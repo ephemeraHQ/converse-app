@@ -1,23 +1,28 @@
 import React, { createContext, useReducer, Dispatch } from "react";
-import { xmtpReducer, XmtpActions, XmtpType } from "./reducers";
+import {
+  xmtpReducer,
+  XmtpActions,
+  XmtpType,
+  xmtpInitialState,
+} from "./reducers";
 
-type InitialStateType = {
+type StateType = {
   xmtp: XmtpType;
 };
 
 const initialState = {
-  xmtp: { connected: false },
+  xmtp: xmtpInitialState,
 };
 
 const AppContext = createContext<{
-  state: InitialStateType;
+  state: StateType;
   dispatch: Dispatch<XmtpActions>;
 }>({
   state: initialState,
   dispatch: () => null,
 });
 
-const mainReducer = ({ xmtp }: InitialStateType, action: XmtpActions) => ({
+const mainReducer = ({ xmtp }: StateType, action: XmtpActions) => ({
   xmtp: xmtpReducer(xmtp, action),
 });
 
