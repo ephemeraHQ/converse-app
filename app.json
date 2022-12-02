@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "xmtp-webview-expo",
-    "slug": "xmtp-webview-expo",
+    "name": "xmtp-native",
+    "slug": "xmtp-native",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -12,7 +12,8 @@
       "backgroundColor": "#ffffff"
     },
     "updates": {
-      "fallbackToCacheTimeout": 0
+      "fallbackToCacheTimeout": 0,
+      "url": "https://u.expo.dev/020d4b12-e7fd-4faf-bc47-ceb6bcb01d1b"
     },
     "assetBundlePatterns": [
       "**/*"
@@ -28,6 +29,14 @@
     },
     "web": {
       "favicon": "./assets/favicon.png"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "020d4b12-e7fd-4faf-bc47-ceb6bcb01d1b"
+      }
+    },
+    "runtimeVersion": {
+      "policy": "sdkVersion"
     }
   }
 }

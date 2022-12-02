@@ -54,9 +54,11 @@ export enum DispatchTypes {
   XmtpConnected = "XMTP_CONNECTED",
   XmtpWebviewLoaded = "XMTP_WEBVIEW_LOADED",
   XmtpSetConversations = "XMTP_SET_CONVERSATIONS",
+  XmtpNewConversation = "XMTP_NEW_CONVERSATION",
   XmtpSetAddress = "XMTP_SET_ADDRESS",
   XmtpSetMessages = "XMTP_SET_MESSAGES",
   XmtpNewMessage = "XMTP_NEW_MESSAGE",
+  XmtpInitialLoad = "XMTP_INITIAL_LOAD",
 }
 
 type XmtpPayload = {
@@ -69,6 +71,9 @@ type XmtpPayload = {
   [DispatchTypes.XmtpSetConversations]: {
     conversations: XmtpConversation[];
   };
+  [DispatchTypes.XmtpNewConversation]: {
+    conversation: XmtpConversation;
+  };
   [DispatchTypes.XmtpSetAddress]: {
     address: string;
   };
@@ -80,11 +85,12 @@ type XmtpPayload = {
     peerAddress: string;
     message: XmtpMessage;
   };
+  [DispatchTypes.XmtpInitialLoad]: undefined;
 };
 
 export type XmtpActions = ActionMap<XmtpPayload>[keyof ActionMap<XmtpPayload>];
 
-export const xmtpReducer = (state: XmtpType, action: XmtpActions) => {
+export const xmtpReducer = (state: XmtpType, action: XmtpActions): XmtpType => {
   switch (action.type) {
     case DispatchTypes.XmtpSetAddress:
       return {
@@ -93,7 +99,7 @@ export const xmtpReducer = (state: XmtpType, action: XmtpActions) => {
       };
     case DispatchTypes.XmtpConnected:
       if (!action.payload.connected) {
-        return xmtpInitialState;
+        return { ...xmtpInitialState, webviewLoaded: state.webviewLoaded };
       }
       return {
         ...state,
@@ -113,8 +119,23 @@ export const xmtpReducer = (state: XmtpType, action: XmtpActions) => {
       });
       return {
         ...state,
-        conversationsLoaded: true,
         conversations,
+      };
+    }
+    case DispatchTypes.XmtpNewConversation: {
+      return {
+        ...state,
+        conversations: {
+          ...state.conversations,
+          [action.payload.conversation.peerAddress]:
+            action.payload.conversation,
+        },
+      };
+    }
+    case DispatchTypes.XmtpInitialLoad: {
+      return {
+        ...state,
+        conversationsLoaded: true,
       };
     }
 

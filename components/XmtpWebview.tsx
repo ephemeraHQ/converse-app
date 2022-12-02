@@ -13,8 +13,8 @@ import { AppContext } from "../store/context";
 import { DispatchTypes } from "../store/reducers";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 
-const XMTP_WEBSITE_URI =
-  "https://xmtp-native-webview.vercel.app";
+const XMTP_WEBSITE_URI = "https://xmtp-native-webview.vercel.app";
+// const XMTP_WEBSITE_URI = "https://813c-109-22-47-86.eu.ngrok.io";
 
 let webview: WebView | null;
 let webviewReadyForMessages = false;
@@ -49,6 +49,7 @@ export const sendMessageToPeer = (peerAddress: string, content: string) => {
 export default function XmtpWebview() {
   const [webviewKey, setWebviewKey] = useState(new Date().getTime());
   const loadedKeys = useRef(false);
+  const web3Connected = useRef(false);
 
   const { state, dispatch } = useContext(AppContext);
 
@@ -96,6 +97,7 @@ export default function XmtpWebview() {
           payload: { connected: false },
         });
         await SecureStore.deleteItemAsync("XMTP_KEYS");
+        webview?.reload();
         break;
       case "LOADED":
         dispatch({
@@ -108,6 +110,14 @@ export default function XmtpWebview() {
           type: DispatchTypes.XmtpSetConversations,
           payload: {
             conversations: data,
+          },
+        });
+        break;
+      case "XMTP_NEW_CONVERSATION":
+        dispatch({
+          type: DispatchTypes.XmtpNewConversation,
+          payload: {
+            conversation: data,
           },
         });
         break;
@@ -134,6 +144,14 @@ export default function XmtpWebview() {
           payload: { peerAddress: data.peerAddress, message: data.message },
         });
         break;
+      case "WEB3_CONNECTED":
+        web3Connected.current = true;
+        break;
+      case "XMTP_INITIAL_LOAD":
+        dispatch({
+          type: DispatchTypes.XmtpInitialLoad,
+        });
+        break;
 
       default:
         break;
@@ -144,72 +162,73 @@ export default function XmtpWebview() {
     );
   }, []);
 
+  const showWebView = state.xmtp.webviewLoaded && !state.xmtp.connected;
+
+  const webviewToRender = (
+    <WebView
+      style={[styles.webview, showWebView ? styles.showWebView : null]}
+      source={{
+        uri: XMTP_WEBSITE_URI,
+      }}
+      javaScriptEnabled={true}
+      key={webviewKey}
+      originWhitelist={["*"]}
+      onMessage={onMessage}
+      scrollEnabled={false}
+      ref={(ref) => {
+        webview = ref;
+      }}
+      onShouldStartLoadWithRequest={(r) => {
+        // Metamask fails when opening the link, we force a direct deeplink
+        if (r.url.startsWith("https://metamask.app.link/")) {
+          const urlEnd = decodeURIComponent(
+            r.url.replace("https://metamask.app.link/", "")
+          );
+          const newUrl = `metamask://${urlEnd}`;
+          Linking.openURL(newUrl);
+          return false;
+        }
+        // Enable http(s) & data URIs
+        if (r.url.startsWith("data:")) {
+          return true;
+        }
+        if (r.url.startsWith("http")) {
+          if (r.url.startsWith(XMTP_WEBSITE_URI)) {
+            return true;
+          } else {
+            Linking.openURL(r.url);
+            return false;
+          }
+        }
+        // Forbid itunes store & blank uris
+        if (
+          r.url.startsWith("about:blank") ||
+          r.url.startsWith("itms-apps://")
+        ) {
+          return false;
+        }
+        Linking.openURL(r.url);
+        setWebviewKey(new Date().getTime());
+        return false;
+      }}
+    />
+  );
+
   return (
-    <View
-      style={
-        state.xmtp.webviewLoaded && !state.xmtp.connected
-          ? styles.showWebView
-          : null
-      }
-    >
-      <SafeAreaProvider>
-        <SafeAreaView style={{ flex: 1, borderWidth: 1 }}>
-          <WebView
-            style={[
-              styles.webview,
-              state.xmtp.webviewLoaded && !state.xmtp.connected
-                ? styles.showWebView
-                : null,
-            ]}
-            source={{
-              uri: XMTP_WEBSITE_URI,
-            }}
-            javaScriptEnabled={true}
-            key={webviewKey}
-            originWhitelist={["*"]}
-            onMessage={onMessage}
-            scrollEnabled={false}
-            ref={(ref) => {
-              webview = ref;
-            }}
-            onShouldStartLoadWithRequest={(r) => {
-              // Metamask fails when opening the link, we force a direct deeplink
-              if (r.url.startsWith("https://metamask.app.link/")) {
-                const urlEnd = decodeURIComponent(
-                  r.url.replace("https://metamask.app.link/", "")
-                );
-                const newUrl = `metamask://${urlEnd}`;
-                Linking.openURL(newUrl);
-                return false;
-              }
-              // Enable http(s) & data URIs
-              if (r.url.startsWith("http") || r.url.startsWith("data:")) {
-                return true;
-              }
-              // Forbid itunes store & blank uris
-              if (
-                r.url.startsWith("about:blank") ||
-                r.url.startsWith("itms-apps://")
-              ) {
-                return false;
-              }
-              Linking.openURL(r.url);
-              setWebviewKey(new Date().getTime());
-              return false;
-            }}
-          />
-        </SafeAreaView>
-      </SafeAreaProvider>
+    <View style={{ flex: showWebView ? 1 : 0 }}>
+      <SafeAreaProvider>{webviewToRender}</SafeAreaProvider>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   webview: {
-    flex: 0,
-    height: 0,
+    flex: 1,
+    position: "absolute",
+    opacity: 0,
   },
   showWebView: {
-    flex: 1,
+    position: "relative",
+    opacity: 1,
   },
 });

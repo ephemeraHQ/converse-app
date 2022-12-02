@@ -10,7 +10,7 @@ type StateType = {
   xmtp: XmtpType;
 };
 
-const initialState = {
+const initialState: StateType = {
   xmtp: xmtpInitialState,
 };
 
