@@ -19,6 +19,7 @@ export type XmtpConversationContext = {
 };
 
 export type XmtpConversation = {
+  topic: string;
   peerAddress: string;
   createdAt: number;
   context?: XmtpConversationContext;
@@ -30,7 +31,7 @@ export type XmtpType = {
   webviewLoaded: boolean;
   conversationsLoaded: boolean;
   conversations: {
-    [peerAddress: string]: XmtpConversation;
+    [topic: string]: XmtpConversation;
   };
   address?: string;
 };
@@ -48,6 +49,7 @@ export type XmtpMessage = {
   senderAddress: string;
   sent: number;
   content: string;
+  lazy?: boolean;
 };
 
 export enum DispatchTypes {
@@ -78,11 +80,11 @@ type XmtpPayload = {
     address: string;
   };
   [DispatchTypes.XmtpSetMessages]: {
-    peerAddress: string;
+    topic: string;
     messages: XmtpMessage[];
   };
   [DispatchTypes.XmtpNewMessage]: {
-    peerAddress: string;
+    topic: string;
     message: XmtpMessage;
   };
   [DispatchTypes.XmtpInitialLoad]: undefined;
@@ -112,10 +114,10 @@ export const xmtpReducer = (state: XmtpType, action: XmtpActions): XmtpType => {
       };
     case DispatchTypes.XmtpSetConversations: {
       const conversations: {
-        [key: string]: XmtpConversation;
+        [topic: string]: XmtpConversation;
       } = {};
       action.payload.conversations.forEach((c) => {
-        conversations[c.peerAddress] = { ...c, messages: [] };
+        conversations[c.topic] = { ...c, messages: [] };
       });
       return {
         ...state,
@@ -123,12 +125,18 @@ export const xmtpReducer = (state: XmtpType, action: XmtpActions): XmtpType => {
       };
     }
     case DispatchTypes.XmtpNewConversation: {
+      const alreadyConversation = Object.keys(state.conversations).includes(
+        action.payload.conversation.topic
+      );
+      if (alreadyConversation) return state;
       return {
         ...state,
         conversations: {
           ...state.conversations,
-          [action.payload.conversation.peerAddress]:
-            action.payload.conversation,
+          [action.payload.conversation.topic]: {
+            ...action.payload.conversation,
+            messages: [],
+          },
         },
       };
     }
@@ -140,14 +148,14 @@ export const xmtpReducer = (state: XmtpType, action: XmtpActions): XmtpType => {
     }
 
     case DispatchTypes.XmtpSetMessages: {
-      const conversation = state.conversations[action.payload.peerAddress];
+      const conversation = state.conversations[action.payload.topic];
       if (!conversation) return state;
       return {
         ...state,
         conversations: {
           ...state.conversations,
-          [action.payload.peerAddress]: {
-            ...state.conversations[action.payload.peerAddress],
+          [action.payload.topic]: {
+            ...state.conversations[action.payload.topic],
             messages: action.payload.messages,
           },
         },
@@ -155,18 +163,23 @@ export const xmtpReducer = (state: XmtpType, action: XmtpActions): XmtpType => {
     }
 
     case DispatchTypes.XmtpNewMessage: {
-      if (!state.conversations[action.payload.peerAddress]) return;
+      if (!state.conversations[action.payload.topic]) return;
 
       const newState = {
         ...state,
       };
-      const conversation = newState.conversations[action.payload.peerAddress];
-      const alreadyMessage = conversation.messages.find(
+      const conversation = newState.conversations[action.payload.topic];
+      const alreadyMessageWithId = conversation.messages.find(
         (m) => m.id === action.payload.message.id
       );
-      if (!alreadyMessage) {
-        conversation.messages.unshift(action.payload.message);
+      if (alreadyMessageWithId) return newState;
+      const lazyMessageWithContentIndex = conversation.messages.findIndex(
+        (m) => m.content === action.payload.message.content && m.lazy
+      );
+      if (lazyMessageWithContentIndex > -1) {
+        conversation.messages.splice(lazyMessageWithContentIndex, 1);
       }
+      conversation.messages.unshift(action.payload.message);
       return newState;
     }
 

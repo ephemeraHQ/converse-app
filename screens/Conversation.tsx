@@ -8,19 +8,21 @@ import React, { useCallback, useContext, useEffect } from "react";
 
 import { NavigationParamList } from "./Navigation";
 import { AppContext } from "../store/context";
-import { sendMessageToPeer } from "../components/XmtpWebview";
+import { sendXmtpMessage } from "../components/XmtpWebview";
 import { TouchableOpacity, Text, StyleSheet } from "react-native";
 import { shortAddress } from "../utils/str";
 import { useActionSheet } from "@expo/react-native-action-sheet";
 import * as Clipboard from "expo-clipboard";
 import { Theme } from "@flyerhq/react-native-chat-ui";
+import { DispatchTypes } from "../store/reducers";
+import uuid from "react-native-uuid";
 
 const Conversation = ({
   route,
   navigation,
 }: NativeStackScreenProps<NavigationParamList, "Conversation">) => {
-  const { state } = useContext(AppContext);
-  const conversation = state.xmtp.conversations[route.params.peerAddress];
+  const { state, dispatch } = useContext(AppContext);
+  const conversation = state.xmtp.conversations[route.params.topic];
   const { showActionSheetWithOptions } = useActionSheet();
 
   useEffect(() => {
@@ -56,7 +58,7 @@ const Conversation = ({
   }, [state.xmtp.address]);
 
   let messages = [] as MessageType.Any[];
-  if (conversation) {
+  if (conversation?.messages) {
     messages = conversation.messages.map((m) => ({
       author: {
         id: m.senderAddress,
@@ -69,7 +71,21 @@ const Conversation = ({
   }
 
   const handleSendPress = useCallback((m: MessageType.PartialText) => {
-    sendMessageToPeer(conversation.peerAddress, m.text);
+    // Lazy message
+    dispatch({
+      type: DispatchTypes.XmtpNewMessage,
+      payload: {
+        topic: conversation.topic,
+        message: {
+          id: uuid.v4().toString(),
+          senderAddress: state.xmtp.address || "",
+          sent: new Date().getTime(),
+          content: m.text,
+          lazy: true,
+        },
+      },
+    });
+    sendXmtpMessage(conversation.topic, m.text);
   }, []);
 
   return (
@@ -98,6 +114,7 @@ const chatTheme = {
   borders: {
     ...defaultTheme.borders,
     messageBorderRadius: 12,
+    inputBorderRadius: 0,
   },
   insets: {
     ...defaultTheme.insets,
@@ -106,13 +123,22 @@ const chatTheme = {
   },
   colors: {
     ...defaultTheme.colors,
-    primary: "#448AF7",
+    primary: "#FC4F37",
+    secondary: "#E9E9EB",
+    inputBackground: "#F6F6F6",
+    inputText: "#333333",
   },
   fonts: {
     ...defaultTheme.fonts,
     inputTextStyle: {
       ...defaultTheme.fonts.inputTextStyle,
       fontWeight: "400",
+      backgroundColor: "white",
+      borderRadius: 15,
+      minHeight: 33,
+      paddingLeft: 12,
+      marginTop: -10,
+      marginBottom: -10,
     },
     receivedMessageBodyTextStyle: {
       ...defaultTheme.fonts.receivedMessageBodyTextStyle,

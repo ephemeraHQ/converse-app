@@ -13,6 +13,7 @@ export type NavigationParamList = {
   Messages: undefined;
   Conversation: {
     peerAddress: string;
+    topic: string;
   };
 };
 

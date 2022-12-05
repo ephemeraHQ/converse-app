@@ -37,6 +37,7 @@ export default ({ theme }: { theme: Theme }) =>
       height: 4,
     },
     keyboardAccessoryView: {
+      maxHeight: 80,
       backgroundColor: theme.colors.inputBackground,
       borderTopLeftRadius: theme.borders.inputBorderRadius,
       borderTopRightRadius: theme.borders.inputBorderRadius,

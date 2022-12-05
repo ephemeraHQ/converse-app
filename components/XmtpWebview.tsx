@@ -14,7 +14,7 @@ import { DispatchTypes } from "../store/reducers";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 
 const XMTP_WEBSITE_URI = "https://xmtp-native-webview.vercel.app";
-// const XMTP_WEBSITE_URI = "https://813c-109-22-47-86.eu.ngrok.io";
+// const XMTP_WEBSITE_URI = "https://7fc1-90-112-194-131.eu.ngrok.io";
 
 let webview: WebView | null;
 let webviewReadyForMessages = false;
@@ -42,8 +42,8 @@ export const sendMessageToWebview = (eventName: string, data?: any) => {
   webview.postMessage(JSON.stringify({ eventName, data }));
 };
 
-export const sendMessageToPeer = (peerAddress: string, content: string) => {
-  sendMessageToWebview("SEND_MESSAGE", { peerAddress, content });
+export const sendXmtpMessage = (topic: string, content: string) => {
+  sendMessageToWebview("SEND_MESSAGE", { topic, content });
 };
 
 export default function XmtpWebview() {
@@ -125,7 +125,7 @@ export default function XmtpWebview() {
         dispatch({
           type: DispatchTypes.XmtpSetMessages,
           payload: {
-            peerAddress: data.peerAddress,
+            topic: data.topic,
             messages: data.messages,
           },
         });
@@ -141,7 +141,7 @@ export default function XmtpWebview() {
       case "XMTP_NEW_MESSAGE":
         dispatch({
           type: DispatchTypes.XmtpNewMessage,
-          payload: { peerAddress: data.peerAddress, message: data.message },
+          payload: { topic: data.topic, message: data.message },
         });
         break;
       case "WEB3_CONNECTED":

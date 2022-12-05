@@ -51,5 +51,7 @@ export const SendButton = ({
 const styles = StyleSheet.create({
   sendButton: {
     marginLeft: 16,
+    marginTop: -30,
+    marginBottom: -30
   },
 })

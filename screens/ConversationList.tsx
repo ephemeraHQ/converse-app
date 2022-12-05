@@ -47,6 +47,7 @@ export function conversationListItem(
       onPress={() => {
         navigation.navigate("Conversation", {
           peerAddress: conversation.peerAddress,
+          topic: conversation.topic,
         });
       }}
       underlayColor="#EEE"
@@ -139,7 +140,7 @@ export default function ConversationList({
       style={styles.conversationList}
       data={orderedConversations}
       renderItem={({ item }) => conversationListItem(navigation, item)}
-      keyExtractor={(item) => item.peerAddress}
+      keyExtractor={(item) => item.topic}
     />
   );
 }

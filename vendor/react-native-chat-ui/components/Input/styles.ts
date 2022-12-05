@@ -17,7 +17,7 @@ export default ({ theme }: { theme: Theme }) =>
       maxHeight: 100,
       // Fixes default paddings for Android
       paddingBottom: 0,
-      paddingTop: 0,
+      paddingTop: 3,
     },
     marginRight: {
       marginRight: 16,
