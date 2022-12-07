@@ -15,7 +15,7 @@ import config from "../config";
 import { AppContext } from "../store/context";
 import { DispatchTypes } from "../store/reducers";
 
-const XMTP_WEBSITE_URI = "https://xmtp-native-webview.vercel.app";
+const XMTP_WEBSITE_URI = "https://e267-90-112-194-131.eu.ngrok.io";
 
 let webview: WebView | null;
 let webviewReadyForMessages = false;
