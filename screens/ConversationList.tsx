@@ -116,7 +116,7 @@ export default function ConversationList({
     );
     conversations.sort((a, b) => b.messages[0].sent - a.messages[0].sent);
     setOrderedConversations(conversations);
-  }, [state.xmtp.conversations]);
+  }, [state.xmtp.lastUpdateAt]);
   useEffect(() => {
     navigation.setOptions({
       headerLeft: () =>

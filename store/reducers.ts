@@ -33,6 +33,7 @@ export type XmtpType = {
   conversations: {
     [topic: string]: XmtpConversation;
   };
+  lastUpdateAt: number;
   address?: string;
 };
 
@@ -42,6 +43,7 @@ export const xmtpInitialState: XmtpType = {
   conversationsLoaded: false,
   conversations: {},
   address: undefined,
+  lastUpdateAt: 0,
 };
 
 export type XmtpMessage = {
@@ -121,6 +123,7 @@ export const xmtpReducer = (state: XmtpType, action: XmtpActions): XmtpType => {
       });
       return {
         ...state,
+        lastUpdateAt: new Date().getTime(),
         conversations,
       };
     }
@@ -131,6 +134,7 @@ export const xmtpReducer = (state: XmtpType, action: XmtpActions): XmtpType => {
       if (alreadyConversation) return state;
       return {
         ...state,
+        lastUpdateAt: new Date().getTime(),
         conversations: {
           ...state.conversations,
           [action.payload.conversation.topic]: {
@@ -152,6 +156,7 @@ export const xmtpReducer = (state: XmtpType, action: XmtpActions): XmtpType => {
       if (!conversation) return state;
       return {
         ...state,
+        lastUpdateAt: new Date().getTime(),
         conversations: {
           ...state.conversations,
           [action.payload.topic]: {
@@ -163,10 +168,11 @@ export const xmtpReducer = (state: XmtpType, action: XmtpActions): XmtpType => {
     }
 
     case DispatchTypes.XmtpNewMessage: {
-      if (!state.conversations[action.payload.topic]) return;
+      if (!state.conversations[action.payload.topic]) return state;
 
       const newState = {
         ...state,
+        lastUpdateAt: new Date().getTime(),
       };
       const conversation = newState.conversations[action.payload.topic];
       const alreadyMessageWithId = conversation.messages.find(
