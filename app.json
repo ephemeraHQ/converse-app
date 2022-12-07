@@ -1,6 +1,7 @@
 {
   "expo": {
     "name": "converse",
+    "scheme": "converse",
     "slug": "converse",
     "version": "1.0.0",
     "orientation": "portrait",
