@@ -15,7 +15,7 @@ import config from "../config";
 import { AppContext } from "../store/context";
 import { DispatchTypes } from "../store/reducers";
 
-const XMTP_WEBSITE_URI = `https://xmtp-native-webview.vercel.app?xmtpEnv=${config.xmtpEnv}`;
+const XMTP_WEBSITE_URI = "https://xmtp-native-webview.vercel.app";
 
 let webview: WebView | null;
 let webviewReadyForMessages = false;
@@ -171,7 +171,7 @@ export default function XmtpWebview() {
     <WebView
       style={[styles.webview, showWebView ? styles.showWebView : null]}
       source={{
-        uri: XMTP_WEBSITE_URI,
+        uri: `${XMTP_WEBSITE_URI}?xmtpEnv=${config.xmtpEnv}`,
       }}
       javaScriptEnabled
       key={webviewKey}
