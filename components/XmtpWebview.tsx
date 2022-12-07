@@ -11,10 +11,11 @@ import { StyleSheet, View } from "react-native";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { WebView, WebViewMessageEvent } from "react-native-webview";
 
+import config from "../config";
 import { AppContext } from "../store/context";
 import { DispatchTypes } from "../store/reducers";
 
-const XMTP_WEBSITE_URI = "https://xmtp-native-webview.vercel.app";
+const XMTP_WEBSITE_URI = `https://xmtp-native-webview.vercel.app?xmtpEnv=${config.xmtpEnv}`;
 
 let webview: WebView | null;
 let webviewReadyForMessages = false;
