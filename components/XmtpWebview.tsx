@@ -6,15 +6,15 @@ import React, {
   useState,
 } from "react";
 import { StyleSheet, View } from "react-native";
+import { SafeAreaProvider } from "react-native-safe-area-context";
 import { WebView, WebViewMessageEvent } from "react-native-webview";
 import * as Linking from "expo-linking";
 import * as SecureStore from "expo-secure-store";
+
 import { AppContext } from "../store/context";
 import { DispatchTypes } from "../store/reducers";
-import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 
 const XMTP_WEBSITE_URI = "https://xmtp-native-webview.vercel.app";
-// const XMTP_WEBSITE_URI = "https://7fc1-90-112-194-131.eu.ngrok.io";
 
 let webview: WebView | null;
 let webviewReadyForMessages = false;
@@ -170,7 +170,7 @@ export default function XmtpWebview() {
       source={{
         uri: XMTP_WEBSITE_URI,
       }}
-      javaScriptEnabled={true}
+      javaScriptEnabled
       key={webviewKey}
       originWhitelist={["*"]}
       onMessage={onMessage}
