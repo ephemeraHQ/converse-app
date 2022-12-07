@@ -1,27 +1,27 @@
+import { useActionSheet } from "@expo/react-native-action-sheet";
 import {
   NativeStackNavigationProp,
   NativeStackScreenProps,
 } from "@react-navigation/native-stack";
-import React, { useContext, useEffect, useState } from "react";
-import { useActionSheet } from "@expo/react-native-action-sheet";
 import differenceInCalendarDays from "date-fns/differenceInCalendarDays";
 import format from "date-fns/format";
-
+import React, { useContext, useEffect, useState } from "react";
 import {
-  Text,
+  ActivityIndicator,
+  Button,
   FlatList,
   StyleSheet,
+  Text,
   TouchableHighlight,
-  Button,
   View,
-  ActivityIndicator,
 } from "react-native";
+
 import { sendMessageToWebview } from "../components/XmtpWebview";
+import ChevronRight from "../components/svgs/chevron.right";
 import { AppContext } from "../store/context";
 import { XmtpConversation } from "../store/reducers";
 import { shortAddress } from "../utils/str";
 import { NavigationParamList } from "./Navigation";
-import ChevronRight from "../components/svgs/chevron.right";
 
 export function conversationListItem(
   navigation: NativeStackNavigationProp<NavigationParamList, "Messages">,

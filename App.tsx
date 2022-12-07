@@ -1,9 +1,11 @@
-import * as SplashScreen from "expo-splash-screen";
-import { AppProvider } from "./store/context";
 import React from "react";
 import { StyleSheet, View } from "react-native";
+// eslint-disable-next-line import/order
+import * as SplashScreen from "expo-splash-screen";
+
 import XmtpWebview from "./components/XmtpWebview";
 import Navigation from "./screens/Navigation";
+import { AppProvider } from "./store/context";
 
 SplashScreen.preventAutoHideAsync().catch(() => {
   /* reloading the app might trigger some race conditions, ignore them */

@@ -1,9 +1,10 @@
-import React, { createContext, useReducer, Dispatch } from "react";
+import React, { createContext, Dispatch, useReducer } from "react";
+
 import {
-  xmtpReducer,
   XmtpActions,
-  XmtpType,
   xmtpInitialState,
+  xmtpReducer,
+  XmtpType,
 } from "./reducers";
 
 type StateType = {
@@ -36,4 +37,4 @@ const AppProvider: React.FC<any> = (props: any) => {
   );
 };
 
-export { AppProvider, AppContext };
+export { AppContext, AppProvider };

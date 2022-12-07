@@ -1,3 +1,5 @@
+import * as Linking from "expo-linking";
+import * as SecureStore from "expo-secure-store";
 import React, {
   useCallback,
   useContext,
@@ -8,8 +10,6 @@ import React, {
 import { StyleSheet, View } from "react-native";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { WebView, WebViewMessageEvent } from "react-native-webview";
-import * as Linking from "expo-linking";
-import * as SecureStore from "expo-secure-store";
 
 import { AppContext } from "../store/context";
 import { DispatchTypes } from "../store/reducers";
@@ -54,7 +54,7 @@ export default function XmtpWebview() {
   const { state, dispatch } = useContext(AppContext);
 
   useEffect(() => {
-    let messagesReadyInterval: any;
+    let messagesReadyInterval = null as any;
     messagesReadyInterval = setInterval(() => {
       if (!webviewReadyForMessages) {
         sendMessageToWebview("PING");
@@ -81,10 +81,12 @@ export default function XmtpWebview() {
       case "PONG":
         webviewReadyForMessages = true;
         break;
-      case "SAVE_KEYS":
+      case "SAVE_KEYS": {
         const { keys } = data;
         await SecureStore.setItemAsync("XMTP_KEYS", keys);
         break;
+      }
+
       case "XMTP_READY":
         dispatch({
           type: DispatchTypes.XmtpConnected,

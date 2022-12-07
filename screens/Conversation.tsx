@@ -1,21 +1,21 @@
+import { useActionSheet } from "@expo/react-native-action-sheet";
+import { Theme } from "@flyerhq/react-native-chat-ui";
+import { NativeStackScreenProps } from "@react-navigation/native-stack";
+import * as Clipboard from "expo-clipboard";
+import React, { useCallback, useContext, useEffect } from "react";
+import { StyleSheet, Text, TouchableOpacity } from "react-native";
+import uuid from "react-native-uuid";
+
+import { sendXmtpMessage } from "../components/XmtpWebview";
+import { AppContext } from "../store/context";
+import { DispatchTypes } from "../store/reducers";
+import { shortAddress } from "../utils/str";
 import {
   Chat,
   defaultTheme,
   MessageType,
 } from "../vendor/react-native-chat-ui";
-import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import React, { useCallback, useContext, useEffect } from "react";
-
 import { NavigationParamList } from "./Navigation";
-import { AppContext } from "../store/context";
-import { sendXmtpMessage } from "../components/XmtpWebview";
-import { TouchableOpacity, Text, StyleSheet } from "react-native";
-import { shortAddress } from "../utils/str";
-import { useActionSheet } from "@expo/react-native-action-sheet";
-import * as Clipboard from "expo-clipboard";
-import { Theme } from "@flyerhq/react-native-chat-ui";
-import { DispatchTypes } from "../store/reducers";
-import uuid from "react-native-uuid";
 
 const Conversation = ({
   route,
