@@ -3,9 +3,11 @@ import Constants from "expo-constants";
 const ENV = {
   dev: {
     xmtpEnv: "dev",
+    xmtpWebviewURI: "",
   },
   prod: {
     xmtpEnv: "production",
+    xmtpWebviewURI: "https://xmtp-native-webview.vercel.app",
   },
 };
 
