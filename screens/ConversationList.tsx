@@ -116,13 +116,13 @@ export default function ConversationList({
     );
     conversations.sort((a, b) => b.messages[0].sent - a.messages[0].sent);
     setOrderedConversations(conversations);
-  }, [state.xmtp.lastUpdateAt]);
+  }, [state.xmtp.conversations, state.xmtp.lastUpdateAt]);
   useEffect(() => {
     navigation.setOptions({
       headerLeft: () =>
         state.xmtp.connected ? <AccountDisconnectButton /> : null,
     });
-  }, [state.xmtp.connected]);
+  }, [navigation, state.xmtp.connected]);
   useEffect(() => {
     if (state.xmtp.conversationsLoaded) {
       navigation.setOptions({
@@ -133,7 +133,7 @@ export default function ConversationList({
         headerTitle: () => <ActivityIndicator />,
       });
     }
-  }, [state.xmtp.conversationsLoaded]);
+  }, [navigation, state.xmtp.conversationsLoaded]);
   return (
     <FlatList
       contentInsetAdjustmentBehavior="automatic"

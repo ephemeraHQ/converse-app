@@ -7,7 +7,7 @@ import React, {
   useRef,
   useState,
 } from "react";
-import { StyleSheet, View } from "react-native";
+import { AppState, StyleSheet, View } from "react-native";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { WebView, WebViewMessageEvent } from "react-native-webview";
 
@@ -48,6 +48,7 @@ export const sendXmtpMessage = (topic: string, content: string) => {
 };
 
 export default function XmtpWebview() {
+  const appState = useRef(AppState.currentState);
   const [webviewKey, setWebviewKey] = useState(new Date().getTime());
   const loadedKeys = useRef(false);
   const web3Connected = useRef(false);
@@ -74,96 +75,122 @@ export default function XmtpWebview() {
     if (!loadedKeys.current) {
       loadKeys();
     }
+
+    return () => {
+      webview = null;
+      webviewReadyForMessages = false;
+    };
   }, []);
 
-  const onMessage = useCallback(async (e: WebViewMessageEvent) => {
-    const { eventName, data } = JSON.parse(e.nativeEvent.data);
-    switch (eventName) {
-      case "PONG":
-        webviewReadyForMessages = true;
-        break;
-      case "SAVE_KEYS": {
-        const { keys } = data;
-        await SecureStore.setItemAsync("XMTP_KEYS", keys);
-        break;
+  useEffect(() => {
+    const subscription = AppState.addEventListener("change", (nextAppState) => {
+      if (
+        appState.current.match(/inactive|background/) &&
+        nextAppState === "active" &&
+        state.xmtp.conversationsLoaded
+      ) {
+        sendMessageToWebview("RELOAD");
+        console.log("Reloading everything!");
       }
+      appState.current = nextAppState;
+    });
 
-      case "XMTP_READY":
-        dispatch({
-          type: DispatchTypes.XmtpConnected,
-          payload: { connected: true },
-        });
-        break;
-      case "DISCONNECTED":
-        dispatch({
-          type: DispatchTypes.XmtpConnected,
-          payload: { connected: false },
-        });
-        await SecureStore.deleteItemAsync("XMTP_KEYS");
-        webview?.reload();
-        break;
-      case "LOADED":
-        dispatch({
-          type: DispatchTypes.XmtpWebviewLoaded,
-          payload: { loaded: true },
-        });
-        break;
-      case "XMTP_CONVERSATIONS":
-        dispatch({
-          type: DispatchTypes.XmtpSetConversations,
-          payload: {
-            conversations: data,
-          },
-        });
-        break;
-      case "XMTP_NEW_CONVERSATION":
-        dispatch({
-          type: DispatchTypes.XmtpNewConversation,
-          payload: {
-            conversation: data,
-          },
-        });
-        break;
-      case "XMTP_MESSAGES":
-        dispatch({
-          type: DispatchTypes.XmtpSetMessages,
-          payload: {
-            topic: data.topic,
-            messages: data.messages,
-          },
-        });
-        break;
-      case "XMTP_ADDRESS":
-        dispatch({
-          type: DispatchTypes.XmtpSetAddress,
-          payload: {
-            address: data.address,
-          },
-        });
-        break;
-      case "XMTP_NEW_MESSAGE":
-        dispatch({
-          type: DispatchTypes.XmtpNewMessage,
-          payload: { topic: data.topic, message: data.message },
-        });
-        break;
-      case "WEB3_CONNECTED":
-        web3Connected.current = true;
-        break;
-      case "XMTP_INITIAL_LOAD":
-        dispatch({
-          type: DispatchTypes.XmtpInitialLoad,
-        });
-        break;
+    return () => {
+      subscription.remove();
+    };
+  }, [state.xmtp.conversationsLoaded]);
 
-      default:
-        break;
-    }
-    console.log(
-      `[Expo  ⬅️   Webview]: ${eventName}`,
-      (!hideDataFromEvents.includes(eventName) && data) || ""
-    );
-  }, []);
+  const onMessage = useCallback(
+    async (e: WebViewMessageEvent) => {
+      const { eventName, data } = JSON.parse(e.nativeEvent.data);
+      switch (eventName) {
+        case "PONG":
+          webviewReadyForMessages = true;
+          break;
+        case "SAVE_KEYS": {
+          const { keys } = data;
+          await SecureStore.setItemAsync("XMTP_KEYS", keys);
+          break;
+        }
+
+        case "XMTP_READY":
+          dispatch({
+            type: DispatchTypes.XmtpConnected,
+            payload: { connected: true },
+          });
+          break;
+        case "DISCONNECTED":
+          dispatch({
+            type: DispatchTypes.XmtpConnected,
+            payload: { connected: false },
+          });
+          await SecureStore.deleteItemAsync("XMTP_KEYS");
+          webview?.reload();
+          break;
+        case "LOADED":
+          dispatch({
+            type: DispatchTypes.XmtpWebviewLoaded,
+            payload: { loaded: true },
+          });
+          break;
+        case "XMTP_CONVERSATIONS":
+          dispatch({
+            type: DispatchTypes.XmtpSetConversations,
+            payload: {
+              conversations: data,
+            },
+          });
+          break;
+        case "XMTP_NEW_CONVERSATION":
+          dispatch({
+            type: DispatchTypes.XmtpNewConversation,
+            payload: {
+              conversation: data,
+            },
+          });
+          break;
+        case "XMTP_MESSAGES":
+          dispatch({
+            type: DispatchTypes.XmtpSetMessages,
+            payload: {
+              topic: data.topic,
+              messages: data.messages,
+            },
+          });
+          break;
+        case "XMTP_ADDRESS":
+          dispatch({
+            type: DispatchTypes.XmtpSetAddress,
+            payload: {
+              address: data.address,
+            },
+          });
+          break;
+        case "XMTP_NEW_MESSAGE":
+          dispatch({
+            type: DispatchTypes.XmtpNewMessage,
+            payload: { topic: data.topic, message: data.message },
+          });
+          break;
+        case "WEB3_CONNECTED":
+          web3Connected.current = true;
+          break;
+        case "XMTP_INITIAL_LOAD":
+          dispatch({
+            type: DispatchTypes.XmtpInitialLoad,
+          });
+          break;
+
+        default:
+          break;
+      }
+      console.log(
+        `[Expo  ⬅️   Webview]: ${eventName}`,
+        (!hideDataFromEvents.includes(eventName) && data) || ""
+      );
+    },
+    [dispatch]
+  );
 
   const showWebView = state.xmtp.webviewLoaded && !state.xmtp.connected;
 

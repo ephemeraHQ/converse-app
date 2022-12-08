@@ -55,7 +55,12 @@ const Conversation = ({
         </TouchableOpacity>
       ),
     });
-  }, [state.xmtp.address]);
+  }, [
+    navigation,
+    route.params.peerAddress,
+    showActionSheetWithOptions,
+    state.xmtp.address,
+  ]);
 
   let messages = [] as MessageType.Any[];
   if (conversation?.messages) {
@@ -70,23 +75,26 @@ const Conversation = ({
     }));
   }
 
-  const handleSendPress = useCallback((m: MessageType.PartialText) => {
-    // Lazy message
-    dispatch({
-      type: DispatchTypes.XmtpNewMessage,
-      payload: {
-        topic: conversation.topic,
-        message: {
-          id: uuid.v4().toString(),
-          senderAddress: state.xmtp.address || "",
-          sent: new Date().getTime(),
-          content: m.text,
-          lazy: true,
+  const handleSendPress = useCallback(
+    (m: MessageType.PartialText) => {
+      // Lazy message
+      dispatch({
+        type: DispatchTypes.XmtpNewMessage,
+        payload: {
+          topic: conversation.topic,
+          message: {
+            id: uuid.v4().toString(),
+            senderAddress: state.xmtp.address || "",
+            sent: new Date().getTime(),
+            content: m.text,
+            lazy: true,
+          },
         },
-      },
-    });
-    sendXmtpMessage(conversation.topic, m.text);
-  }, []);
+      });
+      sendXmtpMessage(conversation.topic, m.text);
+    },
+    [conversation.topic, dispatch, state.xmtp.address]
+  );
 
   return (
     <Chat
