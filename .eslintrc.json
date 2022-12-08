@@ -1,9 +1,11 @@
 {
   "extends": "universe/native",
   "ignorePatterns": ["dist/", "node_modules/", "vendor/"],
-  "plugins": ["react", "import", "unused-imports"],
+  "plugins": ["react", "import", "unused-imports", "react-hooks"],
   "rules": {
     "no-unused-vars": "off",
-    "unused-imports/no-unused-imports": "error"
+    "unused-imports/no-unused-imports": "error",
+    "react-hooks/rules-of-hooks": "error",
+    "react-hooks/exhaustive-deps": "warn"
   }
 }

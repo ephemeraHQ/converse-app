@@ -118,8 +118,12 @@ export const xmtpReducer = (state: XmtpType, action: XmtpActions): XmtpType => {
       const conversations: {
         [topic: string]: XmtpConversation;
       } = {};
+
       action.payload.conversations.forEach((c) => {
-        conversations[c.topic] = { ...c, messages: [] };
+        conversations[c.topic] = {
+          ...c,
+          messages: state.conversations[c.topic]?.messages || [],
+        };
       });
       return {
         ...state,
