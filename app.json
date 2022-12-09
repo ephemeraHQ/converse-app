@@ -21,7 +21,8 @@
     ],
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.converse.native"
+      "bundleIdentifier": "com.converse.native",
+      "buildNumber": 2
     },
     "android": {
       "adaptiveIcon": {
