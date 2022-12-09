@@ -6,7 +6,8 @@
     "start": "expo start",
     "android": "expo start --android",
     "ios": "expo start --ios",
-    "web": "expo start --web"
+    "web": "expo start --web",
+    "deploy": "node bump.js && eas build --platform ios && eas submit -p ios"
   },
   "dependencies": {
     "@expo/metro-config": "^0.5.1",
