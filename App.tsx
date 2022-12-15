@@ -4,7 +4,7 @@ import { StyleSheet, View } from "react-native";
 import * as SplashScreen from "expo-splash-screen";
 
 import XmtpWebview from "./components/XmtpWebview";
-import Navigation from "./screens/Navigation";
+import Main from "./screens/Main";
 import { AppProvider } from "./store/context";
 
 SplashScreen.preventAutoHideAsync().catch(() => {
@@ -16,7 +16,7 @@ export default function App() {
     <AppProvider>
       <View style={styles.safe}>
         <XmtpWebview />
-        <Navigation />
+        <Main />
       </View>
     </AppProvider>
   );

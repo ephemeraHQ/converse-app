@@ -13,7 +13,8 @@ import { WebView, WebViewMessageEvent } from "react-native-webview";
 
 import config from "../config";
 import { AppContext } from "../store/context";
-import { DispatchTypes } from "../store/reducers";
+import { XmtpDispatchTypes } from "../store/xmtpReducer";
+import { subscribeToNotifications } from "../utils/notifications";
 
 const XMTP_WEBSITE_URI = config.xmtpWebviewURI;
 
@@ -115,13 +116,13 @@ export default function XmtpWebview() {
 
         case "XMTP_READY":
           dispatch({
-            type: DispatchTypes.XmtpConnected,
+            type: XmtpDispatchTypes.XmtpConnected,
             payload: { connected: true },
           });
           break;
         case "DISCONNECTED":
           dispatch({
-            type: DispatchTypes.XmtpConnected,
+            type: XmtpDispatchTypes.XmtpConnected,
             payload: { connected: false },
           });
           await SecureStore.deleteItemAsync("XMTP_KEYS");
@@ -129,29 +130,36 @@ export default function XmtpWebview() {
           break;
         case "LOADED":
           dispatch({
-            type: DispatchTypes.XmtpWebviewLoaded,
+            type: XmtpDispatchTypes.XmtpWebviewLoaded,
             payload: { loaded: true },
           });
           break;
         case "XMTP_CONVERSATIONS":
           dispatch({
-            type: DispatchTypes.XmtpSetConversations,
+            type: XmtpDispatchTypes.XmtpSetConversations,
             payload: {
               conversations: data,
             },
           });
           break;
-        case "XMTP_NEW_CONVERSATION":
+        case "XMTP_NEW_CONVERSATION": {
           dispatch({
-            type: DispatchTypes.XmtpNewConversation,
+            type: XmtpDispatchTypes.XmtpNewConversation,
             payload: {
               conversation: data,
             },
           });
+          // New conversation, let's subscribe to topic
+          if (state.notifications.status === "granted") {
+            const topics = Object.keys(state.xmtp.conversations);
+            subscribeToNotifications(topics);
+          }
           break;
+        }
+
         case "XMTP_MESSAGES":
           dispatch({
-            type: DispatchTypes.XmtpSetMessages,
+            type: XmtpDispatchTypes.XmtpSetMessages,
             payload: {
               topic: data.topic,
               messages: data.messages,
@@ -160,7 +168,7 @@ export default function XmtpWebview() {
           break;
         case "XMTP_ADDRESS":
           dispatch({
-            type: DispatchTypes.XmtpSetAddress,
+            type: XmtpDispatchTypes.XmtpSetAddress,
             payload: {
               address: data.address,
             },
@@ -168,7 +176,7 @@ export default function XmtpWebview() {
           break;
         case "XMTP_NEW_MESSAGE":
           dispatch({
-            type: DispatchTypes.XmtpNewMessage,
+            type: XmtpDispatchTypes.XmtpNewMessage,
             payload: { topic: data.topic, message: data.message },
           });
           break;
@@ -177,7 +185,7 @@ export default function XmtpWebview() {
           break;
         case "XMTP_INITIAL_LOAD":
           dispatch({
-            type: DispatchTypes.XmtpInitialLoad,
+            type: XmtpDispatchTypes.XmtpInitialLoad,
           });
           break;
 

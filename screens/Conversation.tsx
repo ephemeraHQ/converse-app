@@ -8,14 +8,14 @@ import uuid from "react-native-uuid";
 
 import { sendXmtpMessage } from "../components/XmtpWebview";
 import { AppContext } from "../store/context";
-import { DispatchTypes } from "../store/reducers";
+import { XmtpDispatchTypes } from "../store/xmtpReducer";
 import { shortAddress } from "../utils/str";
 import {
   Chat,
   defaultTheme,
   MessageType,
 } from "../vendor/react-native-chat-ui";
-import { NavigationParamList } from "./Navigation";
+import { NavigationParamList } from "./Main";
 
 const Conversation = ({
   route,
@@ -34,12 +34,12 @@ const Conversation = ({
               {
                 options: ["Copy wallet address", "Cancel"],
                 cancelButtonIndex: 1,
-                title: route.params.peerAddress,
+                title: conversation.peerAddress,
               },
               (selectedIndex?: number) => {
                 switch (selectedIndex) {
                   case 0:
-                    Clipboard.setStringAsync(route.params.peerAddress);
+                    Clipboard.setStringAsync(conversation.peerAddress);
                     break;
 
                   default:
@@ -50,14 +50,14 @@ const Conversation = ({
           }}
         >
           <Text style={styles.title}>
-            {shortAddress(route.params.peerAddress)}
+            {shortAddress(conversation.peerAddress)}
           </Text>
         </TouchableOpacity>
       ),
     });
   }, [
+    conversation.peerAddress,
     navigation,
-    route.params.peerAddress,
     showActionSheetWithOptions,
     state.xmtp.address,
   ]);
@@ -79,7 +79,7 @@ const Conversation = ({
     (m: MessageType.PartialText) => {
       // Lazy message
       dispatch({
-        type: DispatchTypes.XmtpNewMessage,
+        type: XmtpDispatchTypes.XmtpNewMessage,
         payload: {
           topic: conversation.topic,
           message: {
