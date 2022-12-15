@@ -5,6 +5,7 @@ import {
 } from "@react-navigation/native-stack";
 import differenceInCalendarDays from "date-fns/differenceInCalendarDays";
 import format from "date-fns/format";
+import * as Linking from "expo-linking";
 import React, { useContext, useEffect, useState } from "react";
 import {
   ActivityIndicator,
@@ -19,9 +20,15 @@ import {
 import { sendMessageToWebview } from "../components/XmtpWebview";
 import ChevronRight from "../components/svgs/chevron.right";
 import { AppContext } from "../store/context";
-import { XmtpConversation } from "../store/reducers";
+import { NotificationsDispatchTypes } from "../store/notificationsReducer";
+import { XmtpConversation } from "../store/xmtpReducer";
+import {
+  disablePushNotifications,
+  NotificationPermissionStatus,
+  requestPushNotificationsPermissions,
+} from "../utils/notifications";
 import { shortAddress } from "../utils/str";
-import { NavigationParamList } from "./Navigation";
+import { NavigationParamList } from "./Main";
 
 export function conversationListItem(
   navigation: NativeStackNavigationProp<NavigationParamList, "Messages">,
@@ -69,27 +76,57 @@ export function conversationListItem(
 }
 
 function AccountDisconnectButton() {
-  const { state } = useContext(AppContext);
+  const { state, dispatch } = useContext(AppContext);
   const { showActionSheetWithOptions } = useActionSheet();
   return (
     <View style={{ marginLeft: -8 }}>
       <Button
         onPress={() => {
           const destructiveButtonIndex = 0;
-          const cancelButtonIndex = 1;
+          let cancelButtonIndex = 1;
+          let options = ["Disconnect", "Cancel"];
+          let notificationsButton = -1;
+
+          if (state.notifications.status !== "granted") {
+            cancelButtonIndex = 2;
+            notificationsButton = 1;
+            options = ["Disconnect", "Turn on notifications", "Cancel"];
+          }
 
           showActionSheetWithOptions(
             {
-              options: ["Disconnect", "Cancel"],
+              options,
               cancelButtonIndex,
               destructiveButtonIndex,
               title: state.xmtp.address,
             },
             (selectedIndex?: number) => {
               switch (selectedIndex) {
-                case destructiveButtonIndex:
+                case destructiveButtonIndex: {
+                  console.log("DISABLING PUSH YO");
+                  disablePushNotifications();
                   sendMessageToWebview("DISCONNECT");
                   break;
+                }
+
+                case notificationsButton: {
+                  if (state.notifications.status === "denied") {
+                    // Open settings
+                    Linking.openSettings();
+                  } else if (state.notifications.status === "undetermined") {
+                    // Open popup
+                    requestPushNotificationsPermissions().then(
+                      (newStatus: NotificationPermissionStatus | undefined) => {
+                        if (!newStatus) return;
+                        dispatch({
+                          type: NotificationsDispatchTypes.NotificationsStatus,
+                          payload: { status: newStatus },
+                        });
+                      }
+                    );
+                  }
+                  break;
+                }
 
                 default:
                   break;

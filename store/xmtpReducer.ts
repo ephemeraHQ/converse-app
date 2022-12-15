@@ -1,15 +1,4 @@
-type ActionMap<M extends { [index: string]: any }> = {
-  [Key in keyof M]: M[Key] extends undefined
-    ? {
-        type: Key;
-      }
-    : {
-        type: Key;
-        payload: M[Key];
-      };
-};
-
-// Product
+import { ActionMap } from "./types";
 
 export type XmtpConversationContext = {
   conversationId: string;
@@ -54,7 +43,7 @@ export type XmtpMessage = {
   lazy?: boolean;
 };
 
-export enum DispatchTypes {
+export enum XmtpDispatchTypes {
   XmtpConnected = "XMTP_CONNECTED",
   XmtpWebviewLoaded = "XMTP_WEBVIEW_LOADED",
   XmtpSetConversations = "XMTP_SET_CONVERSATIONS",
@@ -66,42 +55,42 @@ export enum DispatchTypes {
 }
 
 type XmtpPayload = {
-  [DispatchTypes.XmtpConnected]: {
+  [XmtpDispatchTypes.XmtpConnected]: {
     connected: boolean;
   };
-  [DispatchTypes.XmtpWebviewLoaded]: {
+  [XmtpDispatchTypes.XmtpWebviewLoaded]: {
     loaded: boolean;
   };
-  [DispatchTypes.XmtpSetConversations]: {
+  [XmtpDispatchTypes.XmtpSetConversations]: {
     conversations: XmtpConversation[];
   };
-  [DispatchTypes.XmtpNewConversation]: {
+  [XmtpDispatchTypes.XmtpNewConversation]: {
     conversation: XmtpConversation;
   };
-  [DispatchTypes.XmtpSetAddress]: {
+  [XmtpDispatchTypes.XmtpSetAddress]: {
     address: string;
   };
-  [DispatchTypes.XmtpSetMessages]: {
+  [XmtpDispatchTypes.XmtpSetMessages]: {
     topic: string;
     messages: XmtpMessage[];
   };
-  [DispatchTypes.XmtpNewMessage]: {
+  [XmtpDispatchTypes.XmtpNewMessage]: {
     topic: string;
     message: XmtpMessage;
   };
-  [DispatchTypes.XmtpInitialLoad]: undefined;
+  [XmtpDispatchTypes.XmtpInitialLoad]: undefined;
 };
 
 export type XmtpActions = ActionMap<XmtpPayload>[keyof ActionMap<XmtpPayload>];
 
 export const xmtpReducer = (state: XmtpType, action: XmtpActions): XmtpType => {
   switch (action.type) {
-    case DispatchTypes.XmtpSetAddress:
+    case XmtpDispatchTypes.XmtpSetAddress:
       return {
         ...state,
         address: action.payload.address,
       };
-    case DispatchTypes.XmtpConnected:
+    case XmtpDispatchTypes.XmtpConnected:
       if (!action.payload.connected) {
         return { ...xmtpInitialState, webviewLoaded: state.webviewLoaded };
       }
@@ -109,12 +98,12 @@ export const xmtpReducer = (state: XmtpType, action: XmtpActions): XmtpType => {
         ...state,
         connected: action.payload.connected,
       };
-    case DispatchTypes.XmtpWebviewLoaded:
+    case XmtpDispatchTypes.XmtpWebviewLoaded:
       return {
         ...state,
         webviewLoaded: action.payload.loaded,
       };
-    case DispatchTypes.XmtpSetConversations: {
+    case XmtpDispatchTypes.XmtpSetConversations: {
       const conversations: {
         [topic: string]: XmtpConversation;
       } = {};
@@ -131,7 +120,7 @@ export const xmtpReducer = (state: XmtpType, action: XmtpActions): XmtpType => {
         conversations,
       };
     }
-    case DispatchTypes.XmtpNewConversation: {
+    case XmtpDispatchTypes.XmtpNewConversation: {
       const alreadyConversation = Object.keys(state.conversations).includes(
         action.payload.conversation.topic
       );
@@ -148,14 +137,14 @@ export const xmtpReducer = (state: XmtpType, action: XmtpActions): XmtpType => {
         },
       };
     }
-    case DispatchTypes.XmtpInitialLoad: {
+    case XmtpDispatchTypes.XmtpInitialLoad: {
       return {
         ...state,
         conversationsLoaded: true,
       };
     }
 
-    case DispatchTypes.XmtpSetMessages: {
+    case XmtpDispatchTypes.XmtpSetMessages: {
       const conversation = state.conversations[action.payload.topic];
       if (!conversation) return state;
       return {
@@ -171,7 +160,7 @@ export const xmtpReducer = (state: XmtpType, action: XmtpActions): XmtpType => {
       };
     }
 
-    case DispatchTypes.XmtpNewMessage: {
+    case XmtpDispatchTypes.XmtpNewMessage: {
       if (!state.conversations[action.payload.topic]) return state;
 
       const newState = {
