@@ -3,7 +3,12 @@ import { Theme } from "@flyerhq/react-native-chat-ui";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import * as Clipboard from "expo-clipboard";
 import React, { useCallback, useContext, useEffect } from "react";
-import { StyleSheet, Text, TouchableOpacity } from "react-native";
+import {
+  ActivityIndicator,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+} from "react-native";
 import uuid from "react-native-uuid";
 
 import { sendXmtpMessage } from "../components/XmtpWebview";
@@ -24,6 +29,18 @@ const Conversation = ({
   const { state, dispatch } = useContext(AppContext);
   const conversation = state.xmtp.conversations[route.params.topic];
   const { showActionSheetWithOptions } = useActionSheet();
+
+  useEffect(() => {
+    if (state.xmtp.initialLoadDone && !state.xmtp.loading) {
+      navigation.setOptions({
+        headerTitle: "Messages",
+      });
+    } else {
+      navigation.setOptions({
+        headerTitle: () => <ActivityIndicator />,
+      });
+    }
+  }, [navigation, state.xmtp.initialLoadDone, state.xmtp.loading]);
 
   useEffect(() => {
     navigation.setOptions({

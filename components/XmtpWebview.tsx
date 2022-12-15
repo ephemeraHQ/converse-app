@@ -88,10 +88,14 @@ export default function XmtpWebview() {
       if (
         appState.current.match(/inactive|background/) &&
         nextAppState === "active" &&
-        state.xmtp.conversationsLoaded
+        state.xmtp.initialLoadDone
       ) {
+        console.log("App is active, reloading data");
+        dispatch({
+          type: XmtpDispatchTypes.XmtpLoading,
+          payload: { loading: true },
+        });
         sendMessageToWebview("RELOAD");
-        console.log("Reloading everything!");
       }
       appState.current = nextAppState;
     });
@@ -99,7 +103,7 @@ export default function XmtpWebview() {
     return () => {
       subscription.remove();
     };
-  }, [state.xmtp.conversationsLoaded]);
+  }, [dispatch, state.xmtp.initialLoadDone]);
 
   const onMessage = useCallback(
     async (e: WebViewMessageEvent) => {
@@ -186,6 +190,12 @@ export default function XmtpWebview() {
         case "XMTP_INITIAL_LOAD":
           dispatch({
             type: XmtpDispatchTypes.XmtpInitialLoad,
+          });
+          break;
+        case "XMTP_RELOAD_DONE":
+          dispatch({
+            type: XmtpDispatchTypes.XmtpLoading,
+            payload: { loading: false },
           });
           break;
 

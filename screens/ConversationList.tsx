@@ -161,7 +161,7 @@ export default function ConversationList({
     });
   }, [navigation, state.xmtp.connected]);
   useEffect(() => {
-    if (state.xmtp.conversationsLoaded) {
+    if (state.xmtp.initialLoadDone && !state.xmtp.loading) {
       navigation.setOptions({
         headerTitle: "Messages",
       });
@@ -170,7 +170,7 @@ export default function ConversationList({
         headerTitle: () => <ActivityIndicator />,
       });
     }
-  }, [navigation, state.xmtp.conversationsLoaded]);
+  }, [navigation, state.xmtp.initialLoadDone, state.xmtp.loading]);
   return (
     <FlatList
       contentInsetAdjustmentBehavior="automatic"
