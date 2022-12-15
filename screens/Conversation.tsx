@@ -33,14 +33,19 @@ const Conversation = ({
   useEffect(() => {
     if (state.xmtp.initialLoadDone && !state.xmtp.loading) {
       navigation.setOptions({
-        headerTitle: "Messages",
+        headerTitle: shortAddress(conversation.peerAddress),
       });
     } else {
       navigation.setOptions({
         headerTitle: () => <ActivityIndicator />,
       });
     }
-  }, [navigation, state.xmtp.initialLoadDone, state.xmtp.loading]);
+  }, [
+    conversation.peerAddress,
+    navigation,
+    state.xmtp.initialLoadDone,
+    state.xmtp.loading,
+  ]);
 
   useEffect(() => {
     navigation.setOptions({
