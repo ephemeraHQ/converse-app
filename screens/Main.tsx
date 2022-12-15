@@ -134,7 +134,7 @@ export default function Main() {
   useEffect(() => {
     if (
       state.notifications.status === "granted" &&
-      state.xmtp.conversationsLoaded &&
+      state.xmtp.initialLoadDone &&
       !initialNotificationsSubscribed.current
     ) {
       initialNotificationsSubscribed.current = true;
@@ -144,7 +144,7 @@ export default function Main() {
   }, [
     state.notifications.status,
     state.xmtp.conversations,
-    state.xmtp.conversationsLoaded,
+    state.xmtp.initialLoadDone,
   ]);
 
   useEffect(() => {

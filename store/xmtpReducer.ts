@@ -18,7 +18,8 @@ export type XmtpConversation = {
 export type XmtpType = {
   connected: boolean;
   webviewLoaded: boolean;
-  conversationsLoaded: boolean;
+  initialLoadDone: boolean;
+  loading: boolean;
   conversations: {
     [topic: string]: XmtpConversation;
   };
@@ -29,7 +30,8 @@ export type XmtpType = {
 export const xmtpInitialState: XmtpType = {
   connected: false,
   webviewLoaded: false,
-  conversationsLoaded: false,
+  initialLoadDone: false,
+  loading: false,
   conversations: {},
   address: undefined,
   lastUpdateAt: 0,
@@ -52,6 +54,7 @@ export enum XmtpDispatchTypes {
   XmtpSetMessages = "XMTP_SET_MESSAGES",
   XmtpNewMessage = "XMTP_NEW_MESSAGE",
   XmtpInitialLoad = "XMTP_INITIAL_LOAD",
+  XmtpLoading = "XMTP_LOADING",
 }
 
 type XmtpPayload = {
@@ -77,6 +80,9 @@ type XmtpPayload = {
   [XmtpDispatchTypes.XmtpNewMessage]: {
     topic: string;
     message: XmtpMessage;
+  };
+  [XmtpDispatchTypes.XmtpLoading]: {
+    loading: boolean;
   };
   [XmtpDispatchTypes.XmtpInitialLoad]: undefined;
 };
@@ -140,7 +146,14 @@ export const xmtpReducer = (state: XmtpType, action: XmtpActions): XmtpType => {
     case XmtpDispatchTypes.XmtpInitialLoad: {
       return {
         ...state,
-        conversationsLoaded: true,
+        initialLoadDone: true,
+      };
+    }
+
+    case XmtpDispatchTypes.XmtpLoading: {
+      return {
+        ...state,
+        loading: action.payload.loading,
       };
     }
 
