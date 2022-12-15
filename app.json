@@ -22,7 +22,10 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.converse.native",
-      "buildNumber": "6"
+      "buildNumber": "6",
+      "config": {
+        "usesNonExemptEncryption": false
+      }
     },
     "android": {
       "adaptiveIcon": {
