@@ -12,7 +12,10 @@
       "channel": "preview"
     },
     "production": {
-      "channel": "production"
+      "channel": "production",
+      "env": {
+        "PRODUCTION": "true"
+      }
     }
   },
   "submit": {
