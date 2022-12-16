@@ -4,7 +4,7 @@ const ENV = {
   dev: {
     xmtpEnv: "dev",
     xmtpWebviewURI:
-      "https://b752-2a01-cb04-85e-2800-997-a129-dcce-570.eu.ngrok.io",
+      "https://068a-2a01-cb04-85e-2800-c1c4-dc4d-bcf-c37f.eu.ngrok.io",
     notificationsServerURI: "http://noe-mbp.local:9875",
   },
   preview: {

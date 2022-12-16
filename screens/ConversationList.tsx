@@ -53,7 +53,6 @@ export function conversationListItem(
       key={conversation.peerAddress}
       onPress={() => {
         navigation.navigate("Conversation", {
-          peerAddress: conversation.peerAddress,
           topic: conversation.topic,
         });
       }}
@@ -103,7 +102,6 @@ function AccountDisconnectButton() {
             (selectedIndex?: number) => {
               switch (selectedIndex) {
                 case destructiveButtonIndex: {
-                  console.log("DISABLING PUSH YO");
                   disablePushNotifications();
                   sendMessageToWebview("DISCONNECT");
                   break;
