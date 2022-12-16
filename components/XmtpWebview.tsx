@@ -57,14 +57,15 @@ export default function XmtpWebview() {
   const { state, dispatch } = useContext(AppContext);
 
   useEffect(() => {
-    let messagesReadyInterval = null as any;
-    messagesReadyInterval = setInterval(() => {
+    const messagesReadyInterval = setInterval(() => {
       if (!webviewReadyForMessages) {
         sendMessageToWebview("PING");
-      } else {
-        clearInterval(messagesReadyInterval);
       }
-    }, 100);
+    }, 300);
+
+    return () => {
+      clearInterval(messagesReadyInterval);
+    };
   }, []);
 
   useEffect(() => {
@@ -91,6 +92,7 @@ export default function XmtpWebview() {
         state.xmtp.initialLoadDone
       ) {
         console.log("App is active, reloading data");
+        webviewReadyForMessages = false;
         dispatch({
           type: XmtpDispatchTypes.XmtpLoading,
           payload: { loading: true },
@@ -207,7 +209,7 @@ export default function XmtpWebview() {
         (!hideDataFromEvents.includes(eventName) && data) || ""
       );
     },
-    [dispatch]
+    [dispatch, state.notifications.status, state.xmtp.conversations]
   );
 
   const showWebView = state.xmtp.webviewLoaded && !state.xmtp.connected;
