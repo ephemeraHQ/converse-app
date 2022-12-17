@@ -1,3 +1,4 @@
+import { StatusBar } from "expo-status-bar";
 import React from "react";
 import { StyleSheet, View } from "react-native";
 // eslint-disable-next-line import/order
@@ -15,6 +16,7 @@ export default function App() {
   return (
     <AppProvider>
       <View style={styles.safe}>
+        <StatusBar hidden={false} style="dark" />
         <XmtpWebview />
         <Main />
       </View>
