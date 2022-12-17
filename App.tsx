@@ -1,9 +1,11 @@
-import React from "react";
+import "reflect-metadata";
+import React, { useEffect } from "react";
 import { StyleSheet, View } from "react-native";
 // eslint-disable-next-line import/order
 import * as SplashScreen from "expo-splash-screen";
 
 import XmtpWebview from "./components/XmtpWebview";
+import { initDb } from "./db";
 import Main from "./screens/Main";
 import { AppProvider } from "./store/context";
 
@@ -12,6 +14,9 @@ SplashScreen.preventAutoHideAsync().catch(() => {
 });
 
 export default function App() {
+  useEffect(() => {
+    initDb();
+  }, []);
   return (
     <AppProvider>
       <View style={styles.safe}>
