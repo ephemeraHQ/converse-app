@@ -25,9 +25,11 @@ const initialState: StateType = {
   notifications: notificationsInitialState,
 };
 
+export type ActionsType = XmtpActions | NotificationsActions;
+
 const AppContext = createContext<{
   state: StateType;
-  dispatch: Dispatch<XmtpActions | NotificationsActions>;
+  dispatch: Dispatch<ActionsType>;
 }>({
   state: initialState,
   dispatch: () => null,
@@ -35,7 +37,7 @@ const AppContext = createContext<{
 
 const mainReducer = (
   { xmtp, notifications }: StateType,
-  action: XmtpActions | NotificationsActions
+  action: ActionsType
 ) => ({
   xmtp: xmtpReducer(xmtp, action as XmtpActions),
   notifications: notificationsReducer(

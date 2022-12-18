@@ -12,8 +12,14 @@ import { SafeAreaProvider } from "react-native-safe-area-context";
 import { WebView, WebViewMessageEvent } from "react-native-webview";
 
 import config from "../config";
-import { AppContext } from "../store/context";
-import { XmtpDispatchTypes } from "../store/xmtpReducer";
+import {
+  saveNewConversation,
+  saveNewMessage,
+  saveConversations,
+  saveMessages,
+} from "../data";
+import { AppContext } from "../data/store/context";
+import { XmtpDispatchTypes } from "../data/store/xmtpReducer";
 import { subscribeToNotifications } from "../utils/notifications";
 
 const XMTP_WEBSITE_URI = config.xmtpWebviewURI;
@@ -21,7 +27,12 @@ const XMTP_WEBSITE_URI = config.xmtpWebviewURI;
 let webview: WebView | null;
 let webviewReadyForMessages = false;
 
-const hideDataFromEvents = ["XMTP_MESSAGES", "SAVE_KEYS", "KEYS_LOADED"];
+const hideDataFromEvents = [
+  "XMTP_MESSAGES",
+  "SAVE_KEYS",
+  "KEYS_LOADED",
+  "XMTP_CONVERSATIONS",
+];
 
 export const sendMessageToWebview = (eventName: string, data?: any) => {
   if (!webview) {
@@ -141,20 +152,10 @@ export default function XmtpWebview() {
           });
           break;
         case "XMTP_CONVERSATIONS":
-          dispatch({
-            type: XmtpDispatchTypes.XmtpSetConversations,
-            payload: {
-              conversations: data,
-            },
-          });
+          saveConversations(data, dispatch);
           break;
         case "XMTP_NEW_CONVERSATION": {
-          dispatch({
-            type: XmtpDispatchTypes.XmtpNewConversation,
-            payload: {
-              conversation: data,
-            },
-          });
+          saveNewConversation(data, dispatch);
           // New conversation, let's subscribe to topic
           if (state.notifications.status === "granted") {
             const topics = Object.keys(state.xmtp.conversations);
@@ -162,15 +163,8 @@ export default function XmtpWebview() {
           }
           break;
         }
-
         case "XMTP_MESSAGES":
-          dispatch({
-            type: XmtpDispatchTypes.XmtpSetMessages,
-            payload: {
-              topic: data.topic,
-              messages: data.messages,
-            },
-          });
+          saveMessages(data.messages, data.topic, dispatch);
           break;
         case "XMTP_ADDRESS":
           dispatch({
@@ -181,10 +175,7 @@ export default function XmtpWebview() {
           });
           break;
         case "XMTP_NEW_MESSAGE":
-          dispatch({
-            type: XmtpDispatchTypes.XmtpNewMessage,
-            payload: { topic: data.topic, message: data.message },
-          });
+          saveNewMessage(data.message, data.topic, dispatch);
           break;
         case "WEB3_CONNECTED":
           web3Connected.current = true;

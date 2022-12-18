@@ -1,6 +1,6 @@
 import { Entity, Column, PrimaryColumn, OneToMany } from "typeorm/browser";
 
-import { Message } from "./message";
+import { type Message } from "./message";
 
 @Entity("conversation")
 export class Conversation {
@@ -19,6 +19,6 @@ export class Conversation {
   @Column("text", { nullable: true })
   contextMetadata?: string;
 
-  @OneToMany(() => Message, (message) => message.conversation)
+  @OneToMany("Message", (message: Message) => message.conversation)
   messages?: Message[];
 }

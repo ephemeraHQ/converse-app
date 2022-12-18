@@ -6,7 +6,7 @@ import {
   JoinColumn,
 } from "typeorm/browser";
 
-import { Conversation } from "./conversation";
+import { type Conversation } from "./conversation";
 
 @Entity("message")
 export class Message {
@@ -25,7 +25,10 @@ export class Message {
   @Column("text")
   conversationId!: string;
 
-  @ManyToOne(() => Conversation, (conversation) => conversation.messages)
+  @ManyToOne(
+    "Conversation",
+    (conversation: Conversation) => conversation.messages
+  )
   @JoinColumn({ name: "conversationId" })
   conversation?: Conversation;
 }

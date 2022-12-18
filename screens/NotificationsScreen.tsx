@@ -3,8 +3,8 @@ import { View, StyleSheet, Text } from "react-native";
 
 import Button from "../components/Button";
 import NotificationsSVG from "../components/svgs/notifications";
-import { AppContext } from "../store/context";
-import { NotificationsDispatchTypes } from "../store/notificationsReducer";
+import { AppContext } from "../data/store/context";
+import { NotificationsDispatchTypes } from "../data/store/notificationsReducer";
 import { requestPushNotificationsPermissions } from "../utils/notifications";
 
 export default function NotificationsScreen() {

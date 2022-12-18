@@ -1,6 +1,3 @@
-import { upsertConversations, upsertMessages } from "../db";
-import { Conversation } from "../db/entities/conversation";
-import { Message } from "../db/entities/message";
 import { ActionMap } from "./types";
 
 export type XmtpConversationContext = {
@@ -92,59 +89,6 @@ type XmtpPayload = {
 
 export type XmtpActions = ActionMap<XmtpPayload>[keyof ActionMap<XmtpPayload>];
 
-const xmtpMessageToDb = (
-  xmtpMessage: XmtpMessage,
-  xmtpConversation: XmtpConversation
-): Message => ({
-  id: xmtpMessage.id,
-  senderAddress: xmtpMessage.senderAddress,
-  sent: xmtpMessage.sent,
-  content: xmtpMessage.content,
-  conversationId: xmtpConversation.topic,
-});
-
-// const xmtpMessageFromDb = (message: Message): XmtpMessage => ({
-//   id: message.id,
-//   senderAddress: message.senderAddress,
-//   sent: message.sent,
-//   content: message.content,
-// });
-
-const xmtpConversationToDb = (
-  xmtpConversation: XmtpConversation
-): Conversation => ({
-  topic: xmtpConversation.topic,
-  peerAddress: xmtpConversation.peerAddress,
-  createdAt: xmtpConversation.createdAt,
-  contextConversationId: xmtpConversation.context?.conversationId,
-  contextMetadata: xmtpConversation.context?.metadata
-    ? JSON.stringify(xmtpConversation.context.metadata)
-    : undefined,
-});
-
-// const xmtpConversationFromDb = (
-//   dbConversation: Conversation
-// ): XmtpConversation => {
-//   let context = undefined;
-//   if (dbConversation.contextConversationId) {
-//     context = {
-//       conversationId: dbConversation.contextConversationId,
-//       metadata: dbConversation.contextMetadata
-//         ? JSON.parse(dbConversation?.contextMetadata)
-//         : undefined,
-//     };
-//   }
-//   return {
-//     topic: dbConversation.topic,
-//     peerAddress: dbConversation.peerAddress,
-//     createdAt: dbConversation.createdAt,
-//     context,
-//     messages: dbConversation.messages
-//       ? dbConversation.messages.map(xmtpMessageFromDb)
-//       : [],
-//   };
-// };
-
 export const xmtpReducer = (state: XmtpType, action: XmtpActions): XmtpType => {
   switch (action.type) {
     case XmtpDispatchTypes.XmtpSetAddress:
@@ -173,13 +117,9 @@ export const xmtpReducer = (state: XmtpType, action: XmtpActions): XmtpType => {
       action.payload.conversations.forEach((c) => {
         conversations[c.topic] = {
           ...c,
-          messages: state.conversations[c.topic]?.messages || [],
+          messages: c.messages || state.conversations[c.topic]?.messages || [],
         };
       });
-
-      upsertConversations(
-        action.payload.conversations.map(xmtpConversationToDb)
-      );
 
       return {
         ...state,
@@ -192,7 +132,6 @@ export const xmtpReducer = (state: XmtpType, action: XmtpActions): XmtpType => {
         action.payload.conversation.topic
       );
       if (alreadyConversation) return state;
-      upsertConversations([xmtpConversationToDb(action.payload.conversation)]);
       return {
         ...state,
         lastUpdateAt: new Date().getTime(),
@@ -222,11 +161,6 @@ export const xmtpReducer = (state: XmtpType, action: XmtpActions): XmtpType => {
     case XmtpDispatchTypes.XmtpSetMessages: {
       const conversation = state.conversations[action.payload.topic];
       if (!conversation) return state;
-      upsertMessages(
-        action.payload.messages.map((xmtpMessage) =>
-          xmtpMessageToDb(xmtpMessage, conversation)
-        )
-      );
       return {
         ...state,
         lastUpdateAt: new Date().getTime(),
@@ -252,7 +186,6 @@ export const xmtpReducer = (state: XmtpType, action: XmtpActions): XmtpType => {
         (m) => m.id === action.payload.message.id
       );
       if (alreadyMessageWithId) return newState;
-      upsertMessages([xmtpMessageToDb(action.payload.message, conversation)]);
       const lazyMessageWithContentIndex = conversation.messages.findIndex(
         (m) => m.content === action.payload.message.content && m.lazy
       );
