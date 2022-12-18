@@ -19,9 +19,9 @@ import {
 
 import { sendMessageToWebview } from "../components/XmtpWebview";
 import ChevronRight from "../components/svgs/chevron.right";
-import { AppContext } from "../store/context";
-import { NotificationsDispatchTypes } from "../store/notificationsReducer";
-import { XmtpConversation } from "../store/xmtpReducer";
+import { AppContext } from "../data/store/context";
+import { NotificationsDispatchTypes } from "../data/store/notificationsReducer";
+import { XmtpConversation } from "../data/store/xmtpReducer";
 import {
   disablePushNotifications,
   NotificationPermissionStatus,

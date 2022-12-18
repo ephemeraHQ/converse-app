@@ -7,8 +7,10 @@ import * as SplashScreen from "expo-splash-screen";
 import React, { useCallback, useContext, useEffect, useRef } from "react";
 import { AppState } from "react-native";
 
-import { AppContext } from "../store/context";
-import { NotificationsDispatchTypes } from "../store/notificationsReducer";
+import { loadDataToContext } from "../data";
+import { initDb } from "../data/db";
+import { AppContext } from "../data/store/context";
+import { NotificationsDispatchTypes } from "../data/store/notificationsReducer";
 import {
   getNotificationsPermissionStatus,
   subscribeToNotifications,
@@ -79,6 +81,14 @@ export default function Main() {
     },
     [state.xmtp.conversations]
   );
+
+  useEffect(() => {
+    const loadData = async () => {
+      await initDb();
+      await loadDataToContext(dispatch);
+    };
+    loadData();
+  }, [dispatch]);
 
   useEffect(() => {
     // Things to do when app opens

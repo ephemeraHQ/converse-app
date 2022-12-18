@@ -12,8 +12,8 @@ import {
 import uuid from "react-native-uuid";
 
 import { sendXmtpMessage } from "../components/XmtpWebview";
-import { AppContext } from "../store/context";
-import { XmtpDispatchTypes } from "../store/xmtpReducer";
+import { AppContext } from "../data/store/context";
+import { XmtpDispatchTypes } from "../data/store/xmtpReducer";
 import { shortAddress } from "../utils/str";
 import {
   Chat,
