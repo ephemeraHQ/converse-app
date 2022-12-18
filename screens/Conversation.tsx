@@ -101,16 +101,18 @@ const Conversation = ({
     (m: MessageType.PartialText) => {
       // Lazy message
       dispatch({
-        type: XmtpDispatchTypes.XmtpNewMessage,
+        type: XmtpDispatchTypes.XmtpSetMessages,
         payload: {
           topic: conversation.topic,
-          message: {
-            id: uuid.v4().toString(),
-            senderAddress: state.xmtp.address || "",
-            sent: new Date().getTime(),
-            content: m.text,
-            lazy: true,
-          },
+          messages: [
+            {
+              id: uuid.v4().toString(),
+              senderAddress: state.xmtp.address || "",
+              sent: new Date().getTime(),
+              content: m.text,
+              lazy: true,
+            },
+          ],
         },
       });
       sendXmtpMessage(conversation.topic, m.text);

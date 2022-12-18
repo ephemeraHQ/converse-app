@@ -125,24 +125,6 @@ export const saveMessages = async (
   });
 };
 
-export const saveNewMessage = async (
-  message: XmtpMessage,
-  conversationTopic: string,
-  dispatch: MaybeDispatchType
-) => {
-  // First save to db
-  messageRepository.upsert(
-    [xmtpMessageToDb(message, conversationTopic)],
-    ["id"]
-  );
-  // Then dispatch if set
-  if (!dispatch) return;
-  dispatch({
-    type: XmtpDispatchTypes.XmtpNewMessage,
-    payload: { topic: conversationTopic, message },
-  });
-};
-
 export const loadDataToContext = async (dispatch: DispatchType) => {
   // Let's load conversations and messages and save to context
 
