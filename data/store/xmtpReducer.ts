@@ -52,7 +52,6 @@ export enum XmtpDispatchTypes {
   XmtpNewConversation = "XMTP_NEW_CONVERSATION",
   XmtpSetAddress = "XMTP_SET_ADDRESS",
   XmtpSetMessages = "XMTP_SET_MESSAGES",
-  XmtpNewMessage = "XMTP_NEW_MESSAGE",
   XmtpInitialLoad = "XMTP_INITIAL_LOAD",
   XmtpLoading = "XMTP_LOADING",
 }
@@ -76,10 +75,6 @@ type XmtpPayload = {
   [XmtpDispatchTypes.XmtpSetMessages]: {
     topic: string;
     messages: XmtpMessage[];
-  };
-  [XmtpDispatchTypes.XmtpNewMessage]: {
-    topic: string;
-    message: XmtpMessage;
   };
   [XmtpDispatchTypes.XmtpLoading]: {
     loading: boolean;
@@ -161,38 +156,26 @@ export const xmtpReducer = (state: XmtpType, action: XmtpActions): XmtpType => {
     case XmtpDispatchTypes.XmtpSetMessages: {
       const conversation = state.conversations[action.payload.topic];
       if (!conversation) return state;
-      return {
-        ...state,
-        lastUpdateAt: new Date().getTime(),
-        conversations: {
-          ...state.conversations,
-          [action.payload.topic]: {
-            ...state.conversations[action.payload.topic],
-            messages: action.payload.messages,
-          },
-        },
-      };
-    }
-
-    case XmtpDispatchTypes.XmtpNewMessage: {
-      if (!state.conversations[action.payload.topic]) return state;
-
       const newState = {
         ...state,
         lastUpdateAt: new Date().getTime(),
       };
-      const conversation = newState.conversations[action.payload.topic];
-      const alreadyMessageWithId = conversation.messages.find(
-        (m) => m.id === action.payload.message.id
-      );
-      if (alreadyMessageWithId) return newState;
-      const lazyMessageWithContentIndex = conversation.messages.findIndex(
-        (m) => m.content === action.payload.message.content && m.lazy
-      );
-      if (lazyMessageWithContentIndex > -1) {
-        conversation.messages.splice(lazyMessageWithContentIndex, 1);
+      for (const message of action.payload.messages) {
+        const alreadyMessageWithId = conversation.messages.find(
+          (m) => m.id === message.id
+        );
+        if (alreadyMessageWithId) {
+          continue;
+        }
+        const lazyMessageWithContentIndex = conversation.messages.findIndex(
+          (m) => m.content === message.content && m.lazy
+        );
+        if (lazyMessageWithContentIndex > -1) {
+          conversation.messages.splice(lazyMessageWithContentIndex, 1);
+        }
+        conversation.messages.unshift(message);
       }
-      conversation.messages.unshift(action.payload.message);
+
       return newState;
     }
 

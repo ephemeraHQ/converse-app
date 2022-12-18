@@ -12,12 +12,7 @@ import { SafeAreaProvider } from "react-native-safe-area-context";
 import { WebView, WebViewMessageEvent } from "react-native-webview";
 
 import config from "../config";
-import {
-  saveNewConversation,
-  saveNewMessage,
-  saveConversations,
-  saveMessages,
-} from "../data";
+import { saveNewConversation, saveConversations, saveMessages } from "../data";
 import { AppContext } from "../data/store/context";
 import { XmtpDispatchTypes } from "../data/store/xmtpReducer";
 import { subscribeToNotifications } from "../utils/notifications";
@@ -108,7 +103,13 @@ export default function XmtpWebview() {
           type: XmtpDispatchTypes.XmtpLoading,
           payload: { loading: true },
         });
-        sendMessageToWebview("RELOAD");
+        const lastTimestampByConversation: { [topic: string]: number } = {};
+        for (const topic in state.xmtp.conversations) {
+          const conversation = state.xmtp.conversations[topic];
+          lastTimestampByConversation[topic] =
+            conversation.messages?.[0]?.sent || 0;
+        }
+        sendMessageToWebview("RELOAD", lastTimestampByConversation);
       }
       appState.current = nextAppState;
     });
@@ -116,7 +117,28 @@ export default function XmtpWebview() {
     return () => {
       subscription.remove();
     };
-  }, [dispatch, state.xmtp.initialLoadDone]);
+  }, [dispatch, state.xmtp.conversations, state.xmtp.initialLoadDone]);
+
+  const launchedInitialLoad = useRef(false);
+
+  useEffect(() => {
+    if (state.xmtp.connected && !launchedInitialLoad.current) {
+      // Let's launch the "initial load"
+      // of messages starting with last
+      // timestamp for each convo
+      const lastTimestampByConversation: { [topic: string]: number } = {};
+      for (const topic in state.xmtp.conversations) {
+        const conversation = state.xmtp.conversations[topic];
+        lastTimestampByConversation[topic] =
+          conversation.messages?.[0]?.sent || 0;
+      }
+      sendMessageToWebview(
+        "LOAD_CONVERSATIONS_AND_MESSAGES",
+        lastTimestampByConversation
+      );
+      launchedInitialLoad.current = true;
+    }
+  }, [state.xmtp.connected, state.xmtp.conversations]);
 
   const onMessage = useCallback(
     async (e: WebViewMessageEvent) => {
@@ -173,9 +195,6 @@ export default function XmtpWebview() {
               address: data.address,
             },
           });
-          break;
-        case "XMTP_NEW_MESSAGE":
-          saveNewMessage(data.message, data.topic, dispatch);
           break;
         case "WEB3_CONNECTED":
           web3Connected.current = true;
