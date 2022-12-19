@@ -25,7 +25,7 @@ let webviewReadyForMessages = false;
 const hideDataFromEvents = [
   "XMTP_MESSAGES",
   "SAVE_KEYS",
-  "KEYS_LOADED",
+  "KEYS_LOADED_FROM_SECURE_STORAGE",
   "XMTP_CONVERSATIONS",
 ];
 
@@ -77,7 +77,7 @@ export default function XmtpWebview() {
   useEffect(() => {
     const loadKeys = async () => {
       const keys = await SecureStore.getItemAsync("XMTP_KEYS");
-      sendMessageToWebview("KEYS_LOADED", { keys });
+      sendMessageToWebview("KEYS_LOADED_FROM_SECURE_STORAGE", { keys });
       loadedKeys.current = true;
     };
     if (!loadedKeys.current) {
@@ -122,6 +122,12 @@ export default function XmtpWebview() {
   const launchedInitialLoad = useRef(false);
 
   useEffect(() => {
+    if (!state.xmtp.connected) {
+      launchedInitialLoad.current = false;
+    }
+  }, [state.xmtp.connected]);
+
+  useEffect(() => {
     if (state.xmtp.connected && !launchedInitialLoad.current) {
       // Let's launch the "initial load"
       // of messages starting with last
@@ -164,10 +170,11 @@ export default function XmtpWebview() {
             type: XmtpDispatchTypes.XmtpConnected,
             payload: { connected: false },
           });
+          launchedInitialLoad.current = false;
           await SecureStore.deleteItemAsync("XMTP_KEYS");
           webview?.reload();
           break;
-        case "LOADED":
+        case "WEBVIEW_LOADED":
           dispatch({
             type: XmtpDispatchTypes.XmtpWebviewLoaded,
             payload: { loaded: true },
@@ -204,12 +211,15 @@ export default function XmtpWebview() {
             type: XmtpDispatchTypes.XmtpInitialLoad,
           });
           break;
-        case "XMTP_RELOAD_DONE":
+        case "XMTP_RELOAD_DONE": {
           dispatch({
             type: XmtpDispatchTypes.XmtpLoading,
             payload: { loading: false },
           });
+          const topics = Object.keys(state.xmtp.conversations);
+          subscribeToNotifications(topics);
           break;
+        }
 
         default:
           break;

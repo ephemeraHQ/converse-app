@@ -4,18 +4,22 @@ const ENV = {
   dev: {
     xmtpEnv: "dev",
     xmtpWebviewURI:
-      "https://85ef-2a01-cb04-85e-2800-6957-1668-616f-9dd9.eu.ngrok.io",
+      "https://xmtp-native-webview-eqlo7tp4q-noemalzieu-web3.vercel.app",
     notificationsServerURI: "http://noe-mbp.local:9875",
+    showDebug: true,
   },
   preview: {
     xmtpEnv: "dev",
-    xmtpWebviewURI: "https://xmtp-native-webview.vercel.app",
+    xmtpWebviewURI:
+      "https://xmtp-native-webview-eqlo7tp4q-noemalzieu-web3.vercel.app",
     notificationsServerURI: "https://xmtp-notifications-preview.fly.dev",
+    showDebug: false,
   },
   prod: {
     xmtpEnv: "production",
     xmtpWebviewURI: "https://xmtp-native-webview.vercel.app",
     notificationsServerURI: "https://xmtp-notifications.fly.dev",
+    showDebug: false,
   },
 };
 
