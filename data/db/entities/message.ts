@@ -8,8 +8,11 @@ import {
 
 import { type Conversation } from "./conversation";
 
-@Entity("message")
+@Entity()
 export class Message {
+  // @ts-ignore
+  public static name = "Message";
+
   @PrimaryColumn("text")
   id!: string;
 

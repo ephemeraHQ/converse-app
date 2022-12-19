@@ -1,3 +1,6 @@
+import * as SQLite from "expo-sqlite";
+
+import { addLog } from "../../components/DebugButton";
 import dataSource from "./datasource";
 import { Conversation } from "./entities/conversation";
 import { Message } from "./entities/message";
@@ -13,8 +16,23 @@ export const initDb = async () => {
   console.log("Initializing Database...");
   try {
     await dataSource.initialize();
+    addLog("Database initialized!");
     console.log("Database initialized!");
-  } catch (e) {
+  } catch (e: any) {
+    addLog("Error initializing Database: ");
+    addLog(e.toString());
     console.log("Error initializing Database: ", e);
   }
 };
+
+export async function clearDB() {
+  try {
+    await dataSource.destroy();
+    const db = SQLite.openDatabase("converse");
+    await db.closeAsync();
+    await db.deleteAsync();
+    initDb();
+  } catch (e) {
+    console.log("Could not drop database", e);
+  }
+}

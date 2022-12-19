@@ -25,22 +25,26 @@ export const subscribeToNotifications = async (
     Notifications.getDevicePushTokenAsync(),
   ]);
   expoPushToken = expoTokenQuery.data;
-  await api.post("/api/subscribe", {
-    expoToken: expoPushToken,
-    nativeToken: nativeTokenQuery.data,
-    nativeTokenType: nativeTokenQuery.type,
-    topics,
-  });
+  try {
+    await api.post("/api/subscribe", {
+      expoToken: expoPushToken,
+      nativeToken: nativeTokenQuery.data,
+      nativeTokenType: nativeTokenQuery.type,
+      topics,
+    });
+  } catch (e) {
+    console.log("Could not subscribe to notifications");
+    console.log(e?.message);
+  }
 };
 
 export const disablePushNotifications = async (): Promise<void> => {
-  console.log("IN DISABLE", expoPushToken);
   if (expoPushToken) {
     try {
-      console.log("CALLING DELETE");
       await api.delete(`/api/device/${encodeURIComponent(expoPushToken)}`);
     } catch (e: any) {
-      console.error(e?.response);
+      console.log("Could not unsubscribe from notifications");
+      console.error(e);
     }
     expoPushToken = null;
   }

@@ -2,8 +2,11 @@ import { Entity, Column, PrimaryColumn, OneToMany } from "typeorm/browser";
 
 import { type Message } from "./message";
 
-@Entity("conversation")
+@Entity()
 export class Conversation {
+  // @ts-ignore
+  public static name = "Conversation";
+
   @PrimaryColumn("text")
   topic!: string;
 
