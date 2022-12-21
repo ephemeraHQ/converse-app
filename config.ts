@@ -22,13 +22,13 @@ const ENV = {
   },
 };
 
-const getConfig = (env = Constants.manifest?.releaseChannel) => {
+const getConfig = () => {
   if (__DEV__) {
     return ENV.dev;
-  } else if (env === "production") {
-    return ENV.prod;
-  } else {
+  } else if (Constants.expoConfig?.extra?.PREVIEW) {
     return ENV.preview;
+  } else {
+    return ENV.prod;
   }
 };
 
