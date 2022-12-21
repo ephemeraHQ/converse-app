@@ -10,7 +10,9 @@
     "deploy-prod": "node bump.js && eas build --profile production --platform ios && eas submit -p ios",
     "deploy-preview": "eas build --profile preview --platform ios",
     "deploy-prod-local": "node bump.js && eas build --profile production --platform ios --local && eas submit -p ios",
-    "deploy-preview-local": "eas build --profile preview --platform ios --local"
+    "deploy-preview-local": "eas build --profile preview --platform ios --local",
+    "db": "ts-node scripts/migrations/db.ts",
+    "postinstall": "husky install"
   },
   "dependencies": {
     "@expo/metro-config": "^0.5.1",
@@ -63,8 +65,11 @@
     "eslint-plugin-unused-imports": "^2.0.0",
     "husky": "^8.0.2",
     "lint-staged": "^13.1.0",
+    "nanoid": "^3.0.0",
     "prettier": "^2.8.0",
     "process": "^0.11.10",
+    "sqlite3": "^5.1.4",
+    "ts-node": "^10.9.1",
     "typescript": "^4.6.3"
   },
   "private": true,
