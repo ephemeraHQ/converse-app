@@ -7,10 +7,10 @@
     "android": "expo start --android",
     "ios": "expo start --ios",
     "web": "expo start --web",
-    "deploy": "node bump.js && eas build --platform ios --local && eas submit -p ios",
-    "build-local": "eas build --platform ios --local",
-    "build": "eas build --platform ios",
-    "submit": "eas submit -p ios"
+    "deploy-prod": "node bump.js && eas build --profile production --platform ios && eas submit -p ios",
+    "deploy-preview": "eas build --profile preview --platform ios",
+    "deploy-prod-local": "node bump.js && eas build --profile production --platform ios --local && eas submit -p ios",
+    "deploy-preview-local": "eas build --profile preview --platform ios --local"
   },
   "dependencies": {
     "@expo/metro-config": "^0.5.1",
