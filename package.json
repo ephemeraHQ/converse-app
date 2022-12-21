@@ -7,10 +7,10 @@
     "android": "expo start --android",
     "ios": "expo start --ios",
     "web": "expo start --web",
-    "deploy-prod": "node bump.js && eas build --profile production --platform ios && eas submit -p ios",
+    "deploy-prod": "eas build --profile production --platform ios && eas submit -p ios",
     "deploy-preview": "eas build --profile preview --platform ios",
     "update-preview": "eas update --branch preview",
-    "deploy-prod-local": "node bump.js && eas build --profile production --platform ios --local && eas submit -p ios",
+    "deploy-prod-local": "eas build --profile production --platform ios --local && eas submit -p ios",
     "deploy-preview-local": "eas build --profile preview --platform ios --local",
     "db": "ts-node scripts/migrations/db.ts",
     "postinstall": "husky install"

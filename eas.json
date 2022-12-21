@@ -1,6 +1,7 @@
 {
   "cli": {
-    "version": ">= 2.7.1"
+    "version": ">= 2.7.1",
+    "appVersionSource": "local"
   },
   "build": {
     "development": {
@@ -14,6 +15,7 @@
     },
     "production": {
       "channel": "production",
+      "autoIncrement": true,
       "env": {
         "PRODUCTION": "true"
       }
