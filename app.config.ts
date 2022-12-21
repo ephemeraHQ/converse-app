@@ -1,14 +1,15 @@
 import appBuildNumbers from "./app.json";
 
 const env = process.env as any;
+const isProduction = !env.PREVIEW;
 
 export default {
-  name: env.PRODUCTION ? "Converse" : "Converse PREVIEW",
-  scheme: env.PRODUCTION ? "converse" : "converse-preview",
+  name: isProduction ? "Converse" : "Converse PREVIEW",
+  scheme: isProduction ? "converse" : "converse-preview",
   slug: "converse",
   version: "1.0.0",
   orientation: "portrait",
-  icon: env.PRODUCTION ? "./assets/icon.png" : "./assets/icon-preview.png",
+  icon: isProduction ? "./assets/icon.png" : "./assets/icon-preview.png",
   userInterfaceStyle: "light",
   splash: {
     image: "./assets/splash.png",
@@ -22,7 +23,7 @@ export default {
   assetBundlePatterns: ["**/*"],
   ios: {
     supportsTablet: true,
-    bundleIdentifier: env.PRODUCTION
+    bundleIdentifier: isProduction
       ? "com.converse.native"
       : "com.converse.preview",
     buildNumber: appBuildNumbers.expo.ios.buildNumber,
