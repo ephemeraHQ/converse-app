@@ -1,3 +1,4 @@
+import "reflect-metadata";
 import { StatusBar } from "expo-status-bar";
 import React from "react";
 import { StyleSheet, View } from "react-native";
@@ -5,8 +6,8 @@ import { StyleSheet, View } from "react-native";
 import * as SplashScreen from "expo-splash-screen";
 
 import XmtpWebview from "./components/XmtpWebview";
+import { AppProvider } from "./data/store/context";
 import Main from "./screens/Main";
-import { AppProvider } from "./store/context";
 
 SplashScreen.preventAutoHideAsync().catch(() => {
   /* reloading the app might trigger some race conditions, ignore them */
