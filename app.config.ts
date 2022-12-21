@@ -1,12 +1,14 @@
-export default ({ config }) => ({
-  name: process.env.PRODUCTION ? "Converse" : "Converse PREVIEW",
-  scheme: process.env.PRODUCTION ? "converse" : "converse-preview",
+import appBuildNumbers from "./app.json";
+
+const env = process.env as any;
+
+export default {
+  name: env.PRODUCTION ? "Converse" : "Converse PREVIEW",
+  scheme: env.PRODUCTION ? "converse" : "converse-preview",
   slug: "converse",
   version: "1.0.0",
   orientation: "portrait",
-  icon: process.env.PRODUCTION
-    ? "./assets/icon.png"
-    : "./assets/icon-preview.png",
+  icon: env.PRODUCTION ? "./assets/icon.png" : "./assets/icon-preview.png",
   userInterfaceStyle: "light",
   splash: {
     image: "./assets/splash.png",
@@ -20,10 +22,10 @@ export default ({ config }) => ({
   assetBundlePatterns: ["**/*"],
   ios: {
     supportsTablet: true,
-    bundleIdentifier: process.env.PRODUCTION
+    bundleIdentifier: env.PRODUCTION
       ? "com.converse.native"
       : "com.converse.preview",
-    buildNumber: config.expo.ios.buildNumber,
+    buildNumber: appBuildNumbers.expo.ios.buildNumber,
     config: {
       usesNonExemptEncryption: false,
     },
@@ -46,4 +48,4 @@ export default ({ config }) => ({
     policy: "sdkVersion",
   },
   owner: "noemalzieu",
-});
+};
