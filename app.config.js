@@ -4,7 +4,9 @@ export default {
   slug: "converse",
   version: "1.0.0",
   orientation: "portrait",
-  icon: "./assets/icon.png",
+  icon: process.env.PRODUCTION
+    ? "./assets/icon.png"
+    : "./assets/icon-preview.png",
   userInterfaceStyle: "light",
   splash: {
     image: "./assets/splash.png",
