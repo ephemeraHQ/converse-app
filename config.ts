@@ -10,8 +10,7 @@ const ENV = {
   },
   preview: {
     xmtpEnv: "dev",
-    xmtpWebviewURI:
-      "https://xmtp-native-webview-eqlo7tp4q-noemalzieu-web3.vercel.app",
+    xmtpWebviewURI: "https://xmtp-native-webview.vercel.app",
     notificationsServerURI: "https://xmtp-notifications-preview.fly.dev",
     showDebug: false,
   },
