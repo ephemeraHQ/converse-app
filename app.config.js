@@ -1,6 +1,6 @@
 export default {
   name: process.env.PRODUCTION ? "Converse" : "Converse PREVIEW",
-  scheme: "converse",
+  scheme: process.env.PRODUCTION ? "converse" : "converse-preview",
   slug: "converse",
   version: "1.0.0",
   orientation: "portrait",
