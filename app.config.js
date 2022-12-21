@@ -1,4 +1,4 @@
-export default {
+export default ({ config }) => ({
   name: process.env.PRODUCTION ? "Converse" : "Converse PREVIEW",
   scheme: process.env.PRODUCTION ? "converse" : "converse-preview",
   slug: "converse",
@@ -23,7 +23,7 @@ export default {
     bundleIdentifier: process.env.PRODUCTION
       ? "com.converse.native"
       : "com.converse.preview",
-    buildNumber: "7",
+    buildNumber: config.expo.ios.buildNumber,
     config: {
       usesNonExemptEncryption: false,
     },
@@ -46,4 +46,4 @@ export default {
     policy: "sdkVersion",
   },
   owner: "noemalzieu",
-};
+});
