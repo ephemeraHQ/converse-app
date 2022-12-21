@@ -1,12 +1,10 @@
 import * as SQLite from "expo-sqlite";
 
-import { addLog } from "../../components/DebugButton";
 import dataSource from "./datasource";
 import { Conversation } from "./entities/conversation";
 import { Message } from "./entities/message";
 
 export const conversationRepository = dataSource.getRepository(Conversation);
-
 export const messageRepository = dataSource.getRepository(Message);
 
 export const initDb = async () => {
@@ -16,11 +14,16 @@ export const initDb = async () => {
   console.log("Initializing Database...");
   try {
     await dataSource.initialize();
-    addLog("Database initialized!");
     console.log("Database initialized!");
+    try {
+      console.log("Running migrations...");
+      const r = await dataSource.runMigrations();
+      console.log("Migrations done!", r);
+    } catch (e: any) {
+      console.log("Error running migrations - destroying db", e);
+      await clearDB();
+    }
   } catch (e: any) {
-    addLog("Error initializing Database: ");
-    addLog(e.toString());
     console.log("Error initializing Database: ", e);
   }
 };
