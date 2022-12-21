@@ -25,7 +25,7 @@ const ENV = {
 const getConfig = () => {
   if (__DEV__) {
     return ENV.dev;
-  } else if (Constants.expoConfig?.extra?.PREVIEW) {
+  } else if (Constants.expoConfig?.extra?.ENV === "preview") {
     return ENV.preview;
   } else {
     return ENV.prod;
