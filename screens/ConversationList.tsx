@@ -17,11 +17,14 @@ import {
   View,
 } from "react-native";
 
+import DebugButton from "../components/DebugButton";
 import { sendMessageToWebview } from "../components/XmtpWebview";
 import ChevronRight from "../components/svgs/chevron.right";
-import { AppContext } from "../store/context";
-import { NotificationsDispatchTypes } from "../store/notificationsReducer";
-import { XmtpConversation } from "../store/xmtpReducer";
+import config from "../config";
+import { clearDB } from "../data/db";
+import { AppContext } from "../data/store/context";
+import { NotificationsDispatchTypes } from "../data/store/notificationsReducer";
+import { XmtpConversation } from "../data/store/xmtpReducer";
 import {
   disablePushNotifications,
   NotificationPermissionStatus,
@@ -102,6 +105,7 @@ function AccountDisconnectButton() {
             (selectedIndex?: number) => {
               switch (selectedIndex) {
                 case destructiveButtonIndex: {
+                  clearDB();
                   disablePushNotifications();
                   sendMessageToWebview("DISCONNECT");
                   break;
@@ -156,6 +160,7 @@ export default function ConversationList({
     navigation.setOptions({
       headerLeft: () =>
         state.xmtp.connected ? <AccountDisconnectButton /> : null,
+      headerRight: () => (config.showDebug ? <DebugButton /> : null),
     });
   }, [navigation, state.xmtp.connected]);
   useEffect(() => {

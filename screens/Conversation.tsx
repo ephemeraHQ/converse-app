@@ -12,8 +12,8 @@ import {
 import uuid from "react-native-uuid";
 
 import { sendXmtpMessage } from "../components/XmtpWebview";
-import { AppContext } from "../store/context";
-import { XmtpDispatchTypes } from "../store/xmtpReducer";
+import { AppContext } from "../data/store/context";
+import { XmtpDispatchTypes } from "../data/store/xmtpReducer";
 import { shortAddress } from "../utils/str";
 import {
   Chat,
@@ -101,16 +101,18 @@ const Conversation = ({
     (m: MessageType.PartialText) => {
       // Lazy message
       dispatch({
-        type: XmtpDispatchTypes.XmtpNewMessage,
+        type: XmtpDispatchTypes.XmtpSetMessages,
         payload: {
           topic: conversation.topic,
-          message: {
-            id: uuid.v4().toString(),
-            senderAddress: state.xmtp.address || "",
-            sent: new Date().getTime(),
-            content: m.text,
-            lazy: true,
-          },
+          messages: [
+            {
+              id: uuid.v4().toString(),
+              senderAddress: state.xmtp.address || "",
+              sent: new Date().getTime(),
+              content: m.text,
+              lazy: true,
+            },
+          ],
         },
       });
       sendXmtpMessage(conversation.topic, m.text);

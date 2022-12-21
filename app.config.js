@@ -1,10 +1,12 @@
 export default {
   name: process.env.PRODUCTION ? "Converse" : "Converse PREVIEW",
-  scheme: "converse",
+  scheme: process.env.PRODUCTION ? "converse" : "converse-preview",
   slug: "converse",
   version: "1.0.0",
   orientation: "portrait",
-  icon: "./assets/icon.png",
+  icon: process.env.PRODUCTION
+    ? "./assets/icon.png"
+    : "./assets/icon-preview.png",
   userInterfaceStyle: "light",
   splash: {
     image: "./assets/splash.png",
