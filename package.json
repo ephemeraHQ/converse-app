@@ -9,7 +9,7 @@
     "web": "expo start --web",
     "deploy-prod": "eas build --profile production --platform ios --auto-submit",
     "deploy-preview": "eas build --profile preview --platform ios",
-    "update-preview": "eas update --branch preview",
+    "update-preview": "PREVIEW=true eas update --branch preview",
     "deploy-prod-local": "eas build --profile production --platform ios --local && eas submit --profile production --platform ios",
     "deploy-preview-local": "eas build --profile preview --platform ios --local",
     "db": "ts-node scripts/migrations/db.ts",
