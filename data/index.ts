@@ -69,8 +69,20 @@ const xmtpConversationFromDb = (
 };
 
 const addLensHandle = async (conversation: XmtpConversation) => {
-  const lensHandle = await getLensHandle(conversation.peerAddress);
-  conversation.lensHandle = lensHandle;
+  try {
+    const lensHandle = await getLensHandle(conversation.peerAddress);
+    conversation.lensHandle = lensHandle;
+  } catch (e: any) {
+    // Error (probably rate limited by Alchemy)
+    console.log("Could not add lens handle:", conversation.peerAddress, e);
+    // Let's check if already exists in DB
+    const alreadyConversationInDb = await conversationRepository.findOne({
+      where: { topic: conversation.topic },
+    });
+    if (alreadyConversationInDb) {
+      conversation.lensHandle = alreadyConversationInDb.lensHandle;
+    }
+  }
 };
 
 export const saveConversations = async (
