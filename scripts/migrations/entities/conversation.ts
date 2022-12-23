@@ -10,6 +10,9 @@ export class Conversation {
   @Column("text")
   peerAddress!: string;
 
+  @Column("text", { nullable: true })
+  lensHandle?: string;
+
   @Column("int")
   createdAt!: number;
 

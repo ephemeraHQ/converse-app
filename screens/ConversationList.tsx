@@ -30,7 +30,7 @@ import {
   NotificationPermissionStatus,
   requestPushNotificationsPermissions,
 } from "../utils/notifications";
-import { shortAddress } from "../utils/str";
+import { conversationName, shortAddress } from "../utils/str";
 import { NavigationParamList } from "./Main";
 
 export function conversationListItem(
@@ -62,9 +62,7 @@ export function conversationListItem(
       underlayColor="#EEE"
     >
       <View style={styles.conversationListItem}>
-        <Text style={styles.peerAddress}>
-          {shortAddress(conversation.peerAddress)}
-        </Text>
+        <Text style={styles.peerAddress}>{conversationName(conversation)}</Text>
         <Text style={styles.messagePreview} numberOfLines={2}>
           {conversation.messages?.[0]?.content || ""}
         </Text>

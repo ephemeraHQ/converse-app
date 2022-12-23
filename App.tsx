@@ -1,4 +1,5 @@
 import "reflect-metadata";
+import "./polyfills";
 import { StatusBar } from "expo-status-bar";
 import React from "react";
 import { StyleSheet, View } from "react-native";

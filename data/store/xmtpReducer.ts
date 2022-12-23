@@ -13,6 +13,7 @@ export type XmtpConversation = {
   createdAt: number;
   context?: XmtpConversationContext;
   messages: XmtpMessage[];
+  lensHandle?: string;
 };
 
 export type XmtpType = {

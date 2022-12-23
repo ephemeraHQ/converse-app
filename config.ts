@@ -1,24 +1,30 @@
 import Constants from "expo-constants";
 
+const defaultConfig = {
+  showDebug: false,
+  alchemyPolygon: "tuYDQXthxhDgaAGorMsAaL-J4uPqo4d7",
+};
+
 const ENV = {
   dev: {
+    ...defaultConfig,
     xmtpEnv: "dev",
-    xmtpWebviewURI:
-      "https://xmtp-native-webview-eqlo7tp4q-noemalzieu-web3.vercel.app",
+    xmtpWebviewURI: "https://xmtp-native-webview.vercel.app",
     notificationsServerURI: "http://noe-mbp.local:9875",
     showDebug: true,
   },
   preview: {
+    ...defaultConfig,
     xmtpEnv: "dev",
     xmtpWebviewURI: "https://xmtp-native-webview.vercel.app",
     notificationsServerURI: "https://xmtp-notifications-preview.fly.dev",
     showDebug: true,
   },
   prod: {
+    ...defaultConfig,
     xmtpEnv: "production",
     xmtpWebviewURI: "https://xmtp-native-webview.vercel.app",
     notificationsServerURI: "https://xmtp-notifications.fly.dev",
-    showDebug: false,
   },
 };
 
