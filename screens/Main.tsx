@@ -15,7 +15,7 @@ import {
   getNotificationsPermissionStatus,
   subscribeToNotifications,
 } from "../utils/notifications";
-import { shortAddress } from "../utils/str";
+import { conversationName } from "../utils/str";
 import Conversation from "./Conversation";
 import ConversationList from "./ConversationList";
 import NotificationsScreen from "./NotificationsScreen";
@@ -209,7 +209,7 @@ export default function Main() {
               const conversation = state.xmtp.conversations[route.params.topic];
               if (conversation) {
                 return {
-                  title: shortAddress(conversation.peerAddress),
+                  title: conversationName(conversation),
                 };
               } else {
                 return {

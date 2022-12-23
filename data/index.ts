@@ -1,4 +1,5 @@
 import "reflect-metadata";
+import { getLensHandle } from "../utils/alchemy";
 import { conversationRepository, messageRepository } from "./db";
 import { Conversation } from "./db/entities/conversation";
 import { Message } from "./db/entities/message";
@@ -40,6 +41,7 @@ const xmtpConversationToDb = (
   contextMetadata: xmtpConversation.context?.metadata
     ? JSON.stringify(xmtpConversation.context.metadata)
     : undefined,
+  lensHandle: xmtpConversation.lensHandle,
 });
 
 const xmtpConversationFromDb = (
@@ -62,13 +64,20 @@ const xmtpConversationFromDb = (
     messages: dbConversation.messages
       ? dbConversation.messages.map(xmtpMessageFromDb)
       : [],
+    lensHandle: dbConversation.lensHandle,
   };
+};
+
+const addLensHandle = async (conversation: XmtpConversation) => {
+  const lensHandle = await getLensHandle(conversation.peerAddress);
+  conversation.lensHandle = lensHandle;
 };
 
 export const saveConversations = async (
   conversations: XmtpConversation[],
   dispatch: MaybeDispatchType
 ) => {
+  await Promise.all(conversations.map(addLensHandle));
   // First save to db
   conversationRepository.upsert(conversations.map(xmtpConversationToDb), [
     "topic",
@@ -87,6 +96,7 @@ export const saveNewConversation = async (
   conversation: XmtpConversation,
   dispatch: MaybeDispatchType
 ) => {
+  await addLensHandle(conversation);
   // First save to db
   conversationRepository.upsert(
     [xmtpConversationToDb(conversation)],

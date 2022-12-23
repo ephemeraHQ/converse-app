@@ -1,4 +1,6 @@
+import { faker } from "@faker-js/faker";
 import { execSync } from "child_process";
+import * as ethers from "ethers";
 import fs from "fs";
 import { nanoid } from "nanoid";
 import path from "path";
@@ -8,6 +10,23 @@ import { argv } from "process";
 import dataSource from "./datasource";
 import { Conversation } from "./entities/conversation";
 import { Message } from "./entities/message";
+
+const ethAddress = (): string => {
+  const wallet = ethers.Wallet.createRandom();
+  return wallet.address;
+};
+
+const randomItem = (items: any[]) => {
+  return items[Math.floor(Math.random() * items.length)];
+};
+
+const username = (): string => {
+  return faker.internet.userName().replace(/\./g, "").toLowerCase();
+};
+
+const lensHandle = (): string => {
+  return `@${username()}.lens`;
+};
 
 const exec = (command: string) => {
   try {
@@ -59,16 +78,19 @@ const commands = {
     commands.sync();
     commands.initialize();
     console.log("Inserting fixtures...");
+    const myAddress = ethAddress();
     for (
       let conversationIndex = 0;
       conversationIndex < 3;
       conversationIndex++
     ) {
       const topic = `topic-${nanoid()}`;
+      const peerAddress = ethAddress();
       await dataSource.getRepository(Conversation).insert({
         topic,
-        peerAddress: `0x${nanoid()}`,
+        peerAddress,
         createdAt: new Date().getTime(),
+        lensHandle: lensHandle(),
       });
 
       for (let messageIndex = 0; messageIndex < 10; messageIndex++) {
@@ -76,7 +98,7 @@ const commands = {
           {
             conversationId: topic,
             id: nanoid(),
-            senderAddress: `0x${nanoid()}`,
+            senderAddress: randomItem([myAddress, peerAddress]),
             sent: new Date().getTime(),
             content: `SAMPLE MESSAGE - ${nanoid()}`,
           },

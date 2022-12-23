@@ -14,7 +14,7 @@ import uuid from "react-native-uuid";
 import { sendXmtpMessage } from "../components/XmtpWebview";
 import { AppContext } from "../data/store/context";
 import { XmtpDispatchTypes } from "../data/store/xmtpReducer";
-import { shortAddress } from "../utils/str";
+import { conversationName } from "../utils/str";
 import {
   Chat,
   defaultTheme,
@@ -33,7 +33,7 @@ const Conversation = ({
   useEffect(() => {
     if (state.xmtp.initialLoadDone && !state.xmtp.loading) {
       navigation.setOptions({
-        headerTitle: shortAddress(conversation.peerAddress),
+        headerTitle: conversationName(conversation),
       });
     } else {
       navigation.setOptions({
@@ -71,14 +71,12 @@ const Conversation = ({
             );
           }}
         >
-          <Text style={styles.title}>
-            {shortAddress(conversation.peerAddress)}
-          </Text>
+          <Text style={styles.title}>{conversationName(conversation)}</Text>
         </TouchableOpacity>
       ),
     });
   }, [
-    conversation.peerAddress,
+    conversation,
     navigation,
     showActionSheetWithOptions,
     state.xmtp.address,
