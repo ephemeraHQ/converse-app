@@ -20,6 +20,10 @@ const go = async () => {
     .replace(
       /com\.converse\.native AppStore 2022-12-08T13:34:24\.744Z/g,
       "com.converse.preview AdHoc 1671190919466"
+    )
+    .replace(
+      /ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon/g,
+      "ASSETCATALOG_COMPILER_APPICON_NAME = AppIconPreview"
     );
 
   fs.writeFileSync(PROJ_PATH, newProjContent);
