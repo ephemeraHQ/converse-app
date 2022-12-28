@@ -23,9 +23,6 @@ export default {
   assetBundlePatterns: ["**/*"],
   ios: {
     supportsTablet: true,
-    bundleIdentifier: isProduction
-      ? "com.converse.native"
-      : "com.converse.preview",
     buildNumber: appBuildNumbers.expo.ios.buildNumber,
     config: {
       usesNonExemptEncryption: false,
