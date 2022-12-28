@@ -33,6 +33,10 @@ const go = async () => {
   const info = plist.parse(fs.readFileSync(PLIST_PATH, "utf8"));
   info.CFBundleDisplayName = "Converse PREVIEW";
   info.CFBundleURLSchemes = ["converse-preview", "com.converse.preview"];
+  info.CFBundleURLTypes[0].CFBundleURLSchemes = [
+    "converse-preview",
+    "com.converse.preview",
+  ];
   const newInfo = plist.build(info);
   fs.writeFileSync(PLIST_PATH, newInfo, "utf-8");
 };
