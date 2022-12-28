@@ -9,14 +9,14 @@
       "distribution": "internal",
       "channel": "development",
       "env": {
-        "PREVIEW": "true"
+        "EXPO_ENV": "dev"
       }
     },
     "preview": {
       "distribution": "internal",
       "channel": "preview",
       "env": {
-        "PREVIEW": "true"
+        "EXPO_ENV": "preview"
       }
     },
     "production": {

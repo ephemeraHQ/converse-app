@@ -1,12 +1,17 @@
 import appBuildNumbers from "./app.json";
 
 const env = process.env as any;
-const isProduction = !env.PREVIEW;
+const isDev = env.EXPO_ENV === "dev";
+const isPreview = env.EXPO_ENV === "preview";
+const isProduction = !isDev && !isPreview;
 
 export default {
+  name: isDev ? "Converse DEV" : isPreview ? "Converse PREVIEW" : "Converse",
+  scheme: isDev ? "converse-dev" : isPreview ? "converse-preview" : "converse",
   slug: "converse",
   version: "1.0.0",
   orientation: "portrait",
+  icon: isProduction ? "./assets/icon.png" : "./assets/icon-preview.png",
   userInterfaceStyle: "light",
   splash: {
     image: "./assets/splash.png",
@@ -38,7 +43,7 @@ export default {
     eas: {
       projectId: "49a65fae-3895-4487-8e8a-5bd8bee3a401",
     },
-    ENV: isProduction ? "prod" : "preview",
+    ENV: isDev ? "dev" : isPreview ? "preview" : "prod",
   },
   runtimeVersion: {
     policy: "sdkVersion",
