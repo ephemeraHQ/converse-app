@@ -46,6 +46,7 @@ export default function DebugButton() {
               alert(
                 JSON.stringify(
                   {
+                    expoEnv: Constants.expoConfig?.extra?.ENV,
                     config,
                     version: Constants.manifest?.version,
                     releaseChannel: Constants.manifest?.releaseChannel,
