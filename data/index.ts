@@ -1,5 +1,8 @@
 import "reflect-metadata";
+import SharedGroupPreferences from "react-native-shared-group-preferences";
+
 import { getLensHandle } from "../utils/alchemy";
+import { shortAddress } from "../utils/str";
 import { conversationRepository, messageRepository } from "./db";
 import { Conversation } from "./db/entities/conversation";
 import { Message } from "./db/entities/message";
@@ -68,10 +71,19 @@ const xmtpConversationFromDb = (
   };
 };
 
-const addLensHandle = async (conversation: XmtpConversation) => {
+const setupConversation = async (conversation: XmtpConversation) => {
   try {
     const lensHandle = await getLensHandle(conversation.peerAddress);
     conversation.lensHandle = lensHandle;
+    SharedGroupPreferences.setItem(
+      `conversation-${conversation.topic}`,
+      {
+        lensHandle,
+        peerAddress: conversation.peerAddress,
+        shortAddress: shortAddress(conversation.peerAddress),
+      },
+      "group.com.converse"
+    );
   } catch (e: any) {
     // Error (probably rate limited by Alchemy)
     console.log("Could not add lens handle:", conversation.peerAddress, e);
@@ -82,6 +94,15 @@ const addLensHandle = async (conversation: XmtpConversation) => {
     if (alreadyConversationInDb) {
       conversation.lensHandle = alreadyConversationInDb.lensHandle;
     }
+    SharedGroupPreferences.setItem(
+      `conversation-${conversation.topic}`,
+      {
+        lensHandle: conversation.lensHandle,
+        peerAddress: conversation.peerAddress,
+        shortAddress: shortAddress(conversation.peerAddress),
+      },
+      "group.com.converse"
+    );
   }
 };
 
@@ -89,7 +110,7 @@ export const saveConversations = async (
   conversations: XmtpConversation[],
   dispatch: MaybeDispatchType
 ) => {
-  await Promise.all(conversations.map(addLensHandle));
+  await Promise.all(conversations.map(setupConversation));
   // First save to db
   conversationRepository.upsert(conversations.map(xmtpConversationToDb), [
     "topic",
@@ -108,7 +129,7 @@ export const saveNewConversation = async (
   conversation: XmtpConversation,
   dispatch: MaybeDispatchType
 ) => {
-  await addLensHandle(conversation);
+  await setupConversation(conversation);
   // First save to db
   conversationRepository.upsert(
     [xmtpConversationToDb(conversation)],
