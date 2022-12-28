@@ -15,11 +15,7 @@ const go = async () => {
   const newProjContent = projContent
     .replace(
       /PRODUCT_BUNDLE_IDENTIFIER = com\.converse\.native/g,
-      "PRODUCT_BUNDLE_IDENTIFIER = com.converse.preview"
-    )
-    .replace(
-      /com\.converse\.native AppStore 2022-12-08T13:34:24\.744Z/g,
-      "com.converse.preview AdHoc 1671190919466"
+      "PRODUCT_BUNDLE_IDENTIFIER = com.converse.dev"
     )
     .replace(
       /ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon/g,
@@ -31,8 +27,8 @@ const go = async () => {
   const PLIST_PATH = "ios/Converse/Info.plist";
 
   const info = plist.parse(fs.readFileSync(PLIST_PATH, "utf8"));
-  info.CFBundleDisplayName = "Converse PREVIEW";
-  info.CFBundleURLSchemes = ["converse-preview", "com.converse.preview"];
+  info.CFBundleDisplayName = "Converse DEV";
+  info.CFBundleURLSchemes = ["converse-dev", "com.converse.dev"];
   const newInfo = plist.build(info);
   fs.writeFileSync(PLIST_PATH, newInfo, "utf-8");
 };
