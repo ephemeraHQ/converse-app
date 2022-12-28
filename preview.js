@@ -1,5 +1,6 @@
-const isClean = require("git-is-clean");
+const { execSync } = require("child_process");
 const fs = require("fs");
+const isClean = require("git-is-clean");
 
 const go = async () => {
   const clean = await isClean();
@@ -17,6 +18,8 @@ const go = async () => {
   );
 
   fs.writeFileSync(PROJ_PATH, result);
+
+  execSync("git co -f");
 };
 
 go();
