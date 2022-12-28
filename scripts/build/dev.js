@@ -18,6 +18,10 @@ const go = async () => {
       "PRODUCT_BUNDLE_IDENTIFIER = com.converse.dev"
     )
     .replace(
+      /com\.converse\.native AppStore 2022-12-08T13:34:24\.744Z/g,
+      "com.converse.dev AdHoc 1672231603936"
+    )
+    .replace(
       /ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon/g,
       "ASSETCATALOG_COMPILER_APPICON_NAME = AppIconPreview"
     );
