@@ -4,12 +4,9 @@ const env = process.env as any;
 const isProduction = !env.PREVIEW;
 
 export default {
-  name: isProduction ? "Converse" : "Converse PREVIEW",
-  scheme: isProduction ? "converse" : "converse-preview",
   slug: "converse",
   version: "1.0.0",
   orientation: "portrait",
-  icon: isProduction ? "./assets/icon.png" : "./assets/icon-preview.png",
   userInterfaceStyle: "light",
   splash: {
     image: "./assets/splash.png",
