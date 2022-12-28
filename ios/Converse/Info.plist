@@ -23,10 +23,11 @@
 	<key>CFBundleURLTypes</key>
 	<array>
 		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
 			<key>CFBundleURLSchemes</key>
 			<array>
-				<string>converse</string>
-				<string>com.converse.native</string>
+				<string>converse-preview</string>
 			</array>
 		</dict>
 	</array>
