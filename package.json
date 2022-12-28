@@ -69,6 +69,7 @@
     "eslint-plugin-import": "^2.26.0",
     "eslint-plugin-react-hooks": "^4.6.0",
     "eslint-plugin-unused-imports": "^2.0.0",
+    "git-is-clean": "^3.0.1",
     "husky": "^8.0.2",
     "lint-staged": "^13.1.0",
     "nanoid": "^3.0.0",
