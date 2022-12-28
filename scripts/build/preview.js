@@ -14,16 +14,12 @@ const go = async () => {
 
   const newProjContent = projContent
     .replace(
-      /PRODUCT_BUNDLE_IDENTIFIER = com\.converse\.native/g,
+      /PRODUCT_BUNDLE_IDENTIFIER = com\.converse\.dev/g,
       "PRODUCT_BUNDLE_IDENTIFIER = com.converse.preview"
     )
     .replace(
-      /com\.converse\.native AppStore 2022-12-08T13:34:24\.744Z/g,
+      /com\.converse\.dev AdHoc 1672231603936/g,
       "com.converse.preview AdHoc 1671190919466"
-    )
-    .replace(
-      /ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon/g,
-      "ASSETCATALOG_COMPILER_APPICON_NAME = AppIconPreview"
     );
 
   fs.writeFileSync(PROJ_PATH, newProjContent);
