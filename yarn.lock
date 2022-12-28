@@ -2436,6 +2436,11 @@
   resolved "https://registry.npmjs.org/@types/qs/-/qs-6.9.7.tgz"
   integrity sha512-FGa1F62FT09qcrueBA6qYTrJPVDzah9a+493+o2PCXsesWHIn27G98TsSMs3WPNbZIEj4+VJf6saSFpvD+3Zsw==
 
+"@types/react-native-shared-group-preferences@^1.1.1":
+  version "1.1.1"
+  resolved "https://registry.yarnpkg.com/@types/react-native-shared-group-preferences/-/react-native-shared-group-preferences-1.1.1.tgz#df29c55d64b9ad54598add4ec52cb9297d010cba"
+  integrity sha512-EHkkOzcnZSxUbI79jnIdJZmXLw7qYFdrZ1C0ORYSkRU3tKYk1RCgZhfNI87yjCZpACpBcTiHQP5L/+uED/6mnA==
+
 "@types/react-native@~0.70.6":
   version "0.70.7"
   resolved "https://registry.npmjs.org/@types/react-native/-/react-native-0.70.7.tgz"
@@ -10582,6 +10587,11 @@ react-native-screens@~3.18.0:
   dependencies:
     react-freeze "^1.0.0"
     warn-once "^0.1.0"
+
+react-native-shared-group-preferences@^1.1.23:
+  version "1.1.23"
+  resolved "https://registry.yarnpkg.com/react-native-shared-group-preferences/-/react-native-shared-group-preferences-1.1.23.tgz#f9b9a981728e5c5cef6cb5e26a337e0e60969bda"
+  integrity sha512-ZZyLNksXtuQU2AIe0RDNvjYewy2c8EVDNuA7DE141/43CaWjHScIqyQ+vOhQDVscAq/9XpfYWHQmeu2uteRqCg==
 
 react-native-svg@13.4.0:
   version "13.4.0"
