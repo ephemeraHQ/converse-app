@@ -8,9 +8,11 @@
     "web": "expo start --web",
     "deploy-prod": "eas build --profile production --platform ios --auto-submit",
     "deploy-preview": "node scripts/build/preview.js && eas build --profile preview --platform ios && git co -f",
+    "deploy-dev": "node scripts/build/dev.js && eas build --profile development --platform ios && git co -f",
     "update-preview": "PREVIEW=true eas update --branch preview",
     "deploy-prod-local": "eas build --profile production --platform ios --local && eas submit --profile production --platform ios",
     "deploy-preview-local": "node scripts/build/preview.j && eas build --profile preview --platform ios --local && git co -f",
+    "deploy-dev-local": "node scripts/build/dev.js && eas build --profile development --platform ios --local && git co -f",
     "db": "ts-node scripts/migrations/db.ts",
     "postinstall": "husky install"
   },
