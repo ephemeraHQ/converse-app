@@ -20,6 +20,10 @@ const go = async () => {
     .replace(
       /com\.converse\.dev AdHoc 1672231603936/g,
       "com.converse.preview AdHoc 1671190919466"
+    )
+    .replace(
+      /com\.converse\.ConverseNotificationExtension AdHoc 1672234281727/g,
+      "com.converse.preview.ConverseNotificationExtension AdHoc 1672247337689"
     );
 
   fs.writeFileSync(PROJ_PATH, newProjContent);
