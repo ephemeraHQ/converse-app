@@ -149,7 +149,7 @@ export default function ConversationList({
   >([]);
   useEffect(() => {
     const conversations = Object.values(state.xmtp.conversations).filter(
-      (a) => a?.messages?.length > 0
+      (a) => a?.messages?.length > 0 && a?.peerAddress
     );
     conversations.sort((a, b) => b.messages[0].sent - a.messages[0].sent);
     setOrderedConversations(conversations);

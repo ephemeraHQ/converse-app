@@ -155,12 +155,14 @@ export const xmtpReducer = (state: XmtpType, action: XmtpActions): XmtpType => {
     }
 
     case XmtpDispatchTypes.XmtpSetMessages: {
-      const conversation = state.conversations[action.payload.topic];
-      if (!conversation) return state;
       const newState = {
         ...state,
         lastUpdateAt: new Date().getTime(),
       };
+      newState.conversations[action.payload.topic] = newState.conversations[
+        action.payload.topic
+      ] || { messages: [], topic: action.payload.topic };
+      const conversation = newState.conversations[action.payload.topic];
       for (const message of action.payload.messages) {
         const alreadyMessageWithId = conversation.messages.find(
           (m) => m.id === message.id
