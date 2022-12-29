@@ -10,7 +10,7 @@
     "deploy-preview": "node scripts/build/preview.js && eas build --profile preview --platform ios ; git co -f",
     "deploy-dev": "eas build --profile development --platform ios",
     "update-preview": "EXPO_ENV=preview eas update --branch preview",
-    "deploy-prod-local": "node scripts/build/preview.js && eas build --profile production --platform ios --local && eas submit --profile production --platform ios ; git co -f",
+    "deploy-prod-local": "node scripts/build/prod.js && eas build --profile production --platform ios --local && eas submit --profile production --platform ios ; git co -f",
     "deploy-preview-local": "node scripts/build/preview.js && eas build --profile preview --platform ios --local ; git co -f",
     "deploy-dev-local": "eas build --profile development --platform ios --local",
     "db": "ts-node scripts/migrations/db.ts",
