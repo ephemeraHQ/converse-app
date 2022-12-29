@@ -22,6 +22,10 @@ const go = async () => {
       "com.converse.native AppStore 2022-12-08T13:34:24.744Z"
     )
     .replace(
+      /com\.converse\.dev\.ConverseNotificationExtension AdHoc 1672234281727/g,
+      "com.converse.native.ConverseNotificationExtension AppStore 2022-12-29T15:15:27.011Z"
+    )
+    .replace(
       /ASSETCATALOG_COMPILER_APPICON_NAME = AppIconPreview/g,
       "ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon"
     );
@@ -33,6 +37,10 @@ const go = async () => {
   const info = plist.parse(fs.readFileSync(PLIST_PATH, "utf8"));
   info.CFBundleDisplayName = "Converse";
   info.CFBundleURLSchemes = ["converse", "com.converse.native"];
+  info.CFBundleURLTypes[0].CFBundleURLSchemes = [
+    "converse",
+    "com.converse.native",
+  ];
   const newInfo = plist.build(info);
   fs.writeFileSync(PLIST_PATH, newInfo, "utf-8");
 };
