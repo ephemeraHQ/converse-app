@@ -1,6 +1,6 @@
 import { useActionSheet } from "@expo/react-native-action-sheet";
 import * as Linking from "expo-linking";
-import { useContext } from "react";
+import React, { useContext } from "react";
 import { View, Button } from "react-native";
 
 import { clearDB } from "../data/db";
