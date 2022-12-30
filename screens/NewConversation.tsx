@@ -13,6 +13,7 @@ import {
 
 import { resolveENSName } from "../utils/ens";
 import { getLensOwner } from "../utils/lens";
+import { isOnXmtp } from "../utils/xmtp";
 import { NavigationParamList } from "./Main";
 
 export default function NewConversation({
@@ -30,17 +31,18 @@ export default function NewConversation({
   }, [navigation]);
 
   const [value, setValue] = useState("");
-  const [loading, setLoading] = useState(false);
   const searchingForValue = useRef("");
-  const [error, setError] = useState("");
+
+  const [status, setStatus] = useState({ loading: false, error: "" });
 
   useEffect(() => {
     const searchForValue = async () => {
+      setStatus(({ loading }) => ({ loading, error: "" }));
       const is0x = isAddress(value);
       const isLens = value.endsWith(".lens");
       const isENS = value.endsWith(".eth");
       if (is0x || isLens || isENS) {
-        setLoading(true);
+        setStatus(({ error }) => ({ loading: true, error }));
         searchingForValue.current = value;
         const address = isLens
           ? await getLensOwner(value)
@@ -50,17 +52,30 @@ export default function NewConversation({
         if (searchingForValue.current === value) {
           // If we're still searching for this one
           if (!address) {
-            setLoading(false);
-            setError(
-              isLens
+            setStatus({
+              loading: false,
+              error: isLens
                 ? "This handle does not exist. Please try again."
-                : "This ENS domain does not exist. Please try again"
-            );
+                : "This ENS domain does not exist. Please try again",
+            });
+
+            return;
           }
-          // await check if xmtp exists
+          const addressIsOnXmtp = await isOnXmtp(address);
+          if (searchingForValue.current === value) {
+            if (addressIsOnXmtp) {
+              // VICTORY
+              setStatus({ loading: false, error: "" });
+            } else {
+              setStatus({
+                loading: false,
+                error: `${value} has never used Converse or any other XMTP client. Ask our co-founder Pol to onboard them!`,
+              });
+            }
+          }
         }
       } else {
-        setLoading(false);
+        setStatus({ loading: false, error: "" });
         searchingForValue.current = "";
       }
     };
@@ -80,10 +95,15 @@ export default function NewConversation({
           value={value}
           onChangeText={(text) => setValue(text.trim())}
         />
-        {!loading && (
-          <Text style={styles.message}>Type any .eth, .lens or 0x address</Text>
+        {!status.loading && (
+          <Text
+            style={[styles.message, status.error ? styles.error : undefined]}
+          >
+            {status.error || "Type any .eth, .lens or 0x address"}
+          </Text>
         )}
-        {loading && <ActivityIndicator style={styles.activity} />}
+
+        {status.loading && <ActivityIndicator style={styles.activity} />}
       </View>
     </>
   );
@@ -106,6 +126,10 @@ const styles = StyleSheet.create({
     fontSize: 17,
     color: "rgba(60, 60, 67, 0.6)",
     textAlign: "center",
+    paddingHorizontal: 18,
+  },
+  error: {
+    color: "black",
   },
   activity: {
     marginTop: 23,
