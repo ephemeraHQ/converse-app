@@ -1,7 +1,7 @@
 import "reflect-metadata";
 import SharedGroupPreferences from "react-native-shared-group-preferences";
 
-import { getLensHandle } from "../utils/alchemy";
+import { getLensHandle } from "../utils/lens";
 import { shortAddress } from "../utils/str";
 import { conversationRepository, messageRepository } from "./db";
 import { Conversation } from "./db/entities/conversation";
@@ -85,7 +85,7 @@ const setupConversation = async (conversation: XmtpConversation) => {
       "group.com.converse"
     );
   } catch (e: any) {
-    // Error (probably rate limited by Alchemy)
+    // Error (probably rate limited by Lens)
     console.log("Could not add lens handle:", conversation.peerAddress, e);
     // Let's check if already exists in DB
     const alreadyConversationInDb = await conversationRepository.findOne({

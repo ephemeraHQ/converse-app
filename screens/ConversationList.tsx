@@ -1,36 +1,27 @@
-import { useActionSheet } from "@expo/react-native-action-sheet";
 import {
   NativeStackNavigationProp,
   NativeStackScreenProps,
 } from "@react-navigation/native-stack";
 import differenceInCalendarDays from "date-fns/differenceInCalendarDays";
 import format from "date-fns/format";
-import * as Linking from "expo-linking";
 import React, { useContext, useEffect, useState } from "react";
 import {
   ActivityIndicator,
-  Button,
   FlatList,
+  PlatformColor,
   StyleSheet,
   Text,
   TouchableHighlight,
+  TouchableOpacity,
   View,
 } from "react-native";
+import { SFSymbol } from "react-native-sfsymbols";
 
-import DebugButton from "../components/DebugButton";
-import { sendMessageToWebview } from "../components/XmtpWebview";
+import DisconnectButton from "../components/DisconnectButton";
 import ChevronRight from "../components/svgs/chevron.right";
-import config from "../config";
-import { clearDB } from "../data/db";
 import { AppContext } from "../data/store/context";
-import { NotificationsDispatchTypes } from "../data/store/notificationsReducer";
 import { XmtpConversation } from "../data/store/xmtpReducer";
-import {
-  disablePushNotifications,
-  NotificationPermissionStatus,
-  requestPushNotificationsPermissions,
-} from "../utils/notifications";
-import { conversationName, shortAddress } from "../utils/str";
+import { conversationName } from "../utils/str";
 import { NavigationParamList } from "./Main";
 
 export function conversationListItem(
@@ -75,73 +66,33 @@ export function conversationListItem(
   );
 }
 
-function AccountDisconnectButton() {
-  const { state, dispatch } = useContext(AppContext);
-  const { showActionSheetWithOptions } = useActionSheet();
+function NewConversationButton({
+  navigation,
+}: NativeStackScreenProps<NavigationParamList, "Messages">) {
   return (
-    <View style={{ marginLeft: -8 }}>
-      <Button
-        onPress={() => {
-          const destructiveButtonIndex = 0;
-          let cancelButtonIndex = 1;
-          let options = ["Disconnect", "Cancel"];
-          let notificationsButton = -1;
-
-          if (state.notifications.status !== "granted") {
-            cancelButtonIndex = 2;
-            notificationsButton = 1;
-            options = ["Disconnect", "Turn on notifications", "Cancel"];
-          }
-
-          showActionSheetWithOptions(
-            {
-              options,
-              cancelButtonIndex,
-              destructiveButtonIndex,
-              title: state.xmtp.address,
-            },
-            (selectedIndex?: number) => {
-              switch (selectedIndex) {
-                case destructiveButtonIndex: {
-                  clearDB();
-                  disablePushNotifications();
-                  sendMessageToWebview("DISCONNECT");
-                  break;
-                }
-
-                case notificationsButton: {
-                  if (state.notifications.status === "denied") {
-                    // Open settings
-                    Linking.openSettings();
-                  } else if (state.notifications.status === "undetermined") {
-                    // Open popup
-                    requestPushNotificationsPermissions().then(
-                      (newStatus: NotificationPermissionStatus | undefined) => {
-                        if (!newStatus) return;
-                        dispatch({
-                          type: NotificationsDispatchTypes.NotificationsStatus,
-                          payload: { status: newStatus },
-                        });
-                      }
-                    );
-                  }
-                  break;
-                }
-
-                default:
-                  break;
-              }
-            }
-          );
-        }}
-        title={shortAddress(state.xmtp.address || "")}
+    <TouchableOpacity
+      activeOpacity={0.2}
+      onPress={() => {
+        navigation.navigate("NewConversation");
+      }}
+    >
+      <SFSymbol
+        name="square.and.pencil"
+        weight="semibold"
+        scale="large"
+        color={PlatformColor("systemBlue")}
+        size={16}
+        resizeMode="center"
+        multicolor={false}
+        style={{ width: 32, height: 32 }}
       />
-    </View>
+    </TouchableOpacity>
   );
 }
 
 export default function ConversationList({
   navigation,
+  route,
 }: NativeStackScreenProps<NavigationParamList, "Messages">) {
   const { state } = useContext(AppContext);
   const [orderedConversations, setOrderedConversations] = useState<
@@ -156,11 +107,12 @@ export default function ConversationList({
   }, [state.xmtp.conversations, state.xmtp.lastUpdateAt]);
   useEffect(() => {
     navigation.setOptions({
-      headerLeft: () =>
-        state.xmtp.connected ? <AccountDisconnectButton /> : null,
-      headerRight: () => (config.showDebug ? <DebugButton /> : null),
+      headerLeft: () => (state.xmtp.connected ? <DisconnectButton /> : null),
+      headerRight: () => (
+        <NewConversationButton navigation={navigation} route={route} />
+      ),
     });
-  }, [navigation, state.xmtp.connected]);
+  }, [navigation, route, state.xmtp.connected]);
   useEffect(() => {
     if (state.xmtp.initialLoadDone && !state.xmtp.loading) {
       navigation.setOptions({
