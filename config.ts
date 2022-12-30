@@ -2,7 +2,6 @@ import Constants from "expo-constants";
 
 const defaultConfig = {
   showDebug: false,
-  alchemyPolygon: "tuYDQXthxhDgaAGorMsAaL-J4uPqo4d7",
 };
 
 const ENV = {

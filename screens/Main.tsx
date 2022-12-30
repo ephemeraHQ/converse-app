@@ -18,6 +18,7 @@ import {
 import { conversationName } from "../utils/str";
 import Conversation from "./Conversation";
 import ConversationList from "./ConversationList";
+import NewConversation from "./NewConversation";
 import NotificationsScreen from "./NotificationsScreen";
 
 export type NavigationParamList = {
@@ -25,6 +26,7 @@ export type NavigationParamList = {
   Conversation: {
     topic: string;
   };
+  NewConversation: undefined;
 };
 
 const Stack = createNativeStackNavigator<NavigationParamList>();
@@ -194,30 +196,42 @@ export default function Main() {
     <ActionSheetProvider>
       <NavigationContainer linking={linking}>
         <Stack.Navigator initialRouteName="Messages">
-          <Stack.Screen
-            name="Messages"
-            component={ConversationList}
-            options={{
-              headerTitle: "Messages",
-              headerLargeTitle: true,
-            }}
-          />
-          <Stack.Screen
-            name="Conversation"
-            component={Conversation}
-            options={({ route }) => {
-              const conversation = state.xmtp.conversations[route.params.topic];
-              if (conversation) {
-                return {
-                  title: conversationName(conversation),
-                };
-              } else {
-                return {
-                  title: "Conversation",
-                };
-              }
-            }}
-          />
+          <Stack.Group>
+            <Stack.Screen
+              name="Messages"
+              component={ConversationList}
+              options={{
+                headerTitle: "Messages",
+                headerLargeTitle: true,
+              }}
+            />
+            <Stack.Screen
+              name="Conversation"
+              component={Conversation}
+              options={({ route }) => {
+                const conversation =
+                  state.xmtp.conversations[route.params.topic];
+                if (conversation) {
+                  return {
+                    title: conversationName(conversation),
+                  };
+                } else {
+                  return {
+                    title: "Conversation",
+                  };
+                }
+              }}
+            />
+          </Stack.Group>
+          <Stack.Group screenOptions={{ presentation: "modal" }}>
+            <Stack.Screen
+              name="NewConversation"
+              component={NewConversation}
+              options={{
+                headerTitle: "New conversation",
+              }}
+            />
+          </Stack.Group>
         </Stack.Navigator>
       </NavigationContainer>
     </ActionSheetProvider>

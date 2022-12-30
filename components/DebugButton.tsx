@@ -68,6 +68,7 @@ export default function DebugButton() {
               cancelButtonIndex: options.indexOf("Cancel"),
             },
             (selectedIndex?: number) => {
+              if (selectedIndex === undefined) return;
               const method = methods[options[selectedIndex]];
               if (method) {
                 method();
