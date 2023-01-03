@@ -15,7 +15,7 @@ import {
   XmtpType,
 } from "./xmtpReducer";
 
-type StateType = {
+export type StateType = {
   xmtp: XmtpType;
   notifications: NotificationsType;
 };

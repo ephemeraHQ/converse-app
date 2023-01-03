@@ -29,17 +29,20 @@ export function conversationListItem(
   conversation: XmtpConversation
 ) {
   let timeToShow = "";
-  const lastMessageTime = conversation.messages?.[0]?.sent;
-  if (lastMessageTime) {
-    const days = differenceInCalendarDays(new Date(), lastMessageTime);
+  const conversationTime =
+    conversation.messages?.length > 0
+      ? conversation.messages[0].sent
+      : conversation.createdAt;
+  if (conversationTime) {
+    const days = differenceInCalendarDays(new Date(), conversationTime);
     if (days === 0) {
-      timeToShow = format(lastMessageTime, "hh:mm aa");
+      timeToShow = format(conversationTime, "hh:mm aa");
     } else if (days === 1) {
       timeToShow = "yesterday";
     } else if (days < 7) {
-      timeToShow = format(lastMessageTime, "EEEE");
+      timeToShow = format(conversationTime, "EEEE");
     } else {
-      timeToShow = format(lastMessageTime, "yyyy-MM-dd");
+      timeToShow = format(conversationTime, "yyyy-MM-dd");
     }
   }
   return (
@@ -78,7 +81,7 @@ function NewConversationButton({
     >
       <SFSymbol
         name="square.and.pencil"
-        weight="semibold"
+        weight="medium"
         scale="large"
         color={PlatformColor("systemBlue")}
         size={16}
@@ -100,9 +103,13 @@ export default function ConversationList({
   >([]);
   useEffect(() => {
     const conversations = Object.values(state.xmtp.conversations).filter(
-      (a) => a?.messages?.length > 0 && a?.peerAddress
+      (a) => a?.peerAddress
     );
-    conversations.sort((a, b) => b.messages[0].sent - a.messages[0].sent);
+    conversations.sort((a, b) => {
+      const aDate = a.messages?.length > 0 ? a.messages[0].sent : a.createdAt;
+      const bDate = b.messages?.length > 0 ? b.messages[0].sent : b.createdAt;
+      return bDate - aDate;
+    });
     setOrderedConversations(conversations);
   }, [state.xmtp.conversations, state.xmtp.lastUpdateAt]);
   useEffect(() => {

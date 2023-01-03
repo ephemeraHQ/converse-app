@@ -1,7 +1,13 @@
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { isAddress } from "ethers/lib/utils";
-import { StatusBar } from "expo-status-bar";
-import React, { useEffect, useRef, useState } from "react";
+import { setStatusBarStyle, StatusBar } from "expo-status-bar";
+import React, {
+  useCallback,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import {
   ActivityIndicator,
   Button,
@@ -11,10 +17,37 @@ import {
   View,
 } from "react-native";
 
+import TableView, { TableViewSymbol } from "../components/TableView";
+import { sendMessageToWebview } from "../components/XmtpWebview";
+import { AppContext, StateType } from "../data/store/context";
+import { XmtpConversation } from "../data/store/xmtpReducer";
 import { resolveENSName } from "../utils/ens";
 import { getLensOwner } from "../utils/lens";
+import { addressPrefix, conversationName } from "../utils/str";
 import { isOnXmtp } from "../utils/xmtp";
 import { NavigationParamList } from "./Main";
+
+const CONVERSATION_DOMAIN = "getconverse.app";
+const POL_ADDRESS = "0xf9a3BB070c1f9b3186A547DeD991BeD04a289C5B";
+
+const computeNewConversationId = (state: StateType, peerAddress: string) => {
+  let i = 0;
+  const conversationsIds = Object.values(state.xmtp.conversations)
+    .filter((c) => c.peerAddress === peerAddress)
+    .map((c) => c.context?.conversationId);
+  do {
+    i += 1;
+  } while (
+    conversationsIds.includes(
+      `${CONVERSATION_DOMAIN}/dm/${addressPrefix(
+        state.xmtp.address || ""
+      )}-${addressPrefix(peerAddress)}/${i}`
+    )
+  );
+  return `${CONVERSATION_DOMAIN}/dm/${addressPrefix(
+    state.xmtp.address || ""
+  )}-${addressPrefix(peerAddress)}/${i}`;
+};
 
 export default function NewConversation({
   navigation,
@@ -22,7 +55,13 @@ export default function NewConversation({
   useEffect(() => {
     navigation.setOptions({
       headerLeft: () => (
-        <Button title="Cancel" onPress={() => navigation.goBack()} />
+        <Button
+          title="Cancel"
+          onPress={() => {
+            setStatusBarStyle("dark");
+            navigation.goBack();
+          }}
+        />
       ),
       headerStyle: {
         backgroundColor: "#F5F5F5",
@@ -33,16 +72,36 @@ export default function NewConversation({
   const [value, setValue] = useState("");
   const searchingForValue = useRef("");
 
-  const [status, setStatus] = useState({ loading: false, error: "" });
+  const [status, setStatus] = useState({
+    loading: false,
+    error: "",
+    address: "",
+    askPolToInvite: "",
+    existingConversations: [] as XmtpConversation[],
+  });
+
+  const { state } = useContext(AppContext);
 
   useEffect(() => {
     const searchForValue = async () => {
-      setStatus(({ loading }) => ({ loading, error: "" }));
+      setStatus(({ loading }) => ({
+        loading,
+        error: "",
+        address: "",
+        askPolToInvite: "",
+        existingConversations: [],
+      }));
       const is0x = isAddress(value);
       const isLens = value.endsWith(".lens");
       const isENS = value.endsWith(".eth");
       if (is0x || isLens || isENS) {
-        setStatus(({ error }) => ({ loading: true, error }));
+        setStatus(({ error }) => ({
+          loading: true,
+          error,
+          address: "",
+          askPolToInvite: "",
+          existingConversations: [],
+        }));
         searchingForValue.current = value;
         const address = isLens
           ? await getLensOwner(value)
@@ -54,9 +113,12 @@ export default function NewConversation({
           if (!address) {
             setStatus({
               loading: false,
+              address: "",
+              existingConversations: [],
+              askPolToInvite: "",
               error: isLens
                 ? "This handle does not exist. Please try again."
-                : "This ENS domain does not exist. Please try again",
+                : "No address has been set for this ENS domain. Please try again",
             });
 
             return;
@@ -64,23 +126,90 @@ export default function NewConversation({
           const addressIsOnXmtp = await isOnXmtp(address);
           if (searchingForValue.current === value) {
             if (addressIsOnXmtp) {
-              // VICTORY
-              setStatus({ loading: false, error: "" });
+              // Let's find existing conversations with this user
+              const conversations = Object.values(
+                state.xmtp.conversations
+              ).filter(
+                (c) => c.peerAddress.toLowerCase() === address.toLowerCase()
+              );
+              setStatus({
+                loading: false,
+                error: "",
+                address,
+                askPolToInvite: "",
+                existingConversations: conversations,
+              });
             } else {
               setStatus({
                 loading: false,
                 error: `${value} has never used Converse or any other XMTP client. Ask our co-founder Pol to onboard them!`,
+                address: "",
+                askPolToInvite: value,
+                existingConversations: [],
               });
             }
           }
         }
       } else {
-        setStatus({ loading: false, error: "" });
+        setStatus({
+          loading: false,
+          error: "",
+          address: "",
+          askPolToInvite: "",
+          existingConversations: [],
+        });
         searchingForValue.current = "";
       }
     };
     searchForValue();
-  }, [value]);
+  }, [state.xmtp.conversations, value]);
+
+  const conversationsTopics = useRef(Object.keys(state.xmtp.conversations));
+
+  const navigateToTopic = useCallback(
+    (topic: string, message?: string) => {
+      navigation.goBack();
+      setTimeout(() => {
+        navigation.navigate("Conversation", { topic, message });
+      }, 300);
+    },
+    [navigation]
+  );
+
+  const [creatingNewConversation, setCreatingNewConversation] = useState(false);
+  const waitingForNewConversation = useRef<false | string>(false);
+
+  useEffect(() => {
+    const newConversationsTopics = Object.keys(state.xmtp.conversations);
+    if (waitingForNewConversation.current !== false) {
+      const message = waitingForNewConversation.current;
+      const newTopic = newConversationsTopics.find(
+        (topic) => !conversationsTopics.current.includes(topic)
+      );
+      if (newTopic) {
+        waitingForNewConversation.current = false;
+        setCreatingNewConversation(false);
+        navigateToTopic(newTopic, message);
+      }
+    }
+    conversationsTopics.current = Object.keys(state.xmtp.conversations);
+  }, [navigateToTopic, state.xmtp.conversations]);
+
+  const createNewConversationWithPeer = useCallback(
+    (state: StateType, peerAddress: string, prefilledMessage?: string) => {
+      if (creatingNewConversation) return;
+      waitingForNewConversation.current = prefilledMessage || "";
+      setCreatingNewConversation(true);
+      sendMessageToWebview("CREATE_CONVERSATION", {
+        peerAddress,
+        context: {
+          conversationId: computeNewConversationId(state, peerAddress),
+          metadata: {},
+        },
+      });
+    },
+    [creatingNewConversation]
+  );
 
   return (
     <>
@@ -94,8 +223,18 @@ export default function NewConversation({
           autoCorrect={false}
           value={value}
           onChangeText={(text) => setValue(text.trim())}
+          // onFocus={() => {
+          //   setTimeout(() => {
+          //     setStatusBarStyle("light");
+          //   }, 3000);
+          // }}
+          // onBlur={() => {
+          //   setTimeout(() => {
+          //     setStatusBarStyle("light");
+          //   }, 3000);
+          // }}
         />
-        {!status.loading && (
+        {!status.loading && !status.address && (
           <Text
             style={[styles.message, status.error ? styles.error : undefined]}
           >
@@ -104,6 +243,81 @@ export default function NewConversation({
         )}
 
         {status.loading && <ActivityIndicator style={styles.activity} />}
+
+        {!status.loading && status.askPolToInvite && (
+          <TableView
+            items={[
+              {
+                id: "reachOutToPol",
+                picto: creatingNewConversation ? (
+                  <ActivityIndicator
+                    style={{ width: 32, height: 32, marginRight: 8 }}
+                  />
+                ) : (
+                  <TableViewSymbol symbol="square.and.pencil" />
+                ),
+                title: "Reach out to Pol",
+                subtitle: "",
+                action: () => {
+                  const conversationWithPol = Object.values(
+                    state.xmtp.conversations
+                  ).find(
+                    (c) =>
+                      c.peerAddress.toLowerCase() === POL_ADDRESS.toLowerCase()
+                  );
+                  const message = `Hey Pol! I’d like to write to someone but this person is not on the network. Can you help me? Their address is ${status.askPolToInvite}`;
+                  if (conversationWithPol) {
+                    navigateToTopic(conversationWithPol.topic, message);
+                  } else {
+                    createNewConversationWithPeer(state, POL_ADDRESS, message);
+                  }
+                },
+              },
+            ]}
+            style={styles.tableView}
+          />
+        )}
+
+        {!status.loading && status.address && (
+          <>
+            {status.existingConversations.length > 0 && (
+              <TableView
+                items={status.existingConversations.map((c) => ({
+                  id: c.topic,
+                  picto: <TableViewSymbol symbol="arrow.up.right" />,
+                  title: conversationName(c),
+                  subtitle: c.messages?.[0]?.content || "",
+                  action: () => {
+                    navigateToTopic(c.topic);
+                  },
+                }))}
+                title="Existing conversations"
+                style={styles.tableView}
+              />
+            )}
+
+            <TableView
+              items={[
+                {
+                  id: "new",
+                  picto: creatingNewConversation ? (
+                    <ActivityIndicator
+                      style={{ width: 32, height: 32, marginRight: 8 }}
+                    />
+                  ) : (
+                    <TableViewSymbol symbol="plus" />
+                  ),
+                  title: "Create a new conversation",
+                  action: () => {
+                    createNewConversationWithPeer(state, status.address);
+                  },
+                },
+              ]}
+              title="New conversation"
+              style={styles.tableView}
+            />
+          </>
+        )}
       </View>
     </>
   );
@@ -133,5 +347,8 @@ const styles = StyleSheet.create({
   },
   activity: {
     marginTop: 23,
+  },
+  tableView: {
+    marginTop: 25,
   },
 });
