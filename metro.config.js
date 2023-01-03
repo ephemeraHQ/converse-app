@@ -8,7 +8,7 @@ module.exports = {
   ...defaultConfig,
   resolver: {
     extraNodeModules: {
-      stream: require.resolve("readable-stream"),
+      stream: require.resolve("stream-browserify"),
       crypto: require.resolve("crypto-browserify"),
       http: require.resolve("stream-http"),
       https: require.resolve("https-browserify"),
