@@ -21,6 +21,7 @@ import {
 
 import TableView, { TableViewSymbol } from "../components/TableView";
 import { sendMessageToWebview } from "../components/XmtpWebview";
+import config from "../config";
 import { AppContext, StateType } from "../data/store/context";
 import { XmtpConversation } from "../data/store/xmtpReducer";
 import { resolveENSName } from "../utils/ens";
@@ -28,9 +29,6 @@ import { getLensOwner } from "../utils/lens";
 import { addressPrefix, conversationName } from "../utils/str";
 import { isOnXmtp } from "../utils/xmtp";
 import { NavigationParamList } from "./Main";
-
-const CONVERSATION_DOMAIN = "getconverse.app";
-const POL_ADDRESS = "0xf9a3BB070c1f9b3186A547DeD991BeD04a289C5B";
 
 const computeNewConversationId = (state: StateType, peerAddress: string) => {
   let i = 0;
@@ -41,12 +39,12 @@ const computeNewConversationId = (state: StateType, peerAddress: string) => {
     i += 1;
   } while (
     conversationsIds.includes(
-      `${CONVERSATION_DOMAIN}/dm/${addressPrefix(
+      `${config.conversationDomain}/dm/${addressPrefix(
         state.xmtp.address || ""
       )}-${addressPrefix(peerAddress)}/${i}`
     )
   );
-  return `${CONVERSATION_DOMAIN}/dm/${addressPrefix(
+  return `${config.conversationDomain}/dm/${addressPrefix(
     state.xmtp.address || ""
   )}-${addressPrefix(peerAddress)}/${i}`;
 };
@@ -279,13 +277,18 @@ export default function NewConversation({
                     state.xmtp.conversations
                   ).find(
                     (c) =>
-                      c.peerAddress.toLowerCase() === POL_ADDRESS.toLowerCase()
+                      c.peerAddress.toLowerCase() ===
+                      config.polAddress.toLowerCase()
                   );
                   const message = `Hey Pol! I’d like to write to someone but this person is not on the network. Can you help me? Their address is ${status.askPolToInvite}`;
                   if (conversationWithPol) {
                     navigateToTopic(conversationWithPol.topic, message);
                   } else {
-                    createNewConversationWithPeer(state, POL_ADDRESS, message);
+                    createNewConversationWithPeer(
+                      state,
+                      config.polAddress,
+                      message
+                    );
                   }
                 },
               },
