@@ -28,6 +28,7 @@ const Conversation = ({
 }: NativeStackScreenProps<NavigationParamList, "Conversation">) => {
   const { state, dispatch } = useContext(AppContext);
   const conversation = state.xmtp.conversations[route.params.topic];
+  const messageToPrefill = route.params.message;
   const { showActionSheetWithOptions } = useActionSheet();
 
   useEffect(() => {
@@ -41,6 +42,7 @@ const Conversation = ({
       });
     }
   }, [
+    conversation,
     conversation.peerAddress,
     navigation,
     state.xmtp.initialLoadDone,
@@ -126,6 +128,10 @@ const Conversation = ({
         id: state.xmtp.address || "",
       }}
       theme={chatTheme}
+      textInputProps={{
+        defaultValue: messageToPrefill,
+        autoFocus: !!messageToPrefill,
+      }}
     />
   );
 };

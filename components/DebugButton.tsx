@@ -1,7 +1,7 @@
 import { useActionSheet } from "@expo/react-native-action-sheet";
 import Constants from "expo-constants";
 import * as Updates from "expo-updates";
-import { useContext } from "react";
+import React, { useContext } from "react";
 import { Button, View } from "react-native";
 
 import config from "../config";
