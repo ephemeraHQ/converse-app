@@ -2,6 +2,8 @@ import Constants from "expo-constants";
 
 const defaultConfig = {
   showDebug: false,
+  polAddress: "0xf9a3BB070c1f9b3186A547DeD991BeD04a289C5B",
+  conversationDomain: "getconverse.app",
 };
 
 const ENV = {
