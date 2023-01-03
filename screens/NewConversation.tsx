@@ -11,10 +11,12 @@ import React, {
 import {
   ActivityIndicator,
   Button,
+  KeyboardAvoidingView,
+  ScrollView,
   StyleSheet,
   Text,
   TextInput,
-  View,
+  Keyboard,
 } from "react-native";
 
 import TableView, { TableViewSymbol } from "../components/TableView";
@@ -211,28 +213,42 @@ export default function NewConversation({
     [creatingNewConversation]
   );
 
+  const keyboardWillShow = useCallback(() => {
+    setStatusBarStyle("light");
+  }, []);
+
+  useEffect(() => {
+    const sub = Keyboard.addListener("keyboardWillShow", keyboardWillShow);
+    return () => {
+      sub.remove();
+    };
+  }, [keyboardWillShow]);
+
   return (
-    <>
+    <KeyboardAvoidingView
+      style={{
+        flex: 1,
+        backgroundColor: "white",
+      }}
+      behavior="padding"
+      enabled
+      keyboardVerticalOffset={100}
+    >
       <StatusBar hidden={false} style="light" />
-      <View style={styles.modal}>
+      <ScrollView style={styles.modal} keyboardShouldPersistTaps="handled">
         <TextInput
           style={styles.input}
           placeholder="0x, .eth, .lens …"
           autoCapitalize="none"
-          autoFocus
+          autoFocus={false}
           autoCorrect={false}
           value={value}
+          ref={(r) => {
+            setTimeout(() => {
+              r?.focus();
+            }, 100);
+          }}
           onChangeText={(text) => setValue(text.trim())}
-          // onFocus={() => {
-          //   setTimeout(() => {
-          //     setStatusBarStyle("light");
-          //   }, 3000);
-          // }}
-          // onBlur={() => {
-          //   setTimeout(() => {
-          //     setStatusBarStyle("light");
-          //   }, 3000);
-          // }}
         />
         {!status.loading && !status.address && (
           <Text
@@ -314,12 +330,12 @@ export default function NewConversation({
                 },
               ]}
               title="New conversation"
-              style={styles.tableView}
+              style={[styles.tableView, { marginBottom: 50 }]}
             />
           </>
         )}
-      </View>
-    </>
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 }
 
