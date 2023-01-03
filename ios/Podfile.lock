@@ -429,8 +429,6 @@ PODS:
     - React-RCTImage
   - RNSVG (13.4.0):
     - React-Core
-  - RNTableView (3.1.0):
-    - React
   - Yoga (1.14.0)
 
 DEPENDENCIES:
@@ -500,7 +498,6 @@ DEPENDENCIES:
   - RNReactNativeSharedGroupPreferences (from `../node_modules/react-native-shared-group-preferences`)
   - RNScreens (from `../node_modules/react-native-screens`)
   - RNSVG (from `../node_modules/react-native-svg`)
-  - RNTableView (from `../node_modules/react-native-tableview`)
   - Yoga (from `../node_modules/react-native/ReactCommon/yoga`)
 
 SPEC REPOS:
@@ -639,8 +636,6 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native-screens"
   RNSVG:
     :path: "../node_modules/react-native-svg"
-  RNTableView:
-    :path: "../node_modules/react-native-tableview"
   Yoga:
     :path: "../node_modules/react-native/ReactCommon/yoga"
 
@@ -712,7 +707,6 @@ SPEC CHECKSUMS:
   RNReactNativeSharedGroupPreferences: de0121a4224c267bc7e9fb16c398f3f087c8da81
   RNScreens: 34cc502acf1b916c582c60003dc3089fa01dc66d
   RNSVG: 07dbd870b0dcdecc99b3a202fa37c8ca163caec2
-  RNTableView: 296188cd689281c71285ec30b57747b16f6ed971
   Yoga: eca980a5771bf114c41a754098cd85e6e0d90ed7
 
 PODFILE CHECKSUM: 3b7e0c0df3e905ac526a6ef01ff6ce6398878f7b
