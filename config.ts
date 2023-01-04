@@ -10,16 +10,14 @@ const ENV = {
   dev: {
     ...defaultConfig,
     xmtpEnv: "dev",
-    xmtpWebviewURI:
-      "https://xmtp-native-webview-kwaqe0oaq-noemalzieu-web3.vercel.app",
+    xmtpWebviewURI: "https://xmtp-native-webview.vercel.app",
     notificationsServerURI: "http://noe-mbp.local:9875",
     debugMenu: true,
   },
   preview: {
     ...defaultConfig,
     xmtpEnv: "dev",
-    xmtpWebviewURI:
-      "https://xmtp-native-webview-kwaqe0oaq-noemalzieu-web3.vercel.app",
+    xmtpWebviewURI: "https://xmtp-native-webview.vercel.app",
     notificationsServerURI: "https://xmtp-notifications-preview.fly.dev",
     debugMenu: true,
   },
