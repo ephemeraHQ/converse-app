@@ -33,7 +33,7 @@ import { NavigationParamList } from "./Main";
 const computeNewConversationId = (state: StateType, peerAddress: string) => {
   let i = 0;
   const conversationsIds = Object.values(state.xmtp.conversations)
-    .filter((c) => c.peerAddress === peerAddress)
+    .filter((c) => c.peerAddress.toLowerCase() === peerAddress.toLowerCase())
     .map((c) => c.context?.conversationId);
   do {
     i += 1;
@@ -241,10 +241,12 @@ export default function NewConversation({
           autoCorrect={false}
           value={value}
           ref={(r) => {
+            if (!inputRef.current) {
+              setTimeout(() => {
+                r?.focus();
+              }, 100);
+            }
             inputRef.current = r;
-            setTimeout(() => {
-              r?.focus();
-            }, 100);
           }}
           placeholderTextColor="rgba(60, 60, 67, 0.6)"
           onChangeText={(text) => setValue(text.trim())}
