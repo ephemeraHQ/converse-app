@@ -45,8 +45,6 @@ export default {
     },
     ENV: isDev ? "dev" : isPreview ? "preview" : "prod",
   },
-  runtimeVersion: {
-    policy: "sdkVersion",
-  },
+  runtimeVersion: "exposdk:47.0.0",
   owner: "noemalzieu",
 };
