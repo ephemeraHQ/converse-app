@@ -4,7 +4,7 @@ import {
 } from "@react-navigation/native-stack";
 import differenceInCalendarDays from "date-fns/differenceInCalendarDays";
 import format from "date-fns/format";
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext, useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
   FlatList,
@@ -17,8 +17,10 @@ import {
 } from "react-native";
 import { SFSymbol } from "react-native-sfsymbols";
 
+import DebugButton from "../components/DebugButton";
 import DisconnectButton from "../components/DisconnectButton";
 import ChevronRight from "../components/svgs/chevron.right";
+import config from "../config";
 import { AppContext } from "../data/store/context";
 import { XmtpConversation } from "../data/store/xmtpReducer";
 import { conversationName } from "../utils/str";
@@ -72,13 +74,21 @@ export function conversationListItem(
 function NewConversationButton({
   navigation,
 }: NativeStackScreenProps<NavigationParamList, "Messages">) {
+  const debugRef = useRef();
   return (
     <TouchableOpacity
       activeOpacity={0.2}
       onPress={() => {
         navigation.navigate("NewConversation");
       }}
+      onLongPress={() => {
+        if (!config.debugMenu || !debugRef.current) {
+          return;
+        }
+        (debugRef.current as any).showDebugMenu();
+      }}
     >
+      {config.debugMenu && <DebugButton ref={debugRef} />}
       <SFSymbol
         name="square.and.pencil"
         weight="medium"
