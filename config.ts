@@ -1,7 +1,7 @@
 import Constants from "expo-constants";
 
 const defaultConfig = {
-  showDebug: false,
+  debugMenu: false,
   polAddress: "0xf9a3BB070c1f9b3186A547DeD991BeD04a289C5B",
   conversationDomain: "getconverse.app",
 };
@@ -13,7 +13,7 @@ const ENV = {
     xmtpWebviewURI:
       "https://xmtp-native-webview-kwaqe0oaq-noemalzieu-web3.vercel.app",
     notificationsServerURI: "http://noe-mbp.local:9875",
-    showDebug: true,
+    debugMenu: true,
   },
   preview: {
     ...defaultConfig,
@@ -21,7 +21,7 @@ const ENV = {
     xmtpWebviewURI:
       "https://xmtp-native-webview-kwaqe0oaq-noemalzieu-web3.vercel.app",
     notificationsServerURI: "https://xmtp-notifications-preview.fly.dev",
-    showDebug: true,
+    debugMenu: true,
   },
   prod: {
     ...defaultConfig,

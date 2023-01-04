@@ -11,12 +11,12 @@ import React, {
 import {
   ActivityIndicator,
   Button,
-  KeyboardAvoidingView,
   ScrollView,
   StyleSheet,
   Text,
   TextInput,
   Keyboard,
+  View,
 } from "react-native";
 
 import TableView, { TableViewSymbol } from "../components/TableView";
@@ -222,18 +222,17 @@ export default function NewConversation({
     };
   }, [keyboardWillShow]);
 
+  const inputRef = useRef<TextInput | null>(null);
+
   return (
-    <KeyboardAvoidingView
+    <View
       style={{
         flex: 1,
         backgroundColor: "white",
       }}
-      behavior="padding"
-      enabled
-      keyboardVerticalOffset={100}
     >
       <StatusBar hidden={false} style="light" />
-      <ScrollView style={styles.modal} keyboardShouldPersistTaps="handled">
+      <View style={styles.inputContainer}>
         <TextInput
           style={styles.input}
           placeholder="0x, .eth, .lens …"
@@ -242,12 +241,23 @@ export default function NewConversation({
           autoCorrect={false}
           value={value}
           ref={(r) => {
+            inputRef.current = r;
             setTimeout(() => {
               r?.focus();
             }, 100);
           }}
+          placeholderTextColor="rgba(60, 60, 67, 0.6)"
           onChangeText={(text) => setValue(text.trim())}
+          clearButtonMode="always"
         />
+      </View>
+      <ScrollView
+        style={styles.modal}
+        keyboardShouldPersistTaps="handled"
+        onScrollBeginDrag={() => {
+          inputRef.current?.blur();
+        }}
+      >
         {!status.loading && !status.address && (
           <Text
             style={[styles.message, status.error ? styles.error : undefined]}
@@ -338,7 +348,7 @@ export default function NewConversation({
           </>
         )}
       </ScrollView>
-    </KeyboardAvoidingView>
+    </View>
   );
 }
 
@@ -347,11 +357,15 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "white",
   },
-  input: {
-    borderBottomWidth: 1,
+  inputContainer: {
+    borderBottomWidth: 0.5,
     borderBottomColor: "rgba(60, 60, 67, 0.36)",
+  },
+  input: {
     height: 46,
-    paddingHorizontal: 16,
+    paddingLeft: 16,
+    paddingRight: 8,
+    marginRight: 8,
     fontSize: 17,
   },
   message: {

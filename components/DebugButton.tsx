@@ -1,8 +1,7 @@
 import { useActionSheet } from "@expo/react-native-action-sheet";
 import Constants from "expo-constants";
 import * as Updates from "expo-updates";
-import React, { useContext } from "react";
-import { Button, View } from "react-native";
+import { useContext, forwardRef, useImperativeHandle } from "react";
 
 import config from "../config";
 import { clearDB } from "../data/db";
@@ -14,70 +13,72 @@ export const addLog = (log: string) => {
   logs.push(log);
 };
 
-export default function DebugButton() {
+const DebugButton = forwardRef((props, ref) => {
   const { state } = useContext(AppContext);
   const { showActionSheetWithOptions } = useActionSheet();
-  return (
-    <View style={{ marginLeft: -8 }}>
-      <Button
-        onPress={() => {
-          const methods: any = {
-            "Clear DB": clearDB,
-            "Update app": async () => {
-              try {
-                const update = await Updates.fetchUpdateAsync();
-                if (update.isNew) {
-                  await Updates.reloadAsync();
-                } else {
-                  alert("No new update");
-                }
-              } catch (error) {
-                alert(error);
-                console.error(error);
-              }
-            },
-            "Show logs": () => {
-              alert(logs.join("\n"));
-            },
-            "Show state": () => {
-              alert(JSON.stringify(state, null, 2));
-            },
-            "Show config": () => {
-              alert(
-                JSON.stringify(
-                  {
-                    expoEnv: Constants.expoConfig?.extra?.ENV,
-                    config,
-                    version: Constants.manifest?.version,
-                    releaseChannel: Constants.manifest?.releaseChannel,
-                    build: Constants.manifest?.ios?.buildNumber,
-                    releaseId: Constants.manifest2?.id,
-                  },
-                  null,
-                  2
-                )
-              );
-            },
-            Cancel: undefined,
-          };
-          const options = Object.keys(methods);
-
-          showActionSheetWithOptions(
-            {
-              options,
-              cancelButtonIndex: options.indexOf("Cancel"),
-            },
-            (selectedIndex?: number) => {
-              if (selectedIndex === undefined) return;
-              const method = methods[options[selectedIndex]];
-              if (method) {
-                method();
-              }
+  // The component instance will be extended
+  // with whatever you return from the callback passed
+  // as the second argument
+  useImperativeHandle(ref, () => ({
+    showDebugMenu() {
+      const methods: any = {
+        "Clear DB": clearDB,
+        "Update app": async () => {
+          try {
+            const update = await Updates.fetchUpdateAsync();
+            if (update.isNew) {
+              await Updates.reloadAsync();
+            } else {
+              alert("No new update");
             }
+          } catch (error) {
+            alert(error);
+            console.error(error);
+          }
+        },
+        "Show logs": () => {
+          alert(logs.join("\n"));
+        },
+        "Show state": () => {
+          alert(JSON.stringify(state, null, 2));
+        },
+        "Show config": () => {
+          alert(
+            JSON.stringify(
+              {
+                expoEnv: Constants.expoConfig?.extra?.ENV,
+                config,
+                version: Constants.manifest?.version,
+                releaseChannel: Constants.manifest?.releaseChannel,
+                build: Constants.manifest?.ios?.buildNumber,
+                releaseId: Constants.manifest2?.id,
+              },
+              null,
+              2
+            )
           );
-        }}
-        title="DEBUG"
-      />
-    </View>
-  );
-}
+        },
+        Cancel: undefined,
+      };
+      const options = Object.keys(methods);
+
+      showActionSheetWithOptions(
+        {
+          options,
+          cancelButtonIndex: options.indexOf("Cancel"),
+        },
+        (selectedIndex?: number) => {
+          if (selectedIndex === undefined) return;
+          const method = methods[options[selectedIndex]];
+          if (method) {
+            method();
+          }
+        }
+      );
+    },
+  }));
+
+  return null;
+});
+
+export default DebugButton;

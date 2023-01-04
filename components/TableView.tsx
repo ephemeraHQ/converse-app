@@ -97,7 +97,7 @@ const styles = StyleSheet.create({
     color: "rgba(60, 60, 67, 0.6)",
     fontSize: 12,
     marginLeft: 16,
-    marginBottom: 13,
+    marginBottom: 8,
   },
   tableView: {
     backgroundColor: "white",
@@ -123,8 +123,8 @@ const styles = StyleSheet.create({
     borderBottomColor: "#CCC",
     flex: 1,
     paddingRight: 16,
-    paddingTop: 8,
-    paddingBottom: 8,
+    paddingTop: 10,
+    paddingBottom: 10,
   },
   textContainerLastItem: {
     borderBottomWidth: 0,
