@@ -223,6 +223,7 @@ export default function NewConversation({
   }, [keyboardWillShow]);
 
   const inputRef = useRef<TextInput | null>(null);
+  const initialFocus = useRef(false);
 
   return (
     <View
@@ -241,7 +242,8 @@ export default function NewConversation({
           autoCorrect={false}
           value={value}
           ref={(r) => {
-            if (!inputRef.current) {
+            if (!initialFocus.current) {
+              initialFocus.current = true;
               setTimeout(() => {
                 r?.focus();
               }, 100);
