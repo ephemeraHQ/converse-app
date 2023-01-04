@@ -18,6 +18,7 @@ import {
   Keyboard,
   View,
 } from "react-native";
+import Web3 from "web3";
 
 import TableView, { TableViewSymbol } from "../components/TableView";
 import { sendMessageToWebview } from "../components/XmtpWebview";
@@ -103,14 +104,14 @@ export default function NewConversation({
           existingConversations: [],
         }));
         searchingForValue.current = value;
-        const address = isLens
+        const resolvedAddress = isLens
           ? await getLensOwner(value)
           : isENS
           ? await resolveENSName(value)
           : value;
         if (searchingForValue.current === value) {
           // If we're still searching for this one
-          if (!address) {
+          if (!resolvedAddress) {
             setStatus({
               loading: false,
               address: "",
@@ -123,6 +124,7 @@ export default function NewConversation({
 
             return;
           }
+          const address = Web3.utils.toChecksumAddress(resolvedAddress);
           const addressIsOnXmtp = await isOnXmtp(address);
           if (searchingForValue.current === value) {
             if (addressIsOnXmtp) {
