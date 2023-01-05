@@ -7,7 +7,7 @@ import React, {
   useRef,
   useState,
 } from "react";
-import { AppState, StyleSheet, View } from "react-native";
+import { Alert, AppState, StyleSheet, View } from "react-native";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { WebView, WebViewMessageEvent } from "react-native-webview";
 
@@ -218,6 +218,10 @@ export default function XmtpWebview() {
           });
           const topics = Object.keys(state.xmtp.conversations);
           subscribeToNotifications(topics);
+          break;
+        }
+        case "CANT_CREATE_CONVO": {
+          Alert.alert("Could not create new conversation", data.error);
           break;
         }
 

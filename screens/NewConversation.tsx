@@ -194,8 +194,8 @@ export default function NewConversation({
         navigateToTopic(newTopic, message);
       }
     }
-    conversationsTopics.current = Object.keys(state.xmtp.conversations);
-  }, [navigateToTopic, state.xmtp.conversations]);
+    conversationsTopics.current = newConversationsTopics;
+  }, [navigateToTopic, state.xmtp.conversations, state.xmtp.lastUpdateAt]);
 
   const createNewConversationWithPeer = useCallback(
     (state: StateType, peerAddress: string, prefilledMessage?: string) => {
