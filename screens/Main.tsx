@@ -44,6 +44,16 @@ Notifications.setNotificationHandler({
   }),
 });
 
+const navigateToTopic = (topic: string) => {
+  Linking.openURL(
+    Linking.createURL("/conversation", {
+      queryParams: {
+        topic,
+      },
+    })
+  );
+};
+
 export default function Main() {
   const appState = useRef(AppState.currentState);
   const { state, dispatch } = useContext(AppContext);
@@ -69,19 +79,19 @@ export default function Main() {
     []
   );
 
+  const topicToNavigateTo = useRef("");
+
   const handleNotificationInteraction = useCallback(
     (event: Notifications.NotificationResponse) => {
-      const conversationTopic = (
-        event.notification.request.content.data?.contentTopic as any
-      )?.toString();
-      if (conversationTopic && state.xmtp.conversations[conversationTopic]) {
-        Linking.openURL(
-          Linking.createURL("/conversation", {
-            queryParams: {
-              topic: conversationTopic,
-            },
-          })
-        );
+      const conversationTopic =
+        event.notification.request.content.data?.contentTopic?.toString();
+      if (conversationTopic) {
+        if (state.xmtp.conversations[conversationTopic]) {
+          navigateToTopic(conversationTopic);
+        } else {
+          // App was probably not loaded!
+          topicToNavigateTo.current = conversationTopic;
+        }
       }
     },
     [state.xmtp.conversations]
@@ -141,6 +151,12 @@ export default function Main() {
   useEffect(() => {
     if (state.xmtp.webviewLoaded) {
       SplashScreen.hideAsync();
+      // If app was loaded by clicking on notification,
+      // let's navigate
+      if (topicToNavigateTo.current) {
+        navigateToTopic(topicToNavigateTo.current);
+        topicToNavigateTo.current = "";
+      }
     }
   }, [state.xmtp.webviewLoaded]);
 
