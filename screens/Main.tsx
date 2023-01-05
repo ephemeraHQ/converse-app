@@ -26,6 +26,7 @@ export type NavigationParamList = {
   Conversation: {
     topic: string;
     message?: string;
+    focus?: boolean;
   };
   NewConversation: undefined;
 };

@@ -172,7 +172,7 @@ export default function NewConversation({
     (topic: string, message?: string) => {
       navigation.goBack();
       setTimeout(() => {
-        navigation.navigate("Conversation", { topic, message });
+        navigation.navigate("Conversation", { topic, message, focus: true });
       }, 300);
     },
     [navigation]
