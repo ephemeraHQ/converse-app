@@ -172,9 +172,6 @@ const Conversation = ({
       user={{
         id: state.xmtp.address || "",
       }}
-      onMessageLongPress={(message: MessageType.Any) => {
-        console.log("LONG PRESSED!!", (message as MessageType.Text).text);
-      }}
       theme={chatTheme}
       usePreviewData={false}
       textInputProps={{
