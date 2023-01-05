@@ -2,7 +2,7 @@ import "reflect-metadata";
 import "./polyfills";
 import { StatusBar } from "expo-status-bar";
 import React from "react";
-import { StyleSheet, View } from "react-native";
+import { StyleSheet, useColorScheme, View } from "react-native";
 // eslint-disable-next-line import/order
 import * as SplashScreen from "expo-splash-screen";
 import XmtpWebview from "./components/XmtpWebview";
@@ -13,10 +13,14 @@ SplashScreen.preventAutoHideAsync().catch(() => {
 });
 
 export default function App() {
+  const colorScheme = useColorScheme();
   return (
     <AppProvider>
       <View style={styles.safe}>
-        <StatusBar hidden={false} style="dark" />
+        <StatusBar
+          hidden={false}
+          style={colorScheme === "dark" ? "light" : "dark"}
+        />
         <XmtpWebview />
         <Main />
       </View>

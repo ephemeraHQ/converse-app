@@ -13,6 +13,7 @@ import { initDb } from "../data/db";
 import { AppContext } from "../data/store/context";
 import { NotificationsDispatchTypes } from "../data/store/notificationsReducer";
 import { XmtpConversation } from "../data/store/xmtpReducer";
+import { backgroundColor, titlesColor } from "../utils/colors";
 import { lastValueInMap } from "../utils/map";
 import {
   getNotificationsPermissionStatus,
@@ -65,10 +66,9 @@ const navigateToConversation = (conversation: XmtpConversation) => {
 };
 
 export default function Main() {
+  const colorScheme = useColorScheme();
   const appState = useRef(AppState.currentState);
   const { state, dispatch } = useContext(AppContext);
-  const colorScheme = useColorScheme();
-  console.log("color scheme is", colorScheme);
 
   const saveNotificationsStatus = useCallback(async () => {
     const notificationsStatus = await getNotificationsPermissionStatus();
@@ -234,23 +234,30 @@ export default function Main() {
     <ActionSheetProvider>
       <NavigationContainer linking={linking}>
         <Stack.Navigator initialRouteName="Messages">
-          <Stack.Screen
-            name="Messages"
-            component={ConversationList}
-            options={{
-              headerTitle: "Messages",
-              headerLargeTitle: true,
+          <Stack.Group
+            screenOptions={{
+              headerStyle: { backgroundColor: backgroundColor(colorScheme) },
+              headerTintColor: titlesColor(colorScheme),
             }}
-          />
-          <Stack.Screen name="Conversation" component={Conversation} />
-          <Stack.Screen
-            name="NewConversation"
-            component={NewConversation}
-            options={{
-              headerTitle: "New conversation",
-              presentation: "modal",
-            }}
-          />
+          >
+            <Stack.Screen
+              name="Messages"
+              component={ConversationList}
+              options={{
+                headerTitle: "Messages",
+                headerLargeTitle: true,
+              }}
+            />
+            <Stack.Screen name="Conversation" component={Conversation} />
+            <Stack.Screen
+              name="NewConversation"
+              component={NewConversation}
+              options={{
+                headerTitle: "New conversation",
+                presentation: "modal",
+              }}
+            />
+          </Stack.Group>
         </Stack.Navigator>
       </NavigationContainer>
     </ActionSheetProvider>

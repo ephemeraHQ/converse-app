@@ -7,12 +7,14 @@ import format from "date-fns/format";
 import React, { useContext, useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
+  ColorSchemeName,
   FlatList,
   PlatformColor,
   StyleSheet,
   Text,
   TouchableHighlight,
   TouchableOpacity,
+  useColorScheme,
   View,
 } from "react-native";
 import { SFSymbol } from "react-native-sfsymbols";
@@ -23,14 +25,21 @@ import ChevronRight from "../components/svgs/chevron.right";
 import config from "../config";
 import { AppContext } from "../data/store/context";
 import { XmtpConversation } from "../data/store/xmtpReducer";
+import {
+  backgroundColor,
+  clickedItemBackgroundColor,
+  titlesColor,
+} from "../utils/colors";
 import { lastValueInMap } from "../utils/map";
 import { conversationName } from "../utils/str";
 import { NavigationParamList } from "./Main";
 
 export function conversationListItem(
   navigation: NativeStackNavigationProp<NavigationParamList, "Messages">,
-  conversation: XmtpConversation
+  conversation: XmtpConversation,
+  colorScheme: ColorSchemeName
 ) {
+  const styles = getStyles(colorScheme);
   let timeToShow = "";
   const conversationTime =
     conversation.messages?.size > 0
@@ -56,7 +65,7 @@ export function conversationListItem(
           topic: conversation.topic,
         });
       }}
-      underlayColor="#EEE"
+      underlayColor={clickedItemBackgroundColor(colorScheme)}
     >
       <View style={styles.conversationListItem}>
         <Text style={styles.peerAddress}>{conversationName(conversation)}</Text>
@@ -110,6 +119,8 @@ export default function ConversationList({
   navigation,
   route,
 }: NativeStackScreenProps<NavigationParamList, "Messages">) {
+  const colorScheme = useColorScheme();
+  const styles = getStyles(colorScheme);
   const { state } = useContext(AppContext);
   const [orderedConversations, setOrderedConversations] = useState<
     XmtpConversation[]
@@ -155,46 +166,50 @@ export default function ConversationList({
       contentInsetAdjustmentBehavior="automatic"
       style={styles.conversationList}
       data={orderedConversations}
-      renderItem={({ item }) => conversationListItem(navigation, item)}
+      renderItem={({ item }) =>
+        conversationListItem(navigation, item, colorScheme)
+      }
       keyExtractor={(item) => item.topic}
     />
   );
 }
 
-const styles = StyleSheet.create({
-  conversationList: {
-    flex: 1,
-    backgroundColor: "white",
-  },
-  conversationListItem: {
-    height: 77,
-    borderBottomWidth: 1,
-    borderBottomColor: "#ebebeb",
-    paddingTop: 8,
-    paddingRight: 17,
-    marginLeft: 32,
-  },
-  peerAddress: {
-    fontSize: 17,
-    fontWeight: "600",
-    marginBottom: 3,
-  },
-  messagePreview: {
-    fontSize: 15,
-    color: "rgba(60, 60, 67, 0.6)",
-    flex: 1,
-    marginBottom: 8,
-  },
-  timeAndChevron: {
-    position: "absolute",
-    top: 8,
-    right: 17,
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  timeText: {
-    marginRight: 14,
-    fontSize: 15,
-    color: "rgba(60, 60, 67, 0.6)",
-  },
-});
+const getStyles = (colorScheme: ColorSchemeName) =>
+  StyleSheet.create({
+    conversationList: {
+      flex: 1,
+      backgroundColor: backgroundColor(colorScheme),
+    },
+    conversationListItem: {
+      height: 77,
+      borderBottomWidth: 1,
+      borderBottomColor: "#ebebeb",
+      paddingTop: 8,
+      paddingRight: 17,
+      marginLeft: 32,
+    },
+    peerAddress: {
+      fontSize: 17,
+      fontWeight: "600",
+      marginBottom: 3,
+      color: titlesColor(colorScheme),
+    },
+    messagePreview: {
+      fontSize: 15,
+      color: "rgba(60, 60, 67, 0.6)",
+      flex: 1,
+      marginBottom: 8,
+    },
+    timeAndChevron: {
+      position: "absolute",
+      top: 8,
+      right: 17,
+      flexDirection: "row",
+      alignItems: "center",
+    },
+    timeText: {
+      marginRight: 14,
+      fontSize: 15,
+      color: "rgba(60, 60, 67, 0.6)",
+    },
+  });
