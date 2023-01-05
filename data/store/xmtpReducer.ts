@@ -13,6 +13,7 @@ export type XmtpConversation = {
   createdAt: number;
   context?: XmtpConversationContext;
   messages: XmtpMessage[];
+  lazyMessages: XmtpMessage[];
   lensHandle?: string;
 };
 
@@ -43,7 +44,6 @@ export type XmtpMessage = {
   senderAddress: string;
   sent: number;
   content: string;
-  lazy?: boolean;
 };
 
 export enum XmtpDispatchTypes {
@@ -53,6 +53,7 @@ export enum XmtpDispatchTypes {
   XmtpNewConversation = "XMTP_NEW_CONVERSATION",
   XmtpSetAddress = "XMTP_SET_ADDRESS",
   XmtpSetMessages = "XMTP_SET_MESSAGES",
+  XmtpLazyMessage = "XMTP_LAZY_MESSAGE",
   XmtpInitialLoad = "XMTP_INITIAL_LOAD",
   XmtpLoading = "XMTP_LOADING",
 }
@@ -76,6 +77,10 @@ type XmtpPayload = {
   [XmtpDispatchTypes.XmtpSetMessages]: {
     topic: string;
     messages: XmtpMessage[];
+  };
+  [XmtpDispatchTypes.XmtpLazyMessage]: {
+    topic: string;
+    message: XmtpMessage;
   };
   [XmtpDispatchTypes.XmtpLoading]: {
     loading: boolean;
@@ -114,6 +119,8 @@ export const xmtpReducer = (state: XmtpType, action: XmtpActions): XmtpType => {
         conversations[c.topic] = {
           ...c,
           messages: c.messages || state.conversations[c.topic]?.messages || [],
+          lazyMessages:
+            c.lazyMessages || state.conversations[c.topic]?.lazyMessages || [],
         };
       });
 
@@ -136,6 +143,7 @@ export const xmtpReducer = (state: XmtpType, action: XmtpActions): XmtpType => {
           [action.payload.conversation.topic]: {
             ...action.payload.conversation,
             messages: [],
+            lazyMessages: [],
           },
         },
       };
@@ -154,6 +162,17 @@ export const xmtpReducer = (state: XmtpType, action: XmtpActions): XmtpType => {
       };
     }
 
+    case XmtpDispatchTypes.XmtpLazyMessage: {
+      if (!state.conversations[action.payload.topic]) return state;
+      const newState = {
+        ...state,
+        lastUpdateAt: new Date().getTime(),
+      };
+      const conversation = newState.conversations[action.payload.topic];
+      conversation.lazyMessages.unshift(action.payload.message);
+      return newState;
+    }
+
     case XmtpDispatchTypes.XmtpSetMessages: {
       const newState = {
         ...state,
@@ -161,7 +180,7 @@ export const xmtpReducer = (state: XmtpType, action: XmtpActions): XmtpType => {
       };
       newState.conversations[action.payload.topic] = newState.conversations[
         action.payload.topic
-      ] || { messages: [], topic: action.payload.topic };
+      ] || { messages: [], lazyMessages: [], topic: action.payload.topic };
       const conversation = newState.conversations[action.payload.topic];
       for (const message of action.payload.messages) {
         const alreadyMessageWithId = conversation.messages.find(
@@ -170,11 +189,11 @@ export const xmtpReducer = (state: XmtpType, action: XmtpActions): XmtpType => {
         if (alreadyMessageWithId) {
           continue;
         }
-        const lazyMessageWithContentIndex = conversation.messages.findIndex(
-          (m) => m.content === message.content && m.lazy
+        const lazyMessageWithContentIndex = conversation.lazyMessages.findIndex(
+          (m) => m.content === message.content
         );
         if (lazyMessageWithContentIndex > -1) {
-          conversation.messages.splice(lazyMessageWithContentIndex, 1);
+          conversation.lazyMessages.splice(lazyMessageWithContentIndex, 1);
         }
         conversation.messages.unshift(message);
       }
