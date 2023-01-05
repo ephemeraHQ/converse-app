@@ -12,7 +12,7 @@ export type XmtpConversation = {
   peerAddress: string;
   createdAt: number;
   context?: XmtpConversationContext;
-  messages: XmtpMessage[];
+  messages: Map<string, XmtpMessage>;
   lazyMessages: XmtpMessage[];
   lensHandle?: string;
 };
@@ -118,7 +118,8 @@ export const xmtpReducer = (state: XmtpType, action: XmtpActions): XmtpType => {
       action.payload.conversations.forEach((c) => {
         conversations[c.topic] = {
           ...c,
-          messages: c.messages || state.conversations[c.topic]?.messages || [],
+          messages:
+            c.messages || state.conversations[c.topic]?.messages || new Map(),
           lazyMessages:
             c.lazyMessages || state.conversations[c.topic]?.lazyMessages || [],
         };
@@ -142,7 +143,7 @@ export const xmtpReducer = (state: XmtpType, action: XmtpActions): XmtpType => {
           ...state.conversations,
           [action.payload.conversation.topic]: {
             ...action.payload.conversation,
-            messages: [],
+            messages: new Map(),
             lazyMessages: [],
           },
         },
@@ -180,12 +181,14 @@ export const xmtpReducer = (state: XmtpType, action: XmtpActions): XmtpType => {
       };
       newState.conversations[action.payload.topic] = newState.conversations[
         action.payload.topic
-      ] || { messages: [], lazyMessages: [], topic: action.payload.topic };
+      ] || {
+        messages: new Map(),
+        lazyMessages: [],
+        topic: action.payload.topic,
+      };
       const conversation = newState.conversations[action.payload.topic];
       for (const message of action.payload.messages) {
-        const alreadyMessageWithId = conversation.messages.find(
-          (m) => m.id === message.id
-        );
+        const alreadyMessageWithId = conversation.messages.get(message.id);
         if (alreadyMessageWithId) {
           continue;
         }
@@ -195,7 +198,7 @@ export const xmtpReducer = (state: XmtpType, action: XmtpActions): XmtpType => {
         if (lazyMessageWithContentIndex > -1) {
           conversation.lazyMessages.splice(lazyMessageWithContentIndex, 1);
         }
-        conversation.messages.unshift(message);
+        conversation.messages.set(message.id, message);
       }
 
       return newState;

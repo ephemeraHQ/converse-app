@@ -23,6 +23,7 @@ import ChevronRight from "../components/svgs/chevron.right";
 import config from "../config";
 import { AppContext } from "../data/store/context";
 import { XmtpConversation } from "../data/store/xmtpReducer";
+import { lastValueInMap } from "../utils/map";
 import { conversationName } from "../utils/str";
 import { NavigationParamList } from "./Main";
 
@@ -32,8 +33,8 @@ export function conversationListItem(
 ) {
   let timeToShow = "";
   const conversationTime =
-    conversation.messages?.length > 0
-      ? conversation.messages[0].sent
+    conversation.messages?.size > 0
+      ? lastValueInMap(conversation.messages)?.sent
       : conversation.createdAt;
   if (conversationTime) {
     const days = differenceInCalendarDays(new Date(), conversationTime);
@@ -60,7 +61,9 @@ export function conversationListItem(
       <View style={styles.conversationListItem}>
         <Text style={styles.peerAddress}>{conversationName(conversation)}</Text>
         <Text style={styles.messagePreview} numberOfLines={2}>
-          {conversation.messages?.[0]?.content || ""}
+          {conversation.messages?.size > 0
+            ? lastValueInMap(conversation.messages)?.content
+            : ""}
         </Text>
         <View style={styles.timeAndChevron}>
           <Text style={styles.timeText}>{timeToShow}</Text>
@@ -113,11 +116,17 @@ export default function ConversationList({
   >([]);
   useEffect(() => {
     const conversations = Object.values(state.xmtp.conversations).filter(
-      (a) => a?.peerAddress && a.messages?.length > 0
+      (a) => a?.peerAddress && a.messages?.size > 0
     );
     conversations.sort((a, b) => {
-      const aDate = a.messages?.length > 0 ? a.messages[0].sent : a.createdAt;
-      const bDate = b.messages?.length > 0 ? b.messages[0].sent : b.createdAt;
+      const aDate =
+        (a.messages?.size > 0
+          ? lastValueInMap(a.messages)?.sent
+          : a.createdAt) || a.createdAt;
+      const bDate =
+        (b.messages?.size > 0
+          ? lastValueInMap(b.messages)?.sent
+          : b.createdAt) || b.createdAt;
       return bDate - aDate;
     });
     setOrderedConversations(conversations);

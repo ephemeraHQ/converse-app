@@ -71,8 +71,9 @@ export default function Main() {
 
   const handleNotificationInteraction = useCallback(
     (event: Notifications.NotificationResponse) => {
-      const conversationTopic =
-        event.notification.request.content.data?.contentTopic?.toString();
+      const conversationTopic = (
+        event.notification.request.content.data?.contentTopic as any
+      )?.toString();
       if (conversationTopic && state.xmtp.conversations[conversationTopic]) {
         Linking.openURL(
           Linking.createURL("/conversation", {

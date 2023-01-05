@@ -27,6 +27,7 @@ import { AppContext, StateType } from "../data/store/context";
 import { XmtpConversation } from "../data/store/xmtpReducer";
 import { resolveENSName } from "../utils/ens";
 import { getLensOwner } from "../utils/lens";
+import { lastValueInMap } from "../utils/map";
 import { addressPrefix, conversationName } from "../utils/str";
 import { isOnXmtp } from "../utils/xmtp";
 import { NavigationParamList } from "./Main";
@@ -321,7 +322,7 @@ export default function NewConversation({
                   id: c.topic,
                   picto: <TableViewSymbol symbol="arrow.up.right" />,
                   title: conversationName(c),
-                  subtitle: c.messages?.[0]?.content || "",
+                  subtitle: lastValueInMap(c.messages)?.content || "",
                   action: () => {
                     navigateToTopic(c.topic);
                   },

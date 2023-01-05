@@ -32,7 +32,7 @@ export const subscribeToNotifications = async (
       nativeTokenType: nativeTokenQuery.type,
       topics,
     });
-  } catch (e) {
+  } catch (e: any) {
     console.log("Could not subscribe to notifications");
     console.log(e?.message);
   }
