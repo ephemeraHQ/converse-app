@@ -2,7 +2,7 @@ import { useActionSheet } from "@expo/react-native-action-sheet";
 import { Theme } from "@flyerhq/react-native-chat-ui";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import * as Clipboard from "expo-clipboard";
-import React, { useCallback, useContext, useEffect } from "react";
+import React, { useCallback, useContext, useEffect, useState } from "react";
 import {
   ActivityIndicator,
   StyleSheet,
@@ -84,35 +84,52 @@ const Conversation = ({
     state.xmtp.address,
   ]);
 
-  let messages = [] as MessageType.Any[];
-  if (conversation?.messages) {
-    messages = conversation.messages.map((m) => ({
-      author: {
-        id: m.senderAddress,
-      },
-      createdAt: m.sent,
-      id: m.id,
-      text: m.content,
-      type: "text",
-    }));
-  }
+  const [messages, setMessages] = useState([] as MessageType.Any[]);
+
+  useEffect(() => {
+    const newMessages = [] as MessageType.Any[];
+    conversation.lazyMessages.forEach((m) => {
+      newMessages.push({
+        author: {
+          id: m.senderAddress,
+        },
+        createdAt: m.sent,
+        id: m.id,
+        text: m.content,
+        type: "text",
+      });
+    });
+    conversation.messages.forEach((m) => {
+      newMessages.push({
+        author: {
+          id: m.senderAddress,
+        },
+        createdAt: m.sent,
+        id: m.id,
+        text: m.content,
+        type: "text",
+      });
+    });
+    setMessages(newMessages);
+  }, [
+    conversation.lazyMessages,
+    conversation.messages,
+    state.xmtp.lastUpdateAt,
+  ]);
 
   const handleSendPress = useCallback(
     (m: MessageType.PartialText) => {
       // Lazy message
       dispatch({
-        type: XmtpDispatchTypes.XmtpSetMessages,
+        type: XmtpDispatchTypes.XmtpLazyMessage,
         payload: {
           topic: conversation.topic,
-          messages: [
-            {
-              id: uuid.v4().toString(),
-              senderAddress: state.xmtp.address || "",
-              sent: new Date().getTime(),
-              content: m.text,
-              lazy: true,
-            },
-          ],
+          message: {
+            id: uuid.v4().toString(),
+            senderAddress: state.xmtp.address || "",
+            sent: new Date().getTime(),
+            content: m.text,
+          },
         },
       });
       sendXmtpMessage(conversation.topic, m.text);
