@@ -130,7 +130,7 @@ const Conversation = ({
       theme={chatTheme}
       textInputProps={{
         defaultValue: messageToPrefill,
-        autoFocus: !!messageToPrefill,
+        autoFocus: !!messageToPrefill || route.params.focus,
       }}
     />
   );
