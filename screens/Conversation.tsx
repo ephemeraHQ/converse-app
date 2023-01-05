@@ -88,6 +88,8 @@ const Conversation = ({
 
   useEffect(() => {
     const newMessages = [] as MessageType.Any[];
+    const messagesArray = Array.from(conversation.messages.values());
+    const messagesLength = messagesArray.length;
     conversation.lazyMessages.forEach((m) => {
       newMessages.push({
         author: {
@@ -99,7 +101,8 @@ const Conversation = ({
         type: "text",
       });
     });
-    conversation.messages.forEach((m) => {
+    for (let index = messagesLength - 1; index >= 0; index--) {
+      const m = messagesArray[index];
       newMessages.push({
         author: {
           id: m.senderAddress,
@@ -109,7 +112,7 @@ const Conversation = ({
         text: m.content,
         type: "text",
       });
-    });
+    }
     setMessages(newMessages);
   }, [
     conversation.lazyMessages,

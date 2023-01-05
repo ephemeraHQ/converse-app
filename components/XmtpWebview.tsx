@@ -15,6 +15,7 @@ import config from "../config";
 import { saveNewConversation, saveConversations, saveMessages } from "../data";
 import { AppContext } from "../data/store/context";
 import { XmtpDispatchTypes } from "../data/store/xmtpReducer";
+import { lastValueInMap } from "../utils/map";
 import { subscribeToNotifications } from "../utils/notifications";
 
 const XMTP_WEBSITE_URI = config.xmtpWebviewURI;
@@ -107,7 +108,9 @@ export default function XmtpWebview() {
         for (const topic in state.xmtp.conversations) {
           const conversation = state.xmtp.conversations[topic];
           lastTimestampByConversation[topic] =
-            conversation.messages?.[0]?.sent || 0;
+            conversation.messages?.size > 0
+              ? lastValueInMap(conversation.messages)?.sent || 0
+              : 0;
         }
         sendMessageToWebview("RELOAD", lastTimestampByConversation);
       }
@@ -136,7 +139,9 @@ export default function XmtpWebview() {
       for (const topic in state.xmtp.conversations) {
         const conversation = state.xmtp.conversations[topic];
         lastTimestampByConversation[topic] =
-          conversation.messages?.[0]?.sent || 0;
+          conversation.messages?.size > 0
+            ? lastValueInMap(conversation.messages)?.sent || 0
+            : 0;
       }
       sendMessageToWebview(
         "LOAD_CONVERSATIONS_AND_MESSAGES",

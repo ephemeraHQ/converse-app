@@ -59,15 +59,19 @@ const xmtpConversationFromDb = (
         : undefined,
     };
   }
+
   return {
     topic: dbConversation.topic,
     peerAddress: dbConversation.peerAddress,
     createdAt: dbConversation.createdAt,
     context,
     messages: dbConversation.messages
-      ? dbConversation.messages.map(xmtpMessageFromDb)
-      : [],
+      ? new Map(
+          dbConversation.messages.map((m) => [m.id, xmtpMessageFromDb(m)])
+        )
+      : new Map(),
     lensHandle: dbConversation.lensHandle,
+    lazyMessages: [],
   };
 };
 
@@ -173,7 +177,7 @@ export const loadDataToContext = async (dispatch: DispatchType) => {
 
   const conversationsWithMessages = await conversationRepository.find({
     relations: { messages: true },
-    order: { messages: { sent: "DESC" } },
+    order: { messages: { sent: "ASC" } },
   });
 
   dispatch({
