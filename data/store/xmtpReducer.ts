@@ -15,6 +15,7 @@ export type XmtpConversation = {
   messages: Map<string, XmtpMessage>;
   lazyMessages: XmtpMessage[];
   lensHandle?: string;
+  currentMessage?: string;
 };
 
 export type XmtpType = {
@@ -56,6 +57,7 @@ export enum XmtpDispatchTypes {
   XmtpLazyMessage = "XMTP_LAZY_MESSAGE",
   XmtpInitialLoad = "XMTP_INITIAL_LOAD",
   XmtpLoading = "XMTP_LOADING",
+  XmtpSetCurrentMessageContent = "XMTP_SET_CURRENT_MESSAGE",
 }
 
 type XmtpPayload = {
@@ -81,6 +83,10 @@ type XmtpPayload = {
   [XmtpDispatchTypes.XmtpLazyMessage]: {
     topic: string;
     message: XmtpMessage;
+  };
+  [XmtpDispatchTypes.XmtpSetCurrentMessageContent]: {
+    topic: string;
+    content: string;
   };
   [XmtpDispatchTypes.XmtpLoading]: {
     loading: boolean;
@@ -110,6 +116,12 @@ export const xmtpReducer = (state: XmtpType, action: XmtpActions): XmtpType => {
         ...state,
         webviewLoaded: action.payload.loaded,
       };
+    case XmtpDispatchTypes.XmtpSetCurrentMessageContent: {
+      const newState = { ...state };
+      newState.conversations[action.payload.topic].currentMessage =
+        action.payload.content;
+      return newState;
+    }
     case XmtpDispatchTypes.XmtpSetConversations: {
       const conversations: {
         [topic: string]: XmtpConversation;

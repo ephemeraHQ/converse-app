@@ -2,7 +2,13 @@ import { useActionSheet } from "@expo/react-native-action-sheet";
 import { Theme } from "@flyerhq/react-native-chat-ui";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import * as Clipboard from "expo-clipboard";
-import React, { useCallback, useContext, useEffect, useState } from "react";
+import React, {
+  useCallback,
+  useContext,
+  useEffect,
+  useState,
+  useRef,
+} from "react";
 import {
   ActivityIndicator,
   StyleSheet,
@@ -28,7 +34,9 @@ const Conversation = ({
 }: NativeStackScreenProps<NavigationParamList, "Conversation">) => {
   const { state, dispatch } = useContext(AppContext);
   const conversation = state.xmtp.conversations[route.params.topic];
-  const messageToPrefill = route.params.message;
+  const messageToPrefill =
+    route.params.message || conversation.currentMessage || "";
+  const focusMessageInput = route.params.focus || !!messageToPrefill;
   const { showActionSheetWithOptions } = useActionSheet();
 
   useEffect(() => {
@@ -120,8 +128,11 @@ const Conversation = ({
     state.xmtp.lastUpdateAt,
   ]);
 
+  const messageContent = useRef(messageToPrefill);
+
   const handleSendPress = useCallback(
     (m: MessageType.PartialText) => {
+      messageContent.current = "";
       // Lazy message
       dispatch({
         type: XmtpDispatchTypes.XmtpLazyMessage,
@@ -140,6 +151,20 @@ const Conversation = ({
     [conversation.topic, dispatch, state.xmtp.address]
   );
 
+  const onLeaveScreen = useCallback(() => {
+    dispatch({
+      type: XmtpDispatchTypes.XmtpSetCurrentMessageContent,
+      payload: { topic: conversation.topic, content: messageContent.current },
+    });
+  }, [conversation.topic, dispatch]);
+
+  useEffect(() => {
+    navigation.addListener("beforeRemove", onLeaveScreen);
+    return () => {
+      navigation.removeListener("beforeRemove", onLeaveScreen);
+    };
+  }, [navigation, onLeaveScreen]);
+
   return (
     <Chat
       messages={messages}
@@ -147,10 +172,17 @@ const Conversation = ({
       user={{
         id: state.xmtp.address || "",
       }}
+      onMessageLongPress={(message: MessageType.Any) => {
+        console.log("LONG PRESSED!!", (message as MessageType.Text).text);
+      }}
       theme={chatTheme}
+      usePreviewData={false}
       textInputProps={{
         defaultValue: messageToPrefill,
-        autoFocus: !!messageToPrefill || route.params.focus,
+        autoFocus: focusMessageInput,
+        onChangeText: (text) => {
+          messageContent.current = text;
+        },
       }}
     />
   );
