@@ -12,7 +12,7 @@ export default {
   version: "1.0.0",
   orientation: "portrait",
   icon: isProduction ? "./assets/icon.png" : "./assets/icon-preview.png",
-  userInterfaceStyle: "light",
+  userInterfaceStyle: "automatic",
   splash: {
     image: "./assets/splash.png",
     resizeMode: "contain",

@@ -5,7 +5,7 @@ import * as Linking from "expo-linking";
 import * as Notifications from "expo-notifications";
 import * as SplashScreen from "expo-splash-screen";
 import React, { useCallback, useContext, useEffect, useRef } from "react";
-import { AppState } from "react-native";
+import { AppState, useColorScheme } from "react-native";
 
 import { sendMessageToWebview } from "../components/XmtpWebview";
 import { loadDataToContext } from "../data";
@@ -67,6 +67,8 @@ const navigateToConversation = (conversation: XmtpConversation) => {
 export default function Main() {
   const appState = useRef(AppState.currentState);
   const { state, dispatch } = useContext(AppContext);
+  const colorScheme = useColorScheme();
+  console.log("color scheme is", colorScheme);
 
   const saveNotificationsStatus = useCallback(async () => {
     const notificationsStatus = await getNotificationsPermissionStatus();
