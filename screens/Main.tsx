@@ -15,7 +15,6 @@ import {
   getNotificationsPermissionStatus,
   subscribeToNotifications,
 } from "../utils/notifications";
-import { conversationName } from "../utils/str";
 import Conversation from "./Conversation";
 import ConversationList from "./ConversationList";
 import NewConversation from "./NewConversation";
@@ -223,22 +222,7 @@ export default function Main() {
               headerLargeTitle: true,
             }}
           />
-          <Stack.Screen
-            name="Conversation"
-            component={Conversation}
-            options={({ route }) => {
-              const conversation = state.xmtp.conversations[route.params.topic];
-              if (conversation) {
-                return {
-                  title: conversationName(conversation),
-                };
-              } else {
-                return {
-                  title: "Conversation",
-                };
-              }
-            }}
-          />
+          <Stack.Screen name="Conversation" component={Conversation} />
           <Stack.Screen
             name="NewConversation"
             component={NewConversation}

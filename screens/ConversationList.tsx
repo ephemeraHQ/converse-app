@@ -142,7 +142,7 @@ export default function ConversationList({
   useEffect(() => {
     if (state.xmtp.initialLoadDone && !state.xmtp.loading) {
       navigation.setOptions({
-        headerTitle: "Messages",
+        headerTitle: undefined,
       });
     } else {
       navigation.setOptions({

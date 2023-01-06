@@ -42,7 +42,31 @@ const Conversation = ({
   useEffect(() => {
     if (state.xmtp.initialLoadDone && !state.xmtp.loading) {
       navigation.setOptions({
-        headerTitle: conversationName(conversation),
+        headerTitle: () => (
+          <TouchableOpacity
+            onPress={() => {
+              showActionSheetWithOptions(
+                {
+                  options: ["Copy wallet address", "Cancel"],
+                  cancelButtonIndex: 1,
+                  title: conversation.peerAddress,
+                },
+                (selectedIndex?: number) => {
+                  switch (selectedIndex) {
+                    case 0:
+                      Clipboard.setStringAsync(conversation.peerAddress);
+                      break;
+
+                    default:
+                      break;
+                  }
+                }
+              );
+            }}
+          >
+            <Text style={styles.title}>{conversationName(conversation)}</Text>
+          </TouchableOpacity>
+        ),
       });
     } else {
       navigation.setOptions({
@@ -51,45 +75,11 @@ const Conversation = ({
     }
   }, [
     conversation,
-    conversation.peerAddress,
-    navigation,
-    state.xmtp.initialLoadDone,
-    state.xmtp.loading,
-  ]);
-
-  useEffect(() => {
-    navigation.setOptions({
-      headerTitle: () => (
-        <TouchableOpacity
-          onPress={() => {
-            showActionSheetWithOptions(
-              {
-                options: ["Copy wallet address", "Cancel"],
-                cancelButtonIndex: 1,
-                title: conversation.peerAddress,
-              },
-              (selectedIndex?: number) => {
-                switch (selectedIndex) {
-                  case 0:
-                    Clipboard.setStringAsync(conversation.peerAddress);
-                    break;
-
-                  default:
-                    break;
-                }
-              }
-            );
-          }}
-        >
-          <Text style={styles.title}>{conversationName(conversation)}</Text>
-        </TouchableOpacity>
-      ),
-    });
-  }, [
-    conversation,
     navigation,
     showActionSheetWithOptions,
     state.xmtp.address,
+    state.xmtp.initialLoadDone,
+    state.xmtp.loading,
   ]);
 
   const [messages, setMessages] = useState([] as MessageType.Any[]);
