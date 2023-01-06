@@ -7,10 +7,13 @@ import * as SplashScreen from "expo-splash-screen";
 import React, { useCallback, useContext, useEffect, useRef } from "react";
 import { AppState } from "react-native";
 
+import { sendMessageToWebview } from "../components/XmtpWebview";
 import { loadDataToContext } from "../data";
 import { initDb } from "../data/db";
 import { AppContext } from "../data/store/context";
 import { NotificationsDispatchTypes } from "../data/store/notificationsReducer";
+import { XmtpConversation } from "../data/store/xmtpReducer";
+import { lastValueInMap } from "../utils/map";
 import {
   getNotificationsPermissionStatus,
   subscribeToNotifications,
@@ -43,11 +46,19 @@ Notifications.setNotificationHandler({
   }),
 });
 
-const navigateToTopic = (topic: string) => {
+const navigateToConversation = (conversation: XmtpConversation) => {
+  const lastTimestamp =
+    conversation.messages?.size > 0
+      ? lastValueInMap(conversation.messages)?.sent || 0
+      : 0;
+  sendMessageToWebview("SYNC_CONVERSATION", {
+    conversationTopic: conversation.topic,
+    lastTimestamp,
+  });
   Linking.openURL(
     Linking.createURL("/conversation", {
       queryParams: {
-        topic,
+        topic: conversation.topic,
       },
     })
   );
@@ -86,7 +97,7 @@ export default function Main() {
         event.notification.request.content.data?.contentTopic?.toString();
       if (conversationTopic) {
         if (state.xmtp.conversations[conversationTopic]) {
-          navigateToTopic(conversationTopic);
+          navigateToConversation(state.xmtp.conversations[conversationTopic]);
         } else {
           // App was probably not loaded!
           topicToNavigateTo.current = conversationTopic;
@@ -147,17 +158,24 @@ export default function Main() {
     };
   }, [saveNotificationsStatus]);
 
+  const splashScreenHidden = useRef(false);
+
   useEffect(() => {
-    if (state.xmtp.webviewLoaded) {
+    if (state.xmtp.webviewLoaded && !splashScreenHidden.current) {
+      splashScreenHidden.current = true;
       SplashScreen.hideAsync();
       // If app was loaded by clicking on notification,
       // let's navigate
       if (topicToNavigateTo.current) {
-        navigateToTopic(topicToNavigateTo.current);
+        if (state.xmtp.conversations[topicToNavigateTo.current]) {
+          navigateToConversation(
+            state.xmtp.conversations[topicToNavigateTo.current]
+          );
+        }
         topicToNavigateTo.current = "";
       }
     }
-  }, [state.xmtp.webviewLoaded]);
+  }, [state.xmtp.conversations, state.xmtp.webviewLoaded]);
 
   const initialNotificationsSubscribed = useRef(false);
 
