@@ -13,7 +13,11 @@ import { initDb } from "../data/db";
 import { AppContext } from "../data/store/context";
 import { NotificationsDispatchTypes } from "../data/store/notificationsReducer";
 import { XmtpConversation } from "../data/store/xmtpReducer";
-import { backgroundColor, titlesColor } from "../utils/colors";
+import {
+  backgroundColor,
+  navigationSecondaryBackgroundColor,
+  textPrimaryColor,
+} from "../utils/colors";
 import { lastValueInMap } from "../utils/map";
 import {
   getNotificationsPermissionStatus,
@@ -237,7 +241,7 @@ export default function Main() {
           <Stack.Group
             screenOptions={{
               headerStyle: { backgroundColor: backgroundColor(colorScheme) },
-              headerTintColor: titlesColor(colorScheme),
+              headerTitleStyle: { color: textPrimaryColor(colorScheme) },
             }}
           >
             <Stack.Screen
@@ -255,6 +259,10 @@ export default function Main() {
               options={{
                 headerTitle: "New conversation",
                 presentation: "modal",
+                headerStyle: {
+                  backgroundColor:
+                    navigationSecondaryBackgroundColor(colorScheme),
+                },
               }}
             />
           </Stack.Group>

@@ -1,4 +1,5 @@
 import { useActionSheet } from "@expo/react-native-action-sheet";
+import * as Clipboard from "expo-clipboard";
 import * as Linking from "expo-linking";
 import React, { useContext } from "react";
 import { View, Button } from "react-native";
@@ -21,54 +22,52 @@ export default function DisconnectButton() {
     <View style={{ marginLeft: -8 }}>
       <Button
         onPress={() => {
-          const destructiveButtonIndex = 0;
-          let cancelButtonIndex = 1;
-          let options = ["Disconnect", "Cancel"];
-          let notificationsButton = -1;
+          const methods = {
+            "Copy wallet address": () => {
+              Clipboard.setStringAsync(state.xmtp.address || "");
+            },
+            "Turn on notifications": () => {
+              if (state.notifications.status === "denied") {
+                // Open settings
+                Linking.openSettings();
+              } else if (state.notifications.status === "undetermined") {
+                // Open popup
+                requestPushNotificationsPermissions().then(
+                  (newStatus: NotificationPermissionStatus | undefined) => {
+                    if (!newStatus) return;
+                    dispatch({
+                      type: NotificationsDispatchTypes.NotificationsStatus,
+                      payload: { status: newStatus },
+                    });
+                  }
+                );
+              }
+            },
+            Disconnect: () => {
+              clearDB();
+              disablePushNotifications();
+              sendMessageToWebview("DISCONNECT");
+            },
+            Cancel: () => {},
+          };
 
-          if (state.notifications.status !== "granted") {
-            cancelButtonIndex = 2;
-            notificationsButton = 1;
-            options = ["Disconnect", "Turn on notifications", "Cancel"];
+          const options = Object.keys(methods);
+          if (state.notifications.status === "granted") {
+            options.splice(options.indexOf("Turn on notifications"), 1);
           }
 
           showActionSheetWithOptions(
             {
               options,
-              cancelButtonIndex,
-              destructiveButtonIndex,
+              destructiveButtonIndex: options.indexOf("Disconnect"),
+              cancelButtonIndex: options.indexOf("Cancel"),
               title: state.xmtp.address,
             },
             (selectedIndex?: number) => {
-              switch (selectedIndex) {
-                case destructiveButtonIndex: {
-                  clearDB();
-                  disablePushNotifications();
-                  sendMessageToWebview("DISCONNECT");
-                  break;
-                }
-
-                case notificationsButton: {
-                  if (state.notifications.status === "denied") {
-                    // Open settings
-                    Linking.openSettings();
-                  } else if (state.notifications.status === "undetermined") {
-                    // Open popup
-                    requestPushNotificationsPermissions().then(
-                      (newStatus: NotificationPermissionStatus | undefined) => {
-                        if (!newStatus) return;
-                        dispatch({
-                          type: NotificationsDispatchTypes.NotificationsStatus,
-                          payload: { status: newStatus },
-                        });
-                      }
-                    );
-                  }
-                  break;
-                }
-
-                default:
-                  break;
+              if (selectedIndex === undefined) return;
+              const method = methods[options[selectedIndex]];
+              if (method) {
+                method();
               }
             }
           );

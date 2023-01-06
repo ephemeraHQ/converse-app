@@ -11,15 +11,25 @@ import React, {
 } from "react";
 import {
   ActivityIndicator,
+  ColorSchemeName,
   StyleSheet,
   Text,
   TouchableOpacity,
+  useColorScheme,
 } from "react-native";
 import uuid from "react-native-uuid";
 
 import { sendXmtpMessage } from "../components/XmtpWebview";
 import { AppContext } from "../data/store/context";
 import { XmtpDispatchTypes } from "../data/store/xmtpReducer";
+import {
+  backgroundColor,
+  messageBubbleColor,
+  myMessageBubbleColor,
+  navigationSecondaryBackgroundColor,
+  textPrimaryColor,
+  textSecondaryColor,
+} from "../utils/colors";
 import { conversationName } from "../utils/str";
 import {
   Chat,
@@ -33,11 +43,13 @@ const Conversation = ({
   navigation,
 }: NativeStackScreenProps<NavigationParamList, "Conversation">) => {
   const { state, dispatch } = useContext(AppContext);
+  const colorScheme = useColorScheme();
   const conversation = state.xmtp.conversations[route.params.topic];
   const messageToPrefill =
     route.params.message || conversation.currentMessage || "";
   const focusMessageInput = route.params.focus || !!messageToPrefill;
   const { showActionSheetWithOptions } = useActionSheet();
+  const styles = getStyles(colorScheme);
 
   useEffect(() => {
     if (state.xmtp.initialLoadDone && !state.xmtp.loading) {
@@ -80,6 +92,7 @@ const Conversation = ({
     state.xmtp.address,
     state.xmtp.initialLoadDone,
     state.xmtp.loading,
+    styles.title,
   ]);
 
   const [messages, setMessages] = useState([] as MessageType.Any[]);
@@ -162,7 +175,7 @@ const Conversation = ({
       user={{
         id: state.xmtp.address || "",
       }}
-      theme={chatTheme}
+      theme={chatTheme(colorScheme)}
       usePreviewData={false}
       textInputProps={{
         defaultValue: messageToPrefill,
@@ -170,6 +183,7 @@ const Conversation = ({
         onChangeText: (text) => {
           messageContent.current = text;
         },
+        placeholderTextColor: textSecondaryColor(colorScheme),
       }}
     />
   );
@@ -177,59 +191,64 @@ const Conversation = ({
 
 export default Conversation;
 
-const styles = StyleSheet.create({
-  title: {
-    fontSize: 17,
-    fontWeight: "600",
-  },
-});
+const getStyles = (colorScheme: ColorSchemeName) =>
+  StyleSheet.create({
+    title: {
+      color: textPrimaryColor(colorScheme),
+      fontSize: 17,
+      fontWeight: "600",
+    },
+  });
 
-const chatTheme = {
-  ...defaultTheme,
-  borders: {
-    ...defaultTheme.borders,
-    messageBorderRadius: 12,
-    inputBorderRadius: 0,
-  },
-  insets: {
-    ...defaultTheme.insets,
-    messageInsetsVertical: 6,
-    messageInsetsHorizontal: 16,
-  },
-  colors: {
-    ...defaultTheme.colors,
-    primary: "#FC4F37",
-    secondary: "#E9E9EB",
-    inputBackground: "#F6F6F6",
-    inputText: "#333333",
-  },
-  fonts: {
-    ...defaultTheme.fonts,
-    inputTextStyle: {
-      ...defaultTheme.fonts.inputTextStyle,
-      fontWeight: "400",
-      backgroundColor: "white",
-      borderRadius: 15,
-      minHeight: 33,
-      paddingLeft: 12,
-      marginTop: -10,
-      marginBottom: -10,
+const chatTheme = (colorScheme: ColorSchemeName) =>
+  ({
+    ...defaultTheme,
+    borders: {
+      ...defaultTheme.borders,
+      messageBorderRadius: 12,
+      inputBorderRadius: 0,
     },
-    receivedMessageBodyTextStyle: {
-      ...defaultTheme.fonts.receivedMessageBodyTextStyle,
-      fontWeight: "400",
+    insets: {
+      ...defaultTheme.insets,
+      messageInsetsVertical: 6,
+      messageInsetsHorizontal: 16,
     },
-    receivedMessageCaptionTextStyle: {
-      ...defaultTheme.fonts.receivedMessageCaptionTextStyle,
-      fontWeight: "400",
+    colors: {
+      ...defaultTheme.colors,
+      background: backgroundColor(colorScheme),
+      primary: myMessageBubbleColor(colorScheme),
+      secondary: messageBubbleColor(colorScheme),
+      inputBackground: navigationSecondaryBackgroundColor(colorScheme),
+      inputText: textPrimaryColor(colorScheme),
     },
-    sentMessageBodyTextStyle: {
-      ...defaultTheme.fonts.sentMessageBodyTextStyle,
-      fontWeight: "400",
+    fonts: {
+      ...defaultTheme.fonts,
+      inputTextStyle: {
+        ...defaultTheme.fonts.inputTextStyle,
+        fontWeight: "400",
+        backgroundColor: backgroundColor(colorScheme),
+        borderRadius: 15,
+        minHeight: 33,
+        paddingLeft: 12,
+        marginTop: -10,
+        marginBottom: -10,
+      },
+      receivedMessageBodyTextStyle: {
+        ...defaultTheme.fonts.receivedMessageBodyTextStyle,
+        fontWeight: "400",
+        color: textPrimaryColor(colorScheme),
+      },
+      receivedMessageCaptionTextStyle: {
+        ...defaultTheme.fonts.receivedMessageCaptionTextStyle,
+        fontWeight: "400",
+      },
+      sentMessageBodyTextStyle: {
+        ...defaultTheme.fonts.sentMessageBodyTextStyle,
+        fontWeight: "400",
+      },
+      sentMessageCaptionTextStyle: {
+        ...defaultTheme.fonts.sentMessageCaptionTextStyle,
+        fontWeight: "400",
+      },
     },
-    sentMessageCaptionTextStyle: {
-      ...defaultTheme.fonts.sentMessageCaptionTextStyle,
-      fontWeight: "400",
-    },
-  },
-} as Theme;
+  } as Theme);
