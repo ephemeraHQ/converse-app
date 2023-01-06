@@ -28,6 +28,8 @@ const hideDataFromEvents = [
   "SAVE_KEYS",
   "KEYS_LOADED_FROM_SECURE_STORAGE",
   "XMTP_CONVERSATIONS",
+  "RELOAD",
+  "LOAD_CONVERSATIONS_AND_MESSAGES",
 ];
 
 export const sendMessageToWebview = (eventName: string, data?: any) => {
