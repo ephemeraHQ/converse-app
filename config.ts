@@ -10,8 +10,7 @@ const ENV = {
   dev: {
     ...defaultConfig,
     xmtpEnv: "dev",
-    xmtpWebviewURI:
-      "https://5c1e-2a01-cb04-85e-2800-200d-941d-a92f-c4f9.eu.ngrok.io",
+    xmtpWebviewURI: "https://xmtp-native-webview.vercel.app",
     notificationsServerURI: "http://noe-mbp.local:9875",
     debugMenu: true,
   },
