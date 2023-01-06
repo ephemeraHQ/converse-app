@@ -21,14 +21,16 @@ import { SFSymbol } from "react-native-sfsymbols";
 
 import DebugButton from "../components/DebugButton";
 import DisconnectButton from "../components/DisconnectButton";
-import ChevronRight from "../components/svgs/chevron.right";
 import config from "../config";
 import { AppContext } from "../data/store/context";
 import { XmtpConversation } from "../data/store/xmtpReducer";
 import {
+  actionSecondaryColor,
   backgroundColor,
   clickedItemBackgroundColor,
-  titlesColor,
+  itemSeparatorColor,
+  textPrimaryColor,
+  textSecondaryColor,
 } from "../utils/colors";
 import { lastValueInMap } from "../utils/map";
 import { conversationName } from "../utils/str";
@@ -76,7 +78,15 @@ export function conversationListItem(
         </Text>
         <View style={styles.timeAndChevron}>
           <Text style={styles.timeText}>{timeToShow}</Text>
-          <ChevronRight />
+          <SFSymbol
+            name="chevron.right"
+            weight="semibold"
+            scale="large"
+            color={actionSecondaryColor(colorScheme)}
+            size={10}
+            resizeMode="center"
+            multicolor={false}
+          />
         </View>
       </View>
     </TouchableHighlight>
@@ -183,7 +193,7 @@ const getStyles = (colorScheme: ColorSchemeName) =>
     conversationListItem: {
       height: 77,
       borderBottomWidth: 1,
-      borderBottomColor: "#ebebeb",
+      borderBottomColor: itemSeparatorColor(colorScheme),
       paddingTop: 8,
       paddingRight: 17,
       marginLeft: 32,
@@ -192,11 +202,11 @@ const getStyles = (colorScheme: ColorSchemeName) =>
       fontSize: 17,
       fontWeight: "600",
       marginBottom: 3,
-      color: titlesColor(colorScheme),
+      color: textPrimaryColor(colorScheme),
     },
     messagePreview: {
       fontSize: 15,
-      color: "rgba(60, 60, 67, 0.6)",
+      color: textSecondaryColor(colorScheme),
       flex: 1,
       marginBottom: 8,
     },
@@ -210,6 +220,6 @@ const getStyles = (colorScheme: ColorSchemeName) =>
     timeText: {
       marginRight: 14,
       fontSize: 15,
-      color: "rgba(60, 60, 67, 0.6)",
+      color: textSecondaryColor(colorScheme),
     },
   });

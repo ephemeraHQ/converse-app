@@ -17,6 +17,8 @@ import {
   TextInput,
   Keyboard,
   View,
+  ColorSchemeName,
+  useColorScheme,
 } from "react-native";
 import Web3 from "web3";
 
@@ -25,6 +27,12 @@ import { sendMessageToWebview } from "../components/XmtpWebview";
 import config from "../config";
 import { AppContext, StateType } from "../data/store/context";
 import { XmtpConversation } from "../data/store/xmtpReducer";
+import {
+  backgroundColor,
+  itemSeparatorColor,
+  textPrimaryColor,
+  textSecondaryColor,
+} from "../utils/colors";
 import { resolveENSName } from "../utils/ens";
 import { getLensOwner } from "../utils/lens";
 import { lastValueInMap } from "../utils/map";
@@ -54,22 +62,21 @@ const computeNewConversationId = (state: StateType, peerAddress: string) => {
 export default function NewConversation({
   navigation,
 }: NativeStackScreenProps<NavigationParamList, "NewConversation">) {
+  const colorScheme = useColorScheme();
   useEffect(() => {
     navigation.setOptions({
       headerLeft: () => (
         <Button
           title="Cancel"
           onPress={() => {
-            setStatusBarStyle("dark");
+            screenRemoving.current = true;
+            setStatusBarStyle(colorScheme === "dark" ? "light" : "dark");
             navigation.goBack();
           }}
         />
       ),
-      headerStyle: {
-        backgroundColor: "#F5F5F5",
-      },
     });
-  }, [navigation]);
+  }, [colorScheme, navigation]);
 
   const [value, setValue] = useState("");
   const searchingForValue = useRef("");
@@ -214,19 +221,49 @@ export default function NewConversation({
     [creatingNewConversation]
   );
 
-  const keyboardWillShow = useCallback(() => {
+  const screenRemoving = useRef(false);
+
+  const keyboardToggle = useCallback(() => {
+    if (screenRemoving.current) return;
     setStatusBarStyle("light");
   }, []);
 
+  const beforeRemove = useCallback(() => {
+    screenRemoving.current = true;
+    setStatusBarStyle(colorScheme === "dark" ? "light" : "dark");
+  }, [colorScheme]);
+
   useEffect(() => {
-    const sub = Keyboard.addListener("keyboardWillShow", keyboardWillShow);
+    const subWillShow = Keyboard.addListener(
+      "keyboardWillShow",
+      keyboardToggle
+    );
+    const subWillHide = Keyboard.addListener(
+      "keyboardWillHide",
+      keyboardToggle
+    );
+    const subDidShow = Keyboard.addListener("keyboardDidHide", keyboardToggle);
+    const subDidHide = Keyboard.addListener("keyboardDidShow", keyboardToggle);
+    navigation.addListener("beforeRemove", beforeRemove);
     return () => {
-      sub.remove();
+      subWillShow.remove();
+      subWillHide.remove();
+      subDidShow.remove();
+      subDidHide.remove();
+      navigation.removeListener("beforeRemove", beforeRemove);
     };
-  }, [keyboardWillShow]);
+  }, [beforeRemove, keyboardToggle, navigation]);
+
+  useEffect(() => {
+    return () => {
+      beforeRemove();
+    };
+  }, [beforeRemove]);
 
   const inputRef = useRef<TextInput | null>(null);
   const initialFocus = useRef(false);
+
+  const styles = getStyles(colorScheme);
 
   return (
     <View
@@ -253,7 +290,7 @@ export default function NewConversation({
             }
             inputRef.current = r;
           }}
-          placeholderTextColor="rgba(60, 60, 67, 0.6)"
+          placeholderTextColor={textSecondaryColor(colorScheme)}
           onChangeText={(text) => setValue(text.trim())}
           clearButtonMode="always"
         />
@@ -359,36 +396,39 @@ export default function NewConversation({
   );
 }
 
-const styles = StyleSheet.create({
-  modal: {
-    flex: 1,
-    backgroundColor: "white",
-  },
-  inputContainer: {
-    borderBottomWidth: 0.5,
-    borderBottomColor: "rgba(60, 60, 67, 0.36)",
-  },
-  input: {
-    height: 46,
-    paddingLeft: 16,
-    paddingRight: 8,
-    marginRight: 8,
-    fontSize: 17,
-  },
-  message: {
-    paddingTop: 23,
-    fontSize: 17,
-    color: "rgba(60, 60, 67, 0.6)",
-    textAlign: "center",
-    paddingHorizontal: 18,
-  },
-  error: {
-    color: "black",
-  },
-  activity: {
-    marginTop: 23,
-  },
-  tableView: {
-    marginTop: 25,
-  },
-});
+const getStyles = (colorScheme: ColorSchemeName) =>
+  StyleSheet.create({
+    modal: {
+      flex: 1,
+      backgroundColor: backgroundColor(colorScheme),
+    },
+    inputContainer: {
+      borderBottomWidth: 0.5,
+      borderBottomColor: itemSeparatorColor(colorScheme),
+      backgroundColor: backgroundColor(colorScheme),
+    },
+    input: {
+      height: 46,
+      paddingLeft: 16,
+      paddingRight: 8,
+      marginRight: 8,
+      fontSize: 17,
+      color: textPrimaryColor(colorScheme),
+    },
+    message: {
+      paddingTop: 23,
+      fontSize: 17,
+      color: textSecondaryColor(colorScheme),
+      textAlign: "center",
+      paddingHorizontal: 18,
+    },
+    error: {
+      color: textPrimaryColor(colorScheme),
+    },
+    activity: {
+      marginTop: 23,
+    },
+    tableView: {
+      marginTop: 25,
+    },
+  });

@@ -1,6 +1,6 @@
-import { StyleSheet } from 'react-native'
+import { StyleSheet } from "react-native";
 
-import { MessageType, Theme } from '../../types'
+import { MessageType, Theme } from "../../types";
 
 const styles = ({
   currentUserIsAuthor,
@@ -9,25 +9,25 @@ const styles = ({
   roundBorder,
   theme,
 }: {
-  currentUserIsAuthor: boolean
-  message: MessageType.DerivedAny
-  messageWidth: number
-  roundBorder: boolean
-  theme: Theme
+  currentUserIsAuthor: boolean;
+  message: MessageType.DerivedAny;
+  messageWidth: number;
+  roundBorder: boolean;
+  theme: Theme;
 }) =>
   StyleSheet.create({
     container: {
-      alignItems: 'flex-end',
-      alignSelf: currentUserIsAuthor ? 'flex-end' : 'flex-start',
-      justifyContent: !currentUserIsAuthor ? 'flex-end' : 'flex-start',
+      alignItems: "flex-end",
+      alignSelf: currentUserIsAuthor ? "flex-end" : "flex-start",
+      justifyContent: !currentUserIsAuthor ? "flex-end" : "flex-start",
       flex: 1,
-      flexDirection: 'row',
-      marginBottom: message.type === 'dateHeader' ? 0 : 4 + message.offset,
+      flexDirection: "row",
+      marginBottom: message.type === "dateHeader" ? 0 : 4 + message.offset,
       marginLeft: 20,
     },
     contentContainer: {
       backgroundColor:
-        !currentUserIsAuthor || message.type === 'image'
+        !currentUserIsAuthor || message.type === "image"
           ? theme.colors.secondary
           : theme.colors.primary,
       borderBottomLeftRadius:
@@ -39,19 +39,19 @@ const styles = ({
           ? theme.borders.messageBorderRadius
           : 0
         : theme.borders.messageBorderRadius,
-      borderColor: 'transparent',
+      borderColor: "transparent",
       borderRadius: theme.borders.messageBorderRadius,
-      overflow: 'hidden',
+      overflow: "hidden",
     },
     dateHeader: {
-      alignItems: 'center',
-      justifyContent: 'center',
-      marginBottom: 32,
+      alignItems: "center",
+      justifyContent: "center",
+      marginBottom: 16,
       marginTop: 16,
     },
     pressable: {
       maxWidth: messageWidth,
     },
-  })
+  });
 
-export default styles
+export default styles;

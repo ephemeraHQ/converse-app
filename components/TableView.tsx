@@ -1,14 +1,24 @@
 import React, { ReactElement } from "react";
 import {
+  ColorSchemeName,
   PlatformColor,
   StyleProp,
   StyleSheet,
   Text,
   TouchableOpacity,
+  useColorScheme,
   View,
   ViewStyle,
 } from "react-native";
 import { SFSymbol } from "react-native-sfsymbols";
+
+import {
+  backgroundColor,
+  itemSeparatorColor,
+  tableViewItemBackground,
+  textPrimaryColor,
+  textSecondaryColor,
+} from "../utils/colors";
 
 type TableViewItemType = {
   id: string;
@@ -17,6 +27,7 @@ type TableViewItemType = {
   subtitle?: string;
   isLastItem?: boolean;
   action?: () => void;
+  styles?: ReturnType<typeof getStyles>;
 };
 
 export const TableViewSymbol = ({ symbol }: { symbol: string }) => (
@@ -38,22 +49,23 @@ const TableViewItem = ({
   subtitle,
   isLastItem,
   action,
+  styles,
 }: TableViewItemType) => {
   return (
     <TouchableOpacity activeOpacity={0.6} onPress={action}>
-      <View style={styles.tableViewItem}>
+      <View style={styles?.tableViewItem}>
         {picto}
         <View
           style={[
-            styles.textContainer,
-            isLastItem ? styles.textContainerLastItem : undefined,
+            styles?.textContainer,
+            isLastItem ? styles?.textContainerLastItem : undefined,
           ]}
         >
-          <Text style={styles.tableViewItemTitle} numberOfLines={1}>
+          <Text style={styles?.tableViewItemTitle} numberOfLines={1}>
             {title}
           </Text>
           {subtitle && (
-            <Text style={styles.tableViewItemSubtitle} numberOfLines={2}>
+            <Text style={styles?.tableViewItemSubtitle} numberOfLines={2}>
               {subtitle}
             </Text>
           )}
@@ -72,6 +84,8 @@ export default function TableView({
   items: TableViewItemType[];
   style?: StyleProp<ViewStyle>;
 }) {
+  const colorScheme = useColorScheme();
+  const styles = getStyles(colorScheme);
   return (
     <View style={[styles.tableViewContainer, style]}>
       {title && <Text style={styles.tableViewTitle}>{title}</Text>}
@@ -81,6 +95,7 @@ export default function TableView({
             key={e.id}
             isLastItem={i === items.length - 1}
             {...e}
+            styles={styles}
           />
         ))}
       </View>
@@ -88,45 +103,47 @@ export default function TableView({
   );
 }
 
-const styles = StyleSheet.create({
-  tableViewContainer: {
-    marginHorizontal: 18,
-  },
-  tableViewTitle: {
-    textTransform: "uppercase",
-    color: "rgba(60, 60, 67, 0.6)",
-    fontSize: 12,
-    marginLeft: 16,
-    marginBottom: 8,
-  },
-  tableView: {
-    backgroundColor: "white",
-    borderRadius: 10,
-    overflow: "hidden",
-  },
-  tableViewItem: {
-    backgroundColor: "#F2F2F6",
-    paddingLeft: 16,
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  tableViewItemTitle: {
-    fontSize: 17,
-    marginBottom: 2,
-  },
-  tableViewItemSubtitle: {
-    fontSize: 12,
-    color: "rgba(60, 60, 67, 0.6)",
-  },
-  textContainer: {
-    borderBottomWidth: 1,
-    borderBottomColor: "#CCC",
-    flex: 1,
-    paddingRight: 16,
-    paddingTop: 10,
-    paddingBottom: 10,
-  },
-  textContainerLastItem: {
-    borderBottomWidth: 0,
-  },
-});
+const getStyles = (colorScheme: ColorSchemeName) =>
+  StyleSheet.create({
+    tableViewContainer: {
+      marginHorizontal: 18,
+    },
+    tableViewTitle: {
+      textTransform: "uppercase",
+      color: textSecondaryColor(colorScheme),
+      fontSize: 12,
+      marginLeft: 16,
+      marginBottom: 8,
+    },
+    tableView: {
+      backgroundColor: backgroundColor(colorScheme),
+      borderRadius: 10,
+      overflow: "hidden",
+    },
+    tableViewItem: {
+      backgroundColor: tableViewItemBackground(colorScheme),
+      paddingLeft: 16,
+      flexDirection: "row",
+      alignItems: "center",
+    },
+    tableViewItemTitle: {
+      fontSize: 17,
+      marginBottom: 2,
+      color: textPrimaryColor(colorScheme),
+    },
+    tableViewItemSubtitle: {
+      fontSize: 12,
+      color: textSecondaryColor(colorScheme),
+    },
+    textContainer: {
+      borderBottomWidth: 1,
+      borderBottomColor: itemSeparatorColor(colorScheme),
+      flex: 1,
+      paddingRight: 16,
+      paddingTop: 10,
+      paddingBottom: 10,
+    },
+    textContainerLastItem: {
+      borderBottomWidth: 0,
+    },
+  });
