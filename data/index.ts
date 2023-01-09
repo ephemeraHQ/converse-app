@@ -109,15 +109,23 @@ const setupAndSaveConversation = async (conversation: XmtpConversation) => {
     ["topic"]
   );
 
+  const conversationDict: any = {
+    peerAddress: conversation.peerAddress,
+    shortAddress: shortAddress(conversation.peerAddress),
+  };
+
+  if (lensHandle) {
+    conversationDict.lensHandle = conversationDict;
+  }
+
+  if (ensName) {
+    conversationDict.ensName = ensName;
+  }
+
   // Also save to shared preferences to be able to show notification
   SharedGroupPreferences.setItem(
     `conversation-${conversation.topic}`,
-    {
-      lensHandle,
-      ensName,
-      peerAddress: conversation.peerAddress,
-      shortAddress: shortAddress(conversation.peerAddress),
-    },
+    conversationDict,
     "group.com.converse"
   );
 };
