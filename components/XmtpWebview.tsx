@@ -1,3 +1,7 @@
+import {
+  buildUserInviteTopic,
+  //@ts-ignore
+} from "@xmtp/xmtp-js/dist/cjs/src/utils";
 import * as Linking from "expo-linking";
 import * as SecureStore from "expo-secure-store";
 import React, {
@@ -194,7 +198,10 @@ export default function XmtpWebview() {
           saveNewConversation(data, dispatch);
           // New conversation, let's subscribe to topic
           if (state.notifications.status === "granted") {
-            const topics = Object.keys(state.xmtp.conversations);
+            const topics = [
+              ...Object.keys(state.xmtp.conversations),
+              buildUserInviteTopic(state.xmtp.address || ""),
+            ];
             subscribeToNotifications(topics);
           }
           break;
@@ -223,7 +230,10 @@ export default function XmtpWebview() {
             type: XmtpDispatchTypes.XmtpLoading,
             payload: { loading: false },
           });
-          const topics = Object.keys(state.xmtp.conversations);
+          const topics = [
+            ...Object.keys(state.xmtp.conversations),
+            buildUserInviteTopic(state.xmtp.address || ""),
+          ];
           subscribeToNotifications(topics);
           break;
         }

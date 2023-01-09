@@ -70,15 +70,3 @@ export const requestPushNotificationsPermissions = async (): Promise<
   }
   return finalStatus;
 };
-
-// export const onNotificationReceived = (
-//   callback: (event: Notifications.Notification) => void
-// ) => Notifications.addNotificationReceivedListener(callback);
-
-// export const onNotificationResponse = (
-//   callback: (response: Notifications.NotificationResponse) => void
-// ) => Notifications.addNotificationResponseReceivedListener(callback);
-
-// export const setBadgeCount = (badgeCount: number): Promise<boolean> => {
-//   return Notifications.setBadgeCountAsync(badgeCount);
-// };

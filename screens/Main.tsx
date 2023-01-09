@@ -1,6 +1,10 @@
 import { ActionSheetProvider } from "@expo/react-native-action-sheet";
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import {
+  buildUserInviteTopic,
+  //@ts-ignore
+} from "@xmtp/xmtp-js/dist/cjs/src/utils";
 import * as Linking from "expo-linking";
 import * as Notifications from "expo-notifications";
 import * as SplashScreen from "expo-splash-screen";
@@ -192,11 +196,15 @@ export default function Main() {
       !initialNotificationsSubscribed.current
     ) {
       initialNotificationsSubscribed.current = true;
-      const topics = Object.keys(state.xmtp.conversations);
+      const topics = [
+        ...Object.keys(state.xmtp.conversations),
+        buildUserInviteTopic(state.xmtp.address || ""),
+      ];
       subscribeToNotifications(topics);
     }
   }, [
     state.notifications.status,
+    state.xmtp.address,
     state.xmtp.conversations,
     state.xmtp.initialLoadDone,
   ]);
