@@ -65,7 +65,7 @@ export default function DisconnectButton() {
             },
             (selectedIndex?: number) => {
               if (selectedIndex === undefined) return;
-              const method = methods[options[selectedIndex]];
+              const method = (methods as any)[options[selectedIndex]];
               if (method) {
                 method();
               }

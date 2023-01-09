@@ -3,8 +3,10 @@ import {
   PreviewData,
   REGEX_LINK,
 } from "@flyerhq/react-native-link-preview";
+import * as Clipboard from "expo-clipboard";
+
 import * as React from "react";
-import { Linking, Text, View } from "react-native";
+import { Linking, Text, TouchableOpacity, View } from "react-native";
 import ParsedText from "react-native-parsed-text";
 import Hyperlink from "react-native-hyperlink";
 
@@ -16,6 +18,7 @@ import {
   UserContext,
 } from "../../utils";
 import styles from "./styles";
+import { useActionSheet } from "@expo/react-native-action-sheet";
 
 export interface TextMessageTopLevelProps {
   /** @see {@link LinkPreviewProps.onPreviewDataFetched} */
@@ -45,6 +48,7 @@ export const TextMessage = ({
   showName,
   usePreviewData,
 }: TextMessageProps) => {
+  const { showActionSheetWithOptions } = useActionSheet();
   const theme = React.useContext(ThemeContext);
   const user = React.useContext(UserContext);
   const [previewData, setPreviewData] = React.useState(message.previewData);
@@ -146,16 +150,78 @@ export const TextMessage = ({
       }}
     />
   ) : (
-    <View style={textContainer}>
-      {
-        // Tested inside the link preview
-        /* istanbul ignore next */ showName
-          ? renderPreviewHeader(getUserName(message.author))
-          : null
-      }
-      <Hyperlink linkDefault linkStyle={{ textDecorationLine: "underline" }}>
-        <Text style={text}>{message.text}</Text>
-      </Hyperlink>
-    </View>
+    <TouchableOpacity
+      activeOpacity={1}
+      onLongPress={() => {
+        const methods = {
+          "Copy message": () => {
+            Clipboard.setStringAsync(message.text);
+          },
+          Cancel: () => {},
+        };
+
+        const options = Object.keys(methods);
+
+        showActionSheetWithOptions(
+          {
+            options,
+            title: message.text,
+            cancelButtonIndex: options.indexOf("Cancel"),
+          },
+          (selectedIndex?: number) => {
+            if (selectedIndex === undefined) return;
+            const method = (methods as any)[options[selectedIndex]];
+            if (method) {
+              method();
+            }
+          }
+        );
+      }}
+    >
+      <View style={textContainer}>
+        {
+          // Tested inside the link preview
+          /* istanbul ignore next */ showName
+            ? renderPreviewHeader(getUserName(message.author))
+            : null
+        }
+        <Hyperlink
+          linkDefault
+          linkStyle={{ textDecorationLine: "underline" }}
+          onLongPress={(url?: string, text?: string | undefined) => {
+            const methods: any = {};
+            if (url?.startsWith("mailto:")) {
+              methods["Copy email"] = () => {
+                Clipboard.setStringAsync(text || "");
+              };
+            } else {
+              methods["Copy URL"] = () => {
+                Clipboard.setStringAsync(text || "");
+              };
+            }
+            methods.Cancel = () => {};
+
+            const options = Object.keys(methods);
+
+            showActionSheetWithOptions(
+              {
+                options,
+                title: text || "",
+                cancelButtonIndex: options.indexOf("Cancel"),
+              },
+              (selectedIndex?: number) => {
+                if (selectedIndex === undefined) return;
+                const method = (methods as any)[options[selectedIndex]];
+                if (method) {
+                  method();
+                }
+              }
+            );
+          }}
+        >
+          <Text style={text}>{message.text}</Text>
+        </Hyperlink>
+      </View>
+    </TouchableOpacity>
   );
 };
