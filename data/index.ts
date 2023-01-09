@@ -1,6 +1,7 @@
 import "reflect-metadata";
 import SharedGroupPreferences from "react-native-shared-group-preferences";
 
+import { resolveENSAddress } from "../utils/ens";
 import { getLensHandle } from "../utils/lens";
 import { shortAddress } from "../utils/str";
 import { conversationRepository, messageRepository } from "./db";
@@ -45,6 +46,7 @@ const xmtpConversationToDb = (
     ? JSON.stringify(xmtpConversation.context.metadata)
     : undefined,
   lensHandle: xmtpConversation.lensHandle,
+  ensName: xmtpConversation.ensName,
 });
 
 const xmtpConversationFromDb = (
@@ -71,54 +73,60 @@ const xmtpConversationFromDb = (
         )
       : new Map(),
     lensHandle: dbConversation.lensHandle,
+    ensName: dbConversation.ensName,
     lazyMessages: [],
   };
 };
 
-const setupConversation = async (conversation: XmtpConversation) => {
-  try {
-    const lensHandle = await getLensHandle(conversation.peerAddress);
-    conversation.lensHandle = lensHandle;
-    SharedGroupPreferences.setItem(
-      `conversation-${conversation.topic}`,
-      {
-        lensHandle,
-        peerAddress: conversation.peerAddress,
-        shortAddress: shortAddress(conversation.peerAddress),
-      },
-      "group.com.converse"
-    );
-  } catch (e: any) {
-    // Error (probably rate limited by Lens)
-    console.log("Could not add lens handle:", conversation.peerAddress, e);
-    // Let's check if already exists in DB
-    const alreadyConversationInDb = await conversationRepository.findOne({
-      where: { topic: conversation.topic },
-    });
-    if (alreadyConversationInDb) {
-      conversation.lensHandle = alreadyConversationInDb.lensHandle;
+const setupAndSaveConversation = async (conversation: XmtpConversation) => {
+  const alreadyConversationInDb = await conversationRepository.findOne({
+    where: { topic: conversation.topic },
+  });
+
+  const lastHandlesResolution = alreadyConversationInDb?.handlesUpdatedAt || 0;
+  const now = new Date().getTime();
+  const shouldResolveHandles = now - lastHandlesResolution >= 24 * 3600 * 1000;
+
+  let lensHandle = alreadyConversationInDb?.lensHandle;
+  let ensName = alreadyConversationInDb?.ensName;
+
+  if (shouldResolveHandles) {
+    try {
+      lensHandle = await getLensHandle(conversation.peerAddress);
+      ensName = await resolveENSAddress(conversation.peerAddress);
+    } catch (e) {
+      // Error (probably rate limited)
+      console.log("Could not resolve handles:", conversation.peerAddress, e);
     }
-    SharedGroupPreferences.setItem(
-      `conversation-${conversation.topic}`,
-      {
-        lensHandle: conversation.lensHandle,
-        peerAddress: conversation.peerAddress,
-        shortAddress: shortAddress(conversation.peerAddress),
-      },
-      "group.com.converse"
-    );
   }
+
+  conversation.lensHandle = lensHandle;
+  conversation.ensName = ensName;
+
+  // Save to db
+  await conversationRepository.upsert(
+    [{ ...xmtpConversationToDb(conversation), handlesUpdatedAt: now }],
+    ["topic"]
+  );
+
+  // Also save to shared preferences to be able to show notification
+  SharedGroupPreferences.setItem(
+    `conversation-${conversation.topic}`,
+    {
+      lensHandle,
+      ensName,
+      peerAddress: conversation.peerAddress,
+      shortAddress: shortAddress(conversation.peerAddress),
+    },
+    "group.com.converse"
+  );
 };
 
 export const saveConversations = async (
   conversations: XmtpConversation[],
   dispatch: MaybeDispatchType
 ) => {
-  await Promise.all(conversations.map(setupConversation));
-  // First save to db
-  conversationRepository.upsert(conversations.map(xmtpConversationToDb), [
-    "topic",
-  ]);
+  await Promise.all(conversations.map(setupAndSaveConversation));
   // Then dispatch if set
   if (!dispatch) return;
   dispatch({
@@ -133,12 +141,7 @@ export const saveNewConversation = async (
   conversation: XmtpConversation,
   dispatch: MaybeDispatchType
 ) => {
-  await setupConversation(conversation);
-  // First save to db
-  conversationRepository.upsert(
-    [xmtpConversationToDb(conversation)],
-    ["topic"]
-  );
+  await setupAndSaveConversation(conversation);
   // Then dispatch if set
   if (!dispatch) return;
   dispatch({

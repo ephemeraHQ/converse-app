@@ -15,6 +15,7 @@ export type XmtpConversation = {
   messages: Map<string, XmtpMessage>;
   lazyMessages: XmtpMessage[];
   lensHandle?: string;
+  ensName?: string;
   currentMessage?: string;
 };
 
