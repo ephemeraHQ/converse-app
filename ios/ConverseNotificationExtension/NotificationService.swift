@@ -27,7 +27,8 @@ class NotificationService: UNNotificationServiceExtension {
             if let conversationDict = try JSONSerialization.jsonObject(with: data, options: .allowFragments) as? [String: Any] {
               let shortAddress = conversationDict["shortAddress"]
               let lensHandle = conversationDict["lensHandle"]
-              bestAttemptContent.title = "\(lensHandle ?? (shortAddress ?? bestAttemptContent.title))"
+              let ensName = conversationDict["ensName"]
+              bestAttemptContent.title = "\(lensHandle ?? (ensName ?? (shortAddress ?? bestAttemptContent.title)))"
             }
           } catch {
           }
