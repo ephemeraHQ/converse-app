@@ -157,7 +157,7 @@ export default function ConversationList({
   );
   useEffect(() => {
     const conversations = Object.values(state.xmtp.conversations).filter(
-      (a) => a?.peerAddress && a.messages?.size > 0
+      (a) => a?.peerAddress
     );
     conversations.sort((a, b) => {
       const aDate =

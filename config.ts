@@ -11,21 +11,21 @@ const ENV = {
     ...defaultConfig,
     xmtpEnv: "dev",
     xmtpWebviewURI: "https://xmtp-native-webview.vercel.app",
-    notificationsServerURI: "http://noe-mbp.local:9875",
+    apiURI: "http://noe-mbp.local:9875",
     debugMenu: true,
   },
   preview: {
     ...defaultConfig,
     xmtpEnv: "dev",
     xmtpWebviewURI: "https://xmtp-native-webview.vercel.app",
-    notificationsServerURI: "https://xmtp-notifications-preview.fly.dev",
+    apiURI: "https://xmtp-notifications-preview.fly.dev",
     debugMenu: true,
   },
   prod: {
     ...defaultConfig,
     xmtpEnv: "production",
     xmtpWebviewURI: "https://xmtp-native-webview.vercel.app",
-    notificationsServerURI: "https://xmtp-notifications.fly.dev",
+    apiURI: "https://xmtp-notifications.fly.dev",
   },
 };
 
