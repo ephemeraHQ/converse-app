@@ -4,7 +4,13 @@ import {
 } from "@react-navigation/native-stack";
 import differenceInCalendarDays from "date-fns/differenceInCalendarDays";
 import format from "date-fns/format";
-import React, { useContext, useEffect, useRef, useState } from "react";
+import React, {
+  useCallback,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import {
   ActivityIndicator,
   ColorSchemeName,
@@ -39,7 +45,9 @@ import { NavigationParamList } from "./Main";
 export function conversationListItem(
   navigation: NativeStackNavigationProp<NavigationParamList, "Messages">,
   conversation: XmtpConversation,
-  colorScheme: ColorSchemeName
+  colorScheme: ColorSchemeName,
+  selectedTopic: string | undefined,
+  setSelectedTopic: (topic: string) => void
 ) {
   const styles = getStyles(colorScheme);
   let timeToShow = "";
@@ -66,8 +74,15 @@ export function conversationListItem(
         navigation.navigate("Conversation", {
           topic: conversation.topic,
         });
+        setSelectedTopic(conversation.topic);
       }}
-      underlayColor={clickedItemBackgroundColor(colorScheme)}
+      style={{
+        backgroundColor:
+          selectedTopic === conversation.topic
+            ? clickedItemBackgroundColor(colorScheme)
+            : backgroundColor(colorScheme),
+      }}
+      underlayColor={backgroundColor(colorScheme)}
     >
       <View style={styles.conversationListItem}>
         <Text style={styles.peerAddress}>{conversationName(conversation)}</Text>
@@ -135,6 +150,9 @@ export default function ConversationList({
   const [orderedConversations, setOrderedConversations] = useState<
     XmtpConversation[]
   >([]);
+  const [selectedTopic, setSelectedTopic] = useState<string | undefined>(
+    undefined
+  );
   useEffect(() => {
     const conversations = Object.values(state.xmtp.conversations).filter(
       (a) => a?.peerAddress && a.messages?.size > 0
@@ -160,6 +178,15 @@ export default function ConversationList({
       ),
     });
   }, [navigation, route, state.xmtp.connected]);
+  const resetSelectedTopic = useCallback(() => {
+    setSelectedTopic(undefined);
+  }, []);
+  useEffect(() => {
+    navigation.addListener("transitionEnd", resetSelectedTopic);
+    return () => {
+      navigation.removeListener("transitionEnd", resetSelectedTopic);
+    };
+  }, [navigation, resetSelectedTopic]);
   useEffect(() => {
     if (state.xmtp.initialLoadDone && !state.xmtp.loading) {
       navigation.setOptions({
@@ -177,7 +204,13 @@ export default function ConversationList({
       style={styles.conversationList}
       data={orderedConversations}
       renderItem={({ item }) =>
-        conversationListItem(navigation, item, colorScheme)
+        conversationListItem(
+          navigation,
+          item,
+          colorScheme,
+          selectedTopic,
+          setSelectedTopic
+        )
       }
       keyExtractor={(item) => item.topic}
     />
