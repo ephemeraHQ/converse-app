@@ -17,6 +17,7 @@ import { initDb } from "../data/db";
 import { AppContext } from "../data/store/context";
 import { NotificationsDispatchTypes } from "../data/store/notificationsReducer";
 import { XmtpConversation } from "../data/store/xmtpReducer";
+import { saveUser } from "../utils/api";
 import {
   backgroundColor,
   navigationSecondaryBackgroundColor,
@@ -214,6 +215,12 @@ export default function Main() {
       initialNotificationsSubscribed.current = false;
     }
   }, [state.xmtp.connected]);
+
+  useEffect(() => {
+    if (state.xmtp.address) {
+      saveUser(state.xmtp.address);
+    }
+  }, [state.xmtp.address]);
 
   if (!state.xmtp.connected) return null;
 

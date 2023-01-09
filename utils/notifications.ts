@@ -1,15 +1,10 @@
-import axios from "axios";
 import * as Device from "expo-device";
 import * as Notifications from "expo-notifications";
 import { Platform } from "react-native";
 
-import config from "../config";
+import api from "./api";
 
 let expoPushToken: string | null;
-
-const api = axios.create({
-  baseURL: config.notificationsServerURI,
-});
 
 export type NotificationPermissionStatus =
   | "granted"
