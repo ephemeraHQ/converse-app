@@ -50,6 +50,14 @@ export const clickedItemBackgroundColor = (colorScheme: ColorSchemeName) => {
   return CLICKED_ITEM_BACKGROUND_LIGHT;
 };
 
+const LIST_ITEM_SEPARATOR_LIGHT = "#b2b2b2";
+const LIST_ITEM_SEPARATOR_DARK = "#3A3A3B";
+
+export const listItemSeparatorColor = (colorScheme: ColorSchemeName) => {
+  if (colorScheme === "dark") return LIST_ITEM_SEPARATOR_DARK;
+  return LIST_ITEM_SEPARATOR_LIGHT;
+};
+
 const ITEM_SEPARATOR_LIGHT = "#D1D1D5";
 const ITEM_SEPARATOR_DARK = "#3A3A3B";
 

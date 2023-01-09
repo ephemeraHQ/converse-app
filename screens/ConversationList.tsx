@@ -28,7 +28,7 @@ import {
   actionSecondaryColor,
   backgroundColor,
   clickedItemBackgroundColor,
-  itemSeparatorColor,
+  listItemSeparatorColor,
   textPrimaryColor,
   textSecondaryColor,
 } from "../utils/colors";
@@ -192,8 +192,8 @@ const getStyles = (colorScheme: ColorSchemeName) =>
     },
     conversationListItem: {
       height: 77,
-      borderBottomWidth: 1,
-      borderBottomColor: itemSeparatorColor(colorScheme),
+      borderBottomWidth: 0.25,
+      borderBottomColor: listItemSeparatorColor(colorScheme),
       paddingTop: 8,
       paddingRight: 17,
       marginLeft: 32,
