@@ -12,7 +12,7 @@
 		13B07FC11A68108700A75B9A /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 13B07FB71A68108700A75B9A /* main.m */; };
 		3E461D99554A48A4959DE609 /* SplashScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = AA286B85B6C04FC6940260E9 /* SplashScreen.storyboard */; };
 		4C65044D295C7C1F00C5A40F /* NotificationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C65044C295C7C1F00C5A40F /* NotificationService.swift */; };
-		4C650451295C7C1F00C5A40F /* ConverseNotificationExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 4C65044A295C7C1F00C5A40F /* ConverseNotificationExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		4CC856EF296C174D0011B072 /* ConverseNotificationExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 4C65044A295C7C1F00C5A40F /* ConverseNotificationExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		96905EF65AED1B983A6B3ABC /* libPods-Converse.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 58EEBF8E8E6FB1BC6CAF49B5 /* libPods-Converse.a */; };
 		B18059E884C0ABDD17F3DC3D /* ExpoModulesProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAC715A2D49A985799AEE119 /* ExpoModulesProvider.swift */; };
 		B7969B4A79FE4F9F8C52019D /* noop-file.swift in Sources */ = {isa = PBXBuildFile; fileRef = 68FED7E170C7437EB719C8C6 /* noop-file.swift */; };
@@ -36,7 +36,7 @@
 			dstPath = "";
 			dstSubfolderSpec = 13;
 			files = (
-				4C650451295C7C1F00C5A40F /* ConverseNotificationExtension.appex in Embed Foundation Extensions */,
+				4CC856EF296C174D0011B072 /* ConverseNotificationExtension.appex in Embed Foundation Extensions */,
 			);
 			name = "Embed Foundation Extensions";
 			runOnlyForDeploymentPostprocessing = 1;
