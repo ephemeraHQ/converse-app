@@ -16,8 +16,14 @@ export class Conversation {
   @Column("text", { nullable: true })
   lensHandle?: string;
 
+  @Column("text", { nullable: true })
+  ensName?: string;
+
   @Column("int")
   createdAt!: number;
+
+  @Column("int", { nullable: true })
+  handlesUpdatedAt?: number;
 
   @Column("text", { nullable: true })
   contextConversationId?: string;

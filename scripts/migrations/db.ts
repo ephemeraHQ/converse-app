@@ -28,6 +28,10 @@ const lensHandle = (): string => {
   return `@${username()}.lens`;
 };
 
+const ensName = (): string => {
+  return `${username()}.eth`;
+};
+
 const exec = (command: string) => {
   try {
     const result = execSync(command);
@@ -91,6 +95,8 @@ const commands = {
         peerAddress,
         createdAt: new Date().getTime(),
         lensHandle: lensHandle(),
+        ensName: ensName(),
+        handlesUpdatedAt: new Date().getTime(),
       });
 
       for (let messageIndex = 0; messageIndex < 10; messageIndex++) {

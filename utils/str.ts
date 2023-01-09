@@ -12,5 +12,9 @@ export const addressPrefix = (address: string) =>
   (address && address.length >= 6 ? address.slice(0, 6) : address) || "";
 
 export const conversationName = (conversation: XmtpConversation) => {
-  return conversation.lensHandle || shortAddress(conversation.peerAddress);
+  return (
+    conversation.lensHandle ||
+    conversation.ensName ||
+    shortAddress(conversation.peerAddress)
+  );
 };

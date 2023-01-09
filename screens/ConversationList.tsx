@@ -85,7 +85,9 @@ export function conversationListItem(
       underlayColor={backgroundColor(colorScheme)}
     >
       <View style={styles.conversationListItem}>
-        <Text style={styles.peerAddress}>{conversationName(conversation)}</Text>
+        <Text style={styles.peerAddress} numberOfLines={1}>
+          {conversationName(conversation)}
+        </Text>
         <Text style={styles.messagePreview} numberOfLines={2}>
           {conversation.messages?.size > 0
             ? lastValueInMap(conversation.messages)?.content
@@ -236,6 +238,7 @@ const getStyles = (colorScheme: ColorSchemeName) =>
       fontWeight: "600",
       marginBottom: 3,
       color: textPrimaryColor(colorScheme),
+      marginRight: 110,
     },
     messagePreview: {
       fontSize: 15,

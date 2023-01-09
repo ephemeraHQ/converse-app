@@ -1,5 +1,5 @@
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import { isAddress } from "ethers/lib/utils";
+import { getAddress, isAddress } from "ethers/lib/utils";
 import { setStatusBarStyle, StatusBar } from "expo-status-bar";
 import React, {
   useCallback,
@@ -20,7 +20,6 @@ import {
   ColorSchemeName,
   useColorScheme,
 } from "react-native";
-import Web3 from "web3";
 
 import TableView, { TableViewSymbol } from "../components/TableView";
 import { sendMessageToWebview } from "../components/XmtpWebview";
@@ -132,7 +131,7 @@ export default function NewConversation({
 
             return;
           }
-          const address = Web3.utils.toChecksumAddress(resolvedAddress);
+          const address = getAddress(resolvedAddress);
           const addressIsOnXmtp = await isOnXmtp(address);
           if (searchingForValue.current === value) {
             if (addressIsOnXmtp) {
