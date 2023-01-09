@@ -6,6 +6,7 @@ import {
 import * as React from "react";
 import { Linking, Text, View } from "react-native";
 import ParsedText from "react-native-parsed-text";
+import Hyperlink from "react-native-hyperlink";
 
 import { MessageType } from "../../types";
 import {
@@ -152,7 +153,9 @@ export const TextMessage = ({
           ? renderPreviewHeader(getUserName(message.author))
           : null
       }
-      <Text style={text}>{renderPreviewText(message.text)}</Text>
+      <Hyperlink linkDefault linkStyle={{ textDecorationLine: "underline" }}>
+        <Text style={text}>{message.text}</Text>
+      </Hyperlink>
     </View>
   );
 };
