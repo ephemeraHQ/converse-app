@@ -6,9 +6,10 @@ import {
 import * as Clipboard from "expo-clipboard";
 
 import * as React from "react";
-import { Linking, Text, TouchableOpacity, View } from "react-native";
+import { Text, TouchableOpacity, View } from "react-native";
+import * as Linking from "expo-linking";
+
 import ParsedText from "react-native-parsed-text";
-import Hyperlink from "react-native-hyperlink";
 
 import { MessageType } from "../../types";
 import {
@@ -19,6 +20,12 @@ import {
 } from "../../utils";
 import styles from "./styles";
 import { useActionSheet } from "@expo/react-native-action-sheet";
+import {
+  ADDRESS_REGEX,
+  ETH_REGEX,
+  LENS_REGEX,
+  URL_REGEX,
+} from "../../../../utils/regex";
 
 export interface TextMessageTopLevelProps {
   /** @see {@link LinkPreviewProps.onPreviewDataFetched} */
@@ -59,13 +66,13 @@ export const TextMessage = ({
       user,
     });
 
-  const handleEmailPress = (email: string) => {
+  const handleEmailPress = React.useCallback((email: string) => {
     try {
       Linking.openURL(`mailto:${email}`);
     } catch {}
-  };
+  }, []);
 
-  const handlePreviewDataFetched = (data: PreviewData) => {
+  const handlePreviewDataFetched = React.useCallback((data: PreviewData) => {
     setPreviewData(data);
     onPreviewDataFetched?.({
       // It's okay to cast here since we know it is a text message
@@ -73,31 +80,41 @@ export const TextMessage = ({
       message: excludeDerivedMessageProps(message) as MessageType.Text,
       previewData: data,
     });
-  };
+  }, []);
 
-  const handleUrlPress = (url: string) => {
+  const handleUrlPress = React.useCallback((url: string) => {
     const uri = url.toLowerCase().startsWith("http") ? url : `https://${url}`;
 
     Linking.openURL(uri);
-  };
+  }, []);
 
-  const renderPreviewDescription = (description: string) => {
+  const renderPreviewDescription = React.useCallback((description: string) => {
     return (
       <Text numberOfLines={3} style={descriptionText}>
         {description}
       </Text>
     );
-  };
+  }, []);
 
-  const renderPreviewHeader = (header: string) => {
+  const renderPreviewHeader = React.useCallback((header: string) => {
     return (
       <Text numberOfLines={1} style={headerText}>
         {header}
       </Text>
     );
-  };
+  }, []);
 
-  const renderPreviewText = (previewText: string) => {
+  const handleNewConversationPress = React.useCallback((peer: string) => {
+    Linking.openURL(
+      Linking.createURL("/newConversation", {
+        queryParams: {
+          peer,
+        },
+      })
+    );
+  }, []);
+
+  const renderPreviewText = React.useCallback((previewText: string) => {
     return (
       <ParsedText
         accessibilityRole="link"
@@ -109,7 +126,22 @@ export const TextMessage = ({
           },
           {
             onPress: handleUrlPress,
-            pattern: REGEX_LINK,
+            pattern: URL_REGEX,
+            style: [text, { textDecorationLine: "underline" }],
+          },
+          {
+            onPress: handleNewConversationPress,
+            pattern: ADDRESS_REGEX,
+            style: [text, { textDecorationLine: "underline" }],
+          },
+          {
+            onPress: handleNewConversationPress,
+            pattern: LENS_REGEX,
+            style: [text, { textDecorationLine: "underline" }],
+          },
+          {
+            onPress: handleNewConversationPress,
+            pattern: ETH_REGEX,
             style: [text, { textDecorationLine: "underline" }],
           },
         ]}
@@ -118,15 +150,15 @@ export const TextMessage = ({
         {previewText}
       </ParsedText>
     );
-  };
+  }, []);
 
-  const renderPreviewTitle = (title: string) => {
+  const renderPreviewTitle = React.useCallback((title: string) => {
     return (
       <Text numberOfLines={2} style={titleText}>
         {title}
       </Text>
     );
-  };
+  }, []);
 
   return usePreviewData &&
     !!onPreviewDataFetched &&
@@ -185,42 +217,8 @@ export const TextMessage = ({
             ? renderPreviewHeader(getUserName(message.author))
             : null
         }
-        <Hyperlink
-          linkDefault
-          linkStyle={{ textDecorationLine: "underline" }}
-          onLongPress={(url?: string, text?: string | undefined) => {
-            const methods: any = {};
-            if (url?.startsWith("mailto:")) {
-              methods["Copy email"] = () => {
-                Clipboard.setStringAsync(text || "");
-              };
-            } else {
-              methods["Copy URL"] = () => {
-                Clipboard.setStringAsync(text || "");
-              };
-            }
-            methods.Cancel = () => {};
 
-            const options = Object.keys(methods);
-
-            showActionSheetWithOptions(
-              {
-                options,
-                title: text || "",
-                cancelButtonIndex: options.indexOf("Cancel"),
-              },
-              (selectedIndex?: number) => {
-                if (selectedIndex === undefined) return;
-                const method = (methods as any)[options[selectedIndex]];
-                if (method) {
-                  method();
-                }
-              }
-            );
-          }}
-        >
-          <Text style={text}>{message.text}</Text>
-        </Hyperlink>
+        <Text style={text}>{renderPreviewText(message.text)}</Text>
       </View>
     </TouchableOpacity>
   );
