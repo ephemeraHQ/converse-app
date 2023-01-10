@@ -40,7 +40,9 @@ export type NavigationParamList = {
     message?: string;
     focus?: boolean;
   };
-  NewConversation: undefined;
+  NewConversation: {
+    peer?: string;
+  };
 };
 
 const Stack = createNativeStackNavigator<NavigationParamList>();
@@ -244,6 +246,9 @@ export default function Main() {
           stringify: {
             topic: encodeURIComponent,
           },
+        },
+        NewConversation: {
+          path: "/newConversation",
         },
       },
     },

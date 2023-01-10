@@ -57,7 +57,6 @@
     "react-native": "0.70.5",
     "react-native-fetch-api": "^3.0.0",
     "react-native-get-random-values": "~1.8.0",
-    "react-native-hyperlink": "^0.0.22",
     "react-native-polyfill-globals": "^3.1.0",
     "react-native-safe-area-context": "4.4.1",
     "react-native-screens": "~3.18.0",

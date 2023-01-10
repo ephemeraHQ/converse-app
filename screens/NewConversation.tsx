@@ -59,6 +59,7 @@ const computeNewConversationId = (state: StateType, peerAddress: string) => {
 };
 
 export default function NewConversation({
+  route,
   navigation,
 }: NativeStackScreenProps<NavigationParamList, "NewConversation">) {
   const colorScheme = useColorScheme();
@@ -77,7 +78,7 @@ export default function NewConversation({
     });
   }, [colorScheme, navigation]);
 
-  const [value, setValue] = useState("");
+  const [value, setValue] = useState(route.params.peer || "");
   const searchingForValue = useRef("");
 
   const [status, setStatus] = useState({
