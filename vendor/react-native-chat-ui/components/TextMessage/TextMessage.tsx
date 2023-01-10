@@ -114,6 +114,35 @@ export const TextMessage = ({
     );
   }, []);
 
+  const showCopyActionSheet = React.useCallback(
+    (cta: string) => (content: string) => {
+      const methods = {
+        [cta]: () => {
+          Clipboard.setStringAsync(content);
+        },
+        Cancel: () => {},
+      };
+
+      const options = Object.keys(methods);
+
+      showActionSheetWithOptions(
+        {
+          options,
+          title: content,
+          cancelButtonIndex: options.indexOf("Cancel"),
+        },
+        (selectedIndex?: number) => {
+          if (selectedIndex === undefined) return;
+          const method = (methods as any)[options[selectedIndex]];
+          if (method) {
+            method();
+          }
+        }
+      );
+    },
+    []
+  );
+
   const renderPreviewText = React.useCallback((previewText: string) => {
     return (
       <ParsedText
@@ -121,26 +150,31 @@ export const TextMessage = ({
         parse={[
           {
             onPress: handleEmailPress,
+            onLongPress: showCopyActionSheet("Copy email"),
             style: [text, { textDecorationLine: "underline" }],
             type: "email",
           },
           {
             onPress: handleUrlPress,
+            onLongPress: showCopyActionSheet("Copy link"),
             pattern: URL_REGEX,
             style: [text, { textDecorationLine: "underline" }],
           },
           {
             onPress: handleNewConversationPress,
+            onLongPress: showCopyActionSheet("Copy wallet address"),
             pattern: ADDRESS_REGEX,
             style: [text, { textDecorationLine: "underline" }],
           },
           {
             onPress: handleNewConversationPress,
+            onLongPress: showCopyActionSheet("Copy lens handle"),
             pattern: LENS_REGEX,
             style: [text, { textDecorationLine: "underline" }],
           },
           {
             onPress: handleNewConversationPress,
+            onLongPress: showCopyActionSheet("Copy ENS name"),
             pattern: ETH_REGEX,
             style: [text, { textDecorationLine: "underline" }],
           },
@@ -185,29 +219,7 @@ export const TextMessage = ({
     <TouchableOpacity
       activeOpacity={1}
       onLongPress={() => {
-        const methods = {
-          "Copy message": () => {
-            Clipboard.setStringAsync(message.text);
-          },
-          Cancel: () => {},
-        };
-
-        const options = Object.keys(methods);
-
-        showActionSheetWithOptions(
-          {
-            options,
-            title: message.text,
-            cancelButtonIndex: options.indexOf("Cancel"),
-          },
-          (selectedIndex?: number) => {
-            if (selectedIndex === undefined) return;
-            const method = (methods as any)[options[selectedIndex]];
-            if (method) {
-              method();
-            }
-          }
-        );
+        showCopyActionSheet("Copy message")(message.text);
       }}
     >
       <View style={textContainer}>
