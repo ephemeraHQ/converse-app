@@ -3,7 +3,6 @@ import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import * as Linking from "expo-linking";
 import * as Notifications from "expo-notifications";
-import * as SplashScreen from "expo-splash-screen";
 import React, { useCallback, useContext, useEffect, useRef } from "react";
 import { AppState, useColorScheme } from "react-native";
 
@@ -28,7 +27,7 @@ import {
 import {
   buildUserInviteTopic,
   //@ts-ignore
-} from "../vendor/xmtp-js/utils";
+} from "../vendor/xmtp-js/src/utils";
 import Conversation from "./Conversation";
 import ConversationList from "./ConversationList";
 import NewConversation from "./NewConversation";
@@ -182,28 +181,24 @@ export default function Main() {
     };
   }, [dispatch, saveNotificationsStatus, state.xmtp.address]);
 
-  const splashScreenHidden = useRef(false);
+  // const splashScreenHidden = useRef(false);
 
-  useEffect(() => {
-    if (state.xmtp.webviewLoaded && !splashScreenHidden.current) {
-      splashScreenHidden.current = true;
-      SplashScreen.hideAsync();
-      // If app was loaded by clicking on notification,
-      // let's navigate
-      if (topicToNavigateTo.current) {
-        if (state.xmtp.conversations[topicToNavigateTo.current]) {
-          navigateToConversation(
-            state.xmtp.conversations[topicToNavigateTo.current]
-          );
-        }
-        topicToNavigateTo.current = "";
-      }
-    }
-  }, [
-    navigateToConversation,
-    state.xmtp.conversations,
-    state.xmtp.webviewLoaded,
-  ]);
+  // useEffect(() => {
+  //   if (state.xmtp.webviewLoaded && !splashScreenHidden.current) {
+  //     splashScreenHidden.current = true;
+  //     SplashScreen.hideAsync();
+  //     // If app was loaded by clicking on notification,
+  //     // let's navigate
+  //     if (topicToNavigateTo.current) {
+  //       if (state.xmtp.conversations[topicToNavigateTo.current]) {
+  //         navigateToConversation(
+  //           state.xmtp.conversations[topicToNavigateTo.current]
+  //         );
+  //       }
+  //       topicToNavigateTo.current = "";
+  //     }
+  //   }
+  // }, [state.xmtp.conversations, state.xmtp.webviewLoaded]);
 
   const initialNotificationsSubscribed = useRef(false);
 
