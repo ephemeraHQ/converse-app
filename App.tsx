@@ -8,6 +8,7 @@ import * as SplashScreen from "expo-splash-screen";
 import XmtpWebview from "./components/XmtpWebview";
 import { AppProvider } from "./data/store/context";
 import Main from "./screens/Main";
+import XmtpTest from "./screens/XmtpTest";
 SplashScreen.preventAutoHideAsync().catch(() => {
   /* reloading the app might trigger some race conditions, ignore them */
 });
@@ -23,6 +24,7 @@ export default function App() {
         />
         <XmtpWebview />
         <Main />
+        <XmtpTest />
       </View>
     </AppProvider>
   );
