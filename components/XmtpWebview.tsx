@@ -1,7 +1,3 @@
-import {
-  buildUserInviteTopic,
-  //@ts-ignore
-} from "@xmtp/xmtp-js/dist/cjs/src/utils";
 import * as Linking from "expo-linking";
 import React, {
   useCallback,
@@ -29,6 +25,10 @@ import {
   loadSavedNotificationMessagesToContext,
   subscribeToNotifications,
 } from "../utils/notifications";
+import {
+  buildUserInviteTopic,
+  //@ts-ignore
+} from "../vendor/xmtp-js/utils";
 import { addLog } from "./DebugButton";
 
 const XMTP_WEBSITE_URI = config.xmtpWebviewURI;

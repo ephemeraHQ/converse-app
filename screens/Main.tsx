@@ -1,10 +1,6 @@
 import { ActionSheetProvider } from "@expo/react-native-action-sheet";
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
-import {
-  buildUserInviteTopic,
-  //@ts-ignore
-} from "@xmtp/xmtp-js/dist/cjs/src/utils";
 import * as Linking from "expo-linking";
 import * as Notifications from "expo-notifications";
 import * as SplashScreen from "expo-splash-screen";
@@ -29,6 +25,10 @@ import {
   loadSavedNotificationMessagesToContext,
   subscribeToNotifications,
 } from "../utils/notifications";
+import {
+  buildUserInviteTopic,
+  //@ts-ignore
+} from "../vendor/xmtp-js/utils";
 import Conversation from "./Conversation";
 import ConversationList from "./ConversationList";
 import NewConversation from "./NewConversation";
