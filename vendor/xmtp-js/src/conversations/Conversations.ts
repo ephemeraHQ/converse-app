@@ -90,7 +90,9 @@ export default class Conversations {
     // ])
 
     // const conversations = v1Convos.concat(v2Convos)
+    console.log('listV2Conversations...')
     const conversations = await this.listV2Conversations()
+    console.log('listV2Conversations done!')
 
     conversations.sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime())
     return conversations
@@ -113,9 +115,10 @@ export default class Conversations {
   }
 
   private async listV2Conversations(): Promise<Conversation[]> {
-    return this.v2Cache.load(async ({ latestSeen }) =>
-      this.v2ConversationLoader(latestSeen)
-    )
+    return this.v2Cache.load(async ({ latestSeen }) => {
+      console.log('this.v2ConversationLoader...')
+      return this.v2ConversationLoader(latestSeen)
+    })
   }
 
   // Callback called in listV2Conversations and in newConversation
@@ -123,12 +126,14 @@ export default class Conversations {
     latestSeen: Date | undefined
   ): Promise<Conversation[]> {
     const newConvos: Conversation[] = []
+    console.log('listinvitations....')
     const invites = await this.client.listInvitations({
       startTime: latestSeen
         ? new Date(+latestSeen - CLOCK_SKEW_OFFSET_MS)
         : undefined,
       direction: SortDirection.SORT_DIRECTION_ASCENDING,
     })
+    console.log('inviteslisted', invites.length)
 
     for (const sealed of invites) {
       try {

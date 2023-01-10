@@ -9,6 +9,7 @@ import * as SplashScreen from "expo-splash-screen";
 import XmtpState from "./components/XmtpState";
 import { AppProvider } from "./data/store/context";
 import Main from "./screens/Main";
+
 // import XmtpTest from "./screens/XmtpTest";
 SplashScreen.preventAutoHideAsync().catch(() => {
   /* reloading the app might trigger some race conditions, ignore them */

@@ -393,6 +393,7 @@ export default class Client {
     }
     const { startTime, endTime, limit } = opts
 
+    console.log('listenvelopes...', opts)
     const envelopes = await this.apiClient.query(
       { contentTopics: topics, startTime, endTime },
       {

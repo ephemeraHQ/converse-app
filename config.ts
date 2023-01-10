@@ -1,5 +1,3 @@
-import Constants from "expo-constants";
-
 const defaultConfig = {
   debugMenu: false,
   polAddress: "0xf9a3BB070c1f9b3186A547DeD991BeD04a289C5B",
@@ -38,13 +36,14 @@ const ENV = {
 };
 
 const getConfig = () => {
-  if (__DEV__) {
-    return ENV.dev;
-  } else if (Constants.expoConfig?.extra?.ENV === "preview") {
-    return ENV.preview;
-  } else {
-    return ENV.prod;
-  }
+  // if (__DEV__) {
+  //   return ENV.dev;
+  // } else if (Constants.expoConfig?.extra?.ENV === "preview") {
+  //   return ENV.preview;
+  // } else {
+  //   return ENV.prod;
+  // }
+  return ENV.dev;
 };
 
 export default getConfig();
