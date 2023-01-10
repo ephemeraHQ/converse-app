@@ -3,7 +3,7 @@ import React, { useEffect } from "react";
 import { View } from "react-native";
 
 import config from "../config";
-import { Client, Conversation } from "../vendor/xmtp-js/index";
+import { Client, Conversation } from "../vendor/xmtp-js/src/index";
 
 const xmtpEnv = config.xmtpEnv === "production" ? "production" : "dev";
 

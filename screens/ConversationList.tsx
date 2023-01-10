@@ -26,7 +26,7 @@ import {
 import { SFSymbol } from "react-native-sfsymbols";
 
 import DebugButton from "../components/DebugButton";
-import DisconnectButton from "../components/DisconnectButton";
+import SettingsButton from "../components/SettingsButton";
 import config from "../config";
 import { AppContext } from "../data/store/context";
 import { XmtpConversation } from "../data/store/xmtpReducer";
@@ -184,7 +184,7 @@ export default function ConversationList({
   }, [state.xmtp.conversations, state.xmtp.lastUpdateAt]);
   useEffect(() => {
     navigation.setOptions({
-      headerLeft: () => (state.xmtp.connected ? <DisconnectButton /> : null),
+      headerLeft: () => (state.xmtp.connected ? <SettingsButton /> : null),
       headerRight: () => (
         <NewConversationButton navigation={navigation} route={route} />
       ),

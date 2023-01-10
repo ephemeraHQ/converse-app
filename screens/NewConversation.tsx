@@ -22,6 +22,7 @@ import {
 } from "react-native";
 
 import TableView, { TableViewSymbol } from "../components/TableView";
+import { isOnXmtp } from "../components/XmtpState";
 import { sendMessageToWebview } from "../components/XmtpWebview";
 import config from "../config";
 import { AppContext, StateType } from "../data/store/context";
@@ -36,7 +37,6 @@ import { resolveENSName } from "../utils/ens";
 import { getLensOwner } from "../utils/lens";
 import { lastValueInMap } from "../utils/map";
 import { addressPrefix, conversationName } from "../utils/str";
-import { isOnXmtp } from "../utils/xmtp";
 import { NavigationParamList } from "./Main";
 
 const computeNewConversationId = (state: StateType, peerAddress: string) => {
