@@ -122,6 +122,7 @@ export default class ApiClient {
   private _query(
     req: messageApi.QueryRequest
   ): ReturnType<typeof MessageApi.Query> {
+    console.log('doing retry...')
     return retry(
       MessageApi.Query,
       [
@@ -228,11 +229,13 @@ export default class ApiClient {
   ): Promise<messageApi.Envelope[]> {
     const out: messageApi.Envelope[] = []
     // Use queryIteratePages for better performance. 1/100th the number of Promises to resolve compared to queryStream
+    console.log('doing query…', params)
     for await (const page of this.queryIteratePages(params, {
       direction,
       // If there is a limit of < 100, use that as the page size. Otherwise use 100 and stop if/when limit reached.
       pageSize: limit && limit < 100 ? limit : 100,
     })) {
+      console.log('got page')
       for (const envelope of page) {
         out.push(envelope)
         if (limit && out.length === limit) {
@@ -271,6 +274,7 @@ export default class ApiClient {
     let cursor: messageApi.Cursor | undefined
 
     while (true) {
+      console.log('while true')
       const pagingInfo: messageApi.PagingInfo = {
         limit: pageSize,
         direction,

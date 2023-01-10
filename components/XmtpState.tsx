@@ -1,6 +1,7 @@
 import * as SecureStore from "expo-secure-store";
 import * as SplashScreen from "expo-splash-screen";
 import { useCallback, useContext, useEffect, useRef } from "react";
+import { AppState } from "react-native";
 
 import { saveConversations, saveMessages, saveNewConversation } from "../data";
 import { AppContext } from "../data/store/context";
@@ -21,6 +22,13 @@ const conversationsByTopic: { [topic: string]: Conversation } = {};
 
 export const isOnXmtp = async (address: string) =>
   xmtpClient.canMessage(address);
+
+export const sendXmtpMessage = async (topic: string, content: string) => {
+  const conversation = conversationsByTopic[topic];
+  if (!conversation) return;
+  const message = await conversation.send(content);
+  return message;
+};
 
 export default function XmtpState() {
   const { state, dispatch } = useContext(AppContext);
@@ -48,6 +56,8 @@ export default function XmtpState() {
     };
     loadKeys();
   }, [dispatch]);
+
+  const appState = useRef(AppState.currentState);
 
   const saveXmtpConversations = useCallback(
     (conversations: Conversation[]) => {
@@ -127,14 +137,15 @@ export default function XmtpState() {
         );
         saveXmtpMessages(newMessages, conversation.topic);
       }
-      streamNewConversationMessages(conversation, (message) =>
-        saveXmtpMessages([message], conversation.topic)
-      );
       if (conversationsToLoad > 0) {
         conversationsToLoad = conversationsToLoad - 1;
         if (conversationsToLoad === 0) {
           dispatch({
             type: XmtpDispatchTypes.XmtpInitialLoad,
+          });
+          dispatch({
+            type: XmtpDispatchTypes.XmtpLoading,
+            payload: { loading: false },
           });
         }
       }
@@ -150,10 +161,11 @@ export default function XmtpState() {
     [saveNewXmtpConversation]
   );
 
-  const syncConversations = useCallback(async () => {
+  const initialSync = useCallback(async () => {
     // First make sure we have all conversation
     // instances available to us
     await refreshConversationList();
+
     conversationsToLoad = Object.keys(conversationsByTopic).length;
     if (conversationsToLoad === 0) {
       dispatch({
@@ -164,6 +176,9 @@ export default function XmtpState() {
     for (const topic in conversationsByTopic) {
       const conversation = conversationsByTopic[topic];
       loadNewConversationMessages(conversation);
+      streamNewConversationMessages(conversation, (message) =>
+        saveXmtpMessages([message], conversation.topic)
+      );
     }
     // Then stream newly created conversations
     streamNewConversations(xmtpClient, handleNewConversation);
@@ -172,6 +187,7 @@ export default function XmtpState() {
     handleNewConversation,
     loadNewConversationMessages,
     refreshConversationList,
+    saveXmtpMessages,
   ]);
 
   // When connected, load all conversations
@@ -181,12 +197,56 @@ export default function XmtpState() {
         // Let's launch the "initial load" of messages
         // starting with last timestamp for each convo
         launchedInitialLoad.current = true;
-        await syncConversations();
+        await initialSync();
       }
     };
 
     initialLoad();
-  }, [state.xmtp.connected, syncConversations]);
+  }, [state.xmtp.connected, initialSync]);
+
+  const resync = useCallback(async () => {
+    dispatch({
+      type: XmtpDispatchTypes.XmtpLoading,
+      payload: { loading: true },
+    });
+    await refreshConversationList();
+    conversationsToLoad = Object.keys(conversationsByTopic).length;
+    if (conversationsToLoad === 0) {
+      dispatch({
+        type: XmtpDispatchTypes.XmtpLoading,
+        payload: { loading: false },
+      });
+      return;
+    }
+    // Now let's load missing messages
+    await Promise.all(
+      Object.values(conversationsByTopic).map((conversation) =>
+        loadNewConversationMessages(conversation)
+      )
+    );
+  }, [dispatch, loadNewConversationMessages, refreshConversationList]);
+
+  // On back to active, syncinc missed messages
+  useEffect(() => {
+    const subscription = AppState.addEventListener(
+      "change",
+      async (nextAppState) => {
+        if (
+          appState.current.match(/inactive|background/) &&
+          nextAppState === "active" &&
+          state.xmtp.initialLoadDone
+        ) {
+          console.log("App is active, reloading data");
+          await resync();
+        }
+        appState.current = nextAppState;
+      }
+    );
+
+    return () => {
+      subscription.remove();
+    };
+  }, [resync, state.xmtp.initialLoadDone]);
 
   return null;
 }

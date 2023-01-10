@@ -38,9 +38,11 @@ export async function retry<T extends (...arg0: any[]) => any>(
 ): Promise<Awaited<ReturnType<T>>> {
   const currRetry = typeof retryCount === 'number' ? retryCount : 1
   try {
+    console.log('doing fn...')
     const result = await fn(...args)
     return result
   } catch (e) {
+    console.log(e)
     if (!isRetryableFn(e as Error) || currRetry > maxRetries) {
       throw e
     }

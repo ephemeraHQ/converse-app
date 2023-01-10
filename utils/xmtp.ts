@@ -17,7 +17,9 @@ export const getXmtpClientFromKeys = (keys: any) =>
   });
 
 export const getConversations = async (client: Client) => {
+  console.log("client.conversations.list...");
   const conversations = await client.conversations.list();
+  console.log("returning conversations");
   return conversations;
 };
 
