@@ -190,15 +190,15 @@ export default function ConversationList({
     };
   }, [navigation, resetSelectedTopic]);
   useEffect(() => {
-    if (state.xmtp.initialLoadDone && !state.xmtp.loading) {
-      navigation.setOptions({
-        headerTitle: undefined,
-      });
-    } else {
-      navigation.setOptions({
-        headerTitle: () => <ActivityIndicator />,
-      });
-    }
+    navigation.setOptions({
+      headerTitle: () => (
+        <>
+          {(!state.xmtp.initialLoadDone || state.xmtp.loading) && (
+            <ActivityIndicator />
+          )}
+        </>
+      ),
+    });
   }, [navigation, state.xmtp.initialLoadDone, state.xmtp.loading]);
   return (
     <FlatList
