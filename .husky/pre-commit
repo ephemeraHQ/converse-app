@@ -1,4 +1,6 @@
 #!/usr/bin/env sh
 . "$(dirname -- "$0")/_/husky.sh"
 
+echo "Typechecking project...\n"
+tsc --noEmit
 npx --no-install lint-staged

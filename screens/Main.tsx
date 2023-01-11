@@ -106,8 +106,9 @@ export default function Main() {
 
   const handleNotificationInteraction = useCallback(
     (event: Notifications.NotificationResponse) => {
-      const conversationTopic =
-        event.notification.request.content.data?.contentTopic?.toString();
+      const conversationTopic = (
+        event.notification.request.content.data as any
+      )?.contentTopic?.toString();
       if (conversationTopic) {
         if (state.xmtp.conversations[conversationTopic]) {
           navigateToConversation(state.xmtp.conversations[conversationTopic]);

@@ -118,7 +118,7 @@ function NewConversationButton({
     <TouchableOpacity
       activeOpacity={0.2}
       onPress={() => {
-        navigation.navigate("NewConversation");
+        navigation.navigate("NewConversation", {});
       }}
       onLongPress={() => {
         if (!config.debugMenu || !debugRef.current) {
