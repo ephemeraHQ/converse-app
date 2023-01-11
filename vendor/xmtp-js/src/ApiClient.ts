@@ -281,12 +281,16 @@ export default class ApiClient {
         cursor,
       }
 
+      console.log('running this._query')
+
       const result = await this._query({
         contentTopics,
         startTimeNs,
         endTimeNs,
         pagingInfo,
       })
+
+      console.log('finished running this._query')
 
       if (result.envelopes?.length) {
         yield result.envelopes
