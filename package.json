@@ -98,6 +98,7 @@
     "git-is-clean": "^3.0.1",
     "husky": "^8.0.2",
     "lint-staged": "^13.1.0",
+    "metro-minify-terser": "^0.74.0",
     "nanoid": "^3.0.0",
     "plist": "^3.0.6",
     "prettier": "^2.8.0",
