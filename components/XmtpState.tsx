@@ -20,8 +20,10 @@ let conversationsToLoad = 0;
 let xmtpClient: Client;
 const conversationsByTopic: { [topic: string]: Conversation } = {};
 
-export const isOnXmtp = async (address: string) =>
-  xmtpClient.canMessage(address);
+export const isOnXmtp = async (address: string) => {
+  console.log(xmtpClient);
+  return xmtpClient.canMessage(address);
+};
 
 export const sendXmtpMessage = async (topic: string, content: string) => {
   const conversation = conversationsByTopic[topic];
