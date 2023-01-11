@@ -2,6 +2,11 @@
 import { content as proto } from '@xmtp/proto'
 import './polyfills/stream'
 
+const {
+  CompressionStream,
+  DecompressionStream,
+} = require('@stardazed/streams-polyfill')
+
 //
 // Compression
 //
