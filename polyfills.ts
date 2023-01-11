@@ -7,6 +7,8 @@ import "@azure/core-asynciterator-polyfill";
 import "react-native-polyfill-globals/auto";
 import { Crypto as WebCrypto } from "@peculiar/webcrypto";
 
+import "@stardazed/streams-polyfill";
+
 // Necessary for @peculiar/webcrypto.
 if (!global.Buffer) {
   global.Buffer = require("safe-buffer").Buffer;
