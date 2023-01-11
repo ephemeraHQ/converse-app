@@ -35,6 +35,7 @@ export default function NotificationsScreen() {
         title="Later"
         style={styles.later}
         variant="text"
+        textStyle={{ fontWeight: "600" }}
         onPress={() => {
           dispatch({
             type: NotificationsDispatchTypes.NotificationsShowScreen,
