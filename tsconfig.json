@@ -5,5 +5,9 @@
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true
   },
-  "exclude": ["./vendor/**/*"]
+  "exclude": [
+    "./vendor/**/*",
+    "vendor/react-native-chat-ui/utils/index.ts",
+    "./node_modules/**/*"
+  ]
 }
