@@ -10,4 +10,9 @@ export const saveUser = async (address: string) => {
   await api.post("/api/user", { address });
 };
 
+export const userExists = async (address: string) => {
+  const { data } = await api.get("/api/user/exists", { params: { address } });
+  return data.userExists;
+};
+
 export default api;

@@ -20,7 +20,7 @@ export default function NotificationsScreen() {
       </Text>
       <Button
         title="Accept notifications"
-        primary
+        variant="blue"
         onPress={async () => {
           // Open popup
           const newStatus = await requestPushNotificationsPermissions();
@@ -34,6 +34,7 @@ export default function NotificationsScreen() {
       <Button
         title="Later"
         style={styles.later}
+        variant="text"
         onPress={() => {
           dispatch({
             type: NotificationsDispatchTypes.NotificationsShowScreen,
