@@ -77,9 +77,9 @@ const Conversation = ({
 
   useEffect(() => {
     navigation.setOptions({
-      headerTitle: () => {
-        if (state.xmtp.initialLoadDone && !state.xmtp.loading) {
-          return (
+      headerTitle: () => (
+        <>
+          {state.xmtp.initialLoadDone && !state.xmtp.loading && (
             <TouchableOpacity
               onPress={() => {
                 showActionSheetWithOptions(
@@ -105,18 +105,24 @@ const Conversation = ({
                 {conversationName(conversation)}
               </Text>
             </TouchableOpacity>
-          );
-        } else {
-          return <ActivityIndicator />;
-        }
-      },
+          )}
+          {(!state.xmtp.initialLoadDone || state.xmtp.loading) && (
+            <ActivityIndicator />
+          )}
+        </>
+      ),
       headerRight: () => {
-        if (showInviteBanner) {
-          return (
-            <Button variant="text" title="Invite" onPress={inviteToConverse} />
-          );
-        }
-        return null;
+        return (
+          <>
+            {showInviteBanner && (
+              <Button
+                variant="text"
+                title="Invite"
+                onPress={inviteToConverse}
+              />
+            )}
+          </>
+        );
       },
     });
   }, [
@@ -125,7 +131,6 @@ const Conversation = ({
     navigation,
     showActionSheetWithOptions,
     showInviteBanner,
-    state.xmtp.address,
     state.xmtp.initialLoadDone,
     state.xmtp.loading,
     styles.title,
