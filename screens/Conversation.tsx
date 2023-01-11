@@ -14,16 +14,21 @@ import {
   ColorSchemeName,
   StyleSheet,
   Text,
+  TextInput,
   TouchableOpacity,
   useColorScheme,
+  View,
 } from "react-native";
 import uuid from "react-native-uuid";
 
+import Button from "../components/Button";
 import { sendXmtpMessage } from "../components/XmtpWebview";
 import { AppContext } from "../data/store/context";
 import { XmtpDispatchTypes } from "../data/store/xmtpReducer";
+import { userExists } from "../utils/api";
 import {
   backgroundColor,
+  itemSeparatorColor,
   messageBubbleColor,
   myMessageBubbleColor,
   navigationSecondaryBackgroundColor,
@@ -47,9 +52,21 @@ const Conversation = ({
   const conversation = state.xmtp.conversations[route.params.topic];
   const messageToPrefill =
     route.params.message || conversation.currentMessage || "";
+  const [messageValue, setMessageValue] = useState(messageToPrefill);
   const focusMessageInput = route.params.focus || !!messageToPrefill;
   const { showActionSheetWithOptions } = useActionSheet();
   const styles = getStyles(colorScheme);
+  const [showInviteBanner, setShowInviteBanner] = useState(false);
+
+  useEffect(() => {
+    const checkIfUserExists = async () => {
+      const exists = await userExists(conversation.peerAddress);
+      if (!exists) {
+        setShowInviteBanner(true);
+      }
+    };
+    checkIfUserExists();
+  }, [conversation.peerAddress]);
 
   useEffect(() => {
     if (state.xmtp.initialLoadDone && !state.xmtp.loading) {
@@ -76,7 +93,9 @@ const Conversation = ({
               );
             }}
           >
-            <Text style={styles.title}>{conversationName(conversation)}</Text>
+            <Text style={styles.title} numberOfLines={1}>
+              {conversationName(conversation)}
+            </Text>
           </TouchableOpacity>
         ),
       });
@@ -136,6 +155,7 @@ const Conversation = ({
   const handleSendPress = useCallback(
     (m: MessageType.PartialText) => {
       messageContent.current = "";
+      setMessageValue("");
       // Lazy message
       dispatch({
         type: XmtpDispatchTypes.XmtpLazyMessage,
@@ -153,6 +173,14 @@ const Conversation = ({
     },
     [conversation.topic, dispatch, state.xmtp.address]
   );
+  const textInputRef = useRef<TextInput>();
+
+  const inviteToConverse = useCallback(() => {
+    const inviteText = "Salut, je t'invite";
+    messageContent.current = inviteText;
+    setMessageValue(inviteText);
+    textInputRef.current?.focus();
+  }, []);
 
   const onLeaveScreen = useCallback(() => {
     dispatch({
@@ -169,23 +197,44 @@ const Conversation = ({
   }, [navigation, onLeaveScreen]);
 
   return (
-    <Chat
-      messages={messages}
-      onSendPress={handleSendPress}
-      user={{
-        id: state.xmtp.address || "",
-      }}
-      theme={chatTheme(colorScheme)}
-      usePreviewData={false}
-      textInputProps={{
-        defaultValue: messageToPrefill,
-        autoFocus: focusMessageInput,
-        onChangeText: (text) => {
-          messageContent.current = text;
-        },
-        placeholderTextColor: textSecondaryColor(colorScheme),
-      }}
-    />
+    <View style={styles.container}>
+      {showInviteBanner && (
+        <View style={styles.inviteBanner}>
+          <View style={styles.inviteBannerLeft}>
+            <Text style={styles.inviteTitle}>Invite to Converse</Text>
+            <Text style={styles.inviteSubtitle} numberOfLines={1}>
+              {conversationName(conversation)} is eligible
+            </Text>
+          </View>
+          <Button
+            title="Invite"
+            variant="grey"
+            style={styles.inviteButton}
+            onPress={inviteToConverse}
+          />
+        </View>
+      )}
+      <Chat
+        messages={messages}
+        onSendPress={handleSendPress}
+        user={{
+          id: state.xmtp.address || "",
+        }}
+        theme={chatTheme(colorScheme)}
+        usePreviewData={false}
+        textInputProps={{
+          defaultValue: messageToPrefill,
+          autoFocus: focusMessageInput,
+          value: messageValue,
+          onChangeText: (text) => {
+            messageContent.current = text;
+            setMessageValue(text);
+          },
+          placeholderTextColor: textSecondaryColor(colorScheme),
+          ref: textInputRef,
+        }}
+      />
+    </View>
   );
 };
 
@@ -193,10 +242,40 @@ export default Conversation;
 
 const getStyles = (colorScheme: ColorSchemeName) =>
   StyleSheet.create({
+    container: {
+      flex: 1,
+    },
+    inviteBanner: {
+      height: 63,
+      borderBottomWidth: 1,
+      borderBottomColor: itemSeparatorColor(colorScheme),
+      backgroundColor: backgroundColor(colorScheme),
+      paddingHorizontal: 30,
+      alignItems: "center",
+      flexDirection: "row",
+    },
+    inviteBannerLeft: {
+      flexShrink: 1,
+      marginRight: 10,
+    },
+    inviteTitle: {
+      fontSize: 17,
+      fontWeight: "600",
+      color: textPrimaryColor(colorScheme),
+    },
+    inviteSubtitle: {
+      fontSize: 15,
+      color: textSecondaryColor(colorScheme),
+      fontWeight: "400",
+    },
+    inviteButton: {
+      marginLeft: "auto",
+    },
     title: {
       color: textPrimaryColor(colorScheme),
       fontSize: 17,
       fontWeight: "600",
+      maxWidth: 150,
     },
   });
 

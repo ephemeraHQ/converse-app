@@ -1,54 +1,81 @@
 import React from "react";
 import {
+  ColorSchemeName,
   GestureResponderEvent,
+  PlatformColor,
   StyleProp,
   StyleSheet,
   Text,
   TouchableOpacity,
+  useColorScheme,
   ViewStyle,
 } from "react-native";
+
+import { buttonGreyBackground } from "../utils/colors";
 
 type Props = {
   title: string;
   onPress?: (event: GestureResponderEvent) => void;
-  primary?: boolean;
+  variant: "blue" | "grey" | "text";
   style?: StyleProp<ViewStyle>;
 };
 
-export default function Button({ title, onPress, primary, style }: Props) {
+export default function Button({ title, onPress, variant, style }: Props) {
+  const colorScheme = useColorScheme();
+  const styles = getStyles(colorScheme);
+  const buttonStyle =
+    variant === "blue"
+      ? styles.buttonBlue
+      : variant === "grey"
+      ? styles.buttonGrey
+      : styles.buttonText;
+  const buttonTextStyle =
+    variant === "blue"
+      ? styles.buttonBlueText
+      : variant === "grey"
+      ? styles.buttonGreyText
+      : styles.buttonTextText;
   return (
-    <TouchableOpacity
-      style={[primary ? styles.buttonPrimary : styles.buttonSeconday, style]}
-      onPress={onPress}
-    >
-      <Text style={primary ? styles.textPrimary : styles.textSeconday}>
-        {title}
-      </Text>
+    <TouchableOpacity style={[buttonStyle, style]} onPress={onPress}>
+      <Text style={buttonTextStyle}>{title}</Text>
     </TouchableOpacity>
   );
 }
 
-const styles = StyleSheet.create({
-  buttonPrimary: {
-    backgroundColor: "#007AFF",
-    display: "flex",
-    alignSelf: "stretch",
-    marginHorizontal: 32,
-    textAlign: "center",
-    paddingVertical: 14,
-    borderRadius: 14,
-  },
-  textPrimary: {
-    color: "white",
-    textAlign: "center",
-    fontWeight: "600",
-    fontSize: 17,
-  },
-  buttonSeconday: {},
-  textSeconday: {
-    color: "#007AFF",
-    textAlign: "center",
-    fontWeight: "600",
-    fontSize: 17,
-  },
-});
+const getStyles = (colorScheme: ColorSchemeName) =>
+  StyleSheet.create({
+    buttonBlue: {
+      backgroundColor: PlatformColor("systemBlue"),
+      display: "flex",
+      alignSelf: "stretch",
+      marginHorizontal: 32,
+      textAlign: "center",
+      paddingVertical: 14,
+      borderRadius: 14,
+    },
+    buttonBlueText: {
+      color: "white",
+      textAlign: "center",
+      fontWeight: "600",
+      fontSize: 17,
+    },
+    buttonGrey: {
+      backgroundColor: buttonGreyBackground(colorScheme),
+      paddingHorizontal: 15,
+      paddingVertical: 4,
+      borderRadius: 100,
+    },
+    buttonGreyText: {
+      color: PlatformColor("systemBlue"),
+      textAlign: "center",
+      fontWeight: "600",
+      fontSize: 17,
+    },
+    buttonText: {},
+    buttonTextText: {
+      color: PlatformColor("systemBlue"),
+      textAlign: "center",
+      fontWeight: "600",
+      fontSize: 17,
+    },
+  });
