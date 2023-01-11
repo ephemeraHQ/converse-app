@@ -68,46 +68,63 @@ const Conversation = ({
     checkIfUserExists();
   }, [conversation.peerAddress]);
 
-  useEffect(() => {
-    if (state.xmtp.initialLoadDone && !state.xmtp.loading) {
-      navigation.setOptions({
-        headerTitle: () => (
-          <TouchableOpacity
-            onPress={() => {
-              showActionSheetWithOptions(
-                {
-                  options: ["Copy wallet address", "Cancel"],
-                  cancelButtonIndex: 1,
-                  title: conversation.peerAddress,
-                },
-                (selectedIndex?: number) => {
-                  switch (selectedIndex) {
-                    case 0:
-                      Clipboard.setStringAsync(conversation.peerAddress);
-                      break;
+  const inviteToConverse = useCallback(() => {
+    const inviteText = "Salut, je t'invite";
+    messageContent.current = inviteText;
+    setMessageValue(inviteText);
+    textInputRef.current?.focus();
+  }, []);
 
-                    default:
-                      break;
+  useEffect(() => {
+    navigation.setOptions({
+      headerTitle: () => {
+        if (state.xmtp.initialLoadDone && !state.xmtp.loading) {
+          return (
+            <TouchableOpacity
+              onPress={() => {
+                showActionSheetWithOptions(
+                  {
+                    options: ["Copy wallet address", "Cancel"],
+                    cancelButtonIndex: 1,
+                    title: conversation.peerAddress,
+                  },
+                  (selectedIndex?: number) => {
+                    switch (selectedIndex) {
+                      case 0:
+                        Clipboard.setStringAsync(conversation.peerAddress);
+                        break;
+
+                      default:
+                        break;
+                    }
                   }
-                }
-              );
-            }}
-          >
-            <Text style={styles.title} numberOfLines={1}>
-              {conversationName(conversation)}
-            </Text>
-          </TouchableOpacity>
-        ),
-      });
-    } else {
-      navigation.setOptions({
-        headerTitle: () => <ActivityIndicator />,
-      });
-    }
+                );
+              }}
+            >
+              <Text style={styles.title} numberOfLines={1}>
+                {conversationName(conversation)}
+              </Text>
+            </TouchableOpacity>
+          );
+        } else {
+          return <ActivityIndicator />;
+        }
+      },
+      headerRight: () => {
+        if (showInviteBanner) {
+          return (
+            <Button variant="text" title="Invite" onPress={inviteToConverse} />
+          );
+        }
+        return null;
+      },
+    });
   }, [
     conversation,
+    inviteToConverse,
     navigation,
     showActionSheetWithOptions,
+    showInviteBanner,
     state.xmtp.address,
     state.xmtp.initialLoadDone,
     state.xmtp.loading,
@@ -175,13 +192,6 @@ const Conversation = ({
   );
   const textInputRef = useRef<TextInput>();
 
-  const inviteToConverse = useCallback(() => {
-    const inviteText = "Salut, je t'invite";
-    messageContent.current = inviteText;
-    setMessageValue(inviteText);
-    textInputRef.current?.focus();
-  }, []);
-
   const onLeaveScreen = useCallback(() => {
     dispatch({
       type: XmtpDispatchTypes.XmtpSetCurrentMessageContent,
@@ -198,22 +208,6 @@ const Conversation = ({
 
   return (
     <View style={styles.container}>
-      {showInviteBanner && (
-        <View style={styles.inviteBanner}>
-          <View style={styles.inviteBannerLeft}>
-            <Text style={styles.inviteTitle}>Invite to Converse</Text>
-            <Text style={styles.inviteSubtitle} numberOfLines={1}>
-              {conversationName(conversation)} is eligible
-            </Text>
-          </View>
-          <Button
-            title="Invite"
-            variant="grey"
-            style={styles.inviteButton}
-            onPress={inviteToConverse}
-          />
-        </View>
-      )}
       <Chat
         messages={messages}
         onSendPress={handleSendPress}
@@ -231,6 +225,7 @@ const Conversation = ({
             setMessageValue(text);
           },
           placeholderTextColor: textSecondaryColor(colorScheme),
+          // @ts-ignore
           ref: textInputRef,
         }}
       />

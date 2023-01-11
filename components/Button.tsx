@@ -6,6 +6,7 @@ import {
   StyleProp,
   StyleSheet,
   Text,
+  TextStyle,
   TouchableOpacity,
   useColorScheme,
   ViewStyle,
@@ -18,9 +19,16 @@ type Props = {
   onPress?: (event: GestureResponderEvent) => void;
   variant: "blue" | "grey" | "text";
   style?: StyleProp<ViewStyle>;
+  textStyle?: StyleProp<TextStyle>;
 };
 
-export default function Button({ title, onPress, variant, style }: Props) {
+export default function Button({
+  title,
+  onPress,
+  variant,
+  style,
+  textStyle,
+}: Props) {
   const colorScheme = useColorScheme();
   const styles = getStyles(colorScheme);
   const buttonStyle =
@@ -37,7 +45,7 @@ export default function Button({ title, onPress, variant, style }: Props) {
       : styles.buttonTextText;
   return (
     <TouchableOpacity style={[buttonStyle, style]} onPress={onPress}>
-      <Text style={buttonTextStyle}>{title}</Text>
+      <Text style={[buttonTextStyle, textStyle]}>{title}</Text>
     </TouchableOpacity>
   );
 }
@@ -75,7 +83,7 @@ const getStyles = (colorScheme: ColorSchemeName) =>
     buttonTextText: {
       color: PlatformColor("systemBlue"),
       textAlign: "center",
-      fontWeight: "600",
+      fontWeight: "400",
       fontSize: 17,
     },
   });
