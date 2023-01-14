@@ -69,7 +69,8 @@ const Conversation = ({
   }, [conversation.peerAddress]);
 
   const inviteToConverse = useCallback(() => {
-    const inviteText = "Salut, je t'invite";
+    const inviteText =
+      "I'm sending you this message with Converse, the first mobile messaging app for Lens & XMTP DMs. Ping polmaire.lens or @polmaire on Telegram to get an invite!";
     messageContent.current = inviteText;
     setMessageValue(inviteText);
     textInputRef.current?.focus();
