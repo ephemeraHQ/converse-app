@@ -1,4 +1,5 @@
 import { ActionSheetProvider } from "@expo/react-native-action-sheet";
+import { HeaderBackButton } from "@react-navigation/elements";
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import {
@@ -258,7 +259,26 @@ export default function Main() {
   return (
     <ActionSheetProvider>
       <NavigationContainer linking={linking}>
-        <Stack.Navigator initialRouteName="Messages">
+        <Stack.Navigator
+          initialRouteName="Messages"
+          screenOptions={({ navigation }) => ({
+            headerLeft: (props) => {
+              return (
+                <HeaderBackButton
+                  {...props}
+                  allowFontScaling
+                  label="Messages"
+                  labelVisible
+                  onPress={() => {
+                    if (props.canGoBack) {
+                      navigation.goBack();
+                    }
+                  }}
+                />
+              );
+            },
+          })}
+        >
           <Stack.Group
             screenOptions={{
               headerStyle: { backgroundColor: backgroundColor(colorScheme) },
