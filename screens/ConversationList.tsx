@@ -114,6 +114,10 @@ function NewConversationButton({
   navigation,
 }: NativeStackScreenProps<NavigationParamList, "Messages">) {
   const debugRef = useRef();
+  const { state } = useContext(AppContext);
+  const shouldShowDebug =
+    config.debugMenu ||
+    config.debugAddresses.includes(state.xmtp.address || "");
   return (
     <TouchableOpacity
       activeOpacity={0.2}
@@ -121,13 +125,13 @@ function NewConversationButton({
         navigation.navigate("NewConversation", {});
       }}
       onLongPress={() => {
-        if (!config.debugMenu || !debugRef.current) {
+        if (!shouldShowDebug || !debugRef.current) {
           return;
         }
         (debugRef.current as any).showDebugMenu();
       }}
     >
-      {config.debugMenu && <DebugButton ref={debugRef} />}
+      {shouldShowDebug && <DebugButton ref={debugRef} />}
       <SFSymbol
         name="square.and.pencil"
         weight="medium"
