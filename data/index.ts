@@ -1,7 +1,6 @@
 import "reflect-metadata";
 import SharedGroupPreferences from "react-native-shared-group-preferences";
 
-// import { addLog } from "../components/DebugButton";
 import { addLog } from "../components/DebugButton";
 import { resolveENSAddress } from "../utils/ens";
 import { getLensHandle } from "../utils/lens";
@@ -81,7 +80,6 @@ const xmtpConversationFromDb = (
 };
 
 const setupAndSaveConversation = async (conversation: XmtpConversation) => {
-  addLog(`setupAndSaveConversation: ${conversation.peerAddress}`);
   const alreadyConversationInDb = await conversationRepository.findOne({
     where: { topic: conversation.topic },
   });
@@ -118,14 +116,12 @@ const setupAndSaveConversation = async (conversation: XmtpConversation) => {
   };
 
   if (lensHandle) {
-    conversationDict.lensHandle = conversationDict;
+    conversationDict.lensHandle = lensHandle;
   }
 
   if (ensName) {
     conversationDict.ensName = ensName;
   }
-
-  addLog(`saving preference: ${conversation.peerAddress}`);
 
   // Also save to shared preferences to be able to show notification
   SharedGroupPreferences.setItem(
@@ -203,15 +199,6 @@ export const loadDataToContext = async (dispatch: DispatchType) => {
     relations: { messages: true },
     order: { messages: { sent: "ASC" } },
   });
-
-  // conversationsWithMessages.forEach((c) => {
-  //   SharedGroupPreferences.getItem(
-  //     `conversation-${c.topic}`,
-  //     "group.com.converse"
-  //   ).then((value) => {
-  //     addLog(JSON.stringify(value));
-  //   });
-  // });
 
   dispatch({
     type: XmtpDispatchTypes.XmtpSetConversations,
