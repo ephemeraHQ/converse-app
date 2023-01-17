@@ -20,6 +20,7 @@ type Props = {
   variant: "blue" | "grey" | "text";
   style?: StyleProp<ViewStyle>;
   textStyle?: StyleProp<TextStyle>;
+  allowFontScaling?: boolean;
 };
 
 export default function Button({
@@ -28,6 +29,7 @@ export default function Button({
   variant,
   style,
   textStyle,
+  allowFontScaling = true,
 }: Props) {
   const colorScheme = useColorScheme();
   const styles = getStyles(colorScheme);
@@ -45,7 +47,12 @@ export default function Button({
       : styles.buttonTextText;
   return (
     <TouchableOpacity style={[buttonStyle, style]} onPress={onPress}>
-      <Text style={[buttonTextStyle, textStyle]}>{title}</Text>
+      <Text
+        style={[buttonTextStyle, textStyle]}
+        allowFontScaling={allowFontScaling}
+      >
+        {title}
+      </Text>
     </TouchableOpacity>
   );
 }

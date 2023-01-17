@@ -2,7 +2,7 @@ import { useActionSheet } from "@expo/react-native-action-sheet";
 import * as Clipboard from "expo-clipboard";
 import * as Linking from "expo-linking";
 import React, { useContext } from "react";
-import { View, Button } from "react-native";
+import { View } from "react-native";
 
 import { clearDB } from "../data/db";
 import { AppContext } from "../data/store/context";
@@ -12,15 +12,19 @@ import {
   requestPushNotificationsPermissions,
   NotificationPermissionStatus,
 } from "../utils/notifications";
-import { shortAddress } from "../utils/str";
+import { getTitleFontScale, shortAddress } from "../utils/str";
+import Button from "./Button";
 import { sendMessageToWebview } from "./XmtpWebview";
 
 export default function DisconnectButton() {
   const { state, dispatch } = useContext(AppContext);
   const { showActionSheetWithOptions } = useActionSheet();
   return (
-    <View style={{ marginLeft: -8 }}>
+    <View>
       <Button
+        variant="text"
+        allowFontScaling={false}
+        textStyle={{ fontSize: 17 * getTitleFontScale() }}
         onPress={() => {
           const methods = {
             "Copy wallet address": () => {
