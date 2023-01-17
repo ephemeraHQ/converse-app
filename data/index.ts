@@ -81,6 +81,7 @@ const xmtpConversationFromDb = (
 };
 
 const setupAndSaveConversation = async (conversation: XmtpConversation) => {
+  addLog(`setupAndSaveConversation: ${conversation.peerAddress}`);
   const alreadyConversationInDb = await conversationRepository.findOne({
     where: { topic: conversation.topic },
   });
@@ -123,6 +124,8 @@ const setupAndSaveConversation = async (conversation: XmtpConversation) => {
   if (ensName) {
     conversationDict.ensName = ensName;
   }
+
+  addLog(`saving preference: ${conversation.peerAddress}`);
 
   // Also save to shared preferences to be able to show notification
   SharedGroupPreferences.setItem(
