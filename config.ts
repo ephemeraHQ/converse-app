@@ -3,6 +3,11 @@ import Constants from "expo-constants";
 const defaultConfig = {
   debugMenu: false,
   polAddress: "0xf9a3BB070c1f9b3186A547DeD991BeD04a289C5B",
+  debugAddresses: [
+    "0xf9a3BB070c1f9b3186A547DeD991BeD04a289C5B",
+    "0x4496848684441C15A915fa9bF07D131155603253",
+    "0x2376e9C7C604D1827bA9aCb1293Dc8b4DA2f0DB3",
+  ],
   conversationDomain: "getconverse.app",
 };
 

@@ -1,6 +1,7 @@
 import "reflect-metadata";
 import SharedGroupPreferences from "react-native-shared-group-preferences";
 
+import { addLog } from "../components/DebugButton";
 import { resolveENSAddress } from "../utils/ens";
 import { getLensHandle } from "../utils/lens";
 import { shortAddress } from "../utils/str";
@@ -189,6 +190,15 @@ export const loadDataToContext = async (dispatch: DispatchType) => {
   const conversationsWithMessages = await conversationRepository.find({
     relations: { messages: true },
     order: { messages: { sent: "ASC" } },
+  });
+
+  conversationsWithMessages.forEach((c) => {
+    SharedGroupPreferences.getItem(
+      `conversation-${c.topic}`,
+      "group.com.converse"
+    ).then((value) => {
+      addLog(JSON.stringify(value));
+    });
   });
 
   dispatch({

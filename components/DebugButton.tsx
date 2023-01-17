@@ -1,4 +1,5 @@
 import { useActionSheet } from "@expo/react-native-action-sheet";
+import * as Clipboard from "expo-clipboard";
 import Constants from "expo-constants";
 import * as Updates from "expo-updates";
 import { useContext, forwardRef, useImperativeHandle } from "react";
@@ -38,6 +39,10 @@ const DebugButton = forwardRef((props, ref) => {
         },
         "Show logs": () => {
           alert(logs.join("\n"));
+        },
+        "Copy logs": () => {
+          Clipboard.setStringAsync(logs.join("\n"));
+          alert("Copied!");
         },
         "Show state": () => {
           alert(JSON.stringify(state, null, 2));
