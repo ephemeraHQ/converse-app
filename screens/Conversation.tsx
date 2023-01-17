@@ -35,7 +35,7 @@ import {
   textPrimaryColor,
   textSecondaryColor,
 } from "../utils/colors";
-import { conversationName } from "../utils/str";
+import { conversationName, getTitleFontScale } from "../utils/str";
 import {
   Chat,
   defaultTheme,
@@ -76,6 +76,8 @@ const Conversation = ({
     textInputRef.current?.focus();
   }, []);
 
+  const titleFontScale = getTitleFontScale();
+
   useEffect(() => {
     navigation.setOptions({
       headerTitle: () => (
@@ -102,7 +104,11 @@ const Conversation = ({
                 );
               }}
             >
-              <Text style={styles.title} numberOfLines={1}>
+              <Text
+                style={[styles.title, { fontSize: 17 * titleFontScale }]}
+                numberOfLines={1}
+                allowFontScaling={false}
+              >
                 {conversationName(conversation)}
               </Text>
             </TouchableOpacity>
@@ -120,6 +126,8 @@ const Conversation = ({
                 variant="text"
                 title="Invite"
                 onPress={inviteToConverse}
+                allowFontScaling={false}
+                textStyle={{ fontSize: 17 * titleFontScale }}
               />
             )}
           </>
@@ -135,6 +143,7 @@ const Conversation = ({
     state.xmtp.initialLoadDone,
     state.xmtp.loading,
     styles.title,
+    titleFontScale,
   ]);
 
   const [messages, setMessages] = useState([] as MessageType.Any[]);

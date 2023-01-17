@@ -1,3 +1,5 @@
+import { PixelRatio } from "react-native";
+
 import { XmtpConversation } from "../data/store/xmtpReducer";
 
 export const shortAddress = (address: string) =>
@@ -17,4 +19,13 @@ export const conversationName = (conversation: XmtpConversation) => {
     conversation.ensName ||
     shortAddress(conversation.peerAddress)
   );
+};
+
+export const getTitleFontScale = (): number => {
+  let titleFontScale = 1;
+  const fontScale = PixelRatio.getFontScale();
+  if (fontScale > 1) {
+    titleFontScale = Math.min(fontScale, 1.235);
+  }
+  return titleFontScale;
 };
