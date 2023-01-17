@@ -21,6 +21,7 @@ import { AppContext } from "../data/store/context";
 import { XmtpDispatchTypes } from "../data/store/xmtpReducer";
 import { lastValueInMap } from "../utils/map";
 import { subscribeToNotifications } from "../utils/notifications";
+import { addLog } from "./DebugButton";
 
 const XMTP_WEBSITE_URI = config.xmtpWebviewURI;
 
@@ -241,6 +242,10 @@ export default function XmtpWebview() {
           Alert.alert("Could not create new conversation", data.error);
           break;
         }
+        case "SEND_MESSAGE_ERROR": {
+          addLog(`SEND_MESSAGE_ERROR: ${data}`);
+          break;
+        }
 
         default:
           break;
@@ -250,7 +255,12 @@ export default function XmtpWebview() {
         (!hideDataFromEvents.includes(eventName) && data) || ""
       );
     },
-    [dispatch, state.notifications.status, state.xmtp.conversations]
+    [
+      dispatch,
+      state.notifications.status,
+      state.xmtp.address,
+      state.xmtp.conversations,
+    ]
   );
 
   const showWebView = state.xmtp.webviewLoaded && !state.xmtp.connected;
