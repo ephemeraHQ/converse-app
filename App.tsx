@@ -6,9 +6,10 @@ import { StyleSheet, useColorScheme, View } from "react-native";
 // eslint-disable-next-line import/order
 import * as SplashScreen from "expo-splash-screen";
 // import XmtpWebview from "./components/XmtpWebview";
-import XmtpState from "./components/XmtpState";
+// import XmtpState from "./components/XmtpState";
 import { AppProvider } from "./data/store/context";
 import Main from "./screens/Main";
+import XmtpTest from "./screens/XmtpTest";
 
 // import XmtpTest from "./screens/XmtpTest";
 SplashScreen.preventAutoHideAsync().catch(() => {
@@ -24,10 +25,10 @@ export default function App() {
           hidden={false}
           style={colorScheme === "dark" ? "light" : "dark"}
         />
-        <XmtpState />
+        {/* <XmtpState /> */}
         {/* <XmtpWebview /> */}
         <Main />
-        {/* <XmtpTest /> */}
+        <XmtpTest />
       </View>
     </AppProvider>
   );
