@@ -19,6 +19,8 @@
   },
   "dependencies": {
     "@azure/core-asynciterator-polyfill": "^1.0.2",
+    "@babel/plugin-proposal-decorators": "^7.20.7",
+    "@babel/plugin-proposal-export-namespace-from": "^7.18.9",
     "@ethersproject/shims": "^5.7.0",
     "@expo/metro-config": "^0.5.1",
     "@expo/react-native-action-sheet": "^4.0.1",
@@ -99,6 +101,7 @@
     "husky": "^8.0.2",
     "lint-staged": "^13.1.0",
     "metro-minify-terser": "^0.74.0",
+    "metro-react-native-babel-preset": "^0.74.0",
     "nanoid": "^3.0.0",
     "plist": "^3.0.6",
     "prettier": "^2.8.0",

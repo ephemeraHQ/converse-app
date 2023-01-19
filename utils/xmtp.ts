@@ -53,12 +53,12 @@ export const streamNewConversations = async (
   }
 };
 
-export const streamNewConversationMessages = async (
-  conversation: Conversation,
+export const streamAllMessages = async (
+  client: Client,
   handleNewMessage: (message: DecodedMessage) => void
 ) => {
   // Stream future messages and sends to expo
-  const stream = await conversation.streamMessages();
+  const stream = await client.conversations.streamAllMessages();
   for await (const m of stream) {
     handleNewMessage(m);
   }

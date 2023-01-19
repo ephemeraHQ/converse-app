@@ -22,8 +22,7 @@ import {
 } from "react-native";
 
 import TableView, { TableViewSymbol } from "../components/TableView";
-import { isOnXmtp } from "../components/XmtpState";
-import { sendMessageToWebview } from "../components/XmtpWebview";
+import { createNewConversation, isOnXmtp } from "../components/XmtpState";
 import config from "../config";
 import { AppContext, StateType } from "../data/store/context";
 import { XmtpConversation } from "../data/store/xmtpReducer";
@@ -89,7 +88,7 @@ export default function NewConversation({
     existingConversations: [] as XmtpConversation[],
   });
 
-  const { state } = useContext(AppContext);
+  const { state, dispatch } = useContext(AppContext);
 
   useEffect(() => {
     const searchForValue = async () => {
@@ -174,7 +173,7 @@ export default function NewConversation({
     searchForValue();
   }, [state.xmtp.conversations, value]);
 
-  const conversationsTopics = useRef(Object.keys(state.xmtp.conversations));
+  const navigateWhenReady = useRef({ topic: "", message: "" });
 
   const navigateToTopic = useCallback(
     (topic: string, message?: string) => {
@@ -186,39 +185,42 @@ export default function NewConversation({
     [navigation]
   );
 
-  const [creatingNewConversation, setCreatingNewConversation] = useState(false);
-  const waitingForNewConversation = useRef<false | string>(false);
-
   useEffect(() => {
-    const newConversationsTopics = Object.keys(state.xmtp.conversations);
-    if (waitingForNewConversation.current !== false) {
-      const message = waitingForNewConversation.current;
-      const newTopic = newConversationsTopics.find(
-        (topic) => !conversationsTopics.current.includes(topic)
-      );
-      if (newTopic) {
-        waitingForNewConversation.current = false;
+    const { topic, message } = navigateWhenReady.current;
+    if (topic) {
+      const conversation = state.xmtp.conversations[topic];
+      if (conversation) {
+        navigateWhenReady.current = { topic: "", message: "" };
         setCreatingNewConversation(false);
-        navigateToTopic(newTopic, message);
+        navigateToTopic(topic, message);
       }
     }
-    conversationsTopics.current = newConversationsTopics;
-  }, [navigateToTopic, state.xmtp.conversations, state.xmtp.lastUpdateAt]);
+  }, [navigateToTopic, state.xmtp.conversations]);
+
+  const [creatingNewConversation, setCreatingNewConversation] = useState(false);
 
   const createNewConversationWithPeer = useCallback(
-    (state: StateType, peerAddress: string, prefilledMessage?: string) => {
+    async (
+      state: StateType,
+      peerAddress: string,
+      prefilledMessage?: string
+    ) => {
       if (creatingNewConversation) return;
-      waitingForNewConversation.current = prefilledMessage || "";
       setCreatingNewConversation(true);
-      sendMessageToWebview("CREATE_CONVERSATION", {
+      const newConversation = await createNewConversation(
         peerAddress,
-        context: {
+        {
           conversationId: computeNewConversationId(state, peerAddress),
           metadata: {},
         },
-      });
+        dispatch
+      );
+      navigateWhenReady.current = {
+        topic: newConversation.topic,
+        message: prefilledMessage || "",
+      };
     },
-    [creatingNewConversation]
+    [creatingNewConversation, dispatch]
   );
 
   const screenRemoving = useRef(false);
