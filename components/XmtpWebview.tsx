@@ -28,7 +28,7 @@ import {
 import {
   buildUserInviteTopic,
   //@ts-ignore
-} from "../vendor/xmtp-js/utils";
+} from "../vendor/xmtp-js/src/utils";
 import { addLog } from "./DebugButton";
 
 const XMTP_WEBSITE_URI = config.xmtpWebviewURI;

@@ -1,10 +1,10 @@
 import * as SecureStore from "expo-secure-store";
 import * as SplashScreen from "expo-splash-screen";
-import { useCallback, useContext, useEffect, useRef } from "react";
+import React, { useCallback, useContext, useEffect, useRef } from "react";
 import { AppState } from "react-native";
 
 import { saveConversations, saveMessages, saveNewConversation } from "../data";
-import { AppContext } from "../data/store/context";
+import { ActionsType, AppContext } from "../data/store/context";
 import { XmtpDispatchTypes } from "../data/store/xmtpReducer";
 import { lastValueInMap } from "../utils/map";
 import {
@@ -12,9 +12,10 @@ import {
   getConversations,
   getNewConversationMessages,
   streamNewConversations,
-  streamNewConversationMessages,
+  streamAllMessages,
 } from "../utils/xmtp";
 import { Client, Conversation, DecodedMessage } from "../vendor/xmtp-js/src";
+import { InvitationContext } from "../vendor/xmtp-js/src/Invitation";
 
 let conversationsToLoad = 0;
 let xmtpClient: Client;
@@ -30,6 +31,37 @@ export const sendXmtpMessage = async (topic: string, content: string) => {
   if (!conversation) return;
   const message = await conversation.send(content);
   return message;
+};
+
+export const handleNewConversation = (
+  conversation: Conversation,
+  dispatch: React.Dispatch<ActionsType>
+) => {
+  conversationsByTopic[conversation.topic] = conversation;
+  saveNewConversation(
+    {
+      topic: conversation.topic,
+      peerAddress: conversation.peerAddress,
+      createdAt: conversation.createdAt.getTime(),
+      context: conversation.context || undefined,
+      messages: new Map(),
+      lazyMessages: [],
+    },
+    dispatch
+  );
+};
+
+export const createNewConversation = async (
+  peerAddress: string,
+  context: InvitationContext | undefined,
+  dispatch: React.Dispatch<ActionsType>
+) => {
+  const conversation = await xmtpClient.conversations.newConversation(
+    peerAddress,
+    context
+  );
+  handleNewConversation(conversation, dispatch);
+  return conversation;
 };
 
 export default function XmtpState() {
@@ -72,23 +104,6 @@ export default function XmtpState() {
           messages: new Map(),
           lazyMessages: [],
         })),
-        dispatch
-      );
-    },
-    [dispatch]
-  );
-
-  const saveNewXmtpConversation = useCallback(
-    (conversation: Conversation) => {
-      saveNewConversation(
-        {
-          topic: conversation.topic,
-          peerAddress: conversation.peerAddress,
-          createdAt: conversation.createdAt.getTime(),
-          context: conversation.context || undefined,
-          messages: new Map(),
-          lazyMessages: [],
-        },
         dispatch
       );
     },
@@ -155,14 +170,6 @@ export default function XmtpState() {
     [dispatch, saveXmtpMessages, state.xmtp.conversations]
   );
 
-  const handleNewConversation = useCallback(
-    (conversation: Conversation) => {
-      conversationsByTopic[conversation.topic] = conversation;
-      saveNewXmtpConversation(conversation);
-    },
-    [saveNewXmtpConversation]
-  );
-
   const initialSync = useCallback(async () => {
     // First make sure we have all conversation
     // instances available to us
@@ -174,19 +181,21 @@ export default function XmtpState() {
         type: XmtpDispatchTypes.XmtpInitialLoad,
       });
     }
-    // Now let's stream each conversation
+    // Let's load each conversation messages
     for (const topic in conversationsByTopic) {
       const conversation = conversationsByTopic[topic];
       loadNewConversationMessages(conversation);
-      streamNewConversationMessages(conversation, (message) =>
-        saveXmtpMessages([message], conversation.topic)
-      );
     }
+    // And stream future messages
+    streamAllMessages(xmtpClient, (message) =>
+      saveXmtpMessages([message], message.contentTopic)
+    );
     // Then stream newly created conversations
-    streamNewConversations(xmtpClient, handleNewConversation);
+    streamNewConversations(xmtpClient, (conversation) =>
+      handleNewConversation(conversation, dispatch)
+    );
   }, [
     dispatch,
-    handleNewConversation,
     loadNewConversationMessages,
     refreshConversationList,
     saveXmtpMessages,
