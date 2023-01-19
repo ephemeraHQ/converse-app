@@ -100,7 +100,7 @@ export default function NewConversation({
         askPolToInvite: "",
         existingConversations: [],
       }));
-      const is0x = isAddress(value);
+      const is0x = isAddress(value.toLowerCase());
       const isLens = value.endsWith(".lens");
       const isENS = value.endsWith(".eth");
       if (is0x || isLens || isENS) {
@@ -132,7 +132,7 @@ export default function NewConversation({
 
             return;
           }
-          const address = getAddress(resolvedAddress);
+          const address = getAddress(resolvedAddress.toLowerCase());
           const addressIsOnXmtp = await isOnXmtp(address);
           if (searchingForValue.current === value) {
             if (addressIsOnXmtp) {

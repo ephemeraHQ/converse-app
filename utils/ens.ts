@@ -11,7 +11,7 @@ export const resolveENSName = async (
         query:
           "query ResolveName($name: String!) {\n  domains(where: {name: $name}) {\n    resolvedAddress {\n      id\n    }\n  }\n}",
         variables: {
-          name,
+          name: name.toLowerCase(),
         },
       }
     );
