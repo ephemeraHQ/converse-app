@@ -24,10 +24,7 @@ import {
   loadSavedNotificationMessagesToContext,
   subscribeToNotifications,
 } from "../utils/notifications";
-import {
-  buildUserInviteTopic,
-  //@ts-ignore
-} from "../vendor/xmtp-js/src/utils";
+import { buildUserInviteTopic } from "../utils/xmtp";
 import Conversation from "./Conversation";
 import ConversationList from "./ConversationList";
 import NewConversation from "./NewConversation";

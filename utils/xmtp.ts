@@ -1,10 +1,12 @@
-import config from "../config";
 import {
   Client,
   Conversation,
   DecodedMessage,
   SortDirection,
-} from "../vendor/xmtp-js/src";
+} from "@xmtp/xmtp-js";
+import { getAddress } from "ethers/lib/utils";
+
+import config from "../config";
 
 const env = config.xmtpEnv === "production" ? "production" : "dev";
 
@@ -62,4 +64,12 @@ export const streamAllMessages = async (
   for await (const m of stream) {
     handleNewMessage(m);
   }
+};
+
+export const buildContentTopic = (name: string): string =>
+  `/xmtp/0/${name}/proto`;
+
+export const buildUserInviteTopic = (walletAddr: string): string => {
+  // EIP55 normalize the address case.
+  return buildContentTopic(`invite-${getAddress(walletAddr)}`);
 };
