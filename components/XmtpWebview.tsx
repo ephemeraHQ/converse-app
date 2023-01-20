@@ -25,10 +25,7 @@ import {
   loadSavedNotificationMessagesToContext,
   subscribeToNotifications,
 } from "../utils/notifications";
-import {
-  buildUserInviteTopic,
-  //@ts-ignore
-} from "../vendor/xmtp-js/src/utils";
+import { buildUserInviteTopic } from "../utils/xmtp";
 import { addLog } from "./DebugButton";
 
 const XMTP_WEBSITE_URI = config.xmtpWebviewURI;

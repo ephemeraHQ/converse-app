@@ -1,3 +1,5 @@
+import { Client, Conversation, DecodedMessage } from "@xmtp/xmtp-js";
+import { InvitationContext } from "@xmtp/xmtp-js/dist/types/src/Invitation";
 import * as SecureStore from "expo-secure-store";
 import * as SplashScreen from "expo-splash-screen";
 import React, { useCallback, useContext, useEffect, useRef } from "react";
@@ -14,8 +16,6 @@ import {
   streamNewConversations,
   streamAllMessages,
 } from "../utils/xmtp";
-import { Client, Conversation, DecodedMessage } from "../vendor/xmtp-js/src";
-import { InvitationContext } from "../vendor/xmtp-js/src/Invitation";
 
 let conversationsToLoad = 0;
 let xmtpClient: Client;
@@ -127,13 +127,18 @@ export default function XmtpState() {
   );
 
   const refreshConversationList = useCallback(async () => {
+    const now = new Date().getTime();
     console.log("[XMTP] Refreshing conversation list...");
     const conversations = await getConversations(xmtpClient);
     conversations.forEach((c) => {
       conversationsByTopic[c.topic] = c;
     });
     saveXmtpConversations(conversations);
-    console.log("[XMTP] Conversation list refreshed!");
+    const after = new Date().getTime();
+    const durationSeconds = (after - now) / 1000;
+    console.log(
+      `[XMTP] Conversation list refreshed - ${conversations.length} in ${durationSeconds} seconds`
+    );
   }, [saveXmtpConversations]);
 
   const loadNewConversationMessages = useCallback(
