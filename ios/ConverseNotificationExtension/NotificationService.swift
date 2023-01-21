@@ -6,6 +6,7 @@
 //
 
 import UserNotifications
+import KeychainAccess
 
 class NotificationService: UNNotificationServiceExtension {
   
@@ -16,6 +17,11 @@ class NotificationService: UNNotificationServiceExtension {
     self.contentHandler = contentHandler
     bestAttemptContent = (request.content.mutableCopy() as? UNMutableNotificationContent)
     let sharedDefaults = UserDefaults(suiteName: "group.com.converse")
+    print("Received a notification!")
+    let keychain = Keychain()
+    let token = keychain["XMTP_KEYS"]
+    print("token", token ?? "")
+    
     
     
     if let bestAttemptContent = bestAttemptContent {
