@@ -91,7 +91,7 @@ func handleNotificationAsync(contentHandler: ((UNNotificationContent) -> Void), 
       let xmtpClient = getXmtpClientFromKeys();
       
       if (xmtpClient != nil) {
-        let messageContent = try! await decodeConversationMessage(xmtpClient: xmtpClient!, contentTopic: contentTopic, encodedMessage: encodedMessage)
+        let messageContent = await decodeConversationMessage(xmtpClient: xmtpClient!, contentTopic: contentTopic, encodedMessage: encodedMessage)
         if (messageContent != nil) {
           bestAttemptContent.body = messageContent!;
         }
