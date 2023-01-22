@@ -39,6 +39,31 @@ const go = async () => {
   ];
   const newInfo = plist.build(info);
   fs.writeFileSync(PLIST_PATH, newInfo, "utf-8");
+
+  const ENTITLEMENTS_APP_PATH = "ios/Converse/Converse.entitlements";
+  const ENTITLEMENTS_EXTENSION_PATH = "ios/Converse/Converse.entitlements";
+
+  const entitlementsApp = plist.parse(
+    fs.readFileSync(ENTITLEMENTS_APP_PATH, "utf8")
+  );
+  const entitlementsExtension = plist.parse(
+    fs.readFileSync(ENTITLEMENTS_EXTENSION_PATH, "utf8")
+  );
+  entitlementsApp["keychain-access-groups"][0] = entitlementsApp[
+    "keychain-access-groups"
+  ][0].replace("com.converse.dev", "com.converse.preview");
+  entitlementsExtension["keychain-access-groups"][0] = entitlementsExtension[
+    "keychain-access-groups"
+  ][0].replace("com.converse.dev", "com.converse.preview");
+  const newEntitlementsApp = plist.build(entitlementsApp);
+  fs.writeFileSync(ENTITLEMENTS_APP_PATH, newEntitlementsApp, "utf-8");
+
+  const newEntitlementsExtension = plist.build(entitlementsExtension);
+  fs.writeFileSync(
+    ENTITLEMENTS_EXTENSION_PATH,
+    newEntitlementsExtension,
+    "utf-8"
+  );
 };
 
 go();
