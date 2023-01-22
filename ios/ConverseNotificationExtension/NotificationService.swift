@@ -18,7 +18,7 @@ class NotificationService: UNNotificationServiceExtension {
     bestAttemptContent = (request.content.mutableCopy() as? UNMutableNotificationContent)
     let sharedDefaults = UserDefaults(suiteName: "group.com.converse")
     print("Received a notification!")
-    let keychain = Keychain()
+    let keychain = Keychain(service: "converse.keychainService")
     let token = keychain["XMTP_KEYS"]
     print("token", token ?? "")
     
