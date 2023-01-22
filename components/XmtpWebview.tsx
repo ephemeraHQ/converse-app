@@ -3,7 +3,6 @@ import {
   //@ts-ignore
 } from "@xmtp/xmtp-js/dist/cjs/src/utils";
 import * as Linking from "expo-linking";
-import * as SecureStore from "expo-secure-store";
 import React, {
   useCallback,
   useContext,
@@ -19,6 +18,7 @@ import config from "../config";
 import { saveNewConversation, saveConversations, saveMessages } from "../data";
 import { AppContext } from "../data/store/context";
 import { XmtpDispatchTypes } from "../data/store/xmtpReducer";
+import { deleteXmtpKeys, loadXmtpKeys, saveXmtpKeys } from "../utils/keychain";
 import { lastValueInMap } from "../utils/map";
 import { subscribeToNotifications } from "../utils/notifications";
 import { addLog } from "./DebugButton";
@@ -84,7 +84,7 @@ export default function XmtpWebview() {
 
   useEffect(() => {
     const loadKeys = async () => {
-      const keys = await SecureStore.getItemAsync("XMTP_KEYS");
+      const keys = await loadXmtpKeys();
       sendMessageToWebview("KEYS_LOADED_FROM_SECURE_STORAGE", { keys });
       loadedKeys.current = true;
     };
@@ -167,7 +167,7 @@ export default function XmtpWebview() {
           break;
         case "SAVE_KEYS": {
           const { keys } = data;
-          await SecureStore.setItemAsync("XMTP_KEYS", keys);
+          await saveXmtpKeys(keys);
           break;
         }
 
@@ -183,7 +183,7 @@ export default function XmtpWebview() {
             payload: { connected: false },
           });
           launchedInitialLoad.current = false;
-          await SecureStore.deleteItemAsync("XMTP_KEYS");
+          await deleteXmtpKeys();
           webview?.reload();
           break;
         case "WEBVIEW_LOADED":
