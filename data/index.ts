@@ -2,6 +2,7 @@ import "reflect-metadata";
 import SharedGroupPreferences from "react-native-shared-group-preferences";
 
 import { addLog } from "../components/DebugButton";
+import config from "../config";
 import { resolveENSAddress } from "../utils/ens";
 import { getLensHandle } from "../utils/lens";
 import { shortAddress } from "../utils/str";
@@ -193,8 +194,13 @@ export const saveMessages = async (
 };
 
 export const loadDataToContext = async (dispatch: DispatchType) => {
+  // Save env to shared data with extension
+  SharedGroupPreferences.setItem(
+    "xmtp-env",
+    config.xmtpEnv,
+    "group.com.converse"
+  );
   // Let's load conversations and messages and save to context
-
   const conversationsWithMessages = await conversationRepository.find({
     relations: { messages: true },
     order: { messages: { sent: "ASC" } },
