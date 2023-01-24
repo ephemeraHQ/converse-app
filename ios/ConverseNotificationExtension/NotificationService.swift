@@ -15,13 +15,18 @@ func getXmtpClientFromKeys() -> XMTP.Client? {
   if (xmtpKeys == nil) {
     return nil;
   }
-  let decoder = JSONDecoder()
-  let decoded = try! decoder.decode([UInt8].self, from: xmtpKeys!.data(using: .utf8)!)
-  let data = Data(decoded)
-  let privateKeyBundle = try! PrivateKeyBundle(serializedData: data)
-  let xmtpEnv = getXmtpEnv()
-  let client = try! Client.from(bundle: privateKeyBundle, options: .init(api: .init(env: xmtpEnv)))
-  return client
+  do {
+    let decoder = JSONDecoder()
+    let decoded = try decoder.decode([UInt8].self, from: xmtpKeys!.data(using: .utf8)!)
+    let data = Data(decoded)
+    let privateKeyBundle = try! PrivateKeyBundle(serializedData: data)
+    let xmtpEnv = getXmtpEnv()
+    let client = try Client.from(bundle: privateKeyBundle, options: .init(api: .init(env: xmtpEnv)))
+    return client
+  } catch {
+    return nil;
+  }
+  
 }
 
 func getXmtpEnv() -> XMTP.XMTPEnvironment {
@@ -56,11 +61,11 @@ func decodeConversationMessage(xmtpClient: XMTP.Client, contentTopic: String, en
     for conversation in conversations {
       do {
         try Persistence().save(conversation: conversation)
-        conversationContainer = try! persistence.load(conversationTopic: contentTopic)
       } catch {
         print("Error saving \(conversation.topic): \(error)")
       }
     }
+    conversationContainer = try! persistence.load(conversationTopic: contentTopic)
   }
   
   if (conversationContainer != nil) {
@@ -71,8 +76,13 @@ func decodeConversationMessage(xmtpClient: XMTP.Client, contentTopic: String, en
       envelope.contentTopic = contentTopic
     }
     
-    let decodedMessage = try! conversation.decode(envelope)
-    return try! decodedMessage.content()
+    do {
+      let decodedMessage = try conversation.decode(envelope)
+      return try decodedMessage.content()
+    } catch {
+      return "CANNOT DECODE";
+    }
+    
   }
   return nil;
 }
@@ -94,7 +104,11 @@ func handleNotificationAsync(contentHandler: ((UNNotificationContent) -> Void), 
         let messageContent = await decodeConversationMessage(xmtpClient: xmtpClient!, contentTopic: contentTopic, encodedMessage: encodedMessage)
         if (messageContent != nil) {
           bestAttemptContent.body = messageContent!;
+        } else {
+          bestAttemptContent.body = "Empty message";
         }
+      } else {
+        bestAttemptContent.body = "No XMTP Client";
       }
     }
     
