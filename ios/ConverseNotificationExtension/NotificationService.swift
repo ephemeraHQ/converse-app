@@ -9,6 +9,14 @@ import UserNotifications
 import KeychainAccess
 import XMTP
 
+struct SavedNotificationMessage: Codable {
+    var topic: String
+    var content: String
+    var senderAddress: String
+    var sent: Int
+  
+}
+
 func getXmtpClientFromKeys() -> XMTP.Client? {
   let keychain = Keychain(service: "converse.keychainService")
   let xmtpKeys = keychain["XMTP_KEYS"]
@@ -37,6 +45,37 @@ func getXmtpEnv() -> XMTP.XMTPEnvironment {
   } else {
     return .dev;
   }
+}
+
+func loadSavedMessages() -> [SavedNotificationMessage] {
+  let sharedDefaults = UserDefaults(suiteName: "group.com.converse")
+  let savedMessagesString = sharedDefaults?.string(forKey: "saved-notifications-messages")
+  if (savedMessagesString == nil) {
+    return []
+  } else {
+    let decoder = JSONDecoder()
+    do {
+      let decoded = try decoder.decode([SavedNotificationMessage].self, from: savedMessagesString!.data(using: .utf8)!)
+      return decoded
+    } catch {
+      return []
+    }
+  }
+}
+
+func saveMessage(topic: String, sent: Date, senderAddress: String, content: String) throws {
+  let sharedDefaults = UserDefaults(suiteName: "group.com.converse")
+  print("saving message", sent, senderAddress, content)
+  let savedMessage = SavedNotificationMessage(topic: topic, content: content, senderAddress: senderAddress, sent: Int(sent.timeIntervalSince1970 * 1000))
+
+  var savedMessagesList = loadSavedMessages()
+  print(savedMessagesList)
+  print("appending")
+  savedMessagesList.append(savedMessage)
+  print("saving to shared defaults")
+  let encodedValue = try JSONEncoder().encode(savedMessagesList)
+  let encodedString = String(data: encodedValue, encoding: .utf8)
+  sharedDefaults?.set(encodedString, forKey: "saved-notifications-messages")
 }
 
 func getSavedConversationTitle(contentTopic: String)-> String {
@@ -78,10 +117,10 @@ func decodeConversationMessage(xmtpClient: XMTP.Client, contentTopic: String, en
     
     do {
       let decodedMessage = try conversation.decode(envelope)
-      let decodedContent: String = try decodedMessage.content()
+      let decodedContent: String? = try decodedMessage.content()
       if (decodedContent != nil) {
         // Let's save the notification for immediate display
-        persistence.saveMessage(topic: contentTopic, sent: decodedMessage.sent, content: decodedContent)
+        try saveMessage(topic: contentTopic, sent: decodedMessage.sent, senderAddress: decodedMessage.senderAddress, content: decodedContent!)
       }
       return decodedContent
     } catch {

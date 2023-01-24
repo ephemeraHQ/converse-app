@@ -29,6 +29,7 @@ import {
   getNotificationsPermissionStatus,
   subscribeToNotifications,
 } from "../utils/notifications";
+import { loadSavedNotificationsMessages } from "../utils/sharedData";
 import Conversation from "./Conversation";
 import ConversationList from "./ConversationList";
 import NewConversation from "./NewConversation";
@@ -128,6 +129,7 @@ export default function Main() {
     const loadData = async () => {
       await initDb();
       await loadDataToContext(dispatch);
+      await loadSavedNotificationsMessages();
     };
     loadData();
   }, [dispatch]);

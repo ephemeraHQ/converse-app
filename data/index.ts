@@ -1,10 +1,9 @@
 import "reflect-metadata";
-import SharedGroupPreferences from "react-native-shared-group-preferences";
 
 import { addLog } from "../components/DebugButton";
-import config from "../config";
 import { resolveENSAddress } from "../utils/ens";
 import { getLensHandle } from "../utils/lens";
+import { saveConversationDict, saveXmtpEnv } from "../utils/sharedData";
 import { shortAddress } from "../utils/str";
 import { conversationRepository, messageRepository } from "./db";
 import { Conversation } from "./db/entities/conversation";
@@ -125,11 +124,7 @@ const setupAndSaveConversation = async (conversation: XmtpConversation) => {
   }
 
   // Also save to shared preferences to be able to show notification
-  SharedGroupPreferences.setItem(
-    `conversation-${conversation.topic}`,
-    conversationDict,
-    "group.com.converse"
-  ).catch((e) => {
+  saveConversationDict(conversation.topic, conversationDict).catch((e) => {
     const dataToSave = {
       topic: `conversation-${conversation.topic}`,
       conversationDict,
@@ -195,11 +190,7 @@ export const saveMessages = async (
 
 export const loadDataToContext = async (dispatch: DispatchType) => {
   // Save env to shared data with extension
-  SharedGroupPreferences.setItem(
-    "xmtp-env",
-    config.xmtpEnv,
-    "group.com.converse"
-  );
+  saveXmtpEnv();
   // Let's load conversations and messages and save to context
   const conversationsWithMessages = await conversationRepository.find({
     relations: { messages: true },
