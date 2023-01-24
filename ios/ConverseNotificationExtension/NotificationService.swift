@@ -78,7 +78,12 @@ func decodeConversationMessage(xmtpClient: XMTP.Client, contentTopic: String, en
     
     do {
       let decodedMessage = try conversation.decode(envelope)
-      return try decodedMessage.content()
+      let decodedContent: String = try decodedMessage.content()
+      if (decodedContent != nil) {
+        // Let's save the notification for immediate display
+        persistence.saveMessage(topic: contentTopic, sent: decodedMessage.sent, content: decodedContent)
+      }
+      return decodedContent
     } catch {
       return "CANNOT DECODE";
     }
