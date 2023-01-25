@@ -15,7 +15,12 @@ import { SafeAreaProvider } from "react-native-safe-area-context";
 import { WebView, WebViewMessageEvent } from "react-native-webview";
 
 import config from "../config";
-import { saveNewConversation, saveConversations, saveMessages } from "../data";
+import {
+  saveNewConversation,
+  saveConversations,
+  saveMessages,
+  loadSavedNotificationMessagesToContext,
+} from "../data";
 import { AppContext } from "../data/store/context";
 import { XmtpDispatchTypes } from "../data/store/xmtpReducer";
 import { deleteXmtpKeys, loadXmtpKeys, saveXmtpKeys } from "../utils/keychain";
@@ -99,30 +104,35 @@ export default function XmtpWebview() {
   }, []);
 
   useEffect(() => {
-    const subscription = AppState.addEventListener("change", (nextAppState) => {
-      if (
-        appState.current.match(/inactive|background/) &&
-        nextAppState === "active" &&
-        state.xmtp.initialLoadDone
-      ) {
-        console.log("App is active, reloading data");
-        webviewReadyForMessages = false;
-        dispatch({
-          type: XmtpDispatchTypes.XmtpLoading,
-          payload: { loading: true },
-        });
-        const lastTimestampByConversation: { [topic: string]: number } = {};
-        for (const topic in state.xmtp.conversations) {
-          const conversation = state.xmtp.conversations[topic];
-          lastTimestampByConversation[topic] =
-            conversation.messages?.size > 0
-              ? lastValueInMap(conversation.messages)?.sent || 0
-              : 0;
+    const subscription = AppState.addEventListener(
+      "change",
+      async (nextAppState) => {
+        if (
+          appState.current.match(/inactive|background/) &&
+          nextAppState === "active" &&
+          state.xmtp.initialLoadDone
+        ) {
+          console.log("App is active, reloading data");
+          webviewReadyForMessages = false;
+          dispatch({
+            type: XmtpDispatchTypes.XmtpLoading,
+            payload: { loading: true },
+          });
+          // Load notifications
+          await loadSavedNotificationMessagesToContext(dispatch);
+          const lastTimestampByConversation: { [topic: string]: number } = {};
+          for (const topic in state.xmtp.conversations) {
+            const conversation = state.xmtp.conversations[topic];
+            lastTimestampByConversation[topic] =
+              conversation.messages?.size > 0
+                ? lastValueInMap(conversation.messages)?.sent || 0
+                : 0;
+          }
+          sendMessageToWebview("RELOAD", lastTimestampByConversation);
         }
-        sendMessageToWebview("RELOAD", lastTimestampByConversation);
+        appState.current = nextAppState;
       }
-      appState.current = nextAppState;
-    });
+    );
 
     return () => {
       subscription.remove();

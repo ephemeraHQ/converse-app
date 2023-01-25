@@ -219,7 +219,7 @@ export const loadSavedNotificationMessagesToContext = async (
 ) => {
   const messages = await loadSavedNotificationsMessages();
   console.log("found", messages);
-  emptySavedNotificationsMessages();
+  await emptySavedNotificationsMessages();
   messages.sort((m1: any, m2: any) => m1.sent - m2.sent);
   messages.forEach((message: any) => {
     dispatch({
