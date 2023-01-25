@@ -1,9 +1,16 @@
 import "reflect-metadata";
 
+import uuid from "react-native-uuid";
+
 import { addLog } from "../components/DebugButton";
 import { resolveENSAddress } from "../utils/ens";
 import { getLensHandle } from "../utils/lens";
-import { saveConversationDict, saveXmtpEnv } from "../utils/sharedData";
+import {
+  emptySavedNotificationsMessages,
+  loadSavedNotificationsMessages,
+  saveConversationDict,
+  saveXmtpEnv,
+} from "../utils/sharedData";
 import { shortAddress } from "../utils/str";
 import { conversationRepository, messageRepository } from "./db";
 import { Conversation } from "./db/entities/conversation";
@@ -204,5 +211,28 @@ export const loadDataToContext = async (dispatch: DispatchType) => {
         xmtpConversationFromDb(c)
       ),
     },
+  });
+};
+
+export const loadSavedNotificationMessagesToContext = async (
+  dispatch: DispatchType
+) => {
+  const messages = await loadSavedNotificationsMessages();
+  console.log("found", messages);
+  emptySavedNotificationsMessages();
+  messages.sort((m1: any, m2: any) => m2.sent - m1.sent);
+  messages.forEach((message: any) => {
+    dispatch({
+      type: XmtpDispatchTypes.XmtpLazyMessage,
+      payload: {
+        topic: message.topic,
+        message: {
+          id: uuid.v4().toString(),
+          senderAddress: message.senderAddress,
+          sent: message.sent,
+          content: message.content,
+        },
+      },
+    });
   });
 };
