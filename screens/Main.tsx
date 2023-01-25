@@ -13,7 +13,10 @@ import { AppState, useColorScheme } from "react-native";
 
 import { addLog } from "../components/DebugButton";
 import { sendMessageToWebview } from "../components/XmtpWebview";
-import { loadDataToContext } from "../data";
+import {
+  loadDataToContext,
+  loadSavedNotificationMessagesToContext,
+} from "../data";
 import { initDb } from "../data/db";
 import { AppContext } from "../data/store/context";
 import { NotificationsDispatchTypes } from "../data/store/notificationsReducer";
@@ -29,7 +32,6 @@ import {
   getNotificationsPermissionStatus,
   subscribeToNotifications,
 } from "../utils/notifications";
-import { loadSavedNotificationsMessages } from "../utils/sharedData";
 import Conversation from "./Conversation";
 import ConversationList from "./ConversationList";
 import NewConversation from "./NewConversation";
@@ -129,8 +131,8 @@ export default function Main() {
     const loadData = async () => {
       await initDb();
       await loadDataToContext(dispatch);
-      await loadSavedNotificationsMessages();
     };
+    loadSavedNotificationMessagesToContext(dispatch);
     loadData();
   }, [dispatch]);
 
@@ -167,6 +169,8 @@ export default function Main() {
         ) {
           // App is back to active state
           saveNotificationsStatus();
+          // Load notifications
+          loadSavedNotificationMessagesToContext(dispatch);
         }
         appState.current = nextAppState;
       }
@@ -175,7 +179,7 @@ export default function Main() {
     return () => {
       subscription.remove();
     };
-  }, [saveNotificationsStatus]);
+  }, [dispatch, saveNotificationsStatus]);
 
   const splashScreenHidden = useRef(false);
 

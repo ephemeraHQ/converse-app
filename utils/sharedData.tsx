@@ -16,10 +16,15 @@ export const saveXmtpEnv = () =>
     "group.com.converse"
   );
 
-export const loadSavedNotificationsMessages = async () => {
-  const result = await SharedGroupPreferences.getItem(
+export const loadSavedNotificationsMessages = () =>
+  SharedGroupPreferences.getItem(
     "saved-notifications-messages",
     "group.com.converse"
   );
-  console.log("SAVED NOTIFS", result);
-};
+
+export const emptySavedNotificationsMessages = () =>
+  SharedGroupPreferences.setItem(
+    "saved-notifications-messages",
+    [],
+    "group.com.converse"
+  );
