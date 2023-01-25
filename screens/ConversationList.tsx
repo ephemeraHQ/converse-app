@@ -89,7 +89,9 @@ export function conversationListItem(
           {conversationName(conversation)}
         </Text>
         <Text style={styles.messagePreview} numberOfLines={2}>
-          {conversation.messages?.size > 0
+          {conversation.lazyMessages.length > 0
+            ? conversation.lazyMessages[0].content
+            : conversation.messages?.size > 0
             ? lastValueInMap(conversation.messages)?.content
             : ""}
         </Text>
@@ -165,13 +167,17 @@ export default function ConversationList({
     );
     conversations.sort((a, b) => {
       const aDate =
-        (a.messages?.size > 0
-          ? lastValueInMap(a.messages)?.sent
-          : a.createdAt) || a.createdAt;
+        a.lazyMessages.length > 0
+          ? a.lazyMessages[0].sent
+          : (a.messages?.size > 0
+              ? lastValueInMap(a.messages)?.sent
+              : a.createdAt) || a.createdAt;
       const bDate =
-        (b.messages?.size > 0
-          ? lastValueInMap(b.messages)?.sent
-          : b.createdAt) || b.createdAt;
+        b.lazyMessages.length > 0
+          ? b.lazyMessages[0].sent
+          : (b.messages?.size > 0
+              ? lastValueInMap(b.messages)?.sent
+              : b.createdAt) || b.createdAt;
       return bDate - aDate;
     });
     setOrderedConversations(conversations);

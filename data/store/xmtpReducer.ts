@@ -132,9 +132,13 @@ export const xmtpReducer = (state: XmtpType, action: XmtpActions): XmtpType => {
         conversations[c.topic] = {
           ...c,
           messages:
-            c.messages || state.conversations[c.topic]?.messages || new Map(),
+            c.messages.size > 0
+              ? c.messages
+              : state.conversations[c.topic]?.messages || new Map(),
           lazyMessages:
-            c.lazyMessages || state.conversations[c.topic]?.lazyMessages || [],
+            c.lazyMessages.length > 0
+              ? c.lazyMessages
+              : state.conversations[c.topic]?.lazyMessages || [],
         };
       });
 
@@ -177,10 +181,16 @@ export const xmtpReducer = (state: XmtpType, action: XmtpActions): XmtpType => {
     }
 
     case XmtpDispatchTypes.XmtpLazyMessage: {
-      if (!state.conversations[action.payload.topic]) return state;
       const newState = {
         ...state,
         lastUpdateAt: new Date().getTime(),
+      };
+      newState.conversations[action.payload.topic] = newState.conversations[
+        action.payload.topic
+      ] || {
+        messages: new Map(),
+        lazyMessages: [],
+        topic: action.payload.topic,
       };
       const conversation = newState.conversations[action.payload.topic];
       conversation.lazyMessages.unshift(action.payload.message);
