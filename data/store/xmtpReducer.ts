@@ -132,7 +132,7 @@ export const xmtpReducer = (state: XmtpType, action: XmtpActions): XmtpType => {
         conversations[c.topic] = {
           ...c,
           messages:
-            c.messages.size > 0
+            c.messages?.size > 0
               ? c.messages
               : state.conversations[c.topic]?.messages || new Map(),
           lazyMessages:
