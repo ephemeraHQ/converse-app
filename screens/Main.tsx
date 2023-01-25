@@ -131,8 +131,8 @@ export default function Main() {
     const loadData = async () => {
       await initDb();
       await loadDataToContext(dispatch);
+      await loadSavedNotificationMessagesToContext(dispatch);
     };
-    loadSavedNotificationMessagesToContext(dispatch);
     loadData();
   }, [dispatch]);
 
@@ -169,8 +169,6 @@ export default function Main() {
         ) {
           // App is back to active state
           saveNotificationsStatus();
-          // Load notifications
-          loadSavedNotificationMessagesToContext(dispatch);
         }
         appState.current = nextAppState;
       }
