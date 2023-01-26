@@ -15,17 +15,15 @@ import { SafeAreaProvider } from "react-native-safe-area-context";
 import { WebView, WebViewMessageEvent } from "react-native-webview";
 
 import config from "../config";
-import {
-  saveNewConversation,
-  saveConversations,
-  saveMessages,
-  loadSavedNotificationMessagesToContext,
-} from "../data";
+import { saveNewConversation, saveConversations, saveMessages } from "../data";
 import { AppContext } from "../data/store/context";
 import { XmtpDispatchTypes } from "../data/store/xmtpReducer";
 import { deleteXmtpKeys, loadXmtpKeys, saveXmtpKeys } from "../utils/keychain";
 import { lastValueInMap } from "../utils/map";
-import { subscribeToNotifications } from "../utils/notifications";
+import {
+  loadSavedNotificationMessagesToContext,
+  subscribeToNotifications,
+} from "../utils/notifications";
 import { addLog } from "./DebugButton";
 
 const XMTP_WEBSITE_URI = config.xmtpWebviewURI;

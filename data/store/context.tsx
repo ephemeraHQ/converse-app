@@ -26,6 +26,7 @@ const initialState: StateType = {
 };
 
 export type ActionsType = XmtpActions | NotificationsActions;
+export type DispatchType = (value: ActionsType) => void;
 
 const AppContext = createContext<{
   state: StateType;
