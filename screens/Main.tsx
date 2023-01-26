@@ -13,10 +13,7 @@ import { AppState, useColorScheme } from "react-native";
 
 import { addLog } from "../components/DebugButton";
 import { sendMessageToWebview } from "../components/XmtpWebview";
-import {
-  loadDataToContext,
-  loadSavedNotificationMessagesToContext,
-} from "../data";
+import { loadDataToContext } from "../data";
 import { initDb } from "../data/db";
 import { AppContext } from "../data/store/context";
 import { NotificationsDispatchTypes } from "../data/store/notificationsReducer";
@@ -30,6 +27,7 @@ import {
 import { lastValueInMap } from "../utils/map";
 import {
   getNotificationsPermissionStatus,
+  loadSavedNotificationMessagesToContext,
   subscribeToNotifications,
 } from "../utils/notifications";
 import Conversation from "./Conversation";
@@ -62,29 +60,37 @@ Notifications.setNotificationHandler({
   }),
 });
 
-const navigateToConversation = (conversation: XmtpConversation) => {
-  const lastTimestamp =
-    conversation.messages?.size > 0
-      ? lastValueInMap(conversation.messages)?.sent || 0
-      : 0;
-  addLog(`Navigating to convo ${conversation.topic} - ${lastTimestamp}`);
-  sendMessageToWebview("SYNC_CONVERSATION", {
-    conversationTopic: conversation.topic,
-    lastTimestamp,
-  });
-  Linking.openURL(
-    Linking.createURL("/conversation", {
-      queryParams: {
-        topic: conversation.topic,
-      },
-    })
-  );
-};
+setInterval(() => {
+  console.log("app running");
+}, 500);
 
 export default function Main() {
   const colorScheme = useColorScheme();
   const appState = useRef(AppState.currentState);
   const { state, dispatch } = useContext(AppContext);
+
+  const navigateToConversation = useCallback(
+    async (conversation: XmtpConversation) => {
+      const lastTimestamp =
+        conversation.messages?.size > 0
+          ? lastValueInMap(conversation.messages)?.sent || 0
+          : 0;
+      addLog(`Navigating to convo ${conversation.topic} - ${lastTimestamp}`);
+      await loadSavedNotificationMessagesToContext(dispatch);
+      sendMessageToWebview("SYNC_CONVERSATION", {
+        conversationTopic: conversation.topic,
+        lastTimestamp,
+      });
+      Linking.openURL(
+        Linking.createURL("/conversation", {
+          queryParams: {
+            topic: conversation.topic,
+          },
+        })
+      );
+    },
+    [dispatch]
+  );
 
   const saveNotificationsStatus = useCallback(async () => {
     const notificationsStatus = await getNotificationsPermissionStatus();

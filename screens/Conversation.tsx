@@ -152,6 +152,7 @@ const Conversation = ({
     const newMessages = [] as MessageType.Any[];
     const messagesArray = Array.from(conversation.messages.values());
     const messagesLength = messagesArray.length;
+    console.log("lazy", conversation.lazyMessages);
     conversation.lazyMessages.forEach((m) => {
       newMessages.push({
         author: {
