@@ -90,7 +90,7 @@ func getSavedConversationTitle(contentTopic: String)-> String {
 
 func decodeConversationMessage(xmtpClient: XMTP.Client, contentTopic: String, encodedMessage: String) async -> String? {
   let persistence = Persistence()
-  var foundInList = false;
+  var foundInList = "no";
   do {
     var conversationContainer = try persistence.load(conversationTopic: contentTopic)
     var conversationsCount = 0;
@@ -100,7 +100,7 @@ func decodeConversationMessage(xmtpClient: XMTP.Client, contentTopic: String, en
       conversationsCount = conversations.count
       for conversation in conversations {
         if ((conversation.topic as String) == contentTopic) {
-          foundInList = true;
+          foundInList = "yes";
         }
         do {
           try persistence.save(conversation: conversation)
