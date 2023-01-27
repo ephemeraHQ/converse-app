@@ -42,7 +42,6 @@ func getXmtpClientFromKeys() -> XMTP.Client? {
 func getXmtpEnv() -> XMTP.XMTPEnvironment {
   let sharedDefaults = UserDefaults(suiteName: "group.com.converse")
   let xmtpEnvString = sharedDefaults?.string(forKey: "xmtp-env")
-  print("ENNNNV2", xmtpEnvString)
   if (xmtpEnvString == "\"production\"") {
     return .production;
   } else {
