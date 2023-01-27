@@ -20,6 +20,7 @@ struct SavedNotificationMessage: Codable {
 func getXmtpClientFromKeys() -> XMTP.Client? {
   let keychain = Keychain(service: "converse.keychainService")
   let xmtpKeys = keychain["XMTP_KEYS"]
+  print("KEYYYYS", xmtpKeys ?? "no keys")
   if (xmtpKeys == nil) {
     return nil;
   }
@@ -29,6 +30,7 @@ func getXmtpClientFromKeys() -> XMTP.Client? {
     let data = Data(decoded)
     let privateKeyBundle = try! PrivateKeyBundle(serializedData: data)
     let xmtpEnv = getXmtpEnv()
+    print("ENNNNV", xmtpEnv)
     let client = try Client.from(bundle: privateKeyBundle, options: .init(api: .init(env: xmtpEnv)))
     return client
   } catch {
@@ -40,7 +42,8 @@ func getXmtpClientFromKeys() -> XMTP.Client? {
 func getXmtpEnv() -> XMTP.XMTPEnvironment {
   let sharedDefaults = UserDefaults(suiteName: "group.com.converse")
   let xmtpEnvString = sharedDefaults?.string(forKey: "xmtp-env")
-  if (xmtpEnvString == "production") {
+  print("ENNNNV2", xmtpEnvString)
+  if (xmtpEnvString == "\"production\"") {
     return .production;
   } else {
     return .dev;
