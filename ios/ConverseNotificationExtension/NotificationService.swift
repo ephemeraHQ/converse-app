@@ -128,9 +128,7 @@ func decodeConversationMessage(xmtpClient: XMTP.Client, contentTopic: String, en
       }
       
     } else {
-      let sharedDefaults = UserDefaults(suiteName: "group.com.converse")
-      let xmtpEnvString = sharedDefaults?.string(forKey: "xmtp-env")
-      return "NO CONVERSATION FOUND - \(xmtpEnvString ?? "no env")";
+      return "NO CONVERSATION FOUND";
     }
   } catch {
     return "ERROR WHILE loading - \(error)";
