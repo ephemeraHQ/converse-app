@@ -60,10 +60,6 @@ Notifications.setNotificationHandler({
   }),
 });
 
-setInterval(() => {
-  console.log("app running");
-}, 500);
-
 export default function Main() {
   const colorScheme = useColorScheme();
   const appState = useRef(AppState.currentState);

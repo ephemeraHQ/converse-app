@@ -14,7 +14,7 @@ struct SavedNotificationMessage: Codable {
     var content: String
     var senderAddress: String
     var sent: Int
-  
+    var id: String
 }
 
 func getXmtpClientFromKeys() -> XMTP.Client? {
@@ -63,10 +63,10 @@ func loadSavedMessages() -> [SavedNotificationMessage] {
   }
 }
 
-func saveMessage(topic: String, sent: Date, senderAddress: String, content: String) throws {
+func saveMessage(topic: String, sent: Date, senderAddress: String, content: String, id: String) throws {
   let sharedDefaults = UserDefaults(suiteName: "group.com.converse")
   print("saving message", sent, senderAddress, content)
-  let savedMessage = SavedNotificationMessage(topic: topic, content: content, senderAddress: senderAddress, sent: Int(sent.timeIntervalSince1970 * 1000))
+  let savedMessage = SavedNotificationMessage(topic: topic, content: content, senderAddress: senderAddress, sent: Int(sent.timeIntervalSince1970 * 1000), id: id)
 
   var savedMessagesList = loadSavedMessages()
   print(savedMessagesList)
@@ -120,7 +120,7 @@ func decodeConversationMessage(xmtpClient: XMTP.Client, contentTopic: String, en
       let decodedContent: String? = try decodedMessage.content()
       if (decodedContent != nil) {
         // Let's save the notification for immediate display
-        try saveMessage(topic: contentTopic, sent: decodedMessage.sent, senderAddress: decodedMessage.senderAddress, content: decodedContent!)
+        try saveMessage(topic: contentTopic, sent: decodedMessage.sent, senderAddress: decodedMessage.senderAddress, content: decodedContent!, id: decodedMessage.id)
       }
       return decodedContent
     } catch {

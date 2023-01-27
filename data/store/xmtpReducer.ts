@@ -181,6 +181,16 @@ export const xmtpReducer = (state: XmtpType, action: XmtpActions): XmtpType => {
     }
 
     case XmtpDispatchTypes.XmtpLazyMessage: {
+      // Ignore lazy message with an id that we already have
+      // because it means we got it through the XMTP SDK already
+      if (
+        state.conversations[action.payload.topic].messages.get(
+          action.payload.message.id
+        )
+      ) {
+        console.log("IGNORING A LAZY MESSAGE");
+        return state;
+      }
       const newState = {
         ...state,
         lastUpdateAt: new Date().getTime(),
