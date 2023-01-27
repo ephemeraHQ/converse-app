@@ -120,11 +120,11 @@ func decodeConversationMessage(xmtpClient: XMTP.Client, contentTopic: String, en
       }
       return decodedContent
     } catch {
-      return nil;
+      return "ERROR WHILE DECODING";
     }
     
   }
-  return nil;
+  return "NO CONVERSATION FOUND";
 }
 
 
@@ -144,7 +144,11 @@ func handleNotificationAsync(contentHandler: ((UNNotificationContent) -> Void), 
         let messageContent = await decodeConversationMessage(xmtpClient: xmtpClient!, contentTopic: contentTopic, encodedMessage: encodedMessage)
         if (messageContent != nil) {
           bestAttemptContent.body = messageContent!;
+        } else {
+          bestAttemptContent.body = "NO MESSAGE CONTENT";
         }
+      } else {
+        bestAttemptContent.body = "NO XMTP CLIENT";
       }
     }
     
