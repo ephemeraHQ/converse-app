@@ -90,6 +90,7 @@ func getSavedConversationTitle(contentTopic: String)-> String {
 
 func decodeConversationMessage(xmtpClient: XMTP.Client, contentTopic: String, encodedMessage: String) async -> String? {
   let persistence = Persistence()
+  var foundInList = false;
   do {
     var conversationContainer = try persistence.load(conversationTopic: contentTopic)
     var conversationsCount = 0;
@@ -98,6 +99,9 @@ func decodeConversationMessage(xmtpClient: XMTP.Client, contentTopic: String, en
       let conversations = try! await xmtpClient.conversations.list()
       conversationsCount = conversations.count
       for conversation in conversations {
+        if ((conversation.topic as String) == contentTopic) {
+          foundInList = true;
+        }
         do {
           try persistence.save(conversation: conversation)
           savedCount = savedCount + 1;
@@ -131,7 +135,7 @@ func decodeConversationMessage(xmtpClient: XMTP.Client, contentTopic: String, en
     } else {
       let sharedDefaults = UserDefaults(suiteName: "group.com.converse")
       let xmtpEnvString = sharedDefaults?.string(forKey: "xmtp-env")
-      return "NO CONVERSATION FOUND - \(xmtpEnvString ?? "no env")";
+      return "NO CONVERSATION FOUND - \(xmtpEnvString ?? "no env") - \(foundInList)";
     }
   } catch {
     return "ERROR WHILE loading - \(error)";
