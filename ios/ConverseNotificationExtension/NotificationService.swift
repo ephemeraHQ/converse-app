@@ -20,7 +20,6 @@ struct SavedNotificationMessage: Codable {
 func getXmtpClientFromKeys() -> XMTP.Client? {
   let keychain = Keychain(service: "converse.keychainService")
   let xmtpKeys = keychain["XMTP_KEYS"]
-  print("KEYYYYS", xmtpKeys ?? "no keys")
   if (xmtpKeys == nil) {
     return nil;
   }
@@ -94,7 +93,6 @@ func decodeConversationMessage(xmtpClient: XMTP.Client, contentTopic: String, en
   let persistence = Persistence()
   do {
     var conversationContainer = try persistence.load(conversationTopic: contentTopic)
-    return "ICI CA MARCHE";
     if (conversationContainer == nil) {
       let conversations = try await xmtpClient.conversations.list()
       for conversation in conversations {
@@ -108,7 +106,6 @@ func decodeConversationMessage(xmtpClient: XMTP.Client, contentTopic: String, en
     }
     
     if (conversationContainer != nil) {
-      return "WE HAVE CONTAINER";
       let conversation = conversationContainer!.decode(with: xmtpClient)
       let encryptedMessageData = Data(base64Encoded: Data(encodedMessage.utf8))!
       let envelope = XMTP.Envelope.with { envelope in
