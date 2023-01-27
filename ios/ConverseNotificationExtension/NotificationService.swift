@@ -65,14 +65,10 @@ func loadSavedMessages() -> [SavedNotificationMessage] {
 
 func saveMessage(topic: String, sent: Date, senderAddress: String, content: String, id: String) throws {
   let sharedDefaults = UserDefaults(suiteName: "group.com.converse")
-  print("saving message", sent, senderAddress, content)
   let savedMessage = SavedNotificationMessage(topic: topic, content: content, senderAddress: senderAddress, sent: Int(sent.timeIntervalSince1970 * 1000), id: id)
 
   var savedMessagesList = loadSavedMessages()
-  print(savedMessagesList)
-  print("appending")
   savedMessagesList.append(savedMessage)
-  print("saving to shared defaults")
   let encodedValue = try JSONEncoder().encode(savedMessagesList)
   let encodedString = String(data: encodedValue, encoding: .utf8)
   sharedDefaults?.set(encodedString, forKey: "saved-notifications-messages")
@@ -124,7 +120,7 @@ func decodeConversationMessage(xmtpClient: XMTP.Client, contentTopic: String, en
       }
       return decodedContent
     } catch {
-      return "CANNOT DECODE";
+      return nil;
     }
     
   }
@@ -148,11 +144,7 @@ func handleNotificationAsync(contentHandler: ((UNNotificationContent) -> Void), 
         let messageContent = await decodeConversationMessage(xmtpClient: xmtpClient!, contentTopic: contentTopic, encodedMessage: encodedMessage)
         if (messageContent != nil) {
           bestAttemptContent.body = messageContent!;
-        } else {
-          bestAttemptContent.body = "Empty message";
         }
-      } else {
-        bestAttemptContent.body = "No XMTP Client";
       }
     }
     

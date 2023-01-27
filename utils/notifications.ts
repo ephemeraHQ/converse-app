@@ -77,7 +77,6 @@ let loadingSavedNotifications = false;
 
 const waitForLoadingSavedNotifications = async () => {
   if (!loadingSavedNotifications) return;
-  console.log("notifications saving, waiting…");
   await new Promise((r) => setTimeout(r, 100));
   await waitForLoadingSavedNotifications();
 };
@@ -91,11 +90,9 @@ export const loadSavedNotificationMessagesToContext = async (
   }
   loadingSavedNotifications = true;
   const messages = await loadSavedNotificationsMessages();
-  console.log("found", messages);
   await emptySavedNotificationsMessages();
   messages.sort((m1: any, m2: any) => m1.sent - m2.sent);
   messages.forEach((message: any) => {
-    console.log("Found message with id", message.id);
     dispatch({
       type: XmtpDispatchTypes.XmtpLazyMessage,
       payload: {
