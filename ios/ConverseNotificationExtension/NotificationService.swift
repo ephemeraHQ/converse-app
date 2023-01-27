@@ -94,7 +94,7 @@ func decodeConversationMessage(xmtpClient: XMTP.Client, contentTopic: String, en
   var conversationsCount = 0;
   if (conversationContainer == nil) {
     let conversations = try! await xmtpClient.conversations.list()
-    conversationsCount = conversations.count()
+    conversationsCount = conversations.count
     for conversation in conversations {
       do {
         try Persistence().save(conversation: conversation)
