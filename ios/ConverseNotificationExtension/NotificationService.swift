@@ -92,14 +92,16 @@ func decodeConversationMessage(xmtpClient: XMTP.Client, contentTopic: String, en
   let persistence = Persistence()
   var conversationContainer = try! persistence.load(conversationTopic: contentTopic)
   var conversationsCount = 0;
+  var savedCount = 0;
   if (conversationContainer == nil) {
     let conversations = try! await xmtpClient.conversations.list()
     conversationsCount = conversations.count
     for conversation in conversations {
       do {
-        try Persistence().save(conversation: conversation)
+        try persistence.save(conversation: conversation)
+        savedCount = savedCount + 1;
       } catch {
-        return "Error saving \(conversation.topic): \(error) - \(conversationsCount)";
+        return "Error saving \(conversation.topic): \(error) - \(savedCount)";
       }
     }
     conversationContainer = try! persistence.load(conversationTopic: contentTopic)
@@ -122,11 +124,12 @@ func decodeConversationMessage(xmtpClient: XMTP.Client, contentTopic: String, en
       }
       return decodedContent
     } catch {
-      return "ERROR WHILE DECODING - \(conversationsCount)";
+      return "ERROR WHILE DECODING - \(savedCount)";
     }
     
+  } else {
+    return "NO CONVERSATION FOUND -  \(savedCount) - \(contentTopic)";
   }
-  return "NO CONVERSATION FOUND - \(conversationsCount)";
 }
 
 
