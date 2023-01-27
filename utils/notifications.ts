@@ -95,12 +95,13 @@ export const loadSavedNotificationMessagesToContext = async (
   await emptySavedNotificationsMessages();
   messages.sort((m1: any, m2: any) => m1.sent - m2.sent);
   messages.forEach((message: any) => {
+    console.log("Found message with id", message.id);
     dispatch({
       type: XmtpDispatchTypes.XmtpLazyMessage,
       payload: {
         topic: message.topic,
         message: {
-          id: uuid.v4().toString(),
+          id: message.id || uuid.v4().toString(),
           senderAddress: message.senderAddress,
           sent: message.sent,
           content: message.content,
