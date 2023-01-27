@@ -94,8 +94,9 @@ func decodeConversationMessage(xmtpClient: XMTP.Client, contentTopic: String, en
   let persistence = Persistence()
   do {
     var conversationContainer = try persistence.load(conversationTopic: contentTopic)
+    return "ICI CA MARCHE";
     if (conversationContainer == nil) {
-      let conversations = try! await xmtpClient.conversations.list()
+      let conversations = try await xmtpClient.conversations.list()
       for conversation in conversations {
         do {
           try persistence.save(conversation: conversation)
