@@ -159,12 +159,12 @@ func handleNotificationAsync(contentHandler: ((UNNotificationContent) -> Void), 
       let xmtpClient = getXmtpClientFromKeys();
       
       if (xmtpClient != nil) {
-        let messageContent = await decodeConversationMessage(xmtpClient: xmtpClient!, contentTopic: contentTopic, encodedMessage: encodedMessage)
-        if (messageContent != nil) {
-          bestAttemptContent.body = messageContent!;
-        } else {
+//        let messageContent = await decodeConversationMessage(xmtpClient: xmtpClient!, contentTopic: contentTopic, encodedMessage: encodedMessage)
+//        if (messageContent != nil) {
+//          bestAttemptContent.body = messageContent!;
+//        } else {
           bestAttemptContent.body = "NO MESSAGE CONTENT";
-        }
+//        }
       } else {
         bestAttemptContent.body = "NO XMTP CLIENT";
       }
