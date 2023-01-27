@@ -11,7 +11,6 @@ import * as SplashScreen from "expo-splash-screen";
 import React, { useCallback, useContext, useEffect, useRef } from "react";
 import { AppState, useColorScheme } from "react-native";
 
-import { addLog } from "../components/DebugButton";
 import { sendMessageToWebview } from "../components/XmtpWebview";
 import { loadDataToContext } from "../data";
 import { initDb } from "../data/db";
@@ -71,7 +70,6 @@ export default function Main() {
         conversation.messages?.size > 0
           ? lastValueInMap(conversation.messages)?.sent || 0
           : 0;
-      addLog(`Navigating to convo ${conversation.topic} - ${lastTimestamp}`);
       await loadSavedNotificationMessagesToContext(dispatch);
       sendMessageToWebview("SYNC_CONVERSATION", {
         conversationTopic: conversation.topic,
@@ -116,7 +114,6 @@ export default function Main() {
       const conversationTopic = (
         event.notification.request.content.data as any
       )?.contentTopic?.toString();
-      addLog(`Notification Interaction - ${conversationTopic}`);
       if (conversationTopic) {
         if (state.xmtp.conversations[conversationTopic]) {
           navigateToConversation(state.xmtp.conversations[conversationTopic]);
@@ -126,7 +123,7 @@ export default function Main() {
         }
       }
     },
-    [state.xmtp.conversations]
+    [navigateToConversation, state.xmtp.conversations]
   );
 
   useEffect(() => {
@@ -189,9 +186,6 @@ export default function Main() {
       SplashScreen.hideAsync();
       // If app was loaded by clicking on notification,
       // let's navigate
-      addLog(
-        `Notification Interaction and app killed - ${topicToNavigateTo.current}`
-      );
       if (topicToNavigateTo.current) {
         if (state.xmtp.conversations[topicToNavigateTo.current]) {
           navigateToConversation(
@@ -201,7 +195,11 @@ export default function Main() {
         topicToNavigateTo.current = "";
       }
     }
-  }, [state.xmtp.conversations, state.xmtp.webviewLoaded]);
+  }, [
+    navigateToConversation,
+    state.xmtp.conversations,
+    state.xmtp.webviewLoaded,
+  ]);
 
   const initialNotificationsSubscribed = useRef(false);
 
