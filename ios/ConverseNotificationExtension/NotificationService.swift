@@ -93,29 +93,22 @@ func getSavedConversationTitle(contentTopic: String)-> String {
 
 func decodeConversationMessage(xmtpClient: XMTP.Client, contentTopic: String, encodedMessage: String) async -> String? {
   let persistence = Persistence()
-  var foundInList = "no";
   do {
     var conversationContainer = try persistence.load(conversationTopic: contentTopic)
-    var conversationsCount = 0;
-    var savedCount = 0;
     if (conversationContainer == nil) {
       let conversations = try! await xmtpClient.conversations.list()
-      conversationsCount = conversations.count
       for conversation in conversations {
-        if ((conversation.topic as String) == contentTopic) {
-          foundInList = "yes";
-        }
         do {
           try persistence.save(conversation: conversation)
-          savedCount = savedCount + 1;
         } catch {
-          return "Error saving \(conversation.topic): \(error) - \(savedCount)";
+          return "Error saving \(conversation.topic): \(error)";
         }
       }
       conversationContainer = try! persistence.load(conversationTopic: contentTopic)
     }
     
     if (conversationContainer != nil) {
+      return "WE HAVE CONTAINER";
       let conversation = conversationContainer!.decode(with: xmtpClient)
       let encryptedMessageData = Data(base64Encoded: Data(encodedMessage.utf8))!
       let envelope = XMTP.Envelope.with { envelope in
@@ -132,13 +125,13 @@ func decodeConversationMessage(xmtpClient: XMTP.Client, contentTopic: String, en
         }
         return decodedContent
       } catch {
-        return "ERROR WHILE DECODING - \(savedCount)";
+        return "ERROR WHILE DECODING \(error)";
       }
       
     } else {
       let sharedDefaults = UserDefaults(suiteName: "group.com.converse")
       let xmtpEnvString = sharedDefaults?.string(forKey: "xmtp-env")
-      return "NO CONVERSATION FOUND - \(xmtpEnvString ?? "no env") - \(foundInList)";
+      return "NO CONVERSATION FOUND - \(xmtpEnvString ?? "no env")";
     }
   } catch {
     return "ERROR WHILE loading - \(error)";
@@ -159,12 +152,12 @@ func handleNotificationAsync(contentHandler: ((UNNotificationContent) -> Void), 
       let xmtpClient = getXmtpClientFromKeys();
       
       if (xmtpClient != nil) {
-//        let messageContent = await decodeConversationMessage(xmtpClient: xmtpClient!, contentTopic: contentTopic, encodedMessage: encodedMessage)
-//        if (messageContent != nil) {
-//          bestAttemptContent.body = messageContent!;
-//        } else {
+        let messageContent = await decodeConversationMessage(xmtpClient: xmtpClient!, contentTopic: contentTopic, encodedMessage: encodedMessage)
+        if (messageContent != nil) {
+          bestAttemptContent.body = messageContent!;
+        } else {
           bestAttemptContent.body = "NO MESSAGE CONTENT";
-//        }
+        }
       } else {
         bestAttemptContent.body = "NO XMTP CLIENT";
       }
@@ -191,6 +184,7 @@ class NotificationService: UNNotificationServiceExtension {
     // Called just before the extension will be terminated by the system.
     // Use this as an opportunity to deliver your "best attempt" at modified content, otherwise the original push payload will be used.
     if let contentHandler = contentHandler, let bestAttemptContent =  bestAttemptContent {
+      bestAttemptContent.body = "EXPIRED";
       if let body = bestAttemptContent.userInfo["body"] as? [String: Any], let contentTopic = body["contentTopic"] as? String {
         let conversationTitle = getSavedConversationTitle(contentTopic: contentTopic);
         bestAttemptContent.title = conversationTitle;
