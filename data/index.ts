@@ -1,4 +1,3 @@
-import { AppState } from "react-native";
 import "reflect-metadata";
 
 import { addLog } from "../components/DebugButton";
@@ -186,10 +185,6 @@ export const saveMessages = async (
       messages,
     },
   });
-  if (AppState.currentState.match(/inactive|background/)) {
-    // Received nmessage while app in background,
-    // let's keep track of it to avoid duplicates
-  }
 };
 
 export const loadDataToContext = async (dispatch: DispatchType) => {

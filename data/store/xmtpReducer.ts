@@ -188,7 +188,6 @@ export const xmtpReducer = (state: XmtpType, action: XmtpActions): XmtpType => {
           action.payload.message.id
         )
       ) {
-        console.log("IGNORING A LAZY MESSAGE");
         return state;
       }
       const newState = {
