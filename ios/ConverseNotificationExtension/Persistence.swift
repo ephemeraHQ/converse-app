@@ -19,12 +19,10 @@ struct Persistence {
   }
 
   func load(conversationTopic: String) throws -> ConversationContainer? {
-    guard let data = try keychain.getData(key(topic: conversationTopic)) else {
-      return nil
-    }
+    let data = try keychain.getData(key(topic: conversationTopic))
 
     let decoder = JSONDecoder()
-    let decoded = try decoder.decode(ConversationContainer.self, from: data)
+    let decoded = try decoder.decode(ConversationContainer.self, from: data!)
 
     return decoded
   }

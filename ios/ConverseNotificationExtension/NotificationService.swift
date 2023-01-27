@@ -90,45 +90,49 @@ func getSavedConversationTitle(contentTopic: String)-> String {
 
 func decodeConversationMessage(xmtpClient: XMTP.Client, contentTopic: String, encodedMessage: String) async -> String? {
   let persistence = Persistence()
-  var conversationContainer = try! persistence.load(conversationTopic: contentTopic)
-  var conversationsCount = 0;
-  var savedCount = 0;
-  if (conversationContainer == nil) {
-    let conversations = try! await xmtpClient.conversations.list()
-    conversationsCount = conversations.count
-    for conversation in conversations {
+  do {
+    var conversationContainer = try persistence.load(conversationTopic: contentTopic)
+    var conversationsCount = 0;
+    var savedCount = 0;
+    if (conversationContainer == nil) {
+      let conversations = try! await xmtpClient.conversations.list()
+      conversationsCount = conversations.count
+      for conversation in conversations {
+        do {
+          try persistence.save(conversation: conversation)
+          savedCount = savedCount + 1;
+        } catch {
+          return "Error saving \(conversation.topic): \(error) - \(savedCount)";
+        }
+      }
+      conversationContainer = try! persistence.load(conversationTopic: contentTopic)
+    }
+    
+    if (conversationContainer != nil) {
+      let conversation = conversationContainer!.decode(with: xmtpClient)
+      let encryptedMessageData = Data(base64Encoded: Data(encodedMessage.utf8))!
+      let envelope = XMTP.Envelope.with { envelope in
+        envelope.message = encryptedMessageData
+        envelope.contentTopic = contentTopic
+      }
+      
       do {
-        try persistence.save(conversation: conversation)
-        savedCount = savedCount + 1;
+        let decodedMessage = try conversation.decode(envelope)
+        let decodedContent: String? = try decodedMessage.content()
+        if (decodedContent != nil) {
+          // Let's save the notification for immediate display
+          try saveMessage(topic: contentTopic, sent: decodedMessage.sent, senderAddress: decodedMessage.senderAddress, content: decodedContent!, id: decodedMessage.id)
+        }
+        return decodedContent
       } catch {
-        return "Error saving \(conversation.topic): \(error) - \(savedCount)";
+        return "ERROR WHILE DECODING - \(savedCount)";
       }
+      
+    } else {
+      return "NO CONVERSATION FOUND -  \(savedCount) - \(contentTopic)";
     }
-    conversationContainer = try! persistence.load(conversationTopic: contentTopic)
-  }
-  
-  if (conversationContainer != nil) {
-    let conversation = conversationContainer!.decode(with: xmtpClient)
-    let encryptedMessageData = Data(base64Encoded: Data(encodedMessage.utf8))!
-    let envelope = XMTP.Envelope.with { envelope in
-      envelope.message = encryptedMessageData
-      envelope.contentTopic = contentTopic
-    }
-    
-    do {
-      let decodedMessage = try conversation.decode(envelope)
-      let decodedContent: String? = try decodedMessage.content()
-      if (decodedContent != nil) {
-        // Let's save the notification for immediate display
-        try saveMessage(topic: contentTopic, sent: decodedMessage.sent, senderAddress: decodedMessage.senderAddress, content: decodedContent!, id: decodedMessage.id)
-      }
-      return decodedContent
-    } catch {
-      return "ERROR WHILE DECODING - \(savedCount)";
-    }
-    
-  } else {
-    return "NO CONVERSATION FOUND -  \(savedCount) - \(contentTopic)";
+  } catch {
+    return "ERROR WHILE loading - \(error)";
   }
 }
 
