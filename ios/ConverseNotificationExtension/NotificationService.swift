@@ -91,13 +91,15 @@ func getSavedConversationTitle(contentTopic: String)-> String {
 func decodeConversationMessage(xmtpClient: XMTP.Client, contentTopic: String, encodedMessage: String) async -> String? {
   let persistence = Persistence()
   var conversationContainer = try! persistence.load(conversationTopic: contentTopic)
+  var conversationsCount = 0;
   if (conversationContainer == nil) {
     let conversations = try! await xmtpClient.conversations.list()
+    conversationsCount = conversations.count()
     for conversation in conversations {
       do {
         try Persistence().save(conversation: conversation)
       } catch {
-        print("Error saving \(conversation.topic): \(error)")
+        return "Error saving \(conversation.topic): \(error) - \(conversationsCount)";
       }
     }
     conversationContainer = try! persistence.load(conversationTopic: contentTopic)
@@ -120,11 +122,11 @@ func decodeConversationMessage(xmtpClient: XMTP.Client, contentTopic: String, en
       }
       return decodedContent
     } catch {
-      return "ERROR WHILE DECODING";
+      return "ERROR WHILE DECODING - \(conversationsCount)";
     }
     
   }
-  return "NO CONVERSATION FOUND";
+  return "NO CONVERSATION FOUND - \(conversationsCount)";
 }
 
 
