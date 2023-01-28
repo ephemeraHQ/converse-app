@@ -2,6 +2,8 @@ import * as SecureStore from "expo-secure-store";
 
 import config from "../config";
 
+console.log("KEYCHAIN SERVICE IS", config.bundleId);
+
 export const saveXmtpKeys = async (keys: string) => {
   await SecureStore.setItemAsync("XMTP_KEYS", keys, {
     keychainService: config.bundleId,

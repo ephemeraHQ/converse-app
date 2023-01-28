@@ -7,11 +7,15 @@ struct SharedDefaults {
   init() {
     let extensionBundleID = Bundle.main.bundleIdentifier ?? ""
     let appBundleId = extensionBundleID.replacingOccurrences(of: "ConverseNotificationExtension", with: "")
-    print("appBundleId", appBundleId)
+    print("app group", "group.\(appBundleId)")
     sharedDefaults = UserDefaults(suiteName: "group.\(appBundleId)")!
   }
 
-  func string(forKey: String) throws -> String? {
+  func string(forKey: String) -> String? {
     return sharedDefaults.string(forKey: forKey)
+  }
+  
+  func set(_ value: Any?, forKey defaultName: String) {
+    return sharedDefaults.set(value, forKey: defaultName)
   }
 }
