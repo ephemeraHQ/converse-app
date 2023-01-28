@@ -15,7 +15,10 @@ struct Persistence {
   var keychain: Keychain
 
   init() {
-    keychain = Keychain(service: "converse.keychainService")
+    let extensionBundleID = Bundle.main.bundleIdentifier ?? ""
+    let appBundleId = extensionBundleID.replacingOccurrences(of: "ConverseNotificationExtension", with: "")
+    print("appBundleId", appBundleId)
+    keychain = Keychain(service: appBundleId)
   }
 
   func load(conversationTopic: String) throws -> ConversationContainer? {
