@@ -41,7 +41,8 @@ const go = async () => {
   fs.writeFileSync(PLIST_PATH, newInfo, "utf-8");
 
   const ENTITLEMENTS_APP_PATH = "ios/Converse/Converse.entitlements";
-  const ENTITLEMENTS_EXTENSION_PATH = "ios/Converse/Converse.entitlements";
+  const ENTITLEMENTS_EXTENSION_PATH =
+    "ios/ConverseNotificationExtension/ConverseNotificationExtension.entitlements";
 
   const entitlementsApp = plist.parse(
     fs.readFileSync(ENTITLEMENTS_APP_PATH, "utf8")
