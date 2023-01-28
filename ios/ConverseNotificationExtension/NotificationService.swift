@@ -39,8 +39,8 @@ func getXmtpClientFromKeys() -> XMTP.Client? {
 }
 
 func getXmtpEnv() -> XMTP.XMTPEnvironment {
-  let sharedDefaults = UserDefaults(suiteName: "group.com.converse")
-  let xmtpEnvString = sharedDefaults?.string(forKey: "xmtp-env")
+  let sharedDefaults = SharedDefaults()
+  let xmtpEnvString = sharedDefaults.string(forKey: "xmtp-env")
   if (xmtpEnvString == "\"production\"") {
     return .production;
   } else {
@@ -49,8 +49,8 @@ func getXmtpEnv() -> XMTP.XMTPEnvironment {
 }
 
 func loadSavedMessages() -> [SavedNotificationMessage] {
-  let sharedDefaults = UserDefaults(suiteName: "group.com.converse")
-  let savedMessagesString = sharedDefaults?.string(forKey: "saved-notifications-messages")
+  let sharedDefaults = SharedDefaults()
+  let savedMessagesString = sharedDefaults.string(forKey: "saved-notifications-messages")
   if (savedMessagesString == nil) {
     return []
   } else {
@@ -65,19 +65,19 @@ func loadSavedMessages() -> [SavedNotificationMessage] {
 }
 
 func saveMessage(topic: String, sent: Date, senderAddress: String, content: String, id: String) throws {
-  let sharedDefaults = UserDefaults(suiteName: "group.com.converse")
+  let sharedDefaults = SharedDefaults()
   let savedMessage = SavedNotificationMessage(topic: topic, content: content, senderAddress: senderAddress, sent: Int(sent.timeIntervalSince1970 * 1000), id: id)
 
   var savedMessagesList = loadSavedMessages()
   savedMessagesList.append(savedMessage)
   let encodedValue = try JSONEncoder().encode(savedMessagesList)
   let encodedString = String(data: encodedValue, encoding: .utf8)
-  sharedDefaults?.set(encodedString, forKey: "saved-notifications-messages")
+  sharedDefaults.set(encodedString, forKey: "saved-notifications-messages")
 }
 
 func getSavedConversationTitle(contentTopic: String)-> String {
-  let sharedDefaults = UserDefaults(suiteName: "group.com.converse")
-  let conversationDictString = sharedDefaults?.string(forKey: "conversation-\(contentTopic)")
+  let sharedDefaults = SharedDefaults()
+  let conversationDictString = sharedDefaults.string(forKey: "conversation-\(contentTopic)")
   if let data = conversationDictString?.data(using: .utf8) {
     if let conversationDict = try! JSONSerialization.jsonObject(with: data, options: .allowFragments) as? [String: Any] {
       let shortAddress = conversationDict["shortAddress"]
