@@ -53,9 +53,17 @@ const go = async () => {
   entitlementsApp["keychain-access-groups"][0] = entitlementsApp[
     "keychain-access-groups"
   ][0].replace("com.converse.dev", "com.converse.preview");
+  entitlementsApp["com.apple.security.application-groups"][0].replace(
+    "com.converse.dev",
+    "com.converse.preview"
+  );
   entitlementsExtension["keychain-access-groups"][0] = entitlementsExtension[
     "keychain-access-groups"
   ][0].replace("com.converse.dev", "com.converse.preview");
+  entitlementsExtension["com.apple.security.application-groups"][0].replace(
+    "com.converse.dev",
+    "com.converse.preview"
+  );
   const newEntitlementsApp = plist.build(entitlementsApp);
   fs.writeFileSync(ENTITLEMENTS_APP_PATH, newEntitlementsApp, "utf-8");
 
