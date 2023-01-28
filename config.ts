@@ -18,6 +18,7 @@ const ENV = {
     xmtpWebviewURI: "https://xmtp-native-webview.vercel.app",
     apiURI: "http://noe-mbp.local:9875",
     debugMenu: true,
+    bundleId: "com.converse.dev",
   },
   preview: {
     ...defaultConfig,
@@ -25,12 +26,14 @@ const ENV = {
     xmtpWebviewURI: "https://xmtp-native-webview.vercel.app",
     apiURI: "https://xmtp-notifications-preview.fly.dev",
     debugMenu: true,
+    bundleId: "com.converse.preview",
   },
   prod: {
     ...defaultConfig,
     xmtpEnv: "production",
     xmtpWebviewURI: "https://xmtp-native-webview.vercel.app",
     apiURI: "https://xmtp-notifications.fly.dev",
+    bundleId: "com.converse.native",
   },
 };
 
