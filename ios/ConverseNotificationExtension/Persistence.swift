@@ -16,8 +16,7 @@ struct Persistence {
 
   init() {
     let extensionBundleID = Bundle.main.bundleIdentifier ?? ""
-    let appBundleId = extensionBundleID.replacingOccurrences(of: "ConverseNotificationExtension", with: "")
-    print("keychain service", appBundleId)
+    let appBundleId = extensionBundleID.replacingOccurrences(of: ".ConverseNotificationExtension", with: "")
     keychain = Keychain(service: appBundleId)
   }
 

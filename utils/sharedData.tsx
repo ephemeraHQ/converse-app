@@ -4,8 +4,6 @@ import config from "../config";
 
 const appGroup = `group.${config.bundleId}`;
 
-console.log("app group is", appGroup);
-
 export const saveConversationDict = (topic: string, conversationDict: any) =>
   SharedGroupPreferences.setItem(
     `conversation-${topic}`,
