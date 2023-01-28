@@ -18,9 +18,11 @@ struct SavedNotificationMessage: Codable {
 }
 
 func getXmtpClientFromKeys() -> XMTP.Client? {
-  let keychain = Keychain(service: "converse.keychainService")
+  let extensionBundleID = Bundle.main.bundleIdentifier ?? ""
+  let appBundleId = extensionBundleID.replacingOccurrences(of: ".ConverseNotificationExtension", with: "")
+  let keychain = Keychain(service: appBundleId)
   let xmtpKeys = keychain["XMTP_KEYS"]
-  if (xmtpKeys == nil) {
+  if (xmtpKeys == nil || xmtpKeys?.count == 0) {
     return nil;
   }
   do {
@@ -41,6 +43,7 @@ func getXmtpClientFromKeys() -> XMTP.Client? {
 func getXmtpEnv() -> XMTP.XMTPEnvironment {
   let sharedDefaults = SharedDefaults()
   let xmtpEnvString = sharedDefaults.string(forKey: "xmtp-env")
+  print("STORED XMTP ENV STRING", xmtpEnvString ?? "")
   if (xmtpEnvString == "\"production\"") {
     return .production;
   } else {
@@ -94,15 +97,20 @@ func decodeConversationMessage(xmtpClient: XMTP.Client, contentTopic: String, en
   do {
     var conversationContainer = try persistence.load(conversationTopic: contentTopic)
     if (conversationContainer == nil) {
+      print("No Conversation found in persistence, let's list all conversations")
       let conversations = try await xmtpClient.conversations.list()
       for conversation in conversations {
         do {
           try persistence.save(conversation: conversation)
+          if (conversation.topic == contentTopic) {
+            conversationContainer = conversation.encodedContainer
+          }
         } catch {
           return "Error saving \(conversation.topic): \(error)";
         }
       }
-      conversationContainer = try! persistence.load(conversationTopic: contentTopic)
+    } else {
+      print("Conversation already in persistence, all good!")
     }
     
     if (conversationContainer != nil) {

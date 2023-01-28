@@ -6,8 +6,7 @@ struct SharedDefaults {
 
   init() {
     let extensionBundleID = Bundle.main.bundleIdentifier ?? ""
-    let appBundleId = extensionBundleID.replacingOccurrences(of: "ConverseNotificationExtension", with: "")
-    print("app group", "group.\(appBundleId)")
+    let appBundleId = extensionBundleID.replacingOccurrences(of: ".ConverseNotificationExtension", with: "")
     sharedDefaults = UserDefaults(suiteName: "group.\(appBundleId)")!
   }
 
