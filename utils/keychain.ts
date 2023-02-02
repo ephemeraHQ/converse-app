@@ -23,7 +23,7 @@ export const saveXmtpConversations = async (
       addresses.sort();
       topic = `/xmtp/0/dm-${addresses[0]}-${addresses[1]}/proto`;
     } else {
-      // It's v2, let's force the context
+      // It's v2, let's force the context because the SWIFT SDK wants it
       parsedConversation.context = parsedConversation.context || {
         conversationId: "",
         metadata: {},
