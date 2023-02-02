@@ -18,7 +18,12 @@ import config from "../config";
 import { saveNewConversation, saveConversations, saveMessages } from "../data";
 import { AppContext } from "../data/store/context";
 import { XmtpDispatchTypes } from "../data/store/xmtpReducer";
-import { deleteXmtpKeys, loadXmtpKeys, saveXmtpKeys } from "../utils/keychain";
+import {
+  deleteXmtpKeys,
+  loadXmtpKeys,
+  saveXmtpConversations,
+  saveXmtpKeys,
+} from "../utils/keychain";
 import { lastValueInMap } from "../utils/map";
 import {
   loadSavedNotificationMessagesToContext,
@@ -38,6 +43,7 @@ const hideDataFromEvents = [
   "XMTP_CONVERSATIONS",
   "RELOAD",
   "LOAD_CONVERSATIONS_AND_MESSAGES",
+  "XMTP_EXPORTED_CONVERSATIONS",
 ];
 
 export const sendMessageToWebview = (eventName: string, data?: any) => {
@@ -202,6 +208,13 @@ export default function XmtpWebview() {
           break;
         case "XMTP_CONVERSATIONS":
           saveConversations(data, dispatch);
+          break;
+        case "XMTP_EXPORTED_CONVERSATIONS":
+          try {
+            await saveXmtpConversations(state.xmtp.address, data);
+          } catch (e) {
+            console.log(e);
+          }
           break;
         case "XMTP_NEW_CONVERSATION": {
           saveNewConversation(data, dispatch);

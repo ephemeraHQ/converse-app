@@ -14,8 +14,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/bufbuild/connect-swift",
       "state" : {
-        "revision" : "2dd21eec7ed7dfa657778a19abcbf4af4f450385",
-        "version" : "0.2.0"
+        "revision" : "6f5afc57f44a3ed15b9a01381ce73f84d15e43db",
+        "version" : "0.3.0"
       }
     },
     {
@@ -69,7 +69,7 @@
       "location" : "https://github.com/GigaBitcoin/secp256k1.swift.git",
       "state" : {
         "branch" : "main",
-        "revision" : "c52958801998f5a4bdeb6a02e3621a280dbaa28d"
+        "revision" : "5a162be81f45d6972c0b30022a4ca3dbd49541ff"
       }
     },
     {
@@ -174,10 +174,10 @@
     {
       "identity" : "xmtp-ios",
       "kind" : "remoteSourceControl",
-      "location" : "https://github.com/nmalzieu/xmtp-ios",
+      "location" : "https://github.com/xmtp/xmtp-ios",
       "state" : {
-        "branch" : "push",
-        "revision" : "c6144f8f893e4bcade50165c6b43ad938c0e535f"
+        "branch" : "better-convo-js-interop",
+        "revision" : "e56aa09118aa1e062bb97e60b1e0a6b2cdd86e7c"
       }
     }
   ],

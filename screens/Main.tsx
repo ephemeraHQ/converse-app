@@ -168,6 +168,10 @@ export default function Main() {
         ) {
           // App is back to active state
           saveNotificationsStatus();
+          // Save the user
+          if (state.xmtp.address) {
+            saveUser(state.xmtp.address);
+          }
         }
         appState.current = nextAppState;
       }
@@ -176,7 +180,7 @@ export default function Main() {
     return () => {
       subscription.remove();
     };
-  }, [dispatch, saveNotificationsStatus]);
+  }, [dispatch, saveNotificationsStatus, state.xmtp.address]);
 
   const splashScreenHidden = useRef(false);
 
