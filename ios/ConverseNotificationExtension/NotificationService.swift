@@ -8,6 +8,7 @@
 import UserNotifications
 import KeychainAccess
 import XMTP
+import CryptoKit
 
 struct SavedNotificationMessage: Codable {
     var topic: String
@@ -17,11 +18,16 @@ struct SavedNotificationMessage: Codable {
     var id: String
 }
 
-func getXmtpClientFromKeys() -> XMTP.Client? {
+func getKeychainValue(forKey: String) -> String? {
   let extensionBundleID = Bundle.main.bundleIdentifier ?? ""
   let appBundleId = extensionBundleID.replacingOccurrences(of: ".ConverseNotificationExtension", with: "")
   let keychain = Keychain(service: appBundleId)
-  let xmtpKeys = keychain["XMTP_KEYS"]
+  let value = keychain[forKey]
+  return value
+}
+
+func getXmtpClientFromKeys() -> XMTP.Client? {
+  let xmtpKeys = getKeychainValue(forKey: "XMTP_KEYS")
   if (xmtpKeys == nil || xmtpKeys?.count == 0) {
     return nil;
   }
@@ -31,7 +37,6 @@ func getXmtpClientFromKeys() -> XMTP.Client? {
     let data = Data(decoded)
     let privateKeyBundle = try! PrivateKeyBundle(serializedData: data)
     let xmtpEnv = getXmtpEnv()
-    print("ENNNNV", xmtpEnv)
     let client = try Client.from(bundle: privateKeyBundle, options: .init(api: .init(env: xmtpEnv)))
     return client
   } catch {
@@ -43,7 +48,6 @@ func getXmtpClientFromKeys() -> XMTP.Client? {
 func getXmtpEnv() -> XMTP.XMTPEnvironment {
   let sharedDefaults = SharedDefaults()
   let xmtpEnvString = sharedDefaults.string(forKey: "xmtp-env")
-  print("STORED XMTP ENV STRING", xmtpEnvString ?? "")
   if (xmtpEnvString == "\"production\"") {
     return .production;
   } else {
@@ -92,52 +96,46 @@ func getSavedConversationTitle(contentTopic: String)-> String {
   return "";
 }
 
-func decodeConversationMessage(xmtpClient: XMTP.Client, contentTopic: String, encodedMessage: String) async -> String? {
-  let persistence = Persistence()
-  do {
-    var conversationContainer = try persistence.load(conversationTopic: contentTopic)
-    if (conversationContainer == nil) {
-      print("No Conversation found in persistence, let's list all conversations")
-      let conversations = try await xmtpClient.conversations.list()
-      for conversation in conversations {
-        do {
-          try persistence.save(conversation: conversation)
-          if (conversation.topic == contentTopic) {
-            conversationContainer = conversation.encodedContainer
-          }
-        } catch {
-          return "Error saving \(conversation.topic): \(error)";
-        }
-      }
-    } else {
-      print("Conversation already in persistence, all good!")
+func getPersistedConversation(xmtpClient: XMTP.Client, contentTopic: String) -> Conversation? {
+  let hashedKey = CryptoKit.SHA256.hash(data: contentTopic.data(using: .utf8)!)
+  let hashString = hashedKey.compactMap { String(format: "%02x", $0) }.joined()
+  let persistedConversation = getKeychainValue(forKey: "XMTP_CONVERSATION_\(hashString)")
+  if (persistedConversation != nil && persistedConversation!.count > 0) {
+    do {
+      print("PERSISTED", persistedConversation)
+      let conversation = try xmtpClient.importConversation(from: persistedConversation!.data(using: .utf8)!)
+      return conversation
+    } catch {
+      return nil
     }
-    
-    if (conversationContainer != nil) {
-      let conversation = conversationContainer!.decode(with: xmtpClient)
+  }
+  return nil
+}
+
+func decodeConversationMessage(xmtpClient: XMTP.Client, contentTopic: String, encodedMessage: String) async -> String? {
+  let conversation = getPersistedConversation(xmtpClient: xmtpClient, contentTopic: contentTopic);
+  if (conversation != nil) {
+    print("GOT CONVERSATION", contentTopic, conversation)
+    do {
       let encryptedMessageData = Data(base64Encoded: Data(encodedMessage.utf8))!
       let envelope = XMTP.Envelope.with { envelope in
         envelope.message = encryptedMessageData
         envelope.contentTopic = contentTopic
       }
-      
-      do {
-        let decodedMessage = try conversation.decode(envelope)
-        let decodedContent: String? = try decodedMessage.content()
-        if (decodedContent != nil) {
-          // Let's save the notification for immediate display
-          try saveMessage(topic: contentTopic, sent: decodedMessage.sent, senderAddress: decodedMessage.senderAddress, content: decodedContent!, id: decodedMessage.id)
-        }
-        return decodedContent
-      } catch {
-        return "ERROR WHILE DECODING \(error)";
+      print("GOTTA DECODE")
+      let decodedMessage = try conversation!.decode(envelope)
+      print("DECODED")
+      let decodedContent: String? = try decodedMessage.content()
+      if (decodedContent != nil) {
+        // Let's save the notification for immediate display
+        try saveMessage(topic: contentTopic, sent: decodedMessage.sent, senderAddress: decodedMessage.senderAddress, content: decodedContent!, id: decodedMessage.id)
       }
-      
-    } else {
-      return "NO CONVERSATION FOUND";
+      return decodedContent
+    } catch {
+      return "ERROR WHILE DECODING \(error)";
     }
-  } catch {
-    return "ERROR WHILE loading - \(error)";
+  } else {
+    return "NO CONVERSATION";
   }
 }
 
@@ -152,18 +150,18 @@ func handleNotificationAsync(contentHandler: ((UNNotificationContent) -> Void), 
       let conversationTitle = getSavedConversationTitle(contentTopic: contentTopic);
       bestAttemptContent.title = conversationTitle;
       
-      let xmtpClient = getXmtpClientFromKeys();
-      
-      if (xmtpClient != nil) {
-        let messageContent = await decodeConversationMessage(xmtpClient: xmtpClient!, contentTopic: contentTopic, encodedMessage: encodedMessage)
-        if (messageContent != nil) {
-          bestAttemptContent.body = messageContent!;
-        } else {
-          bestAttemptContent.body = "NO MESSAGE CONTENT";
-        }
-      } else {
-        bestAttemptContent.body = "NO XMTP CLIENT";
-      }
+//      let xmtpClient = getXmtpClientFromKeys();
+//
+//      if (xmtpClient != nil) {
+//        let messageContent = await decodeConversationMessage(xmtpClient: xmtpClient!, contentTopic: contentTopic, encodedMessage: encodedMessage)
+//        if (messageContent != nil) {
+//          bestAttemptContent.body = messageContent!;
+//        } else {
+//          bestAttemptContent.body = "NO MESSAGE CONTENT";
+//        }
+//      } else {
+//        bestAttemptContent.body = "NO XMTP CLIENT";
+//      }
     }
     
     contentHandler(bestAttemptContent)

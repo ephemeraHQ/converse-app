@@ -40,6 +40,15 @@ const DebugButton = forwardRef((props, ref) => {
         "Show logs": () => {
           alert(logs.join("\n"));
         },
+        "Count convos": () => {
+          alert(Object.keys(state.xmtp.conversations).length);
+        },
+        "Copy topics": () => {
+          Clipboard.setStringAsync(
+            Object.keys(state.xmtp.conversations).join("\n")
+          );
+          alert("Copied!");
+        },
         "Copy logs": () => {
           Clipboard.setStringAsync(logs.join("\n"));
           alert("Copied!");
