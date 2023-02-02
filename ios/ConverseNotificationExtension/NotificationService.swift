@@ -150,18 +150,18 @@ func handleNotificationAsync(contentHandler: ((UNNotificationContent) -> Void), 
       let conversationTitle = getSavedConversationTitle(contentTopic: contentTopic);
       bestAttemptContent.title = conversationTitle;
       
-//      let xmtpClient = getXmtpClientFromKeys();
-//
-//      if (xmtpClient != nil) {
-//        let messageContent = await decodeConversationMessage(xmtpClient: xmtpClient!, contentTopic: contentTopic, encodedMessage: encodedMessage)
-//        if (messageContent != nil) {
-//          bestAttemptContent.body = messageContent!;
-//        } else {
-//          bestAttemptContent.body = "NO MESSAGE CONTENT";
-//        }
-//      } else {
-//        bestAttemptContent.body = "NO XMTP CLIENT";
-//      }
+      let xmtpClient = getXmtpClientFromKeys();
+
+      if (xmtpClient != nil) {
+        let messageContent = await decodeConversationMessage(xmtpClient: xmtpClient!, contentTopic: contentTopic, encodedMessage: encodedMessage)
+        if (messageContent != nil) {
+          bestAttemptContent.body = messageContent!;
+        } else {
+          bestAttemptContent.body = "NO MESSAGE CONTENT";
+        }
+      } else {
+        bestAttemptContent.body = "NO XMTP CLIENT";
+      }
     }
     
     contentHandler(bestAttemptContent)
