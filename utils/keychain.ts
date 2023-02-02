@@ -16,14 +16,20 @@ export const saveXmtpConversations = async (
   const parsedConversations = JSON.parse(conversations);
   const promises = [];
   for (const parsedConversation of parsedConversations) {
-    const jsonConversation = JSON.stringify(parsedConversation);
     let topic = parsedConversation.topic;
     if (!topic) {
       // If no topic it's v1, we can build topic
       const addresses = [parsedConversation.peerAddress, clientAddress];
       addresses.sort();
       topic = `/xmtp/0/dm-${addresses[0]}-${addresses[1]}/proto`;
+    } else {
+      // It's v2, let's force the context
+      parsedConversation.context = parsedConversation.context || {
+        conversationId: "",
+        metadata: {},
+      };
     }
+    const jsonConversation = JSON.stringify(parsedConversation);
     const key = createHash("sha256").update(topic).digest("hex");
     promises.push(
       SecureStore.setItemAsync(`XMTP_CONVERSATION_${key}`, jsonConversation, {
