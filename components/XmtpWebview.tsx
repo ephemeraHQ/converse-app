@@ -210,11 +210,14 @@ export default function XmtpWebview() {
           saveConversations(data, dispatch);
           break;
         case "XMTP_EXPORTED_CONVERSATIONS":
-          try {
-            await saveXmtpConversations(state.xmtp.address, data);
-          } catch (e) {
-            console.log(e);
+          if (state.xmtp.address) {
+            try {
+              await saveXmtpConversations(state.xmtp.address, data);
+            } catch (e) {
+              console.log(e);
+            }
           }
+
           break;
         case "XMTP_NEW_CONVERSATION": {
           saveNewConversation(data, dispatch);
