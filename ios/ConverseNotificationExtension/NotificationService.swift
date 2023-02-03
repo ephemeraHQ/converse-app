@@ -11,11 +11,11 @@ import XMTP
 import CryptoKit
 
 struct SavedNotificationMessage: Codable {
-    var topic: String
-    var content: String
-    var senderAddress: String
-    var sent: Int
-    var id: String
+  var topic: String
+  var content: String
+  var senderAddress: String
+  var sent: Int
+  var id: String
 }
 
 func getKeychainValue(forKey: String) -> String? {
@@ -74,7 +74,7 @@ func loadSavedMessages() -> [SavedNotificationMessage] {
 func saveMessage(topic: String, sent: Date, senderAddress: String, content: String, id: String) throws {
   let sharedDefaults = SharedDefaults()
   let savedMessage = SavedNotificationMessage(topic: topic, content: content, senderAddress: senderAddress, sent: Int(sent.timeIntervalSince1970 * 1000), id: id)
-
+  
   var savedMessagesList = loadSavedMessages()
   savedMessagesList.append(savedMessage)
   let encodedValue = try JSONEncoder().encode(savedMessagesList)
@@ -102,7 +102,7 @@ func getPersistedConversation(xmtpClient: XMTP.Client, contentTopic: String) -> 
   let persistedConversation = getKeychainValue(forKey: "XMTP_CONVERSATION_\(hashString)")
   if (persistedConversation != nil && persistedConversation!.count > 0) {
     do {
-      print("PERSISTED", persistedConversation)
+      print("[NotificationExtension] Found a persisted conversation")
       let conversation = try xmtpClient.importConversation(from: persistedConversation!.data(using: .utf8)!)
       return conversation
     } catch {
@@ -115,33 +115,33 @@ func getPersistedConversation(xmtpClient: XMTP.Client, contentTopic: String) -> 
 func decodeConversationMessage(xmtpClient: XMTP.Client, contentTopic: String, encodedMessage: String) async -> String? {
   let conversation = getPersistedConversation(xmtpClient: xmtpClient, contentTopic: contentTopic);
   if (conversation != nil) {
-    print("GOT CONVERSATION", contentTopic, conversation)
     do {
       let encryptedMessageData = Data(base64Encoded: Data(encodedMessage.utf8))!
       let envelope = XMTP.Envelope.with { envelope in
         envelope.message = encryptedMessageData
         envelope.contentTopic = contentTopic
       }
-      print("GOTTA DECODE")
+      print("[NotificationExtension] Decoding message...")
       let decodedMessage = try conversation!.decode(envelope)
-      print("DECODED")
       let decodedContent: String? = try decodedMessage.content()
+      print("[NotificationExtension] Message decoded!")
       if (decodedContent != nil) {
         // Let's save the notification for immediate display
         try saveMessage(topic: contentTopic, sent: decodedMessage.sent, senderAddress: decodedMessage.senderAddress, content: decodedContent!, id: decodedMessage.id)
       }
       return decodedContent
     } catch {
-      return "ERROR WHILE DECODING \(error)";
+      return nil;
+      //      return "ERROR WHILE DECODING \(error)";
     }
   } else {
-    return "NO CONVERSATION";
+    return nil;
+    //    return "NO CONVERSATION";
   }
 }
 
 
 func handleNotificationAsync(contentHandler: ((UNNotificationContent) -> Void), bestAttemptContent: UNMutableNotificationContent?) async {
-  print("Received a notification!")
   
   if let bestAttemptContent = bestAttemptContent {
     
@@ -151,17 +151,19 @@ func handleNotificationAsync(contentHandler: ((UNNotificationContent) -> Void), 
       bestAttemptContent.title = conversationTitle;
       
       let xmtpClient = getXmtpClientFromKeys();
-
+      
       if (xmtpClient != nil) {
         let messageContent = await decodeConversationMessage(xmtpClient: xmtpClient!, contentTopic: contentTopic, encodedMessage: encodedMessage)
         if (messageContent != nil) {
           bestAttemptContent.body = messageContent!;
-        } else {
-          bestAttemptContent.body = "NO MESSAGE CONTENT";
         }
-      } else {
-        bestAttemptContent.body = "NO XMTP CLIENT";
+        //        else {
+        //          bestAttemptContent.body = "NO MESSAGE CONTENT";
+        //        }
       }
+      //      else {
+      //        bestAttemptContent.body = "NO XMTP CLIENT";
+      //      }
     }
     
     contentHandler(bestAttemptContent)
@@ -185,7 +187,7 @@ class NotificationService: UNNotificationServiceExtension {
     // Called just before the extension will be terminated by the system.
     // Use this as an opportunity to deliver your "best attempt" at modified content, otherwise the original push payload will be used.
     if let contentHandler = contentHandler, let bestAttemptContent =  bestAttemptContent {
-      bestAttemptContent.body = "EXPIRED";
+      //      bestAttemptContent.body = "EXPIRED";
       if let body = bestAttemptContent.userInfo["body"] as? [String: Any], let contentTopic = body["contentTopic"] as? String {
         let conversationTitle = getSavedConversationTitle(contentTopic: contentTopic);
         bestAttemptContent.title = conversationTitle;
