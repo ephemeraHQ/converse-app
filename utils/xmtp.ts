@@ -6,7 +6,6 @@ import {
 } from "@xmtp/xmtp-js";
 import { getAddress } from "ethers/lib/utils";
 
-import "react-native-reanimated";
 import config from "../config";
 
 const env = config.xmtpEnv === "production" ? "production" : "dev";
