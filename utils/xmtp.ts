@@ -5,8 +5,6 @@ import {
   SortDirection,
 } from "@xmtp/xmtp-js";
 import { getAddress } from "ethers/lib/utils";
-import { spawnThread } from "react-native-multithreading";
-import sleepSynchronously from "sleep-synchronously";
 
 import "react-native-reanimated";
 import config from "../config";
@@ -22,18 +20,8 @@ export const getXmtpClientFromKeys = (keys: any) =>
   });
 
 export const getConversations = async (client: Client) => {
-  const result = await spawnThread(() => {
-    "worklet";
-    console.log("waiting...");
-    sleepSynchronously(3000);
-    console.log("waited!");
-    return 12;
-  });
-  console.log("fib is", result);
-  // console.log("client.conversations.list...");
-  // const conversations = await client.conversations.list();
-  // console.log("returning conversations");
-  return [];
+  const conversations = await client.conversations.list();
+  return conversations;
 };
 
 export const getNewConversationMessages = async (
