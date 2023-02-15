@@ -1,7 +1,7 @@
 import { useWalletConnect } from "@walletconnect/react-native-dapp";
 import WalletConnectProvider from "@walletconnect/web3-provider";
 import { ethers, Signer } from "ethers";
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { View, StyleSheet, Text } from "react-native";
 
 import Button from "../components/Button";
@@ -15,43 +15,63 @@ export default function OnboardingScreen() {
   // const [client, setClient] = useState<Client>();
   const [signer, setSigner] = useState<Signer>();
   const [address, setAddress] = useState<string>("");
-  const [isLoading, setIsLoading] = useState<boolean>(false);
   const connector = useWalletConnect();
   const provider = new WalletConnectProvider({
     infuraId: INFURA_API_KEY,
     connector,
   });
 
+  const autoDisconnect = useRef(true);
+  const connectorRef = useRef(connector);
+
   useEffect(() => {
-    if (connector?.connected && !signer) {
-      const requestSignatures = async () => {
-        await provider.enable();
-        const ethersProvider = new ethers.providers.Web3Provider(provider);
-        const newSigner = ethersProvider.getSigner();
-        const newAddress = await newSigner.getAddress();
-        setAddress(newAddress);
-        setSigner(newSigner);
-      };
-      requestSignatures();
+    return () => {
+      if (connectorRef.current?.connected) {
+        connectorRef.current?.killSession();
+      }
+    };
+  }, []);
+
+  useEffect(() => {
+    connectorRef.current = connector;
+    const disconnect = async () => {
+      await connector?.killSession();
+      setSigner(undefined);
+    };
+    const requestSignatures = async () => {
+      await provider.enable();
+      const ethersProvider = new ethers.providers.Web3Provider(provider);
+      const newSigner = ethersProvider.getSigner();
+      const newAddress = await newSigner.getAddress();
+      setAddress(newAddress);
+      setSigner(newSigner);
+    };
+
+    if (connector?.connected) {
+      if (autoDisconnect.current) {
+        disconnect();
+      } else if (!signer) {
+        requestSignatures();
+      }
     }
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [connector]);
 
   const initXmtpClient = useCallback(async () => {
     if (!signer) {
-      setIsLoading(false);
       return;
     }
+    autoDisconnect.current = false;
     const keys = JSON.stringify(
       Array.from(await getXmtpKeysFromSigner(signer))
     );
     saveXmtpKeys(keys);
     sendMessageToWebview("KEYS_LOADED_FROM_SECURE_STORAGE", { keys });
-    setIsLoading(false);
   }, [signer]);
 
   const connectWallet = useCallback(async () => {
-    setIsLoading(true);
+    autoDisconnect.current = false;
     await connector?.connect();
   }, [connector]);
 
