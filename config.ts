@@ -19,6 +19,7 @@ const ENV = {
     apiURI: "http://noe-mbp.local:9875",
     debugMenu: true,
     bundleId: "com.converse.dev",
+    scheme: "converse-dev",
   },
   preview: {
     ...defaultConfig,
@@ -27,6 +28,7 @@ const ENV = {
     apiURI: "https://xmtp-notifications-preview.fly.dev",
     debugMenu: true,
     bundleId: "com.converse.preview",
+    scheme: "converse-preview",
   },
   prod: {
     ...defaultConfig,
@@ -34,6 +36,7 @@ const ENV = {
     xmtpWebviewURI: "https://xmtp-native-webview.vercel.app",
     apiURI: "https://xmtp-notifications.fly.dev",
     bundleId: "com.converse.native",
+    scheme: "converse",
   },
 };
 

@@ -2,7 +2,6 @@ import "reflect-metadata";
 import "./polyfills";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import WalletConnectProvider from "@walletconnect/react-native-dapp";
-import * as Linking from "expo-linking";
 import { StatusBar } from "expo-status-bar";
 import React from "react";
 import { StyleSheet, useColorScheme, View } from "react-native";
@@ -11,6 +10,7 @@ import * as SplashScreen from "expo-splash-screen";
 import uuid from "react-native-uuid";
 
 import XmtpWebview from "./components/XmtpWebview";
+import config from "./config";
 import { AppProvider } from "./data/store/context";
 import Main from "./screens/Main";
 
@@ -22,7 +22,7 @@ export default function App() {
   const colorScheme = useColorScheme();
   return (
     <WalletConnectProvider
-      redirectUrl={`${Linking.resolveScheme({})}://"`}
+      redirectUrl={`${config.scheme}://"`}
       storageOptions={{
         // @ts-expect-error: Internal
         asyncStorage: AsyncStorage,
