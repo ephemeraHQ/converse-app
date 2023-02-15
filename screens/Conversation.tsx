@@ -22,7 +22,7 @@ import {
 import uuid from "react-native-uuid";
 
 import Button from "../components/Button";
-import { sendXmtpMessage } from "../components/XmtpState";
+import { sendXmtpMessage } from "../components/XmtpWebview";
 import { AppContext } from "../data/store/context";
 import { XmtpDispatchTypes } from "../data/store/xmtpReducer";
 import { userExists } from "../utils/api";
@@ -185,7 +185,7 @@ const Conversation = ({
   const messageContent = useRef(messageToPrefill);
 
   const handleSendPress = useCallback(
-    async (m: MessageType.PartialText) => {
+    (m: MessageType.PartialText) => {
       messageContent.current = "";
       setMessageValue("");
       // Lazy message
@@ -201,22 +201,7 @@ const Conversation = ({
           },
         },
       });
-      const sentMessage = await sendXmtpMessage(conversation.topic, m.text);
-      if (!sentMessage) return;
-      dispatch({
-        type: XmtpDispatchTypes.XmtpSetMessages,
-        payload: {
-          topic: conversation.topic,
-          messages: [
-            {
-              id: sentMessage.id,
-              senderAddress: sentMessage.senderAddress,
-              sent: sentMessage.sent.getTime(),
-              content: sentMessage.content,
-            },
-          ],
-        },
-      });
+      sendXmtpMessage(conversation.topic, m.text);
     },
     [conversation.topic, dispatch, state.xmtp.address]
   );
