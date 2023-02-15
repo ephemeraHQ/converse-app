@@ -7,7 +7,6 @@ import React from "react";
 import { StyleSheet, useColorScheme, View } from "react-native";
 // eslint-disable-next-line import/order
 import * as SplashScreen from "expo-splash-screen";
-import uuid from "react-native-uuid";
 
 import XmtpWebview from "./components/XmtpWebview";
 import config from "./config";
@@ -26,7 +25,7 @@ export default function App() {
       storageOptions={{
         // @ts-expect-error: Internal
         asyncStorage: AsyncStorage,
-        rootStorageKey: uuid.v4().toString(),
+        // rootStorageKey: uuid.v4().toString(),
       }}
     >
       <AppProvider>
