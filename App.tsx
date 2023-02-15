@@ -27,6 +27,12 @@ export default function App() {
         asyncStorage: AsyncStorage,
         // rootStorageKey: uuid.v4().toString(),
       }}
+      clientMeta={{
+        description: "Sign in with Converse",
+        url: "https://xmtp.org",
+        icons: ["https://avatars.githubusercontent.com/u/82580170"],
+        name: "Converse",
+      }}
     >
       <AppProvider>
         <View style={styles.safe}>
