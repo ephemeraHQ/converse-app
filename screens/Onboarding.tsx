@@ -22,8 +22,6 @@ export default function OnboardingScreen() {
     connector,
   });
 
-  console.log("connector", connector?.connected);
-
   useEffect(() => {
     if (connector?.connected && !signer) {
       const requestSignatures = async () => {
@@ -63,7 +61,11 @@ export default function OnboardingScreen() {
         <NotificationsSVG />
       </View>
       <Text style={styles.title}>GM</Text>
-      <Text style={styles.p}>YOYO some text</Text>
+      <Text style={styles.p}>
+        Connector - {connector ? "true" : "false"} - Connected{" "}
+        {connector?.connected ? "true" : "false"} - Signer{" "}
+        {signer ? "true" : "false"}
+      </Text>
       {!signer && (
         <Button
           title="Connect Wallet"
