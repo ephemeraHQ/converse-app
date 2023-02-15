@@ -27,10 +27,12 @@
     "@expo/webpack-config": "^0.17.2",
     "@flyerhq/react-native-chat-ui": "^1.4.3",
     "@peculiar/webcrypto": "^1.4.1",
-    "@react-native-async-storage/async-storage": "~1.17.3",
+    "@react-native-async-storage/async-storage": "^1.17.11",
     "@react-navigation/native": "^6.0.16",
     "@react-navigation/native-stack": "^6.9.4",
     "@stardazed/streams-polyfill": "^2.4.0",
+    "@walletconnect/react-native-dapp": "^1.8.0",
+    "@walletconnect/web3-provider": "^1.8.0",
     "@xmtp/xmtp-js": "^7.7.2",
     "axios": "^1.2.1",
     "babel-plugin-transform-remove-console": "^6.9.4",
@@ -56,6 +58,7 @@
     "expo-system-ui": "~2.0.1",
     "expo-updates": "~0.15.6",
     "https-browserify": "^1.0.0",
+    "os-browserify": "^0.3.0",
     "patch-package": "^6.5.1",
     "react": "18.1.0",
     "react-dom": "18.1.0",
@@ -67,7 +70,7 @@
     "react-native-screens": "~3.18.0",
     "react-native-sfsymbols": "^1.2.1",
     "react-native-shared-group-preferences": "^1.1.23",
-    "react-native-svg": "13.4.0",
+    "react-native-svg": "^13.8.0",
     "react-native-url-polyfill": "^1.3.0",
     "react-native-uuid": "^2.0.1",
     "react-native-web": "~0.18.7",
@@ -116,5 +119,8 @@
       "eslint --fix",
       "prettier --write"
     ]
+  },
+  "resolutions": {
+    "react-native-svg": "^13.8.0"
   }
 }

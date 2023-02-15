@@ -23,6 +23,7 @@ module.exports = {
       stream: require.resolve("readable-stream"),
       crypto: require.resolve("crypto-browserify"),
       http: require.resolve("stream-http"),
+      os: require.resolve("os-browserify/browser"),
       https: require.resolve("https-browserify"),
     },
   },
