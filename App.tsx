@@ -5,13 +5,10 @@ import React from "react";
 import { StyleSheet, useColorScheme, View } from "react-native";
 // eslint-disable-next-line import/order
 import * as SplashScreen from "expo-splash-screen";
-// import XmtpWebview from "./components/XmtpWebview";
-import XmtpState from "./components/XmtpState";
+import XmtpWebview from "./components/XmtpWebview";
 import { AppProvider } from "./data/store/context";
 import Main from "./screens/Main";
-// import XmtpTest from "./screens/XmtpTest";
 
-// import XmtpTest from "./screens/XmtpTest";
 SplashScreen.preventAutoHideAsync().catch(() => {
   /* reloading the app might trigger some race conditions, ignore them */
 });
@@ -25,10 +22,8 @@ export default function App() {
           hidden={false}
           style={colorScheme === "dark" ? "light" : "dark"}
         />
-        <XmtpState />
-        {/* <XmtpWebview /> */}
+        <XmtpWebview />
         <Main />
-        {/* <XmtpTest /> */}
       </View>
     </AppProvider>
   );
