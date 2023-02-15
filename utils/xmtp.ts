@@ -2,6 +2,7 @@ import {
   Client,
   Conversation,
   DecodedMessage,
+  Signer,
   SortDirection,
 } from "@xmtp/xmtp-js";
 import { getAddress } from "ethers/lib/utils";
@@ -15,6 +16,11 @@ export type TimestampByConversation = { [topic: string]: number };
 export const getXmtpClientFromKeys = (keys: any) =>
   Client.create(null, {
     privateKeyOverride: Buffer.from(keys),
+    env,
+  });
+
+export const getXmtpKeysFromSigner = (signer: Signer) =>
+  Client.getKeys(signer, {
     env,
   });
 
