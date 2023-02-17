@@ -1,6 +1,6 @@
 import { useWalletConnect } from "@walletconnect/react-native-dapp";
 import WalletConnectProvider from "@walletconnect/web3-provider";
-import { ethers, Signer } from "ethers";
+import { Bytes, ethers, Signer } from "ethers";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { View, StyleSheet, Text } from "react-native";
 
@@ -23,6 +23,9 @@ export default function OnboardingScreen() {
 
   const autoDisconnect = useRef(true);
   const connectorRef = useRef(connector);
+  const clickedSecondSignature = useRef(false);
+  const [waitingForSecondSignature, setWaitingForSecondSignature] =
+    useState(false);
 
   useEffect(() => {
     return () => {
@@ -35,6 +38,8 @@ export default function OnboardingScreen() {
   useEffect(() => {
     connectorRef.current = connector;
     const disconnect = async () => {
+      setWaitingForSecondSignature(false);
+      clickedSecondSignature.current = false;
       await connector?.killSession();
       setSigner(undefined);
     };
@@ -42,6 +47,22 @@ export default function OnboardingScreen() {
       await provider.enable();
       const ethersProvider = new ethers.providers.Web3Provider(provider);
       const newSigner = ethersProvider.getSigner();
+      const sm = newSigner.signMessage.bind(newSigner);
+      (newSigner as any).signaturesCount = 0;
+      newSigner.signMessage = async (message: string | Bytes) => {
+        const waitForClickSecondSignature = async () => {
+          while (!clickedSecondSignature.current) {
+            await new Promise((r) => setTimeout(r, 100));
+          }
+        };
+        if ((newSigner as any).signaturesCount === 1) {
+          setWaitingForSecondSignature(true);
+          await waitForClickSecondSignature();
+        }
+        const result = await sm(message);
+        (newSigner as any).signaturesCount += 1;
+        return result;
+      };
       const newAddress = await newSigner.getAddress();
       setAddress(newAddress);
       setSigner(newSigner);
@@ -96,10 +117,16 @@ export default function OnboardingScreen() {
       )}
       {signer && (
         <Button
-          title="Sign messages"
+          title={waitingForSecondSignature ? "Sign message 2" : "Sign messages"}
           variant="blue"
           style={styles.connect}
-          onPress={initXmtpClient}
+          onPress={
+            waitingForSecondSignature
+              ? () => {
+                  clickedSecondSignature.current = true;
+                }
+              : initXmtpClient
+          }
         />
       )}
     </View>
