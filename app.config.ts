@@ -47,5 +47,5 @@ export default {
   },
   runtimeVersion: "exposdk:47.0.0",
   owner: "noemalzieu",
-  jsEngine: "hermes",
+  jsEngine: "jsc",
 };

@@ -9,6 +9,7 @@ const defaultConfig = {
     "0x2376e9C7C604D1827bA9aCb1293Dc8b4DA2f0DB3",
   ],
   conversationDomain: "getconverse.app",
+  infuraApiKey: "38f59a7bbbca49f18046ff3a4a752e1c",
 };
 
 const ENV = {
