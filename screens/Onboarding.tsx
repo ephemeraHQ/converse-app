@@ -2,22 +2,26 @@ import { useWalletConnect } from "@walletconnect/react-native-dapp";
 import WalletConnectProvider from "@walletconnect/web3-provider";
 import { Bytes, ethers, Signer } from "ethers";
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import { View, StyleSheet, Text } from "react-native";
+import { View, StyleSheet, Text, PlatformColor } from "react-native";
+import { SFSymbol } from "react-native-sfsymbols";
 
 import Button from "../components/Button";
 import { sendMessageToWebview } from "../components/XmtpWebview";
-import NotificationsSVG from "../components/svgs/notifications";
+import config from "../config";
 import { saveXmtpKeys } from "../utils/keychain";
-import { getXmtpKeysFromSigner } from "../utils/xmtp";
-export const INFURA_API_KEY = "2bf116f1cc724c5ab9eec605ca8440e1";
+import { shortAddress } from "../utils/str";
+import { getXmtpKeysFromSigner, isOnXmtp } from "../utils/xmtp";
 
 export default function OnboardingScreen() {
-  // const [client, setClient] = useState<Client>();
-  const [signer, setSigner] = useState<Signer>();
-  const [address, setAddress] = useState<string>("");
+  const [loading, setLoading] = useState(false);
+  const [user, setUser] = useState({
+    address: "",
+    isOnXmtp: false,
+    signer: undefined as Signer | undefined,
+  });
   const connector = useWalletConnect();
   const provider = new WalletConnectProvider({
-    infuraId: INFURA_API_KEY,
+    infuraId: config.infuraApiKey,
     connector,
   });
 
@@ -35,16 +39,26 @@ export default function OnboardingScreen() {
     };
   }, []);
 
+  const disconnect = async () => {
+    setWaitingForSecondSignature(false);
+    clickedSecondSignature.current = false;
+    setUser({
+      address: "",
+      isOnXmtp: false,
+      signer: undefined,
+    });
+    setLoading(false);
+    if (connector?.connected) {
+      await connector?.killSession();
+    }
+  };
+
   useEffect(() => {
     connectorRef.current = connector;
-    const disconnect = async () => {
-      setWaitingForSecondSignature(false);
-      clickedSecondSignature.current = false;
-      await connector?.killSession();
-      setSigner(undefined);
-    };
     const requestSignatures = async () => {
+      console.log("enabling...");
       await provider.enable();
+      console.log("enabled!");
       const ethersProvider = new ethers.providers.Web3Provider(provider);
       const newSigner = ethersProvider.getSigner();
       const sm = newSigner.signMessage.bind(newSigner);
@@ -64,14 +78,18 @@ export default function OnboardingScreen() {
         return result;
       };
       const newAddress = await newSigner.getAddress();
-      setAddress(newAddress);
-      setSigner(newSigner);
+      const isOnNetwork = await isOnXmtp(newAddress);
+      setUser({
+        address: newAddress,
+        isOnXmtp: isOnNetwork,
+        signer: newSigner,
+      });
     };
 
     if (connector?.connected) {
       if (autoDisconnect.current) {
         disconnect();
-      } else if (!signer) {
+      } else if (!user.signer) {
         requestSignatures();
       }
     }
@@ -80,54 +98,104 @@ export default function OnboardingScreen() {
   }, [connector]);
 
   const initXmtpClient = useCallback(async () => {
-    if (!signer) {
+    if (!user.signer) {
       return;
     }
     autoDisconnect.current = false;
-    const keys = JSON.stringify(
-      Array.from(await getXmtpKeysFromSigner(signer))
-    );
-    saveXmtpKeys(keys);
-    sendMessageToWebview("KEYS_LOADED_FROM_SECURE_STORAGE", { keys });
-  }, [signer]);
+    try {
+      const keys = JSON.stringify(
+        Array.from(await getXmtpKeysFromSigner(user.signer))
+      );
+      saveXmtpKeys(keys);
+      sendMessageToWebview("KEYS_LOADED_FROM_SECURE_STORAGE", { keys });
+    } catch (e) {
+      setLoading(false);
+      console.error(e);
+    }
+  }, [user]);
 
   const connectWallet = useCallback(async () => {
     autoDisconnect.current = false;
-    await connector?.connect();
+    setLoading(true);
+    try {
+      await connector?.connect();
+    } catch {
+      console.log("User did not connect to WC");
+    }
+    setLoading(false);
   }, [connector]);
+
+  let sfSymbol = "message.circle.fill";
+  let title = "GM";
+  let text = `Converse is on a mission to help humans connect to each other in a safe and smooth way. We recommend that you use your "public" wallet with our app.`;
+  if (user.address) {
+    sfSymbol = "signature";
+    title = "Sign";
+
+    if (user.isOnXmtp) {
+      text = "ALREADY ON XMTP, ONLY ONE SIGNATURE";
+    } else {
+      text = "NOT ON XMTP, TWO SIGNATURES";
+    }
+  }
 
   return (
     <View style={styles.notifications}>
       <View style={styles.picto}>
-        <NotificationsSVG />
+        <SFSymbol
+          name={sfSymbol}
+          weight="regular"
+          scale="large"
+          color={PlatformColor("systemBlue")}
+          size={43}
+          resizeMode="center"
+          style={{ marginBottom: 48 }}
+        />
       </View>
-      <Text style={styles.title}>GM</Text>
-      <Text style={styles.p}>
-        Connector - {connector ? "true" : "false"} - Connected{" "}
-        {connector?.connected ? "true" : "false"} - Signer{" "}
-        {signer ? "true" : "false"}
-      </Text>
-      {!signer && (
+      <Text style={styles.title}>{title}</Text>
+      <Text style={styles.p}>{text}</Text>
+      {!user.signer && (
         <Button
-          title="Connect Wallet"
+          title={loading ? "Connecting..." : "Connect Wallet"}
           variant="blue"
           style={styles.connect}
           onPress={connectWallet}
         />
       )}
-      {signer && (
-        <Button
-          title={waitingForSecondSignature ? "Sign message 2" : "Sign messages"}
-          variant="blue"
-          style={styles.connect}
-          onPress={
-            waitingForSecondSignature
-              ? () => {
-                  clickedSecondSignature.current = true;
+      {user.signer && (
+        <>
+          <Button
+            title={
+              loading
+                ? "Loading..."
+                : waitingForSecondSignature
+                ? "Sign message 2/2"
+                : user.isOnXmtp
+                ? "Sign message"
+                : "Sign message 1/2"
+            }
+            variant="blue"
+            style={styles.sign}
+            onPress={() => {
+              if (waitingForSecondSignature) {
+                setLoading(true);
+                clickedSecondSignature.current = true;
+              } else {
+                if (user.isOnXmtp) {
+                  setLoading(true);
                 }
-              : initXmtpClient
-          }
-        />
+                initXmtpClient();
+              }
+            }}
+          />
+          <Button
+            title={`Log out from ${shortAddress(user.address)}`}
+            style={styles.logout}
+            variant="text"
+            textStyle={{ fontWeight: "600" }}
+            onPress={disconnect}
+          />
+        </>
       )}
     </View>
   );
@@ -157,5 +225,12 @@ const styles = StyleSheet.create({
   connect: {
     marginBottom: 54,
     marginTop: 21,
+  },
+  sign: {
+    marginBottom: 21,
+    marginTop: 21,
+  },
+  logout: {
+    marginBottom: 54,
   },
 });

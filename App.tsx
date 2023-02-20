@@ -25,7 +25,6 @@ export default function App() {
       storageOptions={{
         // @ts-expect-error: Internal
         asyncStorage: AsyncStorage,
-        // rootStorageKey: uuid.v4().toString(),
       }}
       clientMeta={{
         description: "Sign in with Converse",
