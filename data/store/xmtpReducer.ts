@@ -224,15 +224,15 @@ export const xmtpReducer = (state: XmtpType, action: XmtpActions): XmtpType => {
         if (alreadyMessageWithId) {
           continue;
         }
-        // Remove lazy message with same content if sent by me
-        if (message.senderAddress === state.address) {
-          const lazyMessageWithContentIndex =
-            conversation.lazyMessages.findIndex(
-              (m) => m.content === message.content
-            );
-          if (lazyMessageWithContentIndex > -1) {
-            conversation.lazyMessages.splice(lazyMessageWithContentIndex, 1);
-          }
+        // Remove lazy message with same id or with same content and sent by me
+        const lazyMessageToRemoveIndex = conversation.lazyMessages.findIndex(
+          (m) =>
+            m.id === message.id ||
+            (m.content === message.content &&
+              m.senderAddress === message.senderAddress)
+        );
+        if (lazyMessageToRemoveIndex > -1) {
+          conversation.lazyMessages.splice(lazyMessageToRemoveIndex, 1);
         }
         conversation.messages.set(message.id, message);
       }

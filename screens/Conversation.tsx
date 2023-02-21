@@ -153,15 +153,18 @@ const Conversation = ({
     const messagesArray = Array.from(conversation.messages.values());
     const messagesLength = messagesArray.length;
     conversation.lazyMessages.forEach((m) => {
-      newMessages.push({
-        author: {
-          id: m.senderAddress,
-        },
-        createdAt: m.sent,
-        id: m.id,
-        text: m.content,
-        type: "text",
-      });
+      // Do not push lazy messages we already have
+      if (!conversation.messages.get(m.id)) {
+        newMessages.push({
+          author: {
+            id: m.senderAddress,
+          },
+          createdAt: m.sent,
+          id: m.id,
+          text: m.content,
+          type: "text",
+        });
+      }
     });
     for (let index = messagesLength - 1; index >= 0; index--) {
       const m = messagesArray[index];
