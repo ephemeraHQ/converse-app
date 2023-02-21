@@ -201,7 +201,11 @@ const Conversation = ({
           },
         },
       });
-      sendXmtpMessage(conversation.topic, m.text);
+      // Delaying sending to XMTP to be 100% sure
+      // the lazy message has been saved first
+      setTimeout(() => {
+        sendXmtpMessage(conversation.topic, m.text);
+      }, 10);
     },
     [conversation.topic, dispatch, state.xmtp.address]
   );
