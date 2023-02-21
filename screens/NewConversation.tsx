@@ -1,6 +1,6 @@
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { getAddress, isAddress } from "ethers/lib/utils";
-import { setStatusBarStyle, StatusBar } from "expo-status-bar";
+import { StatusBar } from "expo-status-bar";
 import React, {
   useCallback,
   useContext,
@@ -15,7 +15,6 @@ import {
   StyleSheet,
   Text,
   TextInput,
-  Keyboard,
   View,
   ColorSchemeName,
   useColorScheme,
@@ -69,8 +68,6 @@ export default function NewConversation({
         <Button
           title="Cancel"
           onPress={() => {
-            screenRemoving.current = true;
-            setStatusBarStyle(colorScheme === "dark" ? "light" : "dark");
             navigation.goBack();
           }}
         />
@@ -220,45 +217,6 @@ export default function NewConversation({
     },
     [creatingNewConversation]
   );
-
-  const screenRemoving = useRef(false);
-
-  const keyboardToggle = useCallback(() => {
-    if (screenRemoving.current) return;
-    setStatusBarStyle("light");
-  }, []);
-
-  const beforeRemove = useCallback(() => {
-    screenRemoving.current = true;
-    setStatusBarStyle(colorScheme === "dark" ? "light" : "dark");
-  }, [colorScheme]);
-
-  useEffect(() => {
-    const subWillShow = Keyboard.addListener(
-      "keyboardWillShow",
-      keyboardToggle
-    );
-    const subWillHide = Keyboard.addListener(
-      "keyboardWillHide",
-      keyboardToggle
-    );
-    const subDidShow = Keyboard.addListener("keyboardDidHide", keyboardToggle);
-    const subDidHide = Keyboard.addListener("keyboardDidShow", keyboardToggle);
-    navigation.addListener("beforeRemove", beforeRemove);
-    return () => {
-      subWillShow.remove();
-      subWillHide.remove();
-      subDidShow.remove();
-      subDidHide.remove();
-      navigation.removeListener("beforeRemove", beforeRemove);
-    };
-  }, [beforeRemove, keyboardToggle, navigation]);
-
-  useEffect(() => {
-    return () => {
-      beforeRemove();
-    };
-  }, [beforeRemove]);
 
   const inputRef = useRef<TextInput | null>(null);
   const initialFocus = useRef(false);
