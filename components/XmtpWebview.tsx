@@ -1,3 +1,8 @@
+import {
+  buildUserInviteTopic,
+  buildUserIntroTopic,
+  //@ts-ignore
+} from "@xmtp/xmtp-js/dist/cjs/src/utils";
 import * as Linking from "expo-linking";
 import React, {
   useCallback,
@@ -25,7 +30,6 @@ import {
   loadSavedNotificationMessagesToContext,
   subscribeToNotifications,
 } from "../utils/notifications";
-import { buildUserInviteTopic } from "../utils/xmtp";
 import { addLog } from "./DebugButton";
 
 const XMTP_WEBSITE_URI = config.xmtpWebviewURI;
@@ -222,6 +226,7 @@ export default function XmtpWebview() {
           if (state.notifications.status === "granted") {
             const topics = [
               ...Object.keys(state.xmtp.conversations),
+              buildUserIntroTopic(state.xmtp.address || ""),
               buildUserInviteTopic(state.xmtp.address || ""),
             ];
             subscribeToNotifications(topics);
@@ -254,6 +259,7 @@ export default function XmtpWebview() {
           });
           const topics = [
             ...Object.keys(state.xmtp.conversations),
+            buildUserIntroTopic(state.xmtp.address || ""),
             buildUserInviteTopic(state.xmtp.address || ""),
           ];
           subscribeToNotifications(topics);

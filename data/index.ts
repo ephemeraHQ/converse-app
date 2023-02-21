@@ -3,7 +3,11 @@ import "reflect-metadata";
 import { addLog } from "../components/DebugButton";
 import { ethProvider } from "../utils/eth";
 import { getLensHandleFromConversationId } from "../utils/lens";
-import { saveConversationDict, saveXmtpEnv } from "../utils/sharedData";
+import {
+  saveConversationDict,
+  saveXmtpEnv,
+  saveApiURI,
+} from "../utils/sharedData";
 import { shortAddress } from "../utils/str";
 import { conversationRepository, messageRepository } from "./db";
 import { Conversation } from "./db/entities/conversation";
@@ -197,6 +201,7 @@ export const saveMessages = async (
 export const loadDataToContext = async (dispatch: DispatchType) => {
   // Save env to shared data with extension
   saveXmtpEnv();
+  saveApiURI();
   // Let's load conversations and messages and save to context
   const conversationsWithMessages = await conversationRepository.find({
     relations: { messages: true },

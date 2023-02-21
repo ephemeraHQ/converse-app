@@ -6,6 +6,7 @@ import uuid from "react-native-uuid";
 import { DispatchType } from "../data/store/context";
 import { XmtpDispatchTypes } from "../data/store/xmtpReducer";
 import api from "./api";
+import { saveExpoPushToken } from "./keychain";
 import {
   emptySavedNotificationsMessages,
   loadSavedNotificationsMessages,
@@ -27,6 +28,7 @@ export const subscribeToNotifications = async (
     Notifications.getDevicePushTokenAsync(),
   ]);
   expoPushToken = expoTokenQuery.data;
+  saveExpoPushToken(expoPushToken);
   try {
     await api.post("/api/subscribe", {
       expoToken: expoPushToken,
