@@ -89,22 +89,31 @@ export const loadSavedNotificationMessagesToContext = async (
     return;
   }
   loadingSavedNotifications = true;
-  const messages = await loadSavedNotificationsMessages();
-  await emptySavedNotificationsMessages();
-  messages.sort((m1: any, m2: any) => m1.sent - m2.sent);
-  messages.forEach((message: any) => {
-    dispatch({
-      type: XmtpDispatchTypes.XmtpLazyMessage,
-      payload: {
-        topic: message.topic,
-        message: {
-          id: message.id || uuid.v4().toString(),
-          senderAddress: message.senderAddress,
-          sent: message.sent,
-          content: message.content,
+  try {
+    const messages = await loadSavedNotificationsMessages();
+    await emptySavedNotificationsMessages();
+    messages.sort((m1: any, m2: any) => m1.sent - m2.sent);
+    messages.forEach((message: any) => {
+      dispatch({
+        type: XmtpDispatchTypes.XmtpLazyMessage,
+        payload: {
+          topic: message.topic,
+          message: {
+            id: message.id || uuid.v4().toString(),
+            senderAddress: message.senderAddress,
+            sent: message.sent,
+            content: message.content,
+          },
         },
-      },
+      });
     });
-  });
-  loadingSavedNotifications = false;
+    loadingSavedNotifications = false;
+  } catch (e) {
+    console.log(
+      "An error occured while loading saved notifications messages",
+      e
+    );
+    emptySavedNotificationsMessages();
+    loadingSavedNotifications = false;
+  }
 };
