@@ -2,7 +2,13 @@ import { useWalletConnect } from "@walletconnect/react-native-dapp";
 import WalletConnectProvider from "@walletconnect/web3-provider";
 import { Bytes, ethers, Signer } from "ethers";
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import { View, StyleSheet, Text, PlatformColor } from "react-native";
+import {
+  View,
+  StyleSheet,
+  Text,
+  PlatformColor,
+  ActivityIndicator,
+} from "react-native";
 import { SFSymbol } from "react-native-sfsymbols";
 
 import Button from "../components/Button";
@@ -56,9 +62,7 @@ export default function OnboardingScreen() {
   useEffect(() => {
     connectorRef.current = connector;
     const requestSignatures = async () => {
-      console.log("enabling...");
       await provider.enable();
-      console.log("enabled!");
       const ethersProvider = new ethers.providers.Web3Provider(provider);
       const newSigner = ethersProvider.getSigner();
       const sm = newSigner.signMessage.bind(newSigner);
@@ -133,9 +137,18 @@ export default function OnboardingScreen() {
     title = "Sign";
 
     if (user.isOnXmtp) {
-      text = "ALREADY ON XMTP, ONLY ONE SIGNATURE";
+      text =
+        "Second and last step: please sign with your wallet so that we make sure you own it.";
     } else {
-      text = "NOT ON XMTP, TWO SIGNATURES";
+      if (waitingForSecondSignature) {
+        title = "Sign (2/2)";
+        text =
+          "Please sign one last time to access Converse and start chatting.";
+      } else {
+        title = "Sign (1/2)";
+        text =
+          "This first signature will enable your wallet to send and receive messages.";
+      }
     }
   }
 
@@ -152,11 +165,20 @@ export default function OnboardingScreen() {
           style={{ marginBottom: 48 }}
         />
       </View>
-      <Text style={styles.title}>{title}</Text>
-      <Text style={styles.p}>{text}</Text>
-      {!user.signer && (
+      {!loading && (
+        <>
+          <Text style={styles.title}>{title}</Text>
+          <Text style={styles.p}>{text}</Text>
+        </>
+      )}
+
+      {loading && (
+        <ActivityIndicator size="large" style={{ marginBottom: "auto" }} />
+      )}
+
+      {!user.signer && !loading && (
         <Button
-          title={loading ? "Connecting..." : "Connect Wallet"}
+          title="Connect Wallet"
           variant="blue"
           style={styles.connect}
           onPress={connectWallet}
@@ -164,30 +186,31 @@ export default function OnboardingScreen() {
       )}
       {user.signer && (
         <>
-          <Button
-            title={
-              loading
-                ? "Loading..."
-                : waitingForSecondSignature
-                ? "Sign message 2/2"
-                : user.isOnXmtp
-                ? "Sign message"
-                : "Sign message 1/2"
-            }
-            variant="blue"
-            style={styles.sign}
-            onPress={() => {
-              if (waitingForSecondSignature) {
-                setLoading(true);
-                clickedSecondSignature.current = true;
-              } else {
-                if (user.isOnXmtp) {
-                  setLoading(true);
-                }
-                initXmtpClient();
+          {!loading && (
+            <Button
+              title={
+                waitingForSecondSignature
+                  ? "Sign (2/2)"
+                  : user.isOnXmtp
+                  ? "Sign"
+                  : "Sign (1/2)"
               }
-            }}
-          />
+              variant="blue"
+              style={styles.sign}
+              onPress={() => {
+                if (waitingForSecondSignature) {
+                  setLoading(true);
+                  clickedSecondSignature.current = true;
+                } else {
+                  if (user.isOnXmtp) {
+                    setLoading(true);
+                  }
+                  initXmtpClient();
+                }
+              }}
+            />
+          )}
+
           <Button
             title={`Log out from ${shortAddress(user.address)}`}
             style={styles.logout}
