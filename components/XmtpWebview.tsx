@@ -295,6 +295,7 @@ export default function XmtpWebview() {
       source={{
         uri: `${XMTP_WEBSITE_URI}?xmtpEnv=${config.xmtpEnv}`,
       }}
+      autoManageStatusBarEnabled={false}
       javaScriptEnabled
       key={webviewKey}
       originWhitelist={["*"]}

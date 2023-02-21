@@ -228,6 +228,7 @@ const Conversation = ({
   return (
     <View style={styles.container}>
       <Chat
+        key={`chat-${colorScheme}`}
         messages={messages}
         onSendPress={handleSendPress}
         user={{
