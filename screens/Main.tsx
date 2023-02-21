@@ -7,6 +7,7 @@ import {
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import {
   buildUserInviteTopic,
+  buildUserIntroTopic,
   //@ts-ignore
 } from "@xmtp/xmtp-js/dist/cjs/src/utils";
 import * as Linking from "expo-linking";
@@ -244,6 +245,7 @@ export default function Main() {
       initialNotificationsSubscribed.current = true;
       const topics = [
         ...Object.keys(state.xmtp.conversations),
+        buildUserIntroTopic(state.xmtp.address || ""),
         buildUserInviteTopic(state.xmtp.address || ""),
       ];
       subscribeToNotifications(topics);

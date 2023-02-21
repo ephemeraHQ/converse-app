@@ -34,6 +34,13 @@ export const saveXmtpConversations = async (
     promises.push(
       SecureStore.setItemAsync(`XMTP_CONVERSATION_${key}`, jsonConversation, {
         keychainService: config.bundleId,
+      }).catch((e) => {
+        console.log(
+          "ERROR WITH",
+          `XMTP_CONVERSATION_${key}`,
+          jsonConversation,
+          e
+        );
       })
     );
   }
@@ -61,4 +68,10 @@ export const loadXmtpKeys = async (): Promise<string | null> => {
     }
   }
   return keys;
+};
+
+export const saveExpoPushToken = async (pushKey: string) => {
+  await SecureStore.setItemAsync("EXPO_PUSH_TOKEN", pushKey, {
+    keychainService: config.bundleId,
+  });
 };

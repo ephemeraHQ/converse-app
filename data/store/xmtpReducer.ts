@@ -1,3 +1,7 @@
+import {
+  deleteLoggedXmtpAddress,
+  saveLoggedXmtpAddress,
+} from "../../utils/sharedData";
 import { ActionMap } from "./types";
 
 export type XmtpConversationContext = {
@@ -100,12 +104,14 @@ export type XmtpActions = ActionMap<XmtpPayload>[keyof ActionMap<XmtpPayload>];
 export const xmtpReducer = (state: XmtpType, action: XmtpActions): XmtpType => {
   switch (action.type) {
     case XmtpDispatchTypes.XmtpSetAddress:
+      saveLoggedXmtpAddress(action.payload.address);
       return {
         ...state,
         address: action.payload.address,
       };
     case XmtpDispatchTypes.XmtpConnected:
       if (!action.payload.connected) {
+        deleteLoggedXmtpAddress();
         return { ...xmtpInitialState, webviewLoaded: state.webviewLoaded };
       }
       return {
