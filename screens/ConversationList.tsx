@@ -165,7 +165,6 @@ export default function ConversationList({
     const conversations = Object.values(state.xmtp.conversations).filter(
       (a) => a?.peerAddress
     );
-    console.log(conversations.length, "conversations");
     conversations.sort((a, b) => {
       const aDate =
         a.lazyMessages.length > 0
