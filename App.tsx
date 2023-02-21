@@ -27,9 +27,10 @@ export default function App() {
         asyncStorage: AsyncStorage,
       }}
       clientMeta={{
-        description: "Sign in with Converse",
-        url: "https://xmtp.org",
-        icons: ["https://avatars.githubusercontent.com/u/82580170"],
+        description:
+          "Converse connects web3 identities with each other via messaging.",
+        url: "https://getconverse.app",
+        icons: ["https://i.postimg.cc/qvfXMMDT/icon.png"],
         name: "Converse",
       }}
     >
