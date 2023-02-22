@@ -201,13 +201,13 @@ export default function ConversationList({
   }, [navigation, resetSelectedTopic]);
   useEffect(() => {
     navigation.setOptions({
-      headerTitle: () => (
-        <>
-          {(!state.xmtp.initialLoadDone || state.xmtp.loading) && (
-            <ActivityIndicator />
-          )}
-        </>
-      ),
+      headerTitle: () => {
+        if (!state.xmtp.initialLoadDone || state.xmtp.loading) {
+          return <ActivityIndicator />;
+        } else {
+          return undefined;
+        }
+      },
     });
   }, [navigation, state.xmtp.initialLoadDone, state.xmtp.loading]);
   return (
