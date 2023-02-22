@@ -91,7 +91,7 @@ export default function XmtpWebview() {
       });
       loadedKeys.current = true;
     };
-    if (!loadedKeys.current) {
+    if (!loadedKeys.current && state.xmtp.address) {
       loadKeys();
     }
 
@@ -99,7 +99,7 @@ export default function XmtpWebview() {
       webview = null;
       webviewReadyForMessages = false;
     };
-  }, []);
+  }, [state.xmtp.address]);
 
   useEffect(() => {
     const subscription = AppState.addEventListener(
