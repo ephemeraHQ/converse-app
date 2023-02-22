@@ -19,6 +19,7 @@ import {
   useColorScheme,
   View,
 } from "react-native";
+import { SFSymbol } from "react-native-sfsymbols";
 import uuid from "react-native-uuid";
 
 import Button from "../components/Button";
@@ -351,7 +352,16 @@ const chatTheme = (colorScheme: ColorSchemeName) =>
     icons: {
       ...defaultTheme.icons,
       sendButtonIcon: () => (
-        <View style={{ width: 24, height: 24, backgroundColor: "red" }} />
+        <SFSymbol
+          name="paperplane"
+          weight="regular"
+          scale="large"
+          color={textPrimaryColor(colorScheme)}
+          size={18}
+          resizeMode="center"
+          multicolor={false}
+          style={{ width: 24, height: 24 }}
+        />
       ),
     },
   } as Theme);
