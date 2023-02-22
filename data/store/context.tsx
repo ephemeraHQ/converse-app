@@ -1,10 +1,8 @@
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import React, { createContext, Dispatch, useEffect, useReducer } from "react";
+import React, { createContext, Dispatch, useReducer } from "react";
 
 import { AppActions, appInitialState, appReducer, AppType } from "./appReducer";
 import {
   NotificationsActions,
-  NotificationsDispatchTypes,
   notificationsInitialState,
   notificationsReducer,
   NotificationsType,
@@ -53,23 +51,6 @@ const mainReducer = (
 
 const AppProvider: React.FC<any> = (props: any) => {
   const [state, dispatch] = useReducer(mainReducer, initialState);
-
-  // Rehydrating persisted state
-
-  useEffect(() => {
-    AsyncStorage.getItem("state.notifications.showNotificationsScreen").then(
-      (value: string | null) => {
-        if (value) {
-          dispatch({
-            type: NotificationsDispatchTypes.NotificationsShowScreen,
-            payload: {
-              show: value !== "0",
-            },
-          });
-        }
-      }
-    );
-  }, []);
 
   return (
     <AppContext.Provider value={{ state, dispatch }}>

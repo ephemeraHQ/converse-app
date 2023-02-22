@@ -178,13 +178,6 @@ export default function XmtpWebview() {
           await saveXmtpKeys(keys);
           break;
         }
-
-        case "XMTP_READY":
-          dispatch({
-            type: XmtpDispatchTypes.XmtpConnected,
-            payload: { connected: true },
-          });
-          break;
         case "DISCONNECTED":
           dispatch({
             type: XmtpDispatchTypes.XmtpConnected,
@@ -193,12 +186,6 @@ export default function XmtpWebview() {
           launchedInitialLoad.current = false;
           await deleteXmtpKeys();
           webview?.reload();
-          break;
-        case "WEBVIEW_LOADED":
-          dispatch({
-            type: XmtpDispatchTypes.XmtpWebviewLoaded,
-            payload: { loaded: true },
-          });
           break;
         case "XMTP_CONVERSATIONS":
           saveConversations(data, dispatch);
@@ -235,6 +222,12 @@ export default function XmtpWebview() {
             payload: {
               address: data.address,
             },
+          });
+          // If we receive this from webview, we're necessary
+          // connected to the XMTP network!
+          dispatch({
+            type: XmtpDispatchTypes.XmtpConnected,
+            payload: { connected: true },
           });
           break;
         case "WEB3_CONNECTED":
@@ -293,7 +286,9 @@ export default function XmtpWebview() {
       ref={(ref) => {
         webview = ref;
       }}
-      source={{ uri: "xmtp.html" }}
+      source={{
+        uri: "xmtp.html",
+      }}
       javaScriptEnabled
       originWhitelist={["*"]}
       allowFileAccess

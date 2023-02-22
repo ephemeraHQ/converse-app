@@ -208,7 +208,7 @@ export default function ConversationList({
   }, [state.xmtp.conversations, state.xmtp.lastUpdateAt]);
   useEffect(() => {
     navigation.setOptions({
-      headerLeft: () => (state.xmtp.connected ? <SettingsButton /> : null),
+      headerLeft: () => (state.xmtp.address ? <SettingsButton /> : null),
       headerRight: () => (
         <>
           <ShareProfileButton navigation={navigation} route={route} />
@@ -216,7 +216,7 @@ export default function ConversationList({
         </>
       ),
     });
-  }, [navigation, route, state.xmtp.connected]);
+  }, [navigation, route, state.xmtp.address]);
   const resetSelectedTopic = useCallback(() => {
     setSelectedTopic(undefined);
   }, []);
