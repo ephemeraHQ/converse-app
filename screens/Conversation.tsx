@@ -13,6 +13,7 @@ import {
   ActivityIndicator,
   ColorSchemeName,
   StyleSheet,
+  Image,
   Text,
   TextInput,
   TouchableOpacity,
@@ -347,5 +348,14 @@ const chatTheme = (colorScheme: ColorSchemeName) =>
         ...defaultTheme.fonts.sentMessageCaptionTextStyle,
         fontWeight: "400",
       },
+    },
+    icons: {
+      ...defaultTheme.icons,
+      sendButtonIcon: () => (
+        <Image
+          source={require("../vendor/react-native-chat-ui/assets/icon-send.png")}
+          style={{ tintColor: textPrimaryColor(colorScheme) }}
+        />
+      ),
     },
   } as Theme);
