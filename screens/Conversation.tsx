@@ -353,8 +353,12 @@ const chatTheme = (colorScheme: ColorSchemeName) =>
       ...defaultTheme.icons,
       sendButtonIcon: () => (
         <Image
-          source={require("/asset/icon-send.png")}
-          style={{ tintColor: textPrimaryColor(colorScheme) }}
+          source={require("../assets/icon-send.png")}
+          style={{
+            tintColor: textPrimaryColor(colorScheme),
+            width: 24,
+            height: 24,
+          }}
         />
       ),
     },
