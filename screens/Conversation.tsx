@@ -353,7 +353,7 @@ const chatTheme = (colorScheme: ColorSchemeName) =>
       ...defaultTheme.icons,
       sendButtonIcon: () => (
         <Image
-          source={require("../vendor/react-native-chat-ui/assets/icon-send.png")}
+          source={require("/asset/icon-send.png")}
           style={{ tintColor: textPrimaryColor(colorScheme) }}
         />
       ),
