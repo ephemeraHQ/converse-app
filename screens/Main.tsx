@@ -30,6 +30,7 @@ import {
   textPrimaryColor,
 } from "../utils/colors";
 import { ethProvider } from "../utils/eth";
+import { loadXmtpKeys } from "../utils/keychain";
 import { lastValueInMap } from "../utils/map";
 import {
   getNotificationsPermissionStatus,
@@ -205,33 +206,43 @@ export default function Main() {
   const splashScreenHidden = useRef(false);
 
   useEffect(() => {
-    if (state.xmtp.webviewLoaded && !splashScreenHidden.current) {
-      splashScreenHidden.current = true;
-      SplashScreen.hideAsync();
-      dispatch({
-        type: AppDispatchTypes.AppHideSplashscreen,
-        payload: {
-          hide: true,
-        },
-      });
-      // If app was loaded by clicking on notification,
-      // let's navigate
-      if (topicToNavigateTo.current) {
-        if (state.xmtp.conversations[topicToNavigateTo.current]) {
-          navigateToConversation(
-            state.xmtp.conversations[topicToNavigateTo.current]
-          );
+    const hideSplashScreenIfReady = async () => {
+      if (state.xmtp.webviewLoaded && !splashScreenHidden.current) {
+        const keys = await loadXmtpKeys();
+        // We can hide splash screen if
+        // - we don't have any credentials and want to show onboarding
+        // - we have credentials and are connected to XMTP
+        if ((!!keys && state.xmtp.connected) || !keys) {
+          splashScreenHidden.current = true;
+          SplashScreen.hideAsync();
+          dispatch({
+            type: AppDispatchTypes.AppHideSplashscreen,
+            payload: {
+              hide: true,
+            },
+          });
+          // If app was loaded by clicking on notification,
+          // let's navigate
+          if (topicToNavigateTo.current) {
+            if (state.xmtp.conversations[topicToNavigateTo.current]) {
+              navigateToConversation(
+                state.xmtp.conversations[topicToNavigateTo.current]
+              );
+            }
+            topicToNavigateTo.current = "";
+          } else if (initialURL.current) {
+            Linking.openURL(initialURL.current);
+          }
         }
-        topicToNavigateTo.current = "";
-      } else if (initialURL.current) {
-        Linking.openURL(initialURL.current);
       }
-    }
+    };
+    hideSplashScreenIfReady();
   }, [
     dispatch,
     navigateToConversation,
     state.xmtp.conversations,
     state.xmtp.webviewLoaded,
+    state.xmtp.connected,
   ]);
 
   const initialNotificationsSubscribed = useRef(false);
