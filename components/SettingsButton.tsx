@@ -16,7 +16,7 @@ import { getTitleFontScale, shortAddress } from "../utils/str";
 import Button from "./Button";
 import { sendMessageToWebview } from "./XmtpWebview";
 
-export default function DisconnectButton() {
+export default function SettingsButton() {
   const { state, dispatch } = useContext(AppContext);
   const { showActionSheetWithOptions } = useActionSheet();
   return (

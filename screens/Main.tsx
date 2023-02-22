@@ -33,6 +33,7 @@ import Conversation from "./Conversation";
 import ConversationList from "./ConversationList";
 import NewConversation from "./NewConversation";
 import NotificationsScreen from "./NotificationsScreen";
+import OnboardingScreen from "./Onboarding";
 
 export type NavigationParamList = {
   Messages: undefined;
@@ -239,7 +240,7 @@ export default function Main() {
     }
   }, [state.xmtp.address]);
 
-  if (!state.xmtp.connected) return null;
+  if (!state.xmtp.connected) return <OnboardingScreen />;
 
   if (
     state.notifications.showNotificationsScreen &&
