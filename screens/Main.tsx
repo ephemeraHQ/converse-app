@@ -1,4 +1,5 @@
 import { ActionSheetProvider } from "@expo/react-native-action-sheet";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import {
   getStateFromPath,
   NavigationContainer,
@@ -13,7 +14,13 @@ import {
 import * as Linking from "expo-linking";
 import * as Notifications from "expo-notifications";
 import * as SplashScreen from "expo-splash-screen";
-import React, { useCallback, useContext, useEffect, useRef } from "react";
+import React, {
+  useCallback,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import { AppState, useColorScheme } from "react-native";
 
 import { sendMessageToWebview } from "../components/XmtpWebview";
@@ -22,7 +29,7 @@ import { initDb } from "../data/db";
 import { AppDispatchTypes } from "../data/store/appReducer";
 import { AppContext } from "../data/store/context";
 import { NotificationsDispatchTypes } from "../data/store/notificationsReducer";
-import { XmtpConversation } from "../data/store/xmtpReducer";
+import { XmtpConversation, XmtpDispatchTypes } from "../data/store/xmtpReducer";
 import { saveUser } from "../utils/api";
 import {
   backgroundColor,
@@ -30,7 +37,6 @@ import {
   textPrimaryColor,
 } from "../utils/colors";
 import { ethProvider } from "../utils/eth";
-import { loadXmtpKeys } from "../utils/keychain";
 import { lastValueInMap } from "../utils/map";
 import {
   getNotificationsPermissionStatus,
@@ -204,46 +210,53 @@ export default function Main() {
   }, [dispatch, saveNotificationsStatus, state.xmtp.address]);
 
   const splashScreenHidden = useRef(false);
+  const [splashScreenHiddenState, setSplashScreenHiddenState] = useState(false);
 
   useEffect(() => {
     const hideSplashScreenIfReady = async () => {
-      if (state.xmtp.webviewLoaded && !splashScreenHidden.current) {
-        const keys = await loadXmtpKeys();
-        // We can hide splash screen if
-        // - we don't have any credentials and want to show onboarding
-        // - we have credentials and are connected to XMTP
-        if ((!!keys && state.xmtp.connected) || !keys) {
-          splashScreenHidden.current = true;
-          SplashScreen.hideAsync();
+      if (!splashScreenHidden.current) {
+        splashScreenHidden.current = true;
+        // Let's rehydrate value before hiding splash
+        const [showNotificationsScreen, xmtpAddress] = await Promise.all([
+          AsyncStorage.getItem("state.notifications.showNotificationsScreen"),
+          AsyncStorage.getItem("state.xmtp.address"),
+        ]);
+
+        if (showNotificationsScreen) {
           dispatch({
-            type: AppDispatchTypes.AppHideSplashscreen,
+            type: NotificationsDispatchTypes.NotificationsShowScreen,
             payload: {
-              hide: true,
+              show: showNotificationsScreen !== "0",
             },
           });
-          // If app was loaded by clicking on notification,
-          // let's navigate
-          if (topicToNavigateTo.current) {
-            if (state.xmtp.conversations[topicToNavigateTo.current]) {
-              navigateToConversation(
-                state.xmtp.conversations[topicToNavigateTo.current]
-              );
-            }
-            topicToNavigateTo.current = "";
-          } else if (initialURL.current) {
-            Linking.openURL(initialURL.current);
+        }
+
+        if (xmtpAddress) {
+          dispatch({
+            type: XmtpDispatchTypes.XmtpSetAddress,
+            payload: {
+              address: xmtpAddress,
+            },
+          });
+        }
+
+        SplashScreen.hideAsync();
+        setSplashScreenHiddenState(true);
+
+        // If app was loaded by clicking on notification,
+        // let's navigate
+        if (topicToNavigateTo.current) {
+          if (state.xmtp.conversations[topicToNavigateTo.current]) {
+            navigateToConversation(
+              state.xmtp.conversations[topicToNavigateTo.current]
+            );
           }
+          topicToNavigateTo.current = "";
         }
       }
     };
     hideSplashScreenIfReady();
-  }, [
-    dispatch,
-    navigateToConversation,
-    state.xmtp.conversations,
-    state.xmtp.webviewLoaded,
-    state.xmtp.connected,
-  ]);
+  }, [dispatch, navigateToConversation, state.xmtp.conversations]);
 
   const initialNotificationsSubscribed = useRef(false);
 
@@ -309,7 +322,9 @@ export default function Main() {
 
   const navigationState = useRef<any>(undefined);
 
-  if (!state.xmtp.connected) return <OnboardingScreen />;
+  if (!splashScreenHiddenState) return null;
+
+  if (!state.xmtp.address) return <OnboardingScreen />;
 
   if (
     state.notifications.showNotificationsScreen &&
