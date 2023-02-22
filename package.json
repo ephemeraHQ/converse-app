@@ -15,19 +15,24 @@
     "deploy-preview-local": "node scripts/build/preview.js && eas build --profile preview --platform ios --local ; git co -f",
     "deploy-dev-local": "eas build --profile development --platform ios --local",
     "db": "ts-node scripts/migrations/db.ts",
-    "postinstall": "husky install"
+    "postinstall": "husky install && patch-package"
   },
   "dependencies": {
     "@azure/core-asynciterator-polyfill": "^1.0.2",
+    "@babel/plugin-proposal-decorators": "^7.20.7",
+    "@babel/plugin-proposal-export-namespace-from": "^7.18.9",
     "@ethersproject/shims": "^5.7.0",
     "@expo/metro-config": "^0.5.1",
     "@expo/react-native-action-sheet": "^4.0.1",
     "@expo/webpack-config": "^0.17.2",
     "@flyerhq/react-native-chat-ui": "^1.4.3",
     "@peculiar/webcrypto": "^1.4.1",
-    "@react-native-async-storage/async-storage": "~1.17.3",
+    "@react-native-async-storage/async-storage": "^1.17.11",
     "@react-navigation/native": "^6.0.16",
     "@react-navigation/native-stack": "^6.9.4",
+    "@stardazed/streams-polyfill": "^2.4.0",
+    "@walletconnect/react-native-dapp": "^1.8.0",
+    "@walletconnect/web3-provider": "^1.8.0",
     "@xmtp/xmtp-js": "^7.7.2",
     "axios": "^1.2.1",
     "babel-plugin-transform-remove-console": "^6.9.4",
@@ -53,6 +58,8 @@
     "expo-system-ui": "~2.0.1",
     "expo-updates": "~0.15.6",
     "https-browserify": "^1.0.0",
+    "os-browserify": "^0.3.0",
+    "patch-package": "^6.5.1",
     "react": "18.1.0",
     "react-dom": "18.1.0",
     "react-native": "0.70.5",
@@ -63,12 +70,12 @@
     "react-native-screens": "~3.18.0",
     "react-native-sfsymbols": "^1.2.1",
     "react-native-shared-group-preferences": "^1.1.23",
-    "react-native-svg": "13.4.0",
+    "react-native-svg": "^13.8.0",
     "react-native-url-polyfill": "^1.3.0",
     "react-native-uuid": "^2.0.1",
     "react-native-web": "~0.18.7",
     "react-native-webview": "11.23.1",
-    "readable-stream": "^4.2.0",
+    "readable-stream": "^4.3.0",
     "reflect-metadata": "^0.1.13",
     "safe-buffer": "^5.2.1",
     "stream-browserify": "^3.0.0",
@@ -96,6 +103,8 @@
     "git-is-clean": "^3.0.1",
     "husky": "^8.0.2",
     "lint-staged": "^13.1.0",
+    "metro-minify-terser": "^0.74.0",
+    "metro-react-native-babel-preset": "^0.74.0",
     "nanoid": "^3.0.0",
     "plist": "^3.0.6",
     "prettier": "^2.8.0",
@@ -110,5 +119,8 @@
       "eslint --fix",
       "prettier --write"
     ]
+  },
+  "resolutions": {
+    "react-native-svg": "^13.8.0"
   }
 }
