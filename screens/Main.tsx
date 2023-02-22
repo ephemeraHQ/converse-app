@@ -43,6 +43,7 @@ import {
   loadSavedNotificationMessagesToContext,
   subscribeToNotifications,
 } from "../utils/notifications";
+import { getLoggedXmtpAddress } from "../utils/sharedData";
 import Conversation from "./Conversation";
 import ConversationList from "./ConversationList";
 import NewConversation from "./NewConversation";
@@ -154,15 +155,6 @@ export default function Main() {
   );
 
   useEffect(() => {
-    const loadData = async () => {
-      await initDb();
-      await loadDataToContext(dispatch);
-      await loadSavedNotificationMessagesToContext(dispatch);
-    };
-    loadData();
-  }, [dispatch]);
-
-  useEffect(() => {
     // Things to do when app opens
     saveNotificationsStatus();
     const foregroundSubscription =
@@ -219,8 +211,11 @@ export default function Main() {
         // Let's rehydrate value before hiding splash
         const [showNotificationsScreen, xmtpAddress] = await Promise.all([
           AsyncStorage.getItem("state.notifications.showNotificationsScreen"),
-          AsyncStorage.getItem("state.xmtp.address"),
+          getLoggedXmtpAddress(),
+          initDb(),
         ]);
+        await loadDataToContext(dispatch);
+        await loadSavedNotificationMessagesToContext(dispatch);
 
         if (showNotificationsScreen) {
           dispatch({
