@@ -1,5 +1,7 @@
-import AsyncStorage from "@react-native-async-storage/async-storage";
-
+import {
+  deleteLoggedXmtpAddress,
+  saveLoggedXmtpAddress,
+} from "../../utils/sharedData";
 import { ActionMap } from "./types";
 
 export type XmtpConversationContext = {
@@ -96,14 +98,14 @@ export type XmtpActions = ActionMap<XmtpPayload>[keyof ActionMap<XmtpPayload>];
 export const xmtpReducer = (state: XmtpType, action: XmtpActions): XmtpType => {
   switch (action.type) {
     case XmtpDispatchTypes.XmtpSetAddress:
-      AsyncStorage.setItem("state.xmtp.address", action.payload.address);
+      saveLoggedXmtpAddress(action.payload.address);
       return {
         ...state,
         address: action.payload.address,
       };
     case XmtpDispatchTypes.XmtpConnected:
       if (!action.payload.connected) {
-        AsyncStorage.removeItem("state.xmtp.address");
+        deleteLoggedXmtpAddress();
         // Disconnecting = reset state
         return { ...xmtpInitialState };
       }
