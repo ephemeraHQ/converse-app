@@ -37,6 +37,7 @@ import {
   textPrimaryColor,
 } from "../utils/colors";
 import { ethProvider } from "../utils/eth";
+import { loadXmtpKeys } from "../utils/keychain";
 import { lastValueInMap } from "../utils/map";
 import {
   getNotificationsPermissionStatus,
@@ -44,6 +45,7 @@ import {
   subscribeToNotifications,
 } from "../utils/notifications";
 import { getLoggedXmtpAddress } from "../utils/sharedData";
+import { getXmtpClientFromKeys } from "../utils/xmtp";
 import Conversation from "./Conversation";
 import ConversationList from "./ConversationList";
 import NewConversation from "./NewConversation";
@@ -233,9 +235,23 @@ export default function Main() {
               address: xmtpAddress,
             },
           });
+        } else {
+          const keys = await loadXmtpKeys();
+          if (keys) {
+            const parsedKeys = JSON.parse(keys);
+            const xmtpClient = await getXmtpClientFromKeys(parsedKeys);
+            dispatch({
+              type: XmtpDispatchTypes.XmtpSetAddress,
+              payload: {
+                address: xmtpClient.address,
+              },
+            });
+          }
         }
 
-        SplashScreen.hideAsync();
+        setTimeout(() => {
+          SplashScreen.hideAsync();
+        }, 10);
         setSplashScreenHiddenState(true);
 
         // If app was loaded by clicking on notification,
