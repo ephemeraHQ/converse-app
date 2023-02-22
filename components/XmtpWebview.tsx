@@ -95,7 +95,10 @@ export default function XmtpWebview() {
   useEffect(() => {
     const loadKeys = async () => {
       const keys = await loadXmtpKeys();
-      sendMessageToWebview("KEYS_LOADED_FROM_SECURE_STORAGE", { keys });
+      sendMessageToWebview("KEYS_LOADED_FROM_SECURE_STORAGE", {
+        keys,
+        env: config.xmtpEnv,
+      });
       loadedKeys.current = true;
     };
     if (!loadedKeys.current) {
