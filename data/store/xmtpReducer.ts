@@ -184,7 +184,7 @@ export const xmtpReducer = (state: XmtpType, action: XmtpActions): XmtpType => {
       // Ignore lazy message with an id that we already have
       // because it means we got it through the XMTP SDK already
       if (
-        state.conversations[action.payload.topic].messages?.get(
+        state.conversations[action.payload.topic]?.messages?.get(
           action.payload.message.id
         )
       ) {
