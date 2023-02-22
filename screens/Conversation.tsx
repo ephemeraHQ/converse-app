@@ -355,7 +355,7 @@ const chatTheme = (colorScheme: ColorSchemeName) =>
         <Image
           source={require("../assets/icon-send.png")}
           style={{
-            tintColor: textPrimaryColor(colorScheme),
+            tintColor: "red",
             width: 24,
             height: 24,
           }}
