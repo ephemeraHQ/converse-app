@@ -13,7 +13,6 @@ import {
   ActivityIndicator,
   ColorSchemeName,
   StyleSheet,
-  Image,
   Text,
   TextInput,
   TouchableOpacity,
@@ -352,14 +351,7 @@ const chatTheme = (colorScheme: ColorSchemeName) =>
     icons: {
       ...defaultTheme.icons,
       sendButtonIcon: () => (
-        <Image
-          source={require("../assets/icon-send.png")}
-          style={{
-            tintColor: "red",
-            width: 24,
-            height: 24,
-          }}
-        />
+        <View style={{ width: 24, height: 24, backgroundColor: "red" }} />
       ),
     },
   } as Theme);
