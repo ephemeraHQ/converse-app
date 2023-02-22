@@ -131,7 +131,7 @@ export default function OnboardingScreen() {
 
   let sfSymbol = "message.circle.fill";
   let title = "GM";
-  let text = `Converse is on a mission to help humans connect to each other in a safe and smooth way. We recommend that you use your "public" wallet with our app.`;
+  let text = `Converse connects web3 identities with each other. We recommend that you use your "public" wallet with our app.`;
   if (user.address) {
     sfSymbol = "signature";
     title = "Sign";
