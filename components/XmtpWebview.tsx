@@ -94,11 +94,6 @@ export default function XmtpWebview() {
     if (!loadedKeys.current && state.xmtp.address) {
       loadKeys();
     }
-
-    return () => {
-      webview = null;
-      webviewReadyForMessages = false;
-    };
   }, [state.xmtp.address]);
 
   useEffect(() => {

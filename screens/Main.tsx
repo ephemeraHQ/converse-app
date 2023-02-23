@@ -23,6 +23,7 @@ import React, {
 } from "react";
 import { AppState, useColorScheme } from "react-native";
 
+import { addLog } from "../components/DebugButton";
 import { sendMessageToWebview } from "../components/XmtpWebview";
 import { loadDataToContext } from "../data";
 import { initDb } from "../data/db";
@@ -206,52 +207,67 @@ export default function Main() {
   const splashScreenHidden = useRef(false);
   const [splashScreenHiddenState, setSplashScreenHiddenState] = useState(false);
 
+  const [hydrationDone, setHydrationDone] = useState(false);
+
+  // Initial hydration
   useEffect(() => {
-    const hideSplashScreenIfReady = async () => {
-      if (!splashScreenHidden.current) {
-        splashScreenHidden.current = true;
-        // Let's rehydrate value before hiding splash
-        const [showNotificationsScreen, xmtpAddress] = await Promise.all([
-          AsyncStorage.getItem("state.notifications.showNotificationsScreen"),
-          getLoggedXmtpAddress(),
-          initDb(),
-        ]);
-        await loadDataToContext(dispatch);
-        await loadSavedNotificationMessagesToContext(dispatch);
+    const hydrate = async () => {
+      // Let's rehydrate value before hiding splash
+      const showNotificationsScreen = await AsyncStorage.getItem(
+        "state.notifications.showNotificationsScreen"
+      );
+      let xmtpAddress = null;
+      try {
+        xmtpAddress = await getLoggedXmtpAddress();
+      } catch {
+        addLog("Error: failed to load saved logged XMTP Address");
+      }
+      await initDb();
 
-        if (showNotificationsScreen) {
-          dispatch({
-            type: NotificationsDispatchTypes.NotificationsShowScreen,
-            payload: {
-              show: showNotificationsScreen !== "0",
-            },
-          });
-        }
+      await loadDataToContext(dispatch);
+      await loadSavedNotificationMessagesToContext(dispatch);
+      if (showNotificationsScreen) {
+        dispatch({
+          type: NotificationsDispatchTypes.NotificationsShowScreen,
+          payload: {
+            show: showNotificationsScreen !== "0",
+          },
+        });
+      }
 
-        if (xmtpAddress) {
+      if (xmtpAddress) {
+        dispatch({
+          type: XmtpDispatchTypes.XmtpSetAddress,
+          payload: {
+            address: xmtpAddress,
+          },
+        });
+      } else {
+        const keys = await loadXmtpKeys();
+        if (keys) {
+          const parsedKeys = JSON.parse(keys);
+          const xmtpClient = await getXmtpClientFromKeys(parsedKeys);
           dispatch({
             type: XmtpDispatchTypes.XmtpSetAddress,
             payload: {
-              address: xmtpAddress,
+              address: xmtpClient.address,
             },
           });
-        } else {
-          const keys = await loadXmtpKeys();
-          if (keys) {
-            const parsedKeys = JSON.parse(keys);
-            const xmtpClient = await getXmtpClientFromKeys(parsedKeys);
-            dispatch({
-              type: XmtpDispatchTypes.XmtpSetAddress,
-              payload: {
-                address: xmtpClient.address,
-              },
-            });
-          }
         }
+      }
+      addLog("Hydration 100% OK");
+      setHydrationDone(true);
+    };
+    hydrate();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
-        setTimeout(() => {
-          SplashScreen.hideAsync();
-        }, 10);
+  useEffect(() => {
+    const hideSplashScreenIfReady = async () => {
+      if (!splashScreenHidden.current && hydrationDone) {
+        splashScreenHidden.current = true;
+
+        SplashScreen.hideAsync();
         setSplashScreenHiddenState(true);
 
         // If app was loaded by clicking on notification,
@@ -267,7 +283,7 @@ export default function Main() {
       }
     };
     hideSplashScreenIfReady();
-  }, [dispatch, navigateToConversation, state.xmtp.conversations]);
+  }, [hydrationDone, navigateToConversation, state.xmtp.conversations]);
 
   const initialNotificationsSubscribed = useRef(false);
 
