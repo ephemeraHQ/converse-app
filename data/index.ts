@@ -1,8 +1,8 @@
 import "reflect-metadata";
 
 import { addLog } from "../components/DebugButton";
-import { resolveENSAddress } from "../utils/ens";
-import { getLensHandle } from "../utils/lens";
+import { ethProvider } from "../utils/eth";
+import { getLensHandleFromConversationId } from "../utils/lens";
 import { saveConversationDict, saveXmtpEnv } from "../utils/sharedData";
 import { shortAddress } from "../utils/str";
 import { conversationRepository, messageRepository } from "./db";
@@ -87,21 +87,28 @@ const setupAndSaveConversation = async (conversation: XmtpConversation) => {
   const now = new Date().getTime();
   const shouldResolveHandles = now - lastHandlesResolution >= 24 * 3600 * 1000;
 
-  let lensHandle = alreadyConversationInDb?.lensHandle;
-  let ensName = alreadyConversationInDb?.ensName;
+  let lensHandle = alreadyConversationInDb?.lensHandle || null;
+  let ensName = alreadyConversationInDb?.ensName || null;
 
   if (shouldResolveHandles) {
     try {
-      lensHandle = await getLensHandle(conversation.peerAddress);
-      ensName = await resolveENSAddress(conversation.peerAddress);
+      lensHandle = await getLensHandleFromConversationId(
+        conversation.context?.conversationId,
+        conversation.peerAddress
+      );
+      ensName = await ethProvider.lookupAddress(conversation.peerAddress);
+      conversation.lensHandle = lensHandle;
+      conversation.ensName = ensName;
     } catch (e) {
       // Error (probably rate limited)
       console.log("Could not resolve handles:", conversation.peerAddress, e);
+      conversation.lensHandle = alreadyConversationInDb?.lensHandle || null;
+      conversation.ensName = alreadyConversationInDb?.ensName || null;
     }
+  } else {
+    conversation.lensHandle = lensHandle;
+    conversation.ensName = ensName;
   }
-
-  conversation.lensHandle = lensHandle;
-  conversation.ensName = ensName;
 
   // Save to db
   await conversationRepository.upsert(
