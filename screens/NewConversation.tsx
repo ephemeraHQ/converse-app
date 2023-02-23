@@ -31,7 +31,7 @@ import {
   textPrimaryColor,
   textSecondaryColor,
 } from "../utils/colors";
-import { resolveENSName } from "../utils/ens";
+import { ethProvider } from "../utils/eth";
 import { getLensOwner } from "../utils/lens";
 import { lastValueInMap } from "../utils/map";
 import { addressPrefix, conversationName } from "../utils/str";
@@ -98,7 +98,7 @@ export default function NewConversation({
         existingConversations: [],
       }));
       const is0x = isAddress(value.toLowerCase());
-      const isLens = value.endsWith(".lens");
+      const isLens = value.endsWith(config.lensSuffix);
       const isENS = value.endsWith(".eth");
       if (is0x || isLens || isENS) {
         setStatus(({ error }) => ({
@@ -112,7 +112,7 @@ export default function NewConversation({
         const resolvedAddress = isLens
           ? await getLensOwner(value)
           : isENS
-          ? await resolveENSName(value)
+          ? await ethProvider.resolveName(value.toLowerCase())
           : value;
         if (searchingForValue.current === value) {
           // If we're still searching for this one

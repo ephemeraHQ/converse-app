@@ -21,6 +21,9 @@ const ENV = {
     debugMenu: true,
     bundleId: "com.converse.dev",
     scheme: "converse-dev",
+    lensApiDomain: "api-mumbai.lens.dev",
+    ethereumNetwork: "goerli",
+    lensSuffix: ".test",
   },
   preview: {
     ...defaultConfig,
@@ -30,6 +33,9 @@ const ENV = {
     debugMenu: true,
     bundleId: "com.converse.preview",
     scheme: "converse-preview",
+    lensApiDomain: "api-mumbai.lens.dev",
+    ethereumNetwork: "goerli",
+    lensSuffix: ".test",
   },
   prod: {
     ...defaultConfig,
@@ -38,6 +44,9 @@ const ENV = {
     apiURI: "https://xmtp-notifications.fly.dev",
     bundleId: "com.converse.native",
     scheme: "converse",
+    lensApiDomain: "api.lens.dev",
+    ethereumNetwork: "mainnet",
+    lensSuffix: ".lens",
   },
 };
 

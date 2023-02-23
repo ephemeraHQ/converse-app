@@ -14,8 +14,8 @@ export type XmtpConversation = {
   context?: XmtpConversationContext;
   messages: Map<string, XmtpMessage>;
   lazyMessages: XmtpMessage[];
-  lensHandle?: string;
-  ensName?: string;
+  lensHandle?: string | null;
+  ensName?: string | null;
   currentMessage?: string;
 };
 
