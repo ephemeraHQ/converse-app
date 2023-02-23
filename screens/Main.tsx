@@ -14,6 +14,7 @@ import { AppState, useColorScheme } from "react-native";
 import { sendMessageToWebview } from "../components/XmtpWebview";
 import { loadDataToContext } from "../data";
 import { initDb } from "../data/db";
+import { AppDispatchTypes } from "../data/store/appReducer";
 import { AppContext } from "../data/store/context";
 import { NotificationsDispatchTypes } from "../data/store/notificationsReducer";
 import { XmtpConversation } from "../data/store/xmtpReducer";
@@ -108,6 +109,15 @@ export default function Main() {
     []
   );
 
+  const initialURL = useRef("");
+
+  useEffect(() => {
+    const handleInitialDeeplink = async () => {
+      initialURL.current = (await Linking.getInitialURL()) || "";
+    };
+    handleInitialDeeplink();
+  }, []);
+
   const topicToNavigateTo = useRef("");
 
   const handleNotificationInteraction = useCallback(
@@ -189,6 +199,12 @@ export default function Main() {
     if (state.xmtp.webviewLoaded && !splashScreenHidden.current) {
       splashScreenHidden.current = true;
       SplashScreen.hideAsync();
+      dispatch({
+        type: AppDispatchTypes.AppHideSplashscreen,
+        payload: {
+          hide: true,
+        },
+      });
       // If app was loaded by clicking on notification,
       // let's navigate
       if (topicToNavigateTo.current) {
@@ -198,9 +214,12 @@ export default function Main() {
           );
         }
         topicToNavigateTo.current = "";
+      } else if (initialURL.current) {
+        Linking.openURL(initialURL.current);
       }
     }
   }, [
+    dispatch,
     navigateToConversation,
     state.xmtp.conversations,
     state.xmtp.webviewLoaded,
@@ -252,6 +271,7 @@ export default function Main() {
   const linking = {
     prefixes: [prefix],
     config: {
+      initialRouteName: "Messages",
       screens: {
         Messages: "/",
         Conversation: {
@@ -272,7 +292,9 @@ export default function Main() {
 
   return (
     <ActionSheetProvider>
-      <NavigationContainer linking={linking}>
+      <NavigationContainer
+        linking={state.app.splashScreenHidden ? (linking as any) : undefined}
+      >
         <Stack.Navigator initialRouteName="Messages">
           <Stack.Group
             screenOptions={{
