@@ -1,6 +1,7 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import React, { createContext, Dispatch, useEffect, useReducer } from "react";
 
+import { AppActions, appInitialState, appReducer, AppType } from "./appReducer";
 import {
   NotificationsActions,
   NotificationsDispatchTypes,
@@ -18,14 +19,16 @@ import {
 export type StateType = {
   xmtp: XmtpType;
   notifications: NotificationsType;
+  app: AppType;
 };
 
 const initialState: StateType = {
   xmtp: xmtpInitialState,
   notifications: notificationsInitialState,
+  app: appInitialState,
 };
 
-export type ActionsType = XmtpActions | NotificationsActions;
+export type ActionsType = XmtpActions | NotificationsActions | AppActions;
 export type DispatchType = (value: ActionsType) => void;
 
 const AppContext = createContext<{
@@ -37,9 +40,10 @@ const AppContext = createContext<{
 });
 
 const mainReducer = (
-  { xmtp, notifications }: StateType,
+  { xmtp, notifications, app }: StateType,
   action: ActionsType
 ) => ({
+  app: appReducer(app, action as AppActions),
   xmtp: xmtpReducer(xmtp, action as XmtpActions),
   notifications: notificationsReducer(
     notifications,
