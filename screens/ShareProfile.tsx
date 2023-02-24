@@ -15,6 +15,7 @@ import ConverseButton from "../components/Button";
 import config from "../config";
 import { AppContext } from "../data/store/context";
 import { backgroundColor, textPrimaryColor } from "../utils/colors";
+import { shortAddress } from "../utils/str";
 import { NavigationParamList } from "./Main";
 
 export default function ShareProfileScreen({
@@ -51,11 +52,9 @@ export default function ShareProfileScreen({
           />
         </View>
         <Text style={styles.identity}>
-          {state.app.mainIdentity || state.xmtp.address}
+          {state.app.mainIdentity || shortAddress(state.xmtp.address || "")}
         </Text>
-        {state.app.mainIdentity && (
-          <Text style={styles.address}>{state.xmtp.address}</Text>
-        )}
+        <Text style={styles.address}>{state.xmtp.address}</Text>
         <ConverseButton
           variant="blue"
           title="Share link"
