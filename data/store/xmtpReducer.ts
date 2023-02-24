@@ -124,9 +124,7 @@ export const xmtpReducer = (state: XmtpType, action: XmtpActions): XmtpType => {
       return newState;
     }
     case XmtpDispatchTypes.XmtpSetConversations: {
-      const conversations: {
-        [topic: string]: XmtpConversation;
-      } = {};
+      const conversations = { ...state.conversations };
 
       action.payload.conversations.forEach((c) => {
         conversations[c.topic] = {
