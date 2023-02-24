@@ -71,7 +71,7 @@ const Conversation = ({
 
   const inviteToConverse = useCallback(() => {
     const inviteText =
-      "I'm sending you this message with Converse, the first mobile messaging app for Lens & XMTP DMs. Ping polmaire.lens or @polmaire on Telegram to get an invite!";
+      "I am using Converse, the fastest XMTP client, as my web3 messaging app. You can download the app here: https://testflight.apple.com/join/w4exeswh";
     messageContent.current = inviteText;
     setMessageValue(inviteText);
     textInputRef.current?.focus();

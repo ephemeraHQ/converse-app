@@ -8,6 +8,7 @@ const defaultConfig = {
     "0x4496848684441C15A915fa9bF07D131155603253",
     "0x2376e9C7C604D1827bA9aCb1293Dc8b4DA2f0DB3",
   ],
+  websiteDomain: "getconverse.app",
   conversationDomain: "getconverse.app",
   infuraApiKey: "38f59a7bbbca49f18046ff3a4a752e1c",
 };
@@ -15,6 +16,7 @@ const defaultConfig = {
 const ENV = {
   dev: {
     ...defaultConfig,
+    env: "dev",
     xmtpEnv: "dev",
     xmtpWebviewURI: "https://xmtp-native-webview.vercel.app",
     apiURI: "http://noe-mbp.local:9875",
@@ -27,6 +29,7 @@ const ENV = {
   },
   preview: {
     ...defaultConfig,
+    env: "preview",
     xmtpEnv: "dev",
     xmtpWebviewURI: "https://xmtp-native-webview.vercel.app",
     apiURI: "https://xmtp-notifications-preview.fly.dev",
@@ -39,6 +42,7 @@ const ENV = {
   },
   prod: {
     ...defaultConfig,
+    env: "prod",
     xmtpEnv: "production",
     xmtpWebviewURI: "https://xmtp-native-webview.vercel.app",
     apiURI: "https://xmtp-notifications.fly.dev",

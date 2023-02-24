@@ -24,6 +24,7 @@ import {
   navigationSecondaryBackgroundColor,
   textPrimaryColor,
 } from "../utils/colors";
+import { ethProvider } from "../utils/eth";
 import { lastValueInMap } from "../utils/map";
 import {
   getNotificationsPermissionStatus,
@@ -35,6 +36,7 @@ import ConversationList from "./ConversationList";
 import NewConversation from "./NewConversation";
 import NotificationsScreen from "./NotificationsScreen";
 import OnboardingScreen from "./Onboarding";
+import ShareProfileScreen from "./ShareProfile";
 
 export type NavigationParamList = {
   Messages: undefined;
@@ -46,6 +48,7 @@ export type NavigationParamList = {
   NewConversation: {
     peer?: string;
   };
+  ShareProfile: undefined;
 };
 
 const Stack = createNativeStackNavigator<NavigationParamList>();
@@ -256,8 +259,21 @@ export default function Main() {
   useEffect(() => {
     if (state.xmtp.address) {
       saveUser(state.xmtp.address);
+      ethProvider
+        .lookupAddress(state.xmtp.address)
+        .then((result) => {
+          if (result) {
+            dispatch({
+              type: AppDispatchTypes.AppSetMainIdentity,
+              payload: { identity: result },
+            });
+          }
+        })
+        .catch((e) => {
+          console.log(e);
+        });
     }
-  }, [state.xmtp.address]);
+  }, [state.xmtp.address, dispatch]);
 
   if (!state.xmtp.connected) return <OnboardingScreen />;
 
@@ -316,6 +332,18 @@ export default function Main() {
               component={NewConversation}
               options={{
                 headerTitle: "New conversation",
+                presentation: "modal",
+                headerStyle: {
+                  backgroundColor:
+                    navigationSecondaryBackgroundColor(colorScheme),
+                },
+              }}
+            />
+            <Stack.Screen
+              name="ShareProfile"
+              component={ShareProfileScreen}
+              options={{
+                headerTitle: "Share your link",
                 presentation: "modal",
                 headerStyle: {
                   backgroundColor:
