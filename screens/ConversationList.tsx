@@ -148,6 +148,30 @@ function NewConversationButton({
   );
 }
 
+function ShareProfileButton({
+  navigation,
+}: NativeStackScreenProps<NavigationParamList, "Messages">) {
+  return (
+    <TouchableOpacity
+      activeOpacity={0.2}
+      onPress={() => {
+        navigation.navigate("ShareProfile");
+      }}
+    >
+      <SFSymbol
+        name="qrcode"
+        weight="medium"
+        scale="large"
+        color={PlatformColor("systemBlue")}
+        size={16}
+        resizeMode="center"
+        multicolor={false}
+        style={{ width: 32, height: 32, marginRight: 20 }}
+      />
+    </TouchableOpacity>
+  );
+}
+
 export default function ConversationList({
   navigation,
   route,
@@ -186,7 +210,10 @@ export default function ConversationList({
     navigation.setOptions({
       headerLeft: () => (state.xmtp.connected ? <SettingsButton /> : null),
       headerRight: () => (
-        <NewConversationButton navigation={navigation} route={route} />
+        <>
+          <ShareProfileButton navigation={navigation} route={route} />
+          <NewConversationButton navigation={navigation} route={route} />
+        </>
       ),
     });
   }, [navigation, route, state.xmtp.connected]);

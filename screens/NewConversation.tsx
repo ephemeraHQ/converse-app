@@ -73,7 +73,7 @@ export default function NewConversation({
         />
       ),
     });
-  }, [colorScheme, navigation]);
+  }, [navigation]);
 
   const [value, setValue] = useState(route.params.peer || "");
   const searchingForValue = useRef("");

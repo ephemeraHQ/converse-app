@@ -11,6 +11,7 @@ import {
   useColorScheme,
   ViewStyle,
 } from "react-native";
+import { SFSymbol } from "react-native-sfsymbols";
 
 import { buttonGreyBackground } from "../utils/colors";
 
@@ -21,6 +22,7 @@ type Props = {
   style?: StyleProp<ViewStyle>;
   textStyle?: StyleProp<TextStyle>;
   allowFontScaling?: boolean;
+  picto?: string;
 };
 
 export default function Button({
@@ -29,6 +31,7 @@ export default function Button({
   variant,
   style,
   textStyle,
+  picto,
   allowFontScaling = true,
 }: Props) {
   const colorScheme = useColorScheme();
@@ -47,6 +50,18 @@ export default function Button({
       : styles.buttonTextText;
   return (
     <TouchableOpacity style={[buttonStyle, style]} onPress={onPress}>
+      {picto && (
+        <SFSymbol
+          name={picto}
+          weight="bold"
+          scale="large"
+          color="white"
+          size={13}
+          resizeMode="center"
+          multicolor={false}
+          style={styles.picto}
+        />
+      )}
       <Text
         style={[buttonTextStyle, textStyle]}
         allowFontScaling={allowFontScaling}
@@ -67,6 +82,8 @@ const getStyles = (colorScheme: ColorSchemeName) =>
       textAlign: "center",
       paddingVertical: 14,
       borderRadius: 14,
+      flexDirection: "row",
+      justifyContent: "center",
     },
     buttonBlueText: {
       color: "white",
@@ -92,5 +109,8 @@ const getStyles = (colorScheme: ColorSchemeName) =>
       textAlign: "center",
       fontWeight: "400",
       fontSize: 17,
+    },
+    picto: {
+      marginRight: 15,
     },
   });
