@@ -242,9 +242,11 @@ export default function NewConversation({
           ref={(r) => {
             if (!initialFocus.current) {
               initialFocus.current = true;
-              setTimeout(() => {
-                r?.focus();
-              }, 100);
+              if (!value) {
+                setTimeout(() => {
+                  r?.focus();
+                }, 100);
+              }
             }
             inputRef.current = r;
           }}

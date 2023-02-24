@@ -1,5 +1,5 @@
 import { ActionSheetProvider } from "@expo/react-native-action-sheet";
-import { NavigationContainer } from "@react-navigation/native";
+import { NavigationContainer, StackActions } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import {
   buildUserInviteTopic,
@@ -289,6 +289,8 @@ export default function Main() {
     }
   }, [state.xmtp.address, dispatch]);
 
+  const navigationState = useRef<any>(undefined);
+
   if (!state.xmtp.connected) return <OnboardingScreen />;
 
   if (
@@ -325,7 +327,31 @@ export default function Main() {
       <NavigationContainer
         linking={state.app.splashScreenHidden ? (linking as any) : undefined}
       >
-        <Stack.Navigator initialRouteName="Messages">
+        <Stack.Navigator
+          initialRouteName="Messages"
+          screenListeners={({ navigation }) => ({
+            state: (e: any) => {
+              // Fix deeplink if already on NewConversation but changing params
+              // (for instance scanning a QRCode)
+              const oldRoutes = navigationState.current?.state.routes || [];
+              const newRoutes = e.data?.state?.routes || [];
+
+              if (oldRoutes.length > 0 && newRoutes.length > 0) {
+                const lastRouteOld = oldRoutes[oldRoutes.length - 1];
+                const lastRouteNew = newRoutes[newRoutes.length - 1];
+                if (
+                  lastRouteOld.key === lastRouteNew.key &&
+                  lastRouteOld.name === "NewConversation"
+                ) {
+                  navigation.dispatch(
+                    StackActions.replace(lastRouteNew.name, lastRouteNew.params)
+                  );
+                }
+              }
+              navigationState.current = e.data;
+            },
+          })}
+        >
           <Stack.Group
             screenOptions={{
               headerStyle: { backgroundColor: backgroundColor(colorScheme) },
