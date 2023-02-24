@@ -267,11 +267,25 @@ export default function Main() {
               type: AppDispatchTypes.AppSetMainIdentity,
               payload: { identity: result },
             });
+          } else {
+            dispatch({
+              type: AppDispatchTypes.AppSetMainIdentity,
+              payload: { identity: "" },
+            });
           }
         })
         .catch((e) => {
           console.log(e);
+          dispatch({
+            type: AppDispatchTypes.AppSetMainIdentity,
+            payload: { identity: "" },
+          });
         });
+    } else {
+      dispatch({
+        type: AppDispatchTypes.AppSetMainIdentity,
+        payload: { identity: "" },
+      });
     }
   }, [state.xmtp.address, dispatch]);
 
@@ -343,7 +357,7 @@ export default function Main() {
               name="ShareProfile"
               component={ShareProfileScreen}
               options={{
-                headerTitle: "Share your link",
+                headerTitle: "Your Converse link",
                 presentation: "modal",
                 headerStyle: {
                   backgroundColor:
