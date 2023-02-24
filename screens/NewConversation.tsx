@@ -87,6 +87,7 @@ export default function NewConversation({
   });
 
   const { state } = useContext(AppContext);
+  const conversationsRef = useRef(state.xmtp.conversations);
 
   useEffect(() => {
     const searchForValue = async () => {
@@ -135,7 +136,7 @@ export default function NewConversation({
             if (addressIsOnXmtp) {
               // Let's find existing conversations with this user
               const conversations = Object.values(
-                state.xmtp.conversations
+                conversationsRef.current
               ).filter(
                 (c) => c.peerAddress.toLowerCase() === address.toLowerCase()
               );
@@ -169,9 +170,7 @@ export default function NewConversation({
       }
     };
     searchForValue();
-  }, [state.xmtp.conversations, value]);
-
-  const conversationsTopics = useRef(Object.keys(state.xmtp.conversations));
+  }, [value]);
 
   const navigateToTopic = useCallback(
     (topic: string, message?: string) => {
@@ -188,10 +187,11 @@ export default function NewConversation({
 
   useEffect(() => {
     const newConversationsTopics = Object.keys(state.xmtp.conversations);
+    const existingConversationsTopics = Object.keys(conversationsRef.current);
     if (waitingForNewConversation.current !== false) {
       const message = waitingForNewConversation.current;
       const newTopic = newConversationsTopics.find(
-        (topic) => !conversationsTopics.current.includes(topic)
+        (topic) => !existingConversationsTopics.includes(topic)
       );
       if (newTopic) {
         waitingForNewConversation.current = false;
@@ -199,7 +199,7 @@ export default function NewConversation({
         navigateToTopic(newTopic, message);
       }
     }
-    conversationsTopics.current = newConversationsTopics;
+    conversationsRef.current = state.xmtp.conversations;
   }, [navigateToTopic, state.xmtp.conversations, state.xmtp.lastUpdateAt]);
 
   const createNewConversationWithPeer = useCallback(
