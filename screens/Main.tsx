@@ -1,5 +1,9 @@
 import { ActionSheetProvider } from "@expo/react-native-action-sheet";
-import { NavigationContainer, StackActions } from "@react-navigation/native";
+import {
+  getStateFromPath,
+  NavigationContainer,
+  StackActions,
+} from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import {
   buildUserInviteTopic,
@@ -41,9 +45,10 @@ import ShareProfileScreen from "./ShareProfile";
 export type NavigationParamList = {
   Messages: undefined;
   Conversation: {
-    topic: string;
+    topic?: string;
     message?: string;
     focus?: boolean;
+    mainConversationWithPeer?: string;
   };
   NewConversation: {
     peer?: string;
@@ -320,6 +325,17 @@ export default function Main() {
         },
       },
     },
+    getStateFromPath: (path: string, options: any) => {
+      // dm method must link to the Conversation Screen as well
+      // but prefilling the parameters
+      let pathForState = path;
+      if (pathForState.startsWith("dm?peer=")) {
+        const peer = pathForState.slice(8).trim().toLowerCase();
+        pathForState = `conversation?mainConversationWithPeer=${peer}&focus=true`;
+      }
+      const state = getStateFromPath(pathForState, options);
+      return state;
+    },
   };
 
   return (
@@ -339,9 +355,10 @@ export default function Main() {
               if (oldRoutes.length > 0 && newRoutes.length > 0) {
                 const lastRouteOld = oldRoutes[oldRoutes.length - 1];
                 const lastRouteNew = newRoutes[newRoutes.length - 1];
+                const screenToReplace = ["NewConversation", "Conversation"];
                 if (
                   lastRouteOld.key === lastRouteNew.key &&
-                  lastRouteOld.name === "NewConversation"
+                  screenToReplace.includes(lastRouteOld.name)
                 ) {
                   navigation.dispatch(
                     StackActions.replace(lastRouteNew.name, lastRouteNew.params)
