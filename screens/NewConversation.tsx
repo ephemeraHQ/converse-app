@@ -102,7 +102,6 @@ export default function NewConversation({
 
   useEffect(() => {
     const searchForValue = async () => {
-      addLog("searching for value");
       setStatus(({ loading }) => ({
         loading,
         error: "",
@@ -113,9 +112,8 @@ export default function NewConversation({
       const is0x = isAddress(value.toLowerCase());
       const isLens = value.endsWith(config.lensSuffix);
       const isENS = value.endsWith(".eth");
-      addLog(is0x ? "0x" : isLens ? "lens" : isENS ? "ens" : "invalid input");
       if (is0x || isLens || isENS) {
-        addLog("set loading true");
+        addLog(`searching for value - ${value}`);
         setStatus(({ error }) => ({
           loading: true,
           error,
@@ -145,7 +143,7 @@ export default function NewConversation({
             return;
           }
           const address = getAddress(resolvedAddress.toLowerCase());
-          addLog(`real address - ${address}`);
+          addLog(`formatted address - ${address}`);
           const addressIsOnXmtp = await isOnXmtp(address);
           addLog(`address on XMTP - ${addressIsOnXmtp ? "true" : "false"}`);
           if (searchingForValue.current === value) {
@@ -183,7 +181,6 @@ export default function NewConversation({
           addLog("not searching this value #2");
         }
       } else {
-        addLog("Invalid input #1");
         setStatus({
           loading: false,
           error: "",
