@@ -3,15 +3,16 @@ import WalletConnectProvider, {
   QrcodeModal,
   RenderQrcodeModalProps,
 } from "@walletconnect/react-native-dapp";
+import { useState } from "react";
 
 import OnboardingComponent from "../components/OnboardingComponent";
 import config from "../config";
 
-function Modal(props: RenderQrcodeModalProps) {
-  return <QrcodeModal division={4} {...props} />;
-}
-
 export default function OnboardingScreen() {
+  const [walletConnectProps, setWalletConnectProps] = useState<
+    RenderQrcodeModalProps | undefined
+  >(undefined);
+  const [hideModal, setHideModal] = useState(false);
   return (
     <WalletConnectProvider
       redirectUrl={`${config.scheme}://"`}
@@ -27,10 +28,20 @@ export default function OnboardingScreen() {
         name: "Converse",
       }}
       renderQrcodeModal={(props) => {
-        return <Modal {...props} />;
+        if (walletConnectProps?.uri !== props.uri) {
+          setWalletConnectProps(props);
+        }
+        const newProps = {
+          ...props,
+          visible: props.visible && !hideModal,
+        };
+        return <QrcodeModal division={4} {...newProps} />;
       }}
     >
-      <OnboardingComponent />
+      <OnboardingComponent
+        walletConnectProps={walletConnectProps}
+        setHideModal={setHideModal}
+      />
     </WalletConnectProvider>
   );
 }
