@@ -31,18 +31,24 @@ import {
   textPrimaryColor,
   textSecondaryColor,
 } from "../utils/colors";
-import { ethProvider } from "../utils/eth";
-import { getLensOwner } from "../utils/lens";
+import { getAddressForPeer } from "../utils/eth";
 import { lastValueInMap } from "../utils/map";
 import { addressPrefix, conversationName } from "../utils/str";
 import { isOnXmtp } from "../utils/xmtp";
 import { NavigationParamList } from "./Main";
 
-const computeNewConversationId = (state: StateType, peerAddress: string) => {
+const computeNewConversationContext = (
+  state: StateType,
+  peerAddress: string
+) => {
   let i = 0;
   const conversationsIds = Object.values(state.xmtp.conversations)
     .filter((c) => c.peerAddress.toLowerCase() === peerAddress.toLowerCase())
     .map((c) => c.context?.conversationId);
+  // First try to create one without conversationId
+  if (!conversationsIds.includes(undefined)) {
+    return undefined;
+  }
   do {
     i += 1;
   } while (
@@ -52,9 +58,13 @@ const computeNewConversationId = (state: StateType, peerAddress: string) => {
       )}-${addressPrefix(peerAddress)}/${i}`
     )
   );
-  return `${config.conversationDomain}/dm/${addressPrefix(
+  const conversationId = `${config.conversationDomain}/dm/${addressPrefix(
     state.xmtp.address || ""
   )}-${addressPrefix(peerAddress)}/${i}`;
+  return {
+    conversationId,
+    metadata: {},
+  };
 };
 
 export default function NewConversation({
@@ -110,11 +120,7 @@ export default function NewConversation({
           existingConversations: [],
         }));
         searchingForValue.current = value;
-        const resolvedAddress = isLens
-          ? await getLensOwner(value)
-          : isENS
-          ? await ethProvider.resolveName(value.toLowerCase())
-          : value;
+        const resolvedAddress = await getAddressForPeer(value);
         if (searchingForValue.current === value) {
           // If we're still searching for this one
           if (!resolvedAddress) {
@@ -209,10 +215,7 @@ export default function NewConversation({
       setCreatingNewConversation(true);
       sendMessageToWebview("CREATE_CONVERSATION", {
         peerAddress,
-        context: {
-          conversationId: computeNewConversationId(state, peerAddress),
-          metadata: {},
-        },
+        context: computeNewConversationContext(state, peerAddress),
       });
     },
     [creatingNewConversation]

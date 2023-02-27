@@ -23,9 +23,12 @@ import { SFSymbol } from "react-native-sfsymbols";
 import uuid from "react-native-uuid";
 
 import Button from "../components/Button";
-import { sendXmtpMessage } from "../components/XmtpWebview";
+import {
+  sendMessageToWebview,
+  sendXmtpMessage,
+} from "../components/XmtpWebview";
 import { AppContext } from "../data/store/context";
-import { XmtpDispatchTypes } from "../data/store/xmtpReducer";
+import { XmtpConversation, XmtpDispatchTypes } from "../data/store/xmtpReducer";
 import { userExists } from "../utils/api";
 import {
   backgroundColor,
@@ -36,6 +39,7 @@ import {
   textPrimaryColor,
   textSecondaryColor,
 } from "../utils/colors";
+import { getAddressForPeer } from "../utils/eth";
 import { conversationName, getTitleFontScale } from "../utils/str";
 import {
   Chat,
@@ -50,9 +54,81 @@ const Conversation = ({
 }: NativeStackScreenProps<NavigationParamList, "Conversation">) => {
   const { state, dispatch } = useContext(AppContext);
   const colorScheme = useColorScheme();
-  const conversation = state.xmtp.conversations[route.params.topic];
+
+  const [peerAddress, setPeerAddress] = useState(
+    route.params.mainConversationWithPeer || ""
+  );
+  const [conversation, setConversation] = useState<
+    XmtpConversation | undefined
+  >(undefined);
+
+  useEffect(() => {
+    if (route.params.topic) {
+      setConversation(state.xmtp.conversations[route.params.topic]);
+    } else if (peerAddress) {
+      setConversation(
+        Object.values(state.xmtp.conversations).find(
+          (c) =>
+            c.peerAddress.toLowerCase() === peerAddress.toLowerCase() &&
+            !c.context
+        )
+      );
+    }
+  }, [
+    peerAddress,
+    route.params.mainConversationWithPeer,
+    route.params.topic,
+    state.xmtp.conversations,
+  ]);
+
+  useEffect(() => {
+    if (conversation) {
+      setPeerAddress(conversation.peerAddress);
+    }
+  }, [conversation]);
+
+  const sentNewConversationRequest = useRef(false);
+
+  useEffect(() => {
+    const openConversationWithPeer = async () => {
+      if (
+        !conversation &&
+        route.params.mainConversationWithPeer &&
+        !sentNewConversationRequest.current
+      ) {
+        sentNewConversationRequest.current = true;
+        // Create new conversation
+        const peerAddress = await getAddressForPeer(
+          route.params.mainConversationWithPeer
+        );
+        if (!peerAddress) return;
+        const alreadyConversationWithPeer = Object.values(
+          state.xmtp.conversations
+        ).find(
+          (c) =>
+            c.peerAddress.toLowerCase() === peerAddress.toLowerCase() &&
+            !c.context
+        );
+        if (alreadyConversationWithPeer) {
+          setConversation(alreadyConversationWithPeer);
+        } else {
+          setPeerAddress(peerAddress || "");
+          sendMessageToWebview("CREATE_CONVERSATION", {
+            peerAddress,
+            context: null,
+          });
+        }
+      }
+    };
+    openConversationWithPeer();
+  }, [
+    conversation,
+    route.params.mainConversationWithPeer,
+    state.xmtp.conversations,
+  ]);
+
   const messageToPrefill =
-    route.params.message || conversation.currentMessage || "";
+    route.params.message || conversation?.currentMessage || "";
   const [messageValue, setMessageValue] = useState(messageToPrefill);
   const focusMessageInput = route.params.focus || !!messageToPrefill;
   const { showActionSheetWithOptions } = useActionSheet();
@@ -61,13 +137,14 @@ const Conversation = ({
 
   useEffect(() => {
     const checkIfUserExists = async () => {
-      const exists = await userExists(conversation.peerAddress);
+      if (!peerAddress) return;
+      const exists = await userExists(peerAddress);
       if (!exists) {
         setShowInviteBanner(true);
       }
     };
     checkIfUserExists();
-  }, [conversation.peerAddress]);
+  }, [peerAddress]);
 
   const inviteToConverse = useCallback(() => {
     const inviteText =
@@ -90,12 +167,12 @@ const Conversation = ({
                   {
                     options: ["Copy wallet address", "Cancel"],
                     cancelButtonIndex: 1,
-                    title: conversation.peerAddress,
+                    title: peerAddress,
                   },
                   (selectedIndex?: number) => {
                     switch (selectedIndex) {
                       case 0:
-                        Clipboard.setStringAsync(conversation.peerAddress);
+                        Clipboard.setStringAsync(peerAddress || "");
                         break;
 
                       default:
@@ -110,13 +187,13 @@ const Conversation = ({
                 numberOfLines={1}
                 allowFontScaling={false}
               >
-                {conversationName(conversation)}
+                {conversation ? conversationName(conversation) : ""}
               </Text>
             </TouchableOpacity>
           )}
-          {(!state.xmtp.initialLoadDone || state.xmtp.loading) && (
-            <ActivityIndicator />
-          )}
+          {(!state.xmtp.initialLoadDone ||
+            state.xmtp.loading ||
+            !conversation) && <ActivityIndicator />}
         </>
       ),
       headerRight: () => {
@@ -139,6 +216,7 @@ const Conversation = ({
     conversation,
     inviteToConverse,
     navigation,
+    peerAddress,
     showActionSheetWithOptions,
     showInviteBanner,
     state.xmtp.initialLoadDone,
@@ -151,11 +229,13 @@ const Conversation = ({
 
   useEffect(() => {
     const newMessages = [] as MessageType.Any[];
-    const messagesArray = Array.from(conversation.messages.values());
+    const messagesArray = Array.from(
+      conversation ? conversation.messages.values() : []
+    );
     const messagesLength = messagesArray.length;
-    conversation.lazyMessages.forEach((m) => {
+    conversation?.lazyMessages.forEach((m) => {
       // Do not push lazy messages we already have
-      if (!conversation.messages.get(m.id)) {
+      if (!conversation?.messages.get(m.id)) {
         newMessages.push({
           author: {
             id: m.senderAddress,
@@ -181,8 +261,9 @@ const Conversation = ({
     }
     setMessages(newMessages);
   }, [
-    conversation.lazyMessages,
-    conversation.messages,
+    conversation,
+    conversation?.lazyMessages,
+    conversation?.messages,
     state.xmtp.lastUpdateAt,
   ]);
 
@@ -190,6 +271,7 @@ const Conversation = ({
 
   const handleSendPress = useCallback(
     (m: MessageType.PartialText) => {
+      if (!conversation) return;
       messageContent.current = "";
       setMessageValue("");
       // Lazy message
@@ -211,16 +293,18 @@ const Conversation = ({
         sendXmtpMessage(conversation.topic, m.text);
       }, 10);
     },
-    [conversation.topic, dispatch, state.xmtp.address]
+    [conversation, dispatch, state.xmtp.address]
   );
+
   const textInputRef = useRef<TextInput>();
 
   const onLeaveScreen = useCallback(() => {
+    if (!conversation) return;
     dispatch({
       type: XmtpDispatchTypes.XmtpSetCurrentMessageContent,
       payload: { topic: conversation.topic, content: messageContent.current },
     });
-  }, [conversation.topic, dispatch]);
+  }, [conversation, dispatch]);
 
   useEffect(() => {
     navigation.addListener("beforeRemove", onLeaveScreen);
@@ -238,6 +322,24 @@ const Conversation = ({
         user={{
           id: state.xmtp.address || "",
         }}
+        // Using default if we have a convo,
+        // hide if we don't have one (creating)
+        customBottomComponent={
+          conversation
+            ? undefined
+            : () => {
+                return null;
+              }
+        }
+        emptyState={() =>
+          conversation ? null : (
+            <Text
+              style={chatTheme(colorScheme).fonts.emptyChatPlaceholderTextStyle}
+            >
+              Opening your conversation...
+            </Text>
+          )
+        }
         theme={chatTheme(colorScheme)}
         usePreviewData={false}
         textInputProps={{
