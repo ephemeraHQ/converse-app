@@ -1,3 +1,4 @@
+import { WalletMobileSDKEVMProvider } from "@coinbase/wallet-mobile-sdk/build/WalletMobileSDKEVMProvider";
 import {
   RenderQrcodeModalProps,
   useWalletConnect,
@@ -259,6 +260,18 @@ export default function OnboardingComponent({
                 id: "coinbase",
                 picto: <TableViewEmoji emoji="🔵" />,
                 title: "Connect Coinbase Wallet",
+                action: async () => {
+                  const coinbaseProvider = new WalletMobileSDKEVMProvider({
+                    jsonRpcUrl:
+                      "wss://mainnet.infura.io/ws/v3/38f59a7bbbca49f18046ff3a4a752e1c",
+                  });
+                  const result = await coinbaseProvider.request({
+                    method: "eth_requestAccounts",
+                    params: [],
+                  });
+                  console.log(result);
+                  console.log(coinbaseProvider);
+                },
               },
               {
                 id: "walletconnect",

@@ -1,18 +1,33 @@
+import { configure, handleResponse } from "@coinbase/wallet-mobile-sdk";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import WalletConnectProvider, {
   QrcodeModal,
   RenderQrcodeModalProps,
 } from "@walletconnect/react-native-dapp";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { Linking } from "react-native";
 
 import OnboardingComponent from "../components/OnboardingComponent";
 import config from "../config";
+
+configure({
+  callbackURL: new URL(`${config.scheme}://`),
+  hostURL: new URL("https://wallet.coinbase.com/wsegue"),
+  hostPackageName: "org.toshi",
+});
 
 export default function OnboardingScreen() {
   const [walletConnectProps, setWalletConnectProps] = useState<
     RenderQrcodeModalProps | undefined
   >(undefined);
   const [hideModal, setHideModal] = useState(false);
+  // Your app's deeplink handling code
+  useEffect(() => {
+    const sub = Linking.addEventListener("url", ({ url }) => {
+      handleResponse(new URL(url));
+    });
+    return () => sub.remove();
+  }, []);
   return (
     <WalletConnectProvider
       redirectUrl={`${config.scheme}://"`}
