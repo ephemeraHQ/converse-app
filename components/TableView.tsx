@@ -43,6 +43,10 @@ export const TableViewSymbol = ({ symbol }: { symbol: string }) => (
   />
 );
 
+export const TableViewEmoji = ({ emoji }: { emoji: string }) => (
+  <Text style={{ width: 32, marginRight: 2, marginLeft: 6 }}>{emoji}</Text>
+);
+
 const TableViewItem = ({
   picto,
   title,
@@ -140,8 +144,8 @@ const getStyles = (colorScheme: ColorSchemeName) =>
       borderBottomColor: itemSeparatorColor(colorScheme),
       flex: 1,
       paddingRight: 16,
-      paddingTop: 10,
-      paddingBottom: 10,
+      paddingTop: 14,
+      paddingBottom: 14,
     },
     textContainerLastItem: {
       borderBottomWidth: 0,

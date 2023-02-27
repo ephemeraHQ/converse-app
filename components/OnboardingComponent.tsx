@@ -1,4 +1,7 @@
-import { useWalletConnect } from "@walletconnect/react-native-dapp";
+import {
+  RenderQrcodeModalProps,
+  useWalletConnect,
+} from "@walletconnect/react-native-dapp";
 import WalletConnectProvider from "@walletconnect/web3-provider";
 import { Bytes, ethers, Signer } from "ethers";
 import React, { useCallback, useEffect, useRef, useState } from "react";
@@ -8,6 +11,7 @@ import {
   Text,
   PlatformColor,
   ActivityIndicator,
+  AppState,
 } from "react-native";
 import { SFSymbol } from "react-native-sfsymbols";
 
@@ -17,8 +21,17 @@ import config from "../config";
 import { saveXmtpKeys } from "../utils/keychain";
 import { shortAddress } from "../utils/str";
 import { getXmtpKeysFromSigner, isOnXmtp } from "../utils/xmtp";
+import TableView, { TableViewEmoji, TableViewSymbol } from "./TableView";
 
-export default function OnboardingComponent() {
+type Props = {
+  walletConnectProps: RenderQrcodeModalProps | undefined;
+  setHideModal: (hide: boolean) => void;
+};
+
+export default function OnboardingComponent({
+  walletConnectProps,
+  setHideModal,
+}: Props) {
   const [loading, setLoading] = useState(false);
   const [user, setUser] = useState({
     address: "",
@@ -88,6 +101,8 @@ export default function OnboardingComponent() {
         isOnXmtp: isOnNetwork,
         signer: newSigner,
       });
+      console.log("setting loading false 12");
+      setLoading(false);
     };
 
     if (connector?.connected) {
@@ -118,20 +133,64 @@ export default function OnboardingComponent() {
     }
   }, [user]);
 
-  const connectWallet = useCallback(async () => {
-    autoDisconnect.current = false;
-    setLoading(true);
-    try {
-      await connector?.connect();
-    } catch {
-      console.log("User did not connect to WC");
-    }
-    setLoading(false);
+  const directConnectToWallet = useRef("");
+  const appState = useRef(AppState.currentState);
+
+  useEffect(() => {
+    const subscription = AppState.addEventListener(
+      "change",
+      async (nextAppState) => {
+        if (
+          appState.current.match(/inactive|background/) &&
+          nextAppState === "active"
+        ) {
+          (connector as any)?._qrcodeModal?.close();
+        }
+        appState.current = nextAppState;
+      }
+    );
+
+    return () => {
+      subscription.remove();
+    };
   }, [connector]);
+
+  const connectWallet = useCallback(
+    async (walletName: string) => {
+      directConnectToWallet.current = walletName;
+      autoDisconnect.current = false;
+      setLoading(true);
+      setHideModal(!!walletName);
+      try {
+        await connector?.connect();
+      } catch {
+        console.log("User did not connect to WC");
+        setLoading(false);
+      }
+      setHideModal(false);
+    },
+    [connector, setHideModal]
+  );
+
+  useEffect(() => {
+    if (directConnectToWallet.current && walletConnectProps?.uri) {
+      const connectTo = directConnectToWallet.current;
+      directConnectToWallet.current = "";
+      const walletService = walletConnectProps?.walletServices.find(
+        (w) => w.name === connectTo
+      );
+      if (walletService) {
+        walletConnectProps.connectToWalletService(
+          walletService,
+          walletConnectProps?.uri
+        );
+      }
+    }
+  }, [walletConnectProps]);
 
   let sfSymbol = "message.circle.fill";
   let title = "GM";
-  let text = `Converse connects web3 identities with each other. We recommend that you use your "public" wallet with our app.`;
+  let text = `Converse connects web3 identities with each other. Connect your wallet to start chatting.`;
   if (user.address) {
     sfSymbol = "signature";
     title = "Sign";
@@ -177,12 +236,41 @@ export default function OnboardingComponent() {
       )}
 
       {!user.signer && !loading && (
-        <Button
-          title="Connect Wallet"
-          variant="blue"
-          style={styles.connect}
-          onPress={connectWallet}
-        />
+        <View style={styles.walletSelectorContainer}>
+          <TableView
+            items={[
+              {
+                id: "metamask",
+                picto: <TableViewEmoji emoji="🦊" />,
+                title: "Connect Metamask",
+                action: () => {
+                  connectWallet("MetaMask");
+                },
+              },
+              {
+                id: "rainbow",
+                picto: <TableViewEmoji emoji="🌈" />,
+                title: "Connect Rainbow",
+                action: () => {
+                  connectWallet("Rainbow");
+                },
+              },
+              {
+                id: "coinbase",
+                picto: <TableViewEmoji emoji="🔵" />,
+                title: "Connect Coinbase Wallet",
+              },
+              {
+                id: "walletconnect",
+                picto: <TableViewSymbol symbol="plus" />,
+                title: "Connect another wallet",
+                action: () => {
+                  connectWallet("");
+                },
+              },
+            ]}
+          />
+        </View>
       )}
       {user.signer && (
         <>
@@ -255,5 +343,9 @@ const styles = StyleSheet.create({
   },
   logout: {
     marginBottom: 54,
+  },
+  walletSelectorContainer: {
+    width: "100%",
+    marginBottom: 97,
   },
 });
