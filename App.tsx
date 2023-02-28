@@ -22,6 +22,7 @@ Sentry.init({
   dsn: config.sentryDSN,
   enableInExpoDevelopment: true,
   debug: config.env === "dev",
+  environment: config.env,
 });
 
 export default function App() {

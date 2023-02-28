@@ -3,6 +3,7 @@ import * as Clipboard from "expo-clipboard";
 import Constants from "expo-constants";
 import * as Updates from "expo-updates";
 import { forwardRef, useImperativeHandle } from "react";
+import * as Sentry from "sentry-expo";
 
 import config from "../config";
 import { clearDB } from "../data/db";
@@ -25,6 +26,12 @@ const DebugButton = forwardRef((props, ref) => {
         "Is hermes": () => {
           const isHermes = () => (global as any).HermesInternal != null;
           alert(isHermes() ? "yes" : "no");
+        },
+        "Sentry JS error": () => {
+          throw new Error("My first Sentry error!");
+        },
+        "Sentry Native error": () => {
+          Sentry.Native.nativeCrash();
         },
         "Update app": async () => {
           try {
