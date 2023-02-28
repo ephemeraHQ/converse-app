@@ -113,7 +113,6 @@ export default function NewConversation({
       const isLens = value.endsWith(config.lensSuffix);
       const isENS = value.endsWith(".eth");
       if (is0x || isLens || isENS) {
-        addLog(`searching for value - ${value}`);
         setStatus(({ error }) => ({
           loading: true,
           error,
@@ -122,14 +121,10 @@ export default function NewConversation({
           existingConversations: [],
         }));
         searchingForValue.current = value;
-        addLog("getting address for peer");
         const resolvedAddress = await getAddressForPeer(value);
-        addLog(`got address for peer - ${resolvedAddress}`);
         if (searchingForValue.current === value) {
-          addLog("still searching for this value");
           // If we're still searching for this one
           if (!resolvedAddress) {
-            addLog("unresolved address!");
             setStatus({
               loading: false,
               address: "",
@@ -143,27 +138,30 @@ export default function NewConversation({
             return;
           }
           const address = getAddress(resolvedAddress.toLowerCase());
-          addLog(`formatted address - ${address}`);
           const addressIsOnXmtp = await isOnXmtp(address);
           addLog(`address on XMTP - ${addressIsOnXmtp ? "true" : "false"}`);
           if (searchingForValue.current === value) {
             addLog("still searching this value #2");
             if (addressIsOnXmtp) {
               addLog("searching in  conversations");
-              // Let's find existing conversations with this user
-              const conversations = Object.values(
-                conversationsRef.current
-              ).filter(
-                (c) => c.peerAddress.toLowerCase() === address.toLowerCase()
-              );
-              addLog("all good #1");
-              setStatus({
-                loading: false,
-                error: "",
-                address,
-                askPolToInvite: "",
-                existingConversations: conversations,
-              });
+              try {
+                // Let's find existing conversations with this user
+                const conversations = Object.values(
+                  conversationsRef.current
+                ).filter(
+                  (c) => c.peerAddress.toLowerCase() === address.toLowerCase()
+                );
+                addLog("all good #1");
+                setStatus({
+                  loading: false,
+                  error: "",
+                  address,
+                  askPolToInvite: "",
+                  existingConversations: conversations,
+                });
+              } catch (e: any) {
+                addLog(`Error in searching - ${e.message} - ${e}`);
+              }
             } else {
               addLog("not on xmp");
               setStatus({
