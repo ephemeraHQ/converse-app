@@ -7,6 +7,7 @@ import React from "react";
 import { StyleSheet, useColorScheme, View } from "react-native";
 // eslint-disable-next-line import/order
 import * as SplashScreen from "expo-splash-screen";
+import * as Sentry from "sentry-expo";
 
 import XmtpWebview from "./components/XmtpWebview";
 import config from "./config";
@@ -15,6 +16,12 @@ import Main from "./screens/Main";
 
 SplashScreen.preventAutoHideAsync().catch(() => {
   /* reloading the app might trigger some race conditions, ignore them */
+});
+
+Sentry.init({
+  dsn: config.sentryDSN,
+  enableInExpoDevelopment: true,
+  debug: config.env === "dev",
 });
 
 export default function App() {

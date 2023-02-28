@@ -11,6 +11,8 @@ const defaultConfig = {
   websiteDomain: "getconverse.app",
   conversationDomain: "getconverse.app",
   infuraApiKey: "38f59a7bbbca49f18046ff3a4a752e1c",
+  sentryDSN:
+    "https://fb7c7cbf876644b68a05db08623c8369@o4504757119680512.ingest.sentry.io/4504757120729088",
 };
 
 const ENV = {
