@@ -176,8 +176,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/xmtp/xmtp-ios",
       "state" : {
-        "branch" : "better-convo-js-interop",
-        "revision" : "e56aa09118aa1e062bb97e60b1e0a6b2cdd86e7c"
+        "branch" : "main",
+        "revision" : "71316acf125a1ce1ffed376e68e366ca94d1ccfd"
       }
     }
   ],

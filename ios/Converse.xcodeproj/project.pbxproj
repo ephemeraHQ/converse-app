@@ -773,7 +773,7 @@
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/xmtp/xmtp-ios";
 			requirement = {
-				branch = "better-convo-js-interop";
+				branch = main;
 				kind = branch;
 			};
 		};
