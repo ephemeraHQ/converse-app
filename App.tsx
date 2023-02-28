@@ -20,7 +20,7 @@ SplashScreen.preventAutoHideAsync().catch(() => {
 
 Sentry.init({
   dsn: config.sentryDSN,
-  enableInExpoDevelopment: true,
+  enableInExpoDevelopment: false,
   debug: config.env === "dev",
   environment: config.env,
 });
