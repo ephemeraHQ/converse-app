@@ -2,11 +2,10 @@ import { useActionSheet } from "@expo/react-native-action-sheet";
 import * as Clipboard from "expo-clipboard";
 import Constants from "expo-constants";
 import * as Updates from "expo-updates";
-import { useContext, forwardRef, useImperativeHandle } from "react";
+import { forwardRef, useImperativeHandle } from "react";
 
 import config from "../config";
 import { clearDB } from "../data/db";
-import { AppContext } from "../data/store/context";
 
 const logs: string[] = [];
 
@@ -15,7 +14,6 @@ export const addLog = (log: string) => {
 };
 
 const DebugButton = forwardRef((props, ref) => {
-  const { state } = useContext(AppContext);
   const { showActionSheetWithOptions } = useActionSheet();
   // The component instance will be extended
   // with whatever you return from the callback passed
@@ -24,6 +22,10 @@ const DebugButton = forwardRef((props, ref) => {
     showDebugMenu() {
       const methods: any = {
         "Clear DB": clearDB,
+        "Is hermes": () => {
+          const isHermes = () => (global as any).HermesInternal != null;
+          alert(isHermes() ? "yes" : "no");
+        },
         "Update app": async () => {
           try {
             const update = await Updates.fetchUpdateAsync();
@@ -40,21 +42,9 @@ const DebugButton = forwardRef((props, ref) => {
         "Show logs": () => {
           alert(logs.join("\n"));
         },
-        "Count convos": () => {
-          alert(Object.keys(state.xmtp.conversations).length);
-        },
-        "Copy topics": () => {
-          Clipboard.setStringAsync(
-            Object.keys(state.xmtp.conversations).join("\n")
-          );
-          alert("Copied!");
-        },
         "Copy logs": () => {
           Clipboard.setStringAsync(logs.join("\n"));
           alert("Copied!");
-        },
-        "Show state": () => {
-          alert(JSON.stringify(state, null, 2));
         },
         "Show config": () => {
           alert(
