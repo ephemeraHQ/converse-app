@@ -73,28 +73,60 @@ export default function OnboardingComponent({
     }
   };
 
+  const enableDoubleSignature = useCallback((signer: Signer) => {
+    const sm = signer.signMessage.bind(signer);
+    (signer as any).signaturesCount = 0;
+    signer.signMessage = async (message: string | Bytes) => {
+      const waitForClickSecondSignature = async () => {
+        while (!clickedSecondSignature.current) {
+          await new Promise((r) => setTimeout(r, 100));
+        }
+      };
+      if ((signer as any).signaturesCount === 1) {
+        setWaitingForSecondSignature(true);
+        await waitForClickSecondSignature();
+      }
+      const result = await sm(message);
+      (signer as any).signaturesCount += 1;
+      return result;
+    };
+  }, []);
+
+  const connectCoinbaseWallet = useCallback(async () => {
+    setLoading(true);
+    try {
+      const coinbaseProvider = new WalletMobileSDKEVMProvider({
+        jsonRpcUrl: `https://mainnet.infura.io/v3/${config.infuraApiKey}`,
+      });
+      const result: any = await coinbaseProvider.request({
+        method: "eth_requestAccounts",
+        params: [],
+      });
+      const address = result[0];
+      const isOnNetwork = await isOnXmtp(address);
+      const web3Provider = new ethers.providers.Web3Provider(
+        coinbaseProvider as any
+      );
+      const signer = web3Provider.getSigner();
+      enableDoubleSignature(signer);
+      setUser({
+        address,
+        isOnXmtp: isOnNetwork,
+        signer,
+      });
+    } catch (e) {
+      console.log(e);
+    }
+    setLoading(false);
+  }, [enableDoubleSignature]);
+
   useEffect(() => {
     connectorRef.current = connector;
     const requestSignatures = async () => {
       await provider.enable();
       const ethersProvider = new ethers.providers.Web3Provider(provider);
       const newSigner = ethersProvider.getSigner();
-      const sm = newSigner.signMessage.bind(newSigner);
-      (newSigner as any).signaturesCount = 0;
-      newSigner.signMessage = async (message: string | Bytes) => {
-        const waitForClickSecondSignature = async () => {
-          while (!clickedSecondSignature.current) {
-            await new Promise((r) => setTimeout(r, 100));
-          }
-        };
-        if ((newSigner as any).signaturesCount === 1) {
-          setWaitingForSecondSignature(true);
-          await waitForClickSecondSignature();
-        }
-        const result = await sm(message);
-        (newSigner as any).signaturesCount += 1;
-        return result;
-      };
+      enableDoubleSignature(newSigner);
       const newAddress = await newSigner.getAddress();
       const isOnNetwork = await isOnXmtp(newAddress);
       setUser({
@@ -115,7 +147,7 @@ export default function OnboardingComponent({
     }
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [connector]);
+  }, [connector, enableDoubleSignature]);
 
   const initXmtpClient = useCallback(async () => {
     if (!user.signer) {
@@ -260,18 +292,7 @@ export default function OnboardingComponent({
                 id: "coinbase",
                 picto: <TableViewEmoji emoji="🔵" />,
                 title: "Connect Coinbase Wallet",
-                action: async () => {
-                  const coinbaseProvider = new WalletMobileSDKEVMProvider({
-                    jsonRpcUrl:
-                      "wss://mainnet.infura.io/ws/v3/38f59a7bbbca49f18046ff3a4a752e1c",
-                  });
-                  const result = await coinbaseProvider.request({
-                    method: "eth_requestAccounts",
-                    params: [],
-                  });
-                  console.log(result);
-                  console.log(coinbaseProvider);
-                },
+                action: connectCoinbaseWallet,
               },
               {
                 id: "walletconnect",
