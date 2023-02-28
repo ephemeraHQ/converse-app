@@ -13,12 +13,15 @@ import {
   PlatformColor,
   ActivityIndicator,
   AppState,
+  ColorSchemeName,
+  useColorScheme,
 } from "react-native";
 import { SFSymbol } from "react-native-sfsymbols";
 
 import Button from "../components/Button";
 import { sendMessageToWebview } from "../components/XmtpWebview";
 import config from "../config";
+import { backgroundColor, textPrimaryColor } from "../utils/colors";
 import { saveXmtpKeys } from "../utils/keychain";
 import { shortAddress } from "../utils/str";
 import { getXmtpKeysFromSigner, isOnXmtp } from "../utils/xmtp";
@@ -33,6 +36,8 @@ export default function OnboardingComponent({
   walletConnectProps,
   setHideModal,
 }: Props) {
+  const colorScheme = useColorScheme();
+  const styles = getStyles(colorScheme);
   const [loading, setLoading] = useState(false);
   const [user, setUser] = useState({
     address: "",
@@ -245,7 +250,7 @@ export default function OnboardingComponent({
   }
 
   return (
-    <View style={styles.notifications}>
+    <View style={styles.onboarding}>
       <View style={styles.picto}>
         <SFSymbol
           name={sfSymbol}
@@ -346,40 +351,44 @@ export default function OnboardingComponent({
   );
 }
 
-const styles = StyleSheet.create({
-  notifications: {
-    flex: 1,
-    alignItems: "center",
-  },
-  picto: {
-    marginTop: 124,
-    marginBottom: 50,
-  },
-  title: {
-    fontWeight: "700",
-    fontSize: 34,
-  },
-  p: {
-    fontSize: 17,
-    marginLeft: 32,
-    marginRight: 32,
-    textAlign: "center",
-    marginTop: 21,
-    marginBottom: "auto",
-  },
-  connect: {
-    marginBottom: 54,
-    marginTop: 21,
-  },
-  sign: {
-    marginBottom: 21,
-    marginTop: 21,
-  },
-  logout: {
-    marginBottom: 54,
-  },
-  walletSelectorContainer: {
-    width: "100%",
-    marginBottom: 97,
-  },
-});
+const getStyles = (colorScheme: ColorSchemeName) =>
+  StyleSheet.create({
+    onboarding: {
+      flex: 1,
+      alignItems: "center",
+      backgroundColor: backgroundColor(colorScheme),
+    },
+    picto: {
+      marginTop: 124,
+      marginBottom: 50,
+    },
+    title: {
+      fontWeight: "700",
+      fontSize: 34,
+      color: textPrimaryColor(colorScheme),
+    },
+    p: {
+      fontSize: 17,
+      marginLeft: 32,
+      marginRight: 32,
+      textAlign: "center",
+      marginTop: 21,
+      marginBottom: "auto",
+      color: textPrimaryColor(colorScheme),
+    },
+    connect: {
+      marginBottom: 54,
+      marginTop: 21,
+    },
+    sign: {
+      marginBottom: 21,
+      marginTop: 21,
+    },
+    logout: {
+      marginBottom: 54,
+    },
+    walletSelectorContainer: {
+      width: "100%",
+      marginBottom: 97,
+    },
+  });

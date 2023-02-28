@@ -83,7 +83,7 @@ export const myMessageBubbleColor = (colorScheme: ColorSchemeName) => {
 };
 
 const TABLE_VIEW_ITEM_BACKGROUND_LIGHT = "#F2F2F6";
-const TABLE_VIEW_ITEM_BACKGROUND_DARK = "#1C1C1E";
+const TABLE_VIEW_ITEM_BACKGROUND_DARK = "#2C2C2E";
 
 export const tableViewItemBackground = (colorScheme: ColorSchemeName) => {
   if (colorScheme === "dark") return TABLE_VIEW_ITEM_BACKGROUND_DARK;
