@@ -8,6 +8,7 @@
   "exclude": [
     "./vendor/**/*",
     "vendor/react-native-chat-ui/utils/index.ts",
-    "./node_modules/**/*"
+    "./node_modules/**/*",
+    "./dist/**/*"
   ]
 }
