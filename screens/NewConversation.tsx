@@ -20,7 +20,6 @@ import {
   useColorScheme,
 } from "react-native";
 
-import { addLog } from "../components/DebugButton";
 import TableView, { TableViewSymbol } from "../components/TableView";
 import { sendMessageToWebview } from "../components/XmtpWebview";
 import config from "../config";
@@ -34,6 +33,7 @@ import {
 } from "../utils/colors";
 import { getAddressForPeer } from "../utils/eth";
 import { lastValueInMap } from "../utils/map";
+import { sentryTrackMessage } from "../utils/sentry";
 import { addressPrefix, conversationName } from "../utils/str";
 import { isOnXmtp } from "../utils/xmtp";
 import { NavigationParamList } from "./Main";
@@ -139,31 +139,33 @@ export default function NewConversation({
           }
           const address = getAddress(resolvedAddress.toLowerCase());
           const addressIsOnXmtp = await isOnXmtp(address);
-          addLog(`address on XMTP - ${addressIsOnXmtp ? "true" : "false"}`);
           if (searchingForValue.current === value) {
-            addLog("still searching this value #2");
             if (addressIsOnXmtp) {
-              addLog("searching in  conversations");
-              try {
-                // Let's find existing conversations with this user
-                const conversations = Object.values(
-                  conversationsRef.current
-                ).filter(
-                  (c) => c.peerAddress.toLowerCase() === address.toLowerCase()
+              // Let's find existing conversations with this user
+              const conversations = Object.values(
+                conversationsRef.current
+              ).filter((conversation) => {
+                if (!conversation || !conversation.peerAddress) {
+                  sentryTrackMessage(
+                    "Encountered a conversation without peer",
+                    { conversation }
+                  );
+                  return false;
+                }
+                return (
+                  conversation.peerAddress.toLowerCase() ===
+                  address.toLowerCase()
                 );
-                addLog("all good #1");
-                setStatus({
-                  loading: false,
-                  error: "",
-                  address,
-                  askPolToInvite: "",
-                  existingConversations: conversations,
-                });
-              } catch (e: any) {
-                addLog(`Error in searching - ${e.message} - ${e}`);
-              }
+              });
+
+              setStatus({
+                loading: false,
+                error: "",
+                address,
+                askPolToInvite: "",
+                existingConversations: conversations,
+              });
             } else {
-              addLog("not on xmp");
               setStatus({
                 loading: false,
                 error: `${value} has never used Converse or any other XMTP client. Ask our co-founder Pol to onboard them!`,
@@ -172,11 +174,7 @@ export default function NewConversation({
                 existingConversations: [],
               });
             }
-          } else {
-            addLog("not searching this value #1");
           }
-        } else {
-          addLog("not searching this value #2");
         }
       } else {
         setStatus({
