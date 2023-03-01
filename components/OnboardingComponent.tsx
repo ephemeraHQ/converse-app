@@ -103,10 +103,12 @@ export default function OnboardingComponent({
       const coinbaseProvider = new WalletMobileSDKEVMProvider({
         jsonRpcUrl: `https://mainnet.infura.io/v3/${config.infuraApiKey}`,
       });
+      waitingForCoinbase.current = true;
       const result: any = await coinbaseProvider.request({
         method: "eth_requestAccounts",
         params: [],
       });
+      waitingForCoinbase.current = false;
       const address = result[0];
       const isOnNetwork = await isOnXmtp(address);
       const web3Provider = new ethers.providers.Web3Provider(
@@ -122,6 +124,7 @@ export default function OnboardingComponent({
     } catch (e) {
       console.log(e);
     }
+    waitingForCoinbase.current = false;
     setLoading(false);
   }, [enableDoubleSignature]);
 
@@ -139,7 +142,6 @@ export default function OnboardingComponent({
         isOnXmtp: isOnNetwork,
         signer: newSigner,
       });
-      console.log("setting loading false 12");
       setLoading(false);
     };
 
@@ -173,6 +175,7 @@ export default function OnboardingComponent({
 
   const directConnectToWallet = useRef("");
   const appState = useRef(AppState.currentState);
+  const waitingForCoinbase = useRef(false);
 
   useEffect(() => {
     const subscription = AppState.addEventListener(
@@ -182,7 +185,15 @@ export default function OnboardingComponent({
           appState.current.match(/inactive|background/) &&
           nextAppState === "active"
         ) {
-          (connector as any)?._qrcodeModal?.close();
+          try {
+            (connector as any)?._qrcodeModal?.close();
+          } catch (e) {
+            console.log(e);
+          }
+          if (waitingForCoinbase.current) {
+            waitingForCoinbase.current = false;
+            setLoading(false);
+          }
         }
         appState.current = nextAppState;
       }
