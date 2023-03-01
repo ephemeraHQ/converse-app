@@ -19,6 +19,21 @@ struct SavedNotificationMessage: Codable {
   var id: String
 }
 
+func shortAddress(address: String) -> String {
+  if (address.count > 7) {
+    let prefixStart = address.index(address.startIndex, offsetBy: 0)
+    let prefixEnd = address.index(address.startIndex, offsetBy: 3)
+    let suffixStart = address.index(address.startIndex, offsetBy: address.count - 4)
+    let suffixEnd = address.index(address.startIndex, offsetBy: address.count - 1)
+    let prefixRange = prefixStart...prefixEnd
+    let suffixRange = suffixStart...suffixEnd
+    let prefix = address[prefixRange]
+    let suffix = address[suffixRange]
+    return "\(prefix)...\(suffix)"
+  }
+  return address
+}
+
 func getKeychainValue(forKey: String) -> String? {
   let extensionBundleID = Bundle.main.bundleIdentifier ?? ""
   let appBundleId = extensionBundleID.replacingOccurrences(of: ".ConverseNotificationExtension", with: "")
@@ -142,7 +157,7 @@ func persistDecodedConversation(contentTopic: String, dict: [String : Any]) {
   }
 }
 
-func decodeConversationMessage(xmtpClient: XMTP.Client, envelope: XMTP.Envelope) async -> (content: String?, fromMe: Bool) {
+func decodeConversationMessage(xmtpClient: XMTP.Client, envelope: XMTP.Envelope) async -> (content: String?, senderAddress: String?) {
   let conversation = getPersistedConversation(xmtpClient: xmtpClient, contentTopic: envelope.contentTopic);
   if (conversation != nil) {
     do {
@@ -154,13 +169,13 @@ func decodeConversationMessage(xmtpClient: XMTP.Client, envelope: XMTP.Envelope)
         // Let's save the notification for immediate display
         try saveMessage(topic: envelope.contentTopic, sent: decodedMessage.sent, senderAddress: decodedMessage.senderAddress, content: decodedContent!, id: decodedMessage.id)
       }
-      return (decodedContent, decodedMessage.senderAddress == xmtpClient.address)
+      return (decodedContent, decodedMessage.senderAddress)
     } catch {
-      return (nil, false);
+      return (nil, nil);
       //      return "ERROR WHILE DECODING \(error)";
     }
   } else {
-    return (nil, false);
+    return (nil, nil);
     //    return "NO CONVERSATION";
   }
 }
@@ -182,7 +197,7 @@ func subscribeToTopic(apiURI: String?, expoPushToken: String?, topic: String) {
   }
 }
 
-func handleNewConversation(xmtpClient: XMTP.Client, envelope: XMTP.Envelope) {
+func handleNewConversation(xmtpClient: XMTP.Client, envelope: XMTP.Envelope) -> XMTP.Conversation? {
   do {
     // Let's subscribe to that specific topic
     let sharedDefaults = SharedDefaults()
@@ -206,6 +221,8 @@ func handleNewConversation(xmtpClient: XMTP.Client, envelope: XMTP.Envelope) {
       }
       default: do {}
       }
+      
+      return conversation
     } else if (isInviteTopic(topic: envelope.contentTopic)) {
       let conversation = try xmtpClient.conversations.fromInvite(envelope: envelope)
       switch conversation {
@@ -220,10 +237,12 @@ func handleNewConversation(xmtpClient: XMTP.Client, envelope: XMTP.Envelope) {
       }
       default: do {}
       }
+      return conversation
     }
   } catch {
     print("[NotificationExtension] Could not decode new conversation envelope \(error)")
   }
+  return nil;
 }
 
 func handleNotificationAsync(contentHandler: ((UNNotificationContent) -> Void), bestAttemptContent: UNMutableNotificationContent?) async {
@@ -245,20 +264,25 @@ func handleNotificationAsync(contentHandler: ((UNNotificationContent) -> Void), 
         }
         
         if (isIntroTopic(topic: contentTopic) || isInviteTopic(topic: contentTopic)) {
-          handleNewConversation(xmtpClient: xmtpClient!, envelope: envelope)
+          let conversation = handleNewConversation(xmtpClient: xmtpClient!, envelope: envelope)
+          if (conversation != nil && conversation?.peerAddress != nil) {
+            bestAttemptContent.title = shortAddress(address: conversation!.peerAddress)
+          }
         } else {
-          let conversationTitle = getSavedConversationTitle(contentTopic: contentTopic);
-          print("GOT A CONVO TITLE", conversationTitle)
-          bestAttemptContent.title = conversationTitle;
+          var conversationTitle = getSavedConversationTitle(contentTopic: contentTopic);
           let decodedMessageResult = await decodeConversationMessage(xmtpClient: xmtpClient!, envelope: envelope)
-          if (decodedMessageResult.fromMe) {
+          if (decodedMessageResult.senderAddress == xmtpClient?.address) {
             // Message is from me, let's ignore it
             print("[NotificationExtension] Dropping a notification coming from me")
             contentHandler(UNNotificationContent())
             return
           } else if (decodedMessageResult.content != nil) {
             bestAttemptContent.body = decodedMessageResult.content!;
+            if (conversationTitle.count == 0 && decodedMessageResult.senderAddress != nil) {
+              conversationTitle = shortAddress(address: decodedMessageResult.senderAddress!)
+            }
           }
+          bestAttemptContent.title = conversationTitle;
           //        else {
           //          bestAttemptContent.body = "NO MESSAGE CONTENT";
           //        }
