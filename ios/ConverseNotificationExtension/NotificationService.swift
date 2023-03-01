@@ -187,7 +187,6 @@ func handleNewConversation(xmtpClient: XMTP.Client, envelope: XMTP.Envelope) {
     // Let's subscribe to that specific topic
     let sharedDefaults = SharedDefaults()
     let apiURI = sharedDefaults.string(forKey: "api-uri")?.replacingOccurrences(of: "\"", with: "")
-    let loggedAddress = sharedDefaults.string(forKey: "xmtp-address")
     let expoPushToken = getKeychainValue(forKey: "EXPO_PUSH_TOKEN")
     
     if (isIntroTopic(topic: envelope.contentTopic)) {
@@ -199,7 +198,7 @@ func handleNewConversation(xmtpClient: XMTP.Client, envelope: XMTP.Envelope) {
         let createdAt = formatter.string(from: conversation.createdAt)
         
         let conversationDict = ["version": "v2", "peerAddress": conversationV1.peerAddress, "createdAt": createdAt]
-        var addresses = [conversationV1.peerAddress, loggedAddress!]
+        var addresses = [conversationV1.peerAddress, xmtpClient.address]
         addresses.sort()
         let conversationV1Topic = "/xmtp/0/dm-\(addresses[0])-\(addresses[1])/proto"
         subscribeToTopic(apiURI: apiURI, expoPushToken: expoPushToken, topic: conversationV1Topic)
@@ -249,10 +248,12 @@ func handleNotificationAsync(contentHandler: ((UNNotificationContent) -> Void), 
           handleNewConversation(xmtpClient: xmtpClient!, envelope: envelope)
         } else {
           let conversationTitle = getSavedConversationTitle(contentTopic: contentTopic);
+          print("GOT A CONVO TITLE", conversationTitle)
           bestAttemptContent.title = conversationTitle;
           let decodedMessageResult = await decodeConversationMessage(xmtpClient: xmtpClient!, envelope: envelope)
           if (decodedMessageResult.fromMe) {
             // Message is from me, let's ignore it
+            print("[NotificationExtension] Dropping a notification coming from me")
             contentHandler(UNNotificationContent())
             return
           } else if (decodedMessageResult.content != nil) {
