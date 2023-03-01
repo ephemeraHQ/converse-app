@@ -13,8 +13,6 @@
 		19CB22F9EFF3DAB598C97312 /* libPods-Converse.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 1FE6BAD896FE2E2FDF755C51 /* libPods-Converse.a */; };
 		3E461D99554A48A4959DE609 /* SplashScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = AA286B85B6C04FC6940260E9 /* SplashScreen.storyboard */; };
 		4C31F4EE29AF887B0032D062 /* Alamofire in Frameworks */ = {isa = PBXBuildFile; productRef = 4C31F4ED29AF887B0032D062 /* Alamofire */; };
-		41EDB1CAB11274790A5BF955 /* libPods-Converse.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 9AD7F81612EFCFE99FC1D37F /* libPods-Converse.a */; };
-		4C183D2029AF482C00E7EC78 /* xmtp.html in Resources */ = {isa = PBXBuildFile; fileRef = 4C183D1F29AF482B00E7EC78 /* xmtp.html */; };
 		4C3A90D72989DF17002D709F /* XMTP in Frameworks */ = {isa = PBXBuildFile; productRef = 4C3A90D62989DF17002D709F /* XMTP */; };
 		4C5A28D6297CB0AB0070A216 /* KeychainAccess in Frameworks */ = {isa = PBXBuildFile; productRef = 4C5A28D5297CB0AB0070A216 /* KeychainAccess */; };
 		4C5A28D8297CB0C70070A216 /* KeychainAccess in Frameworks */ = {isa = PBXBuildFile; productRef = 4C5A28D7297CB0C70070A216 /* KeychainAccess */; };
@@ -59,7 +57,6 @@
 		13B07FB61A68108700A75B9A /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = Info.plist; path = Converse/Info.plist; sourceTree = "<group>"; };
 		13B07FB71A68108700A75B9A /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = main.m; path = Converse/main.m; sourceTree = "<group>"; };
 		1FE6BAD896FE2E2FDF755C51 /* libPods-Converse.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-Converse.a"; sourceTree = BUILT_PRODUCTS_DIR; };
-		4C183D1F29AF482B00E7EC78 /* xmtp.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; name = xmtp.html; path = ../assets/xmtp.html; sourceTree = "<group>"; };
 		4C3F6104295C9038007A969B /* ConverseNotificationExtension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = ConverseNotificationExtension.entitlements; sourceTree = "<group>"; };
 		4C65044A295C7C1F00C5A40F /* ConverseNotificationExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = ConverseNotificationExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		4C65044C295C7C1F00C5A40F /* NotificationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationService.swift; sourceTree = "<group>"; };
@@ -101,7 +98,6 @@
 		13B07FAE1A68108700A75B9A /* Converse */ = {
 			isa = PBXGroup;
 			children = (
-				4C183D1F29AF482B00E7EC78 /* xmtp.html */,
 				BB2F792B24A3F905000567C9 /* Supporting */,
 				13B07FAF1A68108700A75B9A /* AppDelegate.h */,
 				13B07FB01A68108700A75B9A /* AppDelegate.mm */,
@@ -301,7 +297,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				BB2F792D24A3F905000567C9 /* Expo.plist in Resources */,
-				4C183D2029AF482C00E7EC78 /* xmtp.html in Resources */,
 				13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */,
 				3E461D99554A48A4959DE609 /* SplashScreen.storyboard in Resources */,
 			);
