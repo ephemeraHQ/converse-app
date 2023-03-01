@@ -8,6 +8,7 @@ import * as SplashScreen from "expo-splash-screen";
 import * as Sentry from "sentry-expo";
 
 import XmtpWebview from "./components/XmtpWebview";
+import config from "./config";
 import { AppProvider } from "./data/store/context";
 import Main from "./screens/Main";
 
