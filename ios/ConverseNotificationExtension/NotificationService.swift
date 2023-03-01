@@ -142,7 +142,7 @@ func persistDecodedConversation(contentTopic: String, dict: [String : Any]) {
   }
 }
 
-func decodeConversationMessage(xmtpClient: XMTP.Client, envelope: XMTP.Envelope) async -> String? {
+func decodeConversationMessage(xmtpClient: XMTP.Client, envelope: XMTP.Envelope) async -> (content: String?, fromMe: Bool) {
   let conversation = getPersistedConversation(xmtpClient: xmtpClient, contentTopic: envelope.contentTopic);
   if (conversation != nil) {
     do {
@@ -154,13 +154,13 @@ func decodeConversationMessage(xmtpClient: XMTP.Client, envelope: XMTP.Envelope)
         // Let's save the notification for immediate display
         try saveMessage(topic: envelope.contentTopic, sent: decodedMessage.sent, senderAddress: decodedMessage.senderAddress, content: decodedContent!, id: decodedMessage.id)
       }
-      return decodedContent
+      return (decodedContent, decodedMessage.senderAddress == xmtpClient.address)
     } catch {
-      return nil;
+      return (nil, false);
       //      return "ERROR WHILE DECODING \(error)";
     }
   } else {
-    return nil;
+    return (nil, false);
     //    return "NO CONVERSATION";
   }
 }
@@ -250,9 +250,13 @@ func handleNotificationAsync(contentHandler: ((UNNotificationContent) -> Void), 
         } else {
           let conversationTitle = getSavedConversationTitle(contentTopic: contentTopic);
           bestAttemptContent.title = conversationTitle;
-          let messageContent = await decodeConversationMessage(xmtpClient: xmtpClient!, envelope: envelope)
-          if (messageContent != nil) {
-            bestAttemptContent.body = messageContent!;
+          let decodedMessageResult = await decodeConversationMessage(xmtpClient: xmtpClient!, envelope: envelope)
+          if (decodedMessageResult.fromMe) {
+            // Message is from me, let's ignore it
+            contentHandler(UNNotificationContent())
+            return
+          } else if (decodedMessageResult.content != nil) {
+            bestAttemptContent.body = decodedMessageResult.content!;
           }
           //        else {
           //          bestAttemptContent.body = "NO MESSAGE CONTENT";
