@@ -5,6 +5,7 @@ import {
 import differenceInCalendarDays from "date-fns/differenceInCalendarDays";
 import format from "date-fns/format";
 import React, {
+  memo,
   useCallback,
   useContext,
   useEffect,
@@ -18,7 +19,6 @@ import {
   PlatformColor,
   StyleSheet,
   Text,
-  TouchableHighlight,
   TouchableOpacity,
   useColorScheme,
   View,
@@ -42,19 +42,26 @@ import { lastValueInMap } from "../utils/map";
 import { conversationName } from "../utils/str";
 import { NavigationParamList } from "./Main";
 
-export function conversationListItem(
-  navigation: NativeStackNavigationProp<NavigationParamList, "Messages">,
-  conversation: XmtpConversation,
-  colorScheme: ColorSchemeName,
-  selectedTopic: string | undefined,
-  setSelectedTopic: (topic: string) => void
-) {
+type ConversationListItemProps = {
+  navigation: NativeStackNavigationProp<NavigationParamList, "Messages">;
+  conversation: XmtpConversation;
+  colorScheme: ColorSchemeName;
+  conversationTime: number | undefined;
+  conversationTopic: string;
+  conversationName: string;
+  lastMessagePreview: string | undefined;
+};
+
+const ConversationListItem = memo(function ConversationListItem({
+  navigation,
+  colorScheme,
+  conversationTopic,
+  conversationTime,
+  conversationName,
+  lastMessagePreview,
+}: ConversationListItemProps) {
   const styles = getStyles(colorScheme);
   let timeToShow = "";
-  const conversationTime =
-    conversation.messages?.size > 0
-      ? lastValueInMap(conversation.messages)?.sent
-      : conversation.createdAt;
   if (conversationTime) {
     const days = differenceInCalendarDays(new Date(), conversationTime);
     if (days === 0) {
@@ -67,33 +74,39 @@ export function conversationListItem(
       timeToShow = format(conversationTime, "yyyy-MM-dd");
     }
   }
+  const [selected, setSelected] = useState(false);
+  const resetSelected = useCallback(() => {
+    setSelected(false);
+  }, []);
+  useEffect(() => {
+    navigation.addListener("transitionEnd", resetSelected);
+    return () => {
+      navigation.removeListener("transitionEnd", resetSelected);
+    };
+  }, [navigation, resetSelected]);
   return (
-    <TouchableHighlight
-      key={conversation.peerAddress}
+    <TouchableOpacity
+      activeOpacity={1}
+      key={conversationTopic}
+      onPressIn={() => {}}
       onPress={() => {
         navigation.navigate("Conversation", {
-          topic: conversation.topic,
+          topic: conversationTopic,
         });
-        setSelectedTopic(conversation.topic);
+        setSelected(true);
       }}
       style={{
-        backgroundColor:
-          selectedTopic === conversation.topic
-            ? clickedItemBackgroundColor(colorScheme)
-            : backgroundColor(colorScheme),
+        backgroundColor: selected
+          ? clickedItemBackgroundColor(colorScheme)
+          : backgroundColor(colorScheme),
       }}
-      underlayColor={backgroundColor(colorScheme)}
     >
       <View style={styles.conversationListItem}>
         <Text style={styles.peerAddress} numberOfLines={1}>
-          {conversationName(conversation)}
+          {conversationName}
         </Text>
         <Text style={styles.messagePreview} numberOfLines={2}>
-          {conversation.lazyMessages.length > 0
-            ? conversation.lazyMessages[0].content
-            : conversation.messages?.size > 0
-            ? lastValueInMap(conversation.messages)?.content
-            : ""}
+          {lastMessagePreview}
         </Text>
         <View style={styles.timeAndChevron}>
           <Text style={styles.timeText}>{timeToShow}</Text>
@@ -108,9 +121,9 @@ export function conversationListItem(
           />
         </View>
       </View>
-    </TouchableHighlight>
+    </TouchableOpacity>
   );
-}
+});
 
 function NewConversationButton({
   navigation,
@@ -182,9 +195,6 @@ export default function ConversationList({
   const [orderedConversations, setOrderedConversations] = useState<
     XmtpConversation[]
   >([]);
-  const [selectedTopic, setSelectedTopic] = useState<string | undefined>(
-    undefined
-  );
   useEffect(() => {
     const conversations = Object.values(state.xmtp.conversations).filter(
       (a) => a?.peerAddress
@@ -217,15 +227,6 @@ export default function ConversationList({
       ),
     });
   }, [navigation, route, state.xmtp.address]);
-  const resetSelectedTopic = useCallback(() => {
-    setSelectedTopic(undefined);
-  }, []);
-  useEffect(() => {
-    navigation.addListener("transitionEnd", resetSelectedTopic);
-    return () => {
-      navigation.removeListener("transitionEnd", resetSelectedTopic);
-    };
-  }, [navigation, resetSelectedTopic]);
   useEffect(() => {
     navigation.setOptions({
       headerTitle: () => {
@@ -237,21 +238,41 @@ export default function ConversationList({
       },
     });
   }, [navigation, state.xmtp.initialLoadDone, state.xmtp.loading]);
+  const keyExtractor = useCallback((item: XmtpConversation) => {
+    return item.topic;
+  }, []);
+  const renderItem = useCallback(
+    ({ item }: { item: XmtpConversation }) => (
+      <ConversationListItem
+        navigation={navigation}
+        conversation={item}
+        colorScheme={colorScheme}
+        conversationTopic={item.topic}
+        conversationTime={
+          item.messages?.size > 0
+            ? lastValueInMap(item.messages)?.sent
+            : item.createdAt
+        }
+        conversationName={conversationName(item)}
+        lastMessagePreview={
+          item.lazyMessages.length > 0
+            ? item.lazyMessages[0].content
+            : item.messages?.size > 0
+            ? lastValueInMap(item.messages)?.content
+            : ""
+        }
+      />
+    ),
+    [colorScheme, navigation]
+  );
   return (
     <FlatList
       contentInsetAdjustmentBehavior="automatic"
       style={styles.conversationList}
       data={orderedConversations}
-      renderItem={({ item }) =>
-        conversationListItem(
-          navigation,
-          item,
-          colorScheme,
-          selectedTopic,
-          setSelectedTopic
-        )
-      }
-      keyExtractor={(item) => item.topic}
+      renderItem={renderItem}
+      keyExtractor={keyExtractor}
+      initialNumToRender={20}
     />
   );
 }
