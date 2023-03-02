@@ -1,8 +1,4 @@
 import { WalletMobileSDKEVMProvider } from "@coinbase/wallet-mobile-sdk/build/WalletMobileSDKEVMProvider";
-import {
-  RenderQrcodeModalProps,
-  useWalletConnect,
-} from "@walletconnect/react-native-dapp";
 import WalletConnectProvider from "@walletconnect/web3-provider";
 import { Bytes, ethers, Signer } from "ethers";
 import React, { useCallback, useEffect, useRef, useState } from "react";
@@ -25,6 +21,10 @@ import { backgroundColor, textPrimaryColor } from "../utils/colors";
 import { saveXmtpKeys } from "../utils/keychain";
 import { shortAddress } from "../utils/str";
 import { getXmtpKeysFromSigner, isOnXmtp } from "../utils/xmtp";
+import {
+  RenderQrcodeModalProps,
+  useWalletConnect,
+} from "../vendor/wallet-connect-dapp";
 import TableView, { TableViewEmoji, TableViewSymbol } from "./TableView";
 
 type Props = {
