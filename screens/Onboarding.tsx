@@ -1,14 +1,19 @@
 import { configure, handleResponse } from "@coinbase/wallet-mobile-sdk";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import WalletConnectProvider, {
-  QrcodeModal,
-  RenderQrcodeModalProps,
-} from "@walletconnect/react-native-dapp";
 import { useEffect, useState } from "react";
 import { Linking } from "react-native";
 
 import OnboardingComponent from "../components/OnboardingComponent";
 import config from "../config";
+import WalletConnectProvider, {
+  QrcodeModal,
+  RenderQrcodeModalProps,
+} from "../vendor/wallet-connect-dapp";
+
+Linking.canOpenURL = async (url: string) => {
+  console.log({ url });
+  return true;
+};
 
 configure({
   callbackURL: new URL(`${config.scheme}://`),
