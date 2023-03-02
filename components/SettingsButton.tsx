@@ -1,4 +1,5 @@
 import { useActionSheet } from "@expo/react-native-action-sheet";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as Clipboard from "expo-clipboard";
 import * as Linking from "expo-linking";
 import React, { useContext } from "react";
@@ -51,6 +52,7 @@ export default function SettingsButton() {
               clearDB();
               disablePushNotifications();
               sendMessageToWebview("DISCONNECT");
+              AsyncStorage.clear();
             },
             Cancel: () => {},
           };
