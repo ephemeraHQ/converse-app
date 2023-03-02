@@ -1,4 +1,5 @@
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
+import { StatusBar } from "expo-status-bar";
 import React, { useContext, useEffect } from "react";
 import {
   View,
@@ -42,6 +43,7 @@ export default function ShareProfileScreen({
   }${config.env !== "prod" ? `?env=${config.env}` : ""}`;
   return (
     <View style={styles.shareProfile}>
+      <StatusBar hidden={false} style="light" />
       <View style={styles.shareProfileContent}>
         <View style={styles.qrCode}>
           <QRCode
