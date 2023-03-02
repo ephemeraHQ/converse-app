@@ -205,7 +205,6 @@ export default function Main() {
   }, [dispatch, saveNotificationsStatus, state.xmtp.address]);
 
   const splashScreenHidden = useRef(false);
-  const [splashScreenHiddenState, setSplashScreenHiddenState] = useState(false);
 
   const [hydrationDone, setHydrationDone] = useState(false);
 
@@ -268,7 +267,12 @@ export default function Main() {
         splashScreenHidden.current = true;
 
         SplashScreen.hideAsync();
-        setSplashScreenHiddenState(true);
+        dispatch({
+          type: AppDispatchTypes.AppHideSplashscreen,
+          payload: {
+            hide: true,
+          },
+        });
 
         // If app was loaded by clicking on notification,
         // let's navigate
@@ -351,7 +355,7 @@ export default function Main() {
 
   const navigationState = useRef<any>(undefined);
 
-  if (!splashScreenHiddenState) return null;
+  if (!state.app.splashScreenHidden) return null;
 
   if (!state.xmtp.address) return <OnboardingScreen />;
 
