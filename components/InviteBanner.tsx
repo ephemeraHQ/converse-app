@@ -4,7 +4,9 @@ import React, {
   View,
   Text,
   ColorSchemeName,
+  TouchableOpacity,
 } from "react-native";
+import { SFSymbol } from "react-native-sfsymbols";
 
 import {
   itemSeparatorColor,
@@ -15,7 +17,12 @@ import {
 import Button from "./Button";
 // import { conversationName } from "../utils/str";
 
-export default function InviteBanner() {
+type Props = {
+  onClickInvite: () => void;
+  onClickHide: () => void;
+};
+
+export default function InviteBanner({ onClickInvite, onClickHide }: Props) {
   const colorScheme = useColorScheme();
   const styles = getStyles(colorScheme);
   return (
@@ -23,15 +30,26 @@ export default function InviteBanner() {
       <View style={styles.inviteBannerLeft}>
         <Text style={styles.inviteTitle}>Invite to Converse</Text>
         <Text style={styles.inviteSubtitle} numberOfLines={1}>
-          {/* {conversationName(conversation)} is eligible */}
+          Get faster answers
         </Text>
       </View>
       <Button
         title="Invite"
         variant="grey"
         style={styles.inviteButton}
-        // onPress={inviteToConverse}
+        onPress={onClickInvite}
       />
+      <TouchableOpacity activeOpacity={0.6} onPress={onClickHide}>
+        <SFSymbol
+          name="xmark"
+          scale="large"
+          color="#8E8E93"
+          size={13}
+          resizeMode="center"
+          multicolor={false}
+          style={styles.xmark}
+        />
+      </TouchableOpacity>
     </View>
   );
 }
@@ -63,5 +81,10 @@ const getStyles = (colorScheme: ColorSchemeName) =>
     },
     inviteButton: {
       marginLeft: "auto",
+    },
+    xmark: {
+      width: 22,
+      height: 22,
+      marginLeft: 12,
     },
   });

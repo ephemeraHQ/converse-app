@@ -1,5 +1,6 @@
 import { useActionSheet } from "@expo/react-native-action-sheet";
 import { Theme } from "@flyerhq/react-native-chat-ui";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import * as Clipboard from "expo-clipboard";
 import React, {
@@ -23,6 +24,7 @@ import { SFSymbol } from "react-native-sfsymbols";
 import uuid from "react-native-uuid";
 
 import Button from "../components/Button";
+import InviteBanner from "../components/InviteBanner";
 import {
   sendMessageToWebview,
   sendXmtpMessage,
@@ -58,9 +60,14 @@ const Conversation = ({
   const [peerAddress, setPeerAddress] = useState(
     route.params.mainConversationWithPeer || ""
   );
+
+  const initialConversation = route.params.topic
+    ? state.xmtp.conversations[route.params.topic]
+    : undefined;
+
   const [conversation, setConversation] = useState<
     XmtpConversation | undefined
-  >(undefined);
+  >(initialConversation);
 
   useEffect(() => {
     if (route.params.topic) {
@@ -130,20 +137,35 @@ const Conversation = ({
   const messageToPrefill =
     route.params.message || conversation?.currentMessage || "";
   const [messageValue, setMessageValue] = useState(messageToPrefill);
+
   const focusMessageInput = route.params.focus || !!messageToPrefill;
   const { showActionSheetWithOptions } = useActionSheet();
   const styles = getStyles(colorScheme);
-  const [showInviteBanner, setShowInviteBanner] = useState(false);
+  const [showInvite, setShowInvite] = useState({
+    show: false,
+    banner: false,
+  });
 
   useEffect(() => {
     const checkIfUserExists = async () => {
       if (!peerAddress) return;
-      const exists = await userExists(peerAddress);
+      const [exists, alreadyInvided] = await Promise.all([
+        userExists(peerAddress),
+        AsyncStorage.getItem(`converse-invited-${peerAddress}`),
+      ]);
       if (!exists) {
-        setShowInviteBanner(true);
+        setShowInvite({
+          show: true,
+          banner: !alreadyInvided,
+        });
       }
     };
     checkIfUserExists();
+  }, [peerAddress]);
+
+  const hideInviteBanner = useCallback(() => {
+    setShowInvite({ show: true, banner: false });
+    AsyncStorage.setItem(`converse-invited-${peerAddress}`, "true");
   }, [peerAddress]);
 
   const inviteToConverse = useCallback(() => {
@@ -152,7 +174,9 @@ const Conversation = ({
     messageContent.current = inviteText;
     setMessageValue(inviteText);
     textInputRef.current?.focus();
-  }, []);
+    setShowInvite({ show: true, banner: false });
+    AsyncStorage.setItem(`converse-invited-${peerAddress}`, "true");
+  }, [peerAddress]);
 
   const titleFontScale = getTitleFontScale();
 
@@ -199,7 +223,7 @@ const Conversation = ({
       headerRight: () => {
         return (
           <>
-            {showInviteBanner && (
+            {showInvite.show && !showInvite.banner && (
               <Button
                 variant="text"
                 title="Invite"
@@ -218,7 +242,7 @@ const Conversation = ({
     navigation,
     peerAddress,
     showActionSheetWithOptions,
-    showInviteBanner,
+    showInvite,
     state.xmtp.initialLoadDone,
     state.xmtp.loading,
     styles.title,
@@ -315,6 +339,12 @@ const Conversation = ({
 
   return (
     <View style={styles.container}>
+      {showInvite.show && showInvite.banner && (
+        <InviteBanner
+          onClickInvite={inviteToConverse}
+          onClickHide={hideInviteBanner}
+        />
+      )}
       <Chat
         key={`chat-${colorScheme}`}
         messages={messages}
