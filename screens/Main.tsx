@@ -279,6 +279,8 @@ export default function Main() {
             );
           }
           topicToNavigateTo.current = "";
+        } else if (initialURL.current) {
+          Linking.openURL(initialURL.current);
         }
       }
     };
