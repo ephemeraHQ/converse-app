@@ -21,6 +21,7 @@ import { SFSymbol } from "react-native-sfsymbols";
 import Button from "../components/Button";
 import { sendMessageToWebview } from "../components/XmtpWebview";
 import config from "../config";
+import { clearDB } from "../data/db";
 import { backgroundColor, textPrimaryColor } from "../utils/colors";
 import { saveXmtpKeys } from "../utils/keychain";
 import { shortAddress } from "../utils/str";
@@ -169,6 +170,7 @@ export default function OnboardingComponent({
         Array.from(await getXmtpKeysFromSigner(user.signer))
       );
       saveXmtpKeys(keys);
+      await clearDB();
       sendMessageToWebview("KEYS_LOADED_FROM_SECURE_STORAGE", { keys });
     } catch (e) {
       setLoading(false);
