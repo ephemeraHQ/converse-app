@@ -408,21 +408,37 @@ export default function Main() {
           initialRouteName="Messages"
           screenListeners={({ navigation }) => ({
             state: (e: any) => {
-              // Fix deeplink if already on NewConversation but changing params
-              // (for instance scanning a QRCode)
+              // Fix deeplink if already on a screen but changing params
               const oldRoutes = navigationState.current?.state.routes || [];
               const newRoutes = e.data?.state?.routes || [];
 
               if (oldRoutes.length > 0 && newRoutes.length > 0) {
-                const lastRouteOld = oldRoutes[oldRoutes.length - 1];
-                const lastRouteNew = newRoutes[newRoutes.length - 1];
-                const screenToReplace = ["NewConversation", "Conversation"];
+                const currentRoute = oldRoutes[oldRoutes.length - 1];
+                const newRoute = newRoutes[newRoutes.length - 1];
+                let shouldReplace = false;
                 if (
-                  lastRouteOld.key === lastRouteNew.key &&
-                  screenToReplace.includes(lastRouteOld.name)
+                  currentRoute.key === newRoute.key &&
+                  currentRoute.name === newRoute.name
                 ) {
+                  // We're talking about the same screen!
+                  if (
+                    newRoute.name === "NewConversation" &&
+                    newRoute.params?.peer &&
+                    currentRoute.params?.peer !== newRoute.params?.peer
+                  ) {
+                    shouldReplace = true;
+                  } else if (
+                    newRoute.name === "Conversation" &&
+                    newRoute.params?.mainConversationWithPeer &&
+                    newRoute.params?.mainConversationWithPeer !==
+                      currentRoute.params?.mainConversationWithPeer
+                  ) {
+                    shouldReplace = true;
+                  }
+                }
+                if (shouldReplace) {
                   navigation.dispatch(
-                    StackActions.replace(lastRouteNew.name, lastRouteNew.params)
+                    StackActions.replace(newRoute.name, newRoute.params)
                   );
                 }
               }
