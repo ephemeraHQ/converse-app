@@ -12,12 +12,6 @@ import config from "../config";
 
 const canOpenURL = Linking.canOpenURL.bind(Linking);
 
-configure({
-  callbackURL: new URL(`${config.scheme}://`),
-  hostURL: new URL("https://wallet.coinbase.com/wsegue"),
-  hostPackageName: "org.toshi",
-});
-
 export default function OnboardingScreen() {
   const [walletConnectProps, setWalletConnectProps] = useState<
     RenderQrcodeModalProps | undefined
@@ -25,6 +19,15 @@ export default function OnboardingScreen() {
   const [hideModal, setHideModal] = useState(false);
   // Your app's deeplink handling code
   useEffect(() => {
+    // On dev with hot reloading, this will make the app crash
+    // because we reload JS app so we call configure again
+    // but we don't reboot the native app and the Coinbase SDK crashes
+    // if we call configure a second time.
+    configure({
+      callbackURL: new URL(`${config.scheme}://`),
+      hostURL: new URL("https://wallet.coinbase.com/wsegue"),
+      hostPackageName: "org.toshi",
+    });
     const sub = Linking.addEventListener("url", ({ url }) => {
       handleResponse(new URL(url));
     });
