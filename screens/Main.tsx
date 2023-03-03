@@ -123,7 +123,15 @@ export default function Main() {
 
   useEffect(() => {
     const handleInitialDeeplink = async () => {
-      initialURL.current = (await Linking.getInitialURL()) || "";
+      let openedViaURL = (await Linking.getInitialURL()) || "";
+      // Handling universal links by saving a schemed URI
+      const universalLinkPrefix = `https://${config.websiteDomain}/`;
+      if (openedViaURL.startsWith(universalLinkPrefix)) {
+        openedViaURL = Linking.createURL(
+          openedViaURL.replace(universalLinkPrefix, "")
+        );
+      }
+      initialURL.current = openedViaURL;
     };
     handleInitialDeeplink();
   }, []);
