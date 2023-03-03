@@ -1,0 +1,13 @@
+diff --git a/node_modules/eth-block-tracker/src/polling.js b/node_modules/eth-block-tracker/src/polling.js
+index 1cc8ba7..684f6e7 100644
+--- a/node_modules/eth-block-tracker/src/polling.js
++++ b/node_modules/eth-block-tracker/src/polling.js
+@@ -61,6 +61,8 @@ class PollingBlockTracker extends BaseBlockTracker {
+ 
+   async _updateLatestBlock () {
+     // fetch + set latest block
++    const waitFor = delay => new Promise(resolve => setTimeout(resolve, delay));
++    await waitFor(1500);
+     const latestBlock = await this._fetchLatestBlock()
+     this._newPotentialLatest(latestBlock)
+   }
