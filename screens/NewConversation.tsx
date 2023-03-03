@@ -33,7 +33,6 @@ import {
 } from "../utils/colors";
 import { getAddressForPeer } from "../utils/eth";
 import { lastValueInMap } from "../utils/map";
-import { sentryTrackMessage } from "../utils/sentry";
 import { addressPrefix, conversationName } from "../utils/str";
 import { isOnXmtp } from "../utils/xmtp";
 import { NavigationParamList } from "./Main";
@@ -146,10 +145,6 @@ export default function NewConversation({
                 conversationsRef.current
               ).filter((conversation) => {
                 if (!conversation || !conversation.peerAddress) {
-                  sentryTrackMessage(
-                    "Encountered a conversation without peer",
-                    { conversation }
-                  );
                   return false;
                 }
                 return (
