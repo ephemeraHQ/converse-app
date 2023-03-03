@@ -160,6 +160,7 @@ export const xmtpReducer = (state: XmtpType, action: XmtpActions): XmtpType => {
             ...action.payload.conversation,
             messages: new Map(),
             lazyMessages: [],
+            peerAddress: action.payload.conversation?.peerAddress || "",
           },
         },
       };
