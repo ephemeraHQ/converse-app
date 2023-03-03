@@ -76,7 +76,7 @@ const Conversation = ({
       setConversation(
         Object.values(state.xmtp.conversations).find(
           (c) =>
-            c.peerAddress.toLowerCase() === peerAddress.toLowerCase() &&
+            c.peerAddress?.toLowerCase() === peerAddress.toLowerCase() &&
             !c.context
         )
       );
@@ -113,7 +113,7 @@ const Conversation = ({
           state.xmtp.conversations
         ).find(
           (c) =>
-            c.peerAddress.toLowerCase() === peerAddress.toLowerCase() &&
+            c.peerAddress?.toLowerCase() === peerAddress.toLowerCase() &&
             !c.context
         );
         if (alreadyConversationWithPeer) {
