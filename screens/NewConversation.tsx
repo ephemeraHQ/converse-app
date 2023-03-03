@@ -44,7 +44,7 @@ const computeNewConversationContext = (
 ) => {
   let i = 0;
   const conversationsIds = Object.values(state.xmtp.conversations)
-    .filter((c) => c.peerAddress.toLowerCase() === peerAddress.toLowerCase())
+    .filter((c) => c.peerAddress?.toLowerCase() === peerAddress?.toLowerCase())
     .map((c) => c.context?.conversationId);
   // First try to create one without conversationId
   if (!conversationsIds.includes(undefined)) {
@@ -153,8 +153,8 @@ export default function NewConversation({
                   return false;
                 }
                 return (
-                  conversation.peerAddress.toLowerCase() ===
-                  address.toLowerCase()
+                  conversation.peerAddress?.toLowerCase() ===
+                  address?.toLowerCase()
                 );
               });
 
@@ -306,8 +306,8 @@ export default function NewConversation({
                     state.xmtp.conversations
                   ).find(
                     (c) =>
-                      c.peerAddress.toLowerCase() ===
-                      config.polAddress.toLowerCase()
+                      c.peerAddress?.toLowerCase() ===
+                      config.polAddress?.toLowerCase()
                   );
                   const message = `Hey Pol! I’d like to write to someone but this person is not on the network. Can you help me? Their address is ${status.askPolToInvite}`;
                   if (conversationWithPol) {
