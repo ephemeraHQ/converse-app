@@ -58,10 +58,11 @@ const getStyles = (colorScheme: ColorSchemeName) =>
   StyleSheet.create({
     inviteBanner: {
       height: 63,
-      borderBottomWidth: 1,
+      borderBottomWidth: 0.5,
       borderBottomColor: itemSeparatorColor(colorScheme),
       backgroundColor: backgroundColor(colorScheme),
-      paddingHorizontal: 30,
+      paddingLeft: 30,
+      paddingRight: 25,
       alignItems: "center",
       flexDirection: "row",
     },
@@ -83,8 +84,8 @@ const getStyles = (colorScheme: ColorSchemeName) =>
       marginLeft: "auto",
     },
     xmark: {
-      width: 22,
-      height: 22,
+      width: 13,
+      height: 13,
       marginLeft: 12,
     },
   });
