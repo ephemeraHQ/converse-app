@@ -37,7 +37,7 @@ export default function ShareProfileScreen({
     });
   }, [navigation]);
   const styles = getStyles(colorScheme);
-  const profileUrl = `https://${config.websiteDomain}/${
+  const profileUrl = `https://${config.websiteDomain}/dm/${
     state.app.mainIdentity || state.xmtp.address
   }`;
   return (
