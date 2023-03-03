@@ -8,7 +8,6 @@ const defaultConfig = {
     "0x4496848684441C15A915fa9bF07D131155603253",
     "0x2376e9C7C604D1827bA9aCb1293Dc8b4DA2f0DB3",
   ],
-  websiteDomain: "getconverse.app",
   conversationDomain: "getconverse.app",
   infuraApiKey: "38f59a7bbbca49f18046ff3a4a752e1c",
   sentryDSN:
@@ -28,6 +27,7 @@ const ENV = {
     lensApiDomain: "api-mumbai.lens.dev",
     ethereumNetwork: "goerli",
     lensSuffix: ".test",
+    websiteDomain: "dev.getconverse.app",
   },
   preview: {
     ...defaultConfig,
@@ -41,6 +41,7 @@ const ENV = {
     lensApiDomain: "api-mumbai.lens.dev",
     ethereumNetwork: "goerli",
     lensSuffix: ".test",
+    websiteDomain: "preview.getconverse.app",
   },
   prod: {
     ...defaultConfig,
@@ -53,6 +54,7 @@ const ENV = {
     lensApiDomain: "api.lens.dev",
     ethereumNetwork: "mainnet",
     lensSuffix: ".lens",
+    websiteDomain: "getconverse.app",
   },
 };
 

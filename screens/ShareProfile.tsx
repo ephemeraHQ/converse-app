@@ -39,7 +39,7 @@ export default function ShareProfileScreen({
   const styles = getStyles(colorScheme);
   const profileUrl = `https://${config.websiteDomain}/${
     state.app.mainIdentity || state.xmtp.address
-  }${config.env !== "prod" ? `?env=${config.env}` : ""}`;
+  }`;
   return (
     <View style={styles.shareProfile}>
       <View style={styles.shareProfileContent}>
