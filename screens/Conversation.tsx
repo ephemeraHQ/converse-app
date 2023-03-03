@@ -2,6 +2,7 @@ import { useActionSheet } from "@expo/react-native-action-sheet";
 import { Theme } from "@flyerhq/react-native-chat-ui";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
+import { isAddress } from "ethers/lib/utils";
 import * as Clipboard from "expo-clipboard";
 import React, {
   useCallback,
@@ -57,13 +58,17 @@ const Conversation = ({
   const { state, dispatch } = useContext(AppContext);
   const colorScheme = useColorScheme();
 
-  const [peerAddress, setPeerAddress] = useState(
-    route.params.mainConversationWithPeer || ""
-  );
-
   const initialConversation = route.params.topic
     ? state.xmtp.conversations[route.params.topic]
     : undefined;
+
+  const [peerAddress, setPeerAddress] = useState(
+    isAddress(route.params.mainConversationWithPeer || "")
+      ? route.params.mainConversationWithPeer
+      : initialConversation
+      ? initialConversation.peerAddress
+      : ""
+  );
 
   const [conversation, setConversation] = useState<
     XmtpConversation | undefined
