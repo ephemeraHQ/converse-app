@@ -1,25 +1,16 @@
 import { configure, handleResponse } from "@coinbase/wallet-mobile-sdk";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import WalletConnectProvider, {
+  QrcodeModal,
+  RenderQrcodeModalProps,
+} from "@walletconnect/react-native-dapp";
 import { useEffect, useState } from "react";
 import { Linking } from "react-native";
 
 import OnboardingComponent from "../components/OnboardingComponent";
 import config from "../config";
-import WalletConnectProvider, {
-  QrcodeModal,
-  RenderQrcodeModalProps,
-} from "../vendor/wallet-connect-dapp";
 
 const canOpenURL = Linking.canOpenURL.bind(Linking);
-
-Linking.canOpenURL = async (url: string) => {
-  // Always try to open walletconnect URIs
-  if (url.includes("wc?uri=wc")) {
-    return true;
-  }
-  const result = await canOpenURL(url);
-  return result;
-};
 
 configure({
   callbackURL: new URL(`${config.scheme}://`),
@@ -37,7 +28,14 @@ export default function OnboardingScreen() {
     const sub = Linking.addEventListener("url", ({ url }) => {
       handleResponse(new URL(url));
     });
-    return () => sub.remove();
+    // Overwriting canOpenURL to be sure we can open everything
+    Linking.canOpenURL = async () => {
+      return true;
+    };
+    return () => {
+      sub.remove();
+      Linking.canOpenURL = canOpenURL;
+    };
   }, []);
   return (
     <WalletConnectProvider
