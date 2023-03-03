@@ -10,9 +10,15 @@ import WalletConnectProvider, {
   RenderQrcodeModalProps,
 } from "../vendor/wallet-connect-dapp";
 
+const canOpenURL = Linking.canOpenURL.bind(Linking);
+
 Linking.canOpenURL = async (url: string) => {
-  console.log({ url });
-  return true;
+  // Always try to open walletconnect URIs
+  if (url.includes("wc?uri=wc")) {
+    return true;
+  }
+  const result = await canOpenURL(url);
+  return result;
 };
 
 configure({
