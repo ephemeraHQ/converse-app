@@ -1,0 +1,11 @@
+diff --git a/node_modules/@walletconnect/react-native-dapp/dist/constants/formatWalletServiceUrl.js b/node_modules/@walletconnect/react-native-dapp/dist/constants/formatWalletServiceUrl.js
+index 59016ea..4a3dde0 100644
+--- a/node_modules/@walletconnect/react-native-dapp/dist/constants/formatWalletServiceUrl.js
++++ b/node_modules/@walletconnect/react-native-dapp/dist/constants/formatWalletServiceUrl.js
+@@ -5,5 +5,5 @@ export default function formatProviderUrl(walletService) {
+     if (Platform.OS === "android") {
+         return `${deepLink}`;
+     }
+-    return `${universalLink}`;
++    return `${universalLink || `${deepLink}/`}`;
+ }
