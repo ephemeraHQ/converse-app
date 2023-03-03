@@ -46,8 +46,11 @@ export default function OnboardingComponent({
   });
   const connector = useWalletConnect();
   const provider = new WalletConnectProvider({
-    infuraId: config.infuraApiKey,
     connector,
+    rpc: {
+      1: "https://cloudflare-eth.com",
+      137: "https://matic-mainnet.chainstacklabs.com",
+    },
   });
 
   const autoDisconnect = useRef(true);

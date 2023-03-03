@@ -10,6 +10,8 @@ import { Linking } from "react-native";
 import OnboardingComponent from "../components/OnboardingComponent";
 import config from "../config";
 
+const canOpenURL = Linking.canOpenURL.bind(Linking);
+
 configure({
   callbackURL: new URL(`${config.scheme}://`),
   hostURL: new URL("https://wallet.coinbase.com/wsegue"),
@@ -26,7 +28,14 @@ export default function OnboardingScreen() {
     const sub = Linking.addEventListener("url", ({ url }) => {
       handleResponse(new URL(url));
     });
-    return () => sub.remove();
+    // Overwriting canOpenURL to be sure we can open everything
+    Linking.canOpenURL = async () => {
+      return true;
+    };
+    return () => {
+      sub.remove();
+      Linking.canOpenURL = canOpenURL;
+    };
   }, []);
   return (
     <WalletConnectProvider
