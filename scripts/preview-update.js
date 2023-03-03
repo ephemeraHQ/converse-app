@@ -15,9 +15,6 @@ const uploadUpdatesToExpo = () => {
   execSync("EXPO_ENV=preview eas update --branch preview", {
     cwd: rootPath,
     stdio: "inherit",
-    env: {
-      EXPO_ENV: "preview",
-    },
   });
 };
 
