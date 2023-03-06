@@ -89,11 +89,3 @@ export const tableViewItemBackground = (colorScheme: ColorSchemeName) => {
   if (colorScheme === "dark") return TABLE_VIEW_ITEM_BACKGROUND_DARK;
   return TABLE_VIEW_ITEM_BACKGROUND_LIGHT;
 };
-
-const BUTTON_GREY_BACKGROUND_LIGHT = "#F2F2F7";
-const BUTTON_GREY_BACKGROUND_DARK = "#F2F2F7";
-
-export const buttonGreyBackground = (colorScheme: ColorSchemeName) => {
-  if (colorScheme === "dark") return BUTTON_GREY_BACKGROUND_DARK;
-  return BUTTON_GREY_BACKGROUND_LIGHT;
-};

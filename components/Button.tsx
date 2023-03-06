@@ -13,7 +13,7 @@ import {
 } from "react-native";
 import { SFSymbol } from "react-native-sfsymbols";
 
-import { buttonGreyBackground } from "../utils/colors";
+import { tableViewItemBackground } from "../utils/colors";
 
 type Props = {
   title: string;
@@ -92,13 +92,13 @@ const getStyles = (colorScheme: ColorSchemeName) =>
       fontSize: 17,
     },
     buttonGrey: {
-      backgroundColor: buttonGreyBackground(colorScheme),
+      backgroundColor: tableViewItemBackground(colorScheme),
       paddingHorizontal: 15,
       paddingVertical: 4,
       borderRadius: 100,
     },
     buttonGreyText: {
-      color: PlatformColor("systemBlue"),
+      color: colorScheme === "light" ? PlatformColor("systemBlue") : "white",
       textAlign: "center",
       fontWeight: "600",
       fontSize: 17,
