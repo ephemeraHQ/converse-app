@@ -1,4 +1,4 @@
-const { execSync } = require("child_process");
+const { spawn, execSync } = require("child_process");
 const fs = require("fs");
 const path = require("path");
 const plist = require("plist");
@@ -10,13 +10,41 @@ const rootPath = path.join(__dirname, "..");
 const bundlesPath = path.join(__dirname, "../dist/bundles");
 const infoPlistPath = path.join(__dirname, "../ios/Converse/Info.plist");
 
-const uploadUpdatesToExpo = () => {
-  console.log("Uploading updates to Expo...");
-  execSync("EXPO_ENV=preview eas update --branch preview", {
-    cwd: rootPath,
-    stdio: "inherit",
+const uploadUpdatesToExpo = () =>
+  new Promise((resolve) => {
+    console.log("Uploading updates to Expo...");
+    const eas = spawn("eas", ["update", "--branch", "preview"], {
+      env: { EXPO_ENV: "preview", PATH: process.env.PATH },
+      cwd: rootPath,
+      stdio: ["inherit", "pipe", "pipe"],
+    });
+
+    let allOutput = "";
+
+    eas.stdout.on("data", function (data) {
+      const str = data.toString();
+      allOutput = `${allOutput}${str}`;
+      process.stdout.clearLine();
+      process.stdout.cursorTo(0);
+      process.stdout.write(str);
+    });
+
+    eas.stderr.on("data", function (data) {
+      const str = data.toString("utf-8").trim();
+      process.stderr.clearLine();
+      process.stderr.cursorTo(0);
+      process.stderr.write(str);
+    });
+
+    eas.on("close", () => {
+      const match = allOutput.match(IOS_UPDATE_ID_REGEX);
+      if (match) {
+        resolve(match[1].trim());
+      } else {
+        resolve();
+      }
+    });
   });
-};
 
 const copyBundlesAndGetMap = () => {
   const bundles = fs.readdirSync(bundlesPath);
@@ -54,8 +82,7 @@ const uploadBundlesToSentry = (iosUpdateID, iosMap) => {
 };
 
 const go = async () => {
-  uploadUpdatesToExpo();
-  const { iosUpdateID } = await prompt.get(["iosUpdateID"]);
+  const iosUpdateID = await uploadUpdatesToExpo();
   const iosMap = copyBundlesAndGetMap();
   uploadBundlesToSentry(iosUpdateID, iosMap);
 };
