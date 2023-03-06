@@ -17,6 +17,7 @@ import React, { useCallback, useContext, useEffect, useRef } from "react";
 import { AppState, useColorScheme } from "react-native";
 
 import { sendMessageToWebview } from "../components/XmtpWebview";
+import config from "../config";
 import { loadDataToContext } from "../data";
 import { initDb } from "../data/db";
 import { AppDispatchTypes } from "../data/store/appReducer";
@@ -122,7 +123,15 @@ export default function Main() {
 
   useEffect(() => {
     const handleInitialDeeplink = async () => {
-      initialURL.current = (await Linking.getInitialURL()) || "";
+      let openedViaURL = (await Linking.getInitialURL()) || "";
+      // Handling universal links by saving a schemed URI
+      const universalLinkPrefix = `https://${config.websiteDomain}/`;
+      if (openedViaURL.startsWith(universalLinkPrefix)) {
+        openedViaURL = Linking.createURL(
+          openedViaURL.replace(universalLinkPrefix, "")
+        );
+      }
+      initialURL.current = openedViaURL;
     };
     handleInitialDeeplink();
   }, []);
@@ -308,7 +317,7 @@ export default function Main() {
   }
 
   const linking = {
-    prefixes: [prefix],
+    prefixes: [prefix, `https://${config.websiteDomain}/`],
     config: {
       initialRouteName: "Messages",
       screens: {
@@ -333,6 +342,9 @@ export default function Main() {
       let pathForState = path;
       if (pathForState.startsWith("dm?peer=")) {
         const peer = pathForState.slice(8).trim().toLowerCase();
+        pathForState = `conversation?mainConversationWithPeer=${peer}&focus=true`;
+      } else if (pathForState.startsWith("dm/")) {
+        const peer = pathForState.slice(3).trim().toLowerCase();
         pathForState = `conversation?mainConversationWithPeer=${peer}&focus=true`;
       }
       const state = getStateFromPath(pathForState, options);
