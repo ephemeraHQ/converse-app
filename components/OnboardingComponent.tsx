@@ -232,10 +232,13 @@ export default function OnboardingComponent({
         (w) => w.name === connectTo
       );
       if (walletService) {
-        walletConnectProps.connectToWalletService(
-          walletService,
-          walletConnectProps?.uri
-        );
+        walletConnectProps
+          .connectToWalletService(walletService, walletConnectProps?.uri)
+          .catch((e: any) => {
+            // Wallet is probably not installed!
+            console.log(e);
+            setLoading(false);
+          });
       }
     }
   }, [walletConnectProps]);
@@ -312,6 +315,14 @@ export default function OnboardingComponent({
                 picto: <TableViewEmoji emoji="🔵" />,
                 title: "Connect Coinbase Wallet",
                 action: connectCoinbaseWallet,
+              },
+              {
+                id: "ledger",
+                picto: <TableViewEmoji emoji="🔲" />,
+                title: "Connect Ledger Wallet",
+                action: () => {
+                  connectWallet("Ledger Live");
+                },
               },
               {
                 id: "walletconnect",
