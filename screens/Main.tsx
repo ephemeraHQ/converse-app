@@ -1,4 +1,5 @@
 import { ActionSheetProvider } from "@expo/react-native-action-sheet";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import {
   getStateFromPath,
   NavigationContainer,
@@ -13,9 +14,16 @@ import {
 import * as Linking from "expo-linking";
 import * as Notifications from "expo-notifications";
 import * as SplashScreen from "expo-splash-screen";
-import React, { useCallback, useContext, useEffect, useRef } from "react";
+import React, {
+  useCallback,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import { AppState, useColorScheme } from "react-native";
 
+import { addLog } from "../components/DebugButton";
 import { sendMessageToWebview } from "../components/XmtpWebview";
 import config from "../config";
 import { loadDataToContext } from "../data";
@@ -23,7 +31,7 @@ import { initDb } from "../data/db";
 import { AppDispatchTypes } from "../data/store/appReducer";
 import { AppContext } from "../data/store/context";
 import { NotificationsDispatchTypes } from "../data/store/notificationsReducer";
-import { XmtpConversation } from "../data/store/xmtpReducer";
+import { XmtpConversation, XmtpDispatchTypes } from "../data/store/xmtpReducer";
 import { saveUser } from "../utils/api";
 import {
   backgroundColor,
@@ -31,12 +39,15 @@ import {
   textPrimaryColor,
 } from "../utils/colors";
 import { ethProvider } from "../utils/eth";
+import { loadXmtpKeys } from "../utils/keychain";
 import { lastValueInMap } from "../utils/map";
 import {
   getNotificationsPermissionStatus,
   loadSavedNotificationMessagesToContext,
   subscribeToNotifications,
 } from "../utils/notifications";
+import { getLoggedXmtpAddress } from "../utils/sharedData";
+import { getXmtpClientFromKeys } from "../utils/xmtp";
 import Conversation from "./Conversation";
 import ConversationList from "./ConversationList";
 import NewConversation from "./NewConversation";
@@ -156,15 +167,6 @@ export default function Main() {
   );
 
   useEffect(() => {
-    const loadData = async () => {
-      await initDb();
-      await loadDataToContext(dispatch);
-      await loadSavedNotificationMessagesToContext(dispatch);
-    };
-    loadData();
-  }, [dispatch]);
-
-  useEffect(() => {
     // Things to do when app opens
     saveNotificationsStatus();
     const foregroundSubscription =
@@ -213,35 +215,90 @@ export default function Main() {
 
   const splashScreenHidden = useRef(false);
 
+  const [hydrationDone, setHydrationDone] = useState(false);
+
+  // Initial hydration
   useEffect(() => {
-    if (state.xmtp.webviewLoaded && !splashScreenHidden.current) {
-      splashScreenHidden.current = true;
-      SplashScreen.hideAsync();
-      dispatch({
-        type: AppDispatchTypes.AppHideSplashscreen,
-        payload: {
-          hide: true,
-        },
-      });
-      // If app was loaded by clicking on notification,
-      // let's navigate
-      if (topicToNavigateTo.current) {
-        if (state.xmtp.conversations[topicToNavigateTo.current]) {
-          navigateToConversation(
-            state.xmtp.conversations[topicToNavigateTo.current]
-          );
-        }
-        topicToNavigateTo.current = "";
-      } else if (initialURL.current) {
-        Linking.openURL(initialURL.current);
+    const hydrate = async () => {
+      // Let's rehydrate value before hiding splash
+      const showNotificationsScreen = await AsyncStorage.getItem(
+        "state.notifications.showNotificationsScreen"
+      );
+      let xmtpAddress = null;
+      try {
+        xmtpAddress = await getLoggedXmtpAddress();
+      } catch {
+        addLog("Error: failed to load saved logged XMTP Address");
       }
-    }
-  }, [
-    dispatch,
-    navigateToConversation,
-    state.xmtp.conversations,
-    state.xmtp.webviewLoaded,
-  ]);
+      await initDb();
+
+      await loadDataToContext(dispatch);
+      await loadSavedNotificationMessagesToContext(dispatch);
+      if (showNotificationsScreen) {
+        dispatch({
+          type: NotificationsDispatchTypes.NotificationsShowScreen,
+          payload: {
+            show: showNotificationsScreen !== "0",
+          },
+        });
+      }
+
+      if (xmtpAddress) {
+        dispatch({
+          type: XmtpDispatchTypes.XmtpSetAddress,
+          payload: {
+            address: xmtpAddress,
+          },
+        });
+      } else {
+        const keys = await loadXmtpKeys();
+        if (keys) {
+          const parsedKeys = JSON.parse(keys);
+          const xmtpClient = await getXmtpClientFromKeys(parsedKeys);
+          dispatch({
+            type: XmtpDispatchTypes.XmtpSetAddress,
+            payload: {
+              address: xmtpClient.address,
+            },
+          });
+        }
+      }
+      addLog("Hydration 100% OK");
+      setHydrationDone(true);
+    };
+    hydrate();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
+    const hideSplashScreenIfReady = async () => {
+      if (!splashScreenHidden.current && hydrationDone) {
+        splashScreenHidden.current = true;
+
+        SplashScreen.hideAsync();
+        dispatch({
+          type: AppDispatchTypes.AppHideSplashscreen,
+          payload: {
+            hide: true,
+          },
+        });
+
+        // If app was loaded by clicking on notification,
+        // let's navigate
+        if (topicToNavigateTo.current) {
+          if (state.xmtp.conversations[topicToNavigateTo.current]) {
+            navigateToConversation(
+              state.xmtp.conversations[topicToNavigateTo.current]
+            );
+          }
+          topicToNavigateTo.current = "";
+        } else if (initialURL.current) {
+          Linking.openURL(initialURL.current);
+        }
+      }
+    };
+    hideSplashScreenIfReady();
+  }, [hydrationDone, navigateToConversation, state.xmtp.conversations]);
 
   const initialNotificationsSubscribed = useRef(false);
 
@@ -307,7 +364,9 @@ export default function Main() {
 
   const navigationState = useRef<any>(undefined);
 
-  if (!state.xmtp.connected) return <OnboardingScreen />;
+  if (!state.app.splashScreenHidden) return null;
+
+  if (!state.xmtp.address) return <OnboardingScreen />;
 
   if (
     state.notifications.showNotificationsScreen &&
@@ -361,21 +420,37 @@ export default function Main() {
           initialRouteName="Messages"
           screenListeners={({ navigation }) => ({
             state: (e: any) => {
-              // Fix deeplink if already on NewConversation but changing params
-              // (for instance scanning a QRCode)
+              // Fix deeplink if already on a screen but changing params
               const oldRoutes = navigationState.current?.state.routes || [];
               const newRoutes = e.data?.state?.routes || [];
 
               if (oldRoutes.length > 0 && newRoutes.length > 0) {
-                const lastRouteOld = oldRoutes[oldRoutes.length - 1];
-                const lastRouteNew = newRoutes[newRoutes.length - 1];
-                const screenToReplace = ["NewConversation", "Conversation"];
+                const currentRoute = oldRoutes[oldRoutes.length - 1];
+                const newRoute = newRoutes[newRoutes.length - 1];
+                let shouldReplace = false;
                 if (
-                  lastRouteOld.key === lastRouteNew.key &&
-                  screenToReplace.includes(lastRouteOld.name)
+                  currentRoute.key === newRoute.key &&
+                  currentRoute.name === newRoute.name
                 ) {
+                  // We're talking about the same screen!
+                  if (
+                    newRoute.name === "NewConversation" &&
+                    newRoute.params?.peer &&
+                    currentRoute.params?.peer !== newRoute.params?.peer
+                  ) {
+                    shouldReplace = true;
+                  } else if (
+                    newRoute.name === "Conversation" &&
+                    newRoute.params?.mainConversationWithPeer &&
+                    newRoute.params?.mainConversationWithPeer !==
+                      currentRoute.params?.mainConversationWithPeer
+                  ) {
+                    shouldReplace = true;
+                  }
+                }
+                if (shouldReplace) {
                   navigation.dispatch(
-                    StackActions.replace(lastRouteNew.name, lastRouteNew.params)
+                    StackActions.replace(newRoute.name, newRoute.params)
                   );
                 }
               }

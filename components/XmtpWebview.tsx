@@ -3,14 +3,7 @@ import {
   buildUserIntroTopic,
   //@ts-ignore
 } from "@xmtp/xmtp-js/dist/cjs/src/utils";
-import * as Linking from "expo-linking";
-import React, {
-  useCallback,
-  useContext,
-  useEffect,
-  useRef,
-  useState,
-} from "react";
+import React, { useCallback, useContext, useEffect, useRef } from "react";
 import { Alert, AppState, StyleSheet, View } from "react-native";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { WebView, WebViewMessageEvent } from "react-native-webview";
@@ -31,8 +24,6 @@ import {
   subscribeToNotifications,
 } from "../utils/notifications";
 import { addLog } from "./DebugButton";
-
-const XMTP_WEBSITE_URI = config.xmtpWebviewURI;
 
 let webview: WebView | null;
 let webviewReadyForMessages = false;
@@ -74,7 +65,6 @@ export const sendXmtpMessage = (topic: string, content: string) => {
 
 export default function XmtpWebview() {
   const appState = useRef(AppState.currentState);
-  const [webviewKey, setWebviewKey] = useState(new Date().getTime());
   const loadedKeys = useRef(false);
   const web3Connected = useRef(false);
 
@@ -95,18 +85,16 @@ export default function XmtpWebview() {
   useEffect(() => {
     const loadKeys = async () => {
       const keys = await loadXmtpKeys();
-      sendMessageToWebview("KEYS_LOADED_FROM_SECURE_STORAGE", { keys });
+      sendMessageToWebview("KEYS_LOADED_FROM_SECURE_STORAGE", {
+        keys,
+        env: config.xmtpEnv,
+      });
       loadedKeys.current = true;
     };
-    if (!loadedKeys.current) {
+    if (!loadedKeys.current && state.xmtp.address) {
       loadKeys();
     }
-
-    return () => {
-      webview = null;
-      webviewReadyForMessages = false;
-    };
-  }, []);
+  }, [state.xmtp.address]);
 
   useEffect(() => {
     const subscription = AppState.addEventListener(
@@ -185,13 +173,6 @@ export default function XmtpWebview() {
           await saveXmtpKeys(keys);
           break;
         }
-
-        case "XMTP_READY":
-          dispatch({
-            type: XmtpDispatchTypes.XmtpConnected,
-            payload: { connected: true },
-          });
-          break;
         case "DISCONNECTED":
           dispatch({
             type: XmtpDispatchTypes.XmtpConnected,
@@ -200,12 +181,6 @@ export default function XmtpWebview() {
           launchedInitialLoad.current = false;
           await deleteXmtpKeys();
           webview?.reload();
-          break;
-        case "WEBVIEW_LOADED":
-          dispatch({
-            type: XmtpDispatchTypes.XmtpWebviewLoaded,
-            payload: { loaded: true },
-          });
           break;
         case "XMTP_CONVERSATIONS":
           saveConversations(data, dispatch);
@@ -242,6 +217,12 @@ export default function XmtpWebview() {
             payload: {
               address: data.address,
             },
+          });
+          // If we receive this from webview, we're necessary
+          // connected to the XMTP network!
+          dispatch({
+            type: XmtpDispatchTypes.XmtpConnected,
+            payload: { connected: true },
           });
           break;
         case "WEB3_CONNECTED":
@@ -295,51 +276,17 @@ export default function XmtpWebview() {
   const webviewToRender = (
     <WebView
       style={[styles.webview, showWebView ? styles.showWebView : null]}
-      source={{
-        uri: `${XMTP_WEBSITE_URI}?xmtpEnv=${config.xmtpEnv}`,
-      }}
       autoManageStatusBarEnabled={false}
-      javaScriptEnabled
-      key={webviewKey}
-      originWhitelist={["*"]}
       onMessage={onMessage}
-      scrollEnabled={false}
       ref={(ref) => {
         webview = ref;
       }}
-      onShouldStartLoadWithRequest={(r) => {
-        // Metamask fails when opening the link, we force a direct deeplink
-        if (r.url.startsWith("https://metamask.app.link/")) {
-          const urlEnd = decodeURIComponent(
-            r.url.replace("https://metamask.app.link/", "")
-          );
-          const newUrl = `metamask://${urlEnd}`;
-          Linking.openURL(newUrl);
-          return false;
-        }
-        // Enable http(s) & data URIs
-        if (r.url.startsWith("data:")) {
-          return true;
-        }
-        if (r.url.startsWith("http")) {
-          if (r.url.startsWith(XMTP_WEBSITE_URI)) {
-            return true;
-          } else {
-            Linking.openURL(r.url);
-            return false;
-          }
-        }
-        // Forbid itunes store & blank uris
-        if (
-          r.url.startsWith("about:blank") ||
-          r.url.startsWith("itms-apps://")
-        ) {
-          return false;
-        }
-        Linking.openURL(r.url);
-        setWebviewKey(new Date().getTime());
-        return false;
+      source={{
+        uri: "xmtp.html",
       }}
+      javaScriptEnabled
+      originWhitelist={["*"]}
+      allowFileAccess
     />
   );
 

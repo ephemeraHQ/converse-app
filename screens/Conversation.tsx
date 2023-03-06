@@ -142,8 +142,7 @@ const Conversation = ({
   const messageToPrefill =
     route.params.message || conversation?.currentMessage || "";
   const [messageValue, setMessageValue] = useState(messageToPrefill);
-
-  const focusMessageInput = route.params.focus || !!messageToPrefill;
+  const focusMessageInput = !!route.params.focus || !!messageToPrefill;
   const { showActionSheetWithOptions } = useActionSheet();
   const styles = getStyles(colorScheme);
   const [showInvite, setShowInvite] = useState({
