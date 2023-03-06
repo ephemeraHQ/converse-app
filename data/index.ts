@@ -28,7 +28,7 @@ const xmtpMessageToDb = (
   id: xmtpMessage.id,
   senderAddress: xmtpMessage.senderAddress,
   sent: xmtpMessage.sent,
-  content: xmtpMessage.content,
+  content: xmtpMessage.content || "",
   conversationId: conversationTopic,
 });
 
