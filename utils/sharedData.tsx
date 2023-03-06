@@ -22,3 +22,12 @@ export const emptySavedNotificationsMessages = () =>
 
 export const saveApiURI = () =>
   SharedGroupPreferences.setItem("api-uri", config.apiURI, appGroup);
+
+export const saveLoggedXmtpAddress = (address: string) =>
+  SharedGroupPreferences.setItem("xmtp-address", address, appGroup);
+
+export const deleteLoggedXmtpAddress = () =>
+  SharedGroupPreferences.setItem("xmtp-address", "", appGroup);
+
+export const getLoggedXmtpAddress = () =>
+  SharedGroupPreferences.getItem("xmtp-address", appGroup);

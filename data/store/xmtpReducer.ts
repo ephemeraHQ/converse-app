@@ -1,3 +1,7 @@
+import {
+  deleteLoggedXmtpAddress,
+  saveLoggedXmtpAddress,
+} from "../../utils/sharedData";
 import { ActionMap } from "./types";
 
 export type XmtpConversationContext = {
@@ -21,7 +25,6 @@ export type XmtpConversation = {
 
 export type XmtpType = {
   connected: boolean;
-  webviewLoaded: boolean;
   initialLoadDone: boolean;
   loading: boolean;
   conversations: {
@@ -33,7 +36,6 @@ export type XmtpType = {
 
 export const xmtpInitialState: XmtpType = {
   connected: false,
-  webviewLoaded: false,
   initialLoadDone: false,
   loading: false,
   conversations: {},
@@ -50,7 +52,6 @@ export type XmtpMessage = {
 
 export enum XmtpDispatchTypes {
   XmtpConnected = "XMTP_CONNECTED",
-  XmtpWebviewLoaded = "XMTP_WEBVIEW_LOADED",
   XmtpSetConversations = "XMTP_SET_CONVERSATIONS",
   XmtpNewConversation = "XMTP_NEW_CONVERSATION",
   XmtpSetAddress = "XMTP_SET_ADDRESS",
@@ -64,9 +65,6 @@ export enum XmtpDispatchTypes {
 type XmtpPayload = {
   [XmtpDispatchTypes.XmtpConnected]: {
     connected: boolean;
-  };
-  [XmtpDispatchTypes.XmtpWebviewLoaded]: {
-    loaded: boolean;
   };
   [XmtpDispatchTypes.XmtpSetConversations]: {
     conversations: XmtpConversation[];
@@ -100,22 +98,20 @@ export type XmtpActions = ActionMap<XmtpPayload>[keyof ActionMap<XmtpPayload>];
 export const xmtpReducer = (state: XmtpType, action: XmtpActions): XmtpType => {
   switch (action.type) {
     case XmtpDispatchTypes.XmtpSetAddress:
+      saveLoggedXmtpAddress(action.payload.address);
       return {
         ...state,
         address: action.payload.address,
       };
     case XmtpDispatchTypes.XmtpConnected:
       if (!action.payload.connected) {
-        return { ...xmtpInitialState, webviewLoaded: state.webviewLoaded };
+        deleteLoggedXmtpAddress();
+        // Disconnecting = reset state
+        return { ...xmtpInitialState };
       }
       return {
         ...state,
         connected: action.payload.connected,
-      };
-    case XmtpDispatchTypes.XmtpWebviewLoaded:
-      return {
-        ...state,
-        webviewLoaded: action.payload.loaded,
       };
     case XmtpDispatchTypes.XmtpSetCurrentMessageContent: {
       const newState = { ...state };
