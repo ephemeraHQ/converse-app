@@ -23,6 +23,7 @@ import {
   loadSavedNotificationMessagesToContext,
   subscribeToNotifications,
 } from "../utils/notifications";
+import { sentryTrackMessage } from "../utils/sentry";
 import { addLog } from "./DebugButton";
 
 let webview: WebView | null;
@@ -252,6 +253,31 @@ export default function XmtpWebview() {
         }
         case "SEND_MESSAGE_ERROR": {
           addLog(`SEND_MESSAGE_ERROR: ${data}`);
+          break;
+        }
+
+        case "WEBVIEW_ERROR": {
+          sentryTrackMessage("WEBVIEW_ERROR", data);
+          break;
+        }
+
+        case "WEBVIEW_UNHANDLED_REJECTION": {
+          const IGNORED_REASONS = ["AbortError: Fetch is aborted"];
+          if (IGNORED_REASONS.some((r) => r.includes(data.reason))) {
+            console.log("Ignoring unhandled rejection");
+          } else {
+            sentryTrackMessage("WEBVIEW_UNHANDLED_REJECTION", data);
+          }
+          break;
+        }
+
+        case "ERROR_WHILE_RESYNCINC": {
+          sentryTrackMessage("ERROR_WHILE_RESYNCINC", data);
+          break;
+        }
+
+        case "ERROR_WHILE_SYNCINC": {
+          sentryTrackMessage("ERROR_WHILE_SYNCINC", data);
           break;
         }
 
