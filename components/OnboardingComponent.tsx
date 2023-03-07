@@ -127,7 +127,7 @@ export default function OnboardingComponent({
         signer,
       });
     } catch (e) {
-      console.log(e);
+      console.log("Error while connecting to Coinbase:", e);
     }
     waitingForCoinbase.current = false;
     setLoading(false);
