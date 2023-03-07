@@ -133,6 +133,8 @@ export default function OnboardingComponent({
     setLoading(false);
   }, [enableDoubleSignature]);
 
+  const requestingSignatures = useRef(false);
+
   useEffect(() => {
     connectorRef.current = connector;
     const requestSignatures = async () => {
@@ -153,8 +155,16 @@ export default function OnboardingComponent({
     if (connector?.connected) {
       if (autoDisconnect.current) {
         disconnect();
-      } else if (!user.signer) {
-        requestSignatures();
+      } else if (!user.signer && !requestingSignatures.current) {
+        requestingSignatures.current = true;
+        requestSignatures()
+          .then(() => {
+            requestingSignatures.current = false;
+          })
+          .catch((e) => {
+            console.log(e);
+            requestingSignatures.current = false;
+          });
       }
     }
 
@@ -221,8 +231,8 @@ export default function OnboardingComponent({
       setHideModal(!!walletName);
       try {
         await connector?.connect();
-      } catch {
-        console.log("User did not connect to WC");
+      } catch (e: any) {
+        console.log("User did not connect to WC", e);
         setLoading(false);
       }
       setHideModal(false);
