@@ -172,6 +172,10 @@ android {
     lintOptions {
         abortOnError false
     }
+
+    sourceSets { 
+        main { assets.srcDirs = ['src/main/assets', '../../assets'] } 
+    }
 }
 
 // Apply static values from `gradle.properties` to the `android.packagingOptions`

@@ -4,7 +4,7 @@ import {
   //@ts-ignore
 } from "@xmtp/xmtp-js/dist/cjs/src/utils";
 import React, { useCallback, useContext, useEffect, useRef } from "react";
-import { Alert, AppState, StyleSheet, View } from "react-native";
+import { Alert, AppState, Platform, StyleSheet, View } from "react-native";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { WebView, WebViewMessageEvent } from "react-native-webview";
 
@@ -303,18 +303,19 @@ export default function XmtpWebview() {
     ]
   );
 
-  const showWebView = false;
+  const localWebview =
+    Platform.OS === "android" ? "file:///android_asset/xmtp.html" : "xmtp.html";
 
   const webviewToRender = (
     <WebView
-      style={[styles.webview, showWebView ? styles.showWebView : null]}
+      style={[styles.webview]}
       autoManageStatusBarEnabled={false}
       onMessage={onMessage}
       ref={(ref) => {
         webview = ref;
       }}
       source={{
-        uri: "xmtp.html",
+        uri: localWebview,
       }}
       javaScriptEnabled
       originWhitelist={["*"]}
@@ -323,7 +324,7 @@ export default function XmtpWebview() {
   );
 
   return (
-    <View style={{ flex: showWebView ? 1 : 0 }}>
+    <View style={{ height: 1, position: "absolute", opacity: 0 }}>
       <SafeAreaProvider>{webviewToRender}</SafeAreaProvider>
     </View>
   );
@@ -334,9 +335,5 @@ const styles = StyleSheet.create({
     flex: 1,
     position: "absolute",
     opacity: 0,
-  },
-  showWebView: {
-    position: "relative",
-    opacity: 1,
   },
 });
