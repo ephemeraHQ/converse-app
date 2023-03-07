@@ -233,6 +233,7 @@ export default function Main() {
       try {
         xmtpAddress = await getLoggedXmtpAddress();
       } catch {
+        console.log("Error: failed to load saved logged XMTP Address");
         addLog("Error: failed to load saved logged XMTP Address");
       }
       await initDb();
