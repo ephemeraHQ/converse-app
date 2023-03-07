@@ -21,11 +21,11 @@ import {
   useColorScheme,
   View,
 } from "react-native";
-import { SFSymbol } from "react-native-sfsymbols";
 import uuid from "react-native-uuid";
 
 import Button from "../components/Button";
 import InviteBanner from "../components/InviteBanner";
+import Picto from "../components/Picto/Picto";
 import {
   sendMessageToWebview,
   sendXmtpMessage,
@@ -488,15 +488,11 @@ const chatTheme = (colorScheme: ColorSchemeName) =>
     icons: {
       ...defaultTheme.icons,
       sendButtonIcon: () => (
-        <SFSymbol
-          name="paperplane"
-          weight="regular"
-          scale="large"
+        <Picto
+          picto="paperplane"
           color={textPrimaryColor(colorScheme)}
-          size={18}
-          resizeMode="center"
-          multicolor={false}
           style={{ width: 24, height: 24 }}
+          size={18}
         />
       ),
     },

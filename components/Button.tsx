@@ -11,9 +11,9 @@ import {
   useColorScheme,
   ViewStyle,
 } from "react-native";
-import { SFSymbol } from "react-native-sfsymbols";
 
 import { tableViewItemBackground } from "../utils/colors";
+import Picto from "./Picto/Picto";
 
 type Props = {
   title: string;
@@ -51,15 +51,12 @@ export default function Button({
   return (
     <TouchableOpacity style={[buttonStyle, style]} onPress={onPress}>
       {picto && (
-        <SFSymbol
-          name={picto}
-          weight="bold"
-          scale="large"
-          color="white"
+        <Picto
+          picto={picto}
           size={13}
-          resizeMode="center"
-          multicolor={false}
           style={styles.picto}
+          color="white"
+          weight="bold"
         />
       )}
       <Text

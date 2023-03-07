@@ -6,7 +6,6 @@ import React, {
   ColorSchemeName,
   TouchableOpacity,
 } from "react-native";
-import { SFSymbol } from "react-native-sfsymbols";
 
 import {
   itemSeparatorColor,
@@ -15,6 +14,7 @@ import {
   textSecondaryColor,
 } from "../utils/colors";
 import Button from "./Button";
+import Picto from "./Picto/Picto";
 // import { conversationName } from "../utils/str";
 
 type Props = {
@@ -40,15 +40,7 @@ export default function InviteBanner({ onClickInvite, onClickHide }: Props) {
         onPress={onClickInvite}
       />
       <TouchableOpacity activeOpacity={0.6} onPress={onClickHide}>
-        <SFSymbol
-          name="xmark"
-          scale="large"
-          color="#8E8E93"
-          size={13}
-          resizeMode="center"
-          multicolor={false}
-          style={styles.xmark}
-        />
+        <Picto picto="xmark" color="#8E8E93" size={13} style={styles.xmark} />
       </TouchableOpacity>
     </View>
   );

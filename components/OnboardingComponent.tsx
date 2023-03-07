@@ -10,13 +10,11 @@ import {
   View,
   StyleSheet,
   Text,
-  PlatformColor,
   ActivityIndicator,
   AppState,
   ColorSchemeName,
   useColorScheme,
 } from "react-native";
-import { SFSymbol } from "react-native-sfsymbols";
 
 import Button from "../components/Button";
 import { sendMessageToWebview } from "../components/XmtpWebview";
@@ -26,6 +24,7 @@ import { backgroundColor, textPrimaryColor } from "../utils/colors";
 import { saveXmtpKeys } from "../utils/keychain";
 import { shortAddress } from "../utils/str";
 import { getXmtpKeysFromSigner, isOnXmtp } from "../utils/xmtp";
+import Picto from "./Picto/Picto";
 import TableView, { TableViewEmoji, TableViewSymbol } from "./TableView";
 
 type Props = {
@@ -276,15 +275,7 @@ export default function OnboardingComponent({
   return (
     <View style={styles.onboarding}>
       <View style={styles.picto}>
-        <SFSymbol
-          name={sfSymbol}
-          weight="regular"
-          scale="large"
-          color={PlatformColor("systemBlue")}
-          size={43}
-          resizeMode="center"
-          style={{ marginBottom: 48 }}
-        />
+        <Picto picto={sfSymbol} style={{ marginBottom: 48 }} size={43} />
       </View>
       {!loading && (
         <>
