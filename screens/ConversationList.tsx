@@ -23,9 +23,9 @@ import {
   useColorScheme,
   View,
 } from "react-native";
-import { SFSymbol } from "react-native-sfsymbols";
 
 import DebugButton from "../components/DebugButton";
+import Picto from "../components/Picto/Picto";
 import SettingsButton from "../components/SettingsButton";
 import config from "../config";
 import { AppContext } from "../data/store/context";
@@ -110,14 +110,11 @@ const ConversationListItem = memo(function ConversationListItem({
         </Text>
         <View style={styles.timeAndChevron}>
           <Text style={styles.timeText}>{timeToShow}</Text>
-          <SFSymbol
-            name="chevron.right"
+          <Picto
+            picto="chevron.right"
             weight="semibold"
-            scale="large"
             color={actionSecondaryColor(colorScheme)}
             size={10}
-            resizeMode="center"
-            multicolor={false}
           />
         </View>
       </View>
@@ -147,14 +144,11 @@ function NewConversationButton({
       }}
     >
       {shouldShowDebug && <DebugButton ref={debugRef} />}
-      <SFSymbol
-        name="square.and.pencil"
+      <Picto
+        picto="square.and.pencil"
         weight="medium"
-        scale="large"
         color={PlatformColor("systemBlue")}
         size={16}
-        resizeMode="center"
-        multicolor={false}
         style={{ width: 32, height: 32 }}
       />
     </TouchableOpacity>
@@ -171,14 +165,11 @@ function ShareProfileButton({
         navigation.navigate("ShareProfile");
       }}
     >
-      <SFSymbol
-        name="qrcode"
+      <Picto
+        picto="qrcode"
         weight="medium"
-        scale="large"
         color={PlatformColor("systemBlue")}
         size={16}
-        resizeMode="center"
-        multicolor={false}
         style={{ width: 32, height: 32, marginRight: 20 }}
       />
     </TouchableOpacity>
