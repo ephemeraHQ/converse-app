@@ -16,6 +16,7 @@ import {
   ActivityIndicator,
   ColorSchemeName,
   FlatList,
+  Platform,
   PlatformColor,
   StyleSheet,
   Text,
@@ -147,7 +148,7 @@ function NewConversationButton({
       <Picto
         picto="square.and.pencil"
         weight="medium"
-        color={PlatformColor("systemBlue")}
+        color={Platform.OS === "ios" ? PlatformColor("systemBlue") : "blue"}
         size={16}
         style={{ width: 32, height: 32 }}
       />
@@ -168,7 +169,7 @@ function ShareProfileButton({
       <Picto
         picto="qrcode"
         weight="medium"
-        color={PlatformColor("systemBlue")}
+        color={Platform.OS === "ios" ? PlatformColor("systemBlue") : "blue"}
         size={16}
         style={{ width: 32, height: 32, marginRight: 20 }}
       />

@@ -2,6 +2,7 @@ import React from "react";
 import {
   ColorSchemeName,
   GestureResponderEvent,
+  Platform,
   PlatformColor,
   StyleProp,
   StyleSheet,
@@ -72,7 +73,8 @@ export default function Button({
 const getStyles = (colorScheme: ColorSchemeName) =>
   StyleSheet.create({
     buttonBlue: {
-      backgroundColor: PlatformColor("systemBlue"),
+      backgroundColor:
+        Platform.OS === "ios" ? PlatformColor("systemBlue") : "blue",
       display: "flex",
       alignSelf: "stretch",
       marginHorizontal: 32,
@@ -95,14 +97,19 @@ const getStyles = (colorScheme: ColorSchemeName) =>
       borderRadius: 100,
     },
     buttonGreyText: {
-      color: colorScheme === "light" ? PlatformColor("systemBlue") : "white",
+      color:
+        colorScheme === "light"
+          ? Platform.OS === "ios"
+            ? PlatformColor("systemBlue")
+            : "blue"
+          : "white",
       textAlign: "center",
       fontWeight: "600",
       fontSize: 17,
     },
     buttonText: {},
     buttonTextText: {
-      color: PlatformColor("systemBlue"),
+      color: Platform.OS === "ios" ? PlatformColor("systemBlue") : "blue",
       textAlign: "center",
       fontWeight: "400",
       fontSize: 17,

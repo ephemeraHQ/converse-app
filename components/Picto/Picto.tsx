@@ -1,4 +1,10 @@
-import { ColorValue, PlatformColor, StyleProp, ViewStyle } from "react-native";
+import {
+  ColorValue,
+  Platform,
+  PlatformColor,
+  StyleProp,
+  ViewStyle,
+} from "react-native";
 import { SFSymbol } from "react-native-sfsymbols";
 
 type Props = {
@@ -15,7 +21,9 @@ export default function Picto({ picto, style, size, weight, color }: Props) {
       name={picto}
       weight={(weight as any) || "regular"}
       scale="large"
-      color={color || PlatformColor("systemBlue")}
+      color={
+        color || Platform.OS === "ios" ? PlatformColor("systemBlue") : "blue"
+      }
       size={size}
       multicolor={false}
       resizeMode="center"
