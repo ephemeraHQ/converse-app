@@ -228,15 +228,17 @@ export default function ConversationList({
     });
   }, [navigation, route, state.xmtp.address]);
   useEffect(() => {
-    navigation.setOptions({
-      headerTitle: () => {
-        if (!state.xmtp.initialLoadDone || state.xmtp.loading) {
-          return <ActivityIndicator />;
-        } else {
-          return undefined;
-        }
-      },
-    });
+    setTimeout(() => {
+      navigation.setOptions({
+        headerTitle: () => {
+          if (!state.xmtp.initialLoadDone || state.xmtp.loading) {
+            return <ActivityIndicator />;
+          } else {
+            return undefined;
+          }
+        },
+      });
+    }, 250);
   }, [navigation, state.xmtp.initialLoadDone, state.xmtp.loading]);
   const keyExtractor = useCallback((item: XmtpConversation) => {
     return item.topic;
