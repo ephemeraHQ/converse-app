@@ -23,23 +23,23 @@ PODS:
     - EXJSONUtils
   - EXNotifications (0.18.1):
     - ExpoModulesCore
-  - Expo (48.0.4):
+  - Expo (48.0.5):
     - ExpoModulesCore
-  - expo-dev-client (2.1.4):
+  - expo-dev-client (2.1.5):
     - EXManifests
     - expo-dev-launcher
     - expo-dev-menu
     - expo-dev-menu-interface
     - EXUpdatesInterface
-  - expo-dev-launcher (2.1.4):
+  - expo-dev-launcher (2.1.5):
     - EXManifests
-    - expo-dev-launcher/Main (= 2.1.4)
+    - expo-dev-launcher/Main (= 2.1.5)
     - expo-dev-menu
     - expo-dev-menu-interface
     - ExpoModulesCore
     - EXUpdatesInterface
     - React-Core
-  - expo-dev-launcher/Main (2.1.4):
+  - expo-dev-launcher/Main (2.1.5):
     - EXManifests
     - expo-dev-launcher/Unsafe
     - expo-dev-menu
@@ -47,7 +47,7 @@ PODS:
     - ExpoModulesCore
     - EXUpdatesInterface
     - React-Core
-  - expo-dev-launcher/Unsafe (2.1.4):
+  - expo-dev-launcher/Unsafe (2.1.5):
     - EXManifests
     - expo-dev-menu
     - expo-dev-menu-interface
@@ -97,7 +97,7 @@ PODS:
     - expo-dev-menu/GestureHandler
     - expo-dev-menu/Reanimated
     - expo-dev-menu/SafeAreaView
-  - ExpoClipboard (4.1.1):
+  - ExpoClipboard (4.1.2):
     - ExpoModulesCore
   - ExpoCrypto (12.2.1):
     - ExpoModulesCore
@@ -105,7 +105,7 @@ PODS:
     - ExpoModulesCore
   - ExpoKeepAwake (12.0.1):
     - ExpoModulesCore
-  - ExpoModulesCore (1.2.3):
+  - ExpoModulesCore (1.2.4):
     - React-Core
     - React-RCTAppDelegate
     - ReactCommon/turbomodule/core
@@ -504,12 +504,12 @@ PODS:
   - RNScreens (3.20.0):
     - React-Core
     - React-RCTImage
-  - RNSentry (4.9.0):
+  - RNSentry (4.13.0):
     - React-Core
-    - Sentry/HybridSDK (= 7.31.2)
+    - Sentry/HybridSDK (= 7.31.5)
   - RNSVG (13.4.0):
     - React-Core
-  - Sentry/HybridSDK (7.31.2)
+  - Sentry/HybridSDK (7.31.5)
   - Yoga (1.14.0)
 
 DEPENDENCIES:
@@ -755,16 +755,16 @@ SPEC CHECKSUMS:
   EXJSONUtils: 48b1e764ac35160e6f54d21ab60d7d9501f3e473
   EXManifests: 500666d48e8dd7ca5a482c9e729e4a7a6c34081b
   EXNotifications: dd628737af60fc8cc62dccebacd326b0fbbc0dcb
-  Expo: aae5eb5ed076ff163eb909a003b2be1b85f832dd
-  expo-dev-client: 71c7a10806a324e4312c1cac34d4a439670d2c3b
-  expo-dev-launcher: 53556b0670fe41380948d5010a3bf7dd5274c946
+  Expo: ac2226798ad1f7db860107a4f309303e7a1b4434
+  expo-dev-client: 7c1ef51516853465f4d448c14ddf365167d20361
+  expo-dev-launcher: 90de99d9e5d1a883d81355ca10e87c2f3c81d46e
   expo-dev-menu: d4369e74d8d21a0ccdee35f7c732e7118b0fee16
   expo-dev-menu-interface: 6c82ae323c4b8724dead4763ce3ff24a2108bdb1
-  ExpoClipboard: 8a36a8376ab93df9050c14577e9e0fcb805e9114
+  ExpoClipboard: 9b87df0ad145e3aa841614fab6aea54b7a604850
   ExpoCrypto: 477dfe89c81527b376f2c344ca1d2a01244b243c
   ExpoDevice: e0bebf68f978b3d353377ce42e73c20c0a070215
   ExpoKeepAwake: 69f5f627670d62318410392d03e0b5db0f85759a
-  ExpoModulesCore: f11d8a16e8d3f26c183da2541d75edc6aa9cf8eb
+  ExpoModulesCore: 1667335d4f4c9b7801990930e6f0eea42c916a21
   ExpoRandom: 7ee07d62e7003b74d0536e0495e3a653fe1b2a74
   ExpoSystemUI: 0be5173ee2a7c01e9abc44f56d879a1eaaa16527
   EXSecureStore: e8923258361cc406d0401af380f12bd05b2b720f
@@ -816,11 +816,11 @@ SPEC CHECKSUMS:
   RNCAsyncStorage: 8616bd5a58af409453ea4e1b246521bb76578d60
   RNReactNativeSharedGroupPreferences: de0121a4224c267bc7e9fb16c398f3f087c8da81
   RNScreens: 218801c16a2782546d30bd2026bb625c0302d70f
-  RNSentry: 6503a8ec616947dbe98be828307c8f49e7686674
+  RNSentry: acebe4104a6f5915ae871eb59dc73f13dcc92ef7
   RNSVG: 07dbd870b0dcdecc99b3a202fa37c8ca163caec2
-  Sentry: b15765d11769852fe78c9add942f7df60ed5dbf5
+  Sentry: 4c9babff9034785067c896fd580b1f7de44da020
   Yoga: 5ed1699acbba8863755998a4245daa200ff3817b
 
 PODFILE CHECKSUM: 8d55aa53cad0e3acb1536e287cbcaf98fc4dbe74
 
-COCOAPODS: 1.11.3
+COCOAPODS: 1.12.0
