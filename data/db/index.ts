@@ -3,6 +3,7 @@ import * as SQLite from "expo-sqlite";
 import dataSource from "./datasource";
 import { Conversation } from "./entities/conversation";
 import { Message } from "./entities/message";
+import { checkUpsertSupport } from "./upsert";
 
 export const conversationRepository = dataSource.getRepository(Conversation);
 export const messageRepository = dataSource.getRepository(Message);
@@ -15,6 +16,7 @@ export const initDb = async () => {
   try {
     await dataSource.initialize();
     console.log("Database initialized!");
+    await checkUpsertSupport(dataSource);
     try {
       console.log("Running migrations...");
       const r = await dataSource.runMigrations();
