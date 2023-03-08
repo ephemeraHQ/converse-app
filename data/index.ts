@@ -12,6 +12,7 @@ import { shortAddress } from "../utils/str";
 import { conversationRepository, messageRepository } from "./db";
 import { Conversation } from "./db/entities/conversation";
 import { Message } from "./db/entities/message";
+import { upsertRepository } from "./db/upsert";
 import { DispatchType } from "./store/context";
 import {
   XmtpConversation,
@@ -259,12 +260,14 @@ export const saveMessages = async (
   dispatch: MaybeDispatchType
 ) => {
   // First save to db
-  messageRepository.upsert(
+  upsertRepository(
+    messageRepository,
     messages.map((xmtpMessage) =>
       xmtpMessageToDb(xmtpMessage, conversationTopic)
     ),
     ["id"]
   );
+
   // Then dispatch if set
   if (!dispatch) return;
   dispatch({

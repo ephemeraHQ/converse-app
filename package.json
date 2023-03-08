@@ -84,6 +84,7 @@
     "readable-stream": "^4.3.0",
     "reflect-metadata": "^0.1.13",
     "safe-buffer": "^5.2.1",
+    "semver": "^7.3.8",
     "sentry-expo": "~6.1.0",
     "stream-browserify": "^3.0.0",
     "stream-http": "^3.2.0",
