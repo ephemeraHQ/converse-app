@@ -82,55 +82,20 @@ const xmtpConversationFromDb = (
   };
 };
 
-const setupAndSaveConversation = async (conversation: XmtpConversation) => {
-  const alreadyConversationInDb = await conversationRepository.findOne({
-    where: { topic: conversation.topic },
-  });
-
-  const lastHandlesResolution = alreadyConversationInDb?.handlesUpdatedAt || 0;
-  const now = new Date().getTime();
-  const shouldResolveHandles = now - lastHandlesResolution >= 24 * 3600 * 1000;
-
-  let lensHandle = alreadyConversationInDb?.lensHandle || null;
-  let ensName = alreadyConversationInDb?.ensName || null;
-
-  if (shouldResolveHandles) {
-    try {
-      lensHandle = await getLensHandleFromConversationId(
-        conversation.context?.conversationId,
-        conversation.peerAddress
-      );
-      ensName = await ethProvider.lookupAddress(conversation.peerAddress);
-      conversation.lensHandle = lensHandle;
-      conversation.ensName = ensName;
-    } catch (e) {
-      // Error (probably rate limited)
-      console.log("Could not resolve handles:", conversation.peerAddress, e);
-      conversation.lensHandle = alreadyConversationInDb?.lensHandle || null;
-      conversation.ensName = alreadyConversationInDb?.ensName || null;
-    }
-  } else {
-    conversation.lensHandle = lensHandle;
-    conversation.ensName = ensName;
-  }
-
-  // Save to db
-  await conversationRepository.upsert(
-    [{ ...xmtpConversationToDb(conversation), handlesUpdatedAt: now }],
-    ["topic"]
-  );
-
+const saveConversationIdentifiersForNotifications = (
+  conversation: XmtpConversation
+) => {
   const conversationDict: any = {
     peerAddress: conversation.peerAddress,
     shortAddress: shortAddress(conversation.peerAddress),
   };
 
-  if (lensHandle) {
-    conversationDict.lensHandle = lensHandle;
+  if (conversation.lensHandle) {
+    conversationDict.lensHandle = conversation.lensHandle;
   }
 
-  if (ensName) {
-    conversationDict.ensName = ensName;
+  if (conversation.ensName) {
+    conversationDict.ensName = conversation.ensName;
   }
 
   // Also save to shared preferences to be able to show notification
@@ -145,34 +110,147 @@ const setupAndSaveConversation = async (conversation: XmtpConversation) => {
   });
 };
 
+type HandlesToResolve = {
+  conversation: XmtpConversation;
+  shouldResolveHandles: boolean;
+};
+
+const setupAndSaveConversation = async (
+  conversation: XmtpConversation
+): Promise<HandlesToResolve> => {
+  const alreadyConversationInDb = await conversationRepository.findOne({
+    where: { topic: conversation.topic },
+  });
+
+  const lastHandlesResolution = alreadyConversationInDb?.handlesUpdatedAt || 0;
+  const now = new Date().getTime();
+  const shouldResolveHandles = now - lastHandlesResolution >= 24 * 3600 * 1000;
+
+  const lensHandle = alreadyConversationInDb?.lensHandle || null;
+  const ensName = alreadyConversationInDb?.ensName || null;
+
+  conversation.lensHandle = lensHandle;
+  conversation.ensName = ensName;
+
+  // Save to db
+  await conversationRepository.upsert(
+    [xmtpConversationToDb(conversation)],
+    ["topic"]
+  );
+
+  saveConversationIdentifiersForNotifications(conversation);
+
+  return {
+    conversation,
+    shouldResolveHandles,
+  };
+};
+
+const resolveHandlesForConversation = async (
+  conversation: XmtpConversation
+) => {
+  const currentLensHandle = conversation.lensHandle;
+  const currentEnsName = conversation.ensName;
+  let updated = false;
+  try {
+    const newLensHandle = await getLensHandleFromConversationId(
+      conversation.context?.conversationId,
+      conversation.peerAddress
+    );
+    const newEnsName = await ethProvider.lookupAddress(
+      conversation.peerAddress
+    );
+    if (newLensHandle !== currentLensHandle || newEnsName !== currentEnsName) {
+      updated = true;
+    }
+    conversation.lensHandle = newLensHandle;
+    conversation.ensName = newEnsName;
+  } catch (e) {
+    // Error (probably rate limited)
+    console.log("Could not resolve handles:", conversation.peerAddress, e);
+  }
+
+  // Save to db
+  await conversationRepository.upsert(
+    [
+      {
+        ...xmtpConversationToDb(conversation),
+        handlesUpdatedAt: new Date().getTime(),
+      },
+    ],
+    ["topic"]
+  );
+  saveConversationIdentifiersForNotifications(conversation);
+  return { conversation, updated };
+};
+
 export const saveConversations = async (
   conversations: XmtpConversation[],
   dispatch: MaybeDispatchType
 ) => {
-  await Promise.all(conversations.map(setupAndSaveConversation));
-  // Then dispatch if set
-  if (!dispatch) return;
-  dispatch({
-    type: XmtpDispatchTypes.XmtpSetConversations,
-    payload: {
-      conversations,
-    },
-  });
+  // Save immediatly to db
+  const saveResult = await Promise.all(
+    conversations.map(setupAndSaveConversation)
+  );
+  // Then to context
+  if (dispatch) {
+    dispatch({
+      type: XmtpDispatchTypes.XmtpSetConversations,
+      payload: {
+        conversations: saveResult.map((r) => r.conversation),
+      },
+    });
+  }
+  // Now let's see what conversations need to have a handle resolved
+  const conversationsToResolve = saveResult
+    .filter((c) => c.shouldResolveHandles)
+    .map((c) => c.conversation);
+  if (conversationsToResolve.length === 0) return;
+  const resolveResult = await Promise.all(
+    conversationsToResolve.map(resolveHandlesForConversation)
+  );
+  const conversationsResolved = resolveResult
+    .filter((r) => r.updated)
+    .map((r) => r.conversation);
+  if (dispatch && conversationsResolved.length > 0) {
+    dispatch({
+      type: XmtpDispatchTypes.XmtpSetConversations,
+      payload: {
+        conversations: conversationsResolved,
+      },
+    });
+  }
 };
 
 export const saveNewConversation = async (
   conversation: XmtpConversation,
   dispatch: MaybeDispatchType
 ) => {
-  await setupAndSaveConversation(conversation);
-  // Then dispatch if set
-  if (!dispatch) return;
-  dispatch({
-    type: XmtpDispatchTypes.XmtpNewConversation,
-    payload: {
-      conversation,
-    },
-  });
+  // Save immediatly to db
+  const saveResult = await setupAndSaveConversation(conversation);
+  // Then to context
+  if (dispatch) {
+    dispatch({
+      type: XmtpDispatchTypes.XmtpNewConversation,
+      payload: {
+        conversation,
+      },
+    });
+  }
+  // Now let's see if conversation needs to have a handle resolved
+  if (saveResult.shouldResolveHandles) {
+    const resolveResult = await resolveHandlesForConversation(
+      saveResult.conversation
+    );
+    if (dispatch && resolveResult.updated) {
+      dispatch({
+        type: XmtpDispatchTypes.XmtpSetConversations,
+        payload: {
+          conversations: [resolveResult.conversation],
+        },
+      });
+    }
+  }
 };
 
 export const saveMessages = async (
