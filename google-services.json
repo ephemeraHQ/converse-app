@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "874842573069",
+    "project_id": "conversemessengerapp",
+    "storage_bucket": "conversemessengerapp.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:874842573069:android:2c1472208f3f2648d88844",
+        "android_client_info": {
+          "package_name": "com.converse.dev"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "874842573069-r4st5eh3nvhsber1a86vr68crqulkc4k.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCRyt2mw_3pFgrbJF5KysR0JPCO9ECjhwA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "874842573069-r4st5eh3nvhsber1a86vr68crqulkc4k.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
