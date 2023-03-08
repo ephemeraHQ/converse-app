@@ -164,7 +164,7 @@ export default function NewConversation({
             } else {
               setStatus({
                 loading: false,
-                error: `${value} does not use Converse or XMTP`,
+                error: `${value} does not use Converse or XMTP yet`,
                 address: "",
                 inviteToConverse: value,
                 existingConversations: [],
