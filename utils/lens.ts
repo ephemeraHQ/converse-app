@@ -29,7 +29,7 @@ const resolveLensProfile = async (
       : null;
   } catch (e: any) {
     console.log(`Lens profile resolution failed for lens profile ${profileId}`);
-    console.log(e?.response);
+    console.log(e?.response?.data?.errors);
   }
   return null;
 };

@@ -165,6 +165,7 @@ export const xmtpReducer = (state: XmtpType, action: XmtpActions): XmtpType => {
       return {
         ...state,
         initialLoadDone: true,
+        lastUpdateAt: new Date().getTime(),
       };
     }
 

@@ -298,7 +298,12 @@ export default function Main() {
       }
     };
     hideSplashScreenIfReady();
-  }, [hydrationDone, navigateToConversation, state.xmtp.conversations]);
+  }, [
+    dispatch,
+    hydrationDone,
+    navigateToConversation,
+    state.xmtp.conversations,
+  ]);
 
   const initialNotificationsSubscribed = useRef(false);
 
@@ -306,7 +311,8 @@ export default function Main() {
     if (
       state.notifications.status === "granted" &&
       state.xmtp.initialLoadDone &&
-      !initialNotificationsSubscribed.current
+      !initialNotificationsSubscribed.current &&
+      state.xmtp.address
     ) {
       initialNotificationsSubscribed.current = true;
       const topics = [
