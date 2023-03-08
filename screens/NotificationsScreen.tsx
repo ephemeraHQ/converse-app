@@ -8,7 +8,7 @@ import {
 } from "react-native";
 
 import Button from "../components/Button";
-import NotificationsSVG from "../components/svgs/notifications";
+import Picto from "../components/Picto/Picto";
 import { AppContext } from "../data/store/context";
 import { NotificationsDispatchTypes } from "../data/store/notificationsReducer";
 import { textPrimaryColor } from "../utils/colors";
@@ -21,7 +21,7 @@ export default function NotificationsScreen() {
   return (
     <View style={styles.notifications}>
       <View style={styles.picto}>
-        <NotificationsSVG />
+        <Picto picto="message.badge" style={{ marginBottom: 48 }} size={43} />
       </View>
       <Text style={styles.title}>Accept notifications</Text>
       <Text style={styles.p}>
