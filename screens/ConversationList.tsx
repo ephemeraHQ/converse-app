@@ -217,15 +217,17 @@ export default function ConversationList({
     setOrderedConversations(conversations);
   }, [state.xmtp.conversations, state.xmtp.lastUpdateAt]);
   useEffect(() => {
-    navigation.setOptions({
-      headerLeft: () => (state.xmtp.address ? <SettingsButton /> : null),
-      headerRight: () => (
-        <>
-          <ShareProfileButton navigation={navigation} route={route} />
-          <NewConversationButton navigation={navigation} route={route} />
-        </>
-      ),
-    });
+    setTimeout(() => {
+      navigation.setOptions({
+        headerLeft: () => (state.xmtp.address ? <SettingsButton /> : null),
+        headerRight: () => (
+          <>
+            <ShareProfileButton navigation={navigation} route={route} />
+            <NewConversationButton navigation={navigation} route={route} />
+          </>
+        ),
+      });
+    }, 150);
   }, [navigation, route, state.xmtp.address]);
   useEffect(() => {
     setTimeout(() => {
@@ -238,7 +240,7 @@ export default function ConversationList({
           }
         },
       });
-    }, 250);
+    }, 350);
   }, [navigation, state.xmtp.initialLoadDone, state.xmtp.loading]);
   const keyExtractor = useCallback((item: XmtpConversation) => {
     return item.topic;
