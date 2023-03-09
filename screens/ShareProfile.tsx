@@ -9,6 +9,7 @@ import {
   ColorSchemeName,
   useColorScheme,
   Share,
+  Platform,
 } from "react-native";
 import QRCode from "react-native-qrcode-svg";
 
@@ -41,6 +42,10 @@ export default function ShareProfileScreen({
   const profileUrl = `https://${config.websiteDomain}/dm/${
     state.app.mainIdentity || state.xmtp.address
   }`;
+
+  const shareDict =
+    Platform.OS === "ios" ? { url: profileUrl } : { message: profileUrl };
+
   return (
     <View style={styles.shareProfile}>
       <StatusBar hidden={false} style="light" />
@@ -62,7 +67,7 @@ export default function ShareProfileScreen({
           title="Share link"
           style={styles.shareButton}
           picto="square.and.arrow.up"
-          onPress={() => Share.share({ url: profileUrl, message: profileUrl })}
+          onPress={() => Share.share(shareDict)}
         />
       </View>
     </View>
