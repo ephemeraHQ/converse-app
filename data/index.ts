@@ -134,7 +134,8 @@ const setupAndSaveConversation = async (
   conversation.ensName = ensName;
 
   // Save to db
-  await conversationRepository.upsert(
+  await upsertRepository(
+    conversationRepository,
     [xmtpConversationToDb(conversation)],
     ["topic"]
   );
@@ -172,7 +173,8 @@ const resolveHandlesForConversation = async (
   }
 
   // Save to db
-  await conversationRepository.upsert(
+  await upsertRepository(
+    conversationRepository,
     [
       {
         ...xmtpConversationToDb(conversation),
