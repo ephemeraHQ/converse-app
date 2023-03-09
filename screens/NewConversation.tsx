@@ -1,5 +1,6 @@
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { getAddress, isAddress } from "ethers/lib/utils";
+import * as Linking from "expo-linking";
 import { StatusBar } from "expo-status-bar";
 import React, {
   useCallback,
@@ -92,7 +93,7 @@ export default function NewConversation({
     loading: false,
     error: "",
     address: "",
-    askPolToInvite: "",
+    inviteToConverse: "",
     existingConversations: [] as XmtpConversation[],
   });
 
@@ -105,7 +106,7 @@ export default function NewConversation({
         loading,
         error: "",
         address: "",
-        askPolToInvite: "",
+        inviteToConverse: "",
         existingConversations: [],
       }));
       const is0x = isAddress(value.toLowerCase());
@@ -116,7 +117,7 @@ export default function NewConversation({
           loading: true,
           error,
           address: "",
-          askPolToInvite: "",
+          inviteToConverse: "",
           existingConversations: [],
         }));
         searchingForValue.current = value;
@@ -128,7 +129,7 @@ export default function NewConversation({
               loading: false,
               address: "",
               existingConversations: [],
-              askPolToInvite: "",
+              inviteToConverse: "",
               error: isLens
                 ? "This handle does not exist. Please try again."
                 : "No address has been set for this ENS domain. Please try again",
@@ -157,15 +158,15 @@ export default function NewConversation({
                 loading: false,
                 error: "",
                 address,
-                askPolToInvite: "",
+                inviteToConverse: "",
                 existingConversations: conversations,
               });
             } else {
               setStatus({
                 loading: false,
-                error: `${value} has never used Converse or any other XMTP client. Ask our co-founder Pol to onboard them!`,
+                error: `${value} does not use Converse or XMTP yet`,
                 address: "",
-                askPolToInvite: value,
+                inviteToConverse: value,
                 existingConversations: [],
               });
             }
@@ -176,7 +177,7 @@ export default function NewConversation({
           loading: false,
           error: "",
           address: "",
-          askPolToInvite: "",
+          inviteToConverse: "",
           existingConversations: [],
         });
         searchingForValue.current = "";
@@ -282,7 +283,7 @@ export default function NewConversation({
 
         {status.loading && <ActivityIndicator style={styles.activity} />}
 
-        {!status.loading && status.askPolToInvite && (
+        {!status.loading && status.inviteToConverse && (
           <TableView
             items={[
               {
@@ -292,28 +293,13 @@ export default function NewConversation({
                     style={{ width: 32, height: 32, marginRight: 8 }}
                   />
                 ) : (
-                  <TableViewSymbol symbol="square.and.pencil" />
+                  <TableViewSymbol symbol="link" />
                 ),
-                title: "Reach out to Pol",
+                title: "Invite them to Converse",
                 subtitle: "",
                 action: () => {
-                  const conversationWithPol = Object.values(
-                    state.xmtp.conversations
-                  ).find(
-                    (c) =>
-                      c.peerAddress?.toLowerCase() ===
-                      config.polAddress?.toLowerCase()
-                  );
-                  const message = `Hey Pol! I’d like to write to someone but this person is not on the network. Can you help me? Their address is ${status.askPolToInvite}`;
-                  if (conversationWithPol) {
-                    navigateToTopic(conversationWithPol.topic, message);
-                  } else {
-                    createNewConversationWithPeer(
-                      state,
-                      config.polAddress,
-                      message
-                    );
-                  }
+                  navigation.goBack();
+                  Linking.openURL(Linking.createURL("/shareProfile"));
                 },
               },
             ]}
