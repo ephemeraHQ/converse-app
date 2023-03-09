@@ -12,6 +12,7 @@ import config from "../config";
 import { saveNewConversation, saveConversations, saveMessages } from "../data";
 import { AppContext } from "../data/store/context";
 import { XmtpDispatchTypes } from "../data/store/xmtpReducer";
+import { loadSavedNotificationMessagesToContext } from "../utils/backgroundNotifications/ios";
 import {
   deleteXmtpKeys,
   loadXmtpKeys,
@@ -19,10 +20,7 @@ import {
   saveXmtpKeys,
 } from "../utils/keychain";
 import { lastValueInMap } from "../utils/map";
-import {
-  loadSavedNotificationMessagesToContext,
-  subscribeToNotifications,
-} from "../utils/notifications";
+import { subscribeToNotifications } from "../utils/notifications";
 import { sentryTrackMessage } from "../utils/sentry";
 import { addLog } from "./DebugButton";
 

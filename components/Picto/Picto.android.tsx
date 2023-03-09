@@ -25,7 +25,7 @@ export default function Picto({ picto, style, size, weight, color }: Props) {
   const icon = androidPicto ? (
     <Icon name={androidPicto} size={size} color={color} />
   ) : (
-    <Icon name="cog-sync-outline" size={30} color={color} />
+    <Icon name="circle-outline" size={30} color={color} />
   );
   return <View style={style}>{icon}</View>;
 }

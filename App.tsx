@@ -1,8 +1,7 @@
 import "reflect-metadata";
 import "./polyfills";
-import * as Notifications from "expo-notifications";
+import messaging from "@react-native-firebase/messaging";
 import { StatusBar } from "expo-status-bar";
-import * as TaskManager from "expo-task-manager";
 import React from "react";
 import {
   ColorSchemeName,
@@ -19,6 +18,7 @@ import XmtpWebview from "./components/XmtpWebview";
 import config from "./config";
 import { AppProvider } from "./data/store/context";
 import Main from "./screens/Main";
+import { handleAndroidBackgroundNotification } from "./utils/backgroundNotifications/android";
 import { backgroundColor } from "./utils/colors";
 
 SplashScreen.preventAutoHideAsync().catch(() => {
@@ -33,22 +33,9 @@ Sentry.init({
 });
 
 if (Platform.OS === "android") {
-  const BACKGROUND_NOTIFICATION_TASK = "BACKGROUND-NOTIFICATION-TASK";
-  TaskManager.defineTask(
-    BACKGROUND_NOTIFICATION_TASK,
-    ({ data, error, executionInfo }) => {
-      console.log("Received a notification in the background!");
-      // Do something with the notification data
-      Notifications.scheduleNotificationAsync({
-        content: {
-          title: "Look at that notification",
-          body: "I'm so proud of myself!",
-        },
-        trigger: null,
-      });
-    }
-  );
-  Notifications.registerTaskAsync(BACKGROUND_NOTIFICATION_TASK);
+  // Register background handler
+  messaging().onMessage(handleAndroidBackgroundNotification);
+  messaging().setBackgroundMessageHandler(handleAndroidBackgroundNotification);
 }
 
 export default function App() {
