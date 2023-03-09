@@ -82,6 +82,12 @@ Notifications.setNotificationHandler({
   }),
 });
 
+const universalLinkPrefixes = [
+  `https://${config.websiteDomain}/`,
+  `http://${config.websiteDomain}/`,
+  config.websiteDomain,
+];
+
 export default function Main() {
   const colorScheme = useColorScheme();
   const appState = useRef(AppState.currentState);
@@ -136,12 +142,11 @@ export default function Main() {
     const handleInitialDeeplink = async () => {
       let openedViaURL = (await Linking.getInitialURL()) || "";
       // Handling universal links by saving a schemed URI
-      const universalLinkPrefix = `https://${config.websiteDomain}/`;
-      if (openedViaURL.startsWith(universalLinkPrefix)) {
-        openedViaURL = Linking.createURL(
-          openedViaURL.replace(universalLinkPrefix, "")
-        );
-      }
+      universalLinkPrefixes.forEach((prefix) => {
+        if (openedViaURL.startsWith(prefix)) {
+          openedViaURL = Linking.createURL(openedViaURL.replace(prefix, ""));
+        }
+      });
       initialURL.current = openedViaURL;
     };
     handleInitialDeeplink();
@@ -381,7 +386,7 @@ export default function Main() {
   }
 
   const linking = {
-    prefixes: [prefix, `https://${config.websiteDomain}/`],
+    prefixes: [prefix, ...universalLinkPrefixes],
     config: {
       initialRouteName: "Messages",
       screens: {
