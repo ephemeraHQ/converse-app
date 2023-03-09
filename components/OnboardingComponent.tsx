@@ -171,7 +171,10 @@ export default function OnboardingComponent({
       );
       saveXmtpKeys(keys);
       await clearDB();
-      sendMessageToWebview("KEYS_LOADED_FROM_SECURE_STORAGE", { keys });
+      sendMessageToWebview("KEYS_LOADED_FROM_SECURE_STORAGE", {
+        keys,
+        env: config.xmtpEnv,
+      });
     } catch (e) {
       setLoading(false);
       console.error(e);

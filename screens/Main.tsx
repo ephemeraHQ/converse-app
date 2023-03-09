@@ -316,7 +316,8 @@ export default function Main() {
     if (
       state.notifications.status === "granted" &&
       state.xmtp.initialLoadDone &&
-      !initialNotificationsSubscribed.current
+      !initialNotificationsSubscribed.current &&
+      state.xmtp.address
     ) {
       initialNotificationsSubscribed.current = true;
       const topics = [
