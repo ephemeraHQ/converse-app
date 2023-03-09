@@ -1,4 +1,3 @@
-import * as Device from "expo-device";
 import * as Notifications from "expo-notifications";
 import { Platform } from "react-native";
 import uuid from "react-native-uuid";
@@ -22,7 +21,6 @@ export type NotificationPermissionStatus =
 export const subscribeToNotifications = async (
   topics: string[]
 ): Promise<void> => {
-  if (!Device.isDevice || Platform.OS === "web") return;
   const [expoTokenQuery, nativeTokenQuery] = await Promise.all([
     Notifications.getExpoPushTokenAsync(),
     Notifications.getDevicePushTokenAsync(),
@@ -57,7 +55,6 @@ export const disablePushNotifications = async (): Promise<void> => {
 export const getNotificationsPermissionStatus = async (): Promise<
   NotificationPermissionStatus | undefined
 > => {
-  if (!Device.isDevice || Platform.OS === "web") return;
   if (Platform.OS === "android") {
     await Notifications.setNotificationChannelAsync("default", {
       name: "default",
@@ -71,7 +68,6 @@ export const getNotificationsPermissionStatus = async (): Promise<
 export const requestPushNotificationsPermissions = async (): Promise<
   NotificationPermissionStatus | undefined
 > => {
-  if (!Device.isDevice || Platform.OS === "web") return;
   if (Platform.OS === "android") {
     await Notifications.setNotificationChannelAsync("default", {
       name: "default",

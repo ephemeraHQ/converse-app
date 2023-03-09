@@ -1,9 +1,12 @@
 import "reflect-metadata";
 import "./polyfills";
+import * as Notifications from "expo-notifications";
 import { StatusBar } from "expo-status-bar";
+import * as TaskManager from "expo-task-manager";
 import React from "react";
 import {
   ColorSchemeName,
+  Platform,
   StyleSheet,
   useColorScheme,
   View,
@@ -28,6 +31,25 @@ Sentry.init({
   debug: config.env === "dev",
   environment: config.env,
 });
+
+if (Platform.OS === "android") {
+  const BACKGROUND_NOTIFICATION_TASK = "BACKGROUND-NOTIFICATION-TASK";
+  TaskManager.defineTask(
+    BACKGROUND_NOTIFICATION_TASK,
+    ({ data, error, executionInfo }) => {
+      console.log("Received a notification in the background!");
+      // Do something with the notification data
+      Notifications.scheduleNotificationAsync({
+        content: {
+          title: "Look at that notification",
+          body: "I'm so proud of myself!",
+        },
+        trigger: null,
+      });
+    }
+  );
+  Notifications.registerTaskAsync(BACKGROUND_NOTIFICATION_TASK);
+}
 
 export default function App() {
   const colorScheme = useColorScheme();
