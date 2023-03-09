@@ -62,7 +62,7 @@ export default function ShareProfileScreen({
           title="Share link"
           style={styles.shareButton}
           picto="square.and.arrow.up"
-          onPress={() => Share.share({ url: profileUrl })}
+          onPress={() => Share.share({ url: profileUrl, message: profileUrl })}
         />
       </View>
     </View>
