@@ -217,30 +217,26 @@ export default function ConversationList({
     setOrderedConversations(conversations);
   }, [state.xmtp.conversations, state.xmtp.lastUpdateAt]);
   useEffect(() => {
-    setTimeout(() => {
-      navigation.setOptions({
-        headerLeft: () => (state.xmtp.address ? <SettingsButton /> : null),
-        headerRight: () => (
-          <>
-            <ShareProfileButton navigation={navigation} route={route} />
-            <NewConversationButton navigation={navigation} route={route} />
-          </>
-        ),
-      });
-    }, 150);
+    navigation.setOptions({
+      headerLeft: () => (state.xmtp.address ? <SettingsButton /> : null),
+      headerRight: () => (
+        <>
+          <ShareProfileButton navigation={navigation} route={route} />
+          <NewConversationButton navigation={navigation} route={route} />
+        </>
+      ),
+    });
   }, [navigation, route, state.xmtp.address]);
   useEffect(() => {
-    setTimeout(() => {
-      navigation.setOptions({
-        headerTitle: () => {
-          if (!state.xmtp.initialLoadDone || state.xmtp.loading) {
-            return <ActivityIndicator />;
-          } else {
-            return undefined;
-          }
-        },
-      });
-    }, 350);
+    navigation.setOptions({
+      headerTitle: () => {
+        if (!state.xmtp.initialLoadDone || state.xmtp.loading) {
+          return <ActivityIndicator />;
+        } else {
+          return undefined;
+        }
+      },
+    });
   }, [navigation, state.xmtp.initialLoadDone, state.xmtp.loading]);
   const keyExtractor = useCallback((item: XmtpConversation) => {
     return item.topic;
