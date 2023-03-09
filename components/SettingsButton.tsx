@@ -3,7 +3,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as Clipboard from "expo-clipboard";
 import * as Linking from "expo-linking";
 import React, { useContext } from "react";
-import { View } from "react-native";
+import { Platform, View } from "react-native";
 
 import { clearDB } from "../data/db";
 import { AppContext } from "../data/store/context";
@@ -33,8 +33,23 @@ export default function SettingsButton() {
             },
             "Turn on notifications": () => {
               if (state.notifications.status === "denied") {
-                // Open settings
-                Linking.openSettings();
+                if (Platform.OS === "android") {
+                  // Android 13 is always denied first so let's try to show
+                  requestPushNotificationsPermissions().then(
+                    (newStatus: NotificationPermissionStatus | undefined) => {
+                      if (newStatus === "denied") {
+                        Linking.openSettings();
+                      } else if (newStatus) {
+                        dispatch({
+                          type: NotificationsDispatchTypes.NotificationsStatus,
+                          payload: { status: newStatus },
+                        });
+                      }
+                    }
+                  );
+                } else {
+                  Linking.openSettings();
+                }
               } else if (state.notifications.status === "undetermined") {
                 // Open popup
                 requestPushNotificationsPermissions().then(
