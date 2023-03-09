@@ -21,7 +21,7 @@ import React, {
   useRef,
   useState,
 } from "react";
-import { AppState, useColorScheme } from "react-native";
+import { AppState, Platform, useColorScheme } from "react-native";
 
 import { addLog } from "../components/DebugButton";
 import { sendMessageToWebview } from "../components/XmtpWebview";
@@ -382,7 +382,8 @@ export default function Main() {
 
   if (
     state.notifications.showNotificationsScreen &&
-    state.notifications.status === "undetermined"
+    (state.notifications.status === "undetermined" ||
+      (state.notifications.status === "denied" && Platform.OS === "android"))
   ) {
     return <NotificationsScreen />;
   }

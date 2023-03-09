@@ -1,3 +1,4 @@
+import * as Linking from "expo-linking";
 import React, { useContext } from "react";
 import {
   View,
@@ -5,6 +6,7 @@ import {
   Text,
   useColorScheme,
   ColorSchemeName,
+  Platform,
 } from "react-native";
 
 import Button from "../components/Button";
@@ -34,6 +36,11 @@ export default function NotificationsScreen() {
           // Open popup
           const newStatus = await requestPushNotificationsPermissions();
           if (!newStatus) return;
+          if (newStatus === "denied" && Platform.OS === "android") {
+            // Android 13 always show denied first but sometimes
+            // it will still show the popup. If not, go to Settings!
+            Linking.openSettings();
+          }
           dispatch({
             type: NotificationsDispatchTypes.NotificationsStatus,
             payload: { status: newStatus },
