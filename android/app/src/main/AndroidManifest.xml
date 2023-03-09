@@ -34,7 +34,6 @@
         <action android:name="android.intent.action.VIEW"/>
         <category android:name="android.intent.category.DEFAULT"/>
         <category android:name="android.intent.category.BROWSABLE"/>
-        <!-- Accepts URIs that begin with "https://dev.getconverse.app/dm -->
         <data android:scheme="https" android:host="dev.getconverse.app" android:pathPrefix="/dm"/>
       </intent-filter>
     </activity>
