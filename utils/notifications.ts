@@ -1,15 +1,8 @@
 import * as Notifications from "expo-notifications";
 import { Platform } from "react-native";
-import uuid from "react-native-uuid";
 
-import { DispatchType } from "../data/store/context";
-import { XmtpDispatchTypes } from "../data/store/xmtpReducer";
 import api from "./api";
 import { saveExpoPushToken } from "./keychain";
-import {
-  emptySavedNotificationsMessages,
-  loadSavedNotificationsMessages,
-} from "./sharedData";
 
 let expoPushToken: string | null;
 
@@ -81,49 +74,4 @@ export const requestPushNotificationsPermissions = async (): Promise<
     finalStatus = status;
   }
   return finalStatus;
-};
-
-let loadingSavedNotifications = false;
-
-const waitForLoadingSavedNotifications = async () => {
-  if (!loadingSavedNotifications) return;
-  await new Promise((r) => setTimeout(r, 100));
-  await waitForLoadingSavedNotifications();
-};
-
-export const loadSavedNotificationMessagesToContext = async (
-  dispatch: DispatchType
-) => {
-  if (loadingSavedNotifications) {
-    await waitForLoadingSavedNotifications();
-    return;
-  }
-  loadingSavedNotifications = true;
-  try {
-    const messages = await loadSavedNotificationsMessages();
-    await emptySavedNotificationsMessages();
-    messages.sort((m1: any, m2: any) => m1.sent - m2.sent);
-    messages.forEach((message: any) => {
-      dispatch({
-        type: XmtpDispatchTypes.XmtpLazyMessage,
-        payload: {
-          topic: message.topic,
-          message: {
-            id: message.id || uuid.v4().toString(),
-            senderAddress: message.senderAddress,
-            sent: message.sent,
-            content: message.content,
-          },
-        },
-      });
-    });
-    loadingSavedNotifications = false;
-  } catch (e) {
-    console.log(
-      "An error occured while loading saved notifications messages",
-      e
-    );
-    emptySavedNotificationsMessages();
-    loadingSavedNotifications = false;
-  }
 };
