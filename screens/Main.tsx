@@ -298,7 +298,12 @@ export default function Main() {
       }
     };
     hideSplashScreenIfReady();
-  }, [hydrationDone, navigateToConversation, state.xmtp.conversations]);
+  }, [
+    dispatch,
+    hydrationDone,
+    navigateToConversation,
+    state.xmtp.conversations,
+  ]);
 
   const initialNotificationsSubscribed = useRef(false);
 
@@ -392,6 +397,9 @@ export default function Main() {
         },
         NewConversation: {
           path: "/newConversation",
+        },
+        ShareProfile: {
+          path: "/shareProfile",
         },
       },
     },
