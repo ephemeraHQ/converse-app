@@ -68,9 +68,11 @@ export const handleAndroidBackgroundNotification = async (
           content: {
             title: conversationV2.peerAddress,
             body: decodedMessage.content,
+            data,
           },
           trigger: null,
         });
+        Notifications.setBadgeCountAsync(0);
       }
     }
   } catch (e) {
