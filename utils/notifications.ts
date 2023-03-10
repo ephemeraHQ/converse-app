@@ -52,6 +52,7 @@ export const getNotificationsPermissionStatus = async (): Promise<
     await Notifications.setNotificationChannelAsync("default", {
       name: "default",
       importance: Notifications.AndroidImportance.MAX,
+      showBadge: false,
     });
   }
   const { status } = await Notifications.getPermissionsAsync();
@@ -65,6 +66,7 @@ export const requestPushNotificationsPermissions = async (): Promise<
     await Notifications.setNotificationChannelAsync("default", {
       name: "default",
       importance: Notifications.AndroidImportance.MAX,
+      showBadge: false,
     });
   }
   const { status: existingStatus } = await Notifications.getPermissionsAsync();

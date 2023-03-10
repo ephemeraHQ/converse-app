@@ -7,6 +7,11 @@ import {
 import * as Notifications from "expo-notifications";
 
 import { loadXmtpConversation, loadXmtpKeys } from "../keychain";
+import {
+  loadConversationDict,
+  saveNewNotificationMessage,
+} from "../sharedData/sharedData.android";
+import { shortAddress } from "../str";
 import { getXmtpClientFromKeys } from "../xmtp";
 
 const {
@@ -33,7 +38,13 @@ export const handleAndroidBackgroundNotification = async (
     }
     if (data.contentTopic) {
       const savedConversation = await loadXmtpConversation(data.contentTopic);
-      if (!savedConversation) return;
+      if (!savedConversation) {
+        console.log("nul");
+        return;
+      }
+      const conversationDict = await loadConversationDict(data.contentTopic);
+      const savedFrom =
+        conversationDict?.lensHandle || conversationDict?.ensName;
       let parsedConversation: any = {};
       try {
         parsedConversation = JSON.parse(savedConversation);
@@ -41,39 +52,37 @@ export const handleAndroidBackgroundNotification = async (
         console.log(e);
       }
       if (!parsedConversation) return;
+      let peerAddress = "";
+      let decodedMessage: DecodedMessage | null = null;
       if (parsedConversation.version === "v1") {
         const conversationV1: ConversationV1Type = ConversationV1.fromExport(
           client,
           parsedConversation
         );
         if (!conversationV1) return;
-        const decodedMessage: DecodedMessage =
-          await conversationV1.decodeMessage(data);
-        Notifications.scheduleNotificationAsync({
-          content: {
-            title: conversationV1.peerAddress,
-            body: decodedMessage.content,
-          },
-          trigger: null,
-        });
+        decodedMessage = await conversationV1.decodeMessage(data);
+        peerAddress = conversationV1.peerAddress;
       } else if (parsedConversation.version === "v2") {
         const conversationV2: ConversationV2Type = ConversationV2.fromExport(
           client,
           parsedConversation
         );
         if (!conversationV2) return;
-        const decodedMessage: DecodedMessage =
-          await conversationV2.decodeMessage(data);
-        Notifications.scheduleNotificationAsync({
-          content: {
-            title: conversationV2.peerAddress,
-            body: decodedMessage.content,
-            data,
-          },
-          trigger: null,
-        });
-        Notifications.setBadgeCountAsync(0);
+        decodedMessage = await conversationV2.decodeMessage(data);
+        peerAddress = conversationV2.peerAddress;
       }
+      if (!decodedMessage) return;
+      // Let's show a notification
+      Notifications.scheduleNotificationAsync({
+        content: {
+          title: savedFrom || shortAddress(peerAddress),
+          body: decodedMessage.content,
+          data,
+        },
+        trigger: null,
+      });
+      // Let's save the message to be able to show it ourselves
+      saveNewNotificationMessage(data.contentTopic, decodedMessage);
     }
   } catch (e) {
     console.log("An error occured while decoding the incoming notification");

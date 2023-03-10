@@ -1,7 +1,7 @@
 import {
   deleteLoggedXmtpAddress,
   saveLoggedXmtpAddress,
-} from "../../utils/sharedData";
+} from "../../utils/sharedData/sharedData";
 import { ActionMap } from "./types";
 
 export type XmtpConversationContext = {

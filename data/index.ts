@@ -7,7 +7,7 @@ import {
   saveConversationDict,
   saveXmtpEnv,
   saveApiURI,
-} from "../utils/sharedData";
+} from "../utils/sharedData/sharedData";
 import { shortAddress } from "../utils/str";
 import { conversationRepository, messageRepository } from "./db";
 import { Conversation } from "./db/entities/conversation";

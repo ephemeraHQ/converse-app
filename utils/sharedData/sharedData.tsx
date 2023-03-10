@@ -1,6 +1,13 @@
+/*
+On iOS to decode notifications coming from XMTP we developed a notification
+extension in Swift. This extension needs to access some data, to do so
+we use this lib "SharedGroupPreferences" that enables us to share data
+with other apps (the extension is "another app") through Apple App Groups
+*/
+
 import SharedGroupPreferences from "react-native-shared-group-preferences";
 
-import config from "../config";
+import config from "../../config";
 
 const appGroup = `group.${config.bundleId}`;
 
@@ -10,6 +17,9 @@ export const saveConversationDict = (topic: string, conversationDict: any) =>
     conversationDict,
     appGroup
   );
+
+export const loadConversationDict = (topic: string) =>
+  SharedGroupPreferences.getItem(`conversation-${topic}`, appGroup);
 
 export const saveXmtpEnv = () =>
   SharedGroupPreferences.setItem("xmtp-env", config.xmtpEnv, appGroup);

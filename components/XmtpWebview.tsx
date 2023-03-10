@@ -12,7 +12,7 @@ import config from "../config";
 import { saveNewConversation, saveConversations, saveMessages } from "../data";
 import { AppContext } from "../data/store/context";
 import { XmtpDispatchTypes } from "../data/store/xmtpReducer";
-import { loadSavedNotificationMessagesToContext } from "../utils/backgroundNotifications/ios";
+import { loadSavedNotificationMessagesToContext } from "../utils/backgroundNotifications/loadSavedNotifications";
 import {
   deleteXmtpKeys,
   loadXmtpKeys,
