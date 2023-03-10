@@ -1,4 +1,3 @@
-import { Platform } from "react-native";
 import uuid from "react-native-uuid";
 
 import { DispatchType } from "../../data/store/context";
@@ -6,7 +5,7 @@ import { XmtpDispatchTypes } from "../../data/store/xmtpReducer";
 import {
   emptySavedNotificationsMessages,
   loadSavedNotificationsMessages,
-} from "../sharedData";
+} from "../sharedData/sharedData";
 
 let loadingSavedNotifications = false;
 
@@ -19,11 +18,6 @@ const waitForLoadingSavedNotifications = async () => {
 export const loadSavedNotificationMessagesToContext = async (
   dispatch: DispatchType
 ) => {
-  if (Platform.OS !== "ios") {
-    console.log(
-      "[loadSavedNotificationMessagesToContext] This is not an iOS platform, ignoring"
-    );
-  }
   if (loadingSavedNotifications) {
     await waitForLoadingSavedNotifications();
     return;

@@ -18,7 +18,7 @@ import XmtpWebview from "./components/XmtpWebview";
 import config from "./config";
 import { AppProvider } from "./data/store/context";
 import Main from "./screens/Main";
-import { handleAndroidBackgroundNotification } from "./utils/backgroundNotifications/android";
+import { handleAndroidBackgroundNotification } from "./utils/backgroundNotifications/handleNotificationAndroid";
 import { backgroundColor } from "./utils/colors";
 
 SplashScreen.preventAutoHideAsync().catch(() => {
@@ -33,8 +33,6 @@ Sentry.init({
 });
 
 if (Platform.OS === "android") {
-  // Register background handler
-  messaging().onMessage(handleAndroidBackgroundNotification);
   messaging().setBackgroundMessageHandler(handleAndroidBackgroundNotification);
 }
 

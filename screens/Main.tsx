@@ -33,7 +33,7 @@ import { AppContext } from "../data/store/context";
 import { NotificationsDispatchTypes } from "../data/store/notificationsReducer";
 import { XmtpConversation, XmtpDispatchTypes } from "../data/store/xmtpReducer";
 import { saveUser } from "../utils/api";
-import { loadSavedNotificationMessagesToContext } from "../utils/backgroundNotifications/ios";
+import { loadSavedNotificationMessagesToContext } from "../utils/backgroundNotifications/loadSavedNotifications";
 import {
   backgroundColor,
   navigationSecondaryBackgroundColor,
@@ -46,7 +46,7 @@ import {
   getNotificationsPermissionStatus,
   subscribeToNotifications,
 } from "../utils/notifications";
-import { getLoggedXmtpAddress } from "../utils/sharedData";
+import { getLoggedXmtpAddress } from "../utils/sharedData/sharedData";
 import { getXmtpClientFromKeys } from "../utils/xmtp";
 import Conversation from "./Conversation";
 import ConversationList from "./ConversationList";
