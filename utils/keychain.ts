@@ -48,6 +48,14 @@ export const saveXmtpConversations = async (
   console.log(`Persisted ${promises.length} exported conversations`);
 };
 
+export const loadXmtpConversation = async (topic: string) => {
+  const key = createHash("sha256").update(topic).digest("hex");
+  const value = await SecureStore.getItemAsync(`XMTP_CONVERSATION_${key}`, {
+    keychainService: config.bundleId,
+  });
+  return value;
+};
+
 export const deleteXmtpKeys = async () => {
   await SecureStore.deleteItemAsync("XMTP_KEYS");
   await SecureStore.deleteItemAsync("XMTP_KEYS", {
