@@ -1,4 +1,6 @@
-import { FirebaseMessagingTypes } from "@react-native-firebase/messaging/lib";
+import messaging, {
+  FirebaseMessagingTypes,
+} from "@react-native-firebase/messaging";
 import { Client, DecodedMessage } from "@xmtp/xmtp-js";
 import {
   buildUserInviteTopic,
@@ -31,7 +33,11 @@ const {
   ConversationV2,
 } = require("@xmtp/xmtp-js/dist/esm/src/conversations/Conversation");
 
-export const handleAndroidBackgroundNotification = async (
+export const setupAndroidBackgroundNotificationHandler = () => {
+  messaging().setBackgroundMessageHandler(handleAndroidBackgroundNotification);
+};
+
+const handleAndroidBackgroundNotification = async (
   remoteMessage: FirebaseMessagingTypes.RemoteMessage
 ) => {
   try {

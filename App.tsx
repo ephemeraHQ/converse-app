@@ -31,11 +31,10 @@ Sentry.init({
 });
 
 if (Platform.OS === "android") {
-  const messaging = require("@react-native-firebase/messaging").default;
   const {
-    handleAndroidBackgroundNotification,
+    setupAndroidBackgroundNotificationHandler,
   } = require("./utils/backgroundNotifications/handleNotificationAndroid");
-  messaging().setBackgroundMessageHandler(handleAndroidBackgroundNotification);
+  setupAndroidBackgroundNotificationHandler();
 }
 
 export default function App() {
