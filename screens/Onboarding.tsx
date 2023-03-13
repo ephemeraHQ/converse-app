@@ -24,7 +24,7 @@ export default function OnboardingScreen() {
     // but we don't reboot the native app and the Coinbase SDK crashes
     // if we call configure a second time.
     configure({
-      callbackURL: new URL(`${config.scheme}://`),
+      callbackURL: new URL(`https://${config.websiteDomain}/coinbase`),
       hostURL: new URL("https://wallet.coinbase.com/wsegue"),
       hostPackageName: "org.toshi",
     });
