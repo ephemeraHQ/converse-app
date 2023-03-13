@@ -72,16 +72,19 @@ export const handleAndroidBackgroundNotification = async (
         peerAddress = conversationV2.peerAddress;
       }
       if (!decodedMessage) return;
-      // Let's show a notification
-      Notifications.scheduleNotificationAsync({
-        content: {
-          title: savedFrom || shortAddress(peerAddress),
-          body: decodedMessage.content,
-          data,
-        },
-        trigger: null,
-      });
-      // Let's save the message to be able to show it ourselves
+      if (decodedMessage.senderAddress !== client.address) {
+        // Let's show a notification if not from me
+        Notifications.scheduleNotificationAsync({
+          content: {
+            title: savedFrom || shortAddress(peerAddress),
+            body: decodedMessage.content,
+            data,
+          },
+          trigger: null,
+        });
+      }
+      // Let's save the message to be able to show it
+      // immediatly when user reopens the app
       saveNewNotificationMessage(data.contentTopic, decodedMessage);
     }
   } catch (e) {
