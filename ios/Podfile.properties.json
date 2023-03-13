@@ -1,4 +1,3 @@
 {
-  "expo.jsEngine": "hermes",
-  "ios.useFrameworks": "static"
+  "expo.jsEngine": "hermes"
 }
