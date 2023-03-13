@@ -1,6 +1,5 @@
 import "reflect-metadata";
 import "./polyfills";
-import messaging from "@react-native-firebase/messaging";
 import { StatusBar } from "expo-status-bar";
 import React from "react";
 import {
@@ -18,7 +17,6 @@ import XmtpWebview from "./components/XmtpWebview";
 import config from "./config";
 import { AppProvider } from "./data/store/context";
 import Main from "./screens/Main";
-import { handleAndroidBackgroundNotification } from "./utils/backgroundNotifications/handleNotificationAndroid";
 import { backgroundColor } from "./utils/colors";
 
 SplashScreen.preventAutoHideAsync().catch(() => {
@@ -33,6 +31,10 @@ Sentry.init({
 });
 
 if (Platform.OS === "android") {
+  const messaging = require("@react-native-firebase/messaging").default;
+  const {
+    handleAndroidBackgroundNotification,
+  } = require("./utils/backgroundNotifications/handleNotificationAndroid");
   messaging().setBackgroundMessageHandler(handleAndroidBackgroundNotification);
 }
 
