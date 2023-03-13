@@ -19,7 +19,7 @@ const ENV = {
     ...defaultConfig,
     env: "dev",
     xmtpEnv: "dev",
-    apiURI: "http://noe-mbp.local:9875",
+    apiURI: "http://10.0.2.2:9875",
     debugMenu: true,
     bundleId: "com.converse.dev",
     scheme: "converse-dev",
