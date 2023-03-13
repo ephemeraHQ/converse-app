@@ -49,8 +49,10 @@ export default function OnboardingComponent({
   const provider = new WalletConnectProvider({
     connector,
     rpc: {
-      1: "https://cloudflare-eth.com",
-      137: "https://matic-mainnet.chainstacklabs.com",
+      1: "https://cloudflare-eth.com", // Ethereum
+      137: "https://matic-mainnet.chainstacklabs.com", // Polygon
+      56: "https://endpoints.omniatech.io/v1/bsc/mainnet/public", // BSC
+      10: "https://endpoints.omniatech.io/v1/op/mainnet/public", // Optimism
     },
   });
 
