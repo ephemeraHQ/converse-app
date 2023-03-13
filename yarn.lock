@@ -1335,10 +1335,10 @@
     "@babel/helper-validator-identifier" "^7.19.1"
     to-fast-properties "^2.0.0"
 
-"@coinbase/wallet-mobile-sdk@^1.0.4":
-  version "1.0.4"
-  resolved "https://registry.yarnpkg.com/@coinbase/wallet-mobile-sdk/-/wallet-mobile-sdk-1.0.4.tgz#300006ec66ba6dfef0a03970502c984818095db5"
-  integrity sha512-DlJylFo84uAwnrQ1dO21X7Tr3mun9uLhaiw1x7WnJPMqvPeEytJac4A/7GyTcNXgWJXqPdHbfjJBQtfuI9H6xg==
+"@coinbase/wallet-mobile-sdk@^1.0.5":
+  version "1.0.5"
+  resolved "https://registry.yarnpkg.com/@coinbase/wallet-mobile-sdk/-/wallet-mobile-sdk-1.0.5.tgz#4f7eb9b952c2ee1ea1e456bf333c5580dd027227"
+  integrity sha512-NMJtD/bB9sKL+ZWxQrxJqTi9pMz2dZYTRFsXhgINXwLf0lF55nPJsr06aDV6UIFLw6bljZAcIwXqbszp35S69Q==
   dependencies:
     "@coinbase/wallet-sdk" "^3.5.1"
     "@metamask/safe-event-emitter" "2.0.0"
@@ -12869,10 +12869,10 @@ react-native-mmkv@2.4.3:
   resolved "https://registry.yarnpkg.com/react-native-mmkv/-/react-native-mmkv-2.4.3.tgz#6bb4c2d5e328513da11faab1371d056a189adbd0"
   integrity sha512-0hYNOTbsjJ5j5cpX+qjwReGIxuYE9MWRsyPQ72fTOvzmEjYXCF4Wr2VQoqx8R6W1/Uinekvln7dGvJ4RExmHhQ==
 
-react-native-mmkv@^2.6.2:
-  version "2.6.2"
-  resolved "https://registry.yarnpkg.com/react-native-mmkv/-/react-native-mmkv-2.6.2.tgz#bada94035fbec37494409ab83a24fcbc68ecd2d3"
-  integrity sha512-jYvOYohzwMoNBT6QI8oy4+D4JMYK+j2bnuLzr2koYjigoHsSl3TXfaCt0eErbrFIbBazP1V9j2jqACVwvPgLgA==
+react-native-mmkv@^2.6.3:
+  version "2.6.3"
+  resolved "https://registry.yarnpkg.com/react-native-mmkv/-/react-native-mmkv-2.6.3.tgz#6bfd1b3dd4b264c86e68adbaa9692f3388af2b5d"
+  integrity sha512-CkLAU5EX18eDw0Q+h6qEXPvynb+NVDu54cOY3h4h9VUhaaflfAmGWBJRQCBQz5M0VdnS8utjgJNryTAWKUTqpw==
 
 react-native-parsed-text@^0.0.22:
   version "0.0.22"
