@@ -7,6 +7,7 @@ const defaultConfig = getDefaultConfig(__dirname);
 module.exports = {
   ...defaultConfig,
   transformer: {
+    ...defaultConfig.transformer,
     getTransformOptions: async () => ({
       transform: {
         experimentalImportSupport: false,
@@ -17,8 +18,12 @@ module.exports = {
     minifierConfig: {
       // Terser options...
     },
+    babelTransformerPath: require.resolve("react-native-svg-transformer"),
   },
   resolver: {
+    ...defaultConfig.resolver,
+    assetExts: defaultConfig.resolver.assetExts.filter((ext) => ext !== "svg"),
+    sourceExts: [...defaultConfig.resolver.sourceExts, "svg"],
     extraNodeModules: {
       stream: require.resolve("readable-stream"),
       crypto: require.resolve("crypto-browserify"),

@@ -1,5 +1,6 @@
+// import QuestionMark from "@material-symbols/svg-400/outlined/question_mark.svg";
 import { ColorValue, StyleProp, View, ViewStyle } from "react-native";
-import Icon from "react-native-vector-icons/MaterialCommunityIcons";
+import { SvgProps } from "react-native-svg";
 
 type Props = {
   picto: string;
@@ -9,7 +10,9 @@ type Props = {
   weight?: string;
 };
 
-const iosToAndroidPictoMapping: { [key: string]: string } = {
+const iosToAndroidPictoMapping: {
+  [key: string]: React.FC<SvgProps> | undefined;
+} = {
   // xmark: "close",
   // paperplane: "send",
   // "chevron.right": "chevron_right",
@@ -21,11 +24,19 @@ const iosToAndroidPictoMapping: { [key: string]: string } = {
 };
 
 export default function Picto({ picto, style, size, weight, color }: Props) {
-  const androidPicto = iosToAndroidPictoMapping[picto];
-  const icon = androidPicto ? (
-    <Icon name={androidPicto} size={size} color={color} />
-  ) : (
-    <Icon name="circle-outline" size={30} color={color} />
-  );
-  return <View style={style}>{icon}</View>;
+  const AndroidPicto = iosToAndroidPictoMapping[picto];
+  if (AndroidPicto) {
+    return (
+      <View style={[style]}>
+        <AndroidPicto
+          fill={color}
+          width={size ? size * 1.5 : 48}
+          height={size ? size * 1.5 : 48}
+          viewBox="0 0 48 48"
+        />
+      </View>
+    );
+  } else {
+    return <View style={[style]} />;
+  }
 }
