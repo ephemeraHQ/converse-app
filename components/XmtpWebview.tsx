@@ -97,6 +97,25 @@ export default function XmtpWebview() {
     }
   }, [state.xmtp.address]);
 
+  const reloadData = useCallback(async () => {
+    webviewReadyForMessages = false;
+    dispatch({
+      type: XmtpDispatchTypes.XmtpLoading,
+      payload: { loading: true },
+    });
+    // Load notifications
+    await loadSavedNotificationMessagesToContext(dispatch);
+    const lastTimestampByConversation: { [topic: string]: number } = {};
+    for (const topic in state.xmtp.conversations) {
+      const conversation = state.xmtp.conversations[topic];
+      lastTimestampByConversation[topic] =
+        conversation.messages?.size > 0
+          ? lastValueInMap(conversation.messages)?.sent || 0
+          : 0;
+    }
+    sendMessageToWebview("RELOAD", lastTimestampByConversation);
+  }, [dispatch, state.xmtp.conversations]);
+
   useEffect(() => {
     const subscription = AppState.addEventListener(
       "change",
@@ -107,22 +126,7 @@ export default function XmtpWebview() {
           state.xmtp.initialLoadDone
         ) {
           console.log("App is active, reloading data");
-          webviewReadyForMessages = false;
-          dispatch({
-            type: XmtpDispatchTypes.XmtpLoading,
-            payload: { loading: true },
-          });
-          // Load notifications
-          await loadSavedNotificationMessagesToContext(dispatch);
-          const lastTimestampByConversation: { [topic: string]: number } = {};
-          for (const topic in state.xmtp.conversations) {
-            const conversation = state.xmtp.conversations[topic];
-            lastTimestampByConversation[topic] =
-              conversation.messages?.size > 0
-                ? lastValueInMap(conversation.messages)?.sent || 0
-                : 0;
-          }
-          sendMessageToWebview("RELOAD", lastTimestampByConversation);
+          reloadData();
         }
         appState.current = nextAppState;
       }
@@ -131,7 +135,7 @@ export default function XmtpWebview() {
     return () => {
       subscription.remove();
     };
-  }, [dispatch, state.xmtp.conversations, state.xmtp.initialLoadDone]);
+  }, [reloadData, state.xmtp.initialLoadDone]);
 
   const launchedInitialLoad = useRef(false);
 
@@ -272,11 +276,13 @@ export default function XmtpWebview() {
         }
 
         case "ERROR_WHILE_RESYNCINC": {
+          console.log("ERROR_WHILE_RESYNCINC", data);
           sentryTrackMessage("ERROR_WHILE_RESYNCINC", data);
           break;
         }
 
         case "ERROR_WHILE_SYNCINC": {
+          console.log("ERROR_WHILE_SYNCINC", data);
           sentryTrackMessage("ERROR_WHILE_SYNCINC", data);
           break;
         }
