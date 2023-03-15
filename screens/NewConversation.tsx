@@ -42,7 +42,7 @@ import {
 import { getAddressForPeer } from "../utils/eth";
 import { lastValueInMap } from "../utils/map";
 import { addressPrefix, conversationName } from "../utils/str";
-import { isOnXmtp } from "../utils/xmtp";
+import { isOnXmtp } from "../utils/xmtp/client";
 import { NavigationParamList } from "./Main";
 
 const computeNewConversationContext = (

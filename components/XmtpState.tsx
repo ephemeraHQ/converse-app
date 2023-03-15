@@ -5,11 +5,9 @@ import { AppContext } from "../data/store/context";
 import { XmtpDispatchTypes } from "../data/store/xmtpReducer";
 import { getBlockedPeers } from "../utils/api";
 import { loadXmtpConversation, loadXmtpKeys } from "../utils/keychain";
-import {
-  getXmtpClientFromKeys,
-  getXmtpSignature,
-  instantiateXmtpConversationFromJSON,
-} from "../utils/xmtp";
+import { getXmtpSignature } from "../utils/xmtp";
+import { getXmtpClientFromKeys } from "../utils/xmtp/client";
+import { instantiateXmtpConversationFromJSON } from "../utils/xmtp/conversations";
 
 let xmtpClient: Client | null;
 let xmtpApiSignature: string | null;
