@@ -1,4 +1,5 @@
-import { ColorSchemeName } from "react-native";
+import { ColorSchemeName, Platform } from "react-native";
+import { MD3DarkTheme, MD3LightTheme } from "react-native-paper";
 
 const BACKGROUND_LIGHT = "#FFF";
 const BACKGROUND_DARK = "#111";
@@ -22,16 +23,26 @@ const TEXT_PRIMARY_COLOR_LIGHT = "#000";
 const TEXT_PRIMARY_COLOR_DARK = "#FFF";
 
 export const textPrimaryColor = (colorScheme: ColorSchemeName) => {
-  if (colorScheme === "dark") return TEXT_PRIMARY_COLOR_DARK;
-  return TEXT_PRIMARY_COLOR_LIGHT;
+  if (colorScheme === "dark")
+    return Platform.OS === "android"
+      ? MaterialDarkColors.onBackground
+      : TEXT_PRIMARY_COLOR_DARK;
+  return Platform.OS === "android"
+    ? MaterialLightColors.onBackground
+    : TEXT_PRIMARY_COLOR_LIGHT;
 };
 
 const TEXT_SECONDARY_COLOR_LIGHT = "rgba(60, 60, 67, 0.6)";
 const TEXT_SECONDARY_COLOR_DARK = "rgba(235, 235, 245, 0.6)";
 
 export const textSecondaryColor = (colorScheme: ColorSchemeName) => {
-  if (colorScheme === "dark") return TEXT_SECONDARY_COLOR_DARK;
-  return TEXT_SECONDARY_COLOR_LIGHT;
+  if (colorScheme === "dark")
+    return Platform.OS === "android"
+      ? MaterialDarkColors.onSurfaceVariant
+      : TEXT_SECONDARY_COLOR_DARK;
+  return Platform.OS === "android"
+    ? MaterialLightColors.onSurfaceVariant
+    : TEXT_SECONDARY_COLOR_LIGHT;
 };
 
 const ACTION_SECONDARY_COLOR_LIGHT = "rgba(60, 60, 67, 0.3)";
@@ -88,4 +99,102 @@ const TABLE_VIEW_ITEM_BACKGROUND_DARK = "#2C2C2E";
 export const tableViewItemBackground = (colorScheme: ColorSchemeName) => {
   if (colorScheme === "dark") return TABLE_VIEW_ITEM_BACKGROUND_DARK;
   return TABLE_VIEW_ITEM_BACKGROUND_LIGHT;
+};
+
+// Generated using https://callstack.github.io/react-native-paper/docs/guides/theming#theme-properties
+
+const MaterialLightColors = {
+  primary: "rgb(185, 30, 12)",
+  onPrimary: "rgb(255, 255, 255)",
+  primaryContainer: "rgb(255, 218, 212)",
+  onPrimaryContainer: "rgb(64, 2, 0)",
+  secondary: "rgb(119, 86, 81)",
+  onSecondary: "rgb(255, 255, 255)",
+  secondaryContainer: "rgb(255, 218, 212)",
+  onSecondaryContainer: "rgb(44, 21, 17)",
+  tertiary: "rgb(111, 92, 46)",
+  onTertiary: "rgb(255, 255, 255)",
+  tertiaryContainer: "rgb(250, 224, 166)",
+  onTertiaryContainer: "rgb(37, 26, 0)",
+  error: "rgb(186, 26, 26)",
+  onError: "rgb(255, 255, 255)",
+  errorContainer: "rgb(255, 218, 214)",
+  onErrorContainer: "rgb(65, 0, 2)",
+  background: "rgb(255, 251, 255)",
+  onBackground: "rgb(32, 26, 25)",
+  surface: "rgb(255, 251, 255)",
+  onSurface: "rgb(32, 26, 25)",
+  surfaceVariant: "rgb(245, 221, 217)",
+  onSurfaceVariant: "rgb(83, 67, 64)",
+  outline: "rgb(133, 115, 112)",
+  outlineVariant: "rgb(216, 194, 190)",
+  shadow: "rgb(0, 0, 0)",
+  scrim: "rgb(0, 0, 0)",
+  inverseSurface: "rgb(54, 47, 45)",
+  inverseOnSurface: "rgb(251, 238, 235)",
+  inversePrimary: "rgb(255, 180, 167)",
+  elevation: {
+    level0: "transparent",
+    level1: "rgb(252, 240, 243)",
+    level2: "rgb(249, 233, 236)",
+    level3: "rgb(247, 227, 228)",
+    level4: "rgb(247, 225, 226)",
+    level5: "rgb(245, 220, 221)",
+  },
+  surfaceDisabled: "rgba(32, 26, 25, 0.12)",
+  onSurfaceDisabled: "rgba(32, 26, 25, 0.38)",
+  backdrop: "rgba(59, 45, 43, 0.4)",
+};
+
+const MaterialDarkColors = {
+  primary: "rgb(255, 180, 167)",
+  onPrimary: "rgb(103, 5, 0)",
+  primaryContainer: "rgb(145, 10, 0)",
+  onPrimaryContainer: "rgb(255, 218, 212)",
+  secondary: "rgb(231, 189, 181)",
+  onSecondary: "rgb(68, 42, 37)",
+  secondaryContainer: "rgb(93, 63, 58)",
+  onSecondaryContainer: "rgb(255, 218, 212)",
+  tertiary: "rgb(221, 196, 140)",
+  onTertiary: "rgb(61, 46, 4)",
+  tertiaryContainer: "rgb(86, 69, 25)",
+  onTertiaryContainer: "rgb(250, 224, 166)",
+  error: "rgb(255, 180, 171)",
+  onError: "rgb(105, 0, 5)",
+  errorContainer: "rgb(147, 0, 10)",
+  onErrorContainer: "rgb(255, 180, 171)",
+  background: "rgb(32, 26, 25)",
+  onBackground: "rgb(237, 224, 221)",
+  surface: "rgb(32, 26, 25)",
+  onSurface: "rgb(237, 224, 221)",
+  surfaceVariant: "rgb(83, 67, 64)",
+  onSurfaceVariant: "rgb(216, 194, 190)",
+  outline: "rgb(160, 140, 137)",
+  outlineVariant: "rgb(83, 67, 64)",
+  shadow: "rgb(0, 0, 0)",
+  scrim: "rgb(0, 0, 0)",
+  inverseSurface: "rgb(237, 224, 221)",
+  inverseOnSurface: "rgb(54, 47, 45)",
+  inversePrimary: "rgb(185, 30, 12)",
+  elevation: {
+    level0: "transparent",
+    level1: "rgb(43, 34, 32)",
+    level2: "rgb(50, 38, 36)",
+    level3: "rgb(57, 43, 41)",
+    level4: "rgb(59, 45, 42)",
+    level5: "rgb(63, 48, 45)",
+  },
+  surfaceDisabled: "rgba(237, 224, 221, 0.12)",
+  onSurfaceDisabled: "rgba(237, 224, 221, 0.38)",
+  backdrop: "rgba(59, 45, 43, 0.4)",
+};
+
+export const MaterialLightTheme = {
+  ...MD3LightTheme,
+  colors: MaterialLightColors,
+};
+
+export const MaterialDarkTheme = {
+  ...MD3DarkTheme,
+  colors: MaterialDarkColors,
 };

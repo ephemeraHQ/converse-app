@@ -1,4 +1,6 @@
-// import QuestionMark from "@material-symbols/svg-400/outlined/question_mark.svg";
+import AccountCircle from "@material-symbols/svg-400/outlined/account_circle.svg";
+import Edit from "@material-symbols/svg-400/outlined/edit.svg";
+import QrCodeScanner from "@material-symbols/svg-400/outlined/qr_code_scanner.svg";
 import { ColorValue, StyleProp, View, ViewStyle } from "react-native";
 import { SvgProps } from "react-native-svg";
 
@@ -10,21 +12,22 @@ type Props = {
   weight?: string;
 };
 
-const iosToAndroidPictoMapping: {
+const pictoMapping: {
   [key: string]: React.FC<SvgProps> | undefined;
 } = {
   // xmark: "close",
   // paperplane: "send",
   // "chevron.right": "chevron_right",
-  // "square.and.pencil": "edit",
-  // qrcode: "qr_code",
+  account_circle: AccountCircle,
+  "square.and.pencil": Edit,
+  qrcode: QrCodeScanner,
   // "message.circle.fill": "chat_bubble",
   // signature: "vpn_key",
   // "square.and.arrow.up": "share",
 };
 
 export default function Picto({ picto, style, size, weight, color }: Props) {
-  const AndroidPicto = iosToAndroidPictoMapping[picto];
+  const AndroidPicto = pictoMapping[picto];
   if (AndroidPicto) {
     return (
       <View style={[style]}>
