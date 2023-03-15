@@ -25,7 +25,8 @@ export type XmtpConversation = {
 };
 
 export type XmtpType = {
-  connected: boolean;
+  localConnected: boolean;
+  webviewConnected: boolean;
   initialLoadDone: boolean;
   initialLoadDoneOnce: boolean;
   loading: boolean;
@@ -38,7 +39,8 @@ export type XmtpType = {
 };
 
 export const xmtpInitialState: XmtpType = {
-  connected: false,
+  localConnected: false,
+  webviewConnected: false,
   initialLoadDone: false,
   initialLoadDoneOnce: false,
   loading: false,
@@ -56,7 +58,8 @@ export type XmtpMessage = {
 };
 
 export enum XmtpDispatchTypes {
-  XmtpConnected = "XMTP_CONNECTED",
+  XmtpLocalConnected = "XMTP_LOCAL_CONNECTED",
+  XmtpWebviewConnected = "XMTP_WEBVIEW_CONNECTED",
   XmtpSetConversations = "XMTP_SET_CONVERSATIONS",
   XmtpNewConversation = "XMTP_NEW_CONVERSATION",
   XmtpSetAddress = "XMTP_SET_ADDRESS",
@@ -71,7 +74,10 @@ export enum XmtpDispatchTypes {
 }
 
 type XmtpPayload = {
-  [XmtpDispatchTypes.XmtpConnected]: {
+  [XmtpDispatchTypes.XmtpLocalConnected]: {
+    connected: boolean;
+  };
+  [XmtpDispatchTypes.XmtpWebviewConnected]: {
     connected: boolean;
   };
   [XmtpDispatchTypes.XmtpSetConversations]: {
@@ -119,7 +125,7 @@ export const xmtpReducer = (state: XmtpType, action: XmtpActions): XmtpType => {
         ...state,
         address: action.payload.address,
       };
-    case XmtpDispatchTypes.XmtpConnected:
+    case XmtpDispatchTypes.XmtpWebviewConnected:
       if (!action.payload.connected) {
         deleteLoggedXmtpAddress();
         // Disconnecting = reset state
@@ -127,7 +133,17 @@ export const xmtpReducer = (state: XmtpType, action: XmtpActions): XmtpType => {
       }
       return {
         ...state,
-        connected: action.payload.connected,
+        webviewConnected: action.payload.connected,
+      };
+    case XmtpDispatchTypes.XmtpLocalConnected:
+      if (!action.payload.connected) {
+        deleteLoggedXmtpAddress();
+        // Disconnecting = reset state
+        return { ...xmtpInitialState };
+      }
+      return {
+        ...state,
+        localConnected: action.payload.connected,
       };
     case XmtpDispatchTypes.XmtpSetCurrentMessageContent: {
       const newState = { ...state };

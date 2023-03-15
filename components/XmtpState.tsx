@@ -1,14 +1,59 @@
-import { Client } from "@xmtp/xmtp-js";
+import { Client, Conversation } from "@xmtp/xmtp-js";
 import { useContext, useEffect } from "react";
 
 import { AppContext } from "../data/store/context";
 import { XmtpDispatchTypes } from "../data/store/xmtpReducer";
 import { getBlockedPeers } from "../utils/api";
-import { loadXmtpKeys } from "../utils/keychain";
-import { getXmtpClientFromKeys, getXmtpSignature } from "../utils/xmtp";
+import { loadXmtpConversation, loadXmtpKeys } from "../utils/keychain";
+import {
+  getXmtpClientFromKeys,
+  getXmtpSignature,
+  instantiateXmtpConversationFromJSON,
+} from "../utils/xmtp";
 
 let xmtpClient: Client | null;
 let xmtpApiSignature: string | null;
+
+const conversationsByTopic: { [topic: string]: Conversation } = {};
+
+export const isOnXmtp = async (address: string) => {
+  if (!xmtpClient) throw new Error("No XMTP Client");
+
+  return xmtpClient.canMessage(address);
+};
+
+const getXmtpConversationForTopic = async (
+  topic: string
+): Promise<Conversation> => {
+  if (!xmtpClient) throw new Error("No XMTP Client");
+  if (conversationsByTopic[topic]) return conversationsByTopic[topic];
+  let tries = 0;
+  let savedConversation: string | null = null;
+  // Retry mechanism, 10 times in 5 secs max
+  while (!savedConversation && tries < 10) {
+    savedConversation = await loadXmtpConversation(topic);
+    if (!savedConversation) {
+      // Let's wait 0.5 sec and retry
+      await new Promise((r) => setTimeout(r, 500));
+      tries += 1;
+    }
+  }
+  if (!savedConversation) {
+    throw new Error(`No conversation found for topic ${topic}`);
+  }
+  const conversation = await instantiateXmtpConversationFromJSON(
+    xmtpClient,
+    savedConversation
+  );
+  conversationsByTopic[topic] = conversation;
+  return conversation;
+};
+
+export const sendXmtpMessage = async (topic: string, content: string) => {
+  const conversation = await getXmtpConversationForTopic(topic);
+  const message = await conversation.send(content);
+  return message;
+};
 
 export const getLocalXmtpClient = async () => {
   if (xmtpClient) return xmtpClient;
@@ -48,7 +93,7 @@ export default function XmtpState() {
     getLocalXmtpClient();
   }, []);
   useEffect(() => {
-    if (state.xmtp.connected) {
+    if (state.xmtp.localConnected && state.xmtp.webviewConnected) {
       getBlockedPeers()
         .then((addresses) => {
           const blockedPeerAddresses: { [peerAddress: string]: boolean } = {};
@@ -64,6 +109,6 @@ export default function XmtpState() {
           console.log("Error while getting blocked peers", e);
         });
     }
-  }, [dispatch, state.xmtp.connected]);
+  }, [dispatch, state.xmtp.localConnected, state.xmtp.webviewConnected]);
   return null;
 }

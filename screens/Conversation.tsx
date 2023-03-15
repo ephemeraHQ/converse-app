@@ -27,10 +27,8 @@ import ActivityIndicator from "../components/ActivityIndicator/ActivityIndicator
 import Button from "../components/Button/Button";
 import InviteBanner from "../components/InviteBanner";
 import Picto from "../components/Picto/Picto";
-import {
-  sendMessageToWebview,
-  sendXmtpMessage,
-} from "../components/XmtpWebview";
+import { sendXmtpMessage } from "../components/XmtpState";
+import { sendMessageToWebview } from "../components/XmtpWebview";
 import { AppContext } from "../data/store/context";
 import { XmtpConversation, XmtpDispatchTypes } from "../data/store/xmtpReducer";
 import { blockPeer, userExists } from "../utils/api";
@@ -377,7 +375,7 @@ const Conversation = ({
   const messageContent = useRef(messageToPrefill);
 
   const handleSendPress = useCallback(
-    (m: MessageType.PartialText) => {
+    async (m: MessageType.PartialText) => {
       if (!conversation) return;
       messageContent.current = "";
       setMessageValue("");
@@ -394,11 +392,7 @@ const Conversation = ({
           },
         },
       });
-      // Delaying sending to XMTP to be 100% sure
-      // the lazy message has been saved first
-      setTimeout(() => {
-        sendXmtpMessage(conversation.topic, m.text);
-      }, 10);
+      await sendXmtpMessage(conversation.topic, m.text);
     },
     [conversation, dispatch, state.xmtp.address]
   );
