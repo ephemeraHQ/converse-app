@@ -17,7 +17,6 @@ import {
 import { lastValueInMap } from "../utils/map";
 import { subscribeToNotifications } from "../utils/notifications";
 import { sentryTrackMessage } from "../utils/sentry";
-import { addLog } from "./DebugButton";
 
 let webview: WebView | null;
 let webviewReadyForMessages = false;
@@ -51,10 +50,6 @@ export const sendMessageToWebview = (eventName: string, data?: any) => {
     (!hideDataFromEvents.includes(eventName) && data) || ""
   );
   webview.postMessage(JSON.stringify({ eventName, data }));
-};
-
-export const sendXmtpMessage = (topic: string, content: string) => {
-  sendMessageToWebview("SEND_MESSAGE", { topic, content });
 };
 
 export default function XmtpWebview() {
@@ -133,13 +128,13 @@ export default function XmtpWebview() {
   const launchedInitialLoad = useRef(false);
 
   useEffect(() => {
-    if (!state.xmtp.connected) {
+    if (!state.xmtp.webviewConnected) {
       launchedInitialLoad.current = false;
     }
-  }, [state.xmtp.connected]);
+  }, [state.xmtp.webviewConnected]);
 
   useEffect(() => {
-    if (state.xmtp.connected && !launchedInitialLoad.current) {
+    if (state.xmtp.webviewConnected && !launchedInitialLoad.current) {
       // Let's launch the "initial load"
       // of messages starting with last
       // timestamp for each convo
@@ -157,7 +152,7 @@ export default function XmtpWebview() {
       );
       launchedInitialLoad.current = true;
     }
-  }, [state.xmtp.connected, state.xmtp.conversations]);
+  }, [state.xmtp.webviewConnected, state.xmtp.conversations]);
 
   const onMessage = useCallback(
     async (e: WebViewMessageEvent) => {
@@ -173,7 +168,7 @@ export default function XmtpWebview() {
         }
         case "DISCONNECTED":
           dispatch({
-            type: XmtpDispatchTypes.XmtpConnected,
+            type: XmtpDispatchTypes.XmtpWebviewConnected,
             payload: { connected: false },
           });
           launchedInitialLoad.current = false;
@@ -218,7 +213,7 @@ export default function XmtpWebview() {
           // If we receive this from webview, we're necessary
           // connected to the XMTP network!
           dispatch({
-            type: XmtpDispatchTypes.XmtpConnected,
+            type: XmtpDispatchTypes.XmtpWebviewConnected,
             payload: { connected: true },
           });
           break;
@@ -246,10 +241,6 @@ export default function XmtpWebview() {
         }
         case "CANT_CREATE_CONVO": {
           Alert.alert("Could not create new conversation", data.error);
-          break;
-        }
-        case "SEND_MESSAGE_ERROR": {
-          addLog(`SEND_MESSAGE_ERROR: ${data}`);
           break;
         }
 
