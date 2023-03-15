@@ -1,11 +1,5 @@
-import {
-  NativeStackNavigationProp,
-  NativeStackScreenProps,
-} from "@react-navigation/native-stack";
-import differenceInCalendarDays from "date-fns/differenceInCalendarDays";
-import format from "date-fns/format";
+import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import React, {
-  memo,
   useCallback,
   useContext,
   useEffect,
@@ -19,12 +13,13 @@ import {
   Platform,
   PlatformColor,
   StyleSheet,
-  Text,
   TouchableOpacity,
   useColorScheme,
-  View,
+  Text,
 } from "react-native";
+import { FAB } from "react-native-paper";
 
+import ConversationListItem from "../components/ConversationListItem";
 import DebugButton from "../components/DebugButton";
 import Picto from "../components/Picto/Picto";
 import SettingsButton from "../components/SettingsButton";
@@ -32,96 +27,13 @@ import config from "../config";
 import { AppContext } from "../data/store/context";
 import { XmtpConversation } from "../data/store/xmtpReducer";
 import {
-  actionSecondaryColor,
   backgroundColor,
-  clickedItemBackgroundColor,
-  listItemSeparatorColor,
   textPrimaryColor,
   textSecondaryColor,
 } from "../utils/colors";
 import { lastValueInMap } from "../utils/map";
 import { conversationName } from "../utils/str";
 import { NavigationParamList } from "./Main";
-
-type ConversationListItemProps = {
-  navigation: NativeStackNavigationProp<NavigationParamList, "Messages">;
-  conversation: XmtpConversation;
-  colorScheme: ColorSchemeName;
-  conversationTime: number | undefined;
-  conversationTopic: string;
-  conversationName: string;
-  lastMessagePreview: string | undefined;
-};
-
-const ConversationListItem = memo(function ConversationListItem({
-  navigation,
-  colorScheme,
-  conversationTopic,
-  conversationTime,
-  conversationName,
-  lastMessagePreview,
-}: ConversationListItemProps) {
-  const styles = getStyles(colorScheme);
-  let timeToShow = "";
-  if (conversationTime) {
-    const days = differenceInCalendarDays(new Date(), conversationTime);
-    if (days === 0) {
-      timeToShow = format(conversationTime, "hh:mm aa");
-    } else if (days === 1) {
-      timeToShow = "yesterday";
-    } else if (days < 7) {
-      timeToShow = format(conversationTime, "EEEE");
-    } else {
-      timeToShow = format(conversationTime, "yyyy-MM-dd");
-    }
-  }
-  const [selected, setSelected] = useState(false);
-  const resetSelected = useCallback(() => {
-    setSelected(false);
-  }, []);
-  useEffect(() => {
-    navigation.addListener("transitionEnd", resetSelected);
-    return () => {
-      navigation.removeListener("transitionEnd", resetSelected);
-    };
-  }, [navigation, resetSelected]);
-  return (
-    <TouchableOpacity
-      activeOpacity={1}
-      key={conversationTopic}
-      onPressIn={() => {}}
-      onPress={() => {
-        navigation.navigate("Conversation", {
-          topic: conversationTopic,
-        });
-        setSelected(true);
-      }}
-      style={{
-        backgroundColor: selected
-          ? clickedItemBackgroundColor(colorScheme)
-          : backgroundColor(colorScheme),
-      }}
-    >
-      <View style={styles.conversationListItem}>
-        <Text style={styles.peerAddress} numberOfLines={1}>
-          {conversationName}
-        </Text>
-        <Text style={styles.messagePreview} numberOfLines={2}>
-          {lastMessagePreview}
-        </Text>
-        <View style={styles.timeAndChevron}>
-          <Text style={styles.timeText}>{timeToShow}</Text>
-          <Picto
-            picto="chevron.right"
-            weight="semibold"
-            color={actionSecondaryColor(colorScheme)}
-            size={10}
-          />
-        </View>
-      </View>
-    </TouchableOpacity>
-  );
-});
 
 function NewConversationButton({
   navigation,
@@ -131,34 +43,64 @@ function NewConversationButton({
   const shouldShowDebug =
     config.debugMenu ||
     config.debugAddresses.includes(state.xmtp.address || "");
-  return (
-    <TouchableOpacity
-      activeOpacity={0.2}
-      onPress={() => {
-        navigation.navigate("NewConversation", {});
-      }}
-      onLongPress={() => {
-        if (!shouldShowDebug || !debugRef.current) {
-          return;
-        }
-        (debugRef.current as any).showDebugMenu();
-      }}
-    >
-      {shouldShowDebug && <DebugButton ref={debugRef} />}
-      <Picto
-        picto="square.and.pencil"
-        weight="medium"
-        color={Platform.OS === "ios" ? PlatformColor("systemBlue") : "blue"}
-        size={16}
-        style={{ width: 32, height: 32 }}
+  const onPress = useCallback(() => {
+    navigation.navigate("NewConversation", {});
+  }, [navigation]);
+  const onLongPress = useCallback(() => {
+    if (!shouldShowDebug || !debugRef.current) {
+      return;
+    }
+    (debugRef.current as any).showDebugMenu();
+  }, [shouldShowDebug]);
+  if (Platform.OS === "ios") {
+    return (
+      <TouchableOpacity
+        activeOpacity={0.2}
+        onPress={onPress}
+        onLongPress={onLongPress}
+      >
+        {shouldShowDebug && <DebugButton ref={debugRef} />}
+        <Picto
+          picto="square.and.pencil"
+          weight="medium"
+          color={PlatformColor("systemBlue")}
+          size={16}
+          style={{ width: 32, height: 32 }}
+        />
+      </TouchableOpacity>
+    );
+  } else {
+    return (
+      <FAB
+        icon={(props) => (
+          <>
+            {shouldShowDebug && <DebugButton ref={debugRef} />}
+            <Picto
+              picto="square.and.pencil"
+              weight="medium"
+              color={props.color}
+              size={16}
+              style={{ width: 32, height: 32 }}
+            />
+          </>
+        )}
+        style={{
+          position: "absolute",
+          margin: 0,
+          right: 16,
+          bottom: 20,
+        }}
+        onPress={onPress}
+        onLongPress={onLongPress}
       />
-    </TouchableOpacity>
-  );
+    );
+  }
 }
 
 function ShareProfileButton({
   navigation,
 }: NativeStackScreenProps<NavigationParamList, "Messages">) {
+  const colorScheme = useColorScheme();
   return (
     <TouchableOpacity
       activeOpacity={0.2}
@@ -169,9 +111,17 @@ function ShareProfileButton({
       <Picto
         picto="qrcode"
         weight="medium"
-        color={Platform.OS === "ios" ? PlatformColor("systemBlue") : "blue"}
-        size={16}
-        style={{ width: 32, height: 32, marginRight: 20 }}
+        color={
+          Platform.OS === "ios"
+            ? PlatformColor("systemBlue")
+            : textSecondaryColor(colorScheme)
+        }
+        size={Platform.OS === "ios" ? 16 : 17}
+        style={{
+          width: Platform.OS === "android" ? undefined : 32,
+          height: Platform.OS === "android" ? undefined : 32,
+          marginRight: Platform.OS === "android" ? 0 : 20,
+        }}
       />
     </TouchableOpacity>
   );
@@ -214,7 +164,9 @@ export default function ConversationList({
       headerRight: () => (
         <>
           <ShareProfileButton navigation={navigation} route={route} />
-          <NewConversationButton navigation={navigation} route={route} />
+          {Platform.OS === "ios" && (
+            <NewConversationButton navigation={navigation} route={route} />
+          )}
         </>
       ),
     });
@@ -225,11 +177,18 @@ export default function ConversationList({
         if (!state.xmtp.initialLoadDone || state.xmtp.loading) {
           return <ActivityIndicator />;
         } else {
-          return undefined;
+          return Platform.OS === "android" ? (
+            <Text style={styles.androidTitle}>Converse</Text>
+          ) : undefined;
         }
       },
     });
-  }, [navigation, state.xmtp.initialLoadDone, state.xmtp.loading]);
+  }, [
+    navigation,
+    state.xmtp.initialLoadDone,
+    state.xmtp.loading,
+    styles.androidTitle,
+  ]);
   const keyExtractor = useCallback((item: XmtpConversation) => {
     return item.topic;
   }, []);
@@ -258,14 +217,19 @@ export default function ConversationList({
     [colorScheme, navigation]
   );
   return (
-    <FlatList
-      contentInsetAdjustmentBehavior="automatic"
-      style={styles.conversationList}
-      data={orderedConversations}
-      renderItem={renderItem}
-      keyExtractor={keyExtractor}
-      initialNumToRender={20}
-    />
+    <>
+      <FlatList
+        contentInsetAdjustmentBehavior="automatic"
+        style={styles.conversationList}
+        data={orderedConversations}
+        renderItem={renderItem}
+        keyExtractor={keyExtractor}
+        initialNumToRender={20}
+      />
+      {Platform.OS === "android" && (
+        <NewConversationButton navigation={navigation} route={route} />
+      )}
+    </>
   );
 }
 
@@ -275,37 +239,9 @@ const getStyles = (colorScheme: ColorSchemeName) =>
       flex: 1,
       backgroundColor: backgroundColor(colorScheme),
     },
-    conversationListItem: {
-      height: 77,
-      borderBottomWidth: 0.25,
-      borderBottomColor: listItemSeparatorColor(colorScheme),
-      paddingTop: 8,
-      paddingRight: 17,
-      marginLeft: 32,
-    },
-    peerAddress: {
-      fontSize: 17,
-      fontWeight: "600",
-      marginBottom: 3,
+    androidTitle: {
       color: textPrimaryColor(colorScheme),
-      marginRight: 110,
-    },
-    messagePreview: {
-      fontSize: 15,
-      color: textSecondaryColor(colorScheme),
-      flex: 1,
-      marginBottom: 8,
-    },
-    timeAndChevron: {
-      position: "absolute",
-      top: 8,
-      right: 17,
-      flexDirection: "row",
-      alignItems: "center",
-    },
-    timeText: {
-      marginRight: 14,
-      fontSize: 15,
-      color: textSecondaryColor(colorScheme),
+      fontSize: 22,
+      lineHeight: 26,
     },
   });

@@ -478,6 +478,7 @@ export default function Main() {
             screenOptions={{
               headerStyle: { backgroundColor: backgroundColor(colorScheme) },
               headerTitleStyle: { color: textPrimaryColor(colorScheme) },
+              headerShadowVisible: Platform.OS !== "android",
             }}
           >
             <Stack.Screen

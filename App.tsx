@@ -11,13 +11,18 @@ import {
 } from "react-native";
 // eslint-disable-next-line import/order
 import * as SplashScreen from "expo-splash-screen";
+import { Provider as PaperProvider } from "react-native-paper";
 import * as Sentry from "sentry-expo";
 
 import XmtpWebview from "./components/XmtpWebview";
 import config from "./config";
 import { AppProvider } from "./data/store/context";
 import Main from "./screens/Main";
-import { backgroundColor } from "./utils/colors";
+import {
+  backgroundColor,
+  MaterialDarkTheme,
+  MaterialLightTheme,
+} from "./utils/colors";
 
 SplashScreen.preventAutoHideAsync().catch(() => {
   /* reloading the app might trigger some race conditions, ignore them */
@@ -42,14 +47,18 @@ export default function App() {
   const styles = getStyles(colorScheme);
   return (
     <AppProvider>
-      <View style={styles.safe}>
-        <StatusBar
-          hidden={false}
-          style={colorScheme === "dark" ? "light" : "dark"}
-        />
-        <XmtpWebview />
-        <Main />
-      </View>
+      <PaperProvider
+        theme={colorScheme === "light" ? MaterialLightTheme : MaterialDarkTheme}
+      >
+        <View style={styles.safe}>
+          <StatusBar
+            hidden={false}
+            style={colorScheme === "dark" ? "light" : "dark"}
+          />
+          <XmtpWebview />
+          <Main />
+        </View>
+      </PaperProvider>
     </AppProvider>
   );
 }
