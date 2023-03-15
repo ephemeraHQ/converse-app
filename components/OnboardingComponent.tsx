@@ -40,7 +40,7 @@ import {
 import { getPrivateKeyFromMnemonic, validateMnemonic } from "../utils/eth";
 import { saveXmtpKeys } from "../utils/keychain";
 import { shortAddress } from "../utils/str";
-import { getXmtpKeysFromSigner, isOnXmtp } from "../utils/xmtp";
+import { getXmtpKeysFromSigner, isOnXmtp } from "../utils/xmtp/client";
 import ActivityIndicator from "./ActivityIndicator/ActivityIndicator";
 import Button from "./Button/Button";
 import Picto from "./Picto/Picto";
