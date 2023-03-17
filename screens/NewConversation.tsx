@@ -19,8 +19,10 @@ import {
   View,
   ColorSchemeName,
   useColorScheme,
+  Platform,
 } from "react-native";
 
+import AndroidBackAction from "../components/AndroidBackAction";
 import TableView, { TableViewSymbol } from "../components/TableView";
 import { sendMessageToWebview } from "../components/XmtpWebview";
 import config from "../config";
@@ -75,14 +77,17 @@ export default function NewConversation({
   const colorScheme = useColorScheme();
   useEffect(() => {
     navigation.setOptions({
-      headerLeft: () => (
-        <Button
-          title="Cancel"
-          onPress={() => {
-            navigation.goBack();
-          }}
-        />
-      ),
+      headerLeft: () =>
+        Platform.OS === "ios" ? (
+          <Button
+            title="Cancel"
+            onPress={() => {
+              navigation.goBack();
+            }}
+          />
+        ) : (
+          <AndroidBackAction navigation={navigation} />
+        ),
     });
   }, [navigation]);
 

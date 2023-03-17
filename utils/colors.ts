@@ -15,8 +15,13 @@ const NAVIGATION_SECONDARY_BACKGROUND_DARK = "#1C1C1E";
 export const navigationSecondaryBackgroundColor = (
   colorScheme: ColorSchemeName
 ) => {
-  if (colorScheme === "dark") return NAVIGATION_SECONDARY_BACKGROUND_DARK;
-  return NAVIGATION_SECONDARY_BACKGROUND_LIGHT;
+  if (colorScheme === "dark")
+    return Platform.OS === "android"
+      ? backgroundColor(colorScheme)
+      : NAVIGATION_SECONDARY_BACKGROUND_DARK;
+  return Platform.OS === "android"
+    ? backgroundColor(colorScheme)
+    : NAVIGATION_SECONDARY_BACKGROUND_LIGHT;
 };
 
 const TEXT_PRIMARY_COLOR_LIGHT = "#000";
@@ -198,3 +203,19 @@ export const MaterialDarkTheme = {
   ...MD3DarkTheme,
   colors: MaterialDarkColors,
 };
+
+export const headerTitleStyle = (colorScheme: ColorSchemeName) =>
+  Platform.select({
+    default: {
+      color: textPrimaryColor(colorScheme),
+      fontSize: 17,
+      fontWeight: "600" as any,
+      maxWidth: 150,
+    },
+    android: {
+      color: textPrimaryColor(colorScheme),
+      fontSize: 18,
+      left: -15,
+      fontFamily: "Roboto",
+    },
+  });

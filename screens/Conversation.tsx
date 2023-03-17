@@ -14,6 +14,7 @@ import React, {
 import {
   ActivityIndicator,
   ColorSchemeName,
+  Platform,
   StyleSheet,
   Text,
   TextInput,
@@ -35,6 +36,7 @@ import { XmtpConversation, XmtpDispatchTypes } from "../data/store/xmtpReducer";
 import { userExists } from "../utils/api";
 import {
   backgroundColor,
+  headerTitleStyle,
   itemSeparatorColor,
   messageBubbleColor,
   myMessageBubbleColor,
@@ -211,7 +213,15 @@ const Conversation = ({
               }}
             >
               <Text
-                style={[styles.title, { fontSize: 17 * titleFontScale }]}
+                style={[
+                  styles.title,
+                  {
+                    fontSize:
+                      Platform.OS === "ios"
+                        ? 17 * titleFontScale
+                        : styles.title.fontSize,
+                  },
+                ]}
                 numberOfLines={1}
                 allowFontScaling={false}
               >
@@ -426,12 +436,7 @@ const getStyles = (colorScheme: ColorSchemeName) =>
     inviteButton: {
       marginLeft: "auto",
     },
-    title: {
-      color: textPrimaryColor(colorScheme),
-      fontSize: 17,
-      fontWeight: "600",
-      maxWidth: 150,
-    },
+    title: headerTitleStyle(colorScheme),
   });
 
 const chatTheme = (colorScheme: ColorSchemeName) =>

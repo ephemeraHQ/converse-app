@@ -36,8 +36,8 @@ import { saveUser } from "../utils/api";
 import { loadSavedNotificationMessagesToContext } from "../utils/backgroundNotifications/loadSavedNotifications";
 import {
   backgroundColor,
+  headerTitleStyle,
   navigationSecondaryBackgroundColor,
-  textPrimaryColor,
 } from "../utils/colors";
 import { ethProvider } from "../utils/eth";
 import { loadXmtpKeys } from "../utils/keychain";
@@ -477,7 +477,7 @@ export default function Main() {
           <Stack.Group
             screenOptions={{
               headerStyle: { backgroundColor: backgroundColor(colorScheme) },
-              headerTitleStyle: { color: textPrimaryColor(colorScheme) },
+              headerTitleStyle: headerTitleStyle(colorScheme),
               headerShadowVisible: Platform.OS !== "android",
             }}
           >
@@ -487,6 +487,13 @@ export default function Main() {
               options={{
                 headerTitle: "Messages",
                 headerLargeTitle: true,
+                headerTitleStyle: {
+                  ...headerTitleStyle(colorScheme),
+                  ...Platform.select({
+                    default: {},
+                    android: { fontSize: 22, lineHeight: 26 },
+                  }),
+                },
               }}
             />
             <Stack.Screen name="Conversation" component={Conversation} />
