@@ -7,7 +7,7 @@ import { getBlockedPeers } from "../utils/api";
 import { loadXmtpConversation, loadXmtpKeys } from "../utils/keychain";
 import { getXmtpSignature } from "../utils/xmtp";
 import { getXmtpClientFromKeys } from "../utils/xmtp/client";
-import { instantiateXmtpConversationFromJSON } from "../utils/xmtp/conversations";
+import { parseConversationJSON } from "../utils/xmtp/conversations";
 
 let xmtpClient: Client | null;
 let xmtpApiSignature: string | null;
@@ -39,7 +39,7 @@ const getXmtpConversationForTopic = async (
   if (!savedConversation) {
     throw new Error(`No conversation found for topic ${topic}`);
   }
-  const conversation = await instantiateXmtpConversationFromJSON(
+  const conversation = await parseConversationJSON(
     xmtpClient,
     savedConversation
   );
