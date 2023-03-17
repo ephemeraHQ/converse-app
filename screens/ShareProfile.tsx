@@ -13,6 +13,7 @@ import {
 } from "react-native";
 import QRCode from "react-native-qrcode-svg";
 
+import AndroidBackAction from "../components/AndroidBackAction";
 import ConverseButton from "../components/Button";
 import config from "../config";
 import { AppContext } from "../data/store/context";
@@ -28,14 +29,17 @@ export default function ShareProfileScreen({
   const { state } = useContext(AppContext);
   useEffect(() => {
     navigation.setOptions({
-      headerLeft: () => (
-        <Button
-          title="Cancel"
-          onPress={() => {
-            navigation.goBack();
-          }}
-        />
-      ),
+      headerLeft: () =>
+        Platform.OS === "ios" ? (
+          <Button
+            title="Cancel"
+            onPress={() => {
+              navigation.goBack();
+            }}
+          />
+        ) : (
+          <AndroidBackAction navigation={navigation} />
+        ),
     });
   }, [navigation]);
   const styles = getStyles(colorScheme);

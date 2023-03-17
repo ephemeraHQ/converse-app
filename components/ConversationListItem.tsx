@@ -10,6 +10,7 @@ import {
   StyleSheet,
   Platform,
 } from "react-native";
+import { TouchableRipple } from "react-native-paper";
 
 import Picto from "../components/Picto/Picto";
 import { XmtpConversation } from "../data/store/xmtpReducer";
@@ -65,43 +66,63 @@ const ConversationListItem = memo(function ConversationListItem({
       navigation.removeListener("transitionEnd", resetSelected);
     };
   }, [navigation, resetSelected]);
-  return (
-    <TouchableOpacity
-      activeOpacity={1}
-      key={conversationTopic}
-      onPress={() => {
-        navigation.navigate("Conversation", {
-          topic: conversationTopic,
-        });
-        setSelected(true);
-      }}
-      style={{
-        backgroundColor: selected
-          ? clickedItemBackgroundColor(colorScheme)
-          : backgroundColor(colorScheme),
-      }}
-    >
-      <View style={styles.conversationListItem}>
-        <Text style={styles.conversationName} numberOfLines={1}>
-          {conversationName}
-        </Text>
-        <Text style={styles.messagePreview} numberOfLines={2}>
-          {lastMessagePreview}
-        </Text>
-        <View style={styles.timeAndChevron}>
-          <Text style={styles.timeText}>{timeToShow}</Text>
-          {Platform.OS === "ios" && (
-            <Picto
-              picto="chevron.right"
-              weight="semibold"
-              color={actionSecondaryColor(colorScheme)}
-              size={10}
-            />
-          )}
-        </View>
+  const listItemContent = (
+    <View style={styles.conversationListItem}>
+      <Text style={styles.conversationName} numberOfLines={1}>
+        {conversationName}
+      </Text>
+      <Text style={styles.messagePreview} numberOfLines={2}>
+        {lastMessagePreview}
+      </Text>
+      <View style={styles.timeAndChevron}>
+        <Text style={styles.timeText}>{timeToShow}</Text>
+        {Platform.OS === "ios" && (
+          <Picto
+            picto="chevron.right"
+            weight="semibold"
+            color={actionSecondaryColor(colorScheme)}
+            size={10}
+          />
+        )}
       </View>
-    </TouchableOpacity>
+    </View>
   );
+  if (Platform.OS === "ios") {
+    return (
+      <TouchableOpacity
+        activeOpacity={1}
+        key={conversationTopic}
+        onPress={() => {
+          navigation.navigate("Conversation", {
+            topic: conversationTopic,
+          });
+          setSelected(true);
+        }}
+        style={{
+          backgroundColor: selected
+            ? clickedItemBackgroundColor(colorScheme)
+            : backgroundColor(colorScheme),
+        }}
+      >
+        {listItemContent}
+      </TouchableOpacity>
+    );
+  } else {
+    return (
+      <TouchableRipple
+        key={conversationTopic}
+        unstable_pressDelay={75}
+        onPress={() => {
+          navigation.navigate("Conversation", {
+            topic: conversationTopic,
+          });
+        }}
+        rippleColor={clickedItemBackgroundColor(colorScheme)}
+      >
+        {listItemContent}
+      </TouchableRipple>
+    );
+  }
 });
 export default ConversationListItem;
 
