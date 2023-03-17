@@ -26,10 +26,10 @@ export const streamNewConversations = async (
   }
 };
 
-export const instantiateXmtpConversationFromJSON = async (
+export const parseConversationJSON = (
   xmtpClient: Client,
   savedConversation: string
-): Promise<Conversation> => {
+): Conversation => {
   let parsedConversation: any = {};
   try {
     parsedConversation = JSON.parse(savedConversation);
