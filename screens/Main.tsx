@@ -229,6 +229,17 @@ export default function Main() {
       const showNotificationsScreen = await AsyncStorage.getItem(
         "state.notifications.showNotificationsScreen"
       );
+      const isDemoAccount = await AsyncStorage.getItem(
+        "state.app.isDemoAccount"
+      );
+      if (isDemoAccount) {
+        dispatch({
+          type: AppDispatchTypes.AppSetDemoAccount,
+          payload: {
+            isDemoAccount: true,
+          },
+        });
+      }
       let xmtpAddress = null;
       try {
         xmtpAddress = await getLoggedXmtpAddress();

@@ -1,11 +1,19 @@
 import { WalletMobileSDKEVMProvider } from "@coinbase/wallet-mobile-sdk/build/WalletMobileSDKEVMProvider";
+import { utils } from "@noble/secp256k1";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import {
   RenderQrcodeModalProps,
   useWalletConnect,
 } from "@walletconnect/react-native-dapp";
 import WalletConnectProvider from "@walletconnect/web3-provider";
-import { Bytes, ethers, Signer } from "ethers";
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import { Bytes, ethers, Signer, Wallet } from "ethers";
+import React, {
+  useCallback,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import {
   View,
   StyleSheet,
@@ -20,6 +28,8 @@ import Button from "../components/Button";
 import { sendMessageToWebview } from "../components/XmtpWebview";
 import config from "../config";
 import { clearDB } from "../data/db";
+import { AppDispatchTypes } from "../data/store/appReducer";
+import { AppContext } from "../data/store/context";
 import { backgroundColor, textPrimaryColor } from "../utils/colors";
 import { saveXmtpKeys } from "../utils/keychain";
 import { shortAddress } from "../utils/str";
@@ -30,19 +40,25 @@ import TableView, { TableViewEmoji, TableViewSymbol } from "./TableView";
 type Props = {
   walletConnectProps: RenderQrcodeModalProps | undefined;
   setHideModal: (hide: boolean) => void;
+  connectToDemoWallet: boolean;
+  setConnectToDemoWallet: (value: boolean) => void;
 };
 
 export default function OnboardingComponent({
   walletConnectProps,
   setHideModal,
+  connectToDemoWallet,
+  setConnectToDemoWallet,
 }: Props) {
   const colorScheme = useColorScheme();
   const styles = getStyles(colorScheme);
+  const { dispatch } = useContext(AppContext);
   const [loading, setLoading] = useState(false);
   const [user, setUser] = useState({
     address: "",
     isOnXmtp: false,
     signer: undefined as Signer | undefined,
+    isDemo: false,
   });
   const connector = useWalletConnect();
   const provider = new WalletConnectProvider({
@@ -76,6 +92,7 @@ export default function OnboardingComponent({
       address: "",
       isOnXmtp: false,
       signer: undefined,
+      isDemo: false,
     });
     setLoading(false);
     if (connector?.connected) {
@@ -125,6 +142,7 @@ export default function OnboardingComponent({
         address,
         isOnXmtp: isOnNetwork,
         signer,
+        isDemo: false,
       });
     } catch (e) {
       console.log("Error while connecting to Coinbase:", e);
@@ -132,6 +150,18 @@ export default function OnboardingComponent({
     waitingForCoinbase.current = false;
     setLoading(false);
   }, [enableDoubleSignature]);
+
+  const generateWallet = useCallback(async () => {
+    setLoading(true);
+    const signer = new Wallet(utils.randomPrivateKey());
+    const address = await signer.getAddress();
+    setUser({
+      address,
+      isOnXmtp: false,
+      signer,
+      isDemo: true,
+    });
+  }, []);
 
   const requestingSignatures = useRef(false);
 
@@ -148,6 +178,7 @@ export default function OnboardingComponent({
         address: newAddress,
         isOnXmtp: isOnNetwork,
         signer: newSigner,
+        isDemo: false,
       });
       setLoading(false);
     };
@@ -181,6 +212,13 @@ export default function OnboardingComponent({
         Array.from(await getXmtpKeysFromSigner(user.signer))
       );
       saveXmtpKeys(keys);
+      if (user.isDemo) {
+        AsyncStorage.setItem("state.app.isDemoAccount", "1");
+        dispatch({
+          type: AppDispatchTypes.AppSetDemoAccount,
+          payload: { isDemoAccount: true },
+        });
+      }
       await clearDB();
       sendMessageToWebview("KEYS_LOADED_FROM_SECURE_STORAGE", {
         keys,
@@ -190,7 +228,14 @@ export default function OnboardingComponent({
       setLoading(false);
       console.error(e);
     }
-  }, [user]);
+  }, [dispatch, user.isDemo, user.signer]);
+
+  useEffect(() => {
+    // Demo accounts can sign immediately
+    if (user.isDemo) {
+      initXmtpClient();
+    }
+  }, [initXmtpClient, user.isDemo]);
 
   const directConnectToWallet = useRef("");
   const appState = useRef(AppState.currentState);
@@ -258,6 +303,19 @@ export default function OnboardingComponent({
       }
     }
   }, [walletConnectProps]);
+
+  useEffect(() => {
+    if (connectToDemoWallet) {
+      setHideModal(true);
+      generateWallet();
+      setConnectToDemoWallet(false);
+    }
+  }, [
+    connectToDemoWallet,
+    generateWallet,
+    setConnectToDemoWallet,
+    setHideModal,
+  ]);
 
   let sfSymbol = "message.circle.fill";
   let title = "GM";

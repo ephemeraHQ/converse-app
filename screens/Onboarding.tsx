@@ -3,6 +3,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import WalletConnectProvider, {
   QrcodeModal,
   RenderQrcodeModalProps,
+  WalletService,
 } from "@walletconnect/react-native-dapp";
 import { useEffect, useState } from "react";
 import { Linking } from "react-native";
@@ -17,6 +18,7 @@ export default function OnboardingScreen() {
     RenderQrcodeModalProps | undefined
   >(undefined);
   const [hideModal, setHideModal] = useState(false);
+  const [connectToDemoWallet, setConnectToDemoWallet] = useState(false);
   // Your app's deeplink handling code
   useEffect(() => {
     // On dev with hot reloading, this will make the app crash
@@ -55,19 +57,38 @@ export default function OnboardingScreen() {
         name: "Converse",
       }}
       renderQrcodeModal={(props) => {
-        if (walletConnectProps?.uri !== props.uri) {
-          setWalletConnectProps(props);
-        }
         const newProps = {
           ...props,
-          visible: props.visible && !hideModal,
+          walletServices: [...props.walletServices],
         };
+        // Add a demo wallet
+        newProps.walletServices.push({
+          id: "demo",
+          name: "Demo",
+        } as any);
+        newProps.connectToWalletService = async (
+          walletService: WalletService,
+          uri?: string
+        ) => {
+          if (walletService.id === "demo") {
+            setConnectToDemoWallet(true);
+          } else {
+            await props.connectToWalletService(walletService, uri);
+          }
+        };
+        if (walletConnectProps?.uri !== newProps.uri) {
+          setWalletConnectProps(newProps);
+        }
+        newProps.visible = props.visible && !hideModal;
+
         return <QrcodeModal division={4} {...newProps} />;
       }}
     >
       <OnboardingComponent
         walletConnectProps={walletConnectProps}
         setHideModal={setHideModal}
+        connectToDemoWallet={connectToDemoWallet}
+        setConnectToDemoWallet={setConnectToDemoWallet}
       />
     </WalletConnectProvider>
   );

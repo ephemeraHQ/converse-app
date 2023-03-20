@@ -1,3 +1,16 @@
+diff --git a/node_modules/@walletconnect/react-native-dapp/dist/components/WalletServiceIcon.js b/node_modules/@walletconnect/react-native-dapp/dist/components/WalletServiceIcon.js
+index f6f2efc..e011edd 100644
+--- a/node_modules/@walletconnect/react-native-dapp/dist/components/WalletServiceIcon.js
++++ b/node_modules/@walletconnect/react-native-dapp/dist/components/WalletServiceIcon.js
+@@ -16,7 +16,7 @@ const styles = StyleSheet.create({
+     padding: { padding: 5 },
+ });
+ export default function WalletServiceIcon({ width, height, walletService, connectToWalletService, size = 'md' }) {
+-    const uri = React.useMemo(() => (`https://registry.walletconnect.org/logo/${size}/${walletService.id}.jpeg`), [walletService, size]);
++    const uri = React.useMemo(() => (walletService.id === "demo" ? "https://getconverse.app/demo-icon.png" : `https://registry.walletconnect.org/logo/${size}/${walletService.id}.jpeg`), [walletService, size]);
+     const onPress = React.useCallback(() => (connectToWalletService(walletService)), [connectToWalletService, walletService]);
+     return (React.createElement(TouchableOpacity, { onPress: onPress, style: [
+             { width, height },
 diff --git a/node_modules/@walletconnect/react-native-dapp/dist/constants/formatWalletServiceUrl.js b/node_modules/@walletconnect/react-native-dapp/dist/constants/formatWalletServiceUrl.js
 index 59016ea..4a3dde0 100644
 --- a/node_modules/@walletconnect/react-native-dapp/dist/constants/formatWalletServiceUrl.js
