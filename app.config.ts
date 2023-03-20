@@ -46,7 +46,7 @@ export default {
     ENV: isDev ? "dev" : isPreview ? "preview" : "prod",
   },
   runtimeVersion: "exposdk:48.0.0",
-  owner: "noemalzieu",
+  owner: "converse",
   jsEngine: "hermes",
   plugins: ["sentry-expo"],
   hooks: {
