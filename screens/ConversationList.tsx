@@ -225,6 +225,7 @@ export default function ConversationList({
     },
     [colorScheme, navigation]
   );
+
   return (
     <>
       <FlatList
