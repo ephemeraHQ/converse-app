@@ -6,6 +6,7 @@ import React, { useCallback, useContext } from "react";
 import { Platform, TouchableOpacity, useColorScheme, View } from "react-native";
 
 import { clearDB } from "../data/db";
+import { AppDispatchTypes } from "../data/store/appReducer";
 import { AppContext } from "../data/store/context";
 import { NotificationsDispatchTypes } from "../data/store/notificationsReducer";
 import { textSecondaryColor } from "../utils/colors";
@@ -64,6 +65,10 @@ export default function SettingsButton() {
         clearDB();
         disablePushNotifications();
         sendMessageToWebview("DISCONNECT");
+        dispatch({
+          type: AppDispatchTypes.AppSetDemoAccount,
+          payload: { isDemoAccount: false },
+        });
         AsyncStorage.clear();
       },
       Cancel: () => {},
