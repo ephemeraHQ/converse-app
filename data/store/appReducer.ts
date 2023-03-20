@@ -5,16 +5,19 @@ import { ActionMap } from "./types";
 export type AppType = {
   splashScreenHidden: boolean;
   mainIdentity: string;
+  isDemoAccount: boolean;
 };
 
 export const appInitialState: AppType = {
   splashScreenHidden: false,
   mainIdentity: "",
+  isDemoAccount: false,
 };
 
 export enum AppDispatchTypes {
   AppHideSplashscreen = "APP_HIDE_SPLASHSCREEN",
   AppSetMainIdentity = "APP_SET_MAIN_IDENTITY",
+  AppSetDemoAccount = "APP_SET_DEMO_ACCOUNT",
 }
 
 type AppPayload = {
@@ -23,6 +26,9 @@ type AppPayload = {
   };
   [AppDispatchTypes.AppSetMainIdentity]: {
     identity: string;
+  };
+  [AppDispatchTypes.AppSetDemoAccount]: {
+    isDemoAccount: boolean;
   };
 };
 
@@ -40,6 +46,13 @@ export const appReducer = (state: AppType, action: AppActions): AppType => {
       return {
         ...state,
         mainIdentity: action.payload.identity,
+      };
+    }
+
+    case AppDispatchTypes.AppSetDemoAccount: {
+      return {
+        ...state,
+        isDemoAccount: action.payload.isDemoAccount,
       };
     }
 
