@@ -19,7 +19,7 @@ export default function DemoAccountBanner() {
   return (
     <View style={styles.demoAccountBanner}>
       <View style={styles.demoAccountBannerLeft}>
-        <Text style={styles.demoAccountTitle}>This is a demo app</Text>
+        <Text style={styles.demoAccountTitle}>This is a demo account</Text>
         <Text style={styles.demoAccountSubtitle} numberOfLines={2}>
           Sign in with a third party wallet to keep track of your conversations.
         </Text>
