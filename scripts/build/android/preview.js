@@ -2,6 +2,12 @@ const { execSync } = require("child_process");
 const fs = require("fs");
 const isClean = require("git-is-clean");
 
+const replaceAppName = (path) => {
+  const content = fs.readFileSync(path, "utf-8");
+  content.replace(/com\.converse\.dev/g, "com.converse.preview");
+  fs.writeFileSync(path, content);
+};
+
 const go = async () => {
   const clean = await isClean();
   if (!clean) {
@@ -12,23 +18,27 @@ const go = async () => {
   const APP_GRADLE_PATH = "android/app/build.gradle";
   const APP_MANIFEST_PATH = "android/app/src/main/AndroidManifest.xml";
   const GOOGLE_SERVICES_PATH = "android/app/google-services.json";
+  const DEBUG_FLIPPER_PATH =
+    "android/app/src/debug/java/com/converse/dev/ReactNativeFlipper.java";
+  const MAIN_FLIPPER_PATH =
+    "android/app/src/release/java/com/converse/dev/ReactNativeFlipper.java";
+  const MAIN_ACTIVITY_PATH =
+    "android/app/src/main/java/com/converse/dev/MainActivity.java";
+  const MAIN_APPLICATION_PATH =
+    "android/app/src/main/java/com/converse/dev/MainActivity.java";
 
-  const CODE_PATH = "android/app/src/main/java/com/converse/dev";
-  const NEW_CODE_PATH = "android/app/src/main/java/com/converse/preview";
+  replaceAppName(APP_GRADLE_PATH);
+  replaceAppName(DEBUG_FLIPPER_PATH);
+  replaceAppName(MAIN_FLIPPER_PATH);
+  replaceAppName(MAIN_ACTIVITY_PATH);
+  replaceAppName(MAIN_APPLICATION_PATH);
 
-  const appGradle = fs.readFileSync(APP_GRADLE_PATH, "utf-8");
   const appManifest = fs.readFileSync(APP_MANIFEST_PATH, "utf-8");
-  const googleServices = fs.readFileSync(GOOGLE_SERVICES_PATH, "utf-8");
-
-  const newAppGradle = appGradle.replace(
-    /com\.converse\.dev/g,
-    "com.converse.preview"
-  );
-
   const newAppManifest = appManifest
     .replace(/com\.converse\.dev/g, "com.converse.preview")
     .replace(/converse-dev/g, "converse-preview");
 
+  const googleServices = fs.readFileSync(GOOGLE_SERVICES_PATH, "utf-8");
   const newGoogleServices = JSON.parse(googleServices);
   newGoogleServices.client[0].client_info.mobilesdk_app_id =
     "1:564961909146:android:2faf5c4a2bbcd133bd0223";
@@ -40,7 +50,9 @@ const go = async () => {
     JSON.stringify(newGoogleServices, null, 2)
   );
 
-  fs.writeFileSync(APP_GRADLE_PATH, newAppGradle);
+  const CODE_PATH = "android/app/src/main/java/com/converse/dev";
+  const NEW_CODE_PATH = "android/app/src/main/java/com/converse/preview";
+
   fs.writeFileSync(APP_MANIFEST_PATH, newAppManifest);
 
   execSync(`git mv ${CODE_PATH} ${NEW_CODE_PATH}`);
