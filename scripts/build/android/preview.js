@@ -4,8 +4,8 @@ const isClean = require("git-is-clean");
 
 const replaceAppName = (path) => {
   const content = fs.readFileSync(path, "utf-8");
-  content.replace(/com\.converse\.dev/g, "com.converse.preview");
-  fs.writeFileSync(path, content);
+  const newContent = content.replace(/com\.converse\.dev/g, "com.converse.preview");
+  fs.writeFileSync(path, newContent);
 };
 
 const go = async () => {
