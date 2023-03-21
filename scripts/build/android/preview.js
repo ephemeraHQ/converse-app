@@ -23,13 +23,13 @@ const go = async () => {
   const STRINGS_PATH = "android/app/src/main/res/values/strings.xml";
   const GOOGLE_SERVICES_PATH = "android/app/google-services.json";
   const DEBUG_FLIPPER_PATH =
-    "android/app/src/debug/java/com/converse/dev/ReactNativeFlipper.java";
+    "android/app/src/debug/java/com/converse/app/ReactNativeFlipper.java";
   const MAIN_FLIPPER_PATH =
-    "android/app/src/release/java/com/converse/dev/ReactNativeFlipper.java";
+    "android/app/src/release/java/com/converse/app/ReactNativeFlipper.java";
   const MAIN_ACTIVITY_PATH =
-    "android/app/src/main/java/com/converse/dev/MainActivity.java";
+    "android/app/src/main/java/com/converse/app/MainActivity.java";
   const MAIN_APPLICATION_PATH =
-    "android/app/src/main/java/com/converse/dev/MainApplication.java";
+    "android/app/src/main/java/com/converse/app/MainApplication.java";
 
   replaceAppName(APP_GRADLE_PATH);
   replaceAppName(DEBUG_FLIPPER_PATH);
@@ -60,13 +60,6 @@ const go = async () => {
     '<string name="app_name">Converse PREVIEW</string>'
   );
   fs.writeFileSync(STRINGS_PATH, newStrings);
-
-  const CODE_PATH = "android/app/src/main/java/com/converse/dev";
-  const NEW_CODE_PATH = "android/app/src/main/java/com/converse/preview";
-
-  fs.writeFileSync(APP_MANIFEST_PATH, newAppManifest);
-
-  execSync(`git mv ${CODE_PATH} ${NEW_CODE_PATH}`);
 };
 
 go();
