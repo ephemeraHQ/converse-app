@@ -6,7 +6,7 @@ const replaceAppName = (path) => {
   const content = fs.readFileSync(path, "utf-8");
   const newContent = content.replace(
     /com\.converse\.dev/g,
-    "com.converse.native"
+    "com.converse.prod"
   );
   fs.writeFileSync(path, newContent);
 };
@@ -39,7 +39,7 @@ const go = async () => {
 
   const appManifest = fs.readFileSync(APP_MANIFEST_PATH, "utf-8");
   const newAppManifest = appManifest
-    .replace(/com\.converse\.dev/g, "com.converse.native")
+    .replace(/com\.converse\.dev/g, "com.converse.prod")
     .replace(/converse-dev/g, "converse")
     .replace(/ic_launcher_preview/g, "ic_launcher")
     .replace("dev.getconverse.app", "getconverse.app");
@@ -50,7 +50,7 @@ const go = async () => {
   newGoogleServices.client[0].client_info.mobilesdk_app_id =
     "1:564961909146:android:cf91e864d5f191b1bd0223";
   newGoogleServices.client[0].client_info.android_client_info.package_name =
-    "com.converse.native";
+    "com.converse.prod";
 
   fs.writeFileSync(
     GOOGLE_SERVICES_PATH,
@@ -65,7 +65,7 @@ const go = async () => {
   fs.writeFileSync(STRINGS_PATH, newStrings);
 
   const CODE_PATH = "android/app/src/main/java/com/converse/dev";
-  const NEW_CODE_PATH = "android/app/src/main/java/com/converse/native";
+  const NEW_CODE_PATH = "android/app/src/main/java/com/converse/prod";
 
   execSync(`git mv ${CODE_PATH} ${NEW_CODE_PATH}`);
 };
