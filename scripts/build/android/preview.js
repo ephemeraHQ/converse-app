@@ -1,3 +1,4 @@
+const { execSync } = require("child_process");
 const fs = require("fs");
 const isClean = require("git-is-clean");
 
@@ -42,7 +43,7 @@ const go = async () => {
   fs.writeFileSync(APP_GRADLE_PATH, newAppGradle);
   fs.writeFileSync(APP_MANIFEST_PATH, newAppManifest);
 
-  fs.renameSync(CODE_PATH, NEW_CODE_PATH);
+  execSync(`git mv ${CODE_PATH} ${NEW_CODE_PATH}`);
 };
 
 go();
