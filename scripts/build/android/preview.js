@@ -40,7 +40,8 @@ const go = async () => {
   const appManifest = fs.readFileSync(APP_MANIFEST_PATH, "utf-8");
   const newAppManifest = appManifest
     .replace(/com\.converse\.dev/g, "com.converse.preview")
-    .replace(/converse-dev/g, "converse-preview");
+    .replace(/converse-dev/g, "converse-preview")
+    .replace("dev.getconverse.app", "preview.getconverse.app");
   fs.writeFileSync(APP_MANIFEST_PATH, newAppManifest);
 
   const googleServices = fs.readFileSync(GOOGLE_SERVICES_PATH, "utf-8");
