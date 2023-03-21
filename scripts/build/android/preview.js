@@ -10,9 +10,11 @@ const go = async () => {
 
   const APP_GRADLE_PATH = "android/app/build.gradle";
   const APP_MANIFEST_PATH = "android/app/src/main/AndroidManifest.xml";
+  const GOOGLE_SERVICES_PATH = "android/app/google-services.json";
 
   const appGradle = fs.readFileSync(APP_GRADLE_PATH, "utf-8");
   const appManifest = fs.readFileSync(APP_MANIFEST_PATH, "utf-8");
+  const googleServices = fs.readFileSync(GOOGLE_SERVICES_PATH, "utf-8");
 
   const newAppGradle = appGradle.replace(
     /com\.converse\.dev/g,
@@ -22,6 +24,17 @@ const go = async () => {
   const newAppManifest = appManifest
     .replace(/com\.converse\.dev/g, "com.converse.preview")
     .replace(/converse-dev/g, "converse-preview");
+
+  const newGoogleServices = JSON.parse(googleServices);
+  newGoogleServices.client[0].client_info.mobilesdk_app_id =
+    "1:564961909146:android:2faf5c4a2bbcd133bd0223";
+  newGoogleServices.client[0].client_info.android_client_info.package_name =
+    "com.converse.preview";
+
+  fs.writeFileSync(
+    GOOGLE_SERVICES_PATH,
+    JSON.stringify(newGoogleServices, null, 2)
+  );
 
   fs.writeFileSync(APP_GRADLE_PATH, newAppGradle);
   fs.writeFileSync(APP_MANIFEST_PATH, newAppManifest);
