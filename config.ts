@@ -1,4 +1,5 @@
 import Constants from "expo-constants";
+import { Platform } from "react-native";
 
 const defaultConfig = {
   debugMenu: false,
@@ -13,6 +14,8 @@ const defaultConfig = {
   sentryDSN:
     "https://fb7c7cbf876644b68a05db08623c8369@o4504757119680512.ingest.sentry.io/4504757120729088",
 };
+
+const isAndroid = Platform.OS === "android";
 
 const ENV = {
   dev: {
@@ -46,7 +49,7 @@ const ENV = {
     env: "prod",
     xmtpEnv: "production",
     apiURI: "https://xmtp-notifications.fly.dev",
-    bundleId: "com.converse.native",
+    bundleId: isAndroid ? "com.converse.prod" : "com.converse.native",
     scheme: "converse",
     lensApiDomain: "api.lens.dev",
     ethereumNetwork: "mainnet",
