@@ -15,6 +15,7 @@
     "build-preview-android-local": "node scripts/build/android/preview.js && eas build --profile preview --platform android --local ; git co -f",
     "build-prod-ios": "yarn typecheck && node scripts/build/ios/prod.js && eas build --profile production --platform ios --auto-submit ; git add app.json && git restore .",
     "build-prod-ios-local": "yarn typecheck && node scripts/build/ios/prod.js && eas build --profile production --platform ios --local && eas submit --profile production --platform ios ; git add app.json && git restore .",
+    "build-prod-android-local": "yarn typecheck && node scripts/build/android/prod.js && eas build --profile production --platform android --local && eas submit --profile production --platform android ; git add app.json && git restore --staged --worktree android",
     "db": "ts-node scripts/migrations/db.ts",
     "postinstall": "husky install && patch-package"
   },
