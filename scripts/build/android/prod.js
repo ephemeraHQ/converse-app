@@ -48,7 +48,7 @@ const go = async () => {
   const googleServices = fs.readFileSync(GOOGLE_SERVICES_PATH, "utf-8");
   const newGoogleServices = JSON.parse(googleServices);
   newGoogleServices.client[0].client_info.mobilesdk_app_id =
-    "1:564961909146:android:cf91e864d5f191b1bd0223";
+    "1:564961909146:android:7490961d2153aca8bd0223";
   newGoogleServices.client[0].client_info.android_client_info.package_name =
     "com.converse.prod";
 
