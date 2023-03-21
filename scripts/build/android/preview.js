@@ -25,7 +25,7 @@ const go = async () => {
   const MAIN_ACTIVITY_PATH =
     "android/app/src/main/java/com/converse/dev/MainActivity.java";
   const MAIN_APPLICATION_PATH =
-    "android/app/src/main/java/com/converse/preview/MainApplication.java";
+    "android/app/src/main/java/com/converse/dev/MainApplication.java";
 
   replaceAppName(APP_GRADLE_PATH);
   replaceAppName(DEBUG_FLIPPER_PATH);
