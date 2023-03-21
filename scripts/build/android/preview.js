@@ -1,3 +1,4 @@
+const { execSync } = require("child_process");
 const fs = require("fs");
 const isClean = require("git-is-clean");
 
@@ -64,8 +65,6 @@ const go = async () => {
 
   const CODE_PATH = "android/app/src/main/java/com/converse/dev";
   const NEW_CODE_PATH = "android/app/src/main/java/com/converse/preview";
-
-  fs.writeFileSync(APP_MANIFEST_PATH, newAppManifest);
 
   execSync(`git mv ${CODE_PATH} ${NEW_CODE_PATH}`);
 };
