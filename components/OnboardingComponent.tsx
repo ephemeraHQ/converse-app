@@ -22,6 +22,7 @@ import {
   AppState,
   ColorSchemeName,
   useColorScheme,
+  Platform,
 } from "react-native";
 
 import Button from "../components/Button";
@@ -30,7 +31,11 @@ import config from "../config";
 import { clearDB } from "../data/db";
 import { AppDispatchTypes } from "../data/store/appReducer";
 import { AppContext } from "../data/store/context";
-import { backgroundColor, textPrimaryColor } from "../utils/colors";
+import {
+  backgroundColor,
+  textPrimaryColor,
+  textSecondaryColor,
+} from "../utils/colors";
 import { saveXmtpKeys } from "../utils/keychain";
 import { shortAddress } from "../utils/str";
 import { getXmtpKeysFromSigner, isOnXmtp } from "../utils/xmtp";
@@ -317,11 +322,11 @@ export default function OnboardingComponent({
     setHideModal,
   ]);
 
-  let sfSymbol = "message.circle.fill";
+  let picto = "message.circle.fill";
   let title = "GM";
   let text = `Converse connects web3 identities with each other. Connect your wallet to start chatting.`;
   if (user.address) {
-    sfSymbol = "signature";
+    picto = "signature";
     title = "Sign";
 
     if (user.isOnXmtp) {
@@ -342,9 +347,11 @@ export default function OnboardingComponent({
 
   return (
     <View style={styles.onboarding}>
-      <View style={styles.picto}>
-        <Picto picto={sfSymbol} style={{ marginBottom: 48 }} size={43} />
-      </View>
+      <Picto
+        picto={picto}
+        size={Platform.OS === "android" ? 80 : 43}
+        style={styles.picto}
+      />
       {!loading && (
         <>
           <Text style={styles.title}>{title}</Text>
@@ -413,7 +420,7 @@ export default function OnboardingComponent({
                   ? "Sign"
                   : "Sign (1/2)"
               }
-              variant="blue"
+              variant="primary"
               style={styles.sign}
               onPress={() => {
                 if (waitingForSecondSignature) {
@@ -450,22 +457,46 @@ const getStyles = (colorScheme: ColorSchemeName) =>
       backgroundColor: backgroundColor(colorScheme),
     },
     picto: {
-      marginTop: 124,
-      marginBottom: 50,
+      ...Platform.select({
+        default: {
+          marginTop: 124,
+          marginBottom: 98,
+        },
+        android: {
+          marginTop: 165,
+          marginBottom: 61,
+        },
+      }),
     },
-    title: {
-      fontWeight: "700",
-      fontSize: 34,
-      color: textPrimaryColor(colorScheme),
-    },
+    title: Platform.select({
+      default: {
+        fontWeight: "700",
+        fontSize: 34,
+        color: textPrimaryColor(colorScheme),
+      },
+      android: {
+        fontSize: 24,
+        color: textPrimaryColor(colorScheme),
+      },
+    }),
     p: {
-      fontSize: 17,
-      marginLeft: 32,
-      marginRight: 32,
       textAlign: "center",
       marginTop: 21,
       marginBottom: "auto",
-      color: textPrimaryColor(colorScheme),
+      marginLeft: 32,
+      marginRight: 32,
+      ...Platform.select({
+        default: {
+          fontSize: 17,
+          color: textPrimaryColor(colorScheme),
+        },
+        android: {
+          fontSize: 14,
+          lineHeight: 20,
+          color: textSecondaryColor(colorScheme),
+          maxWidth: 260,
+        },
+      }),
     },
     connect: {
       marginBottom: 54,

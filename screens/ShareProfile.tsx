@@ -67,7 +67,7 @@ export default function ShareProfileScreen({
         </Text>
         <Text style={styles.address}>{state.xmtp.address}</Text>
         <ConverseButton
-          variant="blue"
+          variant="primary"
           title="Share link"
           style={styles.shareButton}
           picto="square.and.arrow.up"

@@ -118,7 +118,7 @@ export default function SettingsButton() {
       <TouchableOpacity onPress={onPress}>
         <Picto
           picto="account_circle"
-          size={17}
+          size={24}
           style={{ marginRight: 16 }}
           color={textSecondaryColor(colorScheme)}
         />
