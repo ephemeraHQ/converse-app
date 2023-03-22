@@ -12,6 +12,7 @@ import {
   useColorScheme,
   ViewStyle,
 } from "react-native";
+import { Button as MaterialButton } from "react-native-paper";
 
 import { tableViewItemBackground } from "../utils/colors";
 import Picto from "./Picto/Picto";
@@ -19,7 +20,7 @@ import Picto from "./Picto/Picto";
 type Props = {
   title: string;
   onPress?: (event: GestureResponderEvent) => void;
-  variant: "blue" | "grey" | "text";
+  variant: "primary" | "grey" | "text";
   style?: StyleProp<ViewStyle>;
   textStyle?: StyleProp<TextStyle>;
   allowFontScaling?: boolean;
@@ -38,17 +39,28 @@ export default function Button({
   const colorScheme = useColorScheme();
   const styles = getStyles(colorScheme);
   const buttonStyle =
-    variant === "blue"
-      ? styles.buttonBlue
+    variant === "primary"
+      ? styles.buttonPrimary
       : variant === "grey"
       ? styles.buttonGrey
       : styles.buttonText;
   const buttonTextStyle =
-    variant === "blue"
-      ? styles.buttonBlueText
+    variant === "primary"
+      ? styles.buttonPrimaryText
       : variant === "grey"
       ? styles.buttonGreyText
       : styles.buttonTextText;
+  if (variant === "primary" && Platform.OS === "android") {
+    return (
+      <MaterialButton
+        mode="contained"
+        style={[styles.materialButtonPrimary, style]}
+        onPress={onPress}
+      >
+        {title}
+      </MaterialButton>
+    );
+  }
   return (
     <TouchableOpacity style={[buttonStyle, style]} onPress={onPress}>
       {picto && (
@@ -72,7 +84,10 @@ export default function Button({
 
 const getStyles = (colorScheme: ColorSchemeName) =>
   StyleSheet.create({
-    buttonBlue: {
+    materialButtonPrimary: {
+      marginHorizontal: 32,
+    },
+    buttonPrimary: {
       backgroundColor:
         Platform.OS === "ios" ? PlatformColor("systemBlue") : "blue",
       display: "flex",
@@ -84,7 +99,7 @@ const getStyles = (colorScheme: ColorSchemeName) =>
       flexDirection: "row",
       justifyContent: "center",
     },
-    buttonBlueText: {
+    buttonPrimaryText: {
       color: "white",
       textAlign: "center",
       fontWeight: "600",

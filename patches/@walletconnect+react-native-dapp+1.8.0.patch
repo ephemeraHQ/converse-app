@@ -12,13 +12,64 @@ index f6f2efc..e011edd 100644
      return (React.createElement(TouchableOpacity, { onPress: onPress, style: [
              { width, height },
 diff --git a/node_modules/@walletconnect/react-native-dapp/dist/constants/formatWalletServiceUrl.js b/node_modules/@walletconnect/react-native-dapp/dist/constants/formatWalletServiceUrl.js
-index 59016ea..4a3dde0 100644
+index 59016ea..3970411 100644
 --- a/node_modules/@walletconnect/react-native-dapp/dist/constants/formatWalletServiceUrl.js
 +++ b/node_modules/@walletconnect/react-native-dapp/dist/constants/formatWalletServiceUrl.js
-@@ -5,5 +5,5 @@ export default function formatProviderUrl(walletService) {
+@@ -3,7 +3,7 @@ export default function formatProviderUrl(walletService) {
+     const { mobile } = walletService;
+     const { universal: universalLink, native: deepLink } = mobile;
      if (Platform.OS === "android") {
-         return `${deepLink}`;
+-        return `${deepLink}`;
++        return `${deepLink}/`;
      }
 -    return `${universalLink}`;
 +    return `${universalLink || `${deepLink}/`}`;
+ }
+diff --git a/node_modules/@walletconnect/react-native-dapp/dist/providers/WalletConnectProvider.js b/node_modules/@walletconnect/react-native-dapp/dist/providers/WalletConnectProvider.js
+index 9b5b1e2..dda914a 100644
+--- a/node_modules/@walletconnect/react-native-dapp/dist/providers/WalletConnectProvider.js
++++ b/node_modules/@walletconnect/react-native-dapp/dist/providers/WalletConnectProvider.js
+@@ -20,7 +20,7 @@ export default function WalletConnectProvider({ children, renderQrcodeModal: may
+         ? maybeRenderQrcodeModal
+         : defaultRenderQrcodeModal), [maybeRenderQrcodeModal]);
+     const open = React.useCallback(async (uri, cb) => {
+-        if (Platform.OS === 'android') {
++        if (Platform.OS === 'android' && false) {
+             const canOpenURL = await Linking.canOpenURL(uri);
+             if (!canOpenURL) {
+                 Linking.openURL('https://walletconnect.org/wallets');
+@@ -68,7 +68,8 @@ export default function WalletConnectProvider({ children, renderQrcodeModal: may
+         const maybeRedirectUrl = typeof redirectUrl === "string"
+             ? `&redirectUrl=${encodeURIComponent(redirectUrl)}`
+             : "";
+-        const connectionUrl = `${formatWalletServiceUrl(walletService)}/wc?uri=${encodeURIComponent(uri)}${maybeRedirectUrl}`;
++        const useDirectURI = walletService.name === "MetaMask" && Platform.OS === "android";
++        const connectionUrl = `${formatWalletServiceUrl(walletService)}/wc?uri=${useDirectURI ? uri : encodeURIComponent(uri)}${maybeRedirectUrl}`;
+         if (await Linking.canOpenURL(connectionUrl)) {
+             return await Promise.all([
+                 storage.setItem(walletServiceStorageKey, walletService),
+@@ -84,7 +85,7 @@ export default function WalletConnectProvider({ children, renderQrcodeModal: may
+             await storage.getItem(sessionStorageKey),
+             await storage.getItem(walletServiceStorageKey),
+         ]);
+-        const isResumable = !!maybeExistingSession && (Platform.OS === 'android' || !!maybeExistingWalletService);
++        const isResumable = !!maybeExistingSession && ((Platform.OS === 'android' && false) || !!maybeExistingWalletService);
+         if (!isResumable) {
+             await Promise.all([
+                 storage.removeItem(sessionStorageKey),
+@@ -107,7 +108,7 @@ export default function WalletConnectProvider({ children, renderQrcodeModal: may
+         });
+         nextConnector.on(ConnectorEvents.CALL_REQUEST_SENT, async (error) => {
+             maybeThrowError(error);
+-            if (Platform.OS === 'android') {
++            if (Platform.OS === 'android' && false) {
+                 const { peerMeta } = nextConnector;
+                 if (!!peerMeta && typeof peerMeta === 'object') {
+                     const [maybeShortName] = `${peerMeta.name || ''}`.toLowerCase().split(/\s+/);
+@@ -220,5 +221,5 @@ export default function WalletConnectProvider({ children, renderQrcodeModal: may
+     ]);
+     return (React.createElement(WalletConnectContext.Provider, { value: value },
+         !!children && children,
+-        Platform.OS !== 'android' && renderQrcodeModal(modalProps)));
++        (Platform.OS !== 'android' || true) && renderQrcodeModal(modalProps)));
  }

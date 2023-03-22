@@ -1,4 +1,4 @@
-import { ColorSchemeName, Platform } from "react-native";
+import { ColorSchemeName, Platform, PlatformColor } from "react-native";
 import { MD3DarkTheme, MD3LightTheme } from "react-native-paper";
 
 const BACKGROUND_LIGHT = "#FFF";
@@ -104,6 +104,17 @@ const TABLE_VIEW_ITEM_BACKGROUND_DARK = "#2C2C2E";
 export const tableViewItemBackground = (colorScheme: ColorSchemeName) => {
   if (colorScheme === "dark") return TABLE_VIEW_ITEM_BACKGROUND_DARK;
   return TABLE_VIEW_ITEM_BACKGROUND_LIGHT;
+};
+
+export const primaryColor = (colorScheme: ColorSchemeName) => {
+  if (Platform.OS === "ios") return PlatformColor("systemBlue");
+  if (Platform.OS === "android") {
+    if (colorScheme === "dark") {
+      return MaterialDarkColors.primary;
+    } else {
+      return MaterialLightColors.primary;
+    }
+  }
 };
 
 // Generated using https://callstack.github.io/react-native-paper/docs/guides/theming#theme-properties

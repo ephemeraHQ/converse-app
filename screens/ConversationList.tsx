@@ -80,7 +80,7 @@ function NewConversationButton({
               picto="square.and.pencil"
               weight="medium"
               color={props.color}
-              size={16}
+              size={Platform.OS === "android" ? 24 : 16}
               style={{ width: 32, height: 32 }}
             />
           </>
@@ -117,7 +117,7 @@ function ShareProfileButton({
             ? PlatformColor("systemBlue")
             : textSecondaryColor(colorScheme)
         }
-        size={Platform.OS === "ios" ? 16 : 17}
+        size={Platform.OS === "ios" ? 16 : 24}
         style={{
           width: Platform.OS === "android" ? undefined : 32,
           height: Platform.OS === "android" ? undefined : 32,
