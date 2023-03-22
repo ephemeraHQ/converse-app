@@ -22,9 +22,11 @@ export default function NotificationsScreen() {
   const styles = getStyles(colorScheme);
   return (
     <View style={styles.notifications}>
-      <View style={styles.picto}>
-        <Picto picto="message.badge" style={{ marginBottom: 48 }} size={43} />
-      </View>
+      <Picto
+        picto="message.badge"
+        size={Platform.OS === "android" ? 80 : 43}
+        style={styles.picto}
+      />
       <Text style={styles.title}>Accept notifications</Text>
       <Text style={styles.p}>
         Converse is a messaging app, it works much better with notifications.
@@ -70,8 +72,16 @@ const getStyles = (colorScheme: ColorSchemeName) =>
       alignItems: "center",
     },
     picto: {
-      marginTop: 124,
-      marginBottom: 50,
+      ...Platform.select({
+        default: {
+          marginTop: 124,
+          marginBottom: 98,
+        },
+        android: {
+          marginTop: 165,
+          marginBottom: 61,
+        },
+      }),
     },
     title: {
       fontWeight: "700",
