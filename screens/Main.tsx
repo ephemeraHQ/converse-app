@@ -514,6 +514,8 @@ export default function Main() {
               options={{
                 headerTitle: "New conversation",
                 presentation: "modal",
+                animation: "slide_from_right",
+                animationTypeForReplace: "push",
                 headerStyle: {
                   backgroundColor:
                     navigationSecondaryBackgroundColor(colorScheme),

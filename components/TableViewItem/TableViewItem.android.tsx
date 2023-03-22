@@ -1,5 +1,4 @@
 import React, { ReactElement } from "react";
-import { StyleSheet } from "react-native";
 import { List as MaterialList } from "react-native-paper";
 
 export type TableViewItemType = {
@@ -9,14 +8,15 @@ export type TableViewItemType = {
   subtitle?: string;
   isLastItem?: boolean;
   action?: () => void;
+  paddingHorizontal?: number;
 };
 
 export default function TableViewItem({
   picto,
   title,
   subtitle,
-  isLastItem,
   action,
+  paddingHorizontal,
 }: TableViewItemType) {
   return (
     <MaterialList.Item
@@ -26,13 +26,7 @@ export default function TableViewItem({
         return picto;
       }}
       onPress={action}
-      style={styles.listItem}
+      style={{ paddingHorizontal }}
     />
   );
 }
-
-const styles = StyleSheet.create({
-  listItem: {
-    paddingHorizontal: 33,
-  },
-});

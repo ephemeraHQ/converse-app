@@ -1,6 +1,7 @@
 import React from "react";
 import {
   ColorSchemeName,
+  Platform,
   StyleProp,
   StyleSheet,
   Text,
@@ -15,13 +16,22 @@ import TableViewItem, {
   TableViewItemType,
 } from "./TableViewItem/TableViewItem";
 
-export const TableViewSymbol = ({ symbol }: { symbol: string }) => (
-  <Picto
-    picto={symbol}
-    size={16}
-    style={{ width: 32, height: 32, marginRight: 8 }}
-  />
-);
+export const TableViewPicto = ({ symbol }: { symbol: string }) => {
+  const colorScheme = useColorScheme();
+  return (
+    <Picto
+      picto={symbol}
+      size={Platform.OS === "android" ? 24 : 16}
+      style={Platform.select({
+        default: { width: 32, height: 32, marginRight: 8 },
+        android: { marginLeft: 8 },
+      })}
+      color={
+        Platform.OS === "android" ? textSecondaryColor(colorScheme) : undefined
+      }
+    />
+  );
+};
 
 export const TableViewEmoji = ({ emoji }: { emoji: string }) => (
   <Text style={{ width: 32, marginRight: 2, marginLeft: 6 }}>{emoji}</Text>
@@ -57,13 +67,13 @@ export default function TableView({
 const getStyles = (colorScheme: ColorSchemeName) =>
   StyleSheet.create({
     tableViewContainer: {
-      marginHorizontal: 24,
+      marginHorizontal: Platform.OS === "android" ? 16 : 24,
     },
     tableViewTitle: {
       textTransform: "uppercase",
       color: textSecondaryColor(colorScheme),
       fontSize: 12,
-      marginLeft: 16,
+      marginLeft: Platform.OS === "android" ? 0 : 16,
       marginBottom: 8,
     },
     tableView: {

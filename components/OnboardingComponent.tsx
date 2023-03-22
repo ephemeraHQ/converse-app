@@ -40,7 +40,7 @@ import { shortAddress } from "../utils/str";
 import { getXmtpKeysFromSigner, isOnXmtp } from "../utils/xmtp";
 import Button from "./Button/Button";
 import Picto from "./Picto/Picto";
-import TableView, { TableViewEmoji, TableViewSymbol } from "./TableView";
+import TableView, { TableViewEmoji, TableViewPicto } from "./TableView";
 
 type Props = {
   walletConnectProps: RenderQrcodeModalProps | undefined;
@@ -345,6 +345,8 @@ export default function OnboardingComponent({
     }
   }
 
+  const tableViewPaddingHorizontal = Platform.OS === "android" ? 33 : 0;
+
   return (
     <View style={styles.onboarding}>
       <Picto
@@ -374,6 +376,7 @@ export default function OnboardingComponent({
                 action: () => {
                   connectWallet("MetaMask");
                 },
+                paddingHorizontal: tableViewPaddingHorizontal,
               },
               {
                 id: "rainbow",
@@ -382,12 +385,14 @@ export default function OnboardingComponent({
                 action: () => {
                   connectWallet("Rainbow");
                 },
+                paddingHorizontal: tableViewPaddingHorizontal,
               },
               {
                 id: "coinbase",
                 picto: <TableViewEmoji emoji="🔵" />,
                 title: "Connect Coinbase Wallet",
                 action: connectCoinbaseWallet,
+                paddingHorizontal: tableViewPaddingHorizontal,
               },
               {
                 id: "ledger",
@@ -396,6 +401,7 @@ export default function OnboardingComponent({
                 action: () => {
                   connectWallet("Ledger Live");
                 },
+                paddingHorizontal: tableViewPaddingHorizontal,
               },
               {
                 id: "walletconnect",
@@ -403,12 +409,13 @@ export default function OnboardingComponent({
                   Platform.OS === "android" ? (
                     <TableViewEmoji emoji="＋" />
                   ) : (
-                    <TableViewSymbol symbol="plus" />
+                    <TableViewPicto symbol="plus" />
                   ),
                 title: "Connect another wallet",
                 action: () => {
                   connectWallet("");
                 },
+                paddingHorizontal: tableViewPaddingHorizontal,
               },
             ]}
           />

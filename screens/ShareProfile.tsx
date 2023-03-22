@@ -52,7 +52,7 @@ export default function ShareProfileScreen({
 
   return (
     <View style={styles.shareProfile}>
-      <StatusBar hidden={false} style="light" />
+      {Platform.OS === "ios" && <StatusBar hidden={false} style="light" />}
       <View style={styles.shareProfileContent}>
         <View style={styles.qrCode}>
           <QRCode

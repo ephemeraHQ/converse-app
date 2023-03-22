@@ -78,8 +78,13 @@ const ITEM_SEPARATOR_LIGHT = "#D1D1D5";
 const ITEM_SEPARATOR_DARK = "#3A3A3B";
 
 export const itemSeparatorColor = (colorScheme: ColorSchemeName) => {
-  if (colorScheme === "dark") return ITEM_SEPARATOR_DARK;
-  return ITEM_SEPARATOR_LIGHT;
+  if (colorScheme === "dark")
+    return Platform.OS === "android"
+      ? MaterialDarkColors.outline
+      : ITEM_SEPARATOR_DARK;
+  return Platform.OS === "android"
+    ? MaterialLightColors.outline
+    : ITEM_SEPARATOR_LIGHT;
 };
 
 const MESSAGE_BUBBLE_LIGHT = "#E9E9EB";
