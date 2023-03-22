@@ -25,7 +25,6 @@ import {
   Platform,
 } from "react-native";
 
-import Button from "../components/Button";
 import { sendMessageToWebview } from "../components/XmtpWebview";
 import config from "../config";
 import { clearDB } from "../data/db";
@@ -39,6 +38,7 @@ import {
 import { saveXmtpKeys } from "../utils/keychain";
 import { shortAddress } from "../utils/str";
 import { getXmtpKeysFromSigner, isOnXmtp } from "../utils/xmtp";
+import Button from "./Button/Button";
 import Picto from "./Picto/Picto";
 import TableView, { TableViewEmoji, TableViewSymbol } from "./TableView";
 
@@ -399,7 +399,12 @@ export default function OnboardingComponent({
               },
               {
                 id: "walletconnect",
-                picto: <TableViewSymbol symbol="plus" />,
+                picto:
+                  Platform.OS === "android" ? (
+                    <TableViewEmoji emoji="＋" />
+                  ) : (
+                    <TableViewSymbol symbol="plus" />
+                  ),
                 title: "Connect another wallet",
                 action: () => {
                   connectWallet("");

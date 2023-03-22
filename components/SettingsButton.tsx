@@ -16,7 +16,7 @@ import {
   NotificationPermissionStatus,
 } from "../utils/notifications";
 import { getTitleFontScale, shortAddress } from "../utils/str";
-import Button from "./Button";
+import Button from "./Button/Button";
 import Picto from "./Picto/Picto";
 import { sendMessageToWebview } from "./XmtpWebview";
 

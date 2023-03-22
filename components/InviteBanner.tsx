@@ -13,7 +13,7 @@ import {
   textPrimaryColor,
   textSecondaryColor,
 } from "../utils/colors";
-import Button from "./Button";
+import Button from "./Button/Button";
 import Picto from "./Picto/Picto";
 // import { conversationName } from "../utils/str";
 

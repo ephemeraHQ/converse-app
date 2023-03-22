@@ -1,33 +1,19 @@
-import React, { ReactElement } from "react";
+import React from "react";
 import {
   ColorSchemeName,
   StyleProp,
   StyleSheet,
   Text,
-  TouchableOpacity,
   useColorScheme,
   View,
   ViewStyle,
 } from "react-native";
 
-import {
-  backgroundColor,
-  itemSeparatorColor,
-  tableViewItemBackground,
-  textPrimaryColor,
-  textSecondaryColor,
-} from "../utils/colors";
+import { backgroundColor, textSecondaryColor } from "../utils/colors";
 import Picto from "./Picto/Picto";
-
-type TableViewItemType = {
-  id: string;
-  picto: ReactElement;
-  title: string;
-  subtitle?: string;
-  isLastItem?: boolean;
-  action?: () => void;
-  styles?: ReturnType<typeof getStyles>;
-};
+import TableViewItem, {
+  TableViewItemType,
+} from "./TableViewItem/TableViewItem";
 
 export const TableViewSymbol = ({ symbol }: { symbol: string }) => (
   <Picto
@@ -40,38 +26,6 @@ export const TableViewSymbol = ({ symbol }: { symbol: string }) => (
 export const TableViewEmoji = ({ emoji }: { emoji: string }) => (
   <Text style={{ width: 32, marginRight: 2, marginLeft: 6 }}>{emoji}</Text>
 );
-
-const TableViewItem = ({
-  picto,
-  title,
-  subtitle,
-  isLastItem,
-  action,
-  styles,
-}: TableViewItemType) => {
-  return (
-    <TouchableOpacity activeOpacity={0.6} onPress={action}>
-      <View style={styles?.tableViewItem}>
-        {picto}
-        <View
-          style={[
-            styles?.textContainer,
-            isLastItem ? styles?.textContainerLastItem : undefined,
-          ]}
-        >
-          <Text style={styles?.tableViewItemTitle} numberOfLines={1}>
-            {title}
-          </Text>
-          {subtitle && (
-            <Text style={styles?.tableViewItemSubtitle} numberOfLines={2}>
-              {subtitle}
-            </Text>
-          )}
-        </View>
-      </View>
-    </TouchableOpacity>
-  );
-};
 
 export default function TableView({
   title,
@@ -93,7 +47,6 @@ export default function TableView({
             key={e.id}
             isLastItem={i === items.length - 1}
             {...e}
-            styles={styles}
           />
         ))}
       </View>
@@ -104,7 +57,7 @@ export default function TableView({
 const getStyles = (colorScheme: ColorSchemeName) =>
   StyleSheet.create({
     tableViewContainer: {
-      marginHorizontal: 18,
+      marginHorizontal: 24,
     },
     tableViewTitle: {
       textTransform: "uppercase",
@@ -117,31 +70,5 @@ const getStyles = (colorScheme: ColorSchemeName) =>
       backgroundColor: backgroundColor(colorScheme),
       borderRadius: 10,
       overflow: "hidden",
-    },
-    tableViewItem: {
-      backgroundColor: tableViewItemBackground(colorScheme),
-      paddingLeft: 16,
-      flexDirection: "row",
-      alignItems: "center",
-    },
-    tableViewItemTitle: {
-      fontSize: 17,
-      marginBottom: 2,
-      color: textPrimaryColor(colorScheme),
-    },
-    tableViewItemSubtitle: {
-      fontSize: 12,
-      color: textSecondaryColor(colorScheme),
-    },
-    textContainer: {
-      borderBottomWidth: 1,
-      borderBottomColor: itemSeparatorColor(colorScheme),
-      flex: 1,
-      paddingRight: 16,
-      paddingTop: 14,
-      paddingBottom: 14,
-    },
-    textContainerLastItem: {
-      borderBottomWidth: 0,
     },
   });

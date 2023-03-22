@@ -9,7 +9,7 @@ import {
   Platform,
 } from "react-native";
 
-import Button from "../components/Button";
+import Button from "../components/Button/Button";
 import Picto from "../components/Picto/Picto";
 import { AppContext } from "../data/store/context";
 import { NotificationsDispatchTypes } from "../data/store/notificationsReducer";

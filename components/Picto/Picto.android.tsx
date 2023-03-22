@@ -2,6 +2,7 @@ import AccountCircle from "@material-symbols/svg-400/outlined/account_circle.svg
 import Chat from "@material-symbols/svg-400/outlined/chat.svg";
 import Edit from "@material-symbols/svg-400/outlined/edit.svg";
 import QrCodeScanner from "@material-symbols/svg-400/outlined/qr_code_scanner.svg";
+import Signature from "@material-symbols/svg-400/outlined/signature.svg";
 import {
   ColorValue,
   StyleProp,
@@ -31,7 +32,7 @@ const pictoMapping: {
   "square.and.pencil": Edit,
   qrcode: QrCodeScanner,
   "message.circle.fill": Chat,
-  // signature: "vpn_key",
+  signature: Signature,
   // "square.and.arrow.up": "share",
 };
 
