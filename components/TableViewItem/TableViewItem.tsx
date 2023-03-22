@@ -22,6 +22,7 @@ export type TableViewItemType = {
   subtitle?: string;
   isLastItem?: boolean;
   action?: () => void;
+  paddingHorizontal?: number;
 };
 
 export default function TableViewItem({
@@ -35,19 +36,19 @@ export default function TableViewItem({
   const styles = getStyles(colorScheme);
   return (
     <TouchableOpacity activeOpacity={0.6} onPress={action}>
-      <View style={styles?.tableViewItem}>
+      <View style={styles.tableViewItem}>
         {picto}
         <View
           style={[
             styles?.textContainer,
-            isLastItem ? styles?.textContainerLastItem : undefined,
+            isLastItem ? styles.textContainerLastItem : undefined,
           ]}
         >
-          <Text style={styles?.tableViewItemTitle} numberOfLines={1}>
+          <Text style={styles.tableViewItemTitle} numberOfLines={1}>
             {title}
           </Text>
           {subtitle && (
-            <Text style={styles?.tableViewItemSubtitle} numberOfLines={2}>
+            <Text style={styles.tableViewItemSubtitle} numberOfLines={2}>
               {subtitle}
             </Text>
           )}

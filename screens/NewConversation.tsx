@@ -21,9 +21,14 @@ import {
   useColorScheme,
   Platform,
 } from "react-native";
+import {
+  Searchbar as MaterialSearchBar,
+  IconButton as MaterialIconButton,
+} from "react-native-paper";
 
 import AndroidBackAction from "../components/AndroidBackAction";
-import TableView, { TableViewSymbol } from "../components/TableView";
+import Picto from "../components/Picto/Picto";
+import TableView, { TableViewPicto } from "../components/TableView";
 import { sendMessageToWebview } from "../components/XmtpWebview";
 import config from "../config";
 import { AppContext, StateType } from "../data/store/context";
@@ -137,7 +142,7 @@ export default function NewConversation({
               inviteToConverse: "",
               error: isLens
                 ? "This handle does not exist. Please try again."
-                : "No address has been set for this ENS domain. Please try again",
+                : "No address has been set for this ENS domain.",
             });
 
             return;
@@ -145,7 +150,7 @@ export default function NewConversation({
           const address = getAddress(resolvedAddress.toLowerCase());
           const addressIsOnXmtp = await isOnXmtp(address);
           if (searchingForValue.current === value) {
-            if (addressIsOnXmtp) {
+            if (addressIsOnXmtp && false) {
               // Let's find existing conversations with this user
               const conversations = Object.values(
                 conversationsRef.current
@@ -246,30 +251,72 @@ export default function NewConversation({
         backgroundColor: "white",
       }}
     >
-      <StatusBar hidden={false} style="light" />
+      {Platform.OS === "ios" && <StatusBar hidden={false} style="light" />}
       <View style={styles.inputContainer}>
-        <TextInput
-          style={styles.input}
-          placeholder="0x, .eth, .lens …"
-          autoCapitalize="none"
-          autoFocus={false}
-          autoCorrect={false}
-          value={value}
-          ref={(r) => {
-            if (!initialFocus.current) {
-              initialFocus.current = true;
-              if (!value) {
-                setTimeout(() => {
-                  r?.focus();
-                }, 100);
+        {Platform.OS === "ios" && (
+          <TextInput
+            style={styles.input}
+            placeholder="0x, .eth, .lens …"
+            autoCapitalize="none"
+            autoFocus={false}
+            autoCorrect={false}
+            value={value}
+            ref={(r) => {
+              if (!initialFocus.current) {
+                initialFocus.current = true;
+                if (!value) {
+                  setTimeout(() => {
+                    r?.focus();
+                  }, 100);
+                }
               }
-            }
-            inputRef.current = r;
-          }}
-          placeholderTextColor={textSecondaryColor(colorScheme)}
-          onChangeText={(text) => setValue(text.trim())}
-          clearButtonMode="always"
-        />
+              inputRef.current = r;
+            }}
+            placeholderTextColor={textSecondaryColor(colorScheme)}
+            onChangeText={(text) => setValue(text.trim())}
+            clearButtonMode="always"
+          />
+        )}
+        {Platform.OS === "android" && (
+          <MaterialSearchBar
+            placeholder="0x, .eth, .lens …"
+            onChangeText={(query) => setValue(query.trim())}
+            value={value}
+            icon={() => null}
+            mode="bar"
+            autoCapitalize="none"
+            autoFocus={false}
+            autoCorrect={false}
+            ref={(r) => {
+              if (!initialFocus.current) {
+                initialFocus.current = true;
+                if (!value) {
+                  setTimeout(() => {
+                    r?.focus();
+                  }, 100);
+                }
+              }
+              inputRef.current = r as TextInput;
+            }}
+            placeholderTextColor={textSecondaryColor(colorScheme)}
+            selectionColor={textPrimaryColor(colorScheme)}
+            style={{ backgroundColor: "white", marginLeft: -37 }}
+            right={() => {
+              if (!value) return null;
+              return (
+                <MaterialIconButton
+                  icon={({ color }) => (
+                    <Picto picto="xmark" size={30} color={color} />
+                  )}
+                  onPress={() => {
+                    setValue("");
+                  }}
+                />
+              );
+            }}
+            clearIcon={() => null}
+          />
+        )}
       </View>
       <ScrollView
         style={styles.modal}
@@ -298,7 +345,7 @@ export default function NewConversation({
                     style={{ width: 32, height: 32, marginRight: 8 }}
                   />
                 ) : (
-                  <TableViewSymbol symbol="link" />
+                  <TableViewPicto symbol="link" />
                 ),
                 title: "Invite them to Converse",
                 subtitle: "",
@@ -318,7 +365,7 @@ export default function NewConversation({
               <TableView
                 items={status.existingConversations.map((c) => ({
                   id: c.topic,
-                  picto: <TableViewSymbol symbol="arrow.up.right" />,
+                  picto: <TableViewPicto symbol="arrow.up.right" />,
                   title: conversationName(c),
                   subtitle: lastValueInMap(c.messages)?.content || "",
                   action: () => {
@@ -339,7 +386,7 @@ export default function NewConversation({
                       style={{ width: 32, height: 32, marginRight: 8 }}
                     />
                   ) : (
-                    <TableViewSymbol symbol="plus" />
+                    <TableViewPicto symbol="plus" />
                   ),
                   title: "Create a new conversation",
                   action: () => {
@@ -364,7 +411,7 @@ const getStyles = (colorScheme: ColorSchemeName) =>
       backgroundColor: backgroundColor(colorScheme),
     },
     inputContainer: {
-      borderBottomWidth: 0.5,
+      borderBottomWidth: Platform.OS === "android" ? 1 : 0.5,
       borderBottomColor: itemSeparatorColor(colorScheme),
       backgroundColor: backgroundColor(colorScheme),
     },
@@ -377,14 +424,28 @@ const getStyles = (colorScheme: ColorSchemeName) =>
       color: textPrimaryColor(colorScheme),
     },
     message: {
-      paddingTop: 23,
-      fontSize: 17,
+      ...Platform.select({
+        default: {
+          paddingTop: 23,
+          fontSize: 17,
+          textAlign: "center",
+          paddingHorizontal: 18,
+        },
+        android: {
+          fontSize: 14,
+          marginRight: 16,
+          marginLeft: 16,
+          marginTop: 16,
+        },
+      }),
+
       color: textSecondaryColor(colorScheme),
-      textAlign: "center",
-      paddingHorizontal: 18,
     },
     error: {
-      color: textPrimaryColor(colorScheme),
+      color:
+        Platform.OS === "android"
+          ? textSecondaryColor(colorScheme)
+          : textPrimaryColor(colorScheme),
     },
     activity: {
       marginTop: 23,
