@@ -12,10 +12,9 @@ import {
   useColorScheme,
   ViewStyle,
 } from "react-native";
-import { Button as MaterialButton } from "react-native-paper";
 
-import { tableViewItemBackground } from "../utils/colors";
-import Picto from "./Picto/Picto";
+import { tableViewItemBackground } from "../../utils/colors";
+import Picto from "../Picto/Picto";
 
 type Props = {
   title: string;
@@ -50,17 +49,6 @@ export default function Button({
       : variant === "grey"
       ? styles.buttonGreyText
       : styles.buttonTextText;
-  if (variant === "primary" && Platform.OS === "android") {
-    return (
-      <MaterialButton
-        mode="contained"
-        style={[styles.materialButtonPrimary, style]}
-        onPress={onPress}
-      >
-        {title}
-      </MaterialButton>
-    );
-  }
   return (
     <TouchableOpacity style={[buttonStyle, style]} onPress={onPress}>
       {picto && (
@@ -84,9 +72,6 @@ export default function Button({
 
 const getStyles = (colorScheme: ColorSchemeName) =>
   StyleSheet.create({
-    materialButtonPrimary: {
-      marginHorizontal: 32,
-    },
     buttonPrimary: {
       backgroundColor:
         Platform.OS === "ios" ? PlatformColor("systemBlue") : "blue",

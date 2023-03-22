@@ -24,7 +24,7 @@ import {
 } from "react-native";
 import uuid from "react-native-uuid";
 
-import Button from "../components/Button";
+import Button from "../components/Button/Button";
 import InviteBanner from "../components/InviteBanner";
 import Picto from "../components/Picto/Picto";
 import {

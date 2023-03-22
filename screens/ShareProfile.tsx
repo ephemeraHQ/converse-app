@@ -14,7 +14,7 @@ import {
 import QRCode from "react-native-qrcode-svg";
 
 import AndroidBackAction from "../components/AndroidBackAction";
-import ConverseButton from "../components/Button";
+import ConverseButton from "../components/Button/Button";
 import config from "../config";
 import { AppContext } from "../data/store/context";
 import { backgroundColor, textPrimaryColor } from "../utils/colors";
