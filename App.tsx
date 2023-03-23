@@ -10,7 +10,7 @@ import {
   View,
 } from "react-native";
 // eslint-disable-next-line import/order
-import * as SplashScreen from "expo-splash-screen";
+import "./utils/splash";
 import { Provider as PaperProvider } from "react-native-paper";
 import * as Sentry from "sentry-expo";
 
@@ -23,10 +23,6 @@ import {
   MaterialDarkTheme,
   MaterialLightTheme,
 } from "./utils/colors";
-
-SplashScreen.preventAutoHideAsync().catch(() => {
-  /* reloading the app might trigger some race conditions, ignore them */
-});
 
 Sentry.init({
   dsn: config.sentryDSN,
