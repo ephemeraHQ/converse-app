@@ -150,7 +150,7 @@ export default function NewConversation({
           const address = getAddress(resolvedAddress.toLowerCase());
           const addressIsOnXmtp = await isOnXmtp(address);
           if (searchingForValue.current === value) {
-            if (addressIsOnXmtp && false) {
+            if (addressIsOnXmtp) {
               // Let's find existing conversations with this user
               const conversations = Object.values(
                 conversationsRef.current
