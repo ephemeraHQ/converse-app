@@ -23,6 +23,7 @@ import {
   ColorSchemeName,
   useColorScheme,
   Platform,
+  ScrollView,
 } from "react-native";
 
 import { sendMessageToWebview } from "../components/XmtpWebview";
@@ -348,7 +349,10 @@ export default function OnboardingComponent({
   const tableViewPaddingHorizontal = Platform.OS === "android" ? 33 : 0;
 
   return (
-    <View style={styles.onboarding}>
+    <ScrollView
+      alwaysBounceVertical={false}
+      contentContainerStyle={styles.onboardingContent}
+    >
       <Picto
         picto={picto}
         size={Platform.OS === "android" ? 80 : 43}
@@ -457,14 +461,14 @@ export default function OnboardingComponent({
           />
         </>
       )}
-    </View>
+    </ScrollView>
   );
 }
 
 const getStyles = (colorScheme: ColorSchemeName) =>
   StyleSheet.create({
-    onboarding: {
-      flex: 1,
+    onboardingContent: {
+      minHeight: "100%",
       alignItems: "center",
       backgroundColor: backgroundColor(colorScheme),
     },
@@ -523,6 +527,7 @@ const getStyles = (colorScheme: ColorSchemeName) =>
     },
     walletSelectorContainer: {
       width: "100%",
+      marginTop: 50,
       marginBottom: 97,
     },
   });

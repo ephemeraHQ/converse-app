@@ -12,6 +12,17 @@
         "EXPO_ENV": "dev"
       }
     },
+    "simulator": {
+      "developmentClient": true,
+      "distribution": "internal",
+      "channel": "development",
+      "env": {
+        "EXPO_ENV": "dev"
+      },
+      "ios": {
+        "simulator": true
+      }
+    },
     "preview": {
       "distribution": "internal",
       "channel": "preview",

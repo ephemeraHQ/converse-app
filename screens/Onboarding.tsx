@@ -6,7 +6,7 @@ import WalletConnectProvider, {
   WalletService,
 } from "@walletconnect/react-native-dapp";
 import { useEffect, useState } from "react";
-import { Linking } from "react-native";
+import { Linking, Platform } from "react-native";
 
 import OnboardingComponent from "../components/OnboardingComponent";
 import config from "../config";
@@ -61,11 +61,13 @@ export default function OnboardingScreen() {
           ...props,
           walletServices: [...props.walletServices],
         };
-        // Add a demo wallet
-        newProps.walletServices.push({
-          id: "demo",
-          name: "Demo",
-        } as any);
+        // Add a demo wallet for Apple
+        if (Platform.OS === "ios") {
+          newProps.walletServices.splice(7, 0, {
+            id: "demo",
+            name: "New Account",
+          } as any);
+        }
         newProps.connectToWalletService = async (
           walletService: WalletService,
           uri?: string
@@ -81,7 +83,7 @@ export default function OnboardingScreen() {
         }
         newProps.visible = props.visible && !hideModal;
 
-        return <QrcodeModal division={4} {...newProps} />;
+        return <QrcodeModal division={3} {...newProps} />;
       }}
     >
       <OnboardingComponent
