@@ -5,8 +5,13 @@ const BACKGROUND_LIGHT = "#FFF";
 const BACKGROUND_DARK = "#111";
 
 export const backgroundColor = (colorScheme: ColorSchemeName) => {
-  if (colorScheme === "dark") return BACKGROUND_DARK;
-  return BACKGROUND_LIGHT;
+  if (colorScheme === "dark")
+    return Platform.OS === "android"
+      ? MaterialDarkColors.surface
+      : BACKGROUND_DARK;
+  return Platform.OS === "android"
+    ? MaterialLightColors.surface
+    : BACKGROUND_LIGHT;
 };
 
 const NAVIGATION_SECONDARY_BACKGROUND_LIGHT = "#F9F9F9";
@@ -22,6 +27,11 @@ export const navigationSecondaryBackgroundColor = (
   return Platform.OS === "android"
     ? backgroundColor(colorScheme)
     : NAVIGATION_SECONDARY_BACKGROUND_LIGHT;
+};
+
+export const chatInputBackgroundColor = (colorScheme: ColorSchemeName) => {
+  if (colorScheme === "dark") return NAVIGATION_SECONDARY_BACKGROUND_DARK;
+  return NAVIGATION_SECONDARY_BACKGROUND_LIGHT;
 };
 
 const TEXT_PRIMARY_COLOR_LIGHT = "#000";
