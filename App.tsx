@@ -10,7 +10,7 @@ import {
   View,
 } from "react-native";
 // eslint-disable-next-line import/order
-import "./utils/splash";
+import "./utils/splash/splash";
 import { Provider as PaperProvider } from "react-native-paper";
 import * as Sentry from "sentry-expo";
 
