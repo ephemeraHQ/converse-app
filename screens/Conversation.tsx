@@ -40,7 +40,7 @@ import {
   itemSeparatorColor,
   messageBubbleColor,
   myMessageBubbleColor,
-  navigationSecondaryBackgroundColor,
+  chatInputBackgroundColor,
   textPrimaryColor,
   textSecondaryColor,
 } from "../utils/colors";
@@ -457,7 +457,7 @@ const chatTheme = (colorScheme: ColorSchemeName) =>
       background: backgroundColor(colorScheme),
       primary: myMessageBubbleColor(colorScheme),
       secondary: messageBubbleColor(colorScheme),
-      inputBackground: navigationSecondaryBackgroundColor(colorScheme),
+      inputBackground: chatInputBackgroundColor(colorScheme),
       inputText: textPrimaryColor(colorScheme),
     },
     fonts: {
@@ -497,7 +497,7 @@ const chatTheme = (colorScheme: ColorSchemeName) =>
           picto="paperplane"
           color={textPrimaryColor(colorScheme)}
           style={{ width: 24, height: 24 }}
-          size={18}
+          size={Platform.OS === "android" ? 24 : 18}
         />
       ),
     },
