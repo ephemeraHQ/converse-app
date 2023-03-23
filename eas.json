@@ -12,16 +12,6 @@
         "EXPO_ENV": "dev"
       }
     },
-    "android-development-app-bundle": {
-      "distribution": "internal",
-      "channel": "development",
-      "env": {
-        "EXPO_ENV": "dev"
-      },
-      "android": {
-        "buildType": "app-bundle"
-      }
-    },
     "ios-simulator": {
       "developmentClient": true,
       "distribution": "internal",
