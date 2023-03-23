@@ -13,7 +13,6 @@ import {
 } from "@xmtp/xmtp-js/dist/cjs/src/utils";
 import * as Linking from "expo-linking";
 import * as Notifications from "expo-notifications";
-import * as SplashScreen from "expo-splash-screen";
 import React, {
   useCallback,
   useContext,
@@ -47,6 +46,7 @@ import {
   subscribeToNotifications,
 } from "../utils/notifications";
 import { getLoggedXmtpAddress } from "../utils/sharedData/sharedData";
+import { hideSplashScreen } from "../utils/splash/splash";
 import { getXmtpClientFromKeys } from "../utils/xmtp";
 import Conversation from "./Conversation";
 import ConversationList from "./ConversationList";
@@ -292,7 +292,8 @@ export default function Main() {
       if (!splashScreenHidden.current && hydrationDone) {
         splashScreenHidden.current = true;
 
-        SplashScreen.hideAsync();
+        await new Promise((r) => setTimeout(r, 5000));
+        hideSplashScreen();
         dispatch({
           type: AppDispatchTypes.AppHideSplashscreen,
           payload: {
