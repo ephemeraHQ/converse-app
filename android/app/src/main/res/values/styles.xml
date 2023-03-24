@@ -21,8 +21,5 @@
     >@color/bootsplash_background</item>
     <item name="windowSplashScreenAnimatedIcon">@mipmap/bootsplash_logo</item>
     <item name="postSplashScreenTheme">@style/AppTheme</item>
-     <item name="android:windowLightStatusBar">true</item>
-     <!-- Navigation bar will stay translucent on Android < 8.1 -->
-    <item name="android:windowTranslucentNavigation">true</item>
 </style>
 </resources>
