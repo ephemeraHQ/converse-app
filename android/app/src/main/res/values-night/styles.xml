@@ -1,6 +1,5 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
-    <style name="AppTheme" parent="Theme.AppCompat.Light.NoActionBar">
-        <!-- Navigation bar will stay translucent on Android < 8.1 -->
-        <item name="android:windowTranslucentNavigation">false</item>
-      </style>
-  </resources>
+    <style name="BootTheme" parent="Theme.SplashScreen">
+       <item name="android:windowLightStatusBar">false</item>
+  </style>
+</resources>
