@@ -35,6 +35,7 @@ export default {
       foregroundImage: "./assets/adaptive-icon.png",
       backgroundColor: "#FFFFFF",
     },
+    versionCode: appBuildNumbers.expo.android.versionCode,
   },
   web: {
     favicon: "./assets/favicon.png",
