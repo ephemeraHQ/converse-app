@@ -462,105 +462,107 @@ export default function Main() {
   };
 
   return (
-    <ActionSheetProvider>
+    <>
       {statusBar}
-      <NavigationContainer
-        linking={state.app.splashScreenHidden ? (linking as any) : undefined}
-      >
-        <Stack.Navigator
-          initialRouteName="Messages"
-          screenListeners={({ navigation }) => ({
-            state: (e: any) => {
-              // Fix deeplink if already on a screen but changing params
-              const oldRoutes = navigationState.current?.state.routes || [];
-              const newRoutes = e.data?.state?.routes || [];
+      <ActionSheetProvider>
+        <NavigationContainer
+          linking={state.app.splashScreenHidden ? (linking as any) : undefined}
+        >
+          <Stack.Navigator
+            initialRouteName="Messages"
+            screenListeners={({ navigation }) => ({
+              state: (e: any) => {
+                // Fix deeplink if already on a screen but changing params
+                const oldRoutes = navigationState.current?.state.routes || [];
+                const newRoutes = e.data?.state?.routes || [];
 
-              if (oldRoutes.length > 0 && newRoutes.length > 0) {
-                const currentRoute = oldRoutes[oldRoutes.length - 1];
-                const newRoute = newRoutes[newRoutes.length - 1];
-                let shouldReplace = false;
-                if (
-                  currentRoute.key === newRoute.key &&
-                  currentRoute.name === newRoute.name
-                ) {
-                  // We're talking about the same screen!
+                if (oldRoutes.length > 0 && newRoutes.length > 0) {
+                  const currentRoute = oldRoutes[oldRoutes.length - 1];
+                  const newRoute = newRoutes[newRoutes.length - 1];
+                  let shouldReplace = false;
                   if (
-                    newRoute.name === "NewConversation" &&
-                    newRoute.params?.peer &&
-                    currentRoute.params?.peer !== newRoute.params?.peer
+                    currentRoute.key === newRoute.key &&
+                    currentRoute.name === newRoute.name
                   ) {
-                    shouldReplace = true;
-                  } else if (
-                    newRoute.name === "Conversation" &&
-                    newRoute.params?.mainConversationWithPeer &&
-                    newRoute.params?.mainConversationWithPeer !==
-                      currentRoute.params?.mainConversationWithPeer
-                  ) {
-                    shouldReplace = true;
+                    // We're talking about the same screen!
+                    if (
+                      newRoute.name === "NewConversation" &&
+                      newRoute.params?.peer &&
+                      currentRoute.params?.peer !== newRoute.params?.peer
+                    ) {
+                      shouldReplace = true;
+                    } else if (
+                      newRoute.name === "Conversation" &&
+                      newRoute.params?.mainConversationWithPeer &&
+                      newRoute.params?.mainConversationWithPeer !==
+                        currentRoute.params?.mainConversationWithPeer
+                    ) {
+                      shouldReplace = true;
+                    }
+                  }
+                  if (shouldReplace) {
+                    navigation.dispatch(
+                      StackActions.replace(newRoute.name, newRoute.params)
+                    );
                   }
                 }
-                if (shouldReplace) {
-                  navigation.dispatch(
-                    StackActions.replace(newRoute.name, newRoute.params)
-                  );
-                }
-              }
-              navigationState.current = e.data;
-            },
-          })}
-        >
-          <Stack.Group
-            screenOptions={{
-              headerStyle: { backgroundColor: backgroundColor(colorScheme) },
-              headerTitleStyle: headerTitleStyle(colorScheme),
-              headerShadowVisible: Platform.OS !== "android",
-            }}
+                navigationState.current = e.data;
+              },
+            })}
           >
-            <Stack.Screen
-              name="Messages"
-              component={ConversationList}
-              options={{
-                headerTitle: "Messages",
-                headerLargeTitle: true,
-                headerTitleStyle: {
-                  ...headerTitleStyle(colorScheme),
-                  ...Platform.select({
-                    default: {},
-                    android: { fontSize: 22, lineHeight: 26 },
-                  }),
-                },
+            <Stack.Group
+              screenOptions={{
+                headerStyle: { backgroundColor: backgroundColor(colorScheme) },
+                headerTitleStyle: headerTitleStyle(colorScheme),
+                headerShadowVisible: Platform.OS !== "android",
               }}
-            />
-            <Stack.Screen name="Conversation" component={Conversation} />
-            <Stack.Screen
-              name="NewConversation"
-              component={NewConversation}
-              options={{
-                headerTitle: "New conversation",
-                presentation: "modal",
-                animation: "slide_from_right",
-                animationTypeForReplace: "push",
-                headerStyle: {
-                  backgroundColor:
-                    navigationSecondaryBackgroundColor(colorScheme),
-                },
-              }}
-            />
-            <Stack.Screen
-              name="ShareProfile"
-              component={ShareProfileScreen}
-              options={{
-                headerTitle: "Your Converse link",
-                presentation: "modal",
-                headerStyle: {
-                  backgroundColor:
-                    navigationSecondaryBackgroundColor(colorScheme),
-                },
-              }}
-            />
-          </Stack.Group>
-        </Stack.Navigator>
-      </NavigationContainer>
-    </ActionSheetProvider>
+            >
+              <Stack.Screen
+                name="Messages"
+                component={ConversationList}
+                options={{
+                  headerTitle: "Messages",
+                  headerLargeTitle: true,
+                  headerTitleStyle: {
+                    ...headerTitleStyle(colorScheme),
+                    ...Platform.select({
+                      default: {},
+                      android: { fontSize: 22, lineHeight: 26 },
+                    }),
+                  },
+                }}
+              />
+              <Stack.Screen name="Conversation" component={Conversation} />
+              <Stack.Screen
+                name="NewConversation"
+                component={NewConversation}
+                options={{
+                  headerTitle: "New conversation",
+                  presentation: "modal",
+                  animation: "slide_from_right",
+                  animationTypeForReplace: "push",
+                  headerStyle: {
+                    backgroundColor:
+                      navigationSecondaryBackgroundColor(colorScheme),
+                  },
+                }}
+              />
+              <Stack.Screen
+                name="ShareProfile"
+                component={ShareProfileScreen}
+                options={{
+                  headerTitle: "Your Converse link",
+                  presentation: "modal",
+                  headerStyle: {
+                    backgroundColor:
+                      navigationSecondaryBackgroundColor(colorScheme),
+                  },
+                }}
+              />
+            </Stack.Group>
+          </Stack.Navigator>
+        </NavigationContainer>
+      </ActionSheetProvider>
+    </>
   );
 }
