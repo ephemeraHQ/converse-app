@@ -121,7 +121,6 @@ const uploadBundlesToSentry = ({
   --dist ${androidUpdateID} \
   --rewrite \
   dist/bundles/index.android.bundle dist/bundles/${androidMap}`;
-  console.log(sentryAndroidUploadCommand);
   try {
     const result = execSync(sentryAndroidUploadCommand, { cwd: rootPath });
     console.log(result.toString());
@@ -133,9 +132,7 @@ const uploadBundlesToSentry = ({
 
 const go = async () => {
   const { iosUpdateID, androidUpdateID } = await uploadUpdatesToExpo();
-  console.log("update ids", { iosUpdateID, androidUpdateID });
   const { iosMap, androidMap } = copyBundlesAndGetMaps();
-  console.log("maps", { iosMap, androidMap });
   uploadBundlesToSentry({ iosUpdateID, iosMap, androidMap, androidUpdateID });
 };
 
