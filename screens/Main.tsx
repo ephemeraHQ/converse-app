@@ -12,6 +12,7 @@ import {
   //@ts-ignore
 } from "@xmtp/xmtp-js/dist/cjs/src/utils";
 import * as Linking from "expo-linking";
+import * as NavigationBar from "expo-navigation-bar";
 import * as Notifications from "expo-notifications";
 import React, {
   useCallback,
@@ -92,6 +93,12 @@ export default function Main() {
   const colorScheme = useColorScheme();
   const appState = useRef(AppState.currentState);
   const { state, dispatch } = useContext(AppContext);
+
+  useEffect(() => {
+    if (Platform.OS === "android") {
+      NavigationBar.setBackgroundColorAsync(backgroundColor(colorScheme));
+    }
+  }, [colorScheme]);
 
   const navigateToConversation = useCallback(
     async (conversation: XmtpConversation) => {
