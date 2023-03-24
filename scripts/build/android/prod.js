@@ -2,17 +2,12 @@ const { execSync } = require("child_process");
 const fs = require("fs");
 const isClean = require("git-is-clean");
 
-const replaceAppNameInContent = (content) => {
+const replaceAppName = (path) => {
+  const content = fs.readFileSync(path, "utf-8");
   const newContent = content.replace(
     /com\.converse\.dev/g,
     "com.converse.prod"
   );
-  return newContent;
-};
-
-const replaceAppName = (path) => {
-  const content = fs.readFileSync(path, "utf-8");
-  const newContent = replaceAppNameInContent(content);
   fs.writeFileSync(path, newContent);
 };
 
