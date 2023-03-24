@@ -30,7 +30,7 @@ export default function InviteBanner({ onClickInvite, onClickHide }: Props) {
       <View style={styles.inviteBannerLeft}>
         <Text style={styles.inviteTitle}>Invite to Converse</Text>
         <Text style={styles.inviteSubtitle} numberOfLines={1}>
-          Get faster answers
+          Get faster responses
         </Text>
       </View>
       <Button
