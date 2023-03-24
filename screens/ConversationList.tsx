@@ -7,7 +7,6 @@ import React, {
   useState,
 } from "react";
 import {
-  ActivityIndicator,
   ColorSchemeName,
   FlatList,
   Platform,
@@ -19,6 +18,7 @@ import {
 } from "react-native";
 import { FAB } from "react-native-paper";
 
+import ActivityIndicator from "../components/ActivityIndicator/ActivityIndicator";
 import ConversationListItem from "../components/ConversationListItem";
 import DebugButton from "../components/DebugButton";
 import DemoAccountBanner from "../components/DemoAccountBanner";

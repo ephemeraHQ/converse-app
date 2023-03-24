@@ -12,7 +12,6 @@ import React, {
   useRef,
 } from "react";
 import {
-  ActivityIndicator,
   ColorSchemeName,
   Platform,
   StyleSheet,
@@ -24,6 +23,7 @@ import {
 } from "react-native";
 import uuid from "react-native-uuid";
 
+import ActivityIndicator from "../components/ActivityIndicator/ActivityIndicator";
 import Button from "../components/Button/Button";
 import InviteBanner from "../components/InviteBanner";
 import Picto from "../components/Picto/Picto";

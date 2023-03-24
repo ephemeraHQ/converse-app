@@ -10,7 +10,6 @@ import React, {
   useState,
 } from "react";
 import {
-  ActivityIndicator,
   Button,
   ScrollView,
   StyleSheet,
@@ -26,6 +25,7 @@ import {
   IconButton as MaterialIconButton,
 } from "react-native-paper";
 
+import ActivityIndicator from "../components/ActivityIndicator/ActivityIndicator";
 import AndroidBackAction from "../components/AndroidBackAction";
 import Picto from "../components/Picto/Picto";
 import TableView, { TableViewPicto } from "../components/TableView";

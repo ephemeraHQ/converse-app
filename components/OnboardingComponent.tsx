@@ -18,7 +18,6 @@ import {
   View,
   StyleSheet,
   Text,
-  ActivityIndicator,
   AppState,
   ColorSchemeName,
   useColorScheme,
@@ -39,6 +38,7 @@ import {
 import { saveXmtpKeys } from "../utils/keychain";
 import { shortAddress } from "../utils/str";
 import { getXmtpKeysFromSigner, isOnXmtp } from "../utils/xmtp";
+import ActivityIndicator from "./ActivityIndicator/ActivityIndicator";
 import Button from "./Button/Button";
 import Picto from "./Picto/Picto";
 import TableView, { TableViewEmoji, TableViewPicto } from "./TableView";
