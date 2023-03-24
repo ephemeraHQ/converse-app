@@ -2,13 +2,31 @@ const { execSync } = require("child_process");
 const fs = require("fs");
 const isClean = require("git-is-clean");
 
-const replaceAppName = (path) => {
-  const content = fs.readFileSync(path, "utf-8");
+const replaceAppNameInContent = (content) => {
   const newContent = content.replace(
     /com\.converse\.dev/g,
     "com.converse.prod"
   );
+  return newContent;
+};
+
+const replaceAppName = (path) => {
+  const content = fs.readFileSync(path, "utf-8");
+  const newContent = replaceAppNameInContent(content);
   fs.writeFileSync(path, newContent);
+};
+
+const replaceAppVersionInContent = (gradleContent, newVersionCode) => {
+  const lines = gradleContent.split("\n");
+  const newLines = [];
+  lines.forEach((line) => {
+    let newLine = line;
+    if (line.startsWith("        versionCode ")) {
+      newLine = `        versionCode ${newVersionCode}`;
+    }
+    newLines.push(newLine);
+  });
+  return newLines.join("\n");
 };
 
 const go = async () => {
@@ -18,6 +36,7 @@ const go = async () => {
     process.exit(1);
   }
 
+  const APP_JSON = "app.json";
   const APP_GRADLE_PATH = "android/app/build.gradle";
   const APP_MANIFEST_PATH = "android/app/src/main/AndroidManifest.xml";
   const STRINGS_PATH = "android/app/src/main/res/values/strings.xml";
@@ -44,6 +63,17 @@ const go = async () => {
     .replace(/ic_launcher_preview/g, "ic_launcher")
     .replace("dev.getconverse.app", "getconverse.app");
   fs.writeFileSync(APP_MANIFEST_PATH, newAppManifest);
+
+  const appJson = JSON.parse(fs.readFileSync(APP_JSON, "utf-8"));
+  const androidVersionCode = appJson.expo.android.versionCode;
+
+  const appGradleContent = fs.readFileSync(APP_GRADLE_PATH, "utf-8");
+  const newAppNameGradleContent = replaceAppNameInContent(appGradleContent);
+  const newAppVersionGradleContent = replaceAppVersionInContent(
+    newAppNameGradleContent,
+    androidVersionCode
+  );
+  fs.writeFileSync(APP_GRADLE_PATH, newAppVersionGradleContent);
 
   const googleServices = fs.readFileSync(GOOGLE_SERVICES_PATH, "utf-8");
   const newGoogleServices = JSON.parse(googleServices);
