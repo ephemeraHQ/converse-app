@@ -245,3 +245,21 @@ export const headerTitleStyle = (colorScheme: ColorSchemeName) =>
       fontFamily: "Roboto",
     },
   });
+
+const rgbStringToHex = (rgbString: string) => {
+  const splitted = rgbString.split("(")[1].split(")")[0].split(",");
+  const hexValue = splitted
+    .map((x: string) => {
+      x = parseInt(x, 10).toString(16);
+      return x.length === 1 ? "0" + x : x;
+    })
+    .join("");
+  return `#${hexValue}`;
+};
+
+export const setAndroidColors = (colorScheme: ColorSchemeName) => {
+  if (Platform.OS === "android") {
+    const BackgroundColor = require("react-native-background-color");
+    BackgroundColor.setColor(rgbStringToHex(backgroundColor(colorScheme)));
+  }
+};

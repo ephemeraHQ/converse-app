@@ -38,11 +38,11 @@ import {
   backgroundColor,
   headerTitleStyle,
   navigationSecondaryBackgroundColor,
+  setAndroidColors,
 } from "../utils/colors";
 import { ethProvider } from "../utils/eth";
 import { loadXmtpKeys } from "../utils/keychain";
 import { lastValueInMap } from "../utils/map";
-// import { setNavigationBarColor } from "../utils/navigationBar";
 import {
   getNotificationsPermissionStatus,
   subscribeToNotifications,
@@ -95,7 +95,9 @@ export default function Main() {
   const appState = useRef(AppState.currentState);
   const { state, dispatch } = useContext(AppContext);
 
-  // setNavigationBarColor(colorScheme);
+  useEffect(() => {
+    setAndroidColors(colorScheme);
+  }, [colorScheme]);
 
   const navigateToConversation = useCallback(
     async (conversation: XmtpConversation) => {
