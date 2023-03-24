@@ -292,7 +292,6 @@ export default function Main() {
       if (!splashScreenHidden.current && hydrationDone) {
         splashScreenHidden.current = true;
 
-        await new Promise((r) => setTimeout(r, 5000));
         hideSplashScreen();
         dispatch({
           type: AppDispatchTypes.AppHideSplashscreen,
