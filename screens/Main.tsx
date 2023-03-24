@@ -12,8 +12,8 @@ import {
   //@ts-ignore
 } from "@xmtp/xmtp-js/dist/cjs/src/utils";
 import * as Linking from "expo-linking";
-import * as NavigationBar from "expo-navigation-bar";
 import * as Notifications from "expo-notifications";
+import { StatusBar } from "expo-status-bar";
 import React, {
   useCallback,
   useContext,
@@ -42,6 +42,7 @@ import {
 import { ethProvider } from "../utils/eth";
 import { loadXmtpKeys } from "../utils/keychain";
 import { lastValueInMap } from "../utils/map";
+// import { setNavigationBarColor } from "../utils/navigationBar";
 import {
   getNotificationsPermissionStatus,
   subscribeToNotifications,
@@ -94,11 +95,7 @@ export default function Main() {
   const appState = useRef(AppState.currentState);
   const { state, dispatch } = useContext(AppContext);
 
-  useEffect(() => {
-    if (Platform.OS === "android") {
-      NavigationBar.setBackgroundColorAsync(backgroundColor(colorScheme));
-    }
-  }, [colorScheme]);
+  // setNavigationBarColor(colorScheme);
 
   const navigateToConversation = useCallback(
     async (conversation: XmtpConversation) => {
@@ -396,14 +393,33 @@ export default function Main() {
 
   if (!state.app.splashScreenHidden) return null;
 
-  if (!state.xmtp.address) return <OnboardingScreen />;
+  const statusBar = (
+    <StatusBar
+      hidden={false}
+      backgroundColor={backgroundColor(colorScheme)}
+      style={colorScheme === "dark" ? "light" : "dark"}
+    />
+  );
+
+  if (!state.xmtp.address)
+    return (
+      <>
+        {statusBar}
+        <OnboardingScreen />
+      </>
+    );
 
   if (
     state.notifications.showNotificationsScreen &&
     (state.notifications.status === "undetermined" ||
       (state.notifications.status === "denied" && Platform.OS === "android"))
   ) {
-    return <NotificationsScreen />;
+    return (
+      <>
+        {statusBar}
+        <NotificationsScreen />
+      </>
+    );
   }
 
   const linking = {
@@ -447,6 +463,7 @@ export default function Main() {
 
   return (
     <ActionSheetProvider>
+      {statusBar}
       <NavigationContainer
         linking={state.app.splashScreenHidden ? (linking as any) : undefined}
       >

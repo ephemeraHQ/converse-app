@@ -1,6 +1,5 @@
 import "reflect-metadata";
 import "./polyfills";
-import { StatusBar } from "expo-status-bar";
 import React from "react";
 import {
   ColorSchemeName,
@@ -48,11 +47,6 @@ export default function App() {
         theme={colorScheme === "light" ? MaterialLightTheme : MaterialDarkTheme}
       >
         <View style={styles.safe}>
-          <StatusBar
-            hidden={false}
-            backgroundColor={backgroundColor(colorScheme)}
-            style={colorScheme === "dark" ? "light" : "dark"}
-          />
           <XmtpWebview />
           <Main />
         </View>
