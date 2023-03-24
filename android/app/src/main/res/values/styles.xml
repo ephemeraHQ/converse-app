@@ -5,6 +5,10 @@
     <item name="android:editTextBackground">@drawable/rn_edit_text_material</item>
     <item name="colorPrimary">@color/colorPrimary</item>
     <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+    <item name="android:windowBackground">@color/bootsplash_background</item>
+    <item name="android:colorBackground">@color/bootsplash_background</item>
+    <!-- Navigation bar will stay translucent on Android < 8.1 -->
+    <item name="android:windowTranslucentNavigation">true</item>
   </style>
   <style name="ResetEditText" parent="@android:style/Widget.EditText">
     <item name="android:padding">0dp</item>
@@ -15,11 +19,7 @@
     <item name="windowSplashScreenBackground">@color/bootsplash_background</item>
     <item name="windowSplashScreenAnimatedIcon">@mipmap/bootsplash_logo</item>
     <item name="postSplashScreenTheme">@style/AppTheme</item>
-
-    <!-- Status bar initial style: true = dark-content, false = light-content -->
-    <item name="android:windowLightStatusBar">true</item>
-
-    <!-- Navigation bar will stay translucent on Android < 8.1 -->
-    <item name="android:windowTranslucentNavigation">true</item>
+     <!-- Status bar initial style: true = dark-content, false = light-content -->
+     <item name="android:windowLightStatusBar">true</item>
 </style>
 </resources>

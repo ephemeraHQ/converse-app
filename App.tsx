@@ -41,6 +41,7 @@ if (Platform.OS === "android") {
 export default function App() {
   const colorScheme = useColorScheme();
   const styles = getStyles(colorScheme);
+
   return (
     <AppProvider>
       <PaperProvider
@@ -49,6 +50,7 @@ export default function App() {
         <View style={styles.safe}>
           <StatusBar
             hidden={false}
+            backgroundColor={backgroundColor(colorScheme)}
             style={colorScheme === "dark" ? "light" : "dark"}
           />
           <XmtpWebview />

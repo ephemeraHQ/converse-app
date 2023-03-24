@@ -300,7 +300,10 @@ export default function NewConversation({
             }}
             placeholderTextColor={textSecondaryColor(colorScheme)}
             selectionColor={textPrimaryColor(colorScheme)}
-            style={{ backgroundColor: "white", marginLeft: -37 }}
+            style={{
+              backgroundColor: backgroundColor(colorScheme),
+              marginLeft: -37,
+            }}
             right={() => {
               if (!value) return null;
               return (
