@@ -1,4 +1,3 @@
 <resources>
-  <color name="splashscreen_background">#000000</color>
-  <color name="bootsplash_background">#000000</color>
+  <color name="bootsplash_background">#201A19</color>
 </resources>
