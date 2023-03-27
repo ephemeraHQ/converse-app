@@ -141,10 +141,18 @@ const Conversation = ({
     state.xmtp.conversations,
   ]);
 
+  const textInputRef = useRef<TextInput>();
+
   const messageToPrefill =
     route.params.message || conversation?.currentMessage || "";
   const [messageValue, setMessageValue] = useState(messageToPrefill);
-  const focusMessageInput = !!route.params.focus || !!messageToPrefill;
+  useEffect(() => {
+    if (!!route.params.focus || !!messageToPrefill) {
+      setTimeout(() => {
+        textInputRef.current?.focus();
+      }, 150);
+    }
+  }, [messageToPrefill, route.params.focus]);
   const { showActionSheetWithOptions } = useActionSheet();
   const styles = getStyles(colorScheme);
   const [showInvite, setShowInvite] = useState({
@@ -334,8 +342,6 @@ const Conversation = ({
     [conversation, dispatch, state.xmtp.address]
   );
 
-  const textInputRef = useRef<TextInput>();
-
   const onLeaveScreen = useCallback(() => {
     if (!conversation) return;
     dispatch({
@@ -388,7 +394,6 @@ const Conversation = ({
         usePreviewData={false}
         textInputProps={{
           defaultValue: messageToPrefill,
-          autoFocus: focusMessageInput,
           value: messageValue,
           onChangeText: (text) => {
             messageContent.current = text;
