@@ -74,6 +74,7 @@ export default function OnboardingComponent({
       137: "https://matic-mainnet.chainstacklabs.com", // Polygon
       56: "https://endpoints.omniatech.io/v1/bsc/mainnet/public", // BSC
       10: "https://endpoints.omniatech.io/v1/op/mainnet/public", // Optimism
+      42161: "https://arb1.arbitrum.io/rpc", // Arbitrum
     },
   });
 
