@@ -14,7 +14,7 @@ import {
   saveXmtpConversations,
   saveXmtpKeys,
 } from "../utils/keychain";
-import { lastValueInMap } from "../utils/map";
+import { getLastXMTPSyncedAt, saveLastXMTPSyncedAt } from "../utils/mmkv";
 import { subscribeToNotifications } from "../utils/notifications";
 import { sentryTrackMessage } from "../utils/sentry";
 
@@ -93,15 +93,11 @@ export default function XmtpWebview() {
     });
     // Load notifications
     await loadSavedNotificationMessagesToContext(dispatch);
-    const lastTimestampByConversation: { [topic: string]: number } = {};
-    for (const topic in state.xmtp.conversations) {
-      const conversation = state.xmtp.conversations[topic];
-      lastTimestampByConversation[topic] =
-        conversation.messages?.size > 0
-          ? lastValueInMap(conversation.messages)?.sent || 0
-          : 0;
-    }
-    sendMessageToWebview("RELOAD", lastTimestampByConversation);
+    const knownTopics = Object.keys(state.xmtp.conversations);
+    sendMessageToWebview("RELOAD", {
+      lastSyncedAt: getLastXMTPSyncedAt(),
+      knownTopics,
+    });
   }, [dispatch, state.xmtp.conversations]);
 
   useEffect(() => {
@@ -138,18 +134,11 @@ export default function XmtpWebview() {
       // Let's launch the "initial load"
       // of messages starting with last
       // timestamp for each convo
-      const lastTimestampByConversation: { [topic: string]: number } = {};
-      for (const topic in state.xmtp.conversations) {
-        const conversation = state.xmtp.conversations[topic];
-        lastTimestampByConversation[topic] =
-          conversation.messages?.size > 0
-            ? lastValueInMap(conversation.messages)?.sent || 0
-            : 0;
-      }
-      sendMessageToWebview(
-        "LOAD_CONVERSATIONS_AND_MESSAGES",
-        lastTimestampByConversation
-      );
+      const knownTopics = Object.keys(state.xmtp.conversations);
+      sendMessageToWebview("LOAD_CONVERSATIONS_AND_MESSAGES", {
+        lastSyncedAt: getLastXMTPSyncedAt(),
+        knownTopics,
+      });
       launchedInitialLoad.current = true;
     }
   }, [state.xmtp.webviewConnected, state.xmtp.conversations]);
@@ -201,7 +190,13 @@ export default function XmtpWebview() {
           break;
         }
         case "XMTP_MESSAGES":
-          saveMessages(data.messages, data.topic, dispatch);
+          data.forEach((messagesFromConversation: any) => {
+            saveMessages(
+              messagesFromConversation.messages,
+              messagesFromConversation.topic,
+              dispatch
+            );
+          });
           break;
         case "XMTP_ADDRESS":
           dispatch({
@@ -221,11 +216,13 @@ export default function XmtpWebview() {
           web3Connected.current = true;
           break;
         case "XMTP_INITIAL_LOAD":
+          saveLastXMTPSyncedAt(data.newLastSyncedAt);
           dispatch({
             type: XmtpDispatchTypes.XmtpInitialLoad,
           });
           break;
         case "XMTP_RELOAD_DONE": {
+          saveLastXMTPSyncedAt(data.newLastSyncedAt);
           dispatch({
             type: XmtpDispatchTypes.XmtpLoading,
             payload: { loading: false },
