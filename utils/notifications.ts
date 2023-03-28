@@ -35,7 +35,7 @@ export const subscribeToNotifications = async (
 
 export const subscribeToNewTopic = async (topic: string): Promise<void> => {
   await Notifications.setNotificationChannelAsync("default", {
-    name: "default",
+    name: "Converse Notifications",
     importance: Notifications.AndroidImportance.MAX,
     showBadge: false,
   });
@@ -69,7 +69,7 @@ export const getNotificationsPermissionStatus = async (): Promise<
 > => {
   if (Platform.OS === "android") {
     await Notifications.setNotificationChannelAsync("default", {
-      name: "default",
+      name: "Converse Notifications",
       importance: Notifications.AndroidImportance.MAX,
       showBadge: false,
     });
@@ -83,7 +83,7 @@ export const requestPushNotificationsPermissions = async (): Promise<
 > => {
   if (Platform.OS === "android") {
     await Notifications.setNotificationChannelAsync("default", {
-      name: "default",
+      name: "Converse Notifications",
       importance: Notifications.AndroidImportance.MAX,
       showBadge: false,
     });
