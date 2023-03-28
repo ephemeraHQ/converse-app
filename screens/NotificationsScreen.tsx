@@ -42,6 +42,11 @@ export default function NotificationsScreen() {
             // Android 13 always show denied first but sometimes
             // it will still show the popup. If not, go to Settings!
             Linking.openSettings();
+          } else {
+            dispatch({
+              type: NotificationsDispatchTypes.NotificationsShowScreen,
+              payload: { show: false },
+            });
           }
           dispatch({
             type: NotificationsDispatchTypes.NotificationsStatus,
