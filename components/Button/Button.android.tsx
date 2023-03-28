@@ -31,14 +31,14 @@ export default function Button({
 }: Props) {
   return (
     <View
-      style={variant === "primary" ? styles.buttonPrimaryContainer : undefined}
+      style={[
+        variant === "primary" ? styles.buttonPrimaryContainer : undefined,
+        style,
+      ]}
     >
       <MaterialButton
         mode={variant === "primary" ? "contained" : "text"}
-        style={[
-          variant === "primary" ? styles.buttonPrimary : undefined,
-          style,
-        ]}
+        style={variant === "primary" ? styles.buttonPrimary : undefined}
         onPress={onPress}
       >
         <Text style={textStyle}>{title}</Text>

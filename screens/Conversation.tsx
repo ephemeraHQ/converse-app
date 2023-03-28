@@ -184,7 +184,7 @@ const Conversation = ({
 
   const inviteToConverse = useCallback(() => {
     const inviteText =
-      "I am using Converse, the fastest XMTP client, as my web3 messaging app. You can download the app here: https://testflight.apple.com/join/w4exeswh";
+      "I am using Converse, the fastest XMTP client, as my web3 messaging app. You can download the app here: https://getconverse.app/";
     messageContent.current = inviteText;
     setMessageValue(inviteText);
     textInputRef.current?.focus();

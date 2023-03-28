@@ -5,6 +5,7 @@ import React, {
   Text,
   ColorSchemeName,
   TouchableOpacity,
+  Platform,
 } from "react-native";
 
 import {
@@ -40,7 +41,16 @@ export default function InviteBanner({ onClickInvite, onClickHide }: Props) {
         onPress={onClickInvite}
       />
       <TouchableOpacity activeOpacity={0.6} onPress={onClickHide}>
-        <Picto picto="xmark" color="#8E8E93" size={13} style={styles.xmark} />
+        <Picto
+          picto="xmark"
+          color={
+            Platform.OS === "android"
+              ? textSecondaryColor(colorScheme)
+              : "#8E8E93"
+          }
+          size={Platform.OS === "android" ? 24 : 13}
+          style={styles.xmark}
+        />
       </TouchableOpacity>
     </View>
   );
@@ -49,12 +59,21 @@ export default function InviteBanner({ onClickInvite, onClickHide }: Props) {
 const getStyles = (colorScheme: ColorSchemeName) =>
   StyleSheet.create({
     inviteBanner: {
-      height: 63,
-      borderBottomWidth: 0.5,
-      borderBottomColor: itemSeparatorColor(colorScheme),
+      ...Platform.select({
+        default: {
+          height: 63,
+          borderBottomWidth: 0.5,
+          paddingLeft: 30,
+          paddingRight: 25,
+          borderBottomColor: itemSeparatorColor(colorScheme),
+        },
+        android: {
+          height: 72,
+          paddingLeft: 16,
+          paddingRight: 14,
+        },
+      }),
       backgroundColor: backgroundColor(colorScheme),
-      paddingLeft: 30,
-      paddingRight: 25,
       alignItems: "center",
       flexDirection: "row",
     },
@@ -63,12 +82,17 @@ const getStyles = (colorScheme: ColorSchemeName) =>
       marginRight: 10,
     },
     inviteTitle: {
-      fontSize: 17,
-      fontWeight: "600",
+      ...Platform.select({
+        default: { fontSize: 17, fontWeight: "600" },
+        android: { fontSize: 16, fontWeight: "400" },
+      }),
       color: textPrimaryColor(colorScheme),
     },
     inviteSubtitle: {
-      fontSize: 15,
+      ...Platform.select({
+        default: { fontSize: 15 },
+        android: { fontSize: 14 },
+      }),
       color: textSecondaryColor(colorScheme),
       fontWeight: "400",
     },
@@ -76,8 +100,10 @@ const getStyles = (colorScheme: ColorSchemeName) =>
       marginLeft: "auto",
     },
     xmark: {
-      width: 13,
-      height: 13,
+      ...Platform.select({
+        default: { width: 13, height: 13 },
+        android: { top: 1 },
+      }),
       marginLeft: 12,
     },
   });
