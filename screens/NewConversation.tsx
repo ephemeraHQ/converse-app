@@ -282,7 +282,14 @@ export default function NewConversation({
             placeholder="0x, .eth, .lens …"
             onChangeText={(query) => setValue(query.trim())}
             value={value}
-            icon={() => null}
+            icon={({ color }) => (
+              <Picto
+                picto="search"
+                size={24}
+                color={color}
+                style={{ top: 1 }}
+              />
+            )}
             mode="bar"
             autoCapitalize="none"
             autoFocus={false}
@@ -302,14 +309,13 @@ export default function NewConversation({
             selectionColor={textPrimaryColor(colorScheme)}
             style={{
               backgroundColor: backgroundColor(colorScheme),
-              marginLeft: -37,
             }}
             right={() => {
               if (!value) return null;
               return (
                 <MaterialIconButton
                   icon={({ color }) => (
-                    <Picto picto="xmark" size={30} color={color} />
+                    <Picto picto="xmark" size={24} color={color} />
                   )}
                   onPress={() => {
                     setValue("");

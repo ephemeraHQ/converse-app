@@ -80,11 +80,11 @@ function NewConversationButton({
               picto="square.and.pencil"
               weight="medium"
               color={props.color}
-              size={Platform.OS === "android" ? 24 : 16}
-              style={{ width: 32, height: 32 }}
+              size={24}
             />
           </>
         )}
+        animated={false}
         style={{
           position: "absolute",
           margin: 0,
