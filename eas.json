@@ -33,6 +33,11 @@
     "production": {
       "channel": "production",
       "autoIncrement": true
+    },
+    "production-internal": {
+      "distribution": "internal",
+      "channel": "production",
+      "autoIncrement": true
     }
   },
   "submit": {
