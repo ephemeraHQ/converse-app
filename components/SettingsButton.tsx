@@ -70,6 +70,14 @@ export default function SettingsButton() {
           payload: { isDemoAccount: false },
         });
         AsyncStorage.clear();
+        setTimeout(() => {
+          dispatch({
+            type: NotificationsDispatchTypes.NotificationsShowScreen,
+            payload: {
+              show: true,
+            },
+          });
+        }, 500);
       },
       Cancel: () => {},
     };
