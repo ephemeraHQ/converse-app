@@ -3,7 +3,6 @@ import "./polyfills";
 import React from "react";
 import {
   ColorSchemeName,
-  Platform,
   StyleSheet,
   useColorScheme,
   View,
@@ -29,13 +28,6 @@ Sentry.init({
   debug: config.env === "dev",
   environment: config.env,
 });
-
-if (Platform.OS === "android") {
-  const {
-    setupAndroidBackgroundNotificationHandler,
-  } = require("./utils/backgroundNotifications/handleNotificationAndroid");
-  setupAndroidBackgroundNotificationHandler();
-}
 
 export default function App() {
   const colorScheme = useColorScheme();
