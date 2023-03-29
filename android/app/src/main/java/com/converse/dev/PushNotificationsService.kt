@@ -33,7 +33,7 @@ import org.json.JSONObject
 import org.xmtp.android.library.*
 import org.xmtp.android.library.messages.Envelope
 import org.xmtp.android.library.messages.EnvelopeBuilder
-import org.xmtp.proto.message.contents.PrivateKeyOuterClass
+import org.xmtp.android.library.messages.PrivateKeyBundleV1
 import java.security.MessageDigest
 import java.util.*
 
@@ -87,7 +87,7 @@ class PushNotificationsService : FirebaseMessagingService() {
         try {
             initXmtpClient()
         } catch (e: java.lang.Exception) {
-            Log.d(TAG, "Could not init XMTP client")
+            Log.d(TAG, "Could not init XMTP client: $e")
         }
     }
 
@@ -169,12 +169,12 @@ class PushNotificationsService : FirebaseMessagingService() {
         val decodedMessage = conversation.decode(envelope)
 
         saveMessageToStorage(envelope.contentTopic, decodedMessage)
-
         if (decodedMessage.senderAddress == xmtpClient.address) return
         var title = getSavedConversationTitle(envelope.contentTopic)
         if (title == "") {
             title = shortAddress(decodedMessage.senderAddress)
         }
+
         showNotification(envelope.contentTopic, title, decodedMessage.body)
     }
 
@@ -192,17 +192,6 @@ class PushNotificationsService : FirebaseMessagingService() {
         val newSavedMessagesString = Klaxon().toJsonString(currentSavedMessages)
         setMMKV("saved-notifications-messages", newSavedMessagesString)
     }
-
-
-    private fun getAndroidByteArrayFromJSByteArray(jsByteArray: ByteArray): ByteArray {
-        // Exported byte array from JS does not have the same format as Kotlin
-        // 3 leading bytes to remove, then convert unsigned byte array to signed byte array
-        val asList = jsByteArray.toList()
-        val transformedList =
-            asList.map { it -> if (it > 127) it - 256 else it }?.slice(3 until asList.size) as List<Byte>
-        return transformedList.toByteArray()
-    }
-
 
     private fun getKeychainValue(key: String) = runBlocking {
         val argumentsMap = mutableMapOf<String, Any>()
@@ -267,19 +256,25 @@ class PushNotificationsService : FirebaseMessagingService() {
         notificationManager.notify(notificationId, notificationBuilder.build())
     }
 
-    private fun initXmtpClient() {
-        val xmtpKeyString = getKeychainValue("XMTP_KEYS")
-        val xmtpKey = Klaxon().parseArray<Int>(xmtpKeyString) as List<Byte>
+    private fun getKeyByteArrayFromBase64(base64String: String): ByteArray {
+        // Exported byte array from JS does not have the same format as Kotlin
+        // 3 leading bytes to remove...
+        val decodedKeys = Base64.decode(base64String, Base64.NO_WRAP)
+        var newKeys = decodedKeys.slice(3 until decodedKeys.size)
+        return newKeys.toByteArray()
+    }
 
-        val xmtpKeyByteArray = getAndroidByteArrayFromJSByteArray(xmtpKey.toByteArray())
+
+    private fun initXmtpClient() {
+        val xmtpBase64KeyString = getKeychainValue("XMTP_BASE64_KEY")
+        val keys = PrivateKeyBundleV1.parseFrom(getKeyByteArrayFromBase64(xmtpBase64KeyString))
 
         val xmtpEnvString = getMMKV("xmtp-env")
         val xmtpEnv =
             if (xmtpEnvString == "production") XMTPEnvironment.PRODUCTION else XMTPEnvironment.DEV
 
         val options = ClientOptions(api = ClientOptions.Api(env = xmtpEnv, isSecure = true))
-        val keys =
-            PrivateKeyOuterClass.PrivateKeyBundleV1.parseFrom(xmtpKeyByteArray)
+
         xmtpClient = Client().buildFrom(bundle = keys, options = options)
     }
 
