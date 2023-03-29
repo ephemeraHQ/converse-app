@@ -7,6 +7,12 @@ export const saveXmtpKeys = async (keys: string) => {
   await SecureStore.setItemAsync("XMTP_KEYS", keys, {
     keychainService: config.bundleId,
   });
+  if (keys) {
+    const base64Key = Buffer.from(JSON.parse(keys)).toString("base64");
+    await SecureStore.setItemAsync("XMTP_BASE64_KEY", base64Key, {
+      keychainService: config.bundleId,
+    });
+  }
 };
 
 export const saveXmtpConversations = async (
@@ -59,6 +65,9 @@ export const loadXmtpConversation = async (topic: string) => {
 export const deleteXmtpKeys = async () => {
   await SecureStore.deleteItemAsync("XMTP_KEYS");
   await SecureStore.deleteItemAsync("XMTP_KEYS", {
+    keychainService: config.bundleId,
+  });
+  await SecureStore.deleteItemAsync("XMTP_BASE64_KEY", {
     keychainService: config.bundleId,
   });
 };
