@@ -93,10 +93,10 @@ class PushNotificationsService : FirebaseMessagingService() {
 
     override fun onMessageReceived(remoteMessage: RemoteMessage) {
         if (applicationInForeground()) {
-            Log.d(TAG, "[AndroidNotificationService] App is in foreground, dropping")
+            Log.d(TAG, "App is in foreground, dropping")
             return
         }
-        Log.d(TAG, "[AndroidNotificationService] Received a notification")
+        Log.d(TAG, "Received a notification")
 
         // Check if message contains a data payload.
         if (remoteMessage.data.isEmpty()) return
@@ -207,7 +207,6 @@ class PushNotificationsService : FirebaseMessagingService() {
     private fun getKeychainValue(key: String) = runBlocking {
         val argumentsMap = mutableMapOf<String, Any>()
         argumentsMap["keychainService"] = packageName
-        Log.d(TAG, "PACKAGE NAME IS $packageName")
 
         val arguments = MapArguments(argumentsMap)
 
@@ -303,7 +302,6 @@ class PushNotificationsService : FirebaseMessagingService() {
             val topicBytes = topic.toByteArray(Charsets.UTF_8)
             val digest = MessageDigest.getInstance("SHA-256").digest(topicBytes)
             val encodedTopic = digest.joinToString("") { "%02x".format(it) }
-            Log.d(TAG, "SAving $encodedTopic")
             setKeychainValue("XMTP_CONVERSATION_$encodedTopic", Klaxon().toJsonString(conversationV2Data))
         } catch (e: Exception) {
             Log.d(TAG, "Could not persist conversation: $e")
@@ -312,7 +310,6 @@ class PushNotificationsService : FirebaseMessagingService() {
 
     private fun getSavedConversationTitle(topic: String): String {
         val savedConversationDict = getMMKV("conversation-$topic")
-        Log.d(TAG, "GOT THE SAVED CONVERSATION: $savedConversationDict")
         if (savedConversationDict == null) return ""
         val parsedConversationDict = Klaxon().parse<ConversationDictData>(savedConversationDict)
         return ((parsedConversationDict?.lensHandle ?: parsedConversationDict?.ensName) ?: parsedConversationDict?.shortAddress) ?: ""
