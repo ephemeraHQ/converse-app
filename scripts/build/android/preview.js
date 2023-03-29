@@ -30,12 +30,15 @@ const go = async () => {
     "android/app/src/main/java/com/converse/dev/MainActivity.java";
   const MAIN_APPLICATION_PATH =
     "android/app/src/main/java/com/converse/dev/MainApplication.java";
+  const NOTIFICATION_SERVICE_PATH =
+    "android/app/src/main/java/com/converse/dev/PushNotificationsService.kt";
 
   replaceAppName(APP_GRADLE_PATH);
   replaceAppName(DEBUG_FLIPPER_PATH);
   replaceAppName(MAIN_FLIPPER_PATH);
   replaceAppName(MAIN_ACTIVITY_PATH);
   replaceAppName(MAIN_APPLICATION_PATH);
+  replaceAppName(NOTIFICATION_SERVICE_PATH);
 
   const appManifest = fs.readFileSync(APP_MANIFEST_PATH, "utf-8");
   const newAppManifest = appManifest
