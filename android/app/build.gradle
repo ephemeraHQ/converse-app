@@ -210,6 +210,8 @@ dependencies {
         exclude group: 'org.bouncycastle', module: 'bcprov-jdk15on'
     }
     implementation 'com.google.crypto.tink:tink-android:1.7.0'
+    implementation 'com.android.volley:volley:1.2.1'
+
 
     def isGifEnabled = (findProperty('expo.gif.enabled') ?: "") == "true";
     def isWebpEnabled = (findProperty('expo.webp.enabled') ?: "") == "true";
