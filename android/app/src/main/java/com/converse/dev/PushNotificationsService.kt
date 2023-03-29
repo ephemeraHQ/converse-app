@@ -222,7 +222,7 @@ class PushNotificationsService : FirebaseMessagingService() {
 
     private fun setKeychainValue(key: String, value: String) = runBlocking {
         val argumentsMap = mutableMapOf<String, Any>()
-        argumentsMap["keychainService"] = "com.converse.dev"
+        argumentsMap["keychainService"] = packageName
 
         val arguments = MapArguments(argumentsMap)
 
