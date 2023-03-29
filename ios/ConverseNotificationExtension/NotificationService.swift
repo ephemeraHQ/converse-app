@@ -212,7 +212,7 @@ func handleNewConversation(xmtpClient: XMTP.Client, envelope: XMTP.Envelope) -> 
         formatter.formatOptions.insert(.withFractionalSeconds)
         let createdAt = formatter.string(from: conversation.createdAt)
         
-        let conversationDict = ["version": "v2", "peerAddress": conversationV1.peerAddress, "createdAt": createdAt]
+        let conversationDict = ["version": "v1", "peerAddress": conversationV1.peerAddress, "createdAt": createdAt]
         var addresses = [conversationV1.peerAddress, xmtpClient.address]
         addresses.sort()
         let conversationV1Topic = "/xmtp/0/dm-\(addresses[0])-\(addresses[1])/proto"

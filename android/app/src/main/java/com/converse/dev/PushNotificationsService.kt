@@ -8,6 +8,9 @@ import android.content.Intent
 import android.util.Log
 import android.view.View
 import androidx.core.app.NotificationCompat
+import com.android.volley.Request
+import com.android.volley.toolbox.JsonObjectRequest
+import com.android.volley.toolbox.Volley
 import com.beust.klaxon.Klaxon
 import com.facebook.react.bridge.PromiseImpl
 import com.facebook.react.bridge.ReactApplicationContext
@@ -26,21 +29,24 @@ import expo.modules.securestore.SecureStoreModule
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
-import org.xmtp.android.library.Client
-import org.xmtp.android.library.ClientOptions
-import org.xmtp.android.library.Conversation
-import org.xmtp.android.library.XMTPEnvironment
+import org.json.JSONObject
+import org.xmtp.android.library.*
+import org.xmtp.android.library.messages.Envelope
 import org.xmtp.android.library.messages.EnvelopeBuilder
 import org.xmtp.proto.message.contents.PrivateKeyOuterClass
 import java.security.MessageDigest
 import java.util.*
 
+
 class NotificationData(val message: String, val timestampNs: String, val contentTopic: String)
 class ConversationDictData(val shortAddress: String? = null, val lensHandle: String? = null, val ensName: String? = null)
+class SavedNotificationMessage(val topic: String, val content: String, val senderAddress: String, val sent: Long, val id: String)
+class ConversationContext(val conversationId: String, val metadata: Map<String, Any>)
+class ConversationV2Data(val version: String = "v2", val topic: String, val peerAddress: String, val createdAt: String, val context: ConversationContext?, val keyMaterial: String)
 
-fun truncatedAddress(input: String): String {
+fun shortAddress(input: String): String {
     if (input.length > 6) {
-        val start = 6
+        val start = 4
         val end = input.lastIndex - 3
         return input.replaceRange(start, end, "...")
     }
@@ -58,6 +64,13 @@ internal class PromiseWrapper (private val mPromise: com.facebook.react.bridge.P
     }
 }
 
+fun isInviteTopic(topic: String): Boolean {
+    return topic.startsWith("/xmtp/0/invite-")
+}
+
+fun isIntroTopic(topic: String): Boolean {
+    return topic.startsWith("/xmtp/0/intro-")
+}
 
 class PushNotificationsService : FirebaseMessagingService() {
     companion object {
@@ -96,15 +109,91 @@ class PushNotificationsService : FirebaseMessagingService() {
         if (notificationData === null) return
         Log.d(TAG, "Decoded notification data: topic is ${notificationData.contentTopic}")
 
-        val conversation = getPersistedConversation(notificationData.contentTopic)
-        if (conversation === null) return
-
         val encryptedMessageData = Base64.decode(notificationData.message, Base64.NO_WRAP)
         val envelope = EnvelopeBuilder.buildFromString(notificationData.contentTopic, Date(notificationData.timestampNs.toLong()/1000000), encryptedMessageData)
+
+        if (isIntroTopic(notificationData.contentTopic)) {
+            return
+        } else if (isInviteTopic(notificationData.contentTopic)) {
+            handleNewConversationV2Notification(envelope)
+        } else {
+            handleNewMessageNotification(envelope)
+        }
+
+    }
+
+    private fun handleNewConversationV2Notification(envelope: Envelope) {
+        val conversation = xmtpClient.conversations.fromInvite((envelope))
+        val conversationV2Data = ConversationV2Data(
+            "v2",
+            conversation.topic,
+            conversation.peerAddress,
+            conversation.createdAt.toString(),
+            null,
+            Base64.encode(conversation.keyMaterial)
+        )
+        val apiURI = getMMKV("api-uri")
+        val expoPushToken = getKeychainValue("EXPO_PUSH_TOKEN")
+        if (apiURI != null) {
+            subscribeToTopic(apiURI, expoPushToken, conversation.topic)
+        }
+        persistNewConversation(conversation.topic, conversationV2Data)
+        showNotification(conversation.topic, shortAddress(conversation.peerAddress), "New Conversation")
+    }
+
+    private fun subscribeToTopic(apiURI: String, expoPushToken: String, topic: String) {
+        val appendTopicURI = "$apiURI/api/subscribe/append"
+        val params: MutableMap<String?, String?> = HashMap()
+        params["topic"] = topic
+        params["expoToken"] = expoPushToken
+
+        val parameters = JSONObject(params as Map<*, *>?)
+
+        val jsonRequest = JsonObjectRequest(Request.Method.POST, appendTopicURI, parameters, {
+            //TODO: handle success
+        }) { error ->
+            error.printStackTrace()
+            //TODO: handle failure
+        }
+
+        Volley.newRequestQueue(this).add(jsonRequest)
+    }
+
+    private fun handleNewMessageNotification(envelope: Envelope) {
+        val conversation = getPersistedConversation(envelope.contentTopic)
+        if (conversation === null) {
+            Log.d(TAG, "No conversation found for ${envelope.contentTopic}")
+            return
+        }
+
         val decodedMessage = conversation.decode(envelope)
 
-        showNotification(notificationData.contentTopic, getSavedConversationTitle(notificationData.contentTopic), decodedMessage.body)
+        saveMessageToStorage(envelope.contentTopic, decodedMessage)
+
+        if (decodedMessage.senderAddress == xmtpClient.address) return
+        var title = getSavedConversationTitle(envelope.contentTopic)
+        if (title == "") {
+            title = shortAddress(decodedMessage.senderAddress)
+        }
+        showNotification(envelope.contentTopic, title, decodedMessage.body)
     }
+
+    private fun saveMessageToStorage(topic: String, decodedMessage: DecodedMessage) {
+        val currentSavedMessagesString = getMMKV("saved-notifications-messages")
+        var currentSavedMessages = Klaxon().parseArray<SavedNotificationMessage>(currentSavedMessagesString ?: "[]") ?: listOf()
+        val newMessageToSave = SavedNotificationMessage(
+            topic,
+            decodedMessage.body,
+            decodedMessage.senderAddress,
+            decodedMessage.sent.time,
+            decodedMessage.id
+        )
+        currentSavedMessages += newMessageToSave
+        val newSavedMessagesString = Klaxon().toJsonString(currentSavedMessages)
+        setMMKV("saved-notifications-messages", newSavedMessagesString)
+    }
+
+
     private fun getAndroidByteArrayFromJSByteArray(jsByteArray: ByteArray): ByteArray {
         // Exported byte array from JS does not have the same format as Kotlin
         // 3 leading bytes to remove, then convert unsigned byte array to signed byte array
@@ -117,7 +206,8 @@ class PushNotificationsService : FirebaseMessagingService() {
 
     private fun getKeychainValue(key: String) = runBlocking {
         val argumentsMap = mutableMapOf<String, Any>()
-        argumentsMap["keychainService"] = "com.converse.dev"
+        argumentsMap["keychainService"] = packageName
+        Log.d(TAG, "PACKAGE NAME IS $packageName")
 
         val arguments = MapArguments(argumentsMap)
 
@@ -131,10 +221,31 @@ class PushNotificationsService : FirebaseMessagingService() {
         return@runBlocking promiseResult as String
     }
 
+    private fun setKeychainValue(key: String, value: String) = runBlocking {
+        val argumentsMap = mutableMapOf<String, Any>()
+        argumentsMap["keychainService"] = "com.converse.dev"
+
+        val arguments = MapArguments(argumentsMap)
+
+        var promiseResult: Any? = null;
+
+        val promise = PromiseImpl({ result: Array<Any?>? -> promiseResult = result?.get(0) }, { error: Array<Any?>? -> })
+        val promiseWrapped = PromiseWrapper(promise)
+        withContext(Dispatchers.Default) {
+            secureStoreModule.setValueWithKeyAsync(value, key, arguments, promiseWrapped)
+        }
+        return@runBlocking promiseResult as String
+    }
+
 
     private fun getMMKV(key: String): String? {
         val kv = MMKV.defaultMMKV()
         return kv.decodeString(key)
+    }
+
+    private fun setMMKV(key: String, value: String): Boolean {
+        val kv = MMKV.defaultMMKV()
+        return kv.encode(key, value)
     }
 
     private fun showNotification(topic: String, title: String, message: String) {
@@ -185,6 +296,18 @@ class PushNotificationsService : FirebaseMessagingService() {
             Log.d(TAG, "Could not retrieve conversation: $e")
         }
         return null
+    }
+
+    private fun persistNewConversation(topic: String, conversationV2Data: ConversationV2Data) {
+        try {
+            val topicBytes = topic.toByteArray(Charsets.UTF_8)
+            val digest = MessageDigest.getInstance("SHA-256").digest(topicBytes)
+            val encodedTopic = digest.joinToString("") { "%02x".format(it) }
+            Log.d(TAG, "SAving $encodedTopic")
+            setKeychainValue("XMTP_CONVERSATION_$encodedTopic", Klaxon().toJsonString(conversationV2Data))
+        } catch (e: Exception) {
+            Log.d(TAG, "Could not persist conversation: $e")
+        }
     }
 
     private fun getSavedConversationTitle(topic: String): String {
