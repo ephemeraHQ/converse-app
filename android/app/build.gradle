@@ -201,6 +201,16 @@ dependencies {
     // The version of react-native is set by the React Native Gradle Plugin
     implementation("com.facebook.react:react-android")
 
+    implementation 'com.google.firebase:firebase-messaging-ktx:23.0.3'
+    implementation 'com.beust:klaxon:5.5'
+    implementation 'com.tencent:mmkv:1.2.15'
+    implementation 'androidx.security:security-crypto:1.1.0-alpha05'
+    implementation('org.xmtp:android:0.0.7') {
+        exclude group: 'com.google.crypto.tink', module: 'tink'
+        exclude group: 'org.bouncycastle', module: 'bcprov-jdk15on'
+    }
+    implementation 'com.google.crypto.tink:tink-android:1.7.0'
+
     def isGifEnabled = (findProperty('expo.gif.enabled') ?: "") == "true";
     def isWebpEnabled = (findProperty('expo.webp.enabled') ?: "") == "true";
     def isWebpAnimatedEnabled = (findProperty('expo.webp.animated') ?: "") == "true";
@@ -242,7 +252,9 @@ dependencies {
     }
 }
 
+
 apply from: new File(["node", "--print", "require.resolve('@react-native-community/cli-platform-android/package.json')"].execute(null, rootDir).text.trim(), "../native_modules.gradle");
 applyNativeModulesAppBuildGradle(project)
 
 apply plugin: 'com.google.gms.google-services'
+apply plugin: 'org.jetbrains.kotlin.android'
