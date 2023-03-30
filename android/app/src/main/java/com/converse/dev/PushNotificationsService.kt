@@ -257,9 +257,9 @@ class PushNotificationsService : FirebaseMessagingService() {
     }
 
     private fun getKeyByteArrayFromBase64(base64String: String): ByteArray {
-        // Exported byte array from JS does not have the same format as Kotlin
-        // 3 leading bytes to remove...
-        val decodedKeys = Base64.decode(base64String, Base64.NO_WRAP)
+        // Exported byte array from JS does not have the same
+        // format as Kotlin XMTP SDK: 3 leading bytes to remove...
+        val decodedKeys = Base64.decode(base64String, Base64.NO_WRAP).toList()
         var newKeys = decodedKeys.slice(3 until decodedKeys.size)
         return newKeys.toByteArray()
     }
