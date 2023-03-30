@@ -12,6 +12,7 @@ import "./utils/splash/splash";
 import { Provider as PaperProvider } from "react-native-paper";
 import * as Sentry from "sentry-expo";
 
+import XmtpState from "./components/XmtpState";
 import XmtpWebview from "./components/XmtpWebview";
 import config from "./config";
 import { AppProvider } from "./data/store/context";
@@ -40,6 +41,7 @@ export default function App() {
       >
         <View style={styles.safe}>
           <XmtpWebview />
+          <XmtpState />
           <Main />
         </View>
       </PaperProvider>
