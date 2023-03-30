@@ -82,3 +82,11 @@ export const buildUserInviteTopic = (walletAddr: string): string => {
   // EIP55 normalize the address case.
   return buildContentTopic(`invite-${getAddress(walletAddr)}`);
 };
+
+export const getXmtpSignature = async (client: Client, message: string) => {
+  const messageToSign = Buffer.from(message);
+  const encodedMessage = (
+    await client.keys.identityKey.sign(messageToSign)
+  ).toBytes();
+  return Buffer.from(encodedMessage).toString("base64");
+};

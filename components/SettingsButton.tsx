@@ -18,6 +18,7 @@ import {
 import { getTitleFontScale, shortAddress } from "../utils/str";
 import Button from "./Button/Button";
 import Picto from "./Picto/Picto";
+import { resetLocalXmtpClient } from "./XmtpState";
 import { sendMessageToWebview } from "./XmtpWebview";
 
 export default function SettingsButton() {
@@ -70,6 +71,7 @@ export default function SettingsButton() {
           payload: { isDemoAccount: false },
         });
         AsyncStorage.clear();
+        resetLocalXmtpClient();
         setTimeout(() => {
           dispatch({
             type: NotificationsDispatchTypes.NotificationsShowScreen,

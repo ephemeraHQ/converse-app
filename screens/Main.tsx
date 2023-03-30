@@ -24,6 +24,7 @@ import React, {
 import { AppState, Platform, useColorScheme } from "react-native";
 
 import { addLog } from "../components/DebugButton";
+import { getLocalXmtpClient } from "../components/XmtpState";
 import { sendMessageToWebview } from "../components/XmtpWebview";
 import config from "../config";
 import { loadDataToContext } from "../data";
@@ -41,7 +42,6 @@ import {
   setAndroidColors,
 } from "../utils/colors";
 import { ethProvider } from "../utils/eth";
-import { loadXmtpKeys } from "../utils/keychain";
 import { lastValueInMap } from "../utils/map";
 import {
   getNotificationsPermissionStatus,
@@ -49,7 +49,6 @@ import {
 } from "../utils/notifications";
 import { getLoggedXmtpAddress } from "../utils/sharedData/sharedData";
 import { hideSplashScreen } from "../utils/splash/splash";
-import { getXmtpClientFromKeys } from "../utils/xmtp";
 import Conversation from "./Conversation";
 import ConversationList from "./ConversationList";
 import NewConversation from "./NewConversation";
@@ -274,10 +273,8 @@ export default function Main() {
           },
         });
       } else {
-        const keys = await loadXmtpKeys();
-        if (keys) {
-          const parsedKeys = JSON.parse(keys);
-          const xmtpClient = await getXmtpClientFromKeys(parsedKeys);
+        const xmtpClient = await getLocalXmtpClient();
+        if (xmtpClient) {
           dispatch({
             type: XmtpDispatchTypes.XmtpSetAddress,
             payload: {
