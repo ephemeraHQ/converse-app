@@ -4,11 +4,9 @@ to use shared data storing. And since this SharedGroupPreferences lib seems to b
 unmaintained let's just fallback to regular storage through MMKV
 */
 import { DecodedMessage } from "@xmtp/xmtp-js";
-import { MMKV } from "react-native-mmkv";
 
 import config from "../../config";
-
-const storage = new MMKV();
+import storage from "../mmkv";
 
 export const saveConversationDict = async (
   topic: string,

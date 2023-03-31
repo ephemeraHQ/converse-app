@@ -214,7 +214,9 @@ export default function ConversationList({
           }
           conversationName={conversationName(item)}
           lastMessagePreview={
-            item.lazyMessages.length > 0
+            state.xmtp.blockedPeerAddresses[item.peerAddress.toLowerCase()]
+              ? "This user is blocked"
+              : item.lazyMessages.length > 0
               ? item.lazyMessages[0].content
               : item.messages?.size > 0
               ? lastValueInMap(item.messages)?.content
@@ -223,7 +225,7 @@ export default function ConversationList({
         />
       );
     },
-    [colorScheme, navigation]
+    [colorScheme, navigation, state.xmtp.blockedPeerAddresses]
   );
 
   return (

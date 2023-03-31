@@ -5,11 +5,13 @@ import * as Linking from "expo-linking";
 import React, { useCallback, useContext } from "react";
 import { Platform, TouchableOpacity, useColorScheme, View } from "react-native";
 
+import config from "../config";
 import { clearDB } from "../data/db";
 import { AppDispatchTypes } from "../data/store/appReducer";
 import { AppContext } from "../data/store/context";
 import { NotificationsDispatchTypes } from "../data/store/notificationsReducer";
 import { textSecondaryColor } from "../utils/colors";
+import mmkv from "../utils/mmkv";
 import {
   disablePushNotifications,
   requestPushNotificationsPermissions,
@@ -29,6 +31,15 @@ export default function SettingsButton() {
     const methods = {
       "Copy wallet address": () => {
         Clipboard.setStringAsync(state.xmtp.address || "");
+      },
+      "Contact Converse team": () => {
+        Linking.openURL(
+          Linking.createURL("/conversation", {
+            queryParams: {
+              mainConversationWithPeer: config.polAddress,
+            },
+          })
+        );
       },
       "Turn on notifications": () => {
         if (state.notifications.status === "denied") {
@@ -71,6 +82,7 @@ export default function SettingsButton() {
           payload: { isDemoAccount: false },
         });
         AsyncStorage.clear();
+        mmkv.clearAll();
         resetLocalXmtpClient();
         setTimeout(() => {
           dispatch({
