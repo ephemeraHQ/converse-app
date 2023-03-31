@@ -12,6 +12,7 @@ export const saveXmtpKeys = async (keys: string) => {
     await SecureStore.setItemAsync("XMTP_BASE64_KEY", base64Key, {
       keychainService: config.bundleId,
     });
+    console.log("Saved base64 key", base64Key, config.bundleId);
   }
 };
 
@@ -84,6 +85,10 @@ export const loadXmtpKeys = async (): Promise<string | null> => {
       await saveXmtpKeys(keys);
     }
   }
+  const base64Keys = await SecureStore.getItemAsync("XMTP_BASE64_KEY", {
+    keychainService: config.bundleId,
+  });
+  console.log({ base64Keys });
   return keys;
 };
 

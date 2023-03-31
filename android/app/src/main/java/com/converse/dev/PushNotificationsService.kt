@@ -73,22 +73,28 @@ fun isIntroTopic(topic: String): Boolean {
 }
 
 class PushNotificationsService : FirebaseMessagingService() {
+    var isInitialized = false
     companion object {
         private const val TAG = "PushNotificationsService"
         internal const val NOTIFICATION_CHANNEL_ID = "default"
         private lateinit var secureStoreModule: SecureStoreModule
         private lateinit var xmtpClient: Client
+
     }
 
     override fun onCreate() {
         super.onCreate()
-        initSecureStore()
-        MMKV.initialize(this)
-        try {
-            initXmtpClient()
-        } catch (e: java.lang.Exception) {
-            showNotification("lolilol", "COULD NOT INIT XMTP CLIENT", "$e")
-            Log.d(TAG, "Could not init XMTP client: $e")
+        if (!isInitialized) {
+            initSecureStore()
+            MMKV.initialize(this)
+            try {
+                initXmtpClient()
+            } catch (e: java.lang.Exception) {
+                Log.d(TAG, "Could not init XMTP client: $e")
+            }
+            isInitialized = true
+        } else {
+            Log.d(TAG, "Notification Service already initialized")
         }
     }
 
@@ -134,7 +140,6 @@ class PushNotificationsService : FirebaseMessagingService() {
             Base64.encode(conversation.keyMaterial)
         )
         val apiURI = getMMKV("api-uri")
-        showNotification("lolilol2", "FOUND API URI", apiURI ?: "vide")
         val expoPushToken = getKeychainValue("EXPO_PUSH_TOKEN")
         if (apiURI != null) {
             subscribeToTopic(apiURI, expoPushToken, conversation.topic)
@@ -182,6 +187,7 @@ class PushNotificationsService : FirebaseMessagingService() {
 
     private fun saveMessageToStorage(topic: String, decodedMessage: DecodedMessage) {
         val currentSavedMessagesString = getMMKV("saved-notifications-messages")
+        Log.d(TAG, "currentSavedMessagesString $currentSavedMessagesString")
         var currentSavedMessages = Klaxon().parseArray<SavedNotificationMessage>(currentSavedMessagesString ?: "[]") ?: listOf()
         val newMessageToSave = SavedNotificationMessage(
             topic,
@@ -197,6 +203,7 @@ class PushNotificationsService : FirebaseMessagingService() {
 
     private fun getKeychainValue(key: String) = runBlocking {
         val argumentsMap = mutableMapOf<String, Any>()
+        Log.d(TAG, "Getting from packageName $packageName")
         argumentsMap["keychainService"] = packageName
 
         val arguments = MapArguments(argumentsMap)
@@ -259,8 +266,16 @@ class PushNotificationsService : FirebaseMessagingService() {
     }
 
     private fun initXmtpClient() {
+        try {
+            Log.d(TAG, "XMTP Client already initialized: ${xmtpClient.address}")
+            return
+        } catch (e: Exception) {
+            // Not yet initialized
+        }
         val xmtpBase64KeyString = getKeychainValue("XMTP_BASE64_KEY")
+        Log.d(TAG, "Got XMTP BASE64 KEY $xmtpBase64KeyString")
         val keys = PrivateKeyBundleV1Builder.buildFromBundle(Base64.decode(xmtpBase64KeyString))
+        Log.d(TAG, "keys are, ${keys}")
 
         val xmtpEnvString = getMMKV("xmtp-env")
         val xmtpEnv =
@@ -292,7 +307,6 @@ class PushNotificationsService : FirebaseMessagingService() {
             val encodedTopic = digest.joinToString("") { "%02x".format(it) }
             setKeychainValue("XMTP_CONVERSATION_$encodedTopic", Klaxon().toJsonString(conversationV2Data))
         } catch (e: Exception) {
-            showNotification("lolilol3", "Could not persist conversation", "$e")
             Log.d(TAG, "Could not persist conversation: $e")
         }
     }

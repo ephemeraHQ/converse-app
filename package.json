@@ -18,7 +18,7 @@
     "build-prod-android": "yarn typecheck && node scripts/build/android/prod.js && eas build --profile production --platform android --auto-submit ; git add app.json && git restore --staged --worktree android",
     "build-prod-android-local": "yarn typecheck && node scripts/build/android/prod.js && eas build --profile production --platform android --local && eas submit --profile production --platform android ; git add app.json && git restore --staged --worktree android",
     "db": "ts-node scripts/migrations/db.ts",
-    "postinstall": "husky install && patch-package"
+    "postinstall": "patch-package && husky install"
   },
   "dependencies": {
     "@azure/core-asynciterator-polyfill": "^1.0.2",
