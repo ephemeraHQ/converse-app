@@ -315,15 +315,9 @@ export default function OnboardingComponent({
   useEffect(() => {
     if (connectToDemoWallet) {
       setHideModal(true);
-      generateWallet();
-      setConnectToDemoWallet(false);
+      setLoading(false);
     }
-  }, [
-    connectToDemoWallet,
-    generateWallet,
-    setConnectToDemoWallet,
-    setHideModal,
-  ]);
+  }, [connectToDemoWallet, setHideModal]);
 
   let picto = "message.circle.fill";
   let title = "GM";
@@ -364,6 +358,11 @@ export default function OnboardingComponent({
         subtitle = termsAndConditions;
       }
     }
+  } else if (connectToDemoWallet) {
+    picto = "signature";
+    title = "Terms";
+    text = "";
+    subtitle = termsAndConditions;
   }
 
   const tableViewPaddingHorizontal = Platform.OS === "android" ? 33 : 0;
@@ -382,7 +381,7 @@ export default function OnboardingComponent({
         <>
           <Text style={styles.title}>{title}</Text>
           <View style={{ marginBottom: "auto" }}>
-            <Text style={styles.p}>{text}</Text>
+            {text && <Text style={styles.p}>{text}</Text>}
             {subtitle}
           </View>
         </>
@@ -392,7 +391,7 @@ export default function OnboardingComponent({
         <ActivityIndicator size="large" style={{ marginBottom: "auto" }} />
       )}
 
-      {!user.signer && !loading && (
+      {!user.signer && !loading && !connectToDemoWallet && (
         <View style={styles.walletSelectorContainer}>
           <TableView
             items={[
@@ -447,6 +446,30 @@ export default function OnboardingComponent({
             ]}
           />
         </View>
+      )}
+      {!user.signer && !loading && connectToDemoWallet && (
+        <>
+          <Button
+            title="Continue"
+            variant="primary"
+            style={styles.sign}
+            onPress={() => {
+              setLoading(true);
+              generateWallet();
+              setConnectToDemoWallet(false);
+            }}
+          />
+
+          <Button
+            title="Cancel"
+            style={styles.logout}
+            variant="text"
+            textStyle={{ fontWeight: "600" }}
+            onPress={() => {
+              setConnectToDemoWallet(false);
+            }}
+          />
+        </>
       )}
       {user.signer && (
         <>
