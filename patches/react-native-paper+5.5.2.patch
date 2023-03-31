@@ -1,0 +1,39 @@
+diff --git a/node_modules/react-native-paper/lib/commonjs/components/FAB/FAB.js b/node_modules/react-native-paper/lib/commonjs/components/FAB/FAB.js
+index 0ec18b0..31ee43a 100644
+--- a/node_modules/react-native-paper/lib/commonjs/components/FAB/FAB.js
++++ b/node_modules/react-native-paper/lib/commonjs/components/FAB/FAB.js
+@@ -139,7 +139,7 @@ const FAB = (0, _forwardRef.forwardRef)((_ref, ref) => {
+     color: foregroundColor,
+     ...font
+   };
+-  const md3Elevation = isFlatMode || disabled ? 0 : 3;
++  const md3Elevation = isFlatMode || disabled ? 0 : 1;
+   const newAccessibilityState = {
+     ...accessibilityState,
+     disabled
+diff --git a/node_modules/react-native-paper/lib/module/components/FAB/FAB.js b/node_modules/react-native-paper/lib/module/components/FAB/FAB.js
+index 6dfc9f1..8285960 100644
+--- a/node_modules/react-native-paper/lib/module/components/FAB/FAB.js
++++ b/node_modules/react-native-paper/lib/module/components/FAB/FAB.js
+@@ -130,7 +130,7 @@ const FAB = forwardRef((_ref, ref) => {
+     color: foregroundColor,
+     ...font
+   };
+-  const md3Elevation = isFlatMode || disabled ? 0 : 3;
++  const md3Elevation = isFlatMode || disabled ? 0 : 1;
+   const newAccessibilityState = {
+     ...accessibilityState,
+     disabled
+diff --git a/node_modules/react-native-paper/src/components/FAB/FAB.tsx b/node_modules/react-native-paper/src/components/FAB/FAB.tsx
+index 050fbaa..afa5d3e 100644
+--- a/node_modules/react-native-paper/src/components/FAB/FAB.tsx
++++ b/node_modules/react-native-paper/src/components/FAB/FAB.tsx
+@@ -247,7 +247,7 @@ const FAB = forwardRef<View, Props>(
+       ...font,
+     };
+ 
+-    const md3Elevation = isFlatMode || disabled ? 0 : 3;
++    const md3Elevation = isFlatMode || disabled ? 0 : 1;
+ 
+     const newAccessibilityState = { ...accessibilityState, disabled };
+ 

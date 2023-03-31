@@ -73,32 +73,21 @@ fun isIntroTopic(topic: String): Boolean {
 }
 
 class PushNotificationsService : FirebaseMessagingService() {
-    var isInitialized = false
     companion object {
         private const val TAG = "PushNotificationsService"
         internal const val NOTIFICATION_CHANNEL_ID = "default"
         private lateinit var secureStoreModule: SecureStoreModule
-        private lateinit var xmtpClient: Client
 
     }
 
     override fun onCreate() {
         super.onCreate()
-        if (!isInitialized) {
-            initSecureStore()
-            MMKV.initialize(this)
-            try {
-                initXmtpClient()
-            } catch (e: java.lang.Exception) {
-                Log.d(TAG, "Could not init XMTP client: $e")
-            }
-            isInitialized = true
-        } else {
-            Log.d(TAG, "Notification Service already initialized")
-        }
+        MMKV.initialize(this)
+        initSecureStore()
     }
 
     override fun onMessageReceived(remoteMessage: RemoteMessage) {
+        var xmtpClient = initXmtpClient()
         if (applicationInForeground()) {
             Log.d(TAG, "App is in foreground, dropping")
             return
@@ -123,17 +112,17 @@ class PushNotificationsService : FirebaseMessagingService() {
             return
         } else if (isInviteTopic(notificationData.contentTopic)) {
             Log.d(TAG, "Handling a new conversation notification")
-            handleNewConversationV2Notification(envelope)
+            handleNewConversationV2Notification(xmtpClient, envelope)
         } else {
             Log.d(TAG, "Handling a new message notification")
-            handleNewMessageNotification(envelope)
+            handleNewMessageNotification(xmtpClient, envelope)
         }
 
     }
 
-    private fun handleNewConversationV2Notification(envelope: Envelope) {
+    private fun handleNewConversationV2Notification(xmtpClient:Client, envelope: Envelope) {
         val conversation = xmtpClient.conversations.fromInvite((envelope))
-        Log.d(TAG, "Decoded notification from invite!")
+        Log.d(TAG, "Decoded new conversation from invite")
         val conversationV2Data = ConversationV2Data(
             "v2",
             conversation.topic,
@@ -145,7 +134,7 @@ class PushNotificationsService : FirebaseMessagingService() {
         val apiURI = getMMKV("api-uri")
         val expoPushToken = getKeychainValue("EXPO_PUSH_TOKEN")
         if (apiURI != null) {
-            Log.d(TAG, "Api URI is not null, subscribing to new topic - $apiURI")
+            Log.d(TAG, "Subscribing to new topic at api: $apiURI")
             subscribeToTopic(apiURI, expoPushToken, conversation.topic)
         }
         persistNewConversation(conversation.topic, conversationV2Data)
@@ -172,15 +161,15 @@ class PushNotificationsService : FirebaseMessagingService() {
         Volley.newRequestQueue(this).add(jsonRequest)
     }
 
-    private fun handleNewMessageNotification(envelope: Envelope) {
-        val conversation = getPersistedConversation(envelope.contentTopic)
+    private fun handleNewMessageNotification(xmtpClient: Client, envelope: Envelope) {
+        val conversation = getPersistedConversation(xmtpClient, envelope.contentTopic)
         if (conversation === null) {
             Log.d(TAG, "No conversation found for ${envelope.contentTopic}")
             return
         }
 
         val decodedMessage = conversation.decode(envelope)
-        Log.d(TAG, "Successfully decoded message: '${decodedMessage.body}'")
+        Log.d(TAG, "Successfully decoded message incoming message")
         saveMessageToStorage(envelope.contentTopic, decodedMessage)
         if (decodedMessage.senderAddress == xmtpClient.address) return
         var title = getSavedConversationTitle(envelope.contentTopic)
@@ -193,7 +182,6 @@ class PushNotificationsService : FirebaseMessagingService() {
 
     private fun saveMessageToStorage(topic: String, decodedMessage: DecodedMessage) {
         val currentSavedMessagesString = getMMKV("saved-notifications-messages")
-        Log.d(TAG, "currentSavedMessagesString $currentSavedMessagesString")
         var currentSavedMessages = Klaxon().parseArray<SavedNotificationMessage>(currentSavedMessagesString ?: "[]") ?: listOf()
         val newMessageToSave = SavedNotificationMessage(
             topic,
@@ -209,7 +197,7 @@ class PushNotificationsService : FirebaseMessagingService() {
 
     private fun getKeychainValue(key: String) = runBlocking {
         val argumentsMap = mutableMapOf<String, Any>()
-        Log.d(TAG, "Getting from packageName $packageName")
+        Log.d(TAG, "Current package is $packageName")
         argumentsMap["keychainService"] = packageName
 
         val arguments = MapArguments(argumentsMap)
@@ -271,28 +259,20 @@ class PushNotificationsService : FirebaseMessagingService() {
         notificationManager.notify(notificationId, notificationBuilder.build())
     }
 
-    private fun initXmtpClient() {
-        try {
-            Log.d(TAG, "XMTP Client already initialized: ${xmtpClient.address}")
-            return
-        } catch (e: Exception) {
-            // Not yet initialized
-        }
+    private fun initXmtpClient(): Client {
         val xmtpBase64KeyString = getKeychainValue("XMTP_BASE64_KEY")
         Log.d(TAG, "Got XMTP BASE64 KEY $xmtpBase64KeyString")
         val keys = PrivateKeyBundleV1Builder.buildFromBundle(Base64.decode(xmtpBase64KeyString))
-        Log.d(TAG, "keys are, ${keys}")
-
         val xmtpEnvString = getMMKV("xmtp-env")
         val xmtpEnv =
             if (xmtpEnvString == "production") XMTPEnvironment.PRODUCTION else XMTPEnvironment.DEV
 
         val options = ClientOptions(api = ClientOptions.Api(env = xmtpEnv, isSecure = true))
 
-        xmtpClient = Client().buildFrom(bundle = keys, options = options)
+        return Client().buildFrom(bundle = keys, options = options)
     }
 
-    private fun getPersistedConversation(topic: String): Conversation? {
+    private fun getPersistedConversation(xmtpClient: Client, topic: String): Conversation? {
         try {
             val topicBytes = topic.toByteArray(Charsets.UTF_8)
             val digest = MessageDigest.getInstance("SHA-256").digest(topicBytes)
