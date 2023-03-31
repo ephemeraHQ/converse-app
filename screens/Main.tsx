@@ -6,11 +6,6 @@ import {
   StackActions,
 } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
-import {
-  buildUserInviteTopic,
-  buildUserIntroTopic,
-  //@ts-ignore
-} from "@xmtp/xmtp-js/dist/cjs/src/utils";
 import * as Linking from "expo-linking";
 import * as Notifications from "expo-notifications";
 import { StatusBar } from "expo-status-bar";
@@ -334,35 +329,25 @@ export default function Main() {
     state.xmtp.conversations,
   ]);
 
-  const initialNotificationsSubscribed = useRef(false);
-
   useEffect(() => {
     if (
       state.notifications.status === "granted" &&
       state.xmtp.initialLoadDone &&
-      !initialNotificationsSubscribed.current &&
       state.xmtp.address
     ) {
-      initialNotificationsSubscribed.current = true;
-      const topics = [
-        ...Object.keys(state.xmtp.conversations),
-        buildUserIntroTopic(state.xmtp.address || ""),
-        buildUserInviteTopic(state.xmtp.address || ""),
-      ];
-      subscribeToNotifications(topics);
+      subscribeToNotifications(
+        state.xmtp.address,
+        Object.values(state.xmtp.conversations),
+        state.xmtp.blockedPeerAddresses
+      );
     }
   }, [
     state.notifications.status,
     state.xmtp.address,
+    state.xmtp.blockedPeerAddresses,
     state.xmtp.conversations,
     state.xmtp.initialLoadDone,
   ]);
-
-  useEffect(() => {
-    if (!state.xmtp.connected) {
-      initialNotificationsSubscribed.current = false;
-    }
-  }, [state.xmtp.connected]);
 
   useEffect(() => {
     if (state.xmtp.address) {

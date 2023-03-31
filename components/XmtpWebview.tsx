@@ -1,8 +1,3 @@
-import {
-  buildUserInviteTopic,
-  buildUserIntroTopic,
-  //@ts-ignore
-} from "@xmtp/xmtp-js/dist/cjs/src/utils";
 import React, { useCallback, useContext, useEffect, useRef } from "react";
 import { Alert, AppState, Platform, StyleSheet, View } from "react-native";
 import { SafeAreaProvider } from "react-native-safe-area-context";
@@ -201,13 +196,12 @@ export default function XmtpWebview() {
         case "XMTP_NEW_CONVERSATION": {
           saveNewConversation(data, dispatch);
           // New conversation, let's subscribe to topic
-          if (state.notifications.status === "granted") {
-            const topics = [
-              ...Object.keys(state.xmtp.conversations),
-              buildUserIntroTopic(state.xmtp.address || ""),
-              buildUserInviteTopic(state.xmtp.address || ""),
-            ];
-            subscribeToNotifications(topics);
+          if (state.notifications.status === "granted" && state.xmtp.address) {
+            subscribeToNotifications(
+              state.xmtp.address,
+              Object.values(state.xmtp.conversations),
+              state.xmtp.blockedPeerAddresses
+            );
           }
           break;
         }
@@ -241,12 +235,13 @@ export default function XmtpWebview() {
             type: XmtpDispatchTypes.XmtpLoading,
             payload: { loading: false },
           });
-          const topics = [
-            ...Object.keys(state.xmtp.conversations),
-            buildUserIntroTopic(state.xmtp.address || ""),
-            buildUserInviteTopic(state.xmtp.address || ""),
-          ];
-          subscribeToNotifications(topics);
+          if (state.notifications.status === "granted" && state.xmtp.address) {
+            subscribeToNotifications(
+              state.xmtp.address,
+              Object.values(state.xmtp.conversations),
+              state.xmtp.blockedPeerAddresses
+            );
+          }
           break;
         }
         case "CANT_CREATE_CONVO": {
@@ -297,6 +292,7 @@ export default function XmtpWebview() {
       dispatch,
       state.notifications.status,
       state.xmtp.address,
+      state.xmtp.blockedPeerAddresses,
       state.xmtp.conversations,
     ]
   );

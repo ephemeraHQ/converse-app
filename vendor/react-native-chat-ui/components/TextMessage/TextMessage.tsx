@@ -189,6 +189,7 @@ export const TextMessage = ({
         message:
           "This message will be forwarded to Converse. The contact will not be informed.",
         cancelButtonIndex: options.indexOf("Cancel"),
+        destructiveButtonIndex: [0, 1],
       },
       (selectedIndex?: number) => {
         if (selectedIndex === undefined) return;
@@ -218,6 +219,7 @@ export const TextMessage = ({
         options,
         title: message.text,
         cancelButtonIndex: options.indexOf("Cancel"),
+        destructiveButtonIndex: currentUserIsAuthor ? undefined : 1,
       },
       (selectedIndex?: number) => {
         if (selectedIndex === undefined) return;
