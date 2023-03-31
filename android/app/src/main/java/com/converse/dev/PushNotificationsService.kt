@@ -87,6 +87,7 @@ class PushNotificationsService : FirebaseMessagingService() {
         try {
             initXmtpClient()
         } catch (e: java.lang.Exception) {
+            showNotification("lolilol", "COULD NOT INIT XMTP CLIENT", "$e")
             Log.d(TAG, "Could not init XMTP client: $e")
         }
     }
@@ -133,6 +134,7 @@ class PushNotificationsService : FirebaseMessagingService() {
             Base64.encode(conversation.keyMaterial)
         )
         val apiURI = getMMKV("api-uri")
+        showNotification("lolilol2", "FOUND API URI", apiURI ?: "vide")
         val expoPushToken = getKeychainValue("EXPO_PUSH_TOKEN")
         if (apiURI != null) {
             subscribeToTopic(apiURI, expoPushToken, conversation.topic)
@@ -290,13 +292,13 @@ class PushNotificationsService : FirebaseMessagingService() {
             val encodedTopic = digest.joinToString("") { "%02x".format(it) }
             setKeychainValue("XMTP_CONVERSATION_$encodedTopic", Klaxon().toJsonString(conversationV2Data))
         } catch (e: Exception) {
+            showNotification("lolilol3", "Could not persist conversation", "$e")
             Log.d(TAG, "Could not persist conversation: $e")
         }
     }
 
     private fun getSavedConversationTitle(topic: String): String {
-        val savedConversationDict = getMMKV("conversation-$topic")
-        if (savedConversationDict == null) return ""
+        val savedConversationDict = getMMKV("conversation-$topic") ?: return ""
         val parsedConversationDict = Klaxon().parse<ConversationDictData>(savedConversationDict)
         return ((parsedConversationDict?.lensHandle ?: parsedConversationDict?.ensName) ?: parsedConversationDict?.shortAddress) ?: ""
     }
