@@ -1,3 +1,4 @@
+import mmkv from "../../utils/mmkv";
 import {
   deleteLoggedXmtpAddress,
   saveLoggedXmtpAddress,
@@ -32,6 +33,7 @@ export type XmtpType = {
   };
   lastUpdateAt: number;
   address?: string;
+  blockedPeerAddresses: { [peerAddress: string]: boolean };
 };
 
 export const xmtpInitialState: XmtpType = {
@@ -41,6 +43,7 @@ export const xmtpInitialState: XmtpType = {
   conversations: {},
   address: undefined,
   lastUpdateAt: 0,
+  blockedPeerAddresses: {},
 };
 
 export type XmtpMessage = {
@@ -60,6 +63,8 @@ export enum XmtpDispatchTypes {
   XmtpInitialLoad = "XMTP_INITIAL_LOAD",
   XmtpLoading = "XMTP_LOADING",
   XmtpSetCurrentMessageContent = "XMTP_SET_CURRENT_MESSAGE",
+  XmtpSetBlockedStatus = "XMTP_SET_BLOCKED_STATUS",
+  XmtpSetBlockedPeerAddresses = "XMTP_SET_BLOCKED_PEER_ADDRESSES",
 }
 
 type XmtpPayload = {
@@ -91,6 +96,13 @@ type XmtpPayload = {
     loading: boolean;
   };
   [XmtpDispatchTypes.XmtpInitialLoad]: undefined;
+  [XmtpDispatchTypes.XmtpSetBlockedStatus]: {
+    peerAddress: string;
+    blocked: boolean;
+  };
+  [XmtpDispatchTypes.XmtpSetBlockedPeerAddresses]: {
+    blockedPeerAddresses: { [peerAddress: string]: boolean };
+  };
 };
 
 export type XmtpActions = ActionMap<XmtpPayload>[keyof ActionMap<XmtpPayload>];
@@ -234,6 +246,34 @@ export const xmtpReducer = (state: XmtpType, action: XmtpActions): XmtpType => {
       }
 
       return newState;
+    }
+
+    case XmtpDispatchTypes.XmtpSetBlockedStatus: {
+      const blockedPeerAddresses = { ...state.blockedPeerAddresses };
+      if (action.payload.blocked) {
+        blockedPeerAddresses[action.payload.peerAddress.toLowerCase()] = true;
+      } else {
+        delete blockedPeerAddresses[action.payload.peerAddress.toLowerCase()];
+      }
+      mmkv.set(
+        "state.xmtp.blockedPeerAddresses",
+        JSON.stringify(blockedPeerAddresses)
+      );
+      return {
+        ...state,
+        blockedPeerAddresses,
+      };
+    }
+
+    case XmtpDispatchTypes.XmtpSetBlockedPeerAddresses: {
+      mmkv.set(
+        "state.xmtp.blockedPeerAddresses",
+        JSON.stringify(action.payload.blockedPeerAddresses)
+      );
+      return {
+        ...state,
+        blockedPeerAddresses: action.payload.blockedPeerAddresses,
+      };
     }
 
     default:

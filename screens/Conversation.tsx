@@ -33,7 +33,7 @@ import {
 } from "../components/XmtpWebview";
 import { AppContext } from "../data/store/context";
 import { XmtpConversation, XmtpDispatchTypes } from "../data/store/xmtpReducer";
-import { userExists } from "../utils/api";
+import { blockPeer, userExists } from "../utils/api";
 import {
   backgroundColor,
   headerTitleStyle,
@@ -141,6 +141,10 @@ const Conversation = ({
     state.xmtp.conversations,
   ]);
 
+  const isBlockedPeer = conversation?.peerAddress
+    ? !!state.xmtp.blockedPeerAddresses[conversation.peerAddress.toLowerCase()]
+    : false;
+
   const textInputRef = useRef<TextInput>();
 
   const messageToPrefill =
@@ -203,14 +207,31 @@ const Conversation = ({
               onPress={() => {
                 showActionSheetWithOptions(
                   {
-                    options: ["Copy wallet address", "Cancel"],
-                    cancelButtonIndex: 1,
+                    options: [
+                      "Copy wallet address",
+                      isBlockedPeer ? "Unblock" : "Block",
+                      "Cancel",
+                    ],
+                    cancelButtonIndex: 2,
                     title: peerAddress,
                   },
                   (selectedIndex?: number) => {
                     switch (selectedIndex) {
                       case 0:
                         Clipboard.setStringAsync(peerAddress || "");
+                        break;
+                      case 1:
+                        blockPeer({
+                          peerAddress: peerAddress || "",
+                          blocked: !isBlockedPeer,
+                        });
+                        dispatch({
+                          type: XmtpDispatchTypes.XmtpSetBlockedStatus,
+                          payload: {
+                            peerAddress: peerAddress || "",
+                            blocked: !isBlockedPeer,
+                          },
+                        });
                         break;
 
                       default:
@@ -260,6 +281,7 @@ const Conversation = ({
     });
   }, [
     conversation,
+    dispatch,
     inviteToConverse,
     navigation,
     peerAddress,
@@ -359,7 +381,7 @@ const Conversation = ({
 
   return (
     <View style={styles.container}>
-      {showInvite.show && showInvite.banner && (
+      {showInvite.show && showInvite.banner && !isBlockedPeer && (
         <InviteBanner
           onClickInvite={inviteToConverse}
           onClickHide={hideInviteBanner}
@@ -367,7 +389,7 @@ const Conversation = ({
       )}
       <Chat
         key={`chat-${colorScheme}`}
-        messages={messages}
+        messages={isBlockedPeer ? [] : messages}
         onSendPress={handleSendPress}
         user={{
           id: state.xmtp.address || "",
@@ -375,18 +397,20 @@ const Conversation = ({
         // Using default if we have a convo,
         // hide if we don't have one (creating)
         customBottomComponent={
-          conversation
+          conversation && !isBlockedPeer
             ? undefined
             : () => {
                 return null;
               }
         }
         emptyState={() =>
-          conversation ? null : (
+          conversation && !isBlockedPeer ? null : (
             <Text
               style={chatTheme(colorScheme).fonts.emptyChatPlaceholderTextStyle}
             >
-              Opening your conversation...
+              {isBlockedPeer
+                ? "This user is blocked"
+                : "Opening your conversation..."}
             </Text>
           )
         }

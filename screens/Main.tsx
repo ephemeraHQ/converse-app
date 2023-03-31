@@ -43,6 +43,7 @@ import {
 } from "../utils/colors";
 import { ethProvider } from "../utils/eth";
 import { lastValueInMap } from "../utils/map";
+import mmkv from "../utils/mmkv";
 import {
   getNotificationsPermissionStatus,
   subscribeToNotifications,
@@ -283,7 +284,15 @@ export default function Main() {
           });
         }
       }
-      addLog("Hydration 100% OK");
+
+      const savedBlockedPeers = JSON.parse(
+        mmkv.getString("state.xmtp.blockedPeerAddresses") || "{}"
+      );
+      dispatch({
+        type: XmtpDispatchTypes.XmtpSetBlockedPeerAddresses,
+        payload: { blockedPeerAddresses: savedBlockedPeers },
+      });
+
       setHydrationDone(true);
     };
     hydrate();
