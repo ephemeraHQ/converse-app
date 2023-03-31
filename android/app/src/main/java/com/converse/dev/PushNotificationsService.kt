@@ -33,7 +33,7 @@ import org.json.JSONObject
 import org.xmtp.android.library.*
 import org.xmtp.android.library.messages.Envelope
 import org.xmtp.android.library.messages.EnvelopeBuilder
-import org.xmtp.android.library.messages.PrivateKeyBundleV1
+import org.xmtp.android.library.messages.PrivateKeyBundleV1Builder
 import java.security.MessageDigest
 import java.util.*
 
@@ -256,18 +256,9 @@ class PushNotificationsService : FirebaseMessagingService() {
         notificationManager.notify(notificationId, notificationBuilder.build())
     }
 
-    private fun getKeyByteArrayFromBase64(base64String: String): ByteArray {
-        // Exported byte array from JS does not have the same
-        // format as Kotlin XMTP SDK: 3 leading bytes to remove...
-        val decodedKeys = Base64.decode(base64String, Base64.NO_WRAP).toList()
-        var newKeys = decodedKeys.slice(3 until decodedKeys.size)
-        return newKeys.toByteArray()
-    }
-
-
     private fun initXmtpClient() {
         val xmtpBase64KeyString = getKeychainValue("XMTP_BASE64_KEY")
-        val keys = PrivateKeyBundleV1.parseFrom(getKeyByteArrayFromBase64(xmtpBase64KeyString))
+        val keys = PrivateKeyBundleV1Builder.buildFromBundle(Base64.decode(xmtpBase64KeyString))
 
         val xmtpEnvString = getMMKV("xmtp-env")
         val xmtpEnv =
