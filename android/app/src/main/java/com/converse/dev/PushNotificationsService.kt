@@ -261,7 +261,11 @@ class PushNotificationsService : FirebaseMessagingService() {
 
     private fun initXmtpClient(): Client {
         val xmtpBase64KeyString = getKeychainValue("XMTP_BASE64_KEY")
-        Log.d(TAG, "Got XMTP BASE64 KEY $xmtpBase64KeyString")
+        if (xmtpBase64KeyString == null || xmtpBase64KeyString.isEmpty()) {
+            Log.d(TAG, "No XMTP Base 64 Key found")
+        } else {
+            Log.d(TAG, "Got XMTP Base 64 Key")
+        }
         val keys = PrivateKeyBundleV1Builder.buildFromBundle(Base64.decode(xmtpBase64KeyString))
         val xmtpEnvString = getMMKV("xmtp-env")
         val xmtpEnv =
