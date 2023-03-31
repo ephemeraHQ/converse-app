@@ -1,6 +1,11 @@
+import {
+  buildUserInviteTopic,
+  //@ts-ignore
+} from "@xmtp/xmtp-js/dist/cjs/src/utils";
 import * as Notifications from "expo-notifications";
 import { Platform } from "react-native";
 
+import { XmtpConversation } from "../data/store/xmtpReducer";
 import api from "./api";
 import { saveExpoPushToken } from "./keychain";
 
@@ -12,8 +17,19 @@ export type NotificationPermissionStatus =
   | "denied";
 
 export const subscribeToNotifications = async (
-  topics: string[]
+  address: string,
+  conversations: XmtpConversation[],
+  blockedPeerAddresses: { [peerAddress: string]: boolean }
 ): Promise<void> => {
+  const topics = [
+    ...conversations
+      .filter(
+        (c) =>
+          c.peerAddress && !blockedPeerAddresses[c.peerAddress.toLowerCase()]
+      )
+      .map((c) => c.topic),
+    buildUserInviteTopic(address || ""),
+  ];
   const [expoTokenQuery, nativeTokenQuery] = await Promise.all([
     Notifications.getExpoPushTokenAsync(),
     Notifications.getDevicePushTokenAsync(),

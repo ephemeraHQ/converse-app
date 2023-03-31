@@ -214,6 +214,7 @@ const Conversation = ({
                     ],
                     cancelButtonIndex: 2,
                     title: peerAddress,
+                    destructiveButtonIndex: isBlockedPeer ? undefined : 1,
                   },
                   (selectedIndex?: number) => {
                     switch (selectedIndex) {
@@ -221,17 +222,37 @@ const Conversation = ({
                         Clipboard.setStringAsync(peerAddress || "");
                         break;
                       case 1:
-                        blockPeer({
-                          peerAddress: peerAddress || "",
-                          blocked: !isBlockedPeer,
-                        });
-                        dispatch({
-                          type: XmtpDispatchTypes.XmtpSetBlockedStatus,
-                          payload: {
-                            peerAddress: peerAddress || "",
-                            blocked: !isBlockedPeer,
+                        showActionSheetWithOptions(
+                          {
+                            options: [
+                              isBlockedPeer ? "Unblock" : "Block",
+                              "Cancel",
+                            ],
+                            cancelButtonIndex: 1,
+                            destructiveButtonIndex: isBlockedPeer
+                              ? undefined
+                              : 0,
+                            title: isBlockedPeer
+                              ? "If you unblock this contact, they will be able to send you messages again."
+                              : "If you block this contact, you will not receive messages from them anymore.",
                           },
-                        });
+                          (selectedIndex?: number) => {
+                            if (selectedIndex === 0) {
+                              blockPeer({
+                                peerAddress: peerAddress || "",
+                                blocked: !isBlockedPeer,
+                              });
+                              dispatch({
+                                type: XmtpDispatchTypes.XmtpSetBlockedStatus,
+                                payload: {
+                                  peerAddress: peerAddress || "",
+                                  blocked: !isBlockedPeer,
+                                },
+                              });
+                            }
+                          }
+                        );
+
                         break;
 
                       default:
