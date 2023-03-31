@@ -43,6 +43,7 @@ import {
   chatInputBackgroundColor,
   textPrimaryColor,
   textSecondaryColor,
+  actionSheetColors,
 } from "../utils/colors";
 import { getAddressForPeer } from "../utils/eth";
 import { conversationName, getTitleFontScale } from "../utils/str";
@@ -215,6 +216,7 @@ const Conversation = ({
                     cancelButtonIndex: 2,
                     title: peerAddress,
                     destructiveButtonIndex: isBlockedPeer ? undefined : 1,
+                    ...actionSheetColors(colorScheme),
                   },
                   (selectedIndex?: number) => {
                     switch (selectedIndex) {
@@ -235,6 +237,7 @@ const Conversation = ({
                             title: isBlockedPeer
                               ? "If you unblock this contact, they will be able to send you messages again."
                               : "If you block this contact, you will not receive messages from them anymore.",
+                            ...actionSheetColors(colorScheme),
                           },
                           (selectedIndex?: number) => {
                             if (selectedIndex === 0) {
@@ -287,27 +290,41 @@ const Conversation = ({
       headerRight: () => {
         return (
           <>
-            {showInvite.show && !showInvite.banner && (
-              <Button
-                variant="text"
-                title="Invite"
-                onPress={inviteToConverse}
-                allowFontScaling={false}
-                textStyle={{ fontSize: 17 * titleFontScale }}
-              />
-            )}
+            {showInvite.show &&
+              !showInvite.banner &&
+              (Platform.OS === "android" ? (
+                <TouchableOpacity onPress={inviteToConverse}>
+                  <Picto
+                    picto="addlink"
+                    size={24}
+                    color={textSecondaryColor(colorScheme)}
+                  />
+                </TouchableOpacity>
+              ) : (
+                <Button
+                  variant="text"
+                  title="Invite"
+                  onPress={inviteToConverse}
+                  allowFontScaling={false}
+                  textStyle={{ fontSize: 17 * titleFontScale }}
+                />
+              ))}
           </>
         );
       },
+      headerTintColor: textSecondaryColor(colorScheme),
     });
   }, [
+    colorScheme,
     conversation,
     dispatch,
     inviteToConverse,
+    isBlockedPeer,
     navigation,
     peerAddress,
     showActionSheetWithOptions,
-    showInvite,
+    showInvite.banner,
+    showInvite.show,
     state.xmtp.initialLoadDone,
     state.xmtp.loading,
     styles.title,

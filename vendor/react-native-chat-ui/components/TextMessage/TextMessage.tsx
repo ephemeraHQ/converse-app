@@ -6,7 +6,13 @@ import {
 import * as Clipboard from "expo-clipboard";
 
 import * as React from "react";
-import { Alert, Text, TouchableOpacity, View } from "react-native";
+import {
+  Alert,
+  Text,
+  TouchableOpacity,
+  useColorScheme,
+  View,
+} from "react-native";
 import * as Linking from "expo-linking";
 
 import ParsedText from "react-native-parsed-text";
@@ -29,6 +35,7 @@ import {
 import { AppContext } from "../../../../data/store/context";
 import { blockPeer, reportMessage } from "../../../../utils/api";
 import { XmtpDispatchTypes } from "../../../../data/store/xmtpReducer";
+import { actionSheetColors } from "../../../../utils/colors";
 
 export interface TextMessageTopLevelProps {
   /** @see {@link LinkPreviewProps.onPreviewDataFetched} */
@@ -70,6 +77,8 @@ export const TextMessage = ({
       theme,
       user,
     });
+
+  const colorScheme = useColorScheme();
 
   const handleEmailPress = React.useCallback((email: string) => {
     try {
@@ -135,6 +144,7 @@ export const TextMessage = ({
           options,
           title: content,
           cancelButtonIndex: options.indexOf("Cancel"),
+          ...actionSheetColors(colorScheme),
         },
         (selectedIndex?: number) => {
           if (selectedIndex === undefined) return;
@@ -190,6 +200,7 @@ export const TextMessage = ({
           "This message will be forwarded to Converse. The contact will not be informed.",
         cancelButtonIndex: options.indexOf("Cancel"),
         destructiveButtonIndex: [0, 1],
+        ...actionSheetColors(colorScheme),
       },
       (selectedIndex?: number) => {
         if (selectedIndex === undefined) return;
@@ -220,6 +231,7 @@ export const TextMessage = ({
         title: message.text,
         cancelButtonIndex: options.indexOf("Cancel"),
         destructiveButtonIndex: currentUserIsAuthor ? undefined : 1,
+        ...actionSheetColors(colorScheme),
       },
       (selectedIndex?: number) => {
         if (selectedIndex === undefined) return;

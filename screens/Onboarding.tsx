@@ -34,7 +34,8 @@ export default function OnboardingScreen() {
       handleResponse(new URL(url));
     });
     // Overwriting canOpenURL to be sure we can open everything
-    Linking.canOpenURL = async () => {
+    Linking.canOpenURL = async (url: string) => {
+      console.log(`[Onboarding] Opening url ${url}`);
       return true;
     };
     return () => {

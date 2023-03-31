@@ -10,7 +10,11 @@ import {
   ViewStyle,
 } from "react-native";
 
-import { backgroundColor, textSecondaryColor } from "../utils/colors";
+import {
+  backgroundColor,
+  textPrimaryColor,
+  textSecondaryColor,
+} from "../utils/colors";
 import Picto from "./Picto/Picto";
 import TableViewItem, {
   TableViewItemType,
@@ -33,9 +37,21 @@ export const TableViewPicto = ({ symbol }: { symbol: string }) => {
   );
 };
 
-export const TableViewEmoji = ({ emoji }: { emoji: string }) => (
-  <Text style={{ width: 32, marginRight: 2, marginLeft: 6 }}>{emoji}</Text>
-);
+export const TableViewEmoji = ({ emoji }: { emoji: string }) => {
+  const colorScheme = useColorScheme();
+  return (
+    <Text
+      style={{
+        width: 32,
+        marginRight: 2,
+        marginLeft: 6,
+        color: textPrimaryColor(colorScheme),
+      }}
+    >
+      {emoji}
+    </Text>
+  );
+};
 
 export default function TableView({
   title,

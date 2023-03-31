@@ -12,18 +12,29 @@ index f6f2efc..e011edd 100644
      return (React.createElement(TouchableOpacity, { onPress: onPress, style: [
              { width, height },
 diff --git a/node_modules/@walletconnect/react-native-dapp/dist/constants/formatWalletServiceUrl.js b/node_modules/@walletconnect/react-native-dapp/dist/constants/formatWalletServiceUrl.js
-index 59016ea..3970411 100644
+index 59016ea..bcadefe 100644
 --- a/node_modules/@walletconnect/react-native-dapp/dist/constants/formatWalletServiceUrl.js
 +++ b/node_modules/@walletconnect/react-native-dapp/dist/constants/formatWalletServiceUrl.js
-@@ -3,7 +3,7 @@ export default function formatProviderUrl(walletService) {
+@@ -2,8 +2,18 @@ import { Platform } from "react-native";
+ export default function formatProviderUrl(walletService) {
      const { mobile } = walletService;
      const { universal: universalLink, native: deepLink } = mobile;
++    let workingDeepLink = deepLink;
++    if (workingDeepLink) {
++        if (workingDeepLink.endsWith("://")) {
++            workingDeepLink = workingDeepLink.slice(0, workingDeepLink.length - 1)
++        } else if (workingDeepLink.endsWith(':/')) {
++            // OK
++        } else if (workingDeepLink.endsWith(':')) {
++            workingDeepLink = `${workingDeepLink}/`
++        }
++    }
      if (Platform.OS === "android") {
 -        return `${deepLink}`;
-+        return `${deepLink}/`;
++        return workingDeepLink
      }
 -    return `${universalLink}`;
-+    return `${universalLink || `${deepLink}/`}`;
++    return `${universalLink || workingDeepLink}`;
  }
 diff --git a/node_modules/@walletconnect/react-native-dapp/dist/providers/WalletConnectProvider.js b/node_modules/@walletconnect/react-native-dapp/dist/providers/WalletConnectProvider.js
 index 9b5b1e2..dda914a 100644

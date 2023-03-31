@@ -1,5 +1,6 @@
 import AccountCircle from "@material-symbols/svg-400/outlined/account_circle.svg";
 import Add from "@material-symbols/svg-400/outlined/add.svg";
+import AddLink from "@material-symbols/svg-400/outlined/add_link.svg";
 import ArrowUpRight from "@material-symbols/svg-400/outlined/call_made.svg";
 import Chat from "@material-symbols/svg-400/outlined/chat.svg";
 import Close from "@material-symbols/svg-400/outlined/close.svg";
@@ -44,6 +45,7 @@ const pictoMapping: {
   signature: Signature,
   "message.badge": ChatNotification,
   search: Search,
+  addlink: AddLink,
 };
 
 export default function Picto({ picto, style, size, weight, color }: Props) {
