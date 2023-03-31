@@ -205,7 +205,7 @@ dependencies {
     implementation 'com.beust:klaxon:5.5'
     implementation 'com.tencent:mmkv:1.2.15'
     implementation 'androidx.security:security-crypto:1.1.0-alpha05'
-    implementation('org.xmtp:android:0.0.7') {
+    implementation('org.xmtp:android:0.0.9') {
         exclude group: 'com.google.crypto.tink', module: 'tink'
         exclude group: 'org.bouncycastle', module: 'bcprov-jdk15on'
     }
