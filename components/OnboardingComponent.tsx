@@ -7,6 +7,7 @@ import {
 } from "@walletconnect/react-native-dapp";
 import WalletConnectProvider from "@walletconnect/web3-provider";
 import { Bytes, ethers, Signer, Wallet } from "ethers";
+import * as Linking from "expo-linking";
 import React, {
   useCallback,
   useContext,
@@ -327,6 +328,22 @@ export default function OnboardingComponent({
   let picto = "message.circle.fill";
   let title = "GM";
   let text = `Converse connects web3 identities with each other. Connect your wallet to start chatting.`;
+  const termsAndConditions = (
+    <Text style={styles.terms}>
+      By signing in you agree to our{" "}
+      <Text
+        style={styles.link}
+        onPress={() =>
+          Linking.openURL(
+            "https://polmaire.notion.site/Terms-and-conditions-f4880f209272477abe1403adc9dd7401"
+          )
+        }
+      >
+        terms and conditions.
+      </Text>
+    </Text>
+  );
+  let subtitle = null;
   if (user.address) {
     picto = "signature";
     title = "Sign";
@@ -334,6 +351,7 @@ export default function OnboardingComponent({
     if (user.isOnXmtp) {
       text =
         "Second and last step: please sign with your wallet so that we make sure you own it.";
+      subtitle = termsAndConditions;
     } else {
       if (waitingForSecondSignature) {
         title = "Sign (2/2)";
@@ -343,6 +361,7 @@ export default function OnboardingComponent({
         title = "Sign (1/2)";
         text =
           "This first signature will enable your wallet to send and receive messages.";
+        subtitle = termsAndConditions;
       }
     }
   }
@@ -362,7 +381,10 @@ export default function OnboardingComponent({
       {!loading && (
         <>
           <Text style={styles.title}>{title}</Text>
-          <Text style={styles.p}>{text}</Text>
+          <View style={{ marginBottom: "auto" }}>
+            <Text style={styles.p}>{text}</Text>
+            {subtitle}
+          </View>
         </>
       )}
 
@@ -499,7 +521,6 @@ const getStyles = (colorScheme: ColorSchemeName) =>
     p: {
       textAlign: "center",
       marginTop: 21,
-      marginBottom: "auto",
       marginLeft: 32,
       marginRight: 32,
       ...Platform.select({
@@ -530,5 +551,24 @@ const getStyles = (colorScheme: ColorSchemeName) =>
       width: "100%",
       marginTop: 50,
       marginBottom: 97,
+    },
+    terms: {
+      textAlign: "center",
+      marginTop: 30,
+      ...Platform.select({
+        default: {
+          fontSize: 17,
+          color: textPrimaryColor(colorScheme),
+        },
+        android: {
+          fontSize: 14,
+          lineHeight: 20,
+          color: textSecondaryColor(colorScheme),
+          maxWidth: 260,
+        },
+      }),
+    },
+    link: {
+      textDecorationLine: "underline",
     },
   });
