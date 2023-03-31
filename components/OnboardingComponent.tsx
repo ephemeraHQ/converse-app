@@ -577,6 +577,8 @@ const getStyles = (colorScheme: ColorSchemeName) =>
     },
     terms: {
       textAlign: "center",
+      marginLeft: 32,
+      marginRight: 32,
       marginTop: 30,
       ...Platform.select({
         default: {

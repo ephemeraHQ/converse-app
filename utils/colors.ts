@@ -263,3 +263,18 @@ export const setAndroidColors = (colorScheme: ColorSchemeName) => {
     BackgroundColor.setColor(rgbStringToHex(backgroundColor(colorScheme)));
   }
 };
+
+export const actionSheetColors = (colorScheme: ColorSchemeName) =>
+  Platform.OS === "android"
+    ? {
+        containerStyle: {
+          backgroundColor:
+            colorScheme === "dark"
+              ? MaterialDarkColors.elevation.level3
+              : backgroundColor(colorScheme),
+        },
+        tintColor: textSecondaryColor(colorScheme),
+        titleTextStyle: { color: textSecondaryColor(colorScheme) },
+        messageTextStyle: { color: textSecondaryColor(colorScheme) },
+      }
+    : {};

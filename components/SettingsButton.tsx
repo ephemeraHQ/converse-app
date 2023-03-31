@@ -10,7 +10,7 @@ import { clearDB } from "../data/db";
 import { AppDispatchTypes } from "../data/store/appReducer";
 import { AppContext } from "../data/store/context";
 import { NotificationsDispatchTypes } from "../data/store/notificationsReducer";
-import { textSecondaryColor } from "../utils/colors";
+import { actionSheetColors, textSecondaryColor } from "../utils/colors";
 import mmkv from "../utils/mmkv";
 import {
   disablePushNotifications,
@@ -107,6 +107,7 @@ export default function SettingsButton() {
         destructiveButtonIndex: options.indexOf("Disconnect"),
         cancelButtonIndex: options.indexOf("Cancel"),
         title: state.xmtp.address,
+        ...actionSheetColors(colorScheme),
       },
       (selectedIndex?: number) => {
         if (selectedIndex === undefined) return;
@@ -117,6 +118,7 @@ export default function SettingsButton() {
       }
     );
   }, [
+    colorScheme,
     dispatch,
     showActionSheetWithOptions,
     state.notifications.status,
