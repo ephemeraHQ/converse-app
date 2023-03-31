@@ -122,8 +122,10 @@ class PushNotificationsService : FirebaseMessagingService() {
         if (isIntroTopic(notificationData.contentTopic)) {
             return
         } else if (isInviteTopic(notificationData.contentTopic)) {
+            Log.d(TAG, "Handling a new conversation notification")
             handleNewConversationV2Notification(envelope)
         } else {
+            Log.d(TAG, "Handling a new message notification")
             handleNewMessageNotification(envelope)
         }
 
@@ -131,6 +133,7 @@ class PushNotificationsService : FirebaseMessagingService() {
 
     private fun handleNewConversationV2Notification(envelope: Envelope) {
         val conversation = xmtpClient.conversations.fromInvite((envelope))
+        Log.d(TAG, "Decoded notification from invite!")
         val conversationV2Data = ConversationV2Data(
             "v2",
             conversation.topic,
@@ -142,6 +145,7 @@ class PushNotificationsService : FirebaseMessagingService() {
         val apiURI = getMMKV("api-uri")
         val expoPushToken = getKeychainValue("EXPO_PUSH_TOKEN")
         if (apiURI != null) {
+            Log.d(TAG, "Api URI is not null, subscribing to new topic - $apiURI")
             subscribeToTopic(apiURI, expoPushToken, conversation.topic)
         }
         persistNewConversation(conversation.topic, conversationV2Data)
@@ -158,9 +162,11 @@ class PushNotificationsService : FirebaseMessagingService() {
 
         val jsonRequest = JsonObjectRequest(Request.Method.POST, appendTopicURI, parameters, {
             //TODO: handle success
+            Log.d(TAG, "Subscribe to new topic success!")
         }) { error ->
             error.printStackTrace()
             //TODO: handle failure
+            Log.d(TAG, "Subscribe to new topic error - $error")
         }
 
         Volley.newRequestQueue(this).add(jsonRequest)
@@ -174,7 +180,7 @@ class PushNotificationsService : FirebaseMessagingService() {
         }
 
         val decodedMessage = conversation.decode(envelope)
-
+        Log.d(TAG, "Successfully decoded message: '${decodedMessage.body}'")
         saveMessageToStorage(envelope.contentTopic, decodedMessage)
         if (decodedMessage.senderAddress == xmtpClient.address) return
         var title = getSavedConversationTitle(envelope.contentTopic)
