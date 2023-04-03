@@ -1,5 +1,4 @@
 import { Client, Signer } from "@xmtp/xmtp-js";
-import { getAddress } from "ethers/lib/utils";
 
 import config from "../../config";
 
@@ -22,11 +21,3 @@ export const getXmtpKeysFromSigner = (signer: Signer) =>
   Client.getKeys(signer, {
     env,
   });
-
-export const buildContentTopic = (name: string): string =>
-  `/xmtp/0/${name}/proto`;
-
-export const buildUserInviteTopic = (walletAddr: string): string => {
-  // EIP55 normalize the address case.
-  return buildContentTopic(`invite-${getAddress(walletAddr)}`);
-};
