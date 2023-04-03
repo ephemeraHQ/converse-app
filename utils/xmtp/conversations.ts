@@ -9,23 +9,6 @@ const {
   ConversationV2,
 } = require("@xmtp/xmtp-js/dist/esm/src/conversations/Conversation");
 
-export const getConversations = async (client: Client) => {
-  const conversations = await client.conversations.list();
-  return conversations;
-};
-
-export const streamNewConversations = async (
-  client: Client,
-  handleNewConversation: (conversation: Conversation) => void
-) => {
-  // Stream future conversations and send to expo
-  // For each new conversation, load & stream messages
-  const conversationStream = await client.conversations.stream();
-  for await (const conversation of conversationStream) {
-    handleNewConversation(conversation);
-  }
-};
-
 export const parseConversationJSON = (
   xmtpClient: Client,
   savedConversation: string
