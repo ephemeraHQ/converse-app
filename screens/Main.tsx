@@ -331,7 +331,8 @@ export default function Main() {
     if (
       state.notifications.status === "granted" &&
       state.xmtp.initialLoadDone &&
-      state.xmtp.address
+      state.xmtp.address &&
+      !state.xmtp.loading
     ) {
       subscribeToNotifications(
         state.xmtp.address,
@@ -345,6 +346,7 @@ export default function Main() {
     state.xmtp.blockedPeerAddresses,
     state.xmtp.conversations,
     state.xmtp.initialLoadDone,
+    state.xmtp.loading,
   ]);
 
   useEffect(() => {

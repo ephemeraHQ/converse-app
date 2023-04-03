@@ -16,6 +16,8 @@ export type NotificationPermissionStatus =
   | "undetermined"
   | "denied";
 
+let lastSubscribedTopics: string[] = [];
+
 export const subscribeToNotifications = async (
   address: string,
   conversations: XmtpConversation[],
@@ -36,6 +38,14 @@ export const subscribeToNotifications = async (
   ]);
   expoPushToken = expoTokenQuery.data;
   saveExpoPushToken(expoPushToken);
+
+  // Let's check if we need to make the query i.e
+  // the topics are not exactly the same
+  const shouldMakeQuery =
+    lastSubscribedTopics.length !== topics.length ||
+    topics.some((t) => !lastSubscribedTopics.includes(t));
+  if (!shouldMakeQuery) return;
+  lastSubscribedTopics = topics;
   try {
     await api.post("/api/subscribe", {
       expoToken: expoPushToken,
