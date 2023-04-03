@@ -21,13 +21,16 @@ import {
   useColorScheme,
   View,
 } from "react-native";
-import uuid from "react-native-uuid";
+// import uuid from "react-native-uuid";
 
 import ActivityIndicator from "../components/ActivityIndicator/ActivityIndicator";
 import Button from "../components/Button/Button";
 import InviteBanner from "../components/InviteBanner";
 import Picto from "../components/Picto/Picto";
-import { sendXmtpMessage } from "../components/XmtpState";
+import {
+  getLocalXmtpConversationForTopic,
+  prepareXmtpMessage,
+} from "../components/XmtpState";
 import { sendMessageToWebview } from "../components/XmtpWebview";
 import { AppContext } from "../data/store/context";
 import { XmtpConversation, XmtpDispatchTypes } from "../data/store/xmtpReducer";
@@ -97,6 +100,7 @@ const Conversation = ({
   useEffect(() => {
     if (conversation) {
       setPeerAddress(conversation.peerAddress);
+      getLocalXmtpConversationForTopic(conversation.topic);
     }
   }, [conversation]);
 
@@ -380,19 +384,36 @@ const Conversation = ({
       messageContent.current = "";
       setMessageValue("");
       // Lazy message
+      // dispatch({
+      //   type: XmtpDispatchTypes.XmtpLazyMessage,
+      //   payload: {
+      //     topic: conversation.topic,
+      //     message: {
+      //       id: uuid.v4().toString(),
+      //       senderAddress: state.xmtp.address || "",
+      //       sent: new Date().getTime(),
+      //       content: m.text,
+      //     },
+      //   },
+      // });
+      const preparedMessage = await prepareXmtpMessage(
+        conversation.topic,
+        m.text
+      );
+      const messageId = await preparedMessage.messageID();
       dispatch({
         type: XmtpDispatchTypes.XmtpLazyMessage,
         payload: {
           topic: conversation.topic,
           message: {
-            id: uuid.v4().toString(),
+            id: messageId,
             senderAddress: state.xmtp.address || "",
             sent: new Date().getTime(),
             content: m.text,
           },
         },
       });
-      await sendXmtpMessage(conversation.topic, m.text);
+      preparedMessage.send();
     },
     [conversation, dispatch, state.xmtp.address]
   );
