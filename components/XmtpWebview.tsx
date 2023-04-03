@@ -10,6 +10,7 @@ import { XmtpDispatchTypes } from "../data/store/xmtpReducer";
 import { loadSavedNotificationMessagesToContext } from "../utils/backgroundNotifications/loadSavedNotifications";
 import {
   deleteXmtpKeys,
+  loadXmtpConversation,
   loadXmtpKeys,
   saveXmtpConversations,
   saveXmtpKeys,
@@ -130,17 +131,22 @@ export default function XmtpWebview() {
   }, [state.xmtp.webviewConnected]);
 
   useEffect(() => {
-    if (state.xmtp.webviewConnected && !launchedInitialLoad.current) {
-      // Let's launch the "initial load"
-      // of messages starting with last
-      // timestamp for each convo
-      const knownTopics = Object.keys(state.xmtp.conversations);
-      sendMessageToWebview("LOAD_CONVERSATIONS_AND_MESSAGES", {
-        lastSyncedAt: getLastXMTPSyncedAt(),
-        knownTopics,
-      });
-      launchedInitialLoad.current = true;
-    }
+    const initialLoad = async () => {
+      if (state.xmtp.webviewConnected && !launchedInitialLoad.current) {
+        // Let's launch the initial load of all convos & messages
+        const knownTopics = Object.keys(state.xmtp.conversations);
+        const exportedConversations = await Promise.all(
+          knownTopics.map(loadXmtpConversation)
+        );
+        sendMessageToWebview("LOAD_CONVERSATIONS_AND_MESSAGES", {
+          lastSyncedAt: getLastXMTPSyncedAt(),
+          knownTopics,
+          exportedConversations,
+        });
+        launchedInitialLoad.current = true;
+      }
+    };
+    initialLoad();
   }, [state.xmtp.webviewConnected, state.xmtp.conversations]);
 
   const onMessage = useCallback(

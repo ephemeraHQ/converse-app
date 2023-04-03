@@ -20,7 +20,7 @@ export const isOnXmtp = async (address: string) => {
   return xmtpClient.canMessage(address);
 };
 
-const getXmtpConversationForTopic = async (
+export const getLocalXmtpConversationForTopic = async (
   topic: string
 ): Promise<Conversation> => {
   if (!xmtpClient) throw new Error("No XMTP Client");
@@ -47,10 +47,10 @@ const getXmtpConversationForTopic = async (
   return conversation;
 };
 
-export const sendXmtpMessage = async (topic: string, content: string) => {
-  const conversation = await getXmtpConversationForTopic(topic);
-  const message = await conversation.send(content);
-  return message;
+export const prepareXmtpMessage = async (topic: string, content: string) => {
+  const conversation = await getLocalXmtpConversationForTopic(topic);
+  const preparedMessage = await conversation.prepareMessage(content);
+  return preparedMessage;
 };
 
 export const getLocalXmtpClient = async () => {
