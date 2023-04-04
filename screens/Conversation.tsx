@@ -354,7 +354,7 @@ const Conversation = ({
         id: m.id,
         text: m.content,
         type: "text",
-        status: m.status,
+        status: m.status || "sent",
       });
     }
     setMessages(newMessages);
