@@ -2,6 +2,7 @@ import { useActionSheet } from "@expo/react-native-action-sheet";
 import { Theme } from "@flyerhq/react-native-chat-ui";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
+import { fromNanoString } from "@xmtp/xmtp-js";
 import { isAddress } from "ethers/lib/utils";
 import * as Clipboard from "expo-clipboard";
 import React, {
@@ -32,6 +33,7 @@ import {
   prepareXmtpMessage,
 } from "../components/XmtpState";
 import { sendMessageToWebview } from "../components/XmtpWebview";
+import { saveMessages } from "../data";
 import { AppContext } from "../data/store/context";
 import { XmtpConversation, XmtpDispatchTypes } from "../data/store/xmtpReducer";
 import { blockPeer, userExists } from "../utils/api";
@@ -342,20 +344,6 @@ const Conversation = ({
       conversation ? conversation.messages.values() : []
     );
     const messagesLength = messagesArray.length;
-    conversation?.lazyMessages.forEach((m) => {
-      // Do not push lazy messages we already have
-      if (!conversation?.messages.get(m.id)) {
-        newMessages.push({
-          author: {
-            id: m.senderAddress,
-          },
-          createdAt: m.sent,
-          id: m.id,
-          text: m.content,
-          type: "text",
-        });
-      }
-    });
     for (let index = messagesLength - 1; index >= 0; index--) {
       const m = messagesArray[index];
       newMessages.push({
@@ -366,15 +354,11 @@ const Conversation = ({
         id: m.id,
         text: m.content,
         type: "text",
+        status: m.status,
       });
     }
     setMessages(newMessages);
-  }, [
-    conversation,
-    conversation?.lazyMessages,
-    conversation?.messages,
-    state.xmtp.lastUpdateAt,
-  ]);
+  }, [conversation, conversation?.messages, state.xmtp.lastUpdateAt]);
 
   const messageContent = useRef(messageToPrefill);
 
@@ -383,36 +367,30 @@ const Conversation = ({
       if (!conversation) return;
       messageContent.current = "";
       setMessageValue("");
-      // Lazy message
-      // dispatch({
-      //   type: XmtpDispatchTypes.XmtpLazyMessage,
-      //   payload: {
-      //     topic: conversation.topic,
-      //     message: {
-      //       id: uuid.v4().toString(),
-      //       senderAddress: state.xmtp.address || "",
-      //       sent: new Date().getTime(),
-      //       content: m.text,
-      //     },
-      //   },
-      // });
       const preparedMessage = await prepareXmtpMessage(
         conversation.topic,
         m.text
       );
       const messageId = await preparedMessage.messageID();
-      dispatch({
-        type: XmtpDispatchTypes.XmtpLazyMessage,
-        payload: {
-          topic: conversation.topic,
-          message: {
+      const sentAtTime = fromNanoString(
+        preparedMessage.messageEnvelope.timestampNs
+      );
+      if (!sentAtTime) return;
+      // Save to DB immediatly
+      saveMessages(
+        [
+          {
             id: messageId,
             senderAddress: state.xmtp.address || "",
-            sent: new Date().getTime(),
+            sent: sentAtTime.getTime(),
             content: m.text,
+            status: "sending",
           },
-        },
-      });
+        ],
+        conversation.topic,
+        dispatch
+      );
+      // Then send for real
       preparedMessage.send();
     },
     [conversation, dispatch, state.xmtp.address]

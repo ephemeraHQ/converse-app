@@ -31,6 +31,7 @@ const xmtpMessageToDb = (
   sent: xmtpMessage.sent,
   content: xmtpMessage.content || "",
   conversationId: conversationTopic,
+  status: xmtpMessage.status || "sent",
 });
 
 const xmtpMessageFromDb = (message: Message): XmtpMessage => ({
@@ -38,6 +39,7 @@ const xmtpMessageFromDb = (message: Message): XmtpMessage => ({
   senderAddress: message.senderAddress,
   sent: message.sent,
   content: message.content,
+  status: message.status,
 });
 
 const xmtpConversationToDb = (
@@ -79,7 +81,6 @@ const xmtpConversationFromDb = (
       : new Map(),
     lensHandle: dbConversation.lensHandle,
     ensName: dbConversation.ensName,
-    lazyMessages: [],
   };
 };
 
