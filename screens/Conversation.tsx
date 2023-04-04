@@ -372,9 +372,9 @@ const Conversation = ({
         m.text
       );
       const messageId = await preparedMessage.messageID();
-      const sentAtTime = fromNanoString(
-        preparedMessage.messageEnvelope.timestampNs
-      );
+      const sentAtTime =
+        (preparedMessage.messageEnvelope as any)?.timestamp ||
+        fromNanoString(preparedMessage.messageEnvelope.timestampNs);
       if (!sentAtTime) return;
       // Save to DB immediatly
       saveMessages(
