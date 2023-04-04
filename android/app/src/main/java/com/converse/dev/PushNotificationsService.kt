@@ -1,13 +1,8 @@
 package com.converse.dev
 
 import android.app.ActivityManager
-import android.app.NotificationManager
-import android.app.PendingIntent
-import android.content.Context
-import android.content.Intent
 import android.util.Log
 import android.view.View
-import androidx.core.app.NotificationCompat
 import com.android.volley.Request
 import com.android.volley.toolbox.JsonObjectRequest
 import com.android.volley.toolbox.Volley
@@ -27,6 +22,12 @@ import expo.modules.core.ViewManager
 import expo.modules.core.arguments.MapArguments
 import expo.modules.core.interfaces.InternalModule
 import expo.modules.core.interfaces.SingletonModule
+import expo.modules.notifications.notifications.JSONNotificationContentBuilder
+import expo.modules.notifications.notifications.model.Notification
+import expo.modules.notifications.notifications.model.NotificationContent
+import expo.modules.notifications.notifications.model.NotificationRequest
+import expo.modules.notifications.notifications.model.triggers.FirebaseNotificationTrigger
+import expo.modules.notifications.service.NotificationsService
 import expo.modules.securestore.SecureStoreModule
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
@@ -115,15 +116,15 @@ class PushNotificationsService : FirebaseMessagingService() {
             return
         } else if (isInviteTopic(notificationData.contentTopic)) {
             Log.d(TAG, "Handling a new conversation notification")
-            handleNewConversationV2Notification(xmtpClient, envelope)
+            handleNewConversationV2Notification(xmtpClient, envelope, remoteMessage)
         } else {
             Log.d(TAG, "Handling a new message notification")
-            handleNewMessageNotification(xmtpClient, envelope)
+            handleNewMessageNotification(xmtpClient, envelope, remoteMessage)
         }
 
     }
 
-    private fun handleNewConversationV2Notification(xmtpClient:Client, envelope: Envelope) {
+    private fun handleNewConversationV2Notification(xmtpClient:Client, envelope: Envelope, remoteMessage: RemoteMessage) {
         val conversation = xmtpClient.conversations.fromInvite((envelope))
         Log.d(TAG, "Decoded new conversation from invite")
         val conversationV2Data = ConversationV2Data(
@@ -141,7 +142,7 @@ class PushNotificationsService : FirebaseMessagingService() {
             subscribeToTopic(apiURI, expoPushToken, conversation.topic)
         }
         persistNewConversation(conversation.topic, conversationV2Data)
-        showNotification(conversation.topic, shortAddress(conversation.peerAddress), "New Conversation")
+        showNotification(shortAddress(conversation.peerAddress), "New Conversation", remoteMessage)
     }
 
     private fun subscribeToTopic(apiURI: String, expoPushToken: String, topic: String) {
@@ -164,7 +165,7 @@ class PushNotificationsService : FirebaseMessagingService() {
         Volley.newRequestQueue(this).add(jsonRequest)
     }
 
-    private fun handleNewMessageNotification(xmtpClient: Client, envelope: Envelope) {
+    private fun handleNewMessageNotification(xmtpClient: Client, envelope: Envelope, remoteMessage: RemoteMessage) {
         val conversation = getPersistedConversation(xmtpClient, envelope.contentTopic)
         if (conversation === null) {
             Log.d(TAG, "No conversation found for ${envelope.contentTopic}")
@@ -180,7 +181,7 @@ class PushNotificationsService : FirebaseMessagingService() {
             title = shortAddress(decodedMessage.senderAddress)
         }
 
-        showNotification(envelope.contentTopic, title, decodedMessage.body)
+        showNotification(title, decodedMessage.body, remoteMessage)
     }
 
     private fun saveMessageToStorage(topic: String, decodedMessage: DecodedMessage) {
@@ -283,24 +284,31 @@ class PushNotificationsService : FirebaseMessagingService() {
         }
     }
 
-    private fun showNotification(topic: String, title: String, message: String) {
-        val intent = Intent(this, MainActivity::class.java)
-        val pendingIntent = PendingIntent.getActivity(this, 0, intent, (PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT))
+    private fun getNotificationIdentifier(remoteMessage: RemoteMessage): String {
+        return remoteMessage.data?.get("tag") ?: remoteMessage.messageId ?: UUID.randomUUID().toString()
+    }
 
-        val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+    private fun createNotificationRequest(
+        identifier: String,
+        content: NotificationContent,
+        notificationTrigger: FirebaseNotificationTrigger
+    ): NotificationRequest {
+        return NotificationRequest(identifier, content, notificationTrigger)
+    }
 
-        // Build the notification
-        val notificationBuilder = NotificationCompat.Builder(this, NOTIFICATION_CHANNEL_ID)
-            .setSmallIcon(R.mipmap.ic_launcher)
-            .setContentTitle(title)
-            .setContentText(message)
-            .setAutoCancel(true)
-            .setContentIntent(pendingIntent)
+    private fun createNotificationFromRemoteMessage(title: String, message: String, remoteMessage: RemoteMessage): Notification {
+        val identifier = getNotificationIdentifier(remoteMessage)
+        var data = remoteMessage.data as MutableMap<Any, Any>
+        data["title"] = title
+        data["message"] = message
+        val payload = JSONObject(data as Map<*, *>)
+        val content = JSONNotificationContentBuilder(this).setPayload(payload).build()
+        val request = createNotificationRequest(identifier, content, FirebaseNotificationTrigger(remoteMessage))
+        return Notification(request, Date(remoteMessage.sentTime))
+    }
 
-        // Show the notification
-        val currentTimeMillis = System.currentTimeMillis()
-        val notificationId = "$topic-$currentTimeMillis".hashCode()
-        notificationManager.notify(notificationId, notificationBuilder.build())
+    private fun showNotification(title: String, message: String, remoteMessage: RemoteMessage) {
+        NotificationsService.receive(this, createNotificationFromRemoteMessage(title, message, remoteMessage))
     }
 
     private fun initXmtpClient(): Client {
