@@ -12,12 +12,14 @@ import com.android.volley.Request
 import com.android.volley.toolbox.JsonObjectRequest
 import com.android.volley.toolbox.Volley
 import com.beust.klaxon.Klaxon
+import com.facebook.react.bridge.Arguments
 import com.facebook.react.bridge.PromiseImpl
 import com.facebook.react.bridge.ReactApplicationContext
+import com.facebook.react.bridge.WritableNativeArray
 import com.google.crypto.tink.subtle.Base64
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
-import com.tencent.mmkv.MMKV
+import com.reactnativecommunity.asyncstorage.AsyncStorageModule
 import expo.modules.core.ExportedModule
 import expo.modules.core.ModuleRegistry
 import expo.modules.core.Promise
@@ -36,7 +38,8 @@ import org.xmtp.android.library.messages.EnvelopeBuilder
 import org.xmtp.android.library.messages.PrivateKeyBundleV1Builder
 import java.security.MessageDigest
 import java.util.*
-
+import kotlinx.coroutines.*
+import kotlin.coroutines.resume
 
 class NotificationData(val message: String, val timestampNs: String, val contentTopic: String)
 class ConversationDictData(val shortAddress: String? = null, val lensHandle: String? = null, val ensName: String? = null)
@@ -77,13 +80,13 @@ class PushNotificationsService : FirebaseMessagingService() {
         private const val TAG = "PushNotificationsService"
         internal const val NOTIFICATION_CHANNEL_ID = "default"
         private lateinit var secureStoreModule: SecureStoreModule
-
+        private lateinit var asyncStorageModule: AsyncStorageModule
     }
 
     override fun onCreate() {
         super.onCreate()
-        MMKV.initialize(this)
         initSecureStore()
+        initAsyncStorage()
     }
 
     override fun onMessageReceived(remoteMessage: RemoteMessage) {
@@ -131,7 +134,7 @@ class PushNotificationsService : FirebaseMessagingService() {
             null,
             Base64.encode(conversation.keyMaterial)
         )
-        val apiURI = getMMKV("api-uri")
+        val apiURI = getAsyncStorage("api-uri")
         val expoPushToken = getKeychainValue("EXPO_PUSH_TOKEN")
         if (apiURI != null) {
             Log.d(TAG, "Subscribing to new topic at api: $apiURI")
@@ -181,8 +184,14 @@ class PushNotificationsService : FirebaseMessagingService() {
     }
 
     private fun saveMessageToStorage(topic: String, decodedMessage: DecodedMessage) {
-        val currentSavedMessagesString = getMMKV("saved-notifications-messages")
-        var currentSavedMessages = Klaxon().parseArray<SavedNotificationMessage>(currentSavedMessagesString ?: "[]") ?: listOf()
+        val currentSavedMessagesString = getAsyncStorage("saved-notifications-messages")
+        Log.d(TAG, "Got current saved messages from storage: $currentSavedMessagesString")
+        var currentSavedMessages = listOf<SavedNotificationMessage>()
+        try {
+            currentSavedMessages = Klaxon().parseArray<SavedNotificationMessage>(currentSavedMessagesString ?: "[]") ?: listOf()
+        } catch (error: Exception) {
+            Log.d(TAG, "Could not parse saved messages from storage: $currentSavedMessagesString - $error")
+        }
         val newMessageToSave = SavedNotificationMessage(
             topic,
             decodedMessage.body,
@@ -192,7 +201,7 @@ class PushNotificationsService : FirebaseMessagingService() {
         )
         currentSavedMessages += newMessageToSave
         val newSavedMessagesString = Klaxon().toJsonString(currentSavedMessages)
-        setMMKV("saved-notifications-messages", newSavedMessagesString)
+        setAsyncStorage("saved-notifications-messages", newSavedMessagesString)
     }
 
     private fun getKeychainValue(key: String) = runBlocking {
@@ -229,14 +238,49 @@ class PushNotificationsService : FirebaseMessagingService() {
     }
 
 
-    private fun getMMKV(key: String): String? {
-        val kv = MMKV.defaultMMKV()
-        return kv.decodeString(key)
+    private fun getAsyncStorage(key: String): String? {
+        val storageArguments = Arguments.createArray()
+        storageArguments.pushString(key)
+
+        var value = ""
+
+        runBlocking {
+            suspendCancellableCoroutine<Unit> { continuation ->
+                // Call the suspend function and pass in a lambda that resumes the coroutine when the callback is called
+                asyncStorageModule.multiGet(storageArguments) { result ->
+                    try {
+                        value =
+                            ((result[1] as WritableNativeArray).toArrayList()[0] as ArrayList<String>)[1]
+                        continuation.resume(Unit)
+                    } catch (e: Exception) {
+                        Log.d(TAG, "Could not read AsyncStorage value : $e")
+                        continuation.resume(Unit)
+                    }
+                }
+            }
+        }
+        return value
     }
 
-    private fun setMMKV(key: String, value: String): Boolean {
-        val kv = MMKV.defaultMMKV()
-        return kv.encode(key, value)
+    private fun setAsyncStorage(key: String, value: String) {
+        val storageArguments = Arguments.createArray()
+        val valueArguments = Arguments.createArray()
+        valueArguments.pushString(key)
+        valueArguments.pushString(value)
+        storageArguments.pushArray(valueArguments)
+        runBlocking {
+            suspendCancellableCoroutine<Unit> { continuation ->
+                // Call the suspend function and pass in a lambda that resumes the coroutine when the callback is called
+                asyncStorageModule.multiSet(storageArguments) { _ ->
+                    try {
+                        continuation.resume(Unit)
+                    } catch (e: Exception) {
+                        Log.d(TAG, "Could not set AsyncStorage value : $e")
+                        continuation.resume(Unit)
+                    }
+                }
+            }
+        }
     }
 
     private fun showNotification(topic: String, title: String, message: String) {
@@ -267,7 +311,7 @@ class PushNotificationsService : FirebaseMessagingService() {
             Log.d(TAG, "Got XMTP Base 64 Key")
         }
         val keys = PrivateKeyBundleV1Builder.buildFromBundle(Base64.decode(xmtpBase64KeyString))
-        val xmtpEnvString = getMMKV("xmtp-env")
+        val xmtpEnvString = getAsyncStorage("xmtp-env")
         val xmtpEnv =
             if (xmtpEnvString == "production") XMTPEnvironment.PRODUCTION else XMTPEnvironment.DEV
 
@@ -302,7 +346,7 @@ class PushNotificationsService : FirebaseMessagingService() {
     }
 
     private fun getSavedConversationTitle(topic: String): String {
-        val savedConversationDict = getMMKV("conversation-$topic") ?: return ""
+        val savedConversationDict = getAsyncStorage("conversation-$topic") ?: return ""
         val parsedConversationDict = Klaxon().parse<ConversationDictData>(savedConversationDict)
         return ((parsedConversationDict?.lensHandle ?: parsedConversationDict?.ensName) ?: parsedConversationDict?.shortAddress) ?: ""
     }
@@ -330,5 +374,10 @@ class PushNotificationsService : FirebaseMessagingService() {
 
         val moduleRegistry = ModuleRegistry(internalModules, exportedModules, viewManagers, singletonModules)
         secureStoreModule.onCreate(moduleRegistry)
+    }
+
+    private fun initAsyncStorage() {
+        val reactContext = ReactApplicationContext(this)
+        asyncStorageModule = AsyncStorageModule(reactContext)
     }
 }
