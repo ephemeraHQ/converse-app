@@ -166,6 +166,8 @@ const go = async () => {
     }
   } else if (command === "reset") {
     await commands.reset();
+  } else {
+    console.log("Command not configured");
   }
 };
 
