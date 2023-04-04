@@ -1,5 +1,3 @@
-import uuid from "react-native-uuid";
-
 import { DispatchType } from "../../data/store/context";
 import { XmtpDispatchTypes } from "../../data/store/xmtpReducer";
 import {
@@ -29,15 +27,18 @@ export const loadSavedNotificationMessagesToContext = async (
     messages.sort((m1: any, m2: any) => m1.sent - m2.sent);
     messages.forEach((message: any) => {
       dispatch({
-        type: XmtpDispatchTypes.XmtpLazyMessage,
+        type: XmtpDispatchTypes.XmtpSetMessages,
         payload: {
           topic: message.topic,
-          message: {
-            id: message.id || uuid.v4().toString(),
-            senderAddress: message.senderAddress,
-            sent: message.sent,
-            content: message.content,
-          },
+          messages: [
+            {
+              id: message.id,
+              senderAddress: message.senderAddress,
+              sent: message.sent,
+              content: message.content,
+              status: "sent",
+            },
+          ],
         },
       });
     });

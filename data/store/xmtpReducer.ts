@@ -18,7 +18,6 @@ export type XmtpConversation = {
   createdAt: number;
   context?: XmtpConversationContext;
   messages: Map<string, XmtpMessage>;
-  lazyMessages: XmtpMessage[];
   lensHandle?: string | null;
   ensName?: string | null;
   currentMessage?: string;
@@ -50,11 +49,15 @@ export const xmtpInitialState: XmtpType = {
   blockedPeerAddresses: {},
 };
 
-export type XmtpMessage = {
+type XmtpProtocolMessage = {
   id: string;
   senderAddress: string;
   sent: number;
   content: string;
+};
+
+export type XmtpMessage = XmtpProtocolMessage & {
+  status: "delivered" | "error" | "seen" | "sending" | "sent";
 };
 
 export enum XmtpDispatchTypes {
@@ -64,7 +67,6 @@ export enum XmtpDispatchTypes {
   XmtpNewConversation = "XMTP_NEW_CONVERSATION",
   XmtpSetAddress = "XMTP_SET_ADDRESS",
   XmtpSetMessages = "XMTP_SET_MESSAGES",
-  XmtpLazyMessage = "XMTP_LAZY_MESSAGE",
   XmtpInitialLoad = "XMTP_INITIAL_LOAD",
   XmtpInitialLoadDoneOnce = "XMTP_INITIAL_LOAD_DONE_ONCE",
   XmtpLoading = "XMTP_LOADING",
@@ -92,10 +94,6 @@ type XmtpPayload = {
   [XmtpDispatchTypes.XmtpSetMessages]: {
     topic: string;
     messages: XmtpMessage[];
-  };
-  [XmtpDispatchTypes.XmtpLazyMessage]: {
-    topic: string;
-    message: XmtpMessage;
   };
   [XmtpDispatchTypes.XmtpSetCurrentMessageContent]: {
     topic: string;
@@ -161,10 +159,6 @@ export const xmtpReducer = (state: XmtpType, action: XmtpActions): XmtpType => {
             c.messages?.size > 0
               ? c.messages
               : state.conversations[c.topic]?.messages || new Map(),
-          lazyMessages:
-            c.lazyMessages?.length > 0
-              ? c.lazyMessages
-              : state.conversations[c.topic]?.lazyMessages || [],
         };
       });
 
@@ -187,7 +181,6 @@ export const xmtpReducer = (state: XmtpType, action: XmtpActions): XmtpType => {
           [action.payload.conversation.topic]: {
             ...action.payload.conversation,
             messages: new Map(),
-            lazyMessages: [],
             peerAddress: action.payload.conversation?.peerAddress || "",
           },
         },
@@ -219,32 +212,6 @@ export const xmtpReducer = (state: XmtpType, action: XmtpActions): XmtpType => {
       };
     }
 
-    case XmtpDispatchTypes.XmtpLazyMessage: {
-      // Ignore lazy message with an id that we already have
-      // because it means we got it through the XMTP SDK already
-      if (
-        state.conversations[action.payload.topic]?.messages?.get(
-          action.payload.message.id
-        )
-      ) {
-        return state;
-      }
-      const newState = {
-        ...state,
-        lastUpdateAt: new Date().getTime(),
-      };
-      newState.conversations[action.payload.topic] = newState.conversations[
-        action.payload.topic
-      ] || {
-        messages: new Map(),
-        lazyMessages: [],
-        topic: action.payload.topic,
-      };
-      const conversation = newState.conversations[action.payload.topic];
-      conversation.lazyMessages.unshift(action.payload.message);
-      return newState;
-    }
-
     case XmtpDispatchTypes.XmtpSetMessages: {
       const newState = {
         ...state,
@@ -254,25 +221,12 @@ export const xmtpReducer = (state: XmtpType, action: XmtpActions): XmtpType => {
         action.payload.topic
       ] || {
         messages: new Map(),
-        lazyMessages: [],
         topic: action.payload.topic,
       };
       const conversation = newState.conversations[action.payload.topic];
       for (const message of action.payload.messages) {
-        const alreadyMessageWithId = conversation.messages.get(message.id);
-        if (alreadyMessageWithId) {
-          continue;
-        }
-        // Remove lazy message with same id or with same content and sent by me
-        const lazyMessageToRemoveIndex = conversation.lazyMessages.findIndex(
-          (m) =>
-            m.id === message.id ||
-            (m.content === message.content &&
-              m.senderAddress === message.senderAddress)
-        );
-        if (lazyMessageToRemoveIndex > -1) {
-          conversation.lazyMessages.splice(lazyMessageToRemoveIndex, 1);
-        }
+        // Default message status is sent
+        if (!message.status) message.status = "sent";
         conversation.messages.set(message.id, message);
       }
 

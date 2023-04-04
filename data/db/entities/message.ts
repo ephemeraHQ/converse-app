@@ -26,7 +26,7 @@ export class Message {
   content!: string;
 
   @Column("text", { default: "sent" })
-  status!: "sending" | "sent" | "received" | "read" | "error";
+  status!: "delivered" | "error" | "seen" | "sending" | "sent";
 
   @Column("text")
   conversationId!: string;
