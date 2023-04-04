@@ -1,20 +1,21 @@
 /*
 On Android since we can decode notifications directly in Javascript we don't need
 to use shared data storing. And since this SharedGroupPreferences lib seems to be
-unmaintained let's just fallback to regular storage through MMKV
+unmaintained let's just fallback to regular storage through AsyncStorage
 */
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { DecodedMessage } from "@xmtp/xmtp-js";
 
 import config from "../../config";
-import storage from "../mmkv";
 
-export const saveConversationDict = async (
-  topic: string,
-  conversationDict: any
-) => storage.set(`conversation-${topic}`, JSON.stringify(conversationDict));
+export const saveConversationDict = (topic: string, conversationDict: any) =>
+  AsyncStorage.setItem(
+    `conversation-${topic}`,
+    JSON.stringify(conversationDict)
+  );
 
 export const loadConversationDict = async (topic: string) => {
-  const jsonDict = storage.getString(`conversation-${topic}`);
+  const jsonDict = await AsyncStorage.getItem(`conversation-${topic}`);
   if (!jsonDict) return {};
   try {
     const dict = JSON.parse(jsonDict);
@@ -25,10 +26,13 @@ export const loadConversationDict = async (topic: string) => {
   }
 };
 
-export const saveXmtpEnv = async () => storage.set("xmtp-env", config.xmtpEnv);
+export const saveXmtpEnv = () =>
+  AsyncStorage.setItem("xmtp-env", config.xmtpEnv);
 
 export const loadSavedNotificationsMessages = async () => {
-  const jsonMessages = storage.getString("saved-notifications-messages");
+  const jsonMessages = await AsyncStorage.getItem(
+    "saved-notifications-messages"
+  );
   if (!jsonMessages) return [];
   try {
     const messages = JSON.parse(jsonMessages);
@@ -51,19 +55,21 @@ export const saveNewNotificationMessage = async (
     sent: message.sent.getTime(),
     content: message.content,
   });
-  storage.set("saved-notifications-messages", JSON.stringify(currentMessages));
+  await AsyncStorage.setItem(
+    "saved-notifications-messages",
+    JSON.stringify(currentMessages)
+  );
 };
 
-export const emptySavedNotificationsMessages = async () =>
-  storage.delete("saved-notifications-messages");
+export const emptySavedNotificationsMessages = () =>
+  AsyncStorage.setItem("saved-notifications-messages", "[]");
 
-export const saveApiURI = async () => storage.set("api-uri", config.apiURI);
+export const saveApiURI = () => AsyncStorage.setItem("api-uri", config.apiURI);
 
-export const saveLoggedXmtpAddress = async (address: string) =>
-  storage.set("xmtp-address", address);
+export const saveLoggedXmtpAddress = (address: string) =>
+  AsyncStorage.setItem("xmtp-address", address);
 
-export const deleteLoggedXmtpAddress = async () =>
-  storage.delete("xmtp-address");
+export const deleteLoggedXmtpAddress = () =>
+  AsyncStorage.removeItem("xmtp-address");
 
-export const getLoggedXmtpAddress = async () =>
-  storage.getString("xmtp-address");
+export const getLoggedXmtpAddress = () => AsyncStorage.getItem("xmtp-address");
