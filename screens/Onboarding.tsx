@@ -6,7 +6,7 @@ import WalletConnectProvider, {
   WalletService,
 } from "@walletconnect/react-native-dapp";
 import { useEffect, useState } from "react";
-import { Linking } from "react-native";
+import { Dimensions, Linking, View } from "react-native";
 
 import OnboardingComponent from "../components/OnboardingComponent";
 import config from "../config";
@@ -82,7 +82,23 @@ export default function OnboardingScreen() {
         }
         newProps.visible = props.visible && !hideModal;
 
-        return <QrcodeModal division={3} {...newProps} />;
+        return (
+          <View
+            pointerEvents="box-none"
+            style={{
+              opacity: hideModal ? 0 : 1,
+              flex: 1,
+              position: "absolute",
+              top: 0,
+              left: 0,
+              height: Dimensions.get("screen").height,
+              width: Dimensions.get("screen").width,
+              flexGrow: 1,
+            }}
+          >
+            <QrcodeModal division={3} {...newProps} />
+          </View>
+        );
       }}
     >
       <OnboardingComponent
