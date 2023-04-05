@@ -4,6 +4,8 @@ import { useContext, useEffect, useRef } from "react";
 import { AppDispatchTypes } from "../../data/store/appReducer";
 import { AppContext } from "../../data/store/context";
 
+export const refreshNetworkState = NetInfo.refresh;
+
 export default function NetworkStateHandler() {
   const { state, dispatch } = useContext(AppContext);
 
@@ -16,7 +18,6 @@ export default function NetworkStateHandler() {
     const unsubscribeNetworkInfo = NetInfo.addEventListener((netState) => {
       const reachable = !!netState.isInternetReachable;
       if (reachable !== reachableRef.current) {
-        console.log({ reachable });
         dispatch({
           type: AppDispatchTypes.AppSetInternetReachable,
           payload: { reachable: !!netState.isInternetReachable },
