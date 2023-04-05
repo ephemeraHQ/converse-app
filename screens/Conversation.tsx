@@ -312,7 +312,8 @@ const Conversation = ({
           </>
         );
       },
-      headerTintColor: textSecondaryColor(colorScheme),
+      headerTintColor:
+        Platform.OS === "android" ? textSecondaryColor(colorScheme) : undefined,
     });
   }, [
     colorScheme,
