@@ -133,6 +133,7 @@ export default function XmtpWebview() {
   useEffect(() => {
     const initialLoad = async () => {
       if (state.xmtp.webviewConnected && !launchedInitialLoad.current) {
+        launchedInitialLoad.current = true;
         // Let's launch the initial load of all convos & messages
         const knownTopics = Object.keys(state.xmtp.conversations);
         const exportedConversations = await Promise.all(
@@ -143,7 +144,6 @@ export default function XmtpWebview() {
           knownTopics,
           exportedConversations,
         });
-        launchedInitialLoad.current = true;
       }
     };
     initialLoad();
