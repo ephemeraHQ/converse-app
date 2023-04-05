@@ -298,14 +298,13 @@ export default function Main() {
     const hideSplashScreenIfReady = async () => {
       if (!splashScreenHidden.current && hydrationDone) {
         splashScreenHidden.current = true;
-
-        hideSplashScreen();
         dispatch({
           type: AppDispatchTypes.AppHideSplashscreen,
           payload: {
             hide: true,
           },
         });
+        await hideSplashScreen();
 
         // If app was loaded by clicking on notification,
         // let's navigate
