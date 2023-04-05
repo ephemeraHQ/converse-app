@@ -301,3 +301,12 @@ export const loadDataToContext = async (dispatch: DispatchType) => {
     },
   });
 };
+
+export const getMessagesToSend = async () => {
+  const messagesToSend = await messageRepository.find({
+    where: {
+      status: "sending",
+    },
+  });
+  return messagesToSend;
+};
