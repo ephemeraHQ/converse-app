@@ -1,5 +1,5 @@
+import { saveMessages } from "../../data";
 import { DispatchType } from "../../data/store/context";
-import { XmtpDispatchTypes } from "../../data/store/xmtpReducer";
 import {
   emptySavedNotificationsMessages,
   loadSavedNotificationsMessages,
@@ -14,7 +14,7 @@ const waitForLoadingSavedNotifications = async () => {
 };
 
 export const loadSavedNotificationMessagesToContext = async (
-  dispatch: DispatchType
+  dispatch?: DispatchType
 ) => {
   if (loadingSavedNotifications) {
     await waitForLoadingSavedNotifications();
@@ -25,12 +25,10 @@ export const loadSavedNotificationMessagesToContext = async (
     const messages = await loadSavedNotificationsMessages();
     await emptySavedNotificationsMessages();
     messages.sort((m1: any, m2: any) => m1.sent - m2.sent);
-    messages.forEach((message: any) => {
-      dispatch({
-        type: XmtpDispatchTypes.XmtpSetMessages,
-        payload: {
-          topic: message.topic,
-          messages: [
+    await Promise.all(
+      messages.map((message: any) =>
+        saveMessages(
+          [
             {
               id: message.id,
               senderAddress: message.senderAddress,
@@ -39,9 +37,12 @@ export const loadSavedNotificationMessagesToContext = async (
               status: "sent",
             },
           ],
-        },
-      });
-    });
+          message.topic,
+          dispatch
+        )
+      )
+    );
+
     loadingSavedNotifications = false;
   } catch (e) {
     console.log(
