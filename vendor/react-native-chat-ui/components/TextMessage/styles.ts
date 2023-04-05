@@ -1,16 +1,16 @@
-import { StyleSheet } from 'react-native'
+import { StyleSheet } from "react-native";
 
-import { MessageType, Theme, User } from '../../types'
-import { getUserAvatarNameColor } from '../../utils'
+import { MessageType, Theme, User } from "../../types";
+import { getUserAvatarNameColor } from "../../utils";
 
 const styles = ({
   message,
   theme,
   user,
 }: {
-  message: MessageType.Text
-  theme: Theme
-  user?: User
+  message: MessageType.Text;
+  theme: Theme;
+  user?: User;
 }) =>
   StyleSheet.create({
     descriptionText: {
@@ -36,9 +36,10 @@ const styles = ({
         ? theme.fonts.sentMessageBodyTextStyle
         : theme.fonts.receivedMessageBodyTextStyle,
     textContainer: {
-      marginHorizontal: theme.insets.messageInsetsHorizontal,
+      marginLeft: theme.insets.messageInsetsHorizontal,
+      marginRight: theme.insets.messageInsetsHorizontal + 9,
       marginVertical: theme.insets.messageInsetsVertical,
     },
-  })
+  });
 
-export default styles
+export default styles;
