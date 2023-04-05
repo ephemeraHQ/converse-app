@@ -9,7 +9,6 @@ export default {
   name: isDev ? "Converse DEV" : isPreview ? "Converse PREVIEW" : "Converse",
   scheme: isDev ? "converse-dev" : isPreview ? "converse-preview" : "converse",
   slug: "converse",
-  version: "1.0.0",
   orientation: "portrait",
   icon: isProduction ? "./assets/icon.png" : "./assets/icon-preview.png",
   userInterfaceStyle: "automatic",
