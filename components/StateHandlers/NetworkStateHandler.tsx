@@ -20,7 +20,7 @@ export default function NetworkStateHandler() {
       if (reachable !== reachableRef.current) {
         dispatch({
           type: AppDispatchTypes.AppSetInternetReachable,
-          payload: { reachable: !!netState.isInternetReachable },
+          payload: { reachable },
         });
       }
     });
