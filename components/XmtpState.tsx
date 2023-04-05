@@ -50,10 +50,15 @@ const sendingMessages: { [messageId: string]: boolean } = {};
 
 export const sendPreparedMessage = async (preparedMessage: PreparedMessage) => {
   const id = await preparedMessage.messageID();
-  if (sendingMessages[id]) return;
-  sendingMessages[id] = true;
-  await preparedMessage.send();
-  delete sendingMessages[id];
+  try {
+    if (sendingMessages[id]) return;
+    sendingMessages[id] = true;
+    await preparedMessage.send();
+    delete sendingMessages[id];
+  } catch (e) {
+    console.log("An error occured while sending message", e);
+    delete sendingMessages[id];
+  }
 };
 
 const sendMessagesToSend = async () => {
