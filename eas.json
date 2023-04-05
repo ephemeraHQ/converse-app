@@ -30,11 +30,21 @@
         "EXPO_ENV": "preview"
       }
     },
-    "production": {
+    "production-ios": {
       "channel": "production",
-      "autoIncrement": true
+      "autoIncrement": true,
+      "env": {
+        "EXPO_PLATFORM": "ios"
+      }
     },
-    "production-internal": {
+    "production-android": {
+      "channel": "production",
+      "autoIncrement": true,
+      "env": {
+        "EXPO_PLATFORM": "android"
+      }
+    },
+    "production-android-internal": {
       "distribution": "internal",
       "channel": "production",
       "autoIncrement": true
