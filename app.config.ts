@@ -25,6 +25,7 @@ export default {
   assetBundlePatterns: ["**/*"],
   ios: {
     supportsTablet: true,
+    version: appBuildNumbers.expo.ios.version,
     buildNumber: appBuildNumbers.expo.ios.buildNumber,
     config: {
       usesNonExemptEncryption: false,
@@ -35,6 +36,7 @@ export default {
       foregroundImage: "./assets/adaptive-icon.png",
       backgroundColor: "#FFFFFF",
     },
+    version: appBuildNumbers.expo.android.version,
     versionCode: appBuildNumbers.expo.android.versionCode,
   },
   web: {
