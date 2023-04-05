@@ -16,7 +16,7 @@ import React, {
   useRef,
   useState,
 } from "react";
-import { Alert, AppState, Platform, useColorScheme } from "react-native";
+import { AppState, Platform, useColorScheme } from "react-native";
 
 import { addLog } from "../components/DebugButton";
 import { getLocalXmtpClient } from "../components/XmtpState";
@@ -171,27 +171,6 @@ export default function Main() {
     },
     [navigateToConversation, state.xmtp.conversations]
   );
-
-  useEffect(() => {
-    if (Platform.OS === "android") return;
-    Alert.alert(
-      "Converse is now available on the App Store!",
-      "Please install it now in order to keep getting updates.",
-      [
-        { text: "Skip for now", onPress: () => {}, style: "destructive" },
-        {
-          text: "Install on the App Store",
-          onPress: () => {
-            Linking.openURL(
-              "https://apps.apple.com/app/converse-messenger/id1658819514"
-            );
-          },
-          style: "default",
-          isPreferred: true,
-        },
-      ]
-    );
-  }, []);
 
   useEffect(() => {
     // Things to do when app opens
