@@ -1,7 +1,8 @@
 import { Client, Conversation } from "@xmtp/xmtp-js";
+import { PreparedMessage } from "@xmtp/xmtp-js/dist/types/src/PreparedMessage";
 import { useContext, useEffect } from "react";
 
-import { AppContext } from "../data/store/context";
+import { AppContext, DispatchType } from "../data/store/context";
 import { XmtpDispatchTypes } from "../data/store/xmtpReducer";
 import { getBlockedPeers } from "../utils/api";
 import { loadXmtpConversation, loadXmtpKeys } from "../utils/keychain";
@@ -14,16 +15,11 @@ let xmtpApiSignature: string | null;
 
 const conversationsByTopic: { [topic: string]: Conversation } = {};
 
-export const isOnXmtp = async (address: string) => {
-  if (!xmtpClient) throw new Error("No XMTP Client");
-
-  return xmtpClient.canMessage(address);
-};
-
 export const getLocalXmtpConversationForTopic = async (
   topic: string
 ): Promise<Conversation> => {
-  if (!xmtpClient) throw new Error("No XMTP Client");
+  const client = await getLocalXmtpClient();
+  if (!client) throw new Error("No XMTP Client");
   if (conversationsByTopic[topic]) return conversationsByTopic[topic];
   let tries = 0;
   let savedConversation: string | null = null;
@@ -39,10 +35,7 @@ export const getLocalXmtpConversationForTopic = async (
   if (!savedConversation) {
     throw new Error(`No conversation found for topic ${topic}`);
   }
-  const conversation = await parseConversationJSON(
-    xmtpClient,
-    savedConversation
-  );
+  const conversation = await parseConversationJSON(client, savedConversation);
   conversationsByTopic[topic] = conversation;
   return conversation;
 };
@@ -53,13 +46,47 @@ export const prepareXmtpMessage = async (topic: string, content: string) => {
   return preparedMessage;
 };
 
-export const getLocalXmtpClient = async () => {
-  if (xmtpClient) return xmtpClient;
-  const keys = await loadXmtpKeys();
-  if (keys) {
-    const parsedKeys = JSON.parse(keys);
-    xmtpClient = await getXmtpClientFromKeys(parsedKeys);
-    getXmtpApiHeaders();
+const sendingMessages: { [messageId: string]: boolean } = {};
+
+export const sendPreparedMessage = async (preparedMessage: PreparedMessage) => {
+  const id = await preparedMessage.messageID();
+  if (sendingMessages[id]) return;
+  sendingMessages[id] = true;
+  await preparedMessage.send();
+  delete sendingMessages[id];
+};
+
+const sendMessagesToSend = async () => {
+  // const messagesToSend = await getMessagesToSend();
+  // for (const message of messagesToSend) {
+  //   const conversation = await getLocalXmtpConversationForTopic(
+  //     message.conversationId
+  //   );
+  //   if (conversation) {
+  //     const preparedMessage = await getPreparedMessageFromMessage(
+  //       message,
+  //       conversation
+  //     );
+  //     await preparedMessage.send();
+  //   }
+  // }
+  // console.log(`${messagesToSend.length} saved messages to send`);
+};
+
+export const getLocalXmtpClient = async (dispatch?: DispatchType) => {
+  if (!xmtpClient) {
+    const keys = await loadXmtpKeys();
+    if (keys) {
+      const parsedKeys = JSON.parse(keys);
+      xmtpClient = await getXmtpClientFromKeys(parsedKeys);
+      getXmtpApiHeaders();
+    }
+  }
+  if (xmtpClient && dispatch) {
+    dispatch({
+      type: XmtpDispatchTypes.XmtpLocalConnected,
+      payload: { connected: true },
+    });
   }
   return xmtpClient;
 };
@@ -88,8 +115,24 @@ export default function XmtpState() {
   const { dispatch, state } = useContext(AppContext);
   // On open; opening XMTP session
   useEffect(() => {
-    getLocalXmtpClient();
-  }, []);
+    getLocalXmtpClient(dispatch);
+  }, [dispatch, state.xmtp.address]);
+  useEffect(() => {
+    const messageSendingInterval = setInterval(() => {
+      if (
+        state.xmtp.localConnected &&
+        state.xmtp.webviewConnected &&
+        state.app.splashScreenHidden
+      ) {
+        sendMessagesToSend();
+      }
+    }, 2000);
+    return () => clearInterval(messageSendingInterval);
+  }, [
+    state.app.splashScreenHidden,
+    state.xmtp.localConnected,
+    state.xmtp.webviewConnected,
+  ]);
   useEffect(() => {
     if (state.xmtp.localConnected && state.xmtp.webviewConnected) {
       getBlockedPeers()

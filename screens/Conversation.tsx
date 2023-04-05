@@ -31,6 +31,7 @@ import Picto from "../components/Picto/Picto";
 import {
   getLocalXmtpConversationForTopic,
   prepareXmtpMessage,
+  sendPreparedMessage,
 } from "../components/XmtpState";
 import { sendMessageToWebview } from "../components/XmtpWebview";
 import { saveMessages } from "../data";
@@ -391,7 +392,7 @@ const Conversation = ({
         dispatch
       );
       // Then send for real
-      preparedMessage.send();
+      sendPreparedMessage(preparedMessage);
     },
     [conversation, dispatch, state.xmtp.address]
   );
