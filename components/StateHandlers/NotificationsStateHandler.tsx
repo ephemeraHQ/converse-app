@@ -12,7 +12,7 @@ import {
 } from "../../utils/notifications";
 import { setTopicToNavigateTo } from "./InitialStateHandler";
 
-// This handler determines how your app handles
+// This handler determines how the app handles
 // notifications that come in while the app is foregrounded
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
