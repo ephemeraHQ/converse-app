@@ -35,6 +35,7 @@ export type XmtpType = {
   lastUpdateAt: number;
   address?: string;
   blockedPeerAddresses: { [peerAddress: string]: boolean };
+  reconnecting: boolean;
 };
 
 export const xmtpInitialState: XmtpType = {
@@ -47,6 +48,7 @@ export const xmtpInitialState: XmtpType = {
   address: undefined,
   lastUpdateAt: 0,
   blockedPeerAddresses: {},
+  reconnecting: false,
 };
 
 type XmtpProtocolMessage = {
@@ -73,6 +75,7 @@ export enum XmtpDispatchTypes {
   XmtpSetCurrentMessageContent = "XMTP_SET_CURRENT_MESSAGE",
   XmtpSetBlockedStatus = "XMTP_SET_BLOCKED_STATUS",
   XmtpSetBlockedPeerAddresses = "XMTP_SET_BLOCKED_PEER_ADDRESSES",
+  XmtpSetReconnecting = "XMTP_SET_RECONNECTING",
 }
 
 type XmtpPayload = {
@@ -110,6 +113,9 @@ type XmtpPayload = {
   };
   [XmtpDispatchTypes.XmtpSetBlockedPeerAddresses]: {
     blockedPeerAddresses: { [peerAddress: string]: boolean };
+  };
+  [XmtpDispatchTypes.XmtpSetReconnecting]: {
+    reconnecting: boolean;
   };
 };
 
@@ -259,6 +265,10 @@ export const xmtpReducer = (state: XmtpType, action: XmtpActions): XmtpType => {
         ...state,
         blockedPeerAddresses: action.payload.blockedPeerAddresses,
       };
+    }
+
+    case XmtpDispatchTypes.XmtpSetReconnecting: {
+      return { ...state, reconnecting: action.payload.reconnecting };
     }
 
     default:

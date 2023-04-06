@@ -21,6 +21,8 @@ import { sentryTrackMessage } from "../utils/sentry";
 
 let webview: WebView | null;
 let webviewReadyForMessages = false;
+let isReconnecting = false;
+let lastRetryAt = 0;
 
 const hideDataFromEvents = [
   "XMTP_MESSAGES",
@@ -86,20 +88,38 @@ export default function XmtpWebview() {
     }
   }, [state.xmtp.address]);
 
-  const reloadData = useCallback(async () => {
-    webviewReadyForMessages = false;
-    dispatch({
-      type: XmtpDispatchTypes.XmtpLoading,
-      payload: { loading: true },
-    });
-    // Load notifications
-    await loadSavedNotificationMessagesToContext(dispatch);
-    const knownTopics = Object.keys(state.xmtp.conversations);
-    sendMessageToWebview("RELOAD", {
-      lastSyncedAt: getLastXMTPSyncedAt(),
-      knownTopics,
-    });
-  }, [dispatch, state.xmtp.conversations]);
+  const reloadData = useCallback(
+    async (showConnecting: boolean) => {
+      isReconnecting = true;
+      if (showConnecting) {
+        dispatch({
+          type: XmtpDispatchTypes.XmtpSetReconnecting,
+          payload: { reconnecting: true },
+        });
+      }
+      const now = new Date().getTime();
+      const diff = now - lastRetryAt;
+      lastRetryAt = now;
+      if (diff < 1000) {
+        // Throttle the reloading
+        await new Promise((r) => setTimeout(r, 1000 - diff));
+      }
+      console.log("RELOADING DATA");
+      webviewReadyForMessages = false;
+      dispatch({
+        type: XmtpDispatchTypes.XmtpLoading,
+        payload: { loading: true },
+      });
+      // Load notifications
+      await loadSavedNotificationMessagesToContext(dispatch);
+      const knownTopics = Object.keys(state.xmtp.conversations);
+      sendMessageToWebview("RELOAD", {
+        lastSyncedAt: getLastXMTPSyncedAt(),
+        knownTopics,
+      });
+    },
+    [dispatch, state.xmtp.conversations]
+  );
 
   useEffect(() => {
     const subscription = AppState.addEventListener(
@@ -111,7 +131,7 @@ export default function XmtpWebview() {
           state.xmtp.initialLoadDone
         ) {
           console.log("App is active, reloading data");
-          reloadData();
+          reloadData(false);
         }
         appState.current = nextAppState;
       }
@@ -233,6 +253,10 @@ export default function XmtpWebview() {
             type: XmtpDispatchTypes.XmtpLoading,
             payload: { loading: false },
           });
+          dispatch({
+            type: XmtpDispatchTypes.XmtpSetReconnecting,
+            payload: { reconnecting: false },
+          });
           if (state.notifications.status === "granted" && state.xmtp.address) {
             subscribeToNotifications(
               state.xmtp.address,
@@ -240,6 +264,7 @@ export default function XmtpWebview() {
               state.xmtp.blockedPeerAddresses
             );
           }
+          isReconnecting = false;
           break;
         }
         case "CANT_CREATE_CONVO": {
@@ -253,6 +278,7 @@ export default function XmtpWebview() {
         }
 
         case "WEBVIEW_UNHANDLED_REJECTION": {
+          isReconnecting = false;
           const IGNORED_REASONS = ["AbortError: Fetch is aborted"];
           if (IGNORED_REASONS.some((r) => r.includes(data.reason))) {
             console.log("Ignoring unhandled rejection");
@@ -263,14 +289,26 @@ export default function XmtpWebview() {
         }
 
         case "ERROR_WHILE_RESYNCINC": {
+          isReconnecting = false;
           console.log("ERROR_WHILE_RESYNCINC", data);
           sentryTrackMessage("ERROR_WHILE_RESYNCINC", data);
+          reloadData(true);
           break;
         }
 
         case "ERROR_WHILE_SYNCINC": {
+          isReconnecting = false;
           console.log("ERROR_WHILE_SYNCINC", data);
           sentryTrackMessage("ERROR_WHILE_SYNCINC", data);
+          reloadData(true);
+          break;
+        }
+
+        case "XMTP_CONNECTION_LOST": {
+          if (!isReconnecting) {
+            console.log("Xmtp Connection Lost, trying to reload");
+            reloadData(true);
+          }
           break;
         }
 
@@ -284,6 +322,7 @@ export default function XmtpWebview() {
     },
     [
       dispatch,
+      reloadData,
       state.notifications.status,
       state.xmtp.address,
       state.xmtp.blockedPeerAddresses,

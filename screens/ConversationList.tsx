@@ -18,7 +18,7 @@ import {
 } from "react-native";
 import { FAB } from "react-native-paper";
 
-import ActivityIndicator from "../components/ActivityIndicator/ActivityIndicator";
+import Connecting, { shouldShowConnecting } from "../components/Connecting";
 import ConversationListItem from "../components/ConversationListItem";
 import DebugButton from "../components/DebugButton";
 import InitialLoad from "../components/InitialLoad";
@@ -172,8 +172,8 @@ export default function ConversationList({
   useEffect(() => {
     navigation.setOptions({
       headerTitle: () => {
-        if (!state.xmtp.initialLoadDone || state.xmtp.loading) {
-          return <ActivityIndicator />;
+        if (shouldShowConnecting(state)) {
+          return <Connecting />;
         } else {
           return Platform.OS === "android" ? (
             <Text style={styles.androidTitle}>Converse</Text>
@@ -181,12 +181,7 @@ export default function ConversationList({
         }
       },
     });
-  }, [
-    navigation,
-    state.xmtp.initialLoadDone,
-    state.xmtp.loading,
-    styles.androidTitle,
-  ]);
+  }, [navigation, state, styles.androidTitle]);
   const keyExtractor = useCallback((item: FlatListItem) => {
     return item.topic;
   }, []);
