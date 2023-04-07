@@ -2890,10 +2890,10 @@
     prompts "^2.4.0"
     semver "^6.3.0"
 
-"@react-native-community/netinfo@^9.3.8":
-  version "9.3.8"
-  resolved "https://registry.yarnpkg.com/@react-native-community/netinfo/-/netinfo-9.3.8.tgz#ddbff4307cd59be3afd417b34b22805e7bd7eb67"
-  integrity sha512-j/eUksTaJoSpg82pVmBnqe8x4UVIq2zN/JnykJWrGfNZrVxw76il5KQYIR2LZ2ZBh0xzkMY5Qp8C5sT2zow0Hg==
+"@react-native-community/netinfo@^9.3.9":
+  version "9.3.9"
+  resolved "https://registry.yarnpkg.com/@react-native-community/netinfo/-/netinfo-9.3.9.tgz#c17a2fb6f014953c31f72be83eb4426110e3c9ea"
+  integrity sha512-L9f8OjX5Fwh5CdP4ygDPa6iQCJJ4tAtXiFuQp6EG4/sdSXDqOXaehAhJrZAN8P8Lztnf8YN8p836GmZuBCrY+A==
 
 "@react-native/assets@1.0.0":
   version "1.0.0"
