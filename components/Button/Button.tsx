@@ -13,7 +13,7 @@ import {
   ViewStyle,
 } from "react-native";
 
-import { tableViewItemBackground } from "../../utils/colors";
+import { tertiaryBackgroundColor } from "../../utils/colors";
 import Picto from "../Picto/Picto";
 
 type Props = {
@@ -91,7 +91,7 @@ const getStyles = (colorScheme: ColorSchemeName) =>
       fontSize: 17,
     },
     buttonGrey: {
-      backgroundColor: tableViewItemBackground(colorScheme),
+      backgroundColor: tertiaryBackgroundColor(colorScheme),
       paddingHorizontal: 15,
       paddingVertical: 4,
       borderRadius: 100,

@@ -10,7 +10,7 @@ import {
 
 import {
   itemSeparatorColor,
-  tableViewItemBackground,
+  tertiaryBackgroundColor,
   textPrimaryColor,
   textSecondaryColor,
 } from "../../utils/colors";
@@ -61,7 +61,7 @@ export default function TableViewItem({
 const getStyles = (colorScheme: ColorSchemeName) =>
   StyleSheet.create({
     tableViewItem: {
-      backgroundColor: tableViewItemBackground(colorScheme),
+      backgroundColor: tertiaryBackgroundColor(colorScheme),
       paddingLeft: 16,
       flexDirection: "row",
       alignItems: "center",

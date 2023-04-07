@@ -1,6 +1,4 @@
 import { WalletMobileSDKEVMProvider } from "@coinbase/wallet-mobile-sdk/build/WalletMobileSDKEVMProvider";
-import { utils } from "@noble/secp256k1";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import {
   RenderQrcodeModalProps,
   useWalletConnect,
@@ -8,13 +6,7 @@ import {
 import WalletConnectProvider from "@walletconnect/web3-provider";
 import { Bytes, ethers, Signer, Wallet } from "ethers";
 import * as Linking from "expo-linking";
-import React, {
-  useCallback,
-  useContext,
-  useEffect,
-  useRef,
-  useState,
-} from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
   View,
   StyleSheet,
@@ -24,18 +16,21 @@ import {
   useColorScheme,
   Platform,
   ScrollView,
+  TextInput,
+  KeyboardAvoidingView,
+  Alert,
 } from "react-native";
 
 import { sendMessageToWebview } from "../components/XmtpWebview";
 import config from "../config";
 import { clearDB } from "../data/db";
-import { AppDispatchTypes } from "../data/store/appReducer";
-import { AppContext } from "../data/store/context";
 import {
   backgroundColor,
+  tertiaryBackgroundColor,
   textPrimaryColor,
   textSecondaryColor,
 } from "../utils/colors";
+import { getPrivateKeyFromMnemonic } from "../utils/eth";
 import { saveXmtpKeys } from "../utils/keychain";
 import { shortAddress } from "../utils/str";
 import { getXmtpKeysFromSigner, isOnXmtp } from "../utils/xmtp";
@@ -47,25 +42,23 @@ import TableView, { TableViewEmoji, TableViewPicto } from "./TableView";
 type Props = {
   walletConnectProps: RenderQrcodeModalProps | undefined;
   setHideModal: (hide: boolean) => void;
-  connectToDemoWallet: boolean;
-  setConnectToDemoWallet: (value: boolean) => void;
 };
 
 export default function OnboardingComponent({
   walletConnectProps,
   setHideModal,
-  connectToDemoWallet,
-  setConnectToDemoWallet,
 }: Props) {
   const colorScheme = useColorScheme();
   const styles = getStyles(colorScheme);
-  const { dispatch } = useContext(AppContext);
   const [loading, setLoading] = useState(false);
+  const [connectWithSeedPhrase, setConnectWithSeedPhrase] = useState(false);
+  const [seedPhrase, setSeedPhrase] = useState("");
+  const [keyboardVerticalOffset, setKeyboardVerticalOffset] = useState(0);
   const [user, setUser] = useState({
     address: "",
     isOnXmtp: false,
     signer: undefined as Signer | undefined,
-    isDemo: false,
+    isSeedPhrase: false,
   });
   const connector = useWalletConnect();
   const provider = new WalletConnectProvider({
@@ -100,7 +93,7 @@ export default function OnboardingComponent({
       address: "",
       isOnXmtp: false,
       signer: undefined,
-      isDemo: false,
+      isSeedPhrase: false,
     });
     setLoading(false);
     if (connector?.connected) {
@@ -150,7 +143,7 @@ export default function OnboardingComponent({
         address,
         isOnXmtp: isOnNetwork,
         signer,
-        isDemo: false,
+        isSeedPhrase: false,
       });
     } catch (e) {
       console.log("Error while connecting to Coinbase:", e);
@@ -159,16 +152,25 @@ export default function OnboardingComponent({
     setLoading(false);
   }, [enableDoubleSignature]);
 
-  const generateWallet = useCallback(async () => {
+  const getSignerFromSeedPhrase = useCallback(async (mnemonic: string) => {
+    console.log("yoooo");
     setLoading(true);
-    const signer = new Wallet(utils.randomPrivateKey());
-    const address = await signer.getAddress();
-    setUser({
-      address,
-      isOnXmtp: false,
-      signer,
-      isDemo: true,
-    });
+    setTimeout(async () => {
+      try {
+        const privateKey = await getPrivateKeyFromMnemonic(mnemonic);
+        const signer = new Wallet(privateKey);
+        const address = await signer.getAddress();
+        setUser({
+          address,
+          isOnXmtp: false,
+          signer,
+          isSeedPhrase: true,
+        });
+      } catch (e) {
+        setLoading(false);
+        Alert.alert("This seed phrase is invalid. Please try again");
+      }
+    }, 10);
   }, []);
 
   const requestingSignatures = useRef(false);
@@ -186,7 +188,7 @@ export default function OnboardingComponent({
         address: newAddress,
         isOnXmtp: isOnNetwork,
         signer: newSigner,
-        isDemo: false,
+        isSeedPhrase: false,
       });
       setLoading(false);
     };
@@ -220,13 +222,7 @@ export default function OnboardingComponent({
         Array.from(await getXmtpKeysFromSigner(user.signer))
       );
       saveXmtpKeys(keys);
-      if (user.isDemo) {
-        AsyncStorage.setItem("state.app.isDemoAccount", "1");
-        dispatch({
-          type: AppDispatchTypes.AppSetDemoAccount,
-          payload: { isDemoAccount: true },
-        });
-      }
+
       await clearDB();
       sendMessageToWebview("KEYS_LOADED_FROM_SECURE_STORAGE", {
         keys,
@@ -236,14 +232,14 @@ export default function OnboardingComponent({
       setLoading(false);
       console.error(e);
     }
-  }, [dispatch, user.isDemo, user.signer]);
+  }, [user.signer]);
 
   useEffect(() => {
     // Demo accounts can sign immediately
-    if (user.isDemo) {
+    if (user.isSeedPhrase) {
       initXmtpClient();
     }
-  }, [initXmtpClient, user.isDemo]);
+  }, [initXmtpClient, user.isSeedPhrase]);
 
   const directConnectToWallet = useRef("");
   const appState = useRef(AppState.currentState);
@@ -312,13 +308,6 @@ export default function OnboardingComponent({
     }
   }, [walletConnectProps]);
 
-  useEffect(() => {
-    if (connectToDemoWallet) {
-      setHideModal(true);
-      setLoading(false);
-    }
-  }, [connectToDemoWallet, setHideModal]);
-
   let picto = "message.circle.fill";
   let title = "GM";
   let text = `Converse connects web3 identities with each other. Connect your wallet to start chatting.`;
@@ -338,7 +327,7 @@ export default function OnboardingComponent({
     </Text>
   );
   let subtitle = null;
-  if (user.address) {
+  if (user.address && !user.isSeedPhrase) {
     picto = "signature";
     title = "Sign";
 
@@ -358,156 +347,208 @@ export default function OnboardingComponent({
         subtitle = termsAndConditions;
       }
     }
-  } else if (connectToDemoWallet) {
-    picto = "signature";
-    title = "Terms";
-    text = "";
-    subtitle = termsAndConditions;
+  } else if (connectWithSeedPhrase || user.isSeedPhrase) {
+    title = "Seed phrase";
+    text =
+      "Enter your wallet's seed phrase. It will be used to connect to the XMTP network and it will not be stored anywhere.";
+    picto = "key.horizontal";
   }
 
   const tableViewPaddingHorizontal = Platform.OS === "android" ? 33 : 0;
+  const scrollViewRef = useRef<ScrollView | null>(null);
+  const textInputRef = useRef<TextInput | null>(null);
 
   return (
-    <ScrollView
-      alwaysBounceVertical={false}
-      contentContainerStyle={styles.onboardingContent}
+    <KeyboardAvoidingView
+      style={{ flex: 1 }}
+      behavior="position"
+      keyboardVerticalOffset={keyboardVerticalOffset}
     >
-      <Picto
-        picto={picto}
-        size={Platform.OS === "android" ? 80 : 43}
-        style={styles.picto}
-      />
-      {!loading && (
-        <>
-          <Text style={styles.title}>{title}</Text>
-          <View style={{ marginBottom: "auto" }}>
-            {text && <Text style={styles.p}>{text}</Text>}
-            {subtitle}
+      <ScrollView
+        alwaysBounceVertical={false}
+        contentContainerStyle={styles.onboardingContent}
+        ref={scrollViewRef}
+      >
+        <Picto
+          picto={picto}
+          size={Platform.OS === "android" ? 80 : 43}
+          style={styles.picto}
+        />
+        {!loading && (
+          <>
+            <Text style={styles.title}>{title}</Text>
+            <View
+              style={{
+                marginBottom: connectWithSeedPhrase ? undefined : "auto",
+              }}
+            >
+              {text && <Text style={styles.p}>{text}</Text>}
+              {subtitle}
+            </View>
+          </>
+        )}
+
+        {loading && (
+          <ActivityIndicator size="large" style={{ marginBottom: "auto" }} />
+        )}
+
+        {!user.signer && !loading && !connectWithSeedPhrase && (
+          <View style={styles.walletSelectorContainer}>
+            <TableView
+              items={[
+                {
+                  id: "metamask",
+                  picto: <TableViewEmoji emoji="🦊" />,
+                  title: "Connect Metamask",
+                  action: () => {
+                    connectWallet("MetaMask");
+                  },
+                  paddingHorizontal: tableViewPaddingHorizontal,
+                },
+                {
+                  id: "rainbow",
+                  picto: <TableViewEmoji emoji="🌈" />,
+                  title: "Connect Rainbow",
+                  action: () => {
+                    connectWallet("Rainbow");
+                  },
+                  paddingHorizontal: tableViewPaddingHorizontal,
+                },
+                {
+                  id: "coinbase",
+                  picto: <TableViewEmoji emoji="🔵" />,
+                  title: "Connect Coinbase Wallet",
+                  action: connectCoinbaseWallet,
+                  paddingHorizontal: tableViewPaddingHorizontal,
+                },
+                {
+                  id: "seedphrase",
+                  picto: <TableViewEmoji emoji="🔑" />,
+                  title: "Connect with seed phrase",
+                  action: () => {
+                    setConnectWithSeedPhrase(true);
+                  },
+                  paddingHorizontal: tableViewPaddingHorizontal,
+                },
+                {
+                  id: "walletconnect",
+                  picto:
+                    Platform.OS === "android" ? (
+                      <TableViewEmoji emoji="＋" />
+                    ) : (
+                      <TableViewPicto symbol="plus" />
+                    ),
+                  title: "Connect another wallet",
+                  action: () => {
+                    connectWallet("");
+                  },
+                  paddingHorizontal: tableViewPaddingHorizontal,
+                },
+              ]}
+            />
           </View>
-        </>
-      )}
+        )}
+        {!user.signer && !loading && connectWithSeedPhrase && (
+          <>
+            <View style={styles.seedPhraseContainer}>
+              <TextInput
+                multiline
+                style={styles.seedPhrase}
+                placeholder="Enter your seed phrase"
+                placeholderTextColor={textSecondaryColor(colorScheme)}
+                onChangeText={(content) => {
+                  setSeedPhrase(content.trim());
+                }}
+                value={seedPhrase}
+                ref={(r) => {
+                  textInputRef.current = r;
+                  r?.measure((x, y, width, height, pageX, pageY) => {
+                    setKeyboardVerticalOffset(-y - height - 80);
+                  });
+                }}
+                onFocus={() => {
+                  const scroll = () => {
+                    scrollViewRef.current?.scrollTo({
+                      x: 0,
+                      y: 200,
+                      animated: true,
+                    });
+                  };
 
-      {loading && (
-        <ActivityIndicator size="large" style={{ marginBottom: "auto" }} />
-      )}
-
-      {!user.signer && !loading && !connectToDemoWallet && (
-        <View style={styles.walletSelectorContainer}>
-          <TableView
-            items={[
-              {
-                id: "metamask",
-                picto: <TableViewEmoji emoji="🦊" />,
-                title: "Connect Metamask",
-                action: () => {
-                  connectWallet("MetaMask");
-                },
-                paddingHorizontal: tableViewPaddingHorizontal,
-              },
-              {
-                id: "rainbow",
-                picto: <TableViewEmoji emoji="🌈" />,
-                title: "Connect Rainbow",
-                action: () => {
-                  connectWallet("Rainbow");
-                },
-                paddingHorizontal: tableViewPaddingHorizontal,
-              },
-              {
-                id: "coinbase",
-                picto: <TableViewEmoji emoji="🔵" />,
-                title: "Connect Coinbase Wallet",
-                action: connectCoinbaseWallet,
-                paddingHorizontal: tableViewPaddingHorizontal,
-              },
-              {
-                id: "ledger",
-                picto: <TableViewEmoji emoji="🔲" />,
-                title: "Connect Ledger Wallet",
-                action: () => {
-                  connectWallet("Ledger Live");
-                },
-                paddingHorizontal: tableViewPaddingHorizontal,
-              },
-              {
-                id: "walletconnect",
-                picto:
-                  Platform.OS === "android" ? (
-                    <TableViewEmoji emoji="＋" />
-                  ) : (
-                    <TableViewPicto symbol="plus" />
-                  ),
-                title: "Connect another wallet",
-                action: () => {
-                  connectWallet("");
-                },
-                paddingHorizontal: tableViewPaddingHorizontal,
-              },
-            ]}
-          />
-        </View>
-      )}
-      {!user.signer && !loading && connectToDemoWallet && (
-        <>
-          <Button
-            title="Continue"
-            variant="primary"
-            style={styles.sign}
-            onPress={() => {
-              setLoading(true);
-              generateWallet();
-              setConnectToDemoWallet(false);
-            }}
-          />
-
-          <Button
-            title="Cancel"
-            style={styles.logout}
-            variant="text"
-            textStyle={{ fontWeight: "600" }}
-            onPress={() => {
-              setConnectToDemoWallet(false);
-            }}
-          />
-        </>
-      )}
-      {user.signer && (
-        <>
-          {!loading && (
-            <Button
-              title={
-                waitingForSecondSignature
-                  ? "Sign (2/2)"
-                  : user.isOnXmtp
-                  ? "Sign"
-                  : "Sign (1/2)"
-              }
-              variant="primary"
-              style={styles.sign}
-              onPress={() => {
-                if (waitingForSecondSignature) {
-                  setLoading(true);
-                  clickedSecondSignature.current = true;
-                } else {
-                  if (user.isOnXmtp) {
-                    setLoading(true);
+                  setTimeout(scroll, 50);
+                  setTimeout(scroll, 100);
+                  setTimeout(scroll, 150);
+                }}
+                onKeyPress={(e) => {
+                  if (e.nativeEvent.key === "Enter") {
+                    textInputRef.current?.blur();
                   }
-                  initXmtpClient();
-                }
+                }}
+              />
+            </View>
+            <View style={{ marginBottom: 20 }}>{termsAndConditions}</View>
+
+            <Button
+              title="Connect"
+              variant="primary"
+              style={[styles.sign, { marginTop: "auto" }]}
+              onPress={() => {
+                if (!seedPhrase || seedPhrase.trim().length === 0) return;
+                console.log(seedPhrase);
+                getSignerFromSeedPhrase(seedPhrase.trim());
               }}
             />
-          )}
 
-          <Button
-            title={`Log out from ${shortAddress(user.address)}`}
-            style={styles.logout}
-            variant="text"
-            textStyle={{ fontWeight: "600" }}
-            onPress={disconnect}
-          />
-        </>
-      )}
-    </ScrollView>
+            <Button
+              title="Back to home screen"
+              style={styles.logout}
+              variant="text"
+              textStyle={{ fontWeight: "600" }}
+              onPress={() => {
+                setConnectWithSeedPhrase(false);
+                setSeedPhrase("");
+              }}
+            />
+          </>
+        )}
+        {user.signer && (
+          <>
+            {!loading && (
+              <Button
+                title={
+                  waitingForSecondSignature
+                    ? "Sign (2/2)"
+                    : user.isOnXmtp
+                    ? "Sign"
+                    : "Sign (1/2)"
+                }
+                variant="primary"
+                style={styles.sign}
+                onPress={() => {
+                  if (waitingForSecondSignature) {
+                    setLoading(true);
+                    clickedSecondSignature.current = true;
+                  } else {
+                    if (user.isOnXmtp) {
+                      setLoading(true);
+                    }
+                    initXmtpClient();
+                  }
+                }}
+              />
+            )}
+
+            <Button
+              title={`Log out from ${shortAddress(user.address)}`}
+              style={styles.logout}
+              variant="text"
+              textStyle={{ fontWeight: "600" }}
+              onPress={disconnect}
+            />
+          </>
+        )}
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 }
 
@@ -595,5 +636,24 @@ const getStyles = (colorScheme: ColorSchemeName) =>
     },
     link: {
       textDecorationLine: "underline",
+    },
+    seedPhraseContainer: {
+      width: "100%",
+      paddingRight: 25,
+      paddingLeft: 25,
+      height: 130,
+      marginTop: 38,
+    },
+    seedPhrase: {
+      width: "100%",
+      height: "100%",
+      color: textPrimaryColor(colorScheme),
+      backgroundColor: tertiaryBackgroundColor(colorScheme),
+      borderRadius: 10,
+      paddingLeft: 16,
+      paddingRight: 16,
+      paddingTop: 10,
+      paddingBottom: 10,
+      fontSize: 17,
     },
   });
