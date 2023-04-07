@@ -25,6 +25,7 @@ import {
   TextInput,
   KeyboardAvoidingView,
   Alert,
+  Dimensions,
 } from "react-native";
 
 import { sendMessageToWebview } from "../components/XmtpWebview";
@@ -36,7 +37,7 @@ import {
   textPrimaryColor,
   textSecondaryColor,
 } from "../utils/colors";
-import { getPrivateKeyFromMnemonic } from "../utils/eth";
+import { getPrivateKeyFromMnemonic, validateMnemonic } from "../utils/eth";
 import { saveXmtpKeys } from "../utils/keychain";
 import { shortAddress } from "../utils/str";
 import { getXmtpKeysFromSigner, isOnXmtp } from "../utils/xmtp";
@@ -159,10 +160,18 @@ export default function OnboardingComponent({
   }, [enableDoubleSignature]);
 
   const getSignerFromSeedPhrase = useCallback(async (mnemonic: string) => {
+    let rightMnemonic = mnemonic;
+    try {
+      rightMnemonic = validateMnemonic(mnemonic);
+    } catch (e) {
+      console.log(e);
+      Alert.alert("This seed phrase is invalid. Please try again");
+      return;
+    }
     setLoading(true);
     setTimeout(async () => {
       try {
-        const privateKey = await getPrivateKeyFromMnemonic(mnemonic);
+        const privateKey = await getPrivateKeyFromMnemonic(rightMnemonic);
         const signer = new Wallet(privateKey);
         const address = await signer.getAddress();
         setUser({
@@ -366,6 +375,7 @@ export default function OnboardingComponent({
   return (
     <KeyboardAvoidingView
       style={{ flex: 1 }}
+      enabled={Dimensions.get("window").height < 850}
       behavior={Platform.OS === "ios" ? "position" : "height"}
       keyboardVerticalOffset={
         Platform.OS === "ios" ? keyboardVerticalOffset : 0
@@ -465,7 +475,10 @@ export default function OnboardingComponent({
                 placeholder="Enter your seed phrase"
                 placeholderTextColor={textSecondaryColor(colorScheme)}
                 onChangeText={(content) => {
-                  setSeedPhrase(content.trim());
+                  setSeedPhrase(content.replace(/\n/g, " "));
+                }}
+                onFocus={() => {
+                  setSeedPhrase(seedPhrase.trim());
                 }}
                 value={seedPhrase}
                 ref={(r) => {
@@ -473,21 +486,6 @@ export default function OnboardingComponent({
                   r?.measure((x, y, width, height, pageX, pageY) => {
                     setKeyboardVerticalOffset(-y - height - 80);
                   });
-                }}
-                onFocus={() => {
-                  const fixScroll = () => {
-                    scrollViewRef.current?.scrollTo({
-                      x: 0,
-                      y: 200,
-                      animated: Platform.OS === "ios",
-                    });
-                  };
-
-                  if (Platform.OS === "ios") {
-                    setTimeout(fixScroll, 50);
-                    setTimeout(fixScroll, 100);
-                    setTimeout(fixScroll, 150);
-                  }
                 }}
                 onKeyPress={(e) => {
                   if (e.nativeEvent.key === "Enter") {
