@@ -279,12 +279,7 @@ export default function XmtpWebview() {
 
         case "WEBVIEW_UNHANDLED_REJECTION": {
           isReconnecting = false;
-          const IGNORED_REASONS = ["AbortError: Fetch is aborted"];
-          if (IGNORED_REASONS.some((r) => r.includes(data.reason))) {
-            console.log("Ignoring unhandled rejection");
-          } else {
-            sentryTrackMessage("WEBVIEW_UNHANDLED_REJECTION", data);
-          }
+          sentryTrackMessage("WEBVIEW_UNHANDLED_REJECTION", data);
           break;
         }
 

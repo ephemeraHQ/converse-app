@@ -1,6 +1,7 @@
+import { useContext, useEffect } from "react";
 import { View, Text } from "react-native";
 
-import { StateType } from "../data/store/context";
+import { AppContext, StateType } from "../data/store/context";
 import ActivityIndicator from "./ActivityIndicator/ActivityIndicator";
 
 export const shouldShowConnecting = (state: StateType) =>
@@ -9,11 +10,17 @@ export const shouldShowConnecting = (state: StateType) =>
   !state.xmtp.webviewConnected ||
   state.xmtp.reconnecting;
 
+export let isReconnecting = false;
+
 export default function Connecting() {
+  const { state } = useContext(AppContext);
+  useEffect(() => {
+    isReconnecting = shouldShowConnecting(state);
+  }, [state]);
   return (
     <View style={{ flexDirection: "row", alignItems: "center" }}>
       <ActivityIndicator />
-      <Text style={{ marginLeft: 10, fontSize: 17 }}>Connecting</Text>
+      <Text style={{ marginLeft: 10 }}>Connecting</Text>
     </View>
   );
 }
