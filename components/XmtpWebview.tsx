@@ -74,22 +74,27 @@ export default function XmtpWebview() {
     };
   }, []);
 
+  const loadKeys = useCallback(async () => {
+    const keys = await loadXmtpKeys();
+    sendMessageToWebview("KEYS_LOADED_FROM_SECURE_STORAGE", {
+      keys,
+      env: config.xmtpEnv,
+    });
+    loadedKeys.current = true;
+  }, []);
+
   useEffect(() => {
-    const loadKeys = async () => {
-      const keys = await loadXmtpKeys();
-      sendMessageToWebview("KEYS_LOADED_FROM_SECURE_STORAGE", {
-        keys,
-        env: config.xmtpEnv,
-      });
-      loadedKeys.current = true;
-    };
     if (!loadedKeys.current && state.xmtp.address) {
       loadKeys();
     }
-  }, [state.xmtp.address]);
+  }, [loadKeys, state.xmtp.address]);
 
   const reloadData = useCallback(
     async (showConnecting: boolean) => {
+      if (!state.xmtp.webviewConnected) {
+        console.log("Not connected, can't reload");
+        return;
+      }
       isReconnecting = true;
       if (showConnecting) {
         dispatch({
@@ -118,8 +123,18 @@ export default function XmtpWebview() {
         knownTopics,
       });
     },
-    [dispatch, state.xmtp.conversations]
+    [dispatch, state.xmtp.conversations, state.xmtp.webviewConnected]
   );
+
+  const isInternetReachable = useRef(state.app.isInternetReachable);
+
+  useEffect(() => {
+    if (!isInternetReachable.current && state.app.isInternetReachable) {
+      // We're back online!
+      reloadData(true);
+    }
+    isInternetReachable.current = state.app.isInternetReachable;
+  }, [reloadData, state.app.isInternetReachable]);
 
   useEffect(() => {
     const subscription = AppState.addEventListener(
@@ -246,6 +261,10 @@ export default function XmtpWebview() {
           dispatch({
             type: XmtpDispatchTypes.XmtpInitialLoad,
           });
+          dispatch({
+            type: XmtpDispatchTypes.XmtpSetReconnecting,
+            payload: { reconnecting: false },
+          });
           break;
         case "XMTP_RELOAD_DONE": {
           saveLastXMTPSyncedAt(data.newLastSyncedAt);
@@ -307,6 +326,14 @@ export default function XmtpWebview() {
           break;
         }
 
+        case "ERROR_WHILE_INSTANTIATING_CLIENT": {
+          console.log("Retying to connect in 3 second...");
+          await new Promise((r) => setTimeout(r, 3000));
+          loadKeys();
+
+          break;
+        }
+
         default:
           break;
       }
@@ -317,6 +344,7 @@ export default function XmtpWebview() {
     },
     [
       dispatch,
+      loadKeys,
       reloadData,
       state.notifications.status,
       state.xmtp.address,
