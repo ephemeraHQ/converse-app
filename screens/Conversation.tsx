@@ -3,6 +3,7 @@ import { Theme } from "@flyerhq/react-native-chat-ui";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { fromNanoString } from "@xmtp/xmtp-js";
+import { PreparedMessage } from "@xmtp/xmtp-js/dist/types/src/PreparedMessage";
 import { isAddress } from "ethers/lib/utils";
 import React, {
   useCallback,
@@ -21,6 +22,7 @@ import {
   useColorScheme,
   View,
 } from "react-native";
+import uuid from "react-native-uuid";
 
 import Button from "../components/Button/Button";
 import ConversationTitle from "../components/Conversation/ConversationTitle";
@@ -285,15 +287,23 @@ const Conversation = ({
       if (!conversation) return;
       messageContent.current = "";
       setMessageValue("");
-      const preparedMessage = await prepareXmtpMessage(
-        conversation.topic,
-        m.text
-      );
-      const messageId = await preparedMessage.messageID();
-      const sentAtTime =
-        (preparedMessage.messageEnvelope as any)?.timestamp ||
-        fromNanoString(preparedMessage.messageEnvelope.timestampNs);
-      if (!sentAtTime) return;
+      let messageId = uuid.v4().toString();
+      let sentAtTime = new Date();
+      let preparedMessage: PreparedMessage | null = null;
+      if (state.xmtp.localConnected) {
+        try {
+          preparedMessage = await prepareXmtpMessage(
+            conversation.topic,
+            m.text
+          );
+          messageId = await preparedMessage.messageID();
+          sentAtTime =
+            (preparedMessage.messageEnvelope as any)?.timestamp ||
+            fromNanoString(preparedMessage.messageEnvelope.timestampNs);
+          if (!sentAtTime) return;
+        } catch (e) {}
+      }
+
       // Save to DB immediatly
       saveMessages(
         [
@@ -309,7 +319,9 @@ const Conversation = ({
         dispatch
       );
       // Then send for real
-      sendPreparedMessage(messageId, preparedMessage);
+      if (preparedMessage) {
+        sendPreparedMessage(messageId, preparedMessage);
+      }
     },
     [conversation, dispatch, state.xmtp.address]
   );

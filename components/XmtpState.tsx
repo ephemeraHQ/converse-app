@@ -143,7 +143,18 @@ export default function XmtpState() {
   const { dispatch, state } = useContext(AppContext);
   // On open; opening XMTP session
   useEffect(() => {
-    getLocalXmtpClient(dispatch);
+    const initXmtp = async () => {
+      try {
+        await getLocalXmtpClient(dispatch);
+      } catch (e) {
+        console.log(
+          "Count not instantiate local XMTP client, retrying in 3 seconds..."
+        );
+        await new Promise((r) => setTimeout(r, 3000));
+        initXmtp();
+      }
+    };
+    initXmtp();
   }, [dispatch, state.xmtp.address]);
   useEffect(() => {
     const messageSendingInterval = setInterval(() => {
