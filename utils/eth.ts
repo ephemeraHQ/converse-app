@@ -1,6 +1,10 @@
 import { pbkdf2 } from "crypto";
 import { ethers } from "ethers";
-import { isAddress } from "ethers/lib/utils";
+import {
+  entropyToMnemonic,
+  isAddress,
+  mnemonicToEntropy,
+} from "ethers/lib/utils";
 
 import config from "../config";
 import { getLensOwner } from "./lens";
@@ -24,6 +28,9 @@ export const getAddressForPeer = async (peer: string) => {
     : peer;
   return resolvedAddress;
 };
+
+export const validateMnemonic = (mnemonic: string) =>
+  entropyToMnemonic(mnemonicToEntropy(mnemonic));
 
 export const getPrivateKeyFromMnemonic = (mnemonic: string): Promise<string> =>
   new Promise((resolve, reject) => {
