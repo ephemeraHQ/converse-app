@@ -4,7 +4,6 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { fromNanoString } from "@xmtp/xmtp-js";
 import { isAddress } from "ethers/lib/utils";
-import * as Clipboard from "expo-clipboard";
 import React, {
   useCallback,
   useContext,
@@ -22,10 +21,9 @@ import {
   useColorScheme,
   View,
 } from "react-native";
-// import uuid from "react-native-uuid";
 
-import ActivityIndicator from "../components/ActivityIndicator/ActivityIndicator";
 import Button from "../components/Button/Button";
+import ConversationTitle from "../components/Conversation/ConversationTitle";
 import InviteBanner from "../components/InviteBanner";
 import Picto from "../components/Picto/Picto";
 import {
@@ -37,7 +35,7 @@ import { sendMessageToWebview } from "../components/XmtpWebview";
 import { saveMessages } from "../data";
 import { AppContext } from "../data/store/context";
 import { XmtpConversation, XmtpDispatchTypes } from "../data/store/xmtpReducer";
-import { blockPeer, userExists } from "../utils/api";
+import { userExists } from "../utils/api";
 import {
   backgroundColor,
   headerTitleStyle,
@@ -47,10 +45,9 @@ import {
   chatInputBackgroundColor,
   textPrimaryColor,
   textSecondaryColor,
-  actionSheetColors,
 } from "../utils/colors";
 import { getAddressForPeer } from "../utils/eth";
-import { conversationName, getTitleFontScale } from "../utils/str";
+import { getTitleFontScale } from "../utils/str";
 import {
   Chat,
   defaultTheme,
@@ -207,90 +204,11 @@ const Conversation = ({
   useEffect(() => {
     navigation.setOptions({
       headerTitle: () => (
-        <>
-          {state.xmtp.initialLoadDone && !state.xmtp.loading && (
-            <TouchableOpacity
-              onPress={() => {
-                showActionSheetWithOptions(
-                  {
-                    options: [
-                      "Copy wallet address",
-                      isBlockedPeer ? "Unblock" : "Block",
-                      "Cancel",
-                    ],
-                    cancelButtonIndex: 2,
-                    title: peerAddress,
-                    destructiveButtonIndex: isBlockedPeer ? undefined : 1,
-                    ...actionSheetColors(colorScheme),
-                  },
-                  (selectedIndex?: number) => {
-                    switch (selectedIndex) {
-                      case 0:
-                        Clipboard.setStringAsync(peerAddress || "");
-                        break;
-                      case 1:
-                        showActionSheetWithOptions(
-                          {
-                            options: [
-                              isBlockedPeer ? "Unblock" : "Block",
-                              "Cancel",
-                            ],
-                            cancelButtonIndex: 1,
-                            destructiveButtonIndex: isBlockedPeer
-                              ? undefined
-                              : 0,
-                            title: isBlockedPeer
-                              ? "If you unblock this contact, they will be able to send you messages again."
-                              : "If you block this contact, you will not receive messages from them anymore.",
-                            ...actionSheetColors(colorScheme),
-                          },
-                          (selectedIndex?: number) => {
-                            if (selectedIndex === 0) {
-                              blockPeer({
-                                peerAddress: peerAddress || "",
-                                blocked: !isBlockedPeer,
-                              });
-                              dispatch({
-                                type: XmtpDispatchTypes.XmtpSetBlockedStatus,
-                                payload: {
-                                  peerAddress: peerAddress || "",
-                                  blocked: !isBlockedPeer,
-                                },
-                              });
-                            }
-                          }
-                        );
-
-                        break;
-
-                      default:
-                        break;
-                    }
-                  }
-                );
-              }}
-            >
-              <Text
-                style={[
-                  styles.title,
-                  {
-                    fontSize:
-                      Platform.OS === "ios"
-                        ? 17 * titleFontScale
-                        : styles.title.fontSize,
-                  },
-                ]}
-                numberOfLines={1}
-                allowFontScaling={false}
-              >
-                {conversation ? conversationName(conversation) : ""}
-              </Text>
-            </TouchableOpacity>
-          )}
-          {(!state.xmtp.initialLoadDone ||
-            state.xmtp.loading ||
-            !conversation) && <ActivityIndicator />}
-        </>
+        <ConversationTitle
+          conversation={conversation}
+          peerAddress={peerAddress}
+          isBlockedPeer={isBlockedPeer}
+        />
       ),
       headerRight: () => {
         return (
@@ -331,8 +249,7 @@ const Conversation = ({
     showActionSheetWithOptions,
     showInvite.banner,
     showInvite.show,
-    state.xmtp.initialLoadDone,
-    state.xmtp.loading,
+    state,
     styles.title,
     titleFontScale,
   ]);
@@ -392,7 +309,7 @@ const Conversation = ({
         dispatch
       );
       // Then send for real
-      sendPreparedMessage(preparedMessage);
+      sendPreparedMessage(messageId, preparedMessage);
     },
     [conversation, dispatch, state.xmtp.address]
   );

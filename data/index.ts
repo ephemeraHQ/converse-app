@@ -310,3 +310,22 @@ export const getMessagesToSend = async () => {
   });
   return messagesToSend;
 };
+
+export const updateMessageId = async (
+  message: Message,
+  newId: string,
+  dispatch: DispatchType
+) => {
+  const oldId = message.id;
+  await messageRepository.update({ id: message.id }, { id: newId });
+  const updatedMessage = await messageRepository.findOneBy({ id: newId });
+  if (!updatedMessage) throw new Error("Updated message does not exist");
+  dispatch({
+    type: XmtpDispatchTypes.XmtpUpdateMessageId,
+    payload: {
+      topic: message.conversationId,
+      message: xmtpMessageFromDb(updatedMessage),
+      oldId,
+    },
+  });
+};

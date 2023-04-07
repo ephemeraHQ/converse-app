@@ -2,6 +2,7 @@ import { Client, Conversation } from "@xmtp/xmtp-js";
 import { PreparedMessage } from "@xmtp/xmtp-js/dist/types/src/PreparedMessage";
 import { useContext, useEffect } from "react";
 
+import { getMessagesToSend, updateMessageId } from "../data";
 import { AppContext, DispatchType } from "../data/store/context";
 import { XmtpDispatchTypes } from "../data/store/xmtpReducer";
 import { getBlockedPeers } from "../utils/api";
@@ -9,6 +10,7 @@ import { loadXmtpConversation, loadXmtpKeys } from "../utils/keychain";
 import { getXmtpSignature } from "../utils/xmtp";
 import { getXmtpClientFromKeys } from "../utils/xmtp/client";
 import { parseConversationJSON } from "../utils/xmtp/conversations";
+import { isReconnecting } from "./Connecting";
 
 let xmtpClient: Client | null;
 let xmtpApiSignature: string | null;
@@ -48,34 +50,55 @@ export const prepareXmtpMessage = async (topic: string, content: string) => {
 
 const sendingMessages: { [messageId: string]: boolean } = {};
 
-export const sendPreparedMessage = async (preparedMessage: PreparedMessage) => {
-  const id = await preparedMessage.messageID();
+export const sendPreparedMessage = async (
+  id: string,
+  preparedMessage: PreparedMessage
+) => {
   try {
-    if (sendingMessages[id]) return;
+    if (sendingMessages[id]) {
+      return;
+    }
     sendingMessages[id] = true;
     await preparedMessage.send();
     delete sendingMessages[id];
-  } catch (e) {
-    console.log("An error occured while sending message", e);
+  } catch (e: any) {
+    console.log("Could not send message, will probably try again later", e);
     delete sendingMessages[id];
   }
 };
 
-const sendMessagesToSend = async () => {
-  // const messagesToSend = await getMessagesToSend();
-  // for (const message of messagesToSend) {
-  //   const conversation = await getLocalXmtpConversationForTopic(
-  //     message.conversationId
-  //   );
-  //   if (conversation) {
-  //     const preparedMessage = await getPreparedMessageFromMessage(
-  //       message,
-  //       conversation
-  //     );
-  //     await preparedMessage.send();
-  //   }
-  // }
-  // console.log(`${messagesToSend.length} saved messages to send`);
+let sendingPendingMessages = false;
+
+const sendPendingMessages = async (dispatch: DispatchType) => {
+  if (sendingPendingMessages) return;
+  sendingPendingMessages = true;
+  try {
+    const messagesToSend = await getMessagesToSend();
+    if (messagesToSend.length > 0) {
+      console.log(
+        `Trying to send ${messagesToSend.length} pending messages...`
+      );
+    }
+    for (const message of messagesToSend) {
+      if (sendingMessages[message.id]) {
+        continue;
+      }
+      const conversation = await getLocalXmtpConversationForTopic(
+        message.conversationId
+      );
+      if (conversation) {
+        const preparedMessage = await conversation.prepareMessage(
+          message.content
+        );
+        const newMessageId = await preparedMessage.messageID();
+        await updateMessageId(message, newMessageId, dispatch);
+        await sendPreparedMessage(newMessageId, preparedMessage);
+      }
+    }
+  } catch (e) {
+    console.log(e);
+  }
+  sendingPendingMessages = false;
 };
 
 export const getLocalXmtpClient = async (dispatch?: DispatchType) => {
@@ -127,14 +150,18 @@ export default function XmtpState() {
       if (
         state.xmtp.localConnected &&
         state.xmtp.webviewConnected &&
-        state.app.splashScreenHidden
+        state.app.splashScreenHidden &&
+        state.xmtp.initialLoadDone &&
+        !isReconnecting
       ) {
-        sendMessagesToSend();
+        sendPendingMessages(dispatch);
       }
     }, 2000);
     return () => clearInterval(messageSendingInterval);
   }, [
+    dispatch,
     state.app.splashScreenHidden,
+    state.xmtp.initialLoadDone,
     state.xmtp.localConnected,
     state.xmtp.webviewConnected,
   ]);
