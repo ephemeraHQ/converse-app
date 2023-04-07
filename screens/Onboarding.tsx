@@ -1,4 +1,4 @@
-import { handleResponse } from "@coinbase/wallet-mobile-sdk";
+import { configure, handleResponse } from "@coinbase/wallet-mobile-sdk";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import WalletConnectProvider, {
   QrcodeModal,
@@ -23,11 +23,11 @@ export default function OnboardingScreen() {
     // because we reload JS app so we call configure again
     // but we don't reboot the native app and the Coinbase SDK crashes
     // if we call configure a second time.
-    // configure({
-    //   callbackURL: new URL(`https://${config.websiteDomain}/coinbase`),
-    //   hostURL: new URL("https://wallet.coinbase.com/wsegue"),
-    //   hostPackageName: "org.toshi",
-    // });
+    configure({
+      callbackURL: new URL(`https://${config.websiteDomain}/coinbase`),
+      hostURL: new URL("https://wallet.coinbase.com/wsegue"),
+      hostPackageName: "org.toshi",
+    });
     const sub = Linking.addEventListener("url", ({ url }) => {
       handleResponse(new URL(url));
     });
