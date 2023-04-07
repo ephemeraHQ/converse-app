@@ -1,9 +1,8 @@
-import { configure, handleResponse } from "@coinbase/wallet-mobile-sdk";
+import { handleResponse } from "@coinbase/wallet-mobile-sdk";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import WalletConnectProvider, {
   QrcodeModal,
   RenderQrcodeModalProps,
-  WalletService,
 } from "@walletconnect/react-native-dapp";
 import { useEffect, useState } from "react";
 import { Dimensions, Linking, View } from "react-native";
@@ -18,18 +17,17 @@ export default function OnboardingScreen() {
     RenderQrcodeModalProps | undefined
   >(undefined);
   const [hideModal, setHideModal] = useState(false);
-  const [connectToDemoWallet, setConnectToDemoWallet] = useState(false);
   // Your app's deeplink handling code
   useEffect(() => {
     // On dev with hot reloading, this will make the app crash
     // because we reload JS app so we call configure again
     // but we don't reboot the native app and the Coinbase SDK crashes
     // if we call configure a second time.
-    configure({
-      callbackURL: new URL(`https://${config.websiteDomain}/coinbase`),
-      hostURL: new URL("https://wallet.coinbase.com/wsegue"),
-      hostPackageName: "org.toshi",
-    });
+    // configure({
+    //   callbackURL: new URL(`https://${config.websiteDomain}/coinbase`),
+    //   hostURL: new URL("https://wallet.coinbase.com/wsegue"),
+    //   hostPackageName: "org.toshi",
+    // });
     const sub = Linking.addEventListener("url", ({ url }) => {
       handleResponse(new URL(url));
     });
@@ -62,21 +60,6 @@ export default function OnboardingScreen() {
           ...props,
           walletServices: [...props.walletServices],
         };
-        // Add a demo wallet for review
-        newProps.walletServices.splice(7, 0, {
-          id: "demo",
-          name: "New Account",
-        } as any);
-        newProps.connectToWalletService = async (
-          walletService: WalletService,
-          uri?: string
-        ) => {
-          if (walletService.id === "demo") {
-            setConnectToDemoWallet(true);
-          } else {
-            await props.connectToWalletService(walletService, uri);
-          }
-        };
         if (walletConnectProps?.uri !== newProps.uri) {
           setWalletConnectProps(newProps);
         }
@@ -104,8 +87,6 @@ export default function OnboardingScreen() {
       <OnboardingComponent
         walletConnectProps={walletConnectProps}
         setHideModal={setHideModal}
-        connectToDemoWallet={connectToDemoWallet}
-        setConnectToDemoWallet={setConnectToDemoWallet}
       />
     </WalletConnectProvider>
   );

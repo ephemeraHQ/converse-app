@@ -21,7 +21,6 @@ import { FAB } from "react-native-paper";
 import ActivityIndicator from "../components/ActivityIndicator/ActivityIndicator";
 import ConversationListItem from "../components/ConversationListItem";
 import DebugButton from "../components/DebugButton";
-import DemoAccountBanner from "../components/DemoAccountBanner";
 import Picto from "../components/Picto/Picto";
 import SettingsButton from "../components/SettingsButton";
 import config from "../config";
@@ -191,16 +190,10 @@ export default function ConversationList({
     styles.androidTitle,
   ]);
   const keyExtractor = useCallback((item: XmtpConversation) => {
-    if ((item as any).id === "demoBanner") {
-      return "demoBanner";
-    }
     return item.topic;
   }, []);
   const renderItem = useCallback(
     ({ item }: { item: XmtpConversation }) => {
-      if ((item as any).id === "demoBanner") {
-        return <DemoAccountBanner />;
-      }
       return (
         <ConversationListItem
           navigation={navigation}
@@ -233,11 +226,7 @@ export default function ConversationList({
       <FlatList
         contentInsetAdjustmentBehavior="automatic"
         style={styles.conversationList}
-        data={
-          state.app.isDemoAccount
-            ? [{ id: "demoBanner" } as any, ...orderedConversations]
-            : orderedConversations
-        }
+        data={orderedConversations}
         renderItem={renderItem}
         keyExtractor={keyExtractor}
         initialNumToRender={20}

@@ -113,12 +113,12 @@ export const myMessageBubbleColor = (colorScheme: ColorSchemeName) => {
   return MY_MESSAGE_BUBBLE_LIGHT;
 };
 
-const TABLE_VIEW_ITEM_BACKGROUND_LIGHT = "#F2F2F6";
-const TABLE_VIEW_ITEM_BACKGROUND_DARK = "#2C2C2E";
+const TERTIARY_BACKGROUND_LIGHT = "rgba(118, 118, 128, 0.12)";
+const TERTIARY_BACKGROUND_DARK = "rgba(118, 118, 128, 0.12)";
 
-export const tableViewItemBackground = (colorScheme: ColorSchemeName) => {
-  if (colorScheme === "dark") return TABLE_VIEW_ITEM_BACKGROUND_DARK;
-  return TABLE_VIEW_ITEM_BACKGROUND_LIGHT;
+export const tertiaryBackgroundColor = (colorScheme: ColorSchemeName) => {
+  if (colorScheme === "dark") return TERTIARY_BACKGROUND_DARK;
+  return TERTIARY_BACKGROUND_LIGHT;
 };
 
 export const primaryColor = (colorScheme: ColorSchemeName) => {
