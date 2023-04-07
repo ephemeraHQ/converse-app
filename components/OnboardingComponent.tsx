@@ -6,7 +6,13 @@ import {
 import WalletConnectProvider from "@walletconnect/web3-provider";
 import { Bytes, ethers, Signer, Wallet } from "ethers";
 import * as Linking from "expo-linking";
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, {
+  Fragment,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import {
   View,
   StyleSheet,
@@ -153,7 +159,6 @@ export default function OnboardingComponent({
   }, [enableDoubleSignature]);
 
   const getSignerFromSeedPhrase = useCallback(async (mnemonic: string) => {
-    console.log("yoooo");
     setLoading(true);
     setTimeout(async () => {
       try {
@@ -361,8 +366,10 @@ export default function OnboardingComponent({
   return (
     <KeyboardAvoidingView
       style={{ flex: 1 }}
-      behavior="position"
-      keyboardVerticalOffset={keyboardVerticalOffset}
+      behavior={Platform.OS === "ios" ? "position" : "height"}
+      keyboardVerticalOffset={
+        Platform.OS === "ios" ? keyboardVerticalOffset : 0
+      }
     >
       <ScrollView
         alwaysBounceVertical={false}
@@ -453,6 +460,7 @@ export default function OnboardingComponent({
             <View style={styles.seedPhraseContainer}>
               <TextInput
                 multiline
+                textAlignVertical="top"
                 style={styles.seedPhrase}
                 placeholder="Enter your seed phrase"
                 placeholderTextColor={textSecondaryColor(colorScheme)}
@@ -467,17 +475,19 @@ export default function OnboardingComponent({
                   });
                 }}
                 onFocus={() => {
-                  const scroll = () => {
+                  const fixScroll = () => {
                     scrollViewRef.current?.scrollTo({
                       x: 0,
                       y: 200,
-                      animated: true,
+                      animated: Platform.OS === "ios",
                     });
                   };
 
-                  setTimeout(scroll, 50);
-                  setTimeout(scroll, 100);
-                  setTimeout(scroll, 150);
+                  if (Platform.OS === "ios") {
+                    setTimeout(fixScroll, 50);
+                    setTimeout(fixScroll, 100);
+                    setTimeout(fixScroll, 150);
+                  }
                 }}
                 onKeyPress={(e) => {
                   if (e.nativeEvent.key === "Enter") {
@@ -494,7 +504,6 @@ export default function OnboardingComponent({
               style={[styles.sign, { marginTop: "auto" }]}
               onPress={() => {
                 if (!seedPhrase || seedPhrase.trim().length === 0) return;
-                console.log(seedPhrase);
                 getSignerFromSeedPhrase(seedPhrase.trim());
               }}
             />
@@ -647,13 +656,25 @@ const getStyles = (colorScheme: ColorSchemeName) =>
     seedPhrase: {
       width: "100%",
       height: "100%",
+      ...Platform.select({
+        default: {
+          backgroundColor: tertiaryBackgroundColor(colorScheme),
+          borderRadius: 10,
+          fontSize: 17,
+        },
+        android: {
+          backgroundColor: backgroundColor(colorScheme),
+          borderWidth: 1,
+          borderRadius: 4,
+          borderColor: textSecondaryColor(colorScheme),
+          fontSize: 16,
+        },
+      }),
+      alignContent: "flex-start",
       color: textPrimaryColor(colorScheme),
-      backgroundColor: tertiaryBackgroundColor(colorScheme),
-      borderRadius: 10,
       paddingLeft: 16,
       paddingRight: 16,
       paddingTop: 10,
       paddingBottom: 10,
-      fontSize: 17,
     },
   });
