@@ -5,6 +5,7 @@ import ArrowUpRight from "@material-symbols/svg-400/outlined/call_made.svg";
 import Chat from "@material-symbols/svg-400/outlined/chat.svg";
 import Close from "@material-symbols/svg-400/outlined/close.svg";
 import Edit from "@material-symbols/svg-400/outlined/edit.svg";
+import Key from "@material-symbols/svg-400/outlined/key.svg";
 import Link from "@material-symbols/svg-400/outlined/link.svg";
 import ChatNotification from "@material-symbols/svg-400/outlined/mark_chat_unread.svg";
 import QrCodeScanner from "@material-symbols/svg-400/outlined/qr_code_scanner.svg";
@@ -46,6 +47,7 @@ const pictoMapping: {
   "message.badge": ChatNotification,
   search: Search,
   addlink: AddLink,
+  "key.horizontal": Key,
 };
 
 export default function Picto({ picto, style, size, weight, color }: Props) {
