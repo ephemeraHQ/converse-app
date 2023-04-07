@@ -56,9 +56,15 @@ export default function OnboardingScreen() {
         name: "Converse",
       }}
       renderQrcodeModal={(props) => {
+        const firstWallets = ["MetaMask", "Rainbow", "Ledger Live"];
+        const walletServices = [...props.walletServices].sort(
+          (walletA, walletB) =>
+            firstWallets.indexOf(walletB.name) -
+            firstWallets.indexOf(walletA.name)
+        );
         const newProps = {
           ...props,
-          walletServices: [...props.walletServices],
+          walletServices,
         };
         if (walletConnectProps?.uri !== newProps.uri) {
           setWalletConnectProps(newProps);
