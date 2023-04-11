@@ -55,21 +55,31 @@ export const prepareXmtpMessage = async (topic: string, content: string) => {
 
 const sendingMessages: { [messageId: string]: boolean } = {};
 
-export const sendPreparedMessages = async (preparedMessages: {
-  [id: string]: PreparedMessage;
-}) => {
+export const sendPreparedMessages = async (
+  preparedMessages: {
+    [id: string]: PreparedMessage;
+  },
+  dispatch: DispatchType
+) => {
   for (const id in preparedMessages) {
     const preparedMessage = preparedMessages[id];
 
     try {
-      if (sendingMessages[id]) {
+      if (
+        sendingMessages[id] ||
+        !preparedMessage.messageEnvelope.contentTopic
+      ) {
         return;
       }
       sendingMessages[id] = true;
       await preparedMessage.send();
-      // Here message has been sent, let's update it in db
-      // to make sure we don't sent twice
-      markMessageAsSent(id);
+      // Here message has been sent, let's mark it as
+      // sent locally to make sure we don't sent twice
+      await markMessageAsSent(
+        id,
+        preparedMessage.messageEnvelope.contentTopic,
+        dispatch
+      );
       delete sendingMessages[id];
     } catch (e: any) {
       console.log("Could not send message, will probably try again later", e);
@@ -125,7 +135,7 @@ export const sendPendingMessages = async (dispatch: DispatchType) => {
       }
     }
     await updateMessagesIds(messageIdsToUpdate, dispatch);
-    await sendPreparedMessages(preparedMessagesToSend);
+    await sendPreparedMessages(preparedMessagesToSend, dispatch);
   } catch (e) {
     console.log(e);
   }
