@@ -70,6 +70,7 @@ const styles = StyleSheet.create({
   container: {
     alignItems: "center",
     height: 16,
+    opacity: 0.6,
     justifyContent: "center",
     paddingHorizontal: 0,
     width: 16,

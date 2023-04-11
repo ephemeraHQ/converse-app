@@ -2,8 +2,6 @@ import { useActionSheet } from "@expo/react-native-action-sheet";
 import { Theme } from "@flyerhq/react-native-chat-ui";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import { fromNanoString } from "@xmtp/xmtp-js";
-import { PreparedMessage } from "@xmtp/xmtp-js/dist/types/src/PreparedMessage";
 import { isAddress } from "ethers/lib/utils";
 import React, {
   useCallback,
@@ -30,8 +28,7 @@ import InviteBanner from "../components/InviteBanner";
 import Picto from "../components/Picto/Picto";
 import {
   getLocalXmtpConversationForTopic,
-  prepareXmtpMessage,
-  sendPreparedMessage,
+  sendPendingMessages,
 } from "../components/XmtpState";
 import { sendMessageToWebview } from "../components/XmtpWebview";
 import { saveMessages } from "../data";
@@ -287,25 +284,11 @@ const Conversation = ({
       if (!conversation) return;
       messageContent.current = "";
       setMessageValue("");
-      let messageId = uuid.v4().toString();
-      let sentAtTime = new Date();
-      let preparedMessage: PreparedMessage | null = null;
-      if (state.xmtp.localConnected) {
-        try {
-          preparedMessage = await prepareXmtpMessage(
-            conversation.topic,
-            m.text
-          );
-          messageId = await preparedMessage.messageID();
-          sentAtTime =
-            (preparedMessage.messageEnvelope as any)?.timestamp ||
-            fromNanoString(preparedMessage.messageEnvelope.timestampNs);
-          if (!sentAtTime) return;
-        } catch (e) {}
-      }
+      const messageId = uuid.v4().toString();
+      const sentAtTime = new Date();
 
       // Save to DB immediatly
-      saveMessages(
+      await saveMessages(
         [
           {
             id: messageId,
@@ -319,9 +302,7 @@ const Conversation = ({
         dispatch
       );
       // Then send for real
-      if (preparedMessage) {
-        sendPreparedMessage(messageId, preparedMessage);
-      }
+      sendPendingMessages(dispatch);
     },
     [conversation, dispatch, state.xmtp.address]
   );
@@ -490,6 +471,9 @@ const chatTheme = (colorScheme: ColorSchemeName) =>
           style={{ width: 24, height: 24 }}
           size={Platform.OS === "android" ? 24 : 18}
         />
+      ),
+      sendingIcon: () => (
+        <Picto picto="clock" color="white" size={8} weight="bold" />
       ),
     },
   } as Theme);
