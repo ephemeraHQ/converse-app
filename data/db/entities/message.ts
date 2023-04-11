@@ -4,6 +4,7 @@ import {
   PrimaryColumn,
   ManyToOne,
   JoinColumn,
+  Index,
 } from "typeorm/browser";
 
 import { type Conversation } from "./conversation";
@@ -25,6 +26,7 @@ export class Message {
   @Column("text")
   content!: string;
 
+  @Index()
   @Column("text", { default: "sent" })
   status!: "delivered" | "error" | "seen" | "sending" | "sent";
 

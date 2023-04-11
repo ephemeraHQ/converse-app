@@ -82,14 +82,11 @@ let sendingPendingMessages = false;
 
 export const sendPendingMessages = async (dispatch: DispatchType) => {
   if (sendingPendingMessages) {
-    console.log("already sending, dude");
     return;
   }
   sendingPendingMessages = true;
   try {
-    console.log(0);
     const messagesToSend = await getMessagesToSend();
-    console.log(1);
     if (messagesToSend.length > 0) {
       console.log(
         `Trying to send ${messagesToSend.length} pending messages...`
@@ -132,7 +129,6 @@ export const sendPendingMessages = async (dispatch: DispatchType) => {
   } catch (e) {
     console.log(e);
   }
-  console.log("finished sending");
   sendingPendingMessages = false;
 };
 
@@ -199,9 +195,8 @@ export default function XmtpState() {
       state.xmtp.initialLoadDone &&
       !isReconnecting
     ) {
-      console.log("calling in interval");
       await sendPendingMessages(dispatch);
-      await new Promise((r) => setTimeout(r, 3000));
+      await new Promise((r) => setTimeout(r, 1000));
       messageSendingInterval();
     }
   }, [
