@@ -307,25 +307,49 @@ export const getMessagesToSend = async () => {
     where: {
       status: "sending",
     },
+    order: {
+      sent: "ASC",
+    },
   });
   return messagesToSend;
 };
 
-export const updateMessageId = async (
-  message: Message,
-  newId: string,
+export const updateMessagesIds = async (
+  messageIdsToUpdate: {
+    [messageId: string]: {
+      newMessageId: string;
+      newMessageSent: number;
+      message: Message;
+    };
+  },
   dispatch: DispatchType
 ) => {
-  const oldId = message.id;
-  await messageRepository.update({ id: message.id }, { id: newId });
-  const updatedMessage = await messageRepository.findOneBy({ id: newId });
-  if (!updatedMessage) throw new Error("Updated message does not exist");
-  dispatch({
-    type: XmtpDispatchTypes.XmtpUpdateMessageId,
-    payload: {
-      topic: message.conversationId,
+  const messagesToDispatch: {
+    topic: string;
+    message: XmtpMessage;
+    oldId: string;
+  }[] = [];
+  for (const oldId in messageIdsToUpdate) {
+    const messageToUpdate = messageIdsToUpdate[oldId];
+    await messageRepository.update(
+      { id: messageToUpdate.message.id },
+      { id: messageToUpdate.newMessageId, sent: messageToUpdate.newMessageSent }
+    );
+    const updatedMessage = await messageRepository.findOneBy({
+      id: messageToUpdate.newMessageId,
+    });
+    if (!updatedMessage) throw new Error("Updated message does not exist");
+    messagesToDispatch.push({
+      topic: messageToUpdate.message.conversationId,
       message: xmtpMessageFromDb(updatedMessage),
       oldId,
-    },
+    });
+  }
+  dispatch({
+    type: XmtpDispatchTypes.XmtpUpdateMessageIds,
+    payload: messagesToDispatch,
   });
 };
+
+export const markMessageAsSent = async (id: string) =>
+  messageRepository.update({ id }, { status: "sent" });

@@ -1,8 +1,13 @@
-import { Client, Conversation } from "@xmtp/xmtp-js";
+import { Client, Conversation, fromNanoString } from "@xmtp/xmtp-js";
 import { PreparedMessage } from "@xmtp/xmtp-js/dist/types/src/PreparedMessage";
-import { useContext, useEffect } from "react";
+import { useCallback, useContext, useEffect } from "react";
 
-import { getMessagesToSend, updateMessageId } from "../data";
+import {
+  getMessagesToSend,
+  markMessageAsSent,
+  updateMessagesIds,
+} from "../data";
+import { Message } from "../data/db/entities/message";
 import { AppContext, DispatchType } from "../data/store/context";
 import { XmtpDispatchTypes } from "../data/store/xmtpReducer";
 import { getBlockedPeers } from "../utils/api";
@@ -50,35 +55,55 @@ export const prepareXmtpMessage = async (topic: string, content: string) => {
 
 const sendingMessages: { [messageId: string]: boolean } = {};
 
-export const sendPreparedMessage = async (
-  id: string,
-  preparedMessage: PreparedMessage
-) => {
-  try {
-    if (sendingMessages[id]) {
-      return;
+export const sendPreparedMessages = async (preparedMessages: {
+  [id: string]: PreparedMessage;
+}) => {
+  for (const id in preparedMessages) {
+    const preparedMessage = preparedMessages[id];
+
+    try {
+      if (sendingMessages[id]) {
+        return;
+      }
+      sendingMessages[id] = true;
+      await preparedMessage.send();
+      // Here message has been sent, let's update it in db
+      // to make sure we don't sent twice
+      markMessageAsSent(id);
+      delete sendingMessages[id];
+    } catch (e: any) {
+      console.log("Could not send message, will probably try again later", e);
+      delete sendingMessages[id];
     }
-    sendingMessages[id] = true;
-    await preparedMessage.send();
-    delete sendingMessages[id];
-  } catch (e: any) {
-    console.log("Could not send message, will probably try again later", e);
-    delete sendingMessages[id];
   }
 };
 
 let sendingPendingMessages = false;
 
-const sendPendingMessages = async (dispatch: DispatchType) => {
-  if (sendingPendingMessages) return;
+export const sendPendingMessages = async (dispatch: DispatchType) => {
+  if (sendingPendingMessages) {
+    console.log("already sending, dude");
+    return;
+  }
   sendingPendingMessages = true;
   try {
+    console.log(0);
     const messagesToSend = await getMessagesToSend();
+    console.log(1);
     if (messagesToSend.length > 0) {
       console.log(
         `Trying to send ${messagesToSend.length} pending messages...`
       );
     }
+    const preparedMessagesToSend: { [newMessageId: string]: PreparedMessage } =
+      {};
+    const messageIdsToUpdate: {
+      [messageId: string]: {
+        newMessageId: string;
+        newMessageSent: number;
+        message: Message;
+      };
+    } = {};
     for (const message of messagesToSend) {
       if (sendingMessages[message.id]) {
         continue;
@@ -91,13 +116,23 @@ const sendPendingMessages = async (dispatch: DispatchType) => {
           message.content
         );
         const newMessageId = await preparedMessage.messageID();
-        await updateMessageId(message, newMessageId, dispatch);
-        await sendPreparedMessage(newMessageId, preparedMessage);
+        preparedMessagesToSend[newMessageId] = preparedMessage;
+        messageIdsToUpdate[message.id] = {
+          newMessageId,
+          newMessageSent:
+            fromNanoString(
+              preparedMessage.messageEnvelope.timestampNs
+            )?.getTime() || 0,
+          message,
+        };
       }
     }
+    await updateMessagesIds(messageIdsToUpdate, dispatch);
+    await sendPreparedMessages(preparedMessagesToSend);
   } catch (e) {
     console.log(e);
   }
+  console.log("finished sending");
   sendingPendingMessages = false;
 };
 
@@ -156,19 +191,19 @@ export default function XmtpState() {
     };
     initXmtp();
   }, [dispatch, state.xmtp.address]);
-  useEffect(() => {
-    const messageSendingInterval = setInterval(() => {
-      if (
-        state.xmtp.localConnected &&
-        state.xmtp.webviewConnected &&
-        state.app.splashScreenHidden &&
-        state.xmtp.initialLoadDone &&
-        !isReconnecting
-      ) {
-        sendPendingMessages(dispatch);
-      }
-    }, 2000);
-    return () => clearInterval(messageSendingInterval);
+  const messageSendingInterval = useCallback(async () => {
+    if (
+      state.xmtp.localConnected &&
+      state.xmtp.webviewConnected &&
+      state.app.splashScreenHidden &&
+      state.xmtp.initialLoadDone &&
+      !isReconnecting
+    ) {
+      console.log("calling in interval");
+      await sendPendingMessages(dispatch);
+      await new Promise((r) => setTimeout(r, 3000));
+      messageSendingInterval();
+    }
   }, [
     dispatch,
     state.app.splashScreenHidden,
@@ -176,6 +211,9 @@ export default function XmtpState() {
     state.xmtp.localConnected,
     state.xmtp.webviewConnected,
   ]);
+  useEffect(() => {
+    messageSendingInterval();
+  }, [messageSendingInterval]);
   useEffect(() => {
     if (state.xmtp.localConnected && state.xmtp.webviewConnected) {
       getBlockedPeers()
