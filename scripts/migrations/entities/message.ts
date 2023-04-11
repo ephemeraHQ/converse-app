@@ -1,4 +1,11 @@
-import { Entity, Column, PrimaryColumn, ManyToOne, JoinColumn } from "typeorm";
+import {
+  Entity,
+  Column,
+  PrimaryColumn,
+  ManyToOne,
+  JoinColumn,
+  Index,
+} from "typeorm";
 
 import { type Conversation } from "./conversation";
 
@@ -16,8 +23,9 @@ export class Message {
   @Column("text")
   content!: string;
 
+  @Index()
   @Column("text", { default: "sent" })
-  status!: "sending" | "sent" | "received" | "read" | "error";
+  status!: "delivered" | "error" | "seen" | "sending" | "sent";
 
   @Column("text")
   conversationId!: string;

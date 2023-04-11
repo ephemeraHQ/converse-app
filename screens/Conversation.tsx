@@ -22,6 +22,7 @@ import {
 } from "react-native";
 import uuid from "react-native-uuid";
 
+import Clock from "../assets/clock.svg";
 import Button from "../components/Button/Button";
 import ConversationTitle from "../components/Conversation/ConversationTitle";
 import InviteBanner from "../components/InviteBanner";
@@ -472,8 +473,6 @@ const chatTheme = (colorScheme: ColorSchemeName) =>
           size={Platform.OS === "android" ? 24 : 18}
         />
       ),
-      sendingIcon: () => (
-        <Picto picto="clock" color="white" size={8} weight="bold" />
-      ),
+      sendingIcon: () => <Clock fill="white" width={12} height={12} />,
     },
   } as Theme);
