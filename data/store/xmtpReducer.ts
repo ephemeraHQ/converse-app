@@ -70,6 +70,7 @@ export enum XmtpDispatchTypes {
   XmtpSetAddress = "XMTP_SET_ADDRESS",
   XmtpSetMessages = "XMTP_SET_MESSAGES",
   XmtpUpdateMessageIds = "XMTP_UPDATE_MESSAGE_IDS",
+  XmtpUpdateMessageStatus = "XMTP_UPDATE_MESSAGE_STATUS",
   XmtpInitialLoad = "XMTP_INITIAL_LOAD",
   XmtpInitialLoadDoneOnce = "XMTP_INITIAL_LOAD_DONE_ONCE",
   XmtpLoading = "XMTP_LOADING",
@@ -104,6 +105,11 @@ type XmtpPayload = {
     oldId: string;
     message: XmtpMessage;
   }[];
+  [XmtpDispatchTypes.XmtpUpdateMessageStatus]: {
+    messageId: string;
+    topic: string;
+    status: "delivered" | "error" | "seen" | "sending" | "sent";
+  };
   [XmtpDispatchTypes.XmtpSetCurrentMessageContent]: {
     topic: string;
     content: string;
@@ -261,6 +267,28 @@ export const xmtpReducer = (state: XmtpType, action: XmtpActions): XmtpType => {
           );
         }
       });
+
+      return newState;
+    }
+
+    case XmtpDispatchTypes.XmtpUpdateMessageStatus: {
+      if (
+        !state.conversations[action.payload.topic] ||
+        !state.conversations[action.payload.topic].messages.has(
+          action.payload.messageId
+        )
+      ) {
+        return state;
+      }
+      const newState = {
+        ...state,
+        lastUpdateAt: new Date().getTime(),
+      };
+      const conversation = newState.conversations[action.payload.topic];
+      const message = conversation.messages.get(action.payload.messageId);
+      if (message) {
+        message.status = action.payload.status;
+      }
 
       return newState;
     }

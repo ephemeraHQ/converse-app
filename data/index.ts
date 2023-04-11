@@ -351,5 +351,18 @@ export const updateMessagesIds = async (
   });
 };
 
-export const markMessageAsSent = async (id: string) =>
-  messageRepository.update({ id }, { status: "sent" });
+export const markMessageAsSent = async (
+  messageId: string,
+  topic: string,
+  dispatch: DispatchType
+) => {
+  await messageRepository.update({ id: messageId }, { status: "sent" });
+  dispatch({
+    type: XmtpDispatchTypes.XmtpUpdateMessageStatus,
+    payload: {
+      messageId,
+      topic,
+      status: "sent",
+    },
+  });
+};
