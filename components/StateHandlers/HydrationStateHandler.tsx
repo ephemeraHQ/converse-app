@@ -65,6 +65,14 @@ export default function HydrationStateHandler() {
       const savedBlockedPeers = JSON.parse(
         mmkv.getString("state.xmtp.blockedPeerAddresses") || "{}"
       );
+      const initialLoadDoneOnce = mmkv.getBoolean(
+        "state.xmtp.initialLoadDoneOnce"
+      );
+      if (initialLoadDoneOnce) {
+        dispatch({
+          type: XmtpDispatchTypes.XmtpInitialLoadDoneOnce,
+        });
+      }
       dispatch({
         type: XmtpDispatchTypes.XmtpSetBlockedPeerAddresses,
         payload: { blockedPeerAddresses: savedBlockedPeers },
