@@ -27,6 +27,7 @@ export type XmtpConversation = {
 export type XmtpType = {
   connected: boolean;
   initialLoadDone: boolean;
+  initialLoadDoneOnce: boolean;
   loading: boolean;
   conversations: {
     [topic: string]: XmtpConversation;
@@ -39,6 +40,7 @@ export type XmtpType = {
 export const xmtpInitialState: XmtpType = {
   connected: false,
   initialLoadDone: false,
+  initialLoadDoneOnce: false,
   loading: false,
   conversations: {},
   address: undefined,
@@ -61,6 +63,7 @@ export enum XmtpDispatchTypes {
   XmtpSetMessages = "XMTP_SET_MESSAGES",
   XmtpLazyMessage = "XMTP_LAZY_MESSAGE",
   XmtpInitialLoad = "XMTP_INITIAL_LOAD",
+  XmtpInitialLoadDoneOnce = "XMTP_INITIAL_LOAD_DONE_ONCE",
   XmtpLoading = "XMTP_LOADING",
   XmtpSetCurrentMessageContent = "XMTP_SET_CURRENT_MESSAGE",
   XmtpSetBlockedStatus = "XMTP_SET_BLOCKED_STATUS",
@@ -96,6 +99,7 @@ type XmtpPayload = {
     loading: boolean;
   };
   [XmtpDispatchTypes.XmtpInitialLoad]: undefined;
+  [XmtpDispatchTypes.XmtpInitialLoadDoneOnce]: undefined;
   [XmtpDispatchTypes.XmtpSetBlockedStatus]: {
     peerAddress: string;
     blocked: boolean;
@@ -174,9 +178,20 @@ export const xmtpReducer = (state: XmtpType, action: XmtpActions): XmtpType => {
       };
     }
     case XmtpDispatchTypes.XmtpInitialLoad: {
+      mmkv.set("state.xmtp.initialLoadDoneOnce", true);
       return {
         ...state,
         initialLoadDone: true,
+        initialLoadDoneOnce: true,
+        lastUpdateAt: new Date().getTime(),
+      };
+    }
+
+    case XmtpDispatchTypes.XmtpInitialLoadDoneOnce: {
+      mmkv.set("state.xmtp.initialLoadDoneOnce", true);
+      return {
+        ...state,
+        initialLoadDoneOnce: true,
         lastUpdateAt: new Date().getTime(),
       };
     }
