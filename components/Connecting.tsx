@@ -1,7 +1,8 @@
 import { useContext, useEffect } from "react";
-import { View, Text } from "react-native";
+import { View, Text, useColorScheme, Platform } from "react-native";
 
 import { AppContext, StateType } from "../data/store/context";
+import { textPrimaryColor } from "../utils/colors";
 import ActivityIndicator from "./ActivityIndicator/ActivityIndicator";
 
 export const shouldShowConnecting = (state: StateType) =>
@@ -13,6 +14,7 @@ export const shouldShowConnecting = (state: StateType) =>
 export let isReconnecting = false;
 
 export default function Connecting() {
+  const colorScheme = useColorScheme();
   const { state } = useContext(AppContext);
   useEffect(() => {
     isReconnecting = shouldShowConnecting(state);
@@ -20,7 +22,17 @@ export default function Connecting() {
   return (
     <View style={{ flexDirection: "row", alignItems: "center" }}>
       <ActivityIndicator />
-      <Text style={{ marginLeft: 10 }}>Connecting</Text>
+      <Text
+        style={{
+          marginLeft: 10,
+          color: textPrimaryColor(colorScheme),
+          ...Platform.select({
+            android: { fontSize: 22, fontFamily: "Roboto" },
+          }),
+        }}
+      >
+        Connecting
+      </Text>
     </View>
   );
 }
