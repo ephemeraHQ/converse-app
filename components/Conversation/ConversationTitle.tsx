@@ -1,7 +1,13 @@
 import { useActionSheet } from "@expo/react-native-action-sheet";
 import * as Clipboard from "expo-clipboard";
 import { useContext } from "react";
-import { TouchableOpacity, Platform, useColorScheme, Text } from "react-native";
+import {
+  TouchableOpacity,
+  Platform,
+  useColorScheme,
+  Text,
+  Alert,
+} from "react-native";
 
 import { AppContext } from "../../data/store/context";
 import {
@@ -12,6 +18,7 @@ import { blockPeer } from "../../utils/api";
 import { actionSheetColors, headerTitleStyle } from "../../utils/colors";
 import { conversationName, getTitleFontScale } from "../../utils/str";
 import Connecting, { shouldShowConnecting } from "../Connecting";
+import { shouldShowDebug } from "../DebugButton";
 
 type Props = {
   isBlockedPeer: boolean;
@@ -31,6 +38,11 @@ export default function ConversationTitle({
     <>
       {!shouldShowConnecting(state) && (
         <TouchableOpacity
+          onLongPress={() => {
+            if (!shouldShowDebug(state)) return;
+            Clipboard.setStringAsync(conversation?.topic || "");
+            Alert.alert("Topic copied");
+          }}
           onPress={() => {
             showActionSheetWithOptions(
               {
