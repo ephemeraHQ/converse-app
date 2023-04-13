@@ -71,7 +71,7 @@ export default function Welcome({ ctaOnly, navigation }: Props) {
         />
       </View>
       {!ctaOnly && (
-        <Text style={[styles.p, { marginTop: 20 }]}>Enjoy your day!</Text>
+        <Text style={[styles.p, { marginTop: 24 }]}>Enjoy your day!</Text>
       )}
     </View>
   );
@@ -113,7 +113,7 @@ const getStyles = (colorScheme: ColorSchemeName) =>
       }),
     },
     ctaWrapper: {
-      marginTop: 20,
+      marginTop: 28,
     },
     cta: {
       fontWeight: "600",
