@@ -13,7 +13,7 @@ import {
   ViewStyle,
 } from "react-native";
 
-import { tertiaryBackgroundColor } from "../../utils/colors";
+import { primaryColor, tertiaryBackgroundColor } from "../../utils/colors";
 import Picto from "../Picto/Picto";
 
 type Props = {
@@ -55,8 +55,11 @@ export default function Button({
         <Picto
           picto={picto}
           size={13}
-          style={styles.picto}
-          color="white"
+          style={[
+            styles.picto,
+            variant === "text" ? { paddingLeft: 15 } : undefined,
+          ]}
+          color={variant === "text" ? primaryColor(colorScheme) : "white"}
           weight="bold"
         />
       )}
@@ -107,7 +110,9 @@ const getStyles = (colorScheme: ColorSchemeName) =>
       fontWeight: "600",
       fontSize: 17,
     },
-    buttonText: {},
+    buttonText: {
+      flexDirection: "row",
+    },
     buttonTextText: {
       color: Platform.OS === "ios" ? PlatformColor("systemBlue") : "blue",
       textAlign: "center",

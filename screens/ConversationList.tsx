@@ -24,6 +24,7 @@ import DebugButton from "../components/DebugButton";
 import InitialLoad from "../components/InitialLoad";
 import Picto from "../components/Picto/Picto";
 import SettingsButton from "../components/SettingsButton";
+import Welcome from "../components/Welcome";
 import config from "../config";
 import { AppContext } from "../data/store/context";
 import { XmtpConversation } from "../data/store/xmtpReducer";
@@ -128,6 +129,8 @@ function ShareProfileButton({
   );
 }
 
+type FlatListItem = XmtpConversation | { topic: string };
+
 export default function ConversationList({
   navigation,
   route,
@@ -135,9 +138,7 @@ export default function ConversationList({
   const colorScheme = useColorScheme();
   const styles = getStyles(colorScheme);
   const { state } = useContext(AppContext);
-  const [orderedConversations, setOrderedConversations] = useState<
-    XmtpConversation[]
-  >([]);
+  const [flatListItems, setFlatListItems] = useState<FlatListItem[]>([]);
   useEffect(() => {
     const conversations = Object.values(state.xmtp.conversations).filter(
       (a) => a?.peerAddress
@@ -157,7 +158,7 @@ export default function ConversationList({
               : b.createdAt) || b.createdAt;
       return bDate - aDate;
     });
-    setOrderedConversations(conversations);
+    setFlatListItems([...conversations, { topic: "welcome" }]);
   }, [state.xmtp.conversations, state.xmtp.lastUpdateAt]);
   useEffect(() => {
     navigation.setOptions({
@@ -190,40 +191,52 @@ export default function ConversationList({
     state.xmtp.loading,
     styles.androidTitle,
   ]);
-  const keyExtractor = useCallback((item: XmtpConversation) => {
+  const keyExtractor = useCallback((item: FlatListItem) => {
     return item.topic;
   }, []);
   const renderItem = useCallback(
-    ({ item }: { item: XmtpConversation }) => {
+    ({ item }: { item: FlatListItem }) => {
+      if (item.topic === "welcome") {
+        return <Welcome ctaOnly navigation={navigation} route={route} />;
+      }
+
+      const conversation = item as XmtpConversation;
+
       return (
         <ConversationListItem
           navigation={navigation}
-          conversation={item}
+          conversation={conversation}
           colorScheme={colorScheme}
-          conversationTopic={item.topic}
+          conversationTopic={conversation.topic}
           conversationTime={
-            item.messages?.size > 0
-              ? lastValueInMap(item.messages)?.sent
-              : item.createdAt
+            conversation.messages?.size > 0
+              ? lastValueInMap(conversation.messages)?.sent
+              : conversation.createdAt
           }
-          conversationName={conversationName(item)}
+          conversationName={conversationName(conversation)}
           lastMessagePreview={
-            state.xmtp.blockedPeerAddresses[item.peerAddress.toLowerCase()]
+            state.xmtp.blockedPeerAddresses[
+              conversation.peerAddress.toLowerCase()
+            ]
               ? "This user is blocked"
-              : item.lazyMessages.length > 0
-              ? item.lazyMessages[0].content
-              : item.messages?.size > 0
-              ? lastValueInMap(item.messages)?.content
+              : conversation.lazyMessages.length > 0
+              ? conversation.lazyMessages[0].content
+              : conversation.messages?.size > 0
+              ? lastValueInMap(conversation.messages)?.content
               : ""
           }
         />
       );
     },
-    [colorScheme, navigation, state.xmtp.blockedPeerAddresses]
+    [colorScheme, navigation, route, state.xmtp.blockedPeerAddresses]
   );
 
   if (!state.xmtp.initialLoadDoneOnce) {
     return <InitialLoad />;
+  }
+
+  if (flatListItems.length === 0) {
+    return <Welcome ctaOnly={false} navigation={navigation} route={route} />;
   }
 
   return (
@@ -231,7 +244,7 @@ export default function ConversationList({
       <FlatList
         contentInsetAdjustmentBehavior="automatic"
         style={styles.conversationList}
-        data={orderedConversations}
+        data={flatListItems}
         renderItem={renderItem}
         keyExtractor={keyExtractor}
         initialNumToRender={20}
