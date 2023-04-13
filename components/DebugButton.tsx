@@ -7,12 +7,16 @@ import * as Sentry from "sentry-expo";
 
 import config from "../config";
 import { clearDB } from "../data/db";
+import { StateType } from "../data/store/context";
 
 const logs: string[] = [];
 
 export const addLog = (log: string) => {
   logs.push(log);
 };
+
+export const shouldShowDebug = (state: StateType) =>
+  config.debugMenu || config.debugAddresses.includes(state.xmtp.address || "");
 
 const DebugButton = forwardRef((props, ref) => {
   const { showActionSheetWithOptions } = useActionSheet();

@@ -20,12 +20,11 @@ import { FAB } from "react-native-paper";
 
 import Connecting, { shouldShowConnecting } from "../components/Connecting";
 import ConversationListItem from "../components/ConversationListItem";
-import DebugButton from "../components/DebugButton";
+import DebugButton, { shouldShowDebug } from "../components/DebugButton";
 import InitialLoad from "../components/InitialLoad";
 import Picto from "../components/Picto/Picto";
 import SettingsButton from "../components/SettingsButton";
 import Welcome from "../components/Welcome";
-import config from "../config";
 import { AppContext } from "../data/store/context";
 import { XmtpConversation } from "../data/store/xmtpReducer";
 import {
@@ -42,18 +41,16 @@ function NewConversationButton({
 }: NativeStackScreenProps<NavigationParamList, "Messages">) {
   const debugRef = useRef();
   const { state } = useContext(AppContext);
-  const shouldShowDebug =
-    config.debugMenu ||
-    config.debugAddresses.includes(state.xmtp.address || "");
+  const showDebug = shouldShowDebug(state);
   const onPress = useCallback(() => {
     navigation.navigate("NewConversation", {});
   }, [navigation]);
   const onLongPress = useCallback(() => {
-    if (!shouldShowDebug || !debugRef.current) {
+    if (!showDebug || !debugRef.current) {
       return;
     }
     (debugRef.current as any).showDebugMenu();
-  }, [shouldShowDebug]);
+  }, [showDebug]);
   if (Platform.OS === "ios") {
     return (
       <TouchableOpacity
@@ -61,7 +58,7 @@ function NewConversationButton({
         onPress={onPress}
         onLongPress={onLongPress}
       >
-        {shouldShowDebug && <DebugButton ref={debugRef} />}
+        {showDebug && <DebugButton ref={debugRef} />}
         <Picto
           picto="square.and.pencil"
           weight="medium"
@@ -76,7 +73,7 @@ function NewConversationButton({
       <FAB
         icon={(props) => (
           <>
-            {shouldShowDebug && <DebugButton ref={debugRef} />}
+            {showDebug && <DebugButton ref={debugRef} />}
             <Picto
               picto="square.and.pencil"
               weight="medium"
