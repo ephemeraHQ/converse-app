@@ -12,6 +12,7 @@ import QrCodeScanner from "@material-symbols/svg-400/outlined/qr_code_scanner.sv
 import Search from "@material-symbols/svg-400/outlined/search.svg";
 import Send from "@material-symbols/svg-400/outlined/send.svg";
 import Signature from "@material-symbols/svg-400/outlined/signature.svg";
+import WavingHand from "@material-symbols/svg-400/outlined/waving_hand.svg";
 import {
   ColorValue,
   StyleProp,
@@ -48,6 +49,8 @@ const pictoMapping: {
   search: Search,
   addlink: AddLink,
   "key.horizontal": Key,
+  "hand.wave": WavingHand,
+  "square.and.arrow.up": Send,
 };
 
 export default function Picto({ picto, style, size, weight, color }: Props) {

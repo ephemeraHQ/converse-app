@@ -10,6 +10,8 @@ import {
 } from "react-native";
 import { Button as MaterialButton } from "react-native-paper";
 
+import Picto from "../Picto/Picto.android";
+
 type Props = {
   title: string;
   onPress?: (event: GestureResponderEvent) => void;
@@ -40,6 +42,18 @@ export default function Button({
         mode={variant === "primary" ? "contained" : "text"}
         style={variant === "primary" ? styles.buttonPrimary : undefined}
         onPress={onPress}
+        icon={
+          picto
+            ? ({ color, size }) => (
+                <Picto
+                  picto={picto}
+                  color={color}
+                  size={size}
+                  style={styles.picto}
+                />
+              )
+            : undefined
+        }
       >
         <Text style={textStyle}>{title}</Text>
       </MaterialButton>
@@ -54,5 +68,8 @@ const styles = StyleSheet.create({
   },
   buttonPrimary: {
     width: "100%",
+  },
+  picto: {
+    marginRight: 10,
   },
 });
