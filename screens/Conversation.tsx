@@ -80,15 +80,19 @@ const Conversation = ({
 
   useEffect(() => {
     if (route.params.topic) {
-      setConversation(state.xmtp.conversations[route.params.topic]);
+      const foundConversation = state.xmtp.conversations[route.params.topic];
+      if (foundConversation) {
+        setConversation(foundConversation);
+      }
     } else if (peerAddress) {
-      setConversation(
-        Object.values(state.xmtp.conversations).find(
-          (c) =>
-            c.peerAddress?.toLowerCase() === peerAddress.toLowerCase() &&
-            !c.context
-        )
+      const foundConversation = Object.values(state.xmtp.conversations).find(
+        (c) =>
+          c.peerAddress?.toLowerCase() === peerAddress.toLowerCase() &&
+          !c.context
       );
+      if (foundConversation) {
+        setConversation(foundConversation);
+      }
     }
   }, [
     peerAddress,
