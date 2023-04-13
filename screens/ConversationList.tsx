@@ -235,7 +235,7 @@ export default function ConversationList({
     return <InitialLoad />;
   }
 
-  if (flatListItems.length === 0) {
+  if (flatListItems.length === 1) {
     return <Welcome ctaOnly={false} navigation={navigation} route={route} />;
   }
 
