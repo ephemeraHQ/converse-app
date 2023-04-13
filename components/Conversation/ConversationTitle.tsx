@@ -40,8 +40,13 @@ export default function ConversationTitle({
         <TouchableOpacity
           onLongPress={() => {
             if (!shouldShowDebug(state)) return;
-            Clipboard.setStringAsync(conversation?.topic || "");
-            Alert.alert("Topic copied");
+            Clipboard.setStringAsync(
+              JSON.stringify({
+                topic: conversation?.topic || "",
+                context: conversation?.context,
+              })
+            );
+            Alert.alert("Conversation details copied");
           }}
           onPress={() => {
             showActionSheetWithOptions(
