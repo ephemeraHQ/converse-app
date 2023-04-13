@@ -89,6 +89,7 @@ const getStyles = (colorScheme: ColorSchemeName) =>
     welcomCtaOnly: {
       alignItems: "center",
       backgroundColor: backgroundColor(colorScheme),
+      paddingBottom: 30,
     },
     ellipse: {
       marginBottom: 40,
