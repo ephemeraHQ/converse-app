@@ -54,13 +54,13 @@ export default function Button({
       {picto && (
         <Picto
           picto={picto}
-          size={13}
+          size={variant === "text" ? 15 : 13}
           style={[
             styles.picto,
             variant === "text" ? { paddingLeft: 15 } : undefined,
           ]}
           color={variant === "text" ? primaryColor(colorScheme) : "white"}
-          weight="bold"
+          weight={variant === "text" ? "medium" : "bold"}
         />
       )}
       <Text
