@@ -53,7 +53,7 @@
   "submit": {
     "production": {
       "android": {
-        "track": "alpha"
+        "track": "internal"
       }
     }
   }
