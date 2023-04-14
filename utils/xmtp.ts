@@ -2,6 +2,8 @@ import {
   Client,
   Conversation,
   DecodedMessage,
+  InMemoryKeystore,
+  PrivateKeyBundle,
   Signer,
   SortDirection,
 } from "@xmtp/xmtp-js";
@@ -93,10 +95,14 @@ export const buildUserInviteTopic = (walletAddr: string): string => {
 
 export const getXmtpSignature = async (client: Client, message: string) => {
   const messageToSign = Buffer.from(message);
-  const encodedMessage = (
-    await client.keys.identityKey.sign(messageToSign)
-  ).toBytes();
-  return Buffer.from(encodedMessage).toString("base64");
+  let signature = "";
+  if (client.keystore instanceof InMemoryKeystore) {
+    const keys = (client.keystore as any).v1Keys as PrivateKeyBundle;
+    signature = Buffer.from(
+      (await keys.identityKey.sign(messageToSign)).toBytes()
+    ).toString("base64");
+  }
+  return signature;
 };
 
 export const instantiateXmtpConversationFromJSON = async (
