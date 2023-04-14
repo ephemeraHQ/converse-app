@@ -10,6 +10,7 @@ import { clearDB } from "../data/db";
 import { AppContext } from "../data/store/context";
 import { NotificationsDispatchTypes } from "../data/store/notificationsReducer";
 import { actionSheetColors, textSecondaryColor } from "../utils/colors";
+import { deleteXmtpConversations } from "../utils/keychain";
 import mmkv from "../utils/mmkv";
 import {
   disablePushNotifications,
@@ -19,7 +20,7 @@ import {
 import { getTitleFontScale, shortAddress } from "../utils/str";
 import Button from "./Button/Button";
 import Picto from "./Picto/Picto";
-import { resetLocalXmtpClient, resetXmtpState } from "./XmtpState";
+import { resetLocalXmtpState } from "./XmtpState";
 import { sendMessageToWebview } from "./XmtpWebview";
 
 export default function SettingsButton() {
@@ -73,13 +74,22 @@ export default function SettingsButton() {
         }
       },
       Disconnect: () => {
-        resetXmtpState();
+        // Deleting all keychain values for conversations
+        const knownConversationsTopics = Object.keys(state.xmtp.conversations);
+        deleteXmtpConversations(knownConversationsTopics);
+        // Resetting the local XMTP client
+        resetLocalXmtpState();
+        // Clearing the Sqlite db
         clearDB();
+        // Unsubscribing from notifications
         disablePushNotifications();
+        // Disconnecting from the webview xmtp client
         sendMessageToWebview("DISCONNECT");
+        // Clearing Async storage and mmkv
         AsyncStorage.clear();
         mmkv.clearAll();
-        resetLocalXmtpClient();
+        // Re-showing the notification screen if notifications
+        // are disabled
         setTimeout(() => {
           dispatch({
             type: NotificationsDispatchTypes.NotificationsShowScreen,

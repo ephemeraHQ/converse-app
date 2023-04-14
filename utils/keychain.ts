@@ -56,6 +56,15 @@ export const loadXmtpConversation = async (topic: string) => {
   return value;
 };
 
+export const deleteXmtpConversations = async (topics: string[]) => {
+  for (const topic of topics) {
+    const key = createHash("sha256").update(topic).digest("hex");
+    await SecureStore.deleteItemAsync(`XMTP_CONVERSATION_${key}`, {
+      keychainService: config.bundleId,
+    });
+  }
+};
+
 export const deleteXmtpKeys = async () => {
   await SecureStore.deleteItemAsync("XMTP_KEYS");
   await SecureStore.deleteItemAsync("XMTP_KEYS", {
