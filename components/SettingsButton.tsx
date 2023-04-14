@@ -19,7 +19,7 @@ import {
 import { getTitleFontScale, shortAddress } from "../utils/str";
 import Button from "./Button/Button";
 import Picto from "./Picto/Picto";
-import { resetLocalXmtpClient } from "./XmtpState";
+import { resetLocalXmtpClient, resetXmtpState } from "./XmtpState";
 import { sendMessageToWebview } from "./XmtpWebview";
 
 export default function SettingsButton() {
@@ -73,6 +73,7 @@ export default function SettingsButton() {
         }
       },
       Disconnect: () => {
+        resetXmtpState();
         clearDB();
         disablePushNotifications();
         sendMessageToWebview("DISCONNECT");
