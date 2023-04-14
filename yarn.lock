@@ -4243,10 +4243,10 @@
     rxjs "^7.8.0"
     undici "^5.8.1"
 
-"@xmtp/xmtp-js@^8.0.1":
-  version "8.0.1"
-  resolved "https://registry.yarnpkg.com/@xmtp/xmtp-js/-/xmtp-js-8.0.1.tgz#41d27d185ecf15a45de24c9ae52cccfba78e6e41"
-  integrity sha512-00wCc+08jwcBfsfUrGTjQDrsh5uFUhakaXxh1Ybd+UcRvdRySFHpaOUOmljStXb7lwlyWrISZLL6hrg5Z8YH0g==
+"@xmtp/xmtp-js@8.0.2":
+  version "8.0.2"
+  resolved "https://registry.yarnpkg.com/@xmtp/xmtp-js/-/xmtp-js-8.0.2.tgz#b0f347b9ae85e30a6831b5a81962492fe65288a4"
+  integrity sha512-li3Z+1l2DIvegm1oD7GDiwKGPtzWtiMmEK25rXy+1TlFUpxxrnENkfV6hB1BaHEaEw8pc2bPrOkgu26O7PVgDg==
   dependencies:
     "@noble/secp256k1" "^1.5.2"
     "@stardazed/streams-polyfill" "^2.4.0"
