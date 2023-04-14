@@ -20,7 +20,17 @@ import { isReconnecting } from "./Connecting";
 let xmtpClient: Client | null;
 let xmtpApiSignature: string | null;
 
-const conversationsByTopic: { [topic: string]: Conversation } = {};
+let conversationsByTopic: { [topic: string]: Conversation } = {};
+let sendingMessages: { [messageId: string]: boolean } = {};
+let sendingPendingMessages = false;
+
+export const resetXmtpState = () => {
+  xmtpClient = null;
+  xmtpApiSignature = null;
+  conversationsByTopic = {};
+  sendingMessages = {};
+  sendingPendingMessages = false;
+};
 
 export const getLocalXmtpConversationForTopic = async (
   topic: string
@@ -52,8 +62,6 @@ export const prepareXmtpMessage = async (topic: string, content: string) => {
   const preparedMessage = await conversation.prepareMessage(content);
   return preparedMessage;
 };
-
-const sendingMessages: { [messageId: string]: boolean } = {};
 
 export const sendPreparedMessages = async (
   preparedMessages: {
@@ -87,8 +95,6 @@ export const sendPreparedMessages = async (
     }
   }
 };
-
-let sendingPendingMessages = false;
 
 export const sendPendingMessages = async (dispatch: DispatchType) => {
   if (sendingPendingMessages) {
