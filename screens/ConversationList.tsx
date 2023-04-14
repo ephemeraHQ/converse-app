@@ -21,7 +21,7 @@ import { FAB } from "react-native-paper";
 import ActivityIndicator from "../components/ActivityIndicator/ActivityIndicator";
 import ConversationListItem from "../components/ConversationListItem";
 import DebugButton from "../components/DebugButton";
-// import InitialLoad from "../components/InitialLoad";
+import InitialLoad from "../components/InitialLoad";
 import Picto from "../components/Picto/Picto";
 import SettingsButton from "../components/SettingsButton";
 import Welcome from "../components/Welcome";
@@ -231,9 +231,9 @@ export default function ConversationList({
     [colorScheme, navigation, route, state.xmtp.blockedPeerAddresses]
   );
 
-  // if (!state.xmtp.initialLoadDoneOnce) {
-  //   return <InitialLoad />;
-  // }
+  if (!state.xmtp.initialLoadDoneOnce && flatListItems.length <= 1) {
+    return <InitialLoad />;
+  }
 
   if (flatListItems.length === 1) {
     return <Welcome ctaOnly={false} navigation={navigation} route={route} />;
