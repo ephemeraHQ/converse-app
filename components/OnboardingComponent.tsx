@@ -4,7 +4,7 @@ import {
   useWalletConnect,
 } from "@walletconnect/react-native-dapp";
 import WalletConnectProvider from "@walletconnect/web3-provider";
-import { Bytes, ethers, Signer, Wallet } from "ethers";
+import { ethers, Signer, Wallet } from "ethers";
 import * as Linking from "expo-linking";
 import React, {
   Fragment,
@@ -108,25 +108,6 @@ export default function OnboardingComponent({
     }
   };
 
-  const enableDoubleSignature = useCallback((signer: Signer) => {
-    const sm = signer.signMessage.bind(signer);
-    (signer as any).signaturesCount = 0;
-    signer.signMessage = async (message: string | Bytes) => {
-      const waitForClickSecondSignature = async () => {
-        while (!clickedSecondSignature.current) {
-          await new Promise((r) => setTimeout(r, 100));
-        }
-      };
-      if ((signer as any).signaturesCount === 1) {
-        setWaitingForSecondSignature(true);
-        await waitForClickSecondSignature();
-      }
-      const result = await sm(message);
-      (signer as any).signaturesCount += 1;
-      return result;
-    };
-  }, []);
-
   const connectCoinbaseWallet = useCallback(async () => {
     setLoading(true);
     try {
@@ -145,7 +126,6 @@ export default function OnboardingComponent({
         coinbaseProvider as any
       );
       const signer = web3Provider.getSigner();
-      enableDoubleSignature(signer);
       setUser({
         address,
         isOnXmtp: isOnNetwork,
@@ -157,7 +137,7 @@ export default function OnboardingComponent({
     }
     waitingForCoinbase.current = false;
     setLoading(false);
-  }, [enableDoubleSignature]);
+  }, []);
 
   const getSignerFromSeedPhrase = useCallback(async (mnemonic: string) => {
     let rightMnemonic = mnemonic;
@@ -195,7 +175,6 @@ export default function OnboardingComponent({
       await provider.enable();
       const ethersProvider = new ethers.providers.Web3Provider(provider);
       const newSigner = ethersProvider.getSigner();
-      enableDoubleSignature(newSigner);
       const newAddress = await newSigner.getAddress();
       const isOnNetwork = await isOnXmtp(newAddress);
       setUser({
@@ -224,7 +203,12 @@ export default function OnboardingComponent({
     }
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [connector, enableDoubleSignature]);
+  }, [connector]);
+
+  const waitingForSecondSignatureRef = useRef(waitingForSecondSignature);
+  useEffect(() => {
+    waitingForSecondSignatureRef.current = waitingForSecondSignature;
+  }, [waitingForSecondSignature]);
 
   const initXmtpClient = useCallback(async () => {
     if (!user.signer) {
@@ -233,7 +217,30 @@ export default function OnboardingComponent({
     autoDisconnect.current = false;
     try {
       const keys = JSON.stringify(
-        Array.from(await getXmtpKeysFromSigner(user.signer))
+        Array.from(
+          await getXmtpKeysFromSigner(
+            user.signer,
+            async () => {
+              // Before calling "create" signature
+              setWaitingForSecondSignature(true);
+              clickedSecondSignature.current = false;
+            },
+            async () => {
+              // Before calling "enable" signature
+              const waitForClickSecondSignature = async () => {
+                while (!clickedSecondSignature.current) {
+                  await new Promise((r) => setTimeout(r, 100));
+                }
+              };
+
+              if (waitingForSecondSignatureRef.current) {
+                setLoading(false);
+                await waitForClickSecondSignature();
+                setWaitingForSecondSignature(false);
+              }
+            }
+          )
+        )
       );
       saveXmtpKeys(keys);
 
@@ -244,6 +251,8 @@ export default function OnboardingComponent({
       });
     } catch (e) {
       setLoading(false);
+      clickedSecondSignature.current = false;
+      setWaitingForSecondSignature(false);
       console.error(e);
     }
   }, [user.signer]);
@@ -539,9 +548,7 @@ export default function OnboardingComponent({
                     setLoading(true);
                     clickedSecondSignature.current = true;
                   } else {
-                    if (user.isOnXmtp) {
-                      setLoading(true);
-                    }
+                    setLoading(true);
                     initXmtpClient();
                   }
                 }}

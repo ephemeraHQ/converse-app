@@ -17,7 +17,13 @@ export const getXmtpClientFromKeys = (keys: any) =>
     env,
   });
 
-export const getXmtpKeysFromSigner = (signer: Signer) =>
+export const getXmtpKeysFromSigner = (
+  signer: Signer,
+  preCreateIdentityCallback?: () => Promise<void>,
+  preEnableIdentityCallback?: () => Promise<void>
+) =>
   Client.getKeys(signer, {
     env,
+    preCreateIdentityCallback,
+    preEnableIdentityCallback,
   });
