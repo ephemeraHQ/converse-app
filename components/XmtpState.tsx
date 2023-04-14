@@ -148,8 +148,14 @@ export const sendPendingMessages = async (dispatch: DispatchType) => {
   sendingPendingMessages = false;
 };
 
-export const getLocalXmtpClient = async (dispatch?: DispatchType) => {
-  if (!xmtpClient) {
+export const getLocalXmtpClient = async (
+  dispatch?: DispatchType,
+  currentAddress?: string
+) => {
+  if (
+    !xmtpClient ||
+    (currentAddress && xmtpClient.address !== currentAddress)
+  ) {
     const keys = await loadXmtpKeys();
     if (keys) {
       const parsedKeys = JSON.parse(keys);
@@ -192,7 +198,7 @@ export default function XmtpState() {
   useEffect(() => {
     const initXmtp = async () => {
       try {
-        await getLocalXmtpClient(dispatch);
+        await getLocalXmtpClient(dispatch, state.xmtp.address);
       } catch (e) {
         console.log(
           "Count not instantiate local XMTP client, retrying in 3 seconds..."

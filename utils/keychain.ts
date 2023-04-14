@@ -28,12 +28,6 @@ export const saveXmtpConversations = async (
       const addresses = [parsedConversation.peerAddress, clientAddress];
       addresses.sort();
       topic = `/xmtp/0/dm-${addresses[0]}-${addresses[1]}/proto`;
-    } else {
-      // It's v2, let's force the context because the SWIFT SDK wants it
-      parsedConversation.context = parsedConversation.context || {
-        conversationId: "",
-        metadata: {},
-      };
     }
     const jsonConversation = JSON.stringify(parsedConversation);
     const key = createHash("sha256").update(topic).digest("hex");
