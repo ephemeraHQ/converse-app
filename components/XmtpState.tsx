@@ -24,7 +24,7 @@ let conversationsByTopic: { [topic: string]: Conversation } = {};
 let sendingMessages: { [messageId: string]: boolean } = {};
 let sendingPendingMessages = false;
 
-export const resetXmtpState = () => {
+export const resetLocalXmtpState = () => {
   xmtpClient = null;
   xmtpApiSignature = null;
   conversationsByTopic = {};
@@ -185,11 +185,6 @@ export const getXmtpApiHeaders = async () => {
     "xmtp-api-signature": xmtpApiSignature,
     "xmtp-api-address": client.address,
   };
-};
-
-export const resetLocalXmtpClient = () => {
-  xmtpClient = null;
-  xmtpApiSignature = null;
 };
 
 export default function XmtpState() {
