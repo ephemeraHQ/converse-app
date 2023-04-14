@@ -213,9 +213,9 @@ export default function XmtpState() {
       !isReconnecting
     ) {
       await sendPendingMessages(dispatch);
-      await new Promise((r) => setTimeout(r, 1000));
-      messageSendingInterval();
     }
+    await new Promise((r) => setTimeout(r, 1000));
+    messageSendingInterval();
   }, [
     dispatch,
     state.app.splashScreenHidden,
