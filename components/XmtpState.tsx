@@ -103,11 +103,11 @@ export const sendPendingMessages = async (dispatch: DispatchType) => {
   sendingPendingMessages = true;
   try {
     const messagesToSend = await getMessagesToSend();
-    if (messagesToSend.length > 0) {
-      console.log(
-        `Trying to send ${messagesToSend.length} pending messages...`
-      );
+    if (messagesToSend.length === 0) {
+      sendingPendingMessages = false;
+      return;
     }
+    console.log(`Trying to send ${messagesToSend.length} pending messages...`);
     const preparedMessagesToSend: { [newMessageId: string]: PreparedMessage } =
       {};
     const messageIdsToUpdate: {
