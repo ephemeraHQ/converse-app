@@ -231,7 +231,7 @@ export default function ConversationList({
     [colorScheme, navigation, route, state.xmtp.blockedPeerAddresses]
   );
 
-  if (!state.xmtp.initialLoadDoneOnce) {
+  if (!state.xmtp.initialLoadDoneOnce && flatListItems.length <= 1) {
     return <InitialLoad />;
   }
 
