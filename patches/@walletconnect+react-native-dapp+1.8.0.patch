@@ -36,6 +36,19 @@ index 59016ea..bcadefe 100644
 -    return `${universalLink}`;
 +    return `${universalLink || workingDeepLink}`;
  }
+diff --git a/node_modules/@walletconnect/react-native-dapp/dist/hooks/useMobileRegistry.js b/node_modules/@walletconnect/react-native-dapp/dist/hooks/useMobileRegistry.js
+index 7640627..108811a 100644
+--- a/node_modules/@walletconnect/react-native-dapp/dist/hooks/useMobileRegistry.js
++++ b/node_modules/@walletconnect/react-native-dapp/dist/hooks/useMobileRegistry.js
+@@ -9,7 +9,7 @@ export default function useMobileRegistry() {
+     React.useEffect(() => {
+         (async () => {
+             try {
+-                const result = await fetch("https://registry.walletconnect.org/data/wallets.json");
++                const result = await fetch("https://getconverse.app/walletconnect.json");
+                 const data = await result.json();
+                 setState({
+                     data: Object.values(data),
 diff --git a/node_modules/@walletconnect/react-native-dapp/dist/providers/WalletConnectProvider.js b/node_modules/@walletconnect/react-native-dapp/dist/providers/WalletConnectProvider.js
 index 9b5b1e2..dda914a 100644
 --- a/node_modules/@walletconnect/react-native-dapp/dist/providers/WalletConnectProvider.js
