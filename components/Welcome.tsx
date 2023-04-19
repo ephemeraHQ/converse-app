@@ -70,6 +70,17 @@ export default function Welcome({ ctaOnly, navigation }: Props) {
           }}
         />
       </View>
+      <View style={styles.ctaWrapper}>
+        <Button
+          variant="text"
+          title="Spread the “Ping me” initiative"
+          textStyle={styles.cta}
+          picto="party.popper"
+          onPress={() => {
+            navigation.navigate("PingMe");
+          }}
+        />
+      </View>
       {!ctaOnly && (
         <Text style={[styles.p, { marginTop: 24 }]}>Enjoy your day!</Text>
       )}
