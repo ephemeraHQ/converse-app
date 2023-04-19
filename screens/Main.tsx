@@ -50,6 +50,7 @@ import ConversationList from "./ConversationList";
 import NewConversation from "./NewConversation";
 import NotificationsScreen from "./NotificationsScreen";
 import OnboardingScreen from "./Onboarding";
+import PingMeScreen from "./PingMe";
 import ShareProfileScreen from "./ShareProfile";
 
 export type NavigationParamList = {
@@ -64,6 +65,7 @@ export type NavigationParamList = {
     peer?: string;
   };
   ShareProfile: undefined;
+  PingMe: undefined;
 };
 
 const Stack = createNativeStackNavigator<NavigationParamList>();
@@ -432,6 +434,9 @@ export default function Main() {
         ShareProfile: {
           path: "/shareProfile",
         },
+        PingMe: {
+          path: "/pingMe",
+        },
       },
     },
     getStateFromPath: (path: string, options: any) => {
@@ -539,6 +544,18 @@ export default function Main() {
                 component={ShareProfileScreen}
                 options={{
                   headerTitle: "Your Converse link",
+                  presentation: "modal",
+                  headerStyle: {
+                    backgroundColor:
+                      navigationSecondaryBackgroundColor(colorScheme),
+                  },
+                }}
+              />
+              <Stack.Screen
+                name="PingMe"
+                component={PingMeScreen}
+                options={{
+                  headerTitle: "Ping me on Converse",
                   presentation: "modal",
                   headerStyle: {
                     backgroundColor:
