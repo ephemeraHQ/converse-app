@@ -278,3 +278,27 @@ export const actionSheetColors = (colorScheme: ColorSchemeName) =>
         messageTextStyle: { color: textSecondaryColor(colorScheme) },
       }
     : {};
+
+export const textInputStyle = (colorScheme: ColorSchemeName) =>
+  ({
+    ...Platform.select({
+      default: {
+        backgroundColor: tertiaryBackgroundColor(colorScheme),
+        borderRadius: 10,
+        fontSize: 17,
+      },
+      android: {
+        backgroundColor: backgroundColor(colorScheme),
+        borderWidth: 1,
+        borderRadius: 4,
+        borderColor: textSecondaryColor(colorScheme),
+        fontSize: 16,
+      },
+    }),
+    alignContent: "flex-start",
+    color: textPrimaryColor(colorScheme),
+    paddingLeft: 16,
+    paddingRight: 16,
+    paddingTop: 10,
+    paddingBottom: 10,
+  } as any);

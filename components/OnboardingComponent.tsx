@@ -33,7 +33,7 @@ import config from "../config";
 import { clearDB } from "../data/db";
 import {
   backgroundColor,
-  tertiaryBackgroundColor,
+  textInputStyle,
   textPrimaryColor,
   textSecondaryColor,
 } from "../utils/colors";
@@ -471,7 +471,10 @@ export default function OnboardingComponent({
               <TextInput
                 multiline
                 textAlignVertical="top"
-                style={styles.seedPhrase}
+                style={[
+                  textInputStyle(colorScheme),
+                  { width: "100%", height: "100%" },
+                ]}
                 placeholder="Enter your seed phrase"
                 placeholderTextColor={textSecondaryColor(colorScheme)}
                 onChangeText={(content) => {
@@ -654,25 +657,5 @@ const getStyles = (colorScheme: ColorSchemeName) =>
     seedPhrase: {
       width: "100%",
       height: "100%",
-      ...Platform.select({
-        default: {
-          backgroundColor: tertiaryBackgroundColor(colorScheme),
-          borderRadius: 10,
-          fontSize: 17,
-        },
-        android: {
-          backgroundColor: backgroundColor(colorScheme),
-          borderWidth: 1,
-          borderRadius: 4,
-          borderColor: textSecondaryColor(colorScheme),
-          fontSize: 16,
-        },
-      }),
-      alignContent: "flex-start",
-      color: textPrimaryColor(colorScheme),
-      paddingLeft: 16,
-      paddingRight: 16,
-      paddingTop: 10,
-      paddingBottom: 10,
     },
   });

@@ -11,6 +11,7 @@ import {
   useColorScheme,
   Platform,
   ScrollView,
+  TextInput,
 } from "react-native";
 
 import AndroidBackAction from "../components/AndroidBackAction";
@@ -19,9 +20,9 @@ import config from "../config";
 import { AppContext } from "../data/store/context";
 import {
   backgroundColor,
-  tertiaryBackgroundColor,
   textPrimaryColor,
   primaryColor,
+  textInputStyle,
 } from "../utils/colors";
 import { NavigationParamList } from "./Main";
 
@@ -93,7 +94,13 @@ export default function PingMeScreen({
         if you have questions.{"\n\n"}
         Pol, cofounder at Converse
       </Text>
-      <Text style={styles.textToCopy}>{textToCopy}</Text>
+      <TextInput
+        multiline
+        textAlignVertical="top"
+        value={textToCopy}
+        editable={false}
+        style={[textInputStyle(colorScheme), styles.textToCopy]}
+      />
       <ConverseButton
         variant="text"
         picto="doc.on.doc"
@@ -136,15 +143,8 @@ const getStyles = (colorScheme: ColorSchemeName) =>
       color: primaryColor(colorScheme),
     },
     textToCopy: {
-      fontSize: 17,
       marginHorizontal: 24,
-      backgroundColor: tertiaryBackgroundColor(colorScheme),
-      paddingHorizontal: 16,
-      paddingVertical: 10,
-      borderRadius: 10,
-      overflow: "hidden",
       marginBottom: 24,
-      color: textPrimaryColor(colorScheme),
     },
     copyText: {
       fontWeight: "600",
