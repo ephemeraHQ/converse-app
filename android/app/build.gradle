@@ -175,6 +175,12 @@ android {
     sourceSets { 
         main { assets.srcDirs = ['src/main/assets', '../../assets'] } 
     }
+
+    project.ext.react = [
+        entryFile: "index.js",
+        enableHermes: true, // Enable Hermes
+        enableHermesDebugging: true, // Enable source maps generation
+    ]
 }
 
 // Apply static values from `gradle.properties` to the `android.packagingOptions`
