@@ -125,7 +125,7 @@ const getStyles = (colorScheme: ColorSchemeName) =>
     },
     pingMeContent: {
       alignItems: "center",
-      paddingBottom: 50,
+      paddingBottom: 65,
     },
     pol: {
       width: 100,
