@@ -55,6 +55,12 @@
       "android": {
         "track": "internal"
       }
+    },
+    "production-ios": {
+      "extends": "production"
+    },
+    "production-android": {
+      "extends": "production"
     }
   }
 }
