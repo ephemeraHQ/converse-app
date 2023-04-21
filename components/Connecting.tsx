@@ -11,6 +11,11 @@ export const shouldShowConnecting = (state: StateType) =>
   !state.xmtp.webviewConnected ||
   state.xmtp.reconnecting;
 
+export const shouldShowConnectingOrSyncing = (state: StateType) =>
+  shouldShowConnecting(state) ||
+  (!state.xmtp.initialLoadDoneOnce &&
+    Object.keys(state.xmtp.conversations).length > 0);
+
 export let isReconnecting = false;
 
 export default function Connecting() {
@@ -31,7 +36,7 @@ export default function Connecting() {
           }),
         }}
       >
-        Connecting
+        {shouldShowConnecting(state) ? "Connecting" : "Syncing"}
       </Text>
     </View>
   );

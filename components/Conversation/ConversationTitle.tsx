@@ -17,7 +17,7 @@ import {
 import { blockPeer } from "../../utils/api";
 import { actionSheetColors, headerTitleStyle } from "../../utils/colors";
 import { conversationName, getTitleFontScale } from "../../utils/str";
-import Connecting, { shouldShowConnecting } from "../Connecting";
+import Connecting, { shouldShowConnectingOrSyncing } from "../Connecting";
 import { shouldShowDebug } from "../DebugButton";
 
 type Props = {
@@ -36,7 +36,7 @@ export default function ConversationTitle({
   const colorScheme = useColorScheme();
   return (
     <>
-      {!shouldShowConnecting(state) && (
+      {!shouldShowConnectingOrSyncing(state) && (
         <TouchableOpacity
           onLongPress={() => {
             if (!shouldShowDebug(state)) return;
@@ -123,7 +123,7 @@ export default function ConversationTitle({
           </Text>
         </TouchableOpacity>
       )}
-      {shouldShowConnecting(state) && <Connecting />}
+      {shouldShowConnectingOrSyncing(state) && <Connecting />}
     </>
   );
 }

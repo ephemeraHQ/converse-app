@@ -18,7 +18,9 @@ import {
 } from "react-native";
 import { FAB } from "react-native-paper";
 
-import Connecting, { shouldShowConnecting } from "../components/Connecting";
+import Connecting, {
+  shouldShowConnectingOrSyncing,
+} from "../components/Connecting";
 import ConversationListItem from "../components/ConversationListItem";
 import DebugButton, { shouldShowDebug } from "../components/DebugButton";
 import InitialLoad from "../components/InitialLoad";
@@ -169,7 +171,7 @@ export default function ConversationList({
   useEffect(() => {
     navigation.setOptions({
       headerTitle: () => {
-        if (shouldShowConnecting(state)) {
+        if (shouldShowConnectingOrSyncing(state)) {
           return <Connecting />;
         } else {
           return Platform.OS === "android" ? (
