@@ -4181,13 +4181,12 @@
     rxjs "^7.8.0"
     undici "^5.8.1"
 
-"@xmtp/xmtp-js@8.0.2":
-  version "8.0.2"
-  resolved "https://registry.yarnpkg.com/@xmtp/xmtp-js/-/xmtp-js-8.0.2.tgz#b0f347b9ae85e30a6831b5a81962492fe65288a4"
-  integrity sha512-li3Z+1l2DIvegm1oD7GDiwKGPtzWtiMmEK25rXy+1TlFUpxxrnENkfV6hB1BaHEaEw8pc2bPrOkgu26O7PVgDg==
+"@xmtp/xmtp-js@^8.1.3":
+  version "8.1.3"
+  resolved "https://registry.yarnpkg.com/@xmtp/xmtp-js/-/xmtp-js-8.1.3.tgz#f95fc570938f650c6f805cd4948bd18e6b5c5ea3"
+  integrity sha512-S2HT3WQUhGWoPOTpqFpFVc5xt9j3hq+WeE512ZIOerhYXt5emcNggEiEo4CAotH2V3AE0URFIpew92MQf3x6gA==
   dependencies:
     "@noble/secp256k1" "^1.5.2"
-    "@stardazed/streams-polyfill" "^2.4.0"
     "@xmtp/proto" "^3.24.0-beta.2"
     async-mutex "^0.4.0"
     elliptic "^6.5.4"
