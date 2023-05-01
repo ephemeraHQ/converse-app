@@ -28,7 +28,8 @@ const go = async () => {
     .replace(
       /ASSETCATALOG_COMPILER_APPICON_NAME = AppIconPreview/g,
       "ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon"
-    );
+    )
+    .replace(/3L9E5TA22P/g, "Q6W2FLK8DM");
 
   fs.writeFileSync(PROJ_PATH, newProjContent);
 
