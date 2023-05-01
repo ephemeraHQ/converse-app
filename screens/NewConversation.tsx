@@ -28,6 +28,7 @@ import {
 import ActivityIndicator from "../components/ActivityIndicator/ActivityIndicator";
 import AndroidBackAction from "../components/AndroidBackAction";
 import Picto from "../components/Picto/Picto";
+import Recommendations from "../components/Recommendations";
 import TableView, { TableViewPicto } from "../components/TableView";
 import {
   saveWebviewNavigation,
@@ -341,11 +342,14 @@ export default function NewConversation({
         }}
       >
         {!status.loading && !status.address && (
-          <Text
-            style={[styles.message, status.error ? styles.error : undefined]}
-          >
-            {status.error || "Type any .eth, .lens or 0x address"}
-          </Text>
+          <>
+            <Text
+              style={[styles.message, status.error ? styles.error : undefined]}
+            >
+              {status.error || "Type any .eth, .lens or 0x address"}
+            </Text>
+            <Recommendations />
+          </>
         )}
 
         {status.loading && <ActivityIndicator style={styles.activity} />}

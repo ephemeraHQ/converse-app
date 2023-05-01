@@ -26,18 +26,6 @@ const DebugButton = forwardRef((props, ref) => {
   useImperativeHandle(ref, () => ({
     showDebugMenu() {
       const methods: any = {
-        "Clear DB": clearDB,
-        "Delete XMTP Key": deleteXmtpKeys,
-        "Is hermes": () => {
-          const isHermes = () => (global as any).HermesInternal != null;
-          alert(isHermes() ? "yes" : "no");
-        },
-        "Sentry JS error": () => {
-          throw new Error("My first Sentry error!");
-        },
-        "Sentry Native error": () => {
-          Sentry.Native.nativeCrash();
-        },
         "Update app": async () => {
           try {
             const update = await Updates.fetchUpdateAsync();
@@ -50,6 +38,14 @@ const DebugButton = forwardRef((props, ref) => {
             alert(error);
             console.error(error);
           }
+        },
+        "Clear DB": clearDB,
+        "Delete XMTP Key": deleteXmtpKeys,
+        "Sentry JS error": () => {
+          throw new Error("My first Sentry error!");
+        },
+        "Sentry Native error": () => {
+          Sentry.Native.nativeCrash();
         },
         "Show logs": () => {
           alert(logs.join("\n"));

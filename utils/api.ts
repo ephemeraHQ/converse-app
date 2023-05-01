@@ -90,4 +90,25 @@ export const getProfilesForAddresses = async (
   return data;
 };
 
+enum RecommentationTag {
+  SHARED_TRANSACTION = "SHARED_TRANSACTION",
+  FOLLOW_EACH_OTHER_ON_LENS = "FOLLOW_EACH_OTHER_ON_LENS",
+  FOLLOW_EACH_OTHER_ON_WARPCAST = "FOLLOW_EACH_OTHER_ON_WARPCAST",
+}
+
+type RecommendationTagWithParams = {
+  tag: RecommentationTag;
+};
+
+export type Frens = { [address: string]: RecommendationTagWithParams[] };
+
+export const findFrens = async () => {
+  const { data } = await api.get("/api/frens/find", {
+    headers: await getXmtpApiHeaders(),
+  });
+  console.log({ data });
+
+  return data.frens as Frens;
+};
+
 export default api;
