@@ -35,20 +35,6 @@ export default function HydrationStateHandler() {
         console.log("Error: failed to load saved logged XMTP Address");
         addLog("Error: failed to load saved logged XMTP Address");
       }
-      if (xmtpAddress && !migrationAlertShown) {
-        const xmtpKeys = await loadXmtpKeys();
-        if (!xmtpKeys) {
-          // We thought we would be logged in but
-          // due to app transfer we lost access to
-          // keychain, let's log user out and alert
-          migrationAlertShown = true;
-          logout(state, dispatch);
-          Alert.alert(
-            "🙏 Log in again",
-            "hey ! Due to a technical migration, we had to log you out. We know it sucks and we're sorry about it, won't happen again anytime soon. Login again and enjoy Converse!"
-          );
-        }
-      }
       await initDb();
 
       await loadSavedNotificationMessagesToContext();
@@ -101,6 +87,20 @@ export default function HydrationStateHandler() {
         type: AppDispatchTypes.AppSetHydrationDone,
         payload: { done: true },
       });
+      if (xmtpAddress && !migrationAlertShown) {
+        const xmtpKeys = await loadXmtpKeys();
+        if (!xmtpKeys) {
+          // We thought we would be logged in but
+          // due to app transfer we lost access to
+          // keychain, let's log user out and alert
+          migrationAlertShown = true;
+          logout(state, dispatch);
+          Alert.alert(
+            "🙏 Log in again",
+            "hey ! Due to a technical migration, we had to log you out. We know it sucks and we're sorry about it, won't happen again anytime soon. Login again and enjoy Converse!"
+          );
+        }
+      }
     };
     hydrate();
     // eslint-disable-next-line react-hooks/exhaustive-deps
