@@ -1,27 +1,21 @@
 import { useActionSheet } from "@expo/react-native-action-sheet";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as Clipboard from "expo-clipboard";
 import * as Linking from "expo-linking";
 import React, { useCallback, useContext } from "react";
 import { Platform, TouchableOpacity, useColorScheme, View } from "react-native";
 
 import config from "../config";
-import { clearDB } from "../data/db";
 import { AppContext } from "../data/store/context";
 import { NotificationsDispatchTypes } from "../data/store/notificationsReducer";
 import { actionSheetColors, textSecondaryColor } from "../utils/colors";
-import { deleteXmtpConversations } from "../utils/keychain";
-import mmkv from "../utils/mmkv";
+import { logout } from "../utils/logout";
 import {
-  disablePushNotifications,
   requestPushNotificationsPermissions,
   NotificationPermissionStatus,
 } from "../utils/notifications";
 import { getTitleFontScale, shortAddress } from "../utils/str";
 import Button from "./Button/Button";
 import Picto from "./Picto/Picto";
-import { resetLocalXmtpState } from "./XmtpState";
-import { sendMessageToWebview } from "./XmtpWebview";
 
 export default function SettingsButton() {
   const { state, dispatch } = useContext(AppContext);
@@ -74,30 +68,7 @@ export default function SettingsButton() {
         }
       },
       Disconnect: () => {
-        // Deleting all keychain values for conversations
-        const knownConversationsTopics = Object.keys(state.xmtp.conversations);
-        deleteXmtpConversations(knownConversationsTopics);
-        // Resetting the local XMTP client
-        resetLocalXmtpState();
-        // Clearing the Sqlite db
-        clearDB();
-        // Unsubscribing from notifications
-        disablePushNotifications();
-        // Disconnecting from the webview xmtp client
-        sendMessageToWebview("DISCONNECT");
-        // Clearing Async storage and mmkv
-        AsyncStorage.clear();
-        mmkv.clearAll();
-        // Re-showing the notification screen if notifications
-        // are disabled
-        setTimeout(() => {
-          dispatch({
-            type: NotificationsDispatchTypes.NotificationsShowScreen,
-            payload: {
-              show: true,
-            },
-          });
-        }, 500);
+        logout(state, dispatch);
       },
       Cancel: () => {},
     };
@@ -123,13 +94,7 @@ export default function SettingsButton() {
         }
       }
     );
-  }, [
-    colorScheme,
-    dispatch,
-    showActionSheetWithOptions,
-    state.notifications.status,
-    state.xmtp.address,
-  ]);
+  }, [colorScheme, dispatch, showActionSheetWithOptions, state]);
 
   if (Platform.OS === "ios") {
     return (
