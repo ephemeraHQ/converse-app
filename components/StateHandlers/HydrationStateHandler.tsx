@@ -16,6 +16,8 @@ import { getLoggedXmtpAddress } from "../../utils/sharedData/sharedData";
 import { addLog } from "../DebugButton";
 import { getLocalXmtpClient } from "../XmtpState";
 
+let migrationAlertShown = false;
+
 export default function HydrationStateHandler() {
   const { state, dispatch } = useContext(AppContext);
 
@@ -33,12 +35,13 @@ export default function HydrationStateHandler() {
         console.log("Error: failed to load saved logged XMTP Address");
         addLog("Error: failed to load saved logged XMTP Address");
       }
-      if (xmtpAddress) {
+      if (xmtpAddress && !migrationAlertShown) {
         const xmtpKeys = await loadXmtpKeys();
         if (!xmtpKeys) {
           // We thought we would be logged in but
           // due to app transfer we lost access to
           // keychain, let's log user out and alert
+          migrationAlertShown = true;
           logout(state, dispatch);
           Alert.alert(
             "🙏 Log in again",
