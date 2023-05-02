@@ -86,183 +86,181 @@ export default function Main() {
     </>
   );
 
-  if (!state.app.splashScreenHidden) return mainHeaders;
+  let screenToShow = undefined;
 
-  if (!state.xmtp.address)
-    return (
-      <>
-        {mainHeaders}
-        <OnboardingScreen />
-      </>
-    );
+  if (state.app.splashScreenHidden) {
+    if (!state.xmtp.address) {
+      screenToShow = <OnboardingScreen />;
+    } else if (
+      state.notifications.showNotificationsScreen &&
+      (state.notifications.status === "undetermined" ||
+        (state.notifications.status === "denied" && Platform.OS === "android"))
+    ) {
+      screenToShow = <NotificationsScreen />;
+    } else {
+      const linking = {
+        prefixes: [prefix, ...universalLinkPrefixes],
+        config: {
+          initialRouteName: "Messages",
+          screens: {
+            Messages: "/",
+            Conversation: {
+              path: "/conversation",
+              parse: {
+                topic: decodeURIComponent,
+              },
+              stringify: {
+                topic: encodeURIComponent,
+              },
+            },
+            NewConversation: {
+              path: "/newConversation",
+            },
+            ShareProfile: {
+              path: "/shareProfile",
+            },
+            PingMe: {
+              path: "/pingMe",
+            },
+          },
+        },
+        getStateFromPath: (path: string, options: any) => {
+          // dm method must link to the Conversation Screen as well
+          // but prefilling the parameters
+          let pathForState = path;
+          if (pathForState.startsWith("dm?peer=")) {
+            const peer = pathForState.slice(8).trim().toLowerCase();
+            pathForState = `conversation?mainConversationWithPeer=${peer}&focus=true`;
+          } else if (pathForState.startsWith("dm/")) {
+            const peer = pathForState.slice(3).trim().toLowerCase();
+            pathForState = `conversation?mainConversationWithPeer=${peer}&focus=true`;
+          }
+          const state = getStateFromPath(pathForState, options);
+          return state;
+        },
+      };
+      screenToShow = (
+        <ActionSheetProvider>
+          <NavigationContainer
+            linking={
+              state.app.splashScreenHidden ? (linking as any) : undefined
+            }
+          >
+            <Stack.Navigator
+              initialRouteName="Messages"
+              screenListeners={({ navigation }) => ({
+                state: (e: any) => {
+                  // Fix deeplink if already on a screen but changing params
+                  const oldRoutes = navigationState.current?.state.routes || [];
+                  const newRoutes = e.data?.state?.routes || [];
 
-  if (
-    state.notifications.showNotificationsScreen &&
-    (state.notifications.status === "undetermined" ||
-      (state.notifications.status === "denied" && Platform.OS === "android"))
-  ) {
-    return (
-      <>
-        {mainHeaders}
-        <NotificationsScreen />
-      </>
-    );
+                  if (oldRoutes.length > 0 && newRoutes.length > 0) {
+                    const currentRoute = oldRoutes[oldRoutes.length - 1];
+                    const newRoute = newRoutes[newRoutes.length - 1];
+                    let shouldReplace = false;
+                    if (
+                      currentRoute.key === newRoute.key &&
+                      currentRoute.name === newRoute.name
+                    ) {
+                      // We're talking about the same screen!
+                      if (
+                        newRoute.name === "NewConversation" &&
+                        newRoute.params?.peer &&
+                        currentRoute.params?.peer !== newRoute.params?.peer
+                      ) {
+                        shouldReplace = true;
+                      } else if (
+                        newRoute.name === "Conversation" &&
+                        newRoute.params?.mainConversationWithPeer &&
+                        newRoute.params?.mainConversationWithPeer !==
+                          currentRoute.params?.mainConversationWithPeer
+                      ) {
+                        shouldReplace = true;
+                      }
+                    }
+                    if (shouldReplace) {
+                      navigation.dispatch(
+                        StackActions.replace(newRoute.name, newRoute.params)
+                      );
+                    }
+                  }
+                  navigationState.current = e.data;
+                },
+              })}
+            >
+              <Stack.Group
+                screenOptions={{
+                  headerStyle: {
+                    backgroundColor: backgroundColor(colorScheme),
+                  },
+                  headerTitleStyle: headerTitleStyle(colorScheme),
+                  headerShadowVisible: Platform.OS !== "android",
+                }}
+              >
+                <Stack.Screen
+                  name="Messages"
+                  component={ConversationList}
+                  options={{
+                    headerTitle: "Messages",
+                    headerLargeTitle: true,
+                    headerTitleStyle: {
+                      ...headerTitleStyle(colorScheme),
+                      ...Platform.select({
+                        default: {},
+                        android: { fontSize: 22, lineHeight: 26 },
+                      }),
+                    },
+                  }}
+                />
+                <Stack.Screen name="Conversation" component={Conversation} />
+                <Stack.Screen
+                  name="NewConversation"
+                  component={NewConversation}
+                  options={{
+                    headerTitle: "New conversation",
+                    presentation: "modal",
+                    headerStyle: {
+                      backgroundColor:
+                        navigationSecondaryBackgroundColor(colorScheme),
+                    },
+                  }}
+                />
+                <Stack.Screen
+                  name="ShareProfile"
+                  component={ShareProfileScreen}
+                  options={{
+                    headerTitle: "Your Converse link",
+                    presentation: "modal",
+                    headerStyle: {
+                      backgroundColor:
+                        navigationSecondaryBackgroundColor(colorScheme),
+                    },
+                  }}
+                />
+                <Stack.Screen
+                  name="PingMe"
+                  component={PingMeScreen}
+                  options={{
+                    headerTitle: "Ping me on Converse",
+                    presentation: "modal",
+                    headerStyle: {
+                      backgroundColor:
+                        navigationSecondaryBackgroundColor(colorScheme),
+                    },
+                  }}
+                />
+              </Stack.Group>
+            </Stack.Navigator>
+          </NavigationContainer>
+        </ActionSheetProvider>
+      );
+    }
   }
-
-  const linking = {
-    prefixes: [prefix, ...universalLinkPrefixes],
-    config: {
-      initialRouteName: "Messages",
-      screens: {
-        Messages: "/",
-        Conversation: {
-          path: "/conversation",
-          parse: {
-            topic: decodeURIComponent,
-          },
-          stringify: {
-            topic: encodeURIComponent,
-          },
-        },
-        NewConversation: {
-          path: "/newConversation",
-        },
-        ShareProfile: {
-          path: "/shareProfile",
-        },
-        PingMe: {
-          path: "/pingMe",
-        },
-      },
-    },
-    getStateFromPath: (path: string, options: any) => {
-      // dm method must link to the Conversation Screen as well
-      // but prefilling the parameters
-      let pathForState = path;
-      if (pathForState.startsWith("dm?peer=")) {
-        const peer = pathForState.slice(8).trim().toLowerCase();
-        pathForState = `conversation?mainConversationWithPeer=${peer}&focus=true`;
-      } else if (pathForState.startsWith("dm/")) {
-        const peer = pathForState.slice(3).trim().toLowerCase();
-        pathForState = `conversation?mainConversationWithPeer=${peer}&focus=true`;
-      }
-      const state = getStateFromPath(pathForState, options);
-      return state;
-    },
-  };
 
   return (
     <>
       {mainHeaders}
-      <ActionSheetProvider>
-        <NavigationContainer
-          linking={state.app.splashScreenHidden ? (linking as any) : undefined}
-        >
-          <Stack.Navigator
-            initialRouteName="Messages"
-            screenListeners={({ navigation }) => ({
-              state: (e: any) => {
-                // Fix deeplink if already on a screen but changing params
-                const oldRoutes = navigationState.current?.state.routes || [];
-                const newRoutes = e.data?.state?.routes || [];
-
-                if (oldRoutes.length > 0 && newRoutes.length > 0) {
-                  const currentRoute = oldRoutes[oldRoutes.length - 1];
-                  const newRoute = newRoutes[newRoutes.length - 1];
-                  let shouldReplace = false;
-                  if (
-                    currentRoute.key === newRoute.key &&
-                    currentRoute.name === newRoute.name
-                  ) {
-                    // We're talking about the same screen!
-                    if (
-                      newRoute.name === "NewConversation" &&
-                      newRoute.params?.peer &&
-                      currentRoute.params?.peer !== newRoute.params?.peer
-                    ) {
-                      shouldReplace = true;
-                    } else if (
-                      newRoute.name === "Conversation" &&
-                      newRoute.params?.mainConversationWithPeer &&
-                      newRoute.params?.mainConversationWithPeer !==
-                        currentRoute.params?.mainConversationWithPeer
-                    ) {
-                      shouldReplace = true;
-                    }
-                  }
-                  if (shouldReplace) {
-                    navigation.dispatch(
-                      StackActions.replace(newRoute.name, newRoute.params)
-                    );
-                  }
-                }
-                navigationState.current = e.data;
-              },
-            })}
-          >
-            <Stack.Group
-              screenOptions={{
-                headerStyle: { backgroundColor: backgroundColor(colorScheme) },
-                headerTitleStyle: headerTitleStyle(colorScheme),
-                headerShadowVisible: Platform.OS !== "android",
-              }}
-            >
-              <Stack.Screen
-                name="Messages"
-                component={ConversationList}
-                options={{
-                  headerTitle: "Messages",
-                  headerLargeTitle: true,
-                  headerTitleStyle: {
-                    ...headerTitleStyle(colorScheme),
-                    ...Platform.select({
-                      default: {},
-                      android: { fontSize: 22, lineHeight: 26 },
-                    }),
-                  },
-                }}
-              />
-              <Stack.Screen name="Conversation" component={Conversation} />
-              <Stack.Screen
-                name="NewConversation"
-                component={NewConversation}
-                options={{
-                  headerTitle: "New conversation",
-                  presentation: "modal",
-                  headerStyle: {
-                    backgroundColor:
-                      navigationSecondaryBackgroundColor(colorScheme),
-                  },
-                }}
-              />
-              <Stack.Screen
-                name="ShareProfile"
-                component={ShareProfileScreen}
-                options={{
-                  headerTitle: "Your Converse link",
-                  presentation: "modal",
-                  headerStyle: {
-                    backgroundColor:
-                      navigationSecondaryBackgroundColor(colorScheme),
-                  },
-                }}
-              />
-              <Stack.Screen
-                name="PingMe"
-                component={PingMeScreen}
-                options={{
-                  headerTitle: "Ping me on Converse",
-                  presentation: "modal",
-                  headerStyle: {
-                    backgroundColor:
-                      navigationSecondaryBackgroundColor(colorScheme),
-                  },
-                }}
-              />
-            </Stack.Group>
-          </Stack.Navigator>
-        </NavigationContainer>
-      </ActionSheetProvider>
+      {screenToShow}
     </>
   );
 }
