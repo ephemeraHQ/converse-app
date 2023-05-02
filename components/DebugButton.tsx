@@ -8,6 +8,7 @@ import * as Sentry from "sentry-expo";
 import config from "../config";
 import { clearDB } from "../data/db";
 import { StateType } from "../data/store/context";
+import { loadXmtpKeys } from "../utils/keychain";
 
 const logs: string[] = [];
 
@@ -27,6 +28,10 @@ const DebugButton = forwardRef((props, ref) => {
     showDebugMenu() {
       const methods: any = {
         "Clear DB": clearDB,
+        "Get XMTP Key": async () => {
+          const keys = await loadXmtpKeys();
+          alert(`keys are ${keys || "nonexistent"}`);
+        },
         "Is hermes": () => {
           const isHermes = () => (global as any).HermesInternal != null;
           alert(isHermes() ? "yes" : "no");
