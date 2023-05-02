@@ -90,17 +90,26 @@ export const getProfilesForAddresses = async (
   return data;
 };
 
-enum RecommentationTag {
+export enum RecommentationTag {
   SHARED_TRANSACTION = "SHARED_TRANSACTION",
   FOLLOW_EACH_OTHER_ON_LENS = "FOLLOW_EACH_OTHER_ON_LENS",
   FOLLOW_EACH_OTHER_ON_WARPCAST = "FOLLOW_EACH_OTHER_ON_WARPCAST",
+  SHARED_NFT_COLLECTION = "SHARED_NFT_COLLECTION",
 }
 
 type RecommendationTagWithParams = {
   tag: RecommentationTag;
+  params?: { [param: string]: any };
 };
 
-export type Frens = { [address: string]: RecommendationTagWithParams[] };
+export type RecommendationData = {
+  tags: RecommendationTagWithParams[];
+  ens?: string;
+  lensHandles: string[];
+  farcasterUsernames: string[];
+};
+
+export type Frens = { [address: string]: RecommendationData };
 
 export const findFrens = async () => {
   const { data } = await api.get("/api/frens/find", {
