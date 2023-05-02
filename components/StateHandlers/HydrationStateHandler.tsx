@@ -1,5 +1,6 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useContext, useEffect } from "react";
+import { Alert } from "react-native";
 
 import { loadDataToContext } from "../../data";
 import { initDb } from "../../data/db";
@@ -8,13 +9,15 @@ import { AppContext } from "../../data/store/context";
 import { NotificationsDispatchTypes } from "../../data/store/notificationsReducer";
 import { XmtpDispatchTypes } from "../../data/store/xmtpReducer";
 import { loadSavedNotificationMessagesToContext } from "../../utils/backgroundNotifications/loadSavedNotifications";
+import { loadXmtpKeys } from "../../utils/keychain";
+import { logout } from "../../utils/logout";
 import mmkv from "../../utils/mmkv";
 import { getLoggedXmtpAddress } from "../../utils/sharedData/sharedData";
 import { addLog } from "../DebugButton";
 import { getLocalXmtpClient } from "../XmtpState";
 
 export default function HydrationStateHandler() {
-  const { dispatch } = useContext(AppContext);
+  const { state, dispatch } = useContext(AppContext);
 
   // Initial hydration
   useEffect(() => {
@@ -29,6 +32,19 @@ export default function HydrationStateHandler() {
       } catch {
         console.log("Error: failed to load saved logged XMTP Address");
         addLog("Error: failed to load saved logged XMTP Address");
+      }
+      if (xmtpAddress) {
+        const xmtpKeys = await loadXmtpKeys();
+        if (!xmtpKeys) {
+          // We thought we would be logged in but
+          // due to app transfer we lost access to
+          // keychain, let's log user out and alert
+          logout(state, dispatch);
+          Alert.alert(
+            "🙏 Log in again",
+            "hey ! Due to a technical migration, we had to log you out. We know it sucks and we're sorry about it, won't happen again anytime soon. Login again and enjoy Converse!"
+          );
+        }
       }
       await initDb();
 
