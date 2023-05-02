@@ -341,14 +341,14 @@ export default function NewConversation({
           inputRef.current?.blur();
         }}
       >
-        {!status.loading && !status.address && (
+        {!value && <Recommendations />}
+        {value && !status.loading && !status.address && (
           <>
             <Text
               style={[styles.message, status.error ? styles.error : undefined]}
             >
               {status.error || "Type any .eth, .lens or 0x address"}
             </Text>
-            <Recommendations />
           </>
         )}
 
