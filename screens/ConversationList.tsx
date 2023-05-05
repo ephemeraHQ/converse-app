@@ -222,6 +222,10 @@ export default function ConversationList({
               ? lastMessage?.content
               : ""
           }
+          lastMessageStatus={lastMessage?.status}
+          lastMessageFromMe={
+            !!lastMessage && lastMessage?.senderAddress === state.xmtp.address
+          }
         />
       );
     },
@@ -229,6 +233,7 @@ export default function ConversationList({
       colorScheme,
       navigation,
       route,
+      state.xmtp.address,
       state.xmtp.blockedPeerAddresses,
       state.xmtp.initialLoadDoneOnce,
     ]
