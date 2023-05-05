@@ -20,9 +20,9 @@ import { NavigationParamList } from "../screens/Main";
 import {
   actionSecondaryColor,
   backgroundColor,
+  badgeColor,
   clickedItemBackgroundColor,
   listItemSeparatorColor,
-  primaryColor,
   textPrimaryColor,
   textSecondaryColor,
 } from "../utils/colors";
@@ -221,16 +221,35 @@ const getStyles = (colorScheme: ColorSchemeName) =>
     },
     unread: {
       position: "absolute",
-      width: 18,
-      height: 18,
-      backgroundColor: primaryColor(colorScheme),
-      borderRadius: 18,
-      top: 30,
-      right: 16,
+      ...Platform.select({
+        default: {
+          width: 18,
+          height: 18,
+          borderRadius: 18,
+          right: 16,
+          top: 30,
+        },
+        android: {
+          width: 16,
+          height: 16,
+          borderRadius: 16,
+          right: 24,
+          top: 36,
+        },
+      }),
+      backgroundColor: badgeColor(colorScheme),
     },
     lastMessageStatus: {
       position: "absolute",
-      left: 0,
-      top: 35,
+      ...Platform.select({
+        default: {
+          left: 0,
+          top: 35,
+        },
+        android: {
+          left: 16,
+          top: 39,
+        },
+      }),
     },
   });

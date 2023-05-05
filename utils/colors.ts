@@ -132,6 +132,17 @@ export const primaryColor = (colorScheme: ColorSchemeName) => {
   }
 };
 
+export const badgeColor = (colorScheme: ColorSchemeName) => {
+  if (Platform.OS === "android") {
+    if (colorScheme === "dark") {
+      return MaterialDarkColors.error;
+    } else {
+      return MaterialLightColors.error;
+    }
+  }
+  return primaryColor(colorScheme);
+};
+
 // Generated using https://callstack.github.io/react-native-paper/docs/guides/theming#theme-properties
 
 const MaterialLightColors = {

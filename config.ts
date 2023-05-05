@@ -22,7 +22,7 @@ const ENV = {
     ...defaultConfig,
     env: "dev",
     xmtpEnv: "dev",
-    apiURI: "http://noe-mbp.local:9875",
+    apiURI: "https://c3c9-62-23-200-122.ngrok-free.app",
     debugMenu: true,
     bundleId: "com.converse.dev",
     scheme: "converse-dev",
