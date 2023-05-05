@@ -5,7 +5,10 @@ export class addReadStatus1683114681319 implements MigrationInterface {
 
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.query(
-      `ALTER TABLE "conversation" ADD COLUMN "readUntil" integer DEFAULT NULL`
+      `ALTER TABLE "conversation" ADD COLUMN "readUntil" integer NOT NULL DEFAULT 0`
+    );
+    await queryRunner.query(
+      `UPDATE "conversation" SET "readUntil" = (SELECT COALESCE(MAX(sent), 0) FROM "message" WHERE "message"."conversationId" = "conversation"."topic")`
     );
   }
 
