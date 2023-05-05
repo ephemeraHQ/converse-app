@@ -32,6 +32,7 @@ type ConversationListItemProps = {
   conversationTopic: string;
   conversationName: string;
   lastMessagePreview: string | undefined;
+  showUnread: boolean;
 };
 
 const ConversationListItem = memo(function ConversationListItem({
@@ -41,6 +42,7 @@ const ConversationListItem = memo(function ConversationListItem({
   conversationTime,
   conversationName,
   lastMessagePreview,
+  showUnread,
 }: ConversationListItemProps) {
   const styles = getStyles(colorScheme);
   let timeToShow = "";
@@ -67,7 +69,12 @@ const ConversationListItem = memo(function ConversationListItem({
     };
   }, [navigation, resetSelected]);
   const listItemContent = (
-    <View style={styles.conversationListItem}>
+    <View
+      style={[
+        styles.conversationListItem,
+        showUnread ? { backgroundColor: "red" } : undefined,
+      ]}
+    >
       <Text style={styles.conversationName} numberOfLines={1}>
         {conversationName}
       </Text>

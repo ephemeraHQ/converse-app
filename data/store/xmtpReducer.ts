@@ -1,3 +1,5 @@
+import { markAllConversationsAsReadInDb } from "..";
+import { lastValueInMap } from "../../utils/map";
 import mmkv from "../../utils/mmkv";
 import {
   deleteLoggedXmtpAddress,
@@ -21,6 +23,7 @@ export type XmtpConversation = {
   lensHandle?: string | null;
   ensName?: string | null;
   currentMessage?: string;
+  readUntil: number;
 };
 
 export type XmtpType = {
@@ -177,6 +180,8 @@ export const xmtpReducer = (state: XmtpType, action: XmtpActions): XmtpType => {
             c.messages?.size > 0
               ? c.messages
               : state.conversations[c.topic]?.messages || new Map(),
+          readUntil:
+            c.readUntil || state.conversations[c.topic]?.readUntil || 0,
         };
       });
 
@@ -205,16 +210,32 @@ export const xmtpReducer = (state: XmtpType, action: XmtpActions): XmtpType => {
       };
     }
     case XmtpDispatchTypes.XmtpInitialLoad: {
-      mmkv.set("state.xmtp.initialLoadDoneOnce", true);
-      return {
+      // Called at the end of the initial load.
+      const newState = {
         ...state,
         initialLoadDone: true,
         initialLoadDoneOnce: true,
         lastUpdateAt: new Date().getTime(),
       };
+      if (!state.initialLoadDoneOnce) {
+        // If it's the initial sync, let's mark
+        // all conversations as read
+        for (const topic in newState.conversations) {
+          const conversation = newState.conversations[topic];
+          if (conversation.messages.size > 0) {
+            const lastMessage = lastValueInMap(conversation.messages);
+            conversation.readUntil = lastMessage ? lastMessage.sent : 0;
+          }
+        }
+        markAllConversationsAsReadInDb();
+      }
+      mmkv.set("state.xmtp.initialLoadDoneOnce", true);
+      return newState;
     }
 
     case XmtpDispatchTypes.XmtpInitialLoadDoneOnce: {
+      // Called during hydration to remember we've
+      // loaded everything at least once
       mmkv.set("state.xmtp.initialLoadDoneOnce", true);
       return {
         ...state,

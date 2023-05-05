@@ -3,6 +3,7 @@ import "reflect-metadata";
 import { addLog } from "../components/DebugButton";
 import { ethProvider } from "../utils/eth";
 import { getLensHandleFromConversationId } from "../utils/lens";
+import { lastValueInMap } from "../utils/map";
 import {
   saveConversationDict,
   saveXmtpEnv,
@@ -10,6 +11,7 @@ import {
 } from "../utils/sharedData/sharedData";
 import { shortAddress } from "../utils/str";
 import { conversationRepository, messageRepository } from "./db";
+import dataSource from "./db/datasource";
 import { Conversation } from "./db/entities/conversation";
 import { Message } from "./db/entities/message";
 import { upsertRepository } from "./db/upsert";
@@ -54,6 +56,7 @@ const xmtpConversationToDb = (
     : undefined,
   lensHandle: xmtpConversation.lensHandle,
   ensName: xmtpConversation.ensName,
+  readUntil: xmtpConversation.readUntil || 0,
 });
 
 const xmtpConversationFromDb = (
@@ -81,6 +84,7 @@ const xmtpConversationFromDb = (
       : new Map(),
     lensHandle: dbConversation.lensHandle,
     ensName: dbConversation.ensName,
+    readUntil: dbConversation.readUntil || 0,
   };
 };
 
@@ -133,6 +137,8 @@ const setupAndSaveConversation = async (
 
   conversation.lensHandle = lensHandle;
   conversation.ensName = ensName;
+  conversation.readUntil =
+    conversation.readUntil || alreadyConversationInDb?.readUntil || 0;
 
   // Save to db
   await upsertRepository(
@@ -365,4 +371,45 @@ export const markMessageAsSent = async (
       status: "sent",
     },
   });
+};
+
+export const markAllConversationsAsReadInDb = async () => {
+  await dataSource.query(
+    `UPDATE "conversation" SET "readUntil" = (SELECT COALESCE(MAX(sent), 0) FROM "message" WHERE "message"."conversationId" = "conversation"."topic")`
+  );
+};
+
+export const markConversationReadUntil = (
+  conversation: XmtpConversation,
+  readUntil: number,
+  dispatch: DispatchType,
+  allowBefore = false
+) => {
+  if (readUntil === conversation.readUntil) {
+    return;
+  }
+  if (readUntil < conversation.readUntil && !allowBefore) {
+    return;
+  }
+  return saveConversations([{ ...conversation, readUntil }], dispatch);
+};
+
+export const markConversationRead = (
+  conversation: XmtpConversation,
+  dispatch: DispatchType,
+  allowBefore = false
+) => {
+  let newReadUntil = conversation.readUntil;
+  if (conversation.messages.size > 0) {
+    const lastMessage = lastValueInMap(conversation.messages);
+    if (lastMessage) {
+      newReadUntil = lastMessage.sent;
+    }
+  }
+  return markConversationReadUntil(
+    conversation,
+    newReadUntil,
+    dispatch,
+    allowBefore
+  );
 };

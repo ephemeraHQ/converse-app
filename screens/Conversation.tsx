@@ -32,7 +32,11 @@ import {
   sendPendingMessages,
 } from "../components/XmtpState";
 import { sendMessageToWebview } from "../components/XmtpWebview";
-import { saveMessages } from "../data";
+import {
+  markConversationRead,
+  markConversationReadUntil,
+  saveMessages,
+} from "../data";
 import { AppContext } from "../data/store/context";
 import { XmtpConversation, XmtpDispatchTypes } from "../data/store/xmtpReducer";
 import { userExists } from "../utils/api";
@@ -106,7 +110,7 @@ const Conversation = ({
       setPeerAddress(conversation.peerAddress);
       getLocalXmtpConversationForTopic(conversation.topic);
     }
-  }, [conversation]);
+  }, [conversation, dispatch]);
 
   const sentNewConversationRequest = useRef(false);
 
@@ -265,9 +269,13 @@ const Conversation = ({
     const messagesArray = Array.from(
       conversation ? conversation.messages.values() : []
     );
+    let lastMessageTimestamp = 0;
     const messagesLength = messagesArray.length;
     for (let index = messagesLength - 1; index >= 0; index--) {
       const m = messagesArray[index];
+      if (m.sent > lastMessageTimestamp) {
+        lastMessageTimestamp = m.sent;
+      }
       newMessages.push({
         author: {
           id: m.senderAddress,
@@ -280,7 +288,10 @@ const Conversation = ({
       });
     }
     setMessages(newMessages);
-  }, [conversation, conversation?.messages, state.xmtp.lastUpdateAt]);
+    if (conversation) {
+      markConversationReadUntil(conversation, lastMessageTimestamp, dispatch);
+    }
+  }, [conversation, conversation?.messages, state.xmtp.lastUpdateAt, dispatch]);
 
   const messageContent = useRef(messageToPrefill);
 
@@ -318,6 +329,7 @@ const Conversation = ({
       type: XmtpDispatchTypes.XmtpSetCurrentMessageContent,
       payload: { topic: conversation.topic, content: messageContent.current },
     });
+    markConversationRead(conversation, dispatch);
   }, [conversation, dispatch]);
 
   useEffect(() => {

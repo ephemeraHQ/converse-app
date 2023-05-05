@@ -191,6 +191,7 @@ export default function ConversationList({
       }
 
       const conversation = item as XmtpConversation;
+      const lastMessage = lastValueInMap(conversation.messages);
 
       return (
         <ConversationListItem
@@ -200,23 +201,37 @@ export default function ConversationList({
           conversationTopic={conversation.topic}
           conversationTime={
             conversation.messages?.size > 0
-              ? lastValueInMap(conversation.messages)?.sent
+              ? lastMessage?.sent
               : conversation.createdAt
           }
           conversationName={conversationName(conversation)}
+          showUnread={
+            !!(
+              state.xmtp.initialLoadDoneOnce &&
+              lastMessage &&
+              conversation.readUntil < lastMessage.sent &&
+              lastMessage.senderAddress === conversation.peerAddress
+            )
+          }
           lastMessagePreview={
             state.xmtp.blockedPeerAddresses[
               conversation.peerAddress.toLowerCase()
             ]
               ? "This user is blocked"
               : conversation.messages?.size > 0
-              ? lastValueInMap(conversation.messages)?.content
+              ? lastMessage?.content
               : ""
           }
         />
       );
     },
-    [colorScheme, navigation, route, state.xmtp.blockedPeerAddresses]
+    [
+      colorScheme,
+      navigation,
+      route,
+      state.xmtp.blockedPeerAddresses,
+      state.xmtp.initialLoadDoneOnce,
+    ]
   );
 
   if (!state.xmtp.initialLoadDoneOnce && flatListItems.length <= 1) {
