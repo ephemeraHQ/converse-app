@@ -12,6 +12,8 @@ import {
 } from "react-native";
 import { TouchableRipple } from "react-native-paper";
 
+import Checkmark from "../assets/checkmark.svg";
+import Clock from "../assets/clock.svg";
 import Picto from "../components/Picto/Picto";
 import { XmtpConversation } from "../data/store/xmtpReducer";
 import { NavigationParamList } from "../screens/Main";
@@ -20,6 +22,7 @@ import {
   backgroundColor,
   clickedItemBackgroundColor,
   listItemSeparatorColor,
+  primaryColor,
   textPrimaryColor,
   textSecondaryColor,
 } from "../utils/colors";
@@ -32,6 +35,8 @@ type ConversationListItemProps = {
   conversationTopic: string;
   conversationName: string;
   lastMessagePreview: string | undefined;
+  lastMessageFromMe: boolean;
+  lastMessageStatus?: "delivered" | "error" | "seen" | "sending" | "sent";
   showUnread: boolean;
 };
 
@@ -42,6 +47,8 @@ const ConversationListItem = memo(function ConversationListItem({
   conversationTime,
   conversationName,
   lastMessagePreview,
+  lastMessageStatus,
+  lastMessageFromMe,
   showUnread,
 }: ConversationListItemProps) {
   const styles = getStyles(colorScheme);
@@ -69,16 +76,28 @@ const ConversationListItem = memo(function ConversationListItem({
     };
   }, [navigation, resetSelected]);
   const listItemContent = (
-    <View
-      style={[
-        styles.conversationListItem,
-        showUnread ? { backgroundColor: "red" } : undefined,
-      ]}
-    >
+    <View style={styles.conversationListItem}>
       <Text style={styles.conversationName} numberOfLines={1}>
         {conversationName}
       </Text>
+      {lastMessageFromMe &&
+        (lastMessageStatus === "sending" ? (
+          <Clock
+            style={styles.lastMessageStatus}
+            fill={textSecondaryColor(colorScheme)}
+            width={12}
+            height={12}
+          />
+        ) : (
+          <Checkmark
+            style={styles.lastMessageStatus}
+            fill={textSecondaryColor(colorScheme)}
+            width={10}
+            height={10}
+          />
+        ))}
       <Text style={styles.messagePreview} numberOfLines={2}>
+        {lastMessageFromMe ? <View style={{ width: 15 }} /> : undefined}
         {lastMessagePreview}
       </Text>
       <View style={styles.timeAndChevron}>
@@ -92,6 +111,7 @@ const ConversationListItem = memo(function ConversationListItem({
           />
         )}
       </View>
+      {showUnread && <View style={styles.unread} />}
     </View>
   );
   if (Platform.OS === "ios") {
@@ -141,7 +161,7 @@ const getStyles = (colorScheme: ColorSchemeName) =>
         borderBottomWidth: 0.25,
         borderBottomColor: listItemSeparatorColor(colorScheme),
         paddingTop: 8,
-        paddingRight: 17,
+        paddingRight: 60,
         marginLeft: 32,
       },
       android: {
@@ -182,7 +202,7 @@ const getStyles = (colorScheme: ColorSchemeName) =>
       ...Platform.select({
         default: {
           top: 8,
-          right: 17,
+          right: 20,
           flexDirection: "row",
           alignItems: "center",
         },
@@ -198,5 +218,19 @@ const getStyles = (colorScheme: ColorSchemeName) =>
         default: { marginRight: 14, fontSize: 15 },
         android: { fontSize: 11 },
       }),
+    },
+    unread: {
+      position: "absolute",
+      width: 18,
+      height: 18,
+      backgroundColor: primaryColor(colorScheme),
+      borderRadius: 18,
+      top: 30,
+      right: 16,
+    },
+    lastMessageStatus: {
+      position: "absolute",
+      left: 0,
+      top: 35,
     },
   });
