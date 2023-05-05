@@ -239,16 +239,16 @@ export default function ConversationList({
     ]
   );
 
+  let screenToShow: JSX.Element;
+
   if (!state.xmtp.initialLoadDoneOnce && flatListItems.length <= 1) {
-    return <InitialLoad />;
-  }
-
-  if (flatListItems.length === 1) {
-    return <Welcome ctaOnly={false} navigation={navigation} route={route} />;
-  }
-
-  return (
-    <>
+    screenToShow = <InitialLoad />;
+  } else if (flatListItems.length === 1) {
+    screenToShow = (
+      <Welcome ctaOnly={false} navigation={navigation} route={route} />
+    );
+  } else {
+    screenToShow = (
       <FlatList
         contentInsetAdjustmentBehavior="automatic"
         style={styles.conversationList}
@@ -257,6 +257,12 @@ export default function ConversationList({
         keyExtractor={keyExtractor}
         initialNumToRender={20}
       />
+    );
+  }
+
+  return (
+    <>
+      {screenToShow}
       {Platform.OS === "android" && (
         <NewConversationButton navigation={navigation} route={route} />
       )}
