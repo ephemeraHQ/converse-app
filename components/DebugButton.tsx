@@ -1,4 +1,3 @@
-import { useActionSheet } from "@expo/react-native-action-sheet";
 import * as Clipboard from "expo-clipboard";
 import Constants from "expo-constants";
 import * as Updates from "expo-updates";
@@ -9,6 +8,7 @@ import config from "../config";
 import { clearDB } from "../data/db";
 import { StateType } from "../data/store/context";
 import { deleteXmtpKeys } from "../utils/keychain";
+import { showActionSheetWithOptions } from "./StateHandlers/ActionSheetStateHandler";
 
 const logs: string[] = [];
 
@@ -20,7 +20,6 @@ export const shouldShowDebug = (state: StateType) =>
   config.debugMenu || config.debugAddresses.includes(state.xmtp.address || "");
 
 const DebugButton = forwardRef((props, ref) => {
-  const { showActionSheetWithOptions } = useActionSheet();
   // The component instance will be extended
   // with whatever you return from the callback passed
   // as the second argument

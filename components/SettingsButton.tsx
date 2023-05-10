@@ -1,4 +1,3 @@
-import { useActionSheet } from "@expo/react-native-action-sheet";
 import * as Clipboard from "expo-clipboard";
 import * as Linking from "expo-linking";
 import React, { useCallback, useContext } from "react";
@@ -16,11 +15,11 @@ import {
 import { getTitleFontScale, shortAddress } from "../utils/str";
 import Button from "./Button/Button";
 import Picto from "./Picto/Picto";
+import { showActionSheetWithOptions } from "./StateHandlers/ActionSheetStateHandler";
 
 export default function SettingsButton() {
   const { state, dispatch } = useContext(AppContext);
   const colorScheme = useColorScheme();
-  const { showActionSheetWithOptions } = useActionSheet();
   const onPress = useCallback(() => {
     const methods = {
       "Copy wallet address": () => {
@@ -94,7 +93,7 @@ export default function SettingsButton() {
         }
       }
     );
-  }, [colorScheme, dispatch, showActionSheetWithOptions, state]);
+  }, [colorScheme, dispatch, state]);
 
   if (Platform.OS === "ios") {
     return (

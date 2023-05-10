@@ -1,5 +1,6 @@
 import "reflect-metadata";
 import "./polyfills";
+import { ActionSheetProvider } from "@expo/react-native-action-sheet";
 import React from "react";
 import {
   ColorSchemeName,
@@ -36,15 +37,19 @@ export default function App() {
 
   return (
     <AppProvider>
-      <PaperProvider
-        theme={colorScheme === "light" ? MaterialLightTheme : MaterialDarkTheme}
-      >
-        <View style={styles.safe}>
-          <XmtpWebview />
-          <XmtpState />
-          <Main />
-        </View>
-      </PaperProvider>
+      <ActionSheetProvider>
+        <PaperProvider
+          theme={
+            colorScheme === "light" ? MaterialLightTheme : MaterialDarkTheme
+          }
+        >
+          <View style={styles.safe}>
+            <XmtpWebview />
+            <XmtpState />
+            <Main />
+          </View>
+        </PaperProvider>
+      </ActionSheetProvider>
     </AppProvider>
   );
 }
