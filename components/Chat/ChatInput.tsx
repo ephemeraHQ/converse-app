@@ -52,6 +52,7 @@ export default function ChatInput({
         onPress={() => {
           sendMessage(inputValue);
         }}
+        style={{ width: 50 }}
       />
     </View>
   );
@@ -66,5 +67,6 @@ const getStyles = (colorScheme: ColorSchemeName) =>
     chatInput: {
       backgroundColor: "orange",
       flexGrow: 1,
+      flexShrink: 1,
     },
   });

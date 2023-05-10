@@ -50,6 +50,7 @@ import {
 import { getAddressForPeer } from "../utils/eth";
 import { lastValueInMap } from "../utils/map";
 import { getTitleFontScale } from "../utils/str";
+import { CONVERSE_INVISIBLE_CHAR } from "../utils/xmtp/messages";
 import { NavigationParamList } from "./Main";
 
 const Conversation = ({
@@ -282,7 +283,7 @@ const Conversation = ({
             id: messageId,
             senderAddress: state.xmtp.address || "",
             sent: sentAtTime.getTime(),
-            content,
+            content: `${content}${CONVERSE_INVISIBLE_CHAR}`,
             status: "sending",
           },
         ],
