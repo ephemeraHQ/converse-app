@@ -7,12 +7,15 @@ import {
   useColorScheme,
 } from "react-native";
 
+import Button from "../Button/Button";
+
 type Props = {
   inputValue: string;
   setInputValue: (value: string) => void;
   chatInputHeight: number;
   setChatInputHeight: (height: number) => void;
   inputRef: MutableRefObject<TextInput | undefined>;
+  sendMessage: (content: string) => Promise<void>;
 };
 
 export default function ChatInput({
@@ -21,6 +24,7 @@ export default function ChatInput({
   chatInputHeight,
   setChatInputHeight,
   inputRef,
+  sendMessage,
 }: Props) {
   const colorScheme = useColorScheme();
   const styles = getStyles(colorScheme);
@@ -42,6 +46,13 @@ export default function ChatInput({
           }
         }}
       />
+      <Button
+        variant="text"
+        title="Send"
+        onPress={() => {
+          sendMessage(inputValue);
+        }}
+      />
     </View>
   );
 }
@@ -50,8 +61,10 @@ const getStyles = (colorScheme: ColorSchemeName) =>
   StyleSheet.create({
     chatInputContainer: {
       backgroundColor: "cyan",
+      flexDirection: "row",
     },
     chatInput: {
       backgroundColor: "orange",
+      flexGrow: 1,
     },
   });
