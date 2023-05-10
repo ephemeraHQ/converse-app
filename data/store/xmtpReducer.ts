@@ -26,6 +26,10 @@ export type XmtpConversation = {
   readUntil: number;
 };
 
+export type XmtpConversationWithUpdate = XmtpConversation & {
+  lastUpdateAt: number;
+};
+
 export type XmtpType = {
   localConnected: boolean;
   webviewConnected: boolean;
@@ -33,7 +37,7 @@ export type XmtpType = {
   initialLoadDoneOnce: boolean;
   loading: boolean;
   conversations: {
-    [topic: string]: XmtpConversation;
+    [topic: string]: XmtpConversationWithUpdate;
   };
   lastUpdateAt: number;
   address?: string;
@@ -137,6 +141,7 @@ type XmtpPayload = {
 export type XmtpActions = ActionMap<XmtpPayload>[keyof ActionMap<XmtpPayload>];
 
 export const xmtpReducer = (state: XmtpType, action: XmtpActions): XmtpType => {
+  const now = new Date().getTime();
   switch (action.type) {
     case XmtpDispatchTypes.XmtpSetAddress:
       saveLoggedXmtpAddress(action.payload.address);
@@ -182,12 +187,13 @@ export const xmtpReducer = (state: XmtpType, action: XmtpActions): XmtpType => {
               : state.conversations[c.topic]?.messages || new Map(),
           readUntil:
             c.readUntil || state.conversations[c.topic]?.readUntil || 0,
+          lastUpdateAt: now,
         };
       });
 
       return {
         ...state,
-        lastUpdateAt: new Date().getTime(),
+        lastUpdateAt: now,
         conversations,
       };
     }
@@ -198,13 +204,14 @@ export const xmtpReducer = (state: XmtpType, action: XmtpActions): XmtpType => {
       if (alreadyConversation) return state;
       return {
         ...state,
-        lastUpdateAt: new Date().getTime(),
+        lastUpdateAt: now,
         conversations: {
           ...state.conversations,
           [action.payload.conversation.topic]: {
             ...action.payload.conversation,
             messages: new Map(),
             peerAddress: action.payload.conversation?.peerAddress || "",
+            lastUpdateAt: now,
           },
         },
       };
@@ -215,13 +222,14 @@ export const xmtpReducer = (state: XmtpType, action: XmtpActions): XmtpType => {
         ...state,
         initialLoadDone: true,
         initialLoadDoneOnce: true,
-        lastUpdateAt: new Date().getTime(),
+        lastUpdateAt: now,
       };
       if (!state.initialLoadDoneOnce) {
         // If it's the initial sync, let's mark
         // all conversations as read
         for (const topic in newState.conversations) {
           const conversation = newState.conversations[topic];
+          conversation.lastUpdateAt = now;
           if (conversation.messages.size > 0) {
             const lastMessage = lastValueInMap(conversation.messages);
             conversation.readUntil = lastMessage ? lastMessage.sent : 0;
@@ -240,7 +248,7 @@ export const xmtpReducer = (state: XmtpType, action: XmtpActions): XmtpType => {
       return {
         ...state,
         initialLoadDoneOnce: true,
-        lastUpdateAt: new Date().getTime(),
+        lastUpdateAt: now,
       };
     }
 
@@ -254,7 +262,7 @@ export const xmtpReducer = (state: XmtpType, action: XmtpActions): XmtpType => {
     case XmtpDispatchTypes.XmtpSetMessages: {
       const newState = {
         ...state,
-        lastUpdateAt: new Date().getTime(),
+        lastUpdateAt: now,
       };
       newState.conversations[action.payload.topic] = newState.conversations[
         action.payload.topic
@@ -263,6 +271,7 @@ export const xmtpReducer = (state: XmtpType, action: XmtpActions): XmtpType => {
         topic: action.payload.topic,
       };
       const conversation = newState.conversations[action.payload.topic];
+      conversation.lastUpdateAt = now;
       for (const message of action.payload.messages) {
         // Default message status is sent
         if (!message.status) message.status = "sent";
@@ -276,11 +285,12 @@ export const xmtpReducer = (state: XmtpType, action: XmtpActions): XmtpType => {
       if (action.payload.length === 0) return state;
       const newState = {
         ...state,
-        lastUpdateAt: new Date().getTime(),
+        lastUpdateAt: now,
       };
       action.payload.forEach((messageToUpdate) => {
         if (newState.conversations[messageToUpdate.topic]) {
           const conversation = newState.conversations[messageToUpdate.topic];
+          conversation.lastUpdateAt = now;
           conversation.messages.delete(messageToUpdate.oldId);
           conversation.messages.set(
             messageToUpdate.message.id,
@@ -303,9 +313,10 @@ export const xmtpReducer = (state: XmtpType, action: XmtpActions): XmtpType => {
       }
       const newState = {
         ...state,
-        lastUpdateAt: new Date().getTime(),
+        lastUpdateAt: now,
       };
       const conversation = newState.conversations[action.payload.topic];
+      conversation.lastUpdateAt = now;
       const message = conversation.messages.get(action.payload.messageId);
       if (message) {
         message.status = action.payload.status;

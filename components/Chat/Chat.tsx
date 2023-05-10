@@ -1,5 +1,11 @@
 import { FlashList } from "@shopify/flash-list";
-import { MutableRefObject, useContext, useRef, useState } from "react";
+import {
+  MutableRefObject,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import {
   ColorSchemeName,
   useColorScheme,
@@ -12,16 +18,17 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { AppContext } from "../../data/store/context";
-import { XmtpConversation } from "../../data/store/xmtpReducer";
+import { XmtpConversationWithUpdate } from "../../data/store/xmtpReducer";
 import ChatInput from "./ChatInput";
 import ChatMessage from "./ChatMessage";
 
 type Props = {
-  conversation: XmtpConversation | undefined;
+  conversation?: XmtpConversationWithUpdate;
   xmtpAddress?: string;
   setInputValue: (value: string) => void;
   inputValue: string;
   inputRef: MutableRefObject<TextInput | undefined>;
+  sendMessage: (content: string) => Promise<void>;
 };
 
 export default function Chat({
@@ -30,6 +37,7 @@ export default function Chat({
   setInputValue,
   inputValue,
   inputRef,
+  sendMessage,
 }: Props) {
   const { state } = useContext(AppContext);
   const colorScheme = useColorScheme();
@@ -40,9 +48,16 @@ export default function Chat({
   const [chatInputHeight, setChatInputHeight] = useState(25);
 
   const styles = getStyles(colorScheme);
-  const messagesArray = Array.from(
-    conversation ? conversation.messages.values() : []
-  ).reverse();
+  const [messagesArray, setMessagesArray] = useState(
+    Array.from(conversation ? conversation.messages.values() : []).reverse()
+  );
+  useEffect(() => {
+    console.log("convo has changed");
+    const conversationMessages = conversation?.messages?.values();
+    setMessagesArray(
+      conversationMessages ? Array.from(conversationMessages).reverse() : []
+    );
+  }, [conversation?.messages, conversation?.lastUpdateAt]);
   const insets = useSafeAreaInsets();
   const minAccessoryHeight = useRef(chatInputHeight + insets.bottom);
   const chatInput = (
@@ -52,6 +67,7 @@ export default function Chat({
       chatInputHeight={chatInputHeight}
       setChatInputHeight={setChatInputHeight}
       inputRef={inputRef}
+      sendMessage={sendMessage}
     />
   );
   return (

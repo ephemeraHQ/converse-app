@@ -35,7 +35,10 @@ import {
   saveMessages,
 } from "../data";
 import { AppContext } from "../data/store/context";
-import { XmtpConversation, XmtpDispatchTypes } from "../data/store/xmtpReducer";
+import {
+  XmtpConversationWithUpdate,
+  XmtpDispatchTypes,
+} from "../data/store/xmtpReducer";
 import { userExists } from "../utils/api";
 import {
   backgroundColor,
@@ -47,7 +50,6 @@ import {
 import { getAddressForPeer } from "../utils/eth";
 import { lastValueInMap } from "../utils/map";
 import { getTitleFontScale } from "../utils/str";
-import { MessageType } from "../vendor/react-native-chat-ui";
 import { NavigationParamList } from "./Main";
 
 const Conversation = ({
@@ -70,7 +72,7 @@ const Conversation = ({
   );
 
   const [conversation, setConversation] = useState<
-    XmtpConversation | undefined
+    XmtpConversationWithUpdate | undefined
   >(initialConversation);
 
   useEffect(() => {
@@ -196,7 +198,6 @@ const Conversation = ({
   const inviteToConverse = useCallback(() => {
     const inviteText =
       "I am using Converse, the fastest XMTP client, as my web3 messaging app. You can download the app here: https://getconverse.app/";
-    inputValueRef.current = inviteText;
     setInputValue(inviteText);
     textInputRef.current?.focus();
     setShowInvite({ show: true, banner: false });
@@ -267,12 +268,9 @@ const Conversation = ({
     }
   }, [conversation, dispatch]);
 
-  const inputValueRef = useRef(messageToPrefill);
-
   const sendMessage = useCallback(
-    async (m: MessageType.PartialText) => {
+    async (content: string) => {
       if (!conversation) return;
-      inputValueRef.current = "";
       setInputValue("");
       const messageId = uuid.v4().toString();
       const sentAtTime = new Date();
@@ -284,7 +282,7 @@ const Conversation = ({
             id: messageId,
             senderAddress: state.xmtp.address || "",
             sent: sentAtTime.getTime(),
-            content: m.text,
+            content,
             status: "sending",
           },
         ],
@@ -301,10 +299,10 @@ const Conversation = ({
     if (!conversation) return;
     dispatch({
       type: XmtpDispatchTypes.XmtpSetCurrentMessageContent,
-      payload: { topic: conversation.topic, content: inputValueRef.current },
+      payload: { topic: conversation.topic, content: inputValue },
     });
     markConversationRead(conversation, dispatch);
-  }, [conversation, dispatch]);
+  }, [conversation, dispatch, inputValue]);
 
   useEffect(() => {
     const unsubscribe = navigation.addListener("beforeRemove", onLeaveScreen);
@@ -328,6 +326,7 @@ const Conversation = ({
         setInputValue={setInputValue}
         inputValue={inputValue}
         inputRef={textInputRef}
+        sendMessage={sendMessage}
       />
       {/* <Chat
         key={`chat-${colorScheme}`}
