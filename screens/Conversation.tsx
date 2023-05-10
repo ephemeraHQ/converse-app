@@ -1,5 +1,3 @@
-import { useActionSheet } from "@expo/react-native-action-sheet";
-import { Theme } from "@flyerhq/react-native-chat-ui";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { isAddress } from "ethers/lib/utils";
@@ -14,7 +12,6 @@ import {
   ColorSchemeName,
   Platform,
   StyleSheet,
-  Text,
   TextInput,
   TouchableOpacity,
   useColorScheme,
@@ -22,8 +19,8 @@ import {
 } from "react-native";
 import uuid from "react-native-uuid";
 
-import Clock from "../assets/clock.svg";
 import Button from "../components/Button/Button";
+import ConverseChat from "../components/Chat/Chat";
 import ConversationTitle from "../components/Conversation/ConversationTitle";
 import InviteBanner from "../components/InviteBanner";
 import Picto from "../components/Picto/Picto";
@@ -44,19 +41,13 @@ import {
   backgroundColor,
   headerTitleStyle,
   itemSeparatorColor,
-  messageBubbleColor,
-  myMessageBubbleColor,
-  chatInputBackgroundColor,
   textPrimaryColor,
   textSecondaryColor,
 } from "../utils/colors";
 import { getAddressForPeer } from "../utils/eth";
+import { lastValueInMap } from "../utils/map";
 import { getTitleFontScale } from "../utils/str";
-import {
-  Chat,
-  defaultTheme,
-  MessageType,
-} from "../vendor/react-native-chat-ui";
+import { MessageType } from "../vendor/react-native-chat-ui";
 import { NavigationParamList } from "./Main";
 
 const Conversation = ({
@@ -160,36 +151,41 @@ const Conversation = ({
 
   const messageToPrefill =
     route.params.message || conversation?.currentMessage || "";
-  const [messageValue, setMessageValue] = useState(messageToPrefill);
+  const [inputValue, setInputValue] = useState(messageToPrefill);
+
   useEffect(() => {
-    if (!!route.params.focus || !!messageToPrefill) {
-      setTimeout(() => {
+    const unsubscribe = navigation.addListener("transitionEnd", (e) => {
+      if (!e.data.closing && (!!route.params.focus || !!messageToPrefill)) {
         textInputRef.current?.focus();
-      }, 150);
-    }
-  }, [messageToPrefill, route.params.focus]);
-  const { showActionSheetWithOptions } = useActionSheet();
+      }
+    });
+
+    return unsubscribe;
+  }, [messageToPrefill, navigation, route.params.focus]);
+
   const styles = getStyles(colorScheme);
   const [showInvite, setShowInvite] = useState({
     show: false,
     banner: false,
   });
 
-  useEffect(() => {
-    const checkIfUserExists = async () => {
-      if (!peerAddress) return;
-      const [exists, alreadyInvided] = await Promise.all([
-        userExists(peerAddress),
-        AsyncStorage.getItem(`converse-invited-${peerAddress}`),
-      ]);
-      if (!exists) {
+  const alreadyCheckedIfUserExists = useRef(false);
+
+  const checkIfUserExists = useCallback(async () => {
+    if (!peerAddress || alreadyCheckedIfUserExists.current) return;
+    alreadyCheckedIfUserExists.current = true;
+    const [exists, alreadyInvided] = await Promise.all([
+      userExists(peerAddress),
+      AsyncStorage.getItem(`converse-invited-${peerAddress}`),
+    ]);
+    if (!exists) {
+      setTimeout(() => {
         setShowInvite({
           show: true,
           banner: !alreadyInvided,
         });
-      }
-    };
-    checkIfUserExists();
+      }, 200);
+    }
   }, [peerAddress]);
 
   const hideInviteBanner = useCallback(() => {
@@ -200,8 +196,8 @@ const Conversation = ({
   const inviteToConverse = useCallback(() => {
     const inviteText =
       "I am using Converse, the fastest XMTP client, as my web3 messaging app. You can download the app here: https://getconverse.app/";
-    messageContent.current = inviteText;
-    setMessageValue(inviteText);
+    inputValueRef.current = inviteText;
+    setInputValue(inviteText);
     textInputRef.current?.focus();
     setShowInvite({ show: true, banner: false });
     AsyncStorage.setItem(`converse-invited-${peerAddress}`, "true");
@@ -216,6 +212,7 @@ const Conversation = ({
           conversation={conversation}
           peerAddress={peerAddress}
           isBlockedPeer={isBlockedPeer}
+          textInputRef={textInputRef}
         />
       ),
       headerRight: () => {
@@ -254,7 +251,6 @@ const Conversation = ({
     isBlockedPeer,
     navigation,
     peerAddress,
-    showActionSheetWithOptions,
     showInvite.banner,
     showInvite.show,
     state,
@@ -262,44 +258,22 @@ const Conversation = ({
     titleFontScale,
   ]);
 
-  const [messages, setMessages] = useState([] as MessageType.Any[]);
-
   useEffect(() => {
-    const newMessages = [] as MessageType.Any[];
-    const messagesArray = Array.from(
-      conversation ? conversation.messages.values() : []
-    );
-    let lastMessageTimestamp = 0;
-    const messagesLength = messagesArray.length;
-    for (let index = messagesLength - 1; index >= 0; index--) {
-      const m = messagesArray[index];
-      if (m.sent > lastMessageTimestamp) {
-        lastMessageTimestamp = m.sent;
-      }
-      newMessages.push({
-        author: {
-          id: m.senderAddress,
-        },
-        createdAt: m.sent,
-        id: m.id,
-        text: m.content,
-        type: "text",
-        status: m.status || "sent",
-      });
-    }
-    setMessages(newMessages);
     if (conversation) {
-      markConversationReadUntil(conversation, lastMessageTimestamp, dispatch);
+      const lastMessageTimestamp = lastValueInMap(conversation.messages)?.sent;
+      if (lastMessageTimestamp) {
+        markConversationReadUntil(conversation, lastMessageTimestamp, dispatch);
+      }
     }
-  }, [conversation, conversation?.messages, state.xmtp.lastUpdateAt, dispatch]);
+  }, [conversation, dispatch]);
 
-  const messageContent = useRef(messageToPrefill);
+  const inputValueRef = useRef(messageToPrefill);
 
-  const handleSendPress = useCallback(
+  const sendMessage = useCallback(
     async (m: MessageType.PartialText) => {
       if (!conversation) return;
-      messageContent.current = "";
-      setMessageValue("");
+      inputValueRef.current = "";
+      setInputValue("");
       const messageId = uuid.v4().toString();
       const sentAtTime = new Date();
 
@@ -327,27 +301,35 @@ const Conversation = ({
     if (!conversation) return;
     dispatch({
       type: XmtpDispatchTypes.XmtpSetCurrentMessageContent,
-      payload: { topic: conversation.topic, content: messageContent.current },
+      payload: { topic: conversation.topic, content: inputValueRef.current },
     });
     markConversationRead(conversation, dispatch);
   }, [conversation, dispatch]);
 
   useEffect(() => {
-    navigation.addListener("beforeRemove", onLeaveScreen);
-    return () => {
-      navigation.removeListener("beforeRemove", onLeaveScreen);
-    };
+    const unsubscribe = navigation.addListener("beforeRemove", onLeaveScreen);
+    return unsubscribe;
   }, [navigation, onLeaveScreen]);
 
+  const showInviteBanner =
+    showInvite.show && showInvite.banner && !isBlockedPeer;
+
   return (
-    <View style={styles.container}>
-      {showInvite.show && showInvite.banner && !isBlockedPeer && (
+    <View style={styles.container} onLayout={checkIfUserExists}>
+      {showInviteBanner && (
         <InviteBanner
           onClickInvite={inviteToConverse}
           onClickHide={hideInviteBanner}
         />
       )}
-      <Chat
+      <ConverseChat
+        conversation={conversation}
+        xmtpAddress={state.xmtp.address}
+        setInputValue={setInputValue}
+        inputValue={inputValue}
+        inputRef={textInputRef}
+      />
+      {/* <Chat
         key={`chat-${colorScheme}`}
         messages={isBlockedPeer ? [] : messages}
         onSendPress={handleSendPress}
@@ -387,7 +369,7 @@ const Conversation = ({
           // @ts-ignore
           ref: textInputRef,
         }}
-      />
+      /> */}
     </View>
   );
 };
@@ -427,68 +409,3 @@ const getStyles = (colorScheme: ColorSchemeName) =>
     },
     title: headerTitleStyle(colorScheme),
   });
-
-const chatTheme = (colorScheme: ColorSchemeName) =>
-  ({
-    ...defaultTheme,
-    borders: {
-      ...defaultTheme.borders,
-      messageBorderRadius: 12,
-      inputBorderRadius: 0,
-    },
-    insets: {
-      ...defaultTheme.insets,
-      messageInsetsVertical: 6,
-      messageInsetsHorizontal: 16,
-    },
-    colors: {
-      ...defaultTheme.colors,
-      background: backgroundColor(colorScheme),
-      primary: myMessageBubbleColor(colorScheme),
-      secondary: messageBubbleColor(colorScheme),
-      inputBackground: chatInputBackgroundColor(colorScheme),
-      inputText: textPrimaryColor(colorScheme),
-    },
-    fonts: {
-      ...defaultTheme.fonts,
-      inputTextStyle: {
-        ...defaultTheme.fonts.inputTextStyle,
-        fontWeight: "400",
-        backgroundColor: backgroundColor(colorScheme),
-        borderRadius: 15,
-        minHeight: 33,
-        paddingLeft: 12,
-        marginTop: -10,
-        marginBottom: -10,
-      },
-      receivedMessageBodyTextStyle: {
-        ...defaultTheme.fonts.receivedMessageBodyTextStyle,
-        fontWeight: "400",
-        color: textPrimaryColor(colorScheme),
-      },
-      receivedMessageCaptionTextStyle: {
-        ...defaultTheme.fonts.receivedMessageCaptionTextStyle,
-        fontWeight: "400",
-      },
-      sentMessageBodyTextStyle: {
-        ...defaultTheme.fonts.sentMessageBodyTextStyle,
-        fontWeight: "400",
-      },
-      sentMessageCaptionTextStyle: {
-        ...defaultTheme.fonts.sentMessageCaptionTextStyle,
-        fontWeight: "400",
-      },
-    },
-    icons: {
-      ...defaultTheme.icons,
-      sendButtonIcon: () => (
-        <Picto
-          picto="paperplane"
-          color={textPrimaryColor(colorScheme)}
-          style={{ width: 24, height: 24 }}
-          size={Platform.OS === "android" ? 24 : 18}
-        />
-      ),
-      sendingIcon: () => <Clock fill="white" width={12} height={12} />,
-    },
-  } as Theme);

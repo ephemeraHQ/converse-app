@@ -1,12 +1,12 @@
-import { useActionSheet } from "@expo/react-native-action-sheet";
 import * as Clipboard from "expo-clipboard";
-import { useContext } from "react";
+import { MutableRefObject, useContext } from "react";
 import {
   TouchableOpacity,
   Platform,
   useColorScheme,
   Text,
   Alert,
+  TextInput,
 } from "react-native";
 
 import { AppContext } from "../../data/store/context";
@@ -19,20 +19,22 @@ import { actionSheetColors, headerTitleStyle } from "../../utils/colors";
 import { conversationName, getTitleFontScale } from "../../utils/str";
 import Connecting, { shouldShowConnectingOrSyncing } from "../Connecting";
 import { shouldShowDebug } from "../DebugButton";
+import { showActionSheetWithOptions } from "../StateHandlers/ActionSheetStateHandler";
 
 type Props = {
   isBlockedPeer: boolean;
   peerAddress?: string;
   conversation?: XmtpConversation;
+  textInputRef: MutableRefObject<TextInput | undefined>;
 };
 
 export default function ConversationTitle({
   isBlockedPeer,
   peerAddress,
   conversation,
+  textInputRef,
 }: Props) {
   const { state, dispatch } = useContext(AppContext);
-  const { showActionSheetWithOptions } = useActionSheet();
   const colorScheme = useColorScheme();
   return (
     <>
@@ -48,7 +50,11 @@ export default function ConversationTitle({
             );
             Alert.alert("Conversation details copied");
           }}
-          onPress={() => {
+          onPress={async () => {
+            // Close keyboard
+            textInputRef?.current?.blur();
+            // Delay before showing action sheet
+            await new Promise((r) => setTimeout(r, 10));
             showActionSheetWithOptions(
               {
                 options: [

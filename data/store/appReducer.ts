@@ -7,6 +7,7 @@ export type AppType = {
   mainIdentity: string;
   isInternetReachable: boolean;
   hydrationDone: boolean;
+  showingActionSheet: boolean;
 };
 
 export const appInitialState: AppType = {
@@ -14,6 +15,7 @@ export const appInitialState: AppType = {
   mainIdentity: "",
   isInternetReachable: false,
   hydrationDone: false,
+  showingActionSheet: false,
 };
 
 export enum AppDispatchTypes {
@@ -21,6 +23,7 @@ export enum AppDispatchTypes {
   AppSetMainIdentity = "APP_SET_MAIN_IDENTITY",
   AppSetInternetReachable = "APP_SET_INTERNET_REACHABLE",
   AppSetHydrationDone = "APP_SET_HYDRATION_DONE",
+  AppShowingActionSheet = "APP_SHOWING_ACTION_SHEET",
 }
 
 type AppPayload = {
@@ -35,6 +38,9 @@ type AppPayload = {
   };
   [AppDispatchTypes.AppSetHydrationDone]: {
     done: boolean;
+  };
+  [AppDispatchTypes.AppShowingActionSheet]: {
+    showing: boolean;
   };
 };
 
@@ -66,6 +72,13 @@ export const appReducer = (state: AppType, action: AppActions): AppType => {
       return {
         ...state,
         hydrationDone: action.payload.done,
+      };
+    }
+
+    case AppDispatchTypes.AppShowingActionSheet: {
+      return {
+        ...state,
+        showingActionSheet: action.payload.showing,
       };
     }
 
