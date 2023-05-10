@@ -14,7 +14,7 @@ import {
 import { showActionSheetWithOptions } from "./StateHandlers/ActionSheetStateHandler";
 
 type Props = {
-  children: string;
+  children: React.ReactNode;
 };
 
 export default function ClickableText({ children }: Props) {
@@ -72,36 +72,37 @@ export default function ClickableText({ children }: Props) {
   return (
     <ParsedText
       accessibilityRole="link"
+      style={styles.text}
       parse={[
         {
           onPress: handleEmailPress,
           onLongPress: showCopyActionSheet("Copy email"),
-          style: styles.text,
+          style: styles.clickableText,
           type: "email",
         },
         {
           onPress: handleUrlPress,
           onLongPress: showCopyActionSheet("Copy link"),
           pattern: URL_REGEX,
-          style: styles.text,
+          style: styles.clickableText,
         },
         {
           onPress: handleNewConversationPress,
           onLongPress: showCopyActionSheet("Copy wallet address"),
           pattern: ADDRESS_REGEX,
-          style: styles.text,
+          style: styles.clickableText,
         },
         {
           onPress: handleNewConversationPress,
           onLongPress: showCopyActionSheet("Copy lens handle"),
           pattern: LENS_REGEX,
-          style: styles.text,
+          style: styles.clickableText,
         },
         {
           onPress: handleNewConversationPress,
           onLongPress: showCopyActionSheet("Copy ENS name"),
           pattern: ETH_REGEX,
-          style: styles.text,
+          style: styles.clickableText,
         },
       ]}
     >
@@ -112,5 +113,8 @@ export default function ClickableText({ children }: Props) {
 
 const getStyles = (colorScheme: ColorSchemeName) =>
   StyleSheet.create({
-    text: {},
+    text: {
+      flexDirection: "column",
+    },
+    clickableText: { textDecorationLine: "underline" },
   });

@@ -11,20 +11,31 @@ import {
 
 import Checkmark from "../../assets/checkmark.svg";
 import Clock from "../../assets/clock.svg";
+import MessageTail from "../../assets/message-tail.svg";
 import { AppContext } from "../../data/store/context";
 import { XmtpDispatchTypes, XmtpMessage } from "../../data/store/xmtpReducer";
 import { blockPeer, reportMessage } from "../../utils/api";
-import { actionSheetColors, textSecondaryColor } from "../../utils/colors";
+import {
+  actionSheetColors,
+  messageBubbleColor,
+  myMessageBubbleColor,
+  textSecondaryColor,
+} from "../../utils/colors";
 import ClickableText from "../ClickableText";
 import { showActionSheetWithOptions } from "../StateHandlers/ActionSheetStateHandler";
 
-type Props = {
-  message: XmtpMessage;
-  xmtpAddress?: string;
+export type MessageToDisplay = XmtpMessage & {
+  lastMessageInSeries: boolean;
+  fromMe: boolean;
+  sentViaConverse: boolean;
+  messageToDisplay: string;
 };
 
-export default function ChatMessage({ message, xmtpAddress }: Props) {
-  const isFromMe = !!xmtpAddress && xmtpAddress === message.senderAddress;
+type Props = {
+  message: MessageToDisplay;
+};
+
+export default function ChatMessage({ message }: Props) {
   const colorScheme = useColorScheme();
   const styles = getStyles(colorScheme);
 
@@ -85,10 +96,10 @@ export default function ChatMessage({ message, xmtpAddress }: Props) {
   const showMessageActionSheet = useCallback(() => {
     const methods: any = {
       "Copy message": () => {
-        Clipboard.setStringAsync(message.content);
+        Clipboard.setStringAsync(message.messageToDisplay);
       },
     };
-    if (!isFromMe) {
+    if (!message.fromMe) {
       methods["Report message"] = showMessageReportActionSheet;
     }
     methods.Cancel = () => {};
@@ -98,9 +109,9 @@ export default function ChatMessage({ message, xmtpAddress }: Props) {
     showActionSheetWithOptions(
       {
         options,
-        title: message.content,
+        title: message.messageToDisplay,
         cancelButtonIndex: options.indexOf("Cancel"),
-        destructiveButtonIndex: isFromMe ? undefined : 1,
+        destructiveButtonIndex: message.fromMe ? undefined : 1,
         ...actionSheetColors(colorScheme),
       },
       (selectedIndex?: number) => {
@@ -111,35 +122,63 @@ export default function ChatMessage({ message, xmtpAddress }: Props) {
         }
       }
     );
-  }, [colorScheme, isFromMe, message.content, showMessageReportActionSheet]);
+  }, [
+    colorScheme,
+    message.fromMe,
+    message.messageToDisplay,
+    showMessageReportActionSheet,
+  ]);
+
+  const metadata = (
+    <View style={styles.metadata}>
+      {message.fromMe &&
+        (message.status === "sending" ? (
+          <Clock
+            style={styles.statusIcon}
+            fill={textSecondaryColor(colorScheme)}
+            width={12}
+            height={12}
+          />
+        ) : (
+          <Checkmark
+            style={styles.statusIcon}
+            fill={textSecondaryColor(colorScheme)}
+            width={10}
+            height={10}
+          />
+        ))}
+    </View>
+  );
 
   return (
     <View style={styles.messageRow}>
       <TouchableOpacity
         style={[
           styles.messageBubble,
-          isFromMe ? styles.messageBubbleMe : undefined,
+          message.fromMe ? styles.messageBubbleMe : undefined,
         ]}
         activeOpacity={1}
         onLongPress={showMessageActionSheet}
       >
-        <ClickableText>{message.content}</ClickableText>
-        {isFromMe &&
-          (message.status === "sending" ? (
-            <Clock
-              style={styles.statusIcon}
-              fill={textSecondaryColor(colorScheme)}
-              width={12}
-              height={12}
-            />
-          ) : (
-            <Checkmark
-              style={styles.statusIcon}
-              fill={textSecondaryColor(colorScheme)}
-              width={10}
-              height={10}
-            />
-          ))}
+        <ClickableText>
+          {message.messageToDisplay}
+          <View style={{ opacity: 0 }}>{metadata}</View>
+        </ClickableText>
+        <View style={styles.metadataContainer}>{metadata}</View>
+
+        {message.lastMessageInSeries && (
+          <MessageTail
+            fill={
+              message.fromMe
+                ? myMessageBubbleColor(colorScheme)
+                : messageBubbleColor(colorScheme)
+            }
+            style={[
+              styles.messageTail,
+              message.fromMe ? styles.messageTailMe : undefined,
+            ]}
+          />
+        )}
       </TouchableOpacity>
     </View>
   );
@@ -155,13 +194,39 @@ const getStyles = (colorScheme: ColorSchemeName) =>
     messageBubble: {
       flexShrink: 1,
       flexGrow: 0,
-      padding: 10,
+      paddingHorizontal: 12,
+      paddingVertical: 6,
       maxWidth: "80%",
-      backgroundColor: "pink",
-      borderRadius: 10,
+      backgroundColor: messageBubbleColor(colorScheme),
+      borderRadius: 18,
     },
     messageBubbleMe: {
       marginLeft: "auto",
+      backgroundColor: myMessageBubbleColor(colorScheme),
+    },
+    messageTail: {
+      position: "absolute",
+      left: 0,
+      bottom: 0,
+      width: 14,
+      height: 21,
+      zIndex: -1,
+    },
+    messageTailMe: {
+      left: "auto",
+      right: 0,
+      transform: [{ scaleX: -1 }],
+    },
+    metadataContainer: {
+      position: "absolute",
+      right: 12,
+      bottom: 6,
+    },
+    metadata: {
+      borderWidth: 0.5,
+      paddingLeft: 10,
+      height: 10,
+      alignSelf: "flex-start",
     },
     statusIcon: {},
   });

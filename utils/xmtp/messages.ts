@@ -1,0 +1,1 @@
+export const CONVERSE_INVISIBLE_CHAR = "\u2060";

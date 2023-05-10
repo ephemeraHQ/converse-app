@@ -19,8 +19,9 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { AppContext } from "../../data/store/context";
 import { XmtpConversationWithUpdate } from "../../data/store/xmtpReducer";
+import { CONVERSE_INVISIBLE_CHAR } from "../../utils/xmtp/messages";
 import ChatInput from "./ChatInput";
-import ChatMessage from "./ChatMessage";
+import ChatMessage, { MessageToDisplay } from "./ChatMessage";
 
 type Props = {
   conversation?: XmtpConversationWithUpdate;
@@ -29,6 +30,35 @@ type Props = {
   inputValue: string;
   inputRef: MutableRefObject<TextInput | undefined>;
   sendMessage: (content: string) => Promise<void>;
+};
+
+const getMessagesArray = (
+  xmtpAddress?: string,
+  conversation?: XmtpConversationWithUpdate
+) => {
+  if (!conversation) return [];
+  const messagesArray = Array.from(conversation.messages.values());
+  const reverseArray = [];
+  for (let index = messagesArray.length - 1; index >= 0; index--) {
+    const message = messagesArray[index] as MessageToDisplay;
+    message.sentViaConverse = message.content.endsWith(CONVERSE_INVISIBLE_CHAR);
+    message.messageToDisplay = message.sentViaConverse
+      ? message.content.slice(0, message.content.length - 1)
+      : message.content;
+    message.fromMe =
+      !!xmtpAddress &&
+      xmtpAddress.toLowerCase() === message.senderAddress.toLowerCase();
+
+    message.lastMessageInSeries = true;
+    if (index < messagesArray.length - 1) {
+      const previousMessage = messagesArray[index + 1];
+      if (previousMessage.senderAddress === message.senderAddress) {
+        message.lastMessageInSeries = false;
+      }
+    }
+    reverseArray.push(message);
+  }
+  return reverseArray;
 };
 
 export default function Chat({
@@ -49,15 +79,11 @@ export default function Chat({
 
   const styles = getStyles(colorScheme);
   const [messagesArray, setMessagesArray] = useState(
-    Array.from(conversation ? conversation.messages.values() : []).reverse()
+    getMessagesArray(xmtpAddress, conversation)
   );
   useEffect(() => {
-    console.log("convo has changed");
-    const conversationMessages = conversation?.messages?.values();
-    setMessagesArray(
-      conversationMessages ? Array.from(conversationMessages).reverse() : []
-    );
-  }, [conversation?.messages, conversation?.lastUpdateAt]);
+    setMessagesArray(getMessagesArray(xmtpAddress, conversation));
+  }, [conversation, conversation?.lastUpdateAt, xmtpAddress]);
   const insets = useSafeAreaInsets();
   const minAccessoryHeight = useRef(chatInputHeight + insets.bottom);
   const chatInput = (
@@ -75,9 +101,7 @@ export default function Chat({
       <FlashList
         contentContainerStyle={styles.chat}
         data={messagesArray}
-        renderItem={({ item }) => (
-          <ChatMessage xmtpAddress={xmtpAddress} message={item} />
-        )}
+        renderItem={({ item }) => <ChatMessage message={item} />}
         onLayout={() => {
           if (!automaticallyAdjustKeyboardInsets) {
             setTimeout(() => {
