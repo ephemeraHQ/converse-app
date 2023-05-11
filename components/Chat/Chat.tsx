@@ -55,6 +55,8 @@ const getMessagesArray = (
       const previousMessage = messagesArray[index - 1];
       message.dateChange =
         differenceInCalendarDays(message.sent, previousMessage.sent) > 0;
+    } else {
+      message.dateChange = true;
     }
     reverseArray.push(message);
   }
