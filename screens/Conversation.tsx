@@ -158,7 +158,7 @@ const Conversation = ({
 
   useEffect(() => {
     const unsubscribe = navigation.addListener("transitionEnd", (e) => {
-      if (!e.data.closing && (!!route.params.focus || !!messageToPrefill)) {
+      if (!e.data.closing && !!route.params.focus) {
         textInputRef.current?.focus();
       }
     });
