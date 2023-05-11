@@ -1,0 +1,47 @@
+diff --git a/node_modules/react-native-parsed-text/src/ParsedText.js b/node_modules/react-native-parsed-text/src/ParsedText.js
+index d8a0cc5..14ccb41 100644
+--- a/node_modules/react-native-parsed-text/src/ParsedText.js
++++ b/node_modules/react-native-parsed-text/src/ParsedText.js
+@@ -98,16 +98,30 @@ class ParsedText extends React.Component {
+     if (!this.props.parse) {
+       return this.props.children;
+     }
+-    if (typeof this.props.children !== 'string') {
++    let stringChild = null;
++    let prefix = null;
++    let suffix = null;
++    if (typeof this.props.children === 'string') {
++      stringChild = this.props.children;
++    } else if (Array.isArray(this.props.children)) {
++      if (typeof this.props.children[0] === "string") {
++        stringChild = this.props.children[0];
++        suffix = this.props.children.slice(1);
++      } else if (typeof this.props.children[this.props.children.length - 1] === "string") {
++        stringChild = this.props.children[this.props.children.length - 1];
++        prefix = this.props.children.slice(0, this.props.children.length - 1);
++      }
++    }
++    if (!stringChild) {
+       return this.props.children;
+     }
+ 
+     const textExtraction = new TextExtraction(
+-      this.props.children,
++      stringChild,
+       this.getPatterns(),
+     );
+ 
+-    return textExtraction.parse().map((props, index) => {
++    return [prefix, ...textExtraction.parse().map((props, index) => {
+       const { style: parentStyle } = this.props;
+       const { style, ...remainder } = props;
+       return (
+@@ -118,7 +132,7 @@ class ParsedText extends React.Component {
+           {...remainder}
+         />
+       );
+-    });
++    }), suffix];
+   }
+ 
+   render() {

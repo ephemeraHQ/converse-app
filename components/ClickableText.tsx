@@ -1,7 +1,13 @@
 import * as Clipboard from "expo-clipboard";
 import * as Linking from "expo-linking";
 import { useCallback } from "react";
-import { ColorSchemeName, StyleSheet, useColorScheme } from "react-native";
+import {
+  ColorSchemeName,
+  StyleProp,
+  StyleSheet,
+  TextStyle,
+  useColorScheme,
+} from "react-native";
 import ParsedText from "react-native-parsed-text";
 
 import { actionSheetColors } from "../utils/colors";
@@ -15,9 +21,10 @@ import { showActionSheetWithOptions } from "./StateHandlers/ActionSheetStateHand
 
 type Props = {
   children: React.ReactNode;
+  style?: StyleProp<TextStyle>;
 };
 
-export default function ClickableText({ children }: Props) {
+export default function ClickableText({ children, style }: Props) {
   const colorScheme = useColorScheme();
   const styles = getStyles(colorScheme);
   const handleEmailPress = useCallback((email: string) => {
@@ -72,7 +79,7 @@ export default function ClickableText({ children }: Props) {
   return (
     <ParsedText
       accessibilityRole="link"
-      style={styles.text}
+      style={style}
       parse={[
         {
           onPress: handleEmailPress,
@@ -113,8 +120,5 @@ export default function ClickableText({ children }: Props) {
 
 const getStyles = (colorScheme: ColorSchemeName) =>
   StyleSheet.create({
-    text: {
-      flexDirection: "column",
-    },
     clickableText: { textDecorationLine: "underline" },
   });
