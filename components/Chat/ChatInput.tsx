@@ -12,7 +12,6 @@ import {
   actionSecondaryColor,
   backgroundColor,
   itemSeparatorColor,
-  tertiaryBackgroundColor,
 } from "../../utils/colors";
 
 type Props = {
@@ -22,6 +21,8 @@ type Props = {
   setChatInputHeight: (height: number) => void;
   inputRef: MutableRefObject<TextInput | undefined>;
   sendMessage: (content: string) => Promise<void>;
+  onBlur: () => void;
+  onFocus: () => void;
 };
 
 export default function ChatInput({
@@ -31,6 +32,8 @@ export default function ChatInput({
   setChatInputHeight,
   inputRef,
   sendMessage,
+  onBlur,
+  onFocus,
 }: Props) {
   const colorScheme = useColorScheme();
   const styles = getStyles(colorScheme);
@@ -56,6 +59,8 @@ export default function ChatInput({
         }}
         placeholder="Message"
         placeholderTextColor={actionSecondaryColor(colorScheme)}
+        onBlur={onBlur}
+        onFocus={onFocus}
       />
       <View style={styles.sendButtonContainer}>
         <SendButton
@@ -74,7 +79,8 @@ export default function ChatInput({
 const getStyles = (colorScheme: ColorSchemeName) =>
   StyleSheet.create({
     chatInputContainer: {
-      backgroundColor: tertiaryBackgroundColor(colorScheme),
+      // backgroundColor: tertiaryBackgroundColor(colorScheme),
+      backgroundColor: "red",
       flexDirection: "row",
     },
     chatInput: {
