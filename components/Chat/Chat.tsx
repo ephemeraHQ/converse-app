@@ -1,26 +1,19 @@
 import { FlashList } from "@shopify/flash-list";
 import differenceInCalendarDays from "date-fns/differenceInCalendarDays";
-import {
-  MutableRefObject,
-  useContext,
-  useEffect,
-  useRef,
-  useState,
-} from "react";
+import { MutableRefObject, useContext, useEffect, useState } from "react";
 import {
   ColorSchemeName,
   useColorScheme,
-  // InputAccessoryView,
+  InputAccessoryView,
   View,
   StyleSheet,
   TextInput,
 } from "react-native";
-import { useAnimatedKeyboard, useAnimatedStyle } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { AppContext } from "../../data/store/context";
 import { XmtpConversationWithUpdate } from "../../data/store/xmtpReducer";
-import { backgroundColor } from "../../utils/colors";
+import { backgroundColor, tertiaryBackgroundColor } from "../../utils/colors";
 import { CONVERSE_INVISIBLE_CHAR } from "../../utils/xmtp/messages";
 import ChatInput from "./ChatInput";
 import ChatMessage, { MessageToDisplay } from "./ChatMessage";
@@ -92,16 +85,8 @@ export default function Chat({
     setMessagesArray(getMessagesArray(xmtpAddress, conversation));
   }, [conversation, conversation?.lastUpdateAt, xmtpAddress]);
   const insets = useSafeAreaInsets();
-  const keyboard = useAnimatedKeyboard();
-  const translateStyle = useAnimatedStyle(() => {
-    return {
-      transform: [{ translateY: -keyboard.height.value }],
-    };
-  });
   const minAccessoryHeight = chatInputHeight + insets.bottom + 14;
   // console.log(minAccessoryHeight, chatInputHeight + insets.bottom + 14);
-  const flashListRef = useRef<FlashList<MessageToDisplay> | null>();
-  const flashListScrollPosition = useRef(0);
   const chatInput = (
     <ChatInput
       inputValue={inputValue}
@@ -110,30 +95,8 @@ export default function Chat({
       setChatInputHeight={setChatInputHeight}
       inputRef={inputRef}
       sendMessage={sendMessage}
-      onFocus={() => {
-        // setTimeout(() => {
-        //   flashListRef.current?.scrollToIndex({
-        //     animated: true,
-        //     index: 0,
-        //   });
-        // }, 500);
-      }}
-      onBlur={() => {
-        if (flashListScrollPosition.current <= 50) {
-          flashListRef.current?.scrollToOffset({
-            animated: true,
-            offset: 0,
-          });
-        }
-        // flashListRef.current?.scrollToOffset({
-        //   animated: true,
-        //   offset: flashListScrollPosition.current - 48,
-        // });
-        // flashListRef.current?.scrollToIndex({ index: 0, animated: true });
-      }}
     />
   );
-
   return (
     <View style={styles.chatContainer}>
       <FlashList
@@ -147,12 +110,9 @@ export default function Chat({
             }, 50);
           }
         }}
-        ref={(r) => {
-          flashListRef.current = r;
-        }}
         estimatedItemSize={100}
         keyboardDismissMode="interactive"
-        automaticallyAdjustContentInsets
+        automaticallyAdjustContentInsets={false}
         contentInsetAdjustmentBehavior="never"
         maintainVisibleContentPosition={{
           minIndexForVisible: 0,
@@ -163,60 +123,26 @@ export default function Chat({
           automaticallyAdjustKeyboardInsets && !state.app.showingActionSheet
         }
         keyExtractor={(item) => item.id}
-        onScroll={(e) => {
-          console.log(flashListScrollPosition.current);
-          flashListScrollPosition.current = e.nativeEvent.contentOffset.y;
-          // console.log(flashListScrollPosition.current);
-        }}
       />
-      {/* <View style={{borderWidth: 1, borderColor: "green", height: 30}}>{chatInput}</View> */}
-      {/* <KeyboardTrackingView> */}
-      {/* <KeyboardTrackingView
+      <View
         style={{
-          // position: "absolute",
-          width: "100%",
-          // height: 0.5,
-          overflow: "visible",
-          // height: chatInputHeight + 14,
-          bottom: 0,
+          backgroundColor: tertiaryBackgroundColor(colorScheme),
+          height: minAccessoryHeight,
         }}
       >
-        <View style={{top: 0, zIndex: 100000}}> */}
-      {chatInput}
-      {/* </View>
-      </KeyboardTrackingView> */}
-      {/* </KeyboardTrackingView> */}
-      {/* <KeyboardTrackingView style={{ height: 30, borderWidth: 1 }}> */}
-      {/* <View style={{ position: "absolute", top: -80, width: "100%" }}>
-          {chatInput}
-        </View> */}
-      {/* <TextInput style={{height: 10, borderWidth: 1, borderColor: "red"}} /> */}
-      {/* </KeyboardTrackingView> */}
-
-      {/* <TextInput
-        onBlur={() => {
-          flashListRef.current?.scrollToIndex({ index: 0, animated: true });
-        }}
-      /> */}
-      {/* <View
-        style={{
-          backgroundColor: "blue",
-          height: insets.bottom,
-        }}
-      /> */}
-      {/* <InputAccessoryView
+        <InputAccessoryView
           backgroundColor={tertiaryBackgroundColor(colorScheme)}
-        > */}
-      {/* <KeyboardTrackingView style={{height: 100, borderWidth: 2}}>{chatInput}</KeyboardTrackingView> */}
-      {/* </InputAccessoryView> */}
-      {/* {chatInput} */}
-      {/* {Platform.OS === "ios" && false && (
+        >
+          {chatInput}
+        </InputAccessoryView>
+        {/* {chatInput} */}
+        {/* {Platform.OS === "ios" && false && (
           <InputAccessoryView backgroundColor={backgroundColor(colorScheme)}>
             {chatInput}
           </InputAccessoryView>
         )}
         {Platform.OS === "ios" && chatInput} */}
-      {/* </View> */}
+      </View>
     </View>
   );
 }
