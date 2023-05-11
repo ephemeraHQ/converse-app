@@ -1,6 +1,4 @@
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import differenceInCalendarDays from "date-fns/differenceInCalendarDays";
-import format from "date-fns/format";
 import React, { memo, useCallback, useEffect, useState } from "react";
 import {
   ColorSchemeName,
@@ -26,6 +24,7 @@ import {
   textPrimaryColor,
   textSecondaryColor,
 } from "../utils/colors";
+import { getRelativeDateTime } from "../utils/date";
 
 type ConversationListItemProps = {
   navigation: NativeStackNavigationProp<NavigationParamList, "Messages">;
@@ -52,19 +51,7 @@ const ConversationListItem = memo(function ConversationListItem({
   showUnread,
 }: ConversationListItemProps) {
   const styles = getStyles(colorScheme);
-  let timeToShow = "";
-  if (conversationTime) {
-    const days = differenceInCalendarDays(new Date(), conversationTime);
-    if (days === 0) {
-      timeToShow = format(conversationTime, "hh:mm aa");
-    } else if (days === 1) {
-      timeToShow = "yesterday";
-    } else if (days < 7) {
-      timeToShow = format(conversationTime, "EEEE");
-    } else {
-      timeToShow = format(conversationTime, "yyyy-MM-dd");
-    }
-  }
+  const timeToShow = getRelativeDateTime(conversationTime);
   const [selected, setSelected] = useState(false);
   const resetSelected = useCallback(() => {
     setSelected(false);

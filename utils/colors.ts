@@ -113,8 +113,8 @@ export const myMessageBubbleColor = (colorScheme: ColorSchemeName) => {
   return MY_MESSAGE_BUBBLE_LIGHT;
 };
 
-const TERTIARY_BACKGROUND_LIGHT = "rgba(118, 118, 128, 0.12)";
-const TERTIARY_BACKGROUND_DARK = "rgba(118, 118, 128, 0.24)";
+const TERTIARY_BACKGROUND_LIGHT = "#EFEFF0";
+const TERTIARY_BACKGROUND_DARK = "#1C1C1F";
 
 export const tertiaryBackgroundColor = (colorScheme: ColorSchemeName) => {
   if (colorScheme === "dark") return TERTIARY_BACKGROUND_DARK;
