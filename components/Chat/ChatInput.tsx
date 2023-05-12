@@ -5,6 +5,7 @@ import {
   StyleSheet,
   ColorSchemeName,
   useColorScheme,
+  TouchableOpacity,
 } from "react-native";
 
 import SendButton from "../../assets/send-button.svg";
@@ -22,6 +23,10 @@ type Props = {
   setChatInputHeight: (height: number) => void;
   inputRef: MutableRefObject<TextInput | undefined>;
   sendMessage: (content: string) => Promise<void>;
+  inputAccessoryViewID?: string;
+  onFocus?: () => void;
+  onBlur?: () => void;
+  editable?: boolean;
 };
 
 export default function ChatInput({
@@ -31,13 +36,24 @@ export default function ChatInput({
   setChatInputHeight,
   inputRef,
   sendMessage,
+  inputAccessoryViewID,
+  onFocus,
+  onBlur,
+  editable,
 }: Props) {
   const colorScheme = useColorScheme();
   const styles = getStyles(colorScheme);
   return (
     <View style={styles.chatInputContainer}>
       <TextInput
-        style={[styles.chatInput, { height: chatInputHeight, maxHeight: 124 }]}
+        editable={editable !== undefined ? editable : true}
+        style={[
+          styles.chatInput,
+          {
+            height: chatInputHeight,
+            maxHeight: 124,
+          },
+        ]}
         value={inputValue}
         onChangeText={setInputValue}
         onContentSizeChange={(event) => {
@@ -56,8 +72,14 @@ export default function ChatInput({
         }}
         placeholder="Message"
         placeholderTextColor={actionSecondaryColor(colorScheme)}
+        inputAccessoryViewID={inputAccessoryViewID}
+        onFocus={onFocus ? () => onFocus() : undefined}
+        onBlur={onBlur ? () => onBlur() : undefined}
       />
-      <View style={styles.sendButtonContainer}>
+      <TouchableOpacity
+        onPress={() => sendMessage(inputValue)}
+        style={styles.sendButtonContainer}
+      >
         <SendButton
           width={36}
           height={36}
@@ -66,7 +88,7 @@ export default function ChatInput({
             { opacity: inputValue.length > 0 ? 1 : 0.6 },
           ]}
         />
-      </View>
+      </TouchableOpacity>
     </View>
   );
 }

@@ -1,6 +1,12 @@
 import { FlashList } from "@shopify/flash-list";
 import differenceInCalendarDays from "date-fns/differenceInCalendarDays";
-import { MutableRefObject, useContext, useEffect, useState } from "react";
+import {
+  MutableRefObject,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import {
   ColorSchemeName,
   useColorScheme,
@@ -8,6 +14,7 @@ import {
   View,
   StyleSheet,
   TextInput,
+  Platform,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -73,12 +80,6 @@ export default function Chat({
 }: Props) {
   const { state } = useContext(AppContext);
   const colorScheme = useColorScheme();
-  const [
-    automaticallyAdjustKeyboardInsets,
-    setAutomaticallyAdjustKeyboardInsets,
-  ] = useState(false);
-  const [chatInputHeight, setChatInputHeight] = useState(36);
-
   const styles = getStyles(colorScheme);
   const [messagesArray, setMessagesArray] = useState(
     getMessagesArray(xmtpAddress, conversation)
@@ -86,10 +87,33 @@ export default function Chat({
   useEffect(() => {
     setMessagesArray(getMessagesArray(xmtpAddress, conversation));
   }, [conversation, conversation?.lastUpdateAt, xmtpAddress]);
+
+  // Adjusting keyboard insets after layout to avoid
+  // scrolling bug
+  const [
+    automaticallyAdjustKeyboardInsets,
+    setAutomaticallyAdjustKeyboardInsets,
+  ] = useState(false);
+
+  // Saving the chat input height to a var to adapt
+  const [chatInputHeight, setChatInputHeight] = useState(36);
+
   const insets = useSafeAreaInsets();
-  const minAccessoryHeight = chatInputHeight + insets.bottom + 14;
-  // console.log(minAccessoryHeight, chatInputHeight + insets.bottom + 14);
-  const chatInput = (
+  const accessoryHeight = chatInputHeight + insets.bottom + 14;
+
+  // Saving scroll position to scroll to 0 if near 0 when
+  // closing the keyboard
+  const scrollPosition = useRef(0);
+
+  // Duplicating the chat input, one that is shown at the beginning
+  // and another one that is show above keyboard as an accessory view
+  const [showChatInputBehindKeyboard, setShowChatInputBehindKeyboard] =
+    useState(true);
+  const inputAboveKeyboardRef = useRef<TextInput | undefined>(undefined);
+
+  // This one is show at the beginning, and when user clicks on it
+  // the other one is sticked above the keyboard
+  const chatInputBehindKeyboard = (
     <ChatInput
       inputValue={inputValue}
       setInputValue={setInputValue}
@@ -97,8 +121,27 @@ export default function Chat({
       setChatInputHeight={setChatInputHeight}
       inputRef={inputRef}
       sendMessage={sendMessage}
+      inputAccessoryViewID="chatInputAccessoryView"
+      editable={showChatInputBehindKeyboard}
+      onFocus={() => {
+        inputAboveKeyboardRef.current?.focus();
+        setShowChatInputBehindKeyboard(false);
+      }}
     />
   );
+
+  // This one is a duplicate that is sticked above the keyboard on iOS
+  const chatInputAboveKeyboard = (
+    <ChatInput
+      inputValue={inputValue}
+      setInputValue={setInputValue}
+      chatInputHeight={chatInputHeight}
+      setChatInputHeight={setChatInputHeight}
+      inputRef={inputAboveKeyboardRef}
+      sendMessage={sendMessage}
+    />
+  );
+
   return (
     <View style={styles.chatContainer}>
       <FlashList
@@ -125,25 +168,28 @@ export default function Chat({
           automaticallyAdjustKeyboardInsets && !state.app.showingActionSheet
         }
         keyExtractor={(item) => item.id}
+        onScroll={(event) => {
+          scrollPosition.current = event.nativeEvent.contentOffset.y;
+        }}
       />
       <View
         style={{
           backgroundColor: tertiaryBackgroundColor(colorScheme),
-          height: minAccessoryHeight,
+          height: accessoryHeight,
         }}
       >
-        <InputAccessoryView
-          backgroundColor={tertiaryBackgroundColor(colorScheme)}
-        >
-          {chatInput}
-        </InputAccessoryView>
-        {/* {chatInput} */}
-        {/* {Platform.OS === "ios" && false && (
-          <InputAccessoryView backgroundColor={backgroundColor(colorScheme)}>
-            {chatInput}
+        {Platform.OS === "ios" && (
+          <InputAccessoryView
+            nativeID="chatInputAccessoryView"
+            backgroundColor={tertiaryBackgroundColor(colorScheme)}
+          >
+            <View>{chatInputAboveKeyboard}</View>
           </InputAccessoryView>
         )}
-        {Platform.OS === "ios" && chatInput} */}
+
+        <View style={{ opacity: showChatInputBehindKeyboard ? 1 : 0 }}>
+          {chatInputBehindKeyboard}
+        </View>
       </View>
     </View>
   );
