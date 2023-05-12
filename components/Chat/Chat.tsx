@@ -124,8 +124,10 @@ export default function Chat({
       inputAccessoryViewID="chatInputAccessoryView"
       editable={showChatInputBehindKeyboard}
       onFocus={() => {
-        inputAboveKeyboardRef.current?.focus();
-        setShowChatInputBehindKeyboard(false);
+        if (Platform.OS === "ios") {
+          inputAboveKeyboardRef.current?.focus();
+          setShowChatInputBehindKeyboard(false);
+        }
       }}
     />
   );
