@@ -34,6 +34,17 @@ const hideDataFromEvents = [
   "XMTP_EXPORTED_CONVERSATIONS",
 ];
 
+let lastNavigation: any;
+let lastCreateConvoFromNewConvoScreen = false;
+
+export const saveWebviewNavigation = (navigation: any) => {
+  lastNavigation = navigation;
+};
+
+export const setLastCreateConvoFromNewConvoScreen = (isFrom: boolean) => {
+  lastCreateConvoFromNewConvoScreen = isFrom;
+};
+
 export const sendMessageToWebview = (eventName: string, data?: any) => {
   if (!webview) {
     setTimeout(() => {
@@ -323,6 +334,23 @@ export default function XmtpWebview() {
             console.log("Xmtp Connection Lost, trying to reload");
             reloadData(true);
           }
+          break;
+        }
+
+        case "CREATE_CONVERSATION_FAILED": {
+          Alert.alert(
+            "Network error",
+            lastCreateConvoFromNewConvoScreen
+              ? "We could not create your conversation on the network. Please try again later"
+              : "We could not create your conversation on the network. Please try again later or try typing the address in the “Create conversation” screen.",
+            [
+              {
+                text: "OK",
+                onPress: lastNavigation && lastNavigation.goBack,
+                isPreferred: true,
+              },
+            ]
+          );
           break;
         }
 
