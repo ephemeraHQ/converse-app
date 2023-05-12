@@ -9,7 +9,9 @@ import {
   TouchableWithoutFeedback,
   ScrollView,
   View,
+  Dimensions,
 } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { AppContext } from "../../data/store/context";
 import {
@@ -17,10 +19,11 @@ import {
   XmtpDispatchTypes,
 } from "../../data/store/xmtpReducer";
 import { blockPeer } from "../../utils/api";
-import { textPrimaryColor } from "../../utils/colors";
+import { actionSheetColors, textPrimaryColor } from "../../utils/colors";
 import { conversationName } from "../../utils/str";
 import ActivityIndicator from "../ActivityIndicator/ActivityIndicator";
 import Button from "../Button/Button";
+import { showActionSheetWithOptions } from "../StateHandlers/ActionSheetStateHandler";
 
 type Props = {
   conversation?: XmtpConversationWithUpdate;
@@ -40,6 +43,7 @@ export default function ChatPlaceholder({
   const colorScheme = useColorScheme();
   const styles = getStyles(colorScheme);
   const { dispatch } = useContext(AppContext);
+  const insets = useSafeAreaInsets();
   return (
     <TouchableWithoutFeedback
       onPress={() => {
@@ -51,7 +55,14 @@ export default function ChatPlaceholder({
       <ScrollView
         automaticallyAdjustKeyboardInsets
         style={styles.chatPlaceholder}
-        contentContainerStyle={styles.chatPlaceholderContent}
+        contentContainerStyle={[
+          styles.chatPlaceholderContent,
+          {
+            height:
+              (Dimensions.get("window").height - insets.bottom - insets.top) /
+              2,
+          },
+        ]}
         keyboardDismissMode="interactive"
         automaticallyAdjustContentInsets={false}
         contentInsetAdjustmentBehavior="never"
@@ -79,17 +90,31 @@ export default function ChatPlaceholder({
               title="Unblock"
               style={styles.cta}
               onPress={() => {
-                blockPeer({
-                  peerAddress: conversation?.peerAddress || "",
-                  blocked: false,
-                });
-                dispatch({
-                  type: XmtpDispatchTypes.XmtpSetBlockedStatus,
-                  payload: {
-                    peerAddress: conversation?.peerAddress || "",
-                    blocked: false,
+                showActionSheetWithOptions(
+                  {
+                    options: ["Unblock", "Cancel"],
+                    cancelButtonIndex: 1,
+                    destructiveButtonIndex: isBlockedPeer ? undefined : 0,
+                    title:
+                      "If you unblock this contact, they will be able to send you messages again.",
+                    ...actionSheetColors(colorScheme),
                   },
-                });
+                  (selectedIndex?: number) => {
+                    if (selectedIndex === 0) {
+                      blockPeer({
+                        peerAddress: conversation?.peerAddress || "",
+                        blocked: false,
+                      });
+                      dispatch({
+                        type: XmtpDispatchTypes.XmtpSetBlockedStatus,
+                        payload: {
+                          peerAddress: conversation?.peerAddress || "",
+                          blocked: false,
+                        },
+                      });
+                    }
+                  }
+                );
               }}
             />
           </>
@@ -122,7 +147,7 @@ const getStyles = (colorScheme: ColorSchemeName) =>
       flex: 1,
     },
     chatPlaceholderContent: {
-      flex: 0.52,
+      paddingVertical: 20,
     },
     chatPlaceholderText: {
       textAlign: "center",
@@ -136,6 +161,5 @@ const getStyles = (colorScheme: ColorSchemeName) =>
       borderRadius: 100,
       paddingVertical: 7,
       marginTop: 20,
-      marginBottom: 20,
     },
   });

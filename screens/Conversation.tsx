@@ -9,6 +9,7 @@ import React, {
   useRef,
 } from "react";
 import {
+  Alert,
   ColorSchemeName,
   Platform,
   StyleSheet,
@@ -28,7 +29,11 @@ import {
   getLocalXmtpConversationForTopic,
   sendPendingMessages,
 } from "../components/XmtpState";
-import { sendMessageToWebview } from "../components/XmtpWebview";
+import {
+  saveWebviewNavigation,
+  sendMessageToWebview,
+  setLastCreateConvoFromNewConvoScreen,
+} from "../components/XmtpWebview";
 import {
   markConversationRead,
   markConversationReadUntil,
@@ -49,6 +54,7 @@ import {
 } from "../utils/colors";
 import { getAddressForPeer } from "../utils/eth";
 import { lastValueInMap } from "../utils/map";
+import { sentryTrackMessage } from "../utils/sentry";
 import { getTitleFontScale } from "../utils/str";
 import { CONVERSE_INVISIBLE_CHAR } from "../utils/xmtp/messages";
 import { NavigationParamList } from "./Main";
@@ -120,7 +126,23 @@ const Conversation = ({
         const peerAddress = await getAddressForPeer(
           route.params.mainConversationWithPeer
         );
-        if (!peerAddress) return;
+        if (!peerAddress) {
+          sentryTrackMessage("CREATE_CONVERSATION_ERROR", {
+            error: "Identity not found",
+          });
+          Alert.alert(
+            "Identity not found",
+            `We could not find the address attached to ${route.params.mainConversationWithPeer}`,
+            [
+              {
+                text: "OK",
+                onPress: navigation.goBack,
+                isPreferred: true,
+              },
+            ]
+          );
+          return;
+        }
         const alreadyConversationWithPeer = Object.values(
           state.xmtp.conversations
         ).find(
@@ -132,6 +154,8 @@ const Conversation = ({
           setConversation(alreadyConversationWithPeer);
         } else {
           setPeerAddress(peerAddress || "");
+          setLastCreateConvoFromNewConvoScreen(false);
+          saveWebviewNavigation(navigation);
           sendMessageToWebview("CREATE_CONVERSATION", {
             peerAddress,
             context: null,
@@ -142,6 +166,7 @@ const Conversation = ({
     openConversationWithPeer();
   }, [
     conversation,
+    navigation,
     route.params.mainConversationWithPeer,
     state.xmtp.conversations,
   ]);

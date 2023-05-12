@@ -29,7 +29,11 @@ import ActivityIndicator from "../components/ActivityIndicator/ActivityIndicator
 import AndroidBackAction from "../components/AndroidBackAction";
 import Picto from "../components/Picto/Picto";
 import TableView, { TableViewPicto } from "../components/TableView";
-import { sendMessageToWebview } from "../components/XmtpWebview";
+import {
+  saveWebviewNavigation,
+  sendMessageToWebview,
+  setLastCreateConvoFromNewConvoScreen,
+} from "../components/XmtpWebview";
 import config from "../config";
 import { AppContext, StateType } from "../data/store/context";
 import { XmtpConversation } from "../data/store/xmtpReducer";
@@ -231,12 +235,19 @@ export default function NewConversation({
       if (creatingNewConversation) return;
       waitingForNewConversation.current = prefilledMessage || "";
       setCreatingNewConversation(true);
+      setLastCreateConvoFromNewConvoScreen(true);
+      saveWebviewNavigation(navigation);
       sendMessageToWebview("CREATE_CONVERSATION", {
         peerAddress,
-        context: computeNewConversationContext(state, peerAddress),
+        context: {
+          conversationId: undefined,
+          metadata: {
+            coucou: "test",
+          },
+        },
       });
     },
-    [creatingNewConversation]
+    [creatingNewConversation, navigation]
   );
 
   const inputRef = useRef<TextInput | null>(null);
