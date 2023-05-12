@@ -110,45 +110,6 @@ export default function Chat({
   // closing the keyboard
   const scrollPosition = useRef(0);
 
-  // Duplicating the chat input, one that is shown at the beginning
-  // and another one that is show above keyboard as an accessory view
-  const [showChatInputBehindKeyboard, setShowChatInputBehindKeyboard] =
-    useState(true);
-  const inputAboveKeyboardRef = useRef<TextInput | undefined>(undefined);
-
-  // This one is show at the beginning, and when user clicks on it
-  // the other one is sticked above the keyboard
-  const chatInputBehindKeyboard = (
-    <ChatInput
-      inputValue={inputValue}
-      setInputValue={setInputValue}
-      chatInputHeight={chatInputHeight}
-      setChatInputHeight={setChatInputHeight}
-      inputRef={inputRef}
-      sendMessage={sendMessage}
-      inputAccessoryViewID="chatInputAccessoryView"
-      editable={showChatInputBehindKeyboard}
-      onFocus={() => {
-        if (Platform.OS === "ios") {
-          inputAboveKeyboardRef.current?.focus();
-          setShowChatInputBehindKeyboard(false);
-        }
-      }}
-    />
-  );
-
-  // This one is a duplicate that is sticked above the keyboard on iOS
-  const chatInputAboveKeyboard = (
-    <ChatInput
-      inputValue={inputValue}
-      setInputValue={setInputValue}
-      chatInputHeight={chatInputHeight}
-      setChatInputHeight={setChatInputHeight}
-      inputRef={inputAboveKeyboardRef}
-      sendMessage={sendMessage}
-    />
-  );
-
   return (
     <View style={styles.chatContainer}>
       <View style={styles.chatContent}>
@@ -186,7 +147,6 @@ export default function Chat({
         {(messagesArray.length === 0 || isBlockedPeer || !conversation) && (
           <ChatPlaceholder
             onReadyToFocus={onReadyToFocus}
-            inputAboveKeyboardRef={inputAboveKeyboardRef}
             isBlockedPeer={isBlockedPeer}
             conversation={conversation}
             messagesCount={messagesArray.length}
@@ -204,16 +164,18 @@ export default function Chat({
         >
           {Platform.OS === "ios" && (
             <InputAccessoryView
-              nativeID="chatInputAccessoryView"
               backgroundColor={tertiaryBackgroundColor(colorScheme)}
             >
-              <View>{chatInputAboveKeyboard}</View>
+              <ChatInput
+                inputValue={inputValue}
+                setInputValue={setInputValue}
+                chatInputHeight={chatInputHeight}
+                setChatInputHeight={setChatInputHeight}
+                inputRef={inputRef}
+                sendMessage={sendMessage}
+              />
             </InputAccessoryView>
           )}
-
-          <View style={{ opacity: showChatInputBehindKeyboard ? 1 : 0 }}>
-            {chatInputBehindKeyboard}
-          </View>
         </View>
       )}
     </View>
