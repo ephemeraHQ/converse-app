@@ -31,6 +31,7 @@ type Props = {
   sendMessage: (content: string) => Promise<void>;
   isBlockedPeer: boolean;
   messagesCount: number;
+  onReadyToFocus: () => void;
 };
 
 export default function ChatPlaceholder({
@@ -39,6 +40,7 @@ export default function ChatPlaceholder({
   conversation,
   messagesCount,
   sendMessage,
+  onReadyToFocus,
 }: Props) {
   const colorScheme = useColorScheme();
   const styles = getStyles(colorScheme);
@@ -53,6 +55,11 @@ export default function ChatPlaceholder({
       }}
     >
       <ScrollView
+        onLayout={() => {
+          if (conversation && !isBlockedPeer && messagesCount === 0) {
+            onReadyToFocus();
+          }
+        }}
         automaticallyAdjustKeyboardInsets
         style={styles.chatPlaceholder}
         contentContainerStyle={[
