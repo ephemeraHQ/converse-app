@@ -328,6 +328,7 @@ const Conversation = ({
         inputValue={inputValue}
         inputRef={textInputRef}
         sendMessage={sendMessage}
+        isBlockedPeer={isBlockedPeer}
       />
       {/* <Chat
         key={`chat-${colorScheme}`}

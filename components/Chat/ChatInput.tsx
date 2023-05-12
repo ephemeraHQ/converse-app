@@ -82,17 +82,16 @@ export default function ChatInput({
         onBlur={onBlur ? () => onBlur() : undefined}
       />
       <TouchableOpacity
-        onPress={() => sendMessage(inputValue)}
-        style={styles.sendButtonContainer}
+        onPress={
+          inputValue.length > 0 ? () => sendMessage(inputValue) : undefined
+        }
+        activeOpacity={inputValue.length > 0 ? 0.4 : 0.6}
+        style={[
+          styles.sendButtonContainer,
+          { opacity: inputValue.length > 0 ? 1 : 0.6 },
+        ]}
       >
-        <SendButton
-          width={36}
-          height={36}
-          style={[
-            styles.sendButton,
-            { opacity: inputValue.length > 0 ? 1 : 0.6 },
-          ]}
-        />
+        <SendButton width={36} height={36} style={[styles.sendButton]} />
       </TouchableOpacity>
     </View>
   );
