@@ -58,11 +58,16 @@ export default function ChatInput({
         onChangeText={setInputValue}
         onContentSizeChange={(event) => {
           setChatInputHeight(
-            Math.max(36, event.nativeEvent.contentSize.height + 12)
+            Math.min(
+              124,
+              Math.max(36, event.nativeEvent.contentSize.height + 12)
+            )
           );
         }}
         onLayout={(event) => {
-          setChatInputHeight(Math.max(36, event.nativeEvent.layout.height));
+          setChatInputHeight(
+            Math.min(124, Math.max(36, event.nativeEvent.layout.height))
+          );
         }}
         multiline
         ref={(r) => {
