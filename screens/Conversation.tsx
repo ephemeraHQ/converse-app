@@ -181,10 +181,24 @@ const Conversation = ({
     route.params.message || conversation?.currentMessage || "";
   const [inputValue, setInputValue] = useState(messageToPrefill);
 
+  const focusOnLayout = useRef(false);
+  const chatLayoutDone = useRef(false);
+
+  const onReadyToFocus = useCallback(() => {
+    chatLayoutDone.current = true;
+    if (focusOnLayout.current) {
+      textInputRef.current?.focus();
+    }
+  }, []);
+
   useEffect(() => {
     const unsubscribe = navigation.addListener("transitionEnd", (e) => {
       if (!e.data.closing && !!route.params.focus) {
-        textInputRef.current?.focus();
+        if (chatLayoutDone.current) {
+          textInputRef.current?.focus();
+        } else {
+          focusOnLayout.current = true;
+        }
       }
     });
 
@@ -354,48 +368,8 @@ const Conversation = ({
         inputRef={textInputRef}
         sendMessage={sendMessage}
         isBlockedPeer={isBlockedPeer}
+        onReadyToFocus={onReadyToFocus}
       />
-      {/* <Chat
-        key={`chat-${colorScheme}`}
-        messages={isBlockedPeer ? [] : messages}
-        onSendPress={handleSendPress}
-        user={{
-          id: state.xmtp.address || "",
-        }}
-        // Using default if we have a convo,
-        // hide if we don't have one (creating)
-        customBottomComponent={
-          conversation && !isBlockedPeer
-            ? undefined
-            : () => {
-                return null;
-              }
-        }
-        emptyState={() =>
-          conversation && !isBlockedPeer ? null : (
-            <Text
-              style={chatTheme(colorScheme).fonts.emptyChatPlaceholderTextStyle}
-            >
-              {isBlockedPeer
-                ? "This user is blocked"
-                : "Opening your conversation..."}
-            </Text>
-          )
-        }
-        theme={chatTheme(colorScheme)}
-        usePreviewData={false}
-        textInputProps={{
-          defaultValue: messageToPrefill,
-          value: messageValue,
-          onChangeText: (text) => {
-            messageContent.current = text;
-            setMessageValue(text);
-          },
-          placeholderTextColor: textSecondaryColor(colorScheme),
-          // @ts-ignore
-          ref: textInputRef,
-        }}
-      /> */}
     </View>
   );
 };

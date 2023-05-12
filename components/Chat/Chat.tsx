@@ -34,6 +34,7 @@ type Props = {
   inputRef: MutableRefObject<TextInput | undefined>;
   sendMessage: (content: string) => Promise<void>;
   isBlockedPeer: boolean;
+  onReadyToFocus: () => void;
 };
 
 const getMessagesArray = (
@@ -80,6 +81,7 @@ export default function Chat({
   inputRef,
   sendMessage,
   isBlockedPeer,
+  onReadyToFocus,
 }: Props) {
   const { state } = useContext(AppContext);
   const colorScheme = useColorScheme();
@@ -159,6 +161,7 @@ export default function Chat({
               if (!automaticallyAdjustKeyboardInsets) {
                 setTimeout(() => {
                   setAutomaticallyAdjustKeyboardInsets(true);
+                  onReadyToFocus();
                 }, 50);
               }
             }}
@@ -182,6 +185,7 @@ export default function Chat({
         )}
         {(messagesArray.length === 0 || isBlockedPeer || !conversation) && (
           <ChatPlaceholder
+            onReadyToFocus={onReadyToFocus}
             inputAboveKeyboardRef={inputAboveKeyboardRef}
             isBlockedPeer={isBlockedPeer}
             conversation={conversation}
