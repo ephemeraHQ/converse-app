@@ -24,6 +24,7 @@ import { backgroundColor, tertiaryBackgroundColor } from "../../utils/colors";
 import { CONVERSE_INVISIBLE_CHAR } from "../../utils/xmtp/messages";
 import ChatInput from "./ChatInput";
 import ChatMessage, { MessageToDisplay } from "./ChatMessage";
+import ChatPlaceholder from "./ChatPlaceholder";
 
 type Props = {
   conversation?: XmtpConversationWithUpdate;
@@ -32,6 +33,7 @@ type Props = {
   inputValue: string;
   inputRef: MutableRefObject<TextInput | undefined>;
   sendMessage: (content: string) => Promise<void>;
+  isBlockedPeer: boolean;
 };
 
 const getMessagesArray = (
@@ -77,6 +79,7 @@ export default function Chat({
   inputValue,
   inputRef,
   sendMessage,
+  isBlockedPeer,
 }: Props) {
   const { state } = useContext(AppContext);
   const colorScheme = useColorScheme();
@@ -146,53 +149,69 @@ export default function Chat({
 
   return (
     <View style={styles.chatContainer}>
-      <FlashList
-        contentContainerStyle={styles.chat}
-        data={messagesArray}
-        renderItem={({ item }) => <ChatMessage message={item} />}
-        onLayout={() => {
-          if (!automaticallyAdjustKeyboardInsets) {
-            setTimeout(() => {
-              setAutomaticallyAdjustKeyboardInsets(true);
-            }, 50);
-          }
-        }}
-        estimatedItemSize={100}
-        keyboardDismissMode="interactive"
-        automaticallyAdjustContentInsets={false}
-        contentInsetAdjustmentBehavior="never"
-        maintainVisibleContentPosition={{
-          minIndexForVisible: 0,
-          autoscrollToTopThreshold: 100,
-        }}
-        inverted
-        automaticallyAdjustKeyboardInsets={
-          automaticallyAdjustKeyboardInsets && !state.app.showingActionSheet
-        }
-        keyExtractor={(item) => item.id}
-        onScroll={(event) => {
-          scrollPosition.current = event.nativeEvent.contentOffset.y;
-        }}
-      />
-      <View
-        style={{
-          backgroundColor: tertiaryBackgroundColor(colorScheme),
-          height: accessoryHeight,
-        }}
-      >
-        {Platform.OS === "ios" && (
-          <InputAccessoryView
-            nativeID="chatInputAccessoryView"
-            backgroundColor={tertiaryBackgroundColor(colorScheme)}
-          >
-            <View>{chatInputAboveKeyboard}</View>
-          </InputAccessoryView>
+      <View style={styles.chatContent}>
+        {conversation && messagesArray.length > 0 && !isBlockedPeer && (
+          <FlashList
+            contentContainerStyle={styles.chat}
+            data={messagesArray}
+            renderItem={({ item }) => <ChatMessage message={item} />}
+            onLayout={() => {
+              if (!automaticallyAdjustKeyboardInsets) {
+                setTimeout(() => {
+                  setAutomaticallyAdjustKeyboardInsets(true);
+                }, 50);
+              }
+            }}
+            estimatedItemSize={100}
+            keyboardDismissMode="interactive"
+            automaticallyAdjustContentInsets={false}
+            contentInsetAdjustmentBehavior="never"
+            maintainVisibleContentPosition={{
+              minIndexForVisible: 0,
+              autoscrollToTopThreshold: 100,
+            }}
+            inverted
+            automaticallyAdjustKeyboardInsets={
+              automaticallyAdjustKeyboardInsets && !state.app.showingActionSheet
+            }
+            keyExtractor={(item) => item.id}
+            onScroll={(event) => {
+              scrollPosition.current = event.nativeEvent.contentOffset.y;
+            }}
+          />
         )}
-
-        <View style={{ opacity: showChatInputBehindKeyboard ? 1 : 0 }}>
-          {chatInputBehindKeyboard}
-        </View>
+        {(messagesArray.length === 0 || isBlockedPeer || !conversation) && (
+          <ChatPlaceholder
+            inputAboveKeyboardRef={inputAboveKeyboardRef}
+            isBlockedPeer={isBlockedPeer}
+            conversation={conversation}
+            messagesCount={messagesArray.length}
+            sendMessage={sendMessage}
+          />
+        )}
       </View>
+
+      {conversation && !isBlockedPeer && (
+        <View
+          style={{
+            backgroundColor: tertiaryBackgroundColor(colorScheme),
+            height: accessoryHeight,
+          }}
+        >
+          {Platform.OS === "ios" && (
+            <InputAccessoryView
+              nativeID="chatInputAccessoryView"
+              backgroundColor={tertiaryBackgroundColor(colorScheme)}
+            >
+              <View>{chatInputAboveKeyboard}</View>
+            </InputAccessoryView>
+          )}
+
+          <View style={{ opacity: showChatInputBehindKeyboard ? 1 : 0 }}>
+            {chatInputBehindKeyboard}
+          </View>
+        </View>
+      )}
     </View>
   );
 }
@@ -202,6 +221,9 @@ const getStyles = (colorScheme: ColorSchemeName) =>
     chatContainer: {
       flex: 1,
       backgroundColor: backgroundColor(colorScheme),
+    },
+    chatContent: {
+      flex: 1,
     },
     chat: {
       backgroundColor: backgroundColor(colorScheme),
