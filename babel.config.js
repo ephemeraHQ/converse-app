@@ -16,7 +16,8 @@ module.exports = {
           crypto: "crypto-browserify",
         },
       },
-    ]
+    ],
+    "react-native-reanimated/plugin",
   ],
   env: {
     production: {
