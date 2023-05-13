@@ -1,4 +1,5 @@
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
+import { FlashList } from "@shopify/flash-list";
 import React, {
   useCallback,
   useContext,
@@ -8,13 +9,13 @@ import React, {
 } from "react";
 import {
   ColorSchemeName,
-  FlatList,
   Platform,
   PlatformColor,
   StyleSheet,
   TouchableOpacity,
   useColorScheme,
   Text,
+  View,
 } from "react-native";
 import { FAB } from "react-native-paper";
 
@@ -249,14 +250,15 @@ export default function ConversationList({
     );
   } else {
     screenToShow = (
-      <FlatList
-        contentInsetAdjustmentBehavior="automatic"
-        style={styles.conversationList}
-        data={flatListItems}
-        renderItem={renderItem}
-        keyExtractor={keyExtractor}
-        initialNumToRender={20}
-      />
+      <View style={styles.conversationList}>
+        <FlashList
+          contentInsetAdjustmentBehavior="automatic"
+          data={flatListItems}
+          renderItem={renderItem}
+          keyExtractor={keyExtractor}
+          estimatedItemSize={Platform.OS === "ios" ? 77 : 88}
+        />
+      </View>
     );
   }
 

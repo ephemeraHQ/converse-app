@@ -142,7 +142,7 @@ export default function Chat({
                 onReadyToFocus();
               }, 50);
             }}
-            estimatedItemSize={100}
+            estimatedItemSize={80}
             keyboardDismissMode="interactive"
             automaticallyAdjustContentInsets={false}
             contentInsetAdjustmentBehavior="never"
