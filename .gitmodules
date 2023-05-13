@@ -1,3 +1,0 @@
-[submodule "vendor/xmtp-js"]
-	path = vendor/xmtp-js
-	url = git@github.com:Unshut-Labs/xmtp-js.git
