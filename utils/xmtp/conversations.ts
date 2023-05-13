@@ -1,14 +1,9 @@
-import { Client, Conversation, dateToNs } from "@xmtp/xmtp-js";
+import { Client, Conversation, dateToNs } from "../../vendor/xmtp-js/src";
 import {
-  ConversationV2 as ConversationV2Type,
-  ConversationV1 as ConversationV1Type,
-} from "@xmtp/xmtp-js/dist/types/src/conversations";
-import { InviteStore } from "@xmtp/xmtp-js/dist/types/src/keystore";
-
-const {
   ConversationV1,
   ConversationV2,
-} = require("@xmtp/xmtp-js/dist/esm/src/conversations/Conversation");
+} from "../../vendor/xmtp-js/src/conversations";
+import { InviteStore } from "../../vendor/xmtp-js/src/keystore";
 
 export const parseConversationJSON = async (
   xmtpClient: Client,
@@ -22,7 +17,7 @@ export const parseConversationJSON = async (
     throw new Error("Could not parse saved conversation");
   }
   if (parsedConversation.version === "v1") {
-    const conversationV1: ConversationV1Type = new ConversationV1(
+    const conversationV1 = new ConversationV1(
       xmtpClient,
       parsedConversation.peerAddress,
       new Date(parsedConversation.createdAt)
@@ -45,7 +40,7 @@ export const parseConversationJSON = async (
       },
     ]);
 
-    const conversationV2: ConversationV2Type = new ConversationV2(
+    const conversationV2 = new ConversationV2(
       xmtpClient,
       parsedConversation.topic,
       parsedConversation.peerAddress,

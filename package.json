@@ -42,6 +42,7 @@
     "@stardazed/streams-polyfill": "^2.4.0",
     "@walletconnect/react-native-dapp": "^1.8.0",
     "@walletconnect/web3-provider": "^1.8.0",
+    "@xmtp/proto": "^3.24.0",
     "axios": "^1.2.1",
     "babel-plugin-transform-remove-console": "^6.9.4",
     "babel-preset-expo-modern": "^0.1.3",

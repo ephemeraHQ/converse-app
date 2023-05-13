@@ -1,11 +1,8 @@
-import {
-  buildUserInviteTopic,
-  //@ts-ignore
-} from "@xmtp/xmtp-js/dist/cjs/src/utils";
 import * as Notifications from "expo-notifications";
 import { Platform } from "react-native";
 
 import { XmtpConversation } from "../data/store/xmtpReducer";
+import { buildUserInviteTopic } from "../vendor/xmtp-js/src/utils";
 import api from "./api";
 import { saveExpoPushToken } from "./keychain";
 

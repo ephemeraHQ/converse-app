@@ -1,6 +1,7 @@
-import { Client, Signer } from "@xmtp/xmtp-js";
+import { Signer } from "ethers";
 
 import config from "../../config";
+import { Client } from "../../vendor/xmtp-js/src";
 
 const env = config.xmtpEnv === "production" ? "production" : "dev";
 
