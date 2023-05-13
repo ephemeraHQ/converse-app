@@ -40,6 +40,7 @@
     "@sentry/react-native": "4.15.0",
     "@shopify/flash-list": "^1.4.2",
     "@stardazed/streams-polyfill": "^2.4.0",
+    "@types/elliptic": "^6.4.14",
     "@walletconnect/react-native-dapp": "^1.8.0",
     "@walletconnect/web3-provider": "^1.8.0",
     "@xmtp/proto": "^3.24.0",
