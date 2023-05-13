@@ -10,6 +10,7 @@ import {
 } from "react-native";
 // eslint-disable-next-line import/order
 import "./utils/splash/splash";
+import { KeyboardProvider } from "react-native-keyboard-controller";
 import { Provider as PaperProvider } from "react-native-paper";
 import * as Sentry from "sentry-expo";
 
@@ -36,21 +37,23 @@ export default function App() {
   const styles = getStyles(colorScheme);
 
   return (
-    <AppProvider>
-      <ActionSheetProvider>
-        <PaperProvider
-          theme={
-            colorScheme === "light" ? MaterialLightTheme : MaterialDarkTheme
-          }
-        >
-          <View style={styles.safe}>
-            <XmtpWebview />
-            <XmtpState />
-            <Main />
-          </View>
-        </PaperProvider>
-      </ActionSheetProvider>
-    </AppProvider>
+    <KeyboardProvider>
+      <AppProvider>
+        <ActionSheetProvider>
+          <PaperProvider
+            theme={
+              colorScheme === "light" ? MaterialLightTheme : MaterialDarkTheme
+            }
+          >
+            <View style={styles.safe}>
+              <XmtpWebview />
+              <XmtpState />
+              <Main />
+            </View>
+          </PaperProvider>
+        </ActionSheetProvider>
+      </AppProvider>
+    </KeyboardProvider>
   );
 }
 

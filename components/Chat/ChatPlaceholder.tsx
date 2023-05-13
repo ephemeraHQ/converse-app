@@ -4,11 +4,10 @@ import {
   useColorScheme,
   StyleSheet,
   Text,
-  ScrollView,
   View,
-  Dimensions,
+  TouchableWithoutFeedback,
+  Keyboard,
 } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { AppContext } from "../../data/store/context";
 import {
@@ -40,97 +39,85 @@ export default function ChatPlaceholder({
   const colorScheme = useColorScheme();
   const styles = getStyles(colorScheme);
   const { dispatch } = useContext(AppContext);
-  const insets = useSafeAreaInsets();
   return (
-    <ScrollView
-      onLayout={() => {
-        if (conversation && !isBlockedPeer && messagesCount === 0) {
-          onReadyToFocus();
-        }
+    <TouchableWithoutFeedback
+      onPress={() => {
+        Keyboard.dismiss();
       }}
-      automaticallyAdjustKeyboardInsets
-      style={styles.chatPlaceholder}
-      contentContainerStyle={[
-        styles.chatPlaceholderContent,
-        {
-          height:
-            (Dimensions.get("window").height - insets.bottom - insets.top) / 2,
-        },
-      ]}
-      keyboardDismissMode="interactive"
-      automaticallyAdjustContentInsets={false}
-      contentInsetAdjustmentBehavior="never"
-      maintainVisibleContentPosition={{
-        minIndexForVisible: 0,
-        autoscrollToTopThreshold: 100,
-      }}
-      alwaysBounceVertical={false}
     >
-      <View style={{ marginTop: "auto" }} />
-      {!conversation && (
-        <>
-          <ActivityIndicator style={{ marginBottom: 20 }} />
-          <Text style={styles.chatPlaceholderText}>
-            Opening your conversation
-          </Text>
-        </>
-      )}
-      {conversation && isBlockedPeer && (
-        <>
-          <Text style={styles.chatPlaceholderText}>This user is blocked</Text>
-          <Button
-            variant="primary"
-            picto="lock.open"
-            title="Unblock"
-            style={styles.cta}
-            onPress={() => {
-              showActionSheetWithOptions(
-                {
-                  options: ["Unblock", "Cancel"],
-                  cancelButtonIndex: 1,
-                  destructiveButtonIndex: isBlockedPeer ? undefined : 0,
-                  title:
-                    "If you unblock this contact, they will be able to send you messages again.",
-                  ...actionSheetColors(colorScheme),
-                },
-                (selectedIndex?: number) => {
-                  if (selectedIndex === 0) {
-                    blockPeer({
-                      peerAddress: conversation?.peerAddress || "",
-                      blocked: false,
-                    });
-                    dispatch({
-                      type: XmtpDispatchTypes.XmtpSetBlockedStatus,
-                      payload: {
+      <View
+        onLayout={() => {
+          if (conversation && !isBlockedPeer && messagesCount === 0) {
+            onReadyToFocus();
+          }
+        }}
+        style={styles.chatPlaceholder}
+      >
+        {!conversation && (
+          <View>
+            <ActivityIndicator style={{ marginBottom: 20 }} />
+            <Text style={styles.chatPlaceholderText}>
+              Opening your conversation
+            </Text>
+          </View>
+        )}
+        {conversation && isBlockedPeer && (
+          <View>
+            <Text style={styles.chatPlaceholderText}>This user is blocked</Text>
+            <Button
+              variant="primary"
+              picto="lock.open"
+              title="Unblock"
+              style={styles.cta}
+              onPress={() => {
+                showActionSheetWithOptions(
+                  {
+                    options: ["Unblock", "Cancel"],
+                    cancelButtonIndex: 1,
+                    destructiveButtonIndex: isBlockedPeer ? undefined : 0,
+                    title:
+                      "If you unblock this contact, they will be able to send you messages again.",
+                    ...actionSheetColors(colorScheme),
+                  },
+                  (selectedIndex?: number) => {
+                    if (selectedIndex === 0) {
+                      blockPeer({
                         peerAddress: conversation?.peerAddress || "",
                         blocked: false,
-                      },
-                    });
+                      });
+                      dispatch({
+                        type: XmtpDispatchTypes.XmtpSetBlockedStatus,
+                        payload: {
+                          peerAddress: conversation?.peerAddress || "",
+                          blocked: false,
+                        },
+                      });
+                    }
                   }
-                }
-              );
-            }}
-          />
-        </>
-      )}
-      {conversation && !isBlockedPeer && messagesCount === 0 && (
-        <>
-          <Text style={styles.chatPlaceholderText}>
-            This is the beginning of your{"\n"}conversation with{" "}
-            {conversation ? conversationName(conversation) : ""}
-          </Text>
-          <Button
-            variant="primary"
-            picto="hand.wave"
-            title="Say hi"
-            style={styles.cta}
-            onPress={() => {
-              sendMessage("👋");
-            }}
-          />
-        </>
-      )}
-    </ScrollView>
+                );
+              }}
+            />
+          </View>
+        )}
+        {conversation && !isBlockedPeer && messagesCount === 0 && (
+          <View>
+            <Text style={styles.chatPlaceholderText}>
+              This is the beginning of your{"\n"}conversation with{" "}
+              {conversation ? conversationName(conversation) : ""}
+            </Text>
+            <Button
+              variant="primary"
+              picto="hand.wave"
+              title="Say hi"
+              style={styles.cta}
+              onPress={() => {
+                sendMessage("👋");
+              }}
+            />
+          </View>
+        )}
+      </View>
+    </TouchableWithoutFeedback>
   );
 }
 
@@ -138,9 +125,11 @@ const getStyles = (colorScheme: ColorSchemeName) =>
   StyleSheet.create({
     chatPlaceholder: {
       flex: 1,
+      justifyContent: "center",
     },
     chatPlaceholderContent: {
       paddingVertical: 20,
+      flex: 1,
     },
     chatPlaceholderText: {
       textAlign: "center",

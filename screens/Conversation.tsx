@@ -185,8 +185,8 @@ const Conversation = ({
   const chatLayoutDone = useRef(false);
 
   const onReadyToFocus = useCallback(() => {
-    chatLayoutDone.current = true;
-    if (focusOnLayout.current) {
+    if (focusOnLayout.current && !chatLayoutDone.current) {
+      chatLayoutDone.current = true;
       textInputRef.current?.focus();
     }
   }, []);

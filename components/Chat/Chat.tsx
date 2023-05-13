@@ -1,30 +1,28 @@
 import { FlashList } from "@shopify/flash-list";
 import differenceInCalendarDays from "date-fns/differenceInCalendarDays";
+import React, { MutableRefObject, useState, useEffect } from "react";
 import {
-  MutableRefObject,
-  useContext,
-  useEffect,
-  useRef,
-  useState,
-} from "react";
-import {
-  ColorSchemeName,
-  useColorScheme,
-  InputAccessoryView,
   View,
-  StyleSheet,
   TextInput,
-  Platform,
+  useColorScheme,
+  StyleSheet,
+  ColorSchemeName,
 } from "react-native";
+import Reanimated, { useAnimatedStyle } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-import { AppContext } from "../../data/store/context";
 import { XmtpConversationWithUpdate } from "../../data/store/xmtpReducer";
+import { useKeyboardAnimation } from "../../utils/animations";
 import { backgroundColor, tertiaryBackgroundColor } from "../../utils/colors";
 import { CONVERSE_INVISIBLE_CHAR } from "../../utils/xmtp/messages";
 import ChatInput from "./ChatInput";
 import ChatMessage, { MessageToDisplay } from "./ChatMessage";
 import ChatPlaceholder from "./ChatPlaceholder";
+
+const AnimatedView = Reanimated.createAnimatedComponent(View);
+const AnimatedFlashList = Reanimated.createAnimatedComponent(
+  FlashList
+) as typeof FlashList;
 
 type Props = {
   conversation?: XmtpConversationWithUpdate;
@@ -83,7 +81,6 @@ export default function Chat({
   isBlockedPeer,
   onReadyToFocus,
 }: Props) {
-  const { state } = useContext(AppContext);
   const colorScheme = useColorScheme();
   const styles = getStyles(colorScheme);
   const [messagesArray, setMessagesArray] = useState(
@@ -93,38 +90,57 @@ export default function Chat({
     setMessagesArray(getMessagesArray(xmtpAddress, conversation));
   }, [conversation, conversation?.lastUpdateAt, xmtpAddress]);
 
-  // Adjusting keyboard insets after layout to avoid
-  // scrolling bug
-  const [
-    automaticallyAdjustKeyboardInsets,
-    setAutomaticallyAdjustKeyboardInsets,
-  ] = useState(false);
-
   // Saving the chat input height to a var to adapt
   const [chatInputHeight, setChatInputHeight] = useState(36);
 
   const insets = useSafeAreaInsets();
-  const accessoryHeight = chatInputHeight + insets.bottom + 14;
 
-  // Saving scroll position to scroll to 0 if near 0 when
-  // closing the keyboard
-  const scrollPosition = useRef(0);
+  const { height: keyboardHeight } = useKeyboardAnimation();
+
+  const [inputFocused, setInputFocused] = useState(false);
+  const bottomInset = inputFocused ? 0 : insets.bottom;
+  const tertiary = tertiaryBackgroundColor(colorScheme);
+
+  const showChatInput = !!(conversation && !isBlockedPeer);
+
+  const totalChatInputHeight = showChatInput
+    ? chatInputHeight + 14 + bottomInset
+    : 0;
+
+  const textInputStyle = useAnimatedStyle(
+    () => ({
+      position: "absolute",
+      // height: chatInputHeight + 14 + bottomInset,
+      width: "100%",
+      backgroundColor: tertiary,
+      transform: [{ translateY: -keyboardHeight.value }],
+    }),
+    [keyboardHeight, tertiary]
+  );
+
+  const chatContentStyle = useAnimatedStyle(
+    () => ({
+      ...styles.chatContent,
+      paddingBottom: keyboardHeight.value + totalChatInputHeight,
+    }),
+    [totalChatInputHeight, keyboardHeight]
+  );
+
+  const showPlaceholder =
+    messagesArray.length === 0 || isBlockedPeer || !conversation;
 
   return (
     <View style={styles.chatContainer}>
-      <View style={styles.chatContent}>
+      <AnimatedView style={chatContentStyle}>
         {conversation && messagesArray.length > 0 && !isBlockedPeer && (
-          <FlashList
+          <AnimatedFlashList
             contentContainerStyle={styles.chat}
             data={messagesArray}
             renderItem={({ item }) => <ChatMessage message={item} />}
             onLayout={() => {
-              if (!automaticallyAdjustKeyboardInsets) {
-                setTimeout(() => {
-                  setAutomaticallyAdjustKeyboardInsets(true);
-                  onReadyToFocus();
-                }, 50);
-              }
+              setTimeout(() => {
+                onReadyToFocus();
+              }, 50);
             }}
             estimatedItemSize={100}
             keyboardDismissMode="interactive"
@@ -135,16 +151,10 @@ export default function Chat({
               autoscrollToTopThreshold: 100,
             }}
             inverted
-            automaticallyAdjustKeyboardInsets={
-              automaticallyAdjustKeyboardInsets && !state.app.showingActionSheet
-            }
             keyExtractor={(item) => item.id}
-            onScroll={(event) => {
-              scrollPosition.current = event.nativeEvent.contentOffset.y;
-            }}
           />
         )}
-        {(messagesArray.length === 0 || isBlockedPeer || !conversation) && (
+        {showPlaceholder && (
           <ChatPlaceholder
             onReadyToFocus={onReadyToFocus}
             isBlockedPeer={isBlockedPeer}
@@ -153,30 +163,25 @@ export default function Chat({
             sendMessage={sendMessage}
           />
         )}
-      </View>
-
-      {conversation && !isBlockedPeer && (
-        <View
-          style={{
-            backgroundColor: tertiaryBackgroundColor(colorScheme),
-            height: accessoryHeight,
-          }}
+      </AnimatedView>
+      {showChatInput && (
+        <AnimatedView
+          style={[
+            textInputStyle,
+            { height: chatInputHeight + 14 + bottomInset },
+          ]}
         >
-          {Platform.OS === "ios" && (
-            <InputAccessoryView
-              backgroundColor={tertiaryBackgroundColor(colorScheme)}
-            >
-              <ChatInput
-                inputValue={inputValue}
-                setInputValue={setInputValue}
-                chatInputHeight={chatInputHeight}
-                setChatInputHeight={setChatInputHeight}
-                inputRef={inputRef}
-                sendMessage={sendMessage}
-              />
-            </InputAccessoryView>
-          )}
-        </View>
+          <ChatInput
+            inputValue={inputValue}
+            setInputValue={setInputValue}
+            chatInputHeight={chatInputHeight}
+            setChatInputHeight={setChatInputHeight}
+            inputRef={inputRef}
+            sendMessage={sendMessage}
+            onBlur={() => setInputFocused(false)}
+            onFocus={() => setInputFocused(true)}
+          />
+        </AnimatedView>
       )}
     </View>
   );
@@ -186,9 +191,11 @@ const getStyles = (colorScheme: ColorSchemeName) =>
   StyleSheet.create({
     chatContainer: {
       flex: 1,
+      justifyContent: "flex-end",
       backgroundColor: backgroundColor(colorScheme),
     },
     chatContent: {
+      backgroundColor: backgroundColor(colorScheme),
       flex: 1,
     },
     chat: {
