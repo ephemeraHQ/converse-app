@@ -4,9 +4,9 @@ to use shared data storing. And since this SharedGroupPreferences lib seems to b
 unmaintained let's just fallback to regular storage through AsyncStorage
 */
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { DecodedMessage } from "@xmtp/xmtp-js";
 
 import config from "../../config";
+import { DecodedMessage } from "../../vendor/xmtp-js/src";
 
 export const saveConversationDict = (topic: string, conversationDict: any) =>
   AsyncStorage.setItem(

@@ -1,3 +1,6 @@
+import { getAddress } from "ethers/lib/utils";
+
+import config from "../config";
 import {
   Client,
   Conversation,
@@ -6,15 +9,8 @@ import {
   PrivateKeyBundle,
   Signer,
   SortDirection,
-} from "@xmtp/xmtp-js";
-import { getAddress } from "ethers/lib/utils";
+} from "../vendor/xmtp-js/src";
 
-import config from "../config";
-
-const {
-  ConversationV1,
-  ConversationV2,
-} = require("@xmtp/xmtp-js/dist/esm/src/conversations/Conversation");
 const env = config.xmtpEnv === "production" ? "production" : "dev";
 
 export type TimestampByConversation = { [topic: string]: number };

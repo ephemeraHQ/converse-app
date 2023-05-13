@@ -1,5 +1,3 @@
-import { Client, Conversation, fromNanoString } from "@xmtp/xmtp-js";
-import { PreparedMessage } from "@xmtp/xmtp-js/dist/types/src/PreparedMessage";
 import { useCallback, useContext, useEffect } from "react";
 
 import {
@@ -15,6 +13,8 @@ import { loadXmtpConversation, loadXmtpKeys } from "../utils/keychain";
 import { getXmtpSignature } from "../utils/xmtp";
 import { getXmtpClientFromKeys } from "../utils/xmtp/client";
 import { parseConversationJSON } from "../utils/xmtp/conversations";
+import { Client, Conversation, fromNanoString } from "../vendor/xmtp-js/src";
+import { PreparedMessage } from "../vendor/xmtp-js/src/PreparedMessage";
 import { isReconnecting } from "./Connecting";
 
 let xmtpClient: Client | null;
