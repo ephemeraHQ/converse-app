@@ -67,6 +67,7 @@ type XmtpProtocolMessage = {
 
 export type XmtpMessage = XmtpProtocolMessage & {
   status: "delivered" | "error" | "seen" | "sending" | "sent";
+  sentViaConverse: boolean;
 };
 
 export enum XmtpDispatchTypes {
