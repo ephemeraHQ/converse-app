@@ -1,0 +1,14 @@
+diff --git a/node_modules/react-native-sfsymbols/ios/RNSfsymbols.h b/node_modules/react-native-sfsymbols/ios/RNSfsymbols.h
+index 8107118..f6763d6 100644
+--- a/node_modules/react-native-sfsymbols/ios/RNSfsymbols.h
++++ b/node_modules/react-native-sfsymbols/ios/RNSfsymbols.h
+@@ -1,9 +1,5 @@
+ 
+-#if __has_include("RCTBridgeModule.h")
+-#import "RCTBridgeModule.h"
+-#else
+ #import <React/RCTBridgeModule.h>
+-#endif
+ 
+ @interface RNSfsymbols : NSObject <RCTBridgeModule>
+ 
