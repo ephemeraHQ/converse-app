@@ -8,6 +8,7 @@ import { addEnsName1673277126468 } from "../../data/db/migrations/1673277126468-
 import { addMessageStatus1680616920220 } from "../../data/db/migrations/1680616920220-addMessageStatus";
 import { addStatusIndex1681209069007 } from "../../data/db/migrations/1681209069007-addStatusIndex";
 import { addReadStatus1683114681319 } from "../../data/db/migrations/1683114681319-addReadStatus";
+import { addSentViaConverse1684057254703 } from "../../data/db/migrations/1684057254703-addSentViaConverse";
 import { Conversation } from "./entities/conversation";
 import { Message } from "./entities/message";
 
@@ -23,6 +24,7 @@ const dataSource = new DataSource({
     addMessageStatus1680616920220,
     addStatusIndex1681209069007,
     addReadStatus1683114681319,
+    addSentViaConverse1684057254703,
   ],
   type: "sqlite",
 });

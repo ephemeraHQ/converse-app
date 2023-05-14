@@ -27,6 +27,9 @@ export class Message {
   @Column("text", { default: "sent" })
   status!: "delivered" | "error" | "seen" | "sending" | "sent";
 
+  @Column("boolean", { default: false })
+  sentViaConverse!: boolean;
+
   @Column("text")
   conversationId!: string;
 
