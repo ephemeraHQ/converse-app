@@ -22,8 +22,8 @@ export class Conversation {
   @Column("int", { nullable: true })
   handlesUpdatedAt?: number;
 
-  @Column("int", { nullable: true })
-  readUntil?: number;
+  @Column("int", { nullable: false, default: 0 })
+  readUntil!: number;
 
   @Column("text", { nullable: true })
   contextConversationId?: string;

@@ -30,8 +30,6 @@ export type MessageToDisplay = XmtpMessage & {
   lastMessageInSeries: boolean;
   dateChange: boolean;
   fromMe: boolean;
-  sentViaConverse: boolean;
-  messageToDisplay: string;
 };
 
 type Props = {
@@ -99,7 +97,7 @@ export default function ChatMessage({ message }: Props) {
   const showMessageActionSheet = useCallback(() => {
     const methods: any = {
       "Copy message": () => {
-        Clipboard.setStringAsync(message.messageToDisplay);
+        Clipboard.setStringAsync(message.content);
       },
     };
     if (!message.fromMe) {
@@ -112,7 +110,7 @@ export default function ChatMessage({ message }: Props) {
     showActionSheetWithOptions(
       {
         options,
-        title: message.messageToDisplay,
+        title: message.content,
         cancelButtonIndex: options.indexOf("Cancel"),
         destructiveButtonIndex: message.fromMe ? undefined : 1,
         ...actionSheetColors(colorScheme),
@@ -128,7 +126,7 @@ export default function ChatMessage({ message }: Props) {
   }, [
     colorScheme,
     message.fromMe,
-    message.messageToDisplay,
+    message.content,
     showMessageReportActionSheet,
   ]);
 
@@ -158,7 +156,7 @@ export default function ChatMessage({ message }: Props) {
             message.fromMe ? styles.messageTextMe : undefined,
           ]}
         >
-          {message.messageToDisplay}
+          {message.content}
           <View style={{ opacity: 0 }}>{metadata}</View>
         </ClickableText>
         <View style={styles.metadataContainer}>{metadata}</View>

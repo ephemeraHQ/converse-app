@@ -14,7 +14,6 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { XmtpConversationWithUpdate } from "../../data/store/xmtpReducer";
 import { useKeyboardAnimation } from "../../utils/animations";
 import { backgroundColor, tertiaryBackgroundColor } from "../../utils/colors";
-import { CONVERSE_INVISIBLE_CHAR } from "../../utils/xmtp/messages";
 import ChatInput from "./ChatInput";
 import ChatMessage, { MessageToDisplay } from "./ChatMessage";
 import ChatPlaceholder from "./ChatPlaceholder";
@@ -44,10 +43,6 @@ const getMessagesArray = (
   const reverseArray = [];
   for (let index = messagesArray.length - 1; index >= 0; index--) {
     const message = messagesArray[index] as MessageToDisplay;
-    message.sentViaConverse = message.content.endsWith(CONVERSE_INVISIBLE_CHAR);
-    message.messageToDisplay = message.sentViaConverse
-      ? message.content.slice(0, message.content.length - 1)
-      : message.content;
     message.fromMe =
       !!xmtpAddress &&
       xmtpAddress.toLowerCase() === message.senderAddress.toLowerCase();

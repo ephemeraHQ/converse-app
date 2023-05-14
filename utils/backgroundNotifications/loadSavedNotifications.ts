@@ -35,6 +35,7 @@ export const loadSavedNotificationMessagesToContext = async (
               sent: message.sent,
               content: message.content,
               status: "sent",
+              sentViaConverse: !!message.sentViaConverse,
             },
           ],
           message.topic,
