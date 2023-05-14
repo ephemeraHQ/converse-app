@@ -1,0 +1,14 @@
+diff --git a/node_modules/react-native-shared-group-preferences/ios/RNReactNativeSharedGroupPreferences.h b/node_modules/react-native-shared-group-preferences/ios/RNReactNativeSharedGroupPreferences.h
+index 06254a3..6cfdcae 100644
+--- a/node_modules/react-native-shared-group-preferences/ios/RNReactNativeSharedGroupPreferences.h
++++ b/node_modules/react-native-shared-group-preferences/ios/RNReactNativeSharedGroupPreferences.h
+@@ -1,9 +1,5 @@
+ 
+-#if __has_include("RCTBridgeModule.h")
+-#import "RCTBridgeModule.h"
+-#else
+ #import <React/RCTBridgeModule.h>
+-#endif
+ 
+ @interface RNReactNativeSharedGroupPreferences : NSObject <RCTBridgeModule>
+ 
