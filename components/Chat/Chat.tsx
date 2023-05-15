@@ -86,39 +86,41 @@ export default function Chat({
   }, [conversation, conversation?.lastUpdateAt, xmtpAddress]);
 
   // Saving the chat input height to a var to adapt
-  const [chatInputHeight, setChatInputHeight] = useState(36);
+  const DEFAULT_INPUT_HEIGHT = 36;
+  const INPUT_CONTAINER_MARGIN = 14;
+  const [chatInputHeight, setChatInputHeight] = useState(DEFAULT_INPUT_HEIGHT);
 
   const insets = useSafeAreaInsets();
 
   const { height: keyboardHeight } = useKeyboardAnimation();
 
-  const [inputFocused, setInputFocused] = useState(false);
-  const bottomInset = inputFocused ? 0 : insets.bottom;
   const tertiary = tertiaryBackgroundColor(colorScheme);
 
   const showChatInput = !!(conversation && !isBlockedPeer);
 
-  const totalChatInputHeight = showChatInput
-    ? chatInputHeight + 14 + bottomInset
-    : 0;
-
   const textInputStyle = useAnimatedStyle(
     () => ({
       position: "absolute",
-      // height: chatInputHeight + 14 + bottomInset,
       width: "100%",
       backgroundColor: tertiary,
-      transform: [{ translateY: -keyboardHeight.value }],
+      transform: [
+        { translateY: -Math.max(insets.bottom, keyboardHeight.value) },
+      ],
     }),
-    [keyboardHeight, tertiary]
+    [keyboardHeight, tertiary, insets.bottom]
   );
 
   const chatContentStyle = useAnimatedStyle(
     () => ({
       ...styles.chatContent,
-      paddingBottom: keyboardHeight.value + totalChatInputHeight,
+      paddingBottom: showChatInput
+        ? Math.max(
+            chatInputHeight + INPUT_CONTAINER_MARGIN + insets.bottom,
+            keyboardHeight.value + chatInputHeight + INPUT_CONTAINER_MARGIN
+          )
+        : 0,
     }),
-    [totalChatInputHeight, keyboardHeight]
+    [showChatInput, keyboardHeight, chatInputHeight, insets.bottom]
   );
 
   const showPlaceholder =
@@ -163,23 +165,29 @@ export default function Chat({
         )}
       </AnimatedView>
       {showChatInput && (
-        <AnimatedView
-          style={[
-            textInputStyle,
-            { height: chatInputHeight + 14 + bottomInset },
-          ]}
-        >
-          <ChatInput
-            inputValue={inputValue}
-            setInputValue={setInputValue}
-            chatInputHeight={chatInputHeight}
-            setChatInputHeight={setChatInputHeight}
-            inputRef={inputRef}
-            sendMessage={sendMessage}
-            onBlur={() => setInputFocused(false)}
-            onFocus={() => setInputFocused(true)}
+        <>
+          <AnimatedView
+            style={[
+              textInputStyle,
+              { height: chatInputHeight + INPUT_CONTAINER_MARGIN, zIndex: 1 },
+            ]}
+          >
+            <ChatInput
+              inputValue={inputValue}
+              setInputValue={setInputValue}
+              chatInputHeight={chatInputHeight}
+              setChatInputHeight={setChatInputHeight}
+              inputRef={inputRef}
+              sendMessage={sendMessage}
+            />
+          </AnimatedView>
+          <View
+            style={[
+              styles.inputBottomFiller,
+              { height: insets.bottom + chatInputHeight },
+            ]}
           />
-        </AnimatedView>
+        </>
       )}
     </View>
   );
@@ -198,5 +206,12 @@ const getStyles = (colorScheme: ColorSchemeName) =>
     },
     chat: {
       backgroundColor: backgroundColor(colorScheme),
+    },
+    inputBottomFiller: {
+      position: "absolute",
+      width: "100%",
+      bottom: 0,
+      backgroundColor: tertiaryBackgroundColor(colorScheme),
+      zIndex: 0,
     },
   });
