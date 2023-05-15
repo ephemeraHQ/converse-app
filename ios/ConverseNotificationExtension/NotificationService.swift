@@ -17,6 +17,7 @@ struct SavedNotificationMessage: Codable {
   var senderAddress: String
   var sent: Int
   var id: String
+  var sentViaConverse: Bool
 }
 
 func shortAddress(address: String) -> String {
@@ -101,9 +102,9 @@ func loadSavedMessages() -> [SavedNotificationMessage] {
   }
 }
 
-func saveMessage(topic: String, sent: Date, senderAddress: String, content: String, id: String) throws {
+func saveMessage(topic: String, sent: Date, senderAddress: String, content: String, id: String, sentViaConverse: Bool) throws {
   let sharedDefaults = SharedDefaults()
-  let savedMessage = SavedNotificationMessage(topic: topic, content: content, senderAddress: senderAddress, sent: Int(sent.timeIntervalSince1970 * 1000), id: id)
+  let savedMessage = SavedNotificationMessage(topic: topic, content: content, senderAddress: senderAddress, sent: Int(sent.timeIntervalSince1970 * 1000), id: id, sentViaConverse: sentViaConverse)
   
   var savedMessagesList = loadSavedMessages()
   savedMessagesList.append(savedMessage)
@@ -157,7 +158,7 @@ func persistDecodedConversation(contentTopic: String, dict: [String : Any]) {
   }
 }
 
-func decodeConversationMessage(xmtpClient: XMTP.Client, envelope: XMTP.Envelope) async -> (content: String?, senderAddress: String?) {
+func decodeConversationMessage(xmtpClient: XMTP.Client, envelope: XMTP.Envelope, sentViaConverse: Bool) async -> (content: String?, senderAddress: String?) {
   let conversation = getPersistedConversation(xmtpClient: xmtpClient, contentTopic: envelope.contentTopic);
   if (conversation != nil) {
     do {
@@ -167,7 +168,7 @@ func decodeConversationMessage(xmtpClient: XMTP.Client, envelope: XMTP.Envelope)
       print("[NotificationExtension] Message decoded!")
       if (decodedContent != nil) {
         // Let's save the notification for immediate display
-        try saveMessage(topic: envelope.contentTopic, sent: decodedMessage.sent, senderAddress: decodedMessage.senderAddress, content: decodedContent!, id: decodedMessage.id)
+        try saveMessage(topic: envelope.contentTopic, sent: decodedMessage.sent, senderAddress: decodedMessage.senderAddress, content: decodedContent!, id: decodedMessage.id, sentViaConverse: sentViaConverse)
       }
       return (decodedContent, decodedMessage.senderAddress)
     } catch {
@@ -270,7 +271,8 @@ func handleNotificationAsync(contentHandler: ((UNNotificationContent) -> Void), 
           }
         } else {
           var conversationTitle = getSavedConversationTitle(contentTopic: contentTopic);
-          let decodedMessageResult = await decodeConversationMessage(xmtpClient: xmtpClient!, envelope: envelope)
+          let sentViaConverse = body["sentViaConverse"] as? Bool ?? false;
+          let decodedMessageResult = await decodeConversationMessage(xmtpClient: xmtpClient!, envelope: envelope, sentViaConverse: sentViaConverse)
           if (decodedMessageResult.senderAddress == xmtpClient?.address) {
             // Message is from me, let's ignore it
             print("[NotificationExtension] Dropping a notification coming from me")

@@ -56,7 +56,6 @@ export default function ChatInput({
     }),
     []
   );
-  console.log("value", chatInputHeight.value);
   return (
     <View style={styles.chatInputContainer}>
       <AnimatedTextInput
