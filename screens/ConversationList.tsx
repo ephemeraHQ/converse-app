@@ -254,6 +254,14 @@ export default function ConversationList({
         <FlashList
           contentInsetAdjustmentBehavior="automatic"
           data={flatListItems}
+          extraData={[
+            colorScheme,
+            navigation,
+            route,
+            state.xmtp.address,
+            state.xmtp.blockedPeerAddresses,
+            state.xmtp.initialLoadDoneOnce,
+          ]}
           renderItem={renderItem}
           keyExtractor={keyExtractor}
           estimatedItemSize={Platform.OS === "ios" ? 77 : 88}
