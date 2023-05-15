@@ -7,6 +7,11 @@ import {
   useColorScheme,
   TouchableOpacity,
 } from "react-native";
+import Reanimated, {
+  SharedValue,
+  withTiming,
+  useAnimatedStyle,
+} from "react-native-reanimated";
 
 import SendButton from "../../assets/send-button.svg";
 import {
@@ -19,8 +24,7 @@ import {
 type Props = {
   inputValue: string;
   setInputValue: (value: string) => void;
-  chatInputHeight: number;
-  setChatInputHeight: (height: number) => void;
+  chatInputHeight: SharedValue<number>;
   inputRef: MutableRefObject<TextInput | undefined>;
   sendMessage: (content: string) => Promise<void>;
   inputAccessoryViewID?: string;
@@ -29,11 +33,12 @@ type Props = {
   editable?: boolean;
 };
 
+const AnimatedTextInput = Reanimated.createAnimatedComponent(TextInput);
+
 export default function ChatInput({
   inputValue,
   setInputValue,
   chatInputHeight,
-  setChatInputHeight,
   inputRef,
   sendMessage,
   inputAccessoryViewID,
@@ -43,36 +48,33 @@ export default function ChatInput({
 }: Props) {
   const colorScheme = useColorScheme();
   const styles = getStyles(colorScheme);
+  const textInputStyle = useAnimatedStyle(
+    () => ({
+      ...styles.chatInput,
+      maxHeight: 124,
+      height: chatInputHeight.value,
+    }),
+    []
+  );
+  console.log("value", chatInputHeight.value);
   return (
     <View style={styles.chatInputContainer}>
-      <TextInput
+      <AnimatedTextInput
         editable={editable !== undefined ? editable : true}
-        style={[
-          styles.chatInput,
-          {
-            height: chatInputHeight,
-            maxHeight: 124,
-          },
-        ]}
+        style={textInputStyle}
         value={inputValue}
         onChangeText={setInputValue}
         onContentSizeChange={(event) => {
-          setChatInputHeight(
-            Math.min(
-              124,
-              Math.max(36, event.nativeEvent.contentSize.height + 12)
-            )
+          const newInputHeight = Math.min(
+            124,
+            Math.max(36, event.nativeEvent.contentSize.height + 12)
           );
-        }}
-        onLayout={(event) => {
-          setChatInputHeight(
-            Math.min(124, Math.max(36, event.nativeEvent.layout.height))
-          );
+          chatInputHeight.value = withTiming(newInputHeight, { duration: 200 });
         }}
         multiline
         ref={(r) => {
           if (r) {
-            inputRef.current = r;
+            inputRef.current = r as TextInput;
           }
         }}
         placeholder="Message"
