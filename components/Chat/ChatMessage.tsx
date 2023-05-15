@@ -8,6 +8,7 @@ import {
   StyleSheet,
   TouchableOpacity,
   Text,
+  Platform,
 } from "react-native";
 
 import MessageTail from "../../assets/message-tail.svg";
@@ -27,7 +28,8 @@ import { showActionSheetWithOptions } from "../StateHandlers/ActionSheetStateHan
 import ChatMessageMetadata from "./ChatMessageMetadata";
 
 export type MessageToDisplay = XmtpMessage & {
-  lastMessageInSeries: boolean;
+  hasPreviousMessageInSeries: boolean;
+  hasNextMessageInSeries: boolean;
   dateChange: boolean;
   fromMe: boolean;
 };
@@ -136,7 +138,7 @@ export default function ChatMessage({ message }: Props) {
     <View
       style={[
         styles.messageRow,
-        { marginBottom: message.lastMessageInSeries ? 8 : 2 },
+        { marginBottom: !message.hasNextMessageInSeries ? 8 : 2 },
       ]}
     >
       {message.dateChange && (
@@ -146,6 +148,21 @@ export default function ChatMessage({ message }: Props) {
         style={[
           styles.messageBubble,
           message.fromMe ? styles.messageBubbleMe : undefined,
+          Platform.select({
+            default: {},
+            android: {
+              // Messages not from me
+              borderBottomLeftRadius:
+                !message.fromMe && message.hasNextMessageInSeries ? 2 : 18,
+              borderTopLeftRadius:
+                !message.fromMe && message.hasPreviousMessageInSeries ? 2 : 18,
+              // Messages from me
+              borderBottomRightRadius:
+                message.fromMe && message.hasNextMessageInSeries ? 2 : 18,
+              borderTopRightRadius:
+                message.fromMe && message.hasPreviousMessageInSeries ? 2 : 18,
+            },
+          }),
         ]}
         activeOpacity={1}
         onLongPress={showMessageActionSheet}
@@ -161,13 +178,12 @@ export default function ChatMessage({ message }: Props) {
         </ClickableText>
         <View style={styles.metadataContainer}>{metadata}</View>
 
-        {message.lastMessageInSeries && (
+        {!message.hasNextMessageInSeries && Platform.OS === "ios" && (
           <MessageTail
             fill={
               message.fromMe
                 ? myMessageBubbleColor(colorScheme)
                 : messageBubbleColor(colorScheme)
-              // "red"
             }
             style={[
               styles.messageTail,
@@ -184,7 +200,7 @@ const getStyles = (colorScheme: ColorSchemeName) =>
   StyleSheet.create({
     messageRow: {
       flexDirection: "row",
-      paddingHorizontal: 20,
+      paddingHorizontal: Platform.OS === "android" ? 10 : 20,
       flexWrap: "wrap",
     },
     date: {
