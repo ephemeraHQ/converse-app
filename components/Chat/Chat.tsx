@@ -125,7 +125,10 @@ export default function Chat({
     messagesArray.length === 0 || isBlockedPeer || !conversation;
 
   return (
-    <View style={styles.chatContainer}>
+    <View
+      style={styles.chatContainer}
+      key={`chat-${conversation?.topic}-${isBlockedPeer}`}
+    >
       <AnimatedView style={chatContentStyle}>
         {conversation && messagesArray.length > 0 && !isBlockedPeer && (
           <AnimatedFlashList

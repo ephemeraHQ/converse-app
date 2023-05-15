@@ -239,12 +239,7 @@ export default function NewConversation({
       saveWebviewNavigation(navigation);
       sendMessageToWebview("CREATE_CONVERSATION", {
         peerAddress,
-        context: {
-          conversationId: undefined,
-          metadata: {
-            coucou: "test",
-          },
-        },
+        context: computeNewConversationContext(state, peerAddress),
       });
     },
     [creatingNewConversation, navigation]

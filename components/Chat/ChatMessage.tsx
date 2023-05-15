@@ -184,7 +184,7 @@ const getStyles = (colorScheme: ColorSchemeName) =>
   StyleSheet.create({
     messageRow: {
       flexDirection: "row",
-      paddingHorizontal: 10,
+      paddingHorizontal: 20,
       flexWrap: "wrap",
     },
     date: {
