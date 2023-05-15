@@ -22,7 +22,6 @@ import {
 type Props = {
   inputValue: string;
   setInputValue: (value: string) => void;
-  // chatInputHeight: SharedValue<number>;
   inputRef: MutableRefObject<TextInput | undefined>;
   sendMessage: (content: string) => Promise<void>;
   inputAccessoryViewID?: string;
@@ -36,7 +35,6 @@ const AnimatedTextInput = Reanimated.createAnimatedComponent(TextInput);
 export default function ChatInput({
   inputValue,
   setInputValue,
-  // chatInputHeight,
   inputRef,
   sendMessage,
   inputAccessoryViewID,
