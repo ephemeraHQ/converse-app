@@ -8,7 +8,10 @@ import {
   StyleSheet,
   ColorSchemeName,
 } from "react-native";
-import Reanimated, { useAnimatedStyle } from "react-native-reanimated";
+import Reanimated, {
+  useAnimatedStyle,
+  useSharedValue,
+} from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { XmtpConversationWithUpdate } from "../../data/store/xmtpReducer";
@@ -85,10 +88,9 @@ export default function Chat({
     setMessagesArray(getMessagesArray(xmtpAddress, conversation));
   }, [conversation, conversation?.lastUpdateAt, xmtpAddress]);
 
-  // Saving the chat input height to a var to adapt
   const DEFAULT_INPUT_HEIGHT = 36;
   const INPUT_CONTAINER_MARGIN = 14;
-  const [chatInputHeight, setChatInputHeight] = useState(DEFAULT_INPUT_HEIGHT);
+  const chatInputHeight = useSharedValue(DEFAULT_INPUT_HEIGHT);
 
   const insets = useSafeAreaInsets();
 
@@ -103,11 +105,13 @@ export default function Chat({
       position: "absolute",
       width: "100%",
       backgroundColor: tertiary,
+      height: chatInputHeight.value + INPUT_CONTAINER_MARGIN,
+      zIndex: 1,
       transform: [
         { translateY: -Math.max(insets.bottom, keyboardHeight.value) },
       ],
     }),
-    [keyboardHeight, tertiary, insets.bottom]
+    [keyboardHeight, tertiary, insets.bottom, chatInputHeight]
   );
 
   const chatContentStyle = useAnimatedStyle(
@@ -115,8 +119,10 @@ export default function Chat({
       ...styles.chatContent,
       paddingBottom: showChatInput
         ? Math.max(
-            chatInputHeight + INPUT_CONTAINER_MARGIN + insets.bottom,
-            keyboardHeight.value + chatInputHeight + INPUT_CONTAINER_MARGIN
+            chatInputHeight.value + INPUT_CONTAINER_MARGIN + insets.bottom,
+            keyboardHeight.value +
+              chatInputHeight.value +
+              INPUT_CONTAINER_MARGIN
           )
         : 0,
     }),
@@ -166,17 +172,11 @@ export default function Chat({
       </AnimatedView>
       {showChatInput && (
         <>
-          <AnimatedView
-            style={[
-              textInputStyle,
-              { height: chatInputHeight + INPUT_CONTAINER_MARGIN, zIndex: 1 },
-            ]}
-          >
+          <AnimatedView style={textInputStyle}>
             <ChatInput
               inputValue={inputValue}
               setInputValue={setInputValue}
               chatInputHeight={chatInputHeight}
-              setChatInputHeight={setChatInputHeight}
               inputRef={inputRef}
               sendMessage={sendMessage}
             />
@@ -184,7 +184,7 @@ export default function Chat({
           <View
             style={[
               styles.inputBottomFiller,
-              { height: insets.bottom + chatInputHeight },
+              { height: insets.bottom + DEFAULT_INPUT_HEIGHT },
             ]}
           />
         </>
