@@ -30,8 +30,13 @@ export const navigationSecondaryBackgroundColor = (
 };
 
 export const chatInputBackgroundColor = (colorScheme: ColorSchemeName) => {
-  if (colorScheme === "dark") return NAVIGATION_SECONDARY_BACKGROUND_DARK;
-  return NAVIGATION_SECONDARY_BACKGROUND_LIGHT;
+  if (colorScheme === "dark")
+    return Platform.OS === "android"
+      ? MaterialDarkColors.surface1
+      : NAVIGATION_SECONDARY_BACKGROUND_DARK;
+  return Platform.OS === "android"
+    ? MaterialLightColors.surface1
+    : NAVIGATION_SECONDARY_BACKGROUND_LIGHT;
 };
 
 const TEXT_PRIMARY_COLOR_LIGHT = "#000";
@@ -103,10 +108,10 @@ const MESSAGE_BUBBLE_DARK = "#262628";
 export const messageBubbleColor = (colorScheme: ColorSchemeName) => {
   if (colorScheme === "dark")
     return Platform.OS === "android"
-      ? MaterialDarkColors.elevation.level2
+      ? MaterialDarkColors.surface2
       : MESSAGE_BUBBLE_DARK;
   return Platform.OS === "android"
-    ? MaterialLightColors.elevation.level2
+    ? MaterialLightColors.surface2
     : MESSAGE_BUBBLE_LIGHT;
 };
 
@@ -170,6 +175,8 @@ const MaterialLightColors = {
   background: "rgb(255, 251, 255)",
   onBackground: "rgb(32, 26, 25)",
   surface: "rgb(255, 251, 255)",
+  surface1: "rgb(251, 242, 245)",
+  surface2: "rgb(247, 236, 239)",
   onSurface: "rgb(32, 26, 25)",
   surfaceVariant: "rgb(245, 221, 217)",
   onSurfaceVariant: "rgb(83, 67, 64)",
@@ -213,6 +220,8 @@ const MaterialDarkColors = {
   background: "rgb(32, 26, 25)",
   onBackground: "rgb(237, 224, 221)",
   surface: "rgb(32, 26, 25)",
+  surface1: "rgb(44, 34, 32)",
+  surface2: "rgb(50, 38, 36)",
   onSurface: "rgb(237, 224, 221)",
   surfaceVariant: "rgb(83, 67, 64)",
   onSurfaceVariant: "rgb(216, 194, 190)",
