@@ -50,19 +50,31 @@ const getMessagesArray = (
       !!xmtpAddress &&
       xmtpAddress.toLowerCase() === message.senderAddress.toLowerCase();
 
-    message.lastMessageInSeries = true;
-    if (index < messagesArray.length - 1) {
-      const nextMessage = messagesArray[index + 1];
-      if (nextMessage.senderAddress === message.senderAddress) {
-        message.lastMessageInSeries = false;
-      }
-    }
+    message.hasNextMessageInSeries = false;
+    message.hasPreviousMessageInSeries = false;
+
     if (index > 0) {
       const previousMessage = messagesArray[index - 1];
       message.dateChange =
         differenceInCalendarDays(message.sent, previousMessage.sent) > 0;
+      if (
+        previousMessage.senderAddress === message.senderAddress &&
+        !message.dateChange
+      ) {
+        message.hasPreviousMessageInSeries = true;
+      }
     } else {
       message.dateChange = true;
+    }
+
+    if (index < messagesArray.length - 1) {
+      const nextMessage = messagesArray[index + 1];
+      if (
+        nextMessage.senderAddress === message.senderAddress &&
+        !message.dateChange
+      ) {
+        message.hasNextMessageInSeries = true;
+      }
     }
     reverseArray.push(message);
   }
