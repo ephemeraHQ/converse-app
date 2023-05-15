@@ -8,11 +8,7 @@ import {
   TouchableOpacity,
   Platform,
 } from "react-native";
-import Reanimated, {
-  SharedValue,
-  withTiming,
-  useAnimatedStyle,
-} from "react-native-reanimated";
+import Reanimated from "react-native-reanimated";
 
 import SendButton from "../../assets/send-button.svg";
 import {
@@ -26,7 +22,7 @@ import {
 type Props = {
   inputValue: string;
   setInputValue: (value: string) => void;
-  chatInputHeight: SharedValue<number>;
+  // chatInputHeight: SharedValue<number>;
   inputRef: MutableRefObject<TextInput | undefined>;
   sendMessage: (content: string) => Promise<void>;
   inputAccessoryViewID?: string;
@@ -40,7 +36,7 @@ const AnimatedTextInput = Reanimated.createAnimatedComponent(TextInput);
 export default function ChatInput({
   inputValue,
   setInputValue,
-  chatInputHeight,
+  // chatInputHeight,
   inputRef,
   sendMessage,
   inputAccessoryViewID,
@@ -50,48 +46,14 @@ export default function ChatInput({
 }: Props) {
   const colorScheme = useColorScheme();
   const styles = getStyles(colorScheme);
-  const textInputStyle = useAnimatedStyle(
-    () => ({
-      ...styles.chatInput,
-      maxHeight: 124,
-      height: chatInputHeight.value,
-    }),
-    []
-  );
+
   return (
     <View style={styles.chatInputContainer}>
       <AnimatedTextInput
         editable={editable !== undefined ? editable : true}
-        style={textInputStyle}
+        style={styles.chatInput}
         value={inputValue}
         onChangeText={setInputValue}
-        onContentSizeChange={(event) => {
-          const marginToAdd = Platform.OS === "ios" ? 12 : 0;
-          let newInputHeight = Math.min(
-            124,
-            Math.max(36, event.nativeEvent.contentSize.height + marginToAdd)
-          );
-          console.log({ calculated: newInputHeight });
-          if (newInputHeight > 102) {
-            newInputHeight = 124;
-          } else if (newInputHeight > 80) {
-            newInputHeight = 102;
-          } else if (newInputHeight > 70) {
-            newInputHeight = 80;
-          } else if (newInputHeight > 58) {
-            newInputHeight = 70;
-          } else if (newInputHeight > 36) {
-            newInputHeight = 58;
-          } else {
-            newInputHeight = 36;
-          }
-
-          console.log({ newInputHeight });
-          chatInputHeight.value =
-            Platform.OS === "android"
-              ? newInputHeight
-              : withTiming(newInputHeight, { duration: 200 });
-        }}
         multiline
         ref={(r) => {
           if (r) {
@@ -138,6 +100,7 @@ const getStyles = (colorScheme: ColorSchemeName) =>
         Platform.OS === "android"
           ? tertiaryBackgroundColor(colorScheme)
           : backgroundColor(colorScheme),
+      maxHeight: 130,
       flexGrow: 1,
       flexShrink: 1,
       marginLeft: 12,

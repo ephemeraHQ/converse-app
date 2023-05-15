@@ -101,8 +101,7 @@ export default function Chat({
   }, [conversation, conversation?.lastUpdateAt, xmtpAddress]);
 
   const DEFAULT_INPUT_HEIGHT = 36;
-  const INPUT_CONTAINER_MARGIN = 14;
-  const chatInputHeight = useSharedValue(DEFAULT_INPUT_HEIGHT);
+  const chatInputHeight = useSharedValue(50);
 
   const insets = useSafeAreaInsets();
 
@@ -117,13 +116,13 @@ export default function Chat({
       position: "absolute",
       width: "100%",
       backgroundColor: tertiary,
-      height: chatInputHeight.value + INPUT_CONTAINER_MARGIN,
+      height: "auto",
       zIndex: 1,
       transform: [
         { translateY: -Math.max(insets.bottom, keyboardHeight.value) },
       ],
     }),
-    [keyboardHeight, tertiary, insets.bottom, chatInputHeight]
+    [keyboardHeight, tertiary, insets.bottom]
   );
 
   const chatContentStyle = useAnimatedStyle(
@@ -131,10 +130,8 @@ export default function Chat({
       ...styles.chatContent,
       paddingBottom: showChatInput
         ? Math.max(
-            chatInputHeight.value + INPUT_CONTAINER_MARGIN + insets.bottom,
-            keyboardHeight.value +
-              chatInputHeight.value +
-              INPUT_CONTAINER_MARGIN
+            chatInputHeight.value + insets.bottom,
+            keyboardHeight.value + chatInputHeight.value
           )
         : 0,
     }),
@@ -184,11 +181,15 @@ export default function Chat({
       </AnimatedView>
       {showChatInput && (
         <>
-          <AnimatedView style={textInputStyle}>
+          <AnimatedView
+            style={textInputStyle}
+            onLayout={(e) => {
+              chatInputHeight.value = e.nativeEvent.layout.height;
+            }}
+          >
             <ChatInput
               inputValue={inputValue}
               setInputValue={setInputValue}
-              chatInputHeight={chatInputHeight}
               inputRef={inputRef}
               sendMessage={sendMessage}
             />
