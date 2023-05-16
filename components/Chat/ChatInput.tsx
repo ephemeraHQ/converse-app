@@ -13,6 +13,7 @@ import SendButton from "../../assets/send-button.svg";
 import {
   actionSecondaryColor,
   backgroundColor,
+  chatInputBackgroundColor,
   itemSeparatorColor,
   tertiaryBackgroundColor,
   textPrimaryColor,
@@ -94,15 +95,15 @@ const getStyles = (colorScheme: ColorSchemeName) =>
     chatInput: {
       backgroundColor:
         Platform.OS === "android"
-          ? tertiaryBackgroundColor(colorScheme)
+          ? chatInputBackgroundColor(colorScheme)
           : backgroundColor(colorScheme),
       maxHeight: 130,
       flexGrow: 1,
       flexShrink: 1,
       marginLeft: 12,
       marginVertical: 6,
-      paddingTop: 7,
-      paddingBottom: 7,
+      paddingTop: Platform.OS === "android" ? 4 : 7,
+      paddingBottom: Platform.OS === "android" ? 4 : 7,
       paddingLeft: 12,
       fontSize: Platform.OS === "android" ? 16 : 17,
       lineHeight: 22,
