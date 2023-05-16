@@ -42,6 +42,7 @@ import { NavigationParamList } from "./Main";
 function NewConversationButton({
   navigation,
 }: NativeStackScreenProps<NavigationParamList, "Messages">) {
+  const colorScheme = useColorScheme();
   const debugRef = useRef();
   const { state } = useContext(AppContext);
   const showDebug = shouldShowDebug(state);
@@ -74,6 +75,7 @@ function NewConversationButton({
   } else {
     return (
       <FAB
+        key={`FAB-newConversation-${colorScheme}`}
         icon={(props) => (
           <>
             {showDebug && <DebugButton ref={debugRef} />}
