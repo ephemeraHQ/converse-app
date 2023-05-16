@@ -42,9 +42,9 @@ import java.util.*
 import kotlinx.coroutines.*
 import kotlin.coroutines.resume
 
-class NotificationData(val message: String, val timestampNs: String, val contentTopic: String)
+class NotificationData(val message: String, val timestampNs: String, val contentTopic: String, val sentViaConverse: Boolean? = false)
 class ConversationDictData(val shortAddress: String? = null, val lensHandle: String? = null, val ensName: String? = null)
-class SavedNotificationMessage(val topic: String, val content: String, val senderAddress: String, val sent: Long, val id: String)
+class SavedNotificationMessage(val topic: String, val content: String, val senderAddress: String, val sent: Long, val id: String, val sentViaConverse: Boolean)
 class ConversationContext(val conversationId: String, val metadata: Map<String, Any>)
 class ConversationV2Data(val version: String = "v2", val topic: String, val peerAddress: String, val createdAt: String, val context: ConversationContext?, val keyMaterial: String)
 
@@ -111,6 +111,7 @@ class PushNotificationsService : FirebaseMessagingService() {
 
         val encryptedMessageData = Base64.decode(notificationData.message, Base64.NO_WRAP)
         val envelope = EnvelopeBuilder.buildFromString(notificationData.contentTopic, Date(notificationData.timestampNs.toLong()/1000000), encryptedMessageData)
+        val sentViaConverse = notificationData.sentViaConverse!!
 
         if (isIntroTopic(notificationData.contentTopic)) {
             return
@@ -119,7 +120,7 @@ class PushNotificationsService : FirebaseMessagingService() {
             handleNewConversationV2Notification(xmtpClient, envelope, remoteMessage)
         } else {
             Log.d(TAG, "Handling a new message notification")
-            handleNewMessageNotification(xmtpClient, envelope, remoteMessage)
+            handleNewMessageNotification(xmtpClient, envelope, remoteMessage, sentViaConverse)
         }
 
     }
@@ -165,7 +166,7 @@ class PushNotificationsService : FirebaseMessagingService() {
         Volley.newRequestQueue(this).add(jsonRequest)
     }
 
-    private fun handleNewMessageNotification(xmtpClient: Client, envelope: Envelope, remoteMessage: RemoteMessage) {
+    private fun handleNewMessageNotification(xmtpClient: Client, envelope: Envelope, remoteMessage: RemoteMessage, sentViaConverse: Boolean) {
         val conversation = getPersistedConversation(xmtpClient, envelope.contentTopic)
         if (conversation === null) {
             Log.d(TAG, "No conversation found for ${envelope.contentTopic}")
@@ -174,7 +175,7 @@ class PushNotificationsService : FirebaseMessagingService() {
 
         val decodedMessage = conversation.decode(envelope)
         Log.d(TAG, "Successfully decoded message incoming message")
-        saveMessageToStorage(envelope.contentTopic, decodedMessage)
+        saveMessageToStorage(envelope.contentTopic, decodedMessage, sentViaConverse)
         if (decodedMessage.senderAddress == xmtpClient.address) return
         var title = getSavedConversationTitle(envelope.contentTopic)
         if (title == "") {
@@ -184,7 +185,7 @@ class PushNotificationsService : FirebaseMessagingService() {
         showNotification(title, decodedMessage.body, remoteMessage)
     }
 
-    private fun saveMessageToStorage(topic: String, decodedMessage: DecodedMessage) {
+    private fun saveMessageToStorage(topic: String, decodedMessage: DecodedMessage, sentViaConverse: Boolean) {
         val currentSavedMessagesString = getAsyncStorage("saved-notifications-messages")
         Log.d(TAG, "Got current saved messages from storage: $currentSavedMessagesString")
         var currentSavedMessages = listOf<SavedNotificationMessage>()
@@ -198,7 +199,8 @@ class PushNotificationsService : FirebaseMessagingService() {
             decodedMessage.body,
             decodedMessage.senderAddress,
             decodedMessage.sent.time,
-            decodedMessage.id
+            decodedMessage.id,
+            sentViaConverse
         )
         currentSavedMessages += newMessageToSave
         val newSavedMessagesString = Klaxon().toJsonString(currentSavedMessages)

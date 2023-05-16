@@ -19,7 +19,7 @@ import Picto from "../Picto/Picto";
 type Props = {
   title: string;
   onPress?: (event: GestureResponderEvent) => void;
-  variant: "primary" | "grey" | "text";
+  variant: "primary" | "secondary" | "grey" | "text";
   style?: StyleProp<ViewStyle>;
   textStyle?: StyleProp<TextStyle>;
   allowFontScaling?: boolean;
@@ -39,18 +39,22 @@ export default function Button({
   const styles = getStyles(colorScheme);
   const buttonStyle =
     variant === "primary"
-      ? styles.buttonPrimary
+      ? [styles.buttonPrimary]
+      : variant === "secondary"
+      ? [styles.buttonPrimary, styles.buttonSecondary]
       : variant === "grey"
-      ? styles.buttonGrey
-      : styles.buttonText;
+      ? [styles.buttonGrey]
+      : [styles.buttonText];
   const buttonTextStyle =
     variant === "primary"
-      ? styles.buttonPrimaryText
+      ? [styles.buttonPrimaryText]
+      : variant === "secondary"
+      ? [styles.buttonPrimaryText, styles.buttonSecondaryText]
       : variant === "grey"
-      ? styles.buttonGreyText
-      : styles.buttonTextText;
+      ? [styles.buttonGreyText]
+      : [styles.buttonTextText];
   return (
-    <TouchableOpacity style={[buttonStyle, style]} onPress={onPress}>
+    <TouchableOpacity style={[...buttonStyle, style]} onPress={onPress}>
       {picto && (
         <Picto
           picto={picto}
@@ -64,7 +68,7 @@ export default function Button({
         />
       )}
       <Text
-        style={[buttonTextStyle, textStyle]}
+        style={[...buttonTextStyle, textStyle]}
         allowFontScaling={allowFontScaling}
       >
         {title}
@@ -76,8 +80,7 @@ export default function Button({
 const getStyles = (colorScheme: ColorSchemeName) =>
   StyleSheet.create({
     buttonPrimary: {
-      backgroundColor:
-        Platform.OS === "ios" ? PlatformColor("systemBlue") : "blue",
+      backgroundColor: PlatformColor("systemBlue"),
       display: "flex",
       alignSelf: "stretch",
       marginHorizontal: 32,
@@ -93,6 +96,15 @@ const getStyles = (colorScheme: ColorSchemeName) =>
       fontWeight: "600",
       fontSize: 17,
     },
+    buttonSecondary: {
+      paddingRight: 12,
+      paddingLeft: 22,
+      borderRadius: 100,
+      paddingVertical: 7,
+    },
+    buttonSecondaryText: {
+      fontWeight: "400",
+    },
     buttonGrey: {
       backgroundColor: tertiaryBackgroundColor(colorScheme),
       paddingHorizontal: 15,
@@ -100,12 +112,7 @@ const getStyles = (colorScheme: ColorSchemeName) =>
       borderRadius: 100,
     },
     buttonGreyText: {
-      color:
-        colorScheme === "light"
-          ? Platform.OS === "ios"
-            ? PlatformColor("systemBlue")
-            : "blue"
-          : "white",
+      color: colorScheme === "light" ? PlatformColor("systemBlue") : "white",
       textAlign: "center",
       fontWeight: "600",
       fontSize: 17,

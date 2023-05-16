@@ -8,7 +8,6 @@ import {
   TouchableOpacity,
   Platform,
 } from "react-native";
-import Reanimated from "react-native-reanimated";
 
 import SendButton from "../../assets/send-button.svg";
 import {
@@ -16,6 +15,7 @@ import {
   backgroundColor,
   itemSeparatorColor,
   tertiaryBackgroundColor,
+  textPrimaryColor,
   textSecondaryColor,
 } from "../../utils/colors";
 
@@ -29,8 +29,6 @@ type Props = {
   onBlur?: () => void;
   editable?: boolean;
 };
-
-const AnimatedTextInput = Reanimated.createAnimatedComponent(TextInput);
 
 export default function ChatInput({
   inputValue,
@@ -47,7 +45,7 @@ export default function ChatInput({
 
   return (
     <View style={styles.chatInputContainer}>
-      <AnimatedTextInput
+      <TextInput
         editable={editable !== undefined ? editable : true}
         style={styles.chatInput}
         value={inputValue}
@@ -111,6 +109,7 @@ const getStyles = (colorScheme: ColorSchemeName) =>
       borderRadius: 18,
       borderWidth: Platform.OS === "android" ? 0 : 0.5,
       borderColor: itemSeparatorColor(colorScheme),
+      color: textPrimaryColor(colorScheme),
     },
     sendButtonContainer: {
       width: 60,

@@ -7,6 +7,7 @@ import {
   View,
   TouchableWithoutFeedback,
   Keyboard,
+  Platform,
 } from "react-native";
 
 import { AppContext } from "../../data/store/context";
@@ -65,7 +66,7 @@ export default function ChatPlaceholder({
           <View>
             <Text style={styles.chatPlaceholderText}>This user is blocked</Text>
             <Button
-              variant="primary"
+              variant="secondary"
               picto="lock.open"
               title="Unblock"
               style={styles.cta}
@@ -106,7 +107,7 @@ export default function ChatPlaceholder({
               {conversation ? conversationName(conversation) : ""}
             </Text>
             <Button
-              variant="primary"
+              variant="secondary"
               picto="hand.wave"
               title="Say hi"
               style={styles.cta}
@@ -133,15 +134,11 @@ const getStyles = (colorScheme: ColorSchemeName) =>
     },
     chatPlaceholderText: {
       textAlign: "center",
-      fontSize: 17,
+      fontSize: Platform.OS === "android" ? 16 : 17,
       color: textPrimaryColor(colorScheme),
     },
     cta: {
       alignSelf: "center",
-      paddingRight: 12,
-      paddingLeft: 22,
-      borderRadius: 100,
-      paddingVertical: 7,
       marginTop: 20,
     },
   });
