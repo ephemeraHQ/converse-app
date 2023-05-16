@@ -69,9 +69,12 @@ const getMessagesArray = (
 
     if (index < messagesArray.length - 1) {
       const nextMessage = messagesArray[index + 1];
+      // Here we need to check if next message has a date change
+      const nextMessageDateChange =
+        differenceInCalendarDays(nextMessage.sent, message.sent) > 0;
       if (
         nextMessage.senderAddress === message.senderAddress &&
-        !message.dateChange
+        !nextMessageDateChange
       ) {
         message.hasNextMessageInSeries = true;
       }

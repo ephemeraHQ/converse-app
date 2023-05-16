@@ -15,7 +15,7 @@ import Picto from "../Picto/Picto.android";
 type Props = {
   title: string;
   onPress?: (event: GestureResponderEvent) => void;
-  variant: "primary" | "grey" | "text";
+  variant: "primary" | "secondary" | "grey" | "text";
   style?: StyleProp<ViewStyle>;
   textStyle?: StyleProp<TextStyle>;
   allowFontScaling?: boolean;
@@ -34,13 +34,25 @@ export default function Button({
   return (
     <View
       style={[
-        variant === "primary" ? styles.buttonPrimaryContainer : undefined,
+        variant === "primary"
+          ? styles.buttonPrimaryContainer
+          : variant === "secondary"
+          ? styles.buttonSecondaryContainer
+          : undefined,
         style,
       ]}
     >
       <MaterialButton
-        mode={variant === "primary" ? "contained" : "text"}
-        style={variant === "primary" ? styles.buttonPrimary : undefined}
+        mode={
+          variant === "primary" || variant === "secondary"
+            ? "contained"
+            : "text"
+        }
+        style={
+          variant === "primary" || variant === "secondary"
+            ? styles.buttonPrimary
+            : undefined
+        }
         onPress={onPress}
         icon={
           picto
@@ -49,7 +61,7 @@ export default function Button({
                   picto={picto}
                   color={color}
                   size={size}
-                  style={styles.picto}
+                  style={variant === "secondary" ? undefined : styles.picto}
                 />
               )
             : undefined
@@ -65,6 +77,10 @@ const styles = StyleSheet.create({
   buttonPrimaryContainer: {
     paddingHorizontal: 32,
     width: "100%",
+  },
+  buttonSecondaryContainer: {
+    paddingHorizontal: 16,
+    width: "auto",
   },
   buttonPrimary: {
     width: "100%",

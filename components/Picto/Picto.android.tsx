@@ -9,6 +9,7 @@ import ContentCopy from "@material-symbols/svg-400/outlined/content_copy.svg";
 import Edit from "@material-symbols/svg-400/outlined/edit.svg";
 import Key from "@material-symbols/svg-400/outlined/key.svg";
 import Link from "@material-symbols/svg-400/outlined/link.svg";
+import Lock from "@material-symbols/svg-400/outlined/lock_open.svg";
 import ChatNotification from "@material-symbols/svg-400/outlined/mark_chat_unread.svg";
 import QrCodeScanner from "@material-symbols/svg-400/outlined/qr_code_scanner.svg";
 import Search from "@material-symbols/svg-400/outlined/search.svg";
@@ -55,6 +56,7 @@ const pictoMapping: {
   "square.and.arrow.up": Send,
   "doc.on.doc": ContentCopy,
   "party.popper": Celebration,
+  "lock.open": Lock,
 };
 
 export default function Picto({ picto, style, size, weight, color }: Props) {
