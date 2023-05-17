@@ -105,6 +105,7 @@ const getStyles = (colorScheme: ColorSchemeName) =>
       paddingTop: Platform.OS === "android" ? 4 : 7,
       paddingBottom: Platform.OS === "android" ? 4 : 7,
       paddingLeft: 12,
+      paddingRight: 12,
       fontSize: Platform.OS === "android" ? 16 : 17,
       lineHeight: 22,
       borderRadius: 18,
