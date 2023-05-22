@@ -2,8 +2,7 @@ import { useContext, useEffect } from "react";
 
 import { AppDispatchTypes } from "../../data/store/appReducer";
 import { AppContext } from "../../data/store/context";
-import { saveUser } from "../../utils/api";
-import { ethProvider } from "../../utils/eth";
+import { getProfileForAddress, saveUser } from "../../utils/api";
 
 export default function MainIdentityStateHandler() {
   const { state, dispatch } = useContext(AppContext);
@@ -11,13 +10,12 @@ export default function MainIdentityStateHandler() {
   useEffect(() => {
     if (state.xmtp.address) {
       saveUser(state.xmtp.address);
-      ethProvider
-        .lookupAddress(state.xmtp.address)
+      getProfileForAddress(state.xmtp.address)
         .then((result) => {
-          if (result) {
+          if (result.primaryEns) {
             dispatch({
               type: AppDispatchTypes.AppSetMainIdentity,
-              payload: { identity: result },
+              payload: { identity: result.primaryEns },
             });
           } else {
             dispatch({

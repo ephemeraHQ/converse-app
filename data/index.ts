@@ -1,7 +1,7 @@
 import "reflect-metadata";
 
 import { addLog } from "../components/DebugButton";
-import { ethProvider } from "../utils/eth";
+import { getProfilesForAddresses } from "../utils/api";
 import { getLensHandleFromConversationId } from "../utils/lens";
 import { lastValueInMap } from "../utils/map";
 import {
@@ -157,43 +157,60 @@ const setupAndSaveConversation = async (
   };
 };
 
-const resolveHandlesForConversation = async (
-  conversation: XmtpConversation
-) => {
-  const currentLensHandle = conversation.lensHandle;
-  const currentEnsName = conversation.ensName;
-  let updated = false;
-  try {
-    const newLensHandle = await getLensHandleFromConversationId(
-      conversation.context?.conversationId,
-      conversation.peerAddress
-    );
-    const newEnsName = await ethProvider.lookupAddress(
-      conversation.peerAddress
-    );
-    if (newLensHandle !== currentLensHandle || newEnsName !== currentEnsName) {
-      updated = true;
-    }
-    conversation.lensHandle = newLensHandle;
-    conversation.ensName = newEnsName;
-  } catch (e) {
-    // Error (probably rate limited)
-    console.log("Could not resolve handles:", conversation.peerAddress, e);
-  }
+type ConversationHandlesUpdate = {
+  conversation: XmtpConversation;
+  updated: boolean;
+};
 
-  // Save to db
-  await upsertRepository(
-    conversationRepository,
-    [
-      {
-        ...xmtpConversationToDb(conversation),
-        handlesUpdatedAt: new Date().getTime(),
-      },
-    ],
-    ["topic"]
+const resolveHandlesForConversations = async (
+  conversations: XmtpConversation[]
+) => {
+  const addressesSet = new Set<string>();
+  conversations.forEach((c) => addressesSet.add(c.peerAddress));
+  const profilesByAddress = await getProfilesForAddresses(
+    Array.from(addressesSet)
   );
-  saveConversationIdentifiersForNotifications(conversation);
-  return { conversation, updated };
+  const updates: ConversationHandlesUpdate[] = [];
+  const handleConversation = async (conversation: XmtpConversation) => {
+    const currentLensHandle = conversation.lensHandle;
+    const currentEnsName = conversation.ensName;
+    let updated = false;
+    try {
+      const newLensHandle = await getLensHandleFromConversationId(
+        conversation.context?.conversationId,
+        conversation.peerAddress
+      );
+      const newEnsName = profilesByAddress[conversation.peerAddress].primaryEns;
+      if (
+        newLensHandle !== currentLensHandle ||
+        newEnsName !== currentEnsName
+      ) {
+        updated = true;
+      }
+      conversation.lensHandle = newLensHandle;
+      conversation.ensName = newEnsName;
+      // Save to db
+      await upsertRepository(
+        conversationRepository,
+        [
+          {
+            ...xmtpConversationToDb(conversation),
+            handlesUpdatedAt: new Date().getTime(),
+          },
+        ],
+        ["topic"]
+      );
+    } catch (e) {
+      // Error (probably rate limited)
+      console.log("Could not resolve handles:", conversation.peerAddress, e);
+    }
+
+    updates.push({ conversation, updated });
+
+    saveConversationIdentifiersForNotifications(conversation);
+  };
+
+  return updates;
 };
 
 export const saveConversations = async (
@@ -218,9 +235,10 @@ export const saveConversations = async (
     .filter((c) => c.shouldResolveHandles)
     .map((c) => c.conversation);
   if (conversationsToResolve.length === 0) return;
-  const resolveResult = await Promise.all(
-    conversationsToResolve.map(resolveHandlesForConversation)
+  const resolveResult = await resolveHandlesForConversations(
+    conversationsToResolve
   );
+
   const conversationsResolved = resolveResult
     .filter((r) => r.updated)
     .map((r) => r.conversation);
@@ -251,9 +269,9 @@ export const saveNewConversation = async (
   }
   // Now let's see if conversation needs to have a handle resolved
   if (saveResult.shouldResolveHandles) {
-    const resolveResult = await resolveHandlesForConversation(
-      saveResult.conversation
-    );
+    const resolveResult = (
+      await resolveHandlesForConversations([saveResult.conversation])
+    )[0];
     if (dispatch && resolveResult.updated) {
       dispatch({
         type: XmtpDispatchTypes.XmtpSetConversations,
