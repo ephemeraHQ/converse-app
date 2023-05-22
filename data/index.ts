@@ -210,6 +210,8 @@ const resolveHandlesForConversations = async (
     saveConversationIdentifiersForNotifications(conversation);
   };
 
+  await Promise.all(conversations.map(handleConversation));
+
   return updates;
 };
 
