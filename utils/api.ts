@@ -61,4 +61,33 @@ export const getBlockedPeers = async () => {
   return data.blockedPeers as string[];
 };
 
+export const resolveEnsName = async (
+  name: string
+): Promise<string | undefined> => {
+  const { data } = await api.get("/api/profile/ens", { params: { name } });
+  return data.address;
+};
+
+type Profile = {
+  primaryEns?: string;
+};
+
+export const getProfileForAddress = async (
+  address: string
+): Promise<Profile> => {
+  const { data } = await api.get("/api/profile", {
+    params: { address },
+  });
+  return data;
+};
+
+export const getProfilesForAddresses = async (
+  addresses: string[]
+): Promise<{ [address: string]: Profile }> => {
+  const { data } = await api.get("/api/profile/batch", {
+    params: { addresses },
+  });
+  return data;
+};
+
 export default api;

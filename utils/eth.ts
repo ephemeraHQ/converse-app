@@ -7,6 +7,7 @@ import {
 } from "ethers/lib/utils";
 
 import config from "../config";
+import { resolveEnsName } from "./api";
 import { getLensOwner } from "./lens";
 
 export const ethProvider = new ethers.providers.InfuraProvider(
@@ -24,7 +25,7 @@ export const getAddressForPeer = async (peer: string) => {
   const resolvedAddress = isLens
     ? await getLensOwner(peer)
     : isENS
-    ? await ethProvider.resolveName(peer.toLowerCase())
+    ? await resolveEnsName(peer)
     : peer;
   return resolvedAddress;
 };
