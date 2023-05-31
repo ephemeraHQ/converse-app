@@ -73,11 +73,11 @@ export default function Welcome({ ctaOnly, navigation }: Props) {
       <View style={styles.ctaWrapper}>
         <Button
           variant="text"
-          title="Spread the “Ping me” initiative"
+          title="Find people to talk to"
           textStyle={styles.cta}
-          picto="party.popper"
+          picto="eyes"
           onPress={() => {
-            navigation.navigate("PingMe");
+            navigation.navigate("ConverseMatchMaker");
           }}
         />
       </View>

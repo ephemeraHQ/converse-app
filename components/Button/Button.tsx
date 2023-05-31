@@ -97,8 +97,8 @@ const getStyles = (colorScheme: ColorSchemeName) =>
       fontSize: 17,
     },
     buttonSecondary: {
-      paddingRight: 12,
-      paddingLeft: 22,
+      paddingRight: 15,
+      paddingLeft: 25,
       borderRadius: 100,
       paddingVertical: 7,
     },

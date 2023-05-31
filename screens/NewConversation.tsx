@@ -28,7 +28,6 @@ import {
 import ActivityIndicator from "../components/ActivityIndicator/ActivityIndicator";
 import AndroidBackAction from "../components/AndroidBackAction";
 import Picto from "../components/Picto/Picto";
-import Recommendations from "../components/Recommendations";
 import TableView, { TableViewPicto } from "../components/TableView";
 import {
   saveWebviewNavigation,
@@ -41,6 +40,7 @@ import { XmtpConversation } from "../data/store/xmtpReducer";
 import {
   backgroundColor,
   itemSeparatorColor,
+  primaryColor,
   textPrimaryColor,
   textSecondaryColor,
 } from "../utils/colors";
@@ -341,15 +341,25 @@ export default function NewConversation({
           inputRef.current?.blur();
         }}
       >
-        {!value && <Recommendations />}
-        {value && !status.loading && !status.address && (
-          <>
-            <Text
-              style={[styles.message, status.error ? styles.error : undefined]}
-            >
-              {status.error || "Type any .eth, .lens or 0x address"}
-            </Text>
-          </>
+        {!status.loading && !status.address && (
+          <View style={styles.messageContainer}>
+            {status.error && (
+              <Text style={[styles.message, styles.error]}>{status.error}</Text>
+            )}
+            {!status.error && (
+              <Text style={styles.message}>
+                <Text>Type any 0x, .eth, .lens{"\n"} or </Text>
+                <Text
+                  style={styles.clickableText}
+                  onPress={() => {
+                    navigation.navigate("ConverseMatchMaker");
+                  }}
+                >
+                  find people to talk to
+                </Text>
+              </Text>
+            )}
+          </View>
         )}
 
         {status.loading && <ActivityIndicator style={styles.activity} />}
@@ -442,23 +452,35 @@ const getStyles = (colorScheme: ColorSchemeName) =>
       fontSize: 17,
       color: textPrimaryColor(colorScheme),
     },
-    message: {
+    messageContainer: {
       ...Platform.select({
         default: {
-          paddingTop: 23,
-          fontSize: 17,
-          textAlign: "center",
+          marginTop: 23,
           paddingHorizontal: 18,
         },
         android: {
-          fontSize: 14,
           marginRight: 16,
           marginLeft: 16,
           marginTop: 16,
         },
       }),
+    },
+    message: {
+      ...Platform.select({
+        default: {
+          fontSize: 17,
+          textAlign: "center",
+        },
+        android: {
+          fontSize: 14,
+        },
+      }),
 
       color: textSecondaryColor(colorScheme),
+    },
+    clickableText: {
+      color: primaryColor(colorScheme),
+      fontWeight: "500",
     },
     error: {
       color:

@@ -25,6 +25,7 @@ import {
 } from "../utils/colors";
 import Conversation from "./Conversation";
 import ConversationList from "./ConversationList";
+import ConverseMatchMaker from "./ConverseMatchMaker";
 import NewConversation from "./NewConversation";
 import NotificationsScreen from "./NotificationsScreen";
 import OnboardingScreen from "./Onboarding";
@@ -42,6 +43,7 @@ export type NavigationParamList = {
   NewConversation: {
     peer?: string;
   };
+  ConverseMatchMaker: undefined;
   ShareProfile: undefined;
   PingMe: undefined;
 };
@@ -216,6 +218,18 @@ export default function Main() {
                 component={NewConversation}
                 options={{
                   headerTitle: "New conversation",
+                  presentation: "modal",
+                  headerStyle: {
+                    backgroundColor:
+                      navigationSecondaryBackgroundColor(colorScheme),
+                  },
+                }}
+              />
+              <Stack.Screen
+                name="ConverseMatchMaker"
+                component={ConverseMatchMaker}
+                options={{
+                  headerTitle: "Converse Match Maker",
                   presentation: "modal",
                   headerStyle: {
                     backgroundColor:
