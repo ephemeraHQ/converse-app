@@ -90,20 +90,13 @@ export const getProfilesForAddresses = async (
   return data;
 };
 
-export enum RecommentationTag {
-  SHARED_TRANSACTION = "SHARED_TRANSACTION",
-  FOLLOW_EACH_OTHER_ON_LENS = "FOLLOW_EACH_OTHER_ON_LENS",
-  FOLLOW_EACH_OTHER_ON_WARPCAST = "FOLLOW_EACH_OTHER_ON_WARPCAST",
-  SHARED_NFT_COLLECTION = "SHARED_NFT_COLLECTION",
-}
-
-type RecommendationTagWithParams = {
-  tag: RecommentationTag;
-  params?: { [param: string]: any };
+type RecommendationTag = {
+  text: string;
+  image: string;
 };
 
 export type RecommendationData = {
-  tags: RecommendationTagWithParams[];
+  tags: RecommendationTag[];
   ens?: string;
   lensHandles: string[];
   farcasterUsernames: string[];
@@ -112,10 +105,11 @@ export type RecommendationData = {
 export type Frens = { [address: string]: RecommendationData };
 
 export const findFrens = async () => {
+  const headers = await getXmtpApiHeaders();
   const { data } = await api.get("/api/frens/find", {
-    headers: await getXmtpApiHeaders(),
+    // headers: await getXmtpApiHeaders(),
+    params: { address: headers["xmtp-api-address"] },
   });
-  console.log({ data });
 
   return data.frens as Frens;
 };
