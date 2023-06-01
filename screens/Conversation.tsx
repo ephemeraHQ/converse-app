@@ -187,6 +187,8 @@ const Conversation = ({
     if (focusOnLayout.current && !chatLayoutDone.current) {
       chatLayoutDone.current = true;
       textInputRef.current?.focus();
+    } else {
+      chatLayoutDone.current = true;
     }
   }, []);
 
