@@ -7,8 +7,8 @@ import {
   Text,
   View,
   useColorScheme,
-  Image,
 } from "react-native";
+import FastImage from "react-native-fast-image";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import IconLoading from "../assets/icon-loading.png";
@@ -53,7 +53,7 @@ function Recommendation({
         )}
         {tags.map((t) => (
           <View key={t.text} style={styles.recommendationRow}>
-            <Image
+            <FastImage
               source={{ uri: t.image }}
               defaultSource={IconLoading}
               style={styles.recommendationImage}
