@@ -64,7 +64,7 @@ function Recommendation({
       </View>
       <View style={styles.recommendationRight}>
         <Button
-          variant="secondary"
+          variant={Platform.OS === "android" ? "text" : "secondary"}
           picto="message"
           title="Chat"
           style={styles.cta}
@@ -154,16 +154,27 @@ const getStyles = (colorScheme: ColorSchemeName) =>
   StyleSheet.create({
     recommendations: {
       backgroundColor: backgroundColor(colorScheme),
-      borderTopWidth: 0.5,
-      borderTopColor: itemSeparatorColor(colorScheme),
+      ...Platform.select({
+        default: {
+          borderTopWidth: 0.5,
+          borderTopColor: itemSeparatorColor(colorScheme),
+        },
+        android: {},
+      }),
+
       marginLeft: 16,
     },
     recommendation: {
       flexDirection: "row",
       paddingRight: 10,
-      paddingVertical: 15,
-      borderBottomWidth: 0.5,
-      borderBottomColor: itemSeparatorColor(colorScheme),
+      ...Platform.select({
+        default: {
+          paddingVertical: 15,
+          borderBottomWidth: 0.5,
+          borderBottomColor: itemSeparatorColor(colorScheme),
+        },
+        android: { paddingVertical: 12 },
+      }),
     },
     recommendationLeft: {
       flexGrow: 1,
@@ -213,11 +224,17 @@ const getStyles = (colorScheme: ColorSchemeName) =>
       marginLeft: "auto",
     },
     fetching: {
-      marginBottom: 200,
-      marginTop: 200,
+      flexGrow: 1,
+      justifyContent: "center",
+      marginBottom: 40,
     },
     fetchingText: {
-      fontSize: 17,
+      color: textPrimaryColor(colorScheme),
+      ...Platform.select({
+        default: { fontSize: 17 },
+        android: { fontSize: 16 },
+      }),
+
       textAlign: "center",
       marginTop: 20,
     },

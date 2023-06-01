@@ -348,7 +348,9 @@ export default function NewConversation({
             )}
             {!status.error && (
               <Text style={styles.message}>
-                <Text>Type any 0x, .eth, .lens{"\n"} or </Text>
+                <Text>
+                  Type any 0x, .eth, .lens{Platform.OS === "ios" ? "\n" : ""} or{" "}
+                </Text>
                 <Text
                   style={styles.clickableText}
                   onPress={() => {

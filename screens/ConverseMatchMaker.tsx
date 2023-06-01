@@ -14,7 +14,11 @@ import {
 
 import AndroidBackAction from "../components/AndroidBackAction";
 import Recommendations from "../components/Recommendations";
-import { backgroundColor } from "../utils/colors";
+import {
+  backgroundColor,
+  textPrimaryColor,
+  textSecondaryColor,
+} from "../utils/colors";
 import { NavigationParamList } from "./Main";
 
 export default function ConverseMatchMaker({
@@ -49,7 +53,11 @@ export default function ConverseMatchMaker({
     >
       {Platform.OS === "ios" && <StatusBar hidden={false} style="light" />}
 
-      <ScrollView style={styles.modal} keyboardShouldPersistTaps="handled">
+      <ScrollView
+        style={styles.modal}
+        contentContainerStyle={styles.modalContent}
+        keyboardShouldPersistTaps="handled"
+      >
         <Text style={styles.wave}>👋</Text>
         <Text style={styles.title}>
           Find people who have interests in common with you. Start talking to
@@ -67,15 +75,30 @@ const getStyles = (colorScheme: ColorSchemeName) =>
       flex: 1,
       backgroundColor: backgroundColor(colorScheme),
     },
+    modalContent: {
+      flexGrow: 1,
+    },
     wave: {
       textAlign: "center",
       marginTop: 30,
       fontSize: 34,
     },
     title: {
-      fontSize: 17,
+      ...Platform.select({
+        default: {
+          fontSize: 17,
+          paddingHorizontal: 32,
+          color: textPrimaryColor(colorScheme),
+        },
+        android: {
+          fontSize: 14,
+          paddingHorizontal: 39,
+          color: textSecondaryColor(colorScheme),
+        },
+      }),
+
       textAlign: "center",
-      paddingHorizontal: 32,
+
       marginTop: 12,
       marginBottom: 30,
     },
