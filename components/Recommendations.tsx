@@ -1,5 +1,5 @@
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import {
   ColorSchemeName,
   Platform,
@@ -12,10 +12,12 @@ import FastImage from "react-native-fast-image";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import IconLoading from "../assets/icon-loading.png";
+import config from "../config";
 import { Frens, RecommendationData, findFrens } from "../utils/api";
 import {
   backgroundColor,
   itemSeparatorColor,
+  primaryColor,
   textPrimaryColor,
   textSecondaryColor,
 } from "../utils/colors";
@@ -94,6 +96,17 @@ export default function Recommendations({
   const [fetching, setFetching] = useState(false);
   const [frens, setFrens] = useState<Frens | undefined>(undefined);
 
+  const openSignalList = useCallback(() => {}, []);
+  const contactPol = useCallback(() => {
+    navigation.popToTop();
+    setTimeout(() => {
+      navigation.navigate("Conversation", {
+        mainConversationWithPeer: config.polAddress,
+        focus: true,
+      });
+    }, 300);
+  }, [navigation]);
+
   useEffect(() => {
     // On load, let's load frens
     const getRecommendations = async () => {
@@ -135,24 +148,83 @@ export default function Recommendations({
       </View>
     );
   }
+  if (frens && Object.keys(frens).length === 0) {
+    return (
+      <>
+        <Text style={styles.emoji}>😐</Text>
+        <Text style={styles.title}>
+          We did not find people to match you with. We’re still early and we’re
+          not using that many signals. You can{" "}
+          <Text style={styles.clickableText} onPress={openSignalList}>
+            find the current list here
+          </Text>
+          , please feel free to{" "}
+          <Text style={styles.clickableText} onPress={contactPol}>
+            contact our co-founder Pol
+          </Text>{" "}
+          if you want us to add anything.{"\n\n"}Thank you!
+        </Text>
+      </>
+    );
+  }
   return (
-    <View style={[styles.recommendations, { marginBottom: insets.bottom }]}>
-      {frens &&
-        Object.keys(frens).map((address) => (
-          <Recommendation
-            key={address}
-            address={address}
-            recommendationData={frens[address]}
-            navigation={navigation}
-          />
-        ))}
+    <View style={{ marginBottom: insets.bottom }}>
+      <Text style={styles.emoji}>👋</Text>
+      <Text style={styles.title}>
+        Find people who have interests in common with you. Start talking to
+        them.
+      </Text>
+      <View style={styles.recommendations}>
+        {frens &&
+          Object.keys(frens).map((address) => (
+            <Recommendation
+              key={address}
+              address={address}
+              recommendationData={frens[address]}
+              navigation={navigation}
+            />
+          ))}
+      </View>
+      <Text style={styles.title}>
+        We’re adding matching signals very often.{" "}
+        <Text style={styles.clickableText} onPress={openSignalList}>
+          Here is the current list
+        </Text>
+        ,{" "}
+        <Text style={styles.clickableText} onPress={contactPol}>
+          contact our cofounder Pol
+        </Text>{" "}
+        if you want us to add anything.
+      </Text>
     </View>
   );
 }
 
 const getStyles = (colorScheme: ColorSchemeName) =>
   StyleSheet.create({
+    emoji: {
+      textAlign: "center",
+      marginTop: 30,
+      fontSize: 34,
+      marginBottom: 12,
+    },
+    title: {
+      color: textPrimaryColor(colorScheme),
+      ...Platform.select({
+        default: {
+          fontSize: 17,
+          paddingHorizontal: 32,
+        },
+        android: {
+          fontSize: 14,
+          paddingHorizontal: 39,
+        },
+      }),
+
+      textAlign: "center",
+    },
     recommendations: {
+      marginVertical: 30,
       backgroundColor: backgroundColor(colorScheme),
       ...Platform.select({
         default: {
@@ -237,5 +309,12 @@ const getStyles = (colorScheme: ColorSchemeName) =>
 
       textAlign: "center",
       marginTop: 20,
+    },
+    clickableText: {
+      color: primaryColor(colorScheme),
+      fontWeight: "500",
+    },
+    noMatch: {
+      marginTop: 30,
     },
   });
