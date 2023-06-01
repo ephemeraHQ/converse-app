@@ -11,6 +11,7 @@ import Key from "@material-symbols/svg-400/outlined/key.svg";
 import Link from "@material-symbols/svg-400/outlined/link.svg";
 import Lock from "@material-symbols/svg-400/outlined/lock_open.svg";
 import ChatNotification from "@material-symbols/svg-400/outlined/mark_chat_unread.svg";
+import PersonSearch from "@material-symbols/svg-400/outlined/person_search.svg";
 import QrCodeScanner from "@material-symbols/svg-400/outlined/qr_code_scanner.svg";
 import Search from "@material-symbols/svg-400/outlined/search.svg";
 import Send from "@material-symbols/svg-400/outlined/send.svg";
@@ -57,6 +58,8 @@ const pictoMapping: {
   "doc.on.doc": ContentCopy,
   "party.popper": Celebration,
   "lock.open": Lock,
+  eyes: PersonSearch,
+  message: Chat,
 };
 
 export default function Picto({ picto, style, size, weight, color }: Props) {

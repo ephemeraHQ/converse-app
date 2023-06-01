@@ -61,7 +61,11 @@ export default function Button({
                   picto={picto}
                   color={color}
                   size={size}
-                  style={variant === "secondary" ? undefined : styles.picto}
+                  style={
+                    variant === "secondary" || variant === "text"
+                      ? undefined
+                      : styles.picto
+                  }
                 />
               )
             : undefined
