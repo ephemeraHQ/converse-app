@@ -6,13 +6,7 @@ import {
 import WalletConnectProvider from "@walletconnect/web3-provider";
 import { ethers, Signer, Wallet } from "ethers";
 import * as Linking from "expo-linking";
-import React, {
-  Fragment,
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
-} from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
   View,
   StyleSheet,
@@ -341,7 +335,7 @@ export default function OnboardingComponent({
         style={styles.link}
         onPress={() =>
           Linking.openURL(
-            "https://polmaire.notion.site/Terms-and-conditions-f4880f209272477abe1403adc9dd7401"
+            "https://converseapp.notion.site/Terms-and-conditions-004036ad55044aba888cc83e21b8cbdb"
           )
         }
       >

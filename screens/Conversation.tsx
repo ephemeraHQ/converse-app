@@ -315,6 +315,7 @@ const Conversation = ({
       setInputValue("");
       const messageId = uuid.v4().toString();
       const sentAtTime = new Date();
+      const isV1Conversation = conversation.topic.startsWith("/xmtp/0/dm-");
 
       // Save to DB immediatly
       await saveMessages(
@@ -325,7 +326,7 @@ const Conversation = ({
             sent: sentAtTime.getTime(),
             content,
             status: "sending",
-            sentViaConverse: true,
+            sentViaConverse: !isV1Conversation, // V1 Convo don't support the sentViaConverse feature
           },
         ],
         conversation.topic,
