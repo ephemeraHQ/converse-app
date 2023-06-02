@@ -1,4 +1,5 @@
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import * as Linking from "expo-linking";
 import { useCallback, useEffect, useState } from "react";
 import {
   ColorSchemeName,
@@ -96,7 +97,11 @@ export default function Recommendations({
   const [fetching, setFetching] = useState(false);
   const [frens, setFrens] = useState<Frens | undefined>(undefined);
 
-  const openSignalList = useCallback(() => {}, []);
+  const openSignalList = useCallback(() => {
+    Linking.openURL(
+      "https://converseapp.notion.site/Converse-MM-signals-af014ca135c04ce1aae362e536712461?pvs=4"
+    );
+  }, []);
   const contactPol = useCallback(() => {
     navigation.popToTop();
     setTimeout(() => {
