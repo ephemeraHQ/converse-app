@@ -84,8 +84,8 @@ export const getProfileForAddress = async (
 export const getProfilesForAddresses = async (
   addresses: string[]
 ): Promise<{ [address: string]: Profile }> => {
-  const { data } = await api.get("/api/profile/batch", {
-    params: { addresses },
+  const { data } = await api.post("/api/profile/batch", {
+    addresses,
   });
   return data;
 };
