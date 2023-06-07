@@ -10,6 +10,7 @@ import { argv } from "process";
 import dataSource from "./datasource";
 import { Conversation } from "./entities/conversation";
 import { Message } from "./entities/message";
+import { Profile } from "./entities/profile";
 
 const ethAddress = (): string => {
   const wallet = ethers.Wallet.createRandom();
@@ -63,6 +64,12 @@ const commands = {
           entity
         )}`
       );
+      exec(
+        `sed -i '' '/sentryTrackMessage/d' ${path.join(
+          nodeEntitiesPath,
+          entity
+        )}`
+      );
       exec(`sed -i '' '/@ts-ignore/d' ${path.join(nodeEntitiesPath, entity)}`);
       exec(
         `sed -i '' '/public static name/d' ${path.join(
@@ -94,9 +101,24 @@ const commands = {
         topic,
         peerAddress,
         createdAt: new Date().getTime(),
-        lensHandle: lensHandle(),
-        ensName: ensName(),
-        handlesUpdatedAt: new Date().getTime(),
+      });
+      await dataSource.getRepository(Profile).insert({
+        address: peerAddress,
+        socials: JSON.stringify({
+          ens: [
+            {
+              name: ensName(),
+              isPrimary: true,
+            },
+          ],
+          lensHandles: [
+            {
+              handle: lensHandle(),
+              isDefault: false,
+            },
+          ],
+          farcasterUsernames: [username()],
+        }),
       });
 
       for (let messageIndex = 0; messageIndex < 10; messageIndex++) {

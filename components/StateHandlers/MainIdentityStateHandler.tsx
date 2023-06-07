@@ -12,10 +12,11 @@ export default function MainIdentityStateHandler() {
       saveUser(state.xmtp.address);
       getProfileForAddress(state.xmtp.address)
         .then((result) => {
-          if (result.primaryEns) {
+          const primaryEns = result.ensNames?.find((e) => e.isPrimary)?.name;
+          if (primaryEns) {
             dispatch({
               type: AppDispatchTypes.AppSetMainIdentity,
-              payload: { identity: result.primaryEns },
+              payload: { identity: primaryEns },
             });
           } else {
             dispatch({
