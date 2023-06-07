@@ -30,6 +30,7 @@ import NewConversation from "./NewConversation";
 import NotificationsScreen from "./NotificationsScreen";
 import OnboardingScreen from "./Onboarding";
 import PingMeScreen from "./PingMe";
+import ProfileScreen from "./Profile";
 import ShareProfileScreen from "./ShareProfile";
 
 export type NavigationParamList = {
@@ -46,6 +47,9 @@ export type NavigationParamList = {
   ConverseMatchMaker: undefined;
   ShareProfile: undefined;
   PingMe: undefined;
+  Profile: {
+    address: string;
+  };
 };
 
 const Stack = createNativeStackNavigator<NavigationParamList>();
@@ -259,6 +263,13 @@ export default function Main() {
                     backgroundColor:
                       navigationSecondaryBackgroundColor(colorScheme),
                   },
+                }}
+              />
+              <Stack.Screen
+                name="Profile"
+                component={ProfileScreen}
+                options={{
+                  headerTitle: "Contact details",
                 }}
               />
             </Stack.Group>
