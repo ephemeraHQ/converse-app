@@ -10,11 +10,6 @@ import config from "../config";
 import { resolveEnsName } from "./api";
 import { getLensOwner } from "./lens";
 
-export const ethProvider = new ethers.providers.InfuraProvider(
-  config.ethereumNetwork,
-  config.infuraApiKey
-);
-
 export const getAddressForPeer = async (peer: string) => {
   const is0x = isAddress(peer.toLowerCase());
   const isLens = peer.endsWith(config.lensSuffix);

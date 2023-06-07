@@ -11,6 +11,8 @@ const defaultConfig = {
   ],
   conversationDomain: "getconverse.app",
   infuraApiKey: "38f59a7bbbca49f18046ff3a4a752e1c",
+  lensApiDomain: "api.lens.dev",
+  lensSuffix: ".lens",
   sentryDSN:
     "https://fb7c7cbf876644b68a05db08623c8369@o4504757119680512.ingest.sentry.io/4504757120729088",
 };
@@ -26,9 +28,6 @@ const ENV = {
     debugMenu: true,
     bundleId: "com.converse.dev",
     scheme: "converse-dev",
-    lensApiDomain: "api-mumbai.lens.dev",
-    ethereumNetwork: "goerli",
-    lensSuffix: ".test",
     websiteDomain: "dev.getconverse.app",
   },
   preview: {
@@ -39,9 +38,6 @@ const ENV = {
     debugMenu: true,
     bundleId: "com.converse.preview",
     scheme: "converse-preview",
-    lensApiDomain: "api-mumbai.lens.dev",
-    ethereumNetwork: "goerli",
-    lensSuffix: ".test",
     websiteDomain: "preview.getconverse.app",
   },
   prod: {
@@ -51,9 +47,6 @@ const ENV = {
     apiURI: "https://api-prod.getconverse.app",
     bundleId: isAndroid ? "com.converse.prod" : "com.converse.native",
     scheme: "converse",
-    lensApiDomain: "api.lens.dev",
-    ethereumNetwork: "mainnet",
-    lensSuffix: ".lens",
     websiteDomain: "getconverse.app",
   },
 };
