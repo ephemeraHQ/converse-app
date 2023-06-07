@@ -28,7 +28,8 @@ import {
 import ActivityIndicator from "../components/ActivityIndicator/ActivityIndicator";
 import AndroidBackAction from "../components/AndroidBackAction";
 import Picto from "../components/Picto/Picto";
-import TableView, { TableViewPicto } from "../components/TableView";
+import TableView from "../components/TableView/TableView";
+import { TableViewPicto } from "../components/TableView/TableViewImage";
 import {
   saveWebviewNavigation,
   sendMessageToWebview,
@@ -371,9 +372,9 @@ export default function NewConversation({
             items={[
               {
                 id: "reachOutToPol",
-                picto: creatingNewConversation ? (
+                leftView: creatingNewConversation ? (
                   <ActivityIndicator
-                    style={{ width: 32, height: 32, marginRight: 8 }}
+                    style={{ width: 30, height: 30, marginRight: 8 }}
                   />
                 ) : (
                   <TableViewPicto symbol="link" />
@@ -396,14 +397,14 @@ export default function NewConversation({
               <TableView
                 items={status.existingConversations.map((c) => ({
                   id: c.topic,
-                  picto: <TableViewPicto symbol="arrow.up.right" />,
+                  leftView: <TableViewPicto symbol="arrow.up.right" />,
                   title: conversationName(c),
                   subtitle: lastValueInMap(c.messages)?.content || "",
                   action: () => {
                     navigateToTopic(c.topic);
                   },
                 }))}
-                title="Existing conversations"
+                title="EXISTING CONVERSATIONS"
                 style={styles.tableView}
               />
             )}
@@ -412,7 +413,7 @@ export default function NewConversation({
               items={[
                 {
                   id: "new",
-                  picto: creatingNewConversation ? (
+                  leftView: creatingNewConversation ? (
                     <ActivityIndicator
                       style={{ width: 32, height: 32, marginRight: 8 }}
                     />
@@ -425,7 +426,7 @@ export default function NewConversation({
                   },
                 },
               ]}
-              title="New conversation"
+              title="NEW CONVERSATION"
               style={[styles.tableView, { marginBottom: 50 }]}
             />
           </>
@@ -494,6 +495,6 @@ const getStyles = (colorScheme: ColorSchemeName) =>
       marginTop: 23,
     },
     tableView: {
-      marginTop: 25,
+      marginHorizontal: 18,
     },
   });
