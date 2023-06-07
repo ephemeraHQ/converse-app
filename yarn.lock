@@ -1608,10 +1608,10 @@
     deepmerge "^3.2.0"
     hoist-non-react-statics "^3.3.0"
 
-"@coinbase/wallet-mobile-sdk@^1.0.5":
-  version "1.0.5"
-  resolved "https://registry.yarnpkg.com/@coinbase/wallet-mobile-sdk/-/wallet-mobile-sdk-1.0.5.tgz#4f7eb9b952c2ee1ea1e456bf333c5580dd027227"
-  integrity sha512-NMJtD/bB9sKL+ZWxQrxJqTi9pMz2dZYTRFsXhgINXwLf0lF55nPJsr06aDV6UIFLw6bljZAcIwXqbszp35S69Q==
+"@coinbase/wallet-mobile-sdk@^1.0.6":
+  version "1.0.6"
+  resolved "https://registry.yarnpkg.com/@coinbase/wallet-mobile-sdk/-/wallet-mobile-sdk-1.0.6.tgz#9c53070a3f3e2bd5849735d97ae1706fea0eb27b"
+  integrity sha512-NPdDu/usXS1iEy8JOc1Ob8WmOpVH8RJ8LOolD9IpRD3omRw+4iMiO/5QNzTWTvl80oPLhSkR+09RdZVsOrykDg==
   dependencies:
     "@coinbase/wallet-sdk" "^3.5.1"
     "@metamask/safe-event-emitter" "2.0.0"
