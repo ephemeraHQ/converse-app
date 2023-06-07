@@ -18,9 +18,10 @@ import {
 import dataSource from "./db/datasource";
 import { Conversation } from "./db/entities/conversation";
 import { Message } from "./db/entities/message";
-import { Profile } from "./db/entities/profile";
+import { Profile, ProfileSocials } from "./db/entities/profile";
 import { upsertRepository } from "./db/upsert";
 import { DispatchType } from "./store/context";
+import { ProfilesDispatchTypes } from "./store/profilesReducer";
 import {
   XmtpConversation,
   XmtpDispatchTypes,
@@ -66,7 +67,7 @@ const xmtpConversationToDb = (
 
 const xmtpConversationFromDb = (
   dbConversation: Conversation,
-  dbProfile?: Profile
+  socials?: ProfileSocials
 ): XmtpConversation => {
   let context = undefined;
   if (dbConversation.contextConversationId) {
@@ -77,8 +78,6 @@ const xmtpConversationFromDb = (
         : undefined,
     };
   }
-
-  const socials = dbProfile?.getSocials();
 
   const lensHandle = getLensHandleFromConversationIdAndPeer(
     dbConversation.contextConversationId,
@@ -343,8 +342,11 @@ export const saveMessages = async (
 
 export const loadProfilesByAddress = async () => {
   const profiles = await profileRepository.find();
-  const profileByAddress: { [address: string]: Profile } = {};
-  profiles.forEach((p) => (profileByAddress[p.address] = p));
+  const profileByAddress: { [address: string]: { socials: ProfileSocials } } =
+    {};
+  profiles.forEach(
+    (p) => (profileByAddress[p.address] = { socials: p.getSocials() })
+  );
   return profileByAddress;
 };
 
@@ -363,12 +365,15 @@ export const loadDataToContext = async (dispatch: DispatchType) => {
     }),
     loadProfilesByAddress(),
   ]);
-
+  dispatch({
+    type: ProfilesDispatchTypes.SetProfiles,
+    payload: { profiles: profilesByAddress },
+  });
   dispatch({
     type: XmtpDispatchTypes.XmtpSetConversations,
     payload: {
       conversations: conversationsWithMessages.map((c) =>
-        xmtpConversationFromDb(c, profilesByAddress[c.peerAddress])
+        xmtpConversationFromDb(c, profilesByAddress[c.peerAddress]?.socials)
       ),
     },
   });

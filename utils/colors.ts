@@ -153,6 +153,17 @@ export const badgeColor = (colorScheme: ColorSchemeName) => {
   return primaryColor(colorScheme);
 };
 
+export const dangerColor = (colorScheme: ColorSchemeName) => {
+  if (Platform.OS === "android") {
+    if (colorScheme === "dark") {
+      return MaterialDarkColors.error;
+    } else {
+      return MaterialLightColors.error;
+    }
+  }
+  return colorScheme === "dark" ? "#FF453A" : "#FF3B30";
+};
+
 // Generated using https://callstack.github.io/react-native-paper/docs/guides/theming#theme-properties
 
 const MaterialLightColors = {

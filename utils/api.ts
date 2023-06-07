@@ -2,7 +2,11 @@ import axios from "axios";
 
 import { getXmtpApiHeaders } from "../components/XmtpState";
 import config from "../config";
-import { EnsName, LensHandle } from "../data/db/entities/profile";
+import {
+  EnsName,
+  FarcasterUsername,
+  LensHandle,
+} from "../data/db/entities/profile";
 
 const api = axios.create({
   baseURL: config.apiURI,
@@ -72,7 +76,7 @@ export const resolveEnsName = async (
 type Profile = {
   ensNames?: EnsName[];
   lensHandles?: LensHandle[];
-  farcasterUsernames?: string[];
+  farcasterUsernames?: FarcasterUsername[];
 };
 
 export const getProfileForAddress = async (
