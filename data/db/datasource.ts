@@ -12,6 +12,7 @@ import { addStatusIndex1681209069007 } from "./migrations/1681209069007-addStatu
 import { addReadStatus1683114681319 } from "./migrations/1683114681319-addReadStatus";
 import { addSentViaConverse1684057254703 } from "./migrations/1684057254703-addSentViaConverse";
 import { addProfileEntity1686053217007 } from "./migrations/1686053217007-addProfileEntity";
+import { removeHandlesFromConvo1686124833536 } from "./migrations/1686124833536-removeHandlesFromConvo";
 
 const dataSource = new DataSource({
   database: "converse",
@@ -28,6 +29,7 @@ const dataSource = new DataSource({
     addReadStatus1683114681319,
     addSentViaConverse1684057254703,
     addProfileEntity1686053217007,
+    removeHandlesFromConvo1686124833536,
   ],
   type: "expo",
 });
