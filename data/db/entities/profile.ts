@@ -38,8 +38,9 @@ export class Profile {
       const parsed = JSON.parse(this.socials);
       return parsed;
     } catch (error) {
-      console.log(error);
-      sentryTrackMessage("SOCIALS_PARSING_ERROR", { error });
+      const data = { error, socials: this.socials };
+      console.log(data);
+      sentryTrackMessage("SOCIALS_PARSING_ERROR", data);
       return {};
     }
   }
