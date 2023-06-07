@@ -105,7 +105,7 @@ const commands = {
       await dataSource.getRepository(Profile).insert({
         address: peerAddress,
         socials: JSON.stringify({
-          ens: [
+          ensNames: [
             {
               name: ensName(),
               isPrimary: true,
