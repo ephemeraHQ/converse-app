@@ -13235,6 +13235,11 @@ react-native-svg@13.4.0, react-native-svg@9.6.4:
     css-select "^5.1.0"
     css-tree "^1.1.3"
 
+react-native-tableview-simple@^4.4.0:
+  version "4.4.0"
+  resolved "https://registry.yarnpkg.com/react-native-tableview-simple/-/react-native-tableview-simple-4.4.0.tgz#7318145e9b27934fec8cd41b2a06d773c65d74d7"
+  integrity sha512-b31+2zHrB4ymv/g+iKQRjkVA1qNfVAroRG0z6qDeV1AxL221FUP9Q3XAZrju1sGuJdY4y4JADP0E2fRJwDuBWQ==
+
 react-native-url-polyfill@^1.3.0:
   version "1.3.0"
   resolved "https://registry.yarnpkg.com/react-native-url-polyfill/-/react-native-url-polyfill-1.3.0.tgz#c1763de0f2a8c22cc3e959b654c8790622b6ef6a"

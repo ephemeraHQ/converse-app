@@ -38,7 +38,9 @@ import { getXmtpKeysFromSigner, isOnXmtp } from "../utils/xmtp/client";
 import ActivityIndicator from "./ActivityIndicator/ActivityIndicator";
 import Button from "./Button/Button";
 import Picto from "./Picto/Picto";
-import TableView, { TableViewEmoji, TableViewPicto } from "./TableView";
+// import TableView, { TableViewEmoji, TableViewPicto } from "./ConverseTableView";
+import TableView from "./TableView/TableView";
+import { TableViewEmoji, TableViewPicto } from "./TableView/TableViewImage";
 
 type Props = {
   walletConnectProps: RenderQrcodeModalProps | undefined;
@@ -371,7 +373,6 @@ export default function OnboardingComponent({
     picto = "key.horizontal";
   }
 
-  const tableViewPaddingHorizontal = Platform.OS === "android" ? 33 : 0;
   const scrollViewRef = useRef<ScrollView | null>(null);
   const textInputRef = useRef<TextInput | null>(null);
 
@@ -418,41 +419,37 @@ export default function OnboardingComponent({
               items={[
                 {
                   id: "metamask",
-                  picto: <TableViewEmoji emoji="🦊" />,
+                  leftView: <TableViewEmoji emoji="🦊" />,
                   title: "Connect Metamask",
                   action: () => {
                     connectWallet("MetaMask");
                   },
-                  paddingHorizontal: tableViewPaddingHorizontal,
                 },
                 {
                   id: "rainbow",
-                  picto: <TableViewEmoji emoji="🌈" />,
+                  leftView: <TableViewEmoji emoji="🌈" />,
                   title: "Connect Rainbow",
                   action: () => {
                     connectWallet("Rainbow");
                   },
-                  paddingHorizontal: tableViewPaddingHorizontal,
                 },
                 {
                   id: "coinbase",
-                  picto: <TableViewEmoji emoji="🔵" />,
+                  leftView: <TableViewEmoji emoji="🔵" />,
                   title: "Connect Coinbase Wallet",
                   action: connectCoinbaseWallet,
-                  paddingHorizontal: tableViewPaddingHorizontal,
                 },
                 {
                   id: "seedphrase",
-                  picto: <TableViewEmoji emoji="🔑" />,
+                  leftView: <TableViewEmoji emoji="🔑" />,
                   title: "Connect with seed phrase",
                   action: () => {
                     setConnectWithSeedPhrase(true);
                   },
-                  paddingHorizontal: tableViewPaddingHorizontal,
                 },
                 {
                   id: "walletconnect",
-                  picto:
+                  leftView:
                     Platform.OS === "android" ? (
                       <TableViewEmoji emoji="＋" />
                     ) : (
@@ -462,7 +459,6 @@ export default function OnboardingComponent({
                   action: () => {
                     connectWallet("");
                   },
-                  paddingHorizontal: tableViewPaddingHorizontal,
                 },
               ]}
             />
@@ -626,6 +622,7 @@ const getStyles = (colorScheme: ColorSchemeName) =>
       width: "100%",
       marginTop: 50,
       marginBottom: 97,
+      paddingHorizontal: 24,
     },
     terms: {
       textAlign: "center",
