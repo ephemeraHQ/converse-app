@@ -12,7 +12,7 @@ export type EnsName = {
 };
 
 type Socials = {
-  ensName?: EnsName[];
+  ensNames?: EnsName[];
   farcasterUsernames?: string[];
   lensHandles?: LensHandle[];
 };
@@ -33,6 +33,7 @@ export class Profile {
       const parsed = JSON.parse(this.socials);
       return parsed;
     } catch (error) {
+      console.log(error);
       return {};
     }
   }
