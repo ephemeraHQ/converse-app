@@ -5,36 +5,6 @@ import { LensHandle } from "../data/db/entities/profile";
 
 const LENS_CONVERSATION_ID_REGEX = /^lens\.dev\/dm\/(.*?)-(.*)$/;
 
-type ResolvedLensProfile = {
-  handle: string;
-  ownedBy: string;
-};
-
-const resolveLensProfile = async (
-  profileId: string
-): Promise<ResolvedLensProfile | null> => {
-  try {
-    const { data } = await axios.post(`https://${config.lensApiDomain}/`, {
-      operationName: "ResolveProfile",
-      query:
-        "query ResolveProfile($profileId: ProfileId!) {\n  profile(request: {profileId: $profileId}) {\n    handle\n ownedBy\n  }\n}\n",
-      variables: {
-        profileId,
-      },
-    });
-    return data.data?.profile
-      ? {
-          handle: data.data?.profile.handle,
-          ownedBy: data.data?.profile.ownedBy,
-        }
-      : null;
-  } catch (e: any) {
-    console.log(`Lens profile resolution failed for lens profile ${profileId}`);
-    console.log(e?.response?.data?.errors);
-  }
-  return null;
-};
-
 export const getLensHandleFromConversationIdAndPeer = (
   topic: string | undefined,
   peerLensHandles?: LensHandle[]
