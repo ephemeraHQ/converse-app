@@ -1,6 +1,7 @@
 import axios from "axios";
 
 import config from "../config";
+import { LensHandle } from "../data/db/entities/profile";
 
 const LENS_CONVERSATION_ID_REGEX = /^lens\.dev\/dm\/(.*?)-(.*)$/;
 
@@ -34,23 +35,19 @@ const resolveLensProfile = async (
   return null;
 };
 
-export const getLensHandleFromConversationId = async (
-  conversationId: string | undefined,
-  address: string
-): Promise<string | null> => {
-  if (!conversationId) return null;
-  const match = conversationId.match(LENS_CONVERSATION_ID_REGEX);
+export const getLensHandleFromConversationIdAndPeer = (
+  topic: string | undefined,
+  peerLensHandles?: LensHandle[]
+) => {
+  if (!topic || !peerLensHandles) return null;
+  const match = topic.match(LENS_CONVERSATION_ID_REGEX);
   if (!match) return null;
   const lensId1 = match[1];
   const lensId2 = match[2];
-  const [lensProfile1, lensProfile2] = await Promise.all([
-    resolveLensProfile(lensId1),
-    resolveLensProfile(lensId2),
-  ]);
-  const resolvedLensProfile = [lensProfile1, lensProfile2].find(
-    (p) => p?.ownedBy.toLowerCase() === address.toLowerCase()
+  const peerLensHandle = peerLensHandles.find(
+    (l) => l.profileId === lensId1 || l.profileId === lensId2
   );
-  return resolvedLensProfile?.handle || null;
+  return peerLensHandle?.handle;
 };
 
 export const getLensOwner = async (handle: string): Promise<string | null> => {

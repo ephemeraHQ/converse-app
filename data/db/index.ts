@@ -3,10 +3,12 @@ import * as SQLite from "expo-sqlite";
 import dataSource from "./datasource";
 import { Conversation } from "./entities/conversation";
 import { Message } from "./entities/message";
+import { Profile } from "./entities/profile";
 import { checkUpsertSupport } from "./upsert";
 
 export const conversationRepository = dataSource.getRepository(Conversation);
 export const messageRepository = dataSource.getRepository(Message);
+export const profileRepository = dataSource.getRepository(Profile);
 
 export const initDb = async () => {
   if (dataSource.isInitialized) {

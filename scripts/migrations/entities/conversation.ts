@@ -1,4 +1,4 @@
-import { Entity, Column, PrimaryColumn, OneToMany } from "typeorm";
+import { Index, Entity, Column, PrimaryColumn, OneToMany } from "typeorm";
 
 import { type Message } from "./message";
 
@@ -7,20 +7,12 @@ export class Conversation {
   @PrimaryColumn("text")
   topic!: string;
 
+  @Index()
   @Column("text")
   peerAddress!: string;
 
-  @Column("text", { nullable: true })
-  lensHandle?: string | null;
-
-  @Column("text", { nullable: true })
-  ensName?: string | null;
-
   @Column("int")
   createdAt!: number;
-
-  @Column("int", { nullable: true })
-  handlesUpdatedAt?: number;
 
   @Column("int", { nullable: false, default: 0 })
   readUntil!: number;

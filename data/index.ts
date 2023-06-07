@@ -2,7 +2,7 @@ import "reflect-metadata";
 
 import { addLog } from "../components/DebugButton";
 import { getProfilesForAddresses } from "../utils/api";
-import { getLensHandleFromConversationId } from "../utils/lens";
+import { getLensHandleFromConversationIdAndPeer } from "../utils/lens";
 import { lastValueInMap } from "../utils/map";
 import {
   saveConversationDict,
@@ -10,10 +10,15 @@ import {
   saveApiURI,
 } from "../utils/sharedData/sharedData";
 import { shortAddress } from "../utils/str";
-import { conversationRepository, messageRepository } from "./db";
+import {
+  conversationRepository,
+  messageRepository,
+  profileRepository,
+} from "./db";
 import dataSource from "./db/datasource";
 import { Conversation } from "./db/entities/conversation";
 import { Message } from "./db/entities/message";
+import { Profile } from "./db/entities/profile";
 import { upsertRepository } from "./db/upsert";
 import { DispatchType } from "./store/context";
 import {
@@ -56,13 +61,12 @@ const xmtpConversationToDb = (
   contextMetadata: xmtpConversation.context?.metadata
     ? JSON.stringify(xmtpConversation.context.metadata)
     : undefined,
-  lensHandle: xmtpConversation.lensHandle,
-  ensName: xmtpConversation.ensName,
   readUntil: xmtpConversation.readUntil || 0,
 });
 
 const xmtpConversationFromDb = (
-  dbConversation: Conversation
+  dbConversation: Conversation,
+  dbProfile?: Profile
 ): XmtpConversation => {
   let context = undefined;
   if (dbConversation.contextConversationId) {
@@ -74,6 +78,14 @@ const xmtpConversationFromDb = (
     };
   }
 
+  const socials = dbProfile?.getSocials();
+
+  const lensHandle = getLensHandleFromConversationIdAndPeer(
+    dbConversation.contextConversationId,
+    socials?.lensHandles
+  );
+  const ensName = socials?.ensNames?.find((e) => e.isPrimary)?.name;
+
   return {
     topic: dbConversation.topic,
     peerAddress: dbConversation.peerAddress,
@@ -84,8 +96,8 @@ const xmtpConversationFromDb = (
           dbConversation.messages.map((m) => [m.id, xmtpMessageFromDb(m)])
         )
       : new Map(),
-    lensHandle: dbConversation.lensHandle,
-    ensName: dbConversation.ensName,
+    lensHandle,
+    ensName,
     readUntil: dbConversation.readUntil || 0,
   };
 };
@@ -120,7 +132,7 @@ const saveConversationIdentifiersForNotifications = (
 
 type HandlesToResolve = {
   conversation: XmtpConversation;
-  shouldResolveHandles: boolean;
+  shouldUpdateProfile: boolean;
 };
 
 const setupAndSaveConversation = async (
@@ -130,12 +142,24 @@ const setupAndSaveConversation = async (
     where: { topic: conversation.topic },
   });
 
-  const lastHandlesResolution = alreadyConversationInDb?.handlesUpdatedAt || 0;
+  let alreadyProfileInDb: Profile | null = null;
+  if (alreadyConversationInDb) {
+    alreadyProfileInDb = await profileRepository.findOne({
+      where: { address: alreadyConversationInDb.peerAddress },
+    });
+  }
+  const lastProfileUpdate = alreadyProfileInDb?.updatedAt || 0;
   const now = new Date().getTime();
-  const shouldResolveHandles = now - lastHandlesResolution >= 24 * 3600 * 1000;
+  const shouldUpdateProfile = now - lastProfileUpdate >= 24 * 3600 * 1000;
 
-  const lensHandle = alreadyConversationInDb?.lensHandle || null;
-  const ensName = alreadyConversationInDb?.ensName || null;
+  const profileSocials = alreadyProfileInDb?.getSocials();
+
+  const lensHandle = getLensHandleFromConversationIdAndPeer(
+    conversation.context?.conversationId,
+    profileSocials?.lensHandles
+  );
+  const ensName =
+    profileSocials?.ensNames?.find((e) => e.isPrimary)?.name || null;
 
   conversation.lensHandle = lensHandle;
   conversation.ensName = ensName;
@@ -153,7 +177,7 @@ const setupAndSaveConversation = async (
 
   return {
     conversation,
-    shouldResolveHandles,
+    shouldUpdateProfile,
   };
 };
 
@@ -162,25 +186,46 @@ type ConversationHandlesUpdate = {
   updated: boolean;
 };
 
-const resolveHandlesForConversations = async (
+const updateProfilesForConversations = async (
   conversations: XmtpConversation[]
 ) => {
   const addressesSet = new Set<string>();
   conversations.forEach((c) => addressesSet.add(c.peerAddress));
+  console.log(`Fetching ${addressesSet.size} profiles from API...`);
   const profilesByAddress = await getProfilesForAddresses(
     Array.from(addressesSet)
   );
+  const now = new Date().getTime();
+  console.log("Saving profiles to db...");
+  // Save profiles to db
+  await upsertRepository(
+    profileRepository,
+    Object.keys(profilesByAddress).map((address) => ({
+      socials: JSON.stringify(profilesByAddress[address]),
+      updatedAt: now,
+      address,
+    })),
+    ["address"]
+  );
+  console.log("Done saving profiles to db!");
   const updates: ConversationHandlesUpdate[] = [];
   const handleConversation = async (conversation: XmtpConversation) => {
     const currentLensHandle = conversation.lensHandle;
     const currentEnsName = conversation.ensName;
     let updated = false;
     try {
-      const newLensHandle = await getLensHandleFromConversationId(
-        conversation.context?.conversationId,
+      const profileForConversation =
+        profilesByAddress[conversation.peerAddress];
+      let newLensHandle: string | null | undefined = null;
+      if (profileForConversation) {
+        newLensHandle = getLensHandleFromConversationIdAndPeer(
+          conversation.context?.conversationId,
+          profileForConversation.lensHandles
+        );
+      }
+      const newEnsName = profilesByAddress[
         conversation.peerAddress
-      );
-      const newEnsName = profilesByAddress[conversation.peerAddress].primaryEns;
+      ].ensNames?.find((e) => e.isPrimary)?.name;
       if (
         newLensHandle !== currentLensHandle ||
         newEnsName !== currentEnsName
@@ -189,24 +234,12 @@ const resolveHandlesForConversations = async (
       }
       conversation.lensHandle = newLensHandle;
       conversation.ensName = newEnsName;
-      // Save to db
-      await upsertRepository(
-        conversationRepository,
-        [
-          {
-            ...xmtpConversationToDb(conversation),
-            handlesUpdatedAt: new Date().getTime(),
-          },
-        ],
-        ["topic"]
-      );
     } catch (e) {
       // Error (probably rate limited)
       console.log("Could not resolve handles:", conversation.peerAddress, e);
     }
 
     updates.push({ conversation, updated });
-
     saveConversationIdentifiersForNotifications(conversation);
   };
 
@@ -232,23 +265,21 @@ export const saveConversations = async (
       },
     });
   }
-  // Now let's see what conversations need to have a handle resolved
-  const conversationsToResolve = saveResult
-    .filter((c) => c.shouldResolveHandles)
+  // Now let's see what profiles need to be updated
+  const convosToUpdate = saveResult
+    .filter((c) => c.shouldUpdateProfile)
     .map((c) => c.conversation);
-  if (conversationsToResolve.length === 0) return;
-  const resolveResult = await resolveHandlesForConversations(
-    conversationsToResolve
-  );
+  if (convosToUpdate.length === 0) return;
+  const resolveResult = await updateProfilesForConversations(convosToUpdate);
 
-  const conversationsResolved = resolveResult
+  const updatedConversations = resolveResult
     .filter((r) => r.updated)
     .map((r) => r.conversation);
-  if (dispatch && conversationsResolved.length > 0) {
+  if (dispatch && updatedConversations.length > 0) {
     dispatch({
       type: XmtpDispatchTypes.XmtpSetConversations,
       payload: {
-        conversations: conversationsResolved,
+        conversations: updatedConversations,
       },
     });
   }
@@ -270,9 +301,9 @@ export const saveNewConversation = async (
     });
   }
   // Now let's see if conversation needs to have a handle resolved
-  if (saveResult.shouldResolveHandles) {
+  if (saveResult.shouldUpdateProfile) {
     const resolveResult = (
-      await resolveHandlesForConversations([saveResult.conversation])
+      await updateProfilesForConversations([saveResult.conversation])
     )[0];
     if (dispatch && resolveResult.updated) {
       dispatch({
@@ -310,21 +341,31 @@ export const saveMessages = async (
   });
 };
 
+export const loadProfilesByAddress = async () => {
+  const profiles = await profileRepository.find();
+  const profileByAddress: { [address: string]: Profile } = {};
+  profiles.forEach((p) => (profileByAddress[p.address] = p));
+  return profileByAddress;
+};
+
 export const loadDataToContext = async (dispatch: DispatchType) => {
   // Save env to shared data with extension
   saveXmtpEnv();
   saveApiURI();
   // Let's load conversations and messages and save to context
-  const conversationsWithMessages = await conversationRepository.find({
-    relations: { messages: true },
-    order: { messages: { sent: "ASC" } },
-  });
+  const [conversationsWithMessages, profilesByAddress] = await Promise.all([
+    conversationRepository.find({
+      relations: { messages: true },
+      order: { messages: { sent: "ASC" } },
+    }),
+    loadProfilesByAddress(),
+  ]);
 
   dispatch({
     type: XmtpDispatchTypes.XmtpSetConversations,
     payload: {
       conversations: conversationsWithMessages.map((c) =>
-        xmtpConversationFromDb(c)
+        xmtpConversationFromDb(c, profilesByAddress[c.peerAddress])
       ),
     },
   });
