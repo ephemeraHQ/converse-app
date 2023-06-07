@@ -1,8 +1,10 @@
 import { ReactElement } from "react";
 import {
   ColorSchemeName,
+  ColorValue,
   StyleProp,
   StyleSheet,
+  View,
   ViewStyle,
   useColorScheme,
 } from "react-native";
@@ -25,6 +27,8 @@ type TableViewItemType = {
   title: string;
   subtitle?: string;
   action?: () => void;
+  titleColor?: ColorValue;
+  subtitleColor?: ColorValue;
 };
 
 type Props = {
@@ -56,13 +60,25 @@ export default function TableView({ title, items, style }: Props) {
               {
                 marginTop: i.subtitle ? 5 : 0,
                 marginBottom: i.subtitle ? 2 : 0,
+                color: i.titleColor || textPrimaryColor(colorScheme),
               },
             ]}
-            cellImageView={i.leftView}
+            cellImageView={
+              i.leftView ? (
+                <View style={{ marginRight: 8 }}>{i.leftView}</View>
+              ) : undefined
+            }
+            cellAccessoryView={
+              i.rightView ? (
+                <View style={{ marginRight: -8 }}>{i.rightView}</View>
+              ) : undefined
+            }
             cellStyle={i.subtitle ? "Subtitle" : "Basic"}
             detail={i.subtitle}
-            subtitleColor={textSecondaryColor(colorScheme)}
-            subtitleTextStyle={styles.itemSubtitle}
+            subtitleTextStyle={[
+              styles.itemSubtitle,
+              { color: i.subtitleColor || textSecondaryColor(colorScheme) },
+            ]}
           />
         ))}
       </Section>
@@ -74,9 +90,9 @@ const getStyles = (colorScheme: ColorSchemeName) =>
   StyleSheet.create({
     itemTitle: {
       fontSize: 17,
-      color: textPrimaryColor(colorScheme),
     },
     itemSubtitle: {
+      fontSize: 12,
       marginBottom: 5,
     },
   });
