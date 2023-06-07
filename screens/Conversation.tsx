@@ -255,6 +255,8 @@ const Conversation = ({
           peerAddress={peerAddress}
           isBlockedPeer={isBlockedPeer}
           textInputRef={textInputRef}
+          navigation={navigation}
+          route={route}
         />
       ),
       headerRight: () => {

@@ -348,6 +348,9 @@ export const loadProfilesByAddress = async () => {
   return profileByAddress;
 };
 
+export const loadProfileByAddress = async (address: string) =>
+  profileRepository.findOne({ where: { address } });
+
 export const loadDataToContext = async (dispatch: DispatchType) => {
   // Save env to shared data with extension
   saveXmtpEnv();

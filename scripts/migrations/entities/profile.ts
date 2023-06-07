@@ -33,7 +33,8 @@ export class Profile {
       const parsed = JSON.parse(this.socials);
       return parsed;
     } catch (error) {
-      console.log(error);
+      const data = { error, socials: this.socials };
+      console.log(data);
       return {};
     }
   }
