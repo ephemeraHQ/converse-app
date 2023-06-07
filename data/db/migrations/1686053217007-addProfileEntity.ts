@@ -22,7 +22,7 @@ export class addProfileEntity1686053217007 implements MigrationInterface {
     for (const address in ensByAddress) {
       // Escape any backslashes, forward slashes, double quotes, curly braces {, and curly braces } in the ensName value
       const socials = {
-        ensNames: [{ name: ensByAddress[address], primary: true }],
+        ensNames: [{ name: ensByAddress[address], isPrimary: true }],
         lensHandles: [],
         farcasterUsernames: [],
       };
