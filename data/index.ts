@@ -186,7 +186,8 @@ type ConversationHandlesUpdate = {
 };
 
 const updateProfilesForConversations = async (
-  conversations: XmtpConversation[]
+  conversations: XmtpConversation[],
+  dispatch: MaybeDispatchType
 ) => {
   const addressesSet = new Set<string>();
   conversations.forEach((c) => addressesSet.add(c.peerAddress));
@@ -206,6 +207,19 @@ const updateProfilesForConversations = async (
     })),
     ["address"]
   );
+  // Dispatching the profile to state
+  const socialsToDispatch: { [address: string]: { socials: ProfileSocials } } =
+    {};
+  for (const address in profilesByAddress) {
+    socialsToDispatch[address] = { socials: profilesByAddress[address] };
+  }
+  if (dispatch) {
+    dispatch({
+      type: ProfilesDispatchTypes.SetProfiles,
+      payload: { profiles: socialsToDispatch },
+    });
+  }
+
   console.log("Done saving profiles to db!");
   const updates: ConversationHandlesUpdate[] = [];
   const handleConversation = async (conversation: XmtpConversation) => {
@@ -269,7 +283,10 @@ export const saveConversations = async (
     .filter((c) => c.shouldUpdateProfile)
     .map((c) => c.conversation);
   if (convosToUpdate.length === 0) return;
-  const resolveResult = await updateProfilesForConversations(convosToUpdate);
+  const resolveResult = await updateProfilesForConversations(
+    convosToUpdate,
+    dispatch
+  );
 
   const updatedConversations = resolveResult
     .filter((r) => r.updated)
@@ -302,7 +319,7 @@ export const saveNewConversation = async (
   // Now let's see if conversation needs to have a handle resolved
   if (saveResult.shouldUpdateProfile) {
     const resolveResult = (
-      await updateProfilesForConversations([saveResult.conversation])
+      await updateProfilesForConversations([saveResult.conversation], dispatch)
     )[0];
     if (dispatch && resolveResult.updated) {
       dispatch({
