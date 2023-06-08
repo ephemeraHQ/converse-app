@@ -7,6 +7,7 @@ import {
   ColorSchemeName,
   ScrollView,
   useColorScheme,
+  Platform,
 } from "react-native";
 
 import { showActionSheetWithOptions } from "../components/StateHandlers/ActionSheetStateHandler";
@@ -23,6 +24,7 @@ import {
   actionSheetColors,
   backgroundColor,
   dangerColor,
+  primaryColor,
   textSecondaryColor,
 } from "../utils/colors";
 import { shortAddress } from "../utils/str";
@@ -39,10 +41,8 @@ export default function ProfileScreen({
   const [copiedAddresses, setCopiedAddresses] = useState<{
     [address: string]: boolean;
   }>({});
-  console.log("rendering!");
   const peerAddress = route.params.address;
-  const socials: any = state.profiles[peerAddress].socials;
-  console.log("got socials");
+  const socials = state.profiles[peerAddress]?.socials;
   const addressItems = [
     ...(!socials?.ensNames
       ? []
@@ -52,6 +52,11 @@ export default function ProfileScreen({
           rightView: (
             <TableViewPicto
               symbol={copiedAddresses[e.name] ? "checkmark" : "doc.on.doc"}
+              color={
+                Platform.OS === "android"
+                  ? primaryColor(colorScheme)
+                  : undefined
+              }
             />
           ),
           action: () => {
@@ -68,6 +73,9 @@ export default function ProfileScreen({
       rightView: (
         <TableViewPicto
           symbol={copiedAddresses["address"] ? "checkmark" : "doc.on.doc"}
+          color={
+            Platform.OS === "android" ? primaryColor(colorScheme) : undefined
+          }
         />
       ),
       action: () => {
@@ -159,7 +167,17 @@ export default function ProfileScreen({
           {
             id: "block",
             title: isBlockedPeer ? "Unblock" : "Block",
-            titleColor: isBlockedPeer ? undefined : dangerColor(colorScheme),
+            titleColor:
+              isBlockedPeer || Platform.OS === "android"
+                ? undefined
+                : dangerColor(colorScheme),
+            leftView:
+              Platform.OS === "android" ? (
+                <TableViewPicto
+                  symbol="block"
+                  color={textSecondaryColor(colorScheme)}
+                />
+              ) : undefined,
             action: () => {
               showActionSheetWithOptions(
                 {
@@ -203,7 +221,7 @@ const getStyles = (colorScheme: ColorSchemeName) =>
       backgroundColor: backgroundColor(colorScheme),
     },
     profileContent: {
-      paddingHorizontal: 18,
+      paddingHorizontal: Platform.OS === "ios" ? 18 : 0,
     },
     tableView: {},
   });

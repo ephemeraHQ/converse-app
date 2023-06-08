@@ -14,13 +14,22 @@ import IconLoading from "../../assets/icon-loading.png";
 import { textSecondaryColor } from "../../utils/colors";
 import Picto from "../Picto/Picto";
 
+const IMAGE_SIZE = Platform.OS === "android" ? 24 : 30;
+
 export const TableViewImage = ({ imageURI }: { imageURI?: string }) => {
   return (
-    <FastImage
-      source={{ uri: imageURI }}
-      style={{ width: 30, height: 30, borderRadius: 30 }}
-      defaultSource={IconLoading}
-    />
+    <View style={{ justifyContent: "center" }}>
+      <FastImage
+        source={{ uri: imageURI }}
+        style={{
+          width: IMAGE_SIZE,
+          height: IMAGE_SIZE,
+          borderRadius: IMAGE_SIZE,
+          marginLeft: Platform.OS === "android" ? 16 : 0,
+        }}
+        defaultSource={IconLoading}
+      />
+    </View>
   );
 };
 
@@ -33,20 +42,25 @@ export const TableViewPicto = ({
 }) => {
   const colorScheme = useColorScheme();
   return (
-    <Picto
-      picto={symbol}
-      size={Platform.OS === "android" ? 24 : 16}
-      style={Platform.select({
-        default: { width: 30, height: 30 },
-        // android: { marginLeft: 8 },
-      })}
-      color={
-        color ||
-        (Platform.OS === "android"
-          ? textSecondaryColor(colorScheme)
-          : undefined)
-      }
-    />
+    <View style={{ justifyContent: "center" }}>
+      <Picto
+        picto={symbol}
+        size={Platform.OS === "android" ? 24 : 16}
+        style={Platform.select({
+          default: {
+            width: IMAGE_SIZE,
+            height: IMAGE_SIZE,
+            marginLeft: Platform.OS === "android" ? 16 : 0,
+          },
+        })}
+        color={
+          color ||
+          (Platform.OS === "android"
+            ? textSecondaryColor(colorScheme)
+            : undefined)
+        }
+      />
+    </View>
   );
 };
 
@@ -61,10 +75,11 @@ export const TableViewEmoji = ({
     <View
       style={[
         {
-          width: 30,
-          height: 30,
+          width: IMAGE_SIZE,
+          height: IMAGE_SIZE,
           justifyContent: "center",
           alignItems: "center",
+          marginLeft: Platform.OS === "android" ? 16 : 0,
         },
         style,
       ]}

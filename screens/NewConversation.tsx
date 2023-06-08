@@ -495,6 +495,6 @@ const getStyles = (colorScheme: ColorSchemeName) =>
       marginTop: 23,
     },
     tableView: {
-      marginHorizontal: 18,
+      marginHorizontal: Platform.OS === "android" ? 0 : 18,
     },
   });
