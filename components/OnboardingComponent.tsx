@@ -415,7 +415,6 @@ export default function OnboardingComponent({
         {!user.signer && !loading && !connectWithSeedPhrase && (
           <View style={styles.walletSelectorContainer}>
             <TableView
-              title="NEW CONVERSATION"
               items={[
                 {
                   id: "metamask",
