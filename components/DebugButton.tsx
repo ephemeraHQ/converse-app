@@ -1,12 +1,12 @@
 import * as Clipboard from "expo-clipboard";
 import Constants from "expo-constants";
 import * as Updates from "expo-updates";
-import { forwardRef, useImperativeHandle } from "react";
+import { forwardRef, useContext, useImperativeHandle } from "react";
 import * as Sentry from "sentry-expo";
 
 import config from "../config";
 import { clearDB } from "../data/db";
-import { StateType } from "../data/store/context";
+import { AppContext, StateType } from "../data/store/context";
 import { deleteXmtpKeys } from "../utils/keychain";
 import { showActionSheetWithOptions } from "./StateHandlers/ActionSheetStateHandler";
 
@@ -20,6 +20,7 @@ export const shouldShowDebug = (state: StateType) =>
   config.debugMenu || config.debugAddresses.includes(state.xmtp.address || "");
 
 const DebugButton = forwardRef((props, ref) => {
+  const { state } = useContext(AppContext);
   // The component instance will be extended
   // with whatever you return from the callback passed
   // as the second argument
@@ -52,6 +53,10 @@ const DebugButton = forwardRef((props, ref) => {
         },
         "Copy logs": () => {
           Clipboard.setStringAsync(logs.join("\n"));
+          alert("Copied!");
+        },
+        "Copy profiles": () => {
+          Clipboard.setStringAsync(JSON.stringify(state.profiles));
           alert("Copied!");
         },
         "Show config": () => {
