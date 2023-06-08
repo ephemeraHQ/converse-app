@@ -1,11 +1,14 @@
 import AccountCircle from "@material-symbols/svg-400/outlined/account_circle.svg";
 import Add from "@material-symbols/svg-400/outlined/add.svg";
 import AddLink from "@material-symbols/svg-400/outlined/add_link.svg";
+import ArrowRight from "@material-symbols/svg-400/outlined/arrow_right.svg";
+import Block from "@material-symbols/svg-400/outlined/block.svg";
 import ArrowUpRight from "@material-symbols/svg-400/outlined/call_made.svg";
 import Celebration from "@material-symbols/svg-400/outlined/celebration.svg";
 import Chat from "@material-symbols/svg-400/outlined/chat.svg";
 import Close from "@material-symbols/svg-400/outlined/close.svg";
 import ContentCopy from "@material-symbols/svg-400/outlined/content_copy.svg";
+import Done from "@material-symbols/svg-400/outlined/done.svg";
 import Edit from "@material-symbols/svg-400/outlined/edit.svg";
 import Key from "@material-symbols/svg-400/outlined/key.svg";
 import Link from "@material-symbols/svg-400/outlined/link.svg";
@@ -60,6 +63,9 @@ const pictoMapping: {
   "lock.open": Lock,
   eyes: PersonSearch,
   message: Chat,
+  checkmark: Done,
+  block: Block,
+  "chevron.right": ArrowRight,
 };
 
 export default function Picto({ picto, style, size, weight, color }: Props) {

@@ -38,7 +38,6 @@ import { getXmtpKeysFromSigner, isOnXmtp } from "../utils/xmtp/client";
 import ActivityIndicator from "./ActivityIndicator/ActivityIndicator";
 import Button from "./Button/Button";
 import Picto from "./Picto/Picto";
-// import TableView, { TableViewEmoji, TableViewPicto } from "./ConverseTableView";
 import TableView from "./TableView/TableView";
 import { TableViewEmoji, TableViewPicto } from "./TableView/TableViewImage";
 
@@ -416,6 +415,7 @@ export default function OnboardingComponent({
         {!user.signer && !loading && !connectWithSeedPhrase && (
           <View style={styles.walletSelectorContainer}>
             <TableView
+              title="NEW CONVERSATION"
               items={[
                 {
                   id: "metamask",
@@ -622,7 +622,7 @@ const getStyles = (colorScheme: ColorSchemeName) =>
       width: "100%",
       marginTop: 50,
       marginBottom: 97,
-      paddingHorizontal: 24,
+      paddingHorizontal: Platform.OS === "android" ? 64 : 24,
     },
     terms: {
       textAlign: "center",
