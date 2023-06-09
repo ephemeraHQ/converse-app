@@ -18,7 +18,7 @@ index e948a85..c62b25a 100644
  } from './VirtualizeUtils';
  import invariant from 'invariant';
  import * as React from 'react';
-+import { Platform } from 'react-native';
++import Platform from '../Utilities/Platform';
  
  export type {RenderItemProps, RenderItemType, Separators};
  
