@@ -16,6 +16,8 @@ import {
   ADDRESS_REGEX,
   LENS_REGEX,
   ETH_REGEX,
+  UNS_REGEX,
+  FARCASTER_REGEX,
 } from "../utils/regex";
 import { showActionSheetWithOptions } from "./StateHandlers/ActionSheetStateHandler";
 
@@ -109,6 +111,18 @@ export default function ClickableText({ children, style }: Props) {
           onPress: handleNewConversationPress,
           onLongPress: showCopyActionSheet("Copy ENS name"),
           pattern: ETH_REGEX,
+          style: styles.clickableText,
+        },
+        {
+          onPress: handleNewConversationPress,
+          onLongPress: showCopyActionSheet("Copy Unstoppable domain"),
+          pattern: UNS_REGEX,
+          style: styles.clickableText,
+        },
+        {
+          onPress: handleNewConversationPress,
+          onLongPress: showCopyActionSheet("Copy Farcaster username"),
+          pattern: FARCASTER_REGEX,
           style: styles.clickableText,
         },
       ]}

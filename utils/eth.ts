@@ -7,20 +7,31 @@ import {
 } from "ethers/lib/utils";
 
 import config from "../config";
-import { resolveEnsName } from "./api";
+import {
+  resolveEnsName,
+  resolveFarcasterUsername,
+  resolveUnsDomain,
+} from "./api";
 import { getLensOwner } from "./lens";
+import { isUNSAddress } from "./uns";
 
 export const getAddressForPeer = async (peer: string) => {
   const is0x = isAddress(peer.toLowerCase());
   const isLens = peer.endsWith(config.lensSuffix);
   const isENS = peer.endsWith(".eth");
-  if (!is0x && !isLens && !isENS) {
+  const isFarcaster = peer.endsWith(".fc");
+  const isUNS = isUNSAddress(peer);
+  if (!is0x && !isLens && !isENS && !isFarcaster && !isUNS) {
     throw new Error(`Peer ${peer} is invalid`);
   }
   const resolvedAddress = isLens
     ? await getLensOwner(peer)
     : isENS
     ? await resolveEnsName(peer)
+    : isFarcaster
+    ? await resolveFarcasterUsername(peer.slice(0, peer.length - 3))
+    : isUNS
+    ? await resolveUnsDomain(peer)
     : peer;
   return resolvedAddress;
 };

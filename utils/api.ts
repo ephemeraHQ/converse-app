@@ -73,6 +73,22 @@ export const resolveEnsName = async (
   return data.address;
 };
 
+export const resolveUnsDomain = async (
+  domain: string
+): Promise<string | undefined> => {
+  const { data } = await api.get("/api/profile/uns", { params: { domain } });
+  return data.address;
+};
+
+export const resolveFarcasterUsername = async (
+  username: string
+): Promise<string | undefined> => {
+  const { data } = await api.get("/api/profile/farcaster", {
+    params: { username },
+  });
+  return data.address;
+};
+
 type Profile = {
   ensNames?: EnsName[];
   lensHandles?: LensHandle[];

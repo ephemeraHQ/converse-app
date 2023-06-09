@@ -48,6 +48,7 @@ import {
 import { getAddressForPeer } from "../utils/eth";
 import { lastValueInMap } from "../utils/map";
 import { addressPrefix, conversationName } from "../utils/str";
+import { isUNSAddress } from "../utils/uns";
 import { isOnXmtp } from "../utils/xmtp/client";
 import { NavigationParamList } from "./Main";
 
@@ -128,7 +129,9 @@ export default function NewConversation({
       const is0x = isAddress(value.toLowerCase());
       const isLens = value.endsWith(config.lensSuffix);
       const isENS = value.endsWith(".eth");
-      if (is0x || isLens || isENS) {
+      const isFarcaster = value.endsWith(".fc");
+      const isUNS = isUNSAddress(value);
+      if (is0x || isLens || isENS || isENS || isFarcaster || isUNS) {
         setStatus(({ error }) => ({
           loading: true,
           error,
@@ -146,9 +149,10 @@ export default function NewConversation({
               address: "",
               existingConversations: [],
               inviteToConverse: "",
-              error: isLens
-                ? "This handle does not exist. Please try again."
-                : "No address has been set for this ENS domain.",
+              error:
+                isLens || isFarcaster
+                  ? "This handle does not exist. Please try again."
+                  : "No address has been set for this domain.",
             });
 
             return;
@@ -264,7 +268,7 @@ export default function NewConversation({
         {Platform.OS === "ios" && (
           <TextInput
             style={styles.input}
-            placeholder="0x, .eth, .lens …"
+            placeholder="0x, .eth, .lens, .fc, .crypto …"
             autoCapitalize="none"
             autoFocus={false}
             autoCorrect={false}
@@ -287,7 +291,7 @@ export default function NewConversation({
         )}
         {Platform.OS === "android" && (
           <MaterialSearchBar
-            placeholder="0x, .eth, .lens …"
+            placeholder="0x, .eth, .lens, .fc, .crypto …"
             onChangeText={(query) => setValue(query.trim())}
             value={value}
             icon={({ color }) => (
@@ -350,7 +354,8 @@ export default function NewConversation({
             {!status.error && (
               <Text style={styles.message}>
                 <Text>
-                  Type any 0x, .eth, .lens{Platform.OS === "ios" ? "\n" : ""} or{" "}
+                  Type any 0x, .eth, .lens, .fc, .crypto
+                  {Platform.OS === "ios" ? "\n" : ""} or{" "}
                 </Text>
                 <Text
                   style={styles.clickableText}
