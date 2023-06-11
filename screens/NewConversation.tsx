@@ -268,7 +268,7 @@ export default function NewConversation({
         {Platform.OS === "ios" && (
           <TextInput
             style={styles.input}
-            placeholder="0x, .eth, .lens, .fc, .crypto …"
+            placeholder="0x, .eth, .lens, .fc …"
             autoCapitalize="none"
             autoFocus={false}
             autoCorrect={false}
@@ -291,7 +291,7 @@ export default function NewConversation({
         )}
         {Platform.OS === "android" && (
           <MaterialSearchBar
-            placeholder="0x, .eth, .lens, .fc, .crypto …"
+            placeholder="0x, .eth, .lens, .fc …"
             onChangeText={(query) => setValue(query.trim())}
             value={value}
             icon={({ color }) => (
@@ -354,8 +354,8 @@ export default function NewConversation({
             {!status.error && (
               <Text style={styles.message}>
                 <Text>
-                  Type any 0x, .eth, .lens, .fc, .crypto
-                  {Platform.OS === "ios" ? "\n" : ""} or{" "}
+                  Type any 0x, .eth, .lens, .fc, unstoppable
+                  {Platform.OS === "ios" ? "\n" : ""} domain or{" "}
                 </Text>
                 <Text
                   style={styles.clickableText}
