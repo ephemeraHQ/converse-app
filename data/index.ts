@@ -189,74 +189,82 @@ const updateProfilesForConversations = async (
   conversations: XmtpConversation[],
   dispatch: MaybeDispatchType
 ) => {
-  const addressesSet = new Set<string>();
-  conversations.forEach((c) => addressesSet.add(c.peerAddress));
-  console.log(`Fetching ${addressesSet.size} profiles from API...`);
-  const profilesByAddress = await getProfilesForAddresses(
-    Array.from(addressesSet)
-  );
-  const now = new Date().getTime();
-  console.log("Saving profiles to db...");
-  // Save profiles to db
-  await upsertRepository(
-    profileRepository,
-    Object.keys(profilesByAddress).map((address) => ({
-      socials: JSON.stringify(profilesByAddress[address]),
-      updatedAt: now,
-      address,
-    })),
-    ["address"]
-  );
-  // Dispatching the profile to state
-  const socialsToDispatch: { [address: string]: { socials: ProfileSocials } } =
-    {};
-  for (const address in profilesByAddress) {
-    socialsToDispatch[address] = { socials: profilesByAddress[address] };
-  }
-  if (dispatch) {
-    dispatch({
-      type: ProfilesDispatchTypes.SetProfiles,
-      payload: { profiles: socialsToDispatch },
-    });
-  }
-
-  console.log("Done saving profiles to db!");
   const updates: ConversationHandlesUpdate[] = [];
-  const handleConversation = async (conversation: XmtpConversation) => {
-    const currentLensHandle = conversation.lensHandle;
-    const currentEnsName = conversation.ensName;
-    let updated = false;
-    try {
-      const profileForConversation =
-        profilesByAddress[conversation.peerAddress];
-      let newLensHandle: string | null | undefined = null;
-      if (profileForConversation) {
-        newLensHandle = getLensHandleFromConversationIdAndPeer(
-          conversation.context?.conversationId,
-          profileForConversation.lensHandles
-        );
-      }
-      const newEnsName = profilesByAddress[
-        conversation.peerAddress
-      ].ensNames?.find((e) => e.isPrimary)?.name;
-      if (
-        newLensHandle !== currentLensHandle ||
-        newEnsName !== currentEnsName
-      ) {
-        updated = true;
-      }
-      conversation.lensHandle = newLensHandle;
-      conversation.ensName = newEnsName;
-    } catch (e) {
-      // Error (probably rate limited)
-      console.log("Could not resolve handles:", conversation.peerAddress, e);
+  let batch: XmtpConversation[] = [];
+  let rest = conversations;
+
+  while (rest.length > 0) {
+    batch = rest.slice(0, 150);
+    rest = rest.slice(150);
+    const addressesSet = new Set<string>();
+    batch.forEach((c) => addressesSet.add(c.peerAddress));
+    console.log(`Fetching ${addressesSet.size} profiles from API...`);
+    const profilesByAddress = await getProfilesForAddresses(
+      Array.from(addressesSet)
+    );
+    const now = new Date().getTime();
+    console.log("Saving profiles to db...");
+    // Save profiles to db
+    await upsertRepository(
+      profileRepository,
+      Object.keys(profilesByAddress).map((address) => ({
+        socials: JSON.stringify(profilesByAddress[address]),
+        updatedAt: now,
+        address,
+      })),
+      ["address"]
+    );
+    // Dispatching the profile to state
+    const socialsToDispatch: {
+      [address: string]: { socials: ProfileSocials };
+    } = {};
+    for (const address in profilesByAddress) {
+      socialsToDispatch[address] = { socials: profilesByAddress[address] };
+    }
+    if (dispatch) {
+      dispatch({
+        type: ProfilesDispatchTypes.SetProfiles,
+        payload: { profiles: socialsToDispatch },
+      });
     }
 
-    updates.push({ conversation, updated });
-    saveConversationIdentifiersForNotifications(conversation);
-  };
+    console.log("Done saving profiles to db!");
+    const handleConversation = async (conversation: XmtpConversation) => {
+      const currentLensHandle = conversation.lensHandle;
+      const currentEnsName = conversation.ensName;
+      let updated = false;
+      try {
+        const profileForConversation =
+          profilesByAddress[conversation.peerAddress];
+        let newLensHandle: string | null | undefined = null;
+        if (profileForConversation) {
+          newLensHandle = getLensHandleFromConversationIdAndPeer(
+            conversation.context?.conversationId,
+            profileForConversation.lensHandles
+          );
+        }
+        const newEnsName = profilesByAddress[
+          conversation.peerAddress
+        ].ensNames?.find((e) => e.isPrimary)?.name;
+        if (
+          newLensHandle !== currentLensHandle ||
+          newEnsName !== currentEnsName
+        ) {
+          updated = true;
+        }
+        conversation.lensHandle = newLensHandle;
+        conversation.ensName = newEnsName;
+      } catch (e) {
+        // Error (probably rate limited)
+        console.log("Could not resolve handles:", conversation.peerAddress, e);
+      }
 
-  await Promise.all(conversations.map(handleConversation));
+      updates.push({ conversation, updated });
+      saveConversationIdentifiersForNotifications(conversation);
+    };
+
+    await Promise.all(batch.map(handleConversation));
+  }
 
   return updates;
 };
