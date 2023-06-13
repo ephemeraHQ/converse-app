@@ -54,6 +54,7 @@ export default function OnboardingComponent({
   const styles = getStyles(colorScheme);
   const [loading, setLoading] = useState(false);
   const [connectWithSeedPhrase, setConnectWithSeedPhrase] = useState(false);
+  const [connectWithDesktop, setConnectWithDesktop] = useState(false);
   const [seedPhrase, setSeedPhrase] = useState("");
   const [keyboardVerticalOffset, setKeyboardVerticalOffset] = useState(0);
   const [user, setUser] = useState({
@@ -399,7 +400,10 @@ export default function OnboardingComponent({
             <Text style={styles.title}>{title}</Text>
             <View
               style={{
-                marginBottom: connectWithSeedPhrase ? undefined : "auto",
+                marginBottom:
+                  connectWithSeedPhrase || connectWithDesktop
+                    ? undefined
+                    : "auto",
               }}
             >
               {text && <Text style={styles.p}>{text}</Text>}
@@ -412,57 +416,68 @@ export default function OnboardingComponent({
           <ActivityIndicator size="large" style={{ marginBottom: "auto" }} />
         )}
 
-        {!user.signer && !loading && !connectWithSeedPhrase && (
-          <View style={styles.walletSelectorContainer}>
-            <TableView
-              items={[
-                {
-                  id: "metamask",
-                  leftView: <TableViewEmoji emoji="🦊" />,
-                  title: "Connect Metamask",
-                  action: () => {
-                    connectWallet("MetaMask");
+        {!user.signer &&
+          !loading &&
+          !connectWithSeedPhrase &&
+          !connectWithDesktop && (
+            <View style={styles.walletSelectorContainer}>
+              <TableView
+                items={[
+                  {
+                    id: "metamask",
+                    leftView: <TableViewEmoji emoji="🦊" />,
+                    title: "Connect Metamask",
+                    action: () => {
+                      connectWallet("MetaMask");
+                    },
                   },
-                },
-                {
-                  id: "rainbow",
-                  leftView: <TableViewEmoji emoji="🌈" />,
-                  title: "Connect Rainbow",
-                  action: () => {
-                    connectWallet("Rainbow");
+                  {
+                    id: "rainbow",
+                    leftView: <TableViewEmoji emoji="🌈" />,
+                    title: "Connect Rainbow",
+                    action: () => {
+                      connectWallet("Rainbow");
+                    },
                   },
-                },
-                {
-                  id: "coinbase",
-                  leftView: <TableViewEmoji emoji="🔵" />,
-                  title: "Connect Coinbase Wallet",
-                  action: connectCoinbaseWallet,
-                },
-                {
-                  id: "seedphrase",
-                  leftView: <TableViewEmoji emoji="🔑" />,
-                  title: "Connect with seed phrase",
-                  action: () => {
-                    setConnectWithSeedPhrase(true);
+                  {
+                    id: "coinbase",
+                    leftView: <TableViewEmoji emoji="🔵" />,
+                    title: "Connect Coinbase Wallet",
+                    action: connectCoinbaseWallet,
                   },
-                },
-                {
-                  id: "walletconnect",
-                  leftView:
-                    Platform.OS === "android" ? (
-                      <TableViewEmoji emoji="＋" />
-                    ) : (
-                      <TableViewPicto symbol="plus" />
-                    ),
-                  title: "Connect another wallet",
-                  action: () => {
-                    connectWallet("");
+                  {
+                    id: "seedphrase",
+                    leftView: <TableViewEmoji emoji="🔑" />,
+                    title: "Connect with seed phrase",
+                    action: () => {
+                      setConnectWithSeedPhrase(true);
+                    },
                   },
-                },
-              ]}
-            />
-          </View>
-        )}
+                  {
+                    id: "desktop",
+                    leftView: <TableViewEmoji emoji="💻" />,
+                    title: "Connect with Desktop",
+                    action: () => {
+                      setConnectWithDesktop(true);
+                    },
+                  },
+                  {
+                    id: "walletconnect",
+                    leftView:
+                      Platform.OS === "android" ? (
+                        <TableViewEmoji emoji="＋" />
+                      ) : (
+                        <TableViewPicto symbol="plus" />
+                      ),
+                    title: "Connect another wallet",
+                    action: () => {
+                      connectWallet("");
+                    },
+                  },
+                ]}
+              />
+            </View>
+          )}
         {!user.signer && !loading && connectWithSeedPhrase && (
           <>
             <View style={styles.seedPhraseContainer}>
@@ -517,6 +532,14 @@ export default function OnboardingComponent({
                 setSeedPhrase("");
               }}
             />
+          </>
+        )}
+        {!user.signer && !loading && connectWithDesktop && (
+          <>
+            <Text style={{ marginTop: 50 }}>
+              Go to https://{config.websiteDomain}/connect and follow
+              instructions
+            </Text>
           </>
         )}
         {user.signer && (
