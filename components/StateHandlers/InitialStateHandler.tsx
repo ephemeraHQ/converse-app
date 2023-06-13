@@ -1,5 +1,5 @@
 import * as Linking from "expo-linking";
-import { useContext, useEffect, useRef } from "react";
+import { useCallback, useContext, useEffect, useRef } from "react";
 import { useColorScheme } from "react-native";
 
 import config from "../../config";
@@ -30,6 +30,27 @@ export default function InitialStateHandler() {
 
   const initialURL = useRef("");
 
+  const parseDesktopSessionURL = useCallback(
+    (url?: string) => {
+      if (!url) return;
+      try {
+        const { hostname, queryParams } = Linking.parse(url);
+        if (
+          hostname?.toLowerCase() === "desktopconnect" &&
+          queryParams?.sessionId
+        ) {
+          dispatch({
+            type: AppDispatchTypes.AppSetDesktopConnectSessionId,
+            payload: { sessionId: `${queryParams.sessionId}` },
+          });
+        }
+      } catch (e) {
+        console.log(e);
+      }
+    },
+    [dispatch]
+  );
+
   useEffect(() => {
     const handleInitialDeeplink = async () => {
       let openedViaURL = (await Linking.getInitialURL()) || "";
@@ -40,9 +61,17 @@ export default function InitialStateHandler() {
         }
       });
       initialURL.current = openedViaURL;
+      parseDesktopSessionURL(openedViaURL);
     };
     handleInitialDeeplink();
-  }, []);
+  }, [parseDesktopSessionURL]);
+
+  useEffect(() => {
+    // Parsing the desktop session id if any!
+    Linking.addEventListener("url", (event) => {
+      parseDesktopSessionURL(event.url);
+    });
+  }, [parseDesktopSessionURL]);
 
   const splashScreenHidden = useRef(false);
 

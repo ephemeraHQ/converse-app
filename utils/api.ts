@@ -137,4 +137,34 @@ export const findFrens = async () => {
   return data.frens as Frens;
 };
 
+type DesktopSessionData = {
+  sessionId: string;
+  publicKey: string;
+  otp: string;
+};
+export const openDesktopSession = async ({
+  sessionId,
+  publicKey,
+  otp,
+}: DesktopSessionData) =>
+  api.post("/api/connect", { sessionId, publicKey, otp });
+
+export const fetchDesktopSessionXmtpKey = async ({
+  sessionId,
+  otp,
+}: DesktopSessionData): Promise<string | undefined> => {
+  const { data } = await api.get("/api/connect/session", {
+    params: { sessionId, otp },
+  });
+  return data?.encryptedXmtpKey;
+};
+
+export const markDesktopSessionDone = async ({
+  sessionId,
+  otp,
+}: DesktopSessionData): Promise<string | undefined> =>
+  api.delete("/api/connect/session", {
+    params: { sessionId, otp },
+  });
+
 export default api;

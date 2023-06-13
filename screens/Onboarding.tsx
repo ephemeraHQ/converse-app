@@ -4,15 +4,18 @@ import WalletConnectProvider, {
   QrcodeModal,
   RenderQrcodeModalProps,
 } from "@walletconnect/react-native-dapp";
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { Dimensions, Linking, View } from "react-native";
 
+import DesktopConnect from "../components/DesktopConnect";
 import OnboardingComponent from "../components/OnboardingComponent";
 import config from "../config";
+import { AppContext } from "../data/store/context";
 
 const canOpenURL = Linking.canOpenURL.bind(Linking);
 
 export default function OnboardingScreen() {
+  const { state } = useContext(AppContext);
   const [walletConnectProps, setWalletConnectProps] = useState<
     RenderQrcodeModalProps | undefined
   >(undefined);
@@ -41,6 +44,11 @@ export default function OnboardingScreen() {
       Linking.canOpenURL = canOpenURL;
     };
   }, []);
+
+  if (state.app.desktopConnectSessionId) {
+    return <DesktopConnect />;
+  }
+
   return (
     <WalletConnectProvider
       redirectUrl={`${config.scheme}://"`}
