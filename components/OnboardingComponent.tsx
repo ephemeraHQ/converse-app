@@ -378,7 +378,10 @@ export default function OnboardingComponent({
     picto = "lock.open.laptopcomputer";
     text = (
       <Text>
-        Go to <Text style={{ fontWeight: "700" }}>getconverse.app/connect</Text>{" "}
+        Go to{" "}
+        <Text style={{ fontWeight: "700" }}>
+          {config.websiteDomain}/connect
+        </Text>{" "}
         and follow instructions.
       </Text>
     );
