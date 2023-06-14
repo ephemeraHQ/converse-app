@@ -64,7 +64,7 @@ export default function ProfileScreen({
             Clipboard.setStringAsync(e.name);
             setTimeout(() => {
               setCopiedAddresses((c) => ({ ...c, [e.name]: false }));
-            }, 3000);
+            }, 1000);
           },
         }))),
     {
@@ -83,7 +83,7 @@ export default function ProfileScreen({
         Clipboard.setStringAsync(peerAddress);
         setTimeout(() => {
           setCopiedAddresses((c) => ({ ...c, address: false }));
-        }, 3000);
+        }, 1000);
       },
     },
   ];

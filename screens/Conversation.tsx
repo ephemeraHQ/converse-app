@@ -295,6 +295,7 @@ const Conversation = ({
     isBlockedPeer,
     navigation,
     peerAddress,
+    route,
     showInvite.banner,
     showInvite.show,
     state,

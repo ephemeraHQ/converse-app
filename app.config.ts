@@ -55,17 +55,4 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   owner: "converse",
   jsEngine: "hermes",
   plugins: ["sentry-expo"],
-  hooks: {
-    postPublish: [
-      {
-        file: "sentry-expo/upload-sourcemaps",
-        config: {
-          organization: "converse-app",
-          project: "converse-react-native",
-          authToken:
-            "eac2788f667c4e35b610e664417b0acd1d2c43fd8ab2458986cfe85a96cf940a",
-        },
-      },
-    ],
-  },
 });

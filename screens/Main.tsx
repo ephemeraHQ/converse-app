@@ -22,6 +22,7 @@ import {
   backgroundColor,
   headerTitleStyle,
   navigationSecondaryBackgroundColor,
+  textSecondaryColor,
 } from "../utils/colors";
 import Conversation from "./Conversation";
 import ConversationList from "./ConversationList";
@@ -270,6 +271,10 @@ export default function Main() {
                 component={ProfileScreen}
                 options={{
                   headerTitle: "Contact details",
+                  headerTintColor:
+                    Platform.OS === "android"
+                      ? textSecondaryColor(colorScheme)
+                      : undefined,
                 }}
               />
             </Stack.Group>
