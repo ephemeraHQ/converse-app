@@ -20,6 +20,17 @@ export const setTopicToNavigateTo = (topic: string) => {
   topicToNavigateTo = topic;
 };
 
+const getSchemedURLFromUniversalURL = (url: string) => {
+  let schemedURL = url;
+  // Handling universal links by saving a schemed URI
+  universalLinkPrefixes.forEach((prefix) => {
+    if (schemedURL.startsWith(prefix)) {
+      schemedURL = Linking.createURL(schemedURL.replace(prefix, ""));
+    }
+  });
+  return schemedURL;
+};
+
 export default function InitialStateHandler() {
   const colorScheme = useColorScheme();
   const { state, dispatch } = useContext(AppContext);
@@ -33,15 +44,20 @@ export default function InitialStateHandler() {
   const parseDesktopSessionURL = useCallback(
     (url?: string) => {
       if (!url) return;
+      const schemedURL = getSchemedURLFromUniversalURL(url);
       try {
-        const { hostname, queryParams } = Linking.parse(url);
+        const { hostname, queryParams, path } = Linking.parse(schemedURL);
         if (
-          hostname?.toLowerCase() === "desktopconnect" &&
-          queryParams?.sessionId
+          (hostname?.toLowerCase() === "desktopconnect" &&
+            queryParams?.sessionId) ||
+          path
         ) {
+          const sessionId = queryParams?.sessionId
+            ? queryParams?.sessionId.toString()
+            : `${path}`;
           dispatch({
             type: AppDispatchTypes.AppSetDesktopConnectSessionId,
-            payload: { sessionId: `${queryParams.sessionId}` },
+            payload: { sessionId },
           });
         }
       } catch (e) {
@@ -55,11 +71,7 @@ export default function InitialStateHandler() {
     const handleInitialDeeplink = async () => {
       let openedViaURL = (await Linking.getInitialURL()) || "";
       // Handling universal links by saving a schemed URI
-      universalLinkPrefixes.forEach((prefix) => {
-        if (openedViaURL.startsWith(prefix)) {
-          openedViaURL = Linking.createURL(openedViaURL.replace(prefix, ""));
-        }
-      });
+      openedViaURL = getSchemedURLFromUniversalURL(openedViaURL);
       initialURL.current = openedViaURL;
       parseDesktopSessionURL(openedViaURL);
     };
