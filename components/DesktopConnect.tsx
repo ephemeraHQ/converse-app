@@ -237,6 +237,7 @@ const getStyles = (colorScheme: ColorSchemeName) =>
       fontWeight: "700",
       textAlign: "center",
       marginTop: 25,
+      color: textPrimaryColor(colorScheme),
     },
     back: {
       marginTop: "auto",
