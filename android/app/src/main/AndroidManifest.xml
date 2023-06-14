@@ -39,6 +39,8 @@
         <category android:name="android.intent.category.DEFAULT"/>
         <category android:name="android.intent.category.BROWSABLE"/>
         <data android:host="dev.getconverse.app" android:pathPrefix="/dm" android:scheme="https"/>
+        <data android:host="dev.getconverse.app" android:pathPrefix="/coinbase" android:scheme="https"/>
+        <data android:host="dev.getconverse.app" android:pathPrefix="/desktopconnect" android:scheme="https"/>
       </intent-filter>
     </activity>
     <activity android:name="com.facebook.react.devsupport.DevSettingsActivity" android:exported="false"/>

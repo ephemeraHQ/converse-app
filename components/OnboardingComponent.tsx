@@ -329,7 +329,9 @@ export default function OnboardingComponent({
 
   let picto = "message.circle.fill";
   let title = "GM";
-  let text = `Converse connects web3 identities with each other. Connect your wallet to start chatting.`;
+  let text:
+    | string
+    | JSX.Element = `Converse connects web3 identities with each other. Connect your wallet to start chatting.`;
   const termsAndConditions = (
     <Text style={styles.terms}>
       By signing in you agree to our{" "}
@@ -371,6 +373,15 @@ export default function OnboardingComponent({
     text =
       "Enter your wallet's seed phrase. It will be used to connect to the XMTP network and it will not be stored anywhere.";
     picto = "key.horizontal";
+  } else if (connectWithDesktop) {
+    title = "Desktop Connect";
+    picto = "lock.open.laptopcomputer";
+    text = (
+      <Text>
+        Go to <Text style={{ fontWeight: "700" }}>getconverse.app/connect</Text>{" "}
+        and follow instructions.
+      </Text>
+    );
   }
 
   const scrollViewRef = useRef<ScrollView | null>(null);
@@ -456,7 +467,7 @@ export default function OnboardingComponent({
                   {
                     id: "desktop",
                     leftView: <TableViewEmoji emoji="💻" />,
-                    title: "Connect with Desktop",
+                    title: "Connect with desktop",
                     action: () => {
                       setConnectWithDesktop(true);
                     },
@@ -536,10 +547,15 @@ export default function OnboardingComponent({
         )}
         {!user.signer && !loading && connectWithDesktop && (
           <>
-            <Text style={{ marginTop: 50 }}>
-              Go to https://{config.websiteDomain}/connect and follow
-              instructions
-            </Text>
+            <Button
+              title="Back to home screen"
+              style={[styles.logout, { marginTop: "auto" }]}
+              variant="text"
+              textStyle={{ fontWeight: "600" }}
+              onPress={() => {
+                setConnectWithDesktop(false);
+              }}
+            />
           </>
         )}
         {user.signer && (

@@ -11,6 +11,7 @@ import ContentCopy from "@material-symbols/svg-400/outlined/content_copy.svg";
 import Done from "@material-symbols/svg-400/outlined/done.svg";
 import Edit from "@material-symbols/svg-400/outlined/edit.svg";
 import Key from "@material-symbols/svg-400/outlined/key.svg";
+import Laptop from "@material-symbols/svg-400/outlined/laptop_chromebook.svg";
 import Link from "@material-symbols/svg-400/outlined/link.svg";
 import Lock from "@material-symbols/svg-400/outlined/lock_open.svg";
 import ChatNotification from "@material-symbols/svg-400/outlined/mark_chat_unread.svg";
@@ -66,6 +67,7 @@ const pictoMapping: {
   checkmark: Done,
   block: Block,
   "chevron.right": ArrowRight,
+  "lock.open.laptopcomputer": Laptop,
 };
 
 export default function Picto({ picto, style, size, weight, color }: Props) {
