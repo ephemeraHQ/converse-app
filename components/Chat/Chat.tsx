@@ -123,7 +123,7 @@ export default function Chat({
       zIndex: 1,
       transform: [
         { translateY: -Math.max(insets.bottom, keyboardHeight.value) },
-      ],
+      ] as any,
     }),
     [keyboardHeight, tertiary, insets.bottom]
   );
