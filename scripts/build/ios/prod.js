@@ -63,6 +63,11 @@ const go = async () => {
   ][0].replace("com.converse.dev", "com.converse.native");
   entitlementsApp["com.apple.developer.associated-domains"][0] =
     entitlementsApp["com.apple.developer.associated-domains"][0].replace(
+      "applinks:dev.converse.xyz",
+      "applinks:converse.xyz"
+    );
+  entitlementsApp["com.apple.developer.associated-domains"][1] =
+    entitlementsApp["com.apple.developer.associated-domains"][1].replace(
       "applinks:dev.getconverse.app",
       "applinks:getconverse.app"
     );
