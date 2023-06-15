@@ -7,7 +7,7 @@ index f6f2efc..e011edd 100644
  });
  export default function WalletServiceIcon({ width, height, walletService, connectToWalletService, size = 'md' }) {
 -    const uri = React.useMemo(() => (`https://registry.walletconnect.org/logo/${size}/${walletService.id}.jpeg`), [walletService, size]);
-+    const uri = React.useMemo(() => (walletService.id === "demo" ? "https://getconverse.app/demo-icon.png" : `https://registry.walletconnect.org/logo/${size}/${walletService.id}.jpeg`), [walletService, size]);
++    const uri = React.useMemo(() => (walletService.id === "demo" ? "https://converse.xyz/demo-icon.png" : `https://registry.walletconnect.org/logo/${size}/${walletService.id}.jpeg`), [walletService, size]);
      const onPress = React.useCallback(() => (connectToWalletService(walletService)), [connectToWalletService, walletService]);
      return (React.createElement(TouchableOpacity, { onPress: onPress, style: [
              { width, height },
@@ -45,7 +45,7 @@ index 7640627..108811a 100644
          (async () => {
              try {
 -                const result = await fetch("https://registry.walletconnect.org/data/wallets.json");
-+                const result = await fetch("https://getconverse.app/walletconnect.json");
++                const result = await fetch("https://converse.xyz/walletconnect.json");
                  const data = await result.json();
                  setState({
                      data: Object.values(data),
