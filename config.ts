@@ -29,6 +29,9 @@ const ENV = {
     bundleId: "com.converse.dev",
     scheme: "converse-dev",
     websiteDomain: "dev.getconverse.app",
+    universalLinks: ["dev.converse.xyz/", "dev.getconverse.app/"].flatMap(
+      (domain) => [`https://${domain}`, `http://${domain}`, domain]
+    ),
   },
   preview: {
     ...defaultConfig,
@@ -39,6 +42,10 @@ const ENV = {
     bundleId: "com.converse.preview",
     scheme: "converse-preview",
     websiteDomain: "preview.getconverse.app",
+    universalLinks: [
+      "preview.converse.xyz/",
+      "preview.getconverse.app/",
+    ].flatMap((domain) => [`https://${domain}`, `http://${domain}`, domain]),
   },
   prod: {
     ...defaultConfig,
@@ -48,6 +55,11 @@ const ENV = {
     bundleId: isAndroid ? "com.converse.prod" : "com.converse.native",
     scheme: "converse",
     websiteDomain: "getconverse.app",
+    universalLinks: ["converse.xyz/", "getconverse.app/"].flatMap((domain) => [
+      `https://${domain}`,
+      `http://${domain}`,
+      domain,
+    ]),
   },
 };
 

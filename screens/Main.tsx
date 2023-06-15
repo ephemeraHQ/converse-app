@@ -66,12 +66,6 @@ Notifications.setNotificationHandler({
   }),
 });
 
-const universalLinkPrefixes = [
-  `https://${config.websiteDomain}/`,
-  `http://${config.websiteDomain}/`,
-  config.websiteDomain,
-];
-
 export default function Main() {
   const colorScheme = useColorScheme();
   const { state } = useContext(AppContext);
@@ -107,7 +101,7 @@ export default function Main() {
       screenToShow = <NotificationsScreen />;
     } else {
       const linking = {
-        prefixes: [prefix, ...universalLinkPrefixes],
+        prefixes: [prefix, ...config.universalLinks],
         config: {
           initialRouteName: "Messages",
           screens: {
