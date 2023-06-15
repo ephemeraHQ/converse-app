@@ -42,9 +42,8 @@ export default function InitialStateHandler() {
       try {
         const { hostname, queryParams, path } = Linking.parse(schemedURL);
         if (
-          (hostname?.toLowerCase() === "desktopconnect" &&
-            queryParams?.sessionId) ||
-          path
+          hostname?.toLowerCase() === "desktopconnect" &&
+          (queryParams?.sessionId || path)
         ) {
           const sessionId = queryParams?.sessionId
             ? queryParams?.sessionId.toString()
