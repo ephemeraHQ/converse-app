@@ -9,12 +9,6 @@ import { setAndroidColors } from "../../utils/colors";
 import { navigateToConversation } from "../../utils/navigation";
 import { hideSplashScreen } from "../../utils/splash/splash";
 
-const universalLinkPrefixes = [
-  `https://${config.websiteDomain}/`,
-  `http://${config.websiteDomain}/`,
-  config.websiteDomain,
-];
-
 let topicToNavigateTo = "";
 export const setTopicToNavigateTo = (topic: string) => {
   topicToNavigateTo = topic;
@@ -23,7 +17,7 @@ export const setTopicToNavigateTo = (topic: string) => {
 const getSchemedURLFromUniversalURL = (url: string) => {
   let schemedURL = url;
   // Handling universal links by saving a schemed URI
-  universalLinkPrefixes.forEach((prefix) => {
+  config.universalLinks.forEach((prefix) => {
     if (schemedURL.startsWith(prefix)) {
       schemedURL = Linking.createURL(schemedURL.replace(prefix, ""));
     }
