@@ -1,13 +1,14 @@
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import * as Clipboard from "expo-clipboard";
 import * as Linking from "expo-linking";
-import React, { useContext, useState } from "react";
+import React, { useCallback, useContext, useState } from "react";
 import {
   StyleSheet,
   ColorSchemeName,
   ScrollView,
   useColorScheme,
   Platform,
+  TouchableOpacity,
 } from "react-native";
 
 import { showActionSheetWithOptions } from "../components/StateHandlers/ActionSheetStateHandler";
@@ -43,105 +44,111 @@ export default function ProfileScreen({
   }>({});
   const peerAddress = route.params.address;
   const socials = state.profiles[peerAddress]?.socials;
-  const addressItems = [
-    ...(!socials?.ensNames
-      ? []
-      : socials.ensNames.map((e) => ({
-          id: e.name,
-          title: e.name,
+
+  const getAddressItemsFromArray = useCallback(
+    <T,>(array: T[], titleKey: string, valueKey: string) => {
+      return array.map((e) => {
+        const title = (e as any)[titleKey];
+        const value = (e as any)[valueKey];
+        return {
+          id: title,
+          title,
           rightView: (
-            <TableViewPicto
-              symbol={copiedAddresses[e.name] ? "checkmark" : "doc.on.doc"}
-              color={
-                Platform.OS === "android"
-                  ? primaryColor(colorScheme)
-                  : undefined
-              }
-            />
+            <TouchableOpacity
+              onPress={() => {
+                setCopiedAddresses((c) => ({ ...c, [title]: true }));
+                Clipboard.setStringAsync(value);
+                setTimeout(() => {
+                  setCopiedAddresses((c) => ({ ...c, [title]: false }));
+                }, 1000);
+              }}
+            >
+              <TableViewPicto
+                symbol={copiedAddresses[title] ? "checkmark" : "doc.on.doc"}
+                color={
+                  Platform.OS === "android"
+                    ? primaryColor(colorScheme)
+                    : undefined
+                }
+              />
+            </TouchableOpacity>
           ),
-          action: () => {
-            setCopiedAddresses((c) => ({ ...c, [e.name]: true }));
-            Clipboard.setStringAsync(e.name);
-            setTimeout(() => {
-              setCopiedAddresses((c) => ({ ...c, [e.name]: false }));
-            }, 1000);
-          },
-        }))),
-    {
-      id: "address",
-      title: shortAddress(peerAddress),
-      rightView: (
-        <TableViewPicto
-          symbol={copiedAddresses["address"] ? "checkmark" : "doc.on.doc"}
-          color={
-            Platform.OS === "android" ? primaryColor(colorScheme) : undefined
-          }
-        />
-      ),
-      action: () => {
-        setCopiedAddresses((c) => ({ ...c, address: true }));
-        Clipboard.setStringAsync(peerAddress);
-        setTimeout(() => {
-          setCopiedAddresses((c) => ({ ...c, address: false }));
-        }, 1000);
-      },
+        };
+      });
     },
+    [colorScheme, copiedAddresses]
+  );
+
+  const addressItems = [
+    ...getAddressItemsFromArray(socials?.ensNames || [], "name", "name"),
+    ...getAddressItemsFromArray(
+      socials?.unstoppableDomains || [],
+      "domain",
+      "domain"
+    ),
+    ...getAddressItemsFromArray(
+      [{ shortAddress: shortAddress(peerAddress), address: peerAddress }],
+      "shortAddress",
+      "address"
+    ),
   ];
+
+  const getSocialItemsFromArray = useCallback(
+    <T,>(
+      array: T[],
+      getTitle: (e: T) => string,
+      getSubtitle: (e: T) => string,
+      getLink: (e: T) => string,
+      getImageURI: (e: T) => string | undefined
+    ) => {
+      if (!array) return [];
+      return array.map((e: T) => {
+        const imageURI = getImageURI(e);
+        return {
+          id: getTitle(e),
+          title: getTitle(e),
+          subtitle: getSubtitle(e),
+          action: () => {
+            Linking.openURL(getLink(e));
+          },
+          leftView: imageURI ? (
+            <TableViewImage imageURI={getIPFSAssetURI(imageURI)} />
+          ) : (
+            <TableViewEmoji
+              emoji="👋"
+              style={{
+                backgroundColor: "rgba(118, 118, 128, 0.12)",
+                borderRadius: 30,
+              }}
+            />
+          ),
+          rightView: (
+            <TableViewPicto
+              symbol="chevron.right"
+              color={textSecondaryColor(colorScheme)}
+            />
+          ),
+        };
+      });
+    },
+    [colorScheme]
+  );
+
   const socialItems = [
-    ...(!socials?.lensHandles
-      ? []
-      : socials.lensHandles.map((l) => ({
-          id: l.handle,
-          title: l.name || l.handle,
-          subtitle: `Lens handle: ${l.handle}`,
-          action: () => {
-            Linking.openURL(`https://lenster.xyz/u/${l.handle}`);
-          },
-          leftView: l.profilePictureURI ? (
-            <TableViewImage imageURI={getIPFSAssetURI(l.profilePictureURI)} />
-          ) : (
-            <TableViewEmoji
-              emoji="👋"
-              style={{
-                backgroundColor: "rgba(118, 118, 128, 0.12)",
-                borderRadius: 30,
-              }}
-            />
-          ),
-          rightView: (
-            <TableViewPicto
-              symbol="chevron.right"
-              color={textSecondaryColor(colorScheme)}
-            />
-          ),
-        }))),
-    ...(!socials?.farcasterUsernames
-      ? []
-      : socials.farcasterUsernames.map((f) => ({
-          id: f.username,
-          title: f.name || `${f.username}.fc`,
-          subtitle: `Farcaster id: ${f.username}.fc`,
-          action: () => {
-            Linking.openURL(`https://warpcast.com/${f.username}`);
-          },
-          leftView: f.avatarURI ? (
-            <TableViewImage imageURI={getIPFSAssetURI(f.avatarURI)} />
-          ) : (
-            <TableViewEmoji
-              emoji="👋"
-              style={{
-                backgroundColor: "rgba(118, 118, 128, 0.12)",
-                borderRadius: 30,
-              }}
-            />
-          ),
-          rightView: (
-            <TableViewPicto
-              symbol="chevron.right"
-              color={textSecondaryColor(colorScheme)}
-            />
-          ),
-        }))),
+    ...getSocialItemsFromArray(
+      socials?.lensHandles || [],
+      (l) => l.name || l.handle,
+      (l) => `Lens handle: ${l.handle}`,
+      (l) => `https://lenster.xyz/u/${l.handle}`,
+      (l) => l.profilePictureURI
+    ),
+    ...getSocialItemsFromArray(
+      socials?.farcasterUsernames || [],
+      (f) => f.name || `${f.username}.fc`,
+      (f) => `Farcaster id: ${f.username}.fc`,
+      (f) => `https://warpcast.com/${f.username}`,
+      (f) => f.avatarURI
+    ),
   ];
   const isBlockedPeer =
     state.xmtp.blockedPeerAddresses[peerAddress.toLowerCase()];
