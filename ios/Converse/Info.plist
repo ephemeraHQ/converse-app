@@ -2,6 +2,60 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
   <dict>
+    <key>LSApplicationQueriesSchemes</key>
+    <array>
+      <string>metamask</string>
+      <string>metamask</string>
+      <string>cbwallet</string>
+      <string>trust</string>
+      <string>rainbow</string>
+      <string>uniswap</string>
+      <string>zerion</string>
+      <string>ledgerlive</string>
+      <string>imtokenv2</string>
+      <string>spot</string>
+      <string>omni</string>
+      <string>bitkeep</string>
+      <string>robinhood-wallet</string>
+      <string>crypto</string>
+      <string>awallet</string>
+      <string>safepalwallet</string>
+      <string>mathwallet</string>
+      <string>tpoutside</string>
+      <string>keyring</string>
+      <string>frontier</string>
+      <string>bnc</string>
+      <string>mewwallet</string>
+      <string>zengo</string>
+      <string>fireblocks-wc</string>
+      <string>unstoppabledomains</string>
+      <string>exodus</string>
+      <string>bhcwallet</string>
+      <string>loopring</string>
+      <string>helix-id</string>
+      <string>pitaka</string>
+      <string>kriptomatapp</string>
+      <string>bitizen</string>
+      <string>wc</string>
+      <string>timeless-wallet</string>
+      <string>okex</string>
+      <string>safemoon</string>
+      <string>cypherwallet</string>
+      <string>pltwallet</string>
+      <string>avacus</string>
+      <string>enjinwallet</string>
+      <string>slingshot</string>
+      <string>abra</string>
+      <string>blockchain-wallet</string>
+      <string>kryptogo</string>
+      <string>atwallet</string>
+      <string>premawallet</string>
+      <string>hideoutWallet</string>
+      <string>minerva</string>
+      <string>copiosa</string>
+      <string>beewallet.app</string>
+      <string>abc-wallet</string>
+    </array>
     <key>CFBundleDevelopmentRegion</key>
     <string>$(DEVELOPMENT_LANGUAGE)</string>
     <key>CFBundleDisplayName</key>
