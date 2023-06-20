@@ -20,8 +20,7 @@ export type XmtpConversation = {
   createdAt: number;
   context?: XmtpConversationContext;
   messages: Map<string, XmtpMessage>;
-  lensHandle?: string | null;
-  ensName?: string | null;
+  conversationTitle?: string | null;
   currentMessage?: string;
   readUntil: number;
 };

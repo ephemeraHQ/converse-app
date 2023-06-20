@@ -15,9 +15,7 @@ export const addressPrefix = (address: string) =>
 
 export const conversationName = (conversation: XmtpConversation) => {
   return (
-    conversation.lensHandle ||
-    conversation.ensName ||
-    shortAddress(conversation.peerAddress)
+    conversation.conversationTitle || shortAddress(conversation.peerAddress)
   );
 };
 

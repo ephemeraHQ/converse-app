@@ -6,6 +6,7 @@ import {
   EnsName,
   FarcasterUsername,
   LensHandle,
+  UnstoppableDomain,
 } from "../data/db/entities/profile";
 
 const api = axios.create({
@@ -93,6 +94,7 @@ type Profile = {
   ensNames?: EnsName[];
   lensHandles?: LensHandle[];
   farcasterUsernames?: FarcasterUsername[];
+  unstoppableDomains?: UnstoppableDomain[];
 };
 
 export const getProfileForAddress = async (
