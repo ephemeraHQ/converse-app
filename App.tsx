@@ -1,6 +1,8 @@
 import "reflect-metadata";
 import "./polyfills";
 import { ActionSheetProvider } from "@expo/react-native-action-sheet";
+import { Ethereum } from "@thirdweb-dev/chains";
+import { ThirdwebProvider } from "@thirdweb-dev/react-native";
 import React from "react";
 import {
   ColorSchemeName,
@@ -8,7 +10,6 @@ import {
   useColorScheme,
   View,
 } from "react-native";
-// eslint-disable-next-line import/order
 import "./utils/splash/splash";
 import { KeyboardProvider } from "react-native-keyboard-controller";
 import { Provider as PaperProvider } from "react-native-paper";
@@ -37,23 +38,32 @@ export default function App() {
   const styles = getStyles(colorScheme);
 
   return (
-    <KeyboardProvider>
-      <AppProvider>
-        <ActionSheetProvider>
-          <PaperProvider
-            theme={
-              colorScheme === "light" ? MaterialLightTheme : MaterialDarkTheme
-            }
-          >
-            <View style={styles.safe}>
-              <XmtpWebview />
-              <XmtpState />
-              <Main />
-            </View>
-          </PaperProvider>
-        </ActionSheetProvider>
-      </AppProvider>
-    </KeyboardProvider>
+    <ThirdwebProvider
+      activeChain={Ethereum}
+      dAppMeta={{
+        ...config.walletConnectConfig.dappMetadata,
+        isDarkMode: colorScheme === "dark",
+      }}
+      autoConnect={false}
+    >
+      <KeyboardProvider>
+        <AppProvider>
+          <ActionSheetProvider>
+            <PaperProvider
+              theme={
+                colorScheme === "light" ? MaterialLightTheme : MaterialDarkTheme
+              }
+            >
+              <View style={styles.safe}>
+                <XmtpWebview />
+                <XmtpState />
+                <Main />
+              </View>
+            </PaperProvider>
+          </ActionSheetProvider>
+        </AppProvider>
+      </KeyboardProvider>
+    </ThirdwebProvider>
   );
 }
 

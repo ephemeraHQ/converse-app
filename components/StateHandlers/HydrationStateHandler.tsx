@@ -14,6 +14,7 @@ import { logout } from "../../utils/logout";
 import mmkv from "../../utils/mmkv";
 import { getLoggedXmtpAddress } from "../../utils/sharedData/sharedData";
 import { addLog } from "../DebugButton";
+import { getInstalledWallets } from "../Onboarding/supportedWallets";
 import { getLocalXmtpClient } from "../XmtpState";
 
 let migrationAlertShown = false;
@@ -25,9 +26,10 @@ export default function HydrationStateHandler() {
   useEffect(() => {
     const hydrate = async () => {
       // Let's rehydrate value before hiding splash
-      const showNotificationsScreen = await AsyncStorage.getItem(
-        "state.notifications.showNotificationsScreen"
-      );
+      const [showNotificationsScreen] = await Promise.all([
+        AsyncStorage.getItem("state.notifications.showNotificationsScreen"),
+        getInstalledWallets(false),
+      ]);
       let xmtpAddress = null;
       try {
         xmtpAddress = await getLoggedXmtpAddress();

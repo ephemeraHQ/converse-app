@@ -1,3 +1,4 @@
+import { useDisconnect } from "@thirdweb-dev/react-native";
 import * as Clipboard from "expo-clipboard";
 import * as Linking from "expo-linking";
 import React, { useCallback, useContext } from "react";
@@ -19,6 +20,7 @@ import { showActionSheetWithOptions } from "./StateHandlers/ActionSheetStateHand
 
 export default function SettingsButton() {
   const { state, dispatch } = useContext(AppContext);
+  const disconnectWallet = useDisconnect();
   const colorScheme = useColorScheme();
   const onPress = useCallback(() => {
     const methods = {
@@ -67,6 +69,7 @@ export default function SettingsButton() {
         }
       },
       Disconnect: () => {
+        disconnectWallet();
         logout(state, dispatch);
       },
       Cancel: () => {},

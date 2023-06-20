@@ -15,6 +15,16 @@ const defaultConfig = {
   lensSuffix: ".lens",
   sentryDSN:
     "https://fb7c7cbf876644b68a05db08623c8369@o4504757119680512.ingest.sentry.io/4504757120729088",
+  walletConnectConfig: {
+    projectId: "e0cc618ee5360e934f51ecd94c702d3f",
+    dappMetadata: {
+      name: "Converse",
+      description:
+        "Converse connects web3 identities with each other via messaging.",
+      url: "https://getconverse.app",
+      logoUrl: "https://getconverse.app/icon.png",
+    },
+  },
 };
 
 const isAndroid = Platform.OS === "android";

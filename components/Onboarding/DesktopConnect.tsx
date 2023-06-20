@@ -3,34 +3,30 @@ import * as Linking from "expo-linking";
 import { useContext, useEffect, useState } from "react";
 import {
   ColorSchemeName,
-  Platform,
   StyleSheet,
   useColorScheme,
   Text,
-  View,
+  Platform,
 } from "react-native";
 
-import config from "../config";
-import { clearDB } from "../data/db";
-import { AppDispatchTypes } from "../data/store/appReducer";
-import { AppContext } from "../data/store/context";
+import config from "../../config";
+import { clearDB } from "../../data/db";
+import { AppDispatchTypes } from "../../data/store/appReducer";
+import { AppContext } from "../../data/store/context";
 import {
   fetchDesktopSessionXmtpKey,
   markDesktopSessionDone,
   openDesktopSession,
-} from "../utils/api";
+} from "../../utils/api";
 import {
-  backgroundColor,
   primaryColor,
   textPrimaryColor,
   textSecondaryColor,
-} from "../utils/colors";
-import { saveXmtpKeys } from "../utils/keychain";
-import { getXmtpClientFromKeys } from "../utils/xmtp";
-import ActivityIndicator from "./ActivityIndicator/ActivityIndicator";
-import Button from "./Button/Button";
-import Picto from "./Picto/Picto";
-import { sendMessageToWebview } from "./XmtpWebview";
+} from "../../utils/colors";
+import { saveXmtpKeys } from "../../utils/keychain";
+import { getXmtpClientFromKeys } from "../../utils/xmtp";
+import { sendMessageToWebview } from "../XmtpWebview";
+import OnboardingComponent from "./OnboardingComponent";
 
 export default function DesktopConnect() {
   const { state, dispatch } = useContext(AppContext);
@@ -132,87 +128,54 @@ export default function DesktopConnect() {
   }, [localState, state.app.desktopConnectSessionId, styles.clickableText]);
 
   return (
-    <View style={styles.desktopConnect}>
-      <Picto
-        picto="lock.open.laptopcomputer"
-        size={Platform.OS === "android" ? 80 : 43}
-        style={styles.picto}
-      />
-
-      <Text style={styles.title}>Desktop Connect</Text>
-      {localState.loading && (
-        <ActivityIndicator size="small" style={{ marginTop: 30 }} />
-      )}
-      {localState.subtitle && (
-        <Text style={styles.p}>{localState.subtitle}</Text>
-      )}
-      {localState.showOtp && (
-        <>
-          <Text style={styles.otp}>{localState.otp}</Text>
-          <Text style={styles.p}>
-            By connecting your wallet you agree to our{" "}
-            <Text
-              style={styles.clickableText}
-              onPress={() =>
-                Linking.openURL(
-                  "https://converseapp.notion.site/Terms-and-conditions-004036ad55044aba888cc83e21b8cbdb"
-                )
-              }
-            >
-              terms and conditions
+    <OnboardingComponent
+      picto="lock.open.laptopcomputer"
+      title="Desktop Connect"
+      loading={localState.loading}
+      subtitle={localState.subtitle}
+      backButtonAction={() => {
+        dispatch({
+          type: AppDispatchTypes.AppSetDesktopConnectSessionId,
+          payload: { sessionId: undefined },
+        });
+      }}
+      backButtonText="Back to home screen"
+      view={
+        localState.showOtp && (
+          <>
+            <Text style={styles.otp}>{localState.otp}</Text>
+            <Text style={styles.p}>
+              By connecting your wallet you agree to our{" "}
+              <Text
+                style={styles.clickableText}
+                onPress={() =>
+                  Linking.openURL(
+                    "https://converseapp.notion.site/Terms-and-conditions-004036ad55044aba888cc83e21b8cbdb"
+                  )
+                }
+              >
+                terms and conditions
+              </Text>
+              .
             </Text>
-            .
-          </Text>
-        </>
-      )}
-      <Button
-        variant="text"
-        title="Back to home screen"
-        textStyle={{ fontWeight: "600" }}
-        style={styles.back}
-        onPress={() => {
-          dispatch({
-            type: AppDispatchTypes.AppSetDesktopConnectSessionId,
-            payload: { sessionId: undefined },
-          });
-        }}
-      />
-    </View>
+          </>
+        )
+      }
+    />
   );
 }
 
 const getStyles = (colorScheme: ColorSchemeName) =>
   StyleSheet.create({
-    desktopConnect: {
-      flex: 1,
-      backgroundColor: backgroundColor(colorScheme),
-      alignItems: "center",
-    },
-    picto: {
-      ...Platform.select({
-        default: {
-          marginTop: 124,
-          marginBottom: 98,
-        },
-        android: {
-          marginTop: 165,
-          marginBottom: 61,
-        },
-      }),
-    },
-    title: {
+    otp: {
+      fontSize: 34,
+      fontWeight: "700",
       textAlign: "center",
-      ...Platform.select({
-        default: {
-          fontWeight: "700",
-          fontSize: 34,
-          color: textPrimaryColor(colorScheme),
-        },
-        android: {
-          fontSize: 24,
-          color: textPrimaryColor(colorScheme),
-        },
-      }),
+      marginTop: 25,
+      color: textPrimaryColor(colorScheme),
+    },
+    clickableText: {
+      color: primaryColor(colorScheme),
     },
     p: {
       textAlign: "center",
@@ -231,19 +194,5 @@ const getStyles = (colorScheme: ColorSchemeName) =>
           maxWidth: 260,
         },
       }),
-    },
-    otp: {
-      fontSize: 34,
-      fontWeight: "700",
-      textAlign: "center",
-      marginTop: 25,
-      color: textPrimaryColor(colorScheme),
-    },
-    back: {
-      marginTop: "auto",
-      marginBottom: 54,
-    },
-    clickableText: {
-      color: primaryColor(colorScheme),
     },
   });
