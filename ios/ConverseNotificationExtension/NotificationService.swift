@@ -119,9 +119,12 @@ func getSavedConversationTitle(contentTopic: String)-> String {
   if let data = conversationDictString?.data(using: .utf8) {
     if let conversationDict = try! JSONSerialization.jsonObject(with: data, options: .allowFragments) as? [String: Any] {
       let shortAddress = conversationDict["shortAddress"]
+      let title = conversationDict["title"]
+      // Keeping lensHandle & ensName for now but let's delete them soon
+      // and keep only title
       let lensHandle = conversationDict["lensHandle"]
       let ensName = conversationDict["ensName"]
-      return "\(lensHandle ?? (ensName ?? (shortAddress ?? "")))"
+      return "\(title ?? (lensHandle ?? (ensName ?? (shortAddress ?? ""))))"
     }
   }
   return "";

@@ -9,7 +9,7 @@ import {
   saveXmtpEnv,
   saveApiURI,
 } from "../utils/sharedData/sharedData";
-import { shortAddress } from "../utils/str";
+import { conversationName, shortAddress } from "../utils/str";
 import {
   conversationRepository,
   messageRepository,
@@ -84,6 +84,7 @@ const xmtpConversationFromDb = (
     socials?.lensHandles
   );
   const ensName = socials?.ensNames?.find((e) => e.isPrimary)?.name;
+  const conversationTitle = lensHandle || ensName;
 
   return {
     topic: dbConversation.topic,
@@ -95,8 +96,7 @@ const xmtpConversationFromDb = (
           dbConversation.messages.map((m) => [m.id, xmtpMessageFromDb(m)])
         )
       : new Map(),
-    lensHandle,
-    ensName,
+    conversationTitle,
     readUntil: dbConversation.readUntil || 0,
   };
 };
@@ -107,15 +107,8 @@ const saveConversationIdentifiersForNotifications = (
   const conversationDict: any = {
     peerAddress: conversation.peerAddress,
     shortAddress: shortAddress(conversation.peerAddress),
+    title: conversationName(conversation),
   };
-
-  if (conversation.lensHandle) {
-    conversationDict.lensHandle = conversation.lensHandle;
-  }
-
-  if (conversation.ensName) {
-    conversationDict.ensName = conversation.ensName;
-  }
 
   // Also save to shared preferences to be able to show notification
   saveConversationDict(conversation.topic, conversationDict).catch((e) => {
@@ -159,9 +152,12 @@ const setupAndSaveConversation = async (
   );
   const ensName =
     profileSocials?.ensNames?.find((e) => e.isPrimary)?.name || null;
+  const unsDomain =
+    profileSocials?.unstoppableDomains?.find((e) => e.isPrimary)?.domain ||
+    null;
 
-  conversation.lensHandle = lensHandle;
-  conversation.ensName = ensName;
+  // If this is a lens convo we show lens, if not ENS
+  conversation.conversationTitle = lensHandle || ensName || unsDomain;
   conversation.readUntil =
     conversation.readUntil || alreadyConversationInDb?.readUntil || 0;
 
@@ -230,8 +226,7 @@ const updateProfilesForConversations = async (
 
     console.log("Done saving profiles to db!");
     const handleConversation = async (conversation: XmtpConversation) => {
-      const currentLensHandle = conversation.lensHandle;
-      const currentEnsName = conversation.ensName;
+      const currentTitle = conversation.conversationTitle;
       let updated = false;
       try {
         const profileForConversation =
@@ -246,14 +241,14 @@ const updateProfilesForConversations = async (
         const newEnsName = profilesByAddress[
           conversation.peerAddress
         ].ensNames?.find((e) => e.isPrimary)?.name;
-        if (
-          newLensHandle !== currentLensHandle ||
-          newEnsName !== currentEnsName
-        ) {
+        const newUnsDomain = profilesByAddress[
+          conversation.peerAddress
+        ].unstoppableDomains?.find((e) => e.isPrimary)?.domain;
+        const newTitle = newLensHandle || newEnsName || newUnsDomain;
+        if (newTitle !== currentTitle) {
           updated = true;
         }
-        conversation.lensHandle = newLensHandle;
-        conversation.ensName = newEnsName;
+        conversation.conversationTitle = newTitle;
       } catch (e) {
         // Error (probably rate limited)
         console.log("Could not resolve handles:", conversation.peerAddress, e);

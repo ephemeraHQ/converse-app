@@ -43,7 +43,7 @@ import kotlinx.coroutines.*
 import kotlin.coroutines.resume
 
 class NotificationData(val message: String, val timestampNs: String, val contentTopic: String, val sentViaConverse: Boolean? = false)
-class ConversationDictData(val shortAddress: String? = null, val lensHandle: String? = null, val ensName: String? = null)
+class ConversationDictData(val shortAddress: String? = null, val lensHandle: String? = null, val ensName: String? = null, val title: String? = null)
 class SavedNotificationMessage(val topic: String, val content: String, val senderAddress: String, val sent: Long, val id: String, val sentViaConverse: Boolean)
 class ConversationContext(val conversationId: String, val metadata: Map<String, Any>)
 class ConversationV2Data(val version: String = "v2", val topic: String, val peerAddress: String, val createdAt: String, val context: ConversationContext?, val keyMaterial: String)
@@ -358,7 +358,9 @@ class PushNotificationsService : FirebaseMessagingService() {
     private fun getSavedConversationTitle(topic: String): String {
         val savedConversationDict = getAsyncStorage("conversation-$topic") ?: return ""
         val parsedConversationDict = Klaxon().parse<ConversationDictData>(savedConversationDict)
-        return ((parsedConversationDict?.lensHandle ?: parsedConversationDict?.ensName) ?: parsedConversationDict?.shortAddress) ?: ""
+        // Keeping lensHandle & ensName for now but let's delete them soon
+        // and keep only title
+        return (((parsedConversationDict?.title ?: parsedConversationDict?.lensHandle) ?: parsedConversationDict?.ensName) ?: parsedConversationDict?.shortAddress) ?: ""
     }
 
     private fun applicationInForeground(): Boolean {
