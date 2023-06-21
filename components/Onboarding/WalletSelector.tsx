@@ -65,27 +65,36 @@ export default function WalletSelector({
   // don't work and need parameters to be url decoded
 
   useEffect(() => {
-    console.log("overriding openURL", installedWallets.list.length);
     RNLinking.openURL = (url) => {
-      console.log("here url", url);
-      const openingWallet = installedWallets.list.find((w) =>
-        url.toLowerCase().startsWith(`${w.customScheme.toLowerCase()}wc?uri=wc`)
+      const openingWallet = installedWallets.list.find(
+        (w) =>
+          (w.universalLink && url.startsWith(w.universalLink)) ||
+          url
+            .toLowerCase()
+            .startsWith(`${w.customScheme.toLowerCase()}wc?uri=wc`)
       );
-      console.log({ openingWallet: openingWallet?.name });
       if (openingWallet && openingWallet.decodeWalletConnectURI) {
-        const urlStart = `${openingWallet.customScheme}wc?uri=wc`;
+        const urlStart = openingWallet.universalLink
+          ? `${openingWallet.universalLink}/wc?uri=wc`
+          : `${openingWallet.customScheme}wc?uri=wc`;
         const urlEnd = url.slice(urlStart.length);
         const decodedURI = `${urlStart}${decodeURIComponent(urlEnd)}`;
         console.log(
-          `[WalletConnect] Opening a decoded version of the WC URI for wallet ${openingWallet.name}`
+          `[WalletConnect] Opening a decoded version of the WC URI for wallet ${openingWallet.name} : ${decodedURI}`
         );
-        console.log(decodedURI);
-        return originalOpenURL(decodedURI);
+        return originalOpenURL(decodedURI).catch((e) => {
+          console.log(e);
+          setLoading(false);
+        });
+      } else if (openingWallet) {
+        return originalOpenURL(url).catch((e) => {
+          console.log(e);
+          setLoading(false);
+        });
       }
-      console.log(url);
       return originalOpenURL(url);
     };
-  }, [installedWallets]);
+  }, [installedWallets, setLoading]);
 
   // // Reset openURL when we leave
   // useEffect(() => {
@@ -152,14 +161,6 @@ export default function WalletSelector({
                   } else if (w.isCoinbase) {
                     await connectToCoinbase();
                   } else if (w.walletConnectId) {
-                    console.log({
-                      name: w.name,
-                      iconURL: w.iconURL,
-                      links: {
-                        native: w.customScheme,
-                        universal: w.universalLink,
-                      },
-                    });
                     const native = w.customScheme.endsWith("/")
                       ? w.customScheme.slice(0, w.customScheme.length - 1)
                       : w.customScheme;
@@ -173,8 +174,7 @@ export default function WalletSelector({
                     });
                   }
                 } catch (e: any) {
-                  console.log("COULD NOT LOGIN TO WALLET");
-                  console.log(e);
+                  console.log("Error connecting to wallet:", e);
                   setLoading(false);
                 }
               }, 10);
