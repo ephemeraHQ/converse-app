@@ -10,6 +10,7 @@ import {
   StyleSheet,
   View,
   useColorScheme,
+  Linking as RNLinking,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -35,6 +36,8 @@ type Props = {
   setLoading: (b: boolean) => void;
 };
 
+const originalOpenURL = RNLinking.openURL.bind(RNLinking);
+
 export default function WalletSelector({
   disconnect,
   setConnectWithDesktop,
@@ -58,7 +61,41 @@ export default function WalletSelector({
     list: [] as InstalledWallet[],
   });
 
+  // Walletconnect parameters are url encoded but some wallets (imtoken)
+  // don't work and need parameters to be url decoded
+
+  useEffect(() => {
+    console.log("overriding openURL", installedWallets.list.length);
+    RNLinking.openURL = (url) => {
+      console.log("here url", url);
+      const openingWallet = installedWallets.list.find((w) =>
+        url.toLowerCase().startsWith(`${w.customScheme.toLowerCase()}wc?uri=wc`)
+      );
+      console.log({ openingWallet: openingWallet?.name });
+      if (openingWallet && openingWallet.decodeWalletConnectURI) {
+        const urlStart = `${openingWallet.customScheme}wc?uri=wc`;
+        const urlEnd = url.slice(urlStart.length);
+        const decodedURI = `${urlStart}${decodeURIComponent(urlEnd)}`;
+        console.log(
+          `[WalletConnect] Opening a decoded version of the WC URI for wallet ${openingWallet.name}`
+        );
+        console.log(decodedURI);
+        return originalOpenURL(decodedURI);
+      }
+      console.log(url);
+      return originalOpenURL(url);
+    };
+  }, [installedWallets]);
+
+  // // Reset openURL when we leave
+  // useEffect(() => {
+  //   return () => {
+  //     RNLinking.openURL = originalOpenURL;
+  //   };
+  // }, []);
+
   const appState = useRef(AppState.currentState);
+
   useEffect(() => {
     const loadInstalledWallets = async (refresh: boolean) => {
       const list = await getInstalledWallets(refresh);
@@ -82,7 +119,8 @@ export default function WalletSelector({
     return () => {
       subscription.remove();
     };
-  }, []);
+  }, [setInstalledWallets]);
+
   const hasInstalledWallets = installedWallets.list.length > 0;
   const insets = useSafeAreaInsets();
   return (
@@ -114,13 +152,23 @@ export default function WalletSelector({
                   } else if (w.isCoinbase) {
                     await connectToCoinbase();
                   } else if (w.walletConnectId) {
+                    console.log({
+                      name: w.name,
+                      iconURL: w.iconURL,
+                      links: {
+                        native: w.customScheme,
+                        universal: w.universalLink,
+                      },
+                    });
+                    const native = w.customScheme.endsWith("/")
+                      ? w.customScheme.slice(0, w.customScheme.length - 1)
+                      : w.customScheme;
                     await connectToWalletConnect(w.walletConnectId, {
                       name: w.name,
                       iconURL: w.iconURL,
                       links: {
-                        native: w.customScheme.endsWith("/")
-                          ? w.customScheme.slice(0, w.customScheme.length - 1)
-                          : w.customScheme,
+                        native,
+                        universal: w.universalLink,
                       },
                     });
                   }
