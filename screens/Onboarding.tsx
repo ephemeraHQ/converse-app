@@ -261,7 +261,10 @@ export default function OnboardingScreen() {
         </>
       );
     } else {
-      if (waitingForSecondSignature) {
+      if (
+        (waitingForSecondSignature && !loading) ||
+        clickedSecondSignature.current
+      ) {
         title = "Sign (2/2)";
         text =
           "Please sign one last time to access Converse and start chatting.";
@@ -271,7 +274,7 @@ export default function OnboardingScreen() {
           <>
             <Text>
               This first signature will enable your wallet to send and receive
-              messages.
+              messages.{"\n\n"}
             </Text>
             {termsAndConditions}
           </>
