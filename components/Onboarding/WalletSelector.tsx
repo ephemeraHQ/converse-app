@@ -92,7 +92,13 @@ export default function WalletSelector({
   const insets = useSafeAreaInsets();
   return (
     <View
-      style={[styles.walletSelectorContainer, { marginBottom: insets.bottom }]}
+      style={[
+        styles.walletSelectorContainer,
+        {
+          marginBottom:
+            Platform.OS === "android" ? insets.bottom + 30 : insets.bottom,
+        },
+      ]}
     >
       {hasInstalledWallets && (
         <TableView
@@ -182,6 +188,6 @@ const styles = StyleSheet.create({
     flexGrow: 1,
     marginTop: 30,
     justifyContent: "flex-end",
-    paddingHorizontal: Platform.OS === "android" ? 64 : 24,
+    paddingHorizontal: Platform.OS === "android" ? 0 : 24,
   },
 });
