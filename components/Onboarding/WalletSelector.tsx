@@ -1,10 +1,9 @@
 import {
   useMetaMaskWallet,
   useCoinbaseWallet,
-  useTrustWallet,
 } from "@thirdweb-dev/react-native";
 import * as Linking from "expo-linking";
-import { useContext, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   AppState,
   Platform,
@@ -15,7 +14,6 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import config from "../../config";
-import { AppContext } from "../../data/store/context";
 import { textSecondaryColor } from "../../utils/colors";
 import TableView from "../TableView/TableView";
 import {
@@ -43,15 +41,12 @@ export default function WalletSelector({
   setConnectWithSeedPhrase,
   setLoading,
 }: Props) {
-  const { state, dispatch } = useContext(AppContext);
   const colorScheme = useColorScheme();
   const connectToMetamask = useMetaMaskWallet();
   const connectToCoinbase = useCoinbaseWallet(
     `https://${config.websiteDomain}/coinbase`
   );
   const connectToWalletConnect = useDynamicWalletConnect();
-  // const connectToRainbow = useRainbowWallet();
-  const connectToTrust = useTrustWallet();
   const rightView = (
     <TableViewPicto
       symbol="chevron.right"
