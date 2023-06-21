@@ -10,7 +10,6 @@ import React, {
   useState,
 } from "react";
 import {
-  View,
   StyleSheet,
   Text,
   ColorSchemeName,
@@ -227,7 +226,7 @@ export default function OnboardingScreen() {
     | string
     | JSX.Element = `Converse connects web3 identities with each other. Connect your wallet to start chatting.`;
   const termsAndConditions = (
-    <View>
+    <>
       <Text style={styles.terms}>
         By signing in you agree to our{" "}
         <Text
@@ -241,7 +240,7 @@ export default function OnboardingScreen() {
           terms and conditions.
         </Text>
       </Text>
-    </View>
+    </>
   );
   let primaryButtonText: string | undefined = undefined;
   let primaryButtonAction = () => {};
@@ -256,7 +255,7 @@ export default function OnboardingScreen() {
         <>
           <Text>
             Second and last step: please sign with your wallet so that we make
-            sure you own it.
+            sure you own it.{"\n\n"}
           </Text>
           {termsAndConditions}
         </>
