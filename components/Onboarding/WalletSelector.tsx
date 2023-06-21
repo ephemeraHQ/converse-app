@@ -125,6 +125,7 @@ export default function WalletSelector({
                     });
                   }
                 } catch (e: any) {
+                  console.log("COULD NOT LOGIN TO WALLET");
                   console.log(e);
                   setLoading(false);
                 }
