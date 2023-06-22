@@ -43,10 +43,6 @@
     </intent>
     <intent>
       <action android:name="android.intent.action.VIEW"/>
-      <data android:scheme="mewwallet" android:host="*"/>
-    </intent>
-    <intent>
-      <action android:name="android.intent.action.VIEW"/>
       <data android:scheme="exodus" android:host="*"/>
     </intent>
     <intent>

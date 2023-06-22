@@ -1,5 +1,4 @@
 import * as Linking from "expo-linking";
-import { Platform } from "react-native";
 
 export const POPULAR_WALLETS = [
   {
@@ -107,15 +106,6 @@ const SUPPORTED_WALLETS: InstalledWallet[] = [
     customScheme: "zerion://",
   },
   {
-    name: "MEW wallet",
-    walletConnectId:
-      "f5b4eeb6015d66be3f5940a895cbaa49ef3439e518cd771270e6b553b48f31d2",
-    iconURL:
-      "https://explorer-api.walletconnect.com/v3/logo/sm/e2024511-2c9b-46d7-3111-52df3d241700?projectId=2f05ae7f1116030fde2d36508f472bfb",
-    customScheme: "mewwallet://",
-    platforms: ["ios"], // Custom scheme opens nothing on Android
-  },
-  {
     name: "Exodus",
     walletConnectId:
       "e9ff15be73584489ca4a66f64d32c4537711797e30b6660dbcb71ea72a42b1f4",
@@ -145,10 +135,7 @@ export const getInstalledWallets = async (
   const checkInstalled = await Promise.all(
     SUPPORTED_WALLETS.map((w) => Linking.canOpenURL(`${w.customScheme}wc`))
   );
-  installedWallets = SUPPORTED_WALLETS.filter(
-    (w, i) =>
-      checkInstalled[i] && (!w.platforms || w.platforms.includes(Platform.OS))
-  );
+  installedWallets = SUPPORTED_WALLETS.filter((w, i) => checkInstalled[i]);
   hasCheckedInstalled = true;
   return installedWallets;
 };
