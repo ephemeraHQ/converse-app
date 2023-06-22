@@ -9,7 +9,7 @@ const defaultConfig = {
     "0x4496848684441C15A915fa9bF07D131155603253",
     "0x2376e9C7C604D1827bA9aCb1293Dc8b4DA2f0DB3",
   ],
-  conversationDomain: "getconverse.app",
+  conversationDomain: "converse.xyz",
   infuraApiKey: "38f59a7bbbca49f18046ff3a4a752e1c",
   lensApiDomain: "api.lens.dev",
   lensSuffix: ".lens",
@@ -21,8 +21,8 @@ const defaultConfig = {
       name: "Converse",
       description:
         "Converse connects web3 identities with each other via messaging.",
-      url: "https://getconverse.app",
-      logoUrl: "https://getconverse.app/icon.png",
+      url: "https://converse.xyz",
+      logoUrl: "https://converse.xyz/icon.png",
     },
   },
 };
@@ -38,7 +38,7 @@ const ENV = {
     debugMenu: true,
     bundleId: "com.converse.dev",
     scheme: "converse-dev",
-    websiteDomain: "dev.getconverse.app",
+    websiteDomain: "dev.converse.xyz",
     universalLinks: ["dev.converse.xyz/", "dev.getconverse.app/"].flatMap(
       (domain) => [`https://${domain}`, `http://${domain}`, domain]
     ),
@@ -51,7 +51,7 @@ const ENV = {
     debugMenu: true,
     bundleId: "com.converse.preview",
     scheme: "converse-preview",
-    websiteDomain: "preview.getconverse.app",
+    websiteDomain: "preview.converse.xyz",
     universalLinks: [
       "preview.converse.xyz/",
       "preview.getconverse.app/",
@@ -64,7 +64,7 @@ const ENV = {
     apiURI: "https://backend-prod.converse.xyz",
     bundleId: isAndroid ? "com.converse.prod" : "com.converse.native",
     scheme: "converse",
-    websiteDomain: "getconverse.app",
+    websiteDomain: "converse.xyz",
     universalLinks: ["converse.xyz/", "getconverse.app/"].flatMap((domain) => [
       `https://${domain}`,
       `http://${domain}`,
