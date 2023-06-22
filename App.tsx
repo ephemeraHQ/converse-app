@@ -1,5 +1,6 @@
 import "reflect-metadata";
 import "./polyfills";
+import { configure as configureCoinbase } from "@coinbase/wallet-mobile-sdk";
 import { ActionSheetProvider } from "@expo/react-native-action-sheet";
 import { Ethereum } from "@thirdweb-dev/chains";
 import { ThirdwebProvider } from "@thirdweb-dev/react-native";
@@ -25,6 +26,12 @@ import {
   MaterialDarkTheme,
   MaterialLightTheme,
 } from "./utils/colors";
+
+configureCoinbase({
+  callbackURL: new URL(`https://${config.websiteDomain}/coinbase`),
+  hostURL: new URL("https://wallet.coinbase.com/wsegue"),
+  hostPackageName: "org.toshi",
+});
 
 Sentry.init({
   dsn: config.sentryDSN,

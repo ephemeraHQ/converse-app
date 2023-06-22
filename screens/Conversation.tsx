@@ -34,6 +34,7 @@ import {
   sendMessageToWebview,
   setLastCreateConvoFromNewConvoScreen,
 } from "../components/XmtpWebview";
+import config from "../config";
 import {
   markConversationRead,
   markConversationReadUntil,
@@ -237,8 +238,7 @@ const Conversation = ({
   }, [peerAddress]);
 
   const inviteToConverse = useCallback(() => {
-    const inviteText =
-      "I am using Converse, the fastest XMTP client, as my web3 messaging app. You can download the app here: https://getconverse.app/";
+    const inviteText = `I am using Converse, the fastest XMTP client, as my web3 messaging app. You can download the app here: https://${config.websiteDomain}/`;
     setInputValue(inviteText);
     textInputRef.current?.focus();
     setShowInvite({ show: true, banner: false });
