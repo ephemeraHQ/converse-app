@@ -15,43 +15,43 @@
     </intent>
     <intent>
       <action android:name="android.intent.action.VIEW" />
-      <data android:scheme="cbwallet" />
+      <data android:scheme="cbwallet" android:host="*" />
     </intent>
     <intent>
           <action android:name="android.intent.action.VIEW" />
-          <data android:scheme="ledgerlive" />
+          <data android:scheme="ledgerlive" android:host="*" />
     </intent>
     <intent>
           <action android:name="android.intent.action.VIEW" />
-          <data android:scheme="rainbow" />
+          <data android:scheme="rainbow" android:host="*" />
     </intent>
     <intent>
           <action android:name="android.intent.action.VIEW" />
-          <data android:scheme="metamask" />
+          <data android:scheme="metamask" android:host="*" />
     </intent>
     <intent>
           <action android:name="android.intent.action.VIEW" />
-          <data android:scheme="trust" />
+          <data android:scheme="trust" android:host="*" />
     </intent>
     <intent>
           <action android:name="android.intent.action.VIEW" />
-          <data android:scheme="uniswap" />
+          <data android:scheme="uniswap" android:host="*" />
     </intent>
     <intent>
           <action android:name="android.intent.action.VIEW" />
-          <data android:scheme="zerion" />
+          <data android:scheme="zerion" android:host="*" />
     </intent>
     <intent>
           <action android:name="android.intent.action.VIEW" />
-          <data android:scheme="mewwallet" />
+          <data android:scheme="mewwallet" android:host="*" />
     </intent>
     <intent>
           <action android:name="android.intent.action.VIEW" />
-          <data android:scheme="exodus" />
+          <data android:scheme="exodus" android:host="*" />
     </intent>
     <intent>
           <action android:name="android.intent.action.VIEW" />
-          <data android:scheme="oneinch" />
+          <data android:scheme="oneinch" android:host="*" />
     </intent>
   </queries>
   <application android:name=".MainApplication" android:allowBackup="true" android:icon="@mipmap/ic_launcher_preview" android:label="@string/app_name" android:roundIcon="@mipmap/ic_launcher_preview_round" android:theme="@style/BootTheme" android:usesCleartextTraffic="true">
