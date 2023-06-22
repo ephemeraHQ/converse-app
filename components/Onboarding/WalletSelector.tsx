@@ -10,7 +10,6 @@ import {
   StyleSheet,
   View,
   useColorScheme,
-  Linking as RNLinking,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -35,8 +34,6 @@ type Props = {
   setConnectWithDesktop: (b: boolean) => void;
   setLoading: (b: boolean) => void;
 };
-
-const originalOpenURL = RNLinking.openURL.bind(RNLinking);
 
 export default function WalletSelector({
   disconnect,

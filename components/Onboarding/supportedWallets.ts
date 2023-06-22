@@ -1,4 +1,5 @@
 import * as Linking from "expo-linking";
+import { Platform } from "react-native";
 
 export const POPULAR_WALLETS = [
   {
@@ -47,6 +48,7 @@ export type InstalledWallet = {
   isMetaMask?: boolean;
   isCoinbase?: boolean;
   walletConnectId?: string;
+  platforms?: string[];
 };
 
 const SUPPORTED_WALLETS: InstalledWallet[] = [
@@ -104,14 +106,6 @@ const SUPPORTED_WALLETS: InstalledWallet[] = [
       "https://explorer-api.walletconnect.com/v3/logo/sm/f216b371-96cf-409a-9d88-296392b85800?projectId=2f05ae7f1116030fde2d36508f472bfb",
     customScheme: "zerion://",
   },
-  // {
-  //   name: "imToken",
-  //   walletConnectId:
-  //     "ef333840daf915aafdc4a004525502d6d49d77bd9c65e0642dbaefb3c2893bef",
-  //   iconURL:
-  //     "https://explorer-api.walletconnect.com/v3/logo/sm/99520548-525c-49d7-fb2f-5db65293b000?projectId=2f05ae7f1116030fde2d36508f472bfb",
-  //   customScheme: "imtokenv2://",
-  // },
   {
     name: "MEW wallet",
     walletConnectId:
@@ -119,6 +113,7 @@ const SUPPORTED_WALLETS: InstalledWallet[] = [
     iconURL:
       "https://explorer-api.walletconnect.com/v3/logo/sm/e2024511-2c9b-46d7-3111-52df3d241700?projectId=2f05ae7f1116030fde2d36508f472bfb",
     customScheme: "mewwallet://",
+    platforms: ["ios"], // Custom scheme opens nothing on Android
   },
   {
     name: "Exodus",
@@ -150,7 +145,10 @@ export const getInstalledWallets = async (
   const checkInstalled = await Promise.all(
     SUPPORTED_WALLETS.map((w) => Linking.canOpenURL(`${w.customScheme}wc`))
   );
-  installedWallets = SUPPORTED_WALLETS.filter((w, i) => checkInstalled[i]);
+  installedWallets = SUPPORTED_WALLETS.filter(
+    (w, i) =>
+      checkInstalled[i] && (!w.platforms || w.platforms.includes(Platform.OS))
+  );
   hasCheckedInstalled = true;
   return installedWallets;
 };
