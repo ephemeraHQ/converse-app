@@ -61,48 +61,6 @@ export default function WalletSelector({
     list: [] as InstalledWallet[],
   });
 
-  // Walletconnect parameters are url encoded but some wallets (imtoken)
-  // don't work and need parameters to be url decoded
-
-  useEffect(() => {
-    RNLinking.openURL = (url) => {
-      const openingWallet = installedWallets.list.find(
-        (w) =>
-          (w.universalLink && url.startsWith(w.universalLink)) ||
-          url
-            .toLowerCase()
-            .startsWith(`${w.customScheme.toLowerCase()}wc?uri=wc`)
-      );
-      if (openingWallet && openingWallet.decodeWalletConnectURI) {
-        const urlStart = openingWallet.universalLink
-          ? `${openingWallet.universalLink}/wc?uri=wc`
-          : `${openingWallet.customScheme}wc?uri=wc`;
-        const urlEnd = url.slice(urlStart.length);
-        const decodedURI = `${urlStart}${decodeURIComponent(urlEnd)}`;
-        console.log(
-          `[WalletConnect] Opening a decoded version of the WC URI for wallet ${openingWallet.name} : ${decodedURI}`
-        );
-        return originalOpenURL(decodedURI).catch((e) => {
-          console.log(e);
-          setLoading(false);
-        });
-      } else if (openingWallet) {
-        return originalOpenURL(url).catch((e) => {
-          console.log(e);
-          setLoading(false);
-        });
-      }
-      return originalOpenURL(url);
-    };
-  }, [installedWallets, setLoading]);
-
-  // // Reset openURL when we leave
-  // useEffect(() => {
-  //   return () => {
-  //     RNLinking.openURL = originalOpenURL;
-  //   };
-  // }, []);
-
   const appState = useRef(AppState.currentState);
 
   useEffect(() => {
