@@ -29,7 +29,7 @@ export const POPULAR_WALLETS = [
     name: "Trust Wallet",
     iconURL:
       "https://explorer-api.walletconnect.com/v3/logo/sm/0528ee7e-16d1-4089-21e3-bbfb41933100?projectId=2f05ae7f1116030fde2d36508f472bfb",
-    url: "https://trustology.io/",
+    url: "https://trustwallet.com/",
   },
   {
     name: "Zerion",
