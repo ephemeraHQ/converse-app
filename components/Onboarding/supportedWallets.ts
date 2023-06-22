@@ -148,7 +148,7 @@ export const getInstalledWallets = async (
 ): Promise<InstalledWallet[]> => {
   if (hasCheckedInstalled && !refresh) return installedWallets;
   const checkInstalled = await Promise.all(
-    SUPPORTED_WALLETS.map((w) => Linking.canOpenURL(w.customScheme))
+    SUPPORTED_WALLETS.map((w) => Linking.canOpenURL(`${w.customScheme}wc`))
   );
   installedWallets = SUPPORTED_WALLETS.filter((w, i) => checkInstalled[i]);
   hasCheckedInstalled = true;
