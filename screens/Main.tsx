@@ -30,7 +30,6 @@ import ConverseMatchMaker from "./ConverseMatchMaker";
 import NewConversation from "./NewConversation";
 import NotificationsScreen from "./NotificationsScreen";
 import OnboardingScreen from "./Onboarding";
-import PingMeScreen from "./PingMe";
 import ProfileScreen from "./Profile";
 import ShareProfileScreen from "./ShareProfile";
 
@@ -47,7 +46,6 @@ export type NavigationParamList = {
   };
   ConverseMatchMaker: undefined;
   ShareProfile: undefined;
-  PingMe: undefined;
   Profile: {
     address: string;
   };
@@ -120,9 +118,6 @@ export default function Main() {
             },
             ShareProfile: {
               path: "/shareProfile",
-            },
-            PingMe: {
-              path: "/pingMe",
             },
           },
         },
@@ -248,18 +243,7 @@ export default function Main() {
                   },
                 }}
               />
-              <Stack.Screen
-                name="PingMe"
-                component={PingMeScreen}
-                options={{
-                  headerTitle: "Ping me on Converse",
-                  presentation: "modal",
-                  headerStyle: {
-                    backgroundColor:
-                      navigationSecondaryBackgroundColor(colorScheme),
-                  },
-                }}
-              />
+
               <Stack.Screen
                 name="Profile"
                 component={ProfileScreen}
