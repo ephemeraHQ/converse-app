@@ -1,5 +1,6 @@
 import { useHeaderHeight } from "@react-navigation/elements";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
+import { useContext } from "react";
 import {
   ColorSchemeName,
   StyleSheet,
@@ -11,6 +12,7 @@ import {
 
 import Ellipse from "../assets/ellipse.svg";
 import config from "../config";
+import { AppContext } from "../data/store/context";
 import { NavigationParamList } from "../screens/Main";
 import { backgroundColor, textPrimaryColor } from "../utils/colors";
 import Button from "./Button/Button";
@@ -20,9 +22,11 @@ type Props = {
 } & NativeStackScreenProps<NavigationParamList, "Messages">;
 
 export default function Welcome({ ctaOnly, navigation }: Props) {
+  const { state } = useContext(AppContext);
   const headerHeight = useHeaderHeight();
   const colorScheme = useColorScheme();
   const styles = getStyles(colorScheme);
+  const frensCount = Object.keys(state.recommendations.frens).length;
   return (
     <View
       style={
@@ -73,7 +77,9 @@ export default function Welcome({ ctaOnly, navigation }: Props) {
       <View style={styles.ctaWrapper}>
         <Button
           variant="text"
-          title="Find people to talk to"
+          title={`Recommended profiles${
+            frensCount > 0 ? ` (${frensCount})` : ""
+          }`}
           textStyle={styles.cta}
           picto="eyes"
           onPress={() => {

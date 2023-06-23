@@ -53,7 +53,7 @@ export default function ConverseMatchMaker({
         contentContainerStyle={styles.modalContent}
         keyboardShouldPersistTaps="handled"
       >
-        <Recommendations navigation={navigation} />
+        <Recommendations navigation={navigation} visibility="FULL" />
       </ScrollView>
     </View>
   );
