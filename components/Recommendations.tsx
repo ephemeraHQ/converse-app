@@ -117,7 +117,6 @@ export default function Recommendations({
   useEffect(() => {
     // On load, let's load frens
     const getRecommendations = async () => {
-      console.log("LOADING RECOMMENDATIONS");
       dispatch({
         type: RecommendationsDispatchTypes.SetLoadingRecommendations,
       });
@@ -132,11 +131,12 @@ export default function Recommendations({
     const now = new Date().getTime();
     if (
       !state.recommendations.loading &&
+      state.xmtp.address &&
       now - state.recommendations.updatedAt >= EXPIRE_AFTER
     ) {
       getRecommendations();
     }
-  }, [dispatch, state.recommendations]);
+  }, [dispatch, state.recommendations, state.xmtp.address]);
 
   if (visibility === "HIDDEN") return null;
 
