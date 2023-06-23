@@ -25,17 +25,19 @@ import SeedPhraseConnect, {
   getSignerFromSeedPhrase,
 } from "../components/Onboarding/SeedPhraseConnect";
 import WalletSelector from "../components/Onboarding/WalletSelector";
+import { resetLocalXmtpState } from "../components/XmtpState";
 import { sendMessageToWebview } from "../components/XmtpWebview";
 import config from "../config";
 import { clearDB } from "../data/db";
 import { AppContext } from "../data/store/context";
+import { RecommendationsDispatchTypes } from "../data/store/recommendationsReducer";
 import { textPrimaryColor, textSecondaryColor } from "../utils/colors";
 import { saveXmtpKeys } from "../utils/keychain";
 import { shortAddress } from "../utils/str";
 import { getXmtpKeysFromSigner, isOnXmtp } from "../utils/xmtp/client";
 
 export default function OnboardingScreen() {
-  const { state } = useContext(AppContext);
+  const { state, dispatch } = useContext(AppContext);
   const colorScheme = useColorScheme();
   const styles = getStyles(colorScheme);
 
@@ -201,6 +203,8 @@ export default function OnboardingScreen() {
       saveXmtpKeys(keys);
 
       await clearDB();
+      resetLocalXmtpState();
+      dispatch({ type: RecommendationsDispatchTypes.ResetRecommendations });
       sendMessageToWebview("KEYS_LOADED_FROM_SECURE_STORAGE", {
         keys,
         env: config.xmtpEnv,
@@ -211,7 +215,7 @@ export default function OnboardingScreen() {
       setWaitingForSecondSignature(false);
       console.error(e);
     }
-  }, [thirdwebSigner, user.seedPhraseSigner]);
+  }, [dispatch, thirdwebSigner, user.seedPhraseSigner]);
 
   useEffect(() => {
     // Seed phrase account can sign immediately

@@ -19,7 +19,7 @@ export const recommendationsInitialState: RecommendationsType = {
 export enum RecommendationsDispatchTypes {
   SetLoadingRecommendations = "SET_LOADING_RECOMMENDATIONS",
   SetRecommendations = "SET_RECOMMENDATIONS",
-  DeleteRecommendations = "DELETE_RECOMMENDATIONS",
+  ResetRecommendations = "RESET_RECOMMENDATIONS",
 }
 
 type RecommendationsPayload = {
@@ -28,7 +28,7 @@ type RecommendationsPayload = {
     updatedAt: number;
   };
   [RecommendationsDispatchTypes.SetLoadingRecommendations]: undefined;
-  [RecommendationsDispatchTypes.DeleteRecommendations]: undefined;
+  [RecommendationsDispatchTypes.ResetRecommendations]: undefined;
 };
 
 export type RecommendationsActions =
@@ -56,8 +56,7 @@ export const recommendationsReducer = (
       };
     }
 
-    case RecommendationsDispatchTypes.DeleteRecommendations: {
-      mmkv.delete("converse-recommendations");
+    case RecommendationsDispatchTypes.ResetRecommendations: {
       return recommendationsInitialState;
     }
 

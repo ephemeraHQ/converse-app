@@ -6,7 +6,6 @@ import { clearDB } from "../data/db";
 import { AppDispatchTypes } from "../data/store/appReducer";
 import { DispatchType, StateType } from "../data/store/context";
 import { NotificationsDispatchTypes } from "../data/store/notificationsReducer";
-import { RecommendationsDispatchTypes } from "../data/store/recommendationsReducer";
 import { deleteXmtpConversations } from "./keychain";
 import mmkv from "./mmkv";
 import { disablePushNotifications } from "./notifications";
@@ -33,10 +32,6 @@ export const logout = async (state: StateType, dispatch: DispatchType) => {
       sessionId: undefined,
     },
   });
-  // Emptying recos
-  dispatch({
-    type: RecommendationsDispatchTypes.DeleteRecommendations,
-  });
   // Re-showing the notification screen if notifications
   // are disabled
   setTimeout(() => {
@@ -46,5 +41,7 @@ export const logout = async (state: StateType, dispatch: DispatchType) => {
         show: true,
       },
     });
+    // Emptying recos
+    mmkv.delete("converse-recommendations");
   }, 500);
 };
