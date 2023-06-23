@@ -7,6 +7,7 @@ import { initDb } from "../../data/db";
 import { AppDispatchTypes } from "../../data/store/appReducer";
 import { AppContext } from "../../data/store/context";
 import { NotificationsDispatchTypes } from "../../data/store/notificationsReducer";
+import { RecommendationsDispatchTypes } from "../../data/store/recommendationsReducer";
 import { XmtpDispatchTypes } from "../../data/store/xmtpReducer";
 import { loadSavedNotificationMessagesToContext } from "../../utils/backgroundNotifications/loadSavedNotifications";
 import { loadXmtpKeys } from "../../utils/keychain";
@@ -69,9 +70,6 @@ export default function HydrationStateHandler() {
         }
       }
 
-      const savedBlockedPeers = JSON.parse(
-        mmkv.getString("state.xmtp.blockedPeerAddresses") || "{}"
-      );
       const initialLoadDoneOnce = mmkv.getBoolean(
         "state.xmtp.initialLoadDoneOnce"
       );
@@ -80,6 +78,23 @@ export default function HydrationStateHandler() {
           type: XmtpDispatchTypes.XmtpInitialLoadDoneOnce,
         });
       }
+      const existingRecommendations = mmkv.getString(
+        "converse-recommendations"
+      );
+      if (existingRecommendations) {
+        try {
+          const parsedRecommendations = JSON.parse(existingRecommendations);
+          dispatch({
+            type: RecommendationsDispatchTypes.SetRecommendations,
+            payload: parsedRecommendations,
+          });
+        } catch (e) {
+          console.log(e);
+        }
+      }
+      const savedBlockedPeers = JSON.parse(
+        mmkv.getString("state.xmtp.blockedPeerAddresses") || "{}"
+      );
       dispatch({
         type: XmtpDispatchTypes.XmtpSetBlockedPeerAddresses,
         payload: { blockedPeerAddresses: savedBlockedPeers },

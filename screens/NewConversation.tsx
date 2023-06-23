@@ -28,6 +28,7 @@ import {
 import ActivityIndicator from "../components/ActivityIndicator/ActivityIndicator";
 import AndroidBackAction from "../components/AndroidBackAction";
 import Picto from "../components/Picto/Picto";
+import Recommendations from "../components/Recommendations";
 import TableView from "../components/TableView/TableView";
 import { TableViewPicto } from "../components/TableView/TableViewImage";
 import {
@@ -115,6 +116,11 @@ export default function NewConversation({
   });
 
   const { state } = useContext(AppContext);
+  const recommendationsLoadedOnce = state.recommendations.updatedAt > 0;
+  const recommendationsLoading = state.recommendations.loading;
+  const recommendationsFrensCount = Object.keys(
+    state.recommendations.frens
+  ).length;
   const conversationsRef = useRef(state.xmtp.conversations);
 
   useEffect(() => {
@@ -268,7 +274,7 @@ export default function NewConversation({
         {Platform.OS === "ios" && (
           <TextInput
             style={styles.input}
-            placeholder="0x, .eth, .lens, .fc …"
+            placeholder="0x, .eth, .lens, .fc, unstoppable domain …"
             autoCapitalize="none"
             autoFocus={false}
             autoCorrect={false}
@@ -276,7 +282,12 @@ export default function NewConversation({
             ref={(r) => {
               if (!initialFocus.current) {
                 initialFocus.current = true;
-                if (!value) {
+                if (
+                  !value &&
+                  !recommendationsLoading &&
+                  recommendationsLoadedOnce &&
+                  recommendationsFrensCount === 0
+                ) {
                   setTimeout(() => {
                     r?.focus();
                   }, 100);
@@ -291,7 +302,7 @@ export default function NewConversation({
         )}
         {Platform.OS === "android" && (
           <MaterialSearchBar
-            placeholder="0x, .eth, .lens, .fc …"
+            placeholder="0x, .eth, .lens, .fc, unstoppable domain …"
             onChangeText={(query) => setValue(query.trim())}
             value={value}
             icon={({ color }) => (
@@ -351,24 +362,23 @@ export default function NewConversation({
             {status.error && (
               <Text style={[styles.message, styles.error]}>{status.error}</Text>
             )}
-            {!status.error && (
-              <Text style={styles.message}>
-                <Text>
-                  Type any 0x, .eth, .lens, .fc, unstoppable
-                  {Platform.OS === "ios" ? "\n" : ""} domain or{" "}
+            {!status.error &&
+              (recommendationsFrensCount === 0 || value.length > 0) && (
+                <Text style={styles.message}>
+                  <Text>
+                    Type the full address / domain of your contact (with .eth,
+                    .lens, .fc etc.)
+                  </Text>
                 </Text>
-                <Text
-                  style={styles.clickableText}
-                  onPress={() => {
-                    navigation.navigate("ConverseMatchMaker");
-                  }}
-                >
-                  find people to talk to
-                </Text>
-              </Text>
-            )}
+              )}
           </View>
         )}
+
+        {!status.loading &&
+          value.length === 0 &&
+          recommendationsFrensCount > 0 && (
+            <Recommendations visibility="EMBEDDED" navigation={navigation} />
+          )}
 
         {status.loading && <ActivityIndicator style={styles.activity} />}
 

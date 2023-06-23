@@ -26,6 +26,7 @@ import ConversationListItem from "../components/ConversationListItem";
 import DebugButton, { shouldShowDebug } from "../components/DebugButton";
 import InitialLoad from "../components/InitialLoad";
 import Picto from "../components/Picto/Picto";
+import Recommendations from "../components/Recommendations";
 import SettingsButton from "../components/SettingsButton";
 import Welcome from "../components/Welcome";
 import { AppContext } from "../data/store/context";
@@ -275,6 +276,7 @@ export default function ConversationList({
   return (
     <>
       {screenToShow}
+      <Recommendations navigation={navigation} visibility="HIDDEN" />
       {Platform.OS === "android" && (
         <NewConversationButton navigation={navigation} route={route} />
       )}

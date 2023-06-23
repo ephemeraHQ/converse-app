@@ -14,6 +14,12 @@ import {
   ProfilesType,
 } from "./profilesReducer";
 import {
+  RecommendationsActions,
+  recommendationsInitialState,
+  recommendationsReducer,
+  RecommendationsType,
+} from "./recommendationsReducer";
+import {
   XmtpActions,
   xmtpInitialState,
   xmtpReducer,
@@ -25,6 +31,7 @@ export type StateType = {
   notifications: NotificationsType;
   app: AppType;
   profiles: ProfilesType;
+  recommendations: RecommendationsType;
 };
 
 const initialState: StateType = {
@@ -32,13 +39,15 @@ const initialState: StateType = {
   notifications: notificationsInitialState,
   app: appInitialState,
   profiles: profilesInitialState,
+  recommendations: recommendationsInitialState,
 };
 
 export type ActionsType =
   | XmtpActions
   | NotificationsActions
   | AppActions
-  | ProfilesActions;
+  | ProfilesActions
+  | RecommendationsActions;
 export type DispatchType = (value: ActionsType) => void;
 
 const AppContext = createContext<{
@@ -50,7 +59,7 @@ const AppContext = createContext<{
 });
 
 const mainReducer = (
-  { xmtp, notifications, app, profiles }: StateType,
+  { xmtp, notifications, app, profiles, recommendations }: StateType,
   action: ActionsType
 ) => ({
   app: appReducer(app, action as AppActions),
@@ -60,6 +69,10 @@ const mainReducer = (
     action as NotificationsActions
   ),
   profiles: profilesReducer(profiles, action as ProfilesActions),
+  recommendations: recommendationsReducer(
+    recommendations,
+    action as RecommendationsActions
+  ),
 });
 
 const AppProvider: React.FC<any> = (props: any) => {

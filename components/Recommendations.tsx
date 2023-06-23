@@ -1,6 +1,6 @@
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import * as Linking from "expo-linking";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useContext, useEffect } from "react";
 import {
   ColorSchemeName,
   Platform,
@@ -14,7 +14,9 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import IconLoading from "../assets/icon-loading.png";
 import config from "../config";
-import { Frens, RecommendationData, findFrens } from "../utils/api";
+import { AppContext } from "../data/store/context";
+import { RecommendationsDispatchTypes } from "../data/store/recommendationsReducer";
+import { RecommendationData, findFrens } from "../utils/api";
 import {
   backgroundColor,
   itemSeparatorColor,
@@ -22,7 +24,6 @@ import {
   textPrimaryColor,
   textSecondaryColor,
 } from "../utils/colors";
-import mmkv from "../utils/mmkv";
 import { shortAddress } from "../utils/str";
 import ActivityIndicator from "./ActivityIndicator/ActivityIndicator";
 import Button from "./Button/Button";
@@ -88,14 +89,15 @@ function Recommendation({
 
 export default function Recommendations({
   navigation,
+  visibility,
 }: {
   navigation: NativeStackNavigationProp<any>;
+  visibility: "FULL" | "EMBEDDED" | "HIDDEN";
 }) {
+  const { state, dispatch } = useContext(AppContext);
   const colorScheme = useColorScheme();
   const insets = useSafeAreaInsets();
   const styles = getStyles(colorScheme);
-  const [fetching, setFetching] = useState(false);
-  const [frens, setFrens] = useState<Frens | undefined>(undefined);
 
   const openSignalList = useCallback(() => {
     Linking.openURL(
@@ -115,37 +117,30 @@ export default function Recommendations({
   useEffect(() => {
     // On load, let's load frens
     const getRecommendations = async () => {
-      const now = new Date().getTime();
-      const existingRecommendations = mmkv.getString(
-        "converse-recommendations"
-      );
-      if (existingRecommendations) {
-        try {
-          const parsedRecommendations = JSON.parse(existingRecommendations);
-          if (now - parsedRecommendations.fetchedAt < EXPIRE_AFTER) {
-            setFrens(parsedRecommendations.frens);
-            return;
-          }
-        } catch (e) {
-          console.log(e);
-        }
-      }
-      setFetching(true);
+      console.log("LOADING RECOMMENDATIONS");
+      dispatch({
+        type: RecommendationsDispatchTypes.SetLoadingRecommendations,
+      });
       const frens = await findFrens();
-      mmkv.set(
-        "converse-recommendations",
-        JSON.stringify({
-          fetchedAt: new Date().getTime(),
-          frens,
-        })
-      );
-      setFrens(frens);
-      setFetching(false);
-    };
-    getRecommendations();
-  }, []);
+      const now = new Date().getTime();
 
-  if (fetching) {
+      dispatch({
+        type: RecommendationsDispatchTypes.SetRecommendations,
+        payload: { frens, updatedAt: now },
+      });
+    };
+    const now = new Date().getTime();
+    if (
+      !state.recommendations.loading &&
+      now - state.recommendations.updatedAt >= EXPIRE_AFTER
+    ) {
+      getRecommendations();
+    }
+  }, [dispatch, state.recommendations]);
+
+  if (visibility === "HIDDEN") return null;
+
+  if (state.recommendations.loading) {
     return (
       <View style={styles.fetching}>
         <ActivityIndicator />
@@ -153,7 +148,9 @@ export default function Recommendations({
       </View>
     );
   }
-  if (frens && Object.keys(frens).length === 0) {
+
+  const frens = state.recommendations.frens;
+  if (visibility === "FULL" && frens && Object.keys(frens).length === 0) {
     return (
       <>
         <Text style={styles.emoji}>😐</Text>
@@ -174,12 +171,24 @@ export default function Recommendations({
   }
   return (
     <View style={{ marginBottom: insets.bottom }}>
-      <Text style={styles.emoji}>👋</Text>
-      <Text style={styles.title}>
-        Find people who have interests in common with you. Start talking to
-        them.
-      </Text>
-      <View style={styles.recommendations}>
+      {visibility === "FULL" && (
+        <>
+          <Text style={styles.emoji}>👋</Text>
+          <Text style={styles.title}>
+            Find people who have interests in common with you. Start talking to
+            them.
+          </Text>
+        </>
+      )}
+      {visibility === "EMBEDDED" && (
+        <Text style={styles.sectionTitle}>RECOMMENDED PROFILES</Text>
+      )}
+      <View
+        style={[
+          styles.recommendations,
+          { marginTop: visibility === "FULL" ? 30 : 0 },
+        ]}
+      >
         {frens &&
           Object.keys(frens).map((address) => (
             <Recommendation
@@ -229,7 +238,7 @@ const getStyles = (colorScheme: ColorSchemeName) =>
       textAlign: "center",
     },
     recommendations: {
-      marginVertical: 30,
+      marginBottom: 30,
       backgroundColor: backgroundColor(colorScheme),
       ...Platform.select({
         default: {
@@ -321,5 +330,19 @@ const getStyles = (colorScheme: ColorSchemeName) =>
     },
     noMatch: {
       marginTop: 30,
+    },
+    sectionTitle: {
+      color: textSecondaryColor(colorScheme),
+      marginLeft: 16,
+      ...Platform.select({
+        default: {
+          fontSize: 12,
+          marginBottom: 8,
+        },
+        android: {
+          fontSize: 11,
+          marginBottom: 12,
+        },
+      }),
     },
   });
