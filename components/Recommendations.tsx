@@ -140,7 +140,8 @@ export default function Recommendations({
 
   if (visibility === "HIDDEN") return null;
 
-  if (state.recommendations.loading) {
+  const frens = state.recommendations.frens;
+  if (state.recommendations.loading && Object.keys(frens).length === 0) {
     return (
       <View style={styles.fetching}>
         <ActivityIndicator />
@@ -149,7 +150,6 @@ export default function Recommendations({
     );
   }
 
-  const frens = state.recommendations.frens;
   if (visibility === "FULL" && frens && Object.keys(frens).length === 0) {
     return (
       <>
