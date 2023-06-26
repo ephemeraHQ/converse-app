@@ -110,7 +110,6 @@ export default function WalletSelector({
                   if (w.isCoinbase) {
                     await connectToCoinbase();
                   } else if (w.walletConnectId) {
-                    console.log(w.walletConnectId);
                     const native = w.customScheme.endsWith("/")
                       ? w.customScheme.slice(0, w.customScheme.length - 1)
                       : w.customScheme;
