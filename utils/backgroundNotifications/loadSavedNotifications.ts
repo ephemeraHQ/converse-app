@@ -36,6 +36,7 @@ export const loadSavedNotificationMessagesToContext = async (
               content: message.content,
               status: "sent",
               sentViaConverse: !!message.sentViaConverse,
+              contentType: message.contentType || "xmtp.org/text:1.0",
             },
           ],
           message.topic,

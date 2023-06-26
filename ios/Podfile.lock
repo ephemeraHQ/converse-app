@@ -20,6 +20,9 @@ PODS:
     - ExpoModulesCore
   - EXFont (11.1.1):
     - ExpoModulesCore
+  - EXImageLoader (4.1.1):
+    - ExpoModulesCore
+    - React-Core
   - EXJSONUtils (0.5.1)
   - EXManifests (0.5.2):
     - EXJSONUtils
@@ -104,6 +107,8 @@ PODS:
   - ExpoCrypto (12.2.1):
     - ExpoModulesCore
   - ExpoDevice (5.2.1):
+    - ExpoModulesCore
+  - ExpoImagePicker (14.1.1):
     - ExpoModulesCore
   - ExpoKeepAwake (12.0.1):
     - ExpoModulesCore
@@ -520,6 +525,8 @@ PODS:
     - SDWebImageWebPCoder (~> 0.8.4)
   - RNFlashList (1.4.3):
     - React-Core
+  - RNFS (2.20.0):
+    - React-Core
   - RNReactNativeSharedGroupPreferences (1.1.23):
     - React
   - RNReanimated (3.1.0):
@@ -576,6 +583,7 @@ DEPENDENCIES:
   - EXDocumentPicker (from `../node_modules/expo-document-picker/ios`)
   - EXFileSystem (from `../node_modules/expo-file-system/ios`)
   - EXFont (from `../node_modules/expo-font/ios`)
+  - EXImageLoader (from `../node_modules/expo-image-loader/ios`)
   - EXJSONUtils (from `../node_modules/expo-json-utils/ios`)
   - EXManifests (from `../node_modules/expo-manifests/ios`)
   - EXNotifications (from `../node_modules/expo-notifications/ios`)
@@ -587,6 +595,7 @@ DEPENDENCIES:
   - ExpoClipboard (from `../node_modules/expo-clipboard/ios`)
   - ExpoCrypto (from `../node_modules/expo-crypto/ios`)
   - ExpoDevice (from `../node_modules/expo-device/ios`)
+  - ExpoImagePicker (from `../node_modules/expo-image-picker/ios`)
   - ExpoKeepAwake (from `../node_modules/expo-keep-awake/ios`)
   - ExpoModulesCore (from `../node_modules/expo-modules-core`)
   - ExpoRandom (from `../node_modules/expo-random/ios`)
@@ -640,6 +649,7 @@ DEPENDENCIES:
   - "RNCAsyncStorage (from `../node_modules/@react-native-async-storage/async-storage`)"
   - RNFastImage (from `../node_modules/react-native-fast-image`)
   - "RNFlashList (from `../node_modules/@shopify/flash-list`)"
+  - RNFS (from `../node_modules/react-native-fs`)
   - RNReactNativeSharedGroupPreferences (from `../node_modules/react-native-shared-group-preferences`)
   - RNReanimated (from `../node_modules/react-native-reanimated`)
   - RNScreens (from `../node_modules/react-native-screens`)
@@ -679,6 +689,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/expo-file-system/ios"
   EXFont:
     :path: "../node_modules/expo-font/ios"
+  EXImageLoader:
+    :path: "../node_modules/expo-image-loader/ios"
   EXJSONUtils:
     :path: "../node_modules/expo-json-utils/ios"
   EXManifests:
@@ -701,6 +713,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/expo-crypto/ios"
   ExpoDevice:
     :path: "../node_modules/expo-device/ios"
+  ExpoImagePicker:
+    :path: "../node_modules/expo-image-picker/ios"
   ExpoKeepAwake:
     :path: "../node_modules/expo-keep-awake/ios"
   ExpoModulesCore:
@@ -803,6 +817,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native-fast-image"
   RNFlashList:
     :path: "../node_modules/@shopify/flash-list"
+  RNFS:
+    :path: "../node_modules/react-native-fs"
   RNReactNativeSharedGroupPreferences:
     :path: "../node_modules/react-native-shared-group-preferences"
   RNReanimated:
@@ -828,6 +844,7 @@ SPEC CHECKSUMS:
   EXDocumentPicker: a2e52acbb3204af80b6e3ffd3deb2cb25d052593
   EXFileSystem: 844e86ca9b5375486ecc4ef06d3838d5597d895d
   EXFont: 6ea3800df746be7233208d80fe379b8ed74f4272
+  EXImageLoader: fd053169a8ee932dd83bf1fe5487a50c26d27c2b
   EXJSONUtils: 48b1e764ac35160e6f54d21ab60d7d9501f3e473
   EXManifests: 500666d48e8dd7ca5a482c9e729e4a7a6c34081b
   EXNotifications: dd628737af60fc8cc62dccebacd326b0fbbc0dcb
@@ -839,6 +856,7 @@ SPEC CHECKSUMS:
   ExpoClipboard: 9b87df0ad145e3aa841614fab6aea54b7a604850
   ExpoCrypto: 477dfe89c81527b376f2c344ca1d2a01244b243c
   ExpoDevice: e0bebf68f978b3d353377ce42e73c20c0a070215
+  ExpoImagePicker: 270dea232b3a072d981dd564e2cafc63a864edb1
   ExpoKeepAwake: 69f5f627670d62318410392d03e0b5db0f85759a
   ExpoModulesCore: 653958063a301098b541ae4dfed1ac0b98db607b
   ExpoRandom: 7ee07d62e7003b74d0536e0495e3a653fe1b2a74
@@ -895,6 +913,7 @@ SPEC CHECKSUMS:
   RNCAsyncStorage: 8616bd5a58af409453ea4e1b246521bb76578d60
   RNFastImage: 5c9c9fed9c076e521b3f509fe79e790418a544e8
   RNFlashList: ade81b4e928ebd585dd492014d40fb8d0e848aab
+  RNFS: 4ac0f0ea233904cb798630b3c077808c06931688
   RNReactNativeSharedGroupPreferences: de0121a4224c267bc7e9fb16c398f3f087c8da81
   RNReanimated: b1220a0e5168745283ff5d53bfc7d2144b2cee1b
   RNScreens: 218801c16a2782546d30bd2026bb625c0302d70f

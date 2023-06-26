@@ -32,6 +32,7 @@ const hideDataFromEvents = [
   "RELOAD",
   "LOAD_CONVERSATIONS_AND_MESSAGES",
   "XMTP_EXPORTED_CONVERSATIONS",
+  "UPLOAD_ATTACHMENT",
 ];
 
 let lastNavigation: any;

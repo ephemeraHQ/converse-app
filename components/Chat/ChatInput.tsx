@@ -1,3 +1,5 @@
+import * as ImagePicker from "expo-image-picker";
+import mime from "mime";
 import { MutableRefObject } from "react";
 import {
   View,
@@ -8,6 +10,7 @@ import {
   TouchableOpacity,
   Platform,
 } from "react-native";
+import RNFS from "react-native-fs";
 
 import SendButton from "../../assets/send-button.svg";
 import {
@@ -19,6 +22,7 @@ import {
   textPrimaryColor,
   textSecondaryColor,
 } from "../../utils/colors";
+import { sendMessageToWebview } from "../XmtpWebview";
 
 type Props = {
   inputValue: string;
@@ -46,6 +50,30 @@ export default function ChatInput({
 
   return (
     <View style={styles.chatInputContainer}>
+      <TouchableOpacity
+        onPress={async () => {
+          const mediaPicked = await ImagePicker.launchImageLibraryAsync({
+            mediaTypes: ImagePicker.MediaTypeOptions.All,
+            quality: 1,
+            base64: false,
+            allowsMultipleSelection: false,
+          });
+          const asset = mediaPicked.assets?.[0];
+          if (!asset) {
+            return;
+          }
+          const base64Content = await RNFS.readFile(asset.uri, "base64");
+          sendMessageToWebview("UPLOAD_ATTACHMENT", {
+            filename: asset.fileName,
+            base64Content,
+            mimeType: mime.getType(asset.fileName || ""),
+          });
+        }}
+        activeOpacity={inputValue.length > 0 ? 0.4 : 0.6}
+        style={[styles.sendButtonContainer]}
+      >
+        <SendButton width={36} height={36} style={[styles.sendButton]} />
+      </TouchableOpacity>
       <TextInput
         editable={editable !== undefined ? editable : true}
         style={styles.chatInput}

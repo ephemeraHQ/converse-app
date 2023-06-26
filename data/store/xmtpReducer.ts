@@ -62,6 +62,7 @@ type XmtpProtocolMessage = {
   senderAddress: string;
   sent: number;
   content: string;
+  contentType: string;
 };
 
 export type XmtpMessage = XmtpProtocolMessage & {

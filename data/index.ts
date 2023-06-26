@@ -41,6 +41,7 @@ const xmtpMessageToDb = (
   conversationId: conversationTopic,
   status: xmtpMessage.status || "sent",
   sentViaConverse: !!xmtpMessage.sentViaConverse,
+  contentType: xmtpMessage.contentType,
 });
 
 const xmtpMessageFromDb = (message: Message): XmtpMessage => ({
@@ -50,6 +51,7 @@ const xmtpMessageFromDb = (message: Message): XmtpMessage => ({
   content: message.content,
   status: message.status,
   sentViaConverse: !!message.sentViaConverse,
+  contentType: message.contentType,
 });
 
 const xmtpConversationToDb = (

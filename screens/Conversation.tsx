@@ -330,6 +330,7 @@ const Conversation = ({
             content,
             status: "sending",
             sentViaConverse: !isV1Conversation, // V1 Convo don't support the sentViaConverse feature
+            contentType: "xmtp.org/text:1.0",
           },
         ],
         conversation.topic,

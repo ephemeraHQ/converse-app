@@ -13,6 +13,7 @@ import { addReadStatus1683114681319 } from "./migrations/1683114681319-addReadSt
 import { addSentViaConverse1684057254703 } from "./migrations/1684057254703-addSentViaConverse";
 import { addProfileEntity1686053217007 } from "./migrations/1686053217007-addProfileEntity";
 import { removeHandlesFromConvo1686124833536 } from "./migrations/1686124833536-removeHandlesFromConvo";
+import { addContentType1687793816866 } from "./migrations/1687793816866-addContentType";
 
 const dataSource = new DataSource({
   database: "converse",
@@ -30,6 +31,7 @@ const dataSource = new DataSource({
     addSentViaConverse1684057254703,
     addProfileEntity1686053217007,
     removeHandlesFromConvo1686124833536,
+    addContentType1687793816866,
   ],
   type: "expo",
 });
