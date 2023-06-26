@@ -76,10 +76,11 @@ const SUPPORTED_WALLETS: InstalledWallet[] = [
   },
   {
     name: "MetaMask",
+    walletConnectId:
+      "c57ca95b47569778a828d19178114f4db188b89b763c899ba0be274e97267d96",
     iconURL:
       "https://explorer-api.walletconnect.com/v3/logo/sm/5195e9db-94d8-4579-6f11-ef553be95100?projectId=2f05ae7f1116030fde2d36508f472bfb",
     customScheme: "metamask://",
-    isMetaMask: true,
   },
   {
     name: "Trust Wallet",
