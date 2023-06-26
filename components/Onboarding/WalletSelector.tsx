@@ -1,7 +1,4 @@
-import {
-  useMetaMaskWallet,
-  useCoinbaseWallet,
-} from "@thirdweb-dev/react-native";
+import { useCoinbaseWallet } from "@thirdweb-dev/react-native";
 import * as Linking from "expo-linking";
 import { useEffect, useRef, useState } from "react";
 import {
@@ -42,7 +39,6 @@ export default function WalletSelector({
   setLoading,
 }: Props) {
   const colorScheme = useColorScheme();
-  const connectToMetamask = useMetaMaskWallet();
   const connectToCoinbase = useCoinbaseWallet(
     `https://${config.websiteDomain}/coinbase`
   );
@@ -111,11 +107,10 @@ export default function WalletSelector({
               await disconnect(false);
               setTimeout(async () => {
                 try {
-                  if (w.isMetaMask) {
-                    await connectToMetamask();
-                  } else if (w.isCoinbase) {
+                  if (w.isCoinbase) {
                     await connectToCoinbase();
                   } else if (w.walletConnectId) {
+                    console.log(w.walletConnectId);
                     const native = w.customScheme.endsWith("/")
                       ? w.customScheme.slice(0, w.customScheme.length - 1)
                       : w.customScheme;
