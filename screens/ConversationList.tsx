@@ -223,7 +223,11 @@ export default function ConversationList({
             ]
               ? "This user is blocked"
               : conversation.messages?.size > 0
-              ? lastMessage?.content
+              ? lastMessage?.contentType?.startsWith(
+                  "xmtp.org/remoteStaticAttachment"
+                )
+                ? "Attachment"
+                : lastMessage?.content
               : ""
           }
           lastMessageStatus={lastMessage?.status}

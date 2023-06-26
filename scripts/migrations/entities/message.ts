@@ -33,6 +33,9 @@ export class Message {
   @Column("text")
   conversationId!: string;
 
+  @Column("text", { default: "xmtp.org/text:1.0" })
+  contentType!: string;
+
   @ManyToOne(
     "Conversation",
     (conversation: Conversation) => conversation.messages

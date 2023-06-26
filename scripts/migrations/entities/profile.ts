@@ -4,6 +4,8 @@ export type LensHandle = {
   profileId: string;
   handle: string;
   isDefault: boolean;
+  name?: string;
+  profilePictureURI?: string;
 };
 
 export type EnsName = {
@@ -11,10 +13,22 @@ export type EnsName = {
   isPrimary: boolean;
 };
 
-type Socials = {
+export type FarcasterUsername = {
+  username: string;
+  name?: string;
+  avatarURI?: string;
+};
+
+export type UnstoppableDomain = {
+  domain: string;
+  isPrimary: boolean;
+};
+
+export type ProfileSocials = {
   ensNames?: EnsName[];
-  farcasterUsernames?: string[];
+  farcasterUsernames?: FarcasterUsername[];
   lensHandles?: LensHandle[];
+  unstoppableDomains?: UnstoppableDomain[];
 };
 
 @Entity()
@@ -28,7 +42,7 @@ export class Profile {
   @Column("int", { default: 0 })
   updatedAt!: number;
 
-  getSocials(): Socials {
+  getSocials(): ProfileSocials {
     try {
       const parsed = JSON.parse(this.socials);
       return parsed;
