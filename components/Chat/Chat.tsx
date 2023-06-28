@@ -46,13 +46,6 @@ const getMessagesArray = (
   const reverseArray = [];
   for (let index = messagesArray.length - 1; index >= 0; index--) {
     const message = messagesArray[index] as MessageToDisplay;
-    if (message.contentType.startsWith("xmtp.org/remoteStaticAttachment")) {
-      console.log("WE GOT AN ATTACHMENT");
-      console.log(message.content);
-      // const jsonContent = JSON.parse(message.content);
-      // console.log(jsonContent);
-      continue;
-    }
     message.fromMe =
       !!xmtpAddress &&
       xmtpAddress.toLowerCase() === message.senderAddress.toLowerCase();

@@ -2,6 +2,7 @@ import * as Clipboard from "expo-clipboard";
 import Constants from "expo-constants";
 import * as Updates from "expo-updates";
 import { forwardRef, useContext, useImperativeHandle } from "react";
+import RNFS from "react-native-fs";
 import * as Sentry from "sentry-expo";
 
 import config from "../config";
@@ -41,6 +42,11 @@ const DebugButton = forwardRef((props, ref) => {
           }
         },
         "Clear DB": clearDB,
+        "Clear messages attachments folder": async () => {
+          const messageFolder = `${RNFS.DocumentDirectoryPath}/messages`;
+          await RNFS.unlink(messageFolder);
+          alert("Cleared!");
+        },
         "Delete XMTP Key": deleteXmtpKeys,
         "Sentry JS error": () => {
           throw new Error("My first Sentry error!");

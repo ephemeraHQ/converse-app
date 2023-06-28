@@ -313,9 +313,11 @@ const Conversation = ({
   }, [conversation, dispatch]);
 
   const sendMessage = useCallback(
-    async (content: string) => {
+    async (content: string, contentType = "xmtp.org/text:1.0") => {
       if (!conversation) return;
-      setInputValue("");
+      if (contentType === "xmtp.org/text:1.0") {
+        setInputValue("");
+      }
       const messageId = uuid.v4().toString();
       const sentAtTime = new Date();
       const isV1Conversation = conversation.topic.startsWith("/xmtp/0/dm-");
@@ -330,7 +332,7 @@ const Conversation = ({
             content,
             status: "sending",
             sentViaConverse: !isV1Conversation, // V1 Convo don't support the sentViaConverse feature
-            contentType: "xmtp.org/text:1.0",
+            contentType,
           },
         ],
         conversation.topic,

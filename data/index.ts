@@ -1,5 +1,7 @@
 import "reflect-metadata";
 
+import RNFS from "react-native-fs";
+
 import { addLog } from "../components/DebugButton";
 import { getProfilesForAddresses } from "../utils/api";
 import { getLensHandleFromConversationIdAndPeer } from "../utils/lens";
@@ -434,9 +436,18 @@ export const updateMessagesIds = async (
       { id: messageToUpdate.message.id },
       { id: messageToUpdate.newMessageId, sent: messageToUpdate.newMessageSent }
     );
-    const updatedMessage = await messageRepository.findOneBy({
-      id: messageToUpdate.newMessageId,
-    });
+    // Let's also move message data & attachments if exists
+    const oldMessageFolder = `${RNFS.DocumentDirectoryPath}/messages/${messageToUpdate.message.id}`;
+    const newMessageFolder = `${RNFS.DocumentDirectoryPath}/messages/${messageToUpdate.newMessageId}`;
+    const [messageFolderExists, updatedMessage] = await Promise.all([
+      RNFS.exists(oldMessageFolder),
+      messageRepository.findOneBy({
+        id: messageToUpdate.newMessageId,
+      }),
+    ]);
+    if (messageFolderExists) {
+      await RNFS.moveFile(oldMessageFolder, newMessageFolder);
+    }
     if (!updatedMessage) throw new Error("Updated message does not exist");
     messagesToDispatch.push({
       topic: messageToUpdate.message.conversationId,

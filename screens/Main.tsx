@@ -10,6 +10,7 @@ import { StatusBar } from "expo-status-bar";
 import React, { useContext, useRef } from "react";
 import { Platform, useColorScheme } from "react-native";
 
+import ChatAddMediaPreview from "../components/Chat/ChatAddMediaPreview";
 import ActionSheetStateHandler from "../components/StateHandlers/ActionSheetStateHandler";
 import HydrationStateHandler from "../components/StateHandlers/HydrationStateHandler";
 import InitialStateHandler from "../components/StateHandlers/InitialStateHandler";
@@ -32,6 +33,7 @@ import NotificationsScreen from "./NotificationsScreen";
 import OnboardingScreen from "./Onboarding";
 import ProfileScreen from "./Profile";
 import ShareProfileScreen from "./ShareProfile";
+import WebviewPreview from "./WebviewPreview";
 
 export type NavigationParamList = {
   Messages: undefined;
@@ -48,6 +50,9 @@ export type NavigationParamList = {
   ShareProfile: undefined;
   Profile: {
     address: string;
+  };
+  WebviewPreview: {
+    uri: string;
   };
 };
 
@@ -118,6 +123,15 @@ export default function Main() {
             },
             ShareProfile: {
               path: "/shareProfile",
+            },
+            WebviewPreview: {
+              path: "/webviewPreview",
+              parse: {
+                uri: decodeURIComponent,
+              },
+              stringify: {
+                uri: encodeURIComponent,
+              },
             },
           },
         },
@@ -243,6 +257,18 @@ export default function Main() {
                   },
                 }}
               />
+              <Stack.Screen
+                name="WebviewPreview"
+                component={WebviewPreview}
+                options={{
+                  headerTitle: "File preview",
+                  presentation: "modal",
+                  headerStyle: {
+                    backgroundColor:
+                      navigationSecondaryBackgroundColor(colorScheme),
+                  },
+                }}
+              />
 
               <Stack.Screen
                 name="Profile"
@@ -266,6 +292,7 @@ export default function Main() {
     <>
       {mainHeaders}
       {screenToShow}
+      {state.app.mediaPreview.mediaURI && <ChatAddMediaPreview />}
     </>
   );
 }
