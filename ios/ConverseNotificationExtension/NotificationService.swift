@@ -18,6 +18,7 @@ struct SavedNotificationMessage: Codable {
   var sent: Int
   var id: String
   var sentViaConverse: Bool
+  var contentType: String
 }
 
 func shortAddress(address: String) -> String {
@@ -58,6 +59,8 @@ func setKeychainValue(value: String, forKey: String) throws {
 }
 
 func getXmtpClientFromKeys() -> XMTP.Client? {
+  Client.register(codec: AttachmentCodec())
+  Client.register(codec: RemoteAttachmentCodec())
   let xmtpKeys = getKeychainValue(forKey: "XMTP_KEYS")
   if (xmtpKeys == nil || xmtpKeys?.count == 0) {
     return nil;
@@ -102,9 +105,9 @@ func loadSavedMessages() -> [SavedNotificationMessage] {
   }
 }
 
-func saveMessage(topic: String, sent: Date, senderAddress: String, content: String, id: String, sentViaConverse: Bool) throws {
+func saveMessage(topic: String, sent: Date, senderAddress: String, content: String, id: String, sentViaConverse: Bool, contentType: String) throws {
   let sharedDefaults = SharedDefaults()
-  let savedMessage = SavedNotificationMessage(topic: topic, content: content, senderAddress: senderAddress, sent: Int(sent.timeIntervalSince1970 * 1000), id: id, sentViaConverse: sentViaConverse)
+  let savedMessage = SavedNotificationMessage(topic: topic, content: content, senderAddress: senderAddress, sent: Int(sent.timeIntervalSince1970 * 1000), id: id, sentViaConverse: sentViaConverse, contentType: contentType)
   
   var savedMessagesList = loadSavedMessages()
   savedMessagesList.append(savedMessage)
@@ -167,20 +170,55 @@ func decodeConversationMessage(xmtpClient: XMTP.Client, envelope: XMTP.Envelope,
     do {
       print("[NotificationExtension] Decoding message...")
       let decodedMessage = try conversation!.decode(envelope)
-      let decodedContent: String? = try decodedMessage.content()
       print("[NotificationExtension] Message decoded!")
-      if (decodedContent != nil) {
+      let contentType = getContentTypeString(type: decodedMessage.encodedContent.type)
+      if (contentType.starts(with: "xmtp.org/text:")) {
+        let decodedContent: String? = try decodedMessage.content()
+        if (decodedContent != nil) {
+          // Let's save the notification for immediate display
+          try saveMessage(topic: envelope.contentTopic, sent: decodedMessage.sent, senderAddress: decodedMessage.senderAddress, content: decodedContent!, id: decodedMessage.id, sentViaConverse: sentViaConverse, contentType: contentType)
+        }
+        return (decodedContent, decodedMessage.senderAddress)
+      } else if (contentType.starts(with: "xmtp.org/remoteStaticAttachment:")) {
         // Let's save the notification for immediate display
-        try saveMessage(topic: envelope.contentTopic, sent: decodedMessage.sent, senderAddress: decodedMessage.senderAddress, content: decodedContent!, id: decodedMessage.id, sentViaConverse: sentViaConverse)
+        do {
+          let remoteAttachment: RemoteAttachment = try decodedMessage.encodedContent.decoded()
+          let contentToSave = getJsonRemoteAttachment(remoteAttachment: remoteAttachment)
+          if (contentToSave != nil) {
+            try saveMessage(topic: envelope.contentTopic, sent: decodedMessage.sent, senderAddress: decodedMessage.senderAddress, content: contentToSave!, id: decodedMessage.id, sentViaConverse: sentViaConverse, contentType: contentType)
+          }
+        } catch {
+          print("[NotificationExtension] ERROR WHILE SAVING ATTACHMENT CONTENT \(error)")
+        }
+        return ("📎 Media", decodedMessage.senderAddress)
+      } else {
+        print("[NotificationExtension] Unknown content type")
+        return (nil, nil);
       }
-      return (decodedContent, decodedMessage.senderAddress)
     } catch {
+      print("[NotificationExtension] ERROR WHILE DECODING \(error)")
       return (nil, nil);
       //      return "ERROR WHILE DECODING \(error)";
     }
   } else {
     return (nil, nil);
     //    return "NO CONVERSATION";
+  }
+}
+
+func getContentTypeString(type: ContentTypeID) -> String {
+  return "\(type.authorityID)/\(type.typeID):\(type.versionMajor).\(type.versionMinor)"
+}
+
+func getJsonRemoteAttachment(remoteAttachment: RemoteAttachment) -> String? {
+  do {
+    let dictionary = NSDictionary(dictionary: ["url": remoteAttachment.url, "contentDigest": remoteAttachment.contentDigest, "secret": remoteAttachment.secret.base64EncodedString(), "salt": remoteAttachment.salt.base64EncodedString(), "nonce": remoteAttachment.nonce.base64EncodedString(), "scheme": remoteAttachment.scheme.rawValue, "contentLength": remoteAttachment.contentLength ?? 0, "filename": remoteAttachment.filename ?? ""])
+    let jsonData = try JSONSerialization.data(withJSONObject: dictionary, options: [])
+    let jsonString = String(data: jsonData, encoding: .utf8)
+    return jsonString
+  } catch {
+    print("Error converting dictionary to JSON string: \(error.localizedDescription)")
+    return nil
   }
 }
 
