@@ -16,6 +16,7 @@ import {
   useColorScheme,
   StyleSheet,
   TextInput,
+  Platform,
 } from "react-native";
 import RNFS from "react-native-fs";
 import { ContentTypeRemoteAttachment } from "xmtp-content-type-remote-attachment";
@@ -208,7 +209,11 @@ export default function ChatAddAttachment({ sendMessage, inputRef }: Props) {
       activeOpacity={0.4}
     >
       <View style={styles.attachmentButton}>
-        <Picto picto="plus" color={textSecondaryColor(colorScheme)} size={20} />
+        <Picto
+          picto="plus"
+          color={textSecondaryColor(colorScheme)}
+          size={Platform.OS === "android" ? 30 : 20}
+        />
       </View>
     </TouchableOpacity>
   );
@@ -217,13 +222,22 @@ export default function ChatAddAttachment({ sendMessage, inputRef }: Props) {
 const getStyles = (colorScheme: ColorSchemeName) =>
   StyleSheet.create({
     attachmentButton: {
-      width: 27,
-      height: 27,
       flex: 1,
       justifyContent: "center",
       alignItems: "flex-end",
       flexDirection: "row",
       marginLeft: 12,
-      paddingBottom: 24,
+      ...Platform.select({
+        default: {
+          paddingBottom: 24,
+          width: 27,
+          height: 27,
+        },
+        android: {
+          paddingBottom: 8,
+          width: 27,
+          height: 27,
+        },
+      }),
     },
   });

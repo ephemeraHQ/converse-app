@@ -54,7 +54,7 @@ export default function ChatAttachmentPreview({ message }: Props) {
         const supportedMediaType = isImageMimetype(attachment.mimeType);
         // Let's cache the file and decoded information
         await RNFS.writeFile(attachmentPath, attachment.data, "base64");
-        const imageSize = await getImageSize(attachmentPath);
+        const imageSize = await getImageSize(`file://${attachmentPath}`);
         await RNFS.writeFile(
           attachmentJsonPath,
           JSON.stringify({
@@ -83,7 +83,7 @@ export default function ChatAttachmentPreview({ message }: Props) {
     Linking.openURL(
       Linking.createURL("/webviewPreview", {
         queryParams: {
-          uri: attachment.mediaURL,
+          uri: `file://${attachment.mediaURL}`,
         },
       })
     );
@@ -96,31 +96,34 @@ export default function ChatAttachmentPreview({ message }: Props) {
       // await RNFS.unlink(messageFolder);
       const attachmentJsonPath = `${messageFolder}/attachment.json`;
       if (!client) return;
-      try {
-        const messageAttachmentData = JSON.parse(
-          await RNFS.read(attachmentJsonPath)
-        );
-        const supportedMediaType = isImageMimetype(
-          messageAttachmentData.mimeType
-        );
-        const attachmentPath = `${messageFolder}/${messageAttachmentData.filename}`;
-        const fileExists = await RNFS.exists(attachmentPath);
-        if (fileExists) {
-          // If we have the file locally let's display
-          // it or have a link
-          setAttachment({
-            mediaType: supportedMediaType ? "IMAGE" : "UNSUPPORTED",
-            loading: false,
-            mimeType: messageAttachmentData.mimeType,
-            imageSize: messageAttachmentData.imageSize,
-            mediaURL: attachmentPath,
-            contentLength: 0,
-            filename: messageAttachmentData.filename,
-          });
-          return;
+      const attachmentExists = await RNFS.exists(attachmentJsonPath);
+      if (attachmentExists) {
+        try {
+          const messageAttachmentData = JSON.parse(
+            await RNFS.read(attachmentJsonPath)
+          );
+          const supportedMediaType = isImageMimetype(
+            messageAttachmentData.mimeType
+          );
+          const attachmentPath = `${messageFolder}/${messageAttachmentData.filename}`;
+          const fileExists = await RNFS.exists(attachmentPath);
+          if (fileExists) {
+            // If we have the file locally let's display
+            // it or have a link
+            setAttachment({
+              mediaType: supportedMediaType ? "IMAGE" : "UNSUPPORTED",
+              loading: false,
+              mimeType: messageAttachmentData.mimeType,
+              imageSize: messageAttachmentData.imageSize,
+              mediaURL: attachmentPath,
+              contentLength: 0,
+              filename: messageAttachmentData.filename,
+            });
+            return;
+          }
+        } catch (e) {
+          //
         }
-      } catch (e) {
-        //
       }
 
       let contentLength = 0;
@@ -221,7 +224,7 @@ export default function ChatAttachmentPreview({ message }: Props) {
       <>
         <TouchableWithoutFeedback onPress={openInWebview}>
           <Image
-            source={{ uri: attachment.mediaURL }}
+            source={{ uri: `file://${attachment.mediaURL}` }}
             style={[styles.imagePreview, { aspectRatio }]}
           />
         </TouchableWithoutFeedback>
@@ -251,10 +254,15 @@ const getStyles = (colorScheme: ColorSchemeName) =>
       right: 12,
       backgroundColor: "rgba(24, 24, 24, 0.5)",
       borderRadius: 18,
-      paddingTop: 1,
-      paddingBottom: 1,
       paddingLeft: 1,
       paddingRight: 2,
       zIndex: 2,
+      ...Platform.select({
+        default: {
+          paddingBottom: 1,
+          paddingTop: 1,
+        },
+        android: { paddingBottom: 3, paddingTop: 2 },
+      }),
     },
   });

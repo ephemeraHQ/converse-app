@@ -1,5 +1,5 @@
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Platform, Button } from "react-native";
 import { WebView } from "react-native-webview";
 
@@ -25,11 +25,21 @@ export default function WebviewPreview({
         ),
     });
   }, [navigation]);
+  // This is a trick because on Android, the setAllowFileAccess method
+  // was called AFTER the setAllowFileAccess method and first file
+  // uri could not be loaded. That way we start with a blank screen and
+  // immediatly after we load our local URI
+  const [uri, setUri] = useState("");
+  useEffect(() => {
+    setImmediate(() => {
+      setUri(route.params.uri);
+    });
+  }, [route.params.uri]);
   return (
     <WebView
       autoManageStatusBarEnabled={false}
       source={{
-        uri: route.params.uri,
+        uri,
       }}
       javaScriptEnabled
       originWhitelist={["*"]}
