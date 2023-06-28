@@ -8,6 +8,11 @@ export type AppType = {
   isInternetReachable: boolean;
   hydrationDone: boolean;
   desktopConnectSessionId?: string;
+  mediaPreview: {
+    sending: boolean;
+    mediaURI?: string;
+    error: boolean;
+  };
 };
 
 export const appInitialState: AppType = {
@@ -16,6 +21,11 @@ export const appInitialState: AppType = {
   isInternetReachable: false,
   hydrationDone: false,
   desktopConnectSessionId: undefined,
+  mediaPreview: {
+    sending: false,
+    mediaURI: undefined,
+    error: false,
+  },
 };
 
 export enum AppDispatchTypes {
@@ -24,6 +34,7 @@ export enum AppDispatchTypes {
   AppSetInternetReachable = "APP_SET_INTERNET_REACHABLE",
   AppSetHydrationDone = "APP_SET_HYDRATION_DONE",
   AppSetDesktopConnectSessionId = "APP_SET_DESKTOP_SESSION_ID",
+  AppSetMediaPreview = "APP_SET_MEDIA_PREVIEW",
 }
 
 type AppPayload = {
@@ -41,6 +52,11 @@ type AppPayload = {
   };
   [AppDispatchTypes.AppSetDesktopConnectSessionId]: {
     sessionId?: string;
+  };
+  [AppDispatchTypes.AppSetMediaPreview]: {
+    sending: boolean;
+    mediaURI?: string;
+    error: boolean;
   };
 };
 
@@ -72,6 +88,13 @@ export const appReducer = (state: AppType, action: AppActions): AppType => {
       return {
         ...state,
         hydrationDone: action.payload.done,
+      };
+    }
+
+    case AppDispatchTypes.AppSetMediaPreview: {
+      return {
+        ...state,
+        mediaPreview: action.payload,
       };
     }
 

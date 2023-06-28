@@ -1,6 +1,7 @@
 import React, { useCallback, useContext, useEffect, useRef } from "react";
 import { Alert, AppState, Platform, StyleSheet, View } from "react-native";
 import { SafeAreaProvider } from "react-native-safe-area-context";
+import uuid from "react-native-uuid";
 import { WebView, WebViewMessageEvent } from "react-native-webview";
 
 import config from "../config";
@@ -33,10 +34,16 @@ const hideDataFromEvents = [
   "LOAD_CONVERSATIONS_AND_MESSAGES",
   "XMTP_EXPORTED_CONVERSATIONS",
   "UPLOAD_ATTACHMENT",
+  "ATTACHMENT_UPLOAD_RESULT",
+  "DECODE_ATTACHMENT_RESULT",
+  "DECODE_ATTACHMENT",
 ];
 
 let lastNavigation: any;
 let lastCreateConvoFromNewConvoScreen = false;
+const tasksCallbacks: {
+  [uid: string]: (data: any) => void;
+} = {};
 
 export const saveWebviewNavigation = (navigation: any) => {
   lastNavigation = navigation;
@@ -46,7 +53,11 @@ export const setLastCreateConvoFromNewConvoScreen = (isFrom: boolean) => {
   lastCreateConvoFromNewConvoScreen = isFrom;
 };
 
-export const sendMessageToWebview = (eventName: string, data?: any) => {
+export const sendMessageToWebview = (
+  eventName: string,
+  data?: any,
+  callback?: (data?: any) => void
+) => {
   if (!webview) {
     setTimeout(() => {
       sendMessageToWebview(eventName, data);
@@ -64,6 +75,12 @@ export const sendMessageToWebview = (eventName: string, data?: any) => {
     `[Expo  ➡️   Webview]: ${eventName}`,
     (!hideDataFromEvents.includes(eventName) && data) || ""
   );
+
+  if (callback) {
+    const taskId = uuid.v4().toString();
+    data.taskId = taskId;
+    tasksCallbacks[taskId] = callback;
+  }
   webview.postMessage(JSON.stringify({ eventName, data }));
 };
 
@@ -199,6 +216,13 @@ export default function XmtpWebview() {
   const onMessage = useCallback(
     async (e: WebViewMessageEvent) => {
       const { eventName, data } = JSON.parse(e.nativeEvent.data);
+      if (data?.taskId) {
+        const callback = tasksCallbacks[data.taskId];
+        delete tasksCallbacks[data.taskId];
+        if (callback) {
+          callback(data);
+        }
+      }
       switch (eventName) {
         case "PONG":
           webviewReadyForMessages = true;

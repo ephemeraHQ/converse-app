@@ -1,4 +1,8 @@
 import { Signer } from "ethers";
+import {
+  AttachmentCodec,
+  RemoteAttachmentCodec,
+} from "xmtp-content-type-remote-attachment";
 
 import config from "../../config";
 import { Client } from "../../vendor/xmtp-js/src";
@@ -12,11 +16,15 @@ export const isOnXmtp = async (address: string) =>
     env,
   });
 
-export const getXmtpClientFromKeys = (keys: any) =>
-  Client.create(null, {
+export const getXmtpClientFromKeys = async (keys: any) => {
+  const client = await Client.create(null, {
     privateKeyOverride: Buffer.from(keys),
     env,
   });
+  client.registerCodec(new AttachmentCodec());
+  client.registerCodec(new RemoteAttachmentCodec());
+  return client;
+};
 
 export const getXmtpKeysFromSigner = (
   signer: Signer,

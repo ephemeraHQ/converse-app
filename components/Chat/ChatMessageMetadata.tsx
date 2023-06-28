@@ -16,20 +16,21 @@ import { MessageToDisplay } from "./ChatMessage";
 
 type Props = {
   message: MessageToDisplay;
+  white: boolean;
 };
 
-export default function ChatMessageMetadata({ message }: Props) {
+export default function ChatMessageMetadata({ message, white }: Props) {
   const colorScheme = useColorScheme();
   const styles = getStyles(colorScheme);
   return (
     <View style={styles.metadata}>
-      <Text style={[styles.time, message.fromMe ? styles.timeMe : undefined]}>
+      <Text style={[styles.time, white ? styles.timeWhite : undefined]}>
         {format(message.sent, "HH:mm")}
       </Text>
       {message.sentViaConverse && (
         <ConverseMessageBubble
           style={styles.statusIcon}
-          fill={message.fromMe ? "white" : textPrimaryColor(colorScheme)}
+          fill={white ? "white" : textPrimaryColor(colorScheme)}
           width={9}
           height={9}
         />
@@ -71,7 +72,7 @@ const getStyles = (colorScheme: ColorSchemeName) =>
       color: textPrimaryColor(colorScheme),
       marginRight: 3,
     },
-    timeMe: {
+    timeWhite: {
       color: "white",
     },
     statusIconContainer: {

@@ -1,4 +1,5 @@
 import { useCallback, useContext, useEffect } from "react";
+import { ContentTypeRemoteAttachment } from "xmtp-content-type-remote-attachment";
 
 import {
   getMessagesToSend,
@@ -9,6 +10,7 @@ import { Message } from "../data/db/entities/message";
 import { AppContext, DispatchType } from "../data/store/context";
 import { XmtpDispatchTypes } from "../data/store/xmtpReducer";
 import { getBlockedPeers } from "../utils/api";
+import { deserializeRemoteAttachmentContent } from "../utils/attachment";
 import { loadXmtpConversation, loadXmtpKeys } from "../utils/keychain";
 import { getXmtpSignature } from "../utils/xmtp";
 import { getXmtpClientFromKeys } from "../utils/xmtp/client";
@@ -125,9 +127,16 @@ export const sendPendingMessages = async (dispatch: DispatchType) => {
         message.conversationId
       );
       if (conversation) {
-        const preparedMessage = await conversation.prepareMessage(
-          message.content
-        );
+        let preparedMessage: PreparedMessage;
+        if (message.contentType === ContentTypeRemoteAttachment.toString()) {
+          preparedMessage = await conversation.prepareMessage(
+            deserializeRemoteAttachmentContent(message.content),
+            { contentType: ContentTypeRemoteAttachment }
+          );
+        } else {
+          preparedMessage = await conversation.prepareMessage(message.content);
+        }
+
         const newMessageId = await preparedMessage.messageID();
         preparedMessagesToSend[newMessageId] = preparedMessage;
         messageIdsToUpdate[message.id] = {

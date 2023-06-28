@@ -226,7 +226,7 @@ export default function ConversationList({
               ? lastMessage?.contentType?.startsWith(
                   "xmtp.org/remoteStaticAttachment"
                 )
-                ? "Attachment"
+                ? "📎 Media"
                 : lastMessage?.content
               : ""
           }

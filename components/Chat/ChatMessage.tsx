@@ -1,5 +1,5 @@
 import * as Clipboard from "expo-clipboard";
-import { useCallback, useContext } from "react";
+import { ReactNode, useCallback, useContext } from "react";
 import {
   Alert,
   View,
@@ -25,6 +25,7 @@ import {
 import { getRelativeDate } from "../../utils/date";
 import ClickableText from "../ClickableText";
 import { showActionSheetWithOptions } from "../StateHandlers/ActionSheetStateHandler";
+import ChatAttachmentPreview from "./ChatAttachementPreview";
 import ChatMessageMetadata from "./ChatMessageMetadata";
 
 export type MessageToDisplay = XmtpMessage & {
@@ -132,7 +133,28 @@ export default function ChatMessage({ message }: Props) {
     showMessageReportActionSheet,
   ]);
 
-  const metadata = <ChatMessageMetadata message={message} />;
+  const metadata = (
+    <ChatMessageMetadata message={message} white={message.fromMe} />
+  );
+  const isAttachment = message.contentType.startsWith(
+    "xmtp.org/remoteStaticAttachment:"
+  );
+  let messageContent: ReactNode;
+  if (isAttachment) {
+    messageContent = <ChatAttachmentPreview message={message} />;
+  } else {
+    messageContent = (
+      <ClickableText
+        style={[
+          styles.messageText,
+          message.fromMe ? styles.messageTextMe : undefined,
+        ]}
+      >
+        {message.content}
+        <View style={{ opacity: 0 }}>{metadata}</View>
+      </ClickableText>
+    );
+  }
 
   return (
     <View
@@ -147,6 +169,9 @@ export default function ChatMessage({ message }: Props) {
       <TouchableOpacity
         style={[
           styles.messageBubble,
+          isAttachment
+            ? styles.messageBubbleAttachment
+            : styles.messageBubbleText,
           message.fromMe ? styles.messageBubbleMe : undefined,
           Platform.select({
             default: {},
@@ -165,17 +190,9 @@ export default function ChatMessage({ message }: Props) {
           }),
         ]}
         activeOpacity={1}
-        onLongPress={showMessageActionSheet}
+        onLongPress={isAttachment ? undefined : showMessageActionSheet}
       >
-        <ClickableText
-          style={[
-            styles.messageText,
-            message.fromMe ? styles.messageTextMe : undefined,
-          ]}
-        >
-          {message.content}
-          <View style={{ opacity: 0 }}>{metadata}</View>
-        </ClickableText>
+        {messageContent}
         <View style={styles.metadataContainer}>{metadata}</View>
 
         {!message.hasNextMessageInSeries && Platform.OS === "ios" && (
@@ -215,11 +232,16 @@ const getStyles = (colorScheme: ColorSchemeName) =>
       flexShrink: 1,
       flexGrow: 0,
       maxWidth: "80%",
-      paddingHorizontal: 12,
       minHeight: 36,
-      paddingVertical: Platform.OS === "android" ? 6 : 7,
       backgroundColor: messageBubbleColor(colorScheme),
       borderRadius: 18,
+    },
+    messageBubbleText: {
+      paddingHorizontal: 12,
+      paddingVertical: Platform.OS === "android" ? 6 : 7,
+    },
+    messageBubbleAttachment: {
+      padding: 4,
     },
     messageBubbleMe: {
       marginLeft: "auto",
