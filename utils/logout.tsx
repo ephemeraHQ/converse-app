@@ -27,8 +27,6 @@ export const logout = async (state: StateType, dispatch: DispatchType) => {
   // Clearing Async storage and mmkv
   promisesToAwait.push(AsyncStorage.clear());
   promisesToAwait.push(mmkv.clearAll());
-  console.log("awaiting...");
   await Promise.all(promisesToAwait);
-  console.log("done, restarting!");
   RNRestart.restart();
 };
