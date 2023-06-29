@@ -2,7 +2,6 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import RNRestart from "react-native-restart";
 
 import { resetLocalXmtpState } from "../components/XmtpState";
-import { sendMessageToWebview } from "../components/XmtpWebview";
 import { clearDB } from "../data/db";
 import { DispatchType, StateType } from "../data/store/context";
 import { deleteXmtpConversations, deleteXmtpKeys } from "./keychain";
@@ -25,8 +24,6 @@ export const logout = async (state: StateType, dispatch: DispatchType) => {
   promisesToAwait.push(clearDB());
   // Unsubscribing from notifications
   promisesToAwait.push(disablePushNotifications());
-  // Disconnecting from the webview xmtp client
-  sendMessageToWebview("DISCONNECT");
   // Clearing Async storage and mmkv
   promisesToAwait.push(AsyncStorage.clear());
   promisesToAwait.push(mmkv.clearAll());
