@@ -51,10 +51,12 @@ export default function ChatAttachmentBubble({ message }: Props) {
           NSURLIsExcludedFromBackupKey: true,
         });
         const attachmentPath = `${messageFolder}/${attachment.filename}`;
-        const supportedMediaType = isImageMimetype(attachment.mimeType);
+        const isImage = isImageMimetype(attachment.mimeType);
         // Let's cache the file and decoded information
         await RNFS.writeFile(attachmentPath, attachment.data, "base64");
-        const imageSize = await getImageSize(`file://${attachmentPath}`);
+        const imageSize = isImage
+          ? await getImageSize(`file://${attachmentPath}`)
+          : undefined;
         await RNFS.writeFile(
           attachmentJsonPath,
           JSON.stringify({
@@ -66,7 +68,7 @@ export default function ChatAttachmentBubble({ message }: Props) {
         );
 
         setAttachment({
-          mediaType: supportedMediaType ? "IMAGE" : "UNSUPPORTED",
+          mediaType: isImage ? "IMAGE" : "UNSUPPORTED",
           loading: false,
           imageSize,
           contentLength: 0,
