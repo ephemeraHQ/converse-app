@@ -40,7 +40,7 @@
     "@sentry/react-native": "4.15.2",
     "@shopify/flash-list": "^1.4.3",
     "@stardazed/streams-polyfill": "^2.4.0",
-    "@thirdweb-dev/react-native": "^0.2.21-nightly-6aa6f7e0-20230622035028",
+    "@thirdweb-dev/react-native": "^0.2.25",
     "@thirdweb-dev/react-native-compat": "^0.2.18",
     "@types/elliptic": "^6.4.14",
     "@xmtp/proto": "^3.24.0",
