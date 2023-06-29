@@ -11,7 +11,7 @@ import { RecommendationsDispatchTypes } from "../../data/store/recommendationsRe
 import { XmtpDispatchTypes } from "../../data/store/xmtpReducer";
 import { loadSavedNotificationMessagesToContext } from "../../utils/backgroundNotifications/loadSavedNotifications";
 import { loadXmtpKeys } from "../../utils/keychain";
-import { logout } from "../../utils/logout";
+import { cleanupAfterLogout, logout } from "../../utils/logout";
 import mmkv from "../../utils/mmkv";
 import { getLoggedXmtpAddress } from "../../utils/sharedData/sharedData";
 import { addLog } from "../DebugButton";
@@ -26,6 +26,11 @@ export default function HydrationStateHandler() {
   // Initial hydration
   useEffect(() => {
     const hydrate = async () => {
+      const didJustLogout = mmkv.getBoolean("converse-logout");
+      if (didJustLogout) {
+        console.log("Cleaning up after a logout");
+        await cleanupAfterLogout();
+      }
       // Let's rehydrate value before hiding splash
       const [showNotificationsScreen] = await Promise.all([
         AsyncStorage.getItem("state.notifications.showNotificationsScreen"),
