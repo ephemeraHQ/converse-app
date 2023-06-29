@@ -14,6 +14,7 @@ import com.facebook.react.bridge.WritableNativeArray
 import com.google.crypto.tink.subtle.Base64
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
+import com.google.protobuf.ByteString
 import com.reactnativecommunity.asyncstorage.AsyncStorageModule
 import expo.modules.core.ExportedModule
 import expo.modules.core.ModuleRegistry
@@ -28,6 +29,7 @@ import expo.modules.notifications.notifications.model.NotificationContent
 import expo.modules.notifications.notifications.model.NotificationRequest
 import expo.modules.notifications.notifications.model.triggers.FirebaseNotificationTrigger
 import expo.modules.notifications.service.NotificationsService
+import expo.modules.notifications.service.delegates.encodedInBase64
 import expo.modules.securestore.SecureStoreModule
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
@@ -40,11 +42,16 @@ import org.xmtp.android.library.messages.PrivateKeyBundleV1Builder
 import java.security.MessageDigest
 import java.util.*
 import kotlinx.coroutines.*
+import org.xmtp.android.library.codecs.AttachmentCodec
+import org.xmtp.android.library.codecs.RemoteAttachment
+import org.xmtp.android.library.codecs.RemoteAttachmentCodec
+import org.xmtp.android.library.codecs.decoded
+import org.xmtp.proto.message.contents.Content
 import kotlin.coroutines.resume
 
 class NotificationData(val message: String, val timestampNs: String, val contentTopic: String, val sentViaConverse: Boolean? = false)
 class ConversationDictData(val shortAddress: String? = null, val lensHandle: String? = null, val ensName: String? = null, val title: String? = null)
-class SavedNotificationMessage(val topic: String, val content: String, val senderAddress: String, val sent: Long, val id: String, val sentViaConverse: Boolean)
+class SavedNotificationMessage(val topic: String, val content: String, val senderAddress: String, val sent: Long, val id: String, val sentViaConverse: Boolean, val contentType: String)
 class ConversationContext(val conversationId: String, val metadata: Map<String, Any>)
 class ConversationV2Data(val version: String = "v2", val topic: String, val peerAddress: String, val createdAt: String, val context: ConversationContext?, val keyMaterial: String)
 
@@ -91,6 +98,8 @@ class PushNotificationsService : FirebaseMessagingService() {
     }
 
     override fun onMessageReceived(remoteMessage: RemoteMessage) {
+        Client.register(codec = AttachmentCodec())
+        Client.register(codec = RemoteAttachmentCodec())
         var xmtpClient = initXmtpClient()
         if (applicationInForeground()) {
             Log.d(TAG, "App is in foreground, dropping")
@@ -175,17 +184,31 @@ class PushNotificationsService : FirebaseMessagingService() {
 
         val decodedMessage = conversation.decode(envelope)
         Log.d(TAG, "Successfully decoded message incoming message")
-        saveMessageToStorage(envelope.contentTopic, decodedMessage, sentViaConverse)
+        val contentType = getContentTypeString(decodedMessage.encodedContent.type)
+        var notificationMessage = "New message";
+        if (contentType.startsWith("xmtp.org/text:")) {
+            notificationMessage = decodedMessage.body;
+            saveMessageToStorage(envelope.contentTopic, decodedMessage, sentViaConverse, contentType)
+        } else if (contentType.startsWith("xmtp.org/remoteStaticAttachment:")) {
+            notificationMessage = "\uD83D\uDCCE Media";
+            saveMessageToStorage(envelope.contentTopic, decodedMessage, sentViaConverse, contentType)
+        } else {
+            Log.d(TAG, "Unknown content type")
+        }
         if (decodedMessage.senderAddress == xmtpClient.address) return
         var title = getSavedConversationTitle(envelope.contentTopic)
         if (title == "") {
             title = shortAddress(decodedMessage.senderAddress)
         }
 
-        showNotification(title, decodedMessage.body, remoteMessage)
+        showNotification(title, notificationMessage, remoteMessage)
     }
 
-    private fun saveMessageToStorage(topic: String, decodedMessage: DecodedMessage, sentViaConverse: Boolean) {
+    private fun getContentTypeString(contentType: Content.ContentTypeId): String {
+        return "${contentType.authorityId}/${contentType.typeId}:${contentType.versionMajor}.${contentType.versionMinor}"
+    }
+
+    private fun saveMessageToStorage(topic: String, decodedMessage: DecodedMessage, sentViaConverse: Boolean, contentType: String) {
         val currentSavedMessagesString = getAsyncStorage("saved-notifications-messages")
         Log.d(TAG, "Got current saved messages from storage: $currentSavedMessagesString")
         var currentSavedMessages = listOf<SavedNotificationMessage>()
@@ -194,18 +217,55 @@ class PushNotificationsService : FirebaseMessagingService() {
         } catch (error: Exception) {
             Log.d(TAG, "Could not parse saved messages from storage: $currentSavedMessagesString - $error")
         }
+        var messageBody = "";
+        if (contentType.startsWith("xmtp.org/text:")) {
+            messageBody = decodedMessage.body;
+        } else if (contentType.startsWith("xmtp.org/remoteStaticAttachment:")) {
+            messageBody = getJsonRemoteAttachment(decodedMessage);
+        }
+        if (messageBody.isEmpty()) {
+            return;
+        }
         val newMessageToSave = SavedNotificationMessage(
             topic,
-            decodedMessage.body,
+            messageBody,
             decodedMessage.senderAddress,
             decodedMessage.sent.time,
             decodedMessage.id,
-            sentViaConverse
+            sentViaConverse,
+            contentType
         )
         currentSavedMessages += newMessageToSave
         val newSavedMessagesString = Klaxon().toJsonString(currentSavedMessages)
         setAsyncStorage("saved-notifications-messages", newSavedMessagesString)
     }
+
+    private fun byteStringToBase64(bs: ByteString): String {
+        return Base64.encode(bs.toByteArray())
+    }
+
+    private fun getJsonRemoteAttachment(decodedMessage: DecodedMessage): String {
+        val remoteAttachment =
+            decodedMessage.encodedContent.decoded<RemoteAttachment>() ?: return "";
+        try {
+            val dictionary =
+                mapOf(
+                    "url" to remoteAttachment!!.url,
+                    "contentDigest" to remoteAttachment!!.contentDigest,
+                    "secret" to byteStringToBase64(remoteAttachment!!.secret),
+                    "salt" to byteStringToBase64(remoteAttachment!!.salt),
+                    "nonce" to byteStringToBase64(remoteAttachment!!.nonce),
+                    "scheme" to remoteAttachment!!.scheme,
+                    "contentLength" to (remoteAttachment!!.contentLength ?: 0),
+                    "filename" to (remoteAttachment!!.filename ?: "")
+                )
+            return JSONObject(dictionary).toString()
+        } catch (e: Exception) {
+            println("Error converting dictionary to JSON string: ${e.localizedMessage}")
+            return "";
+        }
+    }
+
 
     private fun getKeychainValue(key: String) = runBlocking {
         val argumentsMap = mutableMapOf<String, Any>()

@@ -10,7 +10,7 @@ import { StatusBar } from "expo-status-bar";
 import React, { useContext, useRef } from "react";
 import { Platform, useColorScheme } from "react-native";
 
-import ChatAddMediaPreview from "../components/Chat/ChatAddMediaPreview";
+import ChatSendAttachment from "../components/Chat/ChatSendAttachment";
 import ActionSheetStateHandler from "../components/StateHandlers/ActionSheetStateHandler";
 import HydrationStateHandler from "../components/StateHandlers/HydrationStateHandler";
 import InitialStateHandler from "../components/StateHandlers/InitialStateHandler";
@@ -292,7 +292,7 @@ export default function Main() {
     <>
       {mainHeaders}
       {screenToShow}
-      {state.app.mediaPreview.mediaURI && <ChatAddMediaPreview />}
+      {state.app.mediaPreview.mediaURI && <ChatSendAttachment />}
     </>
   );
 }

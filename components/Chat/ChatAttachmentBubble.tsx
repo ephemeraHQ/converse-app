@@ -25,7 +25,7 @@ type Props = {
   message: MessageToDisplay;
 };
 
-export default function ChatAttachmentPreview({ message }: Props) {
+export default function ChatAttachmentBubble({ message }: Props) {
   const colorScheme = useColorScheme();
   const styles = getStyles(colorScheme);
   const [attachment, setAttachment] = useState({

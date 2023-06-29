@@ -25,7 +25,7 @@ import {
 import { getRelativeDate } from "../../utils/date";
 import ClickableText from "../ClickableText";
 import { showActionSheetWithOptions } from "../StateHandlers/ActionSheetStateHandler";
-import ChatAttachmentPreview from "./ChatAttachementPreview";
+import ChatAttachmentBubble from "./ChatAttachmentBubble";
 import ChatMessageMetadata from "./ChatMessageMetadata";
 
 export type MessageToDisplay = XmtpMessage & {
@@ -141,7 +141,7 @@ export default function ChatMessage({ message }: Props) {
   );
   let messageContent: ReactNode;
   if (isAttachment) {
-    messageContent = <ChatAttachmentPreview message={message} />;
+    messageContent = <ChatAttachmentBubble message={message} />;
   } else {
     messageContent = (
       <ClickableText

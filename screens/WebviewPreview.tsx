@@ -1,9 +1,10 @@
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useEffect, useState } from "react";
-import { Platform, Button } from "react-native";
+import { Platform, Button, useColorScheme } from "react-native";
 import { WebView } from "react-native-webview";
 
 import AndroidBackAction from "../components/AndroidBackAction";
+import { setAndroidSystemColor, setAndroidColors } from "../utils/colors";
 import { NavigationParamList } from "./Main";
 
 export default function WebviewPreview({
@@ -35,6 +36,13 @@ export default function WebviewPreview({
       setUri(route.params.uri);
     });
   }, [route.params.uri]);
+  const colorScheme = useColorScheme();
+  useEffect(() => {
+    setAndroidSystemColor("#000000");
+    return () => {
+      setAndroidColors(colorScheme);
+    };
+  }, [colorScheme]);
   return (
     <WebView
       autoManageStatusBarEnabled={false}

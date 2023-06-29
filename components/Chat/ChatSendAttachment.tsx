@@ -1,4 +1,5 @@
-import { useCallback, useContext } from "react";
+import { StatusBar } from "expo-status-bar";
+import { useCallback, useContext, useEffect } from "react";
 import {
   ColorSchemeName,
   Image,
@@ -13,10 +14,14 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import SendButton from "../../assets/send-button.svg";
 import { AppDispatchTypes } from "../../data/store/appReducer";
 import { AppContext } from "../../data/store/context";
-import { dangerColor } from "../../utils/colors";
+import {
+  dangerColor,
+  setAndroidColors,
+  setAndroidSystemColor,
+} from "../../utils/colors";
 import ActivityIndicator from "../ActivityIndicator/ActivityIndicator";
 
-export default function ChatAddMediaPreview() {
+export default function ChatSendAttachment() {
   const colorScheme = useColorScheme();
   const styles = getStyles(colorScheme);
   const { state, dispatch } = useContext(AppContext);
@@ -28,9 +33,16 @@ export default function ChatAddMediaPreview() {
       payload: { mediaURI, error: false, sending: true },
     });
   }, [dispatch, mediaURI]);
+  useEffect(() => {
+    setAndroidSystemColor("#000000");
+    return () => {
+      setAndroidColors(colorScheme);
+    };
+  }, [colorScheme]);
   if (!mediaURI) return null;
   return (
     <View style={styles.previewContainer}>
+      <StatusBar hidden={false} style="light" backgroundColor="black" />
       <View style={styles.imageContainer}>
         <Image
           source={{ uri: state.app.mediaPreview.mediaURI }}

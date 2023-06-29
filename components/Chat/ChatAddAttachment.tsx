@@ -1,5 +1,6 @@
 import * as ImagePicker from "expo-image-picker";
 import * as Linking from "expo-linking";
+import { setStatusBarHidden } from "expo-status-bar";
 import mime from "mime";
 import {
   MutableRefObject,
@@ -112,12 +113,18 @@ export default function ChatAddAttachment({ sendMessage, inputRef }: Props) {
   ]);
 
   const pickMedia = useCallback(async () => {
+    if (Platform.OS === "ios") {
+      setStatusBarHidden(true, "fade");
+    }
     const mediaPicked = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       quality: 1,
       base64: false,
       allowsMultipleSelection: false,
     });
+    if (Platform.OS === "ios") {
+      setStatusBarHidden(false, "fade");
+    }
     if (mediaPicked.canceled) return;
     const asset = mediaPicked.assets?.[0];
     if (!asset) return;
