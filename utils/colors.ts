@@ -304,8 +304,10 @@ export const setAndroidSystemColor = (color: string) => {
 };
 
 export const setAndroidColors = (colorScheme: ColorSchemeName) => {
-  const color = rgbStringToHex(backgroundColor(colorScheme));
-  setAndroidSystemColor(color);
+  if (Platform.OS === "android") {
+    const color = rgbStringToHex(backgroundColor(colorScheme));
+    setAndroidSystemColor(color);
+  }
 };
 
 export const actionSheetColors = (colorScheme: ColorSchemeName) =>
