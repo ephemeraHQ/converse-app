@@ -247,7 +247,7 @@ export default function OnboardingScreen() {
       setWaitingForSecondSignature(false);
       console.error(e);
     }
-  }, [dispatch, thirdwebSigner, user.seedPhraseSigner]);
+  }, [dispatch, thirdwebSigner, user.isEphemeral, user.seedPhraseSigner]);
 
   useEffect(() => {
     // Seed phrase account can sign immediately

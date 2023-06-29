@@ -32,13 +32,15 @@ export const initDb = async () => {
   }
 };
 
-export async function clearDB() {
+export async function clearDB(reset = true) {
   try {
     await dataSource.destroy();
     const db = SQLite.openDatabase("converse");
     await db.closeAsync();
     await db.deleteAsync();
-    initDb();
+    if (reset) {
+      initDb();
+    }
   } catch (e) {
     console.log("Could not drop database", e);
   }
