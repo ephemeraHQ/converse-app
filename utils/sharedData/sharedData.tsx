@@ -41,3 +41,8 @@ export const deleteLoggedXmtpAddress = () =>
 
 export const getLoggedXmtpAddress = () =>
   SharedGroupPreferences.getItem("xmtp-address", appGroup);
+
+export const resetSharedData = () => {
+  emptySavedNotificationsMessages();
+  deleteLoggedXmtpAddress();
+};
