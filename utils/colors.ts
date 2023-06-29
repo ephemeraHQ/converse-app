@@ -293,11 +293,19 @@ const rgbStringToHex = (rgbString: string) => {
   return `#${hexValue}`;
 };
 
-export const setAndroidColors = (colorScheme: ColorSchemeName) => {
+export const setAndroidSystemColor = (color: string) => {
   if (Platform.OS === "android") {
     const BackgroundColor = require("react-native-background-color");
-    BackgroundColor.setColor(rgbStringToHex(backgroundColor(colorScheme)));
+    const SystemNavigationBar =
+      require("react-native-system-navigation-bar").default;
+    BackgroundColor.setColor(color);
+    SystemNavigationBar.setNavigationColor(color);
   }
+};
+
+export const setAndroidColors = (colorScheme: ColorSchemeName) => {
+  const color = rgbStringToHex(backgroundColor(colorScheme));
+  setAndroidSystemColor(color);
 };
 
 export const actionSheetColors = (colorScheme: ColorSchemeName) =>
