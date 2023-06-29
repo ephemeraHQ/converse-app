@@ -10,7 +10,6 @@ import { AppContext } from "../data/store/context";
 import { XmtpDispatchTypes } from "../data/store/xmtpReducer";
 import { loadSavedNotificationMessagesToContext } from "../utils/backgroundNotifications/loadSavedNotifications";
 import {
-  deleteXmtpKeys,
   loadXmtpConversation,
   loadXmtpKeys,
   saveXmtpConversations,
@@ -232,15 +231,6 @@ export default function XmtpWebview() {
           await saveXmtpKeys(keys);
           break;
         }
-        case "DISCONNECTED":
-          dispatch({
-            type: XmtpDispatchTypes.XmtpWebviewConnected,
-            payload: { connected: false },
-          });
-          launchedInitialLoad.current = false;
-          await deleteXmtpKeys();
-          webview?.reload();
-          break;
         case "XMTP_CONVERSATIONS":
           saveConversations(data, dispatch);
           break;
