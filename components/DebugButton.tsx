@@ -3,6 +3,7 @@ import Constants from "expo-constants";
 import * as Updates from "expo-updates";
 import { forwardRef, useContext, useImperativeHandle } from "react";
 import RNFS from "react-native-fs";
+import RNRestart from "react-native-restart";
 import * as Sentry from "sentry-expo";
 
 import config from "../config";
@@ -82,6 +83,7 @@ const DebugButton = forwardRef((props, ref) => {
           );
         },
         Cancel: undefined,
+        Restart: RNRestart.restart,
       };
       const options = Object.keys(methods);
 

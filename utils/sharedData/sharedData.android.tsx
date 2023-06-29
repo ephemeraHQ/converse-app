@@ -73,3 +73,8 @@ export const deleteLoggedXmtpAddress = () =>
   AsyncStorage.removeItem("xmtp-address");
 
 export const getLoggedXmtpAddress = () => AsyncStorage.getItem("xmtp-address");
+
+export const resetSharedData = () => {
+  emptySavedNotificationsMessages();
+  deleteLoggedXmtpAddress();
+};
