@@ -148,7 +148,7 @@ export default function ChatAddAttachment({ sendMessage, inputRef }: Props) {
     assetRef.current = asset;
     dispatch({
       type: AppDispatchTypes.AppSetMediaPreview,
-      payload: { mediaURI: asset.uri, sending: true, error: false },
+      payload: { mediaURI: asset.uri, sending: false, error: false },
     });
   }, [dispatch]);
 
