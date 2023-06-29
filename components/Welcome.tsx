@@ -32,10 +32,7 @@ export default function Welcome({ ctaOnly, navigation }: Props) {
       style={
         ctaOnly
           ? styles.welcomCtaOnly
-          : [
-              styles.welcome,
-              { paddingTop: headerHeight + Platform.OS === "ios" ? 52 : 0 },
-            ]
+          : [styles.welcome, { paddingTop: headerHeight }]
       }
     >
       {!ctaOnly && (
