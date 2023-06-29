@@ -100,6 +100,14 @@ export default function HydrationStateHandler() {
         payload: { blockedPeerAddresses: savedBlockedPeers },
       });
 
+      const connectedToEphemeralAccount = mmkv.getBoolean(
+        "state.app.isEphemeralAccount"
+      );
+      dispatch({
+        type: AppDispatchTypes.AppSetEphemeralAccount,
+        payload: { ephemeral: !!connectedToEphemeralAccount },
+      });
+
       dispatch({
         type: AppDispatchTypes.AppSetHydrationDone,
         payload: { done: true },

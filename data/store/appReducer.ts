@@ -13,6 +13,7 @@ export type AppType = {
     mediaURI?: string;
     error: boolean;
   };
+  ephemeralAccount: boolean;
 };
 
 export const appInitialState: AppType = {
@@ -26,6 +27,7 @@ export const appInitialState: AppType = {
     mediaURI: undefined,
     error: false,
   },
+  ephemeralAccount: false,
 };
 
 export enum AppDispatchTypes {
@@ -35,6 +37,7 @@ export enum AppDispatchTypes {
   AppSetHydrationDone = "APP_SET_HYDRATION_DONE",
   AppSetDesktopConnectSessionId = "APP_SET_DESKTOP_SESSION_ID",
   AppSetMediaPreview = "APP_SET_MEDIA_PREVIEW",
+  AppSetEphemeralAccount = "APP_SET_EPHEMERAL_ACCOUNT",
 }
 
 type AppPayload = {
@@ -58,6 +61,9 @@ type AppPayload = {
     mediaURI?: string;
     error: boolean;
   };
+  [AppDispatchTypes.AppSetEphemeralAccount]: {
+    ephemeral: boolean;
+  };
 };
 
 export type AppActions = ActionMap<AppPayload>[keyof ActionMap<AppPayload>];
@@ -74,6 +80,13 @@ export const appReducer = (state: AppType, action: AppActions): AppType => {
       return {
         ...state,
         mainIdentity: action.payload.identity,
+      };
+    }
+
+    case AppDispatchTypes.AppSetEphemeralAccount: {
+      return {
+        ...state,
+        ephemeralAccount: action.payload.ephemeral,
       };
     }
 

@@ -24,6 +24,7 @@ import Connecting, {
 } from "../components/Connecting";
 import ConversationListItem from "../components/ConversationListItem";
 import DebugButton, { shouldShowDebug } from "../components/DebugButton";
+import EphemeralAccountBanner from "../components/EphemeralAccountBanner";
 import InitialLoad from "../components/InitialLoad";
 import Picto from "../components/Picto/Picto";
 import Recommendations from "../components/Recommendations";
@@ -157,8 +158,13 @@ export default function ConversationList({
           : b.createdAt) || b.createdAt;
       return bDate - aDate;
     });
-    setFlatListItems([...conversations, { topic: "welcome" }]);
-  }, [state.xmtp.conversations, state.xmtp.lastUpdateAt]);
+    const items = state.app.ephemeralAccount ? [{ topic: "ephemeral" }] : [];
+    setFlatListItems([...items, ...conversations, { topic: "welcome" }]);
+  }, [
+    state.app.ephemeralAccount,
+    state.xmtp.conversations,
+    state.xmtp.lastUpdateAt,
+  ]);
   useEffect(() => {
     navigation.setOptions({
       headerLeft: () => (state.xmtp.address ? <SettingsButton /> : null),
@@ -192,6 +198,8 @@ export default function ConversationList({
     ({ item }: { item: FlatListItem }) => {
       if (item.topic === "welcome") {
         return <Welcome ctaOnly navigation={navigation} route={route} />;
+      } else if (item.topic === "ephemeral") {
+        return <EphemeralAccountBanner />;
       }
 
       const conversation = item as XmtpConversation;
@@ -251,7 +259,10 @@ export default function ConversationList({
 
   if (!state.xmtp.initialLoadDoneOnce && flatListItems.length <= 1) {
     screenToShow = <InitialLoad />;
-  } else if (flatListItems.length === 1) {
+  } else if (
+    flatListItems.length === 1 ||
+    (flatListItems.length === 2 && state.app.ephemeralAccount)
+  ) {
     screenToShow = (
       <Welcome ctaOnly={false} navigation={navigation} route={route} />
     );

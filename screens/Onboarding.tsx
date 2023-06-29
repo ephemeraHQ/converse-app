@@ -1,3 +1,4 @@
+import { utils } from "@noble/secp256k1";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useDisconnect, useSigner } from "@thirdweb-dev/react-native";
 import { Wallet } from "ethers";
@@ -29,10 +30,12 @@ import { resetLocalXmtpState } from "../components/XmtpState";
 import { sendMessageToWebview } from "../components/XmtpWebview";
 import config from "../config";
 import { clearDB } from "../data/db";
+import { AppDispatchTypes } from "../data/store/appReducer";
 import { AppContext } from "../data/store/context";
 import { RecommendationsDispatchTypes } from "../data/store/recommendationsReducer";
 import { textPrimaryColor, textSecondaryColor } from "../utils/colors";
 import { saveXmtpKeys } from "../utils/keychain";
+import mmkv from "../utils/mmkv";
 import { shortAddress } from "../utils/str";
 import { getXmtpKeysFromSigner, isOnXmtp } from "../utils/xmtp/client";
 
@@ -51,6 +54,7 @@ export default function OnboardingScreen() {
   const [user, setUser] = useState({
     address: "",
     isOnXmtp: false,
+    isEphemeral: false,
     seedPhraseSigner: undefined as Wallet | undefined,
   });
 
@@ -78,6 +82,7 @@ export default function OnboardingScreen() {
       clickedSecondSignature.current = false;
       setUser({
         address: "",
+        isEphemeral: false,
         isOnXmtp: false,
         seedPhraseSigner: undefined,
       });
@@ -104,10 +109,23 @@ export default function OnboardingScreen() {
       const address = await seedPhraseSigner.getAddress();
       setUser({
         address,
+        isEphemeral: false,
         isOnXmtp: false,
         seedPhraseSigner,
       });
     }, 10);
+  }, []);
+
+  const generateWallet = useCallback(async () => {
+    setLoading(true);
+    const signer = new Wallet(utils.randomPrivateKey());
+    const address = await signer.getAddress();
+    setUser({
+      address,
+      isEphemeral: true,
+      isOnXmtp: false,
+      seedPhraseSigner: signer,
+    });
   }, []);
 
   const requestingSignatures = useRef(false);
@@ -148,6 +166,7 @@ export default function OnboardingScreen() {
         const isOnNetwork = await isOnXmtp(newAddress);
         setUser({
           address: newAddress,
+          isEphemeral: false,
           isOnXmtp: isOnNetwork,
           seedPhraseSigner: undefined,
         });
@@ -200,6 +219,19 @@ export default function OnboardingScreen() {
           )
         )
       );
+      if (user.isEphemeral) {
+        mmkv.set("state.app.isEphemeralAccount", true);
+        dispatch({
+          type: AppDispatchTypes.AppSetEphemeralAccount,
+          payload: { ephemeral: true },
+        });
+      } else {
+        mmkv.delete("state.app.isEphemeralAccount");
+        dispatch({
+          type: AppDispatchTypes.AppSetEphemeralAccount,
+          payload: { ephemeral: false },
+        });
+      }
       saveXmtpKeys(keys);
 
       await clearDB();
@@ -338,6 +370,7 @@ export default function OnboardingScreen() {
       <SeedPhraseConnect
         seedPhrase={seedPhrase}
         setSeedPhrase={setSeedPhrase}
+        generateWallet={generateWallet}
         setKeyboardVerticalOffset={setKeyboardVerticalOffset}
       />
     );

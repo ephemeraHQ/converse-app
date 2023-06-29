@@ -23,6 +23,7 @@ type Props = {
   seedPhrase: string;
   setSeedPhrase: (s: string) => void;
   setKeyboardVerticalOffset: (offset: number) => void;
+  generateWallet: () => void;
 };
 
 export const getSignerFromSeedPhrase = async (mnemonic: string) => {
@@ -48,10 +49,12 @@ export default function SeedPhraseConnect({
   seedPhrase,
   setSeedPhrase,
   setKeyboardVerticalOffset,
+  generateWallet,
 }: Props) {
   const colorScheme = useColorScheme();
   const textInputRef = useRef<TextInput | null>(null);
   const styles = getStyles(colorScheme);
+
   return (
     <>
       <View style={styles.seedPhraseContainer}>
@@ -85,7 +88,7 @@ export default function SeedPhraseConnect({
         />
       </View>
       <View style={{ marginBottom: 20 }}>
-        <Text style={styles.terms}>
+        <Text style={styles.links}>
           By signing in you agree to our{" "}
           <Text
             style={styles.link}
@@ -96,6 +99,11 @@ export default function SeedPhraseConnect({
             }
           >
             terms and conditions.
+          </Text>
+        </Text>
+        <Text style={styles.links}>
+          <Text style={styles.link} onPress={generateWallet}>
+            Try the app with an ephemeral wallet.
           </Text>
         </Text>
       </View>
@@ -112,7 +120,7 @@ const getStyles = (colorScheme: ColorSchemeName) =>
       height: 130,
       marginTop: 38,
     },
-    terms: {
+    links: {
       textAlign: "center",
       marginLeft: 32,
       marginRight: 32,
