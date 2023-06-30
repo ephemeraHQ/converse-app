@@ -27,8 +27,6 @@ type Props = {
   inputRef: MutableRefObject<TextInput | undefined>;
   sendMessage: (content: string) => Promise<void>;
   inputAccessoryViewID?: string;
-  onFocus?: () => void;
-  onBlur?: () => void;
   editable?: boolean;
 };
 
@@ -38,8 +36,6 @@ export default function ChatInput({
   inputRef,
   sendMessage,
   inputAccessoryViewID,
-  onFocus,
-  onBlur,
   editable,
 }: Props) {
   const colorScheme = useColorScheme();
@@ -66,8 +62,6 @@ export default function ChatInput({
             : actionSecondaryColor(colorScheme)
         }
         inputAccessoryViewID={inputAccessoryViewID}
-        onFocus={onFocus ? () => onFocus() : undefined}
-        onBlur={onBlur ? () => onBlur() : undefined}
       />
       <TouchableOpacity
         onPress={
