@@ -380,7 +380,9 @@ export default function NewConversation({
             <Recommendations visibility="EMBEDDED" navigation={navigation} />
           )}
 
-        {status.loading && <ActivityIndicator style={styles.activity} />}
+        {status.loading && (
+          <ActivityIndicator style={styles.mainActivityIndicator} />
+        )}
 
         {!status.loading && status.inviteToConverse && (
           <TableView
@@ -389,7 +391,7 @@ export default function NewConversation({
                 id: "reachOutToPol",
                 leftView: creatingNewConversation ? (
                   <ActivityIndicator
-                    style={{ width: 30, height: 30, marginRight: 8 }}
+                    style={styles.tableViewActivityIndicator}
                   />
                 ) : (
                   <TableViewPicto symbol="link" />
@@ -430,7 +432,7 @@ export default function NewConversation({
                   id: "new",
                   leftView: creatingNewConversation ? (
                     <ActivityIndicator
-                      style={{ width: 32, height: 32, marginRight: 8 }}
+                      style={styles.tableViewActivityIndicator}
                     />
                   ) : (
                     <TableViewPicto symbol="plus" />
@@ -506,10 +508,18 @@ const getStyles = (colorScheme: ColorSchemeName) =>
           ? textSecondaryColor(colorScheme)
           : textPrimaryColor(colorScheme),
     },
-    activity: {
+    mainActivityIndicator: {
       marginTop: 23,
     },
     tableView: {
       marginHorizontal: Platform.OS === "android" ? 0 : 18,
+    },
+    tableViewActivityIndicator: {
+      width: 32,
+      height: 32,
+      ...Platform.select({
+        default: { marginRight: 8 },
+        android: { marginLeft: 12, marginRight: -4 },
+      }),
     },
   });
