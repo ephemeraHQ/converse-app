@@ -11,7 +11,7 @@
       "env": {
         "EXPO_ENV": "dev"
       },
-      "node": "18.16.0"
+      "node": "18.16.1"
     },
     "ios-simulator": {
       "developmentClient": true,
@@ -23,7 +23,7 @@
       "ios": {
         "simulator": true
       },
-      "node": "18.16.0"
+      "node": "18.16.1"
     },
     "preview": {
       "distribution": "internal",
@@ -31,7 +31,7 @@
       "env": {
         "EXPO_ENV": "preview"
       },
-      "node": "18.16.0"
+      "node": "18.16.1"
     },
     "production-ios": {
       "channel": "production",
@@ -39,7 +39,7 @@
       "env": {
         "EXPO_PLATFORM": "ios"
       },
-      "node": "18.16.0"
+      "node": "18.16.1"
     },
     "production-android": {
       "channel": "production",
@@ -47,13 +47,13 @@
       "env": {
         "EXPO_PLATFORM": "android"
       },
-      "node": "18.16.0"
+      "node": "18.16.1"
     },
     "production-android-internal": {
       "distribution": "internal",
       "channel": "production",
       "autoIncrement": true,
-      "node": "18.16.0"
+      "node": "18.16.1"
     }
   },
   "submit": {
