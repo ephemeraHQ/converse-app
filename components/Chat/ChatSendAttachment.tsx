@@ -8,6 +8,7 @@ import {
   Text,
   View,
   TouchableOpacity,
+  Platform,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -20,6 +21,7 @@ import {
   setAndroidSystemColor,
 } from "../../utils/colors";
 import ActivityIndicator from "../ActivityIndicator/ActivityIndicator";
+import Picto from "../Picto/Picto";
 
 export default function ChatSendAttachment() {
   const colorScheme = useColorScheme();
@@ -50,17 +52,41 @@ export default function ChatSendAttachment() {
           resizeMode="contain"
         />
       </View>
-      <Text
-        style={[styles.text, styles.cancel]}
-        onPress={() => {
-          dispatch({
-            type: AppDispatchTypes.AppSetMediaPreview,
-            payload: { mediaURI: undefined, error: false, sending: false },
-          });
-        }}
-      >
-        Cancel
-      </Text>
+      {Platform.OS === "ios" && (
+        <Text
+          style={[styles.text, styles.cancel]}
+          onPress={() => {
+            dispatch({
+              type: AppDispatchTypes.AppSetMediaPreview,
+              payload: { mediaURI: undefined, error: false, sending: false },
+            });
+          }}
+        >
+          Cancel
+        </Text>
+      )}
+      {Platform.OS === "android" && (
+        <TouchableOpacity
+          onPress={() => {
+            dispatch({
+              type: AppDispatchTypes.AppSetMediaPreview,
+              payload: { mediaURI: undefined, error: false, sending: false },
+            });
+          }}
+        >
+          <Picto
+            picto="xmark"
+            color="#D8C2BE"
+            style={{
+              width: 34,
+              height: 34,
+              left: 20,
+              top: 20,
+            }}
+            size={34}
+          />
+        </TouchableOpacity>
+      )}
       <View style={[styles.controls, { bottom: insets.bottom }]}>
         {!sending && !error && (
           <TouchableOpacity onPress={sendMedia} activeOpacity={0.6}>

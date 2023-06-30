@@ -4,6 +4,7 @@ import React, {
   View,
   Text,
   ColorSchemeName,
+  Platform,
 } from "react-native";
 
 import {
@@ -33,28 +34,40 @@ const getStyles = (colorScheme: ColorSchemeName) =>
   StyleSheet.create({
     demoAccountBanner: {
       width: "100%",
-      paddingVertical: 8,
-      borderBottomWidth: 0.5,
       borderBottomColor: itemSeparatorColor(colorScheme),
       backgroundColor: messageBubbleColor(colorScheme),
-      paddingLeft: 30,
       paddingRight: 16,
       alignItems: "center",
       flexDirection: "row",
       top: 0,
       zIndex: 1000,
+      ...Platform.select({
+        default: {
+          paddingVertical: 8,
+          paddingLeft: 30,
+          borderBottomWidth: 0.5,
+        },
+        android: { paddingVertical: 12, paddingLeft: 16, borderBottomWidth: 0 },
+      }),
     },
     demoAccountBannerLeft: {
       flexShrink: 1,
       marginRight: 10,
     },
     demoAccountTitle: {
-      fontSize: 17,
-      fontWeight: "600",
       color: textPrimaryColor(colorScheme),
+      ...Platform.select({
+        default: {
+          fontSize: 17,
+          fontWeight: "600",
+        },
+        android: {
+          fontSize: 16,
+        },
+      }),
     },
     demoAccountSubtitle: {
-      fontSize: 15,
+      fontSize: Platform.OS === "android" ? 14 : 15,
       color: textSecondaryColor(colorScheme),
       fontWeight: "400",
     },
