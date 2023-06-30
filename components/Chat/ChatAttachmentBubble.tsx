@@ -97,9 +97,11 @@ export default function ChatAttachmentBubble({ message }: Props) {
       const attachmentExists = await RNFS.exists(attachmentJsonPath);
       if (attachmentExists) {
         try {
-          const messageAttachmentData = JSON.parse(
-            await RNFS.read(attachmentJsonPath)
+          const attachmentJsonContent = await RNFS.readFile(
+            attachmentJsonPath,
+            "utf8"
           );
+          const messageAttachmentData = JSON.parse(attachmentJsonContent);
           const supportedMediaType = isImageMimetype(
             messageAttachmentData.mimeType
           );
@@ -120,7 +122,7 @@ export default function ChatAttachmentBubble({ message }: Props) {
             return;
           }
         } catch (e) {
-          //
+          console.log(e);
         }
       }
 
