@@ -26,6 +26,7 @@ import { AppDispatchTypes } from "../../data/store/appReducer";
 import { AppContext } from "../../data/store/context";
 import { SerializedAttachmentContent } from "../../utils/attachment";
 import { actionSheetColors, textSecondaryColor } from "../../utils/colors";
+import { executeAfterKeyboardClosed } from "../../utils/keyboard";
 import { sentryTrackMessage } from "../../utils/sentry";
 import Picto from "../Picto/Picto";
 import { showActionSheetWithOptions } from "../StateHandlers/ActionSheetStateHandler";
@@ -188,9 +189,7 @@ export default function ChatAddAttachment({ sendMessage, inputRef }: Props) {
   return (
     <TouchableOpacity
       onPress={() => {
-        inputRef?.current?.blur();
-        assetRef.current = undefined;
-        setTimeout(() => {
+        const showOptions = () =>
           showActionSheetWithOptions(
             {
               options: ["Camera", "Photo Library", "Cancel"],
@@ -211,7 +210,9 @@ export default function ChatAddAttachment({ sendMessage, inputRef }: Props) {
               }
             }
           );
-        }, 50);
+
+        executeAfterKeyboardClosed(showOptions);
+        assetRef.current = undefined;
       }}
       activeOpacity={0.4}
     >

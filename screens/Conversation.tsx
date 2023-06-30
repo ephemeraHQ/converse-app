@@ -183,10 +183,13 @@ const Conversation = ({
 
   const focusOnLayout = useRef(false);
   const chatLayoutDone = useRef(false);
+  const alreadyAutomaticallyFocused = useRef(false);
 
   const onReadyToFocus = useCallback(() => {
+    if (alreadyAutomaticallyFocused.current) return;
     if (focusOnLayout.current && !chatLayoutDone.current) {
       chatLayoutDone.current = true;
+      alreadyAutomaticallyFocused.current = true;
       textInputRef.current?.focus();
     } else {
       chatLayoutDone.current = true;
@@ -196,7 +199,8 @@ const Conversation = ({
   useEffect(() => {
     const unsubscribe = navigation.addListener("transitionEnd", (e) => {
       if (!e.data.closing && !!route.params.focus) {
-        if (chatLayoutDone.current) {
+        if (chatLayoutDone.current && !alreadyAutomaticallyFocused.current) {
+          alreadyAutomaticallyFocused.current = true;
           textInputRef.current?.focus();
         } else {
           focusOnLayout.current = true;
