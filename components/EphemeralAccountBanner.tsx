@@ -8,9 +8,9 @@ import React, {
 
 import {
   itemSeparatorColor,
-  backgroundColor,
   textPrimaryColor,
   textSecondaryColor,
+  messageBubbleColor,
 } from "../utils/colors";
 
 export default function EphemeralAccountBanner() {
@@ -19,9 +19,7 @@ export default function EphemeralAccountBanner() {
   return (
     <View style={styles.demoAccountBanner}>
       <View style={styles.demoAccountBannerLeft}>
-        <Text style={styles.demoAccountTitle}>
-          ℹ️ This account is ephemeral
-        </Text>
+        <Text style={styles.demoAccountTitle}>This account is ephemeral</Text>
         <Text style={styles.demoAccountSubtitle} numberOfLines={4}>
           If you log out, you’ll lose all of your conversations. Log in with an
           existing wallet when you’re ready.
@@ -38,7 +36,7 @@ const getStyles = (colorScheme: ColorSchemeName) =>
       paddingVertical: 8,
       borderBottomWidth: 0.5,
       borderBottomColor: itemSeparatorColor(colorScheme),
-      backgroundColor: backgroundColor(colorScheme),
+      backgroundColor: messageBubbleColor(colorScheme),
       paddingLeft: 30,
       paddingRight: 16,
       alignItems: "center",

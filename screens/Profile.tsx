@@ -96,6 +96,7 @@ export default function ProfileScreen({
   const getSocialItemsFromArray = useCallback(
     <T,>(
       array: T[],
+      getId: (e: T) => string,
       getTitle: (e: T) => string,
       getSubtitle: (e: T) => string,
       getLink: (e: T) => string,
@@ -105,7 +106,7 @@ export default function ProfileScreen({
       return array.map((e: T) => {
         const imageURI = getImageURI(e);
         return {
-          id: getTitle(e),
+          id: getId(e),
           title: getTitle(e),
           subtitle: getSubtitle(e),
           action: () => {
@@ -137,6 +138,7 @@ export default function ProfileScreen({
   const socialItems = [
     ...getSocialItemsFromArray(
       socials?.lensHandles || [],
+      (l) => `lens-${l.handle}`,
       (l) => l.name || l.handle,
       (l) => `Lens handle: ${l.handle}`,
       (l) => `https://lenster.xyz/u/${l.handle}`,
@@ -144,6 +146,7 @@ export default function ProfileScreen({
     ),
     ...getSocialItemsFromArray(
       socials?.farcasterUsernames || [],
+      (f) => `fc-${f.username}`,
       (f) => f.name || `${f.username}.fc`,
       (f) => `Farcaster id: ${f.username}.fc`,
       (f) => `https://warpcast.com/${f.username}`,

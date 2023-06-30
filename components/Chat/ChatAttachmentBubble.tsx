@@ -16,7 +16,6 @@ import RNFS from "react-native-fs";
 
 import { textPrimaryColor } from "../../utils/colors";
 import { getImageSize, isImageMimetype } from "../../utils/media";
-import { getLocalXmtpClient } from "../XmtpState";
 import { sendMessageToWebview } from "../XmtpWebview";
 import { MessageToDisplay } from "./ChatMessage";
 import ChatMessageMetadata from "./ChatMessageMetadata";
@@ -93,11 +92,8 @@ export default function ChatAttachmentBubble({ message }: Props) {
 
   useEffect(() => {
     const go = async () => {
-      const client = await getLocalXmtpClient();
       const messageFolder = `${RNFS.DocumentDirectoryPath}/messages/${message.id}`;
-      // await RNFS.unlink(messageFolder);
       const attachmentJsonPath = `${messageFolder}/attachment.json`;
-      if (!client) return;
       const attachmentExists = await RNFS.exists(attachmentJsonPath);
       if (attachmentExists) {
         try {
@@ -173,14 +169,17 @@ export default function ChatAttachmentBubble({ message }: Props) {
       : attachment.filename || "Attachment";
   const textStyle = [
     styles.text,
-    { color: message.fromMe ? "white" : undefined },
+    { color: message.fromMe ? "white" : textPrimaryColor(colorScheme) },
   ];
 
   if (attachment.loading) {
     return (
       <>
-        <Text style={[textStyle, { fontStyle: "italic" }]}>
-          {emoji} Downloading {filename.toLowerCase()}
+        <Text style={textStyle}>
+          {emoji}{" "}
+          <Text style={{ fontStyle: "italic" }}>
+            Downloading {filename.toLowerCase()}
+          </Text>
         </Text>
         <View style={{ opacity: 0 }}>{metadataView}</View>
       </>
