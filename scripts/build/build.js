@@ -59,7 +59,7 @@ const build = async () => {
   }
 
   if (buildLocally) {
-    if (platform === "ios" && ["dev", "preview"].includes("env")) {
+    if (platform === "ios" && ["development", "preview"].includes("env")) {
       buildArgs.push("--non-interactive");
     }
     const currentCommit = execSync('git show --format="%h" --no-patch', {
