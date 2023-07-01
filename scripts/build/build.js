@@ -82,7 +82,12 @@ const build = async () => {
       platform,
     ];
 
-    await executeCommand(submitCommand, submitArgs);
+    try {
+      await executeCommand(submitCommand, submitArgs);
+    } catch (e) {
+      console.log("Error during submission");
+      console.log(e);
+    }
   }
 
   if (env === "preview") {
