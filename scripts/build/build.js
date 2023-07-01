@@ -34,6 +34,7 @@ const build = async () => {
     },
   ];
   const { platform, env, local } = await prompts(questions);
+  if (!platform || !env || !local) process.exit(1);
 
   const buildCommand = "eas";
   const buildProfile = env === "production" ? `production-${platform}` : env;
