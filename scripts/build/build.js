@@ -114,6 +114,7 @@ const build = async () => {
 
 const executeCommand = (command, args) =>
   new Promise((resolve, reject) => {
+    console.log(`${command} ${args.join(" ")}`);
     const buildProcess = spawn(command, args, {
       stdio: "inherit",
       cwd: PROJECT_ROOT,
