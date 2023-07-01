@@ -1,4 +1,5 @@
 import * as Linking from "expo-linking";
+import { isEthOS } from "walletsdk-ethos";
 
 export const POPULAR_WALLETS = [
   {
@@ -136,6 +137,8 @@ export const getInstalledWallets = async (
   const checkInstalled = await Promise.all(
     SUPPORTED_WALLETS.map((w) => Linking.canOpenURL(`${w.customScheme}wc`))
   );
+  const ethOS = await isEthOS();
+  console.log({ ethOS });
   installedWallets = SUPPORTED_WALLETS.filter((w, i) => checkInstalled[i]);
   hasCheckedInstalled = true;
   return installedWallets;

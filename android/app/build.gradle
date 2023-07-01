@@ -129,6 +129,18 @@ android {
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1
         versionName "1.0.0"
+
+        configurations.all {
+            resolutionStrategy.eachDependency { DependencyResolveDetails details ->
+                if (details.requested.name == 'bcprov-jdk15on') {
+                    details.useTarget group: details.requested.group, name: 'bcprov-jdk15to18', version: '1.70'
+                }
+                if (details.requested.name == 'lifecycle-viewmodel-ktx') {
+                    details.useTarget group: details.requested.group, name: 'lifecycle-viewmodel-ktx', version: '2.5.0'
+                }
+            }
+        }
+
     }
 
     splits {
@@ -147,6 +159,9 @@ android {
             keyPassword 'android'
         }
     }
+
+
+
     buildTypes {
         debug {
             signingConfig signingConfigs.debug
@@ -218,6 +233,7 @@ dependencies {
     }
     implementation 'com.google.crypto.tink:tink-android:1.7.0'
     implementation 'com.android.volley:volley:1.2.1'
+
 
     def isGifEnabled = (findProperty('expo.gif.enabled') ?: "") == "true";
     def isWebpEnabled = (findProperty('expo.webp.enabled') ?: "") == "true";
