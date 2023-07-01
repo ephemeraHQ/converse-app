@@ -46,7 +46,7 @@ const build = async () => {
   ];
 
   if (env === "production") {
-    await executeCommand("yarn", "typecheck");
+    await executeCommand("yarn", ["typecheck"]);
   }
 
   if (env === "preview" || env === "production") {
