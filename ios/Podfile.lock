@@ -416,7 +416,7 @@ PODS:
     - glog
   - react-native-get-random-values (1.8.0):
     - React-Core
-  - react-native-keyboard-controller (1.5.2):
+  - react-native-keyboard-controller (1.5.7):
     - React-Core
   - react-native-mmkv (2.6.3):
     - MMKV (>= 1.2.13)
@@ -898,7 +898,7 @@ SPEC CHECKSUMS:
   React-jsinspector: c712f9e3bb9ba4122d6b82b4f906448b8a281580
   React-logger: 342f358b8decfbf8f272367f4eacf4b6154061be
   react-native-get-random-values: a6ea6a8a65dc93e96e24a11105b1a9c8cfe1d72a
-  react-native-keyboard-controller: de9b86cbc970ae095f0bcbd98f4b72c9026f568b
+  react-native-keyboard-controller: dd3b075075eb438e96286013fca84e6e50e7d854
   react-native-mmkv: 2e5bf67513cc8deed86fcffe87e12b8cc250dfab
   react-native-netinfo: 2517ad504b3d303e90d7a431b0fcaef76d207983
   react-native-restart: 7595693413fe3ca15893702f2c8306c62a708162

@@ -13785,17 +13785,9 @@ prompt@^1.3.0:
     revalidator "0.1.x"
     winston "2.x"
 
-prompts@^2.3.2, prompts@^2.4.0:
+prompts@^2.3.2, prompts@^2.4.0, prompts@^2.4.2:
   version "2.4.2"
   resolved "https://registry.npmjs.org/prompts/-/prompts-2.4.2.tgz"
-  integrity sha512-NxNv/kLguCA7p3jE8oL2aEBsrJWgAakBpgmgK6lpPWV+WuOmY6r2/zbAVnP+T8bQlA0nzHXSJSJW0Hq7ylaD2Q==
-  dependencies:
-    kleur "^3.0.3"
-    sisteransi "^1.0.5"
-
-prompts@^2.4.2:
-  version "2.4.2"
-  resolved "https://registry.yarnpkg.com/prompts/-/prompts-2.4.2.tgz#7b57e73b3a48029ad10ebd44f74b01722a4cb069"
   integrity sha512-NxNv/kLguCA7p3jE8oL2aEBsrJWgAakBpgmgK6lpPWV+WuOmY6r2/zbAVnP+T8bQlA0nzHXSJSJW0Hq7ylaD2Q==
   dependencies:
     kleur "^3.0.3"
@@ -14194,10 +14186,10 @@ react-native-image-viewing@^0.2.1:
   resolved "https://registry.npmjs.org/react-native-image-viewing/-/react-native-image-viewing-0.2.2.tgz"
   integrity sha512-osWieG+p/d2NPbAyonOMubttajtYEYiRGQaJA54slFxZ69j1V4/dCmcrVQry47ktVKy8/qpFwCpW1eT6MH5T2Q==
 
-react-native-keyboard-controller@^1.5.2:
-  version "1.5.2"
-  resolved "https://registry.yarnpkg.com/react-native-keyboard-controller/-/react-native-keyboard-controller-1.5.2.tgz#4c066466f8be76cd37823ea1ad4fd9844a537e63"
-  integrity sha512-JalI4bq/N2U7FXyLSJV5JnTM/MjDdk6+5/7HwJfH6HsgG/a1TkZT0jl+fPyhj/eWoCOru3iYgly9daWzpmoDAQ==
+react-native-keyboard-controller@^1.5.7:
+  version "1.5.7"
+  resolved "https://registry.yarnpkg.com/react-native-keyboard-controller/-/react-native-keyboard-controller-1.5.7.tgz#df8916868b70b043a95013786b154582df6c3769"
+  integrity sha512-HMEtE0UponKXET5huNcKBMWHASfQ/8yFTlNs8UT09IHK4xJPpufuJeK/nNXXJ0tM8ODVJozPIm2tX+HLkigdEg==
 
 react-native-mmkv@2.4.3:
   version "2.4.3"
