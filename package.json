@@ -2,7 +2,7 @@
   "name": "converse",
   "version": "1.0.0",
   "scripts": {
-    "build": "node scripts/build.js",
+    "build": "node scripts/build/build.js",
     "start": "EXPO_ENV=dev expo start --dev-client",
     "typecheck": "echo \"➜ Typechecking project...\" && tsc --noEmit",
     "update-preview": "node scripts/preview-update.js",
