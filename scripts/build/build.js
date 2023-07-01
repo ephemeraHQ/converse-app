@@ -30,11 +30,12 @@ const build = async () => {
       type: "select",
       name: "local",
       message: "Build locally or on EAS servers?",
-      choices: [{ value: "EAS" }, { value: "local" }],
+      choices: [{ value: "local" }, { value: "EAS" }],
     },
   ];
   const { platform, env, local } = await prompts(questions);
   if (!platform || !env || !local) process.exit(1);
+  const buildLocally = local === "local";
 
   const buildCommand = "eas";
   const buildProfile = env === "production" ? `production-${platform}` : env;
@@ -54,7 +55,7 @@ const build = async () => {
     await executeCommand("node", [`scripts/build/${platform}/${env}.js`]);
   }
 
-  if (local === "local") {
+  if (buildLocally) {
     const currentCommit = execSync('git show --format="%h" --no-patch', {
       cwd: PROJECT_ROOT,
     })
@@ -73,7 +74,7 @@ const build = async () => {
 
   await executeCommand(buildCommand, buildArgs);
 
-  if (env === "production" && local === "local") {
+  if (env === "production" && buildLocally) {
     const submitCommand = "eas";
     const submitArgs = [
       "submit",
