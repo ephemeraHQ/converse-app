@@ -30,7 +30,7 @@ const build = async () => {
       type: "select",
       name: "local",
       message: "Build locally or on EAS servers?",
-      choices: [{ value: "local" }, { value: "EAS" }],
+      choices: [{ title: "Locally", value: "local" }, { value: "EAS" }],
     },
   ];
   const { platform, env, local } = await prompts(questions);
