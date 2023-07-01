@@ -50,7 +50,7 @@ const build = async () => {
   }
 
   if (env === "preview" || env === "production") {
-    await executeCommand("node", `scripts/build/${platform}/${env}.js`);
+    await executeCommand("node", [`scripts/build/${platform}/${env}.js`]);
   }
 
   if (local === "local") {

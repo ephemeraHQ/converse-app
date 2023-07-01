@@ -1,3 +1,4 @@
 <resources>
   <color name="bootsplash_background">#201A19</color>
+  <color name="colorPrimaryDark">#201A19</color>
 </resources>
