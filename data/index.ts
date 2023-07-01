@@ -88,7 +88,10 @@ const xmtpConversationFromDb = (
     socials?.lensHandles
   );
   const ensName = socials?.ensNames?.find((e) => e.isPrimary)?.name;
-  const conversationTitle = lensHandle || ensName;
+  const unsDomain = socials?.unstoppableDomains?.find(
+    (d) => d.isPrimary
+  )?.domain;
+  const conversationTitle = lensHandle || ensName || unsDomain;
 
   return {
     topic: dbConversation.topic,
