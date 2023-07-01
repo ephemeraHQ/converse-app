@@ -320,7 +320,12 @@ export default function NewConversation({
             ref={(r) => {
               if (!initialFocus.current) {
                 initialFocus.current = true;
-                if (!value) {
+                if (
+                  !value &&
+                  !recommendationsLoading &&
+                  recommendationsLoadedOnce &&
+                  recommendationsFrensCount === 0
+                ) {
                   setTimeout(() => {
                     r?.focus();
                   }, 100);
