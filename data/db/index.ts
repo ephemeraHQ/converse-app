@@ -1,4 +1,4 @@
-import * as SQLite from "expo-sqlite";
+import RNFS from "react-native-fs";
 
 import dataSource from "./datasource";
 import { Conversation } from "./entities/conversation";
@@ -35,13 +35,22 @@ export const initDb = async () => {
 export async function clearDB(reset = true) {
   try {
     await dataSource.destroy();
-    const db = SQLite.openDatabase("converse");
-    await db.closeAsync();
-    await db.deleteAsync();
-    if (reset) {
-      initDb();
-    }
+    console.log(`[ClearDB] Datasource destroyed!`);
   } catch (e) {
-    console.log("Could not drop database", e);
+    console.log(`[ClearDB] Couldn't destroy datasource: ${e}`);
+  }
+
+  // Now let's delete the database file
+  const dbPath = `${RNFS.DocumentDirectoryPath}/SQLite/converse`;
+  const dbExists = await RNFS.exists(dbPath);
+  if (!dbExists) {
+    console.log(`[ClearDB] SQlite file does not exist, no need to delete`);
+  } else {
+    console.log(`[ClearDB] Deleting SQlite file`);
+    await RNFS.unlink(dbPath);
+  }
+
+  if (reset) {
+    return initDb();
   }
 }

@@ -37,8 +37,6 @@ const cleanupBeforeLogout = async (state: StateType) => {
   promisesToAwait.push(disablePushNotifications());
   // Delete keychain xmtp
   promisesToAwait.push(deleteXmtpKeys());
-  // Clearing the Sqlite db
-  promisesToAwait.push(clearDB(false));
   // Delete shared data
   promisesToAwait.push(resetSharedData());
   // Clearing Async storage and mmkv
@@ -49,6 +47,8 @@ const cleanupBeforeLogout = async (state: StateType) => {
 
 export const cleanupAfterLogout = async () => {
   const promisesToAwait: any[] = [];
+  // Clearing the Sqlite db
+  promisesToAwait.push(clearDB(false));
   // Delete keychain xmtp
   promisesToAwait.push(deleteXmtpKeys());
   // Delete shared data
