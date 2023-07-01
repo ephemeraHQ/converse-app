@@ -58,14 +58,14 @@ const SUPPORTED_WALLETS: InstalledWallet[] = [
     customScheme: "cbwallet://",
     isCoinbase: true,
   },
-  // {
-  //   name: "Ledger Live",
-  //   walletConnectId:
-  //     "19177a98252e07ddfc9af2083ba8e07ef627cb6103467ffebb3f8f4205fd7927",
-  //   iconURL:
-  //     "https://explorer-api.walletconnect.com/v3/logo/sm/a7f416de-aa03-4c5e-3280-ab49269aef00?projectId=2f05ae7f1116030fde2d36508f472bfb",
-  //   customScheme: "ledgerlive://",
-  // },
+  {
+    name: "Ledger Live",
+    walletConnectId:
+      "19177a98252e07ddfc9af2083ba8e07ef627cb6103467ffebb3f8f4205fd7927",
+    iconURL:
+      "https://explorer-api.walletconnect.com/v3/logo/sm/a7f416de-aa03-4c5e-3280-ab49269aef00?projectId=2f05ae7f1116030fde2d36508f472bfb",
+    customScheme: "ledgerlive://",
+  },
   {
     name: "Rainbow",
     walletConnectId:
