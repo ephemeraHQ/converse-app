@@ -233,6 +233,7 @@ dependencies {
     }
     implementation 'com.google.crypto.tink:tink-android:1.7.0'
     implementation 'com.android.volley:volley:1.2.1'
+    implementation 'org.web3j:core:4.8.8-android'
 
 
     def isGifEnabled = (findProperty('expo.gif.enabled') ?: "") == "true";
