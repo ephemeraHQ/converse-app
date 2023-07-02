@@ -12,3 +12,7 @@
 -keep class com.facebook.react.turbomodule.** { *; }
 
 # Add any project specific keep options here:
+-keepclassmembers class org.web3j.protocol.** { ; }
+-keepclassmembers class org.web3j.crypto.* { *; }
+-keep class * extends org.web3j.abi.TypeReference
+-keep class * extends org.web3j.abi.datatypes.Type
