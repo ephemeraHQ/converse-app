@@ -138,6 +138,9 @@ android {
                 if (details.requested.name == 'lifecycle-viewmodel-ktx') {
                     details.useTarget group: details.requested.group, name: 'lifecycle-viewmodel-ktx', version: '2.5.0'
                 }
+                if (details.requested.group == 'org.web3j' && details.requested.name == 'core') {
+                    details.useTarget group: details.requested.group, name: details.requested.name, version: '4.8.8-android'
+                }
             }
         }
 
