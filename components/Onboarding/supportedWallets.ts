@@ -1,5 +1,6 @@
 import * as Linking from "expo-linking";
-import { isEthOS } from "walletsdk-ethos";
+
+import { isEthOS } from "../../utils/ethos";
 
 export const POPULAR_WALLETS = [
   {
@@ -43,10 +44,8 @@ export const POPULAR_WALLETS = [
 export type InstalledWallet = {
   name: string;
   iconURL: string;
-  customScheme: string;
+  customScheme?: string;
   universalLink?: string;
-  isMetaMask?: boolean;
-  isCoinbase?: boolean;
   walletConnectId?: string;
   platforms?: string[];
 };
@@ -57,7 +56,6 @@ const SUPPORTED_WALLETS: InstalledWallet[] = [
     iconURL:
       "https://explorer-api.walletconnect.com/v3/logo/sm/a5ebc364-8f91-4200-fcc6-be81310a0000?projectId=2f05ae7f1116030fde2d36508f472bfb",
     customScheme: "cbwallet://",
-    isCoinbase: true,
   },
   {
     name: "Ledger Live",
@@ -137,9 +135,18 @@ export const getInstalledWallets = async (
   const checkInstalled = await Promise.all(
     SUPPORTED_WALLETS.map((w) => Linking.canOpenURL(`${w.customScheme}wc`))
   );
+  const wallets: typeof SUPPORTED_WALLETS = [];
+
   const ethOS = await isEthOS();
-  console.log({ ethOS });
-  installedWallets = SUPPORTED_WALLETS.filter((w, i) => checkInstalled[i]);
+  if (ethOS) {
+    wallets.push({
+      name: "EthOS Wallet",
+      iconURL: "https://converse.xyz/ethos.png",
+    });
+  }
+
+  wallets.push(...SUPPORTED_WALLETS.filter((w, i) => checkInstalled[i]));
+  installedWallets = wallets;
   hasCheckedInstalled = true;
   return installedWallets;
 };
