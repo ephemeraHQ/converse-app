@@ -115,7 +115,11 @@ export default function WalletSelector({
                     await connectToCoinbase();
                   } else if (w.name === "EthOS Wallet") {
                     const signer = getEthOSSigner();
-                    setSigner(signer);
+                    if (signer) {
+                      setSigner(signer);
+                    } else {
+                      setLoading(false);
+                    }
                   } else if (w.walletConnectId && w.customScheme) {
                     const native = w.customScheme.endsWith("/")
                       ? w.customScheme.slice(0, w.customScheme.length - 1)
