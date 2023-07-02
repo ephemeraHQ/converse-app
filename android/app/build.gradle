@@ -138,9 +138,6 @@ android {
                 if (details.requested.name == 'lifecycle-viewmodel-ktx') {
                     details.useTarget group: details.requested.group, name: 'lifecycle-viewmodel-ktx', version: '2.5.0'
                 }
-                if (details.requested.group == 'org.web3j' && details.requested.name == 'core') {
-                    details.useTarget group: details.requested.group, name: details.requested.name, version: '4.8.8-android'
-                }
             }
         }
 
@@ -173,7 +170,7 @@ android {
             // Caution! In production, you need to generate your own keystore file.
             // see https://reactnative.dev/docs/signed-apk-android.
             signingConfig signingConfigs.debug
-            minifyEnabled enableProguardInReleaseBuilds
+            minifyEnabled false
             proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro"
         }
     }
@@ -236,7 +233,6 @@ dependencies {
     }
     implementation 'com.google.crypto.tink:tink-android:1.7.0'
     implementation 'com.android.volley:volley:1.2.1'
-    implementation 'org.web3j:core:4.8.8-android'
 
 
     def isGifEnabled = (findProperty('expo.gif.enabled') ?: "") == "true";
