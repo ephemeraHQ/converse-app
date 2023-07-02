@@ -110,7 +110,7 @@
     "text-encoding": "^0.7.0",
     "typeorm": "^0.3.11",
     "url": "^0.11.0",
-    "walletsdk-ethos": "^0.2.1",
+    "walletsdk-ethos": "^0.2.2",
     "web-streams-polyfill": "^3.2.1",
     "web3": "^1.8.1"
   },
