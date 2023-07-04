@@ -191,12 +191,12 @@ android {
         }
     }
 
-    lintOptions {
-        abortOnError false
-    }
 
-    sourceSets { 
+    sourceSets {
         main { assets.srcDirs = ['src/main/assets', '../../assets'] } 
+    }
+    lint {
+        abortOnError false
     }
 }
 
@@ -230,6 +230,7 @@ dependencies {
     implementation('org.xmtp:android:0.0.9') {
         exclude group: 'com.google.crypto.tink', module: 'tink'
         exclude group: 'org.bouncycastle', module: 'bcprov-jdk15on'
+        exclude group: 'org.web3j', module: 'crypto'
     }
     implementation 'com.google.crypto.tink:tink-android:1.7.0'
     implementation 'com.android.volley:volley:1.2.1'
@@ -262,6 +263,7 @@ dependencies {
 
     implementation("androidx.swiperefreshlayout:swiperefreshlayout:1.0.0")
     implementation("androidx.core:core-splashscreen:1.0.0")
+    implementation 'org.web3j:core:4.8.8-android'
 
     debugImplementation("com.facebook.flipper:flipper:${FLIPPER_VERSION}")
     debugImplementation("com.facebook.flipper:flipper-network-plugin:${FLIPPER_VERSION}") {
