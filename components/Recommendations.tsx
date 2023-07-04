@@ -3,6 +3,7 @@ import * as Linking from "expo-linking";
 import { useCallback, useContext, useEffect } from "react";
 import {
   ColorSchemeName,
+  FlatList,
   Platform,
   StyleSheet,
   Text,
@@ -137,10 +138,76 @@ export default function Recommendations({
       getRecommendations();
     }
   }, [dispatch, state.recommendations, state.xmtp.address]);
+  const frens = state.recommendations.frens;
+
+  const keyExtractor = useCallback((address: string) => address, []);
+  const renderItem = useCallback(
+    ({ item }: { item: string }) => {
+      if (item === "title") {
+        return (
+          <>
+            {visibility === "FULL" && (
+              <View style={styles.titleContainer}>
+                <Text style={styles.emoji}>👋</Text>
+                <Text style={styles.title}>
+                  Find people who have interests in common with you. Start
+                  talking to them.
+                </Text>
+              </View>
+            )}
+            {visibility === "EMBEDDED" && (
+              <View style={styles.sectionTitleContainer}>
+                <Text style={styles.sectionTitle}>RECOMMENDED PROFILES</Text>
+              </View>
+            )}
+          </>
+        );
+      } else if (item === "signals") {
+        return (
+          <Text
+            style={[
+              styles.title,
+              { marginBottom: insets.bottom + 25, marginTop: 30 },
+            ]}
+          >
+            We’re adding matching signals very often.{" "}
+            <Text style={styles.clickableText} onPress={openSignalList}>
+              Here is the current list
+            </Text>
+            ,{" "}
+            <Text style={styles.clickableText} onPress={contactPol}>
+              contact our cofounder Pol
+            </Text>{" "}
+            if you want us to add anything.
+          </Text>
+        );
+      }
+      return (
+        <Recommendation
+          address={item}
+          recommendationData={frens[item]}
+          navigation={navigation}
+        />
+      );
+    },
+    [
+      contactPol,
+      frens,
+      insets.bottom,
+      navigation,
+      openSignalList,
+      styles.clickableText,
+      styles.emoji,
+      styles.sectionTitle,
+      styles.sectionTitleContainer,
+      styles.title,
+      styles.titleContainer,
+      visibility,
+    ]
+  );
 
   if (visibility === "HIDDEN") return null;
 
-  const frens = state.recommendations.frens;
   if (state.recommendations.loading && Object.keys(frens).length === 0) {
     return (
       <View style={styles.fetching}>
@@ -170,46 +237,12 @@ export default function Recommendations({
     );
   }
   return (
-    <View style={{ marginBottom: insets.bottom }}>
-      {visibility === "FULL" && (
-        <>
-          <Text style={styles.emoji}>👋</Text>
-          <Text style={styles.title}>
-            Find people who have interests in common with you. Start talking to
-            them.
-          </Text>
-        </>
-      )}
-      {visibility === "EMBEDDED" && (
-        <Text style={styles.sectionTitle}>RECOMMENDED PROFILES</Text>
-      )}
-      <View
-        style={[
-          styles.recommendations,
-          { marginTop: visibility === "FULL" ? 30 : 0 },
-        ]}
-      >
-        {frens &&
-          Object.keys(frens).map((address) => (
-            <Recommendation
-              key={address}
-              address={address}
-              recommendationData={frens[address]}
-              navigation={navigation}
-            />
-          ))}
-      </View>
-      <Text style={styles.title}>
-        We’re adding matching signals very often.{" "}
-        <Text style={styles.clickableText} onPress={openSignalList}>
-          Here is the current list
-        </Text>
-        ,{" "}
-        <Text style={styles.clickableText} onPress={contactPol}>
-          contact our cofounder Pol
-        </Text>{" "}
-        if you want us to add anything.
-      </Text>
+    <View style={styles.recommendations}>
+      <FlatList
+        data={["title", ...Object.keys(frens), "signals"]}
+        keyExtractor={keyExtractor}
+        renderItem={renderItem}
+      />
     </View>
   );
 }
@@ -240,14 +273,6 @@ const getStyles = (colorScheme: ColorSchemeName) =>
     recommendations: {
       marginBottom: 30,
       backgroundColor: backgroundColor(colorScheme),
-      ...Platform.select({
-        default: {
-          borderTopWidth: 0.5,
-          borderTopColor: itemSeparatorColor(colorScheme),
-        },
-        android: {},
-      }),
-
       marginLeft: 16,
     },
     recommendation: {
@@ -331,17 +356,37 @@ const getStyles = (colorScheme: ColorSchemeName) =>
     noMatch: {
       marginTop: 30,
     },
+    titleContainer: {
+      paddingBottom: 30,
+      ...Platform.select({
+        default: {
+          borderBottomWidth: 0.5,
+          borderBottomColor: itemSeparatorColor(colorScheme),
+        },
+        android: {},
+      }),
+    },
+    sectionTitleContainer: {
+      ...Platform.select({
+        default: {
+          borderBottomWidth: 0.5,
+          borderBottomColor: itemSeparatorColor(colorScheme),
+        },
+        android: {},
+      }),
+    },
     sectionTitle: {
       color: textSecondaryColor(colorScheme),
-      marginLeft: 16,
       ...Platform.select({
         default: {
           fontSize: 12,
           marginBottom: 8,
+          marginTop: 23,
         },
         android: {
           fontSize: 11,
           marginBottom: 12,
+          marginTop: 16,
         },
       }),
     },

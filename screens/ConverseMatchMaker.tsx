@@ -3,7 +3,6 @@ import { StatusBar } from "expo-status-bar";
 import React, { useEffect } from "react";
 import {
   Button,
-  ScrollView,
   StyleSheet,
   View,
   ColorSchemeName,
@@ -40,21 +39,9 @@ export default function ConverseMatchMaker({
   const styles = getStyles(colorScheme);
 
   return (
-    <View
-      style={{
-        flex: 1,
-        backgroundColor: "white",
-      }}
-    >
+    <View style={styles.modal}>
       {Platform.OS === "ios" && <StatusBar hidden={false} style="light" />}
-
-      <ScrollView
-        style={styles.modal}
-        contentContainerStyle={styles.modalContent}
-        keyboardShouldPersistTaps="handled"
-      >
-        <Recommendations navigation={navigation} visibility="FULL" />
-      </ScrollView>
+      <Recommendations navigation={navigation} visibility="FULL" />
     </View>
   );
 }
@@ -64,8 +51,5 @@ const getStyles = (colorScheme: ColorSchemeName) =>
     modal: {
       flex: 1,
       backgroundColor: backgroundColor(colorScheme),
-    },
-    modalContent: {
-      flexGrow: 1,
     },
   });
