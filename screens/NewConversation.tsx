@@ -261,6 +261,8 @@ export default function NewConversation({
   const initialFocus = useRef(false);
 
   const styles = getStyles(colorScheme);
+  const showRecommendations =
+    !status.loading && value.length === 0 && recommendationsFrensCount > 0;
 
   return (
     <View
@@ -355,8 +357,16 @@ export default function NewConversation({
           />
         )}
       </View>
+      <View
+        style={{
+          backgroundColor: backgroundColor(colorScheme),
+          height: showRecommendations ? undefined : 0,
+        }}
+      >
+        <Recommendations visibility="EMBEDDED" navigation={navigation} />
+      </View>
       <ScrollView
-        style={styles.modal}
+        style={[styles.modal, { height: showRecommendations ? 0 : undefined }]}
         keyboardShouldPersistTaps="handled"
         onScrollBeginDrag={() => {
           inputRef.current?.blur();
@@ -378,12 +388,6 @@ export default function NewConversation({
               )}
           </View>
         )}
-
-        {!status.loading &&
-          value.length === 0 &&
-          recommendationsFrensCount > 0 && (
-            <Recommendations visibility="EMBEDDED" navigation={navigation} />
-          )}
 
         {status.loading && (
           <ActivityIndicator style={styles.mainActivityIndicator} />
