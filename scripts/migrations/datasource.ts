@@ -12,6 +12,7 @@ import { addSentViaConverse1684057254703 } from "../../data/db/migrations/168405
 import { addProfileEntity1686053217007 } from "../../data/db/migrations/1686053217007-addProfileEntity";
 import { removeHandlesFromConvo1686124833536 } from "../../data/db/migrations/1686124833536-removeHandlesFromConvo";
 import { addContentType1687793816866 } from "../../data/db/migrations/1687793816866-addContentType";
+import { addMessageReaction1688549487960 } from "../../data/db/migrations/1688549487960-addMessageReaction";
 import { Conversation } from "./entities/conversation";
 import { Message } from "./entities/message";
 import { Profile } from "./entities/profile";
@@ -32,6 +33,7 @@ const dataSource = new DataSource({
     addProfileEntity1686053217007,
     removeHandlesFromConvo1686124833536,
     addContentType1687793816866,
+    addMessageReaction1688549487960,
   ],
   type: "sqlite",
 });

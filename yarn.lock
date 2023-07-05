@@ -5066,6 +5066,13 @@
   resolved "https://registry.npmjs.org/@xmldom/xmldom/-/xmldom-0.7.9.tgz"
   integrity sha512-yceMpm/xd4W2a85iqZyO09gTnHvXF6pyiWjD2jcOJs7hRoZtNNOO1eJlhHj1ixA+xip2hOyGn+LgcvLCMo5zXA==
 
+"@xmtp/content-type-reaction@^1.0.0":
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/@xmtp/content-type-reaction/-/content-type-reaction-1.0.1.tgz#d47b4ce13322258bab4ee0d03356e01e579400b7"
+  integrity sha512-1O507MUAvB8ukt0anyQONieaLYYv2T76yWwh3I+HAfLt0UUKBKlyVUctGwu5tzeCni2cw7coB5LVS2E9Il1OPg==
+  dependencies:
+    "@xmtp/xmtp-js" "^9.1.7"
+
 "@xmtp/content-type-remote-attachment@^1.0.7":
   version "1.0.7"
   resolved "https://registry.yarnpkg.com/@xmtp/content-type-remote-attachment/-/content-type-remote-attachment-1.0.7.tgz#84c85aebfdb8823dc2f06f8e406dc722ed1dc458"
@@ -5099,6 +5106,18 @@
   version "9.2.0"
   resolved "https://registry.yarnpkg.com/@xmtp/xmtp-js/-/xmtp-js-9.2.0.tgz#012236044cca00ae5134a53312f1cdc9a087a18b"
   integrity sha512-wi+pp+3XNXXxFLR+CTnP3+Vjo6a9/bCmoVQHyWRNUZL38eYvq0rAMzyjti8Mc49Or9SkxteZnDaI86eIb4i9Uw==
+  dependencies:
+    "@noble/secp256k1" "^1.5.2"
+    "@xmtp/proto" "^3.24.0"
+    async-mutex "^0.4.0"
+    elliptic "^6.5.4"
+    ethers "^5.5.3"
+    long "^5.2.0"
+
+"@xmtp/xmtp-js@^9.1.7":
+  version "9.4.0"
+  resolved "https://registry.yarnpkg.com/@xmtp/xmtp-js/-/xmtp-js-9.4.0.tgz#9c041e4adaf4e55e6e3998aa57352122efd38ce3"
+  integrity sha512-5YbhhFOCJFUbVHuYmyZMJgMrdWQ1Lr3iQN1IW7BcEJsW2Xavfq3i+N3F9aotDsj4fEU0OCplCA1ehBAZDbAKXw==
   dependencies:
     "@noble/secp256k1" "^1.5.2"
     "@xmtp/proto" "^3.24.0"

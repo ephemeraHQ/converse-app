@@ -14,6 +14,12 @@ import { addSentViaConverse1684057254703 } from "./migrations/1684057254703-addS
 import { addProfileEntity1686053217007 } from "./migrations/1686053217007-addProfileEntity";
 import { removeHandlesFromConvo1686124833536 } from "./migrations/1686124833536-removeHandlesFromConvo";
 import { addContentType1687793816866 } from "./migrations/1687793816866-addContentType";
+import { addMessageReaction1688549487960 } from "./migrations/1688549487960-addMessageReaction";
+
+// We support SQLite from version 3.8.10.2 (embedded in Android 6.0 - SDK 23)
+// For supported methods see https://www.sqlite.org/changes.html
+// Upsert is not always supported (see ./upsert.ts)
+// ADD COLUMN supported (added in version 3.2.0)
 
 const dataSource = new DataSource({
   database: "converse",
@@ -32,6 +38,7 @@ const dataSource = new DataSource({
     addProfileEntity1686053217007,
     removeHandlesFromConvo1686124833536,
     addContentType1687793816866,
+    addMessageReaction1688549487960,
   ],
   type: "expo",
 });

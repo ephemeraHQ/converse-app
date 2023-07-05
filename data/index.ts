@@ -1,11 +1,13 @@
 import "reflect-metadata";
 
+import { Reaction } from "@xmtp/content-type-reaction";
 import RNFS from "react-native-fs";
 
 import { addLog } from "../components/DebugButton";
 import { getProfilesForAddresses } from "../utils/api";
 import { getLensHandleFromConversationIdAndPeer } from "../utils/lens";
 import { lastValueInMap } from "../utils/map";
+import { sentryTrackMessage } from "../utils/sentry";
 import {
   saveConversationDict,
   saveXmtpEnv,
@@ -44,6 +46,8 @@ const xmtpMessageToDb = (
   status: xmtpMessage.status || "sent",
   sentViaConverse: !!xmtpMessage.sentViaConverse,
   contentType: xmtpMessage.contentType,
+  // we don't include the reactions field as it is
+  // filled by other methods
 });
 
 const xmtpMessageFromDb = (message: Message): XmtpMessage => ({
@@ -54,6 +58,7 @@ const xmtpMessageFromDb = (message: Message): XmtpMessage => ({
   status: message.status,
   sentViaConverse: !!message.sentViaConverse,
   contentType: message.contentType,
+  reactions: message.reactions || "{}",
 });
 
 const xmtpConversationToDb = (
@@ -343,12 +348,23 @@ export const saveNewConversation = async (
 };
 
 export const saveMessages = async (
-  messages: XmtpMessage[],
+  allMessages: XmtpMessage[],
   conversationTopic: string,
   dispatch: MaybeDispatchType
 ) => {
-  // First save to db
-  upsertRepository(
+  // Reactions are handled differently since they're not displayed
+  // as a message but modify an existing message
+  const reactionMessages: XmtpMessage[] = [];
+  const messages: XmtpMessage[] = [];
+  allMessages.forEach((m) => {
+    if (m.contentType.startsWith("xmtp.org/reaction:")) {
+      reactionMessages.push(m);
+    } else {
+      messages.push(m);
+    }
+  });
+  // First save messages to db
+  const upsertPromise = upsertRepository(
     messageRepository,
     messages.map((xmtpMessage) =>
       xmtpMessageToDb(xmtpMessage, conversationTopic)
@@ -357,14 +373,62 @@ export const saveMessages = async (
   );
 
   // Then dispatch if set
-  if (!dispatch) return;
-  dispatch({
-    type: XmtpDispatchTypes.XmtpSetMessages,
-    payload: {
-      topic: conversationTopic,
-      messages,
-    },
-  });
+  if (dispatch) {
+    dispatch({
+      type: XmtpDispatchTypes.XmtpSetMessages,
+      payload: {
+        topic: conversationTopic,
+        messages,
+      },
+    });
+  }
+
+  // Now we can handle reactions if there are any
+  if (reactionMessages.length > 0) {
+    await upsertPromise;
+    await saveReactions(reactionMessages, conversationTopic, dispatch);
+  }
+};
+
+const saveReactions = async (
+  reactionMessages: XmtpMessage[],
+  conversationTopic: string,
+  dispatch: MaybeDispatchType
+) => {
+  for (const reactionMessage of reactionMessages) {
+    try {
+      const reactionContent = JSON.parse(reactionMessage.content) as Reaction;
+      // Check if message exists
+      const message = await messageRepository.findOneBy({
+        id: reactionContent.reference,
+        conversationId: conversationTopic,
+      });
+      if (message) {
+        const reactions = JSON.parse(message.reactions || "{}");
+        reactions[reactionMessage.id] = {
+          action: reactionContent.action,
+          content: reactionContent.content,
+          senderAddress: reactionMessage.senderAddress,
+          sent: reactionMessage.sent,
+        };
+        message.reactions = JSON.stringify(reactions);
+        await messageRepository.save(message);
+        if (dispatch) {
+          dispatch({
+            type: XmtpDispatchTypes.XmtpSetMessages,
+            payload: {
+              topic: conversationTopic,
+              messages: [xmtpMessageFromDb(message)],
+            },
+          });
+        }
+      }
+    } catch (e) {
+      sentryTrackMessage("CANT_PARSE_REACTION_CONTENT", {
+        reactionMessageContent: reactionMessage.content,
+      });
+    }
+  }
 };
 
 export const loadProfilesByAddress = async () => {

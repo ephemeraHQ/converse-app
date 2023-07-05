@@ -1,3 +1,4 @@
+import { ContentTypeReaction } from "@xmtp/content-type-reaction";
 import * as Clipboard from "expo-clipboard";
 import { ReactNode, useCallback, useContext } from "react";
 import {
@@ -24,6 +25,7 @@ import {
   textSecondaryColor,
 } from "../../utils/colors";
 import { getRelativeDate } from "../../utils/date";
+import { getMessageReactions } from "../../utils/reactions";
 import ClickableText from "../ClickableText";
 import { showActionSheetWithOptions } from "../StateHandlers/ActionSheetStateHandler";
 import ChatAttachmentBubble from "./ChatAttachmentBubble";
@@ -38,11 +40,13 @@ export type MessageToDisplay = XmtpMessage & {
 
 type Props = {
   message: MessageToDisplay;
+  sendMessage: (content: string, contentType?: string) => Promise<void>;
 };
 
-export default function ChatMessage({ message }: Props) {
+export default function ChatMessage({ message, sendMessage }: Props) {
   const colorScheme = useColorScheme();
   const styles = getStyles(colorScheme);
+  const reactions = getMessageReactions(message);
 
   const { dispatch } = useContext(AppContext);
 
@@ -103,6 +107,26 @@ export default function ChatMessage({ message }: Props) {
       "Copy message": () => {
         Clipboard.setStringAsync(message.content);
       },
+      React: () => {
+        sendMessage(
+          JSON.stringify({
+            reference: message.id,
+            action: "added",
+            content: "smile",
+          }),
+          ContentTypeReaction.toString()
+        );
+      },
+      RemoveReact: () => {
+        sendMessage(
+          JSON.stringify({
+            reference: message.id,
+            action: "removed",
+            content: "smile",
+          }),
+          ContentTypeReaction.toString()
+        );
+      },
     };
     if (!message.fromMe) {
       methods["Report message"] = showMessageReportActionSheet;
@@ -128,9 +152,11 @@ export default function ChatMessage({ message }: Props) {
       }
     );
   }, [
-    colorScheme,
     message.fromMe,
     message.content,
+    message.id,
+    colorScheme,
+    sendMessage,
     showMessageReportActionSheet,
   ]);
 
@@ -150,6 +176,16 @@ export default function ChatMessage({ message }: Props) {
         ]}
       >
         {message.content}
+        {reactions
+          ? Object.keys(reactions).map(
+              (a) =>
+                ` (${reactions[a].content} from ${
+                  reactions[a].senderAddress === message.senderAddress
+                    ? "sender"
+                    : "receiver"
+                })`
+            )
+          : ""}
         <View style={{ opacity: 0 }}>{metadata}</View>
       </ClickableText>
     );

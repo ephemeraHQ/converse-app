@@ -1,4 +1,5 @@
 import { ContentTypeRemoteAttachment } from "@xmtp/content-type-remote-attachment";
+import { ContentTypeReaction } from "@xmtp/content-type-reaction";
 import { useCallback, useContext, useEffect } from "react";
 
 import {
@@ -122,14 +123,20 @@ export const sendPendingMessages = async (dispatch: DispatchType) => {
       );
       if (conversation) {
         let preparedMessage: PreparedMessage;
-        if (message.contentType === ContentTypeRemoteAttachment.toString()) {
+        if (
+          message.contentType.startsWith("xmtp.org/remoteStaticAttachment:")
+        ) {
           preparedMessage = await conversation.prepareMessage(
             deserializeRemoteAttachmentContent(message.content),
             {
               contentType: ContentTypeRemoteAttachment,
-              contentFallback:
-                "This app cannot display this media. You can use converse.xyz now to access it.",
+              contentFallback: "This app cannot display this media. You can use converse.xyz now to access it.",
             }
+          );
+        } else if (message.contentType.startsWith("xmtp.org/reaction:")) {
+          preparedMessage = await conversation.prepareMessage(
+            JSON.parse(message.content),
+            { contentType: ContentTypeReaction, contentFallback: "[Reaction]" }
           );
         } else {
           preparedMessage = await conversation.prepareMessage(message.content);
