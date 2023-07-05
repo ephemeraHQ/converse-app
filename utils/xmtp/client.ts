@@ -1,3 +1,4 @@
+import { ReactionCodec } from "@xmtp/content-type-reaction";
 import {
   AttachmentCodec,
   RemoteAttachmentCodec,
@@ -23,6 +24,7 @@ export const getXmtpClientFromKeys = async (keys: any) => {
   });
   client.registerCodec(new AttachmentCodec());
   client.registerCodec(new RemoteAttachmentCodec());
+  client.registerCodec(new ReactionCodec());
   return client;
 };
 

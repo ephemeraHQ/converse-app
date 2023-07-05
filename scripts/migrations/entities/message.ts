@@ -9,6 +9,13 @@ import {
 
 import { type Conversation } from "./conversation";
 
+export type MessageReaction = {
+  action: "added" | "removed";
+  content: string;
+  senderAddress: string;
+  sent: number;
+};
+
 @Entity()
 export class Message {
   @PrimaryColumn("text")
@@ -36,10 +43,36 @@ export class Message {
   @Column("text", { default: "xmtp.org/text:1.0" })
   contentType!: string;
 
+  @Column("text", { default: "[]" })
+  reactions!: string;
+
   @ManyToOne(
     "Conversation",
     (conversation: Conversation) => conversation.messages
   )
   @JoinColumn({ name: "conversationId" })
   conversation?: Conversation;
+
+  getReactions() {
+    // Returns the last reaction for each sender
+    try {
+      const reactions = JSON.parse(this.reactions) as MessageReaction[];
+      const sortedReactions = reactions.sort((a, b) => b.sent - a.sent);
+      const lastReactionBySender: { [senderAddress: string]: MessageReaction } =
+        {};
+      sortedReactions.forEach((reaction) => {
+        if (reaction.action === "removed") {
+          delete lastReactionBySender[reaction.senderAddress];
+        } else {
+          lastReactionBySender[reaction.senderAddress] = reaction;
+        }
+      });
+
+      return lastReactionBySender;
+    } catch (error) {
+      const data = { error, reactions: this.reactions };
+      console.log(data);
+      return {};
+    }
+  }
 }

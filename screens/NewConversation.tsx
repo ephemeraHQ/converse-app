@@ -260,7 +260,25 @@ export default function NewConversation({
   const styles = getStyles(colorScheme);
   const showRecommendations =
     !status.loading && value.length === 0 && recommendationsFrensCount > 0;
+
   const inputPlaceholder = "0x, .eth, .lens, .fc, .cb.id, UD…";
+
+  const getLastMessagePreview = useCallback((c: XmtpConversation) => {
+    const lastMessage = lastValueInMap(c.messages);
+    if (!lastMessage) return "";
+    console.log(lastMessage.contentType);
+    if (lastMessage.contentType.startsWith("xmtp.org/text:")) {
+      return lastMessage.content;
+    } else if (
+      lastMessage.contentType.startsWith("xmtp.org/remoteStaticAttachment:")
+    ) {
+      return "📎 Media";
+    } else if (lastMessage.contentType.startsWith("xmtp.org/reaction:")) {
+      return "Reaction";
+    }
+    return "";
+  }, []);
+
   return (
     <View
       style={{
@@ -422,7 +440,7 @@ export default function NewConversation({
                   id: c.topic,
                   leftView: <TableViewPicto symbol="arrow.up.right" />,
                   title: conversationName(c),
-                  subtitle: lastValueInMap(c.messages)?.content || "",
+                  subtitle: getLastMessagePreview(c),
                   action: () => {
                     navigateToTopic(c.topic);
                   },

@@ -5,6 +5,7 @@ import React, {
   useState,
   useEffect,
   useContext,
+  useCallback,
 } from "react";
 import {
   View,
@@ -43,7 +44,7 @@ type Props = {
   setInputValue: (value: string) => void;
   inputValue: string;
   inputRef: MutableRefObject<TextInput | undefined>;
-  sendMessage: (content: string) => Promise<void>;
+  sendMessage: (content: string, contentType?: string) => Promise<void>;
   isBlockedPeer: boolean;
   onReadyToFocus: () => void;
 };
@@ -57,6 +58,8 @@ const getFlashlistArray = (
   const reverseArray = [];
   for (let index = messagesArray.length - 1; index >= 0; index--) {
     const message = messagesArray[index] as MessageToDisplay;
+    // Reactions are not displayed in the flow
+    if (message.contentType.startsWith("xmtp.org/reaction:")) continue;
     message.fromMe =
       !!xmtpAddress &&
       xmtpAddress.toLowerCase() === message.senderAddress.toLowerCase();
@@ -155,7 +158,35 @@ export default function Chat({
   );
 
   const showPlaceholder =
-    flashListArray.length === 1 || isBlockedPeer || !conversation;
+    flashListArray.length === 0 || isBlockedPeer || !conversation;
+  const renderItem = useCallback(
+    ({ item }: { item: MessageToDisplay }) => {
+      if (item.id === "converse-recommendations") {
+        const recommendationData = conversation?.peerAddress
+          ? state.recommendations?.frens?.[conversation.peerAddress]
+          : undefined;
+        if (!recommendationData || !conversation?.peerAddress) return null;
+        return (
+          <View style={styles.inChatRecommendations}>
+            <Recommendation
+              recommendationData={recommendationData}
+              address={conversation.peerAddress}
+              embedInChat
+            />
+          </View>
+        );
+      } else {
+        return <ChatMessage message={item} sendMessage={sendMessage} />;
+      }
+    },
+    [
+      conversation?.peerAddress,
+      sendMessage,
+      state.recommendations?.frens,
+      styles.inChatRecommendations,
+    ]
+  );
+  const keyExtractor = useCallback((item: MessageToDisplay) => item.id, []);
 
   return (
     <View
@@ -167,25 +198,7 @@ export default function Chat({
           <AnimatedFlashList
             contentContainerStyle={styles.chat}
             data={flashListArray}
-            renderItem={({ item }) => {
-              if (item.id === "converse-recommendations") {
-                const recommendationData = conversation?.peerAddress
-                  ? state.recommendations?.frens?.[conversation.peerAddress]
-                  : undefined;
-                if (!recommendationData) return null;
-                return (
-                  <View style={styles.inChatRecommendations}>
-                    <Recommendation
-                      recommendationData={recommendationData}
-                      address={conversation.peerAddress}
-                      embedInChat
-                    />
-                  </View>
-                );
-              } else {
-                return <ChatMessage message={item} />;
-              }
-            }}
+            renderItem={renderItem}
             onLayout={() => {
               setTimeout(() => {
                 onReadyToFocus();
@@ -200,7 +213,7 @@ export default function Chat({
               autoscrollToTopThreshold: 100,
             }}
             inverted
-            keyExtractor={(item) => item.id}
+            keyExtractor={keyExtractor}
           />
         )}
         {showPlaceholder && (
