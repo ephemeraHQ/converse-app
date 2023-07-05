@@ -282,14 +282,14 @@ const allowedMimeTypes = [
   ...videoMimeTypes,
 ];
 
-export const isImageMimetype = (mimeType: string) =>
-  imageMimeTypes.includes(mimeType.toLowerCase());
-export const isAudioMimeType = (mimeType: string) =>
-  audioMimeTypes.includes(mimeType.toLowerCase());
-export const isVideoMimeType = (mimeType: string) =>
-  videoMimeTypes.includes(mimeType.toLowerCase());
-export const isAllowedMimeType = (mimeType: string) =>
-  allowedMimeTypes.includes(mimeType.toLowerCase());
+export const isImageMimetype = (mimeType?: string) =>
+  !!mimeType && imageMimeTypes.includes(mimeType.toLowerCase());
+export const isAudioMimeType = (mimeType?: string) =>
+  !!mimeType && audioMimeTypes.includes(mimeType.toLowerCase());
+export const isVideoMimeType = (mimeType?: string) =>
+  !!mimeType && videoMimeTypes.includes(mimeType.toLowerCase());
+export const isAllowedMimeType = (mimeType?: string) =>
+  !!mimeType && allowedMimeTypes.includes(mimeType.toLowerCase());
 
 export const getImageSize = (
   imageURI: string
