@@ -78,9 +78,17 @@ const build = async () => {
     buildArgs.push("--auto-submit");
   }
 
-  await executeCommand(buildCommand, buildArgs);
+  let buildSuccess = false;
 
-  if (env === "production" && buildLocally) {
+  try {
+    await executeCommand(buildCommand, buildArgs);
+    buildSuccess = true;
+  } catch (e) {
+    console.log("Error during build");
+    console.log(e);
+  }
+
+  if (env === "production" && buildLocally && buildSuccess) {
     const submitCommand = "eas";
     const submitArgs = [
       "submit",
@@ -98,9 +106,9 @@ const build = async () => {
     }
   }
 
-  if (env === "preview") {
+  if (env === "preview" || (env === "production" && !buildSuccess)) {
     execSync("git co -f", { cwd: PROJECT_ROOT });
-  } else if (env === "production") {
+  } else if (env === "production" && buildSuccess) {
     execSync("git add app.json", { cwd: PROJECT_ROOT });
     if (platform === "ios") {
       execSync("git restore .", { cwd: PROJECT_ROOT });
