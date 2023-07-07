@@ -26,7 +26,9 @@ export default function Welcome({ ctaOnly, navigation }: Props) {
   const headerHeight = useHeaderHeight();
   const colorScheme = useColorScheme();
   const styles = getStyles(colorScheme);
-  const frensCount = Object.keys(state.recommendations.frens).length;
+  const frensCount = state.recommendations?.frens
+    ? Object.keys(state.recommendations.frens).length
+    : 0;
   return (
     <View
       style={

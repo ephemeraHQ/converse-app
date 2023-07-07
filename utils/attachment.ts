@@ -1,4 +1,4 @@
-import { RemoteAttachment } from "xmtp-content-type-remote-attachment";
+import { RemoteAttachment } from "@xmtp/content-type-remote-attachment";
 
 export type SerializedAttachmentContent = {
   nonce: string;

@@ -1,5 +1,5 @@
+import { ContentTypeRemoteAttachment } from "@xmtp/content-type-remote-attachment";
 import { useCallback, useContext, useEffect } from "react";
-import { ContentTypeRemoteAttachment } from "xmtp-content-type-remote-attachment";
 
 import {
   getMessagesToSend,
@@ -57,12 +57,6 @@ export const getLocalXmtpConversationForTopic = async (
   const conversation = await parseConversationJSON(client, savedConversation);
   conversationsByTopic[topic] = conversation;
   return conversation;
-};
-
-export const prepareXmtpMessage = async (topic: string, content: string) => {
-  const conversation = await getLocalXmtpConversationForTopic(topic);
-  const preparedMessage = await conversation.prepareMessage(content);
-  return preparedMessage;
 };
 
 export const sendPreparedMessages = async (
@@ -131,7 +125,11 @@ export const sendPendingMessages = async (dispatch: DispatchType) => {
         if (message.contentType === ContentTypeRemoteAttachment.toString()) {
           preparedMessage = await conversation.prepareMessage(
             deserializeRemoteAttachmentContent(message.content),
-            { contentType: ContentTypeRemoteAttachment }
+            {
+              contentType: ContentTypeRemoteAttachment,
+              contentFallback:
+                "This app cannot display this media. You can use converse.xyz now to access it.",
+            }
           );
         } else {
           preparedMessage = await conversation.prepareMessage(message.content);

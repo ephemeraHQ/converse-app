@@ -14,6 +14,7 @@ module.exports = {
       {
         alias: {
           crypto: "crypto-browserify",
+          "@xmtp/xmtp-js": "./vendor/xmtp-js/src",
         },
       },
     ],
