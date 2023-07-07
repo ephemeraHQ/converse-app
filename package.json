@@ -33,6 +33,7 @@
     "@thirdweb-dev/react-native": "^0.2.25",
     "@thirdweb-dev/react-native-compat": "^0.2.25",
     "@types/elliptic": "^6.4.14",
+    "@xmtp/content-type-remote-attachment": "^1.0.7",
     "@xmtp/proto": "^3.24.0",
     "axios": "^1.2.1",
     "babel-plugin-transform-remove-console": "^6.9.4",
@@ -107,8 +108,7 @@
     "typeorm": "^0.3.11",
     "url": "^0.11.0",
     "web-streams-polyfill": "^3.2.1",
-    "web3": "^1.8.1",
-    "xmtp-content-type-remote-attachment": "^1.0.7"
+    "web3": "^1.8.1"
   },
   "devDependencies": {
     "@babel/core": "^7.19.3",

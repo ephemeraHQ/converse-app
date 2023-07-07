@@ -1,3 +1,4 @@
+import { ContentTypeRemoteAttachment } from "@xmtp/content-type-remote-attachment";
 import * as ImagePicker from "expo-image-picker";
 import * as Linking from "expo-linking";
 import { setStatusBarHidden } from "expo-status-bar";
@@ -20,7 +21,6 @@ import {
   Platform,
 } from "react-native";
 import RNFS from "react-native-fs";
-import { ContentTypeRemoteAttachment } from "xmtp-content-type-remote-attachment";
 
 import { AppDispatchTypes } from "../../data/store/appReducer";
 import { AppContext } from "../../data/store/context";

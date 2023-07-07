@@ -1,8 +1,8 @@
-import { Signer } from "ethers";
 import {
   AttachmentCodec,
   RemoteAttachmentCodec,
-} from "xmtp-content-type-remote-attachment";
+} from "@xmtp/content-type-remote-attachment";
+import { Signer } from "ethers";
 
 import config from "../../config";
 import { Client } from "../../vendor/xmtp-js/src";
