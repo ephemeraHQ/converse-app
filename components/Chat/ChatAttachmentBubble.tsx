@@ -16,6 +16,7 @@ import RNFS from "react-native-fs";
 
 import { textPrimaryColor } from "../../utils/colors";
 import { getImageSize, isImageMimetype } from "../../utils/media";
+import { sentryTrackMessage } from "../../utils/sentry";
 import { sendMessageToWebview } from "../XmtpWebview";
 import { MessageToDisplay } from "./ChatMessage";
 import ChatMessageMetadata from "./ChatMessageMetadata";
@@ -29,6 +30,7 @@ export default function ChatAttachmentBubble({ message }: Props) {
   const styles = getStyles(colorScheme);
   const [attachment, setAttachment] = useState({
     loading: true,
+    error: false,
     mediaType: undefined as undefined | "IMAGE" | "UNSUPPORTED",
     mediaURL: undefined as undefined | string,
     filename: "",
@@ -42,25 +44,33 @@ export default function ChatAttachmentBubble({ message }: Props) {
     sendMessageToWebview(
       "DECODE_ATTACHMENT",
       { serializedRemoteAttachment: message.content },
-      async (attachment: any) => {
+      async (attachmentResult: any) => {
+        if (attachmentResult.status !== "SUCCESS" || !attachmentResult.data) {
+          sentryTrackMessage("CANT_DECODE_ATTACHMENT", {
+            content: message.content,
+            error: attachmentResult,
+          });
+          setAttachment((a) => ({ ...a, error: true, loading: false }));
+          return;
+        }
         const messageFolder = `${RNFS.DocumentDirectoryPath}/messages/${message.id}`;
         const attachmentJsonPath = `${messageFolder}/attachment.json`;
         // Create folder
         await RNFS.mkdir(messageFolder, {
           NSURLIsExcludedFromBackupKey: true,
         });
-        const attachmentPath = `${messageFolder}/${attachment.filename}`;
-        const isImage = isImageMimetype(attachment.mimeType);
+        const attachmentPath = `${messageFolder}/${attachmentResult.filename}`;
+        const isImage = isImageMimetype(attachmentResult.mimeType);
         // Let's cache the file and decoded information
-        await RNFS.writeFile(attachmentPath, attachment.data, "base64");
+        await RNFS.writeFile(attachmentPath, attachmentResult.data, "base64");
         const imageSize = isImage
           ? await getImageSize(`file://${attachmentPath}`)
           : undefined;
         await RNFS.writeFile(
           attachmentJsonPath,
           JSON.stringify({
-            filename: attachment.filename,
-            mimeType: attachment.mimeType,
+            filename: attachmentResult.filename,
+            mimeType: attachmentResult.mimeType,
             imageSize,
           }),
           "utf8"
@@ -72,8 +82,9 @@ export default function ChatAttachmentBubble({ message }: Props) {
           imageSize,
           contentLength: 0,
           mediaURL: attachmentPath,
-          filename: attachment.filename,
-          mimeType: attachment.mimeType,
+          filename: attachmentResult.filename,
+          mimeType: attachmentResult.mimeType,
+          error: false,
         });
       }
     );
@@ -118,6 +129,7 @@ export default function ChatAttachmentBubble({ message }: Props) {
               mediaURL: attachmentPath,
               contentLength: 0,
               filename: messageAttachmentData.filename,
+              error: false,
             });
             return;
           }
@@ -142,6 +154,7 @@ export default function ChatAttachmentBubble({ message }: Props) {
           contentLength: parsedEncodedContent.contentLength,
           mimeType: parsedType || "",
           filename: parsedEncodedContent.filename,
+          error: false,
         });
       } catch (e) {
         console.log(e);
@@ -152,8 +165,13 @@ export default function ChatAttachmentBubble({ message }: Props) {
         fetchAndDecodeAttachment();
       }
     };
-    go();
-  }, [fetchAndDecodeAttachment, message.content, message.id]);
+    if (!message.content) {
+      sentryTrackMessage("ATTACHMENT_NO_CONTENT", { message });
+      setAttachment((a) => ({ ...a, error: true, loading: false }));
+    } else {
+      go();
+    }
+  }, [fetchAndDecodeAttachment, message]);
 
   const showing =
     !attachment.loading &&
@@ -183,6 +201,13 @@ export default function ChatAttachmentBubble({ message }: Props) {
             Downloading {filename.toLowerCase()}
           </Text>
         </Text>
+        <View style={{ opacity: 0 }}>{metadataView}</View>
+      </>
+    );
+  } else if (attachment.error) {
+    return (
+      <>
+        <Text style={textStyle}>⚠️ Can't load attachment</Text>
         <View style={{ opacity: 0 }}>{metadataView}</View>
       </>
     );
