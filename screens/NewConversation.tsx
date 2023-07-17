@@ -1,5 +1,5 @@
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import { getAddress, isAddress } from "ethers/lib/utils";
+import { getAddress } from "ethers/lib/utils";
 import * as Linking from "expo-linking";
 import { StatusBar } from "expo-status-bar";
 import React, {
@@ -46,10 +46,9 @@ import {
   textPrimaryColor,
   textSecondaryColor,
 } from "../utils/colors";
-import { getAddressForPeer } from "../utils/eth";
+import { getAddressForPeer, isSupportedPeer } from "../utils/eth";
 import { lastValueInMap } from "../utils/map";
 import { addressPrefix, conversationName } from "../utils/str";
-import { isUNSAddress } from "../utils/uns";
 import { isOnXmtp } from "../utils/xmtp/client";
 import { NavigationParamList } from "./Main";
 
@@ -132,12 +131,8 @@ export default function NewConversation({
         inviteToConverse: "",
         existingConversations: [],
       }));
-      const is0x = isAddress(value.toLowerCase());
-      const isLens = value.endsWith(config.lensSuffix);
-      const isENS = value.endsWith(".eth");
-      const isFarcaster = value.endsWith(".fc");
-      const isUNS = isUNSAddress(value);
-      if (is0x || isLens || isENS || isENS || isFarcaster || isUNS) {
+
+      if (isSupportedPeer(value)) {
         setStatus(({ error }) => ({
           loading: true,
           error,
@@ -150,6 +145,8 @@ export default function NewConversation({
         if (searchingForValue.current === value) {
           // If we're still searching for this one
           if (!resolvedAddress) {
+            const isLens = value.endsWith(config.lensSuffix);
+            const isFarcaster = value.endsWith(".fc");
             setStatus({
               loading: false,
               address: "",
