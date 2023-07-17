@@ -74,6 +74,13 @@ export const resolveEnsName = async (
   return data.address;
 };
 
+export const resolveCbIdName = async (
+  name: string
+): Promise<string | undefined> => {
+  const { data } = await api.get("/api/profile/cbid", { params: { name } });
+  return data.address;
+};
+
 export const resolveUnsDomain = async (
   domain: string
 ): Promise<string | undefined> => {
