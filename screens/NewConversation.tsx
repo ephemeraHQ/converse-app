@@ -263,7 +263,7 @@ export default function NewConversation({
   const styles = getStyles(colorScheme);
   const showRecommendations =
     !status.loading && value.length === 0 && recommendationsFrensCount > 0;
-
+  const inputPlaceholder = "0x, .eth, .lens, .fc, .cb.id, UD…";
   return (
     <View
       style={{
@@ -276,7 +276,7 @@ export default function NewConversation({
         {Platform.OS === "ios" && (
           <TextInput
             style={styles.input}
-            placeholder="0x, .eth, .lens, .fc, unstoppable domain …"
+            placeholder={inputPlaceholder}
             autoCapitalize="none"
             autoFocus={false}
             autoCorrect={false}
@@ -304,7 +304,7 @@ export default function NewConversation({
         )}
         {Platform.OS === "android" && (
           <MaterialSearchBar
-            placeholder="0x, .eth, .lens, .fc, unstoppable domain …"
+            placeholder={inputPlaceholder}
             onChangeText={(query) => setValue(query.trim())}
             value={value}
             icon={({ color }) => (
@@ -382,7 +382,7 @@ export default function NewConversation({
                 <Text style={styles.message}>
                   <Text>
                     Type the full address / domain of your contact (with .eth,
-                    .lens, .fc etc.)
+                    .lens, .fc, .cb.id etc.)
                   </Text>
                 </Text>
               )}
