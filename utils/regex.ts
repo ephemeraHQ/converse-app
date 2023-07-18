@@ -2,6 +2,7 @@ export const ADDRESS_REGEX = /\b0x[a-fA-F0-9]{40}\b/gi;
 export const LENS_REGEX = /[^\s]*\.lens\b/gi;
 export const ETH_REGEX = /[^\s]*\.eth\b/gi;
 export const FARCASTER_REGEX = /[^\s]*\.fc\b/gi;
+export const CB_ID_REGEX = /[^\s]*\.cb\.id\b/gi;
 export const UNS_REGEX =
   /[^\s]*\.(crypto|bitcoin|blockchain|dao|nft|888|wallet|x|klever|zil|hi|kresus|polygon|anime|manga|binanceus)\b/gi;
 
