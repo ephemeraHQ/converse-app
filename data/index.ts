@@ -348,22 +348,11 @@ export const saveNewConversation = async (
 };
 
 export const saveMessages = async (
-  allMessages: XmtpMessage[],
+  messages: XmtpMessage[],
   conversationTopic: string,
   dispatch: MaybeDispatchType
 ) => {
-  // Reactions are handled differently since they're not displayed
-  // as a message but modify an existing message
-  const reactionMessages: XmtpMessage[] = [];
-  const messages: XmtpMessage[] = [];
-  allMessages.forEach((m) => {
-    if (m.contentType.startsWith("xmtp.org/reaction:")) {
-      reactionMessages.push(m);
-    } else {
-      messages.push(m);
-    }
-  });
-  // First save messages to db
+  // First save all messages to db
   const upsertPromise = upsertRepository(
     messageRepository,
     messages.map((xmtpMessage) =>
@@ -382,6 +371,10 @@ export const saveMessages = async (
       },
     });
   }
+
+  const reactionMessages = messages.filter((m) =>
+    m.contentType.startsWith("xmtp.org/reaction:")
+  );
 
   // Now we can handle reactions if there are any
   if (reactionMessages.length > 0) {
@@ -407,6 +400,7 @@ const saveReactions = async (
         const reactions = JSON.parse(message.reactions || "{}");
         reactions[reactionMessage.id] = {
           action: reactionContent.action,
+          schema: reactionContent.schema,
           content: reactionContent.content,
           senderAddress: reactionMessage.senderAddress,
           sent: reactionMessage.sent,

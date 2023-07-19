@@ -104,28 +104,19 @@ export default function ChatMessage({ message, sendMessage }: Props) {
 
   const showMessageActionSheet = useCallback(() => {
     const methods: any = {
-      "Copy message": () => {
-        Clipboard.setStringAsync(message.content);
-      },
-      React: () => {
+      "Add a reaction": () => {
         sendMessage(
           JSON.stringify({
             reference: message.id,
             action: "added",
-            content: "smile",
+            content: "😅",
+            schema: "unicode",
           }),
           ContentTypeReaction.toString()
         );
       },
-      RemoveReact: () => {
-        sendMessage(
-          JSON.stringify({
-            reference: message.id,
-            action: "removed",
-            content: "smile",
-          }),
-          ContentTypeReaction.toString()
-        );
+      "Copy message": () => {
+        Clipboard.setStringAsync(message.content);
       },
     };
     if (!message.fromMe) {

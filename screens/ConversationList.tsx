@@ -235,6 +235,8 @@ export default function ConversationList({
               : conversation.messages?.size > 0
               ? isAttachmentMessage(lastMessage?.contentType)
                 ? "📎 Media"
+                : lastMessage?.contentType?.startsWith("xmtp.org/reaction:")
+                ? "Reaction"
                 : lastMessage?.content
               : ""
           }
