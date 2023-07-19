@@ -19,6 +19,7 @@ import Reanimated, {
   useSharedValue,
 } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import EmojiPicker from "rn-emoji-keyboard";
 
 import { AppContext } from "../../data/store/context";
 import { XmtpConversationWithUpdate } from "../../data/store/xmtpReducer";
@@ -88,7 +89,8 @@ const getFlashlistArray = (
         differenceInCalendarDays(nextMessage.sent, message.sent) > 0;
       if (
         nextMessage.senderAddress === message.senderAddress &&
-        !nextMessageDateChange
+        !nextMessageDateChange &&
+        !nextMessage.contentType.startsWith("xmtp.org/reaction:")
       ) {
         message.hasNextMessageInSeries = true;
       }
@@ -249,6 +251,7 @@ export default function Chat({
           />
         </>
       )}
+      <EmojiPicker onEmojiSelected={() => {}} open onClose={() => {}} />
     </View>
   );
 }
