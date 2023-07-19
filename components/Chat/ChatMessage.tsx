@@ -1,24 +1,17 @@
-import { ContentTypeReaction } from "@xmtp/content-type-reaction";
-import * as Clipboard from "expo-clipboard";
-import { ReactNode, useCallback, useContext } from "react";
+import { ReactNode } from "react";
 import {
-  Alert,
   View,
   useColorScheme,
   ColorSchemeName,
   StyleSheet,
-  TouchableOpacity,
   Text,
   Platform,
 } from "react-native";
 
 import MessageTail from "../../assets/message-tail.svg";
-import { AppContext } from "../../data/store/context";
-import { XmtpDispatchTypes, XmtpMessage } from "../../data/store/xmtpReducer";
-import { blockPeer, reportMessage } from "../../utils/api";
+import { XmtpMessage } from "../../data/store/xmtpReducer";
 import { isAttachmentMessage } from "../../utils/attachment";
 import {
-  actionSheetColors,
   messageBubbleColor,
   myMessageBubbleColor,
   textPrimaryColor,
@@ -27,8 +20,8 @@ import {
 import { getRelativeDate } from "../../utils/date";
 import { getMessageReactions } from "../../utils/reactions";
 import ClickableText from "../ClickableText";
-import { showActionSheetWithOptions } from "../StateHandlers/ActionSheetStateHandler";
 import ChatAttachmentBubble from "./ChatAttachmentBubble";
+import ChatMessageActions from "./ChatMessageActions";
 import ChatMessageMetadata from "./ChatMessageMetadata";
 
 export type MessageToDisplay = XmtpMessage & {
@@ -47,109 +40,6 @@ export default function ChatMessage({ message, sendMessage }: Props) {
   const colorScheme = useColorScheme();
   const styles = getStyles(colorScheme);
   const reactions = getMessageReactions(message);
-
-  const { dispatch } = useContext(AppContext);
-
-  const report = useCallback(async () => {
-    reportMessage({
-      messageId: message.id,
-      messageContent: message.content,
-      messageSender: message.senderAddress,
-    });
-
-    Alert.alert("Message reported");
-  }, [message]);
-
-  const reportAndBlock = useCallback(async () => {
-    reportMessage({
-      messageId: message.id,
-      messageContent: message.content,
-      messageSender: message.senderAddress,
-    });
-    blockPeer({ peerAddress: message.senderAddress, blocked: true });
-    dispatch({
-      type: XmtpDispatchTypes.XmtpSetBlockedStatus,
-      payload: { peerAddress: message.senderAddress, blocked: true },
-    });
-  }, [message, dispatch]);
-
-  const showMessageReportActionSheet = useCallback(() => {
-    const methods = {
-      Report: report,
-      "Report and block": reportAndBlock,
-      Cancel: () => {},
-    };
-
-    const options = Object.keys(methods);
-
-    showActionSheetWithOptions(
-      {
-        options,
-        title: "Report this message",
-        message:
-          "This message will be forwarded to Converse. The contact will not be informed.",
-        cancelButtonIndex: options.indexOf("Cancel"),
-        destructiveButtonIndex: [0, 1],
-        ...actionSheetColors(colorScheme),
-      },
-      (selectedIndex?: number) => {
-        if (selectedIndex === undefined) return;
-        const method = (methods as any)[options[selectedIndex]];
-        if (method) {
-          method();
-        }
-      }
-    );
-  }, [colorScheme, report, reportAndBlock]);
-
-  const showMessageActionSheet = useCallback(() => {
-    const methods: any = {
-      "Add a reaction": () => {
-        sendMessage(
-          JSON.stringify({
-            reference: message.id,
-            action: "added",
-            content: "😅",
-            schema: "unicode",
-          }),
-          ContentTypeReaction.toString()
-        );
-      },
-      "Copy message": () => {
-        Clipboard.setStringAsync(message.content);
-      },
-    };
-    if (!message.fromMe) {
-      methods["Report message"] = showMessageReportActionSheet;
-    }
-    methods.Cancel = () => {};
-
-    const options = Object.keys(methods);
-
-    showActionSheetWithOptions(
-      {
-        options,
-        title: message.content,
-        cancelButtonIndex: options.indexOf("Cancel"),
-        destructiveButtonIndex: message.fromMe ? undefined : 1,
-        ...actionSheetColors(colorScheme),
-      },
-      (selectedIndex?: number) => {
-        if (selectedIndex === undefined) return;
-        const method = (methods as any)[options[selectedIndex]];
-        if (method) {
-          method();
-        }
-      }
-    );
-  }, [
-    message.fromMe,
-    message.content,
-    message.id,
-    colorScheme,
-    sendMessage,
-    showMessageReportActionSheet,
-  ]);
 
   const metadata = (
     <ChatMessageMetadata message={message} white={message.fromMe} />
@@ -192,49 +82,53 @@ export default function ChatMessage({ message, sendMessage }: Props) {
       {message.dateChange && (
         <Text style={styles.date}>{getRelativeDate(message.sent)}</Text>
       )}
-      <TouchableOpacity
-        style={[
-          styles.messageBubble,
-          isAttachment
-            ? styles.messageBubbleAttachment
-            : styles.messageBubbleText,
-          message.fromMe ? styles.messageBubbleMe : undefined,
-          Platform.select({
-            default: {},
-            android: {
-              // Messages not from me
-              borderBottomLeftRadius:
-                !message.fromMe && message.hasNextMessageInSeries ? 2 : 18,
-              borderTopLeftRadius:
-                !message.fromMe && message.hasPreviousMessageInSeries ? 2 : 18,
-              // Messages from me
-              borderBottomRightRadius:
-                message.fromMe && message.hasNextMessageInSeries ? 2 : 18,
-              borderTopRightRadius:
-                message.fromMe && message.hasPreviousMessageInSeries ? 2 : 18,
-            },
-          }),
-        ]}
-        activeOpacity={1}
-        onLongPress={isAttachment ? undefined : showMessageActionSheet}
-      >
-        {messageContent}
-        <View style={styles.metadataContainer}>{metadata}</View>
 
-        {!message.hasNextMessageInSeries && Platform.OS === "ios" && (
-          <MessageTail
-            fill={
-              message.fromMe
-                ? myMessageBubbleColor(colorScheme)
-                : messageBubbleColor(colorScheme)
-            }
-            style={[
-              styles.messageTail,
-              message.fromMe ? styles.messageTailMe : undefined,
-            ]}
-          />
-        )}
-      </TouchableOpacity>
+      <ChatMessageActions message={message} sendMessage={sendMessage}>
+        <View
+          style={[
+            styles.messageBubble,
+            isAttachment
+              ? styles.messageBubbleAttachment
+              : styles.messageBubbleText,
+            message.fromMe ? styles.messageBubbleMe : undefined,
+            Platform.select({
+              default: {},
+              android: {
+                // Messages not from me
+                borderBottomLeftRadius:
+                  !message.fromMe && message.hasNextMessageInSeries ? 2 : 18,
+                borderTopLeftRadius:
+                  !message.fromMe && message.hasPreviousMessageInSeries
+                    ? 2
+                    : 18,
+                // Messages from me
+                borderBottomRightRadius:
+                  message.fromMe && message.hasNextMessageInSeries ? 2 : 18,
+                borderTopRightRadius:
+                  message.fromMe && message.hasPreviousMessageInSeries ? 2 : 18,
+              },
+            }),
+          ]}
+        >
+          {messageContent}
+
+          <View style={styles.metadataContainer}>{metadata}</View>
+
+          {!message.hasNextMessageInSeries && Platform.OS === "ios" && (
+            <MessageTail
+              fill={
+                message.fromMe
+                  ? myMessageBubbleColor(colorScheme)
+                  : messageBubbleColor(colorScheme)
+              }
+              style={[
+                styles.messageTail,
+                message.fromMe ? styles.messageTailMe : undefined,
+              ]}
+            />
+          )}
+        </View>
+      </ChatMessageActions>
     </View>
   );
 }
