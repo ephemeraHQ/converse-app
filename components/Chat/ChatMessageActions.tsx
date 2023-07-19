@@ -109,7 +109,9 @@ export default function ChatMessageActions({
         options,
         title: isAttachment ? "Image" : message.content,
         cancelButtonIndex: options.indexOf("Cancel"),
-        destructiveButtonIndex: message.fromMe ? undefined : 1,
+        destructiveButtonIndex: message.fromMe
+          ? undefined
+          : options.indexOf("Report message"),
         ...actionSheetColors(colorScheme),
       },
       (selectedIndex?: number) => {
