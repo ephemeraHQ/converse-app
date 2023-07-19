@@ -243,7 +243,7 @@ export default function ChatAttachmentBubble({ message }: Props) {
   } else if (attachment.error) {
     return (
       <>
-        <Text style={textStyle}>⚠️ Can't load attachment</Text>
+        <Text style={textStyle}>ℹ️ Couldn’t download attachment</Text>
         <View style={{ opacity: 0 }}>{metadataView}</View>
       </>
     );

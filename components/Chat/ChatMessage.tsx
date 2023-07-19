@@ -18,11 +18,11 @@ import {
   textSecondaryColor,
 } from "../../utils/colors";
 import { getRelativeDate } from "../../utils/date";
-import { getMessageReactions } from "../../utils/reactions";
 import ClickableText from "../ClickableText";
 import ChatAttachmentBubble from "./ChatAttachmentBubble";
 import ChatMessageActions from "./ChatMessageActions";
 import ChatMessageMetadata from "./ChatMessageMetadata";
+import ChatMessageReactions from "./ChatMessageReactions";
 
 export type MessageToDisplay = XmtpMessage & {
   hasPreviousMessageInSeries: boolean;
@@ -39,7 +39,6 @@ type Props = {
 export default function ChatMessage({ message, sendMessage }: Props) {
   const colorScheme = useColorScheme();
   const styles = getStyles(colorScheme);
-  const reactions = getMessageReactions(message);
 
   const metadata = (
     <ChatMessageMetadata message={message} white={message.fromMe} />
@@ -57,16 +56,6 @@ export default function ChatMessage({ message, sendMessage }: Props) {
         ]}
       >
         {message.content}
-        {reactions
-          ? Object.keys(reactions).map(
-              (a) =>
-                ` (${reactions[a].content} from ${
-                  reactions[a].senderAddress === message.senderAddress
-                    ? "sender"
-                    : "receiver"
-                })`
-            )
-          : ""}
         <View style={{ opacity: 0 }}>{metadata}</View>
       </ClickableText>
     );
@@ -129,6 +118,7 @@ export default function ChatMessage({ message, sendMessage }: Props) {
           )}
         </View>
       </ChatMessageActions>
+      <ChatMessageReactions message={message} sendMessage={sendMessage} />
     </View>
   );
 }
