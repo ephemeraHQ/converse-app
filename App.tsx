@@ -14,7 +14,6 @@ import {
 import "./utils/splash/splash";
 import { KeyboardProvider } from "react-native-keyboard-controller";
 import { Provider as PaperProvider } from "react-native-paper";
-import { useRecentPicksPersistence } from "rn-emoji-keyboard";
 import * as Sentry from "sentry-expo";
 
 import XmtpState from "./components/XmtpState";
@@ -28,6 +27,7 @@ import {
   MaterialLightTheme,
 } from "./utils/colors";
 import mmkv from "./utils/mmkv";
+import { useRecentPicksPersistence } from "./vendor/rn-emoji-keyboard";
 
 configureCoinbase({
   callbackURL: new URL(`https://${config.websiteDomain}/coinbase`),

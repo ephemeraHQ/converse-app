@@ -6,6 +6,7 @@ type MessageReaction = {
   content: string;
   senderAddress: string;
   sent: number;
+  schema: "unicode" | "shortcode" | "custom";
 };
 
 type MessageReactions = { [reactionId: string]: MessageReaction };
@@ -18,15 +19,37 @@ export const getMessageReactions = (message: XmtpMessage) => {
     const sortedReactions = Object.values(reactions).sort(
       (a, b) => a.sent - b.sent
     );
-    const lastReactionBySender: { [senderAddress: string]: MessageReaction } =
-      {};
+
+    const reactionsBySender: {
+      [senderAddress: string]: { [reactionContent: string]: MessageReaction };
+    } = {};
+    // We get all reactions for each sender, there might be multiple
+    // but we'll only show one!
     sortedReactions.forEach((reaction) => {
-      if (reaction.action === "removed") {
-        delete lastReactionBySender[reaction.senderAddress];
-      } else {
-        lastReactionBySender[reaction.senderAddress] = reaction;
+      if (
+        reaction.action === "removed" &&
+        reactionsBySender[reaction.senderAddress]?.[reaction.content]
+      ) {
+        delete reactionsBySender[reaction.senderAddress][reaction.content];
+      } else if (reaction.action === "added") {
+        reactionsBySender[reaction.senderAddress] =
+          reactionsBySender[reaction.senderAddress] || {};
+        reactionsBySender[reaction.senderAddress][reaction.content] = reaction;
       }
     });
+
+    const lastReactionBySender: {
+      [senderAddress: string]: MessageReaction;
+    } = {};
+
+    for (const senderAddress in reactionsBySender) {
+      const reactions = Object.values(reactionsBySender[senderAddress]).sort(
+        (a, b) => b.sent - a.sent
+      );
+      if (reactions.length > 0) {
+        lastReactionBySender[senderAddress] = reactions[0];
+      }
+    }
 
     return lastReactionBySender;
   } catch (error) {
