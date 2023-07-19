@@ -1,8 +1,10 @@
+import { ContentTypeReaction } from "@xmtp/content-type-reaction";
 import * as Clipboard from "expo-clipboard";
 import { useCallback, useContext, useState } from "react";
 import { Alert, useColorScheme } from "react-native";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import { runOnJS } from "react-native-reanimated";
+import EmojiPicker from "rn-emoji-keyboard";
 
 import { AppContext } from "../../data/store/context";
 import { XmtpDispatchTypes } from "../../data/store/xmtpReducer";
@@ -88,17 +90,6 @@ export default function ChatMessageActions({
 
   const showMessageActionSheet = useCallback(() => {
     const methods: any = {
-      //   "Add a reaction": () => {
-      //     sendMessage(
-      //       JSON.stringify({
-      //         reference: message.id,
-      //         action: "added",
-      //         content: "😅",
-      //         schema: "unicode",
-      //       }),
-      //       ContentTypeReaction.toString()
-      //     );
-      //   },
       "Add a reaction": showReactionModal,
     };
     if (!isAttachment) {
@@ -159,6 +150,29 @@ export default function ChatMessageActions({
       >
         {children}
       </GestureDetector>
+      <EmojiPicker
+        onEmojiSelected={(e) => {
+          sendMessage(
+            JSON.stringify({
+              reference: message.id,
+              action: "added",
+              content: e.emoji,
+              schema: "unicode",
+            }),
+            ContentTypeReaction.toString()
+          );
+        }}
+        open={emojiPickerShown}
+        onClose={() => setEmojiPickerShown(false)}
+        enableRecentlyUsed
+        enableCategoryChangeAnimation
+        enableCategoryChangeGesture
+        enableSearchAnimation={false}
+        enableSearchBar={false}
+        expandable={false}
+        categoryPosition="bottom"
+        categoryOrder={["recently_used"]}
+      />
     </>
   );
 }

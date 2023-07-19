@@ -14,6 +14,7 @@ import {
 import "./utils/splash/splash";
 import { KeyboardProvider } from "react-native-keyboard-controller";
 import { Provider as PaperProvider } from "react-native-paper";
+import { useRecentPicksPersistence } from "rn-emoji-keyboard";
 import * as Sentry from "sentry-expo";
 
 import XmtpState from "./components/XmtpState";
@@ -26,6 +27,7 @@ import {
   MaterialDarkTheme,
   MaterialLightTheme,
 } from "./utils/colors";
+import mmkv from "./utils/mmkv";
 
 configureCoinbase({
   callbackURL: new URL(`https://${config.websiteDomain}/coinbase`),
@@ -40,9 +42,17 @@ Sentry.init({
   environment: config.env,
 });
 
+const RECENT_EMOJI_STORAGE_KEY = "RECENT_EMOJI_STORAGE_KEY";
+
 export default function App() {
   const colorScheme = useColorScheme();
   const styles = getStyles(colorScheme);
+  useRecentPicksPersistence({
+    initialization: () =>
+      JSON.parse(mmkv.getString(RECENT_EMOJI_STORAGE_KEY) || "[]"),
+    onStateChange: (next) =>
+      mmkv.set(RECENT_EMOJI_STORAGE_KEY, JSON.stringify(next)),
+  });
 
   return (
     <ThirdwebProvider
