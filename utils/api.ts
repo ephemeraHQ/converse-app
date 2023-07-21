@@ -122,7 +122,7 @@ export const getProfilesForAddresses = async (
   return data;
 };
 
-type RecommendationTag = {
+export type RecommendationTag = {
   text: string;
   image: string;
 };

@@ -167,7 +167,8 @@ export default function ConversationList({
   ]);
   useEffect(() => {
     navigation.setOptions({
-      headerLeft: () => (state.xmtp.address ? <SettingsButton /> : null),
+      headerLeft: () =>
+        state.xmtp.address ? <SettingsButton navigation={navigation} /> : null,
       headerRight: () => (
         <>
           <ShareProfileButton navigation={navigation} route={route} />

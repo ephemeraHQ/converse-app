@@ -31,14 +31,16 @@ import Button from "./Button/Button";
 
 const EXPIRE_AFTER = 86400000; // 1 DAY
 
-function Recommendation({
+export function Recommendation({
   address,
   recommendationData: { ens, farcasterUsernames, lensHandles, tags },
   navigation,
+  embedInChat,
 }: {
   address: string;
   recommendationData: RecommendationData;
-  navigation: NativeStackNavigationProp<any>;
+  navigation?: NativeStackNavigationProp<any>;
+  embedInChat?: boolean;
 }) {
   const colorScheme = useColorScheme();
   const styles = getStyles(colorScheme);
@@ -47,43 +49,76 @@ function Recommendation({
     ...farcasterUsernames.map((f) => `${f} on farcaster`),
   ];
 
+  const textAlign = embedInChat ? "center" : "left";
+
   return (
-    <View key={address} style={styles.recommendation}>
+    <View
+      key={address}
+      style={[
+        styles.recommendation,
+        embedInChat
+          ? { marginHorizontal: 40, paddingRight: 0 }
+          : styles.recommendationBorderBottom,
+      ]}
+    >
       <View style={styles.recommendationLeft}>
-        <Text style={styles.recommendationTitle}>
+        <Text style={[styles.recommendationTitle, { textAlign }]}>
           {ens || shortAddress(address)}
         </Text>
+
         {socials.length > 0 && (
-          <Text style={styles.recommendationText}>{socials.join(" | ")}</Text>
+          <Text
+            style={[
+              styles.recommendationText,
+              { textAlign, width: embedInChat ? "100%" : undefined },
+            ]}
+          >
+            {socials.join(" | ")}
+          </Text>
         )}
         {tags.map((t) => (
-          <View key={t.text} style={styles.recommendationRow}>
+          <View
+            key={t.text}
+            style={[
+              styles.recommendationRow,
+              embedInChat
+                ? { alignSelf: "center", alignItems: "flex-start" }
+                : { alignItems: "center" },
+            ]}
+          >
             <FastImage
               source={{ uri: t.image }}
               defaultSource={IconLoading}
-              style={styles.recommendationImage}
+              style={[
+                styles.recommendationImage,
+                embedInChat ? { top: 2 } : {},
+              ]}
             />
-            <Text style={styles.recommendationText}>{t.text}</Text>
+            <Text style={[styles.recommendationText, { textAlign }]}>
+              {t.text}
+            </Text>
           </View>
         ))}
       </View>
-      <View style={styles.recommendationRight}>
-        <Button
-          variant={Platform.OS === "android" ? "text" : "secondary"}
-          picto="message"
-          title="Chat"
-          style={styles.cta}
-          onPress={() => {
-            navigation.popToTop();
-            setTimeout(() => {
-              navigation.navigate("Conversation", {
-                mainConversationWithPeer: address,
-                focus: true,
-              });
-            }, 300);
-          }}
-        />
-      </View>
+      {!embedInChat && navigation && (
+        <View style={styles.recommendationRight}>
+          <Button
+            variant={Platform.OS === "android" ? "text" : "secondary"}
+            picto="message"
+            title="Chat"
+            style={styles.cta}
+            onPress={() => {
+              navigation.popToTop();
+              setTimeout(() => {
+                navigation.navigate("Conversation", {
+                  mainConversationWithPeer: address,
+                  focus: true,
+                });
+              }, 300);
+            }}
+          />
+        </View>
+      )}
     </View>
   );
 }
@@ -281,10 +316,17 @@ const getStyles = (colorScheme: ColorSchemeName) =>
       ...Platform.select({
         default: {
           paddingVertical: 15,
+        },
+        android: { paddingVertical: 12 },
+      }),
+    },
+    recommendationBorderBottom: {
+      ...Platform.select({
+        default: {
           borderBottomWidth: 0.5,
           borderBottomColor: itemSeparatorColor(colorScheme),
         },
-        android: { paddingVertical: 12 },
+        android: {},
       }),
     },
     recommendationLeft: {
@@ -295,6 +337,7 @@ const getStyles = (colorScheme: ColorSchemeName) =>
       justifyContent: "center",
     },
     recommendationTitle: {
+      width: "100%",
       color: textPrimaryColor(colorScheme),
       ...Platform.select({
         default: {
@@ -315,7 +358,6 @@ const getStyles = (colorScheme: ColorSchemeName) =>
     },
     recommendationText: {
       color: textSecondaryColor(colorScheme),
-      flex: 1,
       ...Platform.select({
         default: {
           fontSize: 15,
@@ -324,6 +366,7 @@ const getStyles = (colorScheme: ColorSchemeName) =>
           fontSize: 14,
         },
       }),
+      alignSelf: "flex-start",
     },
     recommendationImage: {
       width: 15,

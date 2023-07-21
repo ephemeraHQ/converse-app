@@ -520,3 +520,31 @@ export const markConversationRead = (
     allowBefore
   );
 };
+
+export const refreshProfileForAddress = async (
+  address: string,
+  dispatch: DispatchType
+) => {
+  const now = new Date().getTime();
+  const profilesByAddress = await getProfilesForAddresses([address]);
+  // Save profiles to db
+  await upsertRepository(
+    profileRepository,
+    Object.keys(profilesByAddress).map((address) => ({
+      socials: JSON.stringify(profilesByAddress[address]),
+      updatedAt: now,
+      address,
+    })),
+    ["address"]
+  );
+  dispatch({
+    type: ProfilesDispatchTypes.SetProfiles,
+    payload: {
+      profiles: {
+        [address]: {
+          socials: profilesByAddress[address],
+        },
+      },
+    },
+  });
+};

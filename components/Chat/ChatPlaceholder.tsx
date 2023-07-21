@@ -20,6 +20,7 @@ import { actionSheetColors, textPrimaryColor } from "../../utils/colors";
 import { conversationName } from "../../utils/str";
 import ActivityIndicator from "../ActivityIndicator/ActivityIndicator";
 import Button from "../Button/Button";
+import { Recommendation } from "../Recommendations";
 import { showActionSheetWithOptions } from "../StateHandlers/ActionSheetStateHandler";
 
 type Props = {
@@ -39,7 +40,10 @@ export default function ChatPlaceholder({
 }: Props) {
   const colorScheme = useColorScheme();
   const styles = getStyles(colorScheme);
-  const { dispatch } = useContext(AppContext);
+  const { state, dispatch } = useContext(AppContext);
+  const recommendationData = conversation?.peerAddress
+    ? state.recommendations?.frens?.[conversation.peerAddress]
+    : undefined;
   return (
     <TouchableWithoutFeedback
       onPress={() => {
@@ -102,10 +106,19 @@ export default function ChatPlaceholder({
         )}
         {conversation && !isBlockedPeer && messagesCount === 0 && (
           <View>
-            <Text style={styles.chatPlaceholderText}>
-              This is the beginning of your{"\n"}conversation with{" "}
-              {conversation ? conversationName(conversation) : ""}
-            </Text>
+            {recommendationData ? (
+              <Recommendation
+                address={conversation.peerAddress}
+                recommendationData={recommendationData}
+                embedInChat
+              />
+            ) : (
+              <Text style={styles.chatPlaceholderText}>
+                This is the beginning of your{"\n"}conversation with{" "}
+                {conversation ? conversationName(conversation) : ""}
+              </Text>
+            )}
+
             <Button
               variant="secondary"
               picto="hand.wave"
