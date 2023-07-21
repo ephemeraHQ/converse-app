@@ -1,6 +1,11 @@
 import { FlashList } from "@shopify/flash-list";
 import differenceInCalendarDays from "date-fns/differenceInCalendarDays";
-import React, { MutableRefObject, useState, useEffect } from "react";
+import React, {
+  MutableRefObject,
+  useState,
+  useEffect,
+  useContext,
+} from "react";
 import {
   View,
   TextInput,
@@ -14,9 +19,15 @@ import Reanimated, {
 } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
+import { AppContext } from "../../data/store/context";
 import { XmtpConversationWithUpdate } from "../../data/store/xmtpReducer";
 import { useKeyboardAnimation } from "../../utils/animations";
-import { backgroundColor, tertiaryBackgroundColor } from "../../utils/colors";
+import {
+  backgroundColor,
+  itemSeparatorColor,
+  tertiaryBackgroundColor,
+} from "../../utils/colors";
+import { Recommendation } from "../Recommendations";
 import ChatInput from "./ChatInput";
 import ChatMessage, { MessageToDisplay } from "./ChatMessage";
 import ChatPlaceholder from "./ChatPlaceholder";
@@ -37,7 +48,7 @@ type Props = {
   onReadyToFocus: () => void;
 };
 
-const getMessagesArray = (
+const getFlashlistArray = (
   xmtpAddress?: string,
   conversation?: XmtpConversationWithUpdate
 ) => {
@@ -81,6 +92,7 @@ const getMessagesArray = (
     }
     reverseArray.push(message);
   }
+  reverseArray.push({ id: "converse-recommendations" } as MessageToDisplay);
   return reverseArray;
 };
 
@@ -94,13 +106,14 @@ export default function Chat({
   isBlockedPeer,
   onReadyToFocus,
 }: Props) {
+  const { state } = useContext(AppContext);
   const colorScheme = useColorScheme();
   const styles = getStyles(colorScheme);
-  const [messagesArray, setMessagesArray] = useState(
-    getMessagesArray(xmtpAddress, conversation)
+  const [flashListArray, setFlashListArray] = useState(
+    getFlashlistArray(xmtpAddress, conversation)
   );
   useEffect(() => {
-    setMessagesArray(getMessagesArray(xmtpAddress, conversation));
+    setFlashListArray(getFlashlistArray(xmtpAddress, conversation));
   }, [conversation, conversation?.lastUpdateAt, xmtpAddress]);
 
   const DEFAULT_INPUT_HEIGHT = 36;
@@ -142,7 +155,7 @@ export default function Chat({
   );
 
   const showPlaceholder =
-    messagesArray.length === 0 || isBlockedPeer || !conversation;
+    flashListArray.length === 1 || isBlockedPeer || !conversation;
 
   return (
     <View
@@ -150,11 +163,29 @@ export default function Chat({
       key={`chat-${conversation?.topic}-${isBlockedPeer}`}
     >
       <AnimatedView style={chatContentStyle}>
-        {conversation && messagesArray.length > 0 && !isBlockedPeer && (
+        {conversation && flashListArray.length > 1 && !isBlockedPeer && (
           <AnimatedFlashList
             contentContainerStyle={styles.chat}
-            data={messagesArray}
-            renderItem={({ item }) => <ChatMessage message={item} />}
+            data={flashListArray}
+            renderItem={({ item }) => {
+              if (item.id === "converse-recommendations") {
+                const recommendationData = conversation?.peerAddress
+                  ? state.recommendations?.frens?.[conversation.peerAddress]
+                  : undefined;
+                if (!recommendationData) return null;
+                return (
+                  <View style={styles.inChatRecommendations}>
+                    <Recommendation
+                      recommendationData={recommendationData}
+                      address={conversation.peerAddress}
+                      embedInChat
+                    />
+                  </View>
+                );
+              } else {
+                return <ChatMessage message={item} />;
+              }
+            }}
             onLayout={() => {
               setTimeout(() => {
                 onReadyToFocus();
@@ -177,7 +208,7 @@ export default function Chat({
             onReadyToFocus={onReadyToFocus}
             isBlockedPeer={isBlockedPeer}
             conversation={conversation}
-            messagesCount={messagesArray.length}
+            messagesCount={flashListArray.length - 1}
             sendMessage={sendMessage}
           />
         )}
@@ -229,5 +260,11 @@ const getStyles = (colorScheme: ColorSchemeName) =>
       bottom: 0,
       backgroundColor: tertiaryBackgroundColor(colorScheme),
       zIndex: 0,
+    },
+    inChatRecommendations: {
+      borderBottomWidth: 0.5,
+      borderBottomColor: itemSeparatorColor(colorScheme),
+      marginHorizontal: 20,
+      marginBottom: 10,
     },
   });

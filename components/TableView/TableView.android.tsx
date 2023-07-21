@@ -17,6 +17,7 @@ type TableViewItemType = {
   leftView?: ReactElement;
   rightView?: ReactElement;
   title: string;
+  titleNumberOfLines?: number;
   subtitle?: string;
   action?: () => void;
   titleColor?: ColorValue;
@@ -35,6 +36,7 @@ export default function TableView({ title, items, style }: Props) {
   const sectionContent = items.map((i) => (
     <List.Item
       title={i.title}
+      titleNumberOfLines={i.titleNumberOfLines || 1}
       key={i.id}
       left={() => i.leftView}
       right={() => i.rightView}

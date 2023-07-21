@@ -2,7 +2,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useContext, useEffect } from "react";
 import { Alert } from "react-native";
 
-import { loadDataToContext } from "../../data";
+import { loadDataToContext, refreshProfileForAddress } from "../../data";
 import { initDb } from "../../data/db";
 import { AppDispatchTypes } from "../../data/store/appReducer";
 import { AppContext } from "../../data/store/context";
@@ -56,6 +56,8 @@ export default function HydrationStateHandler() {
         });
       }
 
+      let address = xmtpAddress;
+
       if (xmtpAddress) {
         dispatch({
           type: XmtpDispatchTypes.XmtpSetAddress,
@@ -66,6 +68,7 @@ export default function HydrationStateHandler() {
       } else {
         const xmtpClient = await getLocalXmtpClient();
         if (xmtpClient) {
+          address = xmtpClient.address;
           dispatch({
             type: XmtpDispatchTypes.XmtpSetAddress,
             payload: {
@@ -74,6 +77,8 @@ export default function HydrationStateHandler() {
           });
         }
       }
+
+      refreshProfileForAddress(address, dispatch);
 
       const initialLoadDoneOnce = mmkv.getBoolean(
         "state.xmtp.initialLoadDoneOnce"

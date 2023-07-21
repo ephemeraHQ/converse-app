@@ -1,3 +1,4 @@
+import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useDisconnect } from "@thirdweb-dev/react-native";
 import * as Clipboard from "expo-clipboard";
 import * as Linking from "expo-linking";
@@ -5,8 +6,10 @@ import React, { useCallback, useContext } from "react";
 import { Platform, TouchableOpacity, useColorScheme, View } from "react-native";
 
 import config from "../config";
+import { refreshProfileForAddress } from "../data";
 import { AppContext } from "../data/store/context";
 import { NotificationsDispatchTypes } from "../data/store/notificationsReducer";
+import { NavigationParamList } from "../screens/Main";
 import { actionSheetColors, textSecondaryColor } from "../utils/colors";
 import { logout } from "../utils/logout";
 import {
@@ -18,12 +21,20 @@ import Button from "./Button/Button";
 import Picto from "./Picto/Picto";
 import { showActionSheetWithOptions } from "./StateHandlers/ActionSheetStateHandler";
 
-export default function SettingsButton() {
+export default function SettingsButton({
+  navigation,
+}: NativeStackScreenProps<NavigationParamList, "Messages">) {
   const { state, dispatch } = useContext(AppContext);
   const disconnectWallet = useDisconnect();
   const colorScheme = useColorScheme();
   const onPress = useCallback(() => {
     const methods = {
+      "Your profile page": () => {
+        if (state.xmtp.address) {
+          refreshProfileForAddress(state.xmtp.address, dispatch);
+          navigation.push("Profile", { address: state.xmtp.address });
+        }
+      },
       "Copy wallet address": () => {
         Clipboard.setStringAsync(state.xmtp.address || "");
       },

@@ -155,6 +155,7 @@ export default function ProfileScreen({
   ];
   const isBlockedPeer =
     state.xmtp.blockedPeerAddresses[peerAddress.toLowerCase()];
+  const recommendationTags = state.recommendations?.frens?.[peerAddress]?.tags;
   return (
     <ScrollView
       style={styles.profile}
@@ -172,55 +173,71 @@ export default function ProfileScreen({
           style={styles.tableView}
         />
       )}
-      <TableView
-        items={[
-          {
-            id: "block",
-            title: isBlockedPeer ? "Unblock" : "Block",
-            titleColor:
-              isBlockedPeer || Platform.OS === "android"
-                ? undefined
-                : dangerColor(colorScheme),
-            leftView:
-              Platform.OS === "android" ? (
-                <TableViewPicto
-                  symbol="block"
-                  color={textSecondaryColor(colorScheme)}
-                />
-              ) : undefined,
-            action: () => {
-              showActionSheetWithOptions(
-                {
-                  options: [isBlockedPeer ? "Unblock" : "Block", "Cancel"],
-                  cancelButtonIndex: 1,
-                  destructiveButtonIndex: isBlockedPeer ? undefined : 0,
-                  title: isBlockedPeer
-                    ? "If you unblock this contact, they will be able to send you messages again."
-                    : "If you block this contact, you will not receive messages from them anymore.",
-                  ...actionSheetColors(colorScheme),
+      {peerAddress.toLowerCase() !== state.xmtp.address?.toLowerCase() && (
+        <>
+          {recommendationTags?.length && (
+            <TableView
+              items={recommendationTags.map((t) => ({
+                id: t.text,
+                title: t.text,
+                titleNumberOfLines: 3,
+                leftView: <TableViewImage imageURI={t.image} />,
+              }))}
+              title="COMMON ACTIVITY"
+              style={styles.tableView}
+            />
+          )}
+          <TableView
+            items={[
+              {
+                id: "block",
+                title: isBlockedPeer ? "Unblock" : "Block",
+                titleColor:
+                  isBlockedPeer || Platform.OS === "android"
+                    ? undefined
+                    : dangerColor(colorScheme),
+                leftView:
+                  Platform.OS === "android" ? (
+                    <TableViewPicto
+                      symbol="block"
+                      color={textSecondaryColor(colorScheme)}
+                    />
+                  ) : undefined,
+                action: () => {
+                  showActionSheetWithOptions(
+                    {
+                      options: [isBlockedPeer ? "Unblock" : "Block", "Cancel"],
+                      cancelButtonIndex: 1,
+                      destructiveButtonIndex: isBlockedPeer ? undefined : 0,
+                      title: isBlockedPeer
+                        ? "If you unblock this contact, they will be able to send you messages again."
+                        : "If you block this contact, you will not receive messages from them anymore.",
+                      ...actionSheetColors(colorScheme),
+                    },
+                    (selectedIndex?: number) => {
+                      if (selectedIndex === 0) {
+                        blockPeer({
+                          peerAddress: peerAddress || "",
+                          blocked: !isBlockedPeer,
+                        });
+                        dispatch({
+                          type: XmtpDispatchTypes.XmtpSetBlockedStatus,
+                          payload: {
+                            peerAddress: peerAddress || "",
+                            blocked: !isBlockedPeer,
+                          },
+                        });
+                      }
+                    }
+                  );
                 },
-                (selectedIndex?: number) => {
-                  if (selectedIndex === 0) {
-                    blockPeer({
-                      peerAddress: peerAddress || "",
-                      blocked: !isBlockedPeer,
-                    });
-                    dispatch({
-                      type: XmtpDispatchTypes.XmtpSetBlockedStatus,
-                      payload: {
-                        peerAddress: peerAddress || "",
-                        blocked: !isBlockedPeer,
-                      },
-                    });
-                  }
-                }
-              );
-            },
-          },
-        ]}
-        title="ACTIONS"
-        style={styles.tableView}
-      />
+              },
+            ]}
+            title="ACTIONS"
+            style={styles.tableView}
+          />
+        </>
+      )}
     </ScrollView>
   );
 }

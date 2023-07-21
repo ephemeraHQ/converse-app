@@ -25,6 +25,7 @@ type TableViewItemType = {
   leftView?: ReactElement;
   rightView?: ReactElement;
   title: string;
+  titleNumberOfLines?: number;
   subtitle?: string;
   action?: () => void;
   titleColor?: ColorValue;
@@ -55,6 +56,7 @@ export default function TableView({ title, items, style }: Props) {
             title={i.title}
             onPress={i.action}
             backgroundColor={tertiaryBackgroundColor(colorScheme)}
+            titleTextProps={{ numberOfLines: i.titleNumberOfLines || 1 }}
             titleTextStyle={[
               styles.itemTitle,
               {
