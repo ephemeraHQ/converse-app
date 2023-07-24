@@ -15,21 +15,27 @@ import {
   messageBubbleColor,
   textSecondaryColor,
 } from "../../utils/colors";
-import { getMessageReactions } from "../../utils/reactions";
+import { getReactionContent } from "../../utils/reactions";
 import { shortAddress } from "../../utils/str";
 import { showActionSheetWithOptions } from "../StateHandlers/ActionSheetStateHandler";
 import { MessageToDisplay } from "./ChatMessage";
 
 type Props = {
   message: MessageToDisplay;
+  reactions: {
+    [senderAddress: string]: MessageReaction;
+  };
   sendMessage: (content: string, contentType?: string) => Promise<void>;
 };
 
-export default function ChatMessageReactions({ message, sendMessage }: Props) {
+export default function ChatMessageReactions({
+  message,
+  reactions,
+  sendMessage,
+}: Props) {
   const colorScheme = useColorScheme();
   const styles = getStyles(colorScheme);
   const { state } = useContext(AppContext);
-  const reactions = getMessageReactions(message);
   const reactionsList = Object.values(reactions).sort(
     (r1, r2) => r1.sent - r2.sent
   );
@@ -45,7 +51,9 @@ export default function ChatMessageReactions({ message, sendMessage }: Props) {
         (d) => d.isPrimary
       )?.domain;
       const peer = ensName || unsDomain || shortAddress(peerAddress);
-      methods[`${r.content} ${fromMe ? "you - tap to remove" : peer}`] = () => {
+      methods[
+        `${getReactionContent(r)} ${fromMe ? "you - tap to remove" : peer}`
+      ] = () => {
         if (!fromMe) return;
         sendMessage(
           JSON.stringify({
@@ -107,7 +115,7 @@ export default function ChatMessageReactions({ message, sendMessage }: Props) {
           ]}
         >
           <Text style={styles.emojis}>
-            {reactionsList.map((r) => r.content)}
+            {reactionsList.map((r) => getReactionContent(r))}
           </Text>
           {reactionsList.length > 1 && (
             <Text style={styles.count}>{reactionsList.length}</Text>

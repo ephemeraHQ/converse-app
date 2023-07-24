@@ -14,6 +14,7 @@ export type MessageReaction = {
   content: string;
   senderAddress: string;
   sent: number;
+  schema: "unicode" | "shortcode" | "custom";
 };
 
 @Entity()

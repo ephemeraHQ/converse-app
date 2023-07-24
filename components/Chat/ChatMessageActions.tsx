@@ -1,6 +1,6 @@
 import { ContentTypeReaction } from "@xmtp/content-type-reaction";
 import * as Clipboard from "expo-clipboard";
-import { useCallback, useContext, useState } from "react";
+import { useCallback, useContext, useEffect, useState } from "react";
 import { Alert, useColorScheme } from "react-native";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import { runOnJS } from "react-native-reanimated";
@@ -8,8 +8,10 @@ import EmojiPicker from "rn-emoji-keyboard";
 
 import { AppContext } from "../../data/store/context";
 import { XmtpDispatchTypes } from "../../data/store/xmtpReducer";
+import { MessageReaction } from "../../scripts/migrations/entities/message";
 import { blockPeer, reportMessage } from "../../utils/api";
 import { actionSheetColors } from "../../utils/colors";
+import { getEmojiName } from "../../utils/reactions";
 import { showActionSheetWithOptions } from "../StateHandlers/ActionSheetStateHandler";
 import { MessageToDisplay } from "./ChatMessage";
 
@@ -17,18 +19,22 @@ type Props = {
   children: React.ReactNode;
   message: MessageToDisplay;
   sendMessage: (content: string, contentType?: string) => Promise<void>;
+  reactions: {
+    [senderAddress: string]: MessageReaction;
+  };
 };
 
 export default function ChatMessageActions({
   children,
   message,
   sendMessage,
+  reactions,
 }: Props) {
   const isAttachment = message.contentType.startsWith(
     "xmtp.org/remoteStaticAttachment:"
   );
   const colorScheme = useColorScheme();
-  const { dispatch } = useContext(AppContext);
+  const { state, dispatch } = useContext(AppContext);
 
   const report = useCallback(async () => {
     reportMessage({
@@ -143,6 +149,21 @@ export default function ChatMessageActions({
     doubleTapOnMessage,
     longPressOnMessage
   );
+  const [selectedEmojis, setSelectedEmojis] = useState<string[]>([]);
+  useEffect(() => {
+    const myReaction = state.xmtp.address
+      ? reactions[state.xmtp.address]
+      : undefined;
+    const newSelectedEmojis = [];
+    if (myReaction && myReaction.schema === "unicode") {
+      const emojiName = getEmojiName(myReaction.content);
+      if (emojiName) {
+        newSelectedEmojis.push(emojiName);
+      }
+    }
+    setSelectedEmojis(newSelectedEmojis);
+  }, [reactions, state.xmtp.address]);
+
   return (
     <>
       <GestureDetector
@@ -157,7 +178,7 @@ export default function ChatMessageActions({
           sendMessage(
             JSON.stringify({
               reference: message.id,
-              action: "added",
+              action: e.alreadySelected ? "removed" : "added",
               content: e.emoji,
               schema: "unicode",
             }),
@@ -174,6 +195,7 @@ export default function ChatMessageActions({
         expandable={false}
         categoryPosition="bottom"
         categoryOrder={["recently_used"]}
+        selectedEmojis={selectedEmojis}
       />
     </>
   );
