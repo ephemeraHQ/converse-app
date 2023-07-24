@@ -18,6 +18,7 @@ import {
   textSecondaryColor,
 } from "../../utils/colors";
 import { getRelativeDate } from "../../utils/date";
+import { getMessageReactions } from "../../utils/reactions";
 import ClickableText from "../ClickableText";
 import ChatAttachmentBubble from "./ChatAttachmentBubble";
 import ChatMessageActions from "./ChatMessageActions";
@@ -61,6 +62,8 @@ export default function ChatMessage({ message, sendMessage }: Props) {
     );
   }
 
+  const reactions = getMessageReactions(message);
+
   return (
     <View
       style={[
@@ -72,7 +75,11 @@ export default function ChatMessage({ message, sendMessage }: Props) {
         <Text style={styles.date}>{getRelativeDate(message.sent)}</Text>
       )}
 
-      <ChatMessageActions message={message} sendMessage={sendMessage}>
+      <ChatMessageActions
+        message={message}
+        sendMessage={sendMessage}
+        reactions={reactions}
+      >
         <View
           style={[
             styles.messageBubble,
@@ -118,7 +125,11 @@ export default function ChatMessage({ message, sendMessage }: Props) {
           )}
         </View>
       </ChatMessageActions>
-      <ChatMessageReactions message={message} sendMessage={sendMessage} />
+      <ChatMessageReactions
+        message={message}
+        reactions={reactions}
+        sendMessage={sendMessage}
+      />
     </View>
   );
 }
