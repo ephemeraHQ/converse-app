@@ -191,6 +191,8 @@ func decodeConversationMessage(xmtpClient: XMTP.Client, envelope: XMTP.Envelope,
           print("[NotificationExtension] ERROR WHILE SAVING ATTACHMENT CONTENT \(error)")
         }
         return ("📎 Media", decodedMessage.senderAddress)
+      } else if (contentType.starts(with: "xmtp.org/reaction:")) {
+        return ("Reacted to a message", decodedMessage.senderAddress)
       } else {
         print("[NotificationExtension] Unknown content type")
         return (nil, nil);
