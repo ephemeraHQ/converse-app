@@ -1,8 +1,17 @@
+import { ContentTypeReaction } from "@xmtp/content-type-reaction";
 import { emojisByCategory } from "rn-emoji-keyboard";
 
 import { XmtpMessage } from "../data/store/xmtpReducer";
-import { MessageReaction } from "../scripts/migrations/entities/message";
+import { isAttachmentMessage } from "./attachment";
 import { sentryTrackMessage } from "./sentry";
+
+export type MessageReaction = {
+  action: "added" | "removed";
+  content: string;
+  senderAddress: string;
+  sent: number;
+  schema: "unicode" | "shortcode" | "custom";
+};
 
 type MessageReactions = { [reactionId: string]: MessageReaction };
 
@@ -78,4 +87,52 @@ export const getEmojiName = (emojiString: string) => {
     categoryId += 1;
   }
   return foundEmojiName;
+};
+
+export const addReactionToMessage = (
+  message: XmtpMessage,
+  emoji: string,
+  sendMessage: (
+    content: string,
+    contentType?: string,
+    contentFallback?: string
+  ) => Promise<void>
+) => {
+  const isAttachment = isAttachmentMessage(message.contentType);
+  sendMessage(
+    JSON.stringify({
+      reference: message.id,
+      action: "added",
+      content: emoji,
+      schema: "unicode",
+    }),
+    ContentTypeReaction.toString(),
+    `Reacted ${emoji} to ${
+      isAttachment ? "an attachment" : `“${message.content}”`
+    }`
+  );
+};
+
+export const removeReactionFromMessage = (
+  message: XmtpMessage,
+  emoji: string,
+  sendMessage: (
+    content: string,
+    contentType?: string,
+    contentFallback?: string
+  ) => Promise<void>
+) => {
+  const isAttachment = isAttachmentMessage(message.contentType);
+  sendMessage(
+    JSON.stringify({
+      reference: message.id,
+      action: "removed",
+      content: emoji,
+      schema: "unicode",
+    }),
+    ContentTypeReaction.toString(),
+    `Removed the reaction to ${
+      isAttachment ? "an attachment" : `“${message.content}”`
+    }`
+  );
 };

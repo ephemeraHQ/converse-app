@@ -1,4 +1,3 @@
-import { ContentTypeReaction } from "@xmtp/content-type-reaction";
 import * as Clipboard from "expo-clipboard";
 import { useCallback, useContext, useEffect, useState } from "react";
 import { Alert, useColorScheme } from "react-native";
@@ -8,17 +7,25 @@ import EmojiPicker from "rn-emoji-keyboard";
 
 import { AppContext } from "../../data/store/context";
 import { XmtpDispatchTypes } from "../../data/store/xmtpReducer";
-import { MessageReaction } from "../../scripts/migrations/entities/message";
 import { blockPeer, reportMessage } from "../../utils/api";
 import { actionSheetColors } from "../../utils/colors";
-import { getEmojiName } from "../../utils/reactions";
+import {
+  MessageReaction,
+  addReactionToMessage,
+  getEmojiName,
+  removeReactionFromMessage,
+} from "../../utils/reactions";
 import { showActionSheetWithOptions } from "../StateHandlers/ActionSheetStateHandler";
 import { MessageToDisplay } from "./ChatMessage";
 
 type Props = {
   children: React.ReactNode;
   message: MessageToDisplay;
-  sendMessage: (content: string, contentType?: string) => Promise<void>;
+  sendMessage: (
+    content: string,
+    contentType?: string,
+    contentFallback?: string
+  ) => Promise<void>;
   reactions: {
     [senderAddress: string]: MessageReaction;
   };
@@ -102,10 +109,11 @@ export default function ChatMessageActions({
       methods["Copy message"] = () => {
         Clipboard.setStringAsync(message.content);
       };
+      if (!message.fromMe) {
+        methods["Report message"] = showMessageReportActionSheet;
+      }
     }
-    if (!message.fromMe) {
-      methods["Report message"] = showMessageReportActionSheet;
-    }
+
     methods.Cancel = () => {};
 
     const options = Object.keys(methods);
@@ -113,7 +121,7 @@ export default function ChatMessageActions({
     showActionSheetWithOptions(
       {
         options,
-        title: isAttachment ? "Image" : message.content,
+        title: isAttachment ? "📎 Media" : message.content,
         cancelButtonIndex: options.indexOf("Cancel"),
         destructiveButtonIndex: message.fromMe
           ? undefined
@@ -168,22 +176,29 @@ export default function ChatMessageActions({
     <>
       <GestureDetector
         gesture={
-          isAttachment ? doubleTapOnMessage : doubleTapOrLongPressOnMessage
+          isAttachment ? longPressOnMessage : doubleTapOrLongPressOnMessage
         }
       >
         {children}
       </GestureDetector>
       <EmojiPicker
         onEmojiSelected={(e) => {
-          sendMessage(
-            JSON.stringify({
-              reference: message.id,
-              action: e.alreadySelected ? "removed" : "added",
-              content: e.emoji,
-              schema: "unicode",
-            }),
-            ContentTypeReaction.toString()
-          );
+          if (e.alreadySelected) {
+            removeReactionFromMessage(message, e.emoji, sendMessage);
+          } else {
+            // We want to remove all emojis first
+            const myReaction = state.xmtp.address
+              ? reactions[state.xmtp.address]
+              : undefined;
+            if (myReaction && myReaction.schema === "unicode") {
+              removeReactionFromMessage(
+                message,
+                myReaction.content,
+                sendMessage
+              );
+            }
+            addReactionToMessage(message, e.emoji, sendMessage);
+          }
         }}
         open={emojiPickerShown}
         onClose={() => setEmojiPickerShown(false)}

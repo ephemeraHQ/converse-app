@@ -15,6 +15,7 @@ import { addProfileEntity1686053217007 } from "./migrations/1686053217007-addPro
 import { removeHandlesFromConvo1686124833536 } from "./migrations/1686124833536-removeHandlesFromConvo";
 import { addContentType1687793816866 } from "./migrations/1687793816866-addContentType";
 import { addMessageReaction1688549487960 } from "./migrations/1688549487960-addMessageReaction";
+import { addMessageFallback1690204801962 } from "./migrations/1690204801962-addMessageFallback";
 
 // We support SQLite from version 3.8.10.2 (embedded in Android 6.0 - SDK 23)
 // For supported methods see https://www.sqlite.org/changes.html
@@ -39,6 +40,7 @@ const dataSource = new DataSource({
     removeHandlesFromConvo1686124833536,
     addContentType1687793816866,
     addMessageReaction1688549487960,
+    addMessageFallback1690204801962,
   ],
   type: "expo",
 });
