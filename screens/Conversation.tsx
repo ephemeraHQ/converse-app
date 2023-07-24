@@ -317,7 +317,11 @@ const Conversation = ({
   }, [conversation, dispatch]);
 
   const sendMessage = useCallback(
-    async (content: string, contentType = "xmtp.org/text:1.0") => {
+    async (
+      content: string,
+      contentType = "xmtp.org/text:1.0",
+      contentFallback = undefined as string | undefined
+    ) => {
       if (!conversation) return;
       if (contentType === "xmtp.org/text:1.0") {
         setInputValue("");
@@ -337,6 +341,7 @@ const Conversation = ({
             status: "sending",
             sentViaConverse: !isV1Conversation, // V1 Convo don't support the sentViaConverse feature
             contentType,
+            contentFallback,
           },
         ],
         conversation.topic,

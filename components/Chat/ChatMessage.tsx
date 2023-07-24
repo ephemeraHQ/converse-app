@@ -34,7 +34,11 @@ export type MessageToDisplay = XmtpMessage & {
 
 type Props = {
   message: MessageToDisplay;
-  sendMessage: (content: string, contentType?: string) => Promise<void>;
+  sendMessage: (
+    content: string,
+    contentType?: string,
+    contentFallback?: string
+  ) => Promise<void>;
 };
 
 export default function ChatMessage({ message, sendMessage }: Props) {

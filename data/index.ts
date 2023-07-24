@@ -46,6 +46,7 @@ const xmtpMessageToDb = (
   status: xmtpMessage.status || "sent",
   sentViaConverse: !!xmtpMessage.sentViaConverse,
   contentType: xmtpMessage.contentType,
+  contentFallback: xmtpMessage.contentFallback,
   // we don't include the reactions field as it is
   // filled by other methods
 });
@@ -58,6 +59,7 @@ const xmtpMessageFromDb = (message: Message): XmtpMessage => ({
   status: message.status,
   sentViaConverse: !!message.sentViaConverse,
   contentType: message.contentType,
+  contentFallback: message.contentFallback,
   reactions: message.reactions || "{}",
 });
 

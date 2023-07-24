@@ -137,7 +137,10 @@ export const sendPendingMessages = async (dispatch: DispatchType) => {
         } else if (message.contentType.startsWith("xmtp.org/reaction:")) {
           preparedMessage = await conversation.prepareMessage(
             JSON.parse(message.content),
-            { contentType: ContentTypeReaction, contentFallback: "[Reaction]" }
+            {
+              contentType: ContentTypeReaction,
+              contentFallback: message.contentFallback || "Reaction",
+            }
           );
         } else {
           preparedMessage = await conversation.prepareMessage(message.content);

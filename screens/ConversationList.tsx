@@ -32,12 +32,12 @@ import SettingsButton from "../components/SettingsButton";
 import Welcome from "../components/Welcome";
 import { AppContext } from "../data/store/context";
 import { XmtpConversation } from "../data/store/xmtpReducer";
-import { isAttachmentMessage } from "../utils/attachment";
 import {
   backgroundColor,
   textPrimaryColor,
   textSecondaryColor,
 } from "../utils/colors";
+import { conversationLastMessagePreview } from "../utils/conversation";
 import { lastValueInMap } from "../utils/map";
 import { conversationName } from "../utils/str";
 import { NavigationParamList } from "./Main";
@@ -207,7 +207,10 @@ export default function ConversationList({
       }
 
       const conversation = item as XmtpConversation;
-      const lastMessage = lastValueInMap(conversation.messages);
+      const lastMessagePreview = conversationLastMessagePreview(
+        conversation,
+        state.xmtp.address
+      );
 
       return (
         <ConversationListItem
@@ -216,17 +219,16 @@ export default function ConversationList({
           colorScheme={colorScheme}
           conversationTopic={conversation.topic}
           conversationTime={
-            conversation.messages?.size > 0
-              ? lastMessage?.sent
-              : conversation.createdAt
+            lastMessagePreview?.message?.sent || conversation.createdAt
           }
           conversationName={conversationName(conversation)}
           showUnread={
             !!(
               state.xmtp.initialLoadDoneOnce &&
-              lastMessage &&
-              conversation.readUntil < lastMessage.sent &&
-              lastMessage.senderAddress === conversation.peerAddress
+              lastMessagePreview &&
+              conversation.readUntil < lastMessagePreview.message.sent &&
+              lastMessagePreview.message.senderAddress ===
+                conversation.peerAddress
             )
           }
           lastMessagePreview={
@@ -234,17 +236,14 @@ export default function ConversationList({
               conversation.peerAddress.toLowerCase()
             ]
               ? "This user is blocked"
-              : conversation.messages?.size > 0
-              ? isAttachmentMessage(lastMessage?.contentType)
-                ? "📎 Media"
-                : lastMessage?.contentType?.startsWith("xmtp.org/reaction:")
-                ? "Reaction"
-                : lastMessage?.content
+              : lastMessagePreview
+              ? lastMessagePreview.contentPreview
               : ""
           }
-          lastMessageStatus={lastMessage?.status}
+          lastMessageStatus={lastMessagePreview?.message?.status}
           lastMessageFromMe={
-            !!lastMessage && lastMessage?.senderAddress === state.xmtp.address
+            !!lastMessagePreview &&
+            lastMessagePreview.message?.senderAddress === state.xmtp.address
           }
         />
       );

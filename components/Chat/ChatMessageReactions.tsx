@@ -1,4 +1,3 @@
-import { ContentTypeReaction } from "@xmtp/content-type-reaction";
 import { useCallback, useContext } from "react";
 import {
   ColorSchemeName,
@@ -15,7 +14,11 @@ import {
   messageBubbleColor,
   textSecondaryColor,
 } from "../../utils/colors";
-import { getReactionContent } from "../../utils/reactions";
+import {
+  MessageReaction,
+  getReactionContent,
+  removeReactionFromMessage,
+} from "../../utils/reactions";
 import { shortAddress } from "../../utils/str";
 import { showActionSheetWithOptions } from "../StateHandlers/ActionSheetStateHandler";
 import { MessageToDisplay } from "./ChatMessage";
@@ -25,7 +28,11 @@ type Props = {
   reactions: {
     [senderAddress: string]: MessageReaction;
   };
-  sendMessage: (content: string, contentType?: string) => Promise<void>;
+  sendMessage: (
+    content: string,
+    contentType?: string,
+    contentFallback?: string
+  ) => Promise<void>;
 };
 
 export default function ChatMessageReactions({
@@ -55,15 +62,7 @@ export default function ChatMessageReactions({
         `${getReactionContent(r)} ${fromMe ? "you - tap to remove" : peer}`
       ] = () => {
         if (!fromMe) return;
-        sendMessage(
-          JSON.stringify({
-            reference: message.id,
-            action: "removed",
-            content: r.content,
-            schema: "unicode",
-          }),
-          ContentTypeReaction.toString()
-        );
+        removeReactionFromMessage(message, r.content, sendMessage);
       };
     });
     methods["Back"] = () => {};

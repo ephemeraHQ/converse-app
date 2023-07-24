@@ -26,6 +26,9 @@ export class Message {
   @Column("text")
   content!: string;
 
+  @Column("text", { nullable: true })
+  contentFallback?: string;
+
   @Index()
   @Column("text", { default: "sent" })
   status!: "delivered" | "error" | "seen" | "sending" | "sent";
