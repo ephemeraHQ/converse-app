@@ -15,6 +15,7 @@ import MessageTail from "../../assets/message-tail.svg";
 import { AppContext } from "../../data/store/context";
 import { XmtpDispatchTypes, XmtpMessage } from "../../data/store/xmtpReducer";
 import { blockPeer, reportMessage } from "../../utils/api";
+import { isAttachmentMessage } from "../../utils/attachment";
 import {
   actionSheetColors,
   messageBubbleColor,
@@ -136,9 +137,7 @@ export default function ChatMessage({ message }: Props) {
   const metadata = (
     <ChatMessageMetadata message={message} white={message.fromMe} />
   );
-  const isAttachment = message.contentType.startsWith(
-    "xmtp.org/remoteStaticAttachment:"
-  );
+  const isAttachment = isAttachmentMessage(message.contentType);
   let messageContent: ReactNode;
   if (isAttachment) {
     messageContent = <ChatAttachmentBubble message={message} />;

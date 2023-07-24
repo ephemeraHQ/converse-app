@@ -32,6 +32,7 @@ import SettingsButton from "../components/SettingsButton";
 import Welcome from "../components/Welcome";
 import { AppContext } from "../data/store/context";
 import { XmtpConversation } from "../data/store/xmtpReducer";
+import { isAttachmentMessage } from "../utils/attachment";
 import {
   backgroundColor,
   textPrimaryColor,
@@ -232,9 +233,7 @@ export default function ConversationList({
             ]
               ? "This user is blocked"
               : conversation.messages?.size > 0
-              ? lastMessage?.contentType?.startsWith(
-                  "xmtp.org/remoteStaticAttachment"
-                )
+              ? isAttachmentMessage(lastMessage?.contentType)
                 ? "📎 Media"
                 : lastMessage?.content
               : ""

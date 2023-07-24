@@ -24,7 +24,7 @@ import RNFS from "react-native-fs";
 
 import { AppDispatchTypes } from "../../data/store/appReducer";
 import { AppContext } from "../../data/store/context";
-import { SerializedAttachmentContent } from "../../utils/attachment";
+import { SerializedRemoteAttachmentContent } from "../../utils/attachment";
 import { actionSheetColors, textSecondaryColor } from "../../utils/colors";
 import { executeAfterKeyboardClosed } from "../../utils/keyboard";
 import { sentryTrackMessage } from "../../utils/sentry";
@@ -69,7 +69,7 @@ export default function ChatAddAttachment({ sendMessage, inputRef }: Props) {
         }: {
           status: string;
           error: string;
-          remoteAttachment: SerializedAttachmentContent;
+          remoteAttachment: SerializedRemoteAttachmentContent;
         }) => {
           if (currentAttachmentMediaURI.current !== assetRef.current?.uri)
             return;
