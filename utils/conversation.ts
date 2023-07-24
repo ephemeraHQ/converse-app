@@ -12,7 +12,7 @@ export const conversationLastMessagePreview = (
   conversation: XmtpConversation,
   myAddress?: string
 ): LastMessagePreview | undefined => {
-  if (!conversation.messages?.size) return "";
+  if (!conversation.messages?.size) return undefined;
   const messagesArray = Array.from(conversation.messages.values());
   let removedReactionFromMessage: Reaction | undefined = undefined;
   while (messagesArray.length > 0) {
