@@ -1,6 +1,26 @@
-import { RemoteAttachment } from "@xmtp/content-type-remote-attachment";
+import {
+  Attachment,
+  RemoteAttachment,
+} from "@xmtp/content-type-remote-attachment";
 
 export type SerializedAttachmentContent = {
+  filename: string;
+  mimeType: string;
+  data: string;
+};
+
+export const deserializeAttachmentContent = (
+  serializedAttachment: string
+): Attachment => {
+  const parsedAttachment: SerializedAttachmentContent =
+    JSON.parse(serializedAttachment);
+  return {
+    ...parsedAttachment,
+    data: Buffer.from(parsedAttachment.data, "base64"),
+  };
+};
+
+export type SerializedRemoteAttachmentContent = {
   nonce: string;
   salt: string;
   secret: string;
@@ -12,10 +32,11 @@ export type SerializedAttachmentContent = {
 };
 
 export const deserializeRemoteAttachmentContent = (
-  serializedAttachment: string
+  serializedRemoteAttachment: string
 ): RemoteAttachment => {
-  const parsedAttachment: SerializedAttachmentContent =
-    JSON.parse(serializedAttachment);
+  const parsedAttachment: SerializedRemoteAttachmentContent = JSON.parse(
+    serializedRemoteAttachment
+  );
   return {
     ...parsedAttachment,
     nonce: Buffer.from(parsedAttachment.nonce, "base64"),
@@ -23,3 +44,9 @@ export const deserializeRemoteAttachmentContent = (
     secret: Buffer.from(parsedAttachment.secret, "base64"),
   };
 };
+
+export const isAttachmentMessage = (contentType?: string) =>
+  contentType
+    ? contentType.startsWith("xmtp.org/attachment:") ||
+      contentType.startsWith("xmtp.org/remoteStaticAttachment:")
+    : false;

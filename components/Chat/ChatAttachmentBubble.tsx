@@ -14,6 +14,7 @@ import {
 } from "react-native";
 import RNFS from "react-native-fs";
 
+import { SerializedAttachmentContent } from "../../utils/attachment";
 import { textPrimaryColor } from "../../utils/colors";
 import { getImageSize, isImageMimetype } from "../../utils/media";
 import { sentryTrackMessage } from "../../utils/sentry";
@@ -39,7 +40,47 @@ export default function ChatAttachmentBubble({ message }: Props) {
     imageSize: undefined as undefined | { height: number; width: number },
   });
 
-  const fetchAndDecodeAttachment = useCallback(() => {
+  const saveAndDisplayAttachment = useCallback(
+    async (attachmentContent: SerializedAttachmentContent) => {
+      setAttachment((a) => ({ ...a, loading: true }));
+      const messageFolder = `${RNFS.DocumentDirectoryPath}/messages/${message.id}`;
+      const attachmentJsonPath = `${messageFolder}/attachment.json`;
+      // Create folder
+      await RNFS.mkdir(messageFolder, {
+        NSURLIsExcludedFromBackupKey: true,
+      });
+      const attachmentPath = `${messageFolder}/${attachmentContent.filename}`;
+      const isImage = isImageMimetype(attachmentContent.mimeType);
+      // Let's cache the file and decoded information
+      await RNFS.writeFile(attachmentPath, attachmentContent.data, "base64");
+      const imageSize = isImage
+        ? await getImageSize(`file://${attachmentPath}`)
+        : undefined;
+      await RNFS.writeFile(
+        attachmentJsonPath,
+        JSON.stringify({
+          filename: attachmentContent.filename,
+          mimeType: attachmentContent.mimeType,
+          imageSize,
+        }),
+        "utf8"
+      );
+
+      setAttachment({
+        mediaType: isImage ? "IMAGE" : "UNSUPPORTED",
+        loading: false,
+        imageSize,
+        contentLength: 0,
+        mediaURL: attachmentPath,
+        filename: attachmentContent.filename,
+        mimeType: attachmentContent.mimeType,
+        error: false,
+      });
+    },
+    [message.id]
+  );
+
+  const fetchAndDecodeRemoteAttachment = useCallback(() => {
     setAttachment((a) => ({ ...a, loading: true }));
     sendMessageToWebview(
       "DECODE_ATTACHMENT",
@@ -53,42 +94,24 @@ export default function ChatAttachmentBubble({ message }: Props) {
           setAttachment((a) => ({ ...a, error: true, loading: false }));
           return;
         }
-        const messageFolder = `${RNFS.DocumentDirectoryPath}/messages/${message.id}`;
-        const attachmentJsonPath = `${messageFolder}/attachment.json`;
-        // Create folder
-        await RNFS.mkdir(messageFolder, {
-          NSURLIsExcludedFromBackupKey: true,
-        });
-        const attachmentPath = `${messageFolder}/${attachmentResult.filename}`;
-        const isImage = isImageMimetype(attachmentResult.mimeType);
-        // Let's cache the file and decoded information
-        await RNFS.writeFile(attachmentPath, attachmentResult.data, "base64");
-        const imageSize = isImage
-          ? await getImageSize(`file://${attachmentPath}`)
-          : undefined;
-        await RNFS.writeFile(
-          attachmentJsonPath,
-          JSON.stringify({
-            filename: attachmentResult.filename,
-            mimeType: attachmentResult.mimeType,
-            imageSize,
-          }),
-          "utf8"
-        );
-
-        setAttachment({
-          mediaType: isImage ? "IMAGE" : "UNSUPPORTED",
-          loading: false,
-          imageSize,
-          contentLength: 0,
-          mediaURL: attachmentPath,
-          filename: attachmentResult.filename,
-          mimeType: attachmentResult.mimeType,
-          error: false,
-        });
+        saveAndDisplayAttachment(attachmentResult);
       }
     );
-  }, [message.content, message.id]);
+  }, [message.content, saveAndDisplayAttachment]);
+
+  const saveLocalAttachment = useCallback(
+    async (attachmentContent: SerializedAttachmentContent) => {
+      if (!attachmentContent.data) {
+        sentryTrackMessage("LOCAL_ATTACHMENT_NO_DATA", {
+          content: attachmentContent,
+        });
+        setAttachment((a) => ({ ...a, error: true, loading: false }));
+        return;
+      }
+      saveAndDisplayAttachment(attachmentContent);
+    },
+    [saveAndDisplayAttachment]
+  );
 
   const openInWebview = useCallback(async () => {
     if (!attachment.mediaURL) return;
@@ -138,31 +161,44 @@ export default function ChatAttachmentBubble({ message }: Props) {
         }
       }
 
+      // Either remote or direct attachement (< 1MB)
+      const isRemoteAttachment = message.contentType.startsWith(
+        "xmtp.org/remoteStaticAttachment:"
+      );
+
       let contentLength = 0;
 
       // Let's see if we can infer type from filename
       try {
         const parsedEncodedContent = JSON.parse(message.content);
-        const parsedType = mime.getType(parsedEncodedContent.filename);
-        contentLength = parsedEncodedContent.contentLength;
-        setAttachment({
-          mediaType:
-            parsedType && isImageMimetype(parsedType) ? "IMAGE" : "UNSUPPORTED",
-          loading: false,
-          mediaURL: undefined,
-          imageSize: undefined,
-          contentLength: parsedEncodedContent.contentLength,
-          mimeType: parsedType || "",
-          filename: parsedEncodedContent.filename,
-          error: false,
-        });
+        const parsedType = isRemoteAttachment
+          ? mime.getType(parsedEncodedContent.filename)
+          : parsedEncodedContent.mimeType;
+        if (isRemoteAttachment) {
+          contentLength = parsedEncodedContent.contentLength;
+          setAttachment({
+            mediaType:
+              parsedType && isImageMimetype(parsedType)
+                ? "IMAGE"
+                : "UNSUPPORTED",
+            loading: false,
+            mediaURL: undefined,
+            imageSize: undefined,
+            contentLength: parsedEncodedContent.contentLength,
+            mimeType: parsedType || "",
+            filename: parsedEncodedContent.filename,
+            error: false,
+          });
+        } else {
+          saveLocalAttachment(parsedEncodedContent);
+        }
       } catch (e) {
         console.log(e);
       }
 
-      // Last, if media is supported and size is ok, we fetch immediatly
-      if (contentLength <= 10000000) {
-        fetchAndDecodeAttachment();
+      // Last, if media is local or if remote but supported and size is ok, we fetch immediatly
+      if (isRemoteAttachment && contentLength <= 10000000) {
+        fetchAndDecodeRemoteAttachment();
       }
     };
     if (!message.content) {
@@ -171,7 +207,7 @@ export default function ChatAttachmentBubble({ message }: Props) {
     } else {
       go();
     }
-  }, [fetchAndDecodeAttachment, message]);
+  }, [fetchAndDecodeRemoteAttachment, message, saveLocalAttachment]);
 
   const showing =
     !attachment.loading &&
@@ -219,7 +255,7 @@ export default function ChatAttachmentBubble({ message }: Props) {
           {emoji} {filename} - {filesize}{" "}
           <Text
             style={{ textDecorationLine: "underline" }}
-            onPress={fetchAndDecodeAttachment}
+            onPress={fetchAndDecodeRemoteAttachment}
           >
             download
           </Text>
