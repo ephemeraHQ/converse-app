@@ -4,12 +4,12 @@ import { useCallback, useContext, useState } from "react";
 import { Alert, useColorScheme } from "react-native";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import { runOnJS } from "react-native-reanimated";
+import EmojiPicker from "rn-emoji-keyboard";
 
 import { AppContext } from "../../data/store/context";
 import { XmtpDispatchTypes } from "../../data/store/xmtpReducer";
 import { blockPeer, reportMessage } from "../../utils/api";
 import { actionSheetColors } from "../../utils/colors";
-import EmojiPicker from "../../vendor/rn-emoji-keyboard";
 import { showActionSheetWithOptions } from "../StateHandlers/ActionSheetStateHandler";
 import { MessageToDisplay } from "./ChatMessage";
 
@@ -167,7 +167,7 @@ export default function ChatMessageActions({
         open={emojiPickerShown}
         onClose={() => setEmojiPickerShown(false)}
         enableRecentlyUsed
-        enableCategoryChangeAnimation
+        enableCategoryChangeAnimation={false}
         enableCategoryChangeGesture
         enableSearchAnimation={false}
         enableSearchBar={false}
