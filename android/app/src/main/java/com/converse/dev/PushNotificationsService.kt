@@ -192,7 +192,7 @@ class PushNotificationsService : FirebaseMessagingService() {
         } else if (contentType.startsWith("xmtp.org/remoteStaticAttachment:")) {
             notificationMessage = "\uD83D\uDCCE Media";
             saveMessageToStorage(envelope.contentTopic, decodedMessage, sentViaConverse, contentType)
-        } else if (contentType.startsWith(""xmtp.org/reaction:"")) {
+        } else if (contentType.startsWith("xmtp.org/reaction:")) {
             notificationMessage = "Reacted to a message";
         } else {
             Log.d(TAG, "Unknown content type")
