@@ -14844,6 +14844,11 @@ rlp@^2.2.4:
   dependencies:
     bn.js "^5.2.0"
 
+rn-emoji-keyboard@^1.5.0:
+  version "1.5.0"
+  resolved "https://registry.yarnpkg.com/rn-emoji-keyboard/-/rn-emoji-keyboard-1.5.0.tgz#86307fa0fecab24dbf918811665cc460bcf7e70c"
+  integrity sha512-PnImBZxqpxzsNKHO8crGnpHdwdNh+b3CdT51Irsg3BnFd1ArQQzngqO8wP148JdD3GWZj+uvdn9aWn2KbALoAw==
+
 rpc-websockets@^7.5.1:
   version "7.5.1"
   resolved "https://registry.yarnpkg.com/rpc-websockets/-/rpc-websockets-7.5.1.tgz#e0a05d525a97e7efc31a0617f093a13a2e10c401"
