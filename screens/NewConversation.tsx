@@ -46,8 +46,8 @@ import {
   textPrimaryColor,
   textSecondaryColor,
 } from "../utils/colors";
+import { conversationLastMessagePreview } from "../utils/conversation";
 import { getAddressForPeer, isSupportedPeer } from "../utils/eth";
-import { lastValueInMap } from "../utils/map";
 import { addressPrefix, conversationName } from "../utils/str";
 import { isOnXmtp } from "../utils/xmtp/client";
 import { NavigationParamList } from "./Main";
@@ -263,21 +263,13 @@ export default function NewConversation({
 
   const inputPlaceholder = "0x, .eth, .lens, .fc, .cb.id, UD…";
 
-  const getLastMessagePreview = useCallback((c: XmtpConversation) => {
-    const lastMessage = lastValueInMap(c.messages);
-    if (!lastMessage) return "";
-    console.log(lastMessage.contentType);
-    if (lastMessage.contentType.startsWith("xmtp.org/text:")) {
-      return lastMessage.content;
-    } else if (
-      lastMessage.contentType.startsWith("xmtp.org/remoteStaticAttachment:")
-    ) {
-      return "📎 Media";
-    } else if (lastMessage.contentType.startsWith("xmtp.org/reaction:")) {
-      return "Reaction";
-    }
-    return "";
-  }, []);
+  const getLastMessagePreview = useCallback(
+    (c: XmtpConversation) => {
+      const lastMessage = conversationLastMessagePreview(c, state.xmtp.address);
+      return lastMessage?.contentPreview || "";
+    },
+    [state.xmtp.address]
+  );
 
   return (
     <View

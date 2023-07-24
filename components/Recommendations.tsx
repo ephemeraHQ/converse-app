@@ -243,7 +243,11 @@ export default function Recommendations({
 
   if (visibility === "HIDDEN") return null;
 
-  if (state.recommendations.loading && Object.keys(frens).length === 0) {
+  if (
+    state.recommendations.loading &&
+    Object.keys(frens).length === 0 &&
+    visibility === "FULL"
+  ) {
     return (
       <View style={styles.fetching}>
         <ActivityIndicator />
