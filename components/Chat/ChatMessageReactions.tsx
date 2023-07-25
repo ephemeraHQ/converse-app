@@ -9,8 +9,10 @@ import {
 } from "react-native";
 
 import { AppContext } from "../../data/store/context";
+import { isAttachmentMessage } from "../../utils/attachment";
 import {
   actionSheetColors,
+  backgroundColor,
   messageBubbleColor,
   textSecondaryColor,
 } from "../../utils/colors";
@@ -66,16 +68,14 @@ export default function ChatMessageReactions({
       };
     });
     methods["Back"] = () => {};
-    const isAttachment = message.contentType.startsWith(
-      "xmtp.org/remoteStaticAttachment:"
-    );
+    const isAttachment = isAttachmentMessage(message.contentType);
 
     const options = Object.keys(methods);
 
     showActionSheetWithOptions(
       {
         options,
-        title: isAttachment ? "Image" : message.content,
+        title: isAttachment ? "📎 Media" : message.content,
         cancelButtonIndex: options.indexOf("Back"),
         ...actionSheetColors(colorScheme),
       },
@@ -89,9 +89,7 @@ export default function ChatMessageReactions({
     );
   }, [
     colorScheme,
-    message.content,
-    message.contentType,
-    message.id,
+    message,
     reactionsList,
     sendMessage,
     state.profiles,
@@ -138,12 +136,13 @@ const getStyles = (colorScheme: ColorSchemeName) =>
       paddingVertical: 6,
       paddingHorizontal: 10,
       borderWidth: 1,
-      borderColor: "white",
+      borderColor: backgroundColor(colorScheme),
       borderRadius: 30,
       flexDirection: "row",
     },
     emojis: {
       fontSize: 15,
+      lineHeight: 18.5,
     },
     count: {
       fontSize: 15,

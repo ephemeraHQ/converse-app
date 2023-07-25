@@ -31,14 +31,16 @@ import Recommendations from "../components/Recommendations";
 import SettingsButton from "../components/SettingsButton";
 import Welcome from "../components/Welcome";
 import { AppContext } from "../data/store/context";
-import { XmtpConversation } from "../data/store/xmtpReducer";
+import { XmtpConversationWithUpdate } from "../data/store/xmtpReducer";
 import {
   backgroundColor,
   textPrimaryColor,
   textSecondaryColor,
 } from "../utils/colors";
-import { conversationLastMessagePreview } from "../utils/conversation";
-import { lastValueInMap } from "../utils/map";
+import {
+  LastMessagePreview,
+  conversationLastMessagePreview,
+} from "../utils/conversation";
 import { conversationName } from "../utils/str";
 import { NavigationParamList } from "./Main";
 
@@ -134,7 +136,10 @@ function ShareProfileButton({
   );
 }
 
-type FlatListItem = XmtpConversation | { topic: string };
+type ConversationWithLastMessagePreview = XmtpConversationWithUpdate & {
+  lastMessagePreview?: LastMessagePreview;
+};
+type FlatListItem = ConversationWithLastMessagePreview | { topic: string };
 
 export default function ConversationList({
   navigation,
@@ -145,24 +150,29 @@ export default function ConversationList({
   const { state } = useContext(AppContext);
   const [flatListItems, setFlatListItems] = useState<FlatListItem[]>([]);
   useEffect(() => {
-    const conversations = Object.values(state.xmtp.conversations).filter(
-      (a) => a?.peerAddress
-    );
+    const conversations = Object.values(state.xmtp.conversations)
+      .filter((a) => a?.peerAddress)
+      .map((c: ConversationWithLastMessagePreview) => {
+        c.lastMessagePreview = conversationLastMessagePreview(
+          c,
+          state.xmtp.address
+        );
+        return c;
+      });
     conversations.sort((a, b) => {
-      const aDate =
-        (a.messages?.size > 0
-          ? lastValueInMap(a.messages)?.sent
-          : a.createdAt) || a.createdAt;
-      const bDate =
-        (b.messages?.size > 0
-          ? lastValueInMap(b.messages)?.sent
-          : b.createdAt) || b.createdAt;
+      const aDate = a.lastMessagePreview
+        ? a.lastMessagePreview.message.sent
+        : a.createdAt;
+      const bDate = b.lastMessagePreview
+        ? b.lastMessagePreview.message.sent
+        : b.createdAt;
       return bDate - aDate;
     });
     const items = state.app.ephemeralAccount ? [{ topic: "ephemeral" }] : [];
     setFlatListItems([...items, ...conversations, { topic: "welcome" }]);
   }, [
     state.app.ephemeralAccount,
+    state.xmtp.address,
     state.xmtp.conversations,
     state.xmtp.lastUpdateAt,
   ]);
@@ -206,11 +216,8 @@ export default function ConversationList({
         return <EphemeralAccountBanner />;
       }
 
-      const conversation = item as XmtpConversation;
-      const lastMessagePreview = conversationLastMessagePreview(
-        conversation,
-        state.xmtp.address
-      );
+      const conversation = item as ConversationWithLastMessagePreview;
+      const lastMessagePreview = conversation.lastMessagePreview;
 
       return (
         <ConversationListItem

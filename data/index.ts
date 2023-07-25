@@ -7,6 +7,7 @@ import { addLog } from "../components/DebugButton";
 import { getProfilesForAddresses } from "../utils/api";
 import { getLensHandleFromConversationIdAndPeer } from "../utils/lens";
 import { lastValueInMap } from "../utils/map";
+import { MessageReaction } from "../utils/reactions";
 import { sentryTrackMessage } from "../utils/sentry";
 import {
   saveConversationDict,
@@ -390,40 +391,54 @@ const saveReactions = async (
   conversationTopic: string,
   dispatch: MaybeDispatchType
 ) => {
+  const reactionsByMessage: {
+    [messageId: string]: { [reactionId: string]: MessageReaction };
+  } = {};
   for (const reactionMessage of reactionMessages) {
     try {
       const reactionContent = JSON.parse(reactionMessage.content) as Reaction;
-      // Check if message exists
-      const message = await messageRepository.findOneBy({
-        id: reactionContent.reference,
-        conversationId: conversationTopic,
-      });
-      if (message) {
-        const reactions = JSON.parse(message.reactions || "{}");
-        reactions[reactionMessage.id] = {
-          action: reactionContent.action,
-          schema: reactionContent.schema,
-          content: reactionContent.content,
-          senderAddress: reactionMessage.senderAddress,
-          sent: reactionMessage.sent,
-        };
-        message.reactions = JSON.stringify(reactions);
-        await messageRepository.save(message);
-        if (dispatch) {
-          dispatch({
-            type: XmtpDispatchTypes.XmtpSetMessages,
-            payload: {
-              topic: conversationTopic,
-              messages: [xmtpMessageFromDb(message)],
-            },
-          });
-        }
-      }
-    } catch (e) {
+      reactionsByMessage[reactionContent.reference] =
+        reactionsByMessage[reactionContent.reference] || {};
+      reactionsByMessage[reactionContent.reference][reactionMessage.id] = {
+        action: reactionContent.action,
+        schema: reactionContent.schema,
+        content: reactionContent.content,
+        senderAddress: reactionMessage.senderAddress,
+        sent: reactionMessage.sent,
+      };
+    } catch (e: any) {
       sentryTrackMessage("CANT_PARSE_REACTION_CONTENT", {
         reactionMessageContent: reactionMessage.content,
+        error: e.toString(),
       });
     }
+  }
+  const messagesToDispatch: XmtpMessage[] = [];
+  for (const messageId in reactionsByMessage) {
+    // Check if message exists
+    const message = await messageRepository.findOneBy({
+      id: messageId,
+      conversationId: conversationTopic,
+    });
+    if (message) {
+      const existingReactions = JSON.parse(message.reactions || "{}") as {
+        [reactionId: string]: MessageReaction;
+      };
+      const newReactions = reactionsByMessage[messageId];
+      const reactions = { ...existingReactions, ...newReactions };
+      message.reactions = JSON.stringify(reactions);
+      await messageRepository.save(message);
+      messagesToDispatch.push(xmtpMessageFromDb(message));
+    }
+  }
+  if (dispatch) {
+    dispatch({
+      type: XmtpDispatchTypes.XmtpSetMessages,
+      payload: {
+        topic: conversationTopic,
+        messages: messagesToDispatch,
+      },
+    });
   }
 };
 
