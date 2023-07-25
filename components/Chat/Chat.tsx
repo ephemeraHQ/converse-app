@@ -14,6 +14,7 @@ import {
   StyleSheet,
   ColorSchemeName,
 } from "react-native";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
 import Reanimated, {
   useAnimatedStyle,
   useSharedValue,
@@ -159,7 +160,7 @@ export default function Chat({
   );
 
   const showPlaceholder =
-    flashListArray.length === 0 || isBlockedPeer || !conversation;
+    flashListArray.length === 1 || isBlockedPeer || !conversation;
   const renderItem = useCallback(
     ({ item }: { item: MessageToDisplay }) => {
       if (item.id === "converse-recommendations") {
@@ -190,7 +191,7 @@ export default function Chat({
   const keyExtractor = useCallback((item: MessageToDisplay) => item.id, []);
 
   return (
-    <View
+    <GestureHandlerRootView
       style={styles.chatContainer}
       key={`chat-${conversation?.topic}-${isBlockedPeer}`}
     >
@@ -250,7 +251,7 @@ export default function Chat({
           />
         </>
       )}
-    </View>
+    </GestureHandlerRootView>
   );
 }
 
