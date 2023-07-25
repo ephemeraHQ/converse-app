@@ -54,7 +54,6 @@ export const getMessageReactions = (message: XmtpMessage) => {
         lastReactionBySender[senderAddress] = reactions[0];
       }
     }
-
     return lastReactionBySender;
   } catch (error) {
     const data = { error, reactions: message.reactions };

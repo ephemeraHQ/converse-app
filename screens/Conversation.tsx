@@ -329,7 +329,6 @@ const Conversation = ({
       const messageId = uuid.v4().toString();
       const sentAtTime = new Date();
       const isV1Conversation = conversation.topic.startsWith("/xmtp/0/dm-");
-
       // Save to DB immediatly
       await saveMessages(
         [
