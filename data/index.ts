@@ -413,7 +413,7 @@ const saveReactions = async (
       });
     }
   }
-  const messagesToDispatch: XmtpMessage[] = [];
+  const reactionsToDispatch: { [messageId: string]: string } = {};
   for (const messageId in reactionsByMessage) {
     // Check if message exists
     const message = await messageRepository.findOneBy({
@@ -428,15 +428,15 @@ const saveReactions = async (
       const reactions = { ...existingReactions, ...newReactions };
       message.reactions = JSON.stringify(reactions);
       await messageRepository.save(message);
-      messagesToDispatch.push(xmtpMessageFromDb(message));
+      reactionsToDispatch[messageId] = message.reactions;
     }
   }
   if (dispatch) {
     dispatch({
-      type: XmtpDispatchTypes.XmtpSetMessages,
+      type: XmtpDispatchTypes.XmtpSetMessagesReactions,
       payload: {
         topic: conversationTopic,
-        messages: messagesToDispatch,
+        reactions: reactionsToDispatch,
       },
     });
   }

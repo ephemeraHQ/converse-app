@@ -79,6 +79,7 @@ export enum XmtpDispatchTypes {
   XmtpNewConversation = "XMTP_NEW_CONVERSATION",
   XmtpSetAddress = "XMTP_SET_ADDRESS",
   XmtpSetMessages = "XMTP_SET_MESSAGES",
+  XmtpSetMessagesReactions = "XMTP_SET_MESSAGES_REACTIONS",
   XmtpUpdateMessageIds = "XMTP_UPDATE_MESSAGE_IDS",
   XmtpUpdateMessageStatus = "XMTP_UPDATE_MESSAGE_STATUS",
   XmtpInitialLoad = "XMTP_INITIAL_LOAD",
@@ -109,6 +110,10 @@ type XmtpPayload = {
   [XmtpDispatchTypes.XmtpSetMessages]: {
     topic: string;
     messages: XmtpMessage[];
+  };
+  [XmtpDispatchTypes.XmtpSetMessagesReactions]: {
+    topic: string;
+    reactions: { [messageId: string]: string };
   };
   [XmtpDispatchTypes.XmtpUpdateMessageIds]: {
     topic: string;
@@ -278,9 +283,38 @@ export const xmtpReducer = (state: XmtpType, action: XmtpActions): XmtpType => {
       for (const message of action.payload.messages) {
         // Default message status is sent
         if (!message.status) message.status = "sent";
-        conversation.messages.set(message.id, message);
+        const alreadyMessage = conversation.messages.get(message.id);
+        // Do not override reactions when saving a message
+        if (alreadyMessage) {
+          const newMessage = {
+            ...message,
+            reactions: alreadyMessage.reactions,
+          };
+          conversation.messages.set(message.id, newMessage);
+        } else {
+          conversation.messages.set(message.id, message);
+        }
       }
 
+      return newState;
+    }
+
+    case XmtpDispatchTypes.XmtpSetMessagesReactions: {
+      if (!state.conversations[action.payload.topic]) return state;
+      const newState = {
+        ...state,
+        lastUpdateAt: now,
+      };
+      const conversation = newState.conversations[action.payload.topic];
+      for (const messageId in action.payload.reactions) {
+        const message = conversation.messages.get(messageId);
+        if (!message) {
+          continue;
+        }
+        const reactions = action.payload.reactions[messageId];
+        conversation.lastUpdateAt = now;
+        conversation.messages.set(messageId, { ...message, reactions });
+      }
       return newState;
     }
 
