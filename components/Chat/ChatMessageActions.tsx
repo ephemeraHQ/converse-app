@@ -1,6 +1,6 @@
 import * as Clipboard from "expo-clipboard";
 import { useCallback, useContext, useEffect, useState } from "react";
-import { Alert, useColorScheme } from "react-native";
+import { Alert, Platform, useColorScheme } from "react-native";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import { runOnJS } from "react-native-reanimated";
 import EmojiPicker from "rn-emoji-keyboard";
@@ -211,6 +211,12 @@ export default function ChatMessageActions({
         categoryPosition="bottom"
         categoryOrder={["recently_used"]}
         selectedEmojis={selectedEmojis}
+        styles={{
+          container: {
+            borderBottomLeftRadius: Platform.OS === "android" ? 0 : undefined,
+            borderBottomRightRadius: Platform.OS === "android" ? 0 : undefined,
+          },
+        }}
       />
     </>
   );
