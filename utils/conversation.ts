@@ -3,7 +3,7 @@ import { Reaction } from "@xmtp/content-type-reaction";
 import { XmtpConversation, XmtpMessage } from "../data/store/xmtpReducer";
 import { isAttachmentMessage } from "./attachment";
 
-type LastMessagePreview = {
+export type LastMessagePreview = {
   contentPreview: string;
   message: XmtpMessage;
 };
@@ -14,14 +14,15 @@ export const conversationLastMessagePreview = (
 ): LastMessagePreview | undefined => {
   if (!conversation.messages?.size) return undefined;
   const messagesArray = Array.from(conversation.messages.values());
-  let removedReactionFromMessage: Reaction | undefined = undefined;
+  let removedReactions: { [messageId: string]: Reaction } = {};
   while (messagesArray.length > 0) {
     const lastMessage = messagesArray.pop();
+
     if (!lastMessage) {
       return undefined;
     } else {
       if (isAttachmentMessage(lastMessage.contentType)) {
-        removedReactionFromMessage = undefined;
+        removedReactions = {};
         return {
           contentPreview: "📎 Media",
           message: lastMessage,
@@ -29,19 +30,21 @@ export const conversationLastMessagePreview = (
       } else if (lastMessage?.contentType?.startsWith("xmtp.org/reaction:")) {
         try {
           const reactionContent = JSON.parse(lastMessage.content) as Reaction;
-          if (reactionContent.action === "removed") {
-            removedReactionFromMessage = reactionContent;
-            continue;
-          }
           const message = conversation.messages.get(reactionContent.reference);
           if (!message || message.senderAddress !== myAddress) continue;
+          if (reactionContent.action === "removed") {
+            removedReactions[reactionContent.reference] = reactionContent;
+            continue;
+          }
           if (
-            removedReactionFromMessage?.reference === reactionContent.reference
+            reactionContent.reference in removedReactions &&
+            reactionContent.content ===
+              removedReactions[reactionContent.reference].content
           ) {
-            removedReactionFromMessage = undefined;
+            delete removedReactions[reactionContent.reference];
             continue;
           } else {
-            removedReactionFromMessage = undefined;
+            removedReactions = {};
             const isAttachment = isAttachmentMessage(message.contentType);
             if (reactionContent.schema === "unicode") {
               return {
@@ -59,11 +62,11 @@ export const conversationLastMessagePreview = (
           }
         } catch (e) {
           console.log(e);
-          removedReactionFromMessage = undefined;
+          removedReactions = {};
           continue;
         }
       } else {
-        removedReactionFromMessage = undefined;
+        removedReactions = {};
         return {
           contentPreview: lastMessage.content,
           message: lastMessage,
