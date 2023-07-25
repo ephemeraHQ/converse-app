@@ -14,7 +14,9 @@ export const conversationLastMessagePreview = (
 ): LastMessagePreview | undefined => {
   if (!conversation.messages?.size) return undefined;
   const messagesArray = Array.from(conversation.messages.values());
-  let removedReactions: { [messageId: string]: Reaction } = {};
+  let removedReactions: {
+    [messageId: string]: { [reactionContent: string]: Reaction };
+  } = {};
   while (messagesArray.length > 0) {
     const lastMessage = messagesArray.pop();
 
@@ -33,15 +35,21 @@ export const conversationLastMessagePreview = (
           const message = conversation.messages.get(reactionContent.reference);
           if (!message || message.senderAddress !== myAddress) continue;
           if (reactionContent.action === "removed") {
-            removedReactions[reactionContent.reference] = reactionContent;
+            removedReactions[reactionContent.reference] =
+              removedReactions[reactionContent.reference] || {};
+            removedReactions[reactionContent.reference][
+              reactionContent.content
+            ] = reactionContent;
             continue;
           }
           if (
             reactionContent.reference in removedReactions &&
-            reactionContent.content ===
-              removedReactions[reactionContent.reference].content
+            reactionContent.content in
+              removedReactions[reactionContent.reference]
           ) {
-            delete removedReactions[reactionContent.reference];
+            delete removedReactions[reactionContent.reference][
+              reactionContent.content
+            ];
             continue;
           } else {
             removedReactions = {};
