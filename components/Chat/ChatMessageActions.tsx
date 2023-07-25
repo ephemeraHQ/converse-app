@@ -8,6 +8,7 @@ import EmojiPicker from "rn-emoji-keyboard";
 import { AppContext } from "../../data/store/context";
 import { XmtpDispatchTypes } from "../../data/store/xmtpReducer";
 import { blockPeer, reportMessage } from "../../utils/api";
+import { isAttachmentMessage } from "../../utils/attachment";
 import { actionSheetColors } from "../../utils/colors";
 import {
   MessageReaction,
@@ -37,9 +38,7 @@ export default function ChatMessageActions({
   sendMessage,
   reactions,
 }: Props) {
-  const isAttachment = message.contentType.startsWith(
-    "xmtp.org/remoteStaticAttachment:"
-  );
+  const isAttachment = isAttachmentMessage(message.contentType);
   const colorScheme = useColorScheme();
   const { state, dispatch } = useContext(AppContext);
 
@@ -190,6 +189,8 @@ export default function ChatMessageActions({
             const myReaction = state.xmtp.address
               ? reactions[state.xmtp.address]
               : undefined;
+            // Add before removing so there is no flash
+            addReactionToMessage(message, e.emoji, sendMessage);
             if (myReaction && myReaction.schema === "unicode") {
               removeReactionFromMessage(
                 message,
@@ -197,7 +198,6 @@ export default function ChatMessageActions({
                 sendMessage
               );
             }
-            addReactionToMessage(message, e.emoji, sendMessage);
           }
         }}
         open={emojiPickerShown}
