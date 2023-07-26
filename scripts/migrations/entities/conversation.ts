@@ -7,6 +7,9 @@ export class Conversation {
   @PrimaryColumn("text")
   topic!: string;
 
+  @Column("boolean", { default: false })
+  pending!: boolean;
+
   @Index()
   @Column("text")
   peerAddress!: string;
