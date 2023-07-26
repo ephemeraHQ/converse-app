@@ -195,7 +195,7 @@ func decodeConversationMessage(xmtpClient: XMTP.Client, envelope: XMTP.Envelope,
         return ("Reacted to a message", decodedMessage.senderAddress)
       } else {
         print("[NotificationExtension] Unknown content type")
-        return (nil, nil);
+        return (nil, decodedMessage.senderAddress);
       }
     } catch {
       print("[NotificationExtension] ERROR WHILE DECODING \(error)")
