@@ -14,7 +14,6 @@ import {
   StyleSheet,
   ColorSchemeName,
 } from "react-native";
-import { GestureHandlerRootView } from "react-native-gesture-handler";
 import Reanimated, {
   useAnimatedStyle,
   useSharedValue,
@@ -191,7 +190,7 @@ export default function Chat({
   const keyExtractor = useCallback((item: MessageToDisplay) => item.id, []);
 
   return (
-    <GestureHandlerRootView
+    <View
       style={styles.chatContainer}
       key={`chat-${conversation?.topic}-${isBlockedPeer}`}
     >
@@ -251,7 +250,7 @@ export default function Chat({
           />
         </>
       )}
-    </GestureHandlerRootView>
+    </View>
   );
 }
 
