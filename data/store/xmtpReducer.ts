@@ -39,6 +39,9 @@ export type XmtpType = {
   conversations: {
     [topic: string]: XmtpConversationWithUpdate;
   };
+  conversationsMapping: {
+    [oldTopic: string]: string;
+  };
   lastUpdateAt: number;
   address?: string;
   blockedPeerAddresses: { [peerAddress: string]: boolean };
@@ -52,6 +55,7 @@ export const xmtpInitialState: XmtpType = {
   initialLoadDoneOnce: false,
   loading: false,
   conversations: {},
+  conversationsMapping: {},
   address: undefined,
   lastUpdateAt: 0,
   blockedPeerAddresses: {},
@@ -82,6 +86,7 @@ export enum XmtpDispatchTypes {
   XmtpSetMessages = "XMTP_SET_MESSAGES",
   XmtpSetMessagesReactions = "XMTP_SET_MESSAGES_REACTIONS",
   XmtpUpdateMessageIds = "XMTP_UPDATE_MESSAGE_IDS",
+  XmtpUpdateConversationTopic = "XMTP_UPDATE_CONVERSATION_TOPIC",
   XmtpUpdateMessageStatus = "XMTP_UPDATE_MESSAGE_STATUS",
   XmtpInitialLoad = "XMTP_INITIAL_LOAD",
   XmtpInitialLoadDoneOnce = "XMTP_INITIAL_LOAD_DONE_ONCE",
@@ -121,6 +126,10 @@ type XmtpPayload = {
     oldId: string;
     message: XmtpMessage;
   }[];
+  [XmtpDispatchTypes.XmtpUpdateConversationTopic]: {
+    oldTopic: string;
+    conversation: XmtpConversation;
+  };
   [XmtpDispatchTypes.XmtpUpdateMessageStatus]: {
     messageId: string;
     topic: string;
@@ -394,6 +403,30 @@ export const xmtpReducer = (state: XmtpType, action: XmtpActions): XmtpType => {
 
     case XmtpDispatchTypes.XmtpSetReconnecting: {
       return { ...state, reconnecting: action.payload.reconnecting };
+    }
+
+    case XmtpDispatchTypes.XmtpUpdateConversationTopic: {
+      if (action.payload.oldTopic in state.conversations) {
+        console.log("gonna replace old topic with new");
+        const newState = { ...state };
+        const existingConversation =
+          state.conversations[action.payload.oldTopic];
+        const oldMessages = existingConversation.messages;
+        newState.conversations[action.payload.conversation.topic] = {
+          ...action.payload.conversation,
+          lastUpdateAt: now,
+          messages: oldMessages,
+        };
+        newState.lastUpdateAt = now;
+
+        delete newState.conversations[action.payload.oldTopic];
+        newState.conversationsMapping[action.payload.oldTopic] =
+          action.payload.conversation.topic;
+        console.log("done replaciong old topic with new");
+        return newState;
+      } else {
+        return state;
+      }
     }
 
     default:

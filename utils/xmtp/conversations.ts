@@ -1,9 +1,17 @@
-import { Client, Conversation, dateToNs } from "../../vendor/xmtp-js/src";
+import { sendMessageToWebview } from "../../components/XmtpWebview";
+import { Conversation as DbConversation } from "../../data/db/entities/conversation";
+import {
+  Client,
+  Conversation,
+  InvitationContext,
+  dateToNs,
+} from "../../vendor/xmtp-js/src";
 import {
   ConversationV1,
   ConversationV2,
 } from "../../vendor/xmtp-js/src/conversations";
 import { InviteStore } from "../../vendor/xmtp-js/src/keystore";
+import { sentryTrackMessage } from "../sentry";
 
 export const parseConversationJSON = async (
   xmtpClient: Client,
@@ -53,3 +61,55 @@ export const parseConversationJSON = async (
     `Conversation version ${parsedConversation.version} not handled`
   );
 };
+
+export const createConversation = (
+  dbConversation: DbConversation
+): Promise<string> =>
+  new Promise((resolve, reject) => {
+    if (!dbConversation.pending) {
+      reject(new Error("Can only create a conversation that is pending"));
+      return;
+    }
+    console.log(
+      `[XMTP] Creating a conversation with peer ${dbConversation.peerAddress} and id ${dbConversation.contextConversationId}`
+    );
+    let context: InvitationContext | undefined = undefined;
+    if (dbConversation.contextConversationId) {
+      context = {
+        conversationId: dbConversation.contextConversationId,
+        metadata: dbConversation.contextMetadata
+          ? JSON.parse(dbConversation.contextMetadata)
+          : {},
+      };
+    }
+    sendMessageToWebview(
+      "CREATE_CONVERSATION",
+      { peerAddress: dbConversation.peerAddress, context },
+      async (createConversationResult: any) => {
+        if (
+          createConversationResult?.status !== "SUCCESS" ||
+          createConversationResult?.conversationTopic === undefined
+        ) {
+          console.log(createConversationResult);
+          sentryTrackMessage("CANT_CREATE_CONVO", {
+            peerAddress: dbConversation.peerAddress,
+            context,
+            error: createConversationResult,
+          });
+          reject(
+            new Error(
+              JSON.stringify({
+                peerAddress: dbConversation.peerAddress,
+                context,
+                error: createConversationResult,
+              })
+            )
+          );
+          return;
+        }
+        // Conversation is created!
+        const newConversationTopic = createConversationResult.conversationTopic;
+        resolve(newConversationTopic);
+      }
+    );
+  });

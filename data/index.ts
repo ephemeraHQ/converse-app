@@ -1,7 +1,9 @@
 import "reflect-metadata";
-
 import { Reaction } from "@xmtp/content-type-reaction";
+import { getAddress } from "ethers/lib/utils";
 import RNFS from "react-native-fs";
+import uuid from "react-native-uuid";
+import { Not } from "typeorm/browser";
 
 import { addLog } from "../components/DebugButton";
 import { getProfilesForAddresses } from "../utils/api";
@@ -15,6 +17,7 @@ import {
   saveApiURI,
 } from "../utils/sharedData/sharedData";
 import { conversationName, shortAddress } from "../utils/str";
+import { InvitationContext } from "../vendor/xmtp-js/src";
 import {
   conversationRepository,
   messageRepository,
@@ -144,17 +147,78 @@ type HandlesToResolve = {
   shouldUpdateProfile: boolean;
 };
 
-const setupAndSaveConversation = async (
-  conversation: XmtpConversation
-): Promise<HandlesToResolve> => {
-  const alreadyConversationInDb = await conversationRepository.findOne({
-    where: { topic: conversation.topic },
+const upgradePendingConversationIfNeeded = async (
+  conversation: XmtpConversation,
+  dispatch: MaybeDispatchType
+) => {
+  const alreadyConversationInDbWithConversationId =
+    await conversationRepository.findOne({
+      where: {
+        pending: true,
+        peerAddress: conversation.peerAddress,
+        contextConversationId: conversation.context?.conversationId,
+        topic: Not(conversation.topic),
+      },
+    });
+  if (
+    !alreadyConversationInDbWithConversationId ||
+    alreadyConversationInDbWithConversationId.topic === conversation.topic
+  )
+    return;
+  console.log(
+    "we need to upgrade a pending convo !!",
+    alreadyConversationInDbWithConversationId.topic,
+    conversation.topic
+  );
+
+  // Save this one to db
+  await upsertRepository(
+    conversationRepository,
+    [xmtpConversationToDb(conversation)],
+    ["topic"]
+  );
+
+  console.log("upserted the new one");
+
+  // Reassign messages
+  await messageRepository.update(
+    { conversationId: alreadyConversationInDbWithConversationId.topic },
+    { conversationId: conversation.topic }
+  );
+
+  console.log("updated all messages");
+
+  // Dispatch
+  if (!dispatch) return;
+  console.log("dispatching");
+  dispatch({
+    type: XmtpDispatchTypes.XmtpUpdateConversationTopic,
+    payload: {
+      oldTopic: alreadyConversationInDbWithConversationId.topic,
+      conversation,
+    },
   });
 
+  await conversationRepository.delete({
+    topic: alreadyConversationInDbWithConversationId.topic,
+  });
+};
+
+const setupAndSaveConversation = async (
+  conversation: XmtpConversation,
+  dispatch: MaybeDispatchType
+): Promise<HandlesToResolve> => {
+  await upgradePendingConversationIfNeeded(conversation, dispatch);
+  const alreadyConversationInDbWithTopic = await conversationRepository.findOne(
+    {
+      where: { topic: conversation.topic },
+    }
+  );
+
   let alreadyProfileInDb: Profile | null = null;
-  if (alreadyConversationInDb) {
+  if (alreadyConversationInDbWithTopic) {
     alreadyProfileInDb = await profileRepository.findOne({
-      where: { address: alreadyConversationInDb.peerAddress },
+      where: { address: alreadyConversationInDbWithTopic.peerAddress },
     });
   }
   const lastProfileUpdate = alreadyProfileInDb?.updatedAt || 0;
@@ -176,7 +240,7 @@ const setupAndSaveConversation = async (
   // If this is a lens convo we show lens, if not ENS
   conversation.conversationTitle = lensHandle || ensName || unsDomain;
   conversation.readUntil =
-    conversation.readUntil || alreadyConversationInDb?.readUntil || 0;
+    conversation.readUntil || alreadyConversationInDbWithTopic?.readUntil || 0;
 
   // Save to db
   await upsertRepository(
@@ -287,7 +351,7 @@ export const saveConversations = async (
 ) => {
   // Save immediatly to db
   const saveResult = await Promise.all(
-    conversations.map(setupAndSaveConversation)
+    conversations.map((c) => setupAndSaveConversation(c, dispatch))
   );
   // Then to context
   if (dispatch) {
@@ -326,7 +390,7 @@ export const saveNewConversation = async (
   dispatch: MaybeDispatchType
 ) => {
   // Save immediatly to db
-  const saveResult = await setupAndSaveConversation(conversation);
+  const saveResult = await setupAndSaveConversation(conversation, dispatch);
   // Then to context
   if (dispatch) {
     dispatch({
@@ -491,8 +555,26 @@ export const getMessagesToSend = async () => {
     order: {
       sent: "ASC",
     },
+    relations: {
+      conversation: true,
+    },
   });
-  return messagesToSend;
+  const messagesForExistingConversations = messagesToSend.filter(
+    (m) => m.conversation && m.conversation.pending === false
+  );
+  return messagesForExistingConversations;
+};
+
+export const getPendingConversationsToCreate = async () => {
+  const pendingConversations = await conversationRepository.find({
+    where: {
+      pending: true,
+    },
+    relations: { messages: true },
+  });
+  return pendingConversations.filter(
+    (c) => c.messages && c.messages.length > 0
+  );
 };
 
 export const updateMessagesIds = async (
@@ -624,4 +706,40 @@ export const refreshProfileForAddress = async (
       },
     },
   });
+};
+
+export const createPendingConversation = async (
+  peerAddress: string,
+  context?: InvitationContext,
+  dispatch?: MaybeDispatchType
+) => {
+  const cleanAddress = getAddress(peerAddress.toLowerCase());
+  // Let's first check if we already have a conversation like that in db
+  const alreadyConversationInDb = await conversationRepository.exist({
+    where: {
+      peerAddress: cleanAddress,
+      contextConversationId: context?.conversationId,
+    },
+  });
+  if (alreadyConversationInDb)
+    throw new Error(
+      `A conversation with ${cleanAddress} and id ${context?.conversationId} already exists`
+    );
+
+  const pendingConversationId = uuid.v4().toString();
+  await saveConversations(
+    [
+      {
+        topic: pendingConversationId,
+        pending: true,
+        peerAddress: cleanAddress,
+        createdAt: new Date().getTime(),
+        messages: new Map(),
+        readUntil: 0,
+        context,
+      },
+    ],
+    dispatch
+  );
+  return pendingConversationId;
 };
