@@ -75,6 +75,7 @@ const xmtpConversationToDb = (
     ? JSON.stringify(xmtpConversation.context.metadata)
     : undefined,
   readUntil: xmtpConversation.readUntil || 0,
+  pending: xmtpConversation.pending,
 });
 
 const xmtpConversationFromDb = (
@@ -113,6 +114,7 @@ const xmtpConversationFromDb = (
       : new Map(),
     conversationTitle,
     readUntil: dbConversation.readUntil || 0,
+    pending: dbConversation.pending,
   };
 };
 
