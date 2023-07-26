@@ -120,6 +120,12 @@ export default function Main() {
             },
             NewConversation: {
               path: "/newConversation",
+              parse: {
+                peer: decodeURIComponent,
+              },
+              stringify: {
+                peer: encodeURIComponent,
+              },
             },
             ShareProfile: {
               path: "/shareProfile",

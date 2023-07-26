@@ -19,6 +19,7 @@ import {
   UNS_REGEX,
   FARCASTER_REGEX,
   CB_ID_REGEX,
+  EMAIL_REGEX,
 } from "../utils/regex";
 import { showActionSheetWithOptions } from "./StateHandlers/ActionSheetStateHandler";
 
@@ -85,12 +86,6 @@ export default function ClickableText({ children, style }: Props) {
       style={style}
       parse={[
         {
-          onPress: handleEmailPress,
-          onLongPress: showCopyActionSheet("Copy email"),
-          style: styles.clickableText,
-          type: "email",
-        },
-        {
           onPress: handleNewConversationPress,
           onLongPress: showCopyActionSheet("Copy wallet address"),
           pattern: ADDRESS_REGEX,
@@ -124,6 +119,12 @@ export default function ClickableText({ children, style }: Props) {
           onPress: handleNewConversationPress,
           onLongPress: showCopyActionSheet("Copy Farcaster username"),
           pattern: FARCASTER_REGEX,
+          style: styles.clickableText,
+        },
+        {
+          onPress: handleEmailPress,
+          onLongPress: showCopyActionSheet("Copy email"),
+          pattern: EMAIL_REGEX,
           style: styles.clickableText,
         },
         {
