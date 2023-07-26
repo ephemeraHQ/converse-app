@@ -1,8 +1,12 @@
 import * as Clipboard from "expo-clipboard";
-import { useCallback, useContext, useEffect, useState } from "react";
-import { Alert, Platform, useColorScheme } from "react-native";
-import { Gesture, GestureDetector } from "react-native-gesture-handler";
-import { runOnJS } from "react-native-reanimated";
+import { useCallback, useContext, useEffect, useRef, useState } from "react";
+import {
+  Alert,
+  ColorSchemeName,
+  Platform,
+  TouchableWithoutFeedback,
+  useColorScheme,
+} from "react-native";
 import EmojiPicker from "rn-emoji-keyboard";
 
 import { AppContext } from "../../data/store/context";
@@ -143,19 +147,19 @@ export default function ChatMessageActions({
     showMessageReportActionSheet,
     showReactionModal,
   ]);
-  const doubleTapOnMessage = Gesture.Tap()
-    .numberOfTaps(2)
-    .onStart(() => {
-      runOnJS(showReactionModal)();
-    });
 
-  const longPressOnMessage = Gesture.LongPress().onStart(() => {
-    runOnJS(showMessageActionSheet)();
-  });
-  const doubleTapOrLongPressOnMessage = Gesture.Simultaneous(
-    doubleTapOnMessage,
-    longPressOnMessage
-  );
+  const lastPressMessage = useRef(0);
+  const onPressMessage = useCallback(() => {
+    if (isAttachment) return;
+    const now = new Date().getTime();
+    const sinceLastPress = now - lastPressMessage.current;
+    if (sinceLastPress < 500) {
+      // Double dap!
+      showReactionModal();
+    }
+    lastPressMessage.current = now;
+  }, [isAttachment, showReactionModal]);
+
   const [selectedEmojis, setSelectedEmojis] = useState<string[]>([]);
   useEffect(() => {
     const myReaction = state.xmtp.address
@@ -173,13 +177,12 @@ export default function ChatMessageActions({
 
   return (
     <>
-      <GestureDetector
-        gesture={
-          isAttachment ? longPressOnMessage : doubleTapOrLongPressOnMessage
-        }
+      <TouchableWithoutFeedback
+        onPress={onPressMessage}
+        onLongPress={showMessageActionSheet}
       >
         {children}
-      </GestureDetector>
+      </TouchableWithoutFeedback>
       <EmojiPicker
         onEmojiSelected={(e) => {
           if (e.alreadySelected) {
@@ -189,8 +192,6 @@ export default function ChatMessageActions({
             const myReaction = state.xmtp.address
               ? reactions[state.xmtp.address]
               : undefined;
-            // Add before removing so there is no flash
-            addReactionToMessage(message, e.emoji, sendMessage);
             if (myReaction && myReaction.schema === "unicode") {
               removeReactionFromMessage(
                 message,
@@ -198,6 +199,7 @@ export default function ChatMessageActions({
                 sendMessage
               );
             }
+            addReactionToMessage(message, e.emoji, sendMessage);
           }
         }}
         open={emojiPickerShown}
@@ -211,6 +213,7 @@ export default function ChatMessageActions({
         categoryPosition="bottom"
         categoryOrder={["recently_used"]}
         selectedEmojis={selectedEmojis}
+        theme={getEmojiPickerTheme(colorScheme)}
         styles={{
           container: {
             borderBottomLeftRadius: Platform.OS === "android" ? 0 : undefined,
@@ -221,3 +224,20 @@ export default function ChatMessageActions({
     </>
   );
 }
+
+const getEmojiPickerTheme = (colorScheme: ColorSchemeName) =>
+  colorScheme === "light"
+    ? {}
+    : {
+        backdrop: "#16161888",
+        knob: "#766dfc",
+        container: "#282829",
+        header: "#fff",
+        skinTonesContainer: "#252427",
+        category: {
+          icon: "#766dfc",
+          iconActive: "#fff",
+          container: "#252427",
+          containerActive: "#766dfc",
+        },
+      };
