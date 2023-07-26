@@ -66,8 +66,16 @@ const Conversation = ({
   const { state, dispatch } = useContext(AppContext);
   const colorScheme = useColorScheme();
 
-  const initialConversation = route.params.topic
-    ? state.xmtp.conversations[route.params.topic]
+  let conversationTopic = route.params.topic;
+  if (
+    route.params.topic &&
+    state.xmtp.conversationsMapping[route.params.topic]
+  ) {
+    conversationTopic = state.xmtp.conversationsMapping[route.params.topic];
+  }
+  console.log({ conversationTopic, route: route.params.topic });
+  const initialConversation = conversationTopic
+    ? state.xmtp.conversations[conversationTopic]
     : undefined;
 
   const [peerAddress, setPeerAddress] = useState(
@@ -83,8 +91,8 @@ const Conversation = ({
   >(initialConversation);
 
   useEffect(() => {
-    if (route.params.topic) {
-      const foundConversation = state.xmtp.conversations[route.params.topic];
+    if (conversationTopic) {
+      const foundConversation = state.xmtp.conversations[conversationTopic];
       if (foundConversation) {
         setConversation(foundConversation);
       }
@@ -101,14 +109,16 @@ const Conversation = ({
   }, [
     peerAddress,
     route.params.mainConversationWithPeer,
-    route.params.topic,
+    conversationTopic,
     state.xmtp.conversations,
   ]);
 
   useEffect(() => {
     if (conversation) {
       setPeerAddress(conversation.peerAddress);
-      getLocalXmtpConversationForTopic(conversation.topic);
+      if (!conversation.pending) {
+        getLocalXmtpConversationForTopic(conversation.topic);
+      }
     }
   }, [conversation, dispatch]);
 
@@ -346,8 +356,10 @@ const Conversation = ({
         conversation.topic,
         dispatch
       );
-      // Then send for real
-      sendPendingMessages(dispatch);
+      // Then send for real if conversation exists
+      if (!conversation.pending) {
+        sendPendingMessages(dispatch);
+      }
     },
     [conversation, dispatch, state.xmtp.address]
   );

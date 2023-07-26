@@ -7,10 +7,12 @@ import RNRestart from "react-native-restart";
 import * as Sentry from "sentry-expo";
 
 import config from "../config";
+import { createPendingConversation } from "../data";
 import { clearDB } from "../data/db";
 import { AppContext, StateType } from "../data/store/context";
 import { deleteXmtpKeys } from "../utils/keychain";
 import { showActionSheetWithOptions } from "./StateHandlers/ActionSheetStateHandler";
+import { createPendingConversations, sendPendingMessages } from "./XmtpState";
 
 const logs: string[] = [];
 
@@ -22,13 +24,26 @@ export const shouldShowDebug = (state: StateType) =>
   config.debugMenu || config.debugAddresses.includes(state.xmtp.address || "");
 
 const DebugButton = forwardRef((props, ref) => {
-  const { state } = useContext(AppContext);
+  const { dispatch } = useContext(AppContext);
   // The component instance will be extended
   // with whatever you return from the callback passed
   // as the second argument
   useImperativeHandle(ref, () => ({
     showDebugMenu() {
       const methods: any = {
+        "Send pending messages": () => {
+          sendPendingMessages(dispatch);
+        },
+        "Create new pending conversation": () => {
+          createPendingConversation(
+            "0x4496848684441C15A915fa9bF07D131155603253",
+            { conversationId: "21", metadata: {} },
+            dispatch
+          );
+        },
+        "Create pending conversation on XMTP": async () => {
+          createPendingConversations();
+        },
         "Update app": async () => {
           try {
             const update = await Updates.fetchUpdateAsync();
@@ -62,10 +77,6 @@ const DebugButton = forwardRef((props, ref) => {
           Clipboard.setStringAsync(logs.join("\n"));
           alert("Copied!");
         },
-        "Copy profiles": () => {
-          Clipboard.setStringAsync(JSON.stringify(state.profiles));
-          alert("Copied!");
-        },
         "Show config": () => {
           alert(
             JSON.stringify(
@@ -82,8 +93,8 @@ const DebugButton = forwardRef((props, ref) => {
             )
           );
         },
-        Cancel: undefined,
         Restart: RNRestart.restart,
+        Cancel: undefined,
       };
       const options = Object.keys(methods);
 

@@ -1,9 +1,10 @@
 import { ContentTypeReaction } from "@xmtp/content-type-reaction";
 import { ContentTypeRemoteAttachment } from "@xmtp/content-type-remote-attachment";
-import { useCallback, useContext, useEffect } from "react";
+import { useContext, useEffect, useRef } from "react";
 
 import {
   getMessagesToSend,
+  getPendingConversationsToCreate,
   markMessageAsSent,
   updateMessagesIds,
 } from "../data";
@@ -15,7 +16,10 @@ import { deserializeRemoteAttachmentContent } from "../utils/attachment";
 import { loadXmtpConversation, loadXmtpKeys } from "../utils/keychain";
 import { getXmtpSignature } from "../utils/xmtp";
 import { getXmtpClientFromKeys } from "../utils/xmtp/client";
-import { parseConversationJSON } from "../utils/xmtp/conversations";
+import {
+  createConversation,
+  parseConversationJSON,
+} from "../utils/xmtp/conversations";
 import { Client, Conversation, fromNanoString } from "../vendor/xmtp-js/src";
 import { PreparedMessage } from "../vendor/xmtp-js/src/PreparedMessage";
 import { isReconnecting } from "./Connecting";
@@ -91,6 +95,15 @@ export const sendPreparedMessages = async (
       delete sendingMessages[id];
     }
   }
+};
+
+export const createPendingConversations = async () => {
+  const pendingConvos = await getPendingConversationsToCreate();
+  if (pendingConvos.length === 0) return;
+  console.log(
+    `Trying to create ${pendingConvos.length} pending conversations...`
+  );
+  await Promise.all(pendingConvos.map(createConversation));
 };
 
 export const sendPendingMessages = async (dispatch: DispatchType) => {
@@ -222,18 +235,31 @@ export default function XmtpState() {
     };
     initXmtp();
   }, [dispatch, state.xmtp.address]);
-  const messageSendingInterval = useCallback(async () => {
-    if (
-      state.xmtp.localConnected &&
-      state.xmtp.webviewConnected &&
-      state.app.splashScreenHidden &&
-      state.xmtp.initialLoadDone &&
-      !isReconnecting
-    ) {
-      await sendPendingMessages(dispatch);
-    }
-    await new Promise((r) => setTimeout(r, 1000));
-    messageSendingInterval();
+
+  const lastMessageSendingFinishedAt = useRef(0);
+  const currentlyInMessageSendingInterval = useRef(false);
+  const messageSendingInterval = useRef(() => {});
+  useEffect(() => {
+    messageSendingInterval.current = async () => {
+      currentlyInMessageSendingInterval.current = true;
+      // console.log("  in messageSendingInterval");
+      if (
+        state.xmtp.localConnected &&
+        state.xmtp.webviewConnected &&
+        state.app.splashScreenHidden &&
+        state.xmtp.initialLoadDone &&
+        !isReconnecting
+      ) {
+        try {
+          await createPendingConversations();
+          await sendPendingMessages(dispatch);
+        } catch (e) {
+          console.log(e);
+        }
+      }
+      currentlyInMessageSendingInterval.current = false;
+      lastMessageSendingFinishedAt.current = new Date().getTime();
+    };
   }, [
     dispatch,
     state.app.splashScreenHidden,
@@ -241,9 +267,20 @@ export default function XmtpState() {
     state.xmtp.localConnected,
     state.xmtp.webviewConnected,
   ]);
+
   useEffect(() => {
-    messageSendingInterval();
-  }, [messageSendingInterval]);
+    const interval = setInterval(() => {
+      const now = new Date().getTime();
+      if (
+        !currentlyInMessageSendingInterval.current &&
+        now - lastMessageSendingFinishedAt.current > 1000
+      ) {
+        messageSendingInterval.current();
+      }
+    }, 500);
+    return () => clearInterval(interval);
+  }, []);
+
   useEffect(() => {
     if (state.xmtp.localConnected && state.xmtp.webviewConnected) {
       getBlockedPeers()
