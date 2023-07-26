@@ -23,6 +23,7 @@ export type XmtpConversation = {
   conversationTitle?: string | null;
   currentMessage?: string;
   readUntil: number;
+  pending: boolean;
 };
 
 export type XmtpConversationWithUpdate = XmtpConversation & {
@@ -196,6 +197,7 @@ export const xmtpReducer = (state: XmtpType, action: XmtpActions): XmtpType => {
           readUntil:
             c.readUntil || state.conversations[c.topic]?.readUntil || 0,
           lastUpdateAt: now,
+          pending: c.pending || state.conversations[c.topic]?.pending || false,
         };
       });
 
