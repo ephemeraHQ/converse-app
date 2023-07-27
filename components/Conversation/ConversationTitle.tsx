@@ -97,8 +97,14 @@ export default function ConversationTitle({
           </Text>
           <Picto
             picto="chevron.right"
-            size={8}
-            style={{ position: "absolute", right: -8, bottom: 9.5 }}
+            size={Platform.OS === "android" ? 16 : 8}
+            style={{
+              position: "absolute",
+              ...Platform.select({
+                default: { right: -8, bottom: 9.5 },
+                android: { right: -3, bottom: 3 },
+              }),
+            }}
             color={textSecondaryColor(colorScheme)}
           />
         </TouchableOpacity>
