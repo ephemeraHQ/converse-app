@@ -82,6 +82,7 @@ export enum XmtpDispatchTypes {
   XmtpWebviewConnected = "XMTP_WEBVIEW_CONNECTED",
   XmtpSetConversations = "XMTP_SET_CONVERSATIONS",
   XmtpNewConversation = "XMTP_NEW_CONVERSATION",
+  XmtpDeleteConversations = "XMTP_DELETE_CONVERSATIONS",
   XmtpSetAddress = "XMTP_SET_ADDRESS",
   XmtpSetMessages = "XMTP_SET_MESSAGES",
   XmtpSetMessagesReactions = "XMTP_SET_MESSAGES_REACTIONS",
@@ -153,6 +154,9 @@ type XmtpPayload = {
   };
   [XmtpDispatchTypes.XmtpSetReconnecting]: {
     reconnecting: boolean;
+  };
+  [XmtpDispatchTypes.XmtpDeleteConversations]: {
+    topics: string[];
   };
 };
 
@@ -407,7 +411,6 @@ export const xmtpReducer = (state: XmtpType, action: XmtpActions): XmtpType => {
 
     case XmtpDispatchTypes.XmtpUpdateConversationTopic: {
       if (action.payload.oldTopic in state.conversations) {
-        console.log("gonna replace old topic with new");
         const newState = { ...state };
         const existingConversation =
           state.conversations[action.payload.oldTopic];
@@ -422,11 +425,18 @@ export const xmtpReducer = (state: XmtpType, action: XmtpActions): XmtpType => {
         delete newState.conversations[action.payload.oldTopic];
         newState.conversationsMapping[action.payload.oldTopic] =
           action.payload.conversation.topic;
-        console.log("done replaciong old topic with new");
         return newState;
       } else {
         return state;
       }
+    }
+
+    case XmtpDispatchTypes.XmtpDeleteConversations: {
+      const newState = { ...state };
+      action.payload.topics.forEach((topic) => {
+        delete newState.conversations[topic];
+      });
+      return newState;
     }
 
     default:

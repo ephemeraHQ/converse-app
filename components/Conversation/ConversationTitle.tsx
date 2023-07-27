@@ -1,6 +1,12 @@
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import * as Clipboard from "expo-clipboard";
-import { MutableRefObject, useContext } from "react";
+import {
+  MutableRefObject,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import {
   TouchableOpacity,
   Platform,
@@ -34,6 +40,23 @@ export default function ConversationTitle({
 }: Props) {
   const { state } = useContext(AppContext);
   const colorScheme = useColorScheme();
+  const [title, setTitle] = useState(
+    conversation ? conversationName(conversation) : ""
+  );
+  const conversationRef = useRef(conversation);
+  useEffect(() => {
+    if (!conversation || !conversationRef.current) return;
+    // If it's the same conversation (from pending to real) - we keep the title
+    if (
+      conversation.peerAddress === conversationRef.current.peerAddress &&
+      conversation.context?.conversationId ===
+        conversationRef.current.context?.conversationId
+    ) {
+      return;
+    }
+    setTitle(conversationName(conversation));
+    conversationRef.current = conversation;
+  }, [conversation]);
   return (
     <>
       {!shouldShowConnectingOrSyncing(state) && (
@@ -69,7 +92,7 @@ export default function ConversationTitle({
             numberOfLines={1}
             allowFontScaling={false}
           >
-            {conversation ? conversationName(conversation) : ""}
+            {title}
           </Text>
         </TouchableOpacity>
       )}

@@ -31,6 +31,7 @@ import {
 } from "../components/XmtpState";
 import config from "../config";
 import {
+  cleanupPendingConversations,
   createPendingConversation,
   markConversationRead,
   markConversationReadUntil,
@@ -364,6 +365,7 @@ const Conversation = ({
       payload: { topic: conversation.topic, content: inputValue },
     });
     markConversationRead(conversation, dispatch);
+    cleanupPendingConversations(dispatch);
   }, [conversation, dispatch, inputValue]);
 
   useEffect(() => {
