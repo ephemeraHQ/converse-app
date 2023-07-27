@@ -29,13 +29,9 @@ import {
   getLocalXmtpConversationForTopic,
   sendPendingMessages,
 } from "../components/XmtpState";
-import {
-  saveWebviewNavigation,
-  sendMessageToWebview,
-  setLastCreateConvoFromNewConvoScreen,
-} from "../components/XmtpWebview";
 import config from "../config";
 import {
+  createPendingConversation,
   markConversationRead,
   markConversationReadUntil,
   saveMessages,
@@ -73,7 +69,6 @@ const Conversation = ({
   ) {
     conversationTopic = state.xmtp.conversationsMapping[route.params.topic];
   }
-  console.log({ conversationTopic, route: route.params.topic });
   const initialConversation = conversationTopic
     ? state.xmtp.conversations[conversationTopic]
     : undefined;
@@ -164,18 +159,16 @@ const Conversation = ({
           setConversation(alreadyConversationWithPeer);
         } else {
           setPeerAddress(peerAddress || "");
-          setLastCreateConvoFromNewConvoScreen(false);
-          saveWebviewNavigation(navigation);
-          sendMessageToWebview("CREATE_CONVERSATION", {
-            peerAddress,
-            context: null,
-          });
+          // setLastCreateConvoFromNewConvoScreen(false);
+          // saveWebviewNavigation(navigation);
+          createPendingConversation(peerAddress, undefined, dispatch);
         }
       }
     };
     openConversationWithPeer();
   }, [
     conversation,
+    dispatch,
     navigation,
     route.params.mainConversationWithPeer,
     state.xmtp.conversations,

@@ -31,18 +31,16 @@ const DebugButton = forwardRef((props, ref) => {
   useImperativeHandle(ref, () => ({
     showDebugMenu() {
       const methods: any = {
-        "Send pending messages": () => {
-          sendPendingMessages(dispatch);
+        "Send pending messages": async () => {
+          await createPendingConversations();
+          await sendPendingMessages(dispatch);
         },
         "Create new pending conversation": () => {
           createPendingConversation(
-            "0x4496848684441C15A915fa9bF07D131155603253",
-            { conversationId: "21", metadata: {} },
+            "0x58ad67c06C32046f59335Ac928937E1f75F561d5",
+            { conversationId: `${new Date().getTime()}`, metadata: {} },
             dispatch
           );
-        },
-        "Create pending conversation on XMTP": async () => {
-          createPendingConversations();
         },
         "Update app": async () => {
           try {

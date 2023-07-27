@@ -38,19 +38,19 @@ const hideDataFromEvents = [
   "DECODE_ATTACHMENT",
 ];
 
-let lastNavigation: any;
-let lastCreateConvoFromNewConvoScreen = false;
+// let lastNavigation: any;
+// let lastCreateConvoFromNewConvoScreen = false;
 const tasksCallbacks: {
   [uid: string]: (data: any) => void;
 } = {};
 
-export const saveWebviewNavigation = (navigation: any) => {
-  lastNavigation = navigation;
-};
+// export const saveWebviewNavigation = (navigation: any) => {
+//   lastNavigation = navigation;
+// };
 
-export const setLastCreateConvoFromNewConvoScreen = (isFrom: boolean) => {
-  lastCreateConvoFromNewConvoScreen = isFrom;
-};
+// export const setLastCreateConvoFromNewConvoScreen = (isFrom: boolean) => {
+//   lastCreateConvoFromNewConvoScreen = isFrom;
+// };
 
 export const sendMessageToWebview = (
   eventName: string,
@@ -353,19 +353,21 @@ export default function XmtpWebview() {
         }
 
         case "CREATE_CONVERSATION_FAILED": {
-          Alert.alert(
-            "Network error",
-            lastCreateConvoFromNewConvoScreen
-              ? "We could not create your conversation on the network. Please try again later"
-              : "We could not create your conversation on the network. Please try again later or try typing the address in the “Create conversation” screen.",
-            [
-              {
-                text: "OK",
-                onPress: lastNavigation && lastNavigation.goBack,
-                isPreferred: true,
-              },
-            ]
-          );
+          console.log("CREATE_CONVERSATION_FAILED", data);
+          sentryTrackMessage("CREATE_CONVERSATION_FAILED", data);
+          // Alert.alert(
+          //   "Network error",
+          //   lastCreateConvoFromNewConvoScreen
+          //     ? "We could not create your conversation on the network. Please try again later"
+          //     : "We could not create your conversation on the network. Please try again later or try typing the address in the “Create conversation” screen.",
+          //   [
+          //     {
+          //       text: "OK",
+          //       onPress: lastNavigation && lastNavigation.goBack,
+          //       isPreferred: true,
+          //     },
+          //   ]
+          // );
           break;
         }
 
