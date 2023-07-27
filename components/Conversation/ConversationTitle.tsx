@@ -19,10 +19,11 @@ import {
 import { AppContext } from "../../data/store/context";
 import { XmtpConversation } from "../../data/store/xmtpReducer";
 import { NavigationParamList } from "../../screens/Main";
-import { headerTitleStyle } from "../../utils/colors";
+import { headerTitleStyle, textSecondaryColor } from "../../utils/colors";
 import { conversationName, getTitleFontScale } from "../../utils/str";
 import Connecting, { shouldShowConnectingOrSyncing } from "../Connecting";
 import { shouldShowDebug } from "../DebugButton";
+import Picto from "../Picto/Picto";
 
 type Props = {
   isBlockedPeer: boolean;
@@ -94,6 +95,12 @@ export default function ConversationTitle({
           >
             {title}
           </Text>
+          <Picto
+            picto="chevron.right"
+            size={8}
+            style={{ position: "absolute", right: -8, bottom: 9.5 }}
+            color={textSecondaryColor(colorScheme)}
+          />
         </TouchableOpacity>
       )}
       {shouldShowConnectingOrSyncing(state) && <Connecting />}

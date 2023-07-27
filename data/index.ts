@@ -3,7 +3,7 @@ import { Reaction } from "@xmtp/content-type-reaction";
 import { getAddress } from "ethers/lib/utils";
 import RNFS from "react-native-fs";
 import uuid from "react-native-uuid";
-import { In, Not } from "typeorm/browser";
+import { In } from "typeorm/browser";
 
 import { addLog } from "../components/DebugButton";
 import { getProfilesForAddresses } from "../utils/api";
@@ -152,14 +152,11 @@ const upgradePendingConversationIfNeeded = async (
   dispatch: MaybeDispatchType
 ) => {
   const alreadyConversationInDbWithConversationId =
-    await conversationRepository.findOne({
-      where: {
-        pending: true,
-        peerAddress: conversation.peerAddress,
-        contextConversationId: conversation.context?.conversationId,
-        topic: Not(conversation.topic),
-      },
-    });
+    await getPendingConversationWithPeer(
+      conversation.peerAddress,
+      conversation.context?.conversationId
+    );
+
   if (
     !alreadyConversationInDbWithConversationId ||
     alreadyConversationInDbWithConversationId.topic === conversation.topic
@@ -699,6 +696,24 @@ export const refreshProfileForAddress = async (
   });
 };
 
+const getPendingConversationWithPeer = async (
+  address: string,
+  conversationId?: string
+) => {
+  const conversation = await conversationRepository
+    .createQueryBuilder()
+    .select()
+    .where("peerAddress = :address", { address })
+    .andWhere(
+      conversationId
+        ? "contextConversationId = :conversationId"
+        : "contextConversationId IS NULL",
+      { conversationId }
+    )
+    .getOne();
+  return conversation;
+};
+
 export const createPendingConversation = async (
   peerAddress: string,
   context?: InvitationContext,
@@ -706,17 +721,10 @@ export const createPendingConversation = async (
 ) => {
   const cleanAddress = getAddress(peerAddress.toLowerCase());
   // Let's first check if we already have a conversation like that in db
-  const alreadyConversationInDb = await conversationRepository
-    .createQueryBuilder()
-    .select()
-    .where("peerAddress = :cleanAddress", { cleanAddress })
-    .andWhere(
-      context?.conversationId
-        ? "contextConversationId = :conversationId"
-        : "contextConversationId IS NULL",
-      { conversationId: context?.conversationId }
-    )
-    .getExists();
+  const alreadyConversationInDb = await getPendingConversationWithPeer(
+    cleanAddress,
+    context?.conversationId
+  );
   if (alreadyConversationInDb)
     throw new Error(
       `A conversation with ${cleanAddress} and id ${context?.conversationId} already exists`
