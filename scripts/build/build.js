@@ -58,10 +58,11 @@ const build = async () => {
     await executeCommand("node", [`scripts/build/${platform}/${env}.js`]);
   }
 
+  if (platform === "ios" && ["development", "preview"].includes(env)) {
+    buildArgs.push("--non-interactive");
+  }
+
   if (buildLocally) {
-    if (platform === "ios" && ["development", "preview"].includes(env)) {
-      buildArgs.push("--non-interactive");
-    }
     const currentCommit = execSync('git show --format="%h" --no-patch', {
       cwd: PROJECT_ROOT,
     })
