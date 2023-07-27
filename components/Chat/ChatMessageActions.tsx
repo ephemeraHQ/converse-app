@@ -104,10 +104,14 @@ export default function ChatMessageActions({
     setEmojiPickerShown(true);
   }, []);
 
+  const canAddReaction =
+    message.status !== "sending" && message.status !== "error";
+
   const showMessageActionSheet = useCallback(() => {
-    const methods: any = {
-      "Add a reaction": showReactionModal,
-    };
+    const methods: any = {};
+    if (canAddReaction) {
+      methods["Add a reaction"] = showReactionModal;
+    }
     if (!isAttachment) {
       methods["Copy message"] = () => {
         Clipboard.setStringAsync(message.content);
@@ -144,13 +148,14 @@ export default function ChatMessageActions({
     isAttachment,
     message.content,
     message.fromMe,
+    canAddReaction,
     showMessageReportActionSheet,
     showReactionModal,
   ]);
 
   const lastPressMessage = useRef(0);
   const onPressMessage = useCallback(() => {
-    if (isAttachment) return;
+    if (isAttachment || !canAddReaction) return;
     const now = new Date().getTime();
     const sinceLastPress = now - lastPressMessage.current;
     if (sinceLastPress < 500) {
@@ -158,7 +163,7 @@ export default function ChatMessageActions({
       showReactionModal();
     }
     lastPressMessage.current = now;
-  }, [isAttachment, showReactionModal]);
+  }, [isAttachment, showReactionModal, canAddReaction]);
 
   const [selectedEmojis, setSelectedEmojis] = useState<string[]>([]);
   useEffect(() => {

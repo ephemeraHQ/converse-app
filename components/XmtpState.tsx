@@ -65,14 +65,12 @@ export const getLocalXmtpConversationForTopic = async (
 };
 
 export const sendPreparedMessages = async (
-  preparedMessages: {
-    [id: string]: PreparedMessage;
-  },
+  preparedMessages: Map<string, PreparedMessage>,
   dispatch: DispatchType
 ) => {
-  for (const id in preparedMessages) {
-    const preparedMessage = preparedMessages[id];
-
+  for (const id of preparedMessages.keys()) {
+    const preparedMessage = preparedMessages.get(id);
+    if (!preparedMessage) continue;
     try {
       if (
         sendingMessages[id] ||
@@ -118,8 +116,7 @@ export const sendPendingMessages = async (dispatch: DispatchType) => {
       return;
     }
     console.log(`Trying to send ${messagesToSend.length} pending messages...`);
-    const preparedMessagesToSend: { [newMessageId: string]: PreparedMessage } =
-      {};
+    const preparedMessagesToSend: Map<string, PreparedMessage> = new Map();
     const messageIdsToUpdate: {
       [messageId: string]: {
         newMessageId: string;
@@ -160,7 +157,7 @@ export const sendPendingMessages = async (dispatch: DispatchType) => {
         }
 
         const newMessageId = await preparedMessage.messageID();
-        preparedMessagesToSend[newMessageId] = preparedMessage;
+        preparedMessagesToSend.set(newMessageId, preparedMessage);
         messageIdsToUpdate[message.id] = {
           newMessageId,
           newMessageSent:
@@ -277,7 +274,7 @@ export default function XmtpState() {
       ) {
         messageSendingInterval.current();
       }
-    }, 500);
+    }, 100);
     return () => clearInterval(interval);
   }, []);
 

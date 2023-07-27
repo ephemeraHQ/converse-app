@@ -6,11 +6,11 @@ import { LensHandle } from "../data/db/entities/profile";
 const LENS_CONVERSATION_ID_REGEX = /^lens\.dev\/dm\/(.*?)-(.*)$/;
 
 export const getLensHandleFromConversationIdAndPeer = (
-  topic: string | undefined,
+  conversationId: string | undefined | null,
   peerLensHandles?: LensHandle[]
 ) => {
-  if (!topic || !peerLensHandles) return null;
-  const match = topic.match(LENS_CONVERSATION_ID_REGEX);
+  if (!conversationId || !peerLensHandles) return null;
+  const match = conversationId.match(LENS_CONVERSATION_ID_REGEX);
   if (!match) return null;
   const lensId1 = match[1];
   const lensId2 = match[2];

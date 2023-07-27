@@ -192,7 +192,7 @@ export default function Chat({
   return (
     <View
       style={styles.chatContainer}
-      key={`chat-${conversation?.topic}-${isBlockedPeer}`}
+      key={`chat-${conversation?.peerAddress}-${conversation?.context?.conversationId}-${isBlockedPeer}`}
     >
       <AnimatedView style={chatContentStyle}>
         {conversation && flashListArray.length > 1 && !isBlockedPeer && (

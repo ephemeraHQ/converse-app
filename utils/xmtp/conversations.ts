@@ -90,7 +90,6 @@ export const createConversation = (
           createConversationResult?.status !== "SUCCESS" ||
           createConversationResult?.conversationTopic === undefined
         ) {
-          console.log(createConversationResult);
           sentryTrackMessage("CANT_CREATE_CONVO", {
             peerAddress: dbConversation.peerAddress,
             context,

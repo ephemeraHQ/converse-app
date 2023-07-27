@@ -24,7 +24,9 @@ export const subscribeToNotifications = async (
     ...conversations
       .filter(
         (c) =>
-          c.peerAddress && !blockedPeerAddresses[c.peerAddress.toLowerCase()]
+          c.peerAddress &&
+          !c.pending &&
+          !blockedPeerAddresses[c.peerAddress.toLowerCase()]
       )
       .map((c) => c.topic),
     buildUserInviteTopic(address || ""),

@@ -31,12 +31,8 @@ import Picto from "../components/Picto/Picto";
 import Recommendations from "../components/Recommendations";
 import TableView from "../components/TableView/TableView";
 import { TableViewPicto } from "../components/TableView/TableViewImage";
-import {
-  saveWebviewNavigation,
-  sendMessageToWebview,
-  setLastCreateConvoFromNewConvoScreen,
-} from "../components/XmtpWebview";
 import config from "../config";
+import { createPendingConversation } from "../data";
 import { AppContext, StateType } from "../data/store/context";
 import { XmtpConversation } from "../data/store/xmtpReducer";
 import {
@@ -114,7 +110,7 @@ export default function NewConversation({
     existingConversations: [] as XmtpConversation[],
   });
 
-  const { state } = useContext(AppContext);
+  const { state, dispatch } = useContext(AppContext);
   const recommendationsLoadedOnce = state.recommendations.updatedAt > 0;
   const recommendationsLoading = state.recommendations.loading;
   const recommendationsFrensCount = Object.keys(
@@ -244,14 +240,15 @@ export default function NewConversation({
       if (creatingNewConversation) return;
       waitingForNewConversation.current = prefilledMessage || "";
       setCreatingNewConversation(true);
-      setLastCreateConvoFromNewConvoScreen(true);
-      saveWebviewNavigation(navigation);
-      sendMessageToWebview("CREATE_CONVERSATION", {
+      // setLastCreateConvoFromNewConvoScreen(true);
+      // saveWebviewNavigation(navigation);
+      createPendingConversation(
         peerAddress,
-        context: computeNewConversationContext(state, peerAddress),
-      });
+        computeNewConversationContext(state, peerAddress),
+        dispatch
+      );
     },
-    [creatingNewConversation, navigation]
+    [creatingNewConversation, dispatch]
   );
 
   const inputRef = useRef<TextInput | null>(null);

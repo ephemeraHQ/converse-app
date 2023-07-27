@@ -151,7 +151,7 @@ export default function ConversationList({
   const [flatListItems, setFlatListItems] = useState<FlatListItem[]>([]);
   useEffect(() => {
     const conversations = Object.values(state.xmtp.conversations)
-      .filter((a) => a?.peerAddress)
+      .filter((a) => a?.peerAddress && (!a.pending || a.messages.size > 0))
       .map((c: ConversationWithLastMessagePreview) => {
         c.lastMessagePreview = conversationLastMessagePreview(
           c,

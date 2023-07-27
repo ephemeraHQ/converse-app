@@ -165,11 +165,6 @@ const upgradePendingConversationIfNeeded = async (
     alreadyConversationInDbWithConversationId.topic === conversation.topic
   )
     return;
-  console.log(
-    "we need to upgrade a pending convo !!",
-    alreadyConversationInDbWithConversationId.topic,
-    conversation.topic
-  );
 
   // Save this one to db
   await upsertRepository(
@@ -178,29 +173,25 @@ const upgradePendingConversationIfNeeded = async (
     ["topic"]
   );
 
-  console.log("upserted the new one");
-
   // Reassign messages
   await messageRepository.update(
     { conversationId: alreadyConversationInDbWithConversationId.topic },
     { conversationId: conversation.topic }
   );
 
-  console.log("updated all messages");
+  // Deleting the old conversation
+  await conversationRepository.delete({
+    topic: alreadyConversationInDbWithConversationId.topic,
+  });
 
   // Dispatch
   if (!dispatch) return;
-  console.log("dispatching");
   dispatch({
     type: XmtpDispatchTypes.XmtpUpdateConversationTopic,
     payload: {
       oldTopic: alreadyConversationInDbWithConversationId.topic,
       conversation,
     },
-  });
-
-  await conversationRepository.delete({
-    topic: alreadyConversationInDbWithConversationId.topic,
   });
 };
 
@@ -715,12 +706,17 @@ export const createPendingConversation = async (
 ) => {
   const cleanAddress = getAddress(peerAddress.toLowerCase());
   // Let's first check if we already have a conversation like that in db
-  const alreadyConversationInDb = await conversationRepository.exist({
-    where: {
-      peerAddress: cleanAddress,
-      contextConversationId: context?.conversationId,
-    },
-  });
+  const alreadyConversationInDb = await conversationRepository
+    .createQueryBuilder()
+    .select()
+    .where("peerAddress = :cleanAddress", { cleanAddress })
+    .andWhere(
+      context?.conversationId
+        ? "contextConversationId = :conversationId"
+        : "contextConversationId IS NULL",
+      { conversationId: context?.conversationId }
+    )
+    .getExists();
   if (alreadyConversationInDb)
     throw new Error(
       `A conversation with ${cleanAddress} and id ${context?.conversationId} already exists`
