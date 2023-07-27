@@ -3,7 +3,7 @@ import { Reaction } from "@xmtp/content-type-reaction";
 import { getAddress } from "ethers/lib/utils";
 import RNFS from "react-native-fs";
 import uuid from "react-native-uuid";
-import { Not } from "typeorm/browser";
+import { In, Not } from "typeorm/browser";
 
 import { addLog } from "../components/DebugButton";
 import { getProfilesForAddresses } from "../utils/api";
@@ -738,4 +738,29 @@ export const createPendingConversation = async (
     dispatch
   );
   return pendingConversationId;
+};
+
+export const cleanupPendingConversations = async (dispatch: DispatchType) => {
+  const pendingConversations = await conversationRepository.find({
+    relations: { messages: true },
+  });
+  const pendingConversationsWithoutMessages = pendingConversations.filter(
+    (c) => c.messages?.length === 0
+  );
+  if (pendingConversationsWithoutMessages.length === 0) return;
+  console.log(
+    `Cleaning up ${pendingConversationsWithoutMessages.length} pending convos`
+  );
+  const topicsToDelete = pendingConversationsWithoutMessages.map(
+    (c) => c.topic
+  );
+  await conversationRepository.delete({
+    topic: In(topicsToDelete),
+  });
+  dispatch({
+    type: XmtpDispatchTypes.XmtpDeleteConversations,
+    payload: {
+      topics: topicsToDelete,
+    },
+  });
 };

@@ -28,6 +28,7 @@ import {
   itemSeparatorColor,
   tertiaryBackgroundColor,
 } from "../../utils/colors";
+import { getProfileData } from "../../utils/profile";
 import { Recommendation } from "../Recommendations";
 import ChatInput from "./ChatInput";
 import ChatMessage, { MessageToDisplay } from "./ChatMessage";
@@ -164,7 +165,11 @@ export default function Chat({
     ({ item }: { item: MessageToDisplay }) => {
       if (item.id === "converse-recommendations") {
         const recommendationData = conversation?.peerAddress
-          ? state.recommendations?.frens?.[conversation.peerAddress]
+          ? getProfileData(
+              conversation.peerAddress,
+              state.recommendations,
+              state.profiles
+            )
           : undefined;
         if (!recommendationData || !conversation?.peerAddress) return null;
         return (
@@ -183,7 +188,8 @@ export default function Chat({
     [
       conversation?.peerAddress,
       sendMessage,
-      state.recommendations?.frens,
+      state.profiles,
+      state.recommendations,
       styles.inChatRecommendations,
     ]
   );

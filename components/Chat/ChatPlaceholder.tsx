@@ -17,6 +17,7 @@ import {
 } from "../../data/store/xmtpReducer";
 import { blockPeer } from "../../utils/api";
 import { actionSheetColors, textPrimaryColor } from "../../utils/colors";
+import { getProfileData } from "../../utils/profile";
 import { conversationName } from "../../utils/str";
 import ActivityIndicator from "../ActivityIndicator/ActivityIndicator";
 import Button from "../Button/Button";
@@ -42,7 +43,11 @@ export default function ChatPlaceholder({
   const styles = getStyles(colorScheme);
   const { state, dispatch } = useContext(AppContext);
   const recommendationData = conversation?.peerAddress
-    ? state.recommendations?.frens?.[conversation.peerAddress]
+    ? getProfileData(
+        conversation.peerAddress,
+        state.recommendations,
+        state.profiles
+      )
     : undefined;
   return (
     <TouchableWithoutFeedback
