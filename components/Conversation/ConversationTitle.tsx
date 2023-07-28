@@ -46,18 +46,24 @@ export default function ConversationTitle({
   );
   const conversationRef = useRef(conversation);
   useEffect(() => {
-    if (!conversation || !conversationRef.current) return;
-    // If it's the same conversation (from pending to real) - we keep the title
-    if (
-      conversation.peerAddress === conversationRef.current.peerAddress &&
-      conversation.context?.conversationId ===
-        conversationRef.current.context?.conversationId
-    ) {
+    if (!conversation) {
+      conversationRef.current = conversation;
       return;
     }
-    setTitle(conversationName(conversation));
+
+    const previousConversation = conversationRef.current;
+    if (
+      !previousConversation ||
+      conversation.peerAddress !== previousConversation.peerAddress ||
+      conversation.context?.conversationId !==
+        previousConversation.context?.conversationId
+    ) {
+      // New conversation, lets' set title
+      setTitle(conversationName(conversation));
+    }
     conversationRef.current = conversation;
   }, [conversation]);
+  if (!conversation) return null;
   return (
     <>
       {!shouldShowConnectingOrSyncing(state) && (

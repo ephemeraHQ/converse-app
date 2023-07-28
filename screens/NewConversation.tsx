@@ -216,39 +216,25 @@ export default function NewConversation({
   );
 
   const [creatingNewConversation, setCreatingNewConversation] = useState(false);
-  const waitingForNewConversation = useRef<false | string>(false);
-
-  useEffect(() => {
-    const newConversationsTopics = Object.keys(state.xmtp.conversations);
-    const existingConversationsTopics = Object.keys(conversationsRef.current);
-    if (waitingForNewConversation.current !== false) {
-      const message = waitingForNewConversation.current;
-      const newTopic = newConversationsTopics.find(
-        (topic) => !existingConversationsTopics.includes(topic)
-      );
-      if (newTopic) {
-        waitingForNewConversation.current = false;
-        setCreatingNewConversation(false);
-        navigateToTopic(newTopic, message);
-      }
-    }
-    conversationsRef.current = state.xmtp.conversations;
-  }, [navigateToTopic, state.xmtp.conversations, state.xmtp.lastUpdateAt]);
 
   const createNewConversationWithPeer = useCallback(
-    (state: StateType, peerAddress: string, prefilledMessage?: string) => {
+    async (state: StateType, peerAddress: string) => {
       if (creatingNewConversation) return;
-      waitingForNewConversation.current = prefilledMessage || "";
       setCreatingNewConversation(true);
-      // setLastCreateConvoFromNewConvoScreen(true);
-      // saveWebviewNavigation(navigation);
-      createPendingConversation(
-        peerAddress,
-        computeNewConversationContext(state, peerAddress),
-        dispatch
-      );
+
+      try {
+        const newConversationTopic = await createPendingConversation(
+          peerAddress,
+          computeNewConversationContext(state, peerAddress),
+          dispatch
+        );
+        navigateToTopic(newConversationTopic);
+      } catch (e: any) {
+        console.log(e);
+        setCreatingNewConversation(false);
+      }
     },
-    [creatingNewConversation, dispatch]
+    [creatingNewConversation, dispatch, navigateToTopic]
   );
 
   const inputRef = useRef<TextInput | null>(null);
