@@ -54,6 +54,7 @@ import { getAddressForPeer } from "../utils/eth";
 import { lastValueInMap } from "../utils/map";
 import { sentryTrackMessage } from "../utils/sentry";
 import { getTitleFontScale } from "../utils/str";
+import { isOnXmtp } from "../utils/xmtp";
 import { NavigationParamList } from "./Main";
 
 const Conversation = ({
@@ -162,7 +163,22 @@ const Conversation = ({
           setPeerAddress(peerAddress || "");
           // setLastCreateConvoFromNewConvoScreen(false);
           // saveWebviewNavigation(navigation);
-          createPendingConversation(peerAddress, undefined, dispatch);
+          const onNetwork = await isOnXmtp(peerAddress);
+          if (!onNetwork) {
+            Alert.alert(
+              "Not yet using XMTP",
+              "Your contact is not yet using XMTP. Tell them to download the app at converse.xyz and log in with their wallet.",
+              [
+                {
+                  text: "OK",
+                  onPress: navigation.goBack,
+                  isPreferred: true,
+                },
+              ]
+            );
+          } else {
+            createPendingConversation(peerAddress, undefined, dispatch);
+          }
         }
       }
     };
@@ -224,7 +240,8 @@ const Conversation = ({
   const alreadyCheckedIfUserExists = useRef(false);
 
   const checkIfUserExists = useCallback(async () => {
-    if (!peerAddress || alreadyCheckedIfUserExists.current) return;
+    if (!peerAddress || alreadyCheckedIfUserExists.current || !conversation)
+      return;
     alreadyCheckedIfUserExists.current = true;
     const [exists, alreadyInvided] = await Promise.all([
       userExists(peerAddress),
@@ -238,7 +255,7 @@ const Conversation = ({
         });
       }, 200);
     }
-  }, [peerAddress]);
+  }, [conversation, peerAddress]);
 
   const hideInviteBanner = useCallback(() => {
     setShowInvite({ show: true, banner: false });
