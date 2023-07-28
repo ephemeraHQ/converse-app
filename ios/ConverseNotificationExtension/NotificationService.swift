@@ -58,9 +58,10 @@ func setKeychainValue(value: String, forKey: String) throws {
   try keychain.set(value, key: forKey)
 }
 
-func getXmtpClientFromKeys() -> XMTP.Client? {
+func getXmtpClientFromKeys() async -> XMTP.Client? {
   Client.register(codec: AttachmentCodec())
   Client.register(codec: RemoteAttachmentCodec())
+  Client.register(codec: ReactionCodec())
   let xmtpKeys = getKeychainValue(forKey: "XMTP_KEYS")
   if (xmtpKeys == nil || xmtpKeys?.count == 0) {
     return nil;
@@ -71,7 +72,7 @@ func getXmtpClientFromKeys() -> XMTP.Client? {
     let data = Data(decoded)
     let privateKeyBundle = try! PrivateKeyBundle(serializedData: data)
     let xmtpEnv = getXmtpEnv()
-    let client = try Client.from(bundle: privateKeyBundle, options: .init(api: .init(env: xmtpEnv)))
+    let client = try await Client.from(bundle: privateKeyBundle, options: .init(api: .init(env: xmtpEnv)))
     return client
   } catch {
     return nil;
