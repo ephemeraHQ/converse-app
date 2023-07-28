@@ -56,7 +56,8 @@ export default function ConversationTitle({
       !previousConversation ||
       conversation.peerAddress !== previousConversation.peerAddress ||
       conversation.context?.conversationId !==
-        previousConversation.context?.conversationId
+        previousConversation.context?.conversationId ||
+      conversation.conversationTitle
     ) {
       // New conversation, lets' set title
       setTitle(conversationName(conversation));
