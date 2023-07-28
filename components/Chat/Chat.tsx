@@ -215,6 +215,7 @@ export default function Chat({
             }}
             inverted
             keyExtractor={keyExtractor}
+            keyboardShouldPersistTaps="handled"
           />
         )}
         {showPlaceholder && (
