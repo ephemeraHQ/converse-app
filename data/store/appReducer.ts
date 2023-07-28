@@ -13,6 +13,7 @@ export type AppType = {
     mediaURI?: string;
     error: boolean;
   };
+  openAttachmentForMessage: string | null;
   ephemeralAccount: boolean;
 };
 
@@ -28,6 +29,7 @@ export const appInitialState: AppType = {
     error: false,
   },
   ephemeralAccount: false,
+  openAttachmentForMessage: null,
 };
 
 export enum AppDispatchTypes {
@@ -38,6 +40,7 @@ export enum AppDispatchTypes {
   AppSetDesktopConnectSessionId = "APP_SET_DESKTOP_SESSION_ID",
   AppSetMediaPreview = "APP_SET_MEDIA_PREVIEW",
   AppSetEphemeralAccount = "APP_SET_EPHEMERAL_ACCOUNT",
+  AppOpenAttachmentForMessage = "APP_OPEN_ATTACHMENT_FOR_MESSAGE",
 }
 
 type AppPayload = {
@@ -63,6 +66,9 @@ type AppPayload = {
   };
   [AppDispatchTypes.AppSetEphemeralAccount]: {
     ephemeral: boolean;
+  };
+  [AppDispatchTypes.AppOpenAttachmentForMessage]: {
+    messageId: string | null;
   };
 };
 
@@ -115,6 +121,13 @@ export const appReducer = (state: AppType, action: AppActions): AppType => {
       return {
         ...state,
         desktopConnectSessionId: action.payload.sessionId,
+      };
+    }
+
+    case AppDispatchTypes.AppOpenAttachmentForMessage: {
+      return {
+        ...state,
+        openAttachmentForMessage: action.payload.messageId,
       };
     }
 
