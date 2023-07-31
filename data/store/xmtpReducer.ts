@@ -192,6 +192,7 @@ export const xmtpReducer = (state: XmtpType, action: XmtpActions): XmtpType => {
         localConnected: action.payload.connected,
       };
     case XmtpDispatchTypes.XmtpSetCurrentMessageContent: {
+      if (!state.conversations[action.payload.topic]) return state;
       const newState = { ...state };
       newState.conversations[action.payload.topic].currentMessage =
         action.payload.content;
