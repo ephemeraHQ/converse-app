@@ -350,26 +350,33 @@ export const saveConversations = async (
       },
     });
   }
-  // Now let's see what profiles need to be updated
-  const convosToUpdate = saveResult
-    .filter((c) => c.shouldUpdateProfile)
-    .map((c) => c.conversation);
-  if (convosToUpdate.length === 0) return;
-  const resolveResult = await updateProfilesForConversations(
-    convosToUpdate,
-    dispatch
-  );
+  try {
+    // Now let's see what profiles need to be updated
+    const convosToUpdate = saveResult
+      .filter((c) => c.shouldUpdateProfile)
+      .map((c) => c.conversation);
+    if (convosToUpdate.length === 0) return;
+    const resolveResult = await updateProfilesForConversations(
+      convosToUpdate,
+      dispatch
+    );
 
-  const updatedConversations = resolveResult
-    .filter((r) => r.updated)
-    .map((r) => r.conversation);
-  if (dispatch && updatedConversations.length > 0) {
-    dispatch({
-      type: XmtpDispatchTypes.XmtpSetConversations,
-      payload: {
-        conversations: updatedConversations,
-      },
+    const updatedConversations = resolveResult
+      .filter((r) => r.updated)
+      .map((r) => r.conversation);
+    if (dispatch && updatedConversations.length > 0) {
+      dispatch({
+        type: XmtpDispatchTypes.XmtpSetConversations,
+        payload: {
+          conversations: updatedConversations,
+        },
+      });
+    }
+  } catch (e: any) {
+    sentryTrackMessage("NEW_CONVO_PROFILE_UPDATE_FAILED", {
+      error: e.toString(),
     });
+    console.log(e);
   }
 };
 
@@ -388,19 +395,29 @@ export const saveNewConversation = async (
       },
     });
   }
-  // Now let's see if conversation needs to have a handle resolved
-  if (saveResult.shouldUpdateProfile) {
-    const resolveResult = (
-      await updateProfilesForConversations([saveResult.conversation], dispatch)
-    )[0];
-    if (dispatch && resolveResult.updated) {
-      dispatch({
-        type: XmtpDispatchTypes.XmtpSetConversations,
-        payload: {
-          conversations: [resolveResult.conversation],
-        },
-      });
+  try {
+    // Now let's see if conversation needs to have a handle resolved
+    if (saveResult.shouldUpdateProfile) {
+      const resolveResult = (
+        await updateProfilesForConversations(
+          [saveResult.conversation],
+          dispatch
+        )
+      )[0];
+      if (dispatch && resolveResult.updated) {
+        dispatch({
+          type: XmtpDispatchTypes.XmtpSetConversations,
+          payload: {
+            conversations: [resolveResult.conversation],
+          },
+        });
+      }
     }
+  } catch (e: any) {
+    sentryTrackMessage("NEW_CONVO_PROFILE_UPDATE_FAILED", {
+      error: e.toString(),
+    });
+    console.log(e);
   }
 };
 
