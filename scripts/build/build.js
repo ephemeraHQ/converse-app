@@ -62,7 +62,7 @@ const build = async () => {
     await executeCommand("yarn", ["typecheck"]);
     const tagName = `v${iosVersion}`;
     await executeCommand("git", ["tag", "--force", tagName]);
-    await executeCommand("git", ["push", "origin", tagName]);
+    await executeCommand("git", ["push", "origin", tagName, "--force"]);
   }
 
   if (env === "preview" || env === "production") {
