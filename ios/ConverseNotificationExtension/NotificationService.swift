@@ -58,9 +58,10 @@ func setKeychainValue(value: String, forKey: String) throws {
   try keychain.set(value, key: forKey)
 }
 
-func getXmtpClientFromKeys() -> XMTP.Client? {
+func getXmtpClientFromKeys() async -> XMTP.Client? {
   Client.register(codec: AttachmentCodec())
   Client.register(codec: RemoteAttachmentCodec())
+  Client.register(codec: ReactionCodec())
   let xmtpKeys = getKeychainValue(forKey: "XMTP_KEYS")
   if (xmtpKeys == nil || xmtpKeys?.count == 0) {
     return nil;
@@ -71,7 +72,7 @@ func getXmtpClientFromKeys() -> XMTP.Client? {
     let data = Data(decoded)
     let privateKeyBundle = try! PrivateKeyBundle(serializedData: data)
     let xmtpEnv = getXmtpEnv()
-    let client = try Client.from(bundle: privateKeyBundle, options: .init(api: .init(env: xmtpEnv)))
+    let client = try await Client.from(bundle: privateKeyBundle, options: .init(api: .init(env: xmtpEnv)))
     return client
   } catch {
     return nil;
@@ -164,7 +165,7 @@ func persistDecodedConversation(contentTopic: String, dict: [String : Any]) {
   }
 }
 
-func decodeConversationMessage(xmtpClient: XMTP.Client, envelope: XMTP.Envelope, sentViaConverse: Bool) async -> (content: String?, senderAddress: String?) {
+func decodeConversationMessage(xmtpClient: XMTP.Client, envelope: XMTP.Envelope, sentViaConverse: Bool) async -> (content: String?, senderAddress: String?, forceIgnore: Bool) {
   let conversation = getPersistedConversation(xmtpClient: xmtpClient, contentTopic: envelope.contentTopic);
   if (conversation != nil) {
     do {
@@ -178,7 +179,7 @@ func decodeConversationMessage(xmtpClient: XMTP.Client, envelope: XMTP.Envelope,
           // Let's save the notification for immediate display
           try saveMessage(topic: envelope.contentTopic, sent: decodedMessage.sent, senderAddress: decodedMessage.senderAddress, content: decodedContent!, id: decodedMessage.id, sentViaConverse: sentViaConverse, contentType: contentType)
         }
-        return (decodedContent, decodedMessage.senderAddress)
+        return (decodedContent, decodedMessage.senderAddress, false)
       } else if (contentType.starts(with: "xmtp.org/remoteStaticAttachment:")) {
         // Let's save the notification for immediate display
         do {
@@ -190,20 +191,47 @@ func decodeConversationMessage(xmtpClient: XMTP.Client, envelope: XMTP.Envelope,
         } catch {
           print("[NotificationExtension] ERROR WHILE SAVING ATTACHMENT CONTENT \(error)")
         }
-        return ("📎 Media", decodedMessage.senderAddress)
+        return ("📎 Media", decodedMessage.senderAddress, false)
       } else if (contentType.starts(with: "xmtp.org/reaction:")) {
-        return ("Reacted to a message", decodedMessage.senderAddress)
+        var notificationContent:String? = "Reacted to a message";
+        var ignoreNotification = false;
+        let reactionParameters = decodedMessage.encodedContent.parameters;
+        let action = reactionParameters["action"] ?? "";
+        let schema = reactionParameters["schema"] ?? "";
+        
+        if (action == "removed") {
+          ignoreNotification = true;
+        }
+        
+        // Let's save the notification for immediate display
+        do {
+          if let reactionContent = String(data: decodedMessage.encodedContent.content, encoding: .utf8) {
+            if (action != "removed" && schema == "unicode") {
+              notificationContent = "Reacted \(reactionContent) to a message";
+            }
+            let contentToSave = getJsonReaction(content: reactionContent, parameters: reactionParameters);
+            if (contentToSave != nil) {
+              try saveMessage(topic: envelope.contentTopic, sent: decodedMessage.sent, senderAddress: decodedMessage.senderAddress, content: contentToSave!, id: decodedMessage.id, sentViaConverse: sentViaConverse, contentType: contentType)
+            }
+            
+          }
+          
+        } catch {
+          print("[NotificationExtension] ERROR WHILE SAVING ATTACHMENT CONTENT \(error)")
+        }
+        
+        return (notificationContent, decodedMessage.senderAddress, ignoreNotification);
       } else {
         print("[NotificationExtension] Unknown content type")
-        return (nil, decodedMessage.senderAddress);
+        return (nil, decodedMessage.senderAddress, false);
       }
     } catch {
       print("[NotificationExtension] ERROR WHILE DECODING \(error)")
-      return (nil, nil);
+      return (nil, nil, false);
       //      return "ERROR WHILE DECODING \(error)";
     }
   } else {
-    return (nil, nil);
+    return (nil, nil, false);
     //    return "NO CONVERSATION";
   }
 }
@@ -215,6 +243,22 @@ func getContentTypeString(type: ContentTypeID) -> String {
 func getJsonRemoteAttachment(remoteAttachment: RemoteAttachment) -> String? {
   do {
     let dictionary = NSDictionary(dictionary: ["url": remoteAttachment.url, "contentDigest": remoteAttachment.contentDigest, "secret": remoteAttachment.secret.base64EncodedString(), "salt": remoteAttachment.salt.base64EncodedString(), "nonce": remoteAttachment.nonce.base64EncodedString(), "scheme": remoteAttachment.scheme.rawValue, "contentLength": remoteAttachment.contentLength ?? 0, "filename": remoteAttachment.filename ?? ""])
+    let jsonData = try JSONSerialization.data(withJSONObject: dictionary, options: [])
+    let jsonString = String(data: jsonData, encoding: .utf8)
+    return jsonString
+  } catch {
+    print("Error converting dictionary to JSON string: \(error.localizedDescription)")
+    return nil
+  }
+}
+
+
+func getJsonReaction(content: String, parameters: Dictionary<String, String>) -> String? {
+  do {
+    let reference = parameters["reference"] ?? "";
+    let schema = parameters["schema"] ?? "";
+    let action = parameters["action"] ?? "";
+    let dictionary = NSDictionary(dictionary: ["reference": reference, "action": action, "content": content, "schema": schema])
     let jsonData = try JSONSerialization.data(withJSONObject: dictionary, options: [])
     let jsonString = String(data: jsonData, encoding: .utf8)
     return jsonString
@@ -297,7 +341,7 @@ func handleNotificationAsync(contentHandler: ((UNNotificationContent) -> Void), 
     
     if let body = bestAttemptContent.userInfo["body"] as? [String: Any], let contentTopic = body["contentTopic"] as? String, let encodedMessage = body["message"] as? String {
       
-      let xmtpClient = getXmtpClientFromKeys();
+      let xmtpClient = await getXmtpClientFromKeys();
       
       if (xmtpClient != nil) {
         

@@ -37,15 +37,6 @@
       }
     },
     {
-      "identity" : "grpc-swift",
-      "kind" : "remoteSourceControl",
-      "location" : "https://github.com/grpc/grpc-swift",
-      "state" : {
-        "revision" : "1629de188c25682adc4cb47a80adca1ac90b494d",
-        "version" : "1.13.2"
-      }
-    },
-    {
       "identity" : "gzipswift",
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/1024jp/GzipSwift",
@@ -64,21 +55,12 @@
       }
     },
     {
-      "identity" : "proto",
-      "kind" : "remoteSourceControl",
-      "location" : "https://github.com/xmtp/proto",
-      "state" : {
-        "branch" : "main",
-        "revision" : "07180005024b320da26ee35f0b47ae9a459043f0"
-      }
-    },
-    {
       "identity" : "secp256k1.swift",
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/GigaBitcoin/secp256k1.swift.git",
       "state" : {
-        "branch" : "main",
-        "revision" : "5a162be81f45d6972c0b30022a4ca3dbd49541ff"
+        "revision" : "48fb20fce4ca3aad89180448a127d5bc16f0e44c",
+        "version" : "0.10.0"
       }
     },
     {
@@ -115,24 +97,6 @@
       "state" : {
         "revision" : "45167b8006448c79dda4b7bd604e07a034c15c49",
         "version" : "2.48.0"
-      }
-    },
-    {
-      "identity" : "swift-nio-extras",
-      "kind" : "remoteSourceControl",
-      "location" : "https://github.com/apple/swift-nio-extras.git",
-      "state" : {
-        "revision" : "91dd2d61fb772e1311bb5f13b59266b579d77e42",
-        "version" : "1.15.0"
-      }
-    },
-    {
-      "identity" : "swift-nio-http2",
-      "kind" : "remoteSourceControl",
-      "location" : "https://github.com/apple/swift-nio-http2.git",
-      "state" : {
-        "revision" : "d6656967f33ed8b368b38e4b198631fc7c484a40",
-        "version" : "1.23.1"
       }
     },
     {
@@ -186,7 +150,16 @@
       "location" : "https://github.com/xmtp/xmtp-ios",
       "state" : {
         "branch" : "main",
-        "revision" : "71316acf125a1ce1ffed376e68e366ca94d1ccfd"
+        "revision" : "996d7079f2d52b9d1ca89fa66dde778e896ad0e0"
+      }
+    },
+    {
+      "identity" : "xmtp-rust-swift",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/xmtp/xmtp-rust-swift",
+      "state" : {
+        "revision" : "4a76e5401fa780c40610e2f0d248f695261d08dd",
+        "version" : "0.3.1-beta0"
       }
     }
   ],
