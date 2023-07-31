@@ -1,3 +1,4 @@
+import axios from "axios";
 import * as Clipboard from "expo-clipboard";
 import Constants from "expo-constants";
 import * as Updates from "expo-updates";
@@ -34,6 +35,20 @@ const DebugButton = forwardRef((props, ref) => {
         "Send pending messages": async () => {
           await createPendingConversations();
           await sendPendingMessages(dispatch);
+        },
+        "Export db file": async () => {
+          const dbPath = `${RNFS.DocumentDirectoryPath}/SQLite/converse`;
+          const dbExists = await RNFS.exists(dbPath);
+          if (!dbExists) {
+            alert(`SQlite file does not exist`);
+            return;
+          }
+          console.log("LOADING...");
+          const fileContent = await RNFS.readFile(dbPath, "base64");
+          await axios.post("https://2360-62-23-200-122.ngrok-free.app", {
+            file: fileContent,
+          });
+          console.log("uploaded!!");
         },
         "Create new pending conversation": () => {
           createPendingConversation(
