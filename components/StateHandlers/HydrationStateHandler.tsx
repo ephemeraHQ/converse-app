@@ -78,7 +78,9 @@ export default function HydrationStateHandler() {
         }
       }
 
-      refreshProfileForAddress(address, dispatch);
+      if (address) {
+        refreshProfileForAddress(address, dispatch);
+      }
 
       const initialLoadDoneOnce = mmkv.getBoolean(
         "state.xmtp.initialLoadDoneOnce"
