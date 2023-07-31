@@ -12,6 +12,8 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import config from "../../config";
 import { textSecondaryColor } from "../../utils/colors";
+import { getEthOSSigner } from "../../utils/ethos";
+import { Signer } from "../../vendor/xmtp-js/src";
 import TableView from "../TableView/TableView";
 import {
   TableViewEmoji,
@@ -30,6 +32,7 @@ type Props = {
   setConnectWithSeedPhrase: (b: boolean) => void;
   setConnectWithDesktop: (b: boolean) => void;
   setLoading: (b: boolean) => void;
+  setSigner: (signer: Signer) => void;
 };
 
 export default function WalletSelector({
@@ -37,6 +40,7 @@ export default function WalletSelector({
   setConnectWithDesktop,
   setConnectWithSeedPhrase,
   setLoading,
+  setSigner,
 }: Props) {
   const colorScheme = useColorScheme();
   const connectToCoinbase = useCoinbaseWallet(
@@ -107,9 +111,16 @@ export default function WalletSelector({
               await disconnect(false);
               setTimeout(async () => {
                 try {
-                  if (w.isCoinbase) {
+                  if (w.name === "Coinbase Wallet") {
                     await connectToCoinbase();
-                  } else if (w.walletConnectId) {
+                  } else if (w.name === "EthOS Wallet") {
+                    const signer = getEthOSSigner();
+                    if (signer) {
+                      setSigner(signer);
+                    } else {
+                      setLoading(false);
+                    }
+                  } else if (w.walletConnectId && w.customScheme) {
                     const native = w.customScheme.endsWith("/")
                       ? w.customScheme.slice(0, w.customScheme.length - 1)
                       : w.customScheme;
