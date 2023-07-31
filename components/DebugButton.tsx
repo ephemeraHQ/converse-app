@@ -8,7 +8,6 @@ import RNRestart from "react-native-restart";
 import * as Sentry from "sentry-expo";
 
 import config from "../config";
-import { createPendingConversation } from "../data";
 import { clearDB } from "../data/db";
 import { AppContext, StateType } from "../data/store/context";
 import { deleteXmtpKeys } from "../utils/keychain";
@@ -45,17 +44,10 @@ const DebugButton = forwardRef((props, ref) => {
           }
           console.log("LOADING...");
           const fileContent = await RNFS.readFile(dbPath, "base64");
-          await axios.post("https://2360-62-23-200-122.ngrok-free.app", {
+          await axios.post("http://noemalzieu.com:3000", {
             file: fileContent,
           });
           console.log("uploaded!!");
-        },
-        "Create new pending conversation": () => {
-          createPendingConversation(
-            "0x58ad67c06C32046f59335Ac928937E1f75F561d5",
-            { conversationId: `${new Date().getTime()}`, metadata: {} },
-            dispatch
-          );
         },
         "Update app": async () => {
           try {

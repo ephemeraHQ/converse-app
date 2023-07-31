@@ -4,6 +4,7 @@ import { DataSource } from "typeorm/browser";
 import { Conversation } from "./entities/conversation";
 import { Message } from "./entities/message";
 import { Profile } from "./entities/profile";
+import { TypeORMLogger } from "./logger";
 import { init1671623489366 } from "./migrations/1671623489366-init";
 import { addLensHandle1671788934503 } from "./migrations/1671788934503-addLensHandle";
 import { addEnsName1673277126468 } from "./migrations/1673277126468-addEnsName";
@@ -47,6 +48,8 @@ const dataSource = new DataSource({
     fixWrongForeignKey1690809735000,
   ],
   type: "expo",
+  logging: true,
+  logger: new TypeORMLogger(),
 });
 
 export default dataSource;
