@@ -15,6 +15,7 @@ import { addContentType1687793816866 } from "../../data/db/migrations/1687793816
 import { addMessageReaction1688549487960 } from "../../data/db/migrations/1688549487960-addMessageReaction";
 import { addMessageFallback1690204801962 } from "../../data/db/migrations/1690204801962-addMessageFallback";
 import { addPendingStateToConversations1690376359971 } from "../../data/db/migrations/1690376359971-addPendingStateToConversations";
+import { fixWrongForeignKey1690809735000 } from "../../data/db/migrations/1690809735000-fixWrongForeignKey";
 import { Conversation } from "./entities/conversation";
 import { Message } from "./entities/message";
 import { Profile } from "./entities/profile";
@@ -38,6 +39,7 @@ const dataSource = new DataSource({
     addMessageReaction1688549487960,
     addMessageFallback1690204801962,
     addPendingStateToConversations1690376359971,
+    fixWrongForeignKey1690809735000,
   ],
   type: "sqlite",
 });
