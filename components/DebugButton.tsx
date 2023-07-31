@@ -14,7 +14,7 @@ import { deleteXmtpKeys } from "../utils/keychain";
 import { showActionSheetWithOptions } from "./StateHandlers/ActionSheetStateHandler";
 import { createPendingConversations, sendPendingMessages } from "./XmtpState";
 
-const logs: string[] = [];
+let logs: string[] = [];
 
 export const addLog = (log: string) => {
   logs.push(log);
@@ -81,6 +81,9 @@ const DebugButton = forwardRef((props, ref) => {
         "Copy logs": () => {
           Clipboard.setStringAsync(logs.join("\n"));
           alert("Copied!");
+        },
+        "Clear logs": () => {
+          logs = [];
         },
         "Show config": () => {
           alert(
