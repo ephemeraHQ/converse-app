@@ -20,5 +20,10 @@ module.exports = {
         ios: null,
       },
     },
+    "walletsdk-ethos": {
+      platforms: {
+        ios: null,
+      },
+    },
   },
 };

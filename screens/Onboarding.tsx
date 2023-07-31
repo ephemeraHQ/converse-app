@@ -38,6 +38,7 @@ import { saveXmtpKeys } from "../utils/keychain";
 import mmkv from "../utils/mmkv";
 import { shortAddress } from "../utils/str";
 import { getXmtpKeysFromSigner, isOnXmtp } from "../utils/xmtp/client";
+import { Signer } from "../vendor/xmtp-js/src";
 
 export default function OnboardingScreen() {
   const { state, dispatch } = useContext(AppContext);
@@ -56,6 +57,7 @@ export default function OnboardingScreen() {
     isOnXmtp: false,
     isEphemeral: false,
     seedPhraseSigner: undefined as Wallet | undefined,
+    otherSigner: undefined as Signer | undefined,
   });
 
   const _thirdwebSigner = useSigner();
@@ -70,7 +72,8 @@ export default function OnboardingScreen() {
 
   const disconnectWallet = useDisconnect();
 
-  const loading = isLoading || (thirdwebSigner && !user.address);
+  const loading =
+    isLoading || ((thirdwebSigner || user.otherSigner) && !user.address);
 
   const clickedSecondSignature = useRef(false);
   const [waitingForSecondSignature, setWaitingForSecondSignature] =
@@ -85,6 +88,7 @@ export default function OnboardingScreen() {
         isEphemeral: false,
         isOnXmtp: false,
         seedPhraseSigner: undefined,
+        otherSigner: undefined,
       });
       setThirdwebSigner(undefined);
       if (resetLoading) {
@@ -112,8 +116,19 @@ export default function OnboardingScreen() {
         isEphemeral: false,
         isOnXmtp: false,
         seedPhraseSigner,
+        otherSigner: undefined,
       });
     }, 10);
+  }, []);
+
+  const setSigner = useCallback((signer: Signer) => {
+    setUser((u) => ({
+      address: "",
+      isEphemeral: false,
+      isOnXmtp: false,
+      seedPhraseSigner: undefined,
+      otherSigner: signer,
+    }));
   }, []);
 
   const generateWallet = useCallback(async () => {
@@ -125,6 +140,7 @@ export default function OnboardingScreen() {
       isEphemeral: true,
       isOnXmtp: false,
       seedPhraseSigner: signer,
+      otherSigner: undefined,
     });
   }, []);
 
@@ -159,16 +175,18 @@ export default function OnboardingScreen() {
 
   useEffect(() => {
     const requestSignatures = async () => {
-      if (!thirdwebSigner || requestingSignatures.current) return;
+      const signer = thirdwebSigner || user.otherSigner;
+      if (!signer || requestingSignatures.current) return;
       requestingSignatures.current = true;
       try {
-        const newAddress = await thirdwebSigner.getAddress();
+        const newAddress = await signer.getAddress();
         const isOnNetwork = await isOnXmtp(newAddress);
         setUser({
           address: newAddress,
           isEphemeral: false,
           isOnXmtp: isOnNetwork,
           seedPhraseSigner: undefined,
+          otherSigner: user.otherSigner,
         });
         setLoading(false);
       } catch (e) {
@@ -178,7 +196,7 @@ export default function OnboardingScreen() {
     };
 
     requestSignatures();
-  }, [thirdwebSigner]);
+  }, [thirdwebSigner, user.otherSigner]);
 
   const waitingForSecondSignatureRef = useRef(waitingForSecondSignature);
   useEffect(() => {
@@ -186,7 +204,7 @@ export default function OnboardingScreen() {
   }, [waitingForSecondSignature]);
 
   const initXmtpClient = useCallback(async () => {
-    const signer = user.seedPhraseSigner || thirdwebSigner;
+    const signer = user.seedPhraseSigner || thirdwebSigner || user.otherSigner;
     if (!signer) {
       return;
     }
@@ -247,7 +265,13 @@ export default function OnboardingScreen() {
       setWaitingForSecondSignature(false);
       console.error(e);
     }
-  }, [dispatch, thirdwebSigner, user.isEphemeral, user.seedPhraseSigner]);
+  }, [
+    dispatch,
+    thirdwebSigner,
+    user.isEphemeral,
+    user.seedPhraseSigner,
+    user.otherSigner,
+  ]);
 
   useEffect(() => {
     // Seed phrase account can sign immediately
@@ -347,21 +371,19 @@ export default function OnboardingScreen() {
 
   let onboardingContent: React.ReactNode;
 
-  if (
-    !thirdwebSigner &&
-    !connectWithSeedPhrase &&
-    !connectWithDesktop &&
-    !loading
-  ) {
+  const signer = thirdwebSigner || user.otherSigner;
+
+  if (!signer && !connectWithSeedPhrase && !connectWithDesktop && !loading) {
     onboardingContent = (
       <WalletSelector
         setConnectWithDesktop={setConnectWithDesktop}
         setConnectWithSeedPhrase={setConnectWithSeedPhrase}
         disconnect={disconnect}
         setLoading={setLoading}
+        setSigner={setSigner}
       />
     );
-  } else if (!thirdwebSigner && !loading && connectWithSeedPhrase) {
+  } else if (!signer && !loading && connectWithSeedPhrase) {
     backButtonText = "Back to home screen";
     backButtonAction = () => {
       setConnectWithSeedPhrase(false);
@@ -374,7 +396,7 @@ export default function OnboardingScreen() {
         setKeyboardVerticalOffset={setKeyboardVerticalOffset}
       />
     );
-  } else if (!thirdwebSigner && !loading && connectWithDesktop) {
+  } else if (!signer && !loading && connectWithDesktop) {
     onboardingContent = (
       <>
         <Button
@@ -388,7 +410,7 @@ export default function OnboardingScreen() {
         />
       </>
     );
-  } else if (thirdwebSigner && user.address) {
+  } else if (signer && user.address) {
     backButtonText = `Log out from ${shortAddress(user.address)}`;
     backButtonAction = disconnect;
     primaryButtonText = "Sign";
