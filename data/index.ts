@@ -767,10 +767,11 @@ export const createPendingConversation = async (
 
 export const cleanupPendingConversations = async (dispatch: DispatchType) => {
   const pendingConversations = await conversationRepository.find({
+    where: { pending: true },
     relations: { messages: true },
   });
   const pendingConversationsWithoutMessages = pendingConversations.filter(
-    (c) => c.messages?.length === 0
+    (c) => c.pending && c.messages?.length === 0
   );
   if (pendingConversationsWithoutMessages.length === 0) return;
   console.log(
