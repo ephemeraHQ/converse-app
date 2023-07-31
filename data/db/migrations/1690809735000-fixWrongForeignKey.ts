@@ -1,5 +1,10 @@
 import { MigrationInterface, QueryRunner } from "typeorm";
 
+// One of our migrations messed up the database state with the `message` table
+// having a foreign key on `temporary_conversation` and not `conversation` anymore.
+// Weirdest thing is it didn't impact the app until a few migrations after, I have
+// no idea why. This migration fixes the state
+
 export class fixWrongForeignKey1690809735000 implements MigrationInterface {
   name = "fixWrongForeignKey1690809735000";
 
