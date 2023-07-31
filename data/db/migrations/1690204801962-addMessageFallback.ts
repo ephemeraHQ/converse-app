@@ -11,7 +11,7 @@ export class addMessageFallback1690204801962 implements MigrationInterface {
 
   public async down(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.query(
-      `ALTER TABLE "contentFallback" DROP COLUMN "reactions"`
+      `ALTER TABLE "message" DROP COLUMN "contentFallback"`
     );
   }
 }
