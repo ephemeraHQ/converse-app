@@ -18,6 +18,7 @@ import {
 import { getLastXMTPSyncedAt, saveLastXMTPSyncedAt } from "../utils/mmkv";
 import { subscribeToNotifications } from "../utils/notifications";
 import { sentryTrackMessage } from "../utils/sentry";
+import { addLog } from "./DebugButton";
 
 let webview: WebView | null;
 let webviewReadyForMessages = false;
@@ -257,6 +258,12 @@ export default function XmtpWebview() {
           break;
         }
         case "XMTP_MESSAGES":
+          if (
+            config.debugMenu ||
+            config.debugAddresses.includes(state.xmtp.address || "")
+          ) {
+            addLog(JSON.stringify(data));
+          }
           data.forEach((messagesFromConversation: any) => {
             saveMessages(
               messagesFromConversation.messages,
