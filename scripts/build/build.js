@@ -2,6 +2,8 @@ const { spawn, execSync } = require("child_process");
 const path = require("path");
 const prompts = require("prompts");
 
+const appJson = require("../../app.json");
+
 // eslint-disable-next-line no-undef
 const PROJECT_ROOT = path.join(__dirname, "..", "..");
 
@@ -50,8 +52,17 @@ const build = async () => {
     platform,
   ];
 
+  const iosVersion = appJson.expo.ios.version;
+  const androidVersion = appJson.expo.android.version;
+  if (iosVersion !== androidVersion) {
+    throw new Error("app.json iOS & Android version mismatch");
+  }
+
   if (env === "production") {
     await executeCommand("yarn", ["typecheck"]);
+    const tagName = `v${iosVersion}`;
+    await executeCommand("git", ["tag", "--force", tagName]);
+    await executeCommand("git", ["push", "origin", tagName]);
   }
 
   if (env === "preview" || env === "production") {
