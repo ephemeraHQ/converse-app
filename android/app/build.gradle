@@ -228,7 +228,7 @@ dependencies {
     implementation 'com.google.firebase:firebase-messaging-ktx:23.0.3'
     implementation 'com.beust:klaxon:5.5'
     implementation 'androidx.security:security-crypto:1.1.0-alpha05'
-    implementation('org.xmtp:android:0.0.9') {
+    implementation('org.xmtp:android:0.3.3') {
         exclude group: 'com.google.crypto.tink', module: 'tink'
         exclude group: 'org.bouncycastle', module: 'bcprov-jdk15on'
         // exclude group: 'org.web3j', module: 'crypto'

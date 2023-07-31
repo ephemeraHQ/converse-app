@@ -29,7 +29,6 @@ import expo.modules.notifications.notifications.model.NotificationContent
 import expo.modules.notifications.notifications.model.NotificationRequest
 import expo.modules.notifications.notifications.model.triggers.FirebaseNotificationTrigger
 import expo.modules.notifications.service.NotificationsService
-import expo.modules.notifications.service.delegates.encodedInBase64
 import expo.modules.securestore.SecureStoreModule
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
@@ -42,10 +41,7 @@ import org.xmtp.android.library.messages.PrivateKeyBundleV1Builder
 import java.security.MessageDigest
 import java.util.*
 import kotlinx.coroutines.*
-import org.xmtp.android.library.codecs.AttachmentCodec
-import org.xmtp.android.library.codecs.RemoteAttachment
-import org.xmtp.android.library.codecs.RemoteAttachmentCodec
-import org.xmtp.android.library.codecs.decoded
+import org.xmtp.android.library.codecs.*
 import org.xmtp.proto.message.contents.Content
 import kotlin.coroutines.resume
 
@@ -100,6 +96,7 @@ class PushNotificationsService : FirebaseMessagingService() {
     override fun onMessageReceived(remoteMessage: RemoteMessage) {
         Client.register(codec = AttachmentCodec())
         Client.register(codec = RemoteAttachmentCodec())
+        Client.register(codec = ReactionCodec())
         var xmtpClient = initXmtpClient()
         if (applicationInForeground()) {
             Log.d(TAG, "App is in foreground, dropping")
@@ -193,7 +190,16 @@ class PushNotificationsService : FirebaseMessagingService() {
             notificationMessage = "\uD83D\uDCCE Media";
             saveMessageToStorage(envelope.contentTopic, decodedMessage, sentViaConverse, contentType)
         } else if (contentType.startsWith("xmtp.org/reaction:")) {
-            notificationMessage = "Reacted to a message";
+            val reactionParameters = decodedMessage.encodedContent.parametersMap;
+            saveMessageToStorage(envelope.contentTopic, decodedMessage, sentViaConverse, contentType)
+            if (reactionParameters["action"] == "removed") {
+               return;
+            } else if (reactionParameters["schema"] != "unicode") {
+                notificationMessage = "Reacted to a message";
+            } else {
+                val reactionContent = decodedMessage.encodedContent.content.toStringUtf8();
+                notificationMessage = "Reacted $reactionContent to a message"
+            }
         } else {
             Log.d(TAG, "Unknown content type")
         }
@@ -224,6 +230,8 @@ class PushNotificationsService : FirebaseMessagingService() {
             messageBody = decodedMessage.body;
         } else if (contentType.startsWith("xmtp.org/remoteStaticAttachment:")) {
             messageBody = getJsonRemoteAttachment(decodedMessage);
+        } else if (contentType.startsWith("xmtp.org/reaction:")) {
+            messageBody = getJsonReaction(decodedMessage);
         }
         if (messageBody.isEmpty()) {
             return;
@@ -265,6 +273,24 @@ class PushNotificationsService : FirebaseMessagingService() {
         } catch (e: Exception) {
             println("Error converting dictionary to JSON string: ${e.localizedMessage}")
             return "";
+        }
+    }
+
+    private fun getJsonReaction(decodedMessage: DecodedMessage): String {
+        val reactionContent = decodedMessage.encodedContent.content.toStringUtf8();
+        val reactionParameters = decodedMessage.encodedContent.parametersMap;
+        return try {
+            val dictionary =
+                mapOf(
+                    "reference" to reactionParameters["reference"],
+                    "action" to reactionParameters["action"],
+                    "content" to reactionContent,
+                    "schema" to reactionParameters["schema"],
+                )
+            JSONObject(dictionary).toString()
+        } catch (e: Exception) {
+            println("Error converting dictionary to JSON string: ${e.localizedMessage}")
+            "";
         }
     }
 

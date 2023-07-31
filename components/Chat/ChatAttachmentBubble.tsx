@@ -1,19 +1,20 @@
 import * as Linking from "expo-linking";
 import mime from "mime";
 import prettyBytes from "pretty-bytes";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useContext, useEffect, useState } from "react";
 import {
   ColorSchemeName,
   Image,
   Platform,
   StyleSheet,
   Text,
-  TouchableWithoutFeedback,
   useColorScheme,
   View,
 } from "react-native";
 import RNFS from "react-native-fs";
 
+import { AppDispatchTypes } from "../../data/store/appReducer";
+import { AppContext } from "../../data/store/context";
 import { SerializedAttachmentContent } from "../../utils/attachment";
 import { textPrimaryColor } from "../../utils/colors";
 import { getImageSize, isImageMimetype } from "../../utils/media";
@@ -28,6 +29,7 @@ type Props = {
 
 export default function ChatAttachmentBubble({ message }: Props) {
   const colorScheme = useColorScheme();
+  const { state, dispatch } = useContext(AppContext);
   const styles = getStyles(colorScheme);
   const [attachment, setAttachment] = useState({
     loading: true,
@@ -228,6 +230,31 @@ export default function ChatAttachmentBubble({ message }: Props) {
     { color: message.fromMe ? "white" : textPrimaryColor(colorScheme) },
   ];
 
+  useEffect(() => {
+    if (
+      state.app.openAttachmentForMessage === message.id &&
+      !attachment.loading &&
+      !attachment.error &&
+      attachment.mediaURL &&
+      attachment.mediaType !== "UNSUPPORTED"
+    ) {
+      dispatch({
+        type: AppDispatchTypes.AppOpenAttachmentForMessage,
+        payload: { messageId: null },
+      });
+      openInWebview();
+    }
+  }, [
+    attachment.error,
+    attachment.loading,
+    attachment.mediaType,
+    attachment.mediaURL,
+    dispatch,
+    message.id,
+    openInWebview,
+    state.app.openAttachmentForMessage,
+  ]);
+
   if (attachment.loading) {
     return (
       <>
@@ -286,12 +313,10 @@ export default function ChatAttachmentBubble({ message }: Props) {
       : undefined;
     return (
       <>
-        <TouchableWithoutFeedback onPress={openInWebview}>
-          <Image
-            source={{ uri: `file://${attachment.mediaURL}` }}
-            style={[styles.imagePreview, { aspectRatio }]}
-          />
-        </TouchableWithoutFeedback>
+        <Image
+          source={{ uri: `file://${attachment.mediaURL}` }}
+          style={[styles.imagePreview, { aspectRatio }]}
+        />
         <View style={styles.metadataContainer}>{metadataView}</View>
       </>
     );

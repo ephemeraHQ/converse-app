@@ -9,6 +9,7 @@ import {
 } from "react-native";
 import EmojiPicker from "rn-emoji-keyboard";
 
+import { AppDispatchTypes } from "../../data/store/appReducer";
 import { AppContext } from "../../data/store/context";
 import { XmtpDispatchTypes } from "../../data/store/xmtpReducer";
 import { blockPeer, reportMessage } from "../../utils/api";
@@ -155,7 +156,15 @@ export default function ChatMessageActions({
 
   const lastPressMessage = useRef(0);
   const onPressMessage = useCallback(() => {
-    if (isAttachment || !canAddReaction) return;
+    if (isAttachment) {
+      // Transfering attachment opening intent to component
+      dispatch({
+        type: AppDispatchTypes.AppOpenAttachmentForMessage,
+        payload: { messageId: message.id },
+      });
+      return;
+    }
+    if (!canAddReaction) return;
     const now = new Date().getTime();
     const sinceLastPress = now - lastPressMessage.current;
     if (sinceLastPress < 500) {
@@ -163,7 +172,7 @@ export default function ChatMessageActions({
       showReactionModal();
     }
     lastPressMessage.current = now;
-  }, [isAttachment, showReactionModal, canAddReaction]);
+  }, [canAddReaction, dispatch, isAttachment, message.id, showReactionModal]);
 
   const [selectedEmojis, setSelectedEmojis] = useState<string[]>([]);
   useEffect(() => {

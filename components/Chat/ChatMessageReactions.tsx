@@ -112,7 +112,7 @@ export default function ChatMessageReactions({
           ]}
         >
           <Text style={styles.emojis}>
-            {reactionsList.map((r) => getReactionContent(r))}
+            {[...new Set(reactionsList.map((r) => getReactionContent(r)))]}
           </Text>
           {reactionsList.length > 1 && (
             <Text style={styles.count}>{reactionsList.length}</Text>
