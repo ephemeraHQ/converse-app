@@ -3,10 +3,9 @@ import {
   AttachmentCodec,
   RemoteAttachmentCodec,
 } from "@xmtp/content-type-remote-attachment";
-import { Signer } from "ethers";
 
 import config from "../../config";
-import { Client } from "../../vendor/xmtp-js/src";
+import { Client, Signer } from "../../vendor/xmtp-js/src";
 
 const env = config.xmtpEnv === "production" ? "production" : "dev";
 
