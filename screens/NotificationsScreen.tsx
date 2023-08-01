@@ -11,8 +11,8 @@ import {
 
 import Button from "../components/Button/Button";
 import Picto from "../components/Picto/Picto";
-import { AppContext } from "../data/store/context";
-import { NotificationsDispatchTypes } from "../data/store/notificationsReducer";
+import { AppContext } from "../data/deprecatedStore/context";
+import { NotificationsDispatchTypes } from "../data/deprecatedStore/notificationsReducer";
 import { textPrimaryColor } from "../utils/colors";
 import { requestPushNotificationsPermissions } from "../utils/notifications";
 

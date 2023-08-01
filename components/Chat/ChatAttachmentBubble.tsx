@@ -13,8 +13,8 @@ import {
 } from "react-native";
 import RNFS from "react-native-fs";
 
-import { AppDispatchTypes } from "../../data/store/appReducer";
-import { AppContext } from "../../data/store/context";
+import { AppDispatchTypes } from "../../data/deprecatedStore/appReducer";
+import { AppContext } from "../../data/deprecatedStore/context";
 import { SerializedAttachmentContent } from "../../utils/attachment";
 import { textPrimaryColor } from "../../utils/colors";
 import { getImageSize, isImageMimetype } from "../../utils/media";

@@ -22,8 +22,8 @@ import {
 } from "react-native";
 import RNFS from "react-native-fs";
 
-import { AppDispatchTypes } from "../../data/store/appReducer";
-import { AppContext } from "../../data/store/context";
+import { AppDispatchTypes } from "../../data/deprecatedStore/appReducer";
+import { AppContext } from "../../data/deprecatedStore/context";
 import { SerializedRemoteAttachmentContent } from "../../utils/attachment";
 import { actionSheetColors, textSecondaryColor } from "../../utils/colors";
 import { executeAfterKeyboardClosed } from "../../utils/keyboard";

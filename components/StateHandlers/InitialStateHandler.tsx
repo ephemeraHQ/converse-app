@@ -3,8 +3,8 @@ import { useCallback, useContext, useEffect, useRef } from "react";
 import { useColorScheme } from "react-native";
 
 import config from "../../config";
-import { AppDispatchTypes } from "../../data/store/appReducer";
-import { AppContext } from "../../data/store/context";
+import { AppDispatchTypes } from "../../data/deprecatedStore/appReducer";
+import { AppContext } from "../../data/deprecatedStore/context";
 import { setAndroidColors } from "../../utils/colors";
 import { navigateToConversation } from "../../utils/navigation";
 import { hideSplashScreen } from "../../utils/splash/splash";

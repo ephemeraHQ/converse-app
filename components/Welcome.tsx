@@ -12,7 +12,7 @@ import {
 
 import Ellipse from "../assets/ellipse.svg";
 import config from "../config";
-import { AppContext } from "../data/store/context";
+import { AppContext } from "../data/deprecatedStore/context";
 import { NavigationParamList } from "../screens/Main";
 import { backgroundColor, textPrimaryColor } from "../utils/colors";
 import Button from "./Button/Button";

@@ -1,8 +1,8 @@
 import * as Linking from "expo-linking";
 
 import { sendMessageToWebview } from "../components/XmtpWebview";
-import { DispatchType } from "../data/store/context";
-import { XmtpConversation } from "../data/store/xmtpReducer";
+import { DispatchType } from "../data/deprecatedStore/context";
+import { XmtpConversation } from "../data/deprecatedStore/xmtpReducer";
 import { loadSavedNotificationMessagesToContext } from "./backgroundNotifications/loadSavedNotifications";
 import { lastValueInMap } from "./map";
 

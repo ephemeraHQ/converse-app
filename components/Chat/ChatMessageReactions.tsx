@@ -8,7 +8,7 @@ import {
   View,
 } from "react-native";
 
-import { AppContext } from "../../data/store/context";
+import { AppContext } from "../../data/deprecatedStore/context";
 import { isAttachmentMessage } from "../../utils/attachment";
 import {
   actionSheetColors,

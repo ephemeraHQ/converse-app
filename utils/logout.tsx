@@ -3,7 +3,7 @@ import { Platform } from "react-native";
 import RNRestart from "react-native-restart";
 
 import { clearDB } from "../data/db";
-import { DispatchType, StateType } from "../data/store/context";
+import { DispatchType, StateType } from "../data/deprecatedStore/context";
 import { deleteXmtpConversations, deleteXmtpKeys } from "./keychain";
 import mmkv from "./mmkv";
 import { disablePushNotifications } from "./notifications";

@@ -6,8 +6,8 @@ import { WebView, WebViewMessageEvent } from "react-native-webview";
 
 import config from "../config";
 import { saveNewConversation, saveConversations, saveMessages } from "../data";
-import { AppContext } from "../data/store/context";
-import { XmtpDispatchTypes } from "../data/store/xmtpReducer";
+import { AppContext } from "../data/deprecatedStore/context";
+import { XmtpDispatchTypes } from "../data/deprecatedStore/xmtpReducer";
 import { loadSavedNotificationMessagesToContext } from "../utils/backgroundNotifications/loadSavedNotifications";
 import {
   loadXmtpConversation,

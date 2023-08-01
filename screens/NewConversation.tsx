@@ -33,8 +33,8 @@ import TableView from "../components/TableView/TableView";
 import { TableViewPicto } from "../components/TableView/TableViewImage";
 import config from "../config";
 import { createPendingConversation } from "../data";
-import { AppContext, StateType } from "../data/store/context";
-import { XmtpConversation } from "../data/store/xmtpReducer";
+import { AppContext, StateType } from "../data/deprecatedStore/context";
+import { XmtpConversation } from "../data/deprecatedStore/xmtpReducer";
 import {
   backgroundColor,
   itemSeparatorColor,

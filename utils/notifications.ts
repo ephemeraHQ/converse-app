@@ -1,7 +1,7 @@
 import * as Notifications from "expo-notifications";
 import { Platform } from "react-native";
 
-import { XmtpConversation } from "../data/store/xmtpReducer";
+import { XmtpConversation } from "../data/deprecatedStore/xmtpReducer";
 import { buildUserInviteTopic } from "../vendor/xmtp-js/src/utils";
 import api from "./api";
 import { saveExpoPushToken } from "./keychain";

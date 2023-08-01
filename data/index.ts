@@ -28,13 +28,13 @@ import { Conversation } from "./db/entities/conversation";
 import { Message } from "./db/entities/message";
 import { Profile, ProfileSocials } from "./db/entities/profile";
 import { upsertRepository } from "./db/upsert";
-import { DispatchType } from "./store/context";
-import { ProfilesDispatchTypes } from "./store/profilesReducer";
+import { DispatchType } from "./deprecatedStore/context";
+import { ProfilesDispatchTypes } from "./deprecatedStore/profilesReducer";
 import {
   XmtpConversation,
   XmtpDispatchTypes,
   XmtpMessage,
-} from "./store/xmtpReducer";
+} from "./deprecatedStore/xmtpReducer";
 
 type MaybeDispatchType = DispatchType | undefined;
 

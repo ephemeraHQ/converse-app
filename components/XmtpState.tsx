@@ -9,8 +9,8 @@ import {
   updateMessagesIds,
 } from "../data";
 import { Message } from "../data/db/entities/message";
-import { AppContext, DispatchType } from "../data/store/context";
-import { XmtpDispatchTypes } from "../data/store/xmtpReducer";
+import { AppContext, DispatchType } from "../data/deprecatedStore/context";
+import { XmtpDispatchTypes } from "../data/deprecatedStore/xmtpReducer";
 import { getBlockedPeers } from "../utils/api";
 import { deserializeRemoteAttachmentContent } from "../utils/attachment";
 import { loadXmtpConversation, loadXmtpKeys } from "../utils/keychain";

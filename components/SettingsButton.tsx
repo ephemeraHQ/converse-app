@@ -7,8 +7,8 @@ import { Platform, TouchableOpacity, useColorScheme, View } from "react-native";
 
 import config from "../config";
 import { refreshProfileForAddress } from "../data";
-import { AppContext } from "../data/store/context";
-import { NotificationsDispatchTypes } from "../data/store/notificationsReducer";
+import { AppContext } from "../data/deprecatedStore/context";
+import { NotificationsDispatchTypes } from "../data/deprecatedStore/notificationsReducer";
 import { NavigationParamList } from "../screens/Main";
 import { actionSheetColors, textSecondaryColor } from "../utils/colors";
 import { logout } from "../utils/logout";

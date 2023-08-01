@@ -11,8 +11,8 @@ import {
 
 import config from "../../config";
 import { clearDB } from "../../data/db";
-import { AppDispatchTypes } from "../../data/store/appReducer";
-import { AppContext } from "../../data/store/context";
+import { AppDispatchTypes } from "../../data/deprecatedStore/appReducer";
+import { AppContext } from "../../data/deprecatedStore/context";
 import {
   fetchDesktopSessionXmtpKey,
   markDesktopSessionDone,

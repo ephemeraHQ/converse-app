@@ -1,6 +1,6 @@
 import { PixelRatio } from "react-native";
 
-import { XmtpConversation } from "../data/store/xmtpReducer";
+import { XmtpConversation } from "../data/deprecatedStore/xmtpReducer";
 
 export const shortAddress = (address: string) =>
   address && address.length > 7

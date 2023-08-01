@@ -20,7 +20,7 @@ import * as Sentry from "sentry-expo";
 import XmtpState from "./components/XmtpState";
 import XmtpWebview from "./components/XmtpWebview";
 import config from "./config";
-import { AppProvider } from "./data/store/context";
+import { AppProvider } from "./data/deprecatedStore/context";
 import Main from "./screens/Main";
 import {
   backgroundColor,
