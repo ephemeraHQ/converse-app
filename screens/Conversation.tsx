@@ -38,10 +38,7 @@ import {
   saveMessages,
 } from "../data";
 import { AppContext } from "../data/store/context";
-import {
-  XmtpConversationWithUpdate,
-  XmtpDispatchTypes,
-} from "../data/store/xmtpReducer";
+import { XmtpDispatchTypes } from "../data/store/xmtpReducer";
 import { userExists } from "../utils/api";
 import {
   backgroundColor,
@@ -64,82 +61,85 @@ const Conversation = ({
   const { state, dispatch } = useContext(AppContext);
   const colorScheme = useColorScheme();
 
-  let conversationTopic = route.params.topic;
-  if (
-    route.params.topic &&
-    state.xmtp.conversationsMapping[route.params.topic]
-  ) {
-    conversationTopic = state.xmtp.conversationsMapping[route.params.topic];
-  }
-  const initialConversation = conversationTopic
-    ? state.xmtp.conversations[conversationTopic]
-    : undefined;
+  // Initial conversation topic will be set only if in route params
+  const [_conversationTopic, setConversationTopic] = useState(
+    route.params.topic
+  );
 
+  // When we set the conversation topic, we check if it has been mapped
+  // to a new one (for pending conversations)
+  const conversationTopic =
+    _conversationTopic && state.xmtp.conversationsMapping[_conversationTopic]
+      ? state.xmtp.conversationsMapping[_conversationTopic]
+      : _conversationTopic;
+
+  // Initial conversation will be set only if topic in route params
+  const [conversation, setConversation] = useState(
+    conversationTopic ? state.xmtp.conversations[conversationTopic] : undefined
+  );
+
+  // Initial peer address will be set from the route params
+  // for main convo or through the found convo if exists
   const [peerAddress, setPeerAddress] = useState(
     isAddress(route.params.mainConversationWithPeer || "")
       ? route.params.mainConversationWithPeer
-      : initialConversation
-      ? initialConversation.peerAddress
-      : ""
+      : conversation?.peerAddress
   );
 
-  const [conversation, setConversation] = useState<
-    XmtpConversationWithUpdate | undefined
-  >(initialConversation);
-
+  // When we set the conversation, we set the peer address
+  // and preload the local convo for faster sending
   useEffect(() => {
-    if (conversationTopic) {
-      const foundConversation = state.xmtp.conversations[conversationTopic];
-      if (foundConversation) {
-        setConversation(foundConversation);
+    if (conversation && conversation.peerAddress !== peerAddress) {
+      setPeerAddress(conversation.peerAddress);
+    }
+    if (conversation && !conversation.pending) {
+      getLocalXmtpConversationForTopic(conversation.topic);
+    }
+  }, [conversation, peerAddress]);
+
+  const openedMainConvo = useRef(false);
+
+  const openMainConversationWithPeer = useCallback(
+    async (peerToCreateConvoWith: string) => {
+      if (openedMainConvo.current) return;
+      openedMainConvo.current = true;
+      // First, resolve the peer to an address
+      const peerAddress = await getAddressForPeer(peerToCreateConvoWith);
+      if (!peerAddress) {
+        sentryTrackMessage("CREATE_CONVERSATION_ERROR", {
+          error: "Identity not found",
+        });
+        Alert.alert(
+          "Identity not found",
+          `We could not find the address attached to ${peerToCreateConvoWith}`,
+          [
+            {
+              text: "OK",
+              onPress: navigation.goBack,
+              isPreferred: true,
+            },
+          ]
+        );
+        return;
       }
-    } else if (peerAddress) {
-      const foundConversation = Object.values(state.xmtp.conversations).find(
+      // Then, check if we already have a main conversation with this address
+      const alreadyConversationWithAddress = Object.values(
+        state.xmtp.conversations
+      ).find(
         (c) =>
           c.peerAddress?.toLowerCase() === peerAddress.toLowerCase() &&
           !c.context
       );
-      if (foundConversation) {
-        setConversation(foundConversation);
-      }
-    }
-  }, [
-    peerAddress,
-    route.params.mainConversationWithPeer,
-    conversationTopic,
-    state.xmtp.conversations,
-  ]);
-
-  useEffect(() => {
-    if (conversation) {
-      setPeerAddress(conversation.peerAddress);
-      if (!conversation.pending) {
-        getLocalXmtpConversationForTopic(conversation.topic);
-      }
-    }
-  }, [conversation, dispatch]);
-
-  const sentNewConversationRequest = useRef(false);
-
-  useEffect(() => {
-    const openConversationWithPeer = async () => {
-      if (
-        !conversation &&
-        route.params.mainConversationWithPeer &&
-        !sentNewConversationRequest.current
-      ) {
-        sentNewConversationRequest.current = true;
-        // Create new conversation
-        const peerAddress = await getAddressForPeer(
-          route.params.mainConversationWithPeer
-        );
-        if (!peerAddress) {
-          sentryTrackMessage("CREATE_CONVERSATION_ERROR", {
-            error: "Identity not found",
-          });
+      if (alreadyConversationWithAddress) {
+        setConversationTopic(alreadyConversationWithAddress.topic);
+      } else {
+        // We don't have a convo with this peer, let's check if we
+        // can create a new one
+        const onNetwork = await isOnXmtp(peerAddress);
+        if (!onNetwork) {
           Alert.alert(
-            "Identity not found",
-            `We could not find the address attached to ${route.params.mainConversationWithPeer}`,
+            "Not yet using XMTP",
+            "Your contact is not yet using XMTP. Tell them to download the app at converse.xyz and log in with their wallet.",
             [
               {
                 text: "OK",
@@ -148,45 +148,33 @@ const Conversation = ({
               },
             ]
           );
-          return;
-        }
-        const alreadyConversationWithPeer = Object.values(
-          state.xmtp.conversations
-        ).find(
-          (c) =>
-            c.peerAddress?.toLowerCase() === peerAddress.toLowerCase() &&
-            !c.context
-        );
-        if (alreadyConversationWithPeer) {
-          setConversation(alreadyConversationWithPeer);
         } else {
-          setPeerAddress(peerAddress || "");
-          // setLastCreateConvoFromNewConvoScreen(false);
-          // saveWebviewNavigation(navigation);
-          const onNetwork = await isOnXmtp(peerAddress);
-          if (!onNetwork) {
-            Alert.alert(
-              "Not yet using XMTP",
-              "Your contact is not yet using XMTP. Tell them to download the app at converse.xyz and log in with their wallet.",
-              [
-                {
-                  text: "OK",
-                  onPress: navigation.goBack,
-                  isPreferred: true,
-                },
-              ]
-            );
-          } else {
-            createPendingConversation(peerAddress, undefined, dispatch);
-          }
+          // Creating the conversation locally in a lazy manner
+          const topic = await createPendingConversation(
+            peerAddress,
+            undefined,
+            dispatch
+          );
+          setConversationTopic(topic);
         }
       }
-    };
-    openConversationWithPeer();
+    },
+    [dispatch, navigation.goBack, state.xmtp.conversations]
+  );
+
+  // When the conversation topic changes, we set the conversation object
+  useEffect(() => {
+    if (conversationTopic) {
+      const foundConversation = state.xmtp.conversations[conversationTopic];
+      if (foundConversation) {
+        setConversation(foundConversation);
+      }
+    } else if (route.params.mainConversationWithPeer) {
+      openMainConversationWithPeer(route.params.mainConversationWithPeer);
+    }
   }, [
-    conversation,
-    dispatch,
-    navigation,
+    conversationTopic,
+    openMainConversationWithPeer,
     route.params.mainConversationWithPeer,
     state.xmtp.conversations,
   ]);
@@ -200,7 +188,6 @@ const Conversation = ({
   const messageToPrefill =
     route.params.message || conversation?.currentMessage || "";
   const [inputValue, setInputValue] = useState(messageToPrefill);
-
   const focusOnLayout = useRef(false);
   const chatLayoutDone = useRef(false);
   const alreadyAutomaticallyFocused = useRef(false);
@@ -375,14 +362,14 @@ const Conversation = ({
     [conversation, dispatch, state.xmtp.address]
   );
 
-  const onLeaveScreen = useCallback(() => {
+  const onLeaveScreen = useCallback(async () => {
     if (!conversation) return;
+    await markConversationRead(conversation, dispatch);
+    await cleanupPendingConversations(dispatch);
     dispatch({
       type: XmtpDispatchTypes.XmtpSetCurrentMessageContent,
       payload: { topic: conversation.topic, content: inputValue },
     });
-    markConversationRead(conversation, dispatch);
-    cleanupPendingConversations(dispatch);
   }, [conversation, dispatch, inputValue]);
 
   useEffect(() => {
