@@ -192,7 +192,13 @@ export const xmtpReducer = (state: XmtpType, action: XmtpActions): XmtpType => {
         localConnected: action.payload.connected,
       };
     case XmtpDispatchTypes.XmtpSetCurrentMessageContent: {
-      if (!state.conversations[action.payload.topic]) return state;
+      if (!state.conversations[action.payload.topic]) {
+        console.log(
+          "[Error] Tried to set current message on non existent topic",
+          action.payload.topic
+        );
+        return state;
+      }
       const newState = { ...state };
       newState.conversations[action.payload.topic].currentMessage =
         action.payload.content;
@@ -412,6 +418,9 @@ export const xmtpReducer = (state: XmtpType, action: XmtpActions): XmtpType => {
 
     case XmtpDispatchTypes.XmtpUpdateConversationTopic: {
       if (action.payload.oldTopic in state.conversations) {
+        console.log(
+          `TOPIC UPDATE: old topic ${action.payload.oldTopic} to new topic ${action.payload.conversation.topic}`
+        );
         const newState = { ...state };
         const existingConversation =
           state.conversations[action.payload.oldTopic];
