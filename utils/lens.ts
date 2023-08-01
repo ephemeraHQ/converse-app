@@ -1,7 +1,7 @@
 import axios from "axios";
 
 import config from "../config";
-import { LensHandle } from "../data/db/entities/profile";
+import { LensHandle } from "../data/db/entities/profileEntity";
 
 const LENS_CONVERSATION_ID_REGEX = /^lens\.dev\/dm\/(.*?)-(.*)$/;
 

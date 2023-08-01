@@ -1,9 +1,9 @@
 import "reflect-metadata";
 import { DataSource } from "typeorm/browser";
 
-import { Conversation } from "./entities/conversation";
-import { Message } from "./entities/message";
-import { Profile } from "./entities/profile";
+import { ConversationEntity } from "./entities/conversationEntity";
+import { MessageEntity } from "./entities/messageEntity";
+import { ProfileEntity } from "./entities/profileEntity";
 import { TypeORMLogger } from "./logger";
 import { init1671623489366 } from "./migrations/1671623489366-init";
 import { addLensHandle1671788934503 } from "./migrations/1671788934503-addLensHandle";
@@ -29,7 +29,7 @@ import { removeForeignKeyForTesters1690989046000 } from "./migrations/1690989046
 const dataSource = new DataSource({
   database: "converse",
   driver: require("expo-sqlite"),
-  entities: [Conversation, Message, Profile],
+  entities: [ConversationEntity, MessageEntity, ProfileEntity],
   synchronize: false,
   migrationsRun: false,
   migrations: [

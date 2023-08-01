@@ -24,9 +24,9 @@ import {
   profileRepository,
 } from "./db";
 import dataSource from "./db/datasource";
-import { Conversation } from "./db/entities/conversation";
-import { Message } from "./db/entities/message";
-import { Profile, ProfileSocials } from "./db/entities/profile";
+import { ConversationEntity } from "./db/entities/conversationEntity";
+import { MessageEntity } from "./db/entities/messageEntity";
+import { ProfileEntity, ProfileSocials } from "./db/entities/profileEntity";
 import { upsertRepository } from "./db/upsert";
 import { DispatchType } from "./deprecatedStore/context";
 import { ProfilesDispatchTypes } from "./deprecatedStore/profilesReducer";
@@ -41,7 +41,7 @@ type MaybeDispatchType = DispatchType | undefined;
 const xmtpMessageToDb = (
   xmtpMessage: XmtpMessage,
   conversationTopic: string
-): Message => ({
+): MessageEntity => ({
   id: xmtpMessage.id,
   senderAddress: xmtpMessage.senderAddress,
   sent: xmtpMessage.sent,
@@ -55,7 +55,7 @@ const xmtpMessageToDb = (
   // filled by other methods
 });
 
-const xmtpMessageFromDb = (message: Message): XmtpMessage => ({
+const xmtpMessageFromDb = (message: MessageEntity): XmtpMessage => ({
   id: message.id,
   senderAddress: message.senderAddress,
   sent: message.sent,
@@ -69,7 +69,7 @@ const xmtpMessageFromDb = (message: Message): XmtpMessage => ({
 
 const xmtpConversationToDb = (
   xmtpConversation: XmtpConversation
-): Conversation => ({
+): ConversationEntity => ({
   topic: xmtpConversation.topic,
   peerAddress: xmtpConversation.peerAddress,
   createdAt: xmtpConversation.createdAt,
@@ -82,7 +82,7 @@ const xmtpConversationToDb = (
 });
 
 const xmtpConversationFromDb = (
-  dbConversation: Conversation,
+  dbConversation: ConversationEntity,
   socials?: ProfileSocials
 ): XmtpConversation => {
   let context = undefined;
@@ -203,7 +203,7 @@ const setupAndSaveConversation = async (
     }
   );
 
-  let alreadyProfileInDb: Profile | null = null;
+  let alreadyProfileInDb: ProfileEntity | null = null;
   if (alreadyConversationInDbWithTopic) {
     alreadyProfileInDb = await profileRepository.findOne({
       where: { address: alreadyConversationInDbWithTopic.peerAddress },
@@ -587,7 +587,7 @@ export const updateMessagesIds = async (
     [messageId: string]: {
       newMessageId: string;
       newMessageSent: number;
-      message: Message;
+      message: MessageEntity;
     };
   },
   dispatch: DispatchType
