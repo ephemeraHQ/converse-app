@@ -1,4 +1,4 @@
-import { ProfileSocials } from "../db/entities/profileEntity";
+import { ProfileSocials } from "../store/profilesStore";
 import { ActionMap } from "./types";
 
 // Product
