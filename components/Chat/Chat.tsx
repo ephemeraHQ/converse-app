@@ -1,4 +1,4 @@
-import { FlashList } from "@shopify/flash-list";
+import { AnimatedFlashList } from "@shopify/flash-list";
 import differenceInCalendarDays from "date-fns/differenceInCalendarDays";
 import React, {
   MutableRefObject,
@@ -6,6 +6,7 @@ import React, {
   useEffect,
   useContext,
   useCallback,
+  useRef,
 } from "react";
 import {
   View,
@@ -13,6 +14,7 @@ import {
   useColorScheme,
   StyleSheet,
   ColorSchemeName,
+  FlatList,
 } from "react-native";
 import Reanimated, {
   useAnimatedStyle,
@@ -35,9 +37,9 @@ import ChatMessage, { MessageToDisplay } from "./ChatMessage";
 import ChatPlaceholder from "./ChatPlaceholder";
 
 const AnimatedView = Reanimated.createAnimatedComponent(View);
-const AnimatedFlashList = Reanimated.createAnimatedComponent(
-  FlashList
-) as typeof FlashList;
+const AnimatedFlatList = Reanimated.createAnimatedComponent(
+  FlatList
+) as typeof FlatList;
 
 type Props = {
   conversation?: XmtpConversationWithUpdate;
@@ -50,7 +52,7 @@ type Props = {
   onReadyToFocus: () => void;
 };
 
-const getFlashlistArray = (
+const getListArray = (
   xmtpAddress?: string,
   conversation?: XmtpConversationWithUpdate
 ) => {
@@ -114,11 +116,11 @@ export default function Chat({
   const { state } = useContext(AppContext);
   const colorScheme = useColorScheme();
   const styles = getStyles(colorScheme);
-  const [flashListArray, setFlashListArray] = useState(
-    getFlashlistArray(xmtpAddress, conversation)
+  const [listArray, setListArray] = useState(
+    getListArray(xmtpAddress, conversation)
   );
   useEffect(() => {
-    setFlashListArray(getFlashlistArray(xmtpAddress, conversation));
+    setListArray(getListArray(xmtpAddress, conversation));
   }, [conversation, conversation?.lastUpdateAt, xmtpAddress]);
 
   const DEFAULT_INPUT_HEIGHT = 36;
@@ -160,7 +162,7 @@ export default function Chat({
   );
 
   const showPlaceholder =
-    flashListArray.length === 1 || isBlockedPeer || !conversation;
+    listArray.length === 1 || isBlockedPeer || !conversation;
   const renderItem = useCallback(
     ({ item }: { item: MessageToDisplay }) => {
       if (item.id === "converse-recommendations") {
@@ -195,23 +197,34 @@ export default function Chat({
   );
   const keyExtractor = useCallback((item: MessageToDisplay) => item.id, []);
 
+  // This is a small hack - for pending convos we use FlatList,
+  // for "real" convos we use FlashList, because the replacement
+  // of id of the element in the FlashList without changing
+  // the list size makes it buggy (cropped), especially on Android
+  const pendingConversationRef = useRef(
+    !(conversation && !conversation.pending)
+  );
+
+  const AnimatedListView = pendingConversationRef.current
+    ? AnimatedFlatList
+    : AnimatedFlashList;
+
   return (
     <View
       style={styles.chatContainer}
       key={`chat-${conversation?.peerAddress}-${conversation?.context?.conversationId}-${isBlockedPeer}`}
     >
       <AnimatedView style={chatContentStyle}>
-        {conversation && flashListArray.length > 1 && !isBlockedPeer && (
-          <AnimatedFlashList
+        {conversation && listArray.length > 1 && !isBlockedPeer && (
+          <AnimatedListView
             contentContainerStyle={styles.chat}
-            data={flashListArray}
+            data={listArray}
             renderItem={renderItem}
             onLayout={() => {
               setTimeout(() => {
                 onReadyToFocus();
               }, 50);
             }}
-            estimatedItemSize={80}
             keyboardDismissMode="interactive"
             automaticallyAdjustContentInsets={false}
             contentInsetAdjustmentBehavior="never"
@@ -222,6 +235,7 @@ export default function Chat({
             inverted
             keyExtractor={keyExtractor}
             keyboardShouldPersistTaps="handled"
+            estimatedItemSize={80}
           />
         )}
         {showPlaceholder && (
@@ -229,7 +243,7 @@ export default function Chat({
             onReadyToFocus={onReadyToFocus}
             isBlockedPeer={isBlockedPeer}
             conversation={conversation}
-            messagesCount={flashListArray.length - 1}
+            messagesCount={listArray.length - 1}
             sendMessage={sendMessage}
           />
         )}
