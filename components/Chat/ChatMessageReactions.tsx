@@ -9,6 +9,7 @@ import {
 } from "react-native";
 
 import { AppContext } from "../../data/deprecatedStore/context";
+import { useProfilesStore } from "../../data/store/profilesStore";
 import { isAttachmentMessage } from "../../utils/attachment";
 import {
   actionSheetColors,
@@ -45,6 +46,7 @@ export default function ChatMessageReactions({
   const colorScheme = useColorScheme();
   const styles = getStyles(colorScheme);
   const { state } = useContext(AppContext);
+  const profiles = useProfilesStore((state) => state.profiles);
   const reactionsList = Object.values(reactions).sort(
     (r1, r2) => r1.sent - r2.sent
   );
@@ -54,7 +56,7 @@ export default function ChatMessageReactions({
       const peerAddress = r.senderAddress;
       const fromMe =
         peerAddress.toLowerCase() === state.xmtp.address?.toLowerCase();
-      const socials = state.profiles[peerAddress]?.socials;
+      const socials = profiles[peerAddress]?.socials;
       const ensName = socials?.ensNames?.find((e) => e.isPrimary)?.name;
       const unsDomain = socials?.unstoppableDomains?.find(
         (d) => d.isPrimary
@@ -92,7 +94,7 @@ export default function ChatMessageReactions({
     message,
     reactionsList,
     sendMessage,
-    state.profiles,
+    profiles,
     state.xmtp.address,
   ]);
   if (reactionsList.length === 0) return null;
