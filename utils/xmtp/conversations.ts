@@ -1,5 +1,5 @@
 import { sendMessageToWebview } from "../../components/XmtpWebview";
-import { Conversation as DbConversation } from "../../data/db/entities/conversation";
+import { ConversationEntity as DbConversation } from "../../data/db/entities/conversationEntity";
 import {
   Client,
   Conversation,

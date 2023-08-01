@@ -1,14 +1,15 @@
 import RNFS from "react-native-fs";
 
 import dataSource from "./datasource";
-import { Conversation } from "./entities/conversation";
-import { Message } from "./entities/message";
-import { Profile } from "./entities/profile";
+import { ConversationEntity } from "./entities/conversationEntity";
+import { MessageEntity } from "./entities/messageEntity";
+import { ProfileEntity } from "./entities/profileEntity";
 import { checkUpsertSupport } from "./upsert";
 
-export const conversationRepository = dataSource.getRepository(Conversation);
-export const messageRepository = dataSource.getRepository(Message);
-export const profileRepository = dataSource.getRepository(Profile);
+export const conversationRepository =
+  dataSource.getRepository(ConversationEntity);
+export const messageRepository = dataSource.getRepository(MessageEntity);
+export const profileRepository = dataSource.getRepository(ProfileEntity);
 
 export const initDb = async () => {
   if (dataSource.isInitialized) {

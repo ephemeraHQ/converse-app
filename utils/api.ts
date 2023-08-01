@@ -7,7 +7,7 @@ import {
   FarcasterUsername,
   LensHandle,
   UnstoppableDomain,
-} from "../data/db/entities/profile";
+} from "../data/db/entities/profileEntity";
 
 const api = axios.create({
   baseURL: config.apiURI,

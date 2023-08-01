@@ -34,7 +34,7 @@ export type ProfileSocials = {
 };
 
 @Entity()
-export class Profile {
+export class ProfileEntity {
   // @ts-ignore
   public static name = "Profile";
 

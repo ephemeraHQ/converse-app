@@ -8,7 +8,7 @@ import {
   markMessageAsSent,
   updateMessagesIds,
 } from "../data";
-import { Message } from "../data/db/entities/message";
+import { MessageEntity } from "../data/db/entities/messageEntity";
 import { AppContext, DispatchType } from "../data/deprecatedStore/context";
 import { XmtpDispatchTypes } from "../data/deprecatedStore/xmtpReducer";
 import { getBlockedPeers } from "../utils/api";
@@ -121,7 +121,7 @@ export const sendPendingMessages = async (dispatch: DispatchType) => {
       [messageId: string]: {
         newMessageId: string;
         newMessageSent: number;
-        message: Message;
+        message: MessageEntity;
       };
     } = {};
     for (const message of messagesToSend) {
