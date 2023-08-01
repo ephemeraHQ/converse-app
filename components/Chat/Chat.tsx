@@ -24,6 +24,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { AppContext } from "../../data/deprecatedStore/context";
 import { XmtpConversationWithUpdate } from "../../data/deprecatedStore/xmtpReducer";
+import { useProfilesStore } from "../../data/store/profilesStore";
 import { useKeyboardAnimation } from "../../utils/animations";
 import {
   backgroundColor,
@@ -114,6 +115,11 @@ export default function Chat({
   onReadyToFocus,
 }: Props) {
   const { state } = useContext(AppContext);
+  const peerSocials = useProfilesStore((s) =>
+    conversation?.peerAddress
+      ? s.profiles[conversation.peerAddress]?.socials
+      : undefined
+  );
   const colorScheme = useColorScheme();
   const styles = getStyles(colorScheme);
   const [listArray, setListArray] = useState(
@@ -170,7 +176,7 @@ export default function Chat({
           ? getProfileData(
               conversation.peerAddress,
               state.recommendations,
-              state.profiles
+              peerSocials
             )
           : undefined;
         if (!recommendationData || !conversation?.peerAddress) return null;
@@ -190,9 +196,9 @@ export default function Chat({
     [
       conversation?.peerAddress,
       sendMessage,
-      state.profiles,
       state.recommendations,
       styles.inChatRecommendations,
+      peerSocials,
     ]
   );
   const keyExtractor = useCallback((item: MessageToDisplay) => item.id, []);
@@ -219,6 +225,7 @@ export default function Chat({
           <AnimatedListView
             contentContainerStyle={styles.chat}
             data={listArray}
+            extraData={[peerSocials]}
             renderItem={renderItem}
             onLayout={() => {
               setTimeout(() => {

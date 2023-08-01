@@ -15,6 +15,7 @@ import {
   XmtpConversationWithUpdate,
   XmtpDispatchTypes,
 } from "../../data/deprecatedStore/xmtpReducer";
+import { useProfilesStore } from "../../data/store/profilesStore";
 import { blockPeer } from "../../utils/api";
 import { actionSheetColors, textPrimaryColor } from "../../utils/colors";
 import { getProfileData } from "../../utils/profile";
@@ -42,11 +43,16 @@ export default function ChatPlaceholder({
   const colorScheme = useColorScheme();
   const styles = getStyles(colorScheme);
   const { state, dispatch } = useContext(AppContext);
+  const peerSocials = useProfilesStore((s) =>
+    conversation?.peerAddress
+      ? s.profiles[conversation.peerAddress]?.socials
+      : undefined
+  );
   const recommendationData = conversation?.peerAddress
     ? getProfileData(
         conversation.peerAddress,
         state.recommendations,
-        state.profiles
+        peerSocials
       )
     : undefined;
   return (

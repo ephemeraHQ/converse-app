@@ -29,13 +29,12 @@ import { MessageEntity } from "./db/entities/messageEntity";
 import { ProfileEntity } from "./db/entities/profileEntity";
 import { upsertRepository } from "./db/upsert";
 import { DispatchType } from "./deprecatedStore/context";
-import { ProfilesDispatchTypes } from "./deprecatedStore/profilesReducer";
 import {
   XmtpConversation,
   XmtpDispatchTypes,
   XmtpMessage,
 } from "./deprecatedStore/xmtpReducer";
-import { ProfileSocials } from "./store/profilesStore";
+import { ProfileSocials, useProfilesStore } from "./store/profilesStore";
 
 type MaybeDispatchType = DispatchType | undefined;
 
@@ -287,12 +286,7 @@ const updateProfilesForConversations = async (
     for (const address in profilesByAddress) {
       socialsToDispatch[address] = { socials: profilesByAddress[address] };
     }
-    if (dispatch) {
-      dispatch({
-        type: ProfilesDispatchTypes.SetProfiles,
-        payload: { profiles: socialsToDispatch },
-      });
-    }
+    useProfilesStore.getState().setProfiles(socialsToDispatch);
 
     console.log("Done saving profiles to db!");
     const handleConversation = async (conversation: XmtpConversation) => {
@@ -539,10 +533,7 @@ export const loadDataToContext = async (dispatch: DispatchType) => {
     }),
     loadProfilesByAddress(),
   ]);
-  dispatch({
-    type: ProfilesDispatchTypes.SetProfiles,
-    payload: { profiles: profilesByAddress },
-  });
+  useProfilesStore.getState().setProfiles(profilesByAddress);
   dispatch({
     type: XmtpDispatchTypes.XmtpSetConversations,
     payload: {
@@ -702,14 +693,9 @@ export const refreshProfileForAddress = async (
     })),
     ["address"]
   );
-  dispatch({
-    type: ProfilesDispatchTypes.SetProfiles,
-    payload: {
-      profiles: {
-        [address]: {
-          socials: profilesByAddress[address],
-        },
-      },
+  useProfilesStore.getState().setProfiles({
+    [address]: {
+      socials: profilesByAddress[address],
     },
   });
 };

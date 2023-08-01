@@ -1,3 +1,5 @@
+import { create } from "zustand";
+
 export type LensHandle = {
   profileId: string;
   handle: string;
@@ -28,3 +30,19 @@ export type ProfileSocials = {
   lensHandles?: LensHandle[];
   unstoppableDomains?: UnstoppableDomain[];
 };
+
+export type ProfileByAddress = {
+  [address: string]: { socials: ProfileSocials } | undefined;
+};
+
+export type ProfilesStoreType = {
+  profiles: ProfileByAddress;
+  setProfiles: (profiles: ProfileByAddress) => void;
+};
+
+export const useProfilesStore = create<ProfilesStoreType>()((set) => ({
+  profiles: {},
+  // Setter keeps existing profiles but upserts new ones
+  setProfiles: (profiles) =>
+    set((state) => ({ profiles: { ...state.profiles, ...profiles } })),
+}));

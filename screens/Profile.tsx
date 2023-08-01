@@ -20,6 +20,7 @@ import {
 } from "../components/TableView/TableViewImage";
 import { AppContext } from "../data/deprecatedStore/context";
 import { XmtpDispatchTypes } from "../data/deprecatedStore/xmtpReducer";
+import { useProfilesStore } from "../data/store/profilesStore";
 import { blockPeer } from "../utils/api";
 import {
   actionSheetColors,
@@ -43,7 +44,8 @@ export default function ProfileScreen({
     [address: string]: boolean;
   }>({});
   const peerAddress = route.params.address;
-  const socials = state.profiles[peerAddress]?.socials;
+  const profiles = useProfilesStore((state) => state.profiles);
+  const socials = profiles[peerAddress]?.socials;
 
   const getAddressItemsFromArray = useCallback(
     <T,>(array: T[], titleKey: string, valueKey: string) => {
