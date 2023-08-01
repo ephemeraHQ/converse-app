@@ -15,9 +15,14 @@ import { showActionSheetWithOptions } from "./StateHandlers/ActionSheetStateHand
 import { createPendingConversations, sendPendingMessages } from "./XmtpState";
 
 let logs: string[] = [];
+let messagesFromNetwork = 0;
 
 export const addLog = (log: string) => {
   logs.push(log);
+};
+
+export const gotMessagesFromNetwork = (count: number) => {
+  messagesFromNetwork += count;
 };
 
 export const shouldShowDebug = (state: StateType) =>
@@ -47,7 +52,7 @@ const DebugButton = forwardRef((props, ref) => {
           await axios.post("http://noemalzieu.com:3000", {
             file: fileContent,
           });
-          console.log("uploaded!!");
+          alert("Uploaded!");
         },
         "Update app": async () => {
           try {
@@ -84,6 +89,10 @@ const DebugButton = forwardRef((props, ref) => {
         },
         "Clear logs": () => {
           logs = [];
+        },
+        "Show messages # received": () => {
+          alert(`${messagesFromNetwork} messages received`);
+          messagesFromNetwork = 0;
         },
         "Show config": () => {
           alert(
