@@ -26,7 +26,7 @@ import {
 import dataSource from "./db/datasource";
 import { ConversationEntity } from "./db/entities/conversationEntity";
 import { MessageEntity } from "./db/entities/messageEntity";
-import { ProfileEntity, ProfileSocials } from "./db/entities/profileEntity";
+import { ProfileEntity } from "./db/entities/profileEntity";
 import { upsertRepository } from "./db/upsert";
 import { DispatchType } from "./deprecatedStore/context";
 import { ProfilesDispatchTypes } from "./deprecatedStore/profilesReducer";
@@ -35,6 +35,7 @@ import {
   XmtpDispatchTypes,
   XmtpMessage,
 } from "./deprecatedStore/xmtpReducer";
+import { ProfileSocials } from "./store/profilesStore";
 
 type MaybeDispatchType = DispatchType | undefined;
 
