@@ -18,7 +18,7 @@ import MainIdentityStateHandler from "../components/StateHandlers/MainIdentitySt
 import NetworkStateHandler from "../components/StateHandlers/NetworkStateHandler";
 import NotificationsStateHandler from "../components/StateHandlers/NotificationsStateHandler";
 import config from "../config";
-import { AppContext } from "../data/store/context";
+import { AppContext } from "../data/deprecatedStore/context";
 import {
   backgroundColor,
   headerTitleStyle,

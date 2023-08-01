@@ -1,8 +1,8 @@
 import NetInfo from "@react-native-community/netinfo";
 import { useContext, useEffect, useRef } from "react";
 
-import { AppDispatchTypes } from "../../data/store/appReducer";
-import { AppContext } from "../../data/store/context";
+import { AppDispatchTypes } from "../../data/deprecatedStore/appReducer";
+import { AppContext } from "../../data/deprecatedStore/context";
 
 export const refreshNetworkState = NetInfo.refresh;
 

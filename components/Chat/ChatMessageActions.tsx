@@ -9,9 +9,9 @@ import {
 } from "react-native";
 import EmojiPicker from "rn-emoji-keyboard";
 
-import { AppDispatchTypes } from "../../data/store/appReducer";
-import { AppContext } from "../../data/store/context";
-import { XmtpDispatchTypes } from "../../data/store/xmtpReducer";
+import { AppDispatchTypes } from "../../data/deprecatedStore/appReducer";
+import { AppContext } from "../../data/deprecatedStore/context";
+import { XmtpDispatchTypes } from "../../data/deprecatedStore/xmtpReducer";
 import { blockPeer, reportMessage } from "../../utils/api";
 import { isAttachmentMessage } from "../../utils/attachment";
 import { actionSheetColors } from "../../utils/colors";

@@ -4,11 +4,11 @@ import { Alert } from "react-native";
 
 import { loadDataToContext, refreshProfileForAddress } from "../../data";
 import { initDb } from "../../data/db";
-import { AppDispatchTypes } from "../../data/store/appReducer";
-import { AppContext } from "../../data/store/context";
-import { NotificationsDispatchTypes } from "../../data/store/notificationsReducer";
-import { RecommendationsDispatchTypes } from "../../data/store/recommendationsReducer";
-import { XmtpDispatchTypes } from "../../data/store/xmtpReducer";
+import { AppDispatchTypes } from "../../data/deprecatedStore/appReducer";
+import { AppContext } from "../../data/deprecatedStore/context";
+import { NotificationsDispatchTypes } from "../../data/deprecatedStore/notificationsReducer";
+import { RecommendationsDispatchTypes } from "../../data/deprecatedStore/recommendationsReducer";
+import { XmtpDispatchTypes } from "../../data/deprecatedStore/xmtpReducer";
 import { loadSavedNotificationMessagesToContext } from "../../utils/backgroundNotifications/loadSavedNotifications";
 import { loadXmtpKeys } from "../../utils/keychain";
 import { cleanupAfterLogout, logout } from "../../utils/logout";

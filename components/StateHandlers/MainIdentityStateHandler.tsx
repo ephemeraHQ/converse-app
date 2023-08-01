@@ -1,7 +1,7 @@
 import { useContext, useEffect } from "react";
 
-import { AppDispatchTypes } from "../../data/store/appReducer";
-import { AppContext } from "../../data/store/context";
+import { AppDispatchTypes } from "../../data/deprecatedStore/appReducer";
+import { AppContext } from "../../data/deprecatedStore/context";
 import { getProfileForAddress, saveUser } from "../../utils/api";
 
 export default function MainIdentityStateHandler() {

@@ -2,8 +2,8 @@ import * as Notifications from "expo-notifications";
 import { useCallback, useContext, useEffect, useRef } from "react";
 import { AppState } from "react-native";
 
-import { AppContext } from "../../data/store/context";
-import { NotificationsDispatchTypes } from "../../data/store/notificationsReducer";
+import { AppContext } from "../../data/deprecatedStore/context";
+import { NotificationsDispatchTypes } from "../../data/deprecatedStore/notificationsReducer";
 import { saveUser } from "../../utils/api";
 import { navigateToConversation } from "../../utils/navigation";
 import {

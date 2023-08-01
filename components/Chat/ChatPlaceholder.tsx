@@ -10,11 +10,11 @@ import {
   Platform,
 } from "react-native";
 
-import { AppContext } from "../../data/store/context";
+import { AppContext } from "../../data/deprecatedStore/context";
 import {
   XmtpConversationWithUpdate,
   XmtpDispatchTypes,
-} from "../../data/store/xmtpReducer";
+} from "../../data/deprecatedStore/xmtpReducer";
 import { blockPeer } from "../../utils/api";
 import { actionSheetColors, textPrimaryColor } from "../../utils/colors";
 import { getProfileData } from "../../utils/profile";

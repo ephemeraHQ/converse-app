@@ -18,8 +18,8 @@ import {
   TableViewImage,
   TableViewPicto,
 } from "../components/TableView/TableViewImage";
-import { AppContext } from "../data/store/context";
-import { XmtpDispatchTypes } from "../data/store/xmtpReducer";
+import { AppContext } from "../data/deprecatedStore/context";
+import { XmtpDispatchTypes } from "../data/deprecatedStore/xmtpReducer";
 import { blockPeer } from "../utils/api";
 import {
   actionSheetColors,

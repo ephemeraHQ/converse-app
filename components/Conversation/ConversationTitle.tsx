@@ -16,8 +16,8 @@ import {
   TextInput,
 } from "react-native";
 
-import { AppContext } from "../../data/store/context";
-import { XmtpConversation } from "../../data/store/xmtpReducer";
+import { AppContext } from "../../data/deprecatedStore/context";
+import { XmtpConversation } from "../../data/deprecatedStore/xmtpReducer";
 import { NavigationParamList } from "../../screens/Main";
 import { headerTitleStyle, textSecondaryColor } from "../../utils/colors";
 import { conversationName, getTitleFontScale } from "../../utils/str";

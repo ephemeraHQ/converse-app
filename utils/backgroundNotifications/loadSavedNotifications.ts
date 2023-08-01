@@ -1,5 +1,5 @@
 import { saveMessages } from "../../data";
-import { DispatchType } from "../../data/store/context";
+import { DispatchType } from "../../data/deprecatedStore/context";
 import {
   emptySavedNotificationsMessages,
   loadSavedNotificationsMessages,

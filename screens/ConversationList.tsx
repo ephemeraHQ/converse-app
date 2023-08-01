@@ -30,8 +30,8 @@ import Picto from "../components/Picto/Picto";
 import Recommendations from "../components/Recommendations";
 import SettingsButton from "../components/SettingsButton";
 import Welcome from "../components/Welcome";
-import { AppContext } from "../data/store/context";
-import { XmtpConversationWithUpdate } from "../data/store/xmtpReducer";
+import { AppContext } from "../data/deprecatedStore/context";
+import { XmtpConversationWithUpdate } from "../data/deprecatedStore/xmtpReducer";
 import {
   backgroundColor,
   textPrimaryColor,

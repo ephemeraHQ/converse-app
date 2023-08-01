@@ -15,8 +15,8 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import IconLoading from "../assets/icon-loading.png";
 import config from "../config";
-import { AppContext } from "../data/store/context";
-import { RecommendationsDispatchTypes } from "../data/store/recommendationsReducer";
+import { AppContext } from "../data/deprecatedStore/context";
+import { RecommendationsDispatchTypes } from "../data/deprecatedStore/recommendationsReducer";
 import { RecommendationData, findFrens } from "../utils/api";
 import {
   backgroundColor,

@@ -9,7 +9,7 @@ import * as Sentry from "sentry-expo";
 
 import config from "../config";
 import { clearDB } from "../data/db";
-import { AppContext, StateType } from "../data/store/context";
+import { AppContext, StateType } from "../data/deprecatedStore/context";
 import { deleteXmtpKeys } from "../utils/keychain";
 import { showActionSheetWithOptions } from "./StateHandlers/ActionSheetStateHandler";
 import { createPendingConversations, sendPendingMessages } from "./XmtpState";

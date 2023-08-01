@@ -22,8 +22,8 @@ import Reanimated, {
 } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-import { AppContext } from "../../data/store/context";
-import { XmtpConversationWithUpdate } from "../../data/store/xmtpReducer";
+import { AppContext } from "../../data/deprecatedStore/context";
+import { XmtpConversationWithUpdate } from "../../data/deprecatedStore/xmtpReducer";
 import { useKeyboardAnimation } from "../../utils/animations";
 import {
   backgroundColor,

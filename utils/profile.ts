@@ -1,5 +1,5 @@
-import { ProfilesType } from "../data/store/profilesReducer";
-import { RecommendationsType } from "../data/store/recommendationsReducer";
+import { ProfilesType } from "../data/deprecatedStore/profilesReducer";
+import { RecommendationsType } from "../data/deprecatedStore/recommendationsReducer";
 import { RecommendationData } from "./api";
 
 export const getProfileData = (

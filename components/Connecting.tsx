@@ -1,7 +1,7 @@
 import { useContext, useEffect } from "react";
 import { View, Text, useColorScheme, Platform } from "react-native";
 
-import { AppContext, StateType } from "../data/store/context";
+import { AppContext, StateType } from "../data/deprecatedStore/context";
 import { textPrimaryColor } from "../utils/colors";
 import ActivityIndicator from "./ActivityIndicator/ActivityIndicator";
 
