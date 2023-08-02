@@ -27,7 +27,7 @@ type AccountStoreDataType = {
 // And here call the init method of each store
 const initStoreForAccount = (account: string) => {
   const profilesStore = initProfilesStore();
-  const preferencesStore = initPreferencesStore();
+  const preferencesStore = initPreferencesStore(account);
   storesByAccount[account] = {
     profiles: profilesStore,
     preferences: preferencesStore,

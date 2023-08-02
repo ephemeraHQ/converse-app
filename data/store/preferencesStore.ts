@@ -1,7 +1,10 @@
 import { create } from "zustand";
+import { persist, createJSONStorage } from "zustand/middleware";
+
+import { zustandMMKVStorage } from "../../utils/mmkv";
 
 export type NotificationsPreferences = {
-  dismissed: boolean;
+  showNotificationScreen: boolean;
 };
 
 export type PreferencesStoreType = {
@@ -11,15 +14,26 @@ export type PreferencesStoreType = {
   ) => void;
 };
 
-export const initPreferencesStore = () => {
-  const profilesStore = create<PreferencesStoreType>()((set) => ({
-    notifications: {
-      dismissed: false,
-    },
-    setNotificationsPreferences: (notificationsPreferences) =>
-      set((state) => ({
-        notifications: { ...state.notifications, ...notificationsPreferences },
-      })),
-  }));
+export const initPreferencesStore = (account: string) => {
+  const profilesStore = create<PreferencesStoreType>()(
+    persist(
+      (set) => ({
+        notifications: {
+          showNotificationScreen: true,
+        },
+        setNotificationsPreferences: (notificationsPreferences) =>
+          set((state) => ({
+            notifications: {
+              ...state.notifications,
+              ...notificationsPreferences,
+            },
+          })),
+      }),
+      {
+        name: `store-${account}-preferences`, // Account-based storage so each account can have its own preferences
+        storage: createJSONStorage(() => zustandMMKVStorage),
+      }
+    )
+  );
   return profilesStore;
 };
