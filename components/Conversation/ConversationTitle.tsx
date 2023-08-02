@@ -21,7 +21,7 @@ import { XmtpConversation } from "../../data/deprecatedStore/xmtpReducer";
 import { NavigationParamList } from "../../screens/Main";
 import { headerTitleStyle, textSecondaryColor } from "../../utils/colors";
 import { conversationName, getTitleFontScale } from "../../utils/str";
-import Connecting, { shouldShowConnectingOrSyncing } from "../Connecting";
+import Connecting, { useShouldShowConnectingOrSyncing } from "../Connecting";
 import { shouldShowDebug } from "../DebugButton";
 import Picto from "../Picto/Picto";
 
@@ -44,6 +44,7 @@ export default function ConversationTitle({
   const [title, setTitle] = useState(
     conversation ? conversationName(conversation) : ""
   );
+  const shouldShowConnectingOrSyncing = useShouldShowConnectingOrSyncing();
   const conversationRef = useRef(conversation);
   useEffect(() => {
     if (!conversation) {
@@ -67,7 +68,7 @@ export default function ConversationTitle({
   if (!conversation) return null;
   return (
     <>
-      {!shouldShowConnectingOrSyncing(state) && (
+      {!shouldShowConnectingOrSyncing && (
         <TouchableOpacity
           onLongPress={() => {
             if (!shouldShowDebug(state)) return;
@@ -116,7 +117,7 @@ export default function ConversationTitle({
           />
         </TouchableOpacity>
       )}
-      {shouldShowConnectingOrSyncing(state) && <Connecting />}
+      {shouldShowConnectingOrSyncing && <Connecting />}
     </>
   );
 }

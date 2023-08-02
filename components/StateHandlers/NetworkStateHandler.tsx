@@ -1,33 +1,32 @@
 import NetInfo from "@react-native-community/netinfo";
-import { useContext, useEffect, useRef } from "react";
+import { useEffect, useRef } from "react";
 
-import { AppDispatchTypes } from "../../data/deprecatedStore/appReducer";
-import { AppContext } from "../../data/deprecatedStore/context";
+import { useAppStore } from "../../data/store/appStore";
+import { pick } from "../../utils/objects";
 
 export const refreshNetworkState = NetInfo.refresh;
 
 export default function NetworkStateHandler() {
-  const { state, dispatch } = useContext(AppContext);
+  const { isInternetReachable, setIsInternetReachable } = useAppStore((s) =>
+    pick(s, ["isInternetReachable", "setIsInternetReachable"])
+  );
 
-  const reachableRef = useRef(state.app.isInternetReachable);
+  const reachableRef = useRef(isInternetReachable);
   useEffect(() => {
-    reachableRef.current = state.app.isInternetReachable;
-  }, [state.app.isInternetReachable]);
+    reachableRef.current = isInternetReachable;
+  }, [isInternetReachable]);
 
   useEffect(() => {
     const unsubscribeNetworkInfo = NetInfo.addEventListener((netState) => {
       const reachable = !!netState.isInternetReachable;
       if (reachable !== reachableRef.current) {
-        dispatch({
-          type: AppDispatchTypes.AppSetInternetReachable,
-          payload: { reachable },
-        });
+        setIsInternetReachable(reachable);
       }
     });
 
     return () => {
       unsubscribeNetworkInfo();
     };
-  }, [dispatch]);
+  }, [setIsInternetReachable]);
   return null;
 }

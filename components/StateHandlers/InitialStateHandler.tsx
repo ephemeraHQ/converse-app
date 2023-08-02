@@ -5,8 +5,10 @@ import { useColorScheme } from "react-native";
 import config from "../../config";
 import { AppDispatchTypes } from "../../data/deprecatedStore/appReducer";
 import { AppContext } from "../../data/deprecatedStore/context";
+import { useAppStore } from "../../data/store/appStore";
 import { setAndroidColors } from "../../utils/colors";
 import { navigateToConversation } from "../../utils/navigation";
+import { pick } from "../../utils/objects";
 import { hideSplashScreen } from "../../utils/splash/splash";
 
 let topicToNavigateTo = "";
@@ -28,6 +30,9 @@ const getSchemedURLFromUniversalURL = (url: string) => {
 export default function InitialStateHandler() {
   const colorScheme = useColorScheme();
   const { state, dispatch } = useContext(AppContext);
+  const { setSplashScreenHidden, hydrationDone } = useAppStore((s) =>
+    pick(s, ["setSplashScreenHidden", "hydrationDone"])
+  );
 
   useEffect(() => {
     setAndroidColors(colorScheme);
@@ -82,14 +87,9 @@ export default function InitialStateHandler() {
 
   useEffect(() => {
     const hideSplashScreenIfReady = async () => {
-      if (!splashScreenHidden.current && state.app.hydrationDone) {
+      if (!splashScreenHidden.current && hydrationDone) {
         splashScreenHidden.current = true;
-        dispatch({
-          type: AppDispatchTypes.AppHideSplashscreen,
-          payload: {
-            hide: true,
-          },
-        });
+        setSplashScreenHidden(true);
         await hideSplashScreen();
 
         // If app was loaded by clicking on notification,
@@ -108,7 +108,12 @@ export default function InitialStateHandler() {
       }
     };
     hideSplashScreenIfReady();
-  }, [dispatch, state.app.hydrationDone, state.xmtp.conversations]);
+  }, [
+    dispatch,
+    hydrationDone,
+    setSplashScreenHidden,
+    state.xmtp.conversations,
+  ]);
 
   return null;
 }

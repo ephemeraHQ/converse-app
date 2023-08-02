@@ -11,6 +11,7 @@ import {
 import { MessageEntity } from "../data/db/entities/messageEntity";
 import { AppContext, DispatchType } from "../data/deprecatedStore/context";
 import { XmtpDispatchTypes } from "../data/deprecatedStore/xmtpReducer";
+import { useAppStore } from "../data/store/appStore";
 import { getBlockedPeers } from "../utils/api";
 import { deserializeRemoteAttachmentContent } from "../utils/attachment";
 import { loadXmtpConversation, loadXmtpKeys } from "../utils/keychain";
@@ -217,6 +218,7 @@ export const getXmtpApiHeaders = async () => {
 
 export default function XmtpState() {
   const { dispatch, state } = useContext(AppContext);
+  const splashScreenHidden = useAppStore((s) => s.splashScreenHidden);
   // On open; opening XMTP session
   useEffect(() => {
     const initXmtp = async () => {
@@ -243,7 +245,7 @@ export default function XmtpState() {
       if (
         state.xmtp.localConnected &&
         state.xmtp.webviewConnected &&
-        state.app.splashScreenHidden &&
+        splashScreenHidden &&
         state.xmtp.initialLoadDone &&
         !isReconnecting
       ) {
@@ -259,7 +261,7 @@ export default function XmtpState() {
     };
   }, [
     dispatch,
-    state.app.splashScreenHidden,
+    splashScreenHidden,
     state.xmtp.initialLoadDone,
     state.xmtp.localConnected,
     state.xmtp.webviewConnected,

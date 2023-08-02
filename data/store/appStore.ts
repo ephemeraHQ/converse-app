@@ -8,6 +8,15 @@ type AppStoreType = {
   setNotificationsPermissionStatus: (
     status: AppStoreType["notificationsPermissionStatus"]
   ) => void;
+
+  splashScreenHidden: boolean;
+  setSplashScreenHidden: (hidden: boolean) => void;
+
+  isInternetReachable: boolean;
+  setIsInternetReachable: (reachable: boolean) => void;
+
+  hydrationDone: boolean;
+  setHydrationDone: (done: boolean) => void;
 };
 
 export const useAppStore = create<AppStoreType>()((set) => ({
@@ -16,4 +25,15 @@ export const useAppStore = create<AppStoreType>()((set) => ({
     set(() => ({
       notificationsPermissionStatus: status,
     })),
+
+  splashScreenHidden: false,
+  setSplashScreenHidden: (hidden) =>
+    set(() => ({ splashScreenHidden: hidden })),
+
+  isInternetReachable: false,
+  setIsInternetReachable: (reachable) =>
+    set(() => ({ isInternetReachable: reachable })),
+
+  hydrationDone: false,
+  setHydrationDone: (done) => set(() => ({ hydrationDone: done })),
 }));
