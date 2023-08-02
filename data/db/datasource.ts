@@ -19,6 +19,7 @@ import { addMessageReaction1688549487960 } from "./migrations/1688549487960-addM
 import { addMessageFallback1690204801962 } from "./migrations/1690204801962-addMessageFallback";
 import { addPendingStateToConversations1690376359971 } from "./migrations/1690376359971-addPendingStateToConversations";
 import { fixWrongForeignKey1690809735000 } from "./migrations/1690809735000-fixWrongForeignKey";
+import { removeForeignKeyForTesters1690989046000 } from "./migrations/1690989046000-removeForeignKeyForTesters";
 
 // We support SQLite from version 3.8.10.2 (embedded in Android 6.0 - SDK 23)
 // For supported methods see https://www.sqlite.org/changes.html
@@ -46,6 +47,7 @@ const dataSource = new DataSource({
     addMessageFallback1690204801962,
     addPendingStateToConversations1690376359971,
     fixWrongForeignKey1690809735000,
+    removeForeignKeyForTesters1690989046000,
   ],
   type: "expo",
   logging: true,
