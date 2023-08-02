@@ -677,10 +677,7 @@ export const markConversationRead = (
   );
 };
 
-export const refreshProfileForAddress = async (
-  address: string,
-  dispatch: DispatchType
-) => {
+export const refreshProfileForAddress = async (address: string) => {
   const now = new Date().getTime();
   const profilesByAddress = await getProfilesForAddresses([address]);
   // Save profiles to db

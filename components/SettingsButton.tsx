@@ -31,7 +31,7 @@ export default function SettingsButton({
     const methods = {
       "Your profile page": () => {
         if (state.xmtp.address) {
-          refreshProfileForAddress(state.xmtp.address, dispatch);
+          refreshProfileForAddress(state.xmtp.address);
           navigation.push("Profile", { address: state.xmtp.address });
         }
       },
