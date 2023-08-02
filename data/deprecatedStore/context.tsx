@@ -2,12 +2,6 @@ import React, { createContext, Dispatch, useReducer } from "react";
 
 import { AppActions, appInitialState, appReducer, AppType } from "./appReducer";
 import {
-  RecommendationsActions,
-  recommendationsInitialState,
-  recommendationsReducer,
-  RecommendationsType,
-} from "./recommendationsReducer";
-import {
   XmtpActions,
   xmtpInitialState,
   xmtpReducer,
@@ -17,16 +11,14 @@ import {
 export type StateType = {
   xmtp: XmtpType;
   app: AppType;
-  recommendations: RecommendationsType;
 };
 
 const initialState: StateType = {
   xmtp: xmtpInitialState,
   app: appInitialState,
-  recommendations: recommendationsInitialState,
 };
 
-export type ActionsType = XmtpActions | AppActions | RecommendationsActions;
+export type ActionsType = XmtpActions | AppActions;
 export type DispatchType = (value: ActionsType) => void;
 
 const AppContext = createContext<{
@@ -37,16 +29,9 @@ const AppContext = createContext<{
   dispatch: () => null,
 });
 
-const mainReducer = (
-  { xmtp, app, recommendations }: StateType,
-  action: ActionsType
-) => ({
+const mainReducer = ({ xmtp, app }: StateType, action: ActionsType) => ({
   app: appReducer(app, action as AppActions),
   xmtp: xmtpReducer(xmtp, action as XmtpActions),
-  recommendations: recommendationsReducer(
-    recommendations,
-    action as RecommendationsActions
-  ),
 });
 
 const AppProvider: React.FC<any> = (props: any) => {

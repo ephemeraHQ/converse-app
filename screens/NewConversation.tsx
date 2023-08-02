@@ -35,6 +35,7 @@ import config from "../config";
 import { createPendingConversation } from "../data";
 import { AppContext, StateType } from "../data/deprecatedStore/context";
 import { XmtpConversation } from "../data/deprecatedStore/xmtpReducer";
+import { useRecommendationsStore } from "../data/store/accountsStore";
 import {
   backgroundColor,
   itemSeparatorColor,
@@ -44,6 +45,7 @@ import {
 } from "../utils/colors";
 import { conversationLastMessagePreview } from "../utils/conversation";
 import { getAddressForPeer, isSupportedPeer } from "../utils/eth";
+import { pick } from "../utils/objects";
 import { addressPrefix, conversationName } from "../utils/str";
 import { isOnXmtp } from "../utils/xmtp/client";
 import { NavigationParamList } from "./Main";
@@ -111,11 +113,15 @@ export default function NewConversation({
   });
 
   const { state, dispatch } = useContext(AppContext);
-  const recommendationsLoadedOnce = state.recommendations.updatedAt > 0;
-  const recommendationsLoading = state.recommendations.loading;
-  const recommendationsFrensCount = Object.keys(
-    state.recommendations.frens
-  ).length;
+  const {
+    updatedAt: recommendationsUpdatedAt,
+    loading: recommendationsLoading,
+    frens,
+  } = useRecommendationsStore((s) =>
+    pick(s, ["updatedAt", "loading", "frens"])
+  );
+  const recommendationsLoadedOnce = recommendationsUpdatedAt > 0;
+  const recommendationsFrensCount = Object.keys(frens).length;
   const conversationsRef = useRef(state.xmtp.conversations);
 
   useEffect(() => {

@@ -1,15 +1,12 @@
-import { RecommendationsType } from "../data/deprecatedStore/recommendationsReducer";
 import { ProfileSocials } from "../data/store/profilesStore";
-import { RecommendationData } from "./api";
+import { RecommendationData } from "../data/store/recommendationsStore";
 
 export const getProfileData = (
-  peerAddress: string,
-  recommendations: RecommendationsType,
-  socials: ProfileSocials | undefined
+  recommendationData?: RecommendationData,
+  socials?: ProfileSocials
 ): RecommendationData | undefined => {
   // We get the data from the recommendations part
-  const recos = recommendations?.frens?.[peerAddress];
-  if (recos) return recos;
+  if (recommendationData) return recommendationData;
   // If not we get it from the profile part
   if (!socials) return undefined;
   const ens = socials.ensNames?.find((e) => e.isPrimary)?.name;

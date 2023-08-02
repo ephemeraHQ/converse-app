@@ -16,8 +16,9 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import IconLoading from "../assets/icon-loading.png";
 import config from "../config";
 import { AppContext } from "../data/deprecatedStore/context";
-import { RecommendationsDispatchTypes } from "../data/deprecatedStore/recommendationsReducer";
-import { RecommendationData, findFrens } from "../utils/api";
+import { useRecommendationsStore } from "../data/store/accountsStore";
+import { RecommendationData } from "../data/store/recommendationsStore";
+import { findFrens } from "../utils/api";
 import {
   backgroundColor,
   itemSeparatorColor,
@@ -25,6 +26,7 @@ import {
   textPrimaryColor,
   textSecondaryColor,
 } from "../utils/colors";
+import { pick } from "../utils/objects";
 import { shortAddress } from "../utils/str";
 import ActivityIndicator from "./ActivityIndicator/ActivityIndicator";
 import Button from "./Button/Button";
@@ -130,7 +132,22 @@ export default function Recommendations({
   navigation: NativeStackNavigationProp<any>;
   visibility: "FULL" | "EMBEDDED" | "HIDDEN";
 }) {
-  const { state, dispatch } = useContext(AppContext);
+  const { state } = useContext(AppContext);
+  const {
+    frens,
+    setLoadingRecommendations,
+    setRecommendations,
+    loading,
+    updatedAt,
+  } = useRecommendationsStore((s) =>
+    pick(s, [
+      "frens",
+      "setLoadingRecommendations",
+      "setRecommendations",
+      "loading",
+      "updatedAt",
+    ])
+  );
   const colorScheme = useColorScheme();
   const insets = useSafeAreaInsets();
   const styles = getStyles(colorScheme);
@@ -153,27 +170,22 @@ export default function Recommendations({
   useEffect(() => {
     // On load, let's load frens
     const getRecommendations = async () => {
-      dispatch({
-        type: RecommendationsDispatchTypes.SetLoadingRecommendations,
-      });
+      setLoadingRecommendations();
       const frens = await findFrens();
       const now = new Date().getTime();
-
-      dispatch({
-        type: RecommendationsDispatchTypes.SetRecommendations,
-        payload: { frens, updatedAt: now },
-      });
+      setRecommendations(frens, now);
     };
     const now = new Date().getTime();
-    if (
-      !state.recommendations.loading &&
-      state.xmtp.address &&
-      now - state.recommendations.updatedAt >= EXPIRE_AFTER
-    ) {
+    if (!loading && state.xmtp.address && now - updatedAt >= EXPIRE_AFTER) {
       getRecommendations();
     }
-  }, [dispatch, state.recommendations, state.xmtp.address]);
-  const frens = state.recommendations.frens;
+  }, [
+    loading,
+    setLoadingRecommendations,
+    setRecommendations,
+    state.xmtp.address,
+    updatedAt,
+  ]);
 
   const keyExtractor = useCallback((address: string) => address, []);
   const renderItem = useCallback(
@@ -243,11 +255,7 @@ export default function Recommendations({
 
   if (visibility === "HIDDEN") return null;
 
-  if (
-    state.recommendations.loading &&
-    Object.keys(frens).length === 0 &&
-    visibility === "FULL"
-  ) {
+  if (loading && Object.keys(frens).length === 0 && visibility === "FULL") {
     return (
       <View style={styles.fetching}>
         <ActivityIndicator />

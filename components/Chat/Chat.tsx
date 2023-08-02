@@ -4,7 +4,6 @@ import React, {
   MutableRefObject,
   useState,
   useEffect,
-  useContext,
   useCallback,
   useRef,
 } from "react";
@@ -22,9 +21,11 @@ import Reanimated, {
 } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-import { AppContext } from "../../data/deprecatedStore/context";
 import { XmtpConversationWithUpdate } from "../../data/deprecatedStore/xmtpReducer";
-import { useProfilesStore } from "../../data/store/accountsStore";
+import {
+  useProfilesStore,
+  useRecommendationsStore,
+} from "../../data/store/accountsStore";
 import { useKeyboardAnimation } from "../../utils/animations";
 import {
   backgroundColor,
@@ -114,11 +115,13 @@ export default function Chat({
   isBlockedPeer,
   onReadyToFocus,
 }: Props) {
-  const { state } = useContext(AppContext);
   const peerSocials = useProfilesStore((s) =>
     conversation?.peerAddress
       ? s.profiles[conversation.peerAddress]?.socials
       : undefined
+  );
+  const recommendationsData = useRecommendationsStore((s) =>
+    conversation?.peerAddress ? s.frens[conversation.peerAddress] : undefined
   );
   const colorScheme = useColorScheme();
   const styles = getStyles(colorScheme);
@@ -172,13 +175,10 @@ export default function Chat({
   const renderItem = useCallback(
     ({ item }: { item: MessageToDisplay }) => {
       if (item.id === "converse-recommendations") {
-        const recommendationData = conversation?.peerAddress
-          ? getProfileData(
-              conversation.peerAddress,
-              state.recommendations,
-              peerSocials
-            )
-          : undefined;
+        const recommendationData = getProfileData(
+          recommendationsData,
+          peerSocials
+        );
         if (!recommendationData || !conversation?.peerAddress) return null;
         return (
           <View style={styles.inChatRecommendations}>
@@ -194,11 +194,11 @@ export default function Chat({
       }
     },
     [
-      conversation?.peerAddress,
-      sendMessage,
-      state.recommendations,
-      styles.inChatRecommendations,
+      recommendationsData,
       peerSocials,
+      conversation?.peerAddress,
+      styles.inChatRecommendations,
+      sendMessage,
     ]
   );
   const keyExtractor = useCallback((item: MessageToDisplay) => item.id, []);

@@ -8,6 +8,7 @@ import {
   LensHandle,
   UnstoppableDomain,
 } from "../data/store/profilesStore";
+import { Frens } from "../data/store/recommendationsStore";
 
 const api = axios.create({
   baseURL: config.apiURI,
@@ -121,20 +122,6 @@ export const getProfilesForAddresses = async (
   });
   return data;
 };
-
-export type RecommendationTag = {
-  text: string;
-  image: string;
-};
-
-export type RecommendationData = {
-  tags: RecommendationTag[];
-  ens?: string;
-  lensHandles: string[];
-  farcasterUsernames: string[];
-};
-
-export type Frens = { [address: string]: RecommendationData };
 
 export const findFrens = async () => {
   const headers = await getXmtpApiHeaders();

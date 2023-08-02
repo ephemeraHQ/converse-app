@@ -1,6 +1,5 @@
 import { useHeaderHeight } from "@react-navigation/elements";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import { useContext } from "react";
 import {
   ColorSchemeName,
   StyleSheet,
@@ -12,7 +11,7 @@ import {
 
 import Ellipse from "../assets/ellipse.svg";
 import config from "../config";
-import { AppContext } from "../data/deprecatedStore/context";
+import { useRecommendationsStore } from "../data/store/accountsStore";
 import { NavigationParamList } from "../screens/Main";
 import { backgroundColor, textPrimaryColor } from "../utils/colors";
 import Button from "./Button/Button";
@@ -22,13 +21,11 @@ type Props = {
 } & NativeStackScreenProps<NavigationParamList, "Messages">;
 
 export default function Welcome({ ctaOnly, navigation }: Props) {
-  const { state } = useContext(AppContext);
+  const frens = useRecommendationsStore((s) => s.frens);
   const headerHeight = useHeaderHeight();
   const colorScheme = useColorScheme();
   const styles = getStyles(colorScheme);
-  const frensCount = state.recommendations?.frens
-    ? Object.keys(state.recommendations.frens).length
-    : 0;
+  const frensCount = frens ? Object.keys(frens).length : 0;
   return (
     <View
       style={

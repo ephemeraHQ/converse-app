@@ -20,7 +20,10 @@ import {
 } from "../components/TableView/TableViewImage";
 import { AppContext } from "../data/deprecatedStore/context";
 import { XmtpDispatchTypes } from "../data/deprecatedStore/xmtpReducer";
-import { useProfilesStore } from "../data/store/accountsStore";
+import {
+  useProfilesStore,
+  useRecommendationsStore,
+} from "../data/store/accountsStore";
 import { blockPeer } from "../utils/api";
 import {
   actionSheetColors,
@@ -44,6 +47,9 @@ export default function ProfileScreen({
     [address: string]: boolean;
   }>({});
   const peerAddress = route.params.address;
+  const recommendationTags = useRecommendationsStore(
+    (s) => s.frens[peerAddress]?.tags
+  );
   const profiles = useProfilesStore((state) => state.profiles);
   const socials = profiles[peerAddress]?.socials;
 
@@ -157,7 +163,6 @@ export default function ProfileScreen({
   ];
   const isBlockedPeer =
     state.xmtp.blockedPeerAddresses[peerAddress.toLowerCase()];
-  const recommendationTags = state.recommendations?.frens?.[peerAddress]?.tags;
   return (
     <ScrollView
       style={styles.profile}

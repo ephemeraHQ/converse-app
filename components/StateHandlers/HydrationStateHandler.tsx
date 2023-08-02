@@ -4,7 +4,6 @@ import { Alert } from "react-native";
 import { loadDataToContext, refreshProfileForAddress } from "../../data";
 import { initDb } from "../../data/db";
 import { AppContext } from "../../data/deprecatedStore/context";
-import { RecommendationsDispatchTypes } from "../../data/deprecatedStore/recommendationsReducer";
 import { XmtpDispatchTypes } from "../../data/deprecatedStore/xmtpReducer";
 import { useAppStore } from "../../data/store/appStore";
 import { loadSavedNotificationMessagesToContext } from "../../utils/backgroundNotifications/loadSavedNotifications";
@@ -82,20 +81,7 @@ export default function HydrationStateHandler() {
           type: XmtpDispatchTypes.XmtpInitialLoadDoneOnce,
         });
       }
-      const existingRecommendations = mmkv.getString(
-        "converse-recommendations"
-      );
-      if (existingRecommendations) {
-        try {
-          const parsedRecommendations = JSON.parse(existingRecommendations);
-          dispatch({
-            type: RecommendationsDispatchTypes.SetRecommendations,
-            payload: parsedRecommendations,
-          });
-        } catch (e) {
-          console.log(e);
-        }
-      }
+
       const savedBlockedPeers = JSON.parse(
         mmkv.getString("state.xmtp.blockedPeerAddresses") || "{}"
       );
