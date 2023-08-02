@@ -20,7 +20,7 @@ import {
 } from "../components/TableView/TableViewImage";
 import { AppContext } from "../data/deprecatedStore/context";
 import { XmtpDispatchTypes } from "../data/deprecatedStore/xmtpReducer";
-import { useProfilesStore } from "../data/store/profilesStore";
+import { useProfilesStore } from "../data/store/accountsStore";
 import { blockPeer } from "../utils/api";
 import {
   actionSheetColors,

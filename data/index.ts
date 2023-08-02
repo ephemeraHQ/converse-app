@@ -34,7 +34,8 @@ import {
   XmtpDispatchTypes,
   XmtpMessage,
 } from "./deprecatedStore/xmtpReducer";
-import { ProfileSocials, useProfilesStore } from "./store/profilesStore";
+import { useProfilesStore } from "./store/accountsStore";
+import { ProfileSocials } from "./store/profilesStore";
 
 type MaybeDispatchType = DispatchType | undefined;
 
