@@ -30,18 +30,18 @@ import { resetLocalXmtpState } from "../components/XmtpState";
 import { sendMessageToWebview } from "../components/XmtpWebview";
 import config from "../config";
 import { clearDB } from "../data/db";
-import { AppDispatchTypes } from "../data/deprecatedStore/appReducer";
 import { AppContext } from "../data/deprecatedStore/context";
 import { RecommendationsDispatchTypes } from "../data/deprecatedStore/recommendationsReducer";
+import { usePreferencesStore } from "../data/store/accountsStore";
 import { textPrimaryColor, textSecondaryColor } from "../utils/colors";
 import { saveXmtpKeys } from "../utils/keychain";
-import mmkv from "../utils/mmkv";
 import { shortAddress } from "../utils/str";
 import { getXmtpKeysFromSigner, isOnXmtp } from "../utils/xmtp/client";
 import { Signer } from "../vendor/xmtp-js/src";
 
 export default function OnboardingScreen() {
   const { state, dispatch } = useContext(AppContext);
+  const setEphemeralAccount = usePreferencesStore((s) => s.setEphemeralAccount);
   const colorScheme = useColorScheme();
   const styles = getStyles(colorScheme);
 
@@ -238,17 +238,9 @@ export default function OnboardingScreen() {
         )
       );
       if (user.isEphemeral) {
-        mmkv.set("state.app.isEphemeralAccount", true);
-        dispatch({
-          type: AppDispatchTypes.AppSetEphemeralAccount,
-          payload: { ephemeral: true },
-        });
+        setEphemeralAccount(true);
       } else {
-        mmkv.delete("state.app.isEphemeralAccount");
-        dispatch({
-          type: AppDispatchTypes.AppSetEphemeralAccount,
-          payload: { ephemeral: false },
-        });
+        setEphemeralAccount(false);
       }
       saveXmtpKeys(keys);
 
@@ -267,10 +259,11 @@ export default function OnboardingScreen() {
     }
   }, [
     dispatch,
+    setEphemeralAccount,
     thirdwebSigner,
     user.isEphemeral,
-    user.seedPhraseSigner,
     user.otherSigner,
+    user.seedPhraseSigner,
   ]);
 
   useEffect(() => {
