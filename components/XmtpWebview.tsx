@@ -8,6 +8,7 @@ import config from "../config";
 import { saveNewConversation, saveConversations, saveMessages } from "../data";
 import { AppContext } from "../data/deprecatedStore/context";
 import { XmtpDispatchTypes } from "../data/deprecatedStore/xmtpReducer";
+import { useAppStore } from "../data/store/appStore";
 import { loadSavedNotificationMessagesToContext } from "../utils/backgroundNotifications/loadSavedNotifications";
 import {
   loadXmtpConversation,
@@ -90,6 +91,9 @@ export default function XmtpWebview() {
   const web3Connected = useRef(false);
 
   const { state, dispatch } = useContext(AppContext);
+  const notificationsPermissionStatus = useAppStore(
+    (s) => s.notificationsPermissionStatus
+  );
 
   useEffect(() => {
     const messagesReadyInterval = setInterval(() => {
@@ -248,7 +252,10 @@ export default function XmtpWebview() {
         case "XMTP_NEW_CONVERSATION": {
           saveNewConversation(data, dispatch);
           // New conversation, let's subscribe to topic
-          if (state.notifications.status === "granted" && state.xmtp.address) {
+          if (
+            notificationsPermissionStatus === "granted" &&
+            state.xmtp.address
+          ) {
             subscribeToNotifications(
               state.xmtp.address,
               Object.values(state.xmtp.conversations),
@@ -304,7 +311,10 @@ export default function XmtpWebview() {
             type: XmtpDispatchTypes.XmtpSetReconnecting,
             payload: { reconnecting: false },
           });
-          if (state.notifications.status === "granted" && state.xmtp.address) {
+          if (
+            notificationsPermissionStatus === "granted" &&
+            state.xmtp.address
+          ) {
             subscribeToNotifications(
               state.xmtp.address,
               Object.values(state.xmtp.conversations),
@@ -393,7 +403,7 @@ export default function XmtpWebview() {
       dispatch,
       loadKeys,
       reloadData,
-      state.notifications.status,
+      notificationsPermissionStatus,
       state.xmtp.address,
       state.xmtp.blockedPeerAddresses,
       state.xmtp.conversations,
