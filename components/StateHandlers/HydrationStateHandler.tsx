@@ -1,4 +1,3 @@
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useContext, useEffect } from "react";
 import { Alert } from "react-native";
 
@@ -6,7 +5,6 @@ import { loadDataToContext, refreshProfileForAddress } from "../../data";
 import { initDb } from "../../data/db";
 import { AppDispatchTypes } from "../../data/deprecatedStore/appReducer";
 import { AppContext } from "../../data/deprecatedStore/context";
-import { NotificationsDispatchTypes } from "../../data/deprecatedStore/notificationsReducer";
 import { RecommendationsDispatchTypes } from "../../data/deprecatedStore/recommendationsReducer";
 import { XmtpDispatchTypes } from "../../data/deprecatedStore/xmtpReducer";
 import { loadSavedNotificationMessagesToContext } from "../../utils/backgroundNotifications/loadSavedNotifications";
@@ -32,12 +30,8 @@ export default function HydrationStateHandler() {
         console.log("Cleaning up after a logout");
         await cleanupAfterLogout();
       }
-      prepareForRefacto();
-      // Let's rehydrate value before hiding splash
-      const [showNotificationsScreen] = await Promise.all([
-        AsyncStorage.getItem("state.notifications.showNotificationsScreen"),
-        getInstalledWallets(false),
-      ]);
+      // Let's load installed wallets
+      await getInstalledWallets(false);
       let xmtpAddress = null;
       try {
         xmtpAddress = await getLoggedXmtpAddress();
@@ -49,14 +43,6 @@ export default function HydrationStateHandler() {
 
       await loadSavedNotificationMessagesToContext();
       await loadDataToContext(dispatch);
-      if (showNotificationsScreen) {
-        dispatch({
-          type: NotificationsDispatchTypes.NotificationsShowScreen,
-          payload: {
-            show: showNotificationsScreen !== "0",
-          },
-        });
-      }
 
       let address = xmtpAddress;
 

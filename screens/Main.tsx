@@ -19,6 +19,7 @@ import NetworkStateHandler from "../components/StateHandlers/NetworkStateHandler
 import NotificationsStateHandler from "../components/StateHandlers/NotificationsStateHandler";
 import config from "../config";
 import { AppContext } from "../data/deprecatedStore/context";
+import { usePreferencesStore } from "../data/store/accountsStore";
 import {
   backgroundColor,
   headerTitleStyle,
@@ -72,6 +73,9 @@ Notifications.setNotificationHandler({
 export default function Main() {
   const colorScheme = useColorScheme();
   const { state } = useContext(AppContext);
+  const showNotificationScreen = usePreferencesStore(
+    (s) => s.notifications.showNotificationScreen
+  );
 
   const navigationState = useRef<any>(undefined);
 
@@ -97,7 +101,7 @@ export default function Main() {
     if (!state.xmtp.address) {
       screenToShow = <OnboardingScreen />;
     } else if (
-      state.notifications.showNotificationsScreen &&
+      showNotificationScreen &&
       (state.notifications.status === "undetermined" ||
         (state.notifications.status === "denied" && Platform.OS === "android"))
     ) {

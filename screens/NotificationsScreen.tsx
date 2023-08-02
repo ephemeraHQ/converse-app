@@ -13,11 +13,15 @@ import Button from "../components/Button/Button";
 import Picto from "../components/Picto/Picto";
 import { AppContext } from "../data/deprecatedStore/context";
 import { NotificationsDispatchTypes } from "../data/deprecatedStore/notificationsReducer";
+import { usePreferencesStore } from "../data/store/accountsStore";
 import { textPrimaryColor } from "../utils/colors";
 import { requestPushNotificationsPermissions } from "../utils/notifications";
 
 export default function NotificationsScreen() {
   const { dispatch } = useContext(AppContext);
+  const setNotificationsPreferences = usePreferencesStore(
+    (s) => s.setNotificationsPreferences
+  );
   const colorScheme = useColorScheme();
   const styles = getStyles(colorScheme);
   return (
@@ -43,10 +47,7 @@ export default function NotificationsScreen() {
             // it will still show the popup. If not, go to Settings!
             Linking.openSettings();
           } else {
-            dispatch({
-              type: NotificationsDispatchTypes.NotificationsShowScreen,
-              payload: { show: false },
-            });
+            setNotificationsPreferences({ showNotificationScreen: false });
           }
           dispatch({
             type: NotificationsDispatchTypes.NotificationsStatus,
@@ -60,10 +61,7 @@ export default function NotificationsScreen() {
         variant="text"
         textStyle={{ fontWeight: "600" }}
         onPress={() => {
-          dispatch({
-            type: NotificationsDispatchTypes.NotificationsShowScreen,
-            payload: { show: false },
-          });
+          setNotificationsPreferences({ showNotificationScreen: false });
         }}
       />
     </View>
