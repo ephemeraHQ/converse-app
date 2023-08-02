@@ -16,7 +16,7 @@ export class removeForeignKeyForTesters1690989046000
     );
     if (hasForeignKey.length > 0) {
       console.log(
-        "Database has a foreign key - this is a tester - reapplying migration"
+        "[Migration removeForeignKeyForTesters1690989046000] - message table has a foreign key - reapplying migration"
       );
       // Re-apply precedent migration
       await queryRunner.query(
