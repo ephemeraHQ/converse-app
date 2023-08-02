@@ -33,6 +33,7 @@ export class Message {
   @Column("boolean", { default: false })
   sentViaConverse!: boolean;
 
+  @Index()
   @Column("text")
   conversationId!: string;
 
