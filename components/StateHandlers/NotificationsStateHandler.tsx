@@ -3,13 +3,14 @@ import { useCallback, useContext, useEffect, useRef } from "react";
 import { AppState } from "react-native";
 
 import { AppContext } from "../../data/deprecatedStore/context";
-import { NotificationsDispatchTypes } from "../../data/deprecatedStore/notificationsReducer";
+import { useAppStore } from "../../data/store/appStore";
 import { saveUser } from "../../utils/api";
 import { navigateToConversation } from "../../utils/navigation";
 import {
   getNotificationsPermissionStatus,
   subscribeToNotifications,
 } from "../../utils/notifications";
+import { pick } from "../../utils/objects";
 import { setTopicToNavigateTo } from "./InitialStateHandler";
 
 // This handler determines how the app handles
@@ -25,6 +26,13 @@ Notifications.setNotificationHandler({
 export default function NotificationsStateHandler() {
   const appState = useRef(AppState.currentState);
   const { state, dispatch } = useContext(AppContext);
+  const { setNotificationsPermissionStatus, notificationsPermissionStatus } =
+    useAppStore((s) =>
+      pick(s, [
+        "notificationsPermissionStatus",
+        "setNotificationsPermissionStatus",
+      ])
+    );
 
   const saveNotificationsStatus = useCallback(async () => {
     const notificationsStatus = await getNotificationsPermissionStatus();
@@ -33,12 +41,9 @@ export default function NotificationsStateHandler() {
       notificationsStatus === "granted" ||
       notificationsStatus === "denied"
     ) {
-      dispatch({
-        type: NotificationsDispatchTypes.NotificationsStatus,
-        payload: { status: notificationsStatus },
-      });
+      setNotificationsPermissionStatus(notificationsStatus);
     }
-  }, [dispatch]);
+  }, [setNotificationsPermissionStatus]);
 
   const handleNotificationWhileForegrounded = useCallback(
     (event: Notifications.Notification) => {
@@ -116,7 +121,7 @@ export default function NotificationsStateHandler() {
 
   useEffect(() => {
     if (
-      state.notifications.status === "granted" &&
+      notificationsPermissionStatus === "granted" &&
       state.xmtp.initialLoadDone &&
       state.xmtp.address &&
       !state.xmtp.loading
@@ -128,7 +133,7 @@ export default function NotificationsStateHandler() {
       );
     }
   }, [
-    state.notifications.status,
+    notificationsPermissionStatus,
     state.xmtp.address,
     state.xmtp.blockedPeerAddresses,
     state.xmtp.conversations,

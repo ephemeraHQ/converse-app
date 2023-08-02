@@ -8,7 +8,7 @@ import { Platform, TouchableOpacity, useColorScheme, View } from "react-native";
 import config from "../config";
 import { refreshProfileForAddress } from "../data";
 import { AppContext } from "../data/deprecatedStore/context";
-import { NotificationsDispatchTypes } from "../data/deprecatedStore/notificationsReducer";
+import { useAppStore } from "../data/store/appStore";
 import { NavigationParamList } from "../screens/Main";
 import { actionSheetColors, textSecondaryColor } from "../utils/colors";
 import { logout } from "../utils/logout";
@@ -16,6 +16,7 @@ import {
   requestPushNotificationsPermissions,
   NotificationPermissionStatus,
 } from "../utils/notifications";
+import { pick } from "../utils/objects";
 import { getTitleFontScale, shortAddress } from "../utils/str";
 import Button from "./Button/Button";
 import Picto from "./Picto/Picto";
@@ -25,6 +26,13 @@ export default function SettingsButton({
   navigation,
 }: NativeStackScreenProps<NavigationParamList, "Messages">) {
   const { state, dispatch } = useContext(AppContext);
+  const { setNotificationsPermissionStatus, notificationsPermissionStatus } =
+    useAppStore((s) =>
+      pick(s, [
+        "notificationsPermissionStatus",
+        "setNotificationsPermissionStatus",
+      ])
+    );
   const disconnectWallet = useDisconnect();
   const colorScheme = useColorScheme();
   const onPress = useCallback(() => {
@@ -48,7 +56,7 @@ export default function SettingsButton({
         );
       },
       "Turn on notifications": () => {
-        if (state.notifications.status === "denied") {
+        if (notificationsPermissionStatus === "denied") {
           if (Platform.OS === "android") {
             // Android 13 is always denied first so let's try to show
             requestPushNotificationsPermissions().then(
@@ -56,25 +64,19 @@ export default function SettingsButton({
                 if (newStatus === "denied") {
                   Linking.openSettings();
                 } else if (newStatus) {
-                  dispatch({
-                    type: NotificationsDispatchTypes.NotificationsStatus,
-                    payload: { status: newStatus },
-                  });
+                  setNotificationsPermissionStatus(newStatus);
                 }
               }
             );
           } else {
             Linking.openSettings();
           }
-        } else if (state.notifications.status === "undetermined") {
+        } else if (notificationsPermissionStatus === "undetermined") {
           // Open popup
           requestPushNotificationsPermissions().then(
             (newStatus: NotificationPermissionStatus | undefined) => {
               if (!newStatus) return;
-              dispatch({
-                type: NotificationsDispatchTypes.NotificationsStatus,
-                payload: { status: newStatus },
-              });
+              setNotificationsPermissionStatus(newStatus);
             }
           );
         }
@@ -87,7 +89,7 @@ export default function SettingsButton({
     };
 
     const options = Object.keys(methods);
-    if (state.notifications.status === "granted") {
+    if (notificationsPermissionStatus === "granted") {
       options.splice(options.indexOf("Turn on notifications"), 1);
     }
 
@@ -107,7 +109,15 @@ export default function SettingsButton({
         }
       }
     );
-  }, [colorScheme, dispatch, state]);
+  }, [
+    colorScheme,
+    disconnectWallet,
+    dispatch,
+    navigation,
+    notificationsPermissionStatus,
+    setNotificationsPermissionStatus,
+    state,
+  ]);
 
   if (Platform.OS === "ios") {
     return (

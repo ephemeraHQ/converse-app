@@ -20,6 +20,7 @@ import NotificationsStateHandler from "../components/StateHandlers/Notifications
 import config from "../config";
 import { AppContext } from "../data/deprecatedStore/context";
 import { usePreferencesStore } from "../data/store/accountsStore";
+import { useAppStore } from "../data/store/appStore";
 import {
   backgroundColor,
   headerTitleStyle,
@@ -76,6 +77,9 @@ export default function Main() {
   const showNotificationScreen = usePreferencesStore(
     (s) => s.notifications.showNotificationScreen
   );
+  const notificationsPermissionStatus = useAppStore(
+    (s) => s.notificationsPermissionStatus
+  );
 
   const navigationState = useRef<any>(undefined);
 
@@ -102,8 +106,9 @@ export default function Main() {
       screenToShow = <OnboardingScreen />;
     } else if (
       showNotificationScreen &&
-      (state.notifications.status === "undetermined" ||
-        (state.notifications.status === "denied" && Platform.OS === "android"))
+      (notificationsPermissionStatus === "undetermined" ||
+        (notificationsPermissionStatus === "denied" &&
+          Platform.OS === "android"))
     ) {
       screenToShow = <NotificationsScreen />;
     } else {

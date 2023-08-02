@@ -12,8 +12,8 @@ import {
 import Button from "../components/Button/Button";
 import Picto from "../components/Picto/Picto";
 import { AppContext } from "../data/deprecatedStore/context";
-import { NotificationsDispatchTypes } from "../data/deprecatedStore/notificationsReducer";
 import { usePreferencesStore } from "../data/store/accountsStore";
+import { useAppStore } from "../data/store/appStore";
 import { textPrimaryColor } from "../utils/colors";
 import { requestPushNotificationsPermissions } from "../utils/notifications";
 
@@ -21,6 +21,9 @@ export default function NotificationsScreen() {
   const { dispatch } = useContext(AppContext);
   const setNotificationsPreferences = usePreferencesStore(
     (s) => s.setNotificationsPreferences
+  );
+  const setNotificationsPermissionStatus = useAppStore(
+    (s) => s.setNotificationsPermissionStatus
   );
   const colorScheme = useColorScheme();
   const styles = getStyles(colorScheme);
@@ -49,10 +52,7 @@ export default function NotificationsScreen() {
           } else {
             setNotificationsPreferences({ showNotificationScreen: false });
           }
-          dispatch({
-            type: NotificationsDispatchTypes.NotificationsStatus,
-            payload: { status: newStatus },
-          });
+          setNotificationsPermissionStatus(newStatus);
         }}
       />
       <Button
