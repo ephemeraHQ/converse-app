@@ -1,5 +1,6 @@
 import { create, StoreApi, UseBoundStore } from "zustand";
 
+import { initPreferencesStore, PreferencesStoreType } from "./preferencesStore";
 import { ProfilesStoreType, initProfilesStore } from "./profilesStore";
 
 type AccountsStoreStype = {
@@ -20,12 +21,17 @@ export const useAccountsStore = create<AccountsStoreStype>()((set) => ({
 // Add here the type of each store data
 type AccountStoreDataType = {
   profiles: ProfilesStoreType;
+  preferences: PreferencesStoreType;
 };
 
 // And here call the init method of each store
 const initStoreForAccount = (account: string) => {
   const profilesStore = initProfilesStore();
-  storesByAccount[account] = { profiles: profilesStore };
+  const preferencesStore = initPreferencesStore();
+  storesByAccount[account] = {
+    profiles: profilesStore,
+    preferences: preferencesStore,
+  };
 };
 
 type AccountStoreType = {
@@ -53,16 +59,16 @@ initStoreForAccount("MAIN_ACCOUNT");
 // This enables us to use account-based substores for the current selected user automatically,
 // Just call export useSubStore = accountStoreHook("subStoreName") in the substore definition
 
-export const currentAccountStoreHook = (key: keyof AccountStoreDataType) => {
-  const _useStore = <U>(
-    selector: (state: AccountStoreDataType[typeof key]) => U
-  ) => {
+const currentAccountStoreHook = <T extends keyof AccountStoreDataType>(
+  key: T
+) => {
+  const _useStore = <U>(selector: (state: AccountStoreDataType[T]) => U) => {
     const currentAccount = useAccountsStore((s) => s.currentAccount);
     const accountStore = getAccountStore(currentAccount);
     return accountStore[key](selector);
   };
 
-  const use = _useStore as AccountStoreType[typeof key];
+  const use = _useStore as AccountStoreType[T];
   use.getState = () => {
     const currentAccountState = useAccountsStore.getState();
     const currentAccount = currentAccountState.currentAccount;
@@ -72,24 +78,5 @@ export const currentAccountStoreHook = (key: keyof AccountStoreDataType) => {
   return use;
 };
 
-// This enables us to use account-based substores for the any user automatically,
-// Just call export useSubStore = accountStoreHook("account", "subStoreName") in the substore definition
-
-export const accountStoreHook = (
-  account: string,
-  key: keyof AccountStoreDataType
-) => {
-  const _useStore = <U>(
-    selector: (state: AccountStoreDataType[typeof key]) => U
-  ) => {
-    const accountStore = getAccountStore(account);
-    return accountStore[key](selector);
-  };
-
-  const use = _useStore as AccountStoreType[typeof key];
-  use.getState = () => {
-    const accountStore = getAccountStore(account);
-    return accountStore[key].getState();
-  };
-  return use;
-};
+export const useProfilesStore = currentAccountStoreHook("profiles");
+export const usePreferencesStore = currentAccountStoreHook("preferences");

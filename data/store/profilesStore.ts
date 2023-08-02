@@ -1,7 +1,5 @@
 import { create } from "zustand";
 
-import { currentAccountStoreHook } from "./accountsStore";
-
 export type LensHandle = {
   profileId: string;
   handle: string;
@@ -51,5 +49,3 @@ export const initProfilesStore = () => {
   }));
   return profilesStore;
 };
-
-export const useProfilesStore = currentAccountStoreHook("profiles");

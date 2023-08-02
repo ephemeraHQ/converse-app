@@ -9,7 +9,7 @@ import {
 } from "react-native";
 
 import { AppContext } from "../../data/deprecatedStore/context";
-import { useProfilesStore } from "../../data/store/profilesStore";
+import { useProfilesStore } from "../../data/store/accountsStore";
 import { isAttachmentMessage } from "../../utils/attachment";
 import {
   actionSheetColors,

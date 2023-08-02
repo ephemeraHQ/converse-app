@@ -15,7 +15,7 @@ import {
   XmtpConversationWithUpdate,
   XmtpDispatchTypes,
 } from "../../data/deprecatedStore/xmtpReducer";
-import { useProfilesStore } from "../../data/store/profilesStore";
+import { useProfilesStore } from "../../data/store/accountsStore";
 import { blockPeer } from "../../utils/api";
 import { actionSheetColors, textPrimaryColor } from "../../utils/colors";
 import { getProfileData } from "../../utils/profile";

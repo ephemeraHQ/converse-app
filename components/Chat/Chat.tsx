@@ -24,7 +24,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { AppContext } from "../../data/deprecatedStore/context";
 import { XmtpConversationWithUpdate } from "../../data/deprecatedStore/xmtpReducer";
-import { useProfilesStore } from "../../data/store/profilesStore";
+import { useProfilesStore } from "../../data/store/accountsStore";
 import { useKeyboardAnimation } from "../../utils/animations";
 import {
   backgroundColor,
