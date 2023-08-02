@@ -3,7 +3,6 @@ import { ActionMap } from "./types";
 // Product
 
 export type AppType = {
-  splashScreenHidden: boolean;
   mainIdentity: string;
   isInternetReachable: boolean;
   hydrationDone: boolean;
@@ -18,7 +17,6 @@ export type AppType = {
 };
 
 export const appInitialState: AppType = {
-  splashScreenHidden: false,
   mainIdentity: "",
   isInternetReachable: false,
   hydrationDone: false,
@@ -33,10 +31,7 @@ export const appInitialState: AppType = {
 };
 
 export enum AppDispatchTypes {
-  AppHideSplashscreen = "APP_HIDE_SPLASHSCREEN",
   AppSetMainIdentity = "APP_SET_MAIN_IDENTITY",
-  AppSetInternetReachable = "APP_SET_INTERNET_REACHABLE",
-  AppSetHydrationDone = "APP_SET_HYDRATION_DONE",
   AppSetDesktopConnectSessionId = "APP_SET_DESKTOP_SESSION_ID",
   AppSetMediaPreview = "APP_SET_MEDIA_PREVIEW",
   AppSetEphemeralAccount = "APP_SET_EPHEMERAL_ACCOUNT",
@@ -44,17 +39,8 @@ export enum AppDispatchTypes {
 }
 
 type AppPayload = {
-  [AppDispatchTypes.AppHideSplashscreen]: {
-    hide: boolean;
-  };
   [AppDispatchTypes.AppSetMainIdentity]: {
     identity: string;
-  };
-  [AppDispatchTypes.AppSetInternetReachable]: {
-    reachable: boolean;
-  };
-  [AppDispatchTypes.AppSetHydrationDone]: {
-    done: boolean;
   };
   [AppDispatchTypes.AppSetDesktopConnectSessionId]: {
     sessionId?: string;
@@ -76,12 +62,6 @@ export type AppActions = ActionMap<AppPayload>[keyof ActionMap<AppPayload>];
 
 export const appReducer = (state: AppType, action: AppActions): AppType => {
   switch (action.type) {
-    case AppDispatchTypes.AppHideSplashscreen: {
-      return {
-        ...state,
-        splashScreenHidden: action.payload.hide,
-      };
-    }
     case AppDispatchTypes.AppSetMainIdentity: {
       return {
         ...state,
@@ -93,20 +73,6 @@ export const appReducer = (state: AppType, action: AppActions): AppType => {
       return {
         ...state,
         ephemeralAccount: action.payload.ephemeral,
-      };
-    }
-
-    case AppDispatchTypes.AppSetInternetReachable: {
-      return {
-        ...state,
-        isInternetReachable: action.payload.reachable,
-      };
-    }
-
-    case AppDispatchTypes.AppSetHydrationDone: {
-      return {
-        ...state,
-        hydrationDone: action.payload.done,
       };
     }
 

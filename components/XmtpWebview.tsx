@@ -91,6 +91,7 @@ export default function XmtpWebview() {
   const web3Connected = useRef(false);
 
   const { state, dispatch } = useContext(AppContext);
+  const isInternetReachable = useAppStore((s) => s.isInternetReachable);
   const notificationsPermissionStatus = useAppStore(
     (s) => s.notificationsPermissionStatus
   );
@@ -159,15 +160,15 @@ export default function XmtpWebview() {
     [dispatch, state.xmtp.conversations, state.xmtp.webviewConnected]
   );
 
-  const isInternetReachable = useRef(state.app.isInternetReachable);
+  const isInternetReachableRef = useRef(isInternetReachable);
 
   useEffect(() => {
-    if (!isInternetReachable.current && state.app.isInternetReachable) {
+    if (!isInternetReachableRef.current && isInternetReachable) {
       // We're back online!
       reloadData(true);
     }
-    isInternetReachable.current = state.app.isInternetReachable;
-  }, [reloadData, state.app.isInternetReachable]);
+    isInternetReachableRef.current = isInternetReachable;
+  }, [reloadData, isInternetReachable]);
 
   useEffect(() => {
     const subscription = AppState.addEventListener(

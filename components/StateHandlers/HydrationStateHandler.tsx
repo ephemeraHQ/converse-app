@@ -7,10 +7,12 @@ import { AppDispatchTypes } from "../../data/deprecatedStore/appReducer";
 import { AppContext } from "../../data/deprecatedStore/context";
 import { RecommendationsDispatchTypes } from "../../data/deprecatedStore/recommendationsReducer";
 import { XmtpDispatchTypes } from "../../data/deprecatedStore/xmtpReducer";
+import { useAppStore } from "../../data/store/appStore";
 import { loadSavedNotificationMessagesToContext } from "../../utils/backgroundNotifications/loadSavedNotifications";
 import { loadXmtpKeys } from "../../utils/keychain";
 import { cleanupAfterLogout, logout } from "../../utils/logout";
 import mmkv from "../../utils/mmkv";
+import { pick } from "../../utils/objects";
 import { getLoggedXmtpAddress } from "../../utils/sharedData/sharedData";
 import { addLog } from "../DebugButton";
 import { getInstalledWallets } from "../Onboarding/supportedWallets";
@@ -21,6 +23,9 @@ let migrationAlertShown = false;
 
 export default function HydrationStateHandler() {
   const { state, dispatch } = useContext(AppContext);
+  const { setHydrationDone } = useAppStore((s) =>
+    pick(s, ["setHydrationDone"])
+  );
 
   // Initial hydration
   useEffect(() => {
@@ -108,10 +113,7 @@ export default function HydrationStateHandler() {
         payload: { ephemeral: !!connectedToEphemeralAccount },
       });
 
-      dispatch({
-        type: AppDispatchTypes.AppSetHydrationDone,
-        payload: { done: true },
-      });
+      setHydrationDone(true);
       if (xmtpAddress && !migrationAlertShown) {
         const xmtpKeys = await loadXmtpKeys();
         if (!xmtpKeys) {

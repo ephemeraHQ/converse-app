@@ -20,7 +20,7 @@ import {
 import { FAB } from "react-native-paper";
 
 import Connecting, {
-  shouldShowConnectingOrSyncing,
+  useShouldShowConnectingOrSyncing,
 } from "../components/Connecting";
 import ConversationListItem from "../components/ConversationListItem";
 import DebugButton, { shouldShowDebug } from "../components/DebugButton";
@@ -148,6 +148,7 @@ export default function ConversationList({
   const colorScheme = useColorScheme();
   const styles = getStyles(colorScheme);
   const { state } = useContext(AppContext);
+  const shouldShowConnectingOrSyncing = useShouldShowConnectingOrSyncing();
   const [flatListItems, setFlatListItems] = useState<FlatListItem[]>([]);
   useEffect(() => {
     const conversations = Object.values(state.xmtp.conversations)
@@ -195,7 +196,7 @@ export default function ConversationList({
   useEffect(() => {
     navigation.setOptions({
       headerTitle: () => {
-        if (shouldShowConnectingOrSyncing(state)) {
+        if (shouldShowConnectingOrSyncing) {
           return <Connecting />;
         } else {
           return Platform.OS === "android" ? (

@@ -1,29 +1,40 @@
 import { useContext, useEffect } from "react";
 import { View, Text, useColorScheme, Platform } from "react-native";
 
-import { AppContext, StateType } from "../data/deprecatedStore/context";
+import { AppContext } from "../data/deprecatedStore/context";
+import { useAppStore } from "../data/store/appStore";
 import { textPrimaryColor } from "../utils/colors";
 import ActivityIndicator from "./ActivityIndicator/ActivityIndicator";
 
-export const shouldShowConnecting = (state: StateType) =>
-  !state.app.isInternetReachable ||
-  !state.xmtp.localConnected ||
-  !state.xmtp.webviewConnected ||
-  state.xmtp.reconnecting;
+export const useShouldShowConnecting = () => {
+  const { state } = useContext(AppContext);
+  const isInternetReachable = useAppStore((s) => s.isInternetReachable);
+  return (
+    !isInternetReachable ||
+    !state.xmtp.localConnected ||
+    !state.xmtp.webviewConnected ||
+    state.xmtp.reconnecting
+  );
+};
 
-export const shouldShowConnectingOrSyncing = (state: StateType) =>
-  shouldShowConnecting(state) ||
-  (!state.xmtp.initialLoadDoneOnce &&
-    Object.keys(state.xmtp.conversations).length > 0);
+export const useShouldShowConnectingOrSyncing = () => {
+  const { state } = useContext(AppContext);
+  const shouldShowConnecting = useShouldShowConnecting();
+  return (
+    shouldShowConnecting ||
+    (!state.xmtp.initialLoadDoneOnce &&
+      Object.keys(state.xmtp.conversations).length > 0)
+  );
+};
 
 export let isReconnecting = false;
 
 export default function Connecting() {
   const colorScheme = useColorScheme();
-  const { state } = useContext(AppContext);
+  const shouldShowConnecting = useShouldShowConnecting();
   useEffect(() => {
-    isReconnecting = shouldShowConnecting(state);
-  }, [state]);
+    isReconnecting = shouldShowConnecting;
+  }, [shouldShowConnecting]);
   return (
     <View style={{ flexDirection: "row", alignItems: "center" }}>
       <ActivityIndicator />
@@ -36,7 +47,7 @@ export default function Connecting() {
           }),
         }}
       >
-        {shouldShowConnecting(state) ? "Connecting" : "Syncing"}
+        {shouldShowConnecting ? "Connecting" : "Syncing"}
       </Text>
     </View>
   );

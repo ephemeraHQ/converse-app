@@ -27,6 +27,7 @@ import {
   navigationSecondaryBackgroundColor,
   textSecondaryColor,
 } from "../utils/colors";
+import { pick } from "../utils/objects";
 import Conversation from "./Conversation";
 import ConversationList from "./ConversationList";
 import ConverseMatchMaker from "./ConverseMatchMaker";
@@ -77,8 +78,8 @@ export default function Main() {
   const showNotificationScreen = usePreferencesStore(
     (s) => s.notifications.showNotificationScreen
   );
-  const notificationsPermissionStatus = useAppStore(
-    (s) => s.notificationsPermissionStatus
+  const { notificationsPermissionStatus, splashScreenHidden } = useAppStore(
+    (s) => pick(s, ["notificationsPermissionStatus", "splashScreenHidden"])
   );
 
   const navigationState = useRef<any>(undefined);
@@ -101,7 +102,7 @@ export default function Main() {
 
   let screenToShow = undefined;
 
-  if (state.app.splashScreenHidden) {
+  if (splashScreenHidden) {
     if (!state.xmtp.address) {
       screenToShow = <OnboardingScreen />;
     } else if (
@@ -167,7 +168,7 @@ export default function Main() {
       };
       screenToShow = (
         <NavigationContainer
-          linking={state.app.splashScreenHidden ? (linking as any) : undefined}
+          linking={splashScreenHidden ? (linking as any) : undefined}
         >
           <Stack.Navigator
             initialRouteName="Messages"
