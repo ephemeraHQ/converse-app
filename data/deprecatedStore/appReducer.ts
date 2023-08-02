@@ -3,7 +3,6 @@ import { ActionMap } from "./types";
 // Product
 
 export type AppType = {
-  isInternetReachable: boolean;
   desktopConnectSessionId?: string;
   mediaPreview: {
     sending: boolean;
@@ -14,7 +13,6 @@ export type AppType = {
 };
 
 export const appInitialState: AppType = {
-  isInternetReachable: false,
   desktopConnectSessionId: undefined,
   mediaPreview: {
     sending: false,
