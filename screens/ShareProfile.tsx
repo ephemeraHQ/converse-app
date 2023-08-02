@@ -17,6 +17,7 @@ import AndroidBackAction from "../components/AndroidBackAction";
 import ConverseButton from "../components/Button/Button";
 import config from "../config";
 import { AppContext } from "../data/deprecatedStore/context";
+import { useProfilesStore } from "../data/store/accountsStore";
 import { backgroundColor, textPrimaryColor } from "../utils/colors";
 import { shortAddress } from "../utils/str";
 import { NavigationParamList } from "./Main";
@@ -27,6 +28,11 @@ export default function ShareProfileScreen({
 }: NativeStackScreenProps<NavigationParamList, "ShareProfile">) {
   const colorScheme = useColorScheme();
   const { state } = useContext(AppContext);
+  const loggedUserENSNames = useProfilesStore((s) =>
+    state.xmtp.address
+      ? s.profiles[state.xmtp.address]?.socials?.ensNames
+      : undefined
+  );
   useEffect(() => {
     navigation.setOptions({
       headerLeft: () =>
@@ -43,8 +49,9 @@ export default function ShareProfileScreen({
     });
   }, [navigation]);
   const styles = getStyles(colorScheme);
+  const mainIdentity = loggedUserENSNames?.find((n) => n.isPrimary)?.name;
   const profileUrl = `https://${config.websiteDomain}/dm/${
-    state.app.mainIdentity || state.xmtp.address
+    mainIdentity || state.xmtp.address
   }`;
 
   const shareDict =
@@ -63,7 +70,7 @@ export default function ShareProfileScreen({
           />
         </View>
         <Text style={styles.identity}>
-          {state.app.mainIdentity || shortAddress(state.xmtp.address || "")}
+          {mainIdentity || shortAddress(state.xmtp.address || "")}
         </Text>
         <Text style={styles.address}>{state.xmtp.address}</Text>
         <ConverseButton

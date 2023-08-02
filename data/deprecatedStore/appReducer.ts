@@ -3,7 +3,6 @@ import { ActionMap } from "./types";
 // Product
 
 export type AppType = {
-  mainIdentity: string;
   isInternetReachable: boolean;
   hydrationDone: boolean;
   desktopConnectSessionId?: string;
@@ -17,7 +16,6 @@ export type AppType = {
 };
 
 export const appInitialState: AppType = {
-  mainIdentity: "",
   isInternetReachable: false,
   hydrationDone: false,
   desktopConnectSessionId: undefined,
@@ -31,7 +29,6 @@ export const appInitialState: AppType = {
 };
 
 export enum AppDispatchTypes {
-  AppSetMainIdentity = "APP_SET_MAIN_IDENTITY",
   AppSetDesktopConnectSessionId = "APP_SET_DESKTOP_SESSION_ID",
   AppSetMediaPreview = "APP_SET_MEDIA_PREVIEW",
   AppSetEphemeralAccount = "APP_SET_EPHEMERAL_ACCOUNT",
@@ -39,9 +36,6 @@ export enum AppDispatchTypes {
 }
 
 type AppPayload = {
-  [AppDispatchTypes.AppSetMainIdentity]: {
-    identity: string;
-  };
   [AppDispatchTypes.AppSetDesktopConnectSessionId]: {
     sessionId?: string;
   };
@@ -62,13 +56,6 @@ export type AppActions = ActionMap<AppPayload>[keyof ActionMap<AppPayload>];
 
 export const appReducer = (state: AppType, action: AppActions): AppType => {
   switch (action.type) {
-    case AppDispatchTypes.AppSetMainIdentity: {
-      return {
-        ...state,
-        mainIdentity: action.payload.identity,
-      };
-    }
-
     case AppDispatchTypes.AppSetEphemeralAccount: {
       return {
         ...state,
