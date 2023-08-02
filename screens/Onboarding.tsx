@@ -31,8 +31,10 @@ import { sendMessageToWebview } from "../components/XmtpWebview";
 import config from "../config";
 import { clearDB } from "../data/db";
 import { AppContext } from "../data/deprecatedStore/context";
-import { RecommendationsDispatchTypes } from "../data/deprecatedStore/recommendationsReducer";
-import { usePreferencesStore } from "../data/store/accountsStore";
+import {
+  usePreferencesStore,
+  useRecommendationsStore,
+} from "../data/store/accountsStore";
 import { textPrimaryColor, textSecondaryColor } from "../utils/colors";
 import { saveXmtpKeys } from "../utils/keychain";
 import { shortAddress } from "../utils/str";
@@ -41,6 +43,9 @@ import { Signer } from "../vendor/xmtp-js/src";
 
 export default function OnboardingScreen() {
   const { state, dispatch } = useContext(AppContext);
+  const resetRecommendations = useRecommendationsStore(
+    (s) => s.resetRecommendations
+  );
   const setEphemeralAccount = usePreferencesStore((s) => s.setEphemeralAccount);
   const colorScheme = useColorScheme();
   const styles = getStyles(colorScheme);
@@ -246,7 +251,7 @@ export default function OnboardingScreen() {
 
       await clearDB();
       resetLocalXmtpState();
-      dispatch({ type: RecommendationsDispatchTypes.ResetRecommendations });
+      resetRecommendations();
       sendMessageToWebview("KEYS_LOADED_FROM_SECURE_STORAGE", {
         keys,
         env: config.xmtpEnv,
@@ -258,7 +263,7 @@ export default function OnboardingScreen() {
       console.error(e);
     }
   }, [
-    dispatch,
+    resetRecommendations,
     setEphemeralAccount,
     thirdwebSigner,
     user.isEphemeral,

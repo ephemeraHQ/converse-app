@@ -15,7 +15,10 @@ import {
   XmtpConversationWithUpdate,
   XmtpDispatchTypes,
 } from "../../data/deprecatedStore/xmtpReducer";
-import { useProfilesStore } from "../../data/store/accountsStore";
+import {
+  useProfilesStore,
+  useRecommendationsStore,
+} from "../../data/store/accountsStore";
 import { blockPeer } from "../../utils/api";
 import { actionSheetColors, textPrimaryColor } from "../../utils/colors";
 import { getProfileData } from "../../utils/profile";
@@ -42,19 +45,16 @@ export default function ChatPlaceholder({
 }: Props) {
   const colorScheme = useColorScheme();
   const styles = getStyles(colorScheme);
-  const { state, dispatch } = useContext(AppContext);
+  const { dispatch } = useContext(AppContext);
+  const recommendationData = useRecommendationsStore((s) =>
+    conversation?.peerAddress ? s.frens[conversation.peerAddress] : undefined
+  );
   const peerSocials = useProfilesStore((s) =>
     conversation?.peerAddress
       ? s.profiles[conversation.peerAddress]?.socials
       : undefined
   );
-  const recommendationData = conversation?.peerAddress
-    ? getProfileData(
-        conversation.peerAddress,
-        state.recommendations,
-        peerSocials
-      )
-    : undefined;
+  const profileData = getProfileData(recommendationData, peerSocials);
   return (
     <TouchableWithoutFeedback
       onPress={() => {
@@ -117,10 +117,10 @@ export default function ChatPlaceholder({
         )}
         {conversation && !isBlockedPeer && messagesCount === 0 && (
           <View>
-            {recommendationData ? (
+            {profileData ? (
               <Recommendation
                 address={conversation.peerAddress}
-                recommendationData={recommendationData}
+                recommendationData={profileData}
                 embedInChat
               />
             ) : (
