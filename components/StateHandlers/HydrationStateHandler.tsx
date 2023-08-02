@@ -81,7 +81,7 @@ export default function HydrationStateHandler() {
       }
 
       if (address) {
-        refreshProfileForAddress(address, dispatch);
+        refreshProfileForAddress(address);
       }
 
       const initialLoadDoneOnce = mmkv.getBoolean(

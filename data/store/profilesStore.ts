@@ -1,5 +1,7 @@
 import { create } from "zustand";
 
+import { currentAccountStoreHook } from "./accountsStore";
+
 export type LensHandle = {
   profileId: string;
   handle: string;
@@ -40,9 +42,14 @@ export type ProfilesStoreType = {
   setProfiles: (profiles: ProfileByAddress) => void;
 };
 
-export const useProfilesStore = create<ProfilesStoreType>()((set) => ({
-  profiles: {},
-  // Setter keeps existing profiles but upserts new ones
-  setProfiles: (profiles) =>
-    set((state) => ({ profiles: { ...state.profiles, ...profiles } })),
-}));
+export const initProfilesStore = () => {
+  const profilesStore = create<ProfilesStoreType>()((set) => ({
+    profiles: {},
+    // Setter keeps existing profiles but upserts new ones
+    setProfiles: (profiles) =>
+      set((state) => ({ profiles: { ...state.profiles, ...profiles } })),
+  }));
+  return profilesStore;
+};
+
+export const useProfilesStore = currentAccountStoreHook("profiles");
