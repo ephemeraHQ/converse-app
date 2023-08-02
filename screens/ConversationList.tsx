@@ -32,6 +32,7 @@ import SettingsButton from "../components/SettingsButton";
 import Welcome from "../components/Welcome";
 import { AppContext } from "../data/deprecatedStore/context";
 import { XmtpConversationWithUpdate } from "../data/deprecatedStore/xmtpReducer";
+import { usePreferencesStore } from "../data/store/accountsStore";
 import {
   backgroundColor,
   textPrimaryColor,
@@ -148,6 +149,7 @@ export default function ConversationList({
   const colorScheme = useColorScheme();
   const styles = getStyles(colorScheme);
   const { state } = useContext(AppContext);
+  const ephemeralAccount = usePreferencesStore((s) => s.ephemeralAccount);
   const shouldShowConnectingOrSyncing = useShouldShowConnectingOrSyncing();
   const [flatListItems, setFlatListItems] = useState<FlatListItem[]>([]);
   useEffect(() => {
@@ -169,10 +171,10 @@ export default function ConversationList({
         : b.createdAt;
       return bDate - aDate;
     });
-    const items = state.app.ephemeralAccount ? [{ topic: "ephemeral" }] : [];
+    const items = ephemeralAccount ? [{ topic: "ephemeral" }] : [];
     setFlatListItems([...items, ...conversations, { topic: "welcome" }]);
   }, [
-    state.app.ephemeralAccount,
+    ephemeralAccount,
     state.xmtp.address,
     state.xmtp.conversations,
     state.xmtp.lastUpdateAt,
@@ -272,7 +274,7 @@ export default function ConversationList({
     screenToShow = <InitialLoad />;
   } else if (
     flatListItems.length === 1 ||
-    (flatListItems.length === 2 && state.app.ephemeralAccount)
+    (flatListItems.length === 2 && ephemeralAccount)
   ) {
     screenToShow = (
       <Welcome ctaOnly={false} navigation={navigation} route={route} />

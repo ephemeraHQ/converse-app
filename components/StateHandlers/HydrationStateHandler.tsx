@@ -3,7 +3,6 @@ import { Alert } from "react-native";
 
 import { loadDataToContext, refreshProfileForAddress } from "../../data";
 import { initDb } from "../../data/db";
-import { AppDispatchTypes } from "../../data/deprecatedStore/appReducer";
 import { AppContext } from "../../data/deprecatedStore/context";
 import { RecommendationsDispatchTypes } from "../../data/deprecatedStore/recommendationsReducer";
 import { XmtpDispatchTypes } from "../../data/deprecatedStore/xmtpReducer";
@@ -103,14 +102,6 @@ export default function HydrationStateHandler() {
       dispatch({
         type: XmtpDispatchTypes.XmtpSetBlockedPeerAddresses,
         payload: { blockedPeerAddresses: savedBlockedPeers },
-      });
-
-      const connectedToEphemeralAccount = mmkv.getBoolean(
-        "state.app.isEphemeralAccount"
-      );
-      dispatch({
-        type: AppDispatchTypes.AppSetEphemeralAccount,
-        payload: { ephemeral: !!connectedToEphemeralAccount },
       });
 
       setHydrationDone(true);
