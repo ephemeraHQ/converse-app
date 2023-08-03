@@ -1,5 +1,5 @@
 import { StatusBar } from "expo-status-bar";
-import { useCallback, useContext, useEffect } from "react";
+import { useCallback, useEffect } from "react";
 import {
   ColorSchemeName,
   Image,
@@ -13,41 +13,46 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import SendButton from "../../assets/send-button.svg";
-import { AppDispatchTypes } from "../../data/deprecatedStore/appReducer";
-import { AppContext } from "../../data/deprecatedStore/context";
+import { useAppStore } from "../../data/store/appStore";
 import {
   dangerColor,
   setAndroidColors,
   setAndroidSystemColor,
 } from "../../utils/colors";
+import { pick } from "../../utils/objects";
 import ActivityIndicator from "../ActivityIndicator/ActivityIndicator";
 import Picto from "../Picto/Picto";
 
 export default function ChatSendAttachment() {
   const colorScheme = useColorScheme();
   const styles = getStyles(colorScheme);
-  const { state, dispatch } = useContext(AppContext);
+  const { mediaPreview, setMediaPreview } = useAppStore((s) =>
+    pick(s, ["mediaPreview", "setMediaPreview"])
+  );
   const insets = useSafeAreaInsets();
-  const { mediaURI, sending, error } = state.app.mediaPreview;
   const sendMedia = useCallback(() => {
-    dispatch({
-      type: AppDispatchTypes.AppSetMediaPreview,
-      payload: { mediaURI, error: false, sending: true },
-    });
-  }, [dispatch, mediaURI]);
+    if (mediaPreview?.mediaURI) {
+      setMediaPreview({
+        mediaURI: mediaPreview.mediaURI,
+        error: false,
+        sending: true,
+      });
+    }
+  }, [mediaPreview?.mediaURI, setMediaPreview]);
   useEffect(() => {
     setAndroidSystemColor("#000000");
     return () => {
       setAndroidColors(colorScheme);
     };
   }, [colorScheme]);
-  if (!mediaURI) return null;
+  if (!mediaPreview) return null;
+  const { sending, error } = mediaPreview;
   return (
     <View style={styles.previewContainer}>
       <StatusBar hidden={false} style="light" backgroundColor="black" />
       <View style={styles.imageContainer}>
         <Image
-          source={{ uri: state.app.mediaPreview.mediaURI }}
+          source={{ uri: mediaPreview.mediaURI }}
           style={styles.image}
           resizeMode="contain"
         />
@@ -56,10 +61,7 @@ export default function ChatSendAttachment() {
         <Text
           style={[styles.text, styles.cancel]}
           onPress={() => {
-            dispatch({
-              type: AppDispatchTypes.AppSetMediaPreview,
-              payload: { mediaURI: undefined, error: false, sending: false },
-            });
+            setMediaPreview(null);
           }}
         >
           Cancel
@@ -68,10 +70,7 @@ export default function ChatSendAttachment() {
       {Platform.OS === "android" && (
         <TouchableOpacity
           onPress={() => {
-            dispatch({
-              type: AppDispatchTypes.AppSetMediaPreview,
-              payload: { mediaURI: undefined, error: false, sending: false },
-            });
+            setMediaPreview(null);
           }}
         >
           <Picto

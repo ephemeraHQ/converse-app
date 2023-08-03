@@ -78,9 +78,14 @@ export default function Main() {
   const showNotificationScreen = usePreferencesStore(
     (s) => s.notifications.showNotificationScreen
   );
-  const { notificationsPermissionStatus, splashScreenHidden } = useAppStore(
-    (s) => pick(s, ["notificationsPermissionStatus", "splashScreenHidden"])
-  );
+  const { notificationsPermissionStatus, splashScreenHidden, mediaPreview } =
+    useAppStore((s) =>
+      pick(s, [
+        "notificationsPermissionStatus",
+        "splashScreenHidden",
+        "mediaPreview",
+      ])
+    );
 
   const navigationState = useRef<any>(undefined);
 
@@ -308,7 +313,7 @@ export default function Main() {
     <>
       {mainHeaders}
       {screenToShow}
-      {state.app.mediaPreview.mediaURI && <ChatSendAttachment />}
+      {mediaPreview?.mediaURI && <ChatSendAttachment />}
     </>
   );
 }
