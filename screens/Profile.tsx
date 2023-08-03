@@ -19,10 +19,10 @@ import {
   TableViewPicto,
 } from "../components/TableView/TableViewImage";
 import { AppContext } from "../data/deprecatedStore/context";
-import { XmtpDispatchTypes } from "../data/deprecatedStore/xmtpReducer";
 import {
   useProfilesStore,
   useRecommendationsStore,
+  useSettingsStore,
   useUserStore,
 } from "../data/store/accountsStore";
 import { blockPeer } from "../utils/api";
@@ -53,6 +53,10 @@ export default function ProfileScreen({
     (s) => s.frens[peerAddress]?.tags
   );
   const profiles = useProfilesStore((state) => state.profiles);
+  const isBlockedPeer = useSettingsStore(
+    (s) => s.blockedPeers[peerAddress.toLowerCase()]
+  );
+  const setBlockedPeerStatus = useSettingsStore((s) => s.setBlockedPeerStatus);
   const socials = profiles[peerAddress]?.socials;
 
   const getAddressItemsFromArray = useCallback(
@@ -163,8 +167,7 @@ export default function ProfileScreen({
       (f) => f.avatarURI
     ),
   ];
-  const isBlockedPeer =
-    state.xmtp.blockedPeerAddresses[peerAddress.toLowerCase()];
+
   return (
     <ScrollView
       style={styles.profile}
@@ -224,18 +227,12 @@ export default function ProfileScreen({
                       ...actionSheetColors(colorScheme),
                     },
                     (selectedIndex?: number) => {
-                      if (selectedIndex === 0) {
+                      if (selectedIndex === 0 && peerAddress) {
                         blockPeer({
-                          peerAddress: peerAddress || "",
+                          peerAddress,
                           blocked: !isBlockedPeer,
                         });
-                        dispatch({
-                          type: XmtpDispatchTypes.XmtpSetBlockedStatus,
-                          payload: {
-                            peerAddress: peerAddress || "",
-                            blocked: !isBlockedPeer,
-                          },
-                        });
+                        setBlockedPeerStatus(peerAddress, !isBlockedPeer);
                       }
                     }
                   );

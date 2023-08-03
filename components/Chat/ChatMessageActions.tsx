@@ -10,8 +10,7 @@ import {
 import EmojiPicker from "rn-emoji-keyboard";
 
 import { AppContext } from "../../data/deprecatedStore/context";
-import { XmtpDispatchTypes } from "../../data/deprecatedStore/xmtpReducer";
-import { useUserStore } from "../../data/store/accountsStore";
+import { useSettingsStore, useUserStore } from "../../data/store/accountsStore";
 import { blockPeer, reportMessage } from "../../utils/api";
 import { isAttachmentMessage } from "../../utils/attachment";
 import { actionSheetColors } from "../../utils/colors";
@@ -48,6 +47,7 @@ export default function ChatMessageActions({
   const colorScheme = useColorScheme();
   const { dispatch } = useContext(AppContext);
   const userAddress = useUserStore((s) => s.userAddress);
+  const setBlockedPeerStatus = useSettingsStore((s) => s.setBlockedPeerStatus);
 
   const report = useCallback(async () => {
     reportMessage({
@@ -66,11 +66,13 @@ export default function ChatMessageActions({
       messageSender: message.senderAddress,
     });
     blockPeer({ peerAddress: message.senderAddress, blocked: true });
-    dispatch({
-      type: XmtpDispatchTypes.XmtpSetBlockedStatus,
-      payload: { peerAddress: message.senderAddress, blocked: true },
-    });
-  }, [message, dispatch]);
+    setBlockedPeerStatus(message.senderAddress, true);
+  }, [
+    message.content,
+    message.id,
+    message.senderAddress,
+    setBlockedPeerStatus,
+  ]);
 
   const showMessageReportActionSheet = useCallback(() => {
     const methods = {

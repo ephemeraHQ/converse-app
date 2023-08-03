@@ -39,7 +39,7 @@ import {
 } from "../data";
 import { AppContext } from "../data/deprecatedStore/context";
 import { XmtpDispatchTypes } from "../data/deprecatedStore/xmtpReducer";
-import { useUserStore } from "../data/store/accountsStore";
+import { useSettingsStore, useUserStore } from "../data/store/accountsStore";
 import { userExists } from "../utils/api";
 import {
   backgroundColor,
@@ -62,6 +62,7 @@ const Conversation = ({
   const { state, dispatch } = useContext(AppContext);
   const userAddress = useUserStore((s) => s.userAddress);
   const colorScheme = useColorScheme();
+  const blockedPeers = useSettingsStore((s) => s.blockedPeers);
 
   // Initial conversation topic will be set only if in route params
   const [_conversationTopic, setConversationTopic] = useState(
@@ -182,7 +183,7 @@ const Conversation = ({
   ]);
 
   const isBlockedPeer = conversation?.peerAddress
-    ? !!state.xmtp.blockedPeerAddresses[conversation.peerAddress.toLowerCase()]
+    ? !!blockedPeers[conversation.peerAddress.toLowerCase()]
     : false;
 
   const textInputRef = useRef<TextInput>();

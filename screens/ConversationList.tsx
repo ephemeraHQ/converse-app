@@ -42,6 +42,7 @@ import {
   LastMessagePreview,
   conversationLastMessagePreview,
 } from "../utils/conversation";
+import { pick } from "../utils/objects";
 import { conversationName } from "../utils/str";
 import { NavigationParamList } from "./Main";
 
@@ -149,7 +150,9 @@ export default function ConversationList({
   const styles = getStyles(colorScheme);
   const { state } = useContext(AppContext);
   const userAddress = useUserStore((s) => s.userAddress);
-  const ephemeralAccount = useSettingsStore((s) => s.ephemeralAccount);
+  const { blockedPeers, ephemeralAccount } = useSettingsStore((s) =>
+    pick(s, ["blockedPeers", "ephemeralAccount"])
+  );
   const shouldShowConnectingOrSyncing = useShouldShowConnectingOrSyncing();
   const [flatListItems, setFlatListItems] = useState<FlatListItem[]>([]);
   useEffect(() => {
@@ -239,9 +242,7 @@ export default function ConversationList({
             )
           }
           lastMessagePreview={
-            state.xmtp.blockedPeerAddresses[
-              conversation.peerAddress.toLowerCase()
-            ]
+            blockedPeers[conversation.peerAddress.toLowerCase()]
               ? "This user is blocked"
               : lastMessagePreview
               ? lastMessagePreview.contentPreview
@@ -260,7 +261,7 @@ export default function ConversationList({
       navigation,
       route,
       userAddress,
-      state.xmtp.blockedPeerAddresses,
+      blockedPeers,
       state.xmtp.initialLoadDoneOnce,
     ]
   );
@@ -287,7 +288,7 @@ export default function ConversationList({
             navigation,
             route,
             userAddress,
-            state.xmtp.blockedPeerAddresses,
+            blockedPeers,
             state.xmtp.initialLoadDoneOnce,
           ]}
           renderItem={renderItem}

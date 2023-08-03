@@ -3,7 +3,7 @@ import { useCallback, useContext, useEffect, useRef } from "react";
 import { AppState } from "react-native";
 
 import { AppContext } from "../../data/deprecatedStore/context";
-import { useUserStore } from "../../data/store/accountsStore";
+import { useSettingsStore, useUserStore } from "../../data/store/accountsStore";
 import { useAppStore } from "../../data/store/appStore";
 import { saveUser } from "../../utils/api";
 import { navigateToConversation } from "../../utils/navigation";
@@ -28,6 +28,7 @@ export default function NotificationsStateHandler() {
   const appState = useRef(AppState.currentState);
   const { state, dispatch } = useContext(AppContext);
   const userAddress = useUserStore((s) => s.userAddress);
+  const blockedPeers = useSettingsStore((s) => s.blockedPeers);
   const { setNotificationsPermissionStatus, notificationsPermissionStatus } =
     useAppStore((s) =>
       pick(s, [
@@ -131,13 +132,13 @@ export default function NotificationsStateHandler() {
       subscribeToNotifications(
         userAddress,
         Object.values(state.xmtp.conversations),
-        state.xmtp.blockedPeerAddresses
+        blockedPeers
       );
     }
   }, [
     notificationsPermissionStatus,
     userAddress,
-    state.xmtp.blockedPeerAddresses,
+    blockedPeers,
     state.xmtp.conversations,
     state.xmtp.initialLoadDone,
     state.xmtp.loading,
