@@ -35,7 +35,10 @@ import config from "../config";
 import { createPendingConversation } from "../data";
 import { AppContext, StateType } from "../data/deprecatedStore/context";
 import { XmtpConversation } from "../data/deprecatedStore/xmtpReducer";
-import { useRecommendationsStore } from "../data/store/accountsStore";
+import {
+  useRecommendationsStore,
+  useUserStore,
+} from "../data/store/accountsStore";
 import {
   backgroundColor,
   itemSeparatorColor,
@@ -52,6 +55,7 @@ import { NavigationParamList } from "./Main";
 
 const computeNewConversationContext = (
   state: StateType,
+  userAddress: string,
   peerAddress: string
 ) => {
   let i = 0;
@@ -67,12 +71,12 @@ const computeNewConversationContext = (
   } while (
     conversationsIds.includes(
       `${config.conversationDomain}/dm/${addressPrefix(
-        state.xmtp.address || ""
+        userAddress || ""
       )}-${addressPrefix(peerAddress)}/${i}`
     )
   );
   const conversationId = `${config.conversationDomain}/dm/${addressPrefix(
-    state.xmtp.address || ""
+    userAddress || ""
   )}-${addressPrefix(peerAddress)}/${i}`;
   return {
     conversationId,
@@ -113,6 +117,7 @@ export default function NewConversation({
   });
 
   const { state, dispatch } = useContext(AppContext);
+  const userAddress = useUserStore((s) => s.userAddress);
   const {
     updatedAt: recommendationsUpdatedAt,
     loading: recommendationsLoading,
@@ -224,14 +229,14 @@ export default function NewConversation({
   const [creatingNewConversation, setCreatingNewConversation] = useState(false);
 
   const createNewConversationWithPeer = useCallback(
-    async (state: StateType, peerAddress: string) => {
+    async (state: StateType, userAddress: string, peerAddress: string) => {
       if (creatingNewConversation) return;
       setCreatingNewConversation(true);
 
       try {
         const newConversationTopic = await createPendingConversation(
           peerAddress,
-          computeNewConversationContext(state, peerAddress),
+          computeNewConversationContext(state, userAddress, peerAddress),
           dispatch
         );
         navigateToTopic(newConversationTopic);
@@ -254,10 +259,10 @@ export default function NewConversation({
 
   const getLastMessagePreview = useCallback(
     (c: XmtpConversation) => {
-      const lastMessage = conversationLastMessagePreview(c, state.xmtp.address);
+      const lastMessage = conversationLastMessagePreview(c, userAddress);
       return lastMessage?.contentPreview || "";
     },
-    [state.xmtp.address]
+    [userAddress]
   );
 
   return (
@@ -444,7 +449,11 @@ export default function NewConversation({
                   ),
                   title: "Create a new conversation",
                   action: () => {
-                    createNewConversationWithPeer(state, status.address);
+                    createNewConversationWithPeer(
+                      state,
+                      userAddress,
+                      status.address
+                    );
                   },
                 },
               ]}

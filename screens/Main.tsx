@@ -19,7 +19,7 @@ import NetworkStateHandler from "../components/StateHandlers/NetworkStateHandler
 import NotificationsStateHandler from "../components/StateHandlers/NotificationsStateHandler";
 import config from "../config";
 import { AppContext } from "../data/deprecatedStore/context";
-import { useSettingsStore } from "../data/store/accountsStore";
+import { useSettingsStore, useUserStore } from "../data/store/accountsStore";
 import { useAppStore } from "../data/store/appStore";
 import {
   backgroundColor,
@@ -75,6 +75,7 @@ Notifications.setNotificationHandler({
 export default function Main() {
   const colorScheme = useColorScheme();
   const { state } = useContext(AppContext);
+  const userAddress = useUserStore((s) => s.userAddress);
   const showNotificationScreen = useSettingsStore(
     (s) => s.notifications.showNotificationScreen
   );
@@ -108,7 +109,7 @@ export default function Main() {
   let screenToShow = undefined;
 
   if (splashScreenHidden) {
-    if (!state.xmtp.address) {
+    if (!userAddress) {
       screenToShow = <OnboardingScreen />;
     } else if (
       showNotificationScreen &&

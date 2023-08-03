@@ -11,6 +11,7 @@ import EmojiPicker from "rn-emoji-keyboard";
 
 import { AppContext } from "../../data/deprecatedStore/context";
 import { XmtpDispatchTypes } from "../../data/deprecatedStore/xmtpReducer";
+import { useUserStore } from "../../data/store/accountsStore";
 import { blockPeer, reportMessage } from "../../utils/api";
 import { isAttachmentMessage } from "../../utils/attachment";
 import { actionSheetColors } from "../../utils/colors";
@@ -33,7 +34,7 @@ type Props = {
     contentFallback?: string
   ) => Promise<void>;
   reactions: {
-    [senderAddress: string]: MessageReaction;
+    [senderAddress: string]: MessageReaction | undefined;
   };
 };
 
@@ -45,7 +46,8 @@ export default function ChatMessageActions({
 }: Props) {
   const isAttachment = isAttachmentMessage(message.contentType);
   const colorScheme = useColorScheme();
-  const { state, dispatch } = useContext(AppContext);
+  const { dispatch } = useContext(AppContext);
+  const userAddress = useUserStore((s) => s.userAddress);
 
   const report = useCallback(async () => {
     reportMessage({
@@ -173,9 +175,7 @@ export default function ChatMessageActions({
 
   const [selectedEmojis, setSelectedEmojis] = useState<string[]>([]);
   useEffect(() => {
-    const myReaction = state.xmtp.address
-      ? reactions[state.xmtp.address]
-      : undefined;
+    const myReaction = reactions[userAddress];
     const newSelectedEmojis = [];
     if (myReaction && myReaction.schema === "unicode") {
       const emojiName = getEmojiName(myReaction.content);
@@ -184,7 +184,7 @@ export default function ChatMessageActions({
       }
     }
     setSelectedEmojis(newSelectedEmojis);
-  }, [reactions, state.xmtp.address]);
+  }, [reactions, userAddress]);
 
   return (
     <>
@@ -200,9 +200,7 @@ export default function ChatMessageActions({
             removeReactionFromMessage(message, e.emoji, sendMessage);
           } else {
             // We want to remove all emojis first
-            const myReaction = state.xmtp.address
-              ? reactions[state.xmtp.address]
-              : undefined;
+            const myReaction = reactions[userAddress];
             if (myReaction && myReaction.schema === "unicode") {
               removeReactionFromMessage(
                 message,

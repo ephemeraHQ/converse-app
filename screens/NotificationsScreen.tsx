@@ -1,5 +1,5 @@
 import * as Linking from "expo-linking";
-import React, { useContext } from "react";
+import React from "react";
 import {
   View,
   StyleSheet,
@@ -11,16 +11,14 @@ import {
 
 import Button from "../components/Button/Button";
 import Picto from "../components/Picto/Picto";
-import { AppContext } from "../data/deprecatedStore/context";
 import { useSettingsStore } from "../data/store/accountsStore";
 import { useAppStore } from "../data/store/appStore";
 import { textPrimaryColor } from "../utils/colors";
 import { requestPushNotificationsPermissions } from "../utils/notifications";
 
 export default function NotificationsScreen() {
-  const { dispatch } = useContext(AppContext);
-  const setNotificationsPreferences = useSettingsStore(
-    (s) => s.setNotificationsPreferences
+  const setNotificationsSettings = useSettingsStore(
+    (s) => s.setNotificationsSettings
   );
   const setNotificationsPermissionStatus = useAppStore(
     (s) => s.setNotificationsPermissionStatus
@@ -50,7 +48,7 @@ export default function NotificationsScreen() {
             // it will still show the popup. If not, go to Settings!
             Linking.openSettings();
           } else {
-            setNotificationsPreferences({ showNotificationScreen: false });
+            setNotificationsSettings({ showNotificationScreen: false });
           }
           setNotificationsPermissionStatus(newStatus);
         }}
@@ -61,7 +59,7 @@ export default function NotificationsScreen() {
         variant="text"
         textStyle={{ fontWeight: "600" }}
         onPress={() => {
-          setNotificationsPreferences({ showNotificationScreen: false });
+          setNotificationsSettings({ showNotificationScreen: false });
         }}
       />
     </View>

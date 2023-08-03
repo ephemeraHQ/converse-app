@@ -9,7 +9,8 @@ import * as Sentry from "sentry-expo";
 
 import config from "../config";
 import { clearDB } from "../data/db";
-import { AppContext, StateType } from "../data/deprecatedStore/context";
+import { AppContext } from "../data/deprecatedStore/context";
+import { useUserStore } from "../data/store/accountsStore";
 import { deleteXmtpKeys } from "../utils/keychain";
 import { showActionSheetWithOptions } from "./StateHandlers/ActionSheetStateHandler";
 import { createPendingConversations, sendPendingMessages } from "./XmtpState";
@@ -25,8 +26,10 @@ export const gotMessagesFromNetwork = (count: number) => {
   messagesFromNetwork += count;
 };
 
-export const shouldShowDebug = (state: StateType) =>
-  config.debugMenu || config.debugAddresses.includes(state.xmtp.address || "");
+export const useEnableDebug = () => {
+  const userAddress = useUserStore((s) => s.userAddress);
+  return config.debugMenu || config.debugAddresses.includes(userAddress);
+};
 
 const DebugButton = forwardRef((props, ref) => {
   const { dispatch } = useContext(AppContext);

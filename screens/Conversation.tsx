@@ -39,6 +39,7 @@ import {
 } from "../data";
 import { AppContext } from "../data/deprecatedStore/context";
 import { XmtpDispatchTypes } from "../data/deprecatedStore/xmtpReducer";
+import { useUserStore } from "../data/store/accountsStore";
 import { userExists } from "../utils/api";
 import {
   backgroundColor,
@@ -59,6 +60,7 @@ const Conversation = ({
   navigation,
 }: NativeStackScreenProps<NavigationParamList, "Conversation">) => {
   const { state, dispatch } = useContext(AppContext);
+  const userAddress = useUserStore((s) => s.userAddress);
   const colorScheme = useColorScheme();
 
   // Initial conversation topic will be set only if in route params
@@ -342,7 +344,7 @@ const Conversation = ({
         [
           {
             id: messageId,
-            senderAddress: state.xmtp.address || "",
+            senderAddress: userAddress || "",
             sent: sentAtTime.getTime(),
             content,
             status: "sending",
@@ -359,7 +361,7 @@ const Conversation = ({
         sendPendingMessages(dispatch);
       }
     },
-    [conversation, dispatch, state.xmtp.address]
+    [conversation, dispatch, userAddress]
   );
 
   const onLeaveScreen = useCallback(async () => {
@@ -390,7 +392,7 @@ const Conversation = ({
       )}
       <ConverseChat
         conversation={conversation}
-        xmtpAddress={state.xmtp.address}
+        xmtpAddress={userAddress}
         setInputValue={setInputValue}
         inputValue={inputValue}
         inputRef={textInputRef}

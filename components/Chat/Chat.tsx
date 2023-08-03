@@ -45,7 +45,7 @@ const AnimatedFlatList = Reanimated.createAnimatedComponent(
 
 type Props = {
   conversation?: XmtpConversationWithUpdate;
-  xmtpAddress?: string;
+  xmtpAddress: string;
   setInputValue: (value: string) => void;
   inputValue: string;
   inputRef: MutableRefObject<TextInput | undefined>;

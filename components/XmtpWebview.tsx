@@ -8,6 +8,7 @@ import config from "../config";
 import { saveNewConversation, saveConversations, saveMessages } from "../data";
 import { AppContext } from "../data/deprecatedStore/context";
 import { XmtpDispatchTypes } from "../data/deprecatedStore/xmtpReducer";
+import { useUserStore } from "../data/store/accountsStore";
 import { useAppStore } from "../data/store/appStore";
 import { loadSavedNotificationMessagesToContext } from "../utils/backgroundNotifications/loadSavedNotifications";
 import {
@@ -18,6 +19,7 @@ import {
 } from "../utils/keychain";
 import { getLastXMTPSyncedAt, saveLastXMTPSyncedAt } from "../utils/mmkv";
 import { subscribeToNotifications } from "../utils/notifications";
+import { pick } from "../utils/objects";
 import { sentryTrackMessage } from "../utils/sentry";
 import { gotMessagesFromNetwork } from "./DebugButton";
 
@@ -91,6 +93,9 @@ export default function XmtpWebview() {
   const web3Connected = useRef(false);
 
   const { state, dispatch } = useContext(AppContext);
+  const { userAddress, setUserAddress } = useUserStore((s) =>
+    pick(s, ["userAddress", "setUserAddress"])
+  );
   const isInternetReachable = useAppStore((s) => s.isInternetReachable);
   const notificationsPermissionStatus = useAppStore(
     (s) => s.notificationsPermissionStatus
@@ -118,10 +123,10 @@ export default function XmtpWebview() {
   }, []);
 
   useEffect(() => {
-    if (!loadedKeys.current && state.xmtp.address) {
+    if (!loadedKeys.current && userAddress) {
       loadKeys();
     }
-  }, [loadKeys, state.xmtp.address]);
+  }, [loadKeys, userAddress]);
 
   const reloadData = useCallback(
     async (showConnecting: boolean) => {
@@ -241,9 +246,9 @@ export default function XmtpWebview() {
           saveConversations(data, dispatch);
           break;
         case "XMTP_EXPORTED_CONVERSATIONS":
-          if (state.xmtp.address) {
+          if (userAddress) {
             try {
-              await saveXmtpConversations(state.xmtp.address, data);
+              await saveXmtpConversations(userAddress, data);
             } catch (e) {
               console.log(e);
             }
@@ -253,12 +258,9 @@ export default function XmtpWebview() {
         case "XMTP_NEW_CONVERSATION": {
           saveNewConversation(data, dispatch);
           // New conversation, let's subscribe to topic
-          if (
-            notificationsPermissionStatus === "granted" &&
-            state.xmtp.address
-          ) {
+          if (notificationsPermissionStatus === "granted" && userAddress) {
             subscribeToNotifications(
-              state.xmtp.address,
+              userAddress,
               Object.values(state.xmtp.conversations),
               state.xmtp.blockedPeerAddresses
             );
@@ -276,12 +278,7 @@ export default function XmtpWebview() {
           });
           break;
         case "XMTP_ADDRESS":
-          dispatch({
-            type: XmtpDispatchTypes.XmtpSetAddress,
-            payload: {
-              address: data.address,
-            },
-          });
+          setUserAddress(data.address);
           // If we receive this from webview, we're necessary
           // connected to the XMTP network!
           dispatch({
@@ -312,12 +309,9 @@ export default function XmtpWebview() {
             type: XmtpDispatchTypes.XmtpSetReconnecting,
             payload: { reconnecting: false },
           });
-          if (
-            notificationsPermissionStatus === "granted" &&
-            state.xmtp.address
-          ) {
+          if (notificationsPermissionStatus === "granted" && userAddress) {
             subscribeToNotifications(
-              state.xmtp.address,
+              userAddress,
               Object.values(state.xmtp.conversations),
               state.xmtp.blockedPeerAddresses
             );
@@ -405,7 +399,7 @@ export default function XmtpWebview() {
       loadKeys,
       reloadData,
       notificationsPermissionStatus,
-      state.xmtp.address,
+      userAddress,
       state.xmtp.blockedPeerAddresses,
       state.xmtp.conversations,
     ]

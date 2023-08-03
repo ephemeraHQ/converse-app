@@ -13,7 +13,7 @@ export type LastMessagePreview = {
 
 export const conversationLastMessagePreview = (
   conversation: XmtpConversation,
-  myAddress?: string
+  myAddress: string
 ): LastMessagePreview | undefined => {
   if (!conversation.messages?.size) return undefined;
   const messagesArray = Array.from(conversation.messages.values());

@@ -11,6 +11,7 @@ import {
 import { MessageEntity } from "../data/db/entities/messageEntity";
 import { AppContext, DispatchType } from "../data/deprecatedStore/context";
 import { XmtpDispatchTypes } from "../data/deprecatedStore/xmtpReducer";
+import { useUserStore } from "../data/store/accountsStore";
 import { useAppStore } from "../data/store/appStore";
 import { getBlockedPeers } from "../utils/api";
 import { deserializeRemoteAttachmentContent } from "../utils/attachment";
@@ -218,12 +219,13 @@ export const getXmtpApiHeaders = async () => {
 
 export default function XmtpState() {
   const { dispatch, state } = useContext(AppContext);
+  const userAddress = useUserStore((s) => s.userAddress);
   const splashScreenHidden = useAppStore((s) => s.splashScreenHidden);
   // On open; opening XMTP session
   useEffect(() => {
     const initXmtp = async () => {
       try {
-        await getLocalXmtpClient(dispatch, state.xmtp.address);
+        await getLocalXmtpClient(dispatch, userAddress);
       } catch (e) {
         console.log(
           "Count not instantiate local XMTP client, retrying in 3 seconds..."
@@ -233,7 +235,7 @@ export default function XmtpState() {
       }
     };
     initXmtp();
-  }, [dispatch, state.xmtp.address]);
+  }, [dispatch, userAddress]);
 
   const lastMessageSendingFinishedAt = useRef(0);
   const currentlyInMessageSendingInterval = useRef(false);
