@@ -45,6 +45,7 @@
     "date-fns": "^2.29.3",
     "eciesjs": "^0.4.4",
     "ethers": "^5.7.2",
+    "eventemitter3": "^5.0.1",
     "expo": "^48.0.19",
     "expo-application": "~5.1.1",
     "expo-asset": "~8.9.1",
