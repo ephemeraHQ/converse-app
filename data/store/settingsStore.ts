@@ -16,8 +16,6 @@ export type UserSettings = {
 };
 
 export type SettingsStoreType = {
-  user: UserSettings | null;
-  setUser: (u: UserSettings) => void;
   notifications: NotificationsSettings;
   setNotificationsSettings: (
     notificationsSettings: Partial<NotificationsSettings>
@@ -30,9 +28,6 @@ export const initSettingsStore = (account: string) => {
   const profilesStore = create<SettingsStoreType>()(
     persist(
       (set) => ({
-        user: null,
-        setUser: (u: UserSettings) =>
-          set((state) => ({ user: { ...state.user, ...u } })),
         notifications: {
           showNotificationScreen: true,
         },
