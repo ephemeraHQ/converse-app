@@ -3,7 +3,6 @@ import { ActionMap } from "./types";
 // Product
 
 export type AppType = {
-  desktopConnectSessionId?: string;
   mediaPreview: {
     sending: boolean;
     mediaURI?: string;
@@ -13,7 +12,6 @@ export type AppType = {
 };
 
 export const appInitialState: AppType = {
-  desktopConnectSessionId: undefined,
   mediaPreview: {
     sending: false,
     mediaURI: undefined,
@@ -23,15 +21,11 @@ export const appInitialState: AppType = {
 };
 
 export enum AppDispatchTypes {
-  AppSetDesktopConnectSessionId = "APP_SET_DESKTOP_SESSION_ID",
   AppSetMediaPreview = "APP_SET_MEDIA_PREVIEW",
   AppOpenAttachmentForMessage = "APP_OPEN_ATTACHMENT_FOR_MESSAGE",
 }
 
 type AppPayload = {
-  [AppDispatchTypes.AppSetDesktopConnectSessionId]: {
-    sessionId?: string;
-  };
   [AppDispatchTypes.AppSetMediaPreview]: {
     sending: boolean;
     mediaURI?: string;
@@ -50,13 +44,6 @@ export const appReducer = (state: AppType, action: AppActions): AppType => {
       return {
         ...state,
         mediaPreview: action.payload,
-      };
-    }
-
-    case AppDispatchTypes.AppSetDesktopConnectSessionId: {
-      return {
-        ...state,
-        desktopConnectSessionId: action.payload.sessionId,
       };
     }
 

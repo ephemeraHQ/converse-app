@@ -1,6 +1,6 @@
 import { PrivateKey, decrypt } from "eciesjs";
 import * as Linking from "expo-linking";
-import { useContext, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import {
   ColorSchemeName,
   StyleSheet,
@@ -11,8 +11,7 @@ import {
 
 import config from "../../config";
 import { clearDB } from "../../data/db";
-import { AppDispatchTypes } from "../../data/deprecatedStore/appReducer";
-import { AppContext } from "../../data/deprecatedStore/context";
+import { useOnboardingStore } from "../../data/store/onboardingStore";
 import {
   fetchDesktopSessionXmtpKey,
   markDesktopSessionDone,
@@ -24,12 +23,16 @@ import {
   textSecondaryColor,
 } from "../../utils/colors";
 import { saveXmtpKeys } from "../../utils/keychain";
+import { pick } from "../../utils/objects";
 import { getXmtpClientFromKeys } from "../../utils/xmtp";
 import { sendMessageToWebview } from "../XmtpWebview";
 import OnboardingComponent from "./OnboardingComponent";
 
 export default function DesktopConnect() {
-  const { state, dispatch } = useContext(AppContext);
+  const { desktopConnectSessionId, setDesktopConnectSessionId } =
+    useOnboardingStore((s) =>
+      pick(s, ["desktopConnectSessionId", "setDesktopConnectSessionId"])
+    );
   const colorScheme = useColorScheme();
   const styles = getStyles(colorScheme);
   const [localState, setLocalState] = useState({
@@ -41,7 +44,7 @@ export default function DesktopConnect() {
     loading: true,
   });
   useEffect(() => {
-    if (!state.app.desktopConnectSessionId) return;
+    if (!desktopConnectSessionId) return;
     const privateKey = new PrivateKey();
     const publicKey = privateKey.publicKey.toHex();
     const otpNum = Math.floor(Math.random() * 1000000);
@@ -57,16 +60,16 @@ export default function DesktopConnect() {
     openDesktopSession({
       publicKey,
       otp,
-      sessionId: state.app.desktopConnectSessionId,
+      sessionId: desktopConnectSessionId,
     });
-  }, [state.app.desktopConnectSessionId]);
+  }, [desktopConnectSessionId]);
   useEffect(() => {
     if (!localState.privateKey) return;
     const interval = setInterval(async () => {
-      if (!state.app.desktopConnectSessionId) return;
+      if (!desktopConnectSessionId) return;
       try {
         const fetchedKey = await fetchDesktopSessionXmtpKey({
-          sessionId: state.app.desktopConnectSessionId,
+          sessionId: desktopConnectSessionId,
           otp: localState.otp,
           publicKey: localState.publicKey,
         });
@@ -85,7 +88,7 @@ export default function DesktopConnect() {
           );
           const xmtpKeys = JSON.stringify(Array.from(decryptedKeyBuffer));
           markDesktopSessionDone({
-            sessionId: state.app.desktopConnectSessionId,
+            sessionId: desktopConnectSessionId,
             otp: localState.otp,
             publicKey: localState.publicKey,
           });
@@ -95,7 +98,7 @@ export default function DesktopConnect() {
 
             await clearDB();
             sendMessageToWebview("KEYS_LOADED_FROM_SECURE_STORAGE", {
-              keys: localState,
+              keys: xmtpKeys,
               env: config.xmtpEnv,
             });
           } else {
@@ -125,7 +128,7 @@ export default function DesktopConnect() {
       }
     }, 1000);
     return () => clearInterval(interval);
-  }, [localState, state.app.desktopConnectSessionId, styles.clickableText]);
+  }, [localState, desktopConnectSessionId, styles.clickableText]);
 
   return (
     <OnboardingComponent
@@ -134,10 +137,7 @@ export default function DesktopConnect() {
       loading={localState.loading}
       subtitle={localState.subtitle}
       backButtonAction={() => {
-        dispatch({
-          type: AppDispatchTypes.AppSetDesktopConnectSessionId,
-          payload: { sessionId: undefined },
-        });
+        setDesktopConnectSessionId(null);
       }}
       backButtonText="Back to home screen"
       view={

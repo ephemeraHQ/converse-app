@@ -3,9 +3,9 @@ import { useCallback, useContext, useEffect, useRef } from "react";
 import { useColorScheme } from "react-native";
 
 import config from "../../config";
-import { AppDispatchTypes } from "../../data/deprecatedStore/appReducer";
 import { AppContext } from "../../data/deprecatedStore/context";
 import { useAppStore } from "../../data/store/appStore";
+import { useOnboardingStore } from "../../data/store/onboardingStore";
 import { setAndroidColors } from "../../utils/colors";
 import { navigateToConversation } from "../../utils/navigation";
 import { pick } from "../../utils/objects";
@@ -30,6 +30,9 @@ const getSchemedURLFromUniversalURL = (url: string) => {
 export default function InitialStateHandler() {
   const colorScheme = useColorScheme();
   const { state, dispatch } = useContext(AppContext);
+  const setDesktopConnectSessionId = useOnboardingStore(
+    (s) => s.setDesktopConnectSessionId
+  );
   const { setSplashScreenHidden, hydrationDone } = useAppStore((s) =>
     pick(s, ["setSplashScreenHidden", "hydrationDone"])
   );
@@ -53,16 +56,13 @@ export default function InitialStateHandler() {
           const sessionId = queryParams?.sessionId
             ? queryParams?.sessionId.toString()
             : `${path}`;
-          dispatch({
-            type: AppDispatchTypes.AppSetDesktopConnectSessionId,
-            payload: { sessionId },
-          });
+          setDesktopConnectSessionId(sessionId);
         }
       } catch (e) {
         console.log(e);
       }
     },
-    [dispatch]
+    [setDesktopConnectSessionId]
   );
 
   useEffect(() => {
