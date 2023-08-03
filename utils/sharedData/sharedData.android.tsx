@@ -1,12 +1,11 @@
 /*
-On Android since we can decode notifications directly in Javascript we don't need
+On Android since we the notification Kotlin code is part of the app we don't need
 to use shared data storing. And since this SharedGroupPreferences lib seems to be
 unmaintained let's just fallback to regular storage through AsyncStorage
 */
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 import config from "../../config";
-import { DecodedMessage } from "../../vendor/xmtp-js/src";
 
 export const saveConversationDict = (topic: string, conversationDict: any) =>
   AsyncStorage.setItem(
@@ -41,24 +40,6 @@ export const loadSavedNotificationsMessages = async () => {
     console.log(error);
     return [];
   }
-};
-
-export const saveNewNotificationMessage = async (
-  topic: string,
-  message: DecodedMessage
-) => {
-  const currentMessages = await loadSavedNotificationsMessages();
-  currentMessages.push({
-    topic,
-    id: message.id,
-    senderAddress: message.senderAddress,
-    sent: message.sent.getTime(),
-    content: message.content,
-  });
-  await AsyncStorage.setItem(
-    "saved-notifications-messages",
-    JSON.stringify(currentMessages)
-  );
 };
 
 export const emptySavedNotificationsMessages = () =>
