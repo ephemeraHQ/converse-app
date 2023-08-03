@@ -3,13 +3,7 @@ import * as ImagePicker from "expo-image-picker";
 import * as Linking from "expo-linking";
 import { setStatusBarHidden } from "expo-status-bar";
 import mime from "mime";
-import {
-  MutableRefObject,
-  useCallback,
-  useContext,
-  useEffect,
-  useRef,
-} from "react";
+import { MutableRefObject, useCallback, useEffect, useRef } from "react";
 import {
   Alert,
   ColorSchemeName,
@@ -22,11 +16,11 @@ import {
 } from "react-native";
 import RNFS from "react-native-fs";
 
-import { AppDispatchTypes } from "../../data/deprecatedStore/appReducer";
-import { AppContext } from "../../data/deprecatedStore/context";
+import { useAppStore } from "../../data/store/appStore";
 import { SerializedRemoteAttachmentContent } from "../../utils/attachment";
 import { actionSheetColors, textSecondaryColor } from "../../utils/colors";
 import { executeAfterKeyboardClosed } from "../../utils/keyboard";
+import { pick } from "../../utils/objects";
 import { sentryTrackMessage } from "../../utils/sentry";
 import Picto from "../Picto/Picto";
 import { showActionSheetWithOptions } from "../StateHandlers/ActionSheetStateHandler";
@@ -40,15 +34,17 @@ type Props = {
 export default function ChatAddAttachment({ sendMessage, inputRef }: Props) {
   const colorScheme = useColorScheme();
   const styles = getStyles(colorScheme);
-  const { state, dispatch } = useContext(AppContext);
+  const { mediaPreview, setMediaPreview } = useAppStore((s) =>
+    pick(s, ["mediaPreview", "setMediaPreview"])
+  );
   const [cameraPermissions, requestCameraPermissions] =
     ImagePicker.useCameraPermissions();
-  const currentAttachmentMediaURI = useRef(state.app.mediaPreview.mediaURI);
+  const currentAttachmentMediaURI = useRef(mediaPreview?.mediaURI);
   const assetRef = useRef<ImagePicker.ImagePickerAsset | undefined>(undefined);
   const uploading = useRef(false);
   useEffect(() => {
-    currentAttachmentMediaURI.current = state.app.mediaPreview.mediaURI;
-  }, [state.app.mediaPreview.mediaURI]);
+    currentAttachmentMediaURI.current = mediaPreview?.mediaURI;
+  }, [mediaPreview?.mediaURI]);
 
   useEffect(() => {
     const uploadAsset = async (asset: ImagePicker.ImagePickerAsset) => {
@@ -74,23 +70,17 @@ export default function ChatAddAttachment({ sendMessage, inputRef }: Props) {
           if (currentAttachmentMediaURI.current !== assetRef.current?.uri)
             return;
           if (status === "SUCCESS") {
-            dispatch({
-              type: AppDispatchTypes.AppSetMediaPreview,
-              payload: { mediaURI: undefined, sending: false, error: false },
-            });
+            setMediaPreview(null);
             sendMessage(
               JSON.stringify(remoteAttachment),
               ContentTypeRemoteAttachment.toString()
             );
-          } else {
+          } else if (currentAttachmentMediaURI.current) {
             sentryTrackMessage("ATTACHMENT_UPLOAD_ERROR", { error });
-            dispatch({
-              type: AppDispatchTypes.AppSetMediaPreview,
-              payload: {
-                mediaURI: currentAttachmentMediaURI.current,
-                sending: false,
-                error: true,
-              },
+            setMediaPreview({
+              mediaURI: currentAttachmentMediaURI.current,
+              sending: false,
+              error: true,
             });
           }
 
@@ -99,18 +89,18 @@ export default function ChatAddAttachment({ sendMessage, inputRef }: Props) {
       );
     };
     if (
-      state.app.mediaPreview.mediaURI &&
-      state.app.mediaPreview.mediaURI === assetRef.current?.uri &&
-      state.app.mediaPreview.sending &&
+      mediaPreview?.mediaURI &&
+      mediaPreview?.mediaURI === assetRef.current?.uri &&
+      mediaPreview?.sending &&
       !uploading.current
     ) {
       uploadAsset(assetRef.current);
     }
   }, [
-    dispatch,
+    mediaPreview?.mediaURI,
+    mediaPreview?.sending,
     sendMessage,
-    state.app.mediaPreview.mediaURI,
-    state.app.mediaPreview.sending,
+    setMediaPreview,
   ]);
 
   const pickMedia = useCallback(async () => {
@@ -130,11 +120,8 @@ export default function ChatAddAttachment({ sendMessage, inputRef }: Props) {
     const asset = mediaPicked.assets?.[0];
     if (!asset) return;
     assetRef.current = asset;
-    dispatch({
-      type: AppDispatchTypes.AppSetMediaPreview,
-      payload: { mediaURI: asset.uri, sending: false, error: false },
-    });
-  }, [dispatch]);
+    setMediaPreview({ mediaURI: asset.uri, sending: false, error: false });
+  }, [setMediaPreview]);
 
   const openCamera = useCallback(async () => {
     const mediaPicked = await ImagePicker.launchCameraAsync({
@@ -147,11 +134,8 @@ export default function ChatAddAttachment({ sendMessage, inputRef }: Props) {
     const asset = mediaPicked.assets?.[0];
     if (!asset) return;
     assetRef.current = asset;
-    dispatch({
-      type: AppDispatchTypes.AppSetMediaPreview,
-      payload: { mediaURI: asset.uri, sending: false, error: false },
-    });
-  }, [dispatch]);
+    setMediaPreview({ mediaURI: asset.uri, sending: false, error: false });
+  }, [setMediaPreview]);
 
   const tryToOpenCamera = useCallback(async () => {
     if (!cameraPermissions?.granted) {

@@ -17,6 +17,19 @@ type AppStoreType = {
 
   hydrationDone: boolean;
   setHydrationDone: (done: boolean) => void;
+
+  mediaPreview: {
+    sending: boolean;
+    mediaURI: string;
+    error: boolean;
+  } | null;
+  setMediaPreview: (
+    preview: {
+      sending: boolean;
+      mediaURI: string;
+      error: boolean;
+    } | null
+  ) => void;
 };
 
 export const useAppStore = create<AppStoreType>()((set) => ({
@@ -36,4 +49,7 @@ export const useAppStore = create<AppStoreType>()((set) => ({
 
   hydrationDone: false,
   setHydrationDone: (done) => set(() => ({ hydrationDone: done })),
+
+  mediaPreview: null,
+  setMediaPreview: (preview) => set(() => ({ mediaPreview: preview })),
 }));
