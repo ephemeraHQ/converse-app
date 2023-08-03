@@ -3,13 +3,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useDisconnect, useSigner } from "@thirdweb-dev/react-native";
 import { Wallet } from "ethers";
 import * as Linking from "expo-linking";
-import React, {
-  useCallback,
-  useContext,
-  useEffect,
-  useRef,
-  useState,
-} from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
   StyleSheet,
   Text,
@@ -30,11 +24,11 @@ import { resetLocalXmtpState } from "../components/XmtpState";
 import { sendMessageToWebview } from "../components/XmtpWebview";
 import config from "../config";
 import { clearDB } from "../data/db";
-import { AppContext } from "../data/deprecatedStore/context";
 import {
   usePreferencesStore,
   useRecommendationsStore,
 } from "../data/store/accountsStore";
+import { useOnboardingStore } from "../data/store/onboardingStore";
 import { textPrimaryColor, textSecondaryColor } from "../utils/colors";
 import { saveXmtpKeys } from "../utils/keychain";
 import { shortAddress } from "../utils/str";
@@ -42,7 +36,9 @@ import { getXmtpKeysFromSigner, isOnXmtp } from "../utils/xmtp/client";
 import { Signer } from "../vendor/xmtp-js/src";
 
 export default function OnboardingScreen() {
-  const { state, dispatch } = useContext(AppContext);
+  const desktopConnectSessionId = useOnboardingStore(
+    (s) => s.desktopConnectSessionId
+  );
   const resetRecommendations = useRecommendationsStore(
     (s) => s.resetRecommendations
   );
@@ -363,7 +359,7 @@ export default function OnboardingScreen() {
     );
   }
 
-  if (state.app.desktopConnectSessionId) {
+  if (desktopConnectSessionId) {
     return <DesktopConnect />;
   }
 
