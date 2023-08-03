@@ -1,5 +1,5 @@
 import * as Clipboard from "expo-clipboard";
-import { useCallback, useContext, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
   Alert,
   ColorSchemeName,
@@ -9,7 +9,6 @@ import {
 } from "react-native";
 import EmojiPicker from "rn-emoji-keyboard";
 
-import { AppContext } from "../../data/deprecatedStore/context";
 import { useSettingsStore, useUserStore } from "../../data/store/accountsStore";
 import { blockPeer, reportMessage } from "../../utils/api";
 import { isAttachmentMessage } from "../../utils/attachment";
@@ -45,7 +44,6 @@ export default function ChatMessageActions({
 }: Props) {
   const isAttachment = isAttachmentMessage(message.contentType);
   const colorScheme = useColorScheme();
-  const { dispatch } = useContext(AppContext);
   const userAddress = useUserStore((s) => s.userAddress);
   const setBlockedPeerStatus = useSettingsStore((s) => s.setBlockedPeerStatus);
 

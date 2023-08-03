@@ -21,11 +21,11 @@ import Reanimated, {
 } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-import { XmtpConversationWithUpdate } from "../../data/deprecatedStore/xmtpReducer";
 import {
   useProfilesStore,
   useRecommendationsStore,
 } from "../../data/store/accountsStore";
+import { XmtpConversationWithUpdate } from "../../data/store/chatStore";
 import { useKeyboardAnimation } from "../../utils/animations";
 import {
   backgroundColor,

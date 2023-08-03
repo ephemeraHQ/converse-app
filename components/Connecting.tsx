@@ -1,7 +1,5 @@
-import { useContext } from "react";
 import { View, Text, useColorScheme, Platform } from "react-native";
 
-import { AppContext } from "../data/deprecatedStore/context";
 import { useChatStore } from "../data/store/accountsStore";
 import { useAppStore } from "../data/store/appStore";
 import { textPrimaryColor } from "../utils/colors";
@@ -27,14 +25,13 @@ export const useShouldShowConnecting = () => {
 };
 
 export const useShouldShowConnectingOrSyncing = () => {
-  const { state } = useContext(AppContext);
-  const { initialLoadDoneOnce } = useChatStore((s) =>
-    pick(s, ["initialLoadDoneOnce"])
+  const { initialLoadDoneOnce, conversations } = useChatStore((s) =>
+    pick(s, ["initialLoadDoneOnce", "conversations"])
   );
   const shouldShowConnecting = useShouldShowConnecting();
   return (
     shouldShowConnecting ||
-    (!initialLoadDoneOnce && Object.keys(state.xmtp.conversations).length > 0)
+    (!initialLoadDoneOnce && Object.keys(conversations).length > 0)
   );
 };
 

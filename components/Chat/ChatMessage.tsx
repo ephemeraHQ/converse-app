@@ -9,7 +9,7 @@ import {
 } from "react-native";
 
 import MessageTail from "../../assets/message-tail.svg";
-import { XmtpMessage } from "../../data/deprecatedStore/xmtpReducer";
+import { XmtpMessage } from "../../data/store/chatStore";
 import { isAttachmentMessage } from "../../utils/attachment";
 import {
   messageBubbleColor,

@@ -1,7 +1,7 @@
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import * as Clipboard from "expo-clipboard";
 import * as Linking from "expo-linking";
-import React, { useCallback, useContext, useState } from "react";
+import React, { useCallback, useState } from "react";
 import {
   StyleSheet,
   ColorSchemeName,
@@ -18,7 +18,6 @@ import {
   TableViewImage,
   TableViewPicto,
 } from "../components/TableView/TableViewImage";
-import { AppContext } from "../data/deprecatedStore/context";
 import {
   useProfilesStore,
   useRecommendationsStore,
@@ -41,7 +40,6 @@ export default function ProfileScreen({
   route,
   navigation,
 }: NativeStackScreenProps<NavigationParamList, "Profile">) {
-  const { state, dispatch } = useContext(AppContext);
   const userAddress = useUserStore((s) => s.userAddress);
   const colorScheme = useColorScheme();
   const styles = getStyles(colorScheme);

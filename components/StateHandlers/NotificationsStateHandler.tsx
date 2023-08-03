@@ -1,8 +1,7 @@
 import * as Notifications from "expo-notifications";
-import { useCallback, useContext, useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import { AppState } from "react-native";
 
-import { AppContext } from "../../data/deprecatedStore/context";
 import {
   useChatStore,
   useSettingsStore,
@@ -30,10 +29,9 @@ Notifications.setNotificationHandler({
 
 export default function NotificationsStateHandler() {
   const appState = useRef(AppState.currentState);
-  const { state, dispatch } = useContext(AppContext);
   const userAddress = useUserStore((s) => s.userAddress);
-  const { initialLoadDone, resyncing } = useChatStore((s) =>
-    pick(s, ["initialLoadDone", "resyncing"])
+  const { initialLoadDone, resyncing, conversations } = useChatStore((s) =>
+    pick(s, ["initialLoadDone", "resyncing", "conversations"])
   );
   const blockedPeers = useSettingsStore((s) => s.blockedPeers);
   const { setNotificationsPermissionStatus, notificationsPermissionStatus } =
@@ -68,18 +66,15 @@ export default function NotificationsStateHandler() {
         event.notification.request.content.data as any
       )?.contentTopic?.toString();
       if (conversationTopic) {
-        if (state.xmtp.conversations[conversationTopic]) {
-          navigateToConversation(
-            dispatch,
-            state.xmtp.conversations[conversationTopic]
-          );
+        if (conversations[conversationTopic]) {
+          navigateToConversation(conversations[conversationTopic]);
         } else {
           // App was probably not loaded!
           setTopicToNavigateTo(conversationTopic);
         }
       }
     },
-    [dispatch, state.xmtp.conversations]
+    [conversations]
   );
 
   useEffect(() => {
@@ -127,7 +122,7 @@ export default function NotificationsStateHandler() {
     return () => {
       subscription.remove();
     };
-  }, [dispatch, saveNotificationsStatus, userAddress]);
+  }, [saveNotificationsStatus, userAddress]);
 
   useEffect(() => {
     if (
@@ -138,7 +133,7 @@ export default function NotificationsStateHandler() {
     ) {
       subscribeToNotifications(
         userAddress,
-        Object.values(state.xmtp.conversations),
+        Object.values(conversations),
         blockedPeers
       );
     }
@@ -146,7 +141,7 @@ export default function NotificationsStateHandler() {
     notificationsPermissionStatus,
     userAddress,
     blockedPeers,
-    state.xmtp.conversations,
+    conversations,
     initialLoadDone,
     resyncing,
   ]);

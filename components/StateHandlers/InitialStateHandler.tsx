@@ -1,9 +1,9 @@
 import * as Linking from "expo-linking";
-import { useCallback, useContext, useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import { useColorScheme } from "react-native";
 
 import config from "../../config";
-import { AppContext } from "../../data/deprecatedStore/context";
+import { useChatStore } from "../../data/store/accountsStore";
 import { useAppStore } from "../../data/store/appStore";
 import { useOnboardingStore } from "../../data/store/onboardingStore";
 import { setAndroidColors } from "../../utils/colors";
@@ -29,13 +29,13 @@ const getSchemedURLFromUniversalURL = (url: string) => {
 
 export default function InitialStateHandler() {
   const colorScheme = useColorScheme();
-  const { state, dispatch } = useContext(AppContext);
   const setDesktopConnectSessionId = useOnboardingStore(
     (s) => s.setDesktopConnectSessionId
   );
   const { setSplashScreenHidden, hydrationDone } = useAppStore((s) =>
     pick(s, ["setSplashScreenHidden", "hydrationDone"])
   );
+  const { conversations } = useChatStore((s) => pick(s, ["conversations"]));
 
   useEffect(() => {
     setAndroidColors(colorScheme);
@@ -95,11 +95,8 @@ export default function InitialStateHandler() {
         // If app was loaded by clicking on notification,
         // let's navigate
         if (topicToNavigateTo) {
-          if (state.xmtp.conversations[topicToNavigateTo]) {
-            navigateToConversation(
-              dispatch,
-              state.xmtp.conversations[topicToNavigateTo]
-            );
+          if (conversations[topicToNavigateTo]) {
+            navigateToConversation(conversations[topicToNavigateTo]);
           }
           setTopicToNavigateTo("");
         } else if (initialURL.current) {
@@ -108,12 +105,7 @@ export default function InitialStateHandler() {
       }
     };
     hideSplashScreenIfReady();
-  }, [
-    dispatch,
-    hydrationDone,
-    setSplashScreenHidden,
-    state.xmtp.conversations,
-  ]);
+  }, [hydrationDone, setSplashScreenHidden, conversations]);
 
   return null;
 }

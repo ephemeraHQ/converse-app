@@ -1,4 +1,4 @@
-import { useCallback, useContext } from "react";
+import { useCallback } from "react";
 import {
   ColorSchemeName,
   StyleSheet,
@@ -8,7 +8,6 @@ import {
   View,
 } from "react-native";
 
-import { AppContext } from "../../data/deprecatedStore/context";
 import { useProfilesStore, useUserStore } from "../../data/store/accountsStore";
 import { isAttachmentMessage } from "../../utils/attachment";
 import {
@@ -45,7 +44,6 @@ export default function ChatMessageReactions({
 }: Props) {
   const colorScheme = useColorScheme();
   const styles = getStyles(colorScheme);
-  const { state } = useContext(AppContext);
   const userAddress = useUserStore((s) => s.userAddress);
   const profiles = useProfilesStore((state) => state.profiles);
   const reactionsList = Object.values(reactions).sort(

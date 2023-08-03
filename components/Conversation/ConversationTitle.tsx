@@ -1,12 +1,6 @@
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import * as Clipboard from "expo-clipboard";
-import {
-  MutableRefObject,
-  useContext,
-  useEffect,
-  useRef,
-  useState,
-} from "react";
+import { MutableRefObject, useEffect, useRef, useState } from "react";
 import {
   TouchableOpacity,
   Platform,
@@ -16,8 +10,7 @@ import {
   TextInput,
 } from "react-native";
 
-import { AppContext } from "../../data/deprecatedStore/context";
-import { XmtpConversation } from "../../data/deprecatedStore/xmtpReducer";
+import { XmtpConversation } from "../../data/store/chatStore";
 import { NavigationParamList } from "../../screens/Main";
 import { headerTitleStyle, textSecondaryColor } from "../../utils/colors";
 import { conversationName, getTitleFontScale } from "../../utils/str";
@@ -39,7 +32,6 @@ export default function ConversationTitle({
   textInputRef,
   navigation,
 }: Props) {
-  const { state } = useContext(AppContext);
   const colorScheme = useColorScheme();
   const [title, setTitle] = useState(
     conversation ? conversationName(conversation) : ""

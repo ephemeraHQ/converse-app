@@ -7,7 +7,7 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import * as Linking from "expo-linking";
 import * as Notifications from "expo-notifications";
 import { StatusBar } from "expo-status-bar";
-import React, { useContext, useRef } from "react";
+import React, { useRef } from "react";
 import { Platform, useColorScheme } from "react-native";
 
 import ChatSendAttachment from "../components/Chat/ChatSendAttachment";
@@ -18,7 +18,6 @@ import MainIdentityStateHandler from "../components/StateHandlers/MainIdentitySt
 import NetworkStateHandler from "../components/StateHandlers/NetworkStateHandler";
 import NotificationsStateHandler from "../components/StateHandlers/NotificationsStateHandler";
 import config from "../config";
-import { AppContext } from "../data/deprecatedStore/context";
 import { useSettingsStore, useUserStore } from "../data/store/accountsStore";
 import { useAppStore } from "../data/store/appStore";
 import {
@@ -74,7 +73,6 @@ Notifications.setNotificationHandler({
 
 export default function Main() {
   const colorScheme = useColorScheme();
-  const { state } = useContext(AppContext);
   const userAddress = useUserStore((s) => s.userAddress);
   const showNotificationScreen = useSettingsStore(
     (s) => s.notifications.showNotificationScreen

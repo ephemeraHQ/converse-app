@@ -13,7 +13,7 @@ import { TouchableRipple } from "react-native-paper";
 import Checkmark from "../assets/checkmark.svg";
 import Clock from "../assets/clock.svg";
 import Picto from "../components/Picto/Picto";
-import { XmtpConversation } from "../data/deprecatedStore/xmtpReducer";
+import { XmtpConversation } from "../data/store/chatStore";
 import { NavigationParamList } from "../screens/Main";
 import {
   actionSecondaryColor,

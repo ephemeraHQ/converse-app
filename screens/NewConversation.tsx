@@ -2,13 +2,7 @@ import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { getAddress } from "ethers/lib/utils";
 import * as Linking from "expo-linking";
 import { StatusBar } from "expo-status-bar";
-import React, {
-  useCallback,
-  useContext,
-  useEffect,
-  useRef,
-  useState,
-} from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
   Button,
   ScrollView,
@@ -33,12 +27,12 @@ import TableView from "../components/TableView/TableView";
 import { TableViewPicto } from "../components/TableView/TableViewImage";
 import config from "../config";
 import { createPendingConversation } from "../data";
-import { AppContext, StateType } from "../data/deprecatedStore/context";
-import { XmtpConversation } from "../data/deprecatedStore/xmtpReducer";
 import {
+  useChatStore,
   useRecommendationsStore,
   useUserStore,
 } from "../data/store/accountsStore";
+import { XmtpConversation } from "../data/store/chatStore";
 import {
   backgroundColor,
   itemSeparatorColor,
@@ -54,12 +48,11 @@ import { isOnXmtp } from "../utils/xmtp/client";
 import { NavigationParamList } from "./Main";
 
 const computeNewConversationContext = (
-  state: StateType,
   userAddress: string,
   peerAddress: string
 ) => {
   let i = 0;
-  const conversationsIds = Object.values(state.xmtp.conversations)
+  const conversationsIds = Object.values(useChatStore.getState().conversations)
     .filter((c) => c.peerAddress?.toLowerCase() === peerAddress?.toLowerCase())
     .map((c) => c.context?.conversationId);
   // First try to create one without conversationId
@@ -116,7 +109,6 @@ export default function NewConversation({
     existingConversations: [] as XmtpConversation[],
   });
 
-  const { state, dispatch } = useContext(AppContext);
   const userAddress = useUserStore((s) => s.userAddress);
   const {
     updatedAt: recommendationsUpdatedAt,
@@ -127,7 +119,6 @@ export default function NewConversation({
   );
   const recommendationsLoadedOnce = recommendationsUpdatedAt > 0;
   const recommendationsFrensCount = Object.keys(frens).length;
-  const conversationsRef = useRef(state.xmtp.conversations);
 
   useEffect(() => {
     const searchForValue = async () => {
@@ -173,7 +164,7 @@ export default function NewConversation({
             if (addressIsOnXmtp) {
               // Let's find existing conversations with this user
               const conversations = Object.values(
-                conversationsRef.current
+                useChatStore.getState().conversations
               ).filter((conversation) => {
                 if (!conversation || !conversation.peerAddress) {
                   return false;
@@ -229,15 +220,14 @@ export default function NewConversation({
   const [creatingNewConversation, setCreatingNewConversation] = useState(false);
 
   const createNewConversationWithPeer = useCallback(
-    async (state: StateType, userAddress: string, peerAddress: string) => {
+    async (userAddress: string, peerAddress: string) => {
       if (creatingNewConversation) return;
       setCreatingNewConversation(true);
 
       try {
         const newConversationTopic = await createPendingConversation(
           peerAddress,
-          computeNewConversationContext(state, userAddress, peerAddress),
-          dispatch
+          computeNewConversationContext(userAddress, peerAddress)
         );
         navigateToTopic(newConversationTopic);
       } catch (e: any) {
@@ -245,7 +235,7 @@ export default function NewConversation({
         setCreatingNewConversation(false);
       }
     },
-    [creatingNewConversation, dispatch, navigateToTopic]
+    [creatingNewConversation, navigateToTopic]
   );
 
   const inputRef = useRef<TextInput | null>(null);
@@ -449,11 +439,7 @@ export default function NewConversation({
                   ),
                   title: "Create a new conversation",
                   action: () => {
-                    createNewConversationWithPeer(
-                      state,
-                      userAddress,
-                      status.address
-                    );
+                    createNewConversationWithPeer(userAddress, status.address);
                   },
                 },
               ]}
