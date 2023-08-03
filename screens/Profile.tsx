@@ -23,6 +23,7 @@ import { XmtpDispatchTypes } from "../data/deprecatedStore/xmtpReducer";
 import {
   useProfilesStore,
   useRecommendationsStore,
+  useUserStore,
 } from "../data/store/accountsStore";
 import { blockPeer } from "../utils/api";
 import {
@@ -41,6 +42,7 @@ export default function ProfileScreen({
   navigation,
 }: NativeStackScreenProps<NavigationParamList, "Profile">) {
   const { state, dispatch } = useContext(AppContext);
+  const userAddress = useUserStore((s) => s.userAddress);
   const colorScheme = useColorScheme();
   const styles = getStyles(colorScheme);
   const [copiedAddresses, setCopiedAddresses] = useState<{
@@ -180,7 +182,7 @@ export default function ProfileScreen({
           style={styles.tableView}
         />
       )}
-      {peerAddress.toLowerCase() !== state.xmtp.address?.toLowerCase() && (
+      {peerAddress.toLowerCase() !== userAddress?.toLowerCase() && (
         <>
           {recommendationTags?.length && (
             <TableView

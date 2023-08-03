@@ -22,7 +22,7 @@ import { NavigationParamList } from "../../screens/Main";
 import { headerTitleStyle, textSecondaryColor } from "../../utils/colors";
 import { conversationName, getTitleFontScale } from "../../utils/str";
 import Connecting, { useShouldShowConnectingOrSyncing } from "../Connecting";
-import { shouldShowDebug } from "../DebugButton";
+import { useEnableDebug } from "../DebugButton";
 import Picto from "../Picto/Picto";
 
 type Props = {
@@ -44,6 +44,7 @@ export default function ConversationTitle({
   const [title, setTitle] = useState(
     conversation ? conversationName(conversation) : ""
   );
+  const enableDebug = useEnableDebug();
   const shouldShowConnectingOrSyncing = useShouldShowConnectingOrSyncing();
   const conversationRef = useRef(conversation);
   useEffect(() => {
@@ -71,7 +72,7 @@ export default function ConversationTitle({
       {!shouldShowConnectingOrSyncing && (
         <TouchableOpacity
           onLongPress={() => {
-            if (!shouldShowDebug(state)) return;
+            if (!enableDebug) return;
             Clipboard.setStringAsync(
               JSON.stringify({
                 topic: conversation?.topic || "",

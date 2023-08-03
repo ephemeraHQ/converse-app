@@ -23,7 +23,7 @@ import Connecting, {
   useShouldShowConnectingOrSyncing,
 } from "../components/Connecting";
 import ConversationListItem from "../components/ConversationListItem";
-import DebugButton, { shouldShowDebug } from "../components/DebugButton";
+import DebugButton, { useEnableDebug } from "../components/DebugButton";
 import EphemeralAccountBanner from "../components/EphemeralAccountBanner";
 import InitialLoad from "../components/InitialLoad";
 import Picto from "../components/Picto/Picto";
@@ -32,7 +32,7 @@ import SettingsButton from "../components/SettingsButton";
 import Welcome from "../components/Welcome";
 import { AppContext } from "../data/deprecatedStore/context";
 import { XmtpConversationWithUpdate } from "../data/deprecatedStore/xmtpReducer";
-import { useSettingsStore } from "../data/store/accountsStore";
+import { useSettingsStore, useUserStore } from "../data/store/accountsStore";
 import {
   backgroundColor,
   textPrimaryColor,
@@ -50,17 +50,16 @@ function NewConversationButton({
 }: NativeStackScreenProps<NavigationParamList, "Messages">) {
   const colorScheme = useColorScheme();
   const debugRef = useRef();
-  const { state } = useContext(AppContext);
-  const showDebug = shouldShowDebug(state);
+  const enableDebug = useEnableDebug();
   const onPress = useCallback(() => {
     navigation.navigate("NewConversation", {});
   }, [navigation]);
   const onLongPress = useCallback(() => {
-    if (!showDebug || !debugRef.current) {
+    if (!enableDebug || !debugRef.current) {
       return;
     }
-    (debugRef.current as any).showDebugMenu();
-  }, [showDebug]);
+    (debugRef.current as any).enableDebugMenu();
+  }, [enableDebug]);
   if (Platform.OS === "ios") {
     return (
       <TouchableOpacity
@@ -68,7 +67,7 @@ function NewConversationButton({
         onPress={onPress}
         onLongPress={onLongPress}
       >
-        {showDebug && <DebugButton ref={debugRef} />}
+        {enableDebug && <DebugButton ref={debugRef} />}
         <Picto
           picto="square.and.pencil"
           weight="medium"
@@ -84,7 +83,7 @@ function NewConversationButton({
         key={`FAB-newConversation-${colorScheme}`}
         icon={(props) => (
           <>
-            {showDebug && <DebugButton ref={debugRef} />}
+            {enableDebug && <DebugButton ref={debugRef} />}
             <Picto
               picto="square.and.pencil"
               weight="medium"
@@ -149,6 +148,7 @@ export default function ConversationList({
   const colorScheme = useColorScheme();
   const styles = getStyles(colorScheme);
   const { state } = useContext(AppContext);
+  const userAddress = useUserStore((s) => s.userAddress);
   const ephemeralAccount = useSettingsStore((s) => s.ephemeralAccount);
   const shouldShowConnectingOrSyncing = useShouldShowConnectingOrSyncing();
   const [flatListItems, setFlatListItems] = useState<FlatListItem[]>([]);
@@ -156,10 +156,7 @@ export default function ConversationList({
     const conversations = Object.values(state.xmtp.conversations)
       .filter((a) => a?.peerAddress && (!a.pending || a.messages.size > 0))
       .map((c: ConversationWithLastMessagePreview) => {
-        c.lastMessagePreview = conversationLastMessagePreview(
-          c,
-          state.xmtp.address
-        );
+        c.lastMessagePreview = conversationLastMessagePreview(c, userAddress);
         return c;
       });
     conversations.sort((a, b) => {
@@ -175,14 +172,14 @@ export default function ConversationList({
     setFlatListItems([...items, ...conversations, { topic: "welcome" }]);
   }, [
     ephemeralAccount,
-    state.xmtp.address,
+    userAddress,
     state.xmtp.conversations,
     state.xmtp.lastUpdateAt,
   ]);
   useEffect(() => {
     navigation.setOptions({
       headerLeft: () =>
-        state.xmtp.address ? (
+        userAddress ? (
           <SettingsButton route={route} navigation={navigation} />
         ) : null,
       headerRight: () => (
@@ -194,7 +191,7 @@ export default function ConversationList({
         </>
       ),
     });
-  }, [navigation, route, state.xmtp.address]);
+  }, [navigation, route, userAddress]);
   useEffect(() => {
     navigation.setOptions({
       headerTitle: () => {
@@ -253,7 +250,7 @@ export default function ConversationList({
           lastMessageStatus={lastMessagePreview?.message?.status}
           lastMessageFromMe={
             !!lastMessagePreview &&
-            lastMessagePreview.message?.senderAddress === state.xmtp.address
+            lastMessagePreview.message?.senderAddress === userAddress
           }
         />
       );
@@ -262,7 +259,7 @@ export default function ConversationList({
       colorScheme,
       navigation,
       route,
-      state.xmtp.address,
+      userAddress,
       state.xmtp.blockedPeerAddresses,
       state.xmtp.initialLoadDoneOnce,
     ]
@@ -289,7 +286,7 @@ export default function ConversationList({
             colorScheme,
             navigation,
             route,
-            state.xmtp.address,
+            userAddress,
             state.xmtp.blockedPeerAddresses,
             state.xmtp.initialLoadDoneOnce,
           ]}

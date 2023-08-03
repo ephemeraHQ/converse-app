@@ -8,6 +8,7 @@ import { Platform, TouchableOpacity, useColorScheme, View } from "react-native";
 import config from "../config";
 import { refreshProfileForAddress } from "../data";
 import { AppContext } from "../data/deprecatedStore/context";
+import { useUserStore } from "../data/store/accountsStore";
 import { useAppStore } from "../data/store/appStore";
 import { NavigationParamList } from "../screens/Main";
 import { actionSheetColors, textSecondaryColor } from "../utils/colors";
@@ -26,6 +27,7 @@ export default function SettingsButton({
   navigation,
 }: NativeStackScreenProps<NavigationParamList, "Messages">) {
   const { state, dispatch } = useContext(AppContext);
+  const userAddress = useUserStore((s) => s.userAddress);
   const { setNotificationsPermissionStatus, notificationsPermissionStatus } =
     useAppStore((s) =>
       pick(s, [
@@ -38,13 +40,13 @@ export default function SettingsButton({
   const onPress = useCallback(() => {
     const methods = {
       "Your profile page": () => {
-        if (state.xmtp.address) {
-          refreshProfileForAddress(state.xmtp.address);
-          navigation.push("Profile", { address: state.xmtp.address });
+        if (userAddress) {
+          refreshProfileForAddress(userAddress);
+          navigation.push("Profile", { address: userAddress });
         }
       },
       "Copy wallet address": () => {
-        Clipboard.setStringAsync(state.xmtp.address || "");
+        Clipboard.setStringAsync(userAddress || "");
       },
       "Contact Converse team": () => {
         Linking.openURL(
@@ -98,7 +100,7 @@ export default function SettingsButton({
         options,
         destructiveButtonIndex: options.indexOf("Disconnect"),
         cancelButtonIndex: options.indexOf("Cancel"),
-        title: state.xmtp.address,
+        title: userAddress || undefined,
         ...actionSheetColors(colorScheme),
       },
       (selectedIndex?: number) => {
@@ -117,6 +119,7 @@ export default function SettingsButton({
     notificationsPermissionStatus,
     setNotificationsPermissionStatus,
     state,
+    userAddress,
   ]);
 
   if (Platform.OS === "ios") {
@@ -127,7 +130,7 @@ export default function SettingsButton({
           allowFontScaling={false}
           textStyle={{ fontSize: 17 * getTitleFontScale() }}
           onPress={onPress}
-          title={shortAddress(state.xmtp.address || "")}
+          title={shortAddress(userAddress || "")}
         />
       </View>
     );

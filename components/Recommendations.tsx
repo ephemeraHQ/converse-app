@@ -1,6 +1,6 @@
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import * as Linking from "expo-linking";
-import { useCallback, useContext, useEffect } from "react";
+import { useCallback, useEffect } from "react";
 import {
   ColorSchemeName,
   FlatList,
@@ -15,8 +15,10 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import IconLoading from "../assets/icon-loading.png";
 import config from "../config";
-import { AppContext } from "../data/deprecatedStore/context";
-import { useRecommendationsStore } from "../data/store/accountsStore";
+import {
+  useRecommendationsStore,
+  useUserStore,
+} from "../data/store/accountsStore";
 import { RecommendationData } from "../data/store/recommendationsStore";
 import { findFrens } from "../utils/api";
 import {
@@ -132,7 +134,7 @@ export default function Recommendations({
   navigation: NativeStackNavigationProp<any>;
   visibility: "FULL" | "EMBEDDED" | "HIDDEN";
 }) {
-  const { state } = useContext(AppContext);
+  const userAddress = useUserStore((s) => s.userAddress);
   const {
     frens,
     setLoadingRecommendations,
@@ -176,14 +178,14 @@ export default function Recommendations({
       setRecommendations(frens, now);
     };
     const now = new Date().getTime();
-    if (!loading && state.xmtp.address && now - updatedAt >= EXPIRE_AFTER) {
+    if (!loading && userAddress && now - updatedAt >= EXPIRE_AFTER) {
       getRecommendations();
     }
   }, [
     loading,
     setLoadingRecommendations,
     setRecommendations,
-    state.xmtp.address,
+    userAddress,
     updatedAt,
   ]);
 

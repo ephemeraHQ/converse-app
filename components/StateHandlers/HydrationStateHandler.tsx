@@ -5,6 +5,7 @@ import { loadDataToContext, refreshProfileForAddress } from "../../data";
 import { initDb } from "../../data/db";
 import { AppContext } from "../../data/deprecatedStore/context";
 import { XmtpDispatchTypes } from "../../data/deprecatedStore/xmtpReducer";
+import { useUserStore } from "../../data/store/accountsStore";
 import { useAppStore } from "../../data/store/appStore";
 import { loadSavedNotificationMessagesToContext } from "../../utils/backgroundNotifications/loadSavedNotifications";
 import { loadXmtpKeys } from "../../utils/keychain";
@@ -21,6 +22,7 @@ let migrationAlertShown = false;
 
 export default function HydrationStateHandler() {
   const { state, dispatch } = useContext(AppContext);
+  const setUserAddress = useUserStore((s) => s.setUserAddress);
   const { setHydrationDone } = useAppStore((s) =>
     pick(s, ["setHydrationDone"])
   );
@@ -50,22 +52,12 @@ export default function HydrationStateHandler() {
       let address = xmtpAddress;
 
       if (xmtpAddress) {
-        dispatch({
-          type: XmtpDispatchTypes.XmtpSetAddress,
-          payload: {
-            address: xmtpAddress,
-          },
-        });
+        setUserAddress(xmtpAddress);
       } else {
         const xmtpClient = await getLocalXmtpClient();
         if (xmtpClient) {
           address = xmtpClient.address;
-          dispatch({
-            type: XmtpDispatchTypes.XmtpSetAddress,
-            payload: {
-              address: xmtpClient.address,
-            },
-          });
+          setUserAddress(xmtpClient.address);
         }
       }
 

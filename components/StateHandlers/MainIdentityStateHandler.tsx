@@ -1,18 +1,18 @@
-import { useContext, useEffect } from "react";
+import { useEffect } from "react";
 
 import { refreshProfileForAddress } from "../../data";
-import { AppContext } from "../../data/deprecatedStore/context";
+import { useUserStore } from "../../data/store/accountsStore";
 import { saveUser } from "../../utils/api";
 
 export default function MainIdentityStateHandler() {
-  const { state, dispatch } = useContext(AppContext);
+  const userAddress = useUserStore((s) => s.userAddress);
 
   useEffect(() => {
-    if (state.xmtp.address) {
-      saveUser(state.xmtp.address);
-      refreshProfileForAddress(state.xmtp.address);
+    if (userAddress) {
+      saveUser(userAddress);
+      refreshProfileForAddress(userAddress);
     }
-  }, [state.xmtp.address, dispatch]);
+  }, [userAddress]);
 
   return null;
 }

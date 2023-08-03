@@ -1,10 +1,7 @@
 import { markAllConversationsAsReadInDb } from "..";
 import { lastValueInMap } from "../../utils/map";
 import mmkv from "../../utils/mmkv";
-import {
-  deleteLoggedXmtpAddress,
-  saveLoggedXmtpAddress,
-} from "../../utils/sharedData/sharedData";
+import { deleteLoggedXmtpAddress } from "../../utils/sharedData/sharedData";
 import { ActionMap } from "./types";
 
 export type XmtpConversationContext = {
@@ -43,7 +40,6 @@ export type XmtpType = {
     [oldTopic: string]: string;
   };
   lastUpdateAt: number;
-  address?: string;
   blockedPeerAddresses: { [peerAddress: string]: boolean };
   reconnecting: boolean;
 };
@@ -56,7 +52,6 @@ export const xmtpInitialState: XmtpType = {
   loading: false,
   conversations: {},
   conversationsMapping: {},
-  address: undefined,
   lastUpdateAt: 0,
   blockedPeerAddresses: {},
   reconnecting: false,
@@ -83,7 +78,6 @@ export enum XmtpDispatchTypes {
   XmtpSetConversations = "XMTP_SET_CONVERSATIONS",
   XmtpNewConversation = "XMTP_NEW_CONVERSATION",
   XmtpDeleteConversations = "XMTP_DELETE_CONVERSATIONS",
-  XmtpSetAddress = "XMTP_SET_ADDRESS",
   XmtpSetMessages = "XMTP_SET_MESSAGES",
   XmtpSetMessagesReactions = "XMTP_SET_MESSAGES_REACTIONS",
   XmtpUpdateMessageIds = "XMTP_UPDATE_MESSAGE_IDS",
@@ -111,9 +105,7 @@ type XmtpPayload = {
   [XmtpDispatchTypes.XmtpNewConversation]: {
     conversation: XmtpConversation;
   };
-  [XmtpDispatchTypes.XmtpSetAddress]: {
-    address: string;
-  };
+
   [XmtpDispatchTypes.XmtpSetMessages]: {
     topic: string;
     messages: XmtpMessage[];
@@ -165,12 +157,6 @@ export type XmtpActions = ActionMap<XmtpPayload>[keyof ActionMap<XmtpPayload>];
 export const xmtpReducer = (state: XmtpType, action: XmtpActions): XmtpType => {
   const now = new Date().getTime();
   switch (action.type) {
-    case XmtpDispatchTypes.XmtpSetAddress:
-      saveLoggedXmtpAddress(action.payload.address);
-      return {
-        ...state,
-        address: action.payload.address,
-      };
     case XmtpDispatchTypes.XmtpWebviewConnected:
       if (!action.payload.connected) {
         deleteLoggedXmtpAddress();

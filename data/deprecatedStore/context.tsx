@@ -26,7 +26,7 @@ const AppContext = createContext<{
   dispatch: () => null,
 });
 
-const mainReducer = ({ xmtp, app }: StateType, action: ActionsType) => ({
+const mainReducer = ({ xmtp }: StateType, action: ActionsType) => ({
   xmtp: xmtpReducer(xmtp, action as XmtpActions),
 });
 

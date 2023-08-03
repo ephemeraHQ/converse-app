@@ -3,6 +3,7 @@ import { useCallback, useContext, useEffect, useRef } from "react";
 import { AppState } from "react-native";
 
 import { AppContext } from "../../data/deprecatedStore/context";
+import { useUserStore } from "../../data/store/accountsStore";
 import { useAppStore } from "../../data/store/appStore";
 import { saveUser } from "../../utils/api";
 import { navigateToConversation } from "../../utils/navigation";
@@ -26,6 +27,7 @@ Notifications.setNotificationHandler({
 export default function NotificationsStateHandler() {
   const appState = useRef(AppState.currentState);
   const { state, dispatch } = useContext(AppContext);
+  const userAddress = useUserStore((s) => s.userAddress);
   const { setNotificationsPermissionStatus, notificationsPermissionStatus } =
     useAppStore((s) =>
       pick(s, [
@@ -106,8 +108,8 @@ export default function NotificationsStateHandler() {
           // App is back to active state
           saveNotificationsStatus();
           // Save the user
-          if (state.xmtp.address) {
-            saveUser(state.xmtp.address);
+          if (userAddress) {
+            saveUser(userAddress);
           }
         }
         appState.current = nextAppState;
@@ -117,24 +119,24 @@ export default function NotificationsStateHandler() {
     return () => {
       subscription.remove();
     };
-  }, [dispatch, saveNotificationsStatus, state.xmtp.address]);
+  }, [dispatch, saveNotificationsStatus, userAddress]);
 
   useEffect(() => {
     if (
       notificationsPermissionStatus === "granted" &&
       state.xmtp.initialLoadDone &&
-      state.xmtp.address &&
+      userAddress &&
       !state.xmtp.loading
     ) {
       subscribeToNotifications(
-        state.xmtp.address,
+        userAddress,
         Object.values(state.xmtp.conversations),
         state.xmtp.blockedPeerAddresses
       );
     }
   }, [
     notificationsPermissionStatus,
-    state.xmtp.address,
+    userAddress,
     state.xmtp.blockedPeerAddresses,
     state.xmtp.conversations,
     state.xmtp.initialLoadDone,

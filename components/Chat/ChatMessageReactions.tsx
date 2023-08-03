@@ -9,7 +9,7 @@ import {
 } from "react-native";
 
 import { AppContext } from "../../data/deprecatedStore/context";
-import { useProfilesStore } from "../../data/store/accountsStore";
+import { useProfilesStore, useUserStore } from "../../data/store/accountsStore";
 import { isAttachmentMessage } from "../../utils/attachment";
 import {
   actionSheetColors,
@@ -46,6 +46,7 @@ export default function ChatMessageReactions({
   const colorScheme = useColorScheme();
   const styles = getStyles(colorScheme);
   const { state } = useContext(AppContext);
+  const userAddress = useUserStore((s) => s.userAddress);
   const profiles = useProfilesStore((state) => state.profiles);
   const reactionsList = Object.values(reactions).sort(
     (r1, r2) => r1.sent - r2.sent
@@ -54,8 +55,7 @@ export default function ChatMessageReactions({
     const methods: any = {};
     reactionsList.forEach((r) => {
       const peerAddress = r.senderAddress;
-      const fromMe =
-        peerAddress.toLowerCase() === state.xmtp.address?.toLowerCase();
+      const fromMe = peerAddress.toLowerCase() === userAddress?.toLowerCase();
       const socials = profiles[peerAddress]?.socials;
       const ensName = socials?.ensNames?.find((e) => e.isPrimary)?.name;
       const unsDomain = socials?.unstoppableDomains?.find(
@@ -89,14 +89,7 @@ export default function ChatMessageReactions({
         }
       }
     );
-  }, [
-    colorScheme,
-    message,
-    reactionsList,
-    sendMessage,
-    profiles,
-    state.xmtp.address,
-  ]);
+  }, [colorScheme, message, reactionsList, sendMessage, profiles, userAddress]);
   if (reactionsList.length === 0) return null;
   return (
     <View

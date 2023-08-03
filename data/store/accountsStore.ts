@@ -6,6 +6,7 @@ import {
   RecommendationsStoreType,
 } from "./recommendationsStore";
 import { initSettingsStore, SettingsStoreType } from "./settingsStore";
+import { initUserStore, UserStoreType } from "./userStore";
 
 type AccountsStoreStype = {
   currentAccount: string;
@@ -27,17 +28,16 @@ type AccountStoreDataType = {
   profiles: ProfilesStoreType;
   settings: SettingsStoreType;
   recommendations: RecommendationsStoreType;
+  user: UserStoreType;
 };
 
 // And here call the init method of each store
 const initStoreForAccount = (account: string) => {
-  const profilesStore = initProfilesStore();
-  const settingsStore = initSettingsStore(account);
-  const recommendationsStore = initRecommendationsStore(account);
   storesByAccount[account] = {
-    profiles: profilesStore,
-    settings: settingsStore,
-    recommendations: recommendationsStore,
+    profiles: initProfilesStore(),
+    settings: initSettingsStore(account),
+    recommendations: initRecommendationsStore(account),
+    user: initUserStore(),
   };
 };
 
@@ -89,3 +89,4 @@ export const useProfilesStore = currentAccountStoreHook("profiles");
 export const useSettingsStore = currentAccountStoreHook("settings");
 export const useRecommendationsStore =
   currentAccountStoreHook("recommendations");
+export const useUserStore = currentAccountStoreHook("user");
