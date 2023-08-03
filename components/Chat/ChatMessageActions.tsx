@@ -9,12 +9,12 @@ import {
 } from "react-native";
 import EmojiPicker from "rn-emoji-keyboard";
 
-import { AppDispatchTypes } from "../../data/deprecatedStore/appReducer";
 import { AppContext } from "../../data/deprecatedStore/context";
 import { XmtpDispatchTypes } from "../../data/deprecatedStore/xmtpReducer";
 import { blockPeer, reportMessage } from "../../utils/api";
 import { isAttachmentMessage } from "../../utils/attachment";
 import { actionSheetColors } from "../../utils/colors";
+import { eventEmitter } from "../../utils/events";
 import {
   MessageReaction,
   addReactionToMessage,
@@ -158,10 +158,7 @@ export default function ChatMessageActions({
   const onPressMessage = useCallback(() => {
     if (isAttachment) {
       // Transfering attachment opening intent to component
-      dispatch({
-        type: AppDispatchTypes.AppOpenAttachmentForMessage,
-        payload: { messageId: message.id },
-      });
+      eventEmitter.emit(`openAttachmentForMessage-${message.id}`);
       return;
     }
     if (!canAddReaction) return;
@@ -172,7 +169,7 @@ export default function ChatMessageActions({
       showReactionModal();
     }
     lastPressMessage.current = now;
-  }, [canAddReaction, dispatch, isAttachment, message.id, showReactionModal]);
+  }, [canAddReaction, isAttachment, message.id, showReactionModal]);
 
   const [selectedEmojis, setSelectedEmojis] = useState<string[]>([]);
   useEffect(() => {

@@ -13,10 +13,10 @@ import {
 } from "react-native";
 import RNFS from "react-native-fs";
 
-import { AppDispatchTypes } from "../../data/deprecatedStore/appReducer";
 import { AppContext } from "../../data/deprecatedStore/context";
 import { SerializedAttachmentContent } from "../../utils/attachment";
 import { textPrimaryColor } from "../../utils/colors";
+import { eventEmitter } from "../../utils/events";
 import { getImageSize, isImageMimetype } from "../../utils/media";
 import { sentryTrackMessage } from "../../utils/sentry";
 import { sendMessageToWebview } from "../XmtpWebview";
@@ -116,7 +116,13 @@ export default function ChatAttachmentBubble({ message }: Props) {
   );
 
   const openInWebview = useCallback(async () => {
-    if (!attachment.mediaURL) return;
+    if (
+      !attachment.mediaURL ||
+      attachment.loading ||
+      attachment.error ||
+      !attachment.mediaURL
+    )
+      return;
     Linking.openURL(
       Linking.createURL("/webviewPreview", {
         queryParams: {
@@ -124,7 +130,7 @@ export default function ChatAttachmentBubble({ message }: Props) {
         },
       })
     );
-  }, [attachment.mediaURL]);
+  }, [attachment.error, attachment.loading, attachment.mediaURL]);
 
   useEffect(() => {
     const go = async () => {
@@ -231,29 +237,11 @@ export default function ChatAttachmentBubble({ message }: Props) {
   ];
 
   useEffect(() => {
-    if (
-      state.app.openAttachmentForMessage === message.id &&
-      !attachment.loading &&
-      !attachment.error &&
-      attachment.mediaURL &&
-      attachment.mediaType !== "UNSUPPORTED"
-    ) {
-      dispatch({
-        type: AppDispatchTypes.AppOpenAttachmentForMessage,
-        payload: { messageId: null },
-      });
-      openInWebview();
-    }
-  }, [
-    attachment.error,
-    attachment.loading,
-    attachment.mediaType,
-    attachment.mediaURL,
-    dispatch,
-    message.id,
-    openInWebview,
-    state.app.openAttachmentForMessage,
-  ]);
+    eventEmitter.on(`openAttachmentForMessage-${message.id}`, openInWebview);
+    return () => {
+      eventEmitter.off(`openAttachmentForMessage-${message.id}`, openInWebview);
+    };
+  }, [message.id, openInWebview]);
 
   if (attachment.loading) {
     return (

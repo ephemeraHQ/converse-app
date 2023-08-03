@@ -1,6 +1,5 @@
 import React, { createContext, Dispatch, useReducer } from "react";
 
-import { AppActions, appInitialState, appReducer, AppType } from "./appReducer";
 import {
   XmtpActions,
   xmtpInitialState,
@@ -10,15 +9,13 @@ import {
 
 export type StateType = {
   xmtp: XmtpType;
-  app: AppType;
 };
 
 const initialState: StateType = {
   xmtp: xmtpInitialState,
-  app: appInitialState,
 };
 
-export type ActionsType = XmtpActions | AppActions;
+export type ActionsType = XmtpActions;
 export type DispatchType = (value: ActionsType) => void;
 
 const AppContext = createContext<{
@@ -30,7 +27,6 @@ const AppContext = createContext<{
 });
 
 const mainReducer = ({ xmtp, app }: StateType, action: ActionsType) => ({
-  app: appReducer(app, action as AppActions),
   xmtp: xmtpReducer(xmtp, action as XmtpActions),
 });
 
