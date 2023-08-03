@@ -1,6 +1,3 @@
-import { markAllConversationsAsReadInDb } from "..";
-import { lastValueInMap } from "../../utils/map";
-import mmkv from "../../utils/mmkv";
 import { deleteLoggedXmtpAddress } from "../../utils/sharedData/sharedData";
 import { ActionMap } from "./types";
 
@@ -30,8 +27,6 @@ export type XmtpConversationWithUpdate = XmtpConversation & {
 export type XmtpType = {
   localConnected: boolean;
   webviewConnected: boolean;
-  initialLoadDone: boolean;
-  initialLoadDoneOnce: boolean;
   loading: boolean;
   conversations: {
     [topic: string]: XmtpConversationWithUpdate;
@@ -46,8 +41,6 @@ export type XmtpType = {
 export const xmtpInitialState: XmtpType = {
   localConnected: false,
   webviewConnected: false,
-  initialLoadDone: false,
-  initialLoadDoneOnce: false,
   loading: false,
   conversations: {},
   conversationsMapping: {},
@@ -81,8 +74,6 @@ export enum XmtpDispatchTypes {
   XmtpUpdateMessageIds = "XMTP_UPDATE_MESSAGE_IDS",
   XmtpUpdateConversationTopic = "XMTP_UPDATE_CONVERSATION_TOPIC",
   XmtpUpdateMessageStatus = "XMTP_UPDATE_MESSAGE_STATUS",
-  XmtpInitialLoad = "XMTP_INITIAL_LOAD",
-  XmtpInitialLoadDoneOnce = "XMTP_INITIAL_LOAD_DONE_ONCE",
   XmtpLoading = "XMTP_LOADING",
   XmtpSetCurrentMessageContent = "XMTP_SET_CURRENT_MESSAGE",
   XmtpSetReconnecting = "XMTP_SET_RECONNECTING",
@@ -131,8 +122,6 @@ type XmtpPayload = {
   [XmtpDispatchTypes.XmtpLoading]: {
     loading: boolean;
   };
-  [XmtpDispatchTypes.XmtpInitialLoad]: undefined;
-  [XmtpDispatchTypes.XmtpInitialLoadDoneOnce]: undefined;
 
   [XmtpDispatchTypes.XmtpSetReconnecting]: {
     reconnecting: boolean;
@@ -220,41 +209,6 @@ export const xmtpReducer = (state: XmtpType, action: XmtpActions): XmtpType => {
             lastUpdateAt: now,
           },
         },
-      };
-    }
-    case XmtpDispatchTypes.XmtpInitialLoad: {
-      // Called at the end of the initial load.
-      const newState = {
-        ...state,
-        initialLoadDone: true,
-        initialLoadDoneOnce: true,
-        lastUpdateAt: now,
-      };
-      if (!state.initialLoadDoneOnce) {
-        // If it's the initial sync, let's mark
-        // all conversations as read
-        for (const topic in newState.conversations) {
-          const conversation = newState.conversations[topic];
-          conversation.lastUpdateAt = now;
-          if (conversation.messages.size > 0) {
-            const lastMessage = lastValueInMap(conversation.messages);
-            conversation.readUntil = lastMessage ? lastMessage.sent : 0;
-          }
-        }
-        markAllConversationsAsReadInDb();
-      }
-      mmkv.set("state.xmtp.initialLoadDoneOnce", true);
-      return newState;
-    }
-
-    case XmtpDispatchTypes.XmtpInitialLoadDoneOnce: {
-      // Called during hydration to remember we've
-      // loaded everything at least once
-      mmkv.set("state.xmtp.initialLoadDoneOnce", true);
-      return {
-        ...state,
-        initialLoadDoneOnce: true,
-        lastUpdateAt: now,
       };
     }
 

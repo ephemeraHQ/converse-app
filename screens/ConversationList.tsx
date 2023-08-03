@@ -32,7 +32,11 @@ import SettingsButton from "../components/SettingsButton";
 import Welcome from "../components/Welcome";
 import { AppContext } from "../data/deprecatedStore/context";
 import { XmtpConversationWithUpdate } from "../data/deprecatedStore/xmtpReducer";
-import { useSettingsStore, useUserStore } from "../data/store/accountsStore";
+import {
+  useChatStore,
+  useSettingsStore,
+  useUserStore,
+} from "../data/store/accountsStore";
 import {
   backgroundColor,
   textPrimaryColor,
@@ -149,6 +153,9 @@ export default function ConversationList({
   const colorScheme = useColorScheme();
   const styles = getStyles(colorScheme);
   const { state } = useContext(AppContext);
+  const { initialLoadDoneOnce } = useChatStore((s) =>
+    pick(s, ["initialLoadDoneOnce"])
+  );
   const userAddress = useUserStore((s) => s.userAddress);
   const { blockedPeers, ephemeralAccount } = useSettingsStore((s) =>
     pick(s, ["blockedPeers", "ephemeralAccount"])
@@ -207,7 +214,7 @@ export default function ConversationList({
         }
       },
     });
-  }, [navigation, state, styles.androidTitle]);
+  }, [navigation, shouldShowConnectingOrSyncing, styles.androidTitle]);
   const keyExtractor = useCallback((item: FlatListItem) => {
     return item.topic;
   }, []);
@@ -234,7 +241,7 @@ export default function ConversationList({
           conversationName={conversationName(conversation)}
           showUnread={
             !!(
-              state.xmtp.initialLoadDoneOnce &&
+              initialLoadDoneOnce &&
               lastMessagePreview &&
               conversation.readUntil < lastMessagePreview.message.sent &&
               lastMessagePreview.message.senderAddress ===
@@ -262,13 +269,13 @@ export default function ConversationList({
       route,
       userAddress,
       blockedPeers,
-      state.xmtp.initialLoadDoneOnce,
+      initialLoadDoneOnce,
     ]
   );
 
   let screenToShow: JSX.Element;
 
-  if (!state.xmtp.initialLoadDoneOnce && flatListItems.length <= 1) {
+  if (!initialLoadDoneOnce && flatListItems.length <= 1) {
     screenToShow = <InitialLoad />;
   } else if (
     flatListItems.length === 1 ||
@@ -289,7 +296,7 @@ export default function ConversationList({
             route,
             userAddress,
             blockedPeers,
-            state.xmtp.initialLoadDoneOnce,
+            initialLoadDoneOnce,
           ]}
           renderItem={renderItem}
           keyExtractor={keyExtractor}

@@ -8,7 +8,11 @@ import config from "../config";
 import { saveNewConversation, saveConversations, saveMessages } from "../data";
 import { AppContext } from "../data/deprecatedStore/context";
 import { XmtpDispatchTypes } from "../data/deprecatedStore/xmtpReducer";
-import { useSettingsStore, useUserStore } from "../data/store/accountsStore";
+import {
+  useChatStore,
+  useSettingsStore,
+  useUserStore,
+} from "../data/store/accountsStore";
 import { useAppStore } from "../data/store/appStore";
 import { loadSavedNotificationMessagesToContext } from "../utils/backgroundNotifications/loadSavedNotifications";
 import {
@@ -93,6 +97,9 @@ export default function XmtpWebview() {
   const web3Connected = useRef(false);
 
   const { state, dispatch } = useContext(AppContext);
+  const { initialLoadDone, setInitialLoadDone } = useChatStore((s) =>
+    pick(s, ["initialLoadDone", "setInitialLoadDone"])
+  );
   const { userAddress, setUserAddress } = useUserStore((s) =>
     pick(s, ["userAddress", "setUserAddress"])
   );
@@ -182,7 +189,7 @@ export default function XmtpWebview() {
         if (
           appState.current.match(/inactive|background/) &&
           nextAppState === "active" &&
-          state.xmtp.initialLoadDone
+          initialLoadDone
         ) {
           console.log("App is active, reloading data");
           reloadData(false);
@@ -194,7 +201,7 @@ export default function XmtpWebview() {
     return () => {
       subscription.remove();
     };
-  }, [reloadData, state.xmtp.initialLoadDone]);
+  }, [reloadData, initialLoadDone]);
 
   const launchedInitialLoad = useRef(false);
 
@@ -291,9 +298,7 @@ export default function XmtpWebview() {
           break;
         case "XMTP_INITIAL_LOAD":
           saveLastXMTPSyncedAt(data.newLastSyncedAt);
-          dispatch({
-            type: XmtpDispatchTypes.XmtpInitialLoad,
-          });
+          setInitialLoadDone();
           dispatch({
             type: XmtpDispatchTypes.XmtpSetReconnecting,
             payload: { reconnecting: false },
