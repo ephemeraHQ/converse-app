@@ -10,7 +10,6 @@ import {
 } from "../data";
 import { MessageEntity } from "../data/db/entities/messageEntity";
 import { AppContext, DispatchType } from "../data/deprecatedStore/context";
-import { XmtpDispatchTypes } from "../data/deprecatedStore/xmtpReducer";
 import {
   useChatStore,
   useSettingsStore,
@@ -183,10 +182,7 @@ export const sendPendingMessages = async (dispatch: DispatchType) => {
   sendingPendingMessages = false;
 };
 
-export const getLocalXmtpClient = async (
-  dispatch?: DispatchType,
-  currentAddress?: string
-) => {
+export const getLocalXmtpClient = async (currentAddress?: string) => {
   if (
     !xmtpClient ||
     (currentAddress && xmtpClient.address !== currentAddress)
@@ -198,11 +194,8 @@ export const getLocalXmtpClient = async (
       getXmtpApiHeaders();
     }
   }
-  if (xmtpClient && dispatch) {
-    dispatch({
-      type: XmtpDispatchTypes.XmtpLocalConnected,
-      payload: { connected: true },
-    });
+  if (xmtpClient) {
+    useChatStore.getState().setLocalClientConnected(true);
   }
   return xmtpClient;
 };
@@ -225,7 +218,14 @@ export const getXmtpApiHeaders = async () => {
 export default function XmtpState() {
   const { dispatch, state } = useContext(AppContext);
   const userAddress = useUserStore((s) => s.userAddress);
-  const { initialLoadDone } = useChatStore((s) => pick(s, ["initialLoadDone"]));
+  const { initialLoadDone, localClientConnected, webviewClientConnected } =
+    useChatStore((s) =>
+      pick(s, [
+        "initialLoadDone",
+        "localClientConnected",
+        "webviewClientConnected",
+      ])
+    );
   const splashScreenHidden = useAppStore((s) => s.splashScreenHidden);
   const { setBlockedPeers } = useSettingsStore((s) =>
     pick(s, ["setBlockedPeers"])
@@ -234,7 +234,7 @@ export default function XmtpState() {
   useEffect(() => {
     const initXmtp = async () => {
       try {
-        await getLocalXmtpClient(dispatch, userAddress);
+        await getLocalXmtpClient(userAddress);
       } catch (e) {
         console.log(
           "Count not instantiate local XMTP client, retrying in 3 seconds..."
@@ -244,7 +244,7 @@ export default function XmtpState() {
       }
     };
     initXmtp();
-  }, [dispatch, userAddress]);
+  }, [userAddress]);
 
   const lastMessageSendingFinishedAt = useRef(0);
   const currentlyInMessageSendingInterval = useRef(false);
@@ -254,8 +254,8 @@ export default function XmtpState() {
       currentlyInMessageSendingInterval.current = true;
       // console.log("  in messageSendingInterval");
       if (
-        state.xmtp.localConnected &&
-        state.xmtp.webviewConnected &&
+        localClientConnected &&
+        webviewClientConnected &&
         splashScreenHidden &&
         initialLoadDone &&
         !isReconnecting
@@ -274,8 +274,8 @@ export default function XmtpState() {
     dispatch,
     splashScreenHidden,
     initialLoadDone,
-    state.xmtp.localConnected,
-    state.xmtp.webviewConnected,
+    localClientConnected,
+    webviewClientConnected,
   ]);
 
   useEffect(() => {
@@ -292,7 +292,7 @@ export default function XmtpState() {
   }, []);
 
   useEffect(() => {
-    if (state.xmtp.localConnected && state.xmtp.webviewConnected) {
+    if (localClientConnected && webviewClientConnected) {
       getBlockedPeers()
         .then((addresses) => {
           setBlockedPeers(addresses);
@@ -301,6 +301,6 @@ export default function XmtpState() {
           console.log("Error while getting blocked peers", e);
         });
     }
-  }, [setBlockedPeers, state.xmtp.localConnected, state.xmtp.webviewConnected]);
+  }, [setBlockedPeers, localClientConnected, webviewClientConnected]);
   return null;
 }

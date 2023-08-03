@@ -11,10 +11,13 @@ import ActivityIndicator from "./ActivityIndicator/ActivityIndicator";
 export const useShouldShowConnecting = () => {
   const { state } = useContext(AppContext);
   const isInternetReachable = useAppStore((s) => s.isInternetReachable);
+  const { localClientConnected, webviewClientConnected } = useChatStore((s) =>
+    pick(s, ["localClientConnected", "webviewClientConnected"])
+  );
   return (
     !isInternetReachable ||
-    !state.xmtp.localConnected ||
-    !state.xmtp.webviewConnected ||
+    !localClientConnected ||
+    !webviewClientConnected ||
     state.xmtp.reconnecting
   );
 };

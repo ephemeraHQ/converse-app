@@ -9,6 +9,11 @@ export type ChatStoreType = {
   initialLoadDone: boolean;
   setInitialLoadDone: () => void;
   initialLoadDoneOnce: boolean;
+
+  localClientConnected: boolean;
+  setLocalClientConnected: (connected: boolean) => void;
+  webviewClientConnected: boolean;
+  setWebviewClientConnected: (connected: boolean) => void;
 };
 
 export const initChatStore = (account: string) => {
@@ -34,6 +39,12 @@ export const initChatStore = (account: string) => {
             //     markAllConversationsAsReadInDb();
             return { initialLoadDone: true, initialLoadDoneOnce: true };
           }),
+        localClientConnected: false,
+        setLocalClientConnected: (c) =>
+          set(() => ({ localClientConnected: c })),
+        webviewClientConnected: false,
+        setWebviewClientConnected: (c) =>
+          set(() => ({ webviewClientConnected: c })),
       }),
       {
         name: `store-${account}-chat`, // Account-based storage so each account can have its own chat data
