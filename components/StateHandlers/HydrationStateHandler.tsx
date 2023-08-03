@@ -4,7 +4,6 @@ import { Alert } from "react-native";
 import { loadDataToContext, refreshProfileForAddress } from "../../data";
 import { initDb } from "../../data/db";
 import { AppContext } from "../../data/deprecatedStore/context";
-import { XmtpDispatchTypes } from "../../data/deprecatedStore/xmtpReducer";
 import { useUserStore } from "../../data/store/accountsStore";
 import { useAppStore } from "../../data/store/appStore";
 import { loadSavedNotificationMessagesToContext } from "../../utils/backgroundNotifications/loadSavedNotifications";
@@ -63,15 +62,6 @@ export default function HydrationStateHandler() {
 
       if (address) {
         refreshProfileForAddress(address);
-      }
-
-      const initialLoadDoneOnce = mmkv.getBoolean(
-        "state.xmtp.initialLoadDoneOnce"
-      );
-      if (initialLoadDoneOnce) {
-        dispatch({
-          type: XmtpDispatchTypes.XmtpInitialLoadDoneOnce,
-        });
       }
 
       setHydrationDone(true);

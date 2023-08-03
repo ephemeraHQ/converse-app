@@ -1,5 +1,6 @@
 import { create, StoreApi, UseBoundStore } from "zustand";
 
+import { ChatStoreType, initChatStore } from "./chatStore";
 import { ProfilesStoreType, initProfilesStore } from "./profilesStore";
 import {
   initRecommendationsStore,
@@ -29,6 +30,7 @@ type AccountStoreDataType = {
   settings: SettingsStoreType;
   recommendations: RecommendationsStoreType;
   user: UserStoreType;
+  chat: ChatStoreType;
 };
 
 // And here call the init method of each store
@@ -38,6 +40,7 @@ const initStoreForAccount = (account: string) => {
     settings: initSettingsStore(account),
     recommendations: initRecommendationsStore(account),
     user: initUserStore(),
+    chat: initChatStore(account),
   };
 };
 
@@ -90,3 +93,4 @@ export const useSettingsStore = currentAccountStoreHook("settings");
 export const useRecommendationsStore =
   currentAccountStoreHook("recommendations");
 export const useUserStore = currentAccountStoreHook("user");
+export const useChatStore = currentAccountStoreHook("chat");

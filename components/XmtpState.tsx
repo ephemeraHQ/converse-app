@@ -11,7 +11,11 @@ import {
 import { MessageEntity } from "../data/db/entities/messageEntity";
 import { AppContext, DispatchType } from "../data/deprecatedStore/context";
 import { XmtpDispatchTypes } from "../data/deprecatedStore/xmtpReducer";
-import { useSettingsStore, useUserStore } from "../data/store/accountsStore";
+import {
+  useChatStore,
+  useSettingsStore,
+  useUserStore,
+} from "../data/store/accountsStore";
 import { useAppStore } from "../data/store/appStore";
 import { getBlockedPeers } from "../utils/api";
 import { deserializeRemoteAttachmentContent } from "../utils/attachment";
@@ -221,6 +225,7 @@ export const getXmtpApiHeaders = async () => {
 export default function XmtpState() {
   const { dispatch, state } = useContext(AppContext);
   const userAddress = useUserStore((s) => s.userAddress);
+  const { initialLoadDone } = useChatStore((s) => pick(s, ["initialLoadDone"]));
   const splashScreenHidden = useAppStore((s) => s.splashScreenHidden);
   const { setBlockedPeers } = useSettingsStore((s) =>
     pick(s, ["setBlockedPeers"])
@@ -252,7 +257,7 @@ export default function XmtpState() {
         state.xmtp.localConnected &&
         state.xmtp.webviewConnected &&
         splashScreenHidden &&
-        state.xmtp.initialLoadDone &&
+        initialLoadDone &&
         !isReconnecting
       ) {
         try {
@@ -268,7 +273,7 @@ export default function XmtpState() {
   }, [
     dispatch,
     splashScreenHidden,
-    state.xmtp.initialLoadDone,
+    initialLoadDone,
     state.xmtp.localConnected,
     state.xmtp.webviewConnected,
   ]);

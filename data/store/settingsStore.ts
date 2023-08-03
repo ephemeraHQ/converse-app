@@ -16,9 +16,11 @@ export type SettingsStoreType = {
   setNotificationsSettings: (
     notificationsSettings: Partial<NotificationsSettings>
   ) => void;
+
   blockedPeers: { [peerAddress: string]: boolean };
   setBlockedPeers: (peers: string[]) => void;
   setBlockedPeerStatus: (peerAddress: string, blocked: boolean) => void;
+
   ephemeralAccount: boolean;
   setEphemeralAccount: (ephemeral: boolean) => void;
 };

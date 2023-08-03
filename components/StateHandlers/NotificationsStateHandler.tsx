@@ -3,7 +3,11 @@ import { useCallback, useContext, useEffect, useRef } from "react";
 import { AppState } from "react-native";
 
 import { AppContext } from "../../data/deprecatedStore/context";
-import { useSettingsStore, useUserStore } from "../../data/store/accountsStore";
+import {
+  useChatStore,
+  useSettingsStore,
+  useUserStore,
+} from "../../data/store/accountsStore";
 import { useAppStore } from "../../data/store/appStore";
 import { saveUser } from "../../utils/api";
 import { navigateToConversation } from "../../utils/navigation";
@@ -28,6 +32,7 @@ export default function NotificationsStateHandler() {
   const appState = useRef(AppState.currentState);
   const { state, dispatch } = useContext(AppContext);
   const userAddress = useUserStore((s) => s.userAddress);
+  const { initialLoadDone } = useChatStore((s) => pick(s, ["initialLoadDone"]));
   const blockedPeers = useSettingsStore((s) => s.blockedPeers);
   const { setNotificationsPermissionStatus, notificationsPermissionStatus } =
     useAppStore((s) =>
@@ -125,7 +130,7 @@ export default function NotificationsStateHandler() {
   useEffect(() => {
     if (
       notificationsPermissionStatus === "granted" &&
-      state.xmtp.initialLoadDone &&
+      initialLoadDone &&
       userAddress &&
       !state.xmtp.loading
     ) {
@@ -140,7 +145,7 @@ export default function NotificationsStateHandler() {
     userAddress,
     blockedPeers,
     state.xmtp.conversations,
-    state.xmtp.initialLoadDone,
+    initialLoadDone,
     state.xmtp.loading,
   ]);
 
