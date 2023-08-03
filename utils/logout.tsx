@@ -3,14 +3,14 @@ import { Platform } from "react-native";
 import RNRestart from "react-native-restart";
 
 import { clearDB } from "../data/db";
-import { DispatchType, StateType } from "../data/deprecatedStore/context";
+import { useChatStore } from "../data/store/accountsStore";
 import { deleteXmtpConversations, deleteXmtpKeys } from "./keychain";
 import mmkv from "./mmkv";
 import { disablePushNotifications } from "./notifications";
 import { resetSharedData } from "./sharedData/sharedData";
 
-export const logout = async (state: StateType, dispatch: DispatchType) => {
-  await cleanupBeforeLogout(state);
+export const logout = async () => {
+  await cleanupBeforeLogout();
   mmkv.set("converse-logout", true);
   RNRestart.restart();
 };
@@ -27,11 +27,13 @@ const clearAsyncStorage = async () => {
   }
 };
 
-const cleanupBeforeLogout = async (state: StateType) => {
+const cleanupBeforeLogout = async () => {
   const promisesToAwait: any[] = [];
   // Deleting all keychain values for conversations
   // need state so can't do it after logout
-  const knownConversationsTopics = Object.keys(state.xmtp.conversations);
+  const knownConversationsTopics = Object.keys(
+    useChatStore.getState().conversations
+  );
   promisesToAwait.push(deleteXmtpConversations(knownConversationsTopics));
   // Unsubscribing from notifications
   promisesToAwait.push(disablePushNotifications());

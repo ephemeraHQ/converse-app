@@ -1,12 +1,11 @@
-import React, { useCallback, useContext, useEffect, useRef } from "react";
+import React, { useCallback, useEffect, useRef } from "react";
 import { Alert, AppState, Platform, StyleSheet, View } from "react-native";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import uuid from "react-native-uuid";
 import { WebView, WebViewMessageEvent } from "react-native-webview";
 
 import config from "../config";
-import { saveNewConversation, saveConversations, saveMessages } from "../data";
-import { AppContext } from "../data/deprecatedStore/context";
+import { saveConversations, saveMessages } from "../data";
 import {
   useChatStore,
   useSettingsStore,
@@ -95,7 +94,6 @@ export default function XmtpWebview() {
   const loadedKeys = useRef(false);
   const web3Connected = useRef(false);
 
-  const { state, dispatch } = useContext(AppContext);
   const {
     initialLoadDone,
     setInitialLoadDone,
@@ -103,6 +101,7 @@ export default function XmtpWebview() {
     setWebviewClientConnected,
     setResyncing,
     setReconnecting,
+    conversations,
   } = useChatStore((s) =>
     pick(s, [
       "initialLoadDone",
@@ -111,6 +110,7 @@ export default function XmtpWebview() {
       "setWebviewClientConnected",
       "setResyncing",
       "setReconnecting",
+      "conversations",
     ])
   );
   const { userAddress, setUserAddress } = useUserStore((s) =>
@@ -169,20 +169,14 @@ export default function XmtpWebview() {
       webviewReadyForMessages = false;
       setResyncing(true);
       // Load notifications
-      await loadSavedNotificationMessagesToContext(dispatch);
-      const knownTopics = Object.keys(state.xmtp.conversations);
+      await loadSavedNotificationMessagesToContext();
+      const knownTopics = Object.keys(conversations);
       sendMessageToWebview("RELOAD", {
         lastSyncedAt: getLastXMTPSyncedAt(),
         knownTopics,
       });
     },
-    [
-      dispatch,
-      setReconnecting,
-      setResyncing,
-      state.xmtp.conversations,
-      webviewClientConnected,
-    ]
+    [setReconnecting, setResyncing, conversations, webviewClientConnected]
   );
 
   const isInternetReachableRef = useRef(isInternetReachable);
@@ -229,7 +223,7 @@ export default function XmtpWebview() {
       if (webviewClientConnected && !launchedInitialLoad.current) {
         launchedInitialLoad.current = true;
         // Let's launch the initial load of all convos & messages
-        const knownTopics = Object.keys(state.xmtp.conversations);
+        const knownTopics = Object.keys(conversations);
         const exportedConversations = await Promise.all(
           knownTopics.map(loadXmtpConversation)
         );
@@ -241,7 +235,7 @@ export default function XmtpWebview() {
       }
     };
     initialLoad();
-  }, [webviewClientConnected, state.xmtp.conversations]);
+  }, [webviewClientConnected, conversations]);
 
   const onMessage = useCallback(
     async (e: WebViewMessageEvent) => {
@@ -263,7 +257,7 @@ export default function XmtpWebview() {
           break;
         }
         case "XMTP_CONVERSATIONS":
-          saveConversations(data, dispatch);
+          saveConversations(data);
           break;
         case "XMTP_EXPORTED_CONVERSATIONS":
           if (userAddress) {
@@ -276,12 +270,12 @@ export default function XmtpWebview() {
 
           break;
         case "XMTP_NEW_CONVERSATION": {
-          saveNewConversation(data, dispatch);
+          saveConversations([data]);
           // New conversation, let's subscribe to topic
           if (notificationsPermissionStatus === "granted" && userAddress) {
             subscribeToNotifications(
               userAddress,
-              Object.values(state.xmtp.conversations),
+              Object.values(conversations),
               blockedPeers
             );
           }
@@ -292,8 +286,7 @@ export default function XmtpWebview() {
             gotMessagesFromNetwork(messagesFromConversation.messages.length);
             saveMessages(
               messagesFromConversation.messages,
-              messagesFromConversation.topic,
-              dispatch
+              messagesFromConversation.topic
             );
           });
           break;
@@ -318,7 +311,7 @@ export default function XmtpWebview() {
           if (notificationsPermissionStatus === "granted" && userAddress) {
             subscribeToNotifications(
               userAddress,
-              Object.values(state.xmtp.conversations),
+              Object.values(conversations),
               blockedPeers
             );
           }
@@ -402,7 +395,6 @@ export default function XmtpWebview() {
     },
     [
       blockedPeers,
-      dispatch,
       loadKeys,
       notificationsPermissionStatus,
       reloadData,
@@ -410,8 +402,9 @@ export default function XmtpWebview() {
       setResyncing,
       setUserAddress,
       setWebviewClientConnected,
-      state.xmtp.conversations,
+      conversations,
       userAddress,
+      setReconnecting,
     ]
   );
 

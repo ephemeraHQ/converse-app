@@ -1,4 +1,3 @@
-import { useContext } from "react";
 import {
   ColorSchemeName,
   useColorScheme,
@@ -10,13 +9,12 @@ import {
   Platform,
 } from "react-native";
 
-import { AppContext } from "../../data/deprecatedStore/context";
-import { XmtpConversationWithUpdate } from "../../data/deprecatedStore/xmtpReducer";
 import {
   useProfilesStore,
   useRecommendationsStore,
   useSettingsStore,
 } from "../../data/store/accountsStore";
+import { XmtpConversation } from "../../data/store/chatStore";
 import { blockPeer } from "../../utils/api";
 import { actionSheetColors, textPrimaryColor } from "../../utils/colors";
 import { getProfileData } from "../../utils/profile";
@@ -27,7 +25,7 @@ import { Recommendation } from "../Recommendations";
 import { showActionSheetWithOptions } from "../StateHandlers/ActionSheetStateHandler";
 
 type Props = {
-  conversation?: XmtpConversationWithUpdate;
+  conversation?: XmtpConversation;
   sendMessage: (content: string) => Promise<void>;
   isBlockedPeer: boolean;
   messagesCount: number;
@@ -43,7 +41,6 @@ export default function ChatPlaceholder({
 }: Props) {
   const colorScheme = useColorScheme();
   const styles = getStyles(colorScheme);
-  const { dispatch } = useContext(AppContext);
   const setBlockedPeerStatus = useSettingsStore((s) => s.setBlockedPeerStatus);
   const recommendationData = useRecommendationsStore((s) =>
     conversation?.peerAddress ? s.frens[conversation.peerAddress] : undefined

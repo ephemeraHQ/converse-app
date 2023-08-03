@@ -1,12 +1,6 @@
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { FlashList } from "@shopify/flash-list";
-import React, {
-  useCallback,
-  useContext,
-  useEffect,
-  useRef,
-  useState,
-} from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
   ColorSchemeName,
   Platform,
@@ -30,13 +24,12 @@ import Picto from "../components/Picto/Picto";
 import Recommendations from "../components/Recommendations";
 import SettingsButton from "../components/SettingsButton";
 import Welcome from "../components/Welcome";
-import { AppContext } from "../data/deprecatedStore/context";
-import { XmtpConversationWithUpdate } from "../data/deprecatedStore/xmtpReducer";
 import {
   useChatStore,
   useSettingsStore,
   useUserStore,
 } from "../data/store/accountsStore";
+import { XmtpConversation } from "../data/store/chatStore";
 import {
   backgroundColor,
   textPrimaryColor,
@@ -141,7 +134,7 @@ function ShareProfileButton({
   );
 }
 
-type ConversationWithLastMessagePreview = XmtpConversationWithUpdate & {
+type ConversationWithLastMessagePreview = XmtpConversation & {
   lastMessagePreview?: LastMessagePreview;
 };
 type FlatListItem = ConversationWithLastMessagePreview | { topic: string };
@@ -152,9 +145,8 @@ export default function ConversationList({
 }: NativeStackScreenProps<NavigationParamList, "Messages">) {
   const colorScheme = useColorScheme();
   const styles = getStyles(colorScheme);
-  const { state } = useContext(AppContext);
-  const { initialLoadDoneOnce } = useChatStore((s) =>
-    pick(s, ["initialLoadDoneOnce"])
+  const { initialLoadDoneOnce, conversations, lastUpdateAt } = useChatStore(
+    (s) => pick(s, ["initialLoadDoneOnce", "conversations", "lastUpdateAt"])
   );
   const userAddress = useUserStore((s) => s.userAddress);
   const { blockedPeers, ephemeralAccount } = useSettingsStore((s) =>
@@ -163,13 +155,13 @@ export default function ConversationList({
   const shouldShowConnectingOrSyncing = useShouldShowConnectingOrSyncing();
   const [flatListItems, setFlatListItems] = useState<FlatListItem[]>([]);
   useEffect(() => {
-    const conversations = Object.values(state.xmtp.conversations)
+    const conversationsList = Object.values(conversations)
       .filter((a) => a?.peerAddress && (!a.pending || a.messages.size > 0))
       .map((c: ConversationWithLastMessagePreview) => {
         c.lastMessagePreview = conversationLastMessagePreview(c, userAddress);
         return c;
       });
-    conversations.sort((a, b) => {
+    conversationsList.sort((a, b) => {
       const aDate = a.lastMessagePreview
         ? a.lastMessagePreview.message.sent
         : a.createdAt;
@@ -179,13 +171,8 @@ export default function ConversationList({
       return bDate - aDate;
     });
     const items = ephemeralAccount ? [{ topic: "ephemeral" }] : [];
-    setFlatListItems([...items, ...conversations, { topic: "welcome" }]);
-  }, [
-    ephemeralAccount,
-    userAddress,
-    state.xmtp.conversations,
-    state.xmtp.lastUpdateAt,
-  ]);
+    setFlatListItems([...items, ...conversationsList, { topic: "welcome" }]);
+  }, [ephemeralAccount, userAddress, conversations, lastUpdateAt]);
   useEffect(() => {
     navigation.setOptions({
       headerLeft: () =>

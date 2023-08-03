@@ -1,7 +1,7 @@
 import * as Linking from "expo-linking";
 import mime from "mime";
 import prettyBytes from "pretty-bytes";
-import { useCallback, useContext, useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import {
   ColorSchemeName,
   Image,
@@ -13,7 +13,6 @@ import {
 } from "react-native";
 import RNFS from "react-native-fs";
 
-import { AppContext } from "../../data/deprecatedStore/context";
 import { SerializedAttachmentContent } from "../../utils/attachment";
 import { textPrimaryColor } from "../../utils/colors";
 import { eventEmitter } from "../../utils/events";
@@ -29,7 +28,6 @@ type Props = {
 
 export default function ChatAttachmentBubble({ message }: Props) {
   const colorScheme = useColorScheme();
-  const { state, dispatch } = useContext(AppContext);
   const styles = getStyles(colorScheme);
   const [attachment, setAttachment] = useState({
     loading: true,
@@ -131,6 +129,11 @@ export default function ChatAttachmentBubble({ message }: Props) {
       })
     );
   }, [attachment.error, attachment.loading, attachment.mediaURL]);
+  const clickedOnAttachmentBubble = useCallback(() => {
+    if (attachment.mediaType !== "UNSUPPORTED") {
+      openInWebview();
+    }
+  }, [attachment.mediaType, openInWebview]);
 
   useEffect(() => {
     const go = async () => {
@@ -237,11 +240,17 @@ export default function ChatAttachmentBubble({ message }: Props) {
   ];
 
   useEffect(() => {
-    eventEmitter.on(`openAttachmentForMessage-${message.id}`, openInWebview);
+    eventEmitter.on(
+      `openAttachmentForMessage-${message.id}`,
+      clickedOnAttachmentBubble
+    );
     return () => {
-      eventEmitter.off(`openAttachmentForMessage-${message.id}`, openInWebview);
+      eventEmitter.off(
+        `openAttachmentForMessage-${message.id}`,
+        clickedOnAttachmentBubble
+      );
     };
-  }, [message.id, openInWebview]);
+  }, [message.id, clickedOnAttachmentBubble]);
 
   if (attachment.loading) {
     return (

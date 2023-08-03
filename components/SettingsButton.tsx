@@ -2,12 +2,11 @@ import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useDisconnect } from "@thirdweb-dev/react-native";
 import * as Clipboard from "expo-clipboard";
 import * as Linking from "expo-linking";
-import React, { useCallback, useContext } from "react";
+import React, { useCallback } from "react";
 import { Platform, TouchableOpacity, useColorScheme, View } from "react-native";
 
 import config from "../config";
 import { refreshProfileForAddress } from "../data";
-import { AppContext } from "../data/deprecatedStore/context";
 import { useUserStore } from "../data/store/accountsStore";
 import { useAppStore } from "../data/store/appStore";
 import { NavigationParamList } from "../screens/Main";
@@ -26,7 +25,6 @@ import { showActionSheetWithOptions } from "./StateHandlers/ActionSheetStateHand
 export default function SettingsButton({
   navigation,
 }: NativeStackScreenProps<NavigationParamList, "Messages">) {
-  const { state, dispatch } = useContext(AppContext);
   const userAddress = useUserStore((s) => s.userAddress);
   const { setNotificationsPermissionStatus, notificationsPermissionStatus } =
     useAppStore((s) =>
@@ -85,7 +83,7 @@ export default function SettingsButton({
       },
       Disconnect: () => {
         disconnectWallet();
-        logout(state, dispatch);
+        logout();
       },
       Cancel: () => {},
     };
@@ -114,11 +112,9 @@ export default function SettingsButton({
   }, [
     colorScheme,
     disconnectWallet,
-    dispatch,
     navigation,
     notificationsPermissionStatus,
     setNotificationsPermissionStatus,
-    state,
     userAddress,
   ]);
 

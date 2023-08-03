@@ -2,14 +2,13 @@ import axios from "axios";
 import * as Clipboard from "expo-clipboard";
 import Constants from "expo-constants";
 import * as Updates from "expo-updates";
-import { forwardRef, useContext, useImperativeHandle } from "react";
+import { forwardRef, useImperativeHandle } from "react";
 import RNFS from "react-native-fs";
 import RNRestart from "react-native-restart";
 import * as Sentry from "sentry-expo";
 
 import config from "../config";
 import { clearDB } from "../data/db";
-import { AppContext } from "../data/deprecatedStore/context";
 import { useUserStore } from "../data/store/accountsStore";
 import { deleteXmtpKeys } from "../utils/keychain";
 import { showActionSheetWithOptions } from "./StateHandlers/ActionSheetStateHandler";
@@ -32,7 +31,6 @@ export const useEnableDebug = () => {
 };
 
 const DebugButton = forwardRef((props, ref) => {
-  const { dispatch } = useContext(AppContext);
   // The component instance will be extended
   // with whatever you return from the callback passed
   // as the second argument
@@ -41,7 +39,7 @@ const DebugButton = forwardRef((props, ref) => {
       const methods: any = {
         "Send pending messages": async () => {
           await createPendingConversations();
-          await sendPendingMessages(dispatch);
+          await sendPendingMessages();
         },
         "Export db file": async () => {
           const dbPath = `${RNFS.DocumentDirectoryPath}/SQLite/converse`;

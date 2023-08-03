@@ -28,16 +28,9 @@ import { ConversationEntity } from "./db/entities/conversationEntity";
 import { MessageEntity } from "./db/entities/messageEntity";
 import { ProfileEntity } from "./db/entities/profileEntity";
 import { upsertRepository } from "./db/upsert";
-import { DispatchType } from "./deprecatedStore/context";
-import {
-  XmtpConversation,
-  XmtpDispatchTypes,
-  XmtpMessage,
-} from "./deprecatedStore/xmtpReducer";
-import { useProfilesStore } from "./store/accountsStore";
+import { useChatStore, useProfilesStore } from "./store/accountsStore";
+import { XmtpConversation, XmtpMessage } from "./store/chatStore";
 import { ProfileSocials } from "./store/profilesStore";
-
-type MaybeDispatchType = DispatchType | undefined;
 
 const xmtpMessageToDb = (
   xmtpMessage: XmtpMessage,
@@ -149,8 +142,7 @@ type HandlesToResolve = {
 };
 
 const upgradePendingConversationIfNeeded = async (
-  conversation: XmtpConversation,
-  dispatch: MaybeDispatchType
+  conversation: XmtpConversation
 ) => {
   const alreadyConversationInDbWithConversationId =
     await getPendingConversationWithPeer(
@@ -183,21 +175,18 @@ const upgradePendingConversationIfNeeded = async (
   });
 
   // Dispatch
-  if (!dispatch) return;
-  dispatch({
-    type: XmtpDispatchTypes.XmtpUpdateConversationTopic,
-    payload: {
-      oldTopic: alreadyConversationInDbWithConversationId.topic,
-      conversation,
-    },
-  });
+  useChatStore
+    .getState()
+    .updateConversationTopic(
+      alreadyConversationInDbWithConversationId.topic,
+      conversation
+    );
 };
 
 const setupAndSaveConversation = async (
-  conversation: XmtpConversation,
-  dispatch: MaybeDispatchType
+  conversation: XmtpConversation
 ): Promise<HandlesToResolve> => {
-  await upgradePendingConversationIfNeeded(conversation, dispatch);
+  await upgradePendingConversationIfNeeded(conversation);
   const alreadyConversationInDbWithTopic = await conversationRepository.findOne(
     {
       where: { topic: conversation.topic },
@@ -252,8 +241,7 @@ type ConversationHandlesUpdate = {
 };
 
 const updateProfilesForConversations = async (
-  conversations: XmtpConversation[],
-  dispatch: MaybeDispatchType
+  conversations: XmtpConversation[]
 ) => {
   const updates: ConversationHandlesUpdate[] = [];
   let batch: XmtpConversation[] = [];
@@ -329,98 +317,81 @@ const updateProfilesForConversations = async (
   return updates;
 };
 
-export const saveConversations = async (
-  conversations: XmtpConversation[],
-  dispatch: MaybeDispatchType
-) => {
+export const saveConversations = async (conversations: XmtpConversation[]) => {
   // Save immediatly to db
   const saveResult = await Promise.all(
-    conversations.map((c) => setupAndSaveConversation(c, dispatch))
+    conversations.map((c) => setupAndSaveConversation(c))
   );
   // Then to context
-  if (dispatch) {
-    dispatch({
-      type: XmtpDispatchTypes.XmtpSetConversations,
-      payload: {
-        conversations: saveResult.map((r) => r.conversation),
-      },
-    });
-  }
+  useChatStore
+    .getState()
+    .setConversations(saveResult.map((r) => r.conversation));
   try {
     // Now let's see what profiles need to be updated
     const convosToUpdate = saveResult
       .filter((c) => c.shouldUpdateProfile)
       .map((c) => c.conversation);
     if (convosToUpdate.length === 0) return;
-    const resolveResult = await updateProfilesForConversations(
-      convosToUpdate,
-      dispatch
-    );
+    const resolveResult = await updateProfilesForConversations(convosToUpdate);
 
     const updatedConversations = resolveResult
       .filter((r) => r.updated)
       .map((r) => r.conversation);
-    if (dispatch && updatedConversations.length > 0) {
-      dispatch({
-        type: XmtpDispatchTypes.XmtpSetConversations,
-        payload: {
-          conversations: updatedConversations,
-        },
-      });
+    if (updatedConversations.length > 0) {
+      useChatStore.getState().setConversations(updatedConversations);
     }
   } catch (e: any) {
-    sentryTrackMessage("NEW_CONVO_PROFILE_UPDATE_FAILED", {
+    sentryTrackMessage("SAVE_CONVO_PROFILE_UPDATE_FAILED", {
       error: e.toString(),
     });
     console.log(e);
   }
 };
 
-export const saveNewConversation = async (
-  conversation: XmtpConversation,
-  dispatch: MaybeDispatchType
-) => {
-  // Save immediatly to db
-  const saveResult = await setupAndSaveConversation(conversation, dispatch);
-  // Then to context
-  if (dispatch) {
-    dispatch({
-      type: XmtpDispatchTypes.XmtpNewConversation,
-      payload: {
-        conversation,
-      },
-    });
-  }
-  try {
-    // Now let's see if conversation needs to have a handle resolved
-    if (saveResult.shouldUpdateProfile) {
-      const resolveResult = (
-        await updateProfilesForConversations(
-          [saveResult.conversation],
-          dispatch
-        )
-      )[0];
-      if (dispatch && resolveResult.updated) {
-        dispatch({
-          type: XmtpDispatchTypes.XmtpSetConversations,
-          payload: {
-            conversations: [resolveResult.conversation],
-          },
-        });
-      }
-    }
-  } catch (e: any) {
-    sentryTrackMessage("NEW_CONVO_PROFILE_UPDATE_FAILED", {
-      error: e.toString(),
-    });
-    console.log(e);
-  }
-};
+// export const saveNewConversation = async (
+//   conversation: XmtpConversation,
+//   dispatch: MaybeDispatchType
+// ) => {
+//   // Save immediatly to db
+//   const saveResult = await setupAndSaveConversation(conversation, dispatch);
+//   // Then to context
+//   if (dispatch) {
+//     dispatch({
+//       type: XmtpDispatchTypes.XmtpNewConversation,
+//       payload: {
+//         conversation,
+//       },
+//     });
+//   }
+//   try {
+//     // Now let's see if conversation needs to have a handle resolved
+//     if (saveResult.shouldUpdateProfile) {
+//       const resolveResult = (
+//         await updateProfilesForConversations(
+//           [saveResult.conversation],
+//           dispatch
+//         )
+//       )[0];
+//       if (dispatch && resolveResult.updated) {
+//         dispatch({
+//           type: XmtpDispatchTypes.XmtpSetConversations,
+//           payload: {
+//             conversations: [resolveResult.conversation],
+//           },
+//         });
+//       }
+//     }
+//   } catch (e: any) {
+//     sentryTrackMessage("NEW_CONVO_PROFILE_UPDATE_FAILED", {
+//       error: e.toString(),
+//     });
+//     console.log(e);
+//   }
+// };
 
 export const saveMessages = async (
   messages: XmtpMessage[],
-  conversationTopic: string,
-  dispatch: MaybeDispatchType
+  conversationTopic: string
 ) => {
   // First save all messages to db
   const upsertPromise = upsertRepository(
@@ -431,16 +402,8 @@ export const saveMessages = async (
     ["id"]
   );
 
-  // Then dispatch if set
-  if (dispatch) {
-    dispatch({
-      type: XmtpDispatchTypes.XmtpSetMessages,
-      payload: {
-        topic: conversationTopic,
-        messages,
-      },
-    });
-  }
+  // Then dispatch
+  useChatStore.getState().setMessages(conversationTopic, messages);
 
   const reactionMessages = messages.filter((m) =>
     m.contentType.startsWith("xmtp.org/reaction:")
@@ -449,14 +412,13 @@ export const saveMessages = async (
   // Now we can handle reactions if there are any
   if (reactionMessages.length > 0) {
     await upsertPromise;
-    await saveReactions(reactionMessages, conversationTopic, dispatch);
+    await saveReactions(reactionMessages, conversationTopic);
   }
 };
 
 const saveReactions = async (
   reactionMessages: XmtpMessage[],
-  conversationTopic: string,
-  dispatch: MaybeDispatchType
+  conversationTopic: string
 ) => {
   const reactionsByMessage: {
     [messageId: string]: { [reactionId: string]: MessageReaction };
@@ -498,15 +460,9 @@ const saveReactions = async (
       reactionsToDispatch[messageId] = message.reactions;
     }
   }
-  if (dispatch) {
-    dispatch({
-      type: XmtpDispatchTypes.XmtpSetMessagesReactions,
-      payload: {
-        topic: conversationTopic,
-        reactions: reactionsToDispatch,
-      },
-    });
-  }
+  useChatStore
+    .getState()
+    .setMessagesReactions(conversationTopic, reactionsToDispatch);
 };
 
 export const loadProfilesByAddress = async () => {
@@ -522,7 +478,7 @@ export const loadProfilesByAddress = async () => {
 export const loadProfileByAddress = async (address: string) =>
   profileRepository.findOne({ where: { address } });
 
-export const loadDataToContext = async (dispatch: DispatchType) => {
+export const loadDataToContext = async () => {
   // Save env to shared data with extension
   saveXmtpEnv();
   saveApiURI();
@@ -535,14 +491,13 @@ export const loadDataToContext = async (dispatch: DispatchType) => {
     loadProfilesByAddress(),
   ]);
   useProfilesStore.getState().setProfiles(profilesByAddress);
-  dispatch({
-    type: XmtpDispatchTypes.XmtpSetConversations,
-    payload: {
-      conversations: conversationsWithMessages.map((c) =>
+  useChatStore
+    .getState()
+    .setConversations(
+      conversationsWithMessages.map((c) =>
         xmtpConversationFromDb(c, profilesByAddress[c.peerAddress]?.socials)
-      ),
-    },
-  });
+      )
+    );
 };
 
 export const getMessagesToSend = async () => {
@@ -575,16 +530,13 @@ export const getPendingConversationsToCreate = async () => {
   );
 };
 
-export const updateMessagesIds = async (
-  messageIdsToUpdate: {
-    [messageId: string]: {
-      newMessageId: string;
-      newMessageSent: number;
-      message: MessageEntity;
-    };
-  },
-  dispatch: DispatchType
-) => {
+export const updateMessagesIds = async (messageIdsToUpdate: {
+  [messageId: string]: {
+    newMessageId: string;
+    newMessageSent: number;
+    message: MessageEntity;
+  };
+}) => {
   const messagesToDispatch: {
     topic: string;
     message: XmtpMessage;
@@ -615,26 +567,12 @@ export const updateMessagesIds = async (
       oldId,
     });
   }
-  dispatch({
-    type: XmtpDispatchTypes.XmtpUpdateMessageIds,
-    payload: messagesToDispatch,
-  });
+  useChatStore.getState().updateMessagesIds(messagesToDispatch);
 };
 
-export const markMessageAsSent = async (
-  messageId: string,
-  topic: string,
-  dispatch: DispatchType
-) => {
+export const markMessageAsSent = async (messageId: string, topic: string) => {
   await messageRepository.update({ id: messageId }, { status: "sent" });
-  dispatch({
-    type: XmtpDispatchTypes.XmtpUpdateMessageStatus,
-    payload: {
-      messageId,
-      topic,
-      status: "sent",
-    },
-  });
+  useChatStore.getState().updateMessageStatus(topic, messageId, "sent");
 };
 
 export const markAllConversationsAsReadInDb = async () => {
@@ -646,7 +584,6 @@ export const markAllConversationsAsReadInDb = async () => {
 export const markConversationReadUntil = (
   conversation: XmtpConversation,
   readUntil: number,
-  dispatch: DispatchType,
   allowBefore = false
 ) => {
   if (readUntil === conversation.readUntil) {
@@ -655,12 +592,11 @@ export const markConversationReadUntil = (
   if (readUntil < conversation.readUntil && !allowBefore) {
     return;
   }
-  return saveConversations([{ ...conversation, readUntil }], dispatch);
+  return saveConversations([{ ...conversation, readUntil }]);
 };
 
 export const markConversationRead = (
   conversation: XmtpConversation,
-  dispatch: DispatchType,
   allowBefore = false
 ) => {
   let newReadUntil = conversation.readUntil;
@@ -670,12 +606,7 @@ export const markConversationRead = (
       newReadUntil = lastMessage.sent;
     }
   }
-  return markConversationReadUntil(
-    conversation,
-    newReadUntil,
-    dispatch,
-    allowBefore
-  );
+  return markConversationReadUntil(conversation, newReadUntil, allowBefore);
 };
 
 export const refreshProfileForAddress = async (address: string) => {
@@ -719,8 +650,7 @@ const getPendingConversationWithPeer = async (
 
 export const createPendingConversation = async (
   peerAddress: string,
-  context?: InvitationContext,
-  dispatch?: MaybeDispatchType
+  context?: InvitationContext
 ) => {
   const cleanAddress = getAddress(peerAddress.toLowerCase());
   // Let's first check if we already have a conversation like that in db
@@ -734,24 +664,21 @@ export const createPendingConversation = async (
     );
 
   const pendingConversationId = uuid.v4().toString();
-  await saveConversations(
-    [
-      {
-        topic: pendingConversationId,
-        pending: true,
-        peerAddress: cleanAddress,
-        createdAt: new Date().getTime(),
-        messages: new Map(),
-        readUntil: 0,
-        context,
-      },
-    ],
-    dispatch
-  );
+  await saveConversations([
+    {
+      topic: pendingConversationId,
+      pending: true,
+      peerAddress: cleanAddress,
+      createdAt: new Date().getTime(),
+      messages: new Map(),
+      readUntil: 0,
+      context,
+    },
+  ]);
   return pendingConversationId;
 };
 
-export const cleanupPendingConversations = async (dispatch: DispatchType) => {
+export const cleanupPendingConversations = async () => {
   const pendingConversations = await conversationRepository.find({
     where: { pending: true },
     relations: { messages: true },
@@ -769,10 +696,5 @@ export const cleanupPendingConversations = async (dispatch: DispatchType) => {
   await conversationRepository.delete({
     topic: In(topicsToDelete),
   });
-  dispatch({
-    type: XmtpDispatchTypes.XmtpDeleteConversations,
-    payload: {
-      topics: topicsToDelete,
-    },
-  });
+  useChatStore.getState().deleteConversations(topicsToDelete);
 };

@@ -1,9 +1,8 @@
-import { useContext, useEffect } from "react";
+import { useEffect } from "react";
 import { Alert } from "react-native";
 
 import { loadDataToContext, refreshProfileForAddress } from "../../data";
 import { initDb } from "../../data/db";
-import { AppContext } from "../../data/deprecatedStore/context";
 import { useUserStore } from "../../data/store/accountsStore";
 import { useAppStore } from "../../data/store/appStore";
 import { loadSavedNotificationMessagesToContext } from "../../utils/backgroundNotifications/loadSavedNotifications";
@@ -20,7 +19,6 @@ import { prepareForRefacto } from "./prepareForRefacto";
 let migrationAlertShown = false;
 
 export default function HydrationStateHandler() {
-  const { state, dispatch } = useContext(AppContext);
   const setUserAddress = useUserStore((s) => s.setUserAddress);
   const { setHydrationDone } = useAppStore((s) =>
     pick(s, ["setHydrationDone"])
@@ -46,7 +44,7 @@ export default function HydrationStateHandler() {
       await initDb();
 
       await loadSavedNotificationMessagesToContext();
-      await loadDataToContext(dispatch);
+      await loadDataToContext();
 
       let address = xmtpAddress;
 
@@ -72,7 +70,7 @@ export default function HydrationStateHandler() {
           // due to app transfer we lost access to
           // keychain, let's log user out and alert
           migrationAlertShown = true;
-          logout(state, dispatch);
+          logout();
           Alert.alert(
             "🙏 Log in again",
             "hey ! Due to a technical migration, we had to log you out. We know it sucks and we're sorry about it, won't happen again anytime soon. Login again and enjoy Converse!"

@@ -1,5 +1,4 @@
 import { saveMessages } from "../../data";
-import { DispatchType } from "../../data/deprecatedStore/context";
 import {
   emptySavedNotificationsMessages,
   loadSavedNotificationsMessages,
@@ -13,9 +12,7 @@ const waitForLoadingSavedNotifications = async () => {
   await waitForLoadingSavedNotifications();
 };
 
-export const loadSavedNotificationMessagesToContext = async (
-  dispatch?: DispatchType
-) => {
+export const loadSavedNotificationMessagesToContext = async () => {
   if (loadingSavedNotifications) {
     await waitForLoadingSavedNotifications();
     return;
@@ -39,8 +36,7 @@ export const loadSavedNotificationMessagesToContext = async (
               contentType: message.contentType || "xmtp.org/text:1.0",
             },
           ],
-          message.topic,
-          dispatch
+          message.topic
         )
       )
     );

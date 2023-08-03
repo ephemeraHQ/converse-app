@@ -1,13 +1,7 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { isAddress } from "ethers/lib/utils";
-import React, {
-  useCallback,
-  useContext,
-  useEffect,
-  useState,
-  useRef,
-} from "react";
+import React, { useCallback, useEffect, useState, useRef } from "react";
 import {
   Alert,
   ColorSchemeName,
@@ -37,9 +31,11 @@ import {
   markConversationReadUntil,
   saveMessages,
 } from "../data";
-import { AppContext } from "../data/deprecatedStore/context";
-import { XmtpDispatchTypes } from "../data/deprecatedStore/xmtpReducer";
-import { useSettingsStore, useUserStore } from "../data/store/accountsStore";
+import {
+  useChatStore,
+  useSettingsStore,
+  useUserStore,
+} from "../data/store/accountsStore";
 import { userExists } from "../utils/api";
 import {
   backgroundColor,
@@ -50,6 +46,7 @@ import {
 } from "../utils/colors";
 import { getAddressForPeer } from "../utils/eth";
 import { lastValueInMap } from "../utils/map";
+import { pick } from "../utils/objects";
 import { sentryTrackMessage } from "../utils/sentry";
 import { getTitleFontScale } from "../utils/str";
 import { isOnXmtp } from "../utils/xmtp";
@@ -59,10 +56,17 @@ const Conversation = ({
   route,
   navigation,
 }: NativeStackScreenProps<NavigationParamList, "Conversation">) => {
-  const { state, dispatch } = useContext(AppContext);
   const userAddress = useUserStore((s) => s.userAddress);
   const colorScheme = useColorScheme();
   const blockedPeers = useSettingsStore((s) => s.blockedPeers);
+  const { conversations, conversationsMapping, setConversationMessageDraft } =
+    useChatStore((s) =>
+      pick(s, [
+        "conversations",
+        "conversationsMapping",
+        "setConversationMessageDraft",
+      ])
+    );
 
   // Initial conversation topic will be set only if in route params
   const [_conversationTopic, setConversationTopic] = useState(
@@ -72,13 +76,13 @@ const Conversation = ({
   // When we set the conversation topic, we check if it has been mapped
   // to a new one (for pending conversations)
   const conversationTopic =
-    _conversationTopic && state.xmtp.conversationsMapping[_conversationTopic]
-      ? state.xmtp.conversationsMapping[_conversationTopic]
+    _conversationTopic && conversationsMapping[_conversationTopic]
+      ? conversationsMapping[_conversationTopic]
       : _conversationTopic;
 
   // Initial conversation will be set only if topic in route params
   const [conversation, setConversation] = useState(
-    conversationTopic ? state.xmtp.conversations[conversationTopic] : undefined
+    conversationTopic ? conversations[conversationTopic] : undefined
   );
 
   // Initial peer address will be set from the route params
@@ -126,9 +130,7 @@ const Conversation = ({
         return;
       }
       // Then, check if we already have a main conversation with this address
-      const alreadyConversationWithAddress = Object.values(
-        state.xmtp.conversations
-      ).find(
+      const alreadyConversationWithAddress = Object.values(conversations).find(
         (c) =>
           c.peerAddress?.toLowerCase() === peerAddress.toLowerCase() &&
           !c.context
@@ -153,22 +155,18 @@ const Conversation = ({
           );
         } else {
           // Creating the conversation locally in a lazy manner
-          const topic = await createPendingConversation(
-            peerAddress,
-            undefined,
-            dispatch
-          );
+          const topic = await createPendingConversation(peerAddress, undefined);
           setConversationTopic(topic);
         }
       }
     },
-    [dispatch, navigation.goBack, state.xmtp.conversations]
+    [navigation.goBack, conversations]
   );
 
   // When the conversation topic changes, we set the conversation object
   useEffect(() => {
     if (conversationTopic) {
-      const foundConversation = state.xmtp.conversations[conversationTopic];
+      const foundConversation = conversations[conversationTopic];
       if (foundConversation) {
         setConversation(foundConversation);
       }
@@ -179,7 +177,7 @@ const Conversation = ({
     conversationTopic,
     openMainConversationWithPeer,
     route.params.mainConversationWithPeer,
-    state.xmtp.conversations,
+    conversations,
   ]);
 
   const isBlockedPeer = conversation?.peerAddress
@@ -189,7 +187,7 @@ const Conversation = ({
   const textInputRef = useRef<TextInput>();
 
   const messageToPrefill =
-    route.params.message || conversation?.currentMessage || "";
+    route.params.message || conversation?.messageDraft || "";
   const [inputValue, setInputValue] = useState(messageToPrefill);
   const focusOnLayout = useRef(false);
   const chatLayoutDone = useRef(false);
@@ -305,7 +303,6 @@ const Conversation = ({
   }, [
     colorScheme,
     conversation,
-    dispatch,
     inviteToConverse,
     isBlockedPeer,
     navigation,
@@ -313,7 +310,6 @@ const Conversation = ({
     route,
     showInvite.banner,
     showInvite.show,
-    state,
     styles.title,
     titleFontScale,
   ]);
@@ -322,10 +318,10 @@ const Conversation = ({
     if (conversation) {
       const lastMessageTimestamp = lastValueInMap(conversation.messages)?.sent;
       if (lastMessageTimestamp) {
-        markConversationReadUntil(conversation, lastMessageTimestamp, dispatch);
+        markConversationReadUntil(conversation, lastMessageTimestamp);
       }
     }
-  }, [conversation, dispatch]);
+  }, [conversation]);
 
   const sendMessage = useCallback(
     async (
@@ -354,26 +350,22 @@ const Conversation = ({
             contentFallback,
           },
         ],
-        conversation.topic,
-        dispatch
+        conversation.topic
       );
       // Then send for real if conversation exists
       if (!conversation.pending) {
-        sendPendingMessages(dispatch);
+        sendPendingMessages();
       }
     },
-    [conversation, dispatch, userAddress]
+    [conversation, userAddress]
   );
 
   const onLeaveScreen = useCallback(async () => {
     if (!conversation) return;
-    await markConversationRead(conversation, dispatch);
-    await cleanupPendingConversations(dispatch);
-    dispatch({
-      type: XmtpDispatchTypes.XmtpSetCurrentMessageContent,
-      payload: { topic: conversation.topic, content: inputValue },
-    });
-  }, [conversation, dispatch, inputValue]);
+    await markConversationRead(conversation);
+    await cleanupPendingConversations();
+    setConversationMessageDraft(conversation.topic, inputValue);
+  }, [conversation, inputValue, setConversationMessageDraft]);
 
   useEffect(() => {
     const unsubscribe = navigation.addListener("beforeRemove", onLeaveScreen);
