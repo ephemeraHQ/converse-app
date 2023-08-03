@@ -7,7 +7,6 @@ import { WebView, WebViewMessageEvent } from "react-native-webview";
 import config from "../config";
 import { saveNewConversation, saveConversations, saveMessages } from "../data";
 import { AppContext } from "../data/deprecatedStore/context";
-import { XmtpDispatchTypes } from "../data/deprecatedStore/xmtpReducer";
 import {
   useChatStore,
   useSettingsStore,
@@ -102,12 +101,16 @@ export default function XmtpWebview() {
     setInitialLoadDone,
     webviewClientConnected,
     setWebviewClientConnected,
+    setResyncing,
+    setReconnecting,
   } = useChatStore((s) =>
     pick(s, [
       "initialLoadDone",
       "setInitialLoadDone",
       "webviewClientConnected",
       "setWebviewClientConnected",
+      "setResyncing",
+      "setReconnecting",
     ])
   );
   const { userAddress, setUserAddress } = useUserStore((s) =>
@@ -153,10 +156,7 @@ export default function XmtpWebview() {
       }
       isReconnecting = true;
       if (showConnecting) {
-        dispatch({
-          type: XmtpDispatchTypes.XmtpSetReconnecting,
-          payload: { reconnecting: true },
-        });
+        setReconnecting(true);
       }
       const now = new Date().getTime();
       const diff = now - lastRetryAt;
@@ -167,10 +167,7 @@ export default function XmtpWebview() {
       }
       console.log("RELOADING DATA");
       webviewReadyForMessages = false;
-      dispatch({
-        type: XmtpDispatchTypes.XmtpLoading,
-        payload: { loading: true },
-      });
+      setResyncing(true);
       // Load notifications
       await loadSavedNotificationMessagesToContext(dispatch);
       const knownTopics = Object.keys(state.xmtp.conversations);
@@ -179,7 +176,13 @@ export default function XmtpWebview() {
         knownTopics,
       });
     },
-    [dispatch, state.xmtp.conversations, webviewClientConnected]
+    [
+      dispatch,
+      setReconnecting,
+      setResyncing,
+      state.xmtp.conversations,
+      webviewClientConnected,
+    ]
   );
 
   const isInternetReachableRef = useRef(isInternetReachable);
@@ -306,21 +309,12 @@ export default function XmtpWebview() {
         case "XMTP_INITIAL_LOAD":
           saveLastXMTPSyncedAt(data.newLastSyncedAt);
           setInitialLoadDone();
-          dispatch({
-            type: XmtpDispatchTypes.XmtpSetReconnecting,
-            payload: { reconnecting: false },
-          });
+          setReconnecting(false);
           break;
         case "XMTP_RELOAD_DONE": {
           saveLastXMTPSyncedAt(data.newLastSyncedAt);
-          dispatch({
-            type: XmtpDispatchTypes.XmtpLoading,
-            payload: { loading: false },
-          });
-          dispatch({
-            type: XmtpDispatchTypes.XmtpSetReconnecting,
-            payload: { reconnecting: false },
-          });
+          setResyncing(false);
+          setReconnecting(false);
           if (notificationsPermissionStatus === "granted" && userAddress) {
             subscribeToNotifications(
               userAddress,
@@ -407,14 +401,17 @@ export default function XmtpWebview() {
       );
     },
     [
-      dispatch,
-      userAddress,
-      setUserAddress,
-      notificationsPermissionStatus,
-      state.xmtp.conversations,
       blockedPeers,
-      reloadData,
+      dispatch,
       loadKeys,
+      notificationsPermissionStatus,
+      reloadData,
+      setInitialLoadDone,
+      setResyncing,
+      setUserAddress,
+      setWebviewClientConnected,
+      state.xmtp.conversations,
+      userAddress,
     ]
   );
 
