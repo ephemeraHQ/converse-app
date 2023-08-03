@@ -1,4 +1,4 @@
-import { useContext, useEffect } from "react";
+import { useContext } from "react";
 import { View, Text, useColorScheme, Platform } from "react-native";
 
 import { AppContext } from "../data/deprecatedStore/context";
@@ -9,16 +9,20 @@ import { pick } from "../utils/objects";
 import ActivityIndicator from "./ActivityIndicator/ActivityIndicator";
 
 export const useShouldShowConnecting = () => {
-  const { state } = useContext(AppContext);
   const isInternetReachable = useAppStore((s) => s.isInternetReachable);
-  const { localClientConnected, webviewClientConnected } = useChatStore((s) =>
-    pick(s, ["localClientConnected", "webviewClientConnected"])
-  );
+  const { localClientConnected, webviewClientConnected, reconnecting } =
+    useChatStore((s) =>
+      pick(s, [
+        "localClientConnected",
+        "webviewClientConnected",
+        "reconnecting",
+      ])
+    );
   return (
     !isInternetReachable ||
     !localClientConnected ||
     !webviewClientConnected ||
-    state.xmtp.reconnecting
+    reconnecting
   );
 };
 
@@ -34,14 +38,10 @@ export const useShouldShowConnectingOrSyncing = () => {
   );
 };
 
-export let isReconnecting = false;
-
 export default function Connecting() {
   const colorScheme = useColorScheme();
   const shouldShowConnecting = useShouldShowConnecting();
-  useEffect(() => {
-    isReconnecting = shouldShowConnecting;
-  }, [shouldShowConnecting]);
+
   return (
     <View style={{ flexDirection: "row", alignItems: "center" }}>
       <ActivityIndicator />

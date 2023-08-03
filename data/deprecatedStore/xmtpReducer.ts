@@ -24,7 +24,6 @@ export type XmtpConversationWithUpdate = XmtpConversation & {
 };
 
 export type XmtpType = {
-  loading: boolean;
   conversations: {
     [topic: string]: XmtpConversationWithUpdate;
   };
@@ -32,15 +31,12 @@ export type XmtpType = {
     [oldTopic: string]: string;
   };
   lastUpdateAt: number;
-  reconnecting: boolean;
 };
 
 export const xmtpInitialState: XmtpType = {
-  loading: false,
   conversations: {},
   conversationsMapping: {},
   lastUpdateAt: 0,
-  reconnecting: false,
 };
 
 type XmtpProtocolMessage = {
@@ -69,9 +65,7 @@ export enum XmtpDispatchTypes {
   XmtpUpdateMessageIds = "XMTP_UPDATE_MESSAGE_IDS",
   XmtpUpdateConversationTopic = "XMTP_UPDATE_CONVERSATION_TOPIC",
   XmtpUpdateMessageStatus = "XMTP_UPDATE_MESSAGE_STATUS",
-  XmtpLoading = "XMTP_LOADING",
   XmtpSetCurrentMessageContent = "XMTP_SET_CURRENT_MESSAGE",
-  XmtpSetReconnecting = "XMTP_SET_RECONNECTING",
 }
 
 type XmtpPayload = {
@@ -114,13 +108,7 @@ type XmtpPayload = {
     topic: string;
     content: string;
   };
-  [XmtpDispatchTypes.XmtpLoading]: {
-    loading: boolean;
-  };
 
-  [XmtpDispatchTypes.XmtpSetReconnecting]: {
-    reconnecting: boolean;
-  };
   [XmtpDispatchTypes.XmtpDeleteConversations]: {
     topics: string[];
   };
@@ -184,13 +172,6 @@ export const xmtpReducer = (state: XmtpType, action: XmtpActions): XmtpType => {
             lastUpdateAt: now,
           },
         },
-      };
-    }
-
-    case XmtpDispatchTypes.XmtpLoading: {
-      return {
-        ...state,
-        loading: action.payload.loading,
       };
     }
 
@@ -287,10 +268,6 @@ export const xmtpReducer = (state: XmtpType, action: XmtpActions): XmtpType => {
       }
 
       return newState;
-    }
-
-    case XmtpDispatchTypes.XmtpSetReconnecting: {
-      return { ...state, reconnecting: action.payload.reconnecting };
     }
 
     case XmtpDispatchTypes.XmtpUpdateConversationTopic: {

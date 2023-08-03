@@ -14,6 +14,12 @@ export type ChatStoreType = {
   setLocalClientConnected: (connected: boolean) => void;
   webviewClientConnected: boolean;
   setWebviewClientConnected: (connected: boolean) => void;
+
+  resyncing: boolean;
+  setResyncing: (syncing: boolean) => void;
+
+  reconnecting: boolean;
+  setReconnecting: (reconnecting: boolean) => void;
 };
 
 export const initChatStore = (account: string) => {
@@ -45,6 +51,10 @@ export const initChatStore = (account: string) => {
         webviewClientConnected: false,
         setWebviewClientConnected: (c) =>
           set(() => ({ webviewClientConnected: c })),
+        resyncing: false,
+        setResyncing: (syncing) => set(() => ({ resyncing: syncing })),
+        reconnecting: false,
+        setReconnecting: (reconnecting) => set(() => ({ reconnecting })),
       }),
       {
         name: `store-${account}-chat`, // Account-based storage so each account can have its own chat data

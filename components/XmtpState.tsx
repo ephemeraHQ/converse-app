@@ -28,7 +28,6 @@ import {
 } from "../utils/xmtp/conversations";
 import { Client, Conversation, fromNanoString } from "../vendor/xmtp-js/src";
 import { PreparedMessage } from "../vendor/xmtp-js/src/PreparedMessage";
-import { isReconnecting } from "./Connecting";
 
 let xmtpClient: Client | null;
 let xmtpApiSignature: string | null;
@@ -216,16 +215,21 @@ export const getXmtpApiHeaders = async () => {
 };
 
 export default function XmtpState() {
-  const { dispatch, state } = useContext(AppContext);
+  const { dispatch } = useContext(AppContext);
   const userAddress = useUserStore((s) => s.userAddress);
-  const { initialLoadDone, localClientConnected, webviewClientConnected } =
-    useChatStore((s) =>
-      pick(s, [
-        "initialLoadDone",
-        "localClientConnected",
-        "webviewClientConnected",
-      ])
-    );
+  const {
+    initialLoadDone,
+    localClientConnected,
+    webviewClientConnected,
+    reconnecting,
+  } = useChatStore((s) =>
+    pick(s, [
+      "initialLoadDone",
+      "localClientConnected",
+      "webviewClientConnected",
+      "reconnecting",
+    ])
+  );
   const splashScreenHidden = useAppStore((s) => s.splashScreenHidden);
   const { setBlockedPeers } = useSettingsStore((s) =>
     pick(s, ["setBlockedPeers"])
@@ -258,7 +262,7 @@ export default function XmtpState() {
         webviewClientConnected &&
         splashScreenHidden &&
         initialLoadDone &&
-        !isReconnecting
+        !reconnecting
       ) {
         try {
           await createPendingConversations();
@@ -276,6 +280,7 @@ export default function XmtpState() {
     initialLoadDone,
     localClientConnected,
     webviewClientConnected,
+    reconnecting,
   ]);
 
   useEffect(() => {

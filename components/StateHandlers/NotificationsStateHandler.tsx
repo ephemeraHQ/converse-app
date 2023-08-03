@@ -32,7 +32,9 @@ export default function NotificationsStateHandler() {
   const appState = useRef(AppState.currentState);
   const { state, dispatch } = useContext(AppContext);
   const userAddress = useUserStore((s) => s.userAddress);
-  const { initialLoadDone } = useChatStore((s) => pick(s, ["initialLoadDone"]));
+  const { initialLoadDone, resyncing } = useChatStore((s) =>
+    pick(s, ["initialLoadDone", "resyncing"])
+  );
   const blockedPeers = useSettingsStore((s) => s.blockedPeers);
   const { setNotificationsPermissionStatus, notificationsPermissionStatus } =
     useAppStore((s) =>
@@ -132,7 +134,7 @@ export default function NotificationsStateHandler() {
       notificationsPermissionStatus === "granted" &&
       initialLoadDone &&
       userAddress &&
-      !state.xmtp.loading
+      !resyncing
     ) {
       subscribeToNotifications(
         userAddress,
@@ -146,7 +148,7 @@ export default function NotificationsStateHandler() {
     blockedPeers,
     state.xmtp.conversations,
     initialLoadDone,
-    state.xmtp.loading,
+    resyncing,
   ]);
 
   return null;
