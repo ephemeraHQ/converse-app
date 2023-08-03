@@ -19,7 +19,7 @@ import NetworkStateHandler from "../components/StateHandlers/NetworkStateHandler
 import NotificationsStateHandler from "../components/StateHandlers/NotificationsStateHandler";
 import config from "../config";
 import { AppContext } from "../data/deprecatedStore/context";
-import { usePreferencesStore } from "../data/store/accountsStore";
+import { useSettingsStore } from "../data/store/accountsStore";
 import { useAppStore } from "../data/store/appStore";
 import {
   backgroundColor,
@@ -75,7 +75,7 @@ Notifications.setNotificationHandler({
 export default function Main() {
   const colorScheme = useColorScheme();
   const { state } = useContext(AppContext);
-  const showNotificationScreen = usePreferencesStore(
+  const showNotificationScreen = useSettingsStore(
     (s) => s.notifications.showNotificationScreen
   );
   const { notificationsPermissionStatus, splashScreenHidden, mediaPreview } =

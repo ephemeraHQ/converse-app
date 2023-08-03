@@ -3,36 +3,45 @@ import { persist, createJSONStorage } from "zustand/middleware";
 
 import { zustandMMKVStorage } from "../../utils/mmkv";
 
-// Preferences for each account setup in the app
-// not all of them are really preferences selected
+// Settings for each account setup in the app
+// not all of them are really settings selected
 // by users (i.e. ephemeralAccount is setup when user logs)
 
-export type NotificationsPreferences = {
+export type NotificationsSettings = {
   showNotificationScreen: boolean;
 };
 
-export type PreferencesStoreType = {
-  notifications: NotificationsPreferences;
-  setNotificationsPreferences: (
-    notificationsPreferences: Partial<NotificationsPreferences>
+export type UserSettings = {
+  address: string;
+};
+
+export type SettingsStoreType = {
+  user: UserSettings | null;
+  setUser: (u: UserSettings) => void;
+  notifications: NotificationsSettings;
+  setNotificationsSettings: (
+    notificationsSettings: Partial<NotificationsSettings>
   ) => void;
   ephemeralAccount: boolean;
   setEphemeralAccount: (ephemeral: boolean) => void;
 };
 
-export const initPreferencesStore = (account: string) => {
-  const profilesStore = create<PreferencesStoreType>()(
+export const initSettingsStore = (account: string) => {
+  const profilesStore = create<SettingsStoreType>()(
     persist(
       (set) => ({
+        user: null,
+        setUser: (u: UserSettings) =>
+          set((state) => ({ user: { ...state.user, ...u } })),
         notifications: {
           showNotificationScreen: true,
         },
         ephemeralAccount: false,
-        setNotificationsPreferences: (notificationsPreferences) =>
+        setNotificationsSettings: (notificationsSettings) =>
           set((state) => ({
             notifications: {
               ...state.notifications,
-              ...notificationsPreferences,
+              ...notificationsSettings,
             },
           })),
         setEphemeralAccount: (ephemeral) =>
@@ -41,7 +50,7 @@ export const initPreferencesStore = (account: string) => {
           })),
       }),
       {
-        name: `store-${account}-preferences`, // Account-based storage so each account can have its own preferences
+        name: `store-${account}-settings`, // Account-based storage so each account can have its own settings
         storage: createJSONStorage(() => zustandMMKVStorage),
       }
     )

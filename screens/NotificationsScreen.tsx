@@ -12,14 +12,14 @@ import {
 import Button from "../components/Button/Button";
 import Picto from "../components/Picto/Picto";
 import { AppContext } from "../data/deprecatedStore/context";
-import { usePreferencesStore } from "../data/store/accountsStore";
+import { useSettingsStore } from "../data/store/accountsStore";
 import { useAppStore } from "../data/store/appStore";
 import { textPrimaryColor } from "../utils/colors";
 import { requestPushNotificationsPermissions } from "../utils/notifications";
 
 export default function NotificationsScreen() {
   const { dispatch } = useContext(AppContext);
-  const setNotificationsPreferences = usePreferencesStore(
+  const setNotificationsPreferences = useSettingsStore(
     (s) => s.setNotificationsPreferences
   );
   const setNotificationsPermissionStatus = useAppStore(
