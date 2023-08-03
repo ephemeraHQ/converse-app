@@ -55,8 +55,6 @@ export type XmtpMessage = XmtpProtocolMessage & {
 };
 
 export enum XmtpDispatchTypes {
-  XmtpLocalConnected = "XMTP_LOCAL_CONNECTED",
-  XmtpWebviewConnected = "XMTP_WEBVIEW_CONNECTED",
   XmtpSetConversations = "XMTP_SET_CONVERSATIONS",
   XmtpNewConversation = "XMTP_NEW_CONVERSATION",
   XmtpDeleteConversations = "XMTP_DELETE_CONVERSATIONS",
@@ -69,12 +67,6 @@ export enum XmtpDispatchTypes {
 }
 
 type XmtpPayload = {
-  [XmtpDispatchTypes.XmtpLocalConnected]: {
-    connected: boolean;
-  };
-  [XmtpDispatchTypes.XmtpWebviewConnected]: {
-    connected: boolean;
-  };
   [XmtpDispatchTypes.XmtpSetConversations]: {
     conversations: XmtpConversation[];
   };
