@@ -97,8 +97,18 @@ export default function XmtpWebview() {
   const web3Connected = useRef(false);
 
   const { state, dispatch } = useContext(AppContext);
-  const { initialLoadDone, setInitialLoadDone } = useChatStore((s) =>
-    pick(s, ["initialLoadDone", "setInitialLoadDone"])
+  const {
+    initialLoadDone,
+    setInitialLoadDone,
+    webviewClientConnected,
+    setWebviewClientConnected,
+  } = useChatStore((s) =>
+    pick(s, [
+      "initialLoadDone",
+      "setInitialLoadDone",
+      "webviewClientConnected",
+      "setWebviewClientConnected",
+    ])
   );
   const { userAddress, setUserAddress } = useUserStore((s) =>
     pick(s, ["userAddress", "setUserAddress"])
@@ -137,7 +147,7 @@ export default function XmtpWebview() {
 
   const reloadData = useCallback(
     async (showConnecting: boolean) => {
-      if (!state.xmtp.webviewConnected) {
+      if (!webviewClientConnected) {
         console.log("Not connected, can't reload");
         return;
       }
@@ -169,7 +179,7 @@ export default function XmtpWebview() {
         knownTopics,
       });
     },
-    [dispatch, state.xmtp.conversations, state.xmtp.webviewConnected]
+    [dispatch, state.xmtp.conversations, webviewClientConnected]
   );
 
   const isInternetReachableRef = useRef(isInternetReachable);
@@ -206,14 +216,14 @@ export default function XmtpWebview() {
   const launchedInitialLoad = useRef(false);
 
   useEffect(() => {
-    if (!state.xmtp.webviewConnected) {
+    if (!webviewClientConnected) {
       launchedInitialLoad.current = false;
     }
-  }, [state.xmtp.webviewConnected]);
+  }, [webviewClientConnected]);
 
   useEffect(() => {
     const initialLoad = async () => {
-      if (state.xmtp.webviewConnected && !launchedInitialLoad.current) {
+      if (webviewClientConnected && !launchedInitialLoad.current) {
         launchedInitialLoad.current = true;
         // Let's launch the initial load of all convos & messages
         const knownTopics = Object.keys(state.xmtp.conversations);
@@ -228,7 +238,7 @@ export default function XmtpWebview() {
       }
     };
     initialLoad();
-  }, [state.xmtp.webviewConnected, state.xmtp.conversations]);
+  }, [webviewClientConnected, state.xmtp.conversations]);
 
   const onMessage = useCallback(
     async (e: WebViewMessageEvent) => {
@@ -288,10 +298,7 @@ export default function XmtpWebview() {
           setUserAddress(data.address);
           // If we receive this from webview, we're necessary
           // connected to the XMTP network!
-          dispatch({
-            type: XmtpDispatchTypes.XmtpWebviewConnected,
-            payload: { connected: true },
-          });
+          setWebviewClientConnected(true);
           break;
         case "WEB3_CONNECTED":
           web3Connected.current = true;

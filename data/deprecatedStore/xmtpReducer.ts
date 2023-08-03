@@ -1,4 +1,3 @@
-import { deleteLoggedXmtpAddress } from "../../utils/sharedData/sharedData";
 import { ActionMap } from "./types";
 
 export type XmtpConversationContext = {
@@ -25,8 +24,6 @@ export type XmtpConversationWithUpdate = XmtpConversation & {
 };
 
 export type XmtpType = {
-  localConnected: boolean;
-  webviewConnected: boolean;
   loading: boolean;
   conversations: {
     [topic: string]: XmtpConversationWithUpdate;
@@ -39,8 +36,6 @@ export type XmtpType = {
 };
 
 export const xmtpInitialState: XmtpType = {
-  localConnected: false,
-  webviewConnected: false,
   loading: false,
   conversations: {},
   conversationsMapping: {},
@@ -136,26 +131,6 @@ export type XmtpActions = ActionMap<XmtpPayload>[keyof ActionMap<XmtpPayload>];
 export const xmtpReducer = (state: XmtpType, action: XmtpActions): XmtpType => {
   const now = new Date().getTime();
   switch (action.type) {
-    case XmtpDispatchTypes.XmtpWebviewConnected:
-      if (!action.payload.connected) {
-        deleteLoggedXmtpAddress();
-        // Disconnecting = reset state
-        return { ...xmtpInitialState };
-      }
-      return {
-        ...state,
-        webviewConnected: action.payload.connected,
-      };
-    case XmtpDispatchTypes.XmtpLocalConnected:
-      if (!action.payload.connected) {
-        deleteLoggedXmtpAddress();
-        // Disconnecting = reset state
-        return { ...xmtpInitialState };
-      }
-      return {
-        ...state,
-        localConnected: action.payload.connected,
-      };
     case XmtpDispatchTypes.XmtpSetCurrentMessageContent: {
       if (!state.conversations[action.payload.topic]) {
         console.log(
