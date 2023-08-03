@@ -28,9 +28,11 @@ export default function ShareProfileScreen({
 }: NativeStackScreenProps<NavigationParamList, "ShareProfile">) {
   const colorScheme = useColorScheme();
   const { state } = useContext(AppContext);
-  const loggedUserENSNames = useProfilesStore((s) =>
+  const mainIdentity = useProfilesStore((s) =>
     state.xmtp.address
-      ? s.profiles[state.xmtp.address]?.socials?.ensNames
+      ? s.profiles[state.xmtp.address]?.socials?.ensNames?.find(
+          (n) => n.isPrimary
+        )?.name
       : undefined
   );
   useEffect(() => {
@@ -49,7 +51,6 @@ export default function ShareProfileScreen({
     });
   }, [navigation]);
   const styles = getStyles(colorScheme);
-  const mainIdentity = loggedUserENSNames?.find((n) => n.isPrimary)?.name;
   const profileUrl = `https://${config.websiteDomain}/dm/${
     mainIdentity || state.xmtp.address
   }`;

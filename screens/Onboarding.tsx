@@ -25,7 +25,7 @@ import { sendMessageToWebview } from "../components/XmtpWebview";
 import config from "../config";
 import { clearDB } from "../data/db";
 import {
-  usePreferencesStore,
+  useSettingsStore,
   useRecommendationsStore,
 } from "../data/store/accountsStore";
 import { useOnboardingStore } from "../data/store/onboardingStore";
@@ -42,7 +42,7 @@ export default function OnboardingScreen() {
   const resetRecommendations = useRecommendationsStore(
     (s) => s.resetRecommendations
   );
-  const setEphemeralAccount = usePreferencesStore((s) => s.setEphemeralAccount);
+  const setEphemeralAccount = useSettingsStore((s) => s.setEphemeralAccount);
   const colorScheme = useColorScheme();
   const styles = getStyles(colorScheme);
 

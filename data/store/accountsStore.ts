@@ -1,11 +1,11 @@
 import { create, StoreApi, UseBoundStore } from "zustand";
 
-import { initPreferencesStore, PreferencesStoreType } from "./preferencesStore";
 import { ProfilesStoreType, initProfilesStore } from "./profilesStore";
 import {
   initRecommendationsStore,
   RecommendationsStoreType,
 } from "./recommendationsStore";
+import { initSettingsStore, SettingsStoreType } from "./settingsStore";
 
 type AccountsStoreStype = {
   currentAccount: string;
@@ -25,18 +25,18 @@ export const useAccountsStore = create<AccountsStoreStype>()((set) => ({
 // Add here the type of each store data
 type AccountStoreDataType = {
   profiles: ProfilesStoreType;
-  preferences: PreferencesStoreType;
+  settings: SettingsStoreType;
   recommendations: RecommendationsStoreType;
 };
 
 // And here call the init method of each store
 const initStoreForAccount = (account: string) => {
   const profilesStore = initProfilesStore();
-  const preferencesStore = initPreferencesStore(account);
+  const settingsStore = initSettingsStore(account);
   const recommendationsStore = initRecommendationsStore(account);
   storesByAccount[account] = {
     profiles: profilesStore,
-    preferences: preferencesStore,
+    settings: settingsStore,
     recommendations: recommendationsStore,
   };
 };
@@ -86,6 +86,6 @@ const currentAccountStoreHook = <T extends keyof AccountStoreDataType>(
 };
 
 export const useProfilesStore = currentAccountStoreHook("profiles");
-export const usePreferencesStore = currentAccountStoreHook("preferences");
+export const useSettingsStore = currentAccountStoreHook("settings");
 export const useRecommendationsStore =
   currentAccountStoreHook("recommendations");
