@@ -40,7 +40,6 @@ export type XmtpType = {
     [oldTopic: string]: string;
   };
   lastUpdateAt: number;
-  blockedPeerAddresses: { [peerAddress: string]: boolean };
   reconnecting: boolean;
 };
 
@@ -53,7 +52,6 @@ export const xmtpInitialState: XmtpType = {
   conversations: {},
   conversationsMapping: {},
   lastUpdateAt: 0,
-  blockedPeerAddresses: {},
   reconnecting: false,
 };
 
@@ -87,8 +85,6 @@ export enum XmtpDispatchTypes {
   XmtpInitialLoadDoneOnce = "XMTP_INITIAL_LOAD_DONE_ONCE",
   XmtpLoading = "XMTP_LOADING",
   XmtpSetCurrentMessageContent = "XMTP_SET_CURRENT_MESSAGE",
-  XmtpSetBlockedStatus = "XMTP_SET_BLOCKED_STATUS",
-  XmtpSetBlockedPeerAddresses = "XMTP_SET_BLOCKED_PEER_ADDRESSES",
   XmtpSetReconnecting = "XMTP_SET_RECONNECTING",
 }
 
@@ -137,13 +133,7 @@ type XmtpPayload = {
   };
   [XmtpDispatchTypes.XmtpInitialLoad]: undefined;
   [XmtpDispatchTypes.XmtpInitialLoadDoneOnce]: undefined;
-  [XmtpDispatchTypes.XmtpSetBlockedStatus]: {
-    peerAddress: string;
-    blocked: boolean;
-  };
-  [XmtpDispatchTypes.XmtpSetBlockedPeerAddresses]: {
-    blockedPeerAddresses: { [peerAddress: string]: boolean };
-  };
+
   [XmtpDispatchTypes.XmtpSetReconnecting]: {
     reconnecting: boolean;
   };
@@ -368,34 +358,6 @@ export const xmtpReducer = (state: XmtpType, action: XmtpActions): XmtpType => {
       }
 
       return newState;
-    }
-
-    case XmtpDispatchTypes.XmtpSetBlockedStatus: {
-      const blockedPeerAddresses = { ...state.blockedPeerAddresses };
-      if (action.payload.blocked) {
-        blockedPeerAddresses[action.payload.peerAddress.toLowerCase()] = true;
-      } else {
-        delete blockedPeerAddresses[action.payload.peerAddress.toLowerCase()];
-      }
-      mmkv.set(
-        "state.xmtp.blockedPeerAddresses",
-        JSON.stringify(blockedPeerAddresses)
-      );
-      return {
-        ...state,
-        blockedPeerAddresses,
-      };
-    }
-
-    case XmtpDispatchTypes.XmtpSetBlockedPeerAddresses: {
-      mmkv.set(
-        "state.xmtp.blockedPeerAddresses",
-        JSON.stringify(action.payload.blockedPeerAddresses)
-      );
-      return {
-        ...state,
-        blockedPeerAddresses: action.payload.blockedPeerAddresses,
-      };
     }
 
     case XmtpDispatchTypes.XmtpSetReconnecting: {

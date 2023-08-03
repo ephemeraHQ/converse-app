@@ -11,13 +11,11 @@ import {
 } from "react-native";
 
 import { AppContext } from "../../data/deprecatedStore/context";
-import {
-  XmtpConversationWithUpdate,
-  XmtpDispatchTypes,
-} from "../../data/deprecatedStore/xmtpReducer";
+import { XmtpConversationWithUpdate } from "../../data/deprecatedStore/xmtpReducer";
 import {
   useProfilesStore,
   useRecommendationsStore,
+  useSettingsStore,
 } from "../../data/store/accountsStore";
 import { blockPeer } from "../../utils/api";
 import { actionSheetColors, textPrimaryColor } from "../../utils/colors";
@@ -46,6 +44,7 @@ export default function ChatPlaceholder({
   const colorScheme = useColorScheme();
   const styles = getStyles(colorScheme);
   const { dispatch } = useContext(AppContext);
+  const setBlockedPeerStatus = useSettingsStore((s) => s.setBlockedPeerStatus);
   const recommendationData = useRecommendationsStore((s) =>
     conversation?.peerAddress ? s.frens[conversation.peerAddress] : undefined
   );
@@ -96,18 +95,12 @@ export default function ChatPlaceholder({
                     ...actionSheetColors(colorScheme),
                   },
                   (selectedIndex?: number) => {
-                    if (selectedIndex === 0) {
+                    if (selectedIndex === 0 && conversation?.peerAddress) {
                       blockPeer({
-                        peerAddress: conversation?.peerAddress || "",
+                        peerAddress: conversation.peerAddress,
                         blocked: false,
                       });
-                      dispatch({
-                        type: XmtpDispatchTypes.XmtpSetBlockedStatus,
-                        payload: {
-                          peerAddress: conversation?.peerAddress || "",
-                          blocked: false,
-                        },
-                      });
+                      setBlockedPeerStatus(conversation.peerAddress, false);
                     }
                   }
                 );

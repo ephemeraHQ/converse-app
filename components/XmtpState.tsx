@@ -11,11 +11,12 @@ import {
 import { MessageEntity } from "../data/db/entities/messageEntity";
 import { AppContext, DispatchType } from "../data/deprecatedStore/context";
 import { XmtpDispatchTypes } from "../data/deprecatedStore/xmtpReducer";
-import { useUserStore } from "../data/store/accountsStore";
+import { useSettingsStore, useUserStore } from "../data/store/accountsStore";
 import { useAppStore } from "../data/store/appStore";
 import { getBlockedPeers } from "../utils/api";
 import { deserializeRemoteAttachmentContent } from "../utils/attachment";
 import { loadXmtpConversation, loadXmtpKeys } from "../utils/keychain";
+import { pick } from "../utils/objects";
 import { getXmtpSignature } from "../utils/xmtp";
 import { getXmtpClientFromKeys } from "../utils/xmtp/client";
 import {
@@ -221,6 +222,9 @@ export default function XmtpState() {
   const { dispatch, state } = useContext(AppContext);
   const userAddress = useUserStore((s) => s.userAddress);
   const splashScreenHidden = useAppStore((s) => s.splashScreenHidden);
+  const { setBlockedPeers } = useSettingsStore((s) =>
+    pick(s, ["setBlockedPeers"])
+  );
   // On open; opening XMTP session
   useEffect(() => {
     const initXmtp = async () => {
@@ -286,19 +290,12 @@ export default function XmtpState() {
     if (state.xmtp.localConnected && state.xmtp.webviewConnected) {
       getBlockedPeers()
         .then((addresses) => {
-          const blockedPeerAddresses: { [peerAddress: string]: boolean } = {};
-          addresses.forEach((peerAddress) => {
-            blockedPeerAddresses[peerAddress.toLowerCase()] = true;
-          });
-          dispatch({
-            type: XmtpDispatchTypes.XmtpSetBlockedPeerAddresses,
-            payload: { blockedPeerAddresses },
-          });
+          setBlockedPeers(addresses);
         })
         .catch((e) => {
           console.log("Error while getting blocked peers", e);
         });
     }
-  }, [dispatch, state.xmtp.localConnected, state.xmtp.webviewConnected]);
+  }, [setBlockedPeers, state.xmtp.localConnected, state.xmtp.webviewConnected]);
   return null;
 }

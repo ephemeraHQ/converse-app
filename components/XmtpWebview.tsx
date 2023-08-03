@@ -8,7 +8,7 @@ import config from "../config";
 import { saveNewConversation, saveConversations, saveMessages } from "../data";
 import { AppContext } from "../data/deprecatedStore/context";
 import { XmtpDispatchTypes } from "../data/deprecatedStore/xmtpReducer";
-import { useUserStore } from "../data/store/accountsStore";
+import { useSettingsStore, useUserStore } from "../data/store/accountsStore";
 import { useAppStore } from "../data/store/appStore";
 import { loadSavedNotificationMessagesToContext } from "../utils/backgroundNotifications/loadSavedNotifications";
 import {
@@ -96,10 +96,10 @@ export default function XmtpWebview() {
   const { userAddress, setUserAddress } = useUserStore((s) =>
     pick(s, ["userAddress", "setUserAddress"])
   );
-  const isInternetReachable = useAppStore((s) => s.isInternetReachable);
-  const notificationsPermissionStatus = useAppStore(
-    (s) => s.notificationsPermissionStatus
+  const { isInternetReachable, notificationsPermissionStatus } = useAppStore(
+    (s) => pick(s, ["isInternetReachable", "notificationsPermissionStatus"])
   );
+  const blockedPeers = useSettingsStore((s) => s.blockedPeers);
 
   useEffect(() => {
     const messagesReadyInterval = setInterval(() => {
@@ -262,7 +262,7 @@ export default function XmtpWebview() {
             subscribeToNotifications(
               userAddress,
               Object.values(state.xmtp.conversations),
-              state.xmtp.blockedPeerAddresses
+              blockedPeers
             );
           }
           break;
@@ -313,7 +313,7 @@ export default function XmtpWebview() {
             subscribeToNotifications(
               userAddress,
               Object.values(state.xmtp.conversations),
-              state.xmtp.blockedPeerAddresses
+              blockedPeers
             );
           }
           isReconnecting = false;
@@ -396,12 +396,13 @@ export default function XmtpWebview() {
     },
     [
       dispatch,
-      loadKeys,
-      reloadData,
-      notificationsPermissionStatus,
       userAddress,
-      state.xmtp.blockedPeerAddresses,
+      setUserAddress,
+      notificationsPermissionStatus,
       state.xmtp.conversations,
+      blockedPeers,
+      reloadData,
+      loadKeys,
     ]
   );
 

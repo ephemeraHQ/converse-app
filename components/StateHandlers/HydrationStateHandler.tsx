@@ -74,14 +74,6 @@ export default function HydrationStateHandler() {
         });
       }
 
-      const savedBlockedPeers = JSON.parse(
-        mmkv.getString("state.xmtp.blockedPeerAddresses") || "{}"
-      );
-      dispatch({
-        type: XmtpDispatchTypes.XmtpSetBlockedPeerAddresses,
-        payload: { blockedPeerAddresses: savedBlockedPeers },
-      });
-
       setHydrationDone(true);
       if (xmtpAddress && !migrationAlertShown) {
         const xmtpKeys = await loadXmtpKeys();
