@@ -53,10 +53,14 @@ function NewConversationButton({
     navigation.navigate("NewConversation", {});
   }, [navigation]);
   const onLongPress = useCallback(() => {
-    if (!enableDebug || !debugRef.current) {
+    if (
+      !enableDebug ||
+      !debugRef.current ||
+      !(debugRef.current as any).showDebugMenu
+    ) {
       return;
     }
-    (debugRef.current as any).enableDebugMenu();
+    (debugRef.current as any).showDebugMenu();
   }, [enableDebug]);
   if (Platform.OS === "ios") {
     return (

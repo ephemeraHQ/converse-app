@@ -19,7 +19,7 @@ export class TypeORMLogger implements Logger {
     parameters?: any[] | undefined,
     queryRunner?: QueryRunner | undefined
   ) {
-    // console.log(query);
+    console.log(`⏰ SLOW QUERY ${time}ms: ${query}`, parameters);
   }
   logMigration(message: string, queryRunner?: QueryRunner | undefined) {
     // console.log(message);

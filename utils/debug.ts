@@ -2,7 +2,7 @@ import _ from "lodash";
 const timestamps: { [timestampId: string]: { start: number; last: number } } =
   {};
 
-export const timeSpentDebugger = ({
+export const debugTimeSpent = ({
   start,
   noReset,
   actionToLog,
@@ -25,7 +25,7 @@ export const timeSpentDebugger = ({
     const timeSpentSinceLast = (now - timestamps[timestampId].last) / 1000;
     const timeSpentSinceStart = (now - timestamps[timestampId].start) / 1000;
     console.log(
-      `    ⌛  [${timestampId}] ${actionToLog} occured after ${timeSpentSinceLast} seconds (since start: ${timeSpentSinceStart} seconds)`
+      `    ⌛  [${timestampId}] “${actionToLog}” took ${timeSpentSinceLast} seconds (since start: ${timeSpentSinceStart} seconds)`
     );
   }
   if (!noReset) {
