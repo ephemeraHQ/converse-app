@@ -1,96 +1,70 @@
 import { getLensHandleFromConversationIdAndPeer } from "../../../utils/lens";
+import { lastValueInMap } from "../../../utils/map";
 import { saveConversationIdentifiersForNotifications } from "../../../utils/notifications";
-import { sentryTrackMessage } from "../../../utils/sentry";
-import { conversationRepository, profileRepository } from "../../db";
+import { conversationRepository } from "../../db";
 import dataSource from "../../db/datasource";
-import { ProfileEntity } from "../../db/entities/profileEntity";
 import { upsertRepository } from "../../db/upsert";
 import { xmtpConversationToDb } from "../../mappers";
-import { useChatStore } from "../../store/accountsStore";
+import { useChatStore, useProfilesStore } from "../../store/accountsStore";
 import { XmtpConversation } from "../../store/chatStore";
 import { updateProfilesForConversations } from "../profiles/profilesUpdate";
 import { upgradePendingConversationIfNeeded } from "./pendingConversations";
 
-export const saveConversations = async (conversations: XmtpConversation[]) => {
-  // Save immediatly to db
-  const saveResult = await Promise.all(
-    conversations.map((c) => setupAndSaveConversation(c))
-  );
-  // Then to context
-  useChatStore
-    .getState()
-    .setConversations(saveResult.map((r) => r.conversation));
-  try {
-    // Now let's see what profiles need to be updated
-    const convosToUpdate = saveResult
-      .filter((c) => c.shouldUpdateProfile)
-      .map((c) => c.conversation);
-    if (convosToUpdate.length === 0) return;
-    const resolveResult = await updateProfilesForConversations(convosToUpdate);
-
-    const updatedConversations = resolveResult
-      .filter((r) => r.updated)
-      .map((r) => r.conversation);
-    if (updatedConversations.length > 0) {
-      useChatStore.getState().setConversations(updatedConversations);
+export const saveConversations = async (
+  conversations: XmtpConversation[],
+  forceUpdate = false
+) => {
+  const chatStoreState = useChatStore.getState();
+  const alreadyKnownConversations: XmtpConversation[] = [];
+  const conversationsToUpsert: XmtpConversation[] = [];
+  conversations.forEach((c) => {
+    if (!chatStoreState.conversations[c.topic] || forceUpdate) {
+      conversationsToUpsert.push(c);
+    } else {
+      alreadyKnownConversations.push(c);
     }
-  } catch (e: any) {
-    sentryTrackMessage("SAVE_CONVO_PROFILE_UPDATE_FAILED", {
-      error: e.toString(),
-    });
-    console.log(e);
+  });
+
+  // Save immediatly to db the new ones
+  const newlySavedConversations = await Promise.all(
+    conversationsToUpsert.map((c) => setupAndSaveConversation(c))
+  );
+  // Then to context so it show immediatly even without handle
+  chatStoreState.setConversations(newlySavedConversations);
+
+  // Let's find out which need to have the profile updated
+  const knownProfiles = useProfilesStore.getState().profiles;
+  const convosWithProfilesToUpdate: XmtpConversation[] = [];
+  const now = new Date().getTime();
+  [alreadyKnownConversations, newlySavedConversations].forEach(
+    (conversationList) => {
+      conversationList.forEach((c) => {
+        const existingProfile = knownProfiles[c.peerAddress];
+        const lastProfileUpdate = existingProfile?.updatedAt || 0;
+        const shouldUpdateProfile = now - lastProfileUpdate >= 24 * 3600 * 1000;
+        if (shouldUpdateProfile) {
+          convosWithProfilesToUpdate.push(c);
+        }
+      });
+    }
+  );
+
+  if (convosWithProfilesToUpdate.length === 0) return;
+  const resolveResult = await updateProfilesForConversations(
+    convosWithProfilesToUpdate
+  );
+
+  const updatedConversations = resolveResult
+    .filter((r) => r.updated)
+    .map((r) => r.conversation);
+  if (updatedConversations.length > 0) {
+    useChatStore.getState().setConversations(updatedConversations);
   }
-};
-
-// export const saveNewConversation = async (
-//   conversation: XmtpConversation,
-//   dispatch: MaybeDispatchType
-// ) => {
-//   // Save immediatly to db
-//   const saveResult = await setupAndSaveConversation(conversation, dispatch);
-//   // Then to context
-//   if (dispatch) {
-//     dispatch({
-//       type: XmtpDispatchTypes.XmtpNewConversation,
-//       payload: {
-//         conversation,
-//       },
-//     });
-//   }
-//   try {
-//     // Now let's see if conversation needs to have a handle resolved
-//     if (saveResult.shouldUpdateProfile) {
-//       const resolveResult = (
-//         await updateProfilesForConversations(
-//           [saveResult.conversation],
-//           dispatch
-//         )
-//       )[0];
-//       if (dispatch && resolveResult.updated) {
-//         dispatch({
-//           type: XmtpDispatchTypes.XmtpSetConversations,
-//           payload: {
-//             conversations: [resolveResult.conversation],
-//           },
-//         });
-//       }
-//     }
-//   } catch (e: any) {
-//     sentryTrackMessage("NEW_CONVO_PROFILE_UPDATE_FAILED", {
-//       error: e.toString(),
-//     });
-//     console.log(e);
-//   }
-// };
-
-type HandlesToResolve = {
-  conversation: XmtpConversation;
-  shouldUpdateProfile: boolean;
 };
 
 export const setupAndSaveConversation = async (
   conversation: XmtpConversation
-): Promise<HandlesToResolve> => {
+): Promise<XmtpConversation> => {
   await upgradePendingConversationIfNeeded(conversation);
   const alreadyConversationInDbWithTopic = await conversationRepository.findOne(
     {
@@ -98,17 +72,8 @@ export const setupAndSaveConversation = async (
     }
   );
 
-  let alreadyProfileInDb: ProfileEntity | null = null;
-  if (alreadyConversationInDbWithTopic) {
-    alreadyProfileInDb = await profileRepository.findOne({
-      where: { address: alreadyConversationInDbWithTopic.peerAddress },
-    });
-  }
-  const lastProfileUpdate = alreadyProfileInDb?.updatedAt || 0;
-  const now = new Date().getTime();
-  const shouldUpdateProfile = now - lastProfileUpdate >= 24 * 3600 * 1000;
-
-  const profileSocials = alreadyProfileInDb?.getSocials();
+  const profileSocials =
+    useProfilesStore.getState().profiles[conversation.peerAddress]?.socials;
 
   const lensHandle = getLensHandleFromConversationIdAndPeer(
     conversation.context?.conversationId,
@@ -134,14 +99,39 @@ export const setupAndSaveConversation = async (
 
   saveConversationIdentifiersForNotifications(conversation);
 
-  return {
-    conversation,
-    shouldUpdateProfile,
-  };
+  return conversation;
 };
 
 export const markAllConversationsAsReadInDb = async () => {
   await dataSource.query(
     `UPDATE "conversation" SET "readUntil" = (SELECT COALESCE(MAX(sent), 0) FROM "message" WHERE "message"."conversationId" = "conversation"."topic")`
   );
+};
+
+export const markConversationReadUntil = (
+  conversation: XmtpConversation,
+  readUntil: number,
+  allowBefore = false
+) => {
+  if (readUntil === conversation.readUntil) {
+    return;
+  }
+  if (readUntil < conversation.readUntil && !allowBefore) {
+    return;
+  }
+  return saveConversations([{ ...conversation, readUntil }], true);
+};
+
+export const markConversationRead = (
+  conversation: XmtpConversation,
+  allowBefore = false
+) => {
+  let newReadUntil = conversation.readUntil;
+  if (conversation.messages.size > 0) {
+    const lastMessage = lastValueInMap(conversation.messages);
+    if (lastMessage) {
+      newReadUntil = lastMessage.sent;
+    }
+  }
+  return markConversationReadUntil(conversation, newReadUntil, allowBefore);
 };

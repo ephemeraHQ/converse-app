@@ -27,9 +27,11 @@ import config from "../config";
 import {
   cleanupPendingConversations,
   createPendingConversation,
+} from "../data/helpers/conversations/pendingConversations";
+import {
   markConversationRead,
   markConversationReadUntil,
-} from "../data/helpers/conversations/pendingConversations";
+} from "../data/helpers/conversations/upsertConversations";
 import { saveMessages } from "../data/helpers/messages";
 import {
   useChatStore,

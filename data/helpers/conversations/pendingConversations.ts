@@ -2,7 +2,6 @@ import { getAddress } from "ethers/lib/utils";
 import uuid from "react-native-uuid";
 import { In } from "typeorm/browser";
 
-import { lastValueInMap } from "../../../utils/map";
 import { InvitationContext } from "../../../vendor/xmtp-js/src";
 import { conversationRepository, messageRepository } from "../../db";
 import { upsertRepository } from "../../db/upsert";
@@ -81,37 +80,13 @@ export const createPendingConversation = async (
   return pendingConversationId;
 };
 
-export const markConversationReadUntil = (
-  conversation: XmtpConversation,
-  readUntil: number,
-  allowBefore = false
-) => {
-  if (readUntil === conversation.readUntil) {
-    return;
-  }
-  if (readUntil < conversation.readUntil && !allowBefore) {
-    return;
-  }
-  return saveConversations([{ ...conversation, readUntil }]);
-};
-
-export const markConversationRead = (
-  conversation: XmtpConversation,
-  allowBefore = false
-) => {
-  let newReadUntil = conversation.readUntil;
-  if (conversation.messages.size > 0) {
-    const lastMessage = lastValueInMap(conversation.messages);
-    if (lastMessage) {
-      newReadUntil = lastMessage.sent;
-    }
-  }
-  return markConversationReadUntil(conversation, newReadUntil, allowBefore);
-};
-
 export const upgradePendingConversationIfNeeded = async (
   conversation: XmtpConversation
 ) => {
+  // If we get back a conversation from XMTP that corresponds
+  // to a conversation that we have locally pending, we need
+  // to delete the pending one and reassigns messages
+
   const alreadyConversationInDbWithConversationId =
     await getPendingConversationWithPeer(
       conversation.peerAddress,

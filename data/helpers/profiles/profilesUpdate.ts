@@ -42,10 +42,13 @@ export const updateProfilesForConversations = async (
     );
     // Dispatching the profile to state
     const socialsToDispatch: {
-      [address: string]: { socials: ProfileSocials };
+      [address: string]: { socials: ProfileSocials; updatedAt: number };
     } = {};
     for (const address in profilesByAddress) {
-      socialsToDispatch[address] = { socials: profilesByAddress[address] };
+      socialsToDispatch[address] = {
+        socials: profilesByAddress[address],
+        updatedAt: now,
+      };
     }
     useProfilesStore.getState().setProfiles(socialsToDispatch);
 
@@ -105,6 +108,7 @@ export const refreshProfileForAddress = async (address: string) => {
   useProfilesStore.getState().setProfiles({
     [address]: {
       socials: profilesByAddress[address],
+      updatedAt: now,
     },
   });
 };

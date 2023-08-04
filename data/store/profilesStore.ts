@@ -32,7 +32,7 @@ export type ProfileSocials = {
 };
 
 export type ProfileByAddress = {
-  [address: string]: { socials: ProfileSocials } | undefined;
+  [address: string]: { socials: ProfileSocials; updatedAt: number } | undefined;
 };
 
 export type ProfilesStoreType = {
