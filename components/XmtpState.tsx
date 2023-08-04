@@ -2,13 +2,13 @@ import { ContentTypeReaction } from "@xmtp/content-type-reaction";
 import { ContentTypeRemoteAttachment } from "@xmtp/content-type-remote-attachment";
 import { useEffect, useRef } from "react";
 
+import { MessageEntity } from "../data/db/entities/messageEntity";
+import { getPendingConversationsToCreate } from "../data/helpers/conversations/pendingConversations";
 import {
   getMessagesToSend,
-  getPendingConversationsToCreate,
   markMessageAsSent,
   updateMessagesIds,
-} from "../data";
-import { MessageEntity } from "../data/db/entities/messageEntity";
+} from "../data/helpers/messages";
 import {
   useChatStore,
   useSettingsStore,

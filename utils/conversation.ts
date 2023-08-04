@@ -1,6 +1,6 @@
 import { Reaction } from "@xmtp/content-type-reaction";
 
-import { XmtpConversation, XmtpMessage } from "../data/store/chatStore";
+import { XmtpMessage, XmtpConversation } from "../data/store/chatStore";
 import { isAttachmentMessage } from "./attachment";
 
 export type LastMessagePreview = {

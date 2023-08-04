@@ -6,7 +6,7 @@ import React, { useCallback } from "react";
 import { Platform, TouchableOpacity, useColorScheme, View } from "react-native";
 
 import config from "../config";
-import { refreshProfileForAddress } from "../data";
+import { refreshProfileForAddress } from "../data/helpers/profiles/profilesUpdate";
 import { useUserStore } from "../data/store/accountsStore";
 import { useAppStore } from "../data/store/appStore";
 import { NavigationParamList } from "../screens/Main";
