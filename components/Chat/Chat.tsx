@@ -1,4 +1,4 @@
-import { AnimatedFlashList } from "@shopify/flash-list";
+import { FlashList } from "@shopify/flash-list";
 import differenceInCalendarDays from "date-fns/differenceInCalendarDays";
 import React, {
   MutableRefObject,
@@ -42,6 +42,9 @@ const AnimatedView = Reanimated.createAnimatedComponent(View);
 const AnimatedFlatList = Reanimated.createAnimatedComponent(
   FlatList
 ) as typeof FlatList;
+const AnimatedFlashList = Reanimated.createAnimatedComponent(
+  FlashList
+) as typeof FlashList;
 
 type Props = {
   conversation?: XmtpConversationWithUpdate;
