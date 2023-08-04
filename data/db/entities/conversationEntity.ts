@@ -6,16 +6,17 @@ import {
   OneToMany,
 } from "typeorm/browser";
 
-import { type MessageEntity } from "./messageEntity";
+import { type Message } from "./messageEntity";
 
 @Entity()
-export class ConversationEntity {
+export class Conversation {
   // @ts-ignore
   public static name = "Conversation";
 
   @PrimaryColumn("text")
   topic!: string;
 
+  @Index()
   @Column("boolean", { default: false })
   pending!: boolean;
 
@@ -35,6 +36,6 @@ export class ConversationEntity {
   @Column("text", { nullable: true })
   contextMetadata?: string;
 
-  @OneToMany("Message", (message: MessageEntity) => message.conversation)
-  messages?: MessageEntity[];
+  @OneToMany("Message", (message: Message) => message.conversation)
+  messages?: Message[];
 }

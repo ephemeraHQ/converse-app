@@ -1,10 +1,7 @@
-import { Entity, Column, PrimaryColumn } from "typeorm/browser";
+import { Entity, Column, PrimaryColumn } from "typeorm";
 
 @Entity()
 export class Profile {
-  // @ts-ignore
-  public static name = "Profile";
-
   @PrimaryColumn("text")
   address!: string;
 

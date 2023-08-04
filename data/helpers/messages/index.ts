@@ -4,7 +4,7 @@ import RNFS from "react-native-fs";
 import { MessageReaction } from "../../../utils/reactions";
 import { sentryTrackMessage } from "../../../utils/sentry";
 import { messageRepository } from "../../db";
-import { MessageEntity } from "../../db/entities/messageEntity";
+import { Message } from "../../db/entities/messageEntity";
 import { upsertRepository } from "../../db/upsert";
 import { xmtpMessageFromDb, xmtpMessageToDb } from "../../mappers";
 import { useChatStore } from "../../store/accountsStore";
@@ -90,7 +90,7 @@ export const updateMessagesIds = async (messageIdsToUpdate: {
   [messageId: string]: {
     newMessageId: string;
     newMessageSent: number;
-    message: MessageEntity;
+    message: Message;
   };
 }) => {
   const messagesToDispatch: {

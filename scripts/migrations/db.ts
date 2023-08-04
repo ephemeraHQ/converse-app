@@ -8,9 +8,9 @@ import path from "path";
 import { argv } from "process";
 
 import dataSource from "./datasource";
-import { Conversation } from "./entities/conversation";
-import { Message } from "./entities/message";
-import { Profile } from "./entities/profile";
+import { Conversation } from "./entities/conversationEntity";
+import { Message } from "./entities/messageEntity";
+import { Profile } from "./entities/profileEntity";
 
 const ethAddress = (): string => {
   const wallet = ethers.Wallet.createRandom();

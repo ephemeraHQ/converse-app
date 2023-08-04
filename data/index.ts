@@ -11,13 +11,11 @@ export const loadDataToContext = async () => {
   saveXmtpEnv();
   saveApiURI();
   // Let's load conversations and messages and save to context
-  const [conversationsWithMessages, profilesByAddress] = await Promise.all([
-    conversationRepository.find({
-      relations: { messages: true },
-      order: { messages: { sent: "ASC" } },
-    }),
-    loadProfilesByAddress(),
-  ]);
+  const conversationsWithMessages = await conversationRepository.find({
+    relations: { messages: true },
+    order: { messages: { sent: "ASC" } },
+  });
+  const profilesByAddress = await loadProfilesByAddress();
   useProfilesStore.getState().setProfiles(profilesByAddress);
   useChatStore
     .getState()

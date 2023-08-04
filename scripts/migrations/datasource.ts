@@ -17,9 +17,10 @@ import { addMessageFallback1690204801962 } from "../../data/db/migrations/169020
 import { addPendingStateToConversations1690376359971 } from "../../data/db/migrations/1690376359971-addPendingStateToConversations";
 import { fixWrongForeignKey1690809735000 } from "../../data/db/migrations/1690809735000-fixWrongForeignKey";
 import { removeForeignKeyForTesters1690989046000 } from "../../data/db/migrations/1690989046000-removeForeignKeyForTesters";
-import { Conversation } from "./entities/conversation";
-import { Message } from "./entities/message";
-import { Profile } from "./entities/profile";
+import { addIndexToPendingConversation1691154310694 } from "../../data/db/migrations/1691154310694-addIndexToPendingConversation";
+import { Conversation } from "./entities/conversationEntity";
+import { Message } from "./entities/messageEntity";
+import { Profile } from "./entities/profileEntity";
 
 const dataSource = new DataSource({
   database: path.join(__dirname, "converse-sample.sqlite"),
@@ -42,6 +43,7 @@ const dataSource = new DataSource({
     addPendingStateToConversations1690376359971,
     fixWrongForeignKey1690809735000,
     removeForeignKeyForTesters1690989046000,
+    addIndexToPendingConversation1691154310694,
   ],
   type: "sqlite",
 });
