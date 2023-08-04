@@ -1,15 +1,18 @@
 import * as Notifications from "expo-notifications";
 import { Platform } from "react-native";
 
-import { saveMessages } from "../data";
+import { saveMessages } from "../data/helpers/messages";
 import { XmtpConversation } from "../data/store/chatStore";
 import { buildUserInviteTopic } from "../vendor/xmtp-js/src/utils";
 import api from "./api";
 import { saveExpoPushToken } from "./keychain";
+import { sentryTrackMessage } from "./sentry";
 import {
   emptySavedNotificationsMessages,
   loadSavedNotificationsMessages,
+  saveConversationDict,
 } from "./sharedData/sharedData";
+import { conversationName, shortAddress } from "./str";
 
 let expoPushToken: string | null;
 
@@ -173,4 +176,26 @@ export const loadSavedNotificationMessagesToContext = async () => {
     emptySavedNotificationsMessages();
     loadingSavedNotifications = false;
   }
+};
+
+export const saveConversationIdentifiersForNotifications = (
+  conversation: XmtpConversation
+) => {
+  const conversationDict: any = {
+    peerAddress: conversation.peerAddress,
+    shortAddress: shortAddress(conversation.peerAddress),
+    title: conversationName(conversation),
+  };
+
+  // Also save to shared preferences to be able to show notification
+  saveConversationDict(conversation.topic, conversationDict).catch((e) => {
+    const dataToSave = {
+      topic: `conversation-${conversation.topic}`,
+      conversationDict,
+    };
+    sentryTrackMessage("ERROR_SAVING_SHARED_PREFERENCE", {
+      error: e.toString(),
+      data: JSON.stringify(dataToSave),
+    });
+  });
 };

@@ -29,8 +29,8 @@ import {
   createPendingConversation,
   markConversationRead,
   markConversationReadUntil,
-  saveMessages,
-} from "../data";
+} from "../data/helpers/conversations/pendingConversations";
+import { saveMessages } from "../data/helpers/messages";
 import {
   useChatStore,
   useSettingsStore,

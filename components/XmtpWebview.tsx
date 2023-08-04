@@ -5,7 +5,8 @@ import uuid from "react-native-uuid";
 import { WebView, WebViewMessageEvent } from "react-native-webview";
 
 import config from "../config";
-import { saveConversations, saveMessages } from "../data";
+import { saveConversations } from "../data/helpers/conversations/upsertConversations";
+import { saveMessages } from "../data/helpers/messages";
 import {
   useChatStore,
   useSettingsStore,

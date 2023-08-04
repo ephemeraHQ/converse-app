@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 
-import { refreshProfileForAddress } from "../../data";
+import { refreshProfileForAddress } from "../../data/helpers/profiles/profilesUpdate";
 import { useUserStore } from "../../data/store/accountsStore";
 import { saveUser } from "../../utils/api";
 

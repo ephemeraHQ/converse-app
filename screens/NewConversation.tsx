@@ -26,7 +26,7 @@ import Recommendations from "../components/Recommendations";
 import TableView from "../components/TableView/TableView";
 import { TableViewPicto } from "../components/TableView/TableViewImage";
 import config from "../config";
-import { createPendingConversation } from "../data";
+import { createPendingConversation } from "../data/helpers/conversations/pendingConversations";
 import {
   useChatStore,
   useRecommendationsStore,

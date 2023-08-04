@@ -1,8 +1,9 @@
 import { useEffect } from "react";
 import { Alert } from "react-native";
 
-import { loadDataToContext, refreshProfileForAddress } from "../../data";
+import { loadDataToContext } from "../../data";
 import { initDb } from "../../data/db";
+import { refreshProfileForAddress } from "../../data/helpers/profiles/profilesUpdate";
 import { useUserStore } from "../../data/store/accountsStore";
 import { useAppStore } from "../../data/store/appStore";
 import { loadXmtpKeys } from "../../utils/keychain";

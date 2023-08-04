@@ -1,10 +1,10 @@
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
 
-import { markAllConversationsAsReadInDb } from "..";
 import { lastValueInMap } from "../../utils/map";
 import { zustandMMKVStorage } from "../../utils/mmkv";
 import { omit } from "../../utils/objects";
+import { markAllConversationsAsReadInDb } from "../helpers/conversations/upsertConversations";
 
 // Chat data for each user
 
