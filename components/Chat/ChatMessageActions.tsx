@@ -10,6 +10,7 @@ import {
 import EmojiPicker from "rn-emoji-keyboard";
 
 import { useSettingsStore, useUserStore } from "../../data/store/accountsStore";
+import { useConversationContext } from "../../screens/Conversation";
 import { blockPeer, reportMessage } from "../../utils/api";
 import { isAttachmentMessage } from "../../utils/attachment";
 import { actionSheetColors } from "../../utils/colors";
@@ -26,11 +27,6 @@ import { MessageToDisplay } from "./ChatMessage";
 type Props = {
   children: React.ReactNode;
   message: MessageToDisplay;
-  sendMessage: (
-    content: string,
-    contentType?: string,
-    contentFallback?: string
-  ) => Promise<void>;
   reactions: {
     [senderAddress: string]: MessageReaction | undefined;
   };
@@ -39,9 +35,9 @@ type Props = {
 export default function ChatMessageActions({
   children,
   message,
-  sendMessage,
   reactions,
 }: Props) {
+  const { conversation } = useConversationContext(["conversation"]);
   const isAttachment = isAttachmentMessage(message.contentType);
   const colorScheme = useColorScheme();
   const userAddress = useUserStore((s) => s.userAddress);
@@ -196,19 +192,20 @@ export default function ChatMessageActions({
       </TouchableWithoutFeedback>
       <EmojiPicker
         onEmojiSelected={(e) => {
+          if (!conversation) return;
           if (e.alreadySelected) {
-            removeReactionFromMessage(message, e.emoji, sendMessage);
+            removeReactionFromMessage(conversation, message, e.emoji);
           } else {
             // We want to remove all emojis first
             const myReaction = reactions[userAddress];
             if (myReaction && myReaction.schema === "unicode") {
               removeReactionFromMessage(
+                conversation,
                 message,
-                myReaction.content,
-                sendMessage
+                myReaction.content
               );
             }
-            addReactionToMessage(message, e.emoji, sendMessage);
+            addReactionToMessage(conversation, message, e.emoji);
           }
         }}
         open={emojiPickerShown}

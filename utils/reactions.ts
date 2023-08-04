@@ -1,8 +1,9 @@
 import { ContentTypeReaction } from "@xmtp/content-type-reaction";
 import { emojisByCategory } from "rn-emoji-keyboard";
 
-import { XmtpMessage } from "../data/store/chatStore";
+import { XmtpConversation, XmtpMessage } from "../data/store/chatStore";
 import { isAttachmentMessage } from "./attachment";
+import { sendMessage } from "./message";
 import { sentryTrackMessage } from "./sentry";
 
 export type MessageReaction = {
@@ -89,16 +90,13 @@ export const getEmojiName = (emojiString: string) => {
 };
 
 export const addReactionToMessage = (
+  conversation: XmtpConversation,
   message: XmtpMessage,
-  emoji: string,
-  sendMessage: (
-    content: string,
-    contentType?: string,
-    contentFallback?: string
-  ) => Promise<void>
+  emoji: string
 ) => {
   const isAttachment = isAttachmentMessage(message.contentType);
   sendMessage(
+    conversation,
     JSON.stringify({
       reference: message.id,
       action: "added",
@@ -113,16 +111,13 @@ export const addReactionToMessage = (
 };
 
 export const removeReactionFromMessage = (
+  conversation: XmtpConversation,
   message: XmtpMessage,
-  emoji: string,
-  sendMessage: (
-    content: string,
-    contentType?: string,
-    contentFallback?: string
-  ) => Promise<void>
+  emoji: string
 ) => {
   const isAttachment = isAttachmentMessage(message.contentType);
   sendMessage(
+    conversation,
     JSON.stringify({
       reference: message.id,
       action: "removed",

@@ -9,6 +9,7 @@ import {
 } from "react-native";
 
 import { useProfilesStore, useUserStore } from "../../data/store/accountsStore";
+import { useConversationContext } from "../../screens/Conversation";
 import { isAttachmentMessage } from "../../utils/attachment";
 import {
   actionSheetColors,
@@ -30,18 +31,10 @@ type Props = {
   reactions: {
     [senderAddress: string]: MessageReaction;
   };
-  sendMessage: (
-    content: string,
-    contentType?: string,
-    contentFallback?: string
-  ) => Promise<void>;
 };
 
-export default function ChatMessageReactions({
-  message,
-  reactions,
-  sendMessage,
-}: Props) {
+export default function ChatMessageReactions({ message, reactions }: Props) {
+  const { conversation } = useConversationContext(["conversation"]);
   const colorScheme = useColorScheme();
   const styles = getStyles(colorScheme);
   const userAddress = useUserStore((s) => s.userAddress);
@@ -63,8 +56,8 @@ export default function ChatMessageReactions({
       methods[
         `${getReactionContent(r)} ${fromMe ? "you - tap to remove" : peer}`
       ] = () => {
-        if (!fromMe) return;
-        removeReactionFromMessage(message, r.content, sendMessage);
+        if (!fromMe || !conversation) return;
+        removeReactionFromMessage(conversation, message, r.content);
       };
     });
     methods["Back"] = () => {};
@@ -87,7 +80,7 @@ export default function ChatMessageReactions({
         }
       }
     );
-  }, [colorScheme, message, reactionsList, sendMessage, profiles, userAddress]);
+  }, [colorScheme, message, reactionsList, profiles, userAddress]);
   if (reactionsList.length === 0) return null;
   return (
     <View

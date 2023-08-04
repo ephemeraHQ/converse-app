@@ -1,4 +1,4 @@
-import { MutableRefObject } from "react";
+import { useEffect, useState } from "react";
 import {
   View,
   TextInput,
@@ -10,6 +10,7 @@ import {
 } from "react-native";
 
 import SendButton from "../../assets/send-button.svg";
+import { useConversationContext } from "../../screens/Conversation";
 import {
   actionSecondaryColor,
   backgroundColor,
@@ -19,40 +20,50 @@ import {
   textPrimaryColor,
   textSecondaryColor,
 } from "../../utils/colors";
+import { eventEmitter } from "../../utils/events";
+import { sendMessage } from "../../utils/message";
+import { TextInputWithValue } from "../../utils/str";
 import ChatAddAttachment from "./ChatAddAttachment";
 
-type Props = {
-  inputValue: string;
-  setInputValue: (value: string) => void;
-  inputRef: MutableRefObject<TextInput | undefined>;
-  sendMessage: (content: string) => Promise<void>;
-  inputAccessoryViewID?: string;
-  editable?: boolean;
-};
+export default function ChatInput() {
+  const { conversation, inputRef, messageToPrefill } = useConversationContext([
+    "conversation",
+    "inputRef",
+    "messageToPrefill",
+  ]);
 
-export default function ChatInput({
-  inputValue,
-  setInputValue,
-  inputRef,
-  sendMessage,
-  inputAccessoryViewID,
-  editable,
-}: Props) {
   const colorScheme = useColorScheme();
   const styles = getStyles(colorScheme);
+  const [inputValue, setInputValue] = useState(messageToPrefill);
+
+  // We use an event emitter to receive actions to fill the input value
+  // from outside. This enable us to keep a very small re-rendering
+  // by creating the inputValue in the lowest component, this one
+
+  useEffect(() => {
+    eventEmitter.on("setCurrentConversationInputValue", setInputValue);
+    return () => {
+      eventEmitter.off("setCurrentConversationInputValue", setInputValue);
+    };
+  }, []);
 
   return (
     <View style={styles.chatInputContainer}>
-      <ChatAddAttachment sendMessage={sendMessage} inputRef={inputRef} />
+      <ChatAddAttachment />
       <TextInput
-        editable={editable !== undefined ? editable : true}
         style={styles.chatInput}
         value={inputValue}
-        onChangeText={setInputValue}
+        onChangeText={(t: string) => {
+          setInputValue(t);
+          if (inputRef.current) {
+            inputRef.current.currentValue = t;
+          }
+        }}
         multiline
         ref={(r) => {
-          if (r) {
-            inputRef.current = r as TextInput;
+          if (r && !inputRef.current) {
+            inputRef.current = r as TextInputWithValue;
+            inputRef.current.currentValue = messageToPrefill;
           }
         }}
         placeholder="Message"
@@ -61,12 +72,17 @@ export default function ChatInput({
             ? textSecondaryColor(colorScheme)
             : actionSecondaryColor(colorScheme)
         }
-        inputAccessoryViewID={inputAccessoryViewID}
       />
       <TouchableOpacity
-        onPress={
-          inputValue.length > 0 ? () => sendMessage(inputValue) : undefined
-        }
+        onPress={() => {
+          if (conversation && inputValue.length > 0) {
+            sendMessage(conversation, inputValue);
+            setInputValue("");
+            if (inputRef.current) {
+              inputRef.current.currentValue = "";
+            }
+          }
+        }}
         activeOpacity={inputValue.length > 0 ? 0.4 : 0.6}
         style={[
           styles.sendButtonContainer,

@@ -34,14 +34,9 @@ export type MessageToDisplay = XmtpMessage & {
 
 type Props = {
   message: MessageToDisplay;
-  sendMessage: (
-    content: string,
-    contentType?: string,
-    contentFallback?: string
-  ) => Promise<void>;
 };
 
-export default function ChatMessage({ message, sendMessage }: Props) {
+export default function ChatMessage({ message }: Props) {
   const colorScheme = useColorScheme();
   const styles = getStyles(colorScheme);
 
@@ -79,11 +74,7 @@ export default function ChatMessage({ message, sendMessage }: Props) {
         <Text style={styles.date}>{getRelativeDate(message.sent)}</Text>
       )}
 
-      <ChatMessageActions
-        message={message}
-        sendMessage={sendMessage}
-        reactions={reactions}
-      >
+      <ChatMessageActions message={message} reactions={reactions}>
         <View
           style={[
             styles.messageBubble,
@@ -129,11 +120,7 @@ export default function ChatMessage({ message, sendMessage }: Props) {
           )}
         </View>
       </ChatMessageActions>
-      <ChatMessageReactions
-        message={message}
-        reactions={reactions}
-        sendMessage={sendMessage}
-      />
+      <ChatMessageReactions message={message} reactions={reactions} />
     </View>
   );
 }
