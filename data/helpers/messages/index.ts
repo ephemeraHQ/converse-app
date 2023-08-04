@@ -133,18 +133,22 @@ export const markMessageAsSent = async (messageId: string, topic: string) => {
 
 export const getMessagesToSend = async () => {
   const messagesToSend = await messageRepository.find({
+    select: {
+      id: true,
+      conversationId: true,
+      contentType: true,
+      content: true,
+      contentFallback: true,
+    },
     where: {
       status: "sending",
+      conversation: {
+        pending: false,
+      },
     },
     order: {
       sent: "ASC",
     },
-    relations: {
-      conversation: true,
-    },
   });
-  const messagesForExistingConversations = messagesToSend.filter(
-    (m) => m.conversation && m.conversation.pending === false
-  );
-  return messagesForExistingConversations;
+  return messagesToSend;
 };

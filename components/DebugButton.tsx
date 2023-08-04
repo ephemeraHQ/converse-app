@@ -9,6 +9,7 @@ import * as Sentry from "sentry-expo";
 
 import config from "../config";
 import { clearDB } from "../data/db";
+import dataSource from "../data/db/datasource";
 import { useUserStore } from "../data/store/accountsStore";
 import { deleteXmtpKeys } from "../utils/keychain";
 import { showActionSheetWithOptions } from "./StateHandlers/ActionSheetStateHandler";
@@ -40,6 +41,11 @@ const DebugButton = forwardRef((props, ref) => {
         "Send pending messages": async () => {
           await createPendingConversations();
           await sendPendingMessages();
+        },
+        "Analyze db": async () => {
+          console.log("analyzing...");
+          await dataSource.query("ANALYZE;");
+          alert(`Done!`);
         },
         "Export db file": async () => {
           const dbPath = `${RNFS.DocumentDirectoryPath}/SQLite/converse`;
