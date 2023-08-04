@@ -108,7 +108,7 @@ export const markAllConversationsAsReadInDb = async () => {
   );
 };
 
-export const markConversationReadUntil = (
+export const markConversationReadUntil = async (
   conversation: XmtpConversation,
   readUntil: number,
   allowBefore = false
@@ -119,7 +119,11 @@ export const markConversationReadUntil = (
   if (readUntil < conversation.readUntil && !allowBefore) {
     return;
   }
-  return saveConversations([{ ...conversation, readUntil }], true);
+  await conversationRepository.update(
+    { topic: conversation.topic },
+    { readUntil }
+  );
+  useChatStore.getState().setConversations([{ ...conversation, readUntil }]);
 };
 
 export const markConversationRead = (
