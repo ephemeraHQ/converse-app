@@ -2,8 +2,8 @@ import * as Linking from "expo-linking";
 
 import { sendMessageToWebview } from "../components/XmtpWebview";
 import { XmtpConversation } from "../data/store/chatStore";
-import { loadSavedNotificationMessagesToContext } from "./backgroundNotifications/loadSavedNotifications";
 import { lastValueInMap } from "./map";
+import { loadSavedNotificationMessagesToContext } from "./notifications";
 
 export const navigateToConversation = async (
   conversation: XmtpConversation

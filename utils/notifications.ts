@@ -1,10 +1,15 @@
 import * as Notifications from "expo-notifications";
 import { Platform } from "react-native";
 
+import { saveMessages } from "../data";
 import { XmtpConversation } from "../data/store/chatStore";
 import { buildUserInviteTopic } from "../vendor/xmtp-js/src/utils";
 import api from "./api";
 import { saveExpoPushToken } from "./keychain";
+import {
+  emptySavedNotificationsMessages,
+  loadSavedNotificationsMessages,
+} from "./sharedData/sharedData";
 
 let expoPushToken: string | null;
 
@@ -120,4 +125,52 @@ export const requestPushNotificationsPermissions = async (): Promise<
     finalStatus = status;
   }
   return finalStatus;
+};
+
+let loadingSavedNotifications = false;
+
+const waitForLoadingSavedNotifications = async () => {
+  if (!loadingSavedNotifications) return;
+  await new Promise((r) => setTimeout(r, 100));
+  await waitForLoadingSavedNotifications();
+};
+
+export const loadSavedNotificationMessagesToContext = async () => {
+  if (loadingSavedNotifications) {
+    await waitForLoadingSavedNotifications();
+    return;
+  }
+  loadingSavedNotifications = true;
+  try {
+    const messages = await loadSavedNotificationsMessages();
+    await emptySavedNotificationsMessages();
+    messages.sort((m1: any, m2: any) => m1.sent - m2.sent);
+    await Promise.all(
+      messages.map((message: any) =>
+        saveMessages(
+          [
+            {
+              id: message.id,
+              senderAddress: message.senderAddress,
+              sent: message.sent,
+              content: message.content,
+              status: "sent",
+              sentViaConverse: !!message.sentViaConverse,
+              contentType: message.contentType || "xmtp.org/text:1.0",
+            },
+          ],
+          message.topic
+        )
+      )
+    );
+
+    loadingSavedNotifications = false;
+  } catch (e) {
+    console.log(
+      "An error occured while loading saved notifications messages",
+      e
+    );
+    emptySavedNotificationsMessages();
+    loadingSavedNotifications = false;
+  }
 };

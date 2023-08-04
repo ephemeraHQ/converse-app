@@ -12,7 +12,6 @@ import {
   useUserStore,
 } from "../data/store/accountsStore";
 import { useAppStore } from "../data/store/appStore";
-import { loadSavedNotificationMessagesToContext } from "../utils/backgroundNotifications/loadSavedNotifications";
 import {
   loadXmtpConversation,
   loadXmtpKeys,
@@ -20,7 +19,10 @@ import {
   saveXmtpKeys,
 } from "../utils/keychain";
 import { getLastXMTPSyncedAt, saveLastXMTPSyncedAt } from "../utils/mmkv";
-import { subscribeToNotifications } from "../utils/notifications";
+import {
+  loadSavedNotificationMessagesToContext,
+  subscribeToNotifications,
+} from "../utils/notifications";
 import { pick } from "../utils/objects";
 import { sentryTrackMessage } from "../utils/sentry";
 import { gotMessagesFromNetwork } from "./DebugButton";
