@@ -14,9 +14,10 @@ import {
   useRecommendationsStore,
   useSettingsStore,
 } from "../../data/store/accountsStore";
-import { XmtpConversation } from "../../data/store/chatStore";
+import { useConversationContext } from "../../screens/Conversation";
 import { blockPeer } from "../../utils/api";
 import { actionSheetColors, textPrimaryColor } from "../../utils/colors";
+import { sendMessage } from "../../utils/message";
 import { getProfileData } from "../../utils/profile";
 import { conversationName } from "../../utils/str";
 import ActivityIndicator from "../ActivityIndicator/ActivityIndicator";
@@ -25,20 +26,12 @@ import { Recommendation } from "../Recommendations";
 import { showActionSheetWithOptions } from "../StateHandlers/ActionSheetStateHandler";
 
 type Props = {
-  conversation?: XmtpConversation;
-  sendMessage: (content: string) => Promise<void>;
-  isBlockedPeer: boolean;
   messagesCount: number;
-  onReadyToFocus: () => void;
 };
 
-export default function ChatPlaceholder({
-  isBlockedPeer,
-  conversation,
-  messagesCount,
-  sendMessage,
-  onReadyToFocus,
-}: Props) {
+export default function ChatPlaceholder({ messagesCount }: Props) {
+  const { conversation, isBlockedPeer, onReadyToFocus } =
+    useConversationContext(["conversation", "isBlockedPeer", "onReadyToFocus"]);
   const colorScheme = useColorScheme();
   const styles = getStyles(colorScheme);
   const setBlockedPeerStatus = useSettingsStore((s) => s.setBlockedPeerStatus);
@@ -126,7 +119,7 @@ export default function ChatPlaceholder({
               title="Say hi"
               style={styles.cta}
               onPress={() => {
-                sendMessage("👋");
+                sendMessage(conversation, "👋");
               }}
             />
           </View>

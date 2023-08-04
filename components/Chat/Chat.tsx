@@ -1,15 +1,8 @@
 import { FlashList } from "@shopify/flash-list";
 import differenceInCalendarDays from "date-fns/differenceInCalendarDays";
-import React, {
-  MutableRefObject,
-  useState,
-  useEffect,
-  useCallback,
-  useRef,
-} from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import {
   View,
-  TextInput,
   useColorScheme,
   StyleSheet,
   ColorSchemeName,
@@ -24,8 +17,10 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import {
   useProfilesStore,
   useRecommendationsStore,
+  useUserStore,
 } from "../../data/store/accountsStore";
 import { XmtpConversationWithUpdate } from "../../data/store/chatStore";
+import { useConversationContext } from "../../screens/Conversation";
 import { useKeyboardAnimation } from "../../utils/animations";
 import {
   backgroundColor,
@@ -45,17 +40,6 @@ const AnimatedFlatList = Reanimated.createAnimatedComponent(
 const AnimatedFlashList = Reanimated.createAnimatedComponent(
   FlashList
 ) as typeof FlashList;
-
-type Props = {
-  conversation?: XmtpConversationWithUpdate;
-  xmtpAddress: string;
-  setInputValue: (value: string) => void;
-  inputValue: string;
-  inputRef: MutableRefObject<TextInput | undefined>;
-  sendMessage: (content: string, contentType?: string) => Promise<void>;
-  isBlockedPeer: boolean;
-  onReadyToFocus: () => void;
-};
 
 const getListArray = (
   xmtpAddress?: string,
@@ -108,16 +92,10 @@ const getListArray = (
   return reverseArray;
 };
 
-export default function Chat({
-  conversation,
-  xmtpAddress,
-  setInputValue,
-  inputValue,
-  inputRef,
-  sendMessage,
-  isBlockedPeer,
-  onReadyToFocus,
-}: Props) {
+export default function Chat() {
+  const { conversation, isBlockedPeer, onReadyToFocus } =
+    useConversationContext(["conversation", "isBlockedPeer", "onReadyToFocus"]);
+  const xmtpAddress = useUserStore((s) => s.userAddress);
   const peerSocials = useProfilesStore((s) =>
     conversation?.peerAddress
       ? s.profiles[conversation.peerAddress]?.socials
@@ -193,15 +171,14 @@ export default function Chat({
           </View>
         );
       } else {
-        return <ChatMessage message={item} sendMessage={sendMessage} />;
+        return <ChatMessage message={item} />;
       }
     },
     [
-      recommendationsData,
-      peerSocials,
       conversation?.peerAddress,
+      peerSocials,
+      recommendationsData,
       styles.inChatRecommendations,
-      sendMessage,
     ]
   );
   const keyExtractor = useCallback((item: MessageToDisplay) => item.id, []);
@@ -249,13 +226,7 @@ export default function Chat({
           />
         )}
         {showPlaceholder && (
-          <ChatPlaceholder
-            onReadyToFocus={onReadyToFocus}
-            isBlockedPeer={isBlockedPeer}
-            conversation={conversation}
-            messagesCount={listArray.length - 1}
-            sendMessage={sendMessage}
-          />
+          <ChatPlaceholder messagesCount={listArray.length - 1} />
         )}
       </AnimatedView>
       {showChatInput && (
@@ -266,12 +237,7 @@ export default function Chat({
               chatInputHeight.value = e.nativeEvent.layout.height;
             }}
           >
-            <ChatInput
-              inputValue={inputValue}
-              setInputValue={setInputValue}
-              inputRef={inputRef}
-              sendMessage={sendMessage}
-            />
+            <ChatInput />
           </AnimatedView>
           <View
             style={[

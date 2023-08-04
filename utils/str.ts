@@ -1,4 +1,4 @@
-import { PixelRatio } from "react-native";
+import { PixelRatio, TextInput } from "react-native";
 
 import { XmtpConversation } from "../data/store/chatStore";
 
@@ -27,3 +27,5 @@ export const getTitleFontScale = (): number => {
   }
   return titleFontScale;
 };
+
+export type TextInputWithValue = TextInput & { currentValue: string };

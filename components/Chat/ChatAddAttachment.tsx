@@ -3,7 +3,7 @@ import * as ImagePicker from "expo-image-picker";
 import * as Linking from "expo-linking";
 import { setStatusBarHidden } from "expo-status-bar";
 import mime from "mime";
-import { MutableRefObject, useCallback, useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import {
   Alert,
   ColorSchemeName,
@@ -11,27 +11,24 @@ import {
   View,
   useColorScheme,
   StyleSheet,
-  TextInput,
   Platform,
 } from "react-native";
 import RNFS from "react-native-fs";
 
 import { useAppStore } from "../../data/store/appStore";
+import { useConversationContext } from "../../screens/Conversation";
 import { SerializedRemoteAttachmentContent } from "../../utils/attachment";
 import { actionSheetColors, textSecondaryColor } from "../../utils/colors";
 import { executeAfterKeyboardClosed } from "../../utils/keyboard";
+import { sendMessage } from "../../utils/message";
 import { pick } from "../../utils/objects";
 import { sentryTrackMessage } from "../../utils/sentry";
 import Picto from "../Picto/Picto";
 import { showActionSheetWithOptions } from "../StateHandlers/ActionSheetStateHandler";
 import { sendMessageToWebview } from "../XmtpWebview";
 
-type Props = {
-  sendMessage: (content: string, contentType: string) => Promise<void>;
-  inputRef: MutableRefObject<TextInput | undefined>;
-};
-
-export default function ChatAddAttachment({ sendMessage, inputRef }: Props) {
+export default function ChatAddAttachment() {
+  const { conversation } = useConversationContext(["conversation"]);
   const colorScheme = useColorScheme();
   const styles = getStyles(colorScheme);
   const { mediaPreview, setMediaPreview } = useAppStore((s) =>
@@ -47,6 +44,7 @@ export default function ChatAddAttachment({ sendMessage, inputRef }: Props) {
   }, [mediaPreview?.mediaURI]);
 
   useEffect(() => {
+    if (!conversation) return;
     const uploadAsset = async (asset: ImagePicker.ImagePickerAsset) => {
       uploading.current = true;
       const base64Content = await RNFS.readFile(asset.uri, "base64");
@@ -72,6 +70,7 @@ export default function ChatAddAttachment({ sendMessage, inputRef }: Props) {
           if (status === "SUCCESS") {
             setMediaPreview(null);
             sendMessage(
+              conversation,
               JSON.stringify(remoteAttachment),
               ContentTypeRemoteAttachment.toString()
             );
@@ -97,9 +96,9 @@ export default function ChatAddAttachment({ sendMessage, inputRef }: Props) {
       uploadAsset(assetRef.current);
     }
   }, [
+    conversation,
     mediaPreview?.mediaURI,
     mediaPreview?.sending,
-    sendMessage,
     setMediaPreview,
   ]);
 

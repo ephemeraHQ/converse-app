@@ -1,28 +1,31 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { isAddress } from "ethers/lib/utils";
-import React, { useCallback, useEffect, useState, useRef } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useState,
+  useRef,
+  MutableRefObject,
+  createRef,
+} from "react";
 import {
   Alert,
   ColorSchemeName,
   Platform,
   StyleSheet,
-  TextInput,
   TouchableOpacity,
   useColorScheme,
   View,
 } from "react-native";
-import uuid from "react-native-uuid";
+import { createContext, useContextSelector } from "use-context-selector";
 
 import Button from "../components/Button/Button";
 import ConverseChat from "../components/Chat/Chat";
 import ConversationTitle from "../components/Conversation/ConversationTitle";
 import InviteBanner from "../components/InviteBanner";
 import Picto from "../components/Picto/Picto";
-import {
-  getLocalXmtpConversationForTopic,
-  sendPendingMessages,
-} from "../components/XmtpState";
+import { getLocalXmtpConversationForTopic } from "../components/XmtpState";
 import config from "../config";
 import {
   cleanupPendingConversations,
@@ -32,12 +35,12 @@ import {
   markConversationRead,
   markConversationReadUntil,
 } from "../data/helpers/conversations/upsertConversations";
-import { saveMessages } from "../data/helpers/messages";
 import {
   useChatStore,
   useSettingsStore,
   useUserStore,
 } from "../data/store/accountsStore";
+import { XmtpConversationWithUpdate } from "../data/store/chatStore";
 import { userExists } from "../utils/api";
 import {
   backgroundColor,
@@ -47,10 +50,11 @@ import {
   textSecondaryColor,
 } from "../utils/colors";
 import { getAddressForPeer } from "../utils/eth";
+import { eventEmitter } from "../utils/events";
 import { lastValueInMap } from "../utils/map";
 import { pick } from "../utils/objects";
 import { sentryTrackMessage } from "../utils/sentry";
-import { getTitleFontScale } from "../utils/str";
+import { getTitleFontScale, TextInputWithValue } from "../utils/str";
 import { isOnXmtp } from "../utils/xmtp";
 import { NavigationParamList } from "./Main";
 
@@ -186,11 +190,11 @@ const Conversation = ({
     ? !!blockedPeers[conversation.peerAddress.toLowerCase()]
     : false;
 
-  const textInputRef = useRef<TextInput>();
+  const textInputRef = useRef<TextInputWithValue>();
 
   const messageToPrefill =
     route.params.message || conversation?.messageDraft || "";
-  const [inputValue, setInputValue] = useState(messageToPrefill);
+
   const focusOnLayout = useRef(false);
   const chatLayoutDone = useRef(false);
   const alreadyAutomaticallyFocused = useRef(false);
@@ -219,7 +223,7 @@ const Conversation = ({
     });
 
     return unsubscribe;
-  }, [messageToPrefill, navigation, route.params.focus]);
+  }, [navigation, route.params.focus]);
 
   const styles = getStyles(colorScheme);
   const [showInvite, setShowInvite] = useState({
@@ -254,7 +258,7 @@ const Conversation = ({
 
   const inviteToConverse = useCallback(() => {
     const inviteText = `I am using Converse, the fastest XMTP client, as my web3 messaging app. You can download the app here: https://${config.websiteDomain}/`;
-    setInputValue(inviteText);
+    eventEmitter.emit("setCurrentConversationInputValue", inviteText);
     textInputRef.current?.focus();
     setShowInvite({ show: true, banner: false });
     AsyncStorage.setItem(`converse-invited-${peerAddress}`, "true");
@@ -325,49 +329,15 @@ const Conversation = ({
     }
   }, [conversation]);
 
-  const sendMessage = useCallback(
-    async (
-      content: string,
-      contentType = "xmtp.org/text:1.0",
-      contentFallback = undefined as string | undefined
-    ) => {
-      if (!conversation) return;
-      if (contentType === "xmtp.org/text:1.0") {
-        setInputValue("");
-      }
-      const messageId = uuid.v4().toString();
-      const sentAtTime = new Date();
-      const isV1Conversation = conversation.topic.startsWith("/xmtp/0/dm-");
-      // Save to DB immediatly
-      await saveMessages(
-        [
-          {
-            id: messageId,
-            senderAddress: userAddress || "",
-            sent: sentAtTime.getTime(),
-            content,
-            status: "sending",
-            sentViaConverse: !isV1Conversation, // V1 Convo don't support the sentViaConverse feature
-            contentType,
-            contentFallback,
-          },
-        ],
-        conversation.topic
-      );
-      // Then send for real if conversation exists
-      if (!conversation.pending) {
-        sendPendingMessages();
-      }
-    },
-    [conversation, userAddress]
-  );
-
   const onLeaveScreen = useCallback(async () => {
-    if (!conversation) return;
+    if (!conversation || !textInputRef.current) return;
     await markConversationRead(conversation);
     await cleanupPendingConversations();
-    setConversationMessageDraft(conversation.topic, inputValue);
-  }, [conversation, inputValue, setConversationMessageDraft]);
+    setConversationMessageDraft(
+      conversation.topic,
+      textInputRef.current.currentValue
+    );
+  }, [conversation, setConversationMessageDraft]);
 
   useEffect(() => {
     const unsubscribe = navigation.addListener("beforeRemove", onLeaveScreen);
@@ -385,21 +355,42 @@ const Conversation = ({
           onClickHide={hideInviteBanner}
         />
       )}
-      <ConverseChat
-        conversation={conversation}
-        xmtpAddress={userAddress}
-        setInputValue={setInputValue}
-        inputValue={inputValue}
-        inputRef={textInputRef}
-        sendMessage={sendMessage}
-        isBlockedPeer={isBlockedPeer}
-        onReadyToFocus={onReadyToFocus}
-      />
+      <ConversationContext.Provider
+        value={{
+          conversation,
+          messageToPrefill,
+          inputRef: textInputRef,
+          isBlockedPeer,
+          onReadyToFocus,
+        }}
+      >
+        <ConverseChat />
+      </ConversationContext.Provider>
     </View>
   );
 };
 
 export default Conversation;
+
+type ConversationContextType = {
+  conversation?: XmtpConversationWithUpdate;
+  inputRef: MutableRefObject<TextInputWithValue | undefined>;
+  isBlockedPeer: boolean;
+  onReadyToFocus: () => void;
+  messageToPrefill: string;
+};
+
+export const ConversationContext = createContext<ConversationContextType>({
+  conversation: undefined,
+  inputRef: createRef() as MutableRefObject<TextInputWithValue | undefined>,
+  isBlockedPeer: false,
+  onReadyToFocus: () => {},
+  messageToPrefill: "",
+});
+
+export const useConversationContext = <K extends keyof ConversationContextType>(
+  keys: K[]
+) => useContextSelector(ConversationContext, (s) => pick(s, keys));
 
 const getStyles = (colorScheme: ColorSchemeName) =>
   StyleSheet.create({
