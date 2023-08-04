@@ -134,6 +134,7 @@
     "git-is-clean": "^3.0.1",
     "husky": "^8.0.2",
     "lint-staged": "^13.1.0",
+    "lodash": "^4.17.21",
     "metro-minify-terser": "^0.74.0",
     "metro-react-native-babel-preset": "^0.74.0",
     "nanoid": "^3.0.0",
