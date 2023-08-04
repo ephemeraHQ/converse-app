@@ -1,4 +1,6 @@
+import { sentryTrackMessage } from "../../../utils/sentry";
 import { profileRepository } from "../../db";
+import { Profile } from "../../db/entities/profileEntity";
 import { ProfileSocials } from "../../store/profilesStore";
 
 export const loadProfilesByAddress = async () => {
@@ -9,7 +11,7 @@ export const loadProfilesByAddress = async () => {
   profiles.forEach(
     (p) =>
       (profileByAddress[p.address] = {
-        socials: p.getSocials(),
+        socials: getSocials(p),
         updatedAt: p.updatedAt,
       })
   );
@@ -18,3 +20,15 @@ export const loadProfilesByAddress = async () => {
 
 export const loadProfileByAddress = async (address: string) =>
   profileRepository.findOne({ where: { address } });
+
+export const getSocials = (profileEntity: Profile): ProfileSocials => {
+  try {
+    const parsed = JSON.parse(profileEntity.socials);
+    return parsed;
+  } catch (error) {
+    const data = { error, socials: profileEntity.socials };
+    console.log(data);
+    sentryTrackMessage("SOCIALS_PARSING_ERROR", data);
+    return {};
+  }
+};

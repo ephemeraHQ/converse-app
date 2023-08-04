@@ -7,7 +7,7 @@ import {
   Index,
 } from "typeorm";
 
-import { type Conversation } from "./conversation";
+import { type Conversation } from "./conversationEntity";
 
 @Entity()
 export class Message {

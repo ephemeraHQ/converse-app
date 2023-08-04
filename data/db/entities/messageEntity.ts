@@ -7,10 +7,10 @@ import {
   Index,
 } from "typeorm/browser";
 
-import { type ConversationEntity } from "./conversationEntity";
+import { type Conversation } from "./conversationEntity";
 
 @Entity()
-export class MessageEntity {
+export class Message {
   // @ts-ignore
   public static name = "Message";
 
@@ -48,8 +48,8 @@ export class MessageEntity {
 
   @ManyToOne(
     "Conversation",
-    (conversation: ConversationEntity) => conversation.messages
+    (conversation: Conversation) => conversation.messages
   )
   @JoinColumn({ name: "conversationId" })
-  conversation?: ConversationEntity;
+  conversation?: Conversation;
 }

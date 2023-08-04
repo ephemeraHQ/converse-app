@@ -2,7 +2,7 @@ import { ContentTypeReaction } from "@xmtp/content-type-reaction";
 import { ContentTypeRemoteAttachment } from "@xmtp/content-type-remote-attachment";
 import { useEffect, useRef } from "react";
 
-import { MessageEntity } from "../data/db/entities/messageEntity";
+import { Message } from "../data/db/entities/messageEntity";
 import { getPendingConversationsToCreate } from "../data/helpers/conversations/pendingConversations";
 import {
   getMessagesToSend,
@@ -120,7 +120,7 @@ export const sendPendingMessages = async () => {
       [messageId: string]: {
         newMessageId: string;
         newMessageSent: number;
-        message: MessageEntity;
+        message: Message;
       };
     } = {};
     for (const message of messagesToSend) {

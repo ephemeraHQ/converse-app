@@ -1,8 +1,8 @@
 import "reflect-metadata";
 
 import { getLensHandleFromConversationIdAndPeer } from "../utils/lens";
-import { ConversationEntity } from "./db/entities/conversationEntity";
-import { MessageEntity } from "./db/entities/messageEntity";
+import { Conversation } from "./db/entities/conversationEntity";
+import { Message } from "./db/entities/messageEntity";
 import { XmtpConversation, XmtpMessage } from "./store/chatStore";
 import { ProfileSocials } from "./store/profilesStore";
 
@@ -11,7 +11,7 @@ import { ProfileSocials } from "./store/profilesStore";
 export const xmtpMessageToDb = (
   xmtpMessage: XmtpMessage,
   conversationTopic: string
-): MessageEntity => ({
+): Message => ({
   id: xmtpMessage.id,
   senderAddress: xmtpMessage.senderAddress,
   sent: xmtpMessage.sent,
@@ -25,7 +25,7 @@ export const xmtpMessageToDb = (
   // filled by other methods
 });
 
-export const xmtpMessageFromDb = (message: MessageEntity): XmtpMessage => ({
+export const xmtpMessageFromDb = (message: Message): XmtpMessage => ({
   id: message.id,
   senderAddress: message.senderAddress,
   sent: message.sent,
@@ -39,7 +39,7 @@ export const xmtpMessageFromDb = (message: MessageEntity): XmtpMessage => ({
 
 export const xmtpConversationToDb = (
   xmtpConversation: XmtpConversation
-): ConversationEntity => ({
+): Conversation => ({
   topic: xmtpConversation.topic,
   peerAddress: xmtpConversation.peerAddress,
   createdAt: xmtpConversation.createdAt,
@@ -52,7 +52,7 @@ export const xmtpConversationToDb = (
 });
 
 export const xmtpConversationFromDb = (
-  dbConversation: ConversationEntity,
+  dbConversation: Conversation,
   socials?: ProfileSocials
 ): XmtpConversation => {
   let context = undefined;

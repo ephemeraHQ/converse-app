@@ -1,12 +1,13 @@
 import { Index, Entity, Column, PrimaryColumn, OneToMany } from "typeorm";
 
-import { type Message } from "./message";
+import { type Message } from "./messageEntity";
 
 @Entity()
 export class Conversation {
   @PrimaryColumn("text")
   topic!: string;
 
+  @Index()
   @Column("boolean", { default: false })
   pending!: boolean;
 
