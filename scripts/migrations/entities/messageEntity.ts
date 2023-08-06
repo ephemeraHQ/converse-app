@@ -45,7 +45,8 @@ export class Message {
 
   @ManyToOne(
     "Conversation",
-    (conversation: Conversation) => conversation.messages
+    (conversation: Conversation) => conversation.messages,
+    { createForeignKeyConstraints: false }
   )
   @JoinColumn({ name: "conversationId" })
   conversation?: Conversation;
