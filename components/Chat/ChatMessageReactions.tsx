@@ -1,6 +1,5 @@
 import { useCallback } from "react";
 import {
-  ColorSchemeName,
   StyleSheet,
   Text,
   TouchableWithoutFeedback,
@@ -36,7 +35,7 @@ type Props = {
 export default function ChatMessageReactions({ message, reactions }: Props) {
   const { conversation } = useConversationContext(["conversation"]);
   const colorScheme = useColorScheme();
-  const styles = getStyles(colorScheme);
+  const styles = useStyles();
   const userAddress = useUserStore((s) => s.userAddress);
   const profiles = useProfilesStore((state) => state.profiles);
   const reactionsList = Object.values(reactions).sort(
@@ -109,8 +108,9 @@ export default function ChatMessageReactions({ message, reactions }: Props) {
   );
 }
 
-const getStyles = (colorScheme: ColorSchemeName) =>
-  StyleSheet.create({
+const useStyles = () => {
+  const colorScheme = useColorScheme();
+  return StyleSheet.create({
     reactionsWrapper: {
       flexBasis: "100%",
       flexDirection: "row",
@@ -136,3 +136,4 @@ const getStyles = (colorScheme: ColorSchemeName) =>
       marginLeft: 5,
     },
   });
+};

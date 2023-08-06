@@ -7,7 +7,6 @@ import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
   StyleSheet,
   Text,
-  ColorSchemeName,
   useColorScheme,
   Platform,
   AppState,
@@ -44,7 +43,7 @@ export default function OnboardingScreen() {
   );
   const setEphemeralAccount = useSettingsStore((s) => s.setEphemeralAccount);
   const colorScheme = useColorScheme();
-  const styles = getStyles(colorScheme);
+  const styles = useStyles();
 
   const [isLoading, setLoading] = useState(false);
   const [connectWithSeedPhrase, setConnectWithSeedPhrase] = useState(false);
@@ -435,8 +434,9 @@ export default function OnboardingScreen() {
   );
 }
 
-const getStyles = (colorScheme: ColorSchemeName) =>
-  StyleSheet.create({
+const useStyles = () => {
+  const colorScheme = useColorScheme();
+  return StyleSheet.create({
     sign: {
       marginBottom: 21,
       marginTop: 21,
@@ -466,3 +466,4 @@ const getStyles = (colorScheme: ColorSchemeName) =>
       textDecorationLine: "underline",
     },
   });
+};

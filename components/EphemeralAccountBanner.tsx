@@ -3,7 +3,6 @@ import React, {
   StyleSheet,
   View,
   Text,
-  ColorSchemeName,
   Platform,
 } from "react-native";
 
@@ -15,8 +14,7 @@ import {
 } from "../utils/colors";
 
 export default function EphemeralAccountBanner() {
-  const colorScheme = useColorScheme();
-  const styles = getStyles(colorScheme);
+  const styles = useStyles();
   return (
     <View style={styles.demoAccountBanner}>
       <View style={styles.demoAccountBannerLeft}>
@@ -30,8 +28,9 @@ export default function EphemeralAccountBanner() {
   );
 }
 
-const getStyles = (colorScheme: ColorSchemeName) =>
-  StyleSheet.create({
+const useStyles = () => {
+  const colorScheme = useColorScheme();
+  return StyleSheet.create({
     demoAccountBanner: {
       width: "100%",
       borderBottomColor: itemSeparatorColor(colorScheme),
@@ -72,3 +71,4 @@ const getStyles = (colorScheme: ColorSchemeName) =>
       fontWeight: "400",
     },
   });
+};

@@ -1,13 +1,6 @@
 import * as Linking from "expo-linking";
 import React from "react";
-import {
-  View,
-  StyleSheet,
-  Text,
-  useColorScheme,
-  ColorSchemeName,
-  Platform,
-} from "react-native";
+import { View, StyleSheet, Text, useColorScheme, Platform } from "react-native";
 
 import Button from "../components/Button/Button";
 import Picto from "../components/Picto/Picto";
@@ -23,8 +16,7 @@ export default function NotificationsScreen() {
   const setNotificationsPermissionStatus = useAppStore(
     (s) => s.setNotificationsPermissionStatus
   );
-  const colorScheme = useColorScheme();
-  const styles = getStyles(colorScheme);
+  const styles = useStyles();
   return (
     <View style={styles.notifications}>
       <Picto
@@ -66,8 +58,9 @@ export default function NotificationsScreen() {
   );
 }
 
-const getStyles = (colorScheme: ColorSchemeName) =>
-  StyleSheet.create({
+const useStyles = () => {
+  const colorScheme = useColorScheme();
+  return StyleSheet.create({
     notifications: {
       flex: 1,
       alignItems: "center",
@@ -103,3 +96,4 @@ const getStyles = (colorScheme: ColorSchemeName) =>
       marginTop: 21,
     },
   });
+};

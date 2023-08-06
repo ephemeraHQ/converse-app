@@ -2,10 +2,10 @@ import { ReactNode } from "react";
 import {
   View,
   useColorScheme,
-  ColorSchemeName,
   StyleSheet,
   Text,
   Platform,
+  ColorSchemeName,
 } from "react-native";
 
 import MessageTail from "../../assets/message-tail.svg";
@@ -18,6 +18,7 @@ import {
   textSecondaryColor,
 } from "../../utils/colors";
 import { getRelativeDate } from "../../utils/date";
+import { LimitedMap } from "../../utils/objects";
 import { getMessageReactions } from "../../utils/reactions";
 import ClickableText from "../ClickableText";
 import ChatAttachmentBubble from "./ChatAttachmentBubble";
@@ -34,11 +35,11 @@ export type MessageToDisplay = XmtpMessage & {
 
 type Props = {
   message: MessageToDisplay;
+  colorScheme: ColorSchemeName;
 };
 
-export default function ChatMessage({ message }: Props) {
-  const colorScheme = useColorScheme();
-  const styles = getStyles(colorScheme);
+function ChatMessage({ message, colorScheme }: Props) {
+  const styles = useStyles();
 
   const metadata = (
     <ChatMessageMetadata message={message} white={message.fromMe} />
@@ -125,8 +126,53 @@ export default function ChatMessage({ message }: Props) {
   );
 }
 
-const getStyles = (colorScheme: ColorSchemeName) =>
-  StyleSheet.create({
+// We use a cache for chat messages so that it doesn't rerender too often.
+// Indeed, since we use an inverted FlashList for chat, when a new message
+// arrives it is pushed at the BEGINNING of the array, and FlashList internals
+// rerenders a bunch of messages which can have an impact on performance.
+// With this LimitedMap we keep 50 rendered messages in RAM for better perf.
+
+type RenderedChatMessage = {
+  renderedMessage: JSX.Element;
+  message: MessageToDisplay;
+  colorScheme: ColorSchemeName;
+};
+
+const renderedMessages = new LimitedMap<string, RenderedChatMessage>(50);
+
+export default function CachedChatMessage({ message, colorScheme }: Props) {
+  const keysChangesToRerender: (keyof MessageToDisplay)[] = [
+    "id",
+    "dateChange",
+    "hasNextMessageInSeries",
+    "hasPreviousMessageInSeries",
+    "reactions",
+    "sent",
+    "status",
+  ];
+  const alreadyRenderedMessage = renderedMessages.get(message.id);
+  const shouldRerender =
+    !alreadyRenderedMessage ||
+    alreadyRenderedMessage.colorScheme !== colorScheme ||
+    keysChangesToRerender.some(
+      (k) => message[k] !== alreadyRenderedMessage.message[k]
+    );
+  if (shouldRerender) {
+    const renderedMessage = ChatMessage({ message, colorScheme });
+    renderedMessages.set(message.id, {
+      message,
+      renderedMessage,
+      colorScheme,
+    });
+    return renderedMessage;
+  } else {
+    return alreadyRenderedMessage.renderedMessage;
+  }
+}
+
+const useStyles = () => {
+  const colorScheme = useColorScheme();
+  return StyleSheet.create({
     messageRow: {
       flexDirection: "row",
       paddingHorizontal: Platform.OS === "android" ? 10 : 20,
@@ -185,3 +231,4 @@ const getStyles = (colorScheme: ColorSchemeName) =>
       right: 12,
     },
   });
+};

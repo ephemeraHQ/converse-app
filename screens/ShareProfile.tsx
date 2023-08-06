@@ -6,7 +6,6 @@ import {
   Text,
   Button,
   StyleSheet,
-  ColorSchemeName,
   useColorScheme,
   Share,
   Platform,
@@ -46,7 +45,7 @@ export default function ShareProfileScreen({
         ),
     });
   }, [navigation]);
-  const styles = getStyles(colorScheme);
+  const styles = useStyles();
   const profileUrl = `https://${config.websiteDomain}/dm/${
     mainIdentity || userAddress
   }`;
@@ -82,8 +81,9 @@ export default function ShareProfileScreen({
   );
 }
 
-const getStyles = (colorScheme: ColorSchemeName) =>
-  StyleSheet.create({
+const useStyles = () => {
+  const colorScheme = useColorScheme();
+  return StyleSheet.create({
     shareProfile: {
       flex: 1,
       backgroundColor: backgroundColor(colorScheme),
@@ -112,3 +112,4 @@ const getStyles = (colorScheme: ColorSchemeName) =>
       marginTop: 31,
     },
   });
+};

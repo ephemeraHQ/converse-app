@@ -1,5 +1,4 @@
 import {
-  ColorSchemeName,
   Platform,
   StyleSheet,
   useColorScheme,
@@ -39,8 +38,7 @@ export default function OnboardingComponent({
   primaryButtonAction,
   keyboardVerticalOffset,
 }: Props) {
-  const colorScheme = useColorScheme();
-  const styles = getStyles(colorScheme);
+  const styles = useStyles();
 
   return (
     <KeyboardAvoidingView
@@ -92,8 +90,9 @@ export default function OnboardingComponent({
   );
 }
 
-const getStyles = (colorScheme: ColorSchemeName) =>
-  StyleSheet.create({
+const useStyles = () => {
+  const colorScheme = useColorScheme();
+  return StyleSheet.create({
     onboardingContent: {
       minHeight: "100%",
       alignItems: "center",
@@ -152,3 +151,4 @@ const getStyles = (colorScheme: ColorSchemeName) =>
       marginTop: "auto",
     },
   });
+};

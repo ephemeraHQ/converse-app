@@ -1,5 +1,4 @@
 import {
-  ColorSchemeName,
   useColorScheme,
   StyleSheet,
   Text,
@@ -33,7 +32,7 @@ export default function ChatPlaceholder({ messagesCount }: Props) {
   const { conversation, isBlockedPeer, onReadyToFocus } =
     useConversationContext(["conversation", "isBlockedPeer", "onReadyToFocus"]);
   const colorScheme = useColorScheme();
-  const styles = getStyles(colorScheme);
+  const styles = useStyles();
   const setBlockedPeerStatus = useSettingsStore((s) => s.setBlockedPeerStatus);
   const recommendationData = useRecommendationsStore((s) =>
     conversation?.peerAddress ? s.frens[conversation.peerAddress] : undefined
@@ -129,8 +128,9 @@ export default function ChatPlaceholder({ messagesCount }: Props) {
   );
 }
 
-const getStyles = (colorScheme: ColorSchemeName) =>
-  StyleSheet.create({
+const useStyles = () => {
+  const colorScheme = useColorScheme();
+  return StyleSheet.create({
     chatPlaceholder: {
       flex: 1,
       justifyContent: "center",
@@ -149,3 +149,4 @@ const getStyles = (colorScheme: ColorSchemeName) =>
       marginTop: 20,
     },
   });
+};

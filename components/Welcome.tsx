@@ -1,13 +1,6 @@
 import { useHeaderHeight } from "@react-navigation/elements";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import {
-  ColorSchemeName,
-  StyleSheet,
-  Text,
-  useColorScheme,
-  View,
-  Platform,
-} from "react-native";
+import { StyleSheet, Text, useColorScheme, View, Platform } from "react-native";
 
 import Ellipse from "../assets/ellipse.svg";
 import config from "../config";
@@ -24,7 +17,7 @@ export default function Welcome({ ctaOnly, navigation }: Props) {
   const frens = useRecommendationsStore((s) => s.frens);
   const headerHeight = useHeaderHeight();
   const colorScheme = useColorScheme();
-  const styles = getStyles(colorScheme);
+  const styles = useStyles();
   const frensCount = frens ? Object.keys(frens).length : 0;
   return (
     <View
@@ -90,8 +83,9 @@ export default function Welcome({ ctaOnly, navigation }: Props) {
   );
 }
 
-const getStyles = (colorScheme: ColorSchemeName) =>
-  StyleSheet.create({
+const useStyles = () => {
+  const colorScheme = useColorScheme();
+  return StyleSheet.create({
     welcome: {
       alignItems: "center",
       flex: 1,
@@ -133,3 +127,4 @@ const getStyles = (colorScheme: ColorSchemeName) =>
       fontWeight: "600",
     },
   });
+};

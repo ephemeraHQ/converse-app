@@ -11,7 +11,6 @@ import React, {
 } from "react";
 import {
   Alert,
-  ColorSchemeName,
   Platform,
   StyleSheet,
   TouchableOpacity,
@@ -225,7 +224,7 @@ const Conversation = ({
     return unsubscribe;
   }, [navigation, route.params.focus]);
 
-  const styles = getStyles(colorScheme);
+  const styles = useStyles();
   const [showInvite, setShowInvite] = useState({
     show: false,
     banner: false,
@@ -392,8 +391,9 @@ export const useConversationContext = <K extends keyof ConversationContextType>(
   keys: K[]
 ) => useContextSelector(ConversationContext, (s) => pick(s, keys));
 
-const getStyles = (colorScheme: ColorSchemeName) =>
-  StyleSheet.create({
+const useStyles = () => {
+  const colorScheme = useColorScheme();
+  return StyleSheet.create({
     container: {
       flex: 1,
     },
@@ -425,3 +425,4 @@ const getStyles = (colorScheme: ColorSchemeName) =>
     },
     title: headerTitleStyle(colorScheme),
   });
+};

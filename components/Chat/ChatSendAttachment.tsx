@@ -1,7 +1,6 @@
 import { StatusBar } from "expo-status-bar";
 import { useCallback, useEffect } from "react";
 import {
-  ColorSchemeName,
   Image,
   StyleSheet,
   useColorScheme,
@@ -25,7 +24,7 @@ import Picto from "../Picto/Picto";
 
 export default function ChatSendAttachment() {
   const colorScheme = useColorScheme();
-  const styles = getStyles(colorScheme);
+  const styles = useStyles();
   const { mediaPreview, setMediaPreview } = useAppStore((s) =>
     pick(s, ["mediaPreview", "setMediaPreview"])
   );
@@ -113,8 +112,9 @@ export default function ChatSendAttachment() {
   );
 }
 
-const getStyles = (colorScheme: ColorSchemeName) =>
-  StyleSheet.create({
+const useStyles = () => {
+  const colorScheme = useColorScheme();
+  return StyleSheet.create({
     previewContainer: {
       position: "absolute",
       top: 0,
@@ -158,3 +158,4 @@ const getStyles = (colorScheme: ColorSchemeName) =>
       marginBottom: 6,
     },
   });
+};
