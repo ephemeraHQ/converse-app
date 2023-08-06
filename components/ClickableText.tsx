@@ -1,13 +1,7 @@
 import * as Clipboard from "expo-clipboard";
 import * as Linking from "expo-linking";
 import { useCallback } from "react";
-import {
-  ColorSchemeName,
-  StyleProp,
-  StyleSheet,
-  TextStyle,
-  useColorScheme,
-} from "react-native";
+import { StyleProp, StyleSheet, TextStyle, useColorScheme } from "react-native";
 import ParsedText from "react-native-parsed-text";
 
 import { actionSheetColors } from "../utils/colors";
@@ -30,7 +24,7 @@ type Props = {
 
 export default function ClickableText({ children, style }: Props) {
   const colorScheme = useColorScheme();
-  const styles = getStyles(colorScheme);
+  const styles = useStyles();
   const handleEmailPress = useCallback((email: string) => {
     try {
       Linking.openURL(`mailto:${email}`);
@@ -140,7 +134,8 @@ export default function ClickableText({ children, style }: Props) {
   );
 }
 
-const getStyles = (colorScheme: ColorSchemeName) =>
-  StyleSheet.create({
+const useStyles = () => {
+  return StyleSheet.create({
     clickableText: { textDecorationLine: "underline" },
   });
+};

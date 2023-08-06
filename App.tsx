@@ -5,12 +5,7 @@ import { ActionSheetProvider } from "@expo/react-native-action-sheet";
 import { Ethereum } from "@thirdweb-dev/chains";
 import { coinbaseWallet, ThirdwebProvider } from "@thirdweb-dev/react-native";
 import React from "react";
-import {
-  ColorSchemeName,
-  StyleSheet,
-  useColorScheme,
-  View,
-} from "react-native";
+import { StyleSheet, useColorScheme, View } from "react-native";
 import "./utils/splash/splash";
 import { KeyboardProvider } from "react-native-keyboard-controller";
 import { Provider as PaperProvider } from "react-native-paper";
@@ -44,7 +39,7 @@ Sentry.init({
 
 export default function App() {
   const colorScheme = useColorScheme();
-  const styles = getStyles(colorScheme);
+  const styles = useStyles();
   useRecentPicksPersistence({
     initialization: () =>
       JSON.parse(mmkv.getString(RECENT_EMOJI_STORAGE_KEY) || DEFAULT_EMOJIS),
@@ -87,8 +82,9 @@ export default function App() {
   );
 }
 
-const getStyles = (colorScheme: ColorSchemeName) =>
-  StyleSheet.create({
+const useStyles = () => {
+  const colorScheme = useColorScheme();
+  return StyleSheet.create({
     safe: {
       flex: 1,
       backgroundColor: backgroundColor(colorScheme),
@@ -98,3 +94,4 @@ const getStyles = (colorScheme: ColorSchemeName) =>
       height: 0,
     },
   });
+};

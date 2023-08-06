@@ -1,6 +1,5 @@
 import { ReactElement } from "react";
 import {
-  ColorSchemeName,
   ColorValue,
   StyleProp,
   StyleSheet,
@@ -31,8 +30,7 @@ type Props = {
 };
 
 export default function TableView({ title, items, style }: Props) {
-  const colorScheme = useColorScheme();
-  const styles = getStyles(colorScheme);
+  const styles = useStyles();
   const sectionContent = items.map((i) => (
     <List.Item
       title={i.title}
@@ -58,8 +56,9 @@ export default function TableView({ title, items, style }: Props) {
   );
 }
 
-const getStyles = (colorScheme: ColorSchemeName) =>
-  StyleSheet.create({
+const useStyles = () => {
+  const colorScheme = useColorScheme();
+  return StyleSheet.create({
     sectionTitle: {
       marginBottom: -8,
       color: textSecondaryColor(colorScheme),
@@ -67,3 +66,4 @@ const getStyles = (colorScheme: ColorSchemeName) =>
       fontWeight: "500",
     },
   });
+};

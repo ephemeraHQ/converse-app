@@ -1,20 +1,12 @@
 import { useHeaderHeight } from "@react-navigation/elements";
-import {
-  ColorSchemeName,
-  StyleSheet,
-  Text,
-  useColorScheme,
-  View,
-  Platform,
-} from "react-native";
+import { StyleSheet, Text, useColorScheme, View, Platform } from "react-native";
 
 import { backgroundColor, textPrimaryColor } from "../utils/colors";
 import ActivityIndicator from "./ActivityIndicator/ActivityIndicator";
 
 export default function InitialLoad() {
   const headerHeight = useHeaderHeight();
-  const colorScheme = useColorScheme();
-  const styles = getStyles(colorScheme);
+  const styles = useStyles();
   return (
     <View
       style={[
@@ -32,8 +24,9 @@ export default function InitialLoad() {
   );
 }
 
-const getStyles = (colorScheme: ColorSchemeName) =>
-  StyleSheet.create({
+const useStyles = () => {
+  const colorScheme = useColorScheme();
+  return StyleSheet.create({
     initialLoad: {
       alignItems: "center",
       flex: 1,
@@ -60,3 +53,4 @@ const getStyles = (colorScheme: ColorSchemeName) =>
       }),
     },
   });
+};

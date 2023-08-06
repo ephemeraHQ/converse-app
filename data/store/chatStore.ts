@@ -168,16 +168,19 @@ export const initChatStore = (account: string) => {
             }),
           setMessages: (topic, messagesToSet) =>
             set((state) => {
+              let isUpdated = false;
               const newState = {
                 ...state,
-                lastUpdateAt: now(),
               };
-              newState.conversations[topic] = newState.conversations[topic] || {
-                messages: new Map(),
-                topic,
-              };
+              if (!newState.conversations[topic]) {
+                newState.conversations[topic] = {
+                  messages: new Map(),
+                  topic,
+                } as XmtpConversationWithUpdate;
+                isUpdated = true;
+              }
+
               const conversation = newState.conversations[topic];
-              conversation.lastUpdateAt = now();
               for (const message of messagesToSet) {
                 // Default message status is sent
                 if (!message.status) message.status = "sent";
@@ -188,10 +191,19 @@ export const initChatStore = (account: string) => {
                     ...message,
                     reactions: alreadyMessage.reactions,
                   };
+                  // Existing message, let's see if we can consider it's updated
+                  isUpdated = isMessageUpdated(alreadyMessage, newMessage);
                   conversation.messages.set(message.id, newMessage);
                 } else {
+                  // New message, it's updated
+                  isUpdated = true;
                   conversation.messages.set(message.id, message);
                 }
+              }
+
+              if (isUpdated) {
+                newState.lastUpdateAt = now();
+                newState.conversations[topic].lastUpdateAt = now();
               }
 
               return newState;
@@ -306,4 +318,23 @@ export const initChatStore = (account: string) => {
     )
   );
   return recommendationsStore;
+};
+
+export const isMessageUpdated = (
+  oldMessage: XmtpMessage,
+  newMessage: XmtpMessage
+) => {
+  const keysChangesToRerender: (keyof XmtpMessage)[] = [
+    "id",
+    "reactions",
+    "sent",
+    "status",
+  ];
+  return keysChangesToRerender.some((k) => {
+    const keyUpdated = oldMessage[k] !== newMessage[k];
+    if (keyUpdated) {
+      console.log(`Key ${k} updated for message ${oldMessage.id}`);
+    }
+    return keyUpdated;
+  });
 };

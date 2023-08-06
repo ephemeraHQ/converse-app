@@ -4,7 +4,6 @@ import * as Linking from "expo-linking";
 import React, { useCallback, useState } from "react";
 import {
   StyleSheet,
-  ColorSchemeName,
   ScrollView,
   useColorScheme,
   Platform,
@@ -42,7 +41,7 @@ export default function ProfileScreen({
 }: NativeStackScreenProps<NavigationParamList, "Profile">) {
   const userAddress = useUserStore((s) => s.userAddress);
   const colorScheme = useColorScheme();
-  const styles = getStyles(colorScheme);
+  const styles = useStyles();
   const [copiedAddresses, setCopiedAddresses] = useState<{
     [address: string]: boolean;
   }>({});
@@ -246,8 +245,9 @@ export default function ProfileScreen({
   );
 }
 
-const getStyles = (colorScheme: ColorSchemeName) =>
-  StyleSheet.create({
+const useStyles = () => {
+  const colorScheme = useColorScheme();
+  return StyleSheet.create({
     profile: {
       backgroundColor: backgroundColor(colorScheme),
     },
@@ -256,3 +256,4 @@ const getStyles = (colorScheme: ColorSchemeName) =>
     },
     tableView: {},
   });
+};

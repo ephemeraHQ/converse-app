@@ -1,6 +1,5 @@
 import { ReactElement } from "react";
 import {
-  ColorSchemeName,
   ColorValue,
   StyleProp,
   StyleSheet,
@@ -40,7 +39,7 @@ type Props = {
 
 export default function TableView({ title, items, style }: Props) {
   const colorScheme = useColorScheme();
-  const styles = getStyles(colorScheme);
+  const styles = useStyles();
   const separatorInsetLeft = items.length > 0 && !!items[0].leftView ? 53 : 15;
   return (
     <RNTableView style={style}>
@@ -88,8 +87,8 @@ export default function TableView({ title, items, style }: Props) {
   );
 }
 
-const getStyles = (colorScheme: ColorSchemeName) =>
-  StyleSheet.create({
+const useStyles = () => {
+  return StyleSheet.create({
     itemTitle: {
       fontSize: 17,
     },
@@ -98,3 +97,4 @@ const getStyles = (colorScheme: ColorSchemeName) =>
       marginBottom: 5,
     },
   });
+};

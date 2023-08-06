@@ -1,13 +1,7 @@
 import { FlashList } from "@shopify/flash-list";
 import differenceInCalendarDays from "date-fns/differenceInCalendarDays";
-import React, { useState, useEffect, useCallback, useRef } from "react";
-import {
-  View,
-  useColorScheme,
-  StyleSheet,
-  ColorSchemeName,
-  FlatList,
-} from "react-native";
+import React, { useCallback, useRef, useMemo } from "react";
+import { View, useColorScheme, StyleSheet, FlatList } from "react-native";
 import Reanimated, {
   useAnimatedStyle,
   useSharedValue,
@@ -30,7 +24,7 @@ import {
 import { getProfileData } from "../../utils/profile";
 import { Recommendation } from "../Recommendations";
 import ChatInput from "./ChatInput";
-import ChatMessage, { MessageToDisplay } from "./ChatMessage";
+import CachedChatMessage, { MessageToDisplay } from "./ChatMessage";
 import ChatPlaceholder from "./ChatPlaceholder";
 
 const AnimatedView = Reanimated.createAnimatedComponent(View);
@@ -105,13 +99,12 @@ export default function Chat() {
     conversation?.peerAddress ? s.frens[conversation.peerAddress] : undefined
   );
   const colorScheme = useColorScheme();
-  const styles = getStyles(colorScheme);
-  const [listArray, setListArray] = useState(
-    getListArray(xmtpAddress, conversation)
+  const styles = useStyles();
+  const listArray = useMemo(
+    () => getListArray(xmtpAddress, conversation),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [xmtpAddress, conversation, conversation?.lastUpdateAt]
   );
-  useEffect(() => {
-    setListArray(getListArray(xmtpAddress, conversation));
-  }, [conversation, conversation?.lastUpdateAt, xmtpAddress]);
 
   const DEFAULT_INPUT_HEIGHT = 36;
   const chatInputHeight = useSharedValue(50);
@@ -171,7 +164,9 @@ export default function Chat() {
           </View>
         );
       } else {
-        return <ChatMessage message={item} />;
+        return (
+          <CachedChatMessage message={{ ...item }} colorScheme={colorScheme} />
+        );
       }
     },
     [
@@ -179,6 +174,7 @@ export default function Chat() {
       peerSocials,
       recommendationsData,
       styles.inChatRecommendations,
+      colorScheme,
     ]
   );
   const keyExtractor = useCallback((item: MessageToDisplay) => item.id, []);
@@ -251,8 +247,9 @@ export default function Chat() {
   );
 }
 
-const getStyles = (colorScheme: ColorSchemeName) =>
-  StyleSheet.create({
+const useStyles = () => {
+  const colorScheme = useColorScheme();
+  return StyleSheet.create({
     chatContainer: {
       flex: 1,
       justifyContent: "flex-end",
@@ -279,3 +276,4 @@ const getStyles = (colorScheme: ColorSchemeName) =>
       marginBottom: 10,
     },
   });
+};

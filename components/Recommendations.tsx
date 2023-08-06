@@ -2,7 +2,6 @@ import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import * as Linking from "expo-linking";
 import { useCallback, useEffect } from "react";
 import {
-  ColorSchemeName,
   FlatList,
   Platform,
   StyleSheet,
@@ -46,8 +45,7 @@ export function Recommendation({
   navigation?: NativeStackNavigationProp<any>;
   embedInChat?: boolean;
 }) {
-  const colorScheme = useColorScheme();
-  const styles = getStyles(colorScheme);
+  const styles = useStyles();
   const socials = [
     ...lensHandles,
     ...farcasterUsernames.map((f) => `${f} on farcaster`),
@@ -150,9 +148,8 @@ export default function Recommendations({
       "updatedAt",
     ])
   );
-  const colorScheme = useColorScheme();
   const insets = useSafeAreaInsets();
-  const styles = getStyles(colorScheme);
+  const styles = useStyles();
 
   const openSignalList = useCallback(() => {
     Linking.openURL(
@@ -296,8 +293,9 @@ export default function Recommendations({
   );
 }
 
-const getStyles = (colorScheme: ColorSchemeName) =>
-  StyleSheet.create({
+const useStyles = () => {
+  const colorScheme = useColorScheme();
+  return StyleSheet.create({
     emoji: {
       textAlign: "center",
       marginTop: 30,
@@ -448,3 +446,4 @@ const getStyles = (colorScheme: ColorSchemeName) =>
       }),
     },
   });
+};

@@ -3,7 +3,6 @@ import {
   View,
   TextInput,
   StyleSheet,
-  ColorSchemeName,
   useColorScheme,
   TouchableOpacity,
   Platform,
@@ -33,7 +32,7 @@ export default function ChatInput() {
   ]);
 
   const colorScheme = useColorScheme();
-  const styles = getStyles(colorScheme);
+  const styles = useStyles();
   const [inputValue, setInputValue] = useState(messageToPrefill);
 
   // We use an event emitter to receive actions to fill the input value
@@ -95,8 +94,9 @@ export default function ChatInput() {
   );
 }
 
-const getStyles = (colorScheme: ColorSchemeName) =>
-  StyleSheet.create({
+const useStyles = () => {
+  const colorScheme = useColorScheme();
+  return StyleSheet.create({
     chatInputContainer: {
       backgroundColor:
         Platform.OS === "android"
@@ -134,3 +134,4 @@ const getStyles = (colorScheme: ColorSchemeName) =>
       marginBottom: 6,
     },
   });
+};

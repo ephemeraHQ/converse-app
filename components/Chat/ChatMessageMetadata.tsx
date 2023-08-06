@@ -1,12 +1,6 @@
 import format from "date-fns/format";
 import React from "react";
-import {
-  ColorSchemeName,
-  StyleSheet,
-  Text,
-  useColorScheme,
-  View,
-} from "react-native";
+import { StyleSheet, Text, useColorScheme, View } from "react-native";
 
 import Checkmark from "../../assets/checkmark.svg";
 import Clock from "../../assets/clock.svg";
@@ -21,7 +15,7 @@ type Props = {
 
 export default function ChatMessageMetadata({ message, white }: Props) {
   const colorScheme = useColorScheme();
-  const styles = getStyles(colorScheme);
+  const styles = useStyles();
   return (
     <View style={styles.metadata}>
       <Text style={[styles.time, white ? styles.timeWhite : undefined]}>
@@ -58,8 +52,9 @@ export default function ChatMessageMetadata({ message, white }: Props) {
   );
 }
 
-const getStyles = (colorScheme: ColorSchemeName) =>
-  StyleSheet.create({
+const useStyles = () => {
+  const colorScheme = useColorScheme();
+  return StyleSheet.create({
     metadata: {
       paddingLeft: 5,
       height: 10,
@@ -82,3 +77,4 @@ const getStyles = (colorScheme: ColorSchemeName) =>
     },
     statusIcon: {},
   });
+};

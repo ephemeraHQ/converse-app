@@ -3,7 +3,6 @@ import mime from "mime";
 import prettyBytes from "pretty-bytes";
 import { useCallback, useEffect, useState } from "react";
 import {
-  ColorSchemeName,
   Image,
   Platform,
   StyleSheet,
@@ -28,7 +27,7 @@ type Props = {
 
 export default function ChatAttachmentBubble({ message }: Props) {
   const colorScheme = useColorScheme();
-  const styles = getStyles(colorScheme);
+  const styles = useStyles();
   const [attachment, setAttachment] = useState({
     loading: true,
     error: false,
@@ -320,8 +319,9 @@ export default function ChatAttachmentBubble({ message }: Props) {
   }
 }
 
-const getStyles = (colorScheme: ColorSchemeName) =>
-  StyleSheet.create({
+const useStyles = () => {
+  const colorScheme = useColorScheme();
+  return StyleSheet.create({
     imagePreview: {
       borderRadius: 18,
       width: "100%",
@@ -352,3 +352,4 @@ const getStyles = (colorScheme: ColorSchemeName) =>
       }),
     },
   });
+};

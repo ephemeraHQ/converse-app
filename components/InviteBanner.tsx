@@ -3,7 +3,6 @@ import React, {
   StyleSheet,
   View,
   Text,
-  ColorSchemeName,
   TouchableOpacity,
   Platform,
 } from "react-native";
@@ -25,7 +24,7 @@ type Props = {
 
 export default function InviteBanner({ onClickInvite, onClickHide }: Props) {
   const colorScheme = useColorScheme();
-  const styles = getStyles(colorScheme);
+  const styles = useStyles();
   return (
     <View style={styles.inviteBanner}>
       <View style={styles.inviteBannerLeft}>
@@ -56,8 +55,9 @@ export default function InviteBanner({ onClickInvite, onClickHide }: Props) {
   );
 }
 
-const getStyles = (colorScheme: ColorSchemeName) =>
-  StyleSheet.create({
+const useStyles = () => {
+  const colorScheme = useColorScheme();
+  return StyleSheet.create({
     inviteBanner: {
       ...Platform.select({
         default: {
@@ -107,3 +107,4 @@ const getStyles = (colorScheme: ColorSchemeName) =>
       marginLeft: 12,
     },
   });
+};

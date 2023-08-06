@@ -10,7 +10,6 @@ import {
   Text,
   TextInput,
   View,
-  ColorSchemeName,
   useColorScheme,
   Platform,
 } from "react-native";
@@ -241,7 +240,7 @@ export default function NewConversation({
   const inputRef = useRef<TextInput | null>(null);
   const initialFocus = useRef(false);
 
-  const styles = getStyles(colorScheme);
+  const styles = useStyles();
   const showRecommendations =
     !status.loading && value.length === 0 && recommendationsFrensCount > 0;
 
@@ -453,8 +452,9 @@ export default function NewConversation({
   );
 }
 
-const getStyles = (colorScheme: ColorSchemeName) =>
-  StyleSheet.create({
+const useStyles = () => {
+  const colorScheme = useColorScheme();
+  return StyleSheet.create({
     modal: {
       flex: 1,
       backgroundColor: backgroundColor(colorScheme),
@@ -523,3 +523,4 @@ const getStyles = (colorScheme: ColorSchemeName) =>
       }),
     },
   });
+};

@@ -5,7 +5,6 @@ import {
   Button,
   StyleSheet,
   View,
-  ColorSchemeName,
   useColorScheme,
   Platform,
 } from "react-native";
@@ -19,7 +18,6 @@ export default function ConverseMatchMaker({
   route,
   navigation,
 }: NativeStackScreenProps<NavigationParamList, "ConverseMatchMaker">) {
-  const colorScheme = useColorScheme();
   useEffect(() => {
     navigation.setOptions({
       headerLeft: () =>
@@ -36,7 +34,7 @@ export default function ConverseMatchMaker({
     });
   }, [navigation]);
 
-  const styles = getStyles(colorScheme);
+  const styles = useStyles();
 
   return (
     <View style={styles.modal}>
@@ -46,10 +44,12 @@ export default function ConverseMatchMaker({
   );
 }
 
-const getStyles = (colorScheme: ColorSchemeName) =>
-  StyleSheet.create({
+const useStyles = () => {
+  const colorScheme = useColorScheme();
+  return StyleSheet.create({
     modal: {
       flex: 1,
       backgroundColor: backgroundColor(colorScheme),
     },
   });
+};

@@ -8,7 +8,6 @@ import {
   StyleSheet,
   Text,
   Platform,
-  ColorSchemeName,
   Alert,
 } from "react-native";
 
@@ -53,7 +52,7 @@ export default function SeedPhraseConnect({
 }: Props) {
   const colorScheme = useColorScheme();
   const textInputRef = useRef<TextInput | null>(null);
-  const styles = getStyles(colorScheme);
+  const styles = useStyles();
 
   return (
     <>
@@ -111,8 +110,9 @@ export default function SeedPhraseConnect({
   );
 }
 
-const getStyles = (colorScheme: ColorSchemeName) =>
-  StyleSheet.create({
+const useStyles = () => {
+  const colorScheme = useColorScheme();
+  return StyleSheet.create({
     seedPhraseContainer: {
       width: "100%",
       paddingRight: 25,
@@ -142,3 +142,4 @@ const getStyles = (colorScheme: ColorSchemeName) =>
       textDecorationLine: "underline",
     },
   });
+};

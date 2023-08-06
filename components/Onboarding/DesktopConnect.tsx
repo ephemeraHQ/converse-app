@@ -1,13 +1,7 @@
 import { PrivateKey, decrypt } from "eciesjs";
 import * as Linking from "expo-linking";
 import { useEffect, useState } from "react";
-import {
-  ColorSchemeName,
-  StyleSheet,
-  useColorScheme,
-  Text,
-  Platform,
-} from "react-native";
+import { StyleSheet, useColorScheme, Text, Platform } from "react-native";
 
 import config from "../../config";
 import { clearDB } from "../../data/db";
@@ -33,8 +27,7 @@ export default function DesktopConnect() {
     useOnboardingStore((s) =>
       pick(s, ["desktopConnectSessionId", "setDesktopConnectSessionId"])
     );
-  const colorScheme = useColorScheme();
-  const styles = getStyles(colorScheme);
+  const styles = useStyles();
   const [localState, setLocalState] = useState({
     privateKey: "",
     publicKey: "",
@@ -165,8 +158,9 @@ export default function DesktopConnect() {
   );
 }
 
-const getStyles = (colorScheme: ColorSchemeName) =>
-  StyleSheet.create({
+const useStyles = () => {
+  const colorScheme = useColorScheme();
+  return StyleSheet.create({
     otp: {
       fontSize: 34,
       fontWeight: "700",
@@ -196,3 +190,4 @@ const getStyles = (colorScheme: ColorSchemeName) =>
       }),
     },
   });
+};

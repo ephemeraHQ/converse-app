@@ -6,7 +6,6 @@ import mime from "mime";
 import { useCallback, useEffect, useRef } from "react";
 import {
   Alert,
-  ColorSchemeName,
   TouchableOpacity,
   View,
   useColorScheme,
@@ -30,7 +29,7 @@ import { sendMessageToWebview } from "../XmtpWebview";
 export default function ChatAddAttachment() {
   const { conversation } = useConversationContext(["conversation"]);
   const colorScheme = useColorScheme();
-  const styles = getStyles(colorScheme);
+  const styles = useStyles();
   const { mediaPreview, setMediaPreview } = useAppStore((s) =>
     pick(s, ["mediaPreview", "setMediaPreview"])
   );
@@ -210,8 +209,8 @@ export default function ChatAddAttachment() {
   );
 }
 
-const getStyles = (colorScheme: ColorSchemeName) =>
-  StyleSheet.create({
+const useStyles = () => {
+  return StyleSheet.create({
     attachmentButton: {
       flex: 1,
       justifyContent: "center",
@@ -232,3 +231,4 @@ const getStyles = (colorScheme: ColorSchemeName) =>
       }),
     },
   });
+};

@@ -1,6 +1,5 @@
 import React from "react";
 import {
-  ColorSchemeName,
   GestureResponderEvent,
   Platform,
   PlatformColor,
@@ -36,7 +35,7 @@ export default function Button({
   allowFontScaling = true,
 }: Props) {
   const colorScheme = useColorScheme();
-  const styles = getStyles(colorScheme);
+  const styles = useStyles();
   const buttonStyle =
     variant === "primary"
       ? [styles.buttonPrimary]
@@ -77,8 +76,9 @@ export default function Button({
   );
 }
 
-const getStyles = (colorScheme: ColorSchemeName) =>
-  StyleSheet.create({
+const useStyles = () => {
+  const colorScheme = useColorScheme();
+  return StyleSheet.create({
     buttonPrimary: {
       backgroundColor: PlatformColor("systemBlue"),
       display: "flex",
@@ -130,3 +130,4 @@ const getStyles = (colorScheme: ColorSchemeName) =>
       marginRight: 15,
     },
   });
+};

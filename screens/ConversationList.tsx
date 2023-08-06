@@ -2,7 +2,6 @@ import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { FlashList } from "@shopify/flash-list";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
-  ColorSchemeName,
   Platform,
   PlatformColor,
   StyleSheet,
@@ -148,7 +147,7 @@ export default function ConversationList({
   route,
 }: NativeStackScreenProps<NavigationParamList, "Messages">) {
   const colorScheme = useColorScheme();
-  const styles = getStyles(colorScheme);
+  const styles = useStyles();
   const { initialLoadDoneOnce, conversations, lastUpdateAt } = useChatStore(
     (s) => pick(s, ["initialLoadDoneOnce", "conversations", "lastUpdateAt"])
   );
@@ -308,8 +307,9 @@ export default function ConversationList({
   );
 }
 
-const getStyles = (colorScheme: ColorSchemeName) =>
-  StyleSheet.create({
+const useStyles = () => {
+  const colorScheme = useColorScheme();
+  return StyleSheet.create({
     conversationList: {
       flex: 1,
       backgroundColor: backgroundColor(colorScheme),
@@ -320,3 +320,4 @@ const getStyles = (colorScheme: ColorSchemeName) =>
       lineHeight: 26,
     },
   });
+};
