@@ -46,6 +46,7 @@ export class Message {
   @ManyToOne(
     "Conversation",
     (conversation: Conversation) => conversation.messages,
+    // Disabling foreign key creation to be able to save messages from not-yet known conversations
     { createForeignKeyConstraints: false }
   )
   @JoinColumn({ name: "conversationId" })
