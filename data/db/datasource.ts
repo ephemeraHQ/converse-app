@@ -22,12 +22,13 @@ import { fixWrongForeignKey1690809735000 } from "./migrations/1690809735000-fixW
 import { removeForeignKeyForTesters1690989046000 } from "./migrations/1690989046000-removeForeignKeyForTesters";
 import { addIndexToPendingConversation1691154310694 } from "./migrations/1691154310694-addIndexToPendingConversation";
 import { addReferencedMessage1691397563214 } from "./migrations/1691397563214-addReferencedMessage";
-import { removeOldReactions1691404287922 } from "./migrations/1691404287922-removeOldReactions";
+import { removeOldReactions1691412759130 } from "./migrations/1691412759130-removeOldReactions";
 
 // We support SQLite from version 3.8.10.2 (embedded in Android 6.0 - SDK 23)
 // For supported methods see https://www.sqlite.org/changes.html
 // Upsert is not always supported (see ./upsert.ts)
-// ADD COLUMN supported (added in version 3.2.0)
+// ADD COLUMN supported (added in version 3.2.0 - 2005-03-21)
+// DROP COLUMN NOT SUPPORTED (added in version 3.35.0 - 2021-03-12)
 
 const dataSource = new DataSource({
   database: "converse",
@@ -53,7 +54,7 @@ const dataSource = new DataSource({
     removeForeignKeyForTesters1690989046000,
     addIndexToPendingConversation1691154310694,
     addReferencedMessage1691397563214,
-    removeOldReactions1691404287922,
+    removeOldReactions1691412759130,
   ],
   type: "expo",
   logging: true,

@@ -19,7 +19,7 @@ import { fixWrongForeignKey1690809735000 } from "../../data/db/migrations/169080
 import { removeForeignKeyForTesters1690989046000 } from "../../data/db/migrations/1690989046000-removeForeignKeyForTesters";
 import { addIndexToPendingConversation1691154310694 } from "../../data/db/migrations/1691154310694-addIndexToPendingConversation";
 import { addReferencedMessage1691397563214 } from "../../data/db/migrations/1691397563214-addReferencedMessage";
-import { removeOldReactions1691404287922 } from "../../data/db/migrations/1691404287922-removeOldReactions";
+import { removeOldReactions1691412759130 } from "../../data/db/migrations/1691412759130-removeOldReactions";
 import { Conversation } from "./entities/conversationEntity";
 import { Message } from "./entities/messageEntity";
 import { Profile } from "./entities/profileEntity";
@@ -47,7 +47,7 @@ const dataSource = new DataSource({
     removeForeignKeyForTesters1690989046000,
     addIndexToPendingConversation1691154310694,
     addReferencedMessage1691397563214,
-    removeOldReactions1691404287922,
+    removeOldReactions1691412759130,
   ],
   type: "sqlite",
 });
