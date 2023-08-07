@@ -54,5 +54,4 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   runtimeVersion: "exposdk:48.0.0",
   owner: "converse",
   jsEngine: "hermes",
-  plugins: ["sentry-expo"],
 });
