@@ -11,7 +11,7 @@ index 939110f..4165c67 100644
      android:fromXDelta="-100%"
      android:toXDelta="0%" />
 diff --git a/node_modules/react-native-screens/android/src/main/res/base/anim/rns_slide_in_from_right.xml b/node_modules/react-native-screens/android/src/main/res/base/anim/rns_slide_in_from_right.xml
-index 428eb9b..07156fa 100644
+index 428eb9b..b17bb22 100644
 --- a/node_modules/react-native-screens/android/src/main/res/base/anim/rns_slide_in_from_right.xml
 +++ b/node_modules/react-native-screens/android/src/main/res/base/anim/rns_slide_in_from_right.xml
 @@ -1,5 +1,6 @@
@@ -22,7 +22,6 @@ index 428eb9b..07156fa 100644
 +    android:duration="200"
      android:fromXDelta="100%"
      android:toXDelta="0%" />
-\ No newline at end of file
 diff --git a/node_modules/react-native-screens/android/src/main/res/base/anim/rns_slide_out_to_left.xml b/node_modules/react-native-screens/android/src/main/res/base/anim/rns_slide_out_to_left.xml
 index 400a202..15cc79e 100644
 --- a/node_modules/react-native-screens/android/src/main/res/base/anim/rns_slide_out_to_left.xml

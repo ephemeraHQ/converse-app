@@ -26,6 +26,7 @@ const defaultConfig = {
     },
   },
   thirdwebClientId: "fb80f0aa5ea6c07d74813e56c1ea53e5",
+  expoProjectId: "49a65fae-3895-4487-8e8a-5bd8bee3a401",
 };
 
 const isAndroid = Platform.OS === "android";

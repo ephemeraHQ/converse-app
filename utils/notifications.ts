@@ -1,6 +1,7 @@
 import * as Notifications from "expo-notifications";
 import { Platform } from "react-native";
 
+import config from "../config";
 import { saveMessages } from "../data/helpers/messages";
 import { XmtpConversation } from "../data/store/chatStore";
 import { buildUserInviteTopic } from "../vendor/xmtp-js/src/utils";
@@ -40,7 +41,7 @@ export const subscribeToNotifications = async (
     buildUserInviteTopic(address || ""),
   ];
   const [expoTokenQuery, nativeTokenQuery] = await Promise.all([
-    Notifications.getExpoPushTokenAsync(),
+    Notifications.getExpoPushTokenAsync({ projectId: config.expoProjectId }),
     Notifications.getDevicePushTokenAsync(),
   ]);
   expoPushToken = expoTokenQuery.data;
@@ -72,7 +73,9 @@ export const subscribeToNewTopic = async (topic: string): Promise<void> => {
     importance: Notifications.AndroidImportance.MAX,
     showBadge: false,
   });
-  const expoTokenQuery = await Notifications.getExpoPushTokenAsync();
+  const expoTokenQuery = await Notifications.getExpoPushTokenAsync({
+    projectId: config.expoProjectId,
+  });
   expoPushToken = expoTokenQuery.data;
   try {
     await api.post("/api/subscribe/append", {
