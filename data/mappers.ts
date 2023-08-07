@@ -21,8 +21,7 @@ export const xmtpMessageToDb = (
   sentViaConverse: !!xmtpMessage.sentViaConverse,
   contentType: xmtpMessage.contentType,
   contentFallback: xmtpMessage.contentFallback,
-  // we don't include the reactions field as it is
-  // filled by other methods
+  referencedMessageId: xmtpMessage.referencedMessageId,
 });
 
 export const xmtpMessageFromDb = (message: Message): XmtpMessage => ({
@@ -34,8 +33,35 @@ export const xmtpMessageFromDb = (message: Message): XmtpMessage => ({
   sentViaConverse: !!message.sentViaConverse,
   contentType: message.contentType,
   contentFallback: message.contentFallback,
-  reactions: message.reactions || "{}",
+  referencedMessageId: message.referencedMessageId,
 });
+
+const xmtpMessagesMapFromDb = (
+  messages?: Message[]
+): Map<string, XmtpMessage> => {
+  const messagesMap = new Map<string, XmtpMessage>();
+  if (!messages) return messagesMap;
+  messages.forEach((m) => {
+    const xmtpMessage = xmtpMessageFromDb(m);
+    messagesMap.set(xmtpMessage.id, xmtpMessage);
+    if (
+      xmtpMessage.referencedMessageId &&
+      xmtpMessage.contentType.startsWith("xmtp.org/reaction:")
+    ) {
+      // This is a reaction to a message, let's save it to make
+      // it easily accessible
+      const referencedMessage = messagesMap.get(
+        xmtpMessage.referencedMessageId
+      );
+      if (referencedMessage) {
+        referencedMessage.reactions =
+          referencedMessage.reactions || new Map<string, XmtpMessage>();
+        referencedMessage.reactions.set(m.id, m);
+      }
+    }
+  });
+  return messagesMap;
+};
 
 export const xmtpConversationToDb = (
   xmtpConversation: XmtpConversation
@@ -80,11 +106,7 @@ export const xmtpConversationFromDb = (
     peerAddress: dbConversation.peerAddress,
     createdAt: dbConversation.createdAt,
     context,
-    messages: dbConversation.messages
-      ? new Map(
-          dbConversation.messages.map((m) => [m.id, xmtpMessageFromDb(m)])
-        )
-      : new Map(),
+    messages: xmtpMessagesMapFromDb(dbConversation.messages),
     conversationTitle,
     readUntil: dbConversation.readUntil || 0,
     pending: dbConversation.pending,

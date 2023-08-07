@@ -9,7 +9,8 @@ export const sendMessage = async (
   conversation: XmtpConversation,
   content: string,
   contentType = "xmtp.org/text:1.0",
-  contentFallback = undefined as string | undefined
+  contentFallback = undefined as string | undefined,
+  referencedMessageId = undefined as string | undefined
 ) => {
   if (!conversation) return;
   const messageId = uuid.v4().toString();
@@ -27,6 +28,7 @@ export const sendMessage = async (
         sentViaConverse: !isV1Conversation, // V1 Convo don't support the sentViaConverse feature
         contentType,
         contentFallback,
+        referencedMessageId,
       },
     ],
     conversation.topic

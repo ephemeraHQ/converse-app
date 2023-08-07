@@ -27,6 +27,9 @@ export class Conversation {
   @Column("text", { nullable: true })
   contextMetadata?: string;
 
-  @OneToMany("Message", (message: Message) => message.conversation)
+  @OneToMany("Message", (message: Message) => message.conversation, {
+    // Disabling foreign key creation to be able to save messages from not-yet known conversations
+    createForeignKeyConstraints: false,
+  })
   messages?: Message[];
 }

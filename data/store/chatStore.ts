@@ -45,8 +45,10 @@ type XmtpProtocolMessage = {
 export type XmtpMessage = XmtpProtocolMessage & {
   status: "delivered" | "error" | "seen" | "sending" | "sent";
   sentViaConverse: boolean;
-  reactions?: string;
+  reactions?: Map<string, XmtpMessage>;
   contentFallback?: string;
+  referencedMessageId?: string;
+  lastUpdateAt?: number;
 };
 
 export type ChatStoreType = {
@@ -76,10 +78,6 @@ export type ChatStoreType = {
 
   setInitialLoadDone: () => void;
   setMessages: (topic: string, messagesToSet: XmtpMessage[]) => void;
-  setMessagesReactions: (
-    topic: string,
-    reactions: { [messageId: string]: string }
-  ) => void;
   updateMessagesIds: (
     updates: { topic: string; oldId: string; message: XmtpMessage }[]
   ) => void;
@@ -206,7 +204,7 @@ export const initChatStore = (account: string) => {
                   const newMessage = {
                     ...message,
                     reactions: alreadyMessage.reactions,
-                  };
+                  } as XmtpMessage;
                   // Existing message, let's see if we can consider it's updated
                   isUpdated = isMessageUpdated(alreadyMessage, newMessage);
                   conversation.messages.set(message.id, newMessage);
@@ -221,6 +219,27 @@ export const initChatStore = (account: string) => {
                       conversation.topic,
                       conversation.readUntil
                     );
+                  }
+                }
+                // Let's check if it's a reaction to a message
+                if (
+                  message.referencedMessageId &&
+                  message.contentType.startsWith("xmtp.org/reaction:")
+                ) {
+                  const referencedMessage = conversation.messages.get(
+                    message.referencedMessageId
+                  );
+                  if (referencedMessage) {
+                    referencedMessage.reactions =
+                      referencedMessage.reactions || new Map();
+                    const alreadyReaction = referencedMessage.reactions.get(
+                      message.id
+                    );
+                    if (!alreadyReaction) {
+                      isUpdated = true;
+                      referencedMessage.reactions.set(message.id, message);
+                      referencedMessage.lastUpdateAt = now();
+                    }
                   }
                 }
               }
@@ -268,25 +287,6 @@ export const initChatStore = (account: string) => {
           setResyncing: (syncing) => set(() => ({ resyncing: syncing })),
           reconnecting: false,
           setReconnecting: (reconnecting) => set(() => ({ reconnecting })),
-          setMessagesReactions: (topic, reactionsToSet) =>
-            set((state) => {
-              if (!state.conversations[topic]) return state;
-              const newState = {
-                ...state,
-                lastUpdateAt: now(),
-              };
-              const conversation = newState.conversations[topic];
-              for (const messageId in reactionsToSet) {
-                const message = conversation.messages.get(messageId);
-                if (!message) {
-                  continue;
-                }
-                const reactions = reactionsToSet[messageId];
-                conversation.lastUpdateAt = now();
-                conversation.messages.set(messageId, { ...message, reactions });
-              }
-              return newState;
-            }),
           updateMessagesIds: (updates) =>
             set((state) => {
               if (updates.length === 0) return state;
@@ -299,7 +299,32 @@ export const initChatStore = (account: string) => {
                   const conversation =
                     newState.conversations[messageToUpdate.topic];
                   conversation.lastUpdateAt = now();
+                  const oldMessage = conversation.messages.get(
+                    messageToUpdate.oldId
+                  );
                   conversation.messages.delete(messageToUpdate.oldId);
+                  // Avoid duplicate reactions saved in db
+                  if (oldMessage && oldMessage.referencedMessageId) {
+                    const referencedOldMessage = conversation.messages.get(
+                      oldMessage.referencedMessageId
+                    );
+                    if (
+                      referencedOldMessage &&
+                      referencedOldMessage?.reactions?.get(oldMessage.id)
+                    ) {
+                      const oldReaction = referencedOldMessage.reactions.get(
+                        oldMessage.id
+                      );
+                      if (oldReaction) {
+                        referencedOldMessage?.reactions?.delete(oldMessage.id);
+                        referencedOldMessage.reactions.set(
+                          messageToUpdate.message.id,
+                          messageToUpdate.message
+                        );
+                        referencedOldMessage.lastUpdateAt = now();
+                      }
+                    }
+                  }
                   conversation.messages.set(
                     messageToUpdate.message.id,
                     messageToUpdate.message
@@ -348,12 +373,7 @@ export const isMessageUpdated = (
   oldMessage: XmtpMessage,
   newMessage: XmtpMessage
 ) => {
-  const keysChangesToRerender: (keyof XmtpMessage)[] = [
-    "id",
-    "reactions",
-    "sent",
-    "status",
-  ];
+  const keysChangesToRerender: (keyof XmtpMessage)[] = ["id", "sent", "status"];
   return keysChangesToRerender.some((k) => {
     const keyUpdated = oldMessage[k] !== newMessage[k];
     if (keyUpdated) {

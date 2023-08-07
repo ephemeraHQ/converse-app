@@ -1,8 +1,5 @@
-import { Reaction } from "@xmtp/content-type-reaction";
 import RNFS from "react-native-fs";
 
-import { MessageReaction } from "../../../utils/reactions";
-import { sentryTrackMessage } from "../../../utils/sentry";
 import { messageRepository } from "../../db";
 import { Message } from "../../db/entities/messageEntity";
 import { upsertRepository } from "../../db/upsert";
@@ -14,76 +11,30 @@ export const saveMessages = async (
   messages: XmtpMessage[],
   conversationTopic: string
 ) => {
-  // First save all messages to db
-  const upsertPromise = upsertRepository(
+  // Infer referenced message from content if needed
+  messages.forEach((c) => {
+    if (
+      !c.referencedMessageId &&
+      c.contentType.startsWith("xmtp.org/reaction:")
+    ) {
+      try {
+        c.referencedMessageId = JSON.parse(c.content).reference;
+      } catch (e) {
+        console.log(e);
+      }
+    }
+  });
+  // First dispatch for immediate feedback
+  useChatStore.getState().setMessages(conversationTopic, messages);
+
+  // Then save to db
+  await upsertRepository(
     messageRepository,
     messages.map((xmtpMessage) =>
       xmtpMessageToDb(xmtpMessage, conversationTopic)
     ),
     ["id"]
   );
-
-  // Then dispatch
-  useChatStore.getState().setMessages(conversationTopic, messages);
-
-  const reactionMessages = messages.filter((m) =>
-    m.contentType.startsWith("xmtp.org/reaction:")
-  );
-
-  // Now we can handle reactions if there are any
-  if (reactionMessages.length > 0) {
-    await upsertPromise;
-    await saveReactions(reactionMessages, conversationTopic);
-  }
-};
-
-const saveReactions = async (
-  reactionMessages: XmtpMessage[],
-  conversationTopic: string
-) => {
-  const reactionsByMessage: {
-    [messageId: string]: { [reactionId: string]: MessageReaction };
-  } = {};
-  for (const reactionMessage of reactionMessages) {
-    try {
-      const reactionContent = JSON.parse(reactionMessage.content) as Reaction;
-      reactionsByMessage[reactionContent.reference] =
-        reactionsByMessage[reactionContent.reference] || {};
-      reactionsByMessage[reactionContent.reference][reactionMessage.id] = {
-        action: reactionContent.action,
-        schema: reactionContent.schema,
-        content: reactionContent.content,
-        senderAddress: reactionMessage.senderAddress,
-        sent: reactionMessage.sent,
-      };
-    } catch (e: any) {
-      sentryTrackMessage("CANT_PARSE_REACTION_CONTENT", {
-        reactionMessageContent: reactionMessage.content,
-        error: e.toString(),
-      });
-    }
-  }
-  const reactionsToDispatch: { [messageId: string]: string } = {};
-  for (const messageId in reactionsByMessage) {
-    // Check if message exists
-    const message = await messageRepository.findOneBy({
-      id: messageId,
-      conversationId: conversationTopic,
-    });
-    if (message) {
-      const existingReactions = JSON.parse(message.reactions || "{}") as {
-        [reactionId: string]: MessageReaction;
-      };
-      const newReactions = reactionsByMessage[messageId];
-      const reactions = { ...existingReactions, ...newReactions };
-      message.reactions = JSON.stringify(reactions);
-      await messageRepository.save(message);
-      reactionsToDispatch[messageId] = message.reactions;
-    }
-  }
-  useChatStore
-    .getState()
-    .setMessagesReactions(conversationTopic, reactionsToDispatch);
 };
 
 export const updateMessagesIds = async (messageIdsToUpdate: {

@@ -5,6 +5,7 @@ import {
   ManyToOne,
   JoinColumn,
   Index,
+  OneToMany,
 } from "typeorm";
 
 import { type Conversation } from "./conversationEntity";
@@ -40,9 +41,6 @@ export class Message {
   @Column("text", { default: "xmtp.org/text:1.0" })
   contentType!: string;
 
-  @Column("text", { default: "{}" })
-  reactions?: string;
-
   @ManyToOne(
     "Conversation",
     (conversation: Conversation) => conversation.messages,
@@ -51,4 +49,28 @@ export class Message {
   )
   @JoinColumn({ name: "conversationId" })
   conversation?: Conversation;
+
+  // Some messages reference another message
+  // (reactions, replies)
+  @Index()
+  @Column("text", { nullable: true })
+  referencedMessageId?: string;
+
+  @ManyToOne(
+    "Message",
+    (message: Message) => message.referencingMessages,
+    // Disabling foreign key creation to be able to save reactions from not-yet known messages
+    { createForeignKeyConstraints: false }
+  )
+  @JoinColumn({ name: "referencedMessageId" })
+  referencedMessage?: Message;
+
+  @OneToMany(
+    "Message",
+    (message: Message) => message.referencedMessage,
+    // Disabling foreign key creation to be able to save reactions from not-yet known messages
+    { createForeignKeyConstraints: false }
+  )
+  @JoinColumn({ name: "referencedMessageId" })
+  referencingMessages?: Message[];
 }

@@ -14,16 +14,19 @@ export type MessageReaction = {
   schema: "unicode" | "shortcode" | "custom";
 };
 
-type MessageReactions = { [reactionId: string]: MessageReaction };
-
 export const getMessageReactions = (message: XmtpMessage) => {
   // Returns the last reaction for each sender
   try {
-    if (!message.reactions || message.reactions === "[]") return {};
-    const reactions = JSON.parse(message.reactions) as MessageReactions;
-    const sortedReactions = Object.values(reactions).sort(
-      (a, b) => a.sent - b.sent
+    if (!message.reactions || message.reactions.size === 0) return {};
+    const reactions = Array.from(message.reactions.values()).map(
+      (c) =>
+        ({
+          ...JSON.parse(c.content),
+          senderAddress: c.senderAddress,
+          sent: c.sent,
+        } as MessageReaction)
     );
+    const sortedReactions = reactions.sort((a, b) => a.sent - b.sent);
 
     const reactionsBySender: {
       [senderAddress: string]: { [reactionContent: string]: MessageReaction };
@@ -106,7 +109,8 @@ export const addReactionToMessage = (
     ContentTypeReaction.toString(),
     `Reacted ${emoji} to ${
       isAttachment ? "an attachment" : `“${message.content}”`
-    }`
+    }`,
+    message.id
   );
 };
 
@@ -127,6 +131,7 @@ export const removeReactionFromMessage = (
     ContentTypeReaction.toString(),
     `Removed the reaction to ${
       isAttachment ? "an attachment" : `“${message.content}”`
-    }`
+    }`,
+    message.id
   );
 };
