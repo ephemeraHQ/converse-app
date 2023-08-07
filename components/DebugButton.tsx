@@ -1,6 +1,5 @@
 import axios from "axios";
 import * as Clipboard from "expo-clipboard";
-import Constants from "expo-constants";
 import * as Updates from "expo-updates";
 import { forwardRef, useImperativeHandle } from "react";
 import RNFS from "react-native-fs";
@@ -100,22 +99,6 @@ const DebugButton = forwardRef((props, ref) => {
         "Show messages # received": () => {
           alert(`${messagesFromNetwork} messages received`);
           messagesFromNetwork = 0;
-        },
-        "Show config": () => {
-          alert(
-            JSON.stringify(
-              {
-                expoEnv: Constants.expoConfig?.extra?.ENV,
-                config,
-                version: Constants.manifest?.version,
-                releaseChannel: Constants.manifest?.releaseChannel,
-                build: Constants.manifest?.ios?.buildNumber,
-                releaseId: Constants.manifest2?.id,
-              },
-              null,
-              2
-            )
-          );
         },
         Restart: RNRestart.restart,
         Cancel: undefined,
