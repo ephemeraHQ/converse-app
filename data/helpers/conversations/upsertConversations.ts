@@ -1,5 +1,4 @@
 import { getLensHandleFromConversationIdAndPeer } from "../../../utils/lens";
-import { lastValueInMap } from "../../../utils/map";
 import { saveConversationIdentifiersForNotifications } from "../../../utils/notifications";
 import { conversationRepository } from "../../db";
 import dataSource from "../../db/datasource";
@@ -109,33 +108,8 @@ export const markAllConversationsAsReadInDb = async () => {
 };
 
 export const markConversationReadUntil = async (
-  conversation: XmtpConversation,
-  readUntil: number,
-  allowBefore = false
+  topic: string,
+  readUntil: number
 ) => {
-  if (readUntil === conversation.readUntil) {
-    return;
-  }
-  if (readUntil < conversation.readUntil && !allowBefore) {
-    return;
-  }
-  await conversationRepository.update(
-    { topic: conversation.topic },
-    { readUntil }
-  );
-  useChatStore.getState().setConversations([{ ...conversation, readUntil }]);
-};
-
-export const markConversationRead = (
-  conversation: XmtpConversation,
-  allowBefore = false
-) => {
-  let newReadUntil = conversation.readUntil;
-  if (conversation.messages.size > 0) {
-    const lastMessage = lastValueInMap(conversation.messages);
-    if (lastMessage) {
-      newReadUntil = lastMessage.sent;
-    }
-  }
-  return markConversationReadUntil(conversation, newReadUntil, allowBefore);
+  await conversationRepository.update({ topic }, { readUntil });
 };
