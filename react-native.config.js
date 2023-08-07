@@ -25,5 +25,10 @@ module.exports = {
         ios: null,
       },
     },
+    "react-native-shared-group-preferences": {
+      platforms: {
+        android: null,
+      },
+    },
   },
 };

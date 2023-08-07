@@ -51,7 +51,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     },
     ENV: isDev ? "dev" : isPreview ? "preview" : "prod",
   },
-  runtimeVersion: "exposdk:48.0.0",
+  runtimeVersion: "exposdk:49.0.0",
   owner: "converse",
   jsEngine: "hermes",
 });
