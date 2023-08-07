@@ -4,7 +4,10 @@ import { persist, createJSONStorage } from "zustand/middleware";
 import { lastValueInMap } from "../../utils/map";
 import { zustandMMKVStorage } from "../../utils/mmkv";
 import { omit } from "../../utils/objects";
-import { markAllConversationsAsReadInDb } from "../helpers/conversations/upsertConversations";
+import {
+  markAllConversationsAsReadInDb,
+  markConversationReadUntil,
+} from "../helpers/conversations/upsertConversations";
 
 // Chat data for each user
 
@@ -50,7 +53,8 @@ export type ChatStoreType = {
   conversations: {
     [topic: string]: XmtpConversationWithUpdate;
   };
-
+  openedConversationTopic: string | null;
+  setOpenedConversationTopic: (topic: string | null) => void;
   conversationsMapping: {
     [oldTopic: string]: string;
   };
@@ -99,6 +103,18 @@ export const initChatStore = (account: string) => {
       (set) =>
         ({
           conversations: {},
+          openedConversationTopic: "",
+          setOpenedConversationTopic: (topic) =>
+            set((state) => {
+              const newState = { ...state, openedConversationTopic: topic };
+              if (topic && newState.conversations[topic]) {
+                const n = now();
+                newState.conversations[topic].readUntil = n;
+                // Also mark in db
+                markConversationReadUntil(topic, n);
+              }
+              return newState;
+            }),
           conversationsMapping: {},
           lastUpdateAt: 0,
           setConversations: (conversationsToSet) =>
@@ -198,6 +214,14 @@ export const initChatStore = (account: string) => {
                   // New message, it's updated
                   isUpdated = true;
                   conversation.messages.set(message.id, message);
+                  if (state.openedConversationTopic === topic) {
+                    conversation.readUntil = now();
+                    // Also mark in db
+                    markConversationReadUntil(
+                      conversation.topic,
+                      conversation.readUntil
+                    );
+                  }
                 }
               }
 

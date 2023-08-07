@@ -30,15 +30,7 @@ import {
   cleanupPendingConversations,
   createPendingConversation,
 } from "../data/helpers/conversations/pendingConversations";
-import {
-  markConversationRead,
-  markConversationReadUntil,
-} from "../data/helpers/conversations/upsertConversations";
-import {
-  useChatStore,
-  useSettingsStore,
-  useUserStore,
-} from "../data/store/accountsStore";
+import { useChatStore, useSettingsStore } from "../data/store/accountsStore";
 import { XmtpConversationWithUpdate } from "../data/store/chatStore";
 import { userExists } from "../utils/api";
 import {
@@ -50,7 +42,6 @@ import {
 } from "../utils/colors";
 import { getAddressForPeer } from "../utils/eth";
 import { eventEmitter } from "../utils/events";
-import { lastValueInMap } from "../utils/map";
 import { pick } from "../utils/objects";
 import { sentryTrackMessage } from "../utils/sentry";
 import { getTitleFontScale, TextInputWithValue } from "../utils/str";
@@ -61,7 +52,6 @@ const Conversation = ({
   route,
   navigation,
 }: NativeStackScreenProps<NavigationParamList, "Conversation">) => {
-  const userAddress = useUserStore((s) => s.userAddress);
   const colorScheme = useColorScheme();
   const blockedPeers = useSettingsStore((s) => s.blockedPeers);
   const { conversations, conversationsMapping, setConversationMessageDraft } =
@@ -320,17 +310,16 @@ const Conversation = ({
   ]);
 
   useEffect(() => {
+    // On load, we mark the conversation
+    // as read and as opened
     if (conversation) {
-      const lastMessageTimestamp = lastValueInMap(conversation.messages)?.sent;
-      if (lastMessageTimestamp) {
-        markConversationReadUntil(conversation, lastMessageTimestamp);
-      }
+      useChatStore.getState().setOpenedConversationTopic(conversation.topic);
     }
   }, [conversation]);
 
   const onLeaveScreen = useCallback(async () => {
     if (!conversation || !textInputRef.current) return;
-    await markConversationRead(conversation);
+    useChatStore.getState().setOpenedConversationTopic(null);
     await cleanupPendingConversations();
     setConversationMessageDraft(
       conversation.topic,
