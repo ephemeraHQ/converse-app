@@ -143,12 +143,12 @@ const renderedMessages = new LimitedMap<string, RenderedChatMessage>(50);
 export default function CachedChatMessage({ message, colorScheme }: Props) {
   const keysChangesToRerender: (keyof MessageToDisplay)[] = [
     "id",
+    "sent",
+    "status",
+    "lastUpdateAt",
     "dateChange",
     "hasNextMessageInSeries",
     "hasPreviousMessageInSeries",
-    "reactions",
-    "sent",
-    "status",
   ];
   const alreadyRenderedMessage = renderedMessages.get(message.id);
   const shouldRerender =
