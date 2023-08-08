@@ -1,12 +1,7 @@
 import * as Clipboard from "expo-clipboard";
-import { useCallback, useEffect, useRef, useState } from "react";
-import {
-  Alert,
-  ColorSchemeName,
-  Platform,
-  TouchableWithoutFeedback,
-  useColorScheme,
-} from "react-native";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { Alert, ColorSchemeName, Platform, useColorScheme } from "react-native";
+import { Gesture, GestureDetector } from "react-native-gesture-handler";
 
 import { useSettingsStore, useUserStore } from "../../data/store/accountsStore";
 import { useConversationContext } from "../../screens/Conversation";
@@ -152,22 +147,49 @@ export default function ChatMessageActions({
     showReactionModal,
   ]);
 
-  const lastPressMessage = useRef(0);
-  const onPressMessage = useCallback(() => {
-    if (isAttachment) {
-      // Transfering attachment opening intent to component
-      eventEmitter.emit(`openAttachmentForMessage-${message.id}`);
-      return;
-    }
-    if (!canAddReaction) return;
-    const now = new Date().getTime();
-    const sinceLastPress = now - lastPressMessage.current;
-    if (sinceLastPress < 500) {
-      // Double dap!
-      showReactionModal();
-    }
-    lastPressMessage.current = now;
-  }, [canAddReaction, isAttachment, message.id, showReactionModal]);
+  const singleTapGesture = useMemo(
+    () =>
+      Gesture.Tap()
+        .onEnd(() => {
+          if (isAttachment) {
+            // Transfering attachment opening intent to component
+            eventEmitter.emit(`openAttachmentForMessage-${message.id}`);
+          }
+        })
+        .runOnJS(true),
+    [isAttachment, message.id]
+  );
+
+  const doubleTapGesture = useMemo(
+    () =>
+      Gesture.Tap()
+        .numberOfTaps(2)
+        .onStart(() => {
+          if (isAttachment || !canAddReaction) return;
+          showReactionModal();
+        })
+        .runOnJS(true),
+    [canAddReaction, isAttachment, showReactionModal]
+  );
+
+  const longPressGesture = useMemo(
+    () =>
+      Gesture.LongPress()
+        .onStart(() => {
+          showMessageActionSheet();
+        })
+        .runOnJS(true),
+    [showMessageActionSheet]
+  );
+
+  const composedGesture = useMemo(
+    () =>
+      Gesture.Simultaneous(
+        singleTapGesture,
+        Gesture.Simultaneous(doubleTapGesture, longPressGesture)
+      ),
+    [doubleTapGesture, longPressGesture, singleTapGesture]
+  );
 
   const [selectedEmojis, setSelectedEmojis] = useState<string[]>([]);
   useEffect(() => {
@@ -184,12 +206,7 @@ export default function ChatMessageActions({
 
   return (
     <>
-      <TouchableWithoutFeedback
-        onPress={onPressMessage}
-        onLongPress={showMessageActionSheet}
-      >
-        {children}
-      </TouchableWithoutFeedback>
+      <GestureDetector gesture={composedGesture}>{children}</GestureDetector>
       <EmojiPicker
         onEmojiSelected={(e) => {
           if (!conversation) return;

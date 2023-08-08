@@ -17,6 +17,7 @@ import {
   useColorScheme,
   View,
 } from "react-native";
+import { gestureHandlerRootHOC } from "react-native-gesture-handler";
 import { createContext, useContextSelector } from "use-context-selector";
 
 import Button from "../components/Button/Button";
@@ -358,7 +359,7 @@ const Conversation = ({
   );
 };
 
-export default Conversation;
+export default gestureHandlerRootHOC(Conversation);
 
 type ConversationContextType = {
   conversation?: XmtpConversationWithUpdate;
