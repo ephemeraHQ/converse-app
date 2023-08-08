@@ -63,13 +63,13 @@ const uploadUpdatesToExpo = (env) =>
 const copyBundlesAndGetMaps = () => {
   const bundles = fs.readdirSync(bundlesPath);
   const iosBundle = bundles.find(
-    (b) => b.startsWith("ios-") && b.endsWith(".js")
+    (b) => b.startsWith("ios-") && b.endsWith(".hbc")
   );
   const iosMap = bundles.find(
     (b) => b.startsWith("ios-") && b.endsWith(".map")
   );
   const androidBundle = bundles.find(
-    (b) => b.startsWith("android-") && b.endsWith(".js")
+    (b) => b.startsWith("android-") && b.endsWith(".hbc")
   );
   const androidMap = bundles.find(
     (b) => b.startsWith("android-") && b.endsWith(".map")
