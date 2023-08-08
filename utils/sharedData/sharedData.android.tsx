@@ -42,6 +42,23 @@ export const loadSavedNotificationsMessages = async () => {
   }
 };
 
+export const emptySavedNotificationsConversations = () =>
+  AsyncStorage.setItem("saved-notifications-conversations", "[]");
+
+export const loadSavedNotificationsConversations = async () => {
+  const jsonConversations = await AsyncStorage.getItem(
+    "saved-notifications-conversations"
+  );
+  if (!jsonConversations) return [];
+  try {
+    const conversations = JSON.parse(jsonConversations);
+    return conversations;
+  } catch (error) {
+    console.log(error);
+    return [];
+  }
+};
+
 export const emptySavedNotificationsMessages = () =>
   AsyncStorage.setItem("saved-notifications-messages", "[]");
 
