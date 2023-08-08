@@ -11,6 +11,7 @@ import { KeyboardContext } from "../contexts/KeyboardContext";
 import { useTimeout } from "../hooks/useTimeout";
 import { IsSafeAreaWrapper } from "./ConditionalContainer";
 import {
+  interpolateColor,
   useAnimatedStyle,
   useSharedValue,
   withTiming,
@@ -38,27 +39,39 @@ export const ModalWithBackdrop = ({
     translateY.value = withTiming(isOpen ? 0 : screenHeight, { duration: 300 });
   }, [isOpen, screenHeight, translateY]);
 
-  const handleClose = () => {
-    translateY.value = withTiming(screenHeight, { duration: 300 });
-    handleTimeout(() => backdropPress(), 40);
-  };
-
   const animatedStyle = useAnimatedStyle(() => {
     return {
       transform: [{ translateY: translateY.value }],
     };
   }, [translateY.value]);
 
+  const backgroundColorValue = useSharedValue(0);
+  const backdropAnimatedStyle = useAnimatedStyle(() => {
+    const backgroundColor = interpolateColor(
+      backgroundColorValue.value,
+      [0, 1],
+      ["rgba(0, 0, 0, 0)", "rgba(0, 0, 0, 0.5)"]
+    );
+    return { backgroundColor };
+  });
+  React.useEffect(() => {
+    backgroundColorValue.value = withTiming(isOpen ? 1 : 0, { duration: 300 });
+  }, [isOpen]);
+
+  const handleClose = React.useCallback(() => {
+    translateY.value = withTiming(screenHeight, { duration: 300 });
+    backgroundColorValue.value = withTiming(0, { duration: 300 });
+    handleTimeout(() => backdropPress(), 40);
+  }, []);
+
   return (
-    <Modal visible={isOpen} animationType="fade" transparent={true} {...rest}>
+    <Modal visible={isOpen} transparent {...rest}>
       <TouchableOpacity
-        style={[styles.modalContainer, { backgroundColor: theme.backdrop }]}
+        style={[styles.modalContainer]}
         activeOpacity={1}
         onPress={handleClose}
       >
-        <View
-          style={[styles.modalContainer, { backgroundColor: theme.backdrop }]}
-        >
+        <ReanimatedView style={[backdropAnimatedStyle, styles.modalContainer]}>
           <IsSafeAreaWrapper
             style={styles.modalContainer}
             isSafeArea={!disableSafeArea}
@@ -67,7 +80,7 @@ export const ModalWithBackdrop = ({
               <ReanimatedView style={animatedStyle}>{children}</ReanimatedView>
             </TouchableOpacity>
           </IsSafeAreaWrapper>
-        </View>
+        </ReanimatedView>
       </TouchableOpacity>
     </Modal>
   );
