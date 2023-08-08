@@ -2,6 +2,7 @@ import * as Notifications from "expo-notifications";
 import { Platform } from "react-native";
 
 import config from "../config";
+import { saveConversations } from "../data/helpers/conversations/upsertConversations";
 import { saveMessages } from "../data/helpers/messages";
 import { XmtpConversation } from "../data/store/chatStore";
 import { buildUserInviteTopic } from "../vendor/xmtp-js/src/utils";
@@ -11,6 +12,8 @@ import { sentryTrackMessage } from "./sentry";
 import {
   emptySavedNotificationsMessages,
   loadSavedNotificationsMessages,
+  emptySavedNotificationsConversations,
+  loadSavedNotificationsConversations,
   saveConversationDict,
 } from "./sharedData/sharedData";
 import { conversationName, shortAddress } from "./str";
@@ -148,6 +151,32 @@ export const loadSavedNotificationMessagesToContext = async () => {
   }
   loadingSavedNotifications = true;
   try {
+    const conversations = await loadSavedNotificationsConversations();
+    await emptySavedNotificationsConversations();
+    const conversationsToSave = conversations.map((c: any) => {
+      let context = undefined;
+      // If conversationId is empty string we require at least some metadata…
+      if (
+        c.context &&
+        (c.context.conversationId ||
+          (c.context.metadata && Object.keys(c.context.metadata).length > 0))
+      ) {
+        context = {
+          conversationId: c.context.conversationId,
+          metadata: c.context.metadata,
+        };
+      }
+      return {
+        topic: c.topic,
+        peerAddress: c.peerAddress,
+        createdAt: c.createdAt,
+        readUntil: 0,
+        pending: false,
+        context,
+      };
+    });
+    await saveConversations(conversationsToSave);
+
     const messages = await loadSavedNotificationsMessages();
     await emptySavedNotificationsMessages();
     messages.sort((m1: any, m2: any) => m1.sent - m2.sent);
@@ -172,11 +201,9 @@ export const loadSavedNotificationMessagesToContext = async () => {
 
     loadingSavedNotifications = false;
   } catch (e) {
-    console.log(
-      "An error occured while loading saved notifications messages",
-      e
-    );
+    console.log("An error occured while loading saved notifications", e);
     emptySavedNotificationsMessages();
+    emptySavedNotificationsConversations();
     loadingSavedNotifications = false;
   }
 };

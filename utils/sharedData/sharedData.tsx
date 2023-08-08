@@ -30,6 +30,16 @@ export const loadSavedNotificationsMessages = () =>
 export const emptySavedNotificationsMessages = () =>
   SharedGroupPreferences.setItem("saved-notifications-messages", [], appGroup);
 
+export const loadSavedNotificationsConversations = () =>
+  SharedGroupPreferences.getItem("saved-notifications-conversations", appGroup);
+
+export const emptySavedNotificationsConversations = () =>
+  SharedGroupPreferences.setItem(
+    "saved-notifications-conversations",
+    [],
+    appGroup
+  );
+
 export const saveApiURI = () =>
   SharedGroupPreferences.setItem("api-uri", config.apiURI, appGroup);
 
