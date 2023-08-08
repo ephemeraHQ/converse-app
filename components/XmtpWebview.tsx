@@ -14,7 +14,6 @@ import {
 } from "../data/store/accountsStore";
 import { useAppStore } from "../data/store/appStore";
 import {
-  loadXmtpConversation,
   loadXmtpKeys,
   saveXmtpConversations,
   saveXmtpKeys,
@@ -227,13 +226,9 @@ export default function XmtpWebview() {
         launchedInitialLoad.current = true;
         // Let's launch the initial load of all convos & messages
         const knownTopics = Object.keys(conversations);
-        const exportedConversations = await Promise.all(
-          knownTopics.map(loadXmtpConversation)
-        );
         sendMessageToWebview("LOAD_CONVERSATIONS_AND_MESSAGES", {
           lastSyncedAt: getLastXMTPSyncedAt(),
           knownTopics,
-          exportedConversations,
         });
       }
     };
