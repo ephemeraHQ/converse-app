@@ -108,7 +108,9 @@ const uploadBundlesToSentry = ({
   --dist ${iosUpdateID} \
   --rewrite \
   dist/bundles/main.jsbundle dist/bundles/${iosMap}`;
-  console.log("Uploading iOS bundle to Sentry...");
+  console.log(
+    `Uploading iOS bundle to Sentry (${iOSPlistData.CFBundleShortVersionString}+${iOSPlistData.CFBundleVersion} - dist ${iosUpdateID})`
+  );
   try {
     const result = execSync(sentryIOSUploadCommand, { cwd: rootPath });
     console.log(result.toString());
@@ -116,7 +118,6 @@ const uploadBundlesToSentry = ({
     console.log("An error occured");
     console.log(e);
   }
-  console.log("Uploading Android bundle to Sentry...");
   const androidVersionMatch = androidBuildGradle.match(
     GRADLE_VERSION_NAME_REGEX
   );
@@ -131,6 +132,9 @@ const uploadBundlesToSentry = ({
   --dist ${androidUpdateID} \
   --rewrite \
   dist/bundles/index.android.bundle dist/bundles/${androidMap}`;
+  console.log(
+    `Uploading Android bundle to Sentry... (${androidVersionMatch[1].trim()}+${androidVersionCodeMatch[1].trim()} - dist ${androidUpdateID})`
+  );
   try {
     const result = execSync(sentryAndroidUploadCommand, { cwd: rootPath });
     console.log(result.toString());
