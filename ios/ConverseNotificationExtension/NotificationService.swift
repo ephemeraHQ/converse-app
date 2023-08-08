@@ -21,6 +21,18 @@ struct SavedNotificationMessage: Codable {
   var contentType: String
 }
 
+struct ConversationContext: Codable {
+  var conversationId: String
+  var metadata: Dictionary<String, String>
+}
+
+struct SavedNotificationConversation: Codable {
+  var topic: String
+  var peerAddress: String
+  var createdAt: Int
+  var context: ConversationContext?
+}
+
 func shortAddress(address: String) -> String {
   if (address.count > 7) {
     let prefixStart = address.index(address.startIndex, offsetBy: 0)
@@ -36,27 +48,68 @@ func shortAddress(address: String) -> String {
   return address
 }
 
+// Code taken from Expo SecureStore to match the way it saves data
+
+func getKeychainQuery(key: String) -> [String : Any] {
+  let extensionBundleID = Bundle.main.bundleIdentifier ?? ""
+  let service = extensionBundleID.replacingOccurrences(of: ".ConverseNotificationExtension", with: "")
+  let encodedKey = Data(key.utf8)
+  let query = [
+    kSecClass as String: kSecClassGenericPassword,
+    kSecAttrService as String: service,
+    kSecAttrGeneric as String: encodedKey,
+    kSecAttrAccount as String: encodedKey
+  ] as [String : Any]
+  return query
+}
+
 func getKeychainValue(forKey: String) -> String? {
-  let extensionBundleID = Bundle.main.bundleIdentifier ?? ""
-  let appBundleId = extensionBundleID.replacingOccurrences(of: ".ConverseNotificationExtension", with: "")
-  let keychain = Keychain(service: appBundleId)
-  let value = keychain[forKey]
-  return value
+  var query = getKeychainQuery(key: forKey)
+  query[kSecMatchLimit as String] = kSecMatchLimitOne
+  query[kSecReturnData as String] = kCFBooleanTrue
+  var item: CFTypeRef?
+  let status = SecItemCopyMatching(query as CFDictionary, &item)
+  switch status {
+  case errSecSuccess:
+    guard let item = item as? Data else {
+      return nil
+    }
+    return String(data: item, encoding: .utf8)
+  default:
+    return nil
+  }
 }
 
-func unsetKeychainValue(forKey: String) throws {
-  let extensionBundleID = Bundle.main.bundleIdentifier ?? ""
-  let appBundleId = extensionBundleID.replacingOccurrences(of: ".ConverseNotificationExtension", with: "")
-  let keychain = Keychain(service: appBundleId)
-  try keychain.remove(forKey)
+func setKeychainValue(value: String, forKey: String) throws -> Bool {
+  var query = getKeychainQuery(key: forKey)
+  let valueData = value.data(using: .utf8)
+  query[kSecValueData as String] = valueData
+  let accessibility = kSecAttrAccessibleWhenUnlocked
+  query[kSecAttrAccessible as String] = accessibility
+  let status = SecItemAdd(query as CFDictionary, nil)
+  switch status {
+    case errSecSuccess:
+      return true
+    case errSecDuplicateItem:
+    return try updateKeychainValue(value: value, forKey: forKey)
+    default:
+      return false
+    }
 }
 
-func setKeychainValue(value: String, forKey: String) throws {
-  let extensionBundleID = Bundle.main.bundleIdentifier ?? ""
-  let appBundleId = extensionBundleID.replacingOccurrences(of: ".ConverseNotificationExtension", with: "")
-  let keychain = Keychain(service: appBundleId)
-  try keychain.set(value, key: forKey)
+func updateKeychainValue(value: String, forKey: String) throws -> Bool {
+  var query = getKeychainQuery(key: forKey)
+  let valueData = value.data(using: .utf8)
+  let updateDictionary = [kSecValueData as String: valueData]
+  let status = SecItemUpdate(query as CFDictionary, updateDictionary as CFDictionary)
+
+  if status == errSecSuccess {
+    return true
+  } else {
+    return false
+  }
 }
+
 
 func getXmtpClientFromKeys() async -> XMTP.Client? {
   Client.register(codec: AttachmentCodec())
@@ -90,6 +143,22 @@ func getXmtpEnv() -> XMTP.XMTPEnvironment {
   }
 }
 
+func loadSavedConversations() -> [SavedNotificationConversation] {
+  let sharedDefaults = SharedDefaults()
+  let savedConversationsString = sharedDefaults.string(forKey: "saved-notifications-conversations")
+  if (savedConversationsString == nil) {
+    return []
+  } else {
+    let decoder = JSONDecoder()
+    do {
+      let decoded = try decoder.decode([SavedNotificationConversation].self, from: savedConversationsString!.data(using: .utf8)!)
+      return decoded
+    } catch {
+      return []
+    }
+  }
+}
+
 func loadSavedMessages() -> [SavedNotificationMessage] {
   let sharedDefaults = SharedDefaults()
   let savedMessagesString = sharedDefaults.string(forKey: "saved-notifications-messages")
@@ -117,6 +186,16 @@ func saveMessage(topic: String, sent: Date, senderAddress: String, content: Stri
   sharedDefaults.set(encodedString, forKey: "saved-notifications-messages")
 }
 
+func saveConversation(topic: String, peerAddress: String, createdAt: Int, context: ConversationContext?) throws {
+  let sharedDefaults = SharedDefaults()
+  let savedConversation = SavedNotificationConversation(topic: topic, peerAddress: peerAddress, createdAt: createdAt, context: context)
+  var savedConversationsList = loadSavedConversations()
+  savedConversationsList.append(savedConversation)
+  let encodedValue = try JSONEncoder().encode(savedConversationsList)
+  let encodedString = String(data: encodedValue, encoding: .utf8)
+  sharedDefaults.set(encodedString, forKey: "saved-notifications-conversations")
+}
+
 func getSavedConversationTitle(contentTopic: String)-> String {
   let sharedDefaults = SharedDefaults()
   let conversationDictString = sharedDefaults.string(forKey: "conversation-\(contentTopic)")
@@ -138,9 +217,6 @@ func getPersistedConversation(xmtpClient: XMTP.Client, contentTopic: String) -> 
   let hashedKey = CryptoKit.SHA256.hash(data: contentTopic.data(using: .utf8)!)
   let hashString = hashedKey.compactMap { String(format: "%02x", $0) }.joined()
   var persistedConversation = getKeychainValue(forKey: "XMTP_CONVERSATION_\(hashString)")
-  if (persistedConversation == nil) {
-    persistedConversation = getKeychainValue(forKey: "XMTP_CONVERSATION_TEMP_\(hashString)")
-  }
   if (persistedConversation != nil && persistedConversation!.count > 0) {
     do {
       print("[NotificationExtension] Found a persisted conversation")
@@ -159,7 +235,8 @@ func persistDecodedConversation(contentTopic: String, dict: [String : Any]) {
   do {
     let jsonData = try JSONSerialization.data(withJSONObject: dict, options: [])
     let jsonString = String(data: jsonData, encoding: String.Encoding.utf8)!
-    try setKeychainValue(value: jsonString, forKey: "XMTP_CONVERSATION_TEMP_\(hashString)")
+    try setKeychainValue(value: jsonString, forKey: "XMTP_CONVERSATION_\(hashString)")
+    print("[NotificationExtension] Persisted the new conversation to keychain: XMTP_CONVERSATION_\(hashString)")
   } catch {
     print("[NotificationExtension] Could not persist the new conversation to keychain")
   }
@@ -306,6 +383,7 @@ func handleNewConversation(xmtpClient: XMTP.Client, envelope: XMTP.Envelope) -> 
         let conversationV1Topic = "/xmtp/0/dm-\(addresses[0])-\(addresses[1])/proto"
         subscribeToTopic(apiURI: apiURI, expoPushToken: expoPushToken, topic: conversationV1Topic)
         persistDecodedConversation(contentTopic: conversationV1Topic, dict: conversationDict)
+        try saveConversation(topic: conversationV1Topic, peerAddress: conversationV1.peerAddress, createdAt: Int(conversation.createdAt.timeIntervalSince1970 * 1000), context: nil)
       }
       default: do {}
       }
@@ -322,6 +400,7 @@ func handleNewConversation(xmtpClient: XMTP.Client, envelope: XMTP.Envelope) -> 
         let conversationDict = ["version": "v2", "topic": conversationV2.topic, "peerAddress": conversationV2.peerAddress, "createdAt": createdAt, "context":["conversationId": conversationV2.context.conversationID, "metadata": conversationV2.context.metadata], "keyMaterial": conversationV2.keyMaterial.base64EncodedString()] as [String : Any]
         subscribeToTopic(apiURI: apiURI, expoPushToken: expoPushToken, topic: conversationV2.topic)
         persistDecodedConversation(contentTopic: conversationV2.topic, dict: conversationDict)
+        try saveConversation(topic: conversationV2.topic, peerAddress: conversationV2.peerAddress, createdAt: Int(conversationV2.createdAt.timeIntervalSince1970 * 1000), context: ConversationContext(conversationId: conversationV2.context.conversationID, metadata: conversationV2.context.metadata))
       }
       default: do {}
       }
