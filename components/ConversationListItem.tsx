@@ -3,10 +3,10 @@ import React, { memo, useCallback, useEffect, useState } from "react";
 import {
   ColorSchemeName,
   Text,
-  TouchableOpacity,
   View,
   StyleSheet,
   Platform,
+  TouchableHighlight,
 } from "react-native";
 import { TouchableRipple } from "react-native-paper";
 
@@ -103,9 +103,10 @@ const ConversationListItem = memo(function ConversationListItem({
   );
   if (Platform.OS === "ios") {
     return (
-      <TouchableOpacity
-        activeOpacity={1}
+      <TouchableHighlight
         key={conversationTopic}
+        underlayColor={clickedItemBackgroundColor(colorScheme)}
+        delayPressIn={75}
         onPress={() => {
           navigation.navigate("Conversation", {
             topic: conversationTopic,
@@ -119,7 +120,7 @@ const ConversationListItem = memo(function ConversationListItem({
         }}
       >
         {listItemContent}
-      </TouchableOpacity>
+      </TouchableHighlight>
     );
   } else {
     return (
