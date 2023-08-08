@@ -1,5 +1,7 @@
+import { FlashList } from "@shopify/flash-list";
+import { FlatList, View } from "react-native";
 import { useKeyboardHandler } from "react-native-keyboard-controller";
-import { useSharedValue } from "react-native-reanimated";
+import Reanimated, { useSharedValue } from "react-native-reanimated";
 
 export const useKeyboardAnimation = () => {
   const progress = useSharedValue(0);
@@ -46,3 +48,11 @@ export const useKeyboardAnimation = () => {
 
   return { height, progress };
 };
+
+export const ReanimatedView = Reanimated.createAnimatedComponent(View);
+export const ReanimatedFlatList = Reanimated.createAnimatedComponent(
+  FlatList
+) as typeof FlatList;
+export const ReanimatedFlashList = Reanimated.createAnimatedComponent(
+  FlashList
+) as typeof FlashList;
