@@ -50,6 +50,7 @@ class ConversationDictData(val shortAddress: String? = null, val lensHandle: Str
 class SavedNotificationMessage(val topic: String, val content: String, val senderAddress: String, val sent: Long, val id: String, val sentViaConverse: Boolean, val contentType: String)
 class ConversationContext(val conversationId: String, val metadata: Map<String, Any>)
 class ConversationV2Data(val version: String = "v2", val topic: String, val peerAddress: String, val createdAt: String, val context: ConversationContext?, val keyMaterial: String)
+class SavedNotificationConversation(val topic: String, val peerAddress: String, val createdAt: Long, val context: ConversationContext?)
 
 fun shortAddress(input: String): String {
     if (input.length > 6) {
@@ -133,13 +134,28 @@ class PushNotificationsService : FirebaseMessagingService() {
 
     private fun handleNewConversationV2Notification(xmtpClient:Client, envelope: Envelope, remoteMessage: RemoteMessage) {
         val conversation = xmtpClient.conversations.fromInvite((envelope))
+        var context: ConversationContext? = null;
+        when (conversation) {
+            is Conversation.V1 -> {
+                // Nothing to do
+            }
+            is Conversation.V2 -> {
+                val conversationV2 = conversation.conversationV2
+                if (conversationV2.context.conversationId !== null) {
+                    context = ConversationContext(
+                        conversationV2.context.conversationId,
+                        conversationV2.context.metadataMap
+                    )
+                }
+            }
+        }
         Log.d(TAG, "Decoded new conversation from invite")
         val conversationV2Data = ConversationV2Data(
             "v2",
             conversation.topic,
             conversation.peerAddress,
             conversation.createdAt.toString(),
-            null,
+            context,
             Base64.encode(conversation.keyMaterial)
         )
         val apiURI = getAsyncStorage("api-uri")
@@ -149,6 +165,7 @@ class PushNotificationsService : FirebaseMessagingService() {
             subscribeToTopic(apiURI, expoPushToken, conversation.topic)
         }
         persistNewConversation(conversation.topic, conversationV2Data)
+        saveConversationToStorage(conversation.topic, conversation.peerAddress, conversation.createdAt.time, context);
         showNotification(shortAddress(conversation.peerAddress), "New Conversation", remoteMessage)
     }
 
@@ -248,6 +265,26 @@ class PushNotificationsService : FirebaseMessagingService() {
         currentSavedMessages += newMessageToSave
         val newSavedMessagesString = Klaxon().toJsonString(currentSavedMessages)
         setAsyncStorage("saved-notifications-messages", newSavedMessagesString)
+    }
+
+    private fun saveConversationToStorage(topic: String, peerAddress: String, createdAt: Long, context: ConversationContext?) {
+        val currentSavedConversationsString = getAsyncStorage("saved-notifications-conversations")
+        Log.d(TAG, "Got current saved conversations from storage: $currentSavedConversationsString")
+        var currentSavedConversations = listOf<SavedNotificationConversation>()
+        try {
+            currentSavedConversations = Klaxon().parseArray<SavedNotificationConversation>(currentSavedConversationsString ?: "[]") ?: listOf()
+        } catch (error: Exception) {
+            Log.d(TAG, "Could not parse saved messages from storage: $currentSavedConversationsString - $error")
+        }
+        val newConversationToSave = SavedNotificationConversation(
+            topic,
+            peerAddress,
+            createdAt,
+            context
+        )
+        currentSavedConversations += newConversationToSave
+        val newSavedConversationsString = Klaxon().toJsonString(currentSavedConversations)
+        setAsyncStorage("saved-notifications-conversations", newSavedConversationsString)
     }
 
     private fun byteStringToBase64(bs: ByteString): String {
@@ -438,17 +475,23 @@ class PushNotificationsService : FirebaseMessagingService() {
             val digest = MessageDigest.getInstance("SHA-256").digest(topicBytes)
             val encodedTopic = digest.joinToString("") { "%02x".format(it) }
             setKeychainValue("XMTP_CONVERSATION_$encodedTopic", Klaxon().toJsonString(conversationV2Data))
+            Log.d(TAG, "Persisted new conversation to keychain: XMTP_CONVERSATION_$encodedTopic\"")
         } catch (e: Exception) {
             Log.d(TAG, "Could not persist conversation: $e")
         }
     }
 
     private fun getSavedConversationTitle(topic: String): String {
-        val savedConversationDict = getAsyncStorage("conversation-$topic") ?: return ""
-        val parsedConversationDict = Klaxon().parse<ConversationDictData>(savedConversationDict)
-        // Keeping lensHandle & ensName for now but let's delete them soon
-        // and keep only title
-        return (((parsedConversationDict?.title ?: parsedConversationDict?.lensHandle) ?: parsedConversationDict?.ensName) ?: parsedConversationDict?.shortAddress) ?: ""
+        try {
+            Log.d(TAG, "Getting data conversation-$topic")
+            val savedConversationDict = getAsyncStorage("conversation-$topic") ?: return ""
+            val parsedConversationDict = Klaxon().parse<ConversationDictData>(savedConversationDict)
+            // Keeping lensHandle & ensName for now but let's delete them soon
+            // and keep only title
+            return (((parsedConversationDict?.title ?: parsedConversationDict?.lensHandle) ?: parsedConversationDict?.ensName) ?: parsedConversationDict?.shortAddress) ?: ""
+        } catch (e: Exception) {
+            return ""
+        }
     }
 
     private fun applicationInForeground(): Boolean {

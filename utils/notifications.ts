@@ -153,57 +153,61 @@ export const loadSavedNotificationMessagesToContext = async () => {
   try {
     const conversations = await loadSavedNotificationsConversations();
     await emptySavedNotificationsConversations();
-    const conversationsToSave = conversations.map((c: any) => {
-      let context = undefined;
-      // If conversationId is empty string we require at least some metadata…
-      if (
-        c.context &&
-        (c.context.conversationId ||
-          (c.context.metadata && Object.keys(c.context.metadata).length > 0))
-      ) {
-        context = {
-          conversationId: c.context.conversationId,
-          metadata: c.context.metadata,
+    if (conversations && conversations.length > 0) {
+      const conversationsToSave = conversations.map((c: any) => {
+        let context = undefined;
+        // If conversationId is empty string we require at least some metadata…
+        if (
+          c.context &&
+          (c.context.conversationId ||
+            (c.context.metadata && Object.keys(c.context.metadata).length > 0))
+        ) {
+          context = {
+            conversationId: c.context.conversationId,
+            metadata: c.context.metadata,
+          };
+        }
+        return {
+          topic: c.topic,
+          peerAddress: c.peerAddress,
+          createdAt: c.createdAt,
+          readUntil: 0,
+          pending: false,
+          context,
         };
-      }
-      return {
-        topic: c.topic,
-        peerAddress: c.peerAddress,
-        createdAt: c.createdAt,
-        readUntil: 0,
-        pending: false,
-        context,
-      };
-    });
-    await saveConversations(conversationsToSave);
+      });
+      await saveConversations(conversationsToSave);
+    }
 
     const messages = await loadSavedNotificationsMessages();
     await emptySavedNotificationsMessages();
-    messages.sort((m1: any, m2: any) => m1.sent - m2.sent);
-    await Promise.all(
-      messages.map((message: any) =>
-        saveMessages(
-          [
-            {
-              id: message.id,
-              senderAddress: message.senderAddress,
-              sent: message.sent,
-              content: message.content,
-              status: "sent",
-              sentViaConverse: !!message.sentViaConverse,
-              contentType: message.contentType || "xmtp.org/text:1.0",
-            },
-          ],
-          message.topic
+    if (messages && messages.length > 0) {
+      messages.sort((m1: any, m2: any) => m1.sent - m2.sent);
+      await Promise.all(
+        messages.map((message: any) =>
+          saveMessages(
+            [
+              {
+                id: message.id,
+                senderAddress: message.senderAddress,
+                sent: message.sent,
+                content: message.content,
+                status: "sent",
+                sentViaConverse: !!message.sentViaConverse,
+                contentType: message.contentType || "xmtp.org/text:1.0",
+              },
+            ],
+            message.topic
+          )
         )
-      )
-    );
+      );
+    }
 
     loadingSavedNotifications = false;
   } catch (e) {
     console.log("An error occured while loading saved notifications", e);
-    emptySavedNotificationsMessages();
     emptySavedNotificationsConversations();
+    emptySavedNotificationsMessages();
     loadingSavedNotifications = false;
   }
 };

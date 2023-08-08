@@ -1,7 +1,13 @@
 import { FlashList } from "@shopify/flash-list";
 import differenceInCalendarDays from "date-fns/differenceInCalendarDays";
 import React, { useCallback, useRef, useMemo } from "react";
-import { View, useColorScheme, StyleSheet, FlatList } from "react-native";
+import {
+  View,
+  useColorScheme,
+  StyleSheet,
+  FlatList,
+  Platform,
+} from "react-native";
 import Reanimated, {
   useAnimatedStyle,
   useSharedValue,
@@ -111,7 +117,10 @@ export default function Chat() {
 
   const insets = useSafeAreaInsets();
 
-  const { height: keyboardHeight } = useKeyboardAnimation();
+  const { height: _keyboardHeight } = useKeyboardAnimation();
+  const zeroValue = useSharedValue(0);
+  const keyboardHeight =
+    Platform.OS === "android" ? zeroValue : _keyboardHeight;
 
   const tertiary = tertiaryBackgroundColor(colorScheme);
 
