@@ -25,7 +25,7 @@ target 'Converse' do
 
   use_react_native!(
     :path => config[:reactNativePath],
-    :hermes_enabled => podfile_properties['hermesEnabled'],
+    :hermes_enabled => true,
     :fabric_enabled => flags[:fabric_enabled],
     # An absolute path to your application root.
     :app_path => "#{Pod::Config.instance.installation_root}/..",

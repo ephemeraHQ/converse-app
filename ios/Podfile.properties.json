@@ -1,3 +1,4 @@
 {
-  "hermesEnabled": true
+    "expo.jsEngine": "hermes",
+    "hermesEnabled": true
 }
