@@ -71,7 +71,7 @@ react {
 
 // Override `hermesEnabled` by `expo.jsEngine`
 ext {
-  hermesEnabled = (findProperty('expo.jsEngine') ?: "hermes") == "hermes"
+  hermesEnabled = (findProperty('hermesEnabled') ?: true)
 }
 
 /**
