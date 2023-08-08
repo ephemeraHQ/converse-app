@@ -9,7 +9,6 @@ import { StyleSheet, useColorScheme, View } from "react-native";
 import "./utils/splash/splash";
 import { KeyboardProvider } from "react-native-keyboard-controller";
 import { Provider as PaperProvider } from "react-native-paper";
-import { useRecentPicksPersistence } from "rn-emoji-keyboard";
 import * as Sentry from "sentry-expo";
 
 import XmtpState from "./components/XmtpState";
@@ -23,6 +22,7 @@ import {
 } from "./utils/colors";
 import mmkv from "./utils/mmkv";
 import { DEFAULT_EMOJIS, RECENT_EMOJI_STORAGE_KEY } from "./utils/reactions";
+import { useRecentPicksPersistence } from "./vendor/rn-emoji-keyboard";
 
 configureCoinbase({
   callbackURL: new URL(`https://${config.websiteDomain}/coinbase`),

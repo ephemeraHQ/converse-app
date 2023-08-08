@@ -1,17 +1,7 @@
-import { FlashList } from "@shopify/flash-list";
 import differenceInCalendarDays from "date-fns/differenceInCalendarDays";
 import React, { useCallback, useRef, useMemo } from "react";
-import {
-  View,
-  useColorScheme,
-  StyleSheet,
-  FlatList,
-  Platform,
-} from "react-native";
-import Reanimated, {
-  useAnimatedStyle,
-  useSharedValue,
-} from "react-native-reanimated";
+import { View, useColorScheme, StyleSheet, Platform } from "react-native";
+import { useAnimatedStyle, useSharedValue } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import {
@@ -21,7 +11,12 @@ import {
 } from "../../data/store/accountsStore";
 import { XmtpConversationWithUpdate } from "../../data/store/chatStore";
 import { useConversationContext } from "../../screens/Conversation";
-import { useKeyboardAnimation } from "../../utils/animations";
+import {
+  ReanimatedFlashList,
+  ReanimatedFlatList,
+  ReanimatedView,
+  useKeyboardAnimation,
+} from "../../utils/animations";
 import {
   backgroundColor,
   itemSeparatorColor,
@@ -32,14 +27,6 @@ import { Recommendation } from "../Recommendations";
 import ChatInput from "./ChatInput";
 import CachedChatMessage, { MessageToDisplay } from "./ChatMessage";
 import ChatPlaceholder from "./ChatPlaceholder";
-
-const AnimatedView = Reanimated.createAnimatedComponent(View);
-const AnimatedFlatList = Reanimated.createAnimatedComponent(
-  FlatList
-) as typeof FlatList;
-const AnimatedFlashList = Reanimated.createAnimatedComponent(
-  FlashList
-) as typeof FlashList;
 
 const getListArray = (
   xmtpAddress?: string,
@@ -197,15 +184,15 @@ export default function Chat() {
   );
 
   const AnimatedListView = pendingConversationRef.current
-    ? AnimatedFlatList
-    : AnimatedFlashList;
+    ? ReanimatedFlatList
+    : ReanimatedFlashList;
 
   return (
     <View
       style={styles.chatContainer}
       key={`chat-${conversation?.peerAddress}-${conversation?.context?.conversationId}-${isBlockedPeer}`}
     >
-      <AnimatedView style={chatContentStyle}>
+      <ReanimatedView style={chatContentStyle}>
         {conversation && listArray.length > 1 && !isBlockedPeer && (
           <AnimatedListView
             contentContainerStyle={styles.chat}
@@ -233,17 +220,17 @@ export default function Chat() {
         {showPlaceholder && (
           <ChatPlaceholder messagesCount={listArray.length - 1} />
         )}
-      </AnimatedView>
+      </ReanimatedView>
       {showChatInput && (
         <>
-          <AnimatedView
+          <ReanimatedView
             style={textInputStyle}
             onLayout={(e) => {
               chatInputHeight.value = e.nativeEvent.layout.height;
             }}
           >
             <ChatInput />
-          </AnimatedView>
+          </ReanimatedView>
           <View
             style={[
               styles.inputBottomFiller,

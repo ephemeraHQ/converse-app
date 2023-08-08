@@ -7,7 +7,6 @@ import {
   TouchableWithoutFeedback,
   useColorScheme,
 } from "react-native";
-import EmojiPicker from "rn-emoji-keyboard";
 
 import { useSettingsStore, useUserStore } from "../../data/store/accountsStore";
 import { useConversationContext } from "../../screens/Conversation";
@@ -21,6 +20,7 @@ import {
   getEmojiName,
   removeReactionFromMessage,
 } from "../../utils/reactions";
+import EmojiPicker from "../../vendor/rn-emoji-keyboard";
 import { showActionSheetWithOptions } from "../StateHandlers/ActionSheetStateHandler";
 import { MessageToDisplay } from "./ChatMessage";
 
