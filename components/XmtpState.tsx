@@ -68,7 +68,7 @@ export const getLocalXmtpConversationForTopic = async (
   return conversation;
 };
 
-export const sendPreparedMessages = async (
+const sendPreparedMessages = async (
   preparedMessages: Map<string, PreparedMessage>
 ) => {
   for (const id of preparedMessages.keys()) {

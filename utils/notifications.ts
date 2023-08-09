@@ -70,27 +70,6 @@ export const subscribeToNotifications = async (
   }
 };
 
-export const subscribeToNewTopic = async (topic: string): Promise<void> => {
-  await Notifications.setNotificationChannelAsync("default", {
-    name: "Converse Notifications",
-    importance: Notifications.AndroidImportance.MAX,
-    showBadge: false,
-  });
-  const expoTokenQuery = await Notifications.getExpoPushTokenAsync({
-    projectId: config.expoProjectId,
-  });
-  expoPushToken = expoTokenQuery.data;
-  try {
-    await api.post("/api/subscribe/append", {
-      expoToken: expoPushToken,
-      topic,
-    });
-  } catch (e: any) {
-    console.log("Could not subscribe to new topic");
-    console.log(e?.message);
-  }
-};
-
 export const disablePushNotifications = async (): Promise<void> => {
   if (expoPushToken) {
     try {

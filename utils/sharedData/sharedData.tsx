@@ -18,9 +18,6 @@ export const saveConversationDict = (topic: string, conversationDict: any) =>
     appGroup
   );
 
-export const loadConversationDict = (topic: string) =>
-  SharedGroupPreferences.getItem(`conversation-${topic}`, appGroup);
-
 export const saveXmtpEnv = () =>
   SharedGroupPreferences.setItem("xmtp-env", config.xmtpEnv, appGroup);
 
@@ -43,16 +40,6 @@ export const emptySavedNotificationsConversations = () =>
 export const saveApiURI = () =>
   SharedGroupPreferences.setItem("api-uri", config.apiURI, appGroup);
 
-export const saveLoggedXmtpAddress = (address: string) =>
-  SharedGroupPreferences.setItem("xmtp-address", address, appGroup);
-
-export const deleteLoggedXmtpAddress = () =>
-  SharedGroupPreferences.setItem("xmtp-address", "", appGroup);
-
-export const getLoggedXmtpAddress = () =>
-  SharedGroupPreferences.getItem("xmtp-address", appGroup);
-
 export const resetSharedData = () => {
   emptySavedNotificationsMessages();
-  deleteLoggedXmtpAddress();
 };

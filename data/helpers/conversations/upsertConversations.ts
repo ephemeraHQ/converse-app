@@ -61,7 +61,7 @@ export const saveConversations = async (
   }
 };
 
-export const setupAndSaveConversation = async (
+const setupAndSaveConversation = async (
   conversation: XmtpConversation
 ): Promise<XmtpConversation> => {
   await upgradePendingConversationIfNeeded(conversation);

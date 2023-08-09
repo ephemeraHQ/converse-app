@@ -8,7 +8,7 @@ import { useConversationContext } from "../../screens/Conversation";
 import { blockPeer, reportMessage } from "../../utils/api";
 import { isAttachmentMessage } from "../../utils/attachment";
 import { actionSheetColors } from "../../utils/colors";
-import { eventEmitter } from "../../utils/events";
+import { converseEventEmitter } from "../../utils/events";
 import {
   MessageReaction,
   addReactionToMessage,
@@ -153,7 +153,7 @@ export default function ChatMessageActions({
         .onEnd(() => {
           if (isAttachment) {
             // Transfering attachment opening intent to component
-            eventEmitter.emit(`openAttachmentForMessage-${message.id}`);
+            converseEventEmitter.emit(`openAttachmentForMessage-${message.id}`);
           }
         })
         .runOnJS(true),

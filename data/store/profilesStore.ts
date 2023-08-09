@@ -31,7 +31,7 @@ export type ProfileSocials = {
   unstoppableDomains?: UnstoppableDomain[];
 };
 
-export type ProfileByAddress = {
+type ProfileByAddress = {
   [address: string]: { socials: ProfileSocials; updatedAt: number } | undefined;
 };
 

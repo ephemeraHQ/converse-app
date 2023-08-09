@@ -64,15 +64,6 @@ export const emptySavedNotificationsMessages = () =>
 
 export const saveApiURI = () => AsyncStorage.setItem("api-uri", config.apiURI);
 
-export const saveLoggedXmtpAddress = (address: string) =>
-  AsyncStorage.setItem("xmtp-address", address);
-
-export const deleteLoggedXmtpAddress = () =>
-  AsyncStorage.removeItem("xmtp-address");
-
-export const getLoggedXmtpAddress = () => AsyncStorage.getItem("xmtp-address");
-
 export const resetSharedData = () => {
   emptySavedNotificationsMessages();
-  deleteLoggedXmtpAddress();
 };

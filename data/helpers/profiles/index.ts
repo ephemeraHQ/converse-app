@@ -18,10 +18,7 @@ export const loadProfilesByAddress = async () => {
   return profileByAddress;
 };
 
-export const loadProfileByAddress = async (address: string) =>
-  profileRepository.findOne({ where: { address } });
-
-export const getSocials = (profileEntity: Profile): ProfileSocials => {
+const getSocials = (profileEntity: Profile): ProfileSocials => {
   try {
     const parsed = JSON.parse(profileEntity.socials);
     return parsed;
