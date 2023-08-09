@@ -369,7 +369,7 @@ type ConversationContextType = {
   messageToPrefill: string;
 };
 
-export const ConversationContext = createContext<ConversationContextType>({
+const ConversationContext = createContext<ConversationContextType>({
   conversation: undefined,
   inputRef: createRef() as MutableRefObject<TextInputWithValue | undefined>,
   isBlockedPeer: false,

@@ -7,7 +7,7 @@ import { zustandMMKVStorage } from "../../utils/mmkv";
 // not all of them are really settings selected
 // by users (i.e. ephemeralAccount is setup when user logs)
 
-export type NotificationsSettings = {
+type NotificationsSettings = {
   showNotificationScreen: boolean;
 };
 

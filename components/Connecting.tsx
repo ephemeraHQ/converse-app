@@ -6,7 +6,7 @@ import { textPrimaryColor } from "../utils/colors";
 import { pick } from "../utils/objects";
 import ActivityIndicator from "./ActivityIndicator/ActivityIndicator";
 
-export const useShouldShowConnecting = () => {
+const useShouldShowConnecting = () => {
   const isInternetReachable = useAppStore((s) => s.isInternetReachable);
   const { localClientConnected, webviewClientConnected, reconnecting } =
     useChatStore((s) =>

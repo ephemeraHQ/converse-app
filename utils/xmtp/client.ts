@@ -9,8 +9,6 @@ import { Client, Signer } from "../../vendor/xmtp-js/src";
 
 const env = config.xmtpEnv === "production" ? "production" : "dev";
 
-export type TimestampByConversation = { [topic: string]: number };
-
 export const isOnXmtp = async (address: string) =>
   Client.canMessage(address, {
     env,

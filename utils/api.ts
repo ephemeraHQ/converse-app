@@ -105,15 +105,6 @@ type Profile = {
   unstoppableDomains?: UnstoppableDomain[];
 };
 
-export const getProfileForAddress = async (
-  address: string
-): Promise<Profile> => {
-  const { data } = await api.get("/api/profile", {
-    params: { address },
-  });
-  return data;
-};
-
 export const getProfilesForAddresses = async (
   addresses: string[]
 ): Promise<{ [address: string]: Profile }> => {

@@ -4,8 +4,6 @@ import { useEffect, useRef } from "react";
 import { useAppStore } from "../../data/store/appStore";
 import { pick } from "../../utils/objects";
 
-export const refreshNetworkState = NetInfo.refresh;
-
 export default function NetworkStateHandler() {
   const { isInternetReachable, setIsInternetReachable } = useAppStore((s) =>
     pick(s, ["isInternetReachable", "setIsInternetReachable"])

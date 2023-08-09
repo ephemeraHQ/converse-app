@@ -1,4 +1,4 @@
-export const ALLOWED_UNS_SUFFIXES = [
+const ALLOWED_UNS_SUFFIXES = [
   ".crypto",
   ".bitcoin",
   ".blockchain",

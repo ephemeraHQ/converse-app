@@ -1,23 +1,9 @@
-import {
-  Attachment,
-  RemoteAttachment,
-} from "@xmtp/content-type-remote-attachment";
+import { RemoteAttachment } from "@xmtp/content-type-remote-attachment";
 
 export type SerializedAttachmentContent = {
   filename: string;
   mimeType: string;
   data: string;
-};
-
-export const deserializeAttachmentContent = (
-  serializedAttachment: string
-): Attachment => {
-  const parsedAttachment: SerializedAttachmentContent =
-    JSON.parse(serializedAttachment);
-  return {
-    ...parsedAttachment,
-    data: Buffer.from(parsedAttachment.data, "base64"),
-  };
 };
 
 export type SerializedRemoteAttachmentContent = {

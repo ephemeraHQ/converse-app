@@ -11,7 +11,7 @@ import {
 
 // Chat data for each user
 
-export type XmtpConversationContext = {
+type XmtpConversationContext = {
   conversationId: string;
   metadata: {
     [k: string]: string;
@@ -369,10 +369,7 @@ export const initChatStore = (account: string) => {
   return recommendationsStore;
 };
 
-export const isMessageUpdated = (
-  oldMessage: XmtpMessage,
-  newMessage: XmtpMessage
-) => {
+const isMessageUpdated = (oldMessage: XmtpMessage, newMessage: XmtpMessage) => {
   const keysChangesToRerender: (keyof XmtpMessage)[] = ["id", "sent", "status"];
   return keysChangesToRerender.some((k) => {
     const keyUpdated = oldMessage[k] !== newMessage[k];

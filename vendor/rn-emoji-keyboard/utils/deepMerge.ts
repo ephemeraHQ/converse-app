@@ -15,7 +15,7 @@ export const deepMerge = <T extends object>(
       // @ts-ignore
       result[key] = deepMerge(
         source[key],
-        additional[key]
+        additional[key] as any
       ) as unknown as T[typeof key];
     } else {
       // @ts-ignore
