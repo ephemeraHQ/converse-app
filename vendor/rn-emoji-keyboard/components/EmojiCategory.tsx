@@ -1,18 +1,13 @@
 import * as React from "react";
 
-import {
-  StyleSheet,
-  View,
-  Text,
-  FlatList,
-  ListRenderItemInfo,
-} from "react-native";
+import { StyleSheet, View, Text } from "react-native";
 import type { EmojisByCategory, EmojiSizes, JsonEmoji } from "../types";
 import { SingleEmoji } from "./SingleEmoji";
 import { KeyboardContext } from "../contexts/KeyboardContext";
 import { useKeyboardStore } from "../store/useKeyboardStore";
 import { parseEmoji } from "../utils/parseEmoji";
 import { removeSkinToneModifier } from "../utils/skinToneSelectorUtils";
+import { FlashList } from "@shopify/flash-list";
 
 const emptyEmoji: JsonEmoji = {
   emoji: "",
@@ -27,7 +22,7 @@ export const EmojiCategory = React.memo(
     setKeyboardScrollOffsetY,
   }: {
     item: EmojisByCategory;
-    setKeyboardScrollOffsetY: React.Dispatch<React.SetStateAction<number>>;
+    setKeyboardScrollOffsetY: (y: number) => void;
   }) => {
     const {
       onEmojiSelected,
@@ -57,14 +52,14 @@ export const EmojiCategory = React.memo(
       }
     }, [numberOfColumns, data]);
 
-    const getItemLayout = React.useCallback(
-      (_: ArrayLike<JsonEmoji> | null | undefined, index: number) => ({
-        length: emojiSize ? emojiSize : 0,
-        offset: emojiSize * Math.ceil(index / numberOfColumns),
-        index,
-      }),
-      [emojiSize, numberOfColumns]
-    );
+    // const getItemLayout = React.useCallback(
+    //   (_: ArrayLike<JsonEmoji> | null | undefined, index: number) => ({
+    //     length: emojiSize ? emojiSize : 0,
+    //     offset: emojiSize * Math.ceil(index / numberOfColumns),
+    //     index,
+    //   }),
+    //   [emojiSize, numberOfColumns]
+    // );
 
     const handleEmojiPress = React.useCallback(
       (emoji: JsonEmoji) => {
@@ -97,20 +92,19 @@ export const EmojiCategory = React.memo(
     );
 
     const renderItem = React.useCallback(
-      (props: ListRenderItemInfo<JsonEmoji>) => {
+      ({ item, index }: { item: JsonEmoji; index: number }) => {
         const recentlyUsed = keyboardState?.recentlyUsed || [];
         const recentlyUsedEmoji = recentlyUsed?.find(
-          (emoji) => emoji.name === props.item.name
+          (emoji) => emoji.name === item.name
         );
 
-        const isSelected =
-          selectedEmojis && selectedEmojis.includes(props.item.name);
+        const isSelected = selectedEmojis && selectedEmojis.includes(item.name);
 
         return (
           <SingleEmoji
-            {...props}
+            index={index}
             isSelected={isSelected}
-            item={recentlyUsedEmoji || props.item}
+            item={recentlyUsedEmoji || item}
             emojiSize={emojiSize}
             onPress={handleEmojiPress}
             onLongPress={handleEmojiLongPress}
@@ -136,13 +130,17 @@ export const EmojiCategory = React.memo(
         themeStyles.emoji.selected,
       ]
     );
-    const handleOnScroll = (ev: {
-      nativeEvent: { contentOffset: { y: number } };
-    }) => {
-      // setKeyboardScrollOffsetY(ev.nativeEvent.contentOffset.y);
-      clearEmojiTonesData();
-    };
-    const keyExtractor = React.useCallback((item: JsonEmoji) => item.name, []);
+    // const handleOnScroll = (ev: {
+    //   nativeEvent: { contentOffset: { y: number } };
+    // }) => {
+    //   // setKeyboardScrollOffsetY(ev.nativeEvent.contentOffset.y);
+    //   clearEmojiTonesData();
+    // };
+    // const keyExtractor = React.useCallback(
+    //   (item: JsonEmoji) =>
+    //     `${item.emoji}-${item.name}-${item.toneEnabled}-${item.v}`,
+    //   []
+    // );
 
     return (
       <View style={[styles.container, { width }]}>
@@ -157,27 +155,30 @@ export const EmojiCategory = React.memo(
             {translation[title]}
           </Text>
         )}
-        <FlatList
-          data={[...data, ...empty]}
-          keyExtractor={keyExtractor}
-          numColumns={numberOfColumns}
-          renderItem={renderItem}
-          getItemLayout={getItemLayout}
-          onScroll={handleOnScroll}
-          ListFooterComponent={() => (
-            <View
-              style={
-                categoryPosition === "floating"
-                  ? styles.footerFloating
-                  : styles.footer
-              }
-            />
-          )}
-          // initialNumToRender={10}
-          // windowSize={16}
-          // maxToRenderPerBatch={5}
-          keyboardShouldPersistTaps="handled"
-        />
+        <View style={{ backgroundColor: "green", flex: 1 }}>
+          <FlashList
+            data={[...data, ...empty]}
+            // keyExtractor={keyExtractor}
+            numColumns={numberOfColumns}
+            renderItem={renderItem}
+            estimatedItemSize={emojiSize}
+            // getItemLayout={getItemLayout}
+            // onScroll={handleOnScroll}
+            ListFooterComponent={() => (
+              <View
+                style={
+                  categoryPosition === "floating"
+                    ? styles.footerFloating
+                    : styles.footer
+                }
+              />
+            )}
+            // initialNumToRender={10}
+            // windowSize={16}
+            // maxToRenderPerBatch={5}
+            keyboardShouldPersistTaps="handled"
+          />
+        </View>
       </View>
     );
   },
