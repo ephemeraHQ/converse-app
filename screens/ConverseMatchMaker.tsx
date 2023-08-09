@@ -10,7 +10,7 @@ import {
 } from "react-native";
 
 import AndroidBackAction from "../components/AndroidBackAction";
-import Recommendations from "../components/Recommendations";
+import Recommendations from "../components/Recommendations/Recommendations";
 import { backgroundColor } from "../utils/colors";
 import { NavigationParamList } from "./Main";
 

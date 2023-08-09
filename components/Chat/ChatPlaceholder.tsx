@@ -21,7 +21,7 @@ import { getProfileData } from "../../utils/profile";
 import { conversationName } from "../../utils/str";
 import ActivityIndicator from "../ActivityIndicator/ActivityIndicator";
 import Button from "../Button/Button";
-import { Recommendation } from "../Recommendations";
+import { Recommendation } from "../Recommendations/Recommendation";
 import { showActionSheetWithOptions } from "../StateHandlers/ActionSheetStateHandler";
 
 type Props = {
