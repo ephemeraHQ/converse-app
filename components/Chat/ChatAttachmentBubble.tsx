@@ -14,7 +14,7 @@ import RNFS from "react-native-fs";
 
 import { SerializedAttachmentContent } from "../../utils/attachment";
 import { textPrimaryColor } from "../../utils/colors";
-import { eventEmitter } from "../../utils/events";
+import { converseEventEmitter } from "../../utils/events";
 import { getImageSize, isImageMimetype } from "../../utils/media";
 import { sentryTrackMessage } from "../../utils/sentry";
 import { sendMessageToWebview } from "../XmtpWebview";
@@ -239,12 +239,12 @@ export default function ChatAttachmentBubble({ message }: Props) {
   ];
 
   useEffect(() => {
-    eventEmitter.on(
+    converseEventEmitter.on(
       `openAttachmentForMessage-${message.id}`,
       clickedOnAttachmentBubble
     );
     return () => {
-      eventEmitter.off(
+      converseEventEmitter.off(
         `openAttachmentForMessage-${message.id}`,
         clickedOnAttachmentBubble
       );

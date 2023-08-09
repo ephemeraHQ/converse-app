@@ -42,7 +42,7 @@ import {
   textSecondaryColor,
 } from "../utils/colors";
 import { getAddressForPeer } from "../utils/eth";
-import { eventEmitter } from "../utils/events";
+import { converseEventEmitter } from "../utils/events";
 import { pick } from "../utils/objects";
 import { sentryTrackMessage } from "../utils/sentry";
 import { getTitleFontScale, TextInputWithValue } from "../utils/str";
@@ -248,7 +248,7 @@ const Conversation = ({
 
   const inviteToConverse = useCallback(() => {
     const inviteText = `I am using Converse, the fastest XMTP client, as my web3 messaging app. You can download the app here: https://${config.websiteDomain}/`;
-    eventEmitter.emit("setCurrentConversationInputValue", inviteText);
+    converseEventEmitter.emit("setCurrentConversationInputValue", inviteText);
     textInputRef.current?.focus();
     setShowInvite({ show: true, banner: false });
     AsyncStorage.setItem(`converse-invited-${peerAddress}`, "true");
