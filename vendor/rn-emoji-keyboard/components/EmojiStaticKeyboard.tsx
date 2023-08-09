@@ -9,7 +9,6 @@ import {
   SafeAreaView,
   NativeSyntheticEvent,
   NativeScrollEvent,
-  Platform,
 } from "react-native";
 import type { EmojisByCategory } from "../types";
 import { EmojiCategory } from "./EmojiCategory";
@@ -19,9 +18,6 @@ import { SearchBar } from "./SearchBar";
 import { useKeyboardStore } from "../store/useKeyboardStore";
 import { ConditionalContainer } from "./ConditionalContainer";
 import { SkinTones } from "./SkinTones";
-
-const CATEGORY_ELEMENT_WIDTH = 37;
-const isAndroid = Platform.OS === "android";
 
 export let keyboardScrollOffsetY = 0;
 const setKeyboardScrollOffsetY = (offset: number) => {
@@ -47,7 +43,7 @@ export const EmojiStaticKeyboard = React.memo(
       enableCategoryChangeAnimation,
     } = React.useContext(KeyboardContext);
     const { keyboardState } = useKeyboardStore();
-    const flatListRef = React.useRef<FlatList>(null);
+    const flatListRef = React.useRef<FlatList<any>>(null);
 
     const getItemLayout = React.useCallback(
       (_: ArrayLike<EmojisByCategory> | null | undefined, index: number) => ({
@@ -59,10 +55,10 @@ export const EmojiStaticKeyboard = React.memo(
     );
 
     const renderItem = React.useCallback(
-      (props: any) => (
+      ({ item }: { item: EmojisByCategory }) => (
         <EmojiCategory
+          item={item}
           setKeyboardScrollOffsetY={setKeyboardScrollOffsetY}
-          {...props}
         />
       ),
       []
@@ -84,15 +80,6 @@ export const EmojiStaticKeyboard = React.memo(
       (item: EmojisByCategory) => item.title,
       []
     );
-    const scrollNav = React.useRef(new Animated.Value(0)).current;
-
-    const handleScroll = React.useCallback(
-      (el: NativeSyntheticEvent<NativeScrollEvent>) => {
-        const index = el.nativeEvent.contentOffset.x / width;
-        scrollNav.setValue(index * CATEGORY_ELEMENT_WIDTH);
-      },
-      [scrollNav, width]
-    );
 
     const onScrollEnd = React.useCallback(
       (el: NativeSyntheticEvent<NativeScrollEvent>) => {
@@ -101,6 +88,15 @@ export const EmojiStaticKeyboard = React.memo(
       },
       [setActiveCategoryIndex, width]
     );
+    const scrollNav = React.useRef(new Animated.Value(0)).current;
+
+    // const handleScroll = React.useCallback(
+    //   (el: NativeSyntheticEvent<NativeScrollEvent>) => {
+    //     const index = el.nativeEvent.contentOffset.x / width;
+    //     scrollNav.setValue(index * CATEGORY_ELEMENT_WIDTH);
+    //   },
+    //   [scrollNav, width]
+    // );
 
     return (
       <View
@@ -129,26 +125,31 @@ export const EmojiStaticKeyboard = React.memo(
         >
           <>
             {enableSearchBar && <SearchBar />}
-            <Animated.FlatList<EmojisByCategory>
-              extraData={[keyboardState.recentlyUsed.length, searchPhrase]}
-              data={renderList}
-              keyExtractor={keyExtractor}
-              renderItem={renderItem}
-              removeClippedSubviews={isAndroid}
-              ref={flatListRef}
-              onScrollToIndexFailed={onCategoryChangeFailed}
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              pagingEnabled
-              scrollEventThrottle={16}
-              getItemLayout={getItemLayout}
-              scrollEnabled={enableCategoryChangeGesture}
-              initialNumToRender={1}
-              maxToRenderPerBatch={1}
-              onScroll={handleScroll}
-              keyboardShouldPersistTaps="handled"
-              onMomentumScrollEnd={onScrollEnd}
-            />
+            <View style={{ flex: 1 }}>
+              <FlatList
+                extraData={[keyboardState.recentlyUsed.length, searchPhrase]}
+                data={renderList}
+                keyExtractor={keyExtractor}
+                renderItem={renderItem}
+                // removeClippedSubviews={isAndroid}
+                ref={flatListRef}
+                onScrollToIndexFailed={onCategoryChangeFailed}
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                pagingEnabled
+                // estimatedItemSize={Dimensions.get("window").width}
+                scrollEventThrottle={16}
+                getItemLayout={getItemLayout}
+                scrollEnabled={enableCategoryChangeGesture}
+                initialNumToRender={10}
+                maxToRenderPerBatch={10}
+                windowSize={2}
+                // onScroll={handleScroll}
+                keyboardShouldPersistTaps="handled"
+                onMomentumScrollEnd={onScrollEnd}
+              />
+            </View>
+
             <Categories
               scrollNav={enableCategoryChangeGesture ? scrollNav : undefined}
             />

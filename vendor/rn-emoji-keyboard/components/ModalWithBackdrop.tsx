@@ -4,7 +4,6 @@ import {
   useWindowDimensions,
   StyleSheet,
   TouchableOpacity,
-  View,
   ModalProps,
 } from "react-native";
 import { KeyboardContext } from "../contexts/KeyboardContext";
@@ -32,11 +31,11 @@ export const ModalWithBackdrop = ({
 }: ModalWithBackdropProps & ModalProps) => {
   const { height: screenHeight } = useWindowDimensions();
   const translateY = useSharedValue(screenHeight);
-  const { theme, disableSafeArea } = React.useContext(KeyboardContext);
+  const { disableSafeArea } = React.useContext(KeyboardContext);
   const handleTimeout = useTimeout();
 
   React.useEffect(() => {
-    translateY.value = withTiming(isOpen ? 0 : screenHeight, { duration: 300 });
+    translateY.value = withTiming(isOpen ? 0 : screenHeight, { duration: 400 });
   }, [isOpen, screenHeight, translateY]);
 
   const animatedStyle = useAnimatedStyle(() => {
@@ -55,13 +54,13 @@ export const ModalWithBackdrop = ({
     return { backgroundColor };
   });
   React.useEffect(() => {
-    backgroundColorValue.value = withTiming(isOpen ? 1 : 0, { duration: 300 });
+    backgroundColorValue.value = withTiming(isOpen ? 1 : 0, { duration: 400 });
   }, [isOpen]);
 
   const handleClose = React.useCallback(() => {
-    translateY.value = withTiming(screenHeight, { duration: 300 });
-    backgroundColorValue.value = withTiming(0, { duration: 300 });
-    handleTimeout(() => backdropPress(), 40);
+    translateY.value = withTiming(screenHeight, { duration: 400 });
+    backgroundColorValue.value = withTiming(0, { duration: 600 });
+    handleTimeout(() => backdropPress(), 600);
   }, []);
 
   return (

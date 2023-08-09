@@ -33,7 +33,10 @@ type ProviderProps = Partial<KeyboardProps> &
 
 export const KeyboardProvider: React.FC<ProviderProps> = React.memo((props) => {
   const { width } = useWindowDimensions();
-  const [activeCategoryIndex, setActiveCategoryIndex] = React.useState(0);
+  const [activeCategoryIndex, _setActiveCategoryIndex] = React.useState(0);
+  const setActiveCategoryIndex = (index: number) => {
+    _setActiveCategoryIndex(index);
+  };
   const [shouldAnimateScroll, setShouldAnimateScroll] = React.useState(true);
   const [searchPhrase, setSearchPhrase] = React.useState("");
   const { keyboardState } = useKeyboardStore();
