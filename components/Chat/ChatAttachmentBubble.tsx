@@ -10,12 +10,15 @@ import {
   useColorScheme,
   View,
 } from "react-native";
-import RNFS from "react-native-fs";
 
-import { SerializedAttachmentContent } from "../../utils/attachment";
+import {
+  SerializedAttachmentContent,
+  getLocalAttachment,
+  handleAttachmentContent,
+} from "../../utils/attachment";
 import { textPrimaryColor } from "../../utils/colors";
 import { converseEventEmitter } from "../../utils/events";
-import { getImageSize, isImageMimetype } from "../../utils/media";
+import { isImageMimetype } from "../../utils/media";
 import { sentryTrackMessage } from "../../utils/sentry";
 import { sendMessageToWebview } from "../XmtpWebview";
 import { MessageToDisplay } from "./ChatMessage";
@@ -39,42 +42,15 @@ export default function ChatAttachmentBubble({ message }: Props) {
     imageSize: undefined as undefined | { height: number; width: number },
   });
 
-  const saveAndDisplayAttachment = useCallback(
+  const saveAndDisplay = useCallback(
     async (attachmentContent: SerializedAttachmentContent) => {
       setAttachment((a) => ({ ...a, loading: true }));
-      const messageFolder = `${RNFS.DocumentDirectoryPath}/messages/${message.id}`;
-      const attachmentJsonPath = `${messageFolder}/attachment.json`;
-      // Create folder
-      await RNFS.mkdir(messageFolder, {
-        NSURLIsExcludedFromBackupKey: true,
-      });
-      const attachmentPath = `${messageFolder}/${attachmentContent.filename}`;
-      const isImage = isImageMimetype(attachmentContent.mimeType);
-      // Let's cache the file and decoded information
-      await RNFS.writeFile(attachmentPath, attachmentContent.data, "base64");
-      const imageSize = isImage
-        ? await getImageSize(`file://${attachmentPath}`)
-        : undefined;
-      await RNFS.writeFile(
-        attachmentJsonPath,
-        JSON.stringify({
-          filename: attachmentContent.filename,
-          mimeType: attachmentContent.mimeType,
-          imageSize,
-        }),
-        "utf8"
+      const result = await handleAttachmentContent(
+        message.id,
+        attachmentContent
       );
 
-      setAttachment({
-        mediaType: isImage ? "IMAGE" : "UNSUPPORTED",
-        loading: false,
-        imageSize,
-        contentLength: 0,
-        mediaURL: attachmentPath,
-        filename: attachmentContent.filename,
-        mimeType: attachmentContent.mimeType,
-        error: false,
-      });
+      setAttachment({ ...result, loading: false, error: false });
     },
     [message.id]
   );
@@ -93,10 +69,10 @@ export default function ChatAttachmentBubble({ message }: Props) {
           setAttachment((a) => ({ ...a, error: true, loading: false }));
           return;
         }
-        saveAndDisplayAttachment(attachmentResult);
+        saveAndDisplay(attachmentResult);
       }
     );
-  }, [message.content, saveAndDisplayAttachment]);
+  }, [message.content, saveAndDisplay]);
 
   const saveLocalAttachment = useCallback(
     async (attachmentContent: SerializedAttachmentContent) => {
@@ -107,9 +83,9 @@ export default function ChatAttachmentBubble({ message }: Props) {
         setAttachment((a) => ({ ...a, error: true, loading: false }));
         return;
       }
-      saveAndDisplayAttachment(attachmentContent);
+      saveAndDisplay(attachmentContent);
     },
-    [saveAndDisplayAttachment]
+    [saveAndDisplay]
   );
 
   const openInWebview = useCallback(async () => {
@@ -136,39 +112,10 @@ export default function ChatAttachmentBubble({ message }: Props) {
 
   useEffect(() => {
     const go = async () => {
-      const messageFolder = `${RNFS.DocumentDirectoryPath}/messages/${message.id}`;
-      const attachmentJsonPath = `${messageFolder}/attachment.json`;
-      const attachmentExists = await RNFS.exists(attachmentJsonPath);
-      if (attachmentExists) {
-        try {
-          const attachmentJsonContent = await RNFS.readFile(
-            attachmentJsonPath,
-            "utf8"
-          );
-          const messageAttachmentData = JSON.parse(attachmentJsonContent);
-          const supportedMediaType = isImageMimetype(
-            messageAttachmentData.mimeType
-          );
-          const attachmentPath = `${messageFolder}/${messageAttachmentData.filename}`;
-          const fileExists = await RNFS.exists(attachmentPath);
-          if (fileExists) {
-            // If we have the file locally let's display
-            // it or have a link
-            setAttachment({
-              mediaType: supportedMediaType ? "IMAGE" : "UNSUPPORTED",
-              loading: false,
-              mimeType: messageAttachmentData.mimeType,
-              imageSize: messageAttachmentData.imageSize,
-              mediaURL: attachmentPath,
-              contentLength: 0,
-              filename: messageAttachmentData.filename,
-              error: false,
-            });
-            return;
-          }
-        } catch (e) {
-          console.log(e);
-        }
+      const localAttachment = await getLocalAttachment(message.id);
+      if (localAttachment) {
+        setAttachment({ ...localAttachment, loading: false, error: false });
+        return;
       }
 
       // Either remote or direct attachement (< 1MB)

@@ -9,7 +9,6 @@ import {
 } from "react-native";
 
 import SendButton from "../../assets/send-button.svg";
-import { useConversationContext } from "../../screens/Conversation";
 import {
   actionSecondaryColor,
   backgroundColor,
@@ -19,6 +18,7 @@ import {
   textPrimaryColor,
   textSecondaryColor,
 } from "../../utils/colors";
+import { useConversationContext } from "../../utils/conversation";
 import { converseEventEmitter } from "../../utils/events";
 import { sendMessage } from "../../utils/message";
 import { TextInputWithValue } from "../../utils/str";

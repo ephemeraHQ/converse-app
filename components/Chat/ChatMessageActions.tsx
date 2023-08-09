@@ -4,10 +4,10 @@ import { Alert, ColorSchemeName, Platform, useColorScheme } from "react-native";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 
 import { useSettingsStore, useUserStore } from "../../data/store/accountsStore";
-import { useConversationContext } from "../../screens/Conversation";
 import { blockPeer, reportMessage } from "../../utils/api";
 import { isAttachmentMessage } from "../../utils/attachment";
 import { actionSheetColors } from "../../utils/colors";
+import { useConversationContext } from "../../utils/conversation";
 import { converseEventEmitter } from "../../utils/events";
 import {
   MessageReaction,

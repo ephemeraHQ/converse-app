@@ -1,16 +1,8 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { isAddress } from "ethers/lib/utils";
-import React, {
-  useCallback,
-  useEffect,
-  useState,
-  useRef,
-  MutableRefObject,
-  createRef,
-} from "react";
+import React, { useCallback, useEffect, useState, useRef } from "react";
 import {
-  Alert,
   Platform,
   StyleSheet,
   TouchableOpacity,
@@ -18,7 +10,6 @@ import {
   View,
 } from "react-native";
 import { gestureHandlerRootHOC } from "react-native-gesture-handler";
-import { createContext, useContextSelector } from "use-context-selector";
 
 import Button from "../components/Button/Button";
 import ConverseChat from "../components/Chat/Chat";
@@ -27,12 +18,8 @@ import InviteBanner from "../components/InviteBanner";
 import Picto from "../components/Picto/Picto";
 import { getLocalXmtpConversationForTopic } from "../components/XmtpState";
 import config from "../config";
-import {
-  cleanupPendingConversations,
-  createPendingConversation,
-} from "../data/helpers/conversations/pendingConversations";
+import { cleanupPendingConversations } from "../data/helpers/conversations/pendingConversations";
 import { useChatStore, useSettingsStore } from "../data/store/accountsStore";
-import { XmtpConversationWithUpdate } from "../data/store/chatStore";
 import { userExists } from "../utils/api";
 import {
   backgroundColor,
@@ -41,12 +28,13 @@ import {
   textPrimaryColor,
   textSecondaryColor,
 } from "../utils/colors";
-import { getAddressForPeer } from "../utils/eth";
+import {
+  ConversationContext,
+  openMainConversationWithPeer,
+} from "../utils/conversation";
 import { converseEventEmitter } from "../utils/events";
 import { pick } from "../utils/objects";
-import { sentryTrackMessage } from "../utils/sentry";
 import { getTitleFontScale, TextInputWithValue } from "../utils/str";
-import { isOnXmtp } from "../utils/xmtp";
 import { NavigationParamList } from "./Main";
 
 const Conversation = ({
@@ -102,63 +90,6 @@ const Conversation = ({
 
   const openedMainConvo = useRef(false);
 
-  const openMainConversationWithPeer = useCallback(
-    async (peerToCreateConvoWith: string) => {
-      if (openedMainConvo.current) return;
-      openedMainConvo.current = true;
-      // First, resolve the peer to an address
-      const peerAddress = await getAddressForPeer(peerToCreateConvoWith);
-      if (!peerAddress) {
-        sentryTrackMessage("CREATE_CONVERSATION_ERROR", {
-          error: "Identity not found",
-        });
-        Alert.alert(
-          "Identity not found",
-          `We could not find the address attached to ${peerToCreateConvoWith}`,
-          [
-            {
-              text: "OK",
-              onPress: navigation.goBack,
-              isPreferred: true,
-            },
-          ]
-        );
-        return;
-      }
-      // Then, check if we already have a main conversation with this address
-      const alreadyConversationWithAddress = Object.values(conversations).find(
-        (c) =>
-          c.peerAddress?.toLowerCase() === peerAddress.toLowerCase() &&
-          !c.context
-      );
-      if (alreadyConversationWithAddress) {
-        setConversationTopic(alreadyConversationWithAddress.topic);
-      } else {
-        // We don't have a convo with this peer, let's check if we
-        // can create a new one
-        const onNetwork = await isOnXmtp(peerAddress);
-        if (!onNetwork) {
-          Alert.alert(
-            "Not yet using XMTP",
-            "Your contact is not yet using XMTP. Tell them to download the app at converse.xyz and log in with their wallet.",
-            [
-              {
-                text: "OK",
-                onPress: navigation.goBack,
-                isPreferred: true,
-              },
-            ]
-          );
-        } else {
-          // Creating the conversation locally in a lazy manner
-          const topic = await createPendingConversation(peerAddress, undefined);
-          setConversationTopic(topic);
-        }
-      }
-    },
-    [navigation.goBack, conversations]
-  );
-
   // When the conversation topic changes, we set the conversation object
   useEffect(() => {
     if (conversationTopic) {
@@ -166,14 +97,22 @@ const Conversation = ({
       if (foundConversation) {
         setConversation(foundConversation);
       }
-    } else if (route.params.mainConversationWithPeer) {
-      openMainConversationWithPeer(route.params.mainConversationWithPeer);
+    } else if (
+      route.params.mainConversationWithPeer &&
+      !openedMainConvo.current
+    ) {
+      openedMainConvo.current = true;
+      openMainConversationWithPeer(
+        route.params.mainConversationWithPeer,
+        setConversationTopic,
+        navigation.goBack
+      );
     }
   }, [
     conversationTopic,
-    openMainConversationWithPeer,
-    route.params.mainConversationWithPeer,
     conversations,
+    navigation.goBack,
+    route.params.mainConversationWithPeer,
   ]);
 
   const isBlockedPeer = conversation?.peerAddress
@@ -360,26 +299,6 @@ const Conversation = ({
 };
 
 export default gestureHandlerRootHOC(Conversation);
-
-type ConversationContextType = {
-  conversation?: XmtpConversationWithUpdate;
-  inputRef: MutableRefObject<TextInputWithValue | undefined>;
-  isBlockedPeer: boolean;
-  onReadyToFocus: () => void;
-  messageToPrefill: string;
-};
-
-const ConversationContext = createContext<ConversationContextType>({
-  conversation: undefined,
-  inputRef: createRef() as MutableRefObject<TextInputWithValue | undefined>,
-  isBlockedPeer: false,
-  onReadyToFocus: () => {},
-  messageToPrefill: "",
-});
-
-export const useConversationContext = <K extends keyof ConversationContextType>(
-  keys: K[]
-) => useContextSelector(ConversationContext, (s) => pick(s, keys));
 
 const useStyles = () => {
   const colorScheme = useColorScheme();
