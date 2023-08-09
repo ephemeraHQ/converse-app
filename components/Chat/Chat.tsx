@@ -23,7 +23,7 @@ import {
   tertiaryBackgroundColor,
 } from "../../utils/colors";
 import { getProfileData } from "../../utils/profile";
-import { Recommendation } from "../Recommendations";
+import { Recommendation } from "../Recommendations/Recommendation";
 import ChatInput from "./ChatInput";
 import CachedChatMessage, { MessageToDisplay } from "./ChatMessage";
 import ChatPlaceholder from "./ChatPlaceholder";

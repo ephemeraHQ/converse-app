@@ -20,7 +20,7 @@ import DebugButton, { useEnableDebug } from "../components/DebugButton";
 import EphemeralAccountBanner from "../components/EphemeralAccountBanner";
 import InitialLoad from "../components/InitialLoad";
 import Picto from "../components/Picto/Picto";
-import Recommendations from "../components/Recommendations";
+import Recommendations from "../components/Recommendations/Recommendations";
 import SettingsButton from "../components/SettingsButton";
 import Welcome from "../components/Welcome";
 import {

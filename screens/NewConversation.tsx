@@ -17,7 +17,7 @@ import {
 import ActivityIndicator from "../components/ActivityIndicator/ActivityIndicator";
 import AndroidBackAction from "../components/AndroidBackAction";
 import SearchBar from "../components/NewConversation/SearchBar";
-import Recommendations from "../components/Recommendations";
+import Recommendations from "../components/Recommendations/Recommendations";
 import TableView from "../components/TableView/TableView";
 import { TableViewPicto } from "../components/TableView/TableViewImage";
 import config from "../config";
