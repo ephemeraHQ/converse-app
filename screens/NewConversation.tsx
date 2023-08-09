@@ -13,14 +13,10 @@ import {
   useColorScheme,
   Platform,
 } from "react-native";
-import {
-  Searchbar as MaterialSearchBar,
-  IconButton as MaterialIconButton,
-} from "react-native-paper";
 
 import ActivityIndicator from "../components/ActivityIndicator/ActivityIndicator";
 import AndroidBackAction from "../components/AndroidBackAction";
-import Picto from "../components/Picto/Picto";
+import SearchBar from "../components/NewConversation/SearchBar";
 import Recommendations from "../components/Recommendations";
 import TableView from "../components/TableView/TableView";
 import { TableViewPicto } from "../components/TableView/TableViewImage";
@@ -34,48 +30,19 @@ import {
 import { XmtpConversation } from "../data/store/chatStore";
 import {
   backgroundColor,
-  itemSeparatorColor,
   primaryColor,
   textPrimaryColor,
   textSecondaryColor,
 } from "../utils/colors";
-import { conversationLastMessagePreview } from "../utils/conversation";
+import {
+  computeNewConversationContext,
+  conversationLastMessagePreview,
+} from "../utils/conversation";
 import { getAddressForPeer, isSupportedPeer } from "../utils/eth";
 import { pick } from "../utils/objects";
-import { addressPrefix, conversationName } from "../utils/str";
+import { conversationName } from "../utils/str";
 import { isOnXmtp } from "../utils/xmtp/client";
 import { NavigationParamList } from "./Main";
-
-const computeNewConversationContext = (
-  userAddress: string,
-  peerAddress: string
-) => {
-  let i = 0;
-  const conversationsIds = Object.values(useChatStore.getState().conversations)
-    .filter((c) => c.peerAddress?.toLowerCase() === peerAddress?.toLowerCase())
-    .map((c) => c.context?.conversationId);
-  // First try to create one without conversationId
-  if (!conversationsIds.includes(undefined)) {
-    return undefined;
-  }
-  do {
-    i += 1;
-  } while (
-    conversationsIds.includes(
-      `${config.conversationDomain}/dm/${addressPrefix(
-        userAddress || ""
-      )}-${addressPrefix(peerAddress)}/${i}`
-    )
-  );
-  const conversationId = `${config.conversationDomain}/dm/${addressPrefix(
-    userAddress || ""
-  )}-${addressPrefix(peerAddress)}/${i}`;
-  return {
-    conversationId,
-    metadata: {},
-  };
-};
-
 export default function NewConversation({
   route,
   navigation,
@@ -262,91 +229,28 @@ export default function NewConversation({
       }}
     >
       {Platform.OS === "ios" && <StatusBar hidden={false} style="light" />}
-      <View style={styles.inputContainer}>
-        {Platform.OS === "ios" && (
-          <TextInput
-            style={styles.input}
-            placeholder={inputPlaceholder}
-            autoCapitalize="none"
-            autoFocus={false}
-            autoCorrect={false}
-            value={value}
-            ref={(r) => {
-              if (!initialFocus.current) {
-                initialFocus.current = true;
-                if (
-                  !value &&
-                  !recommendationsLoading &&
-                  recommendationsLoadedOnce &&
-                  recommendationsFrensCount === 0
-                ) {
-                  setTimeout(() => {
-                    r?.focus();
-                  }, 100);
-                }
-              }
-              inputRef.current = r;
-            }}
-            placeholderTextColor={textSecondaryColor(colorScheme)}
-            onChangeText={(text) => setValue(text.trim())}
-            clearButtonMode="always"
-          />
-        )}
-        {Platform.OS === "android" && (
-          <MaterialSearchBar
-            placeholder={inputPlaceholder}
-            onChangeText={(query) => setValue(query.trim())}
-            value={value}
-            icon={({ color }) => (
-              <Picto
-                picto="search"
-                size={24}
-                color={color}
-                style={{ top: 1 }}
-              />
-            )}
-            mode="bar"
-            autoCapitalize="none"
-            autoFocus={false}
-            autoCorrect={false}
-            ref={(r) => {
-              if (!initialFocus.current) {
-                initialFocus.current = true;
-                if (
-                  !value &&
-                  !recommendationsLoading &&
-                  recommendationsLoadedOnce &&
-                  recommendationsFrensCount === 0
-                ) {
-                  setTimeout(() => {
-                    r?.focus();
-                  }, 100);
-                }
-              }
-              inputRef.current = r as TextInput;
-            }}
-            placeholderTextColor={textSecondaryColor(colorScheme)}
-            selectionColor={textPrimaryColor(colorScheme)}
-            style={{
-              backgroundColor: backgroundColor(colorScheme),
-            }}
-            right={() => {
-              if (!value) return null;
-              return (
-                <MaterialIconButton
-                  icon={({ color }) => (
-                    <Picto picto="xmark" size={24} color={color} />
-                  )}
-                  onPress={() => {
-                    setValue("");
-                  }}
-                />
-              );
-            }}
-            clearIcon={() => null}
-          />
-        )}
-      </View>
+      <SearchBar
+        value={value}
+        setValue={setValue}
+        onRef={(r) => {
+          if (!initialFocus.current) {
+            initialFocus.current = true;
+            if (
+              !value &&
+              !recommendationsLoading &&
+              recommendationsLoadedOnce &&
+              recommendationsFrensCount === 0
+            ) {
+              setTimeout(() => {
+                r?.focus();
+              }, 100);
+            }
+          }
+          inputRef.current = r;
+        }}
+        inputPlaceholder={inputPlaceholder}
+      />
+
       <View
         style={{
           backgroundColor: backgroundColor(colorScheme),
@@ -458,19 +362,6 @@ const useStyles = () => {
     modal: {
       flex: 1,
       backgroundColor: backgroundColor(colorScheme),
-    },
-    inputContainer: {
-      borderBottomWidth: Platform.OS === "android" ? 1 : 0.5,
-      borderBottomColor: itemSeparatorColor(colorScheme),
-      backgroundColor: backgroundColor(colorScheme),
-    },
-    input: {
-      height: 46,
-      paddingLeft: 16,
-      paddingRight: 8,
-      marginRight: 8,
-      fontSize: 17,
-      color: textPrimaryColor(colorScheme),
     },
     messageContainer: {
       ...Platform.select({

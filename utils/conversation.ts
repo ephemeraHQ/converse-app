@@ -1,7 +1,10 @@
 import { Reaction } from "@xmtp/content-type-reaction";
 
+import config from "../config";
+import { useChatStore } from "../data/store/accountsStore";
 import { XmtpMessage, XmtpConversation } from "../data/store/chatStore";
 import { isAttachmentMessage } from "./attachment";
+import { addressPrefix } from "./str";
 
 export type LastMessagePreview = {
   contentPreview: string;
@@ -83,4 +86,34 @@ export const conversationLastMessagePreview = (
     }
   }
   return undefined;
+};
+
+export const computeNewConversationContext = (
+  userAddress: string,
+  peerAddress: string
+) => {
+  let i = 0;
+  const conversationsIds = Object.values(useChatStore.getState().conversations)
+    .filter((c) => c.peerAddress?.toLowerCase() === peerAddress?.toLowerCase())
+    .map((c) => c.context?.conversationId);
+  // First try to create one without conversationId
+  if (!conversationsIds.includes(undefined)) {
+    return undefined;
+  }
+  do {
+    i += 1;
+  } while (
+    conversationsIds.includes(
+      `${config.conversationDomain}/dm/${addressPrefix(
+        userAddress || ""
+      )}-${addressPrefix(peerAddress)}/${i}`
+    )
+  );
+  const conversationId = `${config.conversationDomain}/dm/${addressPrefix(
+    userAddress || ""
+  )}-${addressPrefix(peerAddress)}/${i}`;
+  return {
+    conversationId,
+    metadata: {},
+  };
 };
