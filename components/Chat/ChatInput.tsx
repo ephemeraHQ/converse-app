@@ -19,7 +19,7 @@ import {
   textPrimaryColor,
   textSecondaryColor,
 } from "../../utils/colors";
-import { eventEmitter } from "../../utils/events";
+import { converseEventEmitter } from "../../utils/events";
 import { sendMessage } from "../../utils/message";
 import { TextInputWithValue } from "../../utils/str";
 import ChatAddAttachment from "./ChatAddAttachment";
@@ -40,9 +40,12 @@ export default function ChatInput() {
   // by creating the inputValue in the lowest component, this one
 
   useEffect(() => {
-    eventEmitter.on("setCurrentConversationInputValue", setInputValue);
+    converseEventEmitter.on("setCurrentConversationInputValue", setInputValue);
     return () => {
-      eventEmitter.off("setCurrentConversationInputValue", setInputValue);
+      converseEventEmitter.off(
+        "setCurrentConversationInputValue",
+        setInputValue
+      );
     };
   }, []);
 
