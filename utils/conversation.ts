@@ -1,10 +1,22 @@
 import { Reaction } from "@xmtp/content-type-reaction";
+import { MutableRefObject, createRef } from "react";
+import { Alert } from "react-native";
+import { createContext, useContextSelector } from "use-context-selector";
 
 import config from "../config";
+import { createPendingConversation } from "../data/helpers/conversations/pendingConversations";
 import { useChatStore } from "../data/store/accountsStore";
-import { XmtpMessage, XmtpConversation } from "../data/store/chatStore";
+import {
+  XmtpMessage,
+  XmtpConversation,
+  XmtpConversationWithUpdate,
+} from "../data/store/chatStore";
 import { isAttachmentMessage } from "./attachment";
-import { addressPrefix } from "./str";
+import { getAddressForPeer } from "./eth";
+import { pick } from "./objects";
+import { sentryTrackMessage } from "./sentry";
+import { TextInputWithValue, addressPrefix } from "./str";
+import { isOnXmtp } from "./xmtp";
 
 export type LastMessagePreview = {
   contentPreview: string;
@@ -117,3 +129,79 @@ export const computeNewConversationContext = (
     metadata: {},
   };
 };
+
+export const openMainConversationWithPeer = async (
+  peerToCreateConvoWith: string,
+  onSuccess: (topic: string) => void,
+  onError: () => void
+) => {
+  // First, resolve the peer to an address
+  const peerAddress = await getAddressForPeer(peerToCreateConvoWith);
+  if (!peerAddress) {
+    sentryTrackMessage("CREATE_CONVERSATION_ERROR", {
+      error: "Identity not found",
+    });
+    Alert.alert(
+      "Identity not found",
+      `We could not find the address attached to ${peerToCreateConvoWith}`,
+      [
+        {
+          text: "OK",
+          onPress: onError,
+          isPreferred: true,
+        },
+      ]
+    );
+    return;
+  }
+  const conversations = useChatStore.getState().conversations;
+  // Then, check if we already have a main conversation with this address
+  const alreadyConversationWithAddress = Object.values(conversations).find(
+    (c) =>
+      c.peerAddress?.toLowerCase() === peerAddress.toLowerCase() && !c.context
+  );
+  if (alreadyConversationWithAddress) {
+    onSuccess(alreadyConversationWithAddress.topic);
+  } else {
+    // We don't have a convo with this peer, let's check if we
+    // can create a new one
+    const onNetwork = await isOnXmtp(peerAddress);
+    if (!onNetwork) {
+      Alert.alert(
+        "Not yet using XMTP",
+        "Your contact is not yet using XMTP. Tell them to download the app at converse.xyz and log in with their wallet.",
+        [
+          {
+            text: "OK",
+            onPress: onError,
+            isPreferred: true,
+          },
+        ]
+      );
+    } else {
+      // Creating the conversation locally in a lazy manner
+      const topic = await createPendingConversation(peerAddress, undefined);
+      onSuccess(topic);
+    }
+  }
+};
+
+type ConversationContextType = {
+  conversation?: XmtpConversationWithUpdate;
+  inputRef: MutableRefObject<TextInputWithValue | undefined>;
+  isBlockedPeer: boolean;
+  onReadyToFocus: () => void;
+  messageToPrefill: string;
+};
+
+export const ConversationContext = createContext<ConversationContextType>({
+  conversation: undefined,
+  inputRef: createRef() as MutableRefObject<TextInputWithValue | undefined>,
+  isBlockedPeer: false,
+  onReadyToFocus: () => {},
+  messageToPrefill: "",
+});
+
+export const useConversationContext = <K extends keyof ConversationContextType>(
+  keys: K[]
+) => useContextSelector(ConversationContext, (s) => pick(s, keys));

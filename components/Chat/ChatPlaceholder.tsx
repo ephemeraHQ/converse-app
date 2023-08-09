@@ -13,9 +13,9 @@ import {
   useRecommendationsStore,
   useSettingsStore,
 } from "../../data/store/accountsStore";
-import { useConversationContext } from "../../screens/Conversation";
 import { blockPeer } from "../../utils/api";
 import { actionSheetColors, textPrimaryColor } from "../../utils/colors";
+import { useConversationContext } from "../../utils/conversation";
 import { sendMessage } from "../../utils/message";
 import { getProfileData } from "../../utils/profile";
 import { conversationName } from "../../utils/str";

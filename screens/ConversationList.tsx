@@ -1,25 +1,16 @@
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { FlashList } from "@shopify/flash-list";
-import React, { useCallback, useEffect, useRef, useState } from "react";
-import {
-  Platform,
-  PlatformColor,
-  StyleSheet,
-  TouchableOpacity,
-  useColorScheme,
-  Text,
-  View,
-} from "react-native";
-import { FAB } from "react-native-paper";
+import React, { useCallback, useEffect, useState } from "react";
+import { Platform, StyleSheet, useColorScheme, Text, View } from "react-native";
 
 import Connecting, {
   useShouldShowConnectingOrSyncing,
 } from "../components/Connecting";
+import NewConversationButton from "../components/ConversationList/NewConversationButton";
+import ShareProfileButton from "../components/ConversationList/ShareProfileButton";
 import ConversationListItem from "../components/ConversationListItem";
-import DebugButton, { useEnableDebug } from "../components/DebugButton";
 import EphemeralAccountBanner from "../components/EphemeralAccountBanner";
 import InitialLoad from "../components/InitialLoad";
-import Picto from "../components/Picto/Picto";
 import Recommendations from "../components/Recommendations/Recommendations";
 import SettingsButton from "../components/SettingsButton";
 import Welcome from "../components/Welcome";
@@ -29,11 +20,7 @@ import {
   useUserStore,
 } from "../data/store/accountsStore";
 import { XmtpConversation } from "../data/store/chatStore";
-import {
-  backgroundColor,
-  textPrimaryColor,
-  textSecondaryColor,
-} from "../utils/colors";
+import { backgroundColor, textPrimaryColor } from "../utils/colors";
 import {
   LastMessagePreview,
   conversationLastMessagePreview,
@@ -41,101 +28,6 @@ import {
 import { pick } from "../utils/objects";
 import { conversationName } from "../utils/str";
 import { NavigationParamList } from "./Main";
-
-function NewConversationButton({
-  navigation,
-}: NativeStackScreenProps<NavigationParamList, "Messages">) {
-  const colorScheme = useColorScheme();
-  const debugRef = useRef();
-  const enableDebug = useEnableDebug();
-  const onPress = useCallback(() => {
-    navigation.navigate("NewConversation", {});
-  }, [navigation]);
-  const onLongPress = useCallback(() => {
-    if (
-      !enableDebug ||
-      !debugRef.current ||
-      !(debugRef.current as any).showDebugMenu
-    ) {
-      return;
-    }
-    (debugRef.current as any).showDebugMenu();
-  }, [enableDebug]);
-  if (Platform.OS === "ios") {
-    return (
-      <TouchableOpacity
-        activeOpacity={0.2}
-        onPress={onPress}
-        onLongPress={onLongPress}
-      >
-        {enableDebug && <DebugButton ref={debugRef} />}
-        <Picto
-          picto="square.and.pencil"
-          weight="medium"
-          color={PlatformColor("systemBlue")}
-          size={16}
-          style={{ width: 32, height: 32 }}
-        />
-      </TouchableOpacity>
-    );
-  } else {
-    return (
-      <FAB
-        key={`FAB-newConversation-${colorScheme}`}
-        icon={(props) => (
-          <>
-            {enableDebug && <DebugButton ref={debugRef} />}
-            <Picto
-              picto="square.and.pencil"
-              weight="medium"
-              color={props.color}
-              size={24}
-            />
-          </>
-        )}
-        animated={false}
-        style={{
-          position: "absolute",
-          margin: 0,
-          right: 16,
-          bottom: 20,
-        }}
-        onPress={onPress}
-        onLongPress={onLongPress}
-      />
-    );
-  }
-}
-
-function ShareProfileButton({
-  navigation,
-}: NativeStackScreenProps<NavigationParamList, "Messages">) {
-  const colorScheme = useColorScheme();
-  return (
-    <TouchableOpacity
-      activeOpacity={0.2}
-      onPress={() => {
-        navigation.navigate("ShareProfile");
-      }}
-    >
-      <Picto
-        picto="qrcode"
-        weight="medium"
-        color={
-          Platform.OS === "ios"
-            ? PlatformColor("systemBlue")
-            : textSecondaryColor(colorScheme)
-        }
-        size={Platform.OS === "ios" ? 16 : 24}
-        style={{
-          width: Platform.OS === "android" ? undefined : 32,
-          height: Platform.OS === "android" ? undefined : 32,
-          marginRight: Platform.OS === "android" ? 0 : 20,
-        }}
-      />
-    </TouchableOpacity>
-  );
-}
 
 type ConversationWithLastMessagePreview = XmtpConversation & {
   lastMessagePreview?: LastMessagePreview;

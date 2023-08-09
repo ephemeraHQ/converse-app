@@ -10,7 +10,6 @@ import {
   useUserStore,
 } from "../../data/store/accountsStore";
 import { XmtpConversationWithUpdate } from "../../data/store/chatStore";
-import { useConversationContext } from "../../screens/Conversation";
 import {
   ReanimatedFlashList,
   ReanimatedFlatList,
@@ -22,6 +21,7 @@ import {
   itemSeparatorColor,
   tertiaryBackgroundColor,
 } from "../../utils/colors";
+import { useConversationContext } from "../../utils/conversation";
 import { getProfileData } from "../../utils/profile";
 import { Recommendation } from "../Recommendations/Recommendation";
 import ChatInput from "./ChatInput";

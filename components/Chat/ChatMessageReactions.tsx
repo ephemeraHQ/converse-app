@@ -8,7 +8,6 @@ import {
 } from "react-native";
 
 import { useProfilesStore, useUserStore } from "../../data/store/accountsStore";
-import { useConversationContext } from "../../screens/Conversation";
 import { isAttachmentMessage } from "../../utils/attachment";
 import {
   actionSheetColors,
@@ -16,6 +15,7 @@ import {
   messageBubbleColor,
   textSecondaryColor,
 } from "../../utils/colors";
+import { useConversationContext } from "../../utils/conversation";
 import {
   MessageReaction,
   getReactionContent,

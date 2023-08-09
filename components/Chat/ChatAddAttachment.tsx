@@ -15,9 +15,9 @@ import {
 import RNFS from "react-native-fs";
 
 import { useAppStore } from "../../data/store/appStore";
-import { useConversationContext } from "../../screens/Conversation";
 import { SerializedRemoteAttachmentContent } from "../../utils/attachment";
 import { actionSheetColors, textSecondaryColor } from "../../utils/colors";
+import { useConversationContext } from "../../utils/conversation";
 import { executeAfterKeyboardClosed } from "../../utils/keyboard";
 import { sendMessage } from "../../utils/message";
 import { pick } from "../../utils/objects";
