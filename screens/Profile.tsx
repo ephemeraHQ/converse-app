@@ -8,7 +8,9 @@ import {
   useColorScheme,
   Platform,
   TouchableOpacity,
+  View,
 } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { showActionSheetWithOptions } from "../components/StateHandlers/ActionSheetStateHandler";
 import TableView from "../components/TableView/TableView";
@@ -55,6 +57,8 @@ export default function ProfileScreen({
   );
   const setBlockedPeerStatus = useSettingsStore((s) => s.setBlockedPeerStatus);
   const socials = profiles[peerAddress]?.socials;
+
+  const insets = useSafeAreaInsets();
 
   const getAddressItemsFromArray = useCallback(
     <T,>(array: T[], titleKey: string, valueKey: string) => {
@@ -175,6 +179,7 @@ export default function ProfileScreen({
         title="ADDRESS"
         style={styles.tableView}
       />
+
       {socialItems.length > 0 && (
         <TableView
           items={socialItems}
@@ -241,6 +246,7 @@ export default function ProfileScreen({
           />
         </>
       )}
+      <View style={{ height: insets.bottom }} />
     </ScrollView>
   );
 }

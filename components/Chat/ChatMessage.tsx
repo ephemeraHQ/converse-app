@@ -75,51 +75,49 @@ function ChatMessage({ message, colorScheme }: Props) {
         <Text style={styles.date}>{getRelativeDate(message.sent)}</Text>
       )}
 
-      <ChatMessageActions message={message} reactions={reactions}>
-        <View
-          style={[
-            styles.messageBubble,
-            isAttachment
-              ? styles.messageBubbleAttachment
-              : styles.messageBubbleText,
-            message.fromMe ? styles.messageBubbleMe : undefined,
-            Platform.select({
-              default: {},
-              android: {
-                // Messages not from me
-                borderBottomLeftRadius:
-                  !message.fromMe && message.hasNextMessageInSeries ? 2 : 18,
-                borderTopLeftRadius:
-                  !message.fromMe && message.hasPreviousMessageInSeries
-                    ? 2
-                    : 18,
-                // Messages from me
-                borderBottomRightRadius:
-                  message.fromMe && message.hasNextMessageInSeries ? 2 : 18,
-                borderTopRightRadius:
-                  message.fromMe && message.hasPreviousMessageInSeries ? 2 : 18,
-              },
-            }),
-          ]}
-        >
-          {messageContent}
+      <ChatMessageActions
+        message={message}
+        reactions={reactions}
+        style={[
+          styles.messageBubble,
+          isAttachment
+            ? styles.messageBubbleAttachment
+            : styles.messageBubbleText,
+          message.fromMe ? styles.messageBubbleMe : undefined,
+          Platform.select({
+            default: {},
+            android: {
+              // Messages not from me
+              borderBottomLeftRadius:
+                !message.fromMe && message.hasNextMessageInSeries ? 2 : 18,
+              borderTopLeftRadius:
+                !message.fromMe && message.hasPreviousMessageInSeries ? 2 : 18,
+              // Messages from me
+              borderBottomRightRadius:
+                message.fromMe && message.hasNextMessageInSeries ? 2 : 18,
+              borderTopRightRadius:
+                message.fromMe && message.hasPreviousMessageInSeries ? 2 : 18,
+            },
+          }),
+        ]}
+      >
+        {messageContent}
 
-          <View style={styles.metadataContainer}>{metadata}</View>
+        <View style={styles.metadataContainer}>{metadata}</View>
 
-          {!message.hasNextMessageInSeries && Platform.OS === "ios" && (
-            <MessageTail
-              fill={
-                message.fromMe
-                  ? myMessageBubbleColor(colorScheme)
-                  : messageBubbleColor(colorScheme)
-              }
-              style={[
-                styles.messageTail,
-                message.fromMe ? styles.messageTailMe : undefined,
-              ]}
-            />
-          )}
-        </View>
+        {!message.hasNextMessageInSeries && Platform.OS === "ios" && (
+          <MessageTail
+            fill={
+              message.fromMe
+                ? myMessageBubbleColor(colorScheme)
+                : messageBubbleColor(colorScheme)
+            }
+            style={[
+              styles.messageTail,
+              message.fromMe ? styles.messageTailMe : undefined,
+            ]}
+          />
+        )}
       </ChatMessageActions>
       <ChatMessageReactions message={message} reactions={reactions} />
     </View>

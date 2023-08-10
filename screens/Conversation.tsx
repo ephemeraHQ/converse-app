@@ -276,7 +276,11 @@ const Conversation = ({
     showInvite.show && showInvite.banner && !isBlockedPeer;
 
   return (
-    <View style={styles.container} onLayout={checkIfUserExists}>
+    <View
+      style={styles.container}
+      onLayout={checkIfUserExists}
+      key={`conversation-${colorScheme}`}
+    >
       {showInviteBanner && (
         <InviteBanner
           onClickInvite={inviteToConverse}
