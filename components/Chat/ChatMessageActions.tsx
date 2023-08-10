@@ -1,6 +1,14 @@
 import * as Clipboard from "expo-clipboard";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Alert, ColorSchemeName, Platform, useColorScheme } from "react-native";
+import {
+  Alert,
+  ColorSchemeName,
+  Platform,
+  StyleProp,
+  TouchableOpacity,
+  ViewStyle,
+  useColorScheme,
+} from "react-native";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 
 import { useSettingsStore, useUserStore } from "../../data/store/accountsStore";
@@ -25,12 +33,14 @@ type Props = {
   reactions: {
     [senderAddress: string]: MessageReaction | undefined;
   };
+  style: StyleProp<ViewStyle>;
 };
 
 export default function ChatMessageActions({
   children,
   message,
   reactions,
+  style,
 }: Props) {
   const { conversation } = useConversationContext(["conversation"]);
   const isAttachment = isAttachmentMessage(message.contentType);
@@ -147,19 +157,6 @@ export default function ChatMessageActions({
     showReactionModal,
   ]);
 
-  const singleTapGesture = useMemo(
-    () =>
-      Gesture.Tap()
-        .onEnd(() => {
-          if (isAttachment) {
-            // Transfering attachment opening intent to component
-            converseEventEmitter.emit(`openAttachmentForMessage-${message.id}`);
-          }
-        })
-        .runOnJS(true),
-    [isAttachment, message.id]
-  );
-
   const doubleTapGesture = useMemo(
     () =>
       Gesture.Tap()
@@ -170,25 +167,6 @@ export default function ChatMessageActions({
         })
         .runOnJS(true),
     [canAddReaction, isAttachment, showReactionModal]
-  );
-
-  const longPressGesture = useMemo(
-    () =>
-      Gesture.LongPress()
-        .onStart(() => {
-          showMessageActionSheet();
-        })
-        .runOnJS(true),
-    [showMessageActionSheet]
-  );
-
-  const composedGesture = useMemo(
-    () =>
-      Gesture.Simultaneous(
-        singleTapGesture,
-        Gesture.Simultaneous(doubleTapGesture, longPressGesture)
-      ),
-    [doubleTapGesture, longPressGesture, singleTapGesture]
   );
 
   const [selectedEmojis, setSelectedEmojis] = useState<string[]>([]);
@@ -204,9 +182,32 @@ export default function ChatMessageActions({
     setSelectedEmojis(newSelectedEmojis);
   }, [reactions, userAddress]);
 
+  // We use a mix of Gesture Detector AND TouchableOpacity
+  // because GestureDetector is better for dual tap but if
+  // we add the gesture detector for long press the long press
+  // in the parsed text stops working (https://github.com/software-mansion/react-native-gesture-handler/issues/867)
+
   return (
     <>
-      <GestureDetector gesture={composedGesture}>{children}</GestureDetector>
+      <GestureDetector gesture={doubleTapGesture}>
+        <TouchableOpacity
+          activeOpacity={1}
+          style={style}
+          onPress={() => {
+            if (isAttachment) {
+              // Transfering attachment opening intent to component
+              converseEventEmitter.emit(
+                `openAttachmentForMessage-${message.id}`
+              );
+            }
+          }}
+          onLongPress={showMessageActionSheet}
+        >
+          {children}
+        </TouchableOpacity>
+      </GestureDetector>
+      {/* <View style={{width: 50, height: 20, backgroundColor: "red"}} />
+      <GestureDetector gesture={composedGesture}>{children}</GestureDetector> */}
       <EmojiPicker
         onEmojiSelected={(e) => {
           if (!conversation) return;
@@ -261,6 +262,6 @@ const getEmojiPickerTheme = (colorScheme: ColorSchemeName) =>
           icon: "#766dfc",
           iconActive: "#fff",
           container: "#252427",
-          containerActive: "#766dfc",
+          containerActive: "#282829",
         },
       };

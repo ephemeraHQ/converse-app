@@ -48,6 +48,7 @@ export default function TableView({ title, items, style }: Props) {
         separatorInsetLeft={separatorInsetLeft}
         hideSurroundingSeparators
         roundedCorners
+        withSafeAreaView={false}
       >
         {items.map((i) => (
           <Cell
@@ -80,6 +81,7 @@ export default function TableView({ title, items, style }: Props) {
               styles.itemSubtitle,
               { color: i.subtitleColor || textSecondaryColor(colorScheme) },
             ]}
+            withSafeAreaView={false}
           />
         ))}
       </Section>

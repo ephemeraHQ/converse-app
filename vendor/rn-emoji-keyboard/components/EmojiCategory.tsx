@@ -155,7 +155,7 @@ export const EmojiCategory = React.memo(
             {translation[title]}
           </Text>
         )}
-        <View style={{ backgroundColor: "green", flex: 1 }}>
+        <View style={{ flex: 1 }}>
           <FlashList
             data={[...data, ...empty]}
             // keyExtractor={keyExtractor}
