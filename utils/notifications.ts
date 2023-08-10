@@ -56,7 +56,6 @@ export const subscribeToNotifications = async (
     lastSubscribedTopics.length !== topics.length ||
     topics.some((t) => !lastSubscribedTopics.includes(t));
   if (!shouldMakeQuery) return;
-  lastSubscribedTopics = topics;
   try {
     await api.post("/api/subscribe", {
       expoToken: expoPushToken,
@@ -64,6 +63,7 @@ export const subscribeToNotifications = async (
       nativeTokenType: nativeTokenQuery.type,
       topics,
     });
+    lastSubscribedTopics = topics;
   } catch (e: any) {
     console.log("Could not subscribe to notifications");
     console.log(e?.message);
