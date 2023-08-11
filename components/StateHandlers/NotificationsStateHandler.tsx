@@ -62,9 +62,16 @@ export default function NotificationsStateHandler() {
 
   const handleNotificationInteraction = useCallback(
     (event: Notifications.NotificationResponse) => {
-      const conversationTopic = (
-        event.notification.request.content.data as any
-      )?.contentTopic?.toString();
+      const notificationData = event.notification.request.content.data;
+      if (!notificationData) return;
+      const newConversationTopic = notificationData["newConversationTopic"] as
+        | string
+        | undefined;
+      const messageConversationTopic = notificationData["contentTopic"] as
+        | string
+        | undefined;
+      const conversationTopic =
+        newConversationTopic || messageConversationTopic;
       if (conversationTopic) {
         if (conversations[conversationTopic]) {
           navigateToConversation(conversations[conversationTopic]);
