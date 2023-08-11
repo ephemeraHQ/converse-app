@@ -45,7 +45,7 @@ import org.xmtp.android.library.codecs.*
 import org.xmtp.proto.message.contents.Content
 import kotlin.coroutines.resume
 
-class NotificationData(val message: String, val timestampNs: String, val contentTopic: String, val sentViaConverse: Boolean? = false)
+class NotificationData(val message: String, val timestampNs: String, val contentTopic: String, val sentViaConverse: Boolean? = false, val newConversationTopic: String? = null)
 class ConversationDictData(val shortAddress: String? = null, val lensHandle: String? = null, val ensName: String? = null, val title: String? = null)
 class SavedNotificationMessage(val topic: String, val content: String, val senderAddress: String, val sent: Long, val id: String, val sentViaConverse: Boolean, val contentType: String)
 class ConversationContext(val conversationId: String, val metadata: Map<String, Any>)
@@ -124,7 +124,7 @@ class PushNotificationsService : FirebaseMessagingService() {
             return
         } else if (isInviteTopic(notificationData.contentTopic)) {
             Log.d(TAG, "Handling a new conversation notification")
-            handleNewConversationV2Notification(xmtpClient, envelope, remoteMessage)
+            handleNewConversationV2Notification(xmtpClient, envelope, remoteMessage, notificationData)
         } else {
             Log.d(TAG, "Handling a new message notification")
             handleNewMessageNotification(xmtpClient, envelope, remoteMessage, sentViaConverse)
@@ -132,7 +132,7 @@ class PushNotificationsService : FirebaseMessagingService() {
 
     }
 
-    private fun handleNewConversationV2Notification(xmtpClient:Client, envelope: Envelope, remoteMessage: RemoteMessage) {
+    private fun handleNewConversationV2Notification(xmtpClient:Client, envelope: Envelope, remoteMessage: RemoteMessage, notificationData: NotificationData) {
         val conversation = xmtpClient.conversations.fromInvite((envelope))
         var context: ConversationContext? = null;
         when (conversation) {
@@ -164,6 +164,16 @@ class PushNotificationsService : FirebaseMessagingService() {
             Log.d(TAG, "Subscribing to new topic at api: $apiURI")
             subscribeToTopic(apiURI, expoPushToken, conversation.topic)
         }
+        // Let's add the topic to the notification content
+        val newNotificationData = NotificationData(
+            notificationData.message,
+            notificationData.timestampNs,
+            notificationData.contentTopic,
+            notificationData.sentViaConverse,
+            conversation.topic
+        )
+        val newNotificationDataJson = Klaxon().toJsonString(newNotificationData)
+        remoteMessage.data["body"] = newNotificationDataJson
         persistNewConversation(conversation.topic, conversationV2Data)
         saveConversationToStorage(conversation.topic, conversation.peerAddress, conversation.createdAt.time, context);
         showNotification(shortAddress(conversation.peerAddress), "New Conversation", remoteMessage)
