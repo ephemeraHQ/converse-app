@@ -25,6 +25,7 @@ const defaultConfig = {
       logoUrl: "https://converse.xyz/icon.png",
     },
   },
+  thirdwebClientId: "fb80f0aa5ea6c07d74813e56c1ea53e5",
 };
 
 const isAndroid = Platform.OS === "android";

@@ -62,6 +62,7 @@ export default function App() {
         isDarkMode: colorScheme === "dark",
       }}
       autoConnect={false}
+      clientId={config.thirdwebClientId}
     >
       <KeyboardProvider>
         <AppProvider>
