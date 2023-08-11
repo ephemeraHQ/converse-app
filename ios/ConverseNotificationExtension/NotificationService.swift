@@ -418,7 +418,7 @@ func handleNotificationAsync(contentHandler: ((UNNotificationContent) -> Void), 
     
     print("[NotificationExtension] Received a notification")
     
-    if let body = bestAttemptContent.userInfo["body"] as? [String: Any], let contentTopic = body["contentTopic"] as? String, let encodedMessage = body["message"] as? String {
+    if var body = bestAttemptContent.userInfo["body"] as? [String: Any], let contentTopic = body["contentTopic"] as? String, let encodedMessage = body["message"] as? String {
       
       let xmtpClient = await getXmtpClientFromKeys();
       
@@ -434,6 +434,8 @@ func handleNotificationAsync(contentHandler: ((UNNotificationContent) -> Void), 
           let conversation = handleNewConversation(xmtpClient: xmtpClient!, envelope: envelope)
           if (conversation != nil && conversation?.peerAddress != nil) {
             bestAttemptContent.title = shortAddress(address: conversation!.peerAddress)
+            body["newConversationTopic"] = conversation?.topic
+            bestAttemptContent.userInfo.updateValue(body, forKey: "body")
           }
         } else {
           var conversationTitle = getSavedConversationTitle(contentTopic: contentTopic);
