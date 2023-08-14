@@ -13,12 +13,10 @@ import { getInstalledWallets } from "../Onboarding/supportedWallets";
 import { getLocalXmtpClient } from "../XmtpState";
 import { prepareForRefacto } from "./prepareForRefacto";
 
-const migrationAlertShown = false;
-
 export default function HydrationStateHandler() {
   const setUserAddress = useUserStore((s) => s.setUserAddress);
   const { setHydrationDone } = useAppStore((s) =>
-    pick(s, ["setHydrationDone"])
+    pick(s, ["setHydrationDone"]),
   );
 
   // Initial hydration

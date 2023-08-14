@@ -26,7 +26,7 @@ export default function ChatSendAttachment() {
   const colorScheme = useColorScheme();
   const styles = useStyles();
   const { mediaPreview, setMediaPreview } = useAppStore((s) =>
-    pick(s, ["mediaPreview", "setMediaPreview"])
+    pick(s, ["mediaPreview", "setMediaPreview"]),
   );
   const insets = useSafeAreaInsets();
   const sendMedia = useCallback(() => {
@@ -113,7 +113,6 @@ export default function ChatSendAttachment() {
 }
 
 const useStyles = () => {
-  const colorScheme = useColorScheme();
   return StyleSheet.create({
     previewContainer: {
       position: "absolute",
