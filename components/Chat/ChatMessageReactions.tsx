@@ -39,7 +39,7 @@ export default function ChatMessageReactions({ message, reactions }: Props) {
   const userAddress = useUserStore((s) => s.userAddress);
   const profiles = useProfilesStore((state) => state.profiles);
   const reactionsList = Object.values(reactions).sort(
-    (r1, r2) => r1.sent - r2.sent,
+    (r1, r2) => r1.sent - r2.sent
   );
   const showReactionsActionsSheet = useCallback(() => {
     const methods: any = {};
@@ -76,7 +76,7 @@ export default function ChatMessageReactions({ message, reactions }: Props) {
         if (method) {
           method();
         }
-      },
+      }
     );
   }, [
     reactionsList,
