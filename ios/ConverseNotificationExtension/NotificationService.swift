@@ -6,7 +6,6 @@
 //
 
 import UserNotifications
-import KeychainAccess
 import XMTP
 import CryptoKit
 import Alamofire
