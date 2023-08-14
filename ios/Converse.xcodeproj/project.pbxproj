@@ -14,8 +14,6 @@
 		4C1D85B629B096F700A649D3 /* xmtp.html in Resources */ = {isa = PBXBuildFile; fileRef = 4C1D85B529B096F700A649D3 /* xmtp.html */; };
 		4C31F4EE29AF887B0032D062 /* Alamofire in Frameworks */ = {isa = PBXBuildFile; productRef = 4C31F4ED29AF887B0032D062 /* Alamofire */; };
 		4C3A90D72989DF17002D709F /* XMTP in Frameworks */ = {isa = PBXBuildFile; productRef = 4C3A90D62989DF17002D709F /* XMTP */; };
-		4C5A28D6297CB0AB0070A216 /* KeychainAccess in Frameworks */ = {isa = PBXBuildFile; productRef = 4C5A28D5297CB0AB0070A216 /* KeychainAccess */; };
-		4C5A28D8297CB0C70070A216 /* KeychainAccess in Frameworks */ = {isa = PBXBuildFile; productRef = 4C5A28D7297CB0C70070A216 /* KeychainAccess */; };
 		4C65044D295C7C1F00C5A40F /* NotificationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C65044C295C7C1F00C5A40F /* NotificationService.swift */; };
 		4C8BA28B298502DC007F0B76 /* SharedDefaults.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C8BA28A298502DC007F0B76 /* SharedDefaults.swift */; };
 		4CC856EF296C174D0011B072 /* ConverseNotificationExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 4C65044A295C7C1F00C5A40F /* ConverseNotificationExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
@@ -79,7 +77,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				4C3A90D72989DF17002D709F /* XMTP in Frameworks */,
-				4C5A28D6297CB0AB0070A216 /* KeychainAccess in Frameworks */,
 				64416FBDAB55B243CFCD372A /* libPods-Converse.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -89,7 +86,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				4C31F4EE29AF887B0032D062 /* Alamofire in Frameworks */,
-				4C5A28D8297CB0C70070A216 /* KeychainAccess in Frameworks */,
 				4CF1C2602989DFB800C99ED9 /* XMTP in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -225,7 +221,6 @@
 			);
 			name = Converse;
 			packageProductDependencies = (
-				4C5A28D5297CB0AB0070A216 /* KeychainAccess */,
 				4C3A90D62989DF17002D709F /* XMTP */,
 			);
 			productName = Converse;
@@ -246,7 +241,6 @@
 			);
 			name = ConverseNotificationExtension;
 			packageProductDependencies = (
-				4C5A28D7297CB0C70070A216 /* KeychainAccess */,
 				4CF1C25F2989DFB800C99ED9 /* XMTP */,
 				4C31F4ED29AF887B0032D062 /* Alamofire */,
 			);
@@ -281,9 +275,8 @@
 			);
 			mainGroup = 83CBB9F61A601CBA00E9B192;
 			packageReferences = (
-				4C5A28D4297CB0AB0070A216 /* XCRemoteSwiftPackageReference "KeychainAccess" */,
 				4C3A90D52989DF17002D709F /* XCRemoteSwiftPackageReference "xmtp-ios" */,
-				4C31F4EC29AF887B0032D062 /* XCRemoteSwiftPackageReference "Alamofire.git" */,
+				4C31F4EC29AF887B0032D062 /* XCRemoteSwiftPackageReference "Alamofire" */,
 			);
 			productRefGroup = 83CBBA001A601CBA00E9B192 /* Products */;
 			projectDirPath = "";
@@ -799,7 +792,7 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
-		4C31F4EC29AF887B0032D062 /* XCRemoteSwiftPackageReference "Alamofire.git" */ = {
+		4C31F4EC29AF887B0032D062 /* XCRemoteSwiftPackageReference "Alamofire" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/Alamofire/Alamofire.git";
 			requirement = {
@@ -815,36 +808,18 @@
 				kind = branch;
 			};
 		};
-		4C5A28D4297CB0AB0070A216 /* XCRemoteSwiftPackageReference "KeychainAccess" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/kishikawakatsumi/KeychainAccess";
-			requirement = {
-				branch = master;
-				kind = branch;
-			};
-		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
 		4C31F4ED29AF887B0032D062 /* Alamofire */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 4C31F4EC29AF887B0032D062 /* XCRemoteSwiftPackageReference "Alamofire.git" */;
+			package = 4C31F4EC29AF887B0032D062 /* XCRemoteSwiftPackageReference "Alamofire" */;
 			productName = Alamofire;
 		};
 		4C3A90D62989DF17002D709F /* XMTP */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 4C3A90D52989DF17002D709F /* XCRemoteSwiftPackageReference "xmtp-ios" */;
 			productName = XMTP;
-		};
-		4C5A28D5297CB0AB0070A216 /* KeychainAccess */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 4C5A28D4297CB0AB0070A216 /* XCRemoteSwiftPackageReference "KeychainAccess" */;
-			productName = KeychainAccess;
-		};
-		4C5A28D7297CB0C70070A216 /* KeychainAccess */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 4C5A28D4297CB0AB0070A216 /* XCRemoteSwiftPackageReference "KeychainAccess" */;
-			productName = KeychainAccess;
 		};
 		4CF1C25F2989DFB800C99ED9 /* XMTP */ = {
 			isa = XCSwiftPackageProductDependency;
