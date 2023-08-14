@@ -16,7 +16,6 @@ type Props = {
 export default function Welcome({ ctaOnly, navigation }: Props) {
   const frens = useRecommendationsStore((s) => s.frens);
   const headerHeight = useHeaderHeight();
-  const colorScheme = useColorScheme();
   const styles = useStyles();
   const frensCount = frens ? Object.keys(frens).length : 0;
   return (
