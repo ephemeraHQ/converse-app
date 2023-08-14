@@ -39,7 +39,7 @@ const getPendingConversationWithPeer = async (
     .createQueryBuilder()
     .select()
     .where("peerAddress = :address", { address })
-    .andWhere("pending = 1")
+    .andWhere("pending = 1") // Cannot use = TRUE in older sqlite versions
     .andWhere(
       conversationId
         ? "contextConversationId = :conversationId"
