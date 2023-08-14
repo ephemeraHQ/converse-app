@@ -44,7 +44,7 @@ export const resetLocalXmtpState = () => {
 };
 
 export const getLocalXmtpConversationForTopic = async (
-  topic: string,
+  topic: string
 ): Promise<Conversation> => {
   const client = await getLocalXmtpClient();
   if (!client) throw new Error("No XMTP Client");
@@ -69,7 +69,7 @@ export const getLocalXmtpConversationForTopic = async (
 };
 
 const sendPreparedMessages = async (
-  preparedMessages: Map<string, PreparedMessage>,
+  preparedMessages: Map<string, PreparedMessage>
 ) => {
   for (const id of preparedMessages.keys()) {
     const preparedMessage = preparedMessages.get(id);
@@ -98,7 +98,7 @@ export const createPendingConversations = async () => {
   const pendingConvos = await getPendingConversationsToCreate();
   if (pendingConvos.length === 0) return;
   console.log(
-    `Trying to create ${pendingConvos.length} pending conversations...`,
+    `Trying to create ${pendingConvos.length} pending conversations...`
   );
   await Promise.all(pendingConvos.map(createConversation));
 };
@@ -128,7 +128,7 @@ export const sendPendingMessages = async () => {
         continue;
       }
       const conversation = await getLocalXmtpConversationForTopic(
-        message.conversationId,
+        message.conversationId
       );
       if (conversation) {
         let preparedMessage: PreparedMessage;
@@ -141,7 +141,7 @@ export const sendPendingMessages = async () => {
               contentType: ContentTypeRemoteAttachment,
               contentFallback:
                 "This app cannot display this media. You can use converse.xyz now to access it.",
-            },
+            }
           );
         } else if (message.contentType.startsWith("xmtp.org/reaction:")) {
           preparedMessage = await conversation.prepareMessage(
@@ -149,7 +149,7 @@ export const sendPendingMessages = async () => {
             {
               contentType: ContentTypeReaction,
               contentFallback: message.contentFallback || "Reaction",
-            },
+            }
           );
         } else {
           preparedMessage = await conversation.prepareMessage(message.content);
@@ -161,7 +161,7 @@ export const sendPendingMessages = async () => {
           newMessageId,
           newMessageSent:
             fromNanoString(
-              preparedMessage.messageEnvelope.timestampNs,
+              preparedMessage.messageEnvelope.timestampNs
             )?.getTime() || 0,
           message,
         };
@@ -221,11 +221,11 @@ export default function XmtpState() {
       "localClientConnected",
       "webviewClientConnected",
       "reconnecting",
-    ]),
+    ])
   );
   const splashScreenHidden = useAppStore((s) => s.splashScreenHidden);
   const { setBlockedPeers } = useSettingsStore((s) =>
-    pick(s, ["setBlockedPeers"]),
+    pick(s, ["setBlockedPeers"])
   );
   // On open; opening XMTP session
   useEffect(() => {
@@ -235,7 +235,7 @@ export default function XmtpState() {
       } catch (e) {
         console.log(
           "Count not instantiate local XMTP client, retrying in 3 seconds...",
-          e,
+          e
         );
         await new Promise((r) => setTimeout(r, 3000));
         initXmtp();

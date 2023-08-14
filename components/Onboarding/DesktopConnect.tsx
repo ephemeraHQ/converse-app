@@ -25,7 +25,7 @@ import OnboardingComponent from "./OnboardingComponent";
 export default function DesktopConnect() {
   const { desktopConnectSessionId, setDesktopConnectSessionId } =
     useOnboardingStore((s) =>
-      pick(s, ["desktopConnectSessionId", "setDesktopConnectSessionId"]),
+      pick(s, ["desktopConnectSessionId", "setDesktopConnectSessionId"])
     );
   const styles = useStyles();
   const [localState, setLocalState] = useState({
@@ -77,7 +77,7 @@ export default function DesktopConnect() {
           const encryptedKeyBuffer = Buffer.from(fetchedKey, "base64");
           const decryptedKeyBuffer = decrypt(
             localState.privateKey,
-            encryptedKeyBuffer,
+            encryptedKeyBuffer
           );
           const xmtpKeys = JSON.stringify(Array.from(decryptedKeyBuffer));
           markDesktopSessionDone({
@@ -144,7 +144,7 @@ export default function DesktopConnect() {
                 style={styles.clickableText}
                 onPress={() =>
                   Linking.openURL(
-                    "https://converseapp.notion.site/Terms-and-conditions-004036ad55044aba888cc83e21b8cbdb",
+                    "https://converseapp.notion.site/Terms-and-conditions-004036ad55044aba888cc83e21b8cbdb"
                   )
                 }
               >

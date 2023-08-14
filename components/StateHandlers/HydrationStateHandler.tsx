@@ -16,7 +16,7 @@ import { prepareForRefacto } from "./prepareForRefacto";
 export default function HydrationStateHandler() {
   const setUserAddress = useUserStore((s) => s.setUserAddress);
   const { setHydrationDone } = useAppStore((s) =>
-    pick(s, ["setHydrationDone"]),
+    pick(s, ["setHydrationDone"])
   );
 
   // Initial hydration
