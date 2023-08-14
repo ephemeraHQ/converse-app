@@ -18,7 +18,7 @@ import {
 } from "../../utils/colors";
 import { saveXmtpKeys } from "../../utils/keychain";
 import { pick } from "../../utils/objects";
-import { getXmtpClientFromKeys } from "../../utils/xmtp";
+import { getXmtpClientFromKeys } from "../../utils/xmtp/client";
 import { sendMessageToWebview } from "../XmtpWebview";
 import OnboardingComponent from "./OnboardingComponent";
 
