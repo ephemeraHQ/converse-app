@@ -5,7 +5,7 @@
     "build": "node scripts/build/build.js",
     "start": "EXPO_ENV=dev expo start --dev-client",
     "typecheck": "echo \"➜ Typechecking project...\" && tsc --noEmit",
-    "update-preview": "node scripts/preview-update.js",
+    "update": "node scripts/build/update.js",
     "db": "ts-node scripts/migrations/db.ts",
     "postinstall": "patch-package && husky install",
     "commit": "git show --format=\"%h\" --no-patch"
