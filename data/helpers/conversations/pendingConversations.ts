@@ -39,7 +39,7 @@ const getPendingConversationWithPeer = async (
     .createQueryBuilder()
     .select()
     .where("peerAddress = :address", { address })
-    .andWhere("pending = TRUE")
+    .andWhere("pending = 1")
     .andWhere(
       conversationId
         ? "contextConversationId = :conversationId"
