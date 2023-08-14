@@ -19,8 +19,7 @@ import { getBlockedPeers } from "../utils/api";
 import { deserializeRemoteAttachmentContent } from "../utils/attachment";
 import { loadXmtpConversation, loadXmtpKeys } from "../utils/keychain";
 import { pick } from "../utils/objects";
-import { getXmtpSignature } from "../utils/xmtp";
-import { getXmtpClientFromKeys } from "../utils/xmtp/client";
+import { getXmtpClientFromKeys, getXmtpSignature } from "../utils/xmtp/client";
 import {
   createConversation,
   parseConversationJSON,

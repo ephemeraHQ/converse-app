@@ -16,7 +16,7 @@ import { getAddressForPeer } from "./eth";
 import { pick } from "./objects";
 import { sentryTrackMessage } from "./sentry";
 import { TextInputWithValue, addressPrefix } from "./str";
-import { isOnXmtp } from "./xmtp";
+import { isOnXmtp } from "./xmtp/client";
 
 export type LastMessagePreview = {
   contentPreview: string;
