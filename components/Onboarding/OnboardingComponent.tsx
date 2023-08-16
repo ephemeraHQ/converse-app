@@ -8,7 +8,11 @@ import {
   Dimensions,
 } from "react-native";
 
-import { textPrimaryColor, textSecondaryColor } from "../../utils/colors";
+import {
+  backgroundColor,
+  textPrimaryColor,
+  textSecondaryColor,
+} from "../../utils/colors";
 import ActivityIndicator from "../ActivityIndicator/ActivityIndicator";
 import Button from "../Button/Button";
 import Picto from "../Picto/Picto";
@@ -96,7 +100,7 @@ const useStyles = () => {
     onboardingContent: {
       minHeight: "100%",
       alignItems: "center",
-      // backgroundColor: backgroundColor(colorScheme),
+      backgroundColor: backgroundColor(colorScheme),
     },
     picto: {
       ...Platform.select({
