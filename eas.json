@@ -27,6 +27,7 @@
     },
     "preview": {
       "distribution": "internal",
+      "autoIncrement": true,
       "channel": "preview",
       "env": {
         "EXPO_ENV": "preview"

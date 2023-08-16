@@ -1,19 +1,15 @@
 const { spawn, execSync } = require("child_process");
 const fs = require("fs");
 const path = require("path");
-const plist = require("plist");
 const prompts = require("prompts");
+
+const appJson = require("../../app.json");
 
 const IOS_UPDATE_ID_REGEX = /iOS update ID\s*(.*)/;
 const ANDROID_UPDATE_ID_REGEX = /Android update ID\s*(.*)/;
 
 const rootPath = path.join(__dirname, "../..");
 const bundlesPath = path.join(__dirname, "../../dist/bundles");
-const infoPlistPath = path.join(__dirname, "../../ios/Converse/Info.plist");
-const buildGradlePath = path.join(__dirname, "../../android/app/build.gradle");
-
-const GRADLE_VERSION_NAME_REGEX = /versionName "(.*?)"/;
-const GRADLE_VERSION_CODE_REGEX = /versionCode ([0-9]*)/;
 
 const uploadUpdatesToExpo = (env) =>
   new Promise((resolve) => {
@@ -100,16 +96,14 @@ const uploadBundlesToSentry = ({
 }) => {
   const iosBundleId =
     env === "preview" ? "com.converse.preview" : "com.converse.native";
-  const iOSPlistData = plist.parse(fs.readFileSync(infoPlistPath, "utf8"));
-  const androidBuildGradle = fs.readFileSync(buildGradlePath, "utf8");
   const sentryIOSUploadCommand = `SENTRY_ORG=converse-app SENTRY_PROJECT=converse-react-native SENTRY_AUTH_TOKEN=eac2788f667c4e35b610e664417b0acd1d2c43fd8ab2458986cfe85a96cf940a node_modules/@sentry/cli/bin/sentry-cli releases \
-  files ${iosBundleId}@${iOSPlistData.CFBundleShortVersionString}+${iOSPlistData.CFBundleVersion} \
+  files ${iosBundleId}@${appJson.expo.ios.version}+${appJson.expo.ios.buildNumber} \
   upload-sourcemaps \
   --dist ${iosUpdateID} \
   --rewrite \
   dist/bundles/main.jsbundle dist/bundles/${iosMap}`;
   console.log(
-    `Uploading iOS bundle to Sentry (${iOSPlistData.CFBundleShortVersionString}+${iOSPlistData.CFBundleVersion} - dist ${iosUpdateID})`
+    `Uploading iOS bundle to Sentry (${appJson.expo.ios.version}+${appJson.expo.ios.buildNumber} - dist ${iosUpdateID})`
   );
   try {
     const result = execSync(sentryIOSUploadCommand, { cwd: rootPath });
@@ -118,22 +112,17 @@ const uploadBundlesToSentry = ({
     console.log("An error occured");
     console.log(e);
   }
-  const androidVersionMatch = androidBuildGradle.match(
-    GRADLE_VERSION_NAME_REGEX
-  );
-  const androidVersionCodeMatch = androidBuildGradle.match(
-    GRADLE_VERSION_CODE_REGEX
-  );
+
   const androidBundleId =
     env === "preview" ? "com.converse.preview" : "com.converse.prod";
   const sentryAndroidUploadCommand = `SENTRY_ORG=converse-app SENTRY_PROJECT=converse-react-native SENTRY_AUTH_TOKEN=eac2788f667c4e35b610e664417b0acd1d2c43fd8ab2458986cfe85a96cf940a node_modules/@sentry/cli/bin/sentry-cli releases \
-  files ${androidBundleId}@${androidVersionMatch[1].trim()}+${androidVersionCodeMatch[1].trim()} \
+  files ${androidBundleId}@${appJson.expo.android.version}+${appJson.expo.android.versionCode} \
   upload-sourcemaps \
   --dist ${androidUpdateID} \
   --rewrite \
   dist/bundles/index.android.bundle dist/bundles/${androidMap}`;
   console.log(
-    `Uploading Android bundle to Sentry... (${androidVersionMatch[1].trim()}+${androidVersionCodeMatch[1].trim()} - dist ${androidUpdateID})`
+    `Uploading Android bundle to Sentry... (${appJson.expo.android.version}+${appJson.expo.android.versionCode} - dist ${androidUpdateID})`
   );
   try {
     const result = execSync(sentryAndroidUploadCommand, { cwd: rootPath });
