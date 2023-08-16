@@ -5,7 +5,7 @@ import { QueryDeepPartialEntity } from "typeorm/query-builder/QueryPartialEntity
 // We support SQLite from version 3.8.10.2 (embedded in Android 6.0 - SDK 23)
 const UPSERT_SUPPORTED_FROM = "3.24.0";
 
-let supportsUpsert = false;
+export let supportsUpsert = false;
 
 export const checkUpsertSupport = async (dataSource: DataSource) => {
   const sqliteVersion = semver.parse(
