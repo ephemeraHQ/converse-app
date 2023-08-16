@@ -118,9 +118,7 @@ const build = async () => {
     }
   }
 
-  if (env === "preview") {
-    execSync("git co -f", { cwd: PROJECT_ROOT });
-  } else if (env === "production") {
+  if (env === "production" || env === "preview") {
     execSync("git add app.json", { cwd: PROJECT_ROOT });
     if (platform === "ios") {
       execSync("git restore .", { cwd: PROJECT_ROOT });
