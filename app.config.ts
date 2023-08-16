@@ -51,9 +51,10 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     },
     ENV: isDev ? "dev" : isPreview ? "preview" : "prod",
   },
-  runtimeVersion: {
-    policy: "appVersion",
-  },
+  runtimeVersion:
+    env.EXPO_PLATFORM === "android"
+      ? appBuildNumbers.expo.android.version
+      : appBuildNumbers.expo.ios.version,
   owner: "converse",
   jsEngine: "hermes",
 });
