@@ -26,6 +26,7 @@ import { clearDB } from "../data/db";
 import {
   useSettingsStore,
   useRecommendationsStore,
+  useAccountsStore,
 } from "../data/store/accountsStore";
 import { useOnboardingStore } from "../data/store/onboardingStore";
 import { textPrimaryColor, textSecondaryColor } from "../utils/colors";
@@ -42,7 +43,6 @@ export default function OnboardingScreen() {
     (s) => s.resetRecommendations
   );
   const setEphemeralAccount = useSettingsStore((s) => s.setEphemeralAccount);
-  const colorScheme = useColorScheme();
   const styles = useStyles();
 
   const [isLoading, setLoading] = useState(false);
@@ -78,11 +78,13 @@ export default function OnboardingScreen() {
   const clickedSecondSignature = useRef(false);
   const [waitingForSecondSignature, setWaitingForSecondSignature] =
     useState(false);
+  const initiatingClientFor = useRef<string | undefined>(undefined);
 
   const disconnect = useCallback(
     async (resetLoading = true) => {
       setWaitingForSecondSignature(false);
       clickedSecondSignature.current = false;
+      initiatingClientFor.current = undefined;
       setUser({
         address: "",
         isEphemeral: false,
@@ -205,9 +207,14 @@ export default function OnboardingScreen() {
 
   const initXmtpClient = useCallback(async () => {
     const signer = user.seedPhraseSigner || thirdwebSigner || user.otherSigner;
-    if (!signer) {
+    if (
+      !signer ||
+      (user.address && initiatingClientFor.current === user.address)
+    ) {
       return;
     }
+    initiatingClientFor.current = user.address;
+
     try {
       const keys = JSON.stringify(
         Array.from(
@@ -237,13 +244,17 @@ export default function OnboardingScreen() {
           )
         )
       );
+
+      // Successfull login for user, let's setup
+      // the storage !
+      useAccountsStore.getState().setCurrentAccount(user.address);
+
       if (user.isEphemeral) {
-        setEphemeralAccount(true);
+        useSettingsStore.getState().setEphemeralAccount(true);
       } else {
-        setEphemeralAccount(false);
+        useSettingsStore.getState().setEphemeralAccount(false);
       }
       saveXmtpKeys(keys);
-
       await clearDB();
       resetLocalXmtpState();
       resetRecommendations();
@@ -252,19 +263,13 @@ export default function OnboardingScreen() {
         env: config.xmtpEnv,
       });
     } catch (e) {
+      initiatingClientFor.current = undefined;
       setLoading(false);
       clickedSecondSignature.current = false;
       setWaitingForSecondSignature(false);
       console.error(e);
     }
-  }, [
-    resetRecommendations,
-    setEphemeralAccount,
-    thirdwebSigner,
-    user.isEphemeral,
-    user.otherSigner,
-    user.seedPhraseSigner,
-  ]);
+  }, [resetRecommendations, thirdwebSigner, user]);
 
   useEffect(() => {
     // Seed phrase account can sign immediately

@@ -4,7 +4,7 @@ import { configure as configureCoinbase } from "@coinbase/wallet-mobile-sdk";
 import { ActionSheetProvider } from "@expo/react-native-action-sheet";
 import { Ethereum } from "@thirdweb-dev/chains";
 import { coinbaseWallet, ThirdwebProvider } from "@thirdweb-dev/react-native";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { StyleSheet, useColorScheme, View } from "react-native";
 import "./utils/splash/splash";
 import { KeyboardProvider } from "react-native-keyboard-controller";
@@ -14,6 +14,7 @@ import * as Sentry from "sentry-expo";
 import XmtpState from "./components/XmtpState";
 import XmtpWebview from "./components/XmtpWebview";
 import config from "./config";
+import { migrateDataIfNeeded } from "./data/refacto";
 import Main from "./screens/Main";
 import {
   backgroundColor,
@@ -47,6 +48,18 @@ export default function App() {
       mmkv.set(RECENT_EMOJI_STORAGE_KEY, JSON.stringify(next));
     },
   });
+  const [refactoMigrationDone, setRefactoMigrationDone] = useState(false);
+  useEffect(() => {
+    migrateDataIfNeeded()
+      .then(() => {
+        setRefactoMigrationDone(true);
+      })
+      .catch((e) => {
+        console.log(e);
+      });
+  }, []);
+
+  if (!refactoMigrationDone) return null;
 
   return (
     <ThirdwebProvider
