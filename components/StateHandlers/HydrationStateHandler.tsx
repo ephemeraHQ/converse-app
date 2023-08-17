@@ -3,10 +3,11 @@ import { useEffect } from "react";
 import { loadDataToContext } from "../../data";
 import { initDb } from "../../data/db";
 import { refreshProfileForAddress } from "../../data/helpers/profiles/profilesUpdate";
+import { migrateDataIfNeeded } from "../../data/refacto";
 import { useUserStore } from "../../data/store/accountsStore";
 import { useAppStore } from "../../data/store/appStore";
 import { cleanupAfterLogout } from "../../utils/logout";
-import mmkv, { migrateMMKVDataIfNeeded } from "../../utils/mmkv";
+import mmkv from "../../utils/mmkv";
 import { loadSavedNotificationMessagesToContext } from "../../utils/notifications";
 import { pick } from "../../utils/objects";
 import { getInstalledWallets } from "../Onboarding/supportedWallets";
@@ -32,7 +33,7 @@ export default function HydrationStateHandler() {
 
       await initDb();
 
-      migrateMMKVDataIfNeeded();
+      await migrateDataIfNeeded();
 
       await loadSavedNotificationMessagesToContext();
       await loadDataToContext();
