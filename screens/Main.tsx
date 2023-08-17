@@ -199,9 +199,12 @@ export default function Main() {
                       shouldReplace = true;
                     } else if (
                       newRoute.name === "Conversation" &&
-                      newRoute.params?.mainConversationWithPeer &&
-                      newRoute.params?.mainConversationWithPeer !==
-                        currentRoute.params?.mainConversationWithPeer
+                      ((newRoute.params?.mainConversationWithPeer &&
+                        newRoute.params?.mainConversationWithPeer !==
+                          currentRoute.params?.mainConversationWithPeer) ||
+                        (newRoute.params?.topic &&
+                          newRoute.params?.topic !==
+                            currentRoute.params?.topic))
                     ) {
                       shouldReplace = true;
                     }
