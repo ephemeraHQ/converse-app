@@ -18,7 +18,6 @@ import InviteBanner from "../components/InviteBanner";
 import Picto from "../components/Picto/Picto";
 import { getLocalXmtpConversationForTopic } from "../components/XmtpState";
 import config from "../config";
-import { cleanupPendingConversations } from "../data/helpers/conversations/pendingConversations";
 import { useChatStore, useSettingsStore } from "../data/store/accountsStore";
 import { userExists } from "../utils/api";
 import {
@@ -260,7 +259,6 @@ const Conversation = ({
   const onLeaveScreen = useCallback(async () => {
     if (!conversation || !textInputRef.current) return;
     useChatStore.getState().setOpenedConversationTopic(null);
-    await cleanupPendingConversations();
     setConversationMessageDraft(
       conversation.topic,
       textInputRef.current.currentValue
