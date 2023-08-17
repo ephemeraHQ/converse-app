@@ -78,6 +78,7 @@ export type ChatStoreType = {
   setConversationMessageDraft: (topic: string, draft: string) => void;
 
   setInitialLoadDone: () => void;
+  setInitialLoadDoneOnce: () => void;
   setMessages: (topic: string, messagesToSet: XmtpMessage[]) => void;
   updateMessagesIds: (
     updates: { topic: string; oldId: string; message: XmtpMessage }[]
@@ -279,6 +280,8 @@ export const initChatStore = (account: string) => {
               }
               return newState;
             }),
+          setInitialLoadDoneOnce: () =>
+            set(() => ({ initialLoadDoneOnce: true })),
           localClientConnected: false,
           setLocalClientConnected: (c) =>
             set(() => ({ localClientConnected: c })),
