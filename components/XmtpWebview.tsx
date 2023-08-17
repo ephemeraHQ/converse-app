@@ -18,7 +18,6 @@ import {
   saveXmtpConversations,
   saveXmtpKeys,
 } from "../utils/keychain";
-import { getLastXMTPSyncedAt, saveLastXMTPSyncedAt } from "../utils/mmkv";
 import {
   loadSavedNotificationMessagesToContext,
   subscribeToNotifications,
@@ -174,7 +173,7 @@ export default function XmtpWebview() {
       await loadSavedNotificationMessagesToContext();
       const knownTopics = Object.keys(conversations);
       sendMessageToWebview("RELOAD", {
-        lastSyncedAt: getLastXMTPSyncedAt(),
+        lastSyncedAt: useChatStore.getState().lastSyncedAt,
         knownTopics,
       });
     },
@@ -227,7 +226,7 @@ export default function XmtpWebview() {
         // Let's launch the initial load of all convos & messages
         const knownTopics = Object.keys(conversations);
         sendMessageToWebview("LOAD_CONVERSATIONS_AND_MESSAGES", {
-          lastSyncedAt: getLastXMTPSyncedAt(),
+          lastSyncedAt: useChatStore.getState().lastSyncedAt,
           knownTopics,
         });
       }
@@ -298,12 +297,12 @@ export default function XmtpWebview() {
           web3Connected.current = true;
           break;
         case "XMTP_INITIAL_LOAD":
-          saveLastXMTPSyncedAt(data.newLastSyncedAt);
+          useChatStore.getState().setLastSyncedAt(data.newLastSyncedAt);
           setInitialLoadDone();
           setReconnecting(false);
           break;
         case "XMTP_RELOAD_DONE": {
-          saveLastXMTPSyncedAt(data.newLastSyncedAt);
+          useChatStore.getState().setLastSyncedAt(data.newLastSyncedAt);
           setResyncing(false);
           setReconnecting(false);
           if (notificationsPermissionStatus === "granted" && userAddress) {

@@ -2,17 +2,11 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { MMKV } from "react-native-mmkv";
 import { StateStorage } from "zustand/middleware";
 
+import { useChatStore } from "../data/store/accountsStore";
+
 const storage = new MMKV();
 
 export default storage;
-
-export const saveLastXMTPSyncedAt = (timestamp: number) => {
-  AsyncStorage.setItem("lastXMTPSyncedAt", `${timestamp}`);
-  return storage.set("lastXMTPSyncedAt", timestamp);
-};
-
-export const getLastXMTPSyncedAt = () =>
-  storage.getNumber("lastXMTPSyncedAt") || 0;
 
 export const zustandMMKVStorage: StateStorage = {
   setItem: (name, value) => {
@@ -25,4 +19,13 @@ export const zustandMMKVStorage: StateStorage = {
   removeItem: (name) => {
     return storage.delete(name);
   },
+};
+
+export const migrateMMKVDataIfNeeded = () => {
+  const previousSyncedAt = storage.getNumber("lastXMTPSyncedAt") || 0;
+  if (previousSyncedAt) {
+    console.log("Migrating `lastXMTPSyncedAt` to zustand storage");
+    useChatStore.getState().setLastSyncedAt(previousSyncedAt);
+    storage.delete("lastXMTPSyncedAt");
+  }
 };
