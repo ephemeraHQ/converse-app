@@ -61,6 +61,7 @@ export type ChatStoreType = {
     [oldTopic: string]: string;
   };
   lastUpdateAt: number;
+  lastSyncedAt: number;
   initialLoadDone: boolean;
   initialLoadDoneOnce: boolean;
   localClientConnected: boolean;
@@ -91,6 +92,7 @@ export type ChatStoreType = {
   setWebviewClientConnected: (connected: boolean) => void;
   setResyncing: (syncing: boolean) => void;
   setReconnecting: (reconnecting: boolean) => void;
+  setLastSyncedAt: (synced: number) => void;
 };
 
 const now = () => new Date().getTime();
@@ -355,13 +357,16 @@ export const initChatStore = (account: string) => {
 
               return newState;
             }),
-        } as ChatStoreType),
+          setLastSyncedAt: (synced: number) =>
+            set(() => ({ lastSyncedAt: synced })),
+        }) as ChatStoreType,
       {
         name: `store-${account}-chat`, // Account-based storage so each account can have its own chat data
         storage: createJSONStorage(() => zustandMMKVStorage),
         // Only persisting the information we want
         partialize: (state) => ({
-          initialLoadDoneOnce: state.initialLoadDoneOnce, // This one we want to persist!
+          initialLoadDoneOnce: state.initialLoadDoneOnce,
+          lastSyncedAt: state.lastSyncedAt,
         }),
       }
     )
