@@ -1,9 +1,20 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
+import { getLocalXmtpClient } from "../components/XmtpState";
 import storage from "../utils/mmkv";
-import { useChatStore, useSettingsStore } from "./store/accountsStore";
+import {
+  useAccountsStore,
+  useChatStore,
+  useSettingsStore,
+} from "./store/accountsStore";
 
 export const migrateDataIfNeeded = async () => {
+  const xmtpClient = await getLocalXmtpClient(undefined, false);
+  if (xmtpClient && !useAccountsStore.getState().currentAccount) {
+    // Logged in user, let's save his address as current account
+    console.log("Migrating to multi account store - ", xmtpClient.address);
+    useAccountsStore.getState().setCurrentAccount(xmtpClient.address);
+  }
   const previousSyncedAt = storage.getNumber("lastXMTPSyncedAt") || 0;
   if (previousSyncedAt) {
     console.log("Migrating `lastXMTPSyncedAt` to zustand storage");

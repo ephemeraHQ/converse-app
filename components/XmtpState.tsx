@@ -174,7 +174,10 @@ export const sendPendingMessages = async () => {
   sendingPendingMessages = false;
 };
 
-export const getLocalXmtpClient = async (currentAddress?: string) => {
+export const getLocalXmtpClient = async (
+  currentAddress?: string,
+  setState = true
+) => {
   if (
     !xmtpClient ||
     (currentAddress && xmtpClient.address !== currentAddress)
@@ -186,7 +189,7 @@ export const getLocalXmtpClient = async (currentAddress?: string) => {
       getXmtpApiHeaders();
     }
   }
-  if (xmtpClient) {
+  if (xmtpClient && setState) {
     useChatStore.getState().setLocalClientConnected(true);
   }
   return xmtpClient;

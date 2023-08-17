@@ -3,7 +3,6 @@ import { useEffect } from "react";
 import { loadDataToContext } from "../../data";
 import { initDb } from "../../data/db";
 import { refreshProfileForAddress } from "../../data/helpers/profiles/profilesUpdate";
-import { migrateDataIfNeeded } from "../../data/refacto";
 import { useUserStore } from "../../data/store/accountsStore";
 import { useAppStore } from "../../data/store/appStore";
 import { cleanupAfterLogout } from "../../utils/logout";
@@ -32,8 +31,6 @@ export default function HydrationStateHandler() {
       await getInstalledWallets(false);
 
       await initDb();
-
-      await migrateDataIfNeeded();
 
       await loadSavedNotificationMessagesToContext();
       await loadDataToContext();

@@ -1,5 +1,7 @@
 import { create, StoreApi, UseBoundStore } from "zustand";
+import { persist, createJSONStorage } from "zustand/middleware";
 
+import { zustandMMKVStorage } from "../../utils/mmkv";
 import { ChatStoreType, initChatStore } from "./chatStore";
 import { ProfilesStoreType, initProfilesStore } from "./profilesStore";
 import {
@@ -9,17 +11,73 @@ import {
 import { initSettingsStore, SettingsStoreType } from "./settingsStore";
 import { initUserStore, UserStoreType } from "./userStore";
 
-type AccountsStoreStype = {
-  currentAccount: string;
+type AccountStoreType = {
+  [K in keyof AccountStoreDataType]: UseBoundStore<
+    StoreApi<AccountStoreDataType[K]>
+  >;
 };
+
+const storesByAccount: {
+  [account: string]: AccountStoreType;
+} = {};
+
+// And here call the init method of each store
+export const initStoresForAccount = (account: string) => {
+  if (!(account in storesByAccount)) {
+    console.log(`[AccountsStore] Initiating account ${account}`);
+    storesByAccount[account] = {
+      profiles: initProfilesStore(),
+      settings: initSettingsStore(account),
+      recommendations: initRecommendationsStore(account),
+      user: initUserStore(),
+      chat: initChatStore(account),
+    };
+  }
+};
+
+initStoresForAccount("TEMPORARY_ACCOUNT");
 
 // This store is global (i.e. not linked to an account)
 // For now we only use a single account so we initialize it
 // and don't add a setter.
 
-export const useAccountsStore = create<AccountsStoreStype>()((set) => ({
-  currentAccount: "MAIN_ACCOUNT",
-}));
+type AccountsStoreStype = {
+  currentAccount: string;
+  setCurrentAccount: (account: string) => void;
+};
+
+export const useAccountsStore = create<AccountsStoreStype>()(
+  persist(
+    (set) => ({
+      currentAccount: "TEMPORARY_ACCOUNT",
+      setCurrentAccount: (account) =>
+        set(() => {
+          console.log(`[AccountsStore] Setting current account: ${account}`);
+          if (!storesByAccount[account]) {
+            initStoresForAccount(account);
+          }
+          return { currentAccount: account };
+        }),
+    }),
+    {
+      name: "store-accounts",
+      storage: createJSONStorage(() => zustandMMKVStorage),
+      onRehydrateStorage: () => {
+        return (state, error) => {
+          if (error) {
+            console.log("An error happened during hydration", error);
+          } else {
+            if (state?.currentAccount && state.currentAccount.length > 0) {
+              initStoresForAccount(state.currentAccount);
+            } else if (state) {
+              state.currentAccount = "TEMPORARY_ACCOUNT";
+            }
+          }
+        };
+      },
+    }
+  )
+);
 
 // Each account gets multiple substores! Here we define the substore types and
 // getters / setters / helpers to manage these multiple stores for each account
@@ -33,27 +91,6 @@ type AccountStoreDataType = {
   chat: ChatStoreType;
 };
 
-// And here call the init method of each store
-const initStoreForAccount = (account: string) => {
-  storesByAccount[account] = {
-    profiles: initProfilesStore(),
-    settings: initSettingsStore(account),
-    recommendations: initRecommendationsStore(account),
-    user: initUserStore(),
-    chat: initChatStore(account),
-  };
-};
-
-type AccountStoreType = {
-  [K in keyof AccountStoreDataType]: UseBoundStore<
-    StoreApi<AccountStoreDataType[K]>
-  >;
-};
-
-const storesByAccount: {
-  [account: string]: AccountStoreType;
-} = {};
-
 const getAccountStore = (account: string) => {
   if (account in storesByAccount) {
     return storesByAccount[account];
@@ -61,10 +98,6 @@ const getAccountStore = (account: string) => {
     throw new Error(`Tried to access non existent store for ${account}`);
   }
 };
-
-// Right now we just handle a single account, MAIN_ACCOUNT, so we init it ASAP
-
-initStoreForAccount("MAIN_ACCOUNT");
 
 // This enables us to use account-based substores for the current selected user automatically,
 // Just call export useSubStore = accountStoreHook("subStoreName") in the substore definition
