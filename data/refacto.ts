@@ -10,7 +10,10 @@ import {
 
 export const migrateDataIfNeeded = async () => {
   const xmtpClient = await getLocalXmtpClient(undefined, false);
-  if (xmtpClient && !useAccountsStore.getState().currentAccount) {
+  if (
+    xmtpClient &&
+    useAccountsStore.getState().currentAccount === "TEMPORARY_ACCOUNT"
+  ) {
     // Logged in user, let's save his address as current account
     console.log("Migrating to multi account store - ", xmtpClient.address);
     useAccountsStore.getState().setCurrentAccount(xmtpClient.address);
