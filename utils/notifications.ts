@@ -4,6 +4,7 @@ import { Platform } from "react-native";
 import config from "../config";
 import { saveConversations } from "../data/helpers/conversations/upsertConversations";
 import { saveMessages } from "../data/helpers/messages";
+import { currentAccount } from "../data/store/accountsStore";
 import { XmtpConversation } from "../data/store/chatStore";
 import { buildUserInviteTopic } from "../vendor/xmtp-js/src/utils";
 import api from "./api";
@@ -155,7 +156,8 @@ export const loadSavedNotificationMessagesToContext = async () => {
           context,
         };
       });
-      await saveConversations(conversationsToSave);
+      // TODO => not current account here, know from which account is the notif
+      await saveConversations(currentAccount(), conversationsToSave);
     }
 
     const messages = await loadSavedNotificationsMessages();
@@ -165,6 +167,8 @@ export const loadSavedNotificationMessagesToContext = async () => {
       await Promise.all(
         messages.map((message: any) =>
           saveMessages(
+            // TODO => not current account here, know from which account is the notif
+            currentAccount(),
             [
               {
                 id: message.id,

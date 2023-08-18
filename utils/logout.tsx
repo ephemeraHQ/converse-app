@@ -3,7 +3,7 @@ import { Platform } from "react-native";
 import RNRestart from "react-native-restart";
 
 import { clearDB } from "../data/db";
-import { useChatStore } from "../data/store/accountsStore";
+import { currentAccount, useChatStore } from "../data/store/accountsStore";
 import { deleteXmtpConversations, deleteXmtpKeys } from "./keychain";
 import mmkv from "./mmkv";
 import { disablePushNotifications } from "./notifications";
@@ -50,7 +50,7 @@ const cleanupBeforeLogout = async () => {
 export const cleanupAfterLogout = async () => {
   const promisesToAwait: any[] = [];
   // Clearing the Sqlite db
-  promisesToAwait.push(clearDB(false));
+  promisesToAwait.push(clearDB(currentAccount(), false));
   // Delete keychain xmtp
   promisesToAwait.push(deleteXmtpKeys());
   // Delete shared data

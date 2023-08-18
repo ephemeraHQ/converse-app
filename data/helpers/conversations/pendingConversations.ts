@@ -3,14 +3,15 @@ import uuid from "react-native-uuid";
 import { In } from "typeorm/browser";
 
 import { InvitationContext } from "../../../vendor/xmtp-js/src";
-import { conversationRepository, messageRepository } from "../../db";
+import { getCurrentRepository, getRepository } from "../../db";
 import { upsertRepository } from "../../db/upsert";
 import { xmtpConversationToDb } from "../../mappers";
-import { useChatStore } from "../../store/accountsStore";
+import { getChatStore, useChatStore } from "../../store/accountsStore";
 import { XmtpConversation } from "../../store/chatStore";
 import { saveConversations } from "./upsertConversations";
 
 export const cleanupPendingConversations = async () => {
+  const conversationRepository = getCurrentRepository("conversation");
   const pendingConversations = await conversationRepository.find({
     where: { pending: true },
     relations: { messages: true },
@@ -32,9 +33,11 @@ export const cleanupPendingConversations = async () => {
 };
 
 const getPendingConversationWithPeer = async (
+  account: string,
   address: string,
   conversationId?: string
 ) => {
+  const conversationRepository = getRepository(account, "conversation");
   const conversation = await conversationRepository
     .createQueryBuilder()
     .select()
@@ -51,12 +54,14 @@ const getPendingConversationWithPeer = async (
 };
 
 export const createPendingConversation = async (
+  account: string,
   peerAddress: string,
   context?: InvitationContext
 ) => {
   const cleanAddress = getAddress(peerAddress.toLowerCase());
   // Let's first check if we already have a conversation like that in db
   const alreadyConversationInDb = await getPendingConversationWithPeer(
+    account,
     cleanAddress,
     context?.conversationId
   );
@@ -66,7 +71,7 @@ export const createPendingConversation = async (
     );
 
   const pendingConversationId = uuid.v4().toString();
-  await saveConversations([
+  await saveConversations(account, [
     {
       topic: pendingConversationId,
       pending: true,
@@ -81,6 +86,7 @@ export const createPendingConversation = async (
 };
 
 export const upgradePendingConversationIfNeeded = async (
+  account: string,
   conversation: XmtpConversation
 ) => {
   // If we get back a conversation from XMTP that corresponds
@@ -89,6 +95,7 @@ export const upgradePendingConversationIfNeeded = async (
 
   const alreadyConversationInDbWithConversationId =
     await getPendingConversationWithPeer(
+      account,
       conversation.peerAddress,
       conversation.context?.conversationId
     );
@@ -98,6 +105,8 @@ export const upgradePendingConversationIfNeeded = async (
     alreadyConversationInDbWithConversationId.topic === conversation.topic
   )
     return;
+  const conversationRepository = getRepository(account, "conversation");
+  const messageRepository = getRepository(account, "message");
 
   // Save this one to db
   await upsertRepository(
@@ -118,7 +127,7 @@ export const upgradePendingConversationIfNeeded = async (
   });
 
   // Dispatch
-  useChatStore
+  getChatStore(account)
     .getState()
     .updateConversationTopic(
       alreadyConversationInDbWithConversationId.topic,
@@ -126,7 +135,8 @@ export const upgradePendingConversationIfNeeded = async (
     );
 };
 
-export const getPendingConversationsToCreate = async () => {
+export const getPendingConversationsToCreate = async (account: string) => {
+  const conversationRepository = getRepository(account, "conversation");
   const pendingConversations = await conversationRepository.find({
     where: {
       pending: true,

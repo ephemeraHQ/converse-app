@@ -3,7 +3,7 @@ import { useEffect } from "react";
 import { loadDataToContext } from "../../data";
 import { initDb } from "../../data/db";
 import { refreshProfileForAddress } from "../../data/helpers/profiles/profilesUpdate";
-import { useUserStore } from "../../data/store/accountsStore";
+import { getAccounts, useUserStore } from "../../data/store/accountsStore";
 import { useAppStore } from "../../data/store/appStore";
 import { cleanupAfterLogout } from "../../utils/logout";
 import mmkv from "../../utils/mmkv";
@@ -30,12 +30,13 @@ export default function HydrationStateHandler() {
       // Let's load installed wallets
       await getInstalledWallets(false);
 
-      await initDb();
+      const accounts = getAccounts();
+      await Promise.all(accounts.map((a) => initDb(a)));
 
       await loadSavedNotificationMessagesToContext();
-      await loadDataToContext();
+      await Promise.all(accounts.map((a) => loadDataToContext(a)));
 
-      let address = null;
+      let address: string | null = null;
 
       const xmtpClient = await getLocalXmtpClient();
       if (xmtpClient) {
@@ -44,7 +45,7 @@ export default function HydrationStateHandler() {
       }
 
       if (address) {
-        refreshProfileForAddress(address);
+        accounts.map((a) => refreshProfileForAddress(a, address as string));
       }
 
       setHydrationDone(true);

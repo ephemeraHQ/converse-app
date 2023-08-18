@@ -1,4 +1,5 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import RNFS from "react-native-fs";
 
 import { getLocalXmtpClient } from "../components/XmtpState";
 import storage from "../utils/mmkv";
@@ -9,14 +10,25 @@ import {
 } from "./store/accountsStore";
 
 export const migrateDataIfNeeded = async () => {
-  const xmtpClient = await getLocalXmtpClient(undefined, false);
-  if (
-    xmtpClient &&
-    useAccountsStore.getState().currentAccount === "TEMPORARY_ACCOUNT"
-  ) {
-    // Logged in user, let's save his address as current account
-    console.log("Migrating to multi account store - ", xmtpClient.address);
-    useAccountsStore.getState().setCurrentAccount(xmtpClient.address);
+  const before = new Date().getTime();
+  let currentAccount = useAccountsStore.getState().currentAccount;
+  if (currentAccount === "TEMPORARY_ACCOUNT") {
+    const xmtpClient = await getLocalXmtpClient(undefined, false);
+    if (xmtpClient) {
+      currentAccount = xmtpClient.address;
+      console.log("Migrating to multi account store - ", xmtpClient.address);
+      useAccountsStore.getState().setCurrentAccount(xmtpClient.address);
+    }
+  }
+  const dbPath = `${RNFS.DocumentDirectoryPath}/SQLite/converse`;
+  const dbExists = await RNFS.exists(dbPath);
+  if (currentAccount !== "TEMPORARY_ACCOUNT" && dbExists) {
+    const newDbPath = `${RNFS.DocumentDirectoryPath}/SQLite/converse-${currentAccount}.sqlite`;
+    console.log(
+      "Moving the database to a dedicated account database",
+      newDbPath
+    );
+    await RNFS.moveFile(dbPath, newDbPath);
   }
   const previousSyncedAt = storage.getNumber("lastXMTPSyncedAt") || 0;
   if (previousSyncedAt) {
@@ -54,4 +66,6 @@ export const migrateDataIfNeeded = async () => {
     useChatStore.getState().setInitialLoadDoneOnce();
     storage.delete("state.xmtp.initialLoadDoneOnce");
   }
+  const after = new Date().getTime();
+  console.log(`[Refacto] Migration took ${(after - before) / 1000} seconds`);
 };

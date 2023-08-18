@@ -89,7 +89,7 @@ export default function DesktopConnect() {
           if (client && client.address) {
             saveXmtpKeys(xmtpKeys);
 
-            await clearDB();
+            await clearDB(client.address);
             sendMessageToWebview("KEYS_LOADED_FROM_SECURE_STORAGE", {
               keys: xmtpKeys,
               env: config.xmtpEnv,

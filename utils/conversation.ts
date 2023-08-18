@@ -5,7 +5,7 @@ import { createContext, useContextSelector } from "use-context-selector";
 
 import config from "../config";
 import { createPendingConversation } from "../data/helpers/conversations/pendingConversations";
-import { useChatStore } from "../data/store/accountsStore";
+import { getChatStore, useChatStore } from "../data/store/accountsStore";
 import {
   XmtpMessage,
   XmtpConversation,
@@ -131,6 +131,7 @@ export const computeNewConversationContext = (
 };
 
 export const openMainConversationWithPeer = async (
+  account: string,
   peerToCreateConvoWith: string,
   onSuccess: (topic: string) => void,
   onError: () => void
@@ -154,7 +155,7 @@ export const openMainConversationWithPeer = async (
     );
     return;
   }
-  const conversations = useChatStore.getState().conversations;
+  const conversations = getChatStore(account).getState().conversations;
   // Then, check if we already have a main conversation with this address
   const alreadyConversationWithAddress = Object.values(conversations).find(
     (c) =>
@@ -180,7 +181,11 @@ export const openMainConversationWithPeer = async (
       );
     } else {
       // Creating the conversation locally in a lazy manner
-      const topic = await createPendingConversation(peerAddress, undefined);
+      const topic = await createPendingConversation(
+        account,
+        peerAddress,
+        undefined
+      );
       onSuccess(topic);
     }
   }

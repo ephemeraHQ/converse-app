@@ -1,16 +1,16 @@
 import { useConnect } from "@thirdweb-dev/react-core";
 import {
   WCMeta,
-  WalletConnectV2,
   WalletOptions,
   WalletConfig,
   WC2Options,
+  WalletConnectBase,
 } from "@thirdweb-dev/react-native";
 import { useCallback } from "react";
 
 import config from "../../config";
 
-class DynamicWalletConnect extends WalletConnectV2 {
+class DynamicWalletConnect extends WalletConnectBase {
   readonly id: string;
 
   readonly meta: WCMeta;
@@ -29,7 +29,7 @@ class DynamicWalletConnect extends WalletConnectV2 {
 const dynamicWalletConnect = (
   id: string,
   meta: WCMeta
-): WalletConfig<WalletConnectV2> => {
+): WalletConfig<WalletConnectBase> => {
   return {
     id,
     meta,

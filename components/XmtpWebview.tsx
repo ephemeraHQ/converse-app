@@ -8,6 +8,7 @@ import config from "../config";
 import { saveConversations } from "../data/helpers/conversations/upsertConversations";
 import { saveMessages } from "../data/helpers/messages";
 import {
+  useAccountsStore,
   useChatStore,
   useSettingsStore,
   useUserStore,
@@ -94,6 +95,7 @@ export default function XmtpWebview() {
   const appState = useRef(AppState.currentState);
   const loadedKeys = useRef(false);
   const web3Connected = useRef(false);
+  const currentAccount = useAccountsStore((s) => s.currentAccount);
 
   const {
     initialLoadDone,
@@ -254,7 +256,8 @@ export default function XmtpWebview() {
           break;
         }
         case "XMTP_CONVERSATIONS":
-          saveConversations(data);
+          // TODO => handle multiple accounts here
+          saveConversations(currentAccount, data);
           break;
         case "XMTP_EXPORTED_CONVERSATIONS":
           if (userAddress) {
@@ -267,7 +270,7 @@ export default function XmtpWebview() {
 
           break;
         case "XMTP_NEW_CONVERSATION": {
-          saveConversations([data]);
+          saveConversations(currentAccount, [data]);
           // New conversation, let's subscribe to topic
           if (notificationsPermissionStatus === "granted" && userAddress) {
             subscribeToNotifications(
@@ -282,6 +285,7 @@ export default function XmtpWebview() {
           data.forEach((messagesFromConversation: any) => {
             gotMessagesFromNetwork(messagesFromConversation.messages.length);
             saveMessages(
+              currentAccount,
               messagesFromConversation.messages,
               messagesFromConversation.topic
             );
@@ -391,6 +395,7 @@ export default function XmtpWebview() {
       );
     },
     [
+      currentAccount,
       blockedPeers,
       loadKeys,
       notificationsPermissionStatus,

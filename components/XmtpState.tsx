@@ -10,6 +10,7 @@ import {
   updateMessagesIds,
 } from "../data/helpers/messages";
 import {
+  useAccountsStore,
   useChatStore,
   useSettingsStore,
   useUserStore,
@@ -68,6 +69,7 @@ export const getLocalXmtpConversationForTopic = async (
 };
 
 const sendPreparedMessages = async (
+  account: string,
   preparedMessages: Map<string, PreparedMessage>
 ) => {
   for (const id of preparedMessages.keys()) {
@@ -84,7 +86,11 @@ const sendPreparedMessages = async (
       await preparedMessage.send();
       // Here message has been sent, let's mark it as
       // sent locally to make sure we don't sent twice
-      await markMessageAsSent(id, preparedMessage.messageEnvelope.contentTopic);
+      await markMessageAsSent(
+        account,
+        id,
+        preparedMessage.messageEnvelope.contentTopic
+      );
       delete sendingMessages[id];
     } catch (e: any) {
       console.log("Could not send message, will probably try again later", e);
@@ -93,8 +99,8 @@ const sendPreparedMessages = async (
   }
 };
 
-export const createPendingConversations = async () => {
-  const pendingConvos = await getPendingConversationsToCreate();
+export const createPendingConversations = async (account: string) => {
+  const pendingConvos = await getPendingConversationsToCreate(account);
   if (pendingConvos.length === 0) return;
   console.log(
     `Trying to create ${pendingConvos.length} pending conversations...`
@@ -102,13 +108,13 @@ export const createPendingConversations = async () => {
   await Promise.all(pendingConvos.map(createConversation));
 };
 
-export const sendPendingMessages = async () => {
+export const sendPendingMessages = async (account: string) => {
   if (sendingPendingMessages) {
     return;
   }
   sendingPendingMessages = true;
   try {
-    const messagesToSend = await getMessagesToSend();
+    const messagesToSend = await getMessagesToSend(account);
     if (messagesToSend.length === 0) {
       sendingPendingMessages = false;
       return;
@@ -166,8 +172,8 @@ export const sendPendingMessages = async () => {
         };
       }
     }
-    await updateMessagesIds(messageIdsToUpdate);
-    await sendPreparedMessages(preparedMessagesToSend);
+    await updateMessagesIds(account, messageIdsToUpdate);
+    await sendPreparedMessages(account, preparedMessagesToSend);
   } catch (e) {
     console.log(e);
   }
@@ -212,6 +218,7 @@ export const getXmtpApiHeaders = async () => {
 
 export default function XmtpState() {
   const userAddress = useUserStore((s) => s.userAddress);
+  const currentAccount = useAccountsStore((s) => s.currentAccount);
   const {
     initialLoadDone,
     localClientConnected,
@@ -261,8 +268,8 @@ export default function XmtpState() {
         !reconnecting
       ) {
         try {
-          await createPendingConversations();
-          await sendPendingMessages();
+          await createPendingConversations(currentAccount);
+          await sendPendingMessages(currentAccount);
         } catch (e) {
           console.log(e);
         }
@@ -271,6 +278,7 @@ export default function XmtpState() {
       lastMessageSendingFinishedAt.current = new Date().getTime();
     };
   }, [
+    currentAccount,
     splashScreenHidden,
     initialLoadDone,
     localClientConnected,

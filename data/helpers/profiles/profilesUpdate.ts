@@ -1,9 +1,9 @@
 import { getProfilesForAddresses } from "../../../utils/api";
 import { getLensHandleFromConversationIdAndPeer } from "../../../utils/lens";
 import { saveConversationIdentifiersForNotifications } from "../../../utils/notifications";
-import { profileRepository } from "../../db";
+import { getRepository } from "../../db";
 import { upsertRepository } from "../../db/upsert";
-import { useProfilesStore } from "../../store/accountsStore";
+import { getProfilesStore } from "../../store/accountsStore";
 import { XmtpConversation } from "../../store/chatStore";
 import { ProfileSocials } from "../../store/profilesStore";
 
@@ -13,8 +13,10 @@ type ConversationHandlesUpdate = {
 };
 
 export const updateProfilesForConversations = async (
+  account: string,
   conversations: XmtpConversation[]
 ) => {
+  const profileRepository = getRepository(account, "profile");
   const updates: ConversationHandlesUpdate[] = [];
   let batch: XmtpConversation[] = [];
   let rest = conversations;
@@ -50,7 +52,7 @@ export const updateProfilesForConversations = async (
         updatedAt: now,
       };
     }
-    useProfilesStore.getState().setProfiles(socialsToDispatch);
+    getProfilesStore(account).getState().setProfiles(socialsToDispatch);
 
     console.log("Done saving profiles to db!");
     const handleConversation = async (conversation: XmtpConversation) => {
@@ -92,10 +94,14 @@ export const updateProfilesForConversations = async (
   return updates;
 };
 
-export const refreshProfileForAddress = async (address: string) => {
+export const refreshProfileForAddress = async (
+  account: string,
+  address: string
+) => {
   const now = new Date().getTime();
   const profilesByAddress = await getProfilesForAddresses([address]);
   // Save profiles to db
+  const profileRepository = getRepository(account, "profile");
   await upsertRepository(
     profileRepository,
     Object.keys(profilesByAddress).map((address) => ({
@@ -105,10 +111,12 @@ export const refreshProfileForAddress = async (address: string) => {
     })),
     ["address"]
   );
-  useProfilesStore.getState().setProfiles({
-    [address]: {
-      socials: profilesByAddress[address],
-      updatedAt: now,
-    },
-  });
+  getProfilesStore(account)
+    .getState()
+    .setProfiles({
+      [address]: {
+        socials: profilesByAddress[address],
+        updatedAt: now,
+      },
+    });
 };

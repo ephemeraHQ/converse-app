@@ -7,7 +7,7 @@ import { Platform, TouchableOpacity, useColorScheme, View } from "react-native";
 
 import config from "../config";
 import { refreshProfileForAddress } from "../data/helpers/profiles/profilesUpdate";
-import { useUserStore } from "../data/store/accountsStore";
+import { currentAccount, useUserStore } from "../data/store/accountsStore";
 import { useAppStore } from "../data/store/appStore";
 import { NavigationParamList } from "../screens/Main";
 import { actionSheetColors, textSecondaryColor } from "../utils/colors";
@@ -39,7 +39,7 @@ export default function SettingsButton({
     const methods = {
       "Your profile page": () => {
         if (userAddress) {
-          refreshProfileForAddress(userAddress);
+          refreshProfileForAddress(currentAccount(), userAddress);
           navigation.push("Profile", { address: userAddress });
         }
       },
