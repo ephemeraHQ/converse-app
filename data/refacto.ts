@@ -20,15 +20,18 @@ export const migrateDataIfNeeded = async () => {
       useAccountsStore.getState().setCurrentAccount(xmtpClient.address);
     }
   }
-  const dbPath = `${RNFS.DocumentDirectoryPath}/SQLite/converse`;
-  const dbExists = await RNFS.exists(dbPath);
-  if (currentAccount !== "TEMPORARY_ACCOUNT" && dbExists) {
-    const newDbPath = `${RNFS.DocumentDirectoryPath}/SQLite/converse-${currentAccount}.sqlite`;
-    console.log(
-      "Moving the database to a dedicated account database",
-      newDbPath
-    );
-    await RNFS.moveFile(dbPath, newDbPath);
+
+  if (currentAccount !== "TEMPORARY_ACCOUNT") {
+    const dbPath = `${RNFS.DocumentDirectoryPath}/SQLite/converse`;
+    const dbExists = await RNFS.exists(dbPath);
+    if (dbExists) {
+      const newDbPath = `${RNFS.DocumentDirectoryPath}/SQLite/converse-${currentAccount}.sqlite`;
+      console.log(
+        "Moving the database to a dedicated account database",
+        newDbPath
+      );
+      await RNFS.moveFile(dbPath, newDbPath);
+    }
   }
   const previousSyncedAt = storage.getNumber("lastXMTPSyncedAt") || 0;
   if (previousSyncedAt) {
