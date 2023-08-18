@@ -61,8 +61,18 @@ const build = async () => {
   if (env === "production") {
     await executeCommand("yarn", ["typecheck"]);
     const tagName = `v${iosVersion}`;
-    await executeCommand("git", ["tag", "--force", tagName]);
-    await executeCommand("git", ["push", "origin", tagName, "--force"]);
+    const { pushTag } = await prompts([
+      {
+        type: "select",
+        name: "pushTag",
+        message: `Push tag ${tagName} to Github?`,
+        choices: [{ value: "no" }, { value: "yes" }],
+      },
+    ]);
+    if (pushTag === "yes") {
+      await executeCommand("git", ["tag", "--force", tagName]);
+      await executeCommand("git", ["push", "origin", tagName, "--force"]);
+    }
   }
 
   if (env === "preview" || env === "production") {
