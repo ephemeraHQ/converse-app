@@ -23,6 +23,7 @@ import { TableViewPicto } from "../components/TableView/TableViewImage";
 import config from "../config";
 import { createPendingConversation } from "../data/helpers/conversations/pendingConversations";
 import {
+  currentAccount,
   useChatStore,
   useRecommendationsStore,
   useUserStore,
@@ -192,6 +193,7 @@ export default function NewConversation({
 
       try {
         const newConversationTopic = await createPendingConversation(
+          currentAccount(),
           peerAddress,
           computeNewConversationContext(userAddress, peerAddress)
         );

@@ -1,13 +1,14 @@
 import RNFS from "react-native-fs";
 
-import { messageRepository } from "../../db";
+import { getRepository } from "../../db";
 import { Message } from "../../db/entities/messageEntity";
 import { upsertRepository } from "../../db/upsert";
 import { xmtpMessageFromDb, xmtpMessageToDb } from "../../mappers";
-import { useChatStore } from "../../store/accountsStore";
+import { getChatStore } from "../../store/accountsStore";
 import { XmtpMessage } from "../../store/chatStore";
 
 export const saveMessages = async (
+  account: string,
   messages: XmtpMessage[],
   conversationTopic: string
 ) => {
@@ -25,9 +26,10 @@ export const saveMessages = async (
     }
   });
   // First dispatch for immediate feedback
-  useChatStore.getState().setMessages(conversationTopic, messages);
+  getChatStore(account).getState().setMessages(conversationTopic, messages);
 
   // Then save to db
+  const messageRepository = getRepository(account, "message");
   await upsertRepository(
     messageRepository,
     messages.map((xmtpMessage) =>
@@ -37,18 +39,22 @@ export const saveMessages = async (
   );
 };
 
-export const updateMessagesIds = async (messageIdsToUpdate: {
-  [messageId: string]: {
-    newMessageId: string;
-    newMessageSent: number;
-    message: Message;
-  };
-}) => {
+export const updateMessagesIds = async (
+  account: string,
+  messageIdsToUpdate: {
+    [messageId: string]: {
+      newMessageId: string;
+      newMessageSent: number;
+      message: Message;
+    };
+  }
+) => {
   const messagesToDispatch: {
     topic: string;
     message: XmtpMessage;
     oldId: string;
   }[] = [];
+  const messageRepository = getRepository(account, "message");
   for (const oldId in messageIdsToUpdate) {
     const messageToUpdate = messageIdsToUpdate[oldId];
     await messageRepository.update(
@@ -74,15 +80,23 @@ export const updateMessagesIds = async (messageIdsToUpdate: {
       oldId,
     });
   }
-  useChatStore.getState().updateMessagesIds(messagesToDispatch);
+  getChatStore(account).getState().updateMessagesIds(messagesToDispatch);
 };
 
-export const markMessageAsSent = async (messageId: string, topic: string) => {
+export const markMessageAsSent = async (
+  account: string,
+  messageId: string,
+  topic: string
+) => {
+  const messageRepository = getRepository(account, "message");
   await messageRepository.update({ id: messageId }, { status: "sent" });
-  useChatStore.getState().updateMessageStatus(topic, messageId, "sent");
+  getChatStore(account)
+    .getState()
+    .updateMessageStatus(topic, messageId, "sent");
 };
 
-export const getMessagesToSend = async () => {
+export const getMessagesToSend = async (account: string) => {
+  const messageRepository = getRepository(account, "message");
   const messagesToSend = await messageRepository.find({
     select: {
       id: true,

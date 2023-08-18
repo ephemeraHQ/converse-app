@@ -18,7 +18,11 @@ import InviteBanner from "../components/InviteBanner";
 import Picto from "../components/Picto/Picto";
 import { getLocalXmtpConversationForTopic } from "../components/XmtpState";
 import config from "../config";
-import { useChatStore, useSettingsStore } from "../data/store/accountsStore";
+import {
+  currentAccount,
+  useChatStore,
+  useSettingsStore,
+} from "../data/store/accountsStore";
 import { userExists } from "../utils/api";
 import {
   backgroundColor,
@@ -102,6 +106,7 @@ const Conversation = ({
     ) {
       openedMainConvo.current = true;
       openMainConversationWithPeer(
+        currentAccount(),
         route.params.mainConversationWithPeer,
         setConversationTopic,
         navigation.goBack

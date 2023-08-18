@@ -1,9 +1,10 @@
 import { sentryTrackMessage } from "../../../utils/sentry";
-import { profileRepository } from "../../db";
+import { getRepository } from "../../db";
 import { Profile } from "../../db/entities/profileEntity";
 import { ProfileSocials } from "../../store/profilesStore";
 
-export const loadProfilesByAddress = async () => {
+export const loadProfilesByAddress = async (account: string) => {
+  const profileRepository = getRepository(account, "profile");
   const profiles = await profileRepository.find();
   const profileByAddress: {
     [address: string]: { socials: ProfileSocials; updatedAt: number };

@@ -112,7 +112,7 @@ export const initChatStore = (account: string) => {
                 const n = now();
                 newState.conversations[topic].readUntil = n;
                 // Also mark in db
-                markConversationReadUntil(topic, n);
+                markConversationReadUntil(account, topic, n);
               }
               return newState;
             }),
@@ -219,6 +219,7 @@ export const initChatStore = (account: string) => {
                     conversation.readUntil = now();
                     // Also mark in db
                     markConversationReadUntil(
+                      account,
                       conversation.topic,
                       conversation.readUntil
                     );
@@ -276,7 +277,7 @@ export const initChatStore = (account: string) => {
                     conversation.readUntil = lastMessage ? lastMessage.sent : 0;
                   }
                 }
-                markAllConversationsAsReadInDb();
+                markAllConversationsAsReadInDb(account);
               }
               return newState;
             }),

@@ -30,36 +30,45 @@ import { removeOldReactions1691412759130 } from "./migrations/1691412759130-remo
 // ADD COLUMN supported (added in version 3.2.0 - 2005-03-21)
 // DROP COLUMN NOT SUPPORTED (added in version 3.35.0 - 2021-03-12)
 
-const dataSource = new DataSource({
-  database: "converse",
-  driver: require("expo-sqlite"),
-  entities: [Conversation, Message, Profile],
-  synchronize: false,
-  migrationsRun: false,
-  migrations: [
-    init1671623489366,
-    addLensHandle1671788934503,
-    addEnsName1673277126468,
-    addMessageStatus1680616920220,
-    addStatusIndex1681209069007,
-    addReadStatus1683114681319,
-    addSentViaConverse1684057254703,
-    addProfileEntity1686053217007,
-    removeHandlesFromConvo1686124833536,
-    addContentType1687793816866,
-    addMessageReaction1688549487960,
-    addMessageFallback1690204801962,
-    addPendingStateToConversations1690376359971,
-    fixWrongForeignKey1690809735000,
-    removeForeignKeyForTesters1690989046000,
-    addIndexToPendingConversation1691154310694,
-    addReferencedMessage1691397563214,
-    removeOldReactions1691412759130,
-  ],
-  type: "expo",
-  logging: true,
-  maxQueryExecutionTime: 150,
-  logger: new TypeORMLogger(),
-});
+const dataSources: { [account: string]: DataSource } = {};
 
-export default dataSource;
+export const getDataSource = (account: string) => {
+  if (account in dataSources) return dataSources[account];
+  const newDataSource = new DataSource({
+    database: `converse-${account}.sqlite`,
+    driver: require("expo-sqlite"),
+    entities: [Conversation, Message, Profile],
+    synchronize: false,
+    migrationsRun: false,
+    migrations: [
+      init1671623489366,
+      addLensHandle1671788934503,
+      addEnsName1673277126468,
+      addMessageStatus1680616920220,
+      addStatusIndex1681209069007,
+      addReadStatus1683114681319,
+      addSentViaConverse1684057254703,
+      addProfileEntity1686053217007,
+      removeHandlesFromConvo1686124833536,
+      addContentType1687793816866,
+      addMessageReaction1688549487960,
+      addMessageFallback1690204801962,
+      addPendingStateToConversations1690376359971,
+      fixWrongForeignKey1690809735000,
+      removeForeignKeyForTesters1690989046000,
+      addIndexToPendingConversation1691154310694,
+      addReferencedMessage1691397563214,
+      removeOldReactions1691412759130,
+    ],
+    type: "expo",
+    logging: true,
+    maxQueryExecutionTime: 150,
+    logger: new TypeORMLogger(),
+  });
+  dataSources[account] = newDataSource;
+  return newDataSource;
+};
+
+export const deleteDataSource = (account: string) => {
+  delete dataSources[account];
+};

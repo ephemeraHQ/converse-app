@@ -255,7 +255,7 @@ export default function OnboardingScreen() {
         useSettingsStore.getState().setEphemeralAccount(false);
       }
       saveXmtpKeys(keys);
-      await clearDB();
+      await clearDB(user.address);
       resetLocalXmtpState();
       resetRecommendations();
       sendMessageToWebview("KEYS_LOADED_FROM_SECURE_STORAGE", {

@@ -1,19 +1,20 @@
 import { getLensHandleFromConversationIdAndPeer } from "../../../utils/lens";
 import { saveConversationIdentifiersForNotifications } from "../../../utils/notifications";
-import { conversationRepository } from "../../db";
-import dataSource from "../../db/datasource";
+import { getRepository } from "../../db";
+import { getDataSource } from "../../db/datasource";
 import { upsertRepository } from "../../db/upsert";
 import { xmtpConversationToDb } from "../../mappers";
-import { useChatStore, useProfilesStore } from "../../store/accountsStore";
+import { getChatStore, getProfilesStore } from "../../store/accountsStore";
 import { XmtpConversation } from "../../store/chatStore";
 import { updateProfilesForConversations } from "../profiles/profilesUpdate";
 import { upgradePendingConversationIfNeeded } from "./pendingConversations";
 
 export const saveConversations = async (
+  account: string,
   conversations: XmtpConversation[],
   forceUpdate = false
 ) => {
-  const chatStoreState = useChatStore.getState();
+  const chatStoreState = getChatStore(account).getState();
   const alreadyKnownConversations: XmtpConversation[] = [];
   const conversationsToUpsert: XmtpConversation[] = [];
   conversations.forEach((c) => {
@@ -26,13 +27,13 @@ export const saveConversations = async (
 
   // Save immediatly to db the new ones
   const newlySavedConversations = await Promise.all(
-    conversationsToUpsert.map((c) => setupAndSaveConversation(c))
+    conversationsToUpsert.map((c) => setupAndSaveConversation(account, c))
   );
   // Then to context so it show immediatly even without handle
   chatStoreState.setConversations(newlySavedConversations);
 
   // Let's find out which need to have the profile updated
-  const knownProfiles = useProfilesStore.getState().profiles;
+  const knownProfiles = getProfilesStore(account).getState().profiles;
   const convosWithProfilesToUpdate: XmtpConversation[] = [];
   const now = new Date().getTime();
   [alreadyKnownConversations, newlySavedConversations].forEach(
@@ -50,6 +51,7 @@ export const saveConversations = async (
 
   if (convosWithProfilesToUpdate.length === 0) return;
   const resolveResult = await updateProfilesForConversations(
+    account,
     convosWithProfilesToUpdate
   );
 
@@ -57,14 +59,16 @@ export const saveConversations = async (
     .filter((r) => r.updated)
     .map((r) => r.conversation);
   if (updatedConversations.length > 0) {
-    useChatStore.getState().setConversations(updatedConversations);
+    getChatStore(account).getState().setConversations(updatedConversations);
   }
 };
 
 const setupAndSaveConversation = async (
+  account: string,
   conversation: XmtpConversation
 ): Promise<XmtpConversation> => {
-  await upgradePendingConversationIfNeeded(conversation);
+  await upgradePendingConversationIfNeeded(account, conversation);
+  const conversationRepository = getRepository(account, "conversation");
   const alreadyConversationInDbWithTopic = await conversationRepository.findOne(
     {
       where: { topic: conversation.topic },
@@ -72,7 +76,8 @@ const setupAndSaveConversation = async (
   );
 
   const profileSocials =
-    useProfilesStore.getState().profiles[conversation.peerAddress]?.socials;
+    getProfilesStore(account).getState().profiles[conversation.peerAddress]
+      ?.socials;
 
   const lensHandle = getLensHandleFromConversationIdAndPeer(
     conversation.context?.conversationId,
@@ -101,15 +106,18 @@ const setupAndSaveConversation = async (
   return conversation;
 };
 
-export const markAllConversationsAsReadInDb = async () => {
+export const markAllConversationsAsReadInDb = async (account: string) => {
+  const dataSource = getDataSource(account);
   await dataSource.query(
     `UPDATE "conversation" SET "readUntil" = (SELECT COALESCE(MAX(sent), 0) FROM "message" WHERE "message"."conversationId" = "conversation"."topic")`
   );
 };
 
 export const markConversationReadUntil = async (
+  account: string,
   topic: string,
   readUntil: number
 ) => {
+  const conversationRepository = getRepository(account, "conversation");
   await conversationRepository.update({ topic }, { readUntil });
 };
