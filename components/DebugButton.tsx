@@ -8,7 +8,7 @@ import * as Sentry from "sentry-expo";
 
 import config from "../config";
 import { clearDB } from "../data/db";
-import { useUserStore } from "../data/store/accountsStore";
+import { currentAccount, useUserStore } from "../data/store/accountsStore";
 import { deleteXmtpKeys } from "../utils/keychain";
 import { showActionSheetWithOptions } from "./StateHandlers/ActionSheetStateHandler";
 
@@ -62,7 +62,12 @@ const DebugButton = forwardRef((props, ref) => {
             console.error(error);
           }
         },
-        "Clear DB": clearDB,
+        "Clear DB": () => {
+          clearDB(currentAccount());
+        },
+        "Delete DB": () => {
+          clearDB(currentAccount(), false);
+        },
         "Clear messages attachments folder": async () => {
           const messageFolder = `${RNFS.DocumentDirectoryPath}/messages`;
           await RNFS.unlink(messageFolder);
