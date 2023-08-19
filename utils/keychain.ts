@@ -89,6 +89,9 @@ export const loadXmtpKeys = async (): Promise<string | null> => {
     if (keys) {
       await saveXmtpKeys(keys);
     }
+  } else {
+    // Resave it just in case for 64 & options
+    await saveXmtpKeys(keys);
   }
   return keys;
 };
