@@ -12,6 +12,7 @@ export const checkUpsertSupport = async (dataSource: DataSource) => {
     (await dataSource.query(`select sqlite_version() as sqlite_version;`))?.[0]
       ?.sqlite_version
   );
+  console.log(`[SQLite] Version ${sqliteVersion}`);
   const versionCompare = sqliteVersion?.compare(UPSERT_SUPPORTED_FROM);
   if (versionCompare === -1) {
     console.log("Database does not support upsert");
