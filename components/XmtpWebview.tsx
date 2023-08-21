@@ -32,6 +32,14 @@ let webviewReadyForMessages = false;
 let isReconnecting = false;
 let lastRetryAt = 0;
 
+export const resetWebview = () => {
+  webview = null;
+  webviewReadyForMessages = false;
+  isReconnecting = false;
+  lastRetryAt = 0;
+  useAppStore.getState().setLastWebviewReset(new Date().getTime());
+};
+
 const hideDataFromEvents = [
   "XMTP_MESSAGES",
   "SAVE_KEYS",

@@ -1,7 +1,7 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Platform } from "react-native";
 
-import { sendMessageToWebview } from "../components/XmtpWebview";
+import { resetWebview } from "../components/XmtpWebview";
 import { clearDB } from "../data/db";
 import { getChatStore, useAccountsStore } from "../data/store/accountsStore";
 import { deleteXmtpConversations, deleteXmtpKeys } from "./keychain";
@@ -13,8 +13,9 @@ export const logout = async (account: string) => {
     getChatStore(account).getState().conversations
   );
   useAccountsStore.getState().removeAccount(account);
-  // Remove client from webview
-  sendMessageToWebview("LOGOUT");
+  // Reset webview
+  resetWebview();
+
   // Now launch clear db
   clearDB(account, false);
   // TODO => we should save this information
