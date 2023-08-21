@@ -3,7 +3,6 @@ import * as Clipboard from "expo-clipboard";
 import * as Updates from "expo-updates";
 import { forwardRef, useImperativeHandle } from "react";
 import RNFS from "react-native-fs";
-import RNRestart from "react-native-restart";
 import * as Sentry from "sentry-expo";
 
 import config from "../config";
@@ -100,7 +99,6 @@ const DebugButton = forwardRef((props, ref) => {
           alert(`${messagesFromNetwork} messages received`);
           messagesFromNetwork = 0;
         },
-        Restart: RNRestart.restart,
         Cancel: undefined,
       };
       const options = Object.keys(methods);
