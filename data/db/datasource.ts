@@ -1,5 +1,4 @@
 import "reflect-metadata";
-import RNFS from "react-native-fs";
 import { typeORMDriver } from "react-native-quick-sqlite";
 import { DataSource } from "typeorm/browser";
 
@@ -63,7 +62,7 @@ export const getDataSource = (account: string) => {
       removeOldReactions1691412759130,
     ],
     type: "react-native",
-    location: `${RNFS.DocumentDirectoryPath}/SQLite/`,
+    location: `.`,
     logging: true,
     maxQueryExecutionTime: 150,
     logger: new TypeORMLogger(),
