@@ -133,7 +133,11 @@ export default function NewConversation({
               const conversations = Object.values(
                 useChatStore.getState().conversations
               ).filter((conversation) => {
-                if (!conversation || !conversation.peerAddress) {
+                if (
+                  !conversation ||
+                  !conversation.peerAddress ||
+                  conversation.pending
+                ) {
                   return false;
                 }
                 return (
