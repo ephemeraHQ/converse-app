@@ -20,12 +20,35 @@ export const saveXmtpKeys = async (keys: string) => {
   }
 };
 
+export const saveXmtpConversationIfNeeded = async (
+  key: string,
+  jsonConversation: string
+) => {
+  try {
+    const alreadyExists = await SecureStore.getItemAsync(
+      `XMTP_CONVERSATION_${key}`,
+      secureStoreOptions
+    );
+    if (alreadyExists) {
+      return;
+    }
+    await SecureStore.setItemAsync(
+      `XMTP_CONVERSATION_${key}`,
+      jsonConversation,
+      secureStoreOptions
+    );
+  } catch (e) {
+    console.log("ERROR WITH", `XMTP_CONVERSATION_${key}`, jsonConversation, e);
+  }
+};
+
 export const saveXmtpConversations = async (
   clientAddress: string,
   conversations: string
 ) => {
   const parsedConversations = JSON.parse(conversations);
   const promises = [];
+  const now = new Date().getTime();
   for (const parsedConversation of parsedConversations) {
     let topic = parsedConversation.topic;
     if (!topic) {
@@ -36,23 +59,15 @@ export const saveXmtpConversations = async (
     }
     const jsonConversation = JSON.stringify(parsedConversation);
     const key = createHash("sha256").update(topic).digest("hex");
-    promises.push(
-      SecureStore.setItemAsync(
-        `XMTP_CONVERSATION_${key}`,
-        jsonConversation,
-        secureStoreOptions
-      ).catch((e) => {
-        console.log(
-          "ERROR WITH",
-          `XMTP_CONVERSATION_${key}`,
-          jsonConversation,
-          e
-        );
-      })
-    );
+    promises.push(saveXmtpConversationIfNeeded(key, jsonConversation));
   }
   await Promise.all(promises);
-  console.log(`Persisted ${promises.length} exported conversations`);
+  const after = new Date().getTime();
+  console.log(
+    `Persisted ${promises.length} exported conversations in ${
+      (after - now) / 1000
+    } seconds`
+  );
 };
 
 export const loadXmtpConversation = async (topic: string) => {
