@@ -68,6 +68,12 @@ const DebugButton = forwardRef((props, ref) => {
         "Delete DB": () => {
           clearDB(currentAccount(), false);
         },
+        "List files": async () => {
+          const documents = `${RNFS.DocumentDirectoryPath}/`;
+          const documentsFiles = await RNFS.readDir(documents);
+          Clipboard.setStringAsync(JSON.stringify({ documentsFiles }));
+          alert("Done!");
+        },
         "Clear messages attachments folder": async () => {
           const messageFolder = `${RNFS.DocumentDirectoryPath}/messages`;
           await RNFS.unlink(messageFolder);
