@@ -15,6 +15,7 @@ import XmtpState from "./components/XmtpState";
 import XmtpWebview from "./components/XmtpWebview";
 import config from "./config";
 import { migrateDataIfNeeded } from "./data/refacto";
+import { useAppStore } from "./data/store/appStore";
 import Main from "./screens/Main";
 import {
   backgroundColor,
@@ -59,6 +60,8 @@ export default function App() {
       });
   }, []);
 
+  const lastWebviewReset = useAppStore((s) => s.lastWebviewReset);
+
   if (!refactoMigrationDone) return null;
 
   return (
@@ -84,8 +87,11 @@ export default function App() {
             }
           >
             <View style={styles.safe}>
-              <XmtpWebview />
-              <XmtpState />
+              <React.Fragment key={lastWebviewReset}>
+                <XmtpWebview />
+                <XmtpState />
+              </React.Fragment>
+
               <Main />
             </View>
           </PaperProvider>
