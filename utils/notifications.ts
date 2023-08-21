@@ -131,8 +131,15 @@ export const loadSavedNotificationMessagesToContext = async () => {
   }
   loadingSavedNotifications = true;
   try {
-    const conversations = await loadSavedNotificationsConversations();
-    await emptySavedNotificationsConversations();
+    const [conversations, messages] = await Promise.all([
+      loadSavedNotificationsConversations(),
+      loadSavedNotificationsMessages(),
+    ]);
+    await Promise.all([
+      emptySavedNotificationsConversations(),
+      emptySavedNotificationsMessages(),
+    ]);
+
     if (conversations && conversations.length > 0) {
       const conversationsToSave = conversations.map((c: any) => {
         let context = undefined;
@@ -160,8 +167,6 @@ export const loadSavedNotificationMessagesToContext = async () => {
       await saveConversations(currentAccount(), conversationsToSave);
     }
 
-    const messages = await loadSavedNotificationsMessages();
-    await emptySavedNotificationsMessages();
     if (messages && messages.length > 0) {
       messages.sort((m1: any, m2: any) => m1.sent - m2.sent);
       await Promise.all(

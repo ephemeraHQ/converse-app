@@ -153,6 +153,8 @@ export default function XmtpWebview() {
 
   const reloadData = useCallback(
     async (showConnecting: boolean) => {
+      // Load notifications
+      await loadSavedNotificationMessagesToContext();
       if (!webviewClientConnected) {
         console.log("Not connected, can't reload");
         return;
@@ -171,8 +173,6 @@ export default function XmtpWebview() {
       console.log("RELOADING DATA");
       webviewReadyForMessages = false;
       setResyncing(true);
-      // Load notifications
-      await loadSavedNotificationMessagesToContext();
       const knownTopics = Object.keys(conversations);
       sendMessageToWebview("RELOAD", {
         lastSyncedAt: useChatStore.getState().lastSyncedAt,
