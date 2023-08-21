@@ -14,7 +14,6 @@ import InitialLoad from "../components/InitialLoad";
 import Recommendations from "../components/Recommendations/Recommendations";
 import SettingsButton from "../components/SettingsButton";
 import Welcome from "../components/Welcome";
-import { cleanupPendingConversations } from "../data/helpers/conversations/pendingConversations";
 import {
   useChatStore,
   useSettingsStore,
@@ -69,13 +68,6 @@ export default function ConversationList({
     const items = ephemeralAccount ? [{ topic: "ephemeral" }] : [];
     setFlatListItems([...items, ...conversationsList, { topic: "welcome" }]);
   }, [ephemeralAccount, userAddress, conversations, lastUpdateAt]);
-  useEffect(() => {
-    const unsubscribe = navigation.addListener(
-      "focus",
-      cleanupPendingConversations
-    );
-    return unsubscribe;
-  }, [navigation]);
   useEffect(() => {
     navigation.setOptions({
       headerLeft: () =>
