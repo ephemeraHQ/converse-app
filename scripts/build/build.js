@@ -139,6 +139,7 @@ const build = async () => {
     }
   } else if (env === "dev") {
     execSync("git restore ios/Converse/Supporting/Expo.plist", { cwd: PROJECT_ROOT });
+    execSync("git restore android/app/src/main/res/values/strings.xml", { cwd: PROJECT_ROOT });
   }
 };
 
