@@ -62,7 +62,7 @@ export const getDataSource = (account: string) => {
       removeOldReactions1691412759130,
     ],
     type: "react-native",
-    location: `.`,
+    location: `./SQLite`,
     logging: true,
     maxQueryExecutionTime: 150,
     logger: new TypeORMLogger(),
