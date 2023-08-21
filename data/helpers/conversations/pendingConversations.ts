@@ -3,15 +3,15 @@ import uuid from "react-native-uuid";
 import { In } from "typeorm/browser";
 
 import { InvitationContext } from "../../../vendor/xmtp-js/src";
-import { getCurrentRepository, getRepository } from "../../db";
+import { getRepository } from "../../db";
 import { upsertRepository } from "../../db/upsert";
 import { xmtpConversationToDb } from "../../mappers";
 import { getChatStore, useChatStore } from "../../store/accountsStore";
 import { XmtpConversation } from "../../store/chatStore";
 import { saveConversations } from "./upsertConversations";
 
-export const cleanupPendingConversations = async () => {
-  const conversationRepository = getCurrentRepository("conversation");
+export const cleanupPendingConversations = async (account: string) => {
+  const conversationRepository = getRepository(account, "conversation");
   const pendingConversations = await conversationRepository.find({
     where: { pending: true },
     relations: { messages: true },

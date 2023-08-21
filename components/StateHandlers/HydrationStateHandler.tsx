@@ -2,6 +2,7 @@ import { useEffect } from "react";
 
 import { loadDataToContext } from "../../data";
 import { initDb } from "../../data/db";
+import { cleanupPendingConversations } from "../../data/helpers/conversations/pendingConversations";
 import { refreshProfileForAddress } from "../../data/helpers/profiles/profilesUpdate";
 import { getAccounts, useUserStore } from "../../data/store/accountsStore";
 import { useAppStore } from "../../data/store/appStore";
@@ -32,7 +33,7 @@ export default function HydrationStateHandler() {
 
       const accounts = getAccounts();
       await Promise.all(accounts.map((a) => initDb(a)));
-
+      Promise.all(accounts.map((a) => cleanupPendingConversations(a)));
       await loadSavedNotificationMessagesToContext();
       await Promise.all(accounts.map((a) => loadDataToContext(a)));
 
