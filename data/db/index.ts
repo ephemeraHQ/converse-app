@@ -2,7 +2,11 @@ import RNFS from "react-native-fs";
 import { Repository } from "typeorm/browser";
 
 import { useAccountsStore } from "../store/accountsStore";
-import { getDataSource } from "./datasource";
+import {
+  deleteDataSource,
+  getDataSource,
+  getExistingDataSource,
+} from "./datasource";
 import { Conversation } from "./entities/conversationEntity";
 import { Message } from "./entities/messageEntity";
 import { Profile } from "./entities/profileEntity";
@@ -62,12 +66,17 @@ export const initDb = async (account: string) => {
 
 export async function clearDB(account: string, reset = true) {
   try {
-    const dataSource = getDataSource(account);
-    await dataSource.destroy();
-    console.log(`[ClearDB] Datasource destroyed - ${account}`);
+    const dataSource = getExistingDataSource(account);
+    if (dataSource) {
+      await dataSource.destroy();
+      console.log(`[ClearDB] Datasource destroyed - ${account}`);
+    } else {
+      console.log(`[ClearDB] Not datasource to destroy for ${account}`);
+    }
   } catch (e) {
     console.log(`[ClearDB] Couldn't destroy datasource ${account} ${e}`);
   }
+  deleteDataSource(account);
 
   // Now let's delete the database file
   const dbPath = `${RNFS.DocumentDirectoryPath}/SQLite/converse-${account}.sqlite`;

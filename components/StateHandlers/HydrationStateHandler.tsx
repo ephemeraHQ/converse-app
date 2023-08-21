@@ -6,8 +6,6 @@ import { cleanupPendingConversations } from "../../data/helpers/conversations/pe
 import { refreshProfileForAddress } from "../../data/helpers/profiles/profilesUpdate";
 import { getAccounts, useUserStore } from "../../data/store/accountsStore";
 import { useAppStore } from "../../data/store/appStore";
-import { cleanupAfterLogout } from "../../utils/logout";
-import mmkv from "../../utils/mmkv";
 import { loadSavedNotificationMessagesToContext } from "../../utils/notifications";
 import { pick } from "../../utils/objects";
 import { getInstalledWallets } from "../Onboarding/supportedWallets";
@@ -23,11 +21,6 @@ export default function HydrationStateHandler() {
   // Initial hydration
   useEffect(() => {
     const hydrate = async () => {
-      const didJustLogout = mmkv.getBoolean("converse-logout");
-      if (didJustLogout) {
-        console.log("Cleaning up after a logout");
-        await cleanupAfterLogout();
-      }
       // Let's load installed wallets
       await getInstalledWallets(false);
 

@@ -33,8 +33,15 @@ import { removeOldReactions1691412759130 } from "./migrations/1691412759130-remo
 
 const dataSources: { [account: string]: DataSource } = {};
 
+export const getExistingDataSource = (
+  account: string
+): DataSource | undefined => {
+  return dataSources[account];
+};
+
 export const getDataSource = (account: string) => {
-  if (account in dataSources) return dataSources[account];
+  const existingDatasource = getExistingDataSource(account);
+  if (existingDatasource) return existingDatasource;
   const newDataSource = new DataSource({
     database: `converse-${account}.sqlite`,
     driver: typeORMDriver,

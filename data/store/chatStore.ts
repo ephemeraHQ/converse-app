@@ -382,9 +382,6 @@ const isMessageUpdated = (oldMessage: XmtpMessage, newMessage: XmtpMessage) => {
   const keysChangesToRerender: (keyof XmtpMessage)[] = ["id", "sent", "status"];
   return keysChangesToRerender.some((k) => {
     const keyUpdated = oldMessage[k] !== newMessage[k];
-    if (keyUpdated) {
-      console.log(`Key ${k} updated for message ${oldMessage.id}`);
-    }
     return keyUpdated;
   });
 };

@@ -66,4 +66,5 @@ export const saveApiURI = () => AsyncStorage.setItem("api-uri", config.apiURI);
 
 export const resetSharedData = () => {
   emptySavedNotificationsMessages();
+  emptySavedNotificationsConversations();
 };

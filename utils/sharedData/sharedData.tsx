@@ -42,4 +42,5 @@ export const saveApiURI = () =>
 
 export const resetSharedData = () => {
   emptySavedNotificationsMessages();
+  emptySavedNotificationsConversations();
 };

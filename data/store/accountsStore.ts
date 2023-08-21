@@ -1,7 +1,7 @@
 import { create, StoreApi, UseBoundStore } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
 
-import { zustandMMKVStorage } from "../../utils/mmkv";
+import mmkv, { zustandMMKVStorage } from "../../utils/mmkv";
 import { ChatStoreType, initChatStore } from "./chatStore";
 import { ProfilesStoreType, initProfilesStore } from "./profilesStore";
 import {
@@ -25,6 +25,8 @@ const storesByAccount: {
 export const initStores = (account: string) => {
   if (!(account in storesByAccount)) {
     console.log(`[AccountsStore] Initiating account ${account}`);
+    // If adding a persisted store here, please add
+    // the deletion method in deleteStores
     storesByAccount[account] = {
       profiles: initProfilesStore(),
       settings: initSettingsStore(account),
@@ -33,6 +35,14 @@ export const initStores = (account: string) => {
       chat: initChatStore(account),
     };
   }
+};
+
+const deleteStores = (account: string) => {
+  console.log(`[AccountsStore] Deleting account ${account}`);
+  delete storesByAccount[account];
+  mmkv.delete(`store-${account}-chat`);
+  mmkv.delete(`store-${account}-recommendations`);
+  mmkv.delete(`store-${account}-settings`);
 };
 
 initStores("TEMPORARY_ACCOUNT");
@@ -48,6 +58,7 @@ type AccountsStoreStype = {
   currentAccount: string;
   setCurrentAccount: (account: string) => void;
   accounts: string[];
+  removeAccount: (account: string) => void;
 };
 
 export const useAccountsStore = create<AccountsStoreStype>()(
@@ -66,6 +77,19 @@ export const useAccountsStore = create<AccountsStoreStype>()(
             accounts.push(account);
           }
           return { currentAccount: account, accounts };
+        }),
+      removeAccount: (account) =>
+        set((state) => {
+          const newAccounts = [...state.accounts.filter((a) => a !== account)];
+          if (newAccounts.length === 0) {
+            newAccounts.push("TEMPORARY_ACCOUNT");
+          }
+          const newCurrentAccount =
+            state.currentAccount === account
+              ? newAccounts[0]
+              : state.currentAccount;
+          deleteStores(account);
+          return { accounts: newAccounts, currentAccount: newCurrentAccount };
         }),
     }),
     {
