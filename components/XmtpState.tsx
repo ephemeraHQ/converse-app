@@ -2,6 +2,7 @@ import { ContentTypeReaction } from "@xmtp/content-type-reaction";
 import { ContentTypeRemoteAttachment } from "@xmtp/content-type-remote-attachment";
 import { useEffect, useRef } from "react";
 
+import { getExistingDataSource } from "../data/db/datasource";
 import { Message } from "../data/db/entities/messageEntity";
 import { getPendingConversationsToCreate } from "../data/helpers/conversations/pendingConversations";
 import {
@@ -265,7 +266,8 @@ export default function XmtpState() {
         webviewClientConnected &&
         splashScreenHidden &&
         initialLoadDone &&
-        !reconnecting
+        !reconnecting &&
+        getExistingDataSource(currentAccount)
       ) {
         try {
           await createPendingConversations(currentAccount);

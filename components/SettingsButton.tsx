@@ -83,7 +83,7 @@ export default function SettingsButton({
       },
       Disconnect: () => {
         disconnectWallet();
-        logout();
+        logout(currentAccount());
       },
       Cancel: () => {},
     };
