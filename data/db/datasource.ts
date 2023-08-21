@@ -1,4 +1,5 @@
 import "reflect-metadata";
+import { typeORMDriver } from "react-native-quick-sqlite";
 import { DataSource } from "typeorm/browser";
 
 import { Conversation } from "./entities/conversationEntity";
@@ -36,7 +37,7 @@ export const getDataSource = (account: string) => {
   if (account in dataSources) return dataSources[account];
   const newDataSource = new DataSource({
     database: `converse-${account}.sqlite`,
-    driver: require("expo-sqlite"),
+    driver: typeORMDriver,
     entities: [Conversation, Message, Profile],
     synchronize: false,
     migrationsRun: false,
