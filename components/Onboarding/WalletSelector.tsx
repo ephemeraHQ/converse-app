@@ -129,7 +129,7 @@ export default function WalletSelector({
                       iconURL: w.iconURL,
                       links: {
                         native,
-                        universal: w.universalLink,
+                        universal: w.universalLink || "",
                       },
                     });
                   }
