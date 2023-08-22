@@ -1,7 +1,7 @@
 import { getLensHandleFromConversationIdAndPeer } from "../../../utils/lens";
 import { saveConversationIdentifiersForNotifications } from "../../../utils/notifications";
 import { getRepository } from "../../db";
-import { getDataSource } from "../../db/datasource";
+import { getExistingDataSource } from "../../db/datasource";
 import { upsertRepository } from "../../db/upsert";
 import { xmtpConversationToDb } from "../../mappers";
 import { getChatStore, getProfilesStore } from "../../store/accountsStore";
@@ -107,7 +107,8 @@ const setupAndSaveConversation = async (
 };
 
 export const markAllConversationsAsReadInDb = async (account: string) => {
-  const dataSource = getDataSource(account);
+  const dataSource = getExistingDataSource(account);
+  if (!dataSource) return;
   await dataSource.query(
     `UPDATE "conversation" SET "readUntil" = (SELECT COALESCE(MAX(sent), 0) FROM "message" WHERE "message"."conversationId" = "conversation"."topic")`
   );
