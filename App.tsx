@@ -3,7 +3,7 @@ import "./polyfills";
 import { configure as configureCoinbase } from "@coinbase/wallet-mobile-sdk";
 import { ActionSheetProvider } from "@expo/react-native-action-sheet";
 import { Ethereum } from "@thirdweb-dev/chains";
-import { ThirdwebProvider } from "@thirdweb-dev/react-native";
+import { coinbaseWallet, ThirdwebProvider } from "@thirdweb-dev/react-native";
 import React from "react";
 import {
   ColorSchemeName,
@@ -63,6 +63,11 @@ export default function App() {
       }}
       autoConnect={false}
       clientId={config.thirdwebClientId}
+      supportedWallets={[
+        coinbaseWallet({
+          callbackURL: new URL(`https://${config.websiteDomain}/coinbase`),
+        }),
+      ]}
     >
       <KeyboardProvider>
         <AppProvider>

@@ -30,6 +30,7 @@ module.exports = {
       http: require.resolve("stream-http"),
       os: require.resolve("os-browserify/browser"),
       https: require.resolve("https-browserify"),
+      zlib: require.resolve("browserify-zlib"),
     },
   },
 };
