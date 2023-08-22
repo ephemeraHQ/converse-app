@@ -1,0 +1,21 @@
+diff --git a/node_modules/react-native-get-random-values/index.js b/node_modules/react-native-get-random-values/index.js
+index d5a72cc..b49b19b 100644
+--- a/node_modules/react-native-get-random-values/index.js
++++ b/node_modules/react-native-get-random-values/index.js
+@@ -50,11 +50,11 @@ function getRandomValues (array) {
+   }
+ 
+   // Expo SDK 48+
+-  if (global.expo && global.expo.modules && global.expo.modules.ExpoCrypto && global.expo.modules.ExpoCrypto.getRandomValues) {
+-    // ExpoCrypto.getRandomValues doesn't return the array
+-    global.expo.modules.ExpoCrypto.getRandomValues(array)
+-    return array
+-  }
++  // if (global.expo && global.expo.modules && global.expo.modules.ExpoCrypto && global.expo.modules.ExpoCrypto.getRandomValues) {
++  //   // ExpoCrypto.getRandomValues doesn't return the array
++  //   global.expo.modules.ExpoCrypto.getRandomValues(array)
++  //   return array
++  // }
+ 
+   // Calling getRandomBase64 in debug mode leads to the error
+   // "Calling synchronous methods on native modules is not supported in Chrome".
