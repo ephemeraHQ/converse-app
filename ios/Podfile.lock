@@ -103,6 +103,8 @@ PODS:
     - ReactCommon/turbomodule/core
   - ExpoSecureStore (12.3.1):
     - ExpoModulesCore
+  - ExpoSQLite (11.3.2):
+    - ExpoModulesCore
   - ExpoSystemUI (2.4.0):
     - ExpoModulesCore
   - EXSplashScreen (0.20.5):
@@ -460,10 +462,6 @@ PODS:
     - React-Core
   - react-native-netinfo (9.3.10):
     - React-Core
-  - react-native-quick-sqlite (8.0.4):
-    - React
-    - React-callinvoker
-    - React-Core
   - react-native-safe-area-context (4.6.3):
     - RCT-Folly
     - RCTRequired
@@ -673,6 +671,7 @@ DEPENDENCIES:
   - ExpoKeepAwake (from `../node_modules/expo-keep-awake/ios`)
   - ExpoModulesCore (from `../node_modules/expo-modules-core`)
   - ExpoSecureStore (from `../node_modules/expo-secure-store/ios`)
+  - ExpoSQLite (from `../node_modules/expo-sqlite/ios`)
   - ExpoSystemUI (from `../node_modules/expo-system-ui/ios`)
   - EXSplashScreen (from `../node_modules/expo-splash-screen/ios`)
   - EXStructuredHeaders (from `../node_modules/expo-structured-headers/ios`)
@@ -703,7 +702,6 @@ DEPENDENCIES:
   - react-native-keyboard-controller (from `../node_modules/react-native-keyboard-controller`)
   - react-native-mmkv (from `../node_modules/react-native-mmkv`)
   - "react-native-netinfo (from `../node_modules/@react-native-community/netinfo`)"
-  - react-native-quick-sqlite (from `../node_modules/react-native-quick-sqlite`)
   - react-native-safe-area-context (from `../node_modules/react-native-safe-area-context`)
   - react-native-sfsymbols (from `../node_modules/react-native-sfsymbols`)
   - react-native-webview (from `../node_modules/react-native-webview`)
@@ -803,6 +801,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/expo-modules-core"
   ExpoSecureStore:
     :path: "../node_modules/expo-secure-store/ios"
+  ExpoSQLite:
+    :path: "../node_modules/expo-sqlite/ios"
   ExpoSystemUI:
     :path: "../node_modules/expo-system-ui/ios"
   EXSplashScreen:
@@ -860,8 +860,6 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native-mmkv"
   react-native-netinfo:
     :path: "../node_modules/@react-native-community/netinfo"
-  react-native-quick-sqlite:
-    :path: "../node_modules/react-native-quick-sqlite"
   react-native-safe-area-context:
     :path: "../node_modules/react-native-safe-area-context"
   react-native-sfsymbols:
@@ -953,6 +951,7 @@ SPEC CHECKSUMS:
   ExpoKeepAwake: be4cbd52d9b177cde0fd66daa1913afa3161fc1d
   ExpoModulesCore: e4e437139259c5a73530a8895af69774ff8ec12d
   ExpoSecureStore: 57db3b6da8b59046e2057e95bf7738a8027b47c3
+  ExpoSQLite: 4caf114e0f7ef450525b88799e8168ea9860fb66
   ExpoSystemUI: fa4854e3226e87f86d3383570264c6e4e90bc782
   EXSplashScreen: c0e7f2d4a640f3b875808ed0b88575538daf6d82
   EXStructuredHeaders: 324cc3130571d2696357fafd8be7fd9a0b5fdf6e
@@ -987,7 +986,6 @@ SPEC CHECKSUMS:
   react-native-keyboard-controller: dd3b075075eb438e96286013fca84e6e50e7d854
   react-native-mmkv: 2e5bf67513cc8deed86fcffe87e12b8cc250dfab
   react-native-netinfo: ccbe1085dffd16592791d550189772e13bf479e2
-  react-native-quick-sqlite: 9daf75c171e3d0bad2011f95cb501303e4a28363
   react-native-safe-area-context: 36cc67648134e89465663b8172336a19eeda493d
   react-native-sfsymbols: bd3a0d3eab185e80b571bae60753dcf5a0d57967
   react-native-webview: b8ec89966713985111a14d6e4bf98d8b54bced0d
