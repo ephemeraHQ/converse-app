@@ -47,11 +47,11 @@ export const initDb = async (account: string) => {
     console.log(`Database initialized for ${account}`);
     await checkUpsertSupport(dataSource);
     // https://phiresky.github.io/blog/2020/sqlite-performance-tuning/
-    await dataSource.query("pragma journal_mode = WAL;");
-    await dataSource.query("pragma synchronous = normal;");
-    await dataSource.query("pragma temp_store = memory;");
-    await dataSource.query("pragma mmap_size = 30000000000;");
-    console.log(`Database optimized for ${account}`);
+    // await dataSource.query("pragma journal_mode = WAL;");
+    // await dataSource.query("pragma synchronous = normal;");
+    // await dataSource.query("pragma temp_store = memory;");
+    // await dataSource.query("pragma mmap_size = 30000000000;");
+    // console.log(`Database optimized for ${account}`);
     try {
       console.log(`Running migrations for ${account}`);
       const r = await dataSource.runMigrations();
