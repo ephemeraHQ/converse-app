@@ -59,7 +59,17 @@ const build = async () => {
   }
 
   if (env === "production") {
-    await executeCommand("yarn", ["typecheck"]);
+    const { typecheck } = await prompts([
+      {
+        type: "select",
+        name: "typecheck",
+        message: `Typecheck?`,
+        choices: [{ value: "no" }, { value: "yes" }],
+      },
+    ]);
+    if (typecheck === "yes") {
+      await executeCommand("yarn", ["typecheck"]);
+    }
     const tagName = `v${iosVersion}`;
     const { pushTag } = await prompts([
       {
@@ -138,8 +148,12 @@ const build = async () => {
       });
     }
   } else if (env === "dev") {
-    execSync("git restore ios/Converse/Supporting/Expo.plist", { cwd: PROJECT_ROOT });
-    execSync("git restore android/app/src/main/res/values/strings.xml", { cwd: PROJECT_ROOT });
+    execSync("git restore ios/Converse/Supporting/Expo.plist", {
+      cwd: PROJECT_ROOT,
+    });
+    execSync("git restore android/app/src/main/res/values/strings.xml", {
+      cwd: PROJECT_ROOT,
+    });
   }
 };
 
