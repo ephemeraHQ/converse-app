@@ -116,8 +116,6 @@ PODS:
     - React-Core
     - React-RCTAppDelegate
     - ReactCommon/turbomodule/core
-  - ExpoRandom (13.1.1):
-    - ExpoModulesCore
   - ExpoSystemUI (2.2.1):
     - ExpoModulesCore
   - EXSecureStore (12.1.1):
@@ -602,7 +600,6 @@ DEPENDENCIES:
   - ExpoImagePicker (from `../node_modules/expo-image-picker/ios`)
   - ExpoKeepAwake (from `../node_modules/expo-keep-awake/ios`)
   - ExpoModulesCore (from `../node_modules/expo-modules-core`)
-  - ExpoRandom (from `../node_modules/expo-random/ios`)
   - ExpoSystemUI (from `../node_modules/expo-system-ui/ios`)
   - EXSecureStore (from `../node_modules/expo-secure-store/ios`)
   - EXSplashScreen (from `../node_modules/expo-splash-screen/ios`)
@@ -724,8 +721,6 @@ EXTERNAL SOURCES:
     :path: "../node_modules/expo-keep-awake/ios"
   ExpoModulesCore:
     :path: "../node_modules/expo-modules-core"
-  ExpoRandom:
-    :path: "../node_modules/expo-random/ios"
   ExpoSystemUI:
     :path: "../node_modules/expo-system-ui/ios"
   EXSecureStore:
@@ -866,7 +861,6 @@ SPEC CHECKSUMS:
   ExpoImagePicker: 270dea232b3a072d981dd564e2cafc63a864edb1
   ExpoKeepAwake: 69f5f627670d62318410392d03e0b5db0f85759a
   ExpoModulesCore: 653958063a301098b541ae4dfed1ac0b98db607b
-  ExpoRandom: 7ee07d62e7003b74d0536e0495e3a653fe1b2a74
   ExpoSystemUI: 0be5173ee2a7c01e9abc44f56d879a1eaaa16527
   EXSecureStore: e8923258361cc406d0401af380f12bd05b2b720f
   EXSplashScreen: 0e0a9ba0cf7553094e93213099bd7b42e6e237e9
