@@ -6,7 +6,7 @@ import RNFS from "react-native-fs";
 import * as Sentry from "sentry-expo";
 
 import config from "../config";
-import { clearDB } from "../data/db";
+import { clearDB, getRepository } from "../data/db";
 import { currentAccount, useUserStore } from "../data/store/accountsStore";
 import { deleteXmtpKeys } from "../utils/keychain";
 import { showActionSheetWithOptions } from "./StateHandlers/ActionSheetStateHandler";
@@ -66,6 +66,11 @@ const DebugButton = forwardRef((props, ref) => {
         },
         "Delete DB": () => {
           clearDB(currentAccount(), false);
+        },
+        "Check DB": async () => {
+          const repo = getRepository(currentAccount(), "conversation");
+          const result = await repo.query("PRAGMA journal_mode;");
+          console.log(result);
         },
         "List files": async () => {
           const documents = `${RNFS.DocumentDirectoryPath}/`;
