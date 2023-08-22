@@ -1,5 +1,5 @@
 import "reflect-metadata";
-import { typeORMDriver } from "react-native-quick-sqlite";
+// import { typeORMDriver } from "react-native-quick-sqlite";
 import { DataSource } from "typeorm/browser";
 
 import { Conversation } from "./entities/conversationEntity";
@@ -44,7 +44,8 @@ export const getDataSource = (account: string) => {
   if (existingDatasource) return existingDatasource;
   const newDataSource = new DataSource({
     database: `converse-${account}.sqlite`,
-    driver: typeORMDriver,
+    // driver: typeORMDriver,
+    driver: require("expo-sqlite"),
     entities: [Conversation, Message, Profile],
     synchronize: false,
     migrationsRun: false,
@@ -68,8 +69,9 @@ export const getDataSource = (account: string) => {
       addReferencedMessage1691397563214,
       removeOldReactions1691412759130,
     ],
-    type: "react-native",
-    location: `./SQLite`,
+    // type: "react-native",
+    // location: `./SQLite`,
+    type: "expo",
     logging: true,
     maxQueryExecutionTime: 150,
     logger: new TypeORMLogger(),
