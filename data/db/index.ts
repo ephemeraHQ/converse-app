@@ -46,6 +46,7 @@ export const initDb = async (account: string) => {
     await dataSource.initialize();
     console.log(`Database initialized for ${account}`);
     await checkUpsertSupport(dataSource);
+    // https://phiresky.github.io/blog/2020/sqlite-performance-tuning/
     await dataSource.query("pragma journal_mode = WAL;");
     await dataSource.query("pragma synchronous = normal;");
     await dataSource.query("pragma temp_store = memory;");
