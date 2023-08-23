@@ -33,7 +33,6 @@ export const logout = async (account: string) => {
     promisesToAwait.push(deleteXmtpKeys());
     // Delete shared data
     promisesToAwait.push(resetSharedData());
-    // Clearing Async storage and mmkv
     // TODO => clear only for this account, are we still using Async storage?
     promisesToAwait.push(clearAsyncStorage());
   }, 500);
