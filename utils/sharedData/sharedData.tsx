@@ -9,36 +9,52 @@ import SharedGroupPreferences from "react-native-shared-group-preferences";
 
 import config from "../../config";
 
-const appGroup = `group.${config.bundleId}`;
-
 export const saveConversationDict = (topic: string, conversationDict: any) =>
   SharedGroupPreferences.setItem(
     `conversation-${topic}`,
     conversationDict,
-    appGroup
+    config.appleAppGroup
   );
 
 export const saveXmtpEnv = () =>
-  SharedGroupPreferences.setItem("xmtp-env", config.xmtpEnv, appGroup);
+  SharedGroupPreferences.setItem(
+    "xmtp-env",
+    config.xmtpEnv,
+    config.appleAppGroup
+  );
 
 export const loadSavedNotificationsMessages = () =>
-  SharedGroupPreferences.getItem("saved-notifications-messages", appGroup);
+  SharedGroupPreferences.getItem(
+    "saved-notifications-messages",
+    config.appleAppGroup
+  );
 
 export const emptySavedNotificationsMessages = () =>
-  SharedGroupPreferences.setItem("saved-notifications-messages", [], appGroup);
+  SharedGroupPreferences.setItem(
+    "saved-notifications-messages",
+    [],
+    config.appleAppGroup
+  );
 
 export const loadSavedNotificationsConversations = () =>
-  SharedGroupPreferences.getItem("saved-notifications-conversations", appGroup);
+  SharedGroupPreferences.getItem(
+    "saved-notifications-conversations",
+    config.appleAppGroup
+  );
 
 export const emptySavedNotificationsConversations = () =>
   SharedGroupPreferences.setItem(
     "saved-notifications-conversations",
     [],
-    appGroup
+    config.appleAppGroup
   );
 
 export const saveApiURI = () =>
-  SharedGroupPreferences.setItem("api-uri", config.apiURI, appGroup);
+  SharedGroupPreferences.setItem(
+    "api-uri",
+    config.apiURI,
+    config.appleAppGroup
+  );
 
 export const resetSharedData = () => {
   emptySavedNotificationsMessages();

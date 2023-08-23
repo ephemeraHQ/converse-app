@@ -23,7 +23,6 @@ export const logout = async (account: string) => {
   // need to save : known conversation topics + account
   // to remove the notifications & the keys (main one & conversations ones)
   setTimeout(() => {
-    console.log("gogo");
     const promisesToAwait: any[] = [];
     promisesToAwait.push(deleteXmtpConversations(knownConversationsTopics));
     // Unsubscribing from notifications
