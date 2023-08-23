@@ -1,4 +1,3 @@
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import { MMKV } from "react-native-mmkv";
 import { StateStorage } from "zustand/middleware";
 
