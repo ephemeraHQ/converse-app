@@ -39,6 +39,7 @@ const ENV = {
     apiURI: "http://noe-mbp.local:9875",
     debugMenu: true,
     bundleId: "com.converse.dev",
+    appleAppGroup: "group.com.converse.dev",
     scheme: "converse-dev",
     websiteDomain: "dev.converse.xyz",
     universalLinks: ["dev.converse.xyz/", "dev.getconverse.app/"].flatMap(
@@ -52,6 +53,7 @@ const ENV = {
     apiURI: "https://backend-staging.converse.xyz",
     debugMenu: true,
     bundleId: "com.converse.preview",
+    appleAppGroup: "group.com.converse.preview",
     scheme: "converse-preview",
     websiteDomain: "preview.converse.xyz",
     universalLinks: [
@@ -65,6 +67,7 @@ const ENV = {
     xmtpEnv: "production",
     apiURI: "https://backend-prod.converse.xyz",
     bundleId: isAndroid ? "com.converse.prod" : "com.converse.native",
+    appleAppGroup: "group.com.converse.native",
     scheme: "converse",
     websiteDomain: "converse.xyz",
     universalLinks: ["converse.xyz/", "getconverse.app/"].flatMap((domain) => [
