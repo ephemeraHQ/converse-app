@@ -33,12 +33,27 @@ export const migrateDataIfNeeded = async () => {
       await RNFS.moveFile(dbPath, newDbPath);
     }
   }
-  const previousSyncedAt = storage.getNumber("lastXMTPSyncedAt") || 0;
+  const previousSyncedAtMMKV = storage.getNumber("lastXMTPSyncedAt") || 0;
+  const previousSyncedAtAsyncStorage = await AsyncStorage.getItem(
+    "lastXMTPSyncedAt"
+  );
+  let previousSyncedAt = 0;
+  if (previousSyncedAtAsyncStorage) {
+    console.log(
+      "Got `lastXMTPSyncedAt` from Async Storage:",
+      previousSyncedAtAsyncStorage
+    );
+    previousSyncedAt = parseInt(previousSyncedAtAsyncStorage, 10);
+  } else if (previousSyncedAtMMKV) {
+    console.log("Got `lastXMTPSyncedAt` from MMKV:", previousSyncedAtMMKV);
+    previousSyncedAt = previousSyncedAtMMKV;
+  }
   if (previousSyncedAt) {
     console.log("Migrating `lastXMTPSyncedAt` to zustand storage");
     useChatStore.getState().setLastSyncedAt(previousSyncedAt);
-    storage.delete("lastXMTPSyncedAt");
   }
+  AsyncStorage.removeItem("lastXMTPSyncedAt");
+  storage.delete("lastXMTPSyncedAt");
   const showNotificationsScreenString = await AsyncStorage.getItem(
     "state.notifications.showNotificationsScreen"
   );
@@ -52,23 +67,60 @@ export const migrateDataIfNeeded = async () => {
       "state.notifications.showNotificationsScreen"
     );
   }
-  const connectedToEphemeralAccount = storage.getBoolean(
+  let connectedToEphemeralAccount = false;
+  const connectedToEphemeralAccountMMKV = storage.getBoolean(
     "state.app.isEphemeralAccount"
   );
+  const connectedToEphemeralAccountAsyncStorage = await AsyncStorage.getItem(
+    "state.app.isEphemeralAccount"
+  );
+  if (connectedToEphemeralAccountAsyncStorage) {
+    console.log(
+      "Got `isEphemeralAccount` from Async Storage:",
+      connectedToEphemeralAccountAsyncStorage
+    );
+    connectedToEphemeralAccount =
+      connectedToEphemeralAccountAsyncStorage === "true";
+  } else if (connectedToEphemeralAccountMMKV) {
+    console.log(
+      "Got `isEphemeralAccount` from MMKV:",
+      connectedToEphemeralAccountMMKV
+    );
+    connectedToEphemeralAccount = connectedToEphemeralAccountMMKV;
+  }
   if (connectedToEphemeralAccount) {
     console.log("Migrating `connectedToEphemeralAccount` to zustand storage");
     useSettingsStore.getState().setEphemeralAccount(true);
-    storage.delete("state.app.isEphemeralAccount");
   }
+  AsyncStorage.removeItem("state.app.isEphemeralAccount");
+  storage.delete("state.app.isEphemeralAccount");
 
-  const initialLoadDoneOnce = storage.getBoolean(
+  let initialLoadDoneOnce = false;
+  const initialLoadDoneOnceMMKV = storage.getBoolean(
     "state.xmtp.initialLoadDoneOnce"
   );
+  const initialLoadDoneOnceMMKVAsyncStorage = await AsyncStorage.getItem(
+    "state.xmtp.initialLoadDoneOnce"
+  );
+  if (initialLoadDoneOnceMMKVAsyncStorage) {
+    console.log(
+      "Got `initialLoadDoneOnce` from Async Storage:",
+      initialLoadDoneOnceMMKVAsyncStorage
+    );
+    initialLoadDoneOnce = initialLoadDoneOnceMMKVAsyncStorage === "true";
+  } else if (initialLoadDoneOnceMMKV) {
+    console.log(
+      "Got `initialLoadDoneOnce` from MMKV:",
+      initialLoadDoneOnceMMKV
+    );
+    initialLoadDoneOnce = initialLoadDoneOnceMMKV;
+  }
   if (initialLoadDoneOnce) {
     console.log("Migrating `initialLoadDoneOnce` to zustand storage");
     useChatStore.getState().setInitialLoadDoneOnce();
-    storage.delete("state.xmtp.initialLoadDoneOnce");
   }
+  AsyncStorage.removeItem("state.xmtp.initialLoadDoneOnce");
+  storage.delete("state.xmtp.initialLoadDoneOnce");
   const after = new Date().getTime();
   console.log(`[Refacto] Migration took ${(after - before) / 1000} seconds`);
 };
