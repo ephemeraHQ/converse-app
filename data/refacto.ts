@@ -1,7 +1,9 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { Platform } from "react-native";
 import RNFS from "react-native-fs";
 
 import { getLocalXmtpClient } from "../components/XmtpState";
+import config from "../config";
 import storage from "../utils/mmkv";
 import {
   useAccountsStore,
@@ -25,7 +27,11 @@ export const migrateDataIfNeeded = async () => {
     const dbPath = `${RNFS.DocumentDirectoryPath}/SQLite/converse`;
     const dbExists = await RNFS.exists(dbPath);
     if (dbExists) {
-      const newDbPath = `${RNFS.DocumentDirectoryPath}/SQLite/converse-${currentAccount}.sqlite`;
+      let newDbPath = `${RNFS.DocumentDirectoryPath}/SQLite/converse-${currentAccount}.sqlite`;
+      if (Platform.OS === "ios") {
+        const groupPath = await RNFS.pathForGroup(config.appleAppGroup);
+        newDbPath = `${groupPath}/converse-${currentAccount}.sqlite`;
+      }
       console.log(
         "Moving the database to a dedicated account database",
         newDbPath
