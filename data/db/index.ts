@@ -37,7 +37,7 @@ export const getCurrentRepository = <T extends keyof RepositoriesForAccount>(
 };
 
 export const initDb = async (account: string) => {
-  const dataSource = getDataSource(account);
+  const dataSource = await getDataSource(account);
   if (dataSource.isInitialized) {
     return;
   }
