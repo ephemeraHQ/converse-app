@@ -10,6 +10,7 @@ require File.join(File.dirname(`node --print "require.resolve('@react-native-com
 require 'json'
 podfile_properties = JSON.parse(File.read(File.join(__dir__, 'Podfile.properties.json'))) rescue {}
 
+plugin 'cocoapods-pod-linkage'
 platform :ios, podfile_properties['ios.deploymentTarget'] || '13.0'
 install! 'cocoapods',
   :deterministic_uuids => false
@@ -18,7 +19,9 @@ target 'Converse' do
   use_expo_modules!
   config = use_native_modules!
 
-  use_frameworks! :linkage => podfile_properties['ios.useFrameworks'].to_sym if podfile_properties['ios.useFrameworks']
+  use_frameworks! :linkage => :static
+  pod 'MMKV', :linkage => :dynamic
+  pod 'MMKVCore', :linkage => :dynamic
 
   # Flags change depending on the env values.
   flags = get_default_flags()
