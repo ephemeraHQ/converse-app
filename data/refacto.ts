@@ -5,6 +5,7 @@ import RNFS from "react-native-fs";
 import { getLocalXmtpClient } from "../components/XmtpState";
 import config from "../config";
 import storage from "../utils/mmkv";
+import { sentryTrackMessage } from "../utils/sentry";
 import {
   useAccountsStore,
   useChatStore,
@@ -27,16 +28,23 @@ export const migrateDataIfNeeded = async () => {
     const dbPath = `${RNFS.DocumentDirectoryPath}/SQLite/converse`;
     const dbExists = await RNFS.exists(dbPath);
     if (dbExists) {
-      let newDbPath = `${RNFS.DocumentDirectoryPath}/SQLite/converse-${currentAccount}.sqlite`;
+      let newDbPath = "";
       if (Platform.OS === "ios") {
         const groupPath = await RNFS.pathForGroup(config.appleAppGroup);
         newDbPath = `${groupPath}/converse-${currentAccount}.sqlite`;
+      } else {
+        newDbPath = `/data/data/${config.bundleId}/databases/converse-${currentAccount}.sqlite`;
       }
       console.log(
         "Moving the database to a dedicated account database",
         newDbPath
       );
-      await RNFS.moveFile(dbPath, newDbPath);
+      try {
+        await RNFS.moveFile(dbPath, newDbPath);
+      } catch (e) {
+        console.log("COULD NOT MOVE DB", e);
+        sentryTrackMessage("COULD_NOT_MOVE_DB", { error: JSON.stringify(e) });
+      }
     }
   }
   const previousSyncedAtMMKV = storage.getNumber("lastXMTPSyncedAt") || 0;
