@@ -17,6 +17,7 @@ import { getLoggedXmtpAddress } from "../../utils/sharedData/sharedData";
 import { addLog } from "../DebugButton";
 import { getInstalledWallets } from "../Onboarding/supportedWallets";
 import { getLocalXmtpClient } from "../XmtpState";
+import { prepareForRefacto } from "./prepareForRefacto";
 
 let migrationAlertShown = false;
 
@@ -31,6 +32,7 @@ export default function HydrationStateHandler() {
         console.log("Cleaning up after a logout");
         await cleanupAfterLogout();
       }
+      prepareForRefacto();
       // Let's rehydrate value before hiding splash
       const [showNotificationsScreen] = await Promise.all([
         AsyncStorage.getItem("state.notifications.showNotificationsScreen"),
