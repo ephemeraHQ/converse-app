@@ -13,7 +13,7 @@ podfile_properties = JSON.parse(File.read(File.join(__dir__, 'Podfile.properties
 plugin 'cocoapods-pod-linkage'
 platform :ios, podfile_properties['ios.deploymentTarget'] || '13.0'
 install! 'cocoapods',
-  :deterministic_uuids => false
+  :deterministic_uuids => false, :disable_input_output_paths => true
 
 target 'Converse' do
   use_expo_modules!
