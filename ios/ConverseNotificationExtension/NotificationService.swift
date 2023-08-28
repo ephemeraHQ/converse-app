@@ -31,7 +31,6 @@ func handleNotificationAsync(contentHandler: ((UNNotificationContent) -> Void), 
   if let bestAttemptContent = bestAttemptContent {
     
     print("[NotificationExtension] Received a notification")
-    
     if var body = bestAttemptContent.userInfo["body"] as? [String: Any], let contentTopic = body["contentTopic"] as? String, let encodedMessage = body["message"] as? String {
       
       let xmtpClient = await getXmtpClientFromKeys();
