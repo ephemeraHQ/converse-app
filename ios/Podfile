@@ -77,3 +77,8 @@ target 'Converse' do
     end
   end
 end
+
+target 'ConverseNotificationExtension' do
+  use_frameworks! :linkage => :static
+  pod 'MMKVAppExtension', :linkage => :dynamic
+end
