@@ -28,17 +28,23 @@ const go = async () => {
 
   fs.writeFileSync(PROJ_PATH, newProjContent);
 
-  const PLIST_PATH = "ios/Converse/Info.plist";
+  const PLIST_APP_PATH = "ios/Converse/Info.plist";
+  const PLIST_EXTENSION_PATH = "ios/ConverseNotificationExtension/Info.plist";
 
-  const info = plist.parse(fs.readFileSync(PLIST_PATH, "utf8"));
-  info.CFBundleDisplayName = "Converse PREVIEW";
-  info.CFBundleURLSchemes = ["converse-preview", "com.converse.preview"];
-  info.CFBundleURLTypes[0].CFBundleURLSchemes = [
+  const appInfo = plist.parse(fs.readFileSync(PLIST_APP_PATH, "utf8"));
+  appInfo.CFBundleDisplayName = "Converse PREVIEW";
+  appInfo.CFBundleURLSchemes = ["converse-preview", "com.converse.preview"];
+  appInfo.CFBundleURLTypes[0].CFBundleURLSchemes = [
     "converse-preview",
     "com.converse.preview",
   ];
-  const newInfo = plist.build(info);
-  fs.writeFileSync(PLIST_PATH, newInfo, "utf-8");
+  const newAppInfo = plist.build(appInfo);
+  fs.writeFileSync(PLIST_APP_PATH, newAppInfo, "utf-8");
+
+  const extensionInfo = plist.parse(fs.readFileSync(PLIST_EXTENSION_PATH, "utf8"));
+  extensionInfo.AppGroup = "com.converse.preview";
+  const newExtensionInfo = plist.build(appInfo);
+  fs.writeFileSync(PLIST_EXTENSION_PATH, newExtensionInfo, "utf-8");
 
   const ENTITLEMENTS_APP_PATH = "ios/Converse/Converse.entitlements";
   const ENTITLEMENTS_EXTENSION_PATH =

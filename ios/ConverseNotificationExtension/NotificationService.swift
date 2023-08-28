@@ -27,6 +27,7 @@ func shortAddress(address: String) -> String {
 }
 
 func handleNotificationAsync(contentHandler: ((UNNotificationContent) -> Void), bestAttemptContent: UNMutableNotificationContent?) async {
+  initSentry()
   
   if let bestAttemptContent = bestAttemptContent {
     
@@ -89,6 +90,7 @@ class NotificationService: UNNotificationServiceExtension {
   
   override func serviceExtensionTimeWillExpire() {
     // If it took too much time we can at least show the right title
+    sentryTrackMessage(message: "NOTIFICATION_TIMEOUT", extras: nil)
     if let contentHandler = contentHandler, let bestAttemptContent =  bestAttemptContent {
       if let body = bestAttemptContent.userInfo["body"] as? [String: Any], let contentTopic = body["contentTopic"] as? String {
         let conversationTitle = getSavedConversationTitle(contentTopic: contentTopic);

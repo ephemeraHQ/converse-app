@@ -16,6 +16,7 @@ func getXmtpClientFromKeys() async -> XMTP.Client? {
   Client.register(codec: ReactionCodec())
   let xmtpKeys = getKeychainValue(forKey: "XMTP_KEYS")
   if (xmtpKeys == nil || xmtpKeys?.count == 0) {
+    sentryTrackMessage(message: "NOTIFICATION_XMTP_KEYS_NOT_FOUND", extras: nil)
     return nil;
   }
   do {
@@ -27,6 +28,7 @@ func getXmtpClientFromKeys() async -> XMTP.Client? {
     let client = try await Client.from(bundle: privateKeyBundle, options: .init(api: .init(env: xmtpEnv)))
     return client
   } catch {
+    sentryTrackMessage(message: "NOTIFICATION_XMTP_CLIENT_NOT_INSTANTIATED", extras: ["error": error])
     return nil;
   }
   
