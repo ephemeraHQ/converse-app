@@ -49,7 +49,7 @@ const go = async () => {
   const extensionInfo = plist.parse(fs.readFileSync(PLIST_EXTENSION_PATH, "utf8"));
   extensionInfo.AppBundleId = "com.converse.native";
   extensionInfo.Env = "prod";
-  const newExtensionInfo = plist.build(appInfo);
+  const newExtensionInfo = plist.build(extensionInfo);
   fs.writeFileSync(PLIST_EXTENSION_PATH, newExtensionInfo, "utf-8");
 
   const ENTITLEMENTS_APP_PATH = "ios/Converse/Converse.entitlements";
