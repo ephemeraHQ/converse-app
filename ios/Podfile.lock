@@ -645,6 +645,9 @@ PODS:
     - SentryPrivate (= 8.7.1)
   - SentryPrivate (8.7.1)
   - SocketRocket (0.6.1)
+  - SQLite.swift (0.14.1):
+    - SQLite.swift/standard (= 0.14.1)
+  - SQLite.swift/standard (0.14.1)
   - Yoga (1.14.0)
 
 DEPENDENCIES:
@@ -737,6 +740,7 @@ DEPENDENCIES:
   - RNScreens (from `../node_modules/react-native-screens`)
   - "RNSentry (from `../node_modules/@sentry/react-native`)"
   - RNSVG (from `../node_modules/react-native-svg`)
+  - SQLite.swift
   - Yoga (from `../node_modules/react-native/ReactCommon/yoga`)
 
 SPEC REPOS:
@@ -755,6 +759,7 @@ SPEC REPOS:
     - Sentry
     - SentryPrivate
     - SocketRocket
+    - SQLite.swift
 
 EXTERNAL SOURCES:
   boost:
@@ -1028,8 +1033,9 @@ SPEC CHECKSUMS:
   Sentry: 11776f6a25a128808d793d0d41bb7ad873b5ae4f
   SentryPrivate: b3c448eacdabe9eab7679a2e0af609c608f91572
   SocketRocket: f32cd54efbe0f095c4d7594881e52619cfe80b17
+  SQLite.swift: 2992550ebf3c5b268bf4352603e3df87d2a4ed72
   Yoga: 3efc43e0d48686ce2e8c60f99d4e6bd349aff981
 
-PODFILE CHECKSUM: 94e81c9201695b556d8ac4aae451722ed349cf96
+PODFILE CHECKSUM: 1d7478cc7ae5b509e8ec39d85e7cf9f9258dcbc4
 
 COCOAPODS: 1.12.1

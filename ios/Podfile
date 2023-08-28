@@ -81,4 +81,5 @@ end
 target 'ConverseNotificationExtension' do
   use_frameworks! :linkage => :static
   pod 'MMKVAppExtension', :linkage => :dynamic
+  pod 'SQLite.swift'
 end
