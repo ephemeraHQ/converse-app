@@ -1,7 +1,8 @@
 const { execSync } = require("child_process");
 const fs = require("fs");
-const path = require("path");
 const isClean = require("git-is-clean");
+
+const { findFilesRecursively } = require("./utils");
 
 const replaceAppName = (path) => {
   const content = fs.readFileSync(path, "utf-8");
@@ -67,34 +68,6 @@ const go = async () => {
   const NEW_CODE_PATH = "android/app/src/main/java/com/converse/preview";
 
   execSync(`git mv ${CODE_PATH} ${NEW_CODE_PATH}`);
-};
-
-const findFilesRecursively = (
-  folderPath,
-  fileExtensions = [".kt", ".java"]
-) => {
-  const files = [];
-
-  function scanDirectory(directory) {
-    fs.readdirSync(directory).forEach((file) => {
-      const filePath = path.join(directory, file);
-      const stats = fs.statSync(filePath);
-
-      if (stats.isDirectory()) {
-        scanDirectory(filePath);
-      } else if (stats.isFile()) {
-        const fileExtension = path.extname(filePath);
-
-        if (fileExtensions.includes(fileExtension)) {
-          files.push(filePath);
-        }
-      }
-    });
-  }
-
-  scanDirectory(folderPath);
-
-  return files;
 };
 
 go();
