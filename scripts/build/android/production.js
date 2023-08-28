@@ -2,6 +2,9 @@ const { execSync } = require("child_process");
 const fs = require("fs");
 const isClean = require("git-is-clean");
 
+const { findFilesRecursively } = require("./utils");
+
+
 const replaceAppName = (path) => {
   const content = fs.readFileSync(path, "utf-8");
   const newContent = content.replace(
@@ -26,19 +29,14 @@ const go = async () => {
     "android/app/src/debug/java/com/converse/dev/ReactNativeFlipper.java";
   const MAIN_FLIPPER_PATH =
     "android/app/src/release/java/com/converse/dev/ReactNativeFlipper.java";
-  const MAIN_ACTIVITY_PATH =
-    "android/app/src/main/java/com/converse/dev/MainActivity.java";
-  const MAIN_APPLICATION_PATH =
-    "android/app/src/main/java/com/converse/dev/MainApplication.java";
-  const NOTIFICATION_SERVICE_PATH =
-    "android/app/src/main/java/com/converse/dev/PushNotificationsService.kt";
+  
+  const APP_FILES_PATH = "android/app/src/main/java/com/converse/dev";
 
   replaceAppName(APP_GRADLE_PATH);
   replaceAppName(DEBUG_FLIPPER_PATH);
   replaceAppName(MAIN_FLIPPER_PATH);
-  replaceAppName(MAIN_ACTIVITY_PATH);
-  replaceAppName(MAIN_APPLICATION_PATH);
-  replaceAppName(NOTIFICATION_SERVICE_PATH);
+  
+  findFilesRecursively(APP_FILES_PATH).map((f) => replaceAppName(f));
 
   const appManifest = fs.readFileSync(APP_MANIFEST_PATH, "utf-8");
   const newAppManifest = appManifest
