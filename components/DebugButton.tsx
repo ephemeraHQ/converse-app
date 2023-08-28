@@ -68,9 +68,11 @@ const DebugButton = forwardRef((props, ref) => {
           clearDB(currentAccount(), false);
         },
         "List files": async () => {
+          const groupPath = await RNFS.pathForGroup(config.appleAppGroup);
           const documents = `${RNFS.DocumentDirectoryPath}/`;
-          const documentsFiles = await RNFS.readDir(documents);
-          Clipboard.setStringAsync(JSON.stringify({ documentsFiles }));
+          const documentsFiles = await RNFS.readDir(`${groupPath}`);
+          // Clipboard.setStringAsync(JSON.stringify({ documentsFiles }));
+          console.log(documentsFiles);
           alert("Done!");
         },
         "Clear messages attachments folder": async () => {

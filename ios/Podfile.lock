@@ -149,6 +149,8 @@ PODS:
     - libwebp/sharpyuv
   - MMKV (1.3.1):
     - MMKVCore (~> 1.3.1)
+  - MMKVAppExtension (1.3.1):
+    - MMKVCore (~> 1.3.1)
   - MMKVCore (1.3.1)
   - RCT-Folly (2021.07.22.00):
     - boost
@@ -455,7 +457,7 @@ PODS:
     - React-Core
   - react-native-keyboard-controller (1.5.7):
     - React-Core
-  - react-native-mmkv (2.6.3):
+  - react-native-mmkv (2.10.1):
     - MMKV (>= 1.2.13)
     - React-Core
   - react-native-netinfo (9.3.10):
@@ -682,6 +684,7 @@ DEPENDENCIES:
   - hermes-engine (from `../node_modules/react-native/sdks/hermes-engine/hermes-engine.podspec`)
   - libevent (~> 2.1.12)
   - MMKV
+  - MMKVAppExtension
   - MMKVCore
   - RCT-Folly (from `../node_modules/react-native/third-party-podspecs/RCT-Folly.podspec`)
   - RCTRequired (from `../node_modules/react-native/Libraries/RCTRequired`)
@@ -744,6 +747,7 @@ SPEC REPOS:
     - libevent
     - libwebp
     - MMKV
+    - MMKVAppExtension
     - MMKVCore
     - ReachabilitySwift
     - SDWebImage
@@ -966,6 +970,7 @@ SPEC CHECKSUMS:
   libevent: 4049cae6c81cdb3654a443be001fb9bdceff7913
   libwebp: 33dc822fbbf4503668d09f7885bbfedc76c45e96
   MMKV: 5a07930c70c70b86cd87761a42c8f3836fb681d7
+  MMKVAppExtension: 3cda7723ad7d53f486b4cef2782eed9ba8799f68
   MMKVCore: e50135dbd33235b6ab390635991bab437ab873c0
   RCT-Folly: 424b8c9a7a0b9ab2886ffe9c3b041ef628fd4fb1
   RCTRequired: c0569ecc035894e4a68baecb30fe6a7ea6e399f9
@@ -985,7 +990,7 @@ SPEC CHECKSUMS:
   React-logger: da1ebe05ae06eb6db4b162202faeafac4b435e77
   react-native-get-random-values: dee677497c6a740b71e5612e8dbd83e7539ed5bb
   react-native-keyboard-controller: dd3b075075eb438e96286013fca84e6e50e7d854
-  react-native-mmkv: 2e5bf67513cc8deed86fcffe87e12b8cc250dfab
+  react-native-mmkv: dea675cf9697ad35940f1687e98e133e1358ef9f
   react-native-netinfo: ccbe1085dffd16592791d550189772e13bf479e2
   react-native-safe-area-context: 36cc67648134e89465663b8172336a19eeda493d
   react-native-sfsymbols: bd3a0d3eab185e80b571bae60753dcf5a0d57967
@@ -1025,6 +1030,6 @@ SPEC CHECKSUMS:
   SocketRocket: f32cd54efbe0f095c4d7594881e52619cfe80b17
   Yoga: 3efc43e0d48686ce2e8c60f99d4e6bd349aff981
 
-PODFILE CHECKSUM: 0462e07b726f1c30f037c83ed8d8e0d06292441a
+PODFILE CHECKSUM: 94e81c9201695b556d8ac4aae451722ed349cf96
 
 COCOAPODS: 1.12.1
