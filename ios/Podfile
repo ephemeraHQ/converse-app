@@ -82,5 +82,4 @@ target 'ConverseNotificationExtension' do
   use_frameworks! :linkage => :static
   pod 'MMKVAppExtension', :linkage => :dynamic
   pod 'SQLite.swift'
-  pod 'RNSentry', :path => "../node_modules/@sentry/react-native"
 end
