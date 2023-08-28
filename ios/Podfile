@@ -13,7 +13,7 @@ podfile_properties = JSON.parse(File.read(File.join(__dir__, 'Podfile.properties
 plugin 'cocoapods-pod-linkage'
 platform :ios, podfile_properties['ios.deploymentTarget'] || '13.0'
 install! 'cocoapods',
-  :deterministic_uuids => false, :disable_input_output_paths => true
+  :deterministic_uuids => false
 
 target 'Converse' do
   use_expo_modules!
@@ -22,8 +22,6 @@ target 'Converse' do
   use_frameworks! :linkage => :static
   pod 'MMKV', :linkage => :dynamic
   pod 'MMKVCore', :linkage => :dynamic
-  pod 'Sentry', :linkage => :dynamic
-  pod 'SentryPrivate', :linkage => :dynamic
 
   # Flags change depending on the env values.
   flags = get_default_flags()
@@ -84,6 +82,5 @@ target 'ConverseNotificationExtension' do
   use_frameworks! :linkage => :static
   pod 'MMKVAppExtension', :linkage => :dynamic
   pod 'SQLite.swift'
-  pod 'Sentry', :linkage => :dynamic
-  pod 'SentryPrivate', :linkage => :dynamic
+  pod 'RNSentry', :path => "../node_modules/@sentry/react-native"
 end
