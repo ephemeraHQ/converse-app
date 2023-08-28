@@ -10,7 +10,7 @@ import XMTP
 
 
 func loadSavedMessages() -> [SavedNotificationMessage] {
-  let sharedDefaults = SharedDefaults()
+  let sharedDefaults = try! SharedDefaults()
   let savedMessagesString = sharedDefaults.string(forKey: "saved-notifications-messages")
   if (savedMessagesString == nil) {
     return []
@@ -26,7 +26,7 @@ func loadSavedMessages() -> [SavedNotificationMessage] {
 }
 
 func saveMessage(topic: String, sent: Date, senderAddress: String, content: String, id: String, sentViaConverse: Bool, contentType: String) throws {
-  let sharedDefaults = SharedDefaults()
+  let sharedDefaults = try! SharedDefaults()
   let savedMessage = SavedNotificationMessage(topic: topic, content: content, senderAddress: senderAddress, sent: Int(sent.timeIntervalSince1970 * 1000), id: id, sentViaConverse: sentViaConverse, contentType: contentType)
   
   var savedMessagesList = loadSavedMessages()

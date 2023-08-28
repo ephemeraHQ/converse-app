@@ -12,8 +12,8 @@ private var mmkvInstance: MMKV? = nil;
 
 func getMmkv() -> MMKV? {
   if (mmkvInstance == nil) {
-    let myGroupID: NSString = "group.com.converse.dev" // TODO => handle preview & prod
-    let groupDir = (FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: myGroupID as String)?.path)!
+    let groupId = "group.\(try! getInfoPlistValue(key: "AppBundleId", defaultValue: nil))"
+    let groupDir = (FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: groupId)?.path)!
     MMKV.initialize(rootDir: nil, groupDir: groupDir, logLevel: MMKVLogLevel.debug)
     mmkvInstance = MMKV(mmapID: "mmkv.default", cryptKey: nil, mode: MMKVMode.multiProcess)
   }

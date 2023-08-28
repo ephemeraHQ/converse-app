@@ -42,7 +42,8 @@ const go = async () => {
   fs.writeFileSync(PLIST_APP_PATH, newAppInfo, "utf-8");
 
   const extensionInfo = plist.parse(fs.readFileSync(PLIST_EXTENSION_PATH, "utf8"));
-  extensionInfo.AppGroup = "com.converse.preview";
+  extensionInfo.AppBundleId = "com.converse.preview";
+  extensionInfo.Env = "preview";
   const newExtensionInfo = plist.build(appInfo);
   fs.writeFileSync(PLIST_EXTENSION_PATH, newExtensionInfo, "utf-8");
 
