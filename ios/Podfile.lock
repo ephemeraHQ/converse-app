@@ -641,11 +641,6 @@ PODS:
   - SDWebImageWebPCoder (0.8.5):
     - libwebp (~> 1.0)
     - SDWebImage/Core (~> 5.10)
-  - Sentry (8.7.1):
-    - Sentry/Core (= 8.7.1)
-    - SentryPrivate (= 8.7.1)
-  - Sentry/Core (8.7.1):
-    - SentryPrivate (= 8.7.1)
   - Sentry/HybridSDK (8.7.1):
     - SentryPrivate (= 8.7.1)
   - SentryPrivate (8.7.1)
@@ -745,8 +740,6 @@ DEPENDENCIES:
   - RNScreens (from `../node_modules/react-native-screens`)
   - "RNSentry (from `../node_modules/@sentry/react-native`)"
   - RNSVG (from `../node_modules/react-native-svg`)
-  - Sentry
-  - SentryPrivate
   - SQLite.swift
   - Yoga (from `../node_modules/react-native/ReactCommon/yoga`)
 
@@ -1043,6 +1036,6 @@ SPEC CHECKSUMS:
   SQLite.swift: 2992550ebf3c5b268bf4352603e3df87d2a4ed72
   Yoga: 3efc43e0d48686ce2e8c60f99d4e6bd349aff981
 
-PODFILE CHECKSUM: ea90f9c5cf956fa6e99eefe335816f6b11cfd46c
+PODFILE CHECKSUM: 925e50fd6886c6871689bc7d212f26dfa05b5197
 
 COCOAPODS: 1.12.1
