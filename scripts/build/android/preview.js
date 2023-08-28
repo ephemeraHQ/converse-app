@@ -1,5 +1,6 @@
 const { execSync } = require("child_process");
 const fs = require("fs");
+const path = require("path");
 const isClean = require("git-is-clean");
 
 const replaceAppName = (path) => {
@@ -26,19 +27,14 @@ const go = async () => {
     "android/app/src/debug/java/com/converse/dev/ReactNativeFlipper.java";
   const MAIN_FLIPPER_PATH =
     "android/app/src/release/java/com/converse/dev/ReactNativeFlipper.java";
-  const MAIN_ACTIVITY_PATH =
-    "android/app/src/main/java/com/converse/dev/MainActivity.java";
-  const MAIN_APPLICATION_PATH =
-    "android/app/src/main/java/com/converse/dev/MainApplication.java";
-  const NOTIFICATION_SERVICE_PATH =
-    "android/app/src/main/java/com/converse/dev/PushNotificationsService.kt";
+
+  const APP_FILES_PATH = "android/app/src/main/java/com/converse/dev";
 
   replaceAppName(APP_GRADLE_PATH);
   replaceAppName(DEBUG_FLIPPER_PATH);
   replaceAppName(MAIN_FLIPPER_PATH);
-  replaceAppName(MAIN_ACTIVITY_PATH);
-  replaceAppName(MAIN_APPLICATION_PATH);
-  replaceAppName(NOTIFICATION_SERVICE_PATH);
+
+  findFilesRecursively(APP_FILES_PATH).map((f) => replaceAppName(f));
 
   const appManifest = fs.readFileSync(APP_MANIFEST_PATH, "utf-8");
   const newAppManifest = appManifest
@@ -71,6 +67,34 @@ const go = async () => {
   const NEW_CODE_PATH = "android/app/src/main/java/com/converse/preview";
 
   execSync(`git mv ${CODE_PATH} ${NEW_CODE_PATH}`);
+};
+
+const findFilesRecursively = (
+  folderPath,
+  fileExtensions = [".kt", ".java"]
+) => {
+  const files = [];
+
+  function scanDirectory(directory) {
+    fs.readdirSync(directory).forEach((file) => {
+      const filePath = path.join(directory, file);
+      const stats = fs.statSync(filePath);
+
+      if (stats.isDirectory()) {
+        scanDirectory(filePath);
+      } else if (stats.isFile()) {
+        const fileExtension = path.extname(filePath);
+
+        if (fileExtensions.includes(fileExtension)) {
+          files.push(filePath);
+        }
+      }
+    });
+  }
+
+  scanDirectory(folderPath);
+
+  return files;
 };
 
 go();
