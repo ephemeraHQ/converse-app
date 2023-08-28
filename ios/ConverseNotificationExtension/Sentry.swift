@@ -20,14 +20,14 @@ func initSentry() {
 }
 
 func sentryTrackMessage(message: String, extras: [String : Any]?) {
-//  SentrySDK.capture(message: "NOTIFICATION_EXTENSION_ERROR_IOS") { scope in
-//    var extrasWithMessage:[String: Any] = ["message": message]
-//    if (extras != nil) {
-//      for (key, value) in extras! {
-//        extrasWithMessage[key] = value
-//      }
-//    }
-//    scope.setExtras(extrasWithMessage)
-//  }
-//  SentrySDK.flush(timeout: 3)
+ SentrySDK.capture(message: "NOTIFICATION_EXTENSION_ERROR_IOS") { scope in
+   var extrasWithMessage:[String: Any] = ["message": message]
+   if (extras != nil) {
+     for (key, value) in extras! {
+       extrasWithMessage[key] = value
+     }
+   }
+   scope.setExtras(extrasWithMessage)
+ }
+ SentrySDK.flush(timeout: 3)
 }
