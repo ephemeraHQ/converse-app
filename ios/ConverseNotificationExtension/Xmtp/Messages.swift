@@ -61,6 +61,7 @@ func decodeConversationMessage(xmtpClient: XMTP.Client, envelope: XMTP.Envelope,
             try saveMessage(topic: envelope.contentTopic, sent: decodedMessage.sent, senderAddress: decodedMessage.senderAddress, content: contentToSave!, id: decodedMessage.id, sentViaConverse: sentViaConverse, contentType: contentType)
           }
         } catch {
+          sentryTrackMessage(message: "NOTIFICATION_ATTACHMENT_ERROR", extras: ["error": error, "envelope": envelope])
           print("[NotificationExtension] ERROR WHILE SAVING ATTACHMENT CONTENT \(error)")
         }
         return ("📎 Media", decodedMessage.senderAddress, false)
@@ -89,22 +90,24 @@ func decodeConversationMessage(xmtpClient: XMTP.Client, envelope: XMTP.Envelope,
           }
           
         } catch {
-          print("[NotificationExtension] ERROR WHILE SAVING ATTACHMENT CONTENT \(error)")
+          sentryTrackMessage(message: "NOTIFICATION_REACTION_ERROR", extras: ["error": error, "envelope": envelope])
+          print("[NotificationExtension] ERROR WHILE DECODING REACTION CONTENT \(error)")
         }
         
         return (notificationContent, decodedMessage.senderAddress, ignoreNotification);
       } else {
         print("[NotificationExtension] Unknown content type")
+        sentryTrackMessage(message: "NOTIFICATION_UNKNOWN_CONTENT_TYPE", extras: ["contentType": contentType, "envelope": envelope])
         return (nil, decodedMessage.senderAddress, false);
       }
     } catch {
+      sentryTrackMessage(message: "NOTIFICATION_DECODING_ERROR", extras: ["error": error, "envelope": envelope])
       print("[NotificationExtension] ERROR WHILE DECODING \(error)")
       return (nil, nil, false);
-      //      return "ERROR WHILE DECODING \(error)";
     }
   } else {
+    sentryTrackMessage(message: "NOTIFICATION_CONVERSATION_NOT_FOUND", extras: ["envelope": envelope])
     return (nil, nil, false);
-    //    return "NO CONVERSATION";
   }
 }
 
