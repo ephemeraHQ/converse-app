@@ -740,6 +740,7 @@ DEPENDENCIES:
   - RNScreens (from `../node_modules/react-native-screens`)
   - "RNSentry (from `../node_modules/@sentry/react-native`)"
   - RNSVG (from `../node_modules/react-native-svg`)
+  - Sentry/HybridSDK (= 8.7.1)
   - SQLite.swift
   - Yoga (from `../node_modules/react-native/ReactCommon/yoga`)
 
@@ -1036,6 +1037,6 @@ SPEC CHECKSUMS:
   SQLite.swift: 2992550ebf3c5b268bf4352603e3df87d2a4ed72
   Yoga: 3efc43e0d48686ce2e8c60f99d4e6bd349aff981
 
-PODFILE CHECKSUM: 1d7478cc7ae5b509e8ec39d85e7cf9f9258dcbc4
+PODFILE CHECKSUM: cf860c64df412be90f59fa3105256579f8c76cfd
 
 COCOAPODS: 1.12.1
