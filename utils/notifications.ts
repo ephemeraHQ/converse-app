@@ -1,14 +1,17 @@
 import * as Notifications from "expo-notifications";
 import { Platform } from "react-native";
 
+import { setTopicToNavigateTo } from "../components/StateHandlers/InitialStateHandler";
 import config from "../config";
 import { saveConversations } from "../data/helpers/conversations/upsertConversations";
 import { saveMessages } from "../data/helpers/messages";
-import { currentAccount } from "../data/store/accountsStore";
+import { currentAccount, useChatStore } from "../data/store/accountsStore";
+import { useAppStore } from "../data/store/appStore";
 import { XmtpConversation } from "../data/store/chatStore";
 import { buildUserInviteTopic } from "../vendor/xmtp-js/src/utils";
 import api from "./api";
 import { saveExpoPushToken } from "./keychain";
+import { navigateToConversation } from "./navigation";
 import { sentryTrackMessage } from "./sentry";
 import {
   emptySavedNotificationsMessages,
@@ -220,4 +223,40 @@ export const saveConversationIdentifiersForNotifications = (
       data: JSON.stringify(dataToSave),
     });
   });
+};
+
+export const onInteractWithNotification = (
+  event: Notifications.NotificationResponse
+) => {
+  const notificationData = event.notification.request.content.data;
+  if (!notificationData) return;
+  const newConversationTopic = notificationData["newConversationTopic"] as
+    | string
+    | undefined;
+  const messageConversationTopic = notificationData["contentTopic"] as
+    | string
+    | undefined;
+  const conversationTopic = newConversationTopic || messageConversationTopic;
+  if (conversationTopic) {
+    const conversations = useChatStore.getState().conversations;
+    if (conversations[conversationTopic]) {
+      navigateToConversation(conversations[conversationTopic]);
+    } else {
+      // App was probably not loaded!
+      setTopicToNavigateTo(conversationTopic);
+    }
+  }
+};
+
+export const saveNotificationsStatus = async () => {
+  const notificationsStatus = await getNotificationsPermissionStatus();
+  if (
+    notificationsStatus === "undetermined" ||
+    notificationsStatus === "granted" ||
+    notificationsStatus === "denied"
+  ) {
+    useAppStore
+      .getState()
+      .setNotificationsPermissionStatus(notificationsStatus);
+  }
 };
