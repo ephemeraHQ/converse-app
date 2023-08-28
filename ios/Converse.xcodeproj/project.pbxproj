@@ -278,7 +278,6 @@
 				4C650446295C7C1F00C5A40F /* Sources */,
 				4C650447295C7C1F00C5A40F /* Frameworks */,
 				4C650448295C7C1F00C5A40F /* Resources */,
-				4CBD671D2A9D11A70010C648 /* Upload Debug Symbols to Sentry */,
 			);
 			buildRules = (
 			);
@@ -401,24 +400,6 @@
 			inputPaths = (
 			);
 			name = "Upload Debug Symbols to Sentry";
-			outputPaths = (
-			);
-			runOnlyForDeploymentPostprocessing = 1;
-			shellPath = /bin/sh;
-			shellScript = "export SENTRY_PROPERTIES=sentry.properties\n../node_modules/@sentry/cli/bin/sentry-cli upload-dsym\n";
-		};
-		4CBD671D2A9D11A70010C648 /* Upload Debug Symbols to Sentry */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 8;
-			files = (
-			);
-			inputFileListPaths = (
-			);
-			inputPaths = (
-			);
-			name = "Upload Debug Symbols to Sentry";
-			outputFileListPaths = (
-			);
 			outputPaths = (
 			);
 			runOnlyForDeploymentPostprocessing = 1;
