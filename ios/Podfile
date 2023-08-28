@@ -22,6 +22,8 @@ target 'Converse' do
   use_frameworks! :linkage => :static
   pod 'MMKV', :linkage => :dynamic
   pod 'MMKVCore', :linkage => :dynamic
+  pod 'Sentry', :linkage => :dynamic
+  pod 'SentryPrivate', :linkage => :dynamic
 
   # Flags change depending on the env values.
   flags = get_default_flags()
@@ -82,5 +84,6 @@ target 'ConverseNotificationExtension' do
   use_frameworks! :linkage => :static
   pod 'MMKVAppExtension', :linkage => :dynamic
   pod 'SQLite.swift'
-  pod "Sentry"
+  pod 'Sentry', :linkage => :dynamic
+  pod 'SentryPrivate', :linkage => :dynamic
 end

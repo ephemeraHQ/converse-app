@@ -746,6 +746,7 @@ DEPENDENCIES:
   - "RNSentry (from `../node_modules/@sentry/react-native`)"
   - RNSVG (from `../node_modules/react-native-svg`)
   - Sentry
+  - SentryPrivate
   - SQLite.swift
   - Yoga (from `../node_modules/react-native/ReactCommon/yoga`)
 
@@ -1042,6 +1043,6 @@ SPEC CHECKSUMS:
   SQLite.swift: 2992550ebf3c5b268bf4352603e3df87d2a4ed72
   Yoga: 3efc43e0d48686ce2e8c60f99d4e6bd349aff981
 
-PODFILE CHECKSUM: 9b549fd5dee8146396b87aa05fe8b3c945a5f64d
+PODFILE CHECKSUM: 9e134e3bb640374becee08f9395f820cca0f691c
 
 COCOAPODS: 1.12.1
