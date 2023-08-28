@@ -7,6 +7,7 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.suspendCancellableCoroutine
 import java.util.ArrayList
 import kotlin.coroutines.resume
+import com.converse.dev.PushNotificationsService.Companion as PushNotificationsService
 
 fun getAsyncStorage(key: String): String? {
     val storageArguments = Arguments.createArray()
