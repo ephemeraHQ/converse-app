@@ -16,8 +16,8 @@ func getDb(account: String) throws -> Connection {
     return database
   }
   do {
-    let myGroupID: NSString = "group.com.converse.dev" // TODO => handle preview & prod
-    let groupDir = (FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: myGroupID as String)?.path)!
+    let groupId = "group.\(try! getInfoPlistValue(key: "AppBundleId", defaultValue: nil))"
+    let groupDir = (FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: groupId)?.path)!
     let dbPath = (groupDir as NSString).appendingPathComponent("converse-\(account).sqlite")
     db = try Connection(dbPath)
     if let database = db {

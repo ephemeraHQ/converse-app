@@ -4,10 +4,8 @@ import Foundation
 struct SharedDefaults {
   var sharedDefaults: UserDefaults
 
-  init() {
-    let extensionBundleID = Bundle.main.bundleIdentifier ?? ""
-    let appBundleId = extensionBundleID.replacingOccurrences(of: ".ConverseNotificationExtension", with: "")
-    sharedDefaults = UserDefaults(suiteName: "group.\(appBundleId)")!
+  init() throws {
+    sharedDefaults = UserDefaults(suiteName: "group.\(try! getInfoPlistValue(key: "AppBundleId", defaultValue: nil))")!
   }
 
   func string(forKey: String) -> String? {

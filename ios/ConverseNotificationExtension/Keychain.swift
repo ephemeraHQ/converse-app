@@ -11,8 +11,7 @@ import Foundation
 // Code taken from Expo SecureStore to match the way it saves data
 
 func getKeychainQuery(key: String) -> [String : Any] {
-  let extensionBundleID = Bundle.main.bundleIdentifier ?? ""
-  let service = extensionBundleID.replacingOccurrences(of: ".ConverseNotificationExtension", with: "")
+  let service = try! getInfoPlistValue(key: "AppBundleId", defaultValue: nil)
   let encodedKey = Data(key.utf8)
   let query = [
     kSecClass as String: kSecClassGenericPassword,

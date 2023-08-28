@@ -24,6 +24,7 @@
 		4C65044D295C7C1F00C5A40F /* NotificationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C65044C295C7C1F00C5A40F /* NotificationService.swift */; };
 		4C8BA28B298502DC007F0B76 /* SharedDefaults.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C8BA28A298502DC007F0B76 /* SharedDefaults.swift */; };
 		4CBD67182A9CF7C30010C648 /* Sentry.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CBD67172A9CF7C30010C648 /* Sentry.swift */; };
+		4CBD671C2A9D08050010C648 /* Utils.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CBD671B2A9D08050010C648 /* Utils.swift */; };
 		4CC856EF296C174D0011B072 /* ConverseNotificationExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 4C65044A295C7C1F00C5A40F /* ConverseNotificationExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		4CF1C2602989DFB800C99ED9 /* XMTP in Frameworks */ = {isa = PBXBuildFile; productRef = 4CF1C25F2989DFB800C99ED9 /* XMTP */; };
 		6349C35D5A06C18205775758 /* Pods_ConverseNotificationExtension.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = EBA211855BF6C666F4839AF8 /* Pods_ConverseNotificationExtension.framework */; };
@@ -81,6 +82,7 @@
 		4C65044E295C7C1F00C5A40F /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		4C8BA28A298502DC007F0B76 /* SharedDefaults.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SharedDefaults.swift; sourceTree = "<group>"; };
 		4CBD67172A9CF7C30010C648 /* Sentry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Sentry.swift; sourceTree = "<group>"; };
+		4CBD671B2A9D08050010C648 /* Utils.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Utils.swift; sourceTree = "<group>"; };
 		68FED7E170C7437EB719C8C6 /* noop-file.swift */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 4; includeInIndex = 0; lastKnownFileType = sourcecode.swift; name = "noop-file.swift"; path = "Converse/noop-file.swift"; sourceTree = "<group>"; };
 		AA286B85B6C04FC6940260E9 /* SplashScreen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; name = SplashScreen.storyboard; path = Converse/SplashScreen.storyboard; sourceTree = "<group>"; };
 		BB2F792C24A3F905000567C9 /* Expo.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Expo.plist; sourceTree = "<group>"; };
@@ -157,6 +159,7 @@
 				4C3F6104295C9038007A969B /* ConverseNotificationExtension.entitlements */,
 				4C65044C295C7C1F00C5A40F /* NotificationService.swift */,
 				4CBD67172A9CF7C30010C648 /* Sentry.swift */,
+				4CBD671B2A9D08050010C648 /* Utils.swift */,
 				4C2440D12A9C8C5A004F31A3 /* Datatypes.swift */,
 				4C8BA28A298502DC007F0B76 /* SharedDefaults.swift */,
 				4C2440DA2A9C8E30004F31A3 /* MMKV.swift */,
@@ -275,6 +278,7 @@
 				4C650446295C7C1F00C5A40F /* Sources */,
 				4C650447295C7C1F00C5A40F /* Frameworks */,
 				4C650448295C7C1F00C5A40F /* Resources */,
+				4CBD671D2A9D11A70010C648 /* Upload Debug Symbols to Sentry */,
 			);
 			buildRules = (
 			);
@@ -397,6 +401,24 @@
 			inputPaths = (
 			);
 			name = "Upload Debug Symbols to Sentry";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 1;
+			shellPath = /bin/sh;
+			shellScript = "export SENTRY_PROPERTIES=sentry.properties\n../node_modules/@sentry/cli/bin/sentry-cli upload-dsym\n";
+		};
+		4CBD671D2A9D11A70010C648 /* Upload Debug Symbols to Sentry */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 8;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			name = "Upload Debug Symbols to Sentry";
+			outputFileListPaths = (
+			);
 			outputPaths = (
 			);
 			runOnlyForDeploymentPostprocessing = 1;
@@ -536,6 +558,7 @@
 				4CBD67182A9CF7C30010C648 /* Sentry.swift in Sources */,
 				4C2440DD2A9C9006004F31A3 /* SQLite.swift in Sources */,
 				4C2440D92A9C8D5C004F31A3 /* Messages.swift in Sources */,
+				4CBD671C2A9D08050010C648 /* Utils.swift in Sources */,
 				4C8BA28B298502DC007F0B76 /* SharedDefaults.swift in Sources */,
 				4C2440D72A9C8D56004F31A3 /* Conversations.swift in Sources */,
 				4C2440D02A9C8BE8004F31A3 /* Keychain.swift in Sources */,

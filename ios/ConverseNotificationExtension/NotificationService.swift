@@ -30,6 +30,7 @@ func handleNotificationAsync(contentHandler: ((UNNotificationContent) -> Void), 
   initSentry()
   
   if let bestAttemptContent = bestAttemptContent {
+    sentryTrackMessage(message: "NOTIFICATION_WORKS", extras: nil)
     
     print("[NotificationExtension] Received a notification")
     if var body = bestAttemptContent.userInfo["body"] as? [String: Any], let contentTopic = body["contentTopic"] as? String, let encodedMessage = body["message"] as? String {
@@ -43,7 +44,7 @@ func handleNotificationAsync(contentHandler: ((UNNotificationContent) -> Void), 
           envelope.message = encryptedMessageData
           envelope.contentTopic = contentTopic
         }
-        
+      
         if (isIntroTopic(topic: contentTopic) || isInviteTopic(topic: contentTopic)) {
           let conversation = handleNewConversation(xmtpClient: xmtpClient!, envelope: envelope)
           if (conversation != nil && conversation?.peerAddress != nil) {

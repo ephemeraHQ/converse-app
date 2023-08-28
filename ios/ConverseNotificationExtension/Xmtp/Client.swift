@@ -35,7 +35,7 @@ func getXmtpClientFromKeys() async -> XMTP.Client? {
 }
 
 func getXmtpEnv() -> XMTP.XMTPEnvironment {
-  let sharedDefaults = SharedDefaults()
+  let sharedDefaults = try! SharedDefaults()
   let xmtpEnvString = sharedDefaults.string(forKey: "xmtp-env")
   if (xmtpEnvString == "\"production\"") {
     return .production;

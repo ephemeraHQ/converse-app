@@ -13,7 +13,7 @@ import CryptoKit
 func handleNewConversation(xmtpClient: XMTP.Client, envelope: XMTP.Envelope) -> XMTP.Conversation? {
   do {
     // Let's subscribe to that specific topic
-    let sharedDefaults = SharedDefaults()
+    let sharedDefaults = try! SharedDefaults()
     let apiURI = sharedDefaults.string(forKey: "api-uri")?.replacingOccurrences(of: "\"", with: "")
     let expoPushToken = getKeychainValue(forKey: "EXPO_PUSH_TOKEN")
     
@@ -62,7 +62,7 @@ func handleNewConversation(xmtpClient: XMTP.Client, envelope: XMTP.Envelope) -> 
 
 
 func loadSavedConversations() -> [SavedNotificationConversation] {
-  let sharedDefaults = SharedDefaults()
+  let sharedDefaults = try! SharedDefaults()
   let savedConversationsString = sharedDefaults.string(forKey: "saved-notifications-conversations")
   if (savedConversationsString == nil) {
     return []
@@ -79,7 +79,7 @@ func loadSavedConversations() -> [SavedNotificationConversation] {
 
 
 func saveConversation(topic: String, peerAddress: String, createdAt: Int, context: ConversationContext?) throws {
-  let sharedDefaults = SharedDefaults()
+  let sharedDefaults = try! SharedDefaults()
   let savedConversation = SavedNotificationConversation(topic: topic, peerAddress: peerAddress, createdAt: createdAt, context: context)
   var savedConversationsList = loadSavedConversations()
   savedConversationsList.append(savedConversation)
@@ -89,7 +89,7 @@ func saveConversation(topic: String, peerAddress: String, createdAt: Int, contex
 }
 
 func getSavedConversationTitle(contentTopic: String)-> String {
-  let sharedDefaults = SharedDefaults()
+  let sharedDefaults = try! SharedDefaults()
   let conversationDictString = sharedDefaults.string(forKey: "conversation-\(contentTopic)")
   if let data = conversationDictString?.data(using: .utf8) {
     if let conversationDict = try! JSONSerialization.jsonObject(with: data, options: .allowFragments) as? [String: Any] {

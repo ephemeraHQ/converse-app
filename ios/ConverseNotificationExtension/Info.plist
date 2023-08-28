@@ -9,7 +9,9 @@
 		<key>NSExtensionPrincipalClass</key>
 		<string>$(PRODUCT_MODULE_NAME).NotificationService</string>
 	</dict>
-	<key>AppGroup</key>
-    <string>group.com.converse.dev</string>
+	<key>AppBundleId</key>
+    <string>com.converse.dev</string>
+	<key>Env</key>
+    <string>dev</string>
 </dict>
 </plist>
