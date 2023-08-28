@@ -50,17 +50,17 @@ export const saveConversations = async (
   );
 
   if (convosWithProfilesToUpdate.length === 0) return;
-  const resolveResult = await updateProfilesForConversations(
-    account,
-    convosWithProfilesToUpdate
+  // If not connected we need to be able to save convo without querying the API for profiles
+  updateProfilesForConversations(account, convosWithProfilesToUpdate).then(
+    (resolveResult) => {
+      const updatedConversations = resolveResult
+        .filter((r) => r.updated)
+        .map((r) => r.conversation);
+      if (updatedConversations.length > 0) {
+        getChatStore(account).getState().setConversations(updatedConversations);
+      }
+    }
   );
-
-  const updatedConversations = resolveResult
-    .filter((r) => r.updated)
-    .map((r) => r.conversation);
-  if (updatedConversations.length > 0) {
-    getChatStore(account).getState().setConversations(updatedConversations);
-  }
 };
 
 const setupAndSaveConversation = async (

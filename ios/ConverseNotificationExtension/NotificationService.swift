@@ -54,9 +54,9 @@ func handleNotificationAsync(contentHandler: ((UNNotificationContent) -> Void), 
           var conversationTitle = getSavedConversationTitle(contentTopic: contentTopic);
           let sentViaConverse = body["sentViaConverse"] as? Bool ?? false;
           let decodedMessageResult = await decodeConversationMessage(xmtpClient: xmtpClient!, envelope: envelope, sentViaConverse: sentViaConverse)
-          if (decodedMessageResult.senderAddress == xmtpClient?.address) {
-            // Message is from me, let's ignore it
-            print("[NotificationExtension] Dropping a notification coming from me")
+          if (decodedMessageResult.senderAddress == xmtpClient?.address || decodedMessageResult.forceIgnore) {
+            // Message is from me or a reaction removal, let's ignore it
+            print("[NotificationExtension] Not showing a notification")
             contentHandler(UNNotificationContent())
             return
           } else if (decodedMessageResult.content != nil) {
