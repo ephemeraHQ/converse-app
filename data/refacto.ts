@@ -128,6 +128,11 @@ export const migrateDataIfNeeded = async () => {
   }
   AsyncStorage.removeItem("state.xmtp.initialLoadDoneOnce");
   storage.delete("state.xmtp.initialLoadDoneOnce");
+
+  // Let's migrate keys if needed
+  if (currentAccount !== "TEMPORARY_ACCOUNT") {
+  }
+
   const after = new Date().getTime();
   console.log(`[Refacto] Migration took ${(after - before) / 1000} seconds`);
 };
