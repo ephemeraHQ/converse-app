@@ -6,3 +6,5 @@ class SavedNotificationMessage(val topic: String, val content: String, val sende
 class ConversationContext(val conversationId: String, val metadata: Map<String, Any>)
 class ConversationV2Data(val version: String = "v2", val topic: String, val peerAddress: String, val createdAt: String, val context: ConversationContext?, val keyMaterial: String)
 class SavedNotificationConversation(val topic: String, val peerAddress: String, val createdAt: Long, val context: ConversationContext?)
+class Accounts(val currentAccount: String, val accounts: Array<String>)
+class AccountsStore(val state: Accounts, val version: Int)
