@@ -43,7 +43,7 @@ func setKeychainValue(value: String, forKey: String) throws -> Bool {
   var query = getKeychainQuery(key: forKey)
   let valueData = value.data(using: .utf8)
   query[kSecValueData as String] = valueData
-  let accessibility = kSecAttrAccessibleWhenUnlocked
+  let accessibility = kSecAttrAccessibleAfterFirstUnlock
   query[kSecAttrAccessible as String] = accessibility
   let status = SecItemAdd(query as CFDictionary, nil)
   switch status {
