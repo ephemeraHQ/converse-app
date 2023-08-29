@@ -19,6 +19,12 @@ func getDb(account: String) throws -> Connection {
     let groupId = "group.\(try! getInfoPlistValue(key: "AppBundleId", defaultValue: nil))"
     let groupDir = (FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: groupId)?.path)!
     let dbPath = (groupDir as NSString).appendingPathComponent("converse-\(account).sqlite")
+    let fileURL = URL(fileURLWithPath: dbPath)
+
+    if !FileManager.default.fileExists(atPath: fileURL.path) {
+      throw "DB does not exist"
+    }
+
     db = try Connection(dbPath)
     if let database = db {
       return database
