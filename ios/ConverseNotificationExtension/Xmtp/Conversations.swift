@@ -55,6 +55,7 @@ func handleNewConversation(xmtpClient: XMTP.Client, envelope: XMTP.Envelope) -> 
       return conversation
     }
   } catch {
+    sentryTrackMessage(message: "Could not decode new conversation envelope", extras: ["error": error])
     print("[NotificationExtension] Could not decode new conversation envelope \(error)")
   }
   return nil;
@@ -115,9 +116,11 @@ func getPersistedConversation(xmtpClient: XMTP.Client, contentTopic: String) -> 
       let conversation = try xmtpClient.importConversation(from: persistedConversation!.data(using: .utf8)!)
       return conversation
     } catch {
+      sentryTrackMessage(message: "Could not import conversation in XMTP Client", extras: ["error": error])
       return nil
     }
   }
+  sentryTrackMessage(message: "No keychain value found for topic", extras: ["contentTopic": contentTopic])
   return nil
 }
 
@@ -130,6 +133,7 @@ func persistDecodedConversation(contentTopic: String, dict: [String : Any]) {
     try setKeychainValue(value: jsonString, forKey: "XMTP_CONVERSATION_\(hashString)")
     print("[NotificationExtension] Persisted the new conversation to keychain: XMTP_CONVERSATION_\(hashString)")
   } catch {
+    sentryTrackMessage(message: "Could not persist the new conversation to keychain", extras: ["error": error])
     print("[NotificationExtension] Could not persist the new conversation to keychain")
   }
 }
