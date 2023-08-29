@@ -1,6 +1,8 @@
+import { Platform } from "react-native";
 import RNFS from "react-native-fs";
 import { Repository } from "typeorm/browser";
 
+import config from "../../config";
 import { useAccountsStore } from "../store/accountsStore";
 import {
   deleteDataSource,
@@ -70,6 +72,15 @@ export const initDb = async (account: string) => {
   }
 };
 
+export const getDbPath = async (account: string) => {
+  if (Platform.OS === "ios") {
+    const groupPath = await RNFS.pathForGroup(config.appleAppGroup);
+    return `${groupPath}/converse-${account}.sqlite`;
+  } else {
+    return `/data/data/${config.bundleId}/databases/converse-${account}.sqlite`;
+  }
+};
+
 export async function clearDB(account: string, reset = true) {
   try {
     const dataSource = getExistingDataSource(account);
@@ -85,7 +96,7 @@ export async function clearDB(account: string, reset = true) {
   deleteDataSource(account);
 
   // Now let's delete the database file
-  const dbPath = `${RNFS.DocumentDirectoryPath}/SQLite/converse-${account}.sqlite`;
+  const dbPath = await getDbPath(account);
   const dbExists = await RNFS.exists(dbPath);
   if (!dbExists) {
     console.log(
