@@ -48,7 +48,7 @@ class PushNotificationsService : FirebaseMessagingService() {
         Client.register(codec = AttachmentCodec())
         Client.register(codec = RemoteAttachmentCodec())
         Client.register(codec = ReactionCodec())
-        var xmtpClient = getXmtpClient()
+        val xmtpClient = getXmtpClient()
         if (applicationInForeground()) {
             Log.d(TAG, "App is in foreground, dropping")
             return
