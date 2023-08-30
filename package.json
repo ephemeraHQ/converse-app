@@ -18,7 +18,7 @@
     "@ethersproject/shims": "^5.7.0",
     "@expo/metro-config": "^0.10.7",
     "@expo/react-native-action-sheet": "^4.0.1",
-    "@expo/webpack-config": "^18.1.2",
+    "@expo/webpack-config": "^19.0.0",
     "@flyerhq/react-native-chat-ui": "^1.4.3",
     "@material-symbols/svg-400": "^0.5.0",
     "@noble/secp256k1": "^1.5.2",
