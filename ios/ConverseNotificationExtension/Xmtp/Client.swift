@@ -9,21 +9,69 @@ import Foundation
 import XMTP
 import Alamofire
 
-
-func getXmtpClientFromKeys() async -> XMTP.Client? {
+func initCodecs() {
   Client.register(codec: AttachmentCodec())
   Client.register(codec: RemoteAttachmentCodec())
   Client.register(codec: ReactionCodec())
-  let xmtpKeys = getKeychainValue(forKey: "XMTP_KEYS")
-  if (xmtpKeys == nil || xmtpKeys?.count == 0) {
-    sentryTrackMessage(message: "NOTIFICATION_XMTP_KEYS_NOT_FOUND", extras: nil)
-    return nil;
+}
+
+func getXmtpAccountForTopic(contentTopic: String) -> String? {
+  if (isInviteTopic(topic: contentTopic)) {
+    // If invite topic, account is part of topic
+    let startIndex = contentTopic.index(contentTopic.startIndex, offsetBy: 15)
+    let endIndex = contentTopic.index(contentTopic.endIndex, offsetBy: -6)
+    return String(contentTopic[startIndex..<endIndex])
+  } else {
+    let accounts = getAccounts()
+    // Probably a conversation topic, let's find it in db
+    var account: String? = nil
+    var i = 0
+    while (account == nil && i < accounts.count) {
+      let thisAccount = accounts[i]
+      do {
+        if (try hasTopic(account: thisAccount, topic: contentTopic)) {
+          account = thisAccount
+        }
+      } catch {
+        sentryTrackMessage(message: "Could not check if database has topic", extras: ["error": error])
+      }
+      
+      i += 1
+    }
+    return account
   }
-  do {
+}
+
+func getXmtpKeyForTopic(contentTopic: String) throws -> Data? {
+  let legacyKey = getKeychainValue(forKey: "XMTP_KEYS")
+  if (legacyKey != nil && legacyKey!.count > 0) {
+    // We have a legacy key, not yet migrated!
+    // Legacy key is in format "[byte, byte, byte...]"
     let decoder = JSONDecoder()
-    let decoded = try decoder.decode([UInt8].self, from: xmtpKeys!.data(using: .utf8)!)
+    let decoded = try decoder.decode([UInt8].self, from: legacyKey!.data(using: .utf8)!)
     let data = Data(decoded)
-    let privateKeyBundle = try! PrivateKeyBundle(serializedData: data)
+    return data
+  }
+  let account = getXmtpAccountForTopic(contentTopic: contentTopic)
+  if (account == nil) {
+    return nil
+  }
+  let accountKey = getKeychainValue(forKey: "XMTP_KEY_\(account!)")
+  if (accountKey == nil || accountKey!.count == 0) {
+    return nil
+  }
+  // New keys are in base64 format
+  return Data(base64Encoded: accountKey!)
+}
+
+func getXmtpClient(contentTopic: String) async -> XMTP.Client? {
+  do {
+    let xmtpKeyData = try getXmtpKeyForTopic(contentTopic: contentTopic)
+    if (xmtpKeyData == nil) {
+      sentryTrackMessage(message: "No XMTP key found for topic (might be that user logged out)", extras: nil)
+      return nil;
+    }
+    let privateKeyBundle = try! PrivateKeyBundle(serializedData: xmtpKeyData!)
     let xmtpEnv = getXmtpEnv()
     let client = try await Client.from(bundle: privateKeyBundle, options: .init(api: .init(env: xmtpEnv)))
     return client
@@ -35,13 +83,11 @@ func getXmtpClientFromKeys() async -> XMTP.Client? {
 }
 
 func getXmtpEnv() -> XMTP.XMTPEnvironment {
-  let sharedDefaults = try! SharedDefaults()
-  let xmtpEnvString = sharedDefaults.string(forKey: "xmtp-env")
-  if (xmtpEnvString == "\"production\"") {
+  let env = try! getInfoPlistValue(key: "Env", defaultValue: "dev")
+  if (env == "prod") {
     return .production;
-  } else {
-    return .dev;
   }
+  return .dev;
 }
 
 func isInviteTopic(topic: String) -> Bool {

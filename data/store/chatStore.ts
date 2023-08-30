@@ -209,7 +209,8 @@ export const initChatStore = (account: string) => {
                     reactions: alreadyMessage.reactions,
                   } as XmtpMessage;
                   // Existing message, let's see if we can consider it's updated
-                  isUpdated = isMessageUpdated(alreadyMessage, newMessage);
+                  isUpdated =
+                    isUpdated || isMessageUpdated(alreadyMessage, newMessage);
                   conversation.messages.set(message.id, newMessage);
                 } else {
                   // New message, it's updated

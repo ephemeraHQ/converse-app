@@ -32,18 +32,23 @@ func handleNotificationAsync(contentHandler: ((UNNotificationContent) -> Void), 
   if let bestAttemptContent = bestAttemptContent {    
     print("[NotificationExtension] Received a notification")
     if var body = bestAttemptContent.userInfo["body"] as? [String: Any], let contentTopic = body["contentTopic"] as? String, let encodedMessage = body["message"] as? String {
-      
-      let xmtpClient = await getXmtpClientFromKeys();
+      // Init XMTP Codecs
+      initCodecs();
+      let xmtpClient = await getXmtpClient(contentTopic: contentTopic);
       
       if (xmtpClient != nil) {
+        // Let's add account that was found for this topic to notif body!
+        body["account"] = xmtpClient!.address
+        bestAttemptContent.userInfo.updateValue(body, forKey: "body")
         
         let encryptedMessageData = Data(base64Encoded: Data(encodedMessage.utf8))!
         let envelope = XMTP.Envelope.with { envelope in
           envelope.message = encryptedMessageData
           envelope.contentTopic = contentTopic
         }
-      
-        if (isIntroTopic(topic: contentTopic) || isInviteTopic(topic: contentTopic)) {
+        if (isIntroTopic(topic: contentTopic)) {
+          return
+        } else if (isInviteTopic(topic: contentTopic)) {
           let conversation = handleNewConversation(xmtpClient: xmtpClient!, envelope: envelope)
           if (conversation != nil && conversation?.peerAddress != nil) {
             bestAttemptContent.title = shortAddress(address: conversation!.peerAddress)
@@ -67,6 +72,9 @@ func handleNotificationAsync(contentHandler: ((UNNotificationContent) -> Void), 
           }
           bestAttemptContent.title = conversationTitle;
         }
+      } else {
+        print("[NotificationExtension] Not showing a notification because no client found")
+        contentHandler(UNNotificationContent())
       }
     }
     

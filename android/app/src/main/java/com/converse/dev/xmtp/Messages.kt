@@ -25,13 +25,13 @@ fun handleNewMessageNotification(xmtpClient: Client, envelope: Envelope, remoteM
     var notificationMessage = "New message";
     if (contentType.startsWith("xmtp.org/text:")) {
         notificationMessage = decodedMessage.body;
-        saveMessageToStorage(envelope.contentTopic, decodedMessage, sentViaConverse, contentType)
+        saveMessageToStorage(xmtpClient.address, envelope.contentTopic, decodedMessage, sentViaConverse, contentType)
     } else if (contentType.startsWith("xmtp.org/remoteStaticAttachment:")) {
         notificationMessage = "\uD83D\uDCCE Media";
-        saveMessageToStorage(envelope.contentTopic, decodedMessage, sentViaConverse, contentType)
+        saveMessageToStorage(xmtpClient.address, envelope.contentTopic, decodedMessage, sentViaConverse, contentType)
     } else if (contentType.startsWith("xmtp.org/reaction:")) {
         val reactionParameters = decodedMessage.encodedContent.parametersMap;
-        saveMessageToStorage(envelope.contentTopic, decodedMessage, sentViaConverse, contentType)
+        saveMessageToStorage(xmtpClient.address, envelope.contentTopic, decodedMessage, sentViaConverse, contentType)
         if (reactionParameters["action"] == "removed") {
             return null;
         } else if (reactionParameters["schema"] != "unicode") {
@@ -56,7 +56,7 @@ fun getContentTypeString(contentType: Content.ContentTypeId): String {
     return "${contentType.authorityId}/${contentType.typeId}:${contentType.versionMajor}.${contentType.versionMinor}"
 }
 
-fun saveMessageToStorage(topic: String, decodedMessage: DecodedMessage, sentViaConverse: Boolean, contentType: String) {
+fun saveMessageToStorage(account: String, topic: String, decodedMessage: DecodedMessage, sentViaConverse: Boolean, contentType: String) {
     val currentSavedMessagesString = getAsyncStorage("saved-notifications-messages")
     Log.d("PushNotificationsService", "Got current saved messages from storage: $currentSavedMessagesString")
     var currentSavedMessages = listOf<SavedNotificationMessage>()
@@ -77,13 +77,14 @@ fun saveMessageToStorage(topic: String, decodedMessage: DecodedMessage, sentViaC
         return;
     }
     val newMessageToSave = SavedNotificationMessage(
-        topic,
-        messageBody,
-        decodedMessage.senderAddress,
-        decodedMessage.sent.time,
-        decodedMessage.id,
-        sentViaConverse,
-        contentType
+        topic=topic,
+        content=messageBody,
+        senderAddress=decodedMessage.senderAddress,
+        sent=decodedMessage.sent.time,
+        id=decodedMessage.id,
+        sentViaConverse=sentViaConverse,
+        contentType=contentType,
+        account=account
     )
     currentSavedMessages += newMessageToSave
     val newSavedMessagesString = Klaxon().toJsonString(currentSavedMessages)

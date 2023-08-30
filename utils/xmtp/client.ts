@@ -19,9 +19,9 @@ export const isOnXmtp = async (address: string) =>
     env,
   });
 
-export const getXmtpClientFromKeys = async (keys: any) => {
+export const getXmtpClientFromBase64Key = async (base64Key: any) => {
   const client = await Client.create(null, {
-    privateKeyOverride: Buffer.from(keys),
+    privateKeyOverride: Buffer.from(base64Key, "base64"),
     env,
   });
   client.registerCodec(new AttachmentCodec());
@@ -30,16 +30,18 @@ export const getXmtpClientFromKeys = async (keys: any) => {
   return client;
 };
 
-export const getXmtpKeysFromSigner = (
+export const getXmtpKeysFromSigner = async (
   signer: Signer,
   preCreateIdentityCallback?: () => Promise<void>,
   preEnableIdentityCallback?: () => Promise<void>
-) =>
-  Client.getKeys(signer, {
+) => {
+  const keys = await Client.getKeys(signer, {
     env,
     preCreateIdentityCallback,
     preEnableIdentityCallback,
   });
+  return Buffer.from(keys);
+};
 
 export const getXmtpSignature = async (client: Client, message: string) => {
   const messageToSign = Buffer.from(message);

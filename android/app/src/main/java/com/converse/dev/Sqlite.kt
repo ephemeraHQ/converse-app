@@ -7,9 +7,10 @@ import android.util.Log
 import java.io.File
 
 
-private var database: SQLiteDatabase? = null;
+private var dbByAccount = mapOf<String, SQLiteDatabase>();
 
 fun getDb(appContext: Context, account: String): SQLiteDatabase? {
+    var database = dbByAccount[account]
     if (database != null) {
         return database as SQLiteDatabase;
     }
@@ -36,5 +37,20 @@ fun getConversations(appContext: Context, account: String) {
 
     // Close the cursor
     cursor.close()
+}
+
+fun hasTopic(appContext: Context, account: String, topic: String): Boolean {
+    val db = getDb(appContext, account) ?: return false
+    val query = "SELECT COUNT(topic) FROM conversation WHERE topic = ?;"
+    val cursor: Cursor = db.rawQuery(query, arrayOf(topic))
+
+    // Process the count value from the cursor
+    var count = 0
+    if (cursor != null && cursor.moveToFirst()) {
+        count = cursor.getInt(0)
+    }
+    // Close the cursor
+    cursor.close()
+    return count > 0
 }
 

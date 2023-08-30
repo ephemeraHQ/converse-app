@@ -1,10 +1,11 @@
 import { PrivateKey, decrypt } from "eciesjs";
 import * as Linking from "expo-linking";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { StyleSheet, useColorScheme, Text, Platform } from "react-native";
 
 import config from "../../config";
 import { clearDB } from "../../data/db";
+import { useAccountsStore } from "../../data/store/accountsStore";
 import { useOnboardingStore } from "../../data/store/onboardingStore";
 import {
   fetchDesktopSessionXmtpKey,
@@ -16,9 +17,9 @@ import {
   textPrimaryColor,
   textSecondaryColor,
 } from "../../utils/colors";
-import { saveXmtpKeys } from "../../utils/keychain";
+import { saveXmtpKey } from "../../utils/keychain";
 import { pick } from "../../utils/objects";
-import { getXmtpClientFromKeys } from "../../utils/xmtp/client";
+import { getXmtpClientFromBase64Key } from "../../utils/xmtp/client";
 import { sendMessageToWebview } from "../XmtpWebview";
 import OnboardingComponent from "./OnboardingComponent";
 
@@ -56,73 +57,89 @@ export default function DesktopConnect() {
       sessionId: desktopConnectSessionId,
     });
   }, [desktopConnectSessionId]);
-  useEffect(() => {
-    if (!localState.privateKey) return;
-    const interval = setInterval(async () => {
-      if (!desktopConnectSessionId) return;
-      try {
-        const fetchedKey = await fetchDesktopSessionXmtpKey({
+
+  const inDesktopConnectInterval = useRef(false);
+  const desktopConnectInterval = useCallback(async () => {
+    if (!desktopConnectSessionId || inDesktopConnectInterval.current) return;
+    inDesktopConnectInterval.current = true;
+    try {
+      const fetchedKey = await fetchDesktopSessionXmtpKey({
+        sessionId: desktopConnectSessionId,
+        otp: localState.otp,
+        publicKey: localState.publicKey,
+      });
+      if (fetchedKey) {
+        setLocalState((s) => ({
+          ...s,
+          subtitle: "Connecting to XMTP",
+          loading: true,
+          showOtp: false,
+        }));
+        const encryptedKeyBuffer = Buffer.from(fetchedKey, "base64");
+        const decryptedKeyBuffer = decrypt(
+          localState.privateKey,
+          encryptedKeyBuffer
+        );
+        const base64Key = decryptedKeyBuffer.toString("base64");
+        markDesktopSessionDone({
           sessionId: desktopConnectSessionId,
           otp: localState.otp,
           publicKey: localState.publicKey,
         });
-        if (fetchedKey) {
-          setLocalState((s) => ({
-            ...s,
-            subtitle: "Connecting to XMTP",
-            loading: true,
-            showOtp: false,
-          }));
-          clearInterval(interval);
-          const encryptedKeyBuffer = Buffer.from(fetchedKey, "base64");
-          const decryptedKeyBuffer = decrypt(
-            localState.privateKey,
-            encryptedKeyBuffer
-          );
-          const xmtpKeys = JSON.stringify(Array.from(decryptedKeyBuffer));
-          markDesktopSessionDone({
-            sessionId: desktopConnectSessionId,
-            otp: localState.otp,
-            publicKey: localState.publicKey,
+        const client = await getXmtpClientFromBase64Key(base64Key);
+        if (client && client.address) {
+          // Successfull login for user, let's setup
+          // the storage !
+          await saveXmtpKey(client.address, base64Key);
+          await clearDB(client.address);
+          useAccountsStore.getState().setCurrentAccount(client.address);
+          sendMessageToWebview("KEYS_LOADED_FROM_SECURE_STORAGE", {
+            keys: JSON.stringify(Array.from(decryptedKeyBuffer)),
+            env: config.xmtpEnv,
           });
-          const client = await getXmtpClientFromKeys(decryptedKeyBuffer);
-          if (client && client.address) {
-            saveXmtpKeys(xmtpKeys);
-
-            await clearDB(client.address);
-            sendMessageToWebview("KEYS_LOADED_FROM_SECURE_STORAGE", {
-              keys: xmtpKeys,
-              env: config.xmtpEnv,
-            });
-          } else {
-            throw new Error("COULD_NOT_INSTANTIATE_XMTP_CLIENT");
-          }
+        } else {
+          inDesktopConnectInterval.current = false;
+          throw new Error("COULD_NOT_INSTANTIATE_XMTP_CLIENT");
         }
-      } catch (e: any) {
-        console.log(e);
-        setLocalState((s) => ({
-          ...s,
-          subtitle: (
-            <Text>
-              There was an error. Please try again. If it keeps failing,{" "}
-              <Text
-                onPress={() => {
-                  Linking.openURL("https://twitter.com/converseapp_");
-                }}
-                style={styles.clickableText}
-              >
-                ping us on Twitter
-              </Text>
-              .
-            </Text>
-          ),
-          loading: false,
-          showOtp: false,
-        }));
+      } else {
+        inDesktopConnectInterval.current = false;
       }
-    }, 1000);
+    } catch (e: any) {
+      console.log(e);
+      setLocalState((s) => ({
+        ...s,
+        subtitle: (
+          <Text>
+            There was an error. Please try again. If it keeps failing,{" "}
+            <Text
+              onPress={() => {
+                Linking.openURL("https://twitter.com/converseapp_");
+              }}
+              style={styles.clickableText}
+            >
+              ping us on Twitter
+            </Text>
+            .
+          </Text>
+        ),
+        loading: false,
+        showOtp: false,
+      }));
+      inDesktopConnectInterval.current = false;
+    }
+  }, [
+    desktopConnectSessionId,
+    localState.otp,
+    localState.privateKey,
+    localState.publicKey,
+    styles.clickableText,
+  ]);
+
+  useEffect(() => {
+    if (!localState.privateKey) return;
+    const interval = setInterval(desktopConnectInterval, 1000);
     return () => clearInterval(interval);
-  }, [localState, desktopConnectSessionId, styles.clickableText]);
+  }, [desktopConnectInterval, localState.privateKey]);
 
   return (
     <OnboardingComponent

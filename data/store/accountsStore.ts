@@ -45,10 +45,12 @@ const deleteStores = (account: string) => {
   mmkv.delete(`store-${account}-settings`);
 };
 
-initStores("TEMPORARY_ACCOUNT");
+export const TEMPORARY_ACCOUNT_NAME = "TEMPORARY_ACCOUNT";
+
+initStores(TEMPORARY_ACCOUNT_NAME);
 
 export const getAccounts = () =>
-  Object.keys(storesByAccount).filter((a) => a !== "TEMPORARY_ACCOUNT");
+  Object.keys(storesByAccount).filter((a) => a !== TEMPORARY_ACCOUNT_NAME);
 
 // This store is global (i.e. not linked to an account)
 // For now we only use a single account so we initialize it
@@ -64,8 +66,8 @@ type AccountsStoreStype = {
 export const useAccountsStore = create<AccountsStoreStype>()(
   persist(
     (set) => ({
-      currentAccount: "TEMPORARY_ACCOUNT",
-      accounts: ["TEMPORARY_ACCOUNT"],
+      currentAccount: TEMPORARY_ACCOUNT_NAME,
+      accounts: [TEMPORARY_ACCOUNT_NAME],
       setCurrentAccount: (account) =>
         set((state) => {
           console.log(`[AccountsStore] Setting current account: ${account}`);
@@ -82,7 +84,7 @@ export const useAccountsStore = create<AccountsStoreStype>()(
         set((state) => {
           const newAccounts = [...state.accounts.filter((a) => a !== account)];
           if (newAccounts.length === 0) {
-            newAccounts.push("TEMPORARY_ACCOUNT");
+            newAccounts.push(TEMPORARY_ACCOUNT_NAME);
           }
           const newCurrentAccount =
             state.currentAccount === account
@@ -103,8 +105,8 @@ export const useAccountsStore = create<AccountsStoreStype>()(
             if (state?.accounts && state.accounts.length > 0) {
               state.accounts.map(initStores);
             } else if (state) {
-              state.currentAccount = "TEMPORARY_ACCOUNT";
-              state.accounts = ["TEMPORARY_ACCOUNT"];
+              state.currentAccount = TEMPORARY_ACCOUNT_NAME;
+              state.accounts = [TEMPORARY_ACCOUNT_NAME];
             }
           }
         };

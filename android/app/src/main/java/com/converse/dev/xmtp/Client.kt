@@ -1,9 +1,9 @@
 package com.converse.dev.xmtp
 
+import android.content.Context
 import android.util.Log
+import com.converse.dev.*
 import org.xmtp.android.library.*
-import com.converse.dev.getAsyncStorage
-import com.converse.dev.getKeychainValue
 import com.google.crypto.tink.subtle.Base64
 import org.xmtp.android.library.Client
 import org.xmtp.android.library.ClientOptions
@@ -13,17 +13,51 @@ import org.xmtp.android.library.codecs.ReactionCodec
 import org.xmtp.android.library.codecs.RemoteAttachmentCodec
 import org.xmtp.android.library.messages.PrivateKeyBundleV1Builder
 
-fun getXmtpClient(): Client {
+fun initCodecs() {
     Client.register(codec = AttachmentCodec())
     Client.register(codec = RemoteAttachmentCodec())
     Client.register(codec = ReactionCodec())
-    val xmtpBase64KeyString = getKeychainValue("XMTP_BASE64_KEY")
-    if (xmtpBase64KeyString == null || xmtpBase64KeyString.isEmpty()) {
-        Log.d("PushNotificationsService", "No XMTP Base 64 Key found")
-    } else {
-        Log.d("PushNotificationsService", "Got XMTP Base 64 Key")
+}
+
+fun getXmtpAccountForTopic(appContext: Context, topic: String): String? {
+    if (isInviteTopic(topic)) {
+        // If invite topic, account is part of topic
+        return topic.substring(15, topic.length - 6)
     }
-    val keys = PrivateKeyBundleV1Builder.buildFromBundle(Base64.decode(xmtpBase64KeyString))
+    val accounts = getAccounts(appContext)
+    var account: String? = null
+    var i = 0
+    while (account == null && i < accounts.size) {
+        val thisAccount = accounts[i]
+        if (hasTopic(appContext, thisAccount, topic)) {
+            account = thisAccount
+        }
+        i += 1
+    }
+   return account
+}
+
+fun getXmtpKeyForTopic(appContext: Context, topic: String): ByteArray? {
+    val legacyKey = getKeychainValue("XMTP_BASE64_KEY")
+    if (legacyKey != null && legacyKey.isNotEmpty()) {
+        Log.d("XmtpClient", "Legacy Key Found: ${legacyKey} ${legacyKey.length}")
+        return Base64.decode(legacyKey)
+    }
+    val account = getXmtpAccountForTopic(appContext, topic)
+
+    if (account != null) {
+        Log.d("XmtpClient", "Found account for topic: ${account}")
+        val accountKey = getKeychainValue("XMTP_KEY_${account}")
+        if (accountKey != null && accountKey.isNotEmpty()) {
+            Log.d("XmtpClient", "Found key for account: ${account}")
+            return Base64.decode(accountKey)
+        }
+    }
+    return null
+}
+fun getXmtpClient(appContext: Context, topic: String): Client? {
+    val keyByteArray = getXmtpKeyForTopic(appContext, topic) ?: return null
+    val keys = PrivateKeyBundleV1Builder.buildFromBundle(keyByteArray)
     val xmtpEnvString = getAsyncStorage("xmtp-env")
     val xmtpEnv =
         if (xmtpEnvString == "production") XMTPEnvironment.PRODUCTION else XMTPEnvironment.DEV

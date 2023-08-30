@@ -105,6 +105,7 @@ export async function clearDB(account: string, reset = true) {
   } else {
     console.log(`[ClearDB] Deleting SQlite file converse-${account}.sqlite`);
     await RNFS.unlink(dbPath);
+    console.log(`[ClearDB] Deleted SQlite file converse-${account}.sqlite`);
   }
 
   if (reset) {
