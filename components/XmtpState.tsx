@@ -11,6 +11,7 @@ import {
   updateMessagesIds,
 } from "../data/helpers/messages";
 import {
+  currentAccount,
   useAccountsStore,
   useChatStore,
   useSettingsStore,
@@ -19,9 +20,12 @@ import {
 import { useAppStore } from "../data/store/appStore";
 import { getBlockedPeers } from "../utils/api";
 import { deserializeRemoteAttachmentContent } from "../utils/attachment";
-import { loadXmtpConversation, loadXmtpKeys } from "../utils/keychain";
+import { loadXmtpConversation, loadXmtpKey } from "../utils/keychain";
 import { pick } from "../utils/objects";
-import { getXmtpClientFromKeys, getXmtpSignature } from "../utils/xmtp/client";
+import {
+  getXmtpClientFromBase64Key,
+  getXmtpSignature,
+} from "../utils/xmtp/client";
 import {
   createConversation,
   parseConversationJSON,
@@ -47,7 +51,7 @@ export const resetLocalXmtpState = () => {
 export const getLocalXmtpConversationForTopic = async (
   topic: string
 ): Promise<Conversation> => {
-  const client = await getLocalXmtpClient();
+  const client = await getLocalXmtpClient(currentAccount());
   if (!client) throw new Error("No XMTP Client");
   if (conversationsByTopic[topic]) return conversationsByTopic[topic];
   let tries = 0;
@@ -181,18 +185,11 @@ export const sendPendingMessages = async (account: string) => {
   sendingPendingMessages = false;
 };
 
-export const getLocalXmtpClient = async (
-  currentAddress?: string,
-  setState = true
-) => {
-  if (
-    !xmtpClient ||
-    (currentAddress && xmtpClient.address !== currentAddress)
-  ) {
-    const keys = await loadXmtpKeys();
-    if (keys) {
-      const parsedKeys = JSON.parse(keys);
-      xmtpClient = await getXmtpClientFromKeys(parsedKeys);
+export const getLocalXmtpClient = async (account: string, setState = true) => {
+  if (!xmtpClient || (account && xmtpClient.address !== account)) {
+    const base64Key = await loadXmtpKey(account);
+    if (base64Key) {
+      xmtpClient = await getXmtpClientFromBase64Key(base64Key);
       getXmtpApiHeaders();
     }
   }
@@ -203,7 +200,7 @@ export const getLocalXmtpClient = async (
 };
 
 export const getXmtpApiHeaders = async () => {
-  const client = await getLocalXmtpClient();
+  const client = await getLocalXmtpClient(currentAccount());
   if (!client) throw new Error("No XMTP client to generate API signature");
   if (xmtpApiSignature && client)
     return {

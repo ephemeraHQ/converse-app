@@ -15,9 +15,9 @@ import {
 } from "../data/store/accountsStore";
 import { useAppStore } from "../data/store/appStore";
 import {
-  loadXmtpKeys,
+  loadXmtpKey,
   saveXmtpConversations,
-  saveXmtpKeys,
+  saveXmtpKey,
 } from "../utils/keychain";
 import {
   loadSavedNotificationMessagesToContext,
@@ -145,13 +145,14 @@ export default function XmtpWebview() {
   }, []);
 
   const loadKeys = useCallback(async () => {
-    const keys = await loadXmtpKeys();
+    const base64Key = await loadXmtpKey(currentAccount);
+    if (!base64Key) return;
     sendMessageToWebview("KEYS_LOADED_FROM_SECURE_STORAGE", {
-      keys,
+      keys: JSON.stringify(Array.from(Buffer.from(base64Key, "base64"))),
       env: config.xmtpEnv,
     });
     loadedKeys.current = true;
-  }, []);
+  }, [currentAccount]);
 
   useEffect(() => {
     if (!loadedKeys.current && userAddress) {
@@ -260,7 +261,8 @@ export default function XmtpWebview() {
           break;
         case "SAVE_KEYS": {
           const { keys } = data;
-          await saveXmtpKeys(keys);
+          const base64Key = Buffer.from(JSON.parse(keys)).toString("base64");
+          await saveXmtpKey(currentAccount, base64Key);
           break;
         }
         case "XMTP_CONVERSATIONS":

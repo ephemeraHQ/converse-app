@@ -44,7 +44,7 @@ fun handleNewConversationV2Notification(appContext: Context, xmtpClient: Client,
     )
     val apiURI = getAsyncStorage("api-uri")
     val expoPushToken = getKeychainValue("EXPO_PUSH_TOKEN")
-    if (apiURI != null) {
+    if (apiURI != null && expoPushToken !== null) {
         Log.d("PushNotificationsService", "Subscribing to new topic at api: $apiURI")
         subscribeToTopic(appContext, apiURI, expoPushToken, conversation.topic)
     }
@@ -54,12 +54,13 @@ fun handleNewConversationV2Notification(appContext: Context, xmtpClient: Client,
         notificationData.timestampNs,
         notificationData.contentTopic,
         notificationData.sentViaConverse,
+        notificationData.account,
         conversation.topic
     )
     val newNotificationDataJson = Klaxon().toJsonString(newNotificationData)
     remoteMessage.data["body"] = newNotificationDataJson
     persistNewConversation(conversation.topic, conversationV2Data)
-    saveConversationToStorage(conversation.topic, conversation.peerAddress, conversation.createdAt.time, context);
+    saveConversationToStorage(xmtpClient.address, conversation.topic, conversation.peerAddress, conversation.createdAt.time, context);
     return Triple(shortAddress(conversation.peerAddress), "New Conversation", remoteMessage)
 }
 
@@ -82,7 +83,7 @@ fun subscribeToTopic(appContext: Context, apiURI: String, expoPushToken: String,
     Volley.newRequestQueue(appContext).add(jsonRequest)
 }
 
-fun saveConversationToStorage(topic: String, peerAddress: String, createdAt: Long, context: ConversationContext?) {
+fun saveConversationToStorage(account: String, topic: String, peerAddress: String, createdAt: Long, context: ConversationContext?) {
     val currentSavedConversationsString = getAsyncStorage("saved-notifications-conversations")
     Log.d("PushNotificationsService", "Got current saved conversations from storage: $currentSavedConversationsString")
     var currentSavedConversations = listOf<SavedNotificationConversation>()
@@ -91,12 +92,7 @@ fun saveConversationToStorage(topic: String, peerAddress: String, createdAt: Lon
     } catch (error: Exception) {
         Log.d("PushNotificationsService", "Could not parse saved messages from storage: $currentSavedConversationsString - $error")
     }
-    val newConversationToSave = SavedNotificationConversation(
-        topic,
-        peerAddress,
-        createdAt,
-        context
-    )
+    val newConversationToSave = SavedNotificationConversation(topic = topic, peerAddress= peerAddress, createdAt= createdAt, context= context, account = account)
     currentSavedConversations += newConversationToSave
     val newSavedConversationsString = Klaxon().toJsonString(currentSavedConversations)
     setAsyncStorage("saved-notifications-conversations", newSavedConversationsString)
@@ -108,8 +104,9 @@ fun getPersistedConversation(xmtpClient: Client, topic: String): Conversation? {
         val digest = MessageDigest.getInstance("SHA-256").digest(topicBytes)
         val encodedTopic = digest.joinToString("") { "%02x".format(it) }
         var persistedConversationData = getKeychainValue("XMTP_CONVERSATION_$encodedTopic")
-
-        return xmtpClient.importConversation(persistedConversationData.toByteArray())
+        if (persistedConversationData !== null) {
+            return xmtpClient.importConversation(persistedConversationData.toByteArray())
+        }
     } catch (e: Exception) {
         Log.d("PushNotificationsService", "Could not retrieve conversation: $e")
     }

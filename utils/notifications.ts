@@ -5,9 +5,13 @@ import { setTopicToNavigateTo } from "../components/StateHandlers/InitialStateHa
 import config from "../config";
 import { saveConversations } from "../data/helpers/conversations/upsertConversations";
 import { saveMessages } from "../data/helpers/messages";
-import { currentAccount, useChatStore } from "../data/store/accountsStore";
+import {
+  TEMPORARY_ACCOUNT_NAME,
+  useAccountsStore,
+  useChatStore,
+} from "../data/store/accountsStore";
 import { useAppStore } from "../data/store/appStore";
-import { XmtpConversation } from "../data/store/chatStore";
+import { XmtpConversation, XmtpMessage } from "../data/store/chatStore";
 import { buildUserInviteTopic } from "../vendor/xmtp-js/src/utils";
 import api from "./api";
 import { saveExpoPushToken } from "./keychain";
@@ -134,6 +138,9 @@ export const loadSavedNotificationMessagesToContext = async () => {
   }
   loadingSavedNotifications = true;
   try {
+    const knownAccounts = useAccountsStore
+      .getState()
+      .accounts.filter((c) => c !== TEMPORARY_ACCOUNT_NAME);
     const [conversations, messages] = await Promise.all([
       loadSavedNotificationsConversations(),
       loadSavedNotificationsMessages(),
@@ -144,7 +151,10 @@ export const loadSavedNotificationMessagesToContext = async () => {
     ]);
 
     if (conversations && conversations.length > 0) {
-      const conversationsToSave = conversations.map((c: any) => {
+      const conversationsToSaveByAccount: {
+        [account: string]: any[];
+      } = {};
+      conversations.forEach((c: any) => {
         let context = undefined;
         // If conversationId is empty string we require at least some metadata…
         if (
@@ -157,41 +167,61 @@ export const loadSavedNotificationMessagesToContext = async () => {
             metadata: c.context.metadata,
           };
         }
-        return {
-          topic: c.topic,
-          peerAddress: c.peerAddress,
-          createdAt: c.createdAt,
-          readUntil: 0,
-          pending: false,
-          context,
-        };
+        if (c.account && knownAccounts.includes(c.account)) {
+          conversationsToSaveByAccount[c.account] =
+            conversationsToSaveByAccount[c.account] || [];
+          conversationsToSaveByAccount[c.account].push({
+            topic: c.topic,
+            peerAddress: c.peerAddress,
+            createdAt: c.createdAt,
+            readUntil: 0,
+            pending: false,
+            context,
+          });
+        }
       });
-      // TODO => not current account here, know from which account is the notif
-      await saveConversations(currentAccount(), conversationsToSave);
+      for (const account of Object.keys(conversationsToSaveByAccount)) {
+        await saveConversations(account, conversationsToSaveByAccount[account]);
+      }
     }
 
     if (messages && messages.length > 0) {
       messages.sort((m1: any, m2: any) => m1.sent - m2.sent);
-      await Promise.all(
-        messages.map((message: any) =>
-          saveMessages(
-            // TODO => not current account here, know from which account is the notif
-            currentAccount(),
-            [
-              {
-                id: message.id,
-                senderAddress: message.senderAddress,
-                sent: message.sent,
-                content: message.content,
-                status: "sent",
-                sentViaConverse: !!message.sentViaConverse,
-                contentType: message.contentType || "xmtp.org/text:1.0",
-              },
-            ],
-            message.topic
-          )
-        )
-      );
+      const messagesToSaveByAccount: {
+        [account: string]: { [topic: string]: XmtpMessage[] };
+      } = {};
+      messages.forEach((message: any) => {
+        if (message.account && knownAccounts.includes(message.account)) {
+          messagesToSaveByAccount[message.account] =
+            messagesToSaveByAccount[message.account] || {};
+          messagesToSaveByAccount[message.account][message.topic] =
+            messagesToSaveByAccount[message.account][message.topic] || [];
+          messagesToSaveByAccount[message.account][message.topic].push({
+            id: message.id,
+            senderAddress: message.senderAddress,
+            sent: message.sent,
+            content: message.content,
+            status: "sent",
+            sentViaConverse: !!message.sentViaConverse,
+            contentType: message.contentType || "xmtp.org/text:1.0",
+          });
+        }
+      });
+
+      const promises: Promise<void>[] = [];
+
+      for (const account of Object.keys(messagesToSaveByAccount)) {
+        for (const topic of Object.keys(messagesToSaveByAccount[account])) {
+          promises.push(
+            saveMessages(
+              account,
+              messagesToSaveByAccount[account][topic],
+              topic
+            )
+          );
+        }
+      }
+      await Promise.all(promises);
     }
 
     loadingSavedNotifications = false;

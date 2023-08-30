@@ -30,7 +30,7 @@ import {
 } from "../data/store/accountsStore";
 import { useOnboardingStore } from "../data/store/onboardingStore";
 import { textPrimaryColor, textSecondaryColor } from "../utils/colors";
-import { saveXmtpKeys } from "../utils/keychain";
+import { saveXmtpKey } from "../utils/keychain";
 import { shortAddress } from "../utils/str";
 import { getXmtpKeysFromSigner, isOnXmtp } from "../utils/xmtp/client";
 import { Signer } from "../vendor/xmtp-js/src";
@@ -216,35 +216,33 @@ export default function OnboardingScreen() {
     initiatingClientFor.current = user.address;
 
     try {
-      const keys = JSON.stringify(
-        Array.from(
-          await getXmtpKeysFromSigner(
-            signer,
-            async () => {
-              if (user.seedPhraseSigner) return;
-              // Before calling "create" signature
-              setWaitingForSecondSignature(true);
-              clickedSecondSignature.current = false;
-            },
-            async () => {
-              if (user.seedPhraseSigner) return;
-              // Before calling "enable" signature
-              const waitForClickSecondSignature = async () => {
-                while (!clickedSecondSignature.current) {
-                  await new Promise((r) => setTimeout(r, 100));
-                }
-              };
-
-              if (waitingForSecondSignatureRef.current) {
-                setLoading(false);
-                await waitForClickSecondSignature();
-                setWaitingForSecondSignature(false);
-              }
+      const keysBuffer = await getXmtpKeysFromSigner(
+        signer,
+        async () => {
+          if (user.seedPhraseSigner) return;
+          // Before calling "create" signature
+          setWaitingForSecondSignature(true);
+          clickedSecondSignature.current = false;
+        },
+        async () => {
+          if (user.seedPhraseSigner) return;
+          // Before calling "enable" signature
+          const waitForClickSecondSignature = async () => {
+            while (!clickedSecondSignature.current) {
+              await new Promise((r) => setTimeout(r, 100));
             }
-          )
-        )
-      );
+          };
 
+          if (waitingForSecondSignatureRef.current) {
+            setLoading(false);
+            await waitForClickSecondSignature();
+            setWaitingForSecondSignature(false);
+          }
+        }
+      );
+      const base64Key = keysBuffer.toString("base64");
+      await saveXmtpKey(user.address, base64Key);
+      await clearDB(user.address);
       // Successfull login for user, let's setup
       // the storage !
       useAccountsStore.getState().setCurrentAccount(user.address);
@@ -254,12 +252,10 @@ export default function OnboardingScreen() {
       } else {
         useSettingsStore.getState().setEphemeralAccount(false);
       }
-      saveXmtpKeys(keys);
-      await clearDB(user.address);
       resetLocalXmtpState();
       resetRecommendations();
       sendMessageToWebview("KEYS_LOADED_FROM_SECURE_STORAGE", {
-        keys,
+        keys: JSON.stringify(Array.from(keysBuffer)),
         env: config.xmtpEnv,
       });
     } catch (e) {

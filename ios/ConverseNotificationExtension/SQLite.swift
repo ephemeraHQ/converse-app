@@ -9,10 +9,10 @@ import Foundation
 import SQLite
 extension String: Error {}
 
-private var db: Connection? = nil;
+private var dbByAccount: [String: Connection] = [:]
 
 func getDb(account: String) throws -> Connection {
-  if let database = db {
+  if let database = dbByAccount[account] {
     return database
   }
   do {
@@ -25,8 +25,8 @@ func getDb(account: String) throws -> Connection {
       throw "DB does not exist"
     }
 
-    db = try Connection(dbPath)
-    if let database = db {
+    dbByAccount[account] = try Connection(dbPath)
+    if let database = dbByAccount[account] {
       return database
     }
     throw "Could not connect to db"
@@ -43,4 +43,13 @@ func getConversations(account: String) throws {
   for conversation in try db.prepare(conversations) {
       print("topic: \(conversation[topic])")
   }
+}
+
+func hasTopic(account: String, topic: String) throws -> Bool {
+  let conversations = Table("conversation")
+  let topicColumn = Expression<String>("topic")
+  let db = try getDb(account: account)
+  let count = try db.scalar(conversations.filter(topicColumn == topic).count)
+  print("account \(account) has topic : \(count)")
+  return count > 0
 }

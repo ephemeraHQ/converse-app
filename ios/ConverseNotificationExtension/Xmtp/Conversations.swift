@@ -31,7 +31,7 @@ func handleNewConversation(xmtpClient: XMTP.Client, envelope: XMTP.Envelope) -> 
         let conversationV1Topic = "/xmtp/0/dm-\(addresses[0])-\(addresses[1])/proto"
         subscribeToTopic(apiURI: apiURI, expoPushToken: expoPushToken, topic: conversationV1Topic)
         persistDecodedConversation(contentTopic: conversationV1Topic, dict: conversationDict)
-        try saveConversation(topic: conversationV1Topic, peerAddress: conversationV1.peerAddress, createdAt: Int(conversation.createdAt.timeIntervalSince1970 * 1000), context: nil)
+        try saveConversation(account: xmtpClient.address, topic: conversationV1Topic, peerAddress: conversationV1.peerAddress, createdAt: Int(conversation.createdAt.timeIntervalSince1970 * 1000), context: nil)
       }
       default: do {}
       }
@@ -48,7 +48,7 @@ func handleNewConversation(xmtpClient: XMTP.Client, envelope: XMTP.Envelope) -> 
         let conversationDict = ["version": "v2", "topic": conversationV2.topic, "peerAddress": conversationV2.peerAddress, "createdAt": createdAt, "context":["conversationId": conversationV2.context.conversationID, "metadata": conversationV2.context.metadata] as [String : Any], "keyMaterial": conversationV2.keyMaterial.base64EncodedString()] as [String : Any]
         subscribeToTopic(apiURI: apiURI, expoPushToken: expoPushToken, topic: conversationV2.topic)
         persistDecodedConversation(contentTopic: conversationV2.topic, dict: conversationDict)
-        try saveConversation(topic: conversationV2.topic, peerAddress: conversationV2.peerAddress, createdAt: Int(conversationV2.createdAt.timeIntervalSince1970 * 1000), context: ConversationContext(conversationId: conversationV2.context.conversationID, metadata: conversationV2.context.metadata))
+        try saveConversation(account: xmtpClient.address, topic: conversationV2.topic, peerAddress: conversationV2.peerAddress, createdAt: Int(conversationV2.createdAt.timeIntervalSince1970 * 1000), context: ConversationContext(conversationId: conversationV2.context.conversationID, metadata: conversationV2.context.metadata))
       }
       default: do {}
       }
@@ -79,9 +79,9 @@ func loadSavedConversations() -> [SavedNotificationConversation] {
 }
 
 
-func saveConversation(topic: String, peerAddress: String, createdAt: Int, context: ConversationContext?) throws {
+func saveConversation(account: String, topic: String, peerAddress: String, createdAt: Int, context: ConversationContext?) throws {
   let sharedDefaults = try! SharedDefaults()
-  let savedConversation = SavedNotificationConversation(topic: topic, peerAddress: peerAddress, createdAt: createdAt, context: context)
+  let savedConversation = SavedNotificationConversation(topic: topic, peerAddress: peerAddress, createdAt: createdAt, context: context, account: account)
   var savedConversationsList = loadSavedConversations()
   savedConversationsList.append(savedConversation)
   let encodedValue = try JSONEncoder().encode(savedConversationsList)
@@ -109,7 +109,7 @@ func getSavedConversationTitle(contentTopic: String)-> String {
 func getPersistedConversation(xmtpClient: XMTP.Client, contentTopic: String) -> Conversation? {
   let hashedKey = CryptoKit.SHA256.hash(data: contentTopic.data(using: .utf8)!)
   let hashString = hashedKey.compactMap { String(format: "%02x", $0) }.joined()
-  var persistedConversation = getKeychainValue(forKey: "XMTP_CONVERSATION_\(hashString)")
+  let persistedConversation = getKeychainValue(forKey: "XMTP_CONVERSATION_\(hashString)")
   if (persistedConversation != nil && persistedConversation!.count > 0) {
     do {
       print("[NotificationExtension] Found a persisted conversation")

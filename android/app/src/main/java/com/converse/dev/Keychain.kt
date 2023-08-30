@@ -19,7 +19,11 @@ fun getKeychainValue(key: String) = runBlocking {
     withContext(Dispatchers.Default) {
         PushNotificationsService.secureStoreModule.getValueWithKeyAsync(key, arguments, promiseWrapped)
     }
-    return@runBlocking promiseResult as String
+    return@runBlocking when {
+        promiseResult == null -> null
+        promiseResult.toString() == "null" -> null
+        else -> promiseResult.toString()
+    }
 }
 
 fun setKeychainValue(key: String, value: String) = runBlocking {

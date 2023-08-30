@@ -1,11 +1,14 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import * as SecureStore from "expo-secure-store";
 import RNFS from "react-native-fs";
 
-import { getLocalXmtpClient } from "../components/XmtpState";
+import { saveXmtpKey, secureStoreOptions } from "../utils/keychain";
 import storage from "../utils/mmkv";
 import { sentryTrackMessage } from "../utils/sentry";
+import { getXmtpClientFromBase64Key } from "../utils/xmtp/client";
 import { getDbPath } from "./db";
 import {
+  TEMPORARY_ACCOUNT_NAME,
   useAccountsStore,
   useChatStore,
   useSettingsStore,
@@ -14,16 +17,23 @@ import {
 export const migrateDataIfNeeded = async () => {
   const before = new Date().getTime();
   let currentAccount = useAccountsStore.getState().currentAccount;
-  if (currentAccount === "TEMPORARY_ACCOUNT") {
-    const xmtpClient = await getLocalXmtpClient(undefined, false);
-    if (xmtpClient) {
-      currentAccount = xmtpClient.address;
-      console.log("Migrating to multi account store - ", xmtpClient.address);
-      useAccountsStore.getState().setCurrentAccount(xmtpClient.address);
+  if (currentAccount === TEMPORARY_ACCOUNT_NAME) {
+    const xmtpKey = await SecureStore.getItemAsync(
+      "XMTP_KEYS",
+      secureStoreOptions
+    );
+    if (xmtpKey) {
+      const base64Key = Buffer.from(JSON.parse(xmtpKey)).toString("base64");
+      const xmtpClient = await getXmtpClientFromBase64Key(base64Key);
+      if (xmtpClient) {
+        currentAccount = xmtpClient.address;
+        console.log("Migrating to multi account store - ", xmtpClient.address);
+        useAccountsStore.getState().setCurrentAccount(xmtpClient.address);
+      }
     }
   }
 
-  if (currentAccount !== "TEMPORARY_ACCOUNT") {
+  if (currentAccount !== TEMPORARY_ACCOUNT_NAME) {
     const dbPath = `${RNFS.DocumentDirectoryPath}/SQLite/converse`;
     const dbExists = await RNFS.exists(dbPath);
     if (dbExists) {
@@ -130,7 +140,20 @@ export const migrateDataIfNeeded = async () => {
   storage.delete("state.xmtp.initialLoadDoneOnce");
 
   // Let's migrate keys if needed
-  if (currentAccount !== "TEMPORARY_ACCOUNT") {
+  if (currentAccount !== TEMPORARY_ACCOUNT_NAME) {
+    const xmtpKey = await SecureStore.getItemAsync(
+      "XMTP_KEYS",
+      secureStoreOptions
+    );
+    if (xmtpKey) {
+      console.log(
+        `[Refacto] Migrating the XMTP secure Key to an account based key`
+      );
+      const base64Key = Buffer.from(JSON.parse(xmtpKey)).toString("base64");
+      await saveXmtpKey(currentAccount, base64Key);
+      await SecureStore.deleteItemAsync("XMTP_KEYS", secureStoreOptions);
+      await SecureStore.deleteItemAsync("XMTP_BASE64_KEY", secureStoreOptions);
+    }
   }
 
   const after = new Date().getTime();

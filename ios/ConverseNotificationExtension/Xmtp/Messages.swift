@@ -25,9 +25,9 @@ func loadSavedMessages() -> [SavedNotificationMessage] {
   }
 }
 
-func saveMessage(topic: String, sent: Date, senderAddress: String, content: String, id: String, sentViaConverse: Bool, contentType: String) throws {
+func saveMessage(account: String, topic: String, sent: Date, senderAddress: String, content: String, id: String, sentViaConverse: Bool, contentType: String) throws {
   let sharedDefaults = try! SharedDefaults()
-  let savedMessage = SavedNotificationMessage(topic: topic, content: content, senderAddress: senderAddress, sent: Int(sent.timeIntervalSince1970 * 1000), id: id, sentViaConverse: sentViaConverse, contentType: contentType)
+  let savedMessage = SavedNotificationMessage(topic: topic, content: content, senderAddress: senderAddress, sent: Int(sent.timeIntervalSince1970 * 1000), id: id, sentViaConverse: sentViaConverse, contentType: contentType, account: account)
   
   var savedMessagesList = loadSavedMessages()
   savedMessagesList.append(savedMessage)
@@ -49,7 +49,7 @@ func decodeConversationMessage(xmtpClient: XMTP.Client, envelope: XMTP.Envelope,
         let decodedContent: String? = try decodedMessage.content()
         if (decodedContent != nil) {
           // Let's save the notification for immediate display
-          try saveMessage(topic: envelope.contentTopic, sent: decodedMessage.sent, senderAddress: decodedMessage.senderAddress, content: decodedContent!, id: decodedMessage.id, sentViaConverse: sentViaConverse, contentType: contentType)
+          try saveMessage(account: xmtpClient.address, topic: envelope.contentTopic, sent: decodedMessage.sent, senderAddress: decodedMessage.senderAddress, content: decodedContent!, id: decodedMessage.id, sentViaConverse: sentViaConverse, contentType: contentType)
         }
         return (decodedContent, decodedMessage.senderAddress, false)
       } else if (contentType.starts(with: "xmtp.org/remoteStaticAttachment:")) {
@@ -58,7 +58,7 @@ func decodeConversationMessage(xmtpClient: XMTP.Client, envelope: XMTP.Envelope,
           let remoteAttachment: RemoteAttachment = try decodedMessage.encodedContent.decoded()
           let contentToSave = getJsonRemoteAttachment(remoteAttachment: remoteAttachment)
           if (contentToSave != nil) {
-            try saveMessage(topic: envelope.contentTopic, sent: decodedMessage.sent, senderAddress: decodedMessage.senderAddress, content: contentToSave!, id: decodedMessage.id, sentViaConverse: sentViaConverse, contentType: contentType)
+            try saveMessage(account: xmtpClient.address, topic: envelope.contentTopic, sent: decodedMessage.sent, senderAddress: decodedMessage.senderAddress, content: contentToSave!, id: decodedMessage.id, sentViaConverse: sentViaConverse, contentType: contentType)
           }
         } catch {
           sentryTrackMessage(message: "NOTIFICATION_ATTACHMENT_ERROR", extras: ["error": error, "envelope": envelope])
@@ -84,7 +84,7 @@ func decodeConversationMessage(xmtpClient: XMTP.Client, envelope: XMTP.Envelope,
             }
             let contentToSave = getJsonReaction(content: reactionContent, parameters: reactionParameters);
             if (contentToSave != nil) {
-              try saveMessage(topic: envelope.contentTopic, sent: decodedMessage.sent, senderAddress: decodedMessage.senderAddress, content: contentToSave!, id: decodedMessage.id, sentViaConverse: sentViaConverse, contentType: contentType)
+              try saveMessage(account: xmtpClient.address, topic: envelope.contentTopic, sent: decodedMessage.sent, senderAddress: decodedMessage.senderAddress, content: contentToSave!, id: decodedMessage.id, sentViaConverse: sentViaConverse, contentType: contentType)
             }
             
           }

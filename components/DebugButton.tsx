@@ -8,7 +8,7 @@ import * as Sentry from "sentry-expo";
 import config from "../config";
 import { clearDB } from "../data/db";
 import { currentAccount, useUserStore } from "../data/store/accountsStore";
-import { deleteXmtpKeys } from "../utils/keychain";
+import { deleteXmtpKey } from "../utils/keychain";
 import { showActionSheetWithOptions } from "./StateHandlers/ActionSheetStateHandler";
 
 let logs: string[] = [];
@@ -80,7 +80,7 @@ const DebugButton = forwardRef((props, ref) => {
           await RNFS.unlink(messageFolder);
           alert("Cleared!");
         },
-        "Delete XMTP Key": deleteXmtpKeys,
+        "Delete XMTP Key": () => deleteXmtpKey(currentAccount()),
         "Sentry JS error": () => {
           throw new Error("My first Sentry error!");
         },
