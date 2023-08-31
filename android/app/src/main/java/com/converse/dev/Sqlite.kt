@@ -4,6 +4,7 @@ import android.database.sqlite.SQLiteDatabase
 import android.content.Context
 import android.database.Cursor
 import android.util.Log
+import com.google.gson.Gson
 import java.io.File
 
 
@@ -54,3 +55,10 @@ fun hasTopic(appContext: Context, account: String, topic: String): Boolean {
     return count > 0
 }
 
+
+fun insertConversation(appContext: Context, account: String, topic: String, peerAddress: String, createdAt: Long, context: ConversationContext?) {
+    val db = getDb(appContext, account) ?: throw Exception("No Db Found")
+    val query = "INSERT INTO conversation (topic, peerAddress, createdAt, contextConversationId, contextMetadata) VALUES (?, ?, ?, ?, ?);"
+    var contextMetadata = if (context != null && context.metadata != null) Gson().toJson(context.metadata) else null
+    db.execSQL(query, arrayOf(topic, peerAddress, createdAt, context?.conversationId, contextMetadata))
+}

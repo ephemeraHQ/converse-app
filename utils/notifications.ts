@@ -5,18 +5,14 @@ import { setTopicToNavigateTo } from "../components/StateHandlers/InitialStateHa
 import config from "../config";
 import { saveConversations } from "../data/helpers/conversations/upsertConversations";
 import { saveMessages } from "../data/helpers/messages";
-import {
-  TEMPORARY_ACCOUNT_NAME,
-  useAccountsStore,
-  useChatStore,
-} from "../data/store/accountsStore";
+import { getAccountsList, useChatStore } from "../data/store/accountsStore";
 import { useAppStore } from "../data/store/appStore";
 import { XmtpConversation, XmtpMessage } from "../data/store/chatStore";
 import { buildUserInviteTopic } from "../vendor/xmtp-js/src/utils";
 import api from "./api";
 import { saveExpoPushToken } from "./keychain";
 import { navigateToConversation } from "./navigation";
-import { sentryTrackMessage } from "./sentry";
+import { sentryTrackError, sentryTrackMessage } from "./sentry";
 import {
   emptySavedNotificationsMessages,
   loadSavedNotificationsMessages,
@@ -138,9 +134,7 @@ export const loadSavedNotificationMessagesToContext = async () => {
   }
   loadingSavedNotifications = true;
   try {
-    const knownAccounts = useAccountsStore
-      .getState()
-      .accounts.filter((c) => c !== TEMPORARY_ACCOUNT_NAME);
+    const knownAccounts = getAccountsList();
     const [conversations, messages] = await Promise.all([
       loadSavedNotificationsConversations(),
       loadSavedNotificationsMessages(),
@@ -227,6 +221,9 @@ export const loadSavedNotificationMessagesToContext = async () => {
     loadingSavedNotifications = false;
   } catch (e) {
     console.log("An error occured while loading saved notifications", e);
+    sentryTrackError(e, {
+      error: "An error occured while loading saved notifications",
+    });
     emptySavedNotificationsConversations();
     emptySavedNotificationsMessages();
     loadingSavedNotifications = false;

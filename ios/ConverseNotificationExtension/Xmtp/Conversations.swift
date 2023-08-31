@@ -80,6 +80,7 @@ func loadSavedConversations() -> [SavedNotificationConversation] {
 
 
 func saveConversation(account: String, topic: String, peerAddress: String, createdAt: Int, context: ConversationContext?) throws {
+  
   let sharedDefaults = try! SharedDefaults()
   let savedConversation = SavedNotificationConversation(topic: topic, peerAddress: peerAddress, createdAt: createdAt, context: context, account: account)
   var savedConversationsList = loadSavedConversations()
@@ -87,6 +88,15 @@ func saveConversation(account: String, topic: String, peerAddress: String, creat
   let encodedValue = try JSONEncoder().encode(savedConversationsList)
   let encodedString = String(data: encodedValue, encoding: .utf8)
   sharedDefaults.set(encodedString, forKey: "saved-notifications-conversations")
+  
+  // Now also save in SQLite
+  // TODO => stop saving in SharedDefaults or just the id since it's already in sqlite!
+  do {
+    try insertConversation(account: account, topic: topic, peerAddress: peerAddress, createdAt: createdAt, context: context)
+  } catch {
+    print("COULD NOT INSERT CONVO IN SQLITE: \(error)")
+  }
+  
 }
 
 func getSavedConversationTitle(contentTopic: String)-> String {

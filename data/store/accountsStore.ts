@@ -49,8 +49,13 @@ export const TEMPORARY_ACCOUNT_NAME = "TEMPORARY_ACCOUNT";
 
 initStores(TEMPORARY_ACCOUNT_NAME);
 
-export const getAccounts = () =>
+export const getAccountsList = () =>
   Object.keys(storesByAccount).filter((a) => a !== TEMPORARY_ACCOUNT_NAME);
+
+export const useAccountsList = () => {
+  const accounts = useAccountsStore((s) => s.accounts);
+  return accounts.filter((a) => a !== TEMPORARY_ACCOUNT_NAME);
+};
 
 // This store is global (i.e. not linked to an account)
 // For now we only use a single account so we initialize it
