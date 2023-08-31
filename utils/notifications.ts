@@ -145,6 +145,10 @@ export const loadSavedNotificationMessagesToContext = async () => {
     ]);
 
     if (conversations && conversations.length > 0) {
+      console.log(
+        `Got ${conversations.length} new conversations from notifications:`,
+        conversations
+      );
       const conversationsToSaveByAccount: {
         [account: string]: any[];
       } = {};
@@ -181,6 +185,10 @@ export const loadSavedNotificationMessagesToContext = async () => {
 
     if (messages && messages.length > 0) {
       messages.sort((m1: any, m2: any) => m1.sent - m2.sent);
+      console.log(
+        `Got ${messages.length} new messages from notifications:`,
+        messages
+      );
       const messagesToSaveByAccount: {
         [account: string]: { [topic: string]: XmtpMessage[] };
       } = {};
