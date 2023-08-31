@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
   View,
   TextInput,
@@ -23,6 +23,12 @@ import { converseEventEmitter } from "../../utils/events";
 import { sendMessage } from "../../utils/message";
 import { TextInputWithValue } from "../../utils/str";
 import ChatAddAttachment from "./ChatAddAttachment";
+
+const {
+  ModifiersType,
+  ReactNativeKeysKeyCode,
+  useHotkey,
+} = require("react-native-hotkeys");
 
 export default function ChatInput() {
   const { conversation, inputRef, messageToPrefill } = useConversationContext([
@@ -49,6 +55,30 @@ export default function ChatInput() {
     };
   }, []);
 
+  const onValidate = useCallback(() => {
+    if (conversation && inputValue.length > 0) {
+      sendMessage(conversation, inputValue);
+      setInputValue("");
+      if (inputRef.current) {
+        inputRef.current.currentValue = "";
+      }
+    }
+  }, [conversation, inputRef, inputValue]);
+
+  // We use react-native-hotkeys to get events from the Mac Keyboard
+  // in order to send when doing Command + Enter
+
+  const inputIsFocused = useRef(false);
+  useHotkey(
+    ReactNativeKeysKeyCode.Enter,
+    () => {
+      if (inputIsFocused.current) {
+        onValidate();
+      }
+    },
+    { modifiers: ModifiersType.Hyper }
+  );
+
   return (
     <View style={styles.chatInputContainer}>
       <ChatAddAttachment />
@@ -56,10 +86,17 @@ export default function ChatInput() {
         style={styles.chatInput}
         value={inputValue}
         onChangeText={(t: string) => {
+          inputIsFocused.current = true;
           setInputValue(t);
           if (inputRef.current) {
             inputRef.current.currentValue = t;
           }
+        }}
+        onFocus={() => {
+          inputIsFocused.current = true;
+        }}
+        onBlur={() => {
+          inputIsFocused.current = false;
         }}
         multiline
         ref={(r) => {
@@ -76,15 +113,7 @@ export default function ChatInput() {
         }
       />
       <TouchableOpacity
-        onPress={() => {
-          if (conversation && inputValue.length > 0) {
-            sendMessage(conversation, inputValue);
-            setInputValue("");
-            if (inputRef.current) {
-              inputRef.current.currentValue = "";
-            }
-          }
-        }}
+        onPress={onValidate}
         activeOpacity={inputValue.length > 0 ? 0.4 : 0.6}
         style={[
           styles.sendButtonContainer,

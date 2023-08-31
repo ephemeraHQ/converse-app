@@ -14475,6 +14475,11 @@ react-native-device-info@^10.3.0:
   resolved "https://registry.yarnpkg.com/react-native-device-info/-/react-native-device-info-10.8.0.tgz#c331c94d65542f86bac197f223ee064c7e10a9ec"
   integrity sha512-DE4/X82ZVhdcnR1Y21iTP46WSSJA/rHK3lmeqWfGGq1RKLwXTIdxmfbZZnYwryqJ+esrw2l4ND19qlgxDGby8A==
 
+react-native-device-info@^10.9.0:
+  version "10.9.0"
+  resolved "https://registry.yarnpkg.com/react-native-device-info/-/react-native-device-info-10.9.0.tgz#5b378eea884a130db1d3ac637610f3a5ae7e8217"
+  integrity sha512-HqujZoNSkPGYZVs8ZsAwPkdY5UQt2jW0eg/wtW/kKbcAOp0KjUesgG7e1UISY4Z7Bx6LjZeKs0cqDzQI8AlOmw==
+
 react-native-fast-image@^8.6.3:
   version "8.6.3"
   resolved "https://registry.yarnpkg.com/react-native-fast-image/-/react-native-fast-image-8.6.3.tgz#6edc3f9190092a909d636d93eecbcc54a8822255"
@@ -14517,6 +14522,13 @@ react-native-gradle-plugin@^0.71.19:
   version "0.71.19"
   resolved "https://registry.yarnpkg.com/react-native-gradle-plugin/-/react-native-gradle-plugin-0.71.19.tgz#3379e28341fcd189bc1f4691cefc84c1a4d7d232"
   integrity sha512-1dVk9NwhoyKHCSxcrM6vY6cxmojeATsBobDicX0ZKr7DgUF2cBQRTKsimQFvzH8XhOVXyH8p4HyDSZNIFI8OlQ==
+
+react-native-hotkeys@^0.5.6:
+  version "0.5.6"
+  resolved "https://registry.yarnpkg.com/react-native-hotkeys/-/react-native-hotkeys-0.5.6.tgz#2b55212ecb100c5051f4951a0e7f459c7bc5c05e"
+  integrity sha512-2SNEnuvbGzSA6NosoLb9p0xCpeRnSqcUsH0/Nc86i5wLeFVDjydcSdf4racCEsYBiMct76F100895y+xMG0i6A==
+  dependencies:
+    ts-key-enum "^2.0.12"
 
 react-native-image-viewing@^0.2.1:
   version "0.2.2"
@@ -16610,6 +16622,11 @@ ts-interface-checker@^0.1.9:
   version "0.1.13"
   resolved "https://registry.yarnpkg.com/ts-interface-checker/-/ts-interface-checker-0.1.13.tgz#784fd3d679722bc103b1b4b8030bcddb5db2a699"
   integrity sha512-Y/arvbn+rrz3JCKl9C4kVNfTfSm2/mEp5FSz5EsZSANGPSlQrpRI5M4PKF+mJnE52jOO90PnPSc3Ur3bTQw0gA==
+
+ts-key-enum@^2.0.12:
+  version "2.0.12"
+  resolved "https://registry.yarnpkg.com/ts-key-enum/-/ts-key-enum-2.0.12.tgz#4f7f35eb041fa5847f8f9ed8c38beaaa047a33ba"
+  integrity sha512-Ety4IvKMaeG34AyXMp5r11XiVZNDRL+XWxXbVVJjLvq2vxKRttEANBE7Za1bxCAZRdH2/sZT6jFyyTWxXz28hw==
 
 ts-node@^10.9.1:
   version "10.9.1"
