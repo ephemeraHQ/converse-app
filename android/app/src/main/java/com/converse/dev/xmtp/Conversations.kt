@@ -60,7 +60,7 @@ fun handleNewConversationV2Notification(appContext: Context, xmtpClient: Client,
     val newNotificationDataJson = Klaxon().toJsonString(newNotificationData)
     remoteMessage.data["body"] = newNotificationDataJson
     persistNewConversation(conversation.topic, conversationV2Data)
-    saveConversationToStorage(xmtpClient.address, conversation.topic, conversation.peerAddress, conversation.createdAt.time, context);
+    saveConversationToStorage(appContext, xmtpClient.address, conversation.topic, conversation.peerAddress, conversation.createdAt.time, context);
     return Triple(shortAddress(conversation.peerAddress), "New Conversation", remoteMessage)
 }
 
@@ -83,7 +83,7 @@ fun subscribeToTopic(appContext: Context, apiURI: String, expoPushToken: String,
     Volley.newRequestQueue(appContext).add(jsonRequest)
 }
 
-fun saveConversationToStorage(account: String, topic: String, peerAddress: String, createdAt: Long, context: ConversationContext?) {
+fun saveConversationToStorage(appContext: Context, account: String, topic: String, peerAddress: String, createdAt: Long, context: ConversationContext?) {
     val currentSavedConversationsString = getAsyncStorage("saved-notifications-conversations")
     Log.d("PushNotificationsService", "Got current saved conversations from storage: $currentSavedConversationsString")
     var currentSavedConversations = listOf<SavedNotificationConversation>()
@@ -96,6 +96,12 @@ fun saveConversationToStorage(account: String, topic: String, peerAddress: Strin
     currentSavedConversations += newConversationToSave
     val newSavedConversationsString = Klaxon().toJsonString(currentSavedConversations)
     setAsyncStorage("saved-notifications-conversations", newSavedConversationsString)
+
+    try {
+        insertConversation(appContext, account, topic, peerAddress, createdAt, context)
+    } catch (e: Exception) {
+        Log.d("PushNotificationsService", "Could not save new convo to Sqlite: $e")
+    }
 }
 
 fun getPersistedConversation(xmtpClient: Client, topic: String): Conversation? {

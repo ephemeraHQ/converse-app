@@ -4,7 +4,7 @@ import { Platform } from "react-native";
 import { resetWebview } from "../components/XmtpWebview";
 import { clearDB } from "../data/db";
 import {
-  TEMPORARY_ACCOUNT_NAME,
+  getAccountsList,
   getChatStore,
   useAccountsStore,
 } from "../data/store/accountsStore";
@@ -14,9 +14,7 @@ import { resetSharedData } from "./sharedData/sharedData";
 
 export const logout = async (account: string) => {
   const topicsByAccount: { [a: string]: string[] } = {};
-  const accounts = useAccountsStore
-    .getState()
-    .accounts.filter((a) => a !== TEMPORARY_ACCOUNT_NAME);
+  const accounts = getAccountsList();
   accounts.forEach((a) => {
     topicsByAccount[a] = Object.keys(getChatStore(a).getState().conversations);
   });

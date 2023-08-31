@@ -4,7 +4,7 @@ import { loadDataToContext } from "../../data";
 import { initDb } from "../../data/db";
 import { cleanupPendingConversations } from "../../data/helpers/conversations/pendingConversations";
 import { refreshProfileForAddress } from "../../data/helpers/profiles/profilesUpdate";
-import { getAccounts, getUserStore } from "../../data/store/accountsStore";
+import { getAccountsList, getUserStore } from "../../data/store/accountsStore";
 import { useAppStore } from "../../data/store/appStore";
 import { loadSavedNotificationMessagesToContext } from "../../utils/notifications";
 import { pick } from "../../utils/objects";
@@ -21,7 +21,7 @@ export default function HydrationStateHandler() {
       // Let's load installed wallets
       await getInstalledWallets(false);
 
-      const accounts = getAccounts();
+      const accounts = getAccountsList();
       await Promise.all(accounts.map((a) => initDb(a)));
       Promise.all(accounts.map((a) => cleanupPendingConversations(a)));
       await loadSavedNotificationMessagesToContext();

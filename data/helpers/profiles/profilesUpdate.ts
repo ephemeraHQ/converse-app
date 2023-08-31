@@ -3,7 +3,7 @@ import { getLensHandleFromConversationIdAndPeer } from "../../../utils/lens";
 import { saveConversationIdentifiersForNotifications } from "../../../utils/notifications";
 import { getRepository } from "../../db";
 import { upsertRepository } from "../../db/upsert";
-import { getProfilesStore } from "../../store/accountsStore";
+import { getChatStore, getProfilesStore } from "../../store/accountsStore";
 import { XmtpConversation } from "../../store/chatStore";
 import { ProfileSocials } from "../../store/profilesStore";
 
@@ -119,4 +119,30 @@ export const refreshProfileForAddress = async (
         updatedAt: now,
       },
     });
+};
+
+export const refreshProfilesIfNeeded = async (account: string) => {
+  const knownProfiles = getProfilesStore(account).getState().profiles;
+  const conversations = Object.values(
+    getChatStore(account).getState().conversations
+  );
+  const now = new Date().getTime();
+  const conversationsWithStaleProfiles = conversations.filter((c) => {
+    const existingProfile = knownProfiles[c.peerAddress];
+    const lastProfileUpdate = existingProfile?.updatedAt || 0;
+    const shouldUpdateProfile = now - lastProfileUpdate >= 24 * 3600 * 1000;
+    return shouldUpdateProfile;
+  });
+  if (conversationsWithStaleProfiles.length === 0) return;
+  // If not connected we need to be able to save convo without querying the API for profiles
+  updateProfilesForConversations(account, conversationsWithStaleProfiles).then(
+    (resolveResult) => {
+      const updatedConversations = resolveResult
+        .filter((r) => r.updated)
+        .map((r) => r.conversation);
+      if (updatedConversations.length > 0) {
+        getChatStore(account).getState().setConversations(updatedConversations);
+      }
+    }
+  );
 };

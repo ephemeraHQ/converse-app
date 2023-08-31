@@ -6,7 +6,7 @@ import { upsertRepository } from "../../db/upsert";
 import { xmtpConversationToDb } from "../../mappers";
 import { getChatStore, getProfilesStore } from "../../store/accountsStore";
 import { XmtpConversation } from "../../store/chatStore";
-import { updateProfilesForConversations } from "../profiles/profilesUpdate";
+import { refreshProfilesIfNeeded } from "../profiles/profilesUpdate";
 import { upgradePendingConversationIfNeeded } from "./pendingConversations";
 
 export const saveConversations = async (
@@ -48,19 +48,7 @@ export const saveConversations = async (
       });
     }
   );
-
-  if (convosWithProfilesToUpdate.length === 0) return;
-  // If not connected we need to be able to save convo without querying the API for profiles
-  updateProfilesForConversations(account, convosWithProfilesToUpdate).then(
-    (resolveResult) => {
-      const updatedConversations = resolveResult
-        .filter((r) => r.updated)
-        .map((r) => r.conversation);
-      if (updatedConversations.length > 0) {
-        getChatStore(account).getState().setConversations(updatedConversations);
-      }
-    }
-  );
+  refreshProfilesIfNeeded(account);
 };
 
 const setupAndSaveConversation = async (
