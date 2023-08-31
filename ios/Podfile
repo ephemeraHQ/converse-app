@@ -11,7 +11,7 @@ require 'json'
 podfile_properties = JSON.parse(File.read(File.join(__dir__, 'Podfile.properties.json'))) rescue {}
 
 plugin 'cocoapods-pod-linkage'
-platform :ios, podfile_properties['ios.deploymentTarget'] || '13.0'
+platform :ios, podfile_properties['ios.deploymentTarget'] || '16.0'
 install! 'cocoapods',
   :deterministic_uuids => false
 
@@ -22,6 +22,7 @@ target 'Converse' do
   use_frameworks! :linkage => :static
   pod 'MMKV', :linkage => :dynamic
   pod 'MMKVCore', :linkage => :dynamic
+  pod 'XMTP', :modular_headers => true
 
   # Flags change depending on the env values.
   flags = get_default_flags()
@@ -51,7 +52,7 @@ target 'Converse' do
     installer.pods_project.targets.each do |target|
       target.build_configurations.each do |config|
         config.build_settings['SWIFT_VERSION'] = '5.0'
-        config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '14.0'
+        config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '16.0'
         config.build_settings['CODE_SIGNING_ALLOWED'] = 'NO'
       end
     end
@@ -82,6 +83,8 @@ target 'ConverseNotificationExtension' do
   use_frameworks! :linkage => :static
   pod 'MMKVAppExtension', :linkage => :dynamic
   pod 'SQLite.swift'
-  # Version must match version from RNSentry Podspec
+  pod 'XMTP', :modular_headers => true
+  # Version must match version from RNSentry Podspec (matching @sentry/react-native package from package.json)
+  # https://github.com/getsentry/sentry-react-native/blob/5.5.0/RNSentry.podspec#L22
   pod 'Sentry/HybridSDK', '8.7.1'
 end

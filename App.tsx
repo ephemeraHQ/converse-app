@@ -11,11 +11,8 @@ import { KeyboardProvider } from "react-native-keyboard-controller";
 import { Provider as PaperProvider } from "react-native-paper";
 import * as Sentry from "sentry-expo";
 
-import XmtpState from "./components/XmtpState";
-import XmtpWebview from "./components/XmtpWebview";
 import config from "./config";
 import { migrateDataIfNeeded } from "./data/refacto";
-import { useAppStore } from "./data/store/appStore";
 import Main from "./screens/Main";
 import {
   backgroundColor,
@@ -60,7 +57,7 @@ export default function App() {
       });
   }, []);
 
-  const lastWebviewReset = useAppStore((s) => s.lastWebviewReset);
+  // const lastWebviewReset = useAppStore((s) => s.lastWebviewReset);
 
   if (!refactoMigrationDone) return null;
 
@@ -91,10 +88,10 @@ export default function App() {
             }
           >
             <View style={styles.safe}>
-              <React.Fragment key={lastWebviewReset}>
+              {/* <React.Fragment key={lastWebviewReset}>
                 <XmtpWebview />
                 <XmtpState />
-              </React.Fragment>
+              </React.Fragment> */}
 
               <Main />
             </View>
