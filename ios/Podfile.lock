@@ -1,5 +1,6 @@
 PODS:
   - ASN1Decoder (1.8.0)
+  - BigInt (5.0.0)
   - boost (1.76.0)
   - CoinbaseWalletSDK/Client (1.0.4)
   - CoinbaseWalletSDK/CrossPlatform (1.0.4):
@@ -7,6 +8,8 @@ PODS:
   - CoinbaseWalletSDKExpo (1.0.7):
     - CoinbaseWalletSDK/CrossPlatform (= 1.0.4)
     - ExpoModulesCore
+  - Connect-Swift (0.6.0):
+    - SwiftProtobuf (~> 1.22.0)
   - DoubleConversion (1.1.6)
   - EASClient (0.6.0):
     - ExpoModulesCore
@@ -130,7 +133,9 @@ PODS:
     - React-jsi (= 0.72.4)
     - ReactCommon/turbomodule/core (= 0.72.4)
   - fmt (6.2.1)
+  - GenericJSON (2.0.2)
   - glog (0.3.5)
+  - GzipSwift (5.1.1)
   - hermes-engine (0.72.4):
     - hermes-engine/Pre-built (= 0.72.4)
   - hermes-engine/Pre-built (0.72.4)
@@ -147,6 +152,8 @@ PODS:
   - libwebp/sharpyuv (1.3.1)
   - libwebp/webp (1.3.1):
     - libwebp/sharpyuv
+  - Logging (1.0.0)
+  - MessagePacker (0.4.7)
   - MMKV (1.3.1):
     - MMKVCore (~> 1.3.1)
   - MMKVAppExtension (1.3.1):
@@ -641,6 +648,7 @@ PODS:
   - SDWebImageWebPCoder (0.8.5):
     - libwebp (~> 1.0)
     - SDWebImage/Core (~> 5.10)
+  - secp256k1.swift (0.1.4)
   - Sentry/HybridSDK (8.7.1):
     - SentryPrivate (= 8.7.1)
   - SentryPrivate (8.7.1)
@@ -648,6 +656,22 @@ PODS:
   - SQLite.swift (0.14.1):
     - SQLite.swift/standard (= 0.14.1)
   - SQLite.swift/standard (0.14.1)
+  - SwiftProtobuf (1.22.1)
+  - web3.swift (1.6.0):
+    - BigInt (~> 5.0.0)
+    - GenericJSON (~> 2.0)
+    - Logging (~> 1.0.0)
+    - secp256k1.swift (~> 0.1)
+  - XMTP (0.4.10-alpha0):
+    - Connect-Swift
+    - GzipSwift
+    - web3.swift
+    - XMTPRust (= 0.3.1-beta0)
+  - XMTPReactNative (1.10.0):
+    - ExpoModulesCore
+    - MessagePacker
+    - XMTP (= 0.4.10-alpha0)
+  - XMTPRust (0.3.1-beta0)
   - Yoga (1.14.0)
 
 DEPENDENCIES:
@@ -742,25 +766,38 @@ DEPENDENCIES:
   - RNSVG (from `../node_modules/react-native-svg`)
   - Sentry/HybridSDK (= 8.7.1)
   - SQLite.swift
+  - XMTP
+  - "XMTPReactNative (from `../node_modules/@xmtp/react-native-sdk/ios`)"
   - Yoga (from `../node_modules/react-native/ReactCommon/yoga`)
 
 SPEC REPOS:
   trunk:
     - ASN1Decoder
+    - BigInt
     - CoinbaseWalletSDK
+    - Connect-Swift
     - fmt
+    - GenericJSON
+    - GzipSwift
     - libevent
     - libwebp
+    - Logging
+    - MessagePacker
     - MMKV
     - MMKVAppExtension
     - MMKVCore
     - ReachabilitySwift
     - SDWebImage
     - SDWebImageWebPCoder
+    - secp256k1.swift
     - Sentry
     - SentryPrivate
     - SocketRocket
     - SQLite.swift
+    - SwiftProtobuf
+    - web3.swift
+    - XMTP
+    - XMTPRust
 
 EXTERNAL SOURCES:
   boost:
@@ -932,14 +969,18 @@ EXTERNAL SOURCES:
     :path: "../node_modules/@sentry/react-native"
   RNSVG:
     :path: "../node_modules/react-native-svg"
+  XMTPReactNative:
+    :path: "../node_modules/@xmtp/react-native-sdk/ios"
   Yoga:
     :path: "../node_modules/react-native/ReactCommon/yoga"
 
 SPEC CHECKSUMS:
   ASN1Decoder: 6110fdeacfdb41559b1481457a1645be716610aa
+  BigInt: 74b4d88367b0e819d9f77393549226d36faeb0d8
   boost: 57d2868c099736d80fcd648bf211b4431e51a558
   CoinbaseWalletSDK: ea1f37512bbc69ebe07416e3b29bf840f5cc3152
   CoinbaseWalletSDKExpo: 89f8ad7f799227be7aff2b9353b7a77d37eb8283
+  Connect-Swift: ba76bc64b2153cacce4f7985a21d4d81473dac90
   DoubleConversion: 5189b271737e1565bdce30deb4a08d647e3f5f54
   EASClient: 49f8ea858204eb4844d9fb386e5fb7920aee2e30
   EXApplication: 02655a251434d564bb0e73291f5a490c74b5b76f
@@ -971,10 +1012,14 @@ SPEC CHECKSUMS:
   FBLazyVector: 5d4a3b7f411219a45a6d952f77d2c0a6c9989da5
   FBReactNativeSpec: 3fc2d478e1c4b08276f9dd9128f80ec6d5d85c1f
   fmt: ff9d55029c625d3757ed641535fd4a75fedc7ce9
+  GenericJSON: 79a840eeb77030962e8cf02a62d36bd413b67626
   glog: 04b94705f318337d7ead9e6d17c019bd9b1f6b1b
+  GzipSwift: 893f3e48e597a1a4f62fafcb6514220fcf8287fa
   hermes-engine: 81191603c4eaa01f5e4ae5737a9efcf64756c7b2
   libevent: 4049cae6c81cdb3654a443be001fb9bdceff7913
   libwebp: 33dc822fbbf4503668d09f7885bbfedc76c45e96
+  Logging: 9ef4ecb546ad3169398d5a723bc9bea1c46bef26
+  MessagePacker: ab2fe250e86ea7aedd1a9ee47a37083edd41fd02
   MMKV: 5a07930c70c70b86cd87761a42c8f3836fb681d7
   MMKVAppExtension: 3cda7723ad7d53f486b4cef2782eed9ba8799f68
   MMKVCore: e50135dbd33235b6ab390635991bab437ab873c0
@@ -1031,12 +1076,18 @@ SPEC CHECKSUMS:
   RNSVG: 80584470ff1ffc7994923ea135a3e5ad825546b9
   SDWebImage: a7f831e1a65eb5e285e3fb046a23fcfbf08e696d
   SDWebImageWebPCoder: 908b83b6adda48effe7667cd2b7f78c897e5111d
+  secp256k1.swift: a7e7a214f6db6ce5db32cc6b2b45e5c4dd633634
   Sentry: 11776f6a25a128808d793d0d41bb7ad873b5ae4f
   SentryPrivate: b3c448eacdabe9eab7679a2e0af609c608f91572
   SocketRocket: f32cd54efbe0f095c4d7594881e52619cfe80b17
   SQLite.swift: 2992550ebf3c5b268bf4352603e3df87d2a4ed72
+  SwiftProtobuf: 7773c4e96a99d7b8ab7cda0fc30a883732ff93b1
+  web3.swift: 2263d1e12e121b2c42ffb63a5a7beb1acaf33959
+  XMTP: c26390519e97c73456d7495ed49ad85efd2ec4e0
+  XMTPReactNative: 06842fecbfa19a671939656150d71b51b4e4eaa8
+  XMTPRust: 78f65f77b1454392980da244961777aee955652f
   Yoga: 3efc43e0d48686ce2e8c60f99d4e6bd349aff981
 
-PODFILE CHECKSUM: b179c144acff74485a9c90718b62eaa9e39f172c
+PODFILE CHECKSUM: 29ea7d240f0492e3b020e09e744480a04080c68d
 
 COCOAPODS: 1.12.1

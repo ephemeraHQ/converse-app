@@ -10,6 +10,7 @@
 		13B07FBC1A68108700A75B9A /* AppDelegate.mm in Sources */ = {isa = PBXBuildFile; fileRef = 13B07FB01A68108700A75B9A /* AppDelegate.mm */; };
 		13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB51A68108700A75B9A /* Images.xcassets */; };
 		13B07FC11A68108700A75B9A /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 13B07FB71A68108700A75B9A /* main.m */; };
+		227ACF0E2299571EFE0D69F6 /* Pods_ConverseNotificationExtension.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5B83D4951AB20C4D5E87EE38 /* Pods_ConverseNotificationExtension.framework */; };
 		3E461D99554A48A4959DE609 /* SplashScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = AA286B85B6C04FC6940260E9 /* SplashScreen.storyboard */; };
 		4C1D85B629B096F700A649D3 /* xmtp.html in Resources */ = {isa = PBXBuildFile; fileRef = 4C1D85B529B096F700A649D3 /* xmtp.html */; };
 		4C2440D02A9C8BE8004F31A3 /* Keychain.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C2440CF2A9C8BE8004F31A3 /* Keychain.swift */; };
@@ -20,18 +21,15 @@
 		4C2440DB2A9C8E30004F31A3 /* MMKV.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C2440DA2A9C8E30004F31A3 /* MMKV.swift */; };
 		4C2440DD2A9C9006004F31A3 /* SQLite.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C2440DC2A9C9006004F31A3 /* SQLite.swift */; };
 		4C31F4EE29AF887B0032D062 /* Alamofire in Frameworks */ = {isa = PBXBuildFile; productRef = 4C31F4ED29AF887B0032D062 /* Alamofire */; };
-		4C3A90D72989DF17002D709F /* XMTP in Frameworks */ = {isa = PBXBuildFile; productRef = 4C3A90D62989DF17002D709F /* XMTP */; };
 		4C65044D295C7C1F00C5A40F /* NotificationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C65044C295C7C1F00C5A40F /* NotificationService.swift */; };
 		4C8BA28B298502DC007F0B76 /* SharedDefaults.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C8BA28A298502DC007F0B76 /* SharedDefaults.swift */; };
 		4CBD67182A9CF7C30010C648 /* Sentry.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CBD67172A9CF7C30010C648 /* Sentry.swift */; };
 		4CBD671C2A9D08050010C648 /* Utils.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CBD671B2A9D08050010C648 /* Utils.swift */; };
 		4CC856EF296C174D0011B072 /* ConverseNotificationExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 4C65044A295C7C1F00C5A40F /* ConverseNotificationExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
-		4CF1C2602989DFB800C99ED9 /* XMTP in Frameworks */ = {isa = PBXBuildFile; productRef = 4CF1C25F2989DFB800C99ED9 /* XMTP */; };
-		6349C35D5A06C18205775758 /* Pods_ConverseNotificationExtension.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = EBA211855BF6C666F4839AF8 /* Pods_ConverseNotificationExtension.framework */; };
 		B18059E884C0ABDD17F3DC3D /* ExpoModulesProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAC715A2D49A985799AEE119 /* ExpoModulesProvider.swift */; };
 		B7969B4A79FE4F9F8C52019D /* noop-file.swift in Sources */ = {isa = PBXBuildFile; fileRef = 68FED7E170C7437EB719C8C6 /* noop-file.swift */; };
 		BB2F792D24A3F905000567C9 /* Expo.plist in Resources */ = {isa = PBXBuildFile; fileRef = BB2F792C24A3F905000567C9 /* Expo.plist */; };
-		CEB817C9FE5657B44A5E4267 /* Pods_Converse.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D9D59BC8344E677F6D2A37B3 /* Pods_Converse.framework */; };
+		E5B182F30F830DE91EF20288 /* Pods_Converse.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F5F518E31395C7FB6FFAA274 /* Pods_Converse.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -65,9 +63,7 @@
 		13B07FB51A68108700A75B9A /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; name = Images.xcassets; path = Converse/Images.xcassets; sourceTree = "<group>"; };
 		13B07FB61A68108700A75B9A /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = Info.plist; path = Converse/Info.plist; sourceTree = "<group>"; };
 		13B07FB71A68108700A75B9A /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = main.m; path = Converse/main.m; sourceTree = "<group>"; };
-		180DCF3236A5ED06CD579C64 /* Pods-Converse.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Converse.release.xcconfig"; path = "Target Support Files/Pods-Converse/Pods-Converse.release.xcconfig"; sourceTree = "<group>"; };
-		3C358DF74975B9C2E82DF0DB /* Pods-ConverseNotificationExtension.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-ConverseNotificationExtension.release.xcconfig"; path = "Target Support Files/Pods-ConverseNotificationExtension/Pods-ConverseNotificationExtension.release.xcconfig"; sourceTree = "<group>"; };
-		41968FF9F001B9365B7653A1 /* Pods-ConverseNotificationExtension.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-ConverseNotificationExtension.debug.xcconfig"; path = "Target Support Files/Pods-ConverseNotificationExtension/Pods-ConverseNotificationExtension.debug.xcconfig"; sourceTree = "<group>"; };
+		1531CB766903BFB90910CE73 /* Pods-ConverseNotificationExtension.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-ConverseNotificationExtension.debug.xcconfig"; path = "Target Support Files/Pods-ConverseNotificationExtension/Pods-ConverseNotificationExtension.debug.xcconfig"; sourceTree = "<group>"; };
 		4C1D85B529B096F700A649D3 /* xmtp.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; name = xmtp.html; path = ../assets/xmtp.html; sourceTree = "<group>"; };
 		4C2440CF2A9C8BE8004F31A3 /* Keychain.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Keychain.swift; sourceTree = "<group>"; };
 		4C2440D12A9C8C5A004F31A3 /* Datatypes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Datatypes.swift; sourceTree = "<group>"; };
@@ -83,13 +79,15 @@
 		4C8BA28A298502DC007F0B76 /* SharedDefaults.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SharedDefaults.swift; sourceTree = "<group>"; };
 		4CBD67172A9CF7C30010C648 /* Sentry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Sentry.swift; sourceTree = "<group>"; };
 		4CBD671B2A9D08050010C648 /* Utils.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Utils.swift; sourceTree = "<group>"; };
+		5B83D4951AB20C4D5E87EE38 /* Pods_ConverseNotificationExtension.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_ConverseNotificationExtension.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		68FED7E170C7437EB719C8C6 /* noop-file.swift */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 4; includeInIndex = 0; lastKnownFileType = sourcecode.swift; name = "noop-file.swift"; path = "Converse/noop-file.swift"; sourceTree = "<group>"; };
+		6C1F628E9A7051EA109C8110 /* Pods-Converse.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Converse.release.xcconfig"; path = "Target Support Files/Pods-Converse/Pods-Converse.release.xcconfig"; sourceTree = "<group>"; };
 		AA286B85B6C04FC6940260E9 /* SplashScreen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; name = SplashScreen.storyboard; path = Converse/SplashScreen.storyboard; sourceTree = "<group>"; };
+		AE66A1D28341234EBEA21A5B /* Pods-Converse.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Converse.debug.xcconfig"; path = "Target Support Files/Pods-Converse/Pods-Converse.debug.xcconfig"; sourceTree = "<group>"; };
 		BB2F792C24A3F905000567C9 /* Expo.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Expo.plist; sourceTree = "<group>"; };
-		D9D59BC8344E677F6D2A37B3 /* Pods_Converse.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_Converse.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		EBA211855BF6C666F4839AF8 /* Pods_ConverseNotificationExtension.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_ConverseNotificationExtension.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		EC150CBF95C92FD4C4F503AD /* Pods-Converse.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Converse.debug.xcconfig"; path = "Target Support Files/Pods-Converse/Pods-Converse.debug.xcconfig"; sourceTree = "<group>"; };
+		E405D69B80E849A74192576A /* Pods-ConverseNotificationExtension.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-ConverseNotificationExtension.release.xcconfig"; path = "Target Support Files/Pods-ConverseNotificationExtension/Pods-ConverseNotificationExtension.release.xcconfig"; sourceTree = "<group>"; };
 		ED297162215061F000B7C4FE /* JavaScriptCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = JavaScriptCore.framework; path = System/Library/Frameworks/JavaScriptCore.framework; sourceTree = SDKROOT; };
+		F5F518E31395C7FB6FFAA274 /* Pods_Converse.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_Converse.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		FAC715A2D49A985799AEE119 /* ExpoModulesProvider.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ExpoModulesProvider.swift; path = "Pods/Target Support Files/Pods-Converse/ExpoModulesProvider.swift"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -98,8 +96,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				4C3A90D72989DF17002D709F /* XMTP in Frameworks */,
-				CEB817C9FE5657B44A5E4267 /* Pods_Converse.framework in Frameworks */,
+				E5B182F30F830DE91EF20288 /* Pods_Converse.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -108,8 +105,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				4C31F4EE29AF887B0032D062 /* Alamofire in Frameworks */,
-				4CF1C2602989DFB800C99ED9 /* XMTP in Frameworks */,
-				6349C35D5A06C18205775758 /* Pods_ConverseNotificationExtension.framework in Frameworks */,
+				227ACF0E2299571EFE0D69F6 /* Pods_ConverseNotificationExtension.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -136,8 +132,8 @@
 			isa = PBXGroup;
 			children = (
 				ED297162215061F000B7C4FE /* JavaScriptCore.framework */,
-				D9D59BC8344E677F6D2A37B3 /* Pods_Converse.framework */,
-				EBA211855BF6C666F4839AF8 /* Pods_ConverseNotificationExtension.framework */,
+				F5F518E31395C7FB6FFAA274 /* Pods_Converse.framework */,
+				5B83D4951AB20C4D5E87EE38 /* Pods_ConverseNotificationExtension.framework */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -222,10 +218,10 @@
 		D65327D7A22EEC0BE12398D9 /* Pods */ = {
 			isa = PBXGroup;
 			children = (
-				EC150CBF95C92FD4C4F503AD /* Pods-Converse.debug.xcconfig */,
-				180DCF3236A5ED06CD579C64 /* Pods-Converse.release.xcconfig */,
-				41968FF9F001B9365B7653A1 /* Pods-ConverseNotificationExtension.debug.xcconfig */,
-				3C358DF74975B9C2E82DF0DB /* Pods-ConverseNotificationExtension.release.xcconfig */,
+				AE66A1D28341234EBEA21A5B /* Pods-Converse.debug.xcconfig */,
+				6C1F628E9A7051EA109C8110 /* Pods-Converse.release.xcconfig */,
+				1531CB766903BFB90910CE73 /* Pods-ConverseNotificationExtension.debug.xcconfig */,
+				E405D69B80E849A74192576A /* Pods-ConverseNotificationExtension.release.xcconfig */,
 			);
 			path = Pods;
 			sourceTree = "<group>";
@@ -245,7 +241,7 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 13B07F931A680F5B00A75B9A /* Build configuration list for PBXNativeTarget "Converse" */;
 			buildPhases = (
-				6DC8C18C1CA0FA05A74F9770 /* [CP] Check Pods Manifest.lock */,
+				CAC1EFC543029F117CAB1A47 /* [CP] Check Pods Manifest.lock */,
 				FD10A7F022414F080027D42C /* Start Packager */,
 				C4304E4C15B6A588EF0F2290 /* [Expo] Configure project */,
 				13B07F871A680F5B00A75B9A /* Sources */,
@@ -254,8 +250,8 @@
 				00DD1BFF1BD5951E006B06BC /* Bundle React Native code and images */,
 				4C650452295C7C1F00C5A40F /* Embed Foundation Extensions */,
 				3ECC891872AA4817A24011C1 /* Upload Debug Symbols to Sentry */,
-				26A55C038958B3B3F32CBBDF /* [CP] Embed Pods Frameworks */,
-				ECE5E13531909221516DAA74 /* [CP] Copy Pods Resources */,
+				5D6437EAD3254260C1E62322 /* [CP] Embed Pods Frameworks */,
+				51C5C0A74730259DA9FAC20A /* [CP] Copy Pods Resources */,
 			);
 			buildRules = (
 			);
@@ -263,9 +259,6 @@
 				4C650450295C7C1F00C5A40F /* PBXTargetDependency */,
 			);
 			name = Converse;
-			packageProductDependencies = (
-				4C3A90D62989DF17002D709F /* XMTP */,
-			);
 			productName = Converse;
 			productReference = 13B07F961A680F5B00A75B9A /* Converse.app */;
 			productType = "com.apple.product-type.application";
@@ -274,7 +267,7 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 4C650455295C7C1F00C5A40F /* Build configuration list for PBXNativeTarget "ConverseNotificationExtension" */;
 			buildPhases = (
-				AEBFEE53F32B0D7CF9BB5482 /* [CP] Check Pods Manifest.lock */,
+				59D42B6100A1227EC35A636B /* [CP] Check Pods Manifest.lock */,
 				4C650446295C7C1F00C5A40F /* Sources */,
 				4C650447295C7C1F00C5A40F /* Frameworks */,
 				4C650448295C7C1F00C5A40F /* Resources */,
@@ -285,7 +278,6 @@
 			);
 			name = ConverseNotificationExtension;
 			packageProductDependencies = (
-				4CF1C25F2989DFB800C99ED9 /* XMTP */,
 				4C31F4ED29AF887B0032D062 /* Alamofire */,
 			);
 			productName = ConverseNotificationExtension;
@@ -319,8 +311,7 @@
 			);
 			mainGroup = 83CBB9F61A601CBA00E9B192;
 			packageReferences = (
-				4C3A90D52989DF17002D709F /* XCRemoteSwiftPackageReference "xmtp-ios" */,
-				4C31F4EC29AF887B0032D062 /* XCRemoteSwiftPackageReference "Alamofire.git" */,
+				4C31F4EC29AF887B0032D062 /* XCRemoteSwiftPackageReference "Alamofire" */,
 			);
 			productRefGroup = 83CBBA001A601CBA00E9B192 /* Products */;
 			projectDirPath = "";
@@ -368,30 +359,6 @@
 			shellPath = /bin/sh;
 			shellScript = "export SENTRY_PROPERTIES=sentry.properties\nexport EXTRA_PACKAGER_ARGS=\"--sourcemap-output $DERIVED_FILE_DIR/main.jsbundle.map\"\nif [[ -f \"$PODS_ROOT/../.xcode.env\" ]]; then\n  source \"$PODS_ROOT/../.xcode.env\"\nfi\nif [[ -f \"$PODS_ROOT/../.xcode.env.local\" ]]; then\n  source \"$PODS_ROOT/../.xcode.env.local\"\nfi\n\n# The project root by default is one level up from the ios directory\nexport PROJECT_ROOT=\"$PROJECT_DIR\"/..\n\nif [[ \"$CONFIGURATION\" = *Debug* ]]; then\n  export SKIP_BUNDLING=1\nfi\nif [[ -z \"$ENTRY_FILE\" ]]; then\n  # Set the entry JS file using the bundler's entry resolution.\n  export ENTRY_FILE=\"$(\"$NODE_BINARY\" -e \"require('expo/scripts/resolveAppEntry')\" $PROJECT_ROOT ios relative | tail -n 1)\"\nfi\n\n../node_modules/@sentry/cli/bin/sentry-cli react-native xcode `\"$NODE_BINARY\" --print \"require('path').dirname(require.resolve('react-native/package.json')) + '/scripts/react-native-xcode.sh'\"`\n\n";
 		};
-		26A55C038958B3B3F32CBBDF /* [CP] Embed Pods Frameworks */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-Converse/Pods-Converse-frameworks.sh",
-				"${BUILT_PRODUCTS_DIR}/MMKV/MMKV.framework",
-				"${BUILT_PRODUCTS_DIR}/MMKVCore/MMKVCore.framework",
-				"${BUILT_PRODUCTS_DIR}/MMKVAppExtension/MMKVAppExtension.framework",
-				"${PODS_XCFRAMEWORKS_BUILD_DIR}/hermes-engine/Pre-built/hermes.framework/hermes",
-			);
-			name = "[CP] Embed Pods Frameworks";
-			outputPaths = (
-				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/MMKV.framework",
-				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/MMKVCore.framework",
-				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/MMKVAppExtension.framework",
-				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/hermes.framework",
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-Converse/Pods-Converse-frameworks.sh\"\n";
-			showEnvVarsInLog = 0;
-		};
 		3ECC891872AA4817A24011C1 /* Upload Debug Symbols to Sentry */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 8;
@@ -406,70 +373,7 @@
 			shellPath = /bin/sh;
 			shellScript = "export SENTRY_PROPERTIES=sentry.properties\n../node_modules/@sentry/cli/bin/sentry-cli upload-dsym\n";
 		};
-		6DC8C18C1CA0FA05A74F9770 /* [CP] Check Pods Manifest.lock */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-			);
-			inputPaths = (
-				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
-				"${PODS_ROOT}/Manifest.lock",
-			);
-			name = "[CP] Check Pods Manifest.lock";
-			outputFileListPaths = (
-			);
-			outputPaths = (
-				"$(DERIVED_FILE_DIR)/Pods-Converse-checkManifestLockResult.txt",
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
-			showEnvVarsInLog = 0;
-		};
-		AEBFEE53F32B0D7CF9BB5482 /* [CP] Check Pods Manifest.lock */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-			);
-			inputPaths = (
-				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
-				"${PODS_ROOT}/Manifest.lock",
-			);
-			name = "[CP] Check Pods Manifest.lock";
-			outputFileListPaths = (
-			);
-			outputPaths = (
-				"$(DERIVED_FILE_DIR)/Pods-ConverseNotificationExtension-checkManifestLockResult.txt",
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
-			showEnvVarsInLog = 0;
-		};
-		C4304E4C15B6A588EF0F2290 /* [Expo] Configure project */ = {
-			isa = PBXShellScriptBuildPhase;
-			alwaysOutOfDate = 1;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-			);
-			inputPaths = (
-			);
-			name = "[Expo] Configure project";
-			outputFileListPaths = (
-			);
-			outputPaths = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "# This script configures Expo modules and generates the modules provider file.\nbash -l -c \"./Pods/Target\\ Support\\ Files/Pods-Converse/expo-configure-project.sh\"\n";
-		};
-		ECE5E13531909221516DAA74 /* [CP] Copy Pods Resources */ = {
+		51C5C0A74730259DA9FAC20A /* [CP] Copy Pods Resources */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -493,6 +397,93 @@
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
 			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-Converse/Pods-Converse-resources.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		59D42B6100A1227EC35A636B /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
+				"${PODS_ROOT}/Manifest.lock",
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"$(DERIVED_FILE_DIR)/Pods-ConverseNotificationExtension-checkManifestLockResult.txt",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+			showEnvVarsInLog = 0;
+		};
+		5D6437EAD3254260C1E62322 /* [CP] Embed Pods Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-Converse/Pods-Converse-frameworks.sh",
+				"${BUILT_PRODUCTS_DIR}/MMKV/MMKV.framework",
+				"${BUILT_PRODUCTS_DIR}/MMKVCore/MMKVCore.framework",
+				"${BUILT_PRODUCTS_DIR}/MMKVAppExtension/MMKVAppExtension.framework",
+				"${PODS_XCFRAMEWORKS_BUILD_DIR}/hermes-engine/Pre-built/hermes.framework/hermes",
+			);
+			name = "[CP] Embed Pods Frameworks";
+			outputPaths = (
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/MMKV.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/MMKVCore.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/MMKVAppExtension.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/hermes.framework",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-Converse/Pods-Converse-frameworks.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		C4304E4C15B6A588EF0F2290 /* [Expo] Configure project */ = {
+			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			name = "[Expo] Configure project";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "# This script configures Expo modules and generates the modules provider file.\nbash -l -c \"./Pods/Target\\ Support\\ Files/Pods-Converse/expo-configure-project.sh\"\n";
+		};
+		CAC1EFC543029F117CAB1A47 /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
+				"${PODS_ROOT}/Manifest.lock",
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"$(DERIVED_FILE_DIR)/Pods-Converse-checkManifestLockResult.txt",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
 			showEnvVarsInLog = 0;
 		};
 		FD10A7F022414F080027D42C /* Start Packager */ = {
@@ -559,14 +550,15 @@
 /* Begin XCBuildConfiguration section */
 		13B07F941A680F5B00A75B9A /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = EC150CBF95C92FD4C4F503AD /* Pods-Converse.debug.xcconfig */;
+			baseConfigurationReference = AE66A1D28341234EBEA21A5B /* Pods-Converse.debug.xcconfig */;
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIconPreview;
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = Converse/Converse.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
-				CODE_SIGN_STYLE = Automatic;
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Distribution";
+				CODE_SIGN_STYLE = Manual;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = Q6W2FLK8DM;
 				ENABLE_BITCODE = NO;
@@ -575,7 +567,7 @@
 					"FB_SONARKIT_ENABLED=1",
 				);
 				INFOPLIST_FILE = Converse/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -589,6 +581,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.converse.dev;
 				PRODUCT_NAME = Converse;
 				PROVISIONING_PROFILE_SPECIFIER = "";
+				"PROVISIONING_PROFILE_SPECIFIER[sdk=iphoneos*]" = "*[expo] com.converse.dev AdHoc 1672231603936";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
 				SUPPORTS_MACCATALYST = NO;
 				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
@@ -601,18 +594,19 @@
 		};
 		13B07F951A680F5B00A75B9A /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 180DCF3236A5ED06CD579C64 /* Pods-Converse.release.xcconfig */;
+			baseConfigurationReference = 6C1F628E9A7051EA109C8110 /* Pods-Converse.release.xcconfig */;
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIconPreview;
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = Converse/Converse.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
-				CODE_SIGN_STYLE = Automatic;
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Distribution";
+				CODE_SIGN_STYLE = Manual;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = Q6W2FLK8DM;
 				INFOPLIST_FILE = Converse/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -626,6 +620,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.converse.dev;
 				PRODUCT_NAME = Converse;
 				PROVISIONING_PROFILE_SPECIFIER = "";
+				"PROVISIONING_PROFILE_SPECIFIER[sdk=iphoneos*]" = "*[expo] com.converse.dev AdHoc 1672231603936";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
 				SUPPORTS_MACCATALYST = NO;
 				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
@@ -637,7 +632,7 @@
 		};
 		4C650453295C7C1F00C5A40F /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 41968FF9F001B9365B7653A1 /* Pods-ConverseNotificationExtension.debug.xcconfig */;
+			baseConfigurationReference = 1531CB766903BFB90910CE73 /* Pods-ConverseNotificationExtension.debug.xcconfig */;
 			buildSettings = {
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
@@ -648,7 +643,8 @@
 				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
 				CODE_SIGN_ENTITLEMENTS = ConverseNotificationExtension/ConverseNotificationExtension.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
-				CODE_SIGN_STYLE = Automatic;
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Distribution";
+				CODE_SIGN_STYLE = Manual;
 				CURRENT_PROJECT_VERSION = 1;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				DEVELOPMENT_TEAM = Q6W2FLK8DM;
@@ -657,7 +653,7 @@
 				INFOPLIST_FILE = ConverseNotificationExtension/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = ConverseNotificationExtension;
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
-				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -670,6 +666,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.converse.dev.ConverseNotificationExtension;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
+				"PROVISIONING_PROFILE_SPECIFIER[sdk=iphoneos*]" = "*[expo] com.converse.dev.ConverseNotificationExtension AdHoc 1672234281727";
 				SKIP_INSTALL = YES;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -681,7 +678,7 @@
 		};
 		4C650454295C7C1F00C5A40F /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 3C358DF74975B9C2E82DF0DB /* Pods-ConverseNotificationExtension.release.xcconfig */;
+			baseConfigurationReference = E405D69B80E849A74192576A /* Pods-ConverseNotificationExtension.release.xcconfig */;
 			buildSettings = {
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
@@ -692,7 +689,8 @@
 				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
 				CODE_SIGN_ENTITLEMENTS = ConverseNotificationExtension/ConverseNotificationExtension.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
-				CODE_SIGN_STYLE = Automatic;
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Distribution";
+				CODE_SIGN_STYLE = Manual;
 				COPY_PHASE_STRIP = NO;
 				CURRENT_PROJECT_VERSION = 1;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
@@ -702,7 +700,7 @@
 				INFOPLIST_FILE = ConverseNotificationExtension/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = ConverseNotificationExtension;
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
-				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -714,6 +712,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.converse.dev.ConverseNotificationExtension;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
+				"PROVISIONING_PROFILE_SPECIFIER[sdk=iphoneos*]" = "*[expo] com.converse.dev.ConverseNotificationExtension AdHoc 1672234281727";
 				SKIP_INSTALL = YES;
 				SWIFT_COMPILATION_MODE = wholemodule;
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -779,7 +778,7 @@
 					"${PODS_CONFIGURATION_BUILD_DIR}/React-NativeModulesApple/React_NativeModulesApple.framework/Headers",
 					"${PODS_CONFIGURATION_BUILD_DIR}/React-graphics/React_graphics.framework/Headers/react/renderer/graphics/platform/ios",
 				);
-				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					/usr/lib/swift,
 					"$(inherited)",
@@ -843,7 +842,7 @@
 					"${PODS_CONFIGURATION_BUILD_DIR}/React-NativeModulesApple/React_NativeModulesApple.framework/Headers",
 					"${PODS_CONFIGURATION_BUILD_DIR}/React-graphics/React_graphics.framework/Headers/react/renderer/graphics/platform/ios",
 				);
-				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					/usr/lib/swift,
 					"$(inherited)",
@@ -899,14 +898,6 @@
 				kind = branch;
 			};
 		};
-		4C3A90D52989DF17002D709F /* XCRemoteSwiftPackageReference "xmtp-ios" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/xmtp/xmtp-ios";
-			requirement = {
-				branch = main;
-				kind = branch;
-			};
-		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -914,16 +905,6 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 4C31F4EC29AF887B0032D062 /* XCRemoteSwiftPackageReference "Alamofire.git" */;
 			productName = Alamofire;
-		};
-		4C3A90D62989DF17002D709F /* XMTP */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 4C3A90D52989DF17002D709F /* XCRemoteSwiftPackageReference "xmtp-ios" */;
-			productName = XMTP;
-		};
-		4CF1C25F2989DFB800C99ED9 /* XMTP */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 4C3A90D52989DF17002D709F /* XCRemoteSwiftPackageReference "xmtp-ios" */;
-			productName = XMTP;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};
