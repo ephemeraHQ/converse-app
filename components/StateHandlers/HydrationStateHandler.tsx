@@ -7,14 +7,9 @@ import { refreshProfileForAddress } from "../../data/helpers/profiles/profilesUp
 import { getAccountsList, getUserStore } from "../../data/store/accountsStore";
 import { useAppStore } from "../../data/store/appStore";
 import { loadSavedNotificationMessagesToContext } from "../../utils/notifications";
-import { pick } from "../../utils/objects";
 import { getInstalledWallets } from "../Onboarding/supportedWallets";
 
 export default function HydrationStateHandler() {
-  const { setHydrationDone } = useAppStore((s) =>
-    pick(s, ["setHydrationDone"])
-  );
-
   // Initial hydration
   useEffect(() => {
     const hydrate = async () => {
@@ -32,10 +27,9 @@ export default function HydrationStateHandler() {
         refreshProfileForAddress(address, address);
       });
 
-      setHydrationDone(true);
+      useAppStore.getState().setHydrationDone(true);
     };
     hydrate();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return null;
