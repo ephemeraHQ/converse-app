@@ -138,7 +138,7 @@ export const initChatStore = (account: string) => {
                 conversations[c.topic] = {
                   ...c,
                   messages:
-                    c.messages?.size > 0
+                    c.messages && c.messages.size > 0
                       ? c.messages
                       : state.conversations[c.topic]?.messages || new Map(),
                   readUntil:

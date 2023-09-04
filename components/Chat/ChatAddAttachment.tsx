@@ -1,4 +1,3 @@
-import { ContentTypeRemoteAttachment } from "@xmtp/content-type-remote-attachment";
 import * as ImagePicker from "expo-image-picker";
 import * as Linking from "expo-linking";
 import { setStatusBarHidden } from "expo-status-bar";
@@ -12,22 +11,22 @@ import {
   StyleSheet,
   Platform,
 } from "react-native";
-import RNFS from "react-native-fs";
 
+import { useAccountsStore } from "../../data/store/accountsStore";
 import { useAppStore } from "../../data/store/appStore";
-import { SerializedRemoteAttachmentContent } from "../../utils/attachment";
+import { uploadRemoteAttachment } from "../../utils/attachment";
 import { actionSheetColors, textSecondaryColor } from "../../utils/colors";
 import { useConversationContext } from "../../utils/conversation";
 import { executeAfterKeyboardClosed } from "../../utils/keyboard";
-import { sendMessage } from "../../utils/message";
 import { pick } from "../../utils/objects";
 import { sentryTrackMessage } from "../../utils/sentry";
+import { encryptRemoteAttachment } from "../../utils/xmtpRN/attachments";
 import Picto from "../Picto/Picto";
 import { showActionSheetWithOptions } from "../StateHandlers/ActionSheetStateHandler";
-import { sendMessageToWebview } from "../XmtpWebview";
 
 export default function ChatAddAttachment() {
   const { conversation } = useConversationContext(["conversation"]);
+  const currentAccount = useAccountsStore((s) => s.currentAccount);
   const colorScheme = useColorScheme();
   const styles = useStyles();
   const { mediaPreview, setMediaPreview } = useAppStore((s) =>
@@ -46,45 +45,75 @@ export default function ChatAddAttachment() {
     if (!conversation) return;
     const uploadAsset = async (asset: ImagePicker.ImagePickerAsset) => {
       uploading.current = true;
-      const base64Content = await RNFS.readFile(asset.uri, "base64");
-      const filename = asset.fileName || asset.uri.split("/").pop();
-      sendMessageToWebview(
-        "UPLOAD_ATTACHMENT",
-        {
-          filename,
-          base64Content,
-          mimeType: mime.getType(filename || ""),
-        },
-        async ({
-          status,
-          error,
-          remoteAttachment,
-        }: {
-          status: string;
-          error: string;
-          remoteAttachment: SerializedRemoteAttachmentContent;
-        }) => {
-          if (currentAttachmentMediaURI.current !== assetRef.current?.uri)
-            return;
-          if (status === "SUCCESS") {
-            setMediaPreview(null);
-            sendMessage(
-              conversation,
-              JSON.stringify(remoteAttachment),
-              ContentTypeRemoteAttachment.toString()
-            );
-          } else if (currentAttachmentMediaURI.current) {
-            sentryTrackMessage("ATTACHMENT_UPLOAD_ERROR", { error });
-            setMediaPreview({
-              mediaURI: currentAttachmentMediaURI.current,
-              sending: false,
-              error: true,
-            });
-          }
 
-          uploading.current = false;
-        }
+      // const base64Content = await RNFS.readFile(asset.uri, "base64");
+      const filename = asset.fileName || asset.uri.split("/").pop();
+      const mimeType = mime.getType(filename || "");
+      const encodedAttachment = await encryptRemoteAttachment(
+        currentAccount,
+        asset.uri,
+        mimeType || undefined
       );
+      try {
+        const uploadedAttachment = await uploadRemoteAttachment(
+          encodedAttachment
+        );
+        if (currentAttachmentMediaURI.current !== assetRef.current?.uri) return;
+        setMediaPreview(null);
+        // SEND MESSAGE
+        // sendMessage(
+        //   conversation,
+        //   JSON.stringify(remoteAttachment),
+        //   ContentTypeRemoteAttachment.toString()
+        // );
+
+        uploading.current = false;
+      } catch (error) {
+        sentryTrackMessage("ATTACHMENT_UPLOAD_ERROR", { error });
+        setMediaPreview({
+          mediaURI: currentAttachmentMediaURI.current || "",
+          sending: false,
+          error: true,
+        });
+      }
+
+      // sendMessageToWebview(
+      //   "UPLOAD_ATTACHMENT",
+      //   {
+      //     filename,
+      //     base64Content,
+      //     mimeType: mime.getType(filename || ""),
+      //   },
+      //   async ({
+      //     status,
+      //     error,
+      //     remoteAttachment,
+      //   }: {
+      //     status: string;
+      //     error: string;
+      //     remoteAttachment: SerializedRemoteAttachmentContent;
+      //   }) => {
+      //     if (currentAttachmentMediaURI.current !== assetRef.current?.uri)
+      //       return;
+      //     if (status === "SUCCESS") {
+      //       setMediaPreview(null);
+      //       sendMessage(
+      //         conversation,
+      //         JSON.stringify(remoteAttachment),
+      //         ContentTypeRemoteAttachment.toString()
+      //       );
+      //     } else if (currentAttachmentMediaURI.current) {
+      //       sentryTrackMessage("ATTACHMENT_UPLOAD_ERROR", { error });
+      //       setMediaPreview({
+      //         mediaURI: currentAttachmentMediaURI.current,
+      //         sending: false,
+      //         error: true,
+      //       });
+      //     }
+
+      //     uploading.current = false;
+      //   }
+      // );
     };
     if (
       mediaPreview?.mediaURI &&
@@ -96,6 +125,7 @@ export default function ChatAddAttachment() {
     }
   }, [
     conversation,
+    currentAccount,
     mediaPreview?.mediaURI,
     mediaPreview?.sending,
     setMediaPreview,

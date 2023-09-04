@@ -8,7 +8,7 @@ import {
   getChatStore,
   useAccountsStore,
 } from "../data/store/accountsStore";
-import { deleteXmtpConversations, deleteXmtpKey } from "./keychain";
+import { deleteConversationsFromKeychain, deleteXmtpKey } from "./keychain";
 import { disablePushNotifications } from "./notifications";
 import { resetSharedData } from "./sharedData/sharedData";
 
@@ -45,7 +45,7 @@ export const logout = async (account: string) => {
   // to remove the notifications & the keys (main one & conversations ones)
   setTimeout(() => {
     const promisesToAwait: any[] = [];
-    promisesToAwait.push(deleteXmtpConversations(topicsToDelete));
+    promisesToAwait.push(deleteConversationsFromKeychain(topicsToDelete));
     // Unsubscribing from notifications
     // TODO => remove notifications for this account's topic
     promisesToAwait.push(disablePushNotifications());

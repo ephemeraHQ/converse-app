@@ -20,7 +20,7 @@ import {
 import { useAppStore } from "../data/store/appStore";
 import { getBlockedPeers, getDeletedTopics } from "../utils/api";
 import { deserializeRemoteAttachmentContent } from "../utils/attachment";
-import { loadXmtpConversation, loadXmtpKey } from "../utils/keychain";
+import { loadConversationFromKeychain, loadXmtpKey } from "../utils/keychain";
 import { pick } from "../utils/objects";
 import {
   getXmtpClientFromBase64Key,
@@ -58,7 +58,7 @@ export const getLocalXmtpConversationForTopic = async (
   let savedConversation: string | null = null;
   // Retry mechanism, 10 times in 5 secs max
   while (!savedConversation && tries < 10) {
-    savedConversation = await loadXmtpConversation(topic);
+    savedConversation = await loadConversationFromKeychain(topic);
     if (!savedConversation) {
       // Let's wait 0.5 sec and retry
       await new Promise((r) => setTimeout(r, 500));
