@@ -18,18 +18,9 @@ const go = async () => {
       "PRODUCT_BUNDLE_IDENTIFIER = com.converse.native"
     )
     .replace(
-      /com\.converse\.dev AdHoc 1672231603936/g,
-      "com.converse.native AppStore 2022-12-08T13:34:24.744Z"
-    )
-    .replace(
-      /com\.converse\.dev\.ConverseNotificationExtension AdHoc 1672234281727/g,
-      "com.converse.native.ConverseNotificationExtension AppStore 2022-12-29T15:15:27.011Z"
-    )
-    .replace(
       /ASSETCATALOG_COMPILER_APPICON_NAME = AppIconPreview/g,
       "ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon"
-    )
-    .replace(/3L9E5TA22P/g, "Q6W2FLK8DM");
+    );
 
   fs.writeFileSync(PROJ_PATH, newProjContent);
 
