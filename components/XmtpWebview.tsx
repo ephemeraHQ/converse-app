@@ -16,7 +16,7 @@ import {
 import { useAppStore } from "../data/store/appStore";
 import {
   loadXmtpKey,
-  saveXmtpConversations,
+  saveConversationsToKeychain,
   saveXmtpKey,
 } from "../utils/keychain";
 import {
@@ -274,7 +274,7 @@ export default function XmtpWebview() {
         case "XMTP_EXPORTED_CONVERSATIONS":
           if (userAddress) {
             try {
-              await saveXmtpConversations(userAddress, data);
+              await saveConversationsToKeychain(userAddress, data);
             } catch (e) {
               console.log(e);
             }
