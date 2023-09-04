@@ -45,22 +45,39 @@ export const saveXmtpConversationIfNeeded = async (
   }
 };
 
-export const saveXmtpConversations = async (
+export type ConversationWithKeyMaterial =
+  | {
+      version: "v1";
+      peerAddress: string;
+      createdAt: string;
+      topic: string;
+    }
+  | {
+      version: "v2";
+      context:
+        | { conversationId: string; metadata: { [key: string]: any } }
+        | undefined;
+      topic: string;
+      peerAddress: string;
+      createdAt: string;
+      keyMaterial: string;
+    };
+
+export const saveConversationsToKeychain = async (
   clientAddress: string,
-  conversations: string
+  conversationsWithKeys: ConversationWithKeyMaterial[]
 ) => {
-  const parsedConversations = JSON.parse(conversations);
   const promises = [];
   const now = new Date().getTime();
-  for (const parsedConversation of parsedConversations) {
-    let topic = parsedConversation.topic;
+  for (const conversationWithKey of conversationsWithKeys) {
+    let topic = conversationWithKey.topic;
     if (!topic) {
       // If no topic it's v1, we can build topic
-      const addresses = [parsedConversation.peerAddress, clientAddress];
+      const addresses = [conversationWithKey.peerAddress, clientAddress];
       addresses.sort();
       topic = `/xmtp/0/dm-${addresses[0]}-${addresses[1]}/proto`;
     }
-    const jsonConversation = JSON.stringify(parsedConversation);
+    const jsonConversation = JSON.stringify(conversationWithKey);
     const key = createHash("sha256").update(topic).digest("hex");
     promises.push(saveXmtpConversationIfNeeded(key, jsonConversation));
   }
@@ -73,7 +90,7 @@ export const saveXmtpConversations = async (
   );
 };
 
-export const loadXmtpConversation = async (topic: string) => {
+export const loadConversationFromKeychain = async (topic: string) => {
   const key = createHash("sha256").update(topic).digest("hex");
   const value = await SecureStore.getItemAsync(
     `XMTP_CONVERSATION_${key}`,
@@ -82,7 +99,7 @@ export const loadXmtpConversation = async (topic: string) => {
   return value;
 };
 
-export const deleteXmtpConversations = async (topics: string[]) => {
+export const deleteConversationsFromKeychain = async (topics: string[]) => {
   for (const topic of topics) {
     const key = createHash("sha256").update(topic).digest("hex");
     await SecureStore.deleteItemAsync(
