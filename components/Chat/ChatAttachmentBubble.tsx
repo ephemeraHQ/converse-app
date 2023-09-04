@@ -1,7 +1,8 @@
+import { DecryptedLocalAttachment } from "@xmtp/react-native-sdk";
 import * as Linking from "expo-linking";
 import mime from "mime";
 import prettyBytes from "pretty-bytes";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
   Image,
   Platform,
@@ -11,16 +12,18 @@ import {
   View,
 } from "react-native";
 
+import { useAccountsStore } from "../../data/store/accountsStore";
 import {
   SerializedAttachmentContent,
   getLocalAttachment,
-  handleAttachmentContent,
+  handleDecryptedRemoteAttachment,
+  handleStaticAttachment,
 } from "../../utils/attachment";
 import { textPrimaryColor } from "../../utils/colors";
 import { converseEventEmitter } from "../../utils/events";
 import { isImageMimetype } from "../../utils/media";
-import { sentryTrackMessage } from "../../utils/sentry";
-import { sendMessageToWebview } from "../XmtpWebview";
+import { sentryTrackError, sentryTrackMessage } from "../../utils/sentry";
+import { fetchAndDecodeRemoteAttachment } from "../../utils/xmtpRN/attachments";
 import { MessageToDisplay } from "./ChatMessage";
 import ChatMessageMetadata from "./ChatMessageMetadata";
 
@@ -30,6 +33,7 @@ type Props = {
 
 export default function ChatAttachmentBubble({ message }: Props) {
   const colorScheme = useColorScheme();
+  const currentAccount = useAccountsStore((s) => s.currentAccount);
   const styles = useStyles();
   const [attachment, setAttachment] = useState({
     loading: true,
@@ -42,10 +46,10 @@ export default function ChatAttachmentBubble({ message }: Props) {
     imageSize: undefined as undefined | { height: number; width: number },
   });
 
-  const saveAndDisplay = useCallback(
+  const saveAndDisplayLocalAttachment = useCallback(
     async (attachmentContent: SerializedAttachmentContent) => {
       setAttachment((a) => ({ ...a, loading: true }));
-      const result = await handleAttachmentContent(
+      const result = await handleStaticAttachment(
         message.id,
         attachmentContent
       );
@@ -55,24 +59,35 @@ export default function ChatAttachmentBubble({ message }: Props) {
     [message.id]
   );
 
-  const fetchAndDecodeRemoteAttachment = useCallback(() => {
+  const saveAndDisplay = useCallback(
+    async (attachmentContent: DecryptedLocalAttachment) => {
+      setAttachment((a) => ({ ...a, loading: true }));
+      const result = await handleDecryptedRemoteAttachment(
+        message.id,
+        attachmentContent
+      );
+
+      setAttachment({ ...result, loading: false, error: false });
+    },
+    [message.id]
+  );
+  const fetchingAttachment = useRef(false);
+
+  const fetchAndDecode = useCallback(async () => {
+    if (fetchingAttachment.current) return;
+    fetchingAttachment.current = true;
     setAttachment((a) => ({ ...a, loading: true }));
-    sendMessageToWebview(
-      "DECODE_ATTACHMENT",
-      { serializedRemoteAttachment: message.content },
-      async (attachmentResult: any) => {
-        if (attachmentResult.status !== "SUCCESS" || !attachmentResult.data) {
-          sentryTrackMessage("CANT_DECODE_ATTACHMENT", {
-            content: message.content,
-            error: attachmentResult,
-          });
-          setAttachment((a) => ({ ...a, error: true, loading: false }));
-          return;
-        }
-        saveAndDisplay(attachmentResult);
-      }
-    );
-  }, [message.content, saveAndDisplay]);
+    try {
+      const result = await fetchAndDecodeRemoteAttachment(
+        currentAccount,
+        message
+      );
+      saveAndDisplay(result);
+    } catch (e) {
+      sentryTrackError(e, { message });
+      setAttachment((a) => ({ ...a, loading: false, error: true }));
+    }
+  }, [currentAccount, message, saveAndDisplay]);
 
   const saveLocalAttachment = useCallback(
     async (attachmentContent: SerializedAttachmentContent) => {
@@ -83,9 +98,9 @@ export default function ChatAttachmentBubble({ message }: Props) {
         setAttachment((a) => ({ ...a, error: true, loading: false }));
         return;
       }
-      saveAndDisplay(attachmentContent);
+      saveAndDisplayLocalAttachment(attachmentContent);
     },
-    [saveAndDisplay]
+    [saveAndDisplayLocalAttachment]
   );
 
   const openInWebview = useCallback(async () => {
@@ -155,7 +170,7 @@ export default function ChatAttachmentBubble({ message }: Props) {
 
       // Last, if media is local or if remote but supported and size is ok, we fetch immediatly
       if (isRemoteAttachment && contentLength <= 10000000) {
-        fetchAndDecodeRemoteAttachment();
+        fetchAndDecode();
       }
     };
     if (!message.content) {
@@ -164,7 +179,7 @@ export default function ChatAttachmentBubble({ message }: Props) {
     } else {
       go();
     }
-  }, [fetchAndDecodeRemoteAttachment, message, saveLocalAttachment]);
+  }, [fetchAndDecode, message, saveLocalAttachment]);
 
   const showing =
     !attachment.loading &&
@@ -225,7 +240,7 @@ export default function ChatAttachmentBubble({ message }: Props) {
           {emoji} {filename} - {filesize}{" "}
           <Text
             style={{ textDecorationLine: "underline" }}
-            onPress={fetchAndDecodeRemoteAttachment}
+            onPress={fetchAndDecode}
           >
             download
           </Text>
