@@ -18,7 +18,6 @@ import { uploadRemoteAttachment } from "../../utils/attachment";
 import { actionSheetColors, textSecondaryColor } from "../../utils/colors";
 import { useConversationContext } from "../../utils/conversation";
 import { executeAfterKeyboardClosed } from "../../utils/keyboard";
-import { sendMessage } from "../../utils/message";
 import { pick } from "../../utils/objects";
 import { sentryTrackMessage } from "../../utils/sentry";
 import {
@@ -27,6 +26,7 @@ import {
 } from "../../utils/xmtpRN/attachments";
 import Picto from "../Picto/Picto";
 import { showActionSheetWithOptions } from "../StateHandlers/ActionSheetStateHandler";
+import { sendMessage } from "../../utils/message";
 
 export default function ChatAddAttachment() {
   const { conversation } = useConversationContext(["conversation"]);
