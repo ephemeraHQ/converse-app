@@ -19,3 +19,52 @@ index 5d5d308..5f9efd0 100644
 +}
 +
  @end
+diff --git a/node_modules/react-native/React/CoreModules/RCTAppState.mm b/node_modules/react-native/React/CoreModules/RCTAppState.mm
+index 389aa6d..c3e5cc6 100644
+--- a/node_modules/react-native/React/CoreModules/RCTAppState.mm
++++ b/node_modules/react-native/React/CoreModules/RCTAppState.mm
+@@ -88,6 +88,13 @@ - (void)startObserving
+                                                object:nil];
+   }
+ 
++    if (@available(macCatalyst 14.0, *)) {
++        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleAppStateDidChange:) name:@"NSWindowDidBecomeMainNotification" object:nil];
++        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleAppStateDidChange:) name:@"NSWindowDidResignMainNotification" object:nil];
++    }
++    
++    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleAppStateDidChange:) name:@"NSWindowDidBecomeMainNotification" object:nil];
++
+   [[NSNotificationCenter defaultCenter] addObserver:self
+                                            selector:@selector(handleMemoryWarning)
+                                                name:UIApplicationDidReceiveMemoryWarningNotification
+@@ -112,13 +119,23 @@ - (void)handleAppStateDidChange:(NSNotification *)notification
+ {
+   NSString *newState;
+ 
+-  if ([notification.name isEqualToString:UIApplicationWillResignActiveNotification]) {
+-    newState = @"inactive";
+-  } else if ([notification.name isEqualToString:UIApplicationWillEnterForegroundNotification]) {
+-    newState = @"background";
+-  } else {
+-    newState = RCTCurrentAppState();
+-  }
++    if ([notification.name isEqualToString:UIApplicationWillResignActiveNotification]) {
++        newState = @"inactive";
++    } else if ([notification.name isEqualToString:UIApplicationWillEnterForegroundNotification]) {
++        newState = @"background";
++    } else {
++        newState = RCTCurrentAppState();
++    }
++    
++    if (@available(macCatalyst 14.0, *)) {
++        if ([notification.name isEqualToString:@"NSWindowDidBecomeMainNotification"]) {
++            newState = @"active";
++        } else if ([notification.name isEqualToString:@"NSWindowDidResignMainNotification"]) {
++            newState = @"background";
++        }
++    }
++
++  
+ 
+   if (![newState isEqualToString:_lastKnownState]) {
+     _lastKnownState = newState;
