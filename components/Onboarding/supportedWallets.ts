@@ -1,5 +1,6 @@
 import * as Linking from "expo-linking";
 
+import { isDesktop } from "../../utils/device";
 import { isEthOS } from "../../utils/ethos";
 
 export const POPULAR_WALLETS = [
@@ -131,7 +132,7 @@ let installedWallets: typeof SUPPORTED_WALLETS = [];
 export const getInstalledWallets = async (
   refresh: boolean
 ): Promise<InstalledWallet[]> => {
-  if (hasCheckedInstalled && !refresh) return installedWallets;
+  if ((hasCheckedInstalled && !refresh) || isDesktop) return installedWallets;
   const checkInstalled = await Promise.all(
     SUPPORTED_WALLETS.map((w) => Linking.canOpenURL(`${w.customScheme}wc`))
   );

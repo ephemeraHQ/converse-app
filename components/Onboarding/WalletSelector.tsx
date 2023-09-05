@@ -12,6 +12,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import config from "../../config";
 import { textSecondaryColor } from "../../utils/colors";
+import { isDesktop } from "../../utils/device";
 import { getEthOSSigner } from "../../utils/ethos";
 import { Signer } from "../../vendor/xmtp-js/src";
 import TableView from "../TableView/TableView";
@@ -168,7 +169,7 @@ export default function WalletSelector({
           },
         ]}
       />
-      {!hasInstalledWallets && (
+      {!hasInstalledWallets && !isDesktop && (
         <TableView
           title="POPULAR MOBILE APPS"
           items={POPULAR_WALLETS.map((w) => ({
