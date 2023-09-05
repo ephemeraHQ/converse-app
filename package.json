@@ -7,7 +7,7 @@
     "typecheck": "echo \"➜ Typechecking project...\" && tsc --noEmit",
     "update": "node scripts/build/update.js",
     "db": "ts-node scripts/migrations/db.ts",
-    "postinstall": "patch-package && husky install",
+    "postinstall": "patch-package && husky install && bundle install --gemfile=ios/Gemfile",
     "commit": "git show --format=\"%h\" --no-patch"
   },
   "dependencies": {
