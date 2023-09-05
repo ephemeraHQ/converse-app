@@ -179,6 +179,7 @@ export default function ConversationList({
             userAddress,
             blockedPeers,
             initialLoadDoneOnce,
+            lastUpdateAt,
           ]}
           renderItem={renderItem}
           keyExtractor={keyExtractor}
