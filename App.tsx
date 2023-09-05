@@ -7,7 +7,6 @@ import { coinbaseWallet, ThirdwebProvider } from "@thirdweb-dev/react-native";
 import React, { useEffect, useState } from "react";
 import { Platform, StyleSheet, useColorScheme, View } from "react-native";
 import "./utils/splash/splash";
-import { KeysProvider } from "react-native-hotkeys";
 import { KeyboardProvider } from "react-native-keyboard-controller";
 import { Provider as PaperProvider } from "react-native-paper";
 import * as Sentry from "sentry-expo";
@@ -91,15 +90,13 @@ export default function App() {
               colorScheme === "light" ? MaterialLightTheme : MaterialDarkTheme
             }
           >
-            <KeysProvider>
-              <View style={styles.safe}>
-                <React.Fragment key={lastWebviewReset}>
-                  <XmtpWebview />
-                  <XmtpState />
-                </React.Fragment>
-                <Main />
-              </View>
-            </KeysProvider>
+            <View style={styles.safe}>
+              <React.Fragment key={lastWebviewReset}>
+                <XmtpWebview />
+                <XmtpState />
+              </React.Fragment>
+              <Main />
+            </View>
           </PaperProvider>
         </ActionSheetProvider>
       </AppKeyboardProvider>

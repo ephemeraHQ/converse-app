@@ -42,7 +42,6 @@ export default function OnboardingScreen() {
   const resetRecommendations = useRecommendationsStore(
     (s) => s.resetRecommendations
   );
-  const setEphemeralAccount = useSettingsStore((s) => s.setEphemeralAccount);
   const styles = useStyles();
 
   const [isLoading, setLoading] = useState(false);

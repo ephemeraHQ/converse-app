@@ -584,8 +584,6 @@ PODS:
     - React-jsi (= 0.72.4)
     - React-logger (= 0.72.4)
     - React-perflogger (= 0.72.4)
-  - ReactNativeKeys (0.5.6):
-    - ExpoModulesCore
   - RNCAsyncStorage (1.18.2):
     - React-Core
   - RNDeviceInfo (10.9.0):
@@ -734,7 +732,6 @@ DEPENDENCIES:
   - React-runtimescheduler (from `../node_modules/react-native/ReactCommon/react/renderer/runtimescheduler`)
   - React-utils (from `../node_modules/react-native/ReactCommon/react/utils`)
   - ReactCommon/turbomodule/core (from `../node_modules/react-native/ReactCommon`)
-  - ReactNativeKeys (from `../node_modules/react-native-hotkeys/ios`)
   - "RNCAsyncStorage (from `../node_modules/@react-native-async-storage/async-storage`)"
   - RNDeviceInfo (from `../node_modules/react-native-device-info`)
   - RNFastImage (from `../node_modules/react-native-fast-image`)
@@ -918,8 +915,6 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native/ReactCommon/react/utils"
   ReactCommon:
     :path: "../node_modules/react-native/ReactCommon"
-  ReactNativeKeys:
-    :path: "../node_modules/react-native-hotkeys/ios"
   RNCAsyncStorage:
     :path: "../node_modules/@react-native-async-storage/async-storage"
   RNDeviceInfo:
@@ -1029,7 +1024,6 @@ SPEC CHECKSUMS:
   React-runtimescheduler: 4daea6e05a499b94d2b8a4d71a5720c1e89f3cd9
   React-utils: 8c54b0088eeda800d50267d0d7b73747f6f18330
   ReactCommon: b59e328e8b9000dd964007a5dceae73134f62757
-  ReactNativeKeys: aa4bc777d99b073bc4cf4f56974a1c43e672da59
   RNCAsyncStorage: ddc4ee162bfd41b0d2c68bf2d95acd81dd7f1f93
   RNDeviceInfo: 02ea8b23e2280fa18e00a06d7e62804d74028579
   RNFastImage: 5c9c9fed9c076e521b3f509fe79e790418a544e8

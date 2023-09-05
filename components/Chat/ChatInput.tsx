@@ -19,16 +19,11 @@ import {
   textSecondaryColor,
 } from "../../utils/colors";
 import { useConversationContext } from "../../utils/conversation";
+import { isDesktop } from "../../utils/device";
 import { converseEventEmitter } from "../../utils/events";
 import { sendMessage } from "../../utils/message";
 import { TextInputWithValue } from "../../utils/str";
 import ChatAddAttachment from "./ChatAddAttachment";
-
-const {
-  ModifiersType,
-  ReactNativeKeysKeyCode,
-  useHotkey,
-} = require("react-native-hotkeys");
 
 export default function ChatInput() {
   const { conversation, inputRef, messageToPrefill } = useConversationContext([
@@ -40,6 +35,12 @@ export default function ChatInput() {
   const colorScheme = useColorScheme();
   const styles = useStyles();
   const [inputValue, setInputValue] = useState(messageToPrefill);
+
+  useEffect(() => {
+    if (inputRef.current) {
+      inputRef.current.currentValue = inputValue;
+    }
+  }, [inputRef, inputValue]);
 
   // We use an event emitter to receive actions to fill the input value
   // from outside. This enable us to keep a very small re-rendering
@@ -59,25 +60,10 @@ export default function ChatInput() {
     if (conversation && inputValue.length > 0) {
       sendMessage(conversation, inputValue);
       setInputValue("");
-      if (inputRef.current) {
-        inputRef.current.currentValue = "";
-      }
     }
-  }, [conversation, inputRef, inputValue]);
-
-  // We use react-native-hotkeys to get events from the Mac Keyboard
-  // in order to send when doing Command + Enter
+  }, [conversation, inputValue]);
 
   const inputIsFocused = useRef(false);
-  useHotkey(
-    ReactNativeKeysKeyCode.Enter,
-    () => {
-      if (inputIsFocused.current) {
-        onValidate();
-      }
-    },
-    { modifiers: ModifiersType.Hyper }
-  );
 
   return (
     <View style={styles.chatInputContainer}>
@@ -85,12 +71,18 @@ export default function ChatInput() {
       <TextInput
         style={styles.chatInput}
         value={inputValue}
+        onKeyPress={(e) => {
+          console.log(e.nativeEvent.key);
+        }}
+        // On desktop, we modified React Native RCTUITextView.m
+        // to handle key Shift + Enter to add new line
+        // This disables the flickering on Desktop when hitting Enter
+        blurOnSubmit={isDesktop}
+        // Mainly used on Desktop so that Enter sends the message
+        onSubmitEditing={onValidate}
         onChangeText={(t: string) => {
           inputIsFocused.current = true;
           setInputValue(t);
-          if (inputRef.current) {
-            inputRef.current.currentValue = t;
-          }
         }}
         onFocus={() => {
           inputIsFocused.current = true;

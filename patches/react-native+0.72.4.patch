@@ -1,0 +1,21 @@
+diff --git a/node_modules/react-native/Libraries/Text/TextInput/Multiline/RCTUITextView.m b/node_modules/react-native/Libraries/Text/TextInput/Multiline/RCTUITextView.m
+index 5d5d308..5f9efd0 100644
+--- a/node_modules/react-native/Libraries/Text/TextInput/Multiline/RCTUITextView.m
++++ b/node_modules/react-native/Libraries/Text/TextInput/Multiline/RCTUITextView.m
+@@ -303,4 +303,16 @@ - (CGRect)caretRectForPosition:(UITextPosition *)position
+ 
+ #pragma mark - Utility Methods
+ 
++- (NSArray *)keyCommands {
++    return @[[UIKeyCommand keyCommandWithInput:@"\r" modifierFlags:UIKeyModifierShift action:@selector(shiftEnter:)]];
++}
++
++
++- (void)shiftEnter:(id)sender {
++    NSString *currentText = [super text];
++    NSString *newText = [currentText stringByAppendingString:@"\n"];
++    [super setText:newText];
++
++}
++
+ @end
