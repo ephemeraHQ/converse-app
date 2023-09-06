@@ -28,7 +28,7 @@
     "@react-navigation/native": "^6.0.16",
     "@react-navigation/native-stack": "^6.9.4",
     "@sentry/react-native": "5.5.0",
-    "@shopify/flash-list": "^1.4.3",
+    "@shopify/flash-list": "^1.5.0",
     "@stardazed/streams-polyfill": "^2.4.0",
     "@thirdweb-dev/react-native": "^0.2.58",
     "@thirdweb-dev/react-native-compat": "^0.2.58",
@@ -83,7 +83,7 @@
     "react-native-gesture-handler": "^2.11.0",
     "react-native-get-random-values": "~1.9.0",
     "react-native-gradle-plugin": "^0.71.19",
-    "react-native-keyboard-controller": "^1.5.7",
+    "react-native-keyboard-controller": "^1.6.1",
     "react-native-mmkv": "^2.10.1",
     "react-native-paper": "^5.5.2",
     "react-native-parsed-text": "^0.0.22",
@@ -163,7 +163,8 @@
   "expo": {
     "install": {
       "exclude": [
-        "react-native-svg"
+        "react-native-svg",
+        "@shopify/flash-list"
       ]
     }
   }

@@ -3953,10 +3953,10 @@
     "@sentry/types" "7.52.1"
     tslib "^1.9.3"
 
-"@shopify/flash-list@^1.4.3":
-  version "1.4.3"
-  resolved "https://registry.yarnpkg.com/@shopify/flash-list/-/flash-list-1.4.3.tgz#b7a4fe03d64f3c5ce9646859b49b9d95307f203d"
-  integrity sha512-jtIReAbwWzYBV0dQ6Io9wBX+pD0C4qQFMrb5/fkEvX8PYDgBl5KRYvpfr9WLLj8CV2Jsn1X0mYOsB+ysWrI/8g==
+"@shopify/flash-list@^1.5.0":
+  version "1.5.0"
+  resolved "https://registry.yarnpkg.com/@shopify/flash-list/-/flash-list-1.5.0.tgz#f1cf3c4f9bb706a58c3d1f794ddfaedb5872f431"
+  integrity sha512-XeocevDIXastr6jh3TPo1MzV5XkdqTyWtw/j8kUhz9EOBc2SzNWbpJWyzrAsYKlqYNrnxxs0P9C0amlX2jaQnw==
   dependencies:
     recyclerlistview "4.2.0"
     tslib "2.4.0"
@@ -14498,10 +14498,10 @@ react-native-image-viewing@^0.2.1:
   resolved "https://registry.npmjs.org/react-native-image-viewing/-/react-native-image-viewing-0.2.2.tgz"
   integrity sha512-osWieG+p/d2NPbAyonOMubttajtYEYiRGQaJA54slFxZ69j1V4/dCmcrVQry47ktVKy8/qpFwCpW1eT6MH5T2Q==
 
-react-native-keyboard-controller@^1.5.7:
-  version "1.5.7"
-  resolved "https://registry.yarnpkg.com/react-native-keyboard-controller/-/react-native-keyboard-controller-1.5.7.tgz#df8916868b70b043a95013786b154582df6c3769"
-  integrity sha512-HMEtE0UponKXET5huNcKBMWHASfQ/8yFTlNs8UT09IHK4xJPpufuJeK/nNXXJ0tM8ODVJozPIm2tX+HLkigdEg==
+react-native-keyboard-controller@^1.6.1:
+  version "1.6.1"
+  resolved "https://registry.yarnpkg.com/react-native-keyboard-controller/-/react-native-keyboard-controller-1.6.1.tgz#4c45bae900ac3de840629b3332297ac867cac102"
+  integrity sha512-ojzPeS8XadcsDCm46y+A8rBH0qZ52EwYisFKbJRPFlpNi8Hd3XvF9li9Mv8CAhnAH57EfO586qqZ5rYX9EM7oQ==
 
 react-native-mmkv@2.4.3:
   version "2.4.3"

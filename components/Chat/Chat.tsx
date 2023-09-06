@@ -104,11 +104,7 @@ export default function Chat() {
 
   const insets = useSafeAreaInsets();
 
-  const { height: _keyboardHeight } = useKeyboardAnimation();
-  const zeroValue = useSharedValue(0);
-  const keyboardHeight =
-    Platform.OS === "android" ? zeroValue : _keyboardHeight;
-
+  const { height: keyboardHeight } = useKeyboardAnimation();
   const tertiary = tertiaryBackgroundColor(colorScheme);
 
   const showChatInput = !!(conversation && !isBlockedPeer);
@@ -207,14 +203,17 @@ export default function Chat() {
             keyboardDismissMode="interactive"
             automaticallyAdjustContentInsets={false}
             contentInsetAdjustmentBehavior="never"
-            maintainVisibleContentPosition={{
-              minIndexForVisible: 0,
-              autoscrollToTopThreshold: 100,
-            }}
+            // Causes a glitch on Android, no sure we need it for now
+            // maintainVisibleContentPosition={{
+            //   minIndexForVisible: 0,
+            //   autoscrollToTopThreshold: 100,
+            // }}
             inverted
             keyExtractor={keyExtractor}
             keyboardShouldPersistTaps="handled"
             estimatedItemSize={80}
+            // Size glitch on Android
+            showsVerticalScrollIndicator={Platform.OS === "ios"}
           />
         )}
         {showPlaceholder && (
