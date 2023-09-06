@@ -36,7 +36,7 @@ export const POPULAR_WALLETS = [
   {
     name: "Zerion",
     iconURL:
-      "https://explorer-api.walletconnect.com/v3/logo/sm/f216b371-96cf-409a-9d88-296392b85800?projectId=2f05ae7f1116030fde2d36508f472bfb",
+      "https://explorer-api.walletconnect.com/v3/logo/sm/73f6f52f-7862-49e7-bb85-ba93ab72cc00?projectId=2f05ae7f1116030fde2d36508f472bfb",
     url: "https://wallet.zerion.io",
   },
 ];
@@ -102,7 +102,7 @@ const SUPPORTED_WALLETS: InstalledWallet[] = [
     walletConnectId:
       "ecc4036f814562b41a5268adc86270fba1365471402006302e70169465b7ac18",
     iconURL:
-      "https://explorer-api.walletconnect.com/v3/logo/sm/f216b371-96cf-409a-9d88-296392b85800?projectId=2f05ae7f1116030fde2d36508f472bfb",
+      "https://explorer-api.walletconnect.com/v3/logo/sm/73f6f52f-7862-49e7-bb85-ba93ab72cc00?projectId=2f05ae7f1116030fde2d36508f472bfb",
     customScheme: "zerion://",
   },
   {
