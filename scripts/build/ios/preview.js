@@ -1,13 +1,7 @@
 const fs = require("fs");
-const isClean = require("git-is-clean");
 const plist = require("plist");
 
 const go = async () => {
-  const clean = await isClean();
-  if (!clean) {
-    console.log("Git index is not clean");
-    process.exit(1);
-  }
 
   const PROJ_PATH = "ios/Converse.xcodeproj/project.pbxproj";
   const projContent = fs.readFileSync(PROJ_PATH, "utf-8");

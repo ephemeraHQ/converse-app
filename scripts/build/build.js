@@ -1,4 +1,5 @@
 const { spawn, execSync } = require("child_process");
+const isClean = require("git-is-clean");
 const path = require("path");
 const prompts = require("prompts");
 
@@ -40,6 +41,13 @@ const build = async () => {
   ];
   const { platform, env, local } = await prompts(questions);
   if (!platform || !env || !local) process.exit(1);
+  if (env !== "dev") {
+    const clean = await isClean();
+    if (!clean) {
+      console.log("Git index is not clean");
+      process.exit(1);
+    }
+  }
   const buildLocally = local === "local";
 
   const buildCommand = "eas";

@@ -1,6 +1,5 @@
 const { execSync } = require("child_process");
 const fs = require("fs");
-const isClean = require("git-is-clean");
 
 const { findFilesRecursively } = require("./utils");
 
@@ -14,12 +13,6 @@ const replaceAppName = (path) => {
 };
 
 const go = async () => {
-  const clean = await isClean();
-  if (!clean) {
-    console.log("Git index is not clean");
-    process.exit(1);
-  }
-
   const APP_GRADLE_PATH = "android/app/build.gradle";
   const APP_MANIFEST_PATH = "android/app/src/main/AndroidManifest.xml";
   const STRINGS_PATH = "android/app/src/main/res/values/strings.xml";
