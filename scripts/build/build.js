@@ -164,6 +164,7 @@ const executeCommand = (command, args) =>
       stdio: "inherit",
       cwd: PROJECT_ROOT,
       env: {
+        ...process.env,
         EAS_LOCAL_BUILD_SKIP_CLEANUP: 1,
       },
     });
