@@ -207,8 +207,10 @@ export default function ProfileScreen({
                 id: "block",
                 title: isBlockedPeer ? "Unblock" : "Block",
                 titleColor:
-                  isBlockedPeer || Platform.OS === "android"
+                  Platform.OS === "android"
                     ? undefined
+                    : isBlockedPeer
+                    ? primaryColor(colorScheme)
                     : dangerColor(colorScheme),
                 leftView:
                   Platform.OS === "android" ? (
