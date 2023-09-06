@@ -41,7 +41,7 @@ const build = async () => {
   ];
   const { platform, env, local } = await prompts(questions);
   if (!platform || !env || !local) process.exit(1);
-  if (env !== "dev") {
+  if (env !== "development") {
     const clean = await isClean();
     if (!clean) {
       console.log("Git index is not clean");
