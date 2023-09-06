@@ -108,7 +108,7 @@ const build = async () => {
       {
         type: "select",
         name: "skipCleanup",
-        message: "Skip cleanup after buiding locally?",
+        message: "Force keep logs to debug failing build?",
         choices: [{ value: "no" }, { value: "yes" }],
       },
     ]);

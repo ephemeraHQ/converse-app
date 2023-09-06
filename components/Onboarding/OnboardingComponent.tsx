@@ -48,10 +48,8 @@ export default function OnboardingComponent({
     <KeyboardAvoidingView
       style={{ flex: 1 }}
       enabled={Dimensions.get("window").height < 850}
-      behavior={Platform.OS === "ios" ? "position" : "height"}
-      keyboardVerticalOffset={
-        Platform.OS === "ios" ? keyboardVerticalOffset : 0
-      }
+      behavior="position"
+      keyboardVerticalOffset={keyboardVerticalOffset}
     >
       <ScrollView
         alwaysBounceVertical={false}
