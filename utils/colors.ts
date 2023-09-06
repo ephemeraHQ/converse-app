@@ -307,6 +307,9 @@ export const setAndroidColors = (colorScheme: ColorSchemeName) => {
   if (Platform.OS === "android") {
     const color = rgbStringToHex(backgroundColor(colorScheme));
     setAndroidSystemColor(color);
+    const SystemNavigationBar =
+      require("react-native-system-navigation-bar").default;
+    SystemNavigationBar.setBarMode(colorScheme === "dark" ? "light" : "dark");
   }
 };
 
@@ -347,4 +350,4 @@ export const textInputStyle = (colorScheme: ColorSchemeName) =>
     paddingRight: 16,
     paddingTop: 10,
     paddingBottom: 10,
-  } as any);
+  }) as any;
