@@ -101,7 +101,20 @@ const build = async () => {
     buildArgs.push("--non-interactive");
   }
 
+  let keepLogs = false;
+
   if (buildLocally) {
+    const { skipCleanup } = await prompts([
+      {
+        type: "select",
+        name: "skipCleanup",
+        message: "Skip cleanup after buiding locally?",
+        choices: [{ value: "no" }, { value: "yes" }],
+      },
+    ]);
+    if (skipCleanup === "yes") {
+      keepLogs = true;
+    }
     const currentCommit = execSync('git show --format="%h" --no-patch', {
       cwd: PROJECT_ROOT,
     })
@@ -121,7 +134,13 @@ const build = async () => {
   let buildSuccess = false;
 
   try {
-    await executeCommand(buildCommand, buildArgs);
+    const env = {
+      ...process.env,
+    };
+    if (keepLogs) {
+      env.EAS_LOCAL_BUILD_SKIP_CLEANUP = 1;
+    }
+    await executeCommand(buildCommand, buildArgs, env);
     buildSuccess = true;
   } catch (e) {
     console.log("Error during build");
@@ -165,16 +184,13 @@ const build = async () => {
   }
 };
 
-const executeCommand = (command, args) =>
+const executeCommand = (command, args, env) =>
   new Promise((resolve, reject) => {
     console.log(`${command} ${args.join(" ")}`);
     const buildProcess = spawn(command, args, {
       stdio: "inherit",
       cwd: PROJECT_ROOT,
-      env: {
-        ...process.env,
-        EAS_LOCAL_BUILD_SKIP_CLEANUP: 1,
-      },
+      env,
     });
 
     buildProcess.on("error", (error) => {
