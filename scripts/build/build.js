@@ -163,6 +163,9 @@ const executeCommand = (command, args) =>
     const buildProcess = spawn(command, args, {
       stdio: "inherit",
       cwd: PROJECT_ROOT,
+      env: {
+        EAS_LOCAL_BUILD_SKIP_CLEANUP: 1,
+      },
     });
 
     buildProcess.on("error", (error) => {
