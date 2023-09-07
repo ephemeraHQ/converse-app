@@ -87,6 +87,7 @@ export default function Main() {
     );
 
   const navigationState = useRef<any>(undefined);
+  const navigationAnimation = Platform.OS === "ios" ? "default" : "none";
 
   const mainHeaders = (
     <>
@@ -241,9 +242,14 @@ export default function Main() {
                       android: { fontSize: 22, lineHeight: 26 },
                     }),
                   },
+                  animation: navigationAnimation,
                 }}
               />
-              <Stack.Screen name="Conversation" component={Conversation} />
+              <Stack.Screen
+                name="Conversation"
+                component={Conversation}
+                options={{ animation: navigationAnimation }}
+              />
               <Stack.Screen
                 name="NewConversation"
                 component={NewConversation}
@@ -254,6 +260,7 @@ export default function Main() {
                     backgroundColor:
                       navigationSecondaryBackgroundColor(colorScheme),
                   },
+                  animation: navigationAnimation,
                 }}
               />
               <Stack.Screen
@@ -266,6 +273,7 @@ export default function Main() {
                     backgroundColor:
                       navigationSecondaryBackgroundColor(colorScheme),
                   },
+                  animation: navigationAnimation,
                 }}
               />
               <Stack.Screen
@@ -278,6 +286,7 @@ export default function Main() {
                     backgroundColor:
                       navigationSecondaryBackgroundColor(colorScheme),
                   },
+                  animation: navigationAnimation,
                 }}
               />
               <Stack.Screen
@@ -290,6 +299,7 @@ export default function Main() {
                     backgroundColor:
                       navigationSecondaryBackgroundColor(colorScheme),
                   },
+                  animation: navigationAnimation,
                 }}
               />
 
@@ -302,6 +312,7 @@ export default function Main() {
                     Platform.OS === "android"
                       ? textSecondaryColor(colorScheme)
                       : undefined,
+                  animation: navigationAnimation,
                 }}
               />
             </Stack.Group>
