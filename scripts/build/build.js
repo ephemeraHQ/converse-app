@@ -44,8 +44,17 @@ const build = async () => {
   if (env !== "development") {
     const clean = await isClean();
     if (!clean) {
-      console.log("Git index is not clean");
-      process.exit(1);
+      const { acceptGitNotClean } = await prompts([
+        {
+          type: "select",
+          name: "acceptGitNotClean",
+          message: `Git index not clean. Proceed? (Your git index will be reset at the end!)`,
+          choices: [{ value: "no" }, { value: "yes" }],
+        },
+      ]);
+      if (acceptGitNotClean !== "yes") {
+        process.exit(1);
+      }
     }
   }
   const buildLocally = local === "local";
