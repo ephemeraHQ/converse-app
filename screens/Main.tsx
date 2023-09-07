@@ -13,7 +13,9 @@ import { Platform, useColorScheme } from "react-native";
 import ChatSendAttachment from "../components/Chat/ChatSendAttachment";
 import ActionSheetStateHandler from "../components/StateHandlers/ActionSheetStateHandler";
 import HydrationStateHandler from "../components/StateHandlers/HydrationStateHandler";
-import InitialStateHandler from "../components/StateHandlers/InitialStateHandler";
+import InitialStateHandler, {
+  initialURL,
+} from "../components/StateHandlers/InitialStateHandler";
 import MainIdentityStateHandler from "../components/StateHandlers/MainIdentityStateHandler";
 import NetworkStateHandler from "../components/StateHandlers/NetworkStateHandler";
 import NotificationsStateHandler from "../components/StateHandlers/NotificationsStateHandler";
@@ -169,6 +171,9 @@ export default function Main() {
           }
           const state = getStateFromPath(pathForState, options);
           return state;
+        },
+        getInitialURL: () => {
+          return initialURL;
         },
       };
       screenToShow = (
