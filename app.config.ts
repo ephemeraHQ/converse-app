@@ -1,9 +1,16 @@
 import { ExpoConfig, ConfigContext } from "expo/config";
+import warnOnce from "warn-once";
 
 import appBuildNumbers from "./app.json";
 
 const env = process.env as any;
 const isDev = env.EXPO_ENV === "dev";
+
+warnOnce(
+  isDev && !process.env.DEV_API_URI,
+  "\n\n🚧 Running the app without DEV_API_URI setup\n\n"
+);
+
 const isPreview = env.EXPO_ENV === "preview";
 const isProduction = !isDev && !isPreview;
 
@@ -50,6 +57,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
       projectId: "49a65fae-3895-4487-8e8a-5bd8bee3a401",
     },
     ENV: isDev ? "dev" : isPreview ? "preview" : "prod",
+    DEV_API_URI: process.env.DEV_API_URI,
   },
   runtimeVersion:
     env.EXPO_PLATFORM === "android"
