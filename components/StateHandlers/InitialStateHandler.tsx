@@ -27,6 +27,8 @@ const getSchemedURLFromUniversalURL = (url: string) => {
   return schemedURL;
 };
 
+export let initialURL = "";
+
 export default function InitialStateHandler() {
   const colorScheme = useColorScheme();
   const setDesktopConnectSessionId = useOnboardingStore(
@@ -40,8 +42,6 @@ export default function InitialStateHandler() {
   useEffect(() => {
     setAndroidColors(colorScheme);
   }, [colorScheme]);
-
-  const initialURL = useRef("");
 
   const parseDesktopSessionURL = useCallback(
     (url?: string) => {
@@ -70,7 +70,7 @@ export default function InitialStateHandler() {
       let openedViaURL = (await Linking.getInitialURL()) || "";
       // Handling universal links by saving a schemed URI
       openedViaURL = getSchemedURLFromUniversalURL(openedViaURL);
-      initialURL.current = openedViaURL;
+      initialURL = openedViaURL;
       parseDesktopSessionURL(openedViaURL);
     };
     handleInitialDeeplink();
@@ -99,8 +99,11 @@ export default function InitialStateHandler() {
             navigateToConversation(conversations[topicToNavigateTo]);
           }
           setTopicToNavigateTo("");
-        } else if (initialURL.current) {
-          Linking.openURL(initialURL.current);
+        } else if (initialURL) {
+          Linking.openURL(initialURL);
+          // Once opened, let's remove so we don't navigate twice
+          // when logging out / relogging in
+          initialURL = "";
         }
       }
     };
