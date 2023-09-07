@@ -50,7 +50,7 @@ export const TEMPORARY_ACCOUNT_NAME = "TEMPORARY_ACCOUNT";
 initStores(TEMPORARY_ACCOUNT_NAME);
 
 export const getAccountsList = () =>
-  Object.keys(storesByAccount).filter((a) => a !== TEMPORARY_ACCOUNT_NAME);
+  Object.keys(storesByAccount).filter((a) => a && a !== TEMPORARY_ACCOUNT_NAME);
 
 export const useAccountsList = () => {
   const accounts = useAccountsStore((s) => s.accounts);
