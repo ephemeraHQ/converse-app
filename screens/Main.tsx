@@ -7,7 +7,7 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import * as Linking from "expo-linking";
 import * as Notifications from "expo-notifications";
 import { StatusBar } from "expo-status-bar";
-import React, { useRef } from "react";
+import React, { useEffect, useRef } from "react";
 import { Platform, useColorScheme } from "react-native";
 
 import ChatSendAttachment from "../components/Chat/ChatSendAttachment";
@@ -22,6 +22,7 @@ import NotificationsStateHandler from "../components/StateHandlers/Notifications
 import config from "../config";
 import { useSettingsStore, useUserStore } from "../data/store/accountsStore";
 import { useAppStore } from "../data/store/appStore";
+import { useOnboardingStore } from "../data/store/onboardingStore";
 import {
   backgroundColor,
   headerTitleStyle,
@@ -76,6 +77,16 @@ Notifications.setNotificationHandler({
 export default function Main() {
   const colorScheme = useColorScheme();
   const userAddress = useUserStore((s) => s.userAddress);
+  const { desktopConnectSessionId, setDesktopConnectSessionId } =
+    useOnboardingStore((s) =>
+      pick(s, ["desktopConnectSessionId", "setDesktopConnectSessionId"])
+    );
+  // Once the user is fully connected, let's remove the Desktop Connect session id
+  useEffect(() => {
+    if (desktopConnectSessionId && userAddress) {
+      setDesktopConnectSessionId(null);
+    }
+  }, [desktopConnectSessionId, setDesktopConnectSessionId, userAddress]);
   const showNotificationScreen = useSettingsStore(
     (s) => s.notifications.showNotificationScreen
   );
