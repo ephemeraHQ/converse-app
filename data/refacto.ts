@@ -28,7 +28,8 @@ export const migrateDataIfNeeded = async () => {
       // Let's get the saved address from shared preferences
       let savedAddress: any = "";
       if (Platform.OS === "ios") {
-        const SharedGroupPreferences = require("react-native-shared-group-preferences");
+        const SharedGroupPreferences =
+          require("react-native-shared-group-preferences").default;
         savedAddress = await SharedGroupPreferences.getItem(
           "xmtp-address",
           config.appleAppGroup
