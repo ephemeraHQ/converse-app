@@ -7,8 +7,13 @@
     "typecheck": "echo \"➜ Typechecking project...\" && tsc --noEmit",
     "update": "node scripts/build/update.js",
     "db": "ts-node scripts/migrations/db.ts",
-    "postinstall": "patch-package && husky install && [[ $(uname -s) == 'Darwin' ]] && bundle install --gemfile=ios/Gemfile",
+    "postinstall": "patch-package && husky install && cross-os postinstall",
     "commit": "git show --format=\"%h\" --no-patch"
+  },
+  "cross-os": {
+    "postinstall": {
+      "darwin": "bundle install --gemfile=ios/Gemfile"
+    }
   },
   "dependencies": {
     "@azure/core-asynciterator-polyfill": "^1.0.2",
@@ -127,6 +132,7 @@
     "@types/react-native-shared-group-preferences": "^1.1.1",
     "@typescript-eslint/eslint-plugin": "^6.3.0",
     "@typescript-eslint/parser": "^6.3.0",
+    "cross-os": "^1.5.0",
     "eslint": "^8.47.0",
     "eslint-config-prettier": "^9.0.0",
     "eslint-config-universe": "^12.0.0",
