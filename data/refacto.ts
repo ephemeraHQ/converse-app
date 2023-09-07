@@ -1,11 +1,13 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { isAddress } from "ethers/lib/utils";
 import * as SecureStore from "expo-secure-store";
+import { Platform } from "react-native";
 import RNFS from "react-native-fs";
 
+import config from "../config";
 import { saveXmtpKey, secureStoreOptions } from "../utils/keychain";
 import storage from "../utils/mmkv";
 import { sentryTrackMessage } from "../utils/sentry";
-import { getXmtpClientFromBase64Key } from "../utils/xmtp/client";
 import { getDbPath } from "./db";
 import {
   TEMPORARY_ACCOUNT_NAME,
@@ -23,12 +25,26 @@ export const migrateDataIfNeeded = async () => {
       secureStoreOptions
     );
     if (xmtpKey) {
-      const base64Key = Buffer.from(JSON.parse(xmtpKey)).toString("base64");
-      const xmtpClient = await getXmtpClientFromBase64Key(base64Key);
-      if (xmtpClient) {
-        currentAccount = xmtpClient.address;
-        console.log("Migrating to multi account store - ", xmtpClient.address);
-        useAccountsStore.getState().setCurrentAccount(xmtpClient.address);
+      // Let's get the saved address from shared preferences
+      let savedAddress: any = "";
+      if (Platform.OS === "ios") {
+        const SharedGroupPreferences = require("react-native-shared-group-preferences");
+        savedAddress = await SharedGroupPreferences.getItem(
+          "xmtp-address",
+          config.appleAppGroup
+        );
+      } else {
+        savedAddress = await AsyncStorage.getItem("xmtp-address");
+      }
+
+      if (
+        savedAddress &&
+        savedAddress.length > 0 &&
+        isAddress(savedAddress.toLowerCase())
+      ) {
+        currentAccount = savedAddress;
+        console.log("Migrating to multi account store - ", savedAddress);
+        useAccountsStore.getState().setCurrentAccount(savedAddress);
       }
     }
   }
