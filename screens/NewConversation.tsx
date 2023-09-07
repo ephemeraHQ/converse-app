@@ -268,7 +268,7 @@ export default function NewConversation({
       <ScrollView
         style={[styles.modal, { height: showRecommendations ? 0 : undefined }]}
         keyboardShouldPersistTaps="handled"
-        onScrollBeginDrag={() => {
+        onTouchStart={() => {
           inputRef.current?.blur();
         }}
       >

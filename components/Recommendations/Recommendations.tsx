@@ -3,6 +3,7 @@ import * as Linking from "expo-linking";
 import { useCallback, useEffect } from "react";
 import {
   FlatList,
+  Keyboard,
   Platform,
   StyleSheet,
   Text,
@@ -118,7 +119,7 @@ export default function Recommendations({
           <Text
             style={[
               styles.title,
-              { marginBottom: insets.bottom + 25, marginTop: 30 },
+              { marginBottom: insets.bottom + 40, marginTop: 30 },
             ]}
           >
             We’re adding matching signals very often.{" "}
@@ -193,6 +194,7 @@ export default function Recommendations({
         data={["title", ...Object.keys(frens), "signals"]}
         keyExtractor={keyExtractor}
         renderItem={renderItem}
+        onTouchStart={Keyboard.dismiss}
       />
     </View>
   );
