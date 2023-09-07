@@ -36,7 +36,7 @@ const ENV = {
     ...defaultConfig,
     env: "dev",
     xmtpEnv: "dev",
-    apiURI: "http://noe-mbp.local:9875",
+    apiURI: Constants.expoConfig?.extra?.DEV_API_URI || "",
     debugMenu: true,
     bundleId: "com.converse.dev",
     appleAppGroup: "group.com.converse.dev",

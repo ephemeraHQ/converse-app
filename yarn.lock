@@ -17172,7 +17172,7 @@ walletsdk-ethos@0.1.0-no-web3j:
   resolved "https://registry.yarnpkg.com/walletsdk-ethos/-/walletsdk-ethos-0.1.0-no-web3j.tgz#9d065b7ec6671c6d0b5ebc0f9108426f815ba702"
   integrity sha512-IRqKCXExyosRytiOgsttHpW4aUzyOhg7yyC0xCZIVKUahiqPm6a2OkjdjjVYDpqBeTyUWR75DzezcgUqKRl0Hw==
 
-warn-once@^0.1.0:
+warn-once@^0.1.0, warn-once@^0.1.1:
   version "0.1.1"
   resolved "https://registry.yarnpkg.com/warn-once/-/warn-once-0.1.1.tgz#952088f4fb56896e73fd4e6a3767272a3fccce43"
   integrity sha512-VkQZJbO8zVImzYFteBXvBOZEl1qL175WH8VmZcxF2fZAoudNhNDvHi+doCaAEdU2l2vtcIwa2zn0QK5+I1HQ3Q==
