@@ -33,6 +33,7 @@ import { textPrimaryColor, textSecondaryColor } from "../utils/colors";
 import { saveXmtpKey } from "../utils/keychain";
 import { shortAddress } from "../utils/str";
 import { getXmtpKeysFromSigner, isOnXmtp } from "../utils/xmtp/client";
+import { getXmtpClient } from "../utils/xmtpRN/client";
 import { Signer } from "../vendor/xmtp-js/src";
 
 export default function OnboardingScreen() {
@@ -253,6 +254,8 @@ export default function OnboardingScreen() {
       }
       resetLocalXmtpState();
       resetRecommendations();
+      // Now we can instantiate the XMTP Client
+      getXmtpClient(user.address);
       sendMessageToWebview("KEYS_LOADED_FROM_SECURE_STORAGE", {
         keys: JSON.stringify(Array.from(keysBuffer)),
         env: config.xmtpEnv,

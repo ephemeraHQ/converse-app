@@ -7,6 +7,7 @@ import {
   ConversationWithKeyMaterial,
   saveConversationsToKeychain,
 } from "../keychain";
+import { getXmtpClient } from "./client";
 
 const protocolConversationToStateConversation = (
   conversation: Conversation
@@ -86,17 +87,24 @@ export const streamConversations = async (client: Client) => {
   });
 };
 
+export const listConversations = async (client: Client) => {
+  const conversations = await client.conversations.list();
+  conversations.forEach((c) => {
+    setOpenedConversation(client.address, c);
+  });
+  return conversations;
+};
+
 export const loadConversations = async (
   client: Client,
   knownTopics: string[]
 ) => {
   try {
     const now = new Date().getTime();
-    const conversations = await client.conversations.list();
+    const conversations = await listConversations(client);
     const newConversations: Conversation[] = [];
     const knownConversations: Conversation[] = [];
     conversations.forEach((c) => {
-      setOpenedConversation(client.address, c);
       if (!knownTopics.includes(c.topic)) {
         newConversations.push(c);
       } else {
@@ -104,9 +112,9 @@ export const loadConversations = async (
       }
     });
     console.log(
-      `conversations.list() took ${
+      `[XmtpRN] Listing ${conversations.length} conversations took took ${
         (new Date().getTime() - now) / 1000
-      } seconds for ${conversations.length} conversations`
+      } seconds`
     );
     const conversationsToSave = newConversations.map(
       protocolConversationToStateConversation
@@ -125,4 +133,30 @@ export const loadConversations = async (
     error.message = `${e}`;
     throw error;
   }
+};
+
+export const getLocalXmtpConversationForTopic = async (
+  account: string,
+  topic: string
+): Promise<Conversation> => {
+  const client = await getXmtpClient(account);
+  if (!client) throw new Error("No XMTP Client");
+  if (openedConversations[account]?.[topic])
+    return openedConversations[account][topic];
+  let tries = 0;
+  let conversation: Conversation | null = null;
+  // Retry mechanism, 10 times in 5 secs max
+  while (!conversation && tries < 10) {
+    await listConversations(client);
+    conversation = openedConversations[account]?.[topic];
+    if (!conversation) {
+      // Let's wait 0.5 sec and retry
+      await new Promise((r) => setTimeout(r, 500));
+      tries += 1;
+    }
+  }
+  if (!conversation) {
+    throw new Error(`No conversation found for topic ${topic}`);
+  }
+  return conversation;
 };
