@@ -1,9 +1,9 @@
 import uuid from "react-native-uuid";
 
-import { sendPendingMessages } from "../components/XmtpState";
 import { saveMessages } from "../data/helpers/messages";
 import { currentAccount, useUserStore } from "../data/store/accountsStore";
 import { XmtpConversation } from "../data/store/chatStore";
+import { sendPendingMessages } from "./xmtpRN/send";
 
 export const sendMessage = async (
   conversation: XmtpConversation,

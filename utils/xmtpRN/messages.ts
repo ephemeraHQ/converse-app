@@ -7,7 +7,6 @@ import {
 
 import { saveMessages } from "../../data/helpers/messages";
 import { XmtpMessage } from "../../data/store/chatStore";
-// import { saveMessages } from "../../data/helpers/messages";
 
 const BATCH_QUERY_PAGE_SIZE = 30;
 
@@ -31,26 +30,23 @@ const protocolMessageToStateMessage = (
 ): XmtpMessage => {
   const referencedMessageId = undefined; // TODO => handle referenced if reaction
   let content = message.content.text || "";
-  let contentType = "xmtp.org/text:1.0";
   if (message.content.remoteAttachment) {
     content = computeRemoteAttachmentMessageContent(
       message.content.remoteAttachment
     );
-    contentType = "xmtp.org/remoteStaticAttachment:1.0";
   } else if (message.content.attachment) {
     content = JSON.stringify(message.content.attachment);
-    contentType = "xmtp.org/attachment:1.0";
   } else if (message.content.reaction) {
-    // TODO => handle !
+    content = JSON.stringify(message.content.reaction);
   }
   return {
     id: message.id,
     senderAddress: message.senderAddress,
     sent: message.sent,
-    contentType,
+    contentType: message.contentTypeId,
     status: "delivered",
     sentViaConverse: false, // TODO => handle weird timestamps
-    content, // TODO => handle other content types
+    content,
     referencedMessageId,
   };
 };
@@ -79,11 +75,13 @@ export const loadConversationsMessages = async (
     const messagesBatch = await client.listBatchMessages(
       topicsToQuery.map((topic) => ({
         contentTopic: topic,
-        startTime: new Date(queryConversationsFromTimestamp[topic]), // TODO => make startTime work
+        startTime: new Date(queryConversationsFromTimestamp[topic]),
         pageSize: BATCH_QUERY_PAGE_SIZE,
       }))
     );
-    console.log(`[XmtpRn] Fetched ${messagesBatch.length} from network`);
+    console.log(
+      `[XmtpRn] Fetched ${messagesBatch.length} messages from network`
+    );
 
     const messagesByTopic: { [topic: string]: DecodedMessage[] } = {};
     messagesBatch.forEach((m) => {
