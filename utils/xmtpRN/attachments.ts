@@ -54,7 +54,9 @@ export const serializeRemoteAttachmentMessageContent = (
   });
 };
 
-const deserializeRemoteAttachmentMessageContent = (messageContent: string) => {
+export const deserializeRemoteAttachmentMessageContent = (
+  messageContent: string
+) => {
   const parsedContent = JSON.parse(messageContent);
   return {
     ...parsedContent,
