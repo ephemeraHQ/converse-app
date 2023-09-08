@@ -9,6 +9,7 @@ const appJson = require("../../app.json");
 const PROJECT_ROOT = path.join(__dirname, "..", "..");
 
 const build = async () => {
+  const isAdvanced = process.argv.includes("--advanced");
   const questions = [
     {
       type: "select",
@@ -107,12 +108,26 @@ const build = async () => {
   }
 
   if (platform === "ios" && ["development", "preview"].includes(env)) {
-    buildArgs.push("--non-interactive");
+    if (isAdvanced) {
+      const { interactive } = await prompts([
+        {
+          type: "select",
+          name: "interactive",
+          message: `Build interactive?`,
+          choices: [{ value: "no" }, { value: "yes" }],
+        },
+      ]);
+      if (interactive === "no") {
+        buildArgs.push("--non-interactive");
+      }
+    } else {
+      buildArgs.push("--non-interactive");
+    }
   }
 
   let keepLogs = false;
 
-  if (buildLocally) {
+  if (buildLocally && isAdvanced) {
     const { skipCleanup } = await prompts([
       {
         type: "select",
