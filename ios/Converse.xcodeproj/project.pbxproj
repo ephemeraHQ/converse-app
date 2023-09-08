@@ -311,7 +311,7 @@
 			);
 			mainGroup = 83CBB9F61A601CBA00E9B192;
 			packageReferences = (
-				4C31F4EC29AF887B0032D062 /* XCRemoteSwiftPackageReference "Alamofire" */,
+				4C31F4EC29AF887B0032D062 /* XCRemoteSwiftPackageReference "Alamofire.git" */,
 			);
 			productRefGroup = 83CBBA001A601CBA00E9B192 /* Products */;
 			projectDirPath = "";
