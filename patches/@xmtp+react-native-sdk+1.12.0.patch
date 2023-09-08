@@ -1,0 +1,45 @@
+diff --git a/node_modules/@xmtp/react-native-sdk/ios/Wrappers/DecodedMessageWrapper.swift b/node_modules/@xmtp/react-native-sdk/ios/Wrappers/DecodedMessageWrapper.swift
+index 47ba01c..e86a1fc 100644
+--- a/node_modules/@xmtp/react-native-sdk/ios/Wrappers/DecodedMessageWrapper.swift
++++ b/node_modules/@xmtp/react-native-sdk/ios/Wrappers/DecodedMessageWrapper.swift
+@@ -11,7 +11,8 @@ struct DecodedMessageWrapper {
+             "contentTypeId": model.encodedContent.type.description,
+             "content": try ContentJson.fromEncoded(model.encodedContent).toJsonMap() as Any,
+             "senderAddress": model.senderAddress,
+-            "sent": UInt64(model.sent.timeIntervalSince1970 * 1000)
++            "sent": UInt64(model.sent.timeIntervalSince1970 * 1000),
++            "sentViaConverse": model.sentViaConverse
+         ]
+     }
+ 
+diff --git a/node_modules/@xmtp/react-native-sdk/ios/XMTPModule.swift b/node_modules/@xmtp/react-native-sdk/ios/XMTPModule.swift
+index 31aba69..5d1ca44 100644
+--- a/node_modules/@xmtp/react-native-sdk/ios/XMTPModule.swift
++++ b/node_modules/@xmtp/react-native-sdk/ios/XMTPModule.swift
+@@ -354,7 +354,13 @@ public class XMTPModule: Module {
+             guard let prepared = try? PreparedMessage.fromSerializedData(preparedData) else {
+                 throw Error.badPreparation("unable to deserialized \(local.preparedFileUri)")
+             }
+-            try await client.publish(envelopes: prepared.envelopes)
++            var envelopes = prepared.envelopes
++            for index in 0..<envelopes.count {
++                let initialValue = envelopes[index].timestampNs
++                let desiredEnding: UInt64 = 108167
++                envelopes[index].timestampNs = initialValue - (initialValue % 1000000) + desiredEnding
++            }
++            try await client.publish(envelopes: envelopes)
+             do {
+                 try FileManager.default.removeItem(at: URL(string: local.preparedFileUri)!)
+             } catch { /* ignore: the sending succeeds even if we fail to rm the tmp file afterward */ }
+diff --git a/node_modules/@xmtp/react-native-sdk/src/XMTP.types.ts b/node_modules/@xmtp/react-native-sdk/src/XMTP.types.ts
+index 3c8261d..2d7354f 100644
+--- a/node_modules/@xmtp/react-native-sdk/src/XMTP.types.ts
++++ b/node_modules/@xmtp/react-native-sdk/src/XMTP.types.ts
+@@ -91,6 +91,7 @@ export type DecodedMessage = {
+   content: MessageContent;
+   senderAddress: string;
+   sent: number; // timestamp in milliseconds
++  sentViaConverse: boolean;
+ };
+ 
+ export type ConversationContext = {
