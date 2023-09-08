@@ -45,7 +45,7 @@ const protocolMessageToStateMessage = (
     sent: message.sent,
     contentType: message.contentTypeId,
     status: "delivered",
-    sentViaConverse: false, // TODO => handle weird timestamps
+    sentViaConverse: (message as any).sentViaConverse || false,
     content,
     referencedMessageId,
   };

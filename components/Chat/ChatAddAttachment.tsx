@@ -49,14 +49,14 @@ export default function ChatAddAttachment() {
       // const base64Content = await RNFS.readFile(asset.uri, "base64");
       const filename = asset.fileName || asset.uri.split("/").pop();
       const mimeType = mime.getType(filename || "");
-      const encodedAttachment = await encryptRemoteAttachment(
+      const encryptedAttachment = await encryptRemoteAttachment(
         currentAccount,
         asset.uri,
         mimeType || undefined
       );
       try {
         const uploadedAttachment = await uploadRemoteAttachment(
-          encodedAttachment
+          encryptedAttachment
         );
         if (currentAttachmentMediaURI.current !== assetRef.current?.uri) return;
         setMediaPreview(null);
