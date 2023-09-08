@@ -127,17 +127,19 @@ const build = async () => {
 
   let keepLogs = false;
 
-  if (buildLocally && isAdvanced) {
-    const { skipCleanup } = await prompts([
-      {
-        type: "select",
-        name: "skipCleanup",
-        message: "Force keep logs to debug failing build?",
-        choices: [{ value: "no" }, { value: "yes" }],
-      },
-    ]);
-    if (skipCleanup === "yes") {
-      keepLogs = true;
+  if (buildLocally) {
+    if (isAdvanced) {
+      const { skipCleanup } = await prompts([
+        {
+          type: "select",
+          name: "skipCleanup",
+          message: "Force keep logs to debug failing build?",
+          choices: [{ value: "no" }, { value: "yes" }],
+        },
+      ]);
+      if (skipCleanup === "yes") {
+        keepLogs = true;
+      }
     }
     const currentCommit = execSync('git show --format="%h" --no-patch', {
       cwd: PROJECT_ROOT,
