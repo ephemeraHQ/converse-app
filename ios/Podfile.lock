@@ -770,7 +770,6 @@ DEPENDENCIES:
   - Sentry/HybridSDK (= 8.7.1)
   - SQLite.swift
   - XMTP
-  - XMTP (= 0.5.2-alpha0)
   - "XMTPReactNative (from `../node_modules/@xmtp/react-native-sdk/ios`)"
   - Yoga (from `../node_modules/react-native/ReactCommon/yoga`)
 
@@ -1095,6 +1094,6 @@ SPEC CHECKSUMS:
   XMTPRust: 78f65f77b1454392980da244961777aee955652f
   Yoga: 3efc43e0d48686ce2e8c60f99d4e6bd349aff981
 
-PODFILE CHECKSUM: f0c1200f410ba370f61befe7e22bddcf4b0a4577
+PODFILE CHECKSUM: 2f579c07c99f1f672b0c8aa9d102120ca3efeab4
 
 COCOAPODS: 1.12.1
