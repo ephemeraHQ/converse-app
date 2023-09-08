@@ -1,7 +1,7 @@
 import { Client } from "@xmtp/react-native-sdk";
 
 import config from "../../config";
-import { getChatStore } from "../../data/store/accountsStore";
+import { getChatStore, getUserStore } from "../../data/store/accountsStore";
 import { loadXmtpKey } from "../keychain";
 import { loadConversations, streamConversations } from "./conversations";
 import { loadConversationsMessages, streamAllMessages } from "./messages";
@@ -21,6 +21,9 @@ export const getXmtpClient = async (account: string) => {
   const base64Key = await loadXmtpKey(account);
   if (base64Key) {
     const client = await getXmtpClientFromBase64Key(base64Key);
+    console.log(`[XmtpRN] Instantiated client for ${client.address}`);
+    getUserStore(account).getState().setUserAddress(client.address);
+    getChatStore(account).getState().setLocalClientConnected(true);
     xmtpClientByAccount[client.address] = client;
     return client;
   }
@@ -32,6 +35,7 @@ export const syncXmtpClient = async (
   knownTopics: string[],
   lastSyncedAt: number
 ) => {
+  console.log(`[XmtpRN] Syncing ${account}`);
   const now = new Date().getTime();
   const client = await getXmtpClient(account);
   const { newConversations, knownConversations } = await loadConversations(
