@@ -11,7 +11,6 @@ require 'json'
 podfile_properties = JSON.parse(File.read(File.join(__dir__, 'Podfile.properties.json'))) rescue {}
 
 plugin 'cocoapods-pod-linkage'
-plugin 'cocoapods-patch'
 platform :ios, podfile_properties['ios.deploymentTarget'] || '16.0'
 install! 'cocoapods',
   :deterministic_uuids => false
@@ -68,6 +67,9 @@ target 'Converse' do
         end
       end
     end
+
+    # Patch package
+    system('patch -i patches/XMTP.diff')
 
   end
 
