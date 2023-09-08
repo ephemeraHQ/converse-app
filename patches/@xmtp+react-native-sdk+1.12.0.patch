@@ -1,3 +1,15 @@
+diff --git a/node_modules/@xmtp/react-native-sdk/build/XMTP.types.d.ts b/node_modules/@xmtp/react-native-sdk/build/XMTP.types.d.ts
+index 3731914..6348a1e 100644
+--- a/node_modules/@xmtp/react-native-sdk/build/XMTP.types.d.ts
++++ b/node_modules/@xmtp/react-native-sdk/build/XMTP.types.d.ts
+@@ -55,6 +55,7 @@ export type DecodedMessage = {
+     content: MessageContent;
+     senderAddress: string;
+     sent: number;
++    sentViaConverse: boolean;
+ };
+ export type ConversationContext = {
+     conversationID: string;
 diff --git a/node_modules/@xmtp/react-native-sdk/ios/Wrappers/DecodedMessageWrapper.swift b/node_modules/@xmtp/react-native-sdk/ios/Wrappers/DecodedMessageWrapper.swift
 index 47ba01c..e86a1fc 100644
 --- a/node_modules/@xmtp/react-native-sdk/ios/Wrappers/DecodedMessageWrapper.swift

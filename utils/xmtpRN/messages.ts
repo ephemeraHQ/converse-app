@@ -45,7 +45,7 @@ const protocolMessageToStateMessage = (
     sent: message.sent,
     contentType: message.contentTypeId,
     status: "delivered",
-    sentViaConverse: (message as any).sentViaConverse || false,
+    sentViaConverse: message.sentViaConverse || false,
     content,
     referencedMessageId,
   };
