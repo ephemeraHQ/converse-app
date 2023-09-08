@@ -1,0 +1,24 @@
+diff --git a/cocoapods-patch-20230908-84858-13aopua/XMTP/Sources/XMTP/ConversationV2.swift b/Pods/XMTP/Sources/XMTP/ConversationV2.swift
+index 1910b06..f1bda7a 100644
+--- a/cocoapods-patch-20230908-84858-13aopua/XMTP/Sources/XMTP/ConversationV2.swift
++++ b/Pods/XMTP/Sources/XMTP/ConversationV2.swift
+@@ -160,6 +160,7 @@ public struct ConversationV2 {
+ 		var decoded = try decode(message.v2)
+ 
+ 		decoded.id = generateID(from: envelope)
++        decoded.sentViaConverse = String(envelope.timestampNs).hasSuffix("108167")
+ 
+ 		return decoded
+ 	}
+diff --git a/cocoapods-patch-20230908-84858-13aopua/XMTP/Sources/XMTP/DecodedMessage.swift b/Pods/XMTP/Sources/XMTP/DecodedMessage.swift
+index fa31a08..e28c3a5 100644
+--- a/cocoapods-patch-20230908-84858-13aopua/XMTP/Sources/XMTP/DecodedMessage.swift
++++ b/Pods/XMTP/Sources/XMTP/DecodedMessage.swift
+@@ -20,6 +20,7 @@ public struct DecodedMessage: Sendable {
+ 
+ 	/// When the message was sent
+ 	public var sent: Date
++    public var sentViaConverse: Bool = false
+ 
+     public init(topic: String, encodedContent: EncodedContent, senderAddress: String, sent: Date) {
+         self.topic = topic
