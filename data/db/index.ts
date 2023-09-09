@@ -4,7 +4,6 @@ import { Repository } from "typeorm/browser";
 
 import config from "../../config";
 import { sentryTrackError } from "../../utils/sentry";
-import { useAccountsStore } from "../store/accountsStore";
 import {
   deleteDataSource,
   getDataSource,
@@ -25,17 +24,18 @@ const repositories: {
   [account: string]: RepositoriesForAccount;
 } = {};
 
-export const getRepository = <T extends keyof RepositoriesForAccount>(
+export const getRepository = async <T extends keyof RepositoriesForAccount>(
   account: string,
   entity: T
 ) => {
-  return repositories[account][entity];
-};
-
-export const getCurrentRepository = <T extends keyof RepositoriesForAccount>(
-  entity: T
-) => {
-  const account = useAccountsStore.getState().currentAccount;
+  // Blocking method that will return the repository only when it has been
+  // init. This means methods that try to interact with the database too
+  // early will not fail but just take longer to execute!
+  const repositoryExists =
+    account in repositories && entity in repositories[account][entity];
+  while (!repositoryExists) {
+    await new Promise((r) => setTimeout(r, 100));
+  }
   return repositories[account][entity];
 };
 

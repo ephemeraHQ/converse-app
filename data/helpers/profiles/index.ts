@@ -4,7 +4,7 @@ import { Profile } from "../../db/entities/profileEntity";
 import { ProfileSocials } from "../../store/profilesStore";
 
 export const loadProfilesByAddress = async (account: string) => {
-  const profileRepository = getRepository(account, "profile");
+  const profileRepository = await getRepository(account, "profile");
   const profiles = await profileRepository.find();
   const profileByAddress: {
     [address: string]: { socials: ProfileSocials; updatedAt: number };
