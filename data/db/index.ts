@@ -31,9 +31,9 @@ export const getRepository = async <T extends keyof RepositoriesForAccount>(
   // Blocking method that will return the repository only when it has been
   // init. This means methods that try to interact with the database too
   // early will not fail but just take longer to execute!
-  const repositoryExists =
-    account in repositories && entity in repositories[account][entity];
-  while (!repositoryExists) {
+
+  while (!repositories[account]?.[entity]) {
+    console.warn(`Database for ${account} not yet initialized`);
     await new Promise((r) => setTimeout(r, 100));
   }
   return repositories[account][entity];
