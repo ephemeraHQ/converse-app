@@ -130,9 +130,10 @@ const waitForLoadingSavedNotifications = async () => {
 };
 
 export const loadSavedNotificationMessagesToContext = async () => {
+  // Can possibly be called before hydration finished and
+  // database setup, let's check
   if (loadingSavedNotifications) {
     await waitForLoadingSavedNotifications();
-    return;
   }
   loadingSavedNotifications = true;
   let lastStepDone = 0;
