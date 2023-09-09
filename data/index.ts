@@ -10,7 +10,7 @@ export const loadDataToContext = async (account: string) => {
   // Save env to shared data with extension
   saveXmtpEnv();
   saveApiURI();
-  const conversationRepository = getRepository(account, "conversation");
+  const conversationRepository = await getRepository(account, "conversation");
   // Let's load conversations and messages and save to context
   const conversationsWithMessages = await conversationRepository.find({
     relations: { messages: true },

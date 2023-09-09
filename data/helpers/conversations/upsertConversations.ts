@@ -56,7 +56,7 @@ const setupAndSaveConversation = async (
   conversation: XmtpConversation
 ): Promise<XmtpConversation> => {
   await upgradePendingConversationIfNeeded(account, conversation);
-  const conversationRepository = getRepository(account, "conversation");
+  const conversationRepository = await getRepository(account, "conversation");
   const alreadyConversationInDbWithTopic = await conversationRepository.findOne(
     {
       where: { topic: conversation.topic },
@@ -107,6 +107,6 @@ export const markConversationReadUntil = async (
   topic: string,
   readUntil: number
 ) => {
-  const conversationRepository = getRepository(account, "conversation");
+  const conversationRepository = await getRepository(account, "conversation");
   await conversationRepository.update({ topic }, { readUntil });
 };

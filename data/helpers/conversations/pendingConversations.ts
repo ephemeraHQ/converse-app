@@ -11,7 +11,7 @@ import { XmtpConversation } from "../../store/chatStore";
 import { saveConversations } from "./upsertConversations";
 
 export const cleanupPendingConversations = async (account: string) => {
-  const conversationRepository = getRepository(account, "conversation");
+  const conversationRepository = await getRepository(account, "conversation");
   const pendingConversations = await conversationRepository.find({
     where: { pending: true },
     relations: { messages: true },
@@ -37,7 +37,7 @@ const getPendingConversationWithPeer = async (
   address: string,
   conversationId?: string
 ) => {
-  const conversationRepository = getRepository(account, "conversation");
+  const conversationRepository = await getRepository(account, "conversation");
   const conversation = await conversationRepository
     .createQueryBuilder()
     .select()
@@ -105,8 +105,8 @@ export const upgradePendingConversationIfNeeded = async (
     alreadyConversationInDbWithConversationId.topic === conversation.topic
   )
     return;
-  const conversationRepository = getRepository(account, "conversation");
-  const messageRepository = getRepository(account, "message");
+  const conversationRepository = await getRepository(account, "conversation");
+  const messageRepository = await getRepository(account, "message");
 
   // Save this one to db
   await upsertRepository(
@@ -136,7 +136,7 @@ export const upgradePendingConversationIfNeeded = async (
 };
 
 export const getPendingConversationsToCreate = async (account: string) => {
-  const conversationRepository = getRepository(account, "conversation");
+  const conversationRepository = await getRepository(account, "conversation");
   const pendingConversations = await conversationRepository.find({
     where: {
       pending: true,
