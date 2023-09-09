@@ -29,7 +29,7 @@ export const saveMessages = async (
   getChatStore(account).getState().setMessages(conversationTopic, messages);
 
   // Then save to db
-  const messageRepository = getRepository(account, "message");
+  const messageRepository = await getRepository(account, "message");
   await upsertRepository(
     messageRepository,
     messages.map((xmtpMessage) =>
@@ -54,7 +54,7 @@ export const updateMessagesIds = async (
     message: XmtpMessage;
     oldId: string;
   }[] = [];
-  const messageRepository = getRepository(account, "message");
+  const messageRepository = await getRepository(account, "message");
   for (const oldId in messageIdsToUpdate) {
     const messageToUpdate = messageIdsToUpdate[oldId];
     await messageRepository.update(
@@ -88,7 +88,7 @@ export const markMessageAsSent = async (
   messageId: string,
   topic: string
 ) => {
-  const messageRepository = getRepository(account, "message");
+  const messageRepository = await getRepository(account, "message");
   await messageRepository.update({ id: messageId }, { status: "sent" });
   getChatStore(account)
     .getState()
@@ -96,7 +96,7 @@ export const markMessageAsSent = async (
 };
 
 export const getMessagesToSend = async (account: string) => {
-  const messageRepository = getRepository(account, "message");
+  const messageRepository = await getRepository(account, "message");
   const messagesToSend = await messageRepository.find({
     select: {
       id: true,

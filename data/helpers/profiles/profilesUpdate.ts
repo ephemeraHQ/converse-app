@@ -16,7 +16,7 @@ export const updateProfilesForConversations = async (
   account: string,
   conversations: XmtpConversation[]
 ) => {
-  const profileRepository = getRepository(account, "profile");
+  const profileRepository = await getRepository(account, "profile");
   const updates: ConversationHandlesUpdate[] = [];
   let batch: XmtpConversation[] = [];
   let rest = conversations;
@@ -101,7 +101,7 @@ export const refreshProfileForAddress = async (
   const now = new Date().getTime();
   const profilesByAddress = await getProfilesForAddresses([address]);
   // Save profiles to db
-  const profileRepository = getRepository(account, "profile");
+  const profileRepository = await getRepository(account, "profile");
   await upsertRepository(
     profileRepository,
     Object.keys(profilesByAddress).map((address) => ({
