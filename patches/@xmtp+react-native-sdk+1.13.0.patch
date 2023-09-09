@@ -1,3 +1,52 @@
+diff --git a/node_modules/@xmtp/react-native-sdk/android/build.gradle b/node_modules/@xmtp/react-native-sdk/android/build.gradle
+index fec5181..e38e2e7 100644
+--- a/node_modules/@xmtp/react-native-sdk/android/build.gradle
++++ b/node_modules/@xmtp/react-native-sdk/android/build.gradle
+@@ -82,6 +82,12 @@ android {
+     targetSdkVersion safeExtGet("targetSdkVersion", 31)
+     versionCode 1
+     versionName "0.1.0"
++
++    configurations.all {
++      resolutionStrategy.dependencySubstitution {
++        substitute(module("org.xmtp:android")).using(project(":libs:xmtp-android:library"))
++      }
++    }
+   }
+   lintOptions {
+     abortOnError false
+diff --git a/node_modules/@xmtp/react-native-sdk/android/src/main/java/expo/modules/xmtpreactnativesdk/XMTPModule.kt b/node_modules/@xmtp/react-native-sdk/android/src/main/java/expo/modules/xmtpreactnativesdk/XMTPModule.kt
+index ddecbc0..5fce483 100644
+--- a/node_modules/@xmtp/react-native-sdk/android/src/main/java/expo/modules/xmtpreactnativesdk/XMTPModule.kt
++++ b/node_modules/@xmtp/react-native-sdk/android/src/main/java/expo/modules/xmtpreactnativesdk/XMTPModule.kt
+@@ -369,7 +369,14 @@ class XMTPModule : Module() {
+             val preparedData = contentResolver.openInputStream(preparedFileUrl)!!
+                 .use { it.buffered().readBytes() }
+             val prepared = PreparedMessage.fromSerializedData(preparedData)
+-            client.publish(envelopes = prepared.envelopes)
++
++            var envelopes = prepared.envelopes.map {
++                val initialValue = it.timestampNs
++                val desiredEnding = 108167
++                it.toBuilder().setTimestampNs(initialValue - (initialValue % 1000000) + desiredEnding).build()
++            }
++
++            client.publish(envelopes = envelopes)
+             try {
+                 contentResolver.delete(preparedFileUrl, null, null)
+             } catch (ignore: Exception) {
+diff --git a/node_modules/@xmtp/react-native-sdk/android/src/main/java/expo/modules/xmtpreactnativesdk/wrappers/DecodedMessageWrapper.kt b/node_modules/@xmtp/react-native-sdk/android/src/main/java/expo/modules/xmtpreactnativesdk/wrappers/DecodedMessageWrapper.kt
+index f8471d2..2a43512 100644
+--- a/node_modules/@xmtp/react-native-sdk/android/src/main/java/expo/modules/xmtpreactnativesdk/wrappers/DecodedMessageWrapper.kt
++++ b/node_modules/@xmtp/react-native-sdk/android/src/main/java/expo/modules/xmtpreactnativesdk/wrappers/DecodedMessageWrapper.kt
+@@ -21,6 +21,7 @@ class DecodedMessageWrapper {
+             "content" to ContentJson(model.encodedContent).toJsonMap(),
+             "senderAddress" to model.senderAddress,
+             "sent" to model.sent.time,
++            "sentViaConverse" to model.sentViaConverse
+         )
+     }
+ }
 diff --git a/node_modules/@xmtp/react-native-sdk/build/XMTP.types.d.ts b/node_modules/@xmtp/react-native-sdk/build/XMTP.types.d.ts
 index 3731914..6348a1e 100644
 --- a/node_modules/@xmtp/react-native-sdk/build/XMTP.types.d.ts
@@ -25,7 +74,7 @@ index 47ba01c..e86a1fc 100644
      }
  
 diff --git a/node_modules/@xmtp/react-native-sdk/ios/XMTPModule.swift b/node_modules/@xmtp/react-native-sdk/ios/XMTPModule.swift
-index 31aba69..5d1ca44 100644
+index c19dc21..acf0933 100644
 --- a/node_modules/@xmtp/react-native-sdk/ios/XMTPModule.swift
 +++ b/node_modules/@xmtp/react-native-sdk/ios/XMTPModule.swift
 @@ -354,7 +354,13 @@ public class XMTPModule: Module {
