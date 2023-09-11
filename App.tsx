@@ -14,7 +14,6 @@ import * as Sentry from "sentry-expo";
 import XmtpEngine from "./components/XmtpEngine";
 import config from "./config";
 import { migrateDataIfNeeded } from "./data/refacto";
-import { useAppStore } from "./data/store/appStore";
 import Main from "./screens/Main";
 import {
   backgroundColor,

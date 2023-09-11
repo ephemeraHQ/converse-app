@@ -19,6 +19,11 @@ import {
 
 const env = config.xmtpEnv === "production" ? "production" : "dev";
 
+export const isOnXmtp = async (account: string, address: string) => {
+  const client = await getXmtpClient(account);
+  return client.canMessage(address);
+};
+
 export const getXmtpClientFromBase64Key = (base64Key: string) =>
   Client.createFromKeyBundle(base64Key, { env });
 
