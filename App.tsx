@@ -23,6 +23,7 @@ import {
 import mmkv from "./utils/mmkv";
 import { DEFAULT_EMOJIS, RECENT_EMOJI_STORAGE_KEY } from "./utils/reactions";
 import { useRecentPicksPersistence } from "./vendor/rn-emoji-keyboard";
+import "./utils/xmtpRN/cron";
 
 configureCoinbase({
   callbackURL: new URL(`https://${config.websiteDomain}/coinbase`),
