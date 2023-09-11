@@ -11,7 +11,11 @@ import {
 } from "react-native";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 
-import { useSettingsStore, useUserStore } from "../../data/store/accountsStore";
+import {
+  currentAccount,
+  useSettingsStore,
+  useUserStore,
+} from "../../data/store/accountsStore";
 import { blockPeer, reportMessage } from "../../utils/api";
 import { isAttachmentMessage } from "../../utils/attachment";
 import { actionSheetColors } from "../../utils/colors";
@@ -50,6 +54,7 @@ export default function ChatMessageActions({
 
   const report = useCallback(async () => {
     reportMessage({
+      account: currentAccount(),
       messageId: message.id,
       messageContent: message.content,
       messageSender: message.senderAddress,
@@ -60,11 +65,16 @@ export default function ChatMessageActions({
 
   const reportAndBlock = useCallback(async () => {
     reportMessage({
+      account: currentAccount(),
       messageId: message.id,
       messageContent: message.content,
       messageSender: message.senderAddress,
     });
-    blockPeer({ peerAddress: message.senderAddress, blocked: true });
+    blockPeer({
+      peerAddress: message.senderAddress,
+      blocked: true,
+      account: currentAccount(),
+    });
     setBlockedPeerStatus(message.senderAddress, true);
   }, [
     message.content,

@@ -22,6 +22,7 @@ import {
   TableViewPicto,
 } from "../components/TableView/TableViewImage";
 import {
+  currentAccount,
   useProfilesStore,
   useRecommendationsStore,
   useSettingsStore,
@@ -235,6 +236,7 @@ export default function ProfileScreen({
                     (selectedIndex?: number) => {
                       if (selectedIndex === 0 && peerAddress) {
                         blockPeer({
+                          account: currentAccount(),
                           peerAddress,
                           blocked: !isBlockedPeer,
                         });

@@ -3,7 +3,6 @@ import * as Linking from "expo-linking";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { StyleSheet, useColorScheme, Text, Platform } from "react-native";
 
-import config from "../../config";
 import { clearDB } from "../../data/db";
 import { useAccountsStore } from "../../data/store/accountsStore";
 import { useOnboardingStore } from "../../data/store/onboardingStore";
@@ -20,7 +19,7 @@ import {
 import { saveXmtpKey } from "../../utils/keychain";
 import { pick } from "../../utils/objects";
 import { getXmtpClientFromBase64Key } from "../../utils/xmtp/client";
-import { sendMessageToWebview } from "../XmtpWebview";
+import { getXmtpClient } from "../../utils/xmtpRN/client";
 import OnboardingComponent from "./OnboardingComponent";
 
 export default function DesktopConnect() {
@@ -93,10 +92,8 @@ export default function DesktopConnect() {
           await saveXmtpKey(client.address, base64Key);
           await clearDB(client.address);
           useAccountsStore.getState().setCurrentAccount(client.address);
-          sendMessageToWebview("KEYS_LOADED_FROM_SECURE_STORAGE", {
-            keys: JSON.stringify(Array.from(decryptedKeyBuffer)),
-            env: config.xmtpEnv,
-          });
+          // Now we can instantiate the XMTP Client
+          getXmtpClient(client.address);
         } else {
           inDesktopConnectInterval.current = false;
           throw new Error("COULD_NOT_INSTANTIATE_XMTP_CLIENT");

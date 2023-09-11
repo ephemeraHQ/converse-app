@@ -1,4 +1,3 @@
-import { sendMessageToWebview } from "../../components/XmtpWebview";
 import { Conversation as DbConversation } from "../../data/db/entities/conversationEntity";
 import {
   Client,
@@ -11,7 +10,6 @@ import {
   ConversationV2,
 } from "../../vendor/xmtp-js/src/conversations";
 import { InviteStore } from "../../vendor/xmtp-js/src/keystore";
-import { sentryTrackMessage } from "../sentry";
 
 export const parseConversationJSON = async (
   xmtpClient: Client,
@@ -82,33 +80,33 @@ export const createConversation = (
           : {},
       };
     }
-    sendMessageToWebview(
-      "CREATE_CONVERSATION",
-      { peerAddress: dbConversation.peerAddress, context },
-      async (createConversationResult: any) => {
-        if (
-          createConversationResult?.status !== "SUCCESS" ||
-          createConversationResult?.conversationTopic === undefined
-        ) {
-          sentryTrackMessage("CANT_CREATE_CONVO", {
-            peerAddress: dbConversation.peerAddress,
-            context,
-            error: createConversationResult,
-          });
-          reject(
-            new Error(
-              JSON.stringify({
-                peerAddress: dbConversation.peerAddress,
-                context,
-                error: createConversationResult,
-              })
-            )
-          );
-          return;
-        }
-        // Conversation is created!
-        const newConversationTopic = createConversationResult.conversationTopic;
-        resolve(newConversationTopic);
-      }
-    );
+    // sendMessageToWebview(
+    //   "CREATE_CONVERSATION",
+    //   { peerAddress: dbConversation.peerAddress, context },
+    //   async (createConversationResult: any) => {
+    //     if (
+    //       createConversationResult?.status !== "SUCCESS" ||
+    //       createConversationResult?.conversationTopic === undefined
+    //     ) {
+    //       sentryTrackMessage("CANT_CREATE_CONVO", {
+    //         peerAddress: dbConversation.peerAddress,
+    //         context,
+    //         error: createConversationResult,
+    //       });
+    //       reject(
+    //         new Error(
+    //           JSON.stringify({
+    //             peerAddress: dbConversation.peerAddress,
+    //             context,
+    //             error: createConversationResult,
+    //           })
+    //         )
+    //       );
+    //       return;
+    //     }
+    //     // Conversation is created!
+    //     const newConversationTopic = createConversationResult.conversationTopic;
+    //     resolve(newConversationTopic);
+    //   }
+    // );
   });
