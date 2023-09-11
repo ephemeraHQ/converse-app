@@ -52,6 +52,7 @@ const protocolMessageToStateMessage = (
 };
 
 export const streamAllMessages = async (client: Client) => {
+  await stopStreamingAllMessage(client);
   client.conversations.streamAllMessages(async (message) => {
     saveMessages(
       client.address,
@@ -60,6 +61,9 @@ export const streamAllMessages = async (client: Client) => {
     );
   });
 };
+
+export const stopStreamingAllMessage = async (client: Client) =>
+  client.conversations.cancelStreamAllMessages();
 
 export const loadConversationsMessages = async (
   client: Client,
