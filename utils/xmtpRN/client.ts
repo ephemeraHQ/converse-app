@@ -3,8 +3,16 @@ import { Client } from "@xmtp/react-native-sdk";
 import config from "../../config";
 import { getChatStore, getUserStore } from "../../data/store/accountsStore";
 import { loadXmtpKey } from "../keychain";
-import { loadConversations, streamConversations } from "./conversations";
-import { loadConversationsMessages, streamAllMessages } from "./messages";
+import {
+  loadConversations,
+  stopStreamingConversations,
+  streamConversations,
+} from "./conversations";
+import {
+  loadConversationsMessages,
+  stopStreamingAllMessage,
+  streamAllMessages,
+} from "./messages";
 
 const env = config.xmtpEnv === "production" ? "production" : "dev";
 
@@ -63,4 +71,13 @@ export const syncXmtpClient = async (
   // Need to save initial load is done
   getChatStore(account).getState().setInitialLoadDone();
   getChatStore(account).getState().setLastSyncedAt(now);
+};
+
+export const deleteXmtpClient = async (account: string) => {
+  if (account in xmtpClientByAccount) {
+    const client = xmtpClientByAccount[account];
+    stopStreamingAllMessage(client);
+    stopStreamingConversations(client);
+    delete xmtpClientByAccount[account];
+  }
 };
