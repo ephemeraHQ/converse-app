@@ -21,15 +21,21 @@ export default function XmtpEngine() {
 
   const syncAccounts = useCallback((accountsToSync: string[]) => {
     accountsToSync.forEach((a) => {
+      syncedAccounts.current[a] = true;
       const knownTopics = Object.keys(getChatStore(a).getState().conversations);
       const lastSyncedAt = getChatStore(a).getState().lastSyncedAt;
       syncXmtpClient(a, knownTopics, lastSyncedAt);
-      syncedAccounts.current[a] = true;
     });
   }, []);
 
   // Sync accounts on load and when a new one is added
   useEffect(() => {
+    // Let's remove accounts that dont exist anymore from ref
+    Object.keys(syncedAccounts.current).forEach((account) => {
+      if (!accounts.includes(account)) {
+        delete syncedAccounts.current[account];
+      }
+    });
     if (hydrationDone) {
       const unsyncedAccounts = accounts.filter(
         (a) => !syncedAccounts.current[a]

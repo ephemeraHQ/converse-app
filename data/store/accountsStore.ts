@@ -54,7 +54,7 @@ export const getAccountsList = () =>
 
 export const useAccountsList = () => {
   const accounts = useAccountsStore((s) => s.accounts);
-  return accounts.filter((a) => a !== TEMPORARY_ACCOUNT_NAME);
+  return accounts.filter((a) => a && a !== TEMPORARY_ACCOUNT_NAME);
 };
 
 // This store is global (i.e. not linked to an account)
@@ -79,7 +79,7 @@ export const useAccountsStore = create<AccountsStoreStype>()(
           if (!storesByAccount[account]) {
             initStores(account);
           }
-          const accounts = state.accounts;
+          const accounts = [...state.accounts];
           if (!accounts.includes(account)) {
             accounts.push(account);
           }
