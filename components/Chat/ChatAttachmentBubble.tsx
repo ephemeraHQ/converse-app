@@ -153,7 +153,7 @@ export default function ChatAttachmentBubble({ message }: Props) {
               parsedType && isImageMimetype(parsedType)
                 ? "IMAGE"
                 : "UNSUPPORTED",
-            loading: false,
+            loading: contentLength <= 10000000,
             mediaURL: undefined,
             imageSize: undefined,
             contentLength: parsedEncodedContent.contentLength,
