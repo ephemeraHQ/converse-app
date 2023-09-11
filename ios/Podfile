@@ -11,7 +11,7 @@ require 'json'
 podfile_properties = JSON.parse(File.read(File.join(__dir__, 'Podfile.properties.json'))) rescue {}
 
 plugin 'cocoapods-pod-linkage'
-platform :ios, podfile_properties['ios.deploymentTarget'] || '16.0'
+platform :ios, podfile_properties['ios.deploymentTarget'] || '14.0'
 install! 'cocoapods',
   :deterministic_uuids => false
 
@@ -52,7 +52,7 @@ target 'Converse' do
     installer.pods_project.targets.each do |target|
       target.build_configurations.each do |config|
         config.build_settings['SWIFT_VERSION'] = '5.0'
-        config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '16.0'
+        config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '14.0'
         config.build_settings['CODE_SIGNING_ALLOWED'] = 'NO'
       end
     end
@@ -69,7 +69,7 @@ target 'Converse' do
     end
 
     # Patch package
-    system('patch -i patches/XMTP.diff')
+    system('patch -i patches/XMTP.diff -N')
 
   end
 
