@@ -14,6 +14,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import config from "../../config";
 import {
+  useAccountsStore,
   useRecommendationsStore,
   useUserStore,
 } from "../../data/store/accountsStore";
@@ -39,6 +40,7 @@ export default function Recommendations({
   visibility: "FULL" | "EMBEDDED" | "HIDDEN";
 }) {
   const userAddress = useUserStore((s) => s.userAddress);
+  const currentAccount = useAccountsStore((s) => s.currentAccount);
   const {
     frens,
     setLoadingRecommendations,
@@ -76,7 +78,7 @@ export default function Recommendations({
     // On load, let's load frens
     const getRecommendations = async () => {
       setLoadingRecommendations();
-      const frens = await findFrens();
+      const frens = await findFrens(currentAccount);
       const now = new Date().getTime();
       setRecommendations(frens, now);
     };
@@ -90,6 +92,7 @@ export default function Recommendations({
     setRecommendations,
     userAddress,
     updatedAt,
+    currentAccount,
   ]);
 
   const keyExtractor = useCallback((address: string) => address, []);

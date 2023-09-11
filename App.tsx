@@ -14,7 +14,6 @@ import * as Sentry from "sentry-expo";
 import XmtpEngine from "./components/XmtpEngine";
 import config from "./config";
 import { migrateDataIfNeeded } from "./data/refacto";
-import { useAppStore } from "./data/store/appStore";
 import Main from "./screens/Main";
 import {
   backgroundColor,
@@ -60,8 +59,6 @@ export default function App() {
       });
   }, []);
 
-  const lastWebviewReset = useAppStore((s) => s.lastWebviewReset);
-
   if (!refactoMigrationDone) return null;
 
   // On Android we use the default keyboard "animation"
@@ -91,10 +88,6 @@ export default function App() {
             }
           >
             <View style={styles.safe}>
-              {/* <React.Fragment key={lastWebviewReset}>
-                <XmtpWebview />
-                <XmtpState />
-              </React.Fragment> */}
               <XmtpEngine />
               <Main />
             </View>

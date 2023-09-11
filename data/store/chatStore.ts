@@ -65,7 +65,6 @@ export type ChatStoreType = {
   initialLoadDone: boolean;
   initialLoadDoneOnce: boolean;
   localClientConnected: boolean;
-  webviewClientConnected: boolean;
   resyncing: boolean;
   reconnecting: boolean;
   deletedTopics: { [topic: string]: boolean };
@@ -96,7 +95,6 @@ export type ChatStoreType = {
   ) => void;
 
   setLocalClientConnected: (connected: boolean) => void;
-  setWebviewClientConnected: (connected: boolean) => void;
   setResyncing: (syncing: boolean) => void;
   setReconnecting: (reconnecting: boolean) => void;
   setLastSyncedAt: (synced: number) => void;
@@ -299,9 +297,6 @@ export const initChatStore = (account: string) => {
           localClientConnected: false,
           setLocalClientConnected: (c) =>
             set(() => ({ localClientConnected: c })),
-          webviewClientConnected: false,
-          setWebviewClientConnected: (c) =>
-            set(() => ({ webviewClientConnected: c })),
           resyncing: false,
           setResyncing: (syncing) => set(() => ({ resyncing: syncing })),
           reconnecting: false,

@@ -84,6 +84,12 @@ export const setOpenedConversation = (
   openedConversations[account][conversation.topic] = conversation;
 };
 
+export const deleteOpenedConversations = (account: string) => {
+  if (account in openedConversations) {
+    delete openedConversations[account];
+  }
+};
+
 export const streamConversations = async (client: Client) => {
   await stopStreamingConversations(client);
   client.conversations.stream(async (conversation) => {
