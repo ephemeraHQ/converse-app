@@ -5,10 +5,9 @@ import {
   RemoteAttachmentContent,
 } from "@xmtp/react-native-sdk";
 import RNFS from "react-native-fs";
-import { Filelike } from "web3.storage";
 
 import { getImageSize, isImageMimetype } from "./media";
-import web3StorageClient from "./web3.storage";
+import { uploadFileToWeb3Storage } from "./web3.storage";
 
 export type SerializedAttachmentContent = {
   filename: string;
@@ -78,7 +77,10 @@ export const handleDecryptedRemoteAttachment = async (
   const filename = localAttachment.fileUri.split("/").slice(-1)[0];
   const attachmentPath = `${messageFolder}/${filename}`;
   // Let's cache the file and decoded information
-  await RNFS.moveFile(localAttachment.fileUri, attachmentPath);
+  await RNFS.moveFile(
+    localAttachment.fileUri.replace("file:///", "/"),
+    attachmentPath
+  );
   return handleAttachment(messageId, filename, localAttachment.mimeType);
 };
 
@@ -156,38 +158,15 @@ export const getLocalAttachment = async (messageId: string) => {
 export const uploadRemoteAttachment = async (
   attachment: EncryptedLocalAttachment
 ): Promise<RemoteAttachmentContent> => {
-  const filePayloadBase64 = await RNFS.readFile(
-    attachment.encryptedLocalFileUri,
-    "base64"
+  const cid = await uploadFileToWeb3Storage(
+    attachment.encryptedLocalFileUri.replace("file:///", "/"),
+    "XMTPEncryptedContent",
+    "application/octet-stream"
   );
-  const filePayloadBuffer = Buffer.from(filePayloadBase64, "base64");
-  const upload = new Upload("XMTPEncryptedContent", filePayloadBuffer);
-  const cid = await web3StorageClient.put([upload]);
-  const url = `https://${cid}.ipfs.w3s.link/XMTPEncryptedContent`;
+  const url = `https://${cid}.ipfs.w3s.link`;
   return {
     scheme: "https://",
     url,
     ...attachment.metadata,
   };
 };
-
-class Upload implements Filelike {
-  name: string;
-  data: Uint8Array;
-
-  constructor(name: string, data: Uint8Array) {
-    this.name = name;
-    this.data = data;
-  }
-
-  stream(): ReadableStream {
-    // eslint-disable-next-line @typescript-eslint/no-this-alias
-    const self = this;
-    return new ReadableStream({
-      start(controller) {
-        controller.enqueue(Buffer.from(self.data));
-        controller.close();
-      },
-    });
-  }
-}

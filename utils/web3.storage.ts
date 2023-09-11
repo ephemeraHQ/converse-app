@@ -1,9 +1,27 @@
-import type { Web3Storage as Web3StorageType } from "web3.storage";
+import RNFS from "react-native-fs";
 
 import config from "../config";
 
-const { Web3Storage } = require("web3.storage/dist/bundle.esm.min.js");
-
-export default new Web3Storage({
-  token: config.web3StorageToken,
-}) as Web3StorageType;
+export const uploadFileToWeb3Storage = async (
+  filePath: string,
+  fileName: string,
+  mimeType: string
+): Promise<string> => {
+  const web3StorageUpload = await RNFS.uploadFiles({
+    toUrl: "https://api.web3.storage/upload",
+    files: [
+      {
+        name: "file",
+        filename: fileName,
+        filepath: filePath,
+        filetype: mimeType,
+      },
+    ],
+    headers: {
+      Authorization: `Bearer ${config.web3StorageToken}`,
+    },
+  });
+  const uploadResult = await web3StorageUpload.promise;
+  const result = JSON.parse(uploadResult.body);
+  return result.cid;
+};
