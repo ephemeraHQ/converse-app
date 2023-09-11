@@ -11,6 +11,7 @@ import {
 import { deleteConversationsFromKeychain, deleteXmtpKey } from "./keychain";
 import { disablePushNotifications } from "./notifications";
 import { resetSharedData } from "./sharedData/sharedData";
+import { deleteXmtpClient } from "./xmtpRN/client";
 
 export const logout = async (account: string) => {
   const topicsByAccount: { [a: string]: string[] } = {};
@@ -39,6 +40,8 @@ export const logout = async (account: string) => {
 
   // Now launch clear db
   clearDB(account, false);
+
+  deleteXmtpClient(account);
   // TODO => we should save this information
   // to be able to do it even offline.
   // need to save : known conversation topics + account

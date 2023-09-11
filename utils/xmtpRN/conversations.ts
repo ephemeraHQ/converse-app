@@ -1,6 +1,12 @@
 import { keystore } from "@xmtp/proto";
-import { Client, Conversation } from "@xmtp/react-native-sdk";
+import {
+  Client,
+  Conversation,
+  ConversationContext,
+} from "@xmtp/react-native-sdk";
 
+import { Conversation as DbConversation } from "../../data/db/entities/conversationEntity";
+import { getPendingConversationsToCreate } from "../../data/helpers/conversations/pendingConversations";
 import { saveConversations } from "../../data/helpers/conversations/upsertConversations";
 import { XmtpConversation } from "../../data/store/chatStore";
 import {
@@ -79,6 +85,7 @@ export const setOpenedConversation = (
 };
 
 export const streamConversations = async (client: Client) => {
+  await stopStreamingConversations(client);
   client.conversations.stream(async (conversation) => {
     setOpenedConversation(client.address, conversation);
     saveConversations(client.address, [
@@ -86,6 +93,9 @@ export const streamConversations = async (client: Client) => {
     ]);
   });
 };
+
+export const stopStreamingConversations = async (client: Client) =>
+  client.conversations.cancelStream();
 
 export const listConversations = async (client: Client) => {
   const conversations = await client.conversations.list();
@@ -159,4 +169,44 @@ export const getLocalXmtpConversationForTopic = async (
     throw new Error(`No conversation found for topic ${topic}`);
   }
   return conversation;
+};
+
+const createConversation = async (
+  account: string,
+  dbConversation: DbConversation
+) => {
+  if (!dbConversation.pending) {
+    throw new Error("Can only create a conversation that is pending");
+  }
+  console.log(
+    `[XMTP] Creating a conversation with peer ${dbConversation.peerAddress} and id ${dbConversation.contextConversationId}`
+  );
+  const client = await getXmtpClient(account);
+  let context: ConversationContext | undefined = undefined;
+  if (dbConversation.contextConversationId) {
+    context = {
+      conversationID: dbConversation.contextConversationId,
+      metadata: dbConversation.contextMetadata
+        ? JSON.parse(dbConversation.contextMetadata)
+        : {},
+    };
+  }
+  const newConversation = await client.conversations.newConversation(
+    dbConversation.peerAddress,
+    context
+  );
+  setOpenedConversation(account, newConversation);
+  saveConversations(client.address, [
+    protocolConversationToStateConversation(newConversation),
+  ]);
+  return newConversation.topic;
+};
+
+export const createPendingConversations = async (account: string) => {
+  const pendingConvos = await getPendingConversationsToCreate(account);
+  if (pendingConvos.length === 0) return;
+  console.log(
+    `Trying to create ${pendingConvos.length} pending conversations...`
+  );
+  await Promise.all(pendingConvos.map((c) => createConversation(account, c)));
 };
