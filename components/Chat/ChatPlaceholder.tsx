@@ -9,6 +9,7 @@ import {
 } from "react-native";
 
 import {
+  currentAccount,
   useProfilesStore,
   useRecommendationsStore,
   useSettingsStore,
@@ -88,6 +89,7 @@ export default function ChatPlaceholder({ messagesCount }: Props) {
                       blockPeer({
                         peerAddress: conversation.peerAddress,
                         blocked: false,
+                        account: currentAccount(),
                       });
                       setBlockedPeerStatus(conversation.peerAddress, false);
                     }

@@ -29,14 +29,21 @@ export type NotificationPermissionStatus =
   | "undetermined"
   | "denied";
 
-let lastSubscribedTopics: string[] = [];
+const lastSubscribedTopicsByAccount: { [account: string]: string[] } = {};
+
+export const deleteSubscribedTopicsInformation = (account: string) => {
+  if (account in lastSubscribedTopicsByAccount) {
+    delete lastSubscribedTopicsByAccount[account];
+  }
+};
 
 export const subscribeToNotifications = async (
-  address: string,
+  account: string,
   conversations: XmtpConversation[],
   blockedPeerAddresses: { [peerAddress: string]: boolean },
   deletedTopics: { [topic: string]: boolean }
 ): Promise<void> => {
+  const lastSubscribedTopics = lastSubscribedTopicsByAccount[account] || [];
   const topics = [
     ...conversations
       .filter(
@@ -47,7 +54,7 @@ export const subscribeToNotifications = async (
           !deletedTopics[c.topic]
       )
       .map((c) => c.topic),
-    buildUserInviteTopic(address || ""),
+    buildUserInviteTopic(account || ""),
   ];
   const [expoTokenQuery, nativeTokenQuery] = await Promise.all([
     Notifications.getExpoPushTokenAsync({ projectId: config.expoProjectId }),
@@ -69,7 +76,7 @@ export const subscribeToNotifications = async (
       nativeTokenType: nativeTokenQuery.type,
       topics,
     });
-    lastSubscribedTopics = topics;
+    lastSubscribedTopicsByAccount[account] = topics;
   } catch (e: any) {
     console.log("Could not subscribe to notifications");
     console.log(e?.message);

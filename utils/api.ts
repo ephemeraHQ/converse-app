@@ -1,6 +1,5 @@
 import axios from "axios";
 
-import { getXmtpApiHeaders } from "../components/XmtpState";
 import config from "../config";
 import {
   EnsName,
@@ -9,6 +8,7 @@ import {
   UnstoppableDomain,
 } from "../data/store/profilesStore";
 import { Frens } from "../data/store/recommendationsStore";
+import { getXmtpApiHeaders } from "../utils/xmtpRN/client";
 
 const api = axios.create({
   baseURL: config.apiURI,
@@ -24,12 +24,14 @@ export const userExists = async (address: string) => {
 };
 
 type ReportMessageQuery = {
+  account: string;
   messageId: string;
   messageContent: string;
   messageSender: string;
 };
 
 export const reportMessage = async ({
+  account,
   messageId,
   messageContent,
   messageSender,
@@ -41,29 +43,34 @@ export const reportMessage = async ({
       messageContent,
       messageSender,
     },
-    { headers: await getXmtpApiHeaders() }
+    { headers: await getXmtpApiHeaders(account) }
   );
 };
 
 type BlockPeerQuery = {
+  account: string;
   peerAddress: string;
   blocked: boolean;
 };
 
-export const blockPeer = async ({ peerAddress, blocked }: BlockPeerQuery) => {
+export const blockPeer = async ({
+  peerAddress,
+  blocked,
+  account,
+}: BlockPeerQuery) => {
   await api.post(
     "/api/block/peer",
     {
       peerAddress,
       blocked,
     },
-    { headers: await getXmtpApiHeaders() }
+    { headers: await getXmtpApiHeaders(account) }
   );
 };
 
-export const getBlockedPeers = async () => {
+export const getBlockedPeers = async (account: string) => {
   const { data } = await api.get("/api/block/peer", {
-    headers: await getXmtpApiHeaders(),
+    headers: await getXmtpApiHeaders(account),
   });
   return data.blockedPeers as string[];
 };
@@ -114,11 +121,10 @@ export const getProfilesForAddresses = async (
   return data;
 };
 
-export const findFrens = async () => {
-  const headers = await getXmtpApiHeaders();
+export const findFrens = async (account: string) => {
   const { data } = await api.get("/api/frens/find", {
-    // headers: await getXmtpApiHeaders(),
-    params: { address: headers["xmtp-api-address"] },
+    // headers: await getXmtpApiHeaders(account),
+    params: { address: account },
   });
 
   return data.frens as Frens;

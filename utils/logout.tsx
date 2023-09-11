@@ -1,7 +1,6 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Platform } from "react-native";
 
-import { resetWebview } from "../components/XmtpWebview";
 import { clearDB } from "../data/db";
 import {
   getAccountsList,
@@ -9,7 +8,10 @@ import {
   useAccountsStore,
 } from "../data/store/accountsStore";
 import { deleteConversationsFromKeychain, deleteXmtpKey } from "./keychain";
-import { disablePushNotifications } from "./notifications";
+import {
+  deleteSubscribedTopicsInformation,
+  disablePushNotifications,
+} from "./notifications";
 import { resetSharedData } from "./sharedData/sharedData";
 import { deleteXmtpClient } from "./xmtpRN/client";
 
@@ -35,13 +37,12 @@ export const logout = async (account: string) => {
   });
 
   useAccountsStore.getState().removeAccount(account);
-  // Reset webview
-  resetWebview();
 
   // Now launch clear db
   clearDB(account, false);
 
   deleteXmtpClient(account);
+  deleteSubscribedTopicsInformation(account);
   // TODO => we should save this information
   // to be able to do it even offline.
   // need to save : known conversation topics + account
@@ -53,7 +54,7 @@ export const logout = async (account: string) => {
     // TODO => remove notifications for this account's topic
     promisesToAwait.push(disablePushNotifications());
     // Delete keychain xmtp
-    // TODO => remove keychain XMTP for this account's onlyu
+    // TODO => remove keychain XMTP for this account's only
     promisesToAwait.push(deleteXmtpKey(account));
     // Delete shared data
     promisesToAwait.push(resetSharedData());

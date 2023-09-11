@@ -20,7 +20,6 @@ import SeedPhraseConnect, {
 } from "../components/Onboarding/SeedPhraseConnect";
 import WalletSelector from "../components/Onboarding/WalletSelector";
 import { resetLocalXmtpState } from "../components/XmtpState";
-import { sendMessageToWebview } from "../components/XmtpWebview";
 import config from "../config";
 import { clearDB } from "../data/db";
 import {
@@ -256,10 +255,6 @@ export default function OnboardingScreen() {
       resetRecommendations();
       // Now we can instantiate the XMTP Client
       getXmtpClient(user.address);
-      sendMessageToWebview("KEYS_LOADED_FROM_SECURE_STORAGE", {
-        keys: JSON.stringify(Array.from(keysBuffer)),
-        env: config.xmtpEnv,
-      });
     } catch (e) {
       initiatingClientFor.current = undefined;
       setLoading(false);

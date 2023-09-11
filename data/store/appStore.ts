@@ -30,9 +30,6 @@ type AppStoreType = {
       error: boolean;
     } | null
   ) => void;
-
-  lastWebviewReset: number;
-  setLastWebviewReset: (timestamp: number) => void;
 };
 
 export const useAppStore = create<AppStoreType>()((set) => ({
@@ -55,8 +52,4 @@ export const useAppStore = create<AppStoreType>()((set) => ({
 
   mediaPreview: null,
   setMediaPreview: (preview) => set(() => ({ mediaPreview: preview })),
-
-  lastWebviewReset: 0,
-  setLastWebviewReset: (timestamp) =>
-    set(() => ({ lastWebviewReset: timestamp })),
 }));

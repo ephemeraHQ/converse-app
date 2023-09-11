@@ -28,7 +28,7 @@ const computeRemoteAttachmentMessageContent = (
 const protocolMessageToStateMessage = (
   message: DecodedMessage
 ): XmtpMessage => {
-  const referencedMessageId = undefined; // TODO => handle referenced if reaction
+  let referencedMessageId: string | undefined = undefined;
   let content = message.content.text || "";
   if (message.content.remoteAttachment) {
     content = computeRemoteAttachmentMessageContent(
@@ -38,6 +38,7 @@ const protocolMessageToStateMessage = (
     content = JSON.stringify(message.content.attachment);
   } else if (message.content.reaction) {
     content = JSON.stringify(message.content.reaction);
+    referencedMessageId = message.content.reaction.reference;
   }
   return {
     id: message.id,
