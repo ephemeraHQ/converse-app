@@ -18,9 +18,13 @@ import { uploadRemoteAttachment } from "../../utils/attachment";
 import { actionSheetColors, textSecondaryColor } from "../../utils/colors";
 import { useConversationContext } from "../../utils/conversation";
 import { executeAfterKeyboardClosed } from "../../utils/keyboard";
+import { sendMessage } from "../../utils/message";
 import { pick } from "../../utils/objects";
 import { sentryTrackMessage } from "../../utils/sentry";
-import { encryptRemoteAttachment } from "../../utils/xmtpRN/attachments";
+import {
+  encryptRemoteAttachment,
+  serializeRemoteAttachmentMessageContent,
+} from "../../utils/xmtpRN/attachments";
 import Picto from "../Picto/Picto";
 import { showActionSheetWithOptions } from "../StateHandlers/ActionSheetStateHandler";
 
@@ -60,12 +64,13 @@ export default function ChatAddAttachment() {
         );
         if (currentAttachmentMediaURI.current !== assetRef.current?.uri) return;
         setMediaPreview(null);
-        // SEND MESSAGE
-        // sendMessage(
-        //   conversation,
-        //   JSON.stringify(remoteAttachment),
-        //   ContentTypeRemoteAttachment.toString()
-        // );
+        // TODO => save attachment locally so that we can display it immediatly
+        // Send message
+        sendMessage(
+          conversation,
+          serializeRemoteAttachmentMessageContent(uploadedAttachment),
+          "xmtp.org/remoteStaticAttachment:1.0"
+        );
 
         uploading.current = false;
       } catch (error) {
@@ -76,44 +81,6 @@ export default function ChatAddAttachment() {
           error: true,
         });
       }
-
-      // sendMessageToWebview(
-      //   "UPLOAD_ATTACHMENT",
-      //   {
-      //     filename,
-      //     base64Content,
-      //     mimeType: mime.getType(filename || ""),
-      //   },
-      //   async ({
-      //     status,
-      //     error,
-      //     remoteAttachment,
-      //   }: {
-      //     status: string;
-      //     error: string;
-      //     remoteAttachment: SerializedRemoteAttachmentContent;
-      //   }) => {
-      //     if (currentAttachmentMediaURI.current !== assetRef.current?.uri)
-      //       return;
-      //     if (status === "SUCCESS") {
-      //       setMediaPreview(null);
-      //       sendMessage(
-      //         conversation,
-      //         JSON.stringify(remoteAttachment),
-      //         ContentTypeRemoteAttachment.toString()
-      //       );
-      //     } else if (currentAttachmentMediaURI.current) {
-      //       sentryTrackMessage("ATTACHMENT_UPLOAD_ERROR", { error });
-      //       setMediaPreview({
-      //         mediaURI: currentAttachmentMediaURI.current,
-      //         sending: false,
-      //         error: true,
-      //       });
-      //     }
-
-      //     uploading.current = false;
-      //   }
-      // );
     };
     if (
       mediaPreview?.mediaURI &&
