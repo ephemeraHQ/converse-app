@@ -8,20 +8,10 @@ import ActivityIndicator from "./ActivityIndicator/ActivityIndicator";
 
 export const useShouldShowConnecting = () => {
   const isInternetReachable = useAppStore((s) => s.isInternetReachable);
-  const { localClientConnected, webviewClientConnected, reconnecting } =
-    useChatStore((s) =>
-      pick(s, [
-        "localClientConnected",
-        "webviewClientConnected",
-        "reconnecting",
-      ])
-    );
-  return (
-    !isInternetReachable ||
-    !localClientConnected ||
-    !webviewClientConnected ||
-    reconnecting
+  const { localClientConnected, reconnecting } = useChatStore((s) =>
+    pick(s, ["localClientConnected", "reconnecting"])
   );
+  return !isInternetReachable || !localClientConnected || reconnecting;
 };
 
 export const useShouldShowConnectingOrSyncing = () => {
