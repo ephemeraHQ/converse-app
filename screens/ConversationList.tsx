@@ -13,7 +13,6 @@ import {
   Text,
   View,
   Keyboard,
-  Animated,
 } from "react-native";
 
 import Connecting, {
@@ -210,32 +209,12 @@ export default function ConversationList({
     ]
   );
 
-  const [headerAnim] = useState(new Animated.Value(0));
-
-  useEffect(() => {
-    if (searchBarFocused) {
-      Animated.timing(headerAnim, {
-        toValue: 1,
-        duration: 400,
-        useNativeDriver: false,
-      }).start();
-    } else {
-      Animated.timing(headerAnim, {
-        toValue: 0,
-        duration: 400,
-        useNativeDriver: false,
-      }).start();
-    }
-  }, [searchBarFocused, headerAnim]);
-
   const SearchTitleHeader = () => {
     const styles = useStyles();
     return (
-      <Animated.View
-        style={[{ opacity: headerAnim }, styles.searchTitleContainer]}
-      >
+      <View style={styles.searchTitleContainer}>
         <Text style={styles.searchTitle}>Chats</Text>
-      </Animated.View>
+      </View>
     );
   };
 
@@ -289,6 +268,9 @@ export default function ConversationList({
           keyExtractor={keyExtractor}
           estimatedItemSize={Platform.OS === "ios" ? 77 : 88}
           ListHeaderComponent={searchBarFocused ? <SearchTitleHeader /> : null}
+          ListFooterComponent={
+            showNoResult ? <NoResult navigation={navigation} /> : null
+          }
         />
       </View>
     </View>
@@ -299,14 +281,6 @@ export default function ConversationList({
   } else if (showWelcome) {
     screenToShow = (
       <Welcome ctaOnly={false} navigation={navigation} route={route} />
-    );
-  } else if (showNoResult) {
-    screenToShow = (
-      <View style={styles.container}>
-        <View style={styles.conversationList}>
-          <NoResult navigation={navigation} />
-        </View>
-      </View>
     );
   }
 
