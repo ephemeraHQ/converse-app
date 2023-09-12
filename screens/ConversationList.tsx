@@ -89,12 +89,6 @@ export default function ConversationList({
 
   useEffect(() => {
     const items = ephemeralAccount ? [{ topic: "ephemeral" }] : [];
-    setFlatListItems([
-      ...items,
-      ...(sortedConversations || []),
-      { topic: "welcome" },
-    ]);
-
     if (searchQuery && sortedConversations) {
       const matchedPeerAddresses = getMatchedPeerAddresses(
         profiles,
@@ -103,8 +97,13 @@ export default function ConversationList({
       const filteredConversations = sortedConversations.filter((conversation) =>
         matchedPeerAddresses.includes(conversation.peerAddress)
       );
-
       setFlatListItems([...(filteredConversations || [])]);
+    } else {
+      setFlatListItems([
+        ...items,
+        ...(sortedConversations || []),
+        { topic: "welcome" },
+      ]);
     }
   }, [ephemeralAccount, searchQuery, sortedConversations, profiles]);
 
