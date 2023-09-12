@@ -60,18 +60,19 @@ export default function ConversationList({
   const profiles = useProfilesStore((state) => state.profiles);
   const shouldShowConnectingOrSyncing = useShouldShowConnectingOrSyncing();
   const [flatListItems, setFlatListItems] = useState<FlatListItem[]>([]);
-  const [filteredItems, setFilteredItems] = useState<FlatListItem[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
+  const [sortedConversations, setSortedConversations] =
+    useState<ConversationWithLastMessagePreview[]>();
 
   useEffect(() => {
-    const conversationsList = Object.values(conversations)
+    const conversationWithPreview = Object.values(conversations)
       .filter((a) => a?.peerAddress && (!a.pending || a.messages.size > 0))
       .map((c: ConversationWithLastMessagePreview) => {
         c.lastMessagePreview = conversationLastMessagePreview(c, userAddress);
         return c;
       });
 
-    conversationsList.sort((a, b) => {
+    conversationWithPreview.sort((a, b) => {
       const aDate = a.lastMessagePreview
         ? a.lastMessagePreview.message.sent
         : a.createdAt;
@@ -80,31 +81,37 @@ export default function ConversationList({
         : b.createdAt;
       return bDate - aDate;
     });
-    const items = ephemeralAccount ? [{ topic: "ephemeral" }] : [];
 
-    // Search logic
-    if (searchQuery) {
+    setSortedConversations(conversationWithPreview);
+  }, [userAddress, conversations, lastUpdateAt]);
+
+  useEffect(() => {
+    const items = ephemeralAccount ? [{ topic: "ephemeral" }] : [];
+    setFlatListItems([
+      ...items,
+      ...(sortedConversations || []),
+      { topic: "welcome" },
+    ]);
+
+    if (searchQuery && sortedConversations) {
       const matchedPeerAddresses = getMatchedPeerAddresses(
         profiles,
         searchQuery
       );
-      const filteredConversations = conversationsList.filter((conversation) =>
+      const filteredConversations = sortedConversations.filter((conversation) =>
         matchedPeerAddresses.includes(conversation.peerAddress)
       );
-      setFilteredItems(filteredConversations);
-    } else {
-      setFilteredItems(conversationsList);
-    }
 
-    setFlatListItems([...items, ...conversationsList, { topic: "welcome" }]);
-  }, [
-    ephemeralAccount,
-    userAddress,
-    conversations,
-    lastUpdateAt,
-    profiles,
-    searchQuery,
-  ]);
+      // console.log('matchedPeerAddresses:', matchedPeerAddresses);
+      // console.log('= sortedConversations:', JSON.stringify(sortedConversations, null, 2) );
+      // console.log('= filteredConversations:', JSON.stringify(filteredConversations, null, 2) );
+
+      setFlatListItems([
+        ...(filteredConversations || []),
+        { topic: "welcome" },
+      ]);
+    }
+  }, [ephemeralAccount, searchQuery, sortedConversations, profiles]);
 
   useEffect(() => {
     navigation.setOptions({
@@ -121,7 +128,7 @@ export default function ConversationList({
         </>
       ),
     });
-  }, [navigation, route, userAddress]);
+  }, [navigation, route, userAddress, profiles]);
 
   useEffect(() => {
     navigation.setOptions({
@@ -201,8 +208,9 @@ export default function ConversationList({
   if (!initialLoadDoneOnce && flatListItems.length <= 1) {
     screenToShow = <InitialLoad />;
   } else if (
-    flatListItems.length === 1 ||
-    (flatListItems.length === 2 && ephemeralAccount)
+    (flatListItems.length === 1 ||
+      (flatListItems.length === 2 && ephemeralAccount)) &&
+    !searchQuery
   ) {
     screenToShow = (
       <Welcome ctaOnly={false} navigation={navigation} route={route} />
@@ -221,7 +229,7 @@ export default function ConversationList({
         <View style={styles.conversationList}>
           <FlashList
             contentInsetAdjustmentBehavior="automatic"
-            data={filteredItems}
+            data={flatListItems}
             extraData={[
               colorScheme,
               navigation,
