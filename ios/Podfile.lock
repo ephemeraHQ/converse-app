@@ -667,7 +667,7 @@ PODS:
     - GzipSwift
     - web3.swift
     - XMTPRust (= 0.3.1-beta0)
-  - XMTPReactNative (1.13.0):
+  - XMTPReactNative (1.14.0):
     - ExpoModulesCore
     - MessagePacker
     - XMTP (= 0.5.2-alpha0)
@@ -1084,7 +1084,7 @@ SPEC CHECKSUMS:
   SwiftProtobuf: 7773c4e96a99d7b8ab7cda0fc30a883732ff93b1
   web3.swift: 2263d1e12e121b2c42ffb63a5a7beb1acaf33959
   XMTP: 84bc7d2140d86d9548062ce78d67b8890f5f07e3
-  XMTPReactNative: 1b7aa5d31595c3348f4f2da1878459fa2b5fde1c
+  XMTPReactNative: 1e62bde68334e3821910c7501fbf1a5eae19cb71
   XMTPRust: 78f65f77b1454392980da244961777aee955652f
   Yoga: 3efc43e0d48686ce2e8c60f99d4e6bd349aff981
 
