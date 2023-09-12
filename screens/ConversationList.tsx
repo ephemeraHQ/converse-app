@@ -7,6 +7,7 @@ import React, {
   useState,
 } from "react";
 import { Platform, StyleSheet, useColorScheme, Text, View } from "react-native";
+import { Searchbar as MaterialSearchBar } from "react-native-paper";
 import { SearchBarCommands } from "react-native-screens";
 
 import Connecting, {
@@ -17,6 +18,7 @@ import ShareProfileButton from "../components/ConversationList/ShareProfileButto
 import ConversationListItem from "../components/ConversationListItem";
 import EphemeralAccountBanner from "../components/EphemeralAccountBanner";
 import InitialLoad from "../components/InitialLoad";
+import Picto from "../components/Picto/Picto";
 import Recommendations from "../components/Recommendations/Recommendations";
 import NoResult from "../components/Search/NoResult";
 import SettingsButton from "../components/SettingsButton";
@@ -32,6 +34,8 @@ import {
   textPrimaryColor,
   backgroundColor,
   itemSeparatorColor,
+  textSecondaryColor,
+  chatInputBackgroundColor,
 } from "../utils/colors";
 import {
   LastMessagePreview,
@@ -113,35 +117,95 @@ export default function ConversationList({
   }, [ephemeralAccount, searchQuery, sortedConversations, profiles]);
 
   useEffect(() => {
-    navigation.setOptions({
-      headerLeft: () =>
-        userAddress ? (
-          <SettingsButton route={route} navigation={navigation} />
-        ) : null,
-      headerRight: () => (
-        <>
-          <ShareProfileButton navigation={navigation} route={route} />
-          {Platform.OS === "ios" && (
+    if (Platform.OS === "ios") {
+      navigation.setOptions({
+        headerLeft: () =>
+          userAddress ? (
+            <SettingsButton route={route} navigation={navigation} />
+          ) : null,
+        headerRight: () => (
+          <>
+            <ShareProfileButton navigation={navigation} route={route} />
             <NewConversationButton navigation={navigation} route={route} />
-          )}
-        </>
-      ),
-    });
+          </>
+        ),
+      });
+    }
   }, [navigation, route, userAddress, profiles]);
 
   useEffect(() => {
-    navigation.setOptions({
-      headerTitle: () => {
-        if (shouldShowConnectingOrSyncing) {
-          return <Connecting />;
-        } else {
-          return Platform.OS === "android" ? (
-            <Text style={styles.androidTitle}>Converse</Text>
-          ) : undefined;
-        }
-      },
-    });
-  }, [navigation, shouldShowConnectingOrSyncing, styles.androidTitle]);
+    if (Platform.OS === "android") {
+      const onChangeSearch = (query: React.SetStateAction<string>) =>
+        setSearchQuery(query);
+      const rightProps = searchQuery
+        ? {}
+        : {
+            right: () => (
+              <View style={{ flex: 0.16 }}>
+                <ShareProfileButton navigation={navigation} route={route} />
+              </View>
+            ),
+          };
+
+      navigation.setOptions({
+        headerLeft: () =>
+          !shouldShowConnectingOrSyncing ? (
+            <View
+              style={{
+                flexDirection: "row",
+                justifyContent: "flex-start",
+                width: "100%",
+              }}
+            >
+              <View style={{ flex: 1 }}>
+                <MaterialSearchBar
+                  placeholder="Search chats"
+                  onChangeText={onChangeSearch}
+                  value={searchQuery}
+                  icon={({}) => (
+                    <SettingsButton route={route} navigation={navigation} />
+                  )}
+                  mode="bar"
+                  autoCapitalize="none"
+                  autoFocus={false}
+                  autoCorrect={false}
+                  traileringIcon={() => null}
+                  placeholderTextColor={textSecondaryColor(colorScheme)}
+                  selectionColor={textPrimaryColor(colorScheme)}
+                  style={{
+                    backgroundColor: chatInputBackgroundColor(colorScheme),
+                    paddingLeft: 5,
+                    paddingRight: 8,
+                    marginVertical: 10,
+                  }}
+                  clearIcon={({ color }) => (
+                    <Picto picto="xmark" size={24} color={color} />
+                  )}
+                  {...rightProps}
+                />
+              </View>
+              <View style={{ width: 30 }}>{/* Right spacer */}</View>
+            </View>
+          ) : null,
+        headerTitle: () => {
+          if (shouldShowConnectingOrSyncing) {
+            return <Connecting />;
+          } else {
+            return Platform.OS === "android" ? (
+              <Text style={styles.androidTitle} />
+            ) : null;
+          }
+        },
+      });
+    }
+  }, [
+    navigation,
+    shouldShowConnectingOrSyncing,
+    searchQuery,
+    colorScheme,
+    route,
+    styles.androidTitle,
+  ]);
 
   const keyExtractor = useCallback((item: FlatListItem) => {
     return item.topic;
@@ -227,18 +291,20 @@ export default function ConversationList({
       showWelcome === false &&
       flatListItems.length > 1
     ) {
-      navigation.setOptions({
-        headerSearchBarOptions: {
-          ref: searchBarRef,
-          hideNavigationBar: true,
-          hideWhenScrolling: true,
-          autoFocus: false,
-          placeholder: "Search",
-          onChangeText: (event) => setSearchQuery(event.nativeEvent.text),
-          onFocus: () => setSearchBarFocused(true),
-          onCancelButtonPress: () => setSearchBarFocused(false),
-        },
-      });
+      if (Platform.OS === "ios") {
+        navigation.setOptions({
+          headerSearchBarOptions: {
+            ref: searchBarRef,
+            hideNavigationBar: true,
+            hideWhenScrolling: true,
+            autoFocus: false,
+            placeholder: "Search",
+            onChangeText: (event) => setSearchQuery(event.nativeEvent.text),
+            onFocus: () => setSearchBarFocused(true),
+            onCancelButtonPress: () => setSearchBarFocused(false),
+          },
+        });
+      }
     }
   }, [navigation, showWelcome, initialLoadDoneOnce, flatListItems]);
 

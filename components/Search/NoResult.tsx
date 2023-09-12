@@ -40,24 +40,34 @@ const useStyles = () => {
   const colorScheme = useColorScheme();
   return StyleSheet.create({
     emoji: {
-      textAlign: "center",
-      marginTop: 150,
-      fontSize: 34,
-      marginBottom: 12,
+      ...Platform.select({
+        default: {
+          textAlign: "center",
+          marginTop: 150,
+          fontSize: 34,
+          marginBottom: 12,
+        },
+        android: {
+          display: "none",
+        },
+      }),
     },
     title: {
       color: textPrimaryColor(colorScheme),
       ...Platform.select({
         default: {
+          textAlign: "center",
           fontSize: 17,
           paddingHorizontal: 32,
         },
         android: {
-          fontSize: 14,
-          paddingHorizontal: 39,
+          textAlign: "left",
+          fontSize: 16,
+          lineHeight: 22,
+          paddingTop: 10,
+          paddingHorizontal: 22,
         },
       }),
-      textAlign: "center",
     },
     clickableText: {
       color: primaryColor(colorScheme),
