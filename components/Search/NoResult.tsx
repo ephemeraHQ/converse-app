@@ -1,70 +1,67 @@
+import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import React, {
   useColorScheme,
   StyleSheet,
-  View,
   Text,
   Platform,
 } from "react-native";
 
-import {
-  itemSeparatorColor,
-  textPrimaryColor,
-  textSecondaryColor,
-  messageBubbleColor,
-} from "../../utils/colors";
+import { textPrimaryColor, primaryColor } from "../../utils/colors";
 
-export default function NoResult() {
+export default function NoResult({
+  navigation,
+}: {
+  navigation: NativeStackNavigationProp<any>;
+}) {
   const styles = useStyles();
+
   return (
-    <View style={styles.demoAccountBanner}>
-      <View style={styles.demoAccountBannerLeft}>
-        <Text style={styles.demoAccountTitle}>No Result</Text>
-      </View>
-    </View>
+    <>
+      <Text style={styles.emoji}>👀</Text>
+      <Text style={styles.title}>
+        <Text>
+          We could not find any result in your existing conversations. You might
+          want to{" "}
+        </Text>
+        <Text
+          style={styles.clickableText}
+          onPress={() => {
+            navigation.navigate("NewConversation", { focus: true });
+          }}
+        >
+          start a new conversation
+        </Text>
+      </Text>
+    </>
   );
 }
 
 const useStyles = () => {
   const colorScheme = useColorScheme();
   return StyleSheet.create({
-    demoAccountBanner: {
-      width: "100%",
-      borderBottomColor: itemSeparatorColor(colorScheme),
-      backgroundColor: messageBubbleColor(colorScheme),
-      paddingRight: 16,
-      alignItems: "center",
-      flexDirection: "row",
-      top: 0,
-      zIndex: 1000,
-      ...Platform.select({
-        default: {
-          paddingVertical: 8,
-          paddingLeft: 30,
-          borderBottomWidth: 0.5,
-        },
-        android: { paddingVertical: 12, paddingLeft: 16, borderBottomWidth: 0 },
-      }),
+    emoji: {
+      textAlign: "center",
+      marginTop: 150,
+      fontSize: 34,
+      marginBottom: 12,
     },
-    demoAccountBannerLeft: {
-      flexShrink: 1,
-      marginRight: 10,
-    },
-    demoAccountTitle: {
+    title: {
       color: textPrimaryColor(colorScheme),
       ...Platform.select({
         default: {
           fontSize: 17,
-          fontWeight: "600",
+          paddingHorizontal: 32,
         },
         android: {
-          fontSize: 16,
+          fontSize: 14,
+          paddingHorizontal: 39,
         },
       }),
+      textAlign: "center",
     },
-    demoAccountSubtitle: {
-      fontSize: Platform.OS === "android" ? 14 : 15,
-      color: textSecondaryColor(colorScheme),
-      fontWeight: "400",
+    clickableText: {
+      color: primaryColor(colorScheme),
+      fontWeight: "500",
     },
   });
 };
