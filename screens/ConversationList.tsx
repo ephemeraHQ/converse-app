@@ -117,20 +117,6 @@ export default function ConversationList({
     }
   }, [ephemeralAccount, searchQuery, sortedConversations, profiles]);
 
-  useLayoutEffect(() => {
-    navigation.setOptions({
-      headerSearchBarOptions: {
-        hideNavigationBar: true,
-        hideWhenScrolling: false,
-        autoFocus: false,
-        placeholder: "Search",
-        onChangeText: (event) => setSearchQuery(event.nativeEvent.text),
-        onFocus: () => setSearchBarFocused(true),
-        onCancelButtonPress: () => setSearchBarFocused(false),
-      },
-    });
-  }, [navigation]);
-
   useEffect(() => {
     navigation.setOptions({
       headerLeft: () =>
@@ -259,6 +245,26 @@ export default function ConversationList({
     (flatListItems.length === 1 ||
       (flatListItems.length === 2 && ephemeralAccount));
   const showNoResult = flatListItems.length === 0 && searchQuery;
+
+  useLayoutEffect(() => {
+    if (
+      initialLoadDoneOnce &&
+      showWelcome === false &&
+      flatListItems.length > 1
+    ) {
+      navigation.setOptions({
+        headerSearchBarOptions: {
+          hideNavigationBar: true,
+          hideWhenScrolling: false,
+          autoFocus: false,
+          placeholder: "Search",
+          onChangeText: (event) => setSearchQuery(event.nativeEvent.text),
+          onFocus: () => setSearchBarFocused(true),
+          onCancelButtonPress: () => setSearchBarFocused(false),
+        },
+      });
+    }
+  }, [navigation, showWelcome, initialLoadDoneOnce, flatListItems]);
 
   let screenToShow: JSX.Element = (
     <View style={styles.container}>
