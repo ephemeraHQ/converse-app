@@ -5,7 +5,7 @@ import { ActionSheetProvider } from "@expo/react-native-action-sheet";
 import { Ethereum } from "@thirdweb-dev/chains";
 import { coinbaseWallet, ThirdwebProvider } from "@thirdweb-dev/react-native";
 import React, { useEffect, useState } from "react";
-import { StyleSheet, useColorScheme, View } from "react-native";
+import { Platform, StyleSheet, useColorScheme, View } from "react-native";
 import "./utils/splash/splash";
 import { KeyboardProvider } from "react-native-keyboard-controller";
 import { Provider as PaperProvider } from "react-native-paper";
@@ -64,6 +64,10 @@ export default function App() {
 
   if (!refactoMigrationDone) return null;
 
+  // On Android we use the default keyboard "animation"
+  const AppKeyboardProvider =
+    Platform.OS === "ios" ? KeyboardProvider : React.Fragment;
+
   return (
     <ThirdwebProvider
       activeChain={Ethereum}
@@ -79,7 +83,7 @@ export default function App() {
         }),
       ]}
     >
-      <KeyboardProvider>
+      <AppKeyboardProvider>
         <ActionSheetProvider>
           <PaperProvider
             theme={
@@ -96,7 +100,7 @@ export default function App() {
             </View>
           </PaperProvider>
         </ActionSheetProvider>
-      </KeyboardProvider>
+      </AppKeyboardProvider>
     </ThirdwebProvider>
   );
 }
