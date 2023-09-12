@@ -102,10 +102,6 @@ export default function ConversationList({
         matchedPeerAddresses.includes(conversation.peerAddress)
       );
 
-      // console.log('matchedPeerAddresses:', matchedPeerAddresses);
-      // console.log('= sortedConversations:', JSON.stringify(sortedConversations, null, 2) );
-      // console.log('= filteredConversations:', JSON.stringify(filteredConversations, null, 2) );
-
       setFlatListItems([
         ...(filteredConversations || []),
         { topic: "welcome" },
