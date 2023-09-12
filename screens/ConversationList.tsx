@@ -72,8 +72,9 @@ export default function ConversationList({
   const shouldShowConnectingOrSyncing = useShouldShowConnectingOrSyncing();
   const [flatListItems, setFlatListItems] = useState<FlatListItem[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
-  const [sortedConversations, setSortedConversations] =
-    useState<ConversationWithLastMessagePreview[]>();
+  const [sortedConversations, setSortedConversations] = useState<
+    ConversationWithLastMessagePreview[]
+  >([]);
   const [searchBarFocused, setSearchBarFocused] = useState(false);
 
   useEffect(() => {
@@ -107,11 +108,11 @@ export default function ConversationList({
       const filteredConversations = sortedConversations.filter((conversation) =>
         matchedPeerAddresses.includes(conversation.peerAddress)
       );
-      setFlatListItems([...(filteredConversations || [])]);
+      setFlatListItems([...filteredConversations]);
     } else {
       setFlatListItems([
         ...items,
-        ...(sortedConversations || []),
+        ...sortedConversations,
         { topic: "welcome" },
       ]);
     }
