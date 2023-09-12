@@ -16,7 +16,6 @@ import ConverseChat from "../components/Chat/Chat";
 import ConversationTitle from "../components/Conversation/ConversationTitle";
 import InviteBanner from "../components/InviteBanner";
 import Picto from "../components/Picto/Picto";
-import { getLocalXmtpConversationForTopic } from "../components/XmtpState";
 import config from "../config";
 import {
   currentAccount,
@@ -85,9 +84,6 @@ const Conversation = ({
   useEffect(() => {
     if (conversation && conversation.peerAddress !== peerAddress) {
       setPeerAddress(conversation.peerAddress);
-    }
-    if (conversation && !conversation.pending) {
-      getLocalXmtpConversationForTopic(conversation.topic);
     }
   }, [conversation, peerAddress]);
 
