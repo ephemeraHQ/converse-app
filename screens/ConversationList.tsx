@@ -267,7 +267,9 @@ export default function ConversationList({
           renderItem={renderItem}
           keyExtractor={keyExtractor}
           estimatedItemSize={Platform.OS === "ios" ? 77 : 88}
-          ListHeaderComponent={searchBarFocused ? <SearchTitleHeader /> : null}
+          ListHeaderComponent={
+            searchBarFocused && !showNoResult ? <SearchTitleHeader /> : null
+          }
           ListFooterComponent={
             showNoResult ? <NoResult navigation={navigation} /> : null
           }
