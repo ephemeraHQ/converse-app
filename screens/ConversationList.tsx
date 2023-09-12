@@ -131,7 +131,7 @@ export default function ConversationList({
         ),
       });
     }
-  }, [navigation, route, userAddress, profiles]);
+  }, [navigation, route, userAddress]);
 
   useEffect(() => {
     if (Platform.OS === "android") {
