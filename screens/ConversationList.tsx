@@ -7,7 +7,6 @@ import {
   useColorScheme,
   Text,
   View,
-  TextInput,
   Keyboard,
 } from "react-native";
 
@@ -20,6 +19,8 @@ import ConversationListItem from "../components/ConversationListItem";
 import EphemeralAccountBanner from "../components/EphemeralAccountBanner";
 import InitialLoad from "../components/InitialLoad";
 import Recommendations from "../components/Recommendations/Recommendations";
+import NoResult from "../components/Search/NoResult";
+import SearchInput from "../components/Search/SearchInput";
 import SettingsButton from "../components/SettingsButton";
 import Welcome from "../components/Welcome";
 import {
@@ -149,6 +150,8 @@ export default function ConversationList({
     ({ item }: { item: FlatListItem }) => {
       if (item.topic === "welcome") {
         return <Welcome ctaOnly navigation={navigation} route={route} />;
+      } else if (item.topic === "noresult") {
+        return <NoResult />;
       } else if (item.topic === "ephemeral") {
         return <EphemeralAccountBanner />;
       }
@@ -212,17 +215,25 @@ export default function ConversationList({
     screenToShow = (
       <Welcome ctaOnly={false} navigation={navigation} route={route} />
     );
+  } else if (flatListItems.length === 1 && searchQuery) {
+    screenToShow = (
+      <View style={styles.container}>
+        <SearchInput
+          value={searchQuery}
+          onChangeText={(text) => setSearchQuery(text)}
+        />
+        <View style={styles.conversationList}>
+          <NoResult />
+        </View>
+      </View>
+    );
   } else {
     screenToShow = (
       <View style={styles.container}>
-        <View style={styles.searchContainer}>
-          <TextInput
-            style={styles.searchInput}
-            value={searchQuery}
-            onChangeText={(text) => setSearchQuery(text)}
-            placeholder="Search..."
-          />
-        </View>
+        <SearchInput
+          value={searchQuery}
+          onChangeText={(text) => setSearchQuery(text)}
+        />
         <View style={styles.conversationList}>
           <FlashList
             keyboardShouldPersistTaps="handled"
@@ -276,16 +287,6 @@ const useStyles = () => {
       color: textPrimaryColor(colorScheme),
       fontSize: 22,
       lineHeight: 26,
-    },
-    searchContainer: {
-      height: 60,
-      marginTop: 145,
-    },
-    searchInput: {
-      height: 60,
-      backgroundColor: "#f1f1f1",
-      padding: 20,
-      borderRadius: 8,
     },
   });
 };
