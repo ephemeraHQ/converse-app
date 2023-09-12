@@ -1,4 +1,3 @@
-import { DecryptedLocalAttachment } from "@xmtp/react-native-sdk";
 import * as Linking from "expo-linking";
 import mime from "mime";
 import prettyBytes from "pretty-bytes";
@@ -23,7 +22,10 @@ import { textPrimaryColor } from "../../utils/colors";
 import { converseEventEmitter } from "../../utils/events";
 import { isImageMimetype } from "../../utils/media";
 import { sentryTrackError, sentryTrackMessage } from "../../utils/sentry";
-import { fetchAndDecodeRemoteAttachment } from "../../utils/xmtpRN/attachments";
+import {
+  DecryptedLocalAttachmentWithFilename,
+  fetchAndDecodeRemoteAttachment,
+} from "../../utils/xmtpRN/attachments";
 import { MessageToDisplay } from "./ChatMessage";
 import ChatMessageMetadata from "./ChatMessageMetadata";
 
@@ -59,8 +61,8 @@ export default function ChatAttachmentBubble({ message }: Props) {
     [message.id]
   );
 
-  const saveAndDisplay = useCallback(
-    async (attachmentContent: DecryptedLocalAttachment) => {
+  const saveAndDisplayRemoteAttachment = useCallback(
+    async (attachmentContent: DecryptedLocalAttachmentWithFilename) => {
       setAttachment((a) => ({ ...a, loading: true }));
       const result = await handleDecryptedRemoteAttachment(
         message.id,
@@ -82,12 +84,12 @@ export default function ChatAttachmentBubble({ message }: Props) {
         currentAccount,
         message
       );
-      saveAndDisplay(result);
+      saveAndDisplayRemoteAttachment(result);
     } catch (e) {
       sentryTrackError(e, { message });
       setAttachment((a) => ({ ...a, loading: false, error: true }));
     }
-  }, [currentAccount, message, saveAndDisplay]);
+  }, [currentAccount, message, saveAndDisplayRemoteAttachment]);
 
   const saveLocalAttachment = useCallback(
     async (attachmentContent: SerializedAttachmentContent) => {

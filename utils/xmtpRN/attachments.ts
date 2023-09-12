@@ -1,4 +1,7 @@
-import { RemoteAttachmentContent } from "@xmtp/react-native-sdk";
+import {
+  DecryptedLocalAttachment,
+  RemoteAttachmentContent,
+} from "@xmtp/react-native-sdk";
 import RNFS from "react-native-fs";
 
 import { XmtpMessage } from "../../data/store/chatStore";
@@ -17,10 +20,14 @@ export const encryptRemoteAttachment = async (
   return encryptedAttachment;
 };
 
+export type DecryptedLocalAttachmentWithFilename = DecryptedLocalAttachment & {
+  filename: string | undefined;
+};
+
 export const fetchAndDecodeRemoteAttachment = async (
   account: string,
   message: XmtpMessage
-) => {
+): Promise<DecryptedLocalAttachmentWithFilename> => {
   const remoteAttachment = deserializeRemoteAttachmentMessageContent(
     message.content
   );
@@ -36,7 +43,7 @@ export const fetchAndDecodeRemoteAttachment = async (
     encryptedLocalFileUri,
     metadata: remoteAttachment,
   });
-  return decryptedContent;
+  return { ...decryptedContent, filename: remoteAttachment.filename };
 };
 
 export const serializeRemoteAttachmentMessageContent = (
