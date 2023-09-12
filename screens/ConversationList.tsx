@@ -223,16 +223,9 @@ export default function ConversationList({
     ]
   );
 
-  const showInitialLoad = !initialLoadDoneOnce && flatListItems.length <= 1;
-  const showWelcome =
-    !searchQuery &&
-    (flatListItems.length === 1 ||
-      (flatListItems.length === 2 && ephemeralAccount));
-  const showNoResult = flatListItems.length === 0 && searchQuery;
-
   const [headerAnim] = useState(new Animated.Value(0));
 
-  useLayoutEffect(() => {
+  useEffect(() => {
     if (searchBarFocused) {
       Animated.timing(headerAnim, {
         toValue: 1,
@@ -258,6 +251,14 @@ export default function ConversationList({
       </Animated.View>
     );
   };
+
+  const showInitialLoad = !initialLoadDoneOnce && flatListItems.length <= 1;
+  const showWelcome =
+    !searchQuery &&
+    !searchBarFocused &&
+    (flatListItems.length === 1 ||
+      (flatListItems.length === 2 && ephemeralAccount));
+  const showNoResult = flatListItems.length === 0 && searchQuery;
 
   let screenToShow: JSX.Element = (
     <View style={styles.container}>
