@@ -104,10 +104,7 @@ export default function ConversationList({
         matchedPeerAddresses.includes(conversation.peerAddress)
       );
 
-      setFlatListItems([
-        ...(filteredConversations || []),
-        { topic: "welcome" },
-      ]);
+      setFlatListItems([...(filteredConversations || [])]);
     }
   }, [ephemeralAccount, searchQuery, sortedConversations, profiles]);
 
@@ -203,19 +200,50 @@ export default function ConversationList({
     ]
   );
 
-  let screenToShow: JSX.Element;
-
-  if (!initialLoadDoneOnce && flatListItems.length <= 1) {
-    screenToShow = <InitialLoad />;
-  } else if (
+  const showInitialLoad = !initialLoadDoneOnce && flatListItems.length <= 1;
+  const showWelcome =
+    !searchQuery &&
     (flatListItems.length === 1 ||
-      (flatListItems.length === 2 && ephemeralAccount)) &&
-    !searchQuery
-  ) {
+      (flatListItems.length === 2 && ephemeralAccount));
+  const showNoResult = flatListItems.length === 0 && searchQuery;
+
+  let screenToShow: JSX.Element = (
+    <View style={styles.container}>
+      <SearchInput
+        value={searchQuery}
+        onChangeText={(text) => setSearchQuery(text)}
+      />
+      <View style={styles.conversationList}>
+        <FlashList
+          keyboardShouldPersistTaps="handled"
+          onMomentumScrollBegin={Keyboard.dismiss}
+          onScrollBeginDrag={Keyboard.dismiss}
+          contentInsetAdjustmentBehavior="automatic"
+          data={flatListItems}
+          extraData={[
+            colorScheme,
+            navigation,
+            route,
+            userAddress,
+            blockedPeers,
+            initialLoadDoneOnce,
+            lastUpdateAt,
+          ]}
+          renderItem={renderItem}
+          keyExtractor={keyExtractor}
+          estimatedItemSize={Platform.OS === "ios" ? 77 : 88}
+        />
+      </View>
+    </View>
+  );
+
+  if (showInitialLoad) {
+    screenToShow = <InitialLoad />;
+  } else if (showWelcome) {
     screenToShow = (
       <Welcome ctaOnly={false} navigation={navigation} route={route} />
     );
-  } else if (flatListItems.length === 1 && searchQuery) {
+  } else if (showNoResult) {
     screenToShow = (
       <View style={styles.container}>
         <SearchInput
@@ -224,40 +252,6 @@ export default function ConversationList({
         />
         <View style={styles.conversationList}>
           <NoResult />
-        </View>
-      </View>
-    );
-  } else {
-    screenToShow = (
-      <View style={styles.container}>
-        <SearchInput
-          value={searchQuery}
-          onChangeText={(text) => setSearchQuery(text)}
-        />
-        <View style={styles.conversationList}>
-          <FlashList
-            keyboardShouldPersistTaps="handled"
-            onMomentumScrollBegin={() => {
-              Keyboard.dismiss();
-            }}
-            onScrollBeginDrag={() => {
-              Keyboard.dismiss();
-            }}
-            contentInsetAdjustmentBehavior="automatic"
-            data={flatListItems}
-            extraData={[
-              colorScheme,
-              navigation,
-              route,
-              userAddress,
-              blockedPeers,
-              initialLoadDoneOnce,
-              lastUpdateAt,
-            ]}
-            renderItem={renderItem}
-            keyExtractor={keyExtractor}
-            estimatedItemSize={Platform.OS === "ios" ? 77 : 88}
-          />
         </View>
       </View>
     );
