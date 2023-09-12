@@ -11,59 +11,46 @@ export const getMatchedPeerAddresses = (
   searchQuery: string
 ): string[] => {
   const results: string[] = [];
-
-  Object.entries(profiles).forEach(([peerAddress, profile]) => {
-    const query = cleanStringForSearch(searchQuery);
-
-    // console.log('clean query: ', query);
-    // console.log('profile_key: ', peerAddress);
-    // console.log('profile_data: ', JSON.stringify(profile, null, 2));
-
-    let isMatchFound = false;
-
-    if (peerAddress.toLowerCase().includes(query)) {
-      isMatchFound = true;
+  const query = cleanStringForSearch(searchQuery);
+  for (const [peerAddress, profile] of Object.entries(profiles)) {
+    const checkMatch = (str: string | undefined): boolean => {
+      if (str?.toLowerCase().includes(query)) {
+        results.push(peerAddress);
+        return true;
+      }
+      return false;
+    };
+    if (checkMatch(peerAddress)) {
+      continue;
     }
-
-    profile?.socials?.ensNames?.forEach((ens: EnsName) => {
-      if (ens.name.toLowerCase().includes(query)) {
-        isMatchFound = true;
-      }
-    });
-
-    profile?.socials?.lensHandles?.forEach((lens: LensHandle) => {
-      if (
-        lens.name?.toLowerCase().includes(query) ||
-        lens.handle.toLowerCase().includes(query)
-      ) {
-        isMatchFound = true;
-      }
-    });
-
-    profile?.socials?.farcasterUsernames?.forEach(
-      (farcaster: FarcasterUsername) => {
-        if (
-          farcaster.name?.toLowerCase().includes(query) ||
-          farcaster.username.toLowerCase().includes(query)
-        ) {
-          isMatchFound = true;
-        }
-      }
-    );
-
-    profile?.socials?.unstoppableDomains?.forEach(
-      (unstoppable: UnstoppableDomain) => {
-        if (unstoppable.domain.toLowerCase().includes(query)) {
-          isMatchFound = true;
-        }
-      }
-    );
-
-    if (isMatchFound) {
-      results.push(peerAddress);
+    if (
+      profile?.socials?.ensNames?.some((ens: EnsName) => checkMatch(ens.name))
+    ) {
+      continue;
     }
-  });
-
+    if (
+      profile?.socials?.lensHandles?.some(
+        (lens: LensHandle) => checkMatch(lens.name) || checkMatch(lens.handle)
+      )
+    ) {
+      continue;
+    }
+    if (
+      profile?.socials?.farcasterUsernames?.some(
+        (farcaster: FarcasterUsername) =>
+          checkMatch(farcaster.name) || checkMatch(farcaster.username)
+      )
+    ) {
+      continue;
+    }
+    if (
+      profile?.socials?.unstoppableDomains?.some(
+        (unstoppable: UnstoppableDomain) => checkMatch(unstoppable.domain)
+      )
+    ) {
+      continue;
+    }
+  }
   return results;
 };
 
