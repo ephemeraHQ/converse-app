@@ -3,6 +3,7 @@ import RNFS from "react-native-fs";
 import { Repository } from "typeorm/browser";
 
 import config from "../../config";
+import { sentryTrackError } from "../../utils/sentry";
 import { useAccountsStore } from "../store/accountsStore";
 import {
   deleteDataSource,
@@ -64,10 +65,12 @@ export const initDb = async (account: string) => {
         profile: dataSource.getRepository(Profile),
       };
     } catch (e: any) {
+      sentryTrackError(e, { account });
       console.log(`Error running migrations - destroying db for ${account}`, e);
       await clearDB(account);
     }
   } catch (e: any) {
+    sentryTrackError(e, { account });
     console.log(`Error initializing Database for ${account}`, e);
   }
 };
