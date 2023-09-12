@@ -105,9 +105,5 @@ const useStyles = () => {
       flex: 1,
       backgroundColor: backgroundColor(colorScheme),
     },
-    hiddenXmtpWebviewContainer: {
-      flex: 0,
-      height: 0,
-    },
   });
 };
