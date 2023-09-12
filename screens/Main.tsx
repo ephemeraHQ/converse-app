@@ -41,7 +41,7 @@ import ShareProfileScreen from "./ShareProfile";
 import WebviewPreview from "./WebviewPreview";
 
 export type NavigationParamList = {
-  Messages: undefined;
+  Chats: undefined;
   Conversation: {
     topic?: string;
     message?: string;
@@ -134,9 +134,9 @@ export default function Main() {
       const linking = {
         prefixes: [prefix, ...config.universalLinks],
         config: {
-          initialRouteName: "Messages",
+          initialRouteName: "Chats",
           screens: {
-            Messages: "/",
+            Chats: "/",
             Conversation: {
               path: "/conversation",
               parse: {
@@ -192,7 +192,7 @@ export default function Main() {
           linking={splashScreenHidden ? (linking as any) : undefined}
         >
           <Stack.Navigator
-            initialRouteName="Messages"
+            initialRouteName="Chats"
             screenListeners={({ navigation }) => ({
               state: (e: any) => {
                 // Fix deeplink if already on a screen but changing params
@@ -246,10 +246,10 @@ export default function Main() {
               }}
             >
               <Stack.Screen
-                name="Messages"
+                name="Chats"
                 component={ConversationList}
                 options={{
-                  headerTitle: "Messages",
+                  headerTitle: "Chats",
                   headerLargeTitle: true,
                   headerTitleStyle: {
                     ...headerTitleStyle(colorScheme),

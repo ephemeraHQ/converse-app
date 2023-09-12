@@ -57,7 +57,7 @@ type FlatListItem = ConversationWithLastMessagePreview | { topic: string };
 export default function ConversationList({
   navigation,
   route,
-}: NativeStackScreenProps<NavigationParamList, "Messages">) {
+}: NativeStackScreenProps<NavigationParamList, "Chats">) {
   const colorScheme = useColorScheme();
   const styles = useStyles();
   const { initialLoadDoneOnce, conversations, lastUpdateAt } = useChatStore(

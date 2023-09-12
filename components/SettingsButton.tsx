@@ -24,7 +24,7 @@ import { showActionSheetWithOptions } from "./StateHandlers/ActionSheetStateHand
 
 export default function SettingsButton({
   navigation,
-}: NativeStackScreenProps<NavigationParamList, "Messages">) {
+}: NativeStackScreenProps<NavigationParamList, "Chats">) {
   const userAddress = useUserStore((s) => s.userAddress);
   const { setNotificationsPermissionStatus, notificationsPermissionStatus } =
     useAppStore((s) =>
