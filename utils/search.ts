@@ -20,9 +20,6 @@ export const getMatchedPeerAddresses = (
       }
       return false;
     };
-    if (checkMatch(peerAddress)) {
-      continue;
-    }
     if (
       profile?.socials?.ensNames?.some((ens: EnsName) => checkMatch(ens.name))
     ) {
@@ -48,6 +45,9 @@ export const getMatchedPeerAddresses = (
         (unstoppable: UnstoppableDomain) => checkMatch(unstoppable.domain)
       )
     ) {
+      continue;
+    }
+    if (checkMatch(peerAddress)) {
       continue;
     }
   }
