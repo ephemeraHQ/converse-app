@@ -14,8 +14,8 @@ import {
   ReanimatedFlashList,
   ReanimatedFlatList,
   ReanimatedView,
-  useKeyboardAnimation,
 } from "../../utils/animations";
+import { useKeyboardAnimation } from "../../utils/animations/keyboardAnimation";
 import {
   backgroundColor,
   itemSeparatorColor,
