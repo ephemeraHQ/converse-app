@@ -1,7 +1,9 @@
 import { useCallback, useEffect, useRef } from "react";
 import { AppState } from "react-native";
 
+import { getExistingDataSource } from "../data/db/datasource";
 import {
+  getAccountsList,
   getChatStore,
   getSettingsStore,
   useAccountsList,
@@ -10,6 +12,8 @@ import { useAppStore } from "../data/store/appStore";
 import { getBlockedPeers } from "../utils/api";
 import { pick } from "../utils/objects";
 import { syncXmtpClient } from "../utils/xmtpRN/client";
+import { createPendingConversations } from "../utils/xmtpRN/conversations";
+import { sendPendingMessages } from "../utils/xmtpRN/send";
 
 export default function XmtpEngine() {
   const appState = useRef(AppState.currentState);
@@ -79,5 +83,48 @@ export default function XmtpEngine() {
     }
     isInternetReachableRef.current = isInternetReachable;
   }, [accounts, isInternetReachable, syncAccounts]);
+
+  // Cron
+
+  const lastCronTimestamp = useRef(0);
+  const runningCron = useRef(false);
+
+  const xmtpCron = useCallback(async () => {
+    if (!useAppStore.getState().splashScreenHidden) {
+      return;
+    }
+    runningCron.current = true;
+    const accounts = getAccountsList();
+    for (const account of accounts) {
+      if (
+        getChatStore(account).getState().localClientConnected &&
+        getChatStore(account).getState().initialLoadDone &&
+        getExistingDataSource(account)
+      ) {
+        try {
+          await createPendingConversations(account);
+          await sendPendingMessages(account);
+        } catch (e) {
+          console.log(e);
+        }
+      }
+    }
+    lastCronTimestamp.current = new Date().getTime();
+    runningCron.current = false;
+  }, []);
+
+  useEffect(() => {
+    // Launch cron
+    const interval = setInterval(() => {
+      if (runningCron.current) return;
+      const now = new Date().getTime();
+      if (now - lastCronTimestamp.current > 1000) {
+        xmtpCron();
+      }
+    }, 300);
+
+    return () => clearInterval(interval);
+  }, [xmtpCron]);
+
   return null;
 }
