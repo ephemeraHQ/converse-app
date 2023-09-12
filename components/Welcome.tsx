@@ -11,7 +11,7 @@ import Button from "./Button/Button";
 
 type Props = {
   ctaOnly: boolean;
-} & NativeStackScreenProps<NavigationParamList, "Messages">;
+} & NativeStackScreenProps<NavigationParamList, "Chats">;
 
 export default function Welcome({ ctaOnly, navigation }: Props) {
   const frens = useRecommendationsStore((s) => s.frens);

@@ -14,7 +14,7 @@ import Picto from "../Picto/Picto";
 
 export default function NewConversationButton({
   navigation,
-}: NativeStackScreenProps<NavigationParamList, "Messages">) {
+}: NativeStackScreenProps<NavigationParamList, "Chats">) {
   const colorScheme = useColorScheme();
   const debugRef = useRef();
   const enableDebug = useEnableDebug();
