@@ -141,7 +141,7 @@ export default function ConversationList({
         ? {}
         : {
             right: () => (
-              <View style={{ flex: 0.16 }}>
+              <View style={styles.rightButtonContainer}>
                 <ShareProfileButton navigation={navigation} route={route} />
               </View>
             ),
@@ -150,15 +150,10 @@ export default function ConversationList({
       navigation.setOptions({
         headerLeft: () =>
           !shouldShowConnectingOrSyncing ? (
-            <View
-              style={{
-                flexDirection: "row",
-                justifyContent: "flex-start",
-                width: "100%",
-              }}
-            >
-              <View style={{ flex: 1 }}>
+            <View style={styles.searchBarContainer}>
+              <View style={styles.searchBarWrapper}>
                 <MaterialSearchBar
+                  style={styles.searchBar}
                   placeholder="Search chats"
                   onChangeText={onChangeSearch}
                   value={searchQuery}
@@ -172,19 +167,13 @@ export default function ConversationList({
                   traileringIcon={() => null}
                   placeholderTextColor={textSecondaryColor(colorScheme)}
                   selectionColor={textPrimaryColor(colorScheme)}
-                  style={{
-                    backgroundColor: chatInputBackgroundColor(colorScheme),
-                    paddingLeft: 5,
-                    paddingRight: 8,
-                    marginVertical: 10,
-                  }}
                   clearIcon={({ color }) => (
                     <Picto picto="xmark" size={24} color={color} />
                   )}
                   {...rightProps}
                 />
               </View>
-              <View style={{ width: 30 }}>{/* Right spacer */}</View>
+              <View style={styles.searchBarSpacer}>{/* Right spacer */}</View>
             </View>
           ) : null,
         headerTitle: () => {
@@ -204,7 +193,7 @@ export default function ConversationList({
     searchQuery,
     colorScheme,
     route,
-    styles.androidTitle,
+    styles,
   ]);
 
   const keyExtractor = useCallback((item: FlatListItem) => {
@@ -385,10 +374,31 @@ const useStyles = () => {
     conversationList: {
       flex: 2,
     },
+    // Android
     androidTitle: {
       color: textPrimaryColor(colorScheme),
       fontSize: 22,
       lineHeight: 26,
+    },
+    rightButtonContainer: {
+      flex: 0.16,
+    },
+    searchBarContainer: {
+      flexDirection: "row",
+      justifyContent: "flex-start",
+      width: "100%",
+    },
+    searchBarWrapper: {
+      flex: 1,
+    },
+    searchBar: {
+      backgroundColor: chatInputBackgroundColor(colorScheme),
+      paddingLeft: 5,
+      paddingRight: 8,
+      marginVertical: 10,
+    },
+    searchBarSpacer: {
+      width: 30,
     },
   });
 };
