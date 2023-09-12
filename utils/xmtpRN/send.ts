@@ -97,10 +97,9 @@ export const sendPendingMessages = async (account: string) => {
           ...preparedMessage,
           topic: message.conversationId,
         });
-        // TODO => get new message sent from PreparedLocalMessage
         messageIdsToUpdate[message.id] = {
           newMessageId,
-          newMessageSent: message.sent,
+          newMessageSent: preparedMessage.preparedAt,
           message,
         };
       }
