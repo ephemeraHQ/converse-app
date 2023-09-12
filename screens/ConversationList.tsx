@@ -8,6 +8,7 @@ import {
   Text,
   View,
   TextInput,
+  Keyboard,
 } from "react-native";
 
 import Connecting, {
@@ -224,6 +225,13 @@ export default function ConversationList({
         </View>
         <View style={styles.conversationList}>
           <FlashList
+            keyboardShouldPersistTaps="handled"
+            onMomentumScrollBegin={() => {
+              Keyboard.dismiss();
+            }}
+            onScrollBeginDrag={() => {
+              Keyboard.dismiss();
+            }}
             contentInsetAdjustmentBehavior="automatic"
             data={flatListItems}
             extraData={[
