@@ -259,6 +259,7 @@ export default function Main() {
                     }),
                   },
                   animation: navigationAnimation,
+                  headerSearchBarOptions: {},
                 }}
               />
               <Stack.Screen
