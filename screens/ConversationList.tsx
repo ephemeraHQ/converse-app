@@ -157,7 +157,7 @@ export default function ConversationList({
       if (item.topic === "welcome") {
         return <Welcome ctaOnly navigation={navigation} route={route} />;
       } else if (item.topic === "noresult") {
-        return <NoResult />;
+        return <NoResult navigation={navigation} />;
       } else if (item.topic === "ephemeral") {
         return <EphemeralAccountBanner />;
       }
@@ -303,7 +303,7 @@ export default function ConversationList({
     screenToShow = (
       <View style={styles.container}>
         <View style={styles.conversationList}>
-          <NoResult />
+          <NoResult navigation={navigation} />
         </View>
       </View>
     );
