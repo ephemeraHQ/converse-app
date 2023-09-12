@@ -268,7 +268,6 @@ const useStyles = () => {
     searchContainer: {
       height: 60,
       marginTop: 145,
-      backgroundColor: "yellow",
     },
     searchInput: {
       height: 60,
