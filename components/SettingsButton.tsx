@@ -3,7 +3,13 @@ import { useDisconnect } from "@thirdweb-dev/react-native";
 import * as Clipboard from "expo-clipboard";
 import * as Linking from "expo-linking";
 import React, { useCallback } from "react";
-import { Platform, TouchableOpacity, useColorScheme, View } from "react-native";
+import {
+  Keyboard,
+  Platform,
+  TouchableOpacity,
+  useColorScheme,
+  View,
+} from "react-native";
 
 import config from "../config";
 import { refreshProfileForAddress } from "../data/helpers/profiles/profilesUpdate";
@@ -36,6 +42,8 @@ export default function SettingsButton({
   const disconnectWallet = useDisconnect();
   const colorScheme = useColorScheme();
   const onPress = useCallback(() => {
+    Keyboard.dismiss();
+
     const methods = {
       "Your profile page": () => {
         if (userAddress) {
@@ -136,7 +144,6 @@ export default function SettingsButton({
         <Picto
           picto="account_circle"
           size={24}
-          style={{ marginRight: 16 }}
           color={textSecondaryColor(colorScheme)}
         />
       </TouchableOpacity>
