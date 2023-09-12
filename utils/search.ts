@@ -55,8 +55,6 @@ export const getMatchedPeerAddresses = (
 };
 
 const cleanStringForSearch = (input: string): string => {
-  let cleanedString = input.toLowerCase(); // Converts to lowercase
-  cleanedString = cleanedString.replace(/^\s+|\s+$/g, ""); // Removes leading and trailing spaces
-
+  const cleanedString = input.toLowerCase().trim();
   return cleanedString;
 };
