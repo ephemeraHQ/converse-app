@@ -98,6 +98,10 @@ export const streamConversations = async (client: Client) => {
     saveConversations(client.address, [
       protocolConversationToStateConversation(conversation),
     ]);
+    const conversationWithKey = await protocolConversationToKeychain(
+      conversation
+    );
+    saveConversationsToKeychain(client.address, [conversationWithKey]);
     // New conversations are not streamed immediatly
     // by the streamAllMessages method so we add this
     // trick to try and be all synced
