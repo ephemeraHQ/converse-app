@@ -1,6 +1,11 @@
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { FlashList } from "@shopify/flash-list";
-import React, { useCallback, useEffect, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useState,
+} from "react";
 import {
   Platform,
   StyleSheet,
@@ -8,6 +13,7 @@ import {
   Text,
   View,
   Keyboard,
+  Animated,
 } from "react-native";
 
 import Connecting, {
@@ -20,7 +26,6 @@ import EphemeralAccountBanner from "../components/EphemeralAccountBanner";
 import InitialLoad from "../components/InitialLoad";
 import Recommendations from "../components/Recommendations/Recommendations";
 import NoResult from "../components/Search/NoResult";
-import SearchInput from "../components/Search/SearchInput";
 import SettingsButton from "../components/SettingsButton";
 import Welcome from "../components/Welcome";
 import {
@@ -30,7 +35,11 @@ import {
   useProfilesStore,
 } from "../data/store/accountsStore";
 import { XmtpConversation } from "../data/store/chatStore";
-import { textPrimaryColor } from "../utils/colors";
+import {
+  textPrimaryColor,
+  backgroundColor,
+  itemSeparatorColor,
+} from "../utils/colors";
 import {
   LastMessagePreview,
   conversationLastMessagePreview,
@@ -65,6 +74,7 @@ export default function ConversationList({
   const [searchQuery, setSearchQuery] = useState("");
   const [sortedConversations, setSortedConversations] =
     useState<ConversationWithLastMessagePreview[]>();
+  const [searchBarFocused, setSearchBarFocused] = useState(false);
 
   useEffect(() => {
     const conversationWithPreview = Object.values(conversations)
@@ -106,6 +116,20 @@ export default function ConversationList({
       ]);
     }
   }, [ephemeralAccount, searchQuery, sortedConversations, profiles]);
+
+  useLayoutEffect(() => {
+    navigation.setOptions({
+      headerSearchBarOptions: {
+        hideNavigationBar: true,
+        hideWhenScrolling: false,
+        autoFocus: false,
+        placeholder: "Search",
+        onChangeText: (event) => setSearchQuery(event.nativeEvent.text),
+        onFocus: () => setSearchBarFocused(true),
+        onCancelButtonPress: () => setSearchBarFocused(false),
+      },
+    });
+  }, [navigation]);
 
   useEffect(() => {
     navigation.setOptions({
@@ -206,12 +230,37 @@ export default function ConversationList({
       (flatListItems.length === 2 && ephemeralAccount));
   const showNoResult = flatListItems.length === 0 && searchQuery;
 
+  const [headerAnim] = useState(new Animated.Value(0));
+
+  useLayoutEffect(() => {
+    if (searchBarFocused) {
+      Animated.timing(headerAnim, {
+        toValue: 1,
+        duration: 400,
+        useNativeDriver: false,
+      }).start();
+    } else {
+      Animated.timing(headerAnim, {
+        toValue: 0,
+        duration: 400,
+        useNativeDriver: false,
+      }).start();
+    }
+  }, [searchBarFocused, headerAnim]);
+
+  const SearchTitleHeader = () => {
+    const styles = useStyles();
+    return (
+      <Animated.View
+        style={[{ opacity: headerAnim }, styles.searchTitleContainer]}
+      >
+        <Text style={styles.searchTitle}>Chats</Text>
+      </Animated.View>
+    );
+  };
+
   let screenToShow: JSX.Element = (
     <View style={styles.container}>
-      <SearchInput
-        value={searchQuery}
-        onChangeText={(text) => setSearchQuery(text)}
-      />
       <View style={styles.conversationList}>
         <FlashList
           keyboardShouldPersistTaps="handled"
@@ -231,6 +280,7 @@ export default function ConversationList({
           renderItem={renderItem}
           keyExtractor={keyExtractor}
           estimatedItemSize={Platform.OS === "ios" ? 77 : 88}
+          ListHeaderComponent={searchBarFocused ? <SearchTitleHeader /> : null}
         />
       </View>
     </View>
@@ -245,10 +295,6 @@ export default function ConversationList({
   } else if (showNoResult) {
     screenToShow = (
       <View style={styles.container}>
-        <SearchInput
-          value={searchQuery}
-          onChangeText={(text) => setSearchQuery(text)}
-        />
         <View style={styles.conversationList}>
           <NoResult />
         </View>
@@ -272,6 +318,19 @@ const useStyles = () => {
   return StyleSheet.create({
     container: {
       flex: 1,
+      backgroundColor: backgroundColor(colorScheme),
+    },
+    searchTitleContainer: {
+      padding: 10,
+      paddingLeft: 16,
+      backgroundColor: backgroundColor(colorScheme),
+      borderBottomColor: itemSeparatorColor(colorScheme),
+      borderBottomWidth: 0.5,
+    },
+    searchTitle: {
+      fontSize: 22,
+      fontWeight: "bold",
+      color: textPrimaryColor(colorScheme),
     },
     conversationList: {
       flex: 2,
