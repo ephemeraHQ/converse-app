@@ -44,12 +44,11 @@ const styles = StyleSheet.create({
     marginLeft: 6,
     color: "rgba(60, 60, 67, 0.6)",
     textAlign: "left",
-    lineHeight: 22,
+    lineHeight: 20,
     letterSpacing: 0,
     fontSize: 17,
     flex: 1,
   },
-
   searchFieldWrapper: {
     alignItems: "center",
     flexDirection: "row",
@@ -59,8 +58,8 @@ const styles = StyleSheet.create({
   searchField: {
     borderRadius: 10,
     backgroundColor: "rgba(118, 118, 128, 0.12)",
-    paddingHorizontal: 8,
-    paddingVertical: 7,
+    paddingHorizontal: 9,
+    paddingVertical: 10,
     alignItems: "center",
     flexDirection: "row",
     flex: 1,
