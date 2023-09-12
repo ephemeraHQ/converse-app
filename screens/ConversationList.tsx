@@ -1,7 +1,14 @@
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { FlashList } from "@shopify/flash-list";
 import React, { useCallback, useEffect, useState } from "react";
-import { Platform, StyleSheet, useColorScheme, Text, View } from "react-native";
+import {
+  Platform,
+  StyleSheet,
+  useColorScheme,
+  Text,
+  View,
+  TextInput,
+} from "react-native";
 
 import Connecting, {
   useShouldShowConnectingOrSyncing,
@@ -18,14 +25,16 @@ import {
   useChatStore,
   useSettingsStore,
   useUserStore,
+  useProfilesStore,
 } from "../data/store/accountsStore";
 import { XmtpConversation } from "../data/store/chatStore";
-import { backgroundColor, textPrimaryColor } from "../utils/colors";
+import { textPrimaryColor } from "../utils/colors";
 import {
   LastMessagePreview,
   conversationLastMessagePreview,
 } from "../utils/conversation";
 import { pick } from "../utils/objects";
+import { getMatchedPeerAddresses } from "../utils/search";
 import { conversationName } from "../utils/str";
 import { NavigationParamList } from "./Main";
 
@@ -47,8 +56,13 @@ export default function ConversationList({
   const { blockedPeers, ephemeralAccount } = useSettingsStore((s) =>
     pick(s, ["blockedPeers", "ephemeralAccount"])
   );
+
+  const profiles = useProfilesStore((state) => state.profiles);
   const shouldShowConnectingOrSyncing = useShouldShowConnectingOrSyncing();
   const [flatListItems, setFlatListItems] = useState<FlatListItem[]>([]);
+  const [filteredItems, setFilteredItems] = useState<FlatListItem[]>([]);
+  const [searchQuery, setSearchQuery] = useState("");
+
   useEffect(() => {
     const conversationsList = Object.values(conversations)
       .filter((a) => a?.peerAddress && (!a.pending || a.messages.size > 0))
@@ -56,6 +70,7 @@ export default function ConversationList({
         c.lastMessagePreview = conversationLastMessagePreview(c, userAddress);
         return c;
       });
+
     conversationsList.sort((a, b) => {
       const aDate = a.lastMessagePreview
         ? a.lastMessagePreview.message.sent
@@ -66,8 +81,31 @@ export default function ConversationList({
       return bDate - aDate;
     });
     const items = ephemeralAccount ? [{ topic: "ephemeral" }] : [];
+
+    // Search logic
+    if (searchQuery) {
+      const matchedPeerAddresses = getMatchedPeerAddresses(
+        profiles,
+        searchQuery
+      );
+      const filteredConversations = conversationsList.filter((conversation) =>
+        matchedPeerAddresses.includes(conversation.peerAddress)
+      );
+      setFilteredItems(filteredConversations);
+    } else {
+      setFilteredItems(conversationsList);
+    }
+
     setFlatListItems([...items, ...conversationsList, { topic: "welcome" }]);
-  }, [ephemeralAccount, userAddress, conversations, lastUpdateAt]);
+  }, [
+    ephemeralAccount,
+    userAddress,
+    conversations,
+    lastUpdateAt,
+    profiles,
+    searchQuery,
+  ]);
+
   useEffect(() => {
     navigation.setOptions({
       headerLeft: () =>
@@ -84,6 +122,7 @@ export default function ConversationList({
       ),
     });
   }, [navigation, route, userAddress]);
+
   useEffect(() => {
     navigation.setOptions({
       headerTitle: () => {
@@ -97,9 +136,11 @@ export default function ConversationList({
       },
     });
   }, [navigation, shouldShowConnectingOrSyncing, styles.androidTitle]);
+
   const keyExtractor = useCallback((item: FlatListItem) => {
     return item.topic;
   }, []);
+
   const renderItem = useCallback(
     ({ item }: { item: FlatListItem }) => {
       if (item.topic === "welcome") {
@@ -168,23 +209,33 @@ export default function ConversationList({
     );
   } else {
     screenToShow = (
-      <View style={styles.conversationList}>
-        <FlashList
-          contentInsetAdjustmentBehavior="automatic"
-          data={flatListItems}
-          extraData={[
-            colorScheme,
-            navigation,
-            route,
-            userAddress,
-            blockedPeers,
-            initialLoadDoneOnce,
-            lastUpdateAt,
-          ]}
-          renderItem={renderItem}
-          keyExtractor={keyExtractor}
-          estimatedItemSize={Platform.OS === "ios" ? 77 : 88}
-        />
+      <View style={styles.container}>
+        <View style={styles.searchContainer}>
+          <TextInput
+            style={styles.searchInput}
+            value={searchQuery}
+            onChangeText={(text) => setSearchQuery(text)}
+            placeholder="Search..."
+          />
+        </View>
+        <View style={styles.conversationList}>
+          <FlashList
+            contentInsetAdjustmentBehavior="automatic"
+            data={filteredItems}
+            extraData={[
+              colorScheme,
+              navigation,
+              route,
+              userAddress,
+              blockedPeers,
+              initialLoadDoneOnce,
+              lastUpdateAt,
+            ]}
+            renderItem={renderItem}
+            keyExtractor={keyExtractor}
+            estimatedItemSize={Platform.OS === "ios" ? 77 : 88}
+          />
+        </View>
       </View>
     );
   }
@@ -203,14 +254,27 @@ export default function ConversationList({
 const useStyles = () => {
   const colorScheme = useColorScheme();
   return StyleSheet.create({
-    conversationList: {
+    container: {
       flex: 1,
-      backgroundColor: backgroundColor(colorScheme),
+    },
+    conversationList: {
+      flex: 2,
     },
     androidTitle: {
       color: textPrimaryColor(colorScheme),
       fontSize: 22,
       lineHeight: 26,
+    },
+    searchContainer: {
+      height: 60,
+      marginTop: 145,
+      backgroundColor: "yellow",
+    },
+    searchInput: {
+      height: 60,
+      backgroundColor: "#f1f1f1",
+      padding: 20,
+      borderRadius: 8,
     },
   });
 };
