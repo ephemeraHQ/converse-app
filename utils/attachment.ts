@@ -1,13 +1,14 @@
 import { RemoteAttachment } from "@xmtp/content-type-remote-attachment";
 import {
-  DecryptedLocalAttachment,
   EncryptedLocalAttachment,
   RemoteAttachmentContent,
 } from "@xmtp/react-native-sdk";
+import mime from "mime";
 import RNFS from "react-native-fs";
 
 import { getImageSize, isImageMimetype } from "./media";
 import { uploadFileToWeb3Storage } from "./web3.storage";
+import { DecryptedLocalAttachmentWithFilename } from "./xmtpRN/attachments";
 
 export type SerializedAttachmentContent = {
   filename: string;
@@ -67,14 +68,22 @@ export const handleStaticAttachment = async (
 
 export const handleDecryptedRemoteAttachment = async (
   messageId: string,
-  localAttachment: DecryptedLocalAttachment
+  localAttachment: DecryptedLocalAttachmentWithFilename
 ) => {
   const messageFolder = `${RNFS.DocumentDirectoryPath}/messages/${messageId}`;
   // Create folder
   await RNFS.mkdir(messageFolder, {
     NSURLIsExcludedFromBackupKey: true,
   });
-  const filename = localAttachment.fileUri.split("/").slice(-1)[0];
+  let filename =
+    localAttachment.filename || localAttachment.fileUri.split("/").slice(-1)[0];
+  // Add extension for the mimetype if necessary
+  if (localAttachment.mimeType) {
+    const extension = mime.getExtension(localAttachment.mimeType);
+    if (extension && !filename.toLowerCase().endsWith(`.${extension}`)) {
+      filename = `${filename}.${extension}`;
+    }
+  }
   const attachmentPath = `${messageFolder}/${filename}`;
   // Let's cache the file and decoded information
   await RNFS.moveFile(

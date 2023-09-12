@@ -14,6 +14,7 @@ import {
   saveConversationsToKeychain,
 } from "../keychain";
 import { getXmtpClient } from "./client";
+import { loadConversationsMessages } from "./messages";
 
 const protocolConversationToStateConversation = (
   conversation: Conversation
@@ -97,6 +98,13 @@ export const streamConversations = async (client: Client) => {
     saveConversations(client.address, [
       protocolConversationToStateConversation(conversation),
     ]);
+    // New conversations are not streamed immediatly
+    // by the streamAllMessages method so we add this
+    // trick to try and be all synced
+    loadConversationsMessages(client, [conversation], 0);
+    setTimeout(() => {
+      loadConversationsMessages(client, [conversation], 0);
+    }, 3000);
   });
 };
 
