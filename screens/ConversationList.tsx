@@ -6,14 +6,8 @@ import React, {
   useLayoutEffect,
   useState,
 } from "react";
-import {
-  Platform,
-  StyleSheet,
-  useColorScheme,
-  Text,
-  View,
-  Keyboard,
-} from "react-native";
+import { Platform, StyleSheet, useColorScheme, Text, View } from "react-native";
+import { SearchBarCommands } from "react-native-screens";
 
 import Connecting, {
   useShouldShowConnectingOrSyncing,
@@ -75,6 +69,7 @@ export default function ConversationList({
     ConversationWithLastMessagePreview[]
   >([]);
   const [searchBarFocused, setSearchBarFocused] = useState(false);
+  const searchBarRef = React.useRef<SearchBarCommands>(null);
 
   useEffect(() => {
     const conversationWithPreview = Object.values(conversations)
@@ -234,8 +229,9 @@ export default function ConversationList({
     ) {
       navigation.setOptions({
         headerSearchBarOptions: {
+          ref: searchBarRef,
           hideNavigationBar: true,
-          hideWhenScrolling: false,
+          hideWhenScrolling: true,
           autoFocus: false,
           placeholder: "Search",
           onChangeText: (event) => setSearchQuery(event.nativeEvent.text),
@@ -246,13 +242,17 @@ export default function ConversationList({
     }
   }, [navigation, showWelcome, initialLoadDoneOnce, flatListItems]);
 
+  const dismissKeyboard = () => {
+    searchBarRef.current?.blur();
+  };
+
   let screenToShow: JSX.Element = (
     <View style={styles.container}>
       <View style={styles.conversationList}>
         <FlashList
           keyboardShouldPersistTaps="handled"
-          onMomentumScrollBegin={Keyboard.dismiss}
-          onScrollBeginDrag={Keyboard.dismiss}
+          onMomentumScrollBegin={dismissKeyboard}
+          onScrollBeginDrag={dismissKeyboard}
           contentInsetAdjustmentBehavior="automatic"
           data={flatListItems}
           extraData={[
