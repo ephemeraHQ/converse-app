@@ -19,12 +19,10 @@ import SeedPhraseConnect, {
   getSignerFromSeedPhrase,
 } from "../components/Onboarding/SeedPhraseConnect";
 import WalletSelector from "../components/Onboarding/WalletSelector";
-import { resetLocalXmtpState } from "../components/XmtpState";
 import config from "../config";
 import { clearDB } from "../data/db";
 import {
   useSettingsStore,
-  useRecommendationsStore,
   useAccountsStore,
 } from "../data/store/accountsStore";
 import { useOnboardingStore } from "../data/store/onboardingStore";
@@ -38,9 +36,6 @@ import { Signer } from "../vendor/xmtp-js/src";
 export default function OnboardingScreen() {
   const desktopConnectSessionId = useOnboardingStore(
     (s) => s.desktopConnectSessionId
-  );
-  const resetRecommendations = useRecommendationsStore(
-    (s) => s.resetRecommendations
   );
   const styles = useStyles();
 
@@ -251,8 +246,6 @@ export default function OnboardingScreen() {
       } else {
         useSettingsStore.getState().setEphemeralAccount(false);
       }
-      resetLocalXmtpState();
-      resetRecommendations();
       // Now we can instantiate the XMTP Client
       getXmtpClient(user.address);
     } catch (e) {
@@ -262,7 +255,7 @@ export default function OnboardingScreen() {
       setWaitingForSecondSignature(false);
       console.error(e);
     }
-  }, [resetRecommendations, thirdwebSigner, user]);
+  }, [thirdwebSigner, user]);
 
   useEffect(() => {
     // Seed phrase account can sign immediately
