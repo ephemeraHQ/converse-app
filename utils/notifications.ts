@@ -209,15 +209,13 @@ export const loadSavedNotificationMessagesToContext = async () => {
         messages
       );
       const messagesToSaveByAccount: {
-        [account: string]: { [topic: string]: XmtpMessage[] };
+        [account: string]: XmtpMessage[];
       } = {};
       messages.forEach((message: any) => {
         if (message.account && knownAccounts.includes(message.account)) {
           messagesToSaveByAccount[message.account] =
-            messagesToSaveByAccount[message.account] || {};
-          messagesToSaveByAccount[message.account][message.topic] =
-            messagesToSaveByAccount[message.account][message.topic] || [];
-          messagesToSaveByAccount[message.account][message.topic].push({
+            messagesToSaveByAccount[message.account] || [];
+          messagesToSaveByAccount[message.account].push({
             id: message.id,
             senderAddress: message.senderAddress,
             sent: message.sent,
@@ -225,6 +223,7 @@ export const loadSavedNotificationMessagesToContext = async () => {
             status: "sent",
             sentViaConverse: !!message.sentViaConverse,
             contentType: message.contentType || "xmtp.org/text:1.0",
+            topic: message.topic,
           });
         }
       });
@@ -233,15 +232,7 @@ export const loadSavedNotificationMessagesToContext = async () => {
       const promises: Promise<void>[] = [];
 
       for (const account of Object.keys(messagesToSaveByAccount)) {
-        for (const topic of Object.keys(messagesToSaveByAccount[account])) {
-          promises.push(
-            saveMessages(
-              account,
-              messagesToSaveByAccount[account][topic],
-              topic
-            )
-          );
-        }
+        promises.push(saveMessages(account, messagesToSaveByAccount[account]));
       }
       lastStepDone = 10;
       await Promise.all(promises);

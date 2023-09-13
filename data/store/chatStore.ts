@@ -40,6 +40,7 @@ type XmtpProtocolMessage = {
   sent: number;
   content: string;
   contentType: string;
+  topic: string;
 };
 
 export type XmtpMessage = XmtpProtocolMessage & {
@@ -84,7 +85,7 @@ export type ChatStoreType = {
 
   setInitialLoadDone: () => void;
   setInitialLoadDoneOnce: () => void;
-  setMessages: (topic: string, messagesToSet: XmtpMessage[]) => void;
+  setMessages: (messagesToSet: XmtpMessage[]) => void;
   updateMessagesIds: (
     updates: { topic: string; oldId: string; message: XmtpMessage }[]
   ) => void;
@@ -193,22 +194,25 @@ export const initChatStore = (account: string) => {
               newState.conversations[topic].messageDraft = messageDraft;
               return newState;
             }),
-          setMessages: (topic, messagesToSet) =>
+          setMessages: (messagesToSet) =>
             set((state) => {
               let isUpdated = false;
               const newState = {
                 ...state,
               };
-              if (!newState.conversations[topic]) {
-                newState.conversations[topic] = {
-                  messages: new Map(),
-                  topic,
-                } as XmtpConversationWithUpdate;
-                isUpdated = true;
-              }
 
-              const conversation = newState.conversations[topic];
               for (const message of messagesToSet) {
+                const topic = message.topic;
+                if (!newState.conversations[topic]) {
+                  newState.conversations[topic] = {
+                    messages: new Map(),
+                    topic,
+                    lastUpdateAt: now(),
+                  } as XmtpConversationWithUpdate;
+                  isUpdated = true;
+                }
+
+                const conversation = newState.conversations[topic];
                 // Default message status is sent
                 if (!message.status) message.status = "sent";
                 const alreadyMessage = conversation.messages.get(message.id);
@@ -219,12 +223,20 @@ export const initChatStore = (account: string) => {
                     reactions: alreadyMessage.reactions,
                   } as XmtpMessage;
                   // Existing message, let's see if we can consider it's updated
-                  isUpdated =
-                    isUpdated || isMessageUpdated(alreadyMessage, newMessage);
+                  const messageUpdated = isMessageUpdated(
+                    alreadyMessage,
+                    newMessage
+                  );
+
+                  isUpdated = isUpdated || messageUpdated;
+                  if (messageUpdated) {
+                    newState.conversations[topic].lastUpdateAt = now();
+                  }
                   conversation.messages.set(message.id, newMessage);
                 } else {
                   // New message, it's updated
                   isUpdated = true;
+                  newState.conversations[topic].lastUpdateAt = now();
                   conversation.messages.set(message.id, message);
                   if (state.openedConversationTopic === topic) {
                     conversation.readUntil = now();
@@ -252,6 +264,7 @@ export const initChatStore = (account: string) => {
                     );
                     if (!alreadyReaction) {
                       isUpdated = true;
+                      newState.conversations[topic].lastUpdateAt = now();
                       referencedMessage.reactions.set(message.id, message);
                       referencedMessage.lastUpdateAt = now();
                     }
@@ -261,7 +274,6 @@ export const initChatStore = (account: string) => {
 
               if (isUpdated) {
                 newState.lastUpdateAt = now();
-                newState.conversations[topic].lastUpdateAt = now();
               }
 
               return newState;
