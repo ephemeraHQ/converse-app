@@ -86,7 +86,8 @@ const setupAndSaveConversation = async (
   await upsertRepository(
     conversationRepository,
     [xmtpConversationToDb(conversation)],
-    ["topic"]
+    ["topic"],
+    false
   );
 
   saveConversationIdentifiersForNotifications(conversation);
