@@ -92,6 +92,9 @@ export const loadConversationsMessages = async (
     messagesBatch.forEach((m) => {
       messagesByTopic[m.topic] = messagesByTopic[m.topic] || [];
       messagesByTopic[m.topic].push(m);
+      if (m.sent > queryConversationsFromTimestamp[m.topic]) {
+        queryConversationsFromTimestamp[m.topic] = m.sent;
+      }
     });
 
     topicsToQuery.forEach((topic) => {
