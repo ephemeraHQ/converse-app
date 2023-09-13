@@ -80,12 +80,6 @@ export default function ClickableText({ children, style }: Props) {
       style={style}
       parse={[
         {
-          onPress: handleUrlPress,
-          onLongPress: showCopyActionSheet("Copy link"),
-          pattern: URL_REGEX,
-          style: styles.clickableText,
-        },
-        {
           onPress: handleNewConversationPress,
           onLongPress: showCopyActionSheet("Copy wallet address"),
           pattern: ADDRESS_REGEX,
@@ -125,6 +119,12 @@ export default function ClickableText({ children, style }: Props) {
           onPress: handleEmailPress,
           onLongPress: showCopyActionSheet("Copy email"),
           pattern: EMAIL_REGEX,
+          style: styles.clickableText,
+        },
+        {
+          onPress: handleUrlPress,
+          onLongPress: showCopyActionSheet("Copy link"),
+          pattern: URL_REGEX,
           style: styles.clickableText,
         },
       ]}
