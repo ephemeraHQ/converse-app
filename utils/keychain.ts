@@ -23,63 +23,27 @@ export const deleteXmtpKey = async (account: string) => {
 export const loadXmtpKey = async (account: string): Promise<string | null> =>
   SecureStore.getItemAsync(`XMTP_KEY_${account}`, secureStoreOptions);
 
-export const saveXmtpConversationIfNeeded = async (
-  key: string,
-  jsonConversation: string
-) => {
-  try {
-    const alreadyExists = await SecureStore.getItemAsync(
-      `XMTP_CONVERSATION_${key}`,
-      secureStoreOptions
-    );
-    if (alreadyExists) {
-      return;
-    }
-    await SecureStore.setItemAsync(
-      `XMTP_CONVERSATION_${key}`,
-      jsonConversation,
-      secureStoreOptions
-    );
-  } catch (e) {
-    console.log("ERROR WITH", `XMTP_CONVERSATION_${key}`, jsonConversation, e);
+// Faster than saving if already exists
+const saveIfNotExists = async (key: string, value: string) => {
+  const alreadyExists = await SecureStore.getItemAsync(key, secureStoreOptions);
+  if (alreadyExists) {
+    return;
   }
+  await SecureStore.setItemAsync(key, value, secureStoreOptions);
 };
 
-export type ConversationWithKeyMaterial =
-  | {
-      version: "v1";
-      peerAddress: string;
-      createdAt: string;
-      topic: string;
-    }
-  | {
-      version: "v2";
-      context:
-        | { conversationId: string; metadata: { [key: string]: any } }
-        | undefined;
-      topic: string;
-      peerAddress: string;
-      createdAt: string;
-      keyMaterial: string;
-    };
-
-export const saveConversationsToKeychain = async (
-  clientAddress: string,
-  conversationsWithKeys: ConversationWithKeyMaterial[]
+export const saveTopicDataToKeychain = async (
+  account: string,
+  conversationTopicData: { [topic: string]: string }
 ) => {
   const promises = [];
   const now = new Date().getTime();
-  for (const conversationWithKey of conversationsWithKeys) {
-    let topic = conversationWithKey.topic;
-    if (!topic) {
-      // If no topic it's v1, we can build topic
-      const addresses = [conversationWithKey.peerAddress, clientAddress];
-      addresses.sort();
-      topic = `/xmtp/0/dm-${addresses[0]}-${addresses[1]}/proto`;
-    }
-    const jsonConversation = JSON.stringify(conversationWithKey);
+  for (const topic in conversationTopicData) {
+    const topicData = conversationTopicData[topic];
     const key = createHash("sha256").update(topic).digest("hex");
-    promises.push(saveXmtpConversationIfNeeded(key, jsonConversation));
+    promises.push(
+      saveIfNotExists(`XMTP_TOPIC_DATA_${account}_${key}`, topicData)
+    );
   }
   await Promise.all(promises);
   const after = new Date().getTime();
@@ -90,18 +54,36 @@ export const saveConversationsToKeychain = async (
   );
 };
 
-export const loadConversationFromKeychain = async (topic: string) => {
-  const key = createHash("sha256").update(topic).digest("hex");
-  const value = await SecureStore.getItemAsync(
-    `XMTP_CONVERSATION_${key}`,
-    secureStoreOptions
+export const getTopicDataFromKeychain = async (
+  account: string,
+  topics: string[]
+): Promise<string[]> => {
+  const keys = topics.map((topic) =>
+    createHash("sha256").update(topic).digest("hex")
   );
-  return value;
+  const keychainValues = await Promise.all(
+    keys.map((key) =>
+      SecureStore.getItemAsync(
+        `XMTP_TOPIC_DATA_${account}_${key}`,
+        secureStoreOptions
+      )
+    )
+  );
+  const topicData = keychainValues.filter((v) => !!v) as string[];
+  return topicData;
 };
 
-export const deleteConversationsFromKeychain = async (topics: string[]) => {
+export const deleteConversationsFromKeychain = async (
+  account: string,
+  topics: string[]
+) => {
   for (const topic of topics) {
     const key = createHash("sha256").update(topic).digest("hex");
+    await SecureStore.deleteItemAsync(
+      `XMTP_TOPIC_DATA_${account}_${key}`,
+      secureStoreOptions
+    );
+    // Delete old version of the data (TODO => remove)
     await SecureStore.deleteItemAsync(
       `XMTP_CONVERSATION_${key}`,
       secureStoreOptions
