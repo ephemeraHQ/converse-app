@@ -13,7 +13,11 @@ import {
 
 import config from "../config";
 import { refreshProfileForAddress } from "../data/helpers/profiles/profilesUpdate";
-import { currentAccount, useUserStore } from "../data/store/accountsStore";
+import {
+  currentAccount,
+  useProfilesStore,
+  useUserStore,
+} from "../data/store/accountsStore";
 import { useAppStore } from "../data/store/appStore";
 import { NavigationParamList } from "../screens/Main";
 import { actionSheetColors, textSecondaryColor } from "../utils/colors";
@@ -126,15 +130,21 @@ export default function SettingsButton({
     userAddress,
   ]);
 
+  const userPrimaryENS = useProfilesStore(
+    (s) =>
+      s.profiles[userAddress]?.socials.ensNames?.find((n) => n.isPrimary)?.name
+  );
+
   if (Platform.OS === "ios") {
     return (
-      <View>
+      <View style={{ flexBasis: userPrimaryENS ? "40%" : undefined }}>
         <Button
           variant="text"
           allowFontScaling={false}
           textStyle={{ fontSize: 17 * getTitleFontScale() }}
           onPress={onPress}
-          title={shortAddress(userAddress || "")}
+          title={userPrimaryENS || shortAddress(userAddress || "")}
+          numberOfLines={1}
         />
       </View>
     );
