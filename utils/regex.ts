@@ -1,21 +1,20 @@
-const BOUNDARY_START = /(\s|\(|^)/.source; // Either a space, the beginning of the text, or a (
-const BOUNDARY_END = /(\s|\)|$)/.source; // Either a space, the end of the text, or a )
+const BOUNDARY_START_LOOKBEHIND = /(\s|\()/.source; // Either a space or a (
+const BOUNDARY_START = new RegExp(`(?<=${BOUNDARY_START_LOOKBEHIND})|^`).source; // It must be start of the line or be preceded by lookbehind
+const BOUNDARY_END_LOOKAHEAD = /(\s|\)|$|\.|!|\?|\r\n|\r|\n)/.source; // Either a space, the end of the text, or a ), a ., a !, a ?, a line break
+const BOUNDARY_END = new RegExp(`(?=${BOUNDARY_END_LOOKAHEAD})`).source;
 const WORD_CONTENT = /[^()/\s]/.source; // Not a space, not a ( or ), not a /
-const URL_WORD_CONTENT = /[^()\s]/.source; // Not a space, not a ( or )
 
 const getDomainExpression = (suffix: RegExp) =>
   new RegExp(
-    `(?<=${BOUNDARY_START})${WORD_CONTENT}*${suffix.source}(?=${BOUNDARY_END})`,
+    `${BOUNDARY_START}${WORD_CONTENT}*${suffix.source}${BOUNDARY_END}`,
     "gi"
   );
 
-export const URL_REGEX = new RegExp(
-  `(?<=${BOUNDARY_START})((http(s?)://)|(www.))${URL_WORD_CONTENT}*\\.${URL_WORD_CONTENT}*(?=${BOUNDARY_END})`,
-  "gi"
-);
+export const URL_REGEX =
+  /\b(?:(?:https?|ftp):\/\/|www\.)?[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}(?:\/\S*)?(?:\?\S*)?\b/g;
 
 export const ADDRESS_REGEX = new RegExp(
-  `(?<=${BOUNDARY_START})0x[a-fA-F0-9]{40}(?=${BOUNDARY_END})`,
+  `${BOUNDARY_START}0x[a-fA-F0-9]{40}${BOUNDARY_END}`,
   "gi"
 );
 
@@ -28,4 +27,4 @@ export const UNS_REGEX = getDomainExpression(
 );
 
 export const EMAIL_REGEX =
-  /([-!#-'*+/-9=?A-Z^-~]+(\.[-!#-'*+/-9=?A-Z^-~]+)*|"([]!#-[^-~ \t]|(\\[\t -~]))+")@([0-9A-Za-z]([0-9A-Za-z-]{0,61}[0-9A-Za-z])?(\.[0-9A-Za-z]([0-9A-Za-z-]{0,61}[0-9A-Za-z])?)*|\[((25[0-5]|2[0-4][0-9]|1[0-9]{2}|[1-9]?[0-9])(\.(25[0-5]|2[0-4][0-9]|1[0-9]{2}|[1-9]?[0-9])){3}|IPv6:((((0|[1-9A-Fa-f][0-9A-Fa-f]{0,3}):){6}|::((0|[1-9A-Fa-f][0-9A-Fa-f]{0,3}):){5}|[0-9A-Fa-f]{0,4}::((0|[1-9A-Fa-f][0-9A-Fa-f]{0,3}):){4}|(((0|[1-9A-Fa-f][0-9A-Fa-f]{0,3}):)?(0|[1-9A-Fa-f][0-9A-Fa-f]{0,3}))?::((0|[1-9A-Fa-f][0-9A-Fa-f]{0,3}):){3}|(((0|[1-9A-Fa-f][0-9A-Fa-f]{0,3}):){0,2}(0|[1-9A-Fa-f][0-9A-Fa-f]{0,3}))?::((0|[1-9A-Fa-f][0-9A-Fa-f]{0,3}):){2}|(((0|[1-9A-Fa-f][0-9A-Fa-f]{0,3}):){0,3}(0|[1-9A-Fa-f][0-9A-Fa-f]{0,3}))?::(0|[1-9A-Fa-f][0-9A-Fa-f]{0,3}):|(((0|[1-9A-Fa-f][0-9A-Fa-f]{0,3}):){0,4}(0|[1-9A-Fa-f][0-9A-Fa-f]{0,3}))?::)((0|[1-9A-Fa-f][0-9A-Fa-f]{0,3}):(0|[1-9A-Fa-f][0-9A-Fa-f]{0,3})|(25[0-5]|2[0-4][0-9]|1[0-9]{2}|[1-9]?[0-9])(\.(25[0-5]|2[0-4][0-9]|1[0-9]{2}|[1-9]?[0-9])){3})|(((0|[1-9A-Fa-f][0-9A-Fa-f]{0,3}):){0,5}(0|[1-9A-Fa-f][0-9A-Fa-f]{0,3}))?::(0|[1-9A-Fa-f][0-9A-Fa-f]{0,3})|(((0|[1-9A-Fa-f][0-9A-Fa-f]{0,3}):){0,6}(0|[1-9A-Fa-f][0-9A-Fa-f]{0,3}))?::)|(?!IPv6:)[0-9A-Za-z-]*[0-9A-Za-z]:[!-Z^-~]+)])/gi;
+  /(?:[a-z0-9!#$%&'*+=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+=?^_`{|}~-]+)*|"(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21\x23-\x5b\x5d-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])*")@(?:(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?|\[(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?|[a-z0-9-]*[a-z0-9]:(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21-\x5a\x53-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])+)\])/gi;
