@@ -96,23 +96,19 @@ export const loadConversationsMessages = async (
 
     topicsToQuery.forEach((topic) => {
       const messages = messagesByTopic[topic];
-      if (!messages || messages.length < BATCH_QUERY_PAGE_SIZE) {
-        // Since we get less than BATCH_QUERY_PAGE_SIZE
-        // we know that we got everything, no further query
+      if (!messages || messages.length <= 1) {
+        // When we have no more messages for a topic it means we have gone through all of it
+        // Checking if messages.length < BATCH_QUERY_PAGE_SIZE would be more performant (one less query
+        // per topic) but could miss messages because if there are messages that are not decoded they
+        // are not returned by listBatchMessages)
         delete queryConversationsFromTimestamp[topic];
       }
     });
 
-    Object.keys(messagesByTopic).forEach((topic) => {
-      messagesByTopic[topic].sort(
-        (messageA, messageB) => messageA.sent - messageB.sent
-      );
-      messagesByTopic[topic].map(protocolMessageToStateMessage);
-      saveMessages(
-        client.address,
-        messagesByTopic[topic].map(protocolMessageToStateMessage),
-        topic
-      );
-    });
+    messagesBatch.sort((messageA, messageB) => messageA.sent - messageB.sent);
+    saveMessages(
+      client.address,
+      messagesBatch.map(protocolMessageToStateMessage)
+    );
   }
 };
