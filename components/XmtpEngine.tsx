@@ -61,7 +61,8 @@ export default function XmtpEngine() {
       async (nextAppState) => {
         if (
           nextAppState === "active" &&
-          appState.current.match(/inactive|background/)
+          appState.current.match(/inactive|background/) &&
+          hydrationDone
         ) {
           syncAccounts(accounts);
         }
@@ -72,17 +73,21 @@ export default function XmtpEngine() {
     return () => {
       subscription.remove();
     };
-  }, [syncAccounts, accounts]);
+  }, [syncAccounts, accounts, hydrationDone]);
 
   // If lost connection, resync
   const isInternetReachableRef = useRef(isInternetReachable);
   useEffect(() => {
-    if (!isInternetReachableRef.current && isInternetReachable) {
+    if (
+      !isInternetReachableRef.current &&
+      isInternetReachable &&
+      hydrationDone
+    ) {
       // We're back online!
       syncAccounts(accounts);
     }
     isInternetReachableRef.current = isInternetReachable;
-  }, [accounts, isInternetReachable, syncAccounts]);
+  }, [accounts, isInternetReachable, syncAccounts, hydrationDone]);
 
   // Cron
 

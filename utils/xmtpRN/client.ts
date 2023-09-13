@@ -4,7 +4,8 @@ import { Client } from "@xmtp/react-native-sdk";
 
 import config from "../../config";
 import { getChatStore, getUserStore } from "../../data/store/accountsStore";
-import { loadXmtpKey } from "../keychain";
+import { getTopicDataFromKeychain, loadXmtpKey } from "../keychain";
+import { sentryTrackError } from "../sentry";
 import {
   deleteOpenedConversations,
   loadConversations,
@@ -29,6 +30,7 @@ export const getXmtpClientFromBase64Key = (base64Key: string) =>
 
 const xmtpClientByAccount: { [account: string]: Client } = {};
 const xmtpSignatureByAccount: { [account: string]: string } = {};
+const importedTopicDataByAccount: { [account: string]: boolean } = {};
 
 export const getXmtpClient = async (account: string) => {
   console.log(`[XmtpRN] Getting client for ${account}`);
@@ -47,14 +49,43 @@ export const getXmtpClient = async (account: string) => {
   throw new Error(`[XmtpRN] No client found for ${account}`);
 };
 
+const importTopicData = async (client: Client, topics: string[]) => {
+  if (client.address in importedTopicDataByAccount) return;
+  importedTopicDataByAccount[client.address] = true;
+  // If we have topics for this account, let's import them
+  // so the first conversation.list() is faster
+  const beforeImport = new Date().getTime();
+  const topicsData = await getTopicDataFromKeychain(client.address, topics);
+  if (topicsData.length > 0) {
+    try {
+      await topicsData.map((data) =>
+        client.conversations.importTopicData(data)
+      );
+      const afterImport = new Date().getTime();
+      console.log(
+        `[XmtpRN] Imported ${
+          topicsData.length
+        } exported conversations into client in ${
+          (afterImport - beforeImport) / 1000
+        }s`
+      );
+    } catch (e) {
+      console.log(e);
+      // It's ok if import failed it will just be slower
+      sentryTrackError(e);
+    }
+  }
+};
+
 export const syncXmtpClient = async (
   account: string,
   knownTopics: string[],
   lastSyncedAt: number
 ) => {
   console.log(`[XmtpRN] Syncing ${account}`);
-  const now = new Date().getTime();
   const client = await getXmtpClient(account);
+  await importTopicData(client, knownTopics);
+  const now = new Date().getTime();
   const { newConversations, knownConversations } = await loadConversations(
     client,
     knownTopics
@@ -90,6 +121,7 @@ export const deleteXmtpClient = async (account: string) => {
     delete xmtpClientByAccount[account];
     deleteOpenedConversations(account);
     delete xmtpSignatureByAccount[account];
+    delete importedTopicDataByAccount[account];
   }
 };
 
