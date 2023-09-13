@@ -7,6 +7,7 @@ import com.google.firebase.messaging.RemoteMessage
 import org.json.JSONObject
 import org.xmtp.android.library.Client
 import org.xmtp.android.library.DecodedMessage
+import org.xmtp.android.library.codecs.Reaction
 import org.xmtp.android.library.codecs.RemoteAttachment
 import org.xmtp.android.library.codecs.decoded
 import org.xmtp.android.library.messages.Envelope
@@ -30,15 +31,14 @@ fun handleNewMessageNotification(xmtpClient: Client, envelope: Envelope, remoteM
         notificationMessage = "\uD83D\uDCCE Media";
         saveMessageToStorage(xmtpClient.address, envelope.contentTopic, decodedMessage, sentViaConverse, contentType)
     } else if (contentType.startsWith("xmtp.org/reaction:")) {
-        val reactionParameters = decodedMessage.encodedContent.parametersMap;
+        val reaction: Reaction? = decodedMessage.content()
         saveMessageToStorage(xmtpClient.address, envelope.contentTopic, decodedMessage, sentViaConverse, contentType)
-        if (reactionParameters["action"] == "removed") {
+        if (reaction?.action.toString() == "removed") {
             return null;
-        } else if (reactionParameters["schema"] != "unicode") {
+        } else if (reaction == null || reaction?.schema.toString() != "unicode") {
             notificationMessage = "Reacted to a message";
         } else {
-            val reactionContent = decodedMessage.encodedContent.content.toStringUtf8();
-            notificationMessage = "Reacted $reactionContent to a message"
+            notificationMessage = "Reacted ${reaction.content} to a message"
         }
     } else {
         Log.d("PushNotificationsService", "Unknown content type")
@@ -119,15 +119,15 @@ fun getJsonRemoteAttachment(decodedMessage: DecodedMessage): String {
 }
 
 fun getJsonReaction(decodedMessage: DecodedMessage): String {
-    val reactionContent = decodedMessage.encodedContent.content.toStringUtf8();
-    val reactionParameters = decodedMessage.encodedContent.parametersMap;
+    val reaction: Reaction? = decodedMessage.content()
+    val reactionContent = reaction?.content ?: "";
     return try {
         val dictionary =
             mapOf(
-                "reference" to reactionParameters["reference"],
-                "action" to reactionParameters["action"],
-                "content" to reactionContent,
-                "schema" to reactionParameters["schema"],
+                "reference" to (reaction?.reference ?: ""),
+                "action" to (reaction?.action.toString() ?: ""),
+                "content" to (reaction?.content ?: ""),
+                "schema" to (reaction?.schema.toString() ?: ""),
             )
         JSONObject(dictionary).toString()
     } catch (e: Exception) {
