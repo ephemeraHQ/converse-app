@@ -35,7 +35,8 @@ export const saveMessages = async (
     messages.map((xmtpMessage) =>
       xmtpMessageToDb(xmtpMessage, conversationTopic)
     ),
-    ["id"]
+    ["id"],
+    false
   );
 };
 
