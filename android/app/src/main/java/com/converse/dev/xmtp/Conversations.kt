@@ -2,6 +2,7 @@ package com.converse.dev.xmtp
 
 import android.content.Context
 import android.util.Log
+import android.util.Base64.NO_WRAP
 import com.android.volley.Request
 import com.android.volley.toolbox.JsonObjectRequest
 import com.android.volley.toolbox.Volley
@@ -13,6 +14,7 @@ import org.json.JSONObject
 import org.xmtp.android.library.Client
 import org.xmtp.android.library.Conversation
 import org.xmtp.android.library.messages.Envelope
+import org.xmtp.proto.keystore.api.v1.Keystore.TopicMap.TopicData
 import java.security.MessageDigest
 import java.util.HashMap
 
@@ -114,8 +116,17 @@ fun getPersistedConversation(xmtpClient: Client, topic: String): Conversation? {
         val topicBytes = topic.toByteArray(Charsets.UTF_8)
         val digest = MessageDigest.getInstance("SHA-256").digest(topicBytes)
         val encodedTopic = digest.joinToString("") { "%02x".format(it) }
-        var persistedConversationData = getKeychainValue("XMTP_CONVERSATION_$encodedTopic")
+        val persistedTopicData = getKeychainValue("XMTP_TOPIC_DATA_${xmtpClient.address}_$encodedTopic")
+        if (persistedTopicData !== null) {
+            val data = TopicData.parseFrom(Base64.decode(persistedTopicData, NO_WRAP))
+            Log.d("PushNotificationsService", "Got saved conversation from topic data")
+            return xmtpClient.conversations.importTopicData(data)
+        }
+
+        // TODO => remove here as it's the old way of saving convos and we don't use it anymore
+        val persistedConversationData = getKeychainValue("XMTP_CONVERSATION_$encodedTopic")
         if (persistedConversationData !== null) {
+            Log.d("PushNotificationsService", "Got saved conversation persisted data")
             return xmtpClient.importConversation(persistedConversationData.toByteArray())
         }
     } catch (e: Exception) {

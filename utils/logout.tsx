@@ -49,7 +49,9 @@ export const logout = async (account: string) => {
   // to remove the notifications & the keys (main one & conversations ones)
   setTimeout(() => {
     const promisesToAwait: any[] = [];
-    promisesToAwait.push(deleteConversationsFromKeychain(topicsToDelete));
+    promisesToAwait.push(
+      deleteConversationsFromKeychain(account, topicsToDelete)
+    );
     // Unsubscribing from notifications
     // TODO => remove notifications for this account's topic
     promisesToAwait.push(disablePushNotifications());

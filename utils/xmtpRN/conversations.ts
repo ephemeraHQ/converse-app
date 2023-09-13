@@ -1,4 +1,3 @@
-import { keystore } from "@xmtp/proto";
 import {
   Client,
   Conversation,
@@ -9,10 +8,7 @@ import { Conversation as DbConversation } from "../../data/db/entities/conversat
 import { getPendingConversationsToCreate } from "../../data/helpers/conversations/pendingConversations";
 import { saveConversations } from "../../data/helpers/conversations/upsertConversations";
 import { XmtpConversation } from "../../data/store/chatStore";
-import {
-  ConversationWithKeyMaterial,
-  saveConversationsToKeychain,
-} from "../keychain";
+import { saveTopicDataToKeychain } from "../keychain";
 import { getXmtpClient } from "./client";
 import { loadConversationsMessages } from "./messages";
 
@@ -35,42 +31,18 @@ const protocolConversationToStateConversation = (
   pending: false,
 });
 
-const protocolConversationToKeychain = async (
-  conversation: Conversation
-): Promise<ConversationWithKeyMaterial> => {
-  if (conversation.version === "v1") {
-    return {
-      version: "v1",
-      peerAddress: conversation.peerAddress,
-      createdAt: new Date(conversation.createdAt).toISOString(),
-      topic: conversation.topic,
-    };
-  } else {
-    const topicDataBase64 = await conversation.exportTopicData();
-    const topicData = Buffer.from(topicDataBase64, "base64");
-    const keyMaterialData =
-      keystore.TopicMap_TopicData.decode(topicData).invitation
-        ?.aes256GcmHkdfSha256?.keyMaterial;
-    if (!keyMaterialData) {
-      throw new Error(
-        `Conversation ${conversation.topic} is v2 and should have key material`
-      );
-    }
-    const keyMaterial = Buffer.from(keyMaterialData).toString("base64");
-    return {
-      context: conversation.context
-        ? {
-            conversationId: conversation.context.conversationID,
-            metadata: conversation.context.metadata,
-          }
-        : undefined,
-      version: "v2",
-      topic: conversation.topic,
-      peerAddress: conversation.peerAddress,
-      createdAt: new Date(conversation.createdAt).toISOString(),
-      keyMaterial,
-    };
-  }
+const protocolConversationsToTopicData = async (
+  conversations: Conversation[]
+): Promise<{ [topic: string]: string }> => {
+  const topicWithTopicData: { [topic: string]: string } = {};
+  const topicDatas = await Promise.all(
+    conversations.map((c) => c.exportTopicData())
+  );
+  conversations.forEach((c, i) => {
+    const topicData = topicDatas[i];
+    topicWithTopicData[c.topic] = topicData;
+  });
+  return topicWithTopicData;
 };
 
 const openedConversations: {
@@ -98,10 +70,10 @@ export const streamConversations = async (client: Client) => {
     saveConversations(client.address, [
       protocolConversationToStateConversation(conversation),
     ]);
-    const conversationWithKey = await protocolConversationToKeychain(
-      conversation
+    saveTopicDataToKeychain(
+      client.address,
+      await protocolConversationsToTopicData([conversation])
     );
-    saveConversationsToKeychain(client.address, [conversationWithKey]);
     // New conversations are not streamed immediatly
     // by the streamAllMessages method so we add this
     // trick to try and be all synced
@@ -149,10 +121,10 @@ export const loadConversations = async (
     );
     saveConversations(client.address, conversationsToSave);
 
-    const conversationsWithKeys = await Promise.all(
-      conversations.map(protocolConversationToKeychain)
+    saveTopicDataToKeychain(
+      client.address,
+      await protocolConversationsToTopicData(conversations)
     );
-    saveConversationsToKeychain(client.address, conversationsWithKeys);
 
     return { newConversations, knownConversations };
   } catch (e) {

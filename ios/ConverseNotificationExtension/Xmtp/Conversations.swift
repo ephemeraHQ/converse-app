@@ -101,6 +101,21 @@ func getSavedConversationTitle(contentTopic: String)-> String {
 func getPersistedConversation(xmtpClient: XMTP.Client, contentTopic: String) -> Conversation? {
   let hashedKey = CryptoKit.SHA256.hash(data: contentTopic.data(using: .utf8)!)
   let hashString = hashedKey.compactMap { String(format: "%02x", $0) }.joined()
+  let persistedTopicData = getKeychainValue(forKey: "XMTP_TOPIC_DATA_\(xmtpClient.address)_\(hashString)")
+  if (persistedTopicData != nil && persistedTopicData!.count > 0) {
+    do {
+      print("[NotificationExtension] Found a persisted topic data")
+      let data = try Xmtp_KeystoreApi_V1_TopicMap.TopicData(
+        serializedData: Data(base64Encoded: Data(persistedTopicData!.utf8))!
+      )
+      let conversation = xmtpClient.conversations.importTopicData(data: data)
+      return conversation
+    } catch {
+      sentryTrackMessage(message: "Could not import topic data in XMTP Client", extras: ["error": error])
+      return nil
+    }
+  }
+  // TODO => remove here as it's the old way of saving convos and we don't use it anymore
   let persistedConversation = getKeychainValue(forKey: "XMTP_CONVERSATION_\(hashString)")
   if (persistedConversation != nil && persistedConversation!.count > 0) {
     do {
