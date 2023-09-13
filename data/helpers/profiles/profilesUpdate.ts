@@ -40,7 +40,8 @@ export const updateProfilesForConversations = async (
         updatedAt: now,
         address,
       })),
-      ["address"]
+      ["address"],
+      false
     );
     // Dispatching the profile to state
     const socialsToDispatch: {
@@ -109,7 +110,8 @@ export const refreshProfileForAddress = async (
       updatedAt: now,
       address,
     })),
-    ["address"]
+    ["address"],
+    false
   );
   getProfilesStore(account)
     .getState()
