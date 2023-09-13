@@ -17,23 +17,20 @@ export const sendMessage = async (
   const sentAtTime = new Date();
   const isV1Conversation = conversation.topic.startsWith("/xmtp/0/dm-");
   // Save to DB immediatly
-  await saveMessages(
-    currentAccount(),
-    [
-      {
-        id: messageId,
-        senderAddress: useUserStore.getState().userAddress,
-        sent: sentAtTime.getTime(),
-        content,
-        status: "sending",
-        sentViaConverse: !isV1Conversation, // V1 Convo don't support the sentViaConverse feature
-        contentType,
-        contentFallback,
-        referencedMessageId,
-      },
-    ],
-    conversation.topic
-  );
+  await saveMessages(currentAccount(), [
+    {
+      id: messageId,
+      senderAddress: useUserStore.getState().userAddress,
+      sent: sentAtTime.getTime(),
+      content,
+      status: "sending",
+      sentViaConverse: !isV1Conversation, // V1 Convo don't support the sentViaConverse feature
+      contentType,
+      contentFallback,
+      referencedMessageId,
+      topic: conversation.topic,
+    },
+  ]);
   // Then send for real if conversation exists
   if (!conversation.pending) {
     sendPendingMessages(currentAccount());

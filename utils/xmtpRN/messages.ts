@@ -49,17 +49,14 @@ const protocolMessageToStateMessage = (
     sentViaConverse: message.sentViaConverse || false,
     content,
     referencedMessageId,
+    topic: message.topic,
   };
 };
 
 export const streamAllMessages = async (client: Client) => {
   await stopStreamingAllMessage(client);
   client.conversations.streamAllMessages(async (message) => {
-    saveMessages(
-      client.address,
-      [protocolMessageToStateMessage(message)],
-      message.topic
-    );
+    saveMessages(client.address, [protocolMessageToStateMessage(message)]);
   });
 };
 

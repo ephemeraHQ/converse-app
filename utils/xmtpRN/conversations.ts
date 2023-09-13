@@ -63,25 +63,32 @@ export const deleteOpenedConversations = (account: string) => {
   }
 };
 
+const handleNewConversation = async (
+  client: Client,
+  conversation: Conversation
+) => {
+  setOpenedConversation(client.address, conversation);
+  saveConversations(client.address, [
+    protocolConversationToStateConversation(conversation),
+  ]);
+  saveTopicDataToKeychain(
+    client.address,
+    await protocolConversationsToTopicData([conversation])
+  );
+  // New conversations are not streamed immediatly
+  // by the streamAllMessages method so we add this
+  // trick to try and be all synced
+  loadConversationsMessages(client, [conversation], 0);
+  setTimeout(() => {
+    loadConversationsMessages(client, [conversation], 0);
+  }, 3000);
+};
+
 export const streamConversations = async (client: Client) => {
   await stopStreamingConversations(client);
-  client.conversations.stream(async (conversation) => {
-    setOpenedConversation(client.address, conversation);
-    saveConversations(client.address, [
-      protocolConversationToStateConversation(conversation),
-    ]);
-    saveTopicDataToKeychain(
-      client.address,
-      await protocolConversationsToTopicData([conversation])
-    );
-    // New conversations are not streamed immediatly
-    // by the streamAllMessages method so we add this
-    // trick to try and be all synced
-    loadConversationsMessages(client, [conversation], 0);
-    setTimeout(() => {
-      loadConversationsMessages(client, [conversation], 0);
-    }, 3000);
-  });
+  client.conversations.stream((conversation) =>
+    handleNewConversation(client, conversation)
+  );
 };
 
 export const stopStreamingConversations = async (client: Client) =>
@@ -185,10 +192,7 @@ const createConversation = async (
     dbConversation.peerAddress,
     context
   );
-  setOpenedConversation(account, newConversation);
-  saveConversations(client.address, [
-    protocolConversationToStateConversation(newConversation),
-  ]);
+  handleNewConversation(client, newConversation);
   return newConversation.topic;
 };
 
