@@ -112,7 +112,7 @@ export const loadConversations = async (
       }
     });
     console.log(
-      `[XmtpRN] Listing ${conversations.length} conversations took took ${
+      `[XmtpRN] Listing ${conversations.length} conversations took ${
         (new Date().getTime() - now) / 1000
       } seconds`
     );
