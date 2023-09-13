@@ -23,6 +23,7 @@ type Props = {
   textStyle?: StyleProp<TextStyle>;
   allowFontScaling?: boolean;
   picto?: string;
+  numberOfLines?: number;
 };
 
 export default function Button({
@@ -33,6 +34,7 @@ export default function Button({
   textStyle,
   picto,
   allowFontScaling = true,
+  numberOfLines,
 }: Props) {
   const colorScheme = useColorScheme();
   const styles = useStyles();
@@ -69,6 +71,7 @@ export default function Button({
       <Text
         style={[...buttonTextStyle, textStyle]}
         allowFontScaling={allowFontScaling}
+        numberOfLines={numberOfLines}
       >
         {title}
       </Text>
