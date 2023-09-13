@@ -34,6 +34,7 @@ export const xmtpMessageFromDb = (message: Message): XmtpMessage => ({
   contentType: message.contentType,
   contentFallback: message.contentFallback,
   referencedMessageId: message.referencedMessageId,
+  topic: message.conversationId,
 });
 
 const xmtpMessagesMapFromDb = (
@@ -56,7 +57,7 @@ const xmtpMessagesMapFromDb = (
       if (referencedMessage) {
         referencedMessage.reactions =
           referencedMessage.reactions || new Map<string, XmtpMessage>();
-        referencedMessage.reactions.set(m.id, m);
+        referencedMessage.reactions.set(m.id, xmtpMessageFromDb(m));
       }
     }
   });
@@ -96,9 +97,8 @@ export const xmtpConversationFromDb = (
     socials?.lensHandles
   );
   const ensName = socials?.ensNames?.find((e) => e.isPrimary)?.name;
-  const unsDomain = socials?.unstoppableDomains?.find(
-    (d) => d.isPrimary
-  )?.domain;
+  const unsDomain = socials?.unstoppableDomains?.find((d) => d.isPrimary)
+    ?.domain;
   const conversationTitle = lensHandle || ensName || unsDomain;
 
   return {
