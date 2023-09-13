@@ -6,7 +6,7 @@ import RNFS from "react-native-fs";
 import * as Sentry from "sentry-expo";
 
 import config from "../config";
-import { clearDB } from "../data/db";
+import { clearDB, getDbPath } from "../data/db";
 import { currentAccount, useUserStore } from "../data/store/accountsStore";
 import { deleteXmtpKey } from "../utils/keychain";
 import { showActionSheetWithOptions } from "./StateHandlers/ActionSheetStateHandler";
@@ -35,7 +35,7 @@ const DebugButton = forwardRef((props, ref) => {
     showDebugMenu() {
       const methods: any = {
         "Export db file": async () => {
-          const dbPath = `${RNFS.DocumentDirectoryPath}/SQLite/converse`;
+          const dbPath = await getDbPath(currentAccount());
           const dbExists = await RNFS.exists(dbPath);
           if (!dbExists) {
             alert(`SQlite file does not exist`);
