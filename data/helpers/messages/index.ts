@@ -9,8 +9,7 @@ import { XmtpMessage } from "../../store/chatStore";
 
 export const saveMessages = async (
   account: string,
-  messages: XmtpMessage[],
-  conversationTopic: string
+  messages: XmtpMessage[]
 ) => {
   // Infer referenced message from content if needed
   messages.forEach((c) => {
@@ -26,14 +25,14 @@ export const saveMessages = async (
     }
   });
   // First dispatch for immediate feedback
-  getChatStore(account).getState().setMessages(conversationTopic, messages);
+  getChatStore(account).getState().setMessages(messages);
 
   // Then save to db
   const messageRepository = await getRepository(account, "message");
   await upsertRepository(
     messageRepository,
     messages.map((xmtpMessage) =>
-      xmtpMessageToDb(xmtpMessage, conversationTopic)
+      xmtpMessageToDb(xmtpMessage, xmtpMessage.topic)
     ),
     ["id"],
     false
