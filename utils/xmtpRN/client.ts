@@ -31,21 +31,36 @@ export const getXmtpClientFromBase64Key = (base64Key: string) =>
 const xmtpClientByAccount: { [account: string]: Client } = {};
 const xmtpSignatureByAccount: { [account: string]: string } = {};
 const importedTopicDataByAccount: { [account: string]: boolean } = {};
+const instantiatingClientForAccount: { [account: string]: boolean } = {};
 
-export const getXmtpClient = async (account: string) => {
+export const getXmtpClient = async (account: string): Promise<Client> => {
   console.log(`[XmtpRN] Getting client for ${account}`);
   if (account && xmtpClientByAccount[account]) {
     return xmtpClientByAccount[account];
   }
-  const base64Key = await loadXmtpKey(account);
-  if (base64Key) {
-    const client = await getXmtpClientFromBase64Key(base64Key);
-    console.log(`[XmtpRN] Instantiated client for ${client.address}`);
-    getUserStore(account).getState().setUserAddress(client.address);
-    getChatStore(account).getState().setLocalClientConnected(true);
-    xmtpClientByAccount[client.address] = client;
-    return client;
+  if (instantiatingClientForAccount[account]) {
+    // Avoid instantiating 2 clients for the same account
+    // which leads to buggy behaviour
+    await new Promise((r) => setTimeout(r, 200));
+    return getXmtpClient(account);
   }
+  instantiatingClientForAccount[account] = true;
+  try {
+    const base64Key = await loadXmtpKey(account);
+    if (base64Key) {
+      const client = await getXmtpClientFromBase64Key(base64Key);
+      console.log(`[XmtpRN] Instantiated client for ${client.address}`);
+      getUserStore(account).getState().setUserAddress(client.address);
+      getChatStore(account).getState().setLocalClientConnected(true);
+      xmtpClientByAccount[client.address] = client;
+      delete instantiatingClientForAccount[account];
+      return client;
+    }
+  } catch (e) {
+    delete instantiatingClientForAccount[account];
+    throw e;
+  }
+  delete instantiatingClientForAccount[account];
   throw new Error(`[XmtpRN] No client found for ${account}`);
 };
 
@@ -82,7 +97,10 @@ export const syncXmtpClient = async (
   knownTopics: string[],
   lastSyncedAt: number
 ) => {
-  console.log(`[XmtpRN] Syncing ${account}`);
+  console.log(`[XmtpRN] Syncing ${account}`, {
+    lastSyncedAt,
+    knownTopics: knownTopics.length,
+  });
   const client = await getXmtpClient(account);
   await importTopicData(client, knownTopics);
   const now = new Date().getTime();
@@ -122,6 +140,7 @@ export const deleteXmtpClient = async (account: string) => {
     deleteOpenedConversations(account);
     delete xmtpSignatureByAccount[account];
     delete importedTopicDataByAccount[account];
+    delete instantiatingClientForAccount[account];
   }
 };
 
