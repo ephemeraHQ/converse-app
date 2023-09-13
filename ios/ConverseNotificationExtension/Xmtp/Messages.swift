@@ -68,9 +68,10 @@ func decodeConversationMessage(xmtpClient: XMTP.Client, envelope: XMTP.Envelope,
       } else if (contentType.starts(with: "xmtp.org/reaction:")) {
         var notificationContent:String? = "Reacted to a message";
         var ignoreNotification = false;
-        let reactionParameters = decodedMessage.encodedContent.parameters;
-        let action = reactionParameters["action"] ?? "";
-        let schema = reactionParameters["schema"] ?? "";
+        let reaction: Reaction? = try decodedMessage.content()
+        var action = reaction?.action.rawValue
+        var schema = reaction?.schema.rawValue
+        var content = reaction?.content
         
         if (action == "removed") {
           ignoreNotification = true;
@@ -78,13 +79,15 @@ func decodeConversationMessage(xmtpClient: XMTP.Client, envelope: XMTP.Envelope,
         
         // Let's save the notification for immediate display
         do {
-          if let reactionContent = String(data: decodedMessage.encodedContent.content, encoding: .utf8) {
+          if (content != nil) {
             if (action != "removed" && schema == "unicode") {
-              notificationContent = "Reacted \(reactionContent) to a message";
+              notificationContent = "Reacted \(content!) to a message";
             }
-            let contentToSave = getJsonReaction(content: reactionContent, parameters: reactionParameters);
-            if (contentToSave != nil) {
-              try saveMessage(account: xmtpClient.address, topic: envelope.contentTopic, sent: decodedMessage.sent, senderAddress: decodedMessage.senderAddress, content: contentToSave!, id: decodedMessage.id, sentViaConverse: sentViaConverse, contentType: contentType)
+            if (reaction != nil) {
+              let contentToSave = getJsonReaction(reaction: reaction!);
+              if (contentToSave != nil) {
+                try saveMessage(account: xmtpClient.address, topic: envelope.contentTopic, sent: decodedMessage.sent, senderAddress: decodedMessage.senderAddress, content: contentToSave!, id: decodedMessage.id, sentViaConverse: sentViaConverse, contentType: contentType)
+              }
             }
             
           }
@@ -129,11 +132,12 @@ func getJsonRemoteAttachment(remoteAttachment: RemoteAttachment) -> String? {
 }
 
 
-func getJsonReaction(content: String, parameters: Dictionary<String, String>) -> String? {
+func getJsonReaction(reaction: Reaction) -> String? {
   do {
-    let reference = parameters["reference"] ?? "";
-    let schema = parameters["schema"] ?? "";
-    let action = parameters["action"] ?? "";
+    let reference = reaction.reference;
+    let schema = reaction.schema.rawValue;
+    let action = reaction.action.rawValue;
+    let content = reaction.content;
     let dictionary = NSDictionary(dictionary: ["reference": reference, "action": action, "content": content, "schema": schema])
     let jsonData = try JSONSerialization.data(withJSONObject: dictionary, options: [])
     let jsonString = String(data: jsonData, encoding: .utf8)

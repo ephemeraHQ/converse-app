@@ -98,7 +98,7 @@ func getSavedConversationTitle(contentTopic: String)-> String {
   return "";
 }
 
-func getPersistedConversation(xmtpClient: XMTP.Client, contentTopic: String) -> Conversation? {
+func getPersistedConversation(xmtpClient: XMTP.Client, contentTopic: String) -> XMTP.Conversation? {
   let hashedKey = CryptoKit.SHA256.hash(data: contentTopic.data(using: .utf8)!)
   let hashString = hashedKey.compactMap { String(format: "%02x", $0) }.joined()
   let persistedTopicData = getKeychainValue(forKey: "XMTP_TOPIC_DATA_\(xmtpClient.address)_\(hashString)")
