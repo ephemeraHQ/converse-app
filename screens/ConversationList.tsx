@@ -72,15 +72,6 @@ export default function ConversationList({
     ConversationWithLastMessagePreview[]
   >([]);
 
-  const SearchTitleHeader = () => {
-    const styles = useStyles();
-    return (
-      <View style={styles.searchTitleContainer}>
-        <Text style={styles.searchTitle}>Chats</Text>
-      </View>
-    );
-  };
-
   // Display logic
   const showInitialLoad = !initialLoadDoneOnce && flatListItems.length <= 1;
   const showNoResult = flatListItems.length === 0 && searchQuery;
@@ -187,6 +178,23 @@ export default function ConversationList({
     ]
   );
 
+  const SearchTitleHeader = () => {
+    const styles = useStyles();
+    return (
+      <View style={styles.searchTitleContainer}>
+        <Text style={styles.searchTitle}>Chats</Text>
+      </View>
+    );
+  };
+
+  let ListHeaderComponent;
+  if (Platform.OS === "ios") {
+    ListHeaderComponent =
+      searchBarFocused && !showNoResult ? <SearchTitleHeader /> : null;
+  } else {
+    ListHeaderComponent = searchBarFocused ? <SearchTitleHeader /> : null;
+  }
+
   let screenToShow: JSX.Element = (
     <View style={styles.container}>
       <View style={styles.conversationList}>
@@ -208,9 +216,7 @@ export default function ConversationList({
           renderItem={renderItem}
           keyExtractor={keyExtractor}
           estimatedItemSize={Platform.OS === "ios" ? 77 : 88}
-          ListHeaderComponent={
-            searchBarFocused && !showNoResult ? <SearchTitleHeader /> : null
-          }
+          ListHeaderComponent={ListHeaderComponent}
           ListFooterComponent={
             showNoResult ? <NoResult navigation={navigation} /> : null
           }
@@ -245,20 +251,39 @@ const useStyles = () => {
       flex: 1,
       backgroundColor: backgroundColor(colorScheme),
     },
-    searchTitleContainer: {
-      padding: 10,
-      paddingLeft: 16,
-      backgroundColor: backgroundColor(colorScheme),
-      borderBottomColor: itemSeparatorColor(colorScheme),
-      borderBottomWidth: 0.5,
-    },
-    searchTitle: {
-      fontSize: 22,
-      fontWeight: "bold",
-      color: textPrimaryColor(colorScheme),
-    },
     conversationList: {
       flex: 2,
+    },
+    searchTitleContainer: {
+      ...Platform.select({
+        default: {
+          padding: 10,
+          paddingLeft: 16,
+          backgroundColor: backgroundColor(colorScheme),
+          borderBottomColor: itemSeparatorColor(colorScheme),
+          borderBottomWidth: 0.5,
+        },
+        android: {
+          padding: 10,
+          paddingLeft: 16,
+          borderBottomWidth: 0,
+        },
+      }),
+    },
+    searchTitle: {
+      ...Platform.select({
+        default: {
+          fontSize: 22,
+          fontWeight: "bold",
+          color: textPrimaryColor(colorScheme),
+        },
+        android: {
+          fontSize: 11,
+          textTransform: "uppercase",
+          fontWeight: "bold",
+          color: textPrimaryColor(colorScheme),
+        },
+      }),
     },
   });
 };
