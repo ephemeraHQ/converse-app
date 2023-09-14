@@ -1,27 +1,23 @@
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { FlashList } from "@shopify/flash-list";
-import React, {
-  useCallback,
-  useEffect,
-  useLayoutEffect,
-  useState,
-} from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { Platform, StyleSheet, useColorScheme, Text, View } from "react-native";
-import { Searchbar as MaterialSearchBar } from "react-native-paper";
 import { SearchBarCommands } from "react-native-screens";
 
 import Connecting, {
   useShouldShowConnectingOrSyncing,
 } from "../components/Connecting";
+import {
+  useConversationListHeader,
+  useHeaderSearchBar,
+} from "../components/ConversationList/Header";
+// @todo
 import NewConversationButton from "../components/ConversationList/NewConversationButton";
-import ShareProfileButton from "../components/ConversationList/ShareProfileButton";
 import ConversationListItem from "../components/ConversationListItem";
 import EphemeralAccountBanner from "../components/EphemeralAccountBanner";
 import InitialLoad from "../components/InitialLoad";
-import Picto from "../components/Picto/Picto";
 import Recommendations from "../components/Recommendations/Recommendations";
 import NoResult from "../components/Search/NoResult";
-import SettingsButton from "../components/SettingsButton";
 import Welcome from "../components/Welcome";
 import {
   useChatStore,
@@ -34,8 +30,6 @@ import {
   textPrimaryColor,
   backgroundColor,
   itemSeparatorColor,
-  textSecondaryColor,
-  chatInputBackgroundColor,
 } from "../utils/colors";
 import {
   LastMessagePreview,
@@ -60,20 +54,36 @@ export default function ConversationList({
   const { initialLoadDoneOnce, conversations, lastUpdateAt } = useChatStore(
     (s) => pick(s, ["initialLoadDoneOnce", "conversations", "lastUpdateAt"])
   );
-  const userAddress = useUserStore((s) => s.userAddress);
   const { blockedPeers, ephemeralAccount } = useSettingsStore((s) =>
     pick(s, ["blockedPeers", "ephemeralAccount"])
   );
-
+  const userAddress = useUserStore((s) => s.userAddress);
   const profiles = useProfilesStore((state) => state.profiles);
   const shouldShowConnectingOrSyncing = useShouldShowConnectingOrSyncing();
   const [flatListItems, setFlatListItems] = useState<FlatListItem[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
+  const [searchBarFocused, setSearchBarFocused] = useState(false);
+  const searchBarRef = React.useRef<SearchBarCommands>(null);
   const [sortedConversations, setSortedConversations] = useState<
     ConversationWithLastMessagePreview[]
   >([]);
-  const [searchBarFocused, setSearchBarFocused] = useState(false);
-  const searchBarRef = React.useRef<SearchBarCommands>(null);
+
+  const SearchTitleHeader = () => {
+    const styles = useStyles();
+    return (
+      <View style={styles.searchTitleContainer}>
+        <Text style={styles.searchTitle}>Chats</Text>
+      </View>
+    );
+  };
+
+  const showInitialLoad = !initialLoadDoneOnce && flatListItems.length <= 1;
+  const showWelcome =
+    !searchQuery &&
+    !searchBarFocused &&
+    (flatListItems.length === 1 ||
+      (flatListItems.length === 2 && ephemeralAccount));
+  const showNoResult = flatListItems.length === 0 && searchQuery;
 
   useEffect(() => {
     const sortedConversations = sortAndComputePreview(
@@ -93,76 +103,18 @@ export default function ConversationList({
     setFlatListItems(listItems);
   }, [ephemeralAccount, searchQuery, sortedConversations, profiles]);
 
-  useEffect(() => {
-    if (Platform.OS === "ios") {
-      navigation.setOptions({
-        headerLeft: () =>
-          userAddress ? (
-            <SettingsButton route={route} navigation={navigation} />
-          ) : null,
-        headerRight: () => (
-          <>
-            <ShareProfileButton navigation={navigation} route={route} />
-            <NewConversationButton navigation={navigation} route={route} />
-          </>
-        ),
-      });
-    }
-  }, [navigation, route, userAddress]);
+  useConversationListHeader({ navigation, route, userAddress });
 
-  useEffect(() => {
-    if (Platform.OS === "android") {
-      const onChangeSearch = (query: React.SetStateAction<string>) =>
-        setSearchQuery(query);
-      const rightProps = searchQuery
-        ? {}
-        : {
-            right: () => (
-              <View style={styles.rightButtonContainer}>
-                <ShareProfileButton navigation={navigation} route={route} />
-              </View>
-            ),
-          };
-
-      navigation.setOptions({
-        headerLeft: () =>
-          !shouldShowConnectingOrSyncing ? (
-            <View style={styles.searchBarContainer}>
-              <View style={styles.searchBarWrapper}>
-                <MaterialSearchBar
-                  style={styles.searchBar}
-                  placeholder="Search chats"
-                  onChangeText={onChangeSearch}
-                  value={searchQuery}
-                  icon={({}) => (
-                    <SettingsButton route={route} navigation={navigation} />
-                  )}
-                  mode="bar"
-                  autoCapitalize="none"
-                  autoFocus={false}
-                  autoCorrect={false}
-                  traileringIcon={() => null}
-                  placeholderTextColor={textSecondaryColor(colorScheme)}
-                  selectionColor={textPrimaryColor(colorScheme)}
-                  clearIcon={({ color }) => (
-                    <Picto picto="xmark" size={24} color={color} />
-                  )}
-                  {...rightProps}
-                />
-              </View>
-              <View style={styles.searchBarSpacer}>{/* Right spacer */}</View>
-            </View>
-          ) : null,
-      });
-    }
-  }, [
+  useHeaderSearchBar({
     navigation,
-    shouldShowConnectingOrSyncing,
-    searchQuery,
-    colorScheme,
+    showWelcome,
     route,
-    styles,
-  ]);
+    initialLoadDoneOnce,
+    flatListItems,
+    setSearchQuery,
+    searchBarRef,
+    setSearchBarFocused,
+  });
 
   useEffect(() => {
     navigation.setOptions({
@@ -183,6 +135,7 @@ export default function ConversationList({
   const renderItem = useCallback(
     ({ item }: { item: FlatListItem }) => {
       if (item.topic === "welcome") {
+        console.log("→ welcome");
         return <Welcome ctaOnly navigation={navigation} route={route} />;
       } else if (item.topic === "noresult") {
         return <NoResult navigation={navigation} />;
@@ -237,56 +190,13 @@ export default function ConversationList({
     ]
   );
 
-  const SearchTitleHeader = () => {
-    const styles = useStyles();
-    return (
-      <View style={styles.searchTitleContainer}>
-        <Text style={styles.searchTitle}>Chats</Text>
-      </View>
-    );
-  };
-
-  const showInitialLoad = !initialLoadDoneOnce && flatListItems.length <= 1;
-  const showWelcome =
-    !searchQuery &&
-    !searchBarFocused &&
-    (flatListItems.length === 1 ||
-      (flatListItems.length === 2 && ephemeralAccount));
-  const showNoResult = flatListItems.length === 0 && searchQuery;
-
-  useLayoutEffect(() => {
-    if (
-      Platform.OS === "ios" &&
-      initialLoadDoneOnce &&
-      showWelcome === false &&
-      flatListItems.length > 1
-    ) {
-      navigation.setOptions({
-        headerSearchBarOptions: {
-          ref: searchBarRef,
-          hideNavigationBar: true,
-          hideWhenScrolling: false,
-          autoFocus: false,
-          placeholder: "Search",
-          onChangeText: (event) => setSearchQuery(event.nativeEvent.text),
-          onFocus: () => setSearchBarFocused(true),
-          onCancelButtonPress: () => setSearchBarFocused(false),
-        },
-      });
-    }
-  }, [navigation, showWelcome, initialLoadDoneOnce, flatListItems]);
-
-  const dismissKeyboard = () => {
-    searchBarRef.current?.blur();
-  };
-
   let screenToShow: JSX.Element = (
     <View style={styles.container}>
       <View style={styles.conversationList}>
         <FlashList
           keyboardShouldPersistTaps="handled"
-          onMomentumScrollBegin={dismissKeyboard}
-          onScrollBeginDrag={dismissKeyboard}
+          onMomentumScrollBegin={() => searchBarRef.current?.blur()}
+          onScrollBeginDrag={() => searchBarRef.current?.blur()}
           contentInsetAdjustmentBehavior="automatic"
           data={flatListItems}
           extraData={[
@@ -312,9 +222,14 @@ export default function ConversationList({
     </View>
   );
 
+  console.log("→ searchBarFocused:", searchBarFocused);
+
   if (showInitialLoad) {
     screenToShow = <InitialLoad />;
   } else if (showWelcome) {
+    console.log("→ showWelcome called :)");
+    console.log("→ showWelcome/searchBarFocused:", searchBarFocused);
+
     screenToShow = (
       <Welcome ctaOnly={false} navigation={navigation} route={route} />
     );
@@ -352,27 +267,6 @@ const useStyles = () => {
     },
     conversationList: {
       flex: 2,
-    },
-    // Android
-    rightButtonContainer: {
-      flex: 0.16,
-    },
-    searchBarContainer: {
-      flexDirection: "row",
-      justifyContent: "flex-start",
-      width: "100%",
-    },
-    searchBarWrapper: {
-      flex: 1,
-    },
-    searchBar: {
-      backgroundColor: chatInputBackgroundColor(colorScheme),
-      paddingLeft: 5,
-      paddingRight: 8,
-      marginVertical: 10,
-    },
-    searchBarSpacer: {
-      width: 30,
     },
   });
 };
