@@ -20,12 +20,7 @@ import {
 
 const env = config.xmtpEnv === "production" ? "production" : "dev";
 
-export const isOnXmtp = async (account: string, address: string) => {
-  const client = await getXmtpClient(account);
-  return client.canMessage(address);
-};
-
-export const getXmtpClientFromBase64Key = (base64Key: string) =>
+const getXmtpClientFromBase64Key = (base64Key: string) =>
   Client.createFromKeyBundle(base64Key, { env });
 
 const xmtpClientByAccount: { [account: string]: Client } = {};
@@ -165,7 +160,7 @@ export const deleteXmtpClient = async (account: string) => {
   }
 };
 
-export const getXmtpApiSignature = async (account: string, message: string) => {
+const getXmtpApiSignature = async (account: string, message: string) => {
   const messageToSign = Buffer.from(message);
   const base64Key = await loadXmtpKey(account);
   if (!base64Key)
