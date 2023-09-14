@@ -176,15 +176,6 @@ export default function ConversationList({
               <View style={styles.searchBarSpacer}>{/* Right spacer */}</View>
             </View>
           ) : null,
-        headerTitle: () => {
-          if (shouldShowConnectingOrSyncing) {
-            return <Connecting />;
-          } else {
-            return Platform.OS === "android" ? (
-              <Text style={styles.androidTitle} />
-            ) : null;
-          }
-        },
       });
     }
   }, [
@@ -195,6 +186,18 @@ export default function ConversationList({
     route,
     styles,
   ]);
+
+  useEffect(() => {
+    navigation.setOptions({
+      headerTitle: () => {
+        if (shouldShowConnectingOrSyncing) {
+          return <Connecting />;
+        } else {
+          return undefined;
+        }
+      },
+    });
+  }, [navigation, shouldShowConnectingOrSyncing]);
 
   const keyExtractor = useCallback((item: FlatListItem) => {
     return item.topic;
@@ -276,24 +279,23 @@ export default function ConversationList({
 
   useLayoutEffect(() => {
     if (
+      Platform.OS === "ios" &&
       initialLoadDoneOnce &&
       showWelcome === false &&
       flatListItems.length > 1
     ) {
-      if (Platform.OS === "ios") {
-        navigation.setOptions({
-          headerSearchBarOptions: {
-            ref: searchBarRef,
-            hideNavigationBar: true,
-            hideWhenScrolling: true,
-            autoFocus: false,
-            placeholder: "Search",
-            onChangeText: (event) => setSearchQuery(event.nativeEvent.text),
-            onFocus: () => setSearchBarFocused(true),
-            onCancelButtonPress: () => setSearchBarFocused(false),
-          },
-        });
-      }
+      navigation.setOptions({
+        headerSearchBarOptions: {
+          ref: searchBarRef,
+          hideNavigationBar: true,
+          hideWhenScrolling: false,
+          autoFocus: false,
+          placeholder: "Search",
+          onChangeText: (event) => setSearchQuery(event.nativeEvent.text),
+          onFocus: () => setSearchBarFocused(true),
+          onCancelButtonPress: () => setSearchBarFocused(false),
+        },
+      });
     }
   }, [navigation, showWelcome, initialLoadDoneOnce, flatListItems]);
 
@@ -375,11 +377,6 @@ const useStyles = () => {
       flex: 2,
     },
     // Android
-    androidTitle: {
-      color: textPrimaryColor(colorScheme),
-      fontSize: 22,
-      lineHeight: 26,
-    },
     rightButtonContainer: {
       flex: 0.16,
     },

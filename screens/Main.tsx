@@ -259,9 +259,8 @@ export default function Main() {
                     }),
                   },
                   animation: navigationAnimation,
-                  ...(Platform.OS === "ios"
-                    ? { headerSearchBarOptions: {} }
-                    : {}),
+                  headerSearchBarOptions:
+                    Platform.OS === "ios" ? {} : undefined,
                 }}
               />
               <Stack.Screen
