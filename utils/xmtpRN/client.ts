@@ -92,43 +92,64 @@ const importTopicData = async (client: Client, topics: string[]) => {
   }
 };
 
-export const syncXmtpClient = async (
-  account: string,
-  knownTopics: string[],
-  lastSyncedAt: number
-) => {
+const onSyncLost = async (account: string, error: any) => {
+  console.log(
+    `[XmtpRN] An error occured while syncing for ${account}: ${error}`
+  );
+  // If there is an error let's show it
+  getChatStore(account).getState().setReconnecting(true);
+  // Wait a bit before reco
+  await new Promise((r) => setTimeout(r, 1000));
+  // Now let's reload !
+  syncXmtpClient(account);
+};
+
+export const syncXmtpClient = async (account: string) => {
+  const knownTopics = Object.keys(
+    getChatStore(account).getState().conversations
+  );
+  const lastSyncedAt = getChatStore(account).getState().lastSyncedAt;
   console.log(`[XmtpRN] Syncing ${account}`, {
     lastSyncedAt,
     knownTopics: knownTopics.length,
   });
   const client = await getXmtpClient(account);
   await importTopicData(client, knownTopics);
-  const now = new Date().getTime();
-  const { newConversations, knownConversations } = await loadConversations(
-    client,
-    knownTopics
-  );
-
-  const promises = [];
-
-  if (knownConversations.length > 0) {
-    promises.push(
-      loadConversationsMessages(client, knownConversations, lastSyncedAt)
+  try {
+    const now = new Date().getTime();
+    const { newConversations, knownConversations } = await loadConversations(
+      client,
+      knownTopics
     );
+    // As soon as we have done one query we can hide reconnecting
+    getChatStore(account).getState().setReconnecting(false);
+    const promises = [];
+
+    if (knownConversations.length > 0) {
+      promises.push(
+        loadConversationsMessages(client, knownConversations, lastSyncedAt)
+      );
+    }
+
+    if (newConversations.length > 0) {
+      promises.push(loadConversationsMessages(client, newConversations, 0));
+    }
+
+    streamAllMessages(client).catch((e) => {
+      onSyncLost(account, e);
+    });
+    streamConversations(client).catch((e) => {
+      onSyncLost(account, e);
+    });
+
+    await Promise.all(promises);
+
+    // Need to save initial load is done
+    getChatStore(account).getState().setInitialLoadDone();
+    getChatStore(account).getState().setLastSyncedAt(now);
+  } catch (e) {
+    onSyncLost(account, e);
   }
-
-  if (newConversations.length > 0) {
-    promises.push(loadConversationsMessages(client, newConversations, 0));
-  }
-
-  streamAllMessages(client);
-  streamConversations(client);
-
-  await Promise.all(promises);
-
-  // Need to save initial load is done
-  getChatStore(account).getState().setInitialLoadDone();
-  getChatStore(account).getState().setLastSyncedAt(now);
 };
 
 export const deleteXmtpClient = async (account: string) => {
