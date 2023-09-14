@@ -65,7 +65,7 @@ const useStyles = () => {
           fontSize: 16,
           lineHeight: 22,
           paddingTop: 10,
-          paddingHorizontal: 22,
+          paddingHorizontal: 16,
         },
       }),
     },
