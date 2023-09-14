@@ -30,7 +30,12 @@ export default function Connecting() {
   const shouldShowConnecting = useShouldShowConnecting();
 
   return (
-    <View style={{ flexDirection: "row", alignItems: "center" }}>
+    <View
+      style={{
+        flexDirection: "row",
+        alignItems: "center",
+      }}
+    >
       <ActivityIndicator />
       <Text
         style={{
