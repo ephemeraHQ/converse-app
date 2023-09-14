@@ -1,0 +1,72 @@
+diff --git a/build.gradle b/build.gradle
+index c5ec9fc..e77baf5 100644
+--- a/build.gradle
++++ b/build.gradle
+@@ -9,23 +9,11 @@
+ //}
+ 
+ plugins {
+-    id 'com.android.application' version '7.3.1' apply false
+-    id 'com.android.library' version '7.3.1' apply false
+-    id 'org.jetbrains.kotlin.android' version '1.8.0' apply false
+-    id 'io.github.gradle-nexus.publish-plugin' version "1.2.0"
++    id 'com.android.application' apply false
++    id 'com.android.library' apply false
++    id 'org.jetbrains.kotlin.android' apply false
+     id "org.jetbrains.dokka" version "1.8.10"
+ }
+ 
+ group = "org.xmtp"
+-version = System.getenv("RELEASE_VERSION")
+-
+-nexusPublishing {
+-    repositories {
+-        sonatype {
+-            nexusUrl.set(uri("https://s01.oss.sonatype.org/service/local/"))
+-            username = System.getenv("MAVEN_USERNAME")
+-            password = System.getenv("MAVEN_PASSWORD")
+-            stagingProfileId = System.getenv("MAVEN_PROFILE_ID")
+-        }
+-    }
+-}
+\ No newline at end of file
++version = System.getenv("RELEASE_VERSION")
+\ No newline at end of file
+diff --git a/gradle/wrapper/gradle-wrapper.properties b/gradle/wrapper/gradle-wrapper.properties
+index da450a2..c4c7ed6 100644
+--- a/gradle/wrapper/gradle-wrapper.properties
++++ b/gradle/wrapper/gradle-wrapper.properties
+@@ -1,6 +1,6 @@
+ #Tue Dec 20 09:09:47 PST 2022
+ distributionBase=GRADLE_USER_HOME
+-distributionUrl=https\://services.gradle.org/distributions/gradle-7.4-bin.zip
++distributionUrl=https\://services.gradle.org/distributions/gradle-8.0.1-all.zip
+ distributionPath=wrapper/dists
+ zipStorePath=wrapper/dists
+ zipStoreBase=GRADLE_USER_HOME
+diff --git a/library/src/main/java/org/xmtp/android/library/ConversationV2.kt b/library/src/main/java/org/xmtp/android/library/ConversationV2.kt
+index 170e747..3fb998f 100644
+--- a/library/src/main/java/org/xmtp/android/library/ConversationV2.kt
++++ b/library/src/main/java/org/xmtp/android/library/ConversationV2.kt
+@@ -83,6 +83,7 @@ data class ConversationV2(
+         val message = Message.parseFrom(envelope.message)
+         val decoded = decode(message.v2)
+         decoded.id = generateId(envelope)
++        decoded.sentViaConverse = (envelope.timestampNs.toString()).endsWith("108167")
+         return decoded
+     }
+ 
+diff --git a/library/src/main/java/org/xmtp/android/library/DecodedMessage.kt b/library/src/main/java/org/xmtp/android/library/DecodedMessage.kt
+index 6b5122e..70cf469 100644
+--- a/library/src/main/java/org/xmtp/android/library/DecodedMessage.kt
++++ b/library/src/main/java/org/xmtp/android/library/DecodedMessage.kt
+@@ -9,7 +9,8 @@ data class DecodedMessage(
+     var topic: String,
+     var encodedContent: Content.EncodedContent,
+     var senderAddress: String,
+-    var sent: Date
++    var sent: Date,
++    var sentViaConverse: Boolean = false
+ ) {
+     var id: String = ""
+     companion object {
