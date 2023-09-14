@@ -1,4 +1,3 @@
-import { RemoteAttachment } from "@xmtp/content-type-remote-attachment";
 import {
   EncryptedLocalAttachment,
   RemoteAttachmentContent,
@@ -25,20 +24,6 @@ export type SerializedRemoteAttachmentContent = {
   scheme: string;
   contentLength: number;
   filename: string;
-};
-
-export const deserializeRemoteAttachmentContent = (
-  serializedRemoteAttachment: string
-): RemoteAttachment => {
-  const parsedAttachment: SerializedRemoteAttachmentContent = JSON.parse(
-    serializedRemoteAttachment
-  );
-  return {
-    ...parsedAttachment,
-    nonce: Buffer.from(parsedAttachment.nonce, "base64"),
-    salt: Buffer.from(parsedAttachment.salt, "base64"),
-    secret: Buffer.from(parsedAttachment.secret, "base64"),
-  };
 };
 
 export const isAttachmentMessage = (contentType?: string) =>

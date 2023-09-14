@@ -95,7 +95,7 @@ export const disablePushNotifications = async (): Promise<void> => {
   }
 };
 
-export const getNotificationsPermissionStatus = async (): Promise<
+const getNotificationsPermissionStatus = async (): Promise<
   NotificationPermissionStatus | undefined
 > => {
   if (Platform.OS === "android") {
