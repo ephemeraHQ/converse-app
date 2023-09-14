@@ -14,9 +14,15 @@ import {
 import { isAttachmentMessage } from "./attachment";
 import { getAddressForPeer } from "./eth";
 import { pick } from "./objects";
+import { getMatchedPeerAddresses } from "./search";
 import { sentryTrackMessage } from "./sentry";
 import { TextInputWithValue, addressPrefix } from "./str";
 import { isOnXmtp } from "./xmtp/client";
+
+type ConversationWithLastMessagePreview = XmtpConversation & {
+  lastMessagePreview?: LastMessagePreview;
+};
+type FlatListItem = ConversationWithLastMessagePreview | { topic: string };
 
 export type LastMessagePreview = {
   contentPreview: string;
@@ -210,3 +216,46 @@ export const ConversationContext = createContext<ConversationContextType>({
 export const useConversationContext = <K extends keyof ConversationContextType>(
   keys: K[]
 ) => useContextSelector(ConversationContext, (s) => pick(s, keys));
+
+export function sortAndComputePreview(
+  conversations: Record<string, XmtpConversation>,
+  userAddress: string
+): ConversationWithLastMessagePreview[] {
+  const conversationWithPreview = Object.values(conversations)
+    .filter((a) => a?.peerAddress && (!a.pending || a.messages.size > 0))
+    .map((c: ConversationWithLastMessagePreview) => {
+      c.lastMessagePreview = conversationLastMessagePreview(c, userAddress);
+      return c;
+    });
+
+  conversationWithPreview.sort((a, b) => {
+    const aDate = a.lastMessagePreview
+      ? a.lastMessagePreview.message.sent
+      : a.createdAt;
+    const bDate = b.lastMessagePreview
+      ? b.lastMessagePreview.message.sent
+      : b.createdAt;
+    return bDate - aDate;
+  });
+
+  return conversationWithPreview;
+}
+
+export function getConversationListItemsToDisplay(
+  ephemeralAccount: boolean,
+  searchQuery: string,
+  sortedConversations: ConversationWithLastMessagePreview[],
+  profiles: Record<string, any>
+): FlatListItem[] {
+  const items = ephemeralAccount ? [{ topic: "ephemeral" }] : [];
+
+  if (searchQuery && sortedConversations) {
+    const matchedPeerAddresses = getMatchedPeerAddresses(profiles, searchQuery);
+    const filteredConversations = sortedConversations.filter((conversation) =>
+      matchedPeerAddresses.includes(conversation.peerAddress)
+    );
+    return [...filteredConversations];
+  } else {
+    return [...items, ...sortedConversations, { topic: "welcome" }];
+  }
+}
