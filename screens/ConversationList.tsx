@@ -39,10 +39,10 @@ import {
 } from "../utils/colors";
 import {
   LastMessagePreview,
-  conversationLastMessagePreview,
+  sortAndComputePreview,
+  getConversationListItemsToDisplay,
 } from "../utils/conversation";
 import { pick } from "../utils/objects";
-import { getMatchedPeerAddresses } from "../utils/search";
 import { conversationName } from "../utils/str";
 import { NavigationParamList } from "./Main";
 
@@ -76,44 +76,21 @@ export default function ConversationList({
   const searchBarRef = React.useRef<SearchBarCommands>(null);
 
   useEffect(() => {
-    const conversationWithPreview = Object.values(conversations)
-      .filter((a) => a?.peerAddress && (!a.pending || a.messages.size > 0))
-      .map((c: ConversationWithLastMessagePreview) => {
-        c.lastMessagePreview = conversationLastMessagePreview(c, userAddress);
-        return c;
-      });
-
-    conversationWithPreview.sort((a, b) => {
-      const aDate = a.lastMessagePreview
-        ? a.lastMessagePreview.message.sent
-        : a.createdAt;
-      const bDate = b.lastMessagePreview
-        ? b.lastMessagePreview.message.sent
-        : b.createdAt;
-      return bDate - aDate;
-    });
-
-    setSortedConversations(conversationWithPreview);
+    const sortedConversations = sortAndComputePreview(
+      conversations,
+      userAddress
+    );
+    setSortedConversations(sortedConversations);
   }, [userAddress, conversations, lastUpdateAt]);
 
   useEffect(() => {
-    const items = ephemeralAccount ? [{ topic: "ephemeral" }] : [];
-    if (searchQuery && sortedConversations) {
-      const matchedPeerAddresses = getMatchedPeerAddresses(
-        profiles,
-        searchQuery
-      );
-      const filteredConversations = sortedConversations.filter((conversation) =>
-        matchedPeerAddresses.includes(conversation.peerAddress)
-      );
-      setFlatListItems([...filteredConversations]);
-    } else {
-      setFlatListItems([
-        ...items,
-        ...sortedConversations,
-        { topic: "welcome" },
-      ]);
-    }
+    const listItems = getConversationListItemsToDisplay(
+      ephemeralAccount,
+      searchQuery,
+      sortedConversations,
+      profiles
+    );
+    setFlatListItems(listItems);
   }, [ephemeralAccount, searchQuery, sortedConversations, profiles]);
 
   useEffect(() => {
