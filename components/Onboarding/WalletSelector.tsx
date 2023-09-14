@@ -25,6 +25,7 @@ import {
   InstalledWallet,
   POPULAR_WALLETS,
   getInstalledWallets,
+  installedWallets,
 } from "./supportedWallets";
 
 type Props = {
@@ -53,9 +54,9 @@ export default function WalletSelector({
       color={textSecondaryColor(colorScheme)}
     />
   );
-  const [installedWallets, setInstalledWallets] = useState({
+  const [walletsInstalled, setWalletsInstalled] = useState({
     checked: false,
-    list: [] as InstalledWallet[],
+    list: installedWallets as InstalledWallet[],
   });
 
   const appState = useRef(AppState.currentState);
@@ -63,7 +64,7 @@ export default function WalletSelector({
   useEffect(() => {
     const loadInstalledWallets = async (refresh: boolean) => {
       const list = await getInstalledWallets(refresh);
-      setInstalledWallets({ checked: true, list });
+      setWalletsInstalled({ checked: true, list });
     };
     loadInstalledWallets(false);
     // Things to do when app status changes (does NOT include first load)
@@ -83,9 +84,9 @@ export default function WalletSelector({
     return () => {
       subscription.remove();
     };
-  }, [setInstalledWallets]);
+  }, [setWalletsInstalled]);
 
-  const hasInstalledWallets = installedWallets.list.length > 0;
+  const hasInstalledWallets = walletsInstalled.list.length > 0;
   const insets = useSafeAreaInsets();
   return (
     <View
@@ -100,7 +101,7 @@ export default function WalletSelector({
       {hasInstalledWallets && (
         <TableView
           title="INSTALLED APPS"
-          items={installedWallets.list.map((w) => ({
+          items={walletsInstalled.list.map((w) => ({
             id: w.name,
             leftView: <TableViewImage imageURI={w.iconURL} />,
             rightView,

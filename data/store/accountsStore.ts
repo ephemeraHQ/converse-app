@@ -85,6 +85,7 @@ export const useAccountsStore = create<AccountsStoreStype>()(
         }),
       setCurrentAccount: (account) =>
         set((state) => {
+          if (state.currentAccount === account) return state;
           console.log(`[AccountsStore] Setting current account: ${account}`);
           if (!storesByAccount[account]) {
             initStores(account);

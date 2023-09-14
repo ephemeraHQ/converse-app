@@ -11,6 +11,7 @@ import {
   Platform,
   AppState,
 } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import Button from "../components/Button/Button";
 import DesktopConnect from "../components/Onboarding/DesktopConnect";
@@ -22,21 +23,27 @@ import WalletSelector from "../components/Onboarding/WalletSelector";
 import config from "../config";
 import { initDb } from "../data/db";
 import {
-  useSettingsStore,
   useAccountsStore,
+  getSettingsStore,
 } from "../data/store/accountsStore";
 import { useOnboardingStore } from "../data/store/onboardingStore";
 import { textPrimaryColor, textSecondaryColor } from "../utils/colors";
 import { saveXmtpKey } from "../utils/keychain";
+import { pick } from "../utils/objects";
 import { shortAddress } from "../utils/str";
 import { getXmtpKeysFromSigner, isOnXmtp } from "../utils/xmtpJS/client";
 import { getXmtpClient } from "../utils/xmtpRN/client";
 import { Signer } from "../vendor/xmtp-js/src";
 
 export default function OnboardingScreen() {
-  const desktopConnectSessionId = useOnboardingStore(
-    (s) => s.desktopConnectSessionId
-  );
+  const { desktopConnectSessionId, addingNewAccount, setAddingNewAccount } =
+    useOnboardingStore((s) =>
+      pick(s, [
+        "desktopConnectSessionId",
+        "addingNewAccount",
+        "setAddingNewAccount",
+      ])
+    );
   const styles = useStyles();
 
   const [isLoading, setLoading] = useState(false);
@@ -140,6 +147,8 @@ export default function OnboardingScreen() {
     });
   }, []);
 
+  const insets = useSafeAreaInsets();
+
   const requestingSignatures = useRef(false);
 
   const appState = useRef(AppState.currentState);
@@ -242,10 +251,11 @@ export default function OnboardingScreen() {
       await initDb(user.address);
 
       if (user.isEphemeral) {
-        useSettingsStore.getState().setEphemeralAccount(true);
+        getSettingsStore(user.address).getState().setEphemeralAccount(true);
       } else {
-        useSettingsStore.getState().setEphemeralAccount(false);
+        getSettingsStore(user.address).getState().setEphemeralAccount(false);
       }
+      useOnboardingStore.getState().setAddingNewAccount(false);
       // Now we can instantiate the XMTP Client
       getXmtpClient(user.address);
     } catch (e) {
@@ -410,18 +420,28 @@ export default function OnboardingScreen() {
   }
 
   return (
-    <OnboardingComponent
-      loading={loading}
-      title={title}
-      subtitle={loading ? "" : text}
-      picto={picto}
-      view={onboardingContent}
-      backButtonText={backButtonText}
-      backButtonAction={backButtonAction}
-      keyboardVerticalOffset={keyboardVerticalOffset}
-      primaryButtonText={loading ? "" : primaryButtonText}
-      primaryButtonAction={primaryButtonAction}
-    />
+    <>
+      <OnboardingComponent
+        loading={loading}
+        title={title}
+        subtitle={loading ? "" : text}
+        picto={picto}
+        view={onboardingContent}
+        backButtonText={backButtonText}
+        backButtonAction={backButtonAction}
+        keyboardVerticalOffset={keyboardVerticalOffset}
+        primaryButtonText={loading ? "" : primaryButtonText}
+        primaryButtonAction={primaryButtonAction}
+      />
+      {addingNewAccount && (
+        <Button
+          title="Cancel"
+          variant="text"
+          style={[styles.cancelButton, { top: insets.top + 9 }]}
+          onPress={() => setAddingNewAccount(false)}
+        />
+      )}
+    </>
   );
 }
 
@@ -455,6 +475,11 @@ const useStyles = () => {
     },
     link: {
       textDecorationLine: "underline",
+    },
+    cancelButton: {
+      position: "absolute",
+      top: 0,
+      left: 30,
     },
   });
 };

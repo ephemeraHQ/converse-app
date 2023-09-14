@@ -30,6 +30,7 @@ import {
   textSecondaryColor,
 } from "../utils/colors";
 import { pick } from "../utils/objects";
+import Accounts from "./Accounts";
 import Conversation from "./Conversation";
 import ConversationList from "./ConversationList";
 import ConverseMatchMaker from "./ConverseMatchMaker";
@@ -41,6 +42,7 @@ import ShareProfileScreen from "./ShareProfile";
 import WebviewPreview from "./WebviewPreview";
 
 export type NavigationParamList = {
+  Accounts: undefined;
   Chats: undefined;
   Conversation: {
     topic?: string;
@@ -77,10 +79,17 @@ Notifications.setNotificationHandler({
 export default function Main() {
   const colorScheme = useColorScheme();
   const userAddress = useUserStore((s) => s.userAddress);
-  const { desktopConnectSessionId, setDesktopConnectSessionId } =
-    useOnboardingStore((s) =>
-      pick(s, ["desktopConnectSessionId", "setDesktopConnectSessionId"])
-    );
+  const {
+    desktopConnectSessionId,
+    setDesktopConnectSessionId,
+    addingNewAccount,
+  } = useOnboardingStore((s) =>
+    pick(s, [
+      "desktopConnectSessionId",
+      "setDesktopConnectSessionId",
+      "addingNewAccount",
+    ])
+  );
   // Once the user is fully connected, let's remove the Desktop Connect session id
   useEffect(() => {
     if (desktopConnectSessionId && userAddress) {
@@ -121,7 +130,7 @@ export default function Main() {
   let screenToShow = undefined;
 
   if (splashScreenHidden) {
-    if (!userAddress) {
+    if (!userAddress || addingNewAccount) {
       screenToShow = <OnboardingScreen />;
     } else if (
       showNotificationScreen &&
@@ -190,9 +199,20 @@ export default function Main() {
       screenToShow = (
         <NavigationContainer
           linking={splashScreenHidden ? (linking as any) : undefined}
+          initialState={{
+            index: 1,
+            routes: [
+              {
+                name: "Accounts",
+              },
+              {
+                name: "Messages",
+              },
+            ],
+            type: "stack",
+          }}
         >
           <Stack.Navigator
-            initialRouteName="Chats"
             screenListeners={({ navigation }) => ({
               state: (e: any) => {
                 // Fix deeplink if already on a screen but changing params
@@ -246,6 +266,15 @@ export default function Main() {
               }}
             >
               <Stack.Screen
+                name="Accounts"
+                component={Accounts}
+                options={{
+                  headerTitle: "Accounts",
+                  headerLargeTitle: true,
+                  headerShadowVisible: false,
+                }}
+              />
+              <Stack.Screen
                 name="Chats"
                 component={ConversationList}
                 options={{
@@ -258,6 +287,7 @@ export default function Main() {
                       android: { fontSize: 22, lineHeight: 26 },
                     }),
                   },
+                  headerBackTitle: "coucou",
                   animation: navigationAnimation,
                 }}
               />
