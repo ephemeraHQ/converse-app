@@ -20,7 +20,7 @@ import {
 
 const env = config.xmtpEnv === "production" ? "production" : "dev";
 
-const getXmtpClientFromBase64Key = (base64Key: string) =>
+export const getXmtpClientFromBase64Key = (base64Key: string) =>
   Client.createFromKeyBundle(base64Key, { env });
 
 const xmtpClientByAccount: { [account: string]: Client } = {};

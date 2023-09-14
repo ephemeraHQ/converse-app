@@ -18,8 +18,10 @@ import {
 } from "../../utils/colors";
 import { saveXmtpKey } from "../../utils/keychain";
 import { pick } from "../../utils/objects";
-import { getXmtpClientFromBase64Key } from "../../utils/xmtp/client";
-import { getXmtpClient } from "../../utils/xmtpRN/client";
+import {
+  getXmtpClient,
+  getXmtpClientFromBase64Key,
+} from "../../utils/xmtpRN/client";
 import OnboardingComponent from "./OnboardingComponent";
 
 export default function DesktopConnect() {

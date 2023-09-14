@@ -29,7 +29,7 @@ import { useOnboardingStore } from "../data/store/onboardingStore";
 import { textPrimaryColor, textSecondaryColor } from "../utils/colors";
 import { saveXmtpKey } from "../utils/keychain";
 import { shortAddress } from "../utils/str";
-import { getXmtpKeysFromSigner, isOnXmtp } from "../utils/xmtp/client";
+import { getXmtpKeysFromSigner, isOnXmtp } from "../utils/xmtpJS/client";
 import { getXmtpClient } from "../utils/xmtpRN/client";
 import { Signer } from "../vendor/xmtp-js/src";
 
