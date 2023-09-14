@@ -51,8 +51,20 @@ export default function ConversationList({
 }: NativeStackScreenProps<NavigationParamList, "Chats">) {
   const colorScheme = useColorScheme();
   const styles = useStyles();
-  const { initialLoadDoneOnce, conversations, lastUpdateAt } = useChatStore(
-    (s) => pick(s, ["initialLoadDoneOnce", "conversations", "lastUpdateAt"])
+  const {
+    initialLoadDoneOnce,
+    conversations,
+    lastUpdateAt,
+    searchQuery,
+    setSearchQuery,
+  } = useChatStore((s) =>
+    pick(s, [
+      "initialLoadDoneOnce",
+      "conversations",
+      "lastUpdateAt",
+      "searchQuery",
+      "setSearchQuery",
+    ])
   );
   const { blockedPeers, ephemeralAccount } = useSettingsStore((s) =>
     pick(s, ["blockedPeers", "ephemeralAccount"])
@@ -61,7 +73,6 @@ export default function ConversationList({
   const profiles = useProfilesStore((state) => state.profiles);
   const shouldShowConnectingOrSyncing = useShouldShowConnectingOrSyncing();
   const [flatListItems, setFlatListItems] = useState<FlatListItem[]>([]);
-  const [searchQuery, setSearchQuery] = useState("");
   const [searchBarFocused, setSearchBarFocused] = useState(false);
   const searchBarRef = React.useRef<SearchBarCommands>(null);
   const [sortedConversations, setSortedConversations] = useState<
@@ -109,9 +120,7 @@ export default function ConversationList({
     navigation,
     showWelcome,
     route,
-    initialLoadDoneOnce,
     flatListItems,
-    setSearchQuery,
     searchBarRef,
     setSearchBarFocused,
   });
@@ -221,8 +230,6 @@ export default function ConversationList({
       </View>
     </View>
   );
-
-  console.log("→ searchBarFocused:", searchBarFocused);
 
   if (showInitialLoad) {
     screenToShow = <InitialLoad />;

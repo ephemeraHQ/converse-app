@@ -1,6 +1,8 @@
 import React, { useEffect, useLayoutEffect } from "react";
 import { NativeSyntheticEvent, TextInputChangeEventData } from "react-native";
 
+import { useChatStore } from "../../data/store/accountsStore";
+import { pick } from "../../utils/objects";
 import SettingsButton from "../SettingsButton";
 import NewConversationButton from "./NewConversationButton";
 import ShareProfileButton from "./ShareProfileButton";
@@ -35,9 +37,7 @@ export const useConversationListHeader = ({
 type HeaderSearchBarProps = {
   navigation: any;
   showWelcome: boolean;
-  initialLoadDoneOnce: boolean;
   flatListItems: any[];
-  setSearchQuery: React.Dispatch<React.SetStateAction<string>>;
   setSearchBarFocused: React.Dispatch<React.SetStateAction<boolean>>;
   searchBarRef: React.RefObject<any>;
   route: any; // replace
@@ -47,12 +47,26 @@ export const useHeaderSearchBar = ({
   navigation,
   showWelcome,
   route,
-  initialLoadDoneOnce,
   flatListItems,
-  setSearchQuery,
-  setSearchBarFocused,
   searchBarRef,
+  setSearchBarFocused,
 }: HeaderSearchBarProps) => {
+  const {
+    initialLoadDoneOnce,
+    conversations,
+    lastUpdateAt,
+    searchQuery,
+    setSearchQuery,
+  } = useChatStore((s) =>
+    pick(s, [
+      "initialLoadDoneOnce",
+      "conversations",
+      "lastUpdateAt",
+      "searchQuery",
+      "setSearchQuery",
+    ])
+  );
+
   useLayoutEffect(() => {
     if (initialLoadDoneOnce && !showWelcome && flatListItems.length > 1) {
       navigation.setOptions({
@@ -66,6 +80,7 @@ export const useHeaderSearchBar = ({
           onChangeText: (
             event: NativeSyntheticEvent<TextInputChangeEventData>
           ) => {
+            console.log("SETTTTTTTTTTTTTTTTT");
             setSearchQuery(event.nativeEvent.text);
           },
           onFocus: () => setSearchBarFocused(true),
