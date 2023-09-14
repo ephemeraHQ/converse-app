@@ -68,6 +68,8 @@ export type ChatStoreType = {
   webviewClientConnected: boolean;
   resyncing: boolean;
   reconnecting: boolean;
+  searchQuery: string;
+  setSearchQuery: (query: string) => void;
 
   setConversations: (conversations: XmtpConversation[]) => void;
   deleteConversations: (topics: string[]) => void;
@@ -118,6 +120,10 @@ export const initChatStore = (account: string) => {
             }),
           conversationsMapping: {},
           lastUpdateAt: 0,
+
+          searchQuery: "",
+          setSearchQuery: (q) => set(() => ({ searchQuery: q })),
+
           setConversations: (conversationsToSet) =>
             set((state) => {
               const conversations = { ...state.conversations };

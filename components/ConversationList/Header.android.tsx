@@ -1,12 +1,14 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect } from "react";
 import { StyleSheet, useColorScheme, View } from "react-native";
 import { Searchbar as MaterialSearchBar } from "react-native-paper";
 
+import { useChatStore } from "../../data/store/accountsStore";
 import {
   chatInputBackgroundColor,
   textPrimaryColor,
   textSecondaryColor,
 } from "../../utils/colors";
+import { pick } from "../../utils/objects";
 import Picto from "../Picto/Picto";
 import SettingsButton from "../SettingsButton";
 import ShareProfileButton from "./ShareProfileButton";
@@ -27,9 +29,7 @@ type HeaderSearchBarProps = {
   navigation: any; // replace
   route: any; // replace
   shouldShowConnectingOrSyncing: boolean;
-  searchQuery: string;
   flatListItems: any[];
-  setSearchQuery: React.Dispatch<React.SetStateAction<string>>;
   setSearchBarFocused: React.Dispatch<React.SetStateAction<boolean>>;
   showWelcome: boolean;
   searchBarRef: React.RefObject<any>;
@@ -37,75 +37,45 @@ type HeaderSearchBarProps = {
 
 export const useHeaderSearchBar = ({
   navigation,
+  showWelcome,
   route,
   shouldShowConnectingOrSyncing,
-  searchQuery,
-  setSearchQuery,
-  setSearchBarFocused,
-  showWelcome,
   flatListItems,
   searchBarRef,
+  setSearchBarFocused,
 }: HeaderSearchBarProps) => {
-  // Debug
-
-  // == Store the previous values of the dependencies
-  const prevDeps = useRef({
-    navigation,
-    route,
-    shouldShowConnectingOrSyncing,
-    searchQuery,
-  });
-  // == End of debug
-
   const colorScheme = useColorScheme();
   const styles = useStyles();
 
+  const {
+    initialLoadDoneOnce,
+    conversations,
+    lastUpdateAt,
+    searchQuery,
+    setSearchQuery,
+  } = useChatStore((s) =>
+    pick(s, [
+      "initialLoadDoneOnce",
+      "conversations",
+      "lastUpdateAt",
+      "searchQuery",
+      "setSearchQuery",
+    ])
+  );
+
   useEffect(() => {
-    // == Debug
-    // Check which dependency has changed
-    const changedDeps = [];
-
-    if (prevDeps.current.navigation !== navigation) {
-      changedDeps.push("navigation");
-    }
-
-    if (prevDeps.current.route !== route) {
-      changedDeps.push("route");
-    }
-
-    if (
-      prevDeps.current.shouldShowConnectingOrSyncing !==
-      shouldShowConnectingOrSyncing
-    ) {
-      changedDeps.push("shouldShowConnectingOrSyncing");
-    }
-
-    if (prevDeps.current.searchQuery !== searchQuery) {
-      changedDeps.push("searchQuery");
-    }
-
-    // Log the changed dependencies
-    if (changedDeps.length > 0) {
-      console.log(
-        "== useEffect re-run due to changed dependencies:",
-        changedDeps.join(", ")
-      );
-    }
-    // == END OF DEBUG
-
-    const onChangeSearch = (query: React.SetStateAction<string>) =>
-      setSearchQuery(query);
+    const onChangeSearch = (query: string) => setSearchQuery(query);
 
     // Sets the `right` property to display profile button only when `searchQuery` is empty
-    const rightProps = {
-      right: searchQuery
-        ? undefined
-        : () => (
+    const rightProps = searchQuery
+      ? {}
+      : {
+          right: () => (
             <View style={styles.rightButtonContainer}>
               <ShareProfileButton navigation={navigation} route={route} />
             </View>
           ),
-    };
+        };
 
     navigation.setOptions({
       headerLeft: () =>
@@ -142,11 +112,11 @@ export const useHeaderSearchBar = ({
   }, [
     navigation,
     shouldShowConnectingOrSyncing,
-    searchQuery,
     colorScheme,
     route,
     styles,
     setSearchBarFocused,
+    searchQuery,
     setSearchQuery,
   ]);
 };
