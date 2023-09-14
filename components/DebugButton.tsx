@@ -1,3 +1,4 @@
+import { Client } from "@xmtp/react-native-sdk";
 import axios from "axios";
 import * as Clipboard from "expo-clipboard";
 import * as Updates from "expo-updates";
@@ -102,9 +103,11 @@ const DebugButton = forwardRef((props, ref) => {
         "Clear logs": () => {
           logs = [];
         },
-        "Show messages # received": () => {
-          alert(`${messagesFromNetwork} messages received`);
-          messagesFromNetwork = 0;
+        "Stress test SDK": async () => {
+          for (let index = 0; index < 200; index++) {
+            await Client.createRandom();
+            console.log(index);
+          }
         },
         "Logout all": () => {
           const accounts = getAccountsList();

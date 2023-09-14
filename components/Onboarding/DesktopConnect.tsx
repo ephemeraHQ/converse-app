@@ -96,6 +96,7 @@ export default function DesktopConnect() {
           await initDb(client.address);
           // Now we can instantiate the XMTP Client
           getXmtpClient(client.address);
+          useOnboardingStore.getState().setAddingNewAccount(false);
         } else {
           inDesktopConnectInterval.current = false;
           throw new Error("COULD_NOT_INSTANTIATE_XMTP_CLIENT");

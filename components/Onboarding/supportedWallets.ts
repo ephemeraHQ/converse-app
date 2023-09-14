@@ -126,7 +126,7 @@ const SUPPORTED_WALLETS: InstalledWallet[] = [
 ];
 
 let hasCheckedInstalled = false;
-let installedWallets: typeof SUPPORTED_WALLETS = [];
+export let installedWallets: typeof SUPPORTED_WALLETS = [];
 
 export const getInstalledWallets = async (
   refresh: boolean
