@@ -72,6 +72,7 @@ export const loadConversationsMessages = async (
   conversations.forEach((c) => {
     queryConversationsFromTimestamp[c.topic] = lastTimestamp || 0;
   });
+
   while (Object.keys(queryConversationsFromTimestamp).length > 0) {
     const topicsToQuery = Object.keys(queryConversationsFromTimestamp);
     const messagesBatch = await client.listBatchMessages(
