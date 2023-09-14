@@ -30,6 +30,7 @@ import {
 import { pick } from "../utils/objects";
 import { getTitleFontScale, shortAddress } from "../utils/str";
 import Button from "./Button/Button";
+import { useShouldShowConnectingOrSyncing } from "./Connecting";
 import Picto from "./Picto/Picto";
 import { showActionSheetWithOptions } from "./StateHandlers/ActionSheetStateHandler";
 
@@ -135,11 +136,16 @@ export default function SettingsButton({
     (s) =>
       s.profiles[userAddress]?.socials.ensNames?.find((n) => n.isPrimary)?.name
   );
+  const showingConnecting = useShouldShowConnectingOrSyncing();
 
   if (Platform.OS === "ios") {
     const screenWidth = Dimensions.get("screen").width;
     const marginWidth = 26; // 16 left, 10 right
+<<<<<<< HEAD
     const connectingWidth = 110;
+=======
+    const connectingWidth = showingConnecting ? 110 : 0;
+>>>>>>> 6debdc2 (Fix positioning of Syncing / Connecting when showing an ENS)
     const flexBasis = screenWidth / 2 - marginWidth - connectingWidth / 2;
     return (
       <View
