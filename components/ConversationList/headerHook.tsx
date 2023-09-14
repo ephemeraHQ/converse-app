@@ -59,13 +59,15 @@ export const useHeaderSearchBar = ({
   }, [navigation, route, userAddress]);
 
   useLayoutEffect(() => {
-    if (initialLoadDoneOnce && !showWelcome && flatListItems.length > 1) {
+    // flatListItems.length > 2 will make sure not to display the searchBar when there is no chat
+    if (initialLoadDoneOnce && !showWelcome && flatListItems.length > 2) {
       navigation.setOptions({
         headerSearchBarOptions: {
           ref: searchBarRef,
           hideNavigationBar: true,
-          // set `hideWhenScrolling` to `false` to make the search bar always visible for now
-          hideWhenScrolling: false,
+          // set `hideWhenScrolling` to `false` to make the search bar always visible
+          // set to `true` to avoid a visual glitch while loading conversations during initial load
+          hideWhenScrolling: true,
           autoFocus: false,
           placeholder: "Search",
           onChangeText: (
