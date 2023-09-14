@@ -1,5 +1,6 @@
 import { PixelRatio, TextInput } from "react-native";
 
+import { getProfilesStore } from "../data/store/accountsStore";
 import { XmtpConversation } from "../data/store/chatStore";
 
 export const shortAddress = (address: string) =>
@@ -29,3 +30,10 @@ export const getTitleFontScale = (): number => {
 };
 
 export type TextInputWithValue = TextInput & { currentValue: string };
+
+export const getReadableProfile = (account: string, address: string) => {
+  const primaryENS = getProfilesStore(account)
+    .getState()
+    .profiles[address]?.socials.ensNames?.find((e) => e.isPrimary)?.name;
+  return primaryENS || shortAddress(account);
+};
