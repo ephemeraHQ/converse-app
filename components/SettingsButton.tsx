@@ -5,6 +5,7 @@ import * as Linking from "expo-linking";
 import React, { useCallback } from "react";
 import {
   Keyboard,
+  Dimensions,
   Platform,
   TouchableOpacity,
   useColorScheme,
@@ -29,6 +30,7 @@ import {
 import { pick } from "../utils/objects";
 import { getTitleFontScale, shortAddress } from "../utils/str";
 import Button from "./Button/Button";
+import { useShouldShowConnectingOrSyncing } from "./Connecting";
 import Picto from "./Picto/Picto";
 import { showActionSheetWithOptions } from "./StateHandlers/ActionSheetStateHandler";
 
@@ -134,10 +136,19 @@ export default function SettingsButton({
     (s) =>
       s.profiles[userAddress]?.socials.ensNames?.find((n) => n.isPrimary)?.name
   );
+  const showingConnecting = useShouldShowConnectingOrSyncing();
 
   if (Platform.OS === "ios") {
+    const screenWidth = Dimensions.get("screen").width;
+    const marginWidth = 26; // 16 left, 10 right
+    const connectingWidth = showingConnecting ? 110 : 0;
+    const flexBasis = screenWidth / 2 - marginWidth - connectingWidth / 2;
     return (
-      <View style={{ flexBasis: userPrimaryENS ? "40%" : undefined }}>
+      <View
+        style={{
+          flexBasis: userPrimaryENS ? flexBasis : undefined,
+        }}
+      >
         <Button
           variant="text"
           allowFontScaling={false}
