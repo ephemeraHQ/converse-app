@@ -126,7 +126,6 @@ export default function ConversationList({
   const renderItem = useCallback(
     ({ item }: { item: FlatListItem }) => {
       if (item.topic === "welcome") {
-        console.log("→ welcome");
         return <Welcome ctaOnly navigation={navigation} route={route} />;
       } else if (item.topic === "noresult") {
         return <NoResult navigation={navigation} />;
