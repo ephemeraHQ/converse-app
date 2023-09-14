@@ -86,7 +86,7 @@ export default function ConversationList({
   const showWelcome =
     !searchQuery &&
     !searchBarFocused &&
-    !shouldShowConnectingOrSyncing &&
+    (Platform.OS !== "android" || !shouldShowConnectingOrSyncing) &&
     (flatListItems.length === 1 ||
       (flatListItems.length === 2 && ephemeralAccount));
   const showNoResult = flatListItems.length === 0 && searchQuery;
