@@ -49,10 +49,7 @@ const openedConversations: {
   [account: string]: { [topic: string]: Conversation };
 } = {};
 
-export const setOpenedConversation = (
-  account: string,
-  conversation: Conversation
-) => {
+const setOpenedConversation = (account: string, conversation: Conversation) => {
   openedConversations[account] = openedConversations[account] || {};
   openedConversations[account][conversation.topic] = conversation;
 };
@@ -94,7 +91,7 @@ export const streamConversations = async (client: Client) => {
 export const stopStreamingConversations = async (client: Client) =>
   client.conversations.cancelStream();
 
-export const listConversations = async (client: Client) => {
+const listConversations = async (client: Client) => {
   const conversations = await client.conversations.list();
   conversations.forEach((c) => {
     setOpenedConversation(client.address, c);
