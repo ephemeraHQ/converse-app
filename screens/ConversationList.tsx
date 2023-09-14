@@ -4,15 +4,9 @@ import React, { useCallback, useEffect, useState } from "react";
 import { Platform, StyleSheet, useColorScheme, Text, View } from "react-native";
 import { SearchBarCommands } from "react-native-screens";
 
-import Connecting, {
-  useShouldShowConnectingOrSyncing,
-} from "../components/Connecting";
-import {
-  useConversationListHeader,
-  useHeaderSearchBar,
-} from "../components/ConversationList/Header";
-// @todo
+import { useShouldShowConnectingOrSyncing } from "../components/Connecting";
 import NewConversationButton from "../components/ConversationList/NewConversationButton";
+import { useHeaderSearchBar } from "../components/ConversationList/headerHook";
 import ConversationListItem from "../components/ConversationListItem";
 import EphemeralAccountBanner from "../components/EphemeralAccountBanner";
 import InitialLoad from "../components/InitialLoad";
@@ -49,6 +43,7 @@ export default function ConversationList({
   navigation,
   route,
 }: NativeStackScreenProps<NavigationParamList, "Chats">) {
+  const shouldShowConnectingOrSyncing = useShouldShowConnectingOrSyncing();
   const colorScheme = useColorScheme();
   const styles = useStyles();
   const {
@@ -56,14 +51,14 @@ export default function ConversationList({
     conversations,
     lastUpdateAt,
     searchQuery,
-    setSearchQuery,
+    searchBarFocused,
   } = useChatStore((s) =>
     pick(s, [
       "initialLoadDoneOnce",
       "conversations",
       "lastUpdateAt",
       "searchQuery",
-      "setSearchQuery",
+      "searchBarFocused",
     ])
   );
   const { blockedPeers, ephemeralAccount } = useSettingsStore((s) =>
@@ -71,9 +66,7 @@ export default function ConversationList({
   );
   const userAddress = useUserStore((s) => s.userAddress);
   const profiles = useProfilesStore((state) => state.profiles);
-  const shouldShowConnectingOrSyncing = useShouldShowConnectingOrSyncing();
   const [flatListItems, setFlatListItems] = useState<FlatListItem[]>([]);
-  const [searchBarFocused, setSearchBarFocused] = useState(false);
   const searchBarRef = React.useRef<SearchBarCommands>(null);
   const [sortedConversations, setSortedConversations] = useState<
     ConversationWithLastMessagePreview[]
@@ -88,10 +81,12 @@ export default function ConversationList({
     );
   };
 
+  // Display logic
   const showInitialLoad = !initialLoadDoneOnce && flatListItems.length <= 1;
   const showWelcome =
     !searchQuery &&
     !searchBarFocused &&
+    !shouldShowConnectingOrSyncing &&
     (flatListItems.length === 1 ||
       (flatListItems.length === 2 && ephemeralAccount));
   const showNoResult = flatListItems.length === 0 && searchQuery;
@@ -114,28 +109,15 @@ export default function ConversationList({
     setFlatListItems(listItems);
   }, [ephemeralAccount, searchQuery, sortedConversations, profiles]);
 
-  useConversationListHeader({ navigation, route, userAddress });
-
+  // Search bar hook
   useHeaderSearchBar({
     navigation,
-    showWelcome,
     route,
+    userAddress,
+    showWelcome,
     flatListItems,
     searchBarRef,
-    setSearchBarFocused,
   });
-
-  useEffect(() => {
-    navigation.setOptions({
-      headerTitle: () => {
-        if (shouldShowConnectingOrSyncing) {
-          return <Connecting />;
-        } else {
-          return undefined;
-        }
-      },
-    });
-  }, [navigation, shouldShowConnectingOrSyncing]);
 
   const keyExtractor = useCallback((item: FlatListItem) => {
     return item.topic;
@@ -151,10 +133,8 @@ export default function ConversationList({
       } else if (item.topic === "ephemeral") {
         return <EphemeralAccountBanner />;
       }
-
       const conversation = item as ConversationWithLastMessagePreview;
       const lastMessagePreview = conversation.lastMessagePreview;
-
       return (
         <ConversationListItem
           navigation={navigation}
@@ -234,9 +214,6 @@ export default function ConversationList({
   if (showInitialLoad) {
     screenToShow = <InitialLoad />;
   } else if (showWelcome) {
-    console.log("→ showWelcome called :)");
-    console.log("→ showWelcome/searchBarFocused:", searchBarFocused);
-
     screenToShow = (
       <Welcome ctaOnly={false} navigation={navigation} route={route} />
     );

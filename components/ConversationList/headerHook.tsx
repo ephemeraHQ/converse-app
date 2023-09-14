@@ -1,23 +1,48 @@
+import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import React, { useEffect, useLayoutEffect } from "react";
 import { NativeSyntheticEvent, TextInputChangeEventData } from "react-native";
 
 import { useChatStore } from "../../data/store/accountsStore";
+import { NavigationParamList } from "../../screens/Main";
 import { pick } from "../../utils/objects";
+import Connecting, { useShouldShowConnectingOrSyncing } from "../Connecting";
 import SettingsButton from "../SettingsButton";
 import NewConversationButton from "./NewConversationButton";
 import ShareProfileButton from "./ShareProfileButton";
 
-type ConversationListHeaderProps = {
-  navigation: any; // @todo
-  route: any; // @todo
+type HeaderSearchBarProps = {
   userAddress: string | null;
-};
+  showWelcome: boolean;
+  flatListItems: any[];
+  searchBarRef: React.RefObject<any>;
+} & NativeStackScreenProps<NavigationParamList, "Chats">;
 
-export const useConversationListHeader = ({
+export const useHeaderSearchBar = ({
   navigation,
   route,
   userAddress,
-}: ConversationListHeaderProps) => {
+  showWelcome,
+  flatListItems,
+  searchBarRef,
+}: HeaderSearchBarProps) => {
+  const shouldShowConnectingOrSyncing = useShouldShowConnectingOrSyncing();
+  const { initialLoadDoneOnce, setSearchQuery, setSearchBarFocused } =
+    useChatStore((s) =>
+      pick(s, ["initialLoadDoneOnce", "setSearchQuery", "setSearchBarFocused"])
+    );
+
+  useEffect(() => {
+    navigation.setOptions({
+      headerTitle: () => {
+        if (shouldShowConnectingOrSyncing) {
+          return <Connecting />;
+        } else {
+          return undefined;
+        }
+      },
+    });
+  }, [navigation, shouldShowConnectingOrSyncing]);
+
   useEffect(() => {
     navigation.setOptions({
       headerLeft: () =>
@@ -32,40 +57,6 @@ export const useConversationListHeader = ({
       ),
     });
   }, [navigation, route, userAddress]);
-};
-
-type HeaderSearchBarProps = {
-  navigation: any;
-  showWelcome: boolean;
-  flatListItems: any[];
-  setSearchBarFocused: React.Dispatch<React.SetStateAction<boolean>>;
-  searchBarRef: React.RefObject<any>;
-  route: any; // replace
-};
-
-export const useHeaderSearchBar = ({
-  navigation,
-  showWelcome,
-  route,
-  flatListItems,
-  searchBarRef,
-  setSearchBarFocused,
-}: HeaderSearchBarProps) => {
-  const {
-    initialLoadDoneOnce,
-    conversations,
-    lastUpdateAt,
-    searchQuery,
-    setSearchQuery,
-  } = useChatStore((s) =>
-    pick(s, [
-      "initialLoadDoneOnce",
-      "conversations",
-      "lastUpdateAt",
-      "searchQuery",
-      "setSearchQuery",
-    ])
-  );
 
   useLayoutEffect(() => {
     if (initialLoadDoneOnce && !showWelcome && flatListItems.length > 1) {
@@ -80,7 +71,6 @@ export const useHeaderSearchBar = ({
           onChangeText: (
             event: NativeSyntheticEvent<TextInputChangeEventData>
           ) => {
-            console.log("SETTTTTTTTTTTTTTTTT");
             setSearchQuery(event.nativeEvent.text);
           },
           onFocus: () => setSearchBarFocused(true),
@@ -93,8 +83,8 @@ export const useHeaderSearchBar = ({
     initialLoadDoneOnce,
     flatListItems,
     searchBarRef,
-    setSearchBarFocused,
     setSearchQuery,
+    setSearchBarFocused,
     showWelcome,
   ]);
 };
