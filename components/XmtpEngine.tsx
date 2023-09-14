@@ -26,9 +26,7 @@ export default function XmtpEngine() {
   const syncAccounts = useCallback((accountsToSync: string[]) => {
     accountsToSync.forEach((a) => {
       syncedAccounts.current[a] = true;
-      const knownTopics = Object.keys(getChatStore(a).getState().conversations);
-      const lastSyncedAt = getChatStore(a).getState().lastSyncedAt;
-      syncXmtpClient(a, knownTopics, lastSyncedAt);
+      syncXmtpClient(a);
     });
   }, []);
 
