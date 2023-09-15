@@ -1,6 +1,13 @@
 import { useHeaderHeight } from "@react-navigation/elements";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import { StyleSheet, Text, useColorScheme, View, Platform } from "react-native";
+import {
+  StyleSheet,
+  Text,
+  useColorScheme,
+  View,
+  Platform,
+  Dimensions,
+} from "react-native";
 
 import Ellipse from "../assets/ellipse.svg";
 import config from "../config";
@@ -20,11 +27,20 @@ export default function Welcome({ ctaOnly, navigation }: Props) {
   const frensCount = frens ? Object.keys(frens).length : 0;
   return (
     <View
-      style={
+      style={[
         ctaOnly
           ? styles.welcomCtaOnly
-          : [styles.welcome, { paddingTop: headerHeight }]
-      }
+          : [
+              styles.welcome,
+              {
+                paddingTop: Platform.OS === "ios" ? headerHeight : 0,
+                height:
+                  Platform.OS === "android"
+                    ? Dimensions.get("screen").height - headerHeight
+                    : undefined,
+              },
+            ],
+      ]}
     >
       {!ctaOnly && (
         <>
@@ -87,7 +103,7 @@ const useStyles = () => {
   return StyleSheet.create({
     welcome: {
       alignItems: "center",
-      flex: 1,
+      flex: Platform.OS === "ios" ? 1 : undefined,
       justifyContent: "center",
       backgroundColor: backgroundColor(colorScheme),
       paddingHorizontal: 30,
