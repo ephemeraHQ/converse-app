@@ -178,10 +178,10 @@ export const loadConversations = async (
   }
 };
 
-export const getConversationWithTopic = async (
+export const getConversationWithTopic = (
   account: string,
   topic: string
-): Promise<Conversation> => {
+): Conversation | undefined => {
   return openedConversations[account]?.[topic];
 };
 
