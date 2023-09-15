@@ -8,7 +8,8 @@ import { Conversation as DbConversation } from "../../data/db/entities/conversat
 import { getPendingConversationsToCreate } from "../../data/helpers/conversations/pendingConversations";
 import { saveConversations } from "../../data/helpers/conversations/upsertConversations";
 import { XmtpConversation } from "../../data/store/chatStore";
-import { saveTopicDataToKeychain } from "../keychain";
+import { getTopicDataFromKeychain, saveTopicDataToKeychain } from "../keychain";
+import { sentryTrackError } from "../sentry";
 import { getXmtpClient } from "./client";
 import { loadConversationsMessages } from "./messages";
 
@@ -57,6 +58,44 @@ const setOpenedConversation = (account: string, conversation: Conversation) => {
 export const deleteOpenedConversations = (account: string) => {
   if (account in openedConversations) {
     delete openedConversations[account];
+  }
+};
+
+const importedTopicDataByAccount: { [account: string]: boolean } = {};
+export const deleteImportedTopicData = (account: string) => {
+  if (account in importedTopicDataByAccount) {
+    delete importedTopicDataByAccount[account];
+  }
+};
+
+export const importTopicData = async (client: Client, topics: string[]) => {
+  if (client.address in importedTopicDataByAccount) return;
+  importedTopicDataByAccount[client.address] = true;
+  // If we have topics for this account, let's import them
+  // so the first conversation.list() is faster
+  const beforeImport = new Date().getTime();
+  const topicsData = await getTopicDataFromKeychain(client.address, topics);
+  if (topicsData.length > 0) {
+    try {
+      const importedConversations = await Promise.all(
+        topicsData.map((data) => client.conversations.importTopicData(data))
+      );
+      importedConversations.forEach((conversation) => {
+        setOpenedConversation(client.address, conversation);
+      });
+      const afterImport = new Date().getTime();
+      console.log(
+        `[XmtpRN] Imported ${
+          topicsData.length
+        } exported conversations into client in ${
+          (afterImport - beforeImport) / 1000
+        }s`
+      );
+    } catch (e) {
+      console.log(e);
+      // It's ok if import failed it will just be slower
+      sentryTrackError(e);
+    }
   }
 };
 
