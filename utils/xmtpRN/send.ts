@@ -10,7 +10,7 @@ import {
   updateMessagesIds,
 } from "../../data/helpers/messages";
 import { deserializeRemoteAttachmentMessageContent } from "./attachments";
-import { getLocalXmtpConversationForTopic } from "./conversations";
+import { getConversationWithTopic } from "./conversations";
 
 let sendingPendingMessages = false;
 const sendingMessages: { [messageId: string]: boolean } = {};
@@ -68,7 +68,7 @@ export const sendPendingMessages = async (account: string) => {
       if (sendingMessages[message.id]) {
         continue;
       }
-      const conversation = await getLocalXmtpConversationForTopic(
+      const conversation = await getConversationWithTopic(
         account,
         message.conversationId
       );
@@ -102,6 +102,10 @@ export const sendPendingMessages = async (account: string) => {
           newMessageSent: preparedMessage.preparedAt,
           message,
         };
+      } else {
+        console.log(
+          `Did not find the conversation for topic ${message.conversationId}, will retry...`
+        );
       }
     }
     await updateMessagesIds(account, messageIdsToUpdate);
