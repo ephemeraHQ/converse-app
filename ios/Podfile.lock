@@ -8,8 +8,8 @@ PODS:
   - CoinbaseWalletSDKExpo (1.0.7):
     - CoinbaseWalletSDK/CrossPlatform (= 1.0.4)
     - ExpoModulesCore
-  - Connect-Swift (0.6.0):
-    - SwiftProtobuf (~> 1.22.0)
+  - Connect-Swift (0.7.0):
+    - SwiftProtobuf (~> 1.23.0)
   - DoubleConversion (1.1.6)
   - EASClient (0.6.0):
     - ExpoModulesCore
@@ -656,21 +656,21 @@ PODS:
   - SQLite.swift (0.14.1):
     - SQLite.swift/standard (= 0.14.1)
   - SQLite.swift/standard (0.14.1)
-  - SwiftProtobuf (1.22.1)
+  - SwiftProtobuf (1.23.0)
   - web3.swift (1.6.0):
     - BigInt (~> 5.0.0)
     - GenericJSON (~> 2.0)
     - Logging (~> 1.0.0)
     - secp256k1.swift (~> 0.1)
-  - XMTP (0.5.2-alpha0):
+  - XMTP (0.5.4-alpha0):
     - Connect-Swift
     - GzipSwift
     - web3.swift
     - XMTPRust (= 0.3.1-beta0)
-  - XMTPReactNative (1.14.0):
+  - XMTPReactNative (1.15.3):
     - ExpoModulesCore
     - MessagePacker
-    - XMTP (= 0.5.2-alpha0)
+    - XMTP (= 0.5.4-alpha0)
   - XMTPRust (0.3.1-beta0)
   - Yoga (1.14.0)
 
@@ -980,7 +980,7 @@ SPEC CHECKSUMS:
   boost: 57d2868c099736d80fcd648bf211b4431e51a558
   CoinbaseWalletSDK: ea1f37512bbc69ebe07416e3b29bf840f5cc3152
   CoinbaseWalletSDKExpo: 89f8ad7f799227be7aff2b9353b7a77d37eb8283
-  Connect-Swift: ba76bc64b2153cacce4f7985a21d4d81473dac90
+  Connect-Swift: 3b305e8305a8b88a33be087dad207d84aad57dd2
   DoubleConversion: 5189b271737e1565bdce30deb4a08d647e3f5f54
   EASClient: 49f8ea858204eb4844d9fb386e5fb7920aee2e30
   EXApplication: 02655a251434d564bb0e73291f5a490c74b5b76f
@@ -1081,10 +1081,10 @@ SPEC CHECKSUMS:
   SentryPrivate: b3c448eacdabe9eab7679a2e0af609c608f91572
   SocketRocket: f32cd54efbe0f095c4d7594881e52619cfe80b17
   SQLite.swift: 2992550ebf3c5b268bf4352603e3df87d2a4ed72
-  SwiftProtobuf: 7773c4e96a99d7b8ab7cda0fc30a883732ff93b1
+  SwiftProtobuf: b70d65f419fbfe61a2d58003456ca5da58e337d6
   web3.swift: 2263d1e12e121b2c42ffb63a5a7beb1acaf33959
-  XMTP: 84bc7d2140d86d9548062ce78d67b8890f5f07e3
-  XMTPReactNative: 1e62bde68334e3821910c7501fbf1a5eae19cb71
+  XMTP: 8e220d6c064c293911d88adb08087b90d06c22c5
+  XMTPReactNative: 1667e5dcf843ce5c7c29b27d9af49740ed471c8c
   XMTPRust: 78f65f77b1454392980da244961777aee955652f
   Yoga: 3efc43e0d48686ce2e8c60f99d4e6bd349aff981
 
