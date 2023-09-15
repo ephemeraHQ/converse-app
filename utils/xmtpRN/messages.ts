@@ -87,6 +87,10 @@ export const loadConversationsMessages = async (
       `[XmtpRn] Fetched ${messagesBatch.length} messages from network`
     );
 
+    const oldQueryConversationsFromTimestamp = {
+      ...queryConversationsFromTimestamp,
+    };
+
     const messagesByTopic: { [topic: string]: DecodedMessage[] } = {};
     messagesBatch.forEach((m) => {
       messagesByTopic[m.topic] = messagesByTopic[m.topic] || [];
@@ -104,6 +108,20 @@ export const loadConversationsMessages = async (
         // per topic) but could miss messages because if there are messages that are not decoded they
         // are not returned by listBatchMessages)
         delete queryConversationsFromTimestamp[topic];
+      }
+    });
+
+    // To avoid a loop let's verify that we don't query a topic
+    // again with the exact same timestamp
+    Object.keys(queryConversationsFromTimestamp).forEach((topic) => {
+      if (
+        queryConversationsFromTimestamp[topic] ===
+        oldQueryConversationsFromTimestamp[topic]
+      ) {
+        console.log(
+          "[XmtpRn] Avoiding a loop during sync due to weird timestamps"
+        );
+        queryConversationsFromTimestamp[topic] += 1;
       }
     });
 
