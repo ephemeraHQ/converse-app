@@ -4,10 +4,11 @@ import { Client } from "@xmtp/react-native-sdk";
 
 import config from "../../config";
 import { getChatStore, getUserStore } from "../../data/store/accountsStore";
-import { getTopicDataFromKeychain, loadXmtpKey } from "../keychain";
-import { sentryTrackError } from "../sentry";
+import { loadXmtpKey } from "../keychain";
 import {
+  deleteImportedTopicData,
   deleteOpenedConversations,
+  importTopicData,
   loadConversations,
   stopStreamingConversations,
   streamConversations,
@@ -25,7 +26,6 @@ export const getXmtpClientFromBase64Key = (base64Key: string) =>
 
 const xmtpClientByAccount: { [account: string]: Client } = {};
 const xmtpSignatureByAccount: { [account: string]: string } = {};
-const importedTopicDataByAccount: { [account: string]: boolean } = {};
 const instantiatingClientForAccount: { [account: string]: boolean } = {};
 
 export const getXmtpClient = async (account: string): Promise<Client> => {
@@ -57,34 +57,6 @@ export const getXmtpClient = async (account: string): Promise<Client> => {
   }
   delete instantiatingClientForAccount[account];
   throw new Error(`[XmtpRN] No client found for ${account}`);
-};
-
-const importTopicData = async (client: Client, topics: string[]) => {
-  if (client.address in importedTopicDataByAccount) return;
-  importedTopicDataByAccount[client.address] = true;
-  // If we have topics for this account, let's import them
-  // so the first conversation.list() is faster
-  const beforeImport = new Date().getTime();
-  const topicsData = await getTopicDataFromKeychain(client.address, topics);
-  if (topicsData.length > 0) {
-    try {
-      await topicsData.map((data) =>
-        client.conversations.importTopicData(data)
-      );
-      const afterImport = new Date().getTime();
-      console.log(
-        `[XmtpRN] Imported ${
-          topicsData.length
-        } exported conversations into client in ${
-          (afterImport - beforeImport) / 1000
-        }s`
-      );
-    } catch (e) {
-      console.log(e);
-      // It's ok if import failed it will just be slower
-      sentryTrackError(e);
-    }
-  }
 };
 
 const onSyncLost = async (account: string, error: any) => {
@@ -156,7 +128,7 @@ export const deleteXmtpClient = async (account: string) => {
     delete xmtpClientByAccount[account];
     deleteOpenedConversations(account);
     delete xmtpSignatureByAccount[account];
-    delete importedTopicDataByAccount[account];
+    deleteImportedTopicData(account);
     delete instantiatingClientForAccount[account];
   }
 };
