@@ -81,7 +81,7 @@ export const initDb = async (account: string, tryCount = 0): Promise<void> => {
     });
     console.log(`Error initializing Database for ${account}`, e);
     await new Promise((r) => setTimeout(r, 200));
-    if (tryCount < 10) {
+    if (tryCount < 20) {
       return initDb(account, tryCount + 1);
     } else {
       sentryTrackError(e, {
