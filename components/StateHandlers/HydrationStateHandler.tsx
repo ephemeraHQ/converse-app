@@ -13,21 +13,44 @@ export default function HydrationStateHandler() {
   // Initial hydration
   useEffect(() => {
     const hydrate = async () => {
+      const startTime = new Date().getTime();
+      let lastTime = startTime;
       // Let's load installed wallets
       await getInstalledWallets(false);
 
       const accounts = getAccountsList();
       await Promise.all(accounts.map((a) => initDb(a)));
+      console.log(
+        `[Hydration] Db init took ${
+          (new Date().getTime() - lastTime) / 1000
+        } seconds`
+      );
+      lastTime = new Date().getTime();
       Promise.all(accounts.map((a) => cleanupPendingConversations(a)));
       await loadSavedNotificationMessagesToContext();
+      console.log(
+        `[Hydration] Loading notification data took ${
+          (new Date().getTime() - lastTime) / 1000
+        } seconds`
+      );
+      lastTime = new Date().getTime();
       await Promise.all(accounts.map((a) => loadDataToContext(a)));
-
+      console.log(
+        `[Hydration] Loading data to context took ${
+          (new Date().getTime() - lastTime) / 1000
+        } seconds`
+      );
       accounts.map((address) => {
         getUserStore(address).getState().setUserAddress(address);
         refreshProfileForAddress(address, address);
       });
 
       useAppStore.getState().setHydrationDone(true);
+      console.log(
+        `[Hydration] Took ${
+          (new Date().getTime() - startTime) / 1000
+        } seconds total`
+      );
     };
     hydrate();
   }, []);
