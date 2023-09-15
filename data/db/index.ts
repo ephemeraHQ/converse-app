@@ -39,7 +39,7 @@ export const getRepository = async <T extends keyof RepositoriesForAccount>(
   return repositories[account][entity];
 };
 
-export const initDb = async (account: string) => {
+export const initDb = async (account: string, tryCount = 0) => {
   const dataSource = await getDataSource(account);
   if (dataSource.isInitialized) {
     return;
@@ -65,13 +65,25 @@ export const initDb = async (account: string) => {
         profile: dataSource.getRepository(Profile),
       };
     } catch (e: any) {
-      sentryTrackError(e, { account });
+      sentryTrackError(e, { account, message: "Error running migrations" });
       console.log(`Error running migrations - destroying db for ${account}`, e);
       await clearDB(account);
     }
   } catch (e: any) {
-    sentryTrackError(e, { account });
+    const dbPath = await getDbPath(account);
+    const dbPathExists = await RNFS.exists(dbPath);
+    sentryTrackError(e, {
+      account,
+      message: "Could not initialize database",
+      tryCount,
+      dbPath,
+      dbPathExists,
+    });
     console.log(`Error initializing Database for ${account}`, e);
+    await new Promise((r) => setTimeout(r, 200));
+    if (tryCount < 10) {
+      return initDb(account, tryCount + 1);
+    }
   }
 };
 
