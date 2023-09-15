@@ -178,30 +178,11 @@ export const loadConversations = async (
   }
 };
 
-export const getLocalXmtpConversationForTopic = async (
+export const getConversationWithTopic = async (
   account: string,
   topic: string
 ): Promise<Conversation> => {
-  const client = await getXmtpClient(account);
-  if (!client) throw new Error("No XMTP Client");
-  if (openedConversations[account]?.[topic])
-    return openedConversations[account][topic];
-  let tries = 0;
-  let conversation: Conversation | null = null;
-  // Retry mechanism, 10 times in 5 secs max
-  while (!conversation && tries < 10) {
-    await listConversations(client);
-    conversation = openedConversations[account]?.[topic];
-    if (!conversation) {
-      // Let's wait 0.5 sec and retry
-      await new Promise((r) => setTimeout(r, 500));
-      tries += 1;
-    }
-  }
-  if (!conversation) {
-    throw new Error(`No conversation found for topic ${topic}`);
-  }
-  return conversation;
+  return openedConversations[account]?.[topic];
 };
 
 const createConversation = async (
