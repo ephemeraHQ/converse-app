@@ -1,5 +1,5 @@
 diff --git a/node_modules/@xmtp/react-native-sdk/android/build.gradle b/node_modules/@xmtp/react-native-sdk/android/build.gradle
-index fec5181..e38e2e7 100644
+index 4ee1337..a6db00b 100644
 --- a/node_modules/@xmtp/react-native-sdk/android/build.gradle
 +++ b/node_modules/@xmtp/react-native-sdk/android/build.gradle
 @@ -82,6 +82,12 @@ android {
@@ -16,42 +16,41 @@ index fec5181..e38e2e7 100644
    lintOptions {
      abortOnError false
 diff --git a/node_modules/@xmtp/react-native-sdk/android/src/main/java/expo/modules/xmtpreactnativesdk/XMTPModule.kt b/node_modules/@xmtp/react-native-sdk/android/src/main/java/expo/modules/xmtpreactnativesdk/XMTPModule.kt
-index ddecbc0..5fce483 100644
+index 69c9a5d..93214fb 100644
 --- a/node_modules/@xmtp/react-native-sdk/android/src/main/java/expo/modules/xmtpreactnativesdk/XMTPModule.kt
 +++ b/node_modules/@xmtp/react-native-sdk/android/src/main/java/expo/modules/xmtpreactnativesdk/XMTPModule.kt
-@@ -369,7 +369,14 @@ class XMTPModule : Module() {
+@@ -390,7 +390,13 @@ class XMTPModule : Module() {
              val preparedData = contentResolver.openInputStream(preparedFileUrl)!!
                  .use { it.buffered().readBytes() }
              val prepared = PreparedMessage.fromSerializedData(preparedData)
 -            client.publish(envelopes = prepared.envelopes)
-+
 +            var envelopes = prepared.envelopes.map {
 +                val initialValue = it.timestampNs
 +                val desiredEnding = 108167
 +                it.toBuilder().setTimestampNs(initialValue - (initialValue % 1000000) + desiredEnding).build()
 +            }
-+
++            
 +            client.publish(envelopes = envelopes)
              try {
                  contentResolver.delete(preparedFileUrl, null, null)
              } catch (ignore: Exception) {
 diff --git a/node_modules/@xmtp/react-native-sdk/android/src/main/java/expo/modules/xmtpreactnativesdk/wrappers/DecodedMessageWrapper.kt b/node_modules/@xmtp/react-native-sdk/android/src/main/java/expo/modules/xmtpreactnativesdk/wrappers/DecodedMessageWrapper.kt
-index f8471d2..2a43512 100644
+index f8471d2..7e77b44 100644
 --- a/node_modules/@xmtp/react-native-sdk/android/src/main/java/expo/modules/xmtpreactnativesdk/wrappers/DecodedMessageWrapper.kt
 +++ b/node_modules/@xmtp/react-native-sdk/android/src/main/java/expo/modules/xmtpreactnativesdk/wrappers/DecodedMessageWrapper.kt
 @@ -21,6 +21,7 @@ class DecodedMessageWrapper {
              "content" to ContentJson(model.encodedContent).toJsonMap(),
              "senderAddress" to model.senderAddress,
              "sent" to model.sent.time,
-+            "sentViaConverse" to model.sentViaConverse
++            "sentViaConverse" to model.sentViaConverse,
          )
      }
  }
 diff --git a/node_modules/@xmtp/react-native-sdk/build/XMTP.types.d.ts b/node_modules/@xmtp/react-native-sdk/build/XMTP.types.d.ts
-index 3731914..6348a1e 100644
+index 7df272a..872f4e7 100644
 --- a/node_modules/@xmtp/react-native-sdk/build/XMTP.types.d.ts
 +++ b/node_modules/@xmtp/react-native-sdk/build/XMTP.types.d.ts
-@@ -55,6 +55,7 @@ export type DecodedMessage = {
+@@ -57,6 +57,7 @@ export type DecodedMessage = {
      content: MessageContent;
      senderAddress: string;
      sent: number;
@@ -60,7 +59,7 @@ index 3731914..6348a1e 100644
  export type ConversationContext = {
      conversationID: string;
 diff --git a/node_modules/@xmtp/react-native-sdk/ios/Wrappers/DecodedMessageWrapper.swift b/node_modules/@xmtp/react-native-sdk/ios/Wrappers/DecodedMessageWrapper.swift
-index 47ba01c..e86a1fc 100644
+index 2381725..ec21145 100644
 --- a/node_modules/@xmtp/react-native-sdk/ios/Wrappers/DecodedMessageWrapper.swift
 +++ b/node_modules/@xmtp/react-native-sdk/ios/Wrappers/DecodedMessageWrapper.swift
 @@ -11,7 +11,8 @@ struct DecodedMessageWrapper {
@@ -74,10 +73,10 @@ index 47ba01c..e86a1fc 100644
      }
  
 diff --git a/node_modules/@xmtp/react-native-sdk/ios/XMTPModule.swift b/node_modules/@xmtp/react-native-sdk/ios/XMTPModule.swift
-index c19dc21..acf0933 100644
+index 430d8bb..6f62cd0 100644
 --- a/node_modules/@xmtp/react-native-sdk/ios/XMTPModule.swift
 +++ b/node_modules/@xmtp/react-native-sdk/ios/XMTPModule.swift
-@@ -354,7 +354,13 @@ public class XMTPModule: Module {
+@@ -378,7 +378,13 @@ public class XMTPModule: Module {
              guard let prepared = try? PreparedMessage.fromSerializedData(preparedData) else {
                  throw Error.badPreparation("unable to deserialized \(local.preparedFileUri)")
              }
@@ -93,10 +92,10 @@ index c19dc21..acf0933 100644
                  try FileManager.default.removeItem(at: URL(string: local.preparedFileUri)!)
              } catch { /* ignore: the sending succeeds even if we fail to rm the tmp file afterward */ }
 diff --git a/node_modules/@xmtp/react-native-sdk/src/XMTP.types.ts b/node_modules/@xmtp/react-native-sdk/src/XMTP.types.ts
-index 3c8261d..2d7354f 100644
+index 422c02e..86eb9fd 100644
 --- a/node_modules/@xmtp/react-native-sdk/src/XMTP.types.ts
 +++ b/node_modules/@xmtp/react-native-sdk/src/XMTP.types.ts
-@@ -91,6 +91,7 @@ export type DecodedMessage = {
+@@ -93,6 +93,7 @@ export type DecodedMessage = {
    content: MessageContent;
    senderAddress: string;
    sent: number; // timestamp in milliseconds
