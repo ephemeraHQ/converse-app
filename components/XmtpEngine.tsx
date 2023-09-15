@@ -101,7 +101,6 @@ export default function XmtpEngine() {
     for (const account of accounts) {
       if (
         getChatStore(account).getState().localClientConnected &&
-        getChatStore(account).getState().initialLoadDone &&
         getExistingDataSource(account)
       ) {
         try {
