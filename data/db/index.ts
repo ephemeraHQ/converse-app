@@ -79,11 +79,19 @@ export const initDb = async (account: string, tryCount = 0): Promise<void> => {
       dbPath,
       dbPathExists,
     });
-    console.log(`Error initializing Database for ${account}`, e);
     await new Promise((r) => setTimeout(r, 200));
     if (tryCount < 20) {
+      console.log(
+        `Having a hard time initializing database for ${account}, retrying...`,
+        e
+      );
       return initDb(account, tryCount + 1);
     } else {
+      console.log(
+        `Could never initialize database for ${account}, clearing...`,
+        e
+      );
+
       sentryTrackError(e, {
         account,
         message: "Never managed to initialize database",
