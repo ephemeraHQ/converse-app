@@ -1,4 +1,5 @@
 import {
+  DecryptedLocalAttachment,
   EncryptedLocalAttachment,
   RemoteAttachmentContent,
 } from "@xmtp/react-native-sdk";
@@ -7,7 +8,6 @@ import RNFS from "react-native-fs";
 
 import { getImageSize, isImageMimetype } from "./media";
 import { uploadFileToWeb3Storage } from "./web3.storage";
-import { DecryptedLocalAttachmentWithFilename } from "./xmtpRN/attachments";
 
 export type SerializedAttachmentContent = {
   filename: string;
@@ -53,7 +53,7 @@ export const handleStaticAttachment = async (
 
 export const handleDecryptedRemoteAttachment = async (
   messageId: string,
-  localAttachment: DecryptedLocalAttachmentWithFilename
+  localAttachment: DecryptedLocalAttachment
 ) => {
   const messageFolder = `${RNFS.DocumentDirectoryPath}/messages/${messageId}`;
   // Create folder

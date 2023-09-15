@@ -20,14 +20,10 @@ export const encryptRemoteAttachment = async (
   return encryptedAttachment;
 };
 
-export type DecryptedLocalAttachmentWithFilename = DecryptedLocalAttachment & {
-  filename: string | undefined;
-};
-
 export const fetchAndDecodeRemoteAttachment = async (
   account: string,
   message: XmtpMessage
-): Promise<DecryptedLocalAttachmentWithFilename> => {
+): Promise<DecryptedLocalAttachment> => {
   const remoteAttachment = deserializeRemoteAttachmentMessageContent(
     message.content
   );
@@ -43,7 +39,7 @@ export const fetchAndDecodeRemoteAttachment = async (
     encryptedLocalFileUri,
     metadata: remoteAttachment,
   });
-  return { ...decryptedContent, filename: remoteAttachment.filename };
+  return decryptedContent;
 };
 
 export const serializeRemoteAttachmentMessageContent = (
