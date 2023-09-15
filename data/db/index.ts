@@ -39,7 +39,7 @@ export const getRepository = async <T extends keyof RepositoriesForAccount>(
   return repositories[account][entity];
 };
 
-export const initDb = async (account: string, tryCount = 0) => {
+export const initDb = async (account: string, tryCount = 0): Promise<void> => {
   const dataSource = await getDataSource(account);
   if (dataSource.isInitialized) {
     return;
@@ -74,7 +74,7 @@ export const initDb = async (account: string, tryCount = 0) => {
     const dbPathExists = await RNFS.exists(dbPath);
     sentryTrackError(e, {
       account,
-      message: "Could not initialize database",
+      message: "Retrying initializing database",
       tryCount,
       dbPath,
       dbPathExists,
@@ -83,6 +83,15 @@ export const initDb = async (account: string, tryCount = 0) => {
     await new Promise((r) => setTimeout(r, 200));
     if (tryCount < 10) {
       return initDb(account, tryCount + 1);
+    } else {
+      sentryTrackError(e, {
+        account,
+        message: "Never managed to initialize database",
+        tryCount,
+        dbPath,
+        dbPathExists,
+      });
+      await clearDB(account);
     }
   }
 };
