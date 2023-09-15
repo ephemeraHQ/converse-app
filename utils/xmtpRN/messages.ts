@@ -80,6 +80,7 @@ export const loadConversationsMessages = async (
         contentTopic: topic,
         startTime: new Date(queryConversationsFromTimestamp[topic]),
         pageSize: BATCH_QUERY_PAGE_SIZE,
+        direction: "SORT_DIRECTION_ASCENDING",
       }))
     );
     console.log(

@@ -142,6 +142,7 @@ export const syncXmtpClient = async (account: string) => {
     // Need to save initial load is done
     getChatStore(account).getState().setInitialLoadDone();
     getChatStore(account).getState().setLastSyncedAt(now);
+    console.log(`[XmtpRN] Finished syncing ${account}`);
   } catch (e) {
     onSyncLost(account, e);
   }
