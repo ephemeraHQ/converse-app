@@ -34,6 +34,8 @@ export default function Connecting() {
       style={{
         flexDirection: "row",
         alignItems: "center",
+        justifyContent: "center",
+        width: 110,
       }}
     >
       <ActivityIndicator />
