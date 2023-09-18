@@ -36,6 +36,9 @@ export class Conversation {
   @Column("text", { nullable: true })
   contextMetadata?: string;
 
+  @Column("text", { default: "v2" })
+  version!: string;
+
   @OneToMany("Message", (message: Message) => message.conversation, {
     // Disabling foreign key creation to be able to save messages from not-yet known conversations
     createForeignKeyConstraints: false,

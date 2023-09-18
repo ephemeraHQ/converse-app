@@ -227,7 +227,8 @@ export function sortAndComputePreview(
       (a) =>
         a?.peerAddress &&
         (!a.pending || a.messages.size > 0) &&
-        !deletedTopics[a.topic]
+        !deletedTopics[a.topic] &&
+        a.version !== "v1"
     )
     .map((c: ConversationWithLastMessagePreview) => {
       c.lastMessagePreview = conversationLastMessagePreview(c, userAddress);
