@@ -8,7 +8,6 @@ import { Conversation as DbConversation } from "../../data/db/entities/conversat
 import { getPendingConversationsToCreate } from "../../data/helpers/conversations/pendingConversations";
 import { saveConversations } from "../../data/helpers/conversations/upsertConversations";
 import { XmtpConversation } from "../../data/store/chatStore";
-import { debugTimeSpent } from "../debug";
 import { getTopicDataFromKeychain, saveTopicDataToKeychain } from "../keychain";
 import { sentryTrackError } from "../sentry";
 import { getXmtpClient } from "./client";
@@ -72,26 +71,16 @@ export const deleteImportedTopicData = (account: string) => {
 
 export const importTopicData = async (client: Client, topics: string[]) => {
   if (client.address in importedTopicDataByAccount) return;
-  debugTimeSpent({ start: true, id: "importTopicData" });
   importedTopicDataByAccount[client.address] = true;
   // If we have topics for this account, let's import them
   // so the first conversation.list() is faster
   const beforeImport = new Date().getTime();
   const topicsData = await getTopicDataFromKeychain(client.address, topics);
-  debugTimeSpent({
-    id: "importTopicData",
-    actionToLog: "Got topics data from keychain",
-  });
   if (topicsData.length > 0) {
     try {
       const importedConversations = await Promise.all(
         topicsData.map((data) => client.conversations.importTopicData(data))
       );
-      debugTimeSpent({
-        id: "importTopicData",
-        actionToLog: "Imported topics data to client",
-      });
-
       importedConversations.forEach((conversation) => {
         setOpenedConversation(client.address, conversation);
       });
