@@ -20,7 +20,7 @@ import SeedPhraseConnect, {
 } from "../components/Onboarding/SeedPhraseConnect";
 import WalletSelector from "../components/Onboarding/WalletSelector";
 import config from "../config";
-import { clearDB } from "../data/db";
+import { initDb } from "../data/db";
 import {
   useSettingsStore,
   useAccountsStore,
@@ -236,10 +236,10 @@ export default function OnboardingScreen() {
       );
       const base64Key = keysBuffer.toString("base64");
       await saveXmtpKey(user.address, base64Key);
-      await clearDB(user.address);
       // Successfull login for user, let's setup
       // the storage !
       useAccountsStore.getState().setCurrentAccount(user.address);
+      await initDb(user.address);
 
       if (user.isEphemeral) {
         useSettingsStore.getState().setEphemeralAccount(true);

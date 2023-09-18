@@ -3,6 +3,7 @@ import "reflect-metadata";
 import { Platform } from "react-native";
 import { DataSource } from "typeorm/browser";
 
+import { getDbFileName } from ".";
 import { Conversation } from "./entities/conversationEntity";
 import { Message } from "./entities/messageEntity";
 import { Profile } from "./entities/profileEntity";
@@ -44,9 +45,11 @@ export const getExistingDataSource = (
 export const getDataSource = async (account: string) => {
   const existingDatasource = getExistingDataSource(account);
   if (existingDatasource) return existingDatasource;
+  const fileName = getDbFileName(account);
+  console.log(`[Datasource] Initializing datasource for ${fileName}`);
 
   const newDataSource = new DataSource({
-    database: `converse-${account}.sqlite`,
+    database: fileName,
     // driver: typeORMDriver,
     driver: require("react-native-sqlite-storage"),
     entities: [Conversation, Message, Profile],
