@@ -9,6 +9,7 @@ import {
   markMessageAsSent,
   updateMessagesIds,
 } from "../../data/helpers/messages";
+import { debugTimeSpent } from "../debug";
 import { deserializeRemoteAttachmentMessageContent } from "./attachments";
 import { getConversationWithTopic } from "./conversations";
 
@@ -32,9 +33,17 @@ const sendConversePreparedMessages = async (
       }
       sendingMessages[id] = true;
       await sendPreparedMessage(account, preparedMessage);
+      debugTimeSpent({
+        id: "timeToFirstMessage",
+        actionToLog: `send prepared message`,
+      });
       // Here message has been sent, let's mark it as
       // sent locally to make sure we don't sent twice
       await markMessageAsSent(account, id, preparedMessage.topic);
+      debugTimeSpent({
+        id: "timeToFirstMessage",
+        actionToLog: `marked as sent`,
+      });
       delete sendingMessages[id];
     } catch (e: any) {
       console.log("Could not send message, will probably try again later", e);
@@ -54,6 +63,10 @@ export const sendPendingMessages = async (account: string) => {
       sendingPendingMessages = false;
       return;
     }
+    debugTimeSpent({
+      id: "timeToFirstMessage",
+      actionToLog: "got messages to send",
+    });
     console.log(`Trying to send ${messagesToSend.length} pending messages...`);
     const preparedMessagesToSend: Map<string, ConversePreparedMessage> =
       new Map();
@@ -72,6 +85,10 @@ export const sendPendingMessages = async (account: string) => {
         account,
         message.conversationId
       );
+      debugTimeSpent({
+        id: "timeToFirstMessage",
+        actionToLog: `got conversation with topic: ${!!conversation}`,
+      });
       if (conversation) {
         let preparedMessage: PreparedLocalMessage;
         if (
@@ -91,6 +108,10 @@ export const sendPendingMessages = async (account: string) => {
             text: message.content,
           });
         }
+        debugTimeSpent({
+          id: "timeToFirstMessage",
+          actionToLog: `prepared message`,
+        });
 
         const newMessageId = await preparedMessage.messageId;
         preparedMessagesToSend.set(newMessageId, {
@@ -109,6 +130,10 @@ export const sendPendingMessages = async (account: string) => {
       }
     }
     await updateMessagesIds(account, messageIdsToUpdate);
+    debugTimeSpent({
+      id: "timeToFirstMessage",
+      actionToLog: `updated message id`,
+    });
     await sendConversePreparedMessages(account, preparedMessagesToSend);
   } catch (e) {
     console.log(e);
