@@ -58,7 +58,7 @@ export const useHeaderSearchBar = ({
 
   useEffect(() => {
     // Sets the `right` property to display profile button only when `searchQuery` is empty
-    // Overrides default dehavior: show clear button when `searchQuery` is empty and searchBar is focused
+    // Overrides default behavior: show clear button when `searchQuery` is empty and searchBar is focused
     const rightNotFocused = {
       right: () => (
         <View style={styles.rightButtonContainer}>
