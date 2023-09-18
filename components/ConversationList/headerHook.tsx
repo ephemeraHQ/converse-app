@@ -13,7 +13,7 @@ import ShareProfileButton from "./ShareProfileButton";
 type HeaderSearchBarProps = {
   userAddress: string | null;
   showWelcome: boolean;
-  flatListItems: any[];
+  sortedConversations: any[];
   searchBarRef: React.RefObject<any>;
 } & NativeStackScreenProps<NavigationParamList, "Chats">;
 
@@ -22,7 +22,7 @@ export const useHeaderSearchBar = ({
   route,
   userAddress,
   showWelcome,
-  flatListItems,
+  sortedConversations,
   searchBarRef,
 }: HeaderSearchBarProps) => {
   const shouldShowConnectingOrSyncing = useShouldShowConnectingOrSyncing();
@@ -59,14 +59,13 @@ export const useHeaderSearchBar = ({
   }, [navigation, route, userAddress]);
 
   useLayoutEffect(() => {
-    // flatListItems.length > 2 will make sure not to display the searchBar when there is no chat
-    if (initialLoadDoneOnce && !showWelcome && flatListItems.length > 2) {
+    if (initialLoadDoneOnce && !showWelcome && sortedConversations.length > 0) {
       navigation.setOptions({
         headerSearchBarOptions: {
           ref: searchBarRef,
           hideNavigationBar: true,
-          // set `hideWhenScrolling` to `false` to make the search bar always visible
-          // set to `true` to avoid a visual glitch while loading conversations during initial load
+          // set to hideWhenScrolling to `false` to  to make the search bar always visible
+          // set it to `true` to avoid a visual glitch while loading conversations during initial load
           hideWhenScrolling: true,
           autoFocus: false,
           placeholder: "Search",
@@ -83,10 +82,10 @@ export const useHeaderSearchBar = ({
   }, [
     navigation,
     initialLoadDoneOnce,
-    flatListItems,
-    searchBarRef,
     setSearchQuery,
     setSearchBarFocused,
     showWelcome,
+    sortedConversations,
+    searchBarRef,
   ]);
 };

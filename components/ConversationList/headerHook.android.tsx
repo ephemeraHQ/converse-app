@@ -28,7 +28,7 @@ import ShareProfileButton from "./ShareProfileButton";
 type HeaderSearchBarProps = {
   userAddress: string | null;
   showWelcome: boolean;
-  flatListItems: any[];
+  sortedConversations: any[];
   searchBarRef: React.RefObject<any>;
 } & NativeStackScreenProps<NavigationParamList, "Chats">;
 
