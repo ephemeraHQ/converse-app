@@ -1,6 +1,12 @@
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import React, { useEffect } from "react";
-import { StyleSheet, useColorScheme, View } from "react-native";
+import React, { useEffect, useRef } from "react";
+import {
+  StyleSheet,
+  TextInput,
+  TouchableOpacity,
+  useColorScheme,
+  View,
+} from "react-native";
 import { Searchbar as MaterialSearchBar } from "react-native-paper";
 
 import { useChatStore } from "../../data/store/accountsStore";
@@ -26,6 +32,11 @@ type HeaderSearchBarProps = {
   searchBarRef: React.RefObject<any>;
 } & NativeStackScreenProps<NavigationParamList, "Chats">;
 
+type TextInputHandles = Pick<
+  TextInput,
+  "setNativeProps" | "isFocused" | "clear" | "blur" | "focus"
+>;
+
 export const useHeaderSearchBar = ({
   navigation,
   route,
@@ -43,18 +54,38 @@ export const useHeaderSearchBar = ({
         "setSearchBarFocused",
       ])
     );
+  const searchBar = useRef<TextInputHandles | null>(null);
 
   useEffect(() => {
     // Sets the `right` property to display profile button only when `searchQuery` is empty
-    const rightProps = searchQuery
-      ? {}
-      : {
-          right: () => (
-            <View style={styles.rightButtonContainer}>
-              <ShareProfileButton navigation={navigation} route={route} />
-            </View>
-          ),
-        };
+    // Overrides default dehavior: show clear button when `searchQuery` is empty and searchBar is focused
+    const rightNotFocused = {
+      right: () => (
+        <View style={styles.rightButtonContainer}>
+          <ShareProfileButton navigation={navigation} route={route} />
+        </View>
+      ),
+    };
+    const rightFocusedEmptyQuery = {
+      right: () => (
+        <TouchableOpacity
+          style={styles.rightButtonContainer}
+          onPress={() => searchBar.current?.blur()}
+        >
+          <Picto
+            picto="xmark"
+            size={24}
+            color={textSecondaryColor(colorScheme)}
+          />
+        </TouchableOpacity>
+      ),
+    };
+    const rightProps = !searchBarFocused
+      ? rightNotFocused
+      : searchQuery === ""
+      ? rightFocusedEmptyQuery
+      : {};
+
     const onChangeSearch = (query: string) => setSearchQuery(query);
     const searchPlaceholder = (): string => {
       if (shouldShowConnectingOrSyncing && !searchBarFocused) {
@@ -62,11 +93,13 @@ export const useHeaderSearchBar = ({
       }
       return "Search chats";
     };
+
     navigation.setOptions({
       headerLeft: () => (
         <View style={styles.searchBarContainer}>
           <View style={styles.searchBarWrapper}>
             <MaterialSearchBar
+              ref={searchBar}
               onFocus={() => setSearchBarFocused(true)}
               onBlur={() => setSearchBarFocused(false)}
               style={styles.searchBar}
@@ -86,6 +119,9 @@ export const useHeaderSearchBar = ({
               clearIcon={({ color }) => (
                 <Picto picto="xmark" size={24} color={color} />
               )}
+              onClearIconPress={() => {
+                searchBar.current?.blur();
+              }}
               {...rightProps}
             />
           </View>
@@ -114,7 +150,7 @@ const useStyles = () => {
   const colorScheme = useColorScheme();
   return StyleSheet.create({
     rightButtonContainer: {
-      flex: 0.17,
+      width: 38,
     },
     searchBarContainer: {
       flexDirection: "row",
