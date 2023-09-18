@@ -78,10 +78,7 @@ export default function ConversationList({
 
   // Welcome screen
   const showWelcome =
-    !searchQuery &&
-    !searchBarFocused &&
-    (flatListItems.length === 1 ||
-      (flatListItems.length === 2 && ephemeralAccount));
+    !searchQuery && !searchBarFocused && sortedConversations.length === 0;
 
   useEffect(() => {
     const sortedConversations = sortAndComputePreview(
@@ -107,7 +104,7 @@ export default function ConversationList({
     route,
     userAddress,
     showWelcome,
-    flatListItems,
+    sortedConversations,
     searchBarRef,
   });
 
