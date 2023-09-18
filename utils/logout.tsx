@@ -1,7 +1,7 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Platform } from "react-native";
 
-import { clearDB } from "../data/db";
+import { clearDb } from "../data/db";
 import {
   getAccountsList,
   getChatStore,
@@ -36,10 +36,12 @@ export const logout = async (account: string) => {
     }
   });
 
-  useAccountsStore.getState().removeAccount(account);
+  clearDb(account);
 
-  // Now launch clear db
-  clearDB(account, false);
+  // Now that db has been deleted we can remove account
+  // from store (account holds the db id so it was needed
+  // to clear db)
+  useAccountsStore.getState().removeAccount(account);
 
   deleteXmtpClient(account);
   deleteSubscribedTopicsInformation(account);
