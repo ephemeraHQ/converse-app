@@ -29,7 +29,7 @@ func handleNewConversation(xmtpClient: XMTP.Client, envelope: XMTP.Envelope) -> 
         if (!hasForbiddenPattern(address: conversationV2.peerAddress)) {
           subscribeToTopic(apiURI: apiURI, expoPushToken: expoPushToken, topic: conversationV2.topic)
         }
-        persistDecodedConversation(contentTopic: conversationV2.topic, dict: conversationDict)
+        persistDecodedConversation(account: xmtpClient.address, conversation: conversation)
         try saveConversation(account: xmtpClient.address, topic: conversationV2.topic, peerAddress: conversationV2.peerAddress, createdAt: Int(conversationV2.createdAt.timeIntervalSince1970 * 1000), context: ConversationContext(conversationId: conversationV2.context.conversationID, metadata: conversationV2.context.metadata))
       }
       default: do {}
@@ -131,14 +131,13 @@ func getPersistedConversation(xmtpClient: XMTP.Client, contentTopic: String) -> 
   return nil
 }
 
-func persistDecodedConversation(contentTopic: String, dict: [String : Any]) {
-  let hashedKey = CryptoKit.SHA256.hash(data: contentTopic.data(using: .utf8)!)
+func persistDecodedConversation(account: String, conversation: Conversation) {
+  let hashedKey = CryptoKit.SHA256.hash(data: conversation.topic.data(using: .utf8)!)
   let hashString = hashedKey.compactMap { String(format: "%02x", $0) }.joined()
   do {
-    let jsonData = try JSONSerialization.data(withJSONObject: dict, options: [])
-    let jsonString = String(data: jsonData, encoding: String.Encoding.utf8)!
-    try setKeychainValue(value: jsonString, forKey: "XMTP_CONVERSATION_\(hashString)")
-    print("[NotificationExtension] Persisted the new conversation to keychain: XMTP_CONVERSATION_\(hashString)")
+    let conversationTopicData = try conversation.toTopicData().serializedData().base64EncodedString()
+    try setKeychainValue(value: conversationTopicData, forKey: "XMTP_TOPIC_DATA_\(account)_\(hashString)")
+    print("[NotificationExtension] Persisted the new conversation to keychain: XMTP_TOPIC_DATA_\(account)_\(hashString)")
   } catch {
     sentryTrackMessage(message: "Could not persist the new conversation to keychain", extras: ["error": error])
     print("[NotificationExtension] Could not persist the new conversation to keychain")
