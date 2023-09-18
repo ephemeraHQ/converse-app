@@ -3,7 +3,6 @@ import uuid from "react-native-uuid";
 import { saveMessages } from "../data/helpers/messages";
 import { currentAccount, useUserStore } from "../data/store/accountsStore";
 import { XmtpConversation } from "../data/store/chatStore";
-import { debugTimeSpent } from "./debug";
 import { sendPendingMessages } from "./xmtpRN/send";
 
 export const sendMessage = async (
@@ -17,7 +16,6 @@ export const sendMessage = async (
   const messageId = uuid.v4().toString();
   const sentAtTime = new Date();
   const isV1Conversation = conversation.topic.startsWith("/xmtp/0/dm-");
-  debugTimeSpent({ start: true, id: "timeToFirstMessage" });
   // Save to DB immediatly
   await saveMessages(currentAccount(), [
     {
@@ -33,10 +31,6 @@ export const sendMessage = async (
       topic: conversation.topic,
     },
   ]);
-  debugTimeSpent({
-    id: "timeToFirstMessage",
-    actionToLog: "saved pending message",
-  });
   // Then send for real if conversation exists
   if (!conversation.pending) {
     sendPendingMessages(currentAccount());
