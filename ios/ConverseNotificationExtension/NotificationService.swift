@@ -41,7 +41,6 @@ func handleNotificationAsync(contentHandler: ((UNNotificationContent) -> Void), 
   var shouldIncrementBadge = false
   
   if let bestAttemptContent = bestAttemptContent {    
-    print("[NotificationExtension] Received a notification")
     if var body = bestAttemptContent.userInfo["body"] as? [String: Any], let contentTopic = body["contentTopic"] as? String, let encodedMessage = body["message"] as? String {
       // Init XMTP Codecs
       initCodecs();
