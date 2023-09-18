@@ -105,6 +105,7 @@ export async function clearDB(account: string, reset = true) {
       console.log(`[ClearDB] Not datasource to destroy for ${account}`);
     }
   } catch (e) {
+    sentryTrackError(e, { message: "Couldn't destroy datasource", account });
     console.log(`[ClearDB] Couldn't destroy datasource ${account} ${e}`);
   }
   deleteDataSource(account);
@@ -119,6 +120,7 @@ export async function clearDB(account: string, reset = true) {
   } else {
     console.log(`[ClearDB] Deleting SQlite file converse-${account}.sqlite`);
     await RNFS.unlink(dbPath);
+
     console.log(`[ClearDB] Deleted SQlite file converse-${account}.sqlite`);
   }
 
