@@ -10,12 +10,18 @@ import java.io.File
 
 private var dbByAccount = mapOf<String, SQLiteDatabase>();
 
+fun getDbName(appContext: Context, account: String): String {
+    val accountsState = getAccountsState(appContext)
+    val databaseId = accountsState?.databaseId?.get(account) ?: account
+    return "converse-${databaseId}.sqlite"
+}
+
 fun getDb(appContext: Context, account: String): SQLiteDatabase? {
     var database = dbByAccount[account]
     if (database != null) {
         return database as SQLiteDatabase;
     }
-    val databasePath = appContext.getDatabasePath("converse-${account}.sqlite").path
+    val databasePath = appContext.getDatabasePath(getDbName(appContext, account)).path
     return if (File(databasePath).exists()) {
         Log.d("DB PATH", databasePath)
         database = SQLiteDatabase.openDatabase(databasePath, null, SQLiteDatabase.OPEN_READWRITE)

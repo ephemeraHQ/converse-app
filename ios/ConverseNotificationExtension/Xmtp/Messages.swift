@@ -109,6 +109,7 @@ func decodeConversationMessage(xmtpClient: XMTP.Client, envelope: XMTP.Envelope,
       return (nil, nil, false);
     }
   } else {
+    print("[NotificationExtension] NOTIFICATION_CONVERSATION_NOT_FOUND", envelope)
     sentryTrackMessage(message: "NOTIFICATION_CONVERSATION_NOT_FOUND", extras: ["envelope": envelope])
     return (nil, nil, false);
   }

@@ -34,6 +34,7 @@ struct SavedNotificationConversation: Codable {
 struct Accounts: Codable {
   var currentAccount: String
   var accounts: [String]
+  var databaseId: Dictionary<String, String>
 }
 
 struct AccountsStore: Codable {

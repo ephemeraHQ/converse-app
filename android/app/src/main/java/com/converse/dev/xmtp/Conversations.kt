@@ -38,14 +38,6 @@ fun handleNewConversationV2Notification(appContext: Context, xmtpClient: Client,
         }
     }
     Log.d("PushNotificationsService", "Decoded new conversation from invite")
-    val conversationV2Data = ConversationV2Data(
-        "v2",
-        conversation.topic,
-        conversation.peerAddress,
-        conversation.createdAt.toString(),
-        context,
-        Base64.encode(conversation.keyMaterial)
-    )
     val apiURI = getAsyncStorage("api-uri")
     val expoPushToken = getKeychainValue("EXPO_PUSH_TOKEN")
     if (apiURI != null && expoPushToken !== null && !hasForbiddenPattern(conversation.peerAddress)) {
@@ -63,7 +55,7 @@ fun handleNewConversationV2Notification(appContext: Context, xmtpClient: Client,
     )
     val newNotificationDataJson = Klaxon().toJsonString(newNotificationData)
     remoteMessage.data["body"] = newNotificationDataJson
-    persistNewConversation(conversation.topic, conversationV2Data)
+    persistNewConversation(xmtpClient.address, conversation)
     saveConversationToStorage(appContext, xmtpClient.address, conversation.topic, conversation.peerAddress, conversation.createdAt.time, context);
     if (hasForbiddenPattern(conversation.peerAddress)) {
         return null
@@ -135,13 +127,14 @@ fun getPersistedConversation(xmtpClient: Client, topic: String): Conversation? {
     return null
 }
 
-fun persistNewConversation(topic: String, conversationV2Data: ConversationV2Data) {
+fun persistNewConversation(account: String, conversation: Conversation) {
     try {
-        val topicBytes = topic.toByteArray(Charsets.UTF_8)
+        val topicBytes = conversation.topic.toByteArray(Charsets.UTF_8)
         val digest = MessageDigest.getInstance("SHA-256").digest(topicBytes)
         val encodedTopic = digest.joinToString("") { "%02x".format(it) }
-        setKeychainValue("XMTP_CONVERSATION_$encodedTopic", Klaxon().toJsonString(conversationV2Data))
-        Log.d("PushNotificationsService", "Persisted new conversation to keychain: XMTP_CONVERSATION_$encodedTopic\"")
+        val conversationTopicData = Base64.encodeToString(conversation.toTopicData().toByteArray(), NO_WRAP)
+        setKeychainValue("XMTP_TOPIC_DATA_${account}_$encodedTopic", conversationTopicData)
+        Log.d("PushNotificationsService", "Persisted new conversation to keychain: XMTP_TOPIC_DATA_${account}_$encodedTopic")
     } catch (e: Exception) {
         Log.d("PushNotificationsService", "Could not persist conversation: $e")
     }

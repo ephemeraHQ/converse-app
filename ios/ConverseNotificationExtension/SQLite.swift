@@ -11,6 +11,12 @@ extension String: Error {}
 
 private var dbByAccount: [String: Connection] = [:]
 
+func getDbName(account: String) -> String {
+  let accounts = getAccountsState()
+  let databaseId = accounts?.databaseId[account] ?? account
+  return "converse-\(databaseId).sqlite"
+}
+
 func getDb(account: String) throws -> Connection {
   if let database = dbByAccount[account] {
     return database
@@ -18,7 +24,7 @@ func getDb(account: String) throws -> Connection {
   do {
     let groupId = "group.\(try! getInfoPlistValue(key: "AppBundleId", defaultValue: nil))"
     let groupDir = (FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: groupId)?.path)!
-    let dbPath = (groupDir as NSString).appendingPathComponent("converse-\(account).sqlite")
+    let dbPath = (groupDir as NSString).appendingPathComponent(getDbName(account: account))
     let fileURL = URL(fileURLWithPath: dbPath)
 
     if !FileManager.default.fileExists(atPath: fileURL.path) {
@@ -50,7 +56,6 @@ func hasTopic(account: String, topic: String) throws -> Bool {
   let topicColumn = Expression<String>("topic")
   let db = try getDb(account: account)
   let count = try db.scalar(conversations.filter(topicColumn == topic).count)
-  print("account \(account) has topic : \(count)")
   return count > 0
 }
 
