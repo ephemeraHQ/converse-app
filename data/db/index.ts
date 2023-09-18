@@ -3,7 +3,7 @@ import RNFS from "react-native-fs";
 import { Repository } from "typeorm/browser";
 
 import config from "../../config";
-import { sentryTrackError } from "../../utils/sentry";
+import { sentryTrackError, sentryTrackMessage } from "../../utils/sentry";
 import {
   deleteDataSource,
   getDataSource,
@@ -28,6 +28,10 @@ export const getRepository = async <T extends keyof RepositoriesForAccount>(
   account: string,
   entity: T
 ) => {
+  if (!account || !entity) {
+    sentryTrackMessage("Cannot get repository", { entity, account });
+    throw new Error(`Cannot get repository ${entity} for account ${account}`);
+  }
   // Blocking method that will return the repository only when it has been
   // init. This means methods that try to interact with the database too
   // early will not fail but just take longer to execute!
@@ -39,7 +43,7 @@ export const getRepository = async <T extends keyof RepositoriesForAccount>(
   return repositories[account][entity];
 };
 
-export const initDb = async (account: string, tryCount = 0): Promise<void> => {
+export const initDb = async (account: string): Promise<void> => {
   const dataSource = await getDataSource(account);
   if (dataSource.isInitialized) {
     return;
@@ -74,33 +78,11 @@ export const initDb = async (account: string, tryCount = 0): Promise<void> => {
     const dbPathExists = await RNFS.exists(dbPath);
     sentryTrackError(e, {
       account,
-      message: "Retrying initializing database",
-      tryCount,
+      message: "Did not manage to initialize database",
       dbPath,
       dbPathExists,
     });
-    await new Promise((r) => setTimeout(r, 200));
-    if (tryCount < 20) {
-      console.log(
-        `Having a hard time initializing database for ${account}, retrying...`,
-        e
-      );
-      return initDb(account, tryCount + 1);
-    } else {
-      console.log(
-        `Could never initialize database for ${account}, clearing...`,
-        e
-      );
-
-      sentryTrackError(e, {
-        account,
-        message: "Never managed to initialize database",
-        tryCount,
-        dbPath,
-        dbPathExists,
-      });
-      await clearDB(account);
-    }
+    await clearDB(account);
   }
 };
 
