@@ -80,6 +80,7 @@ export const createPendingConversation = async (
       messages: new Map(),
       readUntil: 0,
       context,
+      version: "v2",
     },
   ]);
   return pendingConversationId;
