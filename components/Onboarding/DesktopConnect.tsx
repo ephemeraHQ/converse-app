@@ -3,7 +3,7 @@ import * as Linking from "expo-linking";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { StyleSheet, useColorScheme, Text, Platform } from "react-native";
 
-import { clearDB } from "../../data/db";
+import { initDb } from "../../data/db";
 import { useAccountsStore } from "../../data/store/accountsStore";
 import { useOnboardingStore } from "../../data/store/onboardingStore";
 import {
@@ -95,8 +95,8 @@ export default function DesktopConnect() {
           // Successfull login for user, let's setup
           // the storage !
           await saveXmtpKey(client.address, base64Key);
-          await clearDB(client.address);
           useAccountsStore.getState().setCurrentAccount(client.address);
+          await initDb(client.address);
           // Now we can instantiate the XMTP Client
           getXmtpClient(client.address);
         } else {
