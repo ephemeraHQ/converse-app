@@ -77,19 +77,11 @@ export default function ConversationList({
   const showNoResult = flatListItems.length === 0 && searchQuery;
 
   // Welcome screen
-  // @todo rework the welcome screen display logic
-  const commonConditions =
+  const showWelcome =
     !searchQuery &&
     !searchBarFocused &&
     (flatListItems.length === 1 ||
       (flatListItems.length === 2 && ephemeralAccount));
-
-  // This avoids a visual glitch on Android, and waits for the connect/sync to finish
-  // @todo still a visual glitch to fix on welcome screen on Android
-  const showWelcome =
-    Platform.OS === "android"
-      ? commonConditions && !shouldShowConnectingOrSyncing
-      : commonConditions;
 
   useEffect(() => {
     const sortedConversations = sortAndComputePreview(
