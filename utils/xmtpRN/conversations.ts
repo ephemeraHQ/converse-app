@@ -62,16 +62,7 @@ export const deleteOpenedConversations = (account: string) => {
   }
 };
 
-const importedTopicDataByAccount: { [account: string]: boolean } = {};
-export const deleteImportedTopicData = (account: string) => {
-  if (account in importedTopicDataByAccount) {
-    delete importedTopicDataByAccount[account];
-  }
-};
-
-export const importTopicData = async (client: Client, topics: string[]) => {
-  if (client.address in importedTopicDataByAccount) return;
-  importedTopicDataByAccount[client.address] = true;
+const importTopicData = async (client: Client, topics: string[]) => {
   // If we have topics for this account, let's import them
   // so the first conversation.list() is faster
   const beforeImport = new Date().getTime();
@@ -182,10 +173,15 @@ export const loadConversations = async (
   }
 };
 
-export const getConversationWithTopic = (
+export const getConversationWithTopic = async (
   account: string,
   topic: string
-): Conversation | undefined => {
+): Promise<Conversation | undefined> => {
+  const alreadyConversation = openedConversations[account]?.[topic];
+  if (alreadyConversation) return alreadyConversation;
+  // Let's try to import from keychain if we don't have it already
+  const client = await getXmtpClient(account);
+  await importTopicData(client, [topic]);
   return openedConversations[account]?.[topic];
 };
 

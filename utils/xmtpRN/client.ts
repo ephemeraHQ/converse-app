@@ -6,9 +6,7 @@ import config from "../../config";
 import { getChatStore, getUserStore } from "../../data/store/accountsStore";
 import { loadXmtpKey } from "../keychain";
 import {
-  deleteImportedTopicData,
   deleteOpenedConversations,
-  importTopicData,
   loadConversations,
   stopStreamingConversations,
   streamConversations,
@@ -81,7 +79,6 @@ export const syncXmtpClient = async (account: string) => {
     knownTopics: knownTopics.length,
   });
   const client = await getXmtpClient(account);
-  await importTopicData(client, knownTopics);
   try {
     const now = new Date().getTime();
     const { newConversations, knownConversations } = await loadConversations(
@@ -128,7 +125,6 @@ export const deleteXmtpClient = async (account: string) => {
     delete xmtpClientByAccount[account];
     deleteOpenedConversations(account);
     delete xmtpSignatureByAccount[account];
-    deleteImportedTopicData(account);
     delete instantiatingClientForAccount[account];
   }
 };
