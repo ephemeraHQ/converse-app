@@ -68,7 +68,7 @@ export const sendPendingMessages = async (account: string) => {
       if (sendingMessages[message.id]) {
         continue;
       }
-      const conversation = getConversationWithTopic(
+      const conversation = await getConversationWithTopic(
         account,
         message.conversationId
       );
