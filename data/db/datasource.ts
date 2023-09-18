@@ -25,6 +25,7 @@ import { removeForeignKeyForTesters1690989046000 } from "./migrations/1690989046
 import { addIndexToPendingConversation1691154310694 } from "./migrations/1691154310694-addIndexToPendingConversation";
 import { addReferencedMessage1691397563214 } from "./migrations/1691397563214-addReferencedMessage";
 import { removeOldReactions1691412759130 } from "./migrations/1691412759130-removeOldReactions";
+import { AddVersionToConversation1695029413899 } from "./migrations/1695029413899-addVersionToConversation";
 
 // We support SQLite from version 3.8.10.2 (embedded in Android 6.0 - SDK 23)
 // For supported methods see https://www.sqlite.org/changes.html
@@ -70,6 +71,7 @@ export const getDataSource = async (account: string) => {
       addIndexToPendingConversation1691154310694,
       addReferencedMessage1691397563214,
       removeOldReactions1691412759130,
+      AddVersionToConversation1695029413899,
     ],
     type: "react-native",
     location: Platform.OS === "ios" ? "Shared" : "./SQLite",
