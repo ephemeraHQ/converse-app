@@ -28,6 +28,7 @@ export type XmtpConversation = {
   messageDraft?: string;
   readUntil: number;
   pending: boolean;
+  version: string;
 };
 
 export type XmtpConversationWithUpdate = XmtpConversation & {

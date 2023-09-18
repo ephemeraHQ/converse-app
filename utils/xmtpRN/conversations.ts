@@ -30,6 +30,7 @@ const protocolConversationToStateConversation = (
   messageDraft: undefined,
   readUntil: 0,
   pending: false,
+  version: conversation.version,
 });
 
 const protocolConversationsToTopicData = async (
@@ -103,6 +104,7 @@ const handleNewConversation = async (
   client: Client,
   conversation: Conversation
 ) => {
+  if (conversation.version === "v1") return;
   setOpenedConversation(client.address, conversation);
   saveConversations(client.address, [
     protocolConversationToStateConversation(conversation),
@@ -131,7 +133,9 @@ export const stopStreamingConversations = async (client: Client) =>
   client.conversations.cancelStream();
 
 const listConversations = async (client: Client) => {
-  const conversations = await client.conversations.list();
+  const conversations = (await client.conversations.list()).filter(
+    (c) => c.version !== "v1"
+  );
   conversations.forEach((c) => {
     setOpenedConversation(client.address, c);
   });

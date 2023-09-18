@@ -76,6 +76,7 @@ export const xmtpConversationToDb = (
     : undefined,
   readUntil: xmtpConversation.readUntil || 0,
   pending: xmtpConversation.pending,
+  version: xmtpConversation.version,
 });
 
 export const xmtpConversationFromDb = (
@@ -110,5 +111,6 @@ export const xmtpConversationFromDb = (
     conversationTitle,
     readUntil: dbConversation.readUntil || 0,
     pending: dbConversation.pending,
+    version: dbConversation.version,
   };
 };
