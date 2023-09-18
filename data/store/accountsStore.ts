@@ -1,3 +1,4 @@
+import uuid from "react-native-uuid";
 import { create, StoreApi, UseBoundStore } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
 
@@ -66,6 +67,8 @@ type AccountsStoreStype = {
   setCurrentAccount: (account: string) => void;
   accounts: string[];
   removeAccount: (account: string) => void;
+  databaseId: { [account: string]: string };
+  resetDatabaseId: (account: string) => void;
 };
 
 export const useAccountsStore = create<AccountsStoreStype>()(
@@ -73,6 +76,13 @@ export const useAccountsStore = create<AccountsStoreStype>()(
     (set) => ({
       currentAccount: TEMPORARY_ACCOUNT_NAME,
       accounts: [TEMPORARY_ACCOUNT_NAME],
+      databaseId: {},
+      resetDatabaseId: (account) =>
+        set((state) => {
+          const databaseId = { ...state.databaseId };
+          databaseId[account] = uuid.v4().toString();
+          return { databaseId };
+        }),
       setCurrentAccount: (account) =>
         set((state) => {
           console.log(`[AccountsStore] Setting current account: ${account}`);
@@ -80,10 +90,12 @@ export const useAccountsStore = create<AccountsStoreStype>()(
             initStores(account);
           }
           const accounts = [...state.accounts];
+          const databaseId = { ...state.databaseId };
           if (!accounts.includes(account)) {
             accounts.push(account);
+            databaseId[account] = uuid.v4().toString();
           }
-          return { currentAccount: account, accounts };
+          return { currentAccount: account, accounts, databaseId };
         }),
       removeAccount: (account) =>
         set((state) => {
@@ -95,8 +107,14 @@ export const useAccountsStore = create<AccountsStoreStype>()(
             state.currentAccount === account
               ? newAccounts[0]
               : state.currentAccount;
+          const newDatabaseId = { ...state.databaseId };
+          delete newDatabaseId[account];
           deleteStores(account);
-          return { accounts: newAccounts, currentAccount: newCurrentAccount };
+          return {
+            accounts: newAccounts,
+            currentAccount: newCurrentAccount,
+            databaseId: newDatabaseId,
+          };
         }),
     }),
     {

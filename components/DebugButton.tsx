@@ -6,7 +6,7 @@ import RNFS from "react-native-fs";
 import * as Sentry from "sentry-expo";
 
 import config from "../config";
-import { clearDB, getDbPath } from "../data/db";
+import { resetDb, getDbPath, clearDb } from "../data/db";
 import { currentAccount, useUserStore } from "../data/store/accountsStore";
 import { deleteXmtpKey } from "../utils/keychain";
 import { showActionSheetWithOptions } from "./StateHandlers/ActionSheetStateHandler";
@@ -61,11 +61,11 @@ const DebugButton = forwardRef((props, ref) => {
             console.error(error);
           }
         },
-        "Clear DB": () => {
-          clearDB(currentAccount());
+        "Reset DB": () => {
+          resetDb(currentAccount());
         },
         "Delete DB": () => {
-          clearDB(currentAccount(), false);
+          clearDb(currentAccount());
         },
         "List files": async () => {
           const groupPath = await RNFS.pathForGroup(config.appleAppGroup);

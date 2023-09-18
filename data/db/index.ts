@@ -4,6 +4,7 @@ import { Repository } from "typeorm/browser";
 
 import config from "../../config";
 import { sentryTrackError, sentryTrackMessage } from "../../utils/sentry";
+import { useAccountsStore } from "../store/accountsStore";
 import {
   deleteDataSource,
   getDataSource,
@@ -71,7 +72,7 @@ export const initDb = async (account: string): Promise<void> => {
     } catch (e: any) {
       sentryTrackError(e, { account, message: "Error running migrations" });
       console.log(`Error running migrations - destroying db for ${account}`, e);
-      await clearDB(account);
+      await resetDb(account);
     }
   } catch (e: any) {
     const dbPath = await getDbPath(account);
@@ -82,20 +83,31 @@ export const initDb = async (account: string): Promise<void> => {
       dbPath,
       dbPathExists,
     });
-    await clearDB(account);
+    await resetDb(account);
   }
+};
+
+export const getDbFileName = (account: string) => {
+  const dbId = useAccountsStore.getState().databaseId[account];
+  if (!dbId) {
+    // By default we use the account name, but for next logout
+    // we'll use the mapping
+    return `converse-${account}.sqlite`;
+  }
+  return `converse-${dbId}.sqlite`;
 };
 
 export const getDbPath = async (account: string) => {
+  const filename = getDbFileName(account);
   if (Platform.OS === "ios") {
     const groupPath = await RNFS.pathForGroup(config.appleAppGroup);
-    return `${groupPath}/converse-${account}.sqlite`;
+    return `${groupPath}/${filename}`;
   } else {
-    return `/data/data/${config.bundleId}/databases/converse-${account}.sqlite`;
+    return `/data/data/${config.bundleId}/databases/${filename}`;
   }
 };
 
-export async function clearDB(account: string, reset = true) {
+export const clearDb = async (account: string) => {
   try {
     const dataSource = getExistingDataSource(account);
     if (dataSource) {
@@ -118,13 +130,17 @@ export async function clearDB(account: string, reset = true) {
       `[ClearDB] SQlite file converse-${account}.sqlite does not exist, no need to delete`
     );
   } else {
-    console.log(`[ClearDB] Deleting SQlite file converse-${account}.sqlite`);
+    console.log(`[ClearDB] Deleting SQlite file ${getDbFileName(account)}`);
     await RNFS.unlink(dbPath);
 
-    console.log(`[ClearDB] Deleted SQlite file converse-${account}.sqlite`);
+    console.log(`[ClearDB] Deleted SQlite file ${getDbFileName(account)}`);
   }
+};
 
-  if (reset) {
-    return initDb(account);
-  }
+export async function resetDb(account: string) {
+  await clearDb(account);
+  // Change filename & path to avoid locked state due to
+  // filesystem locking the previous file path
+  useAccountsStore.getState().resetDatabaseId(account);
+  return initDb(account);
 }
