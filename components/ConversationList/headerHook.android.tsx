@@ -11,7 +11,10 @@ import {
   textSecondaryColor,
 } from "../../utils/colors";
 import { pick } from "../../utils/objects";
-import { useShouldShowConnectingOrSyncing } from "../Connecting";
+import {
+  useShouldShowConnectingOrSyncing,
+  useShouldShowConnecting,
+} from "../Connecting";
 import Picto from "../Picto/Picto";
 import SettingsButton from "../SettingsButton";
 import ShareProfileButton from "./ShareProfileButton";
@@ -30,9 +33,16 @@ export const useHeaderSearchBar = ({
   const colorScheme = useColorScheme();
   const styles = useStyles();
   const shouldShowConnectingOrSyncing = useShouldShowConnectingOrSyncing();
-  const { searchQuery, setSearchQuery, setSearchBarFocused } = useChatStore(
-    (s) => pick(s, ["searchQuery", "setSearchQuery", "setSearchBarFocused"])
-  );
+  const shouldShowConnecting = useShouldShowConnecting();
+  const { searchQuery, setSearchQuery, searchBarFocused, setSearchBarFocused } =
+    useChatStore((s) =>
+      pick(s, [
+        "searchQuery",
+        "setSearchQuery",
+        "searchBarFocused",
+        "setSearchBarFocused",
+      ])
+    );
 
   useEffect(() => {
     // Sets the `right` property to display profile button only when `searchQuery` is empty
@@ -46,6 +56,12 @@ export const useHeaderSearchBar = ({
           ),
         };
     const onChangeSearch = (query: string) => setSearchQuery(query);
+    const searchPlaceholder = (): string => {
+      if (shouldShowConnectingOrSyncing && !searchBarFocused) {
+        return shouldShowConnecting ? "Connecting…" : "Syncing…";
+      }
+      return "Search chats";
+    };
     navigation.setOptions({
       headerLeft: () => (
         <View style={styles.searchBarContainer}>
@@ -54,9 +70,7 @@ export const useHeaderSearchBar = ({
               onFocus={() => setSearchBarFocused(true)}
               onBlur={() => setSearchBarFocused(false)}
               style={styles.searchBar}
-              placeholder={
-                shouldShowConnectingOrSyncing ? "Connecting…" : "Search chats"
-              }
+              placeholder={searchPlaceholder()}
               onChangeText={onChangeSearch}
               value={searchQuery}
               icon={() => (
@@ -85,9 +99,11 @@ export const useHeaderSearchBar = ({
   }, [
     navigation,
     shouldShowConnectingOrSyncing,
+    shouldShowConnecting,
     colorScheme,
     route,
     styles,
+    searchBarFocused,
     setSearchBarFocused,
     searchQuery,
     setSearchQuery,
