@@ -47,7 +47,7 @@ export default function Accounts({
           title: getReadableProfile(a, a),
           action: () => {
             setCurrentAccount(a);
-            navigation.push("Messages");
+            navigation.push("Chats");
           },
           rightView: (
             <View style={{ flexDirection: "row" }}>
