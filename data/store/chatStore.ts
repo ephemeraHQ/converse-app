@@ -24,6 +24,7 @@ export type XmtpConversation = {
   createdAt: number;
   context?: XmtpConversationContext;
   messages: Map<string, XmtpMessage>;
+  messagesIds: string[];
   conversationTitle?: string | null;
   messageDraft?: string;
   readUntil: number;
@@ -137,6 +138,10 @@ export const initChatStore = (account: string) => {
               conversationsToSet.forEach((c) => {
                 conversations[c.topic] = {
                   ...c,
+                  messagesIds:
+                    c.messagesIds ||
+                    state.conversations[c.topic]?.messagesIds ||
+                    [],
                   messages:
                     c.messages && c.messages.size > 0
                       ? c.messages
@@ -168,10 +173,12 @@ export const initChatStore = (account: string) => {
                 const newState = { ...state };
                 const existingConversation = state.conversations[oldTopic];
                 const oldMessages = existingConversation.messages;
+                const oldMessagesIds = existingConversation.messagesIds;
                 newState.conversations[conversation.topic] = {
                   ...conversation,
                   lastUpdateAt: now(),
                   messages: oldMessages,
+                  messagesIds: oldMessagesIds,
                 };
                 newState.lastUpdateAt = now();
 
@@ -233,12 +240,12 @@ export const initChatStore = (account: string) => {
                   if (messageUpdated) {
                     newState.conversations[topic].lastUpdateAt = now();
                   }
-                  conversation.messages.set(message.id, newMessage);
+                  insertMessageIdAtRightIndex(conversation, newMessage);
                 } else {
                   // New message, it's updated
                   isUpdated = true;
                   newState.conversations[topic].lastUpdateAt = now();
-                  conversation.messages.set(message.id, message);
+                  insertMessageIdAtRightIndex(conversation, message);
                   if (state.openedConversationTopic === topic) {
                     conversation.readUntil = now();
                     // Also mark in db
@@ -352,9 +359,10 @@ export const initChatStore = (account: string) => {
                       }
                     }
                   }
-                  conversation.messages.set(
-                    messageToUpdate.message.id,
-                    messageToUpdate.message
+                  insertMessageIdAtRightIndex(
+                    conversation,
+                    messageToUpdate.message,
+                    oldMessage?.id
                   );
                 }
               });
@@ -414,4 +422,64 @@ const isMessageUpdated = (oldMessage: XmtpMessage, newMessage: XmtpMessage) => {
     const keyUpdated = oldMessage[k] !== newMessage[k];
     return keyUpdated;
   });
+};
+
+const reverseRemoveElement = (array: string[], element: string) => {
+  for (let index = array.length - 1; index >= 0; index--) {
+    const sortedElement = array[index];
+    if (sortedElement === element) {
+      array.splice(index, 1);
+      break;
+    }
+  }
+};
+
+const insertMessageIdAtRightIndex = (
+  conversation: XmtpConversation,
+  newMessage: XmtpMessage,
+  replacingMessageId?: string
+) => {
+  conversation.messagesIds = conversation.messagesIds || [];
+  const currentMessages = conversation.messages;
+  const alreadyMessage = currentMessages.get(newMessage.id);
+  if (alreadyMessage) {
+    if (newMessage.sent === alreadyMessage.sent) {
+      return;
+    } else {
+      // If date change, let's remove existing position, it will
+      // be reinserted at the right position
+      reverseRemoveElement(conversation.messagesIds, newMessage.id);
+    }
+  }
+  if (replacingMessageId) {
+    reverseRemoveElement(conversation.messagesIds, replacingMessageId);
+  }
+  const lastMessageId =
+    conversation.messagesIds.length > 0
+      ? conversation.messagesIds[conversation.messagesIds.length - 1]
+      : undefined;
+  const lastMessage = lastMessageId
+    ? currentMessages.get(lastMessageId)
+    : undefined;
+  if (lastMessageId && !lastMessage) {
+    console.warn(`Message id ${lastMessageId} exists but no matching message`);
+  }
+  // Basic case is just push the message at the end
+  if (!lastMessage || newMessage.sent >= lastMessage.sent) {
+    conversation.messagesIds.push(newMessage.id);
+    conversation.messages.set(newMessage.id, newMessage);
+    return;
+  }
+  // More complicated case, we loop in reverse (since usually it will be one of
+  // the last messages) and we find out the right position to insert
+  for (let index = conversation.messagesIds.length - 1; index >= 0; index--) {
+    const sortedMessageId = conversation.messagesIds[index];
+    const sortedMessage = conversation.messages.get(sortedMessageId);
+    if (sortedMessage && sortedMessage.sent < newMessage.sent) {
+      // When we find an older message, we're ready to insert after it
+      conversation.messagesIds.splice(index + 1, 0, newMessage.id);
+      conversation.messages.set(newMessage.id, newMessage);
+      return;
+    }
+  }
 };
