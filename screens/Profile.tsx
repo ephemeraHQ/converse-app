@@ -13,7 +13,9 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { showActionSheetWithOptions } from "../components/StateHandlers/ActionSheetStateHandler";
-import TableView from "../components/TableView/TableView";
+import TableView, {
+  TableViewItemType,
+} from "../components/TableView/TableView";
 import {
   TableViewEmoji,
   TableViewImage,
@@ -33,7 +35,6 @@ import {
   primaryColor,
   textSecondaryColor,
 } from "../utils/colors";
-import { shortAddress } from "../utils/str";
 import { getIPFSAssetURI } from "../utils/thirdweb";
 import { NavigationParamList } from "./Main";
 
@@ -68,6 +69,7 @@ export default function ProfileScreen({
         return {
           id: title,
           title,
+          titleNumberOfLines: 2,
           rightView: (
             <TouchableOpacity
               onPress={() => {
@@ -89,7 +91,7 @@ export default function ProfileScreen({
             </TouchableOpacity>
           ),
         };
-      });
+      }) as TableViewItemType[];
     },
     [colorScheme, copiedAddresses]
   );
@@ -102,8 +104,8 @@ export default function ProfileScreen({
       "domain"
     ),
     ...getAddressItemsFromArray(
-      [{ shortAddress: shortAddress(peerAddress), address: peerAddress }],
-      "shortAddress",
+      [{ title: peerAddress, address: peerAddress }],
+      "title",
       "address"
     ),
   ];
@@ -145,7 +147,7 @@ export default function ProfileScreen({
             />
           ),
         };
-      });
+      }) as TableViewItemType[];
     },
     [colorScheme]
   );
