@@ -27,7 +27,7 @@ import {
 import { getRelativeDateTime } from "../utils/date";
 
 type ConversationListItemProps = {
-  navigation: NativeStackNavigationProp<NavigationParamList, "Messages">;
+  navigation: NativeStackNavigationProp<NavigationParamList, "Chats">;
   conversation: XmtpConversation;
   colorScheme: ColorSchemeName;
   conversationTime: number | undefined;

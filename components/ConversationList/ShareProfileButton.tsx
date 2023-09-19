@@ -13,7 +13,7 @@ import Picto from "../Picto/Picto";
 
 export default function ShareProfileButton({
   navigation,
-}: NativeStackScreenProps<NavigationParamList, "Messages">) {
+}: NativeStackScreenProps<NavigationParamList, "Chats">) {
   const colorScheme = useColorScheme();
   return (
     <TouchableOpacity
