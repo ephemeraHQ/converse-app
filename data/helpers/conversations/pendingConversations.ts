@@ -78,6 +78,7 @@ export const createPendingConversation = async (
       peerAddress: cleanAddress,
       createdAt: new Date().getTime(),
       messages: new Map(),
+      messagesIds: [],
       readUntil: 0,
       context,
       version: "v2",
