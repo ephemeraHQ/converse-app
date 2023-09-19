@@ -26,6 +26,7 @@ const protocolConversationToStateConversation = (
       }
     : undefined,
   messages: new Map(),
+  messagesIds: [],
   conversationTitle: undefined,
   messageDraft: undefined,
   readUntil: 0,
