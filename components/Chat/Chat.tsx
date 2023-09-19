@@ -33,10 +33,10 @@ const getListArray = (
   conversation?: XmtpConversationWithUpdate
 ) => {
   if (!conversation) return [];
-  const messagesArray = Array.from(conversation.messages.values());
   const reverseArray = [];
-  for (let index = messagesArray.length - 1; index >= 0; index--) {
-    const message = messagesArray[index] as MessageToDisplay;
+  for (let index = conversation.messagesIds.length - 1; index >= 0; index--) {
+    const messageId = conversation.messagesIds[index];
+    const message = conversation.messages.get(messageId) as MessageToDisplay;
     // Reactions are not displayed in the flow
     if (message.contentType.startsWith("xmtp.org/reaction:")) continue;
     message.fromMe =
@@ -47,30 +47,37 @@ const getListArray = (
     message.hasPreviousMessageInSeries = false;
 
     if (index > 0) {
-      const previousMessage = messagesArray[index - 1];
-      message.dateChange =
-        differenceInCalendarDays(message.sent, previousMessage.sent) > 0;
-      if (
-        previousMessage.senderAddress === message.senderAddress &&
-        !message.dateChange
-      ) {
-        message.hasPreviousMessageInSeries = true;
+      const previousMessageId = conversation.messagesIds[index - 1];
+      const previousMessage = conversation.messages.get(previousMessageId);
+      if (previousMessage) {
+        message.dateChange =
+          differenceInCalendarDays(message.sent, previousMessage.sent) > 0;
+        if (
+          previousMessage.senderAddress === message.senderAddress &&
+          !message.dateChange &&
+          !previousMessage.contentType.startsWith("xmtp.org/reaction:")
+        ) {
+          message.hasPreviousMessageInSeries = true;
+        }
       }
     } else {
       message.dateChange = true;
     }
 
-    if (index < messagesArray.length - 1) {
-      const nextMessage = messagesArray[index + 1];
-      // Here we need to check if next message has a date change
-      const nextMessageDateChange =
-        differenceInCalendarDays(nextMessage.sent, message.sent) > 0;
-      if (
-        nextMessage.senderAddress === message.senderAddress &&
-        !nextMessageDateChange &&
-        !nextMessage.contentType.startsWith("xmtp.org/reaction:")
-      ) {
-        message.hasNextMessageInSeries = true;
+    if (index < conversation.messagesIds.length - 1) {
+      const nextMessageId = conversation.messagesIds[index + 1];
+      const nextMessage = conversation.messages.get(nextMessageId);
+      if (nextMessage) {
+        // Here we need to check if next message has a date change
+        const nextMessageDateChange =
+          differenceInCalendarDays(nextMessage.sent, message.sent) > 0;
+        if (
+          nextMessage.senderAddress === message.senderAddress &&
+          !nextMessageDateChange &&
+          !nextMessage.contentType.startsWith("xmtp.org/reaction:")
+        ) {
+          message.hasNextMessageInSeries = true;
+        }
       }
     }
     reverseArray.push(message);

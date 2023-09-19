@@ -108,6 +108,7 @@ export const xmtpConversationFromDb = (
     createdAt: dbConversation.createdAt,
     context,
     messages: xmtpMessagesMapFromDb(dbConversation.messages),
+    messagesIds: dbConversation.messages?.map((m) => m.id) || [],
     conversationTitle,
     readUntil: dbConversation.readUntil || 0,
     pending: dbConversation.pending,
