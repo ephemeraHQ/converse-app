@@ -1,7 +1,7 @@
-diff --color=auto -ur Pods/XMTP/Sources/XMTP/ConversationV2.swift Pods/XMTPPATCHED/Sources/XMTP/ConversationV2.swift
---- Pods/XMTP/Sources/XMTP/ConversationV2.swift	2023-09-08 16:09:11
-+++ Pods/XMTP/Sources/XMTP/ConversationV2.swift	2023-09-08 16:13:07
-@@ -160,6 +160,7 @@
+diff --color=auto -ur Pods/XMTP/Sources/XMTP/ConversationV2.swift Pods/XMTPatched/Sources/XMTP/ConversationV2.swift
+--- Pods/XMTP/Sources/XMTP/ConversationV2.swift	2023-09-20 21:23:39
++++ Pods/XMTPatched/Sources/XMTP/ConversationV2.swift	2023-09-20 21:23:32
+@@ -171,6 +171,7 @@
  		var decoded = try decode(message.v2)
  
  		decoded.id = generateID(from: envelope)
@@ -9,15 +9,15 @@ diff --color=auto -ur Pods/XMTP/Sources/XMTP/ConversationV2.swift Pods/XMTPPATCH
  
  		return decoded
  	}
-diff --color=auto -ur Pods/XMTP/Sources/XMTP/DecodedMessage.swift Pods/XMTPPATCHED/Sources/XMTP/DecodedMessage.swift
---- Pods/XMTP/Sources/XMTP/DecodedMessage.swift	2023-09-08 16:09:11
-+++ Pods/XMTP/Sources/XMTP/DecodedMessage.swift	2023-09-08 16:13:05
+diff --color=auto -ur Pods/XMTP/Sources/XMTP/DecodedMessage.swift Pods/XMTPatched/Sources/XMTP/DecodedMessage.swift
+--- Pods/XMTP/Sources/XMTP/DecodedMessage.swift	2023-09-20 21:23:37
++++ Pods/XMTPatched/Sources/XMTP/DecodedMessage.swift	2023-09-20 21:23:32
 @@ -21,6 +21,8 @@
  	/// When the message was sent
  	public var sent: Date
  
 +	public var sentViaConverse: Bool = false
 +
-     public init(topic: String, encodedContent: EncodedContent, senderAddress: String, sent: Date) {
-         self.topic = topic
- 		self.encodedContent = encodedContent
+ 	var client: Client
+ 
+     public init(
