@@ -10,6 +10,7 @@ import {
   useColorScheme,
   Platform,
   AppState,
+  Alert,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -25,6 +26,7 @@ import { initDb } from "../data/db";
 import {
   useAccountsStore,
   getSettingsStore,
+  getAccountsList,
 } from "../data/store/accountsStore";
 import { useOnboardingStore } from "../data/store/onboardingStore";
 import { textPrimaryColor, textSecondaryColor } from "../utils/colors";
@@ -185,6 +187,14 @@ export default function OnboardingScreen() {
       requestingSignatures.current = true;
       try {
         const newAddress = await signer.getAddress();
+        if (getAccountsList().includes(newAddress)) {
+          Alert.alert(
+            "Already connected",
+            "This account is already connected to Converse."
+          );
+          disconnect();
+          return;
+        }
         const isOnNetwork = await isOnXmtp(newAddress);
         setUser({
           address: newAddress,
@@ -201,7 +211,7 @@ export default function OnboardingScreen() {
     };
 
     requestSignatures();
-  }, [thirdwebSigner, user.otherSigner]);
+  }, [thirdwebSigner, user.otherSigner, disconnect]);
 
   const waitingForSecondSignatureRef = useRef(waitingForSecondSignature);
   useEffect(() => {
