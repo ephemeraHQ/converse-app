@@ -2,6 +2,7 @@
 
 #import <React/RCTBundleURLProvider.h>
 #import <React/RCTLinkingManager.h>
+#import <UserNotifications/UserNotifications.h>
 
 @implementation AppDelegate
 
@@ -12,8 +13,16 @@
   // You can add your custom initial props in the dictionary below.
   // They will be passed down to the ViewController used by React Native.
   self.initialProps = @{};
+  
+  // Remove all delivered notifications
+  [[UNUserNotificationCenter currentNotificationCenter] removeAllDeliveredNotifications];
 
   return [super application:application didFinishLaunchingWithOptions:launchOptions];
+}
+
+- (void)applicationDidBecomeActive:(UIApplication *)application {
+  // Remove all delivered notifications
+  [[UNUserNotificationCenter currentNotificationCenter] removeAllDeliveredNotifications];
 }
 
 - (NSURL *)sourceURLForBridge:(RCTBridge *)bridge
