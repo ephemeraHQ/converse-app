@@ -55,7 +55,7 @@ func decodeConversationMessage(xmtpClient: XMTP.Client, envelope: XMTP.Envelope,
       } else if (contentType.starts(with: "xmtp.org/remoteStaticAttachment:")) {
         // Let's save the notification for immediate display
         do {
-          let remoteAttachment: RemoteAttachment = try decodedMessage.encodedContent.decoded()
+          let remoteAttachment: RemoteAttachment = try decodedMessage.encodedContent.decoded(with: xmtpClient)
           let contentToSave = getJsonRemoteAttachment(remoteAttachment: remoteAttachment)
           if (contentToSave != nil) {
             try saveMessage(account: xmtpClient.address, topic: envelope.contentTopic, sent: decodedMessage.sent, senderAddress: decodedMessage.senderAddress, content: contentToSave!, id: decodedMessage.id, sentViaConverse: sentViaConverse, contentType: contentType)
