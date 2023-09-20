@@ -11,7 +11,7 @@ import {
   textSecondaryColor,
 } from "../utils/colors";
 import { getReadableProfile } from "../utils/str";
-import { NavigationParamList } from "./Main";
+import { NavigationParamList } from "./Navigation/Navigation";
 
 // initialState={{
 //   index: 1,

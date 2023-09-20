@@ -11,7 +11,7 @@ import {
 } from "react-native";
 
 import { XmtpConversation } from "../../data/store/chatStore";
-import { NavigationParamList } from "../../screens/Main";
+import { NavigationParamList } from "../../screens/Navigation/Navigation";
 import { headerTitleStyle, textSecondaryColor } from "../../utils/colors";
 import { conversationName, getTitleFontScale } from "../../utils/str";
 import Connecting, { useShouldShowConnectingOrSyncing } from "../Connecting";

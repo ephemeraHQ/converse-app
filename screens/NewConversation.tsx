@@ -43,7 +43,7 @@ import { getAddressForPeer, isSupportedPeer } from "../utils/eth";
 import { pick } from "../utils/objects";
 import { conversationName } from "../utils/str";
 import { isOnXmtp } from "../utils/xmtpJS/client";
-import { NavigationParamList } from "./Main";
+import { NavigationParamList } from "./Navigation/Navigation";
 export default function NewConversation({
   route,
   navigation,
