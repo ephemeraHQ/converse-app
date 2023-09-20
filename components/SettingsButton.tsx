@@ -20,7 +20,7 @@ import {
   useUserStore,
 } from "../data/store/accountsStore";
 import { useAppStore } from "../data/store/appStore";
-import { NavigationParamList } from "../screens/Main";
+import { NavigationParamList } from "../screens/Navigation/Navigation";
 import { actionSheetColors, textSecondaryColor } from "../utils/colors";
 import { logout } from "../utils/logout";
 import {

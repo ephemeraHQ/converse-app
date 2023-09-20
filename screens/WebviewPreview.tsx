@@ -5,7 +5,7 @@ import { WebView } from "react-native-webview";
 
 import AndroidBackAction from "../components/AndroidBackAction";
 import { setAndroidSystemColor, setAndroidColors } from "../utils/colors";
-import { NavigationParamList } from "./Main";
+import { NavigationParamList } from "./Navigation/Navigation";
 
 export default function WebviewPreview({
   route,

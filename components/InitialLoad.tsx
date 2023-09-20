@@ -1,5 +1,12 @@
 import { useHeaderHeight } from "@react-navigation/elements";
-import { StyleSheet, Text, useColorScheme, View, Platform } from "react-native";
+import {
+  StyleSheet,
+  Text,
+  useColorScheme,
+  View,
+  Platform,
+  Dimensions,
+} from "react-native";
 
 import { backgroundColor, textPrimaryColor } from "../utils/colors";
 import ActivityIndicator from "./ActivityIndicator/ActivityIndicator";
@@ -11,7 +18,7 @@ export default function InitialLoad() {
     <View
       style={[
         styles.initialLoad,
-        { paddingTop: headerHeight + Platform.OS === "ios" ? 52 : 0 },
+        { height: Dimensions.get("window").height - headerHeight * 2 },
       ]}
     >
       <ActivityIndicator />

@@ -1,12 +1,16 @@
-import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { FlashList } from "@shopify/flash-list";
 import React, { useCallback, useEffect, useState } from "react";
-import { Platform, StyleSheet, useColorScheme, Text, View } from "react-native";
+import {
+  Platform,
+  StyleSheet,
+  useColorScheme,
+  Text,
+  View,
+  ScrollView,
+} from "react-native";
 import { gestureHandlerRootHOC } from "react-native-gesture-handler";
-import { SearchBarCommands } from "react-native-screens";
 
 import NewConversationButton from "../components/ConversationList/NewConversationButton";
-import { useHeaderSearchBar } from "../components/ConversationList/headerHook";
 import ConversationListItem from "../components/ConversationListItem";
 import EphemeralAccountBanner from "../components/EphemeralAccountBanner";
 import InitialLoad from "../components/InitialLoad";
@@ -33,7 +37,7 @@ import {
 import { converseEventEmitter } from "../utils/events";
 import { pick } from "../utils/objects";
 import { conversationName } from "../utils/str";
-import { NavigationParamList } from "./Main";
+import { useHeaderSearchBar } from "./Navigation/ConversationListNav";
 
 type ConversationWithLastMessagePreview = XmtpConversation & {
   lastMessagePreview?: LastMessagePreview;
@@ -43,16 +47,17 @@ type FlatListItem = ConversationWithLastMessagePreview | { topic: string };
 function ConversationList({
   navigation,
   route,
-}: NativeStackScreenProps<NavigationParamList, "Chats">) {
+  searchBarRef,
+}: Props) {
   const colorScheme = useColorScheme();
   const styles = useStyles();
   const {
-    initialLoadDoneOnce,
     conversations,
     lastUpdateAt,
     searchQuery,
     searchBarFocused,
     deletedTopics,
+    initialLoadDoneOnce,
   } = useChatStore((s) =>
     pick(s, [
       "initialLoadDoneOnce",
@@ -69,7 +74,6 @@ function ConversationList({
   const userAddress = useUserStore((s) => s.userAddress);
   const profiles = useProfilesStore((state) => state.profiles);
   const [flatListItems, setFlatListItems] = useState<FlatListItem[]>([]);
-  const searchBarRef = React.useRef<SearchBarCommands>(null);
   const [sortedConversations, setSortedConversations] = useState<
     ConversationWithLastMessagePreview[]
   >([]);
@@ -105,9 +109,6 @@ function ConversationList({
   useHeaderSearchBar({
     navigation,
     route,
-    userAddress,
-    showWelcome,
-    sortedConversations,
     searchBarRef,
   });
 
@@ -224,10 +225,24 @@ function ConversationList({
   );
 
   if (showInitialLoad) {
-    screenToShow = <InitialLoad />;
+    screenToShow = (
+      <ScrollView
+        contentInsetAdjustmentBehavior="automatic"
+        alwaysBounceVertical={false}
+        style={styles.scrollViewWrapper}
+      >
+        <InitialLoad />
+      </ScrollView>
+    );
   } else if (showWelcome) {
     screenToShow = (
-      <Welcome ctaOnly={false} navigation={navigation} route={route} />
+      <ScrollView
+        contentInsetAdjustmentBehavior="automatic"
+        alwaysBounceVertical={false}
+        style={styles.scrollViewWrapper}
+      >
+        <Welcome ctaOnly={false} navigation={navigation} route={route} />
+      </ScrollView>
     );
   }
 
@@ -284,6 +299,9 @@ const useStyles = () => {
           color: textPrimaryColor(colorScheme),
         },
       }),
+    },
+    scrollViewWrapper: {
+      backgroundColor: backgroundColor(colorScheme),
     },
   });
 };
