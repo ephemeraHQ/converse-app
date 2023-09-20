@@ -9,12 +9,6 @@ import Foundation
 import XMTP
 import Alamofire
 
-func initCodecs() {
-  Client.register(codec: AttachmentCodec())
-  Client.register(codec: RemoteAttachmentCodec())
-  Client.register(codec: ReactionCodec())
-}
-
 func getXmtpAccountForTopic(contentTopic: String) -> String? {
   if (isInviteTopic(topic: contentTopic)) {
     // If invite topic, account is part of topic
@@ -74,6 +68,9 @@ func getXmtpClient(contentTopic: String) async -> XMTP.Client? {
     let privateKeyBundle = try! PrivateKeyBundle(serializedData: xmtpKeyData!)
     let xmtpEnv = getXmtpEnv()
     let client = try await Client.from(bundle: privateKeyBundle, options: .init(api: .init(env: xmtpEnv)))
+    client.register(codec: AttachmentCodec())
+    client.register(codec: RemoteAttachmentCodec())
+    client.register(codec: ReactionCodec())
     return client
   } catch {
     sentryTrackMessage(message: "NOTIFICATION_XMTP_CLIENT_NOT_INSTANTIATED", extras: ["error": error])
