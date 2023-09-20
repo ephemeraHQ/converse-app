@@ -10,6 +10,7 @@ import {
 } from "../data/store/accountsStore";
 import { useAppStore } from "../data/store/appStore";
 import { getBlockedPeers } from "../utils/api";
+import { loadSavedNotificationMessagesToContext } from "../utils/notifications";
 import { pick } from "../utils/objects";
 import { syncXmtpClient } from "../utils/xmtpRN/client";
 import { createPendingConversations } from "../utils/xmtpRN/conversations";
@@ -53,6 +54,7 @@ export default function XmtpEngine() {
   }, [accounts, syncAccounts, hydrationDone]);
 
   // When app back active, resync all, in case we lost sync
+  // And also save data from notifications
   useEffect(() => {
     const subscription = AppState.addEventListener(
       "change",
@@ -62,6 +64,7 @@ export default function XmtpEngine() {
           appState.current.match(/inactive|background/) &&
           hydrationDone
         ) {
+          loadSavedNotificationMessagesToContext();
           syncAccounts(accounts);
         }
         appState.current = nextAppState;
