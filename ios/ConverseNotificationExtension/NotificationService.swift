@@ -35,8 +35,6 @@ func handleNotificationAsync(contentHandler: ((UNNotificationContent) -> Void), 
   
   if let bestAttemptContent = bestAttemptContent {    
     if var body = bestAttemptContent.userInfo["body"] as? [String: Any], let contentTopic = body["contentTopic"] as? String, let encodedMessage = body["message"] as? String {
-      // Init XMTP Codecs
-      initCodecs();
       let xmtpClient = await getXmtpClient(contentTopic: contentTopic);
       
       if (xmtpClient != nil) {

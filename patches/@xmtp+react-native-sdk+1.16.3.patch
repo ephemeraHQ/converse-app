@@ -59,24 +59,22 @@ index cad4e13..6f76267 100644
  export type ConversationContext = {
      conversationID: string;
 diff --git a/node_modules/@xmtp/react-native-sdk/ios/Wrappers/DecodedMessageWrapper.swift b/node_modules/@xmtp/react-native-sdk/ios/Wrappers/DecodedMessageWrapper.swift
-index d694df5..cdbd69c 100644
+index 41e2642..6dcfa4a 100644
 --- a/node_modules/@xmtp/react-native-sdk/ios/Wrappers/DecodedMessageWrapper.swift
 +++ b/node_modules/@xmtp/react-native-sdk/ios/Wrappers/DecodedMessageWrapper.swift
-@@ -11,7 +11,8 @@ struct DecodedMessageWrapper {
-             "contentTypeId": model.encodedContent.type.description,
-             "content": try ContentJson.fromEncoded(model.encodedContent).toJsonMap() as Any,
+@@ -12,6 +12,7 @@ struct DecodedMessageWrapper {
+             "content": ContentJson.fromEncoded(model.encodedContent, client: model.client).toJsonMap() as Any,
              "senderAddress": model.senderAddress,
--            "sent": UInt64(model.sent.timeIntervalSince1970 * 1000)
-+            "sent": UInt64(model.sent.timeIntervalSince1970 * 1000),
-+            "sentViaConverse": model.sentViaConverse
+             "sent": UInt64(model.sent.timeIntervalSince1970 * 1000),
++            "sentViaConverse": model.sentViaConverse,
          ]
      }
  
 diff --git a/node_modules/@xmtp/react-native-sdk/ios/XMTPModule.swift b/node_modules/@xmtp/react-native-sdk/ios/XMTPModule.swift
-index 17234ac..8dbf74b 100644
+index 30df006..414f581 100644
 --- a/node_modules/@xmtp/react-native-sdk/ios/XMTPModule.swift
 +++ b/node_modules/@xmtp/react-native-sdk/ios/XMTPModule.swift
-@@ -430,7 +430,13 @@ public class XMTPModule: Module {
+@@ -435,7 +435,13 @@ public class XMTPModule: Module {
              guard let prepared = try? PreparedMessage.fromSerializedData(preparedData) else {
                  throw Error.badPreparation("unable to deserialized \(local.preparedFileUri)")
              }

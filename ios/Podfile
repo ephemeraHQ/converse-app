@@ -22,7 +22,7 @@ target 'Converse' do
   use_frameworks! :linkage => :static
   pod 'MMKV', :linkage => :dynamic
   pod 'MMKVCore', :linkage => :dynamic
-  pod 'XMTP', :modular_headers => true
+  pod 'XMTP', '0.5.10-alpha0', :modular_headers => true
 
   # Flags change depending on the env values.
   flags = get_default_flags()
@@ -86,10 +86,9 @@ target 'ConverseNotificationExtension' do
   use_frameworks! :linkage => :static
   pod 'MMKVAppExtension', :linkage => :dynamic
   pod 'SQLite.swift'
-  # We want version to match the one installed by React Native, but we must not precise version here
-  # because it's buggy. If an upgrade is needed, easiest way is to update XMTP in the Podfile.lock
-  # (remove @xmtp/react-native-sdk, pod install, add @xmtp/react-native-sdk, pod install)
-  pod 'XMTP', :modular_headers => true
+  # Version must match version from XMTP Podspec (matching @xmtp/react-native-sdk from package.json)
+  # https://github.com/xmtp/xmtp-react-native/blob/v1.16.3/ios/XMTPReactNative.podspec#L28
+  pod 'XMTP', '0.5.10-alpha0', :modular_headers => true
   # Version must match version from RNSentry Podspec (matching @sentry/react-native package from package.json)
   # https://github.com/getsentry/sentry-react-native/blob/5.5.0/RNSentry.podspec#L22
   pod 'Sentry/HybridSDK', '8.7.1'
