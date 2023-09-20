@@ -105,7 +105,7 @@ const DebugButton = forwardRef((props, ref) => {
         },
         "Stress test SDK": async () => {
           for (let index = 0; index < 200; index++) {
-            await Client.createRandom();
+            Client.createRandom();
             console.log(index);
           }
         },
