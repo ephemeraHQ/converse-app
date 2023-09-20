@@ -6,6 +6,7 @@ import {
 import mime from "mime";
 import RNFS from "react-native-fs";
 
+import { moveFileAndReplace } from "./fileSystem";
 import { getImageSize, isImageMimetype } from "./media";
 import { uploadFileToWeb3Storage } from "./web3.storage";
 
@@ -71,7 +72,7 @@ export const handleDecryptedRemoteAttachment = async (
   }
   const attachmentPath = `${messageFolder}/${filename}`;
   // Let's cache the file and decoded information
-  await RNFS.moveFile(
+  await moveFileAndReplace(
     localAttachment.fileUri.replace("file:///", "/"),
     attachmentPath
   );

@@ -25,8 +25,8 @@ export default function HydrationStateHandler() {
           (new Date().getTime() - lastTime) / 1000
         } seconds`
       );
+      accounts.map((a) => cleanupPendingConversations(a));
       lastTime = new Date().getTime();
-      Promise.all(accounts.map((a) => cleanupPendingConversations(a)));
       await loadSavedNotificationMessagesToContext();
       console.log(
         `[Hydration] Loading notification data took ${

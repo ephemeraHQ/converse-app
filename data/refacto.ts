@@ -5,6 +5,7 @@ import { Platform } from "react-native";
 import RNFS from "react-native-fs";
 
 import config from "../config";
+import { moveFileAndReplace } from "../utils/fileSystem";
 import { saveXmtpKey, secureStoreOptions } from "../utils/keychain";
 import storage from "../utils/mmkv";
 import { sentryTrackMessage } from "../utils/sentry";
@@ -60,7 +61,7 @@ export const migrateDataIfNeeded = async () => {
         newDbPath
       );
       try {
-        await RNFS.moveFile(dbPath, newDbPath);
+        await moveFileAndReplace(dbPath, newDbPath);
       } catch (e) {
         console.log("COULD NOT MOVE DB", e);
         sentryTrackMessage("COULD_NOT_MOVE_DB", { error: JSON.stringify(e) });
