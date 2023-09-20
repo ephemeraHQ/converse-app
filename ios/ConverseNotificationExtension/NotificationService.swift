@@ -59,7 +59,7 @@ func handleNotificationAsync(contentHandler: ((UNNotificationContent) -> Void), 
         if (isIntroTopic(topic: contentTopic)) {
           return
         } else if (isInviteTopic(topic: contentTopic)) {
-          let conversation = handleNewConversation(xmtpClient: xmtpClient!, envelope: envelope)
+          let conversation = await handleNewConversation(xmtpClient: xmtpClient!, envelope: envelope)
           if (conversation != nil && conversation?.peerAddress != nil) {
             if (hasForbiddenPattern(address: conversation!.peerAddress)) {
               print("[NotificationExtension] Not showing a notification because forbidden spammy address")

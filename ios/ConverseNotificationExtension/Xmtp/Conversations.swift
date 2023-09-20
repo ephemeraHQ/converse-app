@@ -10,7 +10,7 @@ import XMTP
 import CryptoKit
 
 
-func handleNewConversation(xmtpClient: XMTP.Client, envelope: XMTP.Envelope) -> XMTP.Conversation? {
+func handleNewConversation(xmtpClient: XMTP.Client, envelope: XMTP.Envelope) async -> XMTP.Conversation? {
   do {
     // Let's subscribe to that specific topic
     let sharedDefaults = try! SharedDefaults()
@@ -18,7 +18,7 @@ func handleNewConversation(xmtpClient: XMTP.Client, envelope: XMTP.Envelope) -> 
     let expoPushToken = getKeychainValue(forKey: "EXPO_PUSH_TOKEN")
     
     if (isInviteTopic(topic: envelope.contentTopic)) {
-      let conversation = try xmtpClient.conversations.fromInvite(envelope: envelope)
+      let conversation = try await xmtpClient.conversations.fromInvite(envelope: envelope)
       switch conversation {
       case let .v2(conversationV2): do {
         let formatter = ISO8601DateFormatter()
@@ -98,7 +98,7 @@ func getSavedConversationTitle(contentTopic: String)-> String {
   return "";
 }
 
-func getPersistedConversation(xmtpClient: XMTP.Client, contentTopic: String) -> XMTP.Conversation? {
+func getPersistedConversation(xmtpClient: XMTP.Client, contentTopic: String) async -> XMTP.Conversation? {
   let hashedKey = CryptoKit.SHA256.hash(data: contentTopic.data(using: .utf8)!)
   let hashString = hashedKey.compactMap { String(format: "%02x", $0) }.joined()
   let persistedTopicData = getKeychainValue(forKey: "XMTP_TOPIC_DATA_\(xmtpClient.address)_\(hashString)")
@@ -108,7 +108,7 @@ func getPersistedConversation(xmtpClient: XMTP.Client, contentTopic: String) -> 
       let data = try Xmtp_KeystoreApi_V1_TopicMap.TopicData(
         serializedData: Data(base64Encoded: Data(persistedTopicData!.utf8))!
       )
-      let conversation = xmtpClient.conversations.importTopicData(data: data)
+      let conversation = await xmtpClient.conversations.importTopicData(data: data)
       return conversation
     } catch {
       sentryTrackMessage(message: "Could not import topic data in XMTP Client", extras: ["error": error])
