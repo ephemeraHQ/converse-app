@@ -151,9 +151,9 @@ export const loadConversations = async (
       }
     });
     console.log(
-      `[XmtpRN] Listing ${conversations.length} conversations took ${
-        (new Date().getTime() - now) / 1000
-      } seconds`
+      `[XmtpRN] Listing ${conversations.length} conversations for ${
+        client.address
+      } took ${(new Date().getTime() - now) / 1000} seconds`
     );
     const conversationsToSave = newConversations.map(
       protocolConversationToStateConversation
