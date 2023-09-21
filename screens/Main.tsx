@@ -1,7 +1,12 @@
 import * as Notifications from "expo-notifications";
 import { StatusBar } from "expo-status-bar";
-import React, { useEffect, useRef } from "react";
-import { Platform, useColorScheme } from "react-native";
+import React, { useCallback, useEffect, useRef } from "react";
+import {
+  Dimensions,
+  DrawerLayoutAndroid,
+  Platform,
+  useColorScheme,
+} from "react-native";
 
 import ChatSendAttachment from "../components/Chat/ChatSendAttachment";
 import ActionSheetStateHandler from "../components/StateHandlers/ActionSheetStateHandler";
@@ -14,7 +19,9 @@ import { useSettingsStore, useUserStore } from "../data/store/accountsStore";
 import { useAppStore } from "../data/store/appStore";
 import { useOnboardingStore } from "../data/store/onboardingStore";
 import { backgroundColor } from "../utils/colors";
+import { converseEventEmitter } from "../utils/events";
 import { pick } from "../utils/objects";
+import AccountsAndroid from "./Accounts/AccountsAndroid";
 import Navigation from "./Navigation/Navigation";
 import NotificationsScreen from "./NotificationsScreen";
 import OnboardingScreen from "./Onboarding";
@@ -60,9 +67,23 @@ export default function Main() {
         "mediaPreview",
       ])
     );
-
-  const navigationState = useRef<any>(undefined);
-  const navigationAnimation = Platform.OS === "ios" ? "default" : "none";
+  const navigationDrawer = useRef<DrawerLayoutAndroid>(null);
+  const toggleNavigationDrawer = useCallback((open: boolean) => {
+    if (open) {
+      navigationDrawer.current?.openDrawer();
+    } else {
+      navigationDrawer.current?.closeDrawer();
+    }
+  }, []);
+  useEffect(() => {
+    converseEventEmitter.on("toggle-navigation-drawer", toggleNavigationDrawer);
+    return () => {
+      converseEventEmitter.off(
+        "toggle-navigation-drawer",
+        toggleNavigationDrawer
+      );
+    };
+  }, [toggleNavigationDrawer]);
 
   const mainHeaders = (
     <>
@@ -92,6 +113,18 @@ export default function Main() {
           Platform.OS === "android"))
     ) {
       screenToShow = <NotificationsScreen />;
+    } else if (Platform.OS === "android") {
+      // On Android the whole navigation is wrapped in a drawler
+      // layout to be able to display the menu
+      screenToShow = (
+        <DrawerLayoutAndroid
+          ref={navigationDrawer}
+          drawerWidth={Dimensions.get("screen").width * 0.77}
+          renderNavigationView={() => <AccountsAndroid />}
+        >
+          <Navigation />
+        </DrawerLayoutAndroid>
+      );
     } else {
       screenToShow = <Navigation />;
     }

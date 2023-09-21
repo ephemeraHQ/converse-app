@@ -1,4 +1,4 @@
-import Accounts from "../Accounts";
+import Accounts from "../Accounts/Accounts";
 import { NativeStack } from "./Navigation";
 
 export default function AccountsNav() {

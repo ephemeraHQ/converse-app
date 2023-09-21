@@ -69,6 +69,9 @@ const linking = {
           peer: encodeURIComponent,
         },
       },
+      Profile: {
+        path: "/profile",
+      },
       ShareProfile: {
         path: "/shareProfile",
       },
@@ -111,18 +114,32 @@ export default function Navigation() {
   return (
     <NavigationContainer
       linking={splashScreenHidden ? (linking as any) : undefined}
-      initialState={{
-        index: 1,
-        routes: [
-          {
-            name: "Accounts",
-          },
-          {
-            name: "Chats",
-          },
-        ],
-        type: "stack",
-      }}
+      initialState={
+        Platform.OS === "ios"
+          ? {
+              // On iOS, the Accounts switcher is available through a back button
+              index: 1,
+              routes: [
+                {
+                  name: "Accounts",
+                },
+                {
+                  name: "Chats",
+                },
+              ],
+              type: "stack",
+            }
+          : {
+              // On Android, the Accounts switcher is available through the drawer
+              index: 0,
+              routes: [
+                {
+                  name: "Chats",
+                },
+              ],
+              type: "stack",
+            }
+      }
     >
       <NativeStack.Navigator
         screenListeners={({ navigation }) => ({

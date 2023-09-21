@@ -1,18 +1,21 @@
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { ScrollView, StyleSheet, View, useColorScheme } from "react-native";
 
-import SettingsButton from "../components/SettingsButton";
-import TableView from "../components/TableView/TableView";
-import { TableViewPicto } from "../components/TableView/TableViewImage";
-import { useAccountsList, useAccountsStore } from "../data/store/accountsStore";
-import { useOnboardingStore } from "../data/store/onboardingStore";
+import SettingsButton from "../../components/SettingsButton";
+import TableView from "../../components/TableView/TableView";
+import { TableViewPicto } from "../../components/TableView/TableViewImage";
+import {
+  useAccountsList,
+  useAccountsStore,
+} from "../../data/store/accountsStore";
+import { useOnboardingStore } from "../../data/store/onboardingStore";
 import {
   backgroundColor,
   primaryColor,
   textSecondaryColor,
-} from "../utils/colors";
-import { getReadableProfile } from "../utils/str";
-import { NavigationParamList } from "./Navigation/Navigation";
+} from "../../utils/colors";
+import { getReadableProfile } from "../../utils/str";
+import { NavigationParamList } from "../Navigation/Navigation";
 
 export default function Accounts({
   navigation,
@@ -39,11 +42,7 @@ export default function Accounts({
           },
           rightView: (
             <View style={{ flexDirection: "row" }}>
-              <SettingsButton
-                navigation={navigation}
-                route={route}
-                account={a}
-              />
+              <SettingsButton navigation={navigation} account={a} />
               <TableViewPicto
                 symbol="chevron.right"
                 color={textSecondaryColor(colorScheme)}

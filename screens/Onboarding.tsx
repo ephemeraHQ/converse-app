@@ -489,7 +489,7 @@ const useStyles = () => {
     cancelButton: {
       position: "absolute",
       top: 0,
-      left: 30,
+      left: Platform.OS === "android" ? 10 : 30,
     },
   });
 };
