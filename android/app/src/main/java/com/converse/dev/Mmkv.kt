@@ -34,3 +34,13 @@ fun getAccounts(appContext: Context): List<String> {
     val accountsState = getAccountsState(appContext) ?: return listOf()
     return accountsState?.accounts?.filter { it != "TEMPORARY_ACCOUNT" } ?: return listOf()
 }
+
+fun getBadge(appContext: Context): Int {
+    val mmkv = getMmkv(appContext)
+    return mmkv?.getInt("notifications-badge", 0) ?: 0
+}
+
+fun setBadge(appContext: Context, badge: Int) {
+    val mmkv = getMmkv(appContext)
+    mmkv?.putInt("notifications-badge", badge)
+}
