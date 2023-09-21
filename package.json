@@ -42,7 +42,7 @@
     "@xmtp/content-type-reaction": "^1.0.1",
     "@xmtp/content-type-remote-attachment": "^1.0.7",
     "@xmtp/proto": "^3.24.0",
-    "@xmtp/react-native-sdk": "^1.16.3",
+    "@xmtp/react-native-sdk": "^1.16.5",
     "axios": "^1.2.1",
     "babel-plugin-transform-remove-console": "^6.9.4",
     "babel-preset-expo-modern": "^0.1.3",
