@@ -316,5 +316,5 @@ export const saveNotificationsStatus = async () => {
 export const resetNotifications = async (): Promise<void> => {
   Notifications.dismissAllNotificationsAsync();
   Notifications.setBadgeCountAsync(0);
-  mmkv.set("badge", 0);
+  mmkv.set("notifications-badge", 0);
 };
