@@ -1,6 +1,7 @@
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { ScrollView, StyleSheet, View, useColorScheme } from "react-native";
 
+import SettingsButton from "../components/SettingsButton";
 import TableView from "../components/TableView/TableView";
 import { TableViewPicto } from "../components/TableView/TableViewImage";
 import { useAccountsList, useAccountsStore } from "../data/store/accountsStore";
@@ -12,19 +13,6 @@ import {
 } from "../utils/colors";
 import { getReadableProfile } from "../utils/str";
 import { NavigationParamList } from "./Navigation/Navigation";
-
-// initialState={{
-//   index: 1,
-//   routes: [
-//     {
-//       name: "Accounts",
-//     },
-//     {
-//       name: "Messages",
-//     },
-//   ],
-//   type: "stack",
-// }}
 
 export default function Accounts({
   navigation,
@@ -51,12 +39,10 @@ export default function Accounts({
           },
           rightView: (
             <View style={{ flexDirection: "row" }}>
-              <TableViewPicto
-                symbol="info.circle"
-                color={primaryColor(colorScheme)}
-                onPress={() => {
-                  console.log("pressed");
-                }}
+              <SettingsButton
+                navigation={navigation}
+                route={route}
+                account={a}
               />
               <TableViewPicto
                 symbol="chevron.right"

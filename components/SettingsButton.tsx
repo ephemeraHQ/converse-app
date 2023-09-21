@@ -3,40 +3,28 @@ import { useDisconnect } from "@thirdweb-dev/react-native";
 import * as Clipboard from "expo-clipboard";
 import * as Linking from "expo-linking";
 import React, { useCallback } from "react";
-import {
-  Keyboard,
-  Dimensions,
-  Platform,
-  TouchableOpacity,
-  useColorScheme,
-  View,
-} from "react-native";
+import { Keyboard, Platform, useColorScheme } from "react-native";
 
 import config from "../config";
 import { refreshProfileForAddress } from "../data/helpers/profiles/profilesUpdate";
-import {
-  currentAccount,
-  useProfilesStore,
-  useUserStore,
-} from "../data/store/accountsStore";
+import { currentAccount, useAccountsStore } from "../data/store/accountsStore";
 import { useAppStore } from "../data/store/appStore";
 import { NavigationParamList } from "../screens/Navigation/Navigation";
-import { actionSheetColors, textSecondaryColor } from "../utils/colors";
+import { actionSheetColors, primaryColor } from "../utils/colors";
 import { logout } from "../utils/logout";
 import {
   requestPushNotificationsPermissions,
   NotificationPermissionStatus,
 } from "../utils/notifications";
 import { pick } from "../utils/objects";
-import { getTitleFontScale, shortAddress } from "../utils/str";
-import Button from "./Button/Button";
-import Picto from "./Picto/Picto";
 import { showActionSheetWithOptions } from "./StateHandlers/ActionSheetStateHandler";
+import { TableViewPicto } from "./TableView/TableViewImage";
 
-export default function SettingsButton({
-  navigation,
-}: NativeStackScreenProps<NavigationParamList, "Chats">) {
-  const userAddress = useUserStore((s) => s.userAddress);
+type Props = {
+  account: string;
+} & NativeStackScreenProps<NavigationParamList, "Accounts">;
+
+export default function SettingsButton({ navigation, account }: Props) {
   const { setNotificationsPermissionStatus, notificationsPermissionStatus } =
     useAppStore((s) =>
       pick(s, [
@@ -44,6 +32,7 @@ export default function SettingsButton({
         "setNotificationsPermissionStatus",
       ])
     );
+  const setCurrentAccount = useAccountsStore((s) => s.setCurrentAccount);
   const disconnectWallet = useDisconnect();
   const colorScheme = useColorScheme();
   const onPress = useCallback(() => {
@@ -51,22 +40,22 @@ export default function SettingsButton({
 
     const methods = {
       "Your profile page": () => {
-        if (userAddress) {
-          refreshProfileForAddress(currentAccount(), userAddress);
-          navigation.push("Profile", { address: userAddress });
+        if (account) {
+          refreshProfileForAddress(currentAccount(), account);
+          setCurrentAccount(account);
+          navigation.push("Chats");
+          navigation.push("Profile", { address: account });
         }
       },
       "Copy wallet address": () => {
-        Clipboard.setStringAsync(userAddress || "");
+        Clipboard.setStringAsync(account || "");
       },
       "Contact Converse team": () => {
-        Linking.openURL(
-          Linking.createURL("/conversation", {
-            queryParams: {
-              mainConversationWithPeer: config.polAddress,
-            },
-          })
-        );
+        setCurrentAccount(account);
+        navigation.push("Chats");
+        navigation.push("Conversation", {
+          mainConversationWithPeer: config.polAddress,
+        });
       },
       "Turn on notifications": () => {
         if (notificationsPermissionStatus === "denied") {
@@ -111,7 +100,7 @@ export default function SettingsButton({
         options,
         destructiveButtonIndex: options.indexOf("Disconnect"),
         cancelButtonIndex: options.indexOf("Cancel"),
-        title: userAddress || undefined,
+        title: account || undefined,
         ...actionSheetColors(colorScheme),
       },
       (selectedIndex?: number) => {
@@ -123,49 +112,20 @@ export default function SettingsButton({
       }
     );
   }, [
-    colorScheme,
-    disconnectWallet,
-    navigation,
     notificationsPermissionStatus,
+    account,
+    colorScheme,
+    setCurrentAccount,
+    navigation,
     setNotificationsPermissionStatus,
-    userAddress,
+    disconnectWallet,
   ]);
 
-  const userPrimaryENS = useProfilesStore(
-    (s) =>
-      s.profiles[userAddress]?.socials.ensNames?.find((n) => n.isPrimary)?.name
+  return (
+    <TableViewPicto
+      symbol="info.circle"
+      color={primaryColor(colorScheme)}
+      onPress={onPress}
+    />
   );
-
-  if (Platform.OS === "ios") {
-    const screenWidth = Dimensions.get("screen").width;
-    const marginWidth = 26; // 16 left, 10 right
-    const connectingWidth = 110;
-    const flexBasis = screenWidth / 2 - marginWidth - connectingWidth / 2;
-    return (
-      <View
-        style={{
-          flexBasis: userPrimaryENS ? flexBasis : undefined,
-        }}
-      >
-        <Button
-          variant="text"
-          allowFontScaling={false}
-          textStyle={{ fontSize: 17 * getTitleFontScale() }}
-          onPress={onPress}
-          title={userPrimaryENS || shortAddress(userAddress || "")}
-          numberOfLines={1}
-        />
-      </View>
-    );
-  } else {
-    return (
-      <TouchableOpacity onPress={onPress}>
-        <Picto
-          picto="account_circle"
-          size={24}
-          color={textSecondaryColor(colorScheme)}
-        />
-      </TouchableOpacity>
-    );
-  }
 }
