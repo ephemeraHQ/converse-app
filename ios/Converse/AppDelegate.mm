@@ -2,7 +2,6 @@
 
 #import <React/RCTBundleURLProvider.h>
 #import <React/RCTLinkingManager.h>
-#import <UserNotifications/UserNotifications.h>
 
 @implementation AppDelegate
 
