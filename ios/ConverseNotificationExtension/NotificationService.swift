@@ -80,6 +80,11 @@ func handleNotificationAsync(contentHandler: ((UNNotificationContent) -> Void), 
             }
           }
           bestAttemptContent.title = conversationTitle;
+          
+          // Increment notification badge
+          let newBadgeCount = getBadge() + 1
+          setBadge(newBadgeCount)
+          bestAttemptContent.badge = NSNumber(value: newBadgeCount)
         }
       } else {
         print("[NotificationExtension] Not showing a notification because no client found")

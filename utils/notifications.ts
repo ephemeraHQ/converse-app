@@ -11,6 +11,7 @@ import { XmtpConversation, XmtpMessage } from "../data/store/chatStore";
 import { buildUserInviteTopic } from "../vendor/xmtp-js/src/utils";
 import api from "./api";
 import { saveExpoPushToken } from "./keychain";
+import mmkv from "./mmkv";
 import { navigateToConversation } from "./navigation";
 import { sentryTrackError, sentryTrackMessage } from "./sentry";
 import {
@@ -310,4 +311,10 @@ export const saveNotificationsStatus = async () => {
       .getState()
       .setNotificationsPermissionStatus(notificationsStatus);
   }
+};
+
+export const resetNotifications = async (): Promise<void> => {
+  Notifications.dismissAllNotificationsAsync();
+  Notifications.setBadgeCountAsync(0);
+  mmkv.set("badge", 0);
 };
