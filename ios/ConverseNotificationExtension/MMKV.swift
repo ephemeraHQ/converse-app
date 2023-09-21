@@ -53,3 +53,16 @@ func getAccounts() -> [String] {
     return account != "TEMPORARY_ACCOUNT"
   }))!
 }
+
+func getBadge() -> Int {
+  let mmkv = getMmkv()
+  if let badge = mmkv?.int32(forKey: "badge") {
+    return Int(badge)
+  }
+  return 0
+}
+
+func setBadge(_ badge: Int) {
+  let mmkv = getMmkv()
+  mmkv?.set(Int32(badge), forKey: "badge")
+}
