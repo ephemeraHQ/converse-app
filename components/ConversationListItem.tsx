@@ -7,7 +7,10 @@ import {
   StyleSheet,
   Platform,
   TouchableHighlight,
+  Alert,
 } from "react-native";
+import { RectButton } from "react-native-gesture-handler";
+import Swipeable from "react-native-gesture-handler/Swipeable";
 import { TouchableRipple } from "react-native-paper";
 
 import Checkmark from "../assets/checkmark.svg";
@@ -20,6 +23,7 @@ import {
   backgroundColor,
   badgeColor,
   clickedItemBackgroundColor,
+  dangerColor,
   listItemSeparatorColor,
   textPrimaryColor,
   textSecondaryColor,
@@ -101,26 +105,56 @@ const ConversationListItem = memo(function ConversationListItem({
       {showUnread && <View style={styles.unread} />}
     </View>
   );
-  if (Platform.OS === "ios") {
+  const renderRightActions = useCallback(() => {
     return (
-      <TouchableHighlight
-        key={conversationTopic}
-        underlayColor={clickedItemBackgroundColor(colorScheme)}
-        delayPressIn={75}
+      <RectButton
+        style={[styles.rightAction]}
         onPress={() => {
-          navigation.navigate("Conversation", {
-            topic: conversationTopic,
-          });
-          setSelected(true);
-        }}
-        style={{
-          backgroundColor: selected
-            ? clickedItemBackgroundColor(colorScheme)
-            : backgroundColor(colorScheme),
+          Alert.alert("Delete conversation?", "It will be deleted", [
+            { text: "Cancel" },
+            {
+              text: "Yes",
+              style: "destructive",
+              isPreferred: true,
+              onPress: () => {
+                console.log("Really delete convo");
+              },
+            },
+          ]);
         }}
       >
-        {listItemContent}
-      </TouchableHighlight>
+        <Picto picto="trash" color="white" size={18} />
+      </RectButton>
+    );
+  }, [styles.rightAction]);
+
+  if (Platform.OS === "ios") {
+    return (
+      <Swipeable
+        renderRightActions={renderRightActions}
+        overshootFriction={4}
+        useNativeAnimations
+        containerStyle={styles.swipeableRow}
+      >
+        <TouchableHighlight
+          key={conversationTopic}
+          underlayColor={clickedItemBackgroundColor(colorScheme)}
+          delayPressIn={75}
+          onPress={() => {
+            navigation.navigate("Conversation", {
+              topic: conversationTopic,
+            });
+            setSelected(true);
+          }}
+          style={{
+            backgroundColor: selected
+              ? clickedItemBackgroundColor(colorScheme)
+              : backgroundColor(colorScheme),
+          }}
+        >
+          {listItemContent}
+        </TouchableHighlight>
+      </Swipeable>
     );
   } else {
     return (
@@ -143,11 +177,17 @@ export default ConversationListItem;
 
 const getStyles = (colorScheme: ColorSchemeName) =>
   StyleSheet.create({
+    swipeableRow: Platform.select({
+      default: {
+        borderBottomWidth: 0.25,
+        borderBottomColor: listItemSeparatorColor(colorScheme),
+      },
+      android: {},
+    }),
     conversationListItem: Platform.select({
       default: {
         height: 77,
-        borderBottomWidth: 0.25,
-        borderBottomColor: listItemSeparatorColor(colorScheme),
+
         paddingTop: 8,
         paddingRight: 60,
         marginLeft: 32,
@@ -239,5 +279,11 @@ const getStyles = (colorScheme: ColorSchemeName) =>
           top: 39,
         },
       }),
+    },
+    rightAction: {
+      width: 100,
+      alignItems: "center",
+      backgroundColor: dangerColor(colorScheme),
+      justifyContent: "center",
     },
   });

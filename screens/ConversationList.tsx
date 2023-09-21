@@ -2,9 +2,9 @@ import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { FlashList } from "@shopify/flash-list";
 import React, { useCallback, useEffect, useState } from "react";
 import { Platform, StyleSheet, useColorScheme, Text, View } from "react-native";
+import { gestureHandlerRootHOC } from "react-native-gesture-handler";
 import { SearchBarCommands } from "react-native-screens";
 
-import { useShouldShowConnectingOrSyncing } from "../components/Connecting";
 import NewConversationButton from "../components/ConversationList/NewConversationButton";
 import { useHeaderSearchBar } from "../components/ConversationList/headerHook";
 import ConversationListItem from "../components/ConversationListItem";
@@ -39,11 +39,10 @@ type ConversationWithLastMessagePreview = XmtpConversation & {
 };
 type FlatListItem = ConversationWithLastMessagePreview | { topic: string };
 
-export default function ConversationList({
+function ConversationList({
   navigation,
   route,
 }: NativeStackScreenProps<NavigationParamList, "Chats">) {
-  const shouldShowConnectingOrSyncing = useShouldShowConnectingOrSyncing();
   const colorScheme = useColorScheme();
   const styles = useStyles();
   const {
@@ -232,6 +231,8 @@ export default function ConversationList({
     </>
   );
 }
+
+export default gestureHandlerRootHOC(ConversationList);
 
 const useStyles = () => {
   const colorScheme = useColorScheme();
