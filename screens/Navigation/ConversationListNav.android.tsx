@@ -14,7 +14,6 @@ import {
 } from "../../components/Connecting";
 import ShareProfileButton from "../../components/ConversationList/ShareProfileButton";
 import Picto from "../../components/Picto/Picto";
-import SettingsButton from "../../components/SettingsButton";
 import { useChatStore } from "../../data/store/accountsStore";
 import {
   chatInputBackgroundColor,
@@ -22,6 +21,7 @@ import {
   textPrimaryColor,
   textSecondaryColor,
 } from "../../utils/colors";
+import { converseEventEmitter } from "../../utils/events";
 import { pick } from "../../utils/objects";
 import ConversationList from "../ConversationList";
 import { NativeStack, navigationAnimation } from "./Navigation";
@@ -103,9 +103,12 @@ export default function ConversationListNav() {
                 placeholder={searchPlaceholder()}
                 onChangeText={onChangeSearch}
                 value={searchQuery}
-                icon={() => (
-                  <SettingsButton route={route} navigation={navigation} />
+                icon={({ color }) => (
+                  <Picto picto="menu" size={24} color={color} />
                 )}
+                onIconPress={() => {
+                  converseEventEmitter.emit("toggle-navigation-drawer", true);
+                }}
                 mode="bar"
                 autoCapitalize="none"
                 autoFocus={false}
