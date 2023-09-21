@@ -38,6 +38,7 @@ func incrementBadge(for content: UNMutableNotificationContent) {
 
 func handleNotificationAsync(contentHandler: ((UNNotificationContent) -> Void), bestAttemptContent: UNMutableNotificationContent?) async {
   initSentry()
+  var shouldIncrementBadge = false
   
   if let bestAttemptContent = bestAttemptContent {    
     print("[NotificationExtension] Received a notification")
@@ -69,7 +70,7 @@ func handleNotificationAsync(contentHandler: ((UNNotificationContent) -> Void), 
             bestAttemptContent.title = shortAddress(address: conversation!.peerAddress)
             body["newConversationTopic"] = conversation?.topic
             bestAttemptContent.userInfo.updateValue(body, forKey: "body")
-            incrementBadge(for: bestAttemptContent)
+            shouldIncrementBadge = true
           }
         } else {
           var conversationTitle = getSavedConversationTitle(contentTopic: contentTopic);
@@ -87,12 +88,16 @@ func handleNotificationAsync(contentHandler: ((UNNotificationContent) -> Void), 
             }
           }
           bestAttemptContent.title = conversationTitle;
-          incrementBadge(for: bestAttemptContent)
+          shouldIncrementBadge = true
         }
       } else {
         print("[NotificationExtension] Not showing a notification because no client found")
         contentHandler(UNNotificationContent())
       }
+    }
+    
+    if shouldIncrementBadge {
+      incrementBadge(for: bestAttemptContent)
     }
     
     contentHandler(bestAttemptContent)
@@ -119,6 +124,7 @@ class NotificationService: UNNotificationServiceExtension {
       if let body = bestAttemptContent.userInfo["body"] as? [String: Any], let contentTopic = body["contentTopic"] as? String {
         let conversationTitle = getSavedConversationTitle(contentTopic: contentTopic);
         bestAttemptContent.title = conversationTitle;
+        incrementBadge(for: bestAttemptContent)
       }
       
       contentHandler(bestAttemptContent)
