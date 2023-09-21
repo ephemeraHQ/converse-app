@@ -56,7 +56,7 @@ func getAccounts() -> [String] {
 
 func getBadge() -> Int {
   let mmkv = getMmkv()
-  if let badge = mmkv?.int32(forKey: "badge") {
+  if let badge = mmkv?.int32(forKey: "notifications-badge") {
     return Int(badge)
   }
   return 0
@@ -64,5 +64,5 @@ func getBadge() -> Int {
 
 func setBadge(_ badge: Int) {
   let mmkv = getMmkv()
-  mmkv?.set(Int32(badge), forKey: "badge")
+  mmkv?.set(Int32(badge), forKey: "notifications-badge")
 }

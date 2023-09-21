@@ -30,6 +30,12 @@ func hasForbiddenPattern(address: String) -> Bool {
   return address.hasPrefix("0x0000") && address.hasSuffix("0000");
 }
 
+func incrementBadge(for content: UNMutableNotificationContent) {
+    let newBadgeCount = getBadge() + 1
+    setBadge(newBadgeCount)
+    content.badge = NSNumber(value: newBadgeCount)
+}
+
 func handleNotificationAsync(contentHandler: ((UNNotificationContent) -> Void), bestAttemptContent: UNMutableNotificationContent?) async {
   initSentry()
   
@@ -63,6 +69,7 @@ func handleNotificationAsync(contentHandler: ((UNNotificationContent) -> Void), 
             bestAttemptContent.title = shortAddress(address: conversation!.peerAddress)
             body["newConversationTopic"] = conversation?.topic
             bestAttemptContent.userInfo.updateValue(body, forKey: "body")
+            incrementBadge(for: bestAttemptContent)
           }
         } else {
           var conversationTitle = getSavedConversationTitle(contentTopic: contentTopic);
@@ -80,11 +87,7 @@ func handleNotificationAsync(contentHandler: ((UNNotificationContent) -> Void), 
             }
           }
           bestAttemptContent.title = conversationTitle;
-          
-          // Increment notification badge
-          let newBadgeCount = getBadge() + 1
-          setBadge(newBadgeCount)
-          bestAttemptContent.badge = NSNumber(value: newBadgeCount)
+          incrementBadge(for: bestAttemptContent)
         }
       } else {
         print("[NotificationExtension] Not showing a notification because no client found")
