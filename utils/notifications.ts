@@ -135,18 +135,23 @@ export const loadSavedNotificationMessagesToContext = async () => {
     return;
   }
   loadingSavedNotifications = true;
+  let lastStepDone = 0;
   try {
     const knownAccounts = getAccountsList();
+    lastStepDone = 1;
     const [conversations, messages] = await Promise.all([
       loadSavedNotificationsConversations(),
       loadSavedNotificationsMessages(),
     ]);
+    lastStepDone = 2;
     await Promise.all([
       emptySavedNotificationsConversations(),
       emptySavedNotificationsMessages(),
     ]);
+    lastStepDone = 3;
 
     if (conversations && conversations.length > 0) {
+      lastStepDone = 4;
       console.log(
         `Got ${conversations.length} new conversations from notifications:`,
         conversations
@@ -180,12 +185,16 @@ export const loadSavedNotificationMessagesToContext = async () => {
           });
         }
       });
+      lastStepDone = 5;
       for (const account of Object.keys(conversationsToSaveByAccount)) {
         await saveConversations(account, conversationsToSaveByAccount[account]);
       }
+      lastStepDone = 6;
     }
+    lastStepDone = 7;
 
     if (messages && messages.length > 0) {
+      lastStepDone = 8;
       messages.sort((m1: any, m2: any) => m1.sent - m2.sent);
       console.log(
         `Got ${messages.length} new messages from notifications:`,
@@ -211,6 +220,7 @@ export const loadSavedNotificationMessagesToContext = async () => {
           });
         }
       });
+      lastStepDone = 9;
 
       const promises: Promise<void>[] = [];
 
@@ -225,7 +235,9 @@ export const loadSavedNotificationMessagesToContext = async () => {
           );
         }
       }
+      lastStepDone = 10;
       await Promise.all(promises);
+      lastStepDone = 11;
     }
 
     loadingSavedNotifications = false;
@@ -233,6 +245,8 @@ export const loadSavedNotificationMessagesToContext = async () => {
     console.log("An error occured while loading saved notifications", e);
     sentryTrackError(e, {
       error: "An error occured while loading saved notifications",
+      errorType: typeof e,
+      lastStepDone,
     });
     emptySavedNotificationsConversations();
     emptySavedNotificationsMessages();
