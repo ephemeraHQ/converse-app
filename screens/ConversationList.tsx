@@ -30,6 +30,7 @@ import {
   sortAndComputePreview,
   getConversationListItemsToDisplay,
 } from "../utils/conversation";
+import { converseEventEmitter } from "../utils/events";
 import { pick } from "../utils/objects";
 import { conversationName } from "../utils/str";
 import { NavigationParamList } from "./Main";
@@ -191,8 +192,14 @@ function ConversationList({
       <View style={styles.conversationList}>
         <FlashList
           keyboardShouldPersistTaps="handled"
-          onMomentumScrollBegin={() => searchBarRef.current?.blur()}
-          onScrollBeginDrag={() => searchBarRef.current?.blur()}
+          onMomentumScrollBegin={() => {
+            converseEventEmitter.emit("conversationList-scroll");
+            searchBarRef.current?.blur();
+          }}
+          onScrollBeginDrag={() => {
+            converseEventEmitter.emit("conversationList-scroll");
+            searchBarRef.current?.blur();
+          }}
           contentInsetAdjustmentBehavior="automatic"
           data={flatListItems}
           extraData={[
