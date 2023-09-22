@@ -68,6 +68,7 @@ export type ChatStoreType = {
   webviewClientConnected: boolean;
   resyncing: boolean;
   reconnecting: boolean;
+  deletedTopics: { [topic: string]: boolean };
 
   searchQuery: string;
   setSearchQuery: (query: string) => void;
@@ -99,6 +100,7 @@ export type ChatStoreType = {
   setResyncing: (syncing: boolean) => void;
   setReconnecting: (reconnecting: boolean) => void;
   setLastSyncedAt: (synced: number) => void;
+  markTopicsAsDeleted: (topics: string[]) => void;
 };
 
 const now = () => new Date().getTime();
@@ -109,6 +111,7 @@ export const initChatStore = (account: string) => {
       (set) =>
         ({
           conversations: {},
+          deletedTopics: {},
           openedConversationTopic: "",
           setOpenedConversationTopic: (topic) =>
             set((state) => {
@@ -373,6 +376,14 @@ export const initChatStore = (account: string) => {
             }),
           setLastSyncedAt: (synced: number) =>
             set(() => ({ lastSyncedAt: synced })),
+          markTopicsAsDeleted: (topics: string[]) =>
+            set((state) => {
+              const newDeletedTopics = { ...state.deletedTopics };
+              topics.forEach((t) => {
+                newDeletedTopics[t] = true;
+              });
+              return { deletedTopics: newDeletedTopics };
+            }),
         }) as ChatStoreType,
       {
         name: `store-${account}-chat`, // Account-based storage so each account can have its own chat data
@@ -381,6 +392,7 @@ export const initChatStore = (account: string) => {
         partialize: (state) => ({
           initialLoadDoneOnce: state.initialLoadDoneOnce,
           lastSyncedAt: state.lastSyncedAt,
+          deletedTopics: state.deletedTopics,
         }),
       }
     )

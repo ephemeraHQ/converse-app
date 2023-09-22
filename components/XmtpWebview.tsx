@@ -113,6 +113,7 @@ export default function XmtpWebview() {
     setResyncing,
     setReconnecting,
     conversations,
+    deletedTopics,
   } = useChatStore((s) =>
     pick(s, [
       "initialLoadDone",
@@ -122,6 +123,7 @@ export default function XmtpWebview() {
       "setResyncing",
       "setReconnecting",
       "conversations",
+      "deletedTopics",
     ])
   );
   const { userAddress, setUserAddress } = useUserStore((s) =>
@@ -286,7 +288,8 @@ export default function XmtpWebview() {
             subscribeToNotifications(
               userAddress,
               Object.values(conversations),
-              blockedPeers
+              blockedPeers,
+              deletedTopics
             );
           }
           break;
@@ -323,7 +326,8 @@ export default function XmtpWebview() {
             subscribeToNotifications(
               userAddress,
               Object.values(conversations),
-              blockedPeers
+              blockedPeers,
+              deletedTopics
             );
           }
           isReconnecting = false;
@@ -417,6 +421,7 @@ export default function XmtpWebview() {
       conversations,
       userAddress,
       setReconnecting,
+      deletedTopics,
     ]
   );
 

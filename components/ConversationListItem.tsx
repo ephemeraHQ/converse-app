@@ -16,8 +16,10 @@ import { TouchableRipple } from "react-native-paper";
 import Checkmark from "../assets/checkmark.svg";
 import Clock from "../assets/clock.svg";
 import Picto from "../components/Picto/Picto";
+import { useChatStore } from "../data/store/accountsStore";
 import { XmtpConversation } from "../data/store/chatStore";
 import { NavigationParamList } from "../screens/Main";
+import { deleteTopic } from "../utils/api";
 import {
   actionSecondaryColor,
   backgroundColor,
@@ -56,6 +58,7 @@ const ConversationListItem = memo(function ConversationListItem({
 }: ConversationListItemProps) {
   const styles = getStyles(colorScheme);
   const timeToShow = getRelativeDateTime(conversationTime);
+  const markTopicsAsDeleted = useChatStore((s) => s.markTopicsAsDeleted);
   const [selected, setSelected] = useState(false);
   const resetSelected = useCallback(() => {
     setSelected(false);
@@ -117,7 +120,8 @@ const ConversationListItem = memo(function ConversationListItem({
               style: "destructive",
               isPreferred: true,
               onPress: () => {
-                console.log("Really delete convo");
+                deleteTopic(conversationTopic);
+                markTopicsAsDeleted([conversationTopic]);
               },
             },
           ]);
@@ -126,7 +130,7 @@ const ConversationListItem = memo(function ConversationListItem({
         <Picto picto="trash" color="white" size={18} />
       </RectButton>
     );
-  }, [styles.rightAction]);
+  }, [conversationTopic, markTopicsAsDeleted, styles.rightAction]);
 
   if (Platform.OS === "ios") {
     return (

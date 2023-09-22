@@ -154,4 +154,18 @@ export const markDesktopSessionDone = async ({
     params: { sessionId, otp },
   });
 
+export const deleteTopic = async (topic: string) => {
+  await api.delete(`/api/topics`, {
+    headers: await getXmtpApiHeaders(),
+    params: { topic },
+  });
+};
+
+export const getDeletedTopics = async () => {
+  const { data } = await api.get("/api/topics/deleted", {
+    headers: await getXmtpApiHeaders(),
+  });
+  return data.deletedTopics as string[];
+};
+
 export default api;

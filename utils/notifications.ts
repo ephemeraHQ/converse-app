@@ -34,7 +34,8 @@ let lastSubscribedTopics: string[] = [];
 export const subscribeToNotifications = async (
   address: string,
   conversations: XmtpConversation[],
-  blockedPeerAddresses: { [peerAddress: string]: boolean }
+  blockedPeerAddresses: { [peerAddress: string]: boolean },
+  deletedTopics: { [topic: string]: boolean }
 ): Promise<void> => {
   const topics = [
     ...conversations
@@ -42,7 +43,8 @@ export const subscribeToNotifications = async (
         (c) =>
           c.peerAddress &&
           !c.pending &&
-          !blockedPeerAddresses[c.peerAddress.toLowerCase()]
+          !blockedPeerAddresses[c.peerAddress.toLowerCase()] &&
+          !deletedTopics[c.topic]
       )
       .map((c) => c.topic),
     buildUserInviteTopic(address || ""),
