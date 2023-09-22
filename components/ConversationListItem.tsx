@@ -31,6 +31,7 @@ import {
   textSecondaryColor,
 } from "../utils/colors";
 import { getRelativeDateTime } from "../utils/date";
+import { shortAddress } from "../utils/str";
 
 type ConversationListItemProps = {
   navigation: NativeStackNavigationProp<NavigationParamList, "Chats">;
@@ -55,6 +56,7 @@ const ConversationListItem = memo(function ConversationListItem({
   lastMessageStatus,
   lastMessageFromMe,
   showUnread,
+  conversation,
 }: ConversationListItemProps) {
   const styles = getStyles(colorScheme);
   const timeToShow = getRelativeDateTime(conversationTime);
@@ -113,24 +115,33 @@ const ConversationListItem = memo(function ConversationListItem({
       <RectButton
         style={[styles.rightAction]}
         onPress={() => {
-          Alert.alert("Delete conversation?", "It will be deleted", [
-            { text: "Cancel" },
-            {
-              text: "Yes",
-              style: "destructive",
-              isPreferred: true,
-              onPress: () => {
-                deleteTopic(conversationTopic);
-                markTopicsAsDeleted([conversationTopic]);
+          Alert.alert(
+            `Delete chat with ${shortAddress(conversation.peerAddress)}?`,
+            undefined,
+            [
+              { text: "Cancel" },
+              {
+                text: "Delete",
+                style: "destructive",
+                isPreferred: true,
+                onPress: () => {
+                  deleteTopic(conversationTopic);
+                  markTopicsAsDeleted([conversationTopic]);
+                },
               },
-            },
-          ]);
+            ]
+          );
         }}
       >
         <Picto picto="trash" color="white" size={18} />
       </RectButton>
     );
-  }, [conversationTopic, markTopicsAsDeleted, styles.rightAction]);
+  }, [
+    conversation.peerAddress,
+    conversationTopic,
+    markTopicsAsDeleted,
+    styles.rightAction,
+  ]);
 
   if (Platform.OS === "ios") {
     return (
