@@ -33,9 +33,15 @@ Notifications.addNotificationResponseReceivedListener(
 export default function NotificationsStateHandler() {
   const appState = useRef(AppState.currentState);
   const userAddress = useUserStore((s) => s.userAddress);
-  const { initialLoadDone, resyncing, conversations } = useChatStore((s) =>
-    pick(s, ["initialLoadDone", "resyncing", "conversations"])
-  );
+  const { initialLoadDone, resyncing, conversations, deletedTopics } =
+    useChatStore((s) =>
+      pick(s, [
+        "initialLoadDone",
+        "resyncing",
+        "conversations",
+        "deletedTopics",
+      ])
+    );
   const blockedPeers = useSettingsStore((s) => s.blockedPeers);
   const { notificationsPermissionStatus } = useAppStore((s) =>
     pick(s, ["notificationsPermissionStatus"])
@@ -81,13 +87,15 @@ export default function NotificationsStateHandler() {
       subscribeToNotifications(
         userAddress,
         Object.values(conversations),
-        blockedPeers
+        blockedPeers,
+        deletedTopics
       );
     }
   }, [
     notificationsPermissionStatus,
     userAddress,
     blockedPeers,
+    deletedTopics,
     conversations,
     initialLoadDone,
     resyncing,

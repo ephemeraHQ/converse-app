@@ -51,6 +51,7 @@ function ConversationList({
     lastUpdateAt,
     searchQuery,
     searchBarFocused,
+    deletedTopics,
   } = useChatStore((s) =>
     pick(s, [
       "initialLoadDoneOnce",
@@ -58,6 +59,7 @@ function ConversationList({
       "lastUpdateAt",
       "searchQuery",
       "searchBarFocused",
+      "deletedTopics",
     ])
   );
   const { blockedPeers, ephemeralAccount } = useSettingsStore((s) =>
@@ -82,10 +84,11 @@ function ConversationList({
   useEffect(() => {
     const sortedConversations = sortAndComputePreview(
       conversations,
-      userAddress
+      userAddress,
+      deletedTopics
     );
     setSortedConversations(sortedConversations);
-  }, [userAddress, conversations, lastUpdateAt]);
+  }, [userAddress, conversations, lastUpdateAt, deletedTopics]);
 
   useEffect(() => {
     const listItems = getConversationListItemsToDisplay(

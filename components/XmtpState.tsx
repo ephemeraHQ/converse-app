@@ -18,7 +18,7 @@ import {
   useUserStore,
 } from "../data/store/accountsStore";
 import { useAppStore } from "../data/store/appStore";
-import { getBlockedPeers } from "../utils/api";
+import { getBlockedPeers, getDeletedTopics } from "../utils/api";
 import { deserializeRemoteAttachmentContent } from "../utils/attachment";
 import { loadXmtpConversation, loadXmtpKey } from "../utils/keychain";
 import { pick } from "../utils/objects";
@@ -222,12 +222,14 @@ export default function XmtpState() {
     localClientConnected,
     webviewClientConnected,
     reconnecting,
+    markTopicsAsDeleted,
   } = useChatStore((s) =>
     pick(s, [
       "initialLoadDone",
       "localClientConnected",
       "webviewClientConnected",
       "reconnecting",
+      "markTopicsAsDeleted",
     ])
   );
   const splashScreenHidden = useAppStore((s) => s.splashScreenHidden);
@@ -307,7 +309,19 @@ export default function XmtpState() {
         .catch((e) => {
           console.log("Error while getting blocked peers", e);
         });
+      getDeletedTopics()
+        .then((topics) => {
+          markTopicsAsDeleted(topics);
+        })
+        .catch((e) => {
+          console.log("Error while getting deleted topics", e);
+        });
     }
-  }, [setBlockedPeers, localClientConnected, webviewClientConnected]);
+  }, [
+    setBlockedPeers,
+    localClientConnected,
+    webviewClientConnected,
+    markTopicsAsDeleted,
+  ]);
   return null;
 }
