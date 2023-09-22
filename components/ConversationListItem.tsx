@@ -1,5 +1,5 @@
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import React, { memo, useCallback, useEffect, useState } from "react";
+import React, { memo, useCallback, useEffect, useRef, useState } from "react";
 import {
   ColorSchemeName,
   Text,
@@ -31,6 +31,7 @@ import {
   textSecondaryColor,
 } from "../utils/colors";
 import { getRelativeDateTime } from "../utils/date";
+import { converseEventEmitter } from "../utils/events";
 import { shortAddress } from "../utils/str";
 
 type ConversationListItemProps = {
@@ -110,6 +111,12 @@ const ConversationListItem = memo(function ConversationListItem({
       {showUnread && <View style={styles.unread} />}
     </View>
   );
+
+  const swipeableRef = useRef<Swipeable | null>(null);
+  const closeSwipeable = useCallback(() => {
+    swipeableRef.current?.close();
+  }, []);
+
   const renderRightActions = useCallback(() => {
     return (
       <RectButton
@@ -119,7 +126,10 @@ const ConversationListItem = memo(function ConversationListItem({
             `Delete chat with ${shortAddress(conversation.peerAddress)}?`,
             undefined,
             [
-              { text: "Cancel" },
+              {
+                text: "Cancel",
+                onPress: closeSwipeable,
+              },
               {
                 text: "Delete",
                 style: "destructive",
@@ -141,6 +151,7 @@ const ConversationListItem = memo(function ConversationListItem({
       </RectButton>
     );
   }, [
+    closeSwipeable,
     conversation.peerAddress,
     conversationTopic,
     markTopicsAsDeleted,
@@ -187,8 +198,14 @@ const ConversationListItem = memo(function ConversationListItem({
     <Swipeable
       renderRightActions={renderRightActions}
       overshootFriction={4}
-      useNativeAnimations
       containerStyle={styles.swipeableRow}
+      ref={swipeableRef}
+      onSwipeableWillOpen={() => {
+        converseEventEmitter.on("conversationList-scroll", closeSwipeable);
+      }}
+      onSwipeableWillClose={() => {
+        converseEventEmitter.off("conversationList-scroll", closeSwipeable);
+      }}
     >
       {rowItem}
     </Swipeable>
