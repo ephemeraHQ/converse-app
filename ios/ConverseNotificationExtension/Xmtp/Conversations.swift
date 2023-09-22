@@ -17,27 +17,7 @@ func handleNewConversation(xmtpClient: XMTP.Client, envelope: XMTP.Envelope) -> 
     let apiURI = sharedDefaults.string(forKey: "api-uri")?.replacingOccurrences(of: "\"", with: "")
     let expoPushToken = getKeychainValue(forKey: "EXPO_PUSH_TOKEN")
     
-    if (isIntroTopic(topic: envelope.contentTopic)) {
-      let conversation = try xmtpClient.conversations.fromIntro(envelope: envelope)
-      switch conversation {
-      case let .v1(conversationV1): do {
-        let formatter = ISO8601DateFormatter()
-        formatter.formatOptions.insert(.withFractionalSeconds)
-        let createdAt = formatter.string(from: conversation.createdAt)
-        
-        let conversationDict = ["version": "v1", "peerAddress": conversationV1.peerAddress, "createdAt": createdAt]
-        var addresses = [conversationV1.peerAddress, xmtpClient.address]
-        addresses.sort()
-        let conversationV1Topic = "/xmtp/0/dm-\(addresses[0])-\(addresses[1])/proto"
-        subscribeToTopic(apiURI: apiURI, expoPushToken: expoPushToken, topic: conversationV1Topic)
-        persistDecodedConversation(contentTopic: conversationV1Topic, dict: conversationDict)
-        try saveConversation(account: xmtpClient.address, topic: conversationV1Topic, peerAddress: conversationV1.peerAddress, createdAt: Int(conversation.createdAt.timeIntervalSince1970 * 1000), context: nil)
-      }
-      default: do {}
-      }
-      
-      return conversation
-    } else if (isInviteTopic(topic: envelope.contentTopic)) {
+    if (isInviteTopic(topic: envelope.contentTopic)) {
       let conversation = try xmtpClient.conversations.fromInvite(envelope: envelope)
       switch conversation {
       case let .v2(conversationV2): do {
@@ -46,7 +26,9 @@ func handleNewConversation(xmtpClient: XMTP.Client, envelope: XMTP.Envelope) -> 
         let createdAt = formatter.string(from: conversationV2.createdAt)
         
         let conversationDict = ["version": "v2", "topic": conversationV2.topic, "peerAddress": conversationV2.peerAddress, "createdAt": createdAt, "context":["conversationId": conversationV2.context.conversationID, "metadata": conversationV2.context.metadata] as [String : Any], "keyMaterial": conversationV2.keyMaterial.base64EncodedString()] as [String : Any]
-        subscribeToTopic(apiURI: apiURI, expoPushToken: expoPushToken, topic: conversationV2.topic)
+        if (!hasForbiddenPattern(address: conversationV2.peerAddress)) {
+          subscribeToTopic(apiURI: apiURI, expoPushToken: expoPushToken, topic: conversationV2.topic)
+        }
         persistDecodedConversation(contentTopic: conversationV2.topic, dict: conversationDict)
         try saveConversation(account: xmtpClient.address, topic: conversationV2.topic, peerAddress: conversationV2.peerAddress, createdAt: Int(conversationV2.createdAt.timeIntervalSince1970 * 1000), context: ConversationContext(conversationId: conversationV2.context.conversationID, metadata: conversationV2.context.metadata))
       }

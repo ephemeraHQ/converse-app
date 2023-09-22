@@ -89,7 +89,9 @@ class PushNotificationsService : FirebaseMessagingService() {
         } else if (isInviteTopic(notificationData.contentTopic)) {
             Log.d(TAG, "Handling a new conversation notification")
             val notificationToShow = handleNewConversationV2Notification(this, xmtpClient, envelope, remoteMessage, notificationData)
-            showNotification(notificationToShow.first, notificationToShow.second, notificationToShow.third)
+            if (notificationToShow != null) {
+                showNotification(notificationToShow.first, notificationToShow.second, notificationToShow.third)
+            }
         } else {
             Log.d(TAG, "Handling a new message notification")
             val notificationToShow = handleNewMessageNotification(xmtpClient, envelope, remoteMessage, sentViaConverse)
