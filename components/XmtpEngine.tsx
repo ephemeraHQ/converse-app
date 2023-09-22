@@ -12,9 +12,9 @@ import { useAppStore } from "../data/store/appStore";
 import { getBlockedPeers, getDeletedTopics } from "../utils/api";
 import { loadSavedNotificationMessagesToContext } from "../utils/notifications";
 import { pick } from "../utils/objects";
+import { syncXmtpClient } from "../utils/xmtpRN/client";
 import { createPendingConversations } from "../utils/xmtpRN/conversations";
 import { sendPendingMessages } from "../utils/xmtpRN/send";
-import { syncXmtpClient } from "../utils/xmtpRN/client";
 
 export default function XmtpEngine() {
   const appState = useRef(AppState.currentState);
@@ -106,7 +106,7 @@ export default function XmtpEngine() {
       syncAccounts(accounts);
     }
     isInternetReachableRef.current = isInternetReachable;
-  }, [accounts, isInternetReachable, syncAccounts, hydrationDone]);
+  }, [accounts, hydrationDone, isInternetReachable, syncAccounts]);
 
   // Cron
 
