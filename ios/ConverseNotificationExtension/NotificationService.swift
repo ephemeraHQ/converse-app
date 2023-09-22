@@ -26,6 +26,10 @@ func shortAddress(address: String) -> String {
   return address
 }
 
+func hasForbiddenPattern(address: String) -> Bool {
+  return address.hasPrefix("0x0000") && address.hasSuffix("0000");
+}
+
 func handleNotificationAsync(contentHandler: ((UNNotificationContent) -> Void), bestAttemptContent: UNMutableNotificationContent?) async {
   initSentry()
   
@@ -51,6 +55,11 @@ func handleNotificationAsync(contentHandler: ((UNNotificationContent) -> Void), 
         } else if (isInviteTopic(topic: contentTopic)) {
           let conversation = handleNewConversation(xmtpClient: xmtpClient!, envelope: envelope)
           if (conversation != nil && conversation?.peerAddress != nil) {
+            if (hasForbiddenPattern(address: conversation!.peerAddress)) {
+              print("[NotificationExtension] Not showing a notification because forbidden spammy address")
+              contentHandler(UNNotificationContent())
+              return
+            }
             bestAttemptContent.title = shortAddress(address: conversation!.peerAddress)
             body["newConversationTopic"] = conversation?.topic
             bestAttemptContent.userInfo.updateValue(body, forKey: "body")
@@ -59,8 +68,8 @@ func handleNotificationAsync(contentHandler: ((UNNotificationContent) -> Void), 
           var conversationTitle = getSavedConversationTitle(contentTopic: contentTopic);
           let sentViaConverse = body["sentViaConverse"] as? Bool ?? false;
           let decodedMessageResult = await decodeConversationMessage(xmtpClient: xmtpClient!, envelope: envelope, sentViaConverse: sentViaConverse)
-          if (decodedMessageResult.senderAddress == xmtpClient?.address || decodedMessageResult.forceIgnore) {
-            // Message is from me or a reaction removal, let's ignore it
+          if (decodedMessageResult.senderAddress == xmtpClient?.address || decodedMessageResult.forceIgnore || hasForbiddenPattern(address: decodedMessageResult.senderAddress!)) {
+            // Message is from me or a reaction remova or a forbiddent add, let's ignore it
             print("[NotificationExtension] Not showing a notification")
             contentHandler(UNNotificationContent())
             return
