@@ -1,3 +1,4 @@
+import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { FlashList } from "@shopify/flash-list";
 import React, { useCallback, useEffect, useState } from "react";
 import {
@@ -7,8 +8,10 @@ import {
   Text,
   View,
   ScrollView,
+  TextInput,
 } from "react-native";
 import { gestureHandlerRootHOC } from "react-native-gesture-handler";
+import { SearchBarCommands } from "react-native-screens";
 
 import NewConversationButton from "../components/ConversationList/NewConversationButton";
 import ConversationListItem from "../components/ConversationListItem";
@@ -38,17 +41,20 @@ import { converseEventEmitter } from "../utils/events";
 import { pick } from "../utils/objects";
 import { conversationName } from "../utils/str";
 import { useHeaderSearchBar } from "./Navigation/ConversationListNav";
+import { NavigationParamList } from "./Navigation/Navigation";
 
 type ConversationWithLastMessagePreview = XmtpConversation & {
   lastMessagePreview?: LastMessagePreview;
 };
 type FlatListItem = ConversationWithLastMessagePreview | { topic: string };
 
-function ConversationList({
-  navigation,
-  route,
-  searchBarRef,
-}: Props) {
+type Props = {
+  searchBarRef:
+    | React.MutableRefObject<SearchBarCommands | null>
+    | React.MutableRefObject<TextInput | null>;
+} & NativeStackScreenProps<NavigationParamList, "Chats">;
+
+function ConversationList({ navigation, route, searchBarRef }: Props) {
   const colorScheme = useColorScheme();
   const styles = useStyles();
   const {
