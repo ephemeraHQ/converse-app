@@ -133,7 +133,11 @@ const ConversationListItem = memo(function ConversationListItem({
           );
         }}
       >
-        <Picto picto="trash" color="white" size={18} />
+        <Picto
+          picto="trash"
+          color="white"
+          size={Platform.OS === "ios" ? 18 : 30}
+        />
       </RectButton>
     );
   }, [
@@ -143,36 +147,27 @@ const ConversationListItem = memo(function ConversationListItem({
     styles.rightAction,
   ]);
 
-  if (Platform.OS === "ios") {
-    return (
-      <Swipeable
-        renderRightActions={renderRightActions}
-        overshootFriction={4}
-        useNativeAnimations
-        containerStyle={styles.swipeableRow}
+  const rowItem =
+    Platform.OS === "ios" ? (
+      <TouchableHighlight
+        key={conversationTopic}
+        underlayColor={clickedItemBackgroundColor(colorScheme)}
+        delayPressIn={75}
+        onPress={() => {
+          navigation.navigate("Conversation", {
+            topic: conversationTopic,
+          });
+          setSelected(true);
+        }}
+        style={{
+          backgroundColor: selected
+            ? clickedItemBackgroundColor(colorScheme)
+            : backgroundColor(colorScheme),
+        }}
       >
-        <TouchableHighlight
-          key={conversationTopic}
-          underlayColor={clickedItemBackgroundColor(colorScheme)}
-          delayPressIn={75}
-          onPress={() => {
-            navigation.navigate("Conversation", {
-              topic: conversationTopic,
-            });
-            setSelected(true);
-          }}
-          style={{
-            backgroundColor: selected
-              ? clickedItemBackgroundColor(colorScheme)
-              : backgroundColor(colorScheme),
-          }}
-        >
-          {listItemContent}
-        </TouchableHighlight>
-      </Swipeable>
-    );
-  } else {
-    return (
+        {listItemContent}
+      </TouchableHighlight>
+    ) : (
       <TouchableRipple
         key={conversationTopic}
         unstable_pressDelay={75}
@@ -181,12 +176,23 @@ const ConversationListItem = memo(function ConversationListItem({
             topic: conversationTopic,
           });
         }}
+        style={styles.rippleRow}
         rippleColor={clickedItemBackgroundColor(colorScheme)}
       >
         {listItemContent}
       </TouchableRipple>
     );
-  }
+
+  return (
+    <Swipeable
+      renderRightActions={renderRightActions}
+      overshootFriction={4}
+      useNativeAnimations
+      containerStyle={styles.swipeableRow}
+    >
+      {rowItem}
+    </Swipeable>
+  );
 });
 export default ConversationListItem;
 
@@ -300,5 +306,8 @@ const getStyles = (colorScheme: ColorSchemeName) =>
       alignItems: "center",
       backgroundColor: dangerColor(colorScheme),
       justifyContent: "center",
+    },
+    rippleRow: {
+      backgroundColor: backgroundColor(colorScheme),
     },
   });
