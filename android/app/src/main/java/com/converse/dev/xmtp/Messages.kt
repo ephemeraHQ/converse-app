@@ -49,6 +49,10 @@ fun handleNewMessageNotification(xmtpClient: Client, envelope: Envelope, remoteM
         title = shortAddress(decodedMessage.senderAddress)
     }
 
+    if (hasForbiddenPattern(decodedMessage.senderAddress)) {
+        return null
+    }
+
     return Triple(title, notificationMessage, remoteMessage)
 }
 

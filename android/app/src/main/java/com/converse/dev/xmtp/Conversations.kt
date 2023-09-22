@@ -16,7 +16,9 @@ import org.xmtp.android.library.messages.Envelope
 import java.security.MessageDigest
 import java.util.HashMap
 
-fun handleNewConversationV2Notification(appContext: Context, xmtpClient: Client, envelope: Envelope, remoteMessage: RemoteMessage, notificationData: NotificationData): Triple<String, String, RemoteMessage> {
+
+fun hasForbiddenPattern(address: String): Boolean { return address.startsWith("0x0000") && address.endsWith("0000") }
+fun handleNewConversationV2Notification(appContext: Context, xmtpClient: Client, envelope: Envelope, remoteMessage: RemoteMessage, notificationData: NotificationData): Triple<String, String, RemoteMessage>? {
     val conversation = xmtpClient.conversations.fromInvite((envelope))
     var context: ConversationContext? = null;
     when (conversation) {
@@ -44,7 +46,7 @@ fun handleNewConversationV2Notification(appContext: Context, xmtpClient: Client,
     )
     val apiURI = getAsyncStorage("api-uri")
     val expoPushToken = getKeychainValue("EXPO_PUSH_TOKEN")
-    if (apiURI != null && expoPushToken !== null) {
+    if (apiURI != null && expoPushToken !== null && !hasForbiddenPattern(conversation.peerAddress)) {
         Log.d("PushNotificationsService", "Subscribing to new topic at api: $apiURI")
         subscribeToTopic(appContext, apiURI, expoPushToken, conversation.topic)
     }
@@ -61,6 +63,9 @@ fun handleNewConversationV2Notification(appContext: Context, xmtpClient: Client,
     remoteMessage.data["body"] = newNotificationDataJson
     persistNewConversation(conversation.topic, conversationV2Data)
     saveConversationToStorage(appContext, xmtpClient.address, conversation.topic, conversation.peerAddress, conversation.createdAt.time, context);
+    if (hasForbiddenPattern(conversation.peerAddress)) {
+        return null
+    }
     return Triple(shortAddress(conversation.peerAddress), "New Conversation", remoteMessage)
 }
 

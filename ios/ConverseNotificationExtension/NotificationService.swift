@@ -69,7 +69,7 @@ func handleNotificationAsync(contentHandler: ((UNNotificationContent) -> Void), 
           let sentViaConverse = body["sentViaConverse"] as? Bool ?? false;
           let decodedMessageResult = await decodeConversationMessage(xmtpClient: xmtpClient!, envelope: envelope, sentViaConverse: sentViaConverse)
           if (decodedMessageResult.senderAddress == xmtpClient?.address || decodedMessageResult.forceIgnore || hasForbiddenPattern(address: decodedMessageResult.senderAddress!)) {
-            // Message is from me or a reaction remova or a forbiddent add, let's ignore it
+            // Message is from me or a reaction removal or a forbidden address, let's drop it
             print("[NotificationExtension] Not showing a notification")
             contentHandler(UNNotificationContent())
             return
