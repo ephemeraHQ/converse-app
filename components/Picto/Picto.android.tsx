@@ -8,6 +8,7 @@ import Celebration from "@material-symbols/svg-400/outlined/celebration.svg";
 import Chat from "@material-symbols/svg-400/outlined/chat.svg";
 import Close from "@material-symbols/svg-400/outlined/close.svg";
 import ContentCopy from "@material-symbols/svg-400/outlined/content_copy.svg";
+import Delete from "@material-symbols/svg-400/outlined/delete.svg";
 import Done from "@material-symbols/svg-400/outlined/done.svg";
 import Edit from "@material-symbols/svg-400/outlined/edit.svg";
 import Key from "@material-symbols/svg-400/outlined/key.svg";
@@ -68,6 +69,7 @@ const pictoMapping: {
   block: Block,
   "chevron.right": ArrowRight,
   "lock.open.laptopcomputer": Laptop,
+  trash: Delete,
 };
 
 export default function Picto({ picto, style, size, weight, color }: Props) {
