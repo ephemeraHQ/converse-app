@@ -20,6 +20,7 @@ import java.util.HashMap
 
 
 fun hasForbiddenPattern(address: String): Boolean { return address.startsWith("0x0000") && address.endsWith("0000") }
+
 fun handleNewConversationV2Notification(appContext: Context, xmtpClient: Client, envelope: Envelope, remoteMessage: RemoteMessage, notificationData: NotificationData): Triple<String, String, RemoteMessage>? {
     val conversation = xmtpClient.conversations.fromInvite((envelope))
     var context: ConversationContext? = null;
