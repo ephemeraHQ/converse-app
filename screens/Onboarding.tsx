@@ -374,10 +374,12 @@ export default function OnboardingScreen() {
   }
 
   let onboardingContent: React.ReactNode;
+  let onWalletSelector = false;
 
   const signer = thirdwebSigner || user.otherSigner;
 
   if (!signer && !connectWithSeedPhrase && !connectWithDesktop && !loading) {
+    onWalletSelector = true;
     onboardingContent = (
       <WalletSelector
         setConnectWithDesktop={setConnectWithDesktop}
@@ -443,7 +445,7 @@ export default function OnboardingScreen() {
         primaryButtonText={loading ? "" : primaryButtonText}
         primaryButtonAction={primaryButtonAction}
       />
-      {addingNewAccount && (
+      {addingNewAccount && onWalletSelector && (
         <Button
           title="Cancel"
           variant="text"
