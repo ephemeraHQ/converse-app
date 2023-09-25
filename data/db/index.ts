@@ -127,7 +127,9 @@ export const clearDb = async (account: string) => {
   const dbExists = await RNFS.exists(dbPath);
   if (!dbExists) {
     console.log(
-      `[ClearDB] SQlite file converse-${account}.sqlite does not exist, no need to delete`
+      `[ClearDB] SQlite file ${getDbFileName(
+        account
+      )} does not exist, no need to delete`
     );
   } else {
     console.log(`[ClearDB] Deleting SQlite file ${getDbFileName(account)}`);

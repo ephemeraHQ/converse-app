@@ -6,12 +6,57 @@ import {
 } from "../data/store/accountsStore";
 import { buildUserInviteTopic } from "../vendor/xmtp-js/src";
 import { deleteConversationsFromKeychain, deleteXmtpKey } from "./keychain";
+import mmkv from "./mmkv";
 import {
   deleteSubscribedTopics,
   unsubscribeFromNotifications,
 } from "./notifications";
 import { resetSharedData } from "./sharedData/sharedData";
 import { deleteXmtpClient } from "./xmtpRN/client";
+
+type LogoutTasks = {
+  [account: string]: { topics: string[] };
+};
+
+export const getLogoutTasks = (): LogoutTasks => {
+  const logoutTasksString = mmkv.getString("converse-logout-tasks");
+  if (logoutTasksString) {
+    try {
+      emptyLogoutTasks();
+      return JSON.parse(logoutTasksString);
+    } catch (e) {
+      console.log(e);
+      return {};
+    }
+  } else {
+    return {};
+  }
+};
+
+export const emptyLogoutTasks = () => mmkv.delete("converse-logout-tasks");
+
+export const saveLogoutTask = (account: string, topics: string[]) => {
+  const logoutTasks = getLogoutTasks();
+  logoutTasks[account] = { topics };
+  mmkv.set("converse-logout-tasks", JSON.stringify(logoutTasks));
+};
+
+export const executeLogoutTasks = async () => {
+  const tasks = getLogoutTasks();
+  for (const account in tasks) {
+    const task = tasks[account];
+    await deleteXmtpKey(account);
+    if (task.topics.length > 0) {
+      await deleteConversationsFromKeychain(account, task.topics);
+      resetSharedData(task.topics);
+    }
+    await unsubscribeFromNotifications([
+      ...task.topics,
+      buildUserInviteTopic(account || ""),
+    ]);
+  }
+  emptyLogoutTasks();
+};
 
 export const logout = async (account: string) => {
   const topicsByAccount: { [a: string]: string[] } = {};
@@ -43,19 +88,10 @@ export const logout = async (account: string) => {
 
   deleteXmtpClient(account);
   deleteSubscribedTopics(account);
-  // TODO => we should save this information
-  // to be able to do it even offline.
-  // need to save : known conversation topics + account
-  // to remove the notifications & the keys (main one & conversations ones)
+
+  saveLogoutTask(account, topicsToDelete);
+
   setTimeout(() => {
-    deleteXmtpKey(account);
-    if (topicsToDelete.length > 0) {
-      deleteConversationsFromKeychain(account, topicsToDelete);
-      resetSharedData(topicsToDelete);
-    }
-    unsubscribeFromNotifications([
-      ...topicsToDelete,
-      buildUserInviteTopic(account || ""),
-    ]);
+    executeLogoutTasks();
   }, 500);
 };
