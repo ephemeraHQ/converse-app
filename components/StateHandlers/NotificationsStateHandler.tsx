@@ -2,17 +2,12 @@ import * as Notifications from "expo-notifications";
 import { useEffect, useRef } from "react";
 import { AppState } from "react-native";
 
-import {
-  useChatStore,
-  useSettingsStore,
-  useUserStore,
-} from "../../data/store/accountsStore";
+import { useAccountsList, useUserStore } from "../../data/store/accountsStore";
 import { useAppStore } from "../../data/store/appStore";
 import { saveUser } from "../../utils/api";
 import {
   onInteractWithNotification,
   saveNotificationsStatus,
-  subscribeToNotifications,
 } from "../../utils/notifications";
 import { pick } from "../../utils/objects";
 
@@ -33,16 +28,7 @@ Notifications.addNotificationResponseReceivedListener(
 export default function NotificationsStateHandler() {
   const appState = useRef(AppState.currentState);
   const userAddress = useUserStore((s) => s.userAddress);
-  const { initialLoadDone, resyncing, conversations, deletedTopics } =
-    useChatStore((s) =>
-      pick(s, [
-        "initialLoadDone",
-        "resyncing",
-        "conversations",
-        "deletedTopics",
-      ])
-    );
-  const blockedPeers = useSettingsStore((s) => s.blockedPeers);
+  const accounts = useAccountsList();
   const { notificationsPermissionStatus } = useAppStore((s) =>
     pick(s, ["notificationsPermissionStatus"])
   );
@@ -76,30 +62,6 @@ export default function NotificationsStateHandler() {
       subscription.remove();
     };
   }, [userAddress]);
-
-  useEffect(() => {
-    if (
-      notificationsPermissionStatus === "granted" &&
-      initialLoadDone &&
-      userAddress &&
-      !resyncing
-    ) {
-      subscribeToNotifications(
-        userAddress,
-        Object.values(conversations),
-        blockedPeers,
-        deletedTopics
-      );
-    }
-  }, [
-    notificationsPermissionStatus,
-    userAddress,
-    blockedPeers,
-    deletedTopics,
-    conversations,
-    initialLoadDone,
-    resyncing,
-  ]);
 
   return null;
 }

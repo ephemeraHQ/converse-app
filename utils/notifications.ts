@@ -5,7 +5,12 @@ import { setTopicToNavigateTo } from "../components/StateHandlers/InitialStateHa
 import config from "../config";
 import { saveConversations } from "../data/helpers/conversations/upsertConversations";
 import { saveMessages } from "../data/helpers/messages";
-import { getAccountsList, useChatStore } from "../data/store/accountsStore";
+import {
+  getAccountsList,
+  getChatStore,
+  getSettingsStore,
+  useChatStore,
+} from "../data/store/accountsStore";
 import { useAppStore } from "../data/store/appStore";
 import { XmtpConversation, XmtpMessage } from "../data/store/chatStore";
 import { buildUserInviteTopic } from "../vendor/xmtp-js/src/utils";
@@ -23,6 +28,7 @@ import {
 import { conversationName, shortAddress } from "./str";
 
 let expoPushToken: string | null;
+let nativePushToken: string | null;
 
 export type NotificationPermissionStatus =
   | "granted"
@@ -31,26 +37,25 @@ export type NotificationPermissionStatus =
 
 const lastSubscribedTopicsByAccount: { [account: string]: string[] } = {};
 
-export const deleteSubscribedTopicsInformation = (account: string) => {
+export const deleteSubscribedTopics = (account: string) => {
   if (account in lastSubscribedTopicsByAccount) {
     delete lastSubscribedTopicsByAccount[account];
   }
 };
 
 export const subscribeToNotifications = async (
-  account: string,
-  conversations: XmtpConversation[],
-  blockedPeerAddresses: { [peerAddress: string]: boolean },
-  deletedTopics: { [topic: string]: boolean }
+  account: string
 ): Promise<void> => {
   const lastSubscribedTopics = lastSubscribedTopicsByAccount[account] || [];
+  const { conversations, deletedTopics } = getChatStore(account).getState();
+  const { blockedPeers } = getSettingsStore(account).getState();
   const topics = [
-    ...conversations
+    ...Object.values(conversations)
       .filter(
         (c) =>
           c.peerAddress &&
           !c.pending &&
-          !blockedPeerAddresses[c.peerAddress.toLowerCase()] &&
+          !blockedPeers[c.peerAddress.toLowerCase()] &&
           !deletedTopics[c.topic]
       )
       .map((c) => c.topic),
@@ -61,6 +66,7 @@ export const subscribeToNotifications = async (
     Notifications.getDevicePushTokenAsync(),
   ]);
   expoPushToken = expoTokenQuery.data;
+  nativePushToken = nativeTokenQuery.data;
   saveExpoPushToken(expoPushToken);
 
   // Let's check if we need to make the query i.e
@@ -70,9 +76,10 @@ export const subscribeToNotifications = async (
     topics.some((t) => !lastSubscribedTopics.includes(t));
   if (!shouldMakeQuery) return;
   try {
+    console.log("subscribeToNotifications", account);
     await api.post("/api/subscribe", {
       expoToken: expoPushToken,
-      nativeToken: nativeTokenQuery.data,
+      nativeToken: nativePushToken,
       nativeTokenType: nativeTokenQuery.type,
       topics,
     });
@@ -83,15 +90,20 @@ export const subscribeToNotifications = async (
   }
 };
 
-export const disablePushNotifications = async (): Promise<void> => {
-  if (expoPushToken) {
+export const unsubscribeFromNotifications = async (
+  topics: string[]
+): Promise<void> => {
+  const nativeTokenQuery = await Notifications.getDevicePushTokenAsync();
+  if (nativeTokenQuery.data) {
     try {
-      await api.delete(`/api/device/${encodeURIComponent(expoPushToken)}`);
+      await api.post("/api/unsubscribe", {
+        nativeToken: nativeTokenQuery.data,
+        topics,
+      });
     } catch (e: any) {
       console.log("Could not unsubscribe from notifications");
       console.error(e);
     }
-    expoPushToken = null;
   }
 };
 
