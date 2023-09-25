@@ -36,57 +36,71 @@ export type NotificationPermissionStatus =
   | "denied";
 
 const lastSubscribedTopicsByAccount: { [account: string]: string[] } = {};
+const subscribingByAccount: { [account: string]: boolean } = {};
 
 export const deleteSubscribedTopics = (account: string) => {
   if (account in lastSubscribedTopicsByAccount) {
     delete lastSubscribedTopicsByAccount[account];
+  }
+  if (account in subscribingByAccount) {
+    delete subscribingByAccount[account];
   }
 };
 
 export const subscribeToNotifications = async (
   account: string
 ): Promise<void> => {
-  const lastSubscribedTopics = lastSubscribedTopicsByAccount[account] || [];
-  const { conversations, deletedTopics } = getChatStore(account).getState();
-  const { blockedPeers } = getSettingsStore(account).getState();
-  const topics = [
-    ...Object.values(conversations)
-      .filter(
-        (c) =>
-          c.peerAddress &&
-          !c.pending &&
-          !blockedPeers[c.peerAddress.toLowerCase()] &&
-          !deletedTopics[c.topic]
-      )
-      .map((c) => c.topic),
-    buildUserInviteTopic(account || ""),
-  ];
-  const [expoTokenQuery, nativeTokenQuery] = await Promise.all([
-    Notifications.getExpoPushTokenAsync({ projectId: config.expoProjectId }),
-    Notifications.getDevicePushTokenAsync(),
-  ]);
-  expoPushToken = expoTokenQuery.data;
-  nativePushToken = nativeTokenQuery.data;
-  saveExpoPushToken(expoPushToken);
-
-  // Let's check if we need to make the query i.e
-  // the topics are not exactly the same
-  const shouldMakeQuery =
-    lastSubscribedTopics.length !== topics.length ||
-    topics.some((t) => !lastSubscribedTopics.includes(t));
-  if (!shouldMakeQuery) return;
+  if (subscribingByAccount[account]) {
+    await new Promise((r) => setTimeout(r, 1000));
+    await subscribeToNotifications(account);
+    return;
+  }
   try {
-    console.log("subscribeToNotifications", account);
-    await api.post("/api/subscribe", {
-      expoToken: expoPushToken,
-      nativeToken: nativePushToken,
-      nativeTokenType: nativeTokenQuery.type,
-      topics,
-    });
-    lastSubscribedTopicsByAccount[account] = topics;
-  } catch (e: any) {
-    console.log("Could not subscribe to notifications");
-    console.log(e?.message);
+    subscribingByAccount[account] = true;
+    const lastSubscribedTopics = lastSubscribedTopicsByAccount[account] || [];
+    const { conversations, deletedTopics } = getChatStore(account).getState();
+    const { blockedPeers } = getSettingsStore(account).getState();
+    const topics = [
+      ...Object.values(conversations)
+        .filter(
+          (c) =>
+            c.peerAddress &&
+            !c.pending &&
+            !blockedPeers[c.peerAddress.toLowerCase()] &&
+            !deletedTopics[c.topic]
+        )
+        .map((c) => c.topic),
+      buildUserInviteTopic(account || ""),
+    ];
+    const [expoTokenQuery, nativeTokenQuery] = await Promise.all([
+      Notifications.getExpoPushTokenAsync({ projectId: config.expoProjectId }),
+      Notifications.getDevicePushTokenAsync(),
+    ]);
+    expoPushToken = expoTokenQuery.data;
+    nativePushToken = nativeTokenQuery.data;
+    saveExpoPushToken(expoPushToken);
+
+    // Let's check if we need to make the query i.e
+    // the topics are not exactly the same
+    const shouldMakeQuery =
+      lastSubscribedTopics.length !== topics.length ||
+      topics.some((t) => !lastSubscribedTopics.includes(t));
+    if (!shouldMakeQuery) return;
+    try {
+      await api.post("/api/subscribe", {
+        expoToken: expoPushToken,
+        nativeToken: nativePushToken,
+        nativeTokenType: nativeTokenQuery.type,
+        topics,
+      });
+      lastSubscribedTopicsByAccount[account] = topics;
+    } catch (e: any) {
+      console.log("Could not subscribe to notifications");
+      console.log(e?.message);
+    }
+    delete subscribingByAccount[account];
+  } catch (e) {
+    delete subscribingByAccount[account];
   }
 };
 

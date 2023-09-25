@@ -113,6 +113,9 @@ PODS:
     - RCT-Folly (= 2021.07.22.00)
     - React-Core
   - EXStructuredHeaders (3.3.0)
+  - EXTaskManager (11.3.0):
+    - ExpoModulesCore
+    - UMAppLoader
   - EXUpdates (0.18.13):
     - ASN1Decoder (~> 1.8)
     - EASClient
@@ -657,6 +660,7 @@ PODS:
     - SQLite.swift/standard (= 0.14.1)
   - SQLite.swift/standard (0.14.1)
   - SwiftProtobuf (1.23.0)
+  - UMAppLoader (4.2.0)
   - web3.swift (1.6.0):
     - BigInt (~> 5.0.0)
     - GenericJSON (~> 2.0)
@@ -703,6 +707,7 @@ DEPENDENCIES:
   - ExpoSystemUI (from `../node_modules/expo-system-ui/ios`)
   - EXSplashScreen (from `../node_modules/expo-splash-screen/ios`)
   - EXStructuredHeaders (from `../node_modules/expo-structured-headers/ios`)
+  - EXTaskManager (from `../node_modules/expo-task-manager/ios`)
   - EXUpdates (from `../node_modules/expo-updates/ios`)
   - EXUpdatesInterface (from `../node_modules/expo-updates-interface/ios`)
   - FBLazyVector (from `../node_modules/react-native/Libraries/FBLazyVector`)
@@ -766,6 +771,7 @@ DEPENDENCIES:
   - RNSVG (from `../node_modules/react-native-svg`)
   - Sentry/HybridSDK (= 8.7.1)
   - SQLite.swift
+  - UMAppLoader (from `../node_modules/unimodules-app-loader/ios`)
   - XMTP (= 0.5.11-alpha0)
   - "XMTPReactNative (from `../node_modules/@xmtp/react-native-sdk/ios`)"
   - Yoga (from `../node_modules/react-native/ReactCommon/yoga`)
@@ -856,6 +862,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/expo-splash-screen/ios"
   EXStructuredHeaders:
     :path: "../node_modules/expo-structured-headers/ios"
+  EXTaskManager:
+    :path: "../node_modules/expo-task-manager/ios"
   EXUpdates:
     :path: "../node_modules/expo-updates/ios"
   EXUpdatesInterface:
@@ -969,6 +977,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/@sentry/react-native"
   RNSVG:
     :path: "../node_modules/react-native-svg"
+  UMAppLoader:
+    :path: "../node_modules/unimodules-app-loader/ios"
   XMTPReactNative:
     :path: "../node_modules/@xmtp/react-native-sdk/ios"
   Yoga:
@@ -1007,6 +1017,7 @@ SPEC CHECKSUMS:
   ExpoSystemUI: fa4854e3226e87f86d3383570264c6e4e90bc782
   EXSplashScreen: 2c80621e4bc952f5bea328304c2436f5fe21c2a0
   EXStructuredHeaders: 324cc3130571d2696357fafd8be7fd9a0b5fdf6e
+  EXTaskManager: f1730c315eb6fe457a3a2ee4ed899a51d717f302
   EXUpdates: 84247b49ea4dde3c6ce5b33c8fc9ac5a2757b73f
   EXUpdatesInterface: 82ed48d417cdcd376c12ca1c2ce390d35500bed6
   FBLazyVector: 71803c074f6325f10b5ec891c443b6bbabef0ca7
@@ -1082,6 +1093,7 @@ SPEC CHECKSUMS:
   SocketRocket: f32cd54efbe0f095c4d7594881e52619cfe80b17
   SQLite.swift: 2992550ebf3c5b268bf4352603e3df87d2a4ed72
   SwiftProtobuf: b70d65f419fbfe61a2d58003456ca5da58e337d6
+  UMAppLoader: e83f024f75f07802fce99739f04b4537d188caaf
   web3.swift: 2263d1e12e121b2c42ffb63a5a7beb1acaf33959
   XMTP: 2b2b4805bf5ba7d44bce4dee936614715a93b1a9
   XMTPReactNative: 7385fe0c18fcb499156c4e4d84a144baf9d3f183
