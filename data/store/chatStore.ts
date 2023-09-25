@@ -139,9 +139,9 @@ export const initChatStore = (account: string) => {
                 conversations[c.topic] = {
                   ...c,
                   messagesIds:
-                    c.messagesIds ||
-                    state.conversations[c.topic]?.messagesIds ||
-                    [],
+                    c.messagesIds && c.messagesIds.length > 0
+                      ? c.messagesIds
+                      : state.conversations[c.topic]?.messagesIds || [],
                   messages:
                     c.messages && c.messages.size > 0
                       ? c.messages
