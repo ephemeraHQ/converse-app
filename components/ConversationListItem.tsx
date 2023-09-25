@@ -195,37 +195,36 @@ const ConversationListItem = memo(function ConversationListItem({
     );
 
   return (
-    <Swipeable
-      renderRightActions={renderRightActions}
-      overshootFriction={4}
-      containerStyle={styles.swipeableRow}
-      ref={swipeableRef}
-      onSwipeableWillOpen={() => {
-        converseEventEmitter.on("conversationList-scroll", closeSwipeable);
-      }}
-      onSwipeableWillClose={() => {
-        converseEventEmitter.off("conversationList-scroll", closeSwipeable);
-      }}
-    >
-      {rowItem}
-    </Swipeable>
+    <>
+      <Swipeable
+        renderRightActions={renderRightActions}
+        overshootFriction={4}
+        ref={swipeableRef}
+        onSwipeableWillOpen={() => {
+          converseEventEmitter.on("conversationList-scroll", closeSwipeable);
+        }}
+        onSwipeableWillClose={() => {
+          converseEventEmitter.off("conversationList-scroll", closeSwipeable);
+        }}
+      >
+        {rowItem}
+      </Swipeable>
+      {Platform.OS === "ios" && <View style={styles.rowSeparator} />}
+    </>
   );
 });
 export default ConversationListItem;
 
 const getStyles = (colorScheme: ColorSchemeName) =>
   StyleSheet.create({
-    swipeableRow: Platform.select({
-      default: {
-        borderBottomWidth: 0.25,
-        borderBottomColor: listItemSeparatorColor(colorScheme),
-      },
-      android: {},
-    }),
+    rowSeparator: {
+      borderBottomWidth: 0.25,
+      borderBottomColor: listItemSeparatorColor(colorScheme),
+      marginLeft: 32,
+    },
     conversationListItem: Platform.select({
       default: {
         height: 77,
-
         paddingTop: 8,
         paddingRight: 60,
         marginLeft: 32,
