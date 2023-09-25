@@ -50,7 +50,6 @@ export default function ChatAddAttachment() {
     const uploadAsset = async (asset: ImagePicker.ImagePickerAsset) => {
       uploading.current = true;
 
-      // const base64Content = await RNFS.readFile(asset.uri, "base64");
       const filename = asset.fileName || asset.uri.split("/").pop();
       const mimeType = mime.getType(filename || "");
       const encryptedAttachment = await encryptRemoteAttachment(
