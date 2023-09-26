@@ -1,4 +1,3 @@
-import * as Notifications from "expo-notifications";
 import { StatusBar } from "expo-status-bar";
 import React, { useCallback, useEffect, useRef } from "react";
 import {
@@ -25,16 +24,6 @@ import AccountsAndroid from "./Accounts/AccountsAndroid";
 import Navigation from "./Navigation/Navigation";
 import NotificationsScreen from "./NotificationsScreen";
 import OnboardingScreen from "./Onboarding";
-
-// This handler determines how your app handles
-// notifications that come in while the app is foregrounded
-Notifications.setNotificationHandler({
-  handleNotification: async () => ({
-    shouldShowAlert: false,
-    shouldPlaySound: false,
-    shouldSetBadge: false,
-  }),
-});
 
 export default function Main() {
   const colorScheme = useColorScheme();

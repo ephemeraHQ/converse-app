@@ -37,7 +37,7 @@ export default function Accounts({
           id: a,
           title: getReadableProfile(a, a),
           action: () => {
-            setCurrentAccount(a);
+            setCurrentAccount(a, false);
             navigation.push("Chats");
           },
           rightView: (
