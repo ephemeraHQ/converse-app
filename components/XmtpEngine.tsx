@@ -20,14 +20,24 @@ export default function XmtpEngine() {
   const appState = useRef(AppState.currentState);
   const accounts = useAccountsList();
   const syncedAccounts = useRef<{ [account: string]: boolean }>({});
+  const syncingAccounts = useRef<{ [account: string]: boolean }>({});
   const { hydrationDone, isInternetReachable } = useAppStore((s) =>
     pick(s, ["hydrationDone", "isInternetReachable"])
   );
 
   const syncAccounts = useCallback((accountsToSync: string[]) => {
     accountsToSync.forEach((a) => {
-      syncedAccounts.current[a] = true;
-      syncXmtpClient(a);
+      if (!syncingAccounts.current[a]) {
+        syncedAccounts.current[a] = true;
+        syncingAccounts.current[a] = true;
+        syncXmtpClient(a)
+          .then(() => {
+            syncingAccounts.current[a] = false;
+          })
+          .catch(() => {
+            syncingAccounts.current[a] = false;
+          });
+      }
     });
   }, []);
 
@@ -59,6 +69,8 @@ export default function XmtpEngine() {
     }
   }, [accounts, syncAccounts, hydrationDone]);
 
+  const isInternetReachableRef = useRef(isInternetReachable);
+
   // When app back active, resync all, in case we lost sync
   // And also save data from notifications
   useEffect(() => {
@@ -68,7 +80,8 @@ export default function XmtpEngine() {
         if (
           nextAppState === "active" &&
           appState.current.match(/inactive|background/) &&
-          hydrationDone
+          hydrationDone &&
+          isInternetReachableRef.current
         ) {
           loadSavedNotificationMessagesToContext();
           syncAccounts(accounts);
@@ -83,7 +96,6 @@ export default function XmtpEngine() {
   }, [syncAccounts, accounts, hydrationDone]);
 
   // If lost connection, resync
-  const isInternetReachableRef = useRef(isInternetReachable);
   useEffect(() => {
     if (
       !isInternetReachableRef.current &&
