@@ -16,7 +16,7 @@ index 7555488..dee39e4 100644
    lintOptions {
      abortOnError false
 diff --git a/node_modules/@xmtp/react-native-sdk/android/src/main/java/expo/modules/xmtpreactnativesdk/XMTPModule.kt b/node_modules/@xmtp/react-native-sdk/android/src/main/java/expo/modules/xmtpreactnativesdk/XMTPModule.kt
-index 69c9a5d..93214fb 100644
+index 7bc4df4..556c30c 100644
 --- a/node_modules/@xmtp/react-native-sdk/android/src/main/java/expo/modules/xmtpreactnativesdk/XMTPModule.kt
 +++ b/node_modules/@xmtp/react-native-sdk/android/src/main/java/expo/modules/xmtpreactnativesdk/XMTPModule.kt
 @@ -390,7 +390,13 @@ class XMTPModule : Module() {
@@ -71,10 +71,10 @@ index 41e2642..6dcfa4a 100644
      }
  
 diff --git a/node_modules/@xmtp/react-native-sdk/ios/XMTPModule.swift b/node_modules/@xmtp/react-native-sdk/ios/XMTPModule.swift
-index 30df006..414f581 100644
+index 17c13e2..82b19c9 100644
 --- a/node_modules/@xmtp/react-native-sdk/ios/XMTPModule.swift
 +++ b/node_modules/@xmtp/react-native-sdk/ios/XMTPModule.swift
-@@ -435,7 +435,13 @@ public class XMTPModule: Module {
+@@ -432,7 +432,13 @@ public class XMTPModule: Module {
              guard let prepared = try? PreparedMessage.fromSerializedData(preparedData) else {
                  throw Error.badPreparation("unable to deserialized \(local.preparedFileUri)")
              }
