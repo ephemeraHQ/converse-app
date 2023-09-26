@@ -71,11 +71,17 @@ export const handleDecryptedRemoteAttachment = async (
     }
   }
   const attachmentPath = `${messageFolder}/${filename}`;
+  let fileUri = localAttachment.fileUri;
+  if (fileUri.startsWith("file:///")) {
+    fileUri = fileUri.slice(7);
+  } else if (fileUri.startsWith("file://")) {
+    fileUri = fileUri.slice(6);
+  } else if (fileUri.startsWith("file:/")) {
+    fileUri = fileUri.slice(5);
+  }
+
   // Let's cache the file and decoded information
-  await moveFileAndReplace(
-    localAttachment.fileUri.replace("file:///", "/"),
-    attachmentPath
-  );
+  await moveFileAndReplace(fileUri, attachmentPath);
   return handleAttachment(messageId, filename, localAttachment.mimeType);
 };
 
