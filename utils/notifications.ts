@@ -6,10 +6,11 @@ import config from "../config";
 import { saveConversations } from "../data/helpers/conversations/upsertConversations";
 import { saveMessages } from "../data/helpers/messages";
 import {
+  currentAccount,
   getAccountsList,
   getChatStore,
   getSettingsStore,
-  useChatStore,
+  useAccountsStore,
 } from "../data/store/accountsStore";
 import { useAppStore } from "../data/store/appStore";
 import { XmtpConversation, XmtpMessage } from "../data/store/chatStore";
@@ -85,23 +86,24 @@ export const subscribeToNotifications = async (
     const shouldMakeQuery =
       lastSubscribedTopics.length !== topics.length ||
       topics.some((t) => !lastSubscribedTopics.includes(t));
-    if (!shouldMakeQuery) return;
-    try {
-      await api.post("/api/subscribe", {
-        expoToken: expoPushToken,
-        nativeToken: nativePushToken,
-        nativeTokenType: nativeTokenQuery.type,
-        topics,
-      });
-      lastSubscribedTopicsByAccount[account] = topics;
-    } catch (e: any) {
-      console.log("Could not subscribe to notifications");
-      console.log(e?.message);
+    if (!shouldMakeQuery) {
+      delete subscribingByAccount[account];
+      return;
     }
-    delete subscribingByAccount[account];
+    console.log(
+      `[Notifications] Subscribing to ${topics.length} topic for ${account}`
+    );
+    await api.post("/api/subscribe", {
+      expoToken: expoPushToken,
+      nativeToken: nativePushToken,
+      nativeTokenType: nativeTokenQuery.type,
+      topics,
+    });
+    lastSubscribedTopicsByAccount[account] = topics;
   } catch (e) {
-    delete subscribingByAccount[account];
+    console.log("[Notifications] Error while subscribing:", e);
   }
+  delete subscribingByAccount[account];
 };
 
 export const unsubscribeFromNotifications = async (
@@ -311,14 +313,36 @@ export const onInteractWithNotification = (
     | string
     | undefined;
   const conversationTopic = newConversationTopic || messageConversationTopic;
+  const account =
+    notificationData["account"] || useAccountsStore.getState().currentAccount;
   if (conversationTopic) {
-    const conversations = useChatStore.getState().conversations;
+    useAccountsStore.getState().setCurrentAccount(account, false);
+    const conversations = getChatStore(account).getState().conversations;
     if (conversations[conversationTopic]) {
       navigateToConversation(conversations[conversationTopic]);
     } else {
       // App was probably not loaded!
       setTopicToNavigateTo(conversationTopic);
     }
+  }
+};
+
+export const shouldShowNotificationForeground = async (
+  notification: Notifications.Notification
+) => {
+  const account = notification.request.content.data?.["account"];
+  if (account && account !== currentAccount()) {
+    return {
+      shouldShowAlert: true,
+      shouldPlaySound: true,
+      shouldSetBadge: true,
+    };
+  } else {
+    return {
+      shouldShowAlert: false,
+      shouldPlaySound: false,
+      shouldSetBadge: false,
+    };
   }
 };
 

@@ -36,7 +36,7 @@ export default function AccountsAndroid() {
           label={getReadableProfile(a, a)}
           active={currentAccount === a}
           onPress={() => {
-            setCurrentAccount(a);
+            setCurrentAccount(a, false);
             converseEventEmitter.emit("toggle-navigation-drawer", false);
           }}
           icon={({ color }) => (

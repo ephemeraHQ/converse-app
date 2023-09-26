@@ -257,7 +257,7 @@ export default function OnboardingScreen() {
       await saveXmtpKey(user.address, base64Key);
       // Successfull login for user, let's setup
       // the storage !
-      useAccountsStore.getState().setCurrentAccount(user.address);
+      useAccountsStore.getState().setCurrentAccount(user.address, true);
       await initDb(user.address);
 
       if (user.isEphemeral) {

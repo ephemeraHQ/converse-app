@@ -92,7 +92,7 @@ export default function DesktopConnect() {
           // Successfull login for user, let's setup
           // the storage !
           await saveXmtpKey(client.address, base64Key);
-          useAccountsStore.getState().setCurrentAccount(client.address);
+          useAccountsStore.getState().setCurrentAccount(client.address, true);
           await initDb(client.address);
           // Now we can instantiate the XMTP Client
           getXmtpClient(client.address);

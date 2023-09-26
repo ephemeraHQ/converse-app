@@ -64,7 +64,7 @@ export const useAccountsList = () => {
 
 type AccountsStoreStype = {
   currentAccount: string;
-  setCurrentAccount: (account: string) => void;
+  setCurrentAccount: (account: string, createIfNew: boolean) => void;
   accounts: string[];
   removeAccount: (account: string) => void;
   databaseId: { [account: string]: string };
@@ -83,16 +83,23 @@ export const useAccountsStore = create<AccountsStoreStype>()(
           databaseId[account] = uuid.v4().toString();
           return { databaseId };
         }),
-      setCurrentAccount: (account) =>
+      setCurrentAccount: (account, createIfNew) =>
         set((state) => {
           if (state.currentAccount === account) return state;
+          const accounts = [...state.accounts];
+          const isNew = !accounts.includes(account);
+          if (isNew && !createIfNew) {
+            console.error(
+              `[AccountsStore] Account ${account} is new but createIfNew is false`
+            );
+            return state;
+          }
           console.log(`[AccountsStore] Setting current account: ${account}`);
           if (!storesByAccount[account]) {
             initStores(account);
           }
-          const accounts = [...state.accounts];
           const databaseId = { ...state.databaseId };
-          if (!accounts.includes(account)) {
+          if (isNew) {
             accounts.push(account);
             databaseId[account] = uuid.v4().toString();
           }

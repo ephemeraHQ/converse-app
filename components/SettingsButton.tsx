@@ -54,7 +54,7 @@ export default function SettingsButton({ navigation, account }: Props) {
       "Your profile page": () => {
         if (account) {
           refreshProfileForAddress(currentAccount(), account);
-          setCurrentAccount(account);
+          setCurrentAccount(account, false);
           if (navigation) {
             navigation.push("Chats");
             navigation.push("Profile", { address: account });
@@ -76,7 +76,7 @@ export default function SettingsButton({ navigation, account }: Props) {
         Clipboard.setStringAsync(account || "");
       },
       "Contact Converse team": () => {
-        setCurrentAccount(account);
+        setCurrentAccount(account, false);
         if (navigation) {
           navigation.push("Chats");
           navigation.push("Conversation", {
