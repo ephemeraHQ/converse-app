@@ -597,8 +597,8 @@ PODS:
     - React-Core
   - RNFastImage (8.6.3):
     - React-Core
-    - SDWebImage (~> 5.11.1)
-    - SDWebImageWebPCoder (~> 0.8.4)
+    - SDWebImage (~> 5.15.1)
+    - SDWebImageWebPCoder (~> 0.9.1)
   - RNFlashList (1.5.0):
     - React-Core
   - RNFS (2.20.0):
@@ -644,12 +644,12 @@ PODS:
     - Sentry/HybridSDK (= 8.7.1)
   - RNSVG (13.10.0):
     - React-Core
-  - SDWebImage (5.11.1):
-    - SDWebImage/Core (= 5.11.1)
-  - SDWebImage/Core (5.11.1)
-  - SDWebImageWebPCoder (0.8.5):
+  - SDWebImage (5.15.8):
+    - SDWebImage/Core (= 5.15.8)
+  - SDWebImage/Core (5.15.8)
+  - SDWebImageWebPCoder (0.9.1):
     - libwebp (~> 1.0)
-    - SDWebImage/Core (~> 5.10)
+    - SDWebImage/Core (~> 5.13)
   - secp256k1.swift (0.1.4)
   - Sentry/HybridSDK (8.7.1):
     - SentryPrivate (= 8.7.1)
@@ -1071,7 +1071,7 @@ SPEC CHECKSUMS:
   ReactCommon: 4ec7cc40d091eed0a510755619940b6a03cb507b
   RNCAsyncStorage: ddc4ee162bfd41b0d2c68bf2d95acd81dd7f1f93
   RNDeviceInfo: 02ea8b23e2280fa18e00a06d7e62804d74028579
-  RNFastImage: 5c9c9fed9c076e521b3f509fe79e790418a544e8
+  RNFastImage: 5340863670380a8f2d265fb0a6cb76cacf94a082
   RNFlashList: 25b0e092b4470c84db0386d4f5316dc34123bb6d
   RNFS: 4ac0f0ea233904cb798630b3c077808c06931688
   RNGestureHandler: c0d04458598fcb26052494ae23dda8f8f5162b13
@@ -1080,8 +1080,8 @@ SPEC CHECKSUMS:
   RNScreens: 50ffe2fa2342eabb2d0afbe19f7c1af286bc7fb3
   RNSentry: 4fb2cd7d2d6cb94423c24884488206ef881da136
   RNSVG: 80584470ff1ffc7994923ea135a3e5ad825546b9
-  SDWebImage: a7f831e1a65eb5e285e3fb046a23fcfbf08e696d
-  SDWebImageWebPCoder: 908b83b6adda48effe7667cd2b7f78c897e5111d
+  SDWebImage: cb032eba469c54e0000e78bcb0a13cdde0a52798
+  SDWebImageWebPCoder: 18503de6621dd2c420d680e33d46bf8e1d5169b0
   secp256k1.swift: a7e7a214f6db6ce5db32cc6b2b45e5c4dd633634
   Sentry: 11776f6a25a128808d793d0d41bb7ad873b5ae4f
   SentryPrivate: b3c448eacdabe9eab7679a2e0af609c608f91572
