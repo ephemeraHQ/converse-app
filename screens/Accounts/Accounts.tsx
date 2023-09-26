@@ -1,4 +1,5 @@
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
+import { useDisconnect } from "@thirdweb-dev/react-native";
 import { ScrollView, StyleSheet, View, useColorScheme } from "react-native";
 
 import SettingsButton from "../../components/SettingsButton";
@@ -26,6 +27,7 @@ export default function Accounts({
   const setCurrentAccount = useAccountsStore((s) => s.setCurrentAccount);
   const setAddingNewAccount = useOnboardingStore((s) => s.setAddingNewAccount);
   const colorScheme = useColorScheme();
+  const disconnectWallet = useDisconnect();
   return (
     <ScrollView
       contentInsetAdjustmentBehavior="automatic"
@@ -57,7 +59,12 @@ export default function Accounts({
             id: "add",
             title: "Add an account",
             titleColor: primaryColor(colorScheme),
-            action: () => {
+            action: async () => {
+              try {
+                await disconnectWallet();
+              } catch (e) {
+                console.error(e);
+              }
               setAddingNewAccount(true);
             },
           },
