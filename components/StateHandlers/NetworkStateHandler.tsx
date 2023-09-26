@@ -4,6 +4,14 @@ import { useEffect, useRef } from "react";
 import { useAppStore } from "../../data/store/appStore";
 import { pick } from "../../utils/objects";
 
+NetInfo.configure({
+  reachabilityUrl: "https://production.xmtp.network/message/v1/query",
+  reachabilityMethod: "GET",
+  reachabilityTest: async (response) => {
+    return response.status === 501;
+  },
+});
+
 export default function NetworkStateHandler() {
   const { isInternetReachable, setIsInternetReachable } = useAppStore((s) =>
     pick(s, ["isInternetReachable", "setIsInternetReachable"])
