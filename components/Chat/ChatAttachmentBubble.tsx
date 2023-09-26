@@ -285,7 +285,7 @@ const useStyles = () => {
   const colorScheme = useColorScheme();
   return StyleSheet.create({
     imagePreview: {
-      borderRadius: 18,
+      borderRadius: 14,
       width: "100%",
       resizeMode: "contain",
       zIndex: 1,
