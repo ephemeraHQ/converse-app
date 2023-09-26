@@ -7,8 +7,13 @@ import * as Sentry from "sentry-expo";
 
 import config from "../config";
 import { resetDb, getDbPath, clearDb } from "../data/db";
-import { currentAccount, useUserStore } from "../data/store/accountsStore";
+import {
+  currentAccount,
+  getAccountsList,
+  useUserStore,
+} from "../data/store/accountsStore";
 import { deleteXmtpKey } from "../utils/keychain";
+import { logout } from "../utils/logout";
 import { showActionSheetWithOptions } from "./StateHandlers/ActionSheetStateHandler";
 
 let logs: string[] = [];
@@ -100,6 +105,10 @@ const DebugButton = forwardRef((props, ref) => {
         "Show messages # received": () => {
           alert(`${messagesFromNetwork} messages received`);
           messagesFromNetwork = 0;
+        },
+        "Logout all": () => {
+          const accounts = getAccountsList();
+          accounts.forEach((account) => logout(account));
         },
         Cancel: undefined,
       };
