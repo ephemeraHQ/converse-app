@@ -12,7 +12,7 @@ import {
 
 import config from "../config";
 import { refreshProfileForAddress } from "../data/helpers/profiles/profilesUpdate";
-import { currentAccount, useAccountsStore } from "../data/store/accountsStore";
+import { useAccountsStore } from "../data/store/accountsStore";
 import { useAppStore } from "../data/store/appStore";
 import { NavigationParamList } from "../screens/Navigation/Navigation";
 import { actionSheetColors, primaryColor } from "../utils/colors";
@@ -53,7 +53,7 @@ export default function SettingsButton({ navigation, account }: Props) {
     const methods = {
       "Your profile page": () => {
         if (account) {
-          refreshProfileForAddress(currentAccount(), account);
+          refreshProfileForAddress(account, account);
           setCurrentAccount(account, false);
           if (navigation) {
             navigation.push("Chats");
@@ -123,7 +123,7 @@ export default function SettingsButton({ navigation, account }: Props) {
       },
       Disconnect: () => {
         disconnectWallet();
-        logout(currentAccount());
+        logout(account);
       },
       Cancel: () => {},
     };
