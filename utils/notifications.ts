@@ -111,15 +111,10 @@ export const unsubscribeFromNotifications = async (
 ): Promise<void> => {
   const nativeTokenQuery = await Notifications.getDevicePushTokenAsync();
   if (nativeTokenQuery.data) {
-    try {
-      await api.post("/api/unsubscribe", {
-        nativeToken: nativeTokenQuery.data,
-        topics,
-      });
-    } catch (e: any) {
-      console.log("Could not unsubscribe from notifications");
-      console.error(e);
-    }
+    await api.post("/api/unsubscribe", {
+      nativeToken: nativeTokenQuery.data,
+      topics,
+    });
   }
 };
 

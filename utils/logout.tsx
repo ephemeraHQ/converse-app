@@ -22,7 +22,6 @@ export const getLogoutTasks = (): LogoutTasks => {
   const logoutTasksString = mmkv.getString("converse-logout-tasks");
   if (logoutTasksString) {
     try {
-      emptyLogoutTasks();
       return JSON.parse(logoutTasksString);
     } catch (e) {
       console.log(e);
@@ -33,7 +32,9 @@ export const getLogoutTasks = (): LogoutTasks => {
   }
 };
 
-export const emptyLogoutTasks = () => mmkv.delete("converse-logout-tasks");
+export const emptyLogoutTasks = () => {
+  mmkv.delete("converse-logout-tasks");
+};
 
 export const saveLogoutTask = (account: string, topics: string[]) => {
   const logoutTasks = getLogoutTasks();
@@ -43,6 +44,8 @@ export const saveLogoutTask = (account: string, topics: string[]) => {
 
 export const executeLogoutTasks = async () => {
   const tasks = getLogoutTasks();
+  const hasTasks = Object.keys(tasks).length > 0;
+  if (!hasTasks) return false;
   for (const account in tasks) {
     const task = tasks[account];
     await deleteXmtpKey(account);
@@ -50,12 +53,14 @@ export const executeLogoutTasks = async () => {
       await deleteConversationsFromKeychain(account, task.topics);
       resetSharedData(task.topics);
     }
+    // This will fail if no connection and will be tried later async
     await unsubscribeFromNotifications([
       ...task.topics,
       buildUserInviteTopic(account || ""),
     ]);
   }
   emptyLogoutTasks();
+  return true;
 };
 
 export const logout = async (account: string) => {

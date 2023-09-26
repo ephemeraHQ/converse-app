@@ -4,6 +4,7 @@ import { AppState } from "react-native";
 
 import { useUserStore } from "../../data/store/accountsStore";
 import { saveUser } from "../../utils/api";
+import { executeLogoutTasks } from "../../utils/logout";
 import {
   onInteractWithNotification,
   saveNotificationsStatus,
@@ -29,6 +30,7 @@ export default function NotificationsStateHandler() {
   useEffect(() => {
     // Things to do when app opens
     saveNotificationsStatus();
+    executeLogoutTasks();
   }, []);
 
   useEffect(() => {
@@ -40,7 +42,7 @@ export default function NotificationsStateHandler() {
           nextAppState === "active" &&
           appState.current.match(/inactive|background/)
         ) {
-          // App is back to active state
+          executeLogoutTasks();
           saveNotificationsStatus();
           // Save the user
           if (userAddress) {
