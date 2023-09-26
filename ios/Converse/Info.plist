@@ -104,5 +104,9 @@
     <string>Give $(PRODUCT_NAME) permission to access your camera</string>
     <key>NSMicrophoneUsageDescription</key>
     <string>Give $(PRODUCT_NAME) permission to use your microphone</string>
+    <key>UIBackgroundModes</key>
+    <array>
+        <string>fetch</string>
+    </array>
   </dict>
 </plist>
