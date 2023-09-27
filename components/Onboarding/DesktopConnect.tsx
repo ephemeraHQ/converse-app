@@ -17,6 +17,7 @@ import {
   textPrimaryColor,
   textSecondaryColor,
 } from "../../utils/colors";
+import { isDesktop } from "../../utils/device";
 import { saveXmtpKey } from "../../utils/keychain";
 import { pick } from "../../utils/objects";
 import { getXmtpClientFromBase64Key } from "../../utils/xmtp/client";
@@ -47,7 +48,9 @@ export default function DesktopConnect() {
       privateKey: privateKey.toHex(),
       publicKey,
       otp,
-      subtitle: "Enter the code below on your desktop.",
+      subtitle: `Enter the code below on your ${
+        isDesktop ? "browser" : "desktop"
+      }.`,
       showOtp: true,
       loading: false,
     });
