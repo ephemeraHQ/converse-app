@@ -136,9 +136,9 @@ PODS:
   - GenericJSON (2.0.2)
   - glog (0.3.5)
   - GzipSwift (5.1.1)
-  - hermes-engine (0.72.4):
-    - hermes-engine/Pre-built (= 0.72.4)
-  - hermes-engine/Pre-built (0.72.4)
+  - hermes-engine (0.72.5):
+    - hermes-engine/Pre-built (= 0.72.5)
+  - hermes-engine/Pre-built (0.72.5)
   - libevent (2.1.12)
   - libwebp (1.3.1):
     - libwebp/demux (= 1.3.1)
@@ -669,7 +669,7 @@ PODS:
     - GzipSwift
     - web3.swift
     - XMTPRust (= 0.3.1-beta0)
-  - XMTPReactNative (1.16.6):
+  - XMTPReactNative (1.16.7):
     - ExpoModulesCore
     - MessagePacker
     - XMTP (= 0.5.11-alpha0)
@@ -1020,7 +1020,7 @@ SPEC CHECKSUMS:
   GenericJSON: 79a840eeb77030962e8cf02a62d36bd413b67626
   glog: 04b94705f318337d7ead9e6d17c019bd9b1f6b1b
   GzipSwift: 893f3e48e597a1a4f62fafcb6514220fcf8287fa
-  hermes-engine: 81191603c4eaa01f5e4ae5737a9efcf64756c7b2
+  hermes-engine: f6cf92a471053245614d9d8097736f6337d5b86c
   libevent: 4049cae6c81cdb3654a443be001fb9bdceff7913
   libwebp: 33dc822fbbf4503668d09f7885bbfedc76c45e96
   Logging: 9ef4ecb546ad3169398d5a723bc9bea1c46bef26
@@ -1090,10 +1090,10 @@ SPEC CHECKSUMS:
   SwiftProtobuf: b70d65f419fbfe61a2d58003456ca5da58e337d6
   web3.swift: 2263d1e12e121b2c42ffb63a5a7beb1acaf33959
   XMTP: 2b2b4805bf5ba7d44bce4dee936614715a93b1a9
-  XMTPReactNative: 7385fe0c18fcb499156c4e4d84a144baf9d3f183
+  XMTPReactNative: ed313d0c331e15f48fbd32a3d8a91deeb7ccfafc
   XMTPRust: 78f65f77b1454392980da244961777aee955652f
   Yoga: 86fed2e4d425ee4c6eab3813ba1791101ee153c6
 
-PODFILE CHECKSUM: de7b7ebf6c8f5ceaa85482c16534169988174e21
+PODFILE CHECKSUM: 00aa3dd3028192f5750515e4cf6b20e355f1c1dc
 
 COCOAPODS: 1.12.1
