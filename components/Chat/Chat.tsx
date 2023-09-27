@@ -24,6 +24,7 @@ import {
 import { useConversationContext } from "../../utils/conversation";
 import { getProfileData } from "../../utils/profile";
 import { Recommendation } from "../Recommendations/Recommendation";
+import ChatConsent from "./ChatConsent";
 import ChatInput from "./ChatInput";
 import CachedChatMessage, { MessageToDisplay } from "./ChatMessage";
 import ChatPlaceholder from "./ChatPlaceholder";
@@ -226,6 +227,7 @@ export default function Chat() {
         {showPlaceholder && (
           <ChatPlaceholder messagesCount={listArray.length} />
         )}
+        <ChatConsent />
       </ReanimatedView>
       {showChatInput && (
         <>
