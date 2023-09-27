@@ -98,7 +98,7 @@ export default function WalletSelector({
         },
       ]}
     >
-      {hasInstalledWallets && (
+      {hasInstalledWallets && !isDesktop && (
         <TableView
           title="INSTALLED APPS"
           items={installedWallets.list.map((w) => ({
@@ -146,16 +146,28 @@ export default function WalletSelector({
 
       <TableView
         title={
-          hasInstalledWallets ? "OTHER OPTIONS" : "CONNECT EXISTING WALLET"
+          isDesktop
+            ? "CONNECTION OPTIONS"
+            : hasInstalledWallets
+            ? "OTHER OPTIONS"
+            : "CONNECT EXISTING WALLET"
         }
         items={[
           {
             id: "desktop",
-            leftView: <TableViewEmoji emoji="💻" />,
-            title: "Connect via desktop",
+            leftView: <TableViewEmoji emoji={isDesktop ? "😎" : "💻"} />,
+            title: isDesktop
+              ? "Connect via browser wallet"
+              : "Connect via desktop",
             rightView,
             action: () => {
-              setConnectWithDesktop(true);
+              if (isDesktop) {
+                Linking.openURL(
+                  `https://${config.websiteDomain}/connect?desktop=true`
+                );
+              } else {
+                setConnectWithDesktop(true);
+              }
             },
           },
           {
