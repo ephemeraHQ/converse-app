@@ -51,6 +51,8 @@ export default function NotificationsStateHandler() {
   useEffect(() => {
     // Things to do when app opens
     saveNotificationsStatus();
+    // Dismiss notifications and set badge to 0
+    resetNotifications();
   }, []);
 
   useEffect(() => {
