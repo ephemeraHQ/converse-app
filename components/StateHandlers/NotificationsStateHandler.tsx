@@ -13,6 +13,7 @@ import {
   onInteractWithNotification,
   saveNotificationsStatus,
   subscribeToNotifications,
+  resetNotifications,
 } from "../../utils/notifications";
 import { pick } from "../../utils/objects";
 
@@ -50,6 +51,8 @@ export default function NotificationsStateHandler() {
   useEffect(() => {
     // Things to do when app opens
     saveNotificationsStatus();
+    // Dismiss notifications and set badge to 0
+    resetNotifications();
   }, []);
 
   useEffect(() => {
@@ -63,6 +66,8 @@ export default function NotificationsStateHandler() {
         ) {
           // App is back to active state
           saveNotificationsStatus();
+          // Dismiss notifications and set badge to 0
+          resetNotifications();
           // Save the user
           if (userAddress) {
             saveUser(userAddress);
