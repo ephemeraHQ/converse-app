@@ -5992,10 +5992,10 @@
     rxjs "^7.8.0"
     undici "^5.8.1"
 
-"@xmtp/react-native-sdk@^1.16.6":
-  version "1.16.6"
-  resolved "https://registry.yarnpkg.com/@xmtp/react-native-sdk/-/react-native-sdk-1.16.6.tgz#cdbefb461c61989830d96baaab484354e7e714ca"
-  integrity sha512-oP1IrOMAfVrN+mDo3yzV7XYEIAmP1B3cPFrTNJmFDTQ1qRNito3yC/s9jyw0vblP0hMS99ij6GUY2kPY81ICJg==
+"@xmtp/react-native-sdk@^1.16.7":
+  version "1.16.7"
+  resolved "https://registry.yarnpkg.com/@xmtp/react-native-sdk/-/react-native-sdk-1.16.7.tgz#cb04b806479bdfde3837c57e0df310b7a175aa0c"
+  integrity sha512-OuXZSayyxNGlNAPKzJNWqTEKB+Edhy9KDTPU3pNxnbo1FO+bKl4BvALWDwvuJNBa2LcSaC8cRa4CjIuZLMdreA==
   dependencies:
     "@msgpack/msgpack" "^3.0.0-beta2"
     "@xmtp/proto" "^3.25.0"
