@@ -115,7 +115,7 @@ export const computeNewConversationContext = (
     .filter((c) => c.peerAddress?.toLowerCase() === peerAddress?.toLowerCase())
     .map((c) => c.context?.conversationId);
   // First try to create one without conversationId
-  if (!conversationsIds.includes(undefined)) {
+  if (!conversationsIds.includes(undefined) && !conversationsIds.includes("")) {
     return undefined;
   }
   do {

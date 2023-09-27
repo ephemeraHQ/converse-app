@@ -196,10 +196,14 @@ export default function NewConversation({
       setCreatingNewConversation(true);
 
       try {
+        const newConversationContext = computeNewConversationContext(
+          userAddress,
+          peerAddress
+        );
         const newConversationTopic = await createPendingConversation(
           currentAccount(),
           peerAddress,
-          computeNewConversationContext(userAddress, peerAddress)
+          newConversationContext
         );
         navigateToTopic(newConversationTopic);
       } catch (e: any) {
