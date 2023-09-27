@@ -20,11 +20,15 @@ import { pick } from "../../utils/objects";
 // This handler determines how the app handles
 // notifications that come in while the app is foregrounded
 Notifications.setNotificationHandler({
-  handleNotification: async () => ({
-    shouldShowAlert: false,
-    shouldPlaySound: false,
-    shouldSetBadge: false,
-  }),
+  handleNotification: async () => {
+    resetNotifications();
+
+    return {
+      shouldShowAlert: false,
+      shouldPlaySound: false,
+      shouldSetBadge: false,
+    };
+  },
 });
 
 Notifications.addNotificationResponseReceivedListener(

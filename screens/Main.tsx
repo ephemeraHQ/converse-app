@@ -5,7 +5,6 @@ import {
 } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import * as Linking from "expo-linking";
-import * as Notifications from "expo-notifications";
 import { StatusBar } from "expo-status-bar";
 import React, { useEffect, useRef } from "react";
 import { Platform, useColorScheme } from "react-native";
@@ -63,16 +62,6 @@ export type NavigationParamList = {
 
 const Stack = createNativeStackNavigator<NavigationParamList>();
 const prefix = Linking.createURL("/");
-
-// This handler determines how your app handles
-// notifications that come in while the app is foregrounded
-Notifications.setNotificationHandler({
-  handleNotification: async () => ({
-    shouldShowAlert: false,
-    shouldPlaySound: false,
-    shouldSetBadge: false,
-  }),
-});
 
 export default function Main() {
   const colorScheme = useColorScheme();
