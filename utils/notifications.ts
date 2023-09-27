@@ -11,6 +11,7 @@ import { XmtpConversation, XmtpMessage } from "../data/store/chatStore";
 import { buildUserInviteTopic } from "../vendor/xmtp-js/src/utils";
 import api from "./api";
 import { saveExpoPushToken } from "./keychain";
+import mmkv from "./mmkv";
 import { navigateToConversation } from "./navigation";
 import { sentryTrackError, sentryTrackMessage } from "./sentry";
 import {
@@ -67,6 +68,8 @@ export const subscribeToNotifications = async (
       expoToken: expoPushToken,
       nativeToken: nativeTokenQuery.data,
       nativeTokenType: nativeTokenQuery.type,
+      notificationChannel:
+        nativeTokenQuery.type === "android" ? "converse-notifications" : null,
       topics,
     });
     lastSubscribedTopics = topics;
@@ -88,16 +91,25 @@ export const disablePushNotifications = async (): Promise<void> => {
   }
 };
 
+const setupAndroidNotificationChannel = async () => {
+  if (Platform.OS !== "android") return;
+
+  // Delete legacy default channel
+  await Notifications.deleteNotificationChannelAsync("default");
+
+  // Create new channel and showBadge set to true
+  await Notifications.setNotificationChannelAsync("converse-notifications", {
+    name: "Converse Notifications",
+    importance: Notifications.AndroidImportance.MAX,
+    showBadge: true,
+  });
+};
+
 export const getNotificationsPermissionStatus = async (): Promise<
   NotificationPermissionStatus | undefined
 > => {
-  if (Platform.OS === "android") {
-    await Notifications.setNotificationChannelAsync("default", {
-      name: "Converse Notifications",
-      importance: Notifications.AndroidImportance.MAX,
-      showBadge: false,
-    });
-  }
+  await setupAndroidNotificationChannel();
+
   const { status } = await Notifications.getPermissionsAsync();
   return status;
 };
@@ -105,19 +117,16 @@ export const getNotificationsPermissionStatus = async (): Promise<
 export const requestPushNotificationsPermissions = async (): Promise<
   NotificationPermissionStatus | undefined
 > => {
-  if (Platform.OS === "android") {
-    await Notifications.setNotificationChannelAsync("default", {
-      name: "Converse Notifications",
-      importance: Notifications.AndroidImportance.MAX,
-      showBadge: false,
-    });
-  }
+  await setupAndroidNotificationChannel();
+
   const { status: existingStatus } = await Notifications.getPermissionsAsync();
   let finalStatus = existingStatus;
+
   if (existingStatus !== "granted") {
     const { status } = await Notifications.requestPermissionsAsync();
     finalStatus = status;
   }
+
   return finalStatus;
 };
 
@@ -310,4 +319,10 @@ export const saveNotificationsStatus = async () => {
       .getState()
       .setNotificationsPermissionStatus(notificationsStatus);
   }
+};
+
+export const resetNotifications = async (): Promise<void> => {
+  Notifications.dismissAllNotificationsAsync();
+  Notifications.setBadgeCountAsync(0);
+  mmkv.set("notifications-badge", 0);
 };

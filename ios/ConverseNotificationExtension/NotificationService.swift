@@ -30,8 +30,15 @@ func hasForbiddenPattern(address: String) -> Bool {
   return address.hasPrefix("0x0000") && address.hasSuffix("0000");
 }
 
+func incrementBadge(for content: UNMutableNotificationContent) {
+    let newBadgeCount = getBadge() + 1
+    setBadge(newBadgeCount)
+    content.badge = NSNumber(value: newBadgeCount)
+}
+
 func handleNotificationAsync(contentHandler: ((UNNotificationContent) -> Void), bestAttemptContent: UNMutableNotificationContent?) async {
   initSentry()
+  var shouldIncrementBadge = false
   
   if let bestAttemptContent = bestAttemptContent {    
     print("[NotificationExtension] Received a notification")
@@ -63,6 +70,7 @@ func handleNotificationAsync(contentHandler: ((UNNotificationContent) -> Void), 
             bestAttemptContent.title = shortAddress(address: conversation!.peerAddress)
             body["newConversationTopic"] = conversation?.topic
             bestAttemptContent.userInfo.updateValue(body, forKey: "body")
+            shouldIncrementBadge = true
           }
         } else {
           var conversationTitle = getSavedConversationTitle(contentTopic: contentTopic);
@@ -80,11 +88,16 @@ func handleNotificationAsync(contentHandler: ((UNNotificationContent) -> Void), 
             }
           }
           bestAttemptContent.title = conversationTitle;
+          shouldIncrementBadge = true
         }
       } else {
         print("[NotificationExtension] Not showing a notification because no client found")
         contentHandler(UNNotificationContent())
       }
+    }
+    
+    if shouldIncrementBadge {
+      incrementBadge(for: bestAttemptContent)
     }
     
     contentHandler(bestAttemptContent)
@@ -111,6 +124,7 @@ class NotificationService: UNNotificationServiceExtension {
       if let body = bestAttemptContent.userInfo["body"] as? [String: Any], let contentTopic = body["contentTopic"] as? String {
         let conversationTitle = getSavedConversationTitle(contentTopic: contentTopic);
         bestAttemptContent.title = conversationTitle;
+        incrementBadge(for: bestAttemptContent)
       }
       
       contentHandler(bestAttemptContent)

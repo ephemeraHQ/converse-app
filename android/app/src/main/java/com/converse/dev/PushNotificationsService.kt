@@ -1,6 +1,7 @@
 package com.converse.dev
 
 import android.app.ActivityManager
+import android.content.Context
 import android.util.Log
 import android.view.View
 import com.beust.klaxon.Klaxon
@@ -25,6 +26,7 @@ import expo.modules.notifications.notifications.model.NotificationRequest
 import expo.modules.notifications.notifications.model.triggers.FirebaseNotificationTrigger
 import expo.modules.notifications.service.NotificationsService
 import expo.modules.securestore.SecureStoreModule
+import me.leolin.shortcutbadger.ShortcutBadger
 import org.json.JSONObject
 import org.xmtp.android.library.*
 import org.xmtp.android.library.messages.EnvelopeBuilder
@@ -50,6 +52,8 @@ class PushNotificationsService : FirebaseMessagingService() {
             return
         }
         Log.d(TAG, "Received a notification")
+
+        var shouldIncrementBadge = false
 
         // Check if message contains a data payload.
         if (remoteMessage.data.isEmpty()) return
@@ -90,16 +94,24 @@ class PushNotificationsService : FirebaseMessagingService() {
             Log.d(TAG, "Handling a new conversation notification")
             val notificationToShow = handleNewConversationV2Notification(this, xmtpClient, envelope, remoteMessage, notificationData)
             if (notificationToShow != null) {
+                shouldIncrementBadge = true
                 showNotification(notificationToShow.first, notificationToShow.second, notificationToShow.third)
             }
         } else {
             Log.d(TAG, "Handling a new message notification")
             val notificationToShow = handleNewMessageNotification(xmtpClient, envelope, remoteMessage, sentViaConverse)
             if (notificationToShow != null) {
+                shouldIncrementBadge = true
                 showNotification(notificationToShow.first, notificationToShow.second, notificationToShow.third)
             }
         }
-
+        Log.d(TAG, "reached the shouldIncrementBadge if statement")
+        if (shouldIncrementBadge) {
+            Log.d(TAG, "shouldIncrementBadge: true!")
+            val newBadgeCount = getBadge(this) + 1
+            setBadge(this, newBadgeCount)
+            ShortcutBadger.applyCount(this, newBadgeCount)
+        }
     }
 
     private fun getNotificationIdentifier(remoteMessage: RemoteMessage): String {
@@ -159,4 +171,5 @@ class PushNotificationsService : FirebaseMessagingService() {
         val reactContext = ReactApplicationContext(this)
         asyncStorageModule = AsyncStorageModule(reactContext)
     }
+
 }
