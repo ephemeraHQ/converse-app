@@ -4,6 +4,7 @@ import {
   Platform,
   StyleProp,
   Text,
+  TouchableOpacity,
   View,
   ViewStyle,
   useColorScheme,
@@ -48,12 +49,14 @@ export const TableViewImage = ({ imageURI }: { imageURI?: string }) => {
 export const TableViewPicto = ({
   symbol,
   color,
+  onPress,
 }: {
   symbol: string;
   color?: ColorValue;
+  onPress?: () => void;
 }) => {
   const colorScheme = useColorScheme();
-  return (
+  const pictoView = (
     <View style={{ justifyContent: "center" }}>
       <Picto
         picto={symbol}
@@ -74,6 +77,8 @@ export const TableViewPicto = ({
       />
     </View>
   );
+  if (!onPress) return pictoView;
+  return <TouchableOpacity onPress={onPress}>{pictoView}</TouchableOpacity>;
 };
 
 export const TableViewEmoji = ({

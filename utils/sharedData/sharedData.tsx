@@ -56,7 +56,14 @@ export const saveApiURI = () =>
     config.appleAppGroup
   );
 
-export const resetSharedData = () => {
+export const resetSharedData = (topics: string[]) => {
   emptySavedNotificationsMessages();
   emptySavedNotificationsConversations();
+  topics.forEach((t) => {
+    SharedGroupPreferences.setItem(
+      `conversation-${t}`,
+      null,
+      config.appleAppGroup
+    );
+  });
 };

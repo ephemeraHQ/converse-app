@@ -106,7 +106,7 @@ export default function XmtpEngine() {
       syncAccounts(accounts);
     }
     isInternetReachableRef.current = isInternetReachable;
-  }, [accounts, isInternetReachable, syncAccounts, hydrationDone]);
+  }, [accounts, hydrationDone, isInternetReachable, syncAccounts]);
 
   // Cron
 

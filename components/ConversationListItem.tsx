@@ -18,7 +18,7 @@ import Clock from "../assets/clock.svg";
 import Picto from "../components/Picto/Picto";
 import { currentAccount, useChatStore } from "../data/store/accountsStore";
 import { XmtpConversation } from "../data/store/chatStore";
-import { NavigationParamList } from "../screens/Main";
+import { NavigationParamList } from "../screens/Navigation/Navigation";
 import { deleteTopic } from "../utils/api";
 import {
   actionSecondaryColor,

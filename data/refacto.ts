@@ -46,7 +46,7 @@ export const migrateDataIfNeeded = async () => {
       ) {
         currentAccount = savedAddress;
         console.log("Migrating to multi account store - ", savedAddress);
-        useAccountsStore.getState().setCurrentAccount(savedAddress);
+        useAccountsStore.getState().setCurrentAccount(savedAddress, true);
       }
     }
   }

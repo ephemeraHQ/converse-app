@@ -1,19 +1,67 @@
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import { Platform } from "react-native";
-
 import { clearDb } from "../data/db";
 import {
   getAccountsList,
   getChatStore,
   useAccountsStore,
 } from "../data/store/accountsStore";
+import { buildUserInviteTopic } from "../vendor/xmtp-js/src";
 import { deleteConversationsFromKeychain, deleteXmtpKey } from "./keychain";
+import mmkv from "./mmkv";
 import {
-  deleteSubscribedTopicsInformation,
-  disablePushNotifications,
+  deleteSubscribedTopics,
+  unsubscribeFromNotifications,
 } from "./notifications";
 import { resetSharedData } from "./sharedData/sharedData";
 import { deleteXmtpClient } from "./xmtpRN/client";
+
+type LogoutTasks = {
+  [account: string]: { topics: string[] };
+};
+
+export const getLogoutTasks = (): LogoutTasks => {
+  const logoutTasksString = mmkv.getString("converse-logout-tasks");
+  if (logoutTasksString) {
+    try {
+      return JSON.parse(logoutTasksString);
+    } catch (e) {
+      console.log(e);
+      return {};
+    }
+  } else {
+    return {};
+  }
+};
+
+export const emptyLogoutTasks = () => {
+  mmkv.delete("converse-logout-tasks");
+};
+
+export const saveLogoutTask = (account: string, topics: string[]) => {
+  const logoutTasks = getLogoutTasks();
+  logoutTasks[account] = { topics };
+  mmkv.set("converse-logout-tasks", JSON.stringify(logoutTasks));
+};
+
+export const executeLogoutTasks = async () => {
+  const tasks = getLogoutTasks();
+  const hasTasks = Object.keys(tasks).length > 0;
+  if (!hasTasks) return false;
+  for (const account in tasks) {
+    const task = tasks[account];
+    await deleteXmtpKey(account);
+    if (task.topics.length > 0) {
+      await deleteConversationsFromKeychain(account, task.topics);
+      resetSharedData(task.topics);
+    }
+    // This will fail if no connection and will be tried later async
+    await unsubscribeFromNotifications([
+      ...task.topics,
+      buildUserInviteTopic(account || ""),
+    ]);
+  }
+  emptyLogoutTasks();
+  return true;
+};
 
 export const logout = async (account: string) => {
   const topicsByAccount: { [a: string]: string[] } = {};
@@ -44,37 +92,11 @@ export const logout = async (account: string) => {
   useAccountsStore.getState().removeAccount(account);
 
   deleteXmtpClient(account);
-  deleteSubscribedTopicsInformation(account);
-  // TODO => we should save this information
-  // to be able to do it even offline.
-  // need to save : known conversation topics + account
-  // to remove the notifications & the keys (main one & conversations ones)
-  setTimeout(() => {
-    const promisesToAwait: any[] = [];
-    promisesToAwait.push(
-      deleteConversationsFromKeychain(account, topicsToDelete)
-    );
-    // Unsubscribing from notifications
-    // TODO => remove notifications for this account's topic
-    promisesToAwait.push(disablePushNotifications());
-    // Delete keychain xmtp
-    // TODO => remove keychain XMTP for this account's only
-    promisesToAwait.push(deleteXmtpKey(account));
-    // Delete shared data
-    promisesToAwait.push(resetSharedData());
-    // TODO => clear only for this account, are we still using Async storage?
-    promisesToAwait.push(clearAsyncStorage());
-  }, 500);
-};
+  deleteSubscribedTopics(account);
 
-const clearAsyncStorage = async () => {
-  const asyncStorageKeys = await AsyncStorage.getAllKeys();
-  if (asyncStorageKeys.length > 0) {
-    if (Platform.OS === "android") {
-      await AsyncStorage.clear();
-    }
-    if (Platform.OS === "ios") {
-      await AsyncStorage.multiRemove(asyncStorageKeys);
-    }
-  }
+  saveLogoutTask(account, topicsToDelete);
+
+  setTimeout(() => {
+    executeLogoutTasks();
+  }, 500);
 };
