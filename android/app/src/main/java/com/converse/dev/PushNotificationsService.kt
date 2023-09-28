@@ -99,7 +99,7 @@ class PushNotificationsService : FirebaseMessagingService() {
             }
         } else {
             Log.d(TAG, "Handling a new message notification")
-            val notificationToShow = handleNewMessageNotification(xmtpClient, envelope, remoteMessage, sentViaConverse)
+            val notificationToShow = handleNewMessageNotification(this, xmtpClient, envelope, remoteMessage, sentViaConverse)
             if (notificationToShow != null) {
                 shouldIncrementBadge = true
                 showNotification(notificationToShow.first, notificationToShow.second, notificationToShow.third)

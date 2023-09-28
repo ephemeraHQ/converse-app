@@ -39,7 +39,12 @@ fun handleNewConversationV2Notification(appContext: Context, xmtpClient: Client,
         }
     }
     Log.d("PushNotificationsService", "Decoded new conversation from invite")
-    val apiURI = getAsyncStorage("api-uri")
+    val mmkv = getMmkv(appContext)
+    var apiURI = mmkv?.decodeString("api-uri")
+    // TODO => stop using async storage
+    if (apiURI == null) {
+        apiURI = getAsyncStorage("api-uri")
+    }
     val expoPushToken = getKeychainValue("EXPO_PUSH_TOKEN")
     if (apiURI != null && expoPushToken !== null && !hasForbiddenPattern(conversation.peerAddress)) {
         Log.d("PushNotificationsService", "Subscribing to new topic at api: $apiURI")
@@ -84,7 +89,8 @@ fun subscribeToTopic(appContext: Context, apiURI: String, expoPushToken: String,
 }
 
 fun saveConversationToStorage(appContext: Context, account: String, topic: String, peerAddress: String, createdAt: Long, context: ConversationContext?) {
-    val currentSavedConversationsString = getAsyncStorage("saved-notifications-conversations")
+    val mmkv = getMmkv(appContext)
+    val currentSavedConversationsString = mmkv?.decodeString("saved-notifications-conversations")
     Log.d("PushNotificationsService", "Got current saved conversations from storage: $currentSavedConversationsString")
     var currentSavedConversations = listOf<SavedNotificationConversation>()
     try {
@@ -95,7 +101,7 @@ fun saveConversationToStorage(appContext: Context, account: String, topic: Strin
     val newConversationToSave = SavedNotificationConversation(topic = topic, peerAddress= peerAddress, createdAt= createdAt, context= context, account = account)
     currentSavedConversations += newConversationToSave
     val newSavedConversationsString = Klaxon().toJsonString(currentSavedConversations)
-    setAsyncStorage("saved-notifications-conversations", newSavedConversationsString)
+    mmkv?.putString("saved-notifications-conversations", newSavedConversationsString)
 
     try {
         insertConversation(appContext, account, topic, peerAddress, createdAt, context)
@@ -142,14 +148,13 @@ fun persistNewConversation(account: String, conversation: Conversation) {
 }
 
 
-fun getSavedConversationTitle(topic: String): String {
+fun getSavedConversationTitle(appContext: Context, topic: String): String {
     try {
         Log.d("PushNotificationsService", "Getting data conversation-$topic")
-        val savedConversationDict = getAsyncStorage("conversation-$topic") ?: return ""
+        val mmkv = getMmkv(appContext)
+        val savedConversationDict = mmkv?.decodeString("conversation-$topic") ?: return ""
         val parsedConversationDict = Klaxon().parse<ConversationDictData>(savedConversationDict)
-        // Keeping lensHandle & ensName for now but let's delete them soon
-        // and keep only title
-        return (((parsedConversationDict?.title ?: parsedConversationDict?.lensHandle) ?: parsedConversationDict?.ensName) ?: parsedConversationDict?.shortAddress) ?: ""
+        return parsedConversationDict?.title ?: parsedConversationDict?.shortAddress ?: "";
     } catch (e: Exception) {
         return ""
     }

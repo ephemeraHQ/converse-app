@@ -1,5 +1,6 @@
 package com.converse.dev.xmtp
 
+import android.content.Context
 import android.util.Log
 import com.beust.klaxon.Klaxon
 import com.converse.dev.*
@@ -13,7 +14,7 @@ import org.xmtp.android.library.codecs.decoded
 import org.xmtp.android.library.messages.Envelope
 import org.xmtp.proto.message.contents.Content
 
-fun handleNewMessageNotification(xmtpClient: Client, envelope: Envelope, remoteMessage: RemoteMessage, sentViaConverse: Boolean): Triple<String, String, RemoteMessage>? {
+fun handleNewMessageNotification(appContext: Context, xmtpClient: Client, envelope: Envelope, remoteMessage: RemoteMessage, sentViaConverse: Boolean): Triple<String, String, RemoteMessage>? {
     val conversation = getPersistedConversation(xmtpClient, envelope.contentTopic)
     if (conversation === null) {
         Log.d("PushNotificationsService", "No conversation found for ${envelope.contentTopic}")
@@ -26,13 +27,13 @@ fun handleNewMessageNotification(xmtpClient: Client, envelope: Envelope, remoteM
     var notificationMessage = "New message";
     if (contentType.startsWith("xmtp.org/text:")) {
         notificationMessage = decodedMessage.body;
-        saveMessageToStorage(xmtpClient.address, envelope.contentTopic, decodedMessage, sentViaConverse, contentType)
+        saveMessageToStorage(appContext, xmtpClient.address, envelope.contentTopic, decodedMessage, sentViaConverse, contentType)
     } else if (contentType.startsWith("xmtp.org/remoteStaticAttachment:")) {
         notificationMessage = "\uD83D\uDCCE Media";
-        saveMessageToStorage(xmtpClient.address, envelope.contentTopic, decodedMessage, sentViaConverse, contentType)
+        saveMessageToStorage(appContext, xmtpClient.address, envelope.contentTopic, decodedMessage, sentViaConverse, contentType)
     } else if (contentType.startsWith("xmtp.org/reaction:")) {
         val reaction: Reaction? = decodedMessage.content()
-        saveMessageToStorage(xmtpClient.address, envelope.contentTopic, decodedMessage, sentViaConverse, contentType)
+        saveMessageToStorage(appContext, xmtpClient.address, envelope.contentTopic, decodedMessage, sentViaConverse, contentType)
         if (reaction?.action.toString() == "removed") {
             return null;
         } else if (reaction == null || reaction?.schema.toString() != "unicode") {
@@ -44,7 +45,7 @@ fun handleNewMessageNotification(xmtpClient: Client, envelope: Envelope, remoteM
         Log.d("PushNotificationsService", "Unknown content type")
     }
     if (decodedMessage.senderAddress == xmtpClient.address) return null
-    var title = getSavedConversationTitle(envelope.contentTopic)
+    var title = getSavedConversationTitle(appContext, envelope.contentTopic)
     if (title == "") {
         title = shortAddress(decodedMessage.senderAddress)
     }
@@ -60,8 +61,9 @@ fun getContentTypeString(contentType: Content.ContentTypeId): String {
     return "${contentType.authorityId}/${contentType.typeId}:${contentType.versionMajor}.${contentType.versionMinor}"
 }
 
-fun saveMessageToStorage(account: String, topic: String, decodedMessage: DecodedMessage, sentViaConverse: Boolean, contentType: String) {
-    val currentSavedMessagesString = getAsyncStorage("saved-notifications-messages")
+fun saveMessageToStorage(appContext: Context, account: String, topic: String, decodedMessage: DecodedMessage, sentViaConverse: Boolean, contentType: String) {
+    val mmkv = getMmkv(appContext)
+    val currentSavedMessagesString = mmkv?.decodeString("saved-notifications-messages")
     Log.d("PushNotificationsService", "Got current saved messages from storage: $currentSavedMessagesString")
     var currentSavedMessages = listOf<SavedNotificationMessage>()
     try {
@@ -92,7 +94,7 @@ fun saveMessageToStorage(account: String, topic: String, decodedMessage: Decoded
     )
     currentSavedMessages += newMessageToSave
     val newSavedMessagesString = Klaxon().toJsonString(currentSavedMessages)
-    setAsyncStorage("saved-notifications-messages", newSavedMessagesString)
+    mmkv?.putString("saved-notifications-messages", newSavedMessagesString)
 }
 
 

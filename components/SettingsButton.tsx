@@ -15,7 +15,11 @@ import { refreshProfileForAddress } from "../data/helpers/profiles/profilesUpdat
 import { useAccountsStore } from "../data/store/accountsStore";
 import { useAppStore } from "../data/store/appStore";
 import { NavigationParamList } from "../screens/Navigation/Navigation";
-import { actionSheetColors, primaryColor } from "../utils/colors";
+import {
+  actionSheetColors,
+  primaryColor,
+  textSecondaryColor,
+} from "../utils/colors";
 import { converseEventEmitter } from "../utils/events";
 import { logout } from "../utils/logout";
 import {
@@ -161,7 +165,11 @@ export default function SettingsButton({ navigation, account }: Props) {
 
   return Platform.OS === "android" ? (
     <TouchableOpacity onPress={onPress}>
-      <Picto picto="more_vert" size={24} color="red" />
+      <Picto
+        picto="more_vert"
+        size={24}
+        color={textSecondaryColor(colorScheme)}
+      />
     </TouchableOpacity>
   ) : (
     <TableViewPicto
