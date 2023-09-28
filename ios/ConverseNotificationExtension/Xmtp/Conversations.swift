@@ -13,8 +13,14 @@ import CryptoKit
 func handleNewConversation(xmtpClient: XMTP.Client, envelope: XMTP.Envelope) async -> XMTP.Conversation? {
   do {
     // Let's subscribe to that specific topic
-    let sharedDefaults = try! SharedDefaults()
-    let apiURI = sharedDefaults.string(forKey: "api-uri")?.replacingOccurrences(of: "\"", with: "")
+    let mmkv = getMmkv()
+    var apiURI = mmkv?.string(forKey: "api-uri")
+    print("GOT API URI FROM MMKV", apiURI)
+    // TODO => remove shared defaults
+    if (apiURI == nil) {
+      let sharedDefaults = try! SharedDefaults()
+      apiURI = sharedDefaults.string(forKey: "api-uri")?.replacingOccurrences(of: "\"", with: "")
+    }
     let expoPushToken = getKeychainValue(forKey: "EXPO_PUSH_TOKEN")
     
     if (isInviteTopic(topic: envelope.contentTopic)) {
@@ -45,8 +51,8 @@ func handleNewConversation(xmtpClient: XMTP.Client, envelope: XMTP.Envelope) asy
 
 
 func loadSavedConversations() -> [SavedNotificationConversation] {
-  let sharedDefaults = try! SharedDefaults()
-  let savedConversationsString = sharedDefaults.string(forKey: "saved-notifications-conversations")
+  let mmkv = getMmkv()
+  let savedConversationsString = mmkv?.string(forKey: "saved-notifications-conversations")
   if (savedConversationsString == nil) {
     return []
   } else {
@@ -62,37 +68,33 @@ func loadSavedConversations() -> [SavedNotificationConversation] {
 
 
 func saveConversation(account: String, topic: String, peerAddress: String, createdAt: Int, context: ConversationContext?) throws {
-  
-  let sharedDefaults = try! SharedDefaults()
   let savedConversation = SavedNotificationConversation(topic: topic, peerAddress: peerAddress, createdAt: createdAt, context: context, account: account)
   var savedConversationsList = loadSavedConversations()
   savedConversationsList.append(savedConversation)
   let encodedValue = try JSONEncoder().encode(savedConversationsList)
   let encodedString = String(data: encodedValue, encoding: .utf8)
-  sharedDefaults.set(encodedString, forKey: "saved-notifications-conversations")
+  let mmkv = getMmkv()
+  mmkv?.set(encodedString!, forKey: "saved-notifications-conversations")
   
   // Now also save in SQLite
-  // TODO => stop saving in SharedDefaults or just the id since it's already in sqlite!
+  // TODO => stop saving in shared data or just the id since it's already in sqlite!
   do {
     try insertConversation(account: account, topic: topic, peerAddress: peerAddress, createdAt: createdAt, context: context)
   } catch {
+    // Usually will happen because it's already there (for instance if the app is running)
     print("COULD NOT INSERT CONVO IN SQLITE: \(error)")
   }
   
 }
 
 func getSavedConversationTitle(contentTopic: String)-> String {
-  let sharedDefaults = try! SharedDefaults()
-  let conversationDictString = sharedDefaults.string(forKey: "conversation-\(contentTopic)")
+  let mmkv = getMmkv()
+  let conversationDictString = mmkv?.string(forKey: "conversation-\(contentTopic)")
   if let data = conversationDictString?.data(using: .utf8) {
     if let conversationDict = try! JSONSerialization.jsonObject(with: data, options: .allowFragments) as? [String: Any] {
       let shortAddress = conversationDict["shortAddress"]
       let title = conversationDict["title"]
-      // Keeping lensHandle & ensName for now but let's delete them soon
-      // and keep only title
-      let lensHandle = conversationDict["lensHandle"]
-      let ensName = conversationDict["ensName"]
-      return "\(title ?? (lensHandle ?? (ensName ?? (shortAddress ?? ""))))"
+      return "\(title ?? shortAddress ?? "")"
     }
   }
   return "";

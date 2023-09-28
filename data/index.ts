@@ -1,6 +1,6 @@
 import "reflect-metadata";
 
-import { saveXmtpEnv, saveApiURI } from "../utils/sharedData/sharedData";
+import { saveXmtpEnv, saveApiURI } from "../utils/sharedData";
 import { getRepository } from "./db";
 import { loadProfilesByAddress } from "./helpers/profiles";
 import { xmtpConversationFromDb } from "./mappers";
