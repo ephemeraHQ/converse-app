@@ -1,5 +1,6 @@
 package com.converse.dev
 import android.content.Context
+import android.util.Log
 import com.beust.klaxon.Klaxon
 
 import com.tencent.mmkv.MMKV;
@@ -18,8 +19,13 @@ fun getMmkv(appContext: Context): MMKV? {
 fun getAccountsState(appContext: Context): Accounts? {
     val mmkv = getMmkv(appContext)
     val accountsString = mmkv?.decodeString("store-accounts") ?: return null
-    val decoded = Klaxon().parse<AccountsStore>(accountsString)
-    return decoded?.state
+    try {
+        val decoded = Klaxon().parse<AccountsStore>(accountsString)
+        return decoded?.state
+    } catch (e) {
+        Log.d("GetAccountsState", "Could not parse the store-accounts data")
+        return null
+    }
 }
 
 fun getCurrentAccount(appContext: Context): String? {

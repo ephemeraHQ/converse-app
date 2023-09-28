@@ -171,5 +171,4 @@ class PushNotificationsService : FirebaseMessagingService() {
         val reactContext = ReactApplicationContext(this)
         asyncStorageModule = AsyncStorageModule(reactContext)
     }
-
 }
