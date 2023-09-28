@@ -5,7 +5,13 @@ import { setTopicToNavigateTo } from "../components/StateHandlers/InitialStateHa
 import config from "../config";
 import { saveConversations } from "../data/helpers/conversations/upsertConversations";
 import { saveMessages } from "../data/helpers/messages";
-import { getAccountsList, useChatStore } from "../data/store/accountsStore";
+import {
+  currentAccount,
+  getAccountsList,
+  getChatStore,
+  getSettingsStore,
+  useAccountsStore,
+} from "../data/store/accountsStore";
 import { useAppStore } from "../data/store/appStore";
 import { XmtpConversation, XmtpMessage } from "../data/store/chatStore";
 import { buildUserInviteTopic } from "../vendor/xmtp-js/src/utils";
@@ -24,6 +30,7 @@ import {
 import { conversationName, shortAddress } from "./str";
 
 let expoPushToken: string | null;
+let nativePushToken: string | null;
 
 export type NotificationPermissionStatus =
   | "granted"
@@ -31,70 +38,86 @@ export type NotificationPermissionStatus =
   | "denied";
 
 const lastSubscribedTopicsByAccount: { [account: string]: string[] } = {};
+const subscribingByAccount: { [account: string]: boolean } = {};
 
-export const deleteSubscribedTopicsInformation = (account: string) => {
+export const deleteSubscribedTopics = (account: string) => {
   if (account in lastSubscribedTopicsByAccount) {
     delete lastSubscribedTopicsByAccount[account];
+  }
+  if (account in subscribingByAccount) {
+    delete subscribingByAccount[account];
   }
 };
 
 export const subscribeToNotifications = async (
-  account: string,
-  conversations: XmtpConversation[],
-  blockedPeerAddresses: { [peerAddress: string]: boolean },
-  deletedTopics: { [topic: string]: boolean }
+  account: string
 ): Promise<void> => {
-  const lastSubscribedTopics = lastSubscribedTopicsByAccount[account] || [];
-  const topics = [
-    ...conversations
-      .filter(
-        (c) =>
-          c.peerAddress &&
-          !c.pending &&
-          !blockedPeerAddresses[c.peerAddress.toLowerCase()] &&
-          !deletedTopics[c.topic]
-      )
-      .map((c) => c.topic),
-    buildUserInviteTopic(account || ""),
-  ];
-  const [expoTokenQuery, nativeTokenQuery] = await Promise.all([
-    Notifications.getExpoPushTokenAsync({ projectId: config.expoProjectId }),
-    Notifications.getDevicePushTokenAsync(),
-  ]);
-  expoPushToken = expoTokenQuery.data;
-  saveExpoPushToken(expoPushToken);
-
-  // Let's check if we need to make the query i.e
-  // the topics are not exactly the same
-  const shouldMakeQuery =
-    lastSubscribedTopics.length !== topics.length ||
-    topics.some((t) => !lastSubscribedTopics.includes(t));
-  if (!shouldMakeQuery) return;
+  if (subscribingByAccount[account]) {
+    await new Promise((r) => setTimeout(r, 1000));
+    await subscribeToNotifications(account);
+    return;
+  }
   try {
+    subscribingByAccount[account] = true;
+    const lastSubscribedTopics = lastSubscribedTopicsByAccount[account] || [];
+    const { conversations, deletedTopics } = getChatStore(account).getState();
+    const { blockedPeers } = getSettingsStore(account).getState();
+    const topics = [
+      ...Object.values(conversations)
+        .filter(
+          (c) =>
+            c.peerAddress &&
+            !c.pending &&
+            !blockedPeers[c.peerAddress.toLowerCase()] &&
+            !deletedTopics[c.topic]
+        )
+        .map((c) => c.topic),
+      buildUserInviteTopic(account || ""),
+    ];
+    const [expoTokenQuery, nativeTokenQuery] = await Promise.all([
+      Notifications.getExpoPushTokenAsync({ projectId: config.expoProjectId }),
+      Notifications.getDevicePushTokenAsync(),
+    ]);
+    expoPushToken = expoTokenQuery.data;
+    nativePushToken = nativeTokenQuery.data;
+    saveExpoPushToken(expoPushToken);
+
+    // Let's check if we need to make the query i.e
+    // the topics are not exactly the same
+    const shouldMakeQuery =
+      lastSubscribedTopics.length !== topics.length ||
+      topics.some((t) => !lastSubscribedTopics.includes(t));
+    if (!shouldMakeQuery) {
+      delete subscribingByAccount[account];
+      return;
+    }
+    console.log(
+      `[Notifications] Subscribing to ${topics.length} topic for ${account}`
+    );
     await api.post("/api/subscribe", {
       expoToken: expoPushToken,
-      nativeToken: nativeTokenQuery.data,
+      nativeToken: nativePushToken,
       nativeTokenType: nativeTokenQuery.type,
       notificationChannel:
         nativeTokenQuery.type === "android" ? "converse-notifications" : null,
       topics,
     });
     lastSubscribedTopicsByAccount[account] = topics;
-  } catch (e: any) {
-    console.log("Could not subscribe to notifications");
-    console.log(e?.message);
+  } catch (e) {
+    console.log("[Notifications] Error while subscribing:", e);
   }
+  delete subscribingByAccount[account];
 };
 
-export const disablePushNotifications = async (): Promise<void> => {
-  if (expoPushToken) {
-    try {
-      await api.delete(`/api/device/${encodeURIComponent(expoPushToken)}`);
-    } catch (e: any) {
-      console.log("Could not unsubscribe from notifications");
-      console.error(e);
-    }
-    expoPushToken = null;
+export const unsubscribeFromNotifications = async (
+  topics: string[]
+): Promise<void> => {
+  const nativeTokenQuery = await Notifications.getDevicePushTokenAsync();
+  if (nativeTokenQuery.data) {
+    await api.post("/api/unsubscribe", {
+      nativeToken: nativeTokenQuery.data,
+      topics,
+    });
   }
 };
 
@@ -112,7 +135,7 @@ const setupAndroidNotificationChannel = async () => {
   });
 };
 
-export const getNotificationsPermissionStatus = async (): Promise<
+const getNotificationsPermissionStatus = async (): Promise<
   NotificationPermissionStatus | undefined
 > => {
   await setupAndroidNotificationChannel();
@@ -294,14 +317,37 @@ export const onInteractWithNotification = (
     | string
     | undefined;
   const conversationTopic = newConversationTopic || messageConversationTopic;
+  const account =
+    notificationData["account"] || useAccountsStore.getState().currentAccount;
   if (conversationTopic) {
-    const conversations = useChatStore.getState().conversations;
+    useAccountsStore.getState().setCurrentAccount(account, false);
+    const conversations = getChatStore(account).getState().conversations;
     if (conversations[conversationTopic]) {
       navigateToConversation(conversations[conversationTopic]);
     } else {
       // App was probably not loaded!
       setTopicToNavigateTo(conversationTopic);
     }
+  }
+};
+
+export const shouldShowNotificationForeground = async (
+  notification: Notifications.Notification
+) => {
+  resetNotifications();
+  const account = notification.request.content.data?.["account"];
+  if (account && account !== currentAccount()) {
+    return {
+      shouldShowAlert: true,
+      shouldPlaySound: true,
+      shouldSetBadge: true,
+    };
+  } else {
+    return {
+      shouldShowAlert: false,
+      shouldPlaySound: false,
+      shouldSetBadge: false,
+    };
   }
 };
 

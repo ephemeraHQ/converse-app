@@ -14,7 +14,17 @@ const api = axios.create({
   baseURL: config.apiURI,
 });
 
+const lastSaveUser: { [address: string]: number } = {};
+
 export const saveUser = async (address: string) => {
+  const now = new Date().getTime();
+  const last = lastSaveUser[address] || 0;
+  if (now - last < 3000) {
+    // Avoid race condition when changing account at same
+    // time than coming back on the app.
+    return;
+  }
+  lastSaveUser[address] = now;
   await api.post("/api/user", { address });
 };
 

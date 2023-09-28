@@ -55,13 +55,17 @@ const protocolMessageToStateMessage = (
 
 export const streamAllMessages = async (client: Client) => {
   await stopStreamingAllMessage(client);
+  console.log(`[XmtpRN] Streaming messages for ${client.address}`);
   client.conversations.streamAllMessages(async (message) => {
+    console.log(`[XmtpRN] Received a message for ${client.address}`);
     saveMessages(client.address, [protocolMessageToStateMessage(message)]);
   });
 };
 
-export const stopStreamingAllMessage = async (client: Client) =>
+export const stopStreamingAllMessage = (client: Client) => {
+  console.log(`[XmtpRN] Stopped streaming messages for ${client.address}`);
   client.conversations.cancelStreamAllMessages();
+};
 
 export const loadConversationsMessages = async (
   client: Client,
@@ -84,7 +88,7 @@ export const loadConversationsMessages = async (
       }))
     );
     console.log(
-      `[XmtpRn] Fetched ${messagesBatch.length} messages from network`
+      `[XmtpRn] Fetched ${messagesBatch.length} messages from network for ${client.address}`
     );
 
     const oldQueryConversationsFromTimestamp = {

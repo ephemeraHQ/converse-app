@@ -12,7 +12,7 @@ import {
 import AndroidBackAction from "../components/AndroidBackAction";
 import Recommendations from "../components/Recommendations/Recommendations";
 import { backgroundColor } from "../utils/colors";
-import { NavigationParamList } from "./Main";
+import { NavigationParamList } from "./Navigation/Navigation";
 
 export default function ConverseMatchMaker({
   route,
