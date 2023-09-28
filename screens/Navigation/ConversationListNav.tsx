@@ -12,7 +12,7 @@ import Connecting, {
 } from "../../components/Connecting";
 import NewConversationButton from "../../components/ConversationList/NewConversationButton";
 import ShareProfileButton from "../../components/ConversationList/ShareProfileButton";
-import { currentAccount, useChatStore } from "../../data/store/accountsStore";
+import { useAccountsStore, useChatStore } from "../../data/store/accountsStore";
 import { headerTitleStyle } from "../../utils/colors";
 import { pick } from "../../utils/objects";
 import { getReadableProfile } from "../../utils/str";
@@ -70,6 +70,7 @@ export default function ConversationListNav() {
   ) as React.MutableRefObject<SearchBarCommands | null>;
 
   const shouldShowConnectingOrSyncing = useShouldShowConnectingOrSyncing();
+  const currentAccount = useAccountsStore((s) => s.currentAccount);
 
   return (
     <NativeStack.Screen
@@ -79,7 +80,7 @@ export default function ConversationListNav() {
           shouldShowConnectingOrSyncing ? <Connecting /> : undefined,
         headerLargeTitle: true,
         headerTitleStyle: headerTitleStyle(colorScheme),
-        headerBackTitle: getReadableProfile(currentAccount(), currentAccount()),
+        headerBackTitle: getReadableProfile(currentAccount, currentAccount),
         headerRight: () => (
           <>
             <ShareProfileButton />
