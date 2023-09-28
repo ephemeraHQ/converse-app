@@ -37,7 +37,7 @@ import {
   textSecondaryColor,
 } from "../utils/colors";
 import { getIPFSAssetURI } from "../utils/thirdweb";
-import { NavigationParamList } from "./Main";
+import { NavigationParamList } from "./Navigation/Navigation";
 
 export default function ProfileScreen({
   route,

@@ -64,7 +64,8 @@ export const emptySavedNotificationsMessages = () =>
 
 export const saveApiURI = () => AsyncStorage.setItem("api-uri", config.apiURI);
 
-export const resetSharedData = () => {
+export const resetSharedData = (topics: string[]) => {
   emptySavedNotificationsMessages();
   emptySavedNotificationsConversations();
+  AsyncStorage.multiRemove(topics.map((t) => `conversation-${t}`));
 };

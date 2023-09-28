@@ -37,7 +37,7 @@ import {
 import { converseEventEmitter } from "../utils/events";
 import { pick } from "../utils/objects";
 import { getTitleFontScale, TextInputWithValue } from "../utils/str";
-import { NavigationParamList } from "./Main";
+import { NavigationParamList } from "./Navigation/Navigation";
 
 const Conversation = ({
   route,

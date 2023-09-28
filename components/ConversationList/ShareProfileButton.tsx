@@ -1,4 +1,5 @@
-import { NativeStackScreenProps } from "@react-navigation/native-stack";
+import { useNavigation } from "@react-navigation/native";
+import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import React from "react";
 import {
   Platform,
@@ -7,13 +8,16 @@ import {
   useColorScheme,
 } from "react-native";
 
-import { NavigationParamList } from "../../screens/Main";
+import { NavigationParamList } from "../../screens/Navigation/Navigation";
 import { textSecondaryColor } from "../../utils/colors";
 import Picto from "../Picto/Picto";
 
-export default function ShareProfileButton({
-  navigation,
-}: NativeStackScreenProps<NavigationParamList, "Chats">) {
+export default function ShareProfileButton() {
+  const navigation = useNavigation() as NativeStackNavigationProp<
+    NavigationParamList,
+    "Chats",
+    undefined
+  >;
   const colorScheme = useColorScheme();
   return (
     <TouchableOpacity

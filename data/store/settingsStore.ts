@@ -2,6 +2,7 @@ import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
 
 import { zustandMMKVStorage } from "../../utils/mmkv";
+import { subscribeToNotifications } from "../../utils/notifications";
 
 // Settings for each account setup in the app
 // not all of them are really settings selected
@@ -47,6 +48,9 @@ export const initSettingsStore = (account: string) => {
             } else {
               delete blockedPeerAddresses[peerAddress.toLowerCase()];
             }
+            setImmediate(() => {
+              subscribeToNotifications(account);
+            });
             return { blockedPeers: blockedPeerAddresses };
           }),
         ephemeralAccount: false,

@@ -3,6 +3,7 @@ import { persist, createJSONStorage } from "zustand/middleware";
 
 import { lastValueInMap } from "../../utils/map";
 import { zustandMMKVStorage } from "../../utils/mmkv";
+import { subscribeToNotifications } from "../../utils/notifications";
 import { omit } from "../../utils/objects";
 import {
   markAllConversationsAsReadInDb,
@@ -154,6 +155,10 @@ export const initChatStore = (account: string) => {
                 };
               });
 
+              setImmediate(() => {
+                subscribeToNotifications(account);
+              });
+
               return {
                 ...state,
                 conversations,
@@ -161,9 +166,14 @@ export const initChatStore = (account: string) => {
               };
             }),
           deleteConversations: (topics) =>
-            set(({ conversations }) => ({
-              conversations: omit(conversations, topics),
-            })),
+            set(({ conversations }) => {
+              setImmediate(() => {
+                subscribeToNotifications(account);
+              });
+              return {
+                conversations: omit(conversations, topics),
+              };
+            }),
           updateConversationTopic: (oldTopic, conversation) =>
             set((state) => {
               if (oldTopic in state.conversations) {
@@ -184,6 +194,9 @@ export const initChatStore = (account: string) => {
 
                 delete newState.conversations[oldTopic];
                 newState.conversationsMapping[oldTopic] = conversation.topic;
+                setImmediate(() => {
+                  subscribeToNotifications(account);
+                });
                 return newState;
               } else {
                 return state;
@@ -397,6 +410,9 @@ export const initChatStore = (account: string) => {
               const newDeletedTopics = { ...state.deletedTopics };
               topics.forEach((t) => {
                 newDeletedTopics[t] = true;
+              });
+              setImmediate(() => {
+                subscribeToNotifications(account);
               });
               return { deletedTopics: newDeletedTopics };
             }),

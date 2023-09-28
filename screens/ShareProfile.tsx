@@ -18,7 +18,7 @@ import config from "../config";
 import { useProfilesStore, useUserStore } from "../data/store/accountsStore";
 import { backgroundColor, textPrimaryColor } from "../utils/colors";
 import { shortAddress } from "../utils/str";
-import { NavigationParamList } from "./Main";
+import { NavigationParamList } from "./Navigation/Navigation";
 
 export default function ShareProfileScreen({
   route,
