@@ -44,6 +44,7 @@ class PushNotificationsService : FirebaseMessagingService() {
         super.onCreate()
         initSecureStore()
         initAsyncStorage()
+        initSentry(this)
     }
 
     override fun onMessageReceived(remoteMessage: RemoteMessage) {
