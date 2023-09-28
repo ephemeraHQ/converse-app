@@ -22,7 +22,8 @@ fun getAccountsState(appContext: Context): Accounts? {
     try {
         val decoded = Klaxon().parse<AccountsStore>(accountsString)
         return decoded?.state
-    } catch (e) {
+    } catch (e: Exception) {
+        sentryTrackError(e, mapOf("message" to "Could not parse the store-accounts data", "accountsString" to accountsString))
         Log.d("GetAccountsState", "Could not parse the store-accounts data")
         return null
     }

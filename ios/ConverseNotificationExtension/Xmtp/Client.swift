@@ -62,7 +62,6 @@ func getXmtpClient(contentTopic: String) async -> XMTP.Client? {
   do {
     let xmtpKeyData = try getXmtpKeyForTopic(contentTopic: contentTopic)
     if (xmtpKeyData == nil) {
-      sentryTrackMessage(message: "No XMTP key found for topic (might be that user logged out)", extras: nil)
       return nil;
     }
     let privateKeyBundle = try! PrivateKeyBundle(serializedData: xmtpKeyData!)
