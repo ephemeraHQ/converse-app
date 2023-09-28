@@ -58,7 +58,12 @@ fun getXmtpKeyForTopic(appContext: Context, topic: String): ByteArray? {
 fun getXmtpClient(appContext: Context, topic: String): Client? {
     val keyByteArray = getXmtpKeyForTopic(appContext, topic) ?: return null
     val keys = PrivateKeyBundleV1Builder.buildFromBundle(keyByteArray)
-    val xmtpEnvString = getAsyncStorage("xmtp-env")
+    val mmkv = getMmkv(appContext)
+    var xmtpEnvString = mmkv?.decodeString("xmtp-env")
+    // TODO => stop using async storage
+    if (xmtpEnvString == null) {
+        xmtpEnvString = getAsyncStorage("xmtp-env")
+    }
     val xmtpEnv =
         if (xmtpEnvString == "production") XMTPEnvironment.PRODUCTION else XMTPEnvironment.DEV
 
