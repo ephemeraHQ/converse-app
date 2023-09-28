@@ -15,6 +15,7 @@ import XmtpEngine from "./components/XmtpEngine";
 import config from "./config";
 import { migrateDataIfNeeded } from "./data/refacto";
 import Main from "./screens/Main";
+import { registerBackgroundFetchTask } from "./utils/background";
 import {
   backgroundColor,
   MaterialDarkTheme,
@@ -40,6 +41,11 @@ Sentry.init({
 export default function App() {
   const colorScheme = useColorScheme();
   const styles = useStyles();
+
+  useEffect(() => {
+    registerBackgroundFetchTask();
+  }, []);
+
   useRecentPicksPersistence({
     initialization: () =>
       JSON.parse(mmkv.getString(RECENT_EMOJI_STORAGE_KEY) || DEFAULT_EMOJIS),

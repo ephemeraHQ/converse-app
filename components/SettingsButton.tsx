@@ -1,42 +1,42 @@
-import { NativeStackScreenProps } from "@react-navigation/native-stack";
+import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { useDisconnect } from "@thirdweb-dev/react-native";
 import * as Clipboard from "expo-clipboard";
 import * as Linking from "expo-linking";
 import React, { useCallback } from "react";
 import {
   Keyboard,
-  Dimensions,
   Platform,
   TouchableOpacity,
   useColorScheme,
-  View,
 } from "react-native";
 
 import config from "../config";
 import { refreshProfileForAddress } from "../data/helpers/profiles/profilesUpdate";
-import {
-  currentAccount,
-  useProfilesStore,
-  useUserStore,
-} from "../data/store/accountsStore";
+import { useAccountsStore } from "../data/store/accountsStore";
 import { useAppStore } from "../data/store/appStore";
-import { NavigationParamList } from "../screens/Main";
-import { actionSheetColors, textSecondaryColor } from "../utils/colors";
+import { NavigationParamList } from "../screens/Navigation/Navigation";
+import { actionSheetColors, primaryColor } from "../utils/colors";
+import { converseEventEmitter } from "../utils/events";
 import { logout } from "../utils/logout";
 import {
   requestPushNotificationsPermissions,
   NotificationPermissionStatus,
 } from "../utils/notifications";
 import { pick } from "../utils/objects";
-import { getTitleFontScale, shortAddress } from "../utils/str";
-import Button from "./Button/Button";
 import Picto from "./Picto/Picto";
 import { showActionSheetWithOptions } from "./StateHandlers/ActionSheetStateHandler";
+import { TableViewPicto } from "./TableView/TableViewImage";
 
-export default function SettingsButton({
-  navigation,
-}: NativeStackScreenProps<NavigationParamList, "Chats">) {
-  const userAddress = useUserStore((s) => s.userAddress);
+type Props = {
+  account: string;
+  navigation?: NativeStackNavigationProp<
+    NavigationParamList,
+    "Accounts",
+    undefined
+  >;
+};
+
+export default function SettingsButton({ navigation, account }: Props) {
   const { setNotificationsPermissionStatus, notificationsPermissionStatus } =
     useAppStore((s) =>
       pick(s, [
@@ -44,6 +44,7 @@ export default function SettingsButton({
         "setNotificationsPermissionStatus",
       ])
     );
+  const setCurrentAccount = useAccountsStore((s) => s.setCurrentAccount);
   const disconnectWallet = useDisconnect();
   const colorScheme = useColorScheme();
   const onPress = useCallback(() => {
@@ -51,22 +52,48 @@ export default function SettingsButton({
 
     const methods = {
       "Your profile page": () => {
-        if (userAddress) {
-          refreshProfileForAddress(currentAccount(), userAddress);
-          navigation.push("Profile", { address: userAddress });
+        if (account) {
+          refreshProfileForAddress(account, account);
+          setCurrentAccount(account, false);
+          if (navigation) {
+            navigation.push("Chats");
+            navigation.push("Profile", { address: account });
+          } else {
+            // On android the drawer is outside the navigation
+            // so we use Linking to navigate
+            converseEventEmitter.emit("toggle-navigation-drawer", false);
+            Linking.openURL(
+              Linking.createURL("/profile", {
+                queryParams: {
+                  address: account,
+                },
+              })
+            );
+          }
         }
       },
       "Copy wallet address": () => {
-        Clipboard.setStringAsync(userAddress || "");
+        Clipboard.setStringAsync(account || "");
       },
       "Contact Converse team": () => {
-        Linking.openURL(
-          Linking.createURL("/conversation", {
-            queryParams: {
-              mainConversationWithPeer: config.polAddress,
-            },
-          })
-        );
+        setCurrentAccount(account, false);
+        if (navigation) {
+          navigation.push("Chats");
+          navigation.push("Conversation", {
+            mainConversationWithPeer: config.polAddress,
+          });
+        } else {
+          // On android the drawer is outside the navigation
+          // so we use Linking to navigate
+          converseEventEmitter.emit("toggle-navigation-drawer", false);
+          Linking.openURL(
+            Linking.createURL("/conversation", {
+              queryParams: {
+                mainConversationWithPeer: config.polAddress,
+              },
+            })
+          );
+        }
       },
       "Turn on notifications": () => {
         if (notificationsPermissionStatus === "denied") {
@@ -96,7 +123,7 @@ export default function SettingsButton({
       },
       Disconnect: () => {
         disconnectWallet();
-        logout(currentAccount());
+        logout(account);
       },
       Cancel: () => {},
     };
@@ -111,7 +138,7 @@ export default function SettingsButton({
         options,
         destructiveButtonIndex: options.indexOf("Disconnect"),
         cancelButtonIndex: options.indexOf("Cancel"),
-        title: userAddress || undefined,
+        title: account || undefined,
         ...actionSheetColors(colorScheme),
       },
       (selectedIndex?: number) => {
@@ -123,49 +150,24 @@ export default function SettingsButton({
       }
     );
   }, [
-    colorScheme,
-    disconnectWallet,
-    navigation,
     notificationsPermissionStatus,
+    account,
+    colorScheme,
+    setCurrentAccount,
+    navigation,
     setNotificationsPermissionStatus,
-    userAddress,
+    disconnectWallet,
   ]);
 
-  const userPrimaryENS = useProfilesStore(
-    (s) =>
-      s.profiles[userAddress]?.socials.ensNames?.find((n) => n.isPrimary)?.name
+  return Platform.OS === "android" ? (
+    <TouchableOpacity onPress={onPress}>
+      <Picto picto="more_vert" size={24} color="red" />
+    </TouchableOpacity>
+  ) : (
+    <TableViewPicto
+      symbol="info.circle"
+      color={primaryColor(colorScheme)}
+      onPress={onPress}
+    />
   );
-
-  if (Platform.OS === "ios") {
-    const screenWidth = Dimensions.get("screen").width;
-    const marginWidth = 26; // 16 left, 10 right
-    const connectingWidth = 110;
-    const flexBasis = screenWidth / 2 - marginWidth - connectingWidth / 2;
-    return (
-      <View
-        style={{
-          flexBasis: userPrimaryENS ? flexBasis : undefined,
-        }}
-      >
-        <Button
-          variant="text"
-          allowFontScaling={false}
-          textStyle={{ fontSize: 17 * getTitleFontScale() }}
-          onPress={onPress}
-          title={userPrimaryENS || shortAddress(userAddress || "")}
-          numberOfLines={1}
-        />
-      </View>
-    );
-  } else {
-    return (
-      <TouchableOpacity onPress={onPress}>
-        <Picto
-          picto="account_circle"
-          size={24}
-          color={textSecondaryColor(colorScheme)}
-        />
-      </TouchableOpacity>
-    );
-  }
 }

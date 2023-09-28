@@ -8,7 +8,7 @@ import {
 } from "react-native";
 import { FAB } from "react-native-paper";
 
-import { NavigationParamList } from "../../screens/Main";
+import { NavigationParamList } from "../../screens/Navigation/Navigation";
 import DebugButton, { useEnableDebug } from "../DebugButton";
 import Picto from "../Picto/Picto";
 
