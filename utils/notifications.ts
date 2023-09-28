@@ -19,14 +19,14 @@ import api from "./api";
 import { saveExpoPushToken } from "./keychain";
 import mmkv from "./mmkv";
 import { navigateToConversation } from "./navigation";
-import { sentryTrackError, sentryTrackMessage } from "./sentry";
+import { sentryTrackError } from "./sentry";
 import {
   emptySavedNotificationsMessages,
   loadSavedNotificationsMessages,
   emptySavedNotificationsConversations,
   loadSavedNotificationsConversations,
   saveConversationDict,
-} from "./sharedData/sharedData";
+} from "./sharedData";
 import { conversationName, shortAddress } from "./str";
 
 let expoPushToken: string | null;
@@ -177,15 +177,11 @@ export const loadSavedNotificationMessagesToContext = async () => {
   try {
     const knownAccounts = getAccountsList();
     lastStepDone = 1;
-    const [conversations, messages] = await Promise.all([
-      loadSavedNotificationsConversations(),
-      loadSavedNotificationsMessages(),
-    ]);
+    const conversations = loadSavedNotificationsConversations();
+    const messages = loadSavedNotificationsMessages();
     lastStepDone = 2;
-    await Promise.all([
-      emptySavedNotificationsConversations(),
-      emptySavedNotificationsMessages(),
-    ]);
+    emptySavedNotificationsConversations();
+    emptySavedNotificationsMessages();
     lastStepDone = 3;
 
     if (conversations && conversations.length > 0) {
@@ -293,16 +289,7 @@ export const saveConversationIdentifiersForNotifications = (
   };
 
   // Also save to shared preferences to be able to show notification
-  saveConversationDict(conversation.topic, conversationDict).catch((e) => {
-    const dataToSave = {
-      topic: `conversation-${conversation.topic}`,
-      conversationDict,
-    };
-    sentryTrackMessage("ERROR_SAVING_SHARED_PREFERENCE", {
-      error: e.toString(),
-      data: JSON.stringify(dataToSave),
-    });
-  });
+  saveConversationDict(conversation.topic, conversationDict);
 };
 
 export const onInteractWithNotification = (

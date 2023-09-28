@@ -11,7 +11,7 @@ import {
   deleteSubscribedTopics,
   unsubscribeFromNotifications,
 } from "./notifications";
-import { resetSharedData } from "./sharedData/sharedData";
+import { resetSharedData } from "./sharedData";
 import { deleteXmtpClient } from "./xmtpRN/client";
 
 type LogoutTasks = {

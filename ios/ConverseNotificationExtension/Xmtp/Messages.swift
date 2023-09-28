@@ -10,8 +10,8 @@ import XMTP
 
 
 func loadSavedMessages() -> [SavedNotificationMessage] {
-  let sharedDefaults = try! SharedDefaults()
-  let savedMessagesString = sharedDefaults.string(forKey: "saved-notifications-messages")
+  let mmkv = getMmkv()
+  let savedMessagesString = mmkv?.string(forKey: "saved-notifications-messages")
   if (savedMessagesString == nil) {
     return []
   } else {
@@ -26,14 +26,14 @@ func loadSavedMessages() -> [SavedNotificationMessage] {
 }
 
 func saveMessage(account: String, topic: String, sent: Date, senderAddress: String, content: String, id: String, sentViaConverse: Bool, contentType: String) throws {
-  let sharedDefaults = try! SharedDefaults()
   let savedMessage = SavedNotificationMessage(topic: topic, content: content, senderAddress: senderAddress, sent: Int(sent.timeIntervalSince1970 * 1000), id: id, sentViaConverse: sentViaConverse, contentType: contentType, account: account)
   
   var savedMessagesList = loadSavedMessages()
   savedMessagesList.append(savedMessage)
   let encodedValue = try JSONEncoder().encode(savedMessagesList)
   let encodedString = String(data: encodedValue, encoding: .utf8)
-  sharedDefaults.set(encodedString, forKey: "saved-notifications-messages")
+  let mmkv = getMmkv()
+  mmkv?.set(encodedString!, forKey: "saved-notifications-messages")
 }
 
 
