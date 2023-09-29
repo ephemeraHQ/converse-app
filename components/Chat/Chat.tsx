@@ -232,7 +232,7 @@ export default function Chat({
         {showPlaceholder && (
           <ChatPlaceholder messagesCount={listArray.length} />
         )}
-        <ChatConsent navigation={navigation} />
+        <ChatConsent navigation={navigation} conversation={conversation} />
       </ReanimatedView>
       {showChatInput && (
         <>
