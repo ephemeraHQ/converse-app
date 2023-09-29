@@ -18,7 +18,7 @@ import Picto from "../Picto/Picto";
 type Props = {
   title: string;
   onPress?: (event: GestureResponderEvent) => void;
-  variant: "primary" | "secondary" | "grey" | "text";
+  variant: "primary" | "secondary" | "secondary-danger" | "grey" | "text";
   style?: StyleProp<ViewStyle>;
   textStyle?: StyleProp<TextStyle>;
   allowFontScaling?: boolean;
@@ -45,11 +45,13 @@ export default function Button({
       ? [styles.buttonPrimary, styles.buttonSecondary]
       : variant === "grey"
       ? [styles.buttonGrey]
+      : variant === "secondary-danger"
+      ? [styles.buttonPrimary, styles.buttonSecondary, , styles.buttonDanger]
       : [styles.buttonText];
   const buttonTextStyle =
     variant === "primary"
       ? [styles.buttonPrimaryText]
-      : variant === "secondary"
+      : variant === "secondary" || variant === "secondary-danger"
       ? [styles.buttonPrimaryText, styles.buttonSecondaryText]
       : variant === "grey"
       ? [styles.buttonGreyText]
@@ -104,6 +106,9 @@ const useStyles = () => {
       paddingLeft: 25,
       borderRadius: 100,
       paddingVertical: 7,
+    },
+    buttonDanger: {
+      backgroundColor: PlatformColor("systemRed"),
     },
     buttonSecondaryText: {
       fontWeight: "400",
