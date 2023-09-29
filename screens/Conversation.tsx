@@ -298,7 +298,7 @@ const Conversation = ({
           onReadyToFocus,
         }}
       >
-        <ConverseChat />
+        <ConverseChat navigation={navigation} />
       </ConversationContext.Provider>
     </View>
   );
