@@ -8,7 +8,9 @@ import {
   Alert,
 } from "react-native";
 
+import { useChatStore } from "../../data/store/accountsStore";
 import { XmtpConversationWithUpdate } from "../../data/store/chatStore";
+import { deleteTopic } from "../../utils/api";
 import {
   backgroundColor,
   tertiaryBackgroundColor,
@@ -25,6 +27,7 @@ export default function ChatConsent({
   conversation: XmtpConversationWithUpdate | undefined;
 }) {
   const styles = useStyles();
+  const markTopicsAsDeleted = useChatStore((s) => s.markTopicsAsDeleted);
 
   const acceptChat = function () {
     console.log("accept");
@@ -57,8 +60,8 @@ export default function ChatConsent({
                   style: "destructive",
                   isPreferred: true,
                   onPress: () => {
-                    //deleteTopic(conversationTopic);
-                    //markTopicsAsDeleted([conversationTopic]);
+                    deleteTopic(conversation.topic);
+                    markTopicsAsDeleted([conversation.topic]);
                     navigation.pop();
                   },
                 },
