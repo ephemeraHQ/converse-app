@@ -32,7 +32,7 @@ export default function NotificationsStateHandler() {
     // Things to do when app opens
     saveNotificationsStatus();
     // Dismiss notifications and set badge to 0
-    resetNotifications();
+    resetNotifications(500);
     executeLogoutTasks();
   }, []);
 
@@ -48,11 +48,14 @@ export default function NotificationsStateHandler() {
           executeLogoutTasks();
           saveNotificationsStatus();
           // Dismiss notifications and set badge to 0
-          resetNotifications();
+          resetNotifications(500);
           // Save the user
           if (userAddress) {
             saveUser(userAddress);
           }
+        } else {
+          // Things to do when app status changes to inactive
+          resetNotifications();
         }
         appState.current = nextAppState;
       }
