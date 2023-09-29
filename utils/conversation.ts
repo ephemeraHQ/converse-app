@@ -34,13 +34,13 @@ export const conversationLastMessagePreview = (
   myAddress: string
 ): LastMessagePreview | undefined => {
   if (!conversation.messages?.size) return undefined;
-  const messagesArray = Array.from(conversation.messages.values());
+  const messageIds = conversation.messagesIds;
   let removedReactions: {
     [messageId: string]: { [reactionContent: string]: Reaction };
   } = {};
-  while (messagesArray.length > 0) {
-    const lastMessage = messagesArray.pop();
-
+  for (let index = messageIds.length - 1; index >= 0; index--) {
+    const lastMessageId = messageIds[index];
+    const lastMessage = conversation.messages.get(lastMessageId);
     if (!lastMessage) {
       return undefined;
     } else {
@@ -103,6 +103,7 @@ export const conversationLastMessagePreview = (
       }
     }
   }
+
   return undefined;
 };
 
