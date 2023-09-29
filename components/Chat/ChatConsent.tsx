@@ -8,27 +8,31 @@ import {
   Alert,
 } from "react-native";
 
+import { XmtpConversationWithUpdate } from "../../data/store/chatStore";
 import {
   backgroundColor,
   tertiaryBackgroundColor,
   textPrimaryColor,
 } from "../../utils/colors";
-import { useConversationContext } from "../../utils/conversation";
 import { shortAddress } from "../../utils/str";
 import Button from "../Button/Button";
 
 export default function ChatConsent({
   navigation,
+  conversation,
 }: {
   navigation: NativeStackNavigationProp<any>;
+  conversation: XmtpConversationWithUpdate | undefined;
 }) {
-  const { conversation } = useConversationContext(["conversation"]);
-
   const styles = useStyles();
 
   const acceptChat = function () {
     console.log("accept");
   };
+
+  if (!conversation) {
+    return null;
+  }
 
   return (
     <View style={styles.chatConsentContainer}>
