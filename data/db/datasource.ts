@@ -1,6 +1,6 @@
 import "reflect-metadata";
-// import { typeORMDriver } from "react-native-quick-sqlite";
 import { Platform } from "react-native";
+import { typeORMDriver } from "react-native-quick-sqlite";
 import { DataSource } from "typeorm/browser";
 
 import { getDbFileName } from ".";
@@ -50,8 +50,7 @@ export const getDataSource = async (account: string) => {
 
   const newDataSource = new DataSource({
     database: fileName,
-    // driver: typeORMDriver,
-    driver: require("react-native-sqlite-storage"),
+    driver: typeORMDriver,
     entities: [Conversation, Message, Profile],
     synchronize: false,
     migrationsRun: false,
@@ -77,8 +76,9 @@ export const getDataSource = async (account: string) => {
       AddVersionToConversation1695029413899,
     ],
     type: "react-native",
-    location: Platform.OS === "ios" ? "Shared" : "./SQLite",
-    // type: "expo",
+    // On iOS, directly in the Shared folder,
+    // on Android, let's see
+    location: Platform.OS === "ios" ? "./" : "./SQLite",
     logging: true,
     maxQueryExecutionTime: 150,
     logger: new TypeORMLogger(),
