@@ -108,6 +108,9 @@ export const getDbPath = async (account: string) => {
 };
 
 export const clearDb = async (account: string) => {
+  const dbPath = await getDbPath(account);
+  let dbExists = await RNFS.exists(dbPath);
+  console.log("[ClearDB]", { dbPath, dbExists });
   try {
     const dataSource = getExistingDataSource(account);
     if (dataSource) {
@@ -123,8 +126,7 @@ export const clearDb = async (account: string) => {
   deleteDataSource(account);
 
   // Now let's delete the database file
-  const dbPath = await getDbPath(account);
-  const dbExists = await RNFS.exists(dbPath);
+  dbExists = await RNFS.exists(dbPath);
   if (!dbExists) {
     console.log(
       `[ClearDB] SQlite file ${getDbFileName(
