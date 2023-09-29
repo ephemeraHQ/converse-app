@@ -17581,6 +17581,11 @@ react-native-qrcode-svg@^6.2.0:
     prop-types "^15.8.0"
     qrcode "^1.5.1"
 
+react-native-quick-sqlite@^8.0.4:
+  version "8.0.4"
+  resolved "https://registry.yarnpkg.com/react-native-quick-sqlite/-/react-native-quick-sqlite-8.0.4.tgz#b3920208dd38e69a11490636452e215f7ae61b0d"
+  integrity sha512-cdIkZl9pCOuEoUwUs2oekWV4YzKpigvlnaOuCovix3pmKd7cRK3buoidRqUkBYuUpObV28Xy7Mhj0BeDQI9mSA==
+
 react-native-reanimated@~3.3.0:
   version "3.3.0"
   resolved "https://registry.yarnpkg.com/react-native-reanimated/-/react-native-reanimated-3.3.0.tgz#80f9d58e28fddf62fe4c1bc792337b8ab57936ab"
