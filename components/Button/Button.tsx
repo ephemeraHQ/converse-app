@@ -46,7 +46,7 @@ export default function Button({
       : variant === "grey"
       ? [styles.buttonGrey]
       : variant === "secondary-danger"
-      ? [styles.buttonPrimary, styles.buttonSecondary, , styles.buttonDanger]
+      ? [styles.buttonPrimary, styles.buttonSecondary, styles.buttonDanger]
       : [styles.buttonText];
   const buttonTextStyle =
     variant === "primary"
