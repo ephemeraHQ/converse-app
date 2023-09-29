@@ -71,15 +71,21 @@ export default function ChatInput() {
       <TextInput
         style={styles.chatInput}
         value={inputValue}
-        onKeyPress={(e) => {
-          console.log(e.nativeEvent.key);
-        }}
         // On desktop, we modified React Native RCTUITextView.m
         // to handle key Shift + Enter to add new line
         // This disables the flickering on Desktop when hitting Enter
         blurOnSubmit={isDesktop}
         // Mainly used on Desktop so that Enter sends the message
-        onSubmitEditing={onValidate}
+        onSubmitEditing={() => {
+          onValidate();
+          // But we still want to refocus on Desktop when we
+          // hit Enter so let's force it
+          if (isDesktop) {
+            setTimeout(() => {
+              inputRef.current?.focus();
+            }, 100);
+          }
+        }}
         onChangeText={(t: string) => {
           inputIsFocused.current = true;
           setInputValue(t);
