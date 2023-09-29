@@ -174,6 +174,20 @@ export const migrateDataIfNeeded = async () => {
     }
   }
 
+  // On Android, let's migrate databases again to use react-native-quick-sqlite
+  if (Platform.OS === "android") {
+    const oldDirectory = `/data/data/${config.bundleId}/databases/`;
+    const newDirectory = `${RNFS.DocumentDirectoryPath}/SQLite`;
+    const databaseFiles = await RNFS.readDir(oldDirectory);
+    for (const file of databaseFiles) {
+      const filename = file.path.replace(oldDirectory, "");
+      if (filename.startsWith("converse-") && filename.endsWith(".sqlite")) {
+        console.log("FOUND A DB TO MOVE", filename);
+        await moveFileAndReplace(file.path, `${newDirectory}/${filename}`);
+      }
+    }
+  }
+
   const after = new Date().getTime();
   console.log(`[Refacto] Migration took ${(after - before) / 1000} seconds`);
 };

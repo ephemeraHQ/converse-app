@@ -2,8 +2,8 @@ import semver from "semver";
 import { DataSource, ObjectLiteral, Repository } from "typeorm/browser";
 import { QueryDeepPartialEntity } from "typeorm/query-builder/QueryPartialEntity";
 
-// TODO => use react-native-quick-sqlite or Expo 50 that embeds
-// a version of sqlite and does not depend on the version from the OS
+// Probably not necessary anymore since we use react-native-quick-sqlite
+// which embeds a version of SQLite : 3.39.5 (2022-09-29)
 
 // We support SQLite from version 3.8.10.2 (embedded in Android 6.0 - SDK 23)
 const UPSERT_SUPPORTED_FROM = "3.24.0";
