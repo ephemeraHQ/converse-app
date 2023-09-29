@@ -1,4 +1,12 @@
-import { View, StyleSheet, useColorScheme, Platform, Text } from "react-native";
+import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import {
+  View,
+  StyleSheet,
+  useColorScheme,
+  Platform,
+  Text,
+  Alert,
+} from "react-native";
 
 import {
   backgroundColor,
@@ -6,15 +14,17 @@ import {
   textPrimaryColor,
 } from "../../utils/colors";
 import { useConversationContext } from "../../utils/conversation";
+import { shortAddress } from "../../utils/str";
 import Button from "../Button/Button";
 
-export default function ChatConsent() {
+export default function ChatConsent({
+  navigation,
+}: {
+  navigation: NativeStackNavigationProp<any>;
+}) {
   const { conversation } = useConversationContext(["conversation"]);
-  const styles = useStyles();
 
-  const deleteChat = function () {
-    console.log("delete");
-  };
+  const styles = useStyles();
 
   const acceptChat = function () {
     console.log("accept");
@@ -31,7 +41,25 @@ export default function ChatConsent() {
           title="Delete"
           style={styles.cta}
           onPress={() => {
-            deleteChat();
+            Alert.alert(
+              `Delete chat with ${shortAddress(conversation.peerAddress)}?`,
+              undefined,
+              [
+                {
+                  text: "Cancel",
+                },
+                {
+                  text: "Delete",
+                  style: "destructive",
+                  isPreferred: true,
+                  onPress: () => {
+                    //deleteTopic(conversationTopic);
+                    //markTopicsAsDeleted([conversationTopic]);
+                    navigation.pop();
+                  },
+                },
+              ]
+            );
           }}
         />
         <Button
