@@ -74,11 +74,13 @@ const DebugButton = forwardRef((props, ref) => {
           clearDb(currentAccount());
         },
         "List files": async () => {
-          const groupPath = await RNFS.pathForGroup(config.appleAppGroup);
-          const documents = `${RNFS.DocumentDirectoryPath}/`;
-          const documentsFiles = await RNFS.readDir(`${groupPath}`);
-          // Clipboard.setStringAsync(JSON.stringify({ documentsFiles }));
+          // const groupPath = await RNFS.pathForGroup(config.appleAppGroup);
+          // const groupFiles = await RNFS.readDir(`${groupPath}`);
+          const documentsFiles = await RNFS.readDir(
+            `${RNFS.DocumentDirectoryPath}/SQLite`
+          );
           console.log(documentsFiles);
+          // Clipboard.setStringAsync(JSON.stringify({ documentsFiles }));
           alert("Done!");
         },
         "Clear messages attachments folder": async () => {

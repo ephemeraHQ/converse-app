@@ -103,7 +103,7 @@ export const getDbPath = async (account: string) => {
     const groupPath = await RNFS.pathForGroup(config.appleAppGroup);
     return `${groupPath}/${filename}`;
   } else {
-    return `/data/data/${config.bundleId}/databases/${filename}`;
+    return `${RNFS.DocumentDirectoryPath}/SQLite/${filename}`;
   }
 };
 
