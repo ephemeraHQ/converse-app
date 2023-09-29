@@ -56,7 +56,9 @@ export default function NotificationsStateHandler() {
     // Things to do when app opens
     saveNotificationsStatus();
     // Dismiss notifications and set badge to 0
-    resetNotifications();
+    setTimeout(() => {
+      resetNotifications();
+    }, 500);
   }, []);
 
   useEffect(() => {
@@ -71,11 +73,16 @@ export default function NotificationsStateHandler() {
           // App is back to active state
           saveNotificationsStatus();
           // Dismiss notifications and set badge to 0
-          resetNotifications();
+          setTimeout(() => {
+            resetNotifications();
+          }, 500);
           // Save the user
           if (userAddress) {
             saveUser(userAddress);
           }
+        } else {
+          // Also dismiss notifications and set badge to 0 when app becomes inactive
+          resetNotifications();
         }
         appState.current = nextAppState;
       }
