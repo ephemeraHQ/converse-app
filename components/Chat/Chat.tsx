@@ -1,5 +1,5 @@
 import differenceInCalendarDays from "date-fns/differenceInCalendarDays";
-import React, { useCallback, useRef, useMemo } from "react";
+import React, { useCallback, useMemo } from "react";
 import { View, useColorScheme, StyleSheet, Platform } from "react-native";
 import { useAnimatedStyle, useSharedValue } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -10,11 +10,7 @@ import {
   useUserStore,
 } from "../../data/store/accountsStore";
 import { XmtpConversationWithUpdate } from "../../data/store/chatStore";
-import {
-  ReanimatedFlashList,
-  ReanimatedFlatList,
-  ReanimatedView,
-} from "../../utils/animations";
+import { ReanimatedFlashList, ReanimatedView } from "../../utils/animations";
 import { useKeyboardAnimation } from "../../utils/animations/keyboardAnimation";
 import {
   backgroundColor,
@@ -178,18 +174,6 @@ export default function Chat() {
   );
   const keyExtractor = useCallback((item: MessageToDisplay) => item.id, []);
 
-  // This is a small hack - for pending convos we use FlatList,
-  // for "real" convos we use FlashList, because the replacement
-  // of id of the element in the FlashList without changing
-  // the list size makes it buggy (cropped), especially on Android
-  const pendingConversationRef = useRef(
-    !(conversation && !conversation.pending)
-  );
-
-  const AnimatedListView = pendingConversationRef.current
-    ? ReanimatedFlatList
-    : ReanimatedFlashList;
-
   return (
     <View
       style={styles.chatContainer}
@@ -197,7 +181,7 @@ export default function Chat() {
     >
       <ReanimatedView style={chatContentStyle}>
         {conversation && listArray.length > 1 && !isBlockedPeer && (
-          <AnimatedListView
+          <ReanimatedFlashList
             contentContainerStyle={styles.chat}
             data={listArray}
             extraData={[peerSocials]}

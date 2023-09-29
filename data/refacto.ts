@@ -52,6 +52,7 @@ export const migrateDataIfNeeded = async () => {
   }
 
   if (currentAccount !== TEMPORARY_ACCOUNT_NAME) {
+    // On iOS and Android this was the path
     const dbPath = `${RNFS.DocumentDirectoryPath}/SQLite/converse`;
     const dbExists = await RNFS.exists(dbPath);
     if (dbExists) {

@@ -1,3 +1,4 @@
+import { useDisconnect } from "@thirdweb-dev/react-native";
 import { StyleSheet, useColorScheme } from "react-native";
 import { Drawer } from "react-native-paper";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -17,6 +18,7 @@ import { getReadableProfile } from "../../utils/str";
 export default function AccountsAndroid() {
   const styles = useStyles();
   const accounts = useAccountsList();
+  const disconnectWallet = useDisconnect();
   const { currentAccount, setCurrentAccount } = useAccountsStore((s) =>
     pick(s, ["currentAccount", "setCurrentAccount"])
   );
@@ -53,7 +55,12 @@ export default function AccountsAndroid() {
       <Drawer.Item
         label="Add an account"
         icon={({ color }) => <Picto picto="plus" size={24} color={color} />}
-        onPress={() => {
+        onPress={async () => {
+          try {
+            await disconnectWallet();
+          } catch (e) {
+            console.error(e);
+          }
           setAddingNewAccount(true);
         }}
         rippleColor={clickedItemBackgroundColor(colorScheme)}
