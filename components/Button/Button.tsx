@@ -12,7 +12,11 @@ import {
   ViewStyle,
 } from "react-native";
 
-import { primaryColor, tertiaryBackgroundColor } from "../../utils/colors";
+import {
+  dangerColor,
+  primaryColor,
+  tertiaryBackgroundColor,
+} from "../../utils/colors";
 import Picto from "../Picto/Picto";
 
 type Props = {
@@ -108,7 +112,7 @@ const useStyles = () => {
       paddingVertical: 7,
     },
     buttonDanger: {
-      backgroundColor: PlatformColor("systemRed"),
+      backgroundColor: dangerColor(colorScheme),
     },
     buttonSecondaryText: {
       fontWeight: "400",
