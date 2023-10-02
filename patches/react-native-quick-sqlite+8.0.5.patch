@@ -1,0 +1,15 @@
+diff --git a/node_modules/react-native-quick-sqlite/cpp/sqlite3.h b/node_modules/react-native-quick-sqlite/cpp/sqlite3.h
+index 9b284d2..6735cb5 100644
+--- a/node_modules/react-native-quick-sqlite/cpp/sqlite3.h
++++ b/node_modules/react-native-quick-sqlite/cpp/sqlite3.h
+@@ -30,8 +30,8 @@
+ ** the version number) and changes its name to "sqlite3.h" as
+ ** part of the build process.
+ */
+-#ifndef SQLITE3_H
+-#define SQLITE3_H
++#ifndef _SQLITE3_H_
++#define _SQLITE3_H_
+ #include <stdarg.h>     /* Needed for the definition of va_list */
+ 
+ /*
