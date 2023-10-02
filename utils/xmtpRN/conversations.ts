@@ -162,7 +162,7 @@ export const loadConversations = async (
 
     saveTopicDataToKeychain(
       client.address,
-      await protocolConversationsToTopicData(conversations)
+      await protocolConversationsToTopicData(newConversations)
     );
 
     return { newConversations, knownConversations };
