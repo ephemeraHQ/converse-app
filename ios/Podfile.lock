@@ -474,7 +474,7 @@ PODS:
     - React-Core
   - react-native-netinfo (9.3.10):
     - React-Core
-  - react-native-quick-sqlite (8.0.4):
+  - react-native-quick-sqlite (8.0.5):
     - React
     - React-callinvoker
     - React-Core
@@ -1072,7 +1072,7 @@ SPEC CHECKSUMS:
   react-native-keyboard-controller: 04fed02b3ff24e18486c7fb52ab92267c15b27a9
   react-native-mmkv: dea675cf9697ad35940f1687e98e133e1358ef9f
   react-native-netinfo: ccbe1085dffd16592791d550189772e13bf479e2
-  react-native-quick-sqlite: 9daf75c171e3d0bad2011f95cb501303e4a28363
+  react-native-quick-sqlite: 28be360af451ddd14fac8cccf5ffcac8ae9ca28a
   react-native-safe-area-context: 36cc67648134e89465663b8172336a19eeda493d
   react-native-sfsymbols: bd3a0d3eab185e80b571bae60753dcf5a0d57967
   react-native-sqlite-storage: f6d515e1c446d1e6d026aa5352908a25d4de3261
