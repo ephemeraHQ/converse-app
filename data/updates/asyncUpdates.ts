@@ -4,13 +4,14 @@ import appJson from "../../app.json";
 import { useAppStore } from "../store/appStore";
 import { setConsent } from "./001-setConsent";
 
-type UpdatesMap = {
-  [key: string]: () => Promise<void>;
+type Step = {
+  id: string;
+  method: () => Promise<void>;
 };
 
-export const updateSteps: UpdatesMap = {
-  "001-setConsent": setConsent,
-};
+type Steps = Step[];
+
+const updateSteps: Steps = [{ id: "setConsent001", method: setConsent }];
 
 export const updateLastVersionOpen = () => {
   console.log(
@@ -24,24 +25,19 @@ export const updateLastVersionOpen = () => {
   useAppStore.getState().setLastVersionOpen(version);
 };
 
-export const useAsyncUpdates = async () => {
-  const isInternetReachable = useAppStore((s) => s.isInternetReachable);
-  const lastUpdateRan = useAppStore((s) => s.lastUpdateRan);
-  const setLastUpdateRan = useAppStore((s) => s.setLastUpdateRan);
+export const runAsyncUpdates = async () => {
+  const isInternetReachable = useAppStore.getState().isInternetReachable;
+  let lastUpdateRan = useAppStore.getState().lastUpdateRan;
 
   if (isInternetReachable) {
-    const updateKeys = Object.keys(updateSteps);
-
-    // Do we have updates to run?
-    console.log("[Async Updates] lastUpdateRan: ", lastUpdateRan);
-
-    for (const updateKey of updateKeys) {
-      if (updateKey > lastUpdateRan) {
+    for (const updateKey of updateSteps) {
+      if (updateKey.id > lastUpdateRan) {
         try {
-          const update = updateSteps[updateKey];
+          const update = updateKey.method;
           if (update) {
-            update();
-            setLastUpdateRan(updateKey);
+            await update();
+            useAppStore.getState().setLastUpdateRan(updateKey.id);
+            lastUpdateRan = updateKey.id;
           } else {
             console.error(
               `[Async Updates] Failed to run migration: ${updateKey} [Error: migration function not found]`
@@ -56,5 +52,8 @@ export const useAsyncUpdates = async () => {
         }
       }
     }
+  } else {
+    await new Promise((r) => setTimeout(r, 2000));
+    runAsyncUpdates();
   }
 };

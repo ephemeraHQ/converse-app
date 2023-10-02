@@ -16,7 +16,7 @@ import config from "./config";
 import { useAppStore } from "./data/store/appStore";
 import {
   updateLastVersionOpen,
-  useAsyncUpdates,
+  runAsyncUpdates,
 } from "./data/updates/asyncUpdates";
 import { migrateDataIfNeeded } from "./data/updates/initialUpdates";
 import Main from "./screens/Main";
@@ -67,10 +67,10 @@ export default function App() {
       .catch((e) => {
         console.log(e);
       });
-    updateLastVersionOpen();
-  }, []);
 
-  useAsyncUpdates();
+    updateLastVersionOpen();
+    runAsyncUpdates();
+  }, []);
 
   const lastWebviewReset = useAppStore((s) => s.lastWebviewReset);
 
