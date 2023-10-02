@@ -13,7 +13,12 @@ import * as Sentry from "sentry-expo";
 
 import XmtpEngine from "./components/XmtpEngine";
 import config from "./config";
-import { migrateDataIfNeeded } from "./data/refacto";
+import { useAppStore } from "./data/store/appStore";
+import {
+  updateLastVersionOpen,
+  useAsyncUpdates,
+} from "./data/updates/asyncUpdates";
+import { migrateDataIfNeeded } from "./data/updates/initialUpdates";
 import Main from "./screens/Main";
 import { registerBackgroundFetchTask } from "./utils/background";
 import {
@@ -62,7 +67,12 @@ export default function App() {
       .catch((e) => {
         console.log(e);
       });
+    updateLastVersionOpen();
   }, []);
+
+  useAsyncUpdates();
+
+  const lastWebviewReset = useAppStore((s) => s.lastWebviewReset);
 
   if (!refactoMigrationDone) return null;
 
