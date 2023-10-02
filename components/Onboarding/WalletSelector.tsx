@@ -46,7 +46,7 @@ export default function WalletSelector({
 }: Props) {
   const colorScheme = useColorScheme();
   const connectToCoinbase = useCoinbaseWallet(
-    `https://${config.websiteDomain}/coinbase`
+    new URL(`https://${config.websiteDomain}/coinbase`)
   );
   const connectToWalletConnect = useDynamicWalletConnect();
   const rightView = (
