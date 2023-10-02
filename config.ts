@@ -8,6 +8,7 @@ const defaultConfig = {
     "0xf9a3BB070c1f9b3186A547DeD991BeD04a289C5B",
     "0x4496848684441C15A915fa9bF07D131155603253",
     "0x2376e9C7C604D1827bA9aCb1293Dc8b4DA2f0DB3",
+    "0xFA08a80e822F7FA002c4Ae81b7a6De7cE79499dB",
   ],
   conversationDomain: "converse.xyz",
   infuraApiKey: "38f59a7bbbca49f18046ff3a4a752e1c",
