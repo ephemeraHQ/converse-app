@@ -608,7 +608,7 @@ PODS:
     - React-Core
     - SDWebImage (~> 5.15.1)
     - SDWebImageWebPCoder (~> 0.9.1)
-  - RNFlashList (1.5.0):
+  - RNFlashList (1.6.1):
     - React-Core
   - RNFS (2.20.0):
     - React-Core
@@ -674,16 +674,16 @@ PODS:
     - GenericJSON (~> 2.0)
     - Logging (~> 1.0.0)
     - secp256k1.swift (~> 0.1)
-  - XMTP (0.5.11-alpha0):
+  - XMTP (0.5.12-alpha0):
     - Connect-Swift
     - GzipSwift
     - web3.swift
-    - XMTPRust (= 0.3.1-beta0)
-  - XMTPReactNative (1.16.8):
+    - XMTPRust (= 0.3.3-beta0)
+  - XMTPReactNative (1.16.10):
     - ExpoModulesCore
     - MessagePacker
-    - XMTP (= 0.5.11-alpha0)
-  - XMTPRust (0.3.1-beta0)
+    - XMTP (= 0.5.12-alpha0)
+  - XMTPRust (0.3.3-beta0)
   - Yoga (1.14.0)
 
 DEPENDENCIES:
@@ -783,7 +783,7 @@ DEPENDENCIES:
   - Sentry/HybridSDK (= 8.7.1)
   - SQLite.swift
   - UMAppLoader (from `../node_modules/unimodules-app-loader/ios`)
-  - XMTP (= 0.5.11-alpha0)
+  - XMTP (= 0.5.12-alpha0)
   - "XMTPReactNative (from `../node_modules/@xmtp/react-native-sdk/ios`)"
   - Yoga (from `../node_modules/react-native/ReactCommon/yoga`)
 
@@ -1097,7 +1097,7 @@ SPEC CHECKSUMS:
   RNCAsyncStorage: ddc4ee162bfd41b0d2c68bf2d95acd81dd7f1f93
   RNDeviceInfo: 02ea8b23e2280fa18e00a06d7e62804d74028579
   RNFastImage: 5340863670380a8f2d265fb0a6cb76cacf94a082
-  RNFlashList: 25b0e092b4470c84db0386d4f5316dc34123bb6d
+  RNFlashList: 236646d48f224a034f35baa0242e1b77db063b1e
   RNFS: 4ac0f0ea233904cb798630b3c077808c06931688
   RNGestureHandler: c0d04458598fcb26052494ae23dda8f8f5162b13
   RNReactNativeSharedGroupPreferences: de0121a4224c267bc7e9fb16c398f3f087c8da81
@@ -1115,11 +1115,11 @@ SPEC CHECKSUMS:
   SwiftProtobuf: b70d65f419fbfe61a2d58003456ca5da58e337d6
   UMAppLoader: e83f024f75f07802fce99739f04b4537d188caaf
   web3.swift: 2263d1e12e121b2c42ffb63a5a7beb1acaf33959
-  XMTP: 2b2b4805bf5ba7d44bce4dee936614715a93b1a9
-  XMTPReactNative: d8969ba166e68ea09db951143df5f7f39609426b
-  XMTPRust: 78f65f77b1454392980da244961777aee955652f
+  XMTP: fd60e3080fc54d20b7a7a5149eb2c0c2c073ba38
+  XMTPReactNative: 15d4d517ba7d9b373f92c3f3da8f509f8ac8cdaf
+  XMTPRust: cd0e942ea7368b3d025fa5291ab56229d7f24bf1
   Yoga: 86fed2e4d425ee4c6eab3813ba1791101ee153c6
 
-PODFILE CHECKSUM: 17244321a9b1720d1ac3ff243af29f53898d53fb
+PODFILE CHECKSUM: 7db1ff634c5ed4d3baa67a18b1f5aa9c8be483f9
 
 COCOAPODS: 1.12.1
