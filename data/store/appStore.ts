@@ -39,6 +39,9 @@ type AppStoreType = {
 
   lastVersionOpen: string;
   setLastVersionOpen: (version: string) => void;
+
+  lastUpdateRan: string;
+  setLastUpdateRan: (version: string) => void;
 };
 
 export const useAppStore = create<AppStoreType>()(
@@ -71,13 +74,16 @@ export const useAppStore = create<AppStoreType>()(
       lastVersionOpen: "",
       setLastVersionOpen: (version) =>
         set(() => ({ lastVersionOpen: version })),
+
+      lastUpdateRan: "",
+      setLastUpdateRan: (update) => set(() => ({ lastUpdateRan: update })),
     }),
     {
       name: "store-app",
       storage: createJSONStorage(() => zustandMMKVStorage),
       partialize: (state) => ({
         lastVersionOpen: state.lastVersionOpen,
-        lastWebviewReset: state.lastWebviewReset,
+        lastUpdateRan: state.lastUpdateRan,
       }),
     }
   )
