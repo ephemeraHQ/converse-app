@@ -28,14 +28,25 @@ func getDb(account: String) throws -> Connection {
     let fileURL = URL(fileURLWithPath: dbPath)
 
     if !FileManager.default.fileExists(atPath: fileURL.path) {
+      sentryTrackMessage(message: "DB does not exist", extras: ["account": account, "dbPath": dbPath])
       throw "DB does not exist"
     }
-
-    dbByAccount[account] = try Connection(dbPath)
-    if let database = dbByAccount[account] {
-      return database
+    
+    if !FileManager.default.isWritableFile(atPath: fileURL.path) {
+      sentryTrackMessage(message: "DB is not writeable", extras: ["account": account, "dbPath": dbPath, "exists": FileManager.default.fileExists(atPath: fileURL.path)])
+      throw "DB is not writeable"
     }
-    throw "Could not connect to db"
+    
+    let db: Connection = try Connection(dbPath)
+    do {
+        try db.execute("PRAGMA journal_mode=WAL;")
+    } catch {
+      sentryTrackMessage(message: "Could not enable WAL mode", extras: ["error": error, "account": account, "dbPath": dbPath, "exists": FileManager.default.fileExists(atPath: fileURL.path)])
+      throw "Could not enable WAL mode"
+    }
+
+    dbByAccount[account] = db
+    return db
   } catch {
     print (error)
     throw "Could not connect to db"

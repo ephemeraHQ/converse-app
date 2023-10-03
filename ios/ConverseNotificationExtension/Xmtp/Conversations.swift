@@ -15,7 +15,6 @@ func handleNewConversation(xmtpClient: XMTP.Client, envelope: XMTP.Envelope) asy
     // Let's subscribe to that specific topic
     let mmkv = getMmkv()
     var apiURI = mmkv?.string(forKey: "api-uri")
-    print("GOT API URI FROM MMKV", apiURI)
     // TODO => remove shared defaults
     if (apiURI == nil) {
       let sharedDefaults = try! SharedDefaults()
