@@ -40,6 +40,9 @@ export const saveLogoutTask = (account: string, topics: string[]) => {
   const logoutTasks = getLogoutTasks();
   logoutTasks[account] = { topics };
   mmkv.set("converse-logout-tasks", JSON.stringify(logoutTasks));
+  console.log(
+    `[Logout] Saved ${topics.length} topics to logout for ${account}`
+  );
 };
 
 export const executeLogoutTasks = async () => {
@@ -48,6 +51,9 @@ export const executeLogoutTasks = async () => {
   if (!hasTasks) return false;
   for (const account in tasks) {
     const task = tasks[account];
+    console.log(
+      `[Logout] Executing logout task for ${account} (${task.topics.length} topics)`
+    );
     await deleteXmtpKey(account);
     if (task.topics.length > 0) {
       await deleteConversationsFromKeychain(account, task.topics);
