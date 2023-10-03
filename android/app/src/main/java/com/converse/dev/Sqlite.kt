@@ -8,7 +8,7 @@ import com.google.gson.Gson
 import java.io.File
 
 
-private var dbByAccount = mapOf<String, SQLiteDatabase>();
+private var openedDbs = mutableMapOf<String, SQLiteDatabase>();
 
 fun getDbName(appContext: Context, account: String): String {
     val accountsState = getAccountsState(appContext)
@@ -17,14 +17,23 @@ fun getDbName(appContext: Context, account: String): String {
 }
 
 fun getDb(appContext: Context, account: String): SQLiteDatabase? {
-    var database = dbByAccount[account]
+    val dbName = getDbName(appContext, account)
+    var database = openedDbs[dbName]
     if (database != null) {
+        Log.d("DB", "DATABASE ALREADY OPEND FOR $dbName")
         return database as SQLiteDatabase;
     }
-    val databasePath = appContext.getDatabasePath(getDbName(appContext, account)).path
+    var databasePath = "${appContext.filesDir.absolutePath}/SQLite/$dbName"
+    if (!File(databasePath).exists()) {
+        // TODO => remove in the future because migration to react-native-quick-sqlite
+        // made us change path
+        databasePath = appContext.getDatabasePath(getDbName(appContext, account)).path
+    }
+
     return if (File(databasePath).exists()) {
-        Log.d("DB PATH", databasePath)
         database = SQLiteDatabase.openDatabase(databasePath, null, SQLiteDatabase.OPEN_READWRITE)
+        database.rawQuery("PRAGMA journal_mode=WAL;", null)
+        openedDbs[dbName] = database
         database as SQLiteDatabase
     } else {
         null
