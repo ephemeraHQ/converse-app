@@ -31,6 +31,7 @@ import {
 import { useOnboardingStore } from "../data/store/onboardingStore";
 import { textPrimaryColor, textSecondaryColor } from "../utils/colors";
 import { saveXmtpKey } from "../utils/keychain";
+import { waitForLogoutTasksDone } from "../utils/logout";
 import { pick } from "../utils/objects";
 import { shortAddress } from "../utils/str";
 import { getXmtpKeysFromSigner, isOnXmtp } from "../utils/xmtpJS/client";
@@ -254,6 +255,7 @@ export default function OnboardingScreen() {
         }
       );
       const base64Key = keysBuffer.toString("base64");
+      await waitForLogoutTasksDone(500);
       await saveXmtpKey(user.address, base64Key);
       // Successfull login for user, let's setup
       // the storage !

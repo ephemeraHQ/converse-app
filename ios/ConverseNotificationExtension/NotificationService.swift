@@ -90,6 +90,7 @@ func handleNotificationAsync(contentHandler: ((UNNotificationContent) -> Void), 
       } else {
         print("[NotificationExtension] Not showing a notification because no client found")
         contentHandler(UNNotificationContent())
+        return;
       }
     }
     

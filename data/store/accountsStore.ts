@@ -2,6 +2,7 @@ import uuid from "react-native-uuid";
 import { create, StoreApi, UseBoundStore } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
 
+import { removeLogoutTask } from "../../utils/logout";
 import mmkv, { zustandMMKVStorage } from "../../utils/mmkv";
 import { ChatStoreType, initChatStore } from "./chatStore";
 import { ProfilesStoreType, initProfilesStore } from "./profilesStore";
@@ -102,6 +103,7 @@ export const useAccountsStore = create<AccountsStoreStype>()(
           if (isNew) {
             accounts.push(account);
             databaseId[account] = uuid.v4().toString();
+            removeLogoutTask(account);
           }
           return { currentAccount: account, accounts, databaseId };
         }),
