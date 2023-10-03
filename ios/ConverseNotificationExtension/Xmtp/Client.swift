@@ -27,7 +27,7 @@ func getXmtpAccountForTopic(contentTopic: String) -> String? {
           account = thisAccount
         }
       } catch {
-        sentryTrackMessage(message: "Could not check if database has topic", extras: ["error": error])
+        sentryTrackMessage(message: "Could not check if database has topic", extras: ["error": error, "account": thisAccount])
       }
       
       i += 1
