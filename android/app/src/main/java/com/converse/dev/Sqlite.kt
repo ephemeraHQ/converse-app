@@ -32,7 +32,7 @@ fun getDb(appContext: Context, account: String): SQLiteDatabase? {
 
     return if (File(databasePath).exists()) {
         database = SQLiteDatabase.openDatabase(databasePath, null, SQLiteDatabase.OPEN_READWRITE)
-        database.rawQuery("PRAGMA journal_mode=WAL;", null)
+        database.enableWriteAheadLogging()
         openedDbs[dbName] = database
         database as SQLiteDatabase
     } else {

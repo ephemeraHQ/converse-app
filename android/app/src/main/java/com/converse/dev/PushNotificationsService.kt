@@ -132,10 +132,10 @@ class PushNotificationsService : FirebaseMessagingService() {
         var data = remoteMessage.data as MutableMap<Any, Any>
         data["title"] = title
         data["message"] = message
+        Log.d(TAG, "SHOWING NOTIFICATION WITH DATA $data")
         val payload = JSONObject(data as Map<*, *>)
         val content = JSONNotificationContentBuilder(this).setPayload(payload).build()
         val request = createNotificationRequest(identifier, content, FirebaseNotificationTrigger(remoteMessage))
-        Log.d(TAG, "SHOW ${request.identifier} ${request.trigger}")
         return Notification(request, Date(remoteMessage.sentTime))
     }
 
