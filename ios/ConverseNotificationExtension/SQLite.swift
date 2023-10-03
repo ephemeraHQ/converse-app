@@ -9,16 +9,18 @@ import Foundation
 import SQLite
 extension String: Error {}
 
-private var dbByAccount: [String: Connection] = [:]
+private var openedDbs: [String: Connection] = [:]
 
 func getDbName(account: String) -> String {
   let accounts = getAccountsState()
   let databaseId = accounts?.databaseId[account] ?? account
-  return "converse-\(databaseId).sqlite"
+  let dbName = "converse-\(databaseId).sqlite"
+  return dbName
 }
 
 func getDb(account: String) throws -> Connection {
-  if let database = dbByAccount[account] {
+  let dbName = getDbName(account: account)
+  if let database = openedDbs[dbName] {
     return database
   }
   do {
@@ -45,7 +47,7 @@ func getDb(account: String) throws -> Connection {
       throw "Could not enable WAL mode"
     }
 
-    dbByAccount[account] = db
+    openedDbs[dbName] = db
     return db
   } catch {
     print (error)

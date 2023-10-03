@@ -32,8 +32,13 @@ export const getLogoutTasks = (): LogoutTasks => {
   }
 };
 
-export const emptyLogoutTasks = () => {
-  mmkv.delete("converse-logout-tasks");
+export const removeLogoutTask = (account: string) => {
+  const logoutTasks = getLogoutTasks();
+  if (account in logoutTasks) {
+    delete logoutTasks[account];
+    mmkv.set("converse-logout-tasks", JSON.stringify(logoutTasks));
+    console.log(`[Logout] Removed ${account} from logout tasks`);
+  }
 };
 
 export const saveLogoutTask = (account: string, topics: string[]) => {
@@ -45,27 +50,68 @@ export const saveLogoutTask = (account: string, topics: string[]) => {
   );
 };
 
+export const waitForLogoutTasksDone = async (ms: number) => {
+  while (executingLogoutTasks) {
+    console.log(`[Logout] Executing logout tasks, waiting for a bit`);
+    await new Promise((r) => setTimeout(r, ms));
+  }
+};
+
+let executingLogoutTasks = false;
+
+const assertNotLogged = (account: string) => {
+  const loggedAccounts = getAccountsList();
+  if (loggedAccounts.includes(account)) {
+    throw new Error("CONVERSE_ACCOUNT_LOGGED_IN");
+  }
+  return loggedAccounts.includes(account);
+};
+
 export const executeLogoutTasks = async () => {
+  // Prevent multiple logout tasks to execute at the same time
+  await waitForLogoutTasksDone(3000);
+
   const tasks = getLogoutTasks();
   const hasTasks = Object.keys(tasks).length > 0;
-  if (!hasTasks) return false;
-  for (const account in tasks) {
-    const task = tasks[account];
-    console.log(
-      `[Logout] Executing logout task for ${account} (${task.topics.length} topics)`
-    );
-    await deleteXmtpKey(account);
-    if (task.topics.length > 0) {
-      await deleteConversationsFromKeychain(account, task.topics);
-      resetSharedData(task.topics);
-    }
-    // This will fail if no connection and will be tried later async
-    await unsubscribeFromNotifications([
-      ...task.topics,
-      buildUserInviteTopic(account || ""),
-    ]);
+
+  if (!hasTasks) {
+    return false;
   }
-  emptyLogoutTasks();
+
+  executingLogoutTasks = true;
+
+  for (const account in tasks) {
+    try {
+      assertNotLogged(account);
+      const task = tasks[account];
+      console.log(
+        `[Logout] Executing logout task for ${account} (${task.topics.length} topics)`
+      );
+      await deleteXmtpKey(account);
+      assertNotLogged(account);
+      if (task.topics.length > 0) {
+        await deleteConversationsFromKeychain(account, task.topics);
+        resetSharedData(task.topics);
+      }
+      assertNotLogged(account);
+      // This will fail if no connection and will be tried later async
+      await unsubscribeFromNotifications([
+        ...task.topics,
+        buildUserInviteTopic(account || ""),
+      ]);
+      removeLogoutTask(account);
+    } catch (e: any) {
+      if (e.toString().includes("CONVERSE_ACCOUNT_LOGGED_IN")) {
+        removeLogoutTask(account);
+      } else {
+        console.error(
+          `[Logout] Could not finish logging out for ${account}`,
+          e
+        );
+      }
+    }
+  }
+  executingLogoutTasks = false;
   return true;
 };
 
