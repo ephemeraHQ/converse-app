@@ -45,10 +45,10 @@ fun handleNewConversationV2Notification(appContext: Context, xmtpClient: Client,
     if (apiURI == null) {
         apiURI = getAsyncStorage("api-uri")
     }
-    val expoPushToken = getKeychainValue("EXPO_PUSH_TOKEN")
-    if (apiURI != null && expoPushToken !== null && !hasForbiddenPattern(conversation.peerAddress)) {
+    val pushToken = getKeychainValue("PUSH_TOKEN")
+    if (apiURI != null && pushToken !== null && !hasForbiddenPattern(conversation.peerAddress)) {
         Log.d("PushNotificationsService", "Subscribing to new topic at api: $apiURI")
-        subscribeToTopic(appContext, apiURI, expoPushToken, conversation.topic)
+        subscribeToTopic(appContext, apiURI, xmtpClient.address, pushToken, conversation.topic)
     }
     // Let's add the topic to the notification content
     val newNotificationData = NotificationData(
@@ -69,11 +69,12 @@ fun handleNewConversationV2Notification(appContext: Context, xmtpClient: Client,
     return Triple(shortAddress(conversation.peerAddress), "New Conversation", remoteMessage)
 }
 
-fun subscribeToTopic(appContext: Context, apiURI: String, expoPushToken: String, topic: String) {
+fun subscribeToTopic(appContext: Context, apiURI: String, account: String, pushToken: String, topic: String) {
     val appendTopicURI = "$apiURI/api/subscribe/append"
     val params: MutableMap<String?, String?> = HashMap()
     params["topic"] = topic
-    params["expoToken"] = expoPushToken
+    params["nativeToken"] = pushToken
+    params["account"] = account
 
     val parameters = JSONObject(params as Map<*, *>?)
 

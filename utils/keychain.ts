@@ -91,10 +91,6 @@ export const deleteConversationsFromKeychain = async (
   }
 };
 
-export const saveExpoPushToken = async (pushKey: string) => {
-  await SecureStore.setItemAsync(
-    "EXPO_PUSH_TOKEN",
-    pushKey,
-    secureStoreOptions
-  );
+export const savePushToken = async (pushKey: string) => {
+  await SecureStore.setItemAsync("PUSH_TOKEN", pushKey, secureStoreOptions);
 };

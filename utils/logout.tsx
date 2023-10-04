@@ -4,7 +4,6 @@ import {
   getChatStore,
   useAccountsStore,
 } from "../data/store/accountsStore";
-import { buildUserInviteTopic } from "../vendor/xmtp-js/src";
 import { deleteConversationsFromKeychain, deleteXmtpKey } from "./keychain";
 import mmkv from "./mmkv";
 import {
@@ -12,10 +11,13 @@ import {
   unsubscribeFromNotifications,
 } from "./notifications";
 import { resetSharedData } from "./sharedData";
-import { deleteXmtpClient } from "./xmtpRN/client";
+import { deleteXmtpClient, getXmtpApiHeaders } from "./xmtpRN/client";
 
 type LogoutTasks = {
-  [account: string]: { topics: string[] };
+  [account: string]: {
+    topics: string[];
+    apiHeaders: { [key: string]: string };
+  };
 };
 
 export const getLogoutTasks = (): LogoutTasks => {
@@ -41,9 +43,13 @@ export const removeLogoutTask = (account: string) => {
   }
 };
 
-export const saveLogoutTask = (account: string, topics: string[]) => {
+export const saveLogoutTask = (
+  account: string,
+  apiHeaders: { [key: string]: string },
+  topics: string[]
+) => {
   const logoutTasks = getLogoutTasks();
-  logoutTasks[account] = { topics };
+  logoutTasks[account] = { topics, apiHeaders };
   mmkv.set("converse-logout-tasks", JSON.stringify(logoutTasks));
   console.log(
     `[Logout] Saved ${topics.length} topics to logout for ${account}`
@@ -95,10 +101,7 @@ export const executeLogoutTasks = async () => {
       }
       assertNotLogged(account);
       // This will fail if no connection and will be tried later async
-      await unsubscribeFromNotifications([
-        ...task.topics,
-        buildUserInviteTopic(account || ""),
-      ]);
+      await unsubscribeFromNotifications(task.apiHeaders);
       removeLogoutTask(account);
     } catch (e: any) {
       if (e.toString().includes("CONVERSE_ACCOUNT_LOGGED_IN")) {
@@ -125,6 +128,7 @@ export const logout = async (account: string) => {
   // We need to delete topics that are in this account and not other accounts
   // so we start with topics from this account and we'll remove topics we find in others
   const topicsToDelete = topicsByAccount[account];
+  const apiHeaders = await getXmtpApiHeaders(account);
   accounts.forEach((a) => {
     if (a !== account) {
       topicsByAccount[a].forEach((topic) => {
@@ -146,7 +150,7 @@ export const logout = async (account: string) => {
   deleteXmtpClient(account);
   deleteSubscribedTopics(account);
 
-  saveLogoutTask(account, topicsToDelete);
+  saveLogoutTask(account, apiHeaders, topicsToDelete);
 
   setTimeout(() => {
     executeLogoutTasks();
