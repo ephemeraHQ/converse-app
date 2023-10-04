@@ -28,8 +28,9 @@ export const fetchAndDecodeRemoteAttachment = async (
     message.content
   );
   // Let's download the encrypted file
+  const separator = RNFS.TemporaryDirectoryPath.endsWith("/") ? "" : "/";
   const encryptedLocalFileUri =
-    `file://${RNFS.TemporaryDirectoryPath}${message.id}` as `file://${string}`;
+    `file://${RNFS.TemporaryDirectoryPath}${separator}${message.id}` as `file://${string}`;
   await RNFS.downloadFile({
     fromUrl: remoteAttachment.url,
     toFile: encryptedLocalFileUri,
