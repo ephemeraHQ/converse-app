@@ -61,7 +61,7 @@ const ConversationListItem = memo(function ConversationListItem({
 }: ConversationListItemProps) {
   const styles = getStyles(colorScheme);
   const timeToShow = getRelativeDateTime(conversationTime);
-  const markTopicsAsDeleted = useChatStore((s) => s.markTopicsAsDeleted);
+  const setTopicsStatus = useChatStore((s) => s.setTopicsStatus);
   const [selected, setSelected] = useState(false);
   const resetSelected = useCallback(() => {
     setSelected(false);
@@ -136,7 +136,7 @@ const ConversationListItem = memo(function ConversationListItem({
                 isPreferred: true,
                 onPress: () => {
                   deleteTopic(currentAccount(), conversationTopic);
-                  markTopicsAsDeleted([conversationTopic]);
+                  setTopicsStatus([conversationTopic], "deleted");
                 },
               },
             ]
@@ -154,7 +154,7 @@ const ConversationListItem = memo(function ConversationListItem({
     closeSwipeable,
     conversation.peerAddress,
     conversationTopic,
-    markTopicsAsDeleted,
+    setTopicsStatus,
     styles.rightAction,
   ]);
 

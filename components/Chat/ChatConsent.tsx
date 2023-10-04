@@ -31,7 +31,7 @@ export default function ChatConsent({
   conversation: XmtpConversationWithUpdate | undefined;
 }) {
   const styles = useStyles();
-  const markTopicsAsDeleted = useChatStore((s) => s.markTopicsAsDeleted);
+  const setTopicsStatus = useChatStore((s) => s.setTopicsStatus);
   const [consent, setConsent] = useState(false);
 
   const colorScheme = useColorScheme();
@@ -70,7 +70,7 @@ export default function ChatConsent({
                   onPress: () => {
                     // to put in a utils/convo helper
                     deleteTopic(currentAccount(), conversation.topic);
-                    markTopicsAsDeleted([conversation.topic]);
+                    setTopicsStatus([conversation.topic], "deleted");
                     navigation.pop();
                   },
                 },
