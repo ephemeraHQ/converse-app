@@ -1,3 +1,4 @@
+import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import React from "react";
 import {
@@ -10,25 +11,25 @@ import {
 } from "react-native";
 
 import { currentAccount, useChatStore } from "../../data/store/accountsStore";
-import { XmtpConversationWithUpdate } from "../../data/store/chatStore";
+import { NavigationParamList } from "../../screens/Navigation/Navigation";
 import { consentToTopics, deleteTopic } from "../../utils/api";
 import {
   backgroundColor,
   tertiaryBackgroundColor,
   textPrimaryColor,
 } from "../../utils/colors";
+import { useConversationContext } from "../../utils/conversation";
 import { shortAddress } from "../../utils/str";
 import Button from "../Button/Button";
-// @todo useConversationContext
-// @todo useNavigation hook react navigation
 
-export default function ChatConsent({
-  navigation,
-  conversation,
-}: {
-  navigation: NativeStackNavigationProp<any>;
-  conversation: XmtpConversationWithUpdate | undefined;
-}) {
+export default function ChatConsent() {
+  const { conversation } = useConversationContext(["conversation"]);
+  const navigation = useNavigation() as NativeStackNavigationProp<
+    NavigationParamList,
+    "Chats",
+    undefined
+  >;
+
   const styles = useStyles();
   const setTopicsStatus = useChatStore((s) => s.setTopicsStatus);
   const topicsStatus = useChatStore((s) => s.topicsStatus);
