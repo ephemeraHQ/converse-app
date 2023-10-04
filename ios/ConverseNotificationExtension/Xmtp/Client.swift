@@ -94,10 +94,10 @@ func isIntroTopic(topic: String) -> Bool {
   return topic.starts(with: "/xmtp/0/intro-")
 }
 
-func subscribeToTopic(apiURI: String?, expoPushToken: String?, topic: String) {
-  if (apiURI != nil && expoPushToken != nil) {
+func subscribeToTopic(apiURI: String?, account: String, pushToken: String?, topic: String) {
+  if (apiURI != nil && pushToken != nil) {
     let appendTopicURI = "\(apiURI ?? "")/api/subscribe/append"
-    AF.request(appendTopicURI, method: .post, parameters: ["topic": topic, "expoToken": expoPushToken!], encoding: JSONEncoding.default, headers: nil).response { response in
+    AF.request(appendTopicURI, method: .post, parameters: ["topic": topic, "account": account, "nativeToken": pushToken!], encoding: JSONEncoding.default, headers: nil).response { response in
       debugPrint("Response: \(response)")
     }
   }

@@ -16,7 +16,7 @@ import { useAppStore } from "../data/store/appStore";
 import { XmtpConversation, XmtpMessage } from "../data/store/chatStore";
 import { buildUserInviteTopic } from "../vendor/xmtp-js/src/utils";
 import api from "./api";
-import { saveExpoPushToken } from "./keychain";
+import { savePushToken } from "./keychain";
 import mmkv from "./mmkv";
 import { navigateToConversation } from "./navigation";
 import { sentryTrackError } from "./sentry";
@@ -28,6 +28,7 @@ import {
   saveConversationDict,
 } from "./sharedData";
 import { conversationName, shortAddress } from "./str";
+import { getXmtpApiHeaders } from "./xmtpRN/client";
 
 let expoPushToken: string | null;
 let nativePushToken: string | null;
@@ -80,7 +81,9 @@ export const subscribeToNotifications = async (
     ]);
     expoPushToken = expoTokenQuery.data;
     nativePushToken = nativeTokenQuery.data;
-    saveExpoPushToken(expoPushToken);
+    if (nativePushToken) {
+      savePushToken(nativePushToken);
+    }
 
     // Let's check if we need to make the query i.e
     // the topics are not exactly the same
@@ -94,14 +97,18 @@ export const subscribeToNotifications = async (
     console.log(
       `[Notifications] Subscribing to ${topics.length} topic for ${account}`
     );
-    await api.post("/api/subscribe", {
-      expoToken: expoPushToken,
-      nativeToken: nativePushToken,
-      nativeTokenType: nativeTokenQuery.type,
-      notificationChannel:
-        nativeTokenQuery.type === "android" ? "converse-notifications" : null,
-      topics,
-    });
+    await api.post(
+      "/api/subscribe",
+      {
+        expoToken: expoPushToken,
+        nativeToken: nativePushToken,
+        nativeTokenType: nativeTokenQuery.type,
+        notificationChannel:
+          nativeTokenQuery.type === "android" ? "converse-notifications" : null,
+        topics,
+      },
+      { headers: await getXmtpApiHeaders(account) }
+    );
     lastSubscribedTopicsByAccount[account] = topics;
   } catch (e) {
     console.log("[Notifications] Error while subscribing:", e);
@@ -109,15 +116,18 @@ export const subscribeToNotifications = async (
   delete subscribingByAccount[account];
 };
 
-export const unsubscribeFromNotifications = async (
-  topics: string[]
-): Promise<void> => {
+export const unsubscribeFromNotifications = async (apiHeaders: {
+  [key: string]: string;
+}): Promise<void> => {
   const nativeTokenQuery = await Notifications.getDevicePushTokenAsync();
   if (nativeTokenQuery.data) {
-    await api.post("/api/unsubscribe", {
-      nativeToken: nativeTokenQuery.data,
-      topics,
-    });
+    await api.post(
+      "/api/unsubscribe",
+      {
+        nativeToken: nativeTokenQuery.data,
+      },
+      { headers: apiHeaders }
+    );
   }
 };
 

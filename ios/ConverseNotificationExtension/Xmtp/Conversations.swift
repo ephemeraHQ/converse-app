@@ -20,7 +20,7 @@ func handleNewConversation(xmtpClient: XMTP.Client, envelope: XMTP.Envelope) asy
       let sharedDefaults = try! SharedDefaults()
       apiURI = sharedDefaults.string(forKey: "api-uri")?.replacingOccurrences(of: "\"", with: "")
     }
-    let expoPushToken = getKeychainValue(forKey: "EXPO_PUSH_TOKEN")
+    let pushToken = getKeychainValue(forKey: "PUSH_TOKEN")
     
     if (isInviteTopic(topic: envelope.contentTopic)) {
       let conversation = try await xmtpClient.conversations.fromInvite(envelope: envelope)
@@ -32,7 +32,8 @@ func handleNewConversation(xmtpClient: XMTP.Client, envelope: XMTP.Envelope) asy
         
         let conversationDict = ["version": "v2", "topic": conversationV2.topic, "peerAddress": conversationV2.peerAddress, "createdAt": createdAt, "context":["conversationId": conversationV2.context.conversationID, "metadata": conversationV2.context.metadata] as [String : Any], "keyMaterial": conversationV2.keyMaterial.base64EncodedString()] as [String : Any]
         if (!hasForbiddenPattern(address: conversationV2.peerAddress)) {
-          subscribeToTopic(apiURI: apiURI, expoPushToken: expoPushToken, topic: conversationV2.topic)
+          subscribeToTopic(apiURI: apiURI, account: xmtpClient.address, pushToken: pushToken, topic: conversationV2.topic)
+
         }
         persistDecodedConversation(account: xmtpClient.address, conversation: conversation)
         try saveConversation(account: xmtpClient.address, topic: conversationV2.topic, peerAddress: conversationV2.peerAddress, createdAt: Int(conversationV2.createdAt.timeIntervalSince1970 * 1000), context: ConversationContext(conversationId: conversationV2.context.conversationID, metadata: conversationV2.context.metadata))
