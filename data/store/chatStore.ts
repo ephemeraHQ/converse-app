@@ -71,7 +71,6 @@ export type ChatStoreType = {
   localClientConnected: boolean;
   resyncing: boolean;
   reconnecting: boolean;
-  deletedTopics: { [topic: string]: boolean };
   topicsStatus: { [topic: string]: "deleted" | "consented" };
 
   searchQuery: string;
@@ -117,7 +116,6 @@ export const initChatStore = (account: string) => {
       (set) =>
         ({
           conversations: {},
-          deletedTopics: {},
           openedConversationTopic: "",
           setOpenedConversationTopic: (topic) =>
             set((state) => {
@@ -429,9 +427,24 @@ export const initChatStore = (account: string) => {
         partialize: (state) => ({
           initialLoadDoneOnce: state.initialLoadDoneOnce,
           lastSyncedAt: state.lastSyncedAt,
-          deletedTopics: state.deletedTopics,
           topicsStatus: state.topicsStatus,
         }),
+        version: 1,
+        migrate: (persistedState: any, version: number): ChatStoreType => {
+          console.log("Zustand migration version:", version);
+          // Migration from version 0: Convert 'deletedTopics' to 'topicsStatus'
+          if (version === 0 && persistedState.deletedTopics) {
+            for (const [topic, isDeleted] of Object.entries(
+              persistedState.deletedTopics
+            )) {
+              if (isDeleted) {
+                persistedState.topicsStatus[topic] = "deleted";
+              }
+            }
+            delete persistedState.deletedTopics;
+          }
+          return persistedState as ChatStoreType;
+        },
       }
     )
   );
