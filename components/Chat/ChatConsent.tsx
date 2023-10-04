@@ -35,7 +35,12 @@ export default function ChatConsent() {
   const topicsStatus = useChatStore((s) => s.topicsStatus);
   const thisTopicStatus = topicsStatus[conversation?.topic || ""];
 
-  if (!conversation || thisTopicStatus === "consented") {
+  // @todo add pre-consented check if 1 message is already sent
+  if (
+    !conversation ||
+    thisTopicStatus === "consented" ||
+    conversation.pending
+  ) {
     return null;
   }
 
