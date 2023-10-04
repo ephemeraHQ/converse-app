@@ -1,4 +1,6 @@
+// temp for UI state pending Zustand
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import React, { useState } from "react";
 import {
   View,
   StyleSheet,
@@ -8,9 +10,9 @@ import {
   Alert,
 } from "react-native";
 
-import { useChatStore } from "../../data/store/accountsStore";
+import { currentAccount, useChatStore } from "../../data/store/accountsStore";
 import { XmtpConversationWithUpdate } from "../../data/store/chatStore";
-import { deleteTopic } from "../../utils/api";
+import { consentToTopics, deleteTopic } from "../../utils/api";
 import {
   backgroundColor,
   tertiaryBackgroundColor,
@@ -18,6 +20,8 @@ import {
 } from "../../utils/colors";
 import { shortAddress } from "../../utils/str";
 import Button from "../Button/Button";
+// useConversationContext
+// useNavigation hook react navigation
 
 export default function ChatConsent({
   navigation,
@@ -28,9 +32,14 @@ export default function ChatConsent({
 }) {
   const styles = useStyles();
   const markTopicsAsDeleted = useChatStore((s) => s.markTopicsAsDeleted);
+  const [consent, setConsent] = useState(false);
 
-  const acceptChat = function () {
-    console.log("accept");
+  const colorScheme = useColorScheme();
+
+  const acceptChat = function (topic: string) {
+    console.log("===== Consent to topic:", topic);
+    consentToTopics(currentAccount(), [topic]);
+    // setConsent(true);
   };
 
   if (!conversation) {
@@ -40,7 +49,6 @@ export default function ChatConsent({
   return (
     <View style={styles.chatConsentContainer}>
       <Text style={styles.info}>Do you trust this contact?</Text>
-
       <View style={styles.buttonsContainer}>
         <Button
           variant="secondary-danger"
@@ -60,7 +68,8 @@ export default function ChatConsent({
                   style: "destructive",
                   isPreferred: true,
                   onPress: () => {
-                    deleteTopic(conversation.topic);
+                    // to put in a utils/convo helper
+                    deleteTopic(currentAccount(), conversation.topic);
                     markTopicsAsDeleted([conversation.topic]);
                     navigation.pop();
                   },
@@ -75,7 +84,7 @@ export default function ChatConsent({
           title="Accept"
           style={styles.cta}
           onPress={() => {
-            acceptChat();
+            acceptChat(conversation.topic);
           }}
         />
       </View>

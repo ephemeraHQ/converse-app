@@ -205,6 +205,26 @@ export const deleteTopic = async (account: string, topic: string) => {
   });
 };
 
+export const deleteTopics = async (account: string, topics: string[]) => {
+  const topicsArray = topics.map((topic) => ({ [topic]: "deleted" }));
+  await api.post(
+    "/api/topics/status",
+    { topicsArray },
+    { headers: await getXmtpApiHeaders(account) }
+  );
+};
+
+export const consentToTopics = async (account: string, topics: string[]) => {
+  const topicsArray = topics.map((topic) => ({ [topic]: "consented" }));
+  await api.post(
+    "/api/topics/status",
+    { topicsArray },
+    { headers: await getXmtpApiHeaders(account) }
+  );
+};
+
+// @todo change
+// @todo API : api topics status, returning list of topics with status
 export const getDeletedTopics = async (account: string) => {
   const { data } = await api.get("/api/topics/deleted", {
     headers: await getXmtpApiHeaders(account),
