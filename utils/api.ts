@@ -223,13 +223,11 @@ export const consentToTopics = async (account: string, topics: string[]) => {
   );
 };
 
-// @todo change
-// @todo API : api topics status, returning list of topics with status
-export const getDeletedTopics = async (account: string) => {
-  const { data } = await api.get("/api/topics/deleted", {
+export const getTopicsStatus = async (account: string) => {
+  const { data } = await api.get("/api/topics/status", {
     headers: await getXmtpApiHeaders(account),
   });
-  return data.deletedTopics as string[];
+  return data.topicsStatus as { [topic: string]: "deleted" | "consented" };
 };
 
 export default api;

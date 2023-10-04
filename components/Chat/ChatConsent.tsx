@@ -1,6 +1,5 @@
-// temp for UI state pending Zustand
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import React, { useState } from "react";
+import React from "react";
 import {
   View,
   StyleSheet,
@@ -20,8 +19,8 @@ import {
 } from "../../utils/colors";
 import { shortAddress } from "../../utils/str";
 import Button from "../Button/Button";
-// useConversationContext
-// useNavigation hook react navigation
+// @todo useConversationContext
+// @todo useNavigation hook react navigation
 
 export default function ChatConsent({
   navigation,
@@ -32,17 +31,10 @@ export default function ChatConsent({
 }) {
   const styles = useStyles();
   const setTopicsStatus = useChatStore((s) => s.setTopicsStatus);
-  const [consent, setConsent] = useState(false);
+  const topicsStatus = useChatStore((s) => s.topicsStatus);
+  const thisTopicStatus = topicsStatus[conversation?.topic || ""];
 
-  const colorScheme = useColorScheme();
-
-  const acceptChat = function (topic: string) {
-    console.log("===== Consent to topic:", topic);
-    consentToTopics(currentAccount(), [topic]);
-    // setConsent(true);
-  };
-
-  if (!conversation) {
+  if (!conversation || thisTopicStatus === "consented") {
     return null;
   }
 
@@ -68,9 +60,8 @@ export default function ChatConsent({
                   style: "destructive",
                   isPreferred: true,
                   onPress: () => {
-                    // to put in a utils/convo helper
                     deleteTopic(currentAccount(), conversation.topic);
-                    setTopicsStatus([conversation.topic], "deleted");
+                    setTopicsStatus({ [conversation.topic]: "deleted" });
                     navigation.pop();
                   },
                 },
@@ -84,7 +75,8 @@ export default function ChatConsent({
           title="Accept"
           style={styles.cta}
           onPress={() => {
-            acceptChat(conversation.topic);
+            consentToTopics(currentAccount(), [conversation.topic]);
+            setTopicsStatus({ [conversation.topic]: "consented" });
           }}
         />
       </View>

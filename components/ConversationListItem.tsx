@@ -136,7 +136,7 @@ const ConversationListItem = memo(function ConversationListItem({
                 isPreferred: true,
                 onPress: () => {
                   deleteTopic(currentAccount(), conversationTopic);
-                  setTopicsStatus([conversationTopic], "deleted");
+                  setTopicsStatus({ [conversation.topic]: "deleted" });
                 },
               },
             ]
@@ -156,6 +156,7 @@ const ConversationListItem = memo(function ConversationListItem({
     conversationTopic,
     setTopicsStatus,
     styles.rightAction,
+    conversation.topic,
   ]);
 
   const rowItem =
