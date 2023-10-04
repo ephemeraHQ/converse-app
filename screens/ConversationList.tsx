@@ -64,7 +64,7 @@ function ConversationList({ navigation, route, searchBarRef }: Props) {
     lastUpdateAt,
     searchQuery,
     searchBarFocused,
-    deletedTopics,
+    topicsStatus,
     initialLoadDoneOnce,
   } = useChatStore((s) =>
     pick(s, [
@@ -73,7 +73,7 @@ function ConversationList({ navigation, route, searchBarRef }: Props) {
       "lastUpdateAt",
       "searchQuery",
       "searchBarFocused",
-      "deletedTopics",
+      "topicsStatus",
     ])
   );
   const { blockedPeers, ephemeralAccount } = useSettingsStore((s) =>
@@ -101,10 +101,10 @@ function ConversationList({ navigation, route, searchBarRef }: Props) {
     const sortedConversations = sortAndComputePreview(
       conversations,
       userAddress,
-      deletedTopics
+      topicsStatus
     );
     setSortedConversations(sortedConversations);
-  }, [userAddress, conversations, lastUpdateAt, deletedTopics]);
+  }, [userAddress, conversations, lastUpdateAt, topicsStatus]);
 
   useEffect(() => {
     const listItems = getConversationListItemsToDisplay(

@@ -61,7 +61,7 @@ export const subscribeToNotifications = async (
   try {
     subscribingByAccount[account] = true;
     const lastSubscribedTopics = lastSubscribedTopicsByAccount[account] || [];
-    const { conversations, deletedTopics } = getChatStore(account).getState();
+    const { conversations, topicsStatus } = getChatStore(account).getState();
     const { blockedPeers } = getSettingsStore(account).getState();
     const topics = [
       ...Object.values(conversations)
@@ -70,7 +70,7 @@ export const subscribeToNotifications = async (
             c.peerAddress &&
             !c.pending &&
             !blockedPeers[c.peerAddress.toLowerCase()] &&
-            !deletedTopics[c.topic]
+            topicsStatus[c.topic] !== "deleted"
         )
         .map((c) => c.topic),
       buildUserInviteTopic(account || ""),
