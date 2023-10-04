@@ -9,7 +9,7 @@ import {
   useAccountsList,
 } from "../data/store/accountsStore";
 import { useAppStore } from "../data/store/appStore";
-import { getBlockedPeers, getDeletedTopics } from "../utils/api";
+import { getBlockedPeers, getTopicsStatus } from "../utils/api";
 import { loadSavedNotificationMessagesToContext } from "../utils/notifications";
 import { pick } from "../utils/objects";
 import { syncXmtpClient } from "../utils/xmtpRN/client";
@@ -60,10 +60,10 @@ export default function XmtpEngine() {
           getSettingsStore(a).getState().setBlockedPeers(addresses);
         })
       );
-      // Sync deleted topics
+      // Sync topics status
       unsyncedAccounts.map((a) =>
-        getDeletedTopics(a).then((topics) => {
-          getChatStore(a).getState().setTopicsStatus(topics, "deleted");
+        getTopicsStatus(a).then((topicsStatus) => {
+          getChatStore(a).getState().setTopicsStatus(topicsStatus);
         })
       );
     }

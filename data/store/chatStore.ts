@@ -55,10 +55,6 @@ export type XmtpMessage = XmtpProtocolMessage & {
   lastUpdateAt?: number;
 };
 
-export type TopicsStatus = {
-  [topic: string]: "deleted" | "consented";
-};
-
 export type ChatStoreType = {
   conversations: {
     [topic: string]: XmtpConversationWithUpdate;
@@ -108,7 +104,9 @@ export type ChatStoreType = {
   setReconnecting: (reconnecting: boolean) => void;
   setLastSyncedAt: (synced: number) => void;
 
-  setTopicsStatus: (topics: string[], status: "deleted" | "consented") => void;
+  setTopicsStatus: (topicsStatus: {
+    [topic: string]: "deleted" | "consented";
+  }) => void;
 };
 
 const now = () => new Date().getTime();
@@ -411,17 +409,16 @@ export const initChatStore = (account: string) => {
             }),
           setLastSyncedAt: (synced: number) =>
             set(() => ({ lastSyncedAt: synced })),
-          setTopicsStatus: (
-            topics: string[],
-            status: "deleted" | "consented"
-          ) =>
+          setTopicsStatus: (topicsStatus: {
+            [topic: string]: "deleted" | "consented";
+          }) =>
             set((state) => {
-              const updatedStatus: TopicsStatus = {};
-              for (const topic of topics) {
-                updatedStatus[topic] = status;
-              }
+              console.log("topicsStatus:", {
+                ...state.topicsStatus,
+                ...topicsStatus,
+              });
               return {
-                topicsStatus: { ...state.topicsStatus, ...updatedStatus },
+                topicsStatus: { ...state.topicsStatus, ...topicsStatus },
               };
             }),
         }) as ChatStoreType,
