@@ -61,10 +61,11 @@ export const subscribeToNotifications = async (
   try {
     subscribingByAccount[account] = true;
     const lastSubscribedTopics = lastSubscribedTopicsByAccount[account] || [];
-    const { conversations, deletedTopics } = getChatStore(account).getState();
+    const { sortedConversationsWithPreview, deletedTopics } =
+      getChatStore(account).getState();
     const { blockedPeers } = getSettingsStore(account).getState();
     const topics = [
-      ...Object.values(conversations)
+      ...Object.values(sortedConversationsWithPreview.conversationsInbox)
         .filter(
           (c) =>
             c.peerAddress &&

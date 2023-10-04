@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
 
+import { ConversationWithLastMessagePreview } from "../../utils/conversation";
 import { lastValueInMap } from "../../utils/map";
 import { zustandMMKVStorage } from "../../utils/mmkv";
 import { subscribeToNotifications } from "../../utils/notifications";
@@ -29,6 +30,7 @@ export type XmtpConversation = {
   conversationTitle?: string | null;
   messageDraft?: string;
   readUntil: number;
+  hasOneMessageFromMe?: boolean;
   pending: boolean;
   version: string;
 };
@@ -55,6 +57,11 @@ export type XmtpMessage = XmtpProtocolMessage & {
   lastUpdateAt?: number;
 };
 
+type ConversationsListItems = {
+  conversationsInbox: ConversationWithLastMessagePreview[];
+  conversationsRequests: ConversationWithLastMessagePreview[];
+};
+
 export type ChatStoreType = {
   conversations: {
     [topic: string]: XmtpConversationWithUpdate;
@@ -72,6 +79,9 @@ export type ChatStoreType = {
   resyncing: boolean;
   reconnecting: boolean;
   deletedTopics: { [topic: string]: boolean };
+
+  sortedConversationsWithPreview: ConversationsListItems;
+  setSortedConversationsWithPreview: (items: ConversationsListItems) => void;
 
   searchQuery: string;
   setSearchQuery: (query: string) => void;
@@ -113,6 +123,7 @@ export const initChatStore = (account: string) => {
       (set) =>
         ({
           conversations: {},
+          lastSyncedAt: 0,
           deletedTopics: {},
           openedConversationTopic: "",
           setOpenedConversationTopic: (topic) =>
@@ -127,6 +138,12 @@ export const initChatStore = (account: string) => {
               return newState;
             }),
           conversationsMapping: {},
+          sortedConversationsWithPreview: {
+            conversationsInbox: [],
+            conversationsRequests: [],
+          },
+          setSortedConversationsWithPreview: (items) =>
+            set(() => ({ sortedConversationsWithPreview: items })),
           lastUpdateAt: 0,
           searchQuery: "",
           setSearchQuery: (q) => set(() => ({ searchQuery: q })),
@@ -234,6 +251,14 @@ export const initChatStore = (account: string) => {
                 }
 
                 const conversation = newState.conversations[topic];
+                if (
+                  message.senderAddress === account &&
+                  !conversation.hasOneMessageFromMe
+                ) {
+                  conversation.hasOneMessageFromMe = true;
+                  conversation.lastUpdateAt = now();
+                  isUpdated = true;
+                }
                 // Default message status is sent
                 if (!message.status) message.status = "sent";
                 const alreadyMessage = conversation.messages.get(message.id);
