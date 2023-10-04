@@ -19,10 +19,12 @@ import { sentryTrackMessage } from "./sentry";
 import { TextInputWithValue, addressPrefix } from "./str";
 import { isOnXmtp } from "./xmtpJS/client";
 
-type ConversationWithLastMessagePreview = XmtpConversation & {
+export type ConversationWithLastMessagePreview = XmtpConversation & {
   lastMessagePreview?: LastMessagePreview;
 };
-type FlatListItem = ConversationWithLastMessagePreview | { topic: string };
+export type ConversationFlatListItem =
+  | ConversationWithLastMessagePreview
+  | { topic: string };
 
 export type LastMessagePreview = {
   contentPreview: string;
@@ -219,35 +221,54 @@ export const useConversationContext = <K extends keyof ConversationContextType>(
   keys: K[]
 ) => useContextSelector(ConversationContext, (s) => pick(s, keys));
 
+const conversationsSortMethod = (
+  a: ConversationWithLastMessagePreview,
+  b: ConversationWithLastMessagePreview
+) => {
+  const aDate = a.lastMessagePreview
+    ? a.lastMessagePreview.message.sent
+    : a.createdAt;
+  const bDate = b.lastMessagePreview
+    ? b.lastMessagePreview.message.sent
+    : b.createdAt;
+  return bDate - aDate;
+};
+
 export function sortAndComputePreview(
   conversations: Record<string, XmtpConversation>,
   userAddress: string,
   deletedTopics: { [topic: string]: boolean }
-): ConversationWithLastMessagePreview[] {
-  const conversationWithPreview = Object.values(conversations)
-    .filter(
-      (a) =>
-        a?.peerAddress &&
-        (!a.pending || a.messages.size > 0) &&
-        !deletedTopics[a.topic] &&
-        a.version !== "v1"
-    )
-    .map((c: ConversationWithLastMessagePreview) => {
-      c.lastMessagePreview = conversationLastMessagePreview(c, userAddress);
-      return c;
-    });
+) {
+  const conversationsRequests: ConversationWithLastMessagePreview[] = [];
+  const conversationsInbox: ConversationWithLastMessagePreview[] = [];
+  Object.values(conversations).forEach(
+    (conversation: ConversationWithLastMessagePreview, i) => {
+      if (
+        conversation?.peerAddress &&
+        (!conversation.pending || conversation.messages.size > 0) &&
+        !deletedTopics[conversation.topic] && // @todo => use topicsStatus when louis has finished work
+        conversation.version !== "v1"
+      ) {
+        conversation.lastMessagePreview = conversationLastMessagePreview(
+          conversation,
+          userAddress
+        );
+        if (conversation.hasOneMessageFromMe) {
+          // @todo => add manual consent as well when louis has finished
+          conversationsInbox.push(conversation);
+        } else {
+          conversationsRequests.push(conversation);
+        }
+      }
+    }
+  );
+  conversationsRequests.sort(conversationsSortMethod);
+  conversationsInbox.sort(conversationsSortMethod);
 
-  conversationWithPreview.sort((a, b) => {
-    const aDate = a.lastMessagePreview
-      ? a.lastMessagePreview.message.sent
-      : a.createdAt;
-    const bDate = b.lastMessagePreview
-      ? b.lastMessagePreview.message.sent
-      : b.createdAt;
-    return bDate - aDate;
+  getChatStore(userAddress).getState().setSortedConversationsWithPreview({
+    conversationsInbox,
+    conversationsRequests,
   });
-
-  return conversationWithPreview;
 }
 
 export function getConversationListItemsToDisplay(
@@ -255,7 +276,7 @@ export function getConversationListItemsToDisplay(
   searchQuery: string,
   sortedConversations: ConversationWithLastMessagePreview[],
   profiles: Record<string, any>
-): FlatListItem[] {
+): ConversationFlatListItem[] {
   const items = ephemeralAccount ? [{ topic: "ephemeral" }] : [];
 
   if (searchQuery && sortedConversations) {

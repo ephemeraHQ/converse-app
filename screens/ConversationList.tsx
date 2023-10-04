@@ -1,6 +1,5 @@
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import { FlashList } from "@shopify/flash-list";
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Platform,
   StyleSheet,
@@ -9,16 +8,15 @@ import {
   View,
   ScrollView,
   TextInput,
+  TouchableHighlight,
 } from "react-native";
 import { gestureHandlerRootHOC } from "react-native-gesture-handler";
 import { SearchBarCommands } from "react-native-screens";
 
+import ConversationFlashList from "../components/ConversationFlashList";
 import NewConversationButton from "../components/ConversationList/NewConversationButton";
-import ConversationListItem from "../components/ConversationListItem";
-import EphemeralAccountBanner from "../components/EphemeralAccountBanner";
 import InitialLoad from "../components/InitialLoad";
 import Recommendations from "../components/Recommendations/Recommendations";
-import NoResult from "../components/Search/NoResult";
 import Welcome from "../components/Welcome";
 import { refreshProfileForAddress } from "../data/helpers/profiles/profilesUpdate";
 import {
@@ -33,6 +31,8 @@ import {
   textPrimaryColor,
   backgroundColor,
   itemSeparatorColor,
+  listItemSeparatorColor,
+  clickedItemBackgroundColor,
 } from "../utils/colors";
 import {
   LastMessagePreview,
@@ -41,7 +41,6 @@ import {
 } from "../utils/conversation";
 import { converseEventEmitter } from "../utils/events";
 import { pick } from "../utils/objects";
-import { conversationName } from "../utils/str";
 import { useHeaderSearchBar } from "./Navigation/ConversationListNav";
 import { NavigationParamList } from "./Navigation/Navigation";
 
@@ -57,7 +56,6 @@ type Props = {
 } & NativeStackScreenProps<NavigationParamList, "Chats">;
 
 function ConversationList({ navigation, route, searchBarRef }: Props) {
-  const colorScheme = useColorScheme();
   const styles = useStyles();
   const {
     conversations,
@@ -66,6 +64,7 @@ function ConversationList({ navigation, route, searchBarRef }: Props) {
     searchBarFocused,
     deletedTopics,
     initialLoadDoneOnce,
+    sortedConversationsWithPreview,
   } = useChatStore((s) =>
     pick(s, [
       "initialLoadDoneOnce",
@@ -74,60 +73,30 @@ function ConversationList({ navigation, route, searchBarRef }: Props) {
       "searchQuery",
       "searchBarFocused",
       "deletedTopics",
+      "sortedConversationsWithPreview",
     ])
   );
-  const { blockedPeers, ephemeralAccount } = useSettingsStore((s) =>
-    pick(s, ["blockedPeers", "ephemeralAccount"])
+  const { ephemeralAccount } = useSettingsStore((s) =>
+    pick(s, ["ephemeralAccount"])
   );
+  const colorScheme = useColorScheme();
   const userAddress = useUserStore((s) => s.userAddress);
   const profiles = useProfilesStore((state) => state.profiles);
   const [flatListItems, setFlatListItems] = useState<FlatListItem[]>([]);
-  const [sortedConversations, setSortedConversations] = useState<
-    ConversationWithLastMessagePreview[]
-  >([]);
-  const accountPrimaryENS = profiles[userAddress]?.socials.ensNames?.find(
-    (e) => e.isPrimary
-  )?.name;
 
   // Display logic
   const showInitialLoad = !initialLoadDoneOnce && flatListItems.length <= 1;
-  const showNoResult = flatListItems.length === 0 && searchQuery;
+  const showNoResult = flatListItems.length === 0 && !!searchQuery;
 
   // Welcome screen
   const showWelcome =
-    !searchQuery && !searchBarFocused && sortedConversations.length === 0;
+    !searchQuery &&
+    !searchBarFocused &&
+    sortedConversationsWithPreview.conversationsInbox.length === 0;
 
   useEffect(() => {
-    const sortedConversations = sortAndComputePreview(
-      conversations,
-      userAddress,
-      deletedTopics
-    );
-    setSortedConversations(sortedConversations);
+    sortAndComputePreview(conversations, userAddress, deletedTopics);
   }, [userAddress, conversations, lastUpdateAt, deletedTopics]);
-
-  useEffect(() => {
-    const listItems = getConversationListItemsToDisplay(
-      ephemeralAccount,
-      searchQuery,
-      sortedConversations,
-      profiles
-    );
-    setFlatListItems(listItems);
-  }, [ephemeralAccount, searchQuery, sortedConversations, profiles]);
-
-  // Search bar hook
-  useHeaderSearchBar({
-    navigation,
-    route,
-    searchBarRef,
-  });
-
-  useEffect(() => {
-    if (accountPrimaryENS && Platform.OS === "ios") {
-      navigation.setOptions({ headerBackTitle: accountPrimaryENS });
-    }
-  }, [accountPrimaryENS, navigation]);
 
   useEffect(() => {
     if (!initialLoadDoneOnce) {
@@ -136,116 +105,65 @@ function ConversationList({ navigation, route, searchBarRef }: Props) {
     }
   }, [initialLoadDoneOnce]);
 
-  const keyExtractor = useCallback((item: FlatListItem) => {
-    return item.topic;
-  }, []);
+  useEffect(() => {
+    const listItems = getConversationListItemsToDisplay(
+      ephemeralAccount,
+      searchQuery,
+      sortedConversationsWithPreview.conversationsInbox,
+      profiles
+    );
+    setFlatListItems(listItems);
+  }, [
+    ephemeralAccount,
+    searchQuery,
+    sortedConversationsWithPreview.conversationsInbox,
+    profiles,
+  ]);
 
-  const renderItem = useCallback(
-    ({ item }: { item: FlatListItem }) => {
-      if (item.topic === "welcome") {
-        return <Welcome ctaOnly navigation={navigation} route={route} />;
-      } else if (item.topic === "noresult") {
-        return <NoResult navigation={navigation} />;
-      } else if (item.topic === "ephemeral") {
-        return <EphemeralAccountBanner />;
-      }
-      const conversation = item as ConversationWithLastMessagePreview;
-      const lastMessagePreview = conversation.lastMessagePreview;
-      return (
-        <ConversationListItem
-          navigation={navigation}
-          conversation={conversation}
-          colorScheme={colorScheme}
-          conversationTopic={conversation.topic}
-          conversationTime={
-            lastMessagePreview?.message?.sent || conversation.createdAt
-          }
-          conversationName={conversationName(conversation)}
-          showUnread={
-            !!(
-              initialLoadDoneOnce &&
-              lastMessagePreview &&
-              conversation.readUntil < lastMessagePreview.message.sent &&
-              lastMessagePreview.message.senderAddress ===
-                conversation.peerAddress
-            )
-          }
-          lastMessagePreview={
-            blockedPeers[conversation.peerAddress.toLowerCase()]
-              ? "This user is blocked"
-              : lastMessagePreview
-              ? lastMessagePreview.contentPreview
-              : ""
-          }
-          lastMessageStatus={lastMessagePreview?.message?.status}
-          lastMessageFromMe={
-            !!lastMessagePreview &&
-            lastMessagePreview.message?.senderAddress === userAddress
-          }
-        />
-      );
-    },
-    [
-      colorScheme,
-      navigation,
-      route,
-      userAddress,
-      blockedPeers,
-      initialLoadDoneOnce,
-    ]
-  );
+  // Search bar hook
+  useHeaderSearchBar({
+    navigation,
+    route,
+    searchBarRef,
+  });
 
-  const SearchTitleHeader = () => {
-    const styles = useStyles();
-    return (
+  let ListHeaderComponent: React.ReactElement | undefined = undefined;
+  const showSearchTitleHeader =
+    (Platform.OS === "ios" && searchBarFocused && !showNoResult) ||
+    (Platform.OS === "android" && searchBarFocused);
+  if (showSearchTitleHeader) {
+    ListHeaderComponent = (
       <View style={styles.searchTitleContainer}>
         <Text style={styles.searchTitle}>Chats</Text>
       </View>
     );
-  };
-
-  let ListHeaderComponent;
-  if (Platform.OS === "ios") {
-    ListHeaderComponent =
-      searchBarFocused && !showNoResult ? <SearchTitleHeader /> : null;
-  } else {
-    ListHeaderComponent = searchBarFocused ? <SearchTitleHeader /> : null;
+  } else if (sortedConversationsWithPreview.conversationsRequests.length > 0) {
+    ListHeaderComponent = (
+      <TouchableHighlight
+        underlayColor={clickedItemBackgroundColor(colorScheme)}
+        onPress={() => {
+          navigation.push("ChatsRequests");
+        }}
+      >
+        <View style={styles.requestsHeader}>
+          <Text style={styles.requestsHeaderTitle}>Requests</Text>
+        </View>
+      </TouchableHighlight>
+    );
   }
 
-  let screenToShow: JSX.Element = (
-    <View style={styles.container}>
-      <View style={styles.conversationList}>
-        <FlashList
-          keyboardShouldPersistTaps="handled"
-          onMomentumScrollBegin={() => {
-            converseEventEmitter.emit("conversationList-scroll");
-            searchBarRef.current?.blur();
-          }}
-          onScrollBeginDrag={() => {
-            converseEventEmitter.emit("conversationList-scroll");
-            searchBarRef.current?.blur();
-          }}
-          contentInsetAdjustmentBehavior="automatic"
-          data={flatListItems}
-          extraData={[
-            colorScheme,
-            navigation,
-            route,
-            userAddress,
-            blockedPeers,
-            initialLoadDoneOnce,
-            lastUpdateAt,
-          ]}
-          renderItem={renderItem}
-          keyExtractor={keyExtractor}
-          estimatedItemSize={Platform.OS === "ios" ? 77 : 88}
-          ListHeaderComponent={ListHeaderComponent}
-          ListFooterComponent={
-            showNoResult ? <NoResult navigation={navigation} /> : null
-          }
-        />
-      </View>
-    </View>
+  let screenToShow = (
+    <ConversationFlashList
+      route={route}
+      navigation={navigation}
+      onScroll={() => {
+        converseEventEmitter.emit("conversationList-scroll");
+        searchBarRef.current?.blur();
+      }}
+      showNoResult={showNoResult}
+      items={flatListItems}
+      ListHeaderComponent={ListHeaderComponent}
+    />
   );
 
   if (showInitialLoad) {
@@ -286,13 +204,6 @@ export default gestureHandlerRootHOC(ConversationList);
 const useStyles = () => {
   const colorScheme = useColorScheme();
   return StyleSheet.create({
-    container: {
-      flex: 1,
-      backgroundColor: backgroundColor(colorScheme),
-    },
-    conversationList: {
-      flex: 2,
-    },
     searchTitleContainer: {
       ...Platform.select({
         default: {
@@ -326,6 +237,33 @@ const useStyles = () => {
     },
     scrollViewWrapper: {
       backgroundColor: backgroundColor(colorScheme),
+    },
+    requestsHeader: Platform.select({
+      default: {
+        paddingVertical: 8,
+        paddingRight: 60,
+        marginLeft: 32,
+        borderBottomWidth: 0.25,
+        borderBottomColor: listItemSeparatorColor(colorScheme),
+      },
+      android: {
+        paddingTop: 12,
+        paddingHorizontal: 16,
+      },
+    }),
+    requestsHeaderTitle: {
+      color: textPrimaryColor(colorScheme),
+      ...Platform.select({
+        default: {
+          fontSize: 17,
+          fontWeight: "600",
+          marginBottom: 3,
+          marginRight: 110,
+        },
+        android: {
+          fontSize: 16,
+        },
+      }),
     },
   });
 };
