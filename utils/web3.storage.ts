@@ -1,27 +1,18 @@
-import RNFS from "react-native-fs";
+import RNFetchBlob from "rn-fetch-blob";
 
 import config from "../config";
 
 export const uploadFileToWeb3Storage = async (
-  filePath: string,
-  fileName: string,
-  mimeType: string
+  filePath: string
 ): Promise<string> => {
-  const web3StorageUpload = await RNFS.uploadFiles({
-    toUrl: "https://api.web3.storage/upload",
-    files: [
-      {
-        name: "file",
-        filename: fileName,
-        filepath: filePath,
-        filetype: mimeType,
-      },
-    ],
-    headers: {
+  const result = await RNFetchBlob.fetch(
+    "POST",
+    "https://api.web3.storage/upload",
+    {
       Authorization: `Bearer ${config.web3StorageToken}`,
+      "Content-Type": "application/octet-stream",
     },
-  });
-  const uploadResult = await web3StorageUpload.promise;
-  const result = JSON.parse(uploadResult.body);
-  return result.cid;
+    RNFetchBlob.wrap(filePath)
+  );
+  return JSON.parse(result.data).cid;
 };

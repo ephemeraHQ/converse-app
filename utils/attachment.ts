@@ -160,9 +160,7 @@ export const uploadRemoteAttachment = async (
   attachment: EncryptedLocalAttachment
 ): Promise<RemoteAttachmentContent> => {
   const cid = await uploadFileToWeb3Storage(
-    attachment.encryptedLocalFileUri.replace("file:///", "/"),
-    "XMTPEncryptedContent",
-    "application/octet-stream"
+    attachment.encryptedLocalFileUri.replace("file:///", "/")
   );
   const url = `https://${cid}.ipfs.w3s.link`;
   return {
