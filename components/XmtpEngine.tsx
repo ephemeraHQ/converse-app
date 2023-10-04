@@ -63,7 +63,7 @@ export default function XmtpEngine() {
       // Sync deleted topics
       unsyncedAccounts.map((a) =>
         getDeletedTopics(a).then((topics) => {
-          getChatStore(a).getState().markTopicsAsDeleted(topics);
+          getChatStore(a).getState().setTopicsStatus(topics, "deleted");
         })
       );
     }

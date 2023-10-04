@@ -55,6 +55,10 @@ export type XmtpMessage = XmtpProtocolMessage & {
   lastUpdateAt?: number;
 };
 
+export type TopicsStatus = {
+  [topic: string]: "deleted" | "consented";
+};
+
 export type ChatStoreType = {
   conversations: {
     [topic: string]: XmtpConversationWithUpdate;
@@ -72,6 +76,7 @@ export type ChatStoreType = {
   resyncing: boolean;
   reconnecting: boolean;
   deletedTopics: { [topic: string]: boolean };
+  topicsStatus: { [topic: string]: "deleted" | "consented" };
 
   searchQuery: string;
   setSearchQuery: (query: string) => void;
@@ -102,7 +107,8 @@ export type ChatStoreType = {
   setResyncing: (syncing: boolean) => void;
   setReconnecting: (reconnecting: boolean) => void;
   setLastSyncedAt: (synced: number) => void;
-  markTopicsAsDeleted: (topics: string[]) => void;
+
+  setTopicsStatus: (topics: string[], status: "deleted" | "consented") => void;
 };
 
 const now = () => new Date().getTime();
@@ -405,16 +411,18 @@ export const initChatStore = (account: string) => {
             }),
           setLastSyncedAt: (synced: number) =>
             set(() => ({ lastSyncedAt: synced })),
-          markTopicsAsDeleted: (topics: string[]) =>
+          setTopicsStatus: (
+            topics: string[],
+            status: "deleted" | "consented"
+          ) =>
             set((state) => {
-              const newDeletedTopics = { ...state.deletedTopics };
-              topics.forEach((t) => {
-                newDeletedTopics[t] = true;
-              });
-              setImmediate(() => {
-                subscribeToNotifications(account);
-              });
-              return { deletedTopics: newDeletedTopics };
+              const updatedStatus: TopicsStatus = {};
+              for (const topic of topics) {
+                updatedStatus[topic] = status;
+              }
+              return {
+                topicsStatus: { ...state.topicsStatus, ...updatedStatus },
+              };
             }),
         }) as ChatStoreType,
       {
@@ -425,6 +433,7 @@ export const initChatStore = (account: string) => {
           initialLoadDoneOnce: state.initialLoadDoneOnce,
           lastSyncedAt: state.lastSyncedAt,
           deletedTopics: state.deletedTopics,
+          topicsStatus: state.topicsStatus,
         }),
       }
     )
