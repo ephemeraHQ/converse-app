@@ -7,16 +7,17 @@ import {
   Text,
   View,
   TextInput,
-  TouchableHighlight,
 } from "react-native";
 import { gestureHandlerRootHOC } from "react-native-gesture-handler";
 import { SearchBarCommands } from "react-native-screens";
 
 import ConversationFlashList from "../components/ConversationFlashList";
 import NewConversationButton from "../components/ConversationList/NewConversationButton";
+import RequestsButton from "../components/ConversationList/RequestsButton";
+import EphemeralAccountBanner from "../components/EphemeralAccountBanner";
 import InitialLoad from "../components/InitialLoad";
-import Picto from "../components/Picto/Picto";
 import Recommendations from "../components/Recommendations/Recommendations";
+import NoResult from "../components/Search/NoResult";
 import Welcome from "../components/Welcome";
 import { refreshProfileForAddress } from "../data/helpers/profiles/profilesUpdate";
 import {
@@ -32,9 +33,8 @@ import {
   backgroundColor,
   itemSeparatorColor,
   listItemSeparatorColor,
-  clickedItemBackgroundColor,
-  actionSecondaryColor,
   textSecondaryColor,
+  primaryColor,
 } from "../utils/colors";
 import {
   LastMessagePreview,
@@ -109,14 +109,12 @@ function ConversationList({ navigation, route, searchBarRef }: Props) {
 
   useEffect(() => {
     const listItems = getConversationListItemsToDisplay(
-      ephemeralAccount,
       searchQuery,
       sortedConversationsWithPreview.conversationsInbox,
       profiles
     );
     setFlatListItems(listItems);
   }, [
-    ephemeralAccount,
     searchQuery,
     sortedConversationsWithPreview.conversationsInbox,
     profiles,
@@ -129,37 +127,25 @@ function ConversationList({ navigation, route, searchBarRef }: Props) {
     searchBarRef,
   });
 
-  let ListHeaderComponent: React.ReactElement | undefined = undefined;
+  const ListHeaderComponents: React.ReactElement[] = [];
   const showSearchTitleHeader =
     (Platform.OS === "ios" && searchBarFocused && !showNoResult) ||
     (Platform.OS === "android" && searchBarFocused);
   if (showSearchTitleHeader) {
-    ListHeaderComponent = (
-      <View style={styles.searchTitleContainer}>
+    ListHeaderComponents.push(
+      <View key="search" style={styles.searchTitleContainer}>
         <Text style={styles.searchTitle}>Chats</Text>
       </View>
     );
   } else if (sortedConversationsWithPreview.conversationsRequests.length > 0) {
-    ListHeaderComponent = (
-      <TouchableHighlight
-        underlayColor={clickedItemBackgroundColor(colorScheme)}
-        onPress={() => {
-          navigation.push("ChatsRequests");
-        }}
-      >
-        <View style={styles.requestsHeader}>
-          <Text style={styles.requestsHeaderTitle}>Requests</Text>
-          <Text style={styles.requestsCount}>
-            {sortedConversationsWithPreview.conversationsRequests.length}
-          </Text>
-          <Picto
-            picto="chevron.right"
-            weight="semibold"
-            color={actionSecondaryColor(colorScheme)}
-            size={10}
-          />
-        </View>
-      </TouchableHighlight>
+    ListHeaderComponents.push(
+      <RequestsButton
+        navigation={navigation}
+        route={route}
+        requestsCount={
+          sortedConversationsWithPreview.conversationsRequests.length
+        }
+      />
     );
   }
 
@@ -170,6 +156,17 @@ function ConversationList({ navigation, route, searchBarRef }: Props) {
     ListFooterComponent = (
       <Welcome ctaOnly={false} navigation={navigation} route={route} />
     );
+  } else {
+    if (ephemeralAccount && !showNoResult && !showSearchTitleHeader) {
+      ListHeaderComponents.push(<EphemeralAccountBanner key="ephemeral" />);
+    }
+    if (!searchQuery) {
+      ListFooterComponent = (
+        <Welcome ctaOnly navigation={navigation} route={route} />
+      );
+    } else if (showNoResult) {
+      ListFooterComponent = <NoResult navigation={navigation} />;
+    }
   }
 
   return (
@@ -181,9 +178,12 @@ function ConversationList({ navigation, route, searchBarRef }: Props) {
           converseEventEmitter.emit("conversationList-scroll");
           searchBarRef.current?.blur();
         }}
-        showNoResult={showNoResult}
-        items={ListFooterComponent ? [] : flatListItems}
-        ListHeaderComponent={ListHeaderComponent}
+        items={showInitialLoad || showWelcome ? [] : flatListItems}
+        ListHeaderComponent={
+          ListHeaderComponents.length > 0 ? (
+            <>{ListHeaderComponents}</>
+          ) : undefined
+        }
         ListFooterComponent={ListFooterComponent}
       />
       <Recommendations navigation={navigation} visibility="HIDDEN" />
@@ -245,7 +245,7 @@ const useStyles = () => {
           borderBottomColor: listItemSeparatorColor(colorScheme),
         },
         android: {
-          paddingTop: 12,
+          paddingVertical: 12,
           paddingHorizontal: 16,
         },
       }),
@@ -266,11 +266,18 @@ const useStyles = () => {
     },
     requestsCount: {
       marginLeft: "auto",
-      marginRight: 16,
-      color: textSecondaryColor(colorScheme),
+
       ...Platform.select({
-        default: { fontSize: 15 },
-        android: { fontSize: 11 },
+        default: {
+          marginRight: 16,
+          fontSize: 15,
+          color: textSecondaryColor(colorScheme),
+        },
+        android: {
+          marginRight: 1,
+          fontSize: 11,
+          color: primaryColor(colorScheme),
+        },
       }),
     },
   });

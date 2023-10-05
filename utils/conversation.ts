@@ -272,20 +272,17 @@ export function sortAndComputePreview(
 }
 
 export function getConversationListItemsToDisplay(
-  ephemeralAccount: boolean,
   searchQuery: string,
   sortedConversations: ConversationWithLastMessagePreview[],
   profiles: Record<string, any>
 ): ConversationFlatListItem[] {
-  const items = ephemeralAccount ? [{ topic: "ephemeral" }] : [];
-
   if (searchQuery && sortedConversations) {
     const matchedPeerAddresses = getMatchedPeerAddresses(profiles, searchQuery);
     const filteredConversations = sortedConversations.filter((conversation) =>
       matchedPeerAddresses.includes(conversation.peerAddress)
     );
-    return [...filteredConversations];
+    return filteredConversations;
   } else {
-    return [...items, ...sortedConversations, { topic: "welcome" }];
+    return sortedConversations;
   }
 }

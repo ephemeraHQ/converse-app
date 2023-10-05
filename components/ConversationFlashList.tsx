@@ -17,13 +17,9 @@ import {
 import { pick } from "../utils/objects";
 import { conversationName } from "../utils/str";
 import ConversationListItem from "./ConversationListItem";
-import EphemeralAccountBanner from "./EphemeralAccountBanner";
-import NoResult from "./Search/NoResult";
-import Welcome from "./Welcome";
 
 type Props = {
   onScroll?: () => void;
-  showNoResult?: boolean;
   items: ConversationFlatListItem[];
   ListHeaderComponent?: React.ReactElement | null;
   ListFooterComponent?: React.ReactElement | null;
@@ -34,7 +30,6 @@ export default function ConversationFlashList({
   navigation,
   route,
   items,
-  showNoResult,
   ListHeaderComponent,
   ListFooterComponent,
 }: Props) {
@@ -54,13 +49,6 @@ export default function ConversationFlashList({
 
   const renderItem = useCallback(
     ({ item }: { item: ConversationFlatListItem }) => {
-      if (item.topic === "welcome") {
-        return <Welcome ctaOnly navigation={navigation} route={route} />;
-      } else if (item.topic === "noresult") {
-        return <NoResult navigation={navigation} />;
-      } else if (item.topic === "ephemeral") {
-        return <EphemeralAccountBanner />;
-      }
       const conversation = item as ConversationWithLastMessagePreview;
       const lastMessagePreview = conversation.lastMessagePreview;
       return (
@@ -97,14 +85,7 @@ export default function ConversationFlashList({
         />
       );
     },
-    [
-      colorScheme,
-      navigation,
-      route,
-      userAddress,
-      blockedPeers,
-      initialLoadDoneOnce,
-    ]
+    [colorScheme, navigation, userAddress, blockedPeers, initialLoadDoneOnce]
   );
   return (
     <View style={styles.container}>
@@ -113,9 +94,9 @@ export default function ConversationFlashList({
           keyboardShouldPersistTaps="handled"
           onMomentumScrollBegin={onScroll}
           onScrollBeginDrag={onScroll}
-          alwaysBounceVertical={false}
+          alwaysBounceVertical={items.length > 0}
           contentInsetAdjustmentBehavior="automatic"
-          data={ListFooterComponent ? [] : items}
+          data={items}
           extraData={[
             colorScheme,
             navigation,
@@ -129,10 +110,7 @@ export default function ConversationFlashList({
           keyExtractor={keyExtractor}
           estimatedItemSize={Platform.OS === "ios" ? 77 : 88}
           ListHeaderComponent={ListHeaderComponent}
-          ListFooterComponent={
-            ListFooterComponent ||
-            (showNoResult ? <NoResult navigation={navigation} /> : null)
-          }
+          ListFooterComponent={ListFooterComponent}
         />
       </View>
     </View>
