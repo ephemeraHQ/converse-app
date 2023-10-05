@@ -10,6 +10,9 @@ import java.io.File
 
 private var openedDbs = mutableMapOf<String, SQLiteDatabase>();
 
+// Not used anymore for now, was used to find which account should
+// handle a notification but now the payload includes the account.
+// Better because handling SQLite in multiple threads might be tricky!
 fun getDbName(appContext: Context, account: String): String {
     val accountsState = getAccountsState(appContext)
     val databaseId = accountsState?.databaseId?.get(account) ?: account
@@ -23,12 +26,7 @@ fun getDb(appContext: Context, account: String): SQLiteDatabase? {
         Log.d("DB", "DATABASE ALREADY OPEND FOR $dbName")
         return database as SQLiteDatabase;
     }
-    var databasePath = "${appContext.filesDir.absolutePath}/SQLite/$dbName"
-    if (!File(databasePath).exists()) {
-        // TODO => remove in the future because migration to react-native-quick-sqlite
-        // made us change path
-        databasePath = appContext.getDatabasePath(getDbName(appContext, account)).path
-    }
+    val databasePath = appContext.getDatabasePath(getDbName(appContext, account)).path
 
     return if (File(databasePath).exists()) {
         database = SQLiteDatabase.openDatabase(databasePath, null, SQLiteDatabase.OPEN_READWRITE)
@@ -38,42 +36,4 @@ fun getDb(appContext: Context, account: String): SQLiteDatabase? {
     } else {
         null
     }
-}
-
-fun getConversations(appContext: Context, account: String) {
-    val db = getDb(appContext, account) ?: return
-    val query = "SELECT * FROM conversation"
-    val cursor: Cursor = db.rawQuery(query, null)
-
-    // Loop through the cursor and retrieve data
-    if (cursor.moveToFirst()) do {
-        val topic = cursor.getString(cursor.getColumnIndexOrThrow("topic"))
-        Log.d("DEBUG", "GOT TOPIC ${topic}")
-    } while (cursor.moveToNext())
-
-    // Close the cursor
-    cursor.close()
-}
-
-fun hasTopic(appContext: Context, account: String, topic: String): Boolean {
-    val db = getDb(appContext, account) ?: return false
-    val query = "SELECT COUNT(topic) FROM conversation WHERE topic = ?;"
-    val cursor: Cursor = db.rawQuery(query, arrayOf(topic))
-
-    // Process the count value from the cursor
-    var count = 0
-    if (cursor != null && cursor.moveToFirst()) {
-        count = cursor.getInt(0)
-    }
-    // Close the cursor
-    cursor.close()
-    return count > 0
-}
-
-
-fun insertConversation(appContext: Context, account: String, topic: String, peerAddress: String, createdAt: Long, context: ConversationContext?) {
-    val db = getDb(appContext, account) ?: throw Exception("No Db Found")
-    val query = "INSERT INTO conversation (topic, peerAddress, createdAt, contextConversationId, contextMetadata) VALUES (?, ?, ?, ?, ?);"
-    var contextMetadata = if (context != null && context.metadata != null) Gson().toJson(context.metadata) else null
-    db.execSQL(query, arrayOf(topic, peerAddress, createdAt, context?.conversationId, contextMetadata))
 }

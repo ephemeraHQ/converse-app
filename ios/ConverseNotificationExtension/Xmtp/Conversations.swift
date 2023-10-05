@@ -75,16 +75,6 @@ func saveConversation(account: String, topic: String, peerAddress: String, creat
   let encodedString = String(data: encodedValue, encoding: .utf8)
   let mmkv = getMmkv()
   mmkv?.set(encodedString!, forKey: "saved-notifications-conversations")
-  
-  // Now also save in SQLite
-  // TODO => stop saving in shared data or just the id since it's already in sqlite!
-  do {
-    try insertConversation(account: account, topic: topic, peerAddress: peerAddress, createdAt: createdAt, context: context)
-  } catch {
-    // Usually will happen because it's already there (for instance if the app is running)
-    print("COULD NOT INSERT CONVO IN SQLITE: \(error)")
-  }
-  
 }
 
 func getSavedConversationTitle(contentTopic: String)-> String {

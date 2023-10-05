@@ -1,6 +1,7 @@
 import * as secp from "@noble/secp256k1";
 import { privateKey, signature } from "@xmtp/proto";
 import { Client } from "@xmtp/react-native-sdk";
+import { Platform } from "react-native";
 
 import config from "../../config";
 import { getChatStore, getUserStore } from "../../data/store/accountsStore";
@@ -69,6 +70,8 @@ const onSyncLost = async (account: string, error: any) => {
   syncXmtpClient(account);
 };
 
+const streamingAccounts: { [account: string]: boolean } = {};
+
 export const syncXmtpClient = async (account: string) => {
   const knownTopics = Object.keys(
     getChatStore(account).getState().conversations
@@ -99,12 +102,21 @@ export const syncXmtpClient = async (account: string) => {
       promises.push(loadConversationsMessages(client, newConversations, 0));
     }
 
-    streamAllMessages(client).catch((e) => {
-      onSyncLost(account, e);
-    });
-    streamConversations(client).catch((e) => {
-      onSyncLost(account, e);
-    });
+    // Only stream once to avoid GRPC errors
+    // on Android @todo => check with naomi to fix the GRPC errors
+    if (Platform.OS === "android" && streamingAccounts[client.address]) {
+      console.log(
+        `[XmtpRN] Already streaming ${account} - ignoring on Android`
+      );
+    } else {
+      streamAllMessages(client).catch((e) => {
+        onSyncLost(account, e);
+      });
+      streamConversations(client).catch((e) => {
+        onSyncLost(account, e);
+      });
+      streamingAccounts[client.address] = true;
+    }
 
     await Promise.all(promises);
 
@@ -122,11 +134,12 @@ export const deleteXmtpClient = async (account: string) => {
     const client = xmtpClientByAccount[account];
     stopStreamingAllMessage(client);
     stopStreamingConversations(client);
-    delete xmtpClientByAccount[account];
-    deleteOpenedConversations(account);
-    delete xmtpSignatureByAccount[account];
-    delete instantiatingClientForAccount[account];
   }
+  delete xmtpClientByAccount[account];
+  deleteOpenedConversations(account);
+  delete xmtpSignatureByAccount[account];
+  delete instantiatingClientForAccount[account];
+  delete streamingAccounts[account];
 };
 
 const getXmtpApiSignature = async (account: string, message: string) => {

@@ -65,25 +65,14 @@ class PushNotificationsService : FirebaseMessagingService() {
 
         val notificationData = Klaxon().parse<NotificationData>(envelopeJSON)
         if (notificationData === null) return
-        Log.d(TAG, "Decoded notification data: topic is ${notificationData.contentTopic}")
+        Log.d(TAG, "Decoded notification data: account is ${notificationData.account} - topic is ${notificationData.contentTopic}")
 
         initCodecs()
-        val xmtpClient = getXmtpClient(this, notificationData.contentTopic)
+        val xmtpClient = getXmtpClient(this, notificationData.account)
         if (xmtpClient == null) {
             Log.d(TAG, "NO XMTP CLIENT FOUND FOR TOPIC ${notificationData.contentTopic}")
             return
         }
-        // Let's add "account" to RemoteMessage to make it accessible to RN
-        val newNotificationData = NotificationData(
-            notificationData.message,
-            notificationData.timestampNs,
-            notificationData.contentTopic,
-            notificationData.sentViaConverse,
-            xmtpClient.address,
-            null
-        )
-        val newNotificationDataJson = Klaxon().toJsonString(newNotificationData)
-        remoteMessage.data["body"] = newNotificationDataJson
 
         val encryptedMessageData = Base64.decode(notificationData.message, Base64.NO_WRAP)
         val envelope = EnvelopeBuilder.buildFromString(notificationData.contentTopic, Date(notificationData.timestampNs.toLong()/1000000), encryptedMessageData)

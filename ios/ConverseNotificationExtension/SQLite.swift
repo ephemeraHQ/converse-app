@@ -9,6 +9,10 @@ import Foundation
 import SQLite
 extension String: Error {}
 
+// Not used anymore for now, was used to find which account should
+// handle a notification but now the payload includes the account.
+// Better because handling SQLite in multiple threads might be tricky!
+
 private var openedDbs: [String: Connection] = [:]
 
 func getDbName(account: String) -> String {
@@ -55,31 +59,10 @@ func getDb(account: String) throws -> Connection {
   }
 }
 
-func getConversations(account: String) throws {
-  let conversations = Table("conversation")
-  let topic = Expression<String>("topic")
-  let db = try getDb(account: account)
-  for conversation in try db.prepare(conversations) {
-      print("topic: \(conversation[topic])")
-  }
-}
-
 func hasTopic(account: String, topic: String) throws -> Bool {
   let conversations = Table("conversation")
   let topicColumn = Expression<String>("topic")
   let db = try getDb(account: account)
   let count = try db.scalar(conversations.filter(topicColumn == topic).count)
   return count > 0
-}
-
-func insertConversation(account: String, topic: String, peerAddress: String, createdAt: Int, context: ConversationContext?) throws {
-  let conversations = Table("conversation")
-  let topicColumn = Expression<String>("topic")
-  let peerAddressColumn = Expression<String>("peerAddress")
-  let createdAtColumn = Expression<Int>("createdAt")
-  let contextConversationIdColumn = Expression<String?>("contextConversationId")
-  let contextMetadataColumn = Expression<String?>("contextMetadata")
-  let db = try getDb(account: account)
-  let insert = conversations.insert(topicColumn <- topic, peerAddressColumn <- peerAddress, createdAtColumn <- createdAt, contextConversationIdColumn <- context?.conversationId, contextMetadataColumn <- context?.metadata != nil ? String(data: try! JSONSerialization.data(withJSONObject: context?.metadata ?? [String: String](), options: []), encoding: .utf8) : nil)
-  let rowid = try db.run(insert)
 }

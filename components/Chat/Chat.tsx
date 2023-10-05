@@ -10,7 +10,11 @@ import {
   useUserStore,
 } from "../../data/store/accountsStore";
 import { XmtpConversationWithUpdate } from "../../data/store/chatStore";
-import { ReanimatedFlashList, ReanimatedView } from "../../utils/animations";
+import {
+  ReanimatedFlashList,
+  ReanimatedFlatList,
+  ReanimatedView,
+} from "../../utils/animations";
 import { useKeyboardAnimation } from "../../utils/animations/keyboardAnimation";
 import {
   backgroundColor,
@@ -174,6 +178,11 @@ export default function Chat() {
   );
   const keyExtractor = useCallback((item: MessageToDisplay) => item.id, []);
 
+  const AnimatedListView =
+    conversation && !conversation.pending
+      ? ReanimatedFlashList
+      : ReanimatedFlatList;
+
   return (
     <View
       style={styles.chatContainer}
@@ -181,7 +190,7 @@ export default function Chat() {
     >
       <ReanimatedView style={chatContentStyle}>
         {conversation && listArray.length > 1 && !isBlockedPeer && (
-          <ReanimatedFlashList
+          <AnimatedListView
             contentContainerStyle={styles.chat}
             data={listArray}
             extraData={[peerSocials]}
