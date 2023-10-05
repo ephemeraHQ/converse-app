@@ -34,6 +34,7 @@ export type MessageToDisplay = XmtpMessage & {
 };
 
 type Props = {
+  account: string;
   message: MessageToDisplay;
   colorScheme: ColorSchemeName;
 };
@@ -138,7 +139,11 @@ type RenderedChatMessage = {
 
 const renderedMessages = new LimitedMap<string, RenderedChatMessage>(50);
 
-export default function CachedChatMessage({ message, colorScheme }: Props) {
+export default function CachedChatMessage({
+  account,
+  message,
+  colorScheme,
+}: Props) {
   const keysChangesToRerender: (keyof MessageToDisplay)[] = [
     "id",
     "sent",
@@ -148,7 +153,9 @@ export default function CachedChatMessage({ message, colorScheme }: Props) {
     "hasNextMessageInSeries",
     "hasPreviousMessageInSeries",
   ];
-  const alreadyRenderedMessage = renderedMessages.get(message.id);
+  const alreadyRenderedMessage = renderedMessages.get(
+    `${account}-${message.id}`
+  );
   const shouldRerender =
     !alreadyRenderedMessage ||
     alreadyRenderedMessage.colorScheme !== colorScheme ||
@@ -156,8 +163,8 @@ export default function CachedChatMessage({ message, colorScheme }: Props) {
       (k) => message[k] !== alreadyRenderedMessage.message[k]
     );
   if (shouldRerender) {
-    const renderedMessage = ChatMessage({ message, colorScheme });
-    renderedMessages.set(message.id, {
+    const renderedMessage = ChatMessage({ account, message, colorScheme });
+    renderedMessages.set(`${account}-${message.id}`, {
       message,
       renderedMessage,
       colorScheme,

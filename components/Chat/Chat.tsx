@@ -164,7 +164,11 @@ export default function Chat() {
         );
       } else {
         return (
-          <CachedChatMessage message={{ ...item }} colorScheme={colorScheme} />
+          <CachedChatMessage
+            account={xmtpAddress}
+            message={{ ...item }}
+            colorScheme={colorScheme}
+          />
         );
       }
     },
@@ -174,6 +178,7 @@ export default function Chat() {
       recommendationsData,
       styles.inChatRecommendations,
       colorScheme,
+      xmtpAddress,
     ]
   );
   const keyExtractor = useCallback((item: MessageToDisplay) => item.id, []);
