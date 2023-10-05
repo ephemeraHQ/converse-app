@@ -38,7 +38,7 @@ const ENV = {
   dev: {
     ...defaultConfig,
     env: "dev",
-    xmtpEnv: "dev",
+    xmtpEnv: Constants.expoConfig?.extra?.DEV_XMTP_ENV || "dev",
     apiURI: Constants.expoConfig?.extra?.DEV_API_URI || "",
     debugMenu: true,
     bundleId: "com.converse.dev",
