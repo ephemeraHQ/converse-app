@@ -26,6 +26,7 @@ type Props = {
   showNoResult?: boolean;
   items: ConversationFlatListItem[];
   ListHeaderComponent?: React.ReactElement | null;
+  ListFooterComponent?: React.ReactElement | null;
 } & NativeStackScreenProps<NavigationParamList, any>;
 
 export default function ConversationFlashList({
@@ -35,6 +36,7 @@ export default function ConversationFlashList({
   items,
   showNoResult,
   ListHeaderComponent,
+  ListFooterComponent,
 }: Props) {
   const styles = useStyles();
   const colorScheme = useColorScheme();
@@ -111,8 +113,9 @@ export default function ConversationFlashList({
           keyboardShouldPersistTaps="handled"
           onMomentumScrollBegin={onScroll}
           onScrollBeginDrag={onScroll}
+          alwaysBounceVertical={false}
           contentInsetAdjustmentBehavior="automatic"
-          data={items}
+          data={ListFooterComponent ? [] : items}
           extraData={[
             colorScheme,
             navigation,
@@ -127,7 +130,8 @@ export default function ConversationFlashList({
           estimatedItemSize={Platform.OS === "ios" ? 77 : 88}
           ListHeaderComponent={ListHeaderComponent}
           ListFooterComponent={
-            showNoResult ? <NoResult navigation={navigation} /> : null
+            ListFooterComponent ||
+            (showNoResult ? <NoResult navigation={navigation} /> : null)
           }
         />
       </View>

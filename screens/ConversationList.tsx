@@ -6,7 +6,6 @@ import {
   useColorScheme,
   Text,
   View,
-  ScrollView,
   TextInput,
   TouchableHighlight,
 } from "react-native";
@@ -16,6 +15,7 @@ import { SearchBarCommands } from "react-native-screens";
 import ConversationFlashList from "../components/ConversationFlashList";
 import NewConversationButton from "../components/ConversationList/NewConversationButton";
 import InitialLoad from "../components/InitialLoad";
+import Picto from "../components/Picto/Picto";
 import Recommendations from "../components/Recommendations/Recommendations";
 import Welcome from "../components/Welcome";
 import { refreshProfileForAddress } from "../data/helpers/profiles/profilesUpdate";
@@ -33,6 +33,8 @@ import {
   itemSeparatorColor,
   listItemSeparatorColor,
   clickedItemBackgroundColor,
+  actionSecondaryColor,
+  textSecondaryColor,
 } from "../utils/colors";
 import {
   LastMessagePreview,
@@ -147,50 +149,43 @@ function ConversationList({ navigation, route, searchBarRef }: Props) {
       >
         <View style={styles.requestsHeader}>
           <Text style={styles.requestsHeaderTitle}>Requests</Text>
+          <Text style={styles.requestsCount}>
+            {sortedConversationsWithPreview.conversationsRequests.length}
+          </Text>
+          <Picto
+            picto="chevron.right"
+            weight="semibold"
+            color={actionSecondaryColor(colorScheme)}
+            size={10}
+          />
         </View>
       </TouchableHighlight>
     );
   }
 
-  let screenToShow = (
-    <ConversationFlashList
-      route={route}
-      navigation={navigation}
-      onScroll={() => {
-        converseEventEmitter.emit("conversationList-scroll");
-        searchBarRef.current?.blur();
-      }}
-      showNoResult={showNoResult}
-      items={flatListItems}
-      ListHeaderComponent={ListHeaderComponent}
-    />
-  );
-
+  let ListFooterComponent: React.ReactElement | undefined = undefined;
   if (showInitialLoad) {
-    screenToShow = (
-      <ScrollView
-        contentInsetAdjustmentBehavior="automatic"
-        alwaysBounceVertical={false}
-        style={styles.scrollViewWrapper}
-      >
-        <InitialLoad />
-      </ScrollView>
-    );
+    ListFooterComponent = <InitialLoad />;
   } else if (showWelcome) {
-    screenToShow = (
-      <ScrollView
-        contentInsetAdjustmentBehavior="automatic"
-        alwaysBounceVertical={false}
-        style={styles.scrollViewWrapper}
-      >
-        <Welcome ctaOnly={false} navigation={navigation} route={route} />
-      </ScrollView>
+    ListFooterComponent = (
+      <Welcome ctaOnly={false} navigation={navigation} route={route} />
     );
   }
 
   return (
     <>
-      {screenToShow}
+      <ConversationFlashList
+        route={route}
+        navigation={navigation}
+        onScroll={() => {
+          converseEventEmitter.emit("conversationList-scroll");
+          searchBarRef.current?.blur();
+        }}
+        showNoResult={showNoResult}
+        items={ListFooterComponent ? [] : flatListItems}
+        ListHeaderComponent={ListHeaderComponent}
+        ListFooterComponent={ListFooterComponent}
+      />
       <Recommendations navigation={navigation} visibility="HIDDEN" />
       {Platform.OS === "android" && (
         <NewConversationButton navigation={navigation} route={route} />
@@ -238,19 +233,23 @@ const useStyles = () => {
     scrollViewWrapper: {
       backgroundColor: backgroundColor(colorScheme),
     },
-    requestsHeader: Platform.select({
-      default: {
-        paddingVertical: 8,
-        paddingRight: 60,
-        marginLeft: 32,
-        borderBottomWidth: 0.25,
-        borderBottomColor: listItemSeparatorColor(colorScheme),
-      },
-      android: {
-        paddingTop: 12,
-        paddingHorizontal: 16,
-      },
-    }),
+    requestsHeader: {
+      flexDirection: "row",
+      alignItems: "center",
+      ...Platform.select({
+        default: {
+          paddingVertical: 8,
+          paddingRight: 24,
+          marginLeft: 32,
+          borderBottomWidth: 0.25,
+          borderBottomColor: listItemSeparatorColor(colorScheme),
+        },
+        android: {
+          paddingTop: 12,
+          paddingHorizontal: 16,
+        },
+      }),
+    },
     requestsHeaderTitle: {
       color: textPrimaryColor(colorScheme),
       ...Platform.select({
@@ -263,6 +262,15 @@ const useStyles = () => {
         android: {
           fontSize: 16,
         },
+      }),
+    },
+    requestsCount: {
+      marginLeft: "auto",
+      marginRight: 16,
+      color: textSecondaryColor(colorScheme),
+      ...Platform.select({
+        default: { fontSize: 15 },
+        android: { fontSize: 11 },
       }),
     },
   });
