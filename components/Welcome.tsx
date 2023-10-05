@@ -36,7 +36,7 @@ export default function Welcome({ ctaOnly, navigation }: Props) {
                 paddingTop: Platform.OS === "ios" ? headerHeight : 0,
                 height:
                   Platform.OS === "android"
-                    ? Dimensions.get("screen").height - headerHeight
+                    ? Dimensions.get("screen").height - 2 * headerHeight
                     : undefined,
               },
             ],
