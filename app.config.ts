@@ -58,6 +58,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     },
     ENV: isDev ? "dev" : isPreview ? "preview" : "prod",
     DEV_API_URI: process.env.DEV_API_URI,
+    DEV_XMTP_ENV: process.env.DEV_XMTP_ENV,
   },
   runtimeVersion:
     env.EXPO_PLATFORM === "android"

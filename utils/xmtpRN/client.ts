@@ -18,7 +18,7 @@ import {
   streamAllMessages,
 } from "./messages";
 
-const env = config.xmtpEnv === "production" ? "production" : "dev";
+const env = config.xmtpEnv as "dev" | "production" | "local";
 
 export const getXmtpClientFromBase64Key = (base64Key: string) =>
   Client.createFromKeyBundle(base64Key, { env });
