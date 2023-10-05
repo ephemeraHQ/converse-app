@@ -19,44 +19,22 @@ fun initCodecs() {
     Client.register(codec = ReactionCodec())
 }
 
-fun getXmtpAccountForTopic(appContext: Context, topic: String): String? {
-    if (isInviteTopic(topic)) {
-        // If invite topic, account is part of topic
-        return topic.substring(15, topic.length - 6)
-    }
-    val accounts = getAccounts(appContext)
-    var account: String? = null
-    var i = 0
-    while (account == null && i < accounts.size) {
-        val thisAccount = accounts[i]
-        if (hasTopic(appContext, thisAccount, topic)) {
-            account = thisAccount
-        }
-        i += 1
-    }
-   return account
-}
-
-fun getXmtpKeyForTopic(appContext: Context, topic: String): ByteArray? {
+fun getXmtpKeyForAccount(appContext: Context, account: String): ByteArray? {
     val legacyKey = getKeychainValue("XMTP_BASE64_KEY")
     if (legacyKey != null && legacyKey.isNotEmpty()) {
         Log.d("XmtpClient", "Legacy Key Found: ${legacyKey} ${legacyKey.length}")
         return Base64.decode(legacyKey)
     }
-    val account = getXmtpAccountForTopic(appContext, topic)
 
-    if (account != null) {
-        Log.d("XmtpClient", "Found account for topic: ${account}")
-        val accountKey = getKeychainValue("XMTP_KEY_${account}")
-        if (accountKey != null && accountKey.isNotEmpty()) {
-            Log.d("XmtpClient", "Found key for account: ${account}")
-            return Base64.decode(accountKey)
-        }
+    val accountKey = getKeychainValue("XMTP_KEY_${account}")
+    if (accountKey != null && accountKey.isNotEmpty()) {
+        Log.d("XmtpClient", "Found key for account: ${account}")
+        return Base64.decode(accountKey)
     }
     return null
 }
-fun getXmtpClient(appContext: Context, topic: String): Client? {
-    val keyByteArray = getXmtpKeyForTopic(appContext, topic) ?: return null
+fun getXmtpClient(appContext: Context, account: String): Client? {
+    val keyByteArray = getXmtpKeyForAccount(appContext, account) ?: return null
     val keys = PrivateKeyBundleV1Builder.buildFromBundle(keyByteArray)
     val mmkv = getMmkv(appContext)
     var xmtpEnvString = mmkv?.decodeString("xmtp-env")

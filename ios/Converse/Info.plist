@@ -36,8 +36,6 @@
     <string>group.$(PRODUCT_BUNDLE_IDENTIFIER)</string>
     <key>AppGroupName</key>
     <string>group.$(PRODUCT_BUNDLE_IDENTIFIER)</string>
-    <key>ReactNativeQuickSQLite_AppGroup</key>
-    <string>group.$(PRODUCT_BUNDLE_IDENTIFIER)</string>
     <key>CFBundleURLSchemes</key>
     <array>
       <string>converse-dev</string>

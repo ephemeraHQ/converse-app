@@ -103,12 +103,6 @@ fun saveConversationToStorage(appContext: Context, account: String, topic: Strin
     currentSavedConversations += newConversationToSave
     val newSavedConversationsString = Klaxon().toJsonString(currentSavedConversations)
     mmkv?.putString("saved-notifications-conversations", newSavedConversationsString)
-
-    try {
-        insertConversation(appContext, account, topic, peerAddress, createdAt, context)
-    } catch (e: Exception) {
-        Log.d("PushNotificationsService", "Could not save new convo to Sqlite: $e")
-    }
 }
 
 fun getPersistedConversation(xmtpClient: Client, topic: String): Conversation? {

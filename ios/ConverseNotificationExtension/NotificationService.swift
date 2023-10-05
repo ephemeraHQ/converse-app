@@ -41,14 +41,11 @@ func handleNotificationAsync(contentHandler: ((UNNotificationContent) -> Void), 
   var shouldIncrementBadge = false
   
   if let bestAttemptContent = bestAttemptContent {    
-    if var body = bestAttemptContent.userInfo["body"] as? [String: Any], let contentTopic = body["contentTopic"] as? String, let encodedMessage = body["message"] as? String {
-      let xmtpClient = await getXmtpClient(contentTopic: contentTopic);
+    if var body = bestAttemptContent.userInfo["body"] as? [String: Any], let contentTopic = body["contentTopic"] as? String, let encodedMessage = body["message"] as? String, let account = body["account"] as? String {
+      print("Received a notification for account \(account)")
+      let xmtpClient = await getXmtpClient(account: account);
       
-      if (xmtpClient != nil) {
-        // Let's add account that was found for this topic to notif body!
-        body["account"] = xmtpClient!.address
-        bestAttemptContent.userInfo.updateValue(body, forKey: "body")
-        
+      if (xmtpClient != nil) {        
         let encryptedMessageData = Data(base64Encoded: Data(encodedMessage.utf8))!
         let envelope = XMTP.Envelope.with { envelope in
           envelope.message = encryptedMessageData

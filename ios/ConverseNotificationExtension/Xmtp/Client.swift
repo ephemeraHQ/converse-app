@@ -9,34 +9,7 @@ import Foundation
 import XMTP
 import Alamofire
 
-func getXmtpAccountForTopic(contentTopic: String) -> String? {
-  if (isInviteTopic(topic: contentTopic)) {
-    // If invite topic, account is part of topic
-    let startIndex = contentTopic.index(contentTopic.startIndex, offsetBy: 15)
-    let endIndex = contentTopic.index(contentTopic.endIndex, offsetBy: -6)
-    return String(contentTopic[startIndex..<endIndex])
-  } else {
-    let accounts = getAccounts()
-    // Probably a conversation topic, let's find it in db
-    var account: String? = nil
-    var i = 0
-    while (account == nil && i < accounts.count) {
-      let thisAccount = accounts[i]
-      do {
-        if (try hasTopic(account: thisAccount, topic: contentTopic)) {
-          account = thisAccount
-        }
-      } catch {
-        sentryTrackMessage(message: "Could not check if database has topic", extras: ["error": error, "account": thisAccount])
-      }
-      
-      i += 1
-    }
-    return account
-  }
-}
-
-func getXmtpKeyForTopic(contentTopic: String) throws -> Data? {
+func getXmtpKeyForAccount(account: String) throws -> Data? {
   let legacyKey = getKeychainValue(forKey: "XMTP_KEYS")
   if (legacyKey != nil && legacyKey!.count > 0) {
     // We have a legacy key, not yet migrated!
@@ -46,11 +19,7 @@ func getXmtpKeyForTopic(contentTopic: String) throws -> Data? {
     let data = Data(decoded)
     return data
   }
-  let account = getXmtpAccountForTopic(contentTopic: contentTopic)
-  if (account == nil) {
-    return nil
-  }
-  let accountKey = getKeychainValue(forKey: "XMTP_KEY_\(account!)")
+  let accountKey = getKeychainValue(forKey: "XMTP_KEY_\(account)")
   if (accountKey == nil || accountKey!.count == 0) {
     return nil
   }
@@ -58,9 +27,9 @@ func getXmtpKeyForTopic(contentTopic: String) throws -> Data? {
   return Data(base64Encoded: accountKey!)
 }
 
-func getXmtpClient(contentTopic: String) async -> XMTP.Client? {
+func getXmtpClient(account: String) async -> XMTP.Client? {
   do {
-    let xmtpKeyData = try getXmtpKeyForTopic(contentTopic: contentTopic)
+    let xmtpKeyData = try getXmtpKeyForAccount(account: account)
     if (xmtpKeyData == nil) {
       return nil;
     }

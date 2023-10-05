@@ -99,7 +99,6 @@
     "react-native-parsed-text": "^0.0.22",
     "react-native-polyfill-globals": "^3.1.0",
     "react-native-qrcode-svg": "^6.2.0",
-    "react-native-quick-sqlite": "^8.0.5",
     "react-native-reanimated": "~3.3.0",
     "react-native-safe-area-context": "4.6.3",
     "react-native-screens": "~3.22.0",
