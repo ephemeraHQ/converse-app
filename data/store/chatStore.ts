@@ -430,6 +430,7 @@ export const initChatStore = (account: string) => {
           console.log("Zustand migration version:", version);
           // Migration from version 0: Convert 'deletedTopics' to 'topicsStatus'
           if (version === 0 && persistedState.deletedTopics) {
+            persistedState.topicsStatus = {};
             for (const [topic, isDeleted] of Object.entries(
               persistedState.deletedTopics
             )) {
