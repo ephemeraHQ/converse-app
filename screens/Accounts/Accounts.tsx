@@ -15,7 +15,7 @@ import {
   primaryColor,
   textSecondaryColor,
 } from "../../utils/colors";
-import { getReadableProfile } from "../../utils/str";
+import { shortAddress, useAccountsProfiles } from "../../utils/str";
 import { NavigationParamList } from "../Navigation/Navigation";
 
 export default function Accounts({
@@ -24,6 +24,7 @@ export default function Accounts({
 }: NativeStackScreenProps<NavigationParamList, "Accounts">) {
   const styles = useStyles();
   const accounts = useAccountsList();
+  const accountsProfiles = useAccountsProfiles();
   const setCurrentAccount = useAccountsStore((s) => s.setCurrentAccount);
   const setAddingNewAccount = useOnboardingStore((s) => s.setAddingNewAccount);
   const colorScheme = useColorScheme();
@@ -37,7 +38,7 @@ export default function Accounts({
       <TableView
         items={accounts.map((a) => ({
           id: a,
-          title: getReadableProfile(a, a),
+          title: accountsProfiles[a] || shortAddress(a),
           action: () => {
             setCurrentAccount(a, false);
             navigation.push("Chats");

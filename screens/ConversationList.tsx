@@ -83,6 +83,9 @@ function ConversationList({ navigation, route, searchBarRef }: Props) {
   const [sortedConversations, setSortedConversations] = useState<
     ConversationWithLastMessagePreview[]
   >([]);
+  const accountPrimaryENS = profiles[userAddress]?.socials.ensNames?.find(
+    (e) => e.isPrimary
+  )?.name;
 
   // Display logic
   const showInitialLoad = !initialLoadDoneOnce && flatListItems.length <= 1;
@@ -117,6 +120,12 @@ function ConversationList({ navigation, route, searchBarRef }: Props) {
     route,
     searchBarRef,
   });
+
+  useEffect(() => {
+    if (accountPrimaryENS && Platform.OS === "ios") {
+      navigation.setOptions({ headerBackTitle: accountPrimaryENS });
+    }
+  }, [accountPrimaryENS, navigation]);
 
   const keyExtractor = useCallback((item: FlatListItem) => {
     return item.topic;
