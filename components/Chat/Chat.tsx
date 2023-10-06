@@ -1,4 +1,3 @@
-import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import differenceInCalendarDays from "date-fns/differenceInCalendarDays";
 import React, { useCallback, useMemo, useRef } from "react";
 import { View, useColorScheme, StyleSheet, Platform } from "react-native";
@@ -87,11 +86,7 @@ const getListArray = (
   return reverseArray;
 };
 
-export default function Chat({
-  navigation,
-}: {
-  navigation: NativeStackNavigationProp<any>;
-}) {
+export default function Chat() {
   const { conversation, isBlockedPeer, onReadyToFocus } =
     useConversationContext(["conversation", "isBlockedPeer", "onReadyToFocus"]);
   const xmtpAddress = useCurrentAccount() as string;
