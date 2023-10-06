@@ -48,10 +48,6 @@ class PushNotificationsService : FirebaseMessagingService() {
     }
 
     override fun onMessageReceived(remoteMessage: RemoteMessage) {
-        if (applicationInForeground()) {
-            Log.d(TAG, "App is in foreground, dropping")
-            return
-        }
         Log.d(TAG, "Received a notification")
 
         var shouldIncrementBadge = false
