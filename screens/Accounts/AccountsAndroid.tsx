@@ -13,11 +13,13 @@ import { useOnboardingStore } from "../../data/store/onboardingStore";
 import { clickedItemBackgroundColor } from "../../utils/colors";
 import { converseEventEmitter } from "../../utils/events";
 import { pick } from "../../utils/objects";
-import { getReadableProfile } from "../../utils/str";
+import { shortAddress, useAccountsProfiles } from "../../utils/str";
 
 export default function AccountsAndroid() {
   const styles = useStyles();
   const accounts = useAccountsList();
+  const accountsProfiles = useAccountsProfiles();
+
   const disconnectWallet = useDisconnect();
   const { currentAccount, setCurrentAccount } = useAccountsStore((s) =>
     pick(s, ["currentAccount", "setCurrentAccount"])
@@ -35,7 +37,7 @@ export default function AccountsAndroid() {
         <Drawer.Item
           style={styles.item}
           key={a}
-          label={getReadableProfile(a, a)}
+          label={accountsProfiles[a] || shortAddress(a)}
           active={currentAccount === a}
           onPress={() => {
             setCurrentAccount(a, false);

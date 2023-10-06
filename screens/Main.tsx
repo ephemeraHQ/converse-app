@@ -41,10 +41,15 @@ export default function Main() {
   );
   // Once the user is fully connected, let's remove the Desktop Connect session id
   useEffect(() => {
-    if (desktopConnectSessionId && userAddress) {
+    if (desktopConnectSessionId && userAddress && !addingNewAccount) {
       setDesktopConnectSessionId(null);
     }
-  }, [desktopConnectSessionId, setDesktopConnectSessionId, userAddress]);
+  }, [
+    addingNewAccount,
+    desktopConnectSessionId,
+    setDesktopConnectSessionId,
+    userAddress,
+  ]);
   const showNotificationScreen = useSettingsStore(
     (s) => s.notifications.showNotificationScreen
   );

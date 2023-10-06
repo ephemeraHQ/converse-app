@@ -21,6 +21,7 @@ import { getPrivateKeyFromMnemonic, validateMnemonic } from "../../utils/eth";
 type Props = {
   seedPhrase: string;
   setSeedPhrase: (s: string) => void;
+  keyboardVerticalOffset: number;
   setKeyboardVerticalOffset: (offset: number) => void;
   generateWallet: () => void;
 };
@@ -47,6 +48,7 @@ export const getSignerFromSeedPhrase = async (mnemonic: string) => {
 export default function SeedPhraseConnect({
   seedPhrase,
   setSeedPhrase,
+  keyboardVerticalOffset,
   setKeyboardVerticalOffset,
   generateWallet,
 }: Props) {
@@ -74,10 +76,16 @@ export default function SeedPhraseConnect({
           }}
           value={seedPhrase}
           ref={(r) => {
+            const oldInputRef = textInputRef.current;
             textInputRef.current = r;
-            r?.measure((x, y, width, height, pageX, pageY) => {
-              setKeyboardVerticalOffset(-y - height - 80);
-            });
+            if (!oldInputRef) {
+              r?.measure((x, y, width, height, pageX, pageY) => {
+                const newKeyboardOffset = -y - height - 80;
+                if (newKeyboardOffset !== keyboardVerticalOffset) {
+                  setKeyboardVerticalOffset(-y - height - 80);
+                }
+              });
+            }
           }}
           onKeyPress={(e) => {
             if (e.nativeEvent.key === "Enter") {
