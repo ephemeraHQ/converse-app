@@ -411,10 +411,6 @@ export const initChatStore = (account: string) => {
             [topic: string]: "deleted" | "consented";
           }) =>
             set((state) => {
-              console.log("topicsStatus:", {
-                ...state.topicsStatus,
-                ...topicsStatus,
-              });
               return {
                 topicsStatus: { ...state.topicsStatus, ...topicsStatus },
               };
