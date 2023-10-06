@@ -16,5 +16,8 @@ export const useOnboardingStore = create<OnboardingStoreType>()((set) => ({
 
   desktopConnectSessionId: null,
   setDesktopConnectSessionId: (sessionId) =>
-    set(() => ({ desktopConnectSessionId: sessionId })),
+    set(() => ({
+      desktopConnectSessionId: sessionId,
+      addingNewAccount: !!sessionId,
+    })),
 }));

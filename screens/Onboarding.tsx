@@ -401,6 +401,7 @@ export default function OnboardingScreen() {
         seedPhrase={seedPhrase}
         setSeedPhrase={setSeedPhrase}
         generateWallet={generateWallet}
+        keyboardVerticalOffset={keyboardVerticalOffset}
         setKeyboardVerticalOffset={setKeyboardVerticalOffset}
       />
     );
