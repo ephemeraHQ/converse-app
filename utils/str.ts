@@ -65,7 +65,6 @@ export const useAccountsProfiles = () => {
   useEffect(() => {
     const unsubs: (() => void)[] = [];
     accounts.forEach((account) => {
-      console.log("handling account", account);
       const currentState = getProfilesStore(account).getState();
       handleAccount(account, currentState);
       const unsub = getProfilesStore(account).subscribe((state) => {
@@ -79,8 +78,6 @@ export const useAccountsProfiles = () => {
       });
     };
   }, [accounts, handleAccount]);
-
-  console.log("in useaccountsprofiles");
 
   return accountsProfiles;
 };
