@@ -63,20 +63,13 @@ export const useAccountsProfiles = () => {
   );
 
   useEffect(() => {
-    const unsubs: (() => void)[] = [];
     accounts.forEach((account) => {
       const currentState = getProfilesStore(account).getState();
       handleAccount(account, currentState);
-      const unsub = getProfilesStore(account).subscribe((state) => {
+      getProfilesStore(account).subscribe((state) => {
         handleAccount(account, currentState);
       });
-      unsubs.push(unsub);
     });
-    return () => {
-      unsubs.forEach((unsub) => {
-        unsub();
-      });
-    };
   }, [accounts, handleAccount]);
 
   return accountsProfiles;
