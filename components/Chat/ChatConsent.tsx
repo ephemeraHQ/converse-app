@@ -12,7 +12,7 @@ import {
 
 import { currentAccount, useChatStore } from "../../data/store/accountsStore";
 import { NavigationParamList } from "../../screens/Navigation/Navigation";
-import { consentToTopics, deleteTopic } from "../../utils/api";
+import { consentToTopics, deleteTopics } from "../../utils/api";
 import {
   backgroundColor,
   tertiaryBackgroundColor,
@@ -66,7 +66,7 @@ export default function ChatConsent() {
                   style: "destructive",
                   isPreferred: true,
                   onPress: () => {
-                    deleteTopic(currentAccount(), conversation.topic);
+                    deleteTopics(currentAccount(), [conversation.topic]);
                     setTopicsStatus({ [conversation.topic]: "deleted" });
                     navigation.pop();
                   },

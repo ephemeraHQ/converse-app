@@ -198,27 +198,26 @@ export const markDesktopSessionDone = async ({
     params: { sessionId, otp },
   });
 
-export const deleteTopic = async (account: string, topic: string) => {
-  await api.delete(`/api/topics`, {
-    headers: await getXmtpApiHeaders(account),
-    params: { topic },
-  });
-};
-
 export const deleteTopics = async (account: string, topics: string[]) => {
-  const topicsArray = topics.map((topic) => ({ [topic]: "deleted" }));
+  const topicsStatus: { [key: string]: "deleted" } = {};
+  for (const topic of topics) {
+    topicsStatus[topic] = "deleted";
+  }
   await api.post(
     "/api/topics/status",
-    { topicsArray },
+    { topicsStatus },
     { headers: await getXmtpApiHeaders(account) }
   );
 };
 
 export const consentToTopics = async (account: string, topics: string[]) => {
-  const topicsArray = topics.map((topic) => ({ [topic]: "consented" }));
+  const topicsStatus: { [key: string]: "consented" } = {};
+  for (const topic of topics) {
+    topicsStatus[topic] = "consented";
+  }
   await api.post(
     "/api/topics/status",
-    { topicsArray },
+    { topicsStatus },
     { headers: await getXmtpApiHeaders(account) }
   );
 };

@@ -19,7 +19,7 @@ import Picto from "../components/Picto/Picto";
 import { currentAccount, useChatStore } from "../data/store/accountsStore";
 import { XmtpConversation } from "../data/store/chatStore";
 import { NavigationParamList } from "../screens/Navigation/Navigation";
-import { deleteTopic } from "../utils/api";
+import { deleteTopics } from "../utils/api";
 import {
   actionSecondaryColor,
   backgroundColor,
@@ -135,7 +135,7 @@ const ConversationListItem = memo(function ConversationListItem({
                 style: "destructive",
                 isPreferred: true,
                 onPress: () => {
-                  deleteTopic(currentAccount(), conversationTopic);
+                  deleteTopics(currentAccount(), [conversationTopic]);
                   setTopicsStatus({ [conversation.topic]: "deleted" });
                 },
               },
