@@ -33,12 +33,6 @@ type AppStoreType = {
       error: boolean;
     } | null
   ) => void;
-
-  lastVersionOpen: string;
-  setLastVersionOpen: (version: string) => void;
-
-  lastUpdateRan: string;
-  setLastUpdateRan: (version: string) => void;
 };
 
 export const useAppStore = create<AppStoreType>()(
@@ -63,13 +57,6 @@ export const useAppStore = create<AppStoreType>()(
 
       mediaPreview: null,
       setMediaPreview: (preview) => set(() => ({ mediaPreview: preview })),
-
-      lastVersionOpen: "",
-      setLastVersionOpen: (version) =>
-        set(() => ({ lastVersionOpen: version })),
-
-      lastUpdateRan: "",
-      setLastUpdateRan: (update) => set(() => ({ lastUpdateRan: update })),
     }),
     {
       name: "store-app",
