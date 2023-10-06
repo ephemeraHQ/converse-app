@@ -14,6 +14,34 @@ const api = axios.create({
   baseURL: config.apiURI,
 });
 
+// Better error handling
+api.interceptors.response.use(
+  function (response) {
+    return response;
+  },
+  function (error) {
+    if (error.response) {
+      console.error(
+        `[API] HTTP Error ${error.response.status} - ${error.request._url}`,
+        JSON.stringify(
+          { headers: error.request._headers, response: error.response.data },
+          null,
+          2
+        )
+      );
+    } else if (error.request) {
+      console.error(
+        `[API] HTTP Error - No response received - ${error.request._url}`,
+        error.request
+      );
+    } else {
+      // Something happened in setting up the request that triggered an Error
+      console.log("Error", error.message);
+    }
+    return Promise.reject(error);
+  }
+);
+
 const lastSaveUser: { [address: string]: number } = {};
 
 export const saveUser = async (address: string) => {

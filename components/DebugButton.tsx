@@ -15,6 +15,7 @@ import {
 } from "../data/store/accountsStore";
 import { deleteXmtpKey } from "../utils/keychain";
 import { logout } from "../utils/logout";
+import mmkv from "../utils/mmkv";
 import { showActionSheetWithOptions } from "./StateHandlers/ActionSheetStateHandler";
 
 let logs: string[] = [];
@@ -114,6 +115,9 @@ const DebugButton = forwardRef((props, ref) => {
         "Logout all": () => {
           const accounts = getAccountsList();
           accounts.forEach((account) => logout(account));
+        },
+        "Clear logout tasks": () => {
+          mmkv.delete("converse-logout-tasks");
         },
         Cancel: undefined,
       };

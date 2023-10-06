@@ -1,5 +1,5 @@
 import differenceInCalendarDays from "date-fns/differenceInCalendarDays";
-import React, { useCallback, useMemo } from "react";
+import React, { useCallback, useMemo, useRef } from "react";
 import { View, useColorScheme, StyleSheet, Platform } from "react-native";
 import { useAnimatedStyle, useSharedValue } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -183,11 +183,15 @@ export default function Chat() {
   );
   const keyExtractor = useCallback((item: MessageToDisplay) => item.id, []);
 
-  const AnimatedListView =
+  // The first message was really buggy on iOS & Android and this is due to FlashList
+  // so we keep FlatList for new convos and switch to FlashList for bigger convos
+  // that need great perf.
+  const conversationNotPendingRef = useRef(
     conversation && !conversation.pending
-      ? ReanimatedFlashList
-      : ReanimatedFlatList;
-
+  );
+  const AnimatedListView = conversationNotPendingRef.current
+    ? ReanimatedFlashList
+    : ReanimatedFlatList;
   return (
     <View
       style={styles.chatContainer}

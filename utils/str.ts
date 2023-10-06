@@ -1,7 +1,9 @@
+import { useCallback, useEffect, useState } from "react";
 import { PixelRatio, TextInput } from "react-native";
 
-import { getProfilesStore } from "../data/store/accountsStore";
+import { getProfilesStore, useAccountsList } from "../data/store/accountsStore";
 import { XmtpConversation } from "../data/store/chatStore";
+import { ProfilesStoreType } from "../data/store/profilesStore";
 
 export const shortAddress = (address: string) =>
   address && address.length > 7
@@ -36,4 +38,49 @@ export const getReadableProfile = (account: string, address: string) => {
     .getState()
     .profiles[address]?.socials.ensNames?.find((e) => e.isPrimary)?.name;
   return primaryENS || shortAddress(account);
+};
+
+export const useAccountsProfiles = () => {
+  const accounts = useAccountsList();
+  const [accountsProfiles, setAccountsProfiles] = useState<{
+    [account: string]: string;
+  }>({});
+
+  const handleAccount = useCallback(
+    (account: string, state: ProfilesStoreType) => {
+      const primaryENS = state.profiles[account]?.socials.ensNames?.find(
+        (e) => e.isPrimary
+      )?.name;
+      const readableProfile = primaryENS || shortAddress(account);
+      if (accountsProfiles[account] !== readableProfile) {
+        setAccountsProfiles((s) => ({
+          ...s,
+          [account]: primaryENS || shortAddress(account),
+        }));
+      }
+    },
+    [accountsProfiles]
+  );
+
+  useEffect(() => {
+    const unsubs: (() => void)[] = [];
+    accounts.forEach((account) => {
+      console.log("handling account", account);
+      const currentState = getProfilesStore(account).getState();
+      handleAccount(account, currentState);
+      const unsub = getProfilesStore(account).subscribe((state) => {
+        handleAccount(account, currentState);
+      });
+      unsubs.push(unsub);
+    });
+    return () => {
+      unsubs.forEach((unsub) => {
+        unsub();
+      });
+    };
+  }, [accounts, handleAccount]);
+
+  console.log("in useaccountsprofiles");
+
+  return accountsProfiles;
 };
