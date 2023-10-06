@@ -20,11 +20,13 @@ import InitialLoad from "../components/InitialLoad";
 import Recommendations from "../components/Recommendations/Recommendations";
 import NoResult from "../components/Search/NoResult";
 import Welcome from "../components/Welcome";
+import { refreshProfileForAddress } from "../data/helpers/profiles/profilesUpdate";
 import {
   useChatStore,
   useSettingsStore,
   useUserStore,
   useProfilesStore,
+  currentAccount,
 } from "../data/store/accountsStore";
 import { XmtpConversation } from "../data/store/chatStore";
 import {
@@ -126,6 +128,13 @@ function ConversationList({ navigation, route, searchBarRef }: Props) {
       navigation.setOptions({ headerBackTitle: accountPrimaryENS });
     }
   }, [accountPrimaryENS, navigation]);
+
+  useEffect(() => {
+    if (!initialLoadDoneOnce) {
+      // First login, let's refresh the profile
+      refreshProfileForAddress(currentAccount(), currentAccount());
+    }
+  }, [initialLoadDoneOnce]);
 
   const keyExtractor = useCallback((item: FlatListItem) => {
     return item.topic;
