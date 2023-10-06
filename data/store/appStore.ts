@@ -61,10 +61,6 @@ export const useAppStore = create<AppStoreType>()(
     {
       name: "store-app",
       storage: createJSONStorage(() => zustandMMKVStorage),
-      partialize: (state) => ({
-        lastVersionOpen: state.lastVersionOpen,
-        lastUpdateRan: state.lastUpdateRan,
-      }),
     }
   )
 );
