@@ -204,7 +204,7 @@ const styles = StyleSheet.create({
   walletSelectorContainer: {
     width: "100%",
     flexGrow: 1,
-    marginTop: 30,
+    marginTop: isDesktop ? 80 : 30,
     justifyContent: "flex-end",
     paddingHorizontal: Platform.OS === "android" ? 0 : 24,
   },

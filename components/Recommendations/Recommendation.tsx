@@ -1,3 +1,4 @@
+import { useNavigationState } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { Platform, StyleSheet, Text, View, useColorScheme } from "react-native";
 import FastImage from "react-native-fast-image";
@@ -28,8 +29,8 @@ export function Recommendation({
     ...lensHandles,
     ...farcasterUsernames.map((f) => `${f} on farcaster`),
   ];
-
   const textAlign = embedInChat ? "center" : "left";
+  const navigationIndex = useNavigationState((state) => state.index);
 
   return (
     <View
@@ -88,7 +89,10 @@ export function Recommendation({
             title="Chat"
             style={styles.cta}
             onPress={() => {
-              navigation.popToTop();
+              // On Android the accounts are not in the navigation but in a drawer
+              navigation.pop(
+                Platform.OS === "ios" ? navigationIndex - 1 : navigationIndex
+              );
               setTimeout(() => {
                 navigation.navigate("Conversation", {
                   mainConversationWithPeer: address,

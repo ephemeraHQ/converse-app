@@ -13,6 +13,7 @@ import {
   textPrimaryColor,
   textSecondaryColor,
 } from "../../utils/colors";
+import { isDesktop } from "../../utils/device";
 import ActivityIndicator from "../ActivityIndicator/ActivityIndicator";
 import Button from "../Button/Button";
 import Picto from "../Picto/Picto";
@@ -98,7 +99,7 @@ const useStyles = () => {
   const colorScheme = useColorScheme();
   return StyleSheet.create({
     onboardingContent: {
-      minHeight: "100%",
+      minHeight: isDesktop ? undefined : "100%",
       alignItems: "center",
       backgroundColor: backgroundColor(colorScheme),
     },
