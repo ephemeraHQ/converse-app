@@ -28,7 +28,7 @@ import {
   useRecommendationsStore,
   useSettingsStore,
 } from "../data/store/accountsStore";
-import { blockPeer } from "../utils/api";
+import { blockPeers, consentToPeers } from "../utils/api";
 import {
   actionSheetColors,
   backgroundColor,
@@ -55,9 +55,9 @@ export default function ProfileScreen({
   );
   const profiles = useProfilesStore((state) => state.profiles);
   const isBlockedPeer = useSettingsStore(
-    (s) => s.blockedPeers[peerAddress.toLowerCase()]
+    (s) => s.peersStatus[peerAddress.toLowerCase()] === "blocked"
   );
-  const setBlockedPeerStatus = useSettingsStore((s) => s.setBlockedPeerStatus);
+  const setPeersStatus = useSettingsStore((s) => s.setPeersStatus);
   const socials = profiles[peerAddress]?.socials;
 
   const insets = useSafeAreaInsets();
@@ -235,12 +235,15 @@ export default function ProfileScreen({
                     },
                     (selectedIndex?: number) => {
                       if (selectedIndex === 0 && peerAddress) {
-                        blockPeer({
-                          account: currentAccount(),
-                          peerAddress,
-                          blocked: !isBlockedPeer,
-                        });
-                        setBlockedPeerStatus(peerAddress, !isBlockedPeer);
+                        const newStatus = isBlockedPeer
+                          ? "consented"
+                          : "blocked";
+                        const actionFunc = isBlockedPeer
+                          ? consentToPeers
+                          : blockPeers;
+
+                        actionFunc(currentAccount(), [peerAddress]);
+                        setPeersStatus({ [peerAddress]: newStatus });
                       }
                     }
                   );

@@ -9,7 +9,7 @@ import {
   useAccountsList,
 } from "../data/store/accountsStore";
 import { useAppStore } from "../data/store/appStore";
-import { getBlockedPeers, getTopicsStatus } from "../utils/api";
+import { getPeersStatus, getTopicsStatus } from "../utils/api";
 import { loadSavedNotificationMessagesToContext } from "../utils/notifications";
 import { pick } from "../utils/objects";
 import { syncXmtpClient } from "../utils/xmtpRN/client";
@@ -54,10 +54,10 @@ export default function XmtpEngine() {
         (a) => !syncedAccounts.current[a]
       );
       syncAccounts(unsyncedAccounts);
-      // Sync blocked peers
+      // Sync peers status (incl. blocked peers)
       unsyncedAccounts.map((a) =>
-        getBlockedPeers(a).then((addresses) => {
-          getSettingsStore(a).getState().setBlockedPeers(addresses);
+        getPeersStatus(a).then((peersStatus) => {
+          getSettingsStore(a).getState().setPeersStatus(peersStatus);
         })
       );
       // Sync topics status
