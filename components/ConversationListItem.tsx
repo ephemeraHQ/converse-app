@@ -16,10 +16,14 @@ import { TouchableRipple } from "react-native-paper";
 import Checkmark from "../assets/checkmark.svg";
 import Clock from "../assets/clock.svg";
 import Picto from "../components/Picto/Picto";
-import { currentAccount, useChatStore } from "../data/store/accountsStore";
+import {
+  currentAccount,
+  useChatStore,
+  useSettingsStore,
+} from "../data/store/accountsStore";
 import { XmtpConversation } from "../data/store/chatStore";
 import { NavigationParamList } from "../screens/Navigation/Navigation";
-import { deleteTopics } from "../utils/api";
+import { deleteTopics, blockPeers } from "../utils/api";
 import {
   actionSecondaryColor,
   backgroundColor,
@@ -62,6 +66,7 @@ const ConversationListItem = memo(function ConversationListItem({
   const styles = getStyles(colorScheme);
   const timeToShow = getRelativeDateTime(conversationTime);
   const setTopicsStatus = useChatStore((s) => s.setTopicsStatus);
+  const setPeersStatus = useSettingsStore((s) => s.setPeersStatus);
   const [selected, setSelected] = useState(false);
   const resetSelected = useCallback(() => {
     setSelected(false);
@@ -133,10 +138,19 @@ const ConversationListItem = memo(function ConversationListItem({
               {
                 text: "Delete",
                 style: "destructive",
-                isPreferred: true,
                 onPress: () => {
                   deleteTopics(currentAccount(), [conversationTopic]);
                   setTopicsStatus({ [conversation.topic]: "deleted" });
+                },
+              },
+              {
+                text: "Delete & Block",
+                style: "destructive",
+                isPreferred: true,
+                onPress: () => {
+                  // @todo Should we also call deleteTopics and set SetTopicsStatus to deleted here?
+                  blockPeers(currentAccount(), [conversation.peerAddress]);
+                  setPeersStatus({ [conversation.peerAddress]: "blocked" });
                 },
               },
             ]
@@ -155,6 +169,7 @@ const ConversationListItem = memo(function ConversationListItem({
     conversation.peerAddress,
     conversationTopic,
     setTopicsStatus,
+    setPeersStatus,
     styles.rightAction,
     conversation.topic,
   ]);

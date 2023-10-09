@@ -83,7 +83,7 @@ function ConversationList({ navigation, route, searchBarRef }: Props) {
     (peer) => peersStatus[peer] === "blocked"
   );
   const userAddress = useCurrentAccount() as string;
-  const profiles = useProfilesStore((state) => state.profiles);
+  const profiles = useProfilesStore((s) => s.profiles);
   const [flatListItems, setFlatListItems] = useState<FlatListItem[]>([]);
   const [sortedConversations, setSortedConversations] = useState<
     ConversationWithLastMessagePreview[]
@@ -104,10 +104,11 @@ function ConversationList({ navigation, route, searchBarRef }: Props) {
     const sortedConversations = sortAndComputePreview(
       conversations,
       userAddress,
-      topicsStatus
+      topicsStatus,
+      peersStatus
     );
     setSortedConversations(sortedConversations);
-  }, [userAddress, conversations, lastUpdateAt, topicsStatus]);
+  }, [userAddress, conversations, lastUpdateAt, topicsStatus, peersStatus]);
 
   useEffect(() => {
     const listItems = getConversationListItemsToDisplay(

@@ -222,7 +222,8 @@ export const useConversationContext = <K extends keyof ConversationContextType>(
 export function sortAndComputePreview(
   conversations: Record<string, XmtpConversation>,
   userAddress: string,
-  topicsStatus: { [topic: string]: "deleted" | "consented" }
+  topicsStatus: { [topic: string]: "deleted" | "consented" },
+  peersStatus: { [peer: string]: "blocked" | "consented" }
 ): ConversationWithLastMessagePreview[] {
   const conversationWithPreview = Object.values(conversations)
     .filter(
@@ -230,6 +231,7 @@ export function sortAndComputePreview(
         a?.peerAddress &&
         (!a.pending || a.messages.size > 0) &&
         topicsStatus[a.topic] !== "deleted" &&
+        peersStatus[a.peerAddress.toLowerCase()] !== "blocked" &&
         a.version !== "v1"
     )
     .map((c: ConversationWithLastMessagePreview) => {
