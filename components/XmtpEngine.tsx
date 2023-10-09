@@ -80,11 +80,12 @@ export default function XmtpEngine() {
         if (
           nextAppState === "active" &&
           appState.current.match(/inactive|background/) &&
-          hydrationDone &&
-          isInternetReachableRef.current
+          hydrationDone
         ) {
           loadSavedNotificationMessagesToContext();
-          syncAccounts(accounts);
+          if (isInternetReachableRef.current) {
+            syncAccounts(accounts);
+          }
         }
         appState.current = nextAppState;
       }
