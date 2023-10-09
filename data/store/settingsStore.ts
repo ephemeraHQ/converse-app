@@ -18,9 +18,10 @@ export type SettingsStoreType = {
     notificationsSettings: Partial<NotificationsSettings>
   ) => void;
 
-  blockedPeers: { [peerAddress: string]: boolean };
-  setBlockedPeers: (peers: string[]) => void;
-  setBlockedPeerStatus: (peerAddress: string, blocked: boolean) => void;
+  peersStatus: { [peerAddress: string]: "blocked" | "consented" };
+  setPeersStatus: (peersStatus: {
+    [peerAddress: string]: "blocked" | "consented";
+  }) => void;
 
   ephemeralAccount: boolean;
   setEphemeralAccount: (ephemeral: boolean) => void;
@@ -29,43 +30,51 @@ export type SettingsStoreType = {
 export const initSettingsStore = (account: string) => {
   const profilesStore = create<SettingsStoreType>()(
     persist(
-      (set) => ({
-        notifications: {
-          showNotificationScreen: true,
-        },
-        blockedPeers: {},
-        setBlockedPeers: (peers) =>
-          set(() => {
-            const newBlockedPeers: { [peerAddress: string]: boolean } = {};
-            peers.forEach((p) => (newBlockedPeers[p] = true));
-            return { blockedPeers: newBlockedPeers };
-          }),
-        setBlockedPeerStatus: (peerAddress, blocked) =>
-          set((state) => {
-            const blockedPeerAddresses = { ...state.blockedPeers };
-            if (blocked) {
-              blockedPeerAddresses[peerAddress.toLowerCase()] = true;
-            } else {
-              delete blockedPeerAddresses[peerAddress.toLowerCase()];
-            }
-            setImmediate(() => {
-              subscribeToNotifications(account);
-            });
-            return { blockedPeers: blockedPeerAddresses };
-          }),
-        ephemeralAccount: false,
-        setNotificationsSettings: (notificationsSettings) =>
-          set((state) => ({
-            notifications: {
-              ...state.notifications,
-              ...notificationsSettings,
-            },
-          })),
-        setEphemeralAccount: (ephemeral) =>
-          set(() => ({
-            ephemeralAccount: ephemeral,
-          })),
-      }),
+      (set) =>
+        ({
+          notifications: {
+            showNotificationScreen: true,
+          },
+          setPeersStatus: (peersStatus: {
+            [peerAddress: string]: "blocked" | "consented";
+          }) =>
+            set((state) => {
+              // Normalize to lowercase before merging
+              const updatedPeersStatus = {
+                ...Object.fromEntries(
+                  Object.entries(state.peersStatus).map(([key, value]) => [
+                    key.toLowerCase(),
+                    value,
+                  ])
+                ),
+                ...Object.fromEntries(
+                  Object.entries(peersStatus).map(([key, value]) => [
+                    key.toLowerCase(),
+                    value,
+                  ])
+                ),
+              };
+              // Call subscribeToNotifications only if at least one peer is consented
+              if (Object.values(peersStatus).includes("consented")) {
+                setImmediate(() => {
+                  subscribeToNotifications(account);
+                });
+              }
+              return { peersStatus: updatedPeersStatus };
+            }),
+          ephemeralAccount: false,
+          setNotificationsSettings: (notificationsSettings) =>
+            set((state) => ({
+              notifications: {
+                ...state.notifications,
+                ...notificationsSettings,
+              },
+            })),
+          setEphemeralAccount: (ephemeral) =>
+            set(() => ({
+              ephemeralAccount: ephemeral,
+            })),
+        }) as SettingsStoreType,
       {
         name: `store-${account}-settings`, // Account-based storage so each account can have its own settings
         storage: createJSONStorage(() => zustandMMKVStorage),

@@ -62,19 +62,29 @@ export const subscribeToNotifications = async (
     subscribingByAccount[account] = true;
     const lastSubscribedTopics = lastSubscribedTopicsByAccount[account] || [];
     const { conversations, topicsStatus } = getChatStore(account).getState();
-    const { blockedPeers } = getSettingsStore(account).getState();
+    const { peersStatus } = getSettingsStore(account).getState();
+
+    const isBlocked = (peerAddress: string) =>
+      peersStatus[peerAddress.toLowerCase()] === "blocked";
+
+    const isValidConversation = (c: any) => {
+      const hasValidAddress = c.peerAddress;
+      const isNotPending = !c.pending;
+      const isNotBlocked = !isBlocked(c.peerAddress);
+      const isTopicNotDeleted = topicsStatus[c.topic] !== "deleted";
+
+      return (
+        hasValidAddress && isNotPending && isNotBlocked && isTopicNotDeleted
+      );
+    };
+
     const topics = [
       ...Object.values(conversations)
-        .filter(
-          (c) =>
-            c.peerAddress &&
-            !c.pending &&
-            !blockedPeers[c.peerAddress.toLowerCase()] &&
-            topicsStatus[c.topic] !== "deleted"
-        )
+        .filter(isValidConversation)
         .map((c) => c.topic),
       buildUserInviteTopic(account || ""),
     ];
+
     const [expoTokenQuery, nativeTokenQuery] = await Promise.all([
       Notifications.getExpoPushTokenAsync({ projectId: config.expoProjectId }),
       Notifications.getDevicePushTokenAsync(),

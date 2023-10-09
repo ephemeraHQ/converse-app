@@ -45,7 +45,8 @@ const Conversation = ({
   navigation,
 }: NativeStackScreenProps<NavigationParamList, "Conversation">) => {
   const colorScheme = useColorScheme();
-  const blockedPeers = useSettingsStore((s) => s.blockedPeers);
+  const peersStatus = useSettingsStore((s) => s.peersStatus);
+
   const { conversations, conversationsMapping, setConversationMessageDraft } =
     useChatStore((s) =>
       pick(s, [
@@ -117,7 +118,7 @@ const Conversation = ({
   ]);
 
   const isBlockedPeer = conversation?.peerAddress
-    ? !!blockedPeers[conversation.peerAddress.toLowerCase()]
+    ? peersStatus[conversation.peerAddress.toLowerCase()] === "blocked"
     : false;
 
   const textInputRef = useRef<TextInputWithValue>();
