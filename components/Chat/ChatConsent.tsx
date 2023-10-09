@@ -27,7 +27,11 @@ import { shortAddress } from "../../utils/str";
 import Button from "../Button/Button";
 
 export default function ChatConsent() {
-  const { conversation } = useConversationContext(["conversation"]);
+  const { conversation, isBlockedPeer } = useConversationContext([
+    "conversation",
+    "isBlockedPeer",
+  ]);
+
   const navigation = useNavigation() as NativeStackNavigationProp<
     NavigationParamList,
     "Chats",
@@ -44,6 +48,7 @@ export default function ChatConsent() {
   if (
     !conversation ||
     thisTopicStatus === "consented" ||
+    isBlockedPeer ||
     conversation.pending
   ) {
     return null;
