@@ -12,11 +12,12 @@ import {
 
 import {
   currentAccount,
-  useChatStore,
+  getChatStore,
   useSettingsStore,
+  getSettingsStore,
 } from "../../data/store/accountsStore";
 import { NavigationParamList } from "../../screens/Navigation/Navigation";
-import { consentToTopics, blockPeers } from "../../utils/api";
+import { blockPeers, consentToPeers } from "../../utils/api";
 import {
   backgroundColor,
   tertiaryBackgroundColor,
@@ -39,15 +40,22 @@ export default function ChatConsent() {
   >;
 
   const styles = useStyles();
-  const setTopicsStatus = useChatStore((s) => s.setTopicsStatus);
-  const topicsStatus = useChatStore((s) => s.topicsStatus);
+
   const setPeersStatus = useSettingsStore((s) => s.setPeersStatus);
+
+  const { topicsStatus } = getChatStore(currentAccount()).getState();
   const thisTopicStatus = topicsStatus[conversation?.topic || ""];
+
+  const { peersStatus } = getSettingsStore(currentAccount()).getState();
+  const thisPeerStatus = conversation?.peerAddress
+    ? peersStatus[conversation.peerAddress.toLowerCase()]
+    : "";
 
   // @todo add pre-consented check if 1 message is already sent
   if (
     !conversation ||
     thisTopicStatus === "consented" ||
+    thisPeerStatus === "consented" ||
     isBlockedPeer ||
     conversation.pending
   ) {
@@ -91,8 +99,8 @@ export default function ChatConsent() {
           title="Accept"
           style={styles.cta}
           onPress={() => {
-            consentToTopics(currentAccount(), [conversation.topic]);
-            setTopicsStatus({ [conversation.topic]: "consented" });
+            consentToPeers(currentAccount(), [conversation.peerAddress]);
+            setPeersStatus({ [conversation.peerAddress]: "consented" });
           }}
         />
       </View>
