@@ -38,18 +38,16 @@ const getPendingConversationWithPeer = async (
   conversationId?: string
 ) => {
   const conversationRepository = await getRepository(account, "conversation");
-  const conversation = await conversationRepository
-    .createQueryBuilder()
-    .select()
-    .where("peerAddress = :address", { address })
-    .andWhere("pending = 1") // Cannot use = TRUE in older sqlite versions
-    .andWhere(
-      conversationId
-        ? "contextConversationId = :conversationId"
-        : "contextConversationId IS NULL",
-      { conversationId }
-    )
-    .getOne();
+
+  const pendingConversationsWithPeer = await conversationRepository.find({
+    where: { peerAddress: address, pending: true },
+  });
+  const conversation = pendingConversationsWithPeer.find((c) =>
+    conversationId
+      ? c.contextConversationId === conversationId
+      : !c.contextConversationId
+  );
+
   return conversation;
 };
 
