@@ -34,6 +34,7 @@ import {
   ConversationContext,
   openMainConversationWithPeer,
 } from "../utils/conversation";
+import { isDesktop } from "../utils/device";
 import { converseEventEmitter } from "../utils/events";
 import { pick } from "../utils/objects";
 import { getTitleFontScale, TextInputWithValue } from "../utils/str";
@@ -139,9 +140,11 @@ const Conversation = ({
     }
   }, []);
 
+  const autofocus = route.params.focus || isDesktop;
+
   useEffect(() => {
     const unsubscribe = navigation.addListener("transitionEnd", (e) => {
-      if (!e.data.closing && !!route.params.focus) {
+      if (!e.data.closing && !!autofocus) {
         if (chatLayoutDone.current && !alreadyAutomaticallyFocused.current) {
           alreadyAutomaticallyFocused.current = true;
           textInputRef.current?.focus();
@@ -152,7 +155,7 @@ const Conversation = ({
     });
 
     return unsubscribe;
-  }, [navigation, route.params.focus]);
+  }, [navigation, autofocus]);
 
   const styles = useStyles();
   const [showInvite, setShowInvite] = useState({

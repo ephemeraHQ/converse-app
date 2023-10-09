@@ -17,6 +17,7 @@ import ConverseButton from "../components/Button/Button";
 import config from "../config";
 import { useProfilesStore, useUserStore } from "../data/store/accountsStore";
 import { backgroundColor, textPrimaryColor } from "../utils/colors";
+import { isDesktop } from "../utils/device";
 import { shortAddress } from "../utils/str";
 import { NavigationParamList } from "./Navigation/Navigation";
 
@@ -51,7 +52,9 @@ export default function ShareProfileScreen({
   }`;
 
   const shareDict =
-    Platform.OS === "ios" ? { url: profileUrl } : { message: profileUrl };
+    Platform.OS === "ios" && !isDesktop
+      ? { url: profileUrl }
+      : { message: profileUrl };
 
   return (
     <View style={styles.shareProfile}>
