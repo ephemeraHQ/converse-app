@@ -35,6 +35,7 @@ export const initSettingsStore = (account: string) => {
           notifications: {
             showNotificationScreen: true,
           },
+          peersStatus: {},
           setPeersStatus: (peersStatus: {
             [peerAddress: string]: "blocked" | "consented";
           }) =>
