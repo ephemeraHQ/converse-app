@@ -235,6 +235,7 @@ export const initChatStore = (account: string) => {
           setMessages: (messagesToSet) =>
             set((state) => {
               let isUpdated = false;
+              let shouldResubscribe = false;
               const newState = {
                 ...state,
               };
@@ -258,6 +259,7 @@ export const initChatStore = (account: string) => {
                   conversation.hasOneMessageFromMe = true;
                   conversation.lastUpdateAt = now();
                   isUpdated = true;
+                  shouldResubscribe = true;
                 }
                 // Default message status is sent
                 if (!message.status) message.status = "sent";
@@ -320,6 +322,12 @@ export const initChatStore = (account: string) => {
 
               if (isUpdated) {
                 newState.lastUpdateAt = now();
+              }
+
+              if (shouldResubscribe) {
+                setImmediate(() => {
+                  subscribeToNotifications(account);
+                });
               }
 
               return newState;
