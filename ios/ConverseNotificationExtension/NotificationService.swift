@@ -55,17 +55,26 @@ func handleNotificationAsync(contentHandler: ((UNNotificationContent) -> Void), 
           return
         } else if (isInviteTopic(topic: contentTopic)) {
           let conversation = await handleNewConversation(xmtpClient: xmtpClient!, envelope: envelope)
-          if (conversation != nil && conversation?.peerAddress != nil) {
-            if (hasForbiddenPattern(address: conversation!.peerAddress)) {
-              print("[NotificationExtension] Not showing a notification because forbidden spammy address")
-              contentHandler(UNNotificationContent())
-              return
-            }
-            bestAttemptContent.title = shortAddress(address: conversation!.peerAddress)
-            body["newConversationTopic"] = conversation?.topic
-            bestAttemptContent.userInfo.updateValue(body, forKey: "body")
-            shouldIncrementBadge = true
-          }
+          // For now, we don't notifications for new convo anymore at all, they all
+          // go to requests. In the future we will improve and subscribe to
+          // some topics depending on criteria
+          print("[NotificationExtension] Not showing a notification for new convo")
+          contentHandler(UNNotificationContent())
+          return
+//          if (conversation != nil && conversation?.peerAddress != nil) {
+//            // For now, we don't notifications for new convo anymore at all, they all
+//            // go to requests. In the future we will improve and subscribe to
+//            // some topics depending on criteria
+//            if (hasForbiddenPattern(address: conversation!.peerAddress)) {
+//              print("[NotificationExtension] Not showing a notification because forbidden spammy address")
+//              contentHandler(UNNotificationContent())
+//              return
+//            }
+//            bestAttemptContent.title = shortAddress(address: conversation!.peerAddress)
+//            body["newConversationTopic"] = conversation?.topic
+//            bestAttemptContent.userInfo.updateValue(body, forKey: "body")
+//            shouldIncrementBadge = true
+//          }
         } else {
           var conversationTitle = getSavedConversationTitle(contentTopic: contentTopic);
           let sentViaConverse = body["sentViaConverse"] as? Bool ?? false;
