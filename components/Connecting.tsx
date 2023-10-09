@@ -35,7 +35,7 @@ export default function Connecting() {
         flexDirection: "row",
         alignItems: "center",
         justifyContent: "center",
-        width: 110,
+        width: Platform.OS === "ios" ? 110 : 130,
       }}
     >
       <ActivityIndicator />
