@@ -140,6 +140,7 @@ function ConversationList({ navigation, route, searchBarRef }: Props) {
   } else if (sortedConversationsWithPreview.conversationsRequests.length > 0) {
     ListHeaderComponents.push(
       <RequestsButton
+        key="requests"
         navigation={navigation}
         route={route}
         requestsCount={
