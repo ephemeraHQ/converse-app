@@ -1,8 +1,8 @@
 diff --git a/node_modules/react-native/Libraries/Text/TextInput/Multiline/RCTUITextView.m b/node_modules/react-native/Libraries/Text/TextInput/Multiline/RCTUITextView.m
-index 5d5d308..5f9efd0 100644
+index 5d5d308..92a5b40 100644
 --- a/node_modules/react-native/Libraries/Text/TextInput/Multiline/RCTUITextView.m
 +++ b/node_modules/react-native/Libraries/Text/TextInput/Multiline/RCTUITextView.m
-@@ -303,4 +303,16 @@ - (CGRect)caretRectForPosition:(UITextPosition *)position
+@@ -303,4 +303,18 @@ - (CGRect)caretRectForPosition:(UITextPosition *)position
  
  #pragma mark - Utility Methods
  
@@ -12,10 +12,12 @@ index 5d5d308..5f9efd0 100644
 +
 +
 +- (void)shiftEnter:(id)sender {
-+    NSString *currentText = [super text];
-+    NSString *newText = [currentText stringByAppendingString:@"\n"];
++    NSRange cursorPosition = [self selectedRange];
++    NSMutableString *newText = [[NSMutableString alloc] initWithString:[super text]];
++    [newText replaceCharactersInRange:cursorPosition withString:@"\n"];
++    NSRange newPosition = NSMakeRange(cursorPosition.location + 1, 0);
 +    [super setText:newText];
-+
++    [super setSelectedRange:newPosition];
 +}
 +
  @end

@@ -218,7 +218,7 @@ export default ConversationListItem;
 const getStyles = (colorScheme: ColorSchemeName) =>
   StyleSheet.create({
     rowSeparator: {
-      borderBottomWidth: 0.25,
+      borderBottomWidth: 0.5,
       borderBottomColor: listItemSeparatorColor(colorScheme),
       marginLeft: 32,
     },
