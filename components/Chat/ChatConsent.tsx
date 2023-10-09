@@ -10,9 +10,13 @@ import {
   Alert,
 } from "react-native";
 
-import { currentAccount, useChatStore } from "../../data/store/accountsStore";
+import {
+  currentAccount,
+  useChatStore,
+  useSettingsStore,
+} from "../../data/store/accountsStore";
 import { NavigationParamList } from "../../screens/Navigation/Navigation";
-import { consentToTopics, deleteTopics } from "../../utils/api";
+import { consentToTopics, blockPeers } from "../../utils/api";
 import {
   backgroundColor,
   tertiaryBackgroundColor,
@@ -33,6 +37,7 @@ export default function ChatConsent() {
   const styles = useStyles();
   const setTopicsStatus = useChatStore((s) => s.setTopicsStatus);
   const topicsStatus = useChatStore((s) => s.topicsStatus);
+  const setPeersStatus = useSettingsStore((s) => s.setPeersStatus);
   const thisTopicStatus = topicsStatus[conversation?.topic || ""];
 
   // @todo add pre-consented check if 1 message is already sent
@@ -50,24 +55,24 @@ export default function ChatConsent() {
       <View style={styles.buttonsContainer}>
         <Button
           variant="secondary-danger"
-          picto="trash"
-          title="Delete"
+          picto="xmark"
+          title="Block"
           style={styles.cta}
           onPress={() => {
             Alert.alert(
-              `Delete chat with ${shortAddress(conversation.peerAddress)}?`,
+              `Block user ${shortAddress(conversation.peerAddress)}?`,
               undefined,
               [
                 {
                   text: "Cancel",
                 },
                 {
-                  text: "Delete",
+                  text: "Block",
                   style: "destructive",
                   isPreferred: true,
                   onPress: () => {
-                    deleteTopics(currentAccount(), [conversation.topic]);
-                    setTopicsStatus({ [conversation.topic]: "deleted" });
+                    blockPeers(currentAccount(), [conversation.peerAddress]);
+                    setPeersStatus({ [conversation.peerAddress]: "blocked" });
                     navigation.pop();
                   },
                 },
