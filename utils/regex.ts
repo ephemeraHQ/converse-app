@@ -11,7 +11,7 @@ const getDomainExpression = (suffix: RegExp) =>
   );
 
 export const URL_REGEX =
-  /\b(?:(?:https?|ftp):\/\/|www\.)?[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}(?:\/\S*)?(?:\?\S*)?\b/g;
+  /\b(?:(?:https?|ftp):\/\/|www\.)?[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}(?:\/\S*)?(?:\?\S*)?\b/gi;
 
 export const ADDRESS_REGEX = new RegExp(
   `${BOUNDARY_START}0x[a-fA-F0-9]{40}${BOUNDARY_END}`,
