@@ -226,7 +226,7 @@ export const getTopicsStatus = async (account: string) => {
   const { data } = await api.get("/api/topics/status", {
     headers: await getXmtpApiHeaders(account),
   });
-  return data.topicsStatus as { [topic: string]: "deleted" | "consented" };
+  return data as { [topic: string]: "deleted" | "consented" };
 };
 
 export default api;
