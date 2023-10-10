@@ -49,7 +49,7 @@ export default function ChatMessageActions({
   const { conversation } = useConversationContext(["conversation"]);
   const isAttachment = isAttachmentMessage(message.contentType);
   const colorScheme = useColorScheme();
-  const userAddress = useCurrentAccount();
+  const userAddress = useCurrentAccount() as string;
   const setBlockedPeerStatus = useSettingsStore((s) => s.setBlockedPeerStatus);
 
   const report = useCallback(async () => {

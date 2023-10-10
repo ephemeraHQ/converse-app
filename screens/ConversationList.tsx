@@ -79,7 +79,7 @@ function ConversationList({ navigation, route, searchBarRef }: Props) {
   const { blockedPeers, ephemeralAccount } = useSettingsStore((s) =>
     pick(s, ["blockedPeers", "ephemeralAccount"])
   );
-  const userAddress = useCurrentAccount();
+  const userAddress = useCurrentAccount() as string;
   const profiles = useProfilesStore((state) => state.profiles);
   const [flatListItems, setFlatListItems] = useState<FlatListItem[]>([]);
   const [sortedConversations, setSortedConversations] = useState<

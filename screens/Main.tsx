@@ -15,7 +15,6 @@ import MainIdentityStateHandler from "../components/StateHandlers/MainIdentitySt
 import NetworkStateHandler from "../components/StateHandlers/NetworkStateHandler";
 import NotificationsStateHandler from "../components/StateHandlers/NotificationsStateHandler";
 import {
-  TEMPORARY_ACCOUNT_NAME,
   useCurrentAccount,
   useSettingsStore,
 } from "../data/store/accountsStore";
@@ -102,11 +101,7 @@ export default function Main() {
   let screenToShow = undefined;
 
   if (splashScreenHidden) {
-    if (
-      !userAddress ||
-      userAddress === TEMPORARY_ACCOUNT_NAME ||
-      addingNewAccount
-    ) {
+    if (!userAddress || addingNewAccount) {
       screenToShow = <OnboardingScreen />;
     } else if (
       showNotificationScreen &&

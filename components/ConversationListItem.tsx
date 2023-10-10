@@ -161,7 +161,6 @@ const ConversationListItem = memo(function ConversationListItem({
   const rowItem =
     Platform.OS === "ios" ? (
       <TouchableHighlight
-        key={conversationTopic}
         underlayColor={clickedItemBackgroundColor(colorScheme)}
         delayPressIn={75}
         onPress={() => {
@@ -180,7 +179,6 @@ const ConversationListItem = memo(function ConversationListItem({
       </TouchableHighlight>
     ) : (
       <TouchableRipple
-        key={conversationTopic}
         unstable_pressDelay={75}
         onPress={() => {
           navigation.navigate("Conversation", {
@@ -218,14 +216,15 @@ export default ConversationListItem;
 const getStyles = (colorScheme: ColorSchemeName) =>
   StyleSheet.create({
     rowSeparator: {
-      borderBottomWidth: 0.5,
+      borderBottomWidth: 0.25,
+      marginBottom: 0.5,
       borderBottomColor: listItemSeparatorColor(colorScheme),
       marginLeft: 32,
     },
     conversationListItem: Platform.select({
       default: {
         height: 77,
-        paddingTop: 8,
+        paddingTop: 7.5,
         paddingRight: 60,
         marginLeft: 32,
       },

@@ -19,18 +19,13 @@ import mmkv from "../utils/mmkv";
 import { showActionSheetWithOptions } from "./StateHandlers/ActionSheetStateHandler";
 
 let logs: string[] = [];
-let messagesFromNetwork = 0;
 
 export const addLog = (log: string) => {
   logs.push(log);
 };
 
-export const gotMessagesFromNetwork = (count: number) => {
-  messagesFromNetwork += count;
-};
-
 export const useEnableDebug = () => {
-  const userAddress = useCurrentAccount();
+  const userAddress = useCurrentAccount() as string;
   return config.debugMenu || config.debugAddresses.includes(userAddress);
 };
 

@@ -88,7 +88,7 @@ const getListArray = (
 export default function Chat() {
   const { conversation, isBlockedPeer, onReadyToFocus } =
     useConversationContext(["conversation", "isBlockedPeer", "onReadyToFocus"]);
-  const xmtpAddress = useCurrentAccount();
+  const xmtpAddress = useCurrentAccount() as string;
   const peerSocials = useProfilesStore((s) =>
     conversation?.peerAddress
       ? s.profiles[conversation.peerAddress]?.socials
