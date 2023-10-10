@@ -14,7 +14,10 @@ import InitialStateHandler from "../components/StateHandlers/InitialStateHandler
 import MainIdentityStateHandler from "../components/StateHandlers/MainIdentityStateHandler";
 import NetworkStateHandler from "../components/StateHandlers/NetworkStateHandler";
 import NotificationsStateHandler from "../components/StateHandlers/NotificationsStateHandler";
-import { useSettingsStore, useUserStore } from "../data/store/accountsStore";
+import {
+  useCurrentAccount,
+  useSettingsStore,
+} from "../data/store/accountsStore";
 import { useAppStore } from "../data/store/appStore";
 import { useOnboardingStore } from "../data/store/onboardingStore";
 import { backgroundColor } from "../utils/colors";
@@ -27,7 +30,7 @@ import OnboardingScreen from "./Onboarding";
 
 export default function Main() {
   const colorScheme = useColorScheme();
-  const userAddress = useUserStore((s) => s.userAddress);
+  const userAddress = useCurrentAccount();
   const {
     desktopConnectSessionId,
     setDesktopConnectSessionId,

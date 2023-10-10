@@ -15,7 +15,10 @@ import QRCode from "react-native-qrcode-svg";
 import AndroidBackAction from "../components/AndroidBackAction";
 import ConverseButton from "../components/Button/Button";
 import config from "../config";
-import { useProfilesStore, useUserStore } from "../data/store/accountsStore";
+import {
+  useCurrentAccount,
+  useProfilesStore,
+} from "../data/store/accountsStore";
 import { backgroundColor, textPrimaryColor } from "../utils/colors";
 import { isDesktop } from "../utils/device";
 import { shortAddress } from "../utils/str";
@@ -26,7 +29,7 @@ export default function ShareProfileScreen({
   navigation,
 }: NativeStackScreenProps<NavigationParamList, "ShareProfile">) {
   const colorScheme = useColorScheme();
-  const userAddress = useUserStore((s) => s.userAddress);
+  const userAddress = useCurrentAccount();
   const mainIdentity = useProfilesStore(
     (s) =>
       s.profiles[userAddress]?.socials?.ensNames?.find((n) => n.isPrimary)?.name

@@ -5,9 +5,9 @@ import { useAnimatedStyle, useSharedValue } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import {
+  useCurrentAccount,
   useProfilesStore,
   useRecommendationsStore,
-  useUserStore,
 } from "../../data/store/accountsStore";
 import { XmtpConversationWithUpdate } from "../../data/store/chatStore";
 import {
@@ -89,7 +89,7 @@ const getListArray = (
 export default function Chat() {
   const { conversation, isBlockedPeer, onReadyToFocus } =
     useConversationContext(["conversation", "isBlockedPeer", "onReadyToFocus"]);
-  const xmtpAddress = useUserStore((s) => s.userAddress);
+  const xmtpAddress = useCurrentAccount();
   const peerSocials = useProfilesStore((s) =>
     conversation?.peerAddress
       ? s.profiles[conversation.peerAddress]?.socials

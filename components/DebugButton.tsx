@@ -11,7 +11,7 @@ import { resetDb, getDbPath, clearDb } from "../data/db";
 import {
   currentAccount,
   getAccountsList,
-  useUserStore,
+  useCurrentAccount,
 } from "../data/store/accountsStore";
 import { deleteXmtpKey } from "../utils/keychain";
 import { logout } from "../utils/logout";
@@ -30,7 +30,7 @@ export const gotMessagesFromNetwork = (count: number) => {
 };
 
 export const useEnableDebug = () => {
-  const userAddress = useUserStore((s) => s.userAddress);
+  const userAddress = useCurrentAccount();
   return config.debugMenu || config.debugAddresses.includes(userAddress);
 };
 

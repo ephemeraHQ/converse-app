@@ -24,9 +24,9 @@ import { refreshProfileForAddress } from "../data/helpers/profiles/profilesUpdat
 import {
   useChatStore,
   useSettingsStore,
-  useUserStore,
   useProfilesStore,
   currentAccount,
+  useCurrentAccount,
 } from "../data/store/accountsStore";
 import { XmtpConversation } from "../data/store/chatStore";
 import {
@@ -79,7 +79,7 @@ function ConversationList({ navigation, route, searchBarRef }: Props) {
   const { blockedPeers, ephemeralAccount } = useSettingsStore((s) =>
     pick(s, ["blockedPeers", "ephemeralAccount"])
   );
-  const userAddress = useUserStore((s) => s.userAddress);
+  const userAddress = useCurrentAccount();
   const profiles = useProfilesStore((state) => state.profiles);
   const [flatListItems, setFlatListItems] = useState<FlatListItem[]>([]);
   const [sortedConversations, setSortedConversations] = useState<

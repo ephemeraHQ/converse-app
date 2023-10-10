@@ -7,7 +7,10 @@ import {
   View,
 } from "react-native";
 
-import { useProfilesStore, useUserStore } from "../../data/store/accountsStore";
+import {
+  useCurrentAccount,
+  useProfilesStore,
+} from "../../data/store/accountsStore";
 import { isAttachmentMessage } from "../../utils/attachment";
 import {
   actionSheetColors,
@@ -36,7 +39,7 @@ export default function ChatMessageReactions({ message, reactions }: Props) {
   const { conversation } = useConversationContext(["conversation"]);
   const colorScheme = useColorScheme();
   const styles = useStyles();
-  const userAddress = useUserStore((s) => s.userAddress);
+  const userAddress = useCurrentAccount();
   const profiles = useProfilesStore((state) => state.profiles);
   const reactionsList = Object.values(reactions).sort(
     (r1, r2) => r1.sent - r2.sent

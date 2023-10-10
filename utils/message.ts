@@ -1,7 +1,7 @@
 import uuid from "react-native-uuid";
 
 import { saveMessages } from "../data/helpers/messages";
-import { currentAccount, useUserStore } from "../data/store/accountsStore";
+import { currentAccount } from "../data/store/accountsStore";
 import { XmtpConversation } from "../data/store/chatStore";
 import { sendPendingMessages } from "./xmtpRN/send";
 
@@ -20,7 +20,7 @@ export const sendMessage = async (
   await saveMessages(currentAccount(), [
     {
       id: messageId,
-      senderAddress: useUserStore.getState().userAddress,
+      senderAddress: currentAccount(),
       sent: sentAtTime.getTime(),
       content,
       status: "sending",

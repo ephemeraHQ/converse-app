@@ -15,8 +15,8 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import config from "../../config";
 import {
   useAccountsStore,
+  useCurrentAccount,
   useRecommendationsStore,
-  useUserStore,
 } from "../../data/store/accountsStore";
 import { findFrens } from "../../utils/api";
 import {
@@ -39,7 +39,7 @@ export default function Recommendations({
   navigation: NativeStackNavigationProp<any>;
   visibility: "FULL" | "EMBEDDED" | "HIDDEN";
 }) {
-  const userAddress = useUserStore((s) => s.userAddress);
+  const userAddress = useCurrentAccount();
   const currentAccount = useAccountsStore((s) => s.currentAccount);
   const {
     frens,
