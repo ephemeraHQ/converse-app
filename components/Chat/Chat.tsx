@@ -82,7 +82,6 @@ const getListArray = (
     }
     reverseArray.push(message);
   }
-  reverseArray.push({ id: "converse-recommendations" } as MessageToDisplay);
   return reverseArray;
 };
 
@@ -143,43 +142,38 @@ export default function Chat() {
     [showChatInput, keyboardHeight, chatInputHeight, insets.bottom]
   );
 
+  const ListFooterComponent = useMemo(() => {
+    const recommendationData = getProfileData(recommendationsData, peerSocials);
+    if (!recommendationData || !conversation?.peerAddress) return null;
+    return (
+      <View style={styles.inChatRecommendations}>
+        <Recommendation
+          recommendationData={recommendationData}
+          address={conversation.peerAddress}
+          embedInChat
+        />
+      </View>
+    );
+  }, [
+    conversation?.peerAddress,
+    peerSocials,
+    recommendationsData,
+    styles.inChatRecommendations,
+  ]);
+
   const showPlaceholder =
-    listArray.length === 1 || isBlockedPeer || !conversation;
+    listArray.length === 0 || isBlockedPeer || !conversation;
   const renderItem = useCallback(
     ({ item }: { item: MessageToDisplay }) => {
-      if (item.id === "converse-recommendations") {
-        const recommendationData = getProfileData(
-          recommendationsData,
-          peerSocials
-        );
-        if (!recommendationData || !conversation?.peerAddress) return null;
-        return (
-          <View style={styles.inChatRecommendations}>
-            <Recommendation
-              recommendationData={recommendationData}
-              address={conversation.peerAddress}
-              embedInChat
-            />
-          </View>
-        );
-      } else {
-        return (
-          <CachedChatMessage
-            account={xmtpAddress}
-            message={{ ...item }}
-            colorScheme={colorScheme}
-          />
-        );
-      }
+      return (
+        <CachedChatMessage
+          account={xmtpAddress}
+          message={{ ...item }}
+          colorScheme={colorScheme}
+        />
+      );
     },
-    [
-      conversation?.peerAddress,
-      peerSocials,
-      recommendationsData,
-      styles.inChatRecommendations,
-      colorScheme,
-      xmtpAddress,
-    ]
+    [colorScheme, xmtpAddress]
   );
   const keyExtractor = useCallback((item: MessageToDisplay) => item.id, []);
 
@@ -192,13 +186,16 @@ export default function Chat() {
   const AnimatedListView = conversationNotPendingRef.current
     ? ReanimatedFlashList
     : ReanimatedFlatList;
+
   return (
     <View
       style={styles.chatContainer}
-      key={`chat-${conversation?.peerAddress}-${conversation?.context?.conversationId}-${isBlockedPeer}`}
+      key={`chat-${conversation?.peerAddress}-${
+        conversation?.context?.conversationId || ""
+      }-${isBlockedPeer}`}
     >
       <ReanimatedView style={chatContentStyle}>
-        {conversation && listArray.length > 1 && !isBlockedPeer && (
+        {conversation && listArray.length > 0 && !isBlockedPeer && (
           <AnimatedListView
             contentContainerStyle={styles.chat}
             data={listArray}
@@ -223,10 +220,11 @@ export default function Chat() {
             estimatedItemSize={80}
             // Size glitch on Android
             showsVerticalScrollIndicator={Platform.OS === "ios"}
+            ListFooterComponent={ListFooterComponent}
           />
         )}
         {showPlaceholder && (
-          <ChatPlaceholder messagesCount={listArray.length - 1} />
+          <ChatPlaceholder messagesCount={listArray.length} />
         )}
       </ReanimatedView>
       {showChatInput && (

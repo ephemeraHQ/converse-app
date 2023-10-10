@@ -43,6 +43,12 @@ func handleNotificationAsync(contentHandler: ((UNNotificationContent) -> Void), 
   if let bestAttemptContent = bestAttemptContent {    
     if var body = bestAttemptContent.userInfo["body"] as? [String: Any], let contentTopic = body["contentTopic"] as? String, let encodedMessage = body["message"] as? String, let account = body["account"] as? String {
       print("Received a notification for account \(account)")
+      let accounts = getAccounts()
+      if (!accounts.contains(account)) {
+        print("Account \(account) is not in store")
+        contentHandler(UNNotificationContent())
+        return
+      }
       let xmtpClient = await getXmtpClient(account: account);
       
       if (xmtpClient != nil) {        
