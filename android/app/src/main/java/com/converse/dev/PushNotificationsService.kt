@@ -62,6 +62,11 @@ class PushNotificationsService : FirebaseMessagingService() {
         val notificationData = Klaxon().parse<NotificationData>(envelopeJSON)
         if (notificationData === null) return
         Log.d(TAG, "Decoded notification data: account is ${notificationData.account} - topic is ${notificationData.contentTopic}")
+        val accounts = getAccounts(this)
+        if (!accounts.contains(notificationData.account)) {
+            Log.d(TAG, "Account ${notificationData.account} is not in store")
+            return
+        }
 
         initCodecs()
         val xmtpClient = getXmtpClient(this, notificationData.account)
