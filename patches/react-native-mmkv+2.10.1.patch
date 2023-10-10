@@ -1,0 +1,13 @@
+diff --git a/node_modules/react-native-mmkv/android/src/main/cpp/MmkvHostObject.cpp b/node_modules/react-native-mmkv/android/src/main/cpp/MmkvHostObject.cpp
+index e059aae..d6db2c5 100644
+--- a/node_modules/react-native-mmkv/android/src/main/cpp/MmkvHostObject.cpp
++++ b/node_modules/react-native-mmkv/android/src/main/cpp/MmkvHostObject.cpp
+@@ -18,7 +18,7 @@ MmkvHostObject::MmkvHostObject(const std::string& instanceId, std::string path,
+                       instanceId.c_str(), path.c_str(), cryptKey.c_str());
+   std::string* pathPtr = path.size() > 0 ? &path : nullptr;
+   std::string* cryptKeyPtr = cryptKey.size() > 0 ? &cryptKey : nullptr;
+-  instance = MMKV::mmkvWithID(instanceId, mmkv::DEFAULT_MMAP_SIZE, MMKV_SINGLE_PROCESS, cryptKeyPtr, pathPtr);
++  instance = MMKV::mmkvWithID(instanceId, mmkv::DEFAULT_MMAP_SIZE, MMKV_MULTI_PROCESS, cryptKeyPtr, pathPtr);
+ 
+   if (instance == nullptr) {
+     // Check if instanceId is invalid
