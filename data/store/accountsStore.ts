@@ -174,7 +174,7 @@ const getAccountStore = (account: string) => {
 export const currentAccount = () => useAccountsStore.getState().currentAccount;
 export const useCurrentAccount = () => {
   const currentAccount = useAccountsStore((s) => s.currentAccount);
-  return currentAccount;
+  return currentAccount === TEMPORARY_ACCOUNT_NAME ? undefined : currentAccount;
 };
 
 // This enables us to use account-based substores for the current selected user automatically,

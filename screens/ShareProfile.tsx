@@ -29,7 +29,7 @@ export default function ShareProfileScreen({
   navigation,
 }: NativeStackScreenProps<NavigationParamList, "ShareProfile">) {
   const colorScheme = useColorScheme();
-  const userAddress = useCurrentAccount();
+  const userAddress = useCurrentAccount() as string;
   const mainIdentity = useProfilesStore(
     (s) =>
       s.profiles[userAddress]?.socials?.ensNames?.find((n) => n.isPrimary)?.name

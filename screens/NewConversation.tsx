@@ -77,7 +77,7 @@ export default function NewConversation({
     existingConversations: [] as XmtpConversation[],
   });
 
-  const userAddress = useCurrentAccount();
+  const userAddress = useCurrentAccount() as string;
   const {
     updatedAt: recommendationsUpdatedAt,
     loading: recommendationsLoading,
