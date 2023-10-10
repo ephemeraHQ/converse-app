@@ -12,7 +12,7 @@ fun getMmkv(appContext: Context): MMKV? {
         return mmkvInstance;
     }
     MMKV.initialize(appContext)
-    mmkvInstance = MMKV.defaultMMKV()
+    mmkvInstance = MMKV.defaultMMKV(MMKV.MULTI_PROCESS_MODE, null)
     return mmkvInstance;
 }
 
