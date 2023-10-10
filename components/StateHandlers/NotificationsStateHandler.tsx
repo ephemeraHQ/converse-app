@@ -2,7 +2,7 @@ import * as Notifications from "expo-notifications";
 import { useEffect, useRef } from "react";
 import { AppState } from "react-native";
 
-import { useUserStore } from "../../data/store/accountsStore";
+import { useCurrentAccount } from "../../data/store/accountsStore";
 import { saveUser } from "../../utils/api";
 import { executeLogoutTasks } from "../../utils/logout";
 import {
@@ -26,7 +26,7 @@ Notifications.addNotificationResponseReceivedListener(
 
 export default function NotificationsStateHandler() {
   const appState = useRef(AppState.currentState);
-  const userAddress = useUserStore((s) => s.userAddress);
+  const userAddress = useCurrentAccount();
 
   useEffect(() => {
     // Things to do when app opens

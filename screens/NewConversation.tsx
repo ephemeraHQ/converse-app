@@ -25,8 +25,8 @@ import { createPendingConversation } from "../data/helpers/conversations/pending
 import {
   currentAccount,
   useChatStore,
+  useCurrentAccount,
   useRecommendationsStore,
-  useUserStore,
 } from "../data/store/accountsStore";
 import { XmtpConversation } from "../data/store/chatStore";
 import {
@@ -77,7 +77,7 @@ export default function NewConversation({
     existingConversations: [] as XmtpConversation[],
   });
 
-  const userAddress = useUserStore((s) => s.userAddress);
+  const userAddress = useCurrentAccount();
   const {
     updatedAt: recommendationsUpdatedAt,
     loading: recommendationsLoading,

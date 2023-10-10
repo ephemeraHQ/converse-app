@@ -11,7 +11,6 @@ import {
   RecommendationsStoreType,
 } from "./recommendationsStore";
 import { initSettingsStore, SettingsStoreType } from "./settingsStore";
-import { initUserStore, UserStoreType } from "./userStore";
 
 type AccountStoreType = {
   [K in keyof AccountStoreDataType]: UseBoundStore<
@@ -33,7 +32,6 @@ export const initStores = (account: string) => {
       profiles: initProfilesStore(),
       settings: initSettingsStore(account),
       recommendations: initRecommendationsStore(account),
-      user: initUserStore(),
       chat: initChatStore(account),
     };
   }
@@ -162,7 +160,6 @@ type AccountStoreDataType = {
   profiles: ProfilesStoreType;
   settings: SettingsStoreType;
   recommendations: RecommendationsStoreType;
-  user: UserStoreType;
   chat: ChatStoreType;
 };
 
@@ -175,6 +172,10 @@ const getAccountStore = (account: string) => {
 };
 
 export const currentAccount = () => useAccountsStore.getState().currentAccount;
+export const useCurrentAccount = () => {
+  const currentAccount = useAccountsStore((s) => s.currentAccount);
+  return currentAccount;
+};
 
 // This enables us to use account-based substores for the current selected user automatically,
 // Just call export useSubStore = accountStoreHook("subStoreName") in the substore definition
@@ -210,9 +211,6 @@ export const useRecommendationsStore =
   currentAccountStoreHook("recommendations");
 export const getRecommendationsStore = (account: string) =>
   getAccountStore(account).recommendations;
-
-export const useUserStore = currentAccountStoreHook("user");
-export const getUserStore = (account: string) => getAccountStore(account).user;
 
 export const useChatStore = currentAccountStoreHook("chat");
 export const getChatStore = (account: string) => getAccountStore(account).chat;

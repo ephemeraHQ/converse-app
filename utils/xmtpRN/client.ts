@@ -4,7 +4,7 @@ import { Client } from "@xmtp/react-native-sdk";
 import { Platform } from "react-native";
 
 import config from "../../config";
-import { getChatStore, getUserStore } from "../../data/store/accountsStore";
+import { getChatStore } from "../../data/store/accountsStore";
 import { loadXmtpKey } from "../keychain";
 import {
   deleteOpenedConversations,
@@ -44,7 +44,6 @@ export const getXmtpClient = async (account: string): Promise<Client> => {
     if (base64Key) {
       const client = await getXmtpClientFromBase64Key(base64Key);
       console.log(`[XmtpRN] Instantiated client for ${client.address}`);
-      getUserStore(account).getState().setUserAddress(client.address);
       getChatStore(account).getState().setLocalClientConnected(true);
       xmtpClientByAccount[client.address] = client;
       delete instantiatingClientForAccount[account];

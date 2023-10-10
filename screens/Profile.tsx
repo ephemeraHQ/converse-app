@@ -23,10 +23,10 @@ import {
 } from "../components/TableView/TableViewImage";
 import {
   currentAccount,
+  useCurrentAccount,
   useProfilesStore,
   useRecommendationsStore,
   useSettingsStore,
-  useUserStore,
 } from "../data/store/accountsStore";
 import { blockPeer } from "../utils/api";
 import {
@@ -43,7 +43,7 @@ export default function ProfileScreen({
   route,
   navigation,
 }: NativeStackScreenProps<NavigationParamList, "Profile">) {
-  const userAddress = useUserStore((s) => s.userAddress);
+  const userAddress = useCurrentAccount();
   const colorScheme = useColorScheme();
   const styles = useStyles();
   const [copiedAddresses, setCopiedAddresses] = useState<{

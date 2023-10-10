@@ -4,7 +4,7 @@ import { loadDataToContext } from "../../data";
 import { initDb } from "../../data/db";
 import { cleanupPendingConversations } from "../../data/helpers/conversations/pendingConversations";
 import { refreshProfileForAddress } from "../../data/helpers/profiles/profilesUpdate";
-import { getAccountsList, getUserStore } from "../../data/store/accountsStore";
+import { getAccountsList } from "../../data/store/accountsStore";
 import { useAppStore } from "../../data/store/appStore";
 import { loadSavedNotificationMessagesToContext } from "../../utils/notifications";
 import { getInstalledWallets } from "../Onboarding/supportedWallets";
@@ -41,7 +41,6 @@ export default function HydrationStateHandler() {
         } seconds`
       );
       accounts.map((address) => {
-        getUserStore(address).getState().setUserAddress(address);
         refreshProfileForAddress(address, address);
       });
 
