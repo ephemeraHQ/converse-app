@@ -411,6 +411,9 @@ export const initChatStore = (account: string) => {
             [topic: string]: "deleted" | "consented";
           }) =>
             set((state) => {
+              setImmediate(() => {
+                subscribeToNotifications(account);
+              });
               return {
                 topicsStatus: { ...state.topicsStatus, ...topicsStatus },
               };
