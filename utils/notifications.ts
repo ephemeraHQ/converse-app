@@ -61,20 +61,30 @@ export const subscribeToNotifications = async (
   try {
     subscribingByAccount[account] = true;
     const lastSubscribedTopics = lastSubscribedTopicsByAccount[account] || [];
-    const { conversations, deletedTopics } = getChatStore(account).getState();
-    const { blockedPeers } = getSettingsStore(account).getState();
+    const { conversations, topicsStatus } = getChatStore(account).getState();
+    const { peersStatus } = getSettingsStore(account).getState();
+
+    const isBlocked = (peerAddress: string) =>
+      peersStatus[peerAddress.toLowerCase()] === "blocked";
+
+    const isValidConversation = (c: any) => {
+      const hasValidAddress = c.peerAddress;
+      const isNotPending = !c.pending;
+      const isNotBlocked = !isBlocked(c.peerAddress);
+      const isTopicNotDeleted = topicsStatus[c.topic] !== "deleted";
+
+      return (
+        hasValidAddress && isNotPending && isNotBlocked && isTopicNotDeleted
+      );
+    };
+
     const topics = [
       ...Object.values(conversations)
-        .filter(
-          (c) =>
-            c.peerAddress &&
-            !c.pending &&
-            !blockedPeers[c.peerAddress.toLowerCase()] &&
-            !deletedTopics[c.topic]
-        )
+        .filter(isValidConversation)
         .map((c) => c.topic),
       buildUserInviteTopic(account || ""),
     ];
+
     const [expoTokenQuery, nativeTokenQuery] = await Promise.all([
       Notifications.getExpoPushTokenAsync({ projectId: config.expoProjectId }),
       Notifications.getDevicePushTokenAsync(),
@@ -230,7 +240,7 @@ export const loadSavedNotificationMessagesToContext = async () => {
         }
       });
       lastStepDone = 5;
-      for (const account of Object.keys(conversationsToSaveByAccount)) {
+      for (const account in conversationsToSaveByAccount) {
         await saveConversations(account, conversationsToSaveByAccount[account]);
       }
       lastStepDone = 6;
@@ -267,7 +277,7 @@ export const loadSavedNotificationMessagesToContext = async () => {
 
       const promises: Promise<void>[] = [];
 
-      for (const account of Object.keys(messagesToSaveByAccount)) {
+      for (const account in messagesToSaveByAccount) {
         promises.push(saveMessages(account, messagesToSaveByAccount[account]));
       }
       lastStepDone = 10;

@@ -85,32 +85,35 @@ export const reportMessage = async ({
   );
 };
 
-type BlockPeerQuery = {
-  account: string;
-  peerAddress: string;
-  blocked: boolean;
-};
-
-export const blockPeer = async ({
-  peerAddress,
-  blocked,
-  account,
-}: BlockPeerQuery) => {
+export const blockPeers = async (account: string, peers: string[]) => {
+  const peersStatus: { [key: string]: "blocked" } = {};
+  for (const peer of peers) {
+    peersStatus[peer] = "blocked";
+  }
   await api.post(
-    "/api/block/peer",
-    {
-      peerAddress,
-      blocked,
-    },
+    "/api/consent/peer",
+    { peersStatus },
     { headers: await getXmtpApiHeaders(account) }
   );
 };
 
-export const getBlockedPeers = async (account: string) => {
-  const { data } = await api.get("/api/block/peer", {
+export const consentToPeers = async (account: string, peers: string[]) => {
+  const peersStatus: { [key: string]: "consented" } = {};
+  for (const peer of peers) {
+    peersStatus[peer] = "consented";
+  }
+  await api.post(
+    "/api/consent/peer",
+    { peersStatus },
+    { headers: await getXmtpApiHeaders(account) }
+  );
+};
+
+export const getPeersStatus = async (account: string) => {
+  const { data } = await api.get("/api/consent/peer", {
     headers: await getXmtpApiHeaders(account),
   });
-  return data.blockedPeers as string[];
+  return data as { [peerAddress: string]: "blocked" | "consented" };
 };
 
 export const resolveEnsName = async (
@@ -198,18 +201,35 @@ export const markDesktopSessionDone = async ({
     params: { sessionId, otp },
   });
 
-export const deleteTopic = async (account: string, topic: string) => {
-  await api.delete(`/api/topics`, {
-    headers: await getXmtpApiHeaders(account),
-    params: { topic },
-  });
+export const deleteTopics = async (account: string, topics: string[]) => {
+  const topicsStatus: { [key: string]: "deleted" } = {};
+  for (const topic of topics) {
+    topicsStatus[topic] = "deleted";
+  }
+  await api.post(
+    "/api/topics/status",
+    { topicsStatus },
+    { headers: await getXmtpApiHeaders(account) }
+  );
 };
 
-export const getDeletedTopics = async (account: string) => {
-  const { data } = await api.get("/api/topics/deleted", {
+export const consentToTopics = async (account: string, topics: string[]) => {
+  const topicsStatus: { [key: string]: "consented" } = {};
+  for (const topic of topics) {
+    topicsStatus[topic] = "consented";
+  }
+  await api.post(
+    "/api/topics/status",
+    { topicsStatus },
+    { headers: await getXmtpApiHeaders(account) }
+  );
+};
+
+export const getTopicsStatus = async (account: string) => {
+  const { data } = await api.get("/api/topics/status", {
     headers: await getXmtpApiHeaders(account),
   });
-  return data.deletedTopics as string[];
+  return data as { [topic: string]: "deleted" | "consented" };
 };
 
 export default api;

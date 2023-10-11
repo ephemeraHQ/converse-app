@@ -64,7 +64,7 @@ function ConversationList({ navigation, route, searchBarRef }: Props) {
     lastUpdateAt,
     searchQuery,
     searchBarFocused,
-    deletedTopics,
+    topicsStatus,
     initialLoadDoneOnce,
   } = useChatStore((s) =>
     pick(s, [
@@ -73,14 +73,14 @@ function ConversationList({ navigation, route, searchBarRef }: Props) {
       "lastUpdateAt",
       "searchQuery",
       "searchBarFocused",
-      "deletedTopics",
+      "topicsStatus",
     ])
   );
-  const { blockedPeers, ephemeralAccount } = useSettingsStore((s) =>
-    pick(s, ["blockedPeers", "ephemeralAccount"])
+  const { peersStatus, ephemeralAccount } = useSettingsStore((s) =>
+    pick(s, ["peersStatus", "ephemeralAccount"])
   );
   const userAddress = useCurrentAccount() as string;
-  const profiles = useProfilesStore((state) => state.profiles);
+  const profiles = useProfilesStore((s) => s.profiles);
   const [flatListItems, setFlatListItems] = useState<FlatListItem[]>([]);
   const [sortedConversations, setSortedConversations] = useState<
     ConversationWithLastMessagePreview[]
@@ -101,10 +101,11 @@ function ConversationList({ navigation, route, searchBarRef }: Props) {
     const sortedConversations = sortAndComputePreview(
       conversations,
       userAddress,
-      deletedTopics
+      topicsStatus,
+      peersStatus
     );
     setSortedConversations(sortedConversations);
-  }, [userAddress, conversations, lastUpdateAt, deletedTopics]);
+  }, [userAddress, conversations, lastUpdateAt, topicsStatus, peersStatus]);
 
   useEffect(() => {
     const listItems = getConversationListItemsToDisplay(
@@ -151,16 +152,18 @@ function ConversationList({ navigation, route, searchBarRef }: Props) {
       }
       const conversation = item as ConversationWithLastMessagePreview;
       const lastMessagePreview = conversation.lastMessagePreview;
+      const isBlocked =
+        peersStatus[conversation.peerAddress.toLowerCase()] === "blocked";
       return (
         <ConversationListItem
           navigation={navigation}
-          conversation={conversation}
           colorScheme={colorScheme}
           conversationTopic={conversation.topic}
           conversationTime={
             lastMessagePreview?.message?.sent || conversation.createdAt
           }
           conversationName={conversationName(conversation)}
+          conversationPeerAddress={conversation.peerAddress}
           showUnread={
             !!(
               initialLoadDoneOnce &&
@@ -171,7 +174,7 @@ function ConversationList({ navigation, route, searchBarRef }: Props) {
             )
           }
           lastMessagePreview={
-            blockedPeers[conversation.peerAddress.toLowerCase()]
+            isBlocked
               ? "This user is blocked"
               : lastMessagePreview
               ? lastMessagePreview.contentPreview
@@ -190,7 +193,7 @@ function ConversationList({ navigation, route, searchBarRef }: Props) {
       navigation,
       route,
       userAddress,
-      blockedPeers,
+      peersStatus,
       initialLoadDoneOnce,
     ]
   );
@@ -232,7 +235,6 @@ function ConversationList({ navigation, route, searchBarRef }: Props) {
             navigation,
             route,
             userAddress,
-            blockedPeers,
             initialLoadDoneOnce,
             lastUpdateAt,
           ]}
