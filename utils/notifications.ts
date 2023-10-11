@@ -240,7 +240,7 @@ export const loadSavedNotificationMessagesToContext = async () => {
         }
       });
       lastStepDone = 5;
-      for (const account of Object.keys(conversationsToSaveByAccount)) {
+      for (const account in conversationsToSaveByAccount) {
         await saveConversations(account, conversationsToSaveByAccount[account]);
       }
       lastStepDone = 6;
@@ -277,7 +277,7 @@ export const loadSavedNotificationMessagesToContext = async () => {
 
       const promises: Promise<void>[] = [];
 
-      for (const account of Object.keys(messagesToSaveByAccount)) {
+      for (const account in messagesToSaveByAccount) {
         promises.push(saveMessages(account, messagesToSaveByAccount[account]));
       }
       lastStepDone = 10;
