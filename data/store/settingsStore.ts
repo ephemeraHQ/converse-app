@@ -40,16 +40,11 @@ export const initSettingsStore = (account: string) => {
             [peerAddress: string]: "blocked" | "consented";
           }) =>
             set((state) => {
-              // Normalize to lowercase before merging
               const updatedPeersStatus = {
-                ...Object.fromEntries(
-                  Object.entries(state.peersStatus).map(([key, value]) => [
-                    key.toLowerCase(),
-                    value,
-                  ])
-                ),
+                ...state.peersStatus,
                 ...Object.fromEntries(
                   Object.entries(peersStatus).map(([key, value]) => [
+                    // Normalize to lowercase before merging
                     key.toLowerCase(),
                     value,
                   ])
