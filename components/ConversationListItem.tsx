@@ -7,7 +7,6 @@ import {
   StyleSheet,
   Platform,
   TouchableHighlight,
-  Alert,
 } from "react-native";
 import { RectButton } from "react-native-gesture-handler";
 import Swipeable from "react-native-gesture-handler/Swipeable";
@@ -26,6 +25,7 @@ import { NavigationParamList } from "../screens/Navigation/Navigation";
 import { deleteTopics, blockPeers } from "../utils/api";
 import {
   actionSecondaryColor,
+  actionSheetColors,
   backgroundColor,
   badgeColor,
   clickedItemBackgroundColor,
@@ -36,7 +36,7 @@ import {
 } from "../utils/colors";
 import { getRelativeDateTime } from "../utils/date";
 import { converseEventEmitter } from "../utils/events";
-import { shortAddress } from "../utils/str";
+import { showActionSheetWithOptions } from "./StateHandlers/ActionSheetStateHandler";
 
 type ConversationListItemProps = {
   navigation: NativeStackNavigationProp<NavigationParamList, "Chats">;
@@ -127,34 +127,27 @@ const ConversationListItem = memo(function ConversationListItem({
       <RectButton
         style={[styles.rightAction]}
         onPress={() => {
-          Alert.alert(
-            `Delete chat with ${shortAddress(conversation.peerAddress)}?`,
-            undefined,
-            [
-              {
-                text: "Cancel",
-                onPress: closeSwipeable,
-              },
-              {
-                text: "Delete",
-                style: "destructive",
-                onPress: () => {
-                  deleteTopics(currentAccount(), [conversationTopic]);
-                  setTopicsStatus({ [conversation.topic]: "deleted" });
-                },
-              },
-              {
-                text: "Delete & Block",
-                style: "destructive",
-                isPreferred: true,
-                onPress: () => {
-                  deleteTopics(currentAccount(), [conversationTopic]);
-                  setTopicsStatus({ [conversation.topic]: "deleted" });
-                  blockPeers(currentAccount(), [conversation.peerAddress]);
-                  setPeersStatus({ [conversation.peerAddress]: "blocked" });
-                },
-              },
-            ]
+          showActionSheetWithOptions(
+            {
+              options: ["Delete", "Delete and block", "Cancel"],
+              cancelButtonIndex: 2,
+              destructiveButtonIndex: [0, 1],
+              title: `Delete chat with ${conversation.peerAddress}?`,
+              ...actionSheetColors(colorScheme),
+            },
+            (selectedIndex?: number) => {
+              if (selectedIndex === 0) {
+                deleteTopics(currentAccount(), [conversationTopic]);
+                setTopicsStatus({ [conversation.topic]: "deleted" });
+              } else if (selectedIndex === 1) {
+                deleteTopics(currentAccount(), [conversationTopic]);
+                setTopicsStatus({ [conversation.topic]: "deleted" });
+                blockPeers(currentAccount(), [conversation.peerAddress]);
+                setPeersStatus({ [conversation.peerAddress]: "blocked" });
+              } else {
+                closeSwipeable();
+              }
+            }
           );
         }}
       >
@@ -173,6 +166,7 @@ const ConversationListItem = memo(function ConversationListItem({
     setPeersStatus,
     styles.rightAction,
     conversation.topic,
+    colorScheme,
   ]);
 
   const rowItem =
