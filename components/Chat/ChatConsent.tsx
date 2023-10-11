@@ -1,14 +1,7 @@
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import React from "react";
-import {
-  View,
-  StyleSheet,
-  useColorScheme,
-  Platform,
-  Text,
-  Alert,
-} from "react-native";
+import { View, StyleSheet, useColorScheme, Platform, Text } from "react-native";
 
 import {
   currentAccount,
@@ -19,13 +12,14 @@ import {
 import { NavigationParamList } from "../../screens/Navigation/Navigation";
 import { blockPeers, consentToPeers } from "../../utils/api";
 import {
+  actionSheetColors,
   backgroundColor,
   tertiaryBackgroundColor,
   textPrimaryColor,
 } from "../../utils/colors";
 import { useConversationContext } from "../../utils/conversation";
-import { shortAddress } from "../../utils/str";
 import Button from "../Button/Button";
+import { showActionSheetWithOptions } from "../StateHandlers/ActionSheetStateHandler";
 
 export default function ChatConsent() {
   const { conversation, isBlockedPeer } = useConversationContext([
@@ -40,12 +34,11 @@ export default function ChatConsent() {
   >;
 
   const styles = useStyles();
-
-  const setPeersStatus = useSettingsStore((s) => s.setPeersStatus);
+  const colorScheme = useColorScheme();
 
   const { topicsStatus } = getChatStore(currentAccount()).getState();
   const thisTopicStatus = topicsStatus[conversation?.topic || ""];
-
+  const setPeersStatus = useSettingsStore((s) => s.setPeersStatus);
   const { peersStatus } = getSettingsStore(currentAccount()).getState();
   const thisPeerStatus = conversation?.peerAddress
     ? peersStatus[conversation.peerAddress.toLowerCase()]
@@ -72,24 +65,21 @@ export default function ChatConsent() {
           title="Block"
           style={styles.cta}
           onPress={() => {
-            Alert.alert(
-              `Block user ${shortAddress(conversation.peerAddress)}?`,
-              undefined,
-              [
-                {
-                  text: "Cancel",
-                },
-                {
-                  text: "Block",
-                  style: "destructive",
-                  isPreferred: true,
-                  onPress: () => {
-                    blockPeers(currentAccount(), [conversation.peerAddress]);
-                    setPeersStatus({ [conversation.peerAddress]: "blocked" });
-                    navigation.pop();
-                  },
-                },
-              ]
+            showActionSheetWithOptions(
+              {
+                options: ["Block", "Cancel"],
+                cancelButtonIndex: 1,
+                destructiveButtonIndex: 0,
+                title: `If you block this contact, you will not receive messages from them anymore`,
+                ...actionSheetColors(colorScheme),
+              },
+              (selectedIndex?: number) => {
+                if (selectedIndex === 0) {
+                  blockPeers(currentAccount(), [conversation.peerAddress]);
+                  setPeersStatus({ [conversation.peerAddress]: "blocked" });
+                  navigation.pop();
+                }
+              }
             );
           }}
         />
