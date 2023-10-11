@@ -244,6 +244,8 @@ export default function ProfileScreen({
 
                         actionFunc(currentAccount(), [peerAddress]);
                         setPeersStatus({ [peerAddress]: newStatus });
+                        // Pop to conversation list, antepenultimate screen in stack
+                        navigation.pop(2);
                       }
                     }
                   );
