@@ -18,7 +18,7 @@ import Button from "./Button/Button";
 
 type Props = {
   ctaOnly: boolean;
-} & NativeStackScreenProps<NavigationParamList, "Chats">;
+} & NativeStackScreenProps<NavigationParamList, any>;
 
 export default function Welcome({ ctaOnly, navigation }: Props) {
   const frens = useRecommendationsStore((s) => s.frens);
@@ -36,7 +36,7 @@ export default function Welcome({ ctaOnly, navigation }: Props) {
                 paddingTop: Platform.OS === "ios" ? headerHeight : 0,
                 height:
                   Platform.OS === "android"
-                    ? Dimensions.get("screen").height - headerHeight
+                    ? Dimensions.get("screen").height - 2 * headerHeight
                     : undefined,
               },
             ],

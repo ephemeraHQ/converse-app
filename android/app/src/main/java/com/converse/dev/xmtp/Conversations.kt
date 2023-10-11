@@ -46,10 +46,11 @@ fun handleNewConversationV2Notification(appContext: Context, xmtpClient: Client,
         apiURI = getAsyncStorage("api-uri")
     }
     val pushToken = getKeychainValue("PUSH_TOKEN")
-    if (apiURI != null && pushToken !== null && !hasForbiddenPattern(conversation.peerAddress)) {
-        Log.d("PushNotificationsService", "Subscribing to new topic at api: $apiURI")
-        subscribeToTopic(appContext, apiURI, xmtpClient.address, pushToken, conversation.topic)
-    }
+    // Stop subscribing to new topics for now.
+//    if (apiURI != null && pushToken !== null && !hasForbiddenPattern(conversation.peerAddress)) {
+//        Log.d("PushNotificationsService", "Subscribing to new topic at api: $apiURI")
+//        subscribeToTopic(appContext, apiURI, xmtpClient.address, pushToken, conversation.topic)
+//    }
     // Let's add the topic to the notification content
     val newNotificationData = NotificationData(
         notificationData.message,
@@ -63,9 +64,11 @@ fun handleNewConversationV2Notification(appContext: Context, xmtpClient: Client,
     remoteMessage.data["body"] = newNotificationDataJson
     persistNewConversation(xmtpClient.address, conversation)
     saveConversationToStorage(appContext, xmtpClient.address, conversation.topic, conversation.peerAddress, conversation.createdAt.time, context);
-    if (hasForbiddenPattern(conversation.peerAddress)) {
-        return null
-    }
+    // Stop showing notifications for new convos for now
+    return null
+//    if (hasForbiddenPattern(conversation.peerAddress)) {
+//        return null
+//    }
     return Triple(shortAddress(conversation.peerAddress), "New Conversation", remoteMessage)
 }
 

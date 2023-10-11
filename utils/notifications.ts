@@ -61,7 +61,9 @@ export const subscribeToNotifications = async (
   try {
     subscribingByAccount[account] = true;
     const lastSubscribedTopics = lastSubscribedTopicsByAccount[account] || [];
-    const { conversations, topicsStatus } = getChatStore(account).getState();
+
+    const { sortedConversationsWithPreview, topicsStatus } =
+      getChatStore(account).getState();
     const { peersStatus } = getSettingsStore(account).getState();
 
     const isBlocked = (peerAddress: string) =>
@@ -79,7 +81,7 @@ export const subscribeToNotifications = async (
     };
 
     const topics = [
-      ...Object.values(conversations)
+      ...Object.values(sortedConversationsWithPreview.conversationsInbox)
         .filter(isValidConversation)
         .map((c) => c.topic),
       buildUserInviteTopic(account || ""),
