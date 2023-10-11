@@ -55,12 +55,9 @@ export const initSettingsStore = (account: string) => {
                   ])
                 ),
               };
-              // Call subscribeToNotifications only if at least one peer is consented
-              if (Object.values(peersStatus).includes("consented")) {
-                setImmediate(() => {
-                  subscribeToNotifications(account);
-                });
-              }
+              setImmediate(() => {
+                subscribeToNotifications(account);
+              });
               return { peersStatus: updatedPeersStatus };
             }),
           ephemeralAccount: false,
