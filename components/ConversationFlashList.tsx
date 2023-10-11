@@ -35,11 +35,9 @@ export default function ConversationFlashList({
 }: Props) {
   const styles = useStyles();
   const colorScheme = useColorScheme();
-  const {
-    lastUpdateAt,
-
-    initialLoadDoneOnce,
-  } = useChatStore((s) => pick(s, ["initialLoadDoneOnce", "lastUpdateAt"]));
+  const { lastUpdateAt, initialLoadDoneOnce } = useChatStore((s) =>
+    pick(s, ["initialLoadDoneOnce", "lastUpdateAt"])
+  );
   const userAddress = useCurrentAccount() as string;
   const { peersStatus } = useSettingsStore((s) => pick(s, ["peersStatus"]));
 

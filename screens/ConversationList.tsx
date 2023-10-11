@@ -76,7 +76,6 @@ function ConversationList({ navigation, route, searchBarRef }: Props) {
     ])
   );
 
-  const colorScheme = useColorScheme();
   const { peersStatus, ephemeralAccount } = useSettingsStore((s) =>
     pick(s, ["peersStatus", "ephemeralAccount"])
   );
@@ -101,7 +100,7 @@ function ConversationList({ navigation, route, searchBarRef }: Props) {
       topicsStatus,
       peersStatus
     );
-  }, [conversations, userAddress, topicsStatus, peersStatus]);
+  }, [conversations, userAddress, topicsStatus, peersStatus, lastUpdateAt]);
 
   useEffect(() => {
     if (!initialLoadDoneOnce) {

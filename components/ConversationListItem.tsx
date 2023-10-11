@@ -34,6 +34,7 @@ import {
   textSecondaryColor,
 } from "../utils/colors";
 import { getRelativeDateTime } from "../utils/date";
+import { isDesktop } from "../utils/device";
 import { converseEventEmitter } from "../utils/events";
 import { showActionSheetWithOptions } from "./StateHandlers/ActionSheetStateHandler";
 
@@ -225,7 +226,7 @@ export default ConversationListItem;
 const getStyles = (colorScheme: ColorSchemeName) =>
   StyleSheet.create({
     rowSeparator: {
-      borderBottomWidth: 0.25,
+      borderBottomWidth: isDesktop ? 0.5 : 0.25,
       marginBottom: 0.5,
       borderBottomColor: listItemSeparatorColor(colorScheme),
       marginLeft: 32,
