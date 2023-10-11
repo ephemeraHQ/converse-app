@@ -79,9 +79,6 @@ function ConversationList({ navigation, route, searchBarRef }: Props) {
   const { peersStatus, ephemeralAccount } = useSettingsStore((s) =>
     pick(s, ["peersStatus", "ephemeralAccount"])
   );
-  const blockedPeers = Object.keys(peersStatus).filter(
-    (peer) => peersStatus[peer] === "blocked"
-  );
   const userAddress = useCurrentAccount() as string;
   const profiles = useProfilesStore((s) => s.profiles);
   const [flatListItems, setFlatListItems] = useState<FlatListItem[]>([]);
@@ -153,10 +150,10 @@ function ConversationList({ navigation, route, searchBarRef }: Props) {
       } else if (item.topic === "ephemeral") {
         return <EphemeralAccountBanner />;
       }
-      const isBlocked = (peerAddress: string) =>
-        peersStatus[peerAddress.toLowerCase()] === "blocked";
       const conversation = item as ConversationWithLastMessagePreview;
       const lastMessagePreview = conversation.lastMessagePreview;
+      const isBlocked =
+        peersStatus[conversation.peerAddress.toLowerCase()] === "blocked";
       return (
         <ConversationListItem
           navigation={navigation}
@@ -177,7 +174,7 @@ function ConversationList({ navigation, route, searchBarRef }: Props) {
             )
           }
           lastMessagePreview={
-            isBlocked(conversation.peerAddress)
+            isBlocked
               ? "This user is blocked"
               : lastMessagePreview
               ? lastMessagePreview.contentPreview
@@ -238,7 +235,6 @@ function ConversationList({ navigation, route, searchBarRef }: Props) {
             navigation,
             route,
             userAddress,
-            blockedPeers,
             initialLoadDoneOnce,
             lastUpdateAt,
           ]}
