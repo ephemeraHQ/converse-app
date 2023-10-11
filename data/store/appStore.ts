@@ -1,7 +1,4 @@
 import { create } from "zustand";
-import { persist, createJSONStorage } from "zustand/middleware";
-
-import { zustandMMKVStorage } from "../../utils/mmkv";
 
 // A app-wide store to store settings that don't depend on
 // an account like if notifications are accepted
@@ -35,32 +32,24 @@ type AppStoreType = {
   ) => void;
 };
 
-export const useAppStore = create<AppStoreType>()(
-  persist(
-    (set) => ({
-      notificationsPermissionStatus: "undetermined",
-      setNotificationsPermissionStatus: (status) =>
-        set(() => ({
-          notificationsPermissionStatus: status,
-        })),
+export const useAppStore = create<AppStoreType>()((set) => ({
+  notificationsPermissionStatus: "undetermined",
+  setNotificationsPermissionStatus: (status) =>
+    set(() => ({
+      notificationsPermissionStatus: status,
+    })),
 
-      splashScreenHidden: false,
-      setSplashScreenHidden: (hidden) =>
-        set(() => ({ splashScreenHidden: hidden })),
+  splashScreenHidden: false,
+  setSplashScreenHidden: (hidden) =>
+    set(() => ({ splashScreenHidden: hidden })),
 
-      isInternetReachable: false,
-      setIsInternetReachable: (reachable) =>
-        set(() => ({ isInternetReachable: reachable })),
+  isInternetReachable: false,
+  setIsInternetReachable: (reachable) =>
+    set(() => ({ isInternetReachable: reachable })),
 
-      hydrationDone: false,
-      setHydrationDone: (done) => set(() => ({ hydrationDone: done })),
+  hydrationDone: false,
+  setHydrationDone: (done) => set(() => ({ hydrationDone: done })),
 
-      mediaPreview: null,
-      setMediaPreview: (preview) => set(() => ({ mediaPreview: preview })),
-    }),
-    {
-      name: "store-app",
-      storage: createJSONStorage(() => zustandMMKVStorage),
-    }
-  )
-);
+  mediaPreview: null,
+  setMediaPreview: (preview) => set(() => ({ mediaPreview: preview })),
+}));
