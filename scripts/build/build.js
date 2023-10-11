@@ -159,6 +159,28 @@ const build = async () => {
 
   let buildSuccess = false;
 
+  const cleanup = () => {
+    if (env === "production" || env === "preview") {
+      if (env === "production") {
+        execSync("git add app.json", { cwd: PROJECT_ROOT });
+      }
+      if (platform === "ios") {
+        execSync("git restore .", { cwd: PROJECT_ROOT });
+      } else {
+        execSync("git restore --staged --worktree android", {
+          cwd: PROJECT_ROOT,
+        });
+      }
+    } else if (env === "dev") {
+      execSync("git restore ios/Converse/Supporting/Expo.plist", {
+        cwd: PROJECT_ROOT,
+      });
+      execSync("git restore android/app/src/main/res/values/strings.xml", {
+        cwd: PROJECT_ROOT,
+      });
+    }
+  };
+
   try {
     const env = {
       ...process.env,
@@ -170,7 +192,8 @@ const build = async () => {
     buildSuccess = true;
   } catch (e) {
     console.log("Error during build");
-    console.log(e);
+    cleanup();
+    throw e;
   }
 
   if (env === "production" && buildLocally && buildSuccess) {
@@ -187,29 +210,12 @@ const build = async () => {
       await executeCommand(submitCommand, submitArgs);
     } catch (e) {
       console.log("Error during submission");
-      console.log(e);
+      cleanup();
+      throw e;
     }
   }
 
-  if (env === "production" || env === "preview") {
-    if (env === "production") {
-      execSync("git add app.json", { cwd: PROJECT_ROOT });
-    }
-    if (platform === "ios") {
-      execSync("git restore .", { cwd: PROJECT_ROOT });
-    } else {
-      execSync("git restore --staged --worktree android", {
-        cwd: PROJECT_ROOT,
-      });
-    }
-  } else if (env === "dev") {
-    execSync("git restore ios/Converse/Supporting/Expo.plist", {
-      cwd: PROJECT_ROOT,
-    });
-    execSync("git restore android/app/src/main/res/values/strings.xml", {
-      cwd: PROJECT_ROOT,
-    });
-  }
+  cleanup();
 };
 
 const executeCommand = (command, args, env) =>
