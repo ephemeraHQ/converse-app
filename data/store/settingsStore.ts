@@ -40,20 +40,21 @@ export const initSettingsStore = (account: string) => {
             [peerAddress: string]: "blocked" | "consented";
           }) =>
             set((state) => {
-              const updatedPeersStatus = {
-                ...state.peersStatus,
-                ...Object.fromEntries(
-                  Object.entries(peersStatus).map(([key, value]) => [
-                    // Normalize to lowercase before merging
-                    key.toLowerCase(),
-                    value,
-                  ])
-                ),
-              };
               setImmediate(() => {
                 subscribeToNotifications(account);
               });
-              return { peersStatus: updatedPeersStatus };
+              return {
+                peersStatus: {
+                  ...state.peersStatus,
+                  ...Object.fromEntries(
+                    Object.entries(peersStatus).map(([key, value]) => [
+                      // Normalize to lowercase before merging
+                      key.toLowerCase(),
+                      value,
+                    ])
+                  ),
+                },
+              };
             }),
           ephemeralAccount: false,
           setNotificationsSettings: (notificationsSettings) =>
