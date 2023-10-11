@@ -79,9 +79,7 @@ export const initSettingsStore = (account: string) => {
           // Migration from version 0: Convert 'blockedPeers' to 'peersStatus'
           if (version === 0 && persistedState.blockedPeers) {
             persistedState.peersStatus = {};
-            for (const peerAddress of Object.keys(
-              persistedState.blockedPeers
-            )) {
+            for (const peerAddress in persistedState.blockedPeers) {
               persistedState.peersStatus[peerAddress] = "blocked";
             }
             delete persistedState.blockedPeers;
