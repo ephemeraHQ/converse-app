@@ -44,9 +44,9 @@ export default function ChatConsent() {
     ? peersStatus[conversation.peerAddress.toLowerCase()]
     : "";
 
-  // @todo add pre-consented check if 1 message is already sent
   if (
     !conversation ||
+    conversation.hasOneMessageFromMe ||
     thisTopicStatus === "consented" ||
     thisPeerStatus === "consented" ||
     isBlockedPeer ||
