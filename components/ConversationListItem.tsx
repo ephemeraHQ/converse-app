@@ -148,7 +148,8 @@ const ConversationListItem = memo(function ConversationListItem({
                 style: "destructive",
                 isPreferred: true,
                 onPress: () => {
-                  // @todo Should we also call deleteTopics and set SetTopicsStatus to deleted here?
+                  deleteTopics(currentAccount(), [conversationTopic]);
+                  setTopicsStatus({ [conversation.topic]: "deleted" });
                   blockPeers(currentAccount(), [conversation.peerAddress]);
                   setPeersStatus({ [conversation.peerAddress]: "blocked" });
                 },
