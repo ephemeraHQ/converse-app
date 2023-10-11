@@ -20,7 +20,6 @@ import {
   useChatStore,
   useSettingsStore,
 } from "../data/store/accountsStore";
-import { XmtpConversation } from "../data/store/chatStore";
 import { NavigationParamList } from "../screens/Navigation/Navigation";
 import { deleteTopics, blockPeers } from "../utils/api";
 import {
@@ -40,11 +39,11 @@ import { showActionSheetWithOptions } from "./StateHandlers/ActionSheetStateHand
 
 type ConversationListItemProps = {
   navigation: NativeStackNavigationProp<NavigationParamList, "Chats">;
-  conversation: XmtpConversation;
   colorScheme: ColorSchemeName;
   conversationTime: number | undefined;
   conversationTopic: string;
   conversationName: string;
+  conversationPeerAddress: string;
   lastMessagePreview: string | undefined;
   lastMessageFromMe: boolean;
   lastMessageStatus?: "delivered" | "error" | "seen" | "sending" | "sent";
@@ -57,11 +56,11 @@ const ConversationListItem = memo(function ConversationListItem({
   conversationTopic,
   conversationTime,
   conversationName,
+  conversationPeerAddress,
   lastMessagePreview,
   lastMessageStatus,
   lastMessageFromMe,
   showUnread,
-  conversation,
 }: ConversationListItemProps) {
   const styles = getStyles(colorScheme);
   const timeToShow = getRelativeDateTime(conversationTime);
@@ -132,18 +131,18 @@ const ConversationListItem = memo(function ConversationListItem({
               options: ["Delete", "Delete and block", "Cancel"],
               cancelButtonIndex: 2,
               destructiveButtonIndex: [0, 1],
-              title: `Delete chat with ${conversation.peerAddress}?`,
+              title: `Delete chat with ${conversationPeerAddress}?`,
               ...actionSheetColors(colorScheme),
             },
             (selectedIndex?: number) => {
               if (selectedIndex === 0) {
                 deleteTopics(currentAccount(), [conversationTopic]);
-                setTopicsStatus({ [conversation.topic]: "deleted" });
+                setTopicsStatus({ [conversationTopic]: "deleted" });
               } else if (selectedIndex === 1) {
                 deleteTopics(currentAccount(), [conversationTopic]);
-                setTopicsStatus({ [conversation.topic]: "deleted" });
-                blockPeers(currentAccount(), [conversation.peerAddress]);
-                setPeersStatus({ [conversation.peerAddress]: "blocked" });
+                setTopicsStatus({ [conversationTopic]: "deleted" });
+                blockPeers(currentAccount(), [conversationPeerAddress]);
+                setPeersStatus({ [conversationPeerAddress]: "blocked" });
               } else {
                 closeSwipeable();
               }
@@ -159,14 +158,13 @@ const ConversationListItem = memo(function ConversationListItem({
       </RectButton>
     );
   }, [
-    closeSwipeable,
-    conversation.peerAddress,
     conversationTopic,
+    conversationPeerAddress,
     setTopicsStatus,
     setPeersStatus,
-    styles.rightAction,
-    conversation.topic,
+    closeSwipeable,
     colorScheme,
+    styles.rightAction,
   ]);
 
   const rowItem =

@@ -157,13 +157,13 @@ function ConversationList({ navigation, route, searchBarRef }: Props) {
       return (
         <ConversationListItem
           navigation={navigation}
-          conversation={conversation}
           colorScheme={colorScheme}
           conversationTopic={conversation.topic}
           conversationTime={
             lastMessagePreview?.message?.sent || conversation.createdAt
           }
           conversationName={conversationName(conversation)}
+          conversationPeerAddress={conversation.peerAddress}
           showUnread={
             !!(
               initialLoadDoneOnce &&
