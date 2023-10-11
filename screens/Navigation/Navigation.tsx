@@ -15,6 +15,7 @@ import { backgroundColor, headerTitleStyle } from "../../utils/colors";
 import AccountsNav from "./AccountsNav";
 import ConversationListNav from "./ConversationListNav";
 import ConversationNav from "./ConversationNav";
+import ConversationRequestsListNav from "./ConversationRequestsListNav";
 import ConverseMatchMakerNav from "./ConverseMatchMakerNav";
 import NewConversationNav from "./NewConversationNav";
 import ProfileNav from "./ProfileNav";
@@ -24,6 +25,7 @@ import WebviewPreviewNav from "./WebviewPreviewNav";
 export type NavigationParamList = {
   Accounts: undefined;
   Chats: undefined;
+  ChatsRequests: undefined;
   Conversation: {
     topic?: string;
     message?: string;
@@ -195,6 +197,7 @@ export default function Navigation() {
         >
           {AccountsNav()}
           {ConversationListNav()}
+          {ConversationRequestsListNav()}
           {ConversationNav()}
           {NewConversationNav()}
           {ConverseMatchMakerNav()}
