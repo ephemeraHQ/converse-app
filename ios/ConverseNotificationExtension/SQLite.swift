@@ -17,7 +17,7 @@ private var openedDbs: [String: Connection] = [:]
 
 func getDbName(account: String) -> String {
   let accounts = getAccountsState()
-  let databaseId = accounts?.databaseId[account] ?? account
+  let databaseId = accounts?.databaseId?[account] ?? account
   let dbName = "converse-\(databaseId).sqlite"
   return dbName
 }
