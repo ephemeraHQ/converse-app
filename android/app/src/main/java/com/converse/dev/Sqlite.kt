@@ -23,7 +23,7 @@ fun getDb(appContext: Context, account: String): SQLiteDatabase? {
     val dbName = getDbName(appContext, account)
     var database = openedDbs[dbName]
     if (database != null) {
-        Log.d("DB", "DATABASE ALREADY OPEND FOR $dbName")
+        Log.d("DB", "DATABASE ALREADY OPENED FOR $dbName")
         return database as SQLiteDatabase;
     }
     val databasePath = appContext.getDatabasePath(getDbName(appContext, account)).path
