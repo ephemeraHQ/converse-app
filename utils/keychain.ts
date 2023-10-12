@@ -77,18 +77,24 @@ export const deleteConversationsFromKeychain = async (
   account: string,
   topics: string[]
 ) => {
+  const promises: Promise<void>[] = [];
   for (const topic of topics) {
     const key = createHash("sha256").update(topic).digest("hex");
-    await SecureStore.deleteItemAsync(
-      `XMTP_TOPIC_DATA_${account}_${key}`,
-      secureStoreOptions
+    promises.push(
+      SecureStore.deleteItemAsync(
+        `XMTP_TOPIC_DATA_${account}_${key}`,
+        secureStoreOptions
+      )
     );
     // Delete old version of the data (TODO => remove)
-    await SecureStore.deleteItemAsync(
-      `XMTP_CONVERSATION_${key}`,
-      secureStoreOptions
+    promises.push(
+      SecureStore.deleteItemAsync(
+        `XMTP_CONVERSATION_${key}`,
+        secureStoreOptions
+      )
     );
   }
+  await Promise.all(promises);
 };
 
 export const savePushToken = async (pushKey: string) => {

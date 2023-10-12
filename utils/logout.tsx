@@ -4,7 +4,7 @@ import {
   getChatStore,
   useAccountsStore,
 } from "../data/store/accountsStore";
-import { deleteConversationsFromKeychain, deleteXmtpKey } from "./keychain";
+import { deleteXmtpKey } from "./keychain";
 import mmkv from "./mmkv";
 import {
   deleteSubscribedTopics,
@@ -96,7 +96,10 @@ export const executeLogoutTasks = async () => {
       await deleteXmtpKey(account);
       assertNotLogged(account);
       if (task.topics.length > 0) {
-        await deleteConversationsFromKeychain(account, task.topics);
+        // This is too long and might race with re-login, let's not do it for now
+        // it could be done by having a different account id even if you re-login with
+        // same account.
+        // await deleteConversationsFromKeychain(account, task.topics);
         resetSharedData(task.topics);
       }
       assertNotLogged(account);
