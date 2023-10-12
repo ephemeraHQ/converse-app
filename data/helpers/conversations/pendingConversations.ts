@@ -85,54 +85,63 @@ export const createPendingConversation = async (
   return pendingConversationId;
 };
 
-export const upgradePendingConversationIfNeeded = async (
+export const upgradePendingConversationsIfNeeded = async (
   account: string,
-  conversation: XmtpConversation
+  conversations: XmtpConversation[]
 ) => {
+  const conversationRepository = await getRepository(account, "conversation");
+  const messageRepository = await getRepository(account, "message");
+
+  const peerAddresses = conversations.map((c) => c.peerAddress);
+  const pendingConversationsWithPeers = await conversationRepository.find({
+    where: { pending: true, peerAddress: In(peerAddresses) },
+  });
+
   // If we get back a conversation from XMTP that corresponds
   // to a conversation that we have locally pending, we need
   // to delete the pending one and reassigns messages
 
-  const alreadyConversationInDbWithConversationId =
-    await getPendingConversationWithPeer(
-      account,
-      conversation.peerAddress,
-      conversation.context?.conversationId
+  for (const conversation of conversations) {
+    const alreadyConversationInDbWithConversationId =
+      pendingConversationsWithPeers.find((c) =>
+        c.peerAddress === conversation.peerAddress &&
+        conversation.context?.conversationId
+          ? c.contextConversationId === conversation.context?.conversationId
+          : !c.contextConversationId
+      );
+
+    if (
+      !alreadyConversationInDbWithConversationId ||
+      alreadyConversationInDbWithConversationId.topic === conversation.topic
+    )
+      return;
+
+    // Save this one to db
+    await upsertRepository(
+      conversationRepository,
+      [xmtpConversationToDb(conversation)],
+      ["topic"]
     );
 
-  if (
-    !alreadyConversationInDbWithConversationId ||
-    alreadyConversationInDbWithConversationId.topic === conversation.topic
-  )
-    return;
-  const conversationRepository = await getRepository(account, "conversation");
-  const messageRepository = await getRepository(account, "message");
-
-  // Save this one to db
-  await upsertRepository(
-    conversationRepository,
-    [xmtpConversationToDb(conversation)],
-    ["topic"]
-  );
-
-  // Reassign messages
-  await messageRepository.update(
-    { conversationId: alreadyConversationInDbWithConversationId.topic },
-    { conversationId: conversation.topic }
-  );
-
-  // Deleting the old conversation
-  await conversationRepository.delete({
-    topic: alreadyConversationInDbWithConversationId.topic,
-  });
-
-  // Dispatch
-  getChatStore(account)
-    .getState()
-    .updateConversationTopic(
-      alreadyConversationInDbWithConversationId.topic,
-      conversation
+    // Reassign messages
+    await messageRepository.update(
+      { conversationId: alreadyConversationInDbWithConversationId.topic },
+      { conversationId: conversation.topic }
     );
+
+    // Deleting the old conversation
+    await conversationRepository.delete({
+      topic: alreadyConversationInDbWithConversationId.topic,
+    });
+
+    // Dispatch
+    getChatStore(account)
+      .getState()
+      .updateConversationTopic(
+        alreadyConversationInDbWithConversationId.topic,
+        conversation
+      );
+  }
 };
 
 export const getPendingConversationsToCreate = async (account: string) => {

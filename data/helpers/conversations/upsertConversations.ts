@@ -1,13 +1,16 @@
+import { In } from "typeorm/browser";
+
 import { getLensHandleFromConversationIdAndPeer } from "../../../utils/lens";
 import { saveConversationIdentifiersForNotifications } from "../../../utils/notifications";
 import { getRepository } from "../../db";
 import { getExistingDataSource } from "../../db/datasource";
+import { Conversation } from "../../db/entities/conversationEntity";
 import { upsertRepository } from "../../db/upsert";
 import { xmtpConversationToDb } from "../../mappers";
 import { getChatStore, getProfilesStore } from "../../store/accountsStore";
 import { XmtpConversation } from "../../store/chatStore";
 import { refreshProfilesIfNeeded } from "../profiles/profilesUpdate";
-import { upgradePendingConversationIfNeeded } from "./pendingConversations";
+import { upgradePendingConversationsIfNeeded } from "./pendingConversations";
 
 export const saveConversations = async (
   account: string,
@@ -26,8 +29,9 @@ export const saveConversations = async (
   });
 
   // Save immediatly to db the new ones
-  const newlySavedConversations = await Promise.all(
-    conversationsToUpsert.map((c) => setupAndSaveConversation(account, c))
+  const newlySavedConversations = await setupAndSaveConversations(
+    account,
+    conversationsToUpsert
   );
   // Then to context so it show immediatly even without handle
   chatStoreState.setConversations(newlySavedConversations);
@@ -51,48 +55,62 @@ export const saveConversations = async (
   refreshProfilesIfNeeded(account);
 };
 
-const setupAndSaveConversation = async (
+const setupAndSaveConversations = async (
   account: string,
-  conversation: XmtpConversation
-): Promise<XmtpConversation> => {
-  await upgradePendingConversationIfNeeded(account, conversation);
+  conversations: XmtpConversation[]
+): Promise<XmtpConversation[]> => {
+  // If there are here conversations newly created that correspond to
+  // pending convos in our local db, let's update them
+  await upgradePendingConversationsIfNeeded(account, conversations);
+
   const conversationRepository = await getRepository(account, "conversation");
-  const alreadyConversationInDbWithTopic = await conversationRepository.findOne(
-    {
-      where: { topic: conversation.topic },
-    }
-  );
+  const alreadyConversationInDbWithTopics = await conversationRepository.find({
+    where: { topic: In(conversations.map((c) => c.topic)) },
+  });
+  const alreadyConversationsByTopic: {
+    [topic: string]: Conversation | undefined;
+  } = {};
+  alreadyConversationInDbWithTopics.forEach((c) => {
+    alreadyConversationsByTopic[c.topic] = c;
+  });
 
-  const profileSocials =
-    getProfilesStore(account).getState().profiles[conversation.peerAddress]
-      ?.socials;
+  const conversationsToUpsert: Conversation[] = [];
+  conversations.forEach((conversation) => {
+    const alreadyConversationInDbWithTopic =
+      alreadyConversationsByTopic[conversation.topic];
+    const profileSocials =
+      getProfilesStore(account).getState().profiles[conversation.peerAddress]
+        ?.socials;
 
-  const lensHandle = getLensHandleFromConversationIdAndPeer(
-    conversation.context?.conversationId,
-    profileSocials?.lensHandles
-  );
-  const ensName =
-    profileSocials?.ensNames?.find((e) => e.isPrimary)?.name || null;
-  const unsDomain =
-    profileSocials?.unstoppableDomains?.find((e) => e.isPrimary)?.domain ||
-    null;
+    const lensHandle = getLensHandleFromConversationIdAndPeer(
+      conversation.context?.conversationId,
+      profileSocials?.lensHandles
+    );
+    const ensName =
+      profileSocials?.ensNames?.find((e) => e.isPrimary)?.name || null;
+    const unsDomain =
+      profileSocials?.unstoppableDomains?.find((e) => e.isPrimary)?.domain ||
+      null;
 
-  // If this is a lens convo we show lens, if not ENS
-  conversation.conversationTitle = lensHandle || ensName || unsDomain;
-  conversation.readUntil =
-    conversation.readUntil || alreadyConversationInDbWithTopic?.readUntil || 0;
+    // If this is a lens convo we show lens, if not ENS
+    conversation.conversationTitle = lensHandle || ensName || unsDomain;
+    conversation.readUntil =
+      conversation.readUntil ||
+      alreadyConversationInDbWithTopic?.readUntil ||
+      0;
+    conversationsToUpsert.push(xmtpConversationToDb(conversation));
+    saveConversationIdentifiersForNotifications(conversation);
+  });
 
   // Save to db
   await upsertRepository(
     conversationRepository,
-    [xmtpConversationToDb(conversation)],
+    conversationsToUpsert,
     ["topic"],
     false
   );
 
-  saveConversationIdentifiersForNotifications(conversation);
-
-  return conversation;
+  return conversations;
 };
 
 export const markAllConversationsAsReadInDb = async (account: string) => {
