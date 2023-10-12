@@ -15,6 +15,11 @@ platform :ios, podfile_properties['ios.deploymentTarget'] || '14.0'
 install! 'cocoapods',
   :deterministic_uuids => false
 
+
+# Version must match version from XMTP Podspec (matching @xmtp/react-native-sdk from package.json)
+# https://github.com/xmtp/xmtp-react-native/blob/v1.16.13/ios/XMTPReactNative.podspec#L28
+$xmtpVersion = '0.6.0-alpha0'
+
 target 'Converse' do
   use_expo_modules!
   config = use_native_modules!
@@ -22,9 +27,7 @@ target 'Converse' do
   use_frameworks! :linkage => :static
   pod 'MMKV', :linkage => :dynamic
   pod 'MMKVCore', :linkage => :dynamic
-  # Version must match version from XMTP Podspec (matching @xmtp/react-native-sdk from package.json)
-  # https://github.com/xmtp/xmtp-react-native/blob/v1.16.12/ios/XMTPReactNative.podspec#L28
-  pod 'XMTP', '0.5.14-alpha0', :modular_headers => true
+  pod 'XMTP', $xmtpVersion, :modular_headers => true
 
   # Flags change depending on the env values.
   flags = get_default_flags()
@@ -88,9 +91,7 @@ target 'ConverseNotificationExtension' do
   use_frameworks! :linkage => :static
   pod 'MMKVAppExtension', :linkage => :dynamic
   pod 'SQLite.swift'
-  # Version must match version from XMTP Podspec (matching @xmtp/react-native-sdk from package.json)
-  # https://github.com/xmtp/xmtp-react-native/blob/v1.16.12/ios/XMTPReactNative.podspec#L28
-  pod 'XMTP', '0.5.14-alpha0', :modular_headers => true
+  pod 'XMTP', $xmtpVersion, :modular_headers => true
   # Version must match version from RNSentry Podspec (matching @sentry/react-native package from package.json)
   # https://github.com/getsentry/sentry-react-native/blob/5.5.0/RNSentry.podspec#L22
   pod 'Sentry/HybridSDK', '8.7.1'
