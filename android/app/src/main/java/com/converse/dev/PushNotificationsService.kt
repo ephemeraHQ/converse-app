@@ -56,8 +56,6 @@ class PushNotificationsService : FirebaseMessagingService() {
     override fun onMessageReceived(remoteMessage: RemoteMessage) {
         Log.d(TAG, "Received a notification")
 
-        var shouldIncrementBadge = false
-
         // Check if message contains a data payload.
         if (remoteMessage.data.isEmpty()) return
         Log.d(TAG, "Message data payload: ${remoteMessage.data["body"]}")
@@ -84,23 +82,17 @@ class PushNotificationsService : FirebaseMessagingService() {
         val encryptedMessageData = Base64.decode(notificationData.message, Base64.NO_WRAP)
         val envelope = EnvelopeBuilder.buildFromString(notificationData.contentTopic, Date(notificationData.timestampNs.toLong()/1000000), encryptedMessageData)
         val sentViaConverse = notificationData.sentViaConverse!!
+        var shouldIncrementBadge = false
+        var notificationToShow: Triple<String, String, RemoteMessage>?
 
         if (isIntroTopic(notificationData.contentTopic)) {
             return
         } else if (isInviteTopic(notificationData.contentTopic)) {
             Log.d(TAG, "Handling a new conversation notification")
-            val notificationToShow = handleNewConversationV2Notification(this, xmtpClient, envelope, remoteMessage, notificationData)
-            if (notificationToShow != null) {
-                shouldIncrementBadge = true
-                showNotification(notificationToShow.first, notificationToShow.second, notificationToShow.third)
-            }
+            notificationToShow = handleNewConversationV2Notification(this, xmtpClient, envelope, remoteMessage, notificationData)
         } else {
             Log.d(TAG, "Handling a new message notification")
-            val notificationToShow = handleNewMessageNotification(this, xmtpClient, envelope, remoteMessage, sentViaConverse)
-            if (notificationToShow != null) {
-                shouldIncrementBadge = true
-                showNotification(notificationToShow.first, notificationToShow.second, notificationToShow.third)
-            }
+            notificationToShow = handleNewMessageNotification(this, xmtpClient, envelope, remoteMessage, sentViaConverse)
         }
 
         Log.d(TAG, "reached the shouldIncrementBadge & showNotification if statement")
@@ -115,8 +107,8 @@ class PushNotificationsService : FirebaseMessagingService() {
         Log.d("NotificationHandler", "decodedMessage.id: ${decodedMessage.id}")
         val showNotification = notificationHandler.shouldShowNotification(this, decodedMessage.id)
 
-        if (shouldIncrementBadge && showNotification) {
-            Log.d(TAG, "shouldIncrementBadge: true!")
+        if (notificationToShow != null && showNotification) {
+            showNotification(notificationToShow.first, notificationToShow.second, notificationToShow.third)
             val newBadgeCount = getBadge(this) + 1
             setBadge(this, newBadgeCount)
             ShortcutBadger.applyCount(this, newBadgeCount)
