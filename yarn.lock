@@ -2364,10 +2364,10 @@
     mv "~2"
     safe-json-stringify "~1"
 
-"@expo/cli@0.10.12":
-  version "0.10.12"
-  resolved "https://registry.yarnpkg.com/@expo/cli/-/cli-0.10.12.tgz#7a5f8d1a19912496fd6c848096321f8d60b5fa8c"
-  integrity sha512-sc4IkRBbm6HO1Z/0JeJMY/sJiyCAfHyt2EOHhAY8jYfbXr/aqCIGsPrwEGQAfGpsE2OPvyzRa+byZG03HRPTkQ==
+"@expo/cli@0.10.13":
+  version "0.10.13"
+  resolved "https://registry.yarnpkg.com/@expo/cli/-/cli-0.10.13.tgz#6503e6c477a8407986cd645952b0ad6177e08fe7"
+  integrity sha512-8ciyz+yIDih6zCNMWK0IyEv411W7vej/TaWIFGarogPVbFokXrUKr0aKoQG1RU1SLlY4eUpHakbIzqog+rhJdQ==
   dependencies:
     "@babel/runtime" "^7.20.0"
     "@expo/code-signing-certificates" "0.0.5"
@@ -10507,10 +10507,10 @@ expo-updates-interface@~0.10.0:
   resolved "https://registry.yarnpkg.com/expo-updates-interface/-/expo-updates-interface-0.10.1.tgz#cab075641cd381718ccd9264bf133dc393430a44"
   integrity sha512-I6JMR7EgjXwckrydDmrkBEX/iw750dcqpzQVsjznYWfi0HTEOxajLHB90fBFqQkUV5i5s4Fd3hYQ1Cn0oMzUbA==
 
-expo-updates@~0.18.14:
-  version "0.18.14"
-  resolved "https://registry.yarnpkg.com/expo-updates/-/expo-updates-0.18.14.tgz#dd67ef729a1d81ab5ca551a47dd2bf6254a49ce3"
-  integrity sha512-RHlo44Xo4mgXrLqhDK52s0xE1nOFdf0FAMfuQD5O5+uKLk6vbNqwwX8FejiIbrVLhlYTkldUPBPlTsp0G9vB8A==
+expo-updates@~0.18.16:
+  version "0.18.16"
+  resolved "https://registry.yarnpkg.com/expo-updates/-/expo-updates-0.18.16.tgz#d81bff0178d7d9dd279aad51ee25bc71d237f8ab"
+  integrity sha512-5/3Yh6FHG8oRDz1pqpn7NEO6GQBH5GV/sygnkkn3JxsiXzlOsuOY7+x+gFr4CdKVyreaoJV863ZxKvxplVE4fA==
   dependencies:
     "@expo/code-signing-certificates" "0.0.5"
     "@expo/config" "~8.1.0"
@@ -10524,13 +10524,13 @@ expo-updates@~0.18.14:
     fbemitter "^3.0.0"
     resolve-from "^5.0.0"
 
-expo@^49.0.11:
-  version "49.0.11"
-  resolved "https://registry.yarnpkg.com/expo/-/expo-49.0.11.tgz#2ad565aaf0e4533c17e5dcbe0e0020da856cbca9"
-  integrity sha512-4UtSnaVn4bAEsdp2Z2I8okCJEmAm2cj1Rl3ifm79fI4zMz3EqBaXMKs6OdMSTa6DWq3dZp8C/5dEKy/ynah0CA==
+expo@^49.0.13:
+  version "49.0.13"
+  resolved "https://registry.yarnpkg.com/expo/-/expo-49.0.13.tgz#9ee185d4eb1ac2859e67895bd919db5a04d1b8ec"
+  integrity sha512-k2QFmT5XN490ksjKJgogfS5SFj6ZKCu1GwWz4VUV4S9gkPjzr8zQAZoVPKaWxUYRb6xDpTJXdhLt7gSnV3bJvw==
   dependencies:
     "@babel/runtime" "^7.20.0"
-    "@expo/cli" "0.10.12"
+    "@expo/cli" "0.10.13"
     "@expo/config" "8.1.2"
     "@expo/config-plugins" "7.2.5"
     "@expo/vector-icons" "^13.0.0"
