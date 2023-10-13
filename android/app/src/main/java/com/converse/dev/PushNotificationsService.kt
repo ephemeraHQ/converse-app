@@ -82,7 +82,6 @@ class PushNotificationsService : FirebaseMessagingService() {
         val encryptedMessageData = Base64.decode(notificationData.message, Base64.NO_WRAP)
         val envelope = EnvelopeBuilder.buildFromString(notificationData.contentTopic, Date(notificationData.timestampNs.toLong()/1000000), encryptedMessageData)
         val sentViaConverse = notificationData.sentViaConverse!!
-        var shouldIncrementBadge = false
         var notificationToShow: Triple<String, String, RemoteMessage>?
 
         if (isIntroTopic(notificationData.contentTopic)) {
@@ -94,8 +93,6 @@ class PushNotificationsService : FirebaseMessagingService() {
             Log.d(TAG, "Handling a new message notification")
             notificationToShow = handleNewMessageNotification(this, xmtpClient, envelope, remoteMessage, sentViaConverse)
         }
-
-        Log.d(TAG, "reached the shouldIncrementBadge & showNotification if statement")
 
         val conversation = getPersistedConversation(xmtpClient, envelope.contentTopic)
         if (conversation === null) {

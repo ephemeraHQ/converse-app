@@ -27,8 +27,6 @@ func shouldShowNotification(for messageId: String?) -> Bool {
   if existingIds.contains(id) {
     return false
   }
-  
-  print("== existingIds:", existingIds)
 
   // Append the new id to the list
   var updatedIds = existingIds
