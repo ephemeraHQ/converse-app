@@ -20,7 +20,6 @@ import {
 import { useConversationContext } from "../../utils/conversation";
 import Button from "../Button/Button";
 import { showActionSheetWithOptions } from "../StateHandlers/ActionSheetStateHandler";
-import { MessageToDisplay } from "./ChatMessage";
 
 export default function ChatConsent() {
   const { conversation, isBlockedPeer } = useConversationContext([
@@ -45,23 +44,16 @@ export default function ChatConsent() {
     ? peersStatus[conversation.peerAddress.toLowerCase()]
     : "";
 
-  // Check if there's a message from the user in the conversation
-  const hasMessageFromMe = conversation?.messages
-    ? Array.from(conversation.messages.values()).some(
-        (message) => (message as MessageToDisplay).fromMe
-      )
-    : false;
-
   // Determine whether to show the consent window based on various conditions
   const shouldShowConsentWindow =
     conversation &&
     conversation.messages instanceof Map &&
     conversation.messages.size > 0 &&
-    !hasMessageFromMe &&
     thisTopicStatus !== "consented" &&
     thisPeerStatus !== "consented" &&
     !isBlockedPeer &&
-    !conversation.pending;
+    !conversation.pending &&
+    !conversation.hasOneMessageFromMe;
 
   if (!shouldShowConsentWindow) {
     // Consent window will not be displayed
