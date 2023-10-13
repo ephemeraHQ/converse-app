@@ -8,10 +8,6 @@
 import Foundation
 import MMKVAppExtension
 
-let maxStoredIds = 10
-let key = "notificationIds"
-let mmkv = MMKV.default()
-
 func incrementBadge(for content: UNMutableNotificationContent) {
   let newBadgeCount = getBadge() + 1
   setBadge(newBadgeCount)
@@ -19,16 +15,20 @@ func incrementBadge(for content: UNMutableNotificationContent) {
 }
 
 func shouldShowNotification(for messageId: String?) -> Bool {
+  let maxStoredIds = 10
+  
   // Check if the messageId is not nil and not an empty string
   guard let id = messageId, !id.isEmpty else {
     return false
   }
   
   // If the id already exists in the list, don't show the notification
-  let existingIds = retrieveExistingIds()
+  let existingIds = getShownNotificationIds()
   if existingIds.contains(id) {
     return false
   }
+  
+  print("== existingIds:", existingIds)
 
   // Append the new id to the list
   var updatedIds = existingIds
@@ -41,17 +41,9 @@ func shouldShowNotification(for messageId: String?) -> Bool {
 
   // Store the updated list of IDs back to storage
   if let jsonData = try? JSONEncoder().encode(updatedIds) {
-    mmkv?.set(jsonData, forKey: key)
+    setShownNotificationIds(jsonData)
   }
   
   // If all conditions are met, show the notification
   return true
-}
-
-func retrieveExistingIds() -> [String] {
-  if let jsonData = mmkv?.data(forKey: key),
-   let ids = try? JSONDecoder().decode([String].self, from: jsonData) {
-    return ids
-  }
-  return []
 }
