@@ -9,6 +9,7 @@ import UserNotifications
 import XMTP
 import CryptoKit
 import Alamofire
+import MMKVAppExtension
 
 
 func shortAddress(address: String) -> String {
@@ -39,9 +40,54 @@ func incrementBadge(for content: UNMutableNotificationContent) {
   print("== incrementBadge, newBadgeCount: ", newBadgeCount)
 }
 
+func shouldShowNotification(for messageId: String?) -> Bool {
+  let maxStoredIds = 10
+  let key = "notificationIds"
+  let mmkv = MMKV.default()
+  
+  guard let id = messageId, !id.isEmpty else {
+    return false
+  }
+  
+  // Retrieve the notification IDs array from the serialized JSON string
+  let existingIds: [String]
+  if let jsonData = mmkv?.data(forKey: key),
+     let ids = try? JSONDecoder().decode([String].self, from: jsonData) {
+    existingIds = ids
+  } else {
+    existingIds = []
+  }
+  
+  print("== existingIds:", existingIds)
+  
+  // Check if the ID is already in the list
+  if existingIds.contains(id) {
+    return false
+  } else {
+    var updatedIds = existingIds
+    updatedIds.append(id)
+    
+    // Ensure only the last ids are stored
+    if updatedIds.count > maxStoredIds {
+      updatedIds.removeFirst(updatedIds.count - maxStoredIds)
+    }
+    
+    // Store the notification IDs array as a serialized JSON string
+    if let jsonData = try? JSONEncoder().encode(updatedIds) {
+      mmkv?.set(jsonData, forKey: key)
+    }
+    
+    print("== updatedIds:", updatedIds)
+    
+    // Should a notification be sent
+    return true
+  }
+}
+
 func handleNotificationAsync(contentHandler: ((UNNotificationContent) -> Void), bestAttemptContent: UNMutableNotificationContent?) async {
   initSentry()
   var shouldIncrementBadge = false
+  var messageId = "";
   
   if let bestAttemptContent = bestAttemptContent {    
     if var body = bestAttemptContent.userInfo["body"] as? [String: Any], let contentTopic = body["contentTopic"] as? String, let encodedMessage = body["message"] as? String, let account = body["account"] as? String {
@@ -88,6 +134,20 @@ func handleNotificationAsync(contentHandler: ((UNNotificationContent) -> Void), 
           var conversationTitle = getSavedConversationTitle(contentTopic: contentTopic);
           let sentViaConverse = body["sentViaConverse"] as? Bool ?? false;
           let decodedMessageResult = await decodeConversationMessage(xmtpClient: xmtpClient!, envelope: envelope, sentViaConverse: sentViaConverse)
+          
+          let conversation = await getPersistedConversation(xmtpClient: xmtpClient!, contentTopic: envelope.contentTopic);
+          if (conversation != nil) {
+            do {
+              print("[NotificationExtension] Decoding message...")
+              let decodedMessage = try conversation!.decode(envelope)
+              print("== decodedMessage.id:", decodedMessage.id)
+              messageId = decodedMessage.id
+            } catch {
+              sentryTrackMessage(message: "NOTIFICATION_DECODING_ERROR", extras: ["error": error, "envelope": envelope])
+              print("[NotificationExtension] ERROR WHILE DECODING \(error)")
+            }
+          }
+          
           if (decodedMessageResult.senderAddress == xmtpClient?.address || decodedMessageResult.forceIgnore || hasForbiddenPattern(address: decodedMessageResult.senderAddress!)) {
             // Message is from me or a reaction removal or a forbidden address, let's drop it
             print("[NotificationExtension] Not showing a notification")
@@ -109,11 +169,12 @@ func handleNotificationAsync(contentHandler: ((UNNotificationContent) -> Void), 
       }
     }
     
-    if shouldIncrementBadge {
-      incrementBadge(for: bestAttemptContent)
-    }
+    let showNotification = shouldShowNotification(for: messageId)
     
-    contentHandler(bestAttemptContent)
+    if (shouldIncrementBadge && showNotification) {
+      incrementBadge(for: bestAttemptContent)
+      contentHandler(bestAttemptContent)
+    }
   }
 }
 
