@@ -2,8 +2,9 @@ package com.converse.dev
 import android.content.Context
 import android.util.Log
 import com.beust.klaxon.Klaxon
-
-import com.tencent.mmkv.MMKV;
+import com.tencent.mmkv.MMKV
+import org.json.JSONArray
+import org.json.JSONException
 
 private var mmkvInstance:MMKV? = null;
 
@@ -50,4 +51,27 @@ fun getBadge(appContext: Context): Int {
 fun setBadge(appContext: Context, badge: Int) {
     val mmkv = getMmkv(appContext)
     mmkv?.putInt("notifications-badge", badge)
+}
+
+fun getShownNotificationIds(appContext: Context): List<String> {
+    val mmkv = getMmkv(appContext)
+    val jsonData = mmkv?.decodeString("notification-ids") ?: return listOf()
+
+    val idList = mutableListOf<String>()
+    try {
+        val jsonArray = JSONArray(jsonData)
+        for (i in 0 until jsonArray.length()) {
+            idList.add(jsonArray.getString(i))
+        }
+    } catch (e: JSONException) {
+        e.printStackTrace()
+    }
+
+    return idList
+}
+
+fun setShownNotificationIds(appContext: Context, ids: List<String>) {
+    val mmkv = getMmkv(appContext)
+    val jsonArray = JSONArray(ids)
+    mmkv?.encode("notification-ids", jsonArray.toString())
 }
