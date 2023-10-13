@@ -5,6 +5,7 @@ import android.content.Context
 import android.util.Log
 import android.view.View
 import com.beust.klaxon.Klaxon
+import com.converse.dev.xmtp.getPersistedConversation
 import com.converse.dev.xmtp.getXmtpClient
 import com.converse.dev.xmtp.handleNewConversationV2Notification
 import com.converse.dev.xmtp.handleNewMessageNotification
@@ -28,10 +29,12 @@ import expo.modules.notifications.service.NotificationsService
 import expo.modules.securestore.SecureStoreModule
 import me.leolin.shortcutbadger.ShortcutBadger
 import org.json.JSONObject
+import org.koin.core.component.getScopeId
 import org.xmtp.android.library.*
 import org.xmtp.android.library.messages.EnvelopeBuilder
 import java.util.*
 import org.xmtp.android.library.codecs.*
+import org.xmtp.proto.message.contents.decodedMessage
 
 class PushNotificationsService : FirebaseMessagingService() {
     companion object {
@@ -40,10 +43,13 @@ class PushNotificationsService : FirebaseMessagingService() {
         lateinit var asyncStorageModule: AsyncStorageModule
     }
 
+    private lateinit var notificationHandler: NotificationHandler
+
     override fun onCreate() {
         super.onCreate()
         initSecureStore()
         initAsyncStorage()
+        notificationHandler = NotificationHandler()
         initSentry(this)
     }
 
@@ -96,12 +102,26 @@ class PushNotificationsService : FirebaseMessagingService() {
                 showNotification(notificationToShow.first, notificationToShow.second, notificationToShow.third)
             }
         }
-        Log.d(TAG, "reached the shouldIncrementBadge if statement")
-        if (shouldIncrementBadge) {
+
+        Log.d(TAG, "reached the shouldIncrementBadge & showNotification if statement")
+
+        val conversation = getPersistedConversation(xmtpClient, envelope.contentTopic)
+        if (conversation === null) {
+            Log.d(TAG, "No conversation found for ${envelope.contentTopic}")
+            return
+        }
+
+        val decodedMessage = conversation.decode(envelope)
+        Log.d("NotificationHandler", "decodedMessage.id: ${decodedMessage.id}")
+        val showNotification = notificationHandler.shouldShowNotification(this, decodedMessage.id)
+
+        if (shouldIncrementBadge && showNotification) {
             Log.d(TAG, "shouldIncrementBadge: true!")
             val newBadgeCount = getBadge(this) + 1
             setBadge(this, newBadgeCount)
             ShortcutBadger.applyCount(this, newBadgeCount)
+        } else {
+            return
         }
     }
 
