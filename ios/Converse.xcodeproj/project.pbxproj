@@ -28,6 +28,7 @@
 		B7969B4A79FE4F9F8C52019D /* noop-file.swift in Sources */ = {isa = PBXBuildFile; fileRef = 68FED7E170C7437EB719C8C6 /* noop-file.swift */; };
 		BB2F792D24A3F905000567C9 /* Expo.plist in Resources */ = {isa = PBXBuildFile; fileRef = BB2F792C24A3F905000567C9 /* Expo.plist */; };
 		D3EF93E3E8AC8FD19D8613F4 /* Pods_Converse.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7D42F9B3AC04086D45BE101C /* Pods_Converse.framework */; };
+		DA84913A2AD94AED00288FE0 /* NotificationHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA8491392AD94AED00288FE0 /* NotificationHandler.swift */; };
 		DAED85CD84A6D9562C6C5FDA /* Pods_ConverseNotificationExtension.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B3EE1C140A18643A7F1C1809 /* Pods_ConverseNotificationExtension.framework */; };
 /* End PBXBuildFile section */
 
@@ -85,6 +86,7 @@
 		AA286B85B6C04FC6940260E9 /* SplashScreen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; name = SplashScreen.storyboard; path = Converse/SplashScreen.storyboard; sourceTree = "<group>"; };
 		B3EE1C140A18643A7F1C1809 /* Pods_ConverseNotificationExtension.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_ConverseNotificationExtension.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		BB2F792C24A3F905000567C9 /* Expo.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Expo.plist; sourceTree = "<group>"; };
+		DA8491392AD94AED00288FE0 /* NotificationHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationHandler.swift; sourceTree = "<group>"; };
 		ED297162215061F000B7C4FE /* JavaScriptCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = JavaScriptCore.framework; path = System/Library/Frameworks/JavaScriptCore.framework; sourceTree = SDKROOT; };
 		FAC715A2D49A985799AEE119 /* ExpoModulesProvider.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ExpoModulesProvider.swift; path = "Pods/Target Support Files/Pods-Converse/ExpoModulesProvider.swift"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -150,6 +152,7 @@
 			children = (
 				4C2440D52A9C8D3C004F31A3 /* Xmtp */,
 				4C3F6104295C9038007A969B /* ConverseNotificationExtension.entitlements */,
+				DA8491392AD94AED00288FE0 /* NotificationHandler.swift */,
 				4C65044C295C7C1F00C5A40F /* NotificationService.swift */,
 				4CBD67172A9CF7C30010C648 /* Sentry.swift */,
 				4CBD671B2A9D08050010C648 /* Utils.swift */,
@@ -308,7 +311,7 @@
 			);
 			mainGroup = 83CBB9F61A601CBA00E9B192;
 			packageReferences = (
-				4C31F4EC29AF887B0032D062 /* XCRemoteSwiftPackageReference "Alamofire.git" */,
+				4C31F4EC29AF887B0032D062 /* XCRemoteSwiftPackageReference "Alamofire" */,
 			);
 			productRefGroup = 83CBBA001A601CBA00E9B192 /* Products */;
 			projectDirPath = "";
@@ -520,6 +523,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				4C2440DB2A9C8E30004F31A3 /* MMKV.swift in Sources */,
+				DA84913A2AD94AED00288FE0 /* NotificationHandler.swift in Sources */,
 				4C65044D295C7C1F00C5A40F /* NotificationService.swift in Sources */,
 				4C2440D42A9C8CFE004F31A3 /* Client.swift in Sources */,
 				4C2440D22A9C8C5A004F31A3 /* Datatypes.swift in Sources */,
@@ -781,8 +785,8 @@
 					"$(inherited)",
 					"-Wl",
 					"-ld_classic",
-					" ",
-					"-Wl -ld_classic ",
+					"-Wl",
+					"-ld_classic",
 				);
 				REACT_NATIVE_PATH = "${PODS_ROOT}/../../node_modules/react-native";
 				SDKROOT = iphoneos;
@@ -855,8 +859,8 @@
 					"$(inherited)",
 					"-Wl",
 					"-ld_classic",
-					" ",
-					"-Wl -ld_classic ",
+					"-Wl",
+					"-ld_classic",
 				);
 				REACT_NATIVE_PATH = "${PODS_ROOT}/../../node_modules/react-native";
 				SDKROOT = iphoneos;
@@ -897,7 +901,7 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
-		4C31F4EC29AF887B0032D062 /* XCRemoteSwiftPackageReference "Alamofire.git" */ = {
+		4C31F4EC29AF887B0032D062 /* XCRemoteSwiftPackageReference "Alamofire" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/Alamofire/Alamofire.git";
 			requirement = {
@@ -910,7 +914,7 @@
 /* Begin XCSwiftPackageProductDependency section */
 		4C31F4ED29AF887B0032D062 /* Alamofire */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 4C31F4EC29AF887B0032D062 /* XCRemoteSwiftPackageReference "Alamofire.git" */;
+			package = 4C31F4EC29AF887B0032D062 /* XCRemoteSwiftPackageReference "Alamofire" */;
 			productName = Alamofire;
 		};
 /* End XCSwiftPackageProductDependency section */
