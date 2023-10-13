@@ -208,14 +208,14 @@ export const initChatStore = (account: string) => {
                 const existingConversation = state.conversations[oldTopic];
                 const oldMessages = existingConversation.messages;
                 const oldMessagesIds = existingConversation.messagesIds;
-                const oldhasOneMessageFromMe =
+                const oldHasOneMessageFromMe =
                   existingConversation.hasOneMessageFromMe;
                 newState.conversations[conversation.topic] = {
                   ...conversation,
                   lastUpdateAt: now(),
                   messages: oldMessages,
                   messagesIds: oldMessagesIds,
-                  hasOneMessageFromMe: oldhasOneMessageFromMe,
+                  hasOneMessageFromMe: oldHasOneMessageFromMe,
                 };
                 newState.lastUpdateAt = now();
 
