@@ -119,6 +119,9 @@ func handleNotificationAsync(contentHandler: ((UNNotificationContent) -> Void), 
     if (shouldIncrementBadge && showNotification) {
       incrementBadge(for: bestAttemptContent)
       contentHandler(bestAttemptContent)
+    } else {
+      contentHandler(UNNotificationContent())
+      return;
     }
   }
 }
