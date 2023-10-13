@@ -113,8 +113,9 @@ export const upgradePendingConversationsIfNeeded = async (
     if (
       !alreadyConversationInDbWithConversationId ||
       alreadyConversationInDbWithConversationId.topic === conversation.topic
-    )
-      return;
+    ) {
+      continue;
+    }
 
     // Save this one to db
     await upsertRepository(
