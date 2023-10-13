@@ -47,7 +47,6 @@ export default function ChatConsent() {
   // Determine whether to show the consent window based on various conditions
   const shouldShowConsentWindow =
     conversation &&
-    conversation.messages instanceof Map &&
     conversation.messages.size > 0 &&
     thisTopicStatus !== "consented" &&
     thisPeerStatus !== "consented" &&
