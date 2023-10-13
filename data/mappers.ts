@@ -80,6 +80,7 @@ export const xmtpConversationToDb = (
 });
 
 export const xmtpConversationFromDb = (
+  account: string,
   dbConversation: Conversation,
   socials?: ProfileSocials
 ): XmtpConversation => {
@@ -101,6 +102,9 @@ export const xmtpConversationFromDb = (
   const unsDomain = socials?.unstoppableDomains?.find((d) => d.isPrimary)
     ?.domain;
   const conversationTitle = lensHandle || ensName || unsDomain;
+  const hasOneMessageFromMe = !!dbConversation.messages?.find(
+    (m) => m.senderAddress === account
+  );
 
   return {
     topic: dbConversation.topic,
@@ -113,5 +117,6 @@ export const xmtpConversationFromDb = (
     readUntil: dbConversation.readUntil || 0,
     pending: dbConversation.pending,
     version: dbConversation.version,
+    hasOneMessageFromMe,
   };
 };

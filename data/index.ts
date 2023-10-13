@@ -22,7 +22,11 @@ export const loadDataToContext = async (account: string) => {
     .getState()
     .setConversations(
       conversationsWithMessages.map((c) =>
-        xmtpConversationFromDb(c, profilesByAddress[c.peerAddress]?.socials)
+        xmtpConversationFromDb(
+          account,
+          c,
+          profilesByAddress[c.peerAddress]?.socials
+        )
       )
     );
 };

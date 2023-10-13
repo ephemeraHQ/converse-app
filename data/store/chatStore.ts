@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
 
+import { ConversationWithLastMessagePreview } from "../../utils/conversation";
 import { lastValueInMap } from "../../utils/map";
 import { zustandMMKVStorage } from "../../utils/mmkv";
 import { subscribeToNotifications } from "../../utils/notifications";
@@ -29,6 +30,7 @@ export type XmtpConversation = {
   conversationTitle?: string | null;
   messageDraft?: string;
   readUntil: number;
+  hasOneMessageFromMe?: boolean;
   pending: boolean;
   version: string;
 };
@@ -55,6 +57,11 @@ export type XmtpMessage = XmtpProtocolMessage & {
   lastUpdateAt?: number;
 };
 
+type ConversationsListItems = {
+  conversationsInbox: ConversationWithLastMessagePreview[];
+  conversationsRequests: ConversationWithLastMessagePreview[];
+};
+
 export type ChatStoreType = {
   conversations: {
     [topic: string]: XmtpConversationWithUpdate;
@@ -71,7 +78,10 @@ export type ChatStoreType = {
   localClientConnected: boolean;
   resyncing: boolean;
   reconnecting: boolean;
-  deletedTopics: { [topic: string]: boolean };
+  topicsStatus: { [topic: string]: "deleted" | "consented" };
+
+  sortedConversationsWithPreview: ConversationsListItems;
+  setSortedConversationsWithPreview: (items: ConversationsListItems) => void;
 
   searchQuery: string;
   setSearchQuery: (query: string) => void;
@@ -102,7 +112,10 @@ export type ChatStoreType = {
   setResyncing: (syncing: boolean) => void;
   setReconnecting: (reconnecting: boolean) => void;
   setLastSyncedAt: (synced: number) => void;
-  markTopicsAsDeleted: (topics: string[]) => void;
+
+  setTopicsStatus: (topicsStatus: {
+    [topic: string]: "deleted" | "consented";
+  }) => void;
 };
 
 const now = () => new Date().getTime();
@@ -113,7 +126,8 @@ export const initChatStore = (account: string) => {
       (set) =>
         ({
           conversations: {},
-          deletedTopics: {},
+          lastSyncedAt: 0,
+          topicsStatus: {},
           openedConversationTopic: "",
           setOpenedConversationTopic: (topic) =>
             set((state) => {
@@ -127,6 +141,12 @@ export const initChatStore = (account: string) => {
               return newState;
             }),
           conversationsMapping: {},
+          sortedConversationsWithPreview: {
+            conversationsInbox: [],
+            conversationsRequests: [],
+          },
+          setSortedConversationsWithPreview: (items) =>
+            set(() => ({ sortedConversationsWithPreview: items })),
           lastUpdateAt: 0,
           searchQuery: "",
           setSearchQuery: (q) => set(() => ({ searchQuery: q })),
@@ -152,6 +172,10 @@ export const initChatStore = (account: string) => {
                   pending:
                     c.pending || state.conversations[c.topic]?.pending || false,
                   lastUpdateAt: now(),
+                  hasOneMessageFromMe:
+                    c.hasOneMessageFromMe ||
+                    state.conversations[c.topic]?.hasOneMessageFromMe ||
+                    false,
                 };
               });
 
@@ -184,11 +208,14 @@ export const initChatStore = (account: string) => {
                 const existingConversation = state.conversations[oldTopic];
                 const oldMessages = existingConversation.messages;
                 const oldMessagesIds = existingConversation.messagesIds;
+                const oldHasOneMessageFromMe =
+                  existingConversation.hasOneMessageFromMe;
                 newState.conversations[conversation.topic] = {
                   ...conversation,
                   lastUpdateAt: now(),
                   messages: oldMessages,
                   messagesIds: oldMessagesIds,
+                  hasOneMessageFromMe: oldHasOneMessageFromMe,
                 };
                 newState.lastUpdateAt = now();
 
@@ -218,6 +245,7 @@ export const initChatStore = (account: string) => {
           setMessages: (messagesToSet) =>
             set((state) => {
               let isUpdated = false;
+              let shouldResubscribe = false;
               const newState = {
                 ...state,
               };
@@ -234,6 +262,15 @@ export const initChatStore = (account: string) => {
                 }
 
                 const conversation = newState.conversations[topic];
+                if (
+                  message.senderAddress === account &&
+                  !conversation.hasOneMessageFromMe
+                ) {
+                  conversation.hasOneMessageFromMe = true;
+                  conversation.lastUpdateAt = now();
+                  isUpdated = true;
+                  shouldResubscribe = true;
+                }
                 // Default message status is sent
                 if (!message.status) message.status = "sent";
                 const alreadyMessage = conversation.messages.get(message.id);
@@ -295,6 +332,12 @@ export const initChatStore = (account: string) => {
 
               if (isUpdated) {
                 newState.lastUpdateAt = now();
+              }
+
+              if (shouldResubscribe) {
+                setImmediate(() => {
+                  subscribeToNotifications(account);
+                });
               }
 
               return newState;
@@ -405,16 +448,16 @@ export const initChatStore = (account: string) => {
             }),
           setLastSyncedAt: (synced: number) =>
             set(() => ({ lastSyncedAt: synced })),
-          markTopicsAsDeleted: (topics: string[]) =>
+          setTopicsStatus: (topicsStatus: {
+            [topic: string]: "deleted" | "consented";
+          }) =>
             set((state) => {
-              const newDeletedTopics = { ...state.deletedTopics };
-              topics.forEach((t) => {
-                newDeletedTopics[t] = true;
-              });
               setImmediate(() => {
                 subscribeToNotifications(account);
               });
-              return { deletedTopics: newDeletedTopics };
+              return {
+                topicsStatus: { ...state.topicsStatus, ...topicsStatus },
+              };
             }),
         }) as ChatStoreType,
       {
@@ -424,8 +467,25 @@ export const initChatStore = (account: string) => {
         partialize: (state) => ({
           initialLoadDoneOnce: state.initialLoadDoneOnce,
           lastSyncedAt: state.lastSyncedAt,
-          deletedTopics: state.deletedTopics,
+          topicsStatus: state.topicsStatus,
         }),
+        version: 1,
+        migrate: (persistedState: any, version: number): ChatStoreType => {
+          console.log("Zustand migration version:", version);
+          // Migration from version 0: Convert 'deletedTopics' to 'topicsStatus'
+          if (version === 0 && persistedState.deletedTopics) {
+            persistedState.topicsStatus = {};
+            for (const [topic, isDeleted] of Object.entries(
+              persistedState.deletedTopics
+            )) {
+              if (isDeleted) {
+                persistedState.topicsStatus[topic] = "deleted";
+              }
+            }
+            delete persistedState.deletedTopics;
+          }
+          return persistedState as ChatStoreType;
+        },
       }
     )
   );
