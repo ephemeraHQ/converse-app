@@ -31,9 +31,12 @@ func hasForbiddenPattern(address: String) -> Bool {
 }
 
 func incrementBadge(for content: UNMutableNotificationContent) {
-    let newBadgeCount = getBadge() + 1
-    setBadge(newBadgeCount)
-    content.badge = NSNumber(value: newBadgeCount)
+  
+  let newBadgeCount = getBadge() + 1
+  setBadge(newBadgeCount)
+  content.badge = NSNumber(value: newBadgeCount)
+  
+  print("== incrementBadge, newBadgeCount: ", newBadgeCount)
 }
 
 func handleNotificationAsync(contentHandler: ((UNNotificationContent) -> Void), bestAttemptContent: UNMutableNotificationContent?) async {
