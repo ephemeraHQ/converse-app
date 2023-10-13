@@ -214,6 +214,7 @@ const ConversationListItem = memo(function ConversationListItem({
         onSwipeableWillClose={() => {
           converseEventEmitter.off("conversationList-scroll", closeSwipeable);
         }}
+        hitSlop={{ left: -60 }}
       >
         {rowItem}
       </Swipeable>
