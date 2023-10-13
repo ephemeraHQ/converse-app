@@ -172,6 +172,10 @@ export const initChatStore = (account: string) => {
                   pending:
                     c.pending || state.conversations[c.topic]?.pending || false,
                   lastUpdateAt: now(),
+                  hasOneMessageFromMe:
+                    c.hasOneMessageFromMe ||
+                    state.conversations[c.topic]?.hasOneMessageFromMe ||
+                    false,
                 };
               });
 
@@ -204,11 +208,14 @@ export const initChatStore = (account: string) => {
                 const existingConversation = state.conversations[oldTopic];
                 const oldMessages = existingConversation.messages;
                 const oldMessagesIds = existingConversation.messagesIds;
+                const oldhasOneMessageFromMe =
+                  existingConversation.hasOneMessageFromMe;
                 newState.conversations[conversation.topic] = {
                   ...conversation,
                   lastUpdateAt: now(),
                   messages: oldMessages,
                   messagesIds: oldMessagesIds,
+                  hasOneMessageFromMe: oldhasOneMessageFromMe,
                 };
                 newState.lastUpdateAt = now();
 
