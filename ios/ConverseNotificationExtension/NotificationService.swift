@@ -9,7 +9,6 @@ import UserNotifications
 import XMTP
 import CryptoKit
 import Alamofire
-import MMKVAppExtension
 
 
 func shortAddress(address: String) -> String {
@@ -29,59 +28,6 @@ func shortAddress(address: String) -> String {
 
 func hasForbiddenPattern(address: String) -> Bool {
   return address.hasPrefix("0x0000") && address.hasSuffix("0000");
-}
-
-func incrementBadge(for content: UNMutableNotificationContent) {
-  
-  let newBadgeCount = getBadge() + 1
-  setBadge(newBadgeCount)
-  content.badge = NSNumber(value: newBadgeCount)
-  
-  print("== incrementBadge, newBadgeCount: ", newBadgeCount)
-}
-
-func shouldShowNotification(for messageId: String?) -> Bool {
-  let maxStoredIds = 10
-  let key = "notificationIds"
-  let mmkv = MMKV.default()
-  
-  guard let id = messageId, !id.isEmpty else {
-    return false
-  }
-  
-  // Retrieve the notification IDs array from the serialized JSON string
-  let existingIds: [String]
-  if let jsonData = mmkv?.data(forKey: key),
-     let ids = try? JSONDecoder().decode([String].self, from: jsonData) {
-    existingIds = ids
-  } else {
-    existingIds = []
-  }
-  
-  print("== existingIds:", existingIds)
-  
-  // Check if the ID is already in the list
-  if existingIds.contains(id) {
-    return false
-  } else {
-    var updatedIds = existingIds
-    updatedIds.append(id)
-    
-    // Ensure only the last ids are stored
-    if updatedIds.count > maxStoredIds {
-      updatedIds.removeFirst(updatedIds.count - maxStoredIds)
-    }
-    
-    // Store the notification IDs array as a serialized JSON string
-    if let jsonData = try? JSONEncoder().encode(updatedIds) {
-      mmkv?.set(jsonData, forKey: key)
-    }
-    
-    print("== updatedIds:", updatedIds)
-    
-    // Should a notification be sent
-    return true
-  }
 }
 
 func handleNotificationAsync(contentHandler: ((UNNotificationContent) -> Void), bestAttemptContent: UNMutableNotificationContent?) async {
@@ -140,7 +86,6 @@ func handleNotificationAsync(contentHandler: ((UNNotificationContent) -> Void), 
             do {
               print("[NotificationExtension] Decoding message...")
               let decodedMessage = try conversation!.decode(envelope)
-              print("== decodedMessage.id:", decodedMessage.id)
               messageId = decodedMessage.id
             } catch {
               sentryTrackMessage(message: "NOTIFICATION_DECODING_ERROR", extras: ["error": error, "envelope": envelope])
