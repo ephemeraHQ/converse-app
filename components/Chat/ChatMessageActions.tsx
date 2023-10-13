@@ -16,7 +16,7 @@ import {
   useCurrentAccount,
   useSettingsStore,
 } from "../../data/store/accountsStore";
-import { blockPeer, reportMessage } from "../../utils/api";
+import { blockPeers, reportMessage } from "../../utils/api";
 import { isAttachmentMessage } from "../../utils/attachment";
 import { actionSheetColors } from "../../utils/colors";
 import { useConversationContext } from "../../utils/conversation";
@@ -50,7 +50,7 @@ export default function ChatMessageActions({
   const isAttachment = isAttachmentMessage(message.contentType);
   const colorScheme = useColorScheme();
   const userAddress = useCurrentAccount() as string;
-  const setBlockedPeerStatus = useSettingsStore((s) => s.setBlockedPeerStatus);
+  const setPeersStatus = useSettingsStore((s) => s.setPeersStatus);
 
   const report = useCallback(async () => {
     reportMessage({
@@ -70,18 +70,9 @@ export default function ChatMessageActions({
       messageContent: message.content,
       messageSender: message.senderAddress,
     });
-    blockPeer({
-      peerAddress: message.senderAddress,
-      blocked: true,
-      account: currentAccount(),
-    });
-    setBlockedPeerStatus(message.senderAddress, true);
-  }, [
-    message.content,
-    message.id,
-    message.senderAddress,
-    setBlockedPeerStatus,
-  ]);
+    blockPeers(currentAccount(), [message.senderAddress]);
+    setPeersStatus({ [message.senderAddress]: "blocked" });
+  }, [message.content, message.id, message.senderAddress, setPeersStatus]);
 
   const showMessageReportActionSheet = useCallback(() => {
     const methods = {

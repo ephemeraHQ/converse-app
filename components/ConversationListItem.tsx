@@ -7,7 +7,6 @@ import {
   StyleSheet,
   Platform,
   TouchableHighlight,
-  Alert,
 } from "react-native";
 import { RectButton } from "react-native-gesture-handler";
 import Swipeable from "react-native-gesture-handler/Swipeable";
@@ -16,12 +15,16 @@ import { TouchableRipple } from "react-native-paper";
 import Checkmark from "../assets/checkmark.svg";
 import Clock from "../assets/clock.svg";
 import Picto from "../components/Picto/Picto";
-import { currentAccount, useChatStore } from "../data/store/accountsStore";
-import { XmtpConversation } from "../data/store/chatStore";
+import {
+  currentAccount,
+  useChatStore,
+  useSettingsStore,
+} from "../data/store/accountsStore";
 import { NavigationParamList } from "../screens/Navigation/Navigation";
-import { deleteTopic } from "../utils/api";
+import { deleteTopics, blockPeers } from "../utils/api";
 import {
   actionSecondaryColor,
+  actionSheetColors,
   backgroundColor,
   badgeColor,
   clickedItemBackgroundColor,
@@ -31,16 +34,17 @@ import {
   textSecondaryColor,
 } from "../utils/colors";
 import { getRelativeDateTime } from "../utils/date";
+import { isDesktop } from "../utils/device";
 import { converseEventEmitter } from "../utils/events";
-import { shortAddress } from "../utils/str";
+import { showActionSheetWithOptions } from "./StateHandlers/ActionSheetStateHandler";
 
 type ConversationListItemProps = {
   navigation: NativeStackNavigationProp<NavigationParamList, "Chats">;
-  conversation: XmtpConversation;
   colorScheme: ColorSchemeName;
   conversationTime: number | undefined;
   conversationTopic: string;
   conversationName: string;
+  conversationPeerAddress: string;
   lastMessagePreview: string | undefined;
   lastMessageFromMe: boolean;
   lastMessageStatus?: "delivered" | "error" | "seen" | "sending" | "sent";
@@ -53,15 +57,16 @@ const ConversationListItem = memo(function ConversationListItem({
   conversationTopic,
   conversationTime,
   conversationName,
+  conversationPeerAddress,
   lastMessagePreview,
   lastMessageStatus,
   lastMessageFromMe,
   showUnread,
-  conversation,
 }: ConversationListItemProps) {
   const styles = getStyles(colorScheme);
   const timeToShow = getRelativeDateTime(conversationTime);
-  const markTopicsAsDeleted = useChatStore((s) => s.markTopicsAsDeleted);
+  const setTopicsStatus = useChatStore((s) => s.setTopicsStatus);
+  const setPeersStatus = useSettingsStore((s) => s.setPeersStatus);
   const [selected, setSelected] = useState(false);
   const resetSelected = useCallback(() => {
     setSelected(false);
@@ -122,24 +127,27 @@ const ConversationListItem = memo(function ConversationListItem({
       <RectButton
         style={[styles.rightAction]}
         onPress={() => {
-          Alert.alert(
-            `Delete chat with ${shortAddress(conversation.peerAddress)}?`,
-            undefined,
-            [
-              {
-                text: "Cancel",
-                onPress: closeSwipeable,
-              },
-              {
-                text: "Delete",
-                style: "destructive",
-                isPreferred: true,
-                onPress: () => {
-                  deleteTopic(currentAccount(), conversationTopic);
-                  markTopicsAsDeleted([conversationTopic]);
-                },
-              },
-            ]
+          showActionSheetWithOptions(
+            {
+              options: ["Delete", "Delete and block", "Cancel"],
+              cancelButtonIndex: 2,
+              destructiveButtonIndex: [0, 1],
+              title: `Delete chat with ${conversationPeerAddress}?`,
+              ...actionSheetColors(colorScheme),
+            },
+            (selectedIndex?: number) => {
+              if (selectedIndex === 0) {
+                deleteTopics(currentAccount(), [conversationTopic]);
+                setTopicsStatus({ [conversationTopic]: "deleted" });
+              } else if (selectedIndex === 1) {
+                deleteTopics(currentAccount(), [conversationTopic]);
+                setTopicsStatus({ [conversationTopic]: "deleted" });
+                blockPeers(currentAccount(), [conversationPeerAddress]);
+                setPeersStatus({ [conversationPeerAddress]: "blocked" });
+              } else {
+                closeSwipeable();
+              }
+            }
           );
         }}
       >
@@ -151,10 +159,12 @@ const ConversationListItem = memo(function ConversationListItem({
       </RectButton>
     );
   }, [
-    closeSwipeable,
-    conversation.peerAddress,
     conversationTopic,
-    markTopicsAsDeleted,
+    conversationPeerAddress,
+    setTopicsStatus,
+    setPeersStatus,
+    closeSwipeable,
+    colorScheme,
     styles.rightAction,
   ]);
 
@@ -204,6 +214,7 @@ const ConversationListItem = memo(function ConversationListItem({
         onSwipeableWillClose={() => {
           converseEventEmitter.off("conversationList-scroll", closeSwipeable);
         }}
+        hitSlop={{ left: -60 }}
       >
         {rowItem}
       </Swipeable>
@@ -216,7 +227,7 @@ export default ConversationListItem;
 const getStyles = (colorScheme: ColorSchemeName) =>
   StyleSheet.create({
     rowSeparator: {
-      borderBottomWidth: 0.25,
+      borderBottomWidth: isDesktop ? 0.5 : 0.25,
       marginBottom: 0.5,
       borderBottomColor: listItemSeparatorColor(colorScheme),
       marginLeft: 32,

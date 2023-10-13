@@ -1,20 +1,19 @@
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import { FlashList } from "@shopify/flash-list";
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Platform,
   StyleSheet,
   useColorScheme,
   Text,
   View,
-  ScrollView,
   TextInput,
 } from "react-native";
 import { gestureHandlerRootHOC } from "react-native-gesture-handler";
 import { SearchBarCommands } from "react-native-screens";
 
+import ConversationFlashList from "../components/ConversationFlashList";
 import NewConversationButton from "../components/ConversationList/NewConversationButton";
-import ConversationListItem from "../components/ConversationListItem";
+import RequestsButton from "../components/ConversationList/RequestsButton";
 import EphemeralAccountBanner from "../components/EphemeralAccountBanner";
 import InitialLoad from "../components/InitialLoad";
 import Recommendations from "../components/Recommendations/Recommendations";
@@ -41,7 +40,6 @@ import {
 } from "../utils/conversation";
 import { converseEventEmitter } from "../utils/events";
 import { pick } from "../utils/objects";
-import { conversationName } from "../utils/str";
 import { useHeaderSearchBar } from "./Navigation/ConversationListNav";
 import { NavigationParamList } from "./Navigation/Navigation";
 
@@ -57,15 +55,15 @@ type Props = {
 } & NativeStackScreenProps<NavigationParamList, "Chats">;
 
 function ConversationList({ navigation, route, searchBarRef }: Props) {
-  const colorScheme = useColorScheme();
   const styles = useStyles();
   const {
     conversations,
     lastUpdateAt,
     searchQuery,
     searchBarFocused,
-    deletedTopics,
+    topicsStatus,
     initialLoadDoneOnce,
+    sortedConversationsWithPreview,
   } = useChatStore((s) =>
     pick(s, [
       "initialLoadDoneOnce",
@@ -73,61 +71,36 @@ function ConversationList({ navigation, route, searchBarRef }: Props) {
       "lastUpdateAt",
       "searchQuery",
       "searchBarFocused",
-      "deletedTopics",
+      "topicsStatus",
+      "sortedConversationsWithPreview",
     ])
   );
-  const { blockedPeers, ephemeralAccount } = useSettingsStore((s) =>
-    pick(s, ["blockedPeers", "ephemeralAccount"])
+
+  const { peersStatus, ephemeralAccount } = useSettingsStore((s) =>
+    pick(s, ["peersStatus", "ephemeralAccount"])
   );
   const userAddress = useCurrentAccount() as string;
-  const profiles = useProfilesStore((state) => state.profiles);
+  const profiles = useProfilesStore((s) => s.profiles);
   const [flatListItems, setFlatListItems] = useState<FlatListItem[]>([]);
-  const [sortedConversations, setSortedConversations] = useState<
-    ConversationWithLastMessagePreview[]
-  >([]);
-  const accountPrimaryENS = profiles[userAddress]?.socials.ensNames?.find(
-    (e) => e.isPrimary
-  )?.name;
 
   // Display logic
   const showInitialLoad = !initialLoadDoneOnce && flatListItems.length <= 1;
-  const showNoResult = flatListItems.length === 0 && searchQuery;
+  const showNoResult = flatListItems.length === 0 && !!searchQuery;
 
   // Welcome screen
   const showWelcome =
-    !searchQuery && !searchBarFocused && sortedConversations.length === 0;
+    !searchQuery &&
+    !searchBarFocused &&
+    sortedConversationsWithPreview.conversationsInbox.length === 0;
 
   useEffect(() => {
-    const sortedConversations = sortAndComputePreview(
+    sortAndComputePreview(
       conversations,
       userAddress,
-      deletedTopics
+      topicsStatus,
+      peersStatus
     );
-    setSortedConversations(sortedConversations);
-  }, [userAddress, conversations, lastUpdateAt, deletedTopics]);
-
-  useEffect(() => {
-    const listItems = getConversationListItemsToDisplay(
-      ephemeralAccount,
-      searchQuery,
-      sortedConversations,
-      profiles
-    );
-    setFlatListItems(listItems);
-  }, [ephemeralAccount, searchQuery, sortedConversations, profiles]);
-
-  // Search bar hook
-  useHeaderSearchBar({
-    navigation,
-    route,
-    searchBarRef,
-  });
-
-  useEffect(() => {
-    if (accountPrimaryENS && Platform.OS === "ios") {
-      navigation.setOptions({ headerBackTitle: accountPrimaryENS });
-    }
-  }, [accountPrimaryENS, navigation]);
+  }, [conversations, userAddress, topicsStatus, peersStatus, lastUpdateAt]);
 
   useEffect(() => {
     if (!initialLoadDoneOnce) {
@@ -136,143 +109,86 @@ function ConversationList({ navigation, route, searchBarRef }: Props) {
     }
   }, [initialLoadDoneOnce]);
 
-  const keyExtractor = useCallback((item: FlatListItem) => {
-    return item.topic;
-  }, []);
+  useEffect(() => {
+    const listItems = getConversationListItemsToDisplay(
+      searchQuery,
+      sortedConversationsWithPreview.conversationsInbox,
+      profiles
+    );
+    setFlatListItems(listItems);
+  }, [
+    searchQuery,
+    sortedConversationsWithPreview.conversationsInbox,
+    profiles,
+  ]);
 
-  const renderItem = useCallback(
-    ({ item }: { item: FlatListItem }) => {
-      if (item.topic === "welcome") {
-        return <Welcome ctaOnly navigation={navigation} route={route} />;
-      } else if (item.topic === "noresult") {
-        return <NoResult navigation={navigation} />;
-      } else if (item.topic === "ephemeral") {
-        return <EphemeralAccountBanner />;
-      }
-      const conversation = item as ConversationWithLastMessagePreview;
-      const lastMessagePreview = conversation.lastMessagePreview;
-      return (
-        <ConversationListItem
-          navigation={navigation}
-          conversation={conversation}
-          colorScheme={colorScheme}
-          conversationTopic={conversation.topic}
-          conversationTime={
-            lastMessagePreview?.message?.sent || conversation.createdAt
-          }
-          conversationName={conversationName(conversation)}
-          showUnread={
-            !!(
-              initialLoadDoneOnce &&
-              lastMessagePreview &&
-              conversation.readUntil < lastMessagePreview.message.sent &&
-              lastMessagePreview.message.senderAddress ===
-                conversation.peerAddress
-            )
-          }
-          lastMessagePreview={
-            blockedPeers[conversation.peerAddress.toLowerCase()]
-              ? "This user is blocked"
-              : lastMessagePreview
-              ? lastMessagePreview.contentPreview
-              : ""
-          }
-          lastMessageStatus={lastMessagePreview?.message?.status}
-          lastMessageFromMe={
-            !!lastMessagePreview &&
-            lastMessagePreview.message?.senderAddress === userAddress
-          }
-        />
-      );
-    },
-    [
-      colorScheme,
-      navigation,
-      route,
-      userAddress,
-      blockedPeers,
-      initialLoadDoneOnce,
-    ]
-  );
+  // Search bar hook
+  useHeaderSearchBar({
+    navigation,
+    route,
+    searchBarRef,
+  });
 
-  const SearchTitleHeader = () => {
-    const styles = useStyles();
-    return (
-      <View style={styles.searchTitleContainer}>
+  const ListHeaderComponents: React.ReactElement[] = [];
+  const showSearchTitleHeader =
+    (Platform.OS === "ios" && searchBarFocused && !showNoResult) ||
+    (Platform.OS === "android" && searchBarFocused);
+  if (showSearchTitleHeader) {
+    ListHeaderComponents.push(
+      <View key="search" style={styles.searchTitleContainer}>
         <Text style={styles.searchTitle}>Chats</Text>
       </View>
     );
-  };
-
-  let ListHeaderComponent;
-  if (Platform.OS === "ios") {
-    ListHeaderComponent =
-      searchBarFocused && !showNoResult ? <SearchTitleHeader /> : null;
-  } else {
-    ListHeaderComponent = searchBarFocused ? <SearchTitleHeader /> : null;
+  } else if (sortedConversationsWithPreview.conversationsRequests.length > 0) {
+    ListHeaderComponents.push(
+      <RequestsButton
+        key="requests"
+        navigation={navigation}
+        route={route}
+        requestsCount={
+          sortedConversationsWithPreview.conversationsRequests.length
+        }
+      />
+    );
   }
 
-  let screenToShow: JSX.Element = (
-    <View style={styles.container}>
-      <View style={styles.conversationList}>
-        <FlashList
-          keyboardShouldPersistTaps="handled"
-          onMomentumScrollBegin={() => {
-            converseEventEmitter.emit("conversationList-scroll");
-            searchBarRef.current?.blur();
-          }}
-          onScrollBeginDrag={() => {
-            converseEventEmitter.emit("conversationList-scroll");
-            searchBarRef.current?.blur();
-          }}
-          contentInsetAdjustmentBehavior="automatic"
-          data={flatListItems}
-          extraData={[
-            colorScheme,
-            navigation,
-            route,
-            userAddress,
-            blockedPeers,
-            initialLoadDoneOnce,
-            lastUpdateAt,
-          ]}
-          renderItem={renderItem}
-          keyExtractor={keyExtractor}
-          estimatedItemSize={Platform.OS === "ios" ? 77 : 88}
-          ListHeaderComponent={ListHeaderComponent}
-          ListFooterComponent={
-            showNoResult ? <NoResult navigation={navigation} /> : null
-          }
-        />
-      </View>
-    </View>
-  );
-
+  let ListFooterComponent: React.ReactElement | undefined = undefined;
   if (showInitialLoad) {
-    screenToShow = (
-      <ScrollView
-        contentInsetAdjustmentBehavior="automatic"
-        alwaysBounceVertical={false}
-        style={styles.scrollViewWrapper}
-      >
-        <InitialLoad />
-      </ScrollView>
-    );
+    ListFooterComponent = <InitialLoad />;
   } else if (showWelcome) {
-    screenToShow = (
-      <ScrollView
-        contentInsetAdjustmentBehavior="automatic"
-        alwaysBounceVertical={false}
-        style={styles.scrollViewWrapper}
-      >
-        <Welcome ctaOnly={false} navigation={navigation} route={route} />
-      </ScrollView>
+    ListFooterComponent = (
+      <Welcome ctaOnly={false} navigation={navigation} route={route} />
     );
+  } else {
+    if (ephemeralAccount && !showNoResult && !showSearchTitleHeader) {
+      ListHeaderComponents.push(<EphemeralAccountBanner key="ephemeral" />);
+    }
+    if (!searchQuery) {
+      ListFooterComponent = (
+        <Welcome ctaOnly navigation={navigation} route={route} />
+      );
+    } else if (showNoResult) {
+      ListFooterComponent = <NoResult navigation={navigation} />;
+    }
   }
 
   return (
     <>
-      {screenToShow}
+      <ConversationFlashList
+        route={route}
+        navigation={navigation}
+        onScroll={() => {
+          converseEventEmitter.emit("conversationList-scroll");
+          searchBarRef.current?.blur();
+        }}
+        items={showInitialLoad || showWelcome ? [] : flatListItems}
+        ListHeaderComponent={
+          ListHeaderComponents.length > 0 ? (
+            <>{ListHeaderComponents}</>
+          ) : undefined
+        }
+        ListFooterComponent={ListFooterComponent}
+      />
       <Recommendations navigation={navigation} visibility="HIDDEN" />
       {Platform.OS === "android" && (
         <NewConversationButton navigation={navigation} route={route} />
@@ -286,13 +202,6 @@ export default gestureHandlerRootHOC(ConversationList);
 const useStyles = () => {
   const colorScheme = useColorScheme();
   return StyleSheet.create({
-    container: {
-      flex: 1,
-      backgroundColor: backgroundColor(colorScheme),
-    },
-    conversationList: {
-      flex: 2,
-    },
     searchTitleContainer: {
       ...Platform.select({
         default: {

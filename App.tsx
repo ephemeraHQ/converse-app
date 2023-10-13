@@ -13,7 +13,7 @@ import * as Sentry from "sentry-expo";
 
 import XmtpEngine from "./components/XmtpEngine";
 import config from "./config";
-import { migrateDataIfNeeded } from "./data/refacto";
+import { migrateDataIfNeeded } from "./data/updates/initialUpdates";
 import Main from "./screens/Main";
 import { registerBackgroundFetchTask } from "./utils/background";
 import {

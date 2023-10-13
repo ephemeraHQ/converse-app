@@ -4,18 +4,18 @@ import * as SecureStore from "expo-secure-store";
 import { Platform } from "react-native";
 import RNFS from "react-native-fs";
 
-import config from "../config";
-import { moveFileAndReplace } from "../utils/fileSystem";
-import { saveXmtpKey, secureStoreOptions } from "../utils/keychain";
-import storage from "../utils/mmkv";
-import { sentryTrackMessage } from "../utils/sentry";
-import { getDbPath } from "./db";
+import config from "../../config";
+import { moveFileAndReplace } from "../../utils/fileSystem";
+import { saveXmtpKey, secureStoreOptions } from "../../utils/keychain";
+import storage from "../../utils/mmkv";
+import { sentryTrackMessage } from "../../utils/sentry";
+import { getDbPath } from "../db";
 import {
   TEMPORARY_ACCOUNT_NAME,
   useAccountsStore,
   useChatStore,
   useSettingsStore,
-} from "./store/accountsStore";
+} from "../store/accountsStore";
 
 export const migrateDataIfNeeded = async () => {
   const before = new Date().getTime();

@@ -14,7 +14,7 @@ import {
   useRecommendationsStore,
   useSettingsStore,
 } from "../../data/store/accountsStore";
-import { blockPeer } from "../../utils/api";
+import { consentToPeers } from "../../utils/api";
 import { actionSheetColors, textPrimaryColor } from "../../utils/colors";
 import { useConversationContext } from "../../utils/conversation";
 import { sendMessage } from "../../utils/message";
@@ -34,7 +34,7 @@ export default function ChatPlaceholder({ messagesCount }: Props) {
     useConversationContext(["conversation", "isBlockedPeer", "onReadyToFocus"]);
   const colorScheme = useColorScheme();
   const styles = useStyles();
-  const setBlockedPeerStatus = useSettingsStore((s) => s.setBlockedPeerStatus);
+  const setPeersStatus = useSettingsStore((s) => s.setPeersStatus);
   const recommendationData = useRecommendationsStore((s) =>
     conversation?.peerAddress ? s.frens[conversation.peerAddress] : undefined
   );
@@ -86,12 +86,9 @@ export default function ChatPlaceholder({ messagesCount }: Props) {
                   },
                   (selectedIndex?: number) => {
                     if (selectedIndex === 0 && conversation?.peerAddress) {
-                      blockPeer({
-                        peerAddress: conversation.peerAddress,
-                        blocked: false,
-                        account: currentAccount(),
-                      });
-                      setBlockedPeerStatus(conversation.peerAddress, false);
+                      const { peerAddress } = conversation;
+                      consentToPeers(currentAccount(), [peerAddress]);
+                      setPeersStatus({ [peerAddress]: "consented" });
                     }
                   }
                 );
