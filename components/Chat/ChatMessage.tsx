@@ -18,6 +18,7 @@ import {
   textSecondaryColor,
 } from "../../utils/colors";
 import { getRelativeDate } from "../../utils/date";
+import { isDesktop } from "../../utils/device";
 import { LimitedMap } from "../../utils/objects";
 import { getMessageReactions } from "../../utils/reactions";
 import ClickableText from "../ClickableText";
@@ -100,6 +101,15 @@ function ChatMessage({ message, colorScheme }: Props) {
                 message.fromMe && message.hasPreviousMessageInSeries ? 2 : 18,
             },
           }),
+          {
+            maxWidth: isDesktop
+              ? isAttachment
+                ? 366
+                : 588
+              : isAttachment
+              ? "70%"
+              : "75%",
+          },
         ]}
       >
         {messageContent}
@@ -194,7 +204,6 @@ const useStyles = () => {
     messageBubble: {
       flexShrink: 1,
       flexGrow: 0,
-      maxWidth: "80%",
       minHeight: 36,
       backgroundColor: messageBubbleColor(colorScheme),
       borderRadius: 18,
