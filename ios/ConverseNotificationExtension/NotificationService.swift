@@ -26,8 +26,21 @@ func shortAddress(address: String) -> String {
   return address
 }
 
-func hasForbiddenPattern(address: String) -> Bool {
-  return address.hasPrefix("0x0000") && address.hasSuffix("0000");
+func containsURL(input: String) -> Bool {
+  let pattern = "\\b(?:(?:https?|ftp):\\/\\/|www\\.)?[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}(?:\\/\\S*)?(?:\\?\\S*)?\\b"
+  let regex = try? NSRegularExpression(pattern: pattern, options: .caseInsensitive)
+  let matches = regex?.numberOfMatches(in: input, options: [], range: NSRange(location: 0, length: input.utf16.count))
+  return matches ?? 0 > 0
+}
+
+func isSpam(address: String, message: String, sentViaConverse: Bool) -> Bool {
+  if (address.hasPrefix("0x0000") && address.hasSuffix("0000"))
+      || containsURL(input: message)
+      || !sentViaConverse {
+    return true
+  } else {
+    return false
+  }
 }
 
 func handleNotificationAsync(contentHandler: ((UNNotificationContent) -> Void), bestAttemptContent: UNMutableNotificationContent?) async {
@@ -38,14 +51,25 @@ func handleNotificationAsync(contentHandler: ((UNNotificationContent) -> Void), 
   if let bestAttemptContent = bestAttemptContent {    
     if var body = bestAttemptContent.userInfo["body"] as? [String: Any], let contentTopic = body["contentTopic"] as? String, let encodedMessage = body["message"] as? String, let account = body["account"] as? String {
       print("Received a notification for account \(account)")
+      
+      // Let's subscribe to that specific topic
+      let mmkv = getMmkv()
+      var apiURI = mmkv?.string(forKey: "api-uri")
+      // TODO => remove shared defaults
+      if (apiURI == nil) {
+        let sharedDefaults = try! SharedDefaults()
+        apiURI = sharedDefaults.string(forKey: "api-uri")?.replacingOccurrences(of: "\"", with: "")
+      }
+      let pushToken = getKeychainValue(forKey: "PUSH_TOKEN")
+      
       let accounts = getAccounts()
       if (!accounts.contains(account)) {
         print("Account \(account) is not in store")
         contentHandler(UNNotificationContent())
         return
       }
-      let xmtpClient = await getXmtpClient(account: account);
       
+      let xmtpClient = await getXmtpClient(account: account);
       if (xmtpClient != nil) {        
         let encryptedMessageData = Data(base64Encoded: Data(encodedMessage.utf8))!
         let envelope = XMTP.Envelope.with { envelope in
@@ -56,35 +80,37 @@ func handleNotificationAsync(contentHandler: ((UNNotificationContent) -> Void), 
           return
         } else if (isInviteTopic(topic: contentTopic)) {
           let conversation = await handleNewConversation(xmtpClient: xmtpClient!, envelope: envelope)
-          
           if (conversation != nil && conversation?.peerAddress != nil) {
             do {
-              if (hasForbiddenPattern(address: conversation!.peerAddress)) {
-                print("[NotificationExtension] Not showing a notification because forbidden spammy address")
-                contentHandler(UNNotificationContent())
-                return
-              }
-              
               var attempts = 0
               while attempts < 4 { // 4 attempts * 5s = 20s
                 if let messages = try! await conversation?.messages(), !messages.isEmpty {
-                  let data = messages[0].encodedContent.content
+                  let message = messages[0]
+                  let messageContent = String(data: message.encodedContent.content, encoding: .utf8) ?? "New message"
+                  
                   bestAttemptContent.title = shortAddress(address: conversation!.peerAddress)
-                  bestAttemptContent.body = String(data: data, encoding: .utf8) ?? "Message"
+                  bestAttemptContent.body = messageContent
+                  body["topic"] = conversation?.topic
+                  bestAttemptContent.userInfo.updateValue(body, forKey: "body")
                   messageId = messages[0].id
+                  
+                  if (isSpam(address: conversation!.peerAddress,
+                             message: messageContent,
+                             sentViaConverse:message.sentViaConverse)) {
+                    print("[NotificationExtension] Not showing a notification because considered spam")
+                    break
+                  } else {
+                    subscribeToTopic(apiURI: apiURI, account: xmtpClient!.address, pushToken: pushToken, topic: conversation!.topic)
+                  }
+                  
                   shouldIncrementBadge = true
+                  break
                 }
                 
                 // Wait for 5 seconds before the next attempt
                 _ = try? await Task.sleep(nanoseconds: UInt64(5 * 1_000_000_000)) // 5s in nanoseconds
                 attempts += 1
               }
-              
-              // No message was found after 20 seconds
-              contentHandler(UNNotificationContent())
-              return
-              
-              // @todo Depending if sent from converse or not, classify as spam or not AND subscribe/unsubscribe from notifications
             } catch {
               sentryTrackMessage(message: "NOTIFICATION_DECODING_ERROR", extras: ["error": error, "envelope": envelope])
               print("[NotificationExtension] ERROR WHILE DECODING \(error)")
@@ -107,8 +133,8 @@ func handleNotificationAsync(contentHandler: ((UNNotificationContent) -> Void), 
             }
           }
           
-          if (decodedMessageResult.senderAddress == xmtpClient?.address || decodedMessageResult.forceIgnore || hasForbiddenPattern(address: decodedMessageResult.senderAddress!)) {
-            // Message is from me or a reaction removal or a forbidden address, let's drop it
+          if (decodedMessageResult.senderAddress == xmtpClient?.address || decodedMessageResult.forceIgnore) {
+            // Message is from me or a reaction removal, let's drop it
             print("[NotificationExtension] Not showing a notification")
             contentHandler(UNNotificationContent())
             return
@@ -118,6 +144,7 @@ func handleNotificationAsync(contentHandler: ((UNNotificationContent) -> Void), 
               conversationTitle = shortAddress(address: decodedMessageResult.senderAddress!)
             }
           }
+          
           bestAttemptContent.title = conversationTitle;
           shouldIncrementBadge = true
         }

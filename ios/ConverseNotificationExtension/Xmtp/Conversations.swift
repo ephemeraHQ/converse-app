@@ -12,16 +12,6 @@ import CryptoKit
 
 func handleNewConversation(xmtpClient: XMTP.Client, envelope: XMTP.Envelope) async -> XMTP.Conversation? {
   do {
-    // Let's subscribe to that specific topic
-    let mmkv = getMmkv()
-    var apiURI = mmkv?.string(forKey: "api-uri")
-    // TODO => remove shared defaults
-    if (apiURI == nil) {
-      let sharedDefaults = try! SharedDefaults()
-      apiURI = sharedDefaults.string(forKey: "api-uri")?.replacingOccurrences(of: "\"", with: "")
-    }
-    let pushToken = getKeychainValue(forKey: "PUSH_TOKEN")
-    
     if (isInviteTopic(topic: envelope.contentTopic)) {
       let conversation = try await xmtpClient.conversations.fromInvite(envelope: envelope)
       switch conversation {
@@ -29,15 +19,7 @@ func handleNewConversation(xmtpClient: XMTP.Client, envelope: XMTP.Envelope) asy
         let formatter = ISO8601DateFormatter()
         formatter.formatOptions.insert(.withFractionalSeconds)
         let createdAt = formatter.string(from: conversationV2.createdAt)
-        
         let conversationDict = ["version": "v2", "topic": conversationV2.topic, "peerAddress": conversationV2.peerAddress, "createdAt": createdAt, "context":["conversationId": conversationV2.context.conversationID, "metadata": conversationV2.context.metadata] as [String : Any], "keyMaterial": conversationV2.keyMaterial.base64EncodedString()] as [String : Any]
-        // For now, we don't subscribe to new topics anymore at all, they all
-        // go to requests. In the future we will improve and subscribe to
-        // some topics depending on criteria
-//        if (!hasForbiddenPattern(address: conversationV2.peerAddress)) {
-//          subscribeToTopic(apiURI: apiURI, account: xmtpClient.address, pushToken: pushToken, topic: conversationV2.topic)
-//
-//        }
         persistDecodedConversation(account: xmtpClient.address, conversation: conversation)
         try saveConversation(account: xmtpClient.address, topic: conversationV2.topic, peerAddress: conversationV2.peerAddress, createdAt: Int(conversationV2.createdAt.timeIntervalSince1970 * 1000), context: ConversationContext(conversationId: conversationV2.context.conversationID, metadata: conversationV2.context.metadata))
       }
