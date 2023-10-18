@@ -56,12 +56,34 @@ func handleNotificationAsync(contentHandler: ((UNNotificationContent) -> Void), 
           return
         } else if (isInviteTopic(topic: contentTopic)) {
           let conversation = await handleNewConversation(xmtpClient: xmtpClient!, envelope: envelope)
-          // For now, we don't notifications for new convo anymore at all, they all
-          // go to requests. In the future we will improve and subscribe to
-          // some topics depending on criteria
-          print("[NotificationExtension] Not showing a notification for new convo")
-          contentHandler(UNNotificationContent())
-          return
+          if (conversation != nil) {
+            do {
+              var attempts = 0
+              while attempts < 4 { // 4 attempts * 5s = 20s
+                if let messages = try! await conversation?.messages(), !messages.isEmpty {
+                  let data = messages[0].encodedContent.content
+                  bestAttemptContent.title = shortAddress(address: conversation!.peerAddress)
+                  bestAttemptContent.body = String(data: data, encoding: .utf8) ?? "Message"
+                  
+                  contentHandler(bestAttemptContent)
+                  return
+                }
+                
+                // Wait for 5 seconds before the next attempt
+                _ = try? await Task.sleep(nanoseconds: UInt64(5 * 1_000_000_000)) // 5s in nanoseconds
+                attempts += 1
+              }
+              
+              // No message was found after 20 seconds
+              contentHandler(UNNotificationContent())
+              return
+              
+              // @todo Depending if sent from converse or not, classify as spam or not AND subscribe/unsubscribe from notifications
+            } catch {
+              sentryTrackMessage(message: "NOTIFICATION_DECODING_ERROR", extras: ["error": error, "envelope": envelope])
+              print("[NotificationExtension] ERROR WHILE DECODING \(error)")
+            }
+          }
 //          if (conversation != nil && conversation?.peerAddress != nil) {
 //            // For now, we don't notifications for new convo anymore at all, they all
 //            // go to requests. In the future we will improve and subscribe to
