@@ -34,7 +34,6 @@ import {
   textSecondaryColor,
 } from "../utils/colors";
 import { getRelativeDateTime } from "../utils/date";
-import { isDesktop } from "../utils/device";
 import { converseEventEmitter } from "../utils/events";
 import { showActionSheetWithOptions } from "./StateHandlers/ActionSheetStateHandler";
 
@@ -218,7 +217,13 @@ const ConversationListItem = memo(function ConversationListItem({
       >
         {rowItem}
       </Swipeable>
-      {Platform.OS === "ios" && <View style={styles.rowSeparator} />}
+      {/* iOS display weirdness */}
+      {Platform.OS === "ios" && (
+        <View style={{ height: 1 }}>
+          <View style={{ height: 0.25 }} />
+          <View style={styles.rowSeparator} />
+        </View>
+      )}
     </>
   );
 });
@@ -227,14 +232,13 @@ export default ConversationListItem;
 const getStyles = (colorScheme: ColorSchemeName) =>
   StyleSheet.create({
     rowSeparator: {
-      borderBottomWidth: isDesktop ? 0.5 : 0.25,
-      marginBottom: 0.5,
-      borderBottomColor: listItemSeparatorColor(colorScheme),
+      height: 0.25,
+      backgroundColor: listItemSeparatorColor(colorScheme),
       marginLeft: 32,
     },
     conversationListItem: Platform.select({
       default: {
-        height: 77,
+        height: 76,
         paddingTop: 7.5,
         paddingRight: 60,
         marginLeft: 32,
