@@ -76,7 +76,9 @@ func getShownNotificationIds() -> [String] {
   return []
 }
 
-func setShownNotificationIds(_ jsonData: Data) {
+func setShownNotificationIds(_ ids: [String]) {
   let mmkv = getMmkv()
-  mmkv?.set(jsonData, forKey: "notification-ids")
+  if let jsonData = try? JSONEncoder().encode(ids) {
+    mmkv?.set(jsonData, forKey: "notification-ids")
+  }
 }
