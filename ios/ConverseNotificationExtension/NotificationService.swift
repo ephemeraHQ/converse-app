@@ -120,19 +120,6 @@ func handleNotificationAsync(contentHandler: ((UNNotificationContent) -> Void), 
           var conversationTitle = getSavedConversationTitle(contentTopic: contentTopic);
           let sentViaConverse = body["sentViaConverse"] as? Bool ?? false;
           let decodedMessageResult = await decodeConversationMessage(xmtpClient: xmtpClient!, envelope: envelope, sentViaConverse: sentViaConverse)
-          
-          let conversation = await getPersistedConversation(xmtpClient: xmtpClient!, contentTopic: envelope.contentTopic);
-          if (conversation != nil) {
-            do {
-              print("[NotificationExtension] Decoding message...")
-              let decodedMessage = try conversation!.decode(envelope)
-              messageId = decodedMessage.id
-            } catch {
-              sentryTrackMessage(message: "NOTIFICATION_DECODING_ERROR", extras: ["error": error, "envelope": envelope])
-              print("[NotificationExtension] ERROR WHILE DECODING \(error)")
-            }
-          }
-          
           if (decodedMessageResult.senderAddress == xmtpClient?.address || decodedMessageResult.forceIgnore) {
             // Message is from me or a reaction removal, let's drop it
             print("[NotificationExtension] Not showing a notification")
@@ -140,13 +127,13 @@ func handleNotificationAsync(contentHandler: ((UNNotificationContent) -> Void), 
             return
           } else if (decodedMessageResult.content != nil) {
             bestAttemptContent.body = decodedMessageResult.content!;
+            messageId = decodedMessageResult.id!
             if (conversationTitle.count == 0 && decodedMessageResult.senderAddress != nil) {
               conversationTitle = shortAddress(address: decodedMessageResult.senderAddress!)
             }
+            bestAttemptContent.title = conversationTitle;
+            shouldIncrementBadge = true
           }
-          
-          bestAttemptContent.title = conversationTitle;
-          shouldIncrementBadge = true
         }
       } else {
         print("[NotificationExtension] Not showing a notification because no client found")
