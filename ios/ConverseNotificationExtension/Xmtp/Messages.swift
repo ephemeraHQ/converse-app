@@ -37,7 +37,7 @@ func saveMessage(account: String, topic: String, sent: Date, senderAddress: Stri
 }
 
 
-func decodeConversationMessage(xmtpClient: XMTP.Client, envelope: XMTP.Envelope, sentViaConverse: Bool) async -> (content: String?, senderAddress: String?, forceIgnore: Bool) {
+func decodeConversationMessage(xmtpClient: XMTP.Client, envelope: XMTP.Envelope, sentViaConverse: Bool) async -> (content: String?, senderAddress: String?, forceIgnore: Bool, id: String?) {
   let conversation = await getPersistedConversation(xmtpClient: xmtpClient, contentTopic: envelope.contentTopic);
   if (conversation != nil) {
     do {
@@ -51,7 +51,7 @@ func decodeConversationMessage(xmtpClient: XMTP.Client, envelope: XMTP.Envelope,
           // Let's save the notification for immediate display
           try saveMessage(account: xmtpClient.address, topic: envelope.contentTopic, sent: decodedMessage.sent, senderAddress: decodedMessage.senderAddress, content: decodedContent!, id: decodedMessage.id, sentViaConverse: sentViaConverse, contentType: contentType)
         }
-        return (decodedContent, decodedMessage.senderAddress, false)
+        return (decodedContent, decodedMessage.senderAddress, false, decodedMessage.id)
       } else if (contentType.starts(with: "xmtp.org/remoteStaticAttachment:")) {
         // Let's save the notification for immediate display
         do {
@@ -64,7 +64,7 @@ func decodeConversationMessage(xmtpClient: XMTP.Client, envelope: XMTP.Envelope,
           sentryTrackMessage(message: "NOTIFICATION_ATTACHMENT_ERROR", extras: ["error": error, "envelope": envelope])
           print("[NotificationExtension] ERROR WHILE SAVING ATTACHMENT CONTENT \(error)")
         }
-        return ("📎 Media", decodedMessage.senderAddress, false)
+        return ("📎 Media", decodedMessage.senderAddress, false, decodedMessage.id)
       } else if (contentType.starts(with: "xmtp.org/reaction:")) {
         var notificationContent:String? = "Reacted to a message";
         var ignoreNotification = false;
@@ -97,21 +97,21 @@ func decodeConversationMessage(xmtpClient: XMTP.Client, envelope: XMTP.Envelope,
           print("[NotificationExtension] ERROR WHILE DECODING REACTION CONTENT \(error)")
         }
         
-        return (notificationContent, decodedMessage.senderAddress, ignoreNotification);
+        return (notificationContent, decodedMessage.senderAddress, ignoreNotification, decodedMessage.id);
       } else {
         print("[NotificationExtension] Unknown content type")
         sentryTrackMessage(message: "NOTIFICATION_UNKNOWN_CONTENT_TYPE", extras: ["contentType": contentType, "envelope": envelope])
-        return (nil, decodedMessage.senderAddress, false);
+        return (nil, decodedMessage.senderAddress, false, nil);
       }
     } catch {
       sentryTrackMessage(message: "NOTIFICATION_DECODING_ERROR", extras: ["error": error, "envelope": envelope])
       print("[NotificationExtension] ERROR WHILE DECODING \(error)")
-      return (nil, nil, false);
+      return (nil, nil, false, nil);
     }
   } else {
     print("[NotificationExtension] NOTIFICATION_CONVERSATION_NOT_FOUND", envelope)
     sentryTrackMessage(message: "NOTIFICATION_CONVERSATION_NOT_FOUND", extras: ["envelope": envelope])
-    return (nil, nil, false);
+    return (nil, nil, false, nil);
   }
 }
 
