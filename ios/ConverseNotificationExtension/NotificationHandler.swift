@@ -38,9 +38,7 @@ func shouldShowNotification(for messageId: String?) -> Bool {
   }
 
   // Store the updated list of IDs back to storage
-  if let jsonData = try? JSONEncoder().encode(updatedIds) {
-    setShownNotificationIds(jsonData)
-  }
+  setShownNotificationIds(updatedIds)
   
   // If all conditions are met, show the notification
   return true
