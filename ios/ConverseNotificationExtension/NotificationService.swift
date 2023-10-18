@@ -56,17 +56,23 @@ func handleNotificationAsync(contentHandler: ((UNNotificationContent) -> Void), 
           return
         } else if (isInviteTopic(topic: contentTopic)) {
           let conversation = await handleNewConversation(xmtpClient: xmtpClient!, envelope: envelope)
-          if (conversation != nil) {
+          
+          if (conversation != nil && conversation?.peerAddress != nil) {
             do {
+              if (hasForbiddenPattern(address: conversation!.peerAddress)) {
+                print("[NotificationExtension] Not showing a notification because forbidden spammy address")
+                contentHandler(UNNotificationContent())
+                return
+              }
+              
               var attempts = 0
               while attempts < 4 { // 4 attempts * 5s = 20s
                 if let messages = try! await conversation?.messages(), !messages.isEmpty {
                   let data = messages[0].encodedContent.content
                   bestAttemptContent.title = shortAddress(address: conversation!.peerAddress)
                   bestAttemptContent.body = String(data: data, encoding: .utf8) ?? "Message"
-                  
-                  contentHandler(bestAttemptContent)
-                  return
+                  messageId = messages[0].id
+                  shouldIncrementBadge = true
                 }
                 
                 // Wait for 5 seconds before the next attempt
@@ -84,20 +90,6 @@ func handleNotificationAsync(contentHandler: ((UNNotificationContent) -> Void), 
               print("[NotificationExtension] ERROR WHILE DECODING \(error)")
             }
           }
-//          if (conversation != nil && conversation?.peerAddress != nil) {
-//            // For now, we don't notifications for new convo anymore at all, they all
-//            // go to requests. In the future we will improve and subscribe to
-//            // some topics depending on criteria
-//            if (hasForbiddenPattern(address: conversation!.peerAddress)) {
-//              print("[NotificationExtension] Not showing a notification because forbidden spammy address")
-//              contentHandler(UNNotificationContent())
-//              return
-//            }
-//            bestAttemptContent.title = shortAddress(address: conversation!.peerAddress)
-//            body["newConversationTopic"] = conversation?.topic
-//            bestAttemptContent.userInfo.updateValue(body, forKey: "body")
-//            shouldIncrementBadge = true
-//          }
         } else {
           var conversationTitle = getSavedConversationTitle(contentTopic: contentTopic);
           let sentViaConverse = body["sentViaConverse"] as? Bool ?? false;
