@@ -11,146 +11,73 @@ import CryptoKit
 import Alamofire
 
 
-func shortAddress(address: String) -> String {
-  if (address.count > 7) {
-    let prefixStart = address.index(address.startIndex, offsetBy: 0)
-    let prefixEnd = address.index(address.startIndex, offsetBy: 3)
-    let suffixStart = address.index(address.startIndex, offsetBy: address.count - 4)
-    let suffixEnd = address.index(address.startIndex, offsetBy: address.count - 1)
-    let prefixRange = prefixStart...prefixEnd
-    let suffixRange = suffixStart...suffixEnd
-    let prefix = address[prefixRange]
-    let suffix = address[suffixRange]
-    return "\(prefix)...\(suffix)"
-  }
-  return address
-}
-
-func containsURL(input: String) -> Bool {
-  let pattern = "\\b(?:(?:https?|ftp):\\/\\/|www\\.)?[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}(?:\\/\\S*)?(?:\\?\\S*)?\\b"
-  let regex = try? NSRegularExpression(pattern: pattern, options: .caseInsensitive)
-  let matches = regex?.numberOfMatches(in: input, options: [], range: NSRange(location: 0, length: input.utf16.count))
-  return matches ?? 0 > 0
-}
-
-func isSpam(address: String, message: String, sentViaConverse: Bool) -> Bool {
-  if (address.hasPrefix("0x0000") && address.hasSuffix("0000"))
-      || containsURL(input: message)
-      || !sentViaConverse {
-    return true
-  } else {
-    return false
-  }
-}
-
 func handleNotificationAsync(contentHandler: ((UNNotificationContent) -> Void), bestAttemptContent: UNMutableNotificationContent?) async {
   initSentry()
   var shouldShowNotification = false
-  var messageId = "";
+  var messageId: String? = nil
   
-  if let bestAttemptContent = bestAttemptContent {    
-    if var body = bestAttemptContent.userInfo["body"] as? [String: Any], let contentTopic = body["contentTopic"] as? String, let encodedMessage = body["message"] as? String, let account = body["account"] as? String {
-      print("Received a notification for account \(account)")
-      
-      let mmkv = getMmkv()
-      var apiURI = mmkv?.string(forKey: "api-uri")
-      // TODO => remove shared defaults
-      if (apiURI == nil) {
-        let sharedDefaults = try! SharedDefaults()
-        apiURI = sharedDefaults.string(forKey: "api-uri")?.replacingOccurrences(of: "\"", with: "")
-      }
-      let pushToken = getKeychainValue(forKey: "PUSH_TOKEN")
-      
-      let accounts = getAccounts()
-      if (!accounts.contains(account)) {
-        print("Account \(account) is not in store")
-        contentHandler(UNNotificationContent())
-        return
-      }
-      
-      let xmtpClient = await getXmtpClient(account: account);
-      if (xmtpClient != nil) {        
+  if var content = bestAttemptContent {
+    guard let body = content.userInfo["body"] as? [String: Any],
+          let contentTopic = body["contentTopic"] as? String,
+          let encodedMessage = body["message"] as? String,
+          let account = body["account"] as? String else { return }
+    
+    print("Received a notification for account \(account)")
+    
+    let apiURI = getApiURI()
+    let pushToken = getKeychainValue(forKey: "PUSH_TOKEN")
+    let accounts = getAccounts()
+    
+    guard accounts.contains(account) else {
+      print("Account \(account) is not in store")
+      contentHandler(UNNotificationContent())
+      return
+    }
+    
+    if let xmtpClient = await getXmtpClient(account: account), !isIntroTopic(topic: contentTopic) {
+      if isInviteTopic(topic: contentTopic) {
+        guard let conversation = await getNewConversationFromEnvelope(
+          xmtpClient: xmtpClient,
+          contentTopic: contentTopic,
+          encodedMessage: encodedMessage
+        ) else {
+          return
+        }
+        
+        (shouldShowNotification, messageId) = await handleNewConversationFirstMessage(
+          xmtpClient: xmtpClient,
+          apiURI: apiURI,
+          pushToken: pushToken,
+          conversation: conversation,
+          bestAttemptContent: &content
+        )
+      } else {
         let encryptedMessageData = Data(base64Encoded: Data(encodedMessage.utf8))!
         let envelope = XMTP.Envelope.with { envelope in
           envelope.message = encryptedMessageData
           envelope.contentTopic = contentTopic
         }
-        if (isIntroTopic(topic: contentTopic)) {
-          return
-        } else if (isInviteTopic(topic: contentTopic)) {
-          let conversation = await handleNewConversation(xmtpClient: xmtpClient!, envelope: envelope)
-          if (conversation != nil && conversation?.peerAddress != nil) {
-            var attempts = 0
-            while attempts < 4 { // 4 attempts * 5s = 20s
-              if let messages = try! await conversation?.messages(), !messages.isEmpty {
-                let message = messages[0]
-                let messageContent = String(data: message.encodedContent.content, encoding: .utf8) ?? "New message"
-                
-                bestAttemptContent.title = shortAddress(address: conversation!.peerAddress)
-                bestAttemptContent.body = messageContent
-                body["topic"] = conversation?.topic
-                bestAttemptContent.userInfo.updateValue(body, forKey: "body")
-                messageId = messages[0].id
-                
-                // Spam or not?
-                if (isSpam(address: conversation!.peerAddress,
-                           message: messageContent,
-                           sentViaConverse:message.sentViaConverse)) {
-                  print("[NotificationExtension] Not showing a notification because considered spam")
-                  break
-                } else {
-                  // Subscribe to notifications
-                  print ("== subscribeToTopic because the message was sent via converse")
-                  subscribeToTopic(apiURI: apiURI, account: xmtpClient!.address, pushToken: pushToken, topic: conversation!.topic)
-                }
-                
-                shouldShowNotification = true
-                break
-              }
-              
-              // Wait for 5 seconds before the next attempt
-              _ = try? await Task.sleep(nanoseconds: UInt64(5 * 1_000_000_000)) // 5s in nanoseconds
-              attempts += 1
-            }
-          }
-        } else {
-          var conversationTitle = getSavedConversationTitle(contentTopic: contentTopic);
-          let sentViaConverse = body["sentViaConverse"] as? Bool ?? false;
-          let decodedMessageResult = await decodeConversationMessage(xmtpClient: xmtpClient!, envelope: envelope, sentViaConverse: sentViaConverse)
-          if (decodedMessageResult.senderAddress == xmtpClient?.address || decodedMessageResult.forceIgnore) {
-            // Message is from me or a reaction removal, let's drop it
-            print("[NotificationExtension] Not showing a notification")
-            contentHandler(UNNotificationContent())
-            return
-          } else if (decodedMessageResult.content != nil) {
-            bestAttemptContent.body = decodedMessageResult.content!;
-            messageId = decodedMessageResult.id!
-            if (conversationTitle.count == 0 && decodedMessageResult.senderAddress != nil) {
-              conversationTitle = shortAddress(address: decodedMessageResult.senderAddress!)
-            }
-            bestAttemptContent.title = conversationTitle;
-            shouldShowNotification = true
-          }
-        }
-      } else {
-        print("[NotificationExtension] Not showing a notification because no client found")
-        contentHandler(UNNotificationContent())
-        return;
+        
+        (shouldShowNotification, messageId) = await handleOngoingConversationMessage(
+          xmtpClient: xmtpClient,
+          envelope: envelope,
+          bestAttemptContent: &content,
+          body: body
+        )
       }
     }
     
     if (shouldShowNotification && !notificationAlreadyShown(for: messageId)) {
-      incrementBadge(for: bestAttemptContent)
-      contentHandler(bestAttemptContent)
+      incrementBadge(for: content)
+      contentHandler(content)
     } else {
       contentHandler(UNNotificationContent())
-      return;
+      return
     }
   }
 }
 
 class NotificationService: UNNotificationServiceExtension {
-  
   var contentHandler: ((UNNotificationContent) -> Void)?
   var bestAttemptContent: UNMutableNotificationContent?
   
@@ -171,9 +98,7 @@ class NotificationService: UNNotificationServiceExtension {
         bestAttemptContent.title = conversationTitle;
         incrementBadge(for: bestAttemptContent)
       }
-      
       contentHandler(bestAttemptContent)
     }
   }
-  
 }
