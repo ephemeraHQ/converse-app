@@ -45,7 +45,7 @@ func isSpam(address: String, message: String, sentViaConverse: Bool) -> Bool {
 
 func handleNotificationAsync(contentHandler: ((UNNotificationContent) -> Void), bestAttemptContent: UNMutableNotificationContent?) async {
   initSentry()
-  var shouldIncrementBadge = false
+  var shouldShowNotification = false
   var messageId = "";
   
   if let bestAttemptContent = bestAttemptContent {    
@@ -104,7 +104,7 @@ func handleNotificationAsync(contentHandler: ((UNNotificationContent) -> Void), 
                   subscribeToTopic(apiURI: apiURI, account: xmtpClient!.address, pushToken: pushToken, topic: conversation!.topic)
                 }
                 
-                shouldIncrementBadge = true
+                shouldShowNotification = true
                 break
               }
               
@@ -129,7 +129,7 @@ func handleNotificationAsync(contentHandler: ((UNNotificationContent) -> Void), 
               conversationTitle = shortAddress(address: decodedMessageResult.senderAddress!)
             }
             bestAttemptContent.title = conversationTitle;
-            shouldIncrementBadge = true
+            shouldShowNotification = true
           }
         }
       } else {
@@ -139,9 +139,7 @@ func handleNotificationAsync(contentHandler: ((UNNotificationContent) -> Void), 
       }
     }
     
-    let showNotification = shouldShowNotification(for: messageId)
-    
-    if (shouldIncrementBadge && showNotification) {
+    if (shouldShowNotification && !notificationAlreadyShown(for: messageId)) {
       incrementBadge(for: bestAttemptContent)
       contentHandler(bestAttemptContent)
     } else {
