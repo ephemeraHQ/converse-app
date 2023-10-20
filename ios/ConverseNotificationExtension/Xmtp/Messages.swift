@@ -18,24 +18,44 @@ func handleNewConversationFirstMessage(xmtpClient: XMTP.Client, apiURI: String?,
     if !messages.isEmpty {
       let message = messages[0]
       let messageContent = String(data: message.encodedContent.content, encoding: .utf8) ?? "New message"
-      messageId = messages[0].id
+      let contentType = getContentTypeString(type: message.encodedContent.type)
+      let spamScore = computeSpamScore(address: conversation.peerAddress,
+                                       message: messageContent,
+                                       sentViaConverse: message.sentViaConverse,
+                                       contentType: contentType)
+      messageId = message.id
       
-      bestAttemptContent.title = shortAddress(address: conversation.peerAddress)
-      bestAttemptContent.body = messageContent
-      if let body = bestAttemptContent.userInfo["body"] as? [String: Any] {
-        var updatedBody = body
-        updatedBody["topic"] = conversation.topic
-        bestAttemptContent.userInfo.updateValue(updatedBody, forKey: "body")
+      do {
+        try saveMessage(account: xmtpClient.address,
+                        topic: message.topic,
+                        sent: message.sent,
+                        senderAddress: message.senderAddress,
+                        content: messageContent,
+                        id: message.id,
+                        sentViaConverse: message.sentViaConverse,
+                        contentType: contentType)
+      } catch {
+        sentryTrackMessage(message: "NOTIFICATION_SAVE_MESSAGE_ERROR", extras: ["error": error])
+        print("[NotificationExtension] ERROR WHILE SAVING MESSAGE \(error)")
+        break
+      }
+        
+      if (contentType.starts(with: "xmtp.org/text:")) {
+        bestAttemptContent.title = shortAddress(address: conversation.peerAddress)
+        bestAttemptContent.body = messageContent
+        if let body = bestAttemptContent.userInfo["body"] as? [String: Any] {
+          var updatedBody = body
+          updatedBody["topic"] = conversation.topic
+          bestAttemptContent.userInfo.updateValue(updatedBody, forKey: "body")
+        }
+      } else {
+        break
       }
       
-      // @todo Save 1st message whether it's spam or not
-      
-      if computeSpamScore(address: conversation.peerAddress, message: messageContent, sentViaConverse: message.sentViaConverse) {
+      if spamScore >= 1 {
         print("[NotificationExtension] Not showing a notification because considered spam")
         break
       } else {
-        // Subscribe to notifications
-        print ("== subscribeToTopic because the message was sent via converse")
         subscribeToTopic(apiURI: apiURI, account: xmtpClient.address, pushToken: pushToken, topic: conversation.topic)
         shouldShowNotification = true
         break
@@ -212,12 +232,12 @@ func getJsonReaction(reaction: Reaction) -> String? {
   }
 }
 
-func computeSpamScore(address: String, message: String, sentViaConverse: Bool) -> Bool {
+func computeSpamScore(address: String, message: String, sentViaConverse: Bool, contentType: String) -> Double {
   if (address.hasPrefix("0x0000") && address.hasSuffix("0000"))
       || containsURL(input: message)
       || !sentViaConverse {
-    return true
+    return 1
   } else {
-    return false
+    return -1
   }
 }
