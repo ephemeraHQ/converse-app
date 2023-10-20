@@ -31,7 +31,7 @@ PODS:
     - ExpoModulesCore
   - EXNotifications (0.20.1):
     - ExpoModulesCore
-  - Expo (49.0.11):
+  - Expo (49.0.16):
     - ExpoModulesCore
   - expo-dev-client (2.4.11):
     - EXManifests
@@ -118,7 +118,7 @@ PODS:
   - EXTaskManager (11.3.0):
     - ExpoModulesCore
     - UMAppLoader
-  - EXUpdates (0.18.14):
+  - EXUpdates (0.18.16):
     - ASN1Decoder (~> 1.8)
     - EASClient
     - EXManifests
@@ -1017,7 +1017,7 @@ SPEC CHECKSUMS:
   EXJSONUtils: 6802be4282d42b97c51682468ddc1026a06f8276
   EXManifests: 8a4a480e3b58891d5657d3996a39229e5c96d912
   EXNotifications: 09394cbd7165f9a4a00a53328aa09bf874bae717
-  Expo: 8a2d2c235bcbe4f41774562a0635bd74c174858c
+  Expo: fcfd60c1ed6806dee5103b210335ae0c72f675ed
   expo-dev-client: a97a68508a6104ad99f4b2613fd808cda7a4186c
   expo-dev-launcher: 0b4a7ae150c57ac3d4e6e9a434145443cf6637d4
   expo-dev-menu: 69bfd444d546c407a1a7074adefddf606a1afa7a
@@ -1034,7 +1034,7 @@ SPEC CHECKSUMS:
   EXSplashScreen: 2c80621e4bc952f5bea328304c2436f5fe21c2a0
   EXStructuredHeaders: 324cc3130571d2696357fafd8be7fd9a0b5fdf6e
   EXTaskManager: f1730c315eb6fe457a3a2ee4ed899a51d717f302
-  EXUpdates: 7ec199e551666daa808914cda07566a9661f6985
+  EXUpdates: f4cb5c6782ad1635fa853cb5251677040a9ed584
   EXUpdatesInterface: 82ed48d417cdcd376c12ca1c2ce390d35500bed6
   FBLazyVector: 71803c074f6325f10b5ec891c443b6bbabef0ca7
   FBReactNativeSpec: 448e08a759d29a96e15725ae532445bf4343567c
