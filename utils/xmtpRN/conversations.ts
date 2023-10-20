@@ -107,9 +107,9 @@ const handleNewConversation = async (
   // New conversations are not streamed immediatly
   // by the streamAllMessages method so we add this
   // trick to try and be all synced
-  loadConversationsMessages(client, [conversation], 0);
+  loadConversationsMessages(client, { [conversation.topic]: 0 });
   setTimeout(() => {
-    loadConversationsMessages(client, [conversation], 0);
+    loadConversationsMessages(client, { [conversation.topic]: 0 });
   }, 3000);
 };
 

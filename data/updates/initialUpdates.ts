@@ -86,7 +86,7 @@ export const migrateDataIfNeeded = async () => {
   }
   if (previousSyncedAt) {
     console.log("Migrating `lastXMTPSyncedAt` to zustand storage");
-    useChatStore.getState().setLastSyncedAt(previousSyncedAt);
+    useChatStore.getState().setLastSyncedAt(previousSyncedAt, []);
   }
   AsyncStorage.removeItem("lastXMTPSyncedAt");
   storage.delete("lastXMTPSyncedAt");

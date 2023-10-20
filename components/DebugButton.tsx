@@ -21,7 +21,9 @@ import { showActionSheetWithOptions } from "./StateHandlers/ActionSheetStateHand
 let logs: string[] = [];
 
 export const addLog = (log: string) => {
-  logs.push(log);
+  if (config.debugMenu || config.debugAddresses.includes(currentAccount())) {
+    logs.push(log);
+  }
 };
 
 export const useEnableDebug = () => {
