@@ -219,9 +219,10 @@ const ConversationListItem = memo(function ConversationListItem({
       </Swipeable>
       {/* iOS display weirdness */}
       {Platform.OS === "ios" && (
-        <View style={{ height: 1 }}>
-          <View style={{ height: 0.25 }} />
+        <View style={{ height: 1.5 }}>
+          <View style={{ height: 0.5 }} />
           <View style={styles.rowSeparator} />
+          <View style={{ height: 0.5 }} />
         </View>
       )}
     </>
@@ -238,7 +239,7 @@ const getStyles = (colorScheme: ColorSchemeName) =>
     },
     conversationListItem: Platform.select({
       default: {
-        height: 76,
+        height: 75.5,
         paddingTop: 7.5,
         paddingRight: 60,
         marginLeft: 32,
