@@ -13,8 +13,8 @@ func handleNewConversationFirstMessage(xmtpClient: XMTP.Client, apiURI: String?,
   var attempts = 0
   var messageId: String? = nil
   
-  while attempts < 4 { // 4 attempts * 5s = 20s
-    let messages = try! await conversation.messages()    
+  while attempts < 5 { // 5 attempts * 4s = 20s
+    let messages = try! await conversation.messages()
     if !messages.isEmpty {
       let message = messages[0]
       let messageContent = String(data: message.encodedContent.content, encoding: .utf8) ?? "New message"
@@ -62,8 +62,8 @@ func handleNewConversationFirstMessage(xmtpClient: XMTP.Client, apiURI: String?,
       }
     }
     
-    // Wait for 5 seconds before the next attempt
-    _ = try? await Task.sleep(nanoseconds: UInt64(5 * 1_000_000_000)) // 5s in nanoseconds
+    // Wait for 4 seconds before the next attempt
+    _ = try? await Task.sleep(nanoseconds: UInt64(4 * 1_000_000_000))
     attempts += 1
   }
   
