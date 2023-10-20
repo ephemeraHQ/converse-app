@@ -319,13 +319,9 @@ export const onInteractWithNotification = (
 ) => {
   const notificationData = event.notification.request.content.data;
   if (!notificationData) return;
-  const newConversationTopic = notificationData["newConversationTopic"] as
+  const conversationTopic = notificationData["contentTopic"] as
     | string
     | undefined;
-  const messageConversationTopic = notificationData["contentTopic"] as
-    | string
-    | undefined;
-  const conversationTopic = newConversationTopic || messageConversationTopic;
   const account =
     notificationData["account"] || useAccountsStore.getState().currentAccount;
   if (conversationTopic) {
