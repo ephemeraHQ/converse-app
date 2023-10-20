@@ -9,7 +9,6 @@ import { Platform, StyleSheet, useColorScheme, View } from "react-native";
 import "./utils/splash/splash";
 import { KeyboardProvider } from "react-native-keyboard-controller";
 import { Provider as PaperProvider } from "react-native-paper";
-import * as Sentry from "sentry-expo";
 
 import XmtpEngine from "./components/XmtpEngine";
 import config from "./config";
@@ -23,6 +22,7 @@ import {
 } from "./utils/colors";
 import mmkv from "./utils/mmkv";
 import { DEFAULT_EMOJIS, RECENT_EMOJI_STORAGE_KEY } from "./utils/reactions";
+import { initSentry } from "./utils/sentry";
 import { useRecentPicksPersistence } from "./vendor/rn-emoji-keyboard";
 
 configureCoinbase({
@@ -31,12 +31,7 @@ configureCoinbase({
   hostPackageName: "org.toshi",
 });
 
-Sentry.init({
-  dsn: config.sentryDSN,
-  enableInExpoDevelopment: false,
-  debug: config.env === "dev",
-  environment: config.env,
-});
+initSentry();
 
 export default function App() {
   const colorScheme = useColorScheme();
