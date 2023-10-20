@@ -9,7 +9,6 @@ import Foundation
 import XMTP
 import CryptoKit
 
-
 func handleNewConversation(xmtpClient: XMTP.Client, envelope: XMTP.Envelope) async -> XMTP.Conversation? {
   do {
     if (isInviteTopic(topic: envelope.contentTopic)) {
