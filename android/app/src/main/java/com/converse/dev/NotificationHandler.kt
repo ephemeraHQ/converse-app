@@ -9,7 +9,7 @@ class NotificationHandler {
         private const val MAX_STORED_IDS = 10
     }
 
-    fun shouldShowNotification(appContext: Context, messageId: String?): Boolean {
+    fun notificationAlreadyShown(appContext: Context, messageId: String?): Boolean {
         Log.d(TAG, "Checking if we should show notification for message ID: $messageId")
 
         messageId?.let {
@@ -17,7 +17,7 @@ class NotificationHandler {
 
             if (existingIds.contains(it)) {
                 Log.d(TAG, "Message ID already exists. Not showing notification.")
-                return false
+                return true
             }
 
             val updatedIds = existingIds + it
@@ -32,9 +32,9 @@ class NotificationHandler {
             val storedData = getShownNotificationIds(appContext).joinToString(", ")
             Log.d(TAG, "Stored IDs just after saving: $storedData")
 
-            return true
+            return false
         }
         Log.d(TAG, "Message ID is null. Not showing notification.")
-        return false
+        return true
     }
 }

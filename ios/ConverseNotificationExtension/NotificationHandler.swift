@@ -14,18 +14,18 @@ func incrementBadge(for content: UNMutableNotificationContent) {
   content.badge = NSNumber(value: newBadgeCount)
 }
 
-func shouldShowNotification(for messageId: String?) -> Bool {
+func notificationAlreadyShown(for messageId: String?) -> Bool {
   let maxStoredIds = 10
   
   // Check if the messageId is not nil and not an empty string
   guard let id = messageId, !id.isEmpty else {
-    return false
+    return true
   }
   
   // If the id already exists in the list, don't show the notification
   let existingIds = getShownNotificationIds()
   if existingIds.contains(id) {
-    return false
+    return true
   }
 
   // Append the new id to the list
@@ -41,5 +41,5 @@ func shouldShowNotification(for messageId: String?) -> Bool {
   setShownNotificationIds(updatedIds)
   
   // If all conditions are met, show the notification
-  return true
+  return false
 }
