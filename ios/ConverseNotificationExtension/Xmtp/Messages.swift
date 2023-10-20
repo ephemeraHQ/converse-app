@@ -9,6 +9,72 @@ import Foundation
 import XMTP
 
 
+func handleNewConversationFirstMessage(xmtpClient: XMTP.Client, apiURI: String?, pushToken: String?, conversation: XMTP.Conversation, bestAttemptContent: inout UNMutableNotificationContent) async -> (shouldShowNotification: Bool, messageId: String?) {
+  var shouldShowNotification = false
+  var attempts = 0
+  var messageId: String? = nil
+  
+  while attempts < 4 { // 4 attempts * 5s = 20s
+    let messages = try! await conversation.messages()    
+    if !messages.isEmpty {
+      let message = messages[0]
+      let messageContent = String(data: message.encodedContent.content, encoding: .utf8) ?? "New message"
+      messageId = messages[0].id
+      
+      bestAttemptContent.title = shortAddress(address: conversation.peerAddress)
+      bestAttemptContent.body = messageContent
+      if let body = bestAttemptContent.userInfo["body"] as? [String: Any] {
+        var updatedBody = body
+        updatedBody["topic"] = conversation.topic
+        bestAttemptContent.userInfo.updateValue(updatedBody, forKey: "body")
+      }
+      
+      // @todo Save 1st message whether it's spam or not
+      
+      if computeSpamScore(address: conversation.peerAddress, message: messageContent, sentViaConverse: message.sentViaConverse) {
+        print("[NotificationExtension] Not showing a notification because considered spam")
+        break
+      } else {
+        // Subscribe to notifications
+        print ("== subscribeToTopic because the message was sent via converse")
+        subscribeToTopic(apiURI: apiURI, account: xmtpClient.address, pushToken: pushToken, topic: conversation.topic)
+        shouldShowNotification = true
+        break
+      }
+    }
+    
+    // Wait for 5 seconds before the next attempt
+    _ = try? await Task.sleep(nanoseconds: UInt64(5 * 1_000_000_000)) // 5s in nanoseconds
+    attempts += 1
+  }
+  
+  return (shouldShowNotification, messageId)
+}
+
+func handleOngoingConversationMessage(xmtpClient: XMTP.Client, envelope: XMTP.Envelope, bestAttemptContent: inout UNMutableNotificationContent, body: [String: Any]) async -> (shouldShowNotification: Bool, messageId: String?) {
+  var shouldShowNotification = false
+  let contentTopic = envelope.contentTopic
+  var conversationTitle = getSavedConversationTitle(contentTopic: contentTopic)
+  let sentViaConverse = body["sentViaConverse"] as? Bool ?? false
+  let decodedMessageResult = await decodeConversationMessage(xmtpClient: xmtpClient, envelope: envelope, sentViaConverse: sentViaConverse)
+  var messageId: String? = nil
+  
+  if decodedMessageResult.senderAddress == xmtpClient.address || decodedMessageResult.forceIgnore {
+    // Message is from me or a reaction removal, let's drop it
+    print("[NotificationExtension] Not showing a notification")
+  } else if let content = decodedMessageResult.content {
+    bestAttemptContent.body = content
+    if conversationTitle.isEmpty, let senderAddress = decodedMessageResult.senderAddress {
+      conversationTitle = shortAddress(address: senderAddress)
+    }
+    bestAttemptContent.title = conversationTitle
+    shouldShowNotification = true
+    messageId = decodedMessageResult.id
+  }
+  
+  return (shouldShowNotification, messageId)
+}
+
 func loadSavedMessages() -> [SavedNotificationMessage] {
   let mmkv = getMmkv()
   let savedMessagesString = mmkv?.string(forKey: "saved-notifications-messages")
@@ -35,7 +101,6 @@ func saveMessage(account: String, topic: String, sent: Date, senderAddress: Stri
   let mmkv = getMmkv()
   mmkv?.set(encodedString!, forKey: "saved-notifications-messages")
 }
-
 
 func decodeConversationMessage(xmtpClient: XMTP.Client, envelope: XMTP.Envelope, sentViaConverse: Bool) async -> (content: String?, senderAddress: String?, forceIgnore: Bool, id: String?) {
   let conversation = await getPersistedConversation(xmtpClient: xmtpClient, contentTopic: envelope.contentTopic);
@@ -132,7 +197,6 @@ func getJsonRemoteAttachment(remoteAttachment: RemoteAttachment) -> String? {
   }
 }
 
-
 func getJsonReaction(reaction: Reaction) -> String? {
   do {
     let reference = reaction.reference;
@@ -146,5 +210,15 @@ func getJsonReaction(reaction: Reaction) -> String? {
   } catch {
     print("Error converting dictionary to JSON string: \(error.localizedDescription)")
     return nil
+  }
+}
+
+func computeSpamScore(address: String, message: String, sentViaConverse: Bool) -> Bool {
+  if (address.hasPrefix("0x0000") && address.hasSuffix("0000"))
+      || containsURL(input: message)
+      || !sentViaConverse {
+    return true
+  } else {
+    return false
   }
 }

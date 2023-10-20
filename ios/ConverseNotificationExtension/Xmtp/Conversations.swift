@@ -19,7 +19,6 @@ func handleNewConversation(xmtpClient: XMTP.Client, envelope: XMTP.Envelope) asy
         let formatter = ISO8601DateFormatter()
         formatter.formatOptions.insert(.withFractionalSeconds)
         let createdAt = formatter.string(from: conversationV2.createdAt)
-        let conversationDict = ["version": "v2", "topic": conversationV2.topic, "peerAddress": conversationV2.peerAddress, "createdAt": createdAt, "context":["conversationId": conversationV2.context.conversationID, "metadata": conversationV2.context.metadata] as [String : Any], "keyMaterial": conversationV2.keyMaterial.base64EncodedString()] as [String : Any]
         persistDecodedConversation(account: xmtpClient.address, conversation: conversation)
         try saveConversation(account: xmtpClient.address, topic: conversationV2.topic, peerAddress: conversationV2.peerAddress, createdAt: Int(conversationV2.createdAt.timeIntervalSince1970 * 1000), context: ConversationContext(conversationId: conversationV2.context.conversationID, metadata: conversationV2.context.metadata))
       }
@@ -31,9 +30,17 @@ func handleNewConversation(xmtpClient: XMTP.Client, envelope: XMTP.Envelope) asy
     sentryTrackMessage(message: "Could not decode new conversation envelope", extras: ["error": error])
     print("[NotificationExtension] Could not decode new conversation envelope \(error)")
   }
-  return nil;
+  return nil
 }
 
+func getNewConversationFromEnvelope(xmtpClient: XMTP.Client, contentTopic: String, encodedMessage: String) async -> XMTP.Conversation? {
+  let encryptedMessageData = Data(base64Encoded: Data(encodedMessage.utf8))!
+  let envelope = XMTP.Envelope.with { envelope in
+    envelope.message = encryptedMessageData
+    envelope.contentTopic = contentTopic
+  }
+  return await handleNewConversation(xmtpClient: xmtpClient, envelope: envelope)
+}
 
 func loadSavedConversations() -> [SavedNotificationConversation] {
   let mmkv = getMmkv()
