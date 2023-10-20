@@ -73,6 +73,7 @@ export type ChatStoreType = {
   };
   lastUpdateAt: number;
   lastSyncedAt: number;
+  lastSyncedTopics: string[];
   initialLoadDone: boolean;
   initialLoadDoneOnce: boolean;
   localClientConnected: boolean;
@@ -111,7 +112,7 @@ export type ChatStoreType = {
   setLocalClientConnected: (connected: boolean) => void;
   setResyncing: (syncing: boolean) => void;
   setReconnecting: (reconnecting: boolean) => void;
-  setLastSyncedAt: (synced: number) => void;
+  setLastSyncedAt: (synced: number, topics: string[]) => void;
 
   setTopicsStatus: (topicsStatus: {
     [topic: string]: "deleted" | "consented";
@@ -127,6 +128,7 @@ export const initChatStore = (account: string) => {
         ({
           conversations: {},
           lastSyncedAt: 0,
+          lastSyncedTopics: [],
           topicsStatus: {},
           openedConversationTopic: "",
           setOpenedConversationTopic: (topic) =>
@@ -446,8 +448,8 @@ export const initChatStore = (account: string) => {
 
               return newState;
             }),
-          setLastSyncedAt: (synced: number) =>
-            set(() => ({ lastSyncedAt: synced })),
+          setLastSyncedAt: (synced: number, topics: string[]) =>
+            set(() => ({ lastSyncedAt: synced, lastSyncedTopics: topics })),
           setTopicsStatus: (topicsStatus: {
             [topic: string]: "deleted" | "consented";
           }) =>
@@ -467,6 +469,7 @@ export const initChatStore = (account: string) => {
         partialize: (state) => ({
           initialLoadDoneOnce: state.initialLoadDoneOnce,
           lastSyncedAt: state.lastSyncedAt,
+          lastSyncedTopics: state.lastSyncedTopics,
           topicsStatus: state.topicsStatus,
         }),
         version: 1,

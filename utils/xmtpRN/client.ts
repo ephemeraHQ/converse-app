@@ -3,6 +3,7 @@ import { privateKey, signature } from "@xmtp/proto";
 import { Client } from "@xmtp/react-native-sdk";
 import { Platform } from "react-native";
 
+import { addLog } from "../../components/DebugButton";
 import config from "../../config";
 import { getChatStore } from "../../data/store/accountsStore";
 import { loadXmtpKey } from "../keychain";
@@ -72,34 +73,34 @@ const onSyncLost = async (account: string, error: any) => {
 const streamingAccounts: { [account: string]: boolean } = {};
 
 export const syncXmtpClient = async (account: string) => {
-  const knownTopics = Object.keys(
-    getChatStore(account).getState().conversations
-  );
-  const lastSyncedAt = getChatStore(account).getState().lastSyncedAt;
+  const lastSyncedAt = getChatStore(account).getState().lastSyncedAt || 0;
+
+  // We just introduced lastSyncedTopics so it might be empty at first
+  // Last synced topics enable us not to miss messages from new conversations
+  // That we didn't get through notifications
+  const lastSyncedTopics =
+    getChatStore(account).getState().lastSyncedTopics || [];
+  const knownTopics =
+    lastSyncedTopics.length > 0
+      ? lastSyncedTopics
+      : Object.keys(getChatStore(account).getState().conversations);
   console.log(`[XmtpRN] Syncing ${account}`, {
     lastSyncedAt,
     knownTopics: knownTopics.length,
   });
   const client = await getXmtpClient(account);
+  const queryConversationsFromTimestamp: { [topic: string]: number } = {};
+  knownTopics.forEach((topic) => {
+    queryConversationsFromTimestamp[topic] = lastSyncedAt;
+  });
   try {
     const now = new Date().getTime();
-    const { newConversations, knownConversations } = await loadConversations(
-      client,
-      knownTopics
-    );
+    const { newConversations } = await loadConversations(client, knownTopics);
+    newConversations.forEach((c) => {
+      queryConversationsFromTimestamp[c.topic] = 0;
+    });
     // As soon as we have done one query we can hide reconnecting
     getChatStore(account).getState().setReconnecting(false);
-    const promises = [];
-
-    if (knownConversations.length > 0) {
-      promises.push(
-        loadConversationsMessages(client, knownConversations, lastSyncedAt)
-      );
-    }
-
-    if (newConversations.length > 0) {
-      promises.push(loadConversationsMessages(client, newConversations, 0));
-    }
 
     // Only stream once to avoid GRPC errors
     // on Android @todo => check with naomi to fix the GRPC errors
@@ -116,12 +117,21 @@ export const syncXmtpClient = async (account: string) => {
       });
       streamingAccounts[client.address] = true;
     }
+    const topicsToQuery = Object.keys(queryConversationsFromTimestamp);
 
-    await Promise.all(promises);
+    const fetchedMessagesCount = await loadConversationsMessages(
+      client,
+      queryConversationsFromTimestamp
+    );
 
     // Need to save initial load is done
     getChatStore(account).getState().setInitialLoadDone();
-    getChatStore(account).getState().setLastSyncedAt(now);
+    // Only update when we have really fetched, this might mitigate
+    // the case where we never fetch some messages
+    if (fetchedMessagesCount > 0) {
+      getChatStore(account).getState().setLastSyncedAt(now, topicsToQuery);
+      addLog(`Setting lastsynced at - ${now}`);
+    }
     console.log(`[XmtpRN] Finished syncing ${account}`);
   } catch (e) {
     onSyncLost(account, e);

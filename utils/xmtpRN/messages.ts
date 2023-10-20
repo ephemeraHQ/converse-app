@@ -1,10 +1,10 @@
 import {
   Client,
-  Conversation,
   DecodedMessage,
   RemoteAttachmentContent,
 } from "@xmtp/react-native-sdk";
 
+import { addLog } from "../../components/DebugButton";
 import { saveMessages } from "../../data/helpers/messages";
 import { XmtpMessage } from "../../data/store/chatStore";
 
@@ -69,13 +69,12 @@ export const stopStreamingAllMessage = (client: Client) => {
 
 export const loadConversationsMessages = async (
   client: Client,
-  conversations: Conversation[],
-  lastTimestamp?: number
-) => {
-  const queryConversationsFromTimestamp: { [topic: string]: number } = {};
-  conversations.forEach((c) => {
-    queryConversationsFromTimestamp[c.topic] = lastTimestamp || 0;
-  });
+  _queryConversationsFromTimestamp: { [topic: string]: number }
+): Promise<number> => {
+  const queryConversationsFromTimestamp = {
+    ..._queryConversationsFromTimestamp,
+  };
+  let messagesFetched = 0;
 
   while (Object.keys(queryConversationsFromTimestamp).length > 0) {
     const topicsToQuery = Object.keys(queryConversationsFromTimestamp);
@@ -125,14 +124,18 @@ export const loadConversationsMessages = async (
         console.log(
           "[XmtpRn] Avoiding a loop during sync due to weird timestamps"
         );
+        addLog(`Avoiding a loop`);
         queryConversationsFromTimestamp[topic] += 1;
       }
     });
 
     messagesBatch.sort((messageA, messageB) => messageA.sent - messageB.sent);
+    messagesFetched += messagesBatch.length;
     saveMessages(
       client.address,
       messagesBatch.map(protocolMessageToStateMessage)
     );
   }
+  addLog(`Fetched ${messagesFetched} messages from network`);
+  return messagesFetched;
 };
