@@ -57,7 +57,6 @@ func loadSavedConversations() -> [SavedNotificationConversation] {
   }
 }
 
-
 func saveConversation(account: String, topic: String, peerAddress: String, createdAt: Int, context: ConversationContext?) throws {
   let savedConversation = SavedNotificationConversation(topic: topic, peerAddress: peerAddress, createdAt: createdAt, context: context, account: account)
   var savedConversationsList = loadSavedConversations()
