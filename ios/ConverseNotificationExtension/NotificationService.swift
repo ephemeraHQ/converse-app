@@ -19,7 +19,10 @@ func handleNotificationAsync(contentHandler: ((UNNotificationContent) -> Void), 
     guard let body = content.userInfo["body"] as? [String: Any],
           let contentTopic = body["contentTopic"] as? String,
           let encodedMessage = body["message"] as? String,
-          let account = body["account"] as? String else { return }
+          let account = body["account"] as? String else {
+      contentHandler(UNNotificationContent())
+      return
+    }
     
     print("Received a notification for account \(account)")
     
@@ -40,6 +43,7 @@ func handleNotificationAsync(contentHandler: ((UNNotificationContent) -> Void), 
           contentTopic: contentTopic,
           encodedMessage: encodedMessage
         ) else {
+          contentHandler(UNNotificationContent())
           return
         }
         
