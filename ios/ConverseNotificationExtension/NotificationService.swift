@@ -52,7 +52,6 @@ func handleNotificationAsync(contentHandler: ((UNNotificationContent) -> Void), 
     if var body = bestAttemptContent.userInfo["body"] as? [String: Any], let contentTopic = body["contentTopic"] as? String, let encodedMessage = body["message"] as? String, let account = body["account"] as? String {
       print("Received a notification for account \(account)")
       
-      // Let's subscribe to that specific topic
       let mmkv = getMmkv()
       var apiURI = mmkv?.string(forKey: "api-uri")
       // TODO => remove shared defaults
@@ -81,39 +80,37 @@ func handleNotificationAsync(contentHandler: ((UNNotificationContent) -> Void), 
         } else if (isInviteTopic(topic: contentTopic)) {
           let conversation = await handleNewConversation(xmtpClient: xmtpClient!, envelope: envelope)
           if (conversation != nil && conversation?.peerAddress != nil) {
-            do {
-              var attempts = 0
-              while attempts < 4 { // 4 attempts * 5s = 20s
-                if let messages = try! await conversation?.messages(), !messages.isEmpty {
-                  let message = messages[0]
-                  let messageContent = String(data: message.encodedContent.content, encoding: .utf8) ?? "New message"
-                  
-                  bestAttemptContent.title = shortAddress(address: conversation!.peerAddress)
-                  bestAttemptContent.body = messageContent
-                  body["topic"] = conversation?.topic
-                  bestAttemptContent.userInfo.updateValue(body, forKey: "body")
-                  messageId = messages[0].id
-                  
-                  if (isSpam(address: conversation!.peerAddress,
-                             message: messageContent,
-                             sentViaConverse:message.sentViaConverse)) {
-                    print("[NotificationExtension] Not showing a notification because considered spam")
-                    break
-                  } else {
-                    subscribeToTopic(apiURI: apiURI, account: xmtpClient!.address, pushToken: pushToken, topic: conversation!.topic)
-                  }
-                  
-                  shouldIncrementBadge = true
+            var attempts = 0
+            while attempts < 4 { // 4 attempts * 5s = 20s
+              if let messages = try! await conversation?.messages(), !messages.isEmpty {
+                let message = messages[0]
+                let messageContent = String(data: message.encodedContent.content, encoding: .utf8) ?? "New message"
+                
+                bestAttemptContent.title = shortAddress(address: conversation!.peerAddress)
+                bestAttemptContent.body = messageContent
+                body["topic"] = conversation?.topic
+                bestAttemptContent.userInfo.updateValue(body, forKey: "body")
+                messageId = messages[0].id
+                
+                // Spam or not?
+                if (isSpam(address: conversation!.peerAddress,
+                           message: messageContent,
+                           sentViaConverse:message.sentViaConverse)) {
+                  print("[NotificationExtension] Not showing a notification because considered spam")
                   break
+                } else {
+                  // Subscribe to notifications
+                  print ("== subscribeToTopic because the message was sent via converse")
+                  subscribeToTopic(apiURI: apiURI, account: xmtpClient!.address, pushToken: pushToken, topic: conversation!.topic)
                 }
                 
-                // Wait for 5 seconds before the next attempt
-                _ = try? await Task.sleep(nanoseconds: UInt64(5 * 1_000_000_000)) // 5s in nanoseconds
-                attempts += 1
+                shouldIncrementBadge = true
+                break
               }
-            } catch {
-              sentryTrackMessage(message: "NOTIFICATION_DECODING_ERROR", extras: ["error": error, "envelope": envelope])
-              print("[NotificationExtension] ERROR WHILE DECODING \(error)")
+              
+              // Wait for 5 seconds before the next attempt
+              _ = try? await Task.sleep(nanoseconds: UInt64(5 * 1_000_000_000)) // 5s in nanoseconds
+              attempts += 1
             }
           }
         } else {
