@@ -82,7 +82,7 @@ const build = async () => {
         type: "select",
         name: "typecheck",
         message: `Typecheck?`,
-        choices: [{ value: "no" }, { value: "yes" }],
+        choices: [{ value: "yes" }, { value: "no" }],
       },
     ]);
     if (typecheck === "yes") {
