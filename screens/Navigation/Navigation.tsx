@@ -12,6 +12,7 @@ import { initialURL } from "../../components/StateHandlers/InitialStateHandler";
 import config from "../../config";
 import { useAppStore } from "../../data/store/appStore";
 import { backgroundColor, headerTitleStyle } from "../../utils/colors";
+import { isDesktop } from "../../utils/device";
 import AccountsNav from "./AccountsNav";
 import ConversationListNav from "./ConversationListNav";
 import ConversationNav from "./ConversationNav";
@@ -144,6 +145,7 @@ export default function Navigation() {
       }
     >
       <NativeStack.Navigator
+        screenOptions={{ gestureEnabled: !isDesktop }}
         screenListeners={({ navigation }) => ({
           state: (e: any) => {
             // Fix deeplink if already on a screen but changing params
