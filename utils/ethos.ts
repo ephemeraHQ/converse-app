@@ -1,6 +1,5 @@
+import { Signer } from "@xmtp/xmtp-js";
 import { Platform } from "react-native";
-
-import { Signer } from "../vendor/xmtp-js/src";
 
 export const getEthOSSigner = (): Signer | undefined => {
   if (Platform.OS !== "android") return undefined;

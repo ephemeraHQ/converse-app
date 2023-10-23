@@ -1,4 +1,5 @@
 import { useCoinbaseWallet } from "@thirdweb-dev/react-native";
+import { Signer } from "@xmtp/xmtp-js";
 import * as Linking from "expo-linking";
 import { useEffect, useRef, useState } from "react";
 import {
@@ -14,7 +15,6 @@ import config from "../../config";
 import { textSecondaryColor } from "../../utils/colors";
 import { isDesktop } from "../../utils/device";
 import { getEthOSSigner } from "../../utils/ethos";
-import { Signer } from "../../vendor/xmtp-js/src";
 import TableView from "../TableView/TableView";
 import {
   TableViewEmoji,

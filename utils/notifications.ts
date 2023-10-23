@@ -1,3 +1,4 @@
+import { buildUserInviteTopic } from "@xmtp/xmtp-js";
 import * as Notifications from "expo-notifications";
 import { Platform } from "react-native";
 
@@ -14,7 +15,6 @@ import {
 } from "../data/store/accountsStore";
 import { useAppStore } from "../data/store/appStore";
 import { XmtpConversation, XmtpMessage } from "../data/store/chatStore";
-import { buildUserInviteTopic } from "../vendor/xmtp-js/src/utils";
 import api from "./api";
 import { savePushToken } from "./keychain";
 import mmkv from "./mmkv";

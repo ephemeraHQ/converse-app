@@ -1,8 +1,8 @@
+import { InvitationContext } from "@xmtp/xmtp-js";
 import { getAddress } from "ethers/lib/utils";
 import uuid from "react-native-uuid";
 import { In } from "typeorm/browser";
 
-import { InvitationContext } from "../../../vendor/xmtp-js/src";
 import { getRepository } from "../../db";
 import { upsertRepository } from "../../db/upsert";
 import { xmtpConversationToDb } from "../../mappers";

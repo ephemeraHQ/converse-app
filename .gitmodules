@@ -1,6 +1,3 @@
-[submodule "vendor/xmtp-js"]
-	path = vendor/xmtp-js
-	url = git@github.com:Unshut-Labs/xmtp-js.git
 [submodule "android/libs/xmtp-android"]
 	path = android/libs/xmtp-android
 	url = git@github.com:Unshut-Labs/xmtp-android.git
