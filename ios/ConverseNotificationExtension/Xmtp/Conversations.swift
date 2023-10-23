@@ -19,10 +19,7 @@ func getNewConversationFromEnvelope(xmtpClient: XMTP.Client, contentTopic: Strin
     if (isInviteTopic(topic: envelope.contentTopic)) {
       let conversation = try await xmtpClient.conversations.fromInvite(envelope: envelope)
       switch conversation {
-      case let .v2(conversationV2): do {
-        let formatter = ISO8601DateFormatter()
-        formatter.formatOptions.insert(.withFractionalSeconds)
-        let createdAt = formatter.string(from: conversationV2.createdAt)
+      case .v2(_): do {
         persistDecodedConversation(account: xmtpClient.address, conversation: conversation)
       }
       default: do {}
