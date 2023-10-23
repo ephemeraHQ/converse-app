@@ -4,6 +4,11 @@ class NotificationData(val message: String, val timestampNs: String, val content
 class ConversationDictData(val shortAddress: String? = null, val title: String? = null)
 class SavedNotificationMessage(val topic: String, val content: String, val senderAddress: String, val sent: Long, val id: String, val sentViaConverse: Boolean, val contentType: String, val account: String? = null)
 class ConversationContext(val conversationId: String, val metadata: Map<String, Any>)
-class SavedNotificationConversation(val topic: String, val peerAddress: String, val createdAt: Long, val context: ConversationContext?, val account: String? = null)
 class Accounts(val currentAccount: String, val accounts: Array<String>, val databaseId: Map<String, String>? = null)
 class AccountsStore(val state: Accounts, val version: Int)
+class SavedNotificationConversation(val topic: String, val peerAddress: String, val createdAt: Long, val context: ConversationContext?, val account: String? = null, var spamScore: Double? = null) {
+  // Set spamScore with rounded value every time, if not null
+  set(value) {
+    field = value?.let { Math.round(it * 100).toDouble() / 100 }
+  }
+}
