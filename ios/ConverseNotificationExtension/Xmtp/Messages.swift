@@ -19,10 +19,7 @@ func handleNewConversationFirstMessage(xmtpClient: XMTP.Client, apiURI: String?,
       let message = messages[0]
       let messageContent = String(data: message.encodedContent.content, encoding: .utf8) ?? "New message"
       let contentType = getContentTypeString(type: message.encodedContent.type)
-      let spamScore = computeSpamScore(address: conversation.peerAddress,
-                                       message: messageContent,
-                                       sentViaConverse: message.sentViaConverse,
-                                       contentType: contentType)
+      let spamScore = computeSpamScore(address: conversation.peerAddress, message: messageContent, sentViaConverse: message.sentViaConverse, contentType: contentType)
       messageId = message.id
       
       do {
@@ -33,8 +30,9 @@ func handleNewConversationFirstMessage(xmtpClient: XMTP.Client, apiURI: String?,
                                peerAddress: conversationV2.peerAddress,
                                createdAt: Int(conversationV2.createdAt.timeIntervalSince1970 * 1000),
                                context: ConversationContext(conversationId: conversationV2.context.conversationID,
-                                                            metadata: conversationV2.context.metadata))
-                               // add spamScore
+                                                            metadata: conversationV2.context.metadata),
+                               spamScore: spamScore
+          )
         }
         try saveMessage(account: xmtpClient.address,
                         topic: message.topic,
@@ -244,12 +242,12 @@ func getJsonReaction(reaction: Reaction) -> String? {
 }
 
 func computeSpamScore(address: String, message: String, sentViaConverse: Bool, contentType: String) -> Double {
-  // Manage spam score for first message
-  if (address.hasPrefix("0x0000") && address.hasSuffix("0000"))
-      || containsURL(input: message)
-      || !sentViaConverse {
-    return 1
-  } else {
-    return -1
+  var spamScore: Double = 0.0
+  if containsURL(input: message) {
+    spamScore += 1
   }
+  if sentViaConverse {
+    spamScore -= 1
+  }
+  return spamScore
 }
