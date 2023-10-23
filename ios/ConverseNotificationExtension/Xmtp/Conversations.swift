@@ -9,8 +9,13 @@ import Foundation
 import XMTP
 import CryptoKit
 
-func handleNewConversation(xmtpClient: XMTP.Client, envelope: XMTP.Envelope) async -> XMTP.Conversation? {
+func getNewConversationFromEnvelope(xmtpClient: XMTP.Client, contentTopic: String, encodedMessage: String) async -> XMTP.Conversation? {
   do {
+    let encryptedMessageData = Data(base64Encoded: Data(encodedMessage.utf8))!
+    let envelope = XMTP.Envelope.with { envelope in
+      envelope.message = encryptedMessageData
+      envelope.contentTopic = contentTopic
+    }
     if (isInviteTopic(topic: envelope.contentTopic)) {
       let conversation = try await xmtpClient.conversations.fromInvite(envelope: envelope)
       switch conversation {
@@ -19,7 +24,6 @@ func handleNewConversation(xmtpClient: XMTP.Client, envelope: XMTP.Envelope) asy
         formatter.formatOptions.insert(.withFractionalSeconds)
         let createdAt = formatter.string(from: conversationV2.createdAt)
         persistDecodedConversation(account: xmtpClient.address, conversation: conversation)
-        try saveConversation(account: xmtpClient.address, topic: conversationV2.topic, peerAddress: conversationV2.peerAddress, createdAt: Int(conversationV2.createdAt.timeIntervalSince1970 * 1000), context: ConversationContext(conversationId: conversationV2.context.conversationID, metadata: conversationV2.context.metadata))
       }
       default: do {}
       }
@@ -30,15 +34,6 @@ func handleNewConversation(xmtpClient: XMTP.Client, envelope: XMTP.Envelope) asy
     print("[NotificationExtension] Could not decode new conversation envelope \(error)")
   }
   return nil
-}
-
-func getNewConversationFromEnvelope(xmtpClient: XMTP.Client, contentTopic: String, encodedMessage: String) async -> XMTP.Conversation? {
-  let encryptedMessageData = Data(base64Encoded: Data(encodedMessage.utf8))!
-  let envelope = XMTP.Envelope.with { envelope in
-    envelope.message = encryptedMessageData
-    envelope.contentTopic = contentTopic
-  }
-  return await handleNewConversation(xmtpClient: xmtpClient, envelope: envelope)
 }
 
 func loadSavedConversations() -> [SavedNotificationConversation] {
