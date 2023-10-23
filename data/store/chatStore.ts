@@ -6,7 +6,7 @@ import { lastValueInMap } from "../../utils/map";
 import { zustandMMKVStorage } from "../../utils/mmkv";
 import { subscribeToNotifications } from "../../utils/notifications";
 import { omit } from "../../utils/objects";
-import { computeSpamScore } from "../../utils/xmtpRN/conversations";
+import { handleSpamScore } from "../../utils/xmtpRN/conversations";
 import {
   markAllConversationsAsReadInDb,
   markConversationReadUntil,
@@ -278,24 +278,6 @@ export const initChatStore = (account: string) => {
                   shouldResubscribe = true;
                 }
 
-                // Set spamScore if needed
-                if (!conversation.spamScore) {
-                  const firstMessage = conversation.messages.get(
-                    conversation.messagesIds[0]
-                  );
-                  if (firstMessage) {
-                    const spamScore = computeSpamScore(
-                      conversation.peerAddress,
-                      firstMessage.content,
-                      firstMessage.sentViaConverse,
-                      firstMessage.contentType
-                    );
-                    setImmediate(() => {
-                      state.setSpamScore(message.topic, spamScore);
-                    });
-                  }
-                }
-
                 // Default message status is sent
                 if (!message.status) message.status = "sent";
                 const alreadyMessage = conversation.messages.get(message.id);
@@ -331,6 +313,7 @@ export const initChatStore = (account: string) => {
                     );
                   }
                 }
+
                 // Let's check if it's a reaction to a message
                 if (
                   message.referencedMessageId &&
@@ -352,6 +335,13 @@ export const initChatStore = (account: string) => {
                       referencedMessage.lastUpdateAt = now();
                     }
                   }
+                }
+
+                // Set spamScore if needed
+                if (!conversation.spamScore) {
+                  setImmediate(() => {
+                    handleSpamScore(account, conversation, message);
+                  });
                 }
               }
 
