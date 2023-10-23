@@ -29,7 +29,13 @@ struct SavedNotificationConversation: Codable {
   var createdAt: Int
   var context: ConversationContext?
   var account: String
-  var spamScore: Double?
+  var spamScore: Double? {
+    didSet {
+      if let value = spamScore {
+        spamScore = (value * 100).rounded() / 100
+      }
+    }
+  }
 }
 
 struct Accounts: Codable {

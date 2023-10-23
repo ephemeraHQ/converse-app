@@ -49,8 +49,8 @@ func loadSavedConversations() -> [SavedNotificationConversation] {
   }
 }
 
-func saveConversation(account: String, topic: String, peerAddress: String, createdAt: Int, context: ConversationContext?) throws {
-  let savedConversation = SavedNotificationConversation(topic: topic, peerAddress: peerAddress, createdAt: createdAt, context: context, account: account)
+func saveConversation(account: String, topic: String, peerAddress: String, createdAt: Int, context: ConversationContext?, spamScore: Double?) throws {
+  var savedConversation = SavedNotificationConversation(topic: topic, peerAddress: peerAddress, createdAt: createdAt, context: context, account: account, spamScore: spamScore)
   var savedConversationsList = loadSavedConversations()
   savedConversationsList.append(savedConversation)
   let encodedValue = try JSONEncoder().encode(savedConversationsList)
