@@ -8,6 +8,7 @@ import { Conversation as DbConversation } from "../../data/db/entities/conversat
 import { getPendingConversationsToCreate } from "../../data/helpers/conversations/pendingConversations";
 import { saveConversations } from "../../data/helpers/conversations/upsertConversations";
 import { XmtpConversation } from "../../data/store/chatStore";
+import { URL_REGEX } from "../../utils/regex";
 import { getTopicDataFromKeychain, saveTopicDataToKeychain } from "../keychain";
 import { sentryTrackError } from "../sentry";
 import { getXmtpClient } from "./client";
@@ -218,4 +219,20 @@ export const createPendingConversations = async (account: string) => {
     `Trying to create ${pendingConvos.length} pending conversations...`
   );
   await Promise.all(pendingConvos.map((c) => createConversation(account, c)));
+};
+
+export const computeSpamScore = (
+  address: string,
+  message: string,
+  sentViaConverse: boolean,
+  contentType: string
+): number => {
+  let spamScore: number = 0.0;
+  if (URL_REGEX.test(message)) {
+    spamScore += 1;
+  }
+  if (sentViaConverse) {
+    spamScore -= 1;
+  }
+  return spamScore;
 };
