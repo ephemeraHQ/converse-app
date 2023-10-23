@@ -7,7 +7,12 @@ import {
 import { Conversation as DbConversation } from "../../data/db/entities/conversationEntity";
 import { getPendingConversationsToCreate } from "../../data/helpers/conversations/pendingConversations";
 import { saveConversations } from "../../data/helpers/conversations/upsertConversations";
-import { XmtpConversation } from "../../data/store/chatStore";
+import { getChatStore } from "../../data/store/accountsStore";
+import {
+  XmtpConversation,
+  XmtpConversationWithUpdate,
+  XmtpMessage,
+} from "../../data/store/chatStore";
 import { URL_REGEX } from "../../utils/regex";
 import { getTopicDataFromKeychain, saveTopicDataToKeychain } from "../keychain";
 import { sentryTrackError } from "../sentry";
@@ -221,12 +226,12 @@ export const createPendingConversations = async (account: string) => {
   await Promise.all(pendingConvos.map((c) => createConversation(account, c)));
 };
 
-export const computeSpamScore = (
+const computeSpamScore = async (
   address: string,
   message: string,
   sentViaConverse: boolean,
   contentType: string
-): number => {
+): Promise<number> => {
   let spamScore: number = 0.0;
   if (URL_REGEX.test(message)) {
     spamScore += 1;
@@ -235,4 +240,22 @@ export const computeSpamScore = (
     spamScore -= 1;
   }
   return spamScore;
+};
+
+export const handleSpamScore = async (
+  account: string,
+  conversation: XmtpConversationWithUpdate,
+  message: XmtpMessage
+): Promise<void> => {
+  const firstMessage = conversation.messages.get(conversation.messagesIds[0]);
+  if (firstMessage) {
+    const spamScore = await computeSpamScore(
+      conversation.peerAddress,
+      firstMessage.content,
+      firstMessage.sentViaConverse,
+      firstMessage.contentType
+    );
+    console.log("handleSpamScore for message:", message.topic, spamScore);
+    getChatStore(account).getState().setSpamScore(message.topic, spamScore);
+  }
 };
