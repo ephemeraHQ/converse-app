@@ -238,6 +238,7 @@ export const loadSavedNotificationMessagesToContext = async () => {
             readUntil: 0,
             pending: false,
             context,
+            spamScore: c.spamScore,
           });
         }
       });
