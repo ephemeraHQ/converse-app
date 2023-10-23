@@ -311,7 +311,7 @@
 			);
 			mainGroup = 83CBB9F61A601CBA00E9B192;
 			packageReferences = (
-				4C31F4EC29AF887B0032D062 /* XCRemoteSwiftPackageReference "Alamofire" */,
+				4C31F4EC29AF887B0032D062 /* XCRemoteSwiftPackageReference "Alamofire.git" */,
 			);
 			productRefGroup = 83CBBA001A601CBA00E9B192 /* Products */;
 			projectDirPath = "";
@@ -789,6 +789,7 @@
 					"-ld_classic",
 					"-Wl",
 					"-ld_classic",
+					"-Wl -ld_classic ",
 				);
 				REACT_NATIVE_PATH = "${PODS_ROOT}/../../node_modules/react-native";
 				SDKROOT = iphoneos;
@@ -865,6 +866,7 @@
 					"-ld_classic",
 					"-Wl",
 					"-ld_classic",
+					"-Wl -ld_classic ",
 				);
 				REACT_NATIVE_PATH = "${PODS_ROOT}/../../node_modules/react-native";
 				SDKROOT = iphoneos;
@@ -905,7 +907,7 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
-		4C31F4EC29AF887B0032D062 /* XCRemoteSwiftPackageReference "Alamofire" */ = {
+		4C31F4EC29AF887B0032D062 /* XCRemoteSwiftPackageReference "Alamofire.git" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/Alamofire/Alamofire.git";
 			requirement = {
@@ -918,7 +920,7 @@
 /* Begin XCSwiftPackageProductDependency section */
 		4C31F4ED29AF887B0032D062 /* Alamofire */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 4C31F4EC29AF887B0032D062 /* XCRemoteSwiftPackageReference "Alamofire" */;
+			package = 4C31F4EC29AF887B0032D062 /* XCRemoteSwiftPackageReference "Alamofire.git" */;
 			productName = Alamofire;
 		};
 /* End XCSwiftPackageProductDependency section */
