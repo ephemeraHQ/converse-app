@@ -17,9 +17,11 @@ export const addressPrefix = (address: string) =>
   (address && address.length >= 6 ? address.slice(0, 6) : address) || "";
 
 export const conversationName = (conversation: XmtpConversation) => {
-  return (
-    conversation.conversationTitle || shortAddress(conversation.peerAddress)
-  );
+  const baseName =
+    conversation.conversationTitle || shortAddress(conversation.peerAddress);
+  const spamScorePrefix = `[${conversation.spamScore}] `;
+
+  return spamScorePrefix + baseName;
 };
 
 export const getTitleFontScale = (): number => {
