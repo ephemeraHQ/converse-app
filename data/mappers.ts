@@ -77,6 +77,7 @@ export const xmtpConversationToDb = (
   readUntil: xmtpConversation.readUntil || 0,
   pending: xmtpConversation.pending,
   version: xmtpConversation.version,
+  spamScore: xmtpConversation.spamScore,
 });
 
 export const xmtpConversationFromDb = (
@@ -118,5 +119,6 @@ export const xmtpConversationFromDb = (
     pending: dbConversation.pending,
     version: dbConversation.version,
     hasOneMessageFromMe,
+    spamScore: dbConversation.spamScore,
   };
 };

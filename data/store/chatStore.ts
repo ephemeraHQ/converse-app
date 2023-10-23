@@ -6,6 +6,7 @@ import { lastValueInMap } from "../../utils/map";
 import { zustandMMKVStorage } from "../../utils/mmkv";
 import { subscribeToNotifications } from "../../utils/notifications";
 import { omit } from "../../utils/objects";
+import { computeSpamScore } from "../../utils/xmtpRN/conversations";
 import {
   markAllConversationsAsReadInDb,
   markConversationReadUntil,
@@ -81,7 +82,6 @@ export type ChatStoreType = {
   resyncing: boolean;
   reconnecting: boolean;
   topicsStatus: { [topic: string]: "deleted" | "consented" };
-  spamScore?: number;
 
   sortedConversationsWithPreview: ConversationsListItems;
   setSortedConversationsWithPreview: (items: ConversationsListItems) => void;
@@ -120,7 +120,7 @@ export type ChatStoreType = {
     [topic: string]: "deleted" | "consented";
   }) => void;
 
-  setSpamScore: (spamScore: number) => void;
+  setSpamScore: (topic: string, spamScore: number) => void;
 };
 
 const now = () => new Date().getTime();
@@ -277,6 +277,23 @@ export const initChatStore = (account: string) => {
                   isUpdated = true;
                   shouldResubscribe = true;
                 }
+
+                // Set spamScore if needed
+                if (!conversation.spamScore) {
+                  const firstMessage = conversation.messages.get(
+                    conversation.messagesIds[0]
+                  );
+                  if (firstMessage) {
+                    const spamScore = computeSpamScore(
+                      conversation.peerAddress,
+                      firstMessage.content,
+                      firstMessage.sentViaConverse,
+                      firstMessage.contentType
+                    );
+                    state.setSpamScore(message.topic, spamScore);
+                  }
+                }
+
                 // Default message status is sent
                 if (!message.status) message.status = "sent";
                 const alreadyMessage = conversation.messages.get(message.id);
@@ -465,7 +482,13 @@ export const initChatStore = (account: string) => {
                 topicsStatus: { ...state.topicsStatus, ...topicsStatus },
               };
             }),
-          setSpamScore: (spamScore) => set(() => ({ spamScore })),
+          setSpamScore: (topic: string, spamScore: number) =>
+            set((state) => {
+              if (state.conversations[topic]) {
+                state.conversations[topic].spamScore = spamScore;
+              }
+              return state;
+            }),
         }) as ChatStoreType,
       {
         name: `store-${account}-chat`, // Account-based storage so each account can have its own chat data
@@ -476,7 +499,6 @@ export const initChatStore = (account: string) => {
           lastSyncedAt: state.lastSyncedAt,
           lastSyncedTopics: state.lastSyncedTopics,
           topicsStatus: state.topicsStatus,
-          spamScore: state.spamScore,
         }),
         version: 1,
         migrate: (persistedState: any, version: number): ChatStoreType => {
