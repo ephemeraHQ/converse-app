@@ -1,6 +1,7 @@
 import { utils } from "@noble/secp256k1";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useDisconnect, useSigner } from "@thirdweb-dev/react-native";
+import { Signer } from "@xmtp/xmtp-js";
 import { Wallet } from "ethers";
 import * as Linking from "expo-linking";
 import React, { useCallback, useEffect, useRef, useState } from "react";
@@ -36,7 +37,6 @@ import { pick } from "../utils/objects";
 import { shortAddress } from "../utils/str";
 import { getXmtpKeysFromSigner, isOnXmtp } from "../utils/xmtpJS/client";
 import { getXmtpClient } from "../utils/xmtpRN/client";
-import { Signer } from "../vendor/xmtp-js/src";
 
 export default function OnboardingScreen() {
   const { desktopConnectSessionId, addingNewAccount, setAddingNewAccount } =
