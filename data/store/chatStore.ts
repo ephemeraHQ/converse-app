@@ -33,6 +33,7 @@ export type XmtpConversation = {
   hasOneMessageFromMe?: boolean;
   pending: boolean;
   version: string;
+  spamScore?: number;
 };
 
 export type XmtpConversationWithUpdate = XmtpConversation & {
@@ -80,6 +81,7 @@ export type ChatStoreType = {
   resyncing: boolean;
   reconnecting: boolean;
   topicsStatus: { [topic: string]: "deleted" | "consented" };
+  spamScore?: number;
 
   sortedConversationsWithPreview: ConversationsListItems;
   setSortedConversationsWithPreview: (items: ConversationsListItems) => void;
@@ -117,6 +119,8 @@ export type ChatStoreType = {
   setTopicsStatus: (topicsStatus: {
     [topic: string]: "deleted" | "consented";
   }) => void;
+
+  setSpamScore: (spamScore: number) => void;
 };
 
 const now = () => new Date().getTime();
@@ -461,6 +465,7 @@ export const initChatStore = (account: string) => {
                 topicsStatus: { ...state.topicsStatus, ...topicsStatus },
               };
             }),
+          setSpamScore: (spamScore) => set(() => ({ spamScore })),
         }) as ChatStoreType,
       {
         name: `store-${account}-chat`, // Account-based storage so each account can have its own chat data
@@ -471,6 +476,7 @@ export const initChatStore = (account: string) => {
           lastSyncedAt: state.lastSyncedAt,
           lastSyncedTopics: state.lastSyncedTopics,
           topicsStatus: state.topicsStatus,
+          spamScore: state.spamScore,
         }),
         version: 1,
         migrate: (persistedState: any, version: number): ChatStoreType => {
