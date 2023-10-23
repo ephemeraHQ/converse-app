@@ -39,6 +39,9 @@ export class Conversation {
   @Column("text", { default: "v2" })
   version!: string;
 
+  @Column("decimal", { precision: 6, scale: 2, nullable: true, default: null })
+  spamScore?: number;
+
   @OneToMany("Message", (message: Message) => message.conversation, {
     // Disabling foreign key creation to be able to save messages from not-yet known conversations
     createForeignKeyConstraints: false,
