@@ -290,7 +290,9 @@ export const initChatStore = (account: string) => {
                       firstMessage.sentViaConverse,
                       firstMessage.contentType
                     );
-                    state.setSpamScore(message.topic, spamScore);
+                    setImmediate(() => {
+                      state.setSpamScore(message.topic, spamScore);
+                    });
                   }
                 }
 
