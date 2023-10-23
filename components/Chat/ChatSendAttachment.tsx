@@ -1,7 +1,7 @@
+import { Image } from "expo-image";
 import { StatusBar } from "expo-status-bar";
 import { useCallback, useEffect } from "react";
 import {
-  Image,
   StyleSheet,
   useColorScheme,
   Text,
@@ -53,7 +53,7 @@ export default function ChatSendAttachment() {
         <Image
           source={{ uri: mediaPreview.mediaURI }}
           style={styles.image}
-          resizeMode="contain"
+          contentFit="contain"
         />
       </View>
       {Platform.OS === "ios" && (

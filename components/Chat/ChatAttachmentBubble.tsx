@@ -1,16 +1,10 @@
 import { DecryptedLocalAttachment } from "@xmtp/react-native-sdk";
+import { Image } from "expo-image";
 import * as Linking from "expo-linking";
 import mime from "mime";
 import prettyBytes from "pretty-bytes";
 import { useCallback, useEffect, useRef, useState } from "react";
-import {
-  Image,
-  Platform,
-  StyleSheet,
-  Text,
-  useColorScheme,
-  View,
-} from "react-native";
+import { Platform, StyleSheet, Text, useColorScheme, View } from "react-native";
 
 import { useAccountsStore } from "../../data/store/accountsStore";
 import {
@@ -273,6 +267,7 @@ export default function ChatAttachmentBubble({ message }: Props) {
       <>
         <Image
           source={{ uri: `file://${attachment.mediaURL}` }}
+          contentFit="contain"
           style={[styles.imagePreview, { aspectRatio }]}
         />
         <View style={styles.metadataContainer}>{metadataView}</View>
@@ -287,7 +282,6 @@ const useStyles = () => {
     imagePreview: {
       borderRadius: 14,
       width: "100%",
-      resizeMode: "contain",
       zIndex: 1,
     },
     text: {

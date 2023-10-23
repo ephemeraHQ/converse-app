@@ -1,7 +1,7 @@
 import { useNavigationState } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import { Image } from "expo-image";
 import { Platform, StyleSheet, Text, View, useColorScheme } from "react-native";
-import FastImage from "react-native-fast-image";
 
 import IconLoading from "../../assets/icon-loading.png";
 import { RecommendationData } from "../../data/store/recommendationsStore";
@@ -67,9 +67,9 @@ export function Recommendation({
                 : { alignItems: "center" },
             ]}
           >
-            <FastImage
+            <Image
               source={{ uri: t.image }}
-              defaultSource={IconLoading}
+              placeholder={IconLoading}
               style={[
                 styles.recommendationImage,
                 embedInChat ? { top: 2 } : {},

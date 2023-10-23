@@ -1,3 +1,4 @@
+import { Image } from "expo-image";
 import React from "react";
 import {
   ColorValue,
@@ -9,7 +10,6 @@ import {
   ViewStyle,
   useColorScheme,
 } from "react-native";
-import FastImage from "react-native-fast-image";
 
 import IconLoading from "../../assets/icon-loading.png";
 import { textSecondaryColor } from "../../utils/colors";
@@ -36,10 +36,10 @@ export const TableViewImage = ({ imageURI }: { imageURI?: string }) => {
           defaultSource={IconLoading}
         />
       ) : (
-        <FastImage
+        <Image
           source={{ uri: imageURI }}
           style={imageStyle}
-          defaultSource={IconLoading}
+          placeholder={IconLoading}
         />
       )}
     </View>
