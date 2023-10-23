@@ -29,6 +29,7 @@ struct SavedNotificationConversation: Codable {
   var createdAt: Int
   var context: ConversationContext?
   var account: String
+  var spamScore: Double?
 }
 
 struct Accounts: Codable {
