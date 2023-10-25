@@ -91,7 +91,7 @@ func handleOngoingConversationMessage(xmtpClient: XMTP.Client, envelope: XMTP.En
   let sentViaConverse = body["sentViaConverse"] as? Bool ?? false
   var messageId: String? = nil
   
-  let decodedMessage = try! await decodeMessage(xmtpClient: xmtpClient, envelope: envelope)
+  let decodedMessage = try? await decodeMessage(xmtpClient: xmtpClient, envelope: envelope)
   let decodedMessageResult = handleMessageByContentType(decodedMessage: decodedMessage!, xmtpClient: xmtpClient, sentViaConverse: sentViaConverse);
   
   if decodedMessageResult.senderAddress == xmtpClient.address || decodedMessageResult.forceIgnore {
