@@ -24,7 +24,6 @@ func handleNewConversationFirstMessage(xmtpClient: XMTP.Client, apiURI: String?,
       
       do {
         if case .v2(let conversationV2) = conversation {
-          print("save ?")
           try saveConversation(account: xmtpClient.address,
                                topic: conversationV2.topic,
                                peerAddress: conversationV2.peerAddress,

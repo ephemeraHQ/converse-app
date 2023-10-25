@@ -9,13 +9,8 @@ import Foundation
 import XMTP
 import CryptoKit
 
-func getNewConversationFromEnvelope(xmtpClient: XMTP.Client, contentTopic: String, encodedMessage: String) async -> XMTP.Conversation? {
+func getNewConversationFromEnvelope(xmtpClient: XMTP.Client, envelope: XMTP.Envelope) async -> XMTP.Conversation? {
   do {
-    let encryptedMessageData = Data(base64Encoded: Data(encodedMessage.utf8))!
-    let envelope = XMTP.Envelope.with { envelope in
-      envelope.message = encryptedMessageData
-      envelope.contentTopic = contentTopic
-    }
     if (isInviteTopic(topic: envelope.contentTopic)) {
       let conversation = try await xmtpClient.conversations.fromInvite(envelope: envelope)
       switch conversation {
