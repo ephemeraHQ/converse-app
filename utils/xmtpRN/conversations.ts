@@ -259,12 +259,6 @@ export const handleSpamScore = async (
       firstMessage.contentType
     );
 
-    // @todo remove
-    console.log(
-      "== handleSpamScore for message:",
-      firstMessage.topic,
-      spamScore
-    );
     getChatStore(account)
       .getState()
       .setSpamScore(firstMessage.topic, spamScore);
