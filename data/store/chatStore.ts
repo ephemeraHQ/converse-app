@@ -343,7 +343,6 @@ export const initChatStore = (account: string) => {
                     handleSpamScore(account, conversation);
                   });
                   isUpdated = true;
-                  newState.conversations[topic].lastUpdateAt = now();
                 }
               }
 
