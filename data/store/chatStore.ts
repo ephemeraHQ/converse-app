@@ -182,6 +182,8 @@ export const initChatStore = (account: string) => {
                     c.hasOneMessageFromMe ||
                     state.conversations[c.topic]?.hasOneMessageFromMe ||
                     false,
+                  spamScore:
+                    c.spamScore || state.conversations[c.topic]?.spamScore,
                 };
               });
 
