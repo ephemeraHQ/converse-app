@@ -52,6 +52,7 @@ export default function WebviewPreview({
       javaScriptEnabled
       originWhitelist={["*"]}
       allowFileAccess
+      androidLayerType="hardware"
     />
   );
 }
