@@ -21,7 +21,7 @@ func handleNewConversationFirstMessage(xmtpClient: XMTP.Client, apiURI: String?,
         messageId = message.id
         var messageContent: String? = nil
         let contentType = getContentTypeString(type: message.encodedContent.type)
-        if contentType == "text" {
+        if (contentType.starts(with: "xmtp.org/text:")) {
           messageContent = String(data: message.encodedContent.content, encoding: .utf8) ?? "New message"
         }
         let spamScore = computeSpamScore(address: conversation.peerAddress, message: messageContent, sentViaConverse: message.sentViaConverse, contentType: contentType)
@@ -63,6 +63,7 @@ func handleNewConversationFirstMessage(xmtpClient: XMTP.Client, apiURI: String?,
         }
         if spamScore >= 1 {
           print("[NotificationExtension] Not showing a notification because considered spam")
+          shouldShowNotification = false
         } else {
           subscribeToTopic(apiURI: apiURI, account: xmtpClient.address, pushToken: pushToken, topic: conversation.topic)
           shouldShowNotification = true
