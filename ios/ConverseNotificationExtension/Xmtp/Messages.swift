@@ -14,60 +14,64 @@ func handleNewConversationFirstMessage(xmtpClient: XMTP.Client, apiURI: String?,
   var messageId: String? = nil
   
   while attempts < 5 { // 5 attempts * 4s = 20s
-    let messages = try! await conversation.messages(limit: 1, direction: .ascending)
-    if !messages.isEmpty {
-      let message = messages[0]
-      messageId = message.id
-      var messageContent: String? = nil
-      let contentType = getContentTypeString(type: message.encodedContent.type)
-      if contentType == "text" {
-        messageContent = String(data: message.encodedContent.content, encoding: .utf8) ?? "New message"
-      }
-      let spamScore = computeSpamScore(address: conversation.peerAddress, message: messageContent, sentViaConverse: message.sentViaConverse, contentType: contentType)
-      do {
-        if case .v2(let conversationV2) = conversation {
-          try saveConversation(
-            account: xmtpClient.address,
-            topic: conversationV2.topic,
-            peerAddress: conversationV2.peerAddress,
-            createdAt: Int(conversationV2.createdAt.timeIntervalSince1970 * 1000),
-            context: ConversationContext(
-              conversationId: conversationV2.context.conversationID,
-              metadata: conversationV2.context.metadata
-            ),
-            spamScore: spamScore
-          )
+    do {
+      let messages = try await conversation.messages(limit: 1, direction: .ascending)
+      if !messages.isEmpty {
+        let message = messages[0]
+        messageId = message.id
+        var messageContent: String? = nil
+        let contentType = getContentTypeString(type: message.encodedContent.type)
+        if contentType == "text" {
+          messageContent = String(data: message.encodedContent.content, encoding: .utf8) ?? "New message"
         }
-        let decodedMessageResult = handleContentTypes(decodedMessage: message, xmtpClient: xmtpClient, sentViaConverse: message.sentViaConverse);
-        
-        if decodedMessageResult.senderAddress == xmtpClient.address || decodedMessageResult.forceIgnore {
-          // Message is from me or a reaction removal, let's drop it
-          print("[NotificationExtension] Not showing a notification")
-          break
-        } else if let content = decodedMessageResult.content {
-          bestAttemptContent.title = shortAddress(address: conversation.peerAddress)
-          bestAttemptContent.body = content
-          shouldShowNotification = true
-          messageId = decodedMessageResult.id
-          if let body = bestAttemptContent.userInfo["body"] as? [String: Any] {
-            var updatedBody = body
-            updatedBody["topic"] = conversation.topic
-            bestAttemptContent.userInfo.updateValue(updatedBody, forKey: "body")
+        let spamScore = computeSpamScore(address: conversation.peerAddress, message: messageContent, sentViaConverse: message.sentViaConverse, contentType: contentType)
+        do {
+          if case .v2(let conversationV2) = conversation {
+            try saveConversation(
+              account: xmtpClient.address,
+              topic: conversationV2.topic,
+              peerAddress: conversationV2.peerAddress,
+              createdAt: Int(conversationV2.createdAt.timeIntervalSince1970 * 1000),
+              context: ConversationContext(
+                conversationId: conversationV2.context.conversationID,
+                metadata: conversationV2.context.metadata
+              ),
+              spamScore: spamScore
+            )
           }
+          let decodedMessageResult = handleContentTypes(decodedMessage: message, xmtpClient: xmtpClient, sentViaConverse: message.sentViaConverse);
+          
+          if decodedMessageResult.senderAddress == xmtpClient.address || decodedMessageResult.forceIgnore {
+            // Message is from me or a reaction removal, let's drop it
+            print("[NotificationExtension] Not showing a notification")
+            break
+          } else if let content = decodedMessageResult.content {
+            bestAttemptContent.title = shortAddress(address: conversation.peerAddress)
+            bestAttemptContent.body = content
+            shouldShowNotification = true
+            messageId = decodedMessageResult.id
+            if let body = bestAttemptContent.userInfo["body"] as? [String: Any] {
+              var updatedBody = body
+              updatedBody["topic"] = conversation.topic
+              bestAttemptContent.userInfo.updateValue(updatedBody, forKey: "body")
+            }
+          }
+        } catch {
+          sentryTrackMessage(message: "NOTIFICATION_SAVE_MESSAGE_ERROR", extras: ["error": error])
+          print("[NotificationExtension] ERROR WHILE SAVING MESSAGE \(error)")
+          break
         }
-      } catch {
-        sentryTrackMessage(message: "NOTIFICATION_SAVE_MESSAGE_ERROR", extras: ["error": error])
-        print("[NotificationExtension] ERROR WHILE SAVING MESSAGE \(error)")
+        if spamScore >= 1 {
+          print("[NotificationExtension] Not showing a notification because considered spam")
+        } else {
+          subscribeToTopic(apiURI: apiURI, account: xmtpClient.address, pushToken: pushToken, topic: conversation.topic)
+          shouldShowNotification = true
+        }
         break
       }
-      
-      if spamScore >= 1 {
-        print("[NotificationExtension] Not showing a notification because considered spam")
-      } else {
-        subscribeToTopic(apiURI: apiURI, account: xmtpClient.address, pushToken: pushToken, topic: conversation.topic)
-        shouldShowNotification = true
-      }
-      
+    } catch {
+      sentryTrackMessage(message: "NOTIFICATION_SAVE_MESSAGE_ERROR", extras: ["error": error])
+      print("[NotificationExtension] Error fetching messages: \(error)")
       break
     }
     
