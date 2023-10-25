@@ -476,10 +476,11 @@ export const initChatStore = (account: string) => {
             }),
           setSpamScore: (topic: string, spamScore: number) =>
             set((state) => {
-              if (state.conversations[topic]) {
-                state.conversations[topic].spamScore = spamScore;
+              const newState = { ...state };
+              if (newState.conversations[topic]) {
+                newState.conversations[topic].spamScore = spamScore;
               }
-              return state;
+              return newState;
             }),
         }) as ChatStoreType,
       {
