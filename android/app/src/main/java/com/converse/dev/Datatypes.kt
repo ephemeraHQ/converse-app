@@ -7,7 +7,7 @@ class ConversationContext(val conversationId: String, val metadata: Map<String, 
 class Accounts(val currentAccount: String, val accounts: Array<String>, val databaseId: Map<String, String>? = null)
 class AccountsStore(val state: Accounts, val version: Int)
 class SavedNotificationConversation(val topic: String, val peerAddress: String, val createdAt: Long, val context: ConversationContext?, val account: String? = null, var spamScore: Double? = null) {
-  // Set spamScore with rounded value every time, if not null
+  // Whenever spamScore is set, round it to two decimal to ensure it fits as a 2-digit float in the database
   set(value) {
     field = value?.let { Math.round(it * 100).toDouble() / 100 }
   }
