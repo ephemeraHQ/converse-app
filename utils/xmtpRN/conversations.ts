@@ -11,7 +11,6 @@ import { getChatStore } from "../../data/store/accountsStore";
 import {
   XmtpConversation,
   XmtpConversationWithUpdate,
-  XmtpMessage,
 } from "../../data/store/chatStore";
 import { URL_REGEX } from "../../utils/regex";
 import { getTopicDataFromKeychain, saveTopicDataToKeychain } from "../keychain";
@@ -244,9 +243,13 @@ const computeSpamScore = async (
 
 export const handleSpamScore = async (
   account: string,
-  conversation: XmtpConversationWithUpdate,
-  message: XmtpMessage
+  conversation: XmtpConversationWithUpdate
 ): Promise<void> => {
+  if (!conversation.messagesIds.length) {
+    console.warn("No message ID found in the conversation");
+    return;
+  }
+
   const firstMessage = conversation.messages.get(conversation.messagesIds[0]);
   if (firstMessage) {
     const spamScore = await computeSpamScore(
@@ -255,7 +258,15 @@ export const handleSpamScore = async (
       firstMessage.sentViaConverse,
       firstMessage.contentType
     );
-    console.log("handleSpamScore for message:", message.topic, spamScore);
-    getChatStore(account).getState().setSpamScore(message.topic, spamScore);
+
+    // @todo remove
+    console.log(
+      "== handleSpamScore for message:",
+      firstMessage.topic,
+      spamScore
+    );
+    getChatStore(account)
+      .getState()
+      .setSpamScore(firstMessage.topic, spamScore);
   }
 };
