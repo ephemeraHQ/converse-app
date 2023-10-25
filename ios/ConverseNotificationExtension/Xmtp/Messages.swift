@@ -39,7 +39,6 @@ func handleNewConversationFirstMessage(xmtpClient: XMTP.Client, apiURI: String?,
           )
         }
         let decodedMessageResult = handleContentTypes(decodedMessage: message, xmtpClient: xmtpClient, sentViaConverse: message.sentViaConverse);
-        print("!!!! decodedMessageResult: ", decodedMessageResult)
         
         if decodedMessageResult.senderAddress == xmtpClient.address || decodedMessageResult.forceIgnore {
           // Message is from me or a reaction removal, let's drop it
@@ -64,12 +63,12 @@ func handleNewConversationFirstMessage(xmtpClient: XMTP.Client, apiURI: String?,
       
       if spamScore >= 1 {
         print("[NotificationExtension] Not showing a notification because considered spam")
-        break
       } else {
         subscribeToTopic(apiURI: apiURI, account: xmtpClient.address, pushToken: pushToken, topic: conversation.topic)
         shouldShowNotification = true
-        break
       }
+      
+      break
     }
     
     // Wait for 4 seconds before the next attempt
@@ -284,15 +283,14 @@ func getJsonReaction(reaction: Reaction) -> String? {
 
 func computeSpamScore(address: String, message: String?, sentViaConverse: Bool, contentType: String) -> Double {
   var spamScore: Double = 0.0
-  if (message != nil) {
-    if containsURL(input: message!) {
-      spamScore += 1
-    }
+
+  // Spam checking rules
+  if let unwrappedMessage = message, containsURL(input: unwrappedMessage) {
+    spamScore += 1
   }
   if sentViaConverse {
     spamScore -= 1
   }
   
-  print("spamScore from function: ", spamScore)
   return spamScore
 }
