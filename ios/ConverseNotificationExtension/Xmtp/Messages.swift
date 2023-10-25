@@ -39,7 +39,7 @@ func handleNewConversationFirstMessage(xmtpClient: XMTP.Client, apiURI: String?,
               spamScore: spamScore
             )
           }
-          let decodedMessageResult = handleContentTypes(decodedMessage: message, xmtpClient: xmtpClient, sentViaConverse: message.sentViaConverse);
+          let decodedMessageResult = handleMessageByContentType(decodedMessage: message, xmtpClient: xmtpClient, sentViaConverse: message.sentViaConverse);
           
           if decodedMessageResult.senderAddress == xmtpClient.address || decodedMessageResult.forceIgnore {
             // Message is from me or a reaction removal, let's drop it
@@ -91,7 +91,7 @@ func handleOngoingConversationMessage(xmtpClient: XMTP.Client, envelope: XMTP.En
   var messageId: String? = nil
   
   let decodedMessage = try! await decodeMessage(xmtpClient: xmtpClient, envelope: envelope)
-  let decodedMessageResult = handleContentTypes(decodedMessage: decodedMessage!, xmtpClient: xmtpClient, sentViaConverse: sentViaConverse);
+  let decodedMessageResult = handleMessageByContentType(decodedMessage: decodedMessage!, xmtpClient: xmtpClient, sentViaConverse: sentViaConverse);
   
   if decodedMessageResult.senderAddress == xmtpClient.address || decodedMessageResult.forceIgnore {
     // Message is from me or a reaction removal, let's drop it
@@ -155,101 +155,68 @@ func decodeMessage(xmtpClient: XMTP.Client, envelope: XMTP.Envelope) async throw
   }
 }
 
-func handleContentTypes(decodedMessage: DecodedMessage, xmtpClient: XMTP.Client, sentViaConverse: Bool) -> (content: String?, senderAddress: String?, forceIgnore: Bool, id: String?) {
+func handleMessageByContentType(decodedMessage: DecodedMessage, xmtpClient: XMTP.Client, sentViaConverse: Bool) -> (content: String?, senderAddress: String?, forceIgnore: Bool, id: String?) {
   let contentType = getContentTypeString(type: decodedMessage.encodedContent.type)
+  var contentToReturn: String?
+  var contentToSave: String?
+  var forceIgnore = false
   
-  switch contentType {
-  
-  case let type where type.starts(with: "xmtp.org/text:"):
-    do {
-      let decodedContent: String? = try? decodedMessage.content()
-      if let content = decodedContent {
-        // Save the notification for immediate display
-        try saveMessage(
-          account: xmtpClient.address,
-          topic: decodedMessage.topic,
-          sent: decodedMessage.sent,
-          senderAddress: decodedMessage.senderAddress,
-          content: content,
-          id: decodedMessage.id,
-          sentViaConverse: sentViaConverse,
-          contentType: contentType
-        )
-      }
-      return (decodedContent, decodedMessage.senderAddress, false, decodedMessage.id)
-    } catch {
-      sentryTrackMessage(message: "NOTIFICATION_DECODING_ERROR", extras: ["error": error, "topic": decodedMessage.topic])
-      print("[NotificationExtension] ERROR WHILE DECODING \(error)")
-      return (nil, nil, false, nil);
-    }
-      
-  case let type where type.starts(with: "xmtp.org/remoteStaticAttachment:"):
-    do {
+  do {
+    switch contentType {
+    
+    case let type where type.starts(with: "xmtp.org/text:"):
+      contentToReturn = try? decodedMessage.content()
+      contentToSave = contentToReturn
+    
+    case let type where type.starts(with: "xmtp.org/remoteStaticAttachment:"):
       let remoteAttachment: RemoteAttachment = try decodedMessage.encodedContent.decoded(with: xmtpClient)
-      if let contentToSave = getJsonRemoteAttachment(remoteAttachment: remoteAttachment) {
-        try saveMessage(
-          account: xmtpClient.address,
-          topic: decodedMessage.topic,
-          sent: decodedMessage.sent,
-          senderAddress: decodedMessage.senderAddress,
-          content: contentToSave,
-          id: decodedMessage.id,
-          sentViaConverse: sentViaConverse,
-          contentType: contentType
-        )
-      }
-      return ("📎 Media", decodedMessage.senderAddress, false, decodedMessage.id)
-    } catch {
-      sentryTrackMessage(message: "NOTIFICATION_ATTACHMENT_ERROR", extras: ["error": error, "topic": decodedMessage.topic])
-      print("[NotificationExtension] ERROR WHILE SAVING ATTACHMENT CONTENT \(error)")
-      return (nil, nil, false, nil);
-    }
-      
-  case let type where type.starts(with: "xmtp.org/reaction:"):
-    do {
-      var notificationContent:String? = "Reacted to a message";
-      var ignoreNotification = false;
+      contentToSave = getJsonRemoteAttachment(remoteAttachment: remoteAttachment)
+      contentToReturn = "📎 Media"
+    
+    case let type where type.starts(with: "xmtp.org/reaction:"):
       let reaction: Reaction? = try decodedMessage.content()
       let action = reaction?.action.rawValue
       let schema = reaction?.schema.rawValue
       let content = reaction?.content
       
-      if (action == "removed") {
-        ignoreNotification = true;
+      if action == "removed" {
+        forceIgnore = true
+      } else if action != "removed" && schema == "unicode", let reactionContent = content {
+        contentToReturn = "Reacted \(reactionContent) to a message"
+      } else {
+        contentToReturn = "Reacted to a message"
       }
-      
-      // Let's save the notification for immediate display
-      if (content != nil) {
-        if (action != "removed" && schema == "unicode") {
-          notificationContent = "Reacted \(content!) to a message";
-        }
-        if (reaction != nil) {
-          let contentToSave = getJsonReaction(reaction: reaction!);
-          if (contentToSave != nil) {
-            try saveMessage(
-              account: xmtpClient.address,
-              topic: decodedMessage.topic,
-              sent: decodedMessage.sent,
-              senderAddress: decodedMessage.senderAddress,
-              content: contentToSave!,
-              id: decodedMessage.id,
-              sentViaConverse: sentViaConverse,
-              contentType: contentType
-            )
-          }
-        }
+      if let validReaction = reaction {
+        contentToSave = getJsonReaction(reaction: validReaction)
+      } else {
+        contentToSave = nil
       }
-      return (notificationContent, decodedMessage.senderAddress, ignoreNotification, decodedMessage.id)
-    } catch {
-      sentryTrackMessage(message: "NOTIFICATION_REACTION_ERROR", extras: ["error": error, "topic": decodedMessage.topic])
-      print("[NotificationExtension] ERROR WHILE DECODING REACTION CONTENT")
-      return (nil, nil, false, nil);
+    
+    default:
+      sentryTrackMessage(message: "NOTIFICATION_UNKNOWN_CONTENT_TYPE", extras: ["contentType": contentType, "topic": decodedMessage.topic])
+      print("[NotificationExtension] UNKOWN CONTENT TYPE: \(contentType)")
+      return (nil, decodedMessage.senderAddress, false, nil)
     }
     
-  default:
-    sentryTrackMessage(message: "NOTIFICATION_UNKNOWN_CONTENT_TYPE", extras: ["contentType": contentType, "topic": decodedMessage.topic])
-    print("[NotificationExtension] UNKOWN CONTENT TYPE: \(contentType)")
-    return (nil, decodedMessage.senderAddress, false, nil)
+    // If there's content to save, save it
+    if let content = contentToSave {
+      try saveMessage(
+        account: xmtpClient.address,
+        topic: decodedMessage.topic,
+        sent: decodedMessage.sent,
+        senderAddress: decodedMessage.senderAddress,
+        content: content,
+        id: decodedMessage.id,
+        sentViaConverse: sentViaConverse,
+        contentType: contentType
+      )
+    }
+    return (contentToReturn, decodedMessage.senderAddress, forceIgnore, decodedMessage.id)
+  } catch {
+    let errorType = contentType.split(separator: "/").last ?? "UNKNOWN"
+    sentryTrackMessage(message: "NOTIFICATION_\(errorType)_ERROR", extras: ["error": error, "topic": decodedMessage.topic])
+    print("[NotificationExtension] ERROR WHILE HANDLING \(contentType) \(error)")
+    return (nil, nil, false, nil)
   }
 }
 
