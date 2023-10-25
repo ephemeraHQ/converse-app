@@ -338,9 +338,9 @@ export const initChatStore = (account: string) => {
                 }
 
                 // Set spamScore if needed
-                if (!conversation.spamScore) {
+                if (conversation.spamScore === undefined) {
                   setImmediate(() => {
-                    handleSpamScore(account, conversation, message);
+                    handleSpamScore(account, conversation);
                   });
                 }
               }
