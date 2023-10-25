@@ -37,11 +37,16 @@ func handleNotificationAsync(contentHandler: ((UNNotificationContent) -> Void), 
     }
     
     if let xmtpClient = await getXmtpClient(account: account), !isIntroTopic(topic: contentTopic) {
+      let encryptedMessageData = Data(base64Encoded: Data(encodedMessage.utf8))!
+      let envelope = XMTP.Envelope.with { envelope in
+        envelope.message = encryptedMessageData
+        envelope.contentTopic = contentTopic
+      }
+
       if isInviteTopic(topic: contentTopic) {
         guard let conversation = await getNewConversationFromEnvelope(
           xmtpClient: xmtpClient,
-          contentTopic: contentTopic,
-          encodedMessage: encodedMessage
+          envelope: envelope
         ) else {
           contentHandler(UNNotificationContent())
           return
@@ -55,12 +60,6 @@ func handleNotificationAsync(contentHandler: ((UNNotificationContent) -> Void), 
           bestAttemptContent: &content
         )
       } else {
-        let encryptedMessageData = Data(base64Encoded: Data(encodedMessage.utf8))!
-        let envelope = XMTP.Envelope.with { envelope in
-          envelope.message = encryptedMessageData
-          envelope.contentTopic = contentTopic
-        }
-        
         (shouldShowNotification, messageId) = await handleOngoingConversationMessage(
           xmtpClient: xmtpClient,
           envelope: envelope,
