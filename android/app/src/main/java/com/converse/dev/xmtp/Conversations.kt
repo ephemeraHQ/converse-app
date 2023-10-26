@@ -9,82 +9,13 @@ import com.android.volley.toolbox.Volley
 import com.beust.klaxon.Klaxon
 import com.converse.dev.*
 import com.google.crypto.tink.subtle.Base64
-import com.google.firebase.messaging.RemoteMessage
+
 import org.json.JSONObject
 import org.xmtp.android.library.Client
 import org.xmtp.android.library.Conversation
-import org.xmtp.android.library.messages.Envelope
 import org.xmtp.proto.keystore.api.v1.Keystore.TopicMap.TopicData
 import java.security.MessageDigest
 import java.util.HashMap
-
-data class NotificationDataResult(
-    val addressShort: String = "",
-    val title: String = "",
-    val body: String = "",
-    val remoteMessage: RemoteMessage? = null,
-    val messageId: String? = null,
-    val shouldShowNotification: Boolean = false
-)
-
-fun hasForbiddenPattern(address: String): Boolean { return address.startsWith("0x0000") && address.endsWith("0000") }
-data class DecodedMessageResult(
-    val content: String? = null,
-    val senderAddress: String? = null,
-    val forceIgnore: Boolean = false,
-    val id: String? = null
-)
-
-fun handleNewConversationV2Notification(appContext: Context, xmtpClient: Client, envelope: Envelope, remoteMessage: RemoteMessage, notificationData: NotificationData): Triple<String, String, RemoteMessage>? {
-    val conversation = xmtpClient.conversations.fromInvite((envelope))
-    var context: ConversationContext? = null;
-    when (conversation) {
-        is Conversation.V1 -> {
-            // Nothing to do
-        }
-        is Conversation.V2 -> {
-            val conversationV2 = conversation.conversationV2
-            if (conversationV2.context.conversationId !== null) {
-                context = ConversationContext(
-                    conversationV2.context.conversationId,
-                    conversationV2.context.metadataMap
-                )
-            }
-        }
-    }
-    Log.d("PushNotificationsService", "Decoded new conversation from invite")
-    val mmkv = getMmkv(appContext)
-    var apiURI = mmkv?.decodeString("api-uri")
-    // TODO => stop using async storage
-    if (apiURI == null) {
-        apiURI = getAsyncStorage("api-uri")
-    }
-    val pushToken = getKeychainValue("PUSH_TOKEN")
-    // Stop subscribing to new topics for now.
-//    if (apiURI != null && pushToken !== null && !hasForbiddenPattern(conversation.peerAddress)) {
-//        Log.d("PushNotificationsService", "Subscribing to new topic at api: $apiURI")
-//        subscribeToTopic(appContext, apiURI, xmtpClient.address, pushToken, conversation.topic)
-//    }
-    // Let's add the topic to the notification content
-    val newNotificationData = NotificationData(
-        notificationData.message,
-        notificationData.timestampNs,
-        notificationData.contentTopic,
-        notificationData.sentViaConverse,
-        notificationData.account,
-        conversation.topic
-    )
-    val newNotificationDataJson = Klaxon().toJsonString(newNotificationData)
-    remoteMessage.data["body"] = newNotificationDataJson
-    persistNewConversation(xmtpClient.address, conversation)
-    saveConversationToStorage(appContext, xmtpClient.address, conversation.topic, conversation.peerAddress, conversation.createdAt.time, context);
-    // Stop showing notifications for new convos for now
-    return null
-//    if (hasForbiddenPattern(conversation.peerAddress)) {
-//        return null
-//    }
-    return Triple(shortAddress(conversation.peerAddress), "New Conversation", remoteMessage)
-}
 
 fun subscribeToTopic(appContext: Context, apiURI: String, account: String, pushToken: String, topic: String) {
     val appendTopicURI = "$apiURI/api/subscribe/append"
@@ -158,7 +89,6 @@ fun persistNewConversation(account: String, conversation: Conversation) {
         Log.d("PushNotificationsService", "Could not persist conversation: $e")
     }
 }
-
 
 fun getSavedConversationTitle(appContext: Context, topic: String): String {
     try {
