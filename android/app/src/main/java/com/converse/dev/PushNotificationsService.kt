@@ -92,10 +92,12 @@ class PushNotificationsService : FirebaseMessagingService() {
         }
 
         val decodedMessage = conversation.decode(envelope)
-        Log.d("NotificationHandler", "decodedMessage.id: ${decodedMessage.id}")
-        val showNotification = notificationAlreadyShown(this, decodedMessage.id)
+        val notificationAlreadyShown = notificationAlreadyShown(this, decodedMessage.id)
 
-        if (notificationToShow != null && showNotification) {
+        Log.d(TAG, "decodedMessage.id: ${decodedMessage.id}")
+        Log.d(TAG, "notificationToShow: $notificationToShow")
+
+        if (notificationToShow != null && !notificationAlreadyShown) {
             incrementBadge(this)
             showNotification(notificationToShow.first, notificationToShow.second, notificationToShow.third)
         } else {
