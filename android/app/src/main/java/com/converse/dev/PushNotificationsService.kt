@@ -46,14 +46,6 @@ class PushNotificationsService : FirebaseMessagingService() {
     }
 
     override fun onMessageReceived(remoteMessage: RemoteMessage) {
-        super.onMessageReceived(remoteMessage)
-
-        GlobalScope.launch(Dispatchers.IO) {
-            handleReceivedMessage(remoteMessage)
-        }
-    }
-
-    private suspend fun handleReceivedMessage(remoteMessage: RemoteMessage) {
         Log.d(TAG, "Received a notification")
 
         // Check if message contains a data payload.
@@ -84,29 +76,37 @@ class PushNotificationsService : FirebaseMessagingService() {
         var shouldShowNotification = false
         var result: NotificationDataResult = NotificationDataResult()
 
-        if (isInviteTopic(notificationData.contentTopic)) {
-            Log.d(TAG, "Handling a new conversation notification")
-            result = handleNewConversationFirstMessage(this, xmtpClient, envelope, remoteMessage)
-            if (result != NotificationDataResult()) {
-                shouldShowNotification = result.shouldShowNotification
+        // Using IO dispatcher for background work, not blocking the main thread and UI
+        val appContext = this
+        GlobalScope.launch(Dispatchers.IO) {
+            try {
+                if (isInviteTopic(notificationData.contentTopic)) {
+                    Log.d(TAG, "Handling a new conversation notification")
+                    result = handleNewConversationFirstMessage(appContext, xmtpClient, envelope, remoteMessage)
+                    if (result != NotificationDataResult()) {
+                        shouldShowNotification = result.shouldShowNotification
+                    }
+                } else {
+                    Log.d(TAG, "Handling an ongoing conversation message notification")
+                    result = handleOngoingConversationMessage(appContext, xmtpClient, envelope, remoteMessage)
+                    if (result != NotificationDataResult()) {
+                        shouldShowNotification = result.shouldShowNotification
+                    }
+                }
+                val notificationAlreadyShown = notificationAlreadyShown(appContext, result.messageId)
+
+                Log.d(TAG, "** result: $result")
+                Log.d(TAG, "** notificationAlreadyShown: $notificationAlreadyShown")
+                Log.d(TAG, "** shouldShowNotification: $shouldShowNotification")
+
+                if (shouldShowNotification && !notificationAlreadyShown) {
+                    incrementBadge(appContext)
+                    result.remoteMessage?.let { showNotification(result.title, result.body, it) }
+                }
+            } catch (e: Exception) {
+                // Handle any exceptions
+                Log.e(TAG, "Error on IO Dispatcher coroutine", e)
             }
-        } else {
-            Log.d(TAG, "Handling an ongoing conversation message notification")
-            result = handleOngoingConversationMessage(this, xmtpClient, envelope, remoteMessage)
-            if (result != NotificationDataResult()) {
-                shouldShowNotification = result.shouldShowNotification
-            }
-        }
-
-        val notificationAlreadyShown = notificationAlreadyShown(this, result.messageId)
-
-        Log.d(TAG, "** result: $result")
-        Log.d(TAG, "** notificationAlreadyShown: $notificationAlreadyShown")
-        Log.d(TAG, "** shouldShowNotification: $shouldShowNotification")
-
-        if (shouldShowNotification && !notificationAlreadyShown) {
-            incrementBadge(this)
-            result.remoteMessage?.let { showNotification(result.title, result.body, it) }
         }
     }
 
