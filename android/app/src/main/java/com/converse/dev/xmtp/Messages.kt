@@ -53,21 +53,16 @@ suspend fun handleNewConversationFirstMessage(
             if (messages.isNotEmpty()) {
                 val message = messages[0]
                 messageId = message.id
-                var messageContent: String? = null
-                var conversationContext: ConversationContext? = null;
-
-
+                var conversationContext: ConversationContext? = null
                 val contentType = getContentTypeString(message.encodedContent.type)
-                if (contentType.startsWith("xmtp.org/text:")) {
-                    messageContent = message.encodedContent.content.toStringUtf8() ?: "New message"
-                }
 
                 val spamScore = computeSpamScore(
                     address = conversation.peerAddress,
-                    message = messageContent,
+                    message = message.encodedContent.content.toStringUtf8(),
                     sentViaConverse = message.sentViaConverse,
                     contentType = contentType
                 )
+                Log.d(TAG, "spamScore: $spamScore for topic: ${message.topic}")
 
                 when (conversation) {
                     is Conversation.V1 -> {
@@ -82,6 +77,7 @@ suspend fun handleNewConversationFirstMessage(
                         )
 
                         // Save conversation and its spamScore to mmkv
+                        persistNewConversation(xmtpClient.address, conversation)
                         saveConversationToStorage(
                             appContext,
                             xmtpClient.address,
@@ -103,7 +99,7 @@ suspend fun handleNewConversationFirstMessage(
 
                 if (decodedMessageResult.senderAddress == xmtpClient.address || decodedMessageResult.forceIgnore) {
                     // Drop the message
-                    Log.d(PushNotificationsService.TAG, "Not showing a notification")
+                    Log.d(TAG, "Not showing a notification")
                 } else if (decodedMessageResult.content != null) {
                     shouldShowNotification = true
                     messageId = decodedMessageResult.id // @todo probably remove this?
@@ -111,7 +107,7 @@ suspend fun handleNewConversationFirstMessage(
                 }
 
                 if (spamScore >= 1) {
-                    Log.d(PushNotificationsService.TAG, "Not showing a notification because considered spam")
+                    Log.d(TAG, "Not showing a notification because considered spam")
                     shouldShowNotification = false
                 } else {
                     val mmkv = getMmkv(appContext)
@@ -132,11 +128,13 @@ suspend fun handleNewConversationFirstMessage(
                 Log.d(TAG, "No message found in conversation, for now.")
             }
         } catch (e: Exception) {
-            Log.e(PushNotificationsService.TAG, "Error fetching messages: $e")
+            Log.e(TAG, "Error fetching messages: $e")
             break
         }
 
-        delay(4000) // Wait for 4 seconds before the next attempt
+        // Wait for 4 seconds before the next attempt
+        delay(4000)
+
         attempts++
     }
 
@@ -149,48 +147,29 @@ suspend fun handleNewConversationFirstMessage(
     )
 }
 
-suspend fun handleOngoingConversationMessage(
+fun handleOngoingConversationMessage(
     appContext: Context,
     xmtpClient: Client,
     envelope: Envelope,
     remoteMessage: RemoteMessage
 ): NotificationDataResult {
-    var conversation = getPersistedConversation(xmtpClient, envelope.contentTopic)
-    if (conversation === null) {
-        Log.d("PushNotificationsService", "No conversation found for ${envelope.contentTopic}")
-        return NotificationDataResult()
-    }
-
-    var body = ""
-    var messageContent: String? = null
-    var conversationContext: ConversationContext? = null;
-    var shouldShowNotification = false
+    val conversation = getPersistedConversation(xmtpClient, envelope.contentTopic)
+        ?: run {
+            Log.d("PushNotificationsService", "No conversation found for ${envelope.contentTopic}")
+            return NotificationDataResult()
+        }
 
     val message = conversation.decode(envelope)
-    var messageId = message.id
     val contentTopic = envelope.contentTopic
-
     var conversationTitle = getSavedConversationTitle(appContext, contentTopic)
+    var conversationContext: ConversationContext? = null
 
-    when (conversation) {
-        is Conversation.V1 -> {
-            // Nothing to do
-        }
-        is Conversation.V2 -> {
-            val conversationV2 = conversation.conversationV2
-            if (conversationV2.context.conversationId !== null) {
-                conversationContext = ConversationContext(
-                    conversationV2.context.conversationId,
-                    conversationV2.context.metadataMap
-                )
-            }
-        }
+    if (conversation is Conversation.V2 && conversation.conversationV2.context.conversationId !== null) {
+        conversationContext = ConversationContext(
+            conversation.conversationV2.context.conversationId,
+            conversation.conversationV2.context.metadataMap
+        )
     }
-
-    // persistNewConversation(xmtpClient.address, conversation)
-    // saveConversationToStorage(appContext, xmtpClient.address, conversation.topic, conversation.peerAddress, conversation.createdAt.time, conversationContext);
-
-    //////////////////////////////////////
 
     val decodedMessageResult = handleMessageByContentType(
         appContext,
@@ -199,19 +178,19 @@ suspend fun handleOngoingConversationMessage(
         xmtpClient
     )
 
-    if (decodedMessageResult.senderAddress == xmtpClient.address || decodedMessageResult.forceIgnore) {
-        Log.d(TAG, "[NotificationExtension] Not showing a notification")
-    } else if (decodedMessageResult.content != null) {
+    val shouldShowNotification = if (decodedMessageResult.senderAddress != xmtpClient.address && !decodedMessageResult.forceIgnore && decodedMessageResult.content != null) {
         if (conversationTitle.isEmpty() && decodedMessageResult.senderAddress != null) {
             conversationTitle = shortAddress(decodedMessageResult.senderAddress)
         }
-        shouldShowNotification = true
-        body = decodedMessageResult.content
+        true
+    } else {
+        Log.d(TAG, "[NotificationExtension] Not showing a notification")
+        false
     }
 
     return NotificationDataResult(
         title = conversationTitle,
-        body = body,
+        body = decodedMessageResult.content ?: "",
         remoteMessage = remoteMessage,
         messageId = decodedMessageResult.id,
         shouldShowNotification = shouldShowNotification
@@ -225,8 +204,8 @@ fun handleMessageByContentType(
     xmtpClient: Client,
 ): DecodedMessageResult {
     val contentType = getContentTypeString(decodedMessage.encodedContent.type)
-    var contentToReturn: String? = null
-    var contentToSave: String? = null
+    var contentToReturn: String?
+    var contentToSave: String?
     var forceIgnore = false
 
     try {

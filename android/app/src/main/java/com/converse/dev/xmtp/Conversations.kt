@@ -96,7 +96,7 @@ fun getSavedConversationTitle(appContext: Context, topic: String): String {
         val mmkv = getMmkv(appContext)
         val savedConversationDict = mmkv?.decodeString("conversation-$topic") ?: return ""
         val parsedConversationDict = Klaxon().parse<ConversationDictData>(savedConversationDict)
-        return parsedConversationDict?.title ?: parsedConversationDict?.shortAddress ?: "";
+        return parsedConversationDict?.title ?: parsedConversationDict?.shortAddress ?: ""
     } catch (e: Exception) {
         return ""
     }
