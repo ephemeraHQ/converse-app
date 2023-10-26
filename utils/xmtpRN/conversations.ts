@@ -37,6 +37,7 @@ const protocolConversationToStateConversation = (
   readUntil: 0,
   pending: false,
   version: conversation.version,
+  // here spamScore should be set, however it's not available in XMTP Conversation
 });
 
 const protocolConversationsToTopicData = async (
