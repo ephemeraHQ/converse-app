@@ -49,7 +49,7 @@ func handleNewConversationFirstMessage(xmtpClient: XMTP.Client, apiURI: String?,
             bestAttemptContent.title = shortAddress(address: conversation.peerAddress)
             bestAttemptContent.body = content
             shouldShowNotification = true
-            messageId = decodedMessageResult.id
+            messageId = decodedMessageResult.id // @todo probably remove this?
             if let body = bestAttemptContent.userInfo["body"] as? [String: Any] {
               var updatedBody = body
               updatedBody["topic"] = conversation.topic

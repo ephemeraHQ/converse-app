@@ -2,11 +2,11 @@ package com.converse.dev.xmtp
 
 import android.content.Context
 import android.util.Log
-import bolts.Task.delay
 import com.beust.klaxon.Klaxon
 import com.converse.dev.*
 import com.converse.dev.PushNotificationsService.Companion.TAG
 import com.google.firebase.messaging.RemoteMessage
+import kotlinx.coroutines.delay
 import org.json.JSONObject
 import org.xmtp.android.library.Client
 import org.xmtp.android.library.Conversation
@@ -106,7 +106,7 @@ suspend fun handleNewConversationFirstMessage(
                     Log.d(PushNotificationsService.TAG, "Not showing a notification")
                 } else if (decodedMessageResult.content != null) {
                     shouldShowNotification = true
-                    messageId = decodedMessageResult.id
+                    messageId = decodedMessageResult.id // @todo probably remove this?
                     body = decodedMessageResult.content
                 }
 
@@ -122,12 +122,14 @@ suspend fun handleNewConversationFirstMessage(
                     val pushToken = getKeychainValue("PUSH_TOKEN")
 
                     if (apiURI != null && pushToken !== null) {
-                        Log.d("PushNotificationsService", "Subscribing to new topic at api: $apiURI")
+                        Log.d(TAG, "Subscribing to new topic at api: $apiURI")
                         subscribeToTopic(appContext, apiURI, xmtpClient.address, pushToken, conversation.topic)
                         shouldShowNotification = true
                     }
                 }
                 break
+            } else {
+                Log.d(TAG, "No message found in conversation, for now.")
             }
         } catch (e: Exception) {
             Log.e(PushNotificationsService.TAG, "Error fetching messages: $e")
