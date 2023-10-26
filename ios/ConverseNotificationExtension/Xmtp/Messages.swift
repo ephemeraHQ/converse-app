@@ -39,7 +39,7 @@ func handleNewConversationFirstMessage(xmtpClient: XMTP.Client, apiURI: String?,
               spamScore: spamScore
             )
           }
-          let decodedMessageResult = handleMessageByContentType(decodedMessage: message, xmtpClient: xmtpClient, sentViaConverse: message.sentViaConverse);
+          let decodedMessageResult = handleMessageByContentType(decodedMessage: message, xmtpClient: xmtpClient);
           
           if decodedMessageResult.senderAddress == xmtpClient.address || decodedMessageResult.forceIgnore {
             // Message is from me or a reaction removal, let's drop it
@@ -92,7 +92,7 @@ func handleOngoingConversationMessage(xmtpClient: XMTP.Client, envelope: XMTP.En
   var messageId: String? = nil
   
   let decodedMessage = try? await decodeMessage(xmtpClient: xmtpClient, envelope: envelope)
-  let decodedMessageResult = handleMessageByContentType(decodedMessage: decodedMessage!, xmtpClient: xmtpClient, sentViaConverse: sentViaConverse);
+  let decodedMessageResult = handleMessageByContentType(decodedMessage: decodedMessage!, xmtpClient: xmtpClient);
   
   if decodedMessageResult.senderAddress == xmtpClient.address || decodedMessageResult.forceIgnore {
     // Message is from me or a reaction removal, let's drop it
@@ -156,7 +156,7 @@ func decodeMessage(xmtpClient: XMTP.Client, envelope: XMTP.Envelope) async throw
   }
 }
 
-func handleMessageByContentType(decodedMessage: DecodedMessage, xmtpClient: XMTP.Client, sentViaConverse: Bool) -> (content: String?, senderAddress: String?, forceIgnore: Bool, id: String?) {
+func handleMessageByContentType(decodedMessage: DecodedMessage, xmtpClient: XMTP.Client) -> (content: String?, senderAddress: String?, forceIgnore: Bool, id: String?) {
   let contentType = getContentTypeString(type: decodedMessage.encodedContent.type)
   var contentToReturn: String?
   var contentToSave: String?
@@ -208,7 +208,7 @@ func handleMessageByContentType(decodedMessage: DecodedMessage, xmtpClient: XMTP
         senderAddress: decodedMessage.senderAddress,
         content: content,
         id: decodedMessage.id,
-        sentViaConverse: sentViaConverse,
+        sentViaConverse: decodedMessage.sentViaConverse,
         contentType: contentType
       )
     }
