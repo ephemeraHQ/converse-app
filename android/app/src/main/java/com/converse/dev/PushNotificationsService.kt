@@ -4,11 +4,10 @@ import android.app.ActivityManager
 import android.util.Log
 import android.view.View
 import com.beust.klaxon.Klaxon
-import com.converse.dev.xmtp.getPersistedConversation
 import com.converse.dev.xmtp.NotificationDataResult
 import com.converse.dev.xmtp.getXmtpClient
-import com.converse.dev.xmtp.handleNewMessageNotification
 import com.converse.dev.xmtp.handleNewConversationFirstMessage
+import com.converse.dev.xmtp.handleOngoingConversationMessage
 import com.converse.dev.xmtp.initCodecs
 import com.facebook.react.bridge.ReactApplicationContext
 import com.google.crypto.tink.subtle.Base64
@@ -79,18 +78,15 @@ class PushNotificationsService : FirebaseMessagingService() {
         if (isInviteTopic(notificationData.contentTopic)) {
             Log.d(TAG, "Handling a new conversation notification")
             result = handleNewConversationFirstMessage(this, xmtpClient, envelope, remoteMessage)
-            if (result != null) {
+            if (result != NotificationDataResult()) {
                 shouldShowNotification = result.shouldShowNotification
             }
         } else {
-            // @todo Handling a new message notification
-            Log.d(TAG, "@todo Handling a new message notification")
-            /*
-            Log.d(TAG, "Handling a new message notification")
-            val result = handleNewMessageNotification(this, xmtpClient, envelope, remoteMessage, notificationData.sentViaConverse!!)
-            shouldShowNotification = result.first
-            messageId = result.second
-            */
+            Log.d(TAG, "Handling an ongoing conversation message notification")
+            result = handleOngoingConversationMessage(this, xmtpClient, envelope, remoteMessage)
+            if (result != NotificationDataResult()) {
+                shouldShowNotification = result.shouldShowNotification
+            }
         }
 
         val notificationAlreadyShown = notificationAlreadyShown(this, result.messageId)

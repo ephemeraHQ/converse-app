@@ -75,20 +75,21 @@ fun handleNewConversationFirstMessage(
                     }
                     is Conversation.V2 -> {
                         val conversationV2 = conversation.conversationV2
+
+                        conversationContext = ConversationContext(
+                            conversationV2.context.conversationId,
+                            conversationV2.context.metadataMap
+                        )
+
+                        // Save conversation and its spamScore to mmkv
                         saveConversationToStorage(
                             appContext,
                             xmtpClient.address,
                             conversationV2.topic,
                             conversationV2.peerAddress,
                             conversationV2.createdAt.time,
-                            ConversationContext(
-                                conversationV2.context.conversationId,
-                                conversationV2.context.metadataMap
-                            )
-                        )
-                        conversationContext = ConversationContext(
-                            conversationV2.context.conversationId,
-                            conversationV2.context.metadataMap
+                            conversationContext,
+                            spamScore,
                         )
                     }
                 }
@@ -146,9 +147,78 @@ fun handleNewConversationFirstMessage(
     )
 }
 
+fun handleOngoingConversationMessage(
+    appContext: Context,
+    xmtpClient: Client,
+    envelope: Envelope,
+    remoteMessage: RemoteMessage
+): NotificationDataResult {
+    var conversation = getPersistedConversation(xmtpClient, envelope.contentTopic)
+    if (conversation === null) {
+        Log.d("PushNotificationsService", "No conversation found for ${envelope.contentTopic}")
+        return NotificationDataResult()
+    }
+
+    var body = ""
+    var messageContent: String? = null
+    var conversationContext: ConversationContext? = null;
+    var shouldShowNotification = false
+
+    val message = conversation.decode(envelope)
+    var messageId = message.id
+    val contentTopic = envelope.contentTopic
+
+    var conversationTitle = getSavedConversationTitle(appContext, contentTopic)
+
+    when (conversation) {
+        is Conversation.V1 -> {
+            // Nothing to do
+        }
+        is Conversation.V2 -> {
+            val conversationV2 = conversation.conversationV2
+            if (conversationV2.context.conversationId !== null) {
+                conversationContext = ConversationContext(
+                    conversationV2.context.conversationId,
+                    conversationV2.context.metadataMap
+                )
+            }
+        }
+    }
+
+    // persistNewConversation(xmtpClient.address, conversation)
+    // saveConversationToStorage(appContext, xmtpClient.address, conversation.topic, conversation.peerAddress, conversation.createdAt.time, conversationContext);
+
+    //////////////////////////////////////
+
+    val decodedMessageResult = handleMessageByContentType(
+        appContext,
+        conversationContext,
+        message,
+        xmtpClient
+    )
+
+    if (decodedMessageResult.senderAddress == xmtpClient.address || decodedMessageResult.forceIgnore) {
+        Log.d(TAG, "[NotificationExtension] Not showing a notification")
+    } else if (decodedMessageResult.content != null) {
+        if (conversationTitle.isEmpty() && decodedMessageResult.senderAddress != null) {
+            conversationTitle = shortAddress(decodedMessageResult.senderAddress)
+        }
+        shouldShowNotification = true
+        body = decodedMessageResult.content
+    }
+
+    return NotificationDataResult(
+        title = conversationTitle,
+        body = body,
+        remoteMessage = remoteMessage,
+        messageId = decodedMessageResult.id,
+        shouldShowNotification = shouldShowNotification
+    )
+}
+
 fun handleMessageByContentType(
     appContext: Context,
-    conversationContext: ConversationContext?,
+    conversationContext: ConversationContext?, // @todo should we keep the convo context here? I don't think so
     decodedMessage: DecodedMessage,
     xmtpClient: Client,
 ): DecodedMessageResult {
@@ -160,13 +230,15 @@ fun handleMessageByContentType(
     try {
         when {
             contentType.startsWith("xmtp.org/text:") -> {
-                contentToReturn = decodedMessage.content()
-                contentToSave = contentToReturn
+                contentToSave = decodedMessage.body
+                contentToReturn = contentToSave
             }
+
             contentType.startsWith("xmtp.org/remoteStaticAttachment:") -> {
                 contentToSave = getJsonRemoteAttachment(decodedMessage)
                 contentToReturn = "📎 Media"
             }
+
             contentType.startsWith("xmtp.org/reaction:") -> {
                 val reaction: Reaction? = decodedMessage.content()
                 val action = reaction?.action.toString()
@@ -180,21 +252,25 @@ fun handleMessageByContentType(
                     else -> "Reacted to a message"
                 }
             }
+
             else -> {
-                sentryTrackMessage("NOTIFICATION_UNKNOWN_CONTENT_TYPE", mapOf("contentType" to contentType, "topic" to decodedMessage.topic))
+                sentryTrackMessage(
+                    "NOTIFICATION_UNKNOWN_CONTENT_TYPE",
+                    mapOf("contentType" to contentType, "topic" to decodedMessage.topic)
+                )
                 println("[NotificationExtension] UNKNOWN CONTENT TYPE: $contentType")
                 return DecodedMessageResult(null, decodedMessage.senderAddress, false, null)
             }
         }
 
+        // Save message to mmkv
         contentToSave?.let {
-            saveConversationToStorage(
+            saveMessageToStorage(
                 appContext = appContext,
                 account = xmtpClient.address,
-                topic = decodedMessage.topic,
-                peerAddress = decodedMessage.senderAddress,
-                createdAt = decodedMessage.sent.time,
-                context = conversationContext
+                decodedMessage = decodedMessage,
+                content = it,
+                contentType = contentType
             )
         }
 
@@ -211,7 +287,7 @@ fun getContentTypeString(contentType: Content.ContentTypeId): String {
     return "${contentType.authorityId}/${contentType.typeId}:${contentType.versionMajor}.${contentType.versionMinor}"
 }
 
-fun saveMessageToStorage(appContext: Context, account: String, topic: String, decodedMessage: DecodedMessage, sentViaConverse: Boolean, contentType: String) {
+fun saveMessageToStorage(appContext: Context, account: String, decodedMessage: DecodedMessage, content: String, contentType: String) {
     val mmkv = getMmkv(appContext)
     val currentSavedMessagesString = mmkv?.decodeString("saved-notifications-messages")
     Log.d("PushNotificationsService", "Got current saved messages from storage: $currentSavedMessagesString")
@@ -221,24 +297,16 @@ fun saveMessageToStorage(appContext: Context, account: String, topic: String, de
     } catch (error: Exception) {
         Log.d("PushNotificationsService", "Could not parse saved messages from storage: $currentSavedMessagesString - $error")
     }
-    var messageBody = "";
-    if (contentType.startsWith("xmtp.org/text:")) {
-        messageBody = decodedMessage.body;
-    } else if (contentType.startsWith("xmtp.org/remoteStaticAttachment:")) {
-        messageBody = getJsonRemoteAttachment(decodedMessage);
-    } else if (contentType.startsWith("xmtp.org/reaction:")) {
-        messageBody = getJsonReaction(decodedMessage);
-    }
-    if (messageBody.isEmpty()) {
+    if (content.isEmpty()) {
         return;
     }
     val newMessageToSave = SavedNotificationMessage(
-        topic=topic,
-        content=messageBody,
+        topic=decodedMessage.topic,
+        content=content,
         senderAddress=decodedMessage.senderAddress,
         sent=decodedMessage.sent.time,
         id=decodedMessage.id,
-        sentViaConverse=sentViaConverse,
+        sentViaConverse=decodedMessage.sentViaConverse,
         contentType=contentType,
         account=account
     )
