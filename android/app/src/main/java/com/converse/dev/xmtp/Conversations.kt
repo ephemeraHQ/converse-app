@@ -37,7 +37,7 @@ fun subscribeToTopic(appContext: Context, apiURI: String, account: String, pushT
     Volley.newRequestQueue(appContext).add(jsonRequest)
 }
 
-fun saveConversationToStorage(appContext: Context, account: String, topic: String, peerAddress: String, createdAt: Long, context: ConversationContext?) {
+fun saveConversationToStorage(appContext: Context, account: String, topic: String, peerAddress: String, createdAt: Long, context: ConversationContext?, spamScore: Double?) {
     val mmkv = getMmkv(appContext)
     val currentSavedConversationsString = mmkv?.decodeString("saved-notifications-conversations")
     Log.d("PushNotificationsService", "Got current saved conversations from storage: $currentSavedConversationsString")
@@ -47,7 +47,7 @@ fun saveConversationToStorage(appContext: Context, account: String, topic: Strin
     } catch (error: Exception) {
         Log.d("PushNotificationsService", "Could not parse saved messages from storage: $currentSavedConversationsString - $error")
     }
-    val newConversationToSave = SavedNotificationConversation(topic = topic, peerAddress= peerAddress, createdAt= createdAt, context= context, account = account)
+    val newConversationToSave = SavedNotificationConversation(topic = topic, peerAddress= peerAddress, createdAt= createdAt, context= context, account = account, spamScore = spamScore)
     currentSavedConversations += newConversationToSave
     val newSavedConversationsString = Klaxon().toJsonString(currentSavedConversations)
     mmkv?.putString("saved-notifications-conversations", newSavedConversationsString)
