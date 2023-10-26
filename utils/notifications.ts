@@ -244,7 +244,11 @@ export const loadSavedNotificationMessagesToContext = async () => {
       });
       lastStepDone = 5;
       for (const account in conversationsToSaveByAccount) {
-        await saveConversations(account, conversationsToSaveByAccount[account]);
+        await saveConversations(
+          account,
+          conversationsToSaveByAccount[account],
+          true
+        );
       }
       lastStepDone = 6;
     }
