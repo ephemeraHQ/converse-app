@@ -8,6 +8,13 @@ fun byteStringToBase64(bs: ByteString): String {
     return Base64.encode(bs.toByteArray())
 }
 
+fun containsURL(input: String): Boolean {
+    val pattern = "\\b(?:(?:https?|ftp):\\/\\/|www\\.)?[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}(?:\\/\\S*)?(?:\\?\\S*)?\\b"
+    val regex = Regex(pattern, RegexOption.IGNORE_CASE)
+    val matches = regex.findAll(input).count()
+    return matches > 0
+}
+
 fun shortAddress(input: String): String {
     if (input.length > 6) {
         val start = 4

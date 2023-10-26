@@ -137,3 +137,17 @@ fun getJsonReaction(decodedMessage: DecodedMessage): String {
         "";
     }
 }
+
+fun computeSpamScore(address: String, message: String?, sentViaConverse: Boolean, contentType: String): Double {
+    var spamScore = 0.0
+    // Spam checking rules
+    message?.let {
+        if (containsURL(it)) {
+            spamScore += 1
+        }
+    }
+    if (sentViaConverse) {
+        spamScore -= 1
+    }
+    return spamScore
+}
