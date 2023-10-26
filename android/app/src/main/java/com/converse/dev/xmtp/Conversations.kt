@@ -18,8 +18,22 @@ import org.xmtp.proto.keystore.api.v1.Keystore.TopicMap.TopicData
 import java.security.MessageDigest
 import java.util.HashMap
 
+data class NotificationDataResult(
+    val addressShort: String = "",
+    val title: String = "",
+    val body: String = "",
+    val remoteMessage: RemoteMessage? = null,
+    val messageId: String? = null,
+    val shouldShowNotification: Boolean = false
+)
 
 fun hasForbiddenPattern(address: String): Boolean { return address.startsWith("0x0000") && address.endsWith("0000") }
+data class DecodedMessageResult(
+    val content: String? = null,
+    val senderAddress: String? = null,
+    val forceIgnore: Boolean = false,
+    val id: String? = null
+)
 
 fun handleNewConversationV2Notification(appContext: Context, xmtpClient: Client, envelope: Envelope, remoteMessage: RemoteMessage, notificationData: NotificationData): Triple<String, String, RemoteMessage>? {
     val conversation = xmtpClient.conversations.fromInvite((envelope))
