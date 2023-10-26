@@ -1,7 +1,6 @@
 package com.converse.dev
 
 import android.app.ActivityManager
-import android.content.Context
 import android.util.Log
 import android.view.View
 import com.beust.klaxon.Klaxon
@@ -29,12 +28,8 @@ import expo.modules.notifications.service.NotificationsService
 import expo.modules.securestore.SecureStoreModule
 import me.leolin.shortcutbadger.ShortcutBadger
 import org.json.JSONObject
-import org.koin.core.component.getScopeId
-import org.xmtp.android.library.*
 import org.xmtp.android.library.messages.EnvelopeBuilder
 import java.util.*
-import org.xmtp.android.library.codecs.*
-import org.xmtp.proto.message.contents.decodedMessage
 
 class PushNotificationsService : FirebaseMessagingService() {
     companion object {
@@ -43,13 +38,10 @@ class PushNotificationsService : FirebaseMessagingService() {
         lateinit var asyncStorageModule: AsyncStorageModule
     }
 
-    private lateinit var notificationHandler: NotificationHandler
-
     override fun onCreate() {
         super.onCreate()
         initSecureStore()
         initAsyncStorage()
-        notificationHandler = NotificationHandler()
         initSentry(this)
     }
 
@@ -102,7 +94,7 @@ class PushNotificationsService : FirebaseMessagingService() {
 
         val decodedMessage = conversation.decode(envelope)
         Log.d("NotificationHandler", "decodedMessage.id: ${decodedMessage.id}")
-        val showNotification = notificationHandler.notificationAlreadyShown(this, decodedMessage.id)
+        val showNotification = notificationAlreadyShown(this, decodedMessage.id)
 
         if (notificationToShow != null && showNotification) {
             showNotification(notificationToShow.first, notificationToShow.second, notificationToShow.third)
