@@ -33,7 +33,7 @@ data class DecodedMessageResult(
     val id: String? = null
 )
 
-fun handleNewConversationFirstMessage(
+suspend fun handleNewConversationFirstMessage(
     appContext: Context,
     xmtpClient: Client,
     envelope: Envelope,
@@ -147,7 +147,7 @@ fun handleNewConversationFirstMessage(
     )
 }
 
-fun handleOngoingConversationMessage(
+suspend fun handleOngoingConversationMessage(
     appContext: Context,
     xmtpClient: Client,
     envelope: Envelope,

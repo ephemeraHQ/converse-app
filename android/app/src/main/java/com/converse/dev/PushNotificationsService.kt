@@ -29,6 +29,7 @@ import expo.modules.securestore.SecureStoreModule
 import org.json.JSONObject
 import org.xmtp.android.library.messages.EnvelopeBuilder
 import java.util.*
+import kotlinx.coroutines.*
 
 class PushNotificationsService : FirebaseMessagingService() {
     companion object {
@@ -45,6 +46,14 @@ class PushNotificationsService : FirebaseMessagingService() {
     }
 
     override fun onMessageReceived(remoteMessage: RemoteMessage) {
+        super.onMessageReceived(remoteMessage)
+
+        GlobalScope.launch(Dispatchers.IO) {
+            handleReceivedMessage(remoteMessage)
+        }
+    }
+
+    private suspend fun handleReceivedMessage(remoteMessage: RemoteMessage) {
         Log.d(TAG, "Received a notification")
 
         // Check if message contains a data payload.
