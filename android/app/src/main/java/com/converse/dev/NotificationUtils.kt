@@ -2,10 +2,16 @@ package com.converse.dev
 
 import android.util.Log
 import android.content.Context
+import me.leolin.shortcutbadger.ShortcutBadger
 
-private const val TAG = "NotificationHandler"
+private const val TAG = "NotificationUtils"
 private const val MAX_STORED_IDS = 10
 
+fun incrementBadge(context: Context) {
+    val newBadgeCount = getBadge(context) + 1
+    setBadge(context, newBadgeCount)
+    ShortcutBadger.applyCount(context, newBadgeCount)
+}
 fun notificationAlreadyShown(appContext: Context, messageId: String?): Boolean {
     Log.d(TAG, "Checking if we should show notification for message ID: $messageId")
 

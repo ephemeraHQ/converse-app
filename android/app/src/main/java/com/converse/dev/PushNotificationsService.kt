@@ -26,7 +26,6 @@ import expo.modules.notifications.notifications.model.NotificationRequest
 import expo.modules.notifications.notifications.model.triggers.FirebaseNotificationTrigger
 import expo.modules.notifications.service.NotificationsService
 import expo.modules.securestore.SecureStoreModule
-import me.leolin.shortcutbadger.ShortcutBadger
 import org.json.JSONObject
 import org.xmtp.android.library.messages.EnvelopeBuilder
 import java.util.*
@@ -97,10 +96,8 @@ class PushNotificationsService : FirebaseMessagingService() {
         val showNotification = notificationAlreadyShown(this, decodedMessage.id)
 
         if (notificationToShow != null && showNotification) {
+            incrementBadge(this)
             showNotification(notificationToShow.first, notificationToShow.second, notificationToShow.third)
-            val newBadgeCount = getBadge(this) + 1
-            setBadge(this, newBadgeCount)
-            ShortcutBadger.applyCount(this, newBadgeCount)
         } else {
             return
         }
