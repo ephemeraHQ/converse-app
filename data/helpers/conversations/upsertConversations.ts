@@ -102,13 +102,14 @@ const setupAndSaveConversations = async (
     saveConversationIdentifiersForNotifications(conversation);
   });
 
-  // Save to db
-  await upsertRepository(
-    conversationRepository,
-    conversationsToUpsert,
-    ["topic"],
-    false
-  );
+  // Let's save by batch to avoid hermes issues
+  let batch: Conversation[] = [];
+  let rest = conversationsToUpsert;
+  while (rest.length > 0) {
+    batch = rest.slice(0, 5000);
+    rest = rest.slice(5000);
+    await upsertRepository(conversationRepository, batch, ["topic"], false);
+  }
 
   return conversations;
 };

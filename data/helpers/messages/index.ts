@@ -30,14 +30,21 @@ export const saveMessages = async (
 
   // Then save to db
   const messageRepository = await getRepository(account, "message");
-  await upsertRepository(
-    messageRepository,
-    messages.map((xmtpMessage) =>
-      xmtpMessageToDb(xmtpMessage, xmtpMessage.topic)
-    ),
-    ["id"],
-    false
-  );
+  // Let's save by batch to avoid hermes issues
+  let batch: XmtpMessage[] = [];
+  let rest = messages;
+  while (rest.length > 0) {
+    batch = rest.slice(0, 5000);
+    rest = rest.slice(5000);
+    await upsertRepository(
+      messageRepository,
+      batch.map((xmtpMessage) =>
+        xmtpMessageToDb(xmtpMessage, xmtpMessage.topic)
+      ),
+      ["id"],
+      false
+    );
+  }
 };
 
 export const updateMessagesIds = async (
