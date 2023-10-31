@@ -1,6 +1,6 @@
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import * as Linking from "expo-linking";
-import { useCallback, useEffect } from "react";
+import { useCallback, useEffect, useState } from "react";
 import {
   FlatList,
   Keyboard,
@@ -74,6 +74,21 @@ export default function Recommendations({
     }, 300);
   }, [navigation]);
 
+  const [viewableItems, setViewableItems] = useState<{ [key: string]: true }>(
+    {}
+  );
+
+  const onViewableItemsChanged = useCallback(
+    ({ viewableItems: items }: any) => {
+      const viewable: { [key: string]: true } = {};
+      items.forEach((item: any) => {
+        viewable[item.item] = true;
+      });
+      setViewableItems(viewable);
+    },
+    []
+  );
+
   useEffect(() => {
     // On load, let's load frens
     const getRecommendations = async () => {
@@ -142,6 +157,7 @@ export default function Recommendations({
           address={item}
           recommendationData={frens[item]}
           navigation={navigation}
+          isVisible={!!viewableItems[item]}
         />
       );
     },
@@ -158,6 +174,7 @@ export default function Recommendations({
       styles.title,
       styles.titleContainer,
       visibility,
+      viewableItems,
     ]
   );
 
@@ -197,6 +214,11 @@ export default function Recommendations({
         data={["title", ...Object.keys(frens), "signals"]}
         keyExtractor={keyExtractor}
         renderItem={renderItem}
+        onViewableItemsChanged={onViewableItemsChanged}
+        viewabilityConfig={{
+          itemVisiblePercentThreshold: 1,
+          minimumViewTime: 0,
+        }}
         onTouchStart={Keyboard.dismiss}
       />
     </View>

@@ -152,6 +152,7 @@ export default function Chat() {
           recommendationData={recommendationData}
           address={conversation.peerAddress}
           embedInChat
+          isVisible
         />
       </View>
     );

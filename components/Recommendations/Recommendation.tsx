@@ -1,7 +1,13 @@
 import { useNavigationState } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import { Image } from "expo-image";
-import { Platform, StyleSheet, Text, View, useColorScheme } from "react-native";
+import {
+  Platform,
+  StyleSheet,
+  Text,
+  View,
+  Image,
+  useColorScheme,
+} from "react-native";
 
 import IconLoading from "../../assets/icon-loading.png";
 import { RecommendationData } from "../../data/store/recommendationsStore";
@@ -18,11 +24,13 @@ export function Recommendation({
   recommendationData: { ens, farcasterUsernames, lensHandles, tags },
   navigation,
   embedInChat,
+  isVisible,
 }: {
   address: string;
   recommendationData: RecommendationData;
   navigation?: NativeStackNavigationProp<any>;
   embedInChat?: boolean;
+  isVisible: boolean;
 }) {
   const styles = useStyles();
   const socials = [
@@ -68,13 +76,14 @@ export function Recommendation({
             ]}
           >
             <Image
-              source={{ uri: t.image }}
-              placeholder={IconLoading}
+              source={isVisible ? { uri: t.image } : IconLoading}
+              defaultSource={IconLoading}
               style={[
                 styles.recommendationImage,
                 embedInChat ? { top: 2 } : {},
               ]}
             />
+
             <Text style={[styles.recommendationText, { textAlign }]}>
               {t.text}
             </Text>

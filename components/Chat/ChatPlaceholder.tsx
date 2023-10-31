@@ -103,6 +103,7 @@ export default function ChatPlaceholder({ messagesCount }: Props) {
                 address={conversation.peerAddress}
                 recommendationData={profileData}
                 embedInChat
+                isVisible
               />
             ) : (
               <Text style={styles.chatPlaceholderText}>
