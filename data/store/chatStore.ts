@@ -344,7 +344,6 @@ export const initChatStore = (account: string) => {
                   setImmediate(() => {
                     handleSpamScore(account, conversation);
                   });
-                  isUpdated = true;
                 }
               }
 
@@ -482,6 +481,8 @@ export const initChatStore = (account: string) => {
               const newState = { ...state };
               if (newState.conversations[topic]) {
                 newState.conversations[topic].spamScore = spamScore;
+                newState.conversations[topic].lastUpdateAt = now();
+                newState.lastUpdateAt = now();
               }
               return newState;
             }),
