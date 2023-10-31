@@ -171,7 +171,6 @@ fun handleOngoingConversationMessage(
 
     val decodedMessageResult = handleMessageByContentType(
         appContext,
-        conversationContext,
         message,
         xmtpClient
     )
@@ -219,10 +218,9 @@ fun handleMessageByContentType(
 
             contentType.startsWith("xmtp.org/reaction:") -> {
                 val reaction: Reaction? = decodedMessage.content()
-                val action = reaction?.action.toString()
-                val schema = reaction?.schema.toString()
-                val content = reaction?.content.toString()
-
+                val action = reaction?.action?.javaClass?.simpleName?.lowercase()
+                val schema = reaction?.schema?.javaClass?.simpleName?.lowercase()
+                val content = reaction?.content
                 forceIgnore = action == "removed"
                 contentToSave = getJsonReaction(decodedMessage)
                 contentToReturn = when {
@@ -317,14 +315,13 @@ fun getJsonRemoteAttachment(decodedMessage: DecodedMessage): String {
 
 fun getJsonReaction(decodedMessage: DecodedMessage): String {
     val reaction: Reaction? = decodedMessage.content()
-    val reactionContent = reaction?.content ?: "";
     return try {
         val dictionary =
             mapOf(
-                "reference" to (reaction?.reference ?: ""),
-                "action" to (reaction?.action.toString() ?: ""),
+                "action" to (reaction?.action?.javaClass?.simpleName?.lowercase() ?: ""),
+                "schema" to (reaction?.schema?.javaClass?.simpleName?.lowercase() ?: ""),
                 "content" to (reaction?.content ?: ""),
-                "schema" to (reaction?.schema.toString() ?: ""),
+                "reference" to (reaction?.reference ?: ""),
             )
         JSONObject(dictionary).toString()
     } catch (e: Exception) {
