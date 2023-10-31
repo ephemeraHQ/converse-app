@@ -36,7 +36,7 @@ data class DecodedMessageResult(
 suspend fun handleNewConversationFirstMessage(
     appContext: Context,
     xmtpClient: Client,
-    envelope: Envelope,
+    conversation: Conversation,
     remoteMessage: RemoteMessage
 ): NotificationDataResult {
 
@@ -44,8 +44,6 @@ suspend fun handleNewConversationFirstMessage(
     var attempts = 0
     var messageId: String? = null
     var body = ""
-
-    val conversation = xmtpClient.conversations.fromInvite(envelope)
 
     while (attempts < 5) {
         try {
