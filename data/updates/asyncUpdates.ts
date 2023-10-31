@@ -1,6 +1,7 @@
 import { Platform } from "react-native";
 
 import appJson from "../../app.json";
+import { getAccountsList, getSettingsStore } from "../store/accountsStore";
 import { useAppStore } from "../store/appStore";
 import { setConsent } from "./001-setConsent";
 
@@ -26,8 +27,13 @@ export const updateLastVersionOpen = () => {
 };
 
 export const runAsyncUpdates = async () => {
+  const accountList = getAccountsList();
+  console.log("[Async Updates] accountList:", accountList);
+};
+
+const runAsyncUpdatesForAccount = async (account: string) => {
   const isInternetReachable = useAppStore.getState().isInternetReachable;
-  let lastUpdateRan = useAppStore.getState().lastUpdateRan;
+  const lastUpdateRan = getSettingsStore(account).getState().lastUpdateRan;
 
   // Always run setConsent
   await updateSteps[0].method();
@@ -39,9 +45,7 @@ export const runAsyncUpdates = async () => {
           const update = updateKey.method;
           if (update) {
             await update();
-            useAppStore.getState().setLastUpdateRan(updateKey.id);
-            // State is immutable, update it differently
-            lastUpdateRan = updateKey.id;
+            getSettingsStore(account).getState().setLastUpdateRan(updateKey.id);
           } else {
             console.error(
               `[Async Updates] Failed to run migration: ${updateKey} [Error: migration function not found]`
