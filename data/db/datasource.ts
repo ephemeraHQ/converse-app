@@ -79,7 +79,7 @@ export const getDataSource = async (account: string) => {
     type: "react-native",
     location: Platform.OS === "ios" ? "Shared" : "./SQLite",
     logging: true,
-    maxQueryExecutionTime: 150,
+    maxQueryExecutionTime: 500,
     logger: new TypeORMLogger(),
   });
   dataSources[account] = newDataSource;
