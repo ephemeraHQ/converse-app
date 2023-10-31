@@ -25,6 +25,9 @@ export type SettingsStoreType = {
 
   ephemeralAccount: boolean;
   setEphemeralAccount: (ephemeral: boolean) => void;
+
+  lastUpdateRan: string;
+  setLastUpdateRan: (version: string) => void;
 };
 
 export const initSettingsStore = (account: string) => {
@@ -35,6 +38,14 @@ export const initSettingsStore = (account: string) => {
           notifications: {
             showNotificationScreen: true,
           },
+          setNotificationsSettings: (notificationsSettings) =>
+            set((state) => ({
+              notifications: {
+                ...state.notifications,
+                ...notificationsSettings,
+              },
+            })),
+
           peersStatus: {},
           setPeersStatus: (peersStatus: {
             [peerAddress: string]: "blocked" | "consented";
@@ -56,23 +67,21 @@ export const initSettingsStore = (account: string) => {
                 },
               };
             }),
+
           ephemeralAccount: false,
-          setNotificationsSettings: (notificationsSettings) =>
-            set((state) => ({
-              notifications: {
-                ...state.notifications,
-                ...notificationsSettings,
-              },
-            })),
           setEphemeralAccount: (ephemeral) =>
-            set(() => ({
-              ephemeralAccount: ephemeral,
-            })),
+            set(() => ({ ephemeralAccount: ephemeral })),
+
+          lastUpdateRan: "",
+          setLastUpdateRan: (update) => set(() => ({ lastUpdateRan: update })),
         }) as SettingsStoreType,
       {
         name: `store-${account}-settings`, // Account-based storage so each account can have its own settings
         storage: createJSONStorage(() => zustandMMKVStorage),
         version: 1,
+        partialize: (state) => ({
+          lastUpdateRan: state.lastUpdateRan,
+        }),
         migrate: (persistedState: any, version: number): SettingsStoreType => {
           console.log("Zustand migration version:", version);
 
