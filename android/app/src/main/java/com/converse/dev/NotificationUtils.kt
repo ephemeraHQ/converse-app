@@ -34,7 +34,6 @@ fun notificationAlreadyShown(appContext: Context, messageId: String?): Boolean {
 
         val storedData = getShownNotificationIds(appContext).joinToString(", ")
         Log.d(TAG, "Stored IDs just after saving: $storedData")
-        Log.d(TAG, "Notification has not already been shown")
 
         return false
     }
