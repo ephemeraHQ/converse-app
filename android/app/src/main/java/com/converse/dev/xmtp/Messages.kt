@@ -80,7 +80,6 @@ suspend fun handleNewConversationFirstMessage(
                         )
 
                         // Save conversation and its spamScore to mmkv
-                        persistNewConversation(xmtpClient.address, conversation)
                         saveConversationToStorage(
                             appContext,
                             xmtpClient.address,
