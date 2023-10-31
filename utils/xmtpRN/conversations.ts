@@ -6,8 +6,8 @@ import {
 
 import { Conversation as DbConversation } from "../../data/db/entities/conversationEntity";
 import { getPendingConversationsToCreate } from "../../data/helpers/conversations/pendingConversations";
+import { saveSpamScore } from "../../data/helpers/conversations/spamScore";
 import { saveConversations } from "../../data/helpers/conversations/upsertConversations";
-import { getChatStore } from "../../data/store/accountsStore";
 import {
   XmtpConversation,
   XmtpConversationWithUpdate,
@@ -260,8 +260,6 @@ export const handleSpamScore = async (
       firstMessage.contentType
     );
 
-    getChatStore(account)
-      .getState()
-      .setSpamScore(firstMessage.topic, spamScore);
+    saveSpamScore(account, conversation.topic, spamScore);
   }
 };
