@@ -13,6 +13,7 @@ import com.google.crypto.tink.subtle.Base64
 import org.json.JSONObject
 import org.xmtp.android.library.Client
 import org.xmtp.android.library.Conversation
+import org.xmtp.android.library.messages.Envelope
 import org.xmtp.proto.keystore.api.v1.Keystore.TopicMap.TopicData
 import java.security.MessageDigest
 import java.util.HashMap
@@ -51,6 +52,28 @@ fun saveConversationToStorage(appContext: Context, account: String, topic: Strin
     currentSavedConversations += newConversationToSave
     val newSavedConversationsString = Klaxon().toJsonString(currentSavedConversations)
     mmkv?.putString("saved-notifications-conversations", newSavedConversationsString)
+}
+
+suspend fun getNewConversationFromEnvelope(xmtpClient: Client, envelope: Envelope): Conversation? {
+    return try {
+        if (isInviteTopic(envelope.contentTopic)) {
+            val conversation = xmtpClient.conversations.fromInvite(envelope)
+            when (conversation) {
+                is Conversation.V1 -> {
+                    // Nothing to do
+                }
+                is Conversation.V2 -> {
+                    persistNewConversation(xmtpClient.address, conversation)
+                }
+            }
+            conversation
+        } else {
+            null
+        }
+    } catch (e: Exception) {
+        Log.e("PushNotificationsService", "Could not decode new conversation envelope", e)
+        null
+    }
 }
 
 fun getPersistedConversation(xmtpClient: Client, topic: String): Conversation? {

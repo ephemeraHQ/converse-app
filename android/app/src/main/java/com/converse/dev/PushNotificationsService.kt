@@ -5,6 +5,7 @@ import android.util.Log
 import android.view.View
 import com.beust.klaxon.Klaxon
 import com.converse.dev.xmtp.NotificationDataResult
+import com.converse.dev.xmtp.getNewConversationFromEnvelope
 import com.converse.dev.xmtp.getXmtpClient
 import com.converse.dev.xmtp.handleNewConversationFirstMessage
 import com.converse.dev.xmtp.handleOngoingConversationMessage
@@ -74,7 +75,7 @@ class PushNotificationsService : FirebaseMessagingService() {
         val envelope = EnvelopeBuilder.buildFromString(notificationData.contentTopic, Date(notificationData.timestampNs.toLong() / 1000000), encryptedMessageData)
 
         var shouldShowNotification = false
-        var result: NotificationDataResult
+        var result = NotificationDataResult()
 
         // Using IO dispatcher for background work, not blocking the main thread and UI
         val appContext = this
@@ -82,9 +83,17 @@ class PushNotificationsService : FirebaseMessagingService() {
             try {
                 if (isInviteTopic(notificationData.contentTopic)) {
                     Log.d(TAG, "Handling a new conversation notification")
-                    result = handleNewConversationFirstMessage(appContext, xmtpClient, envelope, remoteMessage)
-                    if (result != NotificationDataResult()) {
-                        shouldShowNotification = result.shouldShowNotification
+                    val conversation = getNewConversationFromEnvelope(xmtpClient, envelope)
+                    if (conversation != null) {
+                        result = handleNewConversationFirstMessage(
+                            appContext,
+                            xmtpClient,
+                            conversation,
+                            remoteMessage
+                        )
+                        if (result != NotificationDataResult()) {
+                            shouldShowNotification = result.shouldShowNotification
+                        }
                     }
                 } else {
                     Log.d(TAG, "Handling an ongoing conversation message notification")
@@ -94,10 +103,6 @@ class PushNotificationsService : FirebaseMessagingService() {
                     }
                 }
                 val notificationAlreadyShown = notificationAlreadyShown(appContext, result.messageId)
-
-                Log.d(TAG, "** result: $result")
-                Log.d(TAG, "** notificationAlreadyShown: $notificationAlreadyShown")
-                Log.d(TAG, "** shouldShowNotification: $shouldShowNotification")
 
                 if (shouldShowNotification && !notificationAlreadyShown) {
                     incrementBadge(appContext)
