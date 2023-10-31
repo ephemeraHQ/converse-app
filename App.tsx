@@ -19,6 +19,10 @@ import { Provider as PaperProvider } from "react-native-paper";
 
 import XmtpEngine from "./components/XmtpEngine";
 import config from "./config";
+import {
+  updateLastVersionOpen,
+  runAsyncUpdates,
+} from "./data/updates/asyncUpdates";
 import { migrateDataIfNeeded } from "./data/updates/initialUpdates";
 import Main from "./screens/Main";
 import { registerBackgroundFetchTask } from "./utils/background";
@@ -66,12 +70,17 @@ export default function App() {
     migrateDataIfNeeded()
       .then(() => {
         setRefactoMigrationDone(true);
+
+        // last LastSyncUpdateRun
+        updateLastVersionOpen();
       })
       .catch((e) => {
         sentryTrackError(e);
         // This is still better than being stuck on home…
         setRefactoMigrationDone(true);
       });
+
+    runAsyncUpdates();
   }, []);
 
   if (!refactoMigrationDone) return null;
