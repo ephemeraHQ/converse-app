@@ -124,7 +124,7 @@ PODS:
   - EXTaskManager (11.3.0):
     - ExpoModulesCore
     - UMAppLoader
-  - EXUpdates (0.18.16):
+  - EXUpdates (0.18.17):
     - ASN1Decoder (~> 1.8)
     - EASClient
     - EXManifests
@@ -1056,7 +1056,7 @@ SPEC CHECKSUMS:
   EXSplashScreen: 2c80621e4bc952f5bea328304c2436f5fe21c2a0
   EXStructuredHeaders: 324cc3130571d2696357fafd8be7fd9a0b5fdf6e
   EXTaskManager: f1730c315eb6fe457a3a2ee4ed899a51d717f302
-  EXUpdates: f4cb5c6782ad1635fa853cb5251677040a9ed584
+  EXUpdates: 8f03b362414e8f9f0998f8a6d6c9fc00f2a9d2f2
   EXUpdatesInterface: 82ed48d417cdcd376c12ca1c2ce390d35500bed6
   FBLazyVector: 71803c074f6325f10b5ec891c443b6bbabef0ca7
   FBReactNativeSpec: 448e08a759d29a96e15725ae532445bf4343567c
