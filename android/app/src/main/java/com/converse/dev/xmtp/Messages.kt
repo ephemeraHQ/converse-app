@@ -92,7 +92,6 @@ suspend fun handleNewConversationFirstMessage(
 
                 val decodedMessageResult = handleMessageByContentType(
                     appContext,
-                    conversationContext,
                     message,
                     xmtpClient
                 )
@@ -102,7 +101,6 @@ suspend fun handleNewConversationFirstMessage(
                     Log.d(TAG, "Not showing a notification")
                 } else if (decodedMessageResult.content != null) {
                     shouldShowNotification = true
-                    messageId = decodedMessageResult.id // @todo probably remove this?
                     body = decodedMessageResult.content
                 }
 
@@ -199,7 +197,6 @@ fun handleOngoingConversationMessage(
 
 fun handleMessageByContentType(
     appContext: Context,
-    conversationContext: ConversationContext?, // @todo should we keep the convo context here? I don't think so
     decodedMessage: DecodedMessage,
     xmtpClient: Client,
 ): DecodedMessageResult {

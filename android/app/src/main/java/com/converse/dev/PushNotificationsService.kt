@@ -74,7 +74,7 @@ class PushNotificationsService : FirebaseMessagingService() {
         val envelope = EnvelopeBuilder.buildFromString(notificationData.contentTopic, Date(notificationData.timestampNs.toLong() / 1000000), encryptedMessageData)
 
         var shouldShowNotification = false
-        var result: NotificationDataResult = NotificationDataResult()
+        var result: NotificationDataResult
 
         // Using IO dispatcher for background work, not blocking the main thread and UI
         val appContext = this
