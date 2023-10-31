@@ -335,11 +335,8 @@ fun getJsonReaction(decodedMessage: DecodedMessage): String {
 
 fun computeSpamScore(address: String, message: String?, sentViaConverse: Boolean, contentType: String): Double {
     var spamScore = 0.0
-    // Spam checking rules
-    message?.let {
-        if (containsURL(it)) {
-            spamScore += 1
-        }
+    if (contentType.startsWith("xmtp.org/text:") && message?.let { containsURL(it) } == true) {
+        spamScore += 1
     }
     if (sentViaConverse) {
         spamScore -= 1

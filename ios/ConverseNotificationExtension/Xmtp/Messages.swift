@@ -255,14 +255,11 @@ func getJsonReaction(reaction: Reaction) -> String? {
 
 func computeSpamScore(address: String, message: String?, sentViaConverse: Bool, contentType: String) -> Double {
   var spamScore: Double = 0.0
-
-  // Spam checking rules
-  if let unwrappedMessage = message, containsURL(input: unwrappedMessage) {
+  if contentType.starts(with: "xmtp.org/text:"), let unwrappedMessage = message, containsURL(input: unwrappedMessage) {
     spamScore += 1
   }
   if sentViaConverse {
     spamScore -= 1
   }
-  
   return spamScore
 }

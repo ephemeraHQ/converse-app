@@ -233,7 +233,7 @@ const computeSpamScore = async (
   contentType: string
 ): Promise<number> => {
   let spamScore: number = 0.0;
-  if (URL_REGEX.test(message)) {
+  if (contentType.startsWith("xmtp.org/text:") && URL_REGEX.test(message)) {
     spamScore += 1;
   }
   if (sentViaConverse) {
