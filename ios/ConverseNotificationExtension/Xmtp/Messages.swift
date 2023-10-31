@@ -19,12 +19,20 @@ func handleNewConversationFirstMessage(xmtpClient: XMTP.Client, apiURI: String?,
       if !messages.isEmpty {
         let message = messages[0]
         messageId = message.id
-        var messageContent: String? = nil
         let contentType = getContentTypeString(type: message.encodedContent.type)
+        
+        var messageContent: String? = nil
         if (contentType.starts(with: "xmtp.org/text:")) {
-          messageContent = String(data: message.encodedContent.content, encoding: .utf8) ?? "New message"
+            messageContent = String(data: message.encodedContent.content, encoding: .utf8)
         }
-        let spamScore = computeSpamScore(address: conversation.peerAddress, message: messageContent, sentViaConverse: message.sentViaConverse, contentType: contentType)
+        
+        let spamScore = computeSpamScore(
+          address: conversation.peerAddress,
+          message: messageContent,
+          sentViaConverse: message.sentViaConverse,
+          contentType: contentType
+        )
+        
         do {
           if case .v2(let conversationV2) = conversation {
             try saveConversation(

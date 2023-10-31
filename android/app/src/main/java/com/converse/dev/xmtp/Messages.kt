@@ -54,9 +54,14 @@ suspend fun handleNewConversationFirstMessage(
                 var conversationContext: ConversationContext? = null
                 val contentType = getContentTypeString(message.encodedContent.type)
 
+                var messageContent: String? = null
+                if (contentType.startsWith("xmtp.org/text:")) {
+                    messageContent = message.encodedContent.content.toStringUtf8()
+                }
+
                 val spamScore = computeSpamScore(
                     address = conversation.peerAddress,
-                    message = message.encodedContent.content.toStringUtf8(),
+                    message = messageContent,
                     sentViaConverse = message.sentViaConverse,
                     contentType = contentType
                 )
