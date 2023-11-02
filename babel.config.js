@@ -9,6 +9,9 @@ module.exports = {
   plugins: [
     ["@babel/plugin-proposal-decorators", { version: "legacy" }],
     "@babel/plugin-proposal-export-namespace-from",
+    '@babel/plugin-transform-flow-strip-types', // For privy (phone country selector)
+    ["@babel/plugin-transform-class-properties", { loose: true }], // For privy
+    ["@babel/plugin-transform-private-methods", { loose: true }], // For privy
     [
       "module-resolver",
       {

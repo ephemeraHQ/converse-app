@@ -18,6 +18,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Button from "../components/Button/Button";
 import DesktopConnect from "../components/Onboarding/DesktopConnect";
 import OnboardingComponent from "../components/Onboarding/OnboardingComponent";
+import PrivyConnect from "../components/Onboarding/PrivyConnect";
 import SeedPhraseConnect, {
   getSignerFromSeedPhrase,
 } from "../components/Onboarding/SeedPhraseConnect";
@@ -38,6 +39,8 @@ import { shortAddress } from "../utils/str";
 import { getXmtpKeysFromSigner, isOnXmtp } from "../utils/xmtpJS/client";
 import { getXmtpClient } from "../utils/xmtpRN/client";
 
+export type ConnectionMethod = "wallet" | "phone" | "desktop" | "seedPhrase";
+
 export default function OnboardingScreen() {
   const { desktopConnectSessionId, addingNewAccount, setAddingNewAccount } =
     useOnboardingStore((s) =>
@@ -50,8 +53,9 @@ export default function OnboardingScreen() {
   const styles = useStyles();
 
   const [isLoading, setLoading] = useState(false);
-  const [connectWithSeedPhrase, setConnectWithSeedPhrase] = useState(false);
-  const [connectWithDesktop, setConnectWithDesktop] = useState(false);
+  const [connectionMethod, setConnectionMethod] =
+    useState<ConnectionMethod>("wallet");
+
   const [seedPhrase, setSeedPhrase] = useState("");
 
   const [keyboardVerticalOffset, setKeyboardVerticalOffset] = useState(0);
@@ -347,7 +351,7 @@ export default function OnboardingScreen() {
         );
       }
     }
-  } else if (connectWithSeedPhrase || user.seedPhraseSigner) {
+  } else if (connectionMethod === "seedPhrase" || user.seedPhraseSigner) {
     title = "Seed phrase";
     text =
       "Enter your wallet's seed phrase. It will be used to connect to the XMTP network and it will not be stored anywhere.";
@@ -357,7 +361,7 @@ export default function OnboardingScreen() {
       if (!seedPhrase || seedPhrase.trim().length === 0) return;
       loginWithSeedPhrase(seedPhrase.trim());
     };
-  } else if (connectWithDesktop) {
+  } else if (connectionMethod === "desktop") {
     title = "Desktop Connect";
     picto = "lock.open.laptopcomputer";
     text = (
@@ -369,6 +373,10 @@ export default function OnboardingScreen() {
         and follow instructions.
       </Text>
     );
+  } else if (connectionMethod === "phone") {
+    title = "Connect by phone";
+    picto = "phone.bubble.fill";
+    text = <Text>Login with your phone!</Text>;
   }
 
   if (desktopConnectSessionId) {
@@ -380,21 +388,22 @@ export default function OnboardingScreen() {
 
   const signer = thirdwebSigner || user.otherSigner;
 
-  if (!signer && !connectWithSeedPhrase && !connectWithDesktop && !loading) {
+  if (!signer && connectionMethod === "wallet" && !loading) {
+    // Default screen
     onWalletSelector = true;
     onboardingContent = (
       <WalletSelector
-        setConnectWithDesktop={setConnectWithDesktop}
-        setConnectWithSeedPhrase={setConnectWithSeedPhrase}
+        setConnectionMethod={setConnectionMethod}
         disconnect={disconnect}
         setLoading={setLoading}
         setSigner={setSigner}
       />
     );
-  } else if (!signer && !loading && connectWithSeedPhrase) {
+  } else if (!signer && !loading && connectionMethod === "seedPhrase") {
+    // Seed phrase login
     backButtonText = "Back to home screen";
     backButtonAction = () => {
-      setConnectWithSeedPhrase(false);
+      setConnectionMethod("wallet");
     };
     onboardingContent = (
       <SeedPhraseConnect
@@ -405,7 +414,8 @@ export default function OnboardingScreen() {
         setKeyboardVerticalOffset={setKeyboardVerticalOffset}
       />
     );
-  } else if (!signer && !loading && connectWithDesktop) {
+  } else if (!signer && !loading && connectionMethod === "desktop") {
+    // Desktop login
     onboardingContent = (
       <>
         <Button
@@ -414,12 +424,19 @@ export default function OnboardingScreen() {
           variant="text"
           textStyle={{ fontWeight: "600" }}
           onPress={() => {
-            setConnectWithDesktop(false);
+            setConnectionMethod("wallet");
           }}
         />
       </>
     );
+  } else if (!signer && !loading && connectionMethod === "phone") {
+    // Phone login
+    backButtonAction = () => {
+      setConnectionMethod("wallet");
+    };
+    onboardingContent = <PrivyConnect />;
   } else if (signer && user.address) {
+    // Logged, need to do signatures
     backButtonText = `Log out from ${shortAddress(user.address)}`;
     backButtonAction = disconnect;
     primaryButtonText = "Sign";

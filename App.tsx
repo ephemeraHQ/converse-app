@@ -2,6 +2,7 @@ import "reflect-metadata";
 import "./polyfills";
 import { configure as configureCoinbase } from "@coinbase/wallet-mobile-sdk";
 import { ActionSheetProvider } from "@expo/react-native-action-sheet";
+import { PrivyProvider } from "@privy-io/expo";
 import { Ethereum } from "@thirdweb-dev/chains";
 import { coinbaseWallet, ThirdwebProvider } from "@thirdweb-dev/react-native";
 import React, { useEffect, useState } from "react";
@@ -68,35 +69,37 @@ export default function App() {
     Platform.OS === "ios" ? KeyboardProvider : React.Fragment;
 
   return (
-    <ThirdwebProvider
-      activeChain={Ethereum}
-      dAppMeta={{
-        ...config.walletConnectConfig.dappMetadata,
-        isDarkMode: colorScheme === "dark",
-      }}
-      autoConnect={false}
-      clientId={config.thirdwebClientId}
-      supportedWallets={[
-        coinbaseWallet({
-          callbackURL: new URL(`https://${config.websiteDomain}/coinbase`),
-        }),
-      ]}
-    >
-      <AppKeyboardProvider>
-        <ActionSheetProvider>
-          <PaperProvider
-            theme={
-              colorScheme === "light" ? MaterialLightTheme : MaterialDarkTheme
-            }
-          >
-            <View style={styles.safe}>
-              <XmtpEngine />
-              <Main />
-            </View>
-          </PaperProvider>
-        </ActionSheetProvider>
-      </AppKeyboardProvider>
-    </ThirdwebProvider>
+    <PrivyProvider appId={config.privyAppId}>
+      <ThirdwebProvider
+        activeChain={Ethereum}
+        dAppMeta={{
+          ...config.walletConnectConfig.dappMetadata,
+          isDarkMode: colorScheme === "dark",
+        }}
+        autoConnect={false}
+        clientId={config.thirdwebClientId}
+        supportedWallets={[
+          coinbaseWallet({
+            callbackURL: new URL(`https://${config.websiteDomain}/coinbase`),
+          }),
+        ]}
+      >
+        <AppKeyboardProvider>
+          <ActionSheetProvider>
+            <PaperProvider
+              theme={
+                colorScheme === "light" ? MaterialLightTheme : MaterialDarkTheme
+              }
+            >
+              <View style={styles.safe}>
+                <XmtpEngine />
+                <Main />
+              </View>
+            </PaperProvider>
+          </ActionSheetProvider>
+        </AppKeyboardProvider>
+      </ThirdwebProvider>
+    </PrivyProvider>
   );
 }
 

@@ -12,6 +12,7 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import config from "../../config";
+import { ConnectionMethod } from "../../screens/Onboarding";
 import { textSecondaryColor } from "../../utils/colors";
 import { isDesktop } from "../../utils/device";
 import { getEthOSSigner } from "../../utils/ethos";
@@ -31,16 +32,14 @@ import {
 
 type Props = {
   disconnect: (b: boolean) => Promise<void>;
-  setConnectWithSeedPhrase: (b: boolean) => void;
-  setConnectWithDesktop: (b: boolean) => void;
+  setConnectionMethod: (method: ConnectionMethod) => void;
   setLoading: (b: boolean) => void;
   setSigner: (signer: Signer) => void;
 };
 
 export default function WalletSelector({
   disconnect,
-  setConnectWithDesktop,
-  setConnectWithSeedPhrase,
+  setConnectionMethod,
   setLoading,
   setSigner,
 }: Props) {
@@ -155,6 +154,15 @@ export default function WalletSelector({
         }
         items={[
           {
+            id: "phone",
+            leftView: <TableViewEmoji emoji="📱" />,
+            title: "Connect via phone number",
+            rightView,
+            action: () => {
+              setConnectionMethod("phone");
+            },
+          },
+          {
             id: "desktop",
             leftView: <TableViewEmoji emoji={isDesktop ? "😎" : "💻"} />,
             title: isDesktop
@@ -167,7 +175,7 @@ export default function WalletSelector({
                   `https://${config.websiteDomain}/connect?desktop=true`
                 );
               } else {
-                setConnectWithDesktop(true);
+                setConnectionMethod("desktop");
               }
             },
           },
@@ -177,7 +185,7 @@ export default function WalletSelector({
             title: "Connect via seed phrase",
             rightView,
             action: () => {
-              setConnectWithSeedPhrase(true);
+              setConnectionMethod("seedPhrase");
             },
           },
         ]}
