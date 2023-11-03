@@ -4,6 +4,7 @@ import { Client } from "@xmtp/react-native-sdk";
 
 import { addLog } from "../../components/DebugButton";
 import config from "../../config";
+import { updateAllSpamScores } from "../../data/helpers/conversations/spamScore";
 import { getChatStore } from "../../data/store/accountsStore";
 import { loadXmtpKey } from "../keychain";
 import {
@@ -114,6 +115,9 @@ export const syncXmtpClient = async (account: string) => {
       client,
       queryConversationsFromTimestamp
     );
+
+    // Await multi upsert
+    await updateAllSpamScores(account);
 
     // Need to save initial load is done
     getChatStore(account).getState().setInitialLoadDone();

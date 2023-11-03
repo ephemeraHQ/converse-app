@@ -1,12 +1,12 @@
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
 
+import { handleSpamScore } from "../../data/helpers/conversations/spamScore";
 import { ConversationWithLastMessagePreview } from "../../utils/conversation";
 import { lastValueInMap } from "../../utils/map";
 import { zustandMMKVStorage } from "../../utils/mmkv";
 import { subscribeToNotifications } from "../../utils/notifications";
 import { omit } from "../../utils/objects";
-import { handleSpamScore } from "../../utils/xmtpRN/conversations";
 import {
   markAllConversationsAsReadInDb,
   markConversationReadUntil,
@@ -120,7 +120,7 @@ export type ChatStoreType = {
     [topic: string]: "deleted" | "consented";
   }) => void;
 
-  setSpamScore: (topic: string, spamScore: number) => void;
+  setSpamScores: (topicSpamScores: Record<string, number>) => void;
 };
 
 const now = () => new Date().getTime();
@@ -341,8 +341,18 @@ export const initChatStore = (account: string) => {
                   }
                 }
 
-                // Set spamScore if needed
-                if (conversation.spamScore === undefined) {
+                // Set spamScore if needed, only after initial load is done
+                console.log(
+                  "++ spamScore:",
+                  conversation.spamScore,
+                  "state.initialLoadDoneOnce:",
+                  state.initialLoadDoneOnce
+                );
+
+                if (
+                  conversation.spamScore === undefined &&
+                  state.initialLoadDoneOnce
+                ) {
                   setImmediate(() => {
                     handleSpamScore(account, conversation);
                   });
@@ -478,15 +488,32 @@ export const initChatStore = (account: string) => {
                 topicsStatus: { ...state.topicsStatus, ...topicsStatus },
               };
             }),
-          setSpamScore: (topic: string, spamScore: number) =>
+          setSpamScores: (topicSpamScores: Record<string, number>) =>
             set((state) => {
               const newState = { ...state };
-              if (newState.conversations[topic]) {
-                newState.conversations[topic].spamScore = spamScore;
-                newState.conversations[topic].lastUpdateAt = now();
-                newState.lastUpdateAt = now();
-              }
-              return newState;
+
+              // Create updated conversations by mapping over the entries of the topicSpamScores
+              const updatedConversations = Object.entries(
+                topicSpamScores
+              ).reduce(
+                (conversations, [topic, spamScore]) => {
+                  if (conversations[topic]) {
+                    conversations[topic] = {
+                      ...conversations[topic],
+                      spamScore,
+                      lastUpdateAt: now(),
+                    };
+                  }
+                  return conversations;
+                },
+                { ...newState.conversations }
+              );
+
+              return {
+                ...newState,
+                conversations: updatedConversations,
+                lastUpdateAt: now(),
+              };
             }),
         }) as ChatStoreType,
       {
