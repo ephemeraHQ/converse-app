@@ -97,8 +97,8 @@ export default function InitialStateHandler() {
         if (topicToNavigateTo) {
           if (conversations[topicToNavigateTo]) {
             navigateToConversation(conversations[topicToNavigateTo]);
+            setTopicToNavigateTo("");
           }
-          setTopicToNavigateTo("");
         } else if (initialURL) {
           Linking.openURL(initialURL);
           // Once opened, let's remove so we don't navigate twice
