@@ -1,7 +1,7 @@
 import { useLoginWithSMS, useEmbeddedWallet, usePrivy } from "@privy-io/expo";
 import * as LibPhoneNumber from "libphonenumber-js";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Alert, StyleSheet, useColorScheme, View } from "react-native";
+import { Alert, StyleSheet, useColorScheme, View, Text } from "react-native";
 import { CountryCode } from "react-native-country-picker-modal";
 import * as RNLocalize from "react-native-localize";
 import OtpInputs, { OtpInputsRef } from "react-native-otp-inputs";
@@ -13,7 +13,7 @@ export default function PrivyConnect() {
   const colorScheme = useColorScheme();
   const styles = useStyles();
 
-  const { isReady: privyReady, user: privyUser } = usePrivy();
+  const { isReady: privyReady, user: privyUser, logout } = usePrivy();
   const embeddedWallet = useEmbeddedWallet();
 
   const { sendCode, loginWithCode } = useLoginWithSMS();
@@ -78,6 +78,9 @@ export default function PrivyConnect() {
 
   return (
     <View>
+      <Text>
+        User: {privyUser ? "yes" : "no"} Embedded: {embeddedWallet.status}
+      </Text>
       {status.step === "enter-phone" && (
         <>
           <PhoneInput
@@ -122,6 +125,7 @@ export default function PrivyConnect() {
           <Button variant="primary" onPress={submitCode} title="Validate" />
         </>
       )}
+      <Button variant="primary" onPress={logout} title="Logout" />
     </View>
   );
 }
