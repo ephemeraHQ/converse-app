@@ -60,7 +60,7 @@ func handleNewConversationFirstMessage(xmtpClient: XMTP.Client, apiURI: String?,
             messageId = decodedMessageResult.id // @todo probably remove this?
             if let body = bestAttemptContent.userInfo["body"] as? [String: Any] {
               var updatedBody = body
-              updatedBody["topic"] = conversation.topic
+              updatedBody["contentTopic"] = conversation.topic
               bestAttemptContent.userInfo.updateValue(updatedBody, forKey: "body")
             }
           }
