@@ -342,13 +342,6 @@ export const initChatStore = (account: string) => {
                 }
 
                 // Set spamScore if needed, only after initial load is done
-                console.log(
-                  "++ spamScore:",
-                  conversation.spamScore,
-                  "state.initialLoadDoneOnce:",
-                  state.initialLoadDoneOnce
-                );
-
                 if (
                   conversation.spamScore === undefined &&
                   state.initialLoadDoneOnce

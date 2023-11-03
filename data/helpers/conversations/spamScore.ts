@@ -37,7 +37,6 @@ export const updateAllSpamScores = async (account: string) => {
   const { conversations } = getChatStore(account).getState();
   const peersStatus = getSettingsStore(account).getState().peersStatus;
 
-  console.log(">> peersStatus:", peersStatus);
   console.log(">> updateAllSpamScores() for account:", account);
 
   const topicSpamScores: TopicSpamScores = {};
@@ -49,20 +48,22 @@ export const updateAllSpamScores = async (account: string) => {
 
     if (
       !conversation.hasOneMessageFromMe &&
+      conversation.spamScore === undefined &&
       peerStatus !== "blocked" &&
       peerStatus !== "consented"
     ) {
       // Push the promise of handleSpamScore into the array, without saving
       spamScorePromises.push(
-        handleSpamScore(account, conversation, false).then((result) => {
-          if (result) {
-            const { topic, spamScore } = result;
+        handleSpamScore(account, conversation, false).then((spamScore) => {
+          if (spamScore !== null) {
             topicSpamScores[topic] = spamScore;
           }
         })
       );
     }
   }
+
+  console.log(">> topicSpamScores:", topicSpamScores);
 
   // Wait for all spam scores to be handled
   await Promise.all(spamScorePromises);
@@ -77,13 +78,16 @@ export const handleSpamScore = async (
   account: string,
   conversation: XmtpConversationWithUpdate,
   saveImmediately: boolean = true
-): Promise<TopicSpamScores | null> => {
+): Promise<number | null> => {
   if (!conversation.messagesIds.length) {
     console.warn("No message ID found in the conversation");
-    return null;
+    return 0;
   }
 
-  console.log("!! handleSpamScore for account:", account);
+  console.log(
+    "!! handleSpamScore for topic with peer",
+    conversation.peerAddress
+  );
 
   const firstMessage = conversation.messages.get(conversation.messagesIds[0]);
   if (firstMessage) {
@@ -94,15 +98,20 @@ export const handleSpamScore = async (
       firstMessage.contentType
     );
 
-    console.log("!! fetch firstMessage:", firstMessage.content);
-    console.log(">> computed spam score for the topic:", conversation.topic);
-
-    const topicSpamScore: TopicSpamScores = { [conversation.topic]: spamScore };
+    console.log(
+      ">>",
+      spamScore,
+      "- computed spam score for the topic:",
+      conversation.topic
+    );
 
     if (saveImmediately) {
+      const topicSpamScore: TopicSpamScores = {
+        [conversation.topic]: spamScore,
+      };
       saveSpamScores(account, topicSpamScore);
     } else {
-      return topicSpamScore;
+      return spamScore;
     }
   }
 
