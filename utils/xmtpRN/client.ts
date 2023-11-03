@@ -116,8 +116,10 @@ export const syncXmtpClient = async (account: string) => {
       queryConversationsFromTimestamp
     );
 
-    // Await multi upsert
-    await updateAllSpamScores(account);
+    // Initial sync of all conversations spam scores
+    if (!getChatStore(account).getState().initialLoadDoneOnce) {
+      await updateAllSpamScores(account);
+    }
 
     // Need to save initial load is done
     getChatStore(account).getState().setInitialLoadDone();

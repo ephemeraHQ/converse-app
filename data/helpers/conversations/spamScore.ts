@@ -12,8 +12,6 @@ export const saveSpamScores = async (
 ) => {
   const conversationRepository = await getRepository(account, "conversation");
 
-  console.log(">> saveSpamScores:", topicSpamScores);
-
   await conversationRepository.manager.transaction(
     async (transactionalEntityManager) => {
       for (const [topic, spamScore] of Object.entries(topicSpamScores)) {
@@ -26,8 +24,6 @@ export const saveSpamScores = async (
     }
   );
 
-  console.log(">> Zustand setSpamScores");
-
   // Update Zustand
   const chatStore = getChatStore(account).getState();
   chatStore.setSpamScores(topicSpamScores);
@@ -35,12 +31,9 @@ export const saveSpamScores = async (
 
 export const updateAllSpamScores = async (account: string) => {
   const { conversations } = getChatStore(account).getState();
-  const peersStatus = getSettingsStore(account).getState().peersStatus;
-
-  console.log(">> updateAllSpamScores() for account:", account);
+  const { peersStatus } = getSettingsStore(account).getState();
 
   const topicSpamScores: TopicSpamScores = {};
-
   const spamScorePromises = [];
 
   for (const [topic, conversation] of Object.entries(conversations)) {
@@ -63,8 +56,6 @@ export const updateAllSpamScores = async (account: string) => {
     }
   }
 
-  console.log(">> topicSpamScores:", topicSpamScores);
-
   // Wait for all spam scores to be handled
   await Promise.all(spamScorePromises);
 
@@ -80,14 +71,14 @@ export const handleSpamScore = async (
   saveImmediately: boolean = true
 ): Promise<number | null> => {
   if (!conversation.messagesIds.length) {
-    console.warn("No message ID found in the conversation");
+    console.warn(
+      "No message ID found:",
+      conversation.topic,
+      "with:",
+      conversation.peerAddress
+    );
     return 0;
   }
-
-  console.log(
-    "!! handleSpamScore for topic with peer",
-    conversation.peerAddress
-  );
 
   const firstMessage = conversation.messages.get(conversation.messagesIds[0]);
   if (firstMessage) {
@@ -96,13 +87,6 @@ export const handleSpamScore = async (
       firstMessage.content,
       firstMessage.sentViaConverse,
       firstMessage.contentType
-    );
-
-    console.log(
-      ">>",
-      spamScore,
-      "- computed spam score for the topic:",
-      conversation.topic
     );
 
     if (saveImmediately) {
