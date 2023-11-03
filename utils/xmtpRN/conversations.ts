@@ -6,13 +6,8 @@ import {
 
 import { Conversation as DbConversation } from "../../data/db/entities/conversationEntity";
 import { getPendingConversationsToCreate } from "../../data/helpers/conversations/pendingConversations";
-import { saveSpamScore } from "../../data/helpers/conversations/spamScore";
 import { saveConversations } from "../../data/helpers/conversations/upsertConversations";
-import {
-  XmtpConversation,
-  XmtpConversationWithUpdate,
-} from "../../data/store/chatStore";
-import { URL_REGEX } from "../../utils/regex";
+import { XmtpConversation } from "../../data/store/chatStore";
 import { getTopicDataFromKeychain, saveTopicDataToKeychain } from "../keychain";
 import { sentryTrackError } from "../sentry";
 import { getXmtpClient } from "./client";
@@ -224,42 +219,4 @@ export const createPendingConversations = async (account: string) => {
     `Trying to create ${pendingConvos.length} pending conversations...`
   );
   await Promise.all(pendingConvos.map((c) => createConversation(account, c)));
-};
-
-const computeSpamScore = async (
-  address: string,
-  message: string,
-  sentViaConverse: boolean,
-  contentType: string
-): Promise<number> => {
-  let spamScore: number = 0.0;
-  if (contentType.startsWith("xmtp.org/text:") && URL_REGEX.test(message)) {
-    spamScore += 1;
-  }
-  if (sentViaConverse) {
-    spamScore -= 1;
-  }
-  return spamScore;
-};
-
-export const handleSpamScore = async (
-  account: string,
-  conversation: XmtpConversationWithUpdate
-): Promise<void> => {
-  if (!conversation.messagesIds.length) {
-    console.warn("No message ID found in the conversation");
-    return;
-  }
-
-  const firstMessage = conversation.messages.get(conversation.messagesIds[0]);
-  if (firstMessage) {
-    const spamScore = await computeSpamScore(
-      conversation.peerAddress,
-      firstMessage.content,
-      firstMessage.sentViaConverse,
-      firstMessage.contentType
-    );
-
-    saveSpamScore(account, conversation.topic, spamScore);
-  }
 };
