@@ -75,10 +75,6 @@ export const updateAllSpamScores = async (account: string) => {
   await Promise.all(spamScorePromises);
 
   // Save all spam scores at once if there are any to save
-  console.log(
-    "@@@@ Object.keys(topicSpamScores).length:",
-    Object.keys(topicSpamScores).length
-  );
   console.log("topicSpamScores", topicSpamScores);
 
   if (Object.keys(topicSpamScores).length > 0) {
