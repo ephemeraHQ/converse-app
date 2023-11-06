@@ -34,32 +34,53 @@ export const updateAllSpamScores = async (account: string) => {
   const { peersStatus } = getSettingsStore(account).getState();
 
   const topicSpamScores: TopicSpamScores = {};
-  const spamScorePromises = [];
 
-  for (const [topic, conversation] of Object.entries(conversations)) {
-    const peerStatus = peersStatus[conversation.peerAddress.toLowerCase()];
+  // Array to hold promises for spam score calculations
+  const spamScorePromises = Object.entries(conversations).map(
+    async ([topic, conversation]) => {
+      const peerStatus = peersStatus[conversation.peerAddress.toLowerCase()];
 
-    if (
-      !conversation.hasOneMessageFromMe &&
-      conversation.spamScore === undefined &&
-      peerStatus !== "blocked" &&
-      peerStatus !== "consented"
-    ) {
-      // Push the promise of handleSpamScore into the array, without saving
-      spamScorePromises.push(
-        handleSpamScore(account, conversation, false).then((spamScore) => {
+      if (
+        conversation.spamScore !== undefined &&
+        conversation.spamScore !== null
+      ) {
+        // If spamScore is already defined, no need to re-compute
+      } else if (
+        conversation.hasOneMessageFromMe ||
+        peerStatus === "consented"
+      ) {
+        // For consented and conversations with user participation, set a negative spamScore
+        topicSpamScores[topic] = -1;
+      } else if (peerStatus === "blocked") {
+        // For blocked conversations, set a positive spamScore
+        topicSpamScores[topic] = 1;
+      } else {
+        // Only calculate spamScore if it's undefined
+        try {
+          const spamScore = await handleSpamScore(account, conversation, false);
           if (spamScore !== null) {
             topicSpamScores[topic] = spamScore;
           }
-        })
-      );
+        } catch (error) {
+          console.error(
+            `Error calculating spam score for topic ${topic}:`,
+            error
+          );
+        }
+      }
     }
-  }
+  );
 
   // Wait for all spam scores to be handled
   await Promise.all(spamScorePromises);
 
   // Save all spam scores at once if there are any to save
+  console.log(
+    "@@@@ Object.keys(topicSpamScores).length:",
+    Object.keys(topicSpamScores).length
+  );
+  console.log("topicSpamScores", topicSpamScores);
+
   if (Object.keys(topicSpamScores).length > 0) {
     saveSpamScores(account, topicSpamScores);
   }
