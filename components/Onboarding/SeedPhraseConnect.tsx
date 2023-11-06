@@ -1,6 +1,7 @@
+import { utils } from "@noble/secp256k1";
 import { Wallet } from "ethers";
 import * as Linking from "expo-linking";
-import { useRef } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
   View,
   TextInput,
@@ -10,21 +11,17 @@ import {
   Platform,
   Alert,
 } from "react-native";
+import { AvoidSoftInput } from "react-native-avoid-softinput";
 
+import { useOnboardingStore } from "../../data/store/onboardingStore";
 import {
   textInputStyle,
   textPrimaryColor,
   textSecondaryColor,
 } from "../../utils/colors";
 import { getPrivateKeyFromMnemonic, validateMnemonic } from "../../utils/eth";
-
-type Props = {
-  seedPhrase: string;
-  setSeedPhrase: (s: string) => void;
-  keyboardVerticalOffset: number;
-  setKeyboardVerticalOffset: (offset: number) => void;
-  generateWallet: () => void;
-};
+import { pick } from "../../utils/objects";
+import OnboardingComponent from "./OnboardingComponent";
 
 export const getSignerFromSeedPhrase = async (mnemonic: string) => {
   let rightMnemonic = mnemonic;
@@ -45,19 +42,67 @@ export const getSignerFromSeedPhrase = async (mnemonic: string) => {
   }
 };
 
-export default function SeedPhraseConnect({
-  seedPhrase,
-  setSeedPhrase,
-  keyboardVerticalOffset,
-  setKeyboardVerticalOffset,
-  generateWallet,
-}: Props) {
+export default function SeedPhraseConnect() {
+  const { setLoading, setConnectionMethod, setSigner } = useOnboardingStore(
+    (s) => pick(s, ["setLoading", "setConnectionMethod", "setSigner"])
+  );
+  const [seedPhrase, setSeedPhrase] = useState("");
   const colorScheme = useColorScheme();
   const textInputRef = useRef<TextInput | null>(null);
   const styles = useStyles();
 
+  const generateWallet = useCallback(async () => {
+    setLoading(true);
+    const signer = new Wallet(utils.randomPrivateKey());
+    setSigner(signer);
+  }, [setLoading, setSigner]);
+
+  const loginWithSeedPhrase = useCallback(
+    async (mnemonic: string) => {
+      setLoading(true);
+      setTimeout(async () => {
+        const seedPhraseSigner = await getSignerFromSeedPhrase(mnemonic);
+        if (!seedPhraseSigner) {
+          setLoading(false);
+          return;
+        }
+        setSigner(seedPhraseSigner);
+      }, 10);
+    },
+    [setLoading, setSigner]
+  );
+
+  const avoidInputEffect = useCallback(() => {
+    AvoidSoftInput.setHideAnimationDelay(0);
+    AvoidSoftInput.setShowAnimationDelay(0);
+
+    // This should be run when screen gains focus - enable the module where it's needed
+    AvoidSoftInput.setShouldMimicIOSBehavior(true);
+    AvoidSoftInput.setEnabled(true);
+    return () => {
+      // This should be run when screen loses focus - disable the module where it's not needed, to make a cleanup
+      AvoidSoftInput.setEnabled(false);
+      AvoidSoftInput.setShouldMimicIOSBehavior(false);
+    };
+  }, []);
+
+  useEffect(avoidInputEffect);
+
   return (
-    <>
+    <OnboardingComponent
+      title="Seed phrase"
+      subtitle="Enter your wallet's seed phrase. It will be used to connect to the XMTP network and it will not be stored anywhere."
+      picto="key.horizontal"
+      primaryButtonText="Connect"
+      primaryButtonAction={() => {
+        if (!seedPhrase || seedPhrase.trim().length === 0) return;
+        loginWithSeedPhrase(seedPhrase.trim());
+      }}
+      backButtonText="Back to home screen"
+      backButtonAction={() => {
+        setConnectionMethod(undefined);
+      }}
+    >
       <View style={styles.seedPhraseContainer}>
         <TextInput
           multiline
@@ -76,16 +121,7 @@ export default function SeedPhraseConnect({
           }}
           value={seedPhrase}
           ref={(r) => {
-            const oldInputRef = textInputRef.current;
             textInputRef.current = r;
-            if (!oldInputRef) {
-              r?.measure((x, y, width, height, pageX, pageY) => {
-                const newKeyboardOffset = -y - height - 80;
-                if (newKeyboardOffset !== keyboardVerticalOffset) {
-                  setKeyboardVerticalOffset(-y - height - 80);
-                }
-              });
-            }
           }}
           onKeyPress={(e) => {
             if (e.nativeEvent.key === "Enter") {
@@ -114,7 +150,7 @@ export default function SeedPhraseConnect({
           </Text>
         </Text>
       </View>
-    </>
+    </OnboardingComponent>
   );
 }
 

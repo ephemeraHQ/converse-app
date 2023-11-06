@@ -25,6 +25,9 @@ export type SettingsStoreType = {
 
   ephemeralAccount: boolean;
   setEphemeralAccount: (ephemeral: boolean) => void;
+
+  isPrivyAccount: boolean;
+  setPrivyAccount: (privy: boolean) => void;
 };
 
 export const initSettingsStore = (account: string) => {
@@ -67,6 +70,11 @@ export const initSettingsStore = (account: string) => {
           setEphemeralAccount: (ephemeral) =>
             set(() => ({
               ephemeralAccount: ephemeral,
+            })),
+          isPrivyAccount: false,
+          setPrivyAccount: (privy) =>
+            set(() => ({
+              isPrivyAccount: privy,
             })),
         }) as SettingsStoreType,
       {

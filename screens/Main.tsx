@@ -26,33 +26,20 @@ import { pick } from "../utils/objects";
 import AccountsAndroid from "./Accounts/AccountsAndroid";
 import Navigation from "./Navigation/Navigation";
 import NotificationsScreen from "./NotificationsScreen";
-import OnboardingScreen from "./Onboarding";
+import Onboarding from "./Onboarding";
 
 export default function Main() {
   const colorScheme = useColorScheme();
   const userAddress = useCurrentAccount();
-  const {
-    desktopConnectSessionId,
-    setDesktopConnectSessionId,
-    addingNewAccount,
-  } = useOnboardingStore((s) =>
-    pick(s, [
-      "desktopConnectSessionId",
-      "setDesktopConnectSessionId",
-      "addingNewAccount",
-    ])
+  const { resetOnboarding, addingNewAccount } = useOnboardingStore((s) =>
+    pick(s, ["resetOnboarding", "addingNewAccount"])
   );
   // Once the user is fully connected, let's remove the Desktop Connect session id
   useEffect(() => {
-    if (desktopConnectSessionId && userAddress && !addingNewAccount) {
-      setDesktopConnectSessionId(null);
+    if (userAddress && !addingNewAccount) {
+      resetOnboarding();
     }
-  }, [
-    addingNewAccount,
-    desktopConnectSessionId,
-    setDesktopConnectSessionId,
-    userAddress,
-  ]);
+  }, [addingNewAccount, resetOnboarding, userAddress]);
   const showNotificationScreen = useSettingsStore(
     (s) => s.notifications.showNotificationScreen
   );
@@ -102,7 +89,7 @@ export default function Main() {
 
   if (splashScreenHidden) {
     if (!userAddress || addingNewAccount) {
-      screenToShow = <OnboardingScreen />;
+      screenToShow = <Onboarding />;
     } else if (
       showNotificationScreen &&
       (notificationsPermissionStatus === "undetermined" ||

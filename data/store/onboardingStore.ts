@@ -1,6 +1,14 @@
+import { Signer } from "@xmtp/xmtp-js";
 import { create } from "zustand";
 
 // A app-wide store to store the current onboarding
+
+export type ConnectionMethod =
+  | undefined
+  | "wallet"
+  | "phone"
+  | "desktop"
+  | "seedPhrase";
 
 type OnboardingStoreType = {
   addingNewAccount: boolean;
@@ -8,6 +16,24 @@ type OnboardingStoreType = {
 
   desktopConnectSessionId: string | null;
   setDesktopConnectSessionId: (sessionId: string | null) => void;
+
+  connectionMethod: ConnectionMethod;
+  setConnectionMethod: (method: ConnectionMethod) => void;
+
+  signer: Signer | undefined;
+  address: string | undefined;
+  setSigner: (s: Signer | undefined) => void;
+
+  loading: boolean;
+  setLoading: (l: boolean) => void;
+
+  waitingForSecondSignature: boolean;
+  setWaitingForSecondSignature: (w: boolean) => void;
+
+  isEphemeral: boolean;
+  setIsEphemeral: (e: boolean) => void;
+
+  resetOnboarding: () => void;
 };
 
 export const useOnboardingStore = create<OnboardingStoreType>()((set) => ({
@@ -19,5 +45,52 @@ export const useOnboardingStore = create<OnboardingStoreType>()((set) => ({
     set(() => ({
       desktopConnectSessionId: sessionId,
       addingNewAccount: !!sessionId,
+    })),
+
+  connectionMethod: undefined,
+  setConnectionMethod: (method) =>
+    set(() => ({
+      connectionMethod: method,
+    })),
+
+  signer: undefined,
+  address: undefined,
+  setSigner: async (s) => {
+    let address = undefined as string | undefined;
+    if (s) {
+      address = await s.getAddress();
+    }
+    return set(() => ({
+      signer: s,
+      address,
+    }));
+  },
+
+  loading: false,
+  setLoading: (l) =>
+    set(() => ({
+      loading: l,
+    })),
+
+  waitingForSecondSignature: false,
+  setWaitingForSecondSignature: (w) =>
+    set(() => ({ waitingForSecondSignature: w })),
+
+  isEphemeral: false,
+  setIsEphemeral: (e) =>
+    set(() => ({
+      isEphemeral: e,
+    })),
+
+  resetOnboarding: () =>
+    set(() => ({
+      addingNewAccount: false,
+      desktopConnectSessionId: null,
+      connectionMethod: undefined,
+      signer: undefined,
+      address: undefined,
+      loading: false,
+      waitingForSecondSignature: false,
+      isEphemeral: false,
     })),
 }));

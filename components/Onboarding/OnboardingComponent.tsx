@@ -3,60 +3,67 @@ import {
   StyleSheet,
   useColorScheme,
   Text,
+  View,
   ScrollView,
-  KeyboardAvoidingView,
-  Dimensions,
 } from "react-native";
+import Animated, { useAnimatedStyle } from "react-native-reanimated";
 
+import { useOnboardingStore } from "../../data/store/onboardingStore";
+import { useKeyboardAnimation } from "../../utils/animations/keyboardAnimation";
 import {
   backgroundColor,
   textPrimaryColor,
   textSecondaryColor,
 } from "../../utils/colors";
-import { isDesktop } from "../../utils/device";
+import { pick } from "../../utils/objects";
 import ActivityIndicator from "../ActivityIndicator/ActivityIndicator";
 import Button from "../Button/Button";
 import Picto from "../Picto/Picto";
 
 type Props = {
-  loading?: boolean;
   title: string;
   picto: string;
   subtitle?: string | React.ReactNode;
-  view: React.ReactNode;
+  isLoading?: boolean;
+  children: React.ReactNode;
   backButtonText?: string;
   backButtonAction?: () => void;
   primaryButtonText?: string;
   primaryButtonAction?: () => void;
-  keyboardVerticalOffset?: number;
+  shrinkWithKeyboard?: boolean;
 };
 
 export default function OnboardingComponent({
-  loading,
   title,
   picto,
   subtitle,
-  view,
+  isLoading,
+  children,
   backButtonText,
   backButtonAction,
   primaryButtonText,
   primaryButtonAction,
-  keyboardVerticalOffset,
+  shrinkWithKeyboard,
 }: Props) {
   const styles = useStyles();
+  const { loading: stateLoading, setLoading } = useOnboardingStore((s) =>
+    pick(s, ["loading", "setLoading"])
+  );
+  const loading = stateLoading || isLoading;
+
+  const { height: keyboardHeight } = useKeyboardAnimation();
+  const animatedStyle = useAnimatedStyle(() => {
+    return {
+      paddingBottom: keyboardHeight.value,
+    };
+  }, [keyboardHeight]);
 
   return (
-    <KeyboardAvoidingView
-      style={{ flex: 1 }}
-      enabled={Dimensions.get("window").height < 850}
-      behavior={Platform.OS === "ios" ? "position" : "height"}
-      keyboardVerticalOffset={
-        Platform.OS === "ios" ? keyboardVerticalOffset : 0
-      }
-    >
+    <View style={{ flex: 1, flexDirection: "column" }}>
       <ScrollView
         alwaysBounceVertical={false}
         contentContainerStyle={styles.onboardingContent}
+        keyboardShouldPersistTaps="handled"
       >
         <Picto
           picto={picto}
@@ -68,30 +75,41 @@ export default function OnboardingComponent({
         {loading && (
           <ActivityIndicator size="large" style={{ marginTop: 30 }} />
         )}
-        {subtitle && <Text style={styles.p}>{subtitle}</Text>}
-        {view}
-        {primaryButtonText && (
-          <Button
-            title={primaryButtonText}
-            variant="primary"
-            style={[styles.primaryButton]}
-            onPress={primaryButtonAction}
-          />
-        )}
-        {backButtonText && (
-          <Button
-            variant="text"
-            title={backButtonText}
-            textStyle={{ fontWeight: "600" }}
-            style={{
-              marginBottom: 53,
-              marginTop: primaryButtonText ? 0 : "auto",
-            }}
-            onPress={backButtonAction}
-          />
+        {!loading && (
+          <>
+            {subtitle && <Text style={styles.p}>{subtitle}</Text>}
+            {children}
+            <View style={{ height: 32 }} />
+            {primaryButtonText && (
+              <Button
+                title={primaryButtonText}
+                variant="primary"
+                style={[styles.primaryButton]}
+                onPress={primaryButtonAction}
+              />
+            )}
+            {backButtonText && (
+              <Button
+                variant="text"
+                title={backButtonText}
+                textStyle={{ fontWeight: "600" }}
+                style={{
+                  marginBottom: 53,
+                  marginTop: primaryButtonText && !loading ? 0 : "auto",
+                }}
+                onPress={() => {
+                  setLoading(false);
+                  if (backButtonAction) {
+                    backButtonAction();
+                  }
+                }}
+              />
+            )}
+          </>
         )}
       </ScrollView>
-    </KeyboardAvoidingView>
+      {shrinkWithKeyboard && <Animated.View style={animatedStyle} />}
+    </View>
   );
 }
 
@@ -99,7 +117,7 @@ const useStyles = () => {
   const colorScheme = useColorScheme();
   return StyleSheet.create({
     onboardingContent: {
-      minHeight: isDesktop ? undefined : "100%",
+      flexGrow: 1,
       alignItems: "center",
       backgroundColor: backgroundColor(colorScheme),
     },
