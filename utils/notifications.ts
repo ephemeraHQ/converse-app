@@ -332,18 +332,15 @@ export const onInteractWithNotification = (
     notificationData["account"] || useAccountsStore.getState().currentAccount;
 
   if (conversationTopic) {
-    // Temporary fix, waiting for 100ms for requests/inbox sorting
-    setTimeout(() => {
-      useAccountsStore.getState().setCurrentAccount(account, false);
-      const conversations = getChatStore(account).getState().conversations;
+    useAccountsStore.getState().setCurrentAccount(account, false);
+    const conversations = getChatStore(account).getState().conversations;
 
-      if (conversations[conversationTopic]) {
-        navigateToConversation(conversations[conversationTopic]);
-      } else {
-        // App was probably not loaded!
-        setTopicToNavigateTo(conversationTopic);
-      }
-    }, 100);
+    if (conversations[conversationTopic]) {
+      navigateToConversation(conversations[conversationTopic]);
+    } else {
+      // App was probably not loaded!
+      setTopicToNavigateTo(conversationTopic);
+    }
   }
 };
 

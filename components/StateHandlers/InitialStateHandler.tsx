@@ -11,7 +11,7 @@ import { navigateToConversation } from "../../utils/navigation";
 import { pick } from "../../utils/objects";
 import { hideSplashScreen } from "../../utils/splash/splash";
 
-let topicToNavigateTo = "";
+export let topicToNavigateTo = "";
 export const setTopicToNavigateTo = (topic: string) => {
   topicToNavigateTo = topic;
 };

@@ -94,6 +94,17 @@ class PushNotificationsService : FirebaseMessagingService() {
                         if (result != NotificationDataResult()) {
                             shouldShowNotification = result.shouldShowNotification
                         }
+
+                        // Replace invite-topic with the topic in the notification content
+                        val newNotificationData = NotificationData(
+                            notificationData.message,
+                            notificationData.timestampNs,
+                            conversation.topic,
+                            notificationData.sentViaConverse,
+                            notificationData.account,
+                        )
+                        val newNotificationDataJson = Klaxon().toJsonString(newNotificationData)
+                        remoteMessage.data["body"] = newNotificationDataJson
                     }
                 } else {
                     Log.d(TAG, "Handling an ongoing conversation message notification")

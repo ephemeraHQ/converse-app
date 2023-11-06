@@ -1,6 +1,11 @@
 import { In } from "typeorm/browser";
 
+import {
+  setTopicToNavigateTo,
+  topicToNavigateTo,
+} from "../../../components/StateHandlers/InitialStateHandler";
 import { getLensHandleFromConversationIdAndPeer } from "../../../utils/lens";
+import { navigateToConversation } from "../../../utils/navigation";
 import { saveConversationIdentifiersForNotifications } from "../../../utils/notifications";
 import { getRepository } from "../../db";
 import { getExistingDataSource } from "../../db/datasource";
@@ -35,6 +40,21 @@ export const saveConversations = async (
   );
   // Then to context so it show immediatly even without handle
   chatStoreState.setConversations(newlySavedConversations);
+
+  // Navigate to conversation from a push notification received as a first message if a new conversation
+  if (topicToNavigateTo) {
+    const topicExists = conversations.some(
+      (conversation) => conversation.topic === topicToNavigateTo
+    );
+    const conversationToNavigateTo = conversations.find(
+      (conversation) => conversation.topic === topicToNavigateTo
+    );
+
+    if (topicExists && conversationToNavigateTo) {
+      navigateToConversation(conversationToNavigateTo);
+      setTopicToNavigateTo("");
+    }
+  }
 
   // Let's find out which need to have the profile updated
   const knownProfiles = getProfilesStore(account).getState().profiles;
