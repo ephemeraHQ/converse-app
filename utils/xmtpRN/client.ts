@@ -116,8 +116,9 @@ export const syncXmtpClient = async (account: string) => {
       queryConversationsFromTimestamp
     );
 
-    // Initial sync of all conversations spam scores
-    if (!getChatStore(account).getState().initialLoadDoneOnce) {
+    // Update spam scores after the initial load of conversation data is complete
+    // Ensure spam scores are current, reflecting any new messages received since the last sync
+    if (!getChatStore(account).getState().initialLoadDone) {
       await updateAllSpamScores(account);
     }
 
