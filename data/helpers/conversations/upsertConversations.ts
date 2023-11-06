@@ -43,14 +43,11 @@ export const saveConversations = async (
 
   // Navigate to conversation from a push notification received as a first message if a new conversation
   if (topicToNavigateTo) {
-    const topicExists = conversations.some(
-      (conversation) => conversation.topic === topicToNavigateTo
-    );
     const conversationToNavigateTo = conversations.find(
       (conversation) => conversation.topic === topicToNavigateTo
     );
 
-    if (topicExists && conversationToNavigateTo) {
+    if (conversationToNavigateTo) {
       navigateToConversation(conversationToNavigateTo);
       setTopicToNavigateTo("");
     }
