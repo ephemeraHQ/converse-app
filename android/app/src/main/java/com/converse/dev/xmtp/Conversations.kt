@@ -42,9 +42,10 @@ fun saveConversationToStorage(appContext: Context, account: String, topic: Strin
     val mmkv = getMmkv(appContext)
     val currentSavedConversationsString = mmkv?.decodeString("saved-notifications-conversations")
     Log.d("PushNotificationsService", "Got current saved conversations from storage: $currentSavedConversationsString")
-    var currentSavedConversations = listOf<SavedNotificationConversation>()
+    var currentSavedConversations = mutableListOf<SavedNotificationConversation>()
     try {
-        currentSavedConversations = Klaxon().parseArray<SavedNotificationConversation>(currentSavedConversationsString ?: "[]") ?: listOf()
+        currentSavedConversations =
+            (Klaxon().parseArray<SavedNotificationConversation>(currentSavedConversationsString ?: "[]") ?: listOf()).toMutableList()
     } catch (error: Exception) {
         Log.d("PushNotificationsService", "Could not parse saved messages from storage: $currentSavedConversationsString - $error")
     }
