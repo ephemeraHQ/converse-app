@@ -46,6 +46,10 @@ class PushNotificationsService : FirebaseMessagingService() {
         initSentry(this)
     }
 
+    // Define a CoroutineScope for the service
+    private val serviceJob = SupervisorJob()
+    private val serviceScope = CoroutineScope(Dispatchers.IO + serviceJob)
+
     override fun onMessageReceived(remoteMessage: RemoteMessage) {
         Log.d(TAG, "Received a notification")
 
@@ -78,15 +82,14 @@ class PushNotificationsService : FirebaseMessagingService() {
         var result = NotificationDataResult()
 
         // Using IO dispatcher for background work, not blocking the main thread and UI
-        val appContext = this
-        GlobalScope.launch(Dispatchers.IO) {
+        serviceScope.launch {
             try {
                 if (isInviteTopic(notificationData.contentTopic)) {
                     Log.d(TAG, "Handling a new conversation notification")
                     val conversation = getNewConversationFromEnvelope(xmtpClient, envelope)
                     if (conversation != null) {
                         result = handleNewConversationFirstMessage(
-                            appContext,
+                            applicationContext,
                             xmtpClient,
                             conversation,
                             remoteMessage
@@ -108,15 +111,15 @@ class PushNotificationsService : FirebaseMessagingService() {
                     }
                 } else {
                     Log.d(TAG, "Handling an ongoing conversation message notification")
-                    result = handleOngoingConversationMessage(appContext, xmtpClient, envelope, remoteMessage)
+                    result = handleOngoingConversationMessage(applicationContext, xmtpClient, envelope, remoteMessage)
                     if (result != NotificationDataResult()) {
                         shouldShowNotification = result.shouldShowNotification
                     }
                 }
-                val notificationAlreadyShown = notificationAlreadyShown(appContext, result.messageId)
+                val notificationAlreadyShown = notificationAlreadyShown(applicationContext, result.messageId)
 
                 if (shouldShowNotification && !notificationAlreadyShown) {
-                    incrementBadge(appContext)
+                    incrementBadge(applicationContext)
                     result.remoteMessage?.let { showNotification(result.title, result.body, it) }
                 }
             } catch (e: Exception) {
@@ -182,5 +185,11 @@ class PushNotificationsService : FirebaseMessagingService() {
     private fun initAsyncStorage() {
         val reactContext = ReactApplicationContext(this)
         asyncStorageModule = AsyncStorageModule(reactContext)
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        // Cancel the serviceScope when the service is destroyed
+        serviceScope.cancel()
     }
 }
