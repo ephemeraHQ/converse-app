@@ -6,7 +6,13 @@ import { PrivyProvider } from "@privy-io/expo";
 import { Ethereum } from "@thirdweb-dev/chains";
 import { coinbaseWallet, ThirdwebProvider } from "@thirdweb-dev/react-native";
 import React, { useEffect, useState } from "react";
-import { Platform, StyleSheet, useColorScheme, View } from "react-native";
+import {
+  Platform,
+  StyleSheet,
+  useColorScheme,
+  View,
+  LogBox,
+} from "react-native";
 import "./utils/splash/splash";
 import { KeyboardProvider } from "react-native-keyboard-controller";
 import { Provider as PaperProvider } from "react-native-paper";
@@ -25,6 +31,11 @@ import mmkv from "./utils/mmkv";
 import { DEFAULT_EMOJIS, RECENT_EMOJI_STORAGE_KEY } from "./utils/reactions";
 import { initSentry, sentryTrackError } from "./utils/sentry";
 import { useRecentPicksPersistence } from "./vendor/rn-emoji-keyboard";
+
+LogBox.ignoreLogs([
+  "Privy: Expected status code 200, received 400", // Privy
+  "Error destroying session", // Privy
+]);
 
 configureCoinbase({
   callbackURL: new URL(`https://${config.websiteDomain}/coinbase`),

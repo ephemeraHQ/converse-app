@@ -1,5 +1,4 @@
 import { useCoinbaseWallet } from "@thirdweb-dev/react-native";
-import { Signer } from "@xmtp/xmtp-js";
 import * as Linking from "expo-linking";
 import { useEffect, useRef, useState } from "react";
 import {
@@ -12,10 +11,11 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import config from "../../config";
-import { ConnectionMethod } from "../../screens/Onboarding";
+import { useOnboardingStore } from "../../data/store/onboardingStore";
 import { textSecondaryColor } from "../../utils/colors";
 import { isDesktop } from "../../utils/device";
 import { getEthOSSigner } from "../../utils/ethos";
+import { pick } from "../../utils/objects";
 import TableView from "../TableView/TableView";
 import {
   TableViewEmoji,
@@ -23,6 +23,7 @@ import {
   TableViewPicto,
 } from "../TableView/TableViewImage";
 import { useDynamicWalletConnect } from "./DynamicWalletConnect";
+import OnboardingComponent from "./OnboardingComponent";
 import {
   InstalledWallet,
   POPULAR_WALLETS,
@@ -30,19 +31,10 @@ import {
   installedWallets,
 } from "./supportedWallets";
 
-type Props = {
-  disconnect: (b: boolean) => Promise<void>;
-  setConnectionMethod: (method: ConnectionMethod) => void;
-  setLoading: (b: boolean) => void;
-  setSigner: (signer: Signer) => void;
-};
-
-export default function WalletSelector({
-  disconnect,
-  setConnectionMethod,
-  setLoading,
-  setSigner,
-}: Props) {
+export default function WalletSelector() {
+  const { setConnectionMethod, setSigner, setLoading } = useOnboardingStore(
+    (s) => pick(s, ["setConnectionMethod", "setSigner", "setLoading"])
+  );
   const colorScheme = useColorScheme();
   const connectToCoinbase = useCoinbaseWallet(
     new URL(`https://${config.websiteDomain}/coinbase`)
@@ -89,28 +81,45 @@ export default function WalletSelector({
   const hasInstalledWallets = walletsInstalled.list.length > 0;
   const insets = useSafeAreaInsets();
   return (
-    <View
-      style={[
-        styles.walletSelectorContainer,
-        {
-          marginBottom:
-            Platform.OS === "android" ? insets.bottom + 30 : insets.bottom,
-        },
-      ]}
+    <OnboardingComponent
+      title="GM"
+      picto="message.circle.fill"
+      subtitle="Converse connects web3 identities with each other. Connect your wallet to start chatting."
     >
-      {hasInstalledWallets && !isDesktop && (
+      <View
+        style={[
+          styles.walletSelectorContainer,
+          {
+            marginBottom:
+              Platform.OS === "android" ? insets.bottom + 30 : insets.bottom,
+          },
+        ]}
+      >
         <TableView
-          title="INSTALLED APPS"
-          items={walletsInstalled.list.map((w) => ({
-            id: w.name,
-            leftView: <TableViewImage imageURI={w.iconURL} />,
-            rightView,
-            title: `Connect ${w.name}`,
-            action: async () => {
-              setLoading(true);
-              // Disconnecting from previous WC
-              await disconnect(false);
-              setTimeout(async () => {
+          title="CONVERSE ACCOUNT"
+          items={[
+            {
+              id: "phone",
+              leftView: <TableViewEmoji emoji="📞" />,
+              title: "Connect via Phone",
+              rightView,
+              action: () => {
+                setConnectionMethod("phone");
+              },
+            },
+          ]}
+        />
+        {hasInstalledWallets && !isDesktop && (
+          <TableView
+            title="INSTALLED APPS"
+            items={walletsInstalled.list.map((w) => ({
+              id: w.name,
+              leftView: <TableViewImage imageURI={w.iconURL} />,
+              rightView,
+              title: `Connect ${w.name}`,
+              action: async () => {
+                setLoading(true);
+                setConnectionMethod("wallet");
                 try {
                   if (w.name === "Coinbase Wallet") {
                     await connectToCoinbase();
@@ -136,75 +145,67 @@ export default function WalletSelector({
                   }
                 } catch (e: any) {
                   console.log("Error connecting to wallet:", e);
+                  setConnectionMethod(undefined);
                   setLoading(false);
                 }
-              }, 10);
-            },
-          }))}
-        />
-      )}
+              },
+            }))}
+          />
+        )}
 
-      <TableView
-        title={
-          isDesktop
-            ? "CONNECTION OPTIONS"
-            : hasInstalledWallets
-            ? "OTHER OPTIONS"
-            : "CONNECT EXISTING WALLET"
-        }
-        items={[
-          {
-            id: "phone",
-            leftView: <TableViewEmoji emoji="📱" />,
-            title: "Connect via phone number",
-            rightView,
-            action: () => {
-              setConnectionMethod("phone");
-            },
-          },
-          {
-            id: "desktop",
-            leftView: <TableViewEmoji emoji={isDesktop ? "😎" : "💻"} />,
-            title: isDesktop
-              ? "Connect via browser wallet"
-              : "Connect via desktop",
-            rightView,
-            action: () => {
-              if (isDesktop) {
-                Linking.openURL(
-                  `https://${config.websiteDomain}/connect?desktop=true`
-                );
-              } else {
-                setConnectionMethod("desktop");
-              }
-            },
-          },
-          {
-            id: "seedphrase",
-            leftView: <TableViewEmoji emoji="🔑" />,
-            title: "Connect via seed phrase",
-            rightView,
-            action: () => {
-              setConnectionMethod("seedPhrase");
-            },
-          },
-        ]}
-      />
-      {!hasInstalledWallets && !isDesktop && (
         <TableView
-          title="POPULAR MOBILE APPS"
-          items={POPULAR_WALLETS.map((w) => ({
-            id: w.name,
-            title: w.name,
-            leftView: <TableViewImage imageURI={w.iconURL} />,
-            rightView,
-            action: () => {
-              Linking.openURL(w.url);
+          title={
+            isDesktop
+              ? "CONNECTION OPTIONS"
+              : hasInstalledWallets
+              ? "OTHER OPTIONS"
+              : "CONNECT EXISTING WALLET"
+          }
+          items={[
+            {
+              id: "desktop",
+              leftView: <TableViewEmoji emoji={isDesktop ? "😎" : "💻"} />,
+              title: isDesktop
+                ? "Connect via browser wallet"
+                : "Connect via desktop",
+              rightView,
+              action: () => {
+                if (isDesktop) {
+                  Linking.openURL(
+                    `https://${config.websiteDomain}/connect?desktop=true`
+                  );
+                } else {
+                  setConnectionMethod("desktop");
+                }
+              },
             },
-          }))}
+            {
+              id: "seedphrase",
+              leftView: <TableViewEmoji emoji="🔑" />,
+              title: "Connect via seed phrase",
+              rightView,
+              action: () => {
+                setConnectionMethod("seedPhrase");
+              },
+            },
+          ]}
         />
-      )}
-    </View>
+        {!hasInstalledWallets && !isDesktop && (
+          <TableView
+            title="POPULAR MOBILE APPS"
+            items={POPULAR_WALLETS.map((w) => ({
+              id: w.name,
+              title: w.name,
+              leftView: <TableViewImage imageURI={w.iconURL} />,
+              rightView,
+              action: () => {
+                Linking.openURL(w.url);
+              },
+            }))}
+          />
+        )}
+      </View>
+    </OnboardingComponent>
   );
 }
 

@@ -6517,18 +6517,18 @@
   dependencies:
     zod "^3.21.4"
 
-"@privy-io/expo@^0.2.2":
-  version "0.2.2"
-  resolved "https://registry.yarnpkg.com/@privy-io/expo/-/expo-0.2.2.tgz#69f038113c154d62e52e7ee6ffb5614cd67de078"
-  integrity sha512-L3Dhj2Y/0g7FM7/ToKw7TcnK/cRAFTa+H+3IVjzn+WGz3QJhLSjwFiGsNAqkkhvL/aIufTw/3s+jrkBJPzTHaA==
+"@privy-io/expo@^0.3.0":
+  version "0.3.0"
+  resolved "https://registry.yarnpkg.com/@privy-io/expo/-/expo-0.3.0.tgz#4c1d72c2e2d1b4da72d5da4c113cbe50432f5a0b"
+  integrity sha512-gvERDLuZjrE7pUe+fQoi+g64U9+WZW2B2KRAWsdYLqaJxWLJciGkh3H/HV8nlBS3Ne6pKPN2YCqSXZHSOzp+1w==
   dependencies:
     "@privy-io/js-sdk-core" "*"
     react-fast-compare "^3.2.2"
 
 "@privy-io/js-sdk-core@*":
-  version "0.6.1"
-  resolved "https://registry.yarnpkg.com/@privy-io/js-sdk-core/-/js-sdk-core-0.6.1.tgz#a8769b6eb91ccd774822b5a6832d91c7c3f4aceb"
-  integrity sha512-MXzAQ6LVynzAknm4mtQrpotohw6r+Il8AueCt6fMFd9KKGS8jjYWhHeTjjDE8/5PQ8LSX2CoMP3lQEsxfY1KRQ==
+  version "0.7.0"
+  resolved "https://registry.yarnpkg.com/@privy-io/js-sdk-core/-/js-sdk-core-0.7.0.tgz#901335032f564307190c0c6f45a05d3763604851"
+  integrity sha512-6lq5xTDrsVdpOMMjHoiVU7ILrR54+d77fcE9/G0nql+SnZkR3Pb6O2Z6mNVkns66s7+PnCbpKah0JO5UAZkIsg==
   dependencies:
     "@ethersproject/providers" "^5.7.2"
     "@privy-io/public-api" "*"
@@ -20385,6 +20385,11 @@ react-native-animatable@1.3.3:
   dependencies:
     prop-types "^15.7.2"
 
+react-native-avoid-softinput@^4.0.1:
+  version "4.0.1"
+  resolved "https://registry.yarnpkg.com/react-native-avoid-softinput/-/react-native-avoid-softinput-4.0.1.tgz#c08802f66c46ddc91f72d05d1b80644102f80a30"
+  integrity sha512-feMt+Pb/wEcuobbIRDHXj1leXT15uC8CekgwMb/t8s61kWy5ifCGtX/YqDZMDRiD0sqeFLZx0gykLQOSrCpybA==
+
 react-native-background-color@^0.0.8:
   version "0.0.8"
   resolved "https://registry.yarnpkg.com/react-native-background-color/-/react-native-background-color-0.0.8.tgz#661f737156a18a86ece362126e9c97e33fa42ed2"
@@ -20484,10 +20489,10 @@ react-native-inappbrowser-reborn@^3.7.0:
     invariant "^2.2.4"
     opencollective-postinstall "^2.0.3"
 
-react-native-keyboard-controller@^1.6.1:
-  version "1.6.1"
-  resolved "https://registry.yarnpkg.com/react-native-keyboard-controller/-/react-native-keyboard-controller-1.6.1.tgz#4c45bae900ac3de840629b3332297ac867cac102"
-  integrity sha512-ojzPeS8XadcsDCm46y+A8rBH0qZ52EwYisFKbJRPFlpNi8Hd3XvF9li9Mv8CAhnAH57EfO586qqZ5rYX9EM7oQ==
+react-native-keyboard-controller@^1.9.1:
+  version "1.9.1"
+  resolved "https://registry.yarnpkg.com/react-native-keyboard-controller/-/react-native-keyboard-controller-1.9.1.tgz#c49688f7ad70162eebba2d611e0cc9a7ffdd4517"
+  integrity sha512-yB9xtbPPeicXS15lq2mOvAUqv51w+v4NLo9yBJdd1ussmA0r1DJuZCoExS97evYvjJcTyM7kWpkdD7eFdC+fyQ==
 
 react-native-localize@^3.0.2:
   version "3.0.2"

@@ -1,19 +1,36 @@
 import { useLoginWithSMS, useEmbeddedWallet, usePrivy } from "@privy-io/expo";
+import { ethers } from "ethers";
 import * as LibPhoneNumber from "libphonenumber-js";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Alert, StyleSheet, useColorScheme, View, Text } from "react-native";
+import { Alert, StyleSheet, Text, useColorScheme } from "react-native";
 import { CountryCode } from "react-native-country-picker-modal";
 import * as RNLocalize from "react-native-localize";
 import OtpInputs, { OtpInputsRef } from "react-native-otp-inputs";
 import PhoneInput from "react-native-phone-number-input";
 
-import Button from "../Button/Button";
+import { useOnboardingStore } from "../../data/store/onboardingStore";
+import {
+  tertiaryBackgroundColor,
+  textSecondaryColor,
+} from "../../utils/colors";
+import { pick } from "../../utils/objects";
+import Picto from "../Picto/Picto";
+import OnboardingComponent from "./OnboardingComponent";
 
 export default function PrivyConnect() {
   const colorScheme = useColorScheme();
   const styles = useStyles();
+  const { setConnectionMethod, setLoading, setSigner } = useOnboardingStore(
+    (s) => pick(s, ["setConnectionMethod", "setLoading", "setSigner"])
+  );
 
   const { isReady: privyReady, user: privyUser, logout } = usePrivy();
+
+  useEffect(() => {
+    logout();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const embeddedWallet = useEmbeddedWallet();
 
   const { sendCode, loginWithCode } = useLoginWithSMS();
@@ -21,42 +38,42 @@ export default function PrivyConnect() {
   const otpInputRef = useRef<OtpInputsRef>();
   const phoneInputRef = useRef<PhoneInput>(null);
 
-  const [status, setStatus] = useState<{
-    step: "enter-phone" | "verify-phone" | "logged-in";
-    loading: boolean;
-  }>({
-    step: "enter-phone",
-    loading: false,
-  });
+  const [status, setStatus] = useState<"enter-phone" | "verify-phone">(
+    "enter-phone"
+  );
 
   const [phone, setPhone] = useState("");
   const [formattedPhone, setFormattedPhone] = useState("");
+  const [beautifulPhone, setBeautifulPhone] = useState("");
   const otpCode = useRef("");
 
   const sendPhone = useCallback(async () => {
     const parsed = LibPhoneNumber.parsePhoneNumberFromString(formattedPhone);
     if (!parsed?.isValid) {
-      Alert.alert("Invalid number");
+      Alert.alert("Please enter a valid phone number");
       return;
     }
-    setStatus((s) => ({ step: s.step, loading: true }));
+    setLoading(true);
+    setBeautifulPhone(parsed.formatInternational());
     await sendCode({ phone: parsed.number });
-    setStatus({ step: "verify-phone", loading: false });
-  }, [formattedPhone, sendCode]);
+    setLoading(false);
+    setStatus("verify-phone");
+  }, [formattedPhone, sendCode, setLoading]);
 
   const submitCode = useCallback(async () => {
     if (otpCode.current.length !== 6) {
-      Alert.alert("Invalid code");
+      otpInputRef.current?.reset();
       return;
     }
-    setStatus((s) => ({ step: s.step, loading: true }));
+    setLoading(true);
     const user = await loginWithCode({ code: otpCode.current });
-    if (user) {
-      setStatus({ step: "logged-in", loading: true });
-    } else {
-      Alert.alert("Error occurred");
+    if (!user) {
+      setLoading(false);
+      Alert.alert("The code you entered is not valid, please try again");
+      otpInputRef.current?.reset();
+      otpInputRef.current?.focus();
     }
-  }, [loginWithCode, otpCode]);
+  }, [loginWithCode, setLoading]);
 
   const creatingEmbeddedWallet = useRef(false);
 
@@ -69,19 +86,47 @@ export default function PrivyConnect() {
         !creatingEmbeddedWallet.current
       ) {
         creatingEmbeddedWallet.current = true;
-        console.log("creating embedded wallet !!!");
         await embeddedWallet.create();
       }
     };
     createWallet();
   }, [embeddedWallet, privyReady, privyUser]);
 
+  const gotEmbeddedWallet = useRef(false);
+  useEffect(() => {
+    (async () => {
+      if (
+        privyUser &&
+        embeddedWallet.status === "connected" &&
+        status === "verify-phone" &&
+        !gotEmbeddedWallet.current
+      ) {
+        gotEmbeddedWallet.current = true;
+        const provider = embeddedWallet.provider;
+        await provider.request({
+          method: "wallet_switchEthereumChain",
+          params: [{ chainId: "0x2105" }], // Switching to base chain
+        });
+        const ethersProvider = new ethers.providers.Web3Provider(provider);
+        const ethersSigner = ethersProvider.getSigner();
+        setSigner(ethersSigner);
+      }
+    })();
+  }, [embeddedWallet, privyUser, setSigner, status]);
+
   return (
-    <View>
-      <Text>
-        User: {privyUser ? "yes" : "no"} Embedded: {embeddedWallet.status}
-      </Text>
-      {status.step === "enter-phone" && (
+    <OnboardingComponent
+      title={status === "enter-phone" ? "Phone number" : "Confirmation code"}
+      picto="phone"
+      primaryButtonText={status === "enter-phone" ? "Continue" : undefined}
+      primaryButtonAction={sendPhone}
+      backButtonText="Back to home screen"
+      backButtonAction={() => {
+        setConnectionMethod(undefined);
+      }}
+      shrinkWithKeyboard
+    >
+      {status === "enter-phone" && (
         <>
           <PhoneInput
             ref={phoneInputRef}
@@ -96,12 +141,33 @@ export default function PrivyConnect() {
             }}
             withDarkTheme={colorScheme === "dark"}
             autoFocus
-            countryPickerProps={{ modalProps: { style: styles.countryPicker } }}
+            countryPickerProps={{
+              flatListProps: { style: styles.countryPicker },
+              withFilter: true,
+              filterProps: { autoFocus: true },
+            }}
+            containerStyle={styles.phoneInputContainer}
+            flagButtonStyle={styles.flagButton}
+            textContainerStyle={styles.phoneInput}
+            textInputStyle={styles.phoneInputText}
+            codeTextStyle={styles.phoneCountryCode}
+            renderDropdownImage={
+              <Picto
+                picto="chevron.down"
+                color={textSecondaryColor(colorScheme)}
+                size={12}
+                style={{ marginRight: 9, marginLeft: -2 }}
+              />
+            }
+            // @ts-ignore
+            flagSize={17}
           />
-          <Button variant="primary" onPress={sendPhone} title="Validate" />
+          <Text style={styles.text}>
+            We need your phone number to identify you
+          </Text>
         </>
       )}
-      {status.step === "verify-phone" && (
+      {status === "verify-phone" && (
         <>
           <OtpInputs
             autofillFromClipboard={false}
@@ -113,44 +179,72 @@ export default function PrivyConnect() {
             }}
             numberOfInputs={6}
             ref={(r) => {
-              if (r) {
+              if (r && !otpInputRef.current) {
                 otpInputRef.current = r;
+                r.focus();
               }
             }}
-            // style={styles.otp}
             keyboardType="phone-pad"
             inputStyles={styles.otpInput}
             style={styles.otp}
           />
-          <Button variant="primary" onPress={submitCode} title="Validate" />
+          <Text style={styles.text}>
+            Enter confirmation code sent to{"\n"}
+            {beautifulPhone}
+          </Text>
         </>
       )}
-      <Button variant="primary" onPress={logout} title="Logout" />
-    </View>
+    </OnboardingComponent>
   );
 }
 
 const useStyles = () => {
   const colorScheme = useColorScheme();
   return StyleSheet.create({
+    text: {
+      fontSize: 17,
+      marginTop: 32,
+      marginHorizontal: 50,
+      textAlign: "center",
+    },
+    phoneInputContainer: {
+      marginTop: 32,
+    },
+    phoneInput: {
+      backgroundColor: tertiaryBackgroundColor(colorScheme),
+      borderRadius: 10,
+      height: 36,
+      marginLeft: 20,
+    },
+    phoneInputText: {
+      height: 25,
+    },
+    phoneCountryCode: {
+      height: 20,
+      fontWeight: "400",
+    },
+    flagButton: {
+      backgroundColor: tertiaryBackgroundColor(colorScheme),
+      borderRadius: 10,
+      height: 36,
+      width: 58,
+    },
     countryPicker: {
-      backgroundColor: "red",
+      paddingLeft: 12,
     },
     otp: {
       flex: 1,
       flexDirection: "row",
       flexGrow: 0,
-      marginVertical: 20,
+      marginTop: 32,
     },
-
     otpInput: {
       width: 25,
       borderRadius: 3,
       textAlign: "center",
-      borderColor: "grey",
-      borderWidth: 1,
       height: 30,
       marginRight: 10,
+      backgroundColor: tertiaryBackgroundColor(colorScheme),
     },
   });
 };
