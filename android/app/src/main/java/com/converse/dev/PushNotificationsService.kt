@@ -34,7 +34,7 @@ import kotlinx.coroutines.*
 
 class PushNotificationsService : FirebaseMessagingService() {
     companion object {
-        private const val TAG = "PushNotificationsService"
+        const val TAG = "PushNotificationsService"
         lateinit var secureStoreModule: SecureStoreModule
         lateinit var asyncStorageModule: AsyncStorageModule
     }
