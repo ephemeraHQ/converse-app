@@ -21,7 +21,8 @@
         "EXPO_ENV": "dev"
       },
       "ios": {
-        "simulator": true
+        "simulator": true,
+        "cocoapods": "1.14.2"
       },
       "node": "18.16.1"
     },
@@ -32,7 +33,10 @@
       "env": {
         "EXPO_ENV": "preview"
       },
-      "node": "18.16.1"
+      "node": "18.16.1",
+      "ios": {
+        "cocoapods": "1.14.2"
+      }
     },
     "production-ios": {
       "channel": "production",
@@ -40,7 +44,10 @@
       "env": {
         "EXPO_PLATFORM": "ios"
       },
-      "node": "18.16.1"
+      "node": "18.16.1",
+      "ios": {
+        "cocoapods": "1.14.2"
+      }
     },
     "production-android": {
       "channel": "production",
@@ -48,13 +55,19 @@
       "env": {
         "EXPO_PLATFORM": "android"
       },
-      "node": "18.16.1"
+      "node": "18.16.1",
+      "ios": {
+        "cocoapods": "1.14.2"
+      }
     },
     "production-android-internal": {
       "distribution": "internal",
       "channel": "production",
       "autoIncrement": true,
-      "node": "18.16.1"
+      "node": "18.16.1",
+      "ios": {
+        "cocoapods": "1.14.2"
+      }
     }
   },
   "submit": {
