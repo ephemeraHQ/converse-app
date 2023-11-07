@@ -17,8 +17,8 @@ install! 'cocoapods',
 
 
 # Version must match version from XMTP Podspec (matching @xmtp/react-native-sdk from package.json)
-# https://github.com/xmtp/xmtp-react-native/blob/v1.16.13/ios/XMTPReactNative.podspec#L28
-$xmtpVersion = '0.6.0-alpha0'
+# https://github.com/xmtp/xmtp-react-native/blob/v1.19.1/ios/XMTPReactNative.podspec#L28
+$xmtpVersion = '0.6.6-alpha0'
 
 target 'Converse' do
   use_expo_modules!
