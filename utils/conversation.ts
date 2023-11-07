@@ -96,6 +96,10 @@ export const conversationLastMessagePreview = (
           removedReactions = {};
           continue;
         }
+      } else if (
+        lastMessage?.contentType?.startsWith("xmtp.org/readReceipt:")
+      ) {
+        continue;
       } else {
         removedReactions = {};
         return {
