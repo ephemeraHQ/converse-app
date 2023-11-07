@@ -30,6 +30,7 @@ const protocolMessageToStateMessage = (
 ): XmtpMessage => {
   let referencedMessageId: string | undefined = undefined;
   let content = message.content.text || "";
+  let contentFallback: string | undefined = undefined;
   if (message.content.remoteAttachment) {
     content = computeRemoteAttachmentMessageContent(
       message.content.remoteAttachment
@@ -39,6 +40,8 @@ const protocolMessageToStateMessage = (
   } else if (message.content.reaction) {
     content = JSON.stringify(message.content.reaction);
     referencedMessageId = message.content.reaction.reference;
+  } else {
+    contentFallback = message.fallback;
   }
   return {
     id: message.id,
@@ -50,6 +53,7 @@ const protocolMessageToStateMessage = (
     content,
     referencedMessageId,
     topic: message.topic,
+    contentFallback,
   };
 };
 
