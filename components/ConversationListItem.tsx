@@ -178,11 +178,14 @@ const ConversationListItem = memo(function ConversationListItem({
           });
           setSelected(true);
         }}
-        style={{
-          backgroundColor: selected
-            ? clickedItemBackgroundColor(colorScheme)
-            : backgroundColor(colorScheme),
-        }}
+        style={[
+          {
+            backgroundColor: selected
+              ? clickedItemBackgroundColor(colorScheme)
+              : backgroundColor(colorScheme),
+            height: 76,
+          },
+        ]}
       >
         {listItemContent}
       </TouchableHighlight>
@@ -202,7 +205,7 @@ const ConversationListItem = memo(function ConversationListItem({
     );
 
   return (
-    <>
+    <View style={styles.rowSeparator}>
       <Swipeable
         renderRightActions={renderRightActions}
         overshootFriction={4}
@@ -217,26 +220,33 @@ const ConversationListItem = memo(function ConversationListItem({
       >
         {rowItem}
       </Swipeable>
-      {/* iOS display weirdness */}
+      {/* Hide part of the border to mimic margin*/}
       {Platform.OS === "ios" && (
-        <View style={{ height: 1.5 }}>
-          <View style={{ height: 0.5 }} />
-          <View style={styles.rowSeparator} />
-          <View style={{ height: 0.5 }} />
-        </View>
+        <View
+          style={{
+            position: "absolute",
+            width: 30,
+            height: 0.5,
+            backgroundColor: "white",
+            bottom: -0.25,
+          }}
+        />
       )}
-    </>
+    </View>
   );
 });
 export default ConversationListItem;
 
 const getStyles = (colorScheme: ColorSchemeName) =>
   StyleSheet.create({
-    rowSeparator: {
-      height: 0.25,
-      backgroundColor: listItemSeparatorColor(colorScheme),
-      marginLeft: 32,
-    },
+    rowSeparator: Platform.select({
+      android: {},
+      default: {
+        height: 76.5,
+        borderBottomWidth: 0.25,
+        borderBottomColor: listItemSeparatorColor(colorScheme),
+      },
+    }),
     conversationListItem: Platform.select({
       default: {
         height: 75.5,
