@@ -1,0 +1,29 @@
+diff --git a/node_modules/react-native-phone-number-input/lib/index.d.ts b/node_modules/react-native-phone-number-input/lib/index.d.ts
+index cd625e5..3dec1a3 100644
+--- a/node_modules/react-native-phone-number-input/lib/index.d.ts
++++ b/node_modules/react-native-phone-number-input/lib/index.d.ts
+@@ -30,6 +30,7 @@ export interface PhoneInputProps {
+   layout?: "first" | "second";
+   filterProps?: CountryFilterProps;
+   countryPickerProps?: any;
++  formatter?: (text: string) => string;
+ }
+ export interface PhoneInputState {
+   code: CallingCode | undefined;
+diff --git a/node_modules/react-native-phone-number-input/lib/index.js b/node_modules/react-native-phone-number-input/lib/index.js
+index b89c388..5a47816 100644
+--- a/node_modules/react-native-phone-number-input/lib/index.js
++++ b/node_modules/react-native-phone-number-input/lib/index.js
+@@ -91,9 +91,10 @@ export default class PhoneInput extends PureComponent {
+     }
+   };
+ 
+-  onChangeText = (text) => {
++  onChangeText = (_text) => {
++    const { onChangeText, onChangeFormattedText, formatter } = this.props;
++    const text = formatter ? formatter(_text) : _text;
+     this.setState({ number: text });
+-    const { onChangeText, onChangeFormattedText } = this.props;
+     if (onChangeText) {
+       onChangeText(text);
+     }
