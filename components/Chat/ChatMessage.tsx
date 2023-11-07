@@ -58,7 +58,7 @@ function ChatMessage({ message, colorScheme }: Props) {
           message.fromMe ? styles.messageTextMe : undefined,
         ]}
       >
-        {message.content}
+        {message.content || message.contentFallback}
         <View style={{ opacity: 0 }}>{metadata}</View>
       </ClickableText>
     );
