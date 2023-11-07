@@ -38,8 +38,13 @@ const getListArray = (
   for (let index = conversation.messagesIds.length - 1; index >= 0; index--) {
     const messageId = conversation.messagesIds[index];
     const message = conversation.messages.get(messageId) as MessageToDisplay;
-    // Reactions are not displayed in the flow
-    if (message.contentType.startsWith("xmtp.org/reaction:")) continue;
+    // Reactions & read receipts are not displayed in the flow
+    const notDisplayedContentTypes = [
+      "xmtp.org/reaction:",
+      "xmtp.org/readReceipt:",
+    ];
+    if (notDisplayedContentTypes.some((c) => message.contentType.startsWith(c)))
+      continue;
     message.fromMe =
       !!xmtpAddress &&
       xmtpAddress.toLowerCase() === message.senderAddress.toLowerCase();
