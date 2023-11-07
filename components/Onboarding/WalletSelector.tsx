@@ -11,11 +11,13 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import config from "../../config";
+import { useHasOnePrivyAccount } from "../../data/store/accountsStore";
 import { useOnboardingStore } from "../../data/store/onboardingStore";
 import { textSecondaryColor } from "../../utils/colors";
 import { isDesktop } from "../../utils/device";
 import { getEthOSSigner } from "../../utils/ethos";
 import { pick } from "../../utils/objects";
+import Button from "../Button/Button";
 import TableView from "../TableView/TableView";
 import {
   TableViewEmoji,
@@ -32,8 +34,20 @@ import {
 } from "./supportedWallets";
 
 export default function WalletSelector() {
-  const { setConnectionMethod, setSigner, setLoading } = useOnboardingStore(
-    (s) => pick(s, ["setConnectionMethod", "setSigner", "setLoading"])
+  const {
+    setConnectionMethod,
+    setSigner,
+    setLoading,
+    addingNewAccount,
+    setAddingNewAccount,
+  } = useOnboardingStore((s) =>
+    pick(s, [
+      "setConnectionMethod",
+      "setSigner",
+      "setLoading",
+      "addingNewAccount",
+      "setAddingNewAccount",
+    ])
   );
   const colorScheme = useColorScheme();
   const connectToCoinbase = useCoinbaseWallet(
@@ -80,6 +94,7 @@ export default function WalletSelector() {
 
   const hasInstalledWallets = walletsInstalled.list.length > 0;
   const insets = useSafeAreaInsets();
+  const alreadyConnectedToPrivy = useHasOnePrivyAccount();
   return (
     <OnboardingComponent
       title="GM"
@@ -95,20 +110,23 @@ export default function WalletSelector() {
           },
         ]}
       >
-        <TableView
-          title="CONVERSE ACCOUNT"
-          items={[
-            {
-              id: "phone",
-              leftView: <TableViewEmoji emoji="📞" />,
-              title: "Connect via Phone",
-              rightView,
-              action: () => {
-                setConnectionMethod("phone");
+        {!alreadyConnectedToPrivy && (
+          <TableView
+            title="CONVERSE ACCOUNT"
+            items={[
+              {
+                id: "phone",
+                leftView: <TableViewEmoji emoji="📞" />,
+                title: "Connect via Phone",
+                rightView,
+                action: () => {
+                  setConnectionMethod("phone");
+                },
               },
-            },
-          ]}
-        />
+            ]}
+          />
+        )}
+
         {hasInstalledWallets && !isDesktop && (
           <TableView
             title="INSTALLED APPS"
@@ -205,6 +223,14 @@ export default function WalletSelector() {
           />
         )}
       </View>
+      {addingNewAccount && (
+        <Button
+          title="Cancel"
+          variant="text"
+          style={[styles.cancelButton, { top: insets.top + 9 }]}
+          onPress={() => setAddingNewAccount(false)}
+        />
+      )}
     </OnboardingComponent>
   );
 }
@@ -216,5 +242,10 @@ const styles = StyleSheet.create({
     marginTop: isDesktop ? 80 : 30,
     justifyContent: "flex-end",
     paddingHorizontal: Platform.OS === "android" ? 0 : 24,
+  },
+  cancelButton: {
+    position: "absolute",
+    top: 0,
+    left: Platform.OS === "android" ? 10 : 30,
   },
 });

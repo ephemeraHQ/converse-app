@@ -68,6 +68,8 @@ type AccountsStoreStype = {
   removeAccount: (account: string) => void;
   databaseId: { [account: string]: string };
   resetDatabaseId: (account: string) => void;
+  privyAccountId: { [account: string]: string | undefined };
+  setPrivyAccountId: (account: string, id: string | undefined) => void;
 };
 
 export const useAccountsStore = create<AccountsStoreStype>()(
@@ -75,6 +77,13 @@ export const useAccountsStore = create<AccountsStoreStype>()(
     (set) => ({
       currentAccount: TEMPORARY_ACCOUNT_NAME,
       accounts: [TEMPORARY_ACCOUNT_NAME],
+      privyAccountId: {},
+      setPrivyAccountId: (account, id) =>
+        set((state) => {
+          const privyAccountId = { ...state.privyAccountId };
+          privyAccountId[account] = id;
+          return { privyAccountId };
+        }),
       databaseId: {},
       resetDatabaseId: (account) =>
         set((state) => {
@@ -175,6 +184,28 @@ export const currentAccount = () => useAccountsStore.getState().currentAccount;
 export const useCurrentAccount = () => {
   const currentAccount = useAccountsStore((s) => s.currentAccount);
   return currentAccount === TEMPORARY_ACCOUNT_NAME ? undefined : currentAccount;
+};
+
+export const loggedWithPrivy = () => {
+  const account = currentAccount();
+  return !!useAccountsStore.getState().privyAccountId[account];
+};
+
+export const useLoggedWithPrivy = () => {
+  const account = useCurrentAccount();
+  const privyAccountId = useAccountsStore((s) => s.privyAccountId);
+  return account ? !!privyAccountId[account] : false;
+};
+
+export const useHasOnePrivyAccount = () => {
+  const accountsState = useAccountsStore();
+  let hasOne = false;
+  accountsState.accounts.forEach((a) => {
+    if (a !== TEMPORARY_ACCOUNT_NAME && accountsState.privyAccountId[a]) {
+      hasOne = true;
+    }
+  });
+  return hasOne;
 };
 
 // This enables us to use account-based substores for the current selected user automatically,

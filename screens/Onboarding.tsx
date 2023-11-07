@@ -26,6 +26,7 @@ export default function Onboarding() {
     signer,
     setLoading,
     isEphemeral,
+    privyAccountId,
   } = useOnboardingStore((s) =>
     pick(s, [
       "connectionMethod",
@@ -33,8 +34,8 @@ export default function Onboarding() {
       "address",
       "signer",
       "setLoading",
-
       "isEphemeral",
+      "privyAccountId",
     ])
   );
 
@@ -48,6 +49,9 @@ export default function Onboarding() {
       // Successfull login for user, let's setup
       // the storage !
       useAccountsStore.getState().setCurrentAccount(address, true);
+      if (connectionMethod === "phone" && privyAccountId) {
+        useAccountsStore.getState().setPrivyAccountId(address, privyAccountId);
+      }
       await initDb(address);
 
       if (isEphemeral) {
@@ -55,15 +59,11 @@ export default function Onboarding() {
       } else {
         getSettingsStore(address).getState().setEphemeralAccount(false);
       }
-
-      if (connectionMethod === "phone") {
-        getSettingsStore(address).getState().setPrivyAccount(true);
-      }
       useOnboardingStore.getState().setAddingNewAccount(false);
       // Now we can instantiate the XMTP Client
       getXmtpClient(address);
     },
-    [address, connectionMethod, isEphemeral]
+    [address, connectionMethod, isEphemeral, privyAccountId]
   );
 
   // Method used for all signers that can sign directly
