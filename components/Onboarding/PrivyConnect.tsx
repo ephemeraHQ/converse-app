@@ -49,14 +49,13 @@ export default function PrivyConnect() {
     "enter-phone"
   );
 
-  const [phone, setPhone] = useState("");
   const [formattedPhone, setFormattedPhone] = useState("");
   const [beautifulPhone, setBeautifulPhone] = useState("");
   const otpCode = useRef("");
 
   const sendPhone = useCallback(async () => {
     const parsed = LibPhoneNumber.parsePhoneNumberFromString(formattedPhone);
-    if (!parsed?.isValid) {
+    if (!parsed?.isValid()) {
       Alert.alert("Please enter a valid phone number");
       return;
     }
@@ -139,11 +138,18 @@ export default function PrivyConnect() {
         <>
           <PhoneInput
             ref={phoneInputRef}
-            defaultValue={phone}
             defaultCode={RNLocalize.getCountry() as CountryCode}
             layout="first"
-            onChangeText={(text) => {
-              setPhone(text);
+            formatter={(t) => {
+              const formatter = new LibPhoneNumber.AsYouType(
+                phoneInputRef.current?.getCountryCode() as LibPhoneNumber.CountryCode
+              );
+              const callingCode =
+                phoneInputRef.current?.getCallingCode() as string;
+
+              const formatted = formatter.input(`+${callingCode}${t}`);
+              const result = formatted.slice(callingCode.length + 1).trim();
+              return result;
             }}
             onChangeFormattedText={(text) => {
               setFormattedPhone(text);
