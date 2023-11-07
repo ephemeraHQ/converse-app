@@ -20,13 +20,20 @@ import OnboardingComponent from "./OnboardingComponent";
 export default function PrivyConnect() {
   const colorScheme = useColorScheme();
   const styles = useStyles();
-  const { setConnectionMethod, setLoading, setSigner } = useOnboardingStore(
-    (s) => pick(s, ["setConnectionMethod", "setLoading", "setSigner"])
-  );
+  const { setConnectionMethod, setLoading, setSigner, setPrivyAccountId } =
+    useOnboardingStore((s) =>
+      pick(s, [
+        "setConnectionMethod",
+        "setLoading",
+        "setSigner",
+        "setPrivyAccountId",
+      ])
+    );
 
   const { isReady: privyReady, user: privyUser, logout } = usePrivy();
 
   useEffect(() => {
+    setPrivyAccountId(undefined);
     logout();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -72,8 +79,10 @@ export default function PrivyConnect() {
       Alert.alert("The code you entered is not valid, please try again");
       otpInputRef.current?.reset();
       otpInputRef.current?.focus();
+    } else {
+      setPrivyAccountId(user.user.id);
     }
-  }, [loginWithCode, setLoading]);
+  }, [loginWithCode, setLoading, setPrivyAccountId]);
 
   const creatingEmbeddedWallet = useRef(false);
 

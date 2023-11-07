@@ -33,6 +33,9 @@ type OnboardingStoreType = {
   isEphemeral: boolean;
   setIsEphemeral: (e: boolean) => void;
 
+  privyAccountId: string | undefined;
+  setPrivyAccountId: (id: string | undefined) => void;
+
   resetOnboarding: () => void;
 };
 
@@ -82,6 +85,9 @@ export const useOnboardingStore = create<OnboardingStoreType>()((set) => ({
       isEphemeral: e,
     })),
 
+  privyAccountId: undefined,
+  setPrivyAccountId: (id) => set(() => ({ privyAccountId: id })),
+
   resetOnboarding: () =>
     set(() => ({
       addingNewAccount: false,
@@ -92,5 +98,6 @@ export const useOnboardingStore = create<OnboardingStoreType>()((set) => ({
       loading: false,
       waitingForSecondSignature: false,
       isEphemeral: false,
+      privyAccountId: undefined,
     })),
 }));
