@@ -1,6 +1,6 @@
 import { URL_REGEX } from "../../../utils/regex";
 import { getRepository } from "../../db";
-import { getChatStore, getSettingsStore } from "../../store/accountsStore";
+import { getChatStore } from "../../store/accountsStore";
 import { XmtpConversationWithUpdate } from "../../store/chatStore";
 
 export interface TopicSpamScores {
@@ -32,42 +32,28 @@ export const saveSpamScores = async (
 
 export const refreshAllSpamScores = async (account: string) => {
   const { conversations } = getChatStore(account).getState();
-  const { peersStatus } = getSettingsStore(account).getState();
-
   const topicSpamScores: TopicSpamScores = {};
 
-  // Array to hold promises for spam score calculations
+  // Array to hold promises for spam scores computations
   const spamScorePromises = Object.entries(conversations).map(
     async ([topic, conversation]) => {
-      const peerStatus = peersStatus[conversation.peerAddress.toLowerCase()];
-
       if (
         conversation.spamScore !== undefined &&
         conversation.spamScore !== null
       ) {
-        // If spamScore is already defined, no need to re-compute
-      } else if (
-        conversation.hasOneMessageFromMe ||
-        peerStatus === "consented"
-      ) {
-        // For consented and conversations with user participation, set a negative spamScore
-        topicSpamScores[topic] = -1;
-      } else if (peerStatus === "blocked") {
-        // For blocked conversations, set a positive spamScore
-        topicSpamScores[topic] = 1;
-      } else {
-        // Only calculate spamScore if it's undefined
-        try {
-          const spamScore = await handleSpamScore(account, conversation, false);
-          if (spamScore !== null) {
-            topicSpamScores[topic] = spamScore;
-          }
-        } catch (error) {
-          console.error(
-            `Error calculating spam score for topic ${topic}:`,
-            error
-          );
+        return;
+      }
+
+      try {
+        const spamScore = await handleSpamScore(account, conversation, false);
+        if (spamScore !== null) {
+          topicSpamScores[topic] = spamScore;
         }
+      } catch (error) {
+        console.error(
+          `Error calculating spam score for topic ${topic}:`,
+          error
+        );
       }
     }
   );
