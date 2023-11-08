@@ -221,17 +221,7 @@ const ConversationListItem = memo(function ConversationListItem({
         {rowItem}
       </Swipeable>
       {/* Hide part of the border to mimic margin*/}
-      {Platform.OS === "ios" && (
-        <View
-          style={{
-            position: "absolute",
-            width: 30,
-            height: 0.5,
-            backgroundColor: "white",
-            bottom: -0.25,
-          }}
-        />
-      )}
+      {Platform.OS === "ios" && <View style={styles.rowSeparatorMargin} />}
     </View>
   );
 });
@@ -247,6 +237,13 @@ const getStyles = (colorScheme: ColorSchemeName) =>
         borderBottomColor: listItemSeparatorColor(colorScheme),
       },
     }),
+    rowSeparatorMargin: {
+      position: "absolute",
+      width: 30,
+      height: 0.5,
+      backgroundColor: backgroundColor(colorScheme),
+      bottom: -0.25,
+    },
     conversationListItem: Platform.select({
       default: {
         height: 75.5,
