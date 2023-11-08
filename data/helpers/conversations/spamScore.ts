@@ -30,7 +30,7 @@ export const saveSpamScores = async (
   chatStore.setSpamScores(topicSpamScores);
 };
 
-export const updateAllSpamScores = async (account: string) => {
+export const refreshAllSpamScores = async (account: string) => {
   const { conversations } = getChatStore(account).getState();
   const { peersStatus } = getSettingsStore(account).getState();
 
