@@ -1,7 +1,6 @@
 import * as secp from "@noble/secp256k1";
 import { privateKey, signature } from "@xmtp/proto";
 import { Client } from "@xmtp/react-native-sdk";
-import { Platform } from "react-native";
 
 import { addLog } from "../../components/DebugButton";
 import config from "../../config";
@@ -102,21 +101,13 @@ export const syncXmtpClient = async (account: string) => {
     // As soon as we have done one query we can hide reconnecting
     getChatStore(account).getState().setReconnecting(false);
 
-    // Only stream once to avoid GRPC errors
-    // on Android @todo => check with naomi to fix the GRPC errors
-    if (Platform.OS === "android" && streamingAccounts[client.address]) {
-      console.log(
-        `[XmtpRN] Already streaming ${account} - ignoring on Android`
-      );
-    } else {
-      streamAllMessages(client).catch((e) => {
-        onSyncLost(account, e);
-      });
-      streamConversations(client).catch((e) => {
-        onSyncLost(account, e);
-      });
-      streamingAccounts[client.address] = true;
-    }
+    streamAllMessages(client).catch((e) => {
+      onSyncLost(account, e);
+    });
+    streamConversations(client).catch((e) => {
+      onSyncLost(account, e);
+    });
+    streamingAccounts[client.address] = true;
     const topicsToQuery = Object.keys(queryConversationsFromTimestamp);
 
     const fetchedMessagesCount = await loadConversationsMessages(
