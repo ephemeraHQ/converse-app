@@ -104,9 +104,9 @@ export const handleSpamScore = async (
         [conversation.topic]: spamScore,
       };
       await saveSpamScores(account, topicSpamScore);
-    } else {
-      return spamScore;
     }
+
+    return spamScore;
   }
 
   return null;
