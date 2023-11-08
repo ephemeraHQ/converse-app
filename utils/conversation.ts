@@ -262,7 +262,9 @@ export function sortAndComputePreview(
         );
         if (
           conversation.hasOneMessageFromMe ||
-          peersStatus[conversation.peerAddress.toLowerCase()] === "consented"
+          peersStatus[conversation.peerAddress.toLowerCase()] === "consented" ||
+          (conversation.spamScore !== undefined &&
+            (conversation.spamScore === null || conversation.spamScore < 1))
         ) {
           conversationsInbox.push(conversation);
         } else {

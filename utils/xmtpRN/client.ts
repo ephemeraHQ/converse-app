@@ -4,6 +4,7 @@ import { Client } from "@xmtp/react-native-sdk";
 
 import { addLog } from "../../components/DebugButton";
 import config from "../../config";
+import { refreshAllSpamScores } from "../../data/helpers/conversations/spamScore";
 import { getChatStore } from "../../data/store/accountsStore";
 import { loadXmtpKey } from "../keychain";
 import {
@@ -114,6 +115,12 @@ export const syncXmtpClient = async (account: string) => {
       client,
       queryConversationsFromTimestamp
     );
+
+    // Refresh spam scores after the initial load of conversation data is complete
+    // Ensure spam scores are current, reflecting any new messages received since the last sync
+    if (!getChatStore(account).getState().initialLoadDone) {
+      await refreshAllSpamScores(account);
+    }
 
     // Need to save initial load is done
     getChatStore(account).getState().setInitialLoadDone();

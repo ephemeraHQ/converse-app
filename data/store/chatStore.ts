@@ -1,6 +1,10 @@
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
 
+import {
+  TopicSpamScores,
+  handleSpamScore,
+} from "../../data/helpers/conversations/spamScore";
 import { ConversationWithLastMessagePreview } from "../../utils/conversation";
 import { lastValueInMap } from "../../utils/map";
 import { zustandMMKVStorage } from "../../utils/mmkv";
@@ -33,6 +37,7 @@ export type XmtpConversation = {
   hasOneMessageFromMe?: boolean;
   pending: boolean;
   version: string;
+  spamScore?: number;
 };
 
 export type XmtpConversationWithUpdate = XmtpConversation & {
@@ -117,6 +122,8 @@ export type ChatStoreType = {
   setTopicsStatus: (topicsStatus: {
     [topic: string]: "deleted" | "consented";
   }) => void;
+
+  setSpamScores: (topicSpamScores: TopicSpamScores) => void;
 };
 
 const now = () => new Date().getTime();
@@ -178,6 +185,10 @@ export const initChatStore = (account: string) => {
                     c.hasOneMessageFromMe ||
                     state.conversations[c.topic]?.hasOneMessageFromMe ||
                     false,
+                  spamScore:
+                    c.spamScore === undefined
+                      ? state.conversations[c.topic]?.spamScore
+                      : c.spamScore,
                 };
               });
 
@@ -273,6 +284,7 @@ export const initChatStore = (account: string) => {
                   isUpdated = true;
                   shouldResubscribe = true;
                 }
+
                 // Default message status is sent
                 if (!message.status) message.status = "sent";
                 const alreadyMessage = conversation.messages.get(message.id);
@@ -308,6 +320,7 @@ export const initChatStore = (account: string) => {
                     );
                   }
                 }
+
                 // Let's check if it's a reaction to a message
                 if (
                   message.referencedMessageId &&
@@ -329,6 +342,16 @@ export const initChatStore = (account: string) => {
                       referencedMessage.lastUpdateAt = now();
                     }
                   }
+                }
+
+                // Set spamScore if needed, only after initial load is done
+                if (
+                  conversation.spamScore === undefined &&
+                  state.initialLoadDoneOnce
+                ) {
+                  setImmediate(() => {
+                    handleSpamScore(account, conversation);
+                  });
                 }
               }
 
@@ -460,6 +483,18 @@ export const initChatStore = (account: string) => {
               return {
                 topicsStatus: { ...state.topicsStatus, ...topicsStatus },
               };
+            }),
+          setSpamScores: (topicSpamScores: Record<string, number>) =>
+            set((state) => {
+              const newState = {
+                ...state,
+                lastUpdateAt: now(),
+              };
+              Object.entries(topicSpamScores).forEach(([topic, spamScore]) => {
+                newState.conversations[topic].spamScore = spamScore;
+                newState.conversations[topic].lastUpdateAt = now();
+              });
+              return newState;
             }),
         }) as ChatStoreType,
       {

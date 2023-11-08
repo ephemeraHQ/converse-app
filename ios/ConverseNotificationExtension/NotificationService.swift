@@ -10,112 +10,76 @@ import XMTP
 import CryptoKit
 import Alamofire
 
-
-func shortAddress(address: String) -> String {
-  if (address.count > 7) {
-    let prefixStart = address.index(address.startIndex, offsetBy: 0)
-    let prefixEnd = address.index(address.startIndex, offsetBy: 3)
-    let suffixStart = address.index(address.startIndex, offsetBy: address.count - 4)
-    let suffixEnd = address.index(address.startIndex, offsetBy: address.count - 1)
-    let prefixRange = prefixStart...prefixEnd
-    let suffixRange = suffixStart...suffixEnd
-    let prefix = address[prefixRange]
-    let suffix = address[suffixRange]
-    return "\(prefix)...\(suffix)"
-  }
-  return address
-}
-
-func hasForbiddenPattern(address: String) -> Bool {
-  return address.hasPrefix("0x0000") && address.hasSuffix("0000");
-}
-
-func incrementBadge(for content: UNMutableNotificationContent) {
-    let newBadgeCount = getBadge() + 1
-    setBadge(newBadgeCount)
-    content.badge = NSNumber(value: newBadgeCount)
-}
-
 func handleNotificationAsync(contentHandler: ((UNNotificationContent) -> Void), bestAttemptContent: UNMutableNotificationContent?) async {
   initSentry()
-  var shouldIncrementBadge = false
+  var shouldShowNotification = false
+  var messageId: String? = nil
   
-  if let bestAttemptContent = bestAttemptContent {    
-    if var body = bestAttemptContent.userInfo["body"] as? [String: Any], let contentTopic = body["contentTopic"] as? String, let encodedMessage = body["message"] as? String, let account = body["account"] as? String {
-      print("Received a notification for account \(account)")
-      let accounts = getAccounts()
-      if (!accounts.contains(account)) {
-        print("Account \(account) is not in store")
-        contentHandler(UNNotificationContent())
-        return
+  if var content = bestAttemptContent {
+    guard let body = content.userInfo["body"] as? [String: Any],
+          let contentTopic = body["contentTopic"] as? String,
+          let encodedMessage = body["message"] as? String,
+          let account = body["account"] as? String else {
+      contentHandler(UNNotificationContent())
+      return
+    }
+    
+    print("Received a notification for account \(account)")
+    
+    let apiURI = getApiURI()
+    let pushToken = getKeychainValue(forKey: "PUSH_TOKEN")
+    let accounts = getAccounts()
+    
+    guard accounts.contains(account) else {
+      print("Account \(account) is not in store")
+      contentHandler(UNNotificationContent())
+      return
+    }
+    
+    if let xmtpClient = await getXmtpClient(account: account), !isIntroTopic(topic: contentTopic) {
+      let encryptedMessageData = Data(base64Encoded: Data(encodedMessage.utf8))!
+      let envelope = XMTP.Envelope.with { envelope in
+        envelope.message = encryptedMessageData
+        envelope.contentTopic = contentTopic
       }
-      let xmtpClient = await getXmtpClient(account: account);
-      
-      if (xmtpClient != nil) {        
-        let encryptedMessageData = Data(base64Encoded: Data(encodedMessage.utf8))!
-        let envelope = XMTP.Envelope.with { envelope in
-          envelope.message = encryptedMessageData
-          envelope.contentTopic = contentTopic
-        }
-        if (isIntroTopic(topic: contentTopic)) {
-          return
-        } else if (isInviteTopic(topic: contentTopic)) {
-          let conversation = await handleNewConversation(xmtpClient: xmtpClient!, envelope: envelope)
-          // For now, we don't notifications for new convo anymore at all, they all
-          // go to requests. In the future we will improve and subscribe to
-          // some topics depending on criteria
-          print("[NotificationExtension] Not showing a notification for new convo")
+
+      if isInviteTopic(topic: contentTopic) {
+        guard let conversation = await getNewConversationFromEnvelope(
+          xmtpClient: xmtpClient,
+          envelope: envelope
+        ) else {
           contentHandler(UNNotificationContent())
           return
-//          if (conversation != nil && conversation?.peerAddress != nil) {
-//            // For now, we don't notifications for new convo anymore at all, they all
-//            // go to requests. In the future we will improve and subscribe to
-//            // some topics depending on criteria
-//            if (hasForbiddenPattern(address: conversation!.peerAddress)) {
-//              print("[NotificationExtension] Not showing a notification because forbidden spammy address")
-//              contentHandler(UNNotificationContent())
-//              return
-//            }
-//            bestAttemptContent.title = shortAddress(address: conversation!.peerAddress)
-//            body["newConversationTopic"] = conversation?.topic
-//            bestAttemptContent.userInfo.updateValue(body, forKey: "body")
-//            shouldIncrementBadge = true
-//          }
-        } else {
-          var conversationTitle = getSavedConversationTitle(contentTopic: contentTopic);
-          let sentViaConverse = body["sentViaConverse"] as? Bool ?? false;
-          let decodedMessageResult = await decodeConversationMessage(xmtpClient: xmtpClient!, envelope: envelope, sentViaConverse: sentViaConverse)
-          if (decodedMessageResult.senderAddress == xmtpClient?.address || decodedMessageResult.forceIgnore || hasForbiddenPattern(address: decodedMessageResult.senderAddress!)) {
-            // Message is from me or a reaction removal or a forbidden address, let's drop it
-            print("[NotificationExtension] Not showing a notification")
-            contentHandler(UNNotificationContent())
-            return
-          } else if (decodedMessageResult.content != nil) {
-            bestAttemptContent.body = decodedMessageResult.content!;
-            if (conversationTitle.count == 0 && decodedMessageResult.senderAddress != nil) {
-              conversationTitle = shortAddress(address: decodedMessageResult.senderAddress!)
-            }
-          }
-          bestAttemptContent.title = conversationTitle;
-          shouldIncrementBadge = true
         }
+        
+        (shouldShowNotification, messageId) = await handleNewConversationFirstMessage(
+          xmtpClient: xmtpClient,
+          apiURI: apiURI,
+          pushToken: pushToken,
+          conversation: conversation,
+          bestAttemptContent: &content
+        )
       } else {
-        print("[NotificationExtension] Not showing a notification because no client found")
-        contentHandler(UNNotificationContent())
-        return;
+        (shouldShowNotification, messageId) = await handleOngoingConversationMessage(
+          xmtpClient: xmtpClient,
+          envelope: envelope,
+          bestAttemptContent: &content,
+          body: body
+        )
       }
     }
     
-    if shouldIncrementBadge {
-      incrementBadge(for: bestAttemptContent)
+    if (shouldShowNotification && !notificationAlreadyShown(for: messageId)) {
+      incrementBadge(for: content)
+      contentHandler(content)
+    } else {
+      contentHandler(UNNotificationContent())
+      return
     }
-    
-    contentHandler(bestAttemptContent)
   }
 }
 
 class NotificationService: UNNotificationServiceExtension {
-  
   var contentHandler: ((UNNotificationContent) -> Void)?
   var bestAttemptContent: UNMutableNotificationContent?
   
@@ -136,9 +100,7 @@ class NotificationService: UNNotificationServiceExtension {
         bestAttemptContent.title = conversationTitle;
         incrementBadge(for: bestAttemptContent)
       }
-      
       contentHandler(bestAttemptContent)
     }
   }
-  
 }
