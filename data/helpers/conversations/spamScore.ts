@@ -86,13 +86,8 @@ export const handleSpamScore = async (
   saveImmediately: boolean = true
 ): Promise<number | null> => {
   if (!conversation.messagesIds.length) {
-    console.warn(
-      "No message ID found:",
-      conversation.topic,
-      "with:",
-      conversation.peerAddress
-    );
-    return 0;
+    // Cannot score an empty conversation
+    return null;
   }
 
   const firstMessage = conversation.messages.get(conversation.messagesIds[0]);
