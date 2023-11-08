@@ -76,7 +76,7 @@ export const refreshAllSpamScores = async (account: string) => {
   await Promise.all(spamScorePromises);
 
   if (Object.keys(topicSpamScores).length > 0) {
-    saveSpamScores(account, topicSpamScores);
+    await saveSpamScores(account, topicSpamScores);
   }
 };
 
@@ -103,7 +103,7 @@ export const handleSpamScore = async (
       const topicSpamScore: TopicSpamScores = {
         [conversation.topic]: spamScore,
       };
-      saveSpamScores(account, topicSpamScore);
+      await saveSpamScores(account, topicSpamScore);
     } else {
       return spamScore;
     }
