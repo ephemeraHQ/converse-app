@@ -103,7 +103,8 @@ export const conversationLastMessagePreview = (
       } else {
         removedReactions = {};
         return {
-          contentPreview: lastMessage.content,
+          contentPreview:
+            lastMessage.content || lastMessage.contentFallback || "",
           message: lastMessage,
         };
       }
