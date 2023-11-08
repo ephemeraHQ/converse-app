@@ -1,9 +1,6 @@
 import { In } from "typeorm/browser";
 
-import {
-  setTopicToNavigateTo,
-  topicToNavigateTo,
-} from "../../../components/StateHandlers/InitialStateHandler";
+import { topicToNavigateTo } from "../../../components/StateHandlers/InitialStateHandler";
 import { getLensHandleFromConversationIdAndPeer } from "../../../utils/lens";
 import { navigateToConversation } from "../../../utils/navigation";
 import { saveConversationIdentifiersForNotifications } from "../../../utils/notifications";
@@ -41,18 +38,6 @@ export const saveConversations = async (
   // Then to context so it show immediatly even without handle
   chatStoreState.setConversations(newlySavedConversations);
 
-  // Navigate to conversation from a push notification received as a first message if a new conversation
-  if (topicToNavigateTo) {
-    const conversationToNavigateTo = conversations.find(
-      (conversation) => conversation.topic === topicToNavigateTo
-    );
-
-    if (conversationToNavigateTo) {
-      navigateToConversation(conversationToNavigateTo);
-      setTopicToNavigateTo("");
-    }
-  }
-
   // Let's find out which need to have the profile updated
   const knownProfiles = getProfilesStore(account).getState().profiles;
   const convosWithProfilesToUpdate: XmtpConversation[] = [];
@@ -70,6 +55,29 @@ export const saveConversations = async (
     }
   );
   refreshProfilesIfNeeded(account);
+
+  // Navigate to conversation from push notification on first message
+  if (topicToNavigateTo) {
+    const maxAttempts = 5;
+    const retryInterval = 500;
+
+    const navigateToConversationWithRetry = (attempts = 0) => {
+      const conversationToNavigateTo = conversations.find(
+        (conversation) => conversation.topic === topicToNavigateTo
+      );
+
+      if (conversationToNavigateTo) {
+        navigateToConversation(conversationToNavigateTo);
+      } else if (attempts < maxAttempts) {
+        setTimeout(
+          () => navigateToConversationWithRetry(attempts + 1),
+          retryInterval
+        );
+      }
+    };
+
+    navigateToConversationWithRetry();
+  }
 };
 
 const setupAndSaveConversations = async (

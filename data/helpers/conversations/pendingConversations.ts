@@ -80,7 +80,6 @@ export const createPendingConversation = async (
       readUntil: 0,
       context,
       version: "v2",
-      // not setting spamScore? for pending conversations
     },
   ]);
   return pendingConversationId;
