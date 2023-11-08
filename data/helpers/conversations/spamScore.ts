@@ -2,13 +2,14 @@ import { URL_REGEX } from "../../../utils/regex";
 import { getRepository } from "../../db";
 import { getChatStore, getSettingsStore } from "../../store/accountsStore";
 import { XmtpConversationWithUpdate } from "../../store/chatStore";
-interface TopicSpamScores {
+
+export interface TopicSpamScores {
   [key: string]: number;
 }
 
 export const saveSpamScores = async (
   account: string,
-  topicSpamScores: Record<string, number>
+  topicSpamScores: TopicSpamScores
 ) => {
   const conversationRepository = await getRepository(account, "conversation");
 

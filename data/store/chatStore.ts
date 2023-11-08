@@ -1,7 +1,10 @@
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
 
-import { handleSpamScore } from "../../data/helpers/conversations/spamScore";
+import {
+  TopicSpamScores,
+  handleSpamScore,
+} from "../../data/helpers/conversations/spamScore";
 import { ConversationWithLastMessagePreview } from "../../utils/conversation";
 import { lastValueInMap } from "../../utils/map";
 import { zustandMMKVStorage } from "../../utils/mmkv";
@@ -120,7 +123,7 @@ export type ChatStoreType = {
     [topic: string]: "deleted" | "consented";
   }) => void;
 
-  setSpamScores: (topicSpamScores: Record<string, number>) => void;
+  setSpamScores: (topicSpamScores: TopicSpamScores) => void;
 };
 
 const now = () => new Date().getTime();
