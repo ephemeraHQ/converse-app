@@ -238,12 +238,17 @@ export const loadSavedNotificationMessagesToContext = async () => {
             readUntil: 0,
             pending: false,
             context,
+            spamScore: c.spamScore,
           });
         }
       });
       lastStepDone = 5;
       for (const account in conversationsToSaveByAccount) {
-        await saveConversations(account, conversationsToSaveByAccount[account]);
+        await saveConversations(
+          account,
+          conversationsToSaveByAccount[account],
+          true
+        );
       }
       lastStepDone = 6;
     }
@@ -319,18 +324,17 @@ export const onInteractWithNotification = (
 ) => {
   const notificationData = event.notification.request.content.data;
   if (!notificationData) return;
-  const newConversationTopic = notificationData["newConversationTopic"] as
+  const conversationTopic = notificationData["contentTopic"] as
     | string
     | undefined;
-  const messageConversationTopic = notificationData["contentTopic"] as
-    | string
-    | undefined;
-  const conversationTopic = newConversationTopic || messageConversationTopic;
+
   const account =
     notificationData["account"] || useAccountsStore.getState().currentAccount;
+
   if (conversationTopic) {
     useAccountsStore.getState().setCurrentAccount(account, false);
     const conversations = getChatStore(account).getState().conversations;
+
     if (conversations[conversationTopic]) {
       navigateToConversation(conversations[conversationTopic]);
     } else {

@@ -16,6 +16,10 @@ import ConverseChat from "../components/Chat/Chat";
 import ConversationTitle from "../components/Conversation/ConversationTitle";
 import InviteBanner from "../components/InviteBanner";
 import Picto from "../components/Picto/Picto";
+import {
+  setTopicToNavigateTo,
+  topicToNavigateTo,
+} from "../components/StateHandlers/InitialStateHandler";
 import config from "../config";
 import {
   currentAccount,
@@ -254,10 +258,14 @@ const Conversation = ({
   ]);
 
   useEffect(() => {
-    // On load, we mark the conversation
-    // as read and as opened
     if (conversation) {
+      // On load, we mark the conversation as read and as opened
       useChatStore.getState().setOpenedConversationTopic(conversation.topic);
+
+      // If we are navigating to a conversation, we reset the topic to navigate to
+      if (topicToNavigateTo === conversation.topic) {
+        setTopicToNavigateTo("");
+      }
     }
   }, [conversation]);
 

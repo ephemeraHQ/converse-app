@@ -1,13 +1,14 @@
 package com.converse.dev
 
 import android.app.ActivityManager
-import android.content.Context
 import android.util.Log
 import android.view.View
 import com.beust.klaxon.Klaxon
+import com.converse.dev.xmtp.NotificationDataResult
+import com.converse.dev.xmtp.getNewConversationFromEnvelope
 import com.converse.dev.xmtp.getXmtpClient
-import com.converse.dev.xmtp.handleNewConversationV2Notification
-import com.converse.dev.xmtp.handleNewMessageNotification
+import com.converse.dev.xmtp.handleNewConversationFirstMessage
+import com.converse.dev.xmtp.handleOngoingConversationMessage
 import com.converse.dev.xmtp.initCodecs
 import com.facebook.react.bridge.ReactApplicationContext
 import com.google.crypto.tink.subtle.Base64
@@ -26,16 +27,14 @@ import expo.modules.notifications.notifications.model.NotificationRequest
 import expo.modules.notifications.notifications.model.triggers.FirebaseNotificationTrigger
 import expo.modules.notifications.service.NotificationsService
 import expo.modules.securestore.SecureStoreModule
-import me.leolin.shortcutbadger.ShortcutBadger
 import org.json.JSONObject
-import org.xmtp.android.library.*
 import org.xmtp.android.library.messages.EnvelopeBuilder
 import java.util.*
-import org.xmtp.android.library.codecs.*
+import kotlinx.coroutines.*
 
 class PushNotificationsService : FirebaseMessagingService() {
     companion object {
-        private const val TAG = "PushNotificationsService"
+        const val TAG = "PushNotificationsService"
         lateinit var secureStoreModule: SecureStoreModule
         lateinit var asyncStorageModule: AsyncStorageModule
     }
@@ -47,61 +46,86 @@ class PushNotificationsService : FirebaseMessagingService() {
         initSentry(this)
     }
 
+    // Define a CoroutineScope for the service
+    private val serviceJob = SupervisorJob()
+    private val serviceScope = CoroutineScope(Dispatchers.IO + serviceJob)
+
     override fun onMessageReceived(remoteMessage: RemoteMessage) {
         Log.d(TAG, "Received a notification")
 
-        var shouldIncrementBadge = false
-
         // Check if message contains a data payload.
         if (remoteMessage.data.isEmpty()) return
-        Log.d(TAG, "Message data payload: ${remoteMessage.data["body"]}")
 
-        val envelopeJSON = remoteMessage.data["body"]
-        if (envelopeJSON === null || envelopeJSON.isEmpty()) return
+        val envelopeJSON = remoteMessage.data["body"] ?: return
+        Log.d(TAG, "Message data payload: $envelopeJSON")
 
-        val notificationData = Klaxon().parse<NotificationData>(envelopeJSON)
-        if (notificationData === null) return
+        val notificationData = Klaxon().parse<NotificationData>(envelopeJSON) ?: return
         Log.d(TAG, "Decoded notification data: account is ${notificationData.account} - topic is ${notificationData.contentTopic}")
+
+        initCodecs() // Equivalent to initSentry()
         val accounts = getAccounts(this)
+
         if (!accounts.contains(notificationData.account)) {
             Log.d(TAG, "Account ${notificationData.account} is not in store")
             return
         }
 
-        initCodecs()
-        val xmtpClient = getXmtpClient(this, notificationData.account)
-        if (xmtpClient == null) {
+        val xmtpClient = getXmtpClient(this, notificationData.account) ?: run {
             Log.d(TAG, "NO XMTP CLIENT FOUND FOR TOPIC ${notificationData.contentTopic}")
             return
         }
 
         val encryptedMessageData = Base64.decode(notificationData.message, Base64.NO_WRAP)
-        val envelope = EnvelopeBuilder.buildFromString(notificationData.contentTopic, Date(notificationData.timestampNs.toLong()/1000000), encryptedMessageData)
-        val sentViaConverse = notificationData.sentViaConverse!!
+        val envelope = EnvelopeBuilder.buildFromString(notificationData.contentTopic, Date(notificationData.timestampNs.toLong() / 1000000), encryptedMessageData)
 
-        if (isIntroTopic(notificationData.contentTopic)) {
-            return
-        } else if (isInviteTopic(notificationData.contentTopic)) {
-            Log.d(TAG, "Handling a new conversation notification")
-            val notificationToShow = handleNewConversationV2Notification(this, xmtpClient, envelope, remoteMessage, notificationData)
-            if (notificationToShow != null) {
-                shouldIncrementBadge = true
-                showNotification(notificationToShow.first, notificationToShow.second, notificationToShow.third)
+        var shouldShowNotification = false
+        var result = NotificationDataResult()
+
+        // Using IO dispatcher for background work, not blocking the main thread and UI
+        serviceScope.launch {
+            try {
+                if (isInviteTopic(notificationData.contentTopic)) {
+                    Log.d(TAG, "Handling a new conversation notification")
+                    val conversation = getNewConversationFromEnvelope(xmtpClient, envelope)
+                    if (conversation != null) {
+                        result = handleNewConversationFirstMessage(
+                            applicationContext,
+                            xmtpClient,
+                            conversation,
+                            remoteMessage
+                        )
+                        if (result != NotificationDataResult()) {
+                            shouldShowNotification = result.shouldShowNotification
+                        }
+
+                        // Replace invite-topic with the topic in the notification content
+                        val newNotificationData = NotificationData(
+                            notificationData.message,
+                            notificationData.timestampNs,
+                            conversation.topic,
+                            notificationData.sentViaConverse,
+                            notificationData.account,
+                        )
+                        val newNotificationDataJson = Klaxon().toJsonString(newNotificationData)
+                        remoteMessage.data["body"] = newNotificationDataJson
+                    }
+                } else {
+                    Log.d(TAG, "Handling an ongoing conversation message notification")
+                    result = handleOngoingConversationMessage(applicationContext, xmtpClient, envelope, remoteMessage)
+                    if (result != NotificationDataResult()) {
+                        shouldShowNotification = result.shouldShowNotification
+                    }
+                }
+                val notificationAlreadyShown = notificationAlreadyShown(applicationContext, result.messageId)
+
+                if (shouldShowNotification && !notificationAlreadyShown) {
+                    incrementBadge(applicationContext)
+                    result.remoteMessage?.let { showNotification(result.title, result.body, it) }
+                }
+            } catch (e: Exception) {
+                // Handle any exceptions
+                Log.e(TAG, "Error on IO Dispatcher coroutine", e)
             }
-        } else {
-            Log.d(TAG, "Handling a new message notification")
-            val notificationToShow = handleNewMessageNotification(this, xmtpClient, envelope, remoteMessage, sentViaConverse)
-            if (notificationToShow != null) {
-                shouldIncrementBadge = true
-                showNotification(notificationToShow.first, notificationToShow.second, notificationToShow.third)
-            }
-        }
-        Log.d(TAG, "reached the shouldIncrementBadge if statement")
-        if (shouldIncrementBadge) {
-            Log.d(TAG, "shouldIncrementBadge: true!")
-            val newBadgeCount = getBadge(this) + 1
-            setBadge(this, newBadgeCount)
-            ShortcutBadger.applyCount(this, newBadgeCount)
         }
     }
 
@@ -161,5 +185,11 @@ class PushNotificationsService : FirebaseMessagingService() {
     private fun initAsyncStorage() {
         val reactContext = ReactApplicationContext(this)
         asyncStorageModule = AsyncStorageModule(reactContext)
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        // Cancel the serviceScope when the service is destroyed
+        serviceScope.cancel()
     }
 }

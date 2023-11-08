@@ -1,6 +1,8 @@
 import { In } from "typeorm/browser";
 
+import { topicToNavigateTo } from "../../../components/StateHandlers/InitialStateHandler";
 import { getLensHandleFromConversationIdAndPeer } from "../../../utils/lens";
+import { navigateToConversation } from "../../../utils/navigation";
 import { saveConversationIdentifiersForNotifications } from "../../../utils/notifications";
 import { getRepository } from "../../db";
 import { getExistingDataSource } from "../../db/datasource";
@@ -53,6 +55,29 @@ export const saveConversations = async (
     }
   );
   refreshProfilesIfNeeded(account);
+
+  // Navigate to conversation from push notification on first message
+  if (topicToNavigateTo) {
+    const maxAttempts = 5;
+    const retryInterval = 500;
+
+    const navigateToConversationWithRetry = (attempts = 0) => {
+      const conversationToNavigateTo = conversations.find(
+        (conversation) => conversation.topic === topicToNavigateTo
+      );
+
+      if (conversationToNavigateTo) {
+        navigateToConversation(conversationToNavigateTo);
+      } else if (attempts < maxAttempts) {
+        setTimeout(
+          () => navigateToConversationWithRetry(attempts + 1),
+          retryInterval
+        );
+      }
+    };
+
+    navigateToConversationWithRetry();
+  }
 };
 
 const setupAndSaveConversations = async (

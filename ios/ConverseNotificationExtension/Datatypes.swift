@@ -29,6 +29,14 @@ struct SavedNotificationConversation: Codable {
   var createdAt: Int
   var context: ConversationContext?
   var account: String
+  var spamScore: Double? {
+    didSet {
+      if let value = spamScore {
+        // Whenever spamScore is set, round it to two decimal to ensure it fits as a 2-digit float in the database
+        spamScore = (value * 100).rounded() / 100
+      }
+    }
+  }
 }
 
 struct Accounts: Codable {

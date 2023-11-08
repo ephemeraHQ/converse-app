@@ -9,37 +9,13 @@ import Foundation
 import XMTP
 import CryptoKit
 
-
-func handleNewConversation(xmtpClient: XMTP.Client, envelope: XMTP.Envelope) async -> XMTP.Conversation? {
+func getNewConversationFromEnvelope(xmtpClient: XMTP.Client, envelope: XMTP.Envelope) async -> XMTP.Conversation? {
   do {
-    // Let's subscribe to that specific topic
-    let mmkv = getMmkv()
-    var apiURI = mmkv?.string(forKey: "api-uri")
-    // TODO => remove shared defaults
-    if (apiURI == nil) {
-      let sharedDefaults = try! SharedDefaults()
-      apiURI = sharedDefaults.string(forKey: "api-uri")?.replacingOccurrences(of: "\"", with: "")
-    }
-    let pushToken = getKeychainValue(forKey: "PUSH_TOKEN")
-    
     if (isInviteTopic(topic: envelope.contentTopic)) {
       let conversation = try await xmtpClient.conversations.fromInvite(envelope: envelope)
       switch conversation {
-      case let .v2(conversationV2): do {
-        let formatter = ISO8601DateFormatter()
-        formatter.formatOptions.insert(.withFractionalSeconds)
-        let createdAt = formatter.string(from: conversationV2.createdAt)
-        
-        let conversationDict = ["version": "v2", "topic": conversationV2.topic, "peerAddress": conversationV2.peerAddress, "createdAt": createdAt, "context":["conversationId": conversationV2.context.conversationID, "metadata": conversationV2.context.metadata] as [String : Any], "keyMaterial": conversationV2.keyMaterial.base64EncodedString()] as [String : Any]
-        // For now, we don't subscribe to new topics anymore at all, they all
-        // go to requests. In the future we will improve and subscribe to
-        // some topics depending on criteria
-//        if (!hasForbiddenPattern(address: conversationV2.peerAddress)) {
-//          subscribeToTopic(apiURI: apiURI, account: xmtpClient.address, pushToken: pushToken, topic: conversationV2.topic)
-//
-//        }
+      case .v2(_): do {
         persistDecodedConversation(account: xmtpClient.address, conversation: conversation)
-        try saveConversation(account: xmtpClient.address, topic: conversationV2.topic, peerAddress: conversationV2.peerAddress, createdAt: Int(conversationV2.createdAt.timeIntervalSince1970 * 1000), context: ConversationContext(conversationId: conversationV2.context.conversationID, metadata: conversationV2.context.metadata))
       }
       default: do {}
       }
@@ -49,9 +25,8 @@ func handleNewConversation(xmtpClient: XMTP.Client, envelope: XMTP.Envelope) asy
     sentryTrackMessage(message: "Could not decode new conversation envelope", extras: ["error": error])
     print("[NotificationExtension] Could not decode new conversation envelope \(error)")
   }
-  return nil;
+  return nil
 }
-
 
 func loadSavedConversations() -> [SavedNotificationConversation] {
   let mmkv = getMmkv()
@@ -69,9 +44,8 @@ func loadSavedConversations() -> [SavedNotificationConversation] {
   }
 }
 
-
-func saveConversation(account: String, topic: String, peerAddress: String, createdAt: Int, context: ConversationContext?) throws {
-  let savedConversation = SavedNotificationConversation(topic: topic, peerAddress: peerAddress, createdAt: createdAt, context: context, account: account)
+func saveConversation(account: String, topic: String, peerAddress: String, createdAt: Int, context: ConversationContext?, spamScore: Double?) throws {
+  var savedConversation = SavedNotificationConversation(topic: topic, peerAddress: peerAddress, createdAt: createdAt, context: context, account: account, spamScore: spamScore)
   var savedConversationsList = loadSavedConversations()
   savedConversationsList.append(savedConversation)
   let encodedValue = try JSONEncoder().encode(savedConversationsList)

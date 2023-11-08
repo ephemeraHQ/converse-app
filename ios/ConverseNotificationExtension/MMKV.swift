@@ -66,3 +66,19 @@ func setBadge(_ badge: Int) {
   let mmkv = getMmkv()
   mmkv?.set(Int32(badge), forKey: "notifications-badge")
 }
+
+func getShownNotificationIds() -> [String] {
+  let mmkv = getMmkv()
+  if let jsonData = mmkv?.data(forKey: "notification-ids"),
+   let ids = try? JSONDecoder().decode([String].self, from: jsonData) {
+    return ids
+  }
+  return []
+}
+
+func setShownNotificationIds(_ ids: [String]) {
+  let mmkv = getMmkv()
+  if let jsonData = try? JSONEncoder().encode(ids) {
+    mmkv?.set(jsonData, forKey: "notification-ids")
+  }
+}
