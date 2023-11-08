@@ -97,7 +97,6 @@ export default function InitialStateHandler() {
         if (topicToNavigateTo) {
           if (conversations[topicToNavigateTo]) {
             navigateToConversation(conversations[topicToNavigateTo]);
-            setTopicToNavigateTo("");
           }
         } else if (initialURL) {
           Linking.openURL(initialURL);
