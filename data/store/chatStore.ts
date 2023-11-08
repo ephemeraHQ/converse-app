@@ -486,30 +486,15 @@ export const initChatStore = (account: string) => {
             }),
           setSpamScores: (topicSpamScores: Record<string, number>) =>
             set((state) => {
-              const newState = { ...state };
-
-              // Create updated conversations by mapping over the entries of the topicSpamScores
-              const updatedConversations = Object.entries(
-                topicSpamScores
-              ).reduce(
-                (conversations, [topic, spamScore]) => {
-                  if (conversations[topic]) {
-                    conversations[topic] = {
-                      ...conversations[topic],
-                      spamScore,
-                      lastUpdateAt: now(),
-                    };
-                  }
-                  return conversations;
-                },
-                { ...newState.conversations }
-              );
-
-              return {
-                ...newState,
-                conversations: updatedConversations,
+              const newState = {
+                ...state,
                 lastUpdateAt: now(),
               };
+              Object.entries(topicSpamScores).forEach(([topic, spamScore]) => {
+                newState.conversations[topic].spamScore = spamScore;
+                newState.conversations[topic].lastUpdateAt = now();
+              });
+              return newState;
             }),
         }) as ChatStoreType,
       {
