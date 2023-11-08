@@ -2,7 +2,13 @@ import { useLoginWithSMS, useEmbeddedWallet, usePrivy } from "@privy-io/expo";
 import { ethers } from "ethers";
 import * as LibPhoneNumber from "libphonenumber-js";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Alert, StyleSheet, Text, useColorScheme } from "react-native";
+import {
+  Alert,
+  Platform,
+  StyleSheet,
+  Text,
+  useColorScheme,
+} from "react-native";
 import { CountryCode } from "react-native-country-picker-modal";
 import * as RNLocalize from "react-native-localize";
 import OtpInputs, { OtpInputsRef } from "react-native-otp-inputs";
@@ -10,7 +16,9 @@ import PhoneInput from "react-native-phone-number-input";
 
 import { useOnboardingStore } from "../../data/store/onboardingStore";
 import {
+  backgroundColor,
   tertiaryBackgroundColor,
+  textPrimaryColor,
   textSecondaryColor,
 } from "../../utils/colors";
 import { pick } from "../../utils/objects";
@@ -165,13 +173,17 @@ export default function PrivyConnect() {
             flagButtonStyle={styles.flagButton}
             textContainerStyle={styles.phoneInput}
             textInputStyle={styles.phoneInputText}
+            textInputProps={{
+              placeholderTextColor: textSecondaryColor(colorScheme),
+              selectionColor: textPrimaryColor(colorScheme),
+            }}
             codeTextStyle={styles.phoneCountryCode}
             renderDropdownImage={
               <Picto
                 picto="chevron.down"
                 color={textSecondaryColor(colorScheme)}
-                size={12}
-                style={{ marginRight: 9, marginLeft: -2 }}
+                size={Platform.OS === "ios" ? 12 : 22}
+                style={styles.flagChevron}
               />
             }
             // @ts-ignore
@@ -221,29 +233,59 @@ const useStyles = () => {
       marginTop: 32,
       marginHorizontal: 50,
       textAlign: "center",
+      color:
+        Platform.OS === "android"
+          ? textSecondaryColor(colorScheme)
+          : textPrimaryColor(colorScheme),
     },
     phoneInputContainer: {
       marginTop: 32,
+      backgroundColor: backgroundColor(colorScheme),
     },
-    phoneInput: {
-      backgroundColor: tertiaryBackgroundColor(colorScheme),
-      borderRadius: 10,
-      height: 36,
-      marginLeft: 20,
-    },
+    phoneInput: Platform.select({
+      default: {
+        backgroundColor: tertiaryBackgroundColor(colorScheme),
+        borderRadius: 10,
+        height: 36,
+        marginLeft: 20,
+      },
+      android: {
+        backgroundColor: backgroundColor(colorScheme),
+        borderRadius: 4,
+        borderWidth: 1,
+        borderColor: textSecondaryColor(colorScheme),
+        marginLeft: 10,
+      },
+    }),
     phoneInputText: {
       height: 25,
+      color: textPrimaryColor(colorScheme),
     },
     phoneCountryCode: {
-      height: 20,
+      height: Platform.OS === "android" ? undefined : 20,
+      color: textPrimaryColor(colorScheme),
       fontWeight: "400",
     },
-    flagButton: {
-      backgroundColor: tertiaryBackgroundColor(colorScheme),
-      borderRadius: 10,
-      height: 36,
-      width: 58,
-    },
+    flagButton: Platform.select({
+      default: {
+        backgroundColor: tertiaryBackgroundColor(colorScheme),
+        borderRadius: 10,
+        height: 36,
+        width: 58,
+      },
+      android: {
+        backgroundColor: backgroundColor(colorScheme),
+        borderRadius: 4,
+        borderWidth: 1,
+        borderColor: textSecondaryColor(colorScheme),
+      },
+    }),
+    flagChevron: Platform.select({
+      default: { marginRight: 9, marginLeft: -2 },
+      android: {
+        marginLeft: -5,
+      },
+    }),
     countryPicker: {
       paddingLeft: 12,
     },
@@ -254,12 +296,26 @@ const useStyles = () => {
       marginTop: 32,
     },
     otpInput: {
-      width: 25,
-      borderRadius: 3,
       textAlign: "center",
-      height: 30,
-      marginRight: 10,
-      backgroundColor: tertiaryBackgroundColor(colorScheme),
+      marginRight: 5,
+      marginLeft: 5,
+      color: textPrimaryColor(colorScheme),
+      ...Platform.select({
+        default: {
+          width: 25,
+          borderRadius: 3,
+          height: 30,
+          backgroundColor: tertiaryBackgroundColor(colorScheme),
+        },
+        android: {
+          backgroundColor: backgroundColor(colorScheme),
+          borderRadius: 4,
+          borderWidth: 1,
+          borderColor: textSecondaryColor(colorScheme),
+          height: 56,
+          width: 32,
+        },
+      }),
     },
   });
 };

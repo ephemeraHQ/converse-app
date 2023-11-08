@@ -3,6 +3,7 @@ import Add from "@material-symbols/svg-400/outlined/add.svg";
 import AddLink from "@material-symbols/svg-400/outlined/add_link.svg";
 import ArrowRight from "@material-symbols/svg-400/outlined/arrow_right.svg";
 import Block from "@material-symbols/svg-400/outlined/block.svg";
+import Call from "@material-symbols/svg-400/outlined/call.svg";
 import ArrowUpRight from "@material-symbols/svg-400/outlined/call_made.svg";
 import Celebration from "@material-symbols/svg-400/outlined/celebration.svg";
 import Chat from "@material-symbols/svg-400/outlined/chat.svg";
@@ -11,6 +12,7 @@ import ContentCopy from "@material-symbols/svg-400/outlined/content_copy.svg";
 import Delete from "@material-symbols/svg-400/outlined/delete.svg";
 import Done from "@material-symbols/svg-400/outlined/done.svg";
 import Edit from "@material-symbols/svg-400/outlined/edit.svg";
+import ExpandMore from "@material-symbols/svg-400/outlined/expand_more.svg";
 import Key from "@material-symbols/svg-400/outlined/key.svg";
 import Laptop from "@material-symbols/svg-400/outlined/laptop_chromebook.svg";
 import Link from "@material-symbols/svg-400/outlined/link.svg";
@@ -74,6 +76,8 @@ const pictoMapping: {
   trash: Delete,
   menu: Menu,
   more_vert: MoreVert,
+  phone: Call,
+  "chevron.down": ExpandMore,
 };
 
 export default function Picto({ picto, style, size, weight, color }: Props) {
