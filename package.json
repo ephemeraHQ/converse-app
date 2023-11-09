@@ -101,7 +101,7 @@
     "react-native-keyboard-controller": "^1.9.1",
     "react-native-localize": "^3.0.2",
     "react-native-mmkv": "^2.11.0",
-    "react-native-otp-inputs": "^7.4.0",
+    "react-native-otp-entry": "^1.2.0",
     "react-native-paper": "^5.10.6",
     "react-native-parsed-text": "^0.0.22",
     "react-native-phone-number-input": "^2.1.0",

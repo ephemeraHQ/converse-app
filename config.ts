@@ -31,6 +31,7 @@ const defaultConfig = {
   web3StorageToken:
     "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJkaWQ6ZXRocjoweDBBOTAxOTI0ZTE1NzNhM2RCYzhjNDk3YzlmQ0Q1QzAwZmU3NDAyQUEiLCJpc3MiOiJ3ZWIzLXN0b3JhZ2UiLCJpYXQiOjE2ODc4MDU0MTUxMDYsIm5hbWUiOiJDb252ZXJzZSBUZXN0In0.5ItNFvSEsXpv4NYG1Uwbw9mL5dVzNQeXefOkjQht3ns",
   privyAppId: "cloh5bn1p00q4l50gcg0g1mix",
+  privyChainId: "0x14A33", // Base Goerli
 };
 
 const isAndroid = Platform.OS === "android";

@@ -1,9 +1,9 @@
 import { useLoginWithSMS, useEmbeddedWallet, usePrivy } from "@privy-io/expo";
-import { ethers } from "ethers";
 import * as LibPhoneNumber from "libphonenumber-js";
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
   Alert,
+  Keyboard,
   Platform,
   StyleSheet,
   Text,
@@ -11,7 +11,7 @@ import {
 } from "react-native";
 import { CountryCode } from "react-native-country-picker-modal";
 import * as RNLocalize from "react-native-localize";
-import OtpInputs, { OtpInputsRef } from "react-native-otp-inputs";
+import { OtpInput, OtpInputRef } from "react-native-otp-entry";
 import PhoneInput from "react-native-phone-number-input";
 
 import { useOnboardingStore } from "../../data/store/onboardingStore";
@@ -22,6 +22,7 @@ import {
   textSecondaryColor,
 } from "../../utils/colors";
 import { pick } from "../../utils/objects";
+import { getPrivySigner } from "../../utils/privy";
 import Picto from "../Picto/Picto";
 import OnboardingComponent from "./OnboardingComponent";
 
@@ -50,7 +51,7 @@ export default function PrivyConnect() {
 
   const { sendCode, loginWithCode } = useLoginWithSMS();
 
-  const otpInputRef = useRef<OtpInputsRef>();
+  const otpInputRef = useRef<OtpInputRef>();
   const phoneInputRef = useRef<PhoneInput>(null);
 
   const [status, setStatus] = useState<"enter-phone" | "verify-phone">(
@@ -59,7 +60,6 @@ export default function PrivyConnect() {
 
   const [formattedPhone, setFormattedPhone] = useState("");
   const [beautifulPhone, setBeautifulPhone] = useState("");
-  const otpCode = useRef("");
 
   const sendPhone = useCallback(async () => {
     const parsed = LibPhoneNumber.parsePhoneNumberFromString(formattedPhone);
@@ -74,22 +74,20 @@ export default function PrivyConnect() {
     setStatus("verify-phone");
   }, [formattedPhone, sendCode, setLoading]);
 
-  const submitCode = useCallback(async () => {
-    if (otpCode.current.length !== 6) {
-      otpInputRef.current?.reset();
-      return;
-    }
-    setLoading(true);
-    const user = await loginWithCode({ code: otpCode.current });
-    if (!user) {
-      setLoading(false);
-      Alert.alert("The code you entered is not valid, please try again");
-      otpInputRef.current?.reset();
-      otpInputRef.current?.focus();
-    } else {
-      setPrivyAccountId(user.user.id);
-    }
-  }, [loginWithCode, setLoading, setPrivyAccountId]);
+  const submitCode = useCallback(
+    async (otpCode: string) => {
+      setLoading(true);
+      const user = await loginWithCode({ code: otpCode });
+      if (!user) {
+        setLoading(false);
+        Alert.alert("The code you entered is not valid, please try again");
+        otpInputRef.current?.clear();
+      } else {
+        setPrivyAccountId(user.user.id);
+      }
+    },
+    [loginWithCode, setLoading, setPrivyAccountId]
+  );
 
   const creatingEmbeddedWallet = useRef(false);
 
@@ -118,17 +116,48 @@ export default function PrivyConnect() {
         !gotEmbeddedWallet.current
       ) {
         gotEmbeddedWallet.current = true;
-        const provider = embeddedWallet.provider;
-        await provider.request({
-          method: "wallet_switchEthereumChain",
-          params: [{ chainId: "0x2105" }], // Switching to base chain
-        });
-        const ethersProvider = new ethers.providers.Web3Provider(provider);
-        const ethersSigner = ethersProvider.getSigner();
-        setSigner(ethersSigner);
+        const privySigner = await getPrivySigner(embeddedWallet);
+        setSigner(privySigner);
       }
     })();
   }, [embeddedWallet, privyUser, setSigner, status]);
+
+  const [showOtpTick, setShowOtpTick] = useState(true);
+
+  useEffect(() => {
+    const keyboardWillShowListened = Keyboard.addListener(
+      "keyboardWillShow",
+      () => {
+        setShowOtpTick(true);
+      }
+    );
+    const keyboardWillHideListener = Keyboard.addListener(
+      "keyboardWillHide",
+      () => {
+        setShowOtpTick(false);
+      }
+    );
+
+    const keyboardDidShowListened = Keyboard.addListener(
+      "keyboardDidShow",
+      () => {
+        setShowOtpTick(true);
+      }
+    );
+    const keyboardDidHideListener = Keyboard.addListener(
+      "keyboardDidHide",
+      () => {
+        setShowOtpTick(false);
+      }
+    );
+
+    return () => {
+      keyboardWillShowListened.remove();
+      keyboardWillHideListener.remove();
+      keyboardDidShowListened.remove();
+      keyboardDidHideListener.remove();
+    };
+  }, []);
 
   return (
     <OnboardingComponent
@@ -196,24 +225,26 @@ export default function PrivyConnect() {
       )}
       {status === "verify-phone" && (
         <>
-          <OtpInputs
-            autofillFromClipboard={false}
-            handleChange={(code) => {
-              otpCode.current = code;
-              if (code.length === 6) {
-                submitCode();
+          <OtpInput
+            numberOfDigits={6}
+            onFilled={(text) => {
+              if (text.length === 6) {
+                submitCode(text);
               }
             }}
-            numberOfInputs={6}
             ref={(r) => {
-              if (r && !otpInputRef.current) {
+              if (r) {
                 otpInputRef.current = r;
-                r.focus();
               }
             }}
-            keyboardType="phone-pad"
-            inputStyles={styles.otpInput}
-            style={styles.otp}
+            hideStick={!showOtpTick}
+            focusColor={textSecondaryColor(colorScheme)}
+            theme={{
+              containerStyle: styles.otp,
+              focusStickStyle: styles.otpFocus,
+              pinCodeContainerStyle: styles.otpInput,
+              pinCodeTextStyle: styles.otpText,
+            }}
           />
           <Text style={styles.text}>
             Enter confirmation code sent to{"\n"}
@@ -293,18 +324,26 @@ const useStyles = () => {
       flex: 1,
       flexDirection: "row",
       flexGrow: 0,
+      width: Platform.OS === "android" ? 252 : 210,
       marginTop: 32,
     },
+    otpFocus: {
+      height: Platform.OS === "android" ? 25 : 18,
+      width: 1.75,
+    },
+    otpText: {
+      fontSize: 17,
+      color: textPrimaryColor(colorScheme),
+    },
     otpInput: {
-      textAlign: "center",
       marginRight: 5,
       marginLeft: 5,
-      color: textPrimaryColor(colorScheme),
       ...Platform.select({
         default: {
-          width: 25,
+          minWidth: 25,
+          minHeight: 30,
           borderRadius: 3,
-          height: 30,
+          borderWidth: 0,
           backgroundColor: tertiaryBackgroundColor(colorScheme),
         },
         android: {
@@ -312,8 +351,8 @@ const useStyles = () => {
           borderRadius: 4,
           borderWidth: 1,
           borderColor: textSecondaryColor(colorScheme),
-          height: 56,
-          width: 32,
+          minHeight: 56,
+          minWidth: 32,
         },
       }),
     },
