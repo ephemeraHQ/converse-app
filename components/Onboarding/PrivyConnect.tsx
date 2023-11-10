@@ -22,7 +22,7 @@ import {
   textSecondaryColor,
 } from "../../utils/colors";
 import { pick } from "../../utils/objects";
-import { getPrivySigner } from "../../utils/privy";
+import { usePrivySigner } from "../../utils/privy";
 import Picto from "../Picto/Picto";
 import OnboardingComponent from "./OnboardingComponent";
 
@@ -48,6 +48,7 @@ export default function PrivyConnect() {
   }, []);
 
   const embeddedWallet = useEmbeddedWallet();
+  const privySigner = usePrivySigner(true);
 
   const { sendCode, loginWithCode } = useLoginWithSMS();
 
@@ -110,17 +111,15 @@ export default function PrivyConnect() {
   useEffect(() => {
     (async () => {
       if (
-        privyUser &&
-        embeddedWallet.status === "connected" &&
+        privySigner &&
         status === "verify-phone" &&
         !gotEmbeddedWallet.current
       ) {
         gotEmbeddedWallet.current = true;
-        const privySigner = await getPrivySigner(embeddedWallet);
         setSigner(privySigner);
       }
     })();
-  }, [embeddedWallet, privyUser, setSigner, status]);
+  }, [privySigner, setSigner, status]);
 
   const [showOtpTick, setShowOtpTick] = useState(true);
 
