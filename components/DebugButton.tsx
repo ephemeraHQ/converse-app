@@ -1,3 +1,4 @@
+import { useEmbeddedWallet } from "@privy-io/expo";
 import { Client } from "@xmtp/react-native-sdk";
 import axios from "axios";
 import * as Clipboard from "expo-clipboard";
@@ -16,6 +17,7 @@ import {
 import { deleteXmtpKey } from "../utils/keychain";
 import { logout } from "../utils/logout";
 import mmkv from "../utils/mmkv";
+import { usePrivySigner } from "../utils/privy";
 import { showActionSheetWithOptions } from "./StateHandlers/ActionSheetStateHandler";
 
 let logs: string[] = [];
@@ -32,12 +34,50 @@ export const useEnableDebug = () => {
 };
 
 const DebugButton = forwardRef((props, ref) => {
+  const embeddedWallet = useEmbeddedWallet();
+  const privySigner = usePrivySigner();
   // The component instance will be extended
   // with whatever you return from the callback passed
   // as the second argument
   useImperativeHandle(ref, () => ({
     showDebugMenu() {
       const methods: any = {
+        Balance: async () => {
+          if (embeddedWallet.status === "connected" && privySigner) {
+            const provider = embeddedWallet.provider;
+            // const accounts = await provider.request({
+            //   method: "eth_requestAccounts",
+            // });
+            // const signed = await privySigner.sendUncheckedTransaction({
+            //   from: accounts[0],
+            //   to: "0x6b55F2bF3Ba4852708A6158d0E4c8372F1096F4B",
+            //   value: "1",
+            //   gasLimit: 1542750,
+            // });
+            // console.log(signed);
+            // const response = await provider.request({
+            //   method: "eth_sendTransaction",
+            //   params: [
+            //     {
+            //       from: accounts[0],
+            //       to: "0x6b55F2bF3Ba4852708A6158d0E4c8372F1096F4B",
+            //       value: "1",
+            //     },
+            //   ],
+            // });
+            // const walletClient = createWalletClient({
+            //   // Replace this with your desired network that you imported from viem
+            //   chain: baseGoerli,
+            //   transport: custom(provider),
+            // });
+            // const hash = await walletClient.sendTransaction({
+            //   account: walletClient,
+            //   to: "0x6b55F2bF3Ba4852708A6158d0E4c8372F1096F4B",
+            //   value: 1000000000000000000n,
+            // });
+            // console.log(hash);
+          }
+        },
         "Export db file": async () => {
           const dbPath = await getDbPath(currentAccount());
           const dbExists = await RNFS.exists(dbPath);

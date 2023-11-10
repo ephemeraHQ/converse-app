@@ -1,3 +1,4 @@
+import { usePrivy } from "@privy-io/expo";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { useDisconnect } from "@thirdweb-dev/react-native";
 import * as Clipboard from "expo-clipboard";
@@ -48,7 +49,10 @@ export default function SettingsButton({ navigation, account }: Props) {
         "setNotificationsPermissionStatus",
       ])
     );
-  const setCurrentAccount = useAccountsStore((s) => s.setCurrentAccount);
+  const { setCurrentAccount, privyAccountId } = useAccountsStore((s) =>
+    pick(s, ["setCurrentAccount", "privyAccountId"])
+  );
+  const { logout: privyLogout } = usePrivy();
   const disconnectWallet = useDisconnect();
   const colorScheme = useColorScheme();
   const onPress = useCallback(() => {
@@ -127,6 +131,9 @@ export default function SettingsButton({ navigation, account }: Props) {
       },
       Disconnect: () => {
         disconnectWallet();
+        if (privyAccountId[account]) {
+          privyLogout();
+        }
         logout(account);
       },
       Cancel: () => {},
@@ -161,6 +168,8 @@ export default function SettingsButton({ navigation, account }: Props) {
     navigation,
     setNotificationsPermissionStatus,
     disconnectWallet,
+    privyAccountId,
+    privyLogout,
   ]);
 
   return Platform.OS === "android" ? (
