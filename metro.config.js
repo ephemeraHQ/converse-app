@@ -25,11 +25,7 @@ module.exports = {
     assetExts: defaultConfig.resolver.assetExts.filter((ext) => ext !== "svg"),
     sourceExts: [...defaultConfig.resolver.sourceExts, "svg"],
     extraNodeModules: {
-      stream: require.resolve("readable-stream"),
-      crypto: require.resolve("crypto-browserify"),
-      http: require.resolve("stream-http"),
-      os: require.resolve("os-browserify/browser"),
-      https: require.resolve("https-browserify"),
+      ...require("expo-crypto-polyfills"),
       zlib: require.resolve("browserify-zlib"),
     },
   },

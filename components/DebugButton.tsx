@@ -14,10 +14,15 @@ import {
   getAccountsList,
   useCurrentAccount,
 } from "../data/store/accountsStore";
+import {
+  getETHBalance,
+  getUSDCBalance,
+  getUSDCTransferAuthorization,
+  usePrivySigner,
+} from "../utils/evm/helpers";
 import { deleteXmtpKey } from "../utils/keychain";
 import { logout } from "../utils/logout";
 import mmkv from "../utils/mmkv";
-import { usePrivySigner } from "../utils/privy";
 import { showActionSheetWithOptions } from "./StateHandlers/ActionSheetStateHandler";
 
 let logs: string[] = [];
@@ -44,10 +49,27 @@ const DebugButton = forwardRef((props, ref) => {
       const methods: any = {
         Balance: async () => {
           if (embeddedWallet.status === "connected" && privySigner) {
-            const provider = embeddedWallet.provider;
+            const ethBalance = await getETHBalance(privySigner);
+            const usdcBalance = await getUSDCBalance(privySigner);
+            console.log({ ethBalance, usdcBalance });
+            await getUSDCTransferAuthorization(
+              privySigner,
+              "1",
+              "0x6b55F2bF3Ba4852708A6158d0E4c8372F1096F4B"
+            );
+            // const provider = embeddedWallet.provider;
             // const accounts = await provider.request({
             //   method: "eth_requestAccounts",
             // });
+            // const balance = await getETHBalance(accounts[0]);
+            // console.log(balance);
+            // const balance = await getETHBalance(privySigner);
+            // console.log(balance);
+            // const r = await provider.request({
+            //   method: "eth_getBalance",
+            //   params: ["0x45e5c6d3e7d833953ae70927513644d7e3c60e44", "latest"],
+            // });
+            // console.log({r});
             // const signed = await privySigner.sendUncheckedTransaction({
             //   from: accounts[0],
             //   to: "0x6b55F2bF3Ba4852708A6158d0E4c8372F1096F4B",
