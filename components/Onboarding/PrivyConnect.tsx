@@ -21,8 +21,8 @@ import {
   textPrimaryColor,
   textSecondaryColor,
 } from "../../utils/colors";
+import { usePrivySigner } from "../../utils/evm/helpers";
 import { pick } from "../../utils/objects";
-import { usePrivySigner } from "../../utils/privy";
 import Picto from "../Picto/Picto";
 import OnboardingComponent from "./OnboardingComponent";
 

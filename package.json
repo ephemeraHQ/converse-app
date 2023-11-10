@@ -63,6 +63,7 @@
     "expo-clipboard": "~4.3.1",
     "expo-constants": "~14.4.2",
     "expo-crypto": "~12.4.1",
+    "expo-crypto-polyfills": "^1.1.0",
     "expo-dev-client": "~2.4.11",
     "expo-device": "~5.4.0",
     "expo-document-picker": "^11.5.4",
