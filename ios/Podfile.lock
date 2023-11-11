@@ -484,7 +484,7 @@ PODS:
     - React-Core
   - react-native-keyboard-controller (1.6.1):
     - React-Core
-  - react-native-mmkv (2.10.1):
+  - react-native-mmkv (2.11.0):
     - MMKV (>= 1.2.13)
     - React-Core
   - react-native-netinfo (9.3.10):
@@ -693,7 +693,7 @@ PODS:
     - GzipSwift
     - web3.swift
     - XMTPRust (= 0.3.6-beta0)
-  - XMTPReactNative (1.19.1):
+  - XMTPReactNative (1.20.0):
     - ExpoModulesCore
     - MessagePacker
     - XMTP (= 0.6.6-alpha0)
@@ -1093,7 +1093,7 @@ SPEC CHECKSUMS:
   React-logger: 2e4aee3e11b3ec4fa6cfd8004610bbb3b8d6cca4
   react-native-get-random-values: dee677497c6a740b71e5612e8dbd83e7539ed5bb
   react-native-keyboard-controller: 04fed02b3ff24e18486c7fb52ab92267c15b27a9
-  react-native-mmkv: dea675cf9697ad35940f1687e98e133e1358ef9f
+  react-native-mmkv: e97c0c79403fb94577e5d902ab1ebd42b0715b43
   react-native-netinfo: ccbe1085dffd16592791d550189772e13bf479e2
   react-native-safe-area-context: 36cc67648134e89465663b8172336a19eeda493d
   react-native-sfsymbols: bd3a0d3eab185e80b571bae60753dcf5a0d57967
@@ -1140,10 +1140,10 @@ SPEC CHECKSUMS:
   UMAppLoader: e83f024f75f07802fce99739f04b4537d188caaf
   web3.swift: 2263d1e12e121b2c42ffb63a5a7beb1acaf33959
   XMTP: 6ba5240596cfe7d60248398b651b230dcf88be29
-  XMTPReactNative: fc2fea78c402acb5989f6c6c2bc2e6c2f3759ef6
+  XMTPReactNative: cedc7fc4434817591ca95fee04a46264bcfe4919
   XMTPRust: 3c958736a4f4ee798e425b5644551f1c948da4b0
   Yoga: 86fed2e4d425ee4c6eab3813ba1791101ee153c6
 
-PODFILE CHECKSUM: 42fcd542db12935f6c33d582ebfb2b2cead80b11
+PODFILE CHECKSUM: 0dc9abc089e5a535ba82df8232d1b6016dceed05
 
-COCOAPODS: 1.13.0
+COCOAPODS: 1.14.2
