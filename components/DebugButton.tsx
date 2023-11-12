@@ -55,7 +55,7 @@ const DebugButton = forwardRef((props, ref) => {
             await getUSDCTransferAuthorization(
               privySigner,
               "1",
-              "0x6b55F2bF3Ba4852708A6158d0E4c8372F1096F4B"
+              "0xf9a3BB070c1f9b3186A547DeD991BeD04a289C5B"
             );
             // const provider = embeddedWallet.provider;
             // const accounts = await provider.request({
