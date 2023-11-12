@@ -8,7 +8,7 @@ import config from "../../config";
 import { moveFileAndReplace } from "../../utils/fileSystem";
 import { saveXmtpKey, secureStoreOptions } from "../../utils/keychain";
 import storage from "../../utils/mmkv";
-import { sentryTrackMessage } from "../../utils/sentry";
+import { sentryTrackError, sentryTrackMessage } from "../../utils/sentry";
 import { getDbPath } from "../db";
 import {
   TEMPORARY_ACCOUNT_NAME,
@@ -21,54 +21,66 @@ export const migrateDataIfNeeded = async () => {
   const before = new Date().getTime();
   let currentAccount = useAccountsStore.getState().currentAccount;
   if (currentAccount === TEMPORARY_ACCOUNT_NAME) {
-    const xmtpKey = await SecureStore.getItemAsync(
-      "XMTP_KEYS",
-      secureStoreOptions
-    );
-    if (xmtpKey) {
-      // Let's get the saved address from shared preferences
-      let savedAddress: any = "";
-      if (Platform.OS === "ios") {
-        const SharedGroupPreferences =
-          require("react-native-shared-group-preferences").default;
-        savedAddress = await SharedGroupPreferences.getItem(
-          "xmtp-address",
-          config.appleAppGroup
-        );
-      } else {
-        savedAddress = await AsyncStorage.getItem("xmtp-address");
-      }
-
-      if (
-        savedAddress &&
-        savedAddress.length > 0 &&
-        isAddress(savedAddress.toLowerCase())
-      ) {
-        currentAccount = savedAddress;
-        console.log("Migrating to multi account store - ", savedAddress);
-        useAccountsStore.getState().setCurrentAccount(savedAddress, true);
-      }
-    }
-  }
-
-  if (currentAccount !== TEMPORARY_ACCOUNT_NAME) {
-    // On iOS and Android this was the path
-    const dbPath = `${RNFS.DocumentDirectoryPath}/SQLite/converse`;
-    const dbExists = await RNFS.exists(dbPath);
-    if (dbExists) {
-      const newDbPath = await getDbPath(currentAccount);
-      console.log(
-        "Moving the database to a dedicated account database",
-        newDbPath
+    try {
+      const xmtpKey = await SecureStore.getItemAsync(
+        "XMTP_KEYS",
+        secureStoreOptions
       );
-      try {
-        await moveFileAndReplace(dbPath, newDbPath);
-      } catch (e) {
-        console.log("COULD NOT MOVE DB", e);
-        sentryTrackMessage("COULD_NOT_MOVE_DB", { error: JSON.stringify(e) });
+      if (xmtpKey) {
+        // Let's get the saved address from shared preferences
+        let savedAddress: any = "";
+        if (Platform.OS === "ios") {
+          const SharedGroupPreferences =
+            require("react-native-shared-group-preferences").default;
+          savedAddress = await SharedGroupPreferences.getItem(
+            "xmtp-address",
+            config.appleAppGroup
+          );
+        } else {
+          savedAddress = await AsyncStorage.getItem("xmtp-address");
+        }
+
+        if (
+          savedAddress &&
+          savedAddress.length > 0 &&
+          isAddress(savedAddress.toLowerCase())
+        ) {
+          currentAccount = savedAddress;
+          console.log("Migrating to multi account store - ", savedAddress);
+          useAccountsStore.getState().setCurrentAccount(savedAddress, true);
+        }
       }
+    } catch (e) {
+      sentryTrackError(e);
+      return;
     }
   }
+
+  if (currentAccount === TEMPORARY_ACCOUNT_NAME) {
+    return;
+  }
+
+  // Moving the database
+  const dbPath = `${RNFS.DocumentDirectoryPath}/SQLite/converse`;
+  const dbExists = await RNFS.exists(dbPath);
+  if (dbExists) {
+    const newDbPath = await getDbPath(currentAccount);
+    console.log(
+      "Moving the database to a dedicated account database",
+      newDbPath
+    );
+    try {
+      await moveFileAndReplace(dbPath, newDbPath);
+    } catch (e) {
+      console.log("COULD NOT MOVE DB", e);
+      sentryTrackMessage("COULD_NOT_MOVE_DB", { error: JSON.stringify(e) });
+    }
+  }
+
+  // Moving data from many places to zustand
+
+  // Sync status
+
   const previousSyncedAtMMKV = storage.getNumber("lastXMTPSyncedAt") || 0;
   const previousSyncedAtAsyncStorage = await AsyncStorage.getItem(
     "lastXMTPSyncedAt"
@@ -90,6 +102,9 @@ export const migrateDataIfNeeded = async () => {
   }
   AsyncStorage.removeItem("lastXMTPSyncedAt");
   storage.delete("lastXMTPSyncedAt");
+
+  // Notifications screen
+
   const showNotificationsScreenString = await AsyncStorage.getItem(
     "state.notifications.showNotificationsScreen"
   );
@@ -103,6 +118,8 @@ export const migrateDataIfNeeded = async () => {
       "state.notifications.showNotificationsScreen"
     );
   }
+
+  // Ephemeral account
   let connectedToEphemeralAccount = false;
   const connectedToEphemeralAccountMMKV = storage.getBoolean(
     "state.app.isEphemeralAccount"
@@ -131,6 +148,8 @@ export const migrateDataIfNeeded = async () => {
   AsyncStorage.removeItem("state.app.isEphemeralAccount");
   storage.delete("state.app.isEphemeralAccount");
 
+  // Initial load done
+
   let initialLoadDoneOnce = false;
   const initialLoadDoneOnceMMKV = storage.getBoolean(
     "state.xmtp.initialLoadDoneOnce"
@@ -158,21 +177,19 @@ export const migrateDataIfNeeded = async () => {
   AsyncStorage.removeItem("state.xmtp.initialLoadDoneOnce");
   storage.delete("state.xmtp.initialLoadDoneOnce");
 
-  // Let's migrate keys if needed
-  if (currentAccount !== TEMPORARY_ACCOUNT_NAME) {
-    const xmtpKey = await SecureStore.getItemAsync(
-      "XMTP_KEYS",
-      secureStoreOptions
+  // Moving the key to multi-account
+  const xmtpKey = await SecureStore.getItemAsync(
+    "XMTP_KEYS",
+    secureStoreOptions
+  );
+  if (xmtpKey) {
+    console.log(
+      `[Refacto] Migrating the XMTP secure Key to an account based key`
     );
-    if (xmtpKey) {
-      console.log(
-        `[Refacto] Migrating the XMTP secure Key to an account based key`
-      );
-      const base64Key = Buffer.from(JSON.parse(xmtpKey)).toString("base64");
-      await saveXmtpKey(currentAccount, base64Key);
-      await SecureStore.deleteItemAsync("XMTP_KEYS", secureStoreOptions);
-      await SecureStore.deleteItemAsync("XMTP_BASE64_KEY", secureStoreOptions);
-    }
+    const base64Key = Buffer.from(JSON.parse(xmtpKey)).toString("base64");
+    await saveXmtpKey(currentAccount, base64Key);
+    await SecureStore.deleteItemAsync("XMTP_KEYS", secureStoreOptions);
+    await SecureStore.deleteItemAsync("XMTP_BASE64_KEY", secureStoreOptions);
   }
 
   const after = new Date().getTime();
