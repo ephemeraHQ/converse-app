@@ -22,7 +22,7 @@ import {
 } from "./utils/colors";
 import mmkv from "./utils/mmkv";
 import { DEFAULT_EMOJIS, RECENT_EMOJI_STORAGE_KEY } from "./utils/reactions";
-import { initSentry } from "./utils/sentry";
+import { initSentry, sentryTrackError } from "./utils/sentry";
 import { useRecentPicksPersistence } from "./vendor/rn-emoji-keyboard";
 
 configureCoinbase({
@@ -55,7 +55,9 @@ export default function App() {
         setRefactoMigrationDone(true);
       })
       .catch((e) => {
-        console.log(e);
+        sentryTrackError(e);
+        // This is still better than being stuck on home…
+        setRefactoMigrationDone(true);
       });
   }, []);
 
