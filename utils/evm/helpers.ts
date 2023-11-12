@@ -33,7 +33,7 @@ export const getETHBalance = async (signer: Signer) => {
 
 export const getUSDCBalance = async (signer: Signer) => {
   const contract = new ethers.Contract(
-    config.baseUSDCAddress,
+    config.USDCAddress,
     erc3009Abi,
     signer.provider
   );
@@ -56,7 +56,7 @@ export const getUSDCTransferAuthorization = async (
   recipientAddress: string
 ) => {
   const contract = new ethers.Contract(
-    config.baseUSDCAddress,
+    config.USDCAddress,
     erc3009Abi,
     signer.provider
   );
@@ -79,8 +79,8 @@ export const getUSDCTransferAuthorization = async (
   const domain = {
     name,
     version,
-    chainId: Number(config.privyChainId),
-    verifyingContract: config.baseUSDCAddress,
+    chainId: Number(config.transactionChainId),
+    verifyingContract: config.USDCAddress,
   };
   const value = {
     from: await signer.getAddress(),
@@ -117,7 +117,7 @@ export const usePrivySigner = (onboarding: boolean = false) => {
       provider
         .request({
           method: "wallet_switchEthereumChain",
-          params: [{ chainId: config.privyChainId }],
+          params: [{ chainId: config.transactionChainId }],
         })
         .then(() => {
           setHasSwitchedNetwork(true);

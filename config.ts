@@ -31,8 +31,8 @@ const defaultConfig = {
   web3StorageToken:
     "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJkaWQ6ZXRocjoweDBBOTAxOTI0ZTE1NzNhM2RCYzhjNDk3YzlmQ0Q1QzAwZmU3NDAyQUEiLCJpc3MiOiJ3ZWIzLXN0b3JhZ2UiLCJpYXQiOjE2ODc4MDU0MTUxMDYsIm5hbWUiOiJDb252ZXJzZSBUZXN0In0.5ItNFvSEsXpv4NYG1Uwbw9mL5dVzNQeXefOkjQht3ns",
   privyAppId: "cloh5bn1p00q4l50gcg0g1mix",
-  privyChainId: "0x14A33", // Base Goerli
-  baseUSDCAddress: "0x31D3A7711a74b4Ec970F50c3eaf1ee47ba803A95", // Base Goerli
+  transactionChainId: "0x89", // Polygon Mumbai
+  USDCAddress: "0x3c499c542cEF5E3811e1192ce70d8cC03d5c3359", // Polygon Mumbai USDC
 };
 
 const isAndroid = Platform.OS === "android";
