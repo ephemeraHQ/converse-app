@@ -69,6 +69,8 @@ export default function ChatInput() {
     <View style={styles.chatInputContainer}>
       <ChatAddAttachment />
       <TextInput
+        autoCorrect={isDesktop ? false : undefined}
+        autoComplete={isDesktop ? "off" : undefined}
         style={styles.chatInput}
         value={inputValue}
         // On desktop, we modified React Native RCTUITextView.m
