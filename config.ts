@@ -31,8 +31,8 @@ const defaultConfig = {
   web3StorageToken:
     "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJkaWQ6ZXRocjoweDBBOTAxOTI0ZTE1NzNhM2RCYzhjNDk3YzlmQ0Q1QzAwZmU3NDAyQUEiLCJpc3MiOiJ3ZWIzLXN0b3JhZ2UiLCJpYXQiOjE2ODc4MDU0MTUxMDYsIm5hbWUiOiJDb252ZXJzZSBUZXN0In0.5ItNFvSEsXpv4NYG1Uwbw9mL5dVzNQeXefOkjQht3ns",
   privyAppId: "cloh5bn1p00q4l50gcg0g1mix",
-  transactionChainId: "0x89", // Polygon Mumbai
-  USDCAddress: "0x3c499c542cEF5E3811e1192ce70d8cC03d5c3359", // Polygon Mumbai USDC
+  transactionChainId: "0x13881", // Polygon Mumbai
+  USDCAddress: "0x9999f7fea5938fd3b1e26a12c3f2fb024e194f97", // Polygon Mumbai USDC
 };
 
 const isAndroid = Platform.OS === "android";
@@ -83,6 +83,8 @@ const ENV = {
     ]),
     web3StorageToken:
       "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJkaWQ6ZXRocjoweGViMWU0NEJhYjU2MjYzYkI5Njk1OTVmYTk2RjU2MjRBOTUxRmJiNjUiLCJpc3MiOiJ3ZWIzLXN0b3JhZ2UiLCJpYXQiOjE2ODc4MDQ1ODIyMzMsIm5hbWUiOiJDb252ZXJzZSBBcHAifQ.S4FsNKkmFqp1OWhsxxauUTw82pKqCG3UXEjEYi1xvPM",
+    transactionChainId: "0x89", // Polygon Prod
+    USDCAddress: "0x3c499c542cEF5E3811e1192ce70d8cC03d5c3359", // Polygon Prod USDC
   },
 };
 
