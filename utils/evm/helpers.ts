@@ -82,7 +82,7 @@ export const getUSDCTransferAuthorization = async (
     chainId: Number(config.transactionChainId),
     verifyingContract: config.USDCAddress,
   };
-  const value = {
+  const dataToSign = {
     from: await signer.getAddress(),
     to: recipientAddress,
     value: ethers.utils.parseUnits(amountInUSDC, decimals),
@@ -91,11 +91,15 @@ export const getUSDCTransferAuthorization = async (
     nonce: getRandomHex(32),
   };
 
-  const signature = await (signer as any)._signTypedData(domain, types, value);
+  const signature = await (signer as any)._signTypedData(
+    domain,
+    types,
+    dataToSign
+  );
   const v = "0x" + signature.slice(130, 132);
   const r = signature.slice(0, 66);
   const s = "0x" + signature.slice(66, 130);
-  console.log({ ...value, v, r, s });
+  console.log({ ...dataToSign, v, r, s, value: dataToSign.value.toString() });
 };
 
 export const usePrivySigner = (onboarding: boolean = false) => {
