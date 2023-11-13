@@ -254,7 +254,8 @@ export function sortAndComputePreview(
         (!conversation.pending || conversation.messages.size > 0) &&
         topicsStatus[conversation.topic] !== "deleted" &&
         peersStatus[conversation.peerAddress.toLowerCase()] !== "blocked" &&
-        conversation.version !== "v1"
+        conversation.version !== "v1" &&
+        !conversation.topic.includes("\x00") // Forbidden character that breaks notifications
       ) {
         conversation.lastMessagePreview = conversationLastMessagePreview(
           conversation,
