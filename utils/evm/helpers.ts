@@ -29,7 +29,7 @@ export const usePrivySigner = (onboarding: boolean = false) => {
       provider
         .request({
           method: "wallet_switchEthereumChain",
-          params: [{ chainId: config.transactionChainId }],
+          params: [{ chainId: config.evm.transactionChainId }],
         })
         .then(() => {
           setHasSwitchedNetwork(true);
@@ -89,18 +89,6 @@ export default {
     ethers.utils.hexlify(str.length ? ethers.utils.toUtf8Bytes(str) : 0),
   sha3: ethers.utils.keccak256,
   verifyMessage: ethers.utils.verifyMessage,
-
-  currencyAmountToBigNumber: (amount: CurrencyAmount<any>) => {
-    const { decimals } = amount.currency;
-    const fixed = ethers.FixedNumber.from(amount.toExact());
-    const tokenScale = ethers.FixedNumber.from(
-      ethers.BigNumber.from(10).pow(decimals)
-    );
-    return ethers.BigNumber.from(
-      // have to remove trailing .0 "manually" :/
-      fixed.mulUnsafe(tokenScale).floor().toString().split(".")[0]
-    );
-  },
 
   randomHex: (length: number) => {
     const randomBytes = ethers.utils.randomBytes(length);
