@@ -1,6 +1,6 @@
-import "@ethersproject/shims";
 import { useEmbeddedWallet, usePrivy } from "@privy-io/expo";
-import { Signer, ethers } from "ethers";
+import { ethers } from "ethers";
+import "@ethersproject/shims";
 import { useState } from "react";
 
 import config from "../../config";
@@ -9,98 +9,6 @@ import {
   useCurrentAccount,
 } from "../../data/store/accountsStore";
 import { pick } from "../objects";
-import erc3009Abi from "./abis/erc3009.json";
-
-export const transferETH = async (
-  signer: Signer,
-  amountInEther: string,
-  recipientAddress: string
-) => {
-  const tx: ethers.providers.TransactionRequest = {
-    to: recipientAddress,
-    // Convert currency unit from ether to wei
-    value: ethers.utils.parseEther(amountInEther),
-    gasLimit: 100000,
-  };
-  const txObj = await signer.sendTransaction(tx);
-  console.log("txHash", txObj.hash);
-};
-
-export const getETHBalance = async (signer: Signer) => {
-  const balance = await signer.getBalance();
-  return ethers.utils.formatEther(balance);
-};
-
-export const getUSDCBalance = async (signer: Signer) => {
-  const contract = new ethers.Contract(
-    config.USDCAddress,
-    erc3009Abi,
-    signer.provider
-  );
-  const [balance, decimals] = await Promise.all([
-    contract.balanceOf(await signer.getAddress()),
-    contract.decimals(),
-  ]);
-  return ethers.utils.formatUnits(balance, decimals);
-};
-
-const getRandomHex = (length: number) => {
-  const randomBytes = ethers.utils.randomBytes(length);
-  const randomHex = ethers.utils.hexlify(randomBytes);
-  return randomHex;
-};
-
-export const getUSDCTransferAuthorization = async (
-  signer: Signer,
-  amountInUSDC: string,
-  recipientAddress: string
-) => {
-  const contract = new ethers.Contract(
-    config.USDCAddress,
-    erc3009Abi,
-    signer.provider
-  );
-  const [name, version, decimals] = await Promise.all([
-    contract.name(),
-    contract.version(),
-    contract.decimals(),
-  ]);
-
-  const types = {
-    TransferWithAuthorization: [
-      { name: "from", type: "address" },
-      { name: "to", type: "address" },
-      { name: "value", type: "uint256" },
-      { name: "validAfter", type: "uint256" },
-      { name: "validBefore", type: "uint256" },
-      { name: "nonce", type: "bytes32" },
-    ],
-  };
-  const domain = {
-    name,
-    version,
-    chainId: Number(config.transactionChainId),
-    verifyingContract: config.USDCAddress,
-  };
-  const dataToSign = {
-    from: await signer.getAddress(),
-    to: recipientAddress,
-    value: ethers.utils.parseUnits(amountInUSDC, decimals),
-    validAfter: 0,
-    validBefore: Math.floor(Date.now() / 1000) + 3600, // Valid for an hour
-    nonce: getRandomHex(32),
-  };
-
-  const signature = await (signer as any)._signTypedData(
-    domain,
-    types,
-    dataToSign
-  );
-  const v = "0x" + signature.slice(130, 132);
-  const r = signature.slice(0, 66);
-  const s = "0x" + signature.slice(66, 130);
-  console.log({ ...dataToSign, v, r, s, value: dataToSign.value.toString() });
-};
 
 export const usePrivySigner = (onboarding: boolean = false) => {
   const currentAccount = useCurrentAccount();
@@ -134,4 +42,69 @@ export const usePrivySigner = (onboarding: boolean = false) => {
     }
   }
   return undefined;
+};
+
+export default {
+  toWei: (value: string, units: ethers.BigNumberish) =>
+    ethers.utils.parseUnits(value, units),
+  // This converts a string representation from a value to a number of units, based on the number of decimals passed in
+  toDecimal: (value: string, decimals: number) =>
+    ethers.utils.parseUnits(value, decimals),
+  hexlify: ethers.utils.hexlify,
+  hexStripZeros: ethers.utils.hexStripZeros,
+  bigNumberify: ethers.BigNumber.from,
+  hexToNumberString: (num: number) =>
+    ethers.utils
+      .formatUnits(ethers.BigNumber.from(num), "wei")
+      .replace(".0", ""),
+  toChecksumAddress: ethers.utils.getAddress,
+  fromWei: (num: ethers.BigNumber, units: ethers.BigNumberish) => {
+    return ethers.utils
+      .formatUnits(ethers.BigNumber.from(num), units)
+      .replace(/\.0$/, "");
+  },
+  // This converts a string representation from a unit value to a higher base
+  fromDecimal: (num: string, decimals: number) => {
+    return ethers.utils
+      .formatUnits(ethers.BigNumber.from(num), decimals)
+      .replace(/\.0$/, "");
+  },
+  isInfiniteKeys: (value: string) => {
+    return ethers.BigNumber.from(value).eq(ethers.constants.MaxUint256);
+  },
+  isInfiniteDuration: (value: string) => {
+    return ethers.BigNumber.from(value).eq(ethers.constants.MaxUint256);
+  },
+  toNumber: (value: string) => {
+    return ethers.BigNumber.from(value).toNumber();
+  },
+  toRpcResultNumber: (value: number) => {
+    const num = ethers.utils.hexlify(ethers.BigNumber.from(value));
+    return ethers.utils.hexZeroPad(num, 32);
+  },
+  toRpcResultString: (str: string) => {
+    return str;
+  },
+  utf8ToHex: (str: string) =>
+    ethers.utils.hexlify(str.length ? ethers.utils.toUtf8Bytes(str) : 0),
+  sha3: ethers.utils.keccak256,
+  verifyMessage: ethers.utils.verifyMessage,
+
+  currencyAmountToBigNumber: (amount: CurrencyAmount<any>) => {
+    const { decimals } = amount.currency;
+    const fixed = ethers.FixedNumber.from(amount.toExact());
+    const tokenScale = ethers.FixedNumber.from(
+      ethers.BigNumber.from(10).pow(decimals)
+    );
+    return ethers.BigNumber.from(
+      // have to remove trailing .0 "manually" :/
+      fixed.mulUnsafe(tokenScale).floor().toString().split(".")[0]
+    );
+  },
+
+  randomHex: (length: number) => {
+    const randomBytes = ethers.utils.randomBytes(length);
+    const randomHex = ethers.utils.hexlify(randomBytes);
+    return randomHex;
+  },
 };
