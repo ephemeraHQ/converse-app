@@ -54,7 +54,12 @@ export const saveUser = async (address: string, privyAccountId?: string) => {
     return;
   }
   lastSaveUser[address] = now;
-  await api.post("/api/user", { address, privyAccountId });
+
+  await api.post(
+    "/api/user",
+    { address, privyAccountId }
+    // { headers: await getXmtpApiHeaders(address) },
+  );
 };
 
 export const userExists = async (address: string) => {
