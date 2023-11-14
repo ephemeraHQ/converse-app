@@ -9,6 +9,7 @@ import {
 } from "../data/store/profilesStore";
 import { Frens } from "../data/store/recommendationsStore";
 import { getXmtpApiHeaders } from "../utils/xmtpRN/client";
+import { TransferAuthorizationMessage } from "./evm/erc20";
 
 const api = axios.create({
   baseURL: config.apiURI,
@@ -230,6 +231,22 @@ export const getTopicsStatus = async (account: string) => {
     headers: await getXmtpApiHeaders(account),
   });
   return data as { [topic: string]: "deleted" | "consented" };
+};
+
+export const postUSDCTransferAuthorization = async (
+  account: string,
+  message: TransferAuthorizationMessage,
+  signature: string
+) => {
+  const { data } = await api.post(
+    "/api/evm/transferWithAuthorization",
+    { message, signature },
+    {
+      headers: await getXmtpApiHeaders(account),
+    }
+  );
+  console.log({ data });
+  return data;
 };
 
 export default api;

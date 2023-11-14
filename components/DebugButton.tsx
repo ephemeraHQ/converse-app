@@ -14,12 +14,9 @@ import {
   getAccountsList,
   useCurrentAccount,
 } from "../data/store/accountsStore";
-import {
-  getETHBalance,
-  getUSDCBalance,
-  getUSDCTransferAuthorization,
-  usePrivySigner,
-} from "../utils/evm/helpers";
+import { postUSDCTransferAuthorization } from "../utils/api";
+import { getTransferAuthorization } from "../utils/evm/erc20";
+import { usePrivySigner } from "../utils/evm/helpers";
 import { deleteXmtpKey } from "../utils/keychain";
 import { logout } from "../utils/logout";
 import mmkv from "../utils/mmkv";
@@ -49,55 +46,18 @@ const DebugButton = forwardRef((props, ref) => {
       const methods: any = {
         Balance: async () => {
           if (embeddedWallet.status === "connected" && privySigner) {
-            const ethBalance = await getETHBalance(privySigner);
-            const usdcBalance = await getUSDCBalance(privySigner);
-            console.log({ ethBalance, usdcBalance });
-            await getUSDCTransferAuthorization(
-              privySigner,
-              "1",
-              "0xf9a3BB070c1f9b3186A547DeD991BeD04a289C5B"
+            const result = await getTransferAuthorization(
+              config.USDCAddress,
+              "1000000",
+              "0x2376e9C7C604D1827bA9aCb1293Dc8b4DA2f0DB3",
+              privySigner
             );
-            // const provider = embeddedWallet.provider;
-            // const accounts = await provider.request({
-            //   method: "eth_requestAccounts",
-            // });
-            // const balance = await getETHBalance(accounts[0]);
-            // console.log(balance);
-            // const balance = await getETHBalance(privySigner);
-            // console.log(balance);
-            // const r = await provider.request({
-            //   method: "eth_getBalance",
-            //   params: ["0x45e5c6d3e7d833953ae70927513644d7e3c60e44", "latest"],
-            // });
-            // console.log({r});
-            // const signed = await privySigner.sendUncheckedTransaction({
-            //   from: accounts[0],
-            //   to: "0x6b55F2bF3Ba4852708A6158d0E4c8372F1096F4B",
-            //   value: "1",
-            //   gasLimit: 1542750,
-            // });
-            // console.log(signed);
-            // const response = await provider.request({
-            //   method: "eth_sendTransaction",
-            //   params: [
-            //     {
-            //       from: accounts[0],
-            //       to: "0x6b55F2bF3Ba4852708A6158d0E4c8372F1096F4B",
-            //       value: "1",
-            //     },
-            //   ],
-            // });
-            // const walletClient = createWalletClient({
-            //   // Replace this with your desired network that you imported from viem
-            //   chain: baseGoerli,
-            //   transport: custom(provider),
-            // });
-            // const hash = await walletClient.sendTransaction({
-            //   account: walletClient,
-            //   to: "0x6b55F2bF3Ba4852708A6158d0E4c8372F1096F4B",
-            //   value: 1000000000000000000n,
-            // });
-            // console.log(hash);
+
+            await postUSDCTransferAuthorization(
+              currentAccount(),
+              result.message,
+              result.signature
+            );
           }
         },
         "Export db file": async () => {
