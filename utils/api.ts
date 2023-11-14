@@ -45,7 +45,7 @@ api.interceptors.response.use(
 
 const lastSaveUser: { [address: string]: number } = {};
 
-export const saveUser = async (address: string) => {
+export const saveUser = async (address: string, privyAccountId?: string) => {
   const now = new Date().getTime();
   const last = lastSaveUser[address] || 0;
   if (now - last < 3000) {
@@ -54,7 +54,7 @@ export const saveUser = async (address: string) => {
     return;
   }
   lastSaveUser[address] = now;
-  await api.post("/api/user", { address });
+  await api.post("/api/user", { address, privyAccountId });
 };
 
 export const userExists = async (address: string) => {
