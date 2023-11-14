@@ -237,7 +237,7 @@ export const postUSDCTransferAuthorization = async (
   account: string,
   message: TransferAuthorizationMessage,
   signature: string
-) => {
+): Promise<string> => {
   const { data } = await api.post(
     "/api/evm/transferWithAuthorization",
     { message, signature },
@@ -245,8 +245,7 @@ export const postUSDCTransferAuthorization = async (
       headers: await getXmtpApiHeaders(account),
     }
   );
-  console.log({ data });
-  return data;
+  return data.txHash;
 };
 
 export default api;

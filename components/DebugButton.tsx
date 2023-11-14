@@ -46,18 +46,25 @@ const DebugButton = forwardRef((props, ref) => {
       const methods: any = {
         Balance: async () => {
           if (embeddedWallet.status === "connected" && privySigner) {
+            const now = new Date().getTime();
             const result = await getTransferAuthorization(
-              config.USDCAddress,
+              config.evm.USDC.contractAddress,
               "1000000",
               "0x2376e9C7C604D1827bA9aCb1293Dc8b4DA2f0DB3",
               privySigner
             );
 
-            await postUSDCTransferAuthorization(
+            const txHash = await postUSDCTransferAuthorization(
               currentAccount(),
               result.message,
               result.signature
             );
+
+            const receipt = await privySigner.provider.waitForTransaction(
+              txHash
+            );
+            console.log(receipt.status === 1);
+            console.log(`Took ${(new Date().getTime() - now) / 1000} seconds`);
           }
         },
         "Export db file": async () => {

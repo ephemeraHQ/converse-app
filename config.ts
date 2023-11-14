@@ -31,8 +31,14 @@ const defaultConfig = {
   web3StorageToken:
     "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJkaWQ6ZXRocjoweDBBOTAxOTI0ZTE1NzNhM2RCYzhjNDk3YzlmQ0Q1QzAwZmU3NDAyQUEiLCJpc3MiOiJ3ZWIzLXN0b3JhZ2UiLCJpYXQiOjE2ODc4MDU0MTUxMDYsIm5hbWUiOiJDb252ZXJzZSBUZXN0In0.5ItNFvSEsXpv4NYG1Uwbw9mL5dVzNQeXefOkjQht3ns",
   privyAppId: "cloh5bn1p00q4l50gcg0g1mix",
-  transactionChainId: "0x13881", // Polygon Mumbai
-  USDCAddress: "0xe6b8a5CF854791412c1f6EFC7CAf629f5Df1c747", // Polygon Mumbai USDC
+  evm: {
+    transactionChainId: "0x13881", // Polygon Mumbai
+    USDC: {
+      contractAddress: "0xe6b8a5CF854791412c1f6EFC7CAf629f5Df1c747", // Polygon Mumbai USDC
+      name: "Mumbai USD Coin",
+      version: "2",
+    },
+  },
 };
 
 const isAndroid = Platform.OS === "android";
@@ -83,8 +89,14 @@ const ENV = {
     ]),
     web3StorageToken:
       "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJkaWQ6ZXRocjoweGViMWU0NEJhYjU2MjYzYkI5Njk1OTVmYTk2RjU2MjRBOTUxRmJiNjUiLCJpc3MiOiJ3ZWIzLXN0b3JhZ2UiLCJpYXQiOjE2ODc4MDQ1ODIyMzMsIm5hbWUiOiJDb252ZXJzZSBBcHAifQ.S4FsNKkmFqp1OWhsxxauUTw82pKqCG3UXEjEYi1xvPM",
-    transactionChainId: "0x89", // Polygon Prod
-    USDCAddress: "0x3c499c542cEF5E3811e1192ce70d8cC03d5c3359", // Native Polygon Prod USDC (or Bridged 0x2791bca1f2de4661ed88a30c99a7a9449aa84174)
+    evm: {
+      transactionChainId: "0x89", // Polygon Prod
+      USDC: {
+        contractAddress: "0x3c499c542cEF5E3811e1192ce70d8cC03d5c3359", // Native Polygon Prod USDC (or Bridged 0x2791bca1f2de4661ed88a30c99a7a9449aa84174)
+        name: "Mumbai USD Coin",
+        version: "2", // Probably 1 for 0x2791bca1f2de4661ed88a30c99a7a9449aa84174
+      },
+    },
   },
 };
 

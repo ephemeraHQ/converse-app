@@ -99,29 +99,38 @@ const getDomain = async (
   erc20ContractAddress: string,
   provider: ethers.providers.Provider
 ) => {
-  const contract = new ethers.Contract(
-    erc20ContractAddress,
-    erc20abi,
-    provider
-  );
-
-  let version = "2"; // default to 1 because USDC uses it
-  try {
-    version = await contract.version();
-  } catch (error) {
-    console.warn(
-      `We could not retrieve the version of ${erc20ContractAddress} using the version() method. Defaulting to ${version}`
+  let version = "1";
+  let name = "";
+  if (
+    erc20ContractAddress.toLowerCase() ===
+    config.evm.USDC.contractAddress.toLowerCase()
+  ) {
+    // Useful to gain a bit of precious time
+    version = config.evm.USDC.version;
+    name = config.evm.USDC.name;
+  } else {
+    const contract = new ethers.Contract(
+      erc20ContractAddress,
+      erc20abi,
+      provider
     );
+    try {
+      version = await contract.version();
+    } catch (error) {
+      console.warn(
+        `We could not retrieve the version of ${erc20ContractAddress} using the version() method. Defaulting to ${version}`
+      );
+    }
+    name = await contract.name();
   }
-
-  const name = await contract.name();
 
   // Bridged tokens on Polygon do not use EIP-3009
   // Currently we use a bridged one on Mumbai but not Polygon mainnet (might change)
   // https://ethereum.stackexchange.com/questions/141968/usdc-eip-3009-ethereum-and-polygon-code-mismatches
   if (
     chainId === 80001 &&
-    erc20ContractAddress.toLowerCase() === config.USDCAddress.toLowerCase()
+    erc20ContractAddress.toLowerCase() ===
+      config.evm.USDC.contractAddress.toLowerCase()
   ) {
     return {
       name,
