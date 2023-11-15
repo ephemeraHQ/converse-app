@@ -4,6 +4,7 @@ import { persist, createJSONStorage } from "zustand/middleware";
 
 import { removeLogoutTask } from "../../utils/logout";
 import mmkv, { zustandMMKVStorage } from "../../utils/mmkv";
+import { refreshProfileForAddress } from "../helpers/profiles/profilesUpdate";
 import { ChatStoreType, initChatStore } from "./chatStore";
 import { ProfilesStoreType, initProfilesStore } from "./profilesStore";
 import {
@@ -82,6 +83,11 @@ export const useAccountsStore = create<AccountsStoreStype>()(
         set((state) => {
           const privyAccountId = { ...state.privyAccountId };
           privyAccountId[account] = id;
+
+          // Fetch already existing userNames from api by refreshing profile
+          // @note this should go maybe elsewhere
+          refreshProfileForAddress(account, account);
+
           return { privyAccountId };
         }),
       databaseId: {},
