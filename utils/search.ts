@@ -3,6 +3,7 @@ import {
   FarcasterUsername,
   LensHandle,
   UnstoppableDomain,
+  UserName,
   ProfileByAddress,
 } from "../data/store/profilesStore";
 
@@ -20,6 +21,13 @@ export const getMatchedPeerAddresses = (
       }
       return false;
     };
+    if (
+      profile?.socials?.userNames?.some((userName: UserName) =>
+        checkMatch(userName.name)
+      )
+    ) {
+      continue;
+    }
     if (
       profile?.socials?.ensNames?.some((ens: EnsName) => checkMatch(ens.name))
     ) {

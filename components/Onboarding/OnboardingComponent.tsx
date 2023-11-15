@@ -84,7 +84,10 @@ export default function OnboardingComponent({
               <Button
                 title={primaryButtonText}
                 variant="primary"
-                style={[styles.primaryButton]}
+                style={[
+                  styles.primaryButton,
+                  { marginBottom: !backButtonText ? 53 : 21 },
+                ]}
                 onPress={primaryButtonAction}
               />
             )}

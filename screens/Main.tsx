@@ -8,15 +8,19 @@ import {
 } from "react-native";
 
 import ChatSendAttachment from "../components/Chat/ChatSendAttachment";
+import UsernameSelector from "../components/Onboarding/UsernameSelector";
 import ActionSheetStateHandler from "../components/StateHandlers/ActionSheetStateHandler";
 import HydrationStateHandler from "../components/StateHandlers/HydrationStateHandler";
 import InitialStateHandler from "../components/StateHandlers/InitialStateHandler";
 import MainIdentityStateHandler from "../components/StateHandlers/MainIdentityStateHandler";
 import NetworkStateHandler from "../components/StateHandlers/NetworkStateHandler";
 import NotificationsStateHandler from "../components/StateHandlers/NotificationsStateHandler";
+import { refreshProfileForAddress } from "../data/helpers/profiles/profilesUpdate";
 import {
   useCurrentAccount,
+  loggedWithPrivy,
   useSettingsStore,
+  useProfilesStore,
 } from "../data/store/accountsStore";
 import { useAppStore } from "../data/store/appStore";
 import { useOnboardingStore } from "../data/store/onboardingStore";
@@ -31,6 +35,11 @@ import Onboarding from "./Onboarding";
 export default function Main() {
   const colorScheme = useColorScheme();
   const userAddress = useCurrentAccount();
+  const socials = useProfilesStore((s) =>
+    userAddress ? s.profiles[userAddress]?.socials : undefined
+  );
+  const currentUserName = socials?.userNames?.find((e) => e.isPrimary)?.name;
+
   const { resetOnboarding, addingNewAccount } = useOnboardingStore((s) =>
     pick(s, ["resetOnboarding", "addingNewAccount"])
   );
@@ -87,6 +96,14 @@ export default function Main() {
 
   let screenToShow = undefined;
 
+  // @todo move this away from main
+  const setUserName = async (name: string) => {
+    if (userAddress) {
+      // Fetch profile incl. the new user name from the API
+      await refreshProfileForAddress(userAddress, userAddress);
+    }
+  };
+
   if (splashScreenHidden) {
     if (!userAddress || addingNewAccount) {
       screenToShow = <Onboarding />;
@@ -97,6 +114,8 @@ export default function Main() {
           Platform.OS === "android"))
     ) {
       screenToShow = <NotificationsScreen />;
+    } else if (loggedWithPrivy() && !currentUserName) {
+      screenToShow = <UsernameSelector onSuccess={setUserName} />;
     } else if (Platform.OS === "android") {
       // On Android the whole navigation is wrapped in a drawler
       // layout to be able to display the menu

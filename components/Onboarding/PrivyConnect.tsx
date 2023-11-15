@@ -14,6 +14,8 @@ import * as RNLocalize from "react-native-localize";
 import { OtpInput, OtpInputRef } from "react-native-otp-entry";
 import PhoneInput from "react-native-phone-number-input";
 
+import { refreshProfileForAddress } from "../../data/helpers/profiles/profilesUpdate";
+import { currentAccount } from "../../data/store/accountsStore";
 import { useOnboardingStore } from "../../data/store/onboardingStore";
 import {
   backgroundColor,
@@ -84,6 +86,10 @@ export default function PrivyConnect() {
         Alert.alert("The code you entered is not valid, please try again");
         otpInputRef.current?.clear();
       } else {
+        // Fetch already existing userNames from api by refreshing profile
+        const account = currentAccount();
+        await refreshProfileForAddress(account, account);
+
         setPrivyAccountId(user.user.id);
       }
     },

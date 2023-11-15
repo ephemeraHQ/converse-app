@@ -6,6 +6,7 @@ import {
   FarcasterUsername,
   LensHandle,
   UnstoppableDomain,
+  UserName,
 } from "../data/store/profilesStore";
 import { Frens } from "../data/store/recommendationsStore";
 import { getXmtpApiHeaders } from "../utils/xmtpRN/client";
@@ -157,6 +158,7 @@ type Profile = {
   lensHandles?: LensHandle[];
   farcasterUsernames?: FarcasterUsername[];
   unstoppableDomains?: UnstoppableDomain[];
+  userNames?: UserName[];
 };
 
 export const getProfilesForAddresses = async (
