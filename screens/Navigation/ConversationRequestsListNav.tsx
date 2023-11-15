@@ -1,6 +1,8 @@
 import React from "react";
+import { Platform } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 
+import AndroidBackAction from "../../components/AndroidBackAction";
 import ConversationFlashList from "../../components/ConversationFlashList";
 import { useChatStore } from "../../data/store/accountsStore";
 import { pick } from "../../utils/objects";
@@ -13,9 +15,13 @@ export default function ConversationRequestsListNav() {
   return (
     <NativeStack.Screen
       name="ChatsRequests"
-      options={() => ({
+      options={({ navigation }) => ({
         animation: navigationAnimation,
         headerTitle: "Requests",
+        headerLeft:
+          Platform.OS === "ios"
+            ? undefined
+            : () => <AndroidBackAction navigation={navigation} />,
       })}
     >
       {(navigationProps) => (
