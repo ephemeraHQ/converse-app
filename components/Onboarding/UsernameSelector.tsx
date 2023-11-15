@@ -59,7 +59,13 @@ export const UsernameSelector: FC<UsernameSelectorProps> = ({ onDismiss }) => {
       setErrorMessage(message);
       setIsLoading(false);
 
-      console.error("Error in UsernameSelector:", message, userAddress);
+      // Set this as an error so it's logged in sentry
+      console.error(
+        "Error in UsernameSelector:",
+        message,
+        userAddress,
+        username
+      );
     }
   };
 
