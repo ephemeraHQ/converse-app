@@ -75,7 +75,11 @@ export const updateProfilesForConversations = async (
         const newUnsDomain = profilesByAddress[
           conversation.peerAddress
         ].unstoppableDomains?.find((e) => e.isPrimary)?.domain;
-        const newTitle = newLensHandle || newEnsName || newUnsDomain;
+        const newUserName = profilesByAddress[
+          conversation.peerAddress
+        ].userNames?.find((e) => e.isPrimary)?.name;
+        const newTitle =
+          newLensHandle || newUserName || newEnsName || newUnsDomain;
         if (newTitle !== currentTitle) {
           updated = true;
         }

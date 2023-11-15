@@ -116,9 +116,12 @@ const setupAndSaveConversations = async (
     const unsDomain =
       profileSocials?.unstoppableDomains?.find((e) => e.isPrimary)?.domain ||
       null;
+    const userName =
+      profileSocials?.ensNames?.find((e) => e.isPrimary)?.name || null;
 
-    // If this is a lens convo we show lens, if not ENS
-    conversation.conversationTitle = lensHandle || ensName || unsDomain;
+    // If this is a lens convo we show lens, if not, userName
+    conversation.conversationTitle =
+      lensHandle || userName || ensName || unsDomain;
     conversation.readUntil =
       conversation.readUntil ||
       alreadyConversationInDbWithTopic?.readUntil ||

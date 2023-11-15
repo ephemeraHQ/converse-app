@@ -53,7 +53,9 @@ export default function ChatMessageReactions({ message, reactions }: Props) {
       const ensName = socials?.ensNames?.find((e) => e.isPrimary)?.name;
       const unsDomain = socials?.unstoppableDomains?.find((d) => d.isPrimary)
         ?.domain;
-      const peer = ensName || unsDomain || shortAddress(peerAddress);
+      const userName = socials?.userNames?.find((e) => e.isPrimary)?.name;
+      const peer =
+        userName || ensName || unsDomain || shortAddress(peerAddress);
       methods[
         `${getReactionContent(r)} ${fromMe ? "you - tap to remove" : peer}`
       ] = () => {

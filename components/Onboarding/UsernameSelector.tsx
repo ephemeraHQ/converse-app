@@ -25,10 +25,14 @@ const api = axios.create({
 });
 
 interface UsernameSelectorProps {
-  onDismiss: () => void;
+  onDismiss?: () => void;
+  onSuccess: (name: string) => void;
 }
 
-export const UsernameSelector: FC<UsernameSelectorProps> = ({ onDismiss }) => {
+export const UsernameSelector: FC<UsernameSelectorProps> = ({
+  onDismiss,
+  onSuccess,
+}) => {
   const [username, setUsername] = useState<string>("");
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
@@ -38,7 +42,7 @@ export const UsernameSelector: FC<UsernameSelectorProps> = ({ onDismiss }) => {
 
   const handleDismiss = () => {
     // Only available if presented as a modal, outside of the Privy signup flow
-    onDismiss();
+    if (onDismiss) onDismiss();
   };
 
   const handleContinue = async () => {
@@ -52,7 +56,8 @@ export const UsernameSelector: FC<UsernameSelectorProps> = ({ onDismiss }) => {
         );
         setIsLoading(false);
         console.log("User name set:", data.message);
-        onDismiss();
+        onSuccess(username);
+        if (onDismiss) onDismiss();
       }
     } catch (error: any) {
       const message = error.response?.data?.error || "Unknown error occurred";
@@ -75,7 +80,7 @@ export const UsernameSelector: FC<UsernameSelectorProps> = ({ onDismiss }) => {
       picto="person"
       primaryButtonText="Continue"
       primaryButtonAction={handleContinue}
-      backButtonText="Back"
+      backButtonText={onDismiss ? "Back" : ""}
       backButtonAction={handleDismiss}
       shrinkWithKeyboard
       isLoading={isLoading}

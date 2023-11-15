@@ -102,7 +102,8 @@ export const xmtpConversationFromDb = (
   const ensName = socials?.ensNames?.find((e) => e.isPrimary)?.name;
   const unsDomain = socials?.unstoppableDomains?.find((d) => d.isPrimary)
     ?.domain;
-  const conversationTitle = lensHandle || ensName || unsDomain;
+  const userName = socials?.userNames?.find((e) => e.isPrimary)?.name;
+  const conversationTitle = lensHandle || userName || ensName || unsDomain;
   const hasOneMessageFromMe = !!dbConversation.messages?.find(
     (m) => m.senderAddress === account
   );
