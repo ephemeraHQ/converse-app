@@ -166,8 +166,8 @@ export default function ProfileScreen({
       socials?.lensHandles || [],
       (l) => `lens-${l.handle}`,
       (l) => l.name || l.handle,
-      (l) => `Lens handle: ${l.handle.replace(".lens", "")}`,
-      (l) => `https://hey.xyz/u/${l.handle.replace(".lens", "")}`,
+      (l) => `Lens handle: ${l.handle.replace(/\.lens$/, "")}`,
+      (l) => `https://hey.xyz/u/${l.handle.replace(/\.lens$/, "")}`,
       (l) => l.profilePictureURI
     ),
     ...getSocialItemsFromArray(
