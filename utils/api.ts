@@ -123,6 +123,13 @@ export const getPeersStatus = async (account: string) => {
   return data as { [peerAddress: string]: "blocked" | "consented" };
 };
 
+export const resolveUserName = async (
+  name: string
+): Promise<string | undefined> => {
+  const { data } = await api.get("/api/profile/username", { params: { name } });
+  return data.address;
+};
+
 export const resolveEnsName = async (
   name: string
 ): Promise<string | undefined> => {
