@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import { PixelRatio, TextInput } from "react-native";
+import { PixelRatio, TextInput, Dimensions } from "react-native";
 
 import { getProfilesStore, useAccountsList } from "../data/store/accountsStore";
 import { XmtpConversation } from "../data/store/chatStore";
@@ -12,6 +12,44 @@ export const shortAddress = (address: string) =>
         address.length
       )}`
     : address || "";
+
+export const shortDomainMiddle = (domain: string | undefined): string => {
+  if (!domain) return "";
+
+  const screenWidth = Dimensions.get("window").width;
+  let maxLength = 15;
+
+  // For larger screens
+  if (screenWidth > 400) {
+    maxLength = 20;
+  }
+
+  if (domain.length <= maxLength) {
+    return domain;
+  }
+
+  const frontChars = Math.ceil(maxLength / 2);
+  const backChars = Math.floor(maxLength / 2) - 3;
+
+  return `${domain.slice(0, frontChars)}...${domain.slice(-backChars)}`;
+};
+
+export const shortDomainTail = (domain: string | undefined): string => {
+  if (!domain) return "";
+
+  const screenWidth = Dimensions.get("window").width;
+  let maxLength = 15;
+
+  if (screenWidth > 400) {
+    maxLength = 18;
+  }
+
+  if (domain.length <= maxLength) {
+    return domain;
+  }
+
+  return `${domain.slice(0, maxLength - 3)}...`;
+};
 
 export const addressPrefix = (address: string) =>
   (address && address.length >= 6 ? address.slice(0, 6) : address) || "";
@@ -44,7 +82,12 @@ export const getReadableProfile = (account: string, address: string) => {
     .getState()
     .profiles[address]?.socials.unstoppableDomains?.find((e) => e.isPrimary)
     ?.domain;
-  return primaryUserName || primaryENS || primaryUns || shortAddress(account);
+  return (
+    shortDomainTail(primaryUserName) ||
+    primaryENS ||
+    primaryUns ||
+    shortAddress(account)
+  );
 };
 
 export const useAccountsProfiles = () => {
