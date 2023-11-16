@@ -1,4 +1,4 @@
-import React, { useState, FC } from "react";
+import React, { useState } from "react";
 import {
   View,
   Text,
@@ -8,6 +8,7 @@ import {
   Platform,
 } from "react-native";
 
+import { refreshProfileForAddress } from "../../data/helpers/profiles/profilesUpdate";
 import { useCurrentAccount } from "../../data/store/accountsStore";
 import { claimUserName } from "../../utils/api";
 import {
@@ -19,15 +20,7 @@ import {
 import { sentryTrackError } from "../../utils/sentry";
 import OnboardingComponent from "./OnboardingComponent";
 
-interface UsernameSelectorProps {
-  onDismiss?: () => void;
-  onSuccess: (name: string) => void;
-}
-
-export const UsernameSelector: FC<UsernameSelectorProps> = ({
-  onDismiss,
-  onSuccess,
-}) => {
+export const UsernameSelector = () => {
   const [username, setUsername] = useState<string>("");
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
@@ -35,19 +28,12 @@ export const UsernameSelector: FC<UsernameSelectorProps> = ({
   const colorScheme = useColorScheme();
   const styles = useStyles(colorScheme, errorMessage);
 
-  const handleDismiss = () => {
-    // Only available if presented as a modal, outside of the Privy signup flow
-    if (onDismiss) onDismiss();
-  };
-
   const handleContinue = async () => {
     try {
       setIsLoading(true);
       if (userAddress) {
-        const data = await claimUserName(username, userAddress);
-        console.log("User name set:", data);
-        onSuccess(username);
-        if (onDismiss) onDismiss();
+        await claimUserName(username, userAddress);
+        await refreshProfileForAddress(userAddress, userAddress);
       }
     } catch (error: any) {
       const message = error.response?.data?.error || "Unknown error occurred";
@@ -70,8 +56,6 @@ export const UsernameSelector: FC<UsernameSelectorProps> = ({
       picto="person"
       primaryButtonText="Continue"
       primaryButtonAction={handleContinue}
-      backButtonText={onDismiss ? "Back" : ""}
-      backButtonAction={handleDismiss}
       shrinkWithKeyboard
       isLoading={isLoading}
     >

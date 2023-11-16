@@ -15,7 +15,6 @@ import InitialStateHandler from "../components/StateHandlers/InitialStateHandler
 import MainIdentityStateHandler from "../components/StateHandlers/MainIdentityStateHandler";
 import NetworkStateHandler from "../components/StateHandlers/NetworkStateHandler";
 import NotificationsStateHandler from "../components/StateHandlers/NotificationsStateHandler";
-import { refreshProfileForAddress } from "../data/helpers/profiles/profilesUpdate";
 import {
   useCurrentAccount,
   loggedWithPrivy,
@@ -96,14 +95,6 @@ export default function Main() {
 
   let screenToShow = undefined;
 
-  // @todo move this away from main
-  const setUserName = async (name: string) => {
-    if (userAddress) {
-      // Fetch profile incl. the new user name from the API
-      await refreshProfileForAddress(userAddress, userAddress);
-    }
-  };
-
   if (splashScreenHidden) {
     if (!userAddress || addingNewAccount) {
       screenToShow = <Onboarding />;
@@ -115,7 +106,7 @@ export default function Main() {
     ) {
       screenToShow = <NotificationsScreen />;
     } else if (loggedWithPrivy() && !currentUserName) {
-      screenToShow = <UsernameSelector onSuccess={setUserName} />;
+      screenToShow = <UsernameSelector />;
     } else if (Platform.OS === "android") {
       // On Android the whole navigation is wrapped in a drawler
       // layout to be able to display the menu
