@@ -107,19 +107,17 @@ const useStyles = (colorScheme: any, errorMessage: any) =>
   StyleSheet.create({
     usernameInputContainer: {
       width: "100%",
-      height: 130,
-      paddingHorizontal: 25,
+      paddingHorizontal: 32,
       marginTop: 50,
-      marginBottom: 20,
     },
     usernameInput: {
       width: "100%",
     },
     p: {
       textAlign: "center",
-      marginTop: 21,
-      marginLeft: 32,
-      marginRight: 32,
+      marginTop: 20,
+      marginLeft: 25,
+      marginRight: 25,
       ...Platform.select({
         default: {
           fontSize: 17,

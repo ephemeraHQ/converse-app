@@ -79,7 +79,7 @@ export default function OnboardingComponent({
           <>
             {subtitle && <Text style={styles.p}>{subtitle}</Text>}
             {children}
-            <View style={{ height: 32 }} />
+            <View style={{ height: 25 }} />
             {primaryButtonText && (
               <Button
                 title={primaryButtonText}
@@ -127,8 +127,8 @@ const useStyles = () => {
     picto: {
       ...Platform.select({
         default: {
-          marginTop: 124,
-          marginBottom: 98,
+          marginTop: 140,
+          marginBottom: 60,
         },
         android: {
           marginTop: 165,
