@@ -9,12 +9,9 @@ import {
   Platform,
   TouchableOpacity,
   View,
-  Modal,
-  Button,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-import { UsernameSelector } from "../components/Onboarding/UsernameSelector";
 import { showActionSheetWithOptions } from "../components/StateHandlers/ActionSheetStateHandler";
 import TableView, {
   TableViewItemType,
@@ -265,18 +262,6 @@ export default function ProfileScreen({
           />
         </>
       )}
-      <Button
-        title="Select my username"
-        onPress={toggleUsernameModal}
-        color={primaryColor(colorScheme)}
-      />
-      <Modal
-        animationType="slide"
-        transparent={false}
-        visible={isUsernameModalVisible}
-      >
-        <UsernameSelector onDismiss={toggleUsernameModal} />
-      </Modal>
       <View style={{ height: insets.bottom }} />
     </ScrollView>
   );
