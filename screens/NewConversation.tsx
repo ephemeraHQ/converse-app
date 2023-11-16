@@ -222,7 +222,7 @@ export default function NewConversation({
   const showRecommendations =
     !status.loading && value.length === 0 && recommendationsFrensCount > 0;
 
-  const inputPlaceholder = "0x, .eth, .lens, .fc, .cb.id, UD…";
+  const inputPlaceholder = ".converse.xyz, 0x, .eth, .lens, .fc, .cb.id, UD…";
 
   const getLastMessagePreview = useCallback(
     (c: XmtpConversation) => {
@@ -286,8 +286,8 @@ export default function NewConversation({
               (recommendationsFrensCount === 0 || value.length > 0) && (
                 <Text style={styles.message}>
                   <Text>
-                    Type the full address / domain of your contact (with .eth,
-                    .lens, .fc, .cb.id etc.)
+                    Type the full address/domain of your contact (with
+                    .converse.xyz, .eth, .lens, .fc, .cb.id…)
                   </Text>
                 </Text>
               )}
@@ -378,7 +378,7 @@ const useStyles = () => {
       ...Platform.select({
         default: {
           marginTop: 23,
-          paddingHorizontal: 18,
+          paddingHorizontal: 16,
         },
         android: {
           marginRight: 16,
