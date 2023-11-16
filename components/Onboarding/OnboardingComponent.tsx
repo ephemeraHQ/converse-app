@@ -88,24 +88,24 @@ export default function OnboardingComponent({
                 onPress={primaryButtonAction}
               />
             )}
-            {backButtonText && (
-              <Button
-                variant="text"
-                title={backButtonText}
-                textStyle={{ fontWeight: "600" }}
-                style={{
-                  marginBottom: 53,
-                  marginTop: primaryButtonText && !loading ? 0 : "auto",
-                }}
-                onPress={() => {
-                  setLoading(false);
-                  if (backButtonAction) {
-                    backButtonAction();
-                  }
-                }}
-              />
-            )}
           </>
+        )}
+        {backButtonText && (
+          <Button
+            variant="text"
+            title={backButtonText}
+            textStyle={{ fontWeight: "600" }}
+            style={{
+              marginBottom: 53,
+              marginTop: primaryButtonText && !loading ? 0 : "auto",
+            }}
+            onPress={() => {
+              setLoading(false);
+              if (backButtonAction) {
+                backButtonAction();
+              }
+            }}
+          />
         )}
       </ScrollView>
       {shrinkWithKeyboard && <Animated.View style={animatedStyle} />}
