@@ -102,6 +102,7 @@ export default function Main() {
       // layout to be able to display the menu
       screenToShow = (
         <DrawerLayoutAndroid
+          drawerBackgroundColor={backgroundColor(colorScheme)}
           ref={navigationDrawer}
           drawerWidth={Dimensions.get("screen").width * 0.77}
           renderNavigationView={() => <AccountsAndroid />}
