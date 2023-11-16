@@ -1,4 +1,3 @@
-import axios from "axios";
 import React, { useState, FC } from "react";
 import {
   View,
@@ -9,20 +8,15 @@ import {
   Platform,
 } from "react-native";
 
-import config from "../../config";
 import { useCurrentAccount } from "../../data/store/accountsStore";
+import { claimUserName } from "../../utils/api";
 import {
   textInputStyle,
   textPrimaryColor,
   textSecondaryColor,
   dangerColor,
 } from "../../utils/colors";
-import { getXmtpApiHeaders } from "../../utils/xmtpRN/client";
 import OnboardingComponent from "./OnboardingComponent";
-
-const api = axios.create({
-  baseURL: config.apiURI,
-});
 
 interface UsernameSelectorProps {
   onDismiss?: () => void;
@@ -49,13 +43,8 @@ export const UsernameSelector: FC<UsernameSelectorProps> = ({
     try {
       setIsLoading(true);
       if (userAddress) {
-        const { data } = await api.post(
-          "/api/profile/username",
-          { username, address: userAddress },
-          { headers: await getXmtpApiHeaders(userAddress) }
-        );
-        setIsLoading(false);
-        console.log("User name set:", data.message);
+        const data = await claimUserName(username, userAddress);
+        console.log("User name set:", data);
         onSuccess(username);
         if (onDismiss) onDismiss();
       }
