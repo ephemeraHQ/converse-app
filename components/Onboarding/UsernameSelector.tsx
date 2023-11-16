@@ -16,6 +16,7 @@ import {
   textSecondaryColor,
   dangerColor,
 } from "../../utils/colors";
+import { sentryTrackError } from "../../utils/sentry";
 import OnboardingComponent from "./OnboardingComponent";
 
 interface UsernameSelectorProps {
@@ -53,7 +54,7 @@ export const UsernameSelector: FC<UsernameSelectorProps> = ({
       setErrorMessage(message);
       setIsLoading(false);
 
-      // Set this as an error so it's logged in sentry
+      sentryTrackError(error);
       console.error(
         "Error in UsernameSelector:",
         message,
