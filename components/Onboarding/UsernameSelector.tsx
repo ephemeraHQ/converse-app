@@ -105,7 +105,6 @@ const useStyles = (colorScheme: any, errorMessage: any) =>
           color: errorMessage
             ? dangerColor(colorScheme)
             : textSecondaryColor(colorScheme),
-          maxWidth: 260,
         },
       }),
     },
