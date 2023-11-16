@@ -59,6 +59,7 @@ export const saveUser = async (address: string, privyAccountId?: string) => {
   await api.post(
     "/api/user",
     { address, privyAccountId }
+    // @todo make authenticated API calls
     // { headers: await getXmtpApiHeaders(address) },
   );
 };
