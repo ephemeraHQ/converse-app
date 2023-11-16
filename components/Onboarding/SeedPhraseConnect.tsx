@@ -43,9 +43,15 @@ export const getSignerFromSeedPhrase = async (mnemonic: string) => {
 };
 
 export default function SeedPhraseConnect() {
-  const { setLoading, setConnectionMethod, setSigner } = useOnboardingStore(
-    (s) => pick(s, ["setLoading", "setConnectionMethod", "setSigner"])
-  );
+  const { setLoading, setConnectionMethod, setSigner, setIsEphemeral } =
+    useOnboardingStore((s) =>
+      pick(s, [
+        "setLoading",
+        "setConnectionMethod",
+        "setSigner",
+        "setIsEphemeral",
+      ])
+    );
   const [seedPhrase, setSeedPhrase] = useState("");
   const colorScheme = useColorScheme();
   const textInputRef = useRef<TextInput | null>(null);
@@ -54,8 +60,15 @@ export default function SeedPhraseConnect() {
   const generateWallet = useCallback(async () => {
     setLoading(true);
     const signer = new Wallet(utils.randomPrivateKey());
+    setIsEphemeral(true);
     setSigner(signer);
-  }, [setLoading, setSigner]);
+  }, [setIsEphemeral, setLoading, setSigner]);
+
+  useEffect(() => {
+    return () => {
+      setIsEphemeral(false);
+    };
+  }, [setIsEphemeral]);
 
   const loginWithSeedPhrase = useCallback(
     async (mnemonic: string) => {
