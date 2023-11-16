@@ -103,6 +103,7 @@ export default function ProfileScreen({
   );
 
   const addressItems = [
+    ...getAddressItemsFromArray(socials?.userNames || [], "name", "name"),
     ...getAddressItemsFromArray(socials?.ensNames || [], "name", "name"),
     ...getAddressItemsFromArray(
       socials?.unstoppableDomains || [],
