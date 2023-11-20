@@ -1,7 +1,7 @@
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import React from "react";
-import { View, StyleSheet, useColorScheme, Platform, Text } from "react-native";
+import { View, StyleSheet, useColorScheme, Text } from "react-native";
 
 import {
   currentAccount,
@@ -14,7 +14,6 @@ import { blockPeers, consentToPeers } from "../../utils/api";
 import {
   actionSheetColors,
   backgroundColor,
-  tertiaryBackgroundColor,
   textPrimaryColor,
 } from "../../utils/colors";
 import { useConversationContext } from "../../utils/conversation";
@@ -106,10 +105,7 @@ const useStyles = () => {
   const colorScheme = useColorScheme();
   return StyleSheet.create({
     chatConsentContainer: {
-      backgroundColor:
-        Platform.OS === "android"
-          ? backgroundColor(colorScheme)
-          : tertiaryBackgroundColor(colorScheme),
+      backgroundColor: backgroundColor(colorScheme),
       flexDirection: "column",
       alignItems: "center",
       justifyContent: "center",

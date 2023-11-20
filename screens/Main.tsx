@@ -14,6 +14,7 @@ import InitialStateHandler from "../components/StateHandlers/InitialStateHandler
 import MainIdentityStateHandler from "../components/StateHandlers/MainIdentityStateHandler";
 import NetworkStateHandler from "../components/StateHandlers/NetworkStateHandler";
 import NotificationsStateHandler from "../components/StateHandlers/NotificationsStateHandler";
+import WalletsStateHandler from "../components/StateHandlers/WalletsStateHandler";
 import {
   useCurrentAccount,
   useSettingsStore,
@@ -82,6 +83,7 @@ export default function Main() {
       <MainIdentityStateHandler />
       <NotificationsStateHandler />
       <ActionSheetStateHandler />
+      <WalletsStateHandler />
     </>
   );
 

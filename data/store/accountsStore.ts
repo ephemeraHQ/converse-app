@@ -11,6 +11,7 @@ import {
   RecommendationsStoreType,
 } from "./recommendationsStore";
 import { initSettingsStore, SettingsStoreType } from "./settingsStore";
+import { initWalletStore, WalletStoreType } from "./walletStore";
 
 type AccountStoreType = {
   [K in keyof AccountStoreDataType]: UseBoundStore<
@@ -33,6 +34,7 @@ export const initStores = (account: string) => {
       settings: initSettingsStore(account),
       recommendations: initRecommendationsStore(account),
       chat: initChatStore(account),
+      wallet: initWalletStore(account),
     };
   }
 };
@@ -170,6 +172,7 @@ type AccountStoreDataType = {
   settings: SettingsStoreType;
   recommendations: RecommendationsStoreType;
   chat: ChatStoreType;
+  wallet: WalletStoreType;
 };
 
 const getAccountStore = (account: string) => {
@@ -188,6 +191,10 @@ export const useCurrentAccount = () => {
 
 export const loggedWithPrivy = () => {
   const account = currentAccount();
+  return isPrivyAccount(account);
+};
+
+export const isPrivyAccount = (account: string) => {
   return !!useAccountsStore.getState().privyAccountId[account];
 };
 
@@ -245,3 +252,7 @@ export const getRecommendationsStore = (account: string) =>
 
 export const useChatStore = currentAccountStoreHook("chat");
 export const getChatStore = (account: string) => getAccountStore(account).chat;
+
+export const useWalletStore = currentAccountStoreHook("wallet");
+export const getWalletStore = (account: string) =>
+  getAccountStore(account).wallet;

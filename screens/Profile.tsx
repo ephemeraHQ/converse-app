@@ -9,6 +9,7 @@ import {
   Platform,
   TouchableOpacity,
   View,
+  Text,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -21,12 +22,14 @@ import {
   TableViewImage,
   TableViewPicto,
 } from "../components/TableView/TableViewImage";
+import config from "../config";
 import {
   currentAccount,
   useCurrentAccount,
   useProfilesStore,
   useRecommendationsStore,
   useSettingsStore,
+  useWalletStore,
 } from "../data/store/accountsStore";
 import { blockPeers, consentToPeers } from "../utils/api";
 import {
@@ -36,6 +39,8 @@ import {
   primaryColor,
   textSecondaryColor,
 } from "../utils/colors";
+import { evmHelpers } from "../utils/evm/helpers";
+import { pick } from "../utils/objects";
 import { getIPFSAssetURI } from "../utils/thirdweb";
 import { NavigationParamList } from "./Navigation/Navigation";
 
@@ -44,6 +49,7 @@ export default function ProfileScreen({
   navigation,
 }: NativeStackScreenProps<NavigationParamList, "Profile">) {
   const userAddress = useCurrentAccount();
+  const { USDCBalance } = useWalletStore((s) => pick(s, ["USDCBalance"]));
   const colorScheme = useColorScheme();
   const styles = useStyles();
   const [copiedAddresses, setCopiedAddresses] = useState<{
@@ -172,11 +178,23 @@ export default function ProfileScreen({
     ),
   ];
 
+  const isMyProfile = peerAddress.toLowerCase() === userAddress?.toLowerCase();
+
   return (
     <ScrollView
       style={styles.profile}
       contentContainerStyle={styles.profileContent}
     >
+      {isMyProfile && (
+        <View>
+          <Text>
+            {evmHelpers
+              .fromDecimal(USDCBalance, config.evm.USDC.decimals)
+              .toString()}{" "}
+            USDC
+          </Text>
+        </View>
+      )}
       <TableView
         items={addressItems}
         title="ADDRESS"
@@ -190,7 +208,7 @@ export default function ProfileScreen({
           style={styles.tableView}
         />
       )}
-      {peerAddress.toLowerCase() !== userAddress?.toLowerCase() && (
+      {!isMyProfile && (
         <>
           {recommendationTags?.length && (
             <TableView

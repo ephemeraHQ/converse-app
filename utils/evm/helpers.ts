@@ -44,7 +44,7 @@ export const usePrivySigner = (onboarding: boolean = false) => {
   return undefined;
 };
 
-export default {
+export const evmHelpers = {
   toWei: (value: string, units: ethers.BigNumberish) =>
     ethers.utils.parseUnits(value, units),
   // This converts a string representation from a value to a number of units, based on the number of decimals passed in

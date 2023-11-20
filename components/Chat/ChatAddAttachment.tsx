@@ -12,10 +12,12 @@ import {
   Platform,
 } from "react-native";
 
+import AttachmentButtonDark from "../../assets/attachment-button-dark.svg";
+import AttachmentButtonLight from "../../assets/attachment-button.svg";
 import { useAccountsStore } from "../../data/store/accountsStore";
 import { useAppStore } from "../../data/store/appStore";
 import { uploadRemoteAttachment } from "../../utils/attachment";
-import { actionSheetColors, textSecondaryColor } from "../../utils/colors";
+import { actionSheetColors } from "../../utils/colors";
 import { useConversationContext } from "../../utils/conversation";
 import { executeAfterKeyboardClosed } from "../../utils/keyboard";
 import { sendMessage } from "../../utils/message";
@@ -25,13 +27,14 @@ import {
   encryptRemoteAttachment,
   serializeRemoteAttachmentMessageContent,
 } from "../../utils/xmtpRN/attachments";
-import Picto from "../Picto/Picto";
 import { showActionSheetWithOptions } from "../StateHandlers/ActionSheetStateHandler";
 
 export default function ChatAddAttachment() {
   const { conversation } = useConversationContext(["conversation"]);
   const currentAccount = useAccountsStore((s) => s.currentAccount);
   const colorScheme = useColorScheme();
+  const AttachmentButton =
+    colorScheme === "light" ? AttachmentButtonLight : AttachmentButtonDark;
   const styles = useStyles();
   const { mediaPreview, setMediaPreview } = useAppStore((s) =>
     pick(s, ["mediaPreview", "setMediaPreview"])
@@ -195,11 +198,7 @@ export default function ChatAddAttachment() {
       activeOpacity={0.4}
     >
       <View style={styles.attachmentButton}>
-        <Picto
-          picto="plus"
-          color={textSecondaryColor(colorScheme)}
-          size={Platform.OS === "android" ? 30 : 20}
-        />
+        <AttachmentButton />
       </View>
     </TouchableOpacity>
   );
@@ -212,10 +211,10 @@ const useStyles = () => {
       justifyContent: "center",
       alignItems: "flex-end",
       flexDirection: "row",
-      marginLeft: 12,
+      marginLeft: 16,
       ...Platform.select({
         default: {
-          paddingBottom: 24,
+          paddingBottom: 6,
           width: 27,
           height: 27,
         },
