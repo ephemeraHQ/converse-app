@@ -22,7 +22,6 @@ import { postUSDCTransferAuthorization } from "../../utils/api";
 import {
   actionSecondaryColor,
   backgroundColor,
-  chatInputBackgroundColor,
   dangerColor,
   itemSeparatorColor,
   textPrimaryColor,
@@ -232,8 +231,6 @@ export default function TransactionInput() {
                 {
                   color: transactionValue.valid
                     ? textPrimaryColor(colorScheme)
-                    : Platform.OS === "android"
-                    ? textSecondaryColor(colorScheme)
                     : actionSecondaryColor(colorScheme),
                 },
               ]}
@@ -261,11 +258,7 @@ export default function TransactionInput() {
                 setInputValue(t);
               }}
               placeholder="0"
-              placeholderTextColor={
-                Platform.OS === "android"
-                  ? textSecondaryColor(colorScheme)
-                  : actionSecondaryColor(colorScheme)
-              }
+              placeholderTextColor={actionSecondaryColor(colorScheme)}
               ref={transactionInputRef}
             />
           </View>
@@ -346,27 +339,24 @@ const useStyles = () => {
     moneyInputContainer: {
       flexDirection: "row",
       alignSelf: "center",
-      backgroundColor:
-        Platform.OS === "android"
-          ? chatInputBackgroundColor(colorScheme)
-          : backgroundColor(colorScheme),
+      backgroundColor: backgroundColor(colorScheme),
       height: 50,
       marginVertical: 6,
-      paddingLeft: Platform.OS === "android" ? 4 : 12,
-      paddingRight: Platform.OS === "android" ? 4 : 12,
-      borderBottomWidth: Platform.OS === "android" ? 0 : 0.5,
+      paddingLeft: 12,
+      paddingRight: 12,
+      borderBottomWidth: 0.5,
       borderColor: itemSeparatorColor(colorScheme),
     },
     moneyInputPrefix: {
-      fontSize: Platform.OS === "android" ? 16 : 34,
-      top: 4,
+      fontSize: 34,
+      top: Platform.OS === "ios" ? 4 : 1.5,
       marginRight: 10,
     },
     moneyInput: {
-      fontSize: Platform.OS === "android" ? 16 : 34,
+      fontSize: 34,
       color: textPrimaryColor(colorScheme),
       minWidth: 21,
-      lineHeight: 40,
+      lineHeight: Platform.OS === "android" ? 50 : 40,
     },
     rightButtonsContainer: { width: 46 },
     sendButton: {
