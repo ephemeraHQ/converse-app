@@ -2,7 +2,7 @@ import { ethers } from "ethers";
 
 import config from "../../config";
 import erc20abi from "./abis/erc20.json";
-import helpers from "./helpers";
+import { evmHelpers } from "./helpers";
 
 export const TransferWithAuthorizationTypes = {
   TransferWithAuthorization: [
@@ -26,7 +26,7 @@ export async function getErc20BalanceForAddress(
     provider
   );
   const balance = await contract.balanceOf(address);
-  return helpers.hexToNumberString(balance);
+  return evmHelpers.hexToNumberString(balance);
 }
 
 /**
@@ -38,6 +38,12 @@ export async function getErc20Decimals(
   erc20ContractAddress: string,
   provider: ethers.providers.Provider
 ) {
+  if (
+    erc20ContractAddress.toLowerCase() ===
+    config.evm.USDC.contractAddress.toLowerCase()
+  ) {
+    return config.evm.USDC.decimals;
+  }
   const contract = new ethers.Contract(
     erc20ContractAddress,
     erc20abi,
@@ -50,7 +56,7 @@ export async function getErc20Decimals(
     /** Some ERC20 contracts do not have the right decimals method. Defaults to 18 */
     return 18;
   }
-  return helpers.toNumber(decimals);
+  return evmHelpers.toNumber(decimals);
 }
 
 /**
@@ -171,7 +177,7 @@ export const getTransferAuthorization = async (
     value: amount,
     validAfter: 0,
     validBefore: Math.floor(Date.now() / 1000) + 3600,
-    nonce: helpers.randomHex(32),
+    nonce: evmHelpers.randomHex(32),
   };
   const signature = await signTransferAuthorization(
     erc20ContractAddress,

@@ -212,6 +212,8 @@ type ConversationContextType = {
   isBlockedPeer: boolean;
   onReadyToFocus: () => void;
   messageToPrefill: string;
+  transactionMode: boolean;
+  setTransactionMode: (b: boolean) => void;
 };
 
 export const ConversationContext = createContext<ConversationContextType>({
@@ -220,6 +222,8 @@ export const ConversationContext = createContext<ConversationContextType>({
   isBlockedPeer: false,
   onReadyToFocus: () => {},
   messageToPrefill: "",
+  transactionMode: false,
+  setTransactionMode: () => {},
 });
 
 export const useConversationContext = <K extends keyof ConversationContextType>(

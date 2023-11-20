@@ -37,6 +37,7 @@ const defaultConfig = {
       contractAddress: "0xe6b8a5CF854791412c1f6EFC7CAf629f5Df1c747", // Polygon Mumbai USDC
       name: "Mumbai USD Coin",
       version: "2",
+      decimals: 6,
     },
   },
 };
@@ -95,6 +96,7 @@ const ENV = {
         contractAddress: "0x3c499c542cEF5E3811e1192ce70d8cC03d5c3359", // Native Polygon Prod USDC (or Bridged 0x2791bca1f2de4661ed88a30c99a7a9449aa84174)
         name: "Mumbai USD Coin",
         version: "2", // Probably 1 for 0x2791bca1f2de4661ed88a30c99a7a9449aa84174
+        decimals: 6,
       },
     },
   },

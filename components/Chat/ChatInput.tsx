@@ -9,12 +9,12 @@ import {
 } from "react-native";
 
 import SendButton from "../../assets/send-button.svg";
+import { useLoggedWithPrivy } from "../../data/store/accountsStore";
 import {
   actionSecondaryColor,
   backgroundColor,
   chatInputBackgroundColor,
   itemSeparatorColor,
-  tertiaryBackgroundColor,
   textPrimaryColor,
   textSecondaryColor,
 } from "../../utils/colors";
@@ -24,17 +24,27 @@ import { converseEventEmitter } from "../../utils/events";
 import { sendMessage } from "../../utils/message";
 import { TextInputWithValue } from "../../utils/str";
 import ChatAddAttachment from "./ChatAddAttachment";
+import ChatSendMoney from "./ChatSendMoney";
 
 export default function ChatInput() {
-  const { conversation, inputRef, messageToPrefill } = useConversationContext([
-    "conversation",
-    "inputRef",
-    "messageToPrefill",
-  ]);
+  const { conversation, inputRef, transactionMode, messageToPrefill } =
+    useConversationContext([
+      "conversation",
+      "inputRef",
+      "messageToPrefill",
+      "transactionMode",
+    ]);
 
   const colorScheme = useColorScheme();
   const styles = useStyles();
   const [inputValue, setInputValue] = useState(messageToPrefill);
+  const loggedWithPrivy = useLoggedWithPrivy();
+
+  useEffect(() => {
+    if (transactionMode) {
+      setInputValue("");
+    }
+  }, [transactionMode]);
 
   useEffect(() => {
     if (inputRef.current) {
@@ -68,6 +78,7 @@ export default function ChatInput() {
   return (
     <View style={styles.chatInputContainer}>
       <ChatAddAttachment />
+      {loggedWithPrivy && <ChatSendMoney />}
       <TextInput
         autoCorrect={isDesktop ? false : undefined}
         autoComplete={isDesktop ? "off" : undefined}
@@ -130,10 +141,7 @@ const useStyles = () => {
   const colorScheme = useColorScheme();
   return StyleSheet.create({
     chatInputContainer: {
-      backgroundColor:
-        Platform.OS === "android"
-          ? backgroundColor(colorScheme)
-          : tertiaryBackgroundColor(colorScheme),
+      backgroundColor: backgroundColor(colorScheme),
       flexDirection: "row",
     },
     chatInput: {

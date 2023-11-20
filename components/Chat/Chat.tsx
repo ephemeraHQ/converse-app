@@ -28,6 +28,7 @@ import ChatConsent from "./ChatConsent";
 import ChatInput from "./ChatInput";
 import CachedChatMessage, { MessageToDisplay } from "./ChatMessage";
 import ChatPlaceholder from "./ChatPlaceholder";
+import TransactionInput from "./TransactionInput";
 
 const getListArray = (
   xmtpAddress?: string,
@@ -92,8 +93,13 @@ const getListArray = (
 };
 
 export default function Chat() {
-  const { conversation, isBlockedPeer, onReadyToFocus } =
-    useConversationContext(["conversation", "isBlockedPeer", "onReadyToFocus"]);
+  const { conversation, isBlockedPeer, onReadyToFocus, transactionMode } =
+    useConversationContext([
+      "conversation",
+      "isBlockedPeer",
+      "onReadyToFocus",
+      "transactionMode",
+    ]);
   const xmtpAddress = useCurrentAccount() as string;
   const peerSocials = useProfilesStore((s) =>
     conversation?.peerAddress
@@ -243,7 +249,8 @@ export default function Chat() {
               chatInputHeight.value = e.nativeEvent.layout.height;
             }}
           >
-            <ChatInput />
+            {!transactionMode && <ChatInput />}
+            {transactionMode && <TransactionInput />}
           </ReanimatedView>
           <View
             style={[
@@ -276,7 +283,7 @@ const useStyles = () => {
       position: "absolute",
       width: "100%",
       bottom: 0,
-      backgroundColor: tertiaryBackgroundColor(colorScheme),
+      backgroundColor: backgroundColor(colorScheme),
       zIndex: 0,
     },
     inChatRecommendations: {

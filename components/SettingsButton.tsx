@@ -22,12 +22,14 @@ import {
   textSecondaryColor,
 } from "../utils/colors";
 import { converseEventEmitter } from "../utils/events";
+import { usePrivySigner } from "../utils/evm/helpers";
 import { logout } from "../utils/logout";
 import {
   requestPushNotificationsPermissions,
   NotificationPermissionStatus,
 } from "../utils/notifications";
 import { pick } from "../utils/objects";
+import { refreshBalanceForAccounts } from "../utils/wallet";
 import Picto from "./Picto/Picto";
 import { showActionSheetWithOptions } from "./StateHandlers/ActionSheetStateHandler";
 import { TableViewPicto } from "./TableView/TableViewImage";
@@ -53,6 +55,7 @@ export default function SettingsButton({ navigation, account }: Props) {
     pick(s, ["setCurrentAccount", "privyAccountId"])
   );
   const { logout: privyLogout } = usePrivy();
+  const privySigner = usePrivySigner();
   const disconnectWallet = useDisconnect();
   const colorScheme = useColorScheme();
   const onPress = useCallback(() => {
@@ -62,6 +65,7 @@ export default function SettingsButton({ navigation, account }: Props) {
       "Your profile page": () => {
         if (account) {
           refreshProfileForAddress(account, account);
+          refreshBalanceForAccounts(privySigner);
           setCurrentAccount(account, false);
           if (navigation) {
             navigation.push("Chats");
@@ -164,6 +168,7 @@ export default function SettingsButton({ navigation, account }: Props) {
     notificationsPermissionStatus,
     account,
     colorScheme,
+    privySigner,
     setCurrentAccount,
     navigation,
     setNotificationsPermissionStatus,

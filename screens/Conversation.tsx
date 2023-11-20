@@ -50,6 +50,7 @@ const Conversation = ({
 }: NativeStackScreenProps<NavigationParamList, "Conversation">) => {
   const colorScheme = useColorScheme();
   const peersStatus = useSettingsStore((s) => s.peersStatus);
+  const [transactionMode, setTransactionMode] = useState(false);
 
   const { conversations, conversationsMapping, setConversationMessageDraft } =
     useChatStore((s) =>
@@ -305,6 +306,8 @@ const Conversation = ({
           inputRef: textInputRef,
           isBlockedPeer,
           onReadyToFocus,
+          transactionMode,
+          setTransactionMode,
         }}
       >
         <ConverseChat />
