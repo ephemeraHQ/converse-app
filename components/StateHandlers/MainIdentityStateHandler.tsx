@@ -12,10 +12,19 @@ export default function MainIdentityStateHandler() {
   const privyAccountId = useAccountsStore((s) => s.privyAccountId);
 
   useEffect(() => {
-    if (userAddress) {
-      saveUser(userAddress, privyAccountId[userAddress]);
-      refreshProfileForAddress(userAddress, userAddress);
-    }
+    const handleIdentityState = async () => {
+      console.log("## calling handleIdentityState");
+
+      if (userAddress) {
+        await saveUser(userAddress, privyAccountId[userAddress]);
+        console.log(`** [Identity] Saved user ${userAddress}`);
+
+        await refreshProfileForAddress(userAddress, userAddress);
+        console.log(`** [Identity] Refreshed profile for ${userAddress}`);
+      }
+    };
+
+    handleIdentityState();
   }, [userAddress, privyAccountId]);
 
   return null;
