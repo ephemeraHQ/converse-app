@@ -17,9 +17,9 @@ import NetworkStateHandler from "../components/StateHandlers/NetworkStateHandler
 import NotificationsStateHandler from "../components/StateHandlers/NotificationsStateHandler";
 import {
   useCurrentAccount,
-  loggedWithPrivy,
   useSettingsStore,
   useProfilesStore,
+  useLoggedWithPrivy,
 } from "../data/store/accountsStore";
 import { useAppStore } from "../data/store/appStore";
 import { useOnboardingStore } from "../data/store/onboardingStore";
@@ -94,6 +94,7 @@ export default function Main() {
   );
 
   let screenToShow = undefined;
+  const loggedWithPrivy = useLoggedWithPrivy();
 
   if (splashScreenHidden) {
     if (!userAddress || addingNewAccount) {
@@ -105,7 +106,7 @@ export default function Main() {
           Platform.OS === "android"))
     ) {
       screenToShow = <NotificationsScreen />;
-    } else if (loggedWithPrivy() && !currentUserName) {
+    } else if (loggedWithPrivy && !currentUserName) {
       screenToShow = <UsernameSelector />;
     } else if (Platform.OS === "android") {
       // On Android the whole navigation is wrapped in a drawler
