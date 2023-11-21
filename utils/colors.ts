@@ -1,6 +1,8 @@
 import { ColorSchemeName, Platform, PlatformColor } from "react-native";
 import { MD3DarkTheme, MD3LightTheme } from "react-native-paper";
 
+import { sentryTrackError } from "./sentry";
+
 const BACKGROUND_LIGHT = "#FFF";
 const BACKGROUND_DARK = "#111";
 
@@ -298,8 +300,12 @@ export const setAndroidSystemColor = (color: string) => {
     const BackgroundColor = require("react-native-background-color");
     const SystemNavigationBar =
       require("react-native-system-navigation-bar").default;
-    BackgroundColor.setColor(color);
-    SystemNavigationBar.setNavigationColor(color);
+    try {
+      BackgroundColor.setColor(color);
+    } catch (e) {
+      sentryTrackError(e);
+    }
+    SystemNavigationBar.setNavigationColor(color).catch(sentryTrackError);
   }
 };
 
@@ -309,7 +315,9 @@ export const setAndroidColors = (colorScheme: ColorSchemeName) => {
     setAndroidSystemColor(color);
     const SystemNavigationBar =
       require("react-native-system-navigation-bar").default;
-    SystemNavigationBar.setBarMode(colorScheme === "dark" ? "light" : "dark");
+    SystemNavigationBar.setBarMode(
+      colorScheme === "dark" ? "light" : "dark"
+    ).catch(sentryTrackError);
   }
 };
 
