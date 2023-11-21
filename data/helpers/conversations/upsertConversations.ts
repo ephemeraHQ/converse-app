@@ -107,6 +107,8 @@ const setupAndSaveConversations = async (
       getProfilesStore(account).getState().profiles[conversation.peerAddress]
         ?.socials;
 
+    const userName =
+      profileSocials?.userNames?.find((e) => e.isPrimary)?.name || null;
     const lensHandle = getLensHandleFromConversationIdAndPeer(
       conversation.context?.conversationId,
       profileSocials?.lensHandles
@@ -116,8 +118,6 @@ const setupAndSaveConversations = async (
     const unsDomain =
       profileSocials?.unstoppableDomains?.find((e) => e.isPrimary)?.domain ||
       null;
-    const userName =
-      profileSocials?.ensNames?.find((e) => e.isPrimary)?.name || null;
 
     // If this is a lens convo we show lens, if not, userName
     conversation.conversationTitle =
