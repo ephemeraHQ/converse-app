@@ -19,8 +19,7 @@ import { isUNSAddress } from "./uns";
 
 export const isSupportedPeer = (peer: string) => {
   const is0x = isAddress(peer.toLowerCase());
-  const isUserName = peer.endsWith(".converse.xyz");
-  const isDevUserName = peer.endsWith(".conversedev.eth");
+  const isUserName = peer.endsWith(config.usernameSuffix);
   const isENS = peer.endsWith(".eth");
   const isLens = peer.endsWith(config.lensSuffix);
   const isFarcaster = peer.endsWith(".fc");
@@ -28,7 +27,6 @@ export const isSupportedPeer = (peer: string) => {
   const isUNS = isUNSAddress(peer);
   return (
     isUserName ||
-    isDevUserName ||
     is0x ||
     isLens ||
     isENS ||
@@ -44,16 +42,13 @@ export const getAddressForPeer = async (peer: string) => {
     throw new Error(`Peer ${peer} is invalid`);
   }
   const isLens = peer.endsWith(config.lensSuffix);
-  const isUserName = peer.endsWith(".converse.xyz");
-  const isDevUserName = peer.endsWith(".conversedev.eth");
+  const isUserName = peer.endsWith(config.usernameSuffix);
   const isENS = peer.endsWith(".eth");
   const isFarcaster = peer.endsWith(".fc");
   const isCbId = peer.endsWith(".cb.id");
   const isUNS = isUNSAddress(peer);
 
   const resolvedAddress = isUserName
-    ? await resolveUserName(peer)
-    : isDevUserName
     ? await resolveUserName(peer)
     : isENS
     ? await resolveEnsName(peer)
