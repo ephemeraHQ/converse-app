@@ -4,6 +4,7 @@ import {
   View,
   StyleProp,
   ViewStyle,
+  Platform,
 } from "react-native";
 
 import { messageBubbleColor, textSecondaryColor } from "../../utils/colors";
@@ -22,7 +23,7 @@ export default function ChatActionButton({ picto, style }: Props) {
       <Picto
         picto={picto}
         color={textSecondaryColor(colorScheme)}
-        size={11.7}
+        size={Platform.OS === "android" ? 20 : 11.7}
         weight="medium"
       />
     </View>
