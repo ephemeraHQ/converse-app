@@ -21,6 +21,7 @@ import ConverseMatchMakerNav from "./ConverseMatchMakerNav";
 import NewConversationNav from "./NewConversationNav";
 import ProfileNav from "./ProfileNav";
 import ShareProfileNav from "./ShareProfileNav";
+import TopUpNav from "./TopUpNav";
 import WebviewPreviewNav from "./WebviewPreviewNav";
 
 export type NavigationParamList = {
@@ -38,6 +39,7 @@ export type NavigationParamList = {
   };
   ConverseMatchMaker: undefined;
   ShareProfile: undefined;
+  TopUp: undefined;
   Profile: {
     address: string;
   };
@@ -206,6 +208,7 @@ export default function Navigation() {
           {ShareProfileNav()}
           {WebviewPreviewNav()}
           {ProfileNav()}
+          {TopUpNav()}
         </NativeStack.Group>
       </NativeStack.Navigator>
     </NavigationContainer>

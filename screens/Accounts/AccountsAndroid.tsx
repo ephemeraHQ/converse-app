@@ -3,8 +3,8 @@ import { StyleSheet, useColorScheme } from "react-native";
 import { Drawer } from "react-native-paper";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
+import AccountSettingsButton from "../../components/AccountSettingsButton";
 import Picto from "../../components/Picto/Picto";
-import SettingsButton from "../../components/SettingsButton";
 import {
   useAccountsList,
   useAccountsStore,
@@ -46,7 +46,7 @@ export default function AccountsAndroid() {
           icon={({ color }) => (
             <Picto picto="account_circle" size={24} color={color} />
           )}
-          right={({ color }) => <SettingsButton account={a} />}
+          right={({ color }) => <AccountSettingsButton account={a} />}
           rippleColor={
             currentAccount === a
               ? undefined

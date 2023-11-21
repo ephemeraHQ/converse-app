@@ -43,7 +43,7 @@ type Props = {
   >;
 };
 
-export default function SettingsButton({ navigation, account }: Props) {
+export default function AccountSettingsButton({ navigation, account }: Props) {
   const { setNotificationsPermissionStatus, notificationsPermissionStatus } =
     useAppStore((s) =>
       pick(s, [

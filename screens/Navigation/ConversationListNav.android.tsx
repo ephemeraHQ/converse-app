@@ -12,7 +12,7 @@ import {
   useShouldShowConnecting,
   useShouldShowConnectingOrSyncing,
 } from "../../components/Connecting";
-import ShareProfileButton from "../../components/ConversationList/ShareProfileButton";
+import ProfileSettingsButton from "../../components/ConversationList/ProfileSettingsButton";
 import Picto from "../../components/Picto/Picto";
 import { useChatStore } from "../../data/store/accountsStore";
 import {
@@ -49,7 +49,7 @@ export default function ConversationListNav() {
   const rightNotFocused = {
     right: () => (
       <View style={styles.rightButtonContainer}>
-        <ShareProfileButton />
+        <ProfileSettingsButton />
       </View>
     ),
   };
