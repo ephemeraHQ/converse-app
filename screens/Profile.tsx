@@ -62,11 +62,6 @@ export default function ProfileScreen({
 
   const insets = useSafeAreaInsets();
 
-  const [isUsernameModalVisible, setisUsernameModalVisible] = useState(false);
-  const toggleUsernameModal = () => {
-    setisUsernameModalVisible(!isUsernameModalVisible);
-  };
-
   const getAddressItemsFromArray = useCallback(
     <T,>(array: T[], titleKey: string, valueKey: string) => {
       return array.map((e) => {
