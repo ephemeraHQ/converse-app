@@ -13,8 +13,6 @@ import {
 import uuid from "react-native-uuid";
 
 import SendButton from "../../assets/send-button.svg";
-import CloseButtonDark from "../../assets/transaction-close-button-dark.svg";
-import CloseButtonLight from "../../assets/transaction-close-button.svg";
 import config from "../../config";
 import { currentAccount, useWalletStore } from "../../data/store/accountsStore";
 import { NavigationParamList } from "../../screens/Navigation/Navigation";
@@ -61,9 +59,6 @@ export default function ChatTransactionInput() {
     status: undefined as undefined | "sending" | "failure" | "success",
     canCancel: false,
   });
-
-  const CloseButton =
-    colorScheme === "light" ? CloseButtonLight : CloseButtonDark;
 
   useEffect(() => {
     if (!transactionMode) {
