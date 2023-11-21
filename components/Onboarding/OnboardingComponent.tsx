@@ -79,7 +79,7 @@ export default function OnboardingComponent({
           <>
             {subtitle && <Text style={styles.p}>{subtitle}</Text>}
             {children}
-            <View style={{ height: 25 }} />
+            <View style={{ height: 32 }} />
             {primaryButtonText && (
               <Button
                 title={primaryButtonText}
