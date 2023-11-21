@@ -96,6 +96,9 @@ export default function Main() {
   let screenToShow = undefined;
   const loggedWithPrivy = useLoggedWithPrivy();
 
+  console.log("**** currentUserName:", currentUserName);
+  console.log("**** loggedWithPrivy:", loggedWithPrivy);
+
   if (splashScreenHidden) {
     if (!userAddress || addingNewAccount) {
       screenToShow = <Onboarding />;

@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -27,6 +27,19 @@ export const UsernameSelector = () => {
   const userAddress = useCurrentAccount();
   const colorScheme = useColorScheme();
   const styles = useStyles(colorScheme, errorMessage);
+
+  useEffect(() => {
+    console.log(`** [UsernameSelector] Refreshing profile for ${userAddress}`);
+    const handleIdentityState = async () => {
+      if (userAddress) {
+        setIsLoading(true);
+        await refreshProfileForAddress(userAddress, userAddress);
+        setIsLoading(false);
+        console.log(`** Refreshed profile for ${userAddress}`);
+      }
+    };
+    handleIdentityState();
+  }, [userAddress]);
 
   const handleContinue = useCallback(async () => {
     try {
