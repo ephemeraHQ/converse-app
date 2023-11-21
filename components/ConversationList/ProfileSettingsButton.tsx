@@ -8,11 +8,12 @@ import {
   useColorScheme,
 } from "react-native";
 
+import { currentAccount } from "../../data/store/accountsStore";
 import { NavigationParamList } from "../../screens/Navigation/Navigation";
 import { textSecondaryColor } from "../../utils/colors";
 import Picto from "../Picto/Picto";
 
-export default function ShareProfileButton() {
+export default function ProfileSettingsButton() {
   const navigation = useNavigation() as NativeStackNavigationProp<
     NavigationParamList,
     "Chats",
@@ -23,11 +24,11 @@ export default function ShareProfileButton() {
     <TouchableOpacity
       activeOpacity={0.2}
       onPress={() => {
-        navigation.navigate("ShareProfile");
+        navigation.navigate("Profile", { address: currentAccount() });
       }}
     >
       <Picto
-        picto="qrcode"
+        picto="gear"
         weight="medium"
         color={
           Platform.OS === "ios"
@@ -38,7 +39,7 @@ export default function ShareProfileButton() {
         style={{
           width: Platform.OS === "android" ? undefined : 32,
           height: Platform.OS === "android" ? undefined : 32,
-          marginRight: Platform.OS === "android" ? 0 : 20,
+          marginRight: Platform.OS === "android" ? 0 : 10,
         }}
       />
     </TouchableOpacity>

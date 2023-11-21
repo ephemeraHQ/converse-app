@@ -1,4 +1,7 @@
+import { usePrivy } from "@privy-io/expo";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
+import { useDisconnect } from "@thirdweb-dev/react-native";
+import { ethers } from "ethers";
 import * as Clipboard from "expo-clipboard";
 import * as Linking from "expo-linking";
 import React, { useCallback, useState } from "react";
@@ -26,6 +29,7 @@ import config from "../config";
 import {
   currentAccount,
   useCurrentAccount,
+  useLoggedWithPrivy,
   useProfilesStore,
   useRecommendationsStore,
   useSettingsStore,
@@ -37,9 +41,11 @@ import {
   backgroundColor,
   dangerColor,
   primaryColor,
+  textPrimaryColor,
   textSecondaryColor,
 } from "../utils/colors";
 import { evmHelpers } from "../utils/evm/helpers";
+import { logout } from "../utils/logout";
 import { pick } from "../utils/objects";
 import { getIPFSAssetURI } from "../utils/thirdweb";
 import { NavigationParamList } from "./Navigation/Navigation";
@@ -59,6 +65,7 @@ export default function ProfileScreen({
   const recommendationTags = useRecommendationsStore(
     (s) => s.frens[peerAddress]?.tags
   );
+  const disconnectWallet = useDisconnect();
   const profiles = useProfilesStore((state) => state.profiles);
   const isBlockedPeer = useSettingsStore(
     (s) => s.peersStatus[peerAddress.toLowerCase()] === "blocked"
@@ -103,19 +110,25 @@ export default function ProfileScreen({
     [colorScheme, copiedAddresses]
   );
 
-  const addressItems = [
+  const usernamesItems = [
     ...getAddressItemsFromArray(socials?.ensNames || [], "name", "name"),
     ...getAddressItemsFromArray(
       socials?.unstoppableDomains || [],
       "domain",
       "domain"
     ),
+  ];
+
+  const addressItems = [
     ...getAddressItemsFromArray(
       [{ title: peerAddress, address: peerAddress }],
       "title",
       "address"
     ),
   ];
+
+  const isPrivy = useLoggedWithPrivy();
+  const { logout: privyLogout } = usePrivy();
 
   const getSocialItemsFromArray = useCallback(
     <T,>(
@@ -186,15 +199,74 @@ export default function ProfileScreen({
       contentContainerStyle={styles.profileContent}
     >
       {isMyProfile && (
-        <View>
-          <Text>
-            {evmHelpers
-              .fromDecimal(USDCBalance, config.evm.USDC.decimals)
-              .toString()}{" "}
-            USDC
-          </Text>
-        </View>
+        <TableView
+          items={[
+            {
+              id: "qrCode",
+              title: "Invite more friends",
+              rightView: (
+                <TableViewPicto
+                  symbol="qrcode"
+                  color={
+                    Platform.OS === "android"
+                      ? primaryColor(colorScheme)
+                      : undefined
+                  }
+                  onPress={() => {
+                    navigation.navigate("ShareProfile");
+                  }}
+                />
+              ),
+            },
+          ]}
+          title="FLEX CONVERSE"
+          style={styles.tableView}
+        />
       )}
+      {isMyProfile && isPrivy && (
+        <TableView
+          items={[
+            {
+              id: "balance",
+              title: "Your balance",
+              rightView: (
+                <Text style={styles.balance}>
+                  ${" "}
+                  {evmHelpers.fromDecimal(
+                    USDCBalance,
+                    config.evm.USDC.decimals
+                  )}
+                  {ethers.BigNumber.from(USDCBalance).isZero() ? " 🫤" : ""}
+                </Text>
+              ),
+            },
+            {
+              id: "topUp",
+              title: "Top up your account",
+              action: () => {
+                navigation.push("TopUp");
+              },
+              rightView: (
+                <TableViewPicto
+                  symbol="chevron.right"
+                  color={textSecondaryColor(colorScheme)}
+                />
+              ),
+            },
+          ]}
+          title="BALANCE"
+          style={styles.tableView}
+        />
+      )}
+
+      {usernamesItems.length > 0 && (
+        <TableView
+          items={usernamesItems}
+          title="USERNAMES"
+          style={styles.tableView}
+        />
+      )}
+
       <TableView
         items={addressItems}
         title="ADDRESS"
@@ -275,6 +347,48 @@ export default function ProfileScreen({
           />
         </>
       )}
+      {isMyProfile && (
+        <TableView
+          items={[
+            {
+              id: "contact",
+              title: "Contact Converse Team",
+              action: () => {
+                navigation.pop();
+                setTimeout(() => {
+                  navigation.push("Conversation", {
+                    mainConversationWithPeer: config.polAddress,
+                  });
+                }, 300);
+              },
+              titleColor:
+                Platform.OS === "android"
+                  ? undefined
+                  : primaryColor(colorScheme),
+            },
+            {
+              id: "logout",
+              title: "Disconnect",
+              titleColor:
+                Platform.OS === "android"
+                  ? undefined
+                  : dangerColor(colorScheme),
+              action: () => {
+                navigation.popToTop();
+                setTimeout(() => {
+                  disconnectWallet();
+                  if (isPrivy) {
+                    privyLogout();
+                  }
+                  logout(userAddress);
+                }, 300);
+              },
+            },
+          ]}
+          title="ACTIONS"
+          style={styles.tableView}
+        />
+      )}
       <View style={{ height: insets.bottom }} />
     </ScrollView>
   );
@@ -290,5 +404,9 @@ const useStyles = () => {
       paddingHorizontal: Platform.OS === "ios" ? 18 : 0,
     },
     tableView: {},
+    balance: {
+      color: textPrimaryColor(colorScheme),
+      fontSize: 17,
+    },
   });
 };

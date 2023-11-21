@@ -11,7 +11,7 @@ import Connecting, {
   useShouldShowConnectingOrSyncing,
 } from "../../components/Connecting";
 import NewConversationButton from "../../components/ConversationList/NewConversationButton";
-import ShareProfileButton from "../../components/ConversationList/ShareProfileButton";
+import ProfileSettingsButton from "../../components/ConversationList/ProfileSettingsButton";
 import { useAccountsStore, useChatStore } from "../../data/store/accountsStore";
 import { headerTitleStyle } from "../../utils/colors";
 import { pick } from "../../utils/objects";
@@ -83,7 +83,7 @@ export default function ConversationListNav() {
         headerBackTitle: getReadableProfile(currentAccount, currentAccount),
         headerRight: () => (
           <>
-            <ShareProfileButton />
+            <ProfileSettingsButton />
             <NewConversationButton navigation={navigation} route={route} />
           </>
         ),

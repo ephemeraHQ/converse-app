@@ -72,7 +72,9 @@ export default function TableView({ title, items, style }: Props) {
             }
             cellAccessoryView={
               i.rightView ? (
-                <View style={{ marginRight: -8 }}>{i.rightView}</View>
+                <View style={{ marginRight: -8, marginLeft: 8 }}>
+                  {i.rightView}
+                </View>
               ) : undefined
             }
             cellStyle={i.subtitle ? "Subtitle" : "Basic"}

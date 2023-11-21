@@ -2,7 +2,7 @@ import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useDisconnect } from "@thirdweb-dev/react-native";
 import { ScrollView, StyleSheet, View, useColorScheme } from "react-native";
 
-import SettingsButton from "../../components/SettingsButton";
+import AccountSettingsButton from "../../components/AccountSettingsButton";
 import TableView from "../../components/TableView/TableView";
 import { TableViewPicto } from "../../components/TableView/TableViewImage";
 import {
@@ -45,7 +45,7 @@ export default function Accounts({
           },
           rightView: (
             <View style={{ flexDirection: "row" }}>
-              <SettingsButton navigation={navigation} account={a} />
+              <AccountSettingsButton navigation={navigation} account={a} />
               <TableViewPicto
                 symbol="chevron.right"
                 color={textSecondaryColor(colorScheme)}

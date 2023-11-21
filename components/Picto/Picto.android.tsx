@@ -26,6 +26,7 @@ import PersonSearch from "@material-symbols/svg-400/outlined/person_search.svg";
 import QrCodeScanner from "@material-symbols/svg-400/outlined/qr_code_scanner.svg";
 import Search from "@material-symbols/svg-400/outlined/search.svg";
 import Send from "@material-symbols/svg-400/outlined/send.svg";
+import Settings from "@material-symbols/svg-400/outlined/settings.svg";
 import Signature from "@material-symbols/svg-400/outlined/signature.svg";
 import WavingHand from "@material-symbols/svg-400/outlined/waving_hand.svg";
 import {
@@ -82,6 +83,7 @@ const pictoMapping: {
   "chevron.down": ExpandMore,
   photo: Image,
   dollarsign: AttachMoney,
+  gear: Settings,
 };
 
 export default function Picto({ picto, style, size, weight, color }: Props) {
