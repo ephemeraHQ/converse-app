@@ -12,8 +12,6 @@ import {
   Platform,
 } from "react-native";
 
-import AttachmentButtonDark from "../../assets/attachment-button-dark.svg";
-import AttachmentButtonLight from "../../assets/attachment-button.svg";
 import { useAccountsStore } from "../../data/store/accountsStore";
 import { useAppStore } from "../../data/store/appStore";
 import { uploadRemoteAttachment } from "../../utils/attachment";
@@ -28,13 +26,13 @@ import {
   serializeRemoteAttachmentMessageContent,
 } from "../../utils/xmtpRN/attachments";
 import { showActionSheetWithOptions } from "../StateHandlers/ActionSheetStateHandler";
+import ChatActionButton from "./ChatActionButton";
 
 export default function ChatAddAttachment() {
   const { conversation } = useConversationContext(["conversation"]);
   const currentAccount = useAccountsStore((s) => s.currentAccount);
   const colorScheme = useColorScheme();
-  const AttachmentButton =
-    colorScheme === "light" ? AttachmentButtonLight : AttachmentButtonDark;
+
   const styles = useStyles();
   const { mediaPreview, setMediaPreview } = useAppStore((s) =>
     pick(s, ["mediaPreview", "setMediaPreview"])
@@ -198,7 +196,7 @@ export default function ChatAddAttachment() {
       activeOpacity={0.4}
     >
       <View style={styles.attachmentButton}>
-        <AttachmentButton />
+        <ChatActionButton picto="photo" />
       </View>
     </TouchableOpacity>
   );

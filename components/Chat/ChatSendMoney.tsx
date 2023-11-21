@@ -1,23 +1,13 @@
-import {
-  TouchableOpacity,
-  View,
-  StyleSheet,
-  Platform,
-  useColorScheme,
-} from "react-native";
+import { TouchableOpacity, View, StyleSheet, Platform } from "react-native";
 
-import SendMoneyButtonDark from "../../assets/transaction-button-dark.svg";
-import SendMoneyButtonLight from "../../assets/transaction-button.svg";
 import { useConversationContext } from "../../utils/conversation";
 import { executeAfterKeyboardClosed } from "../../utils/keyboard";
+import ChatActionButton from "./ChatActionButton";
 
 export default function ChatSendMoney() {
   const { setTransactionMode } = useConversationContext(["setTransactionMode"]);
 
   const styles = useStyles();
-  const colorScheme = useColorScheme();
-  const SendMoneyButton =
-    colorScheme === "light" ? SendMoneyButtonLight : SendMoneyButtonDark;
 
   return (
     <TouchableOpacity
@@ -29,7 +19,7 @@ export default function ChatSendMoney() {
       activeOpacity={0.4}
     >
       <View style={styles.sendMoney}>
-        <SendMoneyButton />
+        <ChatActionButton picto="dollarsign" />
       </View>
     </TouchableOpacity>
   );

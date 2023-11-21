@@ -28,7 +28,7 @@ import ChatConsent from "./ChatConsent";
 import ChatInput from "./ChatInput";
 import CachedChatMessage, { MessageToDisplay } from "./ChatMessage";
 import ChatPlaceholder from "./ChatPlaceholder";
-import TransactionInput from "./TransactionInput";
+import ChatTransactionInput from "./ChatTransactionInput";
 
 const getListArray = (
   xmtpAddress?: string,
@@ -250,7 +250,7 @@ export default function Chat() {
             }}
           >
             {!transactionMode && <ChatInput />}
-            {transactionMode && <TransactionInput />}
+            {transactionMode && <ChatTransactionInput />}
           </ReanimatedView>
           <View
             style={[
