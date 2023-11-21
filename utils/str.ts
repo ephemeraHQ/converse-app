@@ -13,42 +13,26 @@ export const shortAddress = (address: string) =>
       )}`
     : address || "";
 
-export const shortDomainMiddle = (domain: string | undefined): string => {
+export const shortDomain = (domain: string | undefined): string => {
   if (!domain) return "";
 
   const screenWidth = Dimensions.get("window").width;
-  let maxLength = 15;
+  let maxLength;
 
-  // For larger screens
-  if (screenWidth > 400) {
-    maxLength = 20;
+  if (screenWidth > 800) {
+    // For iPad and mac app
+    maxLength = 30;
+  } else if (screenWidth > 400) {
+    // For iPhone Plus and Pro Max
+    maxLength = 15;
+  } else {
+    // For iPhone Mini, iPhone, and iPhone Pro
+    maxLength = 12;
   }
 
-  if (domain.length <= maxLength) {
-    return domain;
-  }
-
-  const frontChars = Math.ceil(maxLength / 2);
-  const backChars = Math.floor(maxLength / 2) - 3;
-
-  return `${domain.slice(0, frontChars)}...${domain.slice(-backChars)}`;
-};
-
-export const shortDomainTail = (domain: string | undefined): string => {
-  if (!domain) return "";
-
-  const screenWidth = Dimensions.get("window").width;
-  let maxLength = 15;
-
-  if (screenWidth > 400) {
-    maxLength = 18;
-  }
-
-  if (domain.length <= maxLength) {
-    return domain;
-  }
-
-  return `${domain.slice(0, maxLength - 3)}...`;
+  return domain.length > maxLength
+    ? `${domain.slice(0, maxLength)}...`
+    : domain;
 };
 
 export const addressPrefix = (address: string) =>
@@ -83,7 +67,7 @@ export const getReadableProfile = (account: string, address: string) => {
     .profiles[address]?.socials.unstoppableDomains?.find((e) => e.isPrimary)
     ?.domain;
   return (
-    shortDomainTail(primaryUserName) ||
+    shortDomain(primaryUserName) ||
     primaryENS ||
     primaryUns ||
     shortAddress(account)
