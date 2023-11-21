@@ -67,6 +67,7 @@ export const UsernameSelector = () => {
           placeholder="username"
           placeholderTextColor={textSecondaryColor(colorScheme)}
           autoCapitalize="none"
+          onSubmitEditing={handleContinue}
         />
         <Text style={styles.p}>
           {errorMessage ||
