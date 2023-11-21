@@ -36,8 +36,9 @@ import { pick } from "../../utils/objects";
 import { sentryTrackError } from "../../utils/sentry";
 import { refreshBalanceForAccounts } from "../../utils/wallet";
 import ActivityIndicator from "../ActivityIndicator/ActivityIndicator";
+import ChatActionButton from "./ChatActionButton";
 
-export default function TransactionInput() {
+export default function ChatTransactionInput() {
   const { USDCBalance } = useWalletStore((s) => pick(s, ["USDCBalance"]));
   const { conversation, setTransactionMode, transactionMode } =
     useConversationContext([
@@ -219,7 +220,7 @@ export default function TransactionInput() {
               : 1,
         }}
       >
-        <CloseButton width={36} height={36} style={styles.closeButton} />
+        <ChatActionButton picto="xmark" style={styles.closeButton} />
       </TouchableOpacity>
       <View style={styles.middleContainer}>
         <View style={styles.separatorView} />
