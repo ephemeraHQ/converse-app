@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useCallback, useState } from "react";
 import {
   View,
   Text,
@@ -28,7 +28,7 @@ export const UsernameSelector = () => {
   const colorScheme = useColorScheme();
   const styles = useStyles(colorScheme, errorMessage);
 
-  const handleContinue = async () => {
+  const handleContinue = useCallback(async () => {
     try {
       setIsLoading(true);
       if (userAddress) {
@@ -48,7 +48,7 @@ export const UsernameSelector = () => {
         username
       );
     }
-  };
+  }, [userAddress, username]);
 
   return (
     <OnboardingComponent
