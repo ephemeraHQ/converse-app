@@ -86,6 +86,7 @@ export type ChatStoreType = {
   reconnecting: boolean;
   topicsStatus: { [topic: string]: "deleted" | "consented" };
 
+  conversationsSortedOnce: boolean;
   sortedConversationsWithPreview: ConversationsListItems;
   setSortedConversationsWithPreview: (items: ConversationsListItems) => void;
 
@@ -150,12 +151,16 @@ export const initChatStore = (account: string) => {
               return newState;
             }),
           conversationsMapping: {},
+          conversationsSortedOnce: false,
           sortedConversationsWithPreview: {
             conversationsInbox: [],
             conversationsRequests: [],
           },
           setSortedConversationsWithPreview: (items) =>
-            set(() => ({ sortedConversationsWithPreview: items })),
+            set(() => ({
+              sortedConversationsWithPreview: items,
+              conversationsSortedOnce: true,
+            })),
           lastUpdateAt: 0,
           searchQuery: "",
           setSearchQuery: (q) => set(() => ({ searchQuery: q })),

@@ -2,8 +2,15 @@ import * as Notifications from "expo-notifications";
 import { useEffect, useRef } from "react";
 import { AppState } from "react-native";
 
-import { useCurrentAccount } from "../../data/store/accountsStore";
+import {
+  useCurrentAccount,
+  useAccountsList,
+  getChatStore,
+  getSettingsStore,
+} from "../../data/store/accountsStore";
+import { useAppStore } from "../../data/store/appStore";
 import { saveUser } from "../../utils/api";
+import { sortAndComputePreview } from "../../utils/conversation";
 import { executeLogoutTasks } from "../../utils/logout";
 import {
   onInteractWithNotification,
@@ -65,6 +72,23 @@ export default function NotificationsStateHandler() {
       subscription.remove();
     };
   }, [userAddress]);
+
+  const accounts = useAccountsList();
+  const hydrationDone = useAppStore((s) => s.hydrationDone);
+
+  // Sync accounts on load and when a new one is added
+  useEffect(() => {
+    if (!hydrationDone) return;
+    accounts.forEach((a) => {
+      // Let's sortAndComputePreview to subscribe to the right notifications
+      const { conversations, topicsStatus, conversationsSortedOnce } =
+        getChatStore(a).getState();
+      if (!conversationsSortedOnce) {
+        const { peersStatus } = getSettingsStore(a).getState();
+        sortAndComputePreview(conversations, a, topicsStatus, peersStatus);
+      }
+    });
+  }, [accounts, hydrationDone]);
 
   return null;
 }
