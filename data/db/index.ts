@@ -124,6 +124,7 @@ export const clearDb = async (account: string) => {
     console.log(`[ClearDB] Couldn't destroy datasource ${account} ${e}`);
   }
   deleteDataSource(account);
+  delete repositories[account];
 
   // Now let's delete the database file
   dbExists = await RNFS.exists(dbPath);
