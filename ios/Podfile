@@ -93,6 +93,6 @@ target 'ConverseNotificationExtension' do
   pod 'SQLite.swift'
   pod 'XMTP', $xmtpVersion, :modular_headers => true
   # Version must match version from RNSentry Podspec (matching @sentry/react-native package from package.json)
-  # https://github.com/getsentry/sentry-react-native/blob/5.5.0/RNSentry.podspec#L22
-  pod 'Sentry/HybridSDK', '8.7.1'
+  # https://github.com/getsentry/sentry-react-native/blob/5.10.0/RNSentry.podspec#L27
+  pod 'Sentry/HybridSDK', '8.11.0'
 end
