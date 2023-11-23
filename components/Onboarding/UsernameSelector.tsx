@@ -68,10 +68,10 @@ export const UsernameSelector = () => {
         <TextInput
           style={[textInputStyle(colorScheme), styles.usernameInput]}
           onChangeText={(text) => {
-            // Allow only URL and domain-safe ASCII characters and limit to 30 chars
+            // Allow only alphanumeric and limit to 30 chars
             const safeUserName = text
               .split("")
-              .filter((char) => /^[a-zA-Z0-9-._~]*$/.test(char))
+              .filter((char) => /^[a-zA-Z0-9]*$/.test(char))
               .join("")
               .slice(0, 30);
             setUsername(safeUserName);
