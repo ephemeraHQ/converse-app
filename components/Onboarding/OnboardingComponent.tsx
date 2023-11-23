@@ -84,10 +84,10 @@ export default function OnboardingComponent({
               <Button
                 title={primaryButtonText}
                 variant="primary"
-                style={[
-                  styles.primaryButton,
-                  { marginBottom: !backButtonText ? 53 : 21 },
-                ]}
+                style={{
+                  marginTop: "auto",
+                  marginBottom: !backButtonText ? 51 : 21,
+                }}
                 onPress={primaryButtonAction}
               />
             )}
@@ -97,8 +97,8 @@ export default function OnboardingComponent({
                 title={backButtonText}
                 textStyle={{ fontWeight: "600" }}
                 style={{
-                  marginBottom: 53,
                   marginTop: primaryButtonText && !loading ? 0 : "auto",
+                  marginBottom: 51,
                 }}
                 onPress={() => {
                   setLoading(false);
@@ -167,14 +167,6 @@ const useStyles = () => {
           maxWidth: 260,
         },
       }),
-    },
-    back: {
-      marginTop: "auto",
-      marginBottom: 54,
-    },
-    primaryButton: {
-      marginBottom: 21,
-      marginTop: "auto",
     },
   });
 };
