@@ -4,6 +4,7 @@ import { PixelRatio, TextInput, Dimensions } from "react-native";
 import { getProfilesStore, useAccountsList } from "../data/store/accountsStore";
 import { XmtpConversation } from "../data/store/chatStore";
 import { ProfilesStoreType } from "../data/store/profilesStore";
+import { getPreferredName } from "./profile";
 
 export const shortAddress = (address: string) =>
   address && address.length > 7
@@ -82,26 +83,21 @@ export const useAccountsProfiles = () => {
 
   const handleAccount = useCallback(
     (account: string, state: ProfilesStoreType) => {
-      const primaryUserName = state.profiles[account]?.socials.userNames?.find(
-        (e) => e.isPrimary
-      )?.name;
-      const primaryENS = state.profiles[account]?.socials.ensNames?.find(
-        (e) => e.isPrimary
-      )?.name;
-      const primaryUns = state.profiles[
-        account
-      ]?.socials.unstoppableDomains?.find((e) => e.isPrimary)?.domain;
+      const socials = state.profiles[account]?.socials;
+      const readableProfile = getPreferredName({
+        lensHandle: null,
+        userName: socials?.userNames?.find((e) => e.isPrimary)?.name || null,
+        ensName: socials?.ensNames?.find((e) => e.isPrimary)?.name || null,
+        unsDomain:
+          socials?.unstoppableDomains?.find((e) => e.isPrimary)?.domain || null,
+        peerAddress: account,
+        preferLensHandle: false,
+      });
 
-      const readableProfile =
-        primaryUserName || primaryENS || primaryUns || shortAddress(account);
       if (accountsProfiles[account] !== readableProfile) {
         setAccountsProfiles((s) => ({
           ...s,
-          [account]:
-            primaryUserName ||
-            primaryENS ||
-            primaryUns ||
-            shortAddress(account),
+          [account]: readableProfile,
         }));
       }
     },
