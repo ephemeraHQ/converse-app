@@ -28,8 +28,7 @@ export const getProfileData = (
 export function getPreferredName(
   socials: ProfileSocials | undefined,
   peerAddress: string,
-  conversationId?: string | null,
-  preferLensHandle: boolean = false
+  conversationId?: string | null
 ): string {
   const lensHandle =
     conversationId && socials?.lensHandles
@@ -44,7 +43,7 @@ export function getPreferredName(
   const unsDomain =
     socials?.unstoppableDomains?.find((d) => d.isPrimary)?.domain || null;
 
-  if (preferLensHandle && lensHandle) {
+  if (lensHandle && conversationId) {
     return lensHandle;
   }
 

@@ -110,8 +110,7 @@ const setupAndSaveConversations = async (
     conversation.conversationTitle = getPreferredName(
       profileSocials,
       conversation.peerAddress,
-      conversation.context?.conversationId,
-      true // Prefer Lens Handle
+      conversation.context?.conversationId
     );
 
     conversation.readUntil =
