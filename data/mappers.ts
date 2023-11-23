@@ -1,6 +1,5 @@
 import "reflect-metadata";
 
-import { getLensHandleFromConversationIdAndPeer } from "../utils/lens";
 import { getPreferredName } from "../utils/profile";
 import { Conversation } from "./db/entities/conversationEntity";
 import { Message } from "./db/entities/messageEntity";
@@ -96,17 +95,12 @@ export const xmtpConversationFromDb = (
     };
   }
 
-  const conversationTitle = getPreferredName({
-    lensHandle: getLensHandleFromConversationIdAndPeer(
-      dbConversation.contextConversationId,
-      socials?.lensHandles
-    ),
-    userName: socials?.userNames?.find((e) => e.isPrimary)?.name,
-    ensName: socials?.ensNames?.find((e) => e.isPrimary)?.name,
-    unsDomain: socials?.unstoppableDomains?.find((d) => d.isPrimary)?.domain,
-    peerAddress: dbConversation.peerAddress,
-    preferLensHandle: true,
-  });
+  const conversationTitle = getPreferredName(
+    socials,
+    dbConversation.peerAddress,
+    dbConversation.contextConversationId,
+    true // Prefer Lens Handle
+  );
 
   const hasOneMessageFromMe = !!dbConversation.messages?.find(
     (m) => m.senderAddress === account
