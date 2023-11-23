@@ -9,7 +9,10 @@ import {
 } from "react-native";
 
 import { refreshProfileForAddress } from "../../data/helpers/profiles/profilesUpdate";
-import { useCurrentAccount } from "../../data/store/accountsStore";
+import {
+  useCurrentAccount,
+  useProfilesStore,
+} from "../../data/store/accountsStore";
 import { claimUserName } from "../../utils/api";
 import {
   textInputStyle,
@@ -28,18 +31,14 @@ export const UsernameSelector = () => {
   const colorScheme = useColorScheme();
   const styles = useStyles(colorScheme, errorMessage);
 
+  const profileFetched = useProfilesStore((s) =>
+    userAddress ? !!s.profiles[userAddress] : false
+  );
   useEffect(() => {
-    console.log(`** [UsernameSelector] Refreshing profile for ${userAddress}`);
-    const handleIdentityState = async () => {
-      if (userAddress) {
-        setIsLoading(true);
-        await refreshProfileForAddress(userAddress, userAddress);
-        setIsLoading(false);
-        console.log(`** Refreshed profile for ${userAddress}`);
-      }
-    };
-    handleIdentityState();
-  }, [userAddress]);
+    if (profileFetched) {
+      setIsLoading(false);
+    }
+  }, [profileFetched]);
 
   const handleContinue = useCallback(async () => {
     try {
