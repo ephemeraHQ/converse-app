@@ -65,9 +65,8 @@ export const updateProfilesForConversations = async (
 
         const newTitle = getPreferredName(
           profileForConversation,
-          conversation.peerAddress, // Peer address for the conversation
-          conversation.context?.conversationId, // Conversation ID
-          true // Prefer Lens Handle
+          conversation.peerAddress,
+          conversation.context?.conversationId
         );
 
         if (newTitle !== currentTitle) {

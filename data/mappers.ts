@@ -98,8 +98,7 @@ export const xmtpConversationFromDb = (
   const conversationTitle = getPreferredName(
     socials,
     dbConversation.peerAddress,
-    dbConversation.contextConversationId,
-    true // Prefer Lens Handle
+    dbConversation.contextConversationId
   );
 
   const hasOneMessageFromMe = !!dbConversation.messages?.find(

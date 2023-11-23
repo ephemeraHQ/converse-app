@@ -50,12 +50,7 @@ export default function ChatMessageReactions({ message, reactions }: Props) {
       const peerAddress = r.senderAddress;
       const fromMe = peerAddress.toLowerCase() === userAddress?.toLowerCase();
       const socials = profiles[peerAddress]?.socials;
-      const peer = getPreferredName(
-        socials,
-        peerAddress,
-        null,
-        false // Don't prefer Lens Handle
-      );
+      const peer = getPreferredName(socials, peerAddress);
       methods[
         `${getReactionContent(r)} ${fromMe ? "you - tap to remove" : peer}`
       ] = () => {
