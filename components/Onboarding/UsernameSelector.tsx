@@ -52,14 +52,7 @@ export const UsernameSelector = () => {
       const message = error.response?.data?.error || "Unknown error occurred";
       setErrorMessage(message);
       setIsLoading(false);
-
       sentryTrackError(error);
-      console.error(
-        "Error in UsernameSelector:",
-        message,
-        userAddress,
-        username
-      );
     }
   }, [userAddress, username]);
 
