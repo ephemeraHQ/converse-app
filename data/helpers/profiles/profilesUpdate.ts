@@ -103,57 +103,29 @@ export const refreshProfileForAddress = async (
   account: string,
   address: string
 ) => {
-  try {
-    console.log(
-      "@@ refreshProfileForAddress 1: Starting to get profiles for addresses"
-    );
+  const now = new Date().getTime();
+  const profilesByAddress = await getProfilesForAddresses([address]);
+  // Save profiles to db
 
-    const now = new Date().getTime();
-    const profilesByAddress = await getProfilesForAddresses([address]);
-
-    console.log(
-      "@@ refreshProfileForAddress 2: Got profiles, starting upsertRepository"
-    );
-    console.log("profilesByAddress[address]:", profilesByAddress[address]);
-
-    // Save profiles to db
-    const profileRepository = await getRepository(account, "profile");
-
-    console.log("profileRepository:", profileRepository);
-
-    const upsertedRepo = await upsertRepository(
-      profileRepository,
-      Object.keys(profilesByAddress).map((address) => ({
-        socials: JSON.stringify(profilesByAddress[address]),
+  const profileRepository = await getRepository(account, "profile");
+  await upsertRepository(
+    profileRepository,
+    Object.keys(profilesByAddress).map((address) => ({
+      socials: JSON.stringify(profilesByAddress[address]),
+      updatedAt: now,
+      address,
+    })),
+    ["address"],
+    false
+  );
+  getProfilesStore(account)
+    .getState()
+    .setProfiles({
+      [address]: {
+        socials: profilesByAddress[address],
         updatedAt: now,
-        address,
-      })),
-      ["address"],
-      true
-    );
-
-    console.log("@@ upsertedRepo:", upsertedRepo);
-
-    console.log(
-      "@@ refreshProfileForAddress 3: Upsert done, updating profiles store"
-    );
-
-    getProfilesStore(account)
-      .getState()
-      .setProfiles({
-        [address]: {
-          socials: profilesByAddress[address],
-          updatedAt: now,
-        },
-      });
-
-    console.log(
-      "@@ refreshProfileForAddress 4: Completed refreshProfileForAddress"
-    );
-  } catch (error) {
-    console.error("Error in refreshProfileForAddress:", error);
-    throw error;
-  }
+      },
+    });
 };
 
 export const refreshProfilesIfNeeded = async (account: string) => {
