@@ -67,7 +67,15 @@ export const UsernameSelector = () => {
       <View style={styles.usernameInputContainer}>
         <TextInput
           style={[textInputStyle(colorScheme), styles.usernameInput]}
-          onChangeText={setUsername}
+          onChangeText={(text) => {
+            // Allow only URL and domain-safe ASCII characters and limit to 30 chars
+            const safeUserName = text
+              .split("")
+              .filter((char) => /^[a-zA-Z0-9-._~]*$/.test(char))
+              .join("")
+              .slice(0, 30);
+            setUsername(safeUserName);
+          }}
           value={username}
           placeholder="username"
           placeholderTextColor={textSecondaryColor(colorScheme)}
@@ -75,6 +83,7 @@ export const UsernameSelector = () => {
           onSubmitEditing={handleContinue}
           enterKeyHint="done"
           returnKeyType="done"
+          maxLength={30}
         />
         <Text style={styles.p}>
           {errorMessage ||
