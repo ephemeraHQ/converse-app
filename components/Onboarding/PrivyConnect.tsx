@@ -71,8 +71,8 @@ export default function PrivyConnect() {
     setLoading(true);
     setBeautifulPhone(parsed.formatInternational());
     await sendCode({ phone: parsed.number });
-    setLoading(false);
     setStatus("verify-phone");
+    setLoading(false);
   }, [formattedPhone, sendCode, setLoading]);
 
   const submitCode = useCallback(

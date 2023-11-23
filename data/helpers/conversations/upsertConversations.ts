@@ -4,6 +4,7 @@ import { topicToNavigateTo } from "../../../components/StateHandlers/InitialStat
 import { getLensHandleFromConversationIdAndPeer } from "../../../utils/lens";
 import { navigateToConversation } from "../../../utils/navigation";
 import { saveConversationIdentifiersForNotifications } from "../../../utils/notifications";
+import { getPreferredName } from "../../../utils/profile";
 import { getRepository } from "../../db";
 import { getExistingDataSource } from "../../db/datasource";
 import { Conversation } from "../../db/entities/conversationEntity";
@@ -107,22 +108,27 @@ const setupAndSaveConversations = async (
       getProfilesStore(account).getState().profiles[conversation.peerAddress]
         ?.socials;
 
-    const lensHandle = getLensHandleFromConversationIdAndPeer(
-      conversation.context?.conversationId,
-      profileSocials?.lensHandles
-    );
-    const ensName =
-      profileSocials?.ensNames?.find((e) => e.isPrimary)?.name || null;
-    const unsDomain =
-      profileSocials?.unstoppableDomains?.find((e) => e.isPrimary)?.domain ||
-      null;
+    conversation.conversationTitle = getPreferredName({
+      lensHandle:
+        getLensHandleFromConversationIdAndPeer(
+          conversation.context?.conversationId,
+          profileSocials?.lensHandles
+        ) || null,
+      userName:
+        profileSocials?.userNames?.find((e) => e.isPrimary)?.name || null,
+      ensName: profileSocials?.ensNames?.find((e) => e.isPrimary)?.name || null,
+      unsDomain:
+        profileSocials?.unstoppableDomains?.find((d) => d.isPrimary)?.domain ||
+        null,
+      peerAddress: conversation.peerAddress,
+      preferLensHandle: true,
+    });
 
-    // If this is a lens convo we show lens, if not ENS
-    conversation.conversationTitle = lensHandle || ensName || unsDomain;
     conversation.readUntil =
       conversation.readUntil ||
       alreadyConversationInDbWithTopic?.readUntil ||
       0;
+
     conversationsToUpsert.push(xmtpConversationToDb(conversation));
     saveConversationIdentifiersForNotifications(conversation);
   });

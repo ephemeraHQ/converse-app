@@ -12,19 +12,11 @@ export const saveSpamScores = async (
   topicSpamScores: TopicSpamScores
 ) => {
   const conversationRepository = await getRepository(account, "conversation");
-
-  await conversationRepository.manager.transaction(
-    async (transactionalEntityManager) => {
-      for (const [topic, spamScore] of Object.entries(topicSpamScores)) {
-        await transactionalEntityManager.update(
-          conversationRepository.target,
-          { topic },
-          { spamScore }
-        );
-      }
-    }
+  await Promise.all(
+    Object.entries(topicSpamScores).map(([topic, spamScore]) =>
+      conversationRepository.update({ topic }, { spamScore })
+    )
   );
-
   // Update Zustand
   const chatStore = getChatStore(account).getState();
   chatStore.setSpamScores(topicSpamScores);

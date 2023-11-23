@@ -1,9 +1,10 @@
 import { useCallback, useEffect, useState } from "react";
-import { PixelRatio, TextInput } from "react-native";
+import { PixelRatio, TextInput, Dimensions } from "react-native";
 
 import { getProfilesStore, useAccountsList } from "../data/store/accountsStore";
 import { XmtpConversation } from "../data/store/chatStore";
 import { ProfilesStoreType } from "../data/store/profilesStore";
+import { getPreferredName } from "./profile";
 
 export const shortAddress = (address: string) =>
   address && address.length > 7
@@ -12,6 +13,28 @@ export const shortAddress = (address: string) =>
         address.length
       )}`
     : address || "";
+
+export const shortDomain = (domain: string | undefined): string => {
+  if (!domain) return "";
+
+  const screenWidth = Dimensions.get("window").width;
+  let maxLength;
+
+  if (screenWidth > 800) {
+    // For iPad and mac app
+    maxLength = 30;
+  } else if (screenWidth > 400) {
+    // For iPhone Plus and Pro Max
+    maxLength = 15;
+  } else {
+    // For iPhone Mini, iPhone, and iPhone Pro
+    maxLength = 12;
+  }
+
+  return domain.length > maxLength
+    ? `${domain.slice(0, maxLength)}...`
+    : domain;
+};
 
 export const addressPrefix = (address: string) =>
   (address && address.length >= 6 ? address.slice(0, 6) : address) || "";
@@ -34,10 +57,22 @@ export const getTitleFontScale = (): number => {
 export type TextInputWithValue = TextInput & { currentValue: string };
 
 export const getReadableProfile = (account: string, address: string) => {
+  const primaryUserName = getProfilesStore(account)
+    .getState()
+    .profiles[address]?.socials.userNames?.find((e) => e.isPrimary)?.name;
   const primaryENS = getProfilesStore(account)
     .getState()
     .profiles[address]?.socials.ensNames?.find((e) => e.isPrimary)?.name;
-  return primaryENS || shortAddress(account);
+  const primaryUns = getProfilesStore(account)
+    .getState()
+    .profiles[address]?.socials.unstoppableDomains?.find((e) => e.isPrimary)
+    ?.domain;
+  return (
+    shortDomain(primaryUserName) ||
+    primaryENS ||
+    primaryUns ||
+    shortAddress(account)
+  );
 };
 
 export const useAccountsProfiles = () => {
@@ -48,14 +83,21 @@ export const useAccountsProfiles = () => {
 
   const handleAccount = useCallback(
     (account: string, state: ProfilesStoreType) => {
-      const primaryENS = state.profiles[account]?.socials.ensNames?.find(
-        (e) => e.isPrimary
-      )?.name;
-      const readableProfile = primaryENS || shortAddress(account);
+      const socials = state.profiles[account]?.socials;
+      const readableProfile = getPreferredName({
+        lensHandle: null,
+        userName: socials?.userNames?.find((e) => e.isPrimary)?.name || null,
+        ensName: socials?.ensNames?.find((e) => e.isPrimary)?.name || null,
+        unsDomain:
+          socials?.unstoppableDomains?.find((e) => e.isPrimary)?.domain || null,
+        peerAddress: account,
+        preferLensHandle: false,
+      });
+
       if (accountsProfiles[account] !== readableProfile) {
         setAccountsProfiles((s) => ({
           ...s,
-          [account]: primaryENS || shortAddress(account),
+          [account]: readableProfile,
         }));
       }
     },

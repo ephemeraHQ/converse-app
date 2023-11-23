@@ -1,6 +1,7 @@
 import { getProfilesForAddresses } from "../../../utils/api";
 import { getLensHandleFromConversationIdAndPeer } from "../../../utils/lens";
 import { saveConversationIdentifiersForNotifications } from "../../../utils/notifications";
+import { getPreferredName } from "../../../utils/profile";
 import { getRepository } from "../../db";
 import { upsertRepository } from "../../db/upsert";
 import { getChatStore, getProfilesStore } from "../../store/accountsStore";
@@ -62,20 +63,25 @@ export const updateProfilesForConversations = async (
       try {
         const profileForConversation =
           profilesByAddress[conversation.peerAddress];
-        let newLensHandle: string | null | undefined = null;
-        if (profileForConversation) {
-          newLensHandle = getLensHandleFromConversationIdAndPeer(
-            conversation.context?.conversationId,
-            profileForConversation.lensHandles
-          );
-        }
-        const newEnsName = profilesByAddress[
-          conversation.peerAddress
-        ].ensNames?.find((e) => e.isPrimary)?.name;
-        const newUnsDomain = profilesByAddress[
-          conversation.peerAddress
-        ].unstoppableDomains?.find((e) => e.isPrimary)?.domain;
-        const newTitle = newLensHandle || newEnsName || newUnsDomain;
+        const newTitle = getPreferredName({
+          lensHandle: profileForConversation
+            ? getLensHandleFromConversationIdAndPeer(
+                conversation.context?.conversationId,
+                profileForConversation.lensHandles
+              )
+            : null,
+          userName:
+            profileForConversation?.userNames?.find((e) => e.isPrimary)?.name ||
+            null,
+          ensName:
+            profileForConversation?.ensNames?.find((e) => e.isPrimary)?.name ||
+            null,
+          unsDomain:
+            profileForConversation?.unstoppableDomains?.find((d) => d.isPrimary)
+              ?.domain || null,
+          peerAddress: conversation.peerAddress,
+          preferLensHandle: true,
+        });
         if (newTitle !== currentTitle) {
           updated = true;
         }
@@ -102,6 +108,7 @@ export const refreshProfileForAddress = async (
   const now = new Date().getTime();
   const profilesByAddress = await getProfilesForAddresses([address]);
   // Save profiles to db
+
   const profileRepository = await getRepository(account, "profile");
   await upsertRepository(
     profileRepository,

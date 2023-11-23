@@ -22,6 +22,7 @@ import Lock from "@material-symbols/svg-400/outlined/lock_open.svg";
 import ChatNotification from "@material-symbols/svg-400/outlined/mark_chat_unread.svg";
 import Menu from "@material-symbols/svg-400/outlined/menu.svg";
 import MoreVert from "@material-symbols/svg-400/outlined/more_vert.svg";
+import Person from "@material-symbols/svg-400/outlined/person.svg";
 import PersonSearch from "@material-symbols/svg-400/outlined/person_search.svg";
 import QrCodeScanner from "@material-symbols/svg-400/outlined/qr_code_scanner.svg";
 import Refresh from "@material-symbols/svg-400/outlined/refresh.svg";
@@ -86,6 +87,7 @@ const pictoMapping: {
   dollarsign: AttachMoney,
   gear: Settings,
   "arrow.clockwise": Refresh,
+  person: Person,
 };
 
 export default function Picto({ picto, style, size, weight, color }: Props) {
