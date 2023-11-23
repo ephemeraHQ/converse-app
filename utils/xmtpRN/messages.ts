@@ -148,7 +148,7 @@ export const loadConversationsMessages = async (
     }
     addLog(`8. Fetched ${messagesFetched} messages from network`);
     return messagesFetched;
-  } catch (e) {
+  } catch (e: any) {
     addLog(`9. Got an error while loading messages : ${e.toString()}`);
     sentryTrackError(e);
     throw e;
