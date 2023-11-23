@@ -19,12 +19,12 @@ import {
   textSecondaryColor,
 } from "../../utils/colors";
 import { useConversationContext } from "../../utils/conversation";
+import { getPreferredName } from "../../utils/profile";
 import {
   MessageReaction,
   getReactionContent,
   removeReactionFromMessage,
 } from "../../utils/reactions";
-import { shortAddress } from "../../utils/str";
 import { showActionSheetWithOptions } from "../StateHandlers/ActionSheetStateHandler";
 import { MessageToDisplay } from "./ChatMessage";
 
@@ -50,10 +50,15 @@ export default function ChatMessageReactions({ message, reactions }: Props) {
       const peerAddress = r.senderAddress;
       const fromMe = peerAddress.toLowerCase() === userAddress?.toLowerCase();
       const socials = profiles[peerAddress]?.socials;
-      const ensName = socials?.ensNames?.find((e) => e.isPrimary)?.name;
-      const unsDomain = socials?.unstoppableDomains?.find((d) => d.isPrimary)
-        ?.domain;
-      const peer = ensName || unsDomain || shortAddress(peerAddress);
+      const peer = getPreferredName({
+        lensHandle: null,
+        userName: socials?.userNames?.find((e) => e.isPrimary)?.name || null,
+        ensName: socials?.ensNames?.find((e) => e.isPrimary)?.name || null,
+        unsDomain:
+          socials?.unstoppableDomains?.find((d) => d.isPrimary)?.domain || null,
+        peerAddress,
+        preferLensHandle: false,
+      });
       methods[
         `${getReactionContent(r)} ${fromMe ? "you - tap to remove" : peer}`
       ] = () => {

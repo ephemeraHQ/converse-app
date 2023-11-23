@@ -12,18 +12,29 @@ import {
   resolveEnsName,
   resolveFarcasterUsername,
   resolveUnsDomain,
+  resolveUserName,
 } from "./api";
 import { getLensOwner } from "./lens";
 import { isUNSAddress } from "./uns";
 
 export const isSupportedPeer = (peer: string) => {
   const is0x = isAddress(peer.toLowerCase());
+  const isUserName = peer.endsWith(config.usernameSuffix);
   const isENS = peer.endsWith(".eth");
   const isLens = peer.endsWith(config.lensSuffix);
   const isFarcaster = peer.endsWith(".fc");
   const isCbId = peer.endsWith(".cb.id");
   const isUNS = isUNSAddress(peer);
-  return is0x || isLens || isENS || isENS || isFarcaster || isCbId || isUNS;
+  return (
+    isUserName ||
+    is0x ||
+    isLens ||
+    isENS ||
+    isENS ||
+    isFarcaster ||
+    isCbId ||
+    isUNS
+  );
 };
 
 export const getAddressForPeer = async (peer: string) => {
@@ -31,21 +42,24 @@ export const getAddressForPeer = async (peer: string) => {
     throw new Error(`Peer ${peer} is invalid`);
   }
   const isLens = peer.endsWith(config.lensSuffix);
+  const isUserName = peer.endsWith(config.usernameSuffix);
   const isENS = peer.endsWith(".eth");
   const isFarcaster = peer.endsWith(".fc");
   const isCbId = peer.endsWith(".cb.id");
   const isUNS = isUNSAddress(peer);
 
-  const resolvedAddress = isLens
-    ? await getLensOwner(peer)
+  const resolvedAddress = isUserName
+    ? await resolveUserName(peer)
     : isENS
     ? await resolveEnsName(peer)
-    : isFarcaster
-    ? await resolveFarcasterUsername(peer.slice(0, peer.length - 3))
     : isUNS
     ? await resolveUnsDomain(peer)
     : isCbId
     ? await resolveCbIdName(peer)
+    : isFarcaster
+    ? await resolveFarcasterUsername(peer.slice(0, peer.length - 3))
+    : isLens
+    ? await getLensOwner(peer)
     : peer;
   return resolvedAddress;
 };

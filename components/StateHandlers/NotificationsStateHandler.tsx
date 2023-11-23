@@ -2,7 +2,10 @@ import * as Notifications from "expo-notifications";
 import { useEffect, useRef } from "react";
 import { AppState } from "react-native";
 
-import { useCurrentAccount } from "../../data/store/accountsStore";
+import {
+  useCurrentAccount,
+  useAccountsStore,
+} from "../../data/store/accountsStore";
 import { saveUser } from "../../utils/api";
 import { executeLogoutTasks } from "../../utils/logout";
 import {
@@ -27,6 +30,7 @@ Notifications.addNotificationResponseReceivedListener(
 export default function NotificationsStateHandler() {
   const appState = useRef(AppState.currentState);
   const userAddress = useCurrentAccount();
+  const privyAccountId = useAccountsStore((s) => s.privyAccountId);
 
   useEffect(() => {
     // Things to do when app opens
@@ -51,7 +55,7 @@ export default function NotificationsStateHandler() {
           resetNotifications(500);
           // Save the user
           if (userAddress) {
-            saveUser(userAddress);
+            saveUser(userAddress, privyAccountId[userAddress]);
           }
         } else {
           // Things to do when app status changes to inactive
@@ -64,7 +68,7 @@ export default function NotificationsStateHandler() {
     return () => {
       subscription.remove();
     };
-  }, [userAddress]);
+  }, [userAddress, privyAccountId]);
 
   return null;
 }

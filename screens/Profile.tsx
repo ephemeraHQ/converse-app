@@ -129,6 +129,7 @@ export default function ProfileScreen({
   );
 
   const usernamesItems = [
+    ...getAddressItemsFromArray(socials?.userNames || [], "name", "name"),
     ...getAddressItemsFromArray(socials?.ensNames || [], "name", "name"),
     ...getAddressItemsFromArray(
       socials?.unstoppableDomains || [],
@@ -195,8 +196,8 @@ export default function ProfileScreen({
       socials?.lensHandles || [],
       (l) => `lens-${l.handle}`,
       (l) => l.name || l.handle,
-      (l) => `Lens handle: ${l.handle}`,
-      (l) => `https://lenster.xyz/u/${l.handle}`,
+      (l) => `Lens handle: ${l.handle.replace(/\.lens$/, "")}`,
+      (l) => `https://hey.xyz/u/${l.handle.replace(/\.lens$/, "")}`,
       (l) => l.profilePictureURI
     ),
     ...getSocialItemsFromArray(

@@ -1,5 +1,6 @@
 import { ProfileSocials } from "../data/store/profilesStore";
 import { RecommendationData } from "../data/store/recommendationsStore";
+import { shortAddress } from "./str";
 
 export const getProfileData = (
   recommendationData?: RecommendationData,
@@ -22,3 +23,27 @@ export const getProfileData = (
     lensHandles,
   };
 };
+
+export function getPreferredName(options: {
+  lensHandle?: string | null;
+  userName?: string | null;
+  ensName?: string | null;
+  unsDomain?: string | null;
+  peerAddress: string;
+  preferLensHandle?: boolean;
+}): string {
+  const {
+    lensHandle,
+    userName,
+    ensName,
+    unsDomain,
+    peerAddress,
+    preferLensHandle = false,
+  } = options;
+
+  if (preferLensHandle && lensHandle) {
+    return lensHandle;
+  }
+
+  return userName || ensName || unsDomain || shortAddress(peerAddress);
+}

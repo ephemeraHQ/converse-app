@@ -24,11 +24,17 @@ export type UnstoppableDomain = {
   isPrimary: boolean;
 };
 
+export type UserName = {
+  name: string;
+  isPrimary: boolean;
+};
+
 export type ProfileSocials = {
   ensNames?: EnsName[];
   farcasterUsernames?: FarcasterUsername[];
   lensHandles?: LensHandle[];
   unstoppableDomains?: UnstoppableDomain[];
+  userNames?: UserName[];
 };
 
 export type ProfileByAddress = {

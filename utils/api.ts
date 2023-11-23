@@ -6,6 +6,7 @@ import {
   FarcasterUsername,
   LensHandle,
   UnstoppableDomain,
+  UserName,
 } from "../data/store/profilesStore";
 import { Frens } from "../data/store/recommendationsStore";
 import { getXmtpApiHeaders } from "../utils/xmtpRN/client";
@@ -45,7 +46,7 @@ api.interceptors.response.use(
 
 const lastSaveUser: { [address: string]: number } = {};
 
-export const saveUser = async (address: string) => {
+export const saveUser = async (address: string, privyAccountId?: string) => {
   const now = new Date().getTime();
   const last = lastSaveUser[address] || 0;
   if (now - last < 3000) {
@@ -54,7 +55,13 @@ export const saveUser = async (address: string) => {
     return;
   }
   lastSaveUser[address] = now;
-  await api.post("/api/user", { address });
+
+  await api.post(
+    "/api/user",
+    { address, privyAccountId }
+    // @todo make authenticated API calls
+    // { headers: await getXmtpApiHeaders(address) },
+  );
 };
 
 export const userExists = async (address: string) => {
@@ -117,6 +124,13 @@ export const getPeersStatus = async (account: string) => {
   return data as { [peerAddress: string]: "blocked" | "consented" };
 };
 
+export const resolveUserName = async (
+  name: string
+): Promise<string | undefined> => {
+  const { data } = await api.get("/api/profile/username", { params: { name } });
+  return data.address;
+};
+
 export const resolveEnsName = async (
   name: string
 ): Promise<string | undefined> => {
@@ -152,6 +166,7 @@ type Profile = {
   lensHandles?: LensHandle[];
   farcasterUsernames?: FarcasterUsername[];
   unstoppableDomains?: UnstoppableDomain[];
+  userNames?: UserName[];
 };
 
 export const getProfilesForAddresses = async (
@@ -246,6 +261,18 @@ export const postUSDCTransferAuthorization = async (
     }
   );
   return data.txHash;
+};
+
+export const claimUserName = async (
+  username: string,
+  userAddress: string
+): Promise<string> => {
+  const { data } = await api.post(
+    "/api/profile/username",
+    { username },
+    { headers: await getXmtpApiHeaders(userAddress) }
+  );
+  return data;
 };
 
 export default api;

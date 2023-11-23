@@ -56,6 +56,7 @@ const ENV = {
     appleAppGroup: "group.com.converse.dev",
     scheme: "converse-dev",
     websiteDomain: "dev.converse.xyz",
+    usernameSuffix: ".conversedev.eth",
     universalLinks: ["dev.converse.xyz/", "dev.getconverse.app/"].flatMap(
       (domain) => [`https://${domain}`, `http://${domain}`, domain]
     ),
@@ -70,6 +71,7 @@ const ENV = {
     appleAppGroup: "group.com.converse.preview",
     scheme: "converse-preview",
     websiteDomain: "preview.converse.xyz",
+    usernameSuffix: ".conversedev.eth",
     universalLinks: [
       "preview.converse.xyz/",
       "preview.getconverse.app/",
@@ -84,6 +86,7 @@ const ENV = {
     appleAppGroup: "group.com.converse.native",
     scheme: "converse",
     websiteDomain: "converse.xyz",
+    usernameSuffix: ".converse.xyz",
     universalLinks: ["converse.xyz/", "getconverse.app/"].flatMap((domain) => [
       `https://${domain}`,
       `http://${domain}`,

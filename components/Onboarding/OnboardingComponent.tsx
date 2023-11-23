@@ -84,7 +84,10 @@ export default function OnboardingComponent({
               <Button
                 title={primaryButtonText}
                 variant="primary"
-                style={[styles.primaryButton]}
+                style={{
+                  marginTop: "auto",
+                  marginBottom: !backButtonText ? 51 : 21,
+                }}
                 onPress={primaryButtonAction}
               />
             )}
@@ -96,7 +99,7 @@ export default function OnboardingComponent({
             title={backButtonText}
             textStyle={{ fontWeight: "600" }}
             style={{
-              marginBottom: 53,
+              marginBottom: 51,
               marginTop: primaryButtonText && !loading ? 0 : "auto",
             }}
             onPress={() => {
@@ -124,8 +127,8 @@ const useStyles = () => {
     picto: {
       ...Platform.select({
         default: {
-          marginTop: 124,
-          marginBottom: 98,
+          marginTop: 140,
+          marginBottom: 60,
         },
         android: {
           marginTop: 165,
@@ -164,14 +167,6 @@ const useStyles = () => {
           maxWidth: 260,
         },
       }),
-    },
-    back: {
-      marginTop: "auto",
-      marginBottom: 54,
-    },
-    primaryButton: {
-      marginBottom: 21,
-      marginTop: "auto",
     },
   });
 };
