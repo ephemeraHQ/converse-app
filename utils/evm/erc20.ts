@@ -130,21 +130,20 @@ const getDomain = async (
     name = await contract.name();
   }
 
-  // Bridged tokens on Polygon do not use EIP-3009
-  // Currently we use a bridged one on Mumbai but not Polygon mainnet (might change)
+  // If we want to use Polygon Bridged USDC...
   // https://ethereum.stackexchange.com/questions/141968/usdc-eip-3009-ethereum-and-polygon-code-mismatches
-  if (
-    chainId === 80001 &&
-    erc20ContractAddress.toLowerCase() ===
-      config.evm.USDC.contractAddress.toLowerCase()
-  ) {
-    return {
-      name,
-      version,
-      salt: ethers.utils.zeroPad(ethers.utils.arrayify(chainId), 32),
-      verifyingContract: ethers.utils.getAddress(erc20ContractAddress),
-    };
-  }
+  // if (
+  //   chainId === 80001 &&
+  //   erc20ContractAddress.toLowerCase() ===
+  //     config.evm.USDC.contractAddress.toLowerCase()
+  // ) {
+  //   return {
+  //     name,
+  //     version,
+  //     salt: ethers.utils.zeroPad(ethers.utils.arrayify(chainId), 32),
+  //     verifyingContract: ethers.utils.getAddress(erc20ContractAddress),
+  //   };
+  // }
   return {
     name,
     version,

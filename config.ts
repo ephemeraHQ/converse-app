@@ -32,10 +32,11 @@ const defaultConfig = {
     "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJkaWQ6ZXRocjoweDBBOTAxOTI0ZTE1NzNhM2RCYzhjNDk3YzlmQ0Q1QzAwZmU3NDAyQUEiLCJpc3MiOiJ3ZWIzLXN0b3JhZ2UiLCJpYXQiOjE2ODc4MDU0MTUxMDYsIm5hbWUiOiJDb252ZXJzZSBUZXN0In0.5ItNFvSEsXpv4NYG1Uwbw9mL5dVzNQeXefOkjQht3ns",
   privyAppId: "cloh5bn1p00q4l50gcg0g1mix",
   evm: {
-    transactionChainId: "0x13881", // Polygon Mumbai
+    transactionChainId: "0x14a33", // Base Goerli
     USDC: {
-      contractAddress: "0xe6b8a5CF854791412c1f6EFC7CAf629f5Df1c747", // Polygon Mumbai USDC
-      name: "Mumbai USD Coin",
+      contractAddress: "0x31d3a7711a74b4ec970f50c3eaf1ee47ba803a95", // Base Goerli USDC (NOTfrom doc)
+      // contractAddress: "0xf175520c52418dfe19c8098071a252da48cd1c19", // Base Goerli USDC (from doc)
+      name: "USD Coin",
       version: "2",
       decimals: 6,
     },
@@ -91,11 +92,11 @@ const ENV = {
     web3StorageToken:
       "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJkaWQ6ZXRocjoweGViMWU0NEJhYjU2MjYzYkI5Njk1OTVmYTk2RjU2MjRBOTUxRmJiNjUiLCJpc3MiOiJ3ZWIzLXN0b3JhZ2UiLCJpYXQiOjE2ODc4MDQ1ODIyMzMsIm5hbWUiOiJDb252ZXJzZSBBcHAifQ.S4FsNKkmFqp1OWhsxxauUTw82pKqCG3UXEjEYi1xvPM",
     evm: {
-      transactionChainId: "0x89", // Polygon Prod
+      transactionChainId: "0x2105", // Base Mainnet
       USDC: {
-        contractAddress: "0x3c499c542cEF5E3811e1192ce70d8cC03d5c3359", // Native Polygon Prod USDC (or Bridged 0x2791bca1f2de4661ed88a30c99a7a9449aa84174)
-        name: "Mumbai USD Coin",
-        version: "2", // Probably 1 for 0x2791bca1f2de4661ed88a30c99a7a9449aa84174
+        contractAddress: "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913", // Native Base USDC
+        name: "USD Coin",
+        version: "2",
         decimals: 6,
       },
     },

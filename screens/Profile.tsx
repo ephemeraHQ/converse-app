@@ -4,7 +4,7 @@ import { useDisconnect } from "@thirdweb-dev/react-native";
 import { ethers } from "ethers";
 import * as Clipboard from "expo-clipboard";
 import * as Linking from "expo-linking";
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import {
   StyleSheet,
   ScrollView,
@@ -16,6 +16,7 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
+import ActivityIndicator from "../components/ActivityIndicator/ActivityIndicator";
 import { showActionSheetWithOptions } from "../components/StateHandlers/ActionSheetStateHandler";
 import TableView, {
   TableViewItemType,
@@ -44,10 +45,11 @@ import {
   textPrimaryColor,
   textSecondaryColor,
 } from "../utils/colors";
-import { evmHelpers } from "../utils/evm/helpers";
+import { evmHelpers, usePrivySigner } from "../utils/evm/helpers";
 import { logout } from "../utils/logout";
 import { pick } from "../utils/objects";
 import { getIPFSAssetURI } from "../utils/thirdweb";
+import { refreshBalanceForAccounts } from "../utils/wallet";
 import { NavigationParamList } from "./Navigation/Navigation";
 
 export default function ProfileScreen({
@@ -74,6 +76,22 @@ export default function ProfileScreen({
   const socials = profiles[peerAddress]?.socials;
 
   const insets = useSafeAreaInsets();
+  const privySigner = usePrivySigner();
+  useEffect(() => {
+    refreshBalanceForAccounts(privySigner);
+  }, [privySigner]);
+
+  const [refreshingBalance, setRefreshingBalance] = useState(false);
+  const manuallyRefreshBalance = useCallback(async () => {
+    setRefreshingBalance(true);
+    const now = new Date().getTime();
+    await refreshBalanceForAccounts(privySigner);
+    const after = new Date().getTime();
+    if (after - now < 1000) {
+      await new Promise((r) => setTimeout(r, 1000 - after + now));
+    }
+    setRefreshingBalance(false);
+  }, [privySigner]);
 
   const getAddressItemsFromArray = useCallback(
     <T,>(array: T[], titleKey: string, valueKey: string) => {
@@ -230,14 +248,32 @@ export default function ProfileScreen({
               id: "balance",
               title: "Your balance",
               rightView: (
-                <Text style={styles.balance}>
-                  ${" "}
-                  {evmHelpers.fromDecimal(
-                    USDCBalance,
-                    config.evm.USDC.decimals
-                  )}
-                  {ethers.BigNumber.from(USDCBalance).isZero() ? " 🫤" : ""}
-                </Text>
+                <View style={styles.balanceContainer}>
+                  <Text style={styles.balance}>
+                    ${" "}
+                    {evmHelpers.fromDecimal(
+                      USDCBalance,
+                      config.evm.USDC.decimals
+                    )}
+                    {ethers.BigNumber.from(USDCBalance).isZero() ? " 🫤" : ""}
+                  </Text>
+                  <View style={{ width: 30 }}>
+                    {!refreshingBalance && (
+                      <View style={{ left: Platform.OS === "ios" ? 0 : -14 }}>
+                        <TableViewPicto
+                          symbol="arrow.clockwise"
+                          color={
+                            Platform.OS === "android"
+                              ? primaryColor(colorScheme)
+                              : undefined
+                          }
+                          onPress={manuallyRefreshBalance}
+                        />
+                      </View>
+                    )}
+                    {refreshingBalance && <ActivityIndicator />}
+                  </View>
+                </View>
               ),
             },
             {
@@ -404,9 +440,14 @@ const useStyles = () => {
       paddingHorizontal: Platform.OS === "ios" ? 18 : 0,
     },
     tableView: {},
+    balanceContainer: {
+      flexDirection: "row",
+      alignItems: "center",
+    },
     balance: {
       color: textPrimaryColor(colorScheme),
       fontSize: 17,
+      marginRight: 10,
     },
   });
 };
