@@ -53,7 +53,12 @@ export const deleteSubscribedTopics = (account: string) => {
 export const subscribeToNotifications = async (
   account: string
 ): Promise<void> => {
-  if (subscribingByAccount[account]) {
+  const {
+    sortedConversationsWithPreview,
+    topicsStatus,
+    conversationsSortedOnce,
+  } = getChatStore(account).getState();
+  if (subscribingByAccount[account] || !conversationsSortedOnce) {
     await new Promise((r) => setTimeout(r, 1000));
     await subscribeToNotifications(account);
     return;
@@ -62,8 +67,6 @@ export const subscribeToNotifications = async (
     subscribingByAccount[account] = true;
     const lastSubscribedTopics = lastSubscribedTopicsByAccount[account] || [];
 
-    const { sortedConversationsWithPreview, topicsStatus } =
-      getChatStore(account).getState();
     const { peersStatus } = getSettingsStore(account).getState();
 
     const isBlocked = (peerAddress: string) =>
