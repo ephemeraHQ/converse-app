@@ -267,17 +267,12 @@ export const claimUserName = async (
   username: string,
   userAddress: string
 ): Promise<string> => {
-  try {
-    const { data } = await api.post(
-      "/api/profile/username",
-      { username },
-      { headers: await getXmtpApiHeaders(userAddress) }
-    );
-    return data;
-  } catch (error: any) {
-    console.error("Error in claimUserName:", error);
-    throw error;
-  }
+  const { data } = await api.post(
+    "/api/profile/username",
+    { username },
+    { headers: await getXmtpApiHeaders(userAddress) }
+  );
+  return data;
 };
 
 export default api;
