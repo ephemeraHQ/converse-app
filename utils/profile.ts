@@ -43,9 +43,7 @@ export function getPreferredName(
   const unsDomain =
     socials?.unstoppableDomains?.find((d) => d.isPrimary)?.domain || null;
 
-  if (lensHandle && conversationId) {
-    return lensHandle;
-  }
-
-  return userName || ensName || unsDomain || shortAddress(peerAddress);
+  return (
+    lensHandle || userName || ensName || unsDomain || shortAddress(peerAddress)
+  );
 }
