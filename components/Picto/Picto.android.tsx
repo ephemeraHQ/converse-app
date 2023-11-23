@@ -24,6 +24,7 @@ import Menu from "@material-symbols/svg-400/outlined/menu.svg";
 import MoreVert from "@material-symbols/svg-400/outlined/more_vert.svg";
 import PersonSearch from "@material-symbols/svg-400/outlined/person_search.svg";
 import QrCodeScanner from "@material-symbols/svg-400/outlined/qr_code_scanner.svg";
+import Refresh from "@material-symbols/svg-400/outlined/refresh.svg";
 import Search from "@material-symbols/svg-400/outlined/search.svg";
 import Send from "@material-symbols/svg-400/outlined/send.svg";
 import Settings from "@material-symbols/svg-400/outlined/settings.svg";
@@ -84,6 +85,7 @@ const pictoMapping: {
   photo: Image,
   dollarsign: AttachMoney,
   gear: Settings,
+  "arrow.clockwise": Refresh,
 };
 
 export default function Picto({ picto, style, size, weight, color }: Props) {

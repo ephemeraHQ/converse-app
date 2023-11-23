@@ -1,6 +1,6 @@
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import * as Clipboard from "expo-clipboard";
-import { Image } from "expo-image";
+import * as Linking from "expo-linking";
 import { useEffect, useState } from "react";
 import {
   Platform,
@@ -13,12 +13,14 @@ import {
 } from "react-native";
 
 import AndroidBackAction from "../components/AndroidBackAction";
+import ConverseButton from "../components/Button/Button";
 import TableView from "../components/TableView/TableView";
 import { TableViewPicto } from "../components/TableView/TableViewImage";
 import config from "../config";
 import { useCurrentAccount } from "../data/store/accountsStore";
 import {
   backgroundColor,
+  listItemSeparatorColor,
   primaryColor,
   textPrimaryColor,
 } from "../utils/colors";
@@ -51,32 +53,23 @@ export default function TopUp({
 
   return (
     <View style={styles.topUp}>
-      <Image
-        source={require("../assets/top-up.png")}
-        style={styles.topUpImage}
+      <ConverseButton
+        variant="primary"
+        title="Bridge from any wallet"
+        style={styles.bridgeButton}
+        onPress={() => {
+          Linking.openURL(
+            `https://${config.websiteDomain}/bridge/${userAddress}`
+          );
+        }}
       />
-      <Text style={styles.title}>Read this</Text>
+      <View style={styles.separator} />
       <Text style={styles.p}>
-        Send the money to the <Text style={styles.bold}>right chain</Text> with
-        the <Text style={styles.bold}>right currency</Text>! And{" "}
-        <Text
-          style={styles.primary}
-          onPress={() => {
-            navigation.pop(2);
-            setTimeout(() => {
-              navigation.push("Conversation", {
-                mainConversationWithPeer: config.polAddress,
-              });
-            }, 300);
-          }}
-        >
-          ask me
-        </Text>{" "}
-        if you have no idea what I’m talking about.
+        Alternatively, if you want to do it by yourself, send{" "}
+        <Text style={styles.bold}>USDC</Text> (native, not USDbC) on the{" "}
+        <Text style={styles.bold}>Base</Text> blockchain to your address (see
+        address below).
       </Text>
-      <Text style={[styles.title, { marginBottom: 23 }]}>Chain = BASE</Text>
-      <Text style={styles.title}>Currency = USDC</Text>
-      <Text style={styles.p}>Not USDbC (bridged) or any other asset</Text>
       <TableView
         style={{ width: "100%" }}
         items={[
@@ -120,22 +113,19 @@ const useStyles = () => {
       paddingHorizontal: 32,
       alignItems: "center",
     },
-    topUpImage: {
-      width: 120,
-      height: 135,
-      marginVertical: 23,
+    bridgeButton: {
+      marginVertical: 46,
     },
-    title: {
-      color: textPrimaryColor(colorScheme),
-      fontSize: 34,
-      fontWeight: "700",
-      textAlign: "center",
+    separator: {
+      height: 1,
+      backgroundColor: listItemSeparatorColor(colorScheme),
+      width: "100%",
+      marginBottom: 46,
     },
     p: {
       color: textPrimaryColor(colorScheme),
       fontSize: 17,
       textAlign: "center",
-      marginTop: 17,
       marginBottom: 23,
     },
     bold: {
