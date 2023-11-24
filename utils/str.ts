@@ -84,15 +84,7 @@ export const useAccountsProfiles = () => {
   const handleAccount = useCallback(
     (account: string, state: ProfilesStoreType) => {
       const socials = state.profiles[account]?.socials;
-      const readableProfile = getPreferredName({
-        lensHandle: null,
-        userName: socials?.userNames?.find((e) => e.isPrimary)?.name || null,
-        ensName: socials?.ensNames?.find((e) => e.isPrimary)?.name || null,
-        unsDomain:
-          socials?.unstoppableDomains?.find((e) => e.isPrimary)?.domain || null,
-        peerAddress: account,
-        preferLensHandle: false,
-      });
+      const readableProfile = getPreferredName(socials, account);
 
       if (accountsProfiles[account] !== readableProfile) {
         setAccountsProfiles((s) => ({
