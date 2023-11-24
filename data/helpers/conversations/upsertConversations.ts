@@ -1,7 +1,6 @@
 import { In } from "typeorm/browser";
 
 import { topicToNavigateTo } from "../../../components/StateHandlers/InitialStateHandler";
-import { getLensHandleFromConversationIdAndPeer } from "../../../utils/lens";
 import { navigateToConversation } from "../../../utils/navigation";
 import { saveConversationIdentifiersForNotifications } from "../../../utils/notifications";
 import { getPreferredName } from "../../../utils/profile";
@@ -108,21 +107,11 @@ const setupAndSaveConversations = async (
       getProfilesStore(account).getState().profiles[conversation.peerAddress]
         ?.socials;
 
-    conversation.conversationTitle = getPreferredName({
-      lensHandle:
-        getLensHandleFromConversationIdAndPeer(
-          conversation.context?.conversationId,
-          profileSocials?.lensHandles
-        ) || null,
-      userName:
-        profileSocials?.userNames?.find((e) => e.isPrimary)?.name || null,
-      ensName: profileSocials?.ensNames?.find((e) => e.isPrimary)?.name || null,
-      unsDomain:
-        profileSocials?.unstoppableDomains?.find((d) => d.isPrimary)?.domain ||
-        null,
-      peerAddress: conversation.peerAddress,
-      preferLensHandle: true,
-    });
+    conversation.conversationTitle = getPreferredName(
+      profileSocials,
+      conversation.peerAddress,
+      conversation.context?.conversationId
+    );
 
     conversation.readUntil =
       conversation.readUntil ||

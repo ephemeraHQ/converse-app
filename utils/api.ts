@@ -1,13 +1,7 @@
 import axios from "axios";
 
 import config from "../config";
-import {
-  EnsName,
-  FarcasterUsername,
-  LensHandle,
-  UnstoppableDomain,
-  UserName,
-} from "../data/store/profilesStore";
+import { ProfileSocials } from "../data/store/profilesStore";
 import { Frens } from "../data/store/recommendationsStore";
 import { getXmtpApiHeaders } from "../utils/xmtpRN/client";
 import { TransferAuthorizationMessage } from "./evm/erc20";
@@ -161,17 +155,9 @@ export const resolveFarcasterUsername = async (
   return data.address;
 };
 
-type Profile = {
-  ensNames?: EnsName[];
-  lensHandles?: LensHandle[];
-  farcasterUsernames?: FarcasterUsername[];
-  unstoppableDomains?: UnstoppableDomain[];
-  userNames?: UserName[];
-};
-
 export const getProfilesForAddresses = async (
   addresses: string[]
-): Promise<{ [address: string]: Profile }> => {
+): Promise<{ [address: string]: ProfileSocials }> => {
   const { data } = await api.post("/api/profile/batch", {
     addresses,
   });

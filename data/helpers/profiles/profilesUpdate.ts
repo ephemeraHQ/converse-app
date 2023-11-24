@@ -1,5 +1,4 @@
 import { getProfilesForAddresses } from "../../../utils/api";
-import { getLensHandleFromConversationIdAndPeer } from "../../../utils/lens";
 import { saveConversationIdentifiersForNotifications } from "../../../utils/notifications";
 import { getPreferredName } from "../../../utils/profile";
 import { getRepository } from "../../db";
@@ -63,25 +62,13 @@ export const updateProfilesForConversations = async (
       try {
         const profileForConversation =
           profilesByAddress[conversation.peerAddress];
-        const newTitle = getPreferredName({
-          lensHandle: profileForConversation
-            ? getLensHandleFromConversationIdAndPeer(
-                conversation.context?.conversationId,
-                profileForConversation.lensHandles
-              )
-            : null,
-          userName:
-            profileForConversation?.userNames?.find((e) => e.isPrimary)?.name ||
-            null,
-          ensName:
-            profileForConversation?.ensNames?.find((e) => e.isPrimary)?.name ||
-            null,
-          unsDomain:
-            profileForConversation?.unstoppableDomains?.find((d) => d.isPrimary)
-              ?.domain || null,
-          peerAddress: conversation.peerAddress,
-          preferLensHandle: true,
-        });
+
+        const newTitle = getPreferredName(
+          profileForConversation,
+          conversation.peerAddress,
+          conversation.context?.conversationId
+        );
+
         if (newTitle !== currentTitle) {
           updated = true;
         }

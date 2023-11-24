@@ -1,5 +1,6 @@
 import { ProfileSocials } from "../data/store/profilesStore";
 import { RecommendationData } from "../data/store/recommendationsStore";
+import { getLensHandleFromConversationIdAndPeer } from "./lens";
 import { shortAddress } from "./str";
 
 export const getProfileData = (
@@ -24,26 +25,25 @@ export const getProfileData = (
   };
 };
 
-export function getPreferredName(options: {
-  lensHandle?: string | null;
-  userName?: string | null;
-  ensName?: string | null;
-  unsDomain?: string | null;
-  peerAddress: string;
-  preferLensHandle?: boolean;
-}): string {
-  const {
-    lensHandle,
-    userName,
-    ensName,
-    unsDomain,
-    peerAddress,
-    preferLensHandle = false,
-  } = options;
+export function getPreferredName(
+  socials: ProfileSocials | undefined,
+  peerAddress: string,
+  conversationId?: string | null
+): string {
+  const lensHandle =
+    conversationId && socials?.lensHandles
+      ? getLensHandleFromConversationIdAndPeer(
+          conversationId,
+          socials.lensHandles
+        ) || null
+      : null;
 
-  if (preferLensHandle && lensHandle) {
-    return lensHandle;
-  }
+  const userName = socials?.userNames?.find((e) => e.isPrimary)?.name || null;
+  const ensName = socials?.ensNames?.find((e) => e.isPrimary)?.name || null;
+  const unsDomain =
+    socials?.unstoppableDomains?.find((d) => d.isPrimary)?.domain || null;
 
-  return userName || ensName || unsDomain || shortAddress(peerAddress);
+  return (
+    lensHandle || userName || ensName || unsDomain || shortAddress(peerAddress)
+  );
 }
