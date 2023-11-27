@@ -84,7 +84,11 @@ export const loadConversationsMessages = async (
 
     while (Object.keys(queryConversationsFromTimestamp).length > 0) {
       const topicsToQuery = Object.keys(queryConversationsFromTimestamp);
-      addLog(`4. Loading messages for ${topicsToQuery.length} conversations`);
+      addLog(
+        `4. Loading messages for ${
+          topicsToQuery.length
+        } conversations: ${JSON.stringify(queryConversationsFromTimestamp)}`
+      );
 
       // We want to find out which topic breaks everything
       const newTopicsToQuery = [...topicsToQuery];
