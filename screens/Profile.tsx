@@ -238,7 +238,7 @@ export default function ProfileScreen({
               ),
             },
           ]}
-          title="FLEX CONVERSE"
+          title="YOU'RE THE OG"
           style={styles.tableView}
         />
       )}
@@ -254,7 +254,8 @@ export default function ProfileScreen({
                     ${" "}
                     {evmHelpers.fromDecimal(
                       USDCBalance,
-                      config.evm.USDC.decimals
+                      config.evm.USDC.decimals,
+                      2
                     )}
                     {ethers.BigNumber.from(USDCBalance).isZero() ? " 🫤" : ""}
                   </Text>
@@ -299,7 +300,7 @@ export default function ProfileScreen({
       {usernamesItems.length > 0 && (
         <TableView
           items={usernamesItems}
-          title="USERNAMES"
+          title={`USERNAME${usernamesItems.length > 1 ? "S" : ""}`}
           style={styles.tableView}
         />
       )}
