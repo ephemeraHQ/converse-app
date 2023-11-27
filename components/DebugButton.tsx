@@ -2,7 +2,6 @@ import { useEmbeddedWallet, usePrivy } from "@privy-io/expo";
 import { Client } from "@xmtp/react-native-sdk";
 import axios from "axios";
 import * as Clipboard from "expo-clipboard";
-import * as SecureStore from "expo-secure-store";
 import * as Updates from "expo-updates";
 import { forwardRef, useImperativeHandle } from "react";
 import RNFS from "react-native-fs";
@@ -16,7 +15,7 @@ import {
   useCurrentAccount,
 } from "../data/store/accountsStore";
 import { usePrivySigner } from "../utils/evm/helpers";
-import { deleteXmtpKey } from "../utils/keychain";
+import { deleteXmtpKey, getSecureItemAsync } from "../utils/keychain";
 import { logout } from "../utils/logout";
 import mmkv from "../utils/mmkv";
 import { showActionSheetWithOptions } from "./StateHandlers/ActionSheetStateHandler";
@@ -52,7 +51,7 @@ const DebugButton = forwardRef((props, ref) => {
             "privy-session_transfer_token",
           ];
           const values = await Promise.all(
-            keys.map((k) => SecureStore.getItemAsync(k))
+            keys.map((k) => getSecureItemAsync(k))
           );
           let result = `Privy ready: ${privyReady}\nPrivyUser: ${!!privyUser}\nEmbedded wallet status: ${
             embeddedWallet.status
