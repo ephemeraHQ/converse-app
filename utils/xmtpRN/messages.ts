@@ -85,14 +85,31 @@ export const loadConversationsMessages = async (
     while (Object.keys(queryConversationsFromTimestamp).length > 0) {
       const topicsToQuery = Object.keys(queryConversationsFromTimestamp);
       addLog(`4. Loading messages for ${topicsToQuery.length} conversations`);
-      const messagesBatch = await client.listBatchMessages(
-        topicsToQuery.map((topic) => ({
+
+      // We want to find out which topic breaks everything
+      const newTopicsToQuery = [...topicsToQuery];
+      let messagesBatch = await client.listBatchMessages(
+        newTopicsToQuery.map((topic) => ({
           contentTopic: topic,
           startTime: new Date(queryConversationsFromTimestamp[topic]),
           pageSize: BATCH_QUERY_PAGE_SIZE,
           direction: "SORT_DIRECTION_ASCENDING",
         }))
       );
+      while (messagesBatch.length === 0 && newTopicsToQuery.length >= 1) {
+        const topic = newTopicsToQuery.pop();
+        messagesBatch = await client.listBatchMessages(
+          newTopicsToQuery.map((topic) => ({
+            contentTopic: topic,
+            startTime: new Date(queryConversationsFromTimestamp[topic]),
+            pageSize: BATCH_QUERY_PAGE_SIZE,
+            direction: "SORT_DIRECTION_ASCENDING",
+          }))
+        );
+        if (messagesBatch.length !== 0) {
+          addLog(`4.5 Removing topic ${topic} fixed the issue`);
+        }
+      }
       addLog(`5. Fetched ${messagesBatch.length} messages from network`);
 
       console.log(

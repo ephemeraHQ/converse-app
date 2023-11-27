@@ -99,7 +99,7 @@ export const syncXmtpClient = async (account: string) => {
   try {
     const now = new Date().getTime();
     const { newConversations } = await loadConversations(client, knownTopics);
-    addLog(`3. Got ${newConversations} new conversations`);
+    addLog(`3. Got ${newConversations.length} new conversations`);
     newConversations.forEach((c) => {
       queryConversationsFromTimestamp[c.topic] = 0;
     });
