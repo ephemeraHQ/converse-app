@@ -156,14 +156,14 @@ export default function ChatTransactionInput() {
         if (txReceipt.status === 1) {
           // This is success
           setTxStatus({ status: "success", canCancel: false });
+          refreshBalanceForAccounts(privySigner);
+          await new Promise((r) => setTimeout(r, 2000));
           sendMessage(
             conversation,
             `💸💸💸  just sent you $${evmHelpers
               .fromDecimal(transactionValue.value, config.evm.USDC.decimals)
               .toString()}`
           );
-          refreshBalanceForAccounts(privySigner);
-          await new Promise((r) => setTimeout(r, 2000));
           setTransactionMode(false);
         } else {
           // This is failure

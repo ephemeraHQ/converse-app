@@ -64,10 +64,15 @@ export const evmHelpers = {
       .replace(/\.0$/, "");
   },
   // This converts a string representation from a unit value to a higher base
-  fromDecimal: (num: string, decimals: number) => {
-    return ethers.utils
+  fromDecimal: (num: string, decimals: number, precision?: number) => {
+    const stringResult = ethers.utils
       .formatUnits(ethers.BigNumber.from(num), decimals)
       .replace(/\.0$/, "");
+    if (precision === undefined) {
+      return stringResult;
+    } else {
+      return parseFloat(stringResult).toFixed(precision);
+    }
   },
   isInfiniteKeys: (value: string) => {
     return ethers.BigNumber.from(value).eq(ethers.constants.MaxUint256);

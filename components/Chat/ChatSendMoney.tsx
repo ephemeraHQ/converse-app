@@ -40,7 +40,7 @@ const useStyles = () => {
           height: 27,
         },
         android: {
-          paddingBottom: 8,
+          paddingBottom: 6,
           width: 27,
           height: 27,
         },

@@ -25,7 +25,6 @@ import OnboardingComponent from "./OnboardingComponent";
 
 export const UsernameSelector = () => {
   const [username, setUsername] = useState<string>("");
-  const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const userAddress = useCurrentAccount();
   const colorScheme = useColorScheme();
@@ -34,6 +33,7 @@ export const UsernameSelector = () => {
   const profileFetched = useProfilesStore((s) =>
     userAddress ? !!s.profiles[userAddress] : false
   );
+  const [isLoading, setIsLoading] = useState(!profileFetched);
   useEffect(() => {
     if (profileFetched) {
       setIsLoading(false);
