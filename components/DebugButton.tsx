@@ -1,7 +1,8 @@
-import { useEmbeddedWallet } from "@privy-io/expo";
+import { useEmbeddedWallet, usePrivy } from "@privy-io/expo";
 import { Client } from "@xmtp/react-native-sdk";
 import axios from "axios";
 import * as Clipboard from "expo-clipboard";
+import * as SecureStore from "expo-secure-store";
 import * as Updates from "expo-updates";
 import { forwardRef, useImperativeHandle } from "react";
 import RNFS from "react-native-fs";
@@ -14,8 +15,6 @@ import {
   getAccountsList,
   useCurrentAccount,
 } from "../data/store/accountsStore";
-import { postUSDCTransferAuthorization } from "../utils/api";
-import { getTransferAuthorization } from "../utils/evm/erc20";
 import { usePrivySigner } from "../utils/evm/helpers";
 import { deleteXmtpKey } from "../utils/keychain";
 import { logout } from "../utils/logout";
@@ -38,34 +37,32 @@ export const useEnableDebug = () => {
 const DebugButton = forwardRef((props, ref) => {
   const embeddedWallet = useEmbeddedWallet();
   const privySigner = usePrivySigner();
+  const { isReady: privyReady, user: privyUser } = usePrivy();
   // The component instance will be extended
   // with whatever you return from the callback passed
   // as the second argument
   useImperativeHandle(ref, () => ({
     showDebugMenu() {
       const methods: any = {
-        Balance: async () => {
-          if (embeddedWallet.status === "connected" && privySigner) {
-            const now = new Date().getTime();
-            const result = await getTransferAuthorization(
-              config.evm.USDC.contractAddress,
-              "1000000",
-              "0x2376e9C7C604D1827bA9aCb1293Dc8b4DA2f0DB3",
-              privySigner
-            );
-
-            const txHash = await postUSDCTransferAuthorization(
-              currentAccount(),
-              result.message,
-              result.signature
-            );
-
-            const receipt = await privySigner.provider.waitForTransaction(
-              txHash
-            );
-            console.log(receipt.status === 1);
-            console.log(`Took ${(new Date().getTime() - now) / 1000} seconds`);
-          }
+        Privy: async () => {
+          const keys = [
+            "privy-token",
+            "privy-refresh_token",
+            "privy-session",
+            "privy-session_transfer_token",
+          ];
+          const values = await Promise.all(
+            keys.map((k) => SecureStore.getItemAsync(k))
+          );
+          let result = `Privy ready: ${privyReady}\nPrivyUser: ${!!privyUser}\nEmbedded wallet status: ${
+            embeddedWallet.status
+          }\nprivySigner: ${!!privySigner}`;
+          keys.forEach((k, i) => {
+            const v = values[i];
+            result = `${result}\n${k}:${v}\n`;
+          });
+          alert(result);
+          Clipboard.setStringAsync(result);
         },
         "Export db file": async () => {
           const dbPath = await getDbPath(currentAccount());
