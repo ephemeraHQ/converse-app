@@ -27,6 +27,7 @@ import {
   MaterialDarkTheme,
   MaterialLightTheme,
 } from "./utils/colors";
+import { privySecureStorage } from "./utils/keychain";
 import mmkv from "./utils/mmkv";
 import { DEFAULT_EMOJIS, RECENT_EMOJI_STORAGE_KEY } from "./utils/reactions";
 import { initSentry, sentryTrackError } from "./utils/sentry";
@@ -80,7 +81,7 @@ export default function App() {
     Platform.OS === "ios" ? KeyboardProvider : React.Fragment;
 
   return (
-    <PrivyProvider appId={config.privyAppId}>
+    <PrivyProvider appId={config.privyAppId} storage={privySecureStorage}>
       <ThirdwebProvider
         activeChain={Ethereum}
         dAppMeta={{

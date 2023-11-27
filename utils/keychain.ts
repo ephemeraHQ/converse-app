@@ -1,3 +1,4 @@
+import type { Storage as PrivyStorage } from "@privy-io/js-sdk-core";
 import { createHash } from "crypto";
 import * as SecureStore from "expo-secure-store";
 
@@ -8,28 +9,33 @@ export const secureStoreOptions: SecureStore.SecureStoreOptions = {
   keychainAccessible: SecureStore.AFTER_FIRST_UNLOCK,
 };
 
+export const setSecureItemAsync = (key: string, value: string) =>
+  SecureStore.setItemAsync(key, value, secureStoreOptions);
+
+export const getSecureItemAsync = (key: string) =>
+  SecureStore.getItemAsync(key, secureStoreOptions);
+
+export const deleteSecureItemAsync = (key: string) =>
+  SecureStore.deleteItemAsync(key, secureStoreOptions);
+
 export const saveXmtpKey = (account: string, base64Key: string) =>
-  SecureStore.setItemAsync(
-    `XMTP_KEY_${account}`,
-    base64Key,
-    secureStoreOptions
-  );
+  setSecureItemAsync(`XMTP_KEY_${account}`, base64Key);
 
 export const deleteXmtpKey = async (account: string) => {
-  await SecureStore.deleteItemAsync(`XMTP_KEY_${account}`, secureStoreOptions);
+  await deleteSecureItemAsync(`XMTP_KEY_${account}`);
   console.log(`[Keychain] Deleted XMTP Key for account ${account}`);
 };
 
 export const loadXmtpKey = async (account: string): Promise<string | null> =>
-  SecureStore.getItemAsync(`XMTP_KEY_${account}`, secureStoreOptions);
+  getSecureItemAsync(`XMTP_KEY_${account}`);
 
 // Faster than saving if already exists
 const saveIfNotExists = async (key: string, value: string) => {
-  const alreadyExists = await SecureStore.getItemAsync(key, secureStoreOptions);
+  const alreadyExists = await getSecureItemAsync(key);
   if (alreadyExists) {
     return;
   }
-  await SecureStore.setItemAsync(key, value, secureStoreOptions);
+  await setSecureItemAsync(key, value);
 };
 
 export const saveTopicDataToKeychain = async (
@@ -62,12 +68,7 @@ export const getTopicDataFromKeychain = async (
     createHash("sha256").update(topic).digest("hex")
   );
   const keychainValues = await Promise.all(
-    keys.map((key) =>
-      SecureStore.getItemAsync(
-        `XMTP_TOPIC_DATA_${account}_${key}`,
-        secureStoreOptions
-      )
-    )
+    keys.map((key) => getSecureItemAsync(`XMTP_TOPIC_DATA_${account}_${key}`))
   );
   const topicData = keychainValues.filter((v) => !!v) as string[];
   return topicData;
@@ -80,23 +81,20 @@ export const deleteConversationsFromKeychain = async (
   const promises: Promise<void>[] = [];
   for (const topic of topics) {
     const key = createHash("sha256").update(topic).digest("hex");
-    promises.push(
-      SecureStore.deleteItemAsync(
-        `XMTP_TOPIC_DATA_${account}_${key}`,
-        secureStoreOptions
-      )
-    );
+    promises.push(deleteSecureItemAsync(`XMTP_TOPIC_DATA_${account}_${key}`));
     // Delete old version of the data (TODO => remove)
-    promises.push(
-      SecureStore.deleteItemAsync(
-        `XMTP_CONVERSATION_${key}`,
-        secureStoreOptions
-      )
-    );
+    promises.push(deleteSecureItemAsync(`XMTP_CONVERSATION_${key}`));
   }
   await Promise.all(promises);
 };
 
 export const savePushToken = async (pushKey: string) => {
-  await SecureStore.setItemAsync("PUSH_TOKEN", pushKey, secureStoreOptions);
+  await setSecureItemAsync("PUSH_TOKEN", pushKey);
+};
+
+export const privySecureStorage: PrivyStorage = {
+  get: (key) => getSecureItemAsync(key.replaceAll(":", "-")),
+  put: (key, val: string) => setSecureItemAsync(key.replaceAll(":", "-"), val),
+  del: (key) => deleteSecureItemAsync(key.replaceAll(":", "-")),
+  getKeys: async () => [],
 };
