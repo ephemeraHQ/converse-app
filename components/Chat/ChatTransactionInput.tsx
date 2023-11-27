@@ -158,7 +158,7 @@ export default function ChatTransactionInput() {
           setTxStatus({ status: "success", canCancel: false });
           sendMessage(
             conversation,
-            `💸💸💸 just sent you  $${evmHelpers
+            `💸💸💸  just sent you $${evmHelpers
               .fromDecimal(transactionValue.value, config.evm.USDC.decimals)
               .toString()}`
           );
