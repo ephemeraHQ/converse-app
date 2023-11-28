@@ -42,8 +42,22 @@ export const UsernameSelector = () => {
 
   const handleContinue = useCallback(async () => {
     try {
-      setIsLoading(true);
+      // Allow only alphanumeric and limit to 30 chars
+      if (!/^[a-zA-Z0-9]*$/.test(username)) {
+        setErrorMessage("Your username can only contain letters and numbers");
+        return;
+      }
+
+      // Only allow usernames between 3-30 characters long
+      if (username.length < 3 || username.length > 30) {
+        setErrorMessage(
+          "Your user name must be between 3 and 30 characters long"
+        );
+        return;
+      }
+
       if (userAddress) {
+        setIsLoading(true);
         await claimUserName(username, userAddress);
         await refreshProfileForAddress(userAddress, userAddress);
       }
@@ -68,13 +82,9 @@ export const UsernameSelector = () => {
         <TextInput
           style={[textInputStyle(colorScheme), styles.usernameInput]}
           onChangeText={(text) => {
-            // Allow only alphanumeric and limit to 30 chars
-            const safeUserName = text
-              .split("")
-              .filter((char) => /^[a-zA-Z0-9]*$/.test(char))
-              .join("")
-              .slice(0, 30);
-            setUsername(safeUserName);
+            // Limit the username to 30 characters
+            const trimmedUsername = text.slice(0, 30);
+            setUsername(trimmedUsername);
           }}
           value={username}
           placeholder="username"
