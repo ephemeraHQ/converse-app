@@ -296,7 +296,9 @@ export default function ChatTransactionInput() {
             {txStatus.status === "sending" && (
               <View style={styles.sendingIndicator}>
                 <ActivityIndicator size="small" style={{ marginRight: 10 }} />
-                <Text style={styles.bottomMessageText}>Sending...</Text>
+                <Text style={styles.bottomMessageText}>
+                  {amountPreviewText}Sending...
+                </Text>
               </View>
             )}
           </View>
