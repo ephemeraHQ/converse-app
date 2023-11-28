@@ -290,7 +290,7 @@ export default function ChatTransactionInput() {
             )}
             {txStatus.status === "failure" && (
               <Text style={styles.bottomMessageText}>
-                {amountPreviewText}☹️ error - your money was not sent
+                ☹️ error - your money was not sent
               </Text>
             )}
             {txStatus.status === "sending" && (
