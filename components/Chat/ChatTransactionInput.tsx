@@ -195,6 +195,13 @@ export default function ChatTransactionInput() {
     }, 300);
   }, [navigation]);
 
+  const amountPreviewText = transactionValue.valid
+    ? `${evmHelpers.fromDecimal(
+        transactionValue.value,
+        config.evm.USDC.decimals
+      )} USDC - `
+    : "0.00 USDC - ";
+
   return (
     <View style={styles.transactionInputContainer}>
       <TouchableOpacity
@@ -272,14 +279,18 @@ export default function ChatTransactionInput() {
               </Text>
             )}
             {!txStatus.status && !transactionValue.overBalance && (
-              <Text style={styles.bottomMessageText}>No fee 😉</Text>
+              <Text style={styles.bottomMessageText}>
+                {amountPreviewText}No fee 😉
+              </Text>
             )}
             {txStatus.status === "success" && (
-              <Text style={styles.bottomMessageText}>🥳 Sent</Text>
+              <Text style={styles.bottomMessageText}>
+                {amountPreviewText}🥳 Sent
+              </Text>
             )}
             {txStatus.status === "failure" && (
               <Text style={styles.bottomMessageText}>
-                ☹️ error - your money was not sent
+                {amountPreviewText}☹️ error - your money was not sent
               </Text>
             )}
             {txStatus.status === "sending" && (

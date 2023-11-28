@@ -99,7 +99,7 @@ export default function WalletSelector() {
     <OnboardingComponent
       title="GM"
       picto="message.circle.fill"
-      subtitle="Converse connects web3 identities with each other. Connect your wallet to start chatting."
+      subtitle="Converse lets you communicate and transact freely and safely."
     >
       <View
         style={[

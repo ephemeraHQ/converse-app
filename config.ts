@@ -21,7 +21,7 @@ const defaultConfig = {
     dappMetadata: {
       name: "Converse",
       description:
-        "Converse connects web3 identities with each other via messaging.",
+        "Converse lets you communicate and transact freely and safely.",
       url: "https://converse.xyz",
       logoUrl: "https://converse.xyz/icon.png",
     },
