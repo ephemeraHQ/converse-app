@@ -3,12 +3,14 @@ import { Platform } from "react-native";
 
 const defaultConfig = {
   debugMenu: false,
-  polAddress: "0xf9a3BB070c1f9b3186A547DeD991BeD04a289C5B",
+  polAddress: "0xc50E761C35E731d3A475eeB1e30CB917eDaFE187", // pol.converse.xyz
   debugAddresses: [
-    "0xf9a3BB070c1f9b3186A547DeD991BeD04a289C5B",
-    "0x4496848684441C15A915fa9bF07D131155603253",
-    "0x2376e9C7C604D1827bA9aCb1293Dc8b4DA2f0DB3",
-    "0xFA08a80e822F7FA002c4Ae81b7a6De7cE79499dB",
+    "0xf9a3BB070c1f9b3186A547DeD991BeD04a289C5B", // polmaire.eth
+    "0xc50E761C35E731d3A475eeB1e30CB917eDaFE187", // pol.converse.xyz
+    "0xd3f4Ab0210235e639290B3E1284198bcE42FaA7D", // 0xno12.converse.xyz
+    "0x4496848684441C15A915fa9bF07D131155603253", // No12 first address
+    "0x2376e9C7C604D1827bA9aCb1293Dc8b4DA2f0DB3", // 0xno12.eth
+    "0xFA08a80e822F7FA002c4Ae81b7a6De7cE79499dB", // lourou.eth
   ],
   conversationDomain: "converse.xyz",
   infuraApiKey: "38f59a7bbbca49f18046ff3a4a752e1c",
