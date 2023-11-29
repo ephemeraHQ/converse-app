@@ -1,7 +1,6 @@
 import { usePrivy } from "@privy-io/expo";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useDisconnect } from "@thirdweb-dev/react-native";
-import { ethers } from "ethers";
 import * as Clipboard from "expo-clipboard";
 import * as Linking from "expo-linking";
 import React, { useCallback, useEffect, useState } from "react";
@@ -247,17 +246,16 @@ export default function ProfileScreen({
           items={[
             {
               id: "balance",
-              title: "Your balance",
+              title: "Your balance (USDC)",
               rightView: (
                 <View style={styles.balanceContainer}>
                   <Text style={styles.balance}>
-                    ${" "}
+                    $
                     {evmHelpers.fromDecimal(
                       USDCBalance,
                       config.evm.USDC.decimals,
                       2
                     )}
-                    {ethers.BigNumber.from(USDCBalance).isZero() ? " 🫤" : ""}
                   </Text>
                   <View style={{ width: 30 }}>
                     {!refreshingBalance && (
