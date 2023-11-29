@@ -143,6 +143,7 @@ const useStyles = () => {
     chatInputContainer: {
       backgroundColor: backgroundColor(colorScheme),
       flexDirection: "row",
+      paddingBottom: 8,
     },
     chatInput: {
       backgroundColor:
