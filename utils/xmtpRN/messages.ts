@@ -4,7 +4,6 @@ import {
   RemoteAttachmentContent,
 } from "@xmtp/react-native-sdk";
 
-import { addLog } from "../../components/DebugButton";
 import { saveMessages } from "../../data/helpers/messages";
 import { XmtpMessage } from "../../data/store/chatStore";
 import { sentryTrackError } from "../sentry";
@@ -84,15 +83,10 @@ export const loadConversationsMessages = async (
 
     while (Object.keys(queryConversationsFromTimestamp).length > 0) {
       const topicsToQuery = Object.keys(queryConversationsFromTimestamp);
-      addLog(
-        `4. Loading messages for ${
-          topicsToQuery.length
-        } conversations: ${JSON.stringify(queryConversationsFromTimestamp)}`
-      );
 
       // We want to find out which topic breaks everything
       const newTopicsToQuery = [...topicsToQuery];
-      let messagesBatch = await client.listBatchMessages(
+      const messagesBatch = await client.listBatchMessages(
         newTopicsToQuery.map((topic) => ({
           contentTopic: topic,
           startTime: new Date(queryConversationsFromTimestamp[topic]),
@@ -100,21 +94,6 @@ export const loadConversationsMessages = async (
           direction: "SORT_DIRECTION_ASCENDING",
         }))
       );
-      while (messagesBatch.length === 0 && newTopicsToQuery.length >= 1) {
-        const topic = newTopicsToQuery.pop();
-        messagesBatch = await client.listBatchMessages(
-          newTopicsToQuery.map((topic) => ({
-            contentTopic: topic,
-            startTime: new Date(queryConversationsFromTimestamp[topic]),
-            pageSize: BATCH_QUERY_PAGE_SIZE,
-            direction: "SORT_DIRECTION_ASCENDING",
-          }))
-        );
-        if (messagesBatch.length !== 0) {
-          addLog(`4.5 Removing topic ${topic} fixed the issue`);
-        }
-      }
-      addLog(`5. Fetched ${messagesBatch.length} messages from network`);
 
       console.log(
         `[XmtpRn] Fetched ${messagesBatch.length} messages from network for ${client.address}`
@@ -154,23 +133,19 @@ export const loadConversationsMessages = async (
           console.log(
             "[XmtpRn] Avoiding a loop during sync due to weird timestamps"
           );
-          addLog(`6. Avoiding a loop`);
           queryConversationsFromTimestamp[topic] += 1;
         }
       });
 
       messagesBatch.sort((messageA, messageB) => messageA.sent - messageB.sent);
       messagesFetched += messagesBatch.length;
-      addLog(`7. Saving ${messagesBatch.length} messages`);
       saveMessages(
         client.address,
         messagesBatch.map(protocolMessageToStateMessage)
       );
     }
-    addLog(`8. Fetched ${messagesFetched} messages from network`);
     return messagesFetched;
   } catch (e: any) {
-    addLog(`9. Got an error while loading messages : ${e.toString()}`);
     sentryTrackError(e);
     throw e;
   }

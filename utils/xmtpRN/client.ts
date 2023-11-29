@@ -73,7 +73,6 @@ const onSyncLost = async (account: string, error: any) => {
 const streamingAccounts: { [account: string]: boolean } = {};
 
 export const syncXmtpClient = async (account: string) => {
-  addLog("1. Called syncXmtpClient");
   const lastSyncedAt = getChatStore(account).getState().lastSyncedAt || 0;
 
   // We just introduced lastSyncedTopics so it might be empty at first
@@ -90,7 +89,6 @@ export const syncXmtpClient = async (account: string) => {
     knownTopics: knownTopics.length,
   });
   const client = await getXmtpClient(account);
-  addLog("2. Got XMTP Client");
 
   const queryConversationsFromTimestamp: { [topic: string]: number } = {};
   knownTopics.forEach((topic) => {
@@ -99,7 +97,6 @@ export const syncXmtpClient = async (account: string) => {
   try {
     const now = new Date().getTime();
     const { newConversations } = await loadConversations(client, knownTopics);
-    addLog(`3. Got ${newConversations.length} new conversations`);
     newConversations.forEach((c) => {
       queryConversationsFromTimestamp[c.topic] = 0;
     });

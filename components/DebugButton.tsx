@@ -1,5 +1,5 @@
 import { useEmbeddedWallet, usePrivy } from "@privy-io/expo";
-import { Client } from "@xmtp/react-native-sdk";
+import { Client, DecodedMessage } from "@xmtp/react-native-sdk";
 import axios from "axios";
 import * as Clipboard from "expo-clipboard";
 import * as Updates from "expo-updates";
@@ -18,6 +18,7 @@ import { usePrivySigner } from "../utils/evm/helpers";
 import { deleteXmtpKey, getSecureItemAsync } from "../utils/keychain";
 import { logout } from "../utils/logout";
 import mmkv from "../utils/mmkv";
+import { getXmtpClient } from "../utils/xmtpRN/client";
 import { showActionSheetWithOptions } from "./StateHandlers/ActionSheetStateHandler";
 
 let logs: string[] = [];
@@ -43,6 +44,80 @@ const DebugButton = forwardRef((props, ref) => {
   useImperativeHandle(ref, () => ({
     showDebugMenu() {
       const methods: any = {
+        DebugDaria: async () => {
+          const queryConversationsFromTimestamp = {
+            "/xmtp/0/m-5IMAK3f7IwEcfFoJ615n23bRqpKBnz4yRYXgNg3IasM/proto": 0,
+          } as { [key: string]: number };
+          const client = await getXmtpClient(currentAccount());
+          while (Object.keys(queryConversationsFromTimestamp).length > 0) {
+            const topicsToQuery = Object.keys(queryConversationsFromTimestamp);
+            addLog(
+              `Loading messages for ${
+                topicsToQuery.length
+              } conversations: ${JSON.stringify(
+                queryConversationsFromTimestamp
+              )}`
+            );
+
+            // We want to find out which topic breaks everything
+            const messagesBatch = await client.listBatchMessages(
+              topicsToQuery.map((topic) => ({
+                contentTopic: topic,
+                startTime: new Date(queryConversationsFromTimestamp[topic]),
+                pageSize: 2,
+                direction: "SORT_DIRECTION_ASCENDING",
+              }))
+            );
+
+            const oldQueryConversationsFromTimestamp = {
+              ...queryConversationsFromTimestamp,
+            };
+
+            const messagesByTopic: { [topic: string]: DecodedMessage[] } = {};
+            messagesBatch.forEach((m) => {
+              messagesByTopic[m.topic] = messagesByTopic[m.topic] || [];
+              messagesByTopic[m.topic].push(m);
+              if (m.sent > queryConversationsFromTimestamp[m.topic]) {
+                queryConversationsFromTimestamp[m.topic] = m.sent;
+              }
+            });
+
+            topicsToQuery.forEach((topic) => {
+              const messages = messagesByTopic[topic];
+              if (!messages || messages.length <= 1) {
+                // When we have no more messages for a topic it means we have gone through all of it
+                // Checking if messages.length < BATCH_QUERY_PAGE_SIZE would be more performant (one less query
+                // per topic) but could miss messages because if there are messages that are not decoded they
+                // are not returned by listBatchMessages)
+                delete queryConversationsFromTimestamp[topic];
+              }
+            });
+
+            // To avoid a loop let's verify that we don't query a topic
+            // again with the exact same timestamp
+            Object.keys(queryConversationsFromTimestamp).forEach((topic) => {
+              if (
+                queryConversationsFromTimestamp[topic] ===
+                oldQueryConversationsFromTimestamp[topic]
+              ) {
+                console.log(
+                  "[XmtpRn] Avoiding a loop during sync due to weird timestamps"
+                );
+                addLog(`Avoiding a loop`);
+                queryConversationsFromTimestamp[topic] += 1;
+              }
+            });
+
+            let timestamp = 0;
+            if (messagesBatch.length > 0) {
+              timestamp = messagesBatch[messagesBatch.length - 1].sent;
+            }
+
+            addLog(`Got ${messagesBatch.length} messages - ${timestamp}`);
+          }
+          Clipboard.setStringAsync(logs.join("\n"));
+          alert("FINISHED - LOGS COPIED");
+        },
         Privy: async () => {
           const keys = [
             "privy-token",
