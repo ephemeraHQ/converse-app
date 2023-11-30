@@ -177,11 +177,13 @@ export default function PrivyConnect() {
             defaultCode={RNLocalize.getCountry() as CountryCode}
             layout="first"
             formatter={(t) => {
+              const countryCode = phoneInputRef.current?.getCountryCode();
+              const callingCode = phoneInputRef.current?.getCallingCode();
+              if (!countryCode || !callingCode) return t;
+
               const formatter = new LibPhoneNumber.AsYouType(
-                phoneInputRef.current?.getCountryCode() as LibPhoneNumber.CountryCode
+                countryCode as LibPhoneNumber.CountryCode
               );
-              const callingCode =
-                phoneInputRef.current?.getCallingCode() as string;
 
               const formatted = formatter.input(`+${callingCode}${t}`);
               const result = formatted.slice(callingCode.length + 1).trim();
