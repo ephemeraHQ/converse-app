@@ -1,4 +1,5 @@
 import { ethers } from "ethers";
+import { isAddress } from "ethers/lib/utils";
 
 import config from "../../config";
 import erc20abi from "./abis/erc20.json";
@@ -20,6 +21,9 @@ export async function getErc20BalanceForAddress(
   address: string,
   provider: ethers.providers.Provider
 ) {
+  if (!isAddress(address)) {
+    return "0";
+  }
   const contract = new ethers.Contract(
     erc20ContractAddress,
     erc20abi,

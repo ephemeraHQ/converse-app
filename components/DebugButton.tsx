@@ -1,5 +1,4 @@
 import { useEmbeddedWallet, usePrivy } from "@privy-io/expo";
-import { Client } from "@xmtp/react-native-sdk";
 import axios from "axios";
 import * as Clipboard from "expo-clipboard";
 import * as Updates from "expo-updates";
@@ -8,14 +7,14 @@ import RNFS from "react-native-fs";
 import * as Sentry from "sentry-expo";
 
 import config from "../config";
-import { resetDb, getDbPath, clearDb } from "../data/db";
+import { resetDb, getDbPath } from "../data/db";
 import {
   currentAccount,
   getAccountsList,
   useCurrentAccount,
 } from "../data/store/accountsStore";
 import { usePrivySigner } from "../utils/evm/helpers";
-import { deleteXmtpKey, getSecureItemAsync } from "../utils/keychain";
+import { getSecureItemAsync } from "../utils/keychain";
 import { logout } from "../utils/logout";
 import mmkv from "../utils/mmkv";
 import { showActionSheetWithOptions } from "./StateHandlers/ActionSheetStateHandler";
@@ -93,25 +92,11 @@ const DebugButton = forwardRef((props, ref) => {
         "Reset DB": () => {
           resetDb(currentAccount());
         },
-        "Delete DB": () => {
-          clearDb(currentAccount());
-        },
-        "List files": async () => {
-          // const groupPath = await RNFS.pathForGroup(config.appleAppGroup);
-          // const groupFiles = await RNFS.readDir(`${groupPath}`);
-          const documentsFiles = await RNFS.readDir(
-            `${RNFS.DocumentDirectoryPath}/SQLite`
-          );
-          console.log(documentsFiles);
-          // Clipboard.setStringAsync(JSON.stringify({ documentsFiles }));
-          alert("Done!");
-        },
         "Clear messages attachments folder": async () => {
           const messageFolder = `${RNFS.DocumentDirectoryPath}/messages`;
           await RNFS.unlink(messageFolder);
           alert("Cleared!");
         },
-        "Delete XMTP Key": () => deleteXmtpKey(currentAccount()),
         "Sentry JS error": () => {
           throw new Error("My first Sentry error!");
         },
@@ -127,12 +112,6 @@ const DebugButton = forwardRef((props, ref) => {
         },
         "Clear logs": () => {
           logs = [];
-        },
-        "Stress test SDK": async () => {
-          for (let index = 0; index < 200; index++) {
-            Client.createRandom();
-            console.log(index);
-          }
         },
         "Logout all": () => {
           const accounts = getAccountsList();
