@@ -69,7 +69,7 @@
     "expo-device": "~5.4.0",
     "expo-document-picker": "^11.5.4",
     "expo-image": "~1.3.5",
-    "expo-image-picker": "~14.3.2",
+    "expo-image-picker": "^14.5.0",
     "expo-linking": "~5.0.2",
     "expo-navigation-bar": "~2.3.0",
     "expo-notifications": "~0.20.1",
@@ -90,7 +90,7 @@
     "prompts": "^2.4.2",
     "react": "^18.2.0",
     "react-dom": "18.2.0",
-    "react-native": "^0.72.5",
+    "react-native": "0.72.6",
     "react-native-avoid-softinput": "^4.0.1",
     "react-native-background-color": "^0.0.8",
     "react-native-bootsplash": "^4.5.3",
@@ -193,7 +193,7 @@
       "exclude": [
         "react-native-svg",
         "@shopify/flash-list",
-        "react-native"
+        "expo-image-picker"
       ]
     }
   }
