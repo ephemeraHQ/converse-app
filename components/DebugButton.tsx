@@ -107,7 +107,7 @@ const DebugButton = forwardRef((props, ref) => {
           alert(logs.join("\n"));
         },
         "Copy logs": () => {
-          Clipboard.setStringAsync(logs.join("\n"));
+          Clipboard.setString(logs.join("\n"));
           alert("Copied!");
         },
         "Clear logs": () => {
