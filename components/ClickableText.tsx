@@ -1,4 +1,4 @@
-import * as Clipboard from "expo-clipboard";
+import Clipboard from "@react-native-clipboard/clipboard";
 import * as Linking from "expo-linking";
 import { useCallback } from "react";
 import { StyleProp, StyleSheet, TextStyle, useColorScheme } from "react-native";
@@ -49,7 +49,7 @@ export default function ClickableText({ children, style }: Props) {
     (cta: string) => (content: string) => {
       const methods = {
         [cta]: () => {
-          Clipboard.setStringAsync(content);
+          Clipboard.setString(content);
         },
         Cancel: () => {},
       };

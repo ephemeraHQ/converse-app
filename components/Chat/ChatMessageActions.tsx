@@ -1,4 +1,4 @@
-import * as Clipboard from "expo-clipboard";
+import Clipboard from "@react-native-clipboard/clipboard";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   Alert,
@@ -119,7 +119,7 @@ export default function ChatMessageActions({
     }
     if (!isAttachment) {
       methods["Copy message"] = () => {
-        Clipboard.setStringAsync(message.content);
+        Clipboard.setString(message.content);
       };
       if (!message.fromMe) {
         methods["Report message"] = showMessageReportActionSheet;
