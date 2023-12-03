@@ -1,7 +1,7 @@
 import { usePrivy } from "@privy-io/expo";
+import Clipboard from "@react-native-clipboard/clipboard";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { useDisconnect } from "@thirdweb-dev/react-native";
-import * as Clipboard from "expo-clipboard";
 import * as Linking from "expo-linking";
 import React, { useCallback } from "react";
 import {
@@ -85,7 +85,7 @@ export default function AccountSettingsButton({ navigation, account }: Props) {
         }
       },
       "Copy wallet address": () => {
-        Clipboard.setStringAsync(account || "");
+        Clipboard.setString(account || "");
       },
       "Contact Converse team": () => {
         setCurrentAccount(account, false);

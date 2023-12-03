@@ -1,5 +1,5 @@
+import Clipboard from "@react-native-clipboard/clipboard";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import * as Clipboard from "expo-clipboard";
 import { MutableRefObject, useEffect, useRef, useState } from "react";
 import {
   TouchableOpacity,
@@ -65,7 +65,7 @@ export default function ConversationTitle({
         <TouchableOpacity
           onLongPress={() => {
             if (!enableDebug) return;
-            Clipboard.setStringAsync(
+            Clipboard.setString(
               JSON.stringify({
                 topic: conversation?.topic || "",
                 context: conversation?.context,

@@ -1,5 +1,5 @@
+import Clipboard from "@react-native-clipboard/clipboard";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import * as Clipboard from "expo-clipboard";
 import * as Linking from "expo-linking";
 import { useEffect, useState } from "react";
 import {
@@ -81,7 +81,7 @@ export default function TopUp({
               <TouchableOpacity
                 onPress={() => {
                   setCopiedAddress(true);
-                  Clipboard.setStringAsync(userAddress || "");
+                  Clipboard.setString(userAddress || "");
                   setTimeout(() => {
                     setCopiedAddress(false);
                   }, 1000);

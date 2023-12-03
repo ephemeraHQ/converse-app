@@ -1,7 +1,7 @@
 import { usePrivy } from "@privy-io/expo";
+import Clipboard from "@react-native-clipboard/clipboard";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useDisconnect } from "@thirdweb-dev/react-native";
-import * as Clipboard from "expo-clipboard";
 import * as Linking from "expo-linking";
 import React, { useCallback, useEffect, useState } from "react";
 import {
@@ -105,7 +105,7 @@ export default function ProfileScreen({
             <TouchableOpacity
               onPress={() => {
                 setCopiedAddresses((c) => ({ ...c, [title]: true }));
-                Clipboard.setStringAsync(value);
+                Clipboard.setString(value);
                 setTimeout(() => {
                   setCopiedAddresses((c) => ({ ...c, [title]: false }));
                 }, 1000);

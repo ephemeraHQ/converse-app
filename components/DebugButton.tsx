@@ -1,6 +1,6 @@
 import { useEmbeddedWallet, usePrivy } from "@privy-io/expo";
+import Clipboard from "@react-native-clipboard/clipboard";
 import axios from "axios";
-import * as Clipboard from "expo-clipboard";
 import * as Updates from "expo-updates";
 import { forwardRef, useImperativeHandle } from "react";
 import RNFS from "react-native-fs";
@@ -60,7 +60,7 @@ const DebugButton = forwardRef((props, ref) => {
             result = `${result}\n${k}:${v}\n`;
           });
           alert(result);
-          Clipboard.setStringAsync(result);
+          Clipboard.setString(result);
         },
         "Export db file": async () => {
           const dbPath = await getDbPath(currentAccount());
