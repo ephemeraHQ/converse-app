@@ -77,8 +77,7 @@ export const upsertRepository = async <T extends ObjectLiteral>(
       : [entityOrEntities];
     for (const entity of entities) {
       try {
-        const insertResult = await repository.insert(entity);
-        return insertResult;
+        await repository.insert(entity);
       } catch (e: any) {
         const errorMessage = `${e}`;
         if (

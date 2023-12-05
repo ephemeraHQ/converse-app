@@ -10,10 +10,8 @@ export class TypeORMLogger implements Logger {
     parameters?: any[] | undefined,
     queryRunner?: QueryRunner | undefined
   ) {
-    if (
-      !supportsUpsert &&
-      error.toString().includes("UNIQUE constraint failed")
-    ) {
+    const errString = typeof error === "string" ? error : error.message;
+    if (!supportsUpsert && errString.includes("UNIQUE constraint failed")) {
       // For older devices, we use a try catch for upserts
       // let's not pollute sentry with those
       return;

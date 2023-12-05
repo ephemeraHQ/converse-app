@@ -12,11 +12,24 @@ export const saveSpamScores = async (
   topicSpamScores: TopicSpamScores
 ) => {
   const conversationRepository = await getRepository(account, "conversation");
-  await Promise.all(
-    Object.entries(topicSpamScores).map(([topic, spamScore]) =>
-      conversationRepository.update({ topic }, { spamScore })
-    )
-  );
+  // Let's update by batch
+  let batch: string[] = [];
+  let rest = Object.keys(topicSpamScores);
+  while (rest.length > 0) {
+    batch = rest.slice(0, 5000);
+    rest = rest.slice(5000);
+    let query = `UPDATE "conversation" SET "spamScore" = (case `;
+    const parameters = [] as any[];
+    batch.forEach((topic) => {
+      const spamScore = topicSpamScores[topic];
+      query = `${query}WHEN "topic" = ? THEN ? `;
+      parameters.push(topic);
+      parameters.push(spamScore);
+    });
+    query = `${query} end)`;
+    await conversationRepository.query(query, parameters);
+  }
+
   // Update Zustand
   const chatStore = getChatStore(account).getState();
   chatStore.setSpamScores(topicSpamScores);

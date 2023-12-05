@@ -268,6 +268,10 @@ export const initChatStore = (account: string) => {
                 ...state,
               };
 
+              const conversationsToHandleSpamScore: {
+                [topic: string]: XmtpConversationWithUpdate;
+              } = {};
+
               for (const message of messagesToSet) {
                 const topic = message.topic;
                 if (!newState.conversations[topic]) {
@@ -354,10 +358,20 @@ export const initChatStore = (account: string) => {
                   conversation.spamScore === undefined &&
                   state.initialLoadDoneOnce
                 ) {
-                  setImmediate(() => {
+                  conversationsToHandleSpamScore[conversation.topic] =
+                    conversation;
+                }
+              }
+
+              const updateSpamScoreFor = Object.values(
+                conversationsToHandleSpamScore
+              );
+              if (updateSpamScoreFor.length > 0) {
+                setImmediate(() => {
+                  updateSpamScoreFor.forEach((conversation) => {
                     handleSpamScore(account, conversation);
                   });
-                }
+                });
               }
 
               if (isUpdated) {

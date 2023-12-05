@@ -11,6 +11,7 @@ import { resetDb, getDbPath } from "../data/db";
 import {
   currentAccount,
   getAccountsList,
+  getChatStore,
   useCurrentAccount,
 } from "../data/store/accountsStore";
 import { usePrivySigner } from "../utils/evm/helpers";
@@ -91,6 +92,9 @@ const DebugButton = forwardRef((props, ref) => {
         },
         "Reset DB": () => {
           resetDb(currentAccount());
+        },
+        "Reset last synced add": () => {
+          getChatStore(currentAccount()).getState().setLastSyncedAt(0, []);
         },
         "Clear messages attachments folder": async () => {
           const messageFolder = `${RNFS.DocumentDirectoryPath}/messages`;
