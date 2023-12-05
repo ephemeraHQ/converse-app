@@ -13,7 +13,6 @@ const defaultConfig = {
     "0xFA08a80e822F7FA002c4Ae81b7a6De7cE79499dB", // lourou.eth
   ],
   conversationDomain: "converse.xyz",
-  infuraApiKey: "38f59a7bbbca49f18046ff3a4a752e1c",
   lensApiDomain: "api.lens.dev",
   lensSuffix: ".lens",
   sentryDSN:
@@ -42,6 +41,8 @@ const defaultConfig = {
       version: "2",
       decimals: 6,
     },
+    rpcEndpoint:
+      "https://base-goerli.g.alchemy.com/v2/Jl1z46xZWUzMr042dL1D7533XcOvXmb6",
   },
 };
 
@@ -105,6 +106,8 @@ const ENV = {
         version: "2",
         decimals: 6,
       },
+      rpcEndpoint:
+        "https://base-mainnet.g.alchemy.com/v2/I-IEs_vLzf_vteQDgDZBVlu0kwp76jUv",
     },
   },
 };

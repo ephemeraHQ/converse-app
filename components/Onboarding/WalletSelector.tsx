@@ -200,7 +200,7 @@ export default function WalletSelector() {
             {
               id: "seedphrase",
               leftView: <TableViewEmoji emoji="🔑" />,
-              title: "Connect via seed phrase",
+              title: "Connect via key",
               rightView,
               action: () => {
                 setConnectionMethod("seedPhrase");

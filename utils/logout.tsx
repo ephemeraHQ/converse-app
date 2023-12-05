@@ -2,9 +2,10 @@ import { clearDb } from "../data/db";
 import {
   getAccountsList,
   getChatStore,
+  getWalletStore,
   useAccountsStore,
 } from "../data/store/accountsStore";
-import { deleteXmtpKey } from "./keychain";
+import { deleteSecureItemAsync, deleteXmtpKey } from "./keychain";
 import mmkv from "./mmkv";
 import {
   deleteSubscribedTopics,
@@ -17,6 +18,7 @@ type LogoutTasks = {
   [account: string]: {
     topics: string[];
     apiHeaders: { [key: string]: string };
+    pkPath: string | undefined;
   };
 };
 
@@ -46,10 +48,11 @@ export const removeLogoutTask = (account: string) => {
 export const saveLogoutTask = (
   account: string,
   apiHeaders: { [key: string]: string },
-  topics: string[]
+  topics: string[],
+  pkPath: string | undefined
 ) => {
   const logoutTasks = getLogoutTasks();
-  logoutTasks[account] = { topics, apiHeaders };
+  logoutTasks[account] = { topics, apiHeaders, pkPath };
   mmkv.set("converse-logout-tasks", JSON.stringify(logoutTasks));
   console.log(
     `[Logout] Saved ${topics.length} topics to logout for ${account}`
@@ -94,6 +97,9 @@ export const executeLogoutTasks = async () => {
         `[Logout] Executing logout task for ${account} (${task.topics.length} topics)`
       );
       await deleteXmtpKey(account);
+      if (task.pkPath) {
+        await deleteSecureItemAsync(task.pkPath);
+      }
       assertNotLogged(account);
       if (task.topics.length > 0) {
         // This is too long and might race with re-login, let's not do it for now
@@ -131,6 +137,7 @@ export const logout = async (account: string) => {
   // We need to delete topics that are in this account and not other accounts
   // so we start with topics from this account and we'll remove topics we find in others
   const topicsToDelete = topicsByAccount[account];
+  const pkPath = getWalletStore(account).getState().privateKeyPath;
   const apiHeaders = await getXmtpApiHeaders(account);
   accounts.forEach((a) => {
     if (a !== account) {
@@ -153,7 +160,7 @@ export const logout = async (account: string) => {
   deleteXmtpClient(account);
   deleteSubscribedTopics(account);
 
-  saveLogoutTask(account, apiHeaders, topicsToDelete);
+  saveLogoutTask(account, apiHeaders, topicsToDelete, pkPath);
 
   setTimeout(() => {
     executeLogoutTasks();

@@ -2,6 +2,7 @@ import { usePrivy } from "@privy-io/expo";
 import Clipboard from "@react-native-clipboard/clipboard";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useDisconnect } from "@thirdweb-dev/react-native";
+import Constants from "expo-constants";
 import * as Linking from "expo-linking";
 import React, { useCallback, useEffect, useState } from "react";
 import {
@@ -44,18 +45,18 @@ import {
   textPrimaryColor,
   textSecondaryColor,
 } from "../utils/colors";
-import { evmHelpers, usePrivySigner } from "../utils/evm/helpers";
+import { evmHelpers } from "../utils/evm/helpers";
 import { logout } from "../utils/logout";
 import { pick } from "../utils/objects";
 import { getIPFSAssetURI } from "../utils/thirdweb";
-import { refreshBalanceForAccounts } from "../utils/wallet";
+import { refreshBalanceForAccount } from "../utils/wallet";
 import { NavigationParamList } from "./Navigation/Navigation";
 
 export default function ProfileScreen({
   route,
   navigation,
 }: NativeStackScreenProps<NavigationParamList, "Profile">) {
-  const userAddress = useCurrentAccount();
+  const userAddress = useCurrentAccount() as string;
   const { USDCBalance } = useWalletStore((s) => pick(s, ["USDCBalance"]));
   const colorScheme = useColorScheme();
   const styles = useStyles();
@@ -75,22 +76,21 @@ export default function ProfileScreen({
   const socials = profiles[peerAddress]?.socials;
 
   const insets = useSafeAreaInsets();
-  const privySigner = usePrivySigner();
   useEffect(() => {
-    refreshBalanceForAccounts(privySigner);
-  }, [privySigner]);
+    refreshBalanceForAccount(userAddress);
+  }, [userAddress]);
 
   const [refreshingBalance, setRefreshingBalance] = useState(false);
   const manuallyRefreshBalance = useCallback(async () => {
     setRefreshingBalance(true);
     const now = new Date().getTime();
-    await refreshBalanceForAccounts(privySigner);
+    await refreshBalanceForAccount(userAddress);
     const after = new Date().getTime();
     if (after - now < 1000) {
       await new Promise((r) => setTimeout(r, 1000 - after + now));
     }
     setRefreshingBalance(false);
-  }, [privySigner]);
+  }, [userAddress]);
 
   const getAddressItemsFromArray = useCallback(
     <T,>(array: T[], titleKey: string, valueKey: string) => {
@@ -210,6 +210,11 @@ export default function ProfileScreen({
   ];
 
   const isMyProfile = peerAddress.toLowerCase() === userAddress?.toLowerCase();
+  const appVersion = Constants.expoConfig?.version;
+  const buildNumber =
+    Platform.OS === "ios"
+      ? Constants.expoConfig?.ios?.buildNumber
+      : Constants.expoConfig?.android?.versionCode;
 
   return (
     <ScrollView
@@ -241,7 +246,7 @@ export default function ProfileScreen({
           style={styles.tableView}
         />
       )}
-      {isMyProfile && isPrivy && (
+      {isMyProfile && (
         <TableView
           items={[
             {
@@ -384,46 +389,58 @@ export default function ProfileScreen({
         </>
       )}
       {isMyProfile && (
-        <TableView
-          items={[
-            {
-              id: "contact",
-              title: "Contact Converse Team",
-              action: () => {
-                navigation.pop();
-                setTimeout(() => {
-                  navigation.push("Conversation", {
-                    mainConversationWithPeer: config.polAddress,
-                  });
-                }, 300);
+        <>
+          <TableView
+            items={[
+              {
+                id: "contact",
+                title: "Contact Converse Team",
+                action: () => {
+                  navigation.pop();
+                  setTimeout(() => {
+                    navigation.push("Conversation", {
+                      mainConversationWithPeer: config.polAddress,
+                    });
+                  }, 300);
+                },
+                titleColor:
+                  Platform.OS === "android"
+                    ? undefined
+                    : primaryColor(colorScheme),
               },
-              titleColor:
-                Platform.OS === "android"
-                  ? undefined
-                  : primaryColor(colorScheme),
-            },
-            {
-              id: "logout",
-              title: "Disconnect",
-              titleColor:
-                Platform.OS === "android"
-                  ? undefined
-                  : dangerColor(colorScheme),
-              action: () => {
-                navigation.popToTop();
-                setTimeout(() => {
-                  disconnectWallet();
-                  if (isPrivy) {
-                    privyLogout();
-                  }
-                  logout(userAddress);
-                }, 300);
+              {
+                id: "logout",
+                title: "Disconnect",
+                titleColor:
+                  Platform.OS === "android"
+                    ? undefined
+                    : dangerColor(colorScheme),
+                action: () => {
+                  navigation.popToTop();
+                  setTimeout(() => {
+                    disconnectWallet();
+                    if (isPrivy) {
+                      privyLogout();
+                    }
+                    logout(userAddress);
+                  }, 300);
+                },
               },
-            },
-          ]}
-          title="ACTIONS"
-          style={styles.tableView}
-        />
+            ]}
+            title="ACTIONS"
+            style={styles.tableView}
+          />
+          <TableView
+            items={[
+              {
+                id: "version",
+                title: `v${appVersion} (${buildNumber}) - built in Paris with ❤️`,
+              },
+            ]}
+            title="APP VERSION"
+            style={styles.tableView}
+          />
+        </>
       )}
       <View style={{ height: insets.bottom }} />
     </ScrollView>

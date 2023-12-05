@@ -9,7 +9,6 @@ import {
 } from "react-native";
 
 import SendButton from "../../assets/send-button.svg";
-import { useLoggedWithPrivy } from "../../data/store/accountsStore";
 import {
   actionSecondaryColor,
   backgroundColor,
@@ -38,7 +37,6 @@ export default function ChatInput() {
   const colorScheme = useColorScheme();
   const styles = useStyles();
   const [inputValue, setInputValue] = useState(messageToPrefill);
-  const loggedWithPrivy = useLoggedWithPrivy();
 
   useEffect(() => {
     if (transactionMode) {
@@ -78,7 +76,7 @@ export default function ChatInput() {
   return (
     <View style={styles.chatInputContainer}>
       <ChatAddAttachment />
-      {loggedWithPrivy && <ChatSendMoney />}
+      <ChatSendMoney />
       <TextInput
         autoCorrect={isDesktop ? false : undefined}
         autoComplete={isDesktop ? "off" : undefined}

@@ -45,6 +45,7 @@ const deleteStores = (account: string) => {
   mmkv.delete(`store-${account}-chat`);
   mmkv.delete(`store-${account}-recommendations`);
   mmkv.delete(`store-${account}-settings`);
+  mmkv.delete(`store-${account}-wallet`);
 };
 
 export const TEMPORARY_ACCOUNT_NAME = "TEMPORARY_ACCOUNT";

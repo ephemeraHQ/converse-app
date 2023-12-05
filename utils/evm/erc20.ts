@@ -4,6 +4,7 @@ import { isAddress } from "ethers/lib/utils";
 import config from "../../config";
 import erc20abi from "./abis/erc20.json";
 import { evmHelpers } from "./helpers";
+import provider from "./provider";
 
 export const TransferWithAuthorizationTypes = {
   TransferWithAuthorization: [
@@ -185,7 +186,7 @@ export const getTransferAuthorization = async (
   const signature = await signTransferAuthorization(
     erc20ContractAddress,
     authorizationMessage,
-    signer.provider as ethers.providers.Provider,
+    provider,
     signer
   );
   return { message: authorizationMessage, signature };

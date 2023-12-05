@@ -31,6 +31,7 @@ type Props = {
   primaryButtonText?: string;
   primaryButtonAction?: () => void;
   shrinkWithKeyboard?: boolean;
+  inModal?: boolean;
 };
 
 export default function OnboardingComponent({
@@ -44,6 +45,7 @@ export default function OnboardingComponent({
   primaryButtonText,
   primaryButtonAction,
   shrinkWithKeyboard,
+  inModal,
 }: Props) {
   const styles = useStyles();
   const { loading: stateLoading, setLoading } = useOnboardingStore((s) =>
@@ -68,7 +70,7 @@ export default function OnboardingComponent({
         <Picto
           picto={picto}
           size={Platform.OS === "android" ? 80 : 43}
-          style={styles.picto}
+          style={[styles.picto, inModal ? { marginTop: 50 } : {}]}
         />
 
         <Text style={styles.title}>{title}</Text>
