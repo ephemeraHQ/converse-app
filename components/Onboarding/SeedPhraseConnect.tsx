@@ -12,6 +12,7 @@ import {
   Alert,
 } from "react-native";
 import { AvoidSoftInput } from "react-native-avoid-softinput";
+import uuid from "react-native-uuid";
 
 import { useOnboardingStore } from "../../data/store/onboardingStore";
 import {
@@ -20,16 +21,27 @@ import {
   textSecondaryColor,
 } from "../../utils/colors";
 import { getPrivateKeyFromMnemonic, validateMnemonic } from "../../utils/eth";
+import { setSecureItemAsync } from "../../utils/keychain";
 import { pick } from "../../utils/objects";
 import OnboardingComponent from "./OnboardingComponent";
 
-export const getSignerFromSeedPhrase = async (mnemonic: string) => {
-  let rightMnemonic = mnemonic;
+export const getSignerFromSeedPhraseOrPrivateKey = async (
+  seedPhraseOrPrivateKey: string
+) => {
   try {
-    rightMnemonic = validateMnemonic(mnemonic);
+    const signer = new Wallet(seedPhraseOrPrivateKey);
+    return signer;
+  } catch (e: any) {
+    console.log(
+      "Could not instantitate directly from private key, trying to decode seed phrase"
+    );
+  }
+  let rightMnemonic = seedPhraseOrPrivateKey;
+  try {
+    rightMnemonic = validateMnemonic(seedPhraseOrPrivateKey);
   } catch (e) {
     console.log(e);
-    Alert.alert("This seed phrase is invalid. Please try again");
+    Alert.alert("This private key / seed phrase is invalid. Please try again");
     return;
   }
   try {
@@ -38,20 +50,26 @@ export const getSignerFromSeedPhrase = async (mnemonic: string) => {
     return signer;
   } catch (e) {
     console.log(e);
-    Alert.alert("This seed phrase is invalid. Please try again");
+    Alert.alert("This private key / seed phrase is invalid. Please try again");
   }
 };
 
 export default function SeedPhraseConnect() {
-  const { setLoading, setConnectionMethod, setSigner, setIsEphemeral } =
-    useOnboardingStore((s) =>
-      pick(s, [
-        "setLoading",
-        "setConnectionMethod",
-        "setSigner",
-        "setIsEphemeral",
-      ])
-    );
+  const {
+    setLoading,
+    setConnectionMethod,
+    setSigner,
+    setIsEphemeral,
+    setPkPath,
+  } = useOnboardingStore((s) =>
+    pick(s, [
+      "setLoading",
+      "setConnectionMethod",
+      "setSigner",
+      "setIsEphemeral",
+      "setPkPath",
+    ])
+  );
   const [seedPhrase, setSeedPhrase] = useState("");
   const colorScheme = useColorScheme();
   const textInputRef = useRef<TextInput | null>(null);
@@ -74,15 +92,28 @@ export default function SeedPhraseConnect() {
     async (mnemonic: string) => {
       setLoading(true);
       setTimeout(async () => {
-        const seedPhraseSigner = await getSignerFromSeedPhrase(mnemonic);
+        const seedPhraseSigner = await getSignerFromSeedPhraseOrPrivateKey(
+          mnemonic
+        );
         if (!seedPhraseSigner) {
           setLoading(false);
           return;
         }
-        setSigner(seedPhraseSigner);
+        // Let's save
+        const pkPath = `PK-${uuid.v4().toString()}`;
+        try {
+          // TODO => enable authentication
+          await setSecureItemAsync(pkPath, seedPhraseSigner.privateKey);
+          setPkPath(pkPath);
+          setSigner(seedPhraseSigner);
+        } catch (e: any) {
+          // No biometrics?
+          Alert.alert("An error occured", e.toString());
+          setLoading(false);
+        }
       }, 10);
     },
-    [setLoading, setSigner]
+    [setLoading, setSigner, setPkPath]
   );
 
   const avoidInputEffect = useCallback(() => {
@@ -103,8 +134,12 @@ export default function SeedPhraseConnect() {
 
   return (
     <OnboardingComponent
-      title="Seed phrase"
-      subtitle="Enter your wallet's seed phrase. It will be used to connect to the XMTP network and it will not be stored anywhere."
+      title="Connect via key"
+      subtitle={`Please enter your wallet’s seed phrase or private key. It will be stored locally in the ${
+        Platform.OS === "ios"
+          ? "secure enclave of your phone"
+          : "Android Keystore system"
+      }.`}
       picto="key.horizontal"
       primaryButtonText="Connect"
       primaryButtonAction={() => {
@@ -124,7 +159,7 @@ export default function SeedPhraseConnect() {
             textInputStyle(colorScheme),
             { width: "100%", height: "100%" },
           ]}
-          placeholder="Enter your seed phrase"
+          placeholder="Enter your seed phrase or private key"
           placeholderTextColor={textSecondaryColor(colorScheme)}
           onChangeText={(content) => {
             setSeedPhrase(content.replace(/\n/g, " "));
@@ -157,11 +192,11 @@ export default function SeedPhraseConnect() {
             terms and conditions.
           </Text>
         </Text>
-        <Text style={styles.links}>
+        {/* <Text style={styles.links}>
           <Text style={styles.link} onPress={generateWallet}>
             Try the app with an ephemeral wallet.
           </Text>
-        </Text>
+        </Text> */}
       </View>
     </OnboardingComponent>
   );

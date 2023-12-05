@@ -9,8 +9,12 @@ export const secureStoreOptions: SecureStore.SecureStoreOptions = {
   keychainAccessible: SecureStore.AFTER_FIRST_UNLOCK,
 };
 
-export const setSecureItemAsync = (key: string, value: string) =>
-  SecureStore.setItemAsync(key, value, secureStoreOptions);
+export const setSecureItemAsync = (
+  key: string,
+  value: string,
+  options = {} as SecureStore.SecureStoreOptions
+) =>
+  SecureStore.setItemAsync(key, value, { ...secureStoreOptions, ...options });
 
 export const getSecureItemAsync = (key: string) =>
   SecureStore.getItemAsync(key, secureStoreOptions);

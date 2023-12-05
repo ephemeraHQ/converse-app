@@ -18,6 +18,7 @@ import ConversationListNav from "./ConversationListNav";
 import ConversationNav from "./ConversationNav";
 import ConversationRequestsListNav from "./ConversationRequestsListNav";
 import ConverseMatchMakerNav from "./ConverseMatchMakerNav";
+import EnableTransactionsNav from "./EnableTransactionsNav";
 import NewConversationNav from "./NewConversationNav";
 import ProfileNav from "./ProfileNav";
 import ShareProfileNav from "./ShareProfileNav";
@@ -37,6 +38,7 @@ export type NavigationParamList = {
   NewConversation: {
     peer?: string;
   };
+  EnableTransactions: undefined;
   ConverseMatchMaker: undefined;
   ShareProfile: undefined;
   TopUp: undefined;
@@ -209,6 +211,7 @@ export default function Navigation() {
           {WebviewPreviewNav()}
           {ProfileNav()}
           {TopUpNav()}
+          {EnableTransactionsNav()}
         </NativeStack.Group>
       </NativeStack.Navigator>
     </NavigationContainer>

@@ -9,6 +9,7 @@ import WalletSelector from "../components/Onboarding/WalletSelector";
 import { initDb } from "../data/db";
 import {
   getSettingsStore,
+  getWalletStore,
   useAccountsStore,
 } from "../data/store/accountsStore";
 import { useOnboardingStore } from "../data/store/onboardingStore";
@@ -26,6 +27,7 @@ export default function Onboarding() {
     signer,
     setLoading,
     isEphemeral,
+    pkPath,
     privyAccountId,
   } = useOnboardingStore((s) =>
     pick(s, [
@@ -35,6 +37,7 @@ export default function Onboarding() {
       "signer",
       "setLoading",
       "isEphemeral",
+      "pkPath",
       "privyAccountId",
     ])
   );
@@ -59,11 +62,14 @@ export default function Onboarding() {
       } else {
         getSettingsStore(address).getState().setEphemeralAccount(false);
       }
+      if (pkPath) {
+        getWalletStore(address).getState().setPrivateKeyPath(pkPath);
+      }
       useOnboardingStore.getState().setAddingNewAccount(false);
       // Now we can instantiate the XMTP Client
       getXmtpClient(address);
     },
-    [address, connectionMethod, isEphemeral, privyAccountId]
+    [address, connectionMethod, isEphemeral, pkPath, privyAccountId]
   );
 
   // Method used for all signers that can sign directly

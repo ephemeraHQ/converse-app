@@ -40,6 +40,7 @@ export default function ProfileSettingsButton() {
           width: Platform.OS === "android" ? undefined : 32,
           height: Platform.OS === "android" ? undefined : 32,
           marginRight: Platform.OS === "android" ? 0 : 10,
+          marginTop: Platform.OS === "ios" ? 3 : 0,
         }}
       />
     </TouchableOpacity>

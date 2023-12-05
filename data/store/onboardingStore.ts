@@ -36,6 +36,9 @@ type OnboardingStoreType = {
   privyAccountId: string | undefined;
   setPrivyAccountId: (id: string | undefined) => void;
 
+  pkPath: string | undefined;
+  setPkPath: (p: string) => void;
+
   resetOnboarding: () => void;
 };
 
@@ -88,6 +91,9 @@ export const useOnboardingStore = create<OnboardingStoreType>()((set) => ({
   privyAccountId: undefined,
   setPrivyAccountId: (id) => set(() => ({ privyAccountId: id })),
 
+  pkPath: undefined,
+  setPkPath: (p) => set(() => ({ pkPath: p })),
+
   resetOnboarding: () =>
     set(() => ({
       addingNewAccount: false,
@@ -99,5 +105,6 @@ export const useOnboardingStore = create<OnboardingStoreType>()((set) => ({
       waitingForSecondSignature: false,
       isEphemeral: false,
       privyAccountId: undefined,
+      pkPath: undefined,
     })),
 }));

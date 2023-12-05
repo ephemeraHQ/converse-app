@@ -1,13 +1,16 @@
 import { useEmbeddedWallet, usePrivy } from "@privy-io/expo";
-import { ethers } from "ethers";
+import { Wallet, ethers } from "ethers";
 import "@ethersproject/shims";
 import { useState } from "react";
 
 import config from "../../config";
 import {
+  currentAccount,
+  getWalletStore,
   useAccountsStore,
   useCurrentAccount,
 } from "../../data/store/accountsStore";
+import { getSecureItemAsync } from "../keychain";
 import { pick } from "../objects";
 
 export const usePrivySigner = (onboarding: boolean = false) => {
@@ -42,6 +45,20 @@ export const usePrivySigner = (onboarding: boolean = false) => {
     }
   }
   return undefined;
+};
+
+export const getCurrentAccountSigner = async () => {
+  const account = currentAccount();
+  const pkPath = getWalletStore(account).getState().privateKeyPath;
+  if (!pkPath) return;
+  try {
+    const pk = await getSecureItemAsync(pkPath);
+    if (!pk) return;
+    return new Wallet(pk);
+  } catch (e) {
+    console.log(e);
+    // sentryTrackError(e);
+  }
 };
 
 export const evmHelpers = {

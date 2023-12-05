@@ -56,19 +56,19 @@
     <key>CFBundleVersion</key>
     <string>13</string>
     <key>ITSAppUsesNonExemptEncryption</key>
-    <false/>
+    <false />
     <key>LSRequiresIPhoneOS</key>
-    <true/>
+    <true />
     <key>NSAppTransportSecurity</key>
     <dict>
       <key>NSAllowsArbitraryLoads</key>
-      <true/>
+      <true />
       <key>NSExceptionDomains</key>
       <dict>
         <key>localhost</key>
         <dict>
           <key>NSExceptionAllowsInsecureHTTPLoads</key>
-          <true/>
+          <true />
         </dict>
       </dict>
     </dict>
@@ -79,7 +79,7 @@
       <string>armv7</string>
     </array>
     <key>UIRequiresFullScreen</key>
-    <false/>
+    <false />
     <key>UIStatusBarStyle</key>
     <string>UIStatusBarStyleDefault</string>
     <key>UISupportedInterfaceOrientations</key>
@@ -97,7 +97,7 @@
     <key>UIUserInterfaceStyle</key>
     <string>Automatic</string>
     <key>UIViewControllerBasedStatusBarAppearance</key>
-    <false/>
+    <false />
     <key>NSPhotoLibraryUsageDescription</key>
     <string>Give $(PRODUCT_NAME) permission to access photos</string>
     <key>NSCameraUsageDescription</key>
@@ -106,7 +106,9 @@
     <string>Give $(PRODUCT_NAME) permission to use your microphone</string>
     <key>UIBackgroundModes</key>
     <array>
-        <string>fetch</string>
+      <string>fetch</string>
     </array>
+    <key>NSFaceIDUsageDescription</key>
+    <string>$(PRODUCT_NAME) wants to use biometrics to secure your data</string>
   </dict>
 </plist>

@@ -1,17 +1,15 @@
 import { useEffect, useRef } from "react";
 import { AppState } from "react-native";
 
-import { usePrivySigner } from "../../utils/evm/helpers";
 import { refreshBalanceForAccounts } from "../../utils/wallet";
 
 export default function WalletsStateHandler() {
   const appState = useRef(AppState.currentState);
-  const privySigner = usePrivySigner();
 
   useEffect(() => {
     // Things to do when app opens
-    refreshBalanceForAccounts(privySigner);
-  }, [privySigner]);
+    refreshBalanceForAccounts();
+  }, []);
 
   useEffect(() => {
     // Things to do when app status changes (does NOT include first load)
@@ -22,7 +20,7 @@ export default function WalletsStateHandler() {
           nextAppState === "active" &&
           appState.current.match(/inactive|background/)
         ) {
-          refreshBalanceForAccounts(privySigner);
+          refreshBalanceForAccounts();
         } else {
         }
         appState.current = nextAppState;
@@ -32,7 +30,7 @@ export default function WalletsStateHandler() {
     return () => {
       subscription.remove();
     };
-  }, [privySigner]);
+  }, []);
 
   return null;
 }

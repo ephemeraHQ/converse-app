@@ -6,6 +6,8 @@ import { zustandMMKVStorage } from "../../utils/mmkv";
 export type WalletStoreType = {
   USDCBalance: string;
   setUSDCBalance: (b: string) => void;
+  privateKeyPath?: string | undefined;
+  setPrivateKeyPath: (p: string | undefined) => void;
 };
 
 export const initWalletStore = (account: string) => {
@@ -14,6 +16,8 @@ export const initWalletStore = (account: string) => {
       (set) => ({
         USDCBalance: "0",
         setUSDCBalance: (b) => set(() => ({ USDCBalance: b })),
+        privateKeyPath: undefined,
+        setPrivateKeyPath: (p) => set(() => ({ privateKeyPath: p })),
       }),
       {
         name: `store-${account}-wallet`, // Account-based storage so each account can have its own wallet data

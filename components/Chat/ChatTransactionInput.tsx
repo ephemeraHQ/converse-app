@@ -1,5 +1,6 @@
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import { Signer } from "ethers";
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
   View,
@@ -9,6 +10,7 @@ import {
   TouchableOpacity,
   Platform,
   Text,
+  Alert,
 } from "react-native";
 import uuid from "react-native-uuid";
 
@@ -28,7 +30,12 @@ import {
 import { useConversationContext } from "../../utils/conversation";
 import { isDesktop } from "../../utils/device";
 import { getTransferAuthorization } from "../../utils/evm/erc20";
-import { evmHelpers, usePrivySigner } from "../../utils/evm/helpers";
+import {
+  evmHelpers,
+  getCurrentAccountSigner,
+  usePrivySigner,
+} from "../../utils/evm/helpers";
+import provider from "../../utils/evm/provider";
 import { sendMessage } from "../../utils/message";
 import { pick } from "../../utils/objects";
 import { sentryTrackError } from "../../utils/sentry";
@@ -130,7 +137,18 @@ export default function ChatTransactionInput() {
   const txUUID = useRef("");
 
   const triggerTx = useCallback(async () => {
-    if (conversation && transactionValue.value.length > 0 && privySigner) {
+    if (conversation && transactionValue.value.length > 0) {
+      let signer = privySigner as Signer | undefined;
+      if (!signer) {
+        signer = await getCurrentAccountSigner();
+      }
+      if (!signer) {
+        setTxStatus({ status: "failure", canCancel: false });
+        Alert.alert(
+          "We couldn't get a signer to trigger transaction. Please try again or contact Converse team."
+        );
+        return;
+      }
       const thisUUID = uuid.v4().toString();
       txUUID.current = thisUUID;
       setTxStatus({ status: "sending", canCancel: true });
@@ -143,20 +161,20 @@ export default function ChatTransactionInput() {
           config.evm.USDC.contractAddress,
           transactionValue.value,
           conversation.peerAddress,
-          privySigner
+          signer
         );
 
         const txHash = await postUSDCTransferAuthorization(
-          await privySigner.getAddress(),
+          await signer.getAddress(),
           authorization.message,
           authorization.signature
         );
 
-        const txReceipt = await privySigner.provider.waitForTransaction(txHash);
+        const txReceipt = await provider.waitForTransaction(txHash);
         if (txReceipt.status === 1) {
           // This is success
           setTxStatus({ status: "success", canCancel: false });
-          refreshBalanceForAccounts(privySigner);
+          refreshBalanceForAccounts();
           await new Promise((r) => setTimeout(r, 2000));
           sendMessage(
             conversation,
