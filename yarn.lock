@@ -6517,10 +6517,10 @@
   dependencies:
     zod "^3.21.4"
 
-"@privy-io/expo@^0.3.0":
-  version "0.3.0"
-  resolved "https://registry.yarnpkg.com/@privy-io/expo/-/expo-0.3.0.tgz#4c1d72c2e2d1b4da72d5da4c113cbe50432f5a0b"
-  integrity sha512-gvERDLuZjrE7pUe+fQoi+g64U9+WZW2B2KRAWsdYLqaJxWLJciGkh3H/HV8nlBS3Ne6pKPN2YCqSXZHSOzp+1w==
+"@privy-io/expo@^0.3.1":
+  version "0.3.1"
+  resolved "https://registry.yarnpkg.com/@privy-io/expo/-/expo-0.3.1.tgz#83a8fbd8ae6829d09cc0b8c6182e17ec6b7d2101"
+  integrity sha512-+ADOgYstbUmnp991O69K9Xt2u7YoT8IYnzkQCNJgjPWvTIWwDnnQ0uPqIFwrEpPk1t9l78JmHL3vU7bwTDct+A==
   dependencies:
     "@privy-io/js-sdk-core" "*"
     react-fast-compare "^3.2.2"
