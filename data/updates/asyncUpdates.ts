@@ -7,7 +7,7 @@ import { setConsent } from "./001-setConsent";
 
 type Step = {
   id: string;
-  method: () => Promise<void>;
+  method: (account: string) => Promise<void>;
 };
 
 type Steps = Step[];
@@ -51,9 +51,9 @@ const runAsyncUpdatesForAccount = async (account: string) => {
   for (const updateKey of updateSteps) {
     if (updateKey.id > lastAsyncUpdate) {
       try {
-        const update = updateKey.method;
+        const update = updateKey.method(account);
         if (update) {
-          await update();
+          await update;
           getSettingsStore(account).getState().setLastAsyncUpdate(updateKey.id);
         } else {
           console.error(
