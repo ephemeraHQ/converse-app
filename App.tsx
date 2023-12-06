@@ -67,7 +67,6 @@ export default function App() {
     },
   });
   const [refactoMigrationDone, setRefactoMigrationDone] = useState(false);
-  const [asyncUpdateLock, setAsyncUpdateLock] = useState(false);
   const isInternetReachable = useAppStore((s) => s.isInternetReachable);
 
   useEffect(() => {
@@ -83,19 +82,15 @@ export default function App() {
         // This is still better than being stuck on home…
         setRefactoMigrationDone(true);
       });
+  }, []);
 
-    if (!asyncUpdateLock && isInternetReachable) {
-      setAsyncUpdateLock(true);
-      runAsyncUpdates()
-        .then(() => {
-          setAsyncUpdateLock(false);
-        })
-        .catch((e) => {
-          sentryTrackError(e);
-          setAsyncUpdateLock(false);
-        });
+  useEffect(() => {
+    if (isInternetReachable) {
+      runAsyncUpdates().catch((e) => {
+        sentryTrackError(e);
+      });
     }
-  }, [asyncUpdateLock, isInternetReachable]);
+  }, [isInternetReachable]);
 
   if (!refactoMigrationDone) return null;
 
