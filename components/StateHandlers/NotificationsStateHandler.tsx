@@ -4,10 +4,10 @@ import { AppState } from "react-native";
 
 import {
   useAccountsList,
-  getChatStore,
   useAccountsStore,
   useCurrentAccount,
-  getSettingsStore,
+  useChatStoreForAccount,
+  useSettingsStoreForAccount,
 } from "../../data/store/accountsStore";
 import { useAppStore } from "../../data/store/appStore";
 import { saveUser } from "../../utils/api";
@@ -19,6 +19,7 @@ import {
   resetNotifications,
   shouldShowNotificationForeground,
 } from "../../utils/notifications";
+import { pick } from "../../utils/objects";
 
 // This handler determines how the app handles
 // notifications that come in while the app is foregrounded
@@ -76,21 +77,64 @@ export default function NotificationsStateHandler() {
   }, [userAddress, privyAccountId]);
 
   const accounts = useAccountsList();
-  const hydrationDone = useAppStore((s) => s.hydrationDone);
 
+  return (
+    <>
+      {accounts.map((a) => (
+        <AccountNotificationsStateHandler
+          account={a}
+          key={`account-notifications-handler-${a}`}
+        />
+      ))}
+    </>
+  );
+}
+
+const AccountNotificationsStateHandler = ({ account }: { account: string }) => {
+  const hydrationDone = useAppStore((s) => s.hydrationDone);
+  const { conversations, topicsStatus, lastUpdateAt } = useChatStoreForAccount(
+    account
+  )((s) => pick(s, ["conversations", "topicsStatus", "lastUpdateAt"]));
+  const { peersStatus } = useSettingsStoreForAccount(account)((s) =>
+    pick(s, ["peersStatus"])
+  );
+  console.log(account, Object.keys(conversations).length);
+  const lastRefreshState = useRef({
+    account,
+    conversations: 0,
+    topicsStatus: 0,
+    peersStatus: 0,
+    lastUpdateAt: 0,
+  });
   // Sync accounts on load and when a new one is added
   useEffect(() => {
     if (!hydrationDone) return;
-    accounts.forEach((a) => {
-      // Let's sortAndComputePreview to subscribe to the right notifications
-      const { conversations, topicsStatus, conversationsSortedOnce } =
-        getChatStore(a).getState();
-      if (!conversationsSortedOnce) {
-        const { peersStatus } = getSettingsStore(a).getState();
-        sortAndComputePreview(conversations, a, topicsStatus, peersStatus);
-      }
-    });
-  }, [accounts, hydrationDone]);
-
+    // Let's sortAndComputePreview to subscribe to the right notifications
+    const newRefreshState = {
+      account,
+      conversations: Object.keys(conversations).length,
+      topicsStatus: Object.keys(topicsStatus).length,
+      peersStatus: Object.keys(peersStatus).length,
+      lastUpdateAt,
+    };
+    if (
+      newRefreshState.account !== lastRefreshState.current.account ||
+      newRefreshState.conversations !==
+        lastRefreshState.current.conversations ||
+      newRefreshState.topicsStatus !== lastRefreshState.current.topicsStatus ||
+      newRefreshState.peersStatus !== lastRefreshState.current.peersStatus ||
+      newRefreshState.lastUpdateAt !== lastRefreshState.current.lastUpdateAt
+    ) {
+      lastRefreshState.current = newRefreshState;
+      sortAndComputePreview(conversations, account, topicsStatus, peersStatus);
+    }
+  }, [
+    account,
+    conversations,
+    hydrationDone,
+    peersStatus,
+    topicsStatus,
+    lastUpdateAt,
+  ]);
   return null;
-}
+};

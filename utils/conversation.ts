@@ -13,6 +13,7 @@ import {
 } from "../data/store/chatStore";
 import { isAttachmentMessage } from "./attachment";
 import { getAddressForPeer } from "./eth";
+import { subscribeToNotifications } from "./notifications";
 import { pick } from "./objects";
 import { getMatchedPeerAddresses } from "./search";
 import { sentryTrackMessage } from "./sentry";
@@ -284,6 +285,9 @@ export function sortAndComputePreview(
   getChatStore(userAddress).getState().setSortedConversationsWithPreview({
     conversationsInbox,
     conversationsRequests,
+  });
+  setImmediate(() => {
+    subscribeToNotifications(userAddress);
   });
 }
 
