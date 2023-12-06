@@ -26,8 +26,8 @@ export type SettingsStoreType = {
   ephemeralAccount: boolean;
   setEphemeralAccount: (ephemeral: boolean) => void;
 
-  lastUpdateRan: string;
-  setLastUpdateRan: (version: string) => void;
+  lastAsyncUpdate: string;
+  setLastAsyncUpdate: (version: string) => void;
 };
 
 export const initSettingsStore = (account: string) => {
@@ -72,15 +72,16 @@ export const initSettingsStore = (account: string) => {
           setEphemeralAccount: (ephemeral) =>
             set(() => ({ ephemeralAccount: ephemeral })),
 
-          lastUpdateRan: "",
-          setLastUpdateRan: (update) => set(() => ({ lastUpdateRan: update })),
+          lastAsyncUpdate: "",
+          setLastAsyncUpdate: (version) =>
+            set(() => ({ lastAsyncUpdate: version })),
         }) as SettingsStoreType,
       {
         name: `store-${account}-settings`, // Account-based storage so each account can have its own settings
         storage: createJSONStorage(() => zustandMMKVStorage),
         version: 1,
         partialize: (state) => ({
-          lastUpdateRan: state.lastUpdateRan,
+          lastAsyncUpdate: state.lastAsyncUpdate,
         }),
         migrate: (persistedState: any, version: number): SettingsStoreType => {
           console.log("Zustand migration version:", version);

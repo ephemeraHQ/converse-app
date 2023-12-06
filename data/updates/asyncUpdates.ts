@@ -28,40 +28,47 @@ export const updateLastVersionOpen = () => {
 
 export const runAsyncUpdates = async () => {
   const accountList = getAccountsList();
-  console.log("[Async Updates] accountList:", accountList);
+  console.log(`[Async Updates] accountList: ${accountList}`);
+
+  accountList.forEach((account) => {
+    console.log(
+      `[Async Updates] running async updates for account: ${account}`
+    );
+    runAsyncUpdatesForAccount(account);
+  });
 };
 
 const runAsyncUpdatesForAccount = async (account: string) => {
-  const isInternetReachable = useAppStore.getState().isInternetReachable;
-  const lastUpdateRan = getSettingsStore(account).getState().lastUpdateRan;
+  // Debug, force update
+  // getSettingsStore(account).getState().setLastAsyncUpdate("");
 
-  // Always run setConsent
-  await updateSteps[0].method();
+  const lastAsyncUpdate = getSettingsStore(account).getState().lastAsyncUpdate;
+  console.log(`[Async Updates] lastAsyncUpdate: ${lastAsyncUpdate}`);
 
-  if (isInternetReachable) {
-    for (const updateKey of updateSteps) {
-      if (updateKey.id > lastUpdateRan) {
-        try {
-          const update = updateKey.method;
-          if (update) {
-            await update();
-            getSettingsStore(account).getState().setLastUpdateRan(updateKey.id);
-          } else {
-            console.error(
-              `[Async Updates] Failed to run migration: ${updateKey} [Error: migration function not found]`
-            );
-          }
-        } catch (error) {
+  // Always setConsent
+  // if (lastAsyncUpdate === "") await updateSteps[0].method();
+
+  for (const updateKey of updateSteps) {
+    if (updateKey.id > lastAsyncUpdate) {
+      try {
+        const update = updateKey.method;
+        if (update) {
+          await update();
+          getSettingsStore(account).getState().setLastAsyncUpdate(updateKey.id);
+        } else {
           console.error(
-            `[Async Updates] Failed to run migration: ${updateKey} [Error: ${error}]`
+            `[Async Updates] Failed to run migration: ${updateKey} [Error: migration function not found]`
           );
-          // Break out in case of error
-          break;
         }
+      } catch (error) {
+        console.error(
+          `[Async Updates] Failed to run migration: ${updateKey} [Error: ${error}]`
+        );
+        // Break out in case of error
+        break;
       }
+    } else {
+      console.info("[Async Updates] No update to run");
     }
-  } else {
-    await new Promise((r) => setTimeout(r, 2000));
-    runAsyncUpdates();
   }
 };
