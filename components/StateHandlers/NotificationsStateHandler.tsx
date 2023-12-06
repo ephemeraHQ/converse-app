@@ -98,7 +98,6 @@ const AccountNotificationsStateHandler = ({ account }: { account: string }) => {
   const { peersStatus } = useSettingsStoreForAccount(account)((s) =>
     pick(s, ["peersStatus"])
   );
-  console.log(account, Object.keys(conversations).length);
   const lastRefreshState = useRef({
     account,
     conversations: 0,
