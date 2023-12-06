@@ -35,7 +35,6 @@ import {
 } from "../utils/colors";
 import {
   LastMessagePreview,
-  sortAndComputePreview,
   getConversationListItemsToDisplay,
 } from "../utils/conversation";
 import { converseEventEmitter } from "../utils/events";
@@ -92,15 +91,6 @@ function ConversationList({ navigation, route, searchBarRef }: Props) {
     !searchQuery &&
     !searchBarFocused &&
     sortedConversationsWithPreview.conversationsInbox.length === 0;
-
-  useEffect(() => {
-    sortAndComputePreview(
-      conversations,
-      userAddress,
-      topicsStatus,
-      peersStatus
-    );
-  }, [conversations, userAddress, topicsStatus, peersStatus, lastUpdateAt]);
 
   useEffect(() => {
     if (!initialLoadDoneOnce) {

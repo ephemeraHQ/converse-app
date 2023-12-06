@@ -237,22 +237,49 @@ const currentAccountStoreHook = <T extends keyof AccountStoreDataType>(
   return use;
 };
 
+const accountStoreHook = <T extends keyof AccountStoreDataType>(
+  key: T,
+  account: string
+) => {
+  const _useStore = <U>(selector: (state: AccountStoreDataType[T]) => U) => {
+    const accountStore = getAccountStore(account);
+    return accountStore[key](selector);
+  };
+
+  const use = _useStore as AccountStoreType[T];
+  use.getState = () => {
+    const accountStore = getAccountStore(account);
+    return accountStore[key].getState();
+  };
+  return use;
+};
+
 export const useProfilesStore = currentAccountStoreHook("profiles");
+export const useProfilesStoreForAccount = (account: string) =>
+  accountStoreHook("profiles", account);
 export const getProfilesStore = (account: string) =>
   getAccountStore(account).profiles;
 
 export const useSettingsStore = currentAccountStoreHook("settings");
+export const useSettingsStoreForAccount = (account: string) =>
+  accountStoreHook("settings", account);
 export const getSettingsStore = (account: string) =>
   getAccountStore(account).settings;
 
 export const useRecommendationsStore =
   currentAccountStoreHook("recommendations");
+export const useRecommendationsStoreForAccount = (account: string) =>
+  accountStoreHook("recommendations", account);
 export const getRecommendationsStore = (account: string) =>
   getAccountStore(account).recommendations;
 
 export const useChatStore = currentAccountStoreHook("chat");
+export const useChatStoreForAccount = (account: string) =>
+  accountStoreHook("chat", account);
 export const getChatStore = (account: string) => getAccountStore(account).chat;
 
 export const useWalletStore = currentAccountStoreHook("wallet");
+export const useWalletStoreForAccount = (account: string) =>
+  accountStoreHook("wallet", account);
 export const getWalletStore = (account: string) =>
   getAccountStore(account).wallet;

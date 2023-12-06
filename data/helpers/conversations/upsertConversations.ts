@@ -37,7 +37,6 @@ export const saveConversations = async (
   );
   // Then to context so it show immediatly even without handle
   chatStoreState.setConversations(newlySavedConversations);
-
   // Let's find out which need to have the profile updated
   const knownProfiles = getProfilesStore(account).getState().profiles;
   const convosWithProfilesToUpdate: XmtpConversation[] = [];
