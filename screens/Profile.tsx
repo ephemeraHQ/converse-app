@@ -37,7 +37,6 @@ import {
   useSettingsStore,
   useWalletStore,
 } from "../data/store/accountsStore";
-import { blockPeers, consentToPeers } from "../utils/api";
 import {
   actionSheetColors,
   backgroundColor,
@@ -370,21 +369,14 @@ export default function ProfileScreen({
                         const newStatus = isBlockedPeer
                           ? "consented"
                           : "blocked";
-
-                        const actionFunc = isBlockedPeer
-                          ? consentToPeers
-                          : blockPeers;
-                        actionFunc(currentAccount(), [peerAddress]); // should we remove this?
-
-                        const consentTypeOnProtocol = isBlockedPeer
+                        const consentOnProtocol = isBlockedPeer
                           ? "allow"
                           : "deny";
                         consentToPeersOnProtocol(
                           currentAccount(),
                           [peerAddress],
-                          consentTypeOnProtocol
+                          consentOnProtocol
                         );
-
                         setPeersStatus({ [peerAddress]: newStatus });
 
                         // Pop to conversation list, antepenultimate screen in stack

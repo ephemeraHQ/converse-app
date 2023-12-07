@@ -21,7 +21,7 @@ import {
   useSettingsStore,
 } from "../data/store/accountsStore";
 import { NavigationParamList } from "../screens/Navigation/Navigation";
-import { deleteTopics, blockPeers } from "../utils/api";
+import { deleteTopics } from "../utils/api";
 import {
   actionSecondaryColor,
   actionSheetColors,
@@ -142,7 +142,6 @@ const ConversationListItem = memo(function ConversationListItem({
               } else if (selectedIndex === 1) {
                 deleteTopics(currentAccount(), [conversationTopic]);
                 setTopicsStatus({ [conversationTopic]: "deleted" });
-                blockPeers(currentAccount(), [conversationPeerAddress]); // should we remove this?
                 consentToPeersOnProtocol(
                   currentAccount(),
                   [conversationPeerAddress],

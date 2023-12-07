@@ -14,7 +14,6 @@ import {
   useRecommendationsStore,
   useSettingsStore,
 } from "../../data/store/accountsStore";
-import { consentToPeers } from "../../utils/api";
 import { actionSheetColors, textPrimaryColor } from "../../utils/colors";
 import { useConversationContext } from "../../utils/conversation";
 import { sendMessage } from "../../utils/message";
@@ -88,7 +87,6 @@ export default function ChatPlaceholder({ messagesCount }: Props) {
                   (selectedIndex?: number) => {
                     if (selectedIndex === 0 && conversation?.peerAddress) {
                       const { peerAddress } = conversation;
-                      consentToPeers(currentAccount(), [peerAddress]); // shall we remove this?
                       consentToPeersOnProtocol(
                         currentAccount(),
                         [peerAddress],
