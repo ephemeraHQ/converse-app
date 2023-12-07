@@ -12,7 +12,6 @@ import {
   Alert,
 } from "react-native";
 import { AvoidSoftInput } from "react-native-avoid-softinput";
-import uuid from "react-native-uuid";
 
 import { useOnboardingStore } from "../../data/store/onboardingStore";
 import {
@@ -21,7 +20,6 @@ import {
   textSecondaryColor,
 } from "../../utils/colors";
 import { getPrivateKeyFromMnemonic, validateMnemonic } from "../../utils/eth";
-import { savePrivateKey } from "../../utils/keychain";
 import { pick } from "../../utils/objects";
 import OnboardingComponent from "./OnboardingComponent";
 
@@ -99,20 +97,21 @@ export default function SeedPhraseConnect() {
           setLoading(false);
           return;
         }
+        setSigner(seedPhraseSigner);
         // Let's save
-        const pkPath = `PK-${uuid.v4().toString()}`;
-        try {
-          await savePrivateKey(pkPath, seedPhraseSigner.privateKey);
-          setPkPath(pkPath);
-          setSigner(seedPhraseSigner);
-        } catch (e: any) {
-          // No biometrics?
-          Alert.alert("An error occured", e.toString());
-          setLoading(false);
-        }
+        // const pkPath = `PK-${uuid.v4().toString()}`;
+        // try {
+        //   await savePrivateKey(pkPath, seedPhraseSigner.privateKey);
+        //   setPkPath(pkPath);
+        //   setSigner(seedPhraseSigner);
+        // } catch (e: any) {
+        //   // No biometrics?
+        //   Alert.alert("An error occured", e.toString());
+        //   setLoading(false);
+        // }
       }, 10);
     },
-    [setLoading, setSigner, setPkPath]
+    [setLoading, setSigner]
   );
 
   const avoidInputEffect = useCallback(() => {
