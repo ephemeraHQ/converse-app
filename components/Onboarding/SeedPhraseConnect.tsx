@@ -21,7 +21,7 @@ import {
   textSecondaryColor,
 } from "../../utils/colors";
 import { getPrivateKeyFromMnemonic, validateMnemonic } from "../../utils/eth";
-import { setSecureItemAsync } from "../../utils/keychain";
+import { savePrivateKey } from "../../utils/keychain";
 import { pick } from "../../utils/objects";
 import OnboardingComponent from "./OnboardingComponent";
 
@@ -102,8 +102,7 @@ export default function SeedPhraseConnect() {
         // Let's save
         const pkPath = `PK-${uuid.v4().toString()}`;
         try {
-          // TODO => enable authentication
-          await setSecureItemAsync(pkPath, seedPhraseSigner.privateKey);
+          await savePrivateKey(pkPath, seedPhraseSigner.privateKey);
           setPkPath(pkPath);
           setSigner(seedPhraseSigner);
         } catch (e: any) {

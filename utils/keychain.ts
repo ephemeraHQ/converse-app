@@ -9,12 +9,8 @@ export const secureStoreOptions: SecureStore.SecureStoreOptions = {
   keychainAccessible: SecureStore.AFTER_FIRST_UNLOCK,
 };
 
-export const setSecureItemAsync = (
-  key: string,
-  value: string,
-  options = {} as SecureStore.SecureStoreOptions
-) =>
-  SecureStore.setItemAsync(key, value, { ...secureStoreOptions, ...options });
+export const setSecureItemAsync = (key: string, value: string) =>
+  SecureStore.setItemAsync(key, value, secureStoreOptions);
 
 export const getSecureItemAsync = (key: string) =>
   SecureStore.getItemAsync(key, secureStoreOptions);
@@ -102,3 +98,14 @@ export const privySecureStorage: PrivyStorage = {
   del: (key) => deleteSecureItemAsync(key.replaceAll(":", "-")),
   getKeys: async () => [],
 };
+
+export const savePrivateKey = async (
+  privateKeyPath: string,
+  privateKey: string
+) =>
+  SecureStore.setItemAsync(privateKeyPath, privateKey, {
+    keychainService: config.bundleId,
+    keychainAccessible: SecureStore.WHEN_UNLOCKED_THIS_DEVICE_ONLY,
+    // TODO => add biometric authentication
+    // requireAuthentication: true,
+  });
