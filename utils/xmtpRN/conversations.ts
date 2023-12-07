@@ -224,21 +224,20 @@ export const consentToPeersOnProtocol = async (
 ) => {
   try {
     // Lowercase all strings in the peers array
+    // @todo not sure if we should pass the lowercased address or not to protocol
     const lowercasePeers = peers.map((peer) => peer.toLowerCase());
 
     const client = await getXmtpClient(account);
 
     if (consent === "allow") {
-      client.contacts.allow(lowercasePeers);
+      client.contacts.allow(peers);
     } else if (consent === "deny") {
-      client.contacts.deny(lowercasePeers);
+      client.contacts.deny(peers);
     } else {
       throw new Error(`Invalid consent type: ${consent}`);
     }
 
-    console.log(
-      `Consent updated: ${consent} for peers: ${JSON.stringify(lowercasePeers)}`
-    );
+    console.log(`Consent updated: ${consent} for peers: ${peers}`);
   } catch (error) {
     console.error("Error updating consent:", error);
   }
