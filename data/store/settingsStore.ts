@@ -80,9 +80,6 @@ export const initSettingsStore = (account: string) => {
         name: `store-${account}-settings`, // Account-based storage so each account can have its own settings
         storage: createJSONStorage(() => zustandMMKVStorage),
         version: 1,
-        partialize: (state) => ({
-          lastAsyncUpdate: state.lastAsyncUpdate,
-        }),
         migrate: (persistedState: any, version: number): SettingsStoreType => {
           console.log("Zustand migration version:", version);
 

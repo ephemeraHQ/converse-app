@@ -39,14 +39,8 @@ export const runAsyncUpdates = async () => {
 };
 
 const runAsyncUpdatesForAccount = async (account: string) => {
-  // Debug, force update
-  // getSettingsStore(account).getState().setLastAsyncUpdate("");
-
   const lastAsyncUpdate = getSettingsStore(account).getState().lastAsyncUpdate;
   console.log(`[Async Updates] lastAsyncUpdate: ${lastAsyncUpdate}`);
-
-  // Always setConsent
-  // if (lastAsyncUpdate === "") await updateSteps[0].method();
 
   for (const updateKey of updateSteps) {
     if (updateKey.id > lastAsyncUpdate) {
