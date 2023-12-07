@@ -1,7 +1,9 @@
 import type { Storage as PrivyStorage } from "@privy-io/js-sdk-core";
 import { createHash } from "crypto";
 import * as SecureStore from "expo-secure-store";
+import { Alert } from "react-native";
 
+import { addLog } from "../components/DebugButton";
 import config from "../config";
 
 export const secureStoreOptions: SecureStore.SecureStoreOptions = {
@@ -94,7 +96,13 @@ export const savePushToken = async (pushKey: string) => {
 
 export const privySecureStorage: PrivyStorage = {
   get: (key) => getSecureItemAsync(key.replaceAll(":", "-")),
-  put: (key, val: string) => setSecureItemAsync(key.replaceAll(":", "-"), val),
+  put: (key, val: string) => {
+    addLog(`Setting ${key} to length ${val ? val.length : val}`);
+    if (["privy:token", "privy:refresh_token"].includes(key) && !val) {
+      Alert.alert("Logging out of privy, please check logs");
+    }
+    return setSecureItemAsync(key.replaceAll(":", "-"), val);
+  },
   del: (key) => deleteSecureItemAsync(key.replaceAll(":", "-")),
   getKeys: async () => [],
 };

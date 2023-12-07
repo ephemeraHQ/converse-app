@@ -24,7 +24,8 @@ let logs: string[] = [];
 
 export const addLog = (log: string) => {
   if (config.debugMenu || config.debugAddresses.includes(currentAccount())) {
-    logs.push(log);
+    console.log(`${new Date().toISOString()} - ${log}`);
+    logs.push(`${new Date().toISOString()} - ${log}`);
   }
 };
 
