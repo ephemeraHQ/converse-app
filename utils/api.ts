@@ -87,30 +87,6 @@ export const reportMessage = async ({
   );
 };
 
-export const blockPeers = async (account: string, peers: string[]) => {
-  const peersStatus: { [key: string]: "blocked" } = {};
-  for (const peer of peers) {
-    peersStatus[peer] = "blocked";
-  }
-  await api.post(
-    "/api/consent/peer",
-    { peersStatus },
-    { headers: await getXmtpApiHeaders(account) }
-  );
-};
-
-export const consentToPeers = async (account: string, peers: string[]) => {
-  const peersStatus: { [key: string]: "consented" } = {};
-  for (const peer of peers) {
-    peersStatus[peer] = "consented";
-  }
-  await api.post(
-    "/api/consent/peer",
-    { peersStatus },
-    { headers: await getXmtpApiHeaders(account) }
-  );
-};
-
 export const getPeersStatus = async (account: string) => {
   const { data } = await api.get("/api/consent/peer", {
     headers: await getXmtpApiHeaders(account),

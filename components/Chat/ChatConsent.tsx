@@ -10,7 +10,6 @@ import {
   getSettingsStore,
 } from "../../data/store/accountsStore";
 import { NavigationParamList } from "../../screens/Navigation/Navigation";
-import { blockPeers, consentToPeers } from "../../utils/api";
 import {
   actionSheetColors,
   backgroundColor,
@@ -79,7 +78,6 @@ export default function ChatConsent() {
               },
               (selectedIndex?: number) => {
                 if (selectedIndex === 0) {
-                  blockPeers(currentAccount(), [conversation.peerAddress]); // should we remove this?
                   consentToPeersOnProtocol(
                     currentAccount(),
                     [conversation.peerAddress],
@@ -98,7 +96,6 @@ export default function ChatConsent() {
           title="Accept"
           style={styles.cta}
           onPress={() => {
-            consentToPeers(currentAccount(), [conversation.peerAddress]); // should we remove this?
             consentToPeersOnProtocol(
               currentAccount(),
               [conversation.peerAddress],
