@@ -53,21 +53,15 @@ export const getSignerFromSeedPhraseOrPrivateKey = async (
 };
 
 export default function SeedPhraseConnect() {
-  const {
-    setLoading,
-    setConnectionMethod,
-    setSigner,
-    setIsEphemeral,
-    setPkPath,
-  } = useOnboardingStore((s) =>
-    pick(s, [
-      "setLoading",
-      "setConnectionMethod",
-      "setSigner",
-      "setIsEphemeral",
-      "setPkPath",
-    ])
-  );
+  const { setLoading, setConnectionMethod, setSigner, setIsEphemeral } =
+    useOnboardingStore((s) =>
+      pick(s, [
+        "setLoading",
+        "setConnectionMethod",
+        "setSigner",
+        "setIsEphemeral",
+      ])
+    );
   const [seedPhrase, setSeedPhrase] = useState("");
   const colorScheme = useColorScheme();
   const textInputRef = useRef<TextInput | null>(null);

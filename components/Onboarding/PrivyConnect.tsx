@@ -23,6 +23,7 @@ import {
 } from "../../utils/colors";
 import { usePrivySigner } from "../../utils/evm/helpers";
 import { pick } from "../../utils/objects";
+import { addLog } from "../DebugButton";
 import Picto from "../Picto/Picto";
 import OnboardingComponent from "./OnboardingComponent";
 
@@ -43,6 +44,7 @@ export default function PrivyConnect() {
 
   useEffect(() => {
     setPrivyAccountId(undefined);
+    addLog("Logging out from Privy");
     logout();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
