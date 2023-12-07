@@ -1,32 +1,47 @@
 import { conversationConsentState } from "@xmtp/react-native-sdk";
 
-import { getChatStore } from "../../data/store/accountsStore";
-
-const logConsentStatesForAccount = async (account: string) => {
-  const conversations = getChatStore(account).getState().conversations;
-
-  for (const topic in conversations) {
-    if (conversations.hasOwnProperty(topic)) {
-      const conversation = conversations[topic];
-      try {
-        const consentState = await conversationConsentState(
-          account,
-          conversation.topic
-        );
-        console.log(
-          `Topic: ${topic}, Consent State: ${JSON.stringify(consentState)}`
-        );
-      } catch (error) {
-        console.error(
-          `Error fetching consent state for topic: ${topic}`,
-          error
-        );
-      }
-    }
-  }
-};
+import { getChatStore, getSettingsStore } from "../../data/store/accountsStore";
+import { getXmtpClient } from "../../utils/xmtpRN/client";
+import { SettingsStoreType } from "../store/settingsStore";
 
 export const setConsent = async (account: string) => {
-  console.log("[Async Updates] Running 001-setConsent, account:", account);
-  logConsentStatesForAccount(account);
+  console.log(`[Async Updates] Running 001-setConsent for account: ${account}`);
+
+  const client = await getXmtpClient(account);
+
+  // Update Zustand store with peersStatus for auto-consented conversations
+  const conversations = getChatStore(account).getState().conversations;
+  const peersToConsent: Pick<SettingsStoreType, "peersStatus">["peersStatus"] =
+    {};
+  for (const conversation of Object.values(conversations)) {
+    if (
+      conversation.hasOneMessageFromMe &&
+      (await conversationConsentState(account, conversation.topic)) ===
+        "unknown"
+    ) {
+      peersToConsent[conversation.peerAddress] = "consented";
+    }
+  }
+  if (Object.keys(peersToConsent).length > 0) {
+    getSettingsStore(account).getState().setPeersStatus(peersToConsent);
+  }
+
+  const peersStatus = getSettingsStore(account).getState().peersStatus;
+
+  if (Object.keys(peersStatus).length > 0) {
+    const allowedPeers: string[] = [];
+    const deniedPeers: string[] = [];
+
+    for (const [peerAddress, status] of Object.entries(peersStatus)) {
+      if (status === "consented") {
+        allowedPeers.push(peerAddress);
+      } else if (status === "blocked") {
+        deniedPeers.push(peerAddress);
+      }
+    }
+
+    // Broadcast consent to protocol
+    allowedPeers.length > 0 && client.contacts.allow(allowedPeers);
+    deniedPeers.length > 0 && client.contacts.deny(deniedPeers);
+  }
 };
