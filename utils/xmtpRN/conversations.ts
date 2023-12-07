@@ -3,7 +3,9 @@ import { ConversationContext } from "@xmtp/react-native-sdk";
 import { Conversation as DbConversation } from "../../data/db/entities/conversationEntity";
 import { getPendingConversationsToCreate } from "../../data/helpers/conversations/pendingConversations";
 import { saveConversations } from "../../data/helpers/conversations/upsertConversations";
+import { useSettingsStore } from "../../data/store/accountsStore";
 import { XmtpConversation } from "../../data/store/chatStore";
+import { SettingsStoreType } from "../../data/store/settingsStore";
 import { getTopicDataFromKeychain, saveTopicDataToKeychain } from "../keychain";
 import { sentryTrackError } from "../sentry";
 import {
@@ -169,12 +171,45 @@ export const loadConversations = async (
       await protocolConversationsToTopicData(newConversations)
     );
 
+    // Refresh consent list from protocol
+    // Note: refreshConsentList() will soon return the consent list
+    // @todo once it does, save the dict to our app's peersStatus
+    client.contacts.refreshConsentList();
+
+    const uniquePeers = new Map();
+    for (const conversation of conversations) {
+      uniquePeers.set(conversation.peerAddress, conversation);
+    }
+
+    refreshPeersStatus(Array.from(uniquePeers.values()));
+
     return { newConversations, knownConversations };
   } catch (e) {
     const error = new Error();
     error.name = "LOAD_CONVERSATIONS_FAILED";
     error.message = `${e}`;
     throw error;
+  }
+};
+
+const refreshPeersStatus = async (conversations: Conversation[]) => {
+  const peersStatus: Pick<SettingsStoreType, "peersStatus">["peersStatus"] = {};
+
+  for (const conversation of conversations) {
+    // Using consentState() from the convo to avoid passing client
+    // and calling client.contacts.isAllowed()/isDenied()
+    const consentStatus = await conversation.consentState();
+
+    if (consentStatus === "allowed") {
+      peersStatus[conversation.peerAddress] = "consented";
+    } else if (consentStatus === "denied") {
+      peersStatus[conversation.peerAddress] = "blocked";
+    }
+    // 'unknown' status is ignored
+  }
+
+  if (Object.keys(peersStatus).length > 0) {
+    useSettingsStore.getState().setPeersStatus(peersStatus);
   }
 };
 
