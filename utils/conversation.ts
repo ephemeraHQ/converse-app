@@ -19,6 +19,7 @@ import { getMatchedPeerAddresses } from "./search";
 import { sentryTrackMessage } from "./sentry";
 import { TextInputWithValue, addressPrefix } from "./str";
 import { isOnXmtp } from "./xmtpJS/client";
+import { isContentType } from "./xmtpRN/contentTypes";
 
 export type ConversationWithLastMessagePreview = XmtpConversation & {
   lastMessagePreview?: LastMessagePreview;
@@ -53,7 +54,7 @@ export const conversationLastMessagePreview = (
           contentPreview: "📎 Media",
           message: lastMessage,
         };
-      } else if (lastMessage?.contentType?.startsWith("xmtp.org/reaction:")) {
+      } else if (isContentType("reaction", lastMessage?.contentType)) {
         try {
           const reactionContent = JSON.parse(lastMessage.content) as Reaction;
           const message = conversation.messages.get(reactionContent.reference);
@@ -97,9 +98,7 @@ export const conversationLastMessagePreview = (
           removedReactions = {};
           continue;
         }
-      } else if (
-        lastMessage?.contentType?.startsWith("xmtp.org/readReceipt:")
-      ) {
+      } else if (isContentType("readReceipt", lastMessage?.contentType)) {
         continue;
       } else {
         removedReactions = {};

@@ -9,6 +9,7 @@ import RNFS from "react-native-fs";
 import { moveFileAndReplace } from "./fileSystem";
 import { getImageSize, isImageMimetype } from "./media";
 import { uploadFileToWeb3Storage } from "./web3.storage";
+import { isContentType } from "./xmtpRN/contentTypes";
 
 export type SerializedAttachmentContent = {
   filename: string;
@@ -29,8 +30,8 @@ export type SerializedRemoteAttachmentContent = {
 
 export const isAttachmentMessage = (contentType?: string) =>
   contentType
-    ? contentType.startsWith("xmtp.org/attachment:") ||
-      contentType.startsWith("xmtp.org/remoteStaticAttachment:")
+    ? isContentType("attachment", contentType) ||
+      isContentType("remoteAttachment", contentType)
     : false;
 
 export const handleStaticAttachment = async (

@@ -1,23 +1,49 @@
-diff --color=auto -ur Pods/XMTP/Sources/XMTP/ConversationV2.swift Pods/XMTPatched/Sources/XMTP/ConversationV2.swift
---- Pods/XMTP/Sources/XMTP/ConversationV2.swift	2023-09-20 23:12:39
-+++ Pods/XMTPatched/Sources/XMTP/ConversationV2.swift	2023-09-20 23:13:33
-@@ -171,6 +171,7 @@
- 		var decoded = try decode(message.v2)
+diff --color=auto -ur Pods/XMTP/Sources/XMTP/ConversationV2.swift Pods/XMTP/Sources/XMTP/ConversationV2.swift
+--- Pods/XMTP/Sources/XMTP/ConversationV2.swift	2023-12-07 14:43:36
++++ Pods/XMTP/Sources/XMTP/ConversationV2.swift	2023-12-07 14:43:02
+@@ -143,7 +143,9 @@
  
- 		decoded.id = generateID(from: envelope)
-+		decoded.sentViaConverse = String(envelope.timestampNs).hasSuffix("108167")
- 
- 		return decoded
+ 	func decrypt(envelope: Envelope) throws -> DecryptedMessage {
+ 		let message = try Message(serializedData: envelope.message)
+-		return try MessageV2.decrypt(generateID(from: envelope), topic, message.v2, keyMaterial: keyMaterial, client: client)
++        var decrypted = try MessageV2.decrypt(generateID(from: envelope), topic, message.v2, keyMaterial: keyMaterial, client: client)
++        decrypted.sentViaConverse = String(envelope.timestampNs).hasSuffix("108167")
++        return decrypted
  	}
-diff --color=auto -ur Pods/XMTP/Sources/XMTP/DecodedMessage.swift Pods/XMTPatched/Sources/XMTP/DecodedMessage.swift
---- Pods/XMTP/Sources/XMTP/DecodedMessage.swift	2023-09-20 23:12:39
-+++ Pods/XMTPatched/Sources/XMTP/DecodedMessage.swift	2023-09-20 23:13:49
-@@ -21,6 +21,8 @@
+ 
+ 	var ephemeralTopic: String {
+@@ -194,8 +196,9 @@
+ 
+ 	public func decode(envelope: Envelope) throws -> DecodedMessage {
+ 		let message = try Message(serializedData: envelope.message)
+-
+-		return try MessageV2.decode(generateID(from: envelope), topic, message.v2, keyMaterial: keyMaterial, client: client)
++        var decoded = try MessageV2.decode(generateID(from: envelope), topic, message.v2, keyMaterial: keyMaterial, client: client)
++        decoded.sentViaConverse = String(envelope.timestampNs).hasSuffix("108167")
++		return decoded
+ 	}
+ 
+ 	@discardableResult func send<T>(content: T, options: SendOptions? = nil) async throws -> String {
+diff --color=auto -ur Pods/XMTP/Sources/XMTP/DecodedMessage.swift Pods/XMTP/Sources/XMTP/DecodedMessage.swift
+--- Pods/XMTP/Sources/XMTP/DecodedMessage.swift	2023-12-07 14:43:36
++++ Pods/XMTP/Sources/XMTP/DecodedMessage.swift	2023-12-07 14:43:02
+@@ -20,6 +20,8 @@
+ 
  	/// When the message was sent
  	public var sent: Date
++    
++    public var sentViaConverse: Bool = false
  
-+	public var sentViaConverse: Bool = false
-+
  	public var client: Client
  
-     public init(
+diff --color=auto -ur Pods/XMTP/Sources/XMTP/Messages/DecryptedMessage.swift Pods/XMTP/Sources/XMTP/Messages/DecryptedMessage.swift
+--- Pods/XMTP/Sources/XMTP/Messages/DecryptedMessage.swift	2023-12-07 14:43:36
++++ Pods/XMTP/Sources/XMTP/Messages/DecryptedMessage.swift	2023-12-07 14:43:02
+@@ -9,6 +9,7 @@
+ 
+ public struct DecryptedMessage {
+ 	public var id: String
++    public var sentViaConverse: Bool = false
+ 	public var encodedContent: EncodedContent
+ 	public var senderAddress: String
+ 	public var sentAt: Date
