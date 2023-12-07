@@ -1,13 +1,16 @@
-import { useNavigation } from "@react-navigation/native";
-import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { useCallback, useEffect } from "react";
-import { TouchableOpacity, View, StyleSheet, Platform } from "react-native";
+import {
+  TouchableOpacity,
+  View,
+  StyleSheet,
+  Platform,
+  Alert,
+} from "react-native";
 
 import {
   useLoggedWithPrivy,
   useWalletStore,
 } from "../../data/store/accountsStore";
-import { NavigationParamList } from "../../screens/Navigation/Navigation";
 import { useConversationContext } from "../../utils/conversation";
 import { converseEventEmitter } from "../../utils/events";
 import { executeAfterKeyboardClosed } from "../../utils/keyboard";
@@ -19,11 +22,6 @@ export default function ChatSendMoney() {
   const styles = useStyles();
   const loggedWithPrivy = useLoggedWithPrivy();
   const pkPath = useWalletStore((s) => s.privateKeyPath);
-  const navigation = useNavigation() as NativeStackNavigationProp<
-    NavigationParamList,
-    "Chats",
-    undefined
-  >;
 
   const showMoneyInput = useCallback(() => {
     setTransactionMode(true);
@@ -36,10 +34,11 @@ export default function ChatSendMoney() {
       if (loggedWithPrivy || pkPath) {
         showMoneyInput();
       } else {
-        navigation.navigate("EnableTransactions");
+        Alert.alert("This feature is only available in Privy accounts");
+        // navigation.navigate("EnableTransactions");
       }
     });
-  }, [showMoneyInput, loggedWithPrivy, navigation, pkPath]);
+  }, [showMoneyInput, loggedWithPrivy, pkPath]);
 
   useEffect(() => {
     converseEventEmitter.on("enable-transaction-mode", showMoneyInput);
