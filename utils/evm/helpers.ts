@@ -52,6 +52,8 @@ export const getCurrentAccountSigner = async () => {
   const pkPath = getWalletStore(account).getState().privateKeyPath;
   if (!pkPath) return;
   try {
+    // Here we should check, if the key does not exist, we should probably
+    // delete pkPath and alert the user
     const pk = await getSecureItemAsync(pkPath);
     if (!pk) return;
     return new Wallet(pk);

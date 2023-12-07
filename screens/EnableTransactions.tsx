@@ -21,7 +21,7 @@ import {
   backgroundColor,
 } from "../utils/colors";
 import { converseEventEmitter } from "../utils/events";
-import { setSecureItemAsync } from "../utils/keychain";
+import { savePrivateKey } from "../utils/keychain";
 import { shortAddress } from "../utils/str";
 import { NavigationParamList } from "./Navigation/Navigation";
 
@@ -77,7 +77,7 @@ export default function EnableTransactionsScreen({
         // Now we can save this key and setup its path
         const pkPath = `PK-${uuid.v4().toString()}`;
         try {
-          await setSecureItemAsync(pkPath, seedPhraseSigner.privateKey);
+          await savePrivateKey(pkPath, seedPhraseSigner.privateKey);
           setPkPath(pkPath);
           setLoading(false);
           navigation.goBack();
