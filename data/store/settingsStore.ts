@@ -38,14 +38,6 @@ export const initSettingsStore = (account: string) => {
           notifications: {
             showNotificationScreen: true,
           },
-          setNotificationsSettings: (notificationsSettings) =>
-            set((state) => ({
-              notifications: {
-                ...state.notifications,
-                ...notificationsSettings,
-              },
-            })),
-
           peersStatus: {},
           setPeersStatus: (peersStatus: {
             [peerAddress: string]: "blocked" | "consented";
@@ -67,14 +59,23 @@ export const initSettingsStore = (account: string) => {
                 },
               };
             }),
-
+          setNotificationsSettings: (notificationsSettings) =>
+            set((state) => ({
+              notifications: {
+                ...state.notifications,
+                ...notificationsSettings,
+              },
+            })),
           ephemeralAccount: false,
           setEphemeralAccount: (ephemeral) =>
-            set(() => ({ ephemeralAccount: ephemeral })),
-
+            set(() => ({
+              ephemeralAccount: ephemeral,
+            })),
           lastAsyncUpdate: "",
           setLastAsyncUpdate: (version) =>
-            set(() => ({ lastAsyncUpdate: version })),
+            set(() => ({
+              lastAsyncUpdate: version,
+            })),
         }) as SettingsStoreType,
       {
         name: `store-${account}-settings`, // Account-based storage so each account can have its own settings
