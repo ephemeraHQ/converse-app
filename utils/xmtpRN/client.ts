@@ -13,6 +13,7 @@ import config from "../../config";
 import { refreshAllSpamScores } from "../../data/helpers/conversations/spamScore";
 import { getChatStore } from "../../data/store/accountsStore";
 import { loadXmtpKey } from "../keychain";
+import { CoinbaseMessagingPaymentCodec } from "./contentTypes/coinbasePayment";
 import {
   deleteOpenedConversations,
   loadConversations,
@@ -35,6 +36,7 @@ export const getXmtpClientFromBase64Key = (base64Key: string) =>
       new ReadReceiptCodec(),
       new RemoteAttachmentCodec(),
       new StaticAttachmentCodec(),
+      new CoinbaseMessagingPaymentCodec(),
       // new ReplyCodec()
     ],
   });

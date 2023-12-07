@@ -10,6 +10,7 @@ import { saveMessages } from "../../data/helpers/messages";
 import { XmtpMessage } from "../../data/store/chatStore";
 import { ConverseXmtpClientType, DecodedMessageWithCodecsType } from "./client";
 import { isContentType } from "./contentTypes";
+import { CoinbaseMessagingPaymentContent } from "./contentTypes/coinbasePayment";
 
 const BATCH_QUERY_PAGE_SIZE = 30;
 
@@ -47,6 +48,9 @@ const protocolMessageToStateMessage = (
   } else if (isContentType("reaction", contentType)) {
     content = JSON.stringify(messageContent as ReactionContent);
     referencedMessageId = (messageContent as ReactionContent).reference;
+  } else if (isContentType("coinbasePayment", contentType)) {
+    addLog(JSON.stringify(messageContent as CoinbaseMessagingPaymentContent));
+    alert("GOT A COINBASE PAYMENT");
   } else {
     contentFallback = message.fallback;
   }
