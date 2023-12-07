@@ -1,6 +1,7 @@
 import "reflect-metadata";
 
 import { getPreferredName } from "../utils/profile";
+import { isContentType } from "../utils/xmtpRN/contentTypes";
 import { Conversation } from "./db/entities/conversationEntity";
 import { Message } from "./db/entities/messageEntity";
 import { XmtpConversation, XmtpMessage } from "./store/chatStore";
@@ -47,7 +48,7 @@ const xmtpMessagesMapFromDb = (
     messagesMap.set(xmtpMessage.id, xmtpMessage);
     if (
       xmtpMessage.referencedMessageId &&
-      xmtpMessage.contentType.startsWith("xmtp.org/reaction:")
+      isContentType("reaction", xmtpMessage.contentType)
     ) {
       // This is a reaction to a message, let's save it to make
       // it easily accessible
