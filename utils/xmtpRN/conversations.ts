@@ -217,6 +217,30 @@ const refreshPeersStatus = async (conversations: Conversation[]) => {
   }
 };
 
+export const consentToPeersOnProtocol = async (
+  account: string,
+  peers: string[],
+  consent: "allow" | "deny"
+) => {
+  try {
+    const client = await getXmtpClient(account);
+
+    if (consent === "allow") {
+      client.contacts.allow(peers);
+    } else if (consent === "deny") {
+      client.contacts.deny(peers);
+    } else {
+      throw new Error(`Invalid consent type: ${consent}`);
+    }
+
+    console.log(
+      `Consent updated: ${consent} for peers: ${JSON.stringify(peers)}`
+    );
+  } catch (error) {
+    console.error("Error updating consent:", error);
+  }
+};
+
 export const getConversationWithTopic = async (
   account: string,
   topic: string
