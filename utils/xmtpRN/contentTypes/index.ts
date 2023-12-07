@@ -4,6 +4,7 @@ const contentTypesPrefixes = {
   attachment: "xmtp.org/attachment:",
   reaction: "xmtp.org/reaction:",
   readReceipt: "xmtp.org/readReceipt:",
+  coinbasePayment: "coinbase.com/coinbase-messaging-payment-activity:",
 };
 
 export const isContentType = (
