@@ -27,6 +27,7 @@ import {
   getEmojiName,
   removeReactionFromMessage,
 } from "../../utils/reactions";
+import { consentToPeersOnProtocol } from "../../utils/xmtpRN/conversations";
 import EmojiPicker from "../../vendor/rn-emoji-keyboard";
 import { showActionSheetWithOptions } from "../StateHandlers/ActionSheetStateHandler";
 import { MessageToDisplay } from "./ChatMessage";
@@ -70,7 +71,8 @@ export default function ChatMessageActions({
       messageContent: message.content,
       messageSender: message.senderAddress,
     });
-    blockPeers(currentAccount(), [message.senderAddress]);
+    blockPeers(currentAccount(), [message.senderAddress]); // should we remove this?
+    consentToPeersOnProtocol(currentAccount(), [message.senderAddress], "deny");
     setPeersStatus({ [message.senderAddress]: "blocked" });
   }, [message.content, message.id, message.senderAddress, setPeersStatus]);
 

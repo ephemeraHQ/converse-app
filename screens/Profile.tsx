@@ -51,6 +51,7 @@ import { logout } from "../utils/logout";
 import { pick } from "../utils/objects";
 import { getIPFSAssetURI } from "../utils/thirdweb";
 import { refreshBalanceForAccount } from "../utils/wallet";
+import { consentToPeersOnProtocol } from "../utils/xmtpRN/conversations";
 import { NavigationParamList } from "./Navigation/Navigation";
 
 export default function ProfileScreen({
@@ -369,12 +370,23 @@ export default function ProfileScreen({
                         const newStatus = isBlockedPeer
                           ? "consented"
                           : "blocked";
+
                         const actionFunc = isBlockedPeer
                           ? consentToPeers
                           : blockPeers;
+                        actionFunc(currentAccount(), [peerAddress]); // should we remove this?
 
-                        actionFunc(currentAccount(), [peerAddress]);
+                        const consentTypeOnProtocol = isBlockedPeer
+                          ? "allow"
+                          : "deny";
+                        consentToPeersOnProtocol(
+                          currentAccount(),
+                          [peerAddress],
+                          consentTypeOnProtocol
+                        );
+
                         setPeersStatus({ [peerAddress]: newStatus });
+
                         // Pop to conversation list, antepenultimate screen in stack
                         navigation.pop(2);
                       }
