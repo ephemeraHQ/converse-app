@@ -119,6 +119,10 @@ const handleNewConversation = async (
   setTimeout(() => {
     loadConversationsMessages(client, { [conversation.topic]: 0 });
   }, 3000);
+
+  // Fetch consent from protocol
+  client.contacts.refreshConsentList();
+  await refreshPeersStatus([conversation]);
 };
 
 export const streamConversations = async (client: ConverseXmtpClientType) => {
