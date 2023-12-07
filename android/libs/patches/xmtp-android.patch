@@ -45,28 +45,64 @@ index da450a2..c4c7ed6 100644
  zipStorePath=wrapper/dists
  zipStoreBase=GRADLE_USER_HOME
 diff --git a/library/src/main/java/org/xmtp/android/library/ConversationV2.kt b/library/src/main/java/org/xmtp/android/library/ConversationV2.kt
-index 170e747..3fb998f 100644
+index 4ae5bf1..7c0d730 100644
 --- a/library/src/main/java/org/xmtp/android/library/ConversationV2.kt
 +++ b/library/src/main/java/org/xmtp/android/library/ConversationV2.kt
-@@ -83,6 +83,7 @@ data class ConversationV2(
+@@ -94,13 +94,15 @@ data class ConversationV2(
+ 
+     fun decrypt(envelope: Envelope): DecryptedMessage {
          val message = Message.parseFrom(envelope.message)
-         val decoded = decode(message.v2)
-         decoded.id = generateId(envelope)
-+        decoded.sentViaConverse = (envelope.timestampNs.toString()).endsWith("108167")
-         return decoded
+-        return MessageV2Builder.buildDecrypt(
++        val decrypted = MessageV2Builder.buildDecrypt(
+             id = generateId(envelope = envelope),
+             topic,
+             message.v2,
+             keyMaterial,
+             client
+         )
++        decrypted.sentViaConverse = (envelope.timestampNs.toString()).endsWith("108167")
++        return decrypted
      }
  
+     fun streamMessages(): Flow<DecodedMessage> = flow {
+@@ -111,13 +113,15 @@ data class ConversationV2(
+ 
+     fun decodeEnvelope(envelope: Envelope): DecodedMessage {
+         val message = Message.parseFrom(envelope.message)
+-        return MessageV2Builder.buildDecode(
++        val decoded =  MessageV2Builder.buildDecode(
+             generateId(envelope = envelope),
+             topic = topic,
+             message.v2,
+             keyMaterial = keyMaterial,
+             client = client
+         )
++        decoded.sentViaConverse = (envelope.timestampNs.toString()).endsWith("108167")
++        return decoded
+     }
+ 
+     private fun decodeEnvelopeOrNull(envelope: Envelope): DecodedMessage? {
 diff --git a/library/src/main/java/org/xmtp/android/library/DecodedMessage.kt b/library/src/main/java/org/xmtp/android/library/DecodedMessage.kt
-index 6b5122e..70cf469 100644
+index eb80cd7..5fe75a0 100644
 --- a/library/src/main/java/org/xmtp/android/library/DecodedMessage.kt
 +++ b/library/src/main/java/org/xmtp/android/library/DecodedMessage.kt
-@@ -9,7 +9,8 @@ data class DecodedMessage(
+@@ -9,6 +9,7 @@ data class DecodedMessage(
+     var id: String = "",
+     val client: Client,
      var topic: String,
++    var sentViaConverse: Boolean = false,
      var encodedContent: Content.EncodedContent,
      var senderAddress: String,
--    var sent: Date
-+    var sent: Date,
-+    var sentViaConverse: Boolean = false
- ) {
-     var id: String = ""
-     companion object {
+     var sent: Date
+diff --git a/library/src/main/java/org/xmtp/android/library/messages/DecryptedMessage.kt b/library/src/main/java/org/xmtp/android/library/messages/DecryptedMessage.kt
+index c2b2d4e..95cdc11 100644
+--- a/library/src/main/java/org/xmtp/android/library/messages/DecryptedMessage.kt
++++ b/library/src/main/java/org/xmtp/android/library/messages/DecryptedMessage.kt
+@@ -7,6 +7,7 @@ data class DecryptedMessage(
+     var id: String,
+     var encodedContent: EncodedContent,
+     var senderAddress: String,
++    var sentViaConverse: Boolean = false,
+     var sentAt: Date,
+     var topic: String = ""
+ )

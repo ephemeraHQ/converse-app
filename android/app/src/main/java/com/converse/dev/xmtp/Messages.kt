@@ -95,7 +95,8 @@ suspend fun handleNewConversationFirstMessage(
                 val decodedMessageResult = handleMessageByContentType(
                     appContext,
                     message,
-                    xmtpClient
+                    xmtpClient,
+                    message.sentViaConverse
                 )
 
                 if (decodedMessageResult.senderAddress == xmtpClient.address || decodedMessageResult.forceIgnore) {
@@ -151,7 +152,8 @@ fun handleOngoingConversationMessage(
     appContext: Context,
     xmtpClient: Client,
     envelope: Envelope,
-    remoteMessage: RemoteMessage
+    remoteMessage: RemoteMessage,
+    sentViaConverse: Boolean
 ): NotificationDataResult {
     val conversation = getPersistedConversation(xmtpClient, envelope.contentTopic)
         ?: run {
@@ -162,19 +164,12 @@ fun handleOngoingConversationMessage(
     val message = conversation.decode(envelope)
     val contentTopic = envelope.contentTopic
     var conversationTitle = getSavedConversationTitle(appContext, contentTopic)
-    var conversationContext: ConversationContext? = null
-
-    if (conversation is Conversation.V2 && conversation.conversationV2.context.conversationId !== null) {
-        conversationContext = ConversationContext(
-            conversation.conversationV2.context.conversationId,
-            conversation.conversationV2.context.metadataMap
-        )
-    }
 
     val decodedMessageResult = handleMessageByContentType(
         appContext,
         message,
-        xmtpClient
+        xmtpClient,
+        sentViaConverse
     )
 
     val shouldShowNotification = if (decodedMessageResult.senderAddress != xmtpClient.address && !decodedMessageResult.forceIgnore && decodedMessageResult.content != null) {
@@ -200,6 +195,7 @@ fun handleMessageByContentType(
     appContext: Context,
     decodedMessage: DecodedMessage,
     xmtpClient: Client,
+    sentViaConverse: Boolean
 ): DecodedMessageResult {
     val contentType = getContentTypeString(decodedMessage.encodedContent.type)
     var contentToReturn: String?
@@ -248,7 +244,8 @@ fun handleMessageByContentType(
                 account = xmtpClient.address,
                 decodedMessage = decodedMessage,
                 content = it,
-                contentType = contentType
+                contentType = contentType,
+                sentViaConverse = sentViaConverse
             )
         }
 
@@ -265,7 +262,7 @@ fun getContentTypeString(contentType: Content.ContentTypeId): String {
     return "${contentType.authorityId}/${contentType.typeId}:${contentType.versionMajor}.${contentType.versionMinor}"
 }
 
-fun saveMessageToStorage(appContext: Context, account: String, decodedMessage: DecodedMessage, content: String, contentType: String) {
+fun saveMessageToStorage(appContext: Context, account: String, decodedMessage: DecodedMessage, content: String, contentType: String, sentViaConverse: Boolean) {
     val mmkv = getMmkv(appContext)
     val currentSavedMessagesString = mmkv?.decodeString("saved-notifications-messages")
     Log.d("PushNotificationsService", "Got current saved messages from storage: $currentSavedMessagesString")
@@ -284,7 +281,7 @@ fun saveMessageToStorage(appContext: Context, account: String, decodedMessage: D
         senderAddress=decodedMessage.senderAddress,
         sent=decodedMessage.sent.time,
         id=decodedMessage.id,
-        sentViaConverse=decodedMessage.sentViaConverse,
+        sentViaConverse=sentViaConverse,
         contentType=contentType,
         account=account
     )
