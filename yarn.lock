@@ -6510,7 +6510,7 @@
     "@pnpm/network.ca-file" "^1.0.1"
     config-chain "^1.1.11"
 
-"@privy-io/api-base@*":
+"@privy-io/api-base@*", "@privy-io/api-base@^0.4.0":
   version "0.4.0"
   resolved "https://registry.yarnpkg.com/@privy-io/api-base/-/api-base-0.4.0.tgz#d98805e25d0b8b200647ca1bad145e25d569b76c"
   integrity sha512-Q/MjLyJS/rDC/lkM23NCovimggKVSo7xt7Ukmh3dCM97/UOlTQzai6XnZv8IcHmrzA6ByFPL5TOO9ORAZ2MYTw==
@@ -6539,10 +6539,34 @@
     text-encoding "^0.7.0"
     uuid ">=8 <10"
 
+"@privy-io/js-sdk-core@^0.8.2":
+  version "0.8.2"
+  resolved "https://registry.yarnpkg.com/@privy-io/js-sdk-core/-/js-sdk-core-0.8.2.tgz#7962b23cefd6ac115a752c72c0eea019381a1e7f"
+  integrity sha512-kVjGB+nG3en4eFri+84LOGn1qVFub59Qplx6NDDcNHbhf6AqyII3cUoYCbZP7Q405rGg273gEfnKuQGE9xBH+g==
+  dependencies:
+    "@ethersproject/providers" "^5.7.2"
+    "@privy-io/public-api" "*"
+    eventemitter3 "^5.0.1"
+    fetch-retry "^5.0.6"
+    jose "^4.11.2"
+    js-cookie "^3.0.5"
+    text-encoding "^0.7.0"
+    uuid ">=8 <10"
+
 "@privy-io/public-api@*":
   version "1.4.0"
   resolved "https://registry.yarnpkg.com/@privy-io/public-api/-/public-api-1.4.0.tgz#2f207276adfe3c09f3536369ec955bbffd1251bd"
   integrity sha512-S6+rQXukGGM2zC2tgTBmI3JRBf20GtdBV/i+/jqdIfLlXW4I5XapLw341+PmCNehro2SrPaeCuhJfcGCCFcnaQ==
+  dependencies:
+    "@privy-io/api-base" "*"
+    ethers "^5.7.2"
+    libphonenumber-js "^1.10.31"
+    zod "^3.22.4"
+
+"@privy-io/public-api@^1.4.1":
+  version "1.4.1"
+  resolved "https://registry.yarnpkg.com/@privy-io/public-api/-/public-api-1.4.1.tgz#d3c2548f931699bfd8f304dd81bca228b1b6960b"
+  integrity sha512-JuMTRdb9BK7vK+1n72OS8GpyRDv+7E++8pMs9IRycb8SJSKLL04KinieFdN1MxAX/VN9h87bAAfCZVDGokOqkA==
   dependencies:
     "@privy-io/api-base" "*"
     ethers "^5.7.2"
