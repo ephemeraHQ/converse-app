@@ -8,8 +8,8 @@ PODS:
   - CoinbaseWalletSDKExpo (1.0.7):
     - CoinbaseWalletSDK/CrossPlatform (= 1.0.4)
     - ExpoModulesCore
-  - Connect-Swift (0.9.0):
-    - SwiftProtobuf (~> 1.24.0)
+  - Connect-Swift (0.3.0):
+    - SwiftProtobuf (~> 1.20.3)
   - DoubleConversion (1.1.6)
   - EASClient (0.6.0):
     - ExpoModulesCore
@@ -689,22 +689,22 @@ PODS:
   - SQLite.swift (0.14.1):
     - SQLite.swift/standard (= 0.14.1)
   - SQLite.swift/standard (0.14.1)
-  - SwiftProtobuf (1.24.0)
+  - SwiftProtobuf (1.20.3)
   - UMAppLoader (4.2.0)
   - web3.swift (1.6.0):
     - BigInt (~> 5.0.0)
     - GenericJSON (~> 2.0)
     - Logging (~> 1.0.0)
     - secp256k1.swift (~> 0.1)
-  - XMTP (0.6.6-alpha0):
-    - Connect-Swift
+  - XMTP (0.6.14-alpha0):
+    - Connect-Swift (= 0.3.0)
     - GzipSwift
     - web3.swift
     - XMTPRust (= 0.3.6-beta0)
-  - XMTPReactNative (1.20.0):
+  - XMTPReactNative (1.21.0):
     - ExpoModulesCore
     - MessagePacker
-    - XMTP (= 0.6.6-alpha0)
+    - XMTP (= 0.6.14-alpha0)
   - XMTPRust (0.3.6-beta0)
   - Yoga (1.14.0)
 
@@ -808,7 +808,7 @@ DEPENDENCIES:
   - Sentry/HybridSDK (= 8.15.2)
   - SQLite.swift
   - UMAppLoader (from `../node_modules/unimodules-app-loader/ios`)
-  - XMTP (= 0.6.6-alpha0)
+  - XMTP (= 0.6.14-alpha0)
   - "XMTPReactNative (from `../node_modules/@xmtp/react-native-sdk/ios`)"
   - Yoga (from `../node_modules/react-native/ReactCommon/yoga`)
 
@@ -1043,7 +1043,7 @@ SPEC CHECKSUMS:
   boost: 57d2868c099736d80fcd648bf211b4431e51a558
   CoinbaseWalletSDK: ea1f37512bbc69ebe07416e3b29bf840f5cc3152
   CoinbaseWalletSDKExpo: 89f8ad7f799227be7aff2b9353b7a77d37eb8283
-  Connect-Swift: 1d8dcd7b25e8c110f262b88b5c9eb8849d05e56c
+  Connect-Swift: d38eedc1907d440314f8d26d5a038a00cbb0f6f1
   DoubleConversion: 5189b271737e1565bdce30deb4a08d647e3f5f54
   EASClient: 49f8ea858204eb4844d9fb386e5fb7920aee2e30
   EXApplication: 02655a251434d564bb0e73291f5a490c74b5b76f
@@ -1156,14 +1156,14 @@ SPEC CHECKSUMS:
   SentryPrivate: b2f7996f37781080f04a946eb4e377ff63c64195
   SocketRocket: f32cd54efbe0f095c4d7594881e52619cfe80b17
   SQLite.swift: 2992550ebf3c5b268bf4352603e3df87d2a4ed72
-  SwiftProtobuf: bcfd2bc231cf9ae552cdc7c4e877bd3b41fe57b1
+  SwiftProtobuf: b02b5075dcf60c9f5f403000b3b0c202a11b6ae1
   UMAppLoader: e83f024f75f07802fce99739f04b4537d188caaf
   web3.swift: 2263d1e12e121b2c42ffb63a5a7beb1acaf33959
-  XMTP: 6ba5240596cfe7d60248398b651b230dcf88be29
-  XMTPReactNative: cedc7fc4434817591ca95fee04a46264bcfe4919
+  XMTP: 5314a5151dbfad2e24bb5910e679052916a9faff
+  XMTPReactNative: ebd9b3cb071111cd8f60ed6d5a98155c45b54785
   XMTPRust: 3c958736a4f4ee798e425b5644551f1c948da4b0
   Yoga: b76f1acfda8212aa16b7e26bcce3983230c82603
 
-PODFILE CHECKSUM: 9c8ab8c7ac4f87169d854b515cc3fb9cad6fb9c4
+PODFILE CHECKSUM: 8f2f15b3463e46c4e44bcb2992756668bba33975
 
 COCOAPODS: 1.14.2

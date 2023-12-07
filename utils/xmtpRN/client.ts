@@ -1,6 +1,12 @@
 import * as secp from "@noble/secp256k1";
 import { privateKey, signature } from "@xmtp/proto";
-import { Client } from "@xmtp/react-native-sdk";
+import {
+  Client,
+  ReactionCodec,
+  ReadReceiptCodec,
+  RemoteAttachmentCodec,
+  StaticAttachmentCodec,
+} from "@xmtp/react-native-sdk";
 
 import { addLog } from "../../components/DebugButton";
 import config from "../../config";
@@ -22,13 +28,36 @@ import {
 const env = config.xmtpEnv as "dev" | "production" | "local";
 
 export const getXmtpClientFromBase64Key = (base64Key: string) =>
-  Client.createFromKeyBundle(base64Key, { env });
+  Client.createFromKeyBundle(base64Key, {
+    env,
+    codecs: [
+      new ReactionCodec(),
+      new ReadReceiptCodec(),
+      new RemoteAttachmentCodec(),
+      new StaticAttachmentCodec(),
+      // new ReplyCodec()
+    ],
+  });
 
-const xmtpClientByAccount: { [account: string]: Client } = {};
+export type ConverseXmtpClientType = Awaited<
+  ReturnType<typeof getXmtpClientFromBase64Key>
+>;
+
+export type ConversationWithCodecsType = Awaited<
+  ReturnType<ConverseXmtpClientType["conversations"]["newConversation"]>
+>;
+
+export type DecodedMessageWithCodecsType = Awaited<
+  ReturnType<ConversationWithCodecsType["messages"]>
+>[number];
+
+const xmtpClientByAccount: { [account: string]: ConverseXmtpClientType } = {};
 const xmtpSignatureByAccount: { [account: string]: string } = {};
 const instantiatingClientForAccount: { [account: string]: boolean } = {};
 
-export const getXmtpClient = async (account: string): Promise<Client> => {
+export const getXmtpClient = async (
+  account: string
+): Promise<ConverseXmtpClientType> => {
   console.log(`[XmtpRN] Getting client for ${account}`);
   if (account && xmtpClientByAccount[account]) {
     return xmtpClientByAccount[account];

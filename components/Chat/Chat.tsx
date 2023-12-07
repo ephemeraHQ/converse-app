@@ -23,6 +23,7 @@ import {
 } from "../../utils/colors";
 import { useConversationContext } from "../../utils/conversation";
 import { getProfileData } from "../../utils/profile";
+import { isContentType } from "../../utils/xmtpRN/contentTypes";
 import { Recommendation } from "../Recommendations/Recommendation";
 import ChatConsent from "./ChatConsent";
 import ChatInput from "./ChatInput";
@@ -62,7 +63,7 @@ const getListArray = (
         if (
           previousMessage.senderAddress === message.senderAddress &&
           !message.dateChange &&
-          !previousMessage.contentType.startsWith("xmtp.org/reaction:")
+          !isContentType("reaction", previousMessage.contentType)
         ) {
           message.hasPreviousMessageInSeries = true;
         }
@@ -81,7 +82,7 @@ const getListArray = (
         if (
           nextMessage.senderAddress === message.senderAddress &&
           !nextMessageDateChange &&
-          !nextMessage.contentType.startsWith("xmtp.org/reaction:")
+          !isContentType("reaction", nextMessage.contentType)
         ) {
           message.hasNextMessageInSeries = true;
         }

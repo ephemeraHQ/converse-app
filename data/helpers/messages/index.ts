@@ -1,6 +1,7 @@
 import RNFS from "react-native-fs";
 
 import { moveFileAndReplace } from "../../../utils/fileSystem";
+import { isContentType } from "../../../utils/xmtpRN/contentTypes";
 import { getRepository } from "../../db";
 import { Message } from "../../db/entities/messageEntity";
 import { upsertRepository } from "../../db/upsert";
@@ -14,10 +15,7 @@ export const saveMessages = async (
 ) => {
   // Infer referenced message from content if needed
   messages.forEach((c) => {
-    if (
-      !c.referencedMessageId &&
-      c.contentType.startsWith("xmtp.org/reaction:")
-    ) {
+    if (!c.referencedMessageId && isContentType("reaction", c.contentType)) {
       try {
         c.referencedMessageId = JSON.parse(c.content).reference;
       } catch (e) {

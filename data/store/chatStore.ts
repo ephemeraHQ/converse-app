@@ -10,6 +10,7 @@ import { lastValueInMap } from "../../utils/map";
 import { zustandMMKVStorage } from "../../utils/mmkv";
 import { subscribeToNotifications } from "../../utils/notifications";
 import { omit } from "../../utils/objects";
+import { isContentType } from "../../utils/xmtpRN/contentTypes";
 import {
   markAllConversationsAsReadInDb,
   markConversationReadUntil,
@@ -333,7 +334,7 @@ export const initChatStore = (account: string) => {
                 // Let's check if it's a reaction to a message
                 if (
                   message.referencedMessageId &&
-                  message.contentType.startsWith("xmtp.org/reaction:")
+                  isContentType("reaction", message.contentType)
                 ) {
                   const referencedMessage = conversation.messages.get(
                     message.referencedMessageId
