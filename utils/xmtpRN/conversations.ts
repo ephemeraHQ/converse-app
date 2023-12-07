@@ -1,8 +1,4 @@
-import {
-  Client,
-  Conversation,
-  ConversationContext,
-} from "@xmtp/react-native-sdk";
+import { ConversationContext } from "@xmtp/react-native-sdk";
 
 import { Conversation as DbConversation } from "../../data/db/entities/conversationEntity";
 import { getPendingConversationsToCreate } from "../../data/helpers/conversations/pendingConversations";
@@ -10,11 +6,15 @@ import { saveConversations } from "../../data/helpers/conversations/upsertConver
 import { XmtpConversation } from "../../data/store/chatStore";
 import { getTopicDataFromKeychain, saveTopicDataToKeychain } from "../keychain";
 import { sentryTrackError } from "../sentry";
-import { getXmtpClient } from "./client";
+import {
+  ConversationWithCodecsType,
+  ConverseXmtpClientType,
+  getXmtpClient,
+} from "./client";
 import { loadConversationsMessages } from "./messages";
 
 const protocolConversationToStateConversation = (
-  conversation: Conversation
+  conversation: ConversationWithCodecsType
 ): XmtpConversation => ({
   topic: conversation.topic,
   peerAddress: conversation.peerAddress,
@@ -35,7 +35,7 @@ const protocolConversationToStateConversation = (
 });
 
 const protocolConversationsToTopicData = async (
-  conversations: Conversation[]
+  conversations: ConversationWithCodecsType[]
 ): Promise<{ [topic: string]: string }> => {
   const topicWithTopicData: { [topic: string]: string } = {};
   const topicDatas = await Promise.all(
@@ -49,10 +49,13 @@ const protocolConversationsToTopicData = async (
 };
 
 const openedConversations: {
-  [account: string]: { [topic: string]: Conversation };
+  [account: string]: { [topic: string]: ConversationWithCodecsType };
 } = {};
 
-const setOpenedConversation = (account: string, conversation: Conversation) => {
+const setOpenedConversation = (
+  account: string,
+  conversation: ConversationWithCodecsType
+) => {
   openedConversations[account] = openedConversations[account] || {};
   openedConversations[account][conversation.topic] = conversation;
 };
@@ -63,7 +66,10 @@ export const deleteOpenedConversations = (account: string) => {
   }
 };
 
-const importTopicData = async (client: Client, topics: string[]) => {
+const importTopicData = async (
+  client: ConverseXmtpClientType,
+  topics: string[]
+) => {
   // If we have topics for this account, let's import them
   // so the first conversation.list() is faster
   const beforeImport = new Date().getTime();
@@ -93,8 +99,8 @@ const importTopicData = async (client: Client, topics: string[]) => {
 };
 
 const handleNewConversation = async (
-  client: Client,
-  conversation: Conversation
+  client: ConverseXmtpClientType,
+  conversation: ConversationWithCodecsType
 ) => {
   setOpenedConversation(client.address, conversation);
   saveConversations(client.address, [
@@ -113,17 +119,18 @@ const handleNewConversation = async (
   }, 3000);
 };
 
-export const streamConversations = async (client: Client) => {
+export const streamConversations = async (client: ConverseXmtpClientType) => {
   await stopStreamingConversations(client);
   client.conversations.stream((conversation) =>
     handleNewConversation(client, conversation)
   );
 };
 
-export const stopStreamingConversations = async (client: Client) =>
-  client.conversations.cancelStream();
+export const stopStreamingConversations = async (
+  client: ConverseXmtpClientType
+) => client.conversations.cancelStream();
 
-const listConversations = async (client: Client) => {
+const listConversations = async (client: ConverseXmtpClientType) => {
   const conversations = await client.conversations.list();
   conversations.forEach((c) => {
     setOpenedConversation(client.address, c);
@@ -132,14 +139,14 @@ const listConversations = async (client: Client) => {
 };
 
 export const loadConversations = async (
-  client: Client,
+  client: ConverseXmtpClientType,
   knownTopics: string[]
 ) => {
   try {
     const now = new Date().getTime();
     const conversations = await listConversations(client);
-    const newConversations: Conversation[] = [];
-    const knownConversations: Conversation[] = [];
+    const newConversations: ConversationWithCodecsType[] = [];
+    const knownConversations: ConversationWithCodecsType[] = [];
     conversations.forEach((c) => {
       if (!knownTopics.includes(c.topic)) {
         newConversations.push(c);
@@ -174,7 +181,7 @@ export const loadConversations = async (
 export const getConversationWithTopic = async (
   account: string,
   topic: string
-): Promise<Conversation | undefined> => {
+): Promise<ConversationWithCodecsType | undefined> => {
   const alreadyConversation = openedConversations[account]?.[topic];
   if (alreadyConversation) return alreadyConversation;
   // Let's try to import from keychain if we don't have it already

@@ -10,6 +10,7 @@ import {
   updateMessagesIds,
 } from "../../data/helpers/messages";
 import { deserializeRemoteAttachmentMessageContent } from "./attachments";
+import { isContentType } from "./contentTypes";
 import { getConversationWithTopic } from "./conversations";
 
 let sendingPendingMessages = false;
@@ -74,15 +75,13 @@ export const sendPendingMessages = async (account: string) => {
       );
       if (conversation) {
         let preparedMessage: PreparedLocalMessage;
-        if (
-          message.contentType.startsWith("xmtp.org/remoteStaticAttachment:")
-        ) {
+        if (isContentType("remoteAttachment", message.contentType)) {
           preparedMessage = await conversation.prepareMessage({
             remoteAttachment: deserializeRemoteAttachmentMessageContent(
               message.content
             ),
           });
-        } else if (message.contentType.startsWith("xmtp.org/reaction:")) {
+        } else if (isContentType("reaction", message.contentType)) {
           preparedMessage = await conversation.prepareMessage({
             reaction: JSON.parse(message.content),
           });

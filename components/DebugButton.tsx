@@ -92,6 +92,7 @@ const DebugButton = forwardRef((props, ref) => {
         },
         "Reset DB": () => {
           resetDb(currentAccount());
+          getChatStore(currentAccount()).getState().setLastSyncedAt(0, []);
         },
         "Reset last synced add": () => {
           getChatStore(currentAccount()).getState().setLastSyncedAt(0, []);

@@ -1,12 +1,15 @@
 import {
-  Client,
   DecodedMessage,
+  ReactionContent,
   RemoteAttachmentContent,
+  StaticAttachmentContent,
 } from "@xmtp/react-native-sdk";
 
 import { addLog } from "../../components/DebugButton";
 import { saveMessages } from "../../data/helpers/messages";
 import { XmtpMessage } from "../../data/store/chatStore";
+import { ConverseXmtpClientType, DecodedMessageWithCodecsType } from "./client";
+import { isContentType } from "./contentTypes";
 
 const BATCH_QUERY_PAGE_SIZE = 30;
 
@@ -26,20 +29,24 @@ const computeRemoteAttachmentMessageContent = (
 };
 
 const protocolMessageToStateMessage = (
-  message: DecodedMessage
+  message: DecodedMessageWithCodecsType
 ): XmtpMessage => {
   let referencedMessageId: string | undefined = undefined;
-  let content = message.content.text || "";
+  const contentType = message.contentTypeId;
+  const messageContent = message.content();
+  let content = "";
   let contentFallback: string | undefined = undefined;
-  if (message.content.remoteAttachment) {
+  if (isContentType("text", contentType)) {
+    content = messageContent as string;
+  } else if (isContentType("remoteAttachment", contentType)) {
     content = computeRemoteAttachmentMessageContent(
-      message.content.remoteAttachment
+      messageContent as RemoteAttachmentContent
     );
-  } else if (message.content.attachment) {
-    content = JSON.stringify(message.content.attachment);
-  } else if (message.content.reaction) {
-    content = JSON.stringify(message.content.reaction);
-    referencedMessageId = message.content.reaction.reference;
+  } else if (isContentType("attachment", contentType)) {
+    content = JSON.stringify(messageContent as StaticAttachmentContent);
+  } else if (isContentType("reaction", contentType)) {
+    content = JSON.stringify(messageContent as ReactionContent);
+    referencedMessageId = (messageContent as ReactionContent).reference;
   } else {
     contentFallback = message.fallback;
   }
@@ -57,7 +64,7 @@ const protocolMessageToStateMessage = (
   };
 };
 
-export const streamAllMessages = async (client: Client) => {
+export const streamAllMessages = async (client: ConverseXmtpClientType) => {
   await stopStreamingAllMessage(client);
   console.log(`[XmtpRN] Streaming messages for ${client.address}`);
   client.conversations.streamAllMessages(async (message) => {
@@ -66,13 +73,13 @@ export const streamAllMessages = async (client: Client) => {
   });
 };
 
-export const stopStreamingAllMessage = (client: Client) => {
+export const stopStreamingAllMessage = (client: ConverseXmtpClientType) => {
   console.log(`[XmtpRN] Stopped streaming messages for ${client.address}`);
   client.conversations.cancelStreamAllMessages();
 };
 
 export const loadConversationsMessages = async (
-  client: Client,
+  client: ConverseXmtpClientType,
   _queryConversationsFromTimestamp: { [topic: string]: number }
 ): Promise<number> => {
   const queryConversationsFromTimestamp = {

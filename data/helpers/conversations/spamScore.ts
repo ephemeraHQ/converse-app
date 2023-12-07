@@ -1,4 +1,5 @@
 import { URL_REGEX } from "../../../utils/regex";
+import { isContentType } from "../../../utils/xmtpRN/contentTypes";
 import { getRepository } from "../../db";
 import { getChatStore } from "../../store/accountsStore";
 import { XmtpConversationWithUpdate } from "../../store/chatStore";
@@ -114,7 +115,7 @@ const computeSpamScore = async (
   URL_REGEX.lastIndex = 0;
   const containsUrl = URL_REGEX.test(message);
 
-  if (contentType.startsWith("xmtp.org/text:") && containsUrl) {
+  if (isContentType("text", contentType) && containsUrl) {
     spamScore += 1;
   }
   if (sentViaConverse) {
