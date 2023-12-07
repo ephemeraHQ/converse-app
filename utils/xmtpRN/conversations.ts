@@ -122,6 +122,10 @@ const handleNewConversation = async (
 
   // Fetch consent from protocol
   client.contacts.refreshConsentList();
+
+  // @todo remove temporary delay, waiting for refreshConsentList()
+  await new Promise((resolve) => setTimeout(resolve, 2000));
+
   await refreshPeersStatus([conversation]);
 };
 
@@ -179,6 +183,9 @@ export const loadConversations = async (
     // Note: refreshConsentList() will soon return the consent list
     // @todo once it does, save the dict to our app's peersStatus
     client.contacts.refreshConsentList();
+
+    // @todo remove temporary delay, waiting for refreshConsentList()
+    await new Promise((resolve) => setTimeout(resolve, 2000));
 
     const uniquePeers = new Map();
     for (const conversation of conversations) {
