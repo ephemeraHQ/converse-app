@@ -16,8 +16,9 @@ const updateSteps: Steps = [{ id: "setConsent001", method: setConsent }];
 
 export const updateLastVersionOpen = () => {
   console.log(
-    "[Async Updates] Last version open: ",
-    useAppStore.getState().lastVersionOpen
+    `[Async Updates] Last version open: ${
+      useAppStore.getState().lastVersionOpen
+    }`
   );
   const version =
     Platform.OS === "ios"
