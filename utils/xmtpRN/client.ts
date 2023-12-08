@@ -53,6 +53,11 @@ export type DecodedMessageWithCodecsType = Awaited<
   ReturnType<ConversationWithCodecsType["messages"]>
 >[number];
 
+export const isOnXmtp = async (address: string) =>
+  Client.canMessage(address, {
+    env,
+  });
+
 const xmtpClientByAccount: { [account: string]: ConverseXmtpClientType } = {};
 const xmtpSignatureByAccount: { [account: string]: string } = {};
 const instantiatingClientForAccount: { [account: string]: boolean } = {};

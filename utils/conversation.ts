@@ -18,7 +18,7 @@ import { pick } from "./objects";
 import { getMatchedPeerAddresses } from "./search";
 import { sentryTrackMessage } from "./sentry";
 import { TextInputWithValue, addressPrefix } from "./str";
-import { isOnXmtp } from "./xmtpJS/client";
+import { isOnXmtp } from "./xmtpRN/client";
 import { isContentType } from "./xmtpRN/contentTypes";
 
 export type ConversationWithLastMessagePreview = XmtpConversation & {
