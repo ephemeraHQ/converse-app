@@ -4,11 +4,6 @@ import config from "../../config";
 
 const env = config.xmtpEnv as "dev" | "production" | "local";
 
-export const isOnXmtp = async (address: string) =>
-  Client.canMessage(address, {
-    env,
-  });
-
 export const getXmtpKeysFromSigner = async (
   signer: Signer,
   preCreateIdentityCallback?: () => Promise<void>,
