@@ -11,14 +11,19 @@ import {
   useLoggedWithPrivy,
   useWalletStore,
 } from "../../data/store/accountsStore";
+import { useOnboardingStore } from "../../data/store/onboardingStore";
 import { useConversationContext } from "../../utils/conversation";
 import { converseEventEmitter } from "../../utils/events";
 import { usePrivySigner } from "../../utils/evm/helpers";
 import { executeAfterKeyboardClosed } from "../../utils/keyboard";
+import { pick } from "../../utils/objects";
 import ChatActionButton from "./ChatActionButton";
 
 export default function ChatSendMoney() {
   const { setTransactionMode } = useConversationContext(["setTransactionMode"]);
+  const { setAddingNewAccount, setConnectionMethod } = useOnboardingStore((s) =>
+    pick(s, ["setAddingNewAccount", "setConnectionMethod"])
+  );
 
   const styles = useStyles();
   const loggedWithPrivy = useLoggedWithPrivy();
@@ -44,11 +49,32 @@ export default function ChatSendMoney() {
       } else if (pkPath) {
         showMoneyInput();
       } else {
-        Alert.alert("This feature is only available in Privy accounts");
+        Alert.alert(
+          "Not available",
+          "Gasless USDC transfer is not yet available for external wallets. Please create a Converse account via telephone number to use this feature.",
+          [
+            { text: "Close" },
+            {
+              text: "Create Converse account",
+              isPreferred: true,
+              onPress: () => {
+                setConnectionMethod("phone");
+                setAddingNewAccount(true);
+              },
+            },
+          ]
+        );
         // navigation.navigate("EnableTransactions");
       }
     });
-  }, [loggedWithPrivy, pkPath, privySigner, showMoneyInput]);
+  }, [
+    loggedWithPrivy,
+    pkPath,
+    privySigner,
+    setAddingNewAccount,
+    setConnectionMethod,
+    showMoneyInput,
+  ]);
 
   useEffect(() => {
     converseEventEmitter.on("enable-transaction-mode", showMoneyInput);
