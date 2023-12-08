@@ -38,3 +38,25 @@ func sentryTrackMessage(message: String, extras: [String : Any]?) {
  }
  SentrySDK.flush(timeout: 3)
 }
+
+func sentryTrackError(error: Error, extras: [String : Any]?) {
+ SentrySDK.capture(error: error) { scope in
+   var extrasWithMessage:[String: Any] = [:]
+   if (extras != nil) {
+     for (key, value) in extras! {
+       extrasWithMessage[key] = value
+     }
+   }
+   scope.setExtras(extrasWithMessage)
+ }
+ SentrySDK.flush(timeout: 3)
+}
+
+func sentryAddBreadcrumb(message: String) {
+  print(message)
+  let crumb = Breadcrumb()
+  crumb.level = SentryLevel.info
+  crumb.category = "extension"
+  crumb.message = message
+  SentrySDK.addBreadcrumb(crumb)
+}

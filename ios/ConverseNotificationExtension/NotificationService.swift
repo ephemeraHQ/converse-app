@@ -24,7 +24,7 @@ func handleNotificationAsync(contentHandler: ((UNNotificationContent) -> Void), 
       return
     }
     
-    print("Received a notification for account \(account)")
+    sentryAddBreadcrumb(message: "Received a notification for account \(account)")
     
     let apiURI = getApiURI()
     let pushToken = getKeychainValue(forKey: "PUSH_TOKEN")
@@ -44,6 +44,7 @@ func handleNotificationAsync(contentHandler: ((UNNotificationContent) -> Void), 
       }
 
       if isInviteTopic(topic: contentTopic) {
+        sentryAddBreadcrumb(message: "topic \(contentTopic) is invite topic")
         guard let conversation = await getNewConversationFromEnvelope(
           xmtpClient: xmtpClient,
           envelope: envelope
@@ -60,6 +61,7 @@ func handleNotificationAsync(contentHandler: ((UNNotificationContent) -> Void), 
           bestAttemptContent: &content
         )
       } else {
+        sentryAddBreadcrumb(message: "topic \(contentTopic) is not invite topic")
         (shouldShowNotification, messageId) = await handleOngoingConversationMessage(
           xmtpClient: xmtpClient,
           envelope: envelope,
@@ -93,7 +95,7 @@ class NotificationService: UNNotificationServiceExtension {
   
   override func serviceExtensionTimeWillExpire() {
     // If it took too much time we can at least show the right title
-    sentryTrackMessage(message: "NOTIFICATION_TIMEOUT", extras: nil)
+    sentryTrackMessage(message: "NOTIFICATION_TIMEOUT", extras: ["body": bestAttemptContent?.userInfo["body"]])
     if let contentHandler = contentHandler, let bestAttemptContent =  bestAttemptContent {
       if let body = bestAttemptContent.userInfo["body"] as? [String: Any], let contentTopic = body["contentTopic"] as? String {
         let conversationTitle = getSavedConversationTitle(contentTopic: contentTopic);

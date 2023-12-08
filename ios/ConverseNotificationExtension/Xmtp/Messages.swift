@@ -65,9 +65,10 @@ func handleNewConversationFirstMessage(xmtpClient: XMTP.Client, apiURI: String?,
             }
           }
         } catch {
-          sentryTrackMessage(message: "NOTIFICATION_SAVE_MESSAGE_ERROR", extras: ["error": error])
+          sentryTrackError(error: error, extras: ["message": "NOTIFICATION_SAVE_MESSAGE_ERROR_1", "topic": conversation.topic])
           print("[NotificationExtension] ERROR WHILE SAVING MESSAGE \(error)")
-          break
+          attempts += 1
+          continue
         }
         if spamScore >= 1 {
           print("[NotificationExtension] Not showing a notification because considered spam")
@@ -79,9 +80,8 @@ func handleNewConversationFirstMessage(xmtpClient: XMTP.Client, apiURI: String?,
         break
       }
     } catch {
-      sentryTrackMessage(message: "NOTIFICATION_SAVE_MESSAGE_ERROR", extras: ["error": error])
+      sentryTrackError(error: error, extras: ["message": "NOTIFICATION_SAVE_MESSAGE_ERROR_2", "topic": conversation.topic])
       print("[NotificationExtension] Error fetching messages: \(error)")
-      break
     }
     
     // Wait for 4 seconds before the next attempt
