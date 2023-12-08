@@ -98,7 +98,10 @@ export const conversationLastMessagePreview = (
           removedReactions = {};
           continue;
         }
-      } else if (isContentType("readReceipt", lastMessage?.contentType)) {
+      } else if (
+        isContentType("readReceipt", lastMessage?.contentType) ||
+        (!lastMessage.content && !lastMessage.contentFallback)
+      ) {
         continue;
       } else {
         removedReactions = {};

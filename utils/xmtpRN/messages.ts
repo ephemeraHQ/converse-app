@@ -10,7 +10,7 @@ import { saveMessages } from "../../data/helpers/messages";
 import { XmtpMessage } from "../../data/store/chatStore";
 import { ConverseXmtpClientType, DecodedMessageWithCodecsType } from "./client";
 import { isContentType } from "./contentTypes";
-import { CoinbaseMessagingPaymentContent } from "./contentTypes/coinbasePayment";
+// import { CoinbaseMessagingPaymentContent } from "./contentTypes/coinbasePayment";
 
 const BATCH_QUERY_PAGE_SIZE = 30;
 
@@ -34,24 +34,24 @@ const protocolMessageToStateMessage = (
 ): XmtpMessage => {
   let referencedMessageId: string | undefined = undefined;
   const contentType = message.contentTypeId;
-  const messageContent = message.content();
   let content = "";
   let contentFallback: string | undefined = undefined;
   if (isContentType("text", contentType)) {
-    content = messageContent as string;
+    content = message.content() as string;
   } else if (isContentType("remoteAttachment", contentType)) {
     content = computeRemoteAttachmentMessageContent(
-      messageContent as RemoteAttachmentContent
+      message.content() as RemoteAttachmentContent
     );
   } else if (isContentType("attachment", contentType)) {
-    content = JSON.stringify(messageContent as StaticAttachmentContent);
+    content = JSON.stringify(message.content() as StaticAttachmentContent);
   } else if (isContentType("reaction", contentType)) {
-    content = JSON.stringify(messageContent as ReactionContent);
-    referencedMessageId = (messageContent as ReactionContent).reference;
-  } else if (isContentType("coinbasePayment", contentType)) {
-    addLog(JSON.stringify(messageContent as CoinbaseMessagingPaymentContent));
-    alert("GOT A COINBASE PAYMENT");
-  } else {
+    content = JSON.stringify(message.content() as ReactionContent);
+    referencedMessageId = (message.content() as ReactionContent).reference;
+  }
+  // else if (isContentType("coinbasePayment", contentType)) {
+  // content = JSON.stringify(messageContent as CoinbaseMessagingPaymentContent);
+  // }
+  else {
     contentFallback = message.fallback;
   }
   return {
