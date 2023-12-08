@@ -18,6 +18,7 @@ import { usePrivySigner } from "../utils/evm/helpers";
 import { getSecureItemAsync } from "../utils/keychain";
 import { logout } from "../utils/logout";
 import mmkv from "../utils/mmkv";
+import { sentryAddBreadcrumb } from "../utils/sentry";
 import { showActionSheetWithOptions } from "./StateHandlers/ActionSheetStateHandler";
 
 let logs: string[] = [];
@@ -25,6 +26,7 @@ let logs: string[] = [];
 export const addLog = (log: string) => {
   if (config.debugMenu || config.debugAddresses.includes(currentAccount())) {
     console.log(`${new Date().toISOString()} - ${log}`);
+    sentryAddBreadcrumb(log);
     logs.push(`${new Date().toISOString()} - ${log}`);
   }
 };

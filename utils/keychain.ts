@@ -1,10 +1,10 @@
 import type { Storage as PrivyStorage } from "@privy-io/js-sdk-core";
 import { createHash } from "crypto";
 import * as SecureStore from "expo-secure-store";
-import { Alert } from "react-native";
 
 import { addLog } from "../components/DebugButton";
 import config from "../config";
+import { sentryTrackMessage } from "./sentry";
 
 export const secureStoreOptions: SecureStore.SecureStoreOptions = {
   keychainService: config.bundleId,
@@ -99,7 +99,7 @@ export const privySecureStorage: PrivyStorage = {
   put: (key, val: string) => {
     addLog(`Setting ${key} to length ${val ? val.length : val}`);
     if (["privy:token", "privy:refresh_token"].includes(key) && !val) {
-      Alert.alert("Logging out of privy, please check logs");
+      sentryTrackMessage("Logging out of privy, please check logs");
     }
     return setSecureItemAsync(key.replaceAll(":", "-"), val);
   },

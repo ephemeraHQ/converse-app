@@ -30,6 +30,14 @@ export const initSentry = () => {
   });
 };
 
+export const sentryAddBreadcrumb = (message: string) => {
+  Sentry.React.addBreadcrumb({
+    category: "converse",
+    message,
+    level: "info",
+  });
+};
+
 export const sentryTrackMessage = (message: string, extras = {} as any) => {
   console.log(`[Sentry] ${message}`, extras);
   Sentry.React.withScope((scope) => {
