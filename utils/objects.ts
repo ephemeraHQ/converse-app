@@ -5,7 +5,7 @@ export const pick = <T extends object, K extends keyof T>(obj: T, keys: K[]) =>
 
 export const inclusivePick = <
   T extends object,
-  K extends string | number | symbol
+  K extends string | number | symbol,
 >(
   obj: T,
   keys: K[]
@@ -36,3 +36,6 @@ export class LimitedMap<K, V> extends Map<K, V> {
     return this;
   }
 }
+
+export const isEmptyObject = <T extends object>(obj: T): boolean =>
+  Object.keys(obj).length === 0;
