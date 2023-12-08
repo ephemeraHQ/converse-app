@@ -40,6 +40,7 @@ const getListArray = (
   for (let index = conversation.messagesIds.length - 1; index >= 0; index--) {
     const messageId = conversation.messagesIds[index];
     const message = conversation.messages.get(messageId) as MessageToDisplay;
+    if (!message.content && !message.contentFallback) continue;
     // Reactions & read receipts are not displayed in the flow
     const notDisplayedContentTypes = [
       "xmtp.org/reaction:",

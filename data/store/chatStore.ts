@@ -578,6 +578,8 @@ const insertMessageIdAtRightIndex = (
   const alreadyMessage = currentMessages.get(newMessage.id);
   if (alreadyMessage) {
     if (newMessage.sent === alreadyMessage.sent) {
+      // Just update in place
+      conversation.messages.set(newMessage.id, newMessage);
       return;
     } else {
       // If date change, let's remove existing position, it will

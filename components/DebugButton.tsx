@@ -95,7 +95,7 @@ const DebugButton = forwardRef((props, ref) => {
           resetDb(currentAccount());
           getChatStore(currentAccount()).getState().setLastSyncedAt(0, []);
         },
-        "Reset last synced add": () => {
+        "Reset lastSyncedAt": () => {
           getChatStore(currentAccount()).getState().setLastSyncedAt(0, []);
         },
         "Clear messages attachments folder": async () => {
