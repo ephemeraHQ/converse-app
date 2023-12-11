@@ -1,5 +1,4 @@
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import { getAddress } from "ethers/lib/utils";
 import * as Linking from "expo-linking";
 import { StatusBar } from "expo-status-bar";
 import React, { useCallback, useEffect, useRef, useState } from "react";
@@ -39,7 +38,11 @@ import {
   computeNewConversationContext,
   conversationLastMessagePreview,
 } from "../utils/conversation";
-import { getAddressForPeer, isSupportedPeer } from "../utils/eth";
+import {
+  getAddressForPeer,
+  getCleanAddress,
+  isSupportedPeer,
+} from "../utils/eth";
 import { pick } from "../utils/objects";
 import { conversationName } from "../utils/str";
 import { isOnXmtp } from "../utils/xmtpRN/client";
@@ -126,7 +129,7 @@ export default function NewConversation({
 
             return;
           }
-          const address = getAddress(resolvedAddress.toLowerCase());
+          const address = getCleanAddress(resolvedAddress);
           const addressIsOnXmtp = await isOnXmtp(address);
           if (searchingForValue.current === value) {
             if (addressIsOnXmtp) {

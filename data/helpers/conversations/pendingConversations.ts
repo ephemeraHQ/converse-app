@@ -1,8 +1,8 @@
 import { InvitationContext } from "@xmtp/xmtp-js";
-import { getAddress } from "ethers/lib/utils";
 import uuid from "react-native-uuid";
 import { In } from "typeorm/browser";
 
+import { getCleanAddress } from "../../../utils/eth";
 import { getRepository } from "../../db";
 import { upsertRepository } from "../../db/upsert";
 import { xmtpConversationToDb } from "../../mappers";
@@ -56,7 +56,7 @@ export const createPendingConversation = async (
   peerAddress: string,
   context?: InvitationContext
 ) => {
-  const cleanAddress = getAddress(peerAddress.toLowerCase());
+  const cleanAddress = getCleanAddress(peerAddress);
   // Let's first check if we already have a conversation like that in db
   const alreadyConversationInDb = await getPendingConversationWithPeer(
     account,
