@@ -47,3 +47,31 @@ export function getPreferredName(
     lensHandle || userName || ensName || unsDomain || shortAddress(peerAddress)
   );
 }
+
+export function getPrimaryNames(socials: ProfileSocials | undefined): string[] {
+  if (!socials) {
+    return [];
+  }
+
+  const primaryNames: string[] = [];
+  if (socials.ensNames) {
+    primaryNames.push(
+      ...socials.ensNames.filter((e) => e.isPrimary).map((e) => e.name)
+    );
+  }
+  if (socials.userNames) {
+    primaryNames.push(
+      ...socials.userNames.filter((u) => u.isPrimary).map((u) => u.name)
+    );
+  }
+  if (socials.unstoppableDomains) {
+    primaryNames.push(
+      ...socials.unstoppableDomains
+        .filter((d) => d.isPrimary)
+        .map((d) => d.domain)
+    );
+  }
+
+  // Note: FarcasterUsername and LensHandle are excluded from primary name checks
+  return primaryNames;
+}
