@@ -102,9 +102,8 @@ const useStyles = () => {
     },
     cta: {
       paddingHorizontal: 5, // Add padding around the button
+      marginRight: 14,
     },
-    // ... other styles ...
-
     recommendation: {
       flexDirection: "row",
       paddingRight: 5,
@@ -115,7 +114,6 @@ const useStyles = () => {
         android: { paddingVertical: 12 },
       }),
     },
-
     recommendationRow: {
       flexDirection: "row",
       alignItems: "center",
