@@ -101,19 +101,25 @@ func handleOngoingConversationMessage(xmtpClient: XMTP.Client, envelope: XMTP.En
   var messageId: String? = nil
   
   let decodedMessage = try? await decodeMessage(xmtpClient: xmtpClient, envelope: envelope)
-  let decodedMessageResult = handleMessageByContentType(decodedMessage: decodedMessage!, xmtpClient: xmtpClient, sentViaConverse: sentViaConverse);
-  
-  if decodedMessageResult.senderAddress == xmtpClient.address || decodedMessageResult.forceIgnore {
-    // Message is from me or a reaction removal, let's drop it
-    print("[NotificationExtension] Not showing a notification")
-  } else if let content = decodedMessageResult.content {
-    bestAttemptContent.body = content
-    if conversationTitle.isEmpty, let senderAddress = decodedMessageResult.senderAddress {
-      conversationTitle = shortAddress(address: senderAddress)
+  // If couldn't decode the message, not showing
+  if let message = decodedMessage {
+    let decodedMessageResult = handleMessageByContentType(decodedMessage: message, xmtpClient: xmtpClient, sentViaConverse: sentViaConverse);
+    
+    if decodedMessageResult.senderAddress == xmtpClient.address || decodedMessageResult.forceIgnore {
+      // Message is from me or a reaction removal, let's drop it
+      print("[NotificationExtension] Not showing a notification")
+    } else if let content = decodedMessageResult.content {
+      bestAttemptContent.body = content
+      if conversationTitle.isEmpty, let senderAddress = decodedMessageResult.senderAddress {
+        conversationTitle = shortAddress(address: senderAddress)
+      }
+      bestAttemptContent.title = conversationTitle
+      shouldShowNotification = true
+      messageId = decodedMessageResult.id
     }
-    bestAttemptContent.title = conversationTitle
-    shouldShowNotification = true
-    messageId = decodedMessageResult.id
+  } else {
+    print("[NotificationExtension] Not showing a notification because could not decode message")
+    sentryTrackMessage(message: "Could not decode envelope", extras: ["envelope": envelope, "account": xmtpClient.address])
   }
   
   return (shouldShowNotification, messageId)
