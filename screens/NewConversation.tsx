@@ -391,6 +391,15 @@ export default function NewConversation({
           />
         )}
 
+        {!status.loading && !isEmptyObject(status.profileSearchResults) && (
+          <>
+            <ProfileSearch
+              navigation={navigation}
+              profiles={status.profileSearchResults}
+            />
+          </>
+        )}
+
         {!status.loading && status.address && (
           <>
             {status.existingConversations.length > 0 && (
