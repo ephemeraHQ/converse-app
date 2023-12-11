@@ -1,3 +1,5 @@
+import { useNavigation } from "@react-navigation/native";
+import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { useCallback, useEffect } from "react";
 import {
   TouchableOpacity,
@@ -8,10 +10,13 @@ import {
 } from "react-native";
 
 import {
+  useAccountsStore,
+  useHasOnePrivyAccount,
   useLoggedWithPrivy,
   useWalletStore,
 } from "../../data/store/accountsStore";
 import { useOnboardingStore } from "../../data/store/onboardingStore";
+import { NavigationParamList } from "../../screens/Navigation/Navigation";
 import { useConversationContext } from "../../utils/conversation";
 import { converseEventEmitter } from "../../utils/events";
 import { usePrivySigner } from "../../utils/evm/helpers";
@@ -24,6 +29,15 @@ export default function ChatSendMoney() {
   const { setAddingNewAccount, setConnectionMethod } = useOnboardingStore((s) =>
     pick(s, ["setAddingNewAccount", "setConnectionMethod"])
   );
+  const { setCurrentAccount } = useAccountsStore((s) =>
+    pick(s, ["setCurrentAccount"])
+  );
+  const navigation = useNavigation() as NativeStackNavigationProp<
+    NavigationParamList,
+    "Chats",
+    undefined
+  >;
+  const alreadyConnectedToPrivy = useHasOnePrivyAccount();
 
   const styles = useStyles();
   const loggedWithPrivy = useLoggedWithPrivy();
@@ -48,14 +62,30 @@ export default function ChatSendMoney() {
         }
       } else if (pkPath) {
         showMoneyInput();
+      } else if (alreadyConnectedToPrivy) {
+        Alert.alert(
+          "Use Converse Account",
+          "Gasless money transfers are only available on Converse accounts with telephone numbers for now.",
+          [
+            { text: "Cancel" },
+            {
+              text: "Go to Converse Account",
+              isPreferred: true,
+              onPress: () => {
+                navigation.pop();
+                setCurrentAccount(alreadyConnectedToPrivy, false);
+              },
+            },
+          ]
+        );
       } else {
         Alert.alert(
-          "Not available",
-          "Gasless USDC transfer is not yet available for external wallets. Please create a Converse account via telephone number to use this feature.",
+          "Create Converse Account",
+          "Gasless money transfers are only available on Converse accounts with telephone numbers for now.",
           [
-            { text: "Close" },
+            { text: "Cancel" },
             {
-              text: "Create Converse account",
+              text: "Create Converse Account",
               isPreferred: true,
               onPress: () => {
                 setConnectionMethod("phone");
@@ -64,15 +94,17 @@ export default function ChatSendMoney() {
             },
           ]
         );
-        // navigation.navigate("EnableTransactions");
       }
     });
   }, [
+    alreadyConnectedToPrivy,
     loggedWithPrivy,
+    navigation,
     pkPath,
     privySigner,
     setAddingNewAccount,
     setConnectionMethod,
+    setCurrentAccount,
     showMoneyInput,
   ]);
 

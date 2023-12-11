@@ -14,9 +14,11 @@ import * as RNLocalize from "react-native-localize";
 import { OtpInput, OtpInputRef } from "react-native-otp-entry";
 import PhoneInput from "react-native-phone-number-input";
 
+import Button from "../../components/Button/Button";
 import { useOnboardingStore } from "../../data/store/onboardingStore";
 import {
   backgroundColor,
+  primaryColor,
   tertiaryBackgroundColor,
   textPrimaryColor,
   textSecondaryColor,
@@ -61,6 +63,19 @@ export default function PrivyConnect() {
     "enter-phone"
   );
 
+  const [retrySeconds, setRetrySeconds] = useState(0);
+  useEffect(() => {
+    const i = setInterval(() => {
+      setRetrySeconds((s) => {
+        if (s > 0) {
+          return s - 1;
+        }
+        return s;
+      });
+    }, 1000);
+    return () => clearInterval(i);
+  }, []);
+
   const [formattedPhone, setFormattedPhone] = useState("");
   const [beautifulPhone, setBeautifulPhone] = useState("");
 
@@ -74,6 +89,7 @@ export default function PrivyConnect() {
     setBeautifulPhone(parsed.formatInternational());
     await sendCode({ phone: parsed.number });
     setStatus("verify-phone");
+    setRetrySeconds(30);
     setLoading(false);
   }, [formattedPhone, sendCode, setLoading]);
 
@@ -253,6 +269,25 @@ export default function PrivyConnect() {
             Enter confirmation code sent to{"\n"}
             {beautifulPhone}
           </Text>
+          <Button
+            style={{ marginTop: 32 }}
+            textStyle={{
+              color:
+                retrySeconds > 0
+                  ? textSecondaryColor(colorScheme)
+                  : primaryColor(colorScheme),
+            }}
+            variant="text"
+            title={
+              retrySeconds > 0
+                ? `Resend code in ${retrySeconds} seconds...`
+                : "Resend code"
+            }
+            onPress={() => {
+              if (retrySeconds > 0) return;
+              sendPhone();
+            }}
+          />
         </>
       )}
     </OnboardingComponent>
