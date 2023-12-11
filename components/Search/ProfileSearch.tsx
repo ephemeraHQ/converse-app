@@ -7,6 +7,7 @@ import {
   StyleSheet,
   View,
   useColorScheme,
+  Text,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -89,26 +90,38 @@ export default function ProfileSearch({
   const keyExtractor = useCallback((address: string) => address, []);
   const renderItem = useCallback(
     ({ item }: { item: string }) => {
-      console.log("&& item:", item);
-      console.log("&& profiles:", profiles[item]);
-      console.log("&& isVisible:", !!viewableItems[item]);
-
-      return (
-        <ProfileSearchItem
-          address={item}
-          socials={profiles[item]}
-          navigation={navigation}
-          isVisible={!!viewableItems[item]}
-        />
-      );
+      if (item === "title") {
+        return (
+          <>
+            <View style={styles.sectionTitleContainer}>
+              <Text style={styles.sectionTitle}>RESULTS</Text>
+            </View>
+          </>
+        );
+      } else {
+        return (
+          <ProfileSearchItem
+            address={item}
+            socials={profiles[item]}
+            navigation={navigation}
+            isVisible={!!viewableItems[item]}
+          />
+        );
+      }
     },
-    [profiles, navigation, viewableItems]
+    [
+      profiles,
+      navigation,
+      viewableItems,
+      styles.sectionTitleContainer,
+      styles.sectionTitle,
+    ]
   );
 
   return (
     <View style={styles.recommendations}>
       <FlatList
-        data={[...Object.keys(profiles)]}
+        data={["title", ...Object.keys(profiles)]}
         keyExtractor={keyExtractor}
         renderItem={renderItem}
         onViewableItemsChanged={onViewableItemsChanged}
