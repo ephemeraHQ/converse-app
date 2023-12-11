@@ -12,6 +12,7 @@ import { addLog } from "../../components/DebugButton";
 import config from "../../config";
 import { refreshAllSpamScores } from "../../data/helpers/conversations/spamScore";
 import { getChatStore } from "../../data/store/accountsStore";
+import { getCleanAddress } from "../eth";
 import { loadXmtpKey } from "../keychain";
 // import { CoinbaseMessagingPaymentCodec } from "./contentTypes/coinbasePayment";
 import {
@@ -54,7 +55,7 @@ export type DecodedMessageWithCodecsType = Awaited<
 >[number];
 
 export const isOnXmtp = async (address: string) =>
-  Client.canMessage(address, {
+  Client.canMessage(getCleanAddress(address), {
     env,
   });
 

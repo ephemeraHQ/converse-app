@@ -2,6 +2,7 @@ import { pbkdf2 } from "crypto";
 import { ethers } from "ethers";
 import {
   entropyToMnemonic,
+  getAddress,
   isAddress,
   mnemonicToEntropy,
 } from "ethers/lib/utils";
@@ -78,3 +79,6 @@ export const getPrivateKeyFromMnemonic = (mnemonic: string): Promise<string> =>
       resolve(privateKey);
     });
   });
+
+export const getCleanAddress = (address: string) =>
+  getAddress(address.toLowerCase());
