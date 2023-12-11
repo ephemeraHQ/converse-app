@@ -1,5 +1,5 @@
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback } from "react";
 import {
   FlatList,
   Keyboard,
@@ -11,24 +11,13 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-import {
-  useAccountsStore,
-  useCurrentAccount,
-  useRecommendationsStore,
-} from "../../data/store/accountsStore";
 import { ProfileSocials } from "../../data/store/profilesStore";
-import { findFrens } from "../../utils/api";
 import {
   backgroundColor,
   itemSeparatorColor,
-  primaryColor,
-  textPrimaryColor,
   textSecondaryColor,
 } from "../../utils/colors";
-import { pick } from "../../utils/objects";
 import { ProfileSearchItem } from "./ProfileSearchItem";
-
-const EXPIRE_AFTER = 86400000; // 1 DAY
 
 export default function ProfileSearch({
   navigation,
@@ -37,98 +26,43 @@ export default function ProfileSearch({
   navigation: NativeStackNavigationProp<any>;
   profiles: { [address: string]: ProfileSocials };
 }) {
-  const userAddress = useCurrentAccount();
-  const currentAccount = useAccountsStore((s) => s.currentAccount);
-  const { setLoadingRecommendations, setRecommendations, loading, updatedAt } =
-    useRecommendationsStore((s) =>
-      pick(s, [
-        "setLoadingRecommendations",
-        "setRecommendations",
-        "loading",
-        "updatedAt",
-      ])
-    );
   const insets = useSafeAreaInsets();
   const styles = useStyles();
-
-  const [viewableItems, setViewableItems] = useState<{ [key: string]: true }>(
-    {}
-  );
-
-  const onViewableItemsChanged = useCallback(
-    ({ viewableItems: items }: any) => {
-      const viewable: { [key: string]: true } = {};
-      items.forEach((item: any) => {
-        viewable[item.item] = true;
-      });
-      setViewableItems(viewable);
-    },
-    []
-  );
-
-  useEffect(() => {
-    // On load, let's load frens
-    const getRecommendations = async () => {
-      setLoadingRecommendations();
-      const frens = await findFrens(currentAccount);
-      const now = new Date().getTime();
-      setRecommendations(frens, now);
-    };
-    const now = new Date().getTime();
-    if (!loading && userAddress && now - updatedAt >= EXPIRE_AFTER) {
-      getRecommendations();
-    }
-  }, [
-    loading,
-    setLoadingRecommendations,
-    setRecommendations,
-    userAddress,
-    updatedAt,
-    currentAccount,
-  ]);
-
   const keyExtractor = useCallback((address: string) => address, []);
   const renderItem = useCallback(
     ({ item }: { item: string }) => {
       if (item === "title") {
         return (
-          <>
-            <View style={styles.sectionTitleContainer}>
-              <Text style={styles.sectionTitle}>RESULTS</Text>
-            </View>
-          </>
+          <View style={styles.sectionTitleContainer}>
+            <Text style={styles.sectionTitle}>RESULTS</Text>
+          </View>
         );
-      } else {
-        return (
-          <ProfileSearchItem
-            address={item}
-            socials={profiles[item]}
-            navigation={navigation}
-            isVisible={!!viewableItems[item]}
-          />
-        );
+      } else if (item === "bottomline") {
+        return <View style={{ marginBottom: insets.bottom + 40 }} />;
       }
+      return (
+        <ProfileSearchItem
+          address={item}
+          socials={profiles[item]}
+          navigation={navigation}
+        />
+      );
     },
     [
       profiles,
       navigation,
-      viewableItems,
       styles.sectionTitleContainer,
       styles.sectionTitle,
+      insets.bottom,
     ]
   );
 
   return (
-    <View style={styles.recommendations}>
+    <View style={styles.profileSearch}>
       <FlatList
-        data={["title", ...Object.keys(profiles)]}
+        data={["title", ...Object.keys(profiles), "bottomline"]}
         keyExtractor={keyExtractor}
         renderItem={renderItem}
-        onViewableItemsChanged={onViewableItemsChanged}
-        viewabilityConfig={{
-          itemVisiblePercentThreshold: 1,
-          minimumViewTime: 0,
-        }}
         onTouchStart={Keyboard.dismiss}
       />
     </View>
@@ -138,63 +72,9 @@ export default function ProfileSearch({
 const useStyles = () => {
   const colorScheme = useColorScheme();
   return StyleSheet.create({
-    emoji: {
-      textAlign: "center",
-      marginTop: 30,
-      fontSize: 34,
-      marginBottom: 12,
-    },
-    title: {
-      color: textPrimaryColor(colorScheme),
-      ...Platform.select({
-        default: {
-          fontSize: 17,
-          paddingHorizontal: 32,
-        },
-        android: {
-          fontSize: 14,
-          paddingHorizontal: 39,
-        },
-      }),
-
-      textAlign: "center",
-    },
-    recommendations: {
-      marginBottom: 30,
+    profileSearch: {
       backgroundColor: backgroundColor(colorScheme),
       marginLeft: 16,
-    },
-    fetching: {
-      flexGrow: 1,
-      justifyContent: "center",
-      marginBottom: 40,
-    },
-    fetchingText: {
-      color: textPrimaryColor(colorScheme),
-      ...Platform.select({
-        default: { fontSize: 17 },
-        android: { fontSize: 16 },
-      }),
-
-      textAlign: "center",
-      marginTop: 20,
-    },
-    clickableText: {
-      color: primaryColor(colorScheme),
-      fontWeight: "500",
-    },
-    noMatch: {
-      marginTop: 30,
-    },
-    titleContainer: {
-      paddingBottom: 30,
-      ...Platform.select({
-        default: {
-          borderBottomWidth: 0.5,
-          borderBottomColor: itemSeparatorColor(colorScheme),
-        },
-        android: {},
-      }),
     },
     sectionTitleContainer: {
       ...Platform.select({
