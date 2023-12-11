@@ -44,7 +44,7 @@ export default function PrivyConnect() {
 
   useEffect(() => {
     setPrivyAccountId(undefined);
-    addLog("Logging out from Privy");
+    addLog("Logging out from Privy from PrivyConnect page");
     logout();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);

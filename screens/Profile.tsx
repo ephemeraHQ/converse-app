@@ -17,6 +17,7 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import ActivityIndicator from "../components/ActivityIndicator/ActivityIndicator";
+import { addLog } from "../components/DebugButton";
 import { showActionSheetWithOptions } from "../components/StateHandlers/ActionSheetStateHandler";
 import TableView, {
   TableViewItemType,
@@ -420,6 +421,7 @@ export default function ProfileScreen({
                   setTimeout(() => {
                     disconnectWallet();
                     if (isPrivy) {
+                      addLog("calling privy logout from Profile.tsx");
                       privyLogout();
                     }
                     logout(userAddress);
