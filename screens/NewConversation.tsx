@@ -41,7 +41,11 @@ import {
   computeNewConversationContext,
   conversationLastMessagePreview,
 } from "../utils/conversation";
-import { getAddressForPeer, getCleanAddress, isSupportedPeer } from "../utils/eth";
+import {
+  getAddressForPeer,
+  getCleanAddress,
+  isSupportedPeer,
+} from "../utils/eth";
 import { isEmptyObject, pick } from "../utils/objects";
 import { conversationName } from "../utils/str";
 import { isOnXmtp } from "../utils/xmtpRN/client";
@@ -327,14 +331,17 @@ export default function NewConversation({
         </View>
       )}
 
-      <View
-        style={{
-          backgroundColor: backgroundColor(colorScheme),
-          height: showRecommendations ? undefined : 0,
-        }}
-      >
-        <Recommendations visibility="EMBEDDED" navigation={navigation} />
-      </View>
+      {isEmptyObject(status.profileSearchResults) && (
+        <View
+          style={{
+            backgroundColor: backgroundColor(colorScheme),
+            height: showRecommendations ? undefined : 0,
+          }}
+        >
+          <Recommendations visibility="EMBEDDED" navigation={navigation} />
+        </View>
+      )}
+
       <ScrollView
         style={[styles.modal, { height: showRecommendations ? 0 : undefined }]}
         keyboardShouldPersistTaps="handled"

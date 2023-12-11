@@ -17,7 +17,7 @@ import {
   textSecondaryColor,
 } from "../../utils/colors";
 import { shortAddress } from "../../utils/str";
-import Button from "../Button/Button";
+import { NavigationChatButton } from "../Chat/ChatActionButton";
 
 export function Recommendation({
   address,
@@ -92,23 +92,10 @@ export function Recommendation({
       </View>
       {!embedInChat && navigation && (
         <View style={styles.recommendationRight}>
-          <Button
-            variant={Platform.OS === "android" ? "text" : "secondary"}
-            picto="message"
-            title="Chat"
-            style={styles.cta}
-            onPress={() => {
-              // On Android the accounts are not in the navigation but in a drawer
-              navigation.pop(
-                Platform.OS === "ios" ? navigationIndex - 1 : navigationIndex
-              );
-              setTimeout(() => {
-                navigation.navigate("Conversation", {
-                  mainConversationWithPeer: address,
-                  focus: true,
-                });
-              }, 300);
-            }}
+          <NavigationChatButton
+            navigation={navigation}
+            address={address}
+            navigationIndex={navigationIndex}
           />
         </View>
       )}
@@ -121,7 +108,8 @@ const useStyles = () => {
   return StyleSheet.create({
     recommendation: {
       flexDirection: "row",
-      paddingRight: 10,
+      justifyContent: "space-between",
+      alignItems: "center",
       ...Platform.select({
         default: {
           paddingVertical: 15,
@@ -139,8 +127,8 @@ const useStyles = () => {
       }),
     },
     recommendationLeft: {
-      flexGrow: 1,
-      flexShrink: 1,
+      flex: 1,
+      justifyContent: "center",
     },
     recommendationRight: {
       justifyContent: "center",
@@ -181,10 +169,6 @@ const useStyles = () => {
       width: 15,
       height: 15,
       marginRight: 10,
-    },
-    cta: {
-      marginRight: 0,
-      marginLeft: "auto",
     },
   });
 };
