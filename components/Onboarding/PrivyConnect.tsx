@@ -89,7 +89,7 @@ export default function PrivyConnect() {
     setBeautifulPhone(parsed.formatInternational());
     await sendCode({ phone: parsed.number });
     setStatus("verify-phone");
-    setRetrySeconds(30);
+    setRetrySeconds(60);
     setLoading(false);
   }, [formattedPhone, sendCode, setLoading]);
 
