@@ -71,7 +71,20 @@ export function getPrimaryNames(socials: ProfileSocials | undefined): string[] {
         .map((d) => d.domain)
     );
   }
+  if (socials.farcasterUsernames) {
+    primaryNames.push(
+      ...socials.farcasterUsernames
+        .filter((f) => f.name)
+        .map((f) => `${f.name} on farcaster`)
+    );
+  }
+  if (socials.lensHandles) {
+    primaryNames.push(
+      ...socials.lensHandles
+        .filter((l) => l.handle)
+        .map((l) => `${l.handle} on lens`)
+    );
+  }
 
-  // Note: FarcasterUsername and LensHandle are excluded from primary name checks
   return primaryNames;
 }
