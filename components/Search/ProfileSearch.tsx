@@ -74,7 +74,7 @@ const useStyles = () => {
   return StyleSheet.create({
     profileSearch: {
       backgroundColor: backgroundColor(colorScheme),
-      marginLeft: 16,
+      paddingLeft: 16,
     },
     sectionTitleContainer: {
       ...Platform.select({

@@ -1,3 +1,4 @@
+import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import {
   useColorScheme,
   StyleSheet,
@@ -8,14 +9,23 @@ import {
 } from "react-native";
 
 import { messageBubbleColor, textSecondaryColor } from "../../utils/colors";
+import Button from "../Button/Button";
 import Picto from "../Picto/Picto";
 
-type Props = {
+type ChatActionProps = {
   picto: string;
   style?: StyleProp<ViewStyle>;
 };
 
-export default function ChatActionButton({ picto, style }: Props) {
+type NavigationChatProps = {
+  navigation: NativeStackNavigationProp<any>;
+  address: string;
+  navigationIndex: number;
+  title?: string;
+  picto?: string;
+};
+
+export default function ChatActionButton({ picto, style }: ChatActionProps) {
   const styles = useStyles();
   const colorScheme = useColorScheme();
   return (
@@ -30,6 +40,37 @@ export default function ChatActionButton({ picto, style }: Props) {
   );
 }
 
+export function NavigationChatButton({
+  navigation,
+  address,
+  navigationIndex,
+}: NavigationChatProps) {
+  const styles = useStyles();
+
+  const handlePress = () => {
+    // On Android the accounts are not in the navigation but in a drawer
+    navigation.pop(
+      Platform.OS === "ios" ? navigationIndex - 1 : navigationIndex
+    );
+    setTimeout(() => {
+      navigation.navigate("Conversation", {
+        mainConversationWithPeer: address,
+        focus: true,
+      });
+    }, 300);
+  };
+
+  return (
+    <Button
+      variant={Platform.OS === "android" ? "text" : "secondary"}
+      picto="message"
+      title="Chat"
+      style={styles.navigationButton}
+      onPress={handlePress}
+    />
+  );
+}
+
 const useStyles = () => {
   const colorScheme = useColorScheme();
   return StyleSheet.create({
@@ -40,6 +81,10 @@ const useStyles = () => {
       alignItems: "center",
       justifyContent: "center",
       backgroundColor: messageBubbleColor(colorScheme),
+    },
+    navigationButton: {
+      paddingHorizontal: 5,
+      marginRight: 14,
     },
   });
 };
