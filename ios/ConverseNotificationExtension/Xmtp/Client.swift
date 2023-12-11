@@ -64,7 +64,7 @@ func isIntroTopic(topic: String) -> Bool {
 }
 
 func subscribeToTopic(apiURI: String?, account: String, pushToken: String?, topic: String) {
-  if (apiURI != nil && pushToken != nil) {
+  if (apiURI != nil && pushToken != nil && !apiURI!.isEmpty && !pushToken!.isEmpty) {
     let appendTopicURI = "\(apiURI ?? "")/api/subscribe/append"
     AF.request(appendTopicURI, method: .post, parameters: ["topic": topic, "account": account, "nativeToken": pushToken!], encoding: JSONEncoding.default, headers: nil).response { response in
       debugPrint("Response: \(response)")
