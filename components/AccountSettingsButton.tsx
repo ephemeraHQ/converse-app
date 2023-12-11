@@ -29,6 +29,7 @@ import {
 } from "../utils/notifications";
 import { pick } from "../utils/objects";
 import { refreshBalanceForAccounts } from "../utils/wallet";
+import { addLog } from "./DebugButton";
 import Picto from "./Picto/Picto";
 import { showActionSheetWithOptions } from "./StateHandlers/ActionSheetStateHandler";
 import { TableViewPicto } from "./TableView/TableViewImage";
@@ -134,6 +135,7 @@ export default function AccountSettingsButton({ navigation, account }: Props) {
       Disconnect: () => {
         disconnectWallet();
         if (privyAccountId[account]) {
+          addLog("calling privylogout from AccountSettingsButton");
           privyLogout();
         }
         logout(account);

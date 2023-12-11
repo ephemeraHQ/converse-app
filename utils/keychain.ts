@@ -103,7 +103,13 @@ export const privySecureStorage: PrivyStorage = {
     }
     return setSecureItemAsync(key.replaceAll(":", "-"), val);
   },
-  del: (key) => deleteSecureItemAsync(key.replaceAll(":", "-")),
+  del: (key) => {
+    addLog(`Deleting ${key}`);
+    if (["privy:token", "privy:refresh_token"].includes(key)) {
+      sentryTrackMessage("Logging out of privy, please check logs");
+    }
+    return deleteSecureItemAsync(key.replaceAll(":", "-"));
+  },
   getKeys: async () => [],
 };
 
