@@ -216,6 +216,51 @@ export default function ProfileScreen({
     Platform.OS === "ios"
       ? Constants.expoConfig?.ios?.buildNumber
       : Constants.expoConfig?.android?.versionCode;
+  const balanceItems = [
+    {
+      id: "balance",
+      title: "Your balance (USDC)",
+      rightView: (
+        <View style={styles.balanceContainer}>
+          <Text style={styles.balance}>
+            ${evmHelpers.fromDecimal(USDCBalance, config.evm.USDC.decimals, 2)}
+          </Text>
+          <View style={{ width: 30 }}>
+            {!refreshingBalance && (
+              <View style={{ left: Platform.OS === "ios" ? 0 : -14 }}>
+                <TableViewPicto
+                  symbol="arrow.clockwise"
+                  color={
+                    Platform.OS === "android"
+                      ? primaryColor(colorScheme)
+                      : undefined
+                  }
+                  onPress={manuallyRefreshBalance}
+                />
+              </View>
+            )}
+            {refreshingBalance && <ActivityIndicator />}
+          </View>
+        </View>
+      ),
+    },
+  ] as TableViewItemType[];
+
+  if (isPrivy) {
+    balanceItems.push({
+      id: "topUp",
+      title: "Top up your account",
+      action: () => {
+        navigation.push("TopUp");
+      },
+      rightView: (
+        <TableViewPicto
+          symbol="chevron.right"
+          color={textSecondaryColor(colorScheme)}
+        />
+      ),
+    });
+  }
 
   return (
     <ScrollView
@@ -249,53 +294,7 @@ export default function ProfileScreen({
       )}
       {isMyProfile && (
         <TableView
-          items={[
-            {
-              id: "balance",
-              title: "Your balance (USDC)",
-              rightView: (
-                <View style={styles.balanceContainer}>
-                  <Text style={styles.balance}>
-                    $
-                    {evmHelpers.fromDecimal(
-                      USDCBalance,
-                      config.evm.USDC.decimals,
-                      2
-                    )}
-                  </Text>
-                  <View style={{ width: 30 }}>
-                    {!refreshingBalance && (
-                      <View style={{ left: Platform.OS === "ios" ? 0 : -14 }}>
-                        <TableViewPicto
-                          symbol="arrow.clockwise"
-                          color={
-                            Platform.OS === "android"
-                              ? primaryColor(colorScheme)
-                              : undefined
-                          }
-                          onPress={manuallyRefreshBalance}
-                        />
-                      </View>
-                    )}
-                    {refreshingBalance && <ActivityIndicator />}
-                  </View>
-                </View>
-              ),
-            },
-            {
-              id: "topUp",
-              title: "Top up your account",
-              action: () => {
-                navigation.push("TopUp");
-              },
-              rightView: (
-                <TableViewPicto
-                  symbol="chevron.right"
-                  color={textSecondaryColor(colorScheme)}
-                />
-              ),
-            },
-          ]}
+          items={balanceItems}
           title="BALANCE"
           style={styles.tableView}
         />

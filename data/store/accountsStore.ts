@@ -207,10 +207,10 @@ export const useLoggedWithPrivy = () => {
 
 export const useHasOnePrivyAccount = () => {
   const accountsState = useAccountsStore();
-  let hasOne = false;
+  let hasOne = undefined as string | undefined;
   accountsState.accounts.forEach((a) => {
     if (a !== TEMPORARY_ACCOUNT_NAME && accountsState.privyAccountId[a]) {
-      hasOne = true;
+      hasOne = a;
     }
   });
   return hasOne;
