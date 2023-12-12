@@ -6510,28 +6510,28 @@
     "@pnpm/network.ca-file" "^1.0.1"
     config-chain "^1.1.11"
 
-"@privy-io/api-base@*":
-  version "0.4.0"
-  resolved "https://registry.yarnpkg.com/@privy-io/api-base/-/api-base-0.4.0.tgz#d98805e25d0b8b200647ca1bad145e25d569b76c"
-  integrity sha512-Q/MjLyJS/rDC/lkM23NCovimggKVSo7xt7Ukmh3dCM97/UOlTQzai6XnZv8IcHmrzA6ByFPL5TOO9ORAZ2MYTw==
+"@privy-io/api-base@0.4.1":
+  version "0.4.1"
+  resolved "https://registry.yarnpkg.com/@privy-io/api-base/-/api-base-0.4.1.tgz#399c2d70c9016828d2388ff459f5b31d4f56701b"
+  integrity sha512-s9wzT4of4ZscTCGhQspoI3n85OwN9sjAuYUWW9zHjlvcEFKeVnMyGNG/K2I64dN2Jc83QKCniREaIb6jTNEP4A==
   dependencies:
     zod "^3.21.4"
 
-"@privy-io/expo@^0.3.1":
-  version "0.3.1"
-  resolved "https://registry.yarnpkg.com/@privy-io/expo/-/expo-0.3.1.tgz#83a8fbd8ae6829d09cc0b8c6182e17ec6b7d2101"
-  integrity sha512-+ADOgYstbUmnp991O69K9Xt2u7YoT8IYnzkQCNJgjPWvTIWwDnnQ0uPqIFwrEpPk1t9l78JmHL3vU7bwTDct+A==
+"@privy-io/expo@0.3.3-beta-20231212163447":
+  version "0.3.3-beta-20231212163447"
+  resolved "https://registry.yarnpkg.com/@privy-io/expo/-/expo-0.3.3-beta-20231212163447.tgz#6746cef742d278936baac861e3cbb753d79cb4b7"
+  integrity sha512-OjiGjVthWt5CTNCSTi2GpcYFpRPj3Q7XIW+su9cNB0zmqezuspMU3V+fqop6i2df+BxOCybE9uOsPvbnYxWHww==
   dependencies:
-    "@privy-io/js-sdk-core" "*"
+    "@privy-io/js-sdk-core" "0.8.3-beta-20231212163447"
     react-fast-compare "^3.2.2"
 
-"@privy-io/js-sdk-core@*":
-  version "0.8.2"
-  resolved "https://registry.yarnpkg.com/@privy-io/js-sdk-core/-/js-sdk-core-0.8.2.tgz#7962b23cefd6ac115a752c72c0eea019381a1e7f"
-  integrity sha512-kVjGB+nG3en4eFri+84LOGn1qVFub59Qplx6NDDcNHbhf6AqyII3cUoYCbZP7Q405rGg273gEfnKuQGE9xBH+g==
+"@privy-io/js-sdk-core@0.8.3-beta-20231212163447":
+  version "0.8.3-beta-20231212163447"
+  resolved "https://registry.yarnpkg.com/@privy-io/js-sdk-core/-/js-sdk-core-0.8.3-beta-20231212163447.tgz#c508ae92f0748534eb8d86bfba0a16374fcf8f9e"
+  integrity sha512-Kv8iaOrS7EqiMdRAFSMuLgwE9cAICfQYUkOheFmJ4yc0aA/ndIiqmMR+PUxGLLg0DW40bhGzPpp0cQrksXm6Gw==
   dependencies:
     "@ethersproject/providers" "^5.7.2"
-    "@privy-io/public-api" "*"
+    "@privy-io/public-api" "1.4.3-beta-20231212163447"
     eventemitter3 "^5.0.1"
     fetch-retry "^5.0.6"
     jose "^4.11.2"
@@ -6539,12 +6539,12 @@
     text-encoding "^0.7.0"
     uuid ">=8 <10"
 
-"@privy-io/public-api@*":
-  version "1.4.1"
-  resolved "https://registry.yarnpkg.com/@privy-io/public-api/-/public-api-1.4.1.tgz#d3c2548f931699bfd8f304dd81bca228b1b6960b"
-  integrity sha512-JuMTRdb9BK7vK+1n72OS8GpyRDv+7E++8pMs9IRycb8SJSKLL04KinieFdN1MxAX/VN9h87bAAfCZVDGokOqkA==
+"@privy-io/public-api@1.4.3-beta-20231212163447":
+  version "1.4.3-beta-20231212163447"
+  resolved "https://registry.yarnpkg.com/@privy-io/public-api/-/public-api-1.4.3-beta-20231212163447.tgz#ff4c8871c8b5b3254e3f7df9447e3bb467c774fb"
+  integrity sha512-mrVZN46i9pWgRafUlYplGaeoWQF+Yf3Wx/GciXtvSGp6n4bZ1tC6wid5FLbAlDxb73b50PEU/90AWBXP+6zN1A==
   dependencies:
-    "@privy-io/api-base" "*"
+    "@privy-io/api-base" "0.4.1"
     ethers "^5.7.2"
     libphonenumber-js "^1.10.31"
     zod "^3.22.4"
