@@ -18,6 +18,7 @@ import { uploadRemoteAttachment } from "../../utils/attachment";
 import { actionSheetColors } from "../../utils/colors";
 import { useConversationContext } from "../../utils/conversation";
 import { executeAfterKeyboardClosed } from "../../utils/keyboard";
+import { compressAndResizeImage } from "../../utils/media";
 import { sendMessage } from "../../utils/message";
 import { pick } from "../../utils/objects";
 import { sentryTrackMessage } from "../../utils/sentry";
@@ -51,11 +52,11 @@ export default function ChatAddAttachment() {
     const uploadAsset = async (asset: ImagePicker.ImagePickerAsset) => {
       uploading.current = true;
 
-      const filename = asset.fileName || asset.uri.split("/").pop();
-      const mimeType = mime.getType(filename || "");
+      const resizedImage = await compressAndResizeImage(asset.uri);
+      const mimeType = mime.getType(resizedImage.uri);
       const encryptedAttachment = await encryptRemoteAttachment(
         currentAccount,
-        asset.uri,
+        resizedImage.uri,
         mimeType || undefined
       );
       try {
