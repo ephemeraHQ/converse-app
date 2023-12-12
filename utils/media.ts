@@ -338,11 +338,11 @@ export const compressAndResizeImage = async (imageURI: string) => {
   const imageSize = await getImageSize(imageURI);
   const newSize = calculateImageOptiSize(imageSize);
   console.log(
-    `[ImageUtils] Resizing and compressing image to width ${newSize.width} - height ${newSize.height}`
+    `[ImageUtils] Resizing and compressing image to ${newSize.height}x${newSize.width} (was ${imageSize.height}x${imageSize.width})`
   );
   const manipResult = await manipulateAsync(imageURI, [{ resize: newSize }], {
     base64: false,
-    compress: 0.5,
+    compress: 0.3,
     format: SaveFormat.JPEG,
   });
   return manipResult;
