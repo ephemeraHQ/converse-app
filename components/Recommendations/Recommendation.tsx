@@ -1,4 +1,3 @@
-import { useNavigationState } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import {
   Platform,
@@ -38,7 +37,6 @@ export function Recommendation({
     ...farcasterUsernames.map((f) => `${f} on farcaster`),
   ];
   const textAlign = embedInChat ? "center" : "left";
-  const navigationIndex = useNavigationState((state) => state.index);
 
   return (
     <View
@@ -92,11 +90,7 @@ export function Recommendation({
       </View>
       {!embedInChat && navigation && (
         <View style={styles.recommendationRight}>
-          <NavigationChatButton
-            navigation={navigation}
-            address={address}
-            navigationIndex={navigationIndex}
-          />
+          <NavigationChatButton navigation={navigation} address={address} />
         </View>
       )}
     </View>
