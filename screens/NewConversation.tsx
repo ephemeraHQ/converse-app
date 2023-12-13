@@ -100,6 +100,14 @@ export default function NewConversation({
   useEffect(() => {
     if (value.length < 3) {
       // If the input is less than 3 characters, do nothing
+      setStatus({
+        loading: false,
+        error: "",
+        address: "",
+        inviteToConverse: "",
+        existingConversations: [],
+        profileSearchResults: {},
+      });
       return;
     }
 
@@ -187,6 +195,8 @@ export default function NewConversation({
                   profileSearchResults: {},
                 });
               }
+            } else {
+              console.log("passing HERE");
             }
           }
         } else {
@@ -213,13 +223,12 @@ export default function NewConversation({
           } else {
             setStatus({
               loading: false,
-              error: "This handle does not exist. Please try again.",
+              error: "",
               address: "",
               inviteToConverse: "",
               existingConversations: [],
               profileSearchResults: {},
             });
-            searchingForValue.current = "";
           }
         }
       };
@@ -352,15 +361,14 @@ export default function NewConversation({
                   {status.error}
                 </Text>
               )}
-              {!status.error &&
-                (recommendationsFrensCount === 0 || value.length > 0) && (
-                  <Text style={styles.message}>
-                    <Text>
-                      Type the full address/domain of your contact (with
-                      .converse.xyz, .eth, .lens, .fc, .cb.id…)
-                    </Text>
+              {!status.error && recommendationsFrensCount === 0 && (
+                <Text style={styles.message}>
+                  <Text>
+                    Type the full address/domain of your contact (with
+                    .converse.xyz, .eth, .lens, .fc, .cb.id…)
                   </Text>
-                )}
+                </Text>
+              )}
             </View>
           )}
 
