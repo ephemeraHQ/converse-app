@@ -1,4 +1,4 @@
-import { ConversationContext } from "@xmtp/react-native-sdk";
+import { ConsentListEntry, ConversationContext } from "@xmtp/react-native-sdk";
 
 import { Conversation as DbConversation } from "../../data/db/entities/conversationEntity";
 import { getPendingConversationsToCreate } from "../../data/helpers/conversations/pendingConversations";
@@ -121,12 +121,8 @@ const handleNewConversation = async (
   }, 3000);
 
   // Fetch consent from protocol
-  client.contacts.refreshConsentList();
-
-  // @todo remove temporary delay, waiting for refreshConsentList()
-  await new Promise((resolve) => setTimeout(resolve, 2000));
-
-  await refreshPeersStatus([conversation]);
+  const consentList = await client.contacts.refreshConsentList();
+  await saveConsentState(consentList);
 };
 
 export const streamConversations = async (client: ConverseXmtpClientType) => {
@@ -180,19 +176,8 @@ export const loadConversations = async (
     );
 
     // Refresh consent list from protocol
-    // Note: refreshConsentList() will soon return the consent list
-    // @todo once it does, save the dict to our app's peersStatus
-    client.contacts.refreshConsentList();
-
-    // @todo remove temporary delay, waiting for refreshConsentList()
-    await new Promise((resolve) => setTimeout(resolve, 2000));
-
-    const uniquePeers = new Map();
-    for (const conversation of conversations) {
-      uniquePeers.set(conversation.peerAddress, conversation);
-    }
-
-    refreshPeersStatus(Array.from(uniquePeers.values()));
+    const consentList = await client.contacts.refreshConsentList();
+    await saveConsentState(consentList);
 
     return { newConversations, knownConversations };
   } catch (e) {
@@ -203,20 +188,14 @@ export const loadConversations = async (
   }
 };
 
-const refreshPeersStatus = async (conversations: Conversation[]) => {
+const saveConsentState = async (consentList: ConsentListEntry[]) => {
   const peersStatus: Pick<SettingsStoreType, "peersStatus">["peersStatus"] = {};
 
-  for (const conversation of conversations) {
-    // Using consentState() from the convo to avoid passing client
-    // and calling client.contacts.isAllowed()/isDenied()
-    const consentStatus = await conversation.consentState();
-
-    if (consentStatus === "allowed") {
-      peersStatus[conversation.peerAddress] = "consented";
-    } else if (consentStatus === "denied") {
-      peersStatus[conversation.peerAddress] = "blocked";
+  for (const entry of consentList) {
+    if (entry.entryType === "address") {
+      peersStatus[entry.value] =
+        entry.permissionType === "denied" ? "blocked" : "consented";
     }
-    // 'unknown' status is ignored
   }
 
   if (Object.keys(peersStatus).length > 0) {
