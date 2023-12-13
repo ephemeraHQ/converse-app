@@ -191,12 +191,15 @@ export const loadConversations = async (
 const saveConsentState = async (consentList: ConsentListEntry[]) => {
   const peersStatus: Pick<SettingsStoreType, "peersStatus">["peersStatus"] = {};
 
-  for (const entry of consentList) {
+  consentList.forEach((entry) => {
     if (entry.entryType === "address") {
-      peersStatus[entry.value] =
-        entry.permissionType === "denied" ? "blocked" : "consented";
+      if (entry.permissionType === "allowed") {
+        peersStatus[entry.value] = "consented";
+      } else if (entry.permissionType === "denied") {
+        peersStatus[entry.value] = "blocked";
+      }
     }
-  }
+  });
 
   if (Object.keys(peersStatus).length > 0) {
     useSettingsStore.getState().setPeersStatus(peersStatus);
