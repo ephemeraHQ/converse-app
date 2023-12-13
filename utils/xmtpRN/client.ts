@@ -21,6 +21,7 @@ import {
   loadConversations,
   stopStreamingConversations,
   streamConversations,
+  updateConsentStatus,
 } from "./conversations";
 import {
   loadConversationsMessages,
@@ -134,6 +135,7 @@ export const syncXmtpClient = async (account: string) => {
   });
   try {
     const now = new Date().getTime();
+    updateConsentStatus(client);
     const { newConversations } = await loadConversations(client, knownTopics);
     newConversations.forEach((c) => {
       queryConversationsFromTimestamp[c.topic] = 0;

@@ -119,10 +119,7 @@ const handleNewConversation = async (
   setTimeout(() => {
     loadConversationsMessages(client, { [conversation.topic]: 0 });
   }, 3000);
-
-  // Fetch consent from protocol
-  const consentList = await client.contacts.refreshConsentList();
-  await saveConsentState(consentList);
+  updateConsentStatus(client);
 };
 
 export const streamConversations = async (client: ConverseXmtpClientType) => {
@@ -174,17 +171,21 @@ export const loadConversations = async (
       client.address,
       await protocolConversationsToTopicData(newConversations)
     );
-
-    // Refresh consent list from protocol
-    const consentList = await client.contacts.refreshConsentList();
-    await saveConsentState(consentList);
-
     return { newConversations, knownConversations };
   } catch (e) {
     const error = new Error();
     error.name = "LOAD_CONVERSATIONS_FAILED";
     error.message = `${e}`;
     throw error;
+  }
+};
+
+export const updateConsentStatus = async (client: ConverseXmtpClientType) => {
+  try {
+    const consentList = await client.contacts.refreshConsentList();
+    await saveConsentState(consentList);
+  } catch (error) {
+    console.error("Failed to update consent status:", error);
   }
 };
 
@@ -225,8 +226,6 @@ export const consentToPeersOnProtocol = async (
     } else {
       throw new Error(`Invalid consent type: ${consent}`);
     }
-
-    console.log(`Consent updated: ${consent} for peers: ${peers}`);
   } catch (error) {
     console.error("Error updating consent:", error);
   }
