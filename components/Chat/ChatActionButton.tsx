@@ -1,3 +1,4 @@
+import { useNavigationState } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import {
   useColorScheme,
@@ -20,9 +21,6 @@ type ChatActionProps = {
 type NavigationChatProps = {
   navigation: NativeStackNavigationProp<any>;
   address: string;
-  navigationIndex: number;
-  title?: string;
-  picto?: string;
 };
 
 export default function ChatActionButton({ picto, style }: ChatActionProps) {
@@ -43,9 +41,9 @@ export default function ChatActionButton({ picto, style }: ChatActionProps) {
 export function NavigationChatButton({
   navigation,
   address,
-  navigationIndex,
 }: NavigationChatProps) {
   const styles = useStyles();
+  const navigationIndex = useNavigationState((state) => state.index);
 
   const handlePress = () => {
     // On Android the accounts are not in the navigation but in a drawer

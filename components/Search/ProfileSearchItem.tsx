@@ -1,4 +1,3 @@
-import { useNavigationState } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { StyleSheet, Text, View, useColorScheme } from "react-native";
 
@@ -27,7 +26,6 @@ export function ProfileSearchItem({
   const primaryNamesDisplay = primaryNames.filter(
     (name) => name !== preferredName
   );
-  const navigationIndex = useNavigationState((state) => state.index);
 
   return (
     <View key={address} style={[styles.container]}>
@@ -41,11 +39,7 @@ export function ProfileSearchItem({
       </View>
       {navigation && (
         <View style={styles.right}>
-          <NavigationChatButton
-            navigation={navigation}
-            address={address}
-            navigationIndex={navigationIndex}
-          />
+          <NavigationChatButton navigation={navigation} address={address} />
         </View>
       )}
     </View>
