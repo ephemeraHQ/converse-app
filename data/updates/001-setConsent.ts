@@ -1,4 +1,4 @@
-import { conversationConsentState } from "@xmtp/react-native-sdk";
+import { ConsentListEntry } from "@xmtp/react-native-sdk";
 
 import { getChatStore, getSettingsStore } from "../../data/store/accountsStore";
 import { getXmtpClient } from "../../utils/xmtpRN/client";
@@ -8,16 +8,17 @@ export const setConsent = async (account: string) => {
   console.log(`[Async Updates] Running 001-setConsent for account: ${account}`);
 
   const client = await getXmtpClient(account);
+  const consentList = await client.contacts.refreshConsentList();
 
   // Update Zustand store with peersStatus for auto-consented conversations
   const conversations = getChatStore(account).getState().conversations;
   const peersToConsent: Pick<SettingsStoreType, "peersStatus">["peersStatus"] =
     {};
+
   for (const conversation of Object.values(conversations)) {
     if (
       conversation.hasOneMessageFromMe &&
-      (await conversationConsentState(account, conversation.topic)) ===
-        "unknown"
+      !isPeerInConsentList(conversation.peerAddress, consentList)
     ) {
       peersToConsent[conversation.peerAddress] = "consented";
     }
@@ -43,5 +44,17 @@ export const setConsent = async (account: string) => {
     // Broadcast consent to protocol
     allowedPeers.length > 0 && client.contacts.allow(allowedPeers);
     deniedPeers.length > 0 && client.contacts.deny(deniedPeers);
+
+    // @todo: await for the return,
+    // and remove the associated peers from the UserStatus table
   }
 };
+
+function isPeerInConsentList(
+  peerAddress: string,
+  consentList: ConsentListEntry[]
+): boolean {
+  return consentList.some(
+    (entry) => entry.entryType === "address" && entry.value === peerAddress
+  );
+}
