@@ -75,6 +75,7 @@ export default function ChatAddAttachment() {
 
         uploading.current = false;
       } catch (error) {
+        uploading.current = false;
         sentryTrackMessage("ATTACHMENT_UPLOAD_ERROR", { error });
         setMediaPreview({
           mediaURI: currentAttachmentMediaURI.current || "",
