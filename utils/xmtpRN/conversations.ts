@@ -6,6 +6,7 @@ import { saveConversations } from "../../data/helpers/conversations/upsertConver
 import { useSettingsStore } from "../../data/store/accountsStore";
 import { XmtpConversation } from "../../data/store/chatStore";
 import { SettingsStoreType } from "../../data/store/settingsStore";
+import { getCleanAddress } from "../eth";
 import { getTopicDataFromKeychain, saveTopicDataToKeychain } from "../keychain";
 import { sentryTrackError } from "../sentry";
 import {
@@ -213,16 +214,13 @@ export const consentToPeersOnProtocol = async (
   consent: "allow" | "deny"
 ) => {
   try {
-    // Lowercase all strings in the peers array
-    // @todo not sure if we should pass the lowercased address or not to protocol
-    const lowercasePeers = peers.map((peer) => peer.toLowerCase());
-
+    const cleanPeers = peers.map((peer) => getCleanAddress(peer));
     const client = await getXmtpClient(account);
 
     if (consent === "allow") {
-      client.contacts.allow(peers);
+      client.contacts.allow(cleanPeers);
     } else if (consent === "deny") {
-      client.contacts.deny(peers);
+      client.contacts.deny(cleanPeers);
     } else {
       throw new Error(`Invalid consent type: ${consent}`);
     }
