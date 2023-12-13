@@ -29,40 +29,41 @@ export default function ProfileSearch({
   const insets = useSafeAreaInsets();
   const styles = useStyles();
   const keyExtractor = useCallback((address: string) => address, []);
+
   const renderItem = useCallback(
-    ({ item }: { item: string }) => {
-      if (item === "title") {
-        return (
-          <View style={styles.sectionTitleContainer}>
-            <Text style={styles.sectionTitle}>RESULTS</Text>
-          </View>
-        );
-      } else if (item === "bottomline") {
-        return <View style={{ marginBottom: insets.bottom + 40 }} />;
-      }
-      return (
-        <ProfileSearchItem
-          address={item}
-          socials={profiles[item]}
-          navigation={navigation}
-        />
-      );
-    },
-    [
-      profiles,
-      navigation,
-      styles.sectionTitleContainer,
-      styles.sectionTitle,
-      insets.bottom,
-    ]
+    ({ item }: { item: string }) => (
+      <ProfileSearchItem
+        address={item}
+        socials={profiles[item]}
+        navigation={navigation}
+      />
+    ),
+    [profiles, navigation]
+  );
+
+  const renderHeader = () => (
+    <View style={styles.sectionTitleContainer}>
+      <Text style={styles.sectionTitle}>RESULTS</Text>
+    </View>
+  );
+
+  const renderFooter = () => (
+    <View style={[styles.footer, { marginBottom: insets.bottom + 55 }]}>
+      <Text style={styles.message}>
+        If you don’t see your contact in the list, try typing their full address
+        (with .converse.xyz, .eth, .lens, .fc, .x etc…)
+      </Text>
+    </View>
   );
 
   return (
     <View style={styles.profileSearch}>
       <FlatList
-        data={["title", ...Object.keys(profiles), "bottomline"]}
+        data={Object.keys(profiles)}
         keyExtractor={keyExtractor}
         renderItem={renderItem}
+        ListHeaderComponent={renderHeader}
+        ListFooterComponent={renderFooter}
         onTouchStart={Keyboard.dismiss}
       />
     </View>
@@ -99,6 +100,31 @@ const useStyles = () => {
           marginTop: 16,
         },
       }),
+    },
+    footer: {
+      ...Platform.select({
+        default: {
+          marginTop: 23,
+          marginRight: 16,
+        },
+        android: {
+          marginRight: 16,
+          marginLeft: 16,
+          marginTop: 16,
+        },
+      }),
+    },
+    message: {
+      ...Platform.select({
+        default: {
+          fontSize: 17,
+          textAlign: "center",
+        },
+        android: {
+          fontSize: 14,
+        },
+      }),
+      color: textSecondaryColor(colorScheme),
     },
   });
 };
