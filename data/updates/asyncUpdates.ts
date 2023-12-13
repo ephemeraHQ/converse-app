@@ -6,13 +6,14 @@ import { useAppStore } from "../store/appStore";
 import { setConsent } from "./001-setConsent";
 
 type Step = {
-  id: string;
+  id: number;
   method: (account: string) => Promise<void>;
 };
 
-type Steps = Step[];
-
-const updateSteps: Steps = [{ id: "setConsent001", method: setConsent }];
+export const updateSteps: Step[] = [
+  { id: 1, method: setConsent },
+  // Add more async update steps by sequentially incrementing the id
+];
 
 export const updateLastVersionOpen = () => {
   console.log(
