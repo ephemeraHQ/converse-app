@@ -12,7 +12,7 @@ type Step = {
 
 export const updateSteps: Step[] = [
   { id: 1, method: setConsent },
-  // Add more async update steps by sequentially incrementing the id
+  // Add more update steps by sequentially incrementing the id
 ];
 
 export const updateLastVersionOpen = () => {

@@ -4,6 +4,7 @@ import { persist, createJSONStorage } from "zustand/middleware";
 
 import { removeLogoutTask } from "../../utils/logout";
 import mmkv, { zustandMMKVStorage } from "../../utils/mmkv";
+import { updateSteps } from "../updates/asyncUpdates";
 import { ChatStoreType, initChatStore } from "./chatStore";
 import { ProfilesStoreType, initProfilesStore } from "./profilesStore";
 import {
@@ -114,6 +115,10 @@ export const useAccountsStore = create<AccountsStoreStype>()(
             accounts.push(account);
             databaseId[account] = uuid.v4().toString();
             removeLogoutTask(account);
+            // Init lastAsyncUpdate so no async migration is run for new accounts
+            getSettingsStore(account)
+              .getState()
+              .setLastAsyncUpdate(updateSteps.length);
           }
           return { currentAccount: account, accounts, databaseId };
         }),
