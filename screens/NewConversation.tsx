@@ -74,10 +74,6 @@ export default function NewConversation({
 
   const [value, setValue] = useState(route.params.peer || "");
   const searchingForValue = useRef("");
-  const [profiles, setProfiles] = useState<{
-    [address: string]: ProfileSocials;
-  }>({});
-
   const [status, setStatus] = useState({
     loading: false,
     error: "",
@@ -204,8 +200,6 @@ export default function NewConversation({
           });
 
           const profiles = await searchProfiles(value);
-          console.log(`searchProfiles(): ${JSON.stringify(profiles)}`);
-          setProfiles(profiles);
 
           if (!isEmptyObject(profiles)) {
             setStatus({
