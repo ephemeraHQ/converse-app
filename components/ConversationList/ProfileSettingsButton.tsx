@@ -1,6 +1,6 @@
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
   Platform,
   PlatformColor,
@@ -30,18 +30,50 @@ export default function ProfileSettingsButton() {
   const colorScheme = useColorScheme();
   const isPrivy = useLoggedWithPrivy();
   const { USDCBalance } = useWalletStore((s) => pick(s, ["USDCBalance"]));
-  if (isPrivy) {
+  const [stringBalance, setStringBalance] = useState("");
+  const [stringSize, setStringSize] = useState(0);
+  useEffect(() => {
     const intBalance = parseInt(
       evmHelpers.fromDecimal(USDCBalance, config.evm.USDC.decimals),
       10
     );
-    let stringBalance = "";
+    let str = "";
     if (intBalance < 1000) {
-      stringBalance = `$${intBalance}`;
+      str = `$${intBalance}`;
     } else if (intBalance < 10000) {
-      stringBalance = `$${(Math.trunc(intBalance / 100) / 10).toFixed(1)}k`;
+      str = `$${(Math.trunc(intBalance / 100) / 10).toFixed(1)}k`;
     } else {
-      stringBalance = `$${Math.trunc(intBalance / 1000)}k`;
+      str = `$${Math.trunc(intBalance / 1000)}k`;
+    }
+    setStringBalance(str);
+    setStringSize(str.length * 10 + 10);
+  }, [USDCBalance]);
+  if (isPrivy) {
+    if (Platform.OS === "android") {
+      return (
+        <Button
+          variant="primary"
+          title={stringBalance}
+          onPress={() => {
+            navigation.navigate("Profile", { address: currentAccount() });
+          }}
+          style={{
+            position: "absolute",
+            right: 30,
+            top: -15,
+            width: stringSize,
+            minWidth: 40,
+            height: 30,
+          }}
+          textStyle={{
+            marginHorizontal: 0,
+            fontSize: 16,
+            marginVertical: 5,
+            height: 22,
+            top: 1,
+          }}
+        />
+      );
     }
     return (
       <Button

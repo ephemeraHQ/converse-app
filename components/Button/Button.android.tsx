@@ -54,6 +54,7 @@ export default function Button({
             : undefined
         }
         onPress={onPress}
+        labelStyle={textStyle}
         icon={
           picto
             ? ({ color, size }) => (
@@ -71,7 +72,7 @@ export default function Button({
             : undefined
         }
       >
-        <Text style={textStyle}>{title}</Text>
+        <Text>{title}</Text>
       </MaterialButton>
     </View>
   );
