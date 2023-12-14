@@ -8,9 +8,13 @@ import {
   useColorScheme,
 } from "react-native";
 
-import { currentAccount } from "../../data/store/accountsStore";
+import {
+  currentAccount,
+  useLoggedWithPrivy,
+} from "../../data/store/accountsStore";
 import { NavigationParamList } from "../../screens/Navigation/Navigation";
 import { textSecondaryColor } from "../../utils/colors";
+import Button from "../Button/Button";
 import Picto from "../Picto/Picto";
 
 export default function ProfileSettingsButton() {
@@ -20,6 +24,19 @@ export default function ProfileSettingsButton() {
     undefined
   >;
   const colorScheme = useColorScheme();
+  const isPrivy = useLoggedWithPrivy();
+  if (isPrivy) {
+    return (
+      <Button
+        variant="text"
+        title="12"
+        onPress={() => {
+          navigation.navigate("Profile", { address: currentAccount() });
+        }}
+        style={{ marginTop: 4, marginRight: 10 }}
+      />
+    );
+  }
   return (
     <TouchableOpacity
       activeOpacity={0.2}
@@ -28,7 +45,7 @@ export default function ProfileSettingsButton() {
       }}
     >
       <Picto
-        picto="gear"
+        picto="person"
         weight="medium"
         color={
           Platform.OS === "ios"
