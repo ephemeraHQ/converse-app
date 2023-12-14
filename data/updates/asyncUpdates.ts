@@ -10,10 +10,18 @@ type Step = {
   method: (account: string) => Promise<void>;
 };
 
+let isRunning = false;
+
 export const updateSteps: Step[] = [
   { id: 1, method: setConsent },
   // Add more update steps by sequentially incrementing the id
 ];
+
+const waitForAsyncUpdatesToFinish = async () => {
+  if (!isRunning) return;
+  await new Promise((resolve) => setTimeout(resolve, 100));
+  await waitForAsyncUpdatesToFinish();
+};
 
 export const updateLastVersionOpen = () => {
   console.log(
@@ -29,15 +37,24 @@ export const updateLastVersionOpen = () => {
 };
 
 export const runAsyncUpdates = async () => {
+  if (isRunning) {
+    await waitForAsyncUpdatesToFinish();
+    return;
+  }
+  isRunning = true;
+
   const accountList = getAccountsList();
   console.log(`[Async Updates] accountList: ${accountList}`);
 
-  accountList.forEach((account) => {
+  const updatePromises = accountList.map((account) => {
     console.log(
       `[Async Updates] running async updates for account: ${account}`
     );
-    runAsyncUpdatesForAccount(account);
+    return runAsyncUpdatesForAccount(account);
   });
+
+  await Promise.all(updatePromises);
+  isRunning = false;
 };
 
 const runAsyncUpdatesForAccount = async (account: string) => {
