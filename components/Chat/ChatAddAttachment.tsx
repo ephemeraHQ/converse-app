@@ -11,6 +11,7 @@ import {
   StyleSheet,
   Platform,
 } from "react-native";
+import uuid from "react-native-uuid";
 
 import { useAccountsStore } from "../../data/store/accountsStore";
 import { useAppStore } from "../../data/store/appStore";
@@ -18,6 +19,7 @@ import { uploadRemoteAttachment } from "../../utils/attachment";
 import { actionSheetColors } from "../../utils/colors";
 import { useConversationContext } from "../../utils/conversation";
 import { executeAfterKeyboardClosed } from "../../utils/keyboard";
+import { compressAndResizeImage } from "../../utils/media";
 import { sendMessage } from "../../utils/message";
 import { pick } from "../../utils/objects";
 import { sentryTrackMessage } from "../../utils/sentry";
@@ -50,30 +52,35 @@ export default function ChatAddAttachment() {
     if (!conversation) return;
     const uploadAsset = async (asset: ImagePicker.ImagePickerAsset) => {
       uploading.current = true;
-
-      const filename = asset.fileName || asset.uri.split("/").pop();
-      const mimeType = mime.getType(filename || "");
+      const resizedImage = await compressAndResizeImage(asset.uri);
+      const mimeType = mime.getType(resizedImage.uri);
       const encryptedAttachment = await encryptRemoteAttachment(
         currentAccount,
-        asset.uri,
+        resizedImage.uri,
         mimeType || undefined
       );
       try {
         const uploadedAttachment = await uploadRemoteAttachment(
+          currentAccount,
           encryptedAttachment
         );
         if (currentAttachmentMediaURI.current !== assetRef.current?.uri) return;
         setMediaPreview(null);
-        // TODO => save attachment locally so that we can display it immediatly
         // Send message
-        sendMessage(
+        sendMessage({
           conversation,
-          serializeRemoteAttachmentMessageContent(uploadedAttachment),
-          "xmtp.org/remoteStaticAttachment:1.0"
-        );
+          content: serializeRemoteAttachmentMessageContent(uploadedAttachment),
+          contentType: "xmtp.org/remoteStaticAttachment:1.0",
+          attachmentToSave: {
+            filePath: resizedImage.uri,
+            fileName: asset.uri.split("/").pop() || `${uuid.v4().toString()}`,
+            mimeType,
+          },
+        });
 
         uploading.current = false;
       } catch (error) {
+        uploading.current = false;
         sentryTrackMessage("ATTACHMENT_UPLOAD_ERROR", { error });
         setMediaPreview({
           mediaURI: currentAttachmentMediaURI.current || "",

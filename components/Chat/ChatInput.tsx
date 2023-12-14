@@ -66,7 +66,11 @@ export default function ChatInput() {
 
   const onValidate = useCallback(() => {
     if (conversation && inputValue.length > 0) {
-      sendMessage(conversation, inputValue);
+      sendMessage({
+        conversation,
+        content: inputValue,
+        contentType: "xmtp.org/text:1.0",
+      });
       setInputValue("");
     }
   }, [conversation, inputValue]);

@@ -1,3 +1,5 @@
+import Big from "big.js";
+import { manipulateAsync, SaveFormat } from "expo-image-manipulator";
 import { Image } from "react-native";
 
 const imageMimeTypes = [
@@ -305,3 +307,43 @@ export const getImageSize = (
       }
     );
   });
+
+const calculateImageOptiSize = (imageSize: {
+  width: number;
+  height: number;
+}) => {
+  const isPortrait = imageSize.height > imageSize.width;
+  const biggestValue = new Big(isPortrait ? imageSize.height : imageSize.width);
+  const smallestValue = new Big(
+    isPortrait ? imageSize.width : imageSize.height
+  );
+
+  const ratio1 = biggestValue.gt(1600) ? biggestValue.div(1600) : new Big(1);
+  const ratio2 = smallestValue.gt(1200) ? smallestValue.div(1200) : new Big(1);
+  const ratio = ratio1.gt(ratio2) ? ratio1 : ratio2;
+
+  const newBiggestValue = biggestValue.div(ratio);
+  const newSmallestValue = smallestValue.div(ratio);
+
+  const big = newBiggestValue.toNumber();
+  const small = newSmallestValue.toNumber();
+
+  return {
+    width: isPortrait ? small : big,
+    height: isPortrait ? big : small,
+  };
+};
+
+export const compressAndResizeImage = async (imageURI: string) => {
+  const imageSize = await getImageSize(imageURI);
+  const newSize = calculateImageOptiSize(imageSize);
+  console.log(
+    `[ImageUtils] Resizing and compressing image to ${newSize.height}x${newSize.width} (was ${imageSize.height}x${imageSize.width})`
+  );
+  const manipResult = await manipulateAsync(imageURI, [{ resize: newSize }], {
+    base64: false,
+    compress: 0.3,
+    format: SaveFormat.JPEG,
+  });
+  return manipResult;
+};
