@@ -164,6 +164,17 @@ export const getProfilesForAddresses = async (
   return data;
 };
 
+export const searchProfiles = async (
+  query: string,
+  account: string
+): Promise<{ [address: string]: ProfileSocials }> => {
+  const { data } = await api.get("/api/profile/search", {
+    headers: await getXmtpApiHeaders(account),
+    params: { query },
+  });
+  return data;
+};
+
 export const findFrens = async (account: string) => {
   const { data } = await api.get("/api/frens/find", {
     // headers: await getXmtpApiHeaders(account),

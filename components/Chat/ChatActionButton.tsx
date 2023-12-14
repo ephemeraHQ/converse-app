@@ -10,12 +10,12 @@ import {
 import { messageBubbleColor, textSecondaryColor } from "../../utils/colors";
 import Picto from "../Picto/Picto";
 
-type Props = {
+type ChatActionProps = {
   picto: string;
   style?: StyleProp<ViewStyle>;
 };
 
-export default function ChatActionButton({ picto, style }: Props) {
+export default function ChatActionButton({ picto, style }: ChatActionProps) {
   const styles = useStyles();
   const colorScheme = useColorScheme();
   return (
