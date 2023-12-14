@@ -9,7 +9,7 @@ import {
 } from "../../utils/colors";
 import { getPreferredName, getPrimaryNames } from "../../utils/profile";
 import { shortAddress } from "../../utils/str";
-import { NavigationChatButton } from "../Chat/ChatActionButton";
+import { NavigationChatButton } from "../Search/NavigationChatButton";
 
 export function ProfileSearchItem({
   address,
