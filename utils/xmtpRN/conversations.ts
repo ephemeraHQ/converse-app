@@ -191,7 +191,7 @@ export const updateConsentStatus = async (client: ConverseXmtpClientType) => {
 };
 
 const saveConsentState = async (consentList: ConsentListEntry[]) => {
-  const peersStatus: Pick<SettingsStoreType, "peersStatus">["peersStatus"] = {};
+  const peersStatus: SettingsStoreType["peersStatus"] = {};
 
   consentList.forEach((entry) => {
     if (entry.entryType === "address") {
