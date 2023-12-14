@@ -1,11 +1,17 @@
 import { ConsentListEntry } from "@xmtp/react-native-sdk";
 
 import { getChatStore, getSettingsStore } from "../../data/store/accountsStore";
+import { getPeersStatus } from "../../utils/api";
 import { getXmtpClient } from "../../utils/xmtpRN/client";
 import { SettingsStoreType } from "../store/settingsStore";
 
 export const setConsent = async (account: string) => {
   console.log(`[Async Updates] Running 001-setConsent for account: ${account}`);
+
+  // Sync peers status from API
+  getPeersStatus(account).then((peersStatus) => {
+    getSettingsStore(account).getState().setPeersStatus(peersStatus);
+  });
 
   const client = await getXmtpClient(account);
   const consentList = await client.contacts.refreshConsentList();

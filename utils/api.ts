@@ -202,18 +202,6 @@ export const deleteTopics = async (account: string, topics: string[]) => {
   );
 };
 
-export const consentToTopics = async (account: string, topics: string[]) => {
-  const topicsStatus: { [key: string]: "consented" } = {};
-  for (const topic of topics) {
-    topicsStatus[topic] = "consented";
-  }
-  await api.post(
-    "/api/topics/status",
-    { topicsStatus },
-    { headers: await getXmtpApiHeaders(account) }
-  );
-};
-
 export const getTopicsStatus = async (account: string) => {
   const { data } = await api.get("/api/topics/status", {
     headers: await getXmtpApiHeaders(account),
