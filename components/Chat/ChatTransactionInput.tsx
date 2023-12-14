@@ -176,12 +176,13 @@ export default function ChatTransactionInput() {
           setTxStatus({ status: "success", canCancel: false });
           refreshBalanceForAccounts();
           await new Promise((r) => setTimeout(r, 2000));
-          sendMessage(
+          sendMessage({
             conversation,
-            `💸💸💸  just sent you $${evmHelpers
+            content: `💸💸💸  just sent you $${evmHelpers
               .fromDecimal(transactionValue.value, config.evm.USDC.decimals)
-              .toString()}`
-          );
+              .toString()}`,
+            contentType: "xmtp.org/text:1.0",
+          });
           setTransactionMode(false);
         } else {
           // This is failure

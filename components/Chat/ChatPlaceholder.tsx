@@ -118,7 +118,11 @@ export default function ChatPlaceholder({ messagesCount }: Props) {
               title="Say hi"
               style={styles.cta}
               onPress={() => {
-                sendMessage(conversation, "👋");
+                sendMessage({
+                  conversation,
+                  content: "👋",
+                  contentType: "xmtp.org/text:1.0",
+                });
               }}
             />
           </View>
