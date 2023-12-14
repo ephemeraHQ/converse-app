@@ -17,6 +17,7 @@ import ActivityIndicator from "../components/ActivityIndicator/ActivityIndicator
 import AndroidBackAction from "../components/AndroidBackAction";
 import SearchBar from "../components/NewConversation/SearchBar";
 import Recommendations from "../components/Recommendations/Recommendations";
+import ProfileSearch from "../components/Search/ProfileSearch";
 import TableView from "../components/TableView/TableView";
 import { TableViewPicto } from "../components/TableView/TableViewImage";
 import config from "../config";
@@ -28,6 +29,8 @@ import {
   useRecommendationsStore,
 } from "../data/store/accountsStore";
 import { XmtpConversation } from "../data/store/chatStore";
+import { ProfileSocials } from "../data/store/profilesStore";
+import { searchProfiles } from "../utils/api";
 import {
   backgroundColor,
   primaryColor,
@@ -43,7 +46,7 @@ import {
   getCleanAddress,
   isSupportedPeer,
 } from "../utils/eth";
-import { pick } from "../utils/objects";
+import { isEmptyObject, pick } from "../utils/objects";
 import { conversationName } from "../utils/str";
 import { isOnXmtp } from "../utils/xmtpRN/client";
 import { NavigationParamList } from "./Navigation/Navigation";
@@ -71,13 +74,13 @@ export default function NewConversation({
 
   const [value, setValue] = useState(route.params.peer || "");
   const searchingForValue = useRef("");
-
   const [status, setStatus] = useState({
     loading: false,
     error: "",
     address: "",
     inviteToConverse: "",
     existingConversations: [] as XmtpConversation[],
+    profileSearchResults: {} as { [address: string]: ProfileSocials },
   });
 
   const userAddress = useCurrentAccount() as string;
@@ -91,95 +94,150 @@ export default function NewConversation({
   const recommendationsLoadedOnce = recommendationsUpdatedAt > 0;
   const recommendationsFrensCount = Object.keys(frens).length;
 
+  const debounceDelay = 500;
+  const debounceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
   useEffect(() => {
-    const searchForValue = async () => {
-      setStatus(({ loading }) => ({
-        loading,
+    if (value.length < 3) {
+      // If the input is less than 3 characters, do nothing
+      setStatus({
+        loading: false,
         error: "",
         address: "",
         inviteToConverse: "",
         existingConversations: [],
-      }));
+        profileSearchResults: {},
+      });
+      return;
+    }
 
-      if (isSupportedPeer(value)) {
-        setStatus(({ error }) => ({
-          loading: true,
-          error,
-          address: "",
-          inviteToConverse: "",
-          existingConversations: [],
-        }));
-        searchingForValue.current = value;
-        const resolvedAddress = await getAddressForPeer(value);
-        if (searchingForValue.current === value) {
-          // If we're still searching for this one
-          if (!resolvedAddress) {
-            const isLens = value.endsWith(config.lensSuffix);
-            const isFarcaster = value.endsWith(".fc");
-            setStatus({
-              loading: false,
-              address: "",
-              existingConversations: [],
-              inviteToConverse: "",
-              error:
-                isLens || isFarcaster
-                  ? "This handle does not exist. Please try again."
-                  : "No address has been set for this domain.",
-            });
+    if (debounceTimer.current !== null) {
+      clearTimeout(debounceTimer.current);
+    }
 
-            return;
-          }
-          const address = getCleanAddress(resolvedAddress);
-          const addressIsOnXmtp = await isOnXmtp(address);
-          if (searchingForValue.current === value) {
-            if (addressIsOnXmtp) {
-              // Let's find existing conversations with this user
-              const conversations = Object.values(
-                useChatStore.getState().conversations
-              ).filter((conversation) => {
-                if (
-                  !conversation ||
-                  !conversation.peerAddress ||
-                  conversation.pending
-                ) {
-                  return false;
-                }
-                return (
-                  conversation.peerAddress?.toLowerCase() ===
-                  address?.toLowerCase()
-                );
-              });
-
-              setStatus({
-                loading: false,
-                error: "",
-                address,
-                inviteToConverse: "",
-                existingConversations: conversations,
-              });
-            } else {
-              setStatus({
-                loading: false,
-                error: `${value} does not use Converse or XMTP yet`,
-                address: "",
-                inviteToConverse: value,
-                existingConversations: [],
-              });
-            }
-          }
-        }
-      } else {
-        setStatus({
-          loading: false,
+    debounceTimer.current = setTimeout(async () => {
+      const searchForValue = async () => {
+        setStatus(({ loading }) => ({
+          loading,
           error: "",
           address: "",
           inviteToConverse: "",
           existingConversations: [],
-        });
-        searchingForValue.current = "";
+          profileSearchResults: {},
+        }));
+
+        if (isSupportedPeer(value)) {
+          setStatus(({ error }) => ({
+            loading: true,
+            error,
+            address: "",
+            inviteToConverse: "",
+            existingConversations: [],
+            profileSearchResults: {},
+          }));
+          searchingForValue.current = value;
+          const resolvedAddress = await getAddressForPeer(value);
+          if (searchingForValue.current === value) {
+            // If we're still searching for this one
+            if (!resolvedAddress) {
+              const isLens = value.endsWith(config.lensSuffix);
+              const isFarcaster = value.endsWith(".fc");
+              setStatus({
+                loading: false,
+                address: "",
+                existingConversations: [],
+                profileSearchResults: {},
+                inviteToConverse: "",
+                error:
+                  isLens || isFarcaster
+                    ? "This handle does not exist. Please try again."
+                    : "No address has been set for this domain.",
+              });
+
+              return;
+            }
+            const address = getCleanAddress(resolvedAddress);
+            const addressIsOnXmtp = await isOnXmtp(address);
+            if (searchingForValue.current === value) {
+              if (addressIsOnXmtp) {
+                // Let's find existing conversations with this user
+                const conversations = Object.values(
+                  useChatStore.getState().conversations
+                ).filter((conversation) => {
+                  if (
+                    !conversation ||
+                    !conversation.peerAddress ||
+                    conversation.pending
+                  ) {
+                    return false;
+                  }
+                  return (
+                    conversation.peerAddress?.toLowerCase() ===
+                    address?.toLowerCase()
+                  );
+                });
+
+                setStatus({
+                  loading: false,
+                  error: "",
+                  address,
+                  inviteToConverse: "",
+                  existingConversations: conversations,
+                  profileSearchResults: {},
+                });
+              } else {
+                setStatus({
+                  loading: false,
+                  error: `${value} does not use Converse or XMTP yet`,
+                  address: "",
+                  inviteToConverse: value,
+                  existingConversations: [],
+                  profileSearchResults: {},
+                });
+              }
+            }
+          }
+        } else {
+          setStatus({
+            loading: true,
+            error: "",
+            address: "",
+            inviteToConverse: "",
+            existingConversations: [],
+            profileSearchResults: {},
+          });
+
+          const profiles = await searchProfiles(value, currentAccount());
+
+          if (!isEmptyObject(profiles)) {
+            setStatus({
+              loading: false,
+              error: "",
+              address: "",
+              inviteToConverse: "",
+              existingConversations: [],
+              profileSearchResults: profiles,
+            });
+          } else {
+            setStatus({
+              loading: false,
+              error: "",
+              address: "",
+              inviteToConverse: "",
+              existingConversations: [],
+              profileSearchResults: {},
+            });
+          }
+        }
+      };
+      searchForValue();
+    }, debounceDelay);
+
+    return () => {
+      if (debounceTimer.current !== null) {
+        clearTimeout(debounceTimer.current);
       }
     };
-    searchForValue();
   }, [value]);
 
   const navigateToTopic = useCallback(
@@ -265,14 +323,26 @@ export default function NewConversation({
         inputPlaceholder={inputPlaceholder}
       />
 
-      <View
-        style={{
-          backgroundColor: backgroundColor(colorScheme),
-          height: showRecommendations ? undefined : 0,
-        }}
-      >
-        <Recommendations visibility="EMBEDDED" navigation={navigation} />
-      </View>
+      {!status.loading && !isEmptyObject(status.profileSearchResults) && (
+        <View>
+          <ProfileSearch
+            navigation={navigation}
+            profiles={status.profileSearchResults}
+          />
+        </View>
+      )}
+
+      {isEmptyObject(status.profileSearchResults) && (
+        <View
+          style={{
+            backgroundColor: backgroundColor(colorScheme),
+            height: showRecommendations ? undefined : 0,
+          }}
+        >
+          <Recommendations visibility="EMBEDDED" navigation={navigation} />
+        </View>
+      )}
+
       <ScrollView
         style={[styles.modal, { height: showRecommendations ? 0 : undefined }]}
         keyboardShouldPersistTaps="handled"
@@ -280,13 +350,16 @@ export default function NewConversation({
           inputRef.current?.blur();
         }}
       >
-        {!status.loading && !status.address && (
-          <View style={styles.messageContainer}>
-            {status.error && (
-              <Text style={[styles.message, styles.error]}>{status.error}</Text>
-            )}
-            {!status.error &&
-              (recommendationsFrensCount === 0 || value.length > 0) && (
+        {!status.loading &&
+          !status.address &&
+          isEmptyObject(status.profileSearchResults) && (
+            <View style={styles.messageContainer}>
+              {status.error && (
+                <Text style={[styles.message, styles.error]}>
+                  {status.error}
+                </Text>
+              )}
+              {!status.error && (
                 <Text style={styles.message}>
                   <Text>
                     Type the full address/domain of your contact (with
@@ -294,8 +367,8 @@ export default function NewConversation({
                   </Text>
                 </Text>
               )}
-          </View>
-        )}
+            </View>
+          )}
 
         {status.loading && (
           <ActivityIndicator style={styles.mainActivityIndicator} />
