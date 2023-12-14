@@ -13,6 +13,7 @@ import {
 } from "react-native";
 import { AvoidSoftInput } from "react-native-avoid-softinput";
 
+import config from "../../config";
 import { useOnboardingStore } from "../../data/store/onboardingStore";
 import {
   textInputStyle,
@@ -184,11 +185,13 @@ export default function SeedPhraseConnect() {
             terms and conditions.
           </Text>
         </Text>
-        {/* <Text style={styles.links}>
-          <Text style={styles.link} onPress={generateWallet}>
-            Try the app with an ephemeral wallet.
+        {config.env === "dev" && (
+          <Text style={styles.links}>
+            <Text style={styles.link} onPress={generateWallet}>
+              Try the app with an ephemeral wallet.
+            </Text>
           </Text>
-        </Text> */}
+        )}
       </View>
     </OnboardingComponent>
   );
