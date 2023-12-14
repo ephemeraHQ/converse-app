@@ -76,8 +76,10 @@ export default function ChatAttachmentBubble({ message }: Props) {
         currentAccount,
         message
       );
+      fetchingAttachment.current = false;
       saveAndDisplayRemoteAttachment(result);
     } catch (e) {
+      fetchingAttachment.current = false;
       sentryTrackError(e, { message });
       setAttachment((a) => ({ ...a, loading: false, error: true }));
     }
