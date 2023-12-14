@@ -10,11 +10,25 @@ export const setConsent = async (account: string) => {
 
   // Sync peers status from API
   const peersStatusFromAPI = await getPeersStatus(account);
+
+  console.log(
+    `>> peersStatusFromAPI for account ${account}: ${JSON.stringify(
+      peersStatusFromAPI
+    )}`
+  );
+
   getSettingsStore(account).getState().setPeersStatus(peersStatusFromAPI);
 
   const client = await getXmtpClient(account);
   const consentList = await client.contacts.refreshConsentList();
   const peersStatus = getSettingsStore(account).getState().peersStatus;
+
+  console.log(`>> consentList: ${JSON.stringify(consentList)}`);
+  console.log(
+    `>> peersStatus (zustand) for account ${account}: ${JSON.stringify(
+      peersStatus
+    )}`
+  );
 
   // Update Zustand store with peersStatus for auto-consented conversations
   const conversations = getChatStore(account).getState().conversations;
@@ -22,6 +36,9 @@ export const setConsent = async (account: string) => {
     {};
 
   for (const conversation of Object.values(conversations)) {
+    console.log(
+      `>> conversations loop for ${account}: ${JSON.stringify(conversation)}`
+    );
     if (
       conversation.hasOneMessageFromMe &&
       peersStatus[conversation.peerAddress] !== "blocked" &&
@@ -33,6 +50,11 @@ export const setConsent = async (account: string) => {
   if (Object.keys(peersToConsent).length > 0) {
     getSettingsStore(account).getState().setPeersStatus(peersToConsent);
   }
+
+  // @todo remove
+  console.log(
+    `>> peersToConsent for ${account}: ${JSON.stringify(peersToConsent)}`
+  );
 
   if (Object.keys(peersStatus).length > 0) {
     const allowedPeers: string[] = [];

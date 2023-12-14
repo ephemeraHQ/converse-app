@@ -19,8 +19,11 @@ export const updateSteps: Step[] = [
 
 const waitForAsyncUpdatesToFinish = async () => {
   if (!isRunning) return;
-  await new Promise((resolve) => setTimeout(resolve, 100));
+  await new Promise((resolve) => setTimeout(resolve, 200));
   await waitForAsyncUpdatesToFinish();
+
+  // @todo remove
+  console.log(">> passing in waitForAsyncUpdatesToFinish");
 };
 
 export const updateLastVersionOpen = () => {
@@ -46,14 +49,13 @@ export const runAsyncUpdates = async () => {
   const accountList = getAccountsList();
   console.log(`[Async Updates] accountList: ${accountList}`);
 
-  const updatePromises = accountList.map((account) => {
+  for (const account of accountList) {
     console.log(
       `[Async Updates] running async updates for account: ${account}`
     );
-    return runAsyncUpdatesForAccount(account);
-  });
+    await runAsyncUpdatesForAccount(account);
+  }
 
-  await Promise.all(updatePromises);
   isRunning = false;
 };
 
