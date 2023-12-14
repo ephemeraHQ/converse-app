@@ -1,5 +1,6 @@
 import Clipboard from "@react-native-clipboard/clipboard";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
+import { Image } from "expo-image";
 import * as Linking from "expo-linking";
 import { useEffect, useState } from "react";
 import {
@@ -99,6 +100,14 @@ export default function TopUp({
             ),
           },
         ]}
+      />
+      <Image
+        style={{ width: 305, height: 110, marginTop: 16 }}
+        source={
+          colorScheme === "dark"
+            ? require("../assets/baseUSDCOnly-dark.png")
+            : require("../assets/baseUSDCOnly-light.png")
+        }
       />
     </View>
   );
