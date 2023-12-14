@@ -9,9 +9,8 @@ export const setConsent = async (account: string) => {
   console.log(`[Async Updates] Running 001-setConsent for account: ${account}`);
 
   // Sync peers status from API
-  getPeersStatus(account).then((peersStatus) => {
-    getSettingsStore(account).getState().setPeersStatus(peersStatus);
-  });
+  const peersStatusFromAPI = await getPeersStatus(account);
+  getSettingsStore(account).getState().setPeersStatus(peersStatusFromAPI);
 
   const client = await getXmtpClient(account);
   const consentList = await client.contacts.refreshConsentList();
