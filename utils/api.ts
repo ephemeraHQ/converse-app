@@ -165,9 +165,13 @@ export const getProfilesForAddresses = async (
 };
 
 export const searchProfiles = async (
-  query: string
+  query: string,
+  account: string
 ): Promise<{ [address: string]: ProfileSocials }> => {
-  const { data } = await api.get("/api/profile/search", { params: { query } });
+  const { data } = await api.get("/api/profile/search", {
+    headers: await getXmtpApiHeaders(account),
+    params: { query },
+  });
   return data;
 };
 
