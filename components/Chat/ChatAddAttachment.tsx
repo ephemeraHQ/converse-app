@@ -11,6 +11,7 @@ import {
   StyleSheet,
   Platform,
 } from "react-native";
+import uuid from "react-native-uuid";
 
 import { useAccountsStore } from "../../data/store/accountsStore";
 import { useAppStore } from "../../data/store/appStore";
@@ -51,7 +52,6 @@ export default function ChatAddAttachment() {
     if (!conversation) return;
     const uploadAsset = async (asset: ImagePicker.ImagePickerAsset) => {
       uploading.current = true;
-
       const resizedImage = await compressAndResizeImage(asset.uri);
       const mimeType = mime.getType(resizedImage.uri);
       const encryptedAttachment = await encryptRemoteAttachment(
@@ -61,17 +61,22 @@ export default function ChatAddAttachment() {
       );
       try {
         const uploadedAttachment = await uploadRemoteAttachment(
+          currentAccount,
           encryptedAttachment
         );
         if (currentAttachmentMediaURI.current !== assetRef.current?.uri) return;
         setMediaPreview(null);
-        // TODO => save attachment locally so that we can display it immediatly
         // Send message
-        sendMessage(
+        sendMessage({
           conversation,
-          serializeRemoteAttachmentMessageContent(uploadedAttachment),
-          "xmtp.org/remoteStaticAttachment:1.0"
-        );
+          content: serializeRemoteAttachmentMessageContent(uploadedAttachment),
+          contentType: "xmtp.org/remoteStaticAttachment:1.0",
+          attachmentToSave: {
+            filePath: resizedImage.uri,
+            fileName: asset.uri.split("/").pop() || `${uuid.v4().toString()}`,
+            mimeType,
+          },
+        });
 
         uploading.current = false;
       } catch (error) {

@@ -261,4 +261,11 @@ export const claimUserName = async (
   return data;
 };
 
+export const getPresignedUriForUpload = async (userAddress: string) => {
+  const { data } = await api.get("/api/attachment/presigned", {
+    headers: await getXmtpApiHeaders(userAddress),
+  });
+  return data as { objectKey: string; url: string };
+};
+
 export default api;

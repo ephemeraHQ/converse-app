@@ -5,10 +5,11 @@ import {
 } from "@xmtp/react-native-sdk";
 import mime from "mime";
 import RNFS from "react-native-fs";
+import RNFetchBlob from "rn-fetch-blob";
 
+import { getPresignedUriForUpload } from "./api";
 import { moveFileAndReplace } from "./fileSystem";
 import { getImageSize, isImageMimetype } from "./media";
-import { uploadFileToWeb3Storage } from "./web3.storage";
 import { isContentType } from "./xmtpRN/contentTypes";
 
 export type SerializedAttachmentContent = {
@@ -158,15 +159,42 @@ export const getLocalAttachment = async (messageId: string) => {
 };
 
 export const uploadRemoteAttachment = async (
+  account: string,
   attachment: EncryptedLocalAttachment
 ): Promise<RemoteAttachmentContent> => {
-  const cid = await uploadFileToWeb3Storage(
-    attachment.encryptedLocalFileUri.replace("file:///", "/")
+  const { url } = await getPresignedUriForUpload(account);
+  await RNFetchBlob.fetch(
+    "PUT",
+    url,
+    {
+      "content-type": "application/octet-stream",
+      "x-amz-acl": "public-read",
+    },
+    RNFetchBlob.wrap(attachment.encryptedLocalFileUri.replace("file:///", "/"))
   );
-  const url = `https://${cid}.ipfs.w3s.link`;
+
+  const fileURL = new URL(url);
+  const publicURL = fileURL.origin + fileURL.pathname;
+
   return {
     scheme: "https://",
-    url,
+    url: publicURL,
     ...attachment.metadata,
   };
+};
+
+export const saveAttachmentForPendingMessage = async (
+  pendingMessageId: string,
+  filePath: string,
+  fileName: string,
+  mimeType: string | null
+) => {
+  const messageFolder = `${RNFS.DocumentDirectoryPath}/messages/${pendingMessageId}`;
+  // Create folder
+  await RNFS.mkdir(messageFolder, {
+    NSURLIsExcludedFromBackupKey: true,
+  });
+  const attachmentPath = `${messageFolder}/${fileName}`;
+  await moveFileAndReplace(filePath, attachmentPath);
+  await handleAttachment(pendingMessageId, fileName, mimeType || undefined);
 };

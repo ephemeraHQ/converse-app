@@ -24,7 +24,7 @@ export const getMessageReactions = (message: XmtpMessage) => {
           ...JSON.parse(c.content),
           senderAddress: c.senderAddress,
           sent: c.sent,
-        } as MessageReaction)
+        }) as MessageReaction
     );
     const sortedReactions = reactions.sort((a, b) => a.sent - b.sent);
 
@@ -98,20 +98,20 @@ export const addReactionToMessage = (
   emoji: string
 ) => {
   const isAttachment = isAttachmentMessage(message.contentType);
-  sendMessage(
+  sendMessage({
     conversation,
-    JSON.stringify({
+    content: JSON.stringify({
       reference: message.id,
       action: "added",
       content: emoji,
       schema: "unicode",
     }),
-    ContentTypeReaction.toString(),
-    `Reacted ${emoji} to ${
+    contentType: ContentTypeReaction.toString(),
+    contentFallback: `Reacted ${emoji} to ${
       isAttachment ? "an attachment" : `“${message.content}”`
     }`,
-    message.id
-  );
+    referencedMessageId: message.id,
+  });
 };
 
 export const removeReactionFromMessage = (
@@ -120,18 +120,18 @@ export const removeReactionFromMessage = (
   emoji: string
 ) => {
   const isAttachment = isAttachmentMessage(message.contentType);
-  sendMessage(
+  sendMessage({
     conversation,
-    JSON.stringify({
+    content: JSON.stringify({
       reference: message.id,
       action: "removed",
       content: emoji,
       schema: "unicode",
     }),
-    ContentTypeReaction.toString(),
-    `Removed the reaction to ${
+    contentType: ContentTypeReaction.toString(),
+    contentFallback: `Removed the reaction to ${
       isAttachment ? "an attachment" : `“${message.content}”`
     }`,
-    message.id
-  );
+    referencedMessageId: message.id,
+  });
 };
