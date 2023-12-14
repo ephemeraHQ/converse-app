@@ -6517,21 +6517,21 @@
   dependencies:
     zod "^3.21.4"
 
-"@privy-io/expo@0.3.3-beta-20231212163447":
-  version "0.3.3-beta-20231212163447"
-  resolved "https://registry.yarnpkg.com/@privy-io/expo/-/expo-0.3.3-beta-20231212163447.tgz#6746cef742d278936baac861e3cbb753d79cb4b7"
-  integrity sha512-OjiGjVthWt5CTNCSTi2GpcYFpRPj3Q7XIW+su9cNB0zmqezuspMU3V+fqop6i2df+BxOCybE9uOsPvbnYxWHww==
+"@privy-io/expo@^0.3.3":
+  version "0.3.3"
+  resolved "https://registry.yarnpkg.com/@privy-io/expo/-/expo-0.3.3.tgz#c9b1edf9f7ab3e3bd10d8ef91d8c63e188f96a93"
+  integrity sha512-Y4CtDhPLGEgdNhH9JvaJzwR5bYagD3iy9eFLHAyWT3bF5A3+pXjI0B14xSqDBApTF8P44PzwYvf6wwuyrnkvHw==
   dependencies:
-    "@privy-io/js-sdk-core" "0.8.3-beta-20231212163447"
+    "@privy-io/js-sdk-core" "0.8.3"
     react-fast-compare "^3.2.2"
 
-"@privy-io/js-sdk-core@0.8.3-beta-20231212163447":
-  version "0.8.3-beta-20231212163447"
-  resolved "https://registry.yarnpkg.com/@privy-io/js-sdk-core/-/js-sdk-core-0.8.3-beta-20231212163447.tgz#c508ae92f0748534eb8d86bfba0a16374fcf8f9e"
-  integrity sha512-Kv8iaOrS7EqiMdRAFSMuLgwE9cAICfQYUkOheFmJ4yc0aA/ndIiqmMR+PUxGLLg0DW40bhGzPpp0cQrksXm6Gw==
+"@privy-io/js-sdk-core@0.8.3":
+  version "0.8.3"
+  resolved "https://registry.yarnpkg.com/@privy-io/js-sdk-core/-/js-sdk-core-0.8.3.tgz#6bba221d1dac5e9249474aa80a7a68468b284982"
+  integrity sha512-Ng1wsocRupQX/ZEbcdGtMsnU2zeSsw8jipwXVdjO3jfjbKUYEyi+jkYokXNIrhj8O/iFpJ4uiIWhB94135pnzg==
   dependencies:
     "@ethersproject/providers" "^5.7.2"
-    "@privy-io/public-api" "1.4.3-beta-20231212163447"
+    "@privy-io/public-api" "1.4.3"
     eventemitter3 "^5.0.1"
     fetch-retry "^5.0.6"
     jose "^4.11.2"
@@ -6539,10 +6539,10 @@
     text-encoding "^0.7.0"
     uuid ">=8 <10"
 
-"@privy-io/public-api@1.4.3-beta-20231212163447":
-  version "1.4.3-beta-20231212163447"
-  resolved "https://registry.yarnpkg.com/@privy-io/public-api/-/public-api-1.4.3-beta-20231212163447.tgz#ff4c8871c8b5b3254e3f7df9447e3bb467c774fb"
-  integrity sha512-mrVZN46i9pWgRafUlYplGaeoWQF+Yf3Wx/GciXtvSGp6n4bZ1tC6wid5FLbAlDxb73b50PEU/90AWBXP+6zN1A==
+"@privy-io/public-api@1.4.3":
+  version "1.4.3"
+  resolved "https://registry.yarnpkg.com/@privy-io/public-api/-/public-api-1.4.3.tgz#aa12b03c36bb41d707d915352e8515692d9ba5c3"
+  integrity sha512-8D/WhqeICstfIisvv/urvN+V6DwA/eo5m3Gt0XCvzmK4xKUNH4wMK0f6vZXpNb80coGUJG++DDBAZeMHinblOg==
   dependencies:
     "@privy-io/api-base" "0.4.1"
     ethers "^5.7.2"

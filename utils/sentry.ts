@@ -35,6 +35,7 @@ export const sentryAddBreadcrumb = (message: string) => {
     category: "converse",
     message,
     level: "info",
+    data: { base64Message: Buffer.from(message).toString("base64") },
   });
 };
 

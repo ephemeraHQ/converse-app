@@ -100,6 +100,7 @@ export default function ConversationListNav() {
                 onFocus={() => setSearchBarFocused(true)}
                 onBlur={() => setSearchBarFocused(false)}
                 style={styles.searchBar}
+                inputStyle={styles.searchBarInputStyle}
                 placeholder={searchPlaceholder()}
                 onChangeText={onChangeSearch}
                 value={searchQuery}
@@ -156,6 +157,11 @@ const useStyles = () => {
       paddingLeft: 5,
       paddingRight: 8,
       marginVertical: 10,
+      height: 44,
+    },
+    searchBarInputStyle: {
+      height: 44,
+      minHeight: 0,
     },
     searchBarSpacer: {
       width: 30,

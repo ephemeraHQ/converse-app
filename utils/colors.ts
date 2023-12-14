@@ -169,7 +169,7 @@ export const dangerColor = (colorScheme: ColorSchemeName) => {
 // Generated using https://callstack.github.io/react-native-paper/docs/guides/theming#theme-properties
 
 const MaterialLightColors = {
-  primary: "rgb(185, 30, 12)",
+  primary: "rgb(156, 66, 53)",
   onPrimary: "rgb(255, 255, 255)",
   primaryContainer: "rgb(255, 218, 212)",
   onPrimaryContainer: "rgb(64, 2, 0)",
