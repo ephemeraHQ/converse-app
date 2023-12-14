@@ -209,7 +209,7 @@ export default function NewConversation({
             profileSearchResults: {},
           });
 
-          const profiles = await searchProfiles(value);
+          const profiles = await searchProfiles(value, currentAccount());
 
           if (!isEmptyObject(profiles)) {
             setStatus({
