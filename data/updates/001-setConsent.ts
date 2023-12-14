@@ -9,6 +9,7 @@ export const setConsent = async (account: string) => {
 
   const client = await getXmtpClient(account);
   const consentList = await client.contacts.refreshConsentList();
+  const peersStatus = getSettingsStore(account).getState().peersStatus;
 
   // Update Zustand store with peersStatus for auto-consented conversations
   const conversations = getChatStore(account).getState().conversations;
@@ -18,6 +19,7 @@ export const setConsent = async (account: string) => {
   for (const conversation of Object.values(conversations)) {
     if (
       conversation.hasOneMessageFromMe &&
+      peersStatus[conversation.peerAddress] !== "blocked" &&
       !isPeerInConsentList(conversation.peerAddress, consentList)
     ) {
       peersToConsent[conversation.peerAddress] = "consented";
@@ -26,8 +28,6 @@ export const setConsent = async (account: string) => {
   if (Object.keys(peersToConsent).length > 0) {
     getSettingsStore(account).getState().setPeersStatus(peersToConsent);
   }
-
-  const peersStatus = getSettingsStore(account).getState().peersStatus;
 
   if (Object.keys(peersStatus).length > 0) {
     const allowedPeers: string[] = [];
