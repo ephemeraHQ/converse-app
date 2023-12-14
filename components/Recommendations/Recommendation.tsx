@@ -16,7 +16,7 @@ import {
   textSecondaryColor,
 } from "../../utils/colors";
 import { shortAddress } from "../../utils/str";
-import { NavigationChatButton } from "../Chat/ChatActionButton";
+import { NavigationChatButton } from "../Search/NavigationChatButton";
 
 export function Recommendation({
   address,
