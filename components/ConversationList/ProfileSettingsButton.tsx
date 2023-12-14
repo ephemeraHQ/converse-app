@@ -8,12 +8,16 @@ import {
   useColorScheme,
 } from "react-native";
 
+import config from "../../config";
 import {
   currentAccount,
   useLoggedWithPrivy,
+  useWalletStore,
 } from "../../data/store/accountsStore";
 import { NavigationParamList } from "../../screens/Navigation/Navigation";
 import { textSecondaryColor } from "../../utils/colors";
+import { evmHelpers } from "../../utils/evm/helpers";
+import { pick } from "../../utils/objects";
 import Button from "../Button/Button";
 import Picto from "../Picto/Picto";
 
@@ -25,15 +29,28 @@ export default function ProfileSettingsButton() {
   >;
   const colorScheme = useColorScheme();
   const isPrivy = useLoggedWithPrivy();
+  const { USDCBalance } = useWalletStore((s) => pick(s, ["USDCBalance"]));
   if (isPrivy) {
+    const intBalance = parseInt(
+      evmHelpers.fromDecimal(USDCBalance, config.evm.USDC.decimals),
+      10
+    );
+    let stringBalance = "";
+    if (intBalance < 1000) {
+      stringBalance = `$${intBalance}`;
+    } else if (intBalance < 10000) {
+      stringBalance = `$${(Math.trunc(intBalance / 100) / 10).toFixed(1)}k`;
+    } else {
+      stringBalance = `$${Math.trunc(intBalance / 1000)}k`;
+    }
     return (
       <Button
         variant="text"
-        title="12"
+        title={stringBalance}
         onPress={() => {
           navigation.navigate("Profile", { address: currentAccount() });
         }}
-        style={{ marginTop: 4, marginRight: 10 }}
+        style={{ marginTop: 3.5, marginRight: 16 }}
       />
     );
   }

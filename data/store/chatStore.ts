@@ -10,6 +10,7 @@ import { lastValueInMap } from "../../utils/map";
 import { zustandMMKVStorage } from "../../utils/mmkv";
 import { subscribeToNotifications } from "../../utils/notifications";
 import { omit } from "../../utils/objects";
+import { refreshBalanceForAccount } from "../../utils/wallet";
 import { isContentType } from "../../utils/xmtpRN/contentTypes";
 import {
   markAllConversationsAsReadInDb,
@@ -265,6 +266,7 @@ export const initChatStore = (account: string) => {
             set((state) => {
               let isUpdated = false;
               let shouldResubscribe = false;
+              let shouldRefreshBalance = false;
               const newState = {
                 ...state,
               };
@@ -282,6 +284,14 @@ export const initChatStore = (account: string) => {
                     lastUpdateAt: now(),
                   } as XmtpConversationWithUpdate;
                   isUpdated = true;
+                }
+                // TODO => handle specific content types
+                if (
+                  isContentType("text", message.contentType) &&
+                  message.content &&
+                  message.content.includes("💸💸💸  just sent you $")
+                ) {
+                  shouldRefreshBalance = true;
                 }
 
                 const conversation = newState.conversations[topic];
@@ -383,6 +393,10 @@ export const initChatStore = (account: string) => {
                 setImmediate(() => {
                   subscribeToNotifications(account);
                 });
+              }
+
+              if (shouldRefreshBalance) {
+                refreshBalanceForAccount(account);
               }
 
               return newState;
