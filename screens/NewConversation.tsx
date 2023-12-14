@@ -359,7 +359,7 @@ export default function NewConversation({
                   {status.error}
                 </Text>
               )}
-              {!status.error && recommendationsFrensCount === 0 && (
+              {!status.error && (
                 <Text style={styles.message}>
                   <Text>
                     Type the full address/domain of your contact (with
