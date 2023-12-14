@@ -39,6 +39,7 @@ import {
 } from "../utils/conversation";
 import { converseEventEmitter } from "../utils/events";
 import { pick } from "../utils/objects";
+import { refreshBalanceForAccount } from "../utils/wallet";
 import { useHeaderSearchBar } from "./Navigation/ConversationListNav";
 import { NavigationParamList } from "./Navigation/Navigation";
 
@@ -56,29 +57,22 @@ type Props = {
 function ConversationList({ navigation, route, searchBarRef }: Props) {
   const styles = useStyles();
   const {
-    conversations,
-    lastUpdateAt,
     searchQuery,
     searchBarFocused,
-    topicsStatus,
     initialLoadDoneOnce,
     sortedConversationsWithPreview,
   } = useChatStore((s) =>
     pick(s, [
       "initialLoadDoneOnce",
-      "conversations",
-      "lastUpdateAt",
       "searchQuery",
       "searchBarFocused",
-      "topicsStatus",
       "sortedConversationsWithPreview",
     ])
   );
 
-  const { peersStatus, ephemeralAccount } = useSettingsStore((s) =>
+  const { ephemeralAccount } = useSettingsStore((s) =>
     pick(s, ["peersStatus", "ephemeralAccount"])
   );
-  const userAddress = useCurrentAccount() as string;
   const profiles = useProfilesStore((s) => s.profiles);
   const [flatListItems, setFlatListItems] = useState<FlatListItem[]>([]);
 
@@ -91,6 +85,8 @@ function ConversationList({ navigation, route, searchBarRef }: Props) {
     !searchQuery &&
     !searchBarFocused &&
     sortedConversationsWithPreview.conversationsInbox.length === 0;
+
+  const account = useCurrentAccount() as string;
 
   useEffect(() => {
     if (!initialLoadDoneOnce) {
@@ -118,6 +114,15 @@ function ConversationList({ navigation, route, searchBarRef }: Props) {
     route,
     searchBarRef,
   });
+
+  useEffect(() => {
+    const unsubscribe = navigation.addListener("focus", () => {
+      refreshBalanceForAccount(account);
+    });
+
+    // Return the function to unsubscribe from the event so it gets removed on unmount
+    return unsubscribe;
+  }, [navigation, account]);
 
   const ListHeaderComponents: React.ReactElement[] = [];
   const showSearchTitleHeader =

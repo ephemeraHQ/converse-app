@@ -39,7 +39,10 @@ import provider from "../../utils/evm/provider";
 import { sendMessage } from "../../utils/message";
 import { pick } from "../../utils/objects";
 import { sentryTrackError } from "../../utils/sentry";
-import { refreshBalanceForAccounts } from "../../utils/wallet";
+import {
+  refreshBalanceForAccount,
+  refreshBalanceForAccounts,
+} from "../../utils/wallet";
 import ActivityIndicator from "../ActivityIndicator/ActivityIndicator";
 import ChatActionButton from "./ChatActionButton";
 
@@ -72,6 +75,10 @@ export default function ChatTransactionInput() {
       setInputValue("");
     }
   }, [transactionMode]);
+
+  useEffect(() => {
+    refreshBalanceForAccount(currentAccount());
+  }, []);
 
   useEffect(() => {
     try {
@@ -220,6 +227,9 @@ export default function ChatTransactionInput() {
         config.evm.USDC.decimals
       )} USDC - `
     : "0.00 USDC - ";
+  const balancePreviewText = evmHelpers
+    .fromDecimal(USDCBalance, config.evm.USDC.decimals, 2)
+    .toString();
 
   return (
     <View style={styles.transactionInputContainer}>
@@ -287,11 +297,7 @@ export default function ChatTransactionInput() {
           <View style={styles.bottomMessage}>
             {!txStatus.status && transactionValue.overBalance && (
               <Text style={styles.bottomMessageText}>
-                🫤 your balance is ${" "}
-                {evmHelpers
-                  .fromDecimal(USDCBalance, config.evm.USDC.decimals)
-                  .toString()}{" "}
-                -{" "}
+                Balance: {balancePreviewText} USDC -{" "}
                 <Text style={styles.topUp} onPress={topUp}>
                   top up
                 </Text>
@@ -299,7 +305,7 @@ export default function ChatTransactionInput() {
             )}
             {!txStatus.status && !transactionValue.overBalance && (
               <Text style={styles.bottomMessageText}>
-                {amountPreviewText}No fee 😉
+                Balance: {balancePreviewText} USDC - No fee 😉
               </Text>
             )}
             {txStatus.status === "success" && (
