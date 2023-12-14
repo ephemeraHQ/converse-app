@@ -195,8 +195,6 @@ export default function NewConversation({
                   profileSearchResults: {},
                 });
               }
-            } else {
-              console.log("passing HERE");
             }
           }
         } else {
