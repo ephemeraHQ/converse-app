@@ -94,6 +94,8 @@ export const UsernameSelector = () => {
           enterKeyHint="done"
           returnKeyType="done"
           maxLength={30}
+          autoCorrect={false}
+          autoComplete="off"
         />
         <Text style={styles.p}>
           {errorMessage ||
