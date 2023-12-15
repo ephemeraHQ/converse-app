@@ -52,6 +52,8 @@ const DebugButton = forwardRef((props, ref) => {
             "privy-refresh_token",
             "privy-session",
             "privy-session_transfer_token",
+            "privy-token-old",
+            "privy-refresh_token-old",
           ];
           const values = await Promise.all(
             keys.map((k) => getSecureItemAsync(k))
