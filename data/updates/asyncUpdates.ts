@@ -21,9 +21,6 @@ const waitForAsyncUpdatesToFinish = async () => {
   if (!isRunning) return;
   await new Promise((resolve) => setTimeout(resolve, 200));
   await waitForAsyncUpdatesToFinish();
-
-  // @todo remove
-  console.log(">> passing in waitForAsyncUpdatesToFinish");
 };
 
 export const updateLastVersionOpen = () => {
@@ -47,12 +44,9 @@ export const runAsyncUpdates = async () => {
   isRunning = true;
 
   const accountList = getAccountsList();
-  console.log(`[Async Updates] accountList: ${accountList}`);
 
   for (const account of accountList) {
-    console.log(
-      `[Async Updates] running async updates for account: ${account}`
-    );
+    console.log(`[Async Updates] Account: ${account}`);
     await runAsyncUpdatesForAccount(account);
   }
 
