@@ -3,7 +3,7 @@ import { ConsentListEntry, ConversationContext } from "@xmtp/react-native-sdk";
 import { Conversation as DbConversation } from "../../data/db/entities/conversationEntity";
 import { getPendingConversationsToCreate } from "../../data/helpers/conversations/pendingConversations";
 import { saveConversations } from "../../data/helpers/conversations/upsertConversations";
-import { useSettingsStore } from "../../data/store/accountsStore";
+import { getSettingsStore } from "../../data/store/accountsStore";
 import { XmtpConversation } from "../../data/store/chatStore";
 import { SettingsStoreType } from "../../data/store/settingsStore";
 import { getCleanAddress } from "../eth";
@@ -184,7 +184,7 @@ export const loadConversations = async (
 export const updateConsentStatus = async (client: ConverseXmtpClientType) => {
   try {
     const consentList = await client.contacts.refreshConsentList();
-    await saveConsentState(consentList);
+    await saveConsentState(consentList, client.address);
     console.log(
       `>> consentList for ${client.address}: ${JSON.stringify(consentList)}`
     );
@@ -193,7 +193,10 @@ export const updateConsentStatus = async (client: ConverseXmtpClientType) => {
   }
 };
 
-const saveConsentState = async (consentList: ConsentListEntry[]) => {
+const saveConsentState = async (
+  consentList: ConsentListEntry[],
+  account: string
+) => {
   const peersStatus: SettingsStoreType["peersStatus"] = {};
 
   consentList.forEach((entry) => {
@@ -207,7 +210,7 @@ const saveConsentState = async (consentList: ConsentListEntry[]) => {
   });
 
   if (Object.keys(peersStatus).length > 0) {
-    useSettingsStore.getState().setPeersStatus(peersStatus);
+    getSettingsStore(account).getState().setPeersStatus(peersStatus);
   }
 };
 
