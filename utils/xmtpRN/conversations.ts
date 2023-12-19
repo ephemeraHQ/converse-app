@@ -185,9 +185,6 @@ export const updateConsentStatus = async (client: ConverseXmtpClientType) => {
   try {
     const consentList = await client.contacts.refreshConsentList();
     await saveConsentState(consentList, client.address);
-    console.log(
-      `>> consentList for ${client.address}: ${JSON.stringify(consentList)}`
-    );
   } catch (error) {
     console.error("Failed to update consent status:", error);
   }

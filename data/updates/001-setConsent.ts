@@ -1,7 +1,7 @@
 import { ConsentListEntry } from "@xmtp/react-native-sdk";
 
 import { getChatStore, getSettingsStore } from "../../data/store/accountsStore";
-import { getPeersStatus } from "../../utils/api";
+import { deletePeersFromDb, getPeersStatus } from "../../utils/api";
 import { getXmtpClient } from "../../utils/xmtpRN/client";
 import { SettingsStoreType } from "../store/settingsStore";
 
@@ -10,25 +10,11 @@ export const setConsent = async (account: string) => {
 
   // Sync peers status from API
   const peersStatusFromAPI = await getPeersStatus(account);
-
-  console.log(
-    `>> peersStatusFromAPI for account ${account}: ${JSON.stringify(
-      peersStatusFromAPI
-    )}`
-  );
-
   getSettingsStore(account).getState().setPeersStatus(peersStatusFromAPI);
 
   const client = await getXmtpClient(account);
   const consentList = await client.contacts.refreshConsentList();
   const peersStatus = getSettingsStore(account).getState().peersStatus;
-
-  console.log(`>> consentList: ${JSON.stringify(consentList)}`);
-  console.log(
-    `>> peersStatus (zustand) for account ${account}: ${JSON.stringify(
-      peersStatus
-    )}`
-  );
 
   // Update Zustand store with peersStatus for auto-consented conversations
   const conversations = getChatStore(account).getState().conversations;
@@ -36,9 +22,6 @@ export const setConsent = async (account: string) => {
     {};
 
   for (const conversation of Object.values(conversations)) {
-    console.log(
-      `>> conversations loop for ${account}: ${JSON.stringify(conversation)}`
-    );
     if (
       conversation.hasOneMessageFromMe &&
       peersStatus[conversation.peerAddress] !== "blocked" &&
@@ -51,16 +34,13 @@ export const setConsent = async (account: string) => {
     getSettingsStore(account).getState().setPeersStatus(peersToConsent);
   }
 
-  // @todo remove
-  console.log(
-    `>> peersToConsent for ${account}: ${JSON.stringify(peersToConsent)}`
-  );
+  const updatedPeersStatus = getSettingsStore(account).getState().peersStatus;
 
-  if (Object.keys(peersStatus).length > 0) {
+  if (Object.keys(updatedPeersStatus).length > 0) {
     const allowedPeers: string[] = [];
     const deniedPeers: string[] = [];
 
-    for (const [peerAddress, status] of Object.entries(peersStatus)) {
+    for (const [peerAddress, status] of Object.entries(updatedPeersStatus)) {
       if (status === "consented") {
         allowedPeers.push(peerAddress);
       } else if (status === "blocked") {
@@ -68,12 +48,19 @@ export const setConsent = async (account: string) => {
       }
     }
 
-    // Broadcast consent to protocol
-    allowedPeers.length > 0 && client.contacts.allow(allowedPeers);
-    deniedPeers.length > 0 && client.contacts.deny(deniedPeers);
-
-    // @todo: await for the return,
-    // and remove the associated peers from the UserStatus table
+    // Broadcast consent to protocol, then delete it from db
+    try {
+      if (allowedPeers.length > 0) {
+        await client.contacts.allow(allowedPeers);
+        deletePeersFromDb(account, allowedPeers);
+      }
+      if (deniedPeers.length > 0) {
+        await client.contacts.deny(deniedPeers);
+        deletePeersFromDb(account, deniedPeers);
+      }
+    } catch (error) {
+      console.error("Error updating consent: ", error);
+    }
   }
 };
 
