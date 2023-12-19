@@ -45,11 +45,11 @@ index da450a2..c4c7ed6 100644
  zipStorePath=wrapper/dists
  zipStoreBase=GRADLE_USER_HOME
 diff --git a/library/src/main/java/org/xmtp/android/library/ConversationV2.kt b/library/src/main/java/org/xmtp/android/library/ConversationV2.kt
-index 4ae5bf1..7c0d730 100644
+index 3f6e610..facff52 100644
 --- a/library/src/main/java/org/xmtp/android/library/ConversationV2.kt
 +++ b/library/src/main/java/org/xmtp/android/library/ConversationV2.kt
-@@ -94,13 +94,15 @@ data class ConversationV2(
- 
+@@ -126,13 +126,15 @@ data class ConversationV2(
+      */
      fun decrypt(envelope: Envelope): DecryptedMessage {
          val message = Message.parseFrom(envelope.message)
 -        return MessageV2Builder.buildDecrypt(
@@ -65,8 +65,8 @@ index 4ae5bf1..7c0d730 100644
      }
  
      fun streamMessages(): Flow<DecodedMessage> = flow {
-@@ -111,13 +113,15 @@ data class ConversationV2(
- 
+@@ -148,13 +150,15 @@ data class ConversationV2(
+      */
      fun decodeEnvelope(envelope: Envelope): DecodedMessage {
          val message = Message.parseFrom(envelope.message)
 -        return MessageV2Builder.buildDecode(
@@ -81,7 +81,7 @@ index 4ae5bf1..7c0d730 100644
 +        return decoded
      }
  
-     private fun decodeEnvelopeOrNull(envelope: Envelope): DecodedMessage? {
+     /**
 diff --git a/library/src/main/java/org/xmtp/android/library/DecodedMessage.kt b/library/src/main/java/org/xmtp/android/library/DecodedMessage.kt
 index eb80cd7..5fe75a0 100644
 --- a/library/src/main/java/org/xmtp/android/library/DecodedMessage.kt
