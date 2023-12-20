@@ -6517,18 +6517,18 @@
   dependencies:
     zod "^3.21.4"
 
-"@privy-io/expo@^0.3.3":
-  version "0.3.3"
-  resolved "https://registry.yarnpkg.com/@privy-io/expo/-/expo-0.3.3.tgz#c9b1edf9f7ab3e3bd10d8ef91d8c63e188f96a93"
-  integrity sha512-Y4CtDhPLGEgdNhH9JvaJzwR5bYagD3iy9eFLHAyWT3bF5A3+pXjI0B14xSqDBApTF8P44PzwYvf6wwuyrnkvHw==
+"@privy-io/expo@^0.3.4":
+  version "0.3.4"
+  resolved "https://registry.yarnpkg.com/@privy-io/expo/-/expo-0.3.4.tgz#4649074067792c10b24785d2711aad90693e8750"
+  integrity sha512-qsIcVcfIskBrjgWMBjmdAkM89Zu64MR5zDCFe8L9hK+3SHSW5z2BtNHeNRBiW6pXiz7gg5OW7pFB+17A6j4w+Q==
   dependencies:
-    "@privy-io/js-sdk-core" "0.8.3"
+    "@privy-io/js-sdk-core" "0.8.4"
     react-fast-compare "^3.2.2"
 
-"@privy-io/js-sdk-core@0.8.3":
-  version "0.8.3"
-  resolved "https://registry.yarnpkg.com/@privy-io/js-sdk-core/-/js-sdk-core-0.8.3.tgz#6bba221d1dac5e9249474aa80a7a68468b284982"
-  integrity sha512-Ng1wsocRupQX/ZEbcdGtMsnU2zeSsw8jipwXVdjO3jfjbKUYEyi+jkYokXNIrhj8O/iFpJ4uiIWhB94135pnzg==
+"@privy-io/js-sdk-core@0.8.4":
+  version "0.8.4"
+  resolved "https://registry.yarnpkg.com/@privy-io/js-sdk-core/-/js-sdk-core-0.8.4.tgz#f51159b7af09cae65db4d3b9dcc1f80169e2069f"
+  integrity sha512-l3/YZvfnYoaEwBsUhn980vap18XnpIeEIMskVesh9XA4ky9h3FJFlFOzj6Dqq3Bvht2mm7Sj1xX68/nRl+Nt+A==
   dependencies:
     "@ethersproject/providers" "^5.7.2"
     "@privy-io/public-api" "1.4.3"
