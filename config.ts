@@ -11,6 +11,7 @@ const defaultConfig = {
     "0x4496848684441C15A915fa9bF07D131155603253", // No12 first address
     "0x2376e9C7C604D1827bA9aCb1293Dc8b4DA2f0DB3", // 0xno12.eth
     "0xFA08a80e822F7FA002c4Ae81b7a6De7cE79499dB", // lourou.eth
+    "0xbAc42d62181A57b59afB9d3E9e607Ef73fa8CeD1", // cvandroid.converse.xyz
   ],
   conversationDomain: "converse.xyz",
   lensApiDomain: "api.lens.dev",
