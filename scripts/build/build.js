@@ -30,6 +30,16 @@ const build = async () => {
         { value: "production" },
       ],
     },
+    ...(isAdvanced
+      ? [
+          {
+            type: "select",
+            name: "internalProduction",
+            message: "Build an internal build even if production?",
+            choices: [{ value: "no" }, { value: "yes" }],
+          },
+        ]
+      : []),
     {
       type: "select",
       name: "local",
@@ -40,7 +50,7 @@ const build = async () => {
       ],
     },
   ];
-  const { platform, env, local } = await prompts(questions);
+  const { platform, env, local, internalProduction } = await prompts(questions);
   if (!platform || !env || !local) process.exit(1);
   if (env !== "development") {
     const clean = await isClean();
@@ -59,9 +69,14 @@ const build = async () => {
     }
   }
   const buildLocally = local === "local";
+  const buildInternalProduction =
+    env === "production" && internalProduction === "yes";
 
   const buildCommand = "eas";
-  const buildProfile = env === "production" ? `production-${platform}` : env;
+  const buildProfile =
+    env === "production"
+      ? `production-${platform}${buildInternalProduction ? "-internal" : ""}`
+      : env;
   const buildArgs = [
     "build",
     "--profile",
@@ -153,7 +168,7 @@ const build = async () => {
       "--output",
       `./builds/${platform}-${env}-${currentCommit}.${fileExtension}`
     );
-  } else if (env === "production") {
+  } else if (env === "production" && !buildInternalProduction) {
     buildArgs.push("--auto-submit");
   }
 
