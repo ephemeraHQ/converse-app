@@ -6,6 +6,7 @@ import {
   ReadReceiptCodec,
   RemoteAttachmentCodec,
   StaticAttachmentCodec,
+  TextCodec,
 } from "@xmtp/react-native-sdk";
 
 import { addLog } from "../../components/DebugButton";
@@ -33,6 +34,7 @@ export const getXmtpClientFromBase64Key = (base64Key: string) =>
   Client.createFromKeyBundle(base64Key, {
     env,
     codecs: [
+      new TextCodec(),
       new ReactionCodec(),
       new ReadReceiptCodec(),
       new RemoteAttachmentCodec(),
