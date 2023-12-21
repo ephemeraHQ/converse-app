@@ -15,6 +15,7 @@ const isPreview = env.EXPO_ENV === "preview";
 const isProduction = !isDev && !isPreview;
 
 export default ({ config }: ConfigContext): ExpoConfig => ({
+  ...config,
   name: isDev ? "Converse DEV" : isPreview ? "Converse PREVIEW" : "Converse",
   scheme: isDev ? "converse-dev" : isPreview ? "converse-preview" : "converse",
   slug: "converse",
