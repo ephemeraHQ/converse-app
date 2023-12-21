@@ -59,6 +59,7 @@ export default function ProfileSearch({
   return (
     <View style={styles.profileSearch}>
       <FlatList
+        keyboardShouldPersistTaps="handled"
         data={Object.keys(profiles)}
         keyExtractor={keyExtractor}
         renderItem={renderItem}
