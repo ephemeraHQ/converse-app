@@ -211,7 +211,12 @@ const build = async () => {
     throw e;
   }
 
-  if (env === "production" && buildLocally && buildSuccess) {
+  if (
+    env === "production" &&
+    buildLocally &&
+    buildSuccess &&
+    !buildInternalProduction
+  ) {
     const submitCommand = "eas";
     const submitArgs = [
       "submit",
