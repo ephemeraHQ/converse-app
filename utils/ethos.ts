@@ -1,4 +1,4 @@
-import { Signer } from "@xmtp/xmtp-js";
+import { Signer } from "ethers";
 import { Platform } from "react-native";
 
 export const getEthOSSigner = (): Signer | undefined => {
@@ -20,7 +20,7 @@ export const getEthOSSigner = (): Signer | undefined => {
         return signed;
       }
     },
-  };
+  } as Signer;
 };
 
 export const isEthOS = () => {
