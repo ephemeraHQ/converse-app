@@ -1,0 +1,159 @@
+diff --git a/node_modules/@privy-io/js-sdk-core/dist/index.js b/node_modules/@privy-io/js-sdk-core/dist/index.js
+index 4f8a918..3b90604 100644
+--- a/node_modules/@privy-io/js-sdk-core/dist/index.js
++++ b/node_modules/@privy-io/js-sdk-core/dist/index.js
+@@ -310,6 +310,7 @@ class $98111b9dfa4b03f7$export$2e2bcd8739ae039 {
+             console.warn("Error destroying session");
+         }
+         // Destroy the local auth state
++        this.#privyInternal.session.addLog("calling destroy from logout");
+         this.#privyInternal.session.destroyLocalState();
+         this.#privyInternal.callbacks?.setUser(null);
+     }
+@@ -485,6 +486,33 @@ const $0fb5af1793d0d7b1$export$714c92acd9d3100a = {
+     testnet: true
+ };
+ 
++const getReadableError = (e) => {
++    let readableError = e.message;
++    if (!readableError) {
++        try {
++            readableError = JSON.stringify(e);
++        } catch (e) {
++
++        }
++    }
++    return e;
++}
++
++const cyrb53 = (str, seed = 0) => {
++    let h1 = 0xdeadbeef ^ seed, h2 = 0x41c6ce57 ^ seed;
++    for(let i = 0, ch; i < str.length; i++) {
++        ch = str.charCodeAt(i);
++        h1 = Math.imul(h1 ^ ch, 2654435761);
++        h2 = Math.imul(h2 ^ ch, 1597334677);
++    }
++    h1  = Math.imul(h1 ^ (h1 >>> 16), 2246822507);
++    h1 ^= Math.imul(h2 ^ (h2 >>> 13), 3266489909);
++    h2  = Math.imul(h2 ^ (h2 >>> 16), 2246822507);
++    h2 ^= Math.imul(h1 ^ (h1 >>> 13), 3266489909);
++  
++    return 4294967296 * (2097151 & h2) + (h1 >>> 0);
++};
++
+ 
+ const $060f2147d602435c$export$e2253033e6e1df16 = {
+     id: 8453,
+@@ -1941,6 +1969,7 @@ class $4a5ceffc04a8e7b0$export$1fb4852a55678982 {
+             else return null;
+         } catch (error) {
+             console.error(error);
++            this.addLog(`calling destroy from getToken - ${getReadableError(error)}"`);
+             this.destroyLocalState();
+             return null;
+         }
+@@ -1951,6 +1980,7 @@ class $4a5ceffc04a8e7b0$export$1fb4852a55678982 {
+             return typeof refreshToken === "string" ? refreshToken : null;
+         } catch (error) {
+             console.error(error);
++            this.addLog(`calling destroy from getRefreshToken - ${getReadableError(error)}"`);
+             this.destroyLocalState();
+             return null;
+         }
+@@ -1961,6 +1991,7 @@ class $4a5ceffc04a8e7b0$export$1fb4852a55678982 {
+             return typeof forkedToken === "string" ? forkedToken : null;
+         } catch (error) {
+             console.error(error);
++            this.addLog(`calling destroy from getForkedToken - ${getReadableError(error)}"`);
+             this.destroyLocalState();
+             return null;
+         }
+@@ -2006,6 +2037,7 @@ class $4a5ceffc04a8e7b0$export$1fb4852a55678982 {
+         return token !== null && !token.isExpired($4a5ceffc04a8e7b0$var$DEFAULT_EXPIRATION_PADDING_IN_SECONDS);
+     }
+     destroyLocalState() {
++        this.addLog("in destroy local state");
+         this.storeToken(null);
+         this.storeRefreshToken(null);
+         this.clearForkedToken();
+@@ -2026,6 +2058,9 @@ class $4a5ceffc04a8e7b0$export$1fb4852a55678982 {
+             (0, ($parcel$interopDefault($bwzhE$jscookie))).remove($4a5ceffc04a8e7b0$var$TOKEN_COOKIE_KEY);
+         }
+     }
++    addLog(log) {
++        this.#storage.put("privy_core_log", log);
++    }
+     storeRefreshToken(refreshToken) {
+         if (typeof refreshToken === "string") {
+             this.#storage.put($4a5ceffc04a8e7b0$var$REFRESH_TOKEN_STORAGE_KEY, refreshToken);
+@@ -2208,19 +2243,27 @@ class $5945f4703f62befa$export$9e80c3751b841788 {
+    *
+    * Returns a promise that resolves to the response of the session refresh
+    */ async refreshSession() {
++        this.session.addLog("calling refreshSession");
+         const refreshToken = await this.session.getRefreshToken() ?? undefined;
+         // Use the refresh token as the cache key, if there is no stored token
+         // (i.e. the current app is using cookies) then we use a hardcoded cache key.
+         const key = refreshToken ?? "key";
++        const hashedKey = cyrb53(key);
+         const cached = this.#cache.get(key);
+-        if (cached) return await cached;
++        if (cached) {
++            this.session.addLog(`got back a cached promise for ${hashedKey}`);
++            return await cached;
++        }
+         const promise = this.#refreshSession(refreshToken);
++        this.session.addLog(`setting a cached promise for ${hashedKey}`);
+         this.#cache.set(key, promise);
+         try {
+             return await promise;
+         } catch (e) {
++            this.session.addLog(`refresh promise for ${hashedKey} failed with ${getReadableError(readableError)}`);
+             throw e;
+         } finally{
++            this.session.addLog(`deleting a cached promise for ${hashedKey}`);
+             this.#cache.delete(key);
+         }
+     }
+@@ -2229,6 +2272,9 @@ class $5945f4703f62befa$export$9e80c3751b841788 {
+    * the callstack while separating the actual refresh logic.
+    */ async #refreshSession(refreshToken) {
+         try {
++            const key = refreshToken ?? "key";
++            const hashedKey = cyrb53(key);
++            this.session.addLog(`calling #refreshSession for ${hashedKey}`);
+             const res = await this.fetch((0, $bwzhE$privyiopublicapi.refreshSession), {
+                 body: {
+                     refresh_token: refreshToken
+@@ -2241,19 +2287,30 @@ class $5945f4703f62befa$export$9e80c3751b841788 {
+             // user object but no tokens. On our clients we want to treat this as
+             // a logged out state so we throw this error and handle it similar to
+             // a network error.
+-            if (!res.token) throw new Error("missing_or_invalid_token");
++            if (!res.token) {
++                this.session.addLog(`raising missing_or_invalid_token manually for ${hashedKey}`);
++                throw new Error("missing_or_invalid_token");
++            }
++            if (!res.refresh_token) {
++                this.session.addLog(`got back an empty refresh token for ${hashedKey}`);
++            }
+             this.session.storeToken(res.token);
+             this.session.storeRefreshToken(res.refresh_token);
+             this.callbacks?.setUser(res.user);
+             return res;
+         } catch (error) {
++            const key = refreshToken ?? "key";
++            const hashedKey = cyrb53(key);
++            this.session.addLog(`got an error in #refreshSession for ${hashedKey}: ${error.code} ${error.message}`);
+             if ($5945f4703f62befa$var$isAuthError(error) && error.code === "missing_or_invalid_token") {
+                 // If session cannot be refreshed with current refreshToken, clear local auth state
+                 // otherwise this will result in a loop that is only escapable by clearing storage in userland
++                this.session.addLog(`calling destroy 1 for ${hashedKey}`);
+                 this.session.destroyLocalState();
+                 this.callbacks?.setUser(null);
+             } else if (error instanceof Error && error.message === "missing_or_invalid_token") {
+                 // Handle when this error is throw explicitly above
++                this.session.addLog(`calling destroy 2 for ${hashedKey}`);
+                 this.session.destroyLocalState();
+                 this.callbacks?.setUser(null);
+             }

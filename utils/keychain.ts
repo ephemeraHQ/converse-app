@@ -101,6 +101,9 @@ export const privySecureStorage: PrivyStorage = {
     if (["privy:token", "privy:refresh_token"].includes(key) && !val) {
       sentryTrackMessage("Logging out of privy, please check logs");
     }
+    if (key === "privy_core_log") {
+      addLog(`Privy log: ${val}`);
+    }
     return setSecureItemAsync(key.replaceAll(":", "-"), val);
   },
   del: async (key) => {
