@@ -8,6 +8,7 @@ import {
 import { addLog } from "../../components/DebugButton";
 import { saveMessages } from "../../data/helpers/messages";
 import { XmtpMessage } from "../../data/store/chatStore";
+import { sentryTrackError } from "../sentry";
 import { ConverseXmtpClientType, DecodedMessageWithCodecsType } from "./client";
 import { isContentType } from "./contentTypes";
 // import { CoinbaseMessagingPaymentContent } from "./contentTypes/coinbasePayment";
@@ -68,12 +69,32 @@ const protocolMessageToStateMessage = (
   };
 };
 
+const protocolMessagesToStateMessages = (
+  messages: DecodedMessageWithCodecsType[]
+) => {
+  // Try to decode messages, ignore messages that can't be decoded
+  // so we at least get back some messages from our logic if there
+  // is a messed up messsage
+  const xmtpMessages: XmtpMessage[] = [];
+  messages.forEach((message) => {
+    try {
+      xmtpMessages.push(protocolMessageToStateMessage(message));
+    } catch (e) {
+      sentryTrackError(e, {
+        error: "Could not decode message",
+        contentType: message.contentTypeId,
+      });
+    }
+  });
+  return xmtpMessages;
+};
+
 export const streamAllMessages = async (client: ConverseXmtpClientType) => {
   await stopStreamingAllMessage(client);
   console.log(`[XmtpRN] Streaming messages for ${client.address}`);
   client.conversations.streamAllMessages(async (message) => {
     console.log(`[XmtpRN] Received a message for ${client.address}`);
-    saveMessages(client.address, [protocolMessageToStateMessage(message)]);
+    saveMessages(client.address, protocolMessagesToStateMessages([message]));
   });
 };
 
@@ -148,7 +169,7 @@ export const loadConversationsMessages = async (
     messagesFetched += messagesBatch.length;
     saveMessages(
       client.address,
-      messagesBatch.map(protocolMessageToStateMessage)
+      protocolMessagesToStateMessages(messagesBatch)
     );
   }
   addLog(`Fetched ${messagesFetched} messages from network`);
