@@ -16,8 +16,10 @@ import { useOnboardingStore } from "../data/store/onboardingStore";
 import { useSelect } from "../data/store/storeHelpers";
 import { saveXmtpKey } from "../utils/keychain";
 import { waitForLogoutTasksDone } from "../utils/logout";
-import { getXmtpKeysFromSigner } from "../utils/xmtpJS/client";
-import { getXmtpClient } from "../utils/xmtpRN/client";
+import {
+  getXmtpBase64KeyFromSigner,
+  getXmtpClient,
+} from "../utils/xmtpRN/client";
 
 export default function Onboarding() {
   const {
@@ -81,8 +83,8 @@ export default function Onboarding() {
     initiatingClientFor.current = address;
 
     try {
-      const keysBuffer = await getXmtpKeysFromSigner(signer);
-      const base64Key = keysBuffer.toString("base64");
+      const base64Key = await getXmtpBase64KeyFromSigner(signer);
+
       await connectWithBase64Key(base64Key);
     } catch (e) {
       initiatingClientFor.current = undefined;
