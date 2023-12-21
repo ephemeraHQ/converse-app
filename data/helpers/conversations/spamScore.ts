@@ -27,7 +27,12 @@ export const saveSpamScores = async (
       parameters.push(topic);
       parameters.push(spamScore);
     });
-    query = `${query} end)`;
+    query = `${query} end)
+    WHERE "topic" IN (${batch.map(() => "?").join(",")})`;
+    // Re-add topics to parameters for where clause
+    batch.forEach((topic) => {
+      parameters.push(topic);
+    });
     await conversationRepository.query(query, parameters);
   }
 
