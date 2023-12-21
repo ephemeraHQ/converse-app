@@ -1,4 +1,4 @@
-import { Signer } from "@xmtp/xmtp-js";
+import { Signer } from "ethers";
 import { create } from "zustand";
 
 // A app-wide store to store the current onboarding

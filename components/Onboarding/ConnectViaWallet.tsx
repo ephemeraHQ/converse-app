@@ -16,8 +16,10 @@ import { useOnboardingStore } from "../../data/store/onboardingStore";
 import { useSelect } from "../../data/store/storeHelpers";
 import { textPrimaryColor, textSecondaryColor } from "../../utils/colors";
 import { shortAddress } from "../../utils/str";
-import { getXmtpKeysFromSigner } from "../../utils/xmtpJS/client";
-import { isOnXmtp } from "../../utils/xmtpRN/client";
+import {
+  getXmtpBase64KeyFromSigner,
+  isOnXmtp,
+} from "../../utils/xmtpRN/client";
 import OnboardingComponent from "./OnboardingComponent";
 
 export default function ConnectViaWallet({
@@ -161,14 +163,16 @@ export default function ConnectViaWallet({
     initiatingClientFor.current = address;
 
     try {
-      const keysBuffer = await getXmtpKeysFromSigner(
+      const base64Key = await getXmtpBase64KeyFromSigner(
         signer,
         async () => {
+          console.log("before create");
           // Before calling "create" signature
           setWaitingForSecondSignature(true);
           clickedSecondSignature.current = false;
         },
         async () => {
+          console.log("before enable");
           // Before calling "enable" signature
           const waitForClickSecondSignature = async () => {
             while (!clickedSecondSignature.current) {
@@ -183,7 +187,6 @@ export default function ConnectViaWallet({
           }
         }
       );
-      const base64Key = keysBuffer.toString("base64");
       await connectWithBase64Key(base64Key);
     } catch (e) {
       initiatingClientFor.current = undefined;
