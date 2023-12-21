@@ -38,6 +38,18 @@
         "cocoapods": "1.14.3"
       }
     },
+    "production-ios-internal": {
+      "distribution": "internal",
+      "channel": "production",
+      "autoIncrement": true,
+      "env": {
+        "EXPO_PLATFORM": "ios"
+      },
+      "node": "18.16.1",
+      "ios": {
+        "cocoapods": "1.14.3"
+      }
+    },
     "production-ios": {
       "channel": "production",
       "autoIncrement": true,
