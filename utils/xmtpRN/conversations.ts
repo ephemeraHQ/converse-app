@@ -221,9 +221,9 @@ export const consentToPeersOnProtocol = async (
     const client = await getXmtpClient(account);
 
     if (consent === "allow") {
-      client.contacts.allow(cleanPeers);
+      await client.contacts.allow(cleanPeers);
     } else if (consent === "deny") {
-      client.contacts.deny(cleanPeers);
+      await client.contacts.deny(cleanPeers);
     } else {
       throw new Error(`Invalid consent type: ${consent}`);
     }
