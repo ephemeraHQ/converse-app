@@ -25,7 +25,7 @@ export const setConsent = async (account: string) => {
   for (const conversation of Object.values(conversations)) {
     if (
       conversation.hasOneMessageFromMe &&
-      peersStatus[conversation.peerAddress] !== "blocked" &&
+      peersStatus[conversation.peerAddress.toLowerCase()] !== "blocked" &&
       !isPeerInConsentList(conversation.peerAddress, consentList)
     ) {
       peersToConsent[conversation.peerAddress] = "consented";
