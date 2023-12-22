@@ -1,5 +1,5 @@
 diff --git a/node_modules/@privy-io/js-sdk-core/dist/index.js b/node_modules/@privy-io/js-sdk-core/dist/index.js
-index 4f8a918..3b90604 100644
+index 139fde0..fc7d50c 100644
 --- a/node_modules/@privy-io/js-sdk-core/dist/index.js
 +++ b/node_modules/@privy-io/js-sdk-core/dist/index.js
 @@ -310,6 +310,7 @@ class $98111b9dfa4b03f7$export$2e2bcd8739ae039 {
@@ -10,9 +10,9 @@ index 4f8a918..3b90604 100644
          this.#privyInternal.session.destroyLocalState();
          this.#privyInternal.callbacks?.setUser(null);
      }
-@@ -485,6 +486,33 @@ const $0fb5af1793d0d7b1$export$714c92acd9d3100a = {
-     testnet: true
+@@ -417,6 +418,35 @@ const $766d1441a6fe8323$export$857f1b5f596fb425 = {
  };
+ 
  
 +const getReadableError = (e) => {
 +    let readableError = e.message;
@@ -28,7 +28,7 @@ index 4f8a918..3b90604 100644
 +
 +const cyrb53 = (str, seed = 0) => {
 +    let h1 = 0xdeadbeef ^ seed, h2 = 0x41c6ce57 ^ seed;
-+    for(let i = 0, ch; i < str.length; i++) {
++    for(let i = 0, ch; i < str.length; i) {
 +        ch = str.charCodeAt(i);
 +        h1 = Math.imul(h1 ^ ch, 2654435761);
 +        h2 = Math.imul(h2 ^ ch, 1597334677);
@@ -38,13 +38,15 @@ index 4f8a918..3b90604 100644
 +    h2  = Math.imul(h2 ^ (h2 >>> 16), 2246822507);
 +    h2 ^= Math.imul(h1 ^ (h1 >>> 13), 3266489909);
 +  
-+    return 4294967296 * (2097151 & h2) + (h1 >>> 0);
++    return 4294967296 * (2097151 & h2)  (h1 >>> 0);
 +};
 +
- 
- const $060f2147d602435c$export$e2253033e6e1df16 = {
-     id: 8453,
-@@ -1941,6 +1969,7 @@ class $4a5ceffc04a8e7b0$export$1fb4852a55678982 {
++
++
+ const $e87e50afa870660d$export$ca1d15c01fde7266 = {
+     id: 43114,
+     name: "Avalanche",
+@@ -1944,6 +1974,7 @@ class $4a5ceffc04a8e7b0$export$1fb4852a55678982 {
              else return null;
          } catch (error) {
              console.error(error);
@@ -52,41 +54,41 @@ index 4f8a918..3b90604 100644
              this.destroyLocalState();
              return null;
          }
-@@ -1951,6 +1980,7 @@ class $4a5ceffc04a8e7b0$export$1fb4852a55678982 {
+@@ -1954,6 +1985,7 @@ class $4a5ceffc04a8e7b0$export$1fb4852a55678982 {
              return typeof refreshToken === "string" ? refreshToken : null;
          } catch (error) {
              console.error(error);
-+            this.addLog(`calling destroy from getRefreshToken - ${getReadableError(error)}"`);
++            this.addLog(`calling destroy from getToken - ${getReadableError(error)}"`);
              this.destroyLocalState();
              return null;
          }
-@@ -1961,6 +1991,7 @@ class $4a5ceffc04a8e7b0$export$1fb4852a55678982 {
+@@ -1964,6 +1996,7 @@ class $4a5ceffc04a8e7b0$export$1fb4852a55678982 {
              return typeof forkedToken === "string" ? forkedToken : null;
          } catch (error) {
              console.error(error);
-+            this.addLog(`calling destroy from getForkedToken - ${getReadableError(error)}"`);
++            this.addLog(`calling destroy from getToken - ${getReadableError(error)}"`);
              this.destroyLocalState();
              return null;
          }
-@@ -2006,6 +2037,7 @@ class $4a5ceffc04a8e7b0$export$1fb4852a55678982 {
+@@ -2009,6 +2042,7 @@ class $4a5ceffc04a8e7b0$export$1fb4852a55678982 {
          return token !== null && !token.isExpired($4a5ceffc04a8e7b0$var$DEFAULT_EXPIRATION_PADDING_IN_SECONDS);
      }
-     destroyLocalState() {
+     async destroyLocalState() {
 +        this.addLog("in destroy local state");
-         this.storeToken(null);
-         this.storeRefreshToken(null);
-         this.clearForkedToken();
-@@ -2026,6 +2058,9 @@ class $4a5ceffc04a8e7b0$export$1fb4852a55678982 {
+         await Promise.all([
+             this.storeToken(null),
+             this.storeRefreshToken(null),
+@@ -2031,6 +2065,9 @@ class $4a5ceffc04a8e7b0$export$1fb4852a55678982 {
              (0, ($parcel$interopDefault($bwzhE$jscookie))).remove($4a5ceffc04a8e7b0$var$TOKEN_COOKIE_KEY);
          }
      }
 +    addLog(log) {
 +        this.#storage.put("privy_core_log", log);
 +    }
-     storeRefreshToken(refreshToken) {
+     async storeRefreshToken(refreshToken) {
          if (typeof refreshToken === "string") {
-             this.#storage.put($4a5ceffc04a8e7b0$var$REFRESH_TOKEN_STORAGE_KEY, refreshToken);
-@@ -2208,19 +2243,27 @@ class $5945f4703f62befa$export$9e80c3751b841788 {
+             await this.#storage.put($4a5ceffc04a8e7b0$var$REFRESH_TOKEN_STORAGE_KEY, refreshToken);
+@@ -2240,19 +2277,27 @@ class $5945f4703f62befa$export$9e80c3751b841788 {
     *
     * Returns a promise that resolves to the response of the session refresh
     */ async refreshSession() {
@@ -115,7 +117,7 @@ index 4f8a918..3b90604 100644
              this.#cache.delete(key);
          }
      }
-@@ -2229,6 +2272,9 @@ class $5945f4703f62befa$export$9e80c3751b841788 {
+@@ -2261,6 +2306,9 @@ class $5945f4703f62befa$export$9e80c3751b841788 {
     * the callstack while separating the actual refresh logic.
     */ async #refreshSession(refreshToken) {
          try {
@@ -125,7 +127,7 @@ index 4f8a918..3b90604 100644
              const res = await this.fetch((0, $bwzhE$privyiopublicapi.refreshSession), {
                  body: {
                      refresh_token: refreshToken
-@@ -2241,19 +2287,30 @@ class $5945f4703f62befa$export$9e80c3751b841788 {
+@@ -2273,19 +2321,30 @@ class $5945f4703f62befa$export$9e80c3751b841788 {
              // user object but no tokens. On our clients we want to treat this as
              // a logged out state so we throw this error and handle it similar to
              // a network error.

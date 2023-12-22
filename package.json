@@ -29,7 +29,7 @@
     "@material-symbols/svg-400": "^0.5.0",
     "@noble/secp256k1": "^1.5.2",
     "@peculiar/webcrypto": "^1.4.1",
-    "@privy-io/expo": "^0.3.4",
+    "@privy-io/expo": "^0.3.6",
     "@react-native-async-storage/async-storage": "1.18.2",
     "@react-native-clipboard/clipboard": "^1.12.1",
     "@react-native-community/netinfo": "9.3.10",
