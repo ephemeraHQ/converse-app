@@ -50,20 +50,13 @@ export const setConsent = async (account: string) => {
     }
 
     // Broadcast consent to protocol, then delete it from db
-    try {
-      if (allowedPeers.length > 0) {
-        await client.contacts.allow(allowedPeers);
-        deletePeersFromDb(account, allowedPeers);
-      }
-      if (deniedPeers.length > 0) {
-        await client.contacts.deny(deniedPeers);
-        deletePeersFromDb(account, deniedPeers);
-      }
-    } catch (error) {
-      console.error("Error updating consent: ", error);
-      // Propagate error to asyncUpdate and allow for a re-run later
-      throw error;
+    if (allowedPeers.length > 0) {
+      await client.contacts.allow(allowedPeers);
     }
+    if (deniedPeers.length > 0) {
+      await client.contacts.deny(deniedPeers);
+    }
+    await deletePeersFromDb(account);
   }
 };
 
