@@ -2,6 +2,7 @@ import { ConsentListEntry } from "@xmtp/react-native-sdk";
 
 import { getChatStore, getSettingsStore } from "../../data/store/accountsStore";
 import { deletePeersFromDb, getPeersStatus } from "../../utils/api";
+import { getCleanAddress } from "../../utils/eth";
 import { getXmtpClient } from "../../utils/xmtpRN/client";
 import { consentToPeersOnProtocol } from "../../utils/xmtpRN/conversations";
 import { SettingsStoreType } from "../store/settingsStore";
@@ -43,9 +44,9 @@ export const setConsent = async (account: string) => {
 
     for (const [peerAddress, status] of Object.entries(updatedPeersStatus)) {
       if (status === "consented") {
-        allowedPeers.push(peerAddress);
+        allowedPeers.push(getCleanAddress(peerAddress));
       } else if (status === "blocked") {
-        deniedPeers.push(peerAddress);
+        deniedPeers.push(getCleanAddress(peerAddress));
       }
     }
 
@@ -61,6 +62,8 @@ export const setConsent = async (account: string) => {
       }
     } catch (error) {
       console.error("Error updating consent: ", error);
+      // Propagate error to asyncUpdate and allow for a re-run later
+      throw error;
     }
   }
 };
