@@ -4,7 +4,6 @@ import { getChatStore, getSettingsStore } from "../../data/store/accountsStore";
 import { deletePeersFromDb, getPeersStatus } from "../../utils/api";
 import { getCleanAddress } from "../../utils/eth";
 import { getXmtpClient } from "../../utils/xmtpRN/client";
-import { consentToPeersOnProtocol } from "../../utils/xmtpRN/conversations";
 import { SettingsStoreType } from "../store/settingsStore";
 
 export const setConsent = async (account: string) => {
@@ -53,11 +52,11 @@ export const setConsent = async (account: string) => {
     // Broadcast consent to protocol, then delete it from db
     try {
       if (allowedPeers.length > 0) {
-        await consentToPeersOnProtocol(account, allowedPeers, "allow");
+        await client.contacts.allow(allowedPeers);
         deletePeersFromDb(account, allowedPeers);
       }
       if (deniedPeers.length > 0) {
-        await consentToPeersOnProtocol(account, deniedPeers, "deny");
+        await client.contacts.deny(deniedPeers);
         deletePeersFromDb(account, deniedPeers);
       }
     } catch (error) {
