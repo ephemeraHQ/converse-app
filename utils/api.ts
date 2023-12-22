@@ -94,10 +94,7 @@ export const getPeersStatus = async (account: string) => {
   return data as { [peerAddress: string]: "blocked" | "consented" };
 };
 
-export const deletePeersFromDb = async (
-  account: string,
-  peers: string[]
-): Promise<void> => {
+export const deletePeersFromDb = async (account: string): Promise<void> => {
   const { data } = await api.delete("/api/consent", {
     headers: await getXmtpApiHeaders(account),
   });
