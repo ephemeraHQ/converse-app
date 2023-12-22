@@ -98,15 +98,9 @@ export const deletePeersFromDb = async (
   account: string,
   peers: string[]
 ): Promise<void> => {
-  const { data } = await api.post(
-    "/api/consent/delete",
-    { peers },
-    {
-      headers: await getXmtpApiHeaders(account),
-    }
-  );
-  console.log("data:", data);
-  console.log("data.message:", data.message);
+  const { data } = await api.delete("/api/consent", {
+    headers: await getXmtpApiHeaders(account),
+  });
   return data.message;
 };
 

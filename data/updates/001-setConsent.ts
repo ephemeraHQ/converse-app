@@ -3,6 +3,7 @@ import { ConsentListEntry } from "@xmtp/react-native-sdk";
 import { getChatStore, getSettingsStore } from "../../data/store/accountsStore";
 import { deletePeersFromDb, getPeersStatus } from "../../utils/api";
 import { getXmtpClient } from "../../utils/xmtpRN/client";
+import { consentToPeersOnProtocol } from "../../utils/xmtpRN/conversations";
 import { SettingsStoreType } from "../store/settingsStore";
 
 export const setConsent = async (account: string) => {
@@ -51,11 +52,11 @@ export const setConsent = async (account: string) => {
     // Broadcast consent to protocol, then delete it from db
     try {
       if (allowedPeers.length > 0) {
-        await client.contacts.allow(allowedPeers);
+        await consentToPeersOnProtocol(account, allowedPeers, "allow");
         deletePeersFromDb(account, allowedPeers);
       }
       if (deniedPeers.length > 0) {
-        await client.contacts.deny(deniedPeers);
+        await consentToPeersOnProtocol(account, deniedPeers, "deny");
         deletePeersFromDb(account, deniedPeers);
       }
     } catch (error) {
