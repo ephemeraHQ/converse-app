@@ -1,5 +1,5 @@
 diff --git a/node_modules/@privy-io/js-sdk-core/dist/index.js b/node_modules/@privy-io/js-sdk-core/dist/index.js
-index 139fde0..48240c3 100644
+index 139fde0..f8cdde4 100644
 --- a/node_modules/@privy-io/js-sdk-core/dist/index.js
 +++ b/node_modules/@privy-io/js-sdk-core/dist/index.js
 @@ -310,6 +310,7 @@ class $98111b9dfa4b03f7$export$2e2bcd8739ae039 {
@@ -46,7 +46,7 @@ index 139fde0..48240c3 100644
  const $e87e50afa870660d$export$ca1d15c01fde7266 = {
      id: 43114,
      name: "Avalanche",
-@@ -1944,16 +1974,21 @@ class $4a5ceffc04a8e7b0$export$1fb4852a55678982 {
+@@ -1944,6 +1974,7 @@ class $4a5ceffc04a8e7b0$export$1fb4852a55678982 {
              else return null;
          } catch (error) {
              console.error(error);
@@ -54,29 +54,23 @@ index 139fde0..48240c3 100644
              this.destroyLocalState();
              return null;
          }
-     }
-     async getRefreshToken() {
-         try {
-+            console.log(0, this.#storage, this.#storage.get);
-             const refreshToken = await this.#storage.get($4a5ceffc04a8e7b0$var$REFRESH_TOKEN_STORAGE_KEY);
-+            console.log(1);
+@@ -1954,6 +1985,7 @@ class $4a5ceffc04a8e7b0$export$1fb4852a55678982 {
              return typeof refreshToken === "string" ? refreshToken : null;
          } catch (error) {
-+            console.log(2);
              console.error(error);
-+            this.addLog(`calling destroy from getToken - ${getReadableError(error)}"`);
++            this.addLog(`calling destroy from getRefreshToken - ${getReadableError(error)}"`);
              this.destroyLocalState();
              return null;
          }
-@@ -1964,6 +1999,7 @@ class $4a5ceffc04a8e7b0$export$1fb4852a55678982 {
+@@ -1964,6 +1996,7 @@ class $4a5ceffc04a8e7b0$export$1fb4852a55678982 {
              return typeof forkedToken === "string" ? forkedToken : null;
          } catch (error) {
              console.error(error);
-+            this.addLog(`calling destroy from getToken - ${getReadableError(error)}"`);
++            this.addLog(`calling destroy from getForkedToken - ${getReadableError(error)}"`);
              this.destroyLocalState();
              return null;
          }
-@@ -2009,6 +2045,7 @@ class $4a5ceffc04a8e7b0$export$1fb4852a55678982 {
+@@ -2009,6 +2042,7 @@ class $4a5ceffc04a8e7b0$export$1fb4852a55678982 {
          return token !== null && !token.isExpired($4a5ceffc04a8e7b0$var$DEFAULT_EXPIRATION_PADDING_IN_SECONDS);
      }
      async destroyLocalState() {
@@ -84,7 +78,7 @@ index 139fde0..48240c3 100644
          await Promise.all([
              this.storeToken(null),
              this.storeRefreshToken(null),
-@@ -2031,6 +2068,9 @@ class $4a5ceffc04a8e7b0$export$1fb4852a55678982 {
+@@ -2031,6 +2065,9 @@ class $4a5ceffc04a8e7b0$export$1fb4852a55678982 {
              (0, ($parcel$interopDefault($bwzhE$jscookie))).remove($4a5ceffc04a8e7b0$var$TOKEN_COOKIE_KEY);
          }
      }
@@ -94,7 +88,7 @@ index 139fde0..48240c3 100644
      async storeRefreshToken(refreshToken) {
          if (typeof refreshToken === "string") {
              await this.#storage.put($4a5ceffc04a8e7b0$var$REFRESH_TOKEN_STORAGE_KEY, refreshToken);
-@@ -2240,19 +2280,27 @@ class $5945f4703f62befa$export$9e80c3751b841788 {
+@@ -2240,19 +2277,27 @@ class $5945f4703f62befa$export$9e80c3751b841788 {
     *
     * Returns a promise that resolves to the response of the session refresh
     */ async refreshSession() {
@@ -123,7 +117,7 @@ index 139fde0..48240c3 100644
              this.#cache.delete(key);
          }
      }
-@@ -2261,6 +2309,9 @@ class $5945f4703f62befa$export$9e80c3751b841788 {
+@@ -2261,6 +2306,9 @@ class $5945f4703f62befa$export$9e80c3751b841788 {
     * the callstack while separating the actual refresh logic.
     */ async #refreshSession(refreshToken) {
          try {
@@ -133,7 +127,7 @@ index 139fde0..48240c3 100644
              const res = await this.fetch((0, $bwzhE$privyiopublicapi.refreshSession), {
                  body: {
                      refresh_token: refreshToken
-@@ -2273,19 +2324,30 @@ class $5945f4703f62befa$export$9e80c3751b841788 {
+@@ -2273,19 +2321,30 @@ class $5945f4703f62befa$export$9e80c3751b841788 {
              // user object but no tokens. On our clients we want to treat this as
              // a logged out state so we throw this error and handle it similar to
              // a network error.
