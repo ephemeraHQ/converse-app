@@ -1,3 +1,5 @@
+// TODO import { ContentTypeTransactionReference } from "@xmtp/content-type-transaction-reference";
+
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { Signer } from "ethers";
@@ -39,6 +41,7 @@ import {
   refreshBalanceForAccount,
   refreshBalanceForAccounts,
 } from "../../utils/wallet";
+import { ContentTypeTransactionReference } from "../../utils/xmtpRN/contentTypes/transactionReference";
 import ActivityIndicator from "../ActivityIndicator/ActivityIndicator";
 import ChatActionButton from "./ChatActionButton";
 
@@ -181,10 +184,21 @@ export default function ChatTransactionInput() {
           await new Promise((r) => setTimeout(r, 2000));
           sendMessage({
             conversation,
-            content: `💸💸💸  just sent you $${evmHelpers
-              .fromDecimal(transactionValue.value, config.evm.USDC.decimals)
-              .toString()}`,
-            contentType: "xmtp.org/text:1.0",
+            content: JSON.stringify({
+              namespace: "eip155",
+              networkId: config.evm.transactionChainId,
+              reference: txHash,
+              metadata: {
+                transactionType: "transfer",
+                currency: "USDC",
+                amount: transactionValue.value,
+                decimals: config.evm.USDC.decimals,
+                fromAddress: currentAccount(),
+                toAddress: conversation.peerAddress,
+              },
+            }),
+            contentType: ContentTypeTransactionReference.toString(),
+            contentFallback: `[Crypto transaction] Use a blockchain explorer to learn more using the transaction hash: ${txHash}`,
           });
           setTransactionMode(false);
         } else {
