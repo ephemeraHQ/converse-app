@@ -26,7 +26,7 @@ type TransactionsStoreType = {
   updateTransaction: (id: string, updates: Partial<Transaction>) => void;
 };
 
-export const initTransactionsStore = () => {
+export const initTransactionsStore = (account: string) => {
   const transactionsStore = create<TransactionsStoreType>()(
     persist(
       (set) => ({
@@ -49,7 +49,7 @@ export const initTransactionsStore = () => {
           })),
       }),
       {
-        name: `store-${account}-transactions`, // Account-based storage so each account can have its own settings
+        name: `store-${account}-transactions`, // Account-based storage so each account can have its own transactions
         storage: createJSONStorage(() => zustandMMKVStorage),
         version: 1,
       }
