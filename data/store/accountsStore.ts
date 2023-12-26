@@ -12,6 +12,10 @@ import {
   RecommendationsStoreType,
 } from "./recommendationsStore";
 import { initSettingsStore, SettingsStoreType } from "./settingsStore";
+import {
+  initTransactionsStore,
+  TransactionsStoreType,
+} from "./transactionsStore";
 import { initWalletStore, WalletStoreType } from "./walletStore";
 
 type AccountStoreType = {
@@ -36,6 +40,7 @@ export const initStores = (account: string) => {
       recommendations: initRecommendationsStore(account),
       chat: initChatStore(account),
       wallet: initWalletStore(account),
+      transactions: initTransactionsStore(account),
     };
   }
 };
@@ -47,6 +52,7 @@ const deleteStores = (account: string) => {
   mmkv.delete(`store-${account}-recommendations`);
   mmkv.delete(`store-${account}-settings`);
   mmkv.delete(`store-${account}-wallet`);
+  mmkv.delete(`store-${account}-transactions`);
 };
 
 export const TEMPORARY_ACCOUNT_NAME = "TEMPORARY_ACCOUNT";
@@ -179,6 +185,7 @@ type AccountStoreDataType = {
   recommendations: RecommendationsStoreType;
   chat: ChatStoreType;
   wallet: WalletStoreType;
+  transactions: TransactionsStoreType;
 };
 
 const getAccountStore = (account: string) => {
@@ -289,3 +296,9 @@ export const useWalletStoreForAccount = (account: string) =>
   accountStoreHook("wallet", account);
 export const getWalletStore = (account: string) =>
   getAccountStore(account).wallet;
+
+export const useTransactionsStore = currentAccountStoreHook("transactions");
+export const useTransactionsStoreForAccount = (account: string) =>
+  accountStoreHook("transactions", account);
+export const getTransactionsStore = (account: string) =>
+  getAccountStore(account).transactions;
