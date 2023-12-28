@@ -5,6 +5,7 @@ import { emojisByCategory } from "../vendor/rn-emoji-keyboard";
 import { isAttachmentMessage } from "./attachment/helpers";
 import { sendMessage } from "./message";
 import { sentryTrackMessage } from "./sentry";
+import { getMessageContentType } from "./xmtpRN/contentTypes";
 
 export type MessageReaction = {
   action: "added" | "removed";
@@ -97,7 +98,21 @@ export const addReactionToMessage = (
   message: XmtpMessage,
   emoji: string
 ) => {
-  const isAttachment = isAttachmentMessage(message.contentType);
+  const contentType = getMessageContentType(message.contentType);
+  let contentFallback;
+  switch (contentType) {
+    case "attachment":
+    case "remoteAttachment":
+      contentFallback = `Reacted ${emoji} to an attachment`;
+      break;
+    case "transactionReference":
+    case "coinbasePayment":
+      contentFallback = `Reacted ${emoji} to a transaction`;
+      break;
+    default: // Handles 'text' and other types
+      contentFallback = `Reacted ${emoji} to “${message.content}”`;
+      break;
+  }
   sendMessage({
     conversation,
     content: JSON.stringify({
@@ -107,9 +122,7 @@ export const addReactionToMessage = (
       schema: "unicode",
     }),
     contentType: ContentTypeReaction.toString(),
-    contentFallback: `Reacted ${emoji} to ${
-      isAttachment ? "an attachment" : `“${message.content}”`
-    }`,
+    contentFallback,
     referencedMessageId: message.id,
   });
 };
