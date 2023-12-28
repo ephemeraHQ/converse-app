@@ -25,6 +25,9 @@ export type SettingsStoreType = {
 
   ephemeralAccount: boolean;
   setEphemeralAccount: (ephemeral: boolean) => void;
+
+  lastAsyncUpdate: number;
+  setLastAsyncUpdate: (version: number) => void;
 };
 
 export const initSettingsStore = (account: string) => {
@@ -56,7 +59,6 @@ export const initSettingsStore = (account: string) => {
                 },
               };
             }),
-          ephemeralAccount: false,
           setNotificationsSettings: (notificationsSettings) =>
             set((state) => ({
               notifications: {
@@ -64,9 +66,15 @@ export const initSettingsStore = (account: string) => {
                 ...notificationsSettings,
               },
             })),
+          ephemeralAccount: false,
           setEphemeralAccount: (ephemeral) =>
             set(() => ({
               ephemeralAccount: ephemeral,
+            })),
+          lastAsyncUpdate: 0,
+          setLastAsyncUpdate: (version) =>
+            set(() => ({
+              lastAsyncUpdate: version,
             })),
         }) as SettingsStoreType,
       {

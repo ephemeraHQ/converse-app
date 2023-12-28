@@ -14,12 +14,12 @@ import {
   useRecommendationsStore,
   useSettingsStore,
 } from "../../data/store/accountsStore";
-import { consentToPeers } from "../../utils/api";
 import { actionSheetColors, textPrimaryColor } from "../../utils/colors";
 import { useConversationContext } from "../../utils/conversation";
 import { sendMessage } from "../../utils/message";
 import { getProfileData } from "../../utils/profile";
 import { conversationName } from "../../utils/str";
+import { consentToPeersOnProtocol } from "../../utils/xmtpRN/conversations";
 import ActivityIndicator from "../ActivityIndicator/ActivityIndicator";
 import Button from "../Button/Button";
 import { Recommendation } from "../Recommendations/Recommendation";
@@ -87,7 +87,11 @@ export default function ChatPlaceholder({ messagesCount }: Props) {
                   (selectedIndex?: number) => {
                     if (selectedIndex === 0 && conversation?.peerAddress) {
                       const { peerAddress } = conversation;
-                      consentToPeers(currentAccount(), [peerAddress]);
+                      consentToPeersOnProtocol(
+                        currentAccount(),
+                        [peerAddress],
+                        "allow"
+                      );
                       setPeersStatus({ [peerAddress]: "consented" });
                     }
                   }

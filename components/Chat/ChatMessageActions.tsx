@@ -16,7 +16,7 @@ import {
   useCurrentAccount,
   useSettingsStore,
 } from "../../data/store/accountsStore";
-import { blockPeers, reportMessage } from "../../utils/api";
+import { reportMessage } from "../../utils/api";
 import { isAttachmentMessage } from "../../utils/attachment";
 import { actionSheetColors } from "../../utils/colors";
 import { useConversationContext } from "../../utils/conversation";
@@ -27,6 +27,7 @@ import {
   getEmojiName,
   removeReactionFromMessage,
 } from "../../utils/reactions";
+import { consentToPeersOnProtocol } from "../../utils/xmtpRN/conversations";
 import EmojiPicker from "../../vendor/rn-emoji-keyboard";
 import { showActionSheetWithOptions } from "../StateHandlers/ActionSheetStateHandler";
 import { MessageToDisplay } from "./ChatMessage";
@@ -70,7 +71,7 @@ export default function ChatMessageActions({
       messageContent: message.content,
       messageSender: message.senderAddress,
     });
-    blockPeers(currentAccount(), [message.senderAddress]);
+    consentToPeersOnProtocol(currentAccount(), [message.senderAddress], "deny");
     setPeersStatus({ [message.senderAddress]: "blocked" });
   }, [message.content, message.id, message.senderAddress, setPeersStatus]);
 

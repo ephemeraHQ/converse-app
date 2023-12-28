@@ -5,11 +5,10 @@ import { getExistingDataSource } from "../data/db/datasource";
 import {
   getAccountsList,
   getChatStore,
-  getSettingsStore,
   useAccountsList,
 } from "../data/store/accountsStore";
 import { useAppStore } from "../data/store/appStore";
-import { getPeersStatus, getTopicsStatus } from "../utils/api";
+import { getTopicsStatus } from "../utils/api";
 import { loadSavedNotificationMessagesToContext } from "../utils/notifications";
 import { pick } from "../utils/objects";
 import { syncXmtpClient } from "../utils/xmtpRN/client";
@@ -54,12 +53,6 @@ export default function XmtpEngine() {
         (a) => !syncedAccounts.current[a]
       );
       syncAccounts(unsyncedAccounts);
-      // Sync peers status (incl. blocked peers)
-      unsyncedAccounts.map((a) =>
-        getPeersStatus(a).then((peersStatus) => {
-          getSettingsStore(a).getState().setPeersStatus(peersStatus);
-        })
-      );
       // Sync topics status
       unsyncedAccounts.map((a) =>
         getTopicsStatus(a).then((topicsStatus) => {
