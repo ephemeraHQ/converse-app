@@ -120,7 +120,9 @@ export default function ChatMessageActions({
     }
     if (!isAttachment) {
       methods["Copy message"] = () => {
-        Clipboard.setString(message.content);
+        message.content
+          ? Clipboard.setString(message.content)
+          : Clipboard.setString(message.contentFallback!);
       };
       if (!message.fromMe) {
         methods["Report message"] = showMessageReportActionSheet;
@@ -153,6 +155,7 @@ export default function ChatMessageActions({
     colorScheme,
     isAttachment,
     message.content,
+    message.contentFallback,
     message.fromMe,
     canAddReaction,
     showMessageReportActionSheet,
