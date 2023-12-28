@@ -21,7 +21,7 @@ import {
   useSettingsStore,
 } from "../data/store/accountsStore";
 import { NavigationParamList } from "../screens/Navigation/Navigation";
-import { deleteTopics, blockPeers } from "../utils/api";
+import { deleteTopics } from "../utils/api";
 import {
   actionSecondaryColor,
   actionSheetColors,
@@ -35,6 +35,7 @@ import {
 } from "../utils/colors";
 import { getRelativeDateTime } from "../utils/date";
 import { converseEventEmitter } from "../utils/events";
+import { consentToPeersOnProtocol } from "../utils/xmtpRN/conversations";
 import { showActionSheetWithOptions } from "./StateHandlers/ActionSheetStateHandler";
 
 type ConversationListItemProps = {
@@ -141,7 +142,11 @@ const ConversationListItem = memo(function ConversationListItem({
               } else if (selectedIndex === 1) {
                 deleteTopics(currentAccount(), [conversationTopic]);
                 setTopicsStatus({ [conversationTopic]: "deleted" });
-                blockPeers(currentAccount(), [conversationPeerAddress]);
+                consentToPeersOnProtocol(
+                  currentAccount(),
+                  [conversationPeerAddress],
+                  "deny"
+                );
                 setPeersStatus({ [conversationPeerAddress]: "blocked" });
               } else {
                 closeSwipeable();

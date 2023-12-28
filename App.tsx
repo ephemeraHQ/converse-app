@@ -19,6 +19,11 @@ import { Provider as PaperProvider } from "react-native-paper";
 
 import XmtpEngine from "./components/XmtpEngine";
 import config from "./config";
+import { useAppStore } from "./data/store/appStore";
+import {
+  updateLastVersionOpen,
+  runAsyncUpdates,
+} from "./data/updates/asyncUpdates";
 import { migrateDataIfNeeded } from "./data/updates/initialUpdates";
 import Main from "./screens/Main";
 import { registerBackgroundFetchTask } from "./utils/background";
@@ -62,10 +67,15 @@ export default function App() {
     },
   });
   const [refactoMigrationDone, setRefactoMigrationDone] = useState(false);
+  const isInternetReachable = useAppStore((s) => s.isInternetReachable);
+
   useEffect(() => {
     migrateDataIfNeeded()
       .then(() => {
         setRefactoMigrationDone(true);
+
+        // last LastSyncUpdateRun
+        updateLastVersionOpen();
       })
       .catch((e) => {
         sentryTrackError(e);
@@ -73,6 +83,14 @@ export default function App() {
         setRefactoMigrationDone(true);
       });
   }, []);
+
+  useEffect(() => {
+    if (isInternetReachable) {
+      runAsyncUpdates().catch((e) => {
+        sentryTrackError(e);
+      });
+    }
+  }, [isInternetReachable]);
 
   if (!refactoMigrationDone) return null;
 

@@ -10,13 +10,13 @@ import {
   getSettingsStore,
 } from "../../data/store/accountsStore";
 import { NavigationParamList } from "../../screens/Navigation/Navigation";
-import { blockPeers, consentToPeers } from "../../utils/api";
 import {
   actionSheetColors,
   backgroundColor,
   textPrimaryColor,
 } from "../../utils/colors";
 import { useConversationContext } from "../../utils/conversation";
+import { consentToPeersOnProtocol } from "../../utils/xmtpRN/conversations";
 import Button from "../Button/Button";
 import { showActionSheetWithOptions } from "../StateHandlers/ActionSheetStateHandler";
 
@@ -78,7 +78,11 @@ export default function ChatConsent() {
               },
               (selectedIndex?: number) => {
                 if (selectedIndex === 0) {
-                  blockPeers(currentAccount(), [conversation.peerAddress]);
+                  consentToPeersOnProtocol(
+                    currentAccount(),
+                    [conversation.peerAddress],
+                    "deny"
+                  );
                   setPeersStatus({ [conversation.peerAddress]: "blocked" });
                   navigation.pop();
                 }
@@ -92,7 +96,11 @@ export default function ChatConsent() {
           title="Accept"
           style={styles.cta}
           onPress={() => {
-            consentToPeers(currentAccount(), [conversation.peerAddress]);
+            consentToPeersOnProtocol(
+              currentAccount(),
+              [conversation.peerAddress],
+              "allow"
+            );
             setPeersStatus({ [conversation.peerAddress]: "consented" });
           }}
         />

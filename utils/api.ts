@@ -87,35 +87,18 @@ export const reportMessage = async ({
   );
 };
 
-export const blockPeers = async (account: string, peers: string[]) => {
-  const peersStatus: { [key: string]: "blocked" } = {};
-  for (const peer of peers) {
-    peersStatus[peer] = "blocked";
-  }
-  await api.post(
-    "/api/consent/peer",
-    { peersStatus },
-    { headers: await getXmtpApiHeaders(account) }
-  );
-};
-
-export const consentToPeers = async (account: string, peers: string[]) => {
-  const peersStatus: { [key: string]: "consented" } = {};
-  for (const peer of peers) {
-    peersStatus[peer] = "consented";
-  }
-  await api.post(
-    "/api/consent/peer",
-    { peersStatus },
-    { headers: await getXmtpApiHeaders(account) }
-  );
-};
-
 export const getPeersStatus = async (account: string) => {
   const { data } = await api.get("/api/consent/peer", {
     headers: await getXmtpApiHeaders(account),
   });
   return data as { [peerAddress: string]: "blocked" | "consented" };
+};
+
+export const deletePeersFromDb = async (account: string): Promise<void> => {
+  const { data } = await api.delete("/api/consent", {
+    headers: await getXmtpApiHeaders(account),
+  });
+  return data.message;
 };
 
 export const resolveUserName = async (
@@ -218,18 +201,6 @@ export const deleteTopics = async (account: string, topics: string[]) => {
   const topicsStatus: { [key: string]: "deleted" } = {};
   for (const topic of topics) {
     topicsStatus[topic] = "deleted";
-  }
-  await api.post(
-    "/api/topics/status",
-    { topicsStatus },
-    { headers: await getXmtpApiHeaders(account) }
-  );
-};
-
-export const consentToTopics = async (account: string, topics: string[]) => {
-  const topicsStatus: { [key: string]: "consented" } = {};
-  for (const topic of topics) {
-    topicsStatus[topic] = "consented";
   }
   await api.post(
     "/api/topics/status",

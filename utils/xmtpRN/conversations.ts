@@ -1,9 +1,12 @@
-import { ConversationContext } from "@xmtp/react-native-sdk";
+import { ConsentListEntry, ConversationContext } from "@xmtp/react-native-sdk";
 
 import { Conversation as DbConversation } from "../../data/db/entities/conversationEntity";
 import { getPendingConversationsToCreate } from "../../data/helpers/conversations/pendingConversations";
 import { saveConversations } from "../../data/helpers/conversations/upsertConversations";
+import { getSettingsStore } from "../../data/store/accountsStore";
 import { XmtpConversation } from "../../data/store/chatStore";
+import { SettingsStoreType } from "../../data/store/settingsStore";
+import { getCleanAddress } from "../eth";
 import { getTopicDataFromKeychain, saveTopicDataToKeychain } from "../keychain";
 import { sentryTrackError } from "../sentry";
 import {
@@ -117,6 +120,7 @@ const handleNewConversation = async (
   setTimeout(() => {
     loadConversationsMessages(client, { [conversation.topic]: 0 });
   }, 3000);
+  updateConsentStatus(client);
 };
 
 export const streamConversations = async (client: ConverseXmtpClientType) => {
@@ -168,13 +172,63 @@ export const loadConversations = async (
       client.address,
       await protocolConversationsToTopicData(newConversations)
     );
-
     return { newConversations, knownConversations };
   } catch (e) {
     const error = new Error();
     error.name = "LOAD_CONVERSATIONS_FAILED";
     error.message = `${e}`;
     throw error;
+  }
+};
+
+export const updateConsentStatus = async (client: ConverseXmtpClientType) => {
+  try {
+    const consentList = await client.contacts.refreshConsentList();
+    await saveConsentState(consentList, client.address);
+  } catch (error) {
+    console.error("Failed to update consent status:", error);
+  }
+};
+
+const saveConsentState = async (
+  consentList: ConsentListEntry[],
+  account: string
+) => {
+  const peersStatus: SettingsStoreType["peersStatus"] = {};
+
+  consentList.forEach((entry) => {
+    if (entry.entryType === "address") {
+      if (entry.permissionType === "allowed") {
+        peersStatus[entry.value] = "consented";
+      } else if (entry.permissionType === "denied") {
+        peersStatus[entry.value] = "blocked";
+      }
+    }
+  });
+
+  if (Object.keys(peersStatus).length > 0) {
+    getSettingsStore(account).getState().setPeersStatus(peersStatus);
+  }
+};
+
+export const consentToPeersOnProtocol = async (
+  account: string,
+  peers: string[],
+  consent: "allow" | "deny"
+) => {
+  try {
+    const cleanPeers = peers.map((peer) => getCleanAddress(peer));
+    const client = await getXmtpClient(account);
+
+    if (consent === "allow") {
+      await client.contacts.allow(cleanPeers);
+    } else if (consent === "deny") {
+      await client.contacts.deny(cleanPeers);
+    } else {
+      throw new Error(`Invalid consent type: ${consent}`);
+    }
+  } catch (error) {
+    console.error("Error updating consent:", error);
   }
 };
 
