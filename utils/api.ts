@@ -231,6 +231,30 @@ export const postUSDCTransferAuthorization = async (
   return data.txHash;
 };
 
+export const getTransactionDetails = async (
+  account: string,
+  networkId: string,
+  reference: string
+): Promise<string> => {
+  const { data } = await api.get("/api/evm/transactionDetails", {
+    params: { networkId, reference },
+    headers: await getXmtpApiHeaders(account),
+  });
+  return data;
+};
+
+export const getCoinbaseTransactionDetails = async (
+  account: string,
+  networkId: string,
+  sponsoredTxId: string
+): Promise<string> => {
+  const { data } = await api.get("/api/evm/coinbaseTransactionDetails", {
+    params: { networkId, sponsoredTxId },
+    headers: await getXmtpApiHeaders(account),
+  });
+  return data;
+};
+
 export const claimUserName = async (
   username: string,
   userAddress: string
