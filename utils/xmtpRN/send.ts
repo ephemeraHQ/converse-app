@@ -11,6 +11,7 @@ import {
 import { getMessagesToSend } from "../../data/helpers/messages/getMessagesToSend";
 import { deserializeRemoteAttachmentMessageContent } from "./attachments";
 import { isContentType } from "./contentTypes";
+import { ContentTypeTransactionReference } from "./contentTypes/transactionReference";
 import { getConversationWithTopic } from "./conversations";
 
 let sendingPendingMessages = false;
@@ -85,6 +86,11 @@ export const sendPendingMessages = async (account: string) => {
           preparedMessage = await conversation.prepareMessage({
             reaction: JSON.parse(message.content),
           });
+        } else if (isContentType("transactionReference", message.contentType)) {
+          await conversation.send(JSON.parse(message.content), {
+            contentType: ContentTypeTransactionReference,
+          });
+          return;
         } else {
           preparedMessage = await conversation.prepareMessage({
             text: message.content,
