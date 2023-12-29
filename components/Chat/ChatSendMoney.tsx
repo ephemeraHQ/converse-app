@@ -13,7 +13,7 @@ import {
   useAccountsStore,
   useHasOnePrivyAccount,
   useLoggedWithPrivy,
-  useWalletStore,
+  // useWalletStore,
 } from "../../data/store/accountsStore";
 import { useOnboardingStore } from "../../data/store/onboardingStore";
 import { NavigationParamList } from "../../screens/Navigation/Navigation";
@@ -42,7 +42,7 @@ export default function ChatSendMoney() {
   const styles = useStyles();
   const loggedWithPrivy = useLoggedWithPrivy();
   const privySigner = usePrivySigner();
-  const pkPath = useWalletStore((s) => s.privateKeyPath);
+  // const pkPath = useWalletStore((s) => s.privateKeyPath);
 
   const showMoneyInput = useCallback(() => {
     setTransactionMode(true);
@@ -61,9 +61,11 @@ export default function ChatSendMoney() {
             "Converse is unable to trigger a transaction. Check your internet status. If your internet is good, please kill the app and try again. If the problem is still happening, contact the Converse team."
           );
         }
-      } else if (pkPath) {
-        showMoneyInput();
-      } else if (alreadyConnectedToPrivy) {
+      }
+      //  else if (pkPath) {
+      //   showMoneyInput();
+      // }
+      else if (alreadyConnectedToPrivy) {
         Alert.alert(
           "Use Converse Account",
           "Gasless money transfers are only available on Converse accounts with telephone numbers for now.",
@@ -101,7 +103,7 @@ export default function ChatSendMoney() {
     alreadyConnectedToPrivy,
     loggedWithPrivy,
     navigation,
-    pkPath,
+    // pkPath,
     privySigner,
     setAddingNewAccount,
     setConnectionMethod,
