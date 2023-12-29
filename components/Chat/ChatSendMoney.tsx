@@ -58,7 +58,7 @@ export default function ChatSendMoney() {
         } else {
           Alert.alert(
             "Error",
-            "We can't trigger transactions right now. Please kill / reopen Converse and try again."
+            "Converse is unable to trigger a transaction. Check your internet status. If your internet is good, please kill the app and try again. If the problem is still happening, contact the Converse team."
           );
         }
       } else if (pkPath) {
