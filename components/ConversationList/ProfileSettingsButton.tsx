@@ -60,7 +60,7 @@ export default function ProfileSettingsButton() {
           style={{
             position: "absolute",
             right: 30,
-            top: -15,
+            top: -16,
             width: stringSize,
             minWidth: 40,
             height: 30,
