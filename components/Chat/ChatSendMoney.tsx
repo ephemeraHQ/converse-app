@@ -57,7 +57,8 @@ export default function ChatSendMoney() {
           showMoneyInput();
         } else {
           Alert.alert(
-            "We couldn't get a signer to trigger transaction. Please try again or contact Converse team."
+            "Error",
+            "We can't trigger transactions right now. Please kill / reopen Converse and try again."
           );
         }
       } else if (pkPath) {
