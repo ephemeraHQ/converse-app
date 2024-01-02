@@ -21,11 +21,13 @@ import { getRelativeDate } from "../../utils/date";
 import { isDesktop } from "../../utils/device";
 import { LimitedMap } from "../../utils/objects";
 import { getMessageReactions } from "../../utils/reactions";
+import { getMessageContentType } from "../../utils/xmtpRN/contentTypes";
 import ClickableText from "../ClickableText";
 import ChatAttachmentBubble from "./ChatAttachmentBubble";
 import ChatMessageActions from "./ChatMessageActions";
 import ChatMessageMetadata from "./ChatMessageMetadata";
 import ChatMessageReactions from "./ChatMessageReactions";
+import ChatTransactionReference from "./ChatTransactionReference";
 
 export type MessageToDisplay = XmtpMessage & {
   hasPreviousMessageInSeries: boolean;
@@ -46,24 +48,34 @@ function ChatMessage({ message, colorScheme }: Props) {
   const metadata = (
     <ChatMessageMetadata message={message} white={message.fromMe} />
   );
-  const isAttachment = isAttachmentMessage(message.contentType);
+
   let messageContent: ReactNode;
-  if (isAttachment) {
-    messageContent = <ChatAttachmentBubble message={message} />;
-  } else {
-    messageContent = (
-      <ClickableText
-        style={[
-          styles.messageText,
-          message.fromMe ? styles.messageTextMe : undefined,
-        ]}
-      >
-        {message.content || message.contentFallback}
-        <View style={{ opacity: 0 }}>{metadata}</View>
-      </ClickableText>
-    );
+  const contentType = getMessageContentType(message.contentType);
+  switch (contentType) {
+    case "attachment":
+    case "remoteAttachment":
+      messageContent = <ChatAttachmentBubble message={message} />;
+      break;
+    case "transactionReference":
+    case "coinbasePayment":
+      messageContent = <ChatTransactionReference message={message} />;
+      break;
+    default:
+      messageContent = (
+        <ClickableText
+          style={[
+            styles.messageText,
+            message.fromMe ? styles.messageTextMe : undefined,
+          ]}
+        >
+          {message.content || message.contentFallback}
+          <View style={{ opacity: 0 }}>{metadata}</View>
+        </ClickableText>
+      );
+      break;
   }
 
+  const isAttachment = isAttachmentMessage(message.contentType);
   const reactions = getMessageReactions(message);
 
   return (
