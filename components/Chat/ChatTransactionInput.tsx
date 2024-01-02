@@ -41,7 +41,6 @@ import {
   refreshBalanceForAccount,
   refreshBalanceForAccounts,
 } from "../../utils/wallet";
-import { ContentTypeTransactionReference } from "../../utils/xmtpRN/contentTypes/transactionReference";
 import ActivityIndicator from "../ActivityIndicator/ActivityIndicator";
 import ChatActionButton from "./ChatActionButton";
 
@@ -197,7 +196,7 @@ export default function ChatTransactionInput() {
                 toAddress: conversation.peerAddress,
               },
             }),
-            contentType: ContentTypeTransactionReference.toString(),
+            contentType: "xmtp.org/transactionReference:1.0",
             contentFallback: `[Crypto transaction] Use a blockchain explorer to learn more using the transaction hash: ${txHash}`,
           });
           setTransactionMode(false);
