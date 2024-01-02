@@ -123,6 +123,14 @@ export const myMessageBubbleColor = (colorScheme: ColorSchemeName) => {
   return MY_MESSAGE_BUBBLE_LIGHT;
 };
 
+const MY_MESSAGE_INNER_BUBBLE_LIGHT = "#DC4F36";
+const MY_MESSAGE_INNER_BUBBLE_DARK = "#DC4F36";
+
+export const myMessageInnerBubbleColor = (colorScheme: ColorSchemeName) => {
+  if (colorScheme === "dark") return MY_MESSAGE_INNER_BUBBLE_DARK;
+  return MY_MESSAGE_INNER_BUBBLE_LIGHT;
+};
+
 const TERTIARY_BACKGROUND_LIGHT = "#EFEFF0";
 const TERTIARY_BACKGROUND_DARK = "#1C1C1F";
 
