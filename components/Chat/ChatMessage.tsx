@@ -76,6 +76,7 @@ function ChatMessage({ message, colorScheme }: Props) {
   }
 
   const isAttachment = isAttachmentMessage(message.contentType);
+  const isTransaction = isTransactionMessage(message.contentType);
   const reactions = getMessageReactions(message);
 
   return (
@@ -94,8 +95,8 @@ function ChatMessage({ message, colorScheme }: Props) {
         reactions={reactions}
         style={[
           styles.messageBubble,
-          isAttachment
-            ? styles.messageBubbleAttachment
+          isAttachment || isTransaction
+            ? styles.messageBubbleAttachmentOrTransaction
             : styles.messageBubbleText,
           message.fromMe ? styles.messageBubbleMe : undefined,
           Platform.select({
@@ -225,7 +226,7 @@ const useStyles = () => {
       paddingHorizontal: 12,
       paddingVertical: Platform.OS === "android" ? 6 : 7,
     },
-    messageBubbleAttachment: {
+    messageBubbleAttachmentOrTransaction: {
       padding: 4,
     },
     messageBubbleMe: {

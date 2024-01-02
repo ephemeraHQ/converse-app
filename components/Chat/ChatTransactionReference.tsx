@@ -13,7 +13,10 @@ import {
   handleDecryptedRemoteAttachment,
   handleStaticAttachment,
 } from "../../utils/attachment";
-import { textPrimaryColor } from "../../utils/colors";
+import {
+  myMessageInnerBubbleColor,
+  textPrimaryColor,
+} from "../../utils/colors";
 import { converseEventEmitter } from "../../utils/events";
 import { isImageMimetype } from "../../utils/media";
 import { sentryTrackError, sentryTrackMessage } from "../../utils/sentry";
@@ -291,6 +294,14 @@ const useStyles = () => {
       paddingVertical: Platform.OS === "android" ? 2 : 3,
       fontSize: 17,
       color: textPrimaryColor(colorScheme),
+    },
+    innerBubble: {
+      backgroundColor: myMessageInnerBubbleColor(colorScheme),
+      borderRadius: 15,
+      width: "100%",
+      paddingHorizontal: 2,
+      paddingVertical: 6,
+      marginBottom: 5,
     },
     metadataContainer: {
       position: "absolute",
