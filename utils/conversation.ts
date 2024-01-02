@@ -15,6 +15,7 @@ import { isAttachmentMessage } from "./attachment/helpers";
 import { getAddressForPeer } from "./eth";
 import { subscribeToNotifications } from "./notifications";
 import { pick } from "./objects";
+import { getContentPreview } from "./reactions";
 import { getMatchedPeerAddresses } from "./search";
 import { sentryTrackMessage } from "./sentry";
 import { TextInputWithValue, addressPrefix } from "./str";
@@ -78,12 +79,13 @@ export const conversationLastMessagePreview = (
             continue;
           } else {
             removedReactions = {};
-            const isAttachment = isAttachmentMessage(message.contentType);
+            const contentPreview = getContentPreview(
+              message,
+              reactionContent.content
+            );
             if (reactionContent.schema === "unicode") {
               return {
-                contentPreview: `Reacted ${reactionContent.content} to ${
-                  isAttachment ? "a media" : `“${message.content}”`
-                }`,
+                contentPreview,
                 message: lastMessage,
               };
             } else {
