@@ -93,26 +93,34 @@ export const getEmojiName = (emojiString: string) => {
   return foundEmojiName;
 };
 
+export const getContentPreview = (
+  message: XmtpMessage,
+  reactionContent: string
+) => {
+  const contentType = getMessageContentType(message.contentType);
+  let contentPreview: string;
+  switch (contentType) {
+    case "attachment":
+    case "remoteAttachment":
+      contentPreview = `Reacted ${reactionContent} to a media`;
+      break;
+    case "transactionReference":
+    case "coinbasePayment":
+      contentPreview = `Reacted ${reactionContent} to a transaction`;
+      break;
+    default: // Handles 'text' and other types
+      contentPreview = `Reacted ${reactionContent} to “${message.content}”`;
+      break;
+  }
+  return contentPreview;
+};
+
 export const addReactionToMessage = (
   conversation: XmtpConversation,
   message: XmtpMessage,
   emoji: string
 ) => {
-  const contentType = getMessageContentType(message.contentType);
-  let contentFallback;
-  switch (contentType) {
-    case "attachment":
-    case "remoteAttachment":
-      contentFallback = `Reacted ${emoji} to an attachment`;
-      break;
-    case "transactionReference":
-    case "coinbasePayment":
-      contentFallback = `Reacted ${emoji} to a transaction`;
-      break;
-    default: // Handles 'text' and other types
-      contentFallback = `Reacted ${emoji} to “${message.content}”`;
-      break;
-  }
+  const contentFallback = getContentPreview(message, emoji);
   sendMessage({
     conversation,
     content: JSON.stringify({
