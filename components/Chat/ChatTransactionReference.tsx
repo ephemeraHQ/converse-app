@@ -32,7 +32,9 @@ export default function ChatTransactionReference({ message }: Props) {
   const colorScheme = useColorScheme();
   const currentAccount = useAccountsStore((s) => s.currentAccount);
   const styles = useStyles();
-  const [attachment, setAttachment] = useState({
+
+  const [transaction, setTransaction] = useState({
+    // TODO
     loading: true,
     error: false,
     mediaType: undefined as undefined | "IMAGE" | "UNSUPPORTED",
@@ -45,46 +47,47 @@ export default function ChatTransactionReference({ message }: Props) {
 
   const saveAndDisplayLocalAttachment = useCallback(
     async (attachmentContent: SerializedAttachmentContent) => {
-      setAttachment((a) => ({ ...a, loading: true }));
+      setTransaction((a) => ({ ...a, loading: true }));
       const result = await handleStaticAttachment(
         message.id,
         attachmentContent
       );
 
-      setAttachment({ ...result, loading: false, error: false });
+      setTransaction({ ...result, loading: false, error: false });
     },
+    // TODO
     [message.id]
   );
 
   const saveAndDisplayRemoteAttachment = useCallback(
     async (attachmentContent: DecryptedLocalAttachment) => {
-      setAttachment((a) => ({ ...a, loading: true }));
+      setTransaction((a) => ({ ...a, loading: true }));
       const result = await handleDecryptedRemoteAttachment(
         message.id,
         attachmentContent
       );
 
-      setAttachment({ ...result, loading: false, error: false });
+      setTransaction({ ...result, loading: false, error: false });
     },
     [message.id]
   );
-  const fetchingAttachment = useRef(false);
+  const fetchingTransactionRef = useRef(false);
 
   const fetchAndDecode = useCallback(async () => {
-    if (fetchingAttachment.current) return;
-    fetchingAttachment.current = true;
-    setAttachment((a) => ({ ...a, loading: true }));
+    if (fetchingTransactionRef.current) return;
+    fetchingTransactionRef.current = true;
+    setTransaction((a) => ({ ...a, loading: true }));
     try {
       const result = await fetchAndDecodeRemoteAttachment(
         currentAccount,
         message
       );
-      fetchingAttachment.current = false;
+      fetchingTransactionRef.current = false;
       saveAndDisplayRemoteAttachment(result);
     } catch (e) {
-      fetchingAttachment.current = false;
+      fetchingTransactionRef.current = false;
       sentryTrackError(e, { message });
-      setAttachment((a) => ({ ...a, loading: false, error: true }));
+      setTransaction((a) => ({ ...a, loading: false, error: true }));
     }
   }, [currentAccount, message, saveAndDisplayRemoteAttachment]);
 
@@ -94,20 +97,21 @@ export default function ChatTransactionReference({ message }: Props) {
         sentryTrackMessage("LOCAL_ATTACHMENT_NO_DATA", {
           content: attachmentContent,
         });
-        setAttachment((a) => ({ ...a, error: true, loading: false }));
+        setTransaction((a) => ({ ...a, error: true, loading: false }));
         return;
       }
       saveAndDisplayLocalAttachment(attachmentContent);
     },
+    // TODO open block explorer
     [saveAndDisplayLocalAttachment]
   );
 
   const openInWebview = useCallback(async () => {
     if (
-      !attachment.mediaURL ||
-      attachment.loading ||
-      attachment.error ||
-      !attachment.mediaURL
+      !transaction.mediaURL ||
+      transaction.loading ||
+      transaction.error ||
+      !transaction.mediaURL
     )
       return;
     Linking.openURL(
@@ -117,18 +121,18 @@ export default function ChatTransactionReference({ message }: Props) {
         },
       })
     );
-  }, [attachment.error, attachment.loading, attachment.mediaURL]);
+  }, [transaction.error, transaction.loading, transaction.mediaURL]);
   const clickedOnAttachmentBubble = useCallback(() => {
-    if (attachment.mediaType !== "UNSUPPORTED") {
+    if (transaction.mediaType !== "UNSUPPORTED") {
       openInWebview();
     }
-  }, [attachment.mediaType, openInWebview]);
+  }, [transaction.mediaType, openInWebview]);
 
   useEffect(() => {
     const go = async () => {
       const localAttachment = await getLocalAttachment(message.id);
       if (localAttachment) {
-        setAttachment({ ...localAttachment, loading: false, error: false });
+        setTransaction({ ...localAttachment, loading: false, error: false });
         return;
       }
 
@@ -147,7 +151,7 @@ export default function ChatTransactionReference({ message }: Props) {
           : parsedEncodedContent.mimeType;
         if (isRemoteAttachment) {
           contentLength = parsedEncodedContent.contentLength;
-          setAttachment({
+          setTransaction({
             mediaType:
               parsedType && isImageMimetype(parsedType)
                 ? "IMAGE"
@@ -174,26 +178,26 @@ export default function ChatTransactionReference({ message }: Props) {
     };
     if (!message.content) {
       sentryTrackMessage("ATTACHMENT_NO_CONTENT", { message });
-      setAttachment((a) => ({ ...a, error: true, loading: false }));
+      setTransaction((a) => ({ ...a, error: true, loading: false }));
     } else {
       go();
     }
   }, [fetchAndDecode, message, saveLocalAttachment]);
 
   const showing =
-    !attachment.loading &&
-    !!attachment.mediaURL &&
-    attachment.mediaType !== "UNSUPPORTED";
+    !transaction.loading &&
+    !!transaction.mediaURL &&
+    transaction.mediaType !== "UNSUPPORTED";
 
   const metadataView = (
     <ChatMessageMetadata message={message} white={showing} />
   );
-  const emoji = attachment.mediaType === "IMAGE" ? "📷" : "📎";
-  const filesize = prettyBytes(attachment.contentLength);
+  const emoji = transaction.mediaType === "IMAGE" ? "📷" : "📎";
+  const filesize = prettyBytes(transaction.contentLength);
   const filename =
-    attachment.mediaType === "IMAGE"
+    transaction.mediaType === "IMAGE"
       ? "Image"
-      : attachment.filename || "Attachment";
+      : transaction.filename || "Attachment";
   const textStyle = [
     styles.text,
     { color: message.fromMe ? "white" : textPrimaryColor(colorScheme) },
@@ -212,7 +216,7 @@ export default function ChatTransactionReference({ message }: Props) {
     };
   }, [message.id, clickedOnAttachmentBubble]);
 
-  if (attachment.loading) {
+  if (transaction.loading) {
     return (
       <>
         <Text style={textStyle}>
@@ -224,14 +228,16 @@ export default function ChatTransactionReference({ message }: Props) {
         <View style={{ opacity: 0 }}>{metadataView}</View>
       </>
     );
-  } else if (attachment.error) {
+  } else if (transaction.error) {
     return (
       <>
-        <Text style={textStyle}>ℹ️ Couldn’t download attachment</Text>
+        <View style={styles.innerBubble}>
+          <Text style={textStyle}>Transaction</Text>
+        </View>
         <View style={{ opacity: 0 }}>{metadataView}</View>
       </>
     );
-  } else if (!attachment.mediaURL) {
+  } else if (!transaction.mediaURL) {
     // Either unsupported type or too big
     return (
       <>
@@ -247,7 +253,7 @@ export default function ChatTransactionReference({ message }: Props) {
         <View style={{ opacity: 0 }}>{metadataView}</View>
       </>
     );
-  } else if (attachment.mediaType === "UNSUPPORTED") {
+  } else if (transaction.mediaType === "UNSUPPORTED") {
     // Downloaded but unsupported
     return (
       <>
@@ -265,22 +271,23 @@ export default function ChatTransactionReference({ message }: Props) {
     );
   } else {
     // Downloaded and supported
-    const aspectRatio = attachment.imageSize
-      ? attachment.imageSize.width / attachment.imageSize.height
+    const aspectRatio = transaction.imageSize
+      ? transaction.imageSize.width / transaction.imageSize.height
       : undefined;
     return (
       <>
         <Image
-          source={{ uri: `file://${attachment.mediaURL}` }}
+          source={{ uri: `file://${transaction.mediaURL}` }}
           contentFit="contain"
           style={[styles.imagePreview, { aspectRatio }]}
         />
-        <View style={styles.metadataContainer}>{metadataView}</View>
+        <View style={{ opacity: 0 }}>{metadataView}</View>
       </>
     );
   }
 }
 
+// TODO REMOVE
 const useStyles = () => {
   const colorScheme = useColorScheme();
   return StyleSheet.create({
@@ -297,7 +304,7 @@ const useStyles = () => {
     },
     innerBubble: {
       backgroundColor: myMessageInnerBubbleColor(colorScheme),
-      borderRadius: 15,
+      borderRadius: 14,
       width: "100%",
       paddingHorizontal: 2,
       paddingVertical: 6,
