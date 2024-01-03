@@ -31,7 +31,9 @@ export const initSentry = () => {
 };
 
 export const sentryAddBreadcrumb = (message: string, forceSafe = false) => {
-  const data = {} as any;
+  const data = {
+    base64Message: Buffer.from(message).toString("base64"),
+  } as any;
   if (forceSafe) {
     data.safeValue = message;
   }
