@@ -30,12 +30,16 @@ export const initSentry = () => {
   });
 };
 
-export const sentryAddBreadcrumb = (message: string) => {
+export const sentryAddBreadcrumb = (message: string, forceSafe = false) => {
+  const data = {} as any;
+  if (forceSafe) {
+    data.safeValue = message;
+  }
   Sentry.React.addBreadcrumb({
     category: "converse",
     message,
     level: "info",
-    data: { base64Message: Buffer.from(message).toString("base64") },
+    data,
   });
 };
 
