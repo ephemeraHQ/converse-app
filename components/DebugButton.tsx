@@ -26,7 +26,7 @@ let logs: string[] = [];
 export const addLog = (log: string) => {
   if (config.debugMenu || config.debugAddresses.includes(currentAccount())) {
     console.log(`${new Date().toISOString()} - ${log}`);
-    sentryAddBreadcrumb(log);
+    sentryAddBreadcrumb(log, true);
     logs.push(`${new Date().toISOString()} - ${log}`);
   }
 };

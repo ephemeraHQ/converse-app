@@ -97,7 +97,6 @@ export const savePushToken = async (pushKey: string) => {
 export const privySecureStorage: PrivyStorage = {
   get: (key) => getSecureItemAsync(key.replaceAll(":", "-")),
   put: (key, val: string) => {
-    addLog(`Setting ${key} to length ${val ? val.length : val}`);
     if (["privy:token", "privy:refresh_token"].includes(key) && !val) {
       sentryTrackMessage("Logging out of privy, please check logs");
     }
