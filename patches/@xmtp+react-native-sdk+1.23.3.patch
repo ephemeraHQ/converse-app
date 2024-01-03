@@ -1,5 +1,5 @@
 diff --git a/node_modules/@xmtp/react-native-sdk/android/build.gradle b/node_modules/@xmtp/react-native-sdk/android/build.gradle
-index 748c76a..2027816 100644
+index e3c6c0b..5f43efa 100644
 --- a/node_modules/@xmtp/react-native-sdk/android/build.gradle
 +++ b/node_modules/@xmtp/react-native-sdk/android/build.gradle
 @@ -82,6 +82,13 @@ android {
@@ -17,10 +17,10 @@ index 748c76a..2027816 100644
    lintOptions {
      abortOnError false
 diff --git a/node_modules/@xmtp/react-native-sdk/android/src/main/java/expo/modules/xmtpreactnativesdk/XMTPModule.kt b/node_modules/@xmtp/react-native-sdk/android/src/main/java/expo/modules/xmtpreactnativesdk/XMTPModule.kt
-index c531c90..62e106c 100644
+index 6b49dfe..8251574 100644
 --- a/node_modules/@xmtp/react-native-sdk/android/src/main/java/expo/modules/xmtpreactnativesdk/XMTPModule.kt
 +++ b/node_modules/@xmtp/react-native-sdk/android/src/main/java/expo/modules/xmtpreactnativesdk/XMTPModule.kt
-@@ -452,7 +452,13 @@ class XMTPModule : Module() {
+@@ -485,7 +485,13 @@ class XMTPModule : Module() {
              val preparedData = contentResolver.openInputStream(preparedFileUrl)!!
                  .use { it.buffered().readBytes() }
              val prepared = PreparedMessage.fromSerializedData(preparedData)
@@ -68,7 +68,7 @@ index c3a0eb2..80da776 100644
          senderAddress: string;
          sent: number;
 diff --git a/node_modules/@xmtp/react-native-sdk/build/lib/DecodedMessage.js b/node_modules/@xmtp/react-native-sdk/build/lib/DecodedMessage.js
-index 75f788f..b225164 100644
+index bfceb29..7ee7953 100644
 --- a/node_modules/@xmtp/react-native-sdk/build/lib/DecodedMessage.js
 +++ b/node_modules/@xmtp/react-native-sdk/build/lib/DecodedMessage.js
 @@ -2,6 +2,7 @@ export class DecodedMessage {
@@ -112,10 +112,10 @@ index 72d6c23..f266bc4 100644
  			"contentTypeId": model.encodedContent.type.description,
  			"content": try ContentJson.fromEncoded(model.encodedContent, client: client).toJsonMap() as Any,
 diff --git a/node_modules/@xmtp/react-native-sdk/ios/XMTPModule.swift b/node_modules/@xmtp/react-native-sdk/ios/XMTPModule.swift
-index 8387ab5..4da1faf 100644
+index 841407a..177e3d3 100644
 --- a/node_modules/@xmtp/react-native-sdk/ios/XMTPModule.swift
 +++ b/node_modules/@xmtp/react-native-sdk/ios/XMTPModule.swift
-@@ -389,7 +389,13 @@ public class XMTPModule: Module {
+@@ -413,7 +413,13 @@ public class XMTPModule: Module {
  			guard let prepared = try? PreparedMessage.fromSerializedData(preparedData) else {
  				throw Error.badPreparation("unable to deserialized \(local.preparedFileUri)")
  			}
@@ -131,7 +131,7 @@ index 8387ab5..4da1faf 100644
  				try FileManager.default.removeItem(at: URL(string: local.preparedFileUri)!)
  			} catch { /* ignore: the sending succeeds even if we fail to rm the tmp file afterward */ }
 diff --git a/node_modules/@xmtp/react-native-sdk/src/lib/DecodedMessage.ts b/node_modules/@xmtp/react-native-sdk/src/lib/DecodedMessage.ts
-index 078a87d..5388194 100644
+index c348cac..46cc7ce 100644
 --- a/node_modules/@xmtp/react-native-sdk/src/lib/DecodedMessage.ts
 +++ b/node_modules/@xmtp/react-native-sdk/src/lib/DecodedMessage.ts
 @@ -12,6 +12,7 @@ export class DecodedMessage<ContentTypes = any> {
