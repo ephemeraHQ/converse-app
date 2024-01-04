@@ -1,7 +1,9 @@
 import { In } from "typeorm/browser";
 
-import { topicToNavigateTo } from "../../../components/StateHandlers/InitialStateHandler";
-import { navigateToConversation } from "../../../utils/navigation";
+import {
+  navigateToTopicWithRetry,
+  topicToNavigateTo,
+} from "../../../utils/navigation";
 import { saveConversationIdentifiersForNotifications } from "../../../utils/notifications";
 import { getPreferredName } from "../../../utils/profile";
 import { getRepository } from "../../db";
@@ -57,25 +59,7 @@ export const saveConversations = async (
 
   // Navigate to conversation from push notification on first message
   if (topicToNavigateTo) {
-    const maxAttempts = 5;
-    const retryInterval = 500;
-
-    const navigateToConversationWithRetry = (attempts = 0) => {
-      const conversationToNavigateTo = conversations.find(
-        (conversation) => conversation.topic === topicToNavigateTo
-      );
-
-      if (conversationToNavigateTo) {
-        navigateToConversation(conversationToNavigateTo);
-      } else if (attempts < maxAttempts) {
-        setTimeout(
-          () => navigateToConversationWithRetry(attempts + 1),
-          retryInterval
-        );
-      }
-    };
-
-    navigateToConversationWithRetry();
+    navigateToTopicWithRetry();
   }
 };
 

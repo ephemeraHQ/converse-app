@@ -16,10 +16,6 @@ import ConverseChat from "../components/Chat/Chat";
 import ConversationTitle from "../components/Conversation/ConversationTitle";
 import InviteBanner from "../components/InviteBanner";
 import Picto from "../components/Picto/Picto";
-import {
-  setTopicToNavigateTo,
-  topicToNavigateTo,
-} from "../components/StateHandlers/InitialStateHandler";
 import config from "../config";
 import {
   currentAccount,
@@ -40,6 +36,7 @@ import {
 } from "../utils/conversation";
 import { isDesktop } from "../utils/device";
 import { converseEventEmitter } from "../utils/events";
+import { setTopicToNavigateTo, topicToNavigateTo } from "../utils/navigation";
 import { pick } from "../utils/objects";
 import { getTitleFontScale, TextInputWithValue } from "../utils/str";
 import { NavigationParamList } from "./Navigation/Navigation";
