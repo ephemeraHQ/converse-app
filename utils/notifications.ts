@@ -2,7 +2,6 @@ import { buildUserInviteTopic } from "@xmtp/xmtp-js";
 import * as Notifications from "expo-notifications";
 import { Platform } from "react-native";
 
-import { setTopicToNavigateTo } from "../components/StateHandlers/InitialStateHandler";
 import config from "../config";
 import { saveConversations } from "../data/helpers/conversations/upsertConversations";
 import { saveMessages } from "../data/helpers/messages";
@@ -18,7 +17,7 @@ import { XmtpConversation, XmtpMessage } from "../data/store/chatStore";
 import api from "./api";
 import { savePushToken } from "./keychain";
 import mmkv from "./mmkv";
-import { navigateToConversation } from "./navigation";
+import { navigateToConversation, setTopicToNavigateTo } from "./navigation";
 import { sentryTrackError } from "./sentry";
 import {
   emptySavedNotificationsMessages,

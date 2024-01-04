@@ -7,14 +7,12 @@ import { useChatStore } from "../../data/store/accountsStore";
 import { useAppStore } from "../../data/store/appStore";
 import { useOnboardingStore } from "../../data/store/onboardingStore";
 import { setAndroidColors } from "../../utils/colors";
-import { navigateToConversation } from "../../utils/navigation";
+import {
+  navigateToTopicWithRetry,
+  topicToNavigateTo,
+} from "../../utils/navigation";
 import { pick } from "../../utils/objects";
 import { hideSplashScreen } from "../../utils/splash/splash";
-
-export let topicToNavigateTo = "";
-export const setTopicToNavigateTo = (topic: string) => {
-  topicToNavigateTo = topic;
-};
 
 const getSchemedURLFromUniversalURL = (url: string) => {
   let schemedURL = url;
@@ -95,9 +93,7 @@ export default function InitialStateHandler() {
         // If app was loaded by clicking on notification,
         // let's navigate
         if (topicToNavigateTo) {
-          if (conversations[topicToNavigateTo]) {
-            navigateToConversation(conversations[topicToNavigateTo]);
-          }
+          navigateToTopicWithRetry();
         } else if (initialURL) {
           Linking.openURL(initialURL);
           // Once opened, let's remove so we don't navigate twice
@@ -107,7 +103,7 @@ export default function InitialStateHandler() {
       }
     };
     hideSplashScreenIfReady();
-  }, [hydrationDone, setSplashScreenHidden, conversations]);
+  }, [hydrationDone, setSplashScreenHidden]);
 
   return null;
 }
