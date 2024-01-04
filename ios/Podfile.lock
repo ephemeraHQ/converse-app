@@ -699,16 +699,16 @@ PODS:
     - GenericJSON (~> 2.0)
     - Logging (~> 1.0.0)
     - secp256k1.swift (~> 0.1)
-  - XMTP (0.7.4-alpha0):
+  - XMTP (0.7.5-alpha0):
     - Connect-Swift (= 0.3.0)
     - GzipSwift
     - web3.swift
     - XMTPRust (= 0.3.7-beta0)
-  - XMTPReactNative (1.23.3):
+  - XMTPReactNative (1.23.4):
     - ExpoModulesCore
     - MessagePacker
     - secp256k1.swift
-    - XMTP (= 0.7.4-alpha0)
+    - XMTP (= 0.7.5-alpha0)
   - XMTPRust (0.3.7-beta0)
   - Yoga (1.14.0)
 
@@ -813,7 +813,7 @@ DEPENDENCIES:
   - Sentry/HybridSDK (= 8.15.2)
   - SQLite.swift
   - UMAppLoader (from `../node_modules/unimodules-app-loader/ios`)
-  - XMTP (= 0.7.4-alpha0)
+  - XMTP (= 0.7.5-alpha0)
   - "XMTPReactNative (from `../node_modules/@xmtp/react-native-sdk/ios`)"
   - Yoga (from `../node_modules/react-native/ReactCommon/yoga`)
 
@@ -1167,11 +1167,11 @@ SPEC CHECKSUMS:
   SwiftProtobuf: b02b5075dcf60c9f5f403000b3b0c202a11b6ae1
   UMAppLoader: e83f024f75f07802fce99739f04b4537d188caaf
   web3.swift: 2263d1e12e121b2c42ffb63a5a7beb1acaf33959
-  XMTP: 9ba94e797211aa4f7cbed9ed2a2f4c44d32c8d06
-  XMTPReactNative: 43f7fe6a0087df22e6b9d0384165f5786d5c4052
+  XMTP: aa137f3c8ac7b61ecfb3de0973f2dc2e672a9ec1
+  XMTPReactNative: 8a0a14a34e873f429efedc25746d867df55e1c38
   XMTPRust: 8848a2ba761b2c961d666632f2ad27d1082faa93
   Yoga: b76f1acfda8212aa16b7e26bcce3983230c82603
 
-PODFILE CHECKSUM: 87733fbff5527b6c002401d5f1052e805abfa5b9
+PODFILE CHECKSUM: ea43c685c633d4c699b23feb14e998f359968fa2
 
 COCOAPODS: 1.14.3

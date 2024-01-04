@@ -34,6 +34,7 @@ import {
 } from "./utils/colors";
 import { privySecureStorage } from "./utils/keychain";
 import mmkv from "./utils/mmkv";
+import { pick } from "./utils/objects";
 import { DEFAULT_EMOJIS, RECENT_EMOJI_STORAGE_KEY } from "./utils/reactions";
 import { initSentry, sentryTrackError } from "./utils/sentry";
 import { useRecentPicksPersistence } from "./vendor/rn-emoji-keyboard";
@@ -67,7 +68,9 @@ export default function App() {
     },
   });
   const [refactoMigrationDone, setRefactoMigrationDone] = useState(false);
-  const isInternetReachable = useAppStore((s) => s.isInternetReachable);
+  const { isInternetReachable, hydrationDone } = useAppStore((s) =>
+    pick(s, ["isInternetReachable", "hydrationDone"])
+  );
 
   useEffect(() => {
     migrateDataIfNeeded()
@@ -85,12 +88,12 @@ export default function App() {
   }, []);
 
   useEffect(() => {
-    if (isInternetReachable) {
+    if (isInternetReachable && hydrationDone) {
       runAsyncUpdates().catch((e) => {
         sentryTrackError(e);
       });
     }
-  }, [isInternetReachable]);
+  }, [isInternetReachable, hydrationDone]);
 
   if (!refactoMigrationDone) return null;
 
