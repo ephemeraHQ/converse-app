@@ -1,26 +1,16 @@
-import { DecryptedLocalAttachment } from "@xmtp/react-native-sdk";
 import { Image } from "expo-image";
-import * as Linking from "expo-linking";
 import mime from "mime";
 import prettyBytes from "pretty-bytes";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Platform, StyleSheet, Text, useColorScheme, View } from "react-native";
 
 import { useAccountsStore } from "../../data/store/accountsStore";
-import {
-  SerializedAttachmentContent,
-  getLocalAttachment,
-  handleDecryptedRemoteAttachment,
-  handleStaticAttachment,
-} from "../../utils/attachment";
+import { getLocalAttachment } from "../../utils/attachment";
 import {
   myMessageInnerBubbleColor,
   textPrimaryColor,
 } from "../../utils/colors";
-import { converseEventEmitter } from "../../utils/events";
 import { isImageMimetype } from "../../utils/media";
-import { sentryTrackError, sentryTrackMessage } from "../../utils/sentry";
-import { fetchAndDecodeRemoteAttachment } from "../../utils/xmtpRN/attachments";
 import { MessageToDisplay } from "./ChatMessage";
 import ChatMessageMetadata from "./ChatMessageMetadata";
 
@@ -34,99 +24,31 @@ export default function ChatTransactionReference({ message }: Props) {
   const styles = useStyles();
 
   const [transaction, setTransaction] = useState({
-    // TODO
     loading: true,
     error: false,
-    mediaType: undefined as undefined | "IMAGE" | "UNSUPPORTED",
-    mediaURL: undefined as undefined | string,
-    filename: "",
-    mimeType: "",
-    contentLength: 0,
-    imageSize: undefined as undefined | { height: number; width: number },
+    id: "", // Concatenation of "[networkid]-[reference]"
+    contentType: undefined as
+      | undefined
+      | "transactionReference"
+      | "coinbaseRegular"
+      | "coinbaseSponsored",
+    createdAt: 0,
+    updatedAt: 0,
+    namespace: undefined as undefined | string,
+    networkId: "",
+    reference: "",
+    metadata: undefined as undefined | object,
+    status: undefined as undefined | "PENDING" | "FAILURE" | "SUCCESS",
+    sponsored: true, // by converse
+    blockExplorerURL: undefined as undefined | string,
+    events: undefined as undefined | [],
   });
 
-  const saveAndDisplayLocalAttachment = useCallback(
-    async (attachmentContent: SerializedAttachmentContent) => {
-      setTransaction((a) => ({ ...a, loading: true }));
-      const result = await handleStaticAttachment(
-        message.id,
-        attachmentContent
-      );
+  // TODO saveAndDisplayTransaction
+  // TODO fetchTransactionDetails
+  // TODO openInWebview
 
-      setTransaction({ ...result, loading: false, error: false });
-    },
-    // TODO
-    [message.id]
-  );
-
-  const saveAndDisplayRemoteAttachment = useCallback(
-    async (attachmentContent: DecryptedLocalAttachment) => {
-      setTransaction((a) => ({ ...a, loading: true }));
-      const result = await handleDecryptedRemoteAttachment(
-        message.id,
-        attachmentContent
-      );
-
-      setTransaction({ ...result, loading: false, error: false });
-    },
-    [message.id]
-  );
   const fetchingTransactionRef = useRef(false);
-
-  const fetchAndDecode = useCallback(async () => {
-    if (fetchingTransactionRef.current) return;
-    fetchingTransactionRef.current = true;
-    setTransaction((a) => ({ ...a, loading: true }));
-    try {
-      const result = await fetchAndDecodeRemoteAttachment(
-        currentAccount,
-        message
-      );
-      fetchingTransactionRef.current = false;
-      saveAndDisplayRemoteAttachment(result);
-    } catch (e) {
-      fetchingTransactionRef.current = false;
-      sentryTrackError(e, { message });
-      setTransaction((a) => ({ ...a, loading: false, error: true }));
-    }
-  }, [currentAccount, message, saveAndDisplayRemoteAttachment]);
-
-  const saveLocalAttachment = useCallback(
-    async (attachmentContent: SerializedAttachmentContent) => {
-      if (!attachmentContent.data) {
-        sentryTrackMessage("LOCAL_ATTACHMENT_NO_DATA", {
-          content: attachmentContent,
-        });
-        setTransaction((a) => ({ ...a, error: true, loading: false }));
-        return;
-      }
-      saveAndDisplayLocalAttachment(attachmentContent);
-    },
-    // TODO open block explorer
-    [saveAndDisplayLocalAttachment]
-  );
-
-  const openInWebview = useCallback(async () => {
-    if (
-      !transaction.mediaURL ||
-      transaction.loading ||
-      transaction.error ||
-      !transaction.mediaURL
-    )
-      return;
-    Linking.openURL(
-      Linking.createURL("/webviewPreview", {
-        queryParams: {
-          uri: `file://${attachment.mediaURL}`,
-        },
-      })
-    );
-  }, [transaction.error, transaction.loading, transaction.mediaURL]);
-  const clickedOnAttachmentBubble = useCallback(() => {
-    if (transaction.mediaType !== "UNSUPPORTED") {
-      openInWebview();
-    }
-  }, [transaction.mediaType, openInWebview]);
 
   useEffect(() => {
     const go = async () => {
@@ -182,7 +104,7 @@ export default function ChatTransactionReference({ message }: Props) {
     } else {
       go();
     }
-  }, [fetchAndDecode, message, saveLocalAttachment]);
+  }, [message]);
 
   const showing =
     !transaction.loading &&
@@ -202,19 +124,6 @@ export default function ChatTransactionReference({ message }: Props) {
     styles.text,
     { color: message.fromMe ? "white" : textPrimaryColor(colorScheme) },
   ];
-
-  useEffect(() => {
-    converseEventEmitter.on(
-      `openAttachmentForMessage-${message.id}`,
-      clickedOnAttachmentBubble
-    );
-    return () => {
-      converseEventEmitter.off(
-        `openAttachmentForMessage-${message.id}`,
-        clickedOnAttachmentBubble
-      );
-    };
-  }, [message.id, clickedOnAttachmentBubble]);
 
   if (transaction.loading) {
     return (
