@@ -8,9 +8,9 @@ import {
   useAccountsList,
 } from "../data/store/accountsStore";
 import { useAppStore } from "../data/store/appStore";
+import { useSelect } from "../data/store/storeHelpers";
 import { getTopicsStatus } from "../utils/api";
 import { loadSavedNotificationMessagesToContext } from "../utils/notifications";
-import { pick } from "../utils/objects";
 import { syncXmtpClient } from "../utils/xmtpRN/client";
 import { createPendingConversations } from "../utils/xmtpRN/conversations";
 import { sendPendingMessages } from "../utils/xmtpRN/send";
@@ -20,8 +20,8 @@ export default function XmtpEngine() {
   const accounts = useAccountsList();
   const syncedAccounts = useRef<{ [account: string]: boolean }>({});
   const syncingAccounts = useRef<{ [account: string]: boolean }>({});
-  const { hydrationDone, isInternetReachable } = useAppStore((s) =>
-    pick(s, ["hydrationDone", "isInternetReachable"])
+  const { hydrationDone, isInternetReachable } = useAppStore(
+    useSelect(["hydrationDone", "isInternetReachable"])
   );
 
   const syncAccounts = useCallback((accountsToSync: string[]) => {

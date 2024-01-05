@@ -37,7 +37,6 @@ import {
 } from "../../utils/evm/helpers";
 import provider from "../../utils/evm/provider";
 import { sendMessage } from "../../utils/message";
-import { pick } from "../../utils/objects";
 import { sentryTrackError } from "../../utils/sentry";
 import {
   refreshBalanceForAccount,
@@ -47,7 +46,7 @@ import ActivityIndicator from "../ActivityIndicator/ActivityIndicator";
 import ChatActionButton from "./ChatActionButton";
 
 export default function ChatTransactionInput() {
-  const { USDCBalance } = useWalletStore((s) => pick(s, ["USDCBalance"]));
+  const USDCBalance = useWalletStore((s) => s.USDCBalance);
   const { conversation, setTransactionMode, transactionMode } =
     useConversationContext([
       "conversation",

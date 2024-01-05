@@ -24,9 +24,9 @@ import {
 } from "../data/store/accountsStore";
 import { useAppStore } from "../data/store/appStore";
 import { useOnboardingStore } from "../data/store/onboardingStore";
+import { useSelect } from "../data/store/storeHelpers";
 import { backgroundColor } from "../utils/colors";
 import { converseEventEmitter } from "../utils/events";
-import { pick } from "../utils/objects";
 import AccountsAndroid from "./Accounts/AccountsAndroid";
 import Navigation from "./Navigation/Navigation";
 import SplitScreenNavigation from "./Navigation/SplitScreenNavigation/SplitScreenNavigation";
@@ -43,8 +43,8 @@ export default function Main() {
   const currentUserName = socials?.userNames?.find((e) => e.isPrimary)?.name;
   const isSplitScreen = useIsSplitScreen();
 
-  const { resetOnboarding, addingNewAccount } = useOnboardingStore((s) =>
-    pick(s, ["resetOnboarding", "addingNewAccount"])
+  const { resetOnboarding, addingNewAccount } = useOnboardingStore(
+    useSelect(["resetOnboarding", "addingNewAccount"])
   );
   // Once the user is fully connected, let's remove the Desktop Connect session id
   useEffect(() => {
@@ -56,8 +56,8 @@ export default function Main() {
     (s) => s.notifications.showNotificationScreen
   );
   const { notificationsPermissionStatus, splashScreenHidden, mediaPreview } =
-    useAppStore((s) =>
-      pick(s, [
+    useAppStore(
+      useSelect([
         "notificationsPermissionStatus",
         "splashScreenHidden",
         "mediaPreview",

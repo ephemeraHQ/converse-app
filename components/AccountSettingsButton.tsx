@@ -15,6 +15,7 @@ import config from "../config";
 import { refreshProfileForAddress } from "../data/helpers/profiles/profilesUpdate";
 import { useAccountsStore } from "../data/store/accountsStore";
 import { useAppStore } from "../data/store/appStore";
+import { useSelect } from "../data/store/storeHelpers";
 import { NavigationParamList } from "../screens/Navigation/Navigation";
 import {
   actionSheetColors,
@@ -27,7 +28,6 @@ import {
   requestPushNotificationsPermissions,
   NotificationPermissionStatus,
 } from "../utils/notifications";
-import { pick } from "../utils/objects";
 import { refreshBalanceForAccounts } from "../utils/wallet";
 import { addLog } from "./DebugButton";
 import Picto from "./Picto/Picto";
@@ -45,14 +45,15 @@ type Props = {
 
 export default function AccountSettingsButton({ navigation, account }: Props) {
   const { setNotificationsPermissionStatus, notificationsPermissionStatus } =
-    useAppStore((s) =>
-      pick(s, [
-        "notificationsPermissionStatus",
+    useAppStore(
+      useSelect([
         "setNotificationsPermissionStatus",
+        "notificationsPermissionStatus",
       ])
     );
-  const { setCurrentAccount, privyAccountId } = useAccountsStore((s) =>
-    pick(s, ["setCurrentAccount", "privyAccountId"])
+
+  const { setCurrentAccount, privyAccountId } = useAccountsStore(
+    useSelect(["setCurrentAccount", "privyAccountId"])
   );
   const { logout: privyLogout } = usePrivy();
   const disconnectWallet = useDisconnect();

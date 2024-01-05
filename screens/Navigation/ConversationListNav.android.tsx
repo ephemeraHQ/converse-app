@@ -15,6 +15,7 @@ import {
 import ProfileSettingsButton from "../../components/ConversationList/ProfileSettingsButton";
 import Picto from "../../components/Picto/Picto";
 import { useChatStore } from "../../data/store/accountsStore";
+import { useSelect } from "../../data/store/storeHelpers";
 import {
   chatInputBackgroundColor,
   headerTitleStyle,
@@ -22,7 +23,6 @@ import {
   textSecondaryColor,
 } from "../../utils/colors";
 import { converseEventEmitter } from "../../utils/events";
-import { pick } from "../../utils/objects";
 import ConversationList from "../ConversationList";
 import { NativeStack, navigationAnimation } from "./Navigation";
 
@@ -37,8 +37,8 @@ export default function ConversationListNav() {
   const shouldShowConnectingOrSyncing = useShouldShowConnectingOrSyncing();
   const shouldShowConnecting = useShouldShowConnecting();
   const { searchQuery, setSearchQuery, searchBarFocused, setSearchBarFocused } =
-    useChatStore((s) =>
-      pick(s, [
+    useChatStore(
+      useSelect([
         "searchQuery",
         "setSearchQuery",
         "searchBarFocused",

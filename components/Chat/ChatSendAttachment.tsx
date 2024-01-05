@@ -13,20 +13,20 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import SendButton from "../../assets/send-button.svg";
 import { useAppStore } from "../../data/store/appStore";
+import { useSelect } from "../../data/store/storeHelpers";
 import {
   dangerColor,
   setAndroidColors,
   setAndroidSystemColor,
 } from "../../utils/colors";
-import { pick } from "../../utils/objects";
 import ActivityIndicator from "../ActivityIndicator/ActivityIndicator";
 import Picto from "../Picto/Picto";
 
 export default function ChatSendAttachment() {
   const colorScheme = useColorScheme();
   const styles = useStyles();
-  const { mediaPreview, setMediaPreview } = useAppStore((s) =>
-    pick(s, ["mediaPreview", "setMediaPreview"])
+  const { mediaPreview, setMediaPreview } = useAppStore(
+    useSelect(["mediaPreview", "setMediaPreview"])
   );
   const insets = useSafeAreaInsets();
   const sendMedia = useCallback(() => {

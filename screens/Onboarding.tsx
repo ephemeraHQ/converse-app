@@ -13,9 +13,9 @@ import {
   useAccountsStore,
 } from "../data/store/accountsStore";
 import { useOnboardingStore } from "../data/store/onboardingStore";
+import { useSelect } from "../data/store/storeHelpers";
 import { saveXmtpKey } from "../utils/keychain";
 import { waitForLogoutTasksDone } from "../utils/logout";
-import { pick } from "../utils/objects";
 import { getXmtpKeysFromSigner } from "../utils/xmtpJS/client";
 import { getXmtpClient } from "../utils/xmtpRN/client";
 
@@ -29,8 +29,8 @@ export default function Onboarding() {
     isEphemeral,
     pkPath,
     privyAccountId,
-  } = useOnboardingStore((s) =>
-    pick(s, [
+  } = useOnboardingStore(
+    useSelect([
       "connectionMethod",
       "desktopConnectSessionId",
       "address",

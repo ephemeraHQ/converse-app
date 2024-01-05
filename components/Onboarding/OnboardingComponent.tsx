@@ -9,13 +9,13 @@ import {
 import Animated, { useAnimatedStyle } from "react-native-reanimated";
 
 import { useOnboardingStore } from "../../data/store/onboardingStore";
+import { useSelect } from "../../data/store/storeHelpers";
 import { useKeyboardAnimation } from "../../utils/animations/keyboardAnimation";
 import {
   backgroundColor,
   textPrimaryColor,
   textSecondaryColor,
 } from "../../utils/colors";
-import { pick } from "../../utils/objects";
 import ActivityIndicator from "../ActivityIndicator/ActivityIndicator";
 import Button from "../Button/Button";
 import Picto from "../Picto/Picto";
@@ -48,8 +48,8 @@ export default function OnboardingComponent({
   inModal,
 }: Props) {
   const styles = useStyles();
-  const { loading: stateLoading, setLoading } = useOnboardingStore((s) =>
-    pick(s, ["loading", "setLoading"])
+  const { loading: stateLoading, setLoading } = useOnboardingStore(
+    useSelect(["loading", "setLoading"])
   );
   const loading = stateLoading || isLoading;
 

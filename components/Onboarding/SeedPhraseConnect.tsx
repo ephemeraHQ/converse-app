@@ -15,13 +15,13 @@ import { AvoidSoftInput } from "react-native-avoid-softinput";
 
 import config from "../../config";
 import { useOnboardingStore } from "../../data/store/onboardingStore";
+import { useSelect } from "../../data/store/storeHelpers";
 import {
   textInputStyle,
   textPrimaryColor,
   textSecondaryColor,
 } from "../../utils/colors";
 import { getPrivateKeyFromMnemonic, validateMnemonic } from "../../utils/eth";
-import { pick } from "../../utils/objects";
 import OnboardingComponent from "./OnboardingComponent";
 
 export const getSignerFromSeedPhraseOrPrivateKey = async (
@@ -55,8 +55,8 @@ export const getSignerFromSeedPhraseOrPrivateKey = async (
 
 export default function SeedPhraseConnect() {
   const { setLoading, setConnectionMethod, setSigner, setIsEphemeral } =
-    useOnboardingStore((s) =>
-      pick(s, [
+    useOnboardingStore(
+      useSelect([
         "setLoading",
         "setConnectionMethod",
         "setSigner",

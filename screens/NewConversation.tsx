@@ -30,6 +30,7 @@ import {
 } from "../data/store/accountsStore";
 import { XmtpConversation } from "../data/store/chatStore";
 import { ProfileSocials } from "../data/store/profilesStore";
+import { useSelect } from "../data/store/storeHelpers";
 import { searchProfiles } from "../utils/api";
 import {
   backgroundColor,
@@ -46,7 +47,7 @@ import {
   getCleanAddress,
   isSupportedPeer,
 } from "../utils/eth";
-import { isEmptyObject, pick } from "../utils/objects";
+import { isEmptyObject } from "../utils/objects";
 import { conversationName } from "../utils/str";
 import { isOnXmtp } from "../utils/xmtpRN/client";
 import { NavigationParamList } from "./Navigation/Navigation";
@@ -88,9 +89,7 @@ export default function NewConversation({
     updatedAt: recommendationsUpdatedAt,
     loading: recommendationsLoading,
     frens,
-  } = useRecommendationsStore((s) =>
-    pick(s, ["updatedAt", "loading", "frens"])
-  );
+  } = useRecommendationsStore(useSelect(["updatedAt", "loading", "frens"]));
   const recommendationsLoadedOnce = recommendationsUpdatedAt > 0;
   const recommendationsFrensCount = Object.keys(frens).length;
 

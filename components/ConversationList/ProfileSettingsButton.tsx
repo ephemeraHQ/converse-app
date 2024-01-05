@@ -15,14 +15,13 @@ import {
 } from "../../data/store/accountsStore";
 import { textSecondaryColor } from "../../utils/colors";
 import { evmHelpers } from "../../utils/evm/helpers";
-import { pick } from "../../utils/objects";
 import Button from "../Button/Button";
 import Picto from "../Picto/Picto";
 
 export default function ProfileSettingsButton() {
   const colorScheme = useColorScheme();
   const isPrivy = useLoggedWithPrivy();
-  const { USDCBalance } = useWalletStore((s) => pick(s, ["USDCBalance"]));
+  const USDCBalance = useWalletStore((s) => s.USDCBalance);
   const [stringBalance, setStringBalance] = useState("");
   const [stringSize, setStringSize] = useState(0);
   const openProfile = useCallback(() => {

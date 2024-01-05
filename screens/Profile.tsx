@@ -47,7 +47,6 @@ import {
 } from "../utils/colors";
 import { evmHelpers } from "../utils/evm/helpers";
 import { logout } from "../utils/logout";
-import { pick } from "../utils/objects";
 import { getIPFSAssetURI } from "../utils/thirdweb";
 import { refreshBalanceForAccount } from "../utils/wallet";
 import { consentToPeersOnProtocol } from "../utils/xmtpRN/conversations";
@@ -58,7 +57,7 @@ export default function ProfileScreen({
   navigation,
 }: NativeStackScreenProps<NavigationParamList, "Profile">) {
   const userAddress = useCurrentAccount() as string;
-  const { USDCBalance } = useWalletStore((s) => pick(s, ["USDCBalance"]));
+  const USDCBalance = useWalletStore((s) => s.USDCBalance);
   const colorScheme = useColorScheme();
   const styles = useStyles();
   const [copiedAddresses, setCopiedAddresses] = useState<{

@@ -16,6 +16,7 @@ import PhoneInput from "react-native-phone-number-input";
 
 import Button from "../../components/Button/Button";
 import { useOnboardingStore } from "../../data/store/onboardingStore";
+import { useSelect } from "../../data/store/storeHelpers";
 import {
   backgroundColor,
   primaryColor,
@@ -24,7 +25,6 @@ import {
   textSecondaryColor,
 } from "../../utils/colors";
 import { usePrivySigner } from "../../utils/evm/helpers";
-import { pick } from "../../utils/objects";
 import { addLog } from "../DebugButton";
 import Picto from "../Picto/Picto";
 import OnboardingComponent from "./OnboardingComponent";
@@ -33,8 +33,8 @@ export default function PrivyConnect() {
   const colorScheme = useColorScheme();
   const styles = useStyles();
   const { setConnectionMethod, setLoading, setSigner, setPrivyAccountId } =
-    useOnboardingStore((s) =>
-      pick(s, [
+    useOnboardingStore(
+      useSelect([
         "setConnectionMethod",
         "setLoading",
         "setSigner",

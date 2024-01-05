@@ -5,12 +5,11 @@ import { GestureHandlerRootView } from "react-native-gesture-handler";
 import AndroidBackAction from "../../components/AndroidBackAction";
 import ConversationFlashList from "../../components/ConversationFlashList";
 import { useChatStore } from "../../data/store/accountsStore";
-import { pick } from "../../utils/objects";
 import { NativeStack, navigationAnimation } from "./Navigation";
 
 export default function ConversationRequestsListNav() {
-  const { sortedConversationsWithPreview } = useChatStore((s) =>
-    pick(s, ["sortedConversationsWithPreview"])
+  const sortedConversationsWithPreview = useChatStore(
+    (s) => s.sortedConversationsWithPreview
   );
   return (
     <NativeStack.Screen

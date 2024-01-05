@@ -15,13 +15,13 @@ import uuid from "react-native-uuid";
 
 import { useAccountsStore } from "../../data/store/accountsStore";
 import { useAppStore } from "../../data/store/appStore";
+import { useSelect } from "../../data/store/storeHelpers";
 import { uploadRemoteAttachment } from "../../utils/attachment";
 import { actionSheetColors } from "../../utils/colors";
 import { useConversationContext } from "../../utils/conversation";
 import { executeAfterKeyboardClosed } from "../../utils/keyboard";
 import { compressAndResizeImage } from "../../utils/media";
 import { sendMessage } from "../../utils/message";
-import { pick } from "../../utils/objects";
 import { sentryTrackMessage } from "../../utils/sentry";
 import {
   encryptRemoteAttachment,
@@ -36,8 +36,8 @@ export default function ChatAddAttachment() {
   const colorScheme = useColorScheme();
 
   const styles = useStyles();
-  const { mediaPreview, setMediaPreview } = useAppStore((s) =>
-    pick(s, ["mediaPreview", "setMediaPreview"])
+  const { mediaPreview, setMediaPreview } = useAppStore(
+    useSelect(["mediaPreview", "setMediaPreview"])
   );
   const [cameraPermissions, requestCameraPermissions] =
     ImagePicker.useCameraPermissions();

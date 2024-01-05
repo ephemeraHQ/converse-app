@@ -13,10 +13,10 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import config from "../../config";
 import { useHasOnePrivyAccount } from "../../data/store/accountsStore";
 import { useOnboardingStore } from "../../data/store/onboardingStore";
+import { useSelect } from "../../data/store/storeHelpers";
 import { textSecondaryColor } from "../../utils/colors";
 import { isDesktop } from "../../utils/device";
 import { getEthOSSigner } from "../../utils/ethos";
-import { pick } from "../../utils/objects";
 import Button from "../Button/Button";
 import TableView from "../TableView/TableView";
 import {
@@ -40,8 +40,8 @@ export default function WalletSelector() {
     setLoading,
     addingNewAccount,
     setAddingNewAccount,
-  } = useOnboardingStore((s) =>
-    pick(s, [
+  } = useOnboardingStore(
+    useSelect([
       "setConnectionMethod",
       "setSigner",
       "setLoading",

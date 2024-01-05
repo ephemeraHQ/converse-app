@@ -13,8 +13,8 @@ import Connecting, {
 import NewConversationButton from "../../components/ConversationList/NewConversationButton";
 import ProfileSettingsButton from "../../components/ConversationList/ProfileSettingsButton";
 import { useAccountsStore, useChatStore } from "../../data/store/accountsStore";
+import { useSelect } from "../../data/store/storeHelpers";
 import { headerTitleStyle } from "../../utils/colors";
-import { pick } from "../../utils/objects";
 import { getReadableProfile } from "../../utils/str";
 import ConversationList from "../ConversationList";
 import {
@@ -37,8 +37,8 @@ export const useHeaderSearchBar = ({
   navigation,
   searchBarRef,
 }: HeaderSearchBarProps) => {
-  const { setSearchQuery, setSearchBarFocused } = useChatStore((s) =>
-    pick(s, ["setSearchQuery", "setSearchBarFocused"])
+  const { setSearchQuery, setSearchBarFocused } = useChatStore(
+    useSelect(["setSearchQuery", "setSearchBarFocused"])
   );
 
   useLayoutEffect(() => {
