@@ -1,6 +1,5 @@
-import { useNavigation } from "@react-navigation/native";
-import { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import React, { useEffect, useState } from "react";
+import * as Linking from "expo-linking";
+import React, { useCallback, useEffect, useState } from "react";
 import {
   Platform,
   PlatformColor,
@@ -14,7 +13,6 @@ import {
   useLoggedWithPrivy,
   useWalletStore,
 } from "../../data/store/accountsStore";
-import { NavigationParamList } from "../../screens/Navigation/Navigation";
 import { textSecondaryColor } from "../../utils/colors";
 import { evmHelpers } from "../../utils/evm/helpers";
 import { pick } from "../../utils/objects";
@@ -22,16 +20,18 @@ import Button from "../Button/Button";
 import Picto from "../Picto/Picto";
 
 export default function ProfileSettingsButton() {
-  const navigation = useNavigation() as NativeStackNavigationProp<
-    NavigationParamList,
-    "Chats",
-    undefined
-  >;
   const colorScheme = useColorScheme();
   const isPrivy = useLoggedWithPrivy();
   const { USDCBalance } = useWalletStore((s) => pick(s, ["USDCBalance"]));
   const [stringBalance, setStringBalance] = useState("");
   const [stringSize, setStringSize] = useState(0);
+  const openProfile = useCallback(() => {
+    Linking.openURL(
+      Linking.createURL("/profile", {
+        queryParams: { address: currentAccount() },
+      })
+    );
+  }, []);
   useEffect(() => {
     const intBalance = parseInt(
       evmHelpers.fromDecimal(USDCBalance, config.evm.USDC.decimals),
@@ -54,9 +54,7 @@ export default function ProfileSettingsButton() {
         <Button
           variant="primary"
           title={stringBalance}
-          onPress={() => {
-            navigation.navigate("Profile", { address: currentAccount() });
-          }}
+          onPress={openProfile}
           style={{
             position: "absolute",
             right: 30,
@@ -79,20 +77,13 @@ export default function ProfileSettingsButton() {
       <Button
         variant="text"
         title={stringBalance}
-        onPress={() => {
-          navigation.navigate("Profile", { address: currentAccount() });
-        }}
+        onPress={openProfile}
         style={{ marginTop: 3.5, marginRight: 16 }}
       />
     );
   }
   return (
-    <TouchableOpacity
-      activeOpacity={0.2}
-      onPress={() => {
-        navigation.navigate("Profile", { address: currentAccount() });
-      }}
-    >
+    <TouchableOpacity activeOpacity={0.2} onPress={openProfile}>
       <Picto
         picto="person"
         weight="medium"

@@ -4,6 +4,20 @@ import { navigationSecondaryBackgroundColor } from "../../utils/colors";
 import WebviewPreview from "../WebviewPreview";
 import { NativeStack, navigationAnimation } from "./Navigation";
 
+export type WebviewPreviewNavParams = {
+  uri: string;
+};
+
+export const WebviewPreviewScreenConfig = {
+  path: "/webviewPreview",
+  parse: {
+    uri: decodeURIComponent,
+  },
+  stringify: {
+    uri: encodeURIComponent,
+  },
+};
+
 export default function WebviewPreviewNav() {
   const colorScheme = useColorScheme();
   return (

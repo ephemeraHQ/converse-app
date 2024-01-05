@@ -22,6 +22,7 @@ import {
   NavigationParamList,
   navigationAnimation,
 } from "./Navigation";
+import { useIsSplitScreen } from "./navHelpers";
 
 type HeaderSearchBarProps = {
   searchBarRef: React.RefObject<any>;
@@ -71,6 +72,7 @@ export default function ConversationListNav() {
 
   const shouldShowConnectingOrSyncing = useShouldShowConnectingOrSyncing();
   const currentAccount = useAccountsStore((s) => s.currentAccount);
+  const isSplitScreen = useIsSplitScreen();
 
   return (
     <NativeStack.Screen
@@ -80,7 +82,9 @@ export default function ConversationListNav() {
           shouldShowConnectingOrSyncing ? <Connecting /> : undefined,
         headerLargeTitle: true,
         headerTitleStyle: headerTitleStyle(colorScheme),
-        headerBackTitle: getReadableProfile(currentAccount, currentAccount),
+        headerBackTitle: isSplitScreen
+          ? undefined
+          : getReadableProfile(currentAccount, currentAccount),
         headerRight: () => (
           <>
             <ProfileSettingsButton />

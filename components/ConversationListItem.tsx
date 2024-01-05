@@ -1,4 +1,5 @@
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import * as Linking from "expo-linking";
 import React, { memo, useCallback, useEffect, useRef, useState } from "react";
 import {
   ColorSchemeName,
@@ -20,8 +21,8 @@ import {
   useChatStore,
   useSettingsStore,
 } from "../data/store/accountsStore";
-import { drawerNav } from "../screens/Navigation/DrawerNavigation/DrawerNavigation";
 import { NavigationParamList } from "../screens/Navigation/Navigation";
+import { useIsSplitScreen } from "../screens/Navigation/navHelpers";
 import { deleteTopics } from "../utils/api";
 import {
   actionSecondaryColor,
@@ -36,6 +37,7 @@ import {
 } from "../utils/colors";
 import { getRelativeDateTime } from "../utils/date";
 import { converseEventEmitter } from "../utils/events";
+import { pick } from "../utils/objects";
 import { consentToPeersOnProtocol } from "../utils/xmtpRN/conversations";
 import { showActionSheetWithOptions } from "./StateHandlers/ActionSheetStateHandler";
 
@@ -66,8 +68,11 @@ const ConversationListItem = memo(function ConversationListItem({
 }: ConversationListItemProps) {
   const styles = getStyles(colorScheme);
   const timeToShow = getRelativeDateTime(conversationTime);
-  const setTopicsStatus = useChatStore((s) => s.setTopicsStatus);
+  const { setTopicsStatus, openedConversationTopic } = useChatStore((s) =>
+    pick(s, ["setTopicsStatus", "openedConversationTopic"])
+  );
   const setPeersStatus = useSettingsStore((s) => s.setPeersStatus);
+  const isSplitScreen = useIsSplitScreen();
   const [selected, setSelected] = useState(false);
   const resetSelected = useCallback(() => {
     setSelected(false);
@@ -173,20 +178,39 @@ const ConversationListItem = memo(function ConversationListItem({
     styles.rightAction,
   ]);
 
+  const displayAsSelected =
+    (isSplitScreen && openedConversationTopic === conversationTopic) ||
+    (!isSplitScreen && selected);
+
   const rowItem =
     Platform.OS === "ios" ? (
       <TouchableHighlight
         underlayColor={clickedItemBackgroundColor(colorScheme)}
         delayPressIn={75}
+        onPressIn={() => {
+          if (!isSplitScreen) return;
+          Linking.openURL(
+            Linking.createURL("/conversation", {
+              queryParams: {
+                topic: conversationTopic,
+              },
+            })
+          );
+        }}
         onPress={() => {
-          ((drawerNav as any) || navigation).navigate("Conversation", {
-            topic: conversationTopic,
-          });
+          if (isSplitScreen) return;
+          Linking.openURL(
+            Linking.createURL("/conversation", {
+              queryParams: {
+                topic: conversationTopic,
+              },
+            })
+          );
           setSelected(true);
         }}
         style={[
           {
-            backgroundColor: selected
+            backgroundColor: displayAsSelected
               ? clickedItemBackgroundColor(colorScheme)
               : backgroundColor(colorScheme),
             height: 76,

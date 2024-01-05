@@ -5,6 +5,14 @@ import { textSecondaryColor } from "../../utils/colors";
 import ProfileScreen from "../Profile";
 import { NativeStack, navigationAnimation } from "./Navigation";
 
+export type ProfileNavParams = {
+  address: string;
+};
+
+export const ProfileScreenConfig = {
+  path: "/profile",
+};
+
 export default function ProfileNav() {
   const colorScheme = useColorScheme();
   const account = useCurrentAccount();
