@@ -12,12 +12,12 @@ import { getConverseInitialURL, getConverseStateFromPath } from "../navHelpers";
 import SplitLeftStackNavigation from "./SplitLeftStackNavigation";
 import SplitRightStackNavigation from "./SplitRightStackNavigation";
 
-type DrawerParams = {
+export type SplitScreenDrawerParams = {
   Chats: undefined;
   Conversation: ConversationNavParams;
 };
 
-const Drawer = createDrawerNavigator<DrawerParams>();
+const Drawer = createDrawerNavigator<SplitScreenDrawerParams>();
 
 const prefix = Linking.createURL("/");
 const linking = {
@@ -46,16 +46,14 @@ export default function SplitScreenNavigation() {
         screenOptions={{
           headerShown: false,
           drawerType: "permanent",
-          drawerStyle: { width: "39%" },
+          drawerStyle: { width: 400 },
           drawerContentContainerStyle: { paddingTop: 4 },
           overlayColor: "transparent",
         }}
       >
         <Drawer.Screen name="Conversation">
           {(navigationProps) => (
-            <SplitRightStackNavigation
-              topic={navigationProps.route.params?.topic}
-            />
+            <SplitRightStackNavigation route={navigationProps.route} />
           )}
         </Drawer.Screen>
       </Drawer.Navigator>
