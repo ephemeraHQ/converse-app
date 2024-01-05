@@ -1,4 +1,4 @@
-import { NavigationContainer } from "@react-navigation/native";
+import { NavigationContainer, RouteProp } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import * as Linking from "expo-linking";
 import { Platform, useColorScheme } from "react-native";
@@ -26,6 +26,7 @@ import WebviewPreviewNav, {
   WebviewPreviewScreenConfig,
 } from "../WebviewPreviewNav";
 import { stackGroupScreenOptions } from "../navHelpers";
+import { SplitScreenDrawerParams } from "./SplitScreenNavigation";
 
 export type NavigationParamList = {
   Conversation: ConversationNavParams;
@@ -56,9 +57,9 @@ const linking = {
 export const navigationAnimation = Platform.OS === "ios" ? "default" : "none";
 
 export default function SplitRightStackNavigation({
-  topic,
+  route,
 }: {
-  topic: string | undefined;
+  route: RouteProp<SplitScreenDrawerParams, "Conversation">;
 }) {
   const colorScheme = useColorScheme();
   const splashScreenHidden = useAppStore((s) => s.splashScreenHidden);
@@ -69,7 +70,7 @@ export default function SplitRightStackNavigation({
     >
       <NativeStack.Navigator screenOptions={{ gestureEnabled: !isDesktop }}>
         <NativeStack.Group screenOptions={stackGroupScreenOptions(colorScheme)}>
-          {ConversationNav(topic)}
+          {ConversationNav(route.params)}
           {NewConversationNav()}
           {ShareProfileNav()}
           {WebviewPreviewNav()}

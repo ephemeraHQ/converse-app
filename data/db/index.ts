@@ -38,7 +38,7 @@ export const getRepository = async <T extends keyof RepositoriesForAccount>(
   // early will not fail but just take longer to execute!
 
   while (!repositories[account]?.[entity]) {
-    console.warn(`Database for ${account} not yet initialized`);
+    console.log(`Database for ${account} not yet initialized`);
     await new Promise((r) => setTimeout(r, 100));
   }
   return repositories[account][entity];

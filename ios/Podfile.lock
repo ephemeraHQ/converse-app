@@ -127,7 +127,7 @@ PODS:
   - EXTaskManager (11.3.0):
     - ExpoModulesCore
     - UMAppLoader
-  - EXUpdates (0.18.18):
+  - EXUpdates (0.18.19):
     - ASN1Decoder (~> 1.8)
     - EASClient
     - EXManifests
@@ -663,9 +663,9 @@ PODS:
     - React-RCTText
     - ReactCommon/turbomodule/core
     - Yoga
-  - RNScreens (3.22.1):
+  - RNScreens (3.29.0):
+    - RCT-Folly (= 2021.07.22.00)
     - React-Core
-    - React-RCTImage
   - RNSentry (5.14.1):
     - hermes-engine
     - React-Core
@@ -1081,7 +1081,7 @@ SPEC CHECKSUMS:
   EXSplashScreen: 2c80621e4bc952f5bea328304c2436f5fe21c2a0
   EXStructuredHeaders: 324cc3130571d2696357fafd8be7fd9a0b5fdf6e
   EXTaskManager: f1730c315eb6fe457a3a2ee4ed899a51d717f302
-  EXUpdates: 807b1322dcf275921557cab16c94e124a0ca8393
+  EXUpdates: 59d641d0873236c76ef987917c32de8c210333ea
   EXUpdatesInterface: 82ed48d417cdcd376c12ca1c2ce390d35500bed6
   FBLazyVector: 748c0ef74f2bf4b36cfcccf37916806940a64c32
   FBReactNativeSpec: 966f29e4e697de53a3b366355e8f57375c856ad9
@@ -1152,7 +1152,7 @@ SPEC CHECKSUMS:
   RNLocalize: dbea38dcb344bf80ff18a1757b1becf11f70cae4
   RNReactNativeSharedGroupPreferences: de0121a4224c267bc7e9fb16c398f3f087c8da81
   RNReanimated: 9f7068e43b9358a46a688d94a5a3adb258139457
-  RNScreens: 50ffe2fa2342eabb2d0afbe19f7c1af286bc7fb3
+  RNScreens: 1c2444658fbb696a094272d946708167b1f63409
   RNSentry: ee1a9a80996414205d84ce9180c31bd855fd4641
   RNSVG: 80584470ff1ffc7994923ea135a3e5ad825546b9
   SDWebImage: cb032eba469c54e0000e78bcb0a13cdde0a52798

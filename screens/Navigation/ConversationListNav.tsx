@@ -15,6 +15,7 @@ import ProfileSettingsButton from "../../components/ConversationList/ProfileSett
 import { useAccountsStore, useChatStore } from "../../data/store/accountsStore";
 import { useSelect } from "../../data/store/storeHelpers";
 import { headerTitleStyle } from "../../utils/colors";
+import { isDesktop } from "../../utils/device";
 import { getReadableProfile } from "../../utils/str";
 import ConversationList from "../ConversationList";
 import {
@@ -45,10 +46,10 @@ export const useHeaderSearchBar = ({
     navigation.setOptions({
       headerSearchBarOptions: {
         ref: searchBarRef as React.RefObject<SearchBarCommands>,
-        hideNavigationBar: true,
+        hideNavigationBar: !isDesktop,
         // set to hideWhenScrolling to `false` to  to make the search bar always visible
         // set it to `true` to avoid a visual glitch while loading conversations during initial load
-        hideWhenScrolling: true,
+        hideWhenScrolling: !isDesktop,
         autoFocus: false,
         placeholder: "Search",
         onChangeText: (
@@ -83,7 +84,7 @@ export default function ConversationListNav() {
         headerLargeTitle: true,
         headerTitleStyle: headerTitleStyle(colorScheme),
         headerBackTitle: isSplitScreen
-          ? undefined
+          ? "Accounts"
           : getReadableProfile(currentAccount, currentAccount),
         headerRight: () => (
           <>

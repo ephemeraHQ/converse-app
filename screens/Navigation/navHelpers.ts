@@ -4,6 +4,7 @@ import { ColorSchemeName, Platform, useWindowDimensions } from "react-native";
 import { initialURL } from "../../components/StateHandlers/InitialStateHandler";
 import config from "../../config";
 import { backgroundColor, headerTitleStyle } from "../../utils/colors";
+import { isDesktop } from "../../utils/device";
 
 export const getConverseStateFromPath = (path: string, options: any) => {
   // dm method must link to the Conversation Screen as well
@@ -82,5 +83,5 @@ export const screenListeners =
 export const useIsSplitScreen = () => {
   const dimensions = useWindowDimensions();
 
-  return dimensions.width > config.splitScreenThreshold;
+  return dimensions.width > config.splitScreenThreshold || isDesktop;
 };
