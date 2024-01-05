@@ -4,6 +4,10 @@ import { navigationSecondaryBackgroundColor } from "../../utils/colors";
 import ShareProfileScreen from "../ShareProfile";
 import { NativeStack, navigationAnimation } from "./Navigation";
 
+export const ShareProfileScreenConfig = {
+  path: "/shareProfile",
+};
+
 export default function ShareProfileNav() {
   const colorScheme = useColorScheme();
   return (

@@ -28,8 +28,9 @@ import { backgroundColor } from "../utils/colors";
 import { converseEventEmitter } from "../utils/events";
 import { pick } from "../utils/objects";
 import AccountsAndroid from "./Accounts/AccountsAndroid";
-import DrawerNavigation from "./Navigation/DrawerNavigation/DrawerNavigation";
 import Navigation from "./Navigation/Navigation";
+import SplitScreenNavigation from "./Navigation/SplitScreenNavigation/SplitScreenNavigation";
+import { useIsSplitScreen } from "./Navigation/navHelpers";
 import NotificationsScreen from "./NotificationsScreen";
 import Onboarding from "./Onboarding";
 
@@ -40,6 +41,7 @@ export default function Main() {
     userAddress ? s.profiles[userAddress]?.socials : undefined
   );
   const currentUserName = socials?.userNames?.find((e) => e.isPrimary)?.name;
+  const isSplitScreen = useIsSplitScreen();
 
   const { resetOnboarding, addingNewAccount } = useOnboardingStore((s) =>
     pick(s, ["resetOnboarding", "addingNewAccount"])
@@ -124,8 +126,10 @@ export default function Main() {
           <Navigation />
         </DrawerLayoutAndroid>
       );
+    } else if (isSplitScreen) {
+      screenToShow = <SplitScreenNavigation />;
     } else {
-      screenToShow = <DrawerNavigation />;
+      screenToShow = <Navigation />;
     }
   }
 

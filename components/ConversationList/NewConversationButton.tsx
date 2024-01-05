@@ -1,4 +1,5 @@
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
+import * as Linking from "expo-linking";
 import React, { useCallback, useRef } from "react";
 import {
   Platform,
@@ -14,13 +15,13 @@ import Picto from "../Picto/Picto";
 
 export default function NewConversationButton({
   navigation,
-}: NativeStackScreenProps<NavigationParamList, "Chats">) {
+}: NativeStackScreenProps<NavigationParamList, "Chats" | "Conversation">) {
   const colorScheme = useColorScheme();
   const debugRef = useRef();
   const enableDebug = useEnableDebug();
   const onPress = useCallback(() => {
-    navigation.navigate("NewConversation", {});
-  }, [navigation]);
+    Linking.openURL(Linking.createURL("/newConversation"));
+  }, []);
   const onLongPress = useCallback(() => {
     if (
       !enableDebug ||
