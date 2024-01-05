@@ -286,15 +286,15 @@ export const initChatStore = (account: string) => {
                   } as XmtpConversationWithUpdate;
                   isUpdated = true;
                 }
-                // TODO => handle specific content types
                 if (
-                  isContentType("text", message.contentType) &&
-                  message.content &&
-                  message.content.includes("💸💸💸  just sent you $")
+                  (isContentType("text", message.contentType) &&
+                    message.content &&
+                    message.content.includes("💸💸💸  just sent you $")) ||
+                  isContentType("transactionReference", message.contentType) ||
+                  isContentType("coinbasePayment", message.contentType)
                 ) {
                   shouldRefreshBalance = true;
                 }
-
                 const conversation = newState.conversations[topic];
                 if (
                   message.senderAddress === account &&
