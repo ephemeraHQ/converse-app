@@ -23,7 +23,7 @@ type Transaction = {
 export type TransactionsStoreType = {
   transactions: { [id: string]: Transaction };
 
-  addTransaction: (transaction: Transaction) => void;
+  setTransactions: (transactions: Transaction[]) => void;
   updateTransaction: (id: string, updates: Partial<Transaction>) => void;
 
   getEvents: (id: string) => any[];
@@ -37,21 +37,19 @@ export const initTransactionsStore = (account: string) => {
         ({
           transactions: {},
 
-          addTransaction: (transaction) =>
-            set((state) => ({
-              transactions: {
-                ...state.transactions,
-                [transaction.id]: transaction,
-              },
-            })),
+          setTransactions: (transactions) =>
+            set((state) => {
+              const updatedTransactions = { ...state.transactions };
 
-          updateTransaction: (id, updates) =>
-            set((state) => ({
-              transactions: {
-                ...state.transactions,
-                [id]: { ...state.transactions[id], ...updates },
-              },
-            })),
+              transactions.forEach((transaction) => {
+                updatedTransactions[transaction.id] = {
+                  ...(updatedTransactions[transaction.id] || {}),
+                  ...transaction,
+                };
+              });
+
+              return { transactions: updatedTransactions };
+            }),
 
           getEvents: (id) => {
             const transaction = get().transactions[id];
