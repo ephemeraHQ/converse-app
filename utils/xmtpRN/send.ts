@@ -87,10 +87,9 @@ export const sendPendingMessages = async (account: string) => {
             reaction: JSON.parse(message.content),
           });
         } else if (isContentType("transactionReference", message.contentType)) {
-          await conversation.send(JSON.parse(message.content), {
+          preparedMessage = await conversation.prepareMessage(message.content, {
             contentType: ContentTypeTransactionReference,
           });
-          return;
         } else {
           preparedMessage = await conversation.prepareMessage({
             text: message.content,
