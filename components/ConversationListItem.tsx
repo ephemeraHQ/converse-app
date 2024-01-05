@@ -20,6 +20,7 @@ import {
   useChatStore,
   useSettingsStore,
 } from "../data/store/accountsStore";
+import { drawerNav } from "../screens/Navigation/DrawerNavigation/DrawerNavigation";
 import { NavigationParamList } from "../screens/Navigation/Navigation";
 import { deleteTopics } from "../utils/api";
 import {
@@ -178,7 +179,7 @@ const ConversationListItem = memo(function ConversationListItem({
         underlayColor={clickedItemBackgroundColor(colorScheme)}
         delayPressIn={75}
         onPress={() => {
-          navigation.navigate("Conversation", {
+          ((drawerNav as any) || navigation).navigate("Conversation", {
             topic: conversationTopic,
           });
           setSelected(true);

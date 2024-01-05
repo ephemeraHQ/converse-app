@@ -60,8 +60,12 @@ const Conversation = ({
 
   // Initial conversation topic will be set only if in route params
   const [_conversationTopic, setConversationTopic] = useState(
-    route.params.topic
+    route.params?.topic
   );
+
+  useEffect(() => {
+    setConversationTopic(route.params.topic);
+  }, [route.params?.topic]);
 
   // When we set the conversation topic, we check if it has been mapped
   // to a new one (for pending conversations)
@@ -78,8 +82,8 @@ const Conversation = ({
   // Initial peer address will be set from the route params
   // for main convo or through the found convo if exists
   const [peerAddress, setPeerAddress] = useState(
-    isAddress(route.params.mainConversationWithPeer || "")
-      ? route.params.mainConversationWithPeer
+    isAddress(route.params?.mainConversationWithPeer || "")
+      ? route.params?.mainConversationWithPeer
       : conversation?.peerAddress
   );
 
@@ -101,13 +105,13 @@ const Conversation = ({
         setConversation(foundConversation);
       }
     } else if (
-      route.params.mainConversationWithPeer &&
+      route.params?.mainConversationWithPeer &&
       !openedMainConvo.current
     ) {
       openedMainConvo.current = true;
       openMainConversationWithPeer(
         currentAccount(),
-        route.params.mainConversationWithPeer,
+        route.params?.mainConversationWithPeer,
         setConversationTopic,
         navigation.goBack
       );
@@ -116,7 +120,7 @@ const Conversation = ({
     conversationTopic,
     conversations,
     navigation.goBack,
-    route.params.mainConversationWithPeer,
+    route.params?.mainConversationWithPeer,
   ]);
 
   const isBlockedPeer = conversation?.peerAddress
@@ -126,7 +130,7 @@ const Conversation = ({
   const textInputRef = useRef<TextInputWithValue>();
 
   const messageToPrefill =
-    route.params.message || conversation?.messageDraft || "";
+    route.params?.message || conversation?.messageDraft || "";
 
   const focusOnLayout = useRef(false);
   const chatLayoutDone = useRef(false);
@@ -143,7 +147,7 @@ const Conversation = ({
     }
   }, []);
 
-  const autofocus = route.params.focus || isDesktop;
+  const autofocus = route.params?.focus || isDesktop;
 
   useEffect(() => {
     const unsubscribe = navigation.addListener("transitionEnd", (e) => {
