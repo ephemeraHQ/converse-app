@@ -28,6 +28,7 @@ import { backgroundColor } from "../utils/colors";
 import { converseEventEmitter } from "../utils/events";
 import { pick } from "../utils/objects";
 import AccountsAndroid from "./Accounts/AccountsAndroid";
+import DrawerNavigation from "./Navigation/DrawerNavigation/DrawerNavigation";
 import Navigation from "./Navigation/Navigation";
 import NotificationsScreen from "./NotificationsScreen";
 import Onboarding from "./Onboarding";
@@ -124,7 +125,7 @@ export default function Main() {
         </DrawerLayoutAndroid>
       );
     } else {
-      screenToShow = <Navigation />;
+      screenToShow = <DrawerNavigation />;
     }
   }
 
