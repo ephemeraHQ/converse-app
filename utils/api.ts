@@ -237,8 +237,8 @@ export const getTransactionDetails = async (
   reference: string
 ): Promise<string> => {
   const { data } = await api.get("/api/evm/transactionDetails", {
-    params: { networkId, reference },
     headers: await getXmtpApiHeaders(account),
+    params: { networkId, reference },
   });
   return data;
 };
@@ -249,8 +249,8 @@ export const getCoinbaseTransactionDetails = async (
   sponsoredTxId: string
 ): Promise<string> => {
   const { data } = await api.get("/api/evm/coinbaseTransactionDetails", {
-    params: { networkId, sponsoredTxId },
     headers: await getXmtpApiHeaders(account),
+    params: { networkId, sponsoredTxId },
   });
   return data;
 };
