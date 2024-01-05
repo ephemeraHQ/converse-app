@@ -10,6 +10,7 @@ import {
   useSettingsStoreForAccount,
 } from "../../data/store/accountsStore";
 import { useAppStore } from "../../data/store/appStore";
+import { useSelect } from "../../data/store/storeHelpers";
 import { saveUser } from "../../utils/api";
 import { sortAndComputePreview } from "../../utils/conversation";
 import { executeLogoutTasks } from "../../utils/logout";
@@ -19,7 +20,6 @@ import {
   resetNotifications,
   shouldShowNotificationForeground,
 } from "../../utils/notifications";
-import { pick } from "../../utils/objects";
 
 // This handler determines how the app handles
 // notifications that come in while the app is foregrounded
@@ -94,10 +94,8 @@ const AccountNotificationsStateHandler = ({ account }: { account: string }) => {
   const hydrationDone = useAppStore((s) => s.hydrationDone);
   const { conversations, topicsStatus, lastUpdateAt } = useChatStoreForAccount(
     account
-  )((s) => pick(s, ["conversations", "topicsStatus", "lastUpdateAt"]));
-  const { peersStatus } = useSettingsStoreForAccount(account)((s) =>
-    pick(s, ["peersStatus"])
-  );
+  )(useSelect(["conversations", "topicsStatus", "lastUpdateAt"]));
+  const peersStatus = useSettingsStoreForAccount(account)((s) => s.peersStatus);
   const lastRefreshState = useRef({
     account,
     conversations: 0,

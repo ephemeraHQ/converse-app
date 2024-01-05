@@ -8,13 +8,13 @@ import {
   useCurrentAccount,
   useSettingsStore,
 } from "../data/store/accountsStore";
+import { useSelect } from "../data/store/storeHelpers";
 import { NavigationParamList } from "../screens/Navigation/Navigation";
 import { backgroundColor } from "../utils/colors";
 import {
   ConversationFlatListItem,
   ConversationWithLastMessagePreview,
 } from "../utils/conversation";
-import { pick } from "../utils/objects";
 import { conversationName } from "../utils/str";
 import ConversationListItem from "./ConversationListItem";
 
@@ -35,11 +35,16 @@ export default function ConversationFlashList({
 }: Props) {
   const styles = useStyles();
   const colorScheme = useColorScheme();
-  const { lastUpdateAt, initialLoadDoneOnce } = useChatStore((s) =>
-    pick(s, ["initialLoadDoneOnce", "lastUpdateAt"])
-  );
+  const { lastUpdateAt, initialLoadDoneOnce, openedConversationTopic } =
+    useChatStore(
+      useSelect([
+        "lastUpdateAt",
+        "initialLoadDoneOnce",
+        "openedConversationTopic",
+      ])
+    );
   const userAddress = useCurrentAccount() as string;
-  const { peersStatus } = useSettingsStore((s) => pick(s, ["peersStatus"]));
+  const peersStatus = useSettingsStore((s) => s.peersStatus);
 
   const keyExtractor = useCallback((item: ConversationFlatListItem) => {
     return item.topic;
@@ -80,10 +85,18 @@ export default function ConversationFlashList({
             !!lastMessagePreview &&
             lastMessagePreview.message?.senderAddress === userAddress
           }
+          conversationOpened={conversation.topic === openedConversationTopic}
         />
       );
     },
-    [colorScheme, initialLoadDoneOnce, navigation, peersStatus, userAddress]
+    [
+      colorScheme,
+      initialLoadDoneOnce,
+      navigation,
+      openedConversationTopic,
+      peersStatus,
+      userAddress,
+    ]
   );
   return (
     <View style={styles.container}>

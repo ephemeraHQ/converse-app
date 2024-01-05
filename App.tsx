@@ -20,6 +20,7 @@ import { Provider as PaperProvider } from "react-native-paper";
 import XmtpEngine from "./components/XmtpEngine";
 import config from "./config";
 import { useAppStore } from "./data/store/appStore";
+import { useSelect } from "./data/store/storeHelpers";
 import {
   updateLastVersionOpen,
   runAsyncUpdates,
@@ -34,7 +35,6 @@ import {
 } from "./utils/colors";
 import { privySecureStorage } from "./utils/keychain";
 import mmkv from "./utils/mmkv";
-import { pick } from "./utils/objects";
 import { DEFAULT_EMOJIS, RECENT_EMOJI_STORAGE_KEY } from "./utils/reactions";
 import { initSentry, sentryTrackError } from "./utils/sentry";
 import { useRecentPicksPersistence } from "./vendor/rn-emoji-keyboard";
@@ -68,8 +68,9 @@ export default function App() {
     },
   });
   const [refactoMigrationDone, setRefactoMigrationDone] = useState(false);
-  const { isInternetReachable, hydrationDone } = useAppStore((s) =>
-    pick(s, ["isInternetReachable", "hydrationDone"])
+
+  const { isInternetReachable, hydrationDone } = useAppStore(
+    useSelect(["isInternetReachable", "hydrationDone"])
   );
 
   useEffect(() => {

@@ -11,13 +11,10 @@ import {
   useCurrentAccount,
 } from "../../data/store/accountsStore";
 import { getSecureItemAsync } from "../keychain";
-import { pick } from "../objects";
 
 export const usePrivySigner = (onboarding: boolean = false) => {
   const currentAccount = useCurrentAccount();
-  const { privyAccountId } = useAccountsStore((s) =>
-    pick(s, ["privyAccountId"])
-  );
+  const privyAccountId = useAccountsStore((s) => s.privyAccountId);
   const { isReady: privyReady, user: privyUser } = usePrivy();
   const embeddedWallet = useEmbeddedWallet();
   const [hasSwitchedNetwork, setHasSwitchedNetwork] = useState(false);

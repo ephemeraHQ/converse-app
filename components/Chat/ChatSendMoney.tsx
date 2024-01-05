@@ -16,22 +16,20 @@ import {
   // useWalletStore,
 } from "../../data/store/accountsStore";
 import { useOnboardingStore } from "../../data/store/onboardingStore";
+import { useSelect } from "../../data/store/storeHelpers";
 import { NavigationParamList } from "../../screens/Navigation/Navigation";
 import { useConversationContext } from "../../utils/conversation";
 import { converseEventEmitter } from "../../utils/events";
 import { usePrivySigner } from "../../utils/evm/helpers";
 import { executeAfterKeyboardClosed } from "../../utils/keyboard";
-import { pick } from "../../utils/objects";
 import ChatActionButton from "./ChatActionButton";
 
 export default function ChatSendMoney() {
   const { setTransactionMode } = useConversationContext(["setTransactionMode"]);
-  const { setAddingNewAccount, setConnectionMethod } = useOnboardingStore((s) =>
-    pick(s, ["setAddingNewAccount", "setConnectionMethod"])
+  const { setAddingNewAccount, setConnectionMethod } = useOnboardingStore(
+    useSelect(["setAddingNewAccount", "setConnectionMethod"])
   );
-  const { setCurrentAccount } = useAccountsStore((s) =>
-    pick(s, ["setCurrentAccount"])
-  );
+  const setCurrentAccount = useAccountsStore((s) => s.setCurrentAccount);
   const navigation = useNavigation() as NativeStackNavigationProp<
     NavigationParamList,
     "Chats",

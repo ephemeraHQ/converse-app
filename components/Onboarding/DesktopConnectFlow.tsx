@@ -6,6 +6,7 @@ import { StyleSheet, useColorScheme, Text, Platform } from "react-native";
 import { initDb } from "../../data/db";
 import { useAccountsStore } from "../../data/store/accountsStore";
 import { useOnboardingStore } from "../../data/store/onboardingStore";
+import { useSelect } from "../../data/store/storeHelpers";
 import {
   fetchDesktopSessionXmtpKey,
   markDesktopSessionDone,
@@ -18,7 +19,6 @@ import {
 } from "../../utils/colors";
 import { isDesktop } from "../../utils/device";
 import { saveXmtpKey } from "../../utils/keychain";
-import { pick } from "../../utils/objects";
 import {
   getXmtpClient,
   getXmtpClientFromBase64Key,
@@ -27,8 +27,8 @@ import OnboardingComponent from "./OnboardingComponent";
 
 export default function DesktopConnectFlow() {
   const { desktopConnectSessionId, setDesktopConnectSessionId } =
-    useOnboardingStore((s) =>
-      pick(s, ["desktopConnectSessionId", "setDesktopConnectSessionId"])
+    useOnboardingStore(
+      useSelect(["desktopConnectSessionId", "setDesktopConnectSessionId"])
     );
   const styles = useStyles();
   const [localState, setLocalState] = useState({

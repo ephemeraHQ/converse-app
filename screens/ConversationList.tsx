@@ -27,6 +27,7 @@ import {
   useCurrentAccount,
 } from "../data/store/accountsStore";
 import { XmtpConversation } from "../data/store/chatStore";
+import { useSelect } from "../data/store/storeHelpers";
 import {
   textPrimaryColor,
   backgroundColor,
@@ -37,7 +38,6 @@ import {
   getConversationListItemsToDisplay,
 } from "../utils/conversation";
 import { converseEventEmitter } from "../utils/events";
-import { pick } from "../utils/objects";
 import { refreshBalanceForAccount } from "../utils/wallet";
 import { useHeaderSearchBar } from "./Navigation/ConversationListNav";
 import { NavigationParamList } from "./Navigation/Navigation";
@@ -60,8 +60,8 @@ function ConversationList({ navigation, route, searchBarRef }: Props) {
     searchBarFocused,
     initialLoadDoneOnce,
     sortedConversationsWithPreview,
-  } = useChatStore((s) =>
-    pick(s, [
+  } = useChatStore(
+    useSelect([
       "initialLoadDoneOnce",
       "searchQuery",
       "searchBarFocused",
@@ -69,8 +69,8 @@ function ConversationList({ navigation, route, searchBarRef }: Props) {
     ])
   );
 
-  const { ephemeralAccount } = useSettingsStore((s) =>
-    pick(s, ["peersStatus", "ephemeralAccount"])
+  const { ephemeralAccount } = useSettingsStore(
+    useSelect(["peersStatus", "ephemeralAccount"])
   );
   const profiles = useProfilesStore((s) => s.profiles);
   const [flatListItems, setFlatListItems] = useState<FlatListItem[]>([]);

@@ -3,15 +3,14 @@ import { useCallback, useEffect, useRef } from "react";
 import { useColorScheme } from "react-native";
 
 import config from "../../config";
-import { useChatStore } from "../../data/store/accountsStore";
 import { useAppStore } from "../../data/store/appStore";
 import { useOnboardingStore } from "../../data/store/onboardingStore";
+import { useSelect } from "../../data/store/storeHelpers";
 import { setAndroidColors } from "../../utils/colors";
 import {
   navigateToTopicWithRetry,
   topicToNavigateTo,
 } from "../../utils/navigation";
-import { pick } from "../../utils/objects";
 import { hideSplashScreen } from "../../utils/splash/splash";
 
 const getSchemedURLFromUniversalURL = (url: string) => {
@@ -32,10 +31,9 @@ export default function InitialStateHandler() {
   const setDesktopConnectSessionId = useOnboardingStore(
     (s) => s.setDesktopConnectSessionId
   );
-  const { setSplashScreenHidden, hydrationDone } = useAppStore((s) =>
-    pick(s, ["setSplashScreenHidden", "hydrationDone"])
+  const { setSplashScreenHidden, hydrationDone } = useAppStore(
+    useSelect(["setSplashScreenHidden", "hydrationDone"])
   );
-  const { conversations } = useChatStore((s) => pick(s, ["conversations"]));
 
   useEffect(() => {
     setAndroidColors(colorScheme);

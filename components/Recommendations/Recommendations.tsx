@@ -18,6 +18,7 @@ import {
   useCurrentAccount,
   useRecommendationsStore,
 } from "../../data/store/accountsStore";
+import { useSelect } from "../../data/store/storeHelpers";
 import { findFrens } from "../../utils/api";
 import {
   backgroundColor,
@@ -26,7 +27,6 @@ import {
   textPrimaryColor,
   textSecondaryColor,
 } from "../../utils/colors";
-import { pick } from "../../utils/objects";
 import ActivityIndicator from "../ActivityIndicator/ActivityIndicator";
 import { Recommendation } from "./Recommendation";
 
@@ -47,8 +47,8 @@ export default function Recommendations({
     setRecommendations,
     loading,
     updatedAt,
-  } = useRecommendationsStore((s) =>
-    pick(s, [
+  } = useRecommendationsStore(
+    useSelect([
       "frens",
       "setLoadingRecommendations",
       "setRecommendations",

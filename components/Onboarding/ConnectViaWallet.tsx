@@ -13,8 +13,8 @@ import {
 
 import { getAccountsList } from "../../data/store/accountsStore";
 import { useOnboardingStore } from "../../data/store/onboardingStore";
+import { useSelect } from "../../data/store/storeHelpers";
 import { textPrimaryColor, textSecondaryColor } from "../../utils/colors";
-import { pick } from "../../utils/objects";
 import { shortAddress } from "../../utils/str";
 import { getXmtpKeysFromSigner } from "../../utils/xmtpJS/client";
 import { isOnXmtp } from "../../utils/xmtpRN/client";
@@ -35,8 +35,8 @@ export default function ConnectViaWallet({
     waitingForSecondSignature,
     setWaitingForSecondSignature,
     resetOnboarding,
-  } = useOnboardingStore((s) =>
-    pick(s, [
+  } = useOnboardingStore(
+    useSelect([
       "setConnectionMethod",
       "signer",
       "setSigner",

@@ -10,9 +10,9 @@ import {
   useAccountsStore,
 } from "../../data/store/accountsStore";
 import { useOnboardingStore } from "../../data/store/onboardingStore";
+import { useSelect } from "../../data/store/storeHelpers";
 import { clickedItemBackgroundColor } from "../../utils/colors";
 import { converseEventEmitter } from "../../utils/events";
-import { pick } from "../../utils/objects";
 import { shortAddress, useAccountsProfiles } from "../../utils/str";
 
 export default function AccountsAndroid() {
@@ -21,8 +21,8 @@ export default function AccountsAndroid() {
   const accountsProfiles = useAccountsProfiles();
 
   const disconnectWallet = useDisconnect();
-  const { currentAccount, setCurrentAccount } = useAccountsStore((s) =>
-    pick(s, ["currentAccount", "setCurrentAccount"])
+  const { currentAccount, setCurrentAccount } = useAccountsStore(
+    useSelect(["currentAccount", "setCurrentAccount"])
   );
   const setAddingNewAccount = useOnboardingStore((s) => s.setAddingNewAccount);
   const colorScheme = useColorScheme();

@@ -37,7 +37,6 @@ import {
 } from "../utils/colors";
 import { getRelativeDateTime } from "../utils/date";
 import { converseEventEmitter } from "../utils/events";
-import { pick } from "../utils/objects";
 import { consentToPeersOnProtocol } from "../utils/xmtpRN/conversations";
 import { showActionSheetWithOptions } from "./StateHandlers/ActionSheetStateHandler";
 
@@ -52,6 +51,7 @@ type ConversationListItemProps = {
   lastMessageFromMe: boolean;
   lastMessageStatus?: "delivered" | "error" | "seen" | "sending" | "sent";
   showUnread: boolean;
+  conversationOpened: boolean;
 };
 
 const ConversationListItem = memo(function ConversationListItem({
@@ -65,12 +65,11 @@ const ConversationListItem = memo(function ConversationListItem({
   lastMessageStatus,
   lastMessageFromMe,
   showUnread,
+  conversationOpened,
 }: ConversationListItemProps) {
   const styles = getStyles(colorScheme);
   const timeToShow = getRelativeDateTime(conversationTime);
-  const { setTopicsStatus, openedConversationTopic } = useChatStore((s) =>
-    pick(s, ["setTopicsStatus", "openedConversationTopic"])
-  );
+  const setTopicsStatus = useChatStore((s) => s.setTopicsStatus);
   const setPeersStatus = useSettingsStore((s) => s.setPeersStatus);
   const isSplitScreen = useIsSplitScreen();
   const [selected, setSelected] = useState(false);
@@ -178,10 +177,6 @@ const ConversationListItem = memo(function ConversationListItem({
     styles.rightAction,
   ]);
 
-  const displayAsSelected =
-    (isSplitScreen && openedConversationTopic === conversationTopic) ||
-    (!isSplitScreen && selected);
-
   const rowItem =
     Platform.OS === "ios" ? (
       <TouchableHighlight
@@ -210,9 +205,10 @@ const ConversationListItem = memo(function ConversationListItem({
         }}
         style={[
           {
-            backgroundColor: displayAsSelected
-              ? clickedItemBackgroundColor(colorScheme)
-              : backgroundColor(colorScheme),
+            backgroundColor:
+              selected || (isSplitScreen && conversationOpened)
+                ? clickedItemBackgroundColor(colorScheme)
+                : backgroundColor(colorScheme),
             height: 76,
           },
         ]}

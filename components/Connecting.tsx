@@ -2,21 +2,21 @@ import { View, Text, useColorScheme, Platform } from "react-native";
 
 import { useChatStore } from "../data/store/accountsStore";
 import { useAppStore } from "../data/store/appStore";
+import { useSelect } from "../data/store/storeHelpers";
 import { textPrimaryColor } from "../utils/colors";
-import { pick } from "../utils/objects";
 import ActivityIndicator from "./ActivityIndicator/ActivityIndicator";
 
 export const useShouldShowConnecting = () => {
   const isInternetReachable = useAppStore((s) => s.isInternetReachable);
-  const { localClientConnected, reconnecting } = useChatStore((s) =>
-    pick(s, ["localClientConnected", "reconnecting"])
+  const { localClientConnected, reconnecting } = useChatStore(
+    useSelect(["localClientConnected", "reconnecting"])
   );
   return !isInternetReachable || !localClientConnected || reconnecting;
 };
 
 export const useShouldShowConnectingOrSyncing = () => {
-  const { initialLoadDoneOnce, conversations } = useChatStore((s) =>
-    pick(s, ["initialLoadDoneOnce", "conversations"])
+  const { initialLoadDoneOnce, conversations } = useChatStore(
+    useSelect(["initialLoadDoneOnce", "conversations"])
   );
   const shouldShowConnecting = useShouldShowConnecting();
   return (

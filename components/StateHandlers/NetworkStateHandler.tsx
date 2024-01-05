@@ -2,7 +2,7 @@ import NetInfo from "@react-native-community/netinfo";
 import { useEffect, useRef } from "react";
 
 import { useAppStore } from "../../data/store/appStore";
-import { pick } from "../../utils/objects";
+import { useSelect } from "../../data/store/storeHelpers";
 
 NetInfo.configure({
   reachabilityUrl: "https://production.xmtp.network",
@@ -13,8 +13,8 @@ NetInfo.configure({
 });
 
 export default function NetworkStateHandler() {
-  const { isInternetReachable, setIsInternetReachable } = useAppStore((s) =>
-    pick(s, ["isInternetReachable", "setIsInternetReachable"])
+  const { isInternetReachable, setIsInternetReachable } = useAppStore(
+    useSelect(["isInternetReachable", "setIsInternetReachable"])
   );
 
   const reachableRef = useRef(isInternetReachable);
