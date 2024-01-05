@@ -22,6 +22,7 @@ import {
   useChatStore,
   useSettingsStore,
 } from "../data/store/accountsStore";
+import { useSelect } from "../data/store/storeHelpers";
 import { userExists } from "../utils/api";
 import {
   backgroundColor,
@@ -37,9 +38,9 @@ import {
 import { isDesktop } from "../utils/device";
 import { converseEventEmitter } from "../utils/events";
 import { setTopicToNavigateTo, topicToNavigateTo } from "../utils/navigation";
-import { pick } from "../utils/objects";
 import { getTitleFontScale, TextInputWithValue } from "../utils/str";
 import { NavigationParamList } from "./Navigation/Navigation";
+import { useIsSplitScreen } from "./Navigation/navHelpers";
 
 const Conversation = ({
   route,
@@ -50,8 +51,8 @@ const Conversation = ({
   const [transactionMode, setTransactionMode] = useState(false);
 
   const { conversations, conversationsMapping, setConversationMessageDraft } =
-    useChatStore((s) =>
-      pick(s, [
+    useChatStore(
+      useSelect([
         "conversations",
         "conversationsMapping",
         "setConversationMessageDraft",
@@ -288,31 +289,41 @@ const Conversation = ({
   const showInviteBanner =
     showInvite.show && showInvite.banner && !isBlockedPeer;
 
+  const isSplitScreen = useIsSplitScreen();
+
   return (
     <View
       style={styles.container}
       onLayout={checkIfUserExists}
-      key={`conversation-${colorScheme}`}
+      key={
+        isSplitScreen
+          ? `conversation-${colorScheme}-${route.params?.topic}-${route.params?.mainConversationWithPeer}`
+          : `conversation-${colorScheme}`
+      }
     >
-      {showInviteBanner && (
-        <InviteBanner
-          onClickInvite={inviteToConverse}
-          onClickHide={hideInviteBanner}
-        />
+      {(route.params?.topic || route.params?.mainConversationWithPeer) && (
+        <>
+          {showInviteBanner && (
+            <InviteBanner
+              onClickInvite={inviteToConverse}
+              onClickHide={hideInviteBanner}
+            />
+          )}
+          <ConversationContext.Provider
+            value={{
+              conversation,
+              messageToPrefill,
+              inputRef: textInputRef,
+              isBlockedPeer,
+              onReadyToFocus,
+              transactionMode,
+              setTransactionMode,
+            }}
+          >
+            <ConverseChat />
+          </ConversationContext.Provider>
+        </>
       )}
-      <ConversationContext.Provider
-        value={{
-          conversation,
-          messageToPrefill,
-          inputRef: textInputRef,
-          isBlockedPeer,
-          onReadyToFocus,
-          transactionMode,
-          setTransactionMode,
-        }}
-      >
-        <ConverseChat />
-      </ConversationContext.Provider>
     </View>
   );
 };
