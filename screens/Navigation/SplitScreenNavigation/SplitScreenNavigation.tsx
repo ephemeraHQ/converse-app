@@ -1,7 +1,4 @@
-import {
-  DrawerNavigationProp,
-  createDrawerNavigator,
-} from "@react-navigation/drawer";
+import { createDrawerNavigator } from "@react-navigation/drawer";
 import { NavigationContainer } from "@react-navigation/native";
 import * as Linking from "expo-linking";
 
@@ -19,8 +16,6 @@ type DrawerParams = {
   Chats: undefined;
   Conversation: ConversationNavParams;
 };
-export let drawerNav: DrawerNavigationProp<DrawerParams> | undefined =
-  undefined;
 
 const Drawer = createDrawerNavigator<DrawerParams>();
 
@@ -57,16 +52,11 @@ export default function SplitScreenNavigation() {
         }}
       >
         <Drawer.Screen name="Conversation">
-          {(navigationProps) => {
-            drawerNav =
-              navigationProps.navigation as DrawerNavigationProp<DrawerParams>;
-            console.log("drawer topic", navigationProps.route.params?.topic);
-            return (
-              <SplitRightStackNavigation
-                topic={navigationProps.route.params?.topic}
-              />
-            );
-          }}
+          {(navigationProps) => (
+            <SplitRightStackNavigation
+              topic={navigationProps.route.params?.topic}
+            />
+          )}
         </Drawer.Screen>
       </Drawer.Navigator>
     </NavigationContainer>

@@ -60,7 +60,6 @@ export default function SplitRightStackNavigation({
 }: {
   topic: string | undefined;
 }) {
-  console.log("split right topic", topic);
   const colorScheme = useColorScheme();
   const splashScreenHidden = useAppStore((s) => s.splashScreenHidden);
   return (
