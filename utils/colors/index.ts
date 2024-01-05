@@ -105,6 +105,9 @@ export const itemSeparatorColor = (colorScheme: ColorSchemeName) => {
 const MESSAGE_BUBBLE_LIGHT = "#E9E9EB";
 const MESSAGE_BUBBLE_DARK = "#262628";
 
+const MESSAGE_INNER_BUBBLE_LIGHT = "#DDDDDF";
+const MESSAGE_INNER_BUBBLE_DARK = "#1D1D1E";
+
 export const messageBubbleColor = (colorScheme: ColorSchemeName) => {
   if (colorScheme === "dark")
     return Platform.OS === "android" || Platform.OS === "web"
@@ -115,6 +118,16 @@ export const messageBubbleColor = (colorScheme: ColorSchemeName) => {
     : MESSAGE_BUBBLE_LIGHT;
 };
 
+export const messageInnerBubbleColor = (colorScheme: ColorSchemeName) => {
+  if (colorScheme === "dark")
+    return Platform.OS === "android"
+      ? MaterialDarkColors.surface2
+      : MESSAGE_INNER_BUBBLE_DARK;
+  return Platform.OS === "android"
+    ? MaterialLightColors.surface2
+    : MESSAGE_INNER_BUBBLE_LIGHT;
+};
+
 const MY_MESSAGE_BUBBLE_LIGHT = "#E95C43";
 const MY_MESSAGE_BUBBLE_DARK = "#E95C43";
 
@@ -123,8 +136,8 @@ export const myMessageBubbleColor = (colorScheme: ColorSchemeName) => {
   return MY_MESSAGE_BUBBLE_LIGHT;
 };
 
-const MY_MESSAGE_INNER_BUBBLE_LIGHT = "#DC4F36";
-const MY_MESSAGE_INNER_BUBBLE_DARK = "#DC4F36";
+const MY_MESSAGE_INNER_BUBBLE_LIGHT = "#D2533C";
+const MY_MESSAGE_INNER_BUBBLE_DARK = "#D2533C";
 
 export const myMessageInnerBubbleColor = (colorScheme: ColorSchemeName) => {
   if (colorScheme === "dark") return MY_MESSAGE_INNER_BUBBLE_DARK;

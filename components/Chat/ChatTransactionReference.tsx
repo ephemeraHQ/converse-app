@@ -1,16 +1,15 @@
-import { Image } from "expo-image";
-import mime from "mime";
-import prettyBytes from "pretty-bytes";
 import { useEffect, useRef, useState } from "react";
 import { Platform, StyleSheet, Text, useColorScheme, View } from "react-native";
 
 import { useAccountsStore } from "../../data/store/accountsStore";
-import { getLocalAttachment } from "../../utils/attachment";
+import { getTransactionDetails } from "../../utils/api";
 import {
+  messageInnerBubbleColor,
   myMessageInnerBubbleColor,
   textPrimaryColor,
 } from "../../utils/colors";
-import { isImageMimetype } from "../../utils/media";
+import { sentryTrackMessage } from "../../utils/sentry";
+import { TransactionReference } from "../../utils/xmtpRN/contentTypes/transactionReference";
 import { MessageToDisplay } from "./ChatMessage";
 import ChatMessageMetadata from "./ChatMessageMetadata";
 
@@ -52,151 +51,51 @@ export default function ChatTransactionReference({ message }: Props) {
 
   useEffect(() => {
     const go = async () => {
-      const localAttachment = await getLocalAttachment(message.id);
-      if (localAttachment) {
-        setTransaction({ ...localAttachment, loading: false, error: false });
-        return;
-      }
-
-      // Either remote or direct attachement (< 1MB)
-      const isRemoteAttachment = message.contentType.startsWith(
-        "xmtp.org/remoteStaticAttachment:"
+      const parsedMessageContent: TransactionReference = JSON.parse(
+        message.content
       );
-
-      let contentLength = 0;
-
-      // Let's see if we can infer type from filename
-      try {
-        const parsedEncodedContent = JSON.parse(message.content);
-        const parsedType = isRemoteAttachment
-          ? mime.getType(parsedEncodedContent.filename)
-          : parsedEncodedContent.mimeType;
-        if (isRemoteAttachment) {
-          contentLength = parsedEncodedContent.contentLength;
-          setTransaction({
-            mediaType:
-              parsedType && isImageMimetype(parsedType)
-                ? "IMAGE"
-                : "UNSUPPORTED",
-            loading: contentLength <= 10000000,
-            mediaURL: undefined,
-            imageSize: undefined,
-            contentLength: parsedEncodedContent.contentLength,
-            mimeType: parsedType || "",
-            filename: parsedEncodedContent.filename,
-            error: false,
-          });
-        } else {
-          saveLocalAttachment(parsedEncodedContent);
-        }
-      } catch (e) {
-        console.log(e);
-      }
-
-      // Last, if media is local or if remote but supported and size is ok, we fetch immediatly
-      if (isRemoteAttachment && contentLength <= 10000000) {
-        fetchAndDecode();
-      }
+      const transactionDetails = await getTransactionDetails(
+        currentAccount,
+        parsedMessageContent.networkId as string,
+        parsedMessageContent.reference
+      );
     };
+
     if (!message.content) {
-      sentryTrackMessage("ATTACHMENT_NO_CONTENT", { message });
+      sentryTrackMessage("EMPTY_TRANSACTION", { message });
       setTransaction((a) => ({ ...a, error: true, loading: false }));
     } else {
       go();
     }
-  }, [message]);
+  }, [currentAccount, message]);
 
-  const showing =
-    !transaction.loading &&
-    !!transaction.mediaURL &&
-    transaction.mediaType !== "UNSUPPORTED";
+  const showing = !transaction.loading;
 
-  const metadataView = (
-    <ChatMessageMetadata message={message} white={showing} />
-  );
-  const emoji = transaction.mediaType === "IMAGE" ? "📷" : "📎";
-  const filesize = prettyBytes(transaction.contentLength);
-  const filename =
-    transaction.mediaType === "IMAGE"
-      ? "Image"
-      : transaction.filename || "Attachment";
   const textStyle = [
     styles.text,
     { color: message.fromMe ? "white" : textPrimaryColor(colorScheme) },
   ];
 
-  if (transaction.loading) {
-    return (
-      <>
-        <Text style={textStyle}>
-          {emoji}{" "}
-          <Text style={{ fontStyle: "italic" }}>
-            Downloading {filename.toLowerCase()}
-          </Text>
-        </Text>
-        <View style={{ opacity: 0 }}>{metadataView}</View>
-      </>
-    );
-  } else if (transaction.error) {
-    return (
-      <>
-        <View style={styles.innerBubble}>
-          <Text style={textStyle}>Transaction</Text>
-        </View>
-        <View style={{ opacity: 0 }}>{metadataView}</View>
-      </>
-    );
-  } else if (!transaction.mediaURL) {
-    // Either unsupported type or too big
-    return (
-      <>
-        <Text style={textStyle}>
-          {emoji} {filename} - {filesize}{" "}
-          <Text
-            style={{ textDecorationLine: "underline" }}
-            onPress={fetchAndDecode}
-          >
-            download
-          </Text>
-        </Text>
-        <View style={{ opacity: 0 }}>{metadataView}</View>
-      </>
-    );
-  } else if (transaction.mediaType === "UNSUPPORTED") {
-    // Downloaded but unsupported
-    return (
-      <>
-        <Text style={textStyle}>
-          {emoji} {filename}{" "}
-          <Text
-            style={{ textDecorationLine: "underline" }}
-            onPress={openInWebview}
-          >
-            view
-          </Text>
-        </Text>
-        <View style={{ opacity: 0 }}>{metadataView}</View>
-      </>
-    );
-  } else {
-    // Downloaded and supported
-    const aspectRatio = transaction.imageSize
-      ? transaction.imageSize.width / transaction.imageSize.height
-      : undefined;
-    return (
-      <>
-        <Image
-          source={{ uri: `file://${transaction.mediaURL}` }}
-          contentFit="contain"
-          style={[styles.imagePreview, { aspectRatio }]}
-        />
-        <View style={{ opacity: 0 }}>{metadataView}</View>
-      </>
-    );
-  }
+  const metadataView = (
+    <ChatMessageMetadata message={message} white={showing} />
+  );
+
+  return (
+    <>
+      <View
+        style={[
+          styles.innerBubble,
+          message.fromMe ? styles.innerBubbleMe : undefined,
+        ]}
+      >
+        <Text style={textStyle}>Test Content Inner</Text>
+      </View>
+      <View style={{ opacity: 0 }}>{metadataView}</View>
+    </>
+  );
 }
 
-// TODO REMOVE
+// TODO UPDATE STYLE
 const useStyles = () => {
   const colorScheme = useColorScheme();
   return StyleSheet.create({
@@ -212,12 +111,15 @@ const useStyles = () => {
       color: textPrimaryColor(colorScheme),
     },
     innerBubble: {
-      backgroundColor: myMessageInnerBubbleColor(colorScheme),
+      backgroundColor: messageInnerBubbleColor(colorScheme),
       borderRadius: 14,
       width: "100%",
       paddingHorizontal: 2,
       paddingVertical: 6,
       marginBottom: 5,
+    },
+    innerBubbleMe: {
+      backgroundColor: myMessageInnerBubbleColor(colorScheme),
     },
     metadataContainer: {
       position: "absolute",
