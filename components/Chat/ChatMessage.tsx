@@ -21,6 +21,7 @@ import { getRelativeDate } from "../../utils/date";
 import { isDesktop } from "../../utils/device";
 import { LimitedMap } from "../../utils/objects";
 import { getMessageReactions } from "../../utils/reactions";
+import { isTransactionMessage } from "../../utils/transaction";
 import { getMessageContentType } from "../../utils/xmtpRN/contentTypes";
 import ClickableText from "../ClickableText";
 import ChatAttachmentBubble from "./ChatAttachmentBubble";
