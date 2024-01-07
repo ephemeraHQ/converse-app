@@ -5,10 +5,10 @@ import { useAppStore } from "../../data/store/appStore";
 import { pick } from "../../utils/objects";
 
 NetInfo.configure({
-  reachabilityUrl: "https://production.xmtp.network/message/v1/query",
-  reachabilityMethod: "GET",
+  reachabilityUrl: "https://production.xmtp.network",
+  reachabilityMethod: "HEAD",
   reachabilityTest: async (response) => {
-    return response.status === 501;
+    return response.status === 200;
   },
 });
 
