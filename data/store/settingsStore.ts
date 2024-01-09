@@ -1,3 +1,4 @@
+import { Platform } from "react-native";
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
 
@@ -36,7 +37,8 @@ export const initSettingsStore = (account: string) => {
       (set) =>
         ({
           notifications: {
-            showNotificationScreen: true,
+            // On web we never show notifications screen
+            showNotificationScreen: Platform.OS !== "web",
           },
           peersStatus: {},
           setPeersStatus: (peersStatus: {

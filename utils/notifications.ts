@@ -382,6 +382,7 @@ export const saveNotificationsStatus = async () => {
 export const resetNotifications = async (
   timeout: number = 0
 ): Promise<void> => {
+  if (Platform.OS === "web") return;
   setTimeout(async () => {
     await Notifications.dismissAllNotificationsAsync();
     await Notifications.setBadgeCountAsync(0);

@@ -59,7 +59,7 @@ export default function Main() {
         "mediaPreview",
       ])
     );
-  const navigationDrawer = useRef<typeof AccountsDrawer>(null);
+  const navigationDrawer = useRef<any>(null);
   const toggleNavigationDrawer = useCallback((open: boolean) => {
     if (open) {
       navigationDrawer.current?.openDrawer();
