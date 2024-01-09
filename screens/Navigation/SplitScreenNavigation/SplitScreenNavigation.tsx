@@ -1,8 +1,16 @@
 import { createDrawerNavigator } from "@react-navigation/drawer";
-import { NavigationContainer } from "@react-navigation/native";
+import {
+  NavigationContainer,
+  NavigationContainerRef,
+} from "@react-navigation/native";
 import * as Linking from "expo-linking";
+import { useEffect, useRef } from "react";
 
 import config from "../../../config";
+import {
+  getChatStore,
+  useCurrentAccount,
+} from "../../../data/store/accountsStore";
 import { useAppStore } from "../../../data/store/appStore";
 import {
   ConversationNavParams,
@@ -34,10 +42,33 @@ const linking = {
 
 export default function SplitScreenNavigation() {
   const splashScreenHidden = useAppStore((s) => s.splashScreenHidden);
+  const navRef =
+    useRef<NavigationContainerRef<ReactNavigation.RootParamList> | null>(null);
+  const currentAccount = useCurrentAccount();
+  const accountRef = useRef(currentAccount);
+  useEffect(() => {
+    if (accountRef.current !== currentAccount) {
+      navRef?.current?.reset({
+        index: 0,
+        routes: [
+          {
+            name: "Conversation",
+          },
+        ],
+        type: "stack",
+      });
+      if (currentAccount) {
+        getChatStore(currentAccount).getState().setOpenedConversationTopic("");
+      }
+    }
+
+    accountRef.current = currentAccount;
+  }, [currentAccount]);
 
   return (
     <NavigationContainer
       linking={splashScreenHidden ? (linking as any) : undefined}
+      ref={(r) => (navRef.current = r)}
     >
       <Drawer.Navigator
         backBehavior="none"

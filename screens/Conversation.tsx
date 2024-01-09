@@ -64,10 +64,6 @@ const Conversation = ({
     route.params?.topic
   );
 
-  useEffect(() => {
-    setConversationTopic(route.params.topic);
-  }, [route.params?.topic]);
-
   // When we set the conversation topic, we check if it has been mapped
   // to a new one (for pending conversations)
   const conversationTopic =
