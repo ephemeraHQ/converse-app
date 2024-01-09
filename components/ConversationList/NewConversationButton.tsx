@@ -1,15 +1,11 @@
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import * as Linking from "expo-linking";
 import React, { useCallback, useRef } from "react";
-import {
-  Platform,
-  PlatformColor,
-  TouchableOpacity,
-  useColorScheme,
-} from "react-native";
+import { Platform, TouchableOpacity, useColorScheme } from "react-native";
 import { FAB } from "react-native-paper";
 
 import { NavigationParamList } from "../../screens/Navigation/Navigation";
+import { primaryColor } from "../../utils/colors";
 import DebugButton, { useEnableDebug } from "../DebugButton";
 import Picto from "../Picto/Picto";
 
@@ -43,7 +39,7 @@ export default function NewConversationButton({
         <Picto
           picto="square.and.pencil"
           weight="medium"
-          color={PlatformColor("systemBlue")}
+          color={primaryColor(colorScheme)}
           size={16}
           style={{ width: 32, height: 32 }}
         />
