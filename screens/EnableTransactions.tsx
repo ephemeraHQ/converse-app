@@ -21,7 +21,7 @@ import {
   backgroundColor,
 } from "../utils/colors";
 import { converseEventEmitter } from "../utils/events";
-import { savePrivateKey } from "../utils/keychain";
+import { savePrivateKey } from "../utils/keychain/helpers";
 import { shortAddress } from "../utils/str";
 import { NavigationParamList } from "./Navigation/Navigation";
 

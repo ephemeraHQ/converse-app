@@ -33,7 +33,7 @@ import {
   MaterialDarkTheme,
   MaterialLightTheme,
 } from "./utils/colors";
-import { privySecureStorage } from "./utils/keychain";
+import { privySecureStorage } from "./utils/keychain/helpers";
 import mmkv from "./utils/mmkv";
 import { DEFAULT_EMOJIS, RECENT_EMOJI_STORAGE_KEY } from "./utils/reactions";
 import { initSentry, sentryTrackError } from "./utils/sentry";

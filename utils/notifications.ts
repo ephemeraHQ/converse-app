@@ -15,7 +15,7 @@ import {
 import { useAppStore } from "../data/store/appStore";
 import { XmtpConversation, XmtpMessage } from "../data/store/chatStore";
 import api from "./api";
-import { savePushToken } from "./keychain";
+import { savePushToken } from "./keychain/helpers";
 import mmkv from "./mmkv";
 import { navigateToConversation, setTopicToNavigateTo } from "./navigation";
 import { sentryTrackError } from "./sentry";

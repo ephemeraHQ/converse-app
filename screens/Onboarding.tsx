@@ -14,7 +14,7 @@ import {
 } from "../data/store/accountsStore";
 import { useOnboardingStore } from "../data/store/onboardingStore";
 import { useSelect } from "../data/store/storeHelpers";
-import { saveXmtpKey } from "../utils/keychain";
+import { saveXmtpKey } from "../utils/keychain/helpers";
 import { waitForLogoutTasksDone } from "../utils/logout";
 import {
   getXmtpBase64KeyFromSigner,
