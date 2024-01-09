@@ -1,3 +1,4 @@
+import { Platform } from "react-native";
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
 
@@ -47,7 +48,8 @@ export const useAppStore = create<AppStoreType>()(
           notificationsPermissionStatus: status,
         })),
 
-      splashScreenHidden: false,
+      // On web no splash screen at all
+      splashScreenHidden: Platform.OS === "web",
       setSplashScreenHidden: (hidden) =>
         set(() => ({ splashScreenHidden: hidden })),
 

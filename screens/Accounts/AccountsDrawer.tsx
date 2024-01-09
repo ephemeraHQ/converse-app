@@ -1,3 +1,3 @@
-import { View } from "react-native";
+import { DrawerLayoutAndroid } from "react-native";
 
-export default View as any;
+export default DrawerLayoutAndroid;
