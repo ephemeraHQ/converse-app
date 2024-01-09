@@ -23,6 +23,7 @@
     "@ethersproject/shims": "^5.7.0",
     "@expo/config-plugins": "~7.2.2",
     "@expo/metro-config": "^0.10.7",
+    "@expo/metro-runtime": "^2.2.16",
     "@expo/react-native-action-sheet": "^4.0.1",
     "@expo/webpack-config": "^19.0.0",
     "@flyerhq/react-native-chat-ui": "^1.4.3",
