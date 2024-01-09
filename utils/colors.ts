@@ -1,4 +1,4 @@
-import { ColorSchemeName, Platform, PlatformColor } from "react-native";
+import { ColorSchemeName, Platform } from "react-native";
 import { MD3DarkTheme, MD3LightTheme } from "react-native-paper";
 
 import { sentryTrackError } from "./sentry";
@@ -134,7 +134,13 @@ export const tertiaryBackgroundColor = (colorScheme: ColorSchemeName) => {
 };
 
 export const primaryColor = (colorScheme: ColorSchemeName) => {
-  if (Platform.OS === "ios") return PlatformColor("systemBlue");
+  if (Platform.OS === "ios") {
+    if (colorScheme === "dark") {
+      return "#0A84FF";
+    } else {
+      return "#007AFF";
+    }
+  }
   if (Platform.OS === "android") {
     if (colorScheme === "dark") {
       return MaterialDarkColors.primary;

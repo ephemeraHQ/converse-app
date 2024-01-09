@@ -2,7 +2,6 @@ import React from "react";
 import {
   GestureResponderEvent,
   Platform,
-  PlatformColor,
   StyleProp,
   StyleSheet,
   Text,
@@ -89,7 +88,7 @@ const useStyles = () => {
   const colorScheme = useColorScheme();
   return StyleSheet.create({
     buttonPrimary: {
-      backgroundColor: PlatformColor("systemBlue"),
+      backgroundColor: primaryColor(colorScheme),
       display: "flex",
       alignSelf: "stretch",
       marginHorizontal: 32,
@@ -124,7 +123,7 @@ const useStyles = () => {
       borderRadius: 100,
     },
     buttonGreyText: {
-      color: colorScheme === "light" ? PlatformColor("systemBlue") : "white",
+      color: colorScheme === "light" ? primaryColor(colorScheme) : "white",
       textAlign: "center",
       fontWeight: "600",
       fontSize: 17,
@@ -133,7 +132,7 @@ const useStyles = () => {
       flexDirection: "row",
     },
     buttonTextText: {
-      color: Platform.OS === "ios" ? PlatformColor("systemBlue") : "blue",
+      color: Platform.OS === "ios" ? primaryColor(colorScheme) : "blue",
       textAlign: "center",
       fontWeight: "400",
       fontSize: 17,

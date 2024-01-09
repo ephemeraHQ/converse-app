@@ -1,11 +1,6 @@
 import * as Linking from "expo-linking";
 import React, { useCallback, useEffect, useState } from "react";
-import {
-  Platform,
-  PlatformColor,
-  TouchableOpacity,
-  useColorScheme,
-} from "react-native";
+import { Platform, TouchableOpacity, useColorScheme } from "react-native";
 
 import config from "../../config";
 import {
@@ -13,7 +8,7 @@ import {
   useLoggedWithPrivy,
   useWalletStore,
 } from "../../data/store/accountsStore";
-import { textSecondaryColor } from "../../utils/colors";
+import { primaryColor, textSecondaryColor } from "../../utils/colors";
 import { evmHelpers } from "../../utils/evm/helpers";
 import Button from "../Button/Button";
 import Picto from "../Picto/Picto";
@@ -88,7 +83,7 @@ export default function ProfileSettingsButton() {
         weight="medium"
         color={
           Platform.OS === "ios"
-            ? PlatformColor("systemBlue")
+            ? primaryColor(colorScheme)
             : textSecondaryColor(colorScheme)
         }
         size={Platform.OS === "ios" ? 16 : 24}
