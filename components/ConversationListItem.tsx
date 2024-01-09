@@ -181,7 +181,7 @@ const ConversationListItem = memo(function ConversationListItem({
     Platform.OS === "ios" ? (
       <TouchableHighlight
         underlayColor={clickedItemBackgroundColor(colorScheme)}
-        delayPressIn={75}
+        delayPressIn={isSplitScreen ? 0 : 75}
         onPressIn={() => {
           if (!isSplitScreen) return;
           Linking.openURL(
