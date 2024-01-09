@@ -44,24 +44,28 @@ export class TransactionReferenceCodec
   }
 
   encode(content: TransactionReference): EncodedContent {
-    const { namespace, networkId, reference, metadata } = content;
-    return {
+    console.log("encoding:", content);
+    const encoded = {
       type: ContentTypeTransactionReference,
       parameters: {},
-      content: new TextEncoder().encode(
-        JSON.stringify({ namespace, networkId, reference, metadata })
-      ),
+      content: new TextEncoder().encode(JSON.stringify(content)),
     };
+    console.log("encoded:", encoded);
+    return encoded;
   }
 
   decode(encodedContent: EncodedContent): TransactionReference {
-    const decodedContent = new TextDecoder().decode(encodedContent.content);
-    const content = JSON.parse(decodedContent) as TransactionReference;
-    const { namespace, networkId, reference, metadata } = content;
-    return { namespace, networkId, reference, metadata };
+    const uint8Array = encodedContent.content;
+    const contentReceived = JSON.parse(new TextDecoder().decode(uint8Array));
+    console.log("decoding content:", contentReceived);
+    return contentReceived;
   }
 
   fallback(content: TransactionReference): string | undefined {
-    return `[Crypto transaction] Use a blockchain explorer to learn more using the transaction hash: ${content.reference}`;
+    if (content.reference) {
+      return `[Crypto transaction] Use a blockchain explorer to learn more using the transaction hash: ${content.reference}`;
+    } else {
+      return `Crypto transaction`;
+    }
   }
 }

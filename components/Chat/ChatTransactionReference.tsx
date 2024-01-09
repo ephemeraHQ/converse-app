@@ -54,11 +54,19 @@ export default function ChatTransactionReference({ message }: Props) {
       const parsedMessageContent: TransactionReference = JSON.parse(
         message.content
       );
-      const transactionDetails = await getTransactionDetails(
-        currentAccount,
-        parsedMessageContent.networkId as string,
-        parsedMessageContent.reference
-      );
+
+      if (parsedMessageContent.networkId && parsedMessageContent.reference) {
+        const transactionDetails = await getTransactionDetails(
+          currentAccount,
+          parsedMessageContent.networkId as string,
+          parsedMessageContent.reference
+        );
+
+        console.log(
+          "ChatTransactionReference > transactionDetails:",
+          transactionDetails
+        );
+      }
     };
 
     if (!message.content) {
@@ -88,7 +96,7 @@ export default function ChatTransactionReference({ message }: Props) {
           message.fromMe ? styles.innerBubbleMe : undefined,
         ]}
       >
-        <Text style={textStyle}>Test Content Inner</Text>
+        <Text style={textStyle}>{message.content}</Text>
       </View>
       <View style={{ opacity: 0 }}>{metadataView}</View>
     </>

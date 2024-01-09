@@ -3,6 +3,7 @@ import uuid from "react-native-uuid";
 import { saveMessages } from "../data/helpers/messages";
 import { currentAccount } from "../data/store/accountsStore";
 import { XmtpConversation } from "../data/store/chatStore";
+import { getTransactionDetails } from "./api";
 import { saveAttachmentForPendingMessage } from "./attachment";
 import { isContentType } from "./xmtpRN/contentTypes";
 import { sendPendingMessages } from "./xmtpRN/send";
@@ -32,6 +33,7 @@ export const sendMessage = async ({
   const messageId = uuid.v4().toString();
   const sentAtTime = new Date();
   const isV1Conversation = conversation.topic.startsWith("/xmtp/0/dm-");
+
   if (isContentType("remoteAttachment", contentType) && attachmentToSave) {
     // Let's move file to attachments folder right now!
     await saveAttachmentForPendingMessage(
@@ -41,6 +43,28 @@ export const sendMessage = async ({
       attachmentToSave.mimeType
     );
   }
+
+  if (isContentType("transactionReference", contentType)) {
+    console.log("## contentType is transactionReference -- calling backend");
+
+    const parsedContent = JSON.parse(content);
+    const networkId = parsedContent.networkId;
+    const txHash = parsedContent.reference;
+    const metadata = parsedContent.metadata;
+
+    if (parsedContent.namespace == "eip155" && networkId && txHash) {
+      const transaction = await getTransactionDetails(
+        currentAccount(),
+        networkId,
+        txHash
+      );
+      console.log(
+        "Should save transaction to Zustand >>>>>>>>>>>>>> transaction details:",
+        transaction
+      );
+    }
+  }
+
   // Save to DB immediatly
   await saveMessages(currentAccount(), [
     {
