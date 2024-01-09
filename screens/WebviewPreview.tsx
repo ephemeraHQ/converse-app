@@ -4,7 +4,10 @@ import { Platform, Button, useColorScheme } from "react-native";
 import { WebView } from "react-native-webview";
 
 import AndroidBackAction from "../components/AndroidBackAction";
-import { setAndroidSystemColor, setAndroidColors } from "../utils/colors";
+import {
+  setAndroidColors,
+  setAndroidSystemColor,
+} from "../utils/colors/helpers";
 import { NavigationParamList } from "./Navigation/Navigation";
 
 export default function WebviewPreview({
