@@ -14,11 +14,11 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import SendButton from "../../assets/send-button.svg";
 import { useAppStore } from "../../data/store/appStore";
 import { useSelect } from "../../data/store/storeHelpers";
+import { dangerColor } from "../../utils/colors";
 import {
-  dangerColor,
   setAndroidColors,
   setAndroidSystemColor,
-} from "../../utils/colors";
+} from "../../utils/colors/helpers";
 import ActivityIndicator from "../ActivityIndicator/ActivityIndicator";
 import Picto from "../Picto/Picto";
 

@@ -6,7 +6,7 @@ import config from "../../config";
 import { useAppStore } from "../../data/store/appStore";
 import { useOnboardingStore } from "../../data/store/onboardingStore";
 import { useSelect } from "../../data/store/storeHelpers";
-import { setAndroidColors } from "../../utils/colors";
+import { setAndroidColors } from "../../utils/colors/helpers";
 import {
   navigateToTopicWithRetry,
   topicToNavigateTo,

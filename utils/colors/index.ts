@@ -1,8 +1,6 @@
 import { ColorSchemeName, Platform } from "react-native";
 import { MD3DarkTheme, MD3LightTheme } from "react-native-paper";
 
-import { sentryTrackError } from "./sentry";
-
 const BACKGROUND_LIGHT = "#FFF";
 const BACKGROUND_DARK = "#111";
 
@@ -290,7 +288,7 @@ export const headerTitleStyle = (colorScheme: ColorSchemeName) =>
     },
   });
 
-const rgbStringToHex = (rgbString: string) => {
+export const rgbStringToHex = (rgbString: string) => {
   const splitted = rgbString.split("(")[1].split(")")[0].split(",");
   const hexValue = splitted
     .map((x: string) => {
@@ -299,32 +297,6 @@ const rgbStringToHex = (rgbString: string) => {
     })
     .join("");
   return `#${hexValue}`;
-};
-
-export const setAndroidSystemColor = (color: string) => {
-  if (Platform.OS === "android") {
-    const BackgroundColor = require("react-native-background-color");
-    const SystemNavigationBar =
-      require("react-native-system-navigation-bar").default;
-    try {
-      BackgroundColor.setColor(color);
-    } catch (e) {
-      sentryTrackError(e);
-    }
-    SystemNavigationBar.setNavigationColor(color).catch(sentryTrackError);
-  }
-};
-
-export const setAndroidColors = (colorScheme: ColorSchemeName) => {
-  if (Platform.OS === "android") {
-    const color = rgbStringToHex(backgroundColor(colorScheme));
-    setAndroidSystemColor(color);
-    const SystemNavigationBar =
-      require("react-native-system-navigation-bar").default;
-    SystemNavigationBar.setBarMode(
-      colorScheme === "dark" ? "light" : "dark"
-    ).catch(sentryTrackError);
-  }
 };
 
 export const actionSheetColors = (colorScheme: ColorSchemeName) =>

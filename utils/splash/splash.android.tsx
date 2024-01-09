@@ -1,7 +1,7 @@
 import { Appearance } from "react-native";
 import RNBootSplash from "react-native-bootsplash";
 
-import { setAndroidColors } from "../colors";
+import { setAndroidColors } from "../colors/helpers";
 
 export const hideSplashScreen = async () => {
   await RNBootSplash.hide();
