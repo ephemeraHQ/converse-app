@@ -112,7 +112,7 @@ index 72d6c23..f266bc4 100644
  			"contentTypeId": model.encodedContent.type.description,
  			"content": try ContentJson.fromEncoded(model.encodedContent, client: client).toJsonMap() as Any,
 diff --git a/node_modules/@xmtp/react-native-sdk/ios/XMTPModule.swift b/node_modules/@xmtp/react-native-sdk/ios/XMTPModule.swift
-index f8f65ca..5b9568b 100644
+index 5ab661e..9eb18c1 100644
 --- a/node_modules/@xmtp/react-native-sdk/ios/XMTPModule.swift
 +++ b/node_modules/@xmtp/react-native-sdk/ios/XMTPModule.swift
 @@ -427,7 +427,13 @@ public class XMTPModule: Module {
