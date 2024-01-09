@@ -1,7 +1,9 @@
 import { useNavigationState } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import * as Linking from "expo-linking";
 import { StyleSheet, Platform } from "react-native";
 
+import { useIsSplitScreen } from "../../screens/Navigation/navHelpers";
 import Button from "../Button/Button";
 
 type NavigationChatProps = {
@@ -15,18 +17,26 @@ export function NavigationChatButton({
 }: NavigationChatProps) {
   const styles = useStyles();
   const navigationIndex = useNavigationState((state) => state.index);
+  const isSplitScreen = useIsSplitScreen();
 
   const handlePress = () => {
     // On Android the accounts are not in the navigation but in a drawer
     navigation.pop(
       Platform.OS === "ios" ? navigationIndex - 1 : navigationIndex
     );
-    setTimeout(() => {
-      navigation.navigate("Conversation", {
-        mainConversationWithPeer: address,
-        focus: true,
-      });
-    }, 300);
+    setTimeout(
+      () => {
+        Linking.openURL(
+          Linking.createURL("/conversation", {
+            queryParams: {
+              mainConversationWithPeer: address,
+              focus: true as any,
+            },
+          })
+        );
+      },
+      isSplitScreen ? 0 : 300
+    );
   };
 
   return (

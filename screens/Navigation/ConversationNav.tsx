@@ -1,5 +1,6 @@
 import Conversation from "../Conversation";
 import { NativeStack, navigationAnimation } from "./Navigation";
+import { useIsSplitScreen } from "./navHelpers";
 
 export type ConversationNavParams = {
   topic?: string;
@@ -18,10 +19,13 @@ export const ConversationScreenConfig = {
   },
 };
 
-export default function ConversationNav(topic?: string | undefined) {
+export default function ConversationNav(
+  routeParams?: ConversationNavParams | undefined
+) {
   // If we're in split screen mode, the topic is not passed via the usual StackNavigation
   // but via the DrawerNavigation that passes it back to this component via prop
   // so we override the route when instantiating Conversation
+  const isSplitScreen = useIsSplitScreen();
   return (
     <NativeStack.Screen
       name="Conversation"
@@ -32,9 +36,14 @@ export default function ConversationNav(topic?: string | undefined) {
       {({ route, navigation }) => (
         <Conversation
           navigation={navigation}
+          key={
+            isSplitScreen
+              ? `conversation-${JSON.stringify(routeParams || {})}`
+              : "conversation"
+          }
           route={{
             ...route,
-            params: { ...route.params, topic: route.params?.topic || topic },
+            params: isSplitScreen && routeParams ? routeParams : route.params,
           }}
         />
       )}
