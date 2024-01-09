@@ -1,5 +1,4 @@
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import { useDisconnect } from "@thirdweb-dev/react-native";
 import { ScrollView, StyleSheet, View, useColorScheme } from "react-native";
 
 import AccountSettingsButton from "../../components/AccountSettingsButton";
@@ -15,6 +14,7 @@ import {
   primaryColor,
   textSecondaryColor,
 } from "../../utils/colors";
+import useDisconnect from "../../utils/onboarding/disconnect";
 import { shortAddress, useAccountsProfiles } from "../../utils/str";
 import { NavigationParamList } from "../Navigation/Navigation";
 

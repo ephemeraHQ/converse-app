@@ -1,7 +1,6 @@
 import { usePrivy } from "@privy-io/expo";
 import Clipboard from "@react-native-clipboard/clipboard";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import { useDisconnect } from "@thirdweb-dev/react-native";
 import Constants from "expo-constants";
 import * as Linking from "expo-linking";
 import React, { useCallback, useEffect, useState } from "react";
@@ -17,7 +16,6 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import ActivityIndicator from "../components/ActivityIndicator/ActivityIndicator";
-import { addLog } from "../components/DebugButton";
 import { showActionSheetWithOptions } from "../components/StateHandlers/ActionSheetStateHandler";
 import TableView, {
   TableViewItemType,
@@ -45,8 +43,10 @@ import {
   textPrimaryColor,
   textSecondaryColor,
 } from "../utils/colors";
+import { addLog } from "../utils/debug";
 import { evmHelpers } from "../utils/evm/helpers";
 import { logout } from "../utils/logout";
+import useDisconnect from "../utils/onboarding/disconnect";
 import { getIPFSAssetURI } from "../utils/thirdweb";
 import { refreshBalanceForAccount } from "../utils/wallet";
 import { consentToPeersOnProtocol } from "../utils/xmtpRN/conversations";

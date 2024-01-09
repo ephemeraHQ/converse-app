@@ -1,4 +1,3 @@
-import { useDisconnect } from "@thirdweb-dev/react-native";
 import { StyleSheet, useColorScheme } from "react-native";
 import { Drawer } from "react-native-paper";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -13,6 +12,7 @@ import { useOnboardingStore } from "../../data/store/onboardingStore";
 import { useSelect } from "../../data/store/storeHelpers";
 import { clickedItemBackgroundColor } from "../../utils/colors";
 import { converseEventEmitter } from "../../utils/events";
+import useDisconnect from "../../utils/onboarding/disconnect";
 import { shortAddress, useAccountsProfiles } from "../../utils/str";
 
 export default function AccountsAndroid() {

@@ -3,7 +3,6 @@ import Clipboard from "@react-native-clipboard/clipboard";
 import axios from "axios";
 import * as Updates from "expo-updates";
 import { forwardRef, useImperativeHandle } from "react";
-import RNFS from "react-native-fs";
 import * as Sentry from "sentry-expo";
 
 import config from "../config";
@@ -14,22 +13,12 @@ import {
   getChatStore,
   useCurrentAccount,
 } from "../data/store/accountsStore";
+import { debugLogs, resetDebugLogs } from "../utils/debug";
 import { usePrivySigner } from "../utils/evm/helpers";
 import { getSecureItemAsync } from "../utils/keychain";
 import { logout } from "../utils/logout";
 import mmkv from "../utils/mmkv";
-import { sentryAddBreadcrumb } from "../utils/sentry";
 import { showActionSheetWithOptions } from "./StateHandlers/ActionSheetStateHandler";
-
-let logs: string[] = [];
-
-export const addLog = (log: string) => {
-  if (config.debugMenu || config.debugAddresses.includes(currentAccount())) {
-    console.log(`${new Date().toISOString()} - ${log}`);
-    sentryAddBreadcrumb(log, true);
-    logs.push(`${new Date().toISOString()} - ${log}`);
-  }
-};
 
 export const useEnableDebug = () => {
   const userAddress = useCurrentAccount() as string;
@@ -70,6 +59,7 @@ const DebugButton = forwardRef((props, ref) => {
         },
         "Export db file": async () => {
           const dbPath = await getDbPath(currentAccount());
+          const RNFS = require("react-native-fs");
           const dbExists = await RNFS.exists(dbPath);
           if (!dbExists) {
             alert(`SQlite file does not exist`);
@@ -103,6 +93,7 @@ const DebugButton = forwardRef((props, ref) => {
           getChatStore(currentAccount()).getState().setLastSyncedAt(0, []);
         },
         "Clear messages attachments folder": async () => {
+          const RNFS = require("react-native-fs");
           const messageFolder = `${RNFS.DocumentDirectoryPath}/messages`;
           await RNFS.unlink(messageFolder);
           alert("Cleared!");
@@ -114,15 +105,13 @@ const DebugButton = forwardRef((props, ref) => {
           Sentry.Native.nativeCrash();
         },
         "Show logs": () => {
-          alert(logs.join("\n"));
+          alert(debugLogs.join("\n"));
         },
         "Copy logs": () => {
-          Clipboard.setString(logs.join("\n"));
+          Clipboard.setString(debugLogs.join("\n"));
           alert("Copied!");
         },
-        "Clear logs": () => {
-          logs = [];
-        },
+        "Clear logs": resetDebugLogs,
         "Logout all": () => {
           const accounts = getAccountsList();
           accounts.forEach((account) => logout(account));

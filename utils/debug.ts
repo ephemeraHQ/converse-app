@@ -1,3 +1,7 @@
+import config from "../config";
+import { currentAccount } from "../data/store/accountsStore";
+import { sentryAddBreadcrumb } from "./sentry";
+
 const timestamps: { [timestampId: string]: { start: number; last: number } } =
   {};
 
@@ -36,5 +40,19 @@ export const debugTimeSpent = ({
       console.log(`    ⌛  [${timestampId}] timestamp reset`);
       // addLog(`⌛  [${timestampId}] timestamp reset`);
     }
+  }
+};
+
+export let debugLogs: string[] = [];
+
+export const resetDebugLogs = () => {
+  debugLogs = [];
+};
+
+export const addLog = (log: string) => {
+  if (config.debugMenu || config.debugAddresses.includes(currentAccount())) {
+    console.log(`${new Date().toISOString()} - ${log}`);
+    sentryAddBreadcrumb(log, true);
+    debugLogs.push(`${new Date().toISOString()} - ${log}`);
   }
 };

@@ -57,7 +57,8 @@ export const useAppStore = create<AppStoreType>()(
       setIsInternetReachable: (reachable) =>
         set(() => ({ isInternetReachable: reachable })),
 
-      hydrationDone: false,
+      // No hydration on web
+      hydrationDone: Platform.OS === "web",
       setHydrationDone: (done) => set(() => ({ hydrationDone: done })),
 
       mediaPreview: null,

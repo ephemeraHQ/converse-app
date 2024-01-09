@@ -7,8 +7,8 @@ import {
   getSecureItemAsync,
   setSecureItemAsync,
 } from ".";
-import { addLog } from "../../components/DebugButton";
 import config from "../../config";
+import { addLog } from "../debug";
 import { sentryTrackMessage } from "../sentry";
 
 export const secureStoreOptions: SecureStore.SecureStoreOptions = {
