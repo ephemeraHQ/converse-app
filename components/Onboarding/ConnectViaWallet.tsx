@@ -166,13 +166,11 @@ export default function ConnectViaWallet({
       const base64Key = await getXmtpBase64KeyFromSigner(
         signer,
         async () => {
-          console.log("before create");
           // Before calling "create" signature
           setWaitingForSecondSignature(true);
           clickedSecondSignature.current = false;
         },
         async () => {
-          console.log("before enable");
           // Before calling "enable" signature
           const waitForClickSecondSignature = async () => {
             while (!clickedSecondSignature.current) {
