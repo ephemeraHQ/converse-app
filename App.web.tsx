@@ -1,12 +1,16 @@
 import "@expo/metro-runtime";
 import "./polyfills";
-import { Text } from "react-native";
+import { ActionSheetProvider } from "@expo/react-native-action-sheet";
 import { SafeAreaProvider } from "react-native-safe-area-context";
+
+import Main from "./screens/Main";
 
 export default function App() {
   return (
     <SafeAreaProvider>
-      <Text>Web Version</Text>
+      <ActionSheetProvider>
+        <Main />
+      </ActionSheetProvider>
     </SafeAreaProvider>
   );
 }

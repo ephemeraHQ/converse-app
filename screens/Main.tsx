@@ -1,11 +1,6 @@
 import { StatusBar } from "expo-status-bar";
 import React, { useCallback, useEffect, useRef } from "react";
-import {
-  Dimensions,
-  DrawerLayoutAndroid,
-  Platform,
-  useColorScheme,
-} from "react-native";
+import { Dimensions, Platform, useColorScheme } from "react-native";
 
 import ChatSendAttachment from "../components/Chat/ChatSendAttachment";
 import UsernameSelector from "../components/Onboarding/UsernameSelector";
@@ -28,6 +23,7 @@ import { useSelect } from "../data/store/storeHelpers";
 import { backgroundColor } from "../utils/colors";
 import { converseEventEmitter } from "../utils/events";
 import AccountsAndroid from "./Accounts/AccountsAndroid";
+import AccountsDrawer from "./Accounts/AccountsDrawer";
 import Navigation from "./Navigation/Navigation";
 import SplitScreenNavigation from "./Navigation/SplitScreenNavigation/SplitScreenNavigation";
 import { useIsSplitScreen } from "./Navigation/navHelpers";
@@ -63,7 +59,7 @@ export default function Main() {
         "mediaPreview",
       ])
     );
-  const navigationDrawer = useRef<DrawerLayoutAndroid>(null);
+  const navigationDrawer = useRef<typeof AccountsDrawer>(null);
   const toggleNavigationDrawer = useCallback((open: boolean) => {
     if (open) {
       navigationDrawer.current?.openDrawer();
@@ -117,14 +113,14 @@ export default function Main() {
       // On Android the whole navigation is wrapped in a drawler
       // layout to be able to display the menu
       screenToShow = (
-        <DrawerLayoutAndroid
+        <AccountsDrawer
           drawerBackgroundColor={backgroundColor(colorScheme)}
           ref={navigationDrawer}
           drawerWidth={Dimensions.get("screen").width * 0.77}
           renderNavigationView={() => <AccountsAndroid />}
         >
           <Navigation />
-        </DrawerLayoutAndroid>
+        </AccountsDrawer>
       );
     } else if (isSplitScreen) {
       screenToShow = <SplitScreenNavigation />;
