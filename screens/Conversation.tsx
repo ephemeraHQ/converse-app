@@ -40,7 +40,6 @@ import { converseEventEmitter } from "../utils/events";
 import { setTopicToNavigateTo, topicToNavigateTo } from "../utils/navigation";
 import { getTitleFontScale, TextInputWithValue } from "../utils/str";
 import { NavigationParamList } from "./Navigation/Navigation";
-import { useIsSplitScreen } from "./Navigation/navHelpers";
 
 const Conversation = ({
   route,
@@ -285,17 +284,11 @@ const Conversation = ({
   const showInviteBanner =
     showInvite.show && showInvite.banner && !isBlockedPeer;
 
-  const isSplitScreen = useIsSplitScreen();
-
   return (
     <View
       style={styles.container}
       onLayout={checkIfUserExists}
-      key={
-        isSplitScreen
-          ? `conversation-${colorScheme}-${route.params?.topic}-${route.params?.mainConversationWithPeer}`
-          : `conversation-${colorScheme}`
-      }
+      key={`conversation-${colorScheme}`}
     >
       {(route.params?.topic || route.params?.mainConversationWithPeer) && (
         <>
