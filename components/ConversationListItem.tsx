@@ -36,6 +36,7 @@ import {
   textSecondaryColor,
 } from "../utils/colors";
 import { getRelativeDateTime } from "../utils/date";
+import { isDesktop } from "../utils/device";
 import { converseEventEmitter } from "../utils/events";
 import { consentToPeersOnProtocol } from "../utils/xmtpRN/conversations";
 import { showActionSheetWithOptions } from "./StateHandlers/ActionSheetStateHandler";
@@ -181,7 +182,7 @@ const ConversationListItem = memo(function ConversationListItem({
     Platform.OS === "ios" ? (
       <TouchableHighlight
         underlayColor={clickedItemBackgroundColor(colorScheme)}
-        delayPressIn={isSplitScreen ? 0 : 75}
+        delayPressIn={isDesktop ? 0 : 75}
         onPressIn={() => {
           if (!isSplitScreen) return;
           Linking.openURL(
