@@ -196,7 +196,8 @@
         "react-native-svg",
         "@shopify/flash-list",
         "expo-image-picker",
-        "@sentry/react-native"
+        "@sentry/react-native",
+        "react-native-screens"
       ]
     }
   }
