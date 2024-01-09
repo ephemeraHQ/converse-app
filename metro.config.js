@@ -23,7 +23,9 @@ module.exports = {
   resolver: {
     ...defaultConfig.resolver,
     assetExts: defaultConfig.resolver.assetExts.filter((ext) => ext !== "svg"),
-    sourceExts: [...defaultConfig.resolver.sourceExts, "svg"],
+    // Expo 49 issue: default metro config needs to include "mjs"
+    // https://github.com/expo/expo/issues/23180
+    sourceExts: [...defaultConfig.resolver.sourceExts, "svg", "mjs"],
     extraNodeModules: {
       ...require("expo-crypto-polyfills"),
       zlib: require.resolve("browserify-zlib"),
