@@ -6,7 +6,7 @@ import RNFS from "react-native-fs";
 
 import config from "../../config";
 import { moveFileAndReplace } from "../../utils/fileSystem";
-import { saveXmtpKey, secureStoreOptions } from "../../utils/keychain";
+import { saveXmtpKey, secureStoreOptions } from "../../utils/keychain/helpers";
 import storage from "../../utils/mmkv";
 import { sentryTrackError, sentryTrackMessage } from "../../utils/sentry";
 import { getDbPath } from "../db";

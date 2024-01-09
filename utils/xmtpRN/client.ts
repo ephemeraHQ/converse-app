@@ -15,7 +15,7 @@ import config from "../../config";
 import { refreshAllSpamScores } from "../../data/helpers/conversations/spamScore";
 import { getChatStore } from "../../data/store/accountsStore";
 import { getCleanAddress } from "../eth";
-import { loadXmtpKey } from "../keychain";
+import { loadXmtpKey } from "../keychain/helpers";
 // import { CoinbaseMessagingPaymentCodec } from "./contentTypes/coinbasePayment";
 import {
   deleteOpenedConversations,

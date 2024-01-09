@@ -7,7 +7,10 @@ import { getSettingsStore } from "../../data/store/accountsStore";
 import { XmtpConversation } from "../../data/store/chatStore";
 import { SettingsStoreType } from "../../data/store/settingsStore";
 import { getCleanAddress } from "../eth";
-import { getTopicDataFromKeychain, saveTopicDataToKeychain } from "../keychain";
+import {
+  getTopicDataFromKeychain,
+  saveTopicDataToKeychain,
+} from "../keychain/helpers";
 import { sentryTrackError } from "../sentry";
 import {
   ConversationWithCodecsType,

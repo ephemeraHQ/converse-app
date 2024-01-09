@@ -5,7 +5,8 @@ import {
   getWalletStore,
   useAccountsStore,
 } from "../data/store/accountsStore";
-import { deleteSecureItemAsync, deleteXmtpKey } from "./keychain";
+import { deleteSecureItemAsync } from "./keychain";
+import { deleteXmtpKey } from "./keychain/helpers";
 import mmkv from "./mmkv";
 import {
   deleteSubscribedTopics,

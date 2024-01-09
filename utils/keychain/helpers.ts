@@ -2,23 +2,19 @@ import type { Storage as PrivyStorage } from "@privy-io/js-sdk-core";
 import { createHash } from "crypto";
 import * as SecureStore from "expo-secure-store";
 
-import { addLog } from "../components/DebugButton";
-import config from "../config";
-import { sentryTrackMessage } from "./sentry";
+import {
+  deleteSecureItemAsync,
+  getSecureItemAsync,
+  setSecureItemAsync,
+} from ".";
+import { addLog } from "../../components/DebugButton";
+import config from "../../config";
+import { sentryTrackMessage } from "../sentry";
 
 export const secureStoreOptions: SecureStore.SecureStoreOptions = {
   keychainService: config.bundleId,
   keychainAccessible: SecureStore.AFTER_FIRST_UNLOCK,
 };
-
-export const setSecureItemAsync = (key: string, value: string) =>
-  SecureStore.setItemAsync(key, value, secureStoreOptions);
-
-export const getSecureItemAsync = (key: string) =>
-  SecureStore.getItemAsync(key, secureStoreOptions);
-
-export const deleteSecureItemAsync = (key: string) =>
-  SecureStore.deleteItemAsync(key, secureStoreOptions);
 
 export const saveXmtpKey = (account: string, base64Key: string) =>
   setSecureItemAsync(`XMTP_KEY_${account}`, base64Key);

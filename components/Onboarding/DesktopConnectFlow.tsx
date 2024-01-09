@@ -18,7 +18,7 @@ import {
   textSecondaryColor,
 } from "../../utils/colors";
 import { isDesktop } from "../../utils/device";
-import { saveXmtpKey } from "../../utils/keychain";
+import { saveXmtpKey } from "../../utils/keychain/helpers";
 import {
   getXmtpClient,
   getXmtpClientFromBase64Key,
