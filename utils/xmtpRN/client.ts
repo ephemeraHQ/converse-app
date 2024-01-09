@@ -10,7 +10,6 @@ import {
 } from "@xmtp/react-native-sdk";
 import { Signer } from "ethers";
 
-import { addLog } from "../../components/DebugButton";
 import config from "../../config";
 import { refreshAllSpamScores } from "../../data/helpers/conversations/spamScore";
 import { getChatStore } from "../../data/store/accountsStore";
@@ -184,7 +183,6 @@ export const syncXmtpClient = async (account: string) => {
     // the case where we never fetch some messages
     if (fetchedMessagesCount > 0) {
       getChatStore(account).getState().setLastSyncedAt(now, topicsToQuery);
-      addLog(`Setting lastsynced at - ${now}`);
     }
     console.log(`[XmtpRN] Finished syncing ${account}`);
   } catch (e) {

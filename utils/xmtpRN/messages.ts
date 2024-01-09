@@ -5,9 +5,9 @@ import {
   StaticAttachmentContent,
 } from "@xmtp/react-native-sdk";
 
-import { addLog } from "../../components/DebugButton";
 import { saveMessages } from "../../data/helpers/messages";
 import { XmtpMessage } from "../../data/store/chatStore";
+import { addLog } from "../debug";
 import { sentryTrackError } from "../sentry";
 import { ConverseXmtpClientType, DecodedMessageWithCodecsType } from "./client";
 import { isContentType } from "./contentTypes";
@@ -160,7 +160,6 @@ export const loadConversationsMessages = async (
         console.log(
           "[XmtpRn] Avoiding a loop during sync due to weird timestamps"
         );
-        addLog(`Avoiding a loop`);
         queryConversationsFromTimestamp[topic] += 1;
       }
     });

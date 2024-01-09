@@ -1,7 +1,6 @@
 import { usePrivy } from "@privy-io/expo";
 import Clipboard from "@react-native-clipboard/clipboard";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import { useDisconnect } from "@thirdweb-dev/react-native";
 import * as Linking from "expo-linking";
 import React, { useCallback } from "react";
 import {
@@ -22,14 +21,15 @@ import {
   primaryColor,
   textSecondaryColor,
 } from "../utils/colors";
+import { addLog } from "../utils/debug";
 import { converseEventEmitter } from "../utils/events";
 import { logout } from "../utils/logout";
 import {
   requestPushNotificationsPermissions,
   NotificationPermissionStatus,
 } from "../utils/notifications";
+import useDisconnect from "../utils/onboarding/disconnect";
 import { refreshBalanceForAccounts } from "../utils/wallet";
-import { addLog } from "./DebugButton";
 import Picto from "./Picto/Picto";
 import { showActionSheetWithOptions } from "./StateHandlers/ActionSheetStateHandler";
 import { TableViewPicto } from "./TableView/TableViewImage";

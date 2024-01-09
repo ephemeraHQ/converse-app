@@ -24,8 +24,8 @@ import {
   textPrimaryColor,
   textSecondaryColor,
 } from "../../utils/colors";
+import { addLog } from "../../utils/debug";
 import { usePrivySigner } from "../../utils/evm/helpers";
-import { addLog } from "../DebugButton";
 import Picto from "../Picto/Picto";
 import OnboardingComponent from "./OnboardingComponent";
 

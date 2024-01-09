@@ -84,8 +84,13 @@ export default function Main() {
         backgroundColor={backgroundColor(colorScheme)}
         style={colorScheme === "dark" ? "light" : "dark"}
       />
-      <HydrationStateHandler />
-      <InitialStateHandler />
+      {Platform.OS !== "web" && (
+        <>
+          <HydrationStateHandler />
+          <InitialStateHandler />
+        </>
+      )}
+
       <NetworkStateHandler />
       <MainIdentityStateHandler />
       <NotificationsStateHandler />
