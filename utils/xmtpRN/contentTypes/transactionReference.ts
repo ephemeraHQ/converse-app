@@ -55,6 +55,12 @@ export class TransactionReferenceCodec
   }
 
   decode(encodedContent: EncodedContent): TransactionReference {
+    // Temporary handling content that is base64 encoded by protocol
+    const base64Content = encodedContent.content as unknown as string;
+    const stringContent = Buffer.from(base64Content, "base64").toString();
+    return JSON.parse(stringContent) as TransactionReference;
+
+    // Without base64 protocol encoding
     const uint8Array = encodedContent.content;
     const contentReceived = JSON.parse(new TextDecoder().decode(uint8Array));
     console.log("decoding content:", contentReceived);
