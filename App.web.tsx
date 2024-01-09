@@ -1,17 +1,12 @@
 import "@expo/metro-runtime";
-import { PrivyProvider } from "@privy-io/expo";
-
 import "./polyfills";
-import { View, Text } from "react-native";
-
-import config from "./config";
+import { Text } from "react-native";
+import { SafeAreaProvider } from "react-native-safe-area-context";
 
 export default function App() {
   return (
-    <PrivyProvider appId={config.privyAppId}>
-      <View>
-        <Text>COUCOU WEB</Text>
-      </View>
-    </PrivyProvider>
+    <SafeAreaProvider>
+      <Text>Web Version</Text>
+    </SafeAreaProvider>
   );
 }
