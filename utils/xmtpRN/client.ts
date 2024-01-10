@@ -1,5 +1,3 @@
-import * as secp from "@noble/secp256k1";
-import { privateKey, signature } from "@xmtp/proto";
 import {
   Client,
   ReactionCodec,
@@ -15,7 +13,7 @@ import { refreshAllSpamScores } from "../../data/helpers/conversations/spamScore
 import { getChatStore } from "../../data/store/accountsStore";
 import { getCleanAddress } from "../eth";
 import { loadXmtpKey } from "../keychain/helpers";
-// import { CoinbaseMessagingPaymentCodec } from "./contentTypes/coinbasePayment";
+import { xmtpSignatureByAccount } from "./api";
 import {
   deleteOpenedConversations,
   loadConversations,
@@ -77,7 +75,6 @@ export const isOnXmtp = async (address: string) =>
   });
 
 const xmtpClientByAccount: { [account: string]: ConverseXmtpClientType } = {};
-const xmtpSignatureByAccount: { [account: string]: string } = {};
 const instantiatingClientForAccount: { [account: string]: boolean } = {};
 
 export const getXmtpClient = async (
@@ -142,32 +139,31 @@ export const syncXmtpClient = async (account: string) => {
     lastSyncedAt,
     knownTopics: knownTopics.length,
   });
-  const client = await getXmtpClient(account);
   const queryConversationsFromTimestamp: { [topic: string]: number } = {};
   knownTopics.forEach((topic) => {
     queryConversationsFromTimestamp[topic] = lastSyncedAt;
   });
   try {
     const now = new Date().getTime();
-    updateConsentStatus(client);
-    const { newConversations } = await loadConversations(client, knownTopics);
+    updateConsentStatus(account);
+    const { newConversations } = await loadConversations(account, knownTopics);
     newConversations.forEach((c) => {
       queryConversationsFromTimestamp[c.topic] = 0;
     });
     // As soon as we have done one query we can hide reconnecting
     getChatStore(account).getState().setReconnecting(false);
 
-    streamAllMessages(client).catch((e) => {
+    streamAllMessages(account).catch((e) => {
       onSyncLost(account, e);
     });
-    streamConversations(client).catch((e) => {
+    streamConversations(account).catch((e) => {
       onSyncLost(account, e);
     });
-    streamingAccounts[client.address] = true;
+    streamingAccounts[account] = true;
     const topicsToQuery = Object.keys(queryConversationsFromTimestamp);
 
     const fetchedMessagesCount = await loadConversationsMessages(
-      client,
+      account,
       queryConversationsFromTimestamp
     );
 
@@ -201,50 +197,4 @@ export const deleteXmtpClient = async (account: string) => {
   delete xmtpSignatureByAccount[account];
   delete instantiatingClientForAccount[account];
   delete streamingAccounts[account];
-};
-
-const getXmtpApiSignature = async (account: string, message: string) => {
-  const messageToSign = Buffer.from(message);
-  const base64Key = await loadXmtpKey(account);
-  if (!base64Key)
-    throw new Error(`Cannot create signature for ${account}: no key found`);
-
-  const privateKeyBundle = privateKey.PrivateKeyBundle.decode(
-    Buffer.from(base64Key, "base64")
-  );
-  const privateKeySecp256k1 =
-    privateKeyBundle.v1?.identityKey?.secp256k1 ||
-    privateKeyBundle.v2?.identityKey?.secp256k1;
-  if (!privateKeySecp256k1)
-    throw new Error("Could not extract private key from private key bundle");
-
-  const [signedBytes, recovery] = await secp.sign(
-    messageToSign,
-    privateKeySecp256k1.bytes,
-    {
-      recovered: true,
-      der: false,
-    }
-  );
-  const signatureProto = signature.Signature.fromPartial({
-    ecdsaCompact: { bytes: signedBytes, recovery },
-  });
-  const encodedSignature = Buffer.from(
-    signature.Signature.encode(signatureProto).finish()
-  ).toString("base64");
-  return encodedSignature;
-};
-
-export const getXmtpApiHeaders = async (account: string) => {
-  if (account in xmtpSignatureByAccount)
-    return {
-      "xmtp-api-signature": xmtpSignatureByAccount[account],
-      "xmtp-api-address": account,
-    };
-  const xmtpApiSignature = await getXmtpApiSignature(account, "XMTP_IDENTITY");
-  xmtpSignatureByAccount[account] = xmtpApiSignature;
-  return {
-    "xmtp-api-signature": xmtpApiSignature,
-    "xmtp-api-address": account,
-  };
 };
