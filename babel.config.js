@@ -9,7 +9,7 @@ module.exports = {
   plugins: [
     ["@babel/plugin-proposal-decorators", { version: "legacy" }],
     "@babel/plugin-proposal-export-namespace-from",
-    '@babel/plugin-transform-flow-strip-types', // For privy (phone country selector)
+    "@babel/plugin-transform-flow-strip-types", // For privy (phone country selector)
     ["@babel/plugin-transform-class-properties", { loose: true }], // For privy
     ["@babel/plugin-transform-private-methods", { loose: true }], // For privy
     [
@@ -17,6 +17,10 @@ module.exports = {
       {
         alias: {
           crypto: "crypto-browserify",
+          // This entrypoint mapping is done in @xmtp/user-preferences-bindings-wasm's "exports" in package.json
+          // but we don't want to enable unstable_enablePackageExports for now in metro.config.js
+          "@xmtp/user-preferences-bindings-wasm/web":
+            "@xmtp/user-preferences-bindings-wasm/dist/web/user_preferences_bindings_wasm",
         },
       },
     ],

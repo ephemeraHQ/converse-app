@@ -7,7 +7,7 @@
     "typecheck": "echo \"➜ Typechecking project...\" && tsc --noEmit",
     "update": "node scripts/build/update.js",
     "db": "ts-node scripts/migrations/db.ts",
-    "postinstall": "patch-package && husky install && cross-os postinstall",
+    "postinstall": "patch-package && node scripts/wasm.js && husky install && cross-os postinstall",
     "commit": "git show --format=\"%h\" --no-patch"
   },
   "cross-os": {
@@ -48,7 +48,7 @@
     "@xmtp/content-type-remote-attachment": "^1.0.7",
     "@xmtp/proto": "^3.24.0",
     "@xmtp/react-native-sdk": "^1.23.5",
-    "@xmtp/xmtp-js": "^11.2.0",
+    "@xmtp/xmtp-js": "^11.3.1",
     "axios": "^1.2.1",
     "babel-plugin-transform-remove-console": "^6.9.4",
     "babel-preset-expo-modern": "^0.1.3",
