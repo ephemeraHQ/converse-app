@@ -124,16 +124,17 @@ const handleNewConversation = async (
 };
 
 export const streamConversations = async (account: string) => {
+  await stopStreamingConversations(account);
   const client = await getXmtpClient(account);
-  await stopStreamingConversations(client);
   client.conversations.stream((conversation) =>
     handleNewConversation(client, conversation)
   );
 };
 
-export const stopStreamingConversations = async (
-  client: ConverseXmtpClientType
-) => client.conversations.cancelStream();
+export const stopStreamingConversations = async (account: string) => {
+  const client = await getXmtpClient(account);
+  return client.conversations.cancelStream();
+};
 
 const listConversations = async (client: ConverseXmtpClientType) => {
   const conversations = await client.conversations.list();

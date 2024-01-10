@@ -9,7 +9,7 @@ import { saveMessages } from "../../data/helpers/messages";
 import { XmtpMessage } from "../../data/store/chatStore";
 import { addLog } from "../debug";
 import { sentryTrackError } from "../sentry";
-import { ConverseXmtpClientType, DecodedMessageWithCodecsType } from "./client";
+import { DecodedMessageWithCodecsType } from "./client";
 import { isContentType } from "./contentTypes";
 import { getXmtpClient } from "./sync";
 // import { CoinbaseMessagingPaymentContent } from "./contentTypes/coinbasePayment";
@@ -91,8 +91,8 @@ const protocolMessagesToStateMessages = (
 };
 
 export const streamAllMessages = async (account: string) => {
+  await stopStreamingAllMessage(account);
   const client = await getXmtpClient(account);
-  await stopStreamingAllMessage(client);
   console.log(`[XmtpRN] Streaming messages for ${client.address}`);
   client.conversations.streamAllMessages(async (message) => {
     console.log(`[XmtpRN] Received a message for ${client.address}`);
@@ -100,7 +100,8 @@ export const streamAllMessages = async (account: string) => {
   });
 };
 
-export const stopStreamingAllMessage = (client: ConverseXmtpClientType) => {
+export const stopStreamingAllMessage = async (account: string) => {
+  const client = await getXmtpClient(account);
   console.log(`[XmtpRN] Stopped streaming messages for ${client.address}`);
   client.conversations.cancelStreamAllMessages();
 };
