@@ -4,6 +4,7 @@ import { ActionSheetProvider } from "@expo/react-native-action-sheet";
 import { createWeb3Modal, defaultConfig } from "@web3modal/ethers5/react";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 
+import XmtpEngine from "./components/XmtpEngine";
 import config from "./config";
 import Main from "./screens/Main";
 
@@ -27,7 +28,10 @@ export default function App() {
   return (
     <SafeAreaProvider>
       <ActionSheetProvider>
-        <Main />
+        <>
+          <Main />
+          <XmtpEngine />
+        </>
       </ActionSheetProvider>
     </SafeAreaProvider>
   );
