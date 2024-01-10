@@ -21,6 +21,11 @@ module.exports = {
           // but we don't want to enable unstable_enablePackageExports for now in metro.config.js
           "@xmtp/user-preferences-bindings-wasm/web":
             "@xmtp/user-preferences-bindings-wasm/dist/web/user_preferences_bindings_wasm",
+          // Same for @web3modal/ethers5
+          "@web3modal/ethers5/react":
+            "@web3modal/ethers5/dist/esm/exports/react.js",
+          "@web3modal/scaffold-utils/ethers":
+            "@web3modal/scaffold-utils/dist/esm/exports/ethers.js",
         },
       },
     ],
