@@ -11,9 +11,9 @@ import { useAppStore } from "../data/store/appStore";
 import { useSelect } from "../data/store/storeHelpers";
 import { getTopicsStatus } from "../utils/api";
 import { loadSavedNotificationMessagesToContext } from "../utils/notifications";
-import { syncXmtpClient } from "../utils/xmtpRN/client";
 import { createPendingConversations } from "../utils/xmtpRN/conversations";
 import { sendPendingMessages } from "../utils/xmtpRN/send";
+import { syncXmtpClient } from "../utils/xmtpRN/sync";
 
 export default function XmtpEngine() {
   const appState = useRef(AppState.currentState);

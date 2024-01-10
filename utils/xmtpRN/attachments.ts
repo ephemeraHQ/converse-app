@@ -5,7 +5,7 @@ import {
 import RNFS from "react-native-fs";
 
 import { XmtpMessage } from "../../data/store/chatStore";
-import { getXmtpClient } from "./client";
+import { getXmtpClient } from "./sync";
 
 export const encryptRemoteAttachment = async (
   account: string,
