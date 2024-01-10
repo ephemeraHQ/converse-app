@@ -1,3 +1,4 @@
+import { Platform } from "react-native";
 import semver from "semver";
 import { DataSource, ObjectLiteral, Repository } from "typeorm/browser";
 import { QueryDeepPartialEntity } from "typeorm/query-builder/QueryPartialEntity";
@@ -30,6 +31,7 @@ export const upsertRepository = async <T extends ObjectLiteral>(
   conflictPathsOrOptions: string[],
   returning = true
 ): Promise<any> => {
+  if (Platform.OS === "web") return;
   if (supportsUpsert) {
     // This is basically the "upsert" method from typeorm but with the ability to not
     // return the data from the query which will help in perf because SQLite does not have
