@@ -14,7 +14,7 @@ import {
 } from "./notifications";
 import { resetSharedData } from "./sharedData";
 import { getXmtpApiHeaders } from "./xmtpRN/api";
-import { deleteXmtpClient } from "./xmtpRN/client";
+import { deleteXmtpClient } from "./xmtpRN/sync";
 
 type LogoutTasks = {
   [account: string]: {

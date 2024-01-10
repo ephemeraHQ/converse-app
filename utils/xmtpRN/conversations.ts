@@ -12,12 +12,9 @@ import {
   saveTopicDataToKeychain,
 } from "../keychain/helpers";
 import { sentryTrackError } from "../sentry";
-import {
-  ConversationWithCodecsType,
-  ConverseXmtpClientType,
-  getXmtpClient,
-} from "./client";
+import { ConversationWithCodecsType, ConverseXmtpClientType } from "./client";
 import { loadConversationsMessages } from "./messages";
+import { getXmtpClient } from "./sync";
 
 const protocolConversationToStateConversation = (
   conversation: ConversationWithCodecsType

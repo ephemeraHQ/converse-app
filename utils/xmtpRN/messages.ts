@@ -9,12 +9,9 @@ import { saveMessages } from "../../data/helpers/messages";
 import { XmtpMessage } from "../../data/store/chatStore";
 import { addLog } from "../debug";
 import { sentryTrackError } from "../sentry";
-import {
-  ConverseXmtpClientType,
-  DecodedMessageWithCodecsType,
-  getXmtpClient,
-} from "./client";
+import { ConverseXmtpClientType, DecodedMessageWithCodecsType } from "./client";
 import { isContentType } from "./contentTypes";
+import { getXmtpClient } from "./sync";
 // import { CoinbaseMessagingPaymentContent } from "./contentTypes/coinbasePayment";
 
 const BATCH_QUERY_PAGE_SIZE = 30;

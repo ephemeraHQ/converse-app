@@ -11,7 +11,7 @@ import {
 } from "../data/store/accountsStore";
 import { useOnboardingStore } from "../data/store/onboardingStore";
 import { saveXmtpKey } from "../utils/keychain/helpers";
-import { getXmtpClient } from "../utils/xmtpRN/client";
+import { getXmtpClient } from "../utils/xmtpRN/sync";
 
 export default function Onboarding() {
   const { walletProvider } = useWeb3ModalProvider();
