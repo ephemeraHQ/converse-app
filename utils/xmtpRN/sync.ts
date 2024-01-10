@@ -133,9 +133,8 @@ export const syncXmtpClient = async (account: string) => {
 
 export const deleteXmtpClient = async (account: string) => {
   if (account in xmtpClientByAccount) {
-    const client = xmtpClientByAccount[account];
-    stopStreamingAllMessage(client);
-    stopStreamingConversations(client);
+    stopStreamingAllMessage(account);
+    stopStreamingConversations(account);
   }
   delete xmtpClientByAccount[account];
   deleteOpenedConversations(account);
