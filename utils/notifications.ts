@@ -27,7 +27,7 @@ import {
   saveConversationDict,
 } from "./sharedData";
 import { conversationName, shortAddress } from "./str";
-import { getXmtpApiHeaders } from "./xmtpRN/client";
+import { getXmtpApiHeaders } from "./xmtpRN/api";
 
 let expoPushToken: string | null;
 let nativePushToken: string | null;

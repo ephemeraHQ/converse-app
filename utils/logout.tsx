@@ -13,7 +13,8 @@ import {
   unsubscribeFromNotifications,
 } from "./notifications";
 import { resetSharedData } from "./sharedData";
-import { deleteXmtpClient, getXmtpApiHeaders } from "./xmtpRN/client";
+import { getXmtpApiHeaders } from "./xmtpRN/api";
+import { deleteXmtpClient } from "./xmtpRN/client";
 
 type LogoutTasks = {
   [account: string]: {

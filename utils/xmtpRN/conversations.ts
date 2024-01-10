@@ -119,14 +119,15 @@ const handleNewConversation = async (
   // New conversations are not streamed immediatly
   // by the streamAllMessages method so we add this
   // trick to try and be all synced
-  loadConversationsMessages(client, { [conversation.topic]: 0 });
+  loadConversationsMessages(client.address, { [conversation.topic]: 0 });
   setTimeout(() => {
-    loadConversationsMessages(client, { [conversation.topic]: 0 });
+    loadConversationsMessages(client.address, { [conversation.topic]: 0 });
   }, 3000);
-  updateConsentStatus(client);
+  updateConsentStatus(client.address);
 };
 
-export const streamConversations = async (client: ConverseXmtpClientType) => {
+export const streamConversations = async (account: string) => {
+  const client = await getXmtpClient(account);
   await stopStreamingConversations(client);
   client.conversations.stream((conversation) =>
     handleNewConversation(client, conversation)
@@ -146,10 +147,11 @@ const listConversations = async (client: ConverseXmtpClientType) => {
 };
 
 export const loadConversations = async (
-  client: ConverseXmtpClientType,
+  account: string,
   knownTopics: string[]
 ) => {
   try {
+    const client = await getXmtpClient(account);
     const now = new Date().getTime();
     const conversations = await listConversations(client);
     const newConversations: ConversationWithCodecsType[] = [];
@@ -184,8 +186,9 @@ export const loadConversations = async (
   }
 };
 
-export const updateConsentStatus = async (client: ConverseXmtpClientType) => {
+export const updateConsentStatus = async (account: string) => {
   try {
+    const client = await getXmtpClient(account);
     const consentList = await client.contacts.refreshConsentList();
     await saveConsentState(consentList, client.address);
   } catch (error) {
