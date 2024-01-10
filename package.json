@@ -135,6 +135,7 @@
     "scheduler": "^0.23.0",
     "semver": "^7.3.8",
     "sentry-expo": "~7.1.0",
+    "setimmediate": "^1.0.5",
     "stream-browserify": "^3.0.0",
     "stream-http": "^3.2.0",
     "text-encoding": "^0.7.0",
