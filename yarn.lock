@@ -9052,6 +9052,16 @@
     rxjs "^7.8.0"
     undici "^5.8.1"
 
+"@xmtp/proto@^3.34.0":
+  version "3.36.2"
+  resolved "https://registry.yarnpkg.com/@xmtp/proto/-/proto-3.36.2.tgz#47ea9437451de76ced8984c28829fb711ddd14d2"
+  integrity sha512-FsofGcm4kV/nkXCWl19rAONj2SYafkWR+U8K7HBL9ZrIgL2+RDCqS6OMCmHKc/dAxjsV3o7pQSqz0aPtdYvEBw==
+  dependencies:
+    long "^5.2.0"
+    protobufjs "^7.0.0"
+    rxjs "^7.8.0"
+    undici "^5.8.1"
+
 "@xmtp/react-native-sdk@^1.23.5":
   version "1.23.5"
   resolved "https://registry.yarnpkg.com/@xmtp/react-native-sdk/-/react-native-sdk-1.23.5.tgz#c1e0d89ca0665be6fa0803484d3a7a97cece8bdf"
@@ -9062,13 +9072,31 @@
     ethers "^5.7.2"
     semantic-release "^21.0.1"
 
-"@xmtp/xmtp-js@^11.1.2", "@xmtp/xmtp-js@^11.2.0":
+"@xmtp/user-preferences-bindings-wasm@^0.3.4":
+  version "0.3.4"
+  resolved "https://registry.yarnpkg.com/@xmtp/user-preferences-bindings-wasm/-/user-preferences-bindings-wasm-0.3.4.tgz#c2067c5e4c60c99a4662b663dd4d1283f07a121a"
+  integrity sha512-4d0j8QDZT8Z9DXIjxRJh7M1DjLNWcPV6807eeMN79gwF9SWbR1CXGSnBNqSrOgVu9nQSWqtg6qfyrrlQ3yHybA==
+
+"@xmtp/xmtp-js@^11.1.2":
   version "11.2.0"
   resolved "https://registry.yarnpkg.com/@xmtp/xmtp-js/-/xmtp-js-11.2.0.tgz#c35482654d37cadb317bf442822a94a8d24a8dd6"
   integrity sha512-gTIiXsfmYQeHP0Ot/8j4ztGZzbQBrY3wNGNKfvs39Uvw7pO36NUPnl0lvb/8XyWlLF8B7XRF9q+EvcN9iKNq9Q==
   dependencies:
     "@noble/secp256k1" "^1.5.2"
     "@xmtp/proto" "^3.29.0"
+    async-mutex "^0.4.0"
+    elliptic "^6.5.4"
+    ethers "^5.5.3"
+    long "^5.2.0"
+
+"@xmtp/xmtp-js@^11.3.1":
+  version "11.3.1"
+  resolved "https://registry.yarnpkg.com/@xmtp/xmtp-js/-/xmtp-js-11.3.1.tgz#72792d4dc4d37ae0c7a7f15eb5e660daaaf67597"
+  integrity sha512-ag8bgydJbxllMlxLETf6/RSQIXMDFRj/WvJ3AloITKjSfylJ2MJiLr7+mTj/G5Dj8oFFdJAsoGDsEnd9Yb96Qw==
+  dependencies:
+    "@noble/secp256k1" "^1.5.2"
+    "@xmtp/proto" "^3.34.0"
+    "@xmtp/user-preferences-bindings-wasm" "^0.3.4"
     async-mutex "^0.4.0"
     elliptic "^6.5.4"
     ethers "^5.5.3"
