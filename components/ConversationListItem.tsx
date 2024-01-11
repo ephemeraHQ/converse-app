@@ -14,7 +14,6 @@ import { TouchableRipple } from "react-native-paper";
 
 import Checkmark from "../assets/checkmark.svg";
 import Clock from "../assets/clock.svg";
-import Picto from "../components/Picto/Picto";
 import {
   currentAccount,
   useChatStore,
@@ -39,6 +38,7 @@ import { isDesktop } from "../utils/device";
 import { converseEventEmitter } from "../utils/events";
 import { navigate } from "../utils/navigation";
 import { consentToPeersOnProtocol } from "../utils/xmtpRN/conversations";
+import Picto from "./Picto/Picto";
 import { showActionSheetWithOptions } from "./StateHandlers/ActionSheetStateHandler";
 
 type ConversationListItemProps = {
