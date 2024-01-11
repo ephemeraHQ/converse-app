@@ -44,20 +44,17 @@ export class TransactionReferenceCodec
   }
 
   encode(content: TransactionReference): EncodedContent {
-    console.log("encoding:", content);
     const encoded = {
       type: ContentTypeTransactionReference,
       parameters: {},
       content: new TextEncoder().encode(JSON.stringify(content)),
     };
-    console.log("encoded:", encoded);
     return encoded;
   }
 
   decode(encodedContent: EncodedContent): TransactionReference {
     const uint8Array = encodedContent.content;
     const contentReceived = JSON.parse(new TextDecoder().decode(uint8Array));
-    console.log("decoding content:", contentReceived);
     return contentReceived;
   }
 

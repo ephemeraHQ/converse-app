@@ -5,13 +5,13 @@ import { zustandMMKVStorage } from "../../utils/mmkv";
 
 // Transactions for each account setup in the app
 
-type Transaction = {
+export type Transaction = {
   id: string; // Concatenation of "[networkid]-[reference]"
   contentType: "transactionReference" | "coinbaseRegular" | "coinbaseSponsored";
   createdAt: number;
   updatedAt: number;
   namespace?: string;
-  networkId: string;
+  networkId: string | number;
   reference: string;
   metadata?: string;
   status: "PENDING" | "FAILURE" | "SUCCESS";
