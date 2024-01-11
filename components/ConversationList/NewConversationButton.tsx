@@ -1,11 +1,11 @@
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import * as Linking from "expo-linking";
 import React, { useCallback, useRef } from "react";
 import { Platform, TouchableOpacity, useColorScheme } from "react-native";
 import { FAB } from "react-native-paper";
 
 import { NavigationParamList } from "../../screens/Navigation/Navigation";
 import { primaryColor } from "../../utils/colors";
+import { navigate } from "../../utils/navigation";
 import DebugButton, { useEnableDebug } from "../DebugButton";
 import Picto from "../Picto/Picto";
 
@@ -16,7 +16,7 @@ export default function NewConversationButton({
   const debugRef = useRef();
   const enableDebug = useEnableDebug();
   const onPress = useCallback(() => {
-    Linking.openURL(Linking.createURL("/newConversation"));
+    navigate("NewConversation");
   }, []);
   const onLongPress = useCallback(() => {
     if (

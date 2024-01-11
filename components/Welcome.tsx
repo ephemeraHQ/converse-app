@@ -1,6 +1,5 @@
 import { useHeaderHeight } from "@react-navigation/elements";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import * as Linking from "expo-linking";
 import {
   StyleSheet,
   Text,
@@ -16,6 +15,7 @@ import { useRecommendationsStore } from "../data/store/accountsStore";
 import { NavigationParamList } from "../screens/Navigation/Navigation";
 import { useIsSplitScreen } from "../screens/Navigation/navHelpers";
 import { backgroundColor, textPrimaryColor } from "../utils/colors";
+import { navigate } from "../utils/navigation";
 import Button from "./Button/Button";
 
 type Props = {
@@ -64,11 +64,9 @@ export default function Welcome({ ctaOnly, navigation }: Props) {
           textStyle={styles.cta}
           picto="hand.wave"
           onPress={() => {
-            Linking.openURL(
-              Linking.createURL("/conversation", {
-                queryParams: { mainConversationWithPeer: config.polAddress },
-              })
-            );
+            navigate("Conversation", {
+              mainConversationWithPeer: config.polAddress,
+            });
           }}
         />
       </View>
@@ -79,7 +77,7 @@ export default function Welcome({ ctaOnly, navigation }: Props) {
           textStyle={styles.cta}
           picto="square.and.arrow.up"
           onPress={() => {
-            Linking.openURL(Linking.createURL("/shareProfile"));
+            navigate("ShareProfile");
           }}
         />
       </View>

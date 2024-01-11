@@ -1,5 +1,4 @@
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import * as Linking from "expo-linking";
 import { StatusBar } from "expo-status-bar";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
@@ -47,6 +46,7 @@ import {
   getCleanAddress,
   isSupportedPeer,
 } from "../utils/eth";
+import { navigate } from "../utils/navigation";
 import { isEmptyObject } from "../utils/objects";
 import { conversationName } from "../utils/str";
 import { isOnXmtp } from "../utils/xmtpRN/client";
@@ -389,7 +389,7 @@ export default function NewConversation({
                 subtitle: "",
                 action: () => {
                   navigation.goBack();
-                  Linking.openURL(Linking.createURL("/shareProfile"));
+                  navigate("ShareProfile");
                 },
               },
             ]}

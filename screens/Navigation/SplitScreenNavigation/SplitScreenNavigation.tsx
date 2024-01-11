@@ -1,8 +1,5 @@
 import { createDrawerNavigator } from "@react-navigation/drawer";
-import {
-  NavigationContainer,
-  NavigationContainerRef,
-} from "@react-navigation/native";
+import { NavigationContainer } from "@react-navigation/native";
 import * as Linking from "expo-linking";
 import { useEffect, useRef } from "react";
 
@@ -12,6 +9,7 @@ import {
   useCurrentAccount,
 } from "../../../data/store/accountsStore";
 import { useAppStore } from "../../../data/store/appStore";
+import { converseNavigations } from "../../../utils/navigation";
 import {
   ConversationNavParams,
   ConversationScreenConfig,
@@ -42,13 +40,11 @@ const linking = {
 
 export default function SplitScreenNavigation() {
   const splashScreenHidden = useAppStore((s) => s.splashScreenHidden);
-  const navRef =
-    useRef<NavigationContainerRef<ReactNavigation.RootParamList> | null>(null);
   const currentAccount = useCurrentAccount();
   const accountRef = useRef(currentAccount);
   useEffect(() => {
     if (accountRef.current !== currentAccount) {
-      navRef?.current?.reset({
+      converseNavigations["splitScreen"]?.reset({
         index: 0,
         routes: [
           {
@@ -68,7 +64,14 @@ export default function SplitScreenNavigation() {
   return (
     <NavigationContainer
       linking={splashScreenHidden ? (linking as any) : undefined}
-      ref={(r) => (navRef.current = r)}
+      ref={(r) => {
+        converseNavigations["splitScreen"] = r;
+      }}
+      onUnhandledAction={() => {
+        // Since we're handling multiple navigators,
+        // let's silence errors when the action
+        // is not meant for this one
+      }}
     >
       <Drawer.Navigator
         backBehavior="none"

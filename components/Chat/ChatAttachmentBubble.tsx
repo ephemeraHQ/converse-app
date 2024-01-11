@@ -1,6 +1,5 @@
 import { DecryptedLocalAttachment } from "@xmtp/react-native-sdk";
 import { Image } from "expo-image";
-import * as Linking from "expo-linking";
 import mime from "mime";
 import prettyBytes from "pretty-bytes";
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -16,6 +15,7 @@ import {
 import { textPrimaryColor } from "../../utils/colors";
 import { converseEventEmitter } from "../../utils/events";
 import { isImageMimetype } from "../../utils/media";
+import { navigate } from "../../utils/navigation";
 import { sentryTrackError, sentryTrackMessage } from "../../utils/sentry";
 import { fetchAndDecodeRemoteAttachment } from "../../utils/xmtpRN/attachments";
 import { MessageToDisplay } from "./ChatMessage";
@@ -107,13 +107,7 @@ export default function ChatAttachmentBubble({ message }: Props) {
       !attachment.mediaURL
     )
       return;
-    Linking.openURL(
-      Linking.createURL("/webviewPreview", {
-        queryParams: {
-          uri: `file://${attachment.mediaURL}`,
-        },
-      })
-    );
+    navigate("WebviewPreview", { uri: `file://${attachment.mediaURL}` });
   }, [attachment.error, attachment.loading, attachment.mediaURL]);
   const clickedOnAttachmentBubble = useCallback(() => {
     if (attachment.mediaType !== "UNSUPPORTED") {
