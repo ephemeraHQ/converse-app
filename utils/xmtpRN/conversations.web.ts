@@ -1,4 +1,10 @@
-import { ConsentListEntry, ConversationContext } from "@xmtp/react-native-sdk";
+import {
+  Client,
+  ConsentListEntry,
+  Conversation,
+  InvitationContext,
+  Stream,
+} from "@xmtp/xmtp-js";
 
 import { Conversation as DbConversation } from "../../data/db/entities/conversationEntity";
 import { getPendingConversationsToCreate } from "../../data/helpers/conversations/pendingConversations";
@@ -7,58 +13,30 @@ import { getSettingsStore } from "../../data/store/accountsStore";
 import { XmtpConversation } from "../../data/store/chatStore";
 import { SettingsStoreType } from "../../data/store/settingsStore";
 import { getCleanAddress } from "../eth";
-import {
-  getTopicDataFromKeychain,
-  saveTopicDataToKeychain,
-} from "../keychain/helpers";
-import { sentryTrackError } from "../sentry";
-import { ConversationWithCodecsType, ConverseXmtpClientType } from "./client";
 import { loadConversationsMessages } from "./messages";
 import { getXmtpClient } from "./sync";
 
 const protocolConversationToStateConversation = (
-  conversation: ConversationWithCodecsType
+  conversation: Conversation
 ): XmtpConversation => ({
   topic: conversation.topic,
   peerAddress: conversation.peerAddress,
-  createdAt: conversation.createdAt,
-  context: conversation.context
-    ? {
-        conversationId: conversation.context.conversationID,
-        metadata: conversation.context.metadata,
-      }
-    : undefined,
+  createdAt: conversation.createdAt.getTime(),
+  context: conversation.context || undefined,
   messages: new Map(),
   messagesIds: [],
   conversationTitle: undefined,
   messageDraft: undefined,
   readUntil: 0,
   pending: false,
-  version: conversation.version,
+  version: conversation.conversationVersion,
 });
 
-const protocolConversationsToTopicData = async (
-  conversations: ConversationWithCodecsType[]
-): Promise<{ [topic: string]: string }> => {
-  const topicWithTopicData: { [topic: string]: string } = {};
-  const topicDatas = await Promise.all(
-    conversations.map((c) => c.exportTopicData())
-  );
-  conversations.forEach((c, i) => {
-    const topicData = topicDatas[i];
-    topicWithTopicData[c.topic] = topicData;
-  });
-  return topicWithTopicData;
-};
-
 const openedConversations: {
-  [account: string]: { [topic: string]: ConversationWithCodecsType };
+  [account: string]: { [topic: string]: Conversation };
 } = {};
 
-const setOpenedConversation = (
-  account: string,
-  conversation: ConversationWithCodecsType
-) => {
+const setOpenedConversation = (account: string, conversation: Conversation) => {
   openedConversations[account] = openedConversations[account] || {};
   openedConversations[account][conversation.topic] = conversation;
 };
@@ -69,50 +47,14 @@ export const deleteOpenedConversations = (account: string) => {
   }
 };
 
-const importTopicData = async (
-  client: ConverseXmtpClientType,
-  topics: string[]
-) => {
-  // If we have topics for this account, let's import them
-  // so the first conversation.list() is faster
-  const beforeImport = new Date().getTime();
-  const topicsData = await getTopicDataFromKeychain(client.address, topics);
-  if (topicsData.length > 0) {
-    try {
-      const importedConversations = await Promise.all(
-        topicsData.map((data) => client.conversations.importTopicData(data))
-      );
-      importedConversations.forEach((conversation) => {
-        setOpenedConversation(client.address, conversation);
-      });
-      const afterImport = new Date().getTime();
-      console.log(
-        `[XmtpRN] Imported ${
-          topicsData.length
-        } exported conversations into client in ${
-          (afterImport - beforeImport) / 1000
-        }s`
-      );
-    } catch (e) {
-      console.log(e);
-      // It's ok if import failed it will just be slower
-      sentryTrackError(e);
-    }
-  }
-};
-
 const handleNewConversation = async (
-  client: ConverseXmtpClientType,
-  conversation: ConversationWithCodecsType
+  client: Client,
+  conversation: Conversation
 ) => {
   setOpenedConversation(client.address, conversation);
   saveConversations(client.address, [
     protocolConversationToStateConversation(conversation),
   ]);
-  saveTopicDataToKeychain(
-    client.address,
-    await protocolConversationsToTopicData([conversation])
-  );
   // New conversations are not streamed immediatly
   // by the streamAllMessages method so we add this
   // trick to try and be all synced
@@ -123,20 +65,27 @@ const handleNewConversation = async (
   updateConsentStatus(client.address);
 };
 
+const conversationsStreams: {
+  [account: string]: Stream<Conversation<any>, any>;
+} = {};
+
 export const streamConversations = async (account: string) => {
   await stopStreamingConversations(account);
-  const client = (await getXmtpClient(account)) as ConverseXmtpClientType;
-  client.conversations.stream((conversation) =>
-    handleNewConversation(client, conversation)
-  );
+  const client = (await getXmtpClient(account)) as Client;
+  conversationsStreams[account] = await client.conversations.stream();
+  for await (const conversation of conversationsStreams[account]) {
+    handleNewConversation(client, conversation);
+  }
 };
 
 export const stopStreamingConversations = async (account: string) => {
-  const client = (await getXmtpClient(account)) as ConverseXmtpClientType;
-  return client.conversations.cancelStream();
+  if (conversationsStreams[account]) {
+    await conversationsStreams[account].return();
+    delete conversationsStreams[account];
+  }
 };
 
-const listConversations = async (client: ConverseXmtpClientType) => {
+const listConversations = async (client: Client) => {
   const conversations = await client.conversations.list();
   conversations.forEach((c) => {
     setOpenedConversation(client.address, c);
@@ -149,11 +98,11 @@ export const loadConversations = async (
   knownTopics: string[]
 ) => {
   try {
-    const client = (await getXmtpClient(account)) as ConverseXmtpClientType;
+    const client = (await getXmtpClient(account)) as Client;
     const now = new Date().getTime();
     const conversations = await listConversations(client);
-    const newConversations: ConversationWithCodecsType[] = [];
-    const knownConversations: ConversationWithCodecsType[] = [];
+    const newConversations: Conversation[] = [];
+    const knownConversations: Conversation[] = [];
     conversations.forEach((c) => {
       if (!knownTopics.includes(c.topic)) {
         newConversations.push(c);
@@ -171,10 +120,6 @@ export const loadConversations = async (
     );
     saveConversations(client.address, conversationsToSave);
 
-    saveTopicDataToKeychain(
-      client.address,
-      await protocolConversationsToTopicData(newConversations)
-    );
     return { newConversations, knownConversations };
   } catch (e) {
     const error = new Error();
@@ -186,7 +131,7 @@ export const loadConversations = async (
 
 export const updateConsentStatus = async (account: string) => {
   try {
-    const client = (await getXmtpClient(account)) as ConverseXmtpClientType;
+    const client = (await getXmtpClient(account)) as Client;
     const consentList = await client.contacts.refreshConsentList();
     await saveConsentState(consentList, client.address);
   } catch (error) {
@@ -222,7 +167,7 @@ export const consentToPeersOnProtocol = async (
 ) => {
   try {
     const cleanPeers = peers.map((peer) => getCleanAddress(peer));
-    const client = (await getXmtpClient(account)) as ConverseXmtpClientType;
+    const client = (await getXmtpClient(account)) as Client;
 
     if (consent === "allow") {
       await client.contacts.allow(cleanPeers);
@@ -239,13 +184,9 @@ export const consentToPeersOnProtocol = async (
 export const getConversationWithTopic = async (
   account: string,
   topic: string
-): Promise<ConversationWithCodecsType | undefined> => {
+): Promise<Conversation | undefined> => {
   const alreadyConversation = openedConversations[account]?.[topic];
-  if (alreadyConversation) return alreadyConversation;
-  // Let's try to import from keychain if we don't have it already
-  const client = (await getXmtpClient(account)) as ConverseXmtpClientType;
-  await importTopicData(client, [topic]);
-  return openedConversations[account]?.[topic];
+  return alreadyConversation;
 };
 
 const createConversation = async (
@@ -258,11 +199,11 @@ const createConversation = async (
   console.log(
     `[XMTP] Creating a conversation with peer ${dbConversation.peerAddress} and id ${dbConversation.contextConversationId}`
   );
-  const client = (await getXmtpClient(account)) as ConverseXmtpClientType;
-  let context: ConversationContext | undefined = undefined;
+  const client = (await getXmtpClient(account)) as Client;
+  let context: InvitationContext | undefined = undefined;
   if (dbConversation.contextConversationId) {
     context = {
-      conversationID: dbConversation.contextConversationId,
+      conversationId: dbConversation.contextConversationId,
       metadata: dbConversation.contextMetadata
         ? JSON.parse(dbConversation.contextMetadata)
         : {},

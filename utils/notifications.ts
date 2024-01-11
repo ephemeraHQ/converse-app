@@ -52,6 +52,7 @@ export const deleteSubscribedTopics = (account: string) => {
 export const subscribeToNotifications = async (
   account: string
 ): Promise<void> => {
+  if (Platform.OS === "web") return;
   const {
     sortedConversationsWithPreview,
     topicsStatus,
