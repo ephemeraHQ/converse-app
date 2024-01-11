@@ -27,7 +27,7 @@ import {
   saveConversationDict,
 } from "./sharedData";
 import { conversationName, shortAddress } from "./str";
-import { getXmtpApiHeaders } from "./xmtpRN/client";
+import { getXmtpApiHeaders } from "./xmtpRN/api";
 
 let expoPushToken: string | null;
 let nativePushToken: string | null;
@@ -52,6 +52,7 @@ export const deleteSubscribedTopics = (account: string) => {
 export const subscribeToNotifications = async (
   account: string
 ): Promise<void> => {
+  if (Platform.OS === "web") return;
   const {
     sortedConversationsWithPreview,
     topicsStatus,

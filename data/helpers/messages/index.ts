@@ -1,6 +1,4 @@
-import RNFS from "react-native-fs";
-
-import { moveFileAndReplace } from "../../../utils/fileSystem";
+import { moveAssetsForMessage } from "../../../utils/fileSystem";
 import { isContentType } from "../../../utils/xmtpRN/contentTypes";
 import { getRepository } from "../../db";
 import { Message } from "../../db/entities/messageEntity";
@@ -68,17 +66,14 @@ export const updateMessagesIds = async (
       { id: messageToUpdate.newMessageId, sent: messageToUpdate.newMessageSent }
     );
     // Let's also move message data & attachments if exists
-    const oldMessageFolder = `${RNFS.DocumentDirectoryPath}/messages/${messageToUpdate.message.id}`;
-    const newMessageFolder = `${RNFS.DocumentDirectoryPath}/messages/${messageToUpdate.newMessageId}`;
-    const [oldMessageFolderExists, updatedMessage] = await Promise.all([
-      RNFS.exists(oldMessageFolder),
-      messageRepository.findOneBy({
-        id: messageToUpdate.newMessageId,
-      }),
-    ]);
-    if (oldMessageFolderExists) {
-      await moveFileAndReplace(oldMessageFolder, newMessageFolder);
-    }
+    await moveAssetsForMessage(
+      messageToUpdate.message.id,
+      messageToUpdate.newMessageId
+    );
+    const updatedMessage = await messageRepository.findOneBy({
+      id: messageToUpdate.newMessageId,
+    });
+
     if (!updatedMessage) throw new Error("Updated message does not exist");
     messagesToDispatch.push({
       topic: messageToUpdate.message.conversationId,

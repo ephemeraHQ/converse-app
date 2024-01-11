@@ -10,7 +10,7 @@ import {
 
 import MessageTail from "../../assets/message-tail.svg";
 import { XmtpMessage } from "../../data/store/chatStore";
-import { isAttachmentMessage } from "../../utils/attachment";
+import { isAttachmentMessage } from "../../utils/attachment/helpers";
 import {
   messageBubbleColor,
   myMessageBubbleColor,

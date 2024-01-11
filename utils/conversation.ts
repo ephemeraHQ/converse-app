@@ -11,7 +11,7 @@ import {
   XmtpConversation,
   XmtpConversationWithUpdate,
 } from "../data/store/chatStore";
-import { isAttachmentMessage } from "./attachment";
+import { isAttachmentMessage } from "./attachment/helpers";
 import { getAddressForPeer } from "./eth";
 import { subscribeToNotifications } from "./notifications";
 import { pick } from "./objects";

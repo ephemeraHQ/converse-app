@@ -6,6 +6,7 @@ import { Platform, useColorScheme } from "react-native";
 import config from "../../config";
 import { useAppStore } from "../../data/store/appStore";
 import { isDesktop } from "../../utils/device";
+import { converseNavigations } from "../../utils/navigation";
 import AccountsNav from "./AccountsNav";
 import ConversationListNav from "./ConversationListNav";
 import ConversationNav, {
@@ -103,6 +104,14 @@ export default function Navigation() {
               type: "stack",
             }
       }
+      ref={(r) => {
+        converseNavigations["mainStack"] = r;
+      }}
+      onUnhandledAction={() => {
+        // Since we're handling multiple navigators,
+        // let's silence errors when the action
+        // is not meant for this one
+      }}
     >
       <NativeStack.Navigator
         screenOptions={{ gestureEnabled: !isDesktop }}

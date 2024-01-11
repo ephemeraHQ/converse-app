@@ -5,6 +5,7 @@ import { StyleProp, StyleSheet, TextStyle, useColorScheme } from "react-native";
 import ParsedText from "react-native-parsed-text";
 
 import { actionSheetColors } from "../utils/colors";
+import { navigate } from "../utils/navigation";
 import {
   URL_REGEX,
   ADDRESS_REGEX,
@@ -36,13 +37,7 @@ export default function ClickableText({ children, style }: Props) {
     Linking.openURL(uri);
   }, []);
   const handleNewConversationPress = useCallback((peer: string) => {
-    Linking.openURL(
-      Linking.createURL("/newConversation", {
-        queryParams: {
-          peer,
-        },
-      })
-    );
+    navigate("NewConversation", { peer });
   }, []);
 
   const showCopyActionSheet = useCallback(

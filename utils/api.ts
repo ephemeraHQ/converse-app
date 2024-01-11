@@ -3,7 +3,7 @@ import axios from "axios";
 import config from "../config";
 import { ProfileSocials } from "../data/store/profilesStore";
 import { Frens } from "../data/store/recommendationsStore";
-import { getXmtpApiHeaders } from "../utils/xmtpRN/client";
+import { getXmtpApiHeaders } from "../utils/xmtpRN/api";
 import { TransferAuthorizationMessage } from "./evm/erc20";
 
 const api = axios.create({
