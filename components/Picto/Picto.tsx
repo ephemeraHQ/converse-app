@@ -33,6 +33,7 @@ import Signature from "@material-symbols/svg-400/outlined/signature.svg";
 import WavingHand from "@material-symbols/svg-400/outlined/waving_hand.svg";
 import {
   ColorValue,
+  Platform,
   StyleProp,
   useColorScheme,
   View,
@@ -91,15 +92,16 @@ const pictoMapping: {
 };
 
 export default function Picto({ picto, style, size, weight, color }: Props) {
-  const AndroidPicto = pictoMapping[picto];
+  const SvgPicto = pictoMapping[picto];
   const colorScheme = useColorScheme();
-  if (AndroidPicto) {
+  if (SvgPicto) {
+    const pictoSize = (size || 48) + (Platform.OS === "web" ? 6 : 0);
     return (
       <View style={[style]}>
-        <AndroidPicto
+        <SvgPicto
           fill={color || primaryColor(colorScheme)}
-          width={size || 48}
-          height={size || 48}
+          width={pictoSize}
+          height={pictoSize}
           viewBox="0 0 48 48"
         />
       </View>

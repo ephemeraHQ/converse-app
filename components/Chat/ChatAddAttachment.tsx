@@ -196,9 +196,12 @@ export default function ChatAddAttachment() {
               }
             }
           );
-
-        executeAfterKeyboardClosed(showOptions);
         assetRef.current = undefined;
+        if (Platform.OS === "web") {
+          pickMedia();
+        } else {
+          executeAfterKeyboardClosed(showOptions);
+        }
       }}
       activeOpacity={0.4}
     >

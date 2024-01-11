@@ -1,3 +1,4 @@
+import { Platform } from "react-native";
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
 
@@ -536,6 +537,10 @@ export const initChatStore = (account: string) => {
         storage: createJSONStorage(() => zustandMMKVStorage),
         // Only persisting the information we want
         partialize: (state) => {
+          // Persist nothing in web
+          if (Platform.OS === "web") {
+            return undefined;
+          }
           const persistedState: Partial<ChatStoreType> = {
             initialLoadDoneOnce: state.initialLoadDoneOnce,
             lastSyncedAt: state.lastSyncedAt,
