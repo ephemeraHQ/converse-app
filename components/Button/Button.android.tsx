@@ -10,7 +10,7 @@ import {
 } from "react-native";
 import { Button as MaterialButton } from "react-native-paper";
 
-import Picto from "../Picto/Picto.android";
+import Picto from "../Picto/Picto";
 
 type Props = {
   title: string;
