@@ -108,7 +108,6 @@ export const syncXmtpClient = async (account: string) => {
     });
     streamingAccounts[account] = true;
     const topicsToQuery = Object.keys(queryConversationsFromTimestamp);
-
     const fetchedMessagesCount = await syncConversationsMessages(
       account,
       queryConversationsFromTimestamp

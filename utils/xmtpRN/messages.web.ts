@@ -129,7 +129,6 @@ export const syncConversationsMessages = async (
     await client.apiClient.batchQuery(
       topicsToQuery.map((topic) => ({
         contentTopic: topic,
-        startTime: new Date(queryConversationsFromTimestamp[topic]),
         pageSize: 1,
         direction: messageApi.SortDirection.SORT_DIRECTION_DESCENDING,
       }))

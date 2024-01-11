@@ -132,7 +132,7 @@ export const tertiaryBackgroundColor = (colorScheme: ColorSchemeName) => {
 };
 
 export const primaryColor = (colorScheme: ColorSchemeName) => {
-  if (Platform.OS === "ios") {
+  if (Platform.OS === "ios" || Platform.OS === "web") {
     if (colorScheme === "dark") {
       return "#0A84FF";
     } else {

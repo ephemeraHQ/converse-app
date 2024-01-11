@@ -115,7 +115,9 @@ export const loadConversations = async (
         client.address
       } took ${(new Date().getTime() - now) / 1000} seconds`
     );
-    const conversationsToSave = newConversations.map(
+    // @todo => Maybe just save to mmkv no need to
+    // re-save all convos?
+    const conversationsToSave = conversations.map(
       protocolConversationToStateConversation
     );
     saveConversations(client.address, conversationsToSave);
