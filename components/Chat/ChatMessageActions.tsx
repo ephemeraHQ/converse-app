@@ -17,7 +17,7 @@ import {
   useSettingsStore,
 } from "../../data/store/accountsStore";
 import { reportMessage } from "../../utils/api";
-import { isAttachmentMessage } from "../../utils/attachment";
+import { isAttachmentMessage } from "../../utils/attachment/helpers";
 import { actionSheetColors } from "../../utils/colors";
 import { useConversationContext } from "../../utils/conversation";
 import { converseEventEmitter } from "../../utils/events";

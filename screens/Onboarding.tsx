@@ -16,10 +16,8 @@ import { useOnboardingStore } from "../data/store/onboardingStore";
 import { useSelect } from "../data/store/storeHelpers";
 import { saveXmtpKey } from "../utils/keychain/helpers";
 import { waitForLogoutTasksDone } from "../utils/logout";
-import {
-  getXmtpBase64KeyFromSigner,
-  getXmtpClient,
-} from "../utils/xmtpRN/client";
+import { getXmtpBase64KeyFromSigner } from "../utils/xmtpRN/client";
+import { getXmtpClient } from "../utils/xmtpRN/sync";
 
 export default function Onboarding() {
   const {

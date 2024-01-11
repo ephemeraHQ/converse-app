@@ -1,3 +1,4 @@
+import { Platform } from "react-native";
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
 
@@ -535,12 +536,34 @@ export const initChatStore = (account: string) => {
         name: `store-${account}-chat`, // Account-based storage so each account can have its own chat data
         storage: createJSONStorage(() => zustandMMKVStorage),
         // Only persisting the information we want
-        partialize: (state) => ({
-          initialLoadDoneOnce: state.initialLoadDoneOnce,
-          lastSyncedAt: state.lastSyncedAt,
-          lastSyncedTopics: state.lastSyncedTopics,
-          topicsStatus: state.topicsStatus,
-        }),
+        partialize: (state) => {
+          // Persist nothing in web
+          if (Platform.OS === "web") {
+            return undefined;
+          }
+          const persistedState: Partial<ChatStoreType> = {
+            initialLoadDoneOnce: state.initialLoadDoneOnce,
+            lastSyncedAt: state.lastSyncedAt,
+            lastSyncedTopics: state.lastSyncedTopics,
+            topicsStatus: state.topicsStatus,
+          };
+          // if (Platform.OS === "web" && state.conversations) {
+          //   // On web, we persist convos without messages
+          //   persistedState.conversations = {} as {
+          //     [topic: string]: XmtpConversationWithUpdate;
+          //   };
+          //   Object.keys(state.conversations).forEach((topic) => {
+          //     if (persistedState.conversations) {
+          //       persistedState.conversations[topic] = {
+          //         ...state.conversations[topic],
+          //         messages: new Map(),
+          //         messagesIds: [],
+          //       };
+          //     }
+          //   });
+          // }
+          return persistedState;
+        },
         version: 1,
         migrate: (persistedState: any, version: number): ChatStoreType => {
           console.log("Zustand migration version:", version);
@@ -632,4 +655,8 @@ const insertMessageIdAtRightIndex = (
       return;
     }
   }
+  // If the message to insert is the first (happens on web)
+  // we push it at the beginning
+  conversation.messagesIds.unshift(newMessage.id);
+  conversation.messages.set(newMessage.id, newMessage);
 };

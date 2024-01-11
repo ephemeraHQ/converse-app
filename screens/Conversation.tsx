@@ -39,6 +39,7 @@ import { isDesktop } from "../utils/device";
 import { converseEventEmitter } from "../utils/events";
 import { setTopicToNavigateTo, topicToNavigateTo } from "../utils/navigation";
 import { getTitleFontScale, TextInputWithValue } from "../utils/str";
+import { loadOlderMessages } from "../utils/xmtpRN/messages";
 import { NavigationParamList } from "./Navigation/Navigation";
 
 const Conversation = ({
@@ -55,6 +56,7 @@ const Conversation = ({
         "conversations",
         "conversationsMapping",
         "setConversationMessageDraft",
+        "lastUpdateAt", // Added even if unused to trigger a rerender
       ])
     );
 
@@ -259,6 +261,19 @@ const Conversation = ({
     if (conversation) {
       // On load, we mark the conversation as read and as opened
       useChatStore.getState().setOpenedConversationTopic(conversation.topic);
+
+      // On WEB, we load messages on arrival
+      if (Platform.OS === "web" && conversation.messagesIds.length <= 1) {
+        const firstMessage =
+          conversation.messagesIds.length > 0
+            ? conversation.messages.get(conversation.messagesIds[0])
+            : undefined;
+        loadOlderMessages(
+          currentAccount(),
+          conversation.topic,
+          firstMessage?.sent
+        );
+      }
 
       // If we are navigating to a conversation, we reset the topic to navigate to
       if (topicToNavigateTo === conversation.topic) {

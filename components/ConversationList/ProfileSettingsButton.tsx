@@ -1,4 +1,3 @@
-import * as Linking from "expo-linking";
 import React, { useCallback, useEffect, useState } from "react";
 import { Platform, TouchableOpacity, useColorScheme } from "react-native";
 
@@ -10,6 +9,7 @@ import {
 } from "../../data/store/accountsStore";
 import { primaryColor, textSecondaryColor } from "../../utils/colors";
 import { evmHelpers } from "../../utils/evm/helpers";
+import { navigate } from "../../utils/navigation";
 import Button from "../Button/Button";
 import Picto from "../Picto/Picto";
 
@@ -20,11 +20,7 @@ export default function ProfileSettingsButton() {
   const [stringBalance, setStringBalance] = useState("");
   const [stringSize, setStringSize] = useState(0);
   const openProfile = useCallback(() => {
-    Linking.openURL(
-      Linking.createURL("/profile", {
-        queryParams: { address: currentAccount() },
-      })
-    );
+    navigate("Profile", { address: currentAccount() });
   }, []);
   useEffect(() => {
     const intBalance = parseInt(

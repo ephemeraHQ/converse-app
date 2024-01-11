@@ -19,10 +19,8 @@ import {
 } from "../../utils/colors";
 import { isDesktop } from "../../utils/device";
 import { saveXmtpKey } from "../../utils/keychain/helpers";
-import {
-  getXmtpClient,
-  getXmtpClientFromBase64Key,
-} from "../../utils/xmtpRN/client";
+import { getXmtpClientFromBase64Key } from "../../utils/xmtpRN/client";
+import { getXmtpClient } from "../../utils/xmtpRN/sync";
 import OnboardingComponent from "./OnboardingComponent";
 
 export default function DesktopConnectFlow() {

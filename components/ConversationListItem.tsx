@@ -1,5 +1,4 @@
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import * as Linking from "expo-linking";
 import React, { memo, useCallback, useEffect, useRef, useState } from "react";
 import {
   ColorSchemeName,
@@ -15,7 +14,6 @@ import { TouchableRipple } from "react-native-paper";
 
 import Checkmark from "../assets/checkmark.svg";
 import Clock from "../assets/clock.svg";
-import Picto from "../components/Picto/Picto";
 import {
   currentAccount,
   useChatStore,
@@ -38,7 +36,9 @@ import {
 import { getRelativeDateTime } from "../utils/date";
 import { isDesktop } from "../utils/device";
 import { converseEventEmitter } from "../utils/events";
+import { navigate } from "../utils/navigation";
 import { consentToPeersOnProtocol } from "../utils/xmtpRN/conversations";
+import Picto from "./Picto/Picto";
 import { showActionSheetWithOptions } from "./StateHandlers/ActionSheetStateHandler";
 
 type ConversationListItemProps = {
@@ -77,6 +77,13 @@ const ConversationListItem = memo(function ConversationListItem({
   const resetSelected = useCallback(() => {
     setSelected(false);
   }, []);
+
+  const openConversation = useCallback(() => {
+    navigate("Conversation", {
+      topic: conversationTopic,
+    });
+  }, [conversationTopic]);
+
   useEffect(() => {
     navigation.addListener("transitionEnd", resetSelected);
     return () => {
@@ -185,23 +192,11 @@ const ConversationListItem = memo(function ConversationListItem({
         delayPressIn={isDesktop ? 0 : 75}
         onPressIn={() => {
           if (!isSplitScreen) return;
-          Linking.openURL(
-            Linking.createURL("/conversation", {
-              queryParams: {
-                topic: conversationTopic,
-              },
-            })
-          );
+          openConversation();
         }}
         onPress={() => {
           if (isSplitScreen) return;
-          Linking.openURL(
-            Linking.createURL("/conversation", {
-              queryParams: {
-                topic: conversationTopic,
-              },
-            })
-          );
+          openConversation();
           setSelected(true);
         }}
         style={[
@@ -218,11 +213,14 @@ const ConversationListItem = memo(function ConversationListItem({
       </TouchableHighlight>
     ) : (
       <TouchableRipple
-        unstable_pressDelay={75}
+        unstable_pressDelay={isDesktop || Platform.OS === "web" ? 0 : 75}
+        onPressIn={() => {
+          if (!isSplitScreen) return;
+          openConversation();
+        }}
         onPress={() => {
-          navigation.navigate("Conversation", {
-            topic: conversationTopic,
-          });
+          if (isSplitScreen) return;
+          openConversation();
         }}
         style={styles.rippleRow}
         rippleColor={clickedItemBackgroundColor(colorScheme)}

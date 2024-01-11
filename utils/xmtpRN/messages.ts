@@ -11,6 +11,7 @@ import { addLog } from "../debug";
 import { sentryTrackError } from "../sentry";
 import { ConverseXmtpClientType, DecodedMessageWithCodecsType } from "./client";
 import { isContentType } from "./contentTypes";
+import { getXmtpClient } from "./sync";
 // import { CoinbaseMessagingPaymentContent } from "./contentTypes/coinbasePayment";
 
 const BATCH_QUERY_PAGE_SIZE = 30;
@@ -89,8 +90,9 @@ const protocolMessagesToStateMessages = (
   return xmtpMessages;
 };
 
-export const streamAllMessages = async (client: ConverseXmtpClientType) => {
-  await stopStreamingAllMessage(client);
+export const streamAllMessages = async (account: string) => {
+  await stopStreamingAllMessage(account);
+  const client = (await getXmtpClient(account)) as ConverseXmtpClientType;
   console.log(`[XmtpRN] Streaming messages for ${client.address}`);
   client.conversations.streamAllMessages(async (message) => {
     console.log(`[XmtpRN] Received a message for ${client.address}`);
@@ -98,15 +100,17 @@ export const streamAllMessages = async (client: ConverseXmtpClientType) => {
   });
 };
 
-export const stopStreamingAllMessage = (client: ConverseXmtpClientType) => {
+export const stopStreamingAllMessage = async (account: string) => {
+  const client = (await getXmtpClient(account)) as ConverseXmtpClientType;
   console.log(`[XmtpRN] Stopped streaming messages for ${client.address}`);
   client.conversations.cancelStreamAllMessages();
 };
 
-export const loadConversationsMessages = async (
-  client: ConverseXmtpClientType,
+export const syncConversationsMessages = async (
+  account: string,
   _queryConversationsFromTimestamp: { [topic: string]: number }
 ): Promise<number> => {
+  const client = (await getXmtpClient(account)) as ConverseXmtpClientType;
   const queryConversationsFromTimestamp = {
     ..._queryConversationsFromTimestamp,
   };
@@ -174,3 +178,9 @@ export const loadConversationsMessages = async (
   addLog(`Fetched ${messagesFetched} messages from network`);
   return messagesFetched;
 };
+
+export const loadOlderMessages = async (
+  account: string,
+  topic: string,
+  oldestTimestamp: number | undefined
+) => {};

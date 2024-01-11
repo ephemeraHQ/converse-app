@@ -26,6 +26,7 @@ const defaultConfig = {
         "Converse lets you communicate and transact freely and safely.",
       url: "https://converse.xyz",
       logoUrl: "https://converse.xyz/icon.png",
+      icons: [],
     },
   },
   thirdwebClientId: "fb80f0aa5ea6c07d74813e56c1ea53e5",
@@ -55,7 +56,10 @@ const ENV = {
     ...defaultConfig,
     env: "dev",
     xmtpEnv: Constants.expoConfig?.extra?.DEV_XMTP_ENV || "dev",
-    apiURI: Constants.expoConfig?.extra?.DEV_API_URI || "",
+    apiURI:
+      Platform.OS === "web"
+        ? "http://localhost:9875"
+        : Constants.expoConfig?.extra?.DEV_API_URI || "",
     debugMenu: true,
     bundleId: "com.converse.dev",
     appleAppGroup: "group.com.converse.dev",

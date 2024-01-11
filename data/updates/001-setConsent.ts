@@ -3,7 +3,7 @@ import { ConsentListEntry } from "@xmtp/react-native-sdk";
 import { getChatStore, getSettingsStore } from "../../data/store/accountsStore";
 import { deletePeersFromDb, getPeersStatus } from "../../utils/api";
 import { getCleanAddress } from "../../utils/eth";
-import { getXmtpClient } from "../../utils/xmtpRN/client";
+import { getXmtpClient } from "../../utils/xmtpRN/sync";
 import { SettingsStoreType } from "../store/settingsStore";
 
 export const setConsent = async (account: string) => {

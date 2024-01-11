@@ -6,6 +6,7 @@ import { Platform, useColorScheme } from "react-native";
 import config from "../../../config";
 import { useAppStore } from "../../../data/store/appStore";
 import { isDesktop } from "../../../utils/device";
+import { converseNavigations } from "../../../utils/navigation";
 import ConversationNav, {
   ConversationNavParams,
   ConversationScreenConfig,
@@ -67,6 +68,14 @@ export default function SplitRightStackNavigation({
     <NavigationContainer
       linking={splashScreenHidden ? (linking as any) : undefined}
       independent
+      ref={(r) => {
+        converseNavigations["splitRightStack"] = r;
+      }}
+      onUnhandledAction={() => {
+        // Since we're handling multiple navigators,
+        // let's silence errors when the action
+        // is not meant for this one
+      }}
     >
       <NativeStack.Navigator screenOptions={{ gestureEnabled: !isDesktop }}>
         <NativeStack.Group screenOptions={stackGroupScreenOptions(colorScheme)}>

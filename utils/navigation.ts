@@ -1,8 +1,20 @@
-import * as Linking from "expo-linking";
-
 import { currentAccount, getChatStore } from "../data/store/accountsStore";
 import { XmtpConversation } from "../data/store/chatStore";
+import { NavigationParamList } from "../screens/Navigation/Navigation";
 import { loadSavedNotificationMessagesToContext } from "./notifications";
+
+export const converseNavigations: { [navigationName: string]: any } = {};
+
+export const navigate = async <T extends keyof NavigationParamList>(
+  screen: T,
+  params?: NavigationParamList[T]
+) => {
+  // Navigate to a screen in all navigators
+  // like Linking.openURL but without redirect on web
+  Object.values(converseNavigations).forEach((navigation) => {
+    navigation.navigate(screen, params);
+  });
+};
 
 export let topicToNavigateTo = "";
 export const setTopicToNavigateTo = (topic: string) => {
@@ -13,13 +25,7 @@ export const navigateToConversation = async (
   conversation: XmtpConversation
 ) => {
   await loadSavedNotificationMessagesToContext();
-  Linking.openURL(
-    Linking.createURL("/conversation", {
-      queryParams: {
-        topic: conversation.topic,
-      },
-    })
-  );
+  navigate("Conversation", { topic: conversation.topic });
 };
 
 export const navigateToTopicWithRetry = async () => {
