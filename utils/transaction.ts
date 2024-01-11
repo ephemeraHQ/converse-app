@@ -9,18 +9,18 @@ export const isTransactionMessage = (contentType?: string) =>
     : false;
 
 export const mergeTransactionRefData = (
-  transactionRef: TransactionReference,
+  txRef: TransactionReference,
   details: any
 ): Transaction => {
   return {
-    id: `${transactionRef.networkId}-${transactionRef.reference}`,
+    id: `${txRef.networkId}-${txRef.reference}`,
     contentType: "transactionReference",
     createdAt: details.createdAt || Date.now(),
     updatedAt: details.updatedAt || Date.now(),
-    namespace: transactionRef.namespace,
-    networkId: transactionRef.networkId,
-    reference: transactionRef.reference,
-    metadata: transactionRef.metadata as any,
+    namespace: txRef.namespace,
+    networkId: txRef.networkId,
+    reference: txRef.reference,
+    metadata: txRef.metadata as any,
     status: details.status,
     sponsored: details.sponsored || false,
     blockExplorerURL: details.blockExplorerURL,
@@ -29,11 +29,11 @@ export const mergeTransactionRefData = (
 };
 
 export const isTransactionRefValid = (messageContent: string): boolean => {
-  let parsedContent;
+  let txRef;
 
   // Try to parse the JSON content
   try {
-    parsedContent = JSON.parse(messageContent);
+    txRef = JSON.parse(messageContent);
   } catch (error) {
     console.error("Failed to parse JSON:", error);
     return false;
@@ -41,13 +41,13 @@ export const isTransactionRefValid = (messageContent: string): boolean => {
 
   // Check if the mandatory fields 'networkId' and 'reference' are present and of correct types
   if (
-    typeof parsedContent.networkId !== "string" &&
-    typeof parsedContent.networkId !== "number"
+    typeof txRef.networkId !== "string" &&
+    typeof txRef.networkId !== "number"
   ) {
     return false;
   }
 
-  if (typeof parsedContent.reference !== "string") {
+  if (typeof txRef.reference !== "string") {
     return false;
   }
 
