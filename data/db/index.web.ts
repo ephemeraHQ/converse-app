@@ -3,6 +3,7 @@ const dumbRepository = {
     return [];
   },
   update: async () => {},
+  query: async () => {},
 };
 
 export const getRepository = async (account: string, entity: string) => {

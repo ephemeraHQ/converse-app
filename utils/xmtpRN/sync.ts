@@ -17,7 +17,7 @@ import {
   updateConsentStatus,
 } from "./conversations";
 import {
-  loadConversationsMessages,
+  syncConversationsMessages,
   stopStreamingAllMessage,
   streamAllMessages,
 } from "./messages";
@@ -109,7 +109,7 @@ export const syncXmtpClient = async (account: string) => {
     streamingAccounts[account] = true;
     const topicsToQuery = Object.keys(queryConversationsFromTimestamp);
 
-    const fetchedMessagesCount = await loadConversationsMessages(
+    const fetchedMessagesCount = await syncConversationsMessages(
       account,
       queryConversationsFromTimestamp
     );

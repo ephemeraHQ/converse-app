@@ -11,7 +11,7 @@ import {
   useCurrentAccount,
   useProfilesStore,
 } from "../../data/store/accountsStore";
-import { isAttachmentMessage } from "../../utils/attachment";
+import { isAttachmentMessage } from "../../utils/attachment/helpers";
 import {
   actionSheetColors,
   backgroundColor,

@@ -13,7 +13,7 @@ import {
 } from "../keychain/helpers";
 import { sentryTrackError } from "../sentry";
 import { ConversationWithCodecsType, ConverseXmtpClientType } from "./client";
-import { loadConversationsMessages } from "./messages";
+import { syncConversationsMessages } from "./messages";
 import { getXmtpClient } from "./sync";
 
 const protocolConversationToStateConversation = (
@@ -116,9 +116,9 @@ const handleNewConversation = async (
   // New conversations are not streamed immediatly
   // by the streamAllMessages method so we add this
   // trick to try and be all synced
-  loadConversationsMessages(client.address, { [conversation.topic]: 0 });
+  syncConversationsMessages(client.address, { [conversation.topic]: 0 });
   setTimeout(() => {
-    loadConversationsMessages(client.address, { [conversation.topic]: 0 });
+    syncConversationsMessages(client.address, { [conversation.topic]: 0 });
   }, 3000);
   updateConsentStatus(client.address);
 };

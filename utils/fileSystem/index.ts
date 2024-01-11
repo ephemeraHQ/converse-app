@@ -17,3 +17,15 @@ export const moveFileAndReplace = async (
   }
   await RNFS.moveFile(filePath, destPath);
 };
+
+export const moveAssetsForMessage = async (
+  fromMessageId: string,
+  toMessageId: string
+) => {
+  const oldMessageFolder = `${RNFS.DocumentDirectoryPath}/messages/${fromMessageId}`;
+  const newMessageFolder = `${RNFS.DocumentDirectoryPath}/messages/${toMessageId}`;
+  const oldMessageFolderExists = await RNFS.exists(oldMessageFolder);
+  if (oldMessageFolderExists) {
+    await moveFileAndReplace(oldMessageFolder, newMessageFolder);
+  }
+};

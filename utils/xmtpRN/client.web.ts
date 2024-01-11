@@ -1,3 +1,4 @@
+import { ReactionCodec } from "@xmtp/content-type-reaction";
 import { Client } from "@xmtp/xmtp-js";
 import { Signer } from "ethers";
 
@@ -23,11 +24,14 @@ export const getXmtpBase64KeyFromSigner = async (
   return base64Key;
 };
 
-export const getXmtpClientFromBase64Key = (base64Key: string) =>
-  Client.create(null, {
+export const getXmtpClientFromBase64Key = async (base64Key: string) => {
+  const client = await Client.create(null, {
     env,
     privateKeyOverride: Buffer.from(base64Key, "base64"),
   });
+  client.registerCodec(new ReactionCodec());
+  return client;
+};
 
 export const xmtpClientByAccount: {
   [account: string]: Client;
