@@ -144,81 +144,18 @@ export const syncConversationsMessages = async (
   return messagesBatch.length;
 };
 
-// export const syncConversationsMessages = async (
-//   account: string,
-//   _queryConversationsFromTimestamp: { [topic: string]: number }
-// ): Promise<number> => {
-//   const client = (await getXmtpClient(account)) as Client;
-//   const queryConversationsFromTimestamp = {
-//     ..._queryConversationsFromTimestamp,
-//   };
-//   let messagesFetched = 0;
-
-//   while (Object.keys(queryConversationsFromTimestamp).length > 0) {
-//     const topicsToQuery = Object.keys(queryConversationsFromTimestamp);
-//     const messagesBatch = await decodeBatchMessages(
-//       account,
-//       await client.apiClient.batchQuery(
-//         topicsToQuery.map((topic) => ({
-//           contentTopic: topic,
-//           startTime: new Date(queryConversationsFromTimestamp[topic]),
-//           pageSize: BATCH_QUERY_PAGE_SIZE,
-//           direction: messageApi.SortDirection.SORT_DIRECTION_ASCENDING,
-//         }))
-//       )
-//     );
-
-//     console.log(
-//       `[XmtpJS] Fetched ${messagesBatch.length} envelopes from network for ${client.address}`
-//     );
-
-//     const oldQueryConversationsFromTimestamp = {
-//       ...queryConversationsFromTimestamp,
-//     };
-
-//     const messagesByTopic: { [topic: string]: DecodedMessage[] } = {};
-//     messagesBatch.forEach((m) => {
-//       messagesByTopic[m.contentTopic] = messagesByTopic[m.contentTopic] || [];
-//       messagesByTopic[m.contentTopic].push(m);
-//       if (m.sent.getTime() > queryConversationsFromTimestamp[m.contentTopic]) {
-//         queryConversationsFromTimestamp[m.contentTopic] = m.sent.getTime();
-//       }
-//     });
-
-//     topicsToQuery.forEach((topic) => {
-//       const messages = messagesByTopic[topic];
-//       if (!messages || messages.length <= 1) {
-//         // When we have no more messages for a topic it means we have gone through all of it
-//         // Checking if messages.length < BATCH_QUERY_PAGE_SIZE would be more performant (one less query
-//         // per topic) but could miss messages because if there are messages that are not decoded they
-//         // are not returned by listBatchMessages)
-//         delete queryConversationsFromTimestamp[topic];
-//       }
-//     });
-
-//     // To avoid a loop let's verify that we don't query a topic
-//     // again with the exact same timestamp
-//     Object.keys(queryConversationsFromTimestamp).forEach((topic) => {
-//       if (
-//         queryConversationsFromTimestamp[topic] ===
-//         oldQueryConversationsFromTimestamp[topic]
-//       ) {
-//         console.log(
-//           "[XmtpRn] Avoiding a loop during sync due to weird timestamps"
-//         );
-//         queryConversationsFromTimestamp[topic] += 1;
-//       }
-//     });
-
-//     messagesBatch.sort(
-//       (messageA, messageB) => messageA.sent.getTime() - messageB.sent.getTime()
-//     );
-//     messagesFetched += messagesBatch.length;
-//     saveMessages(
-//       client.address,
-//       protocolMessagesToStateMessages(messagesBatch)
-//     );
-//   }
-//   addLog(`Fetched ${messagesFetched} messages from network`);
-//   return messagesFetched;
-// };
+export const loadOlderMessages = async (
+  account: string,
+  topic: string,
+  oldestTimestamp: number | undefined
+) => {
+  const client = (await getXmtpClient(account)) as Client;
+  const conversation = await getConversationWithTopic(account, topic);
+  if (!conversation) return;
+  const messages = await conversation.messages({
+    endTime: oldestTimestamp ? new Date(oldestTimestamp) : undefined,
+    limit: 100,
+    direction: messageApi.SortDirection.SORT_DIRECTION_DESCENDING,
+  });
+  saveMessages(client.address, protocolMessagesToStateMessages(messages));
+};
