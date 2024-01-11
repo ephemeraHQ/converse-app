@@ -13,7 +13,7 @@ import { getSettingsStore } from "../../data/store/accountsStore";
 import { XmtpConversation } from "../../data/store/chatStore";
 import { SettingsStoreType } from "../../data/store/settingsStore";
 import { getCleanAddress } from "../eth";
-import { loadConversationsMessages } from "./messages";
+import { syncConversationsMessages } from "./messages";
 import { getXmtpClient } from "./sync";
 
 const protocolConversationToStateConversation = (
@@ -58,9 +58,9 @@ const handleNewConversation = async (
   // New conversations are not streamed immediatly
   // by the streamAllMessages method so we add this
   // trick to try and be all synced
-  loadConversationsMessages(client.address, { [conversation.topic]: 0 });
+  syncConversationsMessages(client.address, { [conversation.topic]: 0 });
   setTimeout(() => {
-    loadConversationsMessages(client.address, { [conversation.topic]: 0 });
+    syncConversationsMessages(client.address, { [conversation.topic]: 0 });
   }, 3000);
   updateConsentStatus(client.address);
 };
@@ -111,7 +111,7 @@ export const loadConversations = async (
       }
     });
     console.log(
-      `[XmtpRN] Listing ${conversations.length} conversations for ${
+      `[XmtpJS] Listing ${conversations.length} conversations for ${
         client.address
       } took ${(new Date().getTime() - now) / 1000} seconds`
     );

@@ -106,7 +106,7 @@ export const stopStreamingAllMessage = async (account: string) => {
   client.conversations.cancelStreamAllMessages();
 };
 
-export const loadConversationsMessages = async (
+export const syncConversationsMessages = async (
   account: string,
   _queryConversationsFromTimestamp: { [topic: string]: number }
 ): Promise<number> => {

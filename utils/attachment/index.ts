@@ -7,10 +7,9 @@ import mime from "mime";
 import RNFS from "react-native-fs";
 import RNFetchBlob from "rn-fetch-blob";
 
-import { getPresignedUriForUpload } from "./api";
-import { moveFileAndReplace } from "./fileSystem";
-import { getImageSize, isImageMimetype } from "./media";
-import { isContentType } from "./xmtpRN/contentTypes";
+import { getPresignedUriForUpload } from "../api";
+import { moveFileAndReplace } from "../fileSystem";
+import { getImageSize, isImageMimetype } from "../media";
 
 export type SerializedAttachmentContent = {
   filename: string;
@@ -28,12 +27,6 @@ export type SerializedRemoteAttachmentContent = {
   contentLength: number;
   filename: string;
 };
-
-export const isAttachmentMessage = (contentType?: string) =>
-  contentType
-    ? isContentType("attachment", contentType) ||
-      isContentType("remoteAttachment", contentType)
-    : false;
 
 export const handleStaticAttachment = async (
   messageId: string,

@@ -2,7 +2,7 @@ import { ContentTypeReaction } from "@xmtp/content-type-reaction";
 
 import { XmtpConversation, XmtpMessage } from "../data/store/chatStore";
 import { emojisByCategory } from "../vendor/rn-emoji-keyboard";
-import { isAttachmentMessage } from "./attachment";
+import { isAttachmentMessage } from "./attachment/helpers";
 import { sendMessage } from "./message";
 import { sentryTrackMessage } from "./sentry";
 
