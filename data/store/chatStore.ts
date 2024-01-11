@@ -650,4 +650,8 @@ const insertMessageIdAtRightIndex = (
       return;
     }
   }
+  // If the message to insert is the first (happens on web)
+  // we push it at the beginning
+  conversation.messagesIds.unshift(newMessage.id);
+  conversation.messages.set(newMessage.id, newMessage);
 };

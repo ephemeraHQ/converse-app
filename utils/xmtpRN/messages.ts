@@ -178,3 +178,9 @@ export const syncConversationsMessages = async (
   addLog(`Fetched ${messagesFetched} messages from network`);
   return messagesFetched;
 };
+
+export const loadOlderMessages = async (
+  account: string,
+  topic: string,
+  oldestTimestamp: number | undefined
+) => {};
