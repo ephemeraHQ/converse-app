@@ -68,10 +68,10 @@ index c3a0eb2..80da776 100644
          senderAddress: string;
          sent: number;
 diff --git a/node_modules/@xmtp/react-native-sdk/build/lib/DecodedMessage.js b/node_modules/@xmtp/react-native-sdk/build/lib/DecodedMessage.js
-index bfceb29..7ee7953 100644
+index a457fc4..2685752 100644
 --- a/node_modules/@xmtp/react-native-sdk/build/lib/DecodedMessage.js
 +++ b/node_modules/@xmtp/react-native-sdk/build/lib/DecodedMessage.js
-@@ -2,6 +2,7 @@ export class DecodedMessage {
+@@ -3,6 +3,7 @@ export class DecodedMessage {
      client;
      id;
      topic;
@@ -79,7 +79,7 @@ index bfceb29..7ee7953 100644
      contentTypeId;
      senderAddress;
      sent; // timestamp in milliseconds
-@@ -9,15 +10,16 @@ export class DecodedMessage {
+@@ -10,15 +11,16 @@ export class DecodedMessage {
      fallback;
      static from(json, client) {
          const decoded = JSON.parse(json);
@@ -131,10 +131,10 @@ index 5ab661e..9eb18c1 100644
  				try FileManager.default.removeItem(at: URL(string: local.preparedFileUri)!)
  			} catch { /* ignore: the sending succeeds even if we fail to rm the tmp file afterward */ }
 diff --git a/node_modules/@xmtp/react-native-sdk/src/lib/DecodedMessage.ts b/node_modules/@xmtp/react-native-sdk/src/lib/DecodedMessage.ts
-index c348cac..46cc7ce 100644
+index 103e311..789f8cc 100644
 --- a/node_modules/@xmtp/react-native-sdk/src/lib/DecodedMessage.ts
 +++ b/node_modules/@xmtp/react-native-sdk/src/lib/DecodedMessage.ts
-@@ -12,6 +12,7 @@ export class DecodedMessage<ContentTypes = any> {
+@@ -13,6 +13,7 @@ export class DecodedMessage<ContentTypes = any> {
    client: Client<ContentTypes>
    id: string
    topic: string
@@ -142,7 +142,7 @@ index c348cac..46cc7ce 100644
    contentTypeId: string
    senderAddress: string
    sent: number // timestamp in milliseconds
-@@ -31,7 +32,8 @@ export class DecodedMessage<ContentTypes = any> {
+@@ -32,7 +33,8 @@ export class DecodedMessage<ContentTypes = any> {
        decoded.senderAddress,
        decoded.sent,
        decoded.content,
@@ -152,7 +152,7 @@ index c348cac..46cc7ce 100644
      )
    }
  
-@@ -39,6 +41,7 @@ export class DecodedMessage<ContentTypes = any> {
+@@ -40,6 +42,7 @@ export class DecodedMessage<ContentTypes = any> {
      object: {
        id: string
        topic: string
@@ -160,7 +160,7 @@ index c348cac..46cc7ce 100644
        contentTypeId: string
        senderAddress: string
        sent: number // timestamp in milliseconds
-@@ -55,7 +58,8 @@ export class DecodedMessage<ContentTypes = any> {
+@@ -56,7 +59,8 @@ export class DecodedMessage<ContentTypes = any> {
        object.senderAddress,
        object.sent,
        object.content,
@@ -170,7 +170,7 @@ index c348cac..46cc7ce 100644
      )
    }
  
-@@ -67,7 +71,8 @@ export class DecodedMessage<ContentTypes = any> {
+@@ -68,7 +72,8 @@ export class DecodedMessage<ContentTypes = any> {
      senderAddress: string,
      sent: number,
      content: any,
@@ -180,7 +180,7 @@ index c348cac..46cc7ce 100644
    ) {
      this.client = client
      this.id = id
-@@ -77,6 +82,7 @@ export class DecodedMessage<ContentTypes = any> {
+@@ -78,6 +83,7 @@ export class DecodedMessage<ContentTypes = any> {
      this.sent = sent
      this.nativeContent = content
      this.fallback = fallback
