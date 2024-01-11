@@ -1,16 +1,20 @@
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Platform, StyleSheet, Text, useColorScheme, View } from "react-native";
 
-import { useAccountsStore } from "../../data/store/accountsStore";
+import {
+  getTransactionsStore,
+  useAccountsStore,
+} from "../../data/store/accountsStore";
 import { getTransactionDetails } from "../../utils/api";
 import {
   messageInnerBubbleColor,
   myMessageInnerBubbleColor,
   textPrimaryColor,
 } from "../../utils/colors";
-import { sentryTrackMessage } from "../../utils/sentry";
-import { isTransactionRefValid } from "../../utils/transaction";
-import { TransactionReference } from "../../utils/xmtpRN/contentTypes/transactionReference";
+import {
+  isTransactionRefValid,
+  mergeTransactionRefData,
+} from "../../utils/transaction";
 import { MessageToDisplay } from "./ChatMessage";
 import ChatMessageMetadata from "./ChatMessageMetadata";
 
@@ -22,7 +26,6 @@ export default function ChatTransactionReference({ message }: Props) {
   const colorScheme = useColorScheme();
   const currentAccount = useAccountsStore((s) => s.currentAccount);
   const styles = useStyles();
-
   const [transaction, setTransaction] = useState({
     loading: true,
     error: false,
@@ -43,43 +46,99 @@ export default function ChatTransactionReference({ message }: Props) {
     blockExplorerURL: undefined as undefined | string,
     events: undefined as undefined | [],
   });
+  const fetchingTransaction = useRef(false);
+  const showing = !transaction.loading;
 
-  // TODO saveAndDisplayTransaction
-  // TODO fetchTransactionDetails
-  // TODO openInWebview
+  const saveAndDisplayTransaction = useCallback(
+    (txId: string, txRef, txDetails, update = false) => {
+      console.log("saveAndDisplayTransaction");
 
-  const fetchingTransactionRef = useRef(false);
+      if (txRef.namespace === "eip155" && txRef.networkId && txRef.txHash) {
+        const transactionStore = getTransactionsStore(currentAccount);
+        const transaction = mergeTransactionRefData(txRef, txDetails);
+
+        if (update) {
+          transactionStore.getState().updateTransaction(txId, transaction);
+        } else {
+          transactionStore.getState().setTransactions([transaction]);
+        }
+      }
+    },
+    [currentAccount]
+  );
 
   useEffect(() => {
     const go = async () => {
-      const parsedMessageContent: TransactionReference = JSON.parse(
-        message.content
-      );
+      if (fetchingTransaction.current) return;
+      fetchingTransaction.current = true;
+      setTransaction((t) => ({ ...t, loading: true }));
 
-      if (parsedMessageContent.networkId && parsedMessageContent.reference) {
-        const transactionDetails = await getTransactionDetails(
-          currentAccount,
-          parsedMessageContent.networkId as string,
-          parsedMessageContent.reference
-        );
+      const txRef = JSON.parse(message.content);
+      const txId = `${txRef.networkId}-${txRef.reference}`;
+      const txLookup = getTransactionsStore(currentAccount)
+        .getState()
+        .getTransaction(txId);
 
-        console.log(
-          "ChatTransactionReference > transactionDetails:",
-          transactionDetails
-        );
+      if (!txLookup) {
+        // TODO
+        // Add the transaction since it's not found
+        console.log("** TODO: Add the transaction since it's not found");
+
+        try {
+          const result = await getTransactionDetails(
+            currentAccount,
+            txRef.networkId,
+            txRef.reference
+          );
+          const txDetails = JSON.parse(result);
+          fetchingTransaction.current = false;
+          saveAndDisplayTransaction(txId, txRef, txDetails);
+        } catch (error) {
+          fetchingTransaction.current = false;
+          console.error("Error fetching transaction details", error);
+        }
+      } else if (txLookup.status === "PENDING") {
+        try {
+          const result = await getTransactionDetails(
+            currentAccount,
+            txRef.networkId,
+            txRef.reference
+          );
+          const txDetails = JSON.parse(result);
+
+          if (txDetails.status !== "PENDING") {
+            // TODO
+            // Update the transaction in the store
+            console.log("** TODO: Update the transaction in the store");
+
+            // save and display
+            fetchingTransaction.current = false;
+            saveAndDisplayTransaction(txRef, txDetails, true);
+          } else {
+            // Retry after 5 seconds if still pending
+            console.log("** Retrying");
+            setTimeout(go, 5000);
+          }
+        } catch (error) {
+          fetchingTransaction.current = false;
+          console.error("Error fetching transaction details", error);
+        }
+      } else if (
+        txLookup.status === "SUCCESS" ||
+        txLookup.status === "FAILURE"
+      ) {
+        // Do nothing as it's already saved
       }
     };
 
-    const transactionValid = isTransactionRefValid(message.content);
-    if (!transactionValid) {
-      sentryTrackMessage("INVALID_TRANSACTION_REFERENCE", { message });
+    const isTxRefValid = isTransactionRefValid(message.content);
+    if (!isTxRefValid) {
+      // sentryTrackMessage("INVALID_TRANSACTION_REFERENCE", { message });
       setTransaction((a) => ({ ...a, error: true, loading: false }));
     } else {
       go();
     }
-  }, [currentAccount, message]);
-
-  const showing = !transaction.loading;
+  }, [currentAccount, message, saveAndDisplayTransaction]);
 
   const textStyle = [
     styles.text,
@@ -90,19 +149,38 @@ export default function ChatTransactionReference({ message }: Props) {
     <ChatMessageMetadata message={message} white={showing} />
   );
 
-  return (
-    <>
-      <View
-        style={[
-          styles.innerBubble,
-          message.fromMe ? styles.innerBubbleMe : undefined,
-        ]}
-      >
-        <Text style={textStyle}>{message.content}</Text>
-      </View>
-      <View style={{ opacity: 0 }}>{metadataView}</View>
-    </>
-  );
+  // Conditional rendering
+  if (transaction.loading) {
+    return (
+      <>
+        <View
+          style={[
+            styles.innerBubble,
+            message.fromMe ? styles.innerBubbleMe : undefined,
+          ]}
+        >
+          <Text style={textStyle}>Loading...</Text>
+        </View>
+        <View style={{ opacity: 0 }}>{metadataView}</View>
+      </>
+    );
+  } else if (transaction.error) {
+    return null;
+  } else {
+    return (
+      <>
+        <View
+          style={[
+            styles.innerBubble,
+            message.fromMe ? styles.innerBubbleMe : undefined,
+          ]}
+        >
+          <Text style={textStyle}>{message.content}</Text>
+        </View>
+        <View style={{ opacity: 0 }}>{metadataView}</View>
+      </>
+    );
+  }
 }
 
 // TODO UPDATE STYLE
