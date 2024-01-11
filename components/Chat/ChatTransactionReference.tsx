@@ -9,6 +9,7 @@ import {
   textPrimaryColor,
 } from "../../utils/colors";
 import { sentryTrackMessage } from "../../utils/sentry";
+import { isTransactionRefValid } from "../../utils/transaction";
 import { TransactionReference } from "../../utils/xmtpRN/contentTypes/transactionReference";
 import { MessageToDisplay } from "./ChatMessage";
 import ChatMessageMetadata from "./ChatMessageMetadata";
@@ -69,8 +70,9 @@ export default function ChatTransactionReference({ message }: Props) {
       }
     };
 
-    if (!message.content) {
-      sentryTrackMessage("EMPTY_TRANSACTION", { message });
+    const transactionValid = isTransactionRefValid(message.content);
+    if (!transactionValid) {
+      sentryTrackMessage("INVALID_TRANSACTION_REFERENCE", { message });
       setTransaction((a) => ({ ...a, error: true, loading: false }));
     } else {
       go();
