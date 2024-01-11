@@ -1,16 +1,15 @@
 import { useWeb3ModalProvider } from "@web3modal/ethers5/react";
-import { Client } from "@xmtp/xmtp-js";
 import { ethers } from "ethers";
 import { useEffect, useRef } from "react";
 import { Text, View } from "react-native";
 
-import config from "../config";
 import {
   getSettingsStore,
   useAccountsStore,
 } from "../data/store/accountsStore";
 import { useOnboardingStore } from "../data/store/onboardingStore";
 import { saveXmtpKey } from "../utils/keychain/helpers";
+import { getXmtpBase64KeyFromSigner } from "../utils/xmtpRN/client";
 import { getXmtpClient } from "../utils/xmtpRN/sync";
 
 export default function Onboarding() {
@@ -22,17 +21,9 @@ export default function Onboarding() {
         try {
           const provider = new ethers.providers.Web3Provider(walletProvider);
           const signer = provider.getSigner();
-          const keys = await Client.getKeys(signer, {
-            env: config.xmtpEnv,
-            // we don't need to publish the contact here since it
-            // will happen when we create the client later
-            skipContactPublishing: true,
-            // we can skip persistence on the keystore for this short-lived
-            // instance
-            persistConversations: false,
-          });
-          const base64Key = Buffer.from(keys).toString("base64");
+
           const address = await signer.getAddress();
+          const base64Key = await getXmtpBase64KeyFromSigner(signer);
           await saveXmtpKey(address, base64Key);
           // Successfull login for user, let's setup
           // the storage !

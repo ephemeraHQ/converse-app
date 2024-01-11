@@ -1,3 +1,5 @@
+import { Client } from "@xmtp/xmtp-js";
+
 import { refreshAllSpamScores } from "../../data/helpers/conversations/spamScore";
 import { getChatStore } from "../../data/store/accountsStore";
 import { loadXmtpKey } from "../keychain/helpers";
@@ -24,7 +26,7 @@ const instantiatingClientForAccount: { [account: string]: boolean } = {};
 
 export const getXmtpClient = async (
   account: string
-): Promise<ConverseXmtpClientType> => {
+): Promise<ConverseXmtpClientType | Client> => {
   console.log(`[XmtpRN] Getting client for ${account}`);
   if (account && xmtpClientByAccount[account]) {
     return xmtpClientByAccount[account];

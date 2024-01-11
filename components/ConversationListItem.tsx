@@ -218,11 +218,26 @@ const ConversationListItem = memo(function ConversationListItem({
       </TouchableHighlight>
     ) : (
       <TouchableRipple
-        unstable_pressDelay={75}
+        unstable_pressDelay={isDesktop ? 0 : 75}
+        onPressIn={() => {
+          if (!isSplitScreen) return;
+          Linking.openURL(
+            Linking.createURL("/conversation", {
+              queryParams: {
+                topic: conversationTopic,
+              },
+            })
+          );
+        }}
         onPress={() => {
-          navigation.navigate("Conversation", {
-            topic: conversationTopic,
-          });
+          if (isSplitScreen) return;
+          Linking.openURL(
+            Linking.createURL("/conversation", {
+              queryParams: {
+                topic: conversationTopic,
+              },
+            })
+          );
         }}
         style={styles.rippleRow}
         rippleColor={clickedItemBackgroundColor(colorScheme)}

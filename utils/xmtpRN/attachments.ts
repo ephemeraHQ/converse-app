@@ -5,6 +5,7 @@ import {
 import RNFS from "react-native-fs";
 
 import { XmtpMessage } from "../../data/store/chatStore";
+import { ConverseXmtpClientType } from "./client";
 import { getXmtpClient } from "./sync";
 
 export const encryptRemoteAttachment = async (
@@ -12,7 +13,7 @@ export const encryptRemoteAttachment = async (
   fileUri: string,
   mimeType?: string
 ) => {
-  const client = await getXmtpClient(account);
+  const client = (await getXmtpClient(account)) as ConverseXmtpClientType;
   const encryptedAttachment = await client.encryptAttachment({
     fileUri,
     mimeType,
@@ -35,7 +36,7 @@ export const fetchAndDecodeRemoteAttachment = async (
     fromUrl: remoteAttachment.url,
     toFile: encryptedLocalFileUri,
   }).promise;
-  const client = await getXmtpClient(account);
+  const client = (await getXmtpClient(account)) as ConverseXmtpClientType;
   const decryptedContent = await client.decryptAttachment({
     encryptedLocalFileUri,
     metadata: remoteAttachment,
