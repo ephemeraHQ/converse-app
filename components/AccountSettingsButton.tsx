@@ -24,6 +24,7 @@ import {
 import { addLog } from "../utils/debug";
 import { converseEventEmitter } from "../utils/events";
 import { logout } from "../utils/logout";
+import { navigate } from "../utils/navigation";
 import {
   requestPushNotificationsPermissions,
   NotificationPermissionStatus,
@@ -74,13 +75,9 @@ export default function AccountSettingsButton({ navigation, account }: Props) {
             // On android the drawer is outside the navigation
             // so we use Linking to navigate
             converseEventEmitter.emit("toggle-navigation-drawer", false);
-            Linking.openURL(
-              Linking.createURL("/profile", {
-                queryParams: {
-                  address: account,
-                },
-              })
-            );
+            navigate("Profile", {
+              address: account,
+            });
           }
         }
       },
@@ -98,13 +95,9 @@ export default function AccountSettingsButton({ navigation, account }: Props) {
           // On android the drawer is outside the navigation
           // so we use Linking to navigate
           converseEventEmitter.emit("toggle-navigation-drawer", false);
-          Linking.openURL(
-            Linking.createURL("/conversation", {
-              queryParams: {
-                mainConversationWithPeer: config.polAddress,
-              },
-            })
-          );
+          navigate("Conversation", {
+            mainConversationWithPeer: config.polAddress,
+          });
         }
       },
       "Turn on notifications": () => {

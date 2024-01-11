@@ -3,6 +3,7 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { Platform, useColorScheme } from "react-native";
 
 import { isDesktop } from "../../../utils/device";
+import { converseNavigations } from "../../../utils/navigation";
 import AccountsNav from "../AccountsNav";
 import ConversationListNav from "../ConversationListNav";
 import ConversationRequestsListNav from "../ConversationRequestsListNav";
@@ -51,6 +52,14 @@ export default function SplitLeftStackNavigation() {
               type: "stack",
             }
       }
+      ref={(r) => {
+        converseNavigations["splitLeftStack"] = r;
+      }}
+      onUnhandledAction={() => {
+        // Since we're handling multiple navigators,
+        // let's silence errors when the action
+        // is not meant for this one
+      }}
     >
       <NativeStack.Navigator screenOptions={{ gestureEnabled: !isDesktop }}>
         <NativeStack.Group screenOptions={stackGroupScreenOptions(colorScheme)}>

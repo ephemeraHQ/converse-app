@@ -1,9 +1,9 @@
 import { useNavigationState } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import * as Linking from "expo-linking";
 import { StyleSheet, Platform } from "react-native";
 
 import { useIsSplitScreen } from "../../screens/Navigation/navHelpers";
+import { navigate } from "../../utils/navigation";
 import Button from "../Button/Button";
 
 type NavigationChatProps = {
@@ -26,14 +26,10 @@ export function NavigationChatButton({
     );
     setTimeout(
       () => {
-        Linking.openURL(
-          Linking.createURL("/conversation", {
-            queryParams: {
-              mainConversationWithPeer: address,
-              focus: true as any,
-            },
-          })
-        );
+        navigate("Conversation", {
+          mainConversationWithPeer: address,
+          focus: true,
+        });
       },
       isSplitScreen ? 0 : 300
     );
