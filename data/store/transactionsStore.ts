@@ -24,6 +24,7 @@ export type TransactionsStoreType = {
   transactions: { [id: string]: Transaction };
 
   setTransactions: (transactions: Transaction[]) => void;
+  getTransaction: (id: string) => Transaction;
   updateTransaction: (id: string, updates: Partial<Transaction>) => void;
 
   getEvents: (id: string) => any[];
@@ -49,6 +50,25 @@ export const initTransactionsStore = (account: string) => {
               });
 
               return { transactions: updatedTransactions };
+            }),
+
+          getTransaction: (id: string) => {
+            return get().transactions[id];
+          },
+
+          updateTransaction: (id: string, updates: Partial<Transaction>) =>
+            set((state) => {
+              const existingTransaction = state.transactions[id];
+              if (!existingTransaction) {
+                console.warn(`Transaction with id ${id} not found`);
+                return { ...state };
+              }
+              return {
+                transactions: {
+                  ...state.transactions,
+                  [id]: { ...existingTransaction, ...updates },
+                },
+              };
             }),
 
           getEvents: (id) => {
