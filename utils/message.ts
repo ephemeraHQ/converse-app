@@ -1,10 +1,14 @@
 import uuid from "react-native-uuid";
 
 import { saveMessages } from "../data/helpers/messages";
-import { currentAccount } from "../data/store/accountsStore";
+import {
+  currentAccount,
+  getTransactionsStore,
+} from "../data/store/accountsStore";
 import { XmtpConversation } from "../data/store/chatStore";
 import { getTransactionDetails } from "./api";
 import { saveAttachmentForPendingMessage } from "./attachment";
+import { mergeTransactionRefData } from "./transaction";
 import { isContentType } from "./xmtpRN/contentTypes";
 import { sendPendingMessages } from "./xmtpRN/send";
 
@@ -45,23 +49,19 @@ export const sendMessage = async ({
   }
 
   if (isContentType("transactionReference", contentType)) {
-    console.log("## contentType is transactionReference -- calling backend");
+    const transactionRef = JSON.parse(content);
+    const { namespace, networkId, reference: txHash } = transactionRef;
 
-    const parsedContent = JSON.parse(content);
-    const networkId = parsedContent.networkId;
-    const txHash = parsedContent.reference;
-    const metadata = parsedContent.metadata;
-
-    if (parsedContent.namespace == "eip155" && networkId && txHash) {
-      const transaction = await getTransactionDetails(
+    // Handle Ethereum chain IDs, fetch details and save to Zustand
+    if (namespace === "eip155" && networkId && txHash) {
+      const details = await getTransactionDetails(
         currentAccount(),
         networkId,
         txHash
       );
-      console.log(
-        "Should save transaction to Zustand >>>>>>>>>>>>>> transaction details:",
-        transaction
-      );
+      const transactionStore = getTransactionsStore(currentAccount());
+      const transaction = mergeTransactionRefData(transactionRef, details);
+      transactionStore.getState().setTransactions([transaction]);
     }
   }
 
