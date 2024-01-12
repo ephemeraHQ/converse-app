@@ -73,7 +73,7 @@ export default function NewConversation({
     });
   }, [navigation]);
 
-  const [value, setValue] = useState(route.params.peer || "");
+  const [value, setValue] = useState(route.params?.peer || "");
   const searchingForValue = useRef("");
   const [status, setStatus] = useState({
     loading: false,
@@ -297,6 +297,7 @@ export default function NewConversation({
       style={{
         flex: 1,
         backgroundColor: "white",
+        paddingHorizontal: Platform.OS === "web" ? 20 : undefined,
       }}
     >
       {Platform.OS === "ios" && <StatusBar hidden={false} style="light" />}

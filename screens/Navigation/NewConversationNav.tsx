@@ -1,4 +1,4 @@
-import { useColorScheme } from "react-native";
+import { Platform, useColorScheme } from "react-native";
 
 import { navigationSecondaryBackgroundColor } from "../../utils/colors";
 import NewConversation from "../NewConversation";
@@ -30,6 +30,10 @@ export default function NewConversationNav() {
         headerStyle: {
           backgroundColor: navigationSecondaryBackgroundColor(colorScheme),
         },
+        headerTitleStyle: Platform.select({
+          default: {},
+          web: { left: -20 } as any,
+        }),
         animation: navigationAnimation,
       }}
     />

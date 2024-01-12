@@ -1,5 +1,6 @@
 import { Buffer } from "buffer";
 import "setimmediate";
+import * as Linking from "expo-linking";
 import { Alert, AlertButton, AlertOptions } from "react-native";
 
 window.Buffer = window.Buffer || Buffer;
@@ -24,4 +25,8 @@ Alert.alert = (
     window.alert([title, message].filter(Boolean).join("\n"));
     (confirmOption || cancelOption)?.onPress?.();
   }
+};
+
+(Linking as any).openURL = async (url: string) => {
+  window.open(new URL(url, window.location.href).toString());
 };
