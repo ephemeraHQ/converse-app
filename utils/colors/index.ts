@@ -286,6 +286,11 @@ export const headerTitleStyle = (colorScheme: ColorSchemeName) =>
       left: -15,
       fontFamily: "Roboto",
     },
+    web: {
+      color: textPrimaryColor(colorScheme),
+      fontSize: 17,
+      fontWeight: "600" as any,
+    },
   });
 
 export const rgbStringToHex = (rgbString: string) => {

@@ -1,6 +1,6 @@
 import { HeaderBackButton } from "@react-navigation/elements";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack/lib/typescript/src/types";
-import { useColorScheme } from "react-native";
+import { Platform, useColorScheme } from "react-native";
 
 import { textSecondaryColor } from "../utils/colors";
 
@@ -14,7 +14,7 @@ export default function AndroidBackAction({
     <HeaderBackButton
       onPress={navigation.goBack}
       canGoBack={navigation.canGoBack()}
-      style={{ marginLeft: -3 }}
+      style={{ marginLeft: Platform.OS === "web" ? 15 : -3 }}
       tintColor={textSecondaryColor(colorScheme)}
     />
   );

@@ -34,6 +34,7 @@ export default function TableView({ title, items, style }: Props) {
   const sectionContent = items.map((i) => (
     <List.Item
       title={i.title}
+      titleStyle={{ color: i.titleColor }}
       titleNumberOfLines={i.titleNumberOfLines || 1}
       key={i.id}
       left={() => i.leftView}
