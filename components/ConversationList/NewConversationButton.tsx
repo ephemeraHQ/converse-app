@@ -28,7 +28,7 @@ export default function NewConversationButton({
     }
     (debugRef.current as any).showDebugMenu();
   }, [enableDebug]);
-  if (Platform.OS === "ios" || Platform.OS === "web") {
+  if (Platform.OS === "ios") {
     return (
       <TouchableOpacity
         activeOpacity={0.2}

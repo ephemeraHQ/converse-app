@@ -185,7 +185,7 @@ function ConversationList({ navigation, route, searchBarRef }: Props) {
         ListFooterComponent={ListFooterComponent}
       />
       <Recommendations navigation={navigation} visibility="HIDDEN" />
-      {Platform.OS === "android" && (
+      {(Platform.OS === "android" || Platform.OS === "web") && (
         <NewConversationButton navigation={navigation} route={route} />
       )}
     </>
