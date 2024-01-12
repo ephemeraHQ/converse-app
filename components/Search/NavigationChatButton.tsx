@@ -37,7 +37,11 @@ export function NavigationChatButton({
 
   return (
     <Button
-      variant={Platform.OS === "android" ? "text" : "secondary"}
+      variant={
+        Platform.OS === "android" || Platform.OS === "web"
+          ? "text"
+          : "secondary"
+      }
       picto="message"
       title="Chat"
       style={styles.navigationButton}
