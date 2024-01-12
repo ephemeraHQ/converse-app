@@ -1,32 +1,25 @@
 import React from "react";
 import {
   GestureResponderEvent,
-  Platform,
   StyleProp,
   StyleSheet,
-  Text,
   TextStyle,
-  TouchableOpacity,
-  useColorScheme,
+  View,
+  Text,
   ViewStyle,
 } from "react-native";
+import { Button as MaterialButton } from "react-native-paper";
 
-import {
-  dangerColor,
-  primaryColor,
-  tertiaryBackgroundColor,
-} from "../../utils/colors";
 import Picto from "../Picto/Picto";
 
 type Props = {
   title: string;
   onPress?: (event: GestureResponderEvent) => void;
-  variant: "primary" | "secondary" | "secondary-danger" | "grey" | "text";
+  variant: "primary" | "secondary" | "grey" | "text";
   style?: StyleProp<ViewStyle>;
   textStyle?: StyleProp<TextStyle>;
   allowFontScaling?: boolean;
   picto?: string;
-  numberOfLines?: number;
 };
 
 export default function Button({
@@ -37,108 +30,67 @@ export default function Button({
   textStyle,
   picto,
   allowFontScaling = true,
-  numberOfLines,
 }: Props) {
-  const colorScheme = useColorScheme();
-  const styles = useStyles();
-  const buttonStyle =
-    variant === "primary"
-      ? [styles.buttonPrimary]
-      : variant === "secondary"
-      ? [styles.buttonPrimary, styles.buttonSecondary]
-      : variant === "grey"
-      ? [styles.buttonGrey]
-      : variant === "secondary-danger"
-      ? [styles.buttonPrimary, styles.buttonSecondary, styles.buttonDanger]
-      : [styles.buttonText];
-  const buttonTextStyle =
-    variant === "primary"
-      ? [styles.buttonPrimaryText]
-      : variant === "secondary" || variant === "secondary-danger"
-      ? [styles.buttonPrimaryText, styles.buttonSecondaryText]
-      : variant === "grey"
-      ? [styles.buttonGreyText]
-      : [styles.buttonTextText];
   return (
-    <TouchableOpacity style={[...buttonStyle, style]} onPress={onPress}>
-      {picto && (
-        <Picto
-          picto={picto}
-          size={variant === "text" ? 15 : 13}
-          style={[
-            styles.picto,
-            variant === "text" ? { paddingLeft: 15 } : undefined,
-          ]}
-          color={variant === "text" ? primaryColor(colorScheme) : "white"}
-          weight={variant === "text" ? "medium" : "bold"}
-        />
-      )}
-      <Text
-        style={[...buttonTextStyle, textStyle]}
-        allowFontScaling={allowFontScaling}
-        numberOfLines={numberOfLines}
+    <View
+      style={[
+        variant === "primary"
+          ? styles.buttonPrimaryContainer
+          : variant === "secondary"
+          ? styles.buttonSecondaryContainer
+          : undefined,
+        style,
+      ]}
+    >
+      <MaterialButton
+        mode={
+          variant === "primary" || variant === "secondary"
+            ? "contained"
+            : "text"
+        }
+        style={
+          variant === "primary" || variant === "secondary"
+            ? styles.buttonPrimary
+            : undefined
+        }
+        onPress={onPress}
+        labelStyle={textStyle}
+        icon={
+          picto
+            ? ({ color, size }) => (
+                <Picto
+                  picto={picto}
+                  color={color}
+                  size={size}
+                  style={
+                    variant === "secondary" || variant === "text"
+                      ? undefined
+                      : styles.picto
+                  }
+                />
+              )
+            : undefined
+        }
       >
-        {title}
-      </Text>
-    </TouchableOpacity>
+        <Text>{title}</Text>
+      </MaterialButton>
+    </View>
   );
 }
 
-const useStyles = () => {
-  const colorScheme = useColorScheme();
-  return StyleSheet.create({
-    buttonPrimary: {
-      backgroundColor: primaryColor(colorScheme),
-      display: "flex",
-      alignSelf: "stretch",
-      marginHorizontal: 32,
-      textAlign: "center",
-      paddingVertical: 14,
-      borderRadius: 14,
-      flexDirection: "row",
-      justifyContent: "center",
-    },
-    buttonPrimaryText: {
-      color: "white",
-      textAlign: "center",
-      fontWeight: "600",
-      fontSize: 17,
-    },
-    buttonSecondary: {
-      paddingRight: 15,
-      paddingLeft: 25,
-      borderRadius: 100,
-      paddingVertical: 7,
-    },
-    buttonDanger: {
-      backgroundColor: dangerColor(colorScheme),
-    },
-    buttonSecondaryText: {
-      fontWeight: "400",
-    },
-    buttonGrey: {
-      backgroundColor: tertiaryBackgroundColor(colorScheme),
-      paddingHorizontal: 15,
-      paddingVertical: 4,
-      borderRadius: 100,
-    },
-    buttonGreyText: {
-      color: colorScheme === "light" ? primaryColor(colorScheme) : "white",
-      textAlign: "center",
-      fontWeight: "600",
-      fontSize: 17,
-    },
-    buttonText: {
-      flexDirection: "row",
-    },
-    buttonTextText: {
-      color: Platform.OS === "ios" ? primaryColor(colorScheme) : "blue",
-      textAlign: "center",
-      fontWeight: "400",
-      fontSize: 17,
-    },
-    picto: {
-      marginRight: 15,
-    },
-  });
-};
+const styles = StyleSheet.create({
+  buttonPrimaryContainer: {
+    paddingHorizontal: 32,
+    width: "100%",
+  },
+  buttonSecondaryContainer: {
+    paddingHorizontal: 16,
+    width: "auto",
+  },
+  buttonPrimary: {
+    width: "100%",
+  },
+  picto: {
+    marginRight: 10,
+  },
+});
