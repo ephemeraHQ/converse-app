@@ -7,19 +7,11 @@ import {
   ViewStyle,
   useColorScheme,
 } from "react-native";
-import {
-  Cell,
-  Section,
-  TableView as RNTableView,
-} from "react-native-tableview-simple";
+import { List } from "react-native-paper";
 
-import {
-  tertiaryBackgroundColor,
-  textPrimaryColor,
-  textSecondaryColor,
-} from "../../utils/colors";
+import { textSecondaryColor } from "../../utils/colors";
 
-export type TableViewItemType = {
+type TableViewItemType = {
   id: string;
   leftView?: ReactElement;
   rightView?: ReactElement;
@@ -38,67 +30,40 @@ type Props = {
 };
 
 export default function TableView({ title, items, style }: Props) {
-  const colorScheme = useColorScheme();
   const styles = useStyles();
-  const separatorInsetLeft = items.length > 0 && !!items[0].leftView ? 53 : 15;
+  const sectionContent = items.map((i) => (
+    <List.Item
+      title={i.title}
+      titleNumberOfLines={i.titleNumberOfLines || 1}
+      key={i.id}
+      left={() => i.leftView}
+      right={() => i.rightView}
+      onPress={i.action}
+      description={i.subtitle}
+    />
+  ));
   return (
-    <RNTableView style={style}>
-      <Section
-        header={title}
-        separatorInsetLeft={separatorInsetLeft}
-        hideSurroundingSeparators
-        roundedCorners
-        withSafeAreaView={false}
-      >
-        {items.map((i) => (
-          <Cell
-            key={i.id}
-            title={i.title}
-            onPress={i.action}
-            backgroundColor={tertiaryBackgroundColor(colorScheme)}
-            titleTextProps={{ numberOfLines: i.titleNumberOfLines || 1 }}
-            titleTextStyle={[
-              styles.itemTitle,
-              {
-                marginTop: i.subtitle ? 5 : 0,
-                marginBottom: i.subtitle ? 2 : 0,
-                color: i.titleColor || textPrimaryColor(colorScheme),
-              },
-            ]}
-            cellImageView={
-              i.leftView ? (
-                <View style={{ marginRight: 8 }}>{i.leftView}</View>
-              ) : undefined
-            }
-            cellAccessoryView={
-              i.rightView ? (
-                <View style={{ marginRight: -8, marginLeft: 8 }}>
-                  {i.rightView}
-                </View>
-              ) : undefined
-            }
-            cellStyle={i.subtitle ? "Subtitle" : "Basic"}
-            detail={i.subtitle}
-            subtitleTextStyle={[
-              styles.itemSubtitle,
-              { color: i.subtitleColor || textSecondaryColor(colorScheme) },
-            ]}
-            withSafeAreaView={false}
-          />
-        ))}
-      </Section>
-    </RNTableView>
+    <View style={style}>
+      {title ? (
+        <List.Section>
+          <List.Subheader style={styles.sectionTitle}>{title}</List.Subheader>
+          {sectionContent}
+        </List.Section>
+      ) : (
+        sectionContent
+      )}
+    </View>
   );
 }
 
 const useStyles = () => {
+  const colorScheme = useColorScheme();
   return StyleSheet.create({
-    itemTitle: {
-      fontSize: 17,
-    },
-    itemSubtitle: {
-      fontSize: 12,
-      marginBottom: 5,
+    sectionTitle: {
+      marginBottom: -8,
+      color: textSecondaryColor(colorScheme),
+      fontSize: 11,
+      fontWeight: "500",
     },
   });
 };

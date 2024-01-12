@@ -3,6 +3,7 @@ import { Client } from "@xmtp/xmtp-js";
 import { Signer } from "ethers";
 
 import config from "../../config";
+import { getCleanAddress } from "../eth";
 
 const env = config.xmtpEnv as "dev" | "production" | "local";
 
@@ -36,3 +37,8 @@ export const getXmtpClientFromBase64Key = async (base64Key: string) => {
 export const xmtpClientByAccount: {
   [account: string]: Client;
 } = {};
+
+export const isOnXmtp = async (address: string) =>
+  Client.canMessage(getCleanAddress(address), {
+    env,
+  });

@@ -116,19 +116,20 @@ function ChatMessage({ message, colorScheme }: Props) {
 
         <View style={styles.metadataContainer}>{metadata}</View>
 
-        {!message.hasNextMessageInSeries && Platform.OS === "ios" && (
-          <MessageTail
-            fill={
-              message.fromMe
-                ? myMessageBubbleColor(colorScheme)
-                : messageBubbleColor(colorScheme)
-            }
-            style={[
-              styles.messageTail,
-              message.fromMe ? styles.messageTailMe : undefined,
-            ]}
-          />
-        )}
+        {!message.hasNextMessageInSeries &&
+          (Platform.OS === "ios" || Platform.OS === "web") && (
+            <MessageTail
+              fill={
+                message.fromMe
+                  ? myMessageBubbleColor(colorScheme)
+                  : messageBubbleColor(colorScheme)
+              }
+              style={[
+                styles.messageTail,
+                message.fromMe ? styles.messageTailMe : undefined,
+              ]}
+            />
+          )}
       </ChatMessageActions>
       <ChatMessageReactions message={message} reactions={reactions} />
     </View>

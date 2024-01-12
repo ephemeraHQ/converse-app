@@ -1,4 +1,8 @@
+import { Platform } from "react-native";
 import { create } from "zustand";
+import { persist, createJSONStorage } from "zustand/middleware";
+
+import { zustandMMKVStorage } from "../../utils/mmkv";
 
 export type LensHandle = {
   profileId: string;
@@ -46,12 +50,29 @@ export type ProfilesStoreType = {
   setProfiles: (profiles: ProfileByAddress) => void;
 };
 
-export const initProfilesStore = () => {
-  const profilesStore = create<ProfilesStoreType>()((set) => ({
-    profiles: {},
-    // Setter keeps existing profiles but upserts new ones
-    setProfiles: (profiles) =>
-      set((state) => ({ profiles: { ...state.profiles, ...profiles } })),
-  }));
+export const initProfilesStore = (account: string) => {
+  const profilesStore = create<ProfilesStoreType>()(
+    persist(
+      (set) => ({
+        profiles: {},
+        // Setter keeps existing profiles but upserts new ones
+        setProfiles: (profiles) =>
+          set((state) => ({ profiles: { ...state.profiles, ...profiles } })),
+      }),
+      {
+        name: `store-${account}-profiles`, // Account-based storage so each account can have its own recos
+        storage: createJSONStorage(() => zustandMMKVStorage),
+        // Only persisting the information we want
+        partialize: (state) => {
+          // On web, we persist profiles because we don't store it to SQL
+          if (Platform.OS === "web") {
+            return state;
+          } else {
+            return undefined;
+          }
+        },
+      }
+    )
+  );
   return profilesStore;
 };

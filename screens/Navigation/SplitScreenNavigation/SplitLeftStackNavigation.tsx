@@ -27,7 +27,7 @@ export default function SplitLeftStackNavigation() {
     <NavigationContainer
       independent
       initialState={
-        Platform.OS === "ios"
+        Platform.OS === "ios" || Platform.OS === "web"
           ? {
               // On iOS, the Accounts switcher is available through a back button
               index: 1,
