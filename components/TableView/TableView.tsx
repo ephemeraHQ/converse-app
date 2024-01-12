@@ -11,7 +11,7 @@ import { List } from "react-native-paper";
 
 import { textSecondaryColor } from "../../utils/colors";
 
-type TableViewItemType = {
+export type TableViewItemType = {
   id: string;
   leftView?: ReactElement;
   rightView?: ReactElement;
