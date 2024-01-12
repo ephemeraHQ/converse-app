@@ -350,6 +350,8 @@ export const initChatStore = (account: string) => {
                   const referencedMessage = conversation.messages.get(
                     message.referencedMessageId
                   );
+                  // On web we are reading backwards so let's create the
+                  // referencedMessage if it does not exist
                   if (referencedMessage) {
                     referencedMessage.reactions =
                       referencedMessage.reactions || new Map();
@@ -362,6 +364,14 @@ export const initChatStore = (account: string) => {
                       referencedMessage.reactions.set(message.id, message);
                       referencedMessage.lastUpdateAt = now();
                     }
+                  } else if (Platform.OS === "web") {
+                    isUpdated = true;
+                    newState.conversations[topic].lastUpdateAt = now();
+                    conversation.messages.set(message.referencedMessageId, {
+                      id: message.referencedMessageId,
+                      reactions: new Map().set(message.id, message),
+                      lastUpdateAt: now(),
+                    } as XmtpMessage);
                   }
                 }
 
