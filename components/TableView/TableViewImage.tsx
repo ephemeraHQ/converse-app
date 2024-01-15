@@ -23,7 +23,7 @@ export const TableViewImage = ({ imageURI }: { imageURI?: string }) => {
     width: IMAGE_SIZE,
     height: IMAGE_SIZE,
     borderRadius: IMAGE_SIZE,
-    marginLeft: Platform.OS === "android" ? 16 : 0,
+    marginLeft: Platform.OS === "ios" ? 0 : 16,
   };
   return (
     <View style={{ justifyContent: "center" }}>

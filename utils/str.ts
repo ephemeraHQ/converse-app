@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import { PixelRatio, TextInput, Dimensions } from "react-native";
+import { PixelRatio, TextInput, Dimensions, Platform } from "react-native";
 
 import { getProfilesStore, useAccountsList } from "../data/store/accountsStore";
 import { XmtpConversation } from "../data/store/chatStore";
@@ -16,6 +16,7 @@ export const shortAddress = (address: string) =>
 
 export const shortDomain = (domain: string | undefined): string => {
   if (!domain) return "";
+  if (Platform.OS === "web") return domain;
 
   const screenWidth = Dimensions.get("window").width;
   let maxLength;

@@ -73,7 +73,7 @@ export default function NewConversation({
     });
   }, [navigation]);
 
-  const [value, setValue] = useState(route.params.peer || "");
+  const [value, setValue] = useState(route.params?.peer || "");
   const searchingForValue = useRef("");
   const [status, setStatus] = useState({
     loading: false,
@@ -296,7 +296,8 @@ export default function NewConversation({
     <View
       style={{
         flex: 1,
-        backgroundColor: "white",
+        backgroundColor: backgroundColor(colorScheme),
+        paddingHorizontal: Platform.OS === "web" ? 20 : undefined,
       }}
     >
       {Platform.OS === "ios" && <StatusBar hidden={false} style="light" />}
@@ -353,12 +354,11 @@ export default function NewConversation({
           !status.address &&
           isEmptyObject(status.profileSearchResults) && (
             <View style={styles.messageContainer}>
-              {status.error && (
+              {status.error ? (
                 <Text style={[styles.message, styles.error]}>
                   {status.error}
                 </Text>
-              )}
-              {!status.error && (
+              ) : (
                 <Text style={styles.message}>
                   <Text>
                     Type the full address/domain of your contact (with
@@ -373,7 +373,7 @@ export default function NewConversation({
           <ActivityIndicator style={styles.mainActivityIndicator} />
         )}
 
-        {!status.loading && status.inviteToConverse && (
+        {!status.loading && !!status.inviteToConverse && (
           <TableView
             items={[
               {
@@ -397,7 +397,7 @@ export default function NewConversation({
           />
         )}
 
-        {!status.loading && status.address && (
+        {!status.loading && !!status.address && (
           <>
             {status.existingConversations.length > 0 && (
               <TableView

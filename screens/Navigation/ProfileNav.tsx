@@ -28,6 +28,10 @@ export default function ProfileNav() {
             ? textSecondaryColor(colorScheme)
             : undefined,
         animation: navigationAnimation,
+        headerTitleStyle: Platform.select({
+          default: {},
+          web: { left: -20 } as any,
+        }),
       })}
     />
   );

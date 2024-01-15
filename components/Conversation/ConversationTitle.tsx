@@ -98,12 +98,16 @@ export default function ConversationTitle({
           </Text>
           <Picto
             picto="chevron.right"
-            size={Platform.OS === "android" ? 16 : 8}
+            size={Platform.OS === "ios" ? 8 : 16}
             style={{
               position: "absolute",
               ...Platform.select({
                 default: { right: -8, bottom: 9.5 },
                 android: { right: -3, bottom: 3 },
+                web: {
+                  right: -23,
+                  bottom: -3,
+                },
               }),
             }}
             color={textSecondaryColor(colorScheme)}
