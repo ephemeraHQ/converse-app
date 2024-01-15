@@ -1,3 +1,5 @@
+import { ethers } from "ethers";
+
 import { Transaction } from "../data/store/transactionsStore";
 import { isContentType } from "./xmtpRN/contentTypes";
 import { TransactionReference } from "./xmtpRN/contentTypes/transactionReference";
@@ -42,6 +44,59 @@ export const mergeTransactionRefData = (
     blockExplorerURL: txDetails.blockExplorerURL,
     events: txDetails.events || [],
   };
+};
+
+export const extractChainIdToHex = (networkRawValue: string): string => {
+  const match = networkRawValue.match(/ETHEREUM_CHAIN:(\d+)/);
+  const extractedChainId = match ? match[1] : "";
+  const chainId = ethers.BigNumber.from(extractedChainId);
+  return chainId._hex;
+};
+
+export const getTxContentType = (
+  input: TransactionReference | any
+):
+  | "transactionReference"
+  | "coinbaseRegular"
+  | "coinbaseSponsored"
+  | undefined => {
+  if ("networkId" in input && "reference" in input) {
+    // Has keys specific to TransactionReference
+    return "transactionReference";
+  } else if ("transactionHash" in input) {
+    // Has key specific to coinbaseRegular
+    return "coinbaseRegular";
+  } else if ("sponsoredTxId" in input) {
+    // Has key specific to coinbaseSponsored
+    return "coinbaseSponsored";
+  }
+  return undefined;
+};
+
+export const getTxRefId = (
+  txContentType:
+    | "transactionReference"
+    | "coinbaseRegular"
+    | "coinbaseSponsored",
+  txRef: TransactionReference | any
+): string => {
+  let networkId;
+
+  if (
+    txContentType === "coinbaseRegular" ||
+    txContentType === "coinbaseSponsored"
+  ) {
+    networkId = extractChainIdToHex(txRef.network.rawValue);
+  }
+
+  switch (txContentType) {
+    case "transactionReference":
+      return `${txRef.networkId}-${txRef.reference}`;
+    case "coinbaseRegular":
+      return `${networkId}-${txRef.transactionHash}`;
+    case "coinbaseSponsored":
+      return `${networkId}-${txRef.sponsoredTxId}`;
+  }
 };
 
 export const isTransactionRefValid = (messageContent: string): boolean => {
