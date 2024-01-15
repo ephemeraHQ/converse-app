@@ -9481,6 +9481,14 @@
   dependencies:
     "@xmtp/xmtp-js" "^11.1.2"
 
+"@xmtp/content-type-read-receipt@^1.1.5":
+  version "1.1.5"
+  resolved "https://registry.yarnpkg.com/@xmtp/content-type-read-receipt/-/content-type-read-receipt-1.1.5.tgz#e1ae41f3529e95f05b1f17067c9275a04ac0196d"
+  integrity sha512-/CM/JAuEo+lnUQGJFG3UZ+t5rqql8sA/eLzPc0sJJMzGLCCfogd/SngS8rNkz4KI7yI5SXrXaksAsv5/zqXUHA==
+  dependencies:
+    "@xmtp/proto" "^3.29.0"
+    "@xmtp/xmtp-js" "^11.1.2"
+
 "@xmtp/content-type-remote-attachment@^1.1.4":
   version "1.1.4"
   resolved "https://registry.yarnpkg.com/@xmtp/content-type-remote-attachment/-/content-type-remote-attachment-1.1.4.tgz#bcc48dc9714fe4a696e108f8951da34274ebdfa0"
