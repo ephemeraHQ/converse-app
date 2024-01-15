@@ -1,3 +1,3 @@
-export const useDisconnect = () => {
+export default function useDisconnect() {
   return async () => {};
-};
+}

@@ -1,103 +1,183 @@
-import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import React, { useLayoutEffect } from "react";
+import React, { useRef } from "react";
 import {
-  NativeSyntheticEvent,
-  TextInputChangeEventData,
   useColorScheme,
+  StyleSheet,
+  View,
+  TouchableOpacity,
+  TextInput,
+  Platform,
 } from "react-native";
-import { SearchBarCommands } from "react-native-screens";
+import { Searchbar as MaterialSearchBar } from "react-native-paper";
 
-import Connecting, {
+import {
+  useShouldShowConnecting,
   useShouldShowConnectingOrSyncing,
 } from "../../components/Connecting";
-import NewConversationButton from "../../components/ConversationList/NewConversationButton";
 import ProfileSettingsButton from "../../components/ConversationList/ProfileSettingsButton";
-import { useAccountsStore, useChatStore } from "../../data/store/accountsStore";
+import Picto from "../../components/Picto/Picto";
+import { useChatStore } from "../../data/store/accountsStore";
 import { useSelect } from "../../data/store/storeHelpers";
-import { headerTitleStyle } from "../../utils/colors";
-import { isDesktop } from "../../utils/device";
-import { getReadableProfile } from "../../utils/str";
-import ConversationList from "../ConversationList";
 import {
-  NativeStack,
-  NavigationParamList,
-  navigationAnimation,
-} from "./Navigation";
-import { useIsSplitScreen } from "./navHelpers";
+  chatInputBackgroundColor,
+  headerTitleStyle,
+  textPrimaryColor,
+  textSecondaryColor,
+} from "../../utils/colors";
+import { converseEventEmitter } from "../../utils/events";
+import ConversationList from "../ConversationList";
+import { NativeStack, navigationAnimation } from "./Navigation";
 
-type HeaderSearchBarProps = {
-  searchBarRef: React.RefObject<any>;
-} & NativeStackScreenProps<NavigationParamList, "Chats">;
-
-// If we set the search bar in the NativeStack.Screen and navigate to it,
-// it show before hiding so we do an exception and don't set it in the Screen
-// but using useLayoutEffect. To avoid warning and search not always being set,
-// useLayoutEffect must NOT be conditional so we can't hide it with conditions…
-
-export const useHeaderSearchBar = ({
-  navigation,
-  searchBarRef,
-}: HeaderSearchBarProps) => {
-  const { setSearchQuery, setSearchBarFocused } = useChatStore(
-    useSelect(["setSearchQuery", "setSearchBarFocused"])
-  );
-
-  useLayoutEffect(() => {
-    navigation.setOptions({
-      headerSearchBarOptions: {
-        ref: searchBarRef as React.RefObject<SearchBarCommands>,
-        hideNavigationBar: !isDesktop,
-        // set to hideWhenScrolling to `false` to  to make the search bar always visible
-        // set it to `true` to avoid a visual glitch while loading conversations during initial load
-        hideWhenScrolling: !isDesktop,
-        autoFocus: false,
-        placeholder: "Search",
-        onChangeText: (
-          event: NativeSyntheticEvent<TextInputChangeEventData>
-        ) => {
-          setSearchQuery(event.nativeEvent.text);
-        },
-        onFocus: () => setSearchBarFocused(true),
-        onCancelButtonPress: () => setSearchBarFocused(false),
-      },
-    });
-  }, [navigation, searchBarRef, setSearchBarFocused, setSearchQuery]);
+export const useHeaderSearchBar = (props: any) => {
+  // No-op
 };
 
 export default function ConversationListNav() {
   const colorScheme = useColorScheme();
-
-  const searchBarRef = React.useRef<SearchBarCommands>(
-    null
-  ) as React.MutableRefObject<SearchBarCommands | null>;
-
+  const styles = useStyles();
+  const searchBar = useRef<TextInput | null>(null);
   const shouldShowConnectingOrSyncing = useShouldShowConnectingOrSyncing();
-  const currentAccount = useAccountsStore((s) => s.currentAccount);
-  const isSplitScreen = useIsSplitScreen();
+  const shouldShowConnecting = useShouldShowConnecting();
+  const { searchQuery, setSearchQuery, searchBarFocused, setSearchBarFocused } =
+    useChatStore(
+      useSelect([
+        "searchQuery",
+        "setSearchQuery",
+        "searchBarFocused",
+        "setSearchBarFocused",
+      ])
+    );
+
+  const rightNotFocused = {
+    right: () => (
+      <View style={styles.rightButtonContainer}>
+        <ProfileSettingsButton />
+      </View>
+    ),
+  };
+  const rightFocusedEmptyQuery = {
+    right: () => (
+      <TouchableOpacity
+        style={styles.rightButtonContainer}
+        onPress={() => searchBar.current?.blur()}
+      >
+        <Picto
+          picto="xmark"
+          size={24}
+          color={textSecondaryColor(colorScheme)}
+        />
+      </TouchableOpacity>
+    ),
+  };
+  const rightProps = !searchBarFocused
+    ? rightNotFocused
+    : searchQuery === ""
+    ? rightFocusedEmptyQuery
+    : {};
+
+  const onChangeSearch = (query: string) => setSearchQuery(query);
+  const searchPlaceholder = (): string => {
+    if (shouldShowConnectingOrSyncing && !searchBarFocused) {
+      return shouldShowConnecting ? "Connecting…" : "Syncing…";
+    }
+    return "Search chats";
+  };
 
   return (
     <NativeStack.Screen
       name="Chats"
       options={({ route, navigation }) => ({
-        headerTitle: () =>
-          shouldShowConnectingOrSyncing ? <Connecting /> : undefined,
-        headerLargeTitle: true,
-        headerTitleStyle: headerTitleStyle(colorScheme),
-        headerBackTitle: isSplitScreen
-          ? "Accounts"
-          : getReadableProfile(currentAccount, currentAccount),
-        headerRight: () => (
-          <>
-            <ProfileSettingsButton />
-            <NewConversationButton navigation={navigation} route={route} />
-          </>
-        ),
+        headerTitle: () => null,
+        headerTitleStyle: {
+          ...headerTitleStyle(colorScheme),
+          fontSize: 22,
+          lineHeight: 26,
+        },
         animation: navigationAnimation,
+        headerLeft: () => (
+          <View style={styles.searchBarContainer}>
+            <View style={styles.searchBarWrapper}>
+              <MaterialSearchBar
+                ref={searchBar}
+                onFocus={() => setSearchBarFocused(true)}
+                onBlur={() => setSearchBarFocused(false)}
+                style={styles.searchBar}
+                inputStyle={styles.searchBarInputStyle}
+                placeholder={searchPlaceholder()}
+                onChangeText={onChangeSearch}
+                value={searchQuery}
+                icon={({ color }) => (
+                  <Picto picto="menu" size={24} color={color} />
+                )}
+                onIconPress={() => {
+                  if (Platform.OS === "android") {
+                    converseEventEmitter.emit("toggle-navigation-drawer", true);
+                  } else if (Platform.OS === "web") {
+                    navigation.goBack();
+                  }
+                }}
+                mode="bar"
+                autoCapitalize="none"
+                autoFocus={false}
+                autoCorrect={false}
+                traileringIcon={() => null}
+                placeholderTextColor={textSecondaryColor(colorScheme)}
+                selectionColor={textPrimaryColor(colorScheme)}
+                clearIcon={({ color }) => (
+                  <Picto picto="xmark" size={24} color={color} />
+                )}
+                onClearIconPress={() => {
+                  searchBar.current?.blur();
+                }}
+                {...rightProps}
+              />
+            </View>
+            <View style={styles.searchBarSpacer}>{/* Right spacer */}</View>
+          </View>
+        ),
       })}
     >
       {(navigationProps) => (
-        <ConversationList {...navigationProps} searchBarRef={searchBarRef} />
+        <ConversationList {...navigationProps} searchBarRef={searchBar} />
       )}
     </NativeStack.Screen>
   );
 }
+
+const useStyles = () => {
+  const colorScheme = useColorScheme();
+  return StyleSheet.create({
+    rightButtonContainer: {
+      width: 38,
+    },
+    searchBarContainer: Platform.select({
+      default: {
+        flexDirection: "row",
+        justifyContent: "flex-start",
+        width: "100%",
+      },
+      web: {
+        flexDirection: "row",
+        justifyContent: "flex-start",
+        width: 400,
+        marginLeft: 15,
+      },
+    }),
+    searchBarWrapper: {
+      flex: 1,
+    },
+    searchBar: {
+      backgroundColor: chatInputBackgroundColor(colorScheme),
+      paddingLeft: 5,
+      paddingRight: 8,
+      marginVertical: 10,
+      height: 44,
+    },
+    searchBarInputStyle: {
+      height: 44,
+      minHeight: 0,
+    },
+    searchBarSpacer: {
+      width: 30,
+    },
+  });
+};

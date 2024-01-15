@@ -434,16 +434,18 @@ export default function ProfileScreen({
             title="ACTIONS"
             style={styles.tableView}
           />
-          <TableView
-            items={[
-              {
-                id: "version",
-                title: `v${appVersion} (${buildNumber}) - built in Paris with ❤️`,
-              },
-            ]}
-            title="APP VERSION"
-            style={styles.tableView}
-          />
+          {Platform.OS !== "web" && (
+            <TableView
+              items={[
+                {
+                  id: "version",
+                  title: `v${appVersion} (${buildNumber}) - built in Paris with ❤️`,
+                },
+              ]}
+              title="APP VERSION"
+              style={styles.tableView}
+            />
+          )}
         </>
       )}
       <View style={{ height: insets.bottom }} />
@@ -458,7 +460,8 @@ const useStyles = () => {
       backgroundColor: backgroundColor(colorScheme),
     },
     profileContent: {
-      paddingHorizontal: Platform.OS === "ios" ? 18 : 0,
+      paddingHorizontal:
+        Platform.OS === "ios" || Platform.OS === "web" ? 18 : 0,
     },
     tableView: {},
     balanceContainer: {

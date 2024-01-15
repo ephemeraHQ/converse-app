@@ -4,12 +4,18 @@ import {
   RemoteAttachmentContent,
 } from "@xmtp/react-native-sdk";
 import mime from "mime";
+import { useCallback, useEffect, useRef, useState } from "react";
 import RNFS from "react-native-fs";
 import RNFetchBlob from "rn-fetch-blob";
 
+import { MessageToDisplay } from "../../components/Chat/ChatMessage";
+import { useCurrentAccount } from "../../data/store/accountsStore";
 import { getPresignedUriForUpload } from "../api";
 import { moveFileAndReplace } from "../fileSystem";
 import { getImageSize, isImageMimetype } from "../media";
+import { sentryTrackError, sentryTrackMessage } from "../sentry";
+import { fetchAndDecodeRemoteAttachment } from "../xmtpRN/attachments";
+import { isContentType } from "../xmtpRN/contentTypes";
 
 export type SerializedAttachmentContent = {
   filename: string;
@@ -108,7 +114,7 @@ const handleAttachment = async (
       : ("UNSUPPORTED" as "IMAGE" | "UNSUPPORTED" | undefined),
     imageSize,
     contentLength: 0,
-    mediaURL: attachmentPath,
+    mediaURL: `file://${attachmentPath}`,
     filename,
     mimeType: mimeType || "",
   };
@@ -140,7 +146,7 @@ export const getLocalAttachment = async (messageId: string) => {
             | undefined,
           mimeType: messageAttachmentData.mimeType,
           imageSize: messageAttachmentData.imageSize,
-          mediaURL: attachmentPath,
+          mediaURL: `file://${attachmentPath}`,
           contentLength: 0,
           filename: messageAttachmentData.filename,
         };
@@ -190,4 +196,136 @@ export const saveAttachmentForPendingMessage = async (
   const attachmentPath = `${messageFolder}/${fileName}`;
   await moveFileAndReplace(filePath, attachmentPath);
   await handleAttachment(pendingMessageId, fileName, mimeType || undefined);
+};
+
+export const useAttachmentForMessage = (message: MessageToDisplay) => {
+  const currentAccount = useCurrentAccount() as string;
+  const [attachment, setAttachment] = useState({
+    loading: true,
+    error: false,
+    mediaType: undefined as undefined | "IMAGE" | "UNSUPPORTED",
+    mediaURL: undefined as undefined | string,
+    filename: "",
+    mimeType: "",
+    contentLength: 0,
+    imageSize: undefined as undefined | { height: number; width: number },
+  });
+
+  const saveAndDisplayLocalAttachment = useCallback(
+    async (attachmentContent: SerializedAttachmentContent) => {
+      setAttachment((a) => ({ ...a, loading: true }));
+      const result = await handleStaticAttachment(
+        message.id,
+        attachmentContent
+      );
+
+      setAttachment({ ...result, loading: false, error: false });
+    },
+    [message.id]
+  );
+
+  const saveAndDisplayRemoteAttachment = useCallback(
+    async (attachmentContent: DecryptedLocalAttachment) => {
+      setAttachment((a) => ({ ...a, loading: true }));
+      const result = await handleDecryptedRemoteAttachment(
+        message.id,
+        attachmentContent
+      );
+
+      setAttachment({ ...result, loading: false, error: false });
+    },
+    [message.id]
+  );
+  const fetchingAttachment = useRef(false);
+
+  const fetchAndDecode = useCallback(async () => {
+    if (fetchingAttachment.current) return;
+    fetchingAttachment.current = true;
+    setAttachment((a) => ({ ...a, loading: true }));
+    try {
+      const result = await fetchAndDecodeRemoteAttachment(
+        currentAccount,
+        message
+      );
+      fetchingAttachment.current = false;
+      saveAndDisplayRemoteAttachment(result);
+    } catch (e) {
+      fetchingAttachment.current = false;
+      sentryTrackError(e, { message });
+      setAttachment((a) => ({ ...a, loading: false, error: true }));
+    }
+  }, [currentAccount, message, saveAndDisplayRemoteAttachment]);
+
+  const saveLocalAttachment = useCallback(
+    async (attachmentContent: SerializedAttachmentContent) => {
+      if (!attachmentContent.data) {
+        sentryTrackMessage("LOCAL_ATTACHMENT_NO_DATA", {
+          content: attachmentContent,
+        });
+        setAttachment((a) => ({ ...a, error: true, loading: false }));
+        return;
+      }
+      saveAndDisplayLocalAttachment(attachmentContent);
+    },
+    [saveAndDisplayLocalAttachment]
+  );
+
+  useEffect(() => {
+    const go = async () => {
+      const localAttachment = await getLocalAttachment(message.id);
+      if (localAttachment) {
+        setAttachment({ ...localAttachment, loading: false, error: false });
+        return;
+      }
+
+      // Either remote or direct attachement (< 1MB)
+      const isRemoteAttachment = isContentType(
+        "remoteAttachment",
+        message.contentType
+      );
+
+      let contentLength = 0;
+
+      // Let's see if we can infer type from filename
+      try {
+        const parsedEncodedContent = JSON.parse(message.content);
+        const parsedType = isRemoteAttachment
+          ? mime.getType(parsedEncodedContent.filename)
+          : parsedEncodedContent.mimeType;
+        if (isRemoteAttachment) {
+          contentLength = parsedEncodedContent.contentLength;
+          setAttachment({
+            mediaType:
+              parsedType && isImageMimetype(parsedType)
+                ? "IMAGE"
+                : "UNSUPPORTED",
+            loading: contentLength <= 10000000,
+            mediaURL: undefined,
+            imageSize: undefined,
+            contentLength: parsedEncodedContent.contentLength,
+            mimeType: parsedType || "",
+            filename: parsedEncodedContent.filename,
+            error: false,
+          });
+        } else {
+          saveLocalAttachment(parsedEncodedContent);
+        }
+      } catch (e) {
+        console.log(e);
+      }
+
+      // Last, if media is local or if remote but supported and size is ok, we fetch immediatly
+      if (isRemoteAttachment && contentLength <= 10000000) {
+        fetchAndDecode();
+      }
+    };
+    if (!message.content) {
+      sentryTrackMessage("ATTACHMENT_NO_CONTENT", { message });
+      setAttachment((a) => ({ ...a, error: true, loading: false }));
+    } else {
+      go();
+    }
+  }, [fetchAndDecode, message, saveLocalAttachment]);
+
+  return { attachment, fetch: fetchAndDecode };
 };

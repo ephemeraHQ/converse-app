@@ -284,6 +284,7 @@ const useStyles = () => {
           borderBottomColor: itemSeparatorColor(colorScheme),
         },
         android: {},
+        web: {},
       }),
     },
     sectionTitleContainer: {
@@ -293,6 +294,7 @@ const useStyles = () => {
           borderBottomColor: itemSeparatorColor(colorScheme),
         },
         android: {},
+        web: {},
       }),
     },
     sectionTitle: {

@@ -31,7 +31,7 @@ export const initStores = (account: string) => {
     // If adding a persisted store here, please add
     // the deletion method in deleteStores
     storesByAccount[account] = {
-      profiles: initProfilesStore(),
+      profiles: initProfilesStore(account),
       settings: initSettingsStore(account),
       recommendations: initRecommendationsStore(account),
       chat: initChatStore(account),

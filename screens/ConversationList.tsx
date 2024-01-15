@@ -16,6 +16,7 @@ import NewConversationButton from "../components/ConversationList/NewConversatio
 import RequestsButton from "../components/ConversationList/RequestsButton";
 import EphemeralAccountBanner from "../components/EphemeralAccountBanner";
 import InitialLoad from "../components/InitialLoad";
+import Recommendations from "../components/Recommendations/Recommendations";
 import NoResult from "../components/Search/NoResult";
 import Welcome from "../components/Welcome";
 import { refreshProfileForAddress } from "../data/helpers/profiles/profilesUpdate";
@@ -183,8 +184,8 @@ function ConversationList({ navigation, route, searchBarRef }: Props) {
         }
         ListFooterComponent={ListFooterComponent}
       />
-      {/* <Recommendations navigation={navigation} visibility="HIDDEN" /> */}
-      {Platform.OS === "android" && (
+      <Recommendations navigation={navigation} visibility="HIDDEN" />
+      {(Platform.OS === "android" || Platform.OS === "web") && (
         <NewConversationButton navigation={navigation} route={route} />
       )}
     </>
