@@ -68,7 +68,7 @@ export default function ChatSendMoney() {
           "Use Converse Account",
           "Gasless money transfers are only available on Converse accounts with telephone numbers for now.",
           [
-            { text: "Cancel" },
+            { text: "Cancel", style: "cancel" },
             {
               text: "Go to Converse Account",
               isPreferred: true,
@@ -84,7 +84,7 @@ export default function ChatSendMoney() {
           "Create Converse Account",
           "Gasless money transfers are only available on Converse accounts with telephone numbers for now.",
           [
-            { text: "Cancel" },
+            { text: "Cancel", style: "cancel" },
             {
               text: "Create Converse Account",
               isPreferred: true,
