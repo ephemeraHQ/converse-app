@@ -4,6 +4,9 @@ const dumbRepository = {
   },
   update: async () => {},
   query: async () => {},
+  findOneBy: async () => {
+    return {};
+  },
 };
 
 export const getRepository = async (account: string, entity: string) => {

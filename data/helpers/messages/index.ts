@@ -1,3 +1,5 @@
+import { Platform } from "react-native";
+
 import { moveAssetsForMessage } from "../../../utils/fileSystem";
 import { isContentType } from "../../../utils/xmtpRN/contentTypes";
 import { getRepository } from "../../db";
@@ -70,16 +72,30 @@ export const updateMessagesIds = async (
       messageToUpdate.message.id,
       messageToUpdate.newMessageId
     );
-    const updatedMessage = await messageRepository.findOneBy({
-      id: messageToUpdate.newMessageId,
-    });
 
-    if (!updatedMessage) throw new Error("Updated message does not exist");
-    messagesToDispatch.push({
-      topic: messageToUpdate.message.conversationId,
-      message: xmtpMessageFromDb(updatedMessage),
-      oldId,
-    });
+    if (Platform.OS === "web") {
+      messagesToDispatch.push({
+        topic: messageToUpdate.message.conversationId,
+        message: {
+          ...messageToUpdate.message,
+          id: messageToUpdate.newMessageId,
+          sent: messageToUpdate.newMessageSent,
+          topic: messageToUpdate.message.conversationId,
+        },
+        oldId,
+      });
+    } else {
+      const updatedMessage = await messageRepository.findOneBy({
+        id: messageToUpdate.newMessageId,
+      });
+
+      if (!updatedMessage) throw new Error("Updated message does not exist");
+      messagesToDispatch.push({
+        topic: messageToUpdate.message.conversationId,
+        message: xmtpMessageFromDb(updatedMessage),
+        oldId,
+      });
+    }
   }
   getChatStore(account).getState().updateMessagesIds(messagesToDispatch);
 };
@@ -94,27 +110,4 @@ export const markMessageAsSent = async (
   getChatStore(account)
     .getState()
     .updateMessageStatus(topic, messageId, "sent");
-};
-
-export const getMessagesToSend = async (account: string) => {
-  const messageRepository = await getRepository(account, "message");
-  const messagesToSend = await messageRepository.find({
-    select: {
-      id: true,
-      conversationId: true,
-      contentType: true,
-      content: true,
-      contentFallback: true,
-    },
-    where: {
-      status: "sending",
-      conversation: {
-        pending: false,
-      },
-    },
-    order: {
-      sent: "ASC",
-    },
-  });
-  return messagesToSend;
 };

@@ -1,15 +1,7 @@
-import {
-  Client,
-  ConsentListEntry,
-  Conversation,
-  InvitationContext,
-  Stream,
-} from "@xmtp/xmtp-js";
+import { Client, ConsentListEntry, Conversation, Stream } from "@xmtp/xmtp-js";
 
-import { Conversation as DbConversation } from "../../data/db/entities/conversationEntity";
-import { getPendingConversationsToCreate } from "../../data/helpers/conversations/pendingConversations";
 import { saveConversations } from "../../data/helpers/conversations/upsertConversations";
-import { getSettingsStore } from "../../data/store/accountsStore";
+import { getChatStore, getSettingsStore } from "../../data/store/accountsStore";
 import { XmtpConversation } from "../../data/store/chatStore";
 import { SettingsStoreType } from "../../data/store/settingsStore";
 import { getCleanAddress } from "../eth";
@@ -193,34 +185,28 @@ export const getConversationWithTopic = async (
 
 const createConversation = async (
   account: string,
-  dbConversation: DbConversation
+  conversation: XmtpConversation
 ) => {
-  if (!dbConversation.pending) {
+  if (!conversation.pending) {
     throw new Error("Can only create a conversation that is pending");
   }
   console.log(
-    `[XMTP] Creating a conversation with peer ${dbConversation.peerAddress} and id ${dbConversation.contextConversationId}`
+    `[XMTP] Creating a conversation with peer ${conversation.peerAddress} and id ${conversation.context?.conversationId}`
   );
   const client = (await getXmtpClient(account)) as Client;
-  let context: InvitationContext | undefined = undefined;
-  if (dbConversation.contextConversationId) {
-    context = {
-      conversationId: dbConversation.contextConversationId,
-      metadata: dbConversation.contextMetadata
-        ? JSON.parse(dbConversation.contextMetadata)
-        : {},
-    };
-  }
+
   const newConversation = await client.conversations.newConversation(
-    dbConversation.peerAddress,
-    context
+    conversation.peerAddress,
+    conversation.context
   );
   handleNewConversation(client, newConversation);
   return newConversation.topic;
 };
 
 export const createPendingConversations = async (account: string) => {
-  const pendingConvos = await getPendingConversationsToCreate(account);
+  const pendingConvos = Object.values(
+    getChatStore(account).getState().conversations
+  ).filter((c) => c.pending);
   if (pendingConvos.length === 0) return;
   console.log(
     `Trying to create ${pendingConvos.length} pending conversations...`
