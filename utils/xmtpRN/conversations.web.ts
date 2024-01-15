@@ -206,7 +206,7 @@ const createConversation = async (
 export const createPendingConversations = async (account: string) => {
   const pendingConvos = Object.values(
     getChatStore(account).getState().conversations
-  ).filter((c) => c.pending);
+  ).filter((c) => c.pending && c.messages?.size > 0);
   if (pendingConvos.length === 0) return;
   console.log(
     `Trying to create ${pendingConvos.length} pending conversations...`
