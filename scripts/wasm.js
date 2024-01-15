@@ -1,5 +1,5 @@
 // In react native for web to execute wasm packages we need to
-// have them accessible. Easies way is just to copy them
+// have them accessible. Easiest way is just to copy them to public folder
 const fs = require("fs");
 const path = require("path");
 
