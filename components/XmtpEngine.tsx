@@ -130,8 +130,6 @@ export default function XmtpEngine() {
     runningCron.current = false;
   }, []);
 
-  // TODO disabled for test purpose - this prevents creating new conversations
-  /*
   useEffect(() => {
     // Launch cron
     const interval = setInterval(() => {
@@ -144,7 +142,6 @@ export default function XmtpEngine() {
 
     return () => clearInterval(interval);
   }, [xmtpCron]);
-  */
 
   return null;
 }
