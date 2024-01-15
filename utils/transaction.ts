@@ -2,6 +2,24 @@ import { Transaction } from "../data/store/transactionsStore";
 import { isContentType } from "./xmtpRN/contentTypes";
 import { TransactionReference } from "./xmtpRN/contentTypes/transactionReference";
 
+export interface TransactionEvent {
+  amount: string;
+  contractAddress: string;
+  currency: string;
+  decimals: number;
+  from: string;
+  to: string;
+  type: string;
+}
+
+export interface TransactionDetails {
+  blockExplorerURL: string;
+  chainName: string;
+  events: TransactionEvent[];
+  sponsored: boolean;
+  status: "PENDING" | "FAILURE" | "SUCCESS";
+}
+
 export const isTransactionMessage = (contentType?: string) =>
   contentType
     ? isContentType("transactionReference", contentType) ||
@@ -10,21 +28,19 @@ export const isTransactionMessage = (contentType?: string) =>
 
 export const mergeTransactionRefData = (
   txRef: TransactionReference,
-  details: any
+  txDetails: TransactionDetails
 ): Transaction => {
   return {
     id: `${txRef.networkId}-${txRef.reference}`,
     contentType: "transactionReference",
-    createdAt: details.createdAt || Date.now(),
-    updatedAt: details.updatedAt || Date.now(),
     namespace: txRef.namespace,
     networkId: txRef.networkId,
     reference: txRef.reference,
-    metadata: txRef.metadata as any,
-    status: details.status,
-    sponsored: details.sponsored || false,
-    blockExplorerURL: details.blockExplorerURL,
-    events: details.events || [],
+    metadata: JSON.stringify(txRef.metadata),
+    status: txDetails.status,
+    sponsored: txDetails.sponsored || false,
+    blockExplorerURL: txDetails.blockExplorerURL,
+    events: JSON.stringify(txDetails.events) || JSON.stringify([]),
   };
 };
 

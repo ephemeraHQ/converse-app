@@ -8,8 +8,6 @@ import { zustandMMKVStorage } from "../../utils/mmkv";
 export type Transaction = {
   id: string; // Concatenation of "[networkid]-[reference]"
   contentType: "transactionReference" | "coinbaseRegular" | "coinbaseSponsored";
-  createdAt: number;
-  updatedAt: number;
   namespace?: string;
   networkId: string | number;
   reference: string;

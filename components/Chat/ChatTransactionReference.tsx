@@ -12,9 +12,11 @@ import {
   textPrimaryColor,
 } from "../../utils/colors";
 import {
+  TransactionDetails,
   isTransactionRefValid,
   mergeTransactionRefData,
 } from "../../utils/transaction";
+import { TransactionReference } from "../../utils/xmtpRN/contentTypes/transactionReference";
 import { MessageToDisplay } from "./ChatMessage";
 import ChatMessageMetadata from "./ChatMessageMetadata";
 
@@ -50,10 +52,15 @@ export default function ChatTransactionReference({ message }: Props) {
   const showing = !transaction.loading;
 
   const saveAndDisplayTransaction = useCallback(
-    (txId: string, txRef, txDetails, update = false) => {
+    (
+      txId: string,
+      txRef: TransactionReference,
+      txDetails: TransactionDetails,
+      update = false
+    ) => {
       console.log("saveAndDisplayTransaction");
 
-      if (txRef.namespace === "eip155" && txRef.networkId && txRef.txHash) {
+      if (txRef.namespace === "eip155" && txRef.networkId && txRef.reference) {
         const transactionStore = getTransactionsStore(currentAccount);
         const transaction = mergeTransactionRefData(txRef, txDetails);
 
@@ -85,26 +92,24 @@ export default function ChatTransactionReference({ message }: Props) {
         console.log("** TODO: Add the transaction since it's not found");
 
         try {
-          const result = await getTransactionDetails(
+          const txDetails = await getTransactionDetails(
             currentAccount,
             txRef.networkId,
             txRef.reference
           );
-          const txDetails = JSON.parse(result);
           fetchingTransaction.current = false;
           saveAndDisplayTransaction(txId, txRef, txDetails);
         } catch (error) {
           fetchingTransaction.current = false;
-          console.error("Error fetching transaction details", error);
+          console.error("Error fetching or saving transaction details", error);
         }
       } else if (txLookup.status === "PENDING") {
         try {
-          const result = await getTransactionDetails(
+          const txDetails = await getTransactionDetails(
             currentAccount,
             txRef.networkId,
             txRef.reference
           );
-          const txDetails = JSON.parse(result);
 
           if (txDetails.status !== "PENDING") {
             // TODO
@@ -113,7 +118,7 @@ export default function ChatTransactionReference({ message }: Props) {
 
             // save and display
             fetchingTransaction.current = false;
-            saveAndDisplayTransaction(txRef, txDetails, true);
+            saveAndDisplayTransaction(txId, txRef, txDetails, true);
           } else {
             // Retry after 5 seconds if still pending
             console.log("** Retrying");
