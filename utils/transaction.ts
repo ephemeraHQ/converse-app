@@ -36,11 +36,11 @@ export const mergeTransactionRefData = (
     namespace: txRef.namespace,
     networkId: txRef.networkId,
     reference: txRef.reference,
-    metadata: JSON.stringify(txRef.metadata),
+    metadata: txRef.metadata,
     status: txDetails.status,
     sponsored: txDetails.sponsored || false,
     blockExplorerURL: txDetails.blockExplorerURL,
-    events: JSON.stringify(txDetails.events) || JSON.stringify([]),
+    events: txDetails.events || [],
   };
 };
 

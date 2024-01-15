@@ -2,6 +2,7 @@ import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
 
 import { zustandMMKVStorage } from "../../utils/mmkv";
+import { TransactionEvent } from "../../utils/transaction";
 
 // Transactions for each account setup in the app
 
@@ -11,11 +12,11 @@ export type Transaction = {
   namespace?: string;
   networkId: string | number;
   reference: string;
-  metadata?: string;
+  metadata?: object;
   status: "PENDING" | "FAILURE" | "SUCCESS";
   sponsored: boolean; // by converse
   blockExplorerURL?: string;
-  events?: string;
+  events?: TransactionEvent[];
 };
 
 export type TransactionsStoreType = {
