@@ -1,4 +1,8 @@
 import { ReactionCodec } from "@xmtp/content-type-reaction";
+import {
+  AttachmentCodec,
+  RemoteAttachmentCodec,
+} from "@xmtp/content-type-remote-attachment";
 import { Client } from "@xmtp/xmtp-js";
 import { Signer } from "ethers";
 
@@ -31,6 +35,8 @@ export const getXmtpClientFromBase64Key = async (base64Key: string) => {
     privateKeyOverride: Buffer.from(base64Key, "base64"),
   });
   client.registerCodec(new ReactionCodec());
+  client.registerCodec(new AttachmentCodec());
+  client.registerCodec(new RemoteAttachmentCodec());
   return client;
 };
 
