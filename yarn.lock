@@ -9529,9 +9529,9 @@
     undici "^5.8.1"
 
 "@xmtp/proto@^3.34.0":
-  version "3.36.2"
-  resolved "https://registry.yarnpkg.com/@xmtp/proto/-/proto-3.36.2.tgz#47ea9437451de76ced8984c28829fb711ddd14d2"
-  integrity sha512-FsofGcm4kV/nkXCWl19rAONj2SYafkWR+U8K7HBL9ZrIgL2+RDCqS6OMCmHKc/dAxjsV3o7pQSqz0aPtdYvEBw==
+  version "3.37.0"
+  resolved "https://registry.yarnpkg.com/@xmtp/proto/-/proto-3.37.0.tgz#bed7aa288297d6cdf8bc51f80956ab1fdf9ca762"
+  integrity sha512-x6fMOK3P275ONA77CUU8Fp3FLI50qPzEfTsp06f85zvxJck2Mn/jqJjp087urdIjwr3uc3cR1IHwhua6MWUqRg==
   dependencies:
     long "^5.2.0"
     protobufjs "^7.0.0"
@@ -9565,10 +9565,10 @@
     ethers "^5.5.3"
     long "^5.2.0"
 
-"@xmtp/xmtp-js@^11.3.1":
-  version "11.3.1"
-  resolved "https://registry.yarnpkg.com/@xmtp/xmtp-js/-/xmtp-js-11.3.1.tgz#72792d4dc4d37ae0c7a7f15eb5e660daaaf67597"
-  integrity sha512-ag8bgydJbxllMlxLETf6/RSQIXMDFRj/WvJ3AloITKjSfylJ2MJiLr7+mTj/G5Dj8oFFdJAsoGDsEnd9Yb96Qw==
+"@xmtp/xmtp-js@^11.3.4":
+  version "11.3.4"
+  resolved "https://registry.yarnpkg.com/@xmtp/xmtp-js/-/xmtp-js-11.3.4.tgz#7622bdd5937903269e2798f7b7aedefacd460277"
+  integrity sha512-6dh9odpDiLRzycH8PKRmnL5/sBQAUrnPKXLryD9gySwzFBwLCUwJp5XJ6yJsdb7V4yMSQoPpf5Z4CBcgQ5PWuQ==
   dependencies:
     "@noble/secp256k1" "^1.5.2"
     "@xmtp/proto" "^3.34.0"
@@ -9576,6 +9576,7 @@
     async-mutex "^0.4.0"
     elliptic "^6.5.4"
     ethers "^5.5.3"
+    js-sha3 "^0.9.3"
     long "^5.2.0"
 
 "@xtuc/ieee754@^1.2.0":
@@ -16920,6 +16921,11 @@ js-sha3@^0.5.7:
   version "0.5.7"
   resolved "https://registry.npmjs.org/js-sha3/-/js-sha3-0.5.7.tgz"
   integrity sha512-GII20kjaPX0zJ8wzkTbNDYMY7msuZcTWk8S5UOh6806Jq/wz1J8/bnr8uGU0DAUmYDjj2Mr4X1cW8v/GLYnR+g==
+
+js-sha3@^0.9.3:
+  version "0.9.3"
+  resolved "https://registry.yarnpkg.com/js-sha3/-/js-sha3-0.9.3.tgz#f0209432b23a66a0f6c7af592c26802291a75c2a"
+  integrity sha512-BcJPCQeLg6WjEx3FE591wVAevlli8lxsxm9/FzV4HXkV49TmBH38Yvrpce6fjbADGMKFrBMGTqrVz3qPIZ88Gg==
 
 "js-tokens@^3.0.0 || ^4.0.0", js-tokens@^4.0.0:
   version "4.0.0"

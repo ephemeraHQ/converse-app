@@ -40,14 +40,14 @@ const protocolMessageToStateMessage = (
   else {
     contentFallback = message.content;
   }
+
   return {
     id: message.id,
     senderAddress: message.senderAddress,
     sent: message.sent.getTime(),
     contentType,
     status: "delivered",
-    sentViaConverse: false,
-    // sentViaConverse: message.sentViaConverse || false,
+    sentViaConverse: message.sentViaConverse || false,
     content,
     referencedMessageId,
     topic: message.contentTopic,
@@ -155,10 +155,15 @@ export const loadOlderMessages = async (
   const client = (await getXmtpClient(account)) as Client;
   const conversation = await getConversationWithTopic(account, topic);
   if (!conversation) return;
-  const messages = await conversation.messages({
-    endTime: oldestTimestamp ? new Date(oldestTimestamp) : undefined,
-    limit: 100,
-    direction: messageApi.SortDirection.SORT_DIRECTION_DESCENDING,
-  });
+  const messages = await decodeBatchMessages(
+    account,
+    await client.apiClient.batchQuery([
+      {
+        contentTopic: topic,
+        pageSize: 100,
+        direction: messageApi.SortDirection.SORT_DIRECTION_DESCENDING,
+      },
+    ])
+  );
   saveMessages(client.address, protocolMessagesToStateMessages(messages));
 };
