@@ -15,7 +15,12 @@ Alert.alert = (
   const cancelOption = buttons?.find(({ style }) => style === "cancel");
 
   if (confirmOption && cancelOption) {
-    const result = window.confirm([title, message].filter(Boolean).join("\n"));
+    let messageToShow = [title, message].filter(Boolean).join("\n");
+    if (title && message) {
+      messageToShow = message + `\n\nDo you want to ${confirmOption.text}?`;
+    }
+
+    const result = window.confirm(messageToShow);
     if (result) {
       confirmOption?.onPress?.();
     } else {
