@@ -37,8 +37,6 @@ export default function ChatTransactionReference({ message }: Props) {
       | "transactionReference"
       | "coinbaseRegular"
       | "coinbaseSponsored",
-    createdAt: 0,
-    updatedAt: 0,
     namespace: undefined as undefined | string,
     networkId: "",
     reference: "",

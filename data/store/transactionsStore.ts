@@ -72,8 +72,7 @@ export const initTransactionsStore = (account: string) => {
 
           getEvents: (id) => {
             const transaction = get().transactions[id];
-            const eventsString = transaction?.events ?? "[]";
-            return JSON.parse(eventsString);
+            return transaction.events ?? "[]";
           },
 
           setEvents: (id, events) =>
@@ -82,7 +81,7 @@ export const initTransactionsStore = (account: string) => {
                 ...state.transactions,
                 [id]: {
                   ...state.transactions[id],
-                  events: JSON.stringify(events),
+                  events,
                 },
               },
             })),
