@@ -48,14 +48,14 @@ export class CoinbaseMessagingPaymentCodec
     return {
       type: ContentTypeCoinbasePayment,
       parameters: {},
-      content: Buffer.from(JSON.stringify(content)).toString("base64") as any,
+      content: new TextEncoder().encode(JSON.stringify(content)),
     };
   }
+
   decode(encodedContent: EncodedContent): CoinbaseMessagingPaymentContent {
-    // Handling content that is base64 encoded rather than Buffer
-    const base64Content = encodedContent.content as unknown as string;
-    const stringContent = Buffer.from(base64Content, "base64").toString();
-    return JSON.parse(stringContent) as CoinbaseMessagingPaymentContent;
+    const uint8Array = encodedContent.content;
+    const contentReceived = JSON.parse(new TextDecoder().decode(uint8Array));
+    return contentReceived as CoinbaseMessagingPaymentContent;
   }
 
   fallback(content: CoinbaseMessagingPaymentContent): string | undefined {
