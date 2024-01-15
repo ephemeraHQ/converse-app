@@ -9481,14 +9481,14 @@
   dependencies:
     "@xmtp/xmtp-js" "^11.1.2"
 
-"@xmtp/content-type-remote-attachment@^1.0.7":
-  version "1.0.7"
-  resolved "https://registry.yarnpkg.com/@xmtp/content-type-remote-attachment/-/content-type-remote-attachment-1.0.7.tgz#84c85aebfdb8823dc2f06f8e406dc722ed1dc458"
-  integrity sha512-xq40kwul2b8JnqfIo7+9VgzeKURwXRD+34Wq1kTK2YVSJB4uW10vhdSQhN7JLJS4CuU9Z8R1tmVCJf5IbG+Iag==
+"@xmtp/content-type-remote-attachment@^1.1.4":
+  version "1.1.4"
+  resolved "https://registry.yarnpkg.com/@xmtp/content-type-remote-attachment/-/content-type-remote-attachment-1.1.4.tgz#bcc48dc9714fe4a696e108f8951da34274ebdfa0"
+  integrity sha512-t/ivPqroNYobttxCrJMLOg/b3hAQT0knTw2hio/c5rQ0XyJd9UDP2eDWnmxchlabhdxnnfu9jP9YI05qL7tzWA==
   dependencies:
     "@noble/secp256k1" "^1.7.1"
-    "@xmtp/proto" "^3.25.0"
-    "@xmtp/xmtp-js" "^9.1.6"
+    "@xmtp/proto" "^3.29.0"
+    "@xmtp/xmtp-js" "^11.1.2"
 
 "@xmtp/proto@^3.24.0":
   version "3.24.0"
@@ -9565,18 +9565,6 @@
     "@noble/secp256k1" "^1.5.2"
     "@xmtp/proto" "^3.34.0"
     "@xmtp/user-preferences-bindings-wasm" "^0.3.4"
-    async-mutex "^0.4.0"
-    elliptic "^6.5.4"
-    ethers "^5.5.3"
-    long "^5.2.0"
-
-"@xmtp/xmtp-js@^9.1.6":
-  version "9.2.0"
-  resolved "https://registry.yarnpkg.com/@xmtp/xmtp-js/-/xmtp-js-9.2.0.tgz#012236044cca00ae5134a53312f1cdc9a087a18b"
-  integrity sha512-wi+pp+3XNXXxFLR+CTnP3+Vjo6a9/bCmoVQHyWRNUZL38eYvq0rAMzyjti8Mc49Or9SkxteZnDaI86eIb4i9Uw==
-  dependencies:
-    "@noble/secp256k1" "^1.5.2"
-    "@xmtp/proto" "^3.24.0"
     async-mutex "^0.4.0"
     elliptic "^6.5.4"
     ethers "^5.5.3"

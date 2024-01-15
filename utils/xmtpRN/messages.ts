@@ -9,27 +9,13 @@ import { saveMessages } from "../../data/helpers/messages";
 import { XmtpMessage } from "../../data/store/chatStore";
 import { addLog } from "../debug";
 import { sentryTrackError } from "../sentry";
+import { serializeRemoteAttachmentMessageContent } from "./attachments";
 import { ConverseXmtpClientType, DecodedMessageWithCodecsType } from "./client";
 import { isContentType } from "./contentTypes";
 import { getXmtpClient } from "./sync";
 // import { CoinbaseMessagingPaymentContent } from "./contentTypes/coinbasePayment";
 
 const BATCH_QUERY_PAGE_SIZE = 30;
-
-const computeRemoteAttachmentMessageContent = (
-  content: RemoteAttachmentContent
-) => {
-  const contentLength = content.contentLength
-    ? parseInt(content.contentLength, 10)
-    : undefined;
-  return JSON.stringify({
-    ...content,
-    contentLength,
-    salt: Buffer.from(content.salt, "hex").toString("base64"),
-    nonce: Buffer.from(content.nonce, "hex").toString("base64"),
-    secret: Buffer.from(content.secret, "hex").toString("base64"),
-  });
-};
 
 const protocolMessageToStateMessage = (
   message: DecodedMessageWithCodecsType
@@ -41,7 +27,7 @@ const protocolMessageToStateMessage = (
   if (isContentType("text", contentType)) {
     content = message.content() as string;
   } else if (isContentType("remoteAttachment", contentType)) {
-    content = computeRemoteAttachmentMessageContent(
+    content = serializeRemoteAttachmentMessageContent(
       message.content() as RemoteAttachmentContent
     );
   } else if (isContentType("attachment", contentType)) {

@@ -1,4 +1,8 @@
 import { Reaction } from "@xmtp/content-type-reaction";
+import {
+  RemoteAttachment,
+  Attachment,
+} from "@xmtp/content-type-remote-attachment";
 import { messageApi } from "@xmtp/proto";
 import { Envelope } from "@xmtp/proto/ts/dist/types/message_api/v1/message_api.pb";
 import { Client, DecodedMessage } from "@xmtp/xmtp-js";
@@ -6,6 +10,7 @@ import { Client, DecodedMessage } from "@xmtp/xmtp-js";
 import { saveMessages } from "../../data/helpers/messages";
 import { XmtpMessage } from "../../data/store/chatStore";
 import { sentryTrackError } from "../sentry";
+import { serializeRemoteAttachmentMessageContent } from "./attachments.web";
 import { isContentType } from "./contentTypes";
 import { getConversationWithTopic } from "./conversations.web";
 import { getXmtpClient } from "./sync";
@@ -19,15 +24,13 @@ const protocolMessageToStateMessage = (
   let contentFallback: string | undefined = undefined;
   if (isContentType("text", contentType)) {
     content = message.content as string;
-  }
-  //  else if (isContentType("remoteAttachment", contentType)) {
-  //   content = computeRemoteAttachmentMessageContent(
-  //     message.content() as RemoteAttachmentContent
-  //   );
-  // } else if (isContentType("attachment", contentType)) {
-  //   content = JSON.stringify(message.content() as StaticAttachmentContent);
-  // }
-  else if (isContentType("reaction", contentType)) {
+  } else if (isContentType("remoteAttachment", contentType)) {
+    content = serializeRemoteAttachmentMessageContent(
+      message.content as RemoteAttachment
+    );
+  } else if (isContentType("attachment", contentType)) {
+    content = JSON.stringify(message.content as Attachment);
+  } else if (isContentType("reaction", contentType)) {
     content = JSON.stringify(message.content as Reaction);
     referencedMessageId = (message.content as Reaction).reference;
   }
