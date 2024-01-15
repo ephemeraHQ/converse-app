@@ -12,9 +12,9 @@ import { sentryTrackError } from "../sentry";
 import { serializeRemoteAttachmentMessageContent } from "./attachments";
 import { ConverseXmtpClientType, DecodedMessageWithCodecsType } from "./client";
 import { isContentType } from "./contentTypes";
+import { CoinbaseMessagingPaymentContent } from "./contentTypes/coinbasePayment";
 import { TransactionReference } from "./contentTypes/transactionReference";
 import { getXmtpClient } from "./sync";
-// import { CoinbaseMessagingPaymentContent } from "./contentTypes/coinbasePayment";
 
 const BATCH_QUERY_PAGE_SIZE = 30;
 
@@ -38,11 +38,11 @@ const protocolMessageToStateMessage = (
     referencedMessageId = (message.content() as ReactionContent).reference;
   } else if (isContentType("transactionReference", contentType)) {
     content = JSON.stringify(message.content() as TransactionReference);
-  }
-  // else if (isContentType("coinbasePayment", contentType)) {
-  // content = JSON.stringify(messageContent as CoinbaseMessagingPaymentContent);
-  // }
-  else {
+  } else if (isContentType("coinbasePayment", contentType)) {
+    content = JSON.stringify(
+      message.content() as CoinbaseMessagingPaymentContent
+    );
+  } else {
     contentFallback = message.fallback;
   }
   return {

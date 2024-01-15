@@ -12,6 +12,8 @@ import { XmtpMessage } from "../../data/store/chatStore";
 import { sentryTrackError } from "../sentry";
 import { serializeRemoteAttachmentMessageContent } from "./attachments.web";
 import { isContentType } from "./contentTypes";
+import { CoinbaseMessagingPaymentContent } from "./contentTypes/coinbasePayment";
+import { TransactionReference } from "./contentTypes/transactionReference";
 import { getConversationWithTopic } from "./conversations.web";
 import { getXmtpClient } from "./sync";
 
@@ -33,11 +35,13 @@ const protocolMessageToStateMessage = (
   } else if (isContentType("reaction", contentType)) {
     content = JSON.stringify(message.content as Reaction);
     referencedMessageId = (message.content as Reaction).reference;
-  }
-  // else if (isContentType("coinbasePayment", contentType)) {
-  // content = JSON.stringify(messageContent as CoinbaseMessagingPaymentContent);
-  // }
-  else {
+  } else if (isContentType("transactionReference", contentType)) {
+    content = JSON.stringify(message.content() as TransactionReference);
+  } else if (isContentType("coinbasePayment", contentType)) {
+    content = JSON.stringify(
+      message.content as CoinbaseMessagingPaymentContent
+    );
+  } else {
     contentFallback = message.content;
   }
 
