@@ -12,7 +12,7 @@ import { useOnboardingStore } from "../../data/store/onboardingStore";
 import { useSelect } from "../../data/store/storeHelpers";
 import { clickedItemBackgroundColor } from "../../utils/colors";
 import { converseEventEmitter } from "../../utils/events";
-import useDisconnect from "../../utils/onboarding/disconnect";
+import useDisconnectWallet from "../../utils/logout/wallet";
 import { shortAddress, useAccountsProfiles } from "../../utils/str";
 
 export default function AccountsAndroid() {
@@ -20,7 +20,7 @@ export default function AccountsAndroid() {
   const accounts = useAccountsList();
   const accountsProfiles = useAccountsProfiles();
 
-  const disconnectWallet = useDisconnect();
+  const disconnectWallet = useDisconnectWallet();
   const { currentAccount, setCurrentAccount } = useAccountsStore(
     useSelect(["currentAccount", "setCurrentAccount"])
   );

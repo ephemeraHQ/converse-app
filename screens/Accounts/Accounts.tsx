@@ -14,7 +14,7 @@ import {
   primaryColor,
   textSecondaryColor,
 } from "../../utils/colors";
-import useDisconnect from "../../utils/onboarding/disconnect";
+import useDisconnectWallet from "../../utils/logout/wallet";
 import { shortAddress, useAccountsProfiles } from "../../utils/str";
 import { NavigationParamList } from "../Navigation/Navigation";
 
@@ -28,7 +28,7 @@ export default function Accounts({
   const setCurrentAccount = useAccountsStore((s) => s.setCurrentAccount);
   const setAddingNewAccount = useOnboardingStore((s) => s.setAddingNewAccount);
   const colorScheme = useColorScheme();
-  const disconnectWallet = useDisconnect();
+  const disconnectWallet = useDisconnectWallet();
   return (
     <ScrollView
       contentInsetAdjustmentBehavior="automatic"

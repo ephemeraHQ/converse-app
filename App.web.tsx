@@ -1,6 +1,7 @@
 import "@expo/metro-runtime";
 import "./polyfills";
 import { ActionSheetProvider } from "@expo/react-native-action-sheet";
+import { PrivyProvider } from "@privy-io/react-auth";
 import { createWeb3Modal, defaultConfig } from "@web3modal/ethers5/react";
 import { useColorScheme } from "react-native";
 import { PaperProvider } from "react-native-paper";
@@ -37,10 +38,27 @@ export default function App() {
             colorScheme === "light" ? MaterialLightTheme : MaterialDarkTheme
           }
         >
-          <>
-            <Main />
-            <XmtpEngine />
-          </>
+          <PrivyProvider
+            appId={config.privy.appId}
+            config={{
+              loginMethods: ["sms"],
+              embeddedWallets: {
+                createOnLogin: "users-without-wallets",
+              },
+              defaultChain: config.privy.defaultChain,
+              supportedChains: [config.privy.defaultChain],
+              appearance: {
+                theme: "light",
+                accentColor: "#FB5038",
+                logo: "https://converse.xyz/icon.png",
+              },
+            }}
+          >
+            <>
+              <Main />
+              <XmtpEngine />
+            </>
+          </PrivyProvider>
         </PaperProvider>
       </ActionSheetProvider>
     </SafeAreaProvider>
