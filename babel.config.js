@@ -7,6 +7,10 @@ module.exports = {
     ],
   ],
   plugins: [
+    // Can be removed when using SDK 50
+    // https://github.com/expo/expo/issues/23819#issuecomment-1760250369
+    // This is to make Constants.expoConfig work in web
+    "expo-router/babel",
     ["@babel/plugin-proposal-decorators", { version: "legacy" }],
     "@babel/plugin-proposal-export-namespace-from",
     "@babel/plugin-transform-flow-strip-types", // For privy (phone country selector)
