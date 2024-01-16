@@ -315,7 +315,7 @@ const Conversation = ({
       onLayout={checkIfUserExists}
       key={`conversation-${colorScheme}`}
     >
-      {(route.params?.topic || route.params?.mainConversationWithPeer) && (
+      {route.params?.topic || route.params?.mainConversationWithPeer ? (
         <>
           {showInviteBanner && (
             <InviteBanner
@@ -337,6 +337,8 @@ const Conversation = ({
             <ConverseChat />
           </ConversationContext.Provider>
         </>
+      ) : (
+        <View style={styles.filler} />
       )}
     </View>
   );
@@ -377,5 +379,6 @@ const useStyles = () => {
       marginLeft: "auto",
     },
     title: headerTitleStyle(colorScheme),
+    filler: { flex: 1, backgroundColor: backgroundColor(colorScheme) },
   });
 };

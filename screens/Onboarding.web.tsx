@@ -17,7 +17,11 @@ import {
   useHasOnePrivyAccount,
 } from "../data/store/accountsStore";
 import { useOnboardingStore } from "../data/store/onboardingStore";
-import { textPrimaryColor, textSecondaryColor } from "../utils/colors";
+import {
+  backgroundColor,
+  textPrimaryColor,
+  textSecondaryColor,
+} from "../utils/colors";
 import { saveXmtpKey } from "../utils/keychain/helpers";
 import { getXmtpBase64KeyFromSigner } from "../utils/xmtpRN/client";
 import { getXmtpClient } from "../utils/xmtpRN/sync";
@@ -160,6 +164,8 @@ const useStyles = () => {
     container: {
       flexDirection: "column",
       alignItems: "center",
+      backgroundColor: backgroundColor(colorScheme),
+      flex: 1,
     },
     picto: {
       marginTop: 50,

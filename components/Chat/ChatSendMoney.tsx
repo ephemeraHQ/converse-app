@@ -20,7 +20,7 @@ import { useSelect } from "../../data/store/storeHelpers";
 import { NavigationParamList } from "../../screens/Navigation/Navigation";
 import { useConversationContext } from "../../utils/conversation";
 import { converseEventEmitter } from "../../utils/events";
-import { usePrivySigner } from "../../utils/evm/helpers";
+import { usePrivySigner } from "../../utils/evm/privy";
 import { executeAfterKeyboardClosed } from "../../utils/keyboard";
 import ChatActionButton from "./ChatActionButton";
 

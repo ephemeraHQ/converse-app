@@ -2,6 +2,7 @@ import { createDrawerNavigator } from "@react-navigation/drawer";
 import { NavigationContainer } from "@react-navigation/native";
 import * as Linking from "expo-linking";
 import { useEffect, useRef } from "react";
+import { useColorScheme } from "react-native";
 
 import config from "../../../config";
 import {
@@ -9,6 +10,7 @@ import {
   useCurrentAccount,
 } from "../../../data/store/accountsStore";
 import { useAppStore } from "../../../data/store/appStore";
+import { listItemSeparatorColor } from "../../../utils/colors";
 import { converseNavigations } from "../../../utils/navigation";
 import {
   ConversationNavParams,
@@ -42,6 +44,7 @@ export default function SplitScreenNavigation() {
   const splashScreenHidden = useAppStore((s) => s.splashScreenHidden);
   const currentAccount = useCurrentAccount();
   const accountRef = useRef(currentAccount);
+  const colorScheme = useColorScheme();
   useEffect(() => {
     if (accountRef.current !== currentAccount) {
       converseNavigations["splitScreen"]?.reset({
@@ -80,7 +83,10 @@ export default function SplitScreenNavigation() {
         screenOptions={{
           headerShown: false,
           drawerType: "permanent",
-          drawerStyle: { width: 400 },
+          drawerStyle: {
+            width: 400,
+            borderRightColor: listItemSeparatorColor(colorScheme),
+          },
           drawerContentContainerStyle: { paddingTop: 4 },
           overlayColor: "transparent",
         }}
