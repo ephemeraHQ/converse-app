@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "scripts": {
     "build": "node scripts/build/build.js",
+    "web:preview": "EXPO_ENV=preview expo export -p web",
     "start": "EXPO_ENV=dev expo start",
     "typecheck": "echo \"➜ Typechecking project...\" && tsc --noEmit",
     "update": "node scripts/build/update.js",
@@ -80,6 +81,7 @@
     "expo-linking": "~5.0.2",
     "expo-navigation-bar": "~2.3.0",
     "expo-notifications": "~0.20.1",
+    "expo-router": "^2.0.14",
     "expo-secure-store": "~12.3.1",
     "expo-splash-screen": "~0.20.5",
     "expo-status-bar": "~1.6.0",
