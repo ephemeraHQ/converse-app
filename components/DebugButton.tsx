@@ -13,7 +13,7 @@ import {
   useCurrentAccount,
 } from "../data/store/accountsStore";
 import { debugLogs, resetDebugLogs } from "../utils/debug";
-import { usePrivySigner } from "../utils/evm/helpers";
+import { usePrivySigner } from "../utils/evm/privy";
 import { getSecureItemAsync } from "../utils/keychain";
 import mmkv from "../utils/mmkv";
 import { showActionSheetWithOptions } from "./StateHandlers/ActionSheetStateHandler";

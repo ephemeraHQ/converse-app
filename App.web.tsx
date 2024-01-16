@@ -1,5 +1,6 @@
 import "@expo/metro-runtime";
 import "./polyfills";
+import "./assets/web.css";
 import { ActionSheetProvider } from "@expo/react-native-action-sheet";
 import { PrivyProvider } from "@privy-io/react-auth";
 import { createWeb3Modal, defaultConfig } from "@web3modal/ethers5/react";
@@ -58,7 +59,7 @@ export default function App() {
               defaultChain: config.privy.defaultChain,
               supportedChains: [config.privy.defaultChain],
               appearance: {
-                theme: "light",
+                theme: colorScheme || "light",
                 logo: "https://converse.xyz/icon.png",
               },
             }}
