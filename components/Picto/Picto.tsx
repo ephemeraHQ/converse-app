@@ -15,6 +15,7 @@ import Done from "@material-symbols/svg-400/outlined/done.svg";
 import Edit from "@material-symbols/svg-400/outlined/edit.svg";
 import ExpandMore from "@material-symbols/svg-400/outlined/expand_more.svg";
 import Image from "@material-symbols/svg-400/outlined/image.svg";
+import Info from "@material-symbols/svg-400/outlined/info.svg";
 import Key from "@material-symbols/svg-400/outlined/key.svg";
 import Laptop from "@material-symbols/svg-400/outlined/laptop_chromebook.svg";
 import Link from "@material-symbols/svg-400/outlined/link.svg";
@@ -89,6 +90,7 @@ const pictoMapping: {
   gear: Settings,
   "arrow.clockwise": Refresh,
   person: Person,
+  "info.circle": Info,
 };
 
 export default function Picto({ picto, style, size, weight, color }: Props) {
