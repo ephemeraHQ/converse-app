@@ -1,4 +1,3 @@
-import { usePrivy } from "@privy-io/expo";
 import Clipboard from "@react-native-clipboard/clipboard";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import * as Linking from "expo-linking";
@@ -21,15 +20,13 @@ import {
   primaryColor,
   textSecondaryColor,
 } from "../utils/colors";
-import { addLog } from "../utils/debug";
 import { converseEventEmitter } from "../utils/events";
-import { logout } from "../utils/logout";
+import { useLogoutFromConverse } from "../utils/logout";
 import { navigate } from "../utils/navigation";
 import {
   requestPushNotificationsPermissions,
   NotificationPermissionStatus,
 } from "../utils/notifications";
-import useDisconnect from "../utils/onboarding/disconnect";
 import { refreshBalanceForAccounts } from "../utils/wallet";
 import Picto from "./Picto/Picto";
 import { showActionSheetWithOptions } from "./StateHandlers/ActionSheetStateHandler";
@@ -53,11 +50,10 @@ export default function AccountSettingsButton({ navigation, account }: Props) {
       ])
     );
 
-  const { setCurrentAccount, privyAccountId } = useAccountsStore(
-    useSelect(["setCurrentAccount", "privyAccountId"])
+  const { setCurrentAccount } = useAccountsStore(
+    useSelect(["setCurrentAccount"])
   );
-  const { logout: privyLogout } = usePrivy();
-  const disconnectWallet = useDisconnect();
+  const logout = useLogoutFromConverse(account);
   const colorScheme = useColorScheme();
   const onPress = useCallback(() => {
     Keyboard.dismiss();
@@ -127,18 +123,13 @@ export default function AccountSettingsButton({ navigation, account }: Props) {
         }
       },
       Disconnect: () => {
-        disconnectWallet();
-        if (privyAccountId[account]) {
-          addLog("calling privylogout from AccountSettingsButton");
-          privyLogout();
-        }
-        logout(account);
+        logout();
       },
       Cancel: () => {},
     };
 
     const options = Object.keys(methods);
-    if (notificationsPermissionStatus === "granted") {
+    if (notificationsPermissionStatus === "granted" || Platform.OS === "web") {
       options.splice(options.indexOf("Turn on notifications"), 1);
     }
 
@@ -159,15 +150,13 @@ export default function AccountSettingsButton({ navigation, account }: Props) {
       }
     );
   }, [
-    notificationsPermissionStatus,
     account,
     colorScheme,
-    setCurrentAccount,
+    logout,
     navigation,
+    notificationsPermissionStatus,
+    setCurrentAccount,
     setNotificationsPermissionStatus,
-    disconnectWallet,
-    privyAccountId,
-    privyLogout,
   ]);
 
   return Platform.OS === "android" ? (

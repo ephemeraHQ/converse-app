@@ -20,7 +20,7 @@ import { useSelect } from "../../data/store/storeHelpers";
 import { NavigationParamList } from "../../screens/Navigation/Navigation";
 import { useConversationContext } from "../../utils/conversation";
 import { converseEventEmitter } from "../../utils/events";
-import { usePrivySigner } from "../../utils/evm/helpers";
+import { usePrivySigner } from "../../utils/evm/privy";
 import { executeAfterKeyboardClosed } from "../../utils/keyboard";
 import ChatActionButton from "./ChatActionButton";
 
@@ -68,7 +68,7 @@ export default function ChatSendMoney() {
           "Use Converse Account",
           "Gasless money transfers are only available on Converse accounts with telephone numbers for now.",
           [
-            { text: "Cancel" },
+            { text: "Cancel", style: "cancel" },
             {
               text: "Go to Converse Account",
               isPreferred: true,
@@ -84,7 +84,7 @@ export default function ChatSendMoney() {
           "Create Converse Account",
           "Gasless money transfers are only available on Converse accounts with telephone numbers for now.",
           [
-            { text: "Cancel" },
+            { text: "Cancel", style: "cancel" },
             {
               text: "Create Converse Account",
               isPreferred: true,

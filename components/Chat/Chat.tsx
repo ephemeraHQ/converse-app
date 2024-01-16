@@ -198,9 +198,10 @@ export default function Chat() {
   const conversationNotPendingRef = useRef(
     conversation && !conversation.pending
   );
-  const AnimatedListView = conversationNotPendingRef.current
-    ? ReanimatedFlashList
-    : ReanimatedFlatList;
+  const AnimatedListView =
+    conversationNotPendingRef.current && Platform.OS !== "web"
+      ? ReanimatedFlashList
+      : ReanimatedFlatList;
 
   return (
     <View

@@ -145,11 +145,11 @@ const Conversation = ({
     }
   }, []);
 
-  const autofocus = route.params?.focus || isDesktop;
+  const autofocus = route.params?.focus || isDesktop || Platform.OS === "web";
 
   useEffect(() => {
-    const unsubscribe = navigation.addListener("transitionEnd", (e) => {
-      if (!e.data.closing && !!autofocus) {
+    const handleAutoFocus = () => {
+      if (autofocus) {
         if (chatLayoutDone.current && !alreadyAutomaticallyFocused.current) {
           alreadyAutomaticallyFocused.current = true;
           textInputRef.current?.focus();
@@ -157,7 +157,17 @@ const Conversation = ({
           focusOnLayout.current = true;
         }
       }
+    };
+
+    const unsubscribe = navigation.addListener("transitionEnd", (e) => {
+      if (!e.data.closing) {
+        handleAutoFocus();
+      }
     });
+
+    if (Platform.OS === "web") {
+      handleAutoFocus();
+    }
 
     return unsubscribe;
   }, [navigation, autofocus]);
@@ -305,7 +315,7 @@ const Conversation = ({
       onLayout={checkIfUserExists}
       key={`conversation-${colorScheme}`}
     >
-      {(route.params?.topic || route.params?.mainConversationWithPeer) && (
+      {route.params?.topic || route.params?.mainConversationWithPeer ? (
         <>
           {showInviteBanner && (
             <InviteBanner
@@ -327,6 +337,8 @@ const Conversation = ({
             <ConverseChat />
           </ConversationContext.Provider>
         </>
+      ) : (
+        <View style={styles.filler} />
       )}
     </View>
   );
@@ -367,5 +379,6 @@ const useStyles = () => {
       marginLeft: "auto",
     },
     title: headerTitleStyle(colorScheme),
+    filler: { flex: 1, backgroundColor: backgroundColor(colorScheme) },
   });
 };

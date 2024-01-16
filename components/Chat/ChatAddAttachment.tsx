@@ -30,6 +30,8 @@ import {
 import { showActionSheetWithOptions } from "../StateHandlers/ActionSheetStateHandler";
 import ChatActionButton from "./ChatActionButton";
 
+const DATA_MIMETYPE_REGEX = /data:(.*?);/;
+
 export default function ChatAddAttachment() {
   const { conversation } = useConversationContext(["conversation"]);
   const currentAccount = useAccountsStore((s) => s.currentAccount);
@@ -51,14 +53,20 @@ export default function ChatAddAttachment() {
   useEffect(() => {
     if (!conversation) return;
     const uploadAsset = async (asset: ImagePicker.ImagePickerAsset) => {
-      uploading.current = true;
       const resizedImage = await compressAndResizeImage(asset.uri);
-      const mimeType = mime.getType(resizedImage.uri);
+      let mimeType = mime.getType(resizedImage.uri);
+      if (!mimeType && Platform.OS === "web") {
+        const match = resizedImage.uri.match(DATA_MIMETYPE_REGEX);
+        if (match && match[1]) {
+          mimeType = match[1];
+        }
+      }
       const encryptedAttachment = await encryptRemoteAttachment(
         currentAccount,
         resizedImage.uri,
         mimeType || undefined
       );
+
       try {
         const uploadedAttachment = await uploadRemoteAttachment(
           currentAccount,
@@ -71,11 +79,15 @@ export default function ChatAddAttachment() {
           conversation,
           content: serializeRemoteAttachmentMessageContent(uploadedAttachment),
           contentType: "xmtp.org/remoteStaticAttachment:1.0",
-          attachmentToSave: {
-            filePath: resizedImage.uri,
-            fileName: asset.uri.split("/").pop() || `${uuid.v4().toString()}`,
-            mimeType,
-          },
+          attachmentToSave:
+            Platform.OS === "web"
+              ? undefined
+              : {
+                  filePath: resizedImage.uri,
+                  fileName:
+                    asset.uri.split("/").pop() || `${uuid.v4().toString()}`,
+                  mimeType,
+                },
         });
 
         uploading.current = false;

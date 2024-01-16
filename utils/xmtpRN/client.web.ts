@@ -1,4 +1,5 @@
 import { ReactionCodec } from "@xmtp/content-type-reaction";
+import { ReadReceiptCodec } from "@xmtp/content-type-read-receipt";
 import {
   AttachmentCodec,
   RemoteAttachmentCodec,
@@ -37,6 +38,7 @@ export const getXmtpClientFromBase64Key = async (base64Key: string) => {
   client.registerCodec(new ReactionCodec());
   client.registerCodec(new AttachmentCodec());
   client.registerCodec(new RemoteAttachmentCodec());
+  client.registerCodec(new ReadReceiptCodec());
   return client;
 };
 

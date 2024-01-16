@@ -1,13 +1,17 @@
 import {
   Attachment,
+  EncryptedEncodedContent,
+  RemoteAttachment,
   RemoteAttachmentCodec,
 } from "@xmtp/content-type-remote-attachment";
 import { Client } from "@xmtp/xmtp-js";
+import axios from "axios";
 import mime from "mime";
 import { useCallback, useEffect, useState } from "react";
 
 import { MessageToDisplay } from "../../components/Chat/ChatMessage";
 import { useCurrentAccount } from "../../data/store/accountsStore";
+import { getPresignedUriForUpload } from "../api";
 import { isImageMimetype } from "../media";
 import { sentryTrackMessage } from "../sentry";
 import { deserializeRemoteAttachmentMessageContent } from "../xmtpRN/attachments.web";
@@ -68,12 +72,22 @@ export const useAttachmentForMessage = (message: MessageToDisplay) => {
     async (attachment: Attachment) => {
       const url = getBlobUrl(message.id, attachment) as string;
       const isImage = isImageMimetype(attachment.mimeType);
+      let imageSize: { width: number; height: number } | undefined = undefined;
+
+      if (isImage) {
+        try {
+          imageSize = await getImageSize(url);
+        } catch (e) {
+          console.log(e);
+        }
+      }
 
       setAttachment({
-        mediaType: isImage
-          ? "IMAGE"
-          : ("UNSUPPORTED" as "IMAGE" | "UNSUPPORTED" | undefined),
-        imageSize: isImage ? await getImageSize(url) : undefined,
+        mediaType:
+          isImage && imageSize
+            ? "IMAGE"
+            : ("UNSUPPORTED" as "IMAGE" | "UNSUPPORTED" | undefined),
+        imageSize,
         contentLength: attachment.data.length,
         mediaURL: url,
         filename: attachment.filename,
@@ -128,7 +142,10 @@ export const useAttachmentForMessage = (message: MessageToDisplay) => {
             error: false,
           });
         } else {
-          displayAttachment(parsedEncodedContent as Attachment);
+          displayAttachment({
+            ...parsedEncodedContent,
+            data: Uint8Array.from(Object.values(parsedEncodedContent.data)),
+          } as Attachment);
         }
       } catch (e) {
         console.log(e);
@@ -148,4 +165,34 @@ export const useAttachmentForMessage = (message: MessageToDisplay) => {
   }, [displayAttachment, fetchAndDecode, message]);
 
   return { attachment, fetchAndDecode };
+};
+
+export const uploadRemoteAttachment = async (
+  account: string,
+  attachment: EncryptedEncodedContent & {
+    filename: string;
+    contentLength: number;
+  }
+): Promise<RemoteAttachment> => {
+  const { url } = await getPresignedUriForUpload(account);
+  await axios.put(url, new Blob([attachment.payload]), {
+    headers: {
+      "content-type": "application/octet-stream",
+      "x-amz-acl": "public-read",
+    },
+  });
+
+  const fileURL = new URL(url);
+  const publicURL = fileURL.origin + fileURL.pathname;
+
+  return {
+    url: publicURL,
+    contentDigest: attachment.digest,
+    salt: attachment.salt,
+    nonce: attachment.nonce,
+    secret: attachment.secret,
+    scheme: "https://",
+    contentLength: attachment.contentLength,
+    filename: attachment.filename,
+  };
 };

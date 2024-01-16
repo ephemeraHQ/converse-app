@@ -30,11 +30,8 @@ import {
 import { useConversationContext } from "../../utils/conversation";
 import { isDesktop } from "../../utils/device";
 import { getTransferAuthorization } from "../../utils/evm/erc20";
-import {
-  evmHelpers,
-  getCurrentAccountSigner,
-  usePrivySigner,
-} from "../../utils/evm/helpers";
+import { evmHelpers, getCurrentAccountSigner } from "../../utils/evm/helpers";
+import { usePrivySigner } from "../../utils/evm/privy";
 import provider from "../../utils/evm/provider";
 import { sendMessage } from "../../utils/message";
 import { sentryTrackError } from "../../utils/sentry";
@@ -382,7 +379,7 @@ const useStyles = () => {
     },
     moneyInputPrefix: {
       fontSize: 34,
-      top: Platform.OS === "ios" ? 4 : 1.5,
+      top: Platform.OS === "android" ? 1.5 : 4,
       marginRight: 10,
     },
     moneyInput: {
@@ -390,6 +387,10 @@ const useStyles = () => {
       color: textPrimaryColor(colorScheme),
       minWidth: 21,
       lineHeight: Platform.OS === "android" ? 50 : 40,
+      ...Platform.select({
+        default: {},
+        web: { maxWidth: 100, textAlign: "center" },
+      }),
     },
     rightButtonsContainer: { width: 46 },
     sendButton: {

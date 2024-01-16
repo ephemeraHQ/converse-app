@@ -60,19 +60,17 @@ export const TableViewPicto = ({
     <View style={{ justifyContent: "center" }}>
       <Picto
         picto={symbol}
-        size={Platform.OS === "android" ? 24 : 16}
+        size={Platform.OS === "ios" ? 16 : 24}
         style={Platform.select({
           default: {
             width: IMAGE_SIZE,
             height: IMAGE_SIZE,
-            marginLeft: Platform.OS === "android" ? 16 : 0,
+            marginLeft: Platform.OS === "ios" ? 0 : 16,
           },
         })}
         color={
           color ||
-          (Platform.OS === "android"
-            ? textSecondaryColor(colorScheme)
-            : undefined)
+          (Platform.OS === "ios" ? undefined : textSecondaryColor(colorScheme))
         }
       />
     </View>
