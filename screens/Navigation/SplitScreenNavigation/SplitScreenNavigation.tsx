@@ -94,5 +94,3 @@ export default function SplitScreenNavigation() {
     </NavigationContainer>
   );
 }
-
-const i = 0;

@@ -12,7 +12,7 @@ import { useOnboardingStore } from "../../data/store/onboardingStore";
 import { useSelect } from "../../data/store/storeHelpers";
 import { clickedItemBackgroundColor } from "../../utils/colors";
 import { converseEventEmitter } from "../../utils/events";
-import useDisconnectWallet from "../../utils/logout/wallet";
+import { useDisconnectWallet } from "../../utils/logout/wallet";
 import { shortAddress, useAccountsProfiles } from "../../utils/str";
 
 export default function AccountsAndroid() {
