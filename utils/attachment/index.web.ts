@@ -142,7 +142,10 @@ export const useAttachmentForMessage = (message: MessageToDisplay) => {
             error: false,
           });
         } else {
-          displayAttachment(parsedEncodedContent as Attachment);
+          displayAttachment({
+            ...parsedEncodedContent,
+            data: Uint8Array.from(Object.values(parsedEncodedContent.data)),
+          } as Attachment);
         }
       } catch (e) {
         console.log(e);
