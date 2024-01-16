@@ -9,14 +9,12 @@ import config from "../config";
 import { resetDb, getDbPath } from "../data/db";
 import {
   currentAccount,
-  getAccountsList,
   getChatStore,
   useCurrentAccount,
 } from "../data/store/accountsStore";
 import { debugLogs, resetDebugLogs } from "../utils/debug";
-import { usePrivySigner } from "../utils/evm/helpers";
+import { usePrivySigner } from "../utils/evm/privy";
 import { getSecureItemAsync } from "../utils/keychain";
-import { logout } from "../utils/logout";
 import mmkv from "../utils/mmkv";
 import { showActionSheetWithOptions } from "./StateHandlers/ActionSheetStateHandler";
 
@@ -112,10 +110,6 @@ const DebugButton = forwardRef((props, ref) => {
           alert("Copied!");
         },
         "Clear logs": resetDebugLogs,
-        "Logout all": () => {
-          const accounts = getAccountsList();
-          accounts.forEach((account) => logout(account));
-        },
         "Clear logout tasks": () => {
           mmkv.delete("converse-logout-tasks");
         },

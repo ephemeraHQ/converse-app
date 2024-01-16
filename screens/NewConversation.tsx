@@ -308,10 +308,11 @@ export default function NewConversation({
           if (!initialFocus.current) {
             initialFocus.current = true;
             if (
-              !value &&
-              !recommendationsLoading &&
-              recommendationsLoadedOnce &&
-              recommendationsFrensCount === 0
+              (!value &&
+                !recommendationsLoading &&
+                recommendationsLoadedOnce &&
+                recommendationsFrensCount === 0) ||
+              Platform.OS === "web" // On web, always focus
             ) {
               setTimeout(() => {
                 r?.focus();

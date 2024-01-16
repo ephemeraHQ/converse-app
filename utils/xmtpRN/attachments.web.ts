@@ -1,4 +1,34 @@
-import { RemoteAttachment } from "@xmtp/content-type-remote-attachment";
+import {
+  Attachment,
+  AttachmentCodec,
+  RemoteAttachment,
+  RemoteAttachmentCodec,
+} from "@xmtp/content-type-remote-attachment";
+import axios from "axios";
+import uuid from "react-native-uuid";
+
+export const encryptRemoteAttachment = async (
+  account: string,
+  fileUri: string,
+  mimeType?: string
+) => {
+  const response = await axios.get(fileUri, { responseType: "arraybuffer" });
+  const data = new Uint8Array(response.data);
+  const attachment = {
+    filename: fileUri.split("/").pop() || `${uuid.v4().toString()}`,
+    mimeType: mimeType || "application/octet-stream",
+    data,
+  } as Attachment;
+  const encryptedEncoded = await RemoteAttachmentCodec.encodeEncrypted(
+    attachment,
+    new AttachmentCodec()
+  );
+  return {
+    ...encryptedEncoded,
+    filename: attachment.filename,
+    contentLength: attachment.data.byteLength,
+  };
+};
 
 export const serializeRemoteAttachmentMessageContent = (
   content: RemoteAttachment

@@ -1,5 +1,6 @@
 import Constants from "expo-constants";
 import { Platform } from "react-native";
+import { baseGoerli, base } from "viem/chains";
 
 const defaultConfig = {
   debugMenu: false,
@@ -33,7 +34,10 @@ const defaultConfig = {
   expoProjectId: "49a65fae-3895-4487-8e8a-5bd8bee3a401",
   web3StorageToken:
     "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJkaWQ6ZXRocjoweDBBOTAxOTI0ZTE1NzNhM2RCYzhjNDk3YzlmQ0Q1QzAwZmU3NDAyQUEiLCJpc3MiOiJ3ZWIzLXN0b3JhZ2UiLCJpYXQiOjE2ODc4MDU0MTUxMDYsIm5hbWUiOiJDb252ZXJzZSBUZXN0In0.5ItNFvSEsXpv4NYG1Uwbw9mL5dVzNQeXefOkjQht3ns",
-  privyAppId: "cloh5bn1p00q4l50gcg0g1mix",
+  privy: {
+    appId: "cloh5bn1p00q4l50gcg0g1mix",
+    defaultChain: baseGoerli,
+  },
   evm: {
     transactionChainId: "0x14a33", // Base Goerli
     USDC: {
@@ -103,7 +107,10 @@ const ENV = {
     ]),
     web3StorageToken:
       "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJkaWQ6ZXRocjoweGViMWU0NEJhYjU2MjYzYkI5Njk1OTVmYTk2RjU2MjRBOTUxRmJiNjUiLCJpc3MiOiJ3ZWIzLXN0b3JhZ2UiLCJpYXQiOjE2ODc4MDQ1ODIyMzMsIm5hbWUiOiJDb252ZXJzZSBBcHAifQ.S4FsNKkmFqp1OWhsxxauUTw82pKqCG3UXEjEYi1xvPM",
-    privyAppId: "clpb3fsrl007nlb0fj4ozei9a",
+    privy: {
+      appId: "clpb3fsrl007nlb0fj4ozei9a",
+      defaultChain: base,
+    },
     evm: {
       transactionChainId: "0x2105", // Base Mainnet
       USDC: {

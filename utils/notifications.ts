@@ -134,6 +134,7 @@ export const subscribeToNotifications = async (
 export const unsubscribeFromNotifications = async (apiHeaders: {
   [key: string]: string;
 }): Promise<void> => {
+  if (Platform.OS === "web") return;
   const nativeTokenQuery = await Notifications.getDevicePushTokenAsync();
   if (nativeTokenQuery.data) {
     await api.post(

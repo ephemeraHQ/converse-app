@@ -105,6 +105,24 @@ export default function ChatInput() {
           inputIsFocused.current = true;
           setInputValue(t);
         }}
+        onKeyPress={
+          Platform.OS === "web"
+            ? (event: any) => {
+                if (
+                  event.nativeEvent.key === "Enter" &&
+                  !event.altKey &&
+                  !event.metaKey &&
+                  !event.shiftKey
+                ) {
+                  event.preventDefault();
+                  onValidate();
+                  setTimeout(() => {
+                    inputRef.current?.focus();
+                  }, 100);
+                }
+              }
+            : undefined
+        }
         onFocus={() => {
           inputIsFocused.current = true;
         }}
@@ -167,6 +185,7 @@ const useStyles = () => {
       borderWidth: Platform.OS === "android" ? 0 : 0.5,
       borderColor: itemSeparatorColor(colorScheme),
       color: textPrimaryColor(colorScheme),
+      outlineWidth: Platform.OS === "web" ? 0 : undefined,
     },
     sendButtonContainer: {
       width: 60,

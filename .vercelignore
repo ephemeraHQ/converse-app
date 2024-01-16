@@ -15,4 +15,6 @@ web-build/
 .vscode
 builds
 .env
-.vercel
+
+ios
+android

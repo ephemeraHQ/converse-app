@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef } from "react";
-import { AppState } from "react-native";
+import { AppState, Platform } from "react-native";
 
 import { getExistingDataSource } from "../data/db/datasource";
 import {
@@ -116,7 +116,7 @@ export default function XmtpEngine() {
     for (const account of accounts) {
       if (
         getChatStore(account).getState().localClientConnected &&
-        getExistingDataSource(account)
+        (Platform.OS === "web" || getExistingDataSource(account))
       ) {
         try {
           await createPendingConversations(account);

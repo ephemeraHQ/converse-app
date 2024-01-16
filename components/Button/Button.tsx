@@ -15,7 +15,7 @@ import Picto from "../Picto/Picto";
 type Props = {
   title: string;
   onPress?: (event: GestureResponderEvent) => void;
-  variant: "primary" | "secondary" | "grey" | "text";
+  variant: "primary" | "secondary" | "grey" | "text" | "secondary-danger";
   style?: StyleProp<ViewStyle>;
   textStyle?: StyleProp<TextStyle>;
   allowFontScaling?: boolean;
