@@ -1,4 +1,3 @@
-import { usePrivy } from "@privy-io/expo";
 import Clipboard from "@react-native-clipboard/clipboard";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import Constants from "expo-constants";
@@ -43,10 +42,8 @@ import {
   textPrimaryColor,
   textSecondaryColor,
 } from "../utils/colors";
-import { addLog } from "../utils/debug";
 import { evmHelpers } from "../utils/evm/helpers";
-import { logout } from "../utils/logout";
-import useDisconnect from "../utils/onboarding/disconnect";
+import { useLogoutFromConverse } from "../utils/logout";
 import { getIPFSAssetURI } from "../utils/thirdweb";
 import { refreshBalanceForAccount } from "../utils/wallet";
 import { consentToPeersOnProtocol } from "../utils/xmtpRN/conversations";
@@ -67,7 +64,6 @@ export default function ProfileScreen({
   const recommendationTags = useRecommendationsStore(
     (s) => s.frens[peerAddress]?.tags
   );
-  const disconnectWallet = useDisconnect();
   const profiles = useProfilesStore((state) => state.profiles);
   const isBlockedPeer = useSettingsStore(
     (s) => s.peersStatus[peerAddress.toLowerCase()] === "blocked"
@@ -146,7 +142,7 @@ export default function ProfileScreen({
   ];
 
   const isPrivy = useLoggedWithPrivy();
-  const { logout: privyLogout } = usePrivy();
+  const logout = useLogoutFromConverse(userAddress);
 
   const getSocialItemsFromArray = useCallback(
     <T,>(
@@ -421,12 +417,7 @@ export default function ProfileScreen({
                 action: () => {
                   navigation.popToTop();
                   setTimeout(() => {
-                    disconnectWallet();
-                    if (isPrivy) {
-                      addLog("calling privy logout from Profile.tsx");
-                      privyLogout();
-                    }
-                    logout(userAddress);
+                    logout();
                   }, 300);
                 },
               },

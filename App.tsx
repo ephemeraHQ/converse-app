@@ -103,7 +103,7 @@ export default function App() {
     Platform.OS === "ios" ? KeyboardProvider : React.Fragment;
 
   return (
-    <PrivyProvider appId={config.privyAppId} storage={privySecureStorage}>
+    <PrivyProvider appId={config.privy.appId} storage={privySecureStorage}>
       <ThirdwebProvider
         activeChain={Ethereum}
         dAppMeta={{

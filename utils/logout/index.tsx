@@ -1,20 +1,24 @@
-import { clearDb } from "../data/db";
+import { useCallback } from "react";
+
+import { clearDb } from "../../data/db";
 import {
   getAccountsList,
   getChatStore,
   getWalletStore,
   useAccountsStore,
-} from "../data/store/accountsStore";
-import { deleteSecureItemAsync } from "./keychain";
-import { deleteXmtpKey } from "./keychain/helpers";
-import mmkv from "./mmkv";
+} from "../../data/store/accountsStore";
+import { deleteSecureItemAsync } from "../keychain";
+import { deleteXmtpKey } from "../keychain/helpers";
+import mmkv from "../mmkv";
 import {
   deleteSubscribedTopics,
   unsubscribeFromNotifications,
-} from "./notifications";
-import { resetSharedData } from "./sharedData";
-import { getXmtpApiHeaders } from "./xmtpRN/api";
-import { deleteXmtpClient } from "./xmtpRN/sync";
+} from "../notifications";
+import { resetSharedData } from "../sharedData";
+import { getXmtpApiHeaders } from "../xmtpRN/api";
+import { deleteXmtpClient } from "../xmtpRN/sync";
+import usePrivyLogout from "./privy";
+import useDisconnectWallet from "./wallet";
 
 type LogoutTasks = {
   [account: string]: {
@@ -129,42 +133,55 @@ export const executeLogoutTasks = async () => {
   return true;
 };
 
-export const logout = async (account: string) => {
-  const topicsByAccount: { [a: string]: string[] } = {};
-  const accounts = getAccountsList();
-  accounts.forEach((a) => {
-    topicsByAccount[a] = Object.keys(getChatStore(a).getState().conversations);
-  });
-
-  // We need to delete topics that are in this account and not other accounts
-  // so we start with topics from this account and we'll remove topics we find in others
-  const topicsToDelete = topicsByAccount[account];
-  const pkPath = getWalletStore(account).getState().privateKeyPath;
-  const apiHeaders = await getXmtpApiHeaders(account);
-  accounts.forEach((a) => {
-    if (a !== account) {
-      topicsByAccount[a].forEach((topic) => {
-        const topicIndex = topicsToDelete.indexOf(topic);
-        if (topicIndex > -1) {
-          topicsToDelete.splice(topicIndex, 1);
-        }
-      });
+export const useLogoutFromConverse = (account: string) => {
+  const privyLogout = usePrivyLogout();
+  const disconnectWallet = useDisconnectWallet();
+  const logout = useCallback(async () => {
+    disconnectWallet();
+    const isPrivyAccount =
+      !!useAccountsStore.getState().privyAccountId[account];
+    if (isPrivyAccount) {
+      privyLogout();
     }
-  });
+    const topicsByAccount: { [a: string]: string[] } = {};
+    const accounts = getAccountsList();
+    accounts.forEach((a) => {
+      topicsByAccount[a] = Object.keys(
+        getChatStore(a).getState().conversations
+      );
+    });
 
-  clearDb(account);
+    // We need to delete topics that are in this account and not other accounts
+    // so we start with topics from this account and we'll remove topics we find in others
+    const topicsToDelete = topicsByAccount[account];
+    const pkPath = getWalletStore(account).getState().privateKeyPath;
+    const apiHeaders = await getXmtpApiHeaders(account);
+    accounts.forEach((a) => {
+      if (a !== account) {
+        topicsByAccount[a].forEach((topic) => {
+          const topicIndex = topicsToDelete.indexOf(topic);
+          if (topicIndex > -1) {
+            topicsToDelete.splice(topicIndex, 1);
+          }
+        });
+      }
+    });
 
-  // Now that db has been deleted we can remove account
-  // from store (account holds the db id so it was needed
-  // to clear db)
-  useAccountsStore.getState().removeAccount(account);
+    clearDb(account);
 
-  deleteXmtpClient(account);
-  deleteSubscribedTopics(account);
+    // Now that db has been deleted we can remove account
+    // from store (account holds the db id so it was needed
+    // to clear db)
+    useAccountsStore.getState().removeAccount(account);
 
-  saveLogoutTask(account, apiHeaders, topicsToDelete, pkPath);
+    deleteXmtpClient(account);
+    deleteSubscribedTopics(account);
 
-  setTimeout(() => {
-    executeLogoutTasks();
-  }, 500);
+    saveLogoutTask(account, apiHeaders, topicsToDelete, pkPath);
+
+    setTimeout(() => {
+      executeLogoutTasks();
+    }, 500);
+  }, [account, disconnectWallet, privyLogout]);
+  return logout;
 };
