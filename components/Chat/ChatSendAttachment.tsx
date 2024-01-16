@@ -66,25 +66,26 @@ export default function ChatSendAttachment() {
           Cancel
         </Text>
       )}
-      {Platform.OS === "android" && (
-        <TouchableOpacity
-          onPress={() => {
-            setMediaPreview(null);
-          }}
-        >
-          <Picto
-            picto="xmark"
-            color="#D8C2BE"
-            style={{
-              width: 34,
-              height: 34,
-              left: 20,
-              top: 20,
+      {Platform.OS === "android" ||
+        (Platform.OS === "web" && (
+          <TouchableOpacity
+            onPress={() => {
+              setMediaPreview(null);
             }}
-            size={34}
-          />
-        </TouchableOpacity>
-      )}
+          >
+            <Picto
+              picto="xmark"
+              color="#D8C2BE"
+              style={{
+                width: 34,
+                height: 34,
+                left: 20,
+                top: 20,
+              }}
+              size={34}
+            />
+          </TouchableOpacity>
+        ))}
       <View style={[styles.controls, { bottom: insets.bottom }]}>
         {!sending && !error && (
           <TouchableOpacity onPress={sendMedia} activeOpacity={0.6}>
