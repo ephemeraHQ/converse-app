@@ -15,7 +15,6 @@ import {
 } from "../../components/Connecting";
 import ProfileSettingsButton from "../../components/ConversationList/ProfileSettingsButton";
 import Picto from "../../components/Picto/Picto";
-import config from "../../config";
 import { useChatStore } from "../../data/store/accountsStore";
 import { useSelect } from "../../data/store/storeHelpers";
 import {
@@ -80,7 +79,7 @@ export default function ConversationListNav() {
     if (shouldShowConnectingOrSyncing && !searchBarFocused) {
       return shouldShowConnecting ? "Connecting…" : "Syncing…";
     }
-    return `Search chats ${config.env}`;
+    return "Search chats";
   };
 
   return (
