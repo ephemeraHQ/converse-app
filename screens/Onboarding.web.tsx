@@ -4,6 +4,7 @@ import { ethers } from "ethers";
 import { useEffect, useRef, useState } from "react";
 import { Text, View, useColorScheme, StyleSheet } from "react-native";
 
+import Button from "../components/Button/Button";
 import Picto from "../components/Picto/Picto";
 import TableView from "../components/TableView/TableView";
 import {
@@ -17,6 +18,7 @@ import {
   useHasOnePrivyAccount,
 } from "../data/store/accountsStore";
 import { useOnboardingStore } from "../data/store/onboardingStore";
+import { useSelect } from "../data/store/storeHelpers";
 import {
   backgroundColor,
   textPrimaryColor,
@@ -29,6 +31,9 @@ import { getXmtpClient } from "../utils/xmtpRN/sync";
 export default function Onboarding() {
   const styles = useStyles();
   const { walletProvider } = useWeb3ModalProvider();
+  const { addingNewAccount, setAddingNewAccount } = useOnboardingStore(
+    useSelect(["addingNewAccount", "setAddingNewAccount"])
+  );
   const { open: openModal } = useWeb3Modal();
   const hasOnePrivy = useHasOnePrivyAccount();
   const connectingToXmtp = useRef(false);
@@ -154,6 +159,14 @@ export default function Onboarding() {
           },
         ].filter((i) => i.id !== "phone" || !hasOnePrivy)}
       />
+      {addingNewAccount && (
+        <Button
+          title="Cancel"
+          variant="text"
+          style={[styles.cancelButton]}
+          onPress={() => setAddingNewAccount(false)}
+        />
+      )}
     </View>
   );
 }
@@ -186,6 +199,11 @@ const useStyles = () => {
       lineHeight: 20,
       color: textSecondaryColor(colorScheme),
       maxWidth: 260,
+    },
+    cancelButton: {
+      position: "absolute",
+      top: 15,
+      left: 15,
     },
   });
 };
