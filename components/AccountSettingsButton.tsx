@@ -129,7 +129,7 @@ export default function AccountSettingsButton({ navigation, account }: Props) {
     };
 
     const options = Object.keys(methods);
-    if (notificationsPermissionStatus === "granted") {
+    if (notificationsPermissionStatus === "granted" || Platform.OS === "web") {
       options.splice(options.indexOf("Turn on notifications"), 1);
     }
 

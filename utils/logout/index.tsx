@@ -7,6 +7,7 @@ import {
   getWalletStore,
   useAccountsStore,
 } from "../../data/store/accountsStore";
+import { addLog } from "../debug";
 import { deleteSecureItemAsync } from "../keychain";
 import { deleteXmtpKey } from "../keychain/helpers";
 import mmkv from "../mmkv";
@@ -17,8 +18,8 @@ import {
 import { resetSharedData } from "../sharedData";
 import { getXmtpApiHeaders } from "../xmtpRN/api";
 import { deleteXmtpClient } from "../xmtpRN/sync";
-import usePrivyLogout from "./privy";
-import useDisconnectWallet from "./wallet";
+import { useDisconnectFromPrivy } from "./privy";
+import { useDisconnectWallet } from "./wallet";
 
 type LogoutTasks = {
   [account: string]: {
@@ -134,13 +135,14 @@ export const executeLogoutTasks = async () => {
 };
 
 export const useLogoutFromConverse = (account: string) => {
-  const privyLogout = usePrivyLogout();
+  const privyLogout = useDisconnectFromPrivy();
   const disconnectWallet = useDisconnectWallet();
   const logout = useCallback(async () => {
     disconnectWallet();
     const isPrivyAccount =
       !!useAccountsStore.getState().privyAccountId[account];
     if (isPrivyAccount) {
+      addLog("Logging out from Privy from logout helper");
       privyLogout();
     }
     const topicsByAccount: { [a: string]: string[] } = {};

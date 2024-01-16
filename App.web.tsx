@@ -11,6 +11,9 @@ import XmtpEngine from "./components/XmtpEngine";
 import config from "./config";
 import Main from "./screens/Main";
 import { MaterialDarkTheme, MaterialLightTheme } from "./utils/colors";
+import mmkv from "./utils/mmkv";
+import { DEFAULT_EMOJIS, RECENT_EMOJI_STORAGE_KEY } from "./utils/reactions";
+import { useRecentPicksPersistence } from "./vendor/rn-emoji-keyboard";
 
 const mainnet = {
   chainId: 1,
@@ -30,6 +33,13 @@ createWeb3Modal({
 
 export default function App() {
   const colorScheme = useColorScheme();
+  useRecentPicksPersistence({
+    initialization: () =>
+      JSON.parse(mmkv.getString(RECENT_EMOJI_STORAGE_KEY) || DEFAULT_EMOJIS),
+    onStateChange: (next) => {
+      mmkv.set(RECENT_EMOJI_STORAGE_KEY, JSON.stringify(next));
+    },
+  });
   return (
     <SafeAreaProvider>
       <ActionSheetProvider>
@@ -49,7 +59,6 @@ export default function App() {
               supportedChains: [config.privy.defaultChain],
               appearance: {
                 theme: "light",
-                accentColor: "#FB5038",
                 logo: "https://converse.xyz/icon.png",
               },
             }}

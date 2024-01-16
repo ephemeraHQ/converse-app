@@ -1,6 +1,6 @@
 import { useDisconnect } from "@thirdweb-dev/react-native";
 
-export default function () {
+export const useDisconnectWallet = () => {
   const disconnectWallet = useDisconnect();
   return disconnectWallet;
-}
+};

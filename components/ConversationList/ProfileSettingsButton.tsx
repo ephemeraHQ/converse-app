@@ -39,7 +39,7 @@ export default function ProfileSettingsButton() {
     setStringSize(str.length * 10 + 10);
   }, [USDCBalance]);
   if (isPrivy) {
-    if (Platform.OS === "android") {
+    if (Platform.OS === "android" || Platform.OS === "web") {
       return (
         <Button
           variant="primary"

@@ -14,7 +14,7 @@ import {
   primaryColor,
   textSecondaryColor,
 } from "../../utils/colors";
-import useDisconnectWallet from "../../utils/logout/wallet";
+import { useDisconnectWallet } from "../../utils/logout/wallet";
 import { shortAddress, useAccountsProfiles } from "../../utils/str";
 import { NavigationParamList } from "../Navigation/Navigation";
 
