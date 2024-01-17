@@ -13,7 +13,6 @@ import {
 } from "../../utils/colors";
 import {
   TransactionDetails,
-  isTransactionRefValid,
   mergeTransactionRefData,
 } from "../../utils/transaction";
 import { TransactionReference } from "../../utils/xmtpRN/contentTypes/transactionReference";
