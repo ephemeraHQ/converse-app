@@ -79,7 +79,7 @@ export default function Navigation() {
     <NavigationContainer
       linking={splashScreenHidden ? (linking as any) : undefined}
       initialState={
-        Platform.OS === "ios"
+        Platform.OS === "ios" || Platform.OS === "web"
           ? {
               // On iOS, the Accounts switcher is available through a back button
               index: 1,
