@@ -215,7 +215,8 @@ export default function PrivyConnect() {
             countryPickerProps={{
               flatListProps: { style: styles.countryPicker },
               withFilter: true,
-              filterProps: { autoFocus: true },
+              // Disabling because causes crashes on some iPhones
+              // filterProps: { autoFocus: true },
             }}
             containerStyle={styles.phoneInputContainer}
             flagButtonStyle={styles.flagButton}
