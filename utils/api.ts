@@ -248,7 +248,7 @@ export const getCoinbaseTransactionDetails = async (
   account: string,
   networkId: string,
   sponsoredTxId: string
-): Promise<string> => {
+): Promise<TransactionDetails> => {
   const { data } = await api.get("/api/evm/coinbaseTransactionDetails", {
     headers: await getXmtpApiHeaders(account),
     params: { networkId, sponsoredTxId },
