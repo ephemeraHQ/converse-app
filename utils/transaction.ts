@@ -153,3 +153,24 @@ export function createUniformTransaction(
     throw new Error("Content type could not be determined");
   }
 }
+
+export const formatAmount = (event: TransactionEvent): string => {
+  const { amount, currency, decimals } = event;
+  const actualAmount = Number(amount) / Math.pow(10, decimals);
+
+  if (currency.toLowerCase().includes("usdc")) {
+    // Format as dollars, showing decimals only if necessary
+    const formattedAmount =
+      actualAmount % 1 === 0
+        ? actualAmount.toFixed(0)
+        : actualAmount.toFixed(2);
+    return `$${formattedAmount}`;
+  } else {
+    // Format as "[amount] [currency]", showing decimals only if necessary
+    const formattedAmount =
+      actualAmount % 1 === 0
+        ? actualAmount.toFixed(0)
+        : actualAmount.toFixed(decimals);
+    return `${formattedAmount} ${currency}`;
+  }
+};

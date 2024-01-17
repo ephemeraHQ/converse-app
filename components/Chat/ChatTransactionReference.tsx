@@ -16,8 +16,10 @@ import {
 } from "../../utils/colors";
 import {
   TransactionDetails,
+  TransactionEvent,
   createUniformTransaction,
   extractChainIdToHex,
+  formatAmount,
   getTxContentType,
   getTxRefId,
   mergeTransactionRefData,
@@ -50,7 +52,8 @@ export default function ChatTransactionReference({ message }: Props) {
     status: undefined as undefined | "PENDING" | "FAILURE" | "SUCCESS",
     sponsored: true, // by converse
     blockExplorerURL: undefined as undefined | string,
-    events: undefined as undefined | [],
+    chainName: undefined as undefined | string,
+    events: [] as TransactionEvent[],
   });
   const fetchingTransaction = useRef(false);
   const showing = !transaction.loading;
@@ -167,7 +170,7 @@ export default function ChatTransactionReference({ message }: Props) {
           ...t,
           error: false,
           loading: false,
-          txLookup,
+          ...txLookup,
         }));
       }
     } else {
@@ -210,7 +213,11 @@ export default function ChatTransactionReference({ message }: Props) {
     );
   } else if (transaction.error) {
     return null;
-  } else {
+    // TODO – WIP check for "transfer" events that contains an amount
+  } else if (
+    transaction.status === "SUCCESS" ||
+    transaction.status === "FAILURE"
+  ) {
     return (
       <>
         <View
@@ -219,7 +226,11 @@ export default function ChatTransactionReference({ message }: Props) {
             message.fromMe ? styles.innerBubbleMe : undefined,
           ]}
         >
-          <Text style={textStyle}>{JSON.stringify(transaction)}</Text>
+          <Text style={styles.amount}>
+            {formatAmount(transaction.events[0])}
+          </Text>
+          <Text style={textStyle}>{transaction.chainName}</Text>
+          <Text style={textStyle}>Status: {transaction.status}</Text>
         </View>
         <View style={{ opacity: 0 }}>{metadataView}</View>
       </>
@@ -235,6 +246,14 @@ const useStyles = () => {
       borderRadius: 14,
       width: "100%",
       zIndex: 1,
+    },
+    amount: {
+      paddingHorizontal: 8,
+      paddingVertical: Platform.OS === "android" ? 2 : 3,
+      fontSize: 34,
+      fontWeight: "bold",
+      textAlign: "center",
+      color: textPrimaryColor(colorScheme),
     },
     text: {
       paddingHorizontal: 8,
