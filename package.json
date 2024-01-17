@@ -212,5 +212,6 @@
         "react-native-screens"
       ]
     }
-  }
+  },
+  "packageManager": "yarn@1.22.19"
 }
