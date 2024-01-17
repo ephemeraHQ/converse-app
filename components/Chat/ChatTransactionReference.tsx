@@ -19,6 +19,7 @@ import {
   createUniformTransaction,
   extractChainIdToHex,
   getTxContentType,
+  getTxRefId,
   mergeTransactionRefData,
 } from "../../utils/transaction";
 import { TransactionReference } from "../../utils/xmtpRN/contentTypes/transactionReference";
@@ -43,7 +44,7 @@ export default function ChatTransactionReference({ message }: Props) {
       | "coinbaseRegular"
       | "coinbaseSponsored",
     namespace: undefined as undefined | string,
-    networkId: "",
+    networkId: "" as string | number,
     reference: "",
     metadata: undefined as undefined | object,
     status: undefined as undefined | "PENDING" | "FAILURE" | "SUCCESS",
@@ -87,7 +88,7 @@ export default function ChatTransactionReference({ message }: Props) {
       fetchingTransaction.current = true;
       setTransaction((t) => ({ ...t, loading: true }));
 
-      const txRef = JSON.parse(message.content);
+      const txRef = JSON.parse(message.content); // as TransactionReference;
       const txContentType = getTxContentType(txRef);
       let txDetails: TransactionDetails | undefined;
 
@@ -134,8 +135,8 @@ export default function ChatTransactionReference({ message }: Props) {
           const transactionStore = getTransactionsStore(currentAccount);
           transactionStore.getState().setTransactions([uniformTx]);
 
-          setTransaction((a) => ({
-            ...a,
+          setTransaction((t) => ({
+            ...t,
             error: false,
             loading: false,
             uniformTx,
@@ -154,13 +155,25 @@ export default function ChatTransactionReference({ message }: Props) {
 
     const txRef = JSON.parse(message.content);
     const txContentType = getTxContentType(txRef);
+    if (txContentType) {
+      const txLookup = getTransactionsStore(currentAccount)
+        .getState()
+        .getTransaction(getTxRefId(txRef, txContentType));
 
-    if (!txContentType) {
+      if (!txLookup || txLookup.status === "PENDING") {
+        go();
+      } else {
+        setTransaction((t) => ({
+          ...t,
+          error: false,
+          loading: false,
+          txLookup,
+        }));
+      }
+    } else {
       // sentryTrackMessage("INVALID_TRANSACTION_REFERENCE", { message });
       // TODO: should display message fallback if no valid transaction content type is found
       setTransaction((a) => ({ ...a, error: true, loading: false }));
-    } else {
-      go();
     }
 
     // Cleanup on unmount or dependency change
@@ -169,7 +182,7 @@ export default function ChatTransactionReference({ message }: Props) {
         clearTimeout(retryTimeout);
       }
     };
-  }, [currentAccount, message, saveAndDisplayTransaction]);
+  }, [currentAccount, message]);
 
   const textStyle = [
     styles.text,
