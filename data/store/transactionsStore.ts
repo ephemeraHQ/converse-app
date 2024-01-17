@@ -17,6 +17,7 @@ export type Transaction = {
   sponsored: boolean; // by converse
   blockExplorerURL?: string;
   events?: TransactionEvent[];
+  chainName?: string;
 };
 
 export type TransactionsStoreType = {
