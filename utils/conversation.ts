@@ -19,6 +19,7 @@ import { getContentPreview } from "./reactions";
 import { getMatchedPeerAddresses } from "./search";
 import { sentryTrackMessage } from "./sentry";
 import { TextInputWithValue, addressPrefix } from "./str";
+import { isTransactionMessage } from "./transaction";
 import { isOnXmtp } from "./xmtpRN/client";
 import { isContentType } from "./xmtpRN/contentTypes";
 
@@ -53,6 +54,12 @@ export const conversationLastMessagePreview = (
         removedReactions = {};
         return {
           contentPreview: "📎 Media",
+          message: lastMessage,
+        };
+      } else if (isTransactionMessage(lastMessage?.contentType)) {
+        removedReactions = {};
+        return {
+          contentPreview: "💸 Transaction",
           message: lastMessage,
         };
       } else if (isContentType("reaction", lastMessage?.contentType)) {
