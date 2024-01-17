@@ -98,29 +98,3 @@ export const getTxRefId = (
       return `${networkId}-${txRef.sponsoredTxId}`;
   }
 };
-
-export const isTransactionRefValid = (messageContent: string): boolean => {
-  let txRef;
-
-  // Try to parse the JSON content
-  try {
-    txRef = JSON.parse(messageContent);
-  } catch (error) {
-    console.error("Failed to parse JSON:", error);
-    return false;
-  }
-
-  // Check if the mandatory fields 'networkId' and 'reference' are present and of correct types
-  if (
-    typeof txRef.networkId !== "string" &&
-    typeof txRef.networkId !== "number"
-  ) {
-    return false;
-  }
-
-  if (typeof txRef.reference !== "string") {
-    return false;
-  }
-
-  return true;
-};
