@@ -25,7 +25,6 @@ export type TransactionsStoreType = {
 
   setTransactions: (transactions: Transaction[]) => void;
   getTransaction: (id: string) => Transaction;
-  updateTransaction: (id: string, updates: Partial<Transaction>) => void;
 
   getEvents: (id: string) => any[];
   setEvents: (id: string, events: any[]) => void;
@@ -43,6 +42,7 @@ export const initTransactionsStore = (account: string) => {
               const updatedTransactions = { ...state.transactions };
 
               transactions.forEach((transaction) => {
+                // Upsert logic
                 updatedTransactions[transaction.id] = {
                   ...(updatedTransactions[transaction.id] || {}),
                   ...transaction,
@@ -55,21 +55,6 @@ export const initTransactionsStore = (account: string) => {
           getTransaction: (id: string) => {
             return get().transactions[id];
           },
-
-          updateTransaction: (id: string, updates: Partial<Transaction>) =>
-            set((state) => {
-              const existingTransaction = state.transactions[id];
-              if (!existingTransaction) {
-                console.warn(`Transaction with id ${id} not found`);
-                return { ...state };
-              }
-              return {
-                transactions: {
-                  ...state.transactions,
-                  [id]: { ...existingTransaction, ...updates },
-                },
-              };
-            }),
 
           getEvents: (id) => {
             const transaction = get().transactions[id];

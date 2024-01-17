@@ -36,7 +36,7 @@ export default function ChatTransactionReference({ message }: Props) {
   const [transaction, setTransaction] = useState({
     loading: true,
     error: false,
-    id: "", // Concatenation of "[networkid]-[reference]"
+    id: "", // "[networkid]-[txHash | sponsoredTxId]", see helper: getTxRefId()
     contentType: undefined as
       | undefined
       | "transactionReference"
@@ -73,12 +73,7 @@ export default function ChatTransactionReference({ message }: Props) {
           txRefId,
           txDetails
         );
-
-        if (update) {
-          transactionStore.getState().updateTransaction(txRefId, transaction);
-        } else {
-          transactionStore.getState().setTransactions([transaction]);
-        }
+        transactionStore.getState().setTransactions([transaction]);
       }
     },
     [currentAccount]
@@ -132,13 +127,12 @@ export default function ChatTransactionReference({ message }: Props) {
           console.log("Transaction status is PENDING, retrying...");
           retryTimeout = setTimeout(go, 5000);
         } else if (txDetails) {
-          console.log(
-            "txDetails.status should be FAILURE or SUCCESS:",
-            txDetails.status
-          );
-          // TODO update zustand
           const uniformTx = createUniformTransaction(txRef, txDetails);
-          console.log("uniformTx:", uniformTx);
+          console.log("Updating transaction in Zustand", uniformTx.reference);
+
+          // Update transaction store
+          const transactionStore = getTransactionsStore(currentAccount);
+          transactionStore.getState().setTransactions([uniformTx]);
 
           setTransaction((a) => ({
             ...a,
