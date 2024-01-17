@@ -85,6 +85,8 @@ export default function ChatTransactionReference({ message }: Props) {
   );
 
   useEffect(() => {
+    let retryTimeout: NodeJS.Timeout;
+
     const go = async () => {
       if (fetchingTransaction.current) return;
       fetchingTransaction.current = true;
@@ -126,14 +128,31 @@ export default function ChatTransactionReference({ message }: Props) {
           }
         }
 
-        if (txDetails) {
+        if (txDetails && txDetails.status === "PENDING") {
+          console.log("Transaction status is PENDING, retrying...");
+          retryTimeout = setTimeout(go, 5000);
+        } else if (txDetails) {
+          console.log(
+            "txDetails.status should be FAILURE or SUCCESS:",
+            txDetails.status
+          );
+          // TODO update zustand
           const uniformTx = createUniformTransaction(txRef, txDetails);
           console.log("uniformTx:", uniformTx);
+
+          setTransaction((a) => ({
+            ...a,
+            error: false,
+            loading: false,
+            uniformTx,
+          }));
         } else {
           console.error("Transaction details could not be fetched");
         }
       } catch (error) {
         console.error("Error fetching transaction details:", error);
+      } finally {
+        fetchingTransaction.current = false;
       }
     };
 
@@ -142,12 +161,18 @@ export default function ChatTransactionReference({ message }: Props) {
 
     if (!txContentType) {
       // sentryTrackMessage("INVALID_TRANSACTION_REFERENCE", { message });
-      // TODO: should display message fallback
+      // TODO: should display message fallback if no valid transaction content type is found
       setTransaction((a) => ({ ...a, error: true, loading: false }));
     } else {
-      setTransaction((t) => ({ ...t, contentType: txContentType }));
       go();
     }
+
+    // Cleanup on unmount or dependency change
+    return () => {
+      if (retryTimeout) {
+        clearTimeout(retryTimeout);
+      }
+    };
   }, [currentAccount, message, saveAndDisplayTransaction]);
 
   const textStyle = [
@@ -185,7 +210,7 @@ export default function ChatTransactionReference({ message }: Props) {
             message.fromMe ? styles.innerBubbleMe : undefined,
           ]}
         >
-          <Text style={textStyle}>{message.content}</Text>
+          <Text style={textStyle}>{JSON.stringify(transaction)}</Text>
         </View>
         <View style={{ opacity: 0 }}>{metadataView}</View>
       </>
