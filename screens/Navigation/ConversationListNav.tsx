@@ -26,6 +26,7 @@ import {
 import { converseEventEmitter } from "../../utils/events";
 import ConversationList from "../ConversationList";
 import { NativeStack, navigationAnimation } from "./Navigation";
+import { useIsSplitScreen } from "./navHelpers";
 
 export const useHeaderSearchBar = (props: any) => {
   // No-op
@@ -35,6 +36,7 @@ export default function ConversationListNav() {
   const colorScheme = useColorScheme();
   const styles = useStyles();
   const searchBar = useRef<TextInput | null>(null);
+  const isSplitScreen = useIsSplitScreen();
   const shouldShowConnectingOrSyncing = useShouldShowConnectingOrSyncing();
   const shouldShowConnecting = useShouldShowConnecting();
   const { searchQuery, setSearchQuery, searchBarFocused, setSearchBarFocused } =
@@ -145,6 +147,7 @@ export default function ConversationListNav() {
 
 const useStyles = () => {
   const colorScheme = useColorScheme();
+  const isSplitScreen = useIsSplitScreen();
   return StyleSheet.create({
     rightButtonContainer: {
       width: 38,
@@ -158,8 +161,8 @@ const useStyles = () => {
       web: {
         flexDirection: "row",
         justifyContent: "flex-start",
-        width: 400,
-        marginLeft: 15,
+        width: isSplitScreen ? 400 : "100%",
+        marginLeft: 16,
       },
     }),
     searchBarWrapper: {

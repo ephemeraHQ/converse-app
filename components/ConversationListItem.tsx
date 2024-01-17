@@ -213,7 +213,7 @@ const ConversationListItem = memo(function ConversationListItem({
       </TouchableHighlight>
     ) : (
       <TouchableRipple
-        unstable_pressDelay={isDesktop || Platform.OS === "web" ? 0 : 75}
+        unstable_pressDelay={isDesktop || isSplitScreen ? 0 : 75}
         onPressIn={() => {
           if (!isSplitScreen) return;
           openConversation();
