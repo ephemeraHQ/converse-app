@@ -8,7 +8,7 @@ import {
 import { XmtpConversation } from "../data/store/chatStore";
 import { getTransactionDetails } from "./api";
 import { saveAttachmentForPendingMessage } from "./attachment";
-import { mergeTransactionRefData } from "./transaction";
+import { createUniformTransaction } from "./transaction";
 import { isContentType } from "./xmtpRN/contentTypes";
 import { sendPendingMessages } from "./xmtpRN/send";
 
@@ -49,18 +49,19 @@ export const sendMessage = async ({
   }
 
   if (isContentType("transactionReference", contentType)) {
-    const transactionRef = JSON.parse(content);
-    const { namespace, networkId, reference: txHash } = transactionRef;
+    const txRef = JSON.parse(content);
+    const { namespace, networkId, reference: txHash } = txRef;
 
     // Handle Ethereum chain IDs, fetch details and save to Zustand
     if (namespace === "eip155" && networkId && txHash) {
-      const details = await getTransactionDetails(
+      const txDetails = await getTransactionDetails(
         currentAccount(),
         networkId,
         txHash
       );
+      const transaction = createUniformTransaction(txRef, txDetails);
+
       const transactionStore = getTransactionsStore(currentAccount());
-      const transaction = mergeTransactionRefData(transactionRef, details);
       transactionStore.getState().setTransactions([transaction]);
     }
   }

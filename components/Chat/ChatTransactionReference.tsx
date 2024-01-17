@@ -5,7 +5,10 @@ import {
   getTransactionsStore,
   useAccountsStore,
 } from "../../data/store/accountsStore";
-import { getTransactionDetails } from "../../utils/api";
+import {
+  getCoinbaseTransactionDetails,
+  getTransactionDetails,
+} from "../../utils/api";
 import {
   messageInnerBubbleColor,
   myMessageInnerBubbleColor,
@@ -13,6 +16,9 @@ import {
 } from "../../utils/colors";
 import {
   TransactionDetails,
+  createUniformTransaction,
+  extractChainIdToHex,
+  getTxContentType,
   mergeTransactionRefData,
 } from "../../utils/transaction";
 import { TransactionReference } from "../../utils/xmtpRN/contentTypes/transactionReference";
@@ -50,19 +56,26 @@ export default function ChatTransactionReference({ message }: Props) {
 
   const saveAndDisplayTransaction = useCallback(
     (
-      txId: string,
+      contentType:
+        | "transactionReference"
+        | "coinbaseRegular"
+        | "coinbaseSponsored",
       txRef: TransactionReference,
+      txRefId: string,
       txDetails: TransactionDetails,
       update = false
     ) => {
-      console.log("saveAndDisplayTransaction");
-
       if (txRef.namespace === "eip155" && txRef.networkId && txRef.reference) {
         const transactionStore = getTransactionsStore(currentAccount);
-        const transaction = mergeTransactionRefData(txRef, txDetails);
+        const transaction = mergeTransactionRefData(
+          contentType,
+          txRef,
+          txRefId,
+          txDetails
+        );
 
         if (update) {
-          transactionStore.getState().updateTransaction(txId, transaction);
+          transactionStore.getState().updateTransaction(txRefId, transaction);
         } else {
           transactionStore.getState().setTransactions([transaction]);
         }
@@ -78,66 +91,61 @@ export default function ChatTransactionReference({ message }: Props) {
       setTransaction((t) => ({ ...t, loading: true }));
 
       const txRef = JSON.parse(message.content);
-      const txId = `${txRef.networkId}-${txRef.reference}`;
-      const txLookup = getTransactionsStore(currentAccount)
-        .getState()
-        .getTransaction(txId);
+      const txContentType = getTxContentType(txRef);
+      let txDetails: TransactionDetails | undefined;
 
-      if (!txLookup) {
-        // TODO
-        // Add the transaction since it's not found
-        console.log("** TODO: Add the transaction since it's not found");
-
-        try {
-          const txDetails = await getTransactionDetails(
-            currentAccount,
-            txRef.networkId,
-            txRef.reference
-          );
-          fetchingTransaction.current = false;
-          saveAndDisplayTransaction(txId, txRef, txDetails);
-        } catch (error) {
-          fetchingTransaction.current = false;
-          console.error("Error fetching or saving transaction details", error);
-        }
-      } else if (txLookup.status === "PENDING") {
-        try {
-          const txDetails = await getTransactionDetails(
-            currentAccount,
-            txRef.networkId,
-            txRef.reference
-          );
-
-          if (txDetails.status !== "PENDING") {
-            // TODO
-            // Update the transaction in the store
-            console.log("** TODO: Update the transaction in the store");
-
-            // save and display
-            fetchingTransaction.current = false;
-            saveAndDisplayTransaction(txId, txRef, txDetails, true);
-          } else {
-            // Retry after 5 seconds if still pending
-            console.log("** Retrying");
-            setTimeout(go, 5000);
+      try {
+        switch (txContentType) {
+          case "transactionReference": {
+            txDetails = await getTransactionDetails(
+              currentAccount,
+              txRef.networkId,
+              txRef.reference
+            );
+            break;
           }
-        } catch (error) {
-          fetchingTransaction.current = false;
-          console.error("Error fetching transaction details", error);
+          case "coinbaseRegular": {
+            txDetails = await getTransactionDetails(
+              currentAccount,
+              extractChainIdToHex(txRef.network.rawValue),
+              txRef.transactionHash
+            );
+            break;
+          }
+          case "coinbaseSponsored": {
+            txDetails = await getCoinbaseTransactionDetails(
+              currentAccount,
+              extractChainIdToHex(txRef.network.rawValue),
+              txRef.sponsoredTxId
+            );
+            break;
+          }
+          default: {
+            console.error("Invalid transaction content type");
+            break;
+          }
         }
-      } else if (
-        txLookup.status === "SUCCESS" ||
-        txLookup.status === "FAILURE"
-      ) {
-        // Do nothing as it's already saved
+
+        if (txDetails) {
+          const uniformTx = createUniformTransaction(txRef, txDetails);
+          console.log("uniformTx:", uniformTx);
+        } else {
+          console.error("Transaction details could not be fetched");
+        }
+      } catch (error) {
+        console.error("Error fetching transaction details:", error);
       }
     };
 
-    const isTxRefValid = isTransactionRefValid(message.content);
-    if (!isTxRefValid) {
+    const txRef = JSON.parse(message.content);
+    const txContentType = getTxContentType(txRef);
+
+    if (!txContentType) {
       // sentryTrackMessage("INVALID_TRANSACTION_REFERENCE", { message });
+      // TODO: should display message fallback
       setTransaction((a) => ({ ...a, error: true, loading: false }));
     } else {
+      setTransaction((t) => ({ ...t, contentType: txContentType }));
       go();
     }
   }, [currentAccount, message, saveAndDisplayTransaction]);

@@ -20,6 +20,7 @@ export interface TransactionDetails {
   events: TransactionEvent[];
   sponsored: boolean;
   status: "PENDING" | "FAILURE" | "SUCCESS";
+  transactionHash: string;
 }
 
 export const isTransactionMessage = (contentType?: string) =>
@@ -29,16 +30,18 @@ export const isTransactionMessage = (contentType?: string) =>
     : false;
 
 export const mergeTransactionRefData = (
+  contentType: "transactionReference" | "coinbaseRegular" | "coinbaseSponsored",
   txRef: TransactionReference,
+  txRefId: string,
   txDetails: TransactionDetails
 ): Transaction => {
   return {
-    id: `${txRef.networkId}-${txRef.reference}`,
-    contentType: "transactionReference",
+    id: txRefId,
+    contentType,
     namespace: txRef.namespace,
     networkId: txRef.networkId,
     reference: txRef.reference,
-    metadata: txRef.metadata,
+    metadata: txRef.metadata || {},
     status: txDetails.status,
     sponsored: txDetails.sponsored || false,
     blockExplorerURL: txDetails.blockExplorerURL,
@@ -74,11 +77,11 @@ export const getTxContentType = (
 };
 
 export const getTxRefId = (
+  txRef: TransactionReference | any,
   txContentType:
     | "transactionReference"
     | "coinbaseRegular"
-    | "coinbaseSponsored",
-  txRef: TransactionReference | any
+    | "coinbaseSponsored"
 ): string => {
   let networkId;
 
@@ -98,3 +101,54 @@ export const getTxRefId = (
       return `${networkId}-${txRef.sponsoredTxId}`;
   }
 };
+
+export function createUniformTransaction(
+  input: TransactionReference | any,
+  txDetails: TransactionDetails
+): Transaction {
+  const contentType = getTxContentType(input);
+  let transaction: Transaction;
+
+  if (contentType) {
+    const txRefId = getTxRefId(input, contentType);
+
+    switch (contentType) {
+      case "transactionReference":
+        transaction = mergeTransactionRefData(
+          contentType,
+          input,
+          txRefId,
+          txDetails
+        );
+        break;
+      case "coinbaseRegular":
+        transaction = mergeTransactionRefData(
+          contentType,
+          {
+            networkId: extractChainIdToHex(input.network.rawValue),
+            reference: input.transactionHash,
+          } as TransactionReference,
+          txRefId,
+          txDetails
+        );
+        break;
+      case "coinbaseSponsored":
+        transaction = mergeTransactionRefData(
+          contentType,
+          {
+            networkId: extractChainIdToHex(input.network.rawValue),
+            reference: txDetails.transactionHash,
+          } as TransactionReference,
+          txRefId,
+          txDetails
+        );
+        break;
+      default:
+        throw new Error("Invalid content type");
+    }
+
+    return transaction;
+  } else {
+    throw new Error("Content type could not be determined");
+  }
+}
