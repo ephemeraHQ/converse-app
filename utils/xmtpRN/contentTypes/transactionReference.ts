@@ -31,6 +31,7 @@ export type TransactionReference = {
     transactionType: string;
     currency: string;
     amount: number;
+    decimals: number;
     fromAddress: string;
     toAddress: string;
   };
@@ -54,15 +55,16 @@ export class TransactionReferenceCodec
 
   decode(encodedContent: EncodedContent): TransactionReference {
     const uint8Array = encodedContent.content;
-    const contentReceived = JSON.parse(new TextDecoder().decode(uint8Array));
+    const contentReceived = JSON.parse(
+      new TextDecoder().decode(uint8Array)
+    ) as TransactionReference;
     return contentReceived;
   }
 
   fallback(content: TransactionReference): string | undefined {
     if (content.reference) {
       return `[Crypto transaction] Use a blockchain explorer to learn more using the transaction hash: ${content.reference}`;
-    } else {
-      return `Crypto transaction`;
     }
+    return `Crypto transaction`;
   }
 }
