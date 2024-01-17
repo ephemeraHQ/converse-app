@@ -46,6 +46,7 @@ export const mergeTransactionRefData = (
     sponsored: txDetails.sponsored || false,
     blockExplorerURL: txDetails.blockExplorerURL,
     events: txDetails.events || [],
+    chainName: txDetails.chainName,
   };
 };
 
