@@ -151,6 +151,8 @@ export default function ChatTransactionReference({ message }: Props) {
         }
       } catch (error) {
         console.error("Error fetching transaction details:", error);
+        // Let's retry in case of network error
+        retryTimeout = setTimeout(go, 5000);
       } finally {
         fetchingTransaction.current = false;
       }
