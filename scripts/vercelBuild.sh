@@ -2,7 +2,7 @@
 
 echo "VERCEL_GIT_COMMIT_REF: $VERCEL_GIT_COMMIT_REF"
 
-if [[ "$VERCEL_GIT_COMMIT_REF" == "website-preview" || "$VERCEL_GIT_COMMIT_REF" == "website-prod" ]]; then
+if [[ "$VERCEL_GIT_COMMIT_REF" == "webapp-preview" || "$VERCEL_GIT_COMMIT_REF" == "webapp-prod" ]]; then
     # Proceed with the build
     echo "✅ - Build can proceed"
     exit 1
