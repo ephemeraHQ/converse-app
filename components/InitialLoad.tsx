@@ -39,6 +39,7 @@ const useStyles = () => {
       flex: 1,
       justifyContent: "center",
       backgroundColor: backgroundColor(colorScheme),
+      paddingTop: Platform.OS === "web" ? 50 : undefined,
     },
     welcome: {
       marginTop: 15,
