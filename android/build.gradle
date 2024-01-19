@@ -3,13 +3,11 @@
 buildscript {
     ext {
         minSdkVersion = Integer.parseInt(findProperty('android.minSdkVersion') ?: '23')
-        compileSdkVersion = 33
-        targetSdkVersion = 33
+        compileSdkVersion = 34
+        targetSdkVersion = 34
         kotlinVersion = "1.8.0"
-        frescoVersion = findProperty('expo.frescoVersion') ?: '2.5.0'
 
-        // We use NDK 23 which has both M1 support and is the side-by-side NDK version from AGP.
-        ndkVersion = "23.1.7779620"
+        ndkVersion = "25.1.8937393"
     }
     repositories {
         google()
@@ -17,11 +15,14 @@ buildscript {
     }
     dependencies {
         classpath 'com.google.gms:google-services:4.3.10'
-        classpath('com.android.tools.build:gradle:7.4.2')
+        classpath('com.android.tools.build:gradle')
         classpath('com.facebook.react:react-native-gradle-plugin')
         classpath 'org.jetbrains.kotlin:kotlin-gradle-plugin:1.8.0'
     }
 }
+
+apply plugin: "com.facebook.react.rootproject"
+
 
 allprojects {
     repositories {
@@ -31,7 +32,7 @@ allprojects {
         }
         maven {
             // Android JSC is installed from npm
-            url(new File(['node', '--print', "require.resolve('jsc-android/package.json')"].execute(null, rootDir).text.trim(), '../dist'))
+            url(new File(['node', '--print', "require.resolve('jsc-android/package.json', { paths: [require.resolve('react-native/package.json')] })"].execute(null, rootDir).text.trim(), '../dist'))
         }
 
         google()

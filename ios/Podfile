@@ -29,13 +29,9 @@ target 'Converse' do
   pod 'MMKVCore', :linkage => :dynamic
   pod 'XMTP', $xmtpVersion, :modular_headers => true
 
-  # Flags change depending on the env values.
-  flags = get_default_flags()
-
   use_react_native!(
     :path => config[:reactNativePath],
     :hermes_enabled => true,
-    :fabric_enabled => flags[:fabric_enabled],
     # An absolute path to your application root.
     :app_path => "#{Pod::Config.instance.installation_root}/..",
     #
@@ -51,7 +47,6 @@ target 'Converse' do
       config[:reactNativePath],
       :mac_catalyst_enabled => false
     )
-    __apply_Xcode_12_5_M1_post_install_workaround(installer)
 
     # Reconfigure the pods, update deployment target and signing settings
     installer.pods_project.targets.each do |target|
@@ -93,6 +88,6 @@ target 'ConverseNotificationExtension' do
   pod 'SQLite.swift'
   pod 'XMTP', $xmtpVersion, :modular_headers => true
   # Version must match version from RNSentry Podspec (matching @sentry/react-native package from package.json)
-  # https://github.com/getsentry/sentry-react-native/blob/5.14.1/RNSentry.podspec#L35
-  pod 'Sentry/HybridSDK', '8.15.2'
+  # https://github.com/getsentry/sentry-react-native/blob/5.16.0/RNSentry.podspec#L35
+  pod 'Sentry/HybridSDK', '8.17.1'
 end
