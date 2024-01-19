@@ -39,7 +39,7 @@
     "@react-navigation/drawer": "^6.6.6",
     "@react-navigation/native": "^6.0.16",
     "@react-navigation/native-stack": "^6.9.4",
-    "@sentry/react-native": "5.16.0",
+    "@sentry/react-native": "^5.16.0",
     "@shopify/flash-list": "1.6.3",
     "@stardazed/streams-polyfill": "^2.4.0",
     "@thirdweb-dev/react-native": "^0.3.12",
