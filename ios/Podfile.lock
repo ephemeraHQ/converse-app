@@ -4,7 +4,7 @@ PODS:
   - CoinbaseWalletSDK/Client (1.0.4)
   - CoinbaseWalletSDK/CrossPlatform (1.0.4):
     - CoinbaseWalletSDK/Client
-  - CoinbaseWalletSDKExpo (1.0.7):
+  - CoinbaseWalletSDKExpo (1.0.10):
     - CoinbaseWalletSDK/CrossPlatform (= 1.0.4)
     - ExpoModulesCore
   - Connect-Swift (0.3.0):
@@ -97,7 +97,7 @@ PODS:
     - React-Core
   - ExpoBackgroundFetch (11.8.0):
     - ExpoModulesCore
-  - ExpoClipboard (4.3.1):
+  - ExpoClipboard (5.0.1):
     - ExpoModulesCore
   - ExpoCrypto (12.8.0):
     - ExpoModulesCore
@@ -1323,16 +1323,16 @@ PODS:
     - GenericJSON (~> 2.0)
     - Logging (~> 1.0.0)
     - secp256k1.swift (~> 0.1)
-  - XMTP (0.7.5-alpha0):
+  - XMTP (0.7.6-alpha0):
     - Connect-Swift (= 0.3.0)
     - GzipSwift
     - web3.swift
     - XMTPRust (= 0.3.7-beta0)
-  - XMTPReactNative (1.23.6):
+  - XMTPReactNative (1.24.1):
     - ExpoModulesCore
     - MessagePacker
     - secp256k1.swift
-    - XMTP (= 0.7.5-alpha0)
+    - XMTP (= 0.7.6-alpha0)
   - XMTPRust (0.3.7-beta0)
   - Yoga (1.14.0)
 
@@ -1448,7 +1448,7 @@ DEPENDENCIES:
   - Sentry/HybridSDK (= 8.17.1)
   - SQLite.swift
   - UMAppLoader (from `../node_modules/unimodules-app-loader/ios`)
-  - XMTP (= 0.7.5-alpha0)
+  - XMTP (= 0.7.6-alpha0)
   - "XMTPReactNative (from `../node_modules/@xmtp/react-native-sdk/ios`)"
   - Yoga (from `../node_modules/react-native/ReactCommon/yoga`)
 
@@ -1703,7 +1703,7 @@ SPEC CHECKSUMS:
   BigInt: 74b4d88367b0e819d9f77393549226d36faeb0d8
   boost: d3f49c53809116a5d38da093a8aa78bf551aed09
   CoinbaseWalletSDK: ea1f37512bbc69ebe07416e3b29bf840f5cc3152
-  CoinbaseWalletSDKExpo: 89f8ad7f799227be7aff2b9353b7a77d37eb8283
+  CoinbaseWalletSDKExpo: c79420eb009f482f768c23b6768fc5b2d7c98777
   Connect-Swift: d38eedc1907d440314f8d26d5a038a00cbb0f6f1
   DoubleConversion: fea03f2699887d960129cc54bba7e52542b6f953
   EASClient: a42ee8bf36c93b3128352faf2ae49405ab4f80bd
@@ -1720,7 +1720,7 @@ SPEC CHECKSUMS:
   expo-dev-menu: c232833de3327df1f0db1c92eac7b804fe21dace
   expo-dev-menu-interface: 7ba029c9d1a82ac22b9b584c00514860b060553e
   ExpoBackgroundFetch: 094377b73648adb55032a440f50cad1a5d3c3a89
-  ExpoClipboard: 695f274f8e028cd113837f917da40c76850877eb
+  ExpoClipboard: b597982124f067ff9f5b89093eb3d97898d5d877
   ExpoCrypto: e2ca148f5c93a0514959df86b34256bb3c50d358
   ExpoDevice: d204395e17fffdcefa7470bdef33b07719ac41b1
   ExpoDocumentPicker: 70254802886e29a45d4ad25486e64b6fc9c8f0cc
@@ -1832,11 +1832,11 @@ SPEC CHECKSUMS:
   SwiftProtobuf: b02b5075dcf60c9f5f403000b3b0c202a11b6ae1
   UMAppLoader: 5df85360d65cabaef544be5424ac64672e648482
   web3.swift: 2263d1e12e121b2c42ffb63a5a7beb1acaf33959
-  XMTP: aa137f3c8ac7b61ecfb3de0973f2dc2e672a9ec1
-  XMTPReactNative: 41fb49589c08ce525faa1c1902e2480b7c7df597
+  XMTP: 61788f11954c6f5fdc01ad585c5b0f756f02cb0e
+  XMTPReactNative: 4d076d216715a595a00d1bfc3c2830988481ede1
   XMTPRust: 8848a2ba761b2c961d666632f2ad27d1082faa93
   Yoga: e64aa65de36c0832d04e8c7bd614396c77a80047
 
-PODFILE CHECKSUM: 9b68e83bc5e6d8649b54718df637e67de2f53efa
+PODFILE CHECKSUM: 7bc9008cbca96a34ef79b57ee2c786eb8a199369
 
 COCOAPODS: 1.14.3

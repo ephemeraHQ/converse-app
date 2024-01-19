@@ -1,43 +1,25 @@
 package com.converse.dev
 
-import com.facebook.react.bridge.PromiseImpl
-import expo.modules.core.arguments.MapArguments
-import kotlinx.coroutines.Dispatchers
+
+import expo.modules.securestore.SecureStoreModule
+import expo.modules.securestore.SecureStoreOptions
 import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.withContext
+import kotlin.reflect.full.callSuspend
+import kotlin.reflect.full.memberFunctions
+import kotlin.reflect.jvm.isAccessible
+
+suspend fun Any.invokeSuspendFunction(methodName: String, vararg args: Any?): Any? =
+    this::class.memberFunctions.find { it.name == methodName }?.also {
+        it.isAccessible = true
+        return it.callSuspend(this, *args)
+    }
 
 fun getKeychainValue(key: String) = runBlocking {
-    val argumentsMap = mutableMapOf<String, Any>()
-    argumentsMap["keychainService"] = BuildConfig.APPLICATION_ID
-
-    val arguments = MapArguments(argumentsMap)
-
-    var promiseResult: Any? = null;
-
-    val promise = PromiseImpl({ result: Array<Any?>? -> promiseResult = result?.get(0) }, { error: Array<Any?>? -> })
-    val promiseWrapped = PromiseWrapper(promise)
-    withContext(Dispatchers.Default) {
-        PushNotificationsService.secureStoreModule.getValueWithKeyAsync(key, arguments, promiseWrapped)
-    }
-    return@runBlocking when {
-        promiseResult == null -> null
-        promiseResult.toString() == "null" -> null
-        else -> promiseResult.toString()
-    }
+    val options = SecureStoreOptions("", BuildConfig.APPLICATION_ID, false)
+    return@runBlocking PushNotificationsService.secureStoreModule.invokeSuspendFunction("getItemImpl", key, options) as String?
 }
 
 fun setKeychainValue(key: String, value: String) = runBlocking {
-    val argumentsMap = mutableMapOf<String, Any>()
-    argumentsMap["keychainService"] = BuildConfig.APPLICATION_ID
-
-    val arguments = MapArguments(argumentsMap)
-
-    var promiseResult: Any? = null;
-
-    val promise = PromiseImpl({ result: Array<Any?>? -> promiseResult = result?.get(0) }, { error: Array<Any?>? -> })
-    val promiseWrapped = PromiseWrapper(promise)
-    withContext(Dispatchers.Default) {
-        PushNotificationsService.secureStoreModule.setValueWithKeyAsync(value, key, arguments, promiseWrapped)
-    }
-    return@runBlocking promiseResult as String
+    val options = SecureStoreOptions("", BuildConfig.APPLICATION_ID, false)
+    PushNotificationsService.secureStoreModule.invokeSuspendFunction("setItemImpl", key, value, options, false)
 }
