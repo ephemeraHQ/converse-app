@@ -106,9 +106,9 @@ android {
     buildToolsVersion rootProject.ext.buildToolsVersion
     compileSdk rootProject.ext.compileSdkVersion
 
-    namespace 'com.converse.preview'
+    namespace 'com.converse.dev'
     defaultConfig {
-        applicationId 'com.converse.preview'
+        applicationId 'com.converse.dev'
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1
