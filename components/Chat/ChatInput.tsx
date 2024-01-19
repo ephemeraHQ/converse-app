@@ -185,7 +185,6 @@ const useStyles = () => {
       borderWidth: Platform.OS === "android" ? 0 : 0.5,
       borderColor: itemSeparatorColor(colorScheme),
       color: textPrimaryColor(colorScheme),
-      outlineWidth: Platform.OS === "web" ? 0 : undefined,
     },
     sendButtonContainer: {
       width: 60,

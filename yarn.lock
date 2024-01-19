@@ -6655,21 +6655,21 @@
   dependencies:
     zod "^3.21.4"
 
-"@privy-io/expo@^0.3.6":
-  version "0.3.6"
-  resolved "https://registry.yarnpkg.com/@privy-io/expo/-/expo-0.3.6.tgz#f3b380e0025b76e09a6ef832f776072c48d5835c"
-  integrity sha512-1fW8qE+viES8imw5CyA23BTnk4VmkzUzXKaUCRelk02YFfm3eTgTVdIwMMPg4FeBv6lcn/RK2PB51i7QojecOQ==
+"@privy-io/expo@^0.4.5":
+  version "0.4.5"
+  resolved "https://registry.yarnpkg.com/@privy-io/expo/-/expo-0.4.5.tgz#f11c00253a5f93758b68779c7352f0b60c6b3ff7"
+  integrity sha512-4yeSTf935jbIQvbEsC1+i+2uUHmhZshMkRF3XyKZHZUk9guWoUs8c0A8I4jzeTj6XfBLbecsXwnlC+FfaBEdLQ==
   dependencies:
-    "@privy-io/js-sdk-core" "0.8.6"
+    "@privy-io/js-sdk-core" "0.10.0"
     react-fast-compare "^3.2.2"
 
-"@privy-io/js-sdk-core@0.8.6":
-  version "0.8.6"
-  resolved "https://registry.yarnpkg.com/@privy-io/js-sdk-core/-/js-sdk-core-0.8.6.tgz#adcd0627a89fc53ba3c8237a45aa1d1fd29f7146"
-  integrity sha512-BwB+bipsOyMYtWEhz2ZfYgxKX5Sje2/n5+5dqIRYzFeHWkznwPrtRxSwJCCiAc5DZTEFqmyjTssjPS9stgf6kw==
+"@privy-io/js-sdk-core@0.10.0":
+  version "0.10.0"
+  resolved "https://registry.yarnpkg.com/@privy-io/js-sdk-core/-/js-sdk-core-0.10.0.tgz#7519c5e5e9258b062aa7a482cef9d62d28c839ba"
+  integrity sha512-2x4xKT7Z7Ay3vhppSOWWwGuWN6lIwuAUJ5gsnbWtdBy4943x0OXyVNCjs77mfCt31K2yAjcFFlXlDiqIJiX1XA==
   dependencies:
     "@ethersproject/providers" "^5.7.2"
-    "@privy-io/public-api" "1.4.4"
+    "@privy-io/public-api" "1.5.1"
     eventemitter3 "^5.0.1"
     fetch-retry "^5.0.6"
     jose "^4.11.2"
@@ -6677,10 +6677,10 @@
     text-encoding "^0.7.0"
     uuid ">=8 <10"
 
-"@privy-io/public-api@1.4.4":
-  version "1.4.4"
-  resolved "https://registry.yarnpkg.com/@privy-io/public-api/-/public-api-1.4.4.tgz#119a6b7da5a1f4b663d8d452fc83b8a30dd4c83f"
-  integrity sha512-+hnLOKF89v9yKc9AkLZ3oxQVhHOzGLANhCta4JepQviaiVaLCscckwgRqrObggvm6gDNvvgY1WnCSyeTek9i3Q==
+"@privy-io/public-api@1.5.1":
+  version "1.5.1"
+  resolved "https://registry.yarnpkg.com/@privy-io/public-api/-/public-api-1.5.1.tgz#fc53f578aaaeb0ae79b05251a77bfb0cdc031b7e"
+  integrity sha512-IinkoqwPXoW/exlrTWG/1lbEzVr4wv381/HScTDQ9EtvJFKYd4LByutYU91tW2Ubn3RLX8IQjaigPCZc/XaBbQ==
   dependencies:
     "@privy-io/api-base" "0.4.2"
     ethers "^5.7.2"
