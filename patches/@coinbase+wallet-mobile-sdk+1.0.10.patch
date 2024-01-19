@@ -1,0 +1,27 @@
+diff --git a/node_modules/@coinbase/wallet-mobile-sdk/android/build.gradle b/node_modules/@coinbase/wallet-mobile-sdk/android/build.gradle
+index 6d7909d..c0bd102 100644
+--- a/node_modules/@coinbase/wallet-mobile-sdk/android/build.gradle
++++ b/node_modules/@coinbase/wallet-mobile-sdk/android/build.gradle
+@@ -53,13 +53,16 @@ afterEvaluate {
+ android {
+   compileSdkVersion safeExtGet("compileSdkVersion", 33)
+ 
+-  compileOptions {
+-    sourceCompatibility JavaVersion.VERSION_11
+-    targetCompatibility JavaVersion.VERSION_11
+-  }
++  def agpVersion = com.android.Version.ANDROID_GRADLE_PLUGIN_VERSION
++  if (agpVersion.tokenize('.')[0].toInteger() < 8) {
++    compileOptions {
++      sourceCompatibility JavaVersion.VERSION_11
++      targetCompatibility JavaVersion.VERSION_11
++    }
+ 
+-  kotlinOptions {
+-    jvmTarget = JavaVersion.VERSION_11.majorVersion
++    kotlinOptions {
++      jvmTarget = JavaVersion.VERSION_11.majorVersion
++    }
+   }
+ 
+   namespace "expo.modules.coinbasewalletsdkexpo"

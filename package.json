@@ -33,7 +33,7 @@
     "@peculiar/webcrypto": "^1.4.1",
     "@privy-io/expo": "^0.4.5",
     "@privy-io/react-auth": "^1.52.6",
-    "@react-native-async-storage/async-storage": "1.21.0",
+    "@react-native-async-storage/async-storage": "^1.21.0",
     "@react-native-clipboard/clipboard": "^1.12.1",
     "@react-native-community/netinfo": "11.1.0",
     "@react-navigation/drawer": "^6.6.6",
@@ -42,8 +42,8 @@
     "@sentry/react-native": "^5.16.0",
     "@shopify/flash-list": "1.6.3",
     "@stardazed/streams-polyfill": "^2.4.0",
-    "@thirdweb-dev/react-native": "^0.3.12",
-    "@thirdweb-dev/react-native-compat": "^0.3.12",
+    "@thirdweb-dev/react-native": "^0.6.2",
+    "@thirdweb-dev/react-native-compat": "^0.6.2",
     "@types/elliptic": "^6.4.14",
     "@typescript-eslint/typescript-estree": "^6.3.0",
     "@web3modal/ethers5": "^3.5.5",
@@ -51,7 +51,7 @@
     "@xmtp/content-type-read-receipt": "^1.1.5",
     "@xmtp/content-type-remote-attachment": "^1.1.4",
     "@xmtp/proto": "^3.24.0",
-    "@xmtp/react-native-sdk": "^1.23.6",
+    "@xmtp/react-native-sdk": "^1.24.1",
     "@xmtp/xmtp-js": "^11.3.5",
     "axios": "^1.2.1",
     "babel-plugin-transform-remove-console": "^6.9.4",
@@ -196,6 +196,7 @@
   },
   "resolutions": {
     "react-native-svg": "^14.1.0",
-    "@expo/config-plugins": "~7.8.0"
+    "@expo/config-plugins": "~7.8.0",
+    "expo-clipboard": "5.0.1"
   }
 }
