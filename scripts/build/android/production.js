@@ -3,7 +3,6 @@ const fs = require("fs");
 
 const { findFilesRecursively } = require("./utils");
 
-
 const replaceAppName = (path) => {
   const content = fs.readFileSync(path, "utf-8");
   const newContent = content.replace(
@@ -18,17 +17,11 @@ const go = async () => {
   const APP_MANIFEST_PATH = "android/app/src/main/AndroidManifest.xml";
   const STRINGS_PATH = "android/app/src/main/res/values/strings.xml";
   const GOOGLE_SERVICES_PATH = "android/app/google-services.json";
-  const DEBUG_FLIPPER_PATH =
-    "android/app/src/debug/java/com/converse/dev/ReactNativeFlipper.java";
-  const MAIN_FLIPPER_PATH =
-    "android/app/src/release/java/com/converse/dev/ReactNativeFlipper.java";
-  
+
   const APP_FILES_PATH = "android/app/src/main/java/com/converse/dev";
 
   replaceAppName(APP_GRADLE_PATH);
-  replaceAppName(DEBUG_FLIPPER_PATH);
-  replaceAppName(MAIN_FLIPPER_PATH);
-  
+
   findFilesRecursively(APP_FILES_PATH).map((f) => replaceAppName(f));
 
   const appManifest = fs.readFileSync(APP_MANIFEST_PATH, "utf-8");
