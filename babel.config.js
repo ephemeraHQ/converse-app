@@ -7,10 +7,6 @@ module.exports = {
     ],
   ],
   plugins: [
-    // Can be removed when using SDK 50
-    // https://github.com/expo/expo/issues/23819#issuecomment-1760250369
-    // This is to make Constants.expoConfig work in web
-    "expo-router/babel",
     ["@babel/plugin-proposal-decorators", { version: "legacy" }],
     "@babel/plugin-proposal-export-namespace-from",
     "@babel/plugin-transform-flow-strip-types", // For privy (phone country selector)
@@ -30,6 +26,7 @@ module.exports = {
             "@web3modal/ethers5/dist/esm/exports/react.js",
           "@web3modal/scaffold-utils/ethers":
             "@web3modal/scaffold-utils/dist/esm/exports/ethers.js",
+          "react-native-webview": "react-native-webview/src/index.ts",
         },
       },
     ],
