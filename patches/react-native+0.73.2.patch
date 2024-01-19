@@ -1,0 +1,1175 @@
+diff --git a/node_modules/react-native/.gradle/8.0.2/checksums/checksums.lock b/node_modules/react-native/.gradle/8.0.2/checksums/checksums.lock
+new file mode 100644
+index 0000000..10baa82
+Binary files /dev/null and b/node_modules/react-native/.gradle/8.0.2/checksums/checksums.lock differ
+diff --git a/node_modules/react-native/.gradle/8.0.2/checksums/md5-checksums.bin b/node_modules/react-native/.gradle/8.0.2/checksums/md5-checksums.bin
+new file mode 100644
+index 0000000..0d6bccb
+Binary files /dev/null and b/node_modules/react-native/.gradle/8.0.2/checksums/md5-checksums.bin differ
+diff --git a/node_modules/react-native/.gradle/8.0.2/checksums/sha1-checksums.bin b/node_modules/react-native/.gradle/8.0.2/checksums/sha1-checksums.bin
+new file mode 100644
+index 0000000..175bb0f
+Binary files /dev/null and b/node_modules/react-native/.gradle/8.0.2/checksums/sha1-checksums.bin differ
+diff --git a/node_modules/react-native/.gradle/8.0.2/dependencies-accessors/8504105662192eca0b63cd063bc2470f1a23a9e5/classes/org/gradle/accessors/dm/LibrariesForLibs$AndroidPluginAccessors.class b/node_modules/react-native/.gradle/8.0.2/dependencies-accessors/8504105662192eca0b63cd063bc2470f1a23a9e5/classes/org/gradle/accessors/dm/LibrariesForLibs$AndroidPluginAccessors.class
+new file mode 100644
+index 0000000..5f474ac
+Binary files /dev/null and b/node_modules/react-native/.gradle/8.0.2/dependencies-accessors/8504105662192eca0b63cd063bc2470f1a23a9e5/classes/org/gradle/accessors/dm/LibrariesForLibs$AndroidPluginAccessors.class differ
+diff --git a/node_modules/react-native/.gradle/8.0.2/dependencies-accessors/8504105662192eca0b63cd063bc2470f1a23a9e5/classes/org/gradle/accessors/dm/LibrariesForLibs$AndroidxAppcompatLibraryAccessors.class b/node_modules/react-native/.gradle/8.0.2/dependencies-accessors/8504105662192eca0b63cd063bc2470f1a23a9e5/classes/org/gradle/accessors/dm/LibrariesForLibs$AndroidxAppcompatLibraryAccessors.class
+new file mode 100644
+index 0000000..c8a2067
+Binary files /dev/null and b/node_modules/react-native/.gradle/8.0.2/dependencies-accessors/8504105662192eca0b63cd063bc2470f1a23a9e5/classes/org/gradle/accessors/dm/LibrariesForLibs$AndroidxAppcompatLibraryAccessors.class differ
+diff --git a/node_modules/react-native/.gradle/8.0.2/dependencies-accessors/8504105662192eca0b63cd063bc2470f1a23a9e5/classes/org/gradle/accessors/dm/LibrariesForLibs$AndroidxLibraryAccessors.class b/node_modules/react-native/.gradle/8.0.2/dependencies-accessors/8504105662192eca0b63cd063bc2470f1a23a9e5/classes/org/gradle/accessors/dm/LibrariesForLibs$AndroidxLibraryAccessors.class
+new file mode 100644
+index 0000000..fda3ed5
+Binary files /dev/null and b/node_modules/react-native/.gradle/8.0.2/dependencies-accessors/8504105662192eca0b63cd063bc2470f1a23a9e5/classes/org/gradle/accessors/dm/LibrariesForLibs$AndroidxLibraryAccessors.class differ
+diff --git a/node_modules/react-native/.gradle/8.0.2/dependencies-accessors/8504105662192eca0b63cd063bc2470f1a23a9e5/classes/org/gradle/accessors/dm/LibrariesForLibs$AndroidxTestLibraryAccessors.class b/node_modules/react-native/.gradle/8.0.2/dependencies-accessors/8504105662192eca0b63cd063bc2470f1a23a9e5/classes/org/gradle/accessors/dm/LibrariesForLibs$AndroidxTestLibraryAccessors.class
+new file mode 100644
+index 0000000..143e363
+Binary files /dev/null and b/node_modules/react-native/.gradle/8.0.2/dependencies-accessors/8504105662192eca0b63cd063bc2470f1a23a9e5/classes/org/gradle/accessors/dm/LibrariesForLibs$AndroidxTestLibraryAccessors.class differ
+diff --git a/node_modules/react-native/.gradle/8.0.2/dependencies-accessors/8504105662192eca0b63cd063bc2470f1a23a9e5/classes/org/gradle/accessors/dm/LibrariesForLibs$AndroidxVersionAccessors.class b/node_modules/react-native/.gradle/8.0.2/dependencies-accessors/8504105662192eca0b63cd063bc2470f1a23a9e5/classes/org/gradle/accessors/dm/LibrariesForLibs$AndroidxVersionAccessors.class
+new file mode 100644
+index 0000000..415eb9e
+Binary files /dev/null and b/node_modules/react-native/.gradle/8.0.2/dependencies-accessors/8504105662192eca0b63cd063bc2470f1a23a9e5/classes/org/gradle/accessors/dm/LibrariesForLibs$AndroidxVersionAccessors.class differ
+diff --git a/node_modules/react-native/.gradle/8.0.2/dependencies-accessors/8504105662192eca0b63cd063bc2470f1a23a9e5/classes/org/gradle/accessors/dm/LibrariesForLibs$BundleAccessors.class b/node_modules/react-native/.gradle/8.0.2/dependencies-accessors/8504105662192eca0b63cd063bc2470f1a23a9e5/classes/org/gradle/accessors/dm/LibrariesForLibs$BundleAccessors.class
+new file mode 100644
+index 0000000..eefe42e
+Binary files /dev/null and b/node_modules/react-native/.gradle/8.0.2/dependencies-accessors/8504105662192eca0b63cd063bc2470f1a23a9e5/classes/org/gradle/accessors/dm/LibrariesForLibs$BundleAccessors.class differ
+diff --git a/node_modules/react-native/.gradle/8.0.2/dependencies-accessors/8504105662192eca0b63cd063bc2470f1a23a9e5/classes/org/gradle/accessors/dm/LibrariesForLibs$FlipperFrescoLibraryAccessors.class b/node_modules/react-native/.gradle/8.0.2/dependencies-accessors/8504105662192eca0b63cd063bc2470f1a23a9e5/classes/org/gradle/accessors/dm/LibrariesForLibs$FlipperFrescoLibraryAccessors.class
+new file mode 100644
+index 0000000..b2ebaff
+Binary files /dev/null and b/node_modules/react-native/.gradle/8.0.2/dependencies-accessors/8504105662192eca0b63cd063bc2470f1a23a9e5/classes/org/gradle/accessors/dm/LibrariesForLibs$FlipperFrescoLibraryAccessors.class differ
+diff --git a/node_modules/react-native/.gradle/8.0.2/dependencies-accessors/8504105662192eca0b63cd063bc2470f1a23a9e5/classes/org/gradle/accessors/dm/LibrariesForLibs$FlipperLibraryAccessors.class b/node_modules/react-native/.gradle/8.0.2/dependencies-accessors/8504105662192eca0b63cd063bc2470f1a23a9e5/classes/org/gradle/accessors/dm/LibrariesForLibs$FlipperLibraryAccessors.class
+new file mode 100644
+index 0000000..b469cab
+Binary files /dev/null and b/node_modules/react-native/.gradle/8.0.2/dependencies-accessors/8504105662192eca0b63cd063bc2470f1a23a9e5/classes/org/gradle/accessors/dm/LibrariesForLibs$FlipperLibraryAccessors.class differ
+diff --git a/node_modules/react-native/.gradle/8.0.2/dependencies-accessors/8504105662192eca0b63cd063bc2470f1a23a9e5/classes/org/gradle/accessors/dm/LibrariesForLibs$FlipperNetworkLibraryAccessors.class b/node_modules/react-native/.gradle/8.0.2/dependencies-accessors/8504105662192eca0b63cd063bc2470f1a23a9e5/classes/org/gradle/accessors/dm/LibrariesForLibs$FlipperNetworkLibraryAccessors.class
+new file mode 100644
+index 0000000..b5fe49f
+Binary files /dev/null and b/node_modules/react-native/.gradle/8.0.2/dependencies-accessors/8504105662192eca0b63cd063bc2470f1a23a9e5/classes/org/gradle/accessors/dm/LibrariesForLibs$FlipperNetworkLibraryAccessors.class differ
+diff --git a/node_modules/react-native/.gradle/8.0.2/dependencies-accessors/8504105662192eca0b63cd063bc2470f1a23a9e5/classes/org/gradle/accessors/dm/LibrariesForLibs$FrescoImagepipelineLibraryAccessors.class b/node_modules/react-native/.gradle/8.0.2/dependencies-accessors/8504105662192eca0b63cd063bc2470f1a23a9e5/classes/org/gradle/accessors/dm/LibrariesForLibs$FrescoImagepipelineLibraryAccessors.class
+new file mode 100644
+index 0000000..da15c0b
+Binary files /dev/null and b/node_modules/react-native/.gradle/8.0.2/dependencies-accessors/8504105662192eca0b63cd063bc2470f1a23a9e5/classes/org/gradle/accessors/dm/LibrariesForLibs$FrescoImagepipelineLibraryAccessors.class differ
+diff --git a/node_modules/react-native/.gradle/8.0.2/dependencies-accessors/8504105662192eca0b63cd063bc2470f1a23a9e5/classes/org/gradle/accessors/dm/LibrariesForLibs$FrescoLibraryAccessors.class b/node_modules/react-native/.gradle/8.0.2/dependencies-accessors/8504105662192eca0b63cd063bc2470f1a23a9e5/classes/org/gradle/accessors/dm/LibrariesForLibs$FrescoLibraryAccessors.class
+new file mode 100644
+index 0000000..074a537
+Binary files /dev/null and b/node_modules/react-native/.gradle/8.0.2/dependencies-accessors/8504105662192eca0b63cd063bc2470f1a23a9e5/classes/org/gradle/accessors/dm/LibrariesForLibs$FrescoLibraryAccessors.class differ
+diff --git a/node_modules/react-native/.gradle/8.0.2/dependencies-accessors/8504105662192eca0b63cd063bc2470f1a23a9e5/classes/org/gradle/accessors/dm/LibrariesForLibs$FrescoUiLibraryAccessors.class b/node_modules/react-native/.gradle/8.0.2/dependencies-accessors/8504105662192eca0b63cd063bc2470f1a23a9e5/classes/org/gradle/accessors/dm/LibrariesForLibs$FrescoUiLibraryAccessors.class
+new file mode 100644
+index 0000000..bfdd95b
+Binary files /dev/null and b/node_modules/react-native/.gradle/8.0.2/dependencies-accessors/8504105662192eca0b63cd063bc2470f1a23a9e5/classes/org/gradle/accessors/dm/LibrariesForLibs$FrescoUiLibraryAccessors.class differ
+diff --git a/node_modules/react-native/.gradle/8.0.2/dependencies-accessors/8504105662192eca0b63cd063bc2470f1a23a9e5/classes/org/gradle/accessors/dm/LibrariesForLibs$InferLibraryAccessors.class b/node_modules/react-native/.gradle/8.0.2/dependencies-accessors/8504105662192eca0b63cd063bc2470f1a23a9e5/classes/org/gradle/accessors/dm/LibrariesForLibs$InferLibraryAccessors.class
+new file mode 100644
+index 0000000..b5b40a4
+Binary files /dev/null and b/node_modules/react-native/.gradle/8.0.2/dependencies-accessors/8504105662192eca0b63cd063bc2470f1a23a9e5/classes/org/gradle/accessors/dm/LibrariesForLibs$InferLibraryAccessors.class differ
+diff --git a/node_modules/react-native/.gradle/8.0.2/dependencies-accessors/8504105662192eca0b63cd063bc2470f1a23a9e5/classes/org/gradle/accessors/dm/LibrariesForLibs$InferVersionAccessors.class b/node_modules/react-native/.gradle/8.0.2/dependencies-accessors/8504105662192eca0b63cd063bc2470f1a23a9e5/classes/org/gradle/accessors/dm/LibrariesForLibs$InferVersionAccessors.class
+new file mode 100644
+index 0000000..db8846c
+Binary files /dev/null and b/node_modules/react-native/.gradle/8.0.2/dependencies-accessors/8504105662192eca0b63cd063bc2470f1a23a9e5/classes/org/gradle/accessors/dm/LibrariesForLibs$InferVersionAccessors.class differ
+diff --git a/node_modules/react-native/.gradle/8.0.2/dependencies-accessors/8504105662192eca0b63cd063bc2470f1a23a9e5/classes/org/gradle/accessors/dm/LibrariesForLibs$JavaxLibraryAccessors.class b/node_modules/react-native/.gradle/8.0.2/dependencies-accessors/8504105662192eca0b63cd063bc2470f1a23a9e5/classes/org/gradle/accessors/dm/LibrariesForLibs$JavaxLibraryAccessors.class
+new file mode 100644
+index 0000000..cbba9d5
+Binary files /dev/null and b/node_modules/react-native/.gradle/8.0.2/dependencies-accessors/8504105662192eca0b63cd063bc2470f1a23a9e5/classes/org/gradle/accessors/dm/LibrariesForLibs$JavaxLibraryAccessors.class differ
+diff --git a/node_modules/react-native/.gradle/8.0.2/dependencies-accessors/8504105662192eca0b63cd063bc2470f1a23a9e5/classes/org/gradle/accessors/dm/LibrariesForLibs$JavaxVersionAccessors.class b/node_modules/react-native/.gradle/8.0.2/dependencies-accessors/8504105662192eca0b63cd063bc2470f1a23a9e5/classes/org/gradle/accessors/dm/LibrariesForLibs$JavaxVersionAccessors.class
+new file mode 100644
+index 0000000..ac6d0b9
+Binary files /dev/null and b/node_modules/react-native/.gradle/8.0.2/dependencies-accessors/8504105662192eca0b63cd063bc2470f1a23a9e5/classes/org/gradle/accessors/dm/LibrariesForLibs$JavaxVersionAccessors.class differ
+diff --git a/node_modules/react-native/.gradle/8.0.2/dependencies-accessors/8504105662192eca0b63cd063bc2470f1a23a9e5/classes/org/gradle/accessors/dm/LibrariesForLibs$KotlinPluginAccessors.class b/node_modules/react-native/.gradle/8.0.2/dependencies-accessors/8504105662192eca0b63cd063bc2470f1a23a9e5/classes/org/gradle/accessors/dm/LibrariesForLibs$KotlinPluginAccessors.class
+new file mode 100644
+index 0000000..b7a4b15
+Binary files /dev/null and b/node_modules/react-native/.gradle/8.0.2/dependencies-accessors/8504105662192eca0b63cd063bc2470f1a23a9e5/classes/org/gradle/accessors/dm/LibrariesForLibs$KotlinPluginAccessors.class differ
+diff --git a/node_modules/react-native/.gradle/8.0.2/dependencies-accessors/8504105662192eca0b63cd063bc2470f1a23a9e5/classes/org/gradle/accessors/dm/LibrariesForLibs$NexusPluginAccessors.class b/node_modules/react-native/.gradle/8.0.2/dependencies-accessors/8504105662192eca0b63cd063bc2470f1a23a9e5/classes/org/gradle/accessors/dm/LibrariesForLibs$NexusPluginAccessors.class
+new file mode 100644
+index 0000000..f8f1b20
+Binary files /dev/null and b/node_modules/react-native/.gradle/8.0.2/dependencies-accessors/8504105662192eca0b63cd063bc2470f1a23a9e5/classes/org/gradle/accessors/dm/LibrariesForLibs$NexusPluginAccessors.class differ
+diff --git a/node_modules/react-native/.gradle/8.0.2/dependencies-accessors/8504105662192eca0b63cd063bc2470f1a23a9e5/classes/org/gradle/accessors/dm/LibrariesForLibs$NexusVersionAccessors.class b/node_modules/react-native/.gradle/8.0.2/dependencies-accessors/8504105662192eca0b63cd063bc2470f1a23a9e5/classes/org/gradle/accessors/dm/LibrariesForLibs$NexusVersionAccessors.class
+new file mode 100644
+index 0000000..73c913f
+Binary files /dev/null and b/node_modules/react-native/.gradle/8.0.2/dependencies-accessors/8504105662192eca0b63cd063bc2470f1a23a9e5/classes/org/gradle/accessors/dm/LibrariesForLibs$NexusVersionAccessors.class differ
+diff --git a/node_modules/react-native/.gradle/8.0.2/dependencies-accessors/8504105662192eca0b63cd063bc2470f1a23a9e5/classes/org/gradle/accessors/dm/LibrariesForLibs$Okhttp3LibraryAccessors.class b/node_modules/react-native/.gradle/8.0.2/dependencies-accessors/8504105662192eca0b63cd063bc2470f1a23a9e5/classes/org/gradle/accessors/dm/LibrariesForLibs$Okhttp3LibraryAccessors.class
+new file mode 100644
+index 0000000..feafdf6
+Binary files /dev/null and b/node_modules/react-native/.gradle/8.0.2/dependencies-accessors/8504105662192eca0b63cd063bc2470f1a23a9e5/classes/org/gradle/accessors/dm/LibrariesForLibs$Okhttp3LibraryAccessors.class differ
+diff --git a/node_modules/react-native/.gradle/8.0.2/dependencies-accessors/8504105662192eca0b63cd063bc2470f1a23a9e5/classes/org/gradle/accessors/dm/LibrariesForLibs$PluginAccessors.class b/node_modules/react-native/.gradle/8.0.2/dependencies-accessors/8504105662192eca0b63cd063bc2470f1a23a9e5/classes/org/gradle/accessors/dm/LibrariesForLibs$PluginAccessors.class
+new file mode 100644
+index 0000000..329a599
+Binary files /dev/null and b/node_modules/react-native/.gradle/8.0.2/dependencies-accessors/8504105662192eca0b63cd063bc2470f1a23a9e5/classes/org/gradle/accessors/dm/LibrariesForLibs$PluginAccessors.class differ
+diff --git a/node_modules/react-native/.gradle/8.0.2/dependencies-accessors/8504105662192eca0b63cd063bc2470f1a23a9e5/classes/org/gradle/accessors/dm/LibrariesForLibs$VersionAccessors.class b/node_modules/react-native/.gradle/8.0.2/dependencies-accessors/8504105662192eca0b63cd063bc2470f1a23a9e5/classes/org/gradle/accessors/dm/LibrariesForLibs$VersionAccessors.class
+new file mode 100644
+index 0000000..ade1077
+Binary files /dev/null and b/node_modules/react-native/.gradle/8.0.2/dependencies-accessors/8504105662192eca0b63cd063bc2470f1a23a9e5/classes/org/gradle/accessors/dm/LibrariesForLibs$VersionAccessors.class differ
+diff --git a/node_modules/react-native/.gradle/8.0.2/dependencies-accessors/8504105662192eca0b63cd063bc2470f1a23a9e5/classes/org/gradle/accessors/dm/LibrariesForLibs$YogaLibraryAccessors.class b/node_modules/react-native/.gradle/8.0.2/dependencies-accessors/8504105662192eca0b63cd063bc2470f1a23a9e5/classes/org/gradle/accessors/dm/LibrariesForLibs$YogaLibraryAccessors.class
+new file mode 100644
+index 0000000..5748961
+Binary files /dev/null and b/node_modules/react-native/.gradle/8.0.2/dependencies-accessors/8504105662192eca0b63cd063bc2470f1a23a9e5/classes/org/gradle/accessors/dm/LibrariesForLibs$YogaLibraryAccessors.class differ
+diff --git a/node_modules/react-native/.gradle/8.0.2/dependencies-accessors/8504105662192eca0b63cd063bc2470f1a23a9e5/classes/org/gradle/accessors/dm/LibrariesForLibs$YogaProguardLibraryAccessors.class b/node_modules/react-native/.gradle/8.0.2/dependencies-accessors/8504105662192eca0b63cd063bc2470f1a23a9e5/classes/org/gradle/accessors/dm/LibrariesForLibs$YogaProguardLibraryAccessors.class
+new file mode 100644
+index 0000000..4cadc01
+Binary files /dev/null and b/node_modules/react-native/.gradle/8.0.2/dependencies-accessors/8504105662192eca0b63cd063bc2470f1a23a9e5/classes/org/gradle/accessors/dm/LibrariesForLibs$YogaProguardLibraryAccessors.class differ
+diff --git a/node_modules/react-native/.gradle/8.0.2/dependencies-accessors/8504105662192eca0b63cd063bc2470f1a23a9e5/classes/org/gradle/accessors/dm/LibrariesForLibs$YogaProguardVersionAccessors.class b/node_modules/react-native/.gradle/8.0.2/dependencies-accessors/8504105662192eca0b63cd063bc2470f1a23a9e5/classes/org/gradle/accessors/dm/LibrariesForLibs$YogaProguardVersionAccessors.class
+new file mode 100644
+index 0000000..24d03a2
+Binary files /dev/null and b/node_modules/react-native/.gradle/8.0.2/dependencies-accessors/8504105662192eca0b63cd063bc2470f1a23a9e5/classes/org/gradle/accessors/dm/LibrariesForLibs$YogaProguardVersionAccessors.class differ
+diff --git a/node_modules/react-native/.gradle/8.0.2/dependencies-accessors/8504105662192eca0b63cd063bc2470f1a23a9e5/classes/org/gradle/accessors/dm/LibrariesForLibs$YogaVersionAccessors.class b/node_modules/react-native/.gradle/8.0.2/dependencies-accessors/8504105662192eca0b63cd063bc2470f1a23a9e5/classes/org/gradle/accessors/dm/LibrariesForLibs$YogaVersionAccessors.class
+new file mode 100644
+index 0000000..ada78b5
+Binary files /dev/null and b/node_modules/react-native/.gradle/8.0.2/dependencies-accessors/8504105662192eca0b63cd063bc2470f1a23a9e5/classes/org/gradle/accessors/dm/LibrariesForLibs$YogaVersionAccessors.class differ
+diff --git a/node_modules/react-native/.gradle/8.0.2/dependencies-accessors/8504105662192eca0b63cd063bc2470f1a23a9e5/classes/org/gradle/accessors/dm/LibrariesForLibs.class b/node_modules/react-native/.gradle/8.0.2/dependencies-accessors/8504105662192eca0b63cd063bc2470f1a23a9e5/classes/org/gradle/accessors/dm/LibrariesForLibs.class
+new file mode 100644
+index 0000000..05f4f48
+Binary files /dev/null and b/node_modules/react-native/.gradle/8.0.2/dependencies-accessors/8504105662192eca0b63cd063bc2470f1a23a9e5/classes/org/gradle/accessors/dm/LibrariesForLibs.class differ
+diff --git a/node_modules/react-native/.gradle/8.0.2/dependencies-accessors/8504105662192eca0b63cd063bc2470f1a23a9e5/sources/org/gradle/accessors/dm/LibrariesForLibs.java b/node_modules/react-native/.gradle/8.0.2/dependencies-accessors/8504105662192eca0b63cd063bc2470f1a23a9e5/sources/org/gradle/accessors/dm/LibrariesForLibs.java
+new file mode 100644
+index 0000000..f0b18cf
+--- /dev/null
++++ b/node_modules/react-native/.gradle/8.0.2/dependencies-accessors/8504105662192eca0b63cd063bc2470f1a23a9e5/sources/org/gradle/accessors/dm/LibrariesForLibs.java
+@@ -0,0 +1,835 @@
++package org.gradle.accessors.dm;
++
++import org.gradle.api.NonNullApi;
++import org.gradle.api.artifacts.MinimalExternalModuleDependency;
++import org.gradle.plugin.use.PluginDependency;
++import org.gradle.api.artifacts.ExternalModuleDependencyBundle;
++import org.gradle.api.artifacts.MutableVersionConstraint;
++import org.gradle.api.provider.Provider;
++import org.gradle.api.model.ObjectFactory;
++import org.gradle.api.provider.ProviderFactory;
++import org.gradle.api.internal.catalog.AbstractExternalDependencyFactory;
++import org.gradle.api.internal.catalog.DefaultVersionCatalog;
++import java.util.Map;
++import org.gradle.api.internal.attributes.ImmutableAttributesFactory;
++import org.gradle.api.internal.artifacts.dsl.CapabilityNotationParser;
++import javax.inject.Inject;
++
++/**
++ * A catalog of dependencies accessible via the `libs` extension.
++*/
++@NonNullApi
++public class LibrariesForLibs extends AbstractExternalDependencyFactory {
++
++    private final AbstractExternalDependencyFactory owner = this;
++    private final AndroidxLibraryAccessors laccForAndroidxLibraryAccessors = new AndroidxLibraryAccessors(owner);
++    private final FlipperLibraryAccessors laccForFlipperLibraryAccessors = new FlipperLibraryAccessors(owner);
++    private final FrescoLibraryAccessors laccForFrescoLibraryAccessors = new FrescoLibraryAccessors(owner);
++    private final InferLibraryAccessors laccForInferLibraryAccessors = new InferLibraryAccessors(owner);
++    private final JavaxLibraryAccessors laccForJavaxLibraryAccessors = new JavaxLibraryAccessors(owner);
++    private final Okhttp3LibraryAccessors laccForOkhttp3LibraryAccessors = new Okhttp3LibraryAccessors(owner);
++    private final YogaLibraryAccessors laccForYogaLibraryAccessors = new YogaLibraryAccessors(owner);
++    private final VersionAccessors vaccForVersionAccessors = new VersionAccessors(providers, config);
++    private final BundleAccessors baccForBundleAccessors = new BundleAccessors(objects, providers, config, attributesFactory, capabilityNotationParser);
++    private final PluginAccessors paccForPluginAccessors = new PluginAccessors(providers, config);
++
++    @Inject
++    public LibrariesForLibs(DefaultVersionCatalog config, ProviderFactory providers, ObjectFactory objects, ImmutableAttributesFactory attributesFactory, CapabilityNotationParser capabilityNotationParser) {
++        super(config, providers, objects, attributesFactory, capabilityNotationParser);
++    }
++
++        /**
++         * Creates a dependency provider for assertj (org.assertj:assertj-core)
++         * This dependency was declared in catalog libs.versions.toml
++         */
++        public Provider<MinimalExternalModuleDependency> getAssertj() { return create("assertj"); }
++
++        /**
++         * Creates a dependency provider for fbjni (com.facebook.fbjni:fbjni)
++         * This dependency was declared in catalog libs.versions.toml
++         */
++        public Provider<MinimalExternalModuleDependency> getFbjni() { return create("fbjni"); }
++
++        /**
++         * Creates a dependency provider for jsr305 (com.google.code.findbugs:jsr305)
++         * This dependency was declared in catalog libs.versions.toml
++         */
++        public Provider<MinimalExternalModuleDependency> getJsr305() { return create("jsr305"); }
++
++        /**
++         * Creates a dependency provider for junit (junit:junit)
++         * This dependency was declared in catalog libs.versions.toml
++         */
++        public Provider<MinimalExternalModuleDependency> getJunit() { return create("junit"); }
++
++        /**
++         * Creates a dependency provider for mockito (org.mockito:mockito-inline)
++         * This dependency was declared in catalog libs.versions.toml
++         */
++        public Provider<MinimalExternalModuleDependency> getMockito() { return create("mockito"); }
++
++        /**
++         * Creates a dependency provider for okio (com.squareup.okio:okio)
++         * This dependency was declared in catalog libs.versions.toml
++         */
++        public Provider<MinimalExternalModuleDependency> getOkio() { return create("okio"); }
++
++        /**
++         * Creates a dependency provider for robolectric (org.robolectric:robolectric)
++         * This dependency was declared in catalog libs.versions.toml
++         */
++        public Provider<MinimalExternalModuleDependency> getRobolectric() { return create("robolectric"); }
++
++        /**
++         * Creates a dependency provider for soloader (com.facebook.soloader:soloader)
++         * This dependency was declared in catalog libs.versions.toml
++         */
++        public Provider<MinimalExternalModuleDependency> getSoloader() { return create("soloader"); }
++
++        /**
++         * Creates a dependency provider for thoughtworks (com.thoughtworks.xstream:xstream)
++         * This dependency was declared in catalog libs.versions.toml
++         */
++        public Provider<MinimalExternalModuleDependency> getThoughtworks() { return create("thoughtworks"); }
++
++    /**
++     * Returns the group of libraries at androidx
++     */
++    public AndroidxLibraryAccessors getAndroidx() { return laccForAndroidxLibraryAccessors; }
++
++    /**
++     * Returns the group of libraries at flipper
++     */
++    public FlipperLibraryAccessors getFlipper() { return laccForFlipperLibraryAccessors; }
++
++    /**
++     * Returns the group of libraries at fresco
++     */
++    public FrescoLibraryAccessors getFresco() { return laccForFrescoLibraryAccessors; }
++
++    /**
++     * Returns the group of libraries at infer
++     */
++    public InferLibraryAccessors getInfer() { return laccForInferLibraryAccessors; }
++
++    /**
++     * Returns the group of libraries at javax
++     */
++    public JavaxLibraryAccessors getJavax() { return laccForJavaxLibraryAccessors; }
++
++    /**
++     * Returns the group of libraries at okhttp3
++     */
++    public Okhttp3LibraryAccessors getOkhttp3() { return laccForOkhttp3LibraryAccessors; }
++
++    /**
++     * Returns the group of libraries at yoga
++     */
++    public YogaLibraryAccessors getYoga() { return laccForYogaLibraryAccessors; }
++
++    /**
++     * Returns the group of versions at versions
++     */
++    public VersionAccessors getVersions() { return vaccForVersionAccessors; }
++
++    /**
++     * Returns the group of bundles at bundles
++     */
++    public BundleAccessors getBundles() { return baccForBundleAccessors; }
++
++    /**
++     * Returns the group of plugins at plugins
++     */
++    public PluginAccessors getPlugins() { return paccForPluginAccessors; }
++
++    public static class AndroidxLibraryAccessors extends SubDependencyFactory {
++        private final AndroidxAppcompatLibraryAccessors laccForAndroidxAppcompatLibraryAccessors = new AndroidxAppcompatLibraryAccessors(owner);
++        private final AndroidxTestLibraryAccessors laccForAndroidxTestLibraryAccessors = new AndroidxTestLibraryAccessors(owner);
++
++        public AndroidxLibraryAccessors(AbstractExternalDependencyFactory owner) { super(owner); }
++
++            /**
++             * Creates a dependency provider for annotation (androidx.annotation:annotation)
++             * This dependency was declared in catalog libs.versions.toml
++             */
++            public Provider<MinimalExternalModuleDependency> getAnnotation() { return create("androidx.annotation"); }
++
++            /**
++             * Creates a dependency provider for autofill (androidx.autofill:autofill)
++             * This dependency was declared in catalog libs.versions.toml
++             */
++            public Provider<MinimalExternalModuleDependency> getAutofill() { return create("androidx.autofill"); }
++
++            /**
++             * Creates a dependency provider for swiperefreshlayout (androidx.swiperefreshlayout:swiperefreshlayout)
++             * This dependency was declared in catalog libs.versions.toml
++             */
++            public Provider<MinimalExternalModuleDependency> getSwiperefreshlayout() { return create("androidx.swiperefreshlayout"); }
++
++            /**
++             * Creates a dependency provider for tracing (androidx.tracing:tracing)
++             * This dependency was declared in catalog libs.versions.toml
++             */
++            public Provider<MinimalExternalModuleDependency> getTracing() { return create("androidx.tracing"); }
++
++        /**
++         * Returns the group of libraries at androidx.appcompat
++         */
++        public AndroidxAppcompatLibraryAccessors getAppcompat() { return laccForAndroidxAppcompatLibraryAccessors; }
++
++        /**
++         * Returns the group of libraries at androidx.test
++         */
++        public AndroidxTestLibraryAccessors getTest() { return laccForAndroidxTestLibraryAccessors; }
++
++    }
++
++    public static class AndroidxAppcompatLibraryAccessors extends SubDependencyFactory implements DependencyNotationSupplier {
++
++        public AndroidxAppcompatLibraryAccessors(AbstractExternalDependencyFactory owner) { super(owner); }
++
++            /**
++             * Creates a dependency provider for appcompat (androidx.appcompat:appcompat)
++             * This dependency was declared in catalog libs.versions.toml
++             */
++            public Provider<MinimalExternalModuleDependency> asProvider() { return create("androidx.appcompat"); }
++
++            /**
++             * Creates a dependency provider for resources (androidx.appcompat:appcompat-resources)
++             * This dependency was declared in catalog libs.versions.toml
++             */
++            public Provider<MinimalExternalModuleDependency> getResources() { return create("androidx.appcompat.resources"); }
++
++    }
++
++    public static class AndroidxTestLibraryAccessors extends SubDependencyFactory {
++
++        public AndroidxTestLibraryAccessors(AbstractExternalDependencyFactory owner) { super(owner); }
++
++            /**
++             * Creates a dependency provider for rules (androidx.test:rules)
++             * This dependency was declared in catalog libs.versions.toml
++             */
++            public Provider<MinimalExternalModuleDependency> getRules() { return create("androidx.test.rules"); }
++
++            /**
++             * Creates a dependency provider for runner (androidx.test:runner)
++             * This dependency was declared in catalog libs.versions.toml
++             */
++            public Provider<MinimalExternalModuleDependency> getRunner() { return create("androidx.test.runner"); }
++
++    }
++
++    public static class FlipperLibraryAccessors extends SubDependencyFactory implements DependencyNotationSupplier {
++        private final FlipperFrescoLibraryAccessors laccForFlipperFrescoLibraryAccessors = new FlipperFrescoLibraryAccessors(owner);
++        private final FlipperNetworkLibraryAccessors laccForFlipperNetworkLibraryAccessors = new FlipperNetworkLibraryAccessors(owner);
++
++        public FlipperLibraryAccessors(AbstractExternalDependencyFactory owner) { super(owner); }
++
++            /**
++             * Creates a dependency provider for flipper (com.facebook.flipper:flipper)
++             * This dependency was declared in catalog libs.versions.toml
++             */
++            public Provider<MinimalExternalModuleDependency> asProvider() { return create("flipper"); }
++
++        /**
++         * Returns the group of libraries at flipper.fresco
++         */
++        public FlipperFrescoLibraryAccessors getFresco() { return laccForFlipperFrescoLibraryAccessors; }
++
++        /**
++         * Returns the group of libraries at flipper.network
++         */
++        public FlipperNetworkLibraryAccessors getNetwork() { return laccForFlipperNetworkLibraryAccessors; }
++
++    }
++
++    public static class FlipperFrescoLibraryAccessors extends SubDependencyFactory {
++
++        public FlipperFrescoLibraryAccessors(AbstractExternalDependencyFactory owner) { super(owner); }
++
++            /**
++             * Creates a dependency provider for plugin (com.facebook.fresco:flipper-fresco-plugin)
++             * This dependency was declared in catalog libs.versions.toml
++             */
++            public Provider<MinimalExternalModuleDependency> getPlugin() { return create("flipper.fresco.plugin"); }
++
++    }
++
++    public static class FlipperNetworkLibraryAccessors extends SubDependencyFactory {
++
++        public FlipperNetworkLibraryAccessors(AbstractExternalDependencyFactory owner) { super(owner); }
++
++            /**
++             * Creates a dependency provider for plugin (com.facebook.flipper:flipper-network-plugin)
++             * This dependency was declared in catalog libs.versions.toml
++             */
++            public Provider<MinimalExternalModuleDependency> getPlugin() { return create("flipper.network.plugin"); }
++
++    }
++
++    public static class FrescoLibraryAccessors extends SubDependencyFactory implements DependencyNotationSupplier {
++        private final FrescoImagepipelineLibraryAccessors laccForFrescoImagepipelineLibraryAccessors = new FrescoImagepipelineLibraryAccessors(owner);
++        private final FrescoUiLibraryAccessors laccForFrescoUiLibraryAccessors = new FrescoUiLibraryAccessors(owner);
++
++        public FrescoLibraryAccessors(AbstractExternalDependencyFactory owner) { super(owner); }
++
++            /**
++             * Creates a dependency provider for fresco (com.facebook.fresco:fresco)
++             * This dependency was declared in catalog libs.versions.toml
++             */
++            public Provider<MinimalExternalModuleDependency> asProvider() { return create("fresco"); }
++
++            /**
++             * Creates a dependency provider for middleware (com.facebook.fresco:middleware)
++             * This dependency was declared in catalog libs.versions.toml
++             */
++            public Provider<MinimalExternalModuleDependency> getMiddleware() { return create("fresco.middleware"); }
++
++        /**
++         * Returns the group of libraries at fresco.imagepipeline
++         */
++        public FrescoImagepipelineLibraryAccessors getImagepipeline() { return laccForFrescoImagepipelineLibraryAccessors; }
++
++        /**
++         * Returns the group of libraries at fresco.ui
++         */
++        public FrescoUiLibraryAccessors getUi() { return laccForFrescoUiLibraryAccessors; }
++
++    }
++
++    public static class FrescoImagepipelineLibraryAccessors extends SubDependencyFactory {
++
++        public FrescoImagepipelineLibraryAccessors(AbstractExternalDependencyFactory owner) { super(owner); }
++
++            /**
++             * Creates a dependency provider for okhttp3 (com.facebook.fresco:imagepipeline-okhttp3)
++             * This dependency was declared in catalog libs.versions.toml
++             */
++            public Provider<MinimalExternalModuleDependency> getOkhttp3() { return create("fresco.imagepipeline.okhttp3"); }
++
++    }
++
++    public static class FrescoUiLibraryAccessors extends SubDependencyFactory {
++
++        public FrescoUiLibraryAccessors(AbstractExternalDependencyFactory owner) { super(owner); }
++
++            /**
++             * Creates a dependency provider for common (com.facebook.fresco:ui-common)
++             * This dependency was declared in catalog libs.versions.toml
++             */
++            public Provider<MinimalExternalModuleDependency> getCommon() { return create("fresco.ui.common"); }
++
++    }
++
++    public static class InferLibraryAccessors extends SubDependencyFactory {
++
++        public InferLibraryAccessors(AbstractExternalDependencyFactory owner) { super(owner); }
++
++            /**
++             * Creates a dependency provider for annotation (com.facebook.infer.annotation:infer-annotation)
++             * This dependency was declared in catalog libs.versions.toml
++             */
++            public Provider<MinimalExternalModuleDependency> getAnnotation() { return create("infer.annotation"); }
++
++    }
++
++    public static class JavaxLibraryAccessors extends SubDependencyFactory {
++
++        public JavaxLibraryAccessors(AbstractExternalDependencyFactory owner) { super(owner); }
++
++            /**
++             * Creates a dependency provider for inject (javax.inject:javax.inject)
++             * This dependency was declared in catalog libs.versions.toml
++             */
++            public Provider<MinimalExternalModuleDependency> getInject() { return create("javax.inject"); }
++
++    }
++
++    public static class Okhttp3LibraryAccessors extends SubDependencyFactory implements DependencyNotationSupplier {
++
++        public Okhttp3LibraryAccessors(AbstractExternalDependencyFactory owner) { super(owner); }
++
++            /**
++             * Creates a dependency provider for okhttp3 (com.squareup.okhttp3:okhttp)
++             * This dependency was declared in catalog libs.versions.toml
++             */
++            public Provider<MinimalExternalModuleDependency> asProvider() { return create("okhttp3"); }
++
++            /**
++             * Creates a dependency provider for urlconnection (com.squareup.okhttp3:okhttp-urlconnection)
++             * This dependency was declared in catalog libs.versions.toml
++             */
++            public Provider<MinimalExternalModuleDependency> getUrlconnection() { return create("okhttp3.urlconnection"); }
++
++    }
++
++    public static class YogaLibraryAccessors extends SubDependencyFactory {
++        private final YogaProguardLibraryAccessors laccForYogaProguardLibraryAccessors = new YogaProguardLibraryAccessors(owner);
++
++        public YogaLibraryAccessors(AbstractExternalDependencyFactory owner) { super(owner); }
++
++        /**
++         * Returns the group of libraries at yoga.proguard
++         */
++        public YogaProguardLibraryAccessors getProguard() { return laccForYogaProguardLibraryAccessors; }
++
++    }
++
++    public static class YogaProguardLibraryAccessors extends SubDependencyFactory {
++
++        public YogaProguardLibraryAccessors(AbstractExternalDependencyFactory owner) { super(owner); }
++
++            /**
++             * Creates a dependency provider for annotations (com.facebook.yoga:proguard-annotations)
++             * This dependency was declared in catalog libs.versions.toml
++             */
++            public Provider<MinimalExternalModuleDependency> getAnnotations() { return create("yoga.proguard.annotations"); }
++
++    }
++
++    public static class VersionAccessors extends VersionFactory  {
++
++        private final AndroidxVersionAccessors vaccForAndroidxVersionAccessors = new AndroidxVersionAccessors(providers, config);
++        private final InferVersionAccessors vaccForInferVersionAccessors = new InferVersionAccessors(providers, config);
++        private final JavaxVersionAccessors vaccForJavaxVersionAccessors = new JavaxVersionAccessors(providers, config);
++        private final NexusVersionAccessors vaccForNexusVersionAccessors = new NexusVersionAccessors(providers, config);
++        private final YogaVersionAccessors vaccForYogaVersionAccessors = new YogaVersionAccessors(providers, config);
++        public VersionAccessors(ProviderFactory providers, DefaultVersionCatalog config) { super(providers, config); }
++
++            /**
++             * Returns the version associated to this alias: agp (8.1.1)
++             * If the version is a rich version and that its not expressible as a
++             * single version string, then an empty string is returned.
++             * This version was declared in catalog libs.versions.toml
++             */
++            public Provider<String> getAgp() { return getVersion("agp"); }
++
++            /**
++             * Returns the version associated to this alias: assertj (3.21.0)
++             * If the version is a rich version and that its not expressible as a
++             * single version string, then an empty string is returned.
++             * This version was declared in catalog libs.versions.toml
++             */
++            public Provider<String> getAssertj() { return getVersion("assertj"); }
++
++            /**
++             * Returns the version associated to this alias: boost (1_83_0)
++             * If the version is a rich version and that its not expressible as a
++             * single version string, then an empty string is returned.
++             * This version was declared in catalog libs.versions.toml
++             */
++            public Provider<String> getBoost() { return getVersion("boost"); }
++
++            /**
++             * Returns the version associated to this alias: buildTools (34.0.0)
++             * If the version is a rich version and that its not expressible as a
++             * single version string, then an empty string is returned.
++             * This version was declared in catalog libs.versions.toml
++             */
++            public Provider<String> getBuildTools() { return getVersion("buildTools"); }
++
++            /**
++             * Returns the version associated to this alias: compileSdk (34)
++             * If the version is a rich version and that its not expressible as a
++             * single version string, then an empty string is returned.
++             * This version was declared in catalog libs.versions.toml
++             */
++            public Provider<String> getCompileSdk() { return getVersion("compileSdk"); }
++
++            /**
++             * Returns the version associated to this alias: doubleconversion (1.1.6)
++             * If the version is a rich version and that its not expressible as a
++             * single version string, then an empty string is returned.
++             * This version was declared in catalog libs.versions.toml
++             */
++            public Provider<String> getDoubleconversion() { return getVersion("doubleconversion"); }
++
++            /**
++             * Returns the version associated to this alias: download (5.4.0)
++             * If the version is a rich version and that its not expressible as a
++             * single version string, then an empty string is returned.
++             * This version was declared in catalog libs.versions.toml
++             */
++            public Provider<String> getDownload() { return getVersion("download"); }
++
++            /**
++             * Returns the version associated to this alias: fbjni (0.5.1)
++             * If the version is a rich version and that its not expressible as a
++             * single version string, then an empty string is returned.
++             * This version was declared in catalog libs.versions.toml
++             */
++            public Provider<String> getFbjni() { return getVersion("fbjni"); }
++
++            /**
++             * Returns the version associated to this alias: flipper (0.201.0)
++             * If the version is a rich version and that its not expressible as a
++             * single version string, then an empty string is returned.
++             * This version was declared in catalog libs.versions.toml
++             */
++            public Provider<String> getFlipper() { return getVersion("flipper"); }
++
++            /**
++             * Returns the version associated to this alias: fmt (6.2.1)
++             * If the version is a rich version and that its not expressible as a
++             * single version string, then an empty string is returned.
++             * This version was declared in catalog libs.versions.toml
++             */
++            public Provider<String> getFmt() { return getVersion("fmt"); }
++
++            /**
++             * Returns the version associated to this alias: folly (2022.05.16.00)
++             * If the version is a rich version and that its not expressible as a
++             * single version string, then an empty string is returned.
++             * This version was declared in catalog libs.versions.toml
++             */
++            public Provider<String> getFolly() { return getVersion("folly"); }
++
++            /**
++             * Returns the version associated to this alias: fresco (3.1.3)
++             * If the version is a rich version and that its not expressible as a
++             * single version string, then an empty string is returned.
++             * This version was declared in catalog libs.versions.toml
++             */
++            public Provider<String> getFresco() { return getVersion("fresco"); }
++
++            /**
++             * Returns the version associated to this alias: glog (0.3.5)
++             * If the version is a rich version and that its not expressible as a
++             * single version string, then an empty string is returned.
++             * This version was declared in catalog libs.versions.toml
++             */
++            public Provider<String> getGlog() { return getVersion("glog"); }
++
++            /**
++             * Returns the version associated to this alias: gtest (1.12.1)
++             * If the version is a rich version and that its not expressible as a
++             * single version string, then an empty string is returned.
++             * This version was declared in catalog libs.versions.toml
++             */
++            public Provider<String> getGtest() { return getVersion("gtest"); }
++
++            /**
++             * Returns the version associated to this alias: jsr305 (3.0.2)
++             * If the version is a rich version and that its not expressible as a
++             * single version string, then an empty string is returned.
++             * This version was declared in catalog libs.versions.toml
++             */
++            public Provider<String> getJsr305() { return getVersion("jsr305"); }
++
++            /**
++             * Returns the version associated to this alias: junit (4.13.2)
++             * If the version is a rich version and that its not expressible as a
++             * single version string, then an empty string is returned.
++             * This version was declared in catalog libs.versions.toml
++             */
++            public Provider<String> getJunit() { return getVersion("junit"); }
++
++            /**
++             * Returns the version associated to this alias: kotlin (1.8.0)
++             * If the version is a rich version and that its not expressible as a
++             * single version string, then an empty string is returned.
++             * This version was declared in catalog libs.versions.toml
++             */
++            public Provider<String> getKotlin() { return getVersion("kotlin"); }
++
++            /**
++             * Returns the version associated to this alias: libevent (2.1.12)
++             * If the version is a rich version and that its not expressible as a
++             * single version string, then an empty string is returned.
++             * This version was declared in catalog libs.versions.toml
++             */
++            public Provider<String> getLibevent() { return getVersion("libevent"); }
++
++            /**
++             * Returns the version associated to this alias: minSdk (21)
++             * If the version is a rich version and that its not expressible as a
++             * single version string, then an empty string is returned.
++             * This version was declared in catalog libs.versions.toml
++             */
++            public Provider<String> getMinSdk() { return getVersion("minSdk"); }
++
++            /**
++             * Returns the version associated to this alias: mockito (3.12.4)
++             * If the version is a rich version and that its not expressible as a
++             * single version string, then an empty string is returned.
++             * This version was declared in catalog libs.versions.toml
++             */
++            public Provider<String> getMockito() { return getVersion("mockito"); }
++
++            /**
++             * Returns the version associated to this alias: okhttp (4.9.2)
++             * If the version is a rich version and that its not expressible as a
++             * single version string, then an empty string is returned.
++             * This version was declared in catalog libs.versions.toml
++             */
++            public Provider<String> getOkhttp() { return getVersion("okhttp"); }
++
++            /**
++             * Returns the version associated to this alias: okio (2.9.0)
++             * If the version is a rich version and that its not expressible as a
++             * single version string, then an empty string is returned.
++             * This version was declared in catalog libs.versions.toml
++             */
++            public Provider<String> getOkio() { return getVersion("okio"); }
++
++            /**
++             * Returns the version associated to this alias: robolectric (4.9.2)
++             * If the version is a rich version and that its not expressible as a
++             * single version string, then an empty string is returned.
++             * This version was declared in catalog libs.versions.toml
++             */
++            public Provider<String> getRobolectric() { return getVersion("robolectric"); }
++
++            /**
++             * Returns the version associated to this alias: soloader (0.10.5)
++             * If the version is a rich version and that its not expressible as a
++             * single version string, then an empty string is returned.
++             * This version was declared in catalog libs.versions.toml
++             */
++            public Provider<String> getSoloader() { return getVersion("soloader"); }
++
++            /**
++             * Returns the version associated to this alias: targetSdk (34)
++             * If the version is a rich version and that its not expressible as a
++             * single version string, then an empty string is returned.
++             * This version was declared in catalog libs.versions.toml
++             */
++            public Provider<String> getTargetSdk() { return getVersion("targetSdk"); }
++
++            /**
++             * Returns the version associated to this alias: xstream (1.4.20)
++             * If the version is a rich version and that its not expressible as a
++             * single version string, then an empty string is returned.
++             * This version was declared in catalog libs.versions.toml
++             */
++            public Provider<String> getXstream() { return getVersion("xstream"); }
++
++        /**
++         * Returns the group of versions at versions.androidx
++         */
++        public AndroidxVersionAccessors getAndroidx() { return vaccForAndroidxVersionAccessors; }
++
++        /**
++         * Returns the group of versions at versions.infer
++         */
++        public InferVersionAccessors getInfer() { return vaccForInferVersionAccessors; }
++
++        /**
++         * Returns the group of versions at versions.javax
++         */
++        public JavaxVersionAccessors getJavax() { return vaccForJavaxVersionAccessors; }
++
++        /**
++         * Returns the group of versions at versions.nexus
++         */
++        public NexusVersionAccessors getNexus() { return vaccForNexusVersionAccessors; }
++
++        /**
++         * Returns the group of versions at versions.yoga
++         */
++        public YogaVersionAccessors getYoga() { return vaccForYogaVersionAccessors; }
++
++    }
++
++    public static class AndroidxVersionAccessors extends VersionFactory  {
++
++        public AndroidxVersionAccessors(ProviderFactory providers, DefaultVersionCatalog config) { super(providers, config); }
++
++            /**
++             * Returns the version associated to this alias: androidx.annotation (1.6.0)
++             * If the version is a rich version and that its not expressible as a
++             * single version string, then an empty string is returned.
++             * This version was declared in catalog libs.versions.toml
++             */
++            public Provider<String> getAnnotation() { return getVersion("androidx.annotation"); }
++
++            /**
++             * Returns the version associated to this alias: androidx.appcompat (1.6.1)
++             * If the version is a rich version and that its not expressible as a
++             * single version string, then an empty string is returned.
++             * This version was declared in catalog libs.versions.toml
++             */
++            public Provider<String> getAppcompat() { return getVersion("androidx.appcompat"); }
++
++            /**
++             * Returns the version associated to this alias: androidx.autofill (1.1.0)
++             * If the version is a rich version and that its not expressible as a
++             * single version string, then an empty string is returned.
++             * This version was declared in catalog libs.versions.toml
++             */
++            public Provider<String> getAutofill() { return getVersion("androidx.autofill"); }
++
++            /**
++             * Returns the version associated to this alias: androidx.swiperefreshlayout (1.1.0)
++             * If the version is a rich version and that its not expressible as a
++             * single version string, then an empty string is returned.
++             * This version was declared in catalog libs.versions.toml
++             */
++            public Provider<String> getSwiperefreshlayout() { return getVersion("androidx.swiperefreshlayout"); }
++
++            /**
++             * Returns the version associated to this alias: androidx.test (1.5.0)
++             * If the version is a rich version and that its not expressible as a
++             * single version string, then an empty string is returned.
++             * This version was declared in catalog libs.versions.toml
++             */
++            public Provider<String> getTest() { return getVersion("androidx.test"); }
++
++            /**
++             * Returns the version associated to this alias: androidx.tracing (1.1.0)
++             * If the version is a rich version and that its not expressible as a
++             * single version string, then an empty string is returned.
++             * This version was declared in catalog libs.versions.toml
++             */
++            public Provider<String> getTracing() { return getVersion("androidx.tracing"); }
++
++    }
++
++    public static class InferVersionAccessors extends VersionFactory  {
++
++        public InferVersionAccessors(ProviderFactory providers, DefaultVersionCatalog config) { super(providers, config); }
++
++            /**
++             * Returns the version associated to this alias: infer.annotation (0.18.0)
++             * If the version is a rich version and that its not expressible as a
++             * single version string, then an empty string is returned.
++             * This version was declared in catalog libs.versions.toml
++             */
++            public Provider<String> getAnnotation() { return getVersion("infer.annotation"); }
++
++    }
++
++    public static class JavaxVersionAccessors extends VersionFactory  {
++
++        public JavaxVersionAccessors(ProviderFactory providers, DefaultVersionCatalog config) { super(providers, config); }
++
++            /**
++             * Returns the version associated to this alias: javax.inject (1)
++             * If the version is a rich version and that its not expressible as a
++             * single version string, then an empty string is returned.
++             * This version was declared in catalog libs.versions.toml
++             */
++            public Provider<String> getInject() { return getVersion("javax.inject"); }
++
++    }
++
++    public static class NexusVersionAccessors extends VersionFactory  {
++
++        public NexusVersionAccessors(ProviderFactory providers, DefaultVersionCatalog config) { super(providers, config); }
++
++            /**
++             * Returns the version associated to this alias: nexus.publish (1.3.0)
++             * If the version is a rich version and that its not expressible as a
++             * single version string, then an empty string is returned.
++             * This version was declared in catalog libs.versions.toml
++             */
++            public Provider<String> getPublish() { return getVersion("nexus.publish"); }
++
++    }
++
++    public static class YogaVersionAccessors extends VersionFactory  {
++
++        private final YogaProguardVersionAccessors vaccForYogaProguardVersionAccessors = new YogaProguardVersionAccessors(providers, config);
++        public YogaVersionAccessors(ProviderFactory providers, DefaultVersionCatalog config) { super(providers, config); }
++
++        /**
++         * Returns the group of versions at versions.yoga.proguard
++         */
++        public YogaProguardVersionAccessors getProguard() { return vaccForYogaProguardVersionAccessors; }
++
++    }
++
++    public static class YogaProguardVersionAccessors extends VersionFactory  {
++
++        public YogaProguardVersionAccessors(ProviderFactory providers, DefaultVersionCatalog config) { super(providers, config); }
++
++            /**
++             * Returns the version associated to this alias: yoga.proguard.annotations (1.19.0)
++             * If the version is a rich version and that its not expressible as a
++             * single version string, then an empty string is returned.
++             * This version was declared in catalog libs.versions.toml
++             */
++            public Provider<String> getAnnotations() { return getVersion("yoga.proguard.annotations"); }
++
++    }
++
++    public static class BundleAccessors extends BundleFactory {
++
++        public BundleAccessors(ObjectFactory objects, ProviderFactory providers, DefaultVersionCatalog config, ImmutableAttributesFactory attributesFactory, CapabilityNotationParser capabilityNotationParser) { super(objects, providers, config, attributesFactory, capabilityNotationParser); }
++
++    }
++
++    public static class PluginAccessors extends PluginFactory {
++        private final AndroidPluginAccessors paccForAndroidPluginAccessors = new AndroidPluginAccessors(providers, config);
++        private final KotlinPluginAccessors paccForKotlinPluginAccessors = new KotlinPluginAccessors(providers, config);
++        private final NexusPluginAccessors paccForNexusPluginAccessors = new NexusPluginAccessors(providers, config);
++
++        public PluginAccessors(ProviderFactory providers, DefaultVersionCatalog config) { super(providers, config); }
++
++            /**
++             * Creates a plugin provider for download to the plugin id 'de.undercouch.download'
++             * This plugin was declared in catalog libs.versions.toml
++             */
++            public Provider<PluginDependency> getDownload() { return createPlugin("download"); }
++
++        /**
++         * Returns the group of plugins at plugins.android
++         */
++        public AndroidPluginAccessors getAndroid() { return paccForAndroidPluginAccessors; }
++
++        /**
++         * Returns the group of plugins at plugins.kotlin
++         */
++        public KotlinPluginAccessors getKotlin() { return paccForKotlinPluginAccessors; }
++
++        /**
++         * Returns the group of plugins at plugins.nexus
++         */
++        public NexusPluginAccessors getNexus() { return paccForNexusPluginAccessors; }
++
++    }
++
++    public static class AndroidPluginAccessors extends PluginFactory {
++
++        public AndroidPluginAccessors(ProviderFactory providers, DefaultVersionCatalog config) { super(providers, config); }
++
++            /**
++             * Creates a plugin provider for android.application to the plugin id 'com.android.application'
++             * This plugin was declared in catalog libs.versions.toml
++             */
++            public Provider<PluginDependency> getApplication() { return createPlugin("android.application"); }
++
++            /**
++             * Creates a plugin provider for android.library to the plugin id 'com.android.library'
++             * This plugin was declared in catalog libs.versions.toml
++             */
++            public Provider<PluginDependency> getLibrary() { return createPlugin("android.library"); }
++
++    }
++
++    public static class KotlinPluginAccessors extends PluginFactory {
++
++        public KotlinPluginAccessors(ProviderFactory providers, DefaultVersionCatalog config) { super(providers, config); }
++
++            /**
++             * Creates a plugin provider for kotlin.android to the plugin id 'org.jetbrains.kotlin.android'
++             * This plugin was declared in catalog libs.versions.toml
++             */
++            public Provider<PluginDependency> getAndroid() { return createPlugin("kotlin.android"); }
++
++    }
++
++    public static class NexusPluginAccessors extends PluginFactory {
++
++        public NexusPluginAccessors(ProviderFactory providers, DefaultVersionCatalog config) { super(providers, config); }
++
++            /**
++             * Creates a plugin provider for nexus.publish to the plugin id 'io.github.gradle-nexus.publish-plugin'
++             * This plugin was declared in catalog libs.versions.toml
++             */
++            public Provider<PluginDependency> getPublish() { return createPlugin("nexus.publish"); }
++
++    }
++
++}
+diff --git a/node_modules/react-native/.gradle/8.0.2/dependencies-accessors/dependencies-accessors.lock b/node_modules/react-native/.gradle/8.0.2/dependencies-accessors/dependencies-accessors.lock
+new file mode 100644
+index 0000000..61e14a5
+Binary files /dev/null and b/node_modules/react-native/.gradle/8.0.2/dependencies-accessors/dependencies-accessors.lock differ
+diff --git a/node_modules/react-native/.gradle/8.0.2/dependencies-accessors/executionHistory.bin b/node_modules/react-native/.gradle/8.0.2/dependencies-accessors/executionHistory.bin
+new file mode 100644
+index 0000000..639635c
+Binary files /dev/null and b/node_modules/react-native/.gradle/8.0.2/dependencies-accessors/executionHistory.bin differ
+diff --git a/node_modules/react-native/.gradle/8.0.2/dependencies-accessors/gc.properties b/node_modules/react-native/.gradle/8.0.2/dependencies-accessors/gc.properties
+new file mode 100644
+index 0000000..e69de29
+diff --git a/node_modules/react-native/.gradle/8.0.2/fileChanges/last-build.bin b/node_modules/react-native/.gradle/8.0.2/fileChanges/last-build.bin
+new file mode 100644
+index 0000000..f76dd23
+Binary files /dev/null and b/node_modules/react-native/.gradle/8.0.2/fileChanges/last-build.bin differ
+diff --git a/node_modules/react-native/.gradle/8.0.2/fileHashes/fileHashes.bin b/node_modules/react-native/.gradle/8.0.2/fileHashes/fileHashes.bin
+new file mode 100644
+index 0000000..12c786a
+Binary files /dev/null and b/node_modules/react-native/.gradle/8.0.2/fileHashes/fileHashes.bin differ
+diff --git a/node_modules/react-native/.gradle/8.0.2/fileHashes/fileHashes.lock b/node_modules/react-native/.gradle/8.0.2/fileHashes/fileHashes.lock
+new file mode 100644
+index 0000000..9a0dd3a
+Binary files /dev/null and b/node_modules/react-native/.gradle/8.0.2/fileHashes/fileHashes.lock differ
+diff --git a/node_modules/react-native/.gradle/8.0.2/fileHashes/resourceHashesCache.bin b/node_modules/react-native/.gradle/8.0.2/fileHashes/resourceHashesCache.bin
+new file mode 100644
+index 0000000..2503bdf
+Binary files /dev/null and b/node_modules/react-native/.gradle/8.0.2/fileHashes/resourceHashesCache.bin differ
+diff --git a/node_modules/react-native/.gradle/8.0.2/gc.properties b/node_modules/react-native/.gradle/8.0.2/gc.properties
+new file mode 100644
+index 0000000..e69de29
+diff --git a/node_modules/react-native/.gradle/buildOutputCleanup/buildOutputCleanup.lock b/node_modules/react-native/.gradle/buildOutputCleanup/buildOutputCleanup.lock
+new file mode 100644
+index 0000000..45ffa45
+Binary files /dev/null and b/node_modules/react-native/.gradle/buildOutputCleanup/buildOutputCleanup.lock differ
+diff --git a/node_modules/react-native/.gradle/buildOutputCleanup/cache.properties b/node_modules/react-native/.gradle/buildOutputCleanup/cache.properties
+new file mode 100644
+index 0000000..18ca848
+--- /dev/null
++++ b/node_modules/react-native/.gradle/buildOutputCleanup/cache.properties
+@@ -0,0 +1,2 @@
++#Fri Jan 19 11:14:08 CET 2024
++gradle.version=8.0.2
+diff --git a/node_modules/react-native/.gradle/buildOutputCleanup/outputFiles.bin b/node_modules/react-native/.gradle/buildOutputCleanup/outputFiles.bin
+new file mode 100644
+index 0000000..218b99a
+Binary files /dev/null and b/node_modules/react-native/.gradle/buildOutputCleanup/outputFiles.bin differ
+diff --git a/node_modules/react-native/.gradle/file-system.probe b/node_modules/react-native/.gradle/file-system.probe
+new file mode 100644
+index 0000000..59b1934
+Binary files /dev/null and b/node_modules/react-native/.gradle/file-system.probe differ
+diff --git a/node_modules/react-native/.gradle/vcs-1/gc.properties b/node_modules/react-native/.gradle/vcs-1/gc.properties
+new file mode 100644
+index 0000000..e69de29
+diff --git a/node_modules/react-native/Libraries/Text/TextInput/Multiline/RCTUITextView.mm b/node_modules/react-native/Libraries/Text/TextInput/Multiline/RCTUITextView.mm
+index 582b49c..c62fdac 100644
+--- a/node_modules/react-native/Libraries/Text/TextInput/Multiline/RCTUITextView.mm
++++ b/node_modules/react-native/Libraries/Text/TextInput/Multiline/RCTUITextView.mm
+@@ -316,4 +316,19 @@ - (CGRect)caretRectForPosition:(UITextPosition *)position
+ 
+ #pragma mark - Utility Methods
+ 
++- (NSArray *)keyCommands {
++    return @[[UIKeyCommand keyCommandWithInput:@"\r" modifierFlags:UIKeyModifierShift action:@selector(shiftEnter:)]];
++}
++
++
++- (void)shiftEnter:(id)sender {
++    NSRange cursorPosition = [self selectedRange];
++    NSMutableString *newText = [[NSMutableString alloc] initWithString:[super text]];
++    [newText replaceCharactersInRange:cursorPosition withString:@"\n"];
++    NSRange newPosition = NSMakeRange(cursorPosition.location  1, 0);
++    [super setText:newText];
++    [super setSelectedRange:newPosition];
++}
++
++
+ @end
+diff --git a/node_modules/react-native/React/CoreModules/RCTAppState.mm b/node_modules/react-native/React/CoreModules/RCTAppState.mm
+index 0aa63fc..ad89b7b 100644
+--- a/node_modules/react-native/React/CoreModules/RCTAppState.mm
++++ b/node_modules/react-native/React/CoreModules/RCTAppState.mm
+@@ -92,6 +92,11 @@ - (void)startObserving
+                                                object:nil];
+   }
+ 
++  if (@available(macCatalyst 14.0, *)) {
++    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleAppStateDidChange:) name:@"NSWindowDidBecomeMainNotification" object:nil];
++    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleAppStateDidChange:) name:@"NSWindowDidResignMainNotification" object:nil];
++  }
++
+   [[NSNotificationCenter defaultCenter] addObserver:self
+                                            selector:@selector(handleMemoryWarning)
+                                                name:UIApplicationDidReceiveMemoryWarningNotification
+@@ -124,6 +129,14 @@ - (void)handleAppStateDidChange:(NSNotification *)notification
+     newState = RCTCurrentAppState();
+   }
+ 
++  if (@available(macCatalyst 14.0, *)) {
++    if ([notification.name isEqualToString:@"NSWindowDidBecomeMainNotification"]) {
++        newState = @"active";
++    } else if ([notification.name isEqualToString:@"NSWindowDidResignMainNotification"]) {
++        newState = @"background";
++    }
++  }
++
+   if (![newState isEqualToString:_lastKnownState]) {
+     _lastKnownState = newState;
+     if ([self canSendEvents_DEPRECATED]) {
+diff --git a/node_modules/react-native/React/Fabric/RCTThirdPartyFabricComponentsProvider.h b/node_modules/react-native/React/Fabric/RCTThirdPartyFabricComponentsProvider.h
+new file mode 100644
+index 0000000..e95b895
+--- /dev/null
++++ b/node_modules/react-native/React/Fabric/RCTThirdPartyFabricComponentsProvider.h
+@@ -0,0 +1,33 @@
++
++/*
++ * This code was generated by [react-native-codegen](https://www.npmjs.com/package/react-native-codegen).
++ *
++ * Do not edit this file as changes may cause incorrect behavior and will be lost
++ * once the code is regenerated.
++ *
++ * @generated by GenerateRCTThirdPartyFabricComponentsProviderH
++ */
++
++#pragma GCC diagnostic push
++#pragma GCC diagnostic ignored "-Wreturn-type-c-linkage"
++
++#import <React/RCTComponentViewProtocol.h>
++
++#ifdef __cplusplus
++extern "C" {
++#endif
++
++Class<RCTComponentViewProtocol> RCTThirdPartyFabricComponentsProvider(const char *name);
++
++#ifndef RCT_DYNAMIC_FRAMEWORKS
++
++
++
++#endif
++
++#ifdef __cplusplus
++}
++#endif
++
++#pragma GCC diagnostic pop
++
+diff --git a/node_modules/react-native/React/Fabric/RCTThirdPartyFabricComponentsProvider.mm b/node_modules/react-native/React/Fabric/RCTThirdPartyFabricComponentsProvider.mm
+new file mode 100644
+index 0000000..a6c8eb5
+--- /dev/null
++++ b/node_modules/react-native/React/Fabric/RCTThirdPartyFabricComponentsProvider.mm
+@@ -0,0 +1,31 @@
++
++/**
++ * This code was generated by [react-native-codegen](https://www.npmjs.com/package/react-native-codegen).
++ *
++ * Do not edit this file as changes may cause incorrect behavior and will be lost
++ * once the code is regenerated.
++ *
++ * @generated by GenerateRCTThirdPartyFabricComponentsProviderCpp
++ */
++
++// OSS-compatibility layer
++
++#import "RCTThirdPartyFabricComponentsProvider.h"
++
++#import <string>
++#import <unordered_map>
++
++Class<RCTComponentViewProtocol> RCTThirdPartyFabricComponentsProvider(const char *name) {
++  static std::unordered_map<std::string, Class (*)(void)> sFabricComponentsClassMap = {
++    #ifndef RCT_DYNAMIC_FRAMEWORKS
++
++    #endif
++  };
++
++  auto p = sFabricComponentsClassMap.find(name);
++  if (p != sFabricComponentsClassMap.end()) {
++    auto classFunc = p->second;
++    return classFunc();
++  }
++  return nil;
++}
+diff --git a/node_modules/react-native/ReactCommon/react/renderer/components/rncore/ComponentDescriptors.h b/node_modules/react-native/ReactCommon/react/renderer/components/rncore/ComponentDescriptors.h
+new file mode 100644
+index 0000000..e69de29
+diff --git a/node_modules/react-native/ReactCommon/react/renderer/components/rncore/EventEmitters.cpp b/node_modules/react-native/ReactCommon/react/renderer/components/rncore/EventEmitters.cpp
+new file mode 100644
+index 0000000..e69de29
+diff --git a/node_modules/react-native/ReactCommon/react/renderer/components/rncore/EventEmitters.h b/node_modules/react-native/ReactCommon/react/renderer/components/rncore/EventEmitters.h
+new file mode 100644
+index 0000000..e69de29
+diff --git a/node_modules/react-native/ReactCommon/react/renderer/components/rncore/Props.cpp b/node_modules/react-native/ReactCommon/react/renderer/components/rncore/Props.cpp
+new file mode 100644
+index 0000000..e69de29
+diff --git a/node_modules/react-native/ReactCommon/react/renderer/components/rncore/Props.h b/node_modules/react-native/ReactCommon/react/renderer/components/rncore/Props.h
+new file mode 100644
+index 0000000..e69de29
+diff --git a/node_modules/react-native/ReactCommon/react/renderer/components/rncore/RCTComponentViewHelpers.h b/node_modules/react-native/ReactCommon/react/renderer/components/rncore/RCTComponentViewHelpers.h
+new file mode 100644
+index 0000000..e69de29
+diff --git a/node_modules/react-native/ReactCommon/react/renderer/components/rncore/ShadowNodes.cpp b/node_modules/react-native/ReactCommon/react/renderer/components/rncore/ShadowNodes.cpp
+new file mode 100644
+index 0000000..e69de29
+diff --git a/node_modules/react-native/ReactCommon/react/renderer/components/rncore/ShadowNodes.h b/node_modules/react-native/ReactCommon/react/renderer/components/rncore/ShadowNodes.h
+new file mode 100644
+index 0000000..e69de29
+diff --git a/node_modules/react-native/ReactCommon/react/renderer/components/rncore/States.cpp b/node_modules/react-native/ReactCommon/react/renderer/components/rncore/States.cpp
+new file mode 100644
+index 0000000..e69de29
+diff --git a/node_modules/react-native/ReactCommon/react/renderer/components/rncore/States.h b/node_modules/react-native/ReactCommon/react/renderer/components/rncore/States.h
+new file mode 100644
+index 0000000..e69de29
