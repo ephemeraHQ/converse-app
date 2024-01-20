@@ -199,6 +199,7 @@ const build = async () => {
   try {
     const env = {
       ...process.env,
+      NODE_ENV: env === "dev" ? "development" : "production",
     };
     if (keepLogs) {
       env.EAS_LOCAL_BUILD_SKIP_CLEANUP = 1;
