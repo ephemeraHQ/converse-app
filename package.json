@@ -180,7 +180,7 @@
     "husky": "^8.0.2",
     "knip": "^2.19.1",
     "lint-staged": "^13.1.0",
-    "metro-minify-terser": "^0.74.0",
+    "metro-minify-terser": "^0.80.4",
     "metro-react-native-babel-preset": "^0.77.0",
     "nanoid": "^3.0.0",
     "plist": "^3.0.6",
