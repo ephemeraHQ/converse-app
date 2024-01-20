@@ -197,14 +197,14 @@ const build = async () => {
   };
 
   try {
-    const env = {
+    const commandEnv = {
       ...process.env,
       NODE_ENV: env === "dev" ? "development" : "production",
     };
     if (keepLogs) {
-      env.EAS_LOCAL_BUILD_SKIP_CLEANUP = 1;
+      commandEnv.EAS_LOCAL_BUILD_SKIP_CLEANUP = 1;
     }
-    await executeCommand(buildCommand, buildArgs, env);
+    await executeCommand(buildCommand, buildArgs, commandEnv);
     buildSuccess = true;
   } catch (e) {
     console.log("Error during build");
