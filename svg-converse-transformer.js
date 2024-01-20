@@ -27,7 +27,6 @@ const defaultSVGRConfig = {
 
 module.exports = {
   transform: async ({ src, filename, options }) => {
-    console.log("trasnform on", filename);
     if (filename.endsWith(".svg")) {
       const config = await resolveConfig(resolveConfigDir(filename));
       const svgrConfig = config
