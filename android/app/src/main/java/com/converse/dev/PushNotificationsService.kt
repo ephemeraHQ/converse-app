@@ -16,7 +16,6 @@ import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
 import com.reactnativecommunity.asyncstorage.AsyncStorageModule
 import devmenu.com.th3rdwave.safeareacontext.SafeAreaProviderManager
-import expo.modules.ExpoModulesPackageList
 import expo.modules.core.ExportedModule
 import expo.modules.core.ModuleRegistry
 import expo.modules.core.ViewManager
