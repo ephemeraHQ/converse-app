@@ -1,8 +1,3 @@
-
-plugins {
-    id 'io.sentry.android.gradle' version '4.0.0-beta.1'
-}
-
 apply plugin: "com.android.application"
 apply plugin: "org.jetbrains.kotlin.android"
 apply plugin: "com.facebook.react"
@@ -100,7 +95,7 @@ def enableProguardInReleaseBuilds = (findProperty('android.enableProguardInRelea
  */
 def jscFlavor = 'org.webkit:android-jsc:+'
 
-apply from: "../../node_modules/@sentry/react-native/sentry.gradle"
+apply from: new File(["node", "--print", "require.resolve('@sentry/react-native/package.json')"].execute().text.trim(), "../sentry.gradle")
 android {
     ndkVersion rootProject.ext.ndkVersion
     buildToolsVersion rootProject.ext.buildToolsVersion
@@ -236,12 +231,3 @@ applyNativeModulesAppBuildGradle(project)
 
 apply plugin: 'com.google.gms.google-services'
 apply plugin: 'org.jetbrains.kotlin.android'
-
-sentry {
-    org = "converse-app"
-    projectName = "converse-react-native"
-
-    // this will upload your source code to Sentry to show it as part of the stack traces
-    // disable if you don't want to expose your sources
-    includeSourceContext = true
-}
