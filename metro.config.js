@@ -1,13 +1,23 @@
 // Learn more https://docs.expo.io/guides/customizing-metro
-const { getSentryExpoConfig } = require('@sentry/react-native/metro');
+const { mergeConfig } = require("@react-native/metro-config");
+const {
+  createSentryMetroSerializer,
+} = require("@sentry/react-native/dist/js/tools/sentryMetroSerializer");
+const { getDefaultConfig } = require("expo/metro-config");
+
+const sentryConfig = {
+  serializer: {
+    customSerializer: createSentryMetroSerializer(),
+  },
+};
 
 // eslint-disable-next-line no-undef
-const defaultConfig = getSentryExpoConfig(__dirname, {
+const defaultConfig = getDefaultConfig(__dirname, {
   // [Web-only]: Enables CSS support in Metro.
   isCSSEnabled: true,
 });
 
-module.exports = {
+const converseMetroConfig = {
   ...defaultConfig,
   transformer: {
     ...defaultConfig.transformer,
@@ -35,3 +45,5 @@ module.exports = {
     },
   },
 };
+
+module.exports = mergeConfig(converseMetroConfig, sentryConfig);
