@@ -30,7 +30,7 @@ const converseMetroConfig = {
     minifierConfig: {
       // Terser options...
     },
-    babelTransformerPath: "./svg-converse-transformer.js",
+    babelTransformerPath: require("react-native-svg-transformer"),
   },
   resolver: {
     ...defaultConfig.resolver,
