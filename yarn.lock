@@ -14132,10 +14132,10 @@ expo-navigation-bar@~2.8.1:
     "@react-native/normalize-color" "^2.0.0"
     debug "^4.3.2"
 
-expo-notifications@~0.27.3:
-  version "0.27.3"
-  resolved "https://registry.yarnpkg.com/expo-notifications/-/expo-notifications-0.27.3.tgz#18f3d6dadc14aefc32937bddc54572bbf68236a7"
-  integrity sha512-P4zhbVYDhTtV7xCdcxpk4tTbWh33P+A0ZTbpUrp6vcpZk8QprhjhB2okr1/R1z0fpxUPv74KYex5fnAHxTVIvw==
+expo-notifications@~0.27.4:
+  version "0.27.4"
+  resolved "https://registry.yarnpkg.com/expo-notifications/-/expo-notifications-0.27.4.tgz#04f36a8393049ee2fc7658494f1dc58c390da3d9"
+  integrity sha512-CryQvd2x868GpBI2DzabPPRL2HAD8O+rm2hwYH1sN5lTb39kmC9jm2Riu6RdWoL5XYzayCp9IHIjL6Dnu9hHAw==
   dependencies:
     "@expo/image-utils" "^0.4.0"
     "@ide/backoff" "^1.0.0"
@@ -14156,10 +14156,10 @@ expo-pwa@0.0.127:
     commander "2.20.0"
     update-check "1.5.3"
 
-expo-router@~3.4.3:
-  version "3.4.3"
-  resolved "https://registry.yarnpkg.com/expo-router/-/expo-router-3.4.3.tgz#080bc3d8ebd8f9116b8edcf8402ae6e5569f2afd"
-  integrity sha512-xqiGNkNq2ecN4wHUQhKFne4roPEqrrUUta9tguPTtDKR6vhd41xX9UuRX36qdrRqJqXbG3G+ZPYdssGTXmN8mg==
+expo-router@~3.4.4:
+  version "3.4.4"
+  resolved "https://registry.yarnpkg.com/expo-router/-/expo-router-3.4.4.tgz#8419793065f3663ff8f6433e3a2d778b8e1d27f2"
+  integrity sha512-72vpjXpVw+KoNMlEl6MGL0mpHom/5M3PmtojgLssLE2ZjLQqIym3qPcx2xYEE6nbo61+Z8ol5BT/Jvj9O2q0rw==
   dependencies:
     "@expo/metro-runtime" "3.1.1"
     "@expo/server" "^0.3.0"
