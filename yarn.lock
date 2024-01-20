@@ -18177,17 +18177,10 @@ metro-file-map@0.80.4:
   optionalDependencies:
     fsevents "^2.3.2"
 
-metro-minify-terser@0.80.4:
+metro-minify-terser@0.80.4, metro-minify-terser@^0.80.4:
   version "0.80.4"
   resolved "https://registry.yarnpkg.com/metro-minify-terser/-/metro-minify-terser-0.80.4.tgz#008a4874f6167a4da5d24c90d4281b56f09ba684"
   integrity sha512-cuxfRZWDWGKjh+Z6t4KJkrvmV4JUKXfvQuAX7Pa7U0Mf1YJdLtoGQ5iVOu/6MkfYGXbppqGk2qmFECrRGRh0cA==
-  dependencies:
-    terser "^5.15.0"
-
-metro-minify-terser@^0.74.0:
-  version "0.74.0"
-  resolved "https://registry.yarnpkg.com/metro-minify-terser/-/metro-minify-terser-0.74.0.tgz#8e323b8093cbb66edac9f16e49311134c733de41"
-  integrity sha512-xJXoGxntlw0LP4yaSwtWxnVJBp41y71AytMH8LgL67RZHTfQcrhp7tf0nHbswPIw06YRs9kQU1SaT/sEI0WmqA==
   dependencies:
     terser "^5.15.0"
 
