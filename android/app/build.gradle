@@ -229,10 +229,9 @@ apply from: new File(["node", "--print", "require.resolve('@react-native-communi
 
 applyNativeModulesAppBuildGradle(project)
 
-apply plugin: 'com.google.gms.google-services'
 apply plugin: 'org.jetbrains.kotlin.android'
-
 apply plugin: "io.sentry.android.gradle"
+apply plugin: 'com.google.gms.google-services'
 
 sentry {
     // Enables or disables the automatic configuration of Native Symbols
