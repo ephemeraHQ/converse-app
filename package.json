@@ -109,7 +109,6 @@
     "react-native-fs": "^2.20.0",
     "react-native-gesture-handler": "~2.14.0",
     "react-native-get-random-values": "~1.8.0",
-    "react-native-gradle-plugin": "^0.71.19",
     "react-native-keyboard-controller": "^1.9.1",
     "react-native-localize": "^3.0.2",
     "react-native-mmkv": "^2.11.0",
