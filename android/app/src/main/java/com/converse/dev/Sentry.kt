@@ -25,18 +25,24 @@ fun initSentry(appContext: Context) {
 
 fun sentryTrackError(e: Throwable, extras: Map<String, Any>?) {
     Log.d("ERROR", e.toString())
-    Sentry.withScope { scope: Scope ->
+    Sentry.withScope { scope ->
         extras?.forEach { (key, value) ->
-            scope.setExtra(key, value.toString())
+            scope.setExtra(
+                key,
+                value.toString()
+            )
         }
         Sentry.captureException(e)
     }
 }
 
 fun sentryTrackMessage(message: String, extras: Map<String, Any>?) {
-    Sentry.withScope { scope: Scope ->
+    Sentry.withScope { scope ->
         extras?.forEach { (key, value) ->
-            scope.setExtra(key, value.toString())
+            scope.setExtra(
+                key,
+                value.toString()
+            )
         }
         Sentry.captureMessage(message)
     }
