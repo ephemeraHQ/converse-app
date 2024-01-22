@@ -73,7 +73,7 @@ func setKeychainValue(value: String, forKey: String) throws -> Bool {
 }
 
 func updateKeychainValue(value: String, forKey: String) throws -> Bool {
-  let query = getKeychainQuery(key: forKey)
+  let query = getKeychainQuery(key: forKey, requireAuthentication: false)
   let valueData = value.data(using: .utf8)
   let updateDictionary = [kSecValueData as String: valueData]
   let status = SecItemUpdate(query as CFDictionary, updateDictionary as CFDictionary)
