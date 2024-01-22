@@ -12,9 +12,6 @@ export const getXmtpBase64KeyFromSigner = async (
 ) => {
   const keys = await Client.getKeys(signer, {
     env,
-    // we don't need to publish the contact here since it
-    // will happen when we create the client later
-    skipContactPublishing: true,
     // we can skip persistence on the keystore for this short-lived
     // instance
     persistConversations: false,
