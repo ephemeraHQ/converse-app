@@ -6,7 +6,7 @@ import config from "../config";
 export const initSentry = () => {
   Sentry.init({
     dsn: config.sentryDSN,
-    debug: config.env === "dev",
+    debug: false,
     enabled: config.env === "dev",
     environment: config.env,
     beforeSend: (event: ErrorEvent, hint: EventHint) => {

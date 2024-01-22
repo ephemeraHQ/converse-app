@@ -24,7 +24,7 @@ PODS:
   - EXJSONUtils (0.12.3)
   - EXManifests (0.13.2):
     - ExpoModulesCore
-  - EXNotifications (0.27.3):
+  - EXNotifications (0.27.4):
     - ExpoModulesCore
   - Expo (50.0.2):
     - ExpoModulesCore
@@ -107,7 +107,7 @@ PODS:
     - ExpoModulesCore
   - ExpoFileSystem (16.0.4):
     - ExpoModulesCore
-  - ExpoHead (3.4.3):
+  - ExpoHead (3.4.4):
     - ExpoModulesCore
   - ExpoImage (1.10.4):
     - ExpoModulesCore
@@ -1713,7 +1713,7 @@ SPEC CHECKSUMS:
   EXImageLoader: 55080616b2fe9da19ef8c7f706afd9814e279b6b
   EXJSONUtils: 5c42959e87be238b045ef37cc5268b16a6c0ad4a
   EXManifests: 5e8c29f36c716af768a4ea47ec05e1b89ab93091
-  EXNotifications: 727ca0e18dde91bc3d82b0f8c58a01ae05b644e1
+  EXNotifications: e4c08fe430ab411849bec7a7ca6ef4b98c57ae62
   Expo: 6c6526e76864e140363431722b22d0fa3cdeafd2
   expo-dev-client: 9ddb34c59edd16dee562b5a094dd63c7ce29e92c
   expo-dev-launcher: 8f792740a9bd9a5757c27c5d32e5826bdd17a36e
@@ -1725,7 +1725,7 @@ SPEC CHECKSUMS:
   ExpoDevice: d204395e17fffdcefa7470bdef33b07719ac41b1
   ExpoDocumentPicker: 70254802886e29a45d4ad25486e64b6fc9c8f0cc
   ExpoFileSystem: 39e454b8e7f2358ae2c8f8ec255fede4c3039493
-  ExpoHead: 51c87a70a3eae1a2f0186788082fd3f107867e24
+  ExpoHead: 0bfe44a29df75e5affd2bbffda528c52a5144924
   ExpoImage: d8d1003394f96a42d7702ab07d33e7d3773bcaa3
   ExpoImageManipulator: c1d7cb865eacd620a35659f3da34c70531f10b59
   ExpoImagePicker: 66970181d1c838f444e5e1f81b804ab2d5ff49bd
