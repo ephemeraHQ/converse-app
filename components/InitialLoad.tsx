@@ -39,6 +39,7 @@ const useStyles = () => {
       flex: 1,
       justifyContent: "center",
       backgroundColor: backgroundColor(colorScheme),
+      marginTop: Platform.OS === "web" ? 60 : undefined,
     },
     welcome: {
       marginTop: 15,
