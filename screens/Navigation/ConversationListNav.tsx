@@ -36,7 +36,6 @@ export default function ConversationListNav() {
   const colorScheme = useColorScheme();
   const styles = useStyles();
   const searchBar = useRef<TextInput | null>(null);
-  const isSplitScreen = useIsSplitScreen();
   const shouldShowConnectingOrSyncing = useShouldShowConnectingOrSyncing();
   const shouldShowConnecting = useShouldShowConnecting();
   const { searchQuery, setSearchQuery, searchBarFocused, setSearchBarFocused } =

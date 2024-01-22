@@ -198,8 +198,8 @@ export default function ProfileScreen({
     ...getSocialItemsFromArray(
       socials?.farcasterUsernames || [],
       (f) => `fc-${f.username}`,
-      (f) => f.name || `${f.username}.fc`,
-      (f) => `Farcaster id: ${f.username}.fc`,
+      (f) => f.name || f.username,
+      (f) => `Farcaster id: ${f.username}`,
       (f) => `https://warpcast.com/${f.username}`,
       (f) => f.avatarURI
     ),

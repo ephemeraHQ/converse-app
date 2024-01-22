@@ -165,7 +165,7 @@ const Conversation = ({
       }
     });
 
-    if (Platform.OS === "web") {
+    if (Platform.OS === "web" || isDesktop) {
       handleAutoFocus();
     }
 
