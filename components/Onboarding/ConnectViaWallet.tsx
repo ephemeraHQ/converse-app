@@ -16,10 +16,8 @@ import { useOnboardingStore } from "../../data/store/onboardingStore";
 import { useSelect } from "../../data/store/storeHelpers";
 import { textPrimaryColor, textSecondaryColor } from "../../utils/colors";
 import { shortAddress } from "../../utils/str";
-import {
-  getXmtpBase64KeyFromSigner,
-  isOnXmtp,
-} from "../../utils/xmtpRN/client";
+import { isOnXmtp } from "../../utils/xmtpRN/client";
+import { getXmtpBase64KeyFromSigner } from "../../utils/xmtpRN/signIn";
 import OnboardingComponent from "./OnboardingComponent";
 
 export default function ConnectViaWallet({
