@@ -1,5 +1,5 @@
 import Clipboard from "@react-native-clipboard/clipboard";
-import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import { NavigationProp, useNavigation } from "@react-navigation/native";
 import * as Linking from "expo-linking";
 import React, { useCallback } from "react";
 import {
@@ -14,7 +14,6 @@ import { refreshProfileForAddress } from "../data/helpers/profiles/profilesUpdat
 import { useAccountsStore } from "../data/store/accountsStore";
 import { useAppStore } from "../data/store/appStore";
 import { useSelect } from "../data/store/storeHelpers";
-import { NavigationParamList } from "../screens/Navigation/Navigation";
 import {
   actionSheetColors,
   primaryColor,
@@ -34,14 +33,9 @@ import { TableViewPicto } from "./TableView/TableViewImage";
 
 type Props = {
   account: string;
-  navigation?: NativeStackNavigationProp<
-    NavigationParamList,
-    "Accounts",
-    undefined
-  >;
 };
 
-export default function AccountSettingsButton({ navigation, account }: Props) {
+export default function AccountSettingsButton({ account }: Props) {
   const { setNotificationsPermissionStatus, notificationsPermissionStatus } =
     useAppStore(
       useSelect([
@@ -49,6 +43,7 @@ export default function AccountSettingsButton({ navigation, account }: Props) {
         "notificationsPermissionStatus",
       ])
     );
+  const navigation = useNavigation() as NavigationProp<any>;
 
   const { setCurrentAccount } = useAccountsStore(
     useSelect(["setCurrentAccount"])
@@ -59,7 +54,7 @@ export default function AccountSettingsButton({ navigation, account }: Props) {
     Keyboard.dismiss();
 
     const methods = {
-      "Your profile page": () => {
+      "Your profile page": async () => {
         if (account) {
           refreshProfileForAddress(account, account);
           refreshBalanceForAccounts();
@@ -67,7 +62,10 @@ export default function AccountSettingsButton({ navigation, account }: Props) {
           if (Platform.OS === "android") {
             converseEventEmitter.emit("toggle-navigation-drawer", false);
           } else {
-            navigation?.push("Chats");
+            if (Platform.OS === "web") {
+              await new Promise((r) => setTimeout(r, 200));
+            }
+            navigation?.navigate("Chats");
           }
           navigate("Profile", {
             address: account,
@@ -77,14 +75,17 @@ export default function AccountSettingsButton({ navigation, account }: Props) {
       "Copy wallet address": () => {
         Clipboard.setString(account || "");
       },
-      "Contact Converse team": () => {
+      "Contact Converse team": async () => {
         setCurrentAccount(account, false);
         if (Platform.OS === "android") {
           // On android the drawer is outside the navigation
           // so we use Linking to navigate
           converseEventEmitter.emit("toggle-navigation-drawer", false);
         } else {
-          navigation?.push("Chats");
+          if (Platform.OS === "web") {
+            await new Promise((r) => setTimeout(r, 200));
+          }
+          navigation?.navigate("Chats");
         }
         navigate("Conversation", {
           mainConversationWithPeer: config.polAddress,
