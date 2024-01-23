@@ -12,6 +12,7 @@ import {
   backgroundColor,
   textPrimaryColor,
   textSecondaryColor,
+  listItemSeparatorColor,
 } from "../utils/colors";
 import Button from "./Button/Button";
 import Picto from "./Picto/Picto";
@@ -71,6 +72,13 @@ const useStyles = () => {
           height: 72,
           paddingLeft: 16,
           paddingRight: 14,
+        },
+        web: {
+          height: 72,
+          paddingLeft: 16,
+          paddingRight: 14,
+          borderBottomWidth: 0.5,
+          borderBottomColor: listItemSeparatorColor(colorScheme),
         },
       }),
       backgroundColor: backgroundColor(colorScheme),

@@ -1,6 +1,10 @@
 import { Platform, useColorScheme } from "react-native";
 
-import { navigationSecondaryBackgroundColor } from "../../utils/colors";
+import {
+  listItemSeparatorColor,
+  navigationSecondaryBackgroundColor,
+  textPrimaryColor,
+} from "../../utils/colors";
 import NewConversation from "../NewConversation";
 import { NativeStack, navigationAnimation } from "./Navigation";
 
@@ -29,10 +33,14 @@ export default function NewConversationNav() {
         presentation: "modal",
         headerStyle: {
           backgroundColor: navigationSecondaryBackgroundColor(colorScheme),
-        },
+          borderBottomColor:
+            Platform.OS === "web"
+              ? listItemSeparatorColor(colorScheme)
+              : undefined,
+        } as any,
         headerTitleStyle: Platform.select({
           default: {},
-          web: { left: -20 } as any,
+          web: { left: -20, color: textPrimaryColor(colorScheme) } as any,
         }),
         animation: navigationAnimation,
       }}

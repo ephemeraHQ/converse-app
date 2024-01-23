@@ -3,7 +3,11 @@ import { ColorSchemeName, Platform, useWindowDimensions } from "react-native";
 
 import { initialURL } from "../../components/StateHandlers/InitialStateHandler";
 import config from "../../config";
-import { backgroundColor, headerTitleStyle } from "../../utils/colors";
+import {
+  backgroundColor,
+  headerTitleStyle,
+  listItemSeparatorColor,
+} from "../../utils/colors";
 import { isDesktop } from "../../utils/device";
 
 export const getConverseStateFromPath = (path: string, options: any) => {
@@ -28,6 +32,8 @@ export const getConverseInitialURL = () => {
 export const stackGroupScreenOptions = (colorScheme: ColorSchemeName) => ({
   headerStyle: {
     backgroundColor: backgroundColor(colorScheme),
+    borderBottomColor:
+      Platform.OS === "web" ? listItemSeparatorColor(colorScheme) : undefined,
   },
   headerTitleStyle: headerTitleStyle(colorScheme),
   headerShadowVisible: Platform.OS !== "android",

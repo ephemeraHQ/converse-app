@@ -1,6 +1,9 @@
-import { useColorScheme } from "react-native";
+import { Platform, useColorScheme } from "react-native";
 
-import { navigationSecondaryBackgroundColor } from "../../utils/colors";
+import {
+  listItemSeparatorColor,
+  navigationSecondaryBackgroundColor,
+} from "../../utils/colors";
 import ConverseMatchMaker from "../ConverseMatchMaker";
 import { NativeStack, navigationAnimation } from "./Navigation";
 
@@ -15,7 +18,11 @@ export default function ConverseMatchMakerNav() {
         presentation: "modal",
         headerStyle: {
           backgroundColor: navigationSecondaryBackgroundColor(colorScheme),
-        },
+          borderBottomColor:
+            Platform.OS === "web"
+              ? listItemSeparatorColor(colorScheme)
+              : undefined,
+        } as any,
         animation: navigationAnimation,
       }}
     />
