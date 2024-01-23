@@ -170,7 +170,7 @@ const useStyles = () => {
         Platform.OS === "android"
           ? chatInputBackgroundColor(colorScheme)
           : backgroundColor(colorScheme),
-      maxHeight: 130,
+      maxHeight: Platform.OS === "web" ? 37 : 130,
       flexGrow: 1,
       flexShrink: 1,
       marginLeft: 12,
