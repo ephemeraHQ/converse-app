@@ -8,12 +8,19 @@ export default function AccountsNav() {
   return (
     <NativeStack.Screen
       name="Accounts"
-      component={Platform.OS === "web" ? AccountsAndroid : Accounts}
       options={{
         headerTitle: "Accounts",
         headerLargeTitle: true,
         headerShadowVisible: false,
       }}
-    />
+    >
+      {({ route, navigation }) => {
+        if (Platform.OS === "web") {
+          return <AccountsAndroid navigation={navigation} />;
+        } else {
+          return <Accounts navigation={navigation} route={route} />;
+        }
+      }}
+    </NativeStack.Screen>
   );
 }
