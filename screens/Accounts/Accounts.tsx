@@ -45,7 +45,7 @@ export default function Accounts({
           },
           rightView: (
             <View style={{ flexDirection: "row" }}>
-              <AccountSettingsButton navigation={navigation} account={a} />
+              <AccountSettingsButton account={a} />
               <TableViewPicto
                 symbol="chevron.right"
                 color={textSecondaryColor(colorScheme)}
