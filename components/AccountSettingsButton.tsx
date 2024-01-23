@@ -64,17 +64,14 @@ export default function AccountSettingsButton({ navigation, account }: Props) {
           refreshProfileForAddress(account, account);
           refreshBalanceForAccounts();
           setCurrentAccount(account, false);
-          if (navigation) {
-            navigation.push("Chats");
-            navigation.push("Profile", { address: account });
-          } else {
-            // On android the drawer is outside the navigation
-            // so we use Linking to navigate
+          if (Platform.OS === "android") {
             converseEventEmitter.emit("toggle-navigation-drawer", false);
-            navigate("Profile", {
-              address: account,
-            });
+          } else {
+            navigation?.push("Chats");
           }
+          navigate("Profile", {
+            address: account,
+          });
         }
       },
       "Copy wallet address": () => {
@@ -82,19 +79,16 @@ export default function AccountSettingsButton({ navigation, account }: Props) {
       },
       "Contact Converse team": () => {
         setCurrentAccount(account, false);
-        if (navigation) {
-          navigation.push("Chats");
-          navigation.push("Conversation", {
-            mainConversationWithPeer: config.polAddress,
-          });
-        } else {
+        if (Platform.OS === "android") {
           // On android the drawer is outside the navigation
           // so we use Linking to navigate
           converseEventEmitter.emit("toggle-navigation-drawer", false);
-          navigate("Conversation", {
-            mainConversationWithPeer: config.polAddress,
-          });
+        } else {
+          navigation?.push("Chats");
         }
+        navigate("Conversation", {
+          mainConversationWithPeer: config.polAddress,
+        });
       },
       "Turn on notifications": () => {
         if (notificationsPermissionStatus === "denied") {

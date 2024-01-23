@@ -1,6 +1,7 @@
+import Clipboard from "@react-native-clipboard/clipboard";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { StatusBar } from "expo-status-bar";
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -59,6 +60,8 @@ export default function ShareProfileScreen({
       ? { url: profileUrl }
       : { message: profileUrl };
 
+  const [copiedLink, setCopiedLink] = useState(false);
+
   return (
     <View style={styles.shareProfile}>
       {Platform.OS === "ios" && <StatusBar hidden={false} style="light" />}
@@ -77,10 +80,32 @@ export default function ShareProfileScreen({
         <Text style={styles.address}>{userAddress}</Text>
         <ConverseButton
           variant="primary"
-          title="Share link"
+          title={
+            Platform.OS === "web"
+              ? copiedLink
+                ? "Link copied"
+                : "Copy link"
+              : "Share link"
+          }
           style={styles.shareButton}
-          picto="square.and.arrow.up"
-          onPress={() => Share.share(shareDict)}
+          picto={
+            Platform.OS === "web"
+              ? copiedLink
+                ? "checkmark"
+                : "doc.on.doc"
+              : "square.and.arrow.up"
+          }
+          onPress={() => {
+            if (Platform.OS === "web") {
+              setCopiedLink(true);
+              Clipboard.setString(profileUrl);
+              setTimeout(() => {
+                setCopiedLink(false);
+              }, 1000);
+            } else {
+              Share.share(shareDict);
+            }
+          }}
         />
       </View>
     </View>
@@ -116,6 +141,7 @@ const useStyles = () => {
     },
     shareButton: {
       marginTop: 31,
+      maxWidth: Platform.OS === "web" ? 300 : undefined,
     },
   });
 };

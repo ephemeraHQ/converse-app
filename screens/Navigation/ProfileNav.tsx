@@ -24,7 +24,7 @@ export default function ProfileNav() {
         headerTitle:
           route.params.address === account ? "Profile" : "Contact details",
         headerTintColor:
-          Platform.OS === "android"
+          Platform.OS === "android" || Platform.OS === "web"
             ? textSecondaryColor(colorScheme)
             : undefined,
         animation: navigationAnimation,

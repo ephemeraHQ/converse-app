@@ -51,6 +51,7 @@ import { isEmptyObject } from "../utils/objects";
 import { conversationName } from "../utils/str";
 import { isOnXmtp } from "../utils/xmtpRN/client";
 import { NavigationParamList } from "./Navigation/Navigation";
+import { useIsSplitScreen } from "./Navigation/navHelpers";
 
 export default function NewConversation({
   route,
@@ -239,14 +240,19 @@ export default function NewConversation({
     };
   }, [value]);
 
+  const isSplitScreen = useIsSplitScreen();
+
   const navigateToTopic = useCallback(
     (topic: string, message?: string) => {
       navigation.goBack();
-      setTimeout(() => {
-        navigation.navigate("Conversation", { topic, message, focus: true });
-      }, 300);
+      setTimeout(
+        () => {
+          navigate("Conversation", { topic, message, focus: true });
+        },
+        isSplitScreen ? 0 : 300
+      );
     },
-    [navigation]
+    [navigation, isSplitScreen]
   );
 
   const [creatingNewConversation, setCreatingNewConversation] = useState(false);

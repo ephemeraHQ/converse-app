@@ -43,7 +43,7 @@ export default function ConversationNav(
           }
           route={{
             ...route,
-            params: isSplitScreen && routeParams ? routeParams : route.params,
+            params: isSplitScreen ? routeParams || {} : route.params,
           }}
         />
       )}

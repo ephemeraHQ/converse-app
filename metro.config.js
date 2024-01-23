@@ -45,4 +45,9 @@ const converseMetroConfig = {
   },
 };
 
-module.exports = mergeConfig(converseMetroConfig, sentryConfig);
+const args = process.argv.slice(2);
+const isWeb = args[2] === "web";
+
+module.exports = isWeb
+  ? converseMetroConfig
+  : mergeConfig(converseMetroConfig, sentryConfig);
