@@ -244,7 +244,9 @@ export default function NewConversation({
 
   const navigateToTopic = useCallback(
     (topic: string, message?: string) => {
-      navigation.goBack();
+      if (Platform.OS !== "web") {
+        navigation.goBack();
+      }
       setTimeout(
         () => {
           navigate("Conversation", { topic, message, focus: true });
