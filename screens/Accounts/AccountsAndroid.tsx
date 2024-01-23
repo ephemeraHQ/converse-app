@@ -1,4 +1,4 @@
-import { NavigationProp, useNavigation } from "@react-navigation/native";
+import { NavigationProp } from "@react-navigation/native";
 import { Dimensions, Platform, StyleSheet, useColorScheme } from "react-native";
 import { Drawer } from "react-native-paper";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -19,11 +19,14 @@ import { converseEventEmitter } from "../../utils/events";
 import { useDisconnectWallet } from "../../utils/logout/wallet";
 import { shortAddress, useAccountsProfiles } from "../../utils/str";
 
-export default function AccountsAndroid() {
+type Props = {
+  navigation?: NavigationProp<any> | undefined;
+};
+
+export default function AccountsAndroid({ navigation }: Props) {
   const styles = useStyles();
   const accounts = useAccountsList();
   const accountsProfiles = useAccountsProfiles();
-  const navigation = useNavigation() as NavigationProp<any>;
 
   const disconnectWallet = useDisconnectWallet();
   const { currentAccount, setCurrentAccount } = useAccountsStore(
@@ -64,7 +67,9 @@ export default function AccountsAndroid() {
           icon={({ color }) => (
             <Picto picto="account_circle" size={24} color={color} />
           )}
-          right={({ color }) => <AccountSettingsButton account={a} />}
+          right={({ color }) => (
+            <AccountSettingsButton account={a} navigation={navigation} />
+          )}
           rippleColor={
             currentAccount === a
               ? undefined

@@ -1,5 +1,5 @@
 import Clipboard from "@react-native-clipboard/clipboard";
-import { NavigationProp, useNavigation } from "@react-navigation/native";
+import { NavigationProp } from "@react-navigation/native";
 import * as Linking from "expo-linking";
 import React, { useCallback } from "react";
 import {
@@ -33,9 +33,10 @@ import { TableViewPicto } from "./TableView/TableViewImage";
 
 type Props = {
   account: string;
+  navigation?: NavigationProp<any>;
 };
 
-export default function AccountSettingsButton({ account }: Props) {
+export default function AccountSettingsButton({ account, navigation }: Props) {
   const { setNotificationsPermissionStatus, notificationsPermissionStatus } =
     useAppStore(
       useSelect([
@@ -43,7 +44,6 @@ export default function AccountSettingsButton({ account }: Props) {
         "notificationsPermissionStatus",
       ])
     );
-  const navigation = useNavigation() as NavigationProp<any>;
 
   const { setCurrentAccount } = useAccountsStore(
     useSelect(["setCurrentAccount"])
