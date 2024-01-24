@@ -5,7 +5,7 @@ import { Transaction } from "../data/store/transactionsStore";
 import { isContentType } from "./xmtpRN/contentTypes";
 
 export interface TransactionEvent {
-  amount: string;
+  amount: number;
   contractAddress: string;
   currency: string;
   decimals: number;
@@ -155,10 +155,11 @@ export function createUniformTransaction(
 }
 
 export const formatAmount = (
-  event: TransactionEvent,
+  amount: number,
+  currency: string,
+  decimals: number,
   useCurrencySymbol: boolean = true
 ): string => {
-  const { amount, currency, decimals } = event;
   const actualAmount = Number(amount) / Math.pow(10, decimals);
 
   // Convert the number to a fixed-point notation, then remove trailing zeros and decimal point if not needed
