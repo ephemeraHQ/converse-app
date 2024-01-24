@@ -1,5 +1,6 @@
 const { spawn } = require("child_process");
 const isClean = require("git-is-clean");
+const path = require("path");
 const prompts = require("prompts");
 
 // eslint-disable-next-line no-undef
