@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { Platform, StyleSheet, Text, useColorScheme, View } from "react-native";
 
 import Clock from "../../assets/clock.svg";
+import Exclamationmark from "../../assets/exclamationmark.triangle.svg";
 import {
   getTransactionsStore,
   useAccountsStore,
@@ -255,10 +256,37 @@ export default function ChatTransactionReference({ message }: Props) {
         <View style={{ opacity: 0 }}>{metadataView}</View>
       </>
     );
-  } else if (
-    transaction.status === "SUCCESS" ||
-    transaction.status === "FAILURE"
-  ) {
+  } else if (transaction.status === "FAILURE") {
+    return (
+      <>
+        <View
+          style={[
+            styles.innerBubble,
+            message.fromMe ? styles.innerBubbleMe : undefined,
+          ]}
+        >
+          <Text style={[styles.text, styles.bold]}>Transaction</Text>
+          <Text style={[styles.text, styles.small]}>
+            Blockchain: {transaction.chainName}
+          </Text>
+          <Text style={[styles.text, styles.small]}>
+            Transaction hash: {shortAddress(transaction.reference)}
+          </Text>
+          <View style={styles.transactionStatusContainer}>
+            <Text style={[styles.text, styles.small]}>Status:</Text>
+            <Exclamationmark
+              style={styles.statusIcon}
+              fill={textSecondaryColor(colorScheme)}
+              width={15}
+              height={15}
+            />
+            <Text style={[styles.text, styles.small]}>Failed</Text>
+          </View>
+        </View>
+        <View style={{ opacity: 0 }}>{metadataView}</View>
+      </>
+    );
+  } else if (transaction.status === "SUCCESS") {
     return (
       <>
         <View
