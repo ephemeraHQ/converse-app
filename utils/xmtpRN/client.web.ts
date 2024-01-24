@@ -4,6 +4,7 @@ import {
   AttachmentCodec,
   RemoteAttachmentCodec,
 } from "@xmtp/content-type-remote-attachment";
+import { TransactionReferenceCodec } from "@xmtp/content-type-transaction-reference";
 import { Client } from "@xmtp/xmtp-js";
 import { Signer } from "ethers";
 
@@ -39,6 +40,14 @@ export const getXmtpClientFromBase64Key = async (base64Key: string) => {
   client.registerCodec(new AttachmentCodec());
   client.registerCodec(new RemoteAttachmentCodec());
   client.registerCodec(new ReadReceiptCodec());
+  client.registerCodec(new TransactionReferenceCodec());
+  // client.registerCodec(new CoinbaseMessagingPaymentCodec());
+  /* TODO - this fails with error:
+  Argument of type 'CoinbaseMessagingPaymentCodec' is not assignable to
+  parameter of type 'ContentCodec<any>'.
+  Types of property 'contentType' are incompatible.
+  Property 'sameAs' is missing in type
+  */
   return client;
 };
 
