@@ -23,9 +23,20 @@ const update = async () => {
   const { env } = await prompts(questions);
   if (!env) process.exit(1);
 
-  await executeCommand("node", [`scripts/build/ios/${env}.js`]);
-  await executeCommand("node", [`scripts/build/android/${env}.js`]);
-  await executeCommand("eas", ["update", "--branch", env]);
+  try {
+    await executeCommand("node", [`scripts/build/ios/${env}.js`]);
+    await executeCommand("node", [`scripts/build/android/${env}.js`]);
+    await executeCommand("eas", ["update", "--branch", env]);
+    await executeCommand("npx", ["sentry-expo-upload-sourcemaps", "dist"], {
+      SENTRY_ORG: "converse-app",
+      SENTRY_PROJECT: "converse-react-native",
+      SENTRY_AUTH_TOKEN:
+        "eac2788f667c4e35b610e664417b0acd1d2c43fd8ab2458986cfe85a96cf940a",
+    });
+  } catch (e) {
+    console.error(e);
+  }
+  await executeCommand("git", ["checkout", "-f"]);
 };
 
 update();
