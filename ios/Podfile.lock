@@ -1328,7 +1328,7 @@ PODS:
     - GzipSwift
     - web3.swift
     - XMTPRust (= 0.3.7-beta0)
-  - XMTPReactNative (1.24.1):
+  - XMTPReactNative (1.24.2):
     - ExpoModulesCore
     - MessagePacker
     - secp256k1.swift
@@ -1833,10 +1833,10 @@ SPEC CHECKSUMS:
   UMAppLoader: 5df85360d65cabaef544be5424ac64672e648482
   web3.swift: 2263d1e12e121b2c42ffb63a5a7beb1acaf33959
   XMTP: 61788f11954c6f5fdc01ad585c5b0f756f02cb0e
-  XMTPReactNative: 4d076d216715a595a00d1bfc3c2830988481ede1
+  XMTPReactNative: 82203ad1bde3aaca1b9afb3c846116f32e65f442
   XMTPRust: 8848a2ba761b2c961d666632f2ad27d1082faa93
   Yoga: e64aa65de36c0832d04e8c7bd614396c77a80047
 
-PODFILE CHECKSUM: 6677e8a2a677de01e4162baa6754ccc2ea407f95
+PODFILE CHECKSUM: ee0ef1532feab28c79abcb4c9ca6fdb3e75b783d
 
 COCOAPODS: 1.14.3
