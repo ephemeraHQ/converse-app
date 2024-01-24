@@ -33,7 +33,8 @@ export const mergeTransactionRefData = (
   transactionType:
     | "transactionReference"
     | "coinbaseRegular"
-    | "coinbaseSponsored",
+    | "coinbaseSponsored"
+    | undefined,
   txRef: TransactionReference,
   txRefId: string,
   txDetails?: TransactionDetails

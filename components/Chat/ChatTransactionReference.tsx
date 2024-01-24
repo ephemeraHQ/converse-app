@@ -1,7 +1,15 @@
 import Clipboard from "@react-native-clipboard/clipboard";
+import { TransactionReference } from "@xmtp/content-type-transaction-reference";
 import * as Linking from "expo-linking";
 import { useEffect, useRef, useState } from "react";
-import { Platform, StyleSheet, Text, useColorScheme, View } from "react-native";
+import {
+  ColorSchemeName,
+  Platform,
+  StyleSheet,
+  Text,
+  useColorScheme,
+  View,
+} from "react-native";
 
 import Checkmark from "../../assets/checkmark.svg";
 import Clock from "../../assets/clock.svg";
@@ -11,6 +19,7 @@ import {
   useAccountsStore,
   useTransactionsStore,
 } from "../../data/store/accountsStore";
+import { Transaction } from "../../data/store/transactionsStore";
 import {
   getCoinbaseTransactionDetails,
   getTransactionDetails,
@@ -69,42 +78,7 @@ export default function ChatTransactionReference({ message }: Props) {
   const showing = !transaction.loading;
   const showTransactionActionSheetRef = useRef<(() => void) | null>(null);
   const setTransactions = useTransactionsStore((s) => s.setTransactions);
-
-  const openBlockExplorer = () => {
-    if (transaction.blockExplorerURL) {
-      Linking.openURL(transaction.blockExplorerURL);
-    }
-  };
-
-  const copyTransactionHash = () => {
-    Clipboard.setString(transaction.reference);
-  };
-
-  showTransactionActionSheetRef.current = () => {
-    const options = [
-      "See in block explorer",
-      "Copy transaction hash",
-      "Cancel",
-    ];
-    const methods = {
-      "See in block explorer": openBlockExplorer,
-      "Copy transaction hash": copyTransactionHash,
-    };
-
-    showActionSheetWithOptions(
-      {
-        options,
-        cancelButtonIndex: options.indexOf("Cancel"),
-        ...actionSheetColors(colorScheme),
-      },
-      (selectedIndex?: number) => {
-        if (selectedIndex === undefined) return;
-        const selectedOption = options[selectedIndex];
-        const method = (methods as any)[selectedOption];
-        method?.();
-      }
-    );
-  };
+  const txRef = JSON.parse(message.content); // as TransactionReference;
 
   useEffect(() => {
     const eventHandler = `showActionSheetForTxRef-${message.id}`;
@@ -230,85 +204,163 @@ export default function ChatTransactionReference({ message }: Props) {
     <ChatMessageMetadata message={message} white={showing} />
   );
 
-  // Conditional rendering
-  const txRef = JSON.parse(message.content); // as TransactionReference;
+  const TransactionView = ({
+    fromMe,
+    children,
+  }: {
+    fromMe: boolean;
+    children: React.ReactNode;
+  }) => (
+    <>
+      <View
+        style={[styles.innerBubble, fromMe ? styles.innerBubbleMe : undefined]}
+      >
+        {children}
+      </View>
+    </>
+  );
 
-  if (transaction.loading) {
+  const TransactionStatusView = ({
+    transactionDisplay,
+    status,
+    colorScheme,
+  }: {
+    transactionDisplay: string;
+    status?: "PENDING" | "FAILURE" | "SUCCESS";
+    colorScheme: ColorSchemeName; // Replace with appropriate type
+  }) => {
+    const StatusIcon =
+      status === "FAILURE"
+        ? Exclamationmark
+        : status === "SUCCESS"
+        ? Checkmark
+        : Clock;
+    const statusText =
+      status === "PENDING"
+        ? "Pending"
+        : status === "FAILURE"
+        ? "Failed"
+        : status === "SUCCESS"
+        ? "Success"
+        : "Loading";
+
     return (
       <>
-        <View
-          style={[
-            styles.innerBubble,
-            message.fromMe ? styles.innerBubbleMe : undefined,
-          ]}
-        >
+        <View style={styles.transactionDetailsContainer}>
           <View style={styles.centeredStatusContainer}>
-            <Clock
+            <Text style={[styles.text, styles.transactionDetails]}>
+              {transactionDisplay}
+            </Text>
+            <StatusIcon
               style={styles.statusIcon}
               fill={textSecondaryColor(colorScheme)}
               width={15}
               height={15}
             />
             <Text style={[styles.text, styles.transactionDetails]}>
-              Loading
+              {statusText}
             </Text>
           </View>
         </View>
+      </>
+    );
+  };
+
+  const getTransactionInfo = ({
+    transaction,
+    txRef,
+  }: {
+    transaction: Transaction;
+    txRef: TransactionReference;
+  }) => {
+    let amount, currency, decimals;
+
+    if (transaction.events && transaction.events.length > 0) {
+      ({ amount, currency, decimals } = transaction.events[0]);
+    } else if (txRef.metadata) {
+      ({ amount, currency, decimals } = txRef.metadata);
+    }
+
+    const isUSDC = currency?.toLowerCase().includes("usd"); // USDC, USDT etc...
+    const formattedAmountWithCurrencySymbol =
+      amount && currency && decimals !== undefined
+        ? formatAmount(amount, currency, decimals)
+        : "–";
+    const formattedAmount =
+      amount && currency && decimals !== undefined
+        ? formatAmount(amount, currency, decimals, false)
+        : "–";
+
+    const transactionDisplay = isUSDC
+      ? `${formattedAmount} –`
+      : `${transaction.chainName || "–"} –`;
+
+    return {
+      transactionDisplay,
+      amountToDisplay: formattedAmountWithCurrencySymbol,
+    };
+  };
+
+  const { transactionDisplay, amountToDisplay } = getTransactionInfo({
+    transaction,
+    txRef,
+  });
+
+  const openBlockExplorer = () => {
+    if (transaction.blockExplorerURL) {
+      Linking.openURL(transaction.blockExplorerURL);
+    }
+  };
+
+  const copyTransactionHash = () => {
+    Clipboard.setString(transaction.reference);
+  };
+
+  showTransactionActionSheetRef.current = () => {
+    const options = [
+      "See in block explorer",
+      "Copy transaction hash",
+      "Cancel",
+    ];
+    const methods = {
+      "See in block explorer": openBlockExplorer,
+      "Copy transaction hash": copyTransactionHash,
+    };
+
+    showActionSheetWithOptions(
+      {
+        options,
+        cancelButtonIndex: options.indexOf("Cancel"),
+        ...actionSheetColors(colorScheme),
+      },
+      (selectedIndex?: number) => {
+        if (selectedIndex === undefined) return;
+        const selectedOption = options[selectedIndex];
+        const method = (methods as any)[selectedOption];
+        method?.();
+      }
+    );
+  };
+
+  // Converse sponsored transaction
+  if (transaction.sponsored || transaction.status !== "PENDING") {
+    return (
+      <>
+        <TransactionView fromMe={message.fromMe}>
+          <Text style={[styles.text, styles.amount]}>{amountToDisplay}</Text>
+          <TransactionStatusView
+            transactionDisplay={transactionDisplay}
+            status={transaction.status}
+            colorScheme={colorScheme}
+          />
+        </TransactionView>
         <View style={{ opacity: 0 }}>{metadataView}</View>
       </>
     );
-  } else if (transaction.status === "PENDING" && transaction.sponsored) {
+  } else {
     return (
       <>
-        <View
-          style={[
-            styles.innerBubble,
-            message.fromMe ? styles.innerBubbleMe : undefined,
-          ]}
-        >
-          <Text style={[styles.text, styles.amount]}>
-            {formatAmount(
-              txRef.metadata.amount,
-              txRef.metadata.currency,
-              txRef.metadata.decimals
-            )}
-          </Text>
-          <View style={styles.transactionDetailsContainer}>
-            <View style={styles.centeredStatusContainer}>
-              <Text style={[styles.text, styles.transactionDetails]}>
-                {transaction.events[0].currency.toLowerCase().includes("usdc")
-                  ? `${formatAmount(
-                      txRef.metadata.amount,
-                      txRef.metadata.currency,
-                      txRef.metadata.decimals,
-                      false
-                    )} -`
-                  : `${transaction.chainName} -`}
-              </Text>
-              <Clock
-                style={styles.statusIcon}
-                fill={textSecondaryColor(colorScheme)}
-                width={15}
-                height={15}
-              />
-              <Text style={[styles.text, styles.transactionDetails]}>
-                Pending
-              </Text>
-            </View>
-          </View>
-        </View>
-        <View style={{ opacity: 0 }}>{metadataView}</View>
-      </>
-    );
-  } else if (transaction.status === "PENDING") {
-    return (
-      <>
-        <View
-          style={[
-            styles.innerBubble,
-            message.fromMe ? styles.innerBubbleMe : undefined,
-          ]}
-        >
+        <TransactionView fromMe={message.fromMe}>
           <Text style={[styles.text, styles.bold]}>Transaction</Text>
           <Text style={[styles.text, styles.small]}>
             Blockchain: {transaction.chainName}
@@ -326,123 +378,7 @@ export default function ChatTransactionReference({ message }: Props) {
             />
             <Text style={[styles.text, styles.small]}>Pending</Text>
           </View>
-        </View>
-        <View style={{ opacity: 0 }}>{metadataView}</View>
-      </>
-    );
-  } else if (transaction.status === "FAILURE" || transaction.error) {
-    return (
-      <>
-        <View
-          style={[
-            styles.innerBubble,
-            message.fromMe ? styles.innerBubbleMe : undefined,
-          ]}
-        >
-          <Text style={[styles.text, styles.bold]}>Transaction</Text>
-          <Text style={[styles.text, styles.small]}>
-            Blockchain: {transaction.chainName}
-          </Text>
-          <Text style={[styles.text, styles.small]}>
-            Transaction hash: {shortAddress(transaction.reference)}
-          </Text>
-          <View style={styles.statusContainer}>
-            <Text style={[styles.text, styles.small]}>Status:</Text>
-            <Exclamationmark
-              style={styles.statusIcon}
-              fill={textSecondaryColor(colorScheme)}
-              width={15}
-              height={15}
-            />
-            <Text style={[styles.text, styles.small]}>Failed</Text>
-          </View>
-        </View>
-        <View style={{ opacity: 0 }}>{metadataView}</View>
-      </>
-    );
-  } else if (transaction.status === "SUCCESS" && transaction.sponsored) {
-    return (
-      <>
-        <View
-          style={[
-            styles.innerBubble,
-            message.fromMe ? styles.innerBubbleMe : undefined,
-          ]}
-        >
-          <Text style={[styles.text, styles.amount]}>
-            {formatAmount(
-              transaction.events[0].amount,
-              transaction.events[0].currency,
-              transaction.events[0].decimals
-            )}
-          </Text>
-          <View style={styles.transactionDetailsContainer}>
-            <View style={styles.centeredStatusContainer}>
-              <Text style={[styles.text, styles.transactionDetails]}>
-                {transaction.events[0].currency.toLowerCase().includes("usdc")
-                  ? `${formatAmount(
-                      transaction.events[0].amount,
-                      transaction.events[0].currency,
-                      transaction.events[0].decimals,
-                      false
-                    )} -`
-                  : `${transaction.chainName} -`}
-              </Text>
-              <Checkmark
-                style={styles.statusIcon}
-                fill={textSecondaryColor(colorScheme)}
-                width={15}
-                height={15}
-              />
-              <Text style={[styles.text, styles.transactionDetails]}>
-                Success
-              </Text>
-            </View>
-          </View>
-        </View>
-        <View style={{ opacity: 0 }}>{metadataView}</View>
-      </>
-    );
-  } else if (transaction.status === "SUCCESS") {
-    return (
-      <>
-        <View
-          style={[
-            styles.innerBubble,
-            message.fromMe ? styles.innerBubbleMe : undefined,
-          ]}
-        >
-          <Text style={[styles.text, styles.amount]}>
-            {formatAmount(
-              transaction.events[0].amount,
-              "ETH",
-              transaction.events[0].decimals
-            )}
-          </Text>
-          <View style={styles.transactionDetailsContainer}>
-            <View style={styles.statusContainer}>
-              <Text style={[styles.text, styles.transactionDetails]}>
-                {transaction.events[0].currency.toLowerCase().includes("usdcc")
-                  ? `${formatAmount(
-                      transaction.events[0].amount,
-                      transaction.events[0].currency,
-                      transaction.events[0].decimals,
-                      false
-                    )} -`
-                  : `${transaction.chainName} -`}
-              </Text>
-              <Checkmark
-                style={styles.statusIcon}
-                fill={textSecondaryColor(colorScheme)}
-                width={15}
-                height={15}
-              />
-              <Text style={[styles.text, styles.transactionDetails]}>
-                Success
-              </Text>
-            </View>
-          </View>
-        </View>
+        </TransactionView>
         <View style={{ opacity: 0 }}>{metadataView}</View>
       </>
     );
