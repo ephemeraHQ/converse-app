@@ -26,7 +26,11 @@ const update = async () => {
   try {
     await executeCommand("node", [`scripts/build/ios/${env}.js`]);
     await executeCommand("node", [`scripts/build/android/${env}.js`]);
-    await executeCommand("eas", ["update", "--branch", env]);
+    const updateEnv = { ...process.env };
+    if (env === "preview") {
+      updateEnv.EXPO_ENV = "preview";
+    }
+    await executeCommand("eas", ["update", "--branch", env], updateEnv);
     await executeCommand("npx", ["sentry-expo-upload-sourcemaps", "dist"], {
       ...process.env,
       SENTRY_ORG: "converse-app",
