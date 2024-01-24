@@ -7,7 +7,7 @@ export const initSentry = () => {
   Sentry.init({
     dsn: config.sentryDSN,
     debug: false,
-    enabled: config.env === "dev",
+    enabled: config.env !== "dev",
     environment: config.env,
     beforeSend: (event: ErrorEvent, hint: EventHint) => {
       // Filtering out some errors
