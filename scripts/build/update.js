@@ -24,9 +24,9 @@ const update = async () => {
   if (!env) process.exit(1);
 
   try {
-    // await executeCommand("node", [`scripts/build/ios/${env}.js`]);
-    // await executeCommand("node", [`scripts/build/android/${env}.js`]);
-    // await executeCommand("eas", ["update", "--branch", env]);
+    await executeCommand("node", [`scripts/build/ios/${env}.js`]);
+    await executeCommand("node", [`scripts/build/android/${env}.js`]);
+    await executeCommand("eas", ["update", "--branch", env]);
     await executeCommand("npx", ["sentry-expo-upload-sourcemaps", "dist"], {
       ...process.env,
       SENTRY_ORG: "converse-app",
