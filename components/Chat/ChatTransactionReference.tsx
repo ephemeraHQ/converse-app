@@ -1,7 +1,6 @@
 import Clipboard from "@react-native-clipboard/clipboard";
-import { TransactionReference } from "@xmtp/content-type-transaction-reference";
 import * as Linking from "expo-linking";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Platform, StyleSheet, Text, useColorScheme, View } from "react-native";
 
 import Checkmark from "../../assets/checkmark.svg";
@@ -23,6 +22,7 @@ import {
   textSecondaryColor,
 } from "../../utils/colors";
 import { converseEventEmitter } from "../../utils/events";
+import { sentryTrackMessage } from "../../utils/sentry";
 import { shortAddress } from "../../utils/str";
 import {
   TransactionDetails,
@@ -32,7 +32,6 @@ import {
   formatAmount,
   getTxContentType,
   getTxRefId,
-  mergeTransactionRefData,
 } from "../../utils/transaction";
 import { showActionSheetWithOptions } from "../StateHandlers/ActionSheetStateHandler";
 import { MessageToDisplay } from "./ChatMessage";
@@ -116,31 +115,6 @@ export default function ChatTransactionReference({ message }: Props) {
     };
   }, [message.id]);
 
-  const saveAndDisplayTransaction = useCallback(
-    (
-      contentType:
-        | "transactionReference"
-        | "coinbaseRegular"
-        | "coinbaseSponsored",
-      txRef: TransactionReference,
-      txRefId: string,
-      txDetails: TransactionDetails,
-      update = false
-    ) => {
-      if (txRef.namespace === "eip155" && txRef.networkId && txRef.reference) {
-        const transactionStore = getTransactionsStore(currentAccount);
-        const transaction = mergeTransactionRefData(
-          contentType,
-          txRef,
-          txRefId,
-          txDetails
-        );
-        transactionStore.getState().setTransactions([transaction]);
-      }
-    },
-    [currentAccount]
-  );
-
   useEffect(() => {
     let retryTimeout: NodeJS.Timeout;
 
@@ -195,7 +169,7 @@ export default function ChatTransactionReference({ message }: Props) {
             ...uniformTx,
           }));
 
-          retryTimeout = setTimeout(go, 5000);
+          retryTimeout = setTimeout(go, 50000);
         } else if (txDetails) {
           const uniformTx = createUniformTransaction(txRef, txDetails);
           console.log("Updating transaction in Zustand", uniformTx.reference);
@@ -216,14 +190,15 @@ export default function ChatTransactionReference({ message }: Props) {
       } catch (error) {
         console.error("Error fetching transaction details:", error);
         // Let's retry in case of network error
-        retryTimeout = setTimeout(go, 5000);
+        retryTimeout = setTimeout(go, 50000);
       } finally {
         fetchingTransaction.current = false;
       }
     };
 
-    const txRef = JSON.parse(message.content);
+    const txRef = JSON.parse(message.content); // as TransactionReference;
     const txContentType = getTxContentType(txRef);
+
     if (txContentType) {
       const txLookup = getTransactionsStore(currentAccount)
         .getState()
@@ -240,8 +215,7 @@ export default function ChatTransactionReference({ message }: Props) {
         }));
       }
     } else {
-      // sentryTrackMessage("INVALID_TRANSACTION_REFERENCE", { message });
-      // TODO: should display message fallback if no valid transaction content type is found
+      sentryTrackMessage("INVALID_TRANSACTION_REFERENCE", { message });
       setTransaction((a) => ({ ...a, error: true, loading: false }));
     }
 
@@ -261,34 +235,12 @@ export default function ChatTransactionReference({ message }: Props) {
   if (transaction.loading) {
     return (
       <>
-        <View
-          style={[
-            styles.innerBubble,
-            message.fromMe ? styles.innerBubbleMe : undefined,
-          ]}
-        >
-          <Text style={[styles.text, styles.bold]}>Transaction</Text>
-          <Text style={[styles.text, styles.small]}>
-            Blockchain: {transaction.chainName}
-          </Text>
-          <Text style={[styles.text, styles.small]}>
-            Transaction hash: {shortAddress(transaction.reference)}
-          </Text>
-          <View style={styles.statusContainer}>
-            <Text style={[styles.text, styles.small]}>Status:</Text>
-            <Clock
-              style={styles.statusIcon}
-              fill={textSecondaryColor(colorScheme)}
-              width={15}
-              height={15}
-            />
-            <Text style={[styles.text, styles.small]}>Loading</Text>
-          </View>
-        </View>
-        <View style={{ opacity: 0 }}>{metadataView}</View>
+        <Text>Loading</Text>
       </>
     );
   } else if (transaction.status === "PENDING" && transaction.sponsored) {
+    const txRef = JSON.parse(message.content); // as TransactionReference;
+
     return (
       <>
         <View
@@ -297,22 +249,35 @@ export default function ChatTransactionReference({ message }: Props) {
             message.fromMe ? styles.innerBubbleMe : undefined,
           ]}
         >
-          <Text style={[styles.text, styles.bold]}>Transaction</Text>
-          <Text style={[styles.text, styles.small]}>
-            Blockchain: {transaction.chainName}
+          <Text style={[styles.text, styles.amount]}>
+            {formatAmount(
+              txRef.metadata.amount,
+              txRef.metadata.currency,
+              txRef.metadata.decimals
+            )}
           </Text>
-          <Text style={[styles.text, styles.small]}>
-            Transaction hash: {shortAddress(transaction.reference)}
-          </Text>
-          <View style={styles.statusContainer}>
-            <Text style={[styles.text, styles.small]}>Status:</Text>
-            <Clock
-              style={styles.statusIcon}
-              fill={textSecondaryColor(colorScheme)}
-              width={15}
-              height={15}
-            />
-            <Text style={[styles.text, styles.small]}>Pending</Text>
+          <View style={styles.transactionDetailsContainer}>
+            <View style={styles.centeredStatusContainer}>
+              <Text style={[styles.text, styles.transactionDetails]}>
+                {transaction.events[0].currency.toLowerCase().includes("usdc")
+                  ? `${formatAmount(
+                      txRef.metadata.amount,
+                      txRef.metadata.currency,
+                      txRef.metadata.decimals,
+                      false
+                    )} -`
+                  : `${transaction.chainName} -`}
+              </Text>
+              <Clock
+                style={styles.statusIcon}
+                fill={textSecondaryColor(colorScheme)}
+                width={15}
+                height={15}
+              />
+              <Text style={[styles.text, styles.transactionDetails]}>
+                Pending
+              </Text>
+            </View>
           </View>
         </View>
         <View style={{ opacity: 0 }}>{metadataView}</View>
@@ -388,13 +353,22 @@ export default function ChatTransactionReference({ message }: Props) {
           ]}
         >
           <Text style={[styles.text, styles.amount]}>
-            {formatAmount(transaction.events[0])}
+            {formatAmount(
+              transaction.events[0].amount,
+              transaction.events[0].currency,
+              transaction.events[0].decimals
+            )}
           </Text>
           <View style={styles.transactionDetailsContainer}>
             <View style={styles.centeredStatusContainer}>
               <Text style={[styles.text, styles.transactionDetails]}>
                 {transaction.events[0].currency.toLowerCase().includes("usdc")
-                  ? `${formatAmount(transaction.events[0], false)} -`
+                  ? `${formatAmount(
+                      transaction.events[0].amount,
+                      transaction.events[0].currency,
+                      transaction.events[0].decimals,
+                      false
+                    )} -`
                   : `${transaction.chainName} -`}
               </Text>
               <Checkmark
@@ -422,13 +396,22 @@ export default function ChatTransactionReference({ message }: Props) {
           ]}
         >
           <Text style={[styles.text, styles.amount]}>
-            {formatAmount(transaction.events[0])}
+            {formatAmount(
+              transaction.events[0].amount,
+              "ETH",
+              transaction.events[0].decimals
+            )}
           </Text>
           <View style={styles.transactionDetailsContainer}>
             <View style={styles.statusContainer}>
               <Text style={[styles.text, styles.transactionDetails]}>
-                {transaction.events[0].currency.toLowerCase().includes("usdc")
-                  ? `${formatAmount(transaction.events[0], false)} -`
+                {transaction.events[0].currency.toLowerCase().includes("usdcc")
+                  ? `${formatAmount(
+                      transaction.events[0].amount,
+                      transaction.events[0].currency,
+                      transaction.events[0].decimals,
+                      false
+                    )} -`
                   : `${transaction.chainName} -`}
               </Text>
               <Checkmark
