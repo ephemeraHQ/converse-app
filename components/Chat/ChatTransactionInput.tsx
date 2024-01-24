@@ -195,7 +195,6 @@ export default function ChatTransactionInput() {
               },
             }),
             contentType: "xmtp.org/transactionReference:1.0",
-            contentFallback: `[Crypto transaction] Use a blockchain explorer to learn more using the transaction hash: ${txHash}`,
           });
           setTransactionMode(false);
         } else {
