@@ -9,6 +9,7 @@ import Exclamationmark from "../../assets/exclamationmark.triangle.svg";
 import {
   getTransactionsStore,
   useAccountsStore,
+  useTransactionsStore,
 } from "../../data/store/accountsStore";
 import {
   getCoinbaseTransactionDetails,
@@ -67,6 +68,7 @@ export default function ChatTransactionReference({ message }: Props) {
   const fetchingTransaction = useRef(false);
   const showing = !transaction.loading;
   const showTransactionActionSheetRef = useRef<(() => void) | null>(null);
+  const setTransactions = useTransactionsStore((s) => s.setTransactions);
 
   const openBlockExplorer = () => {
     if (transaction.blockExplorerURL) {
@@ -174,10 +176,10 @@ export default function ChatTransactionReference({ message }: Props) {
           const uniformTx = createUniformTransaction(txRef, txDetails);
           console.log("Updating transaction in Zustand", uniformTx.reference);
 
-          // Update transaction store
-          const transactionStore = getTransactionsStore(currentAccount);
-          transactionStore.getState().setTransactions([uniformTx]);
+          // Update zustand transaction store
+          setTransactions([uniformTx]);
 
+          // Update component state
           setTransaction((t) => ({
             ...t,
             error: false,
@@ -225,7 +227,7 @@ export default function ChatTransactionReference({ message }: Props) {
         clearTimeout(retryTimeout);
       }
     };
-  }, [currentAccount, message]);
+  }, [currentAccount, message, setTransactions]);
 
   const metadataView = (
     <ChatMessageMetadata message={message} white={showing} />
