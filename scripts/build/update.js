@@ -1,6 +1,5 @@
 const { execSync } = require("child_process");
 const isClean = require("git-is-clean");
-const path = require("path");
 const prompts = require("prompts");
 
 const update = async () => {
@@ -20,7 +19,9 @@ const update = async () => {
   const { env } = await prompts(questions);
   if (!env) process.exit(1);
 
+  execSync(`node scripts/build/ios/${env}.js`);
   execSync(`node scripts/build/android/${env}.js`);
+  execSync(`eas update --branch ${env}`);
 };
 
 update();
