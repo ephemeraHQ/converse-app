@@ -1,8 +1,8 @@
+import { TransactionReference } from "@xmtp/content-type-transaction-reference";
 import { ethers } from "ethers";
 
 import { Transaction } from "../data/store/transactionsStore";
 import { isContentType } from "./xmtpRN/contentTypes";
-import { TransactionReference } from "./xmtpRN/contentTypes/transactionReference";
 
 export interface TransactionEvent {
   amount: string;

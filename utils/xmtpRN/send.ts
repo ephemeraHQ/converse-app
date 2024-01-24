@@ -1,3 +1,4 @@
+import { ContentTypeTransactionReference } from "@xmtp/content-type-transaction-reference";
 import {
   PreparedLocalMessage,
   sendPreparedMessage,
@@ -11,7 +12,6 @@ import {
 import { getMessagesToSend } from "../../data/helpers/messages/getMessagesToSend";
 import { deserializeRemoteAttachmentMessageContent } from "./attachments";
 import { isContentType } from "./contentTypes";
-import { ContentTypeTransactionReference } from "./contentTypes/transactionReference";
 import { getConversationWithTopic } from "./conversations";
 
 let sendingPendingMessages = false;

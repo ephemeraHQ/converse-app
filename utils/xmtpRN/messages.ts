@@ -1,3 +1,4 @@
+import { TransactionReference } from "@xmtp/content-type-transaction-reference";
 import {
   DecodedMessage,
   ReactionContent,
@@ -13,7 +14,6 @@ import { serializeRemoteAttachmentMessageContent } from "./attachments";
 import { ConverseXmtpClientType, DecodedMessageWithCodecsType } from "./client";
 import { isContentType } from "./contentTypes";
 import { CoinbaseMessagingPaymentContent } from "./contentTypes/coinbasePayment";
-import { TransactionReference } from "./contentTypes/transactionReference";
 import { getXmtpClient } from "./sync";
 
 const BATCH_QUERY_PAGE_SIZE = 30;

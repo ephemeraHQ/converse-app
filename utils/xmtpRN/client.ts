@@ -1,3 +1,4 @@
+import { TransactionReferenceCodec } from "@xmtp/content-type-transaction-reference";
 import {
   Client,
   ReactionCodec,
@@ -11,7 +12,6 @@ import { Signer } from "ethers";
 import config from "../../config";
 import { getCleanAddress } from "../eth";
 import { CoinbaseMessagingPaymentCodec } from "./contentTypes/coinbasePayment";
-import { TransactionReferenceCodec } from "./contentTypes/transactionReference";
 
 const env = config.xmtpEnv as "dev" | "production" | "local";
 
