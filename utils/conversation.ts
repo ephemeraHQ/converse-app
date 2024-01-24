@@ -1,6 +1,6 @@
 import { Reaction } from "@xmtp/content-type-reaction";
 import { MutableRefObject, createRef } from "react";
-import { Alert } from "react-native";
+import { Alert, Platform } from "react-native";
 import { createContext, useContextSelector } from "use-context-selector";
 
 import config from "../config";
@@ -57,6 +57,23 @@ export const conversationLastMessagePreview = (
       } else if (isContentType("reaction", lastMessage?.contentType)) {
         try {
           const reactionContent = JSON.parse(lastMessage.content) as Reaction;
+          if (Platform.OS === "web") {
+            if (reactionContent.action === "removed") {
+              return {
+                contentPreview: "Removed a reaction to a message",
+                message: lastMessage,
+              };
+            } else if (reactionContent.schema === "unicode") {
+              return {
+                contentPreview: `Reacted ${reactionContent.content} to a message`,
+                message: lastMessage,
+              };
+            }
+            return {
+              contentPreview: "Reacted to a message",
+              message: lastMessage,
+            };
+          }
           const message = conversation.messages.get(reactionContent.reference);
           if (!message || message.senderAddress !== myAddress) continue;
           if (reactionContent.action === "removed") {
