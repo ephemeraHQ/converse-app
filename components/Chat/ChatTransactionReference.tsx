@@ -368,7 +368,7 @@ export default function ChatTransactionReference({ message }: Props) {
           <View style={styles.transactionDetailsContainer}>
             <View style={styles.transactionStatusContainer}>
               <Text style={[styles.text, styles.transactionDetails]}>
-                {`${transaction.events[0].amount} ${transaction.events[0].currency} -`}
+                {`${formatAmount(transaction.events[0], false)} -`}
               </Text>
               <Checkmark
                 style={styles.statusIcon}

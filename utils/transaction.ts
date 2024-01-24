@@ -154,23 +154,20 @@ export function createUniformTransaction(
   }
 }
 
-export const formatAmount = (event: TransactionEvent): string => {
+export const formatAmount = (
+  event: TransactionEvent,
+  useCurrencySymbol: boolean = true
+): string => {
   const { amount, currency, decimals } = event;
   const actualAmount = Number(amount) / Math.pow(10, decimals);
 
-  if (currency.toLowerCase().includes("usdc")) {
-    // Format as dollars, showing decimals only if necessary
-    const formattedAmount =
-      actualAmount % 1 === 0
-        ? actualAmount.toFixed(0)
-        : actualAmount.toFixed(2);
+  // Format as dollars, showing decimals only if necessary
+  const formattedAmount =
+    actualAmount % 1 === 0 ? actualAmount.toFixed(0) : actualAmount.toFixed(2);
+
+  if (useCurrencySymbol && currency.toLowerCase().includes("usdc")) {
     return `$${formattedAmount}`;
   } else {
-    // Format as "[amount] [currency]", showing decimals only if necessary
-    const formattedAmount =
-      actualAmount % 1 === 0
-        ? actualAmount.toFixed(0)
-        : actualAmount.toFixed(decimals);
-    return `${formattedAmount} ${currency}`;
+    return `${formattedAmount} ${currency.toUpperCase()}`;
   }
 };
