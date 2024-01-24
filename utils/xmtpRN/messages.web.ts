@@ -36,7 +36,7 @@ const protocolMessageToStateMessage = (
     content = JSON.stringify(message.content as Reaction);
     referencedMessageId = (message.content as Reaction).reference;
   } else if (isContentType("transactionReference", contentType)) {
-    content = JSON.stringify(message.content() as TransactionReference);
+    content = JSON.stringify(message.content as TransactionReference);
   } else if (isContentType("coinbasePayment", contentType)) {
     content = JSON.stringify(
       message.content as CoinbaseMessagingPaymentContent
