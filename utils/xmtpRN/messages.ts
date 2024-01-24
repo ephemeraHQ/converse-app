@@ -165,8 +165,4 @@ export const syncConversationsMessages = async (
   return messagesFetched;
 };
 
-export const loadOlderMessages = async (
-  account: string,
-  topic: string,
-  oldestTimestamp: number | undefined
-) => {};
+export const loadOlderMessages = async (account: string, topic: string) => {};
