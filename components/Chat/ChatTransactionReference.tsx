@@ -3,6 +3,7 @@ import * as Linking from "expo-linking";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Platform, StyleSheet, Text, useColorScheme, View } from "react-native";
 
+import Checkmark from "../../assets/checkmark.svg";
 import Clock from "../../assets/clock.svg";
 import Exclamationmark from "../../assets/exclamationmark.triangle.svg";
 import {
@@ -271,14 +272,27 @@ export default function ChatTransactionReference({ message }: Props) {
             message.fromMe ? styles.innerBubbleMe : undefined,
           ]}
         >
-          <Text style={textStyle}>Loading...</Text>
+          <Text style={[styles.text, styles.bold]}>Transaction</Text>
+          <Text style={[styles.text, styles.small]}>
+            Blockchain: {transaction.chainName}
+          </Text>
+          <Text style={[styles.text, styles.small]}>
+            Transaction hash: {shortAddress(transaction.reference)}
+          </Text>
+          <View style={styles.transactionStatusContainer}>
+            <Text style={[styles.text, styles.small]}>Status:</Text>
+            <Clock
+              style={styles.statusIcon}
+              fill={textSecondaryColor(colorScheme)}
+              width={15}
+              height={15}
+            />
+            <Text style={[styles.text, styles.small]}>Loading</Text>
+          </View>
         </View>
         <View style={{ opacity: 0 }}>{metadataView}</View>
       </>
     );
-  } else if (transaction.error) {
-    return null;
-    // TODO – WIP check for "transfer" events that contains an amount
   } else if (transaction.status === "PENDING") {
     return (
       <>
@@ -309,7 +323,7 @@ export default function ChatTransactionReference({ message }: Props) {
         <View style={{ opacity: 0 }}>{metadataView}</View>
       </>
     );
-  } else if (transaction.status === "FAILURE") {
+  } else if (transaction.status === "FAILURE" || transaction.error) {
     return (
       <>
         <View
@@ -351,8 +365,22 @@ export default function ChatTransactionReference({ message }: Props) {
           <Text style={[styles.text, styles.amount]}>
             {formatAmount(transaction.events[0])}
           </Text>
-          <Text style={textStyle}>{transaction.chainName}</Text>
-          <Text style={textStyle}>Status: {transaction.status}</Text>
+          <View style={styles.transactionDetailsContainer}>
+            <View style={styles.transactionStatusContainer}>
+              <Text style={[styles.text, styles.transactionDetails]}>
+                {`${transaction.events[0].amount} ${transaction.events[0].currency} -`}
+              </Text>
+              <Checkmark
+                style={styles.statusIcon}
+                fill={textSecondaryColor(colorScheme)}
+                width={15}
+                height={15}
+              />
+              <Text style={[styles.text, styles.transactionDetails]}>
+                Success
+              </Text>
+            </View>
+          </View>
         </View>
         <View style={{ opacity: 0 }}>{metadataView}</View>
       </>
@@ -363,9 +391,17 @@ export default function ChatTransactionReference({ message }: Props) {
 const useStyles = () => {
   const colorScheme = useColorScheme();
   return StyleSheet.create({
+    transactionDetailsContainer: {
+      flexDirection: "column",
+      width: "100%",
+    },
     transactionStatusContainer: {
       flexDirection: "row",
       alignItems: "center",
+    },
+    transactionDetails: {
+      fontSize: 16,
+      color: textSecondaryColor(colorScheme),
     },
     text: {
       paddingHorizontal: 8,
