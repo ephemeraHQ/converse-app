@@ -1,17 +1,8 @@
 const { mergeConfig } = require("@react-native/metro-config");
-const {
-  createSentryMetroSerializer,
-} = require("@sentry/react-native/dist/js/tools/sentryMetroSerializer");
-const { getDefaultConfig } = require("expo/metro-config");
-
-const sentryConfig = {
-  serializer: {
-    customSerializer: createSentryMetroSerializer(),
-  },
-};
+const { getSentryExpoConfig } = require("@sentry/react-native/metro");
 
 // eslint-disable-next-line no-undef
-const defaultConfig = getDefaultConfig(__dirname, {
+const defaultConfig = getSentryExpoConfig(__dirname, {
   // [Web-only]: Enables CSS support in Metro.
   isCSSEnabled: true,
 });
@@ -45,9 +36,4 @@ const converseMetroConfig = {
   },
 };
 
-const args = process.argv.slice(2);
-const isWeb = args[2] === "web";
-
-module.exports = isWeb
-  ? converseMetroConfig
-  : mergeConfig(converseMetroConfig, sentryConfig);
+module.exports = converseMetroConfig;
