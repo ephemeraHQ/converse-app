@@ -8,7 +8,10 @@ import { TransactionEvent } from "../../utils/transaction";
 
 export type Transaction = {
   id: string; // Concatenation of "[networkid]-[reference]"
-  contentType: "transactionReference" | "coinbaseRegular" | "coinbaseSponsored";
+  transactionType:
+    | "transactionReference"
+    | "coinbaseRegular"
+    | "coinbaseSponsored";
   namespace?: string;
   networkId: string | number;
   reference: string;

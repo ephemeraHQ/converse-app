@@ -30,7 +30,7 @@ import {
   createUniformTransaction,
   extractChainIdToHex,
   formatAmount,
-  getTxContentType,
+  getTransactionType,
   getTxRefId,
 } from "../../utils/transaction";
 import { showActionSheetWithOptions } from "../StateHandlers/ActionSheetStateHandler";
@@ -49,7 +49,7 @@ export default function ChatTransactionReference({ message }: Props) {
     loading: true,
     error: false,
     id: "", // "[networkid]-[txHash | sponsoredTxId]", see helper: getTxRefId()
-    contentType: undefined as
+    transactionType: undefined as
       | undefined
       | "transactionReference"
       | "coinbaseRegular"
@@ -124,11 +124,11 @@ export default function ChatTransactionReference({ message }: Props) {
       setTransaction((t) => ({ ...t, loading: true }));
 
       const txRef = JSON.parse(message.content); // as TransactionReference;
-      const txContentType = getTxContentType(txRef);
+      const txType = getTransactionType(txRef);
       let txDetails: TransactionDetails | undefined;
 
       try {
-        switch (txContentType) {
+        switch (txType) {
           case "transactionReference": {
             txDetails = await getTransactionDetails(
               currentAccount,
@@ -197,12 +197,12 @@ export default function ChatTransactionReference({ message }: Props) {
     };
 
     const txRef = JSON.parse(message.content); // as TransactionReference;
-    const txContentType = getTxContentType(txRef);
+    const txType = getTransactionType(txRef);
 
-    if (txContentType) {
+    if (txType) {
       const txLookup = getTransactionsStore(currentAccount)
         .getState()
-        .getTransaction(getTxRefId(txRef, txContentType));
+        .getTransaction(getTxRefId(txRef, txType));
 
       if (!txLookup || txLookup.status === "PENDING") {
         go();

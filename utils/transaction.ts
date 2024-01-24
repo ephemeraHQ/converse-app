@@ -30,14 +30,17 @@ export const isTransactionMessage = (contentType?: string) =>
     : false;
 
 export const mergeTransactionRefData = (
-  contentType: "transactionReference" | "coinbaseRegular" | "coinbaseSponsored",
+  transactionType:
+    | "transactionReference"
+    | "coinbaseRegular"
+    | "coinbaseSponsored",
   txRef: TransactionReference,
   txRefId: string,
   txDetails: TransactionDetails
 ): Transaction => {
   return {
     id: txRefId,
-    contentType,
+    transactionType,
     namespace: txRef.namespace,
     networkId: txRef.networkId,
     reference: txRef.reference,
@@ -57,7 +60,7 @@ export const extractChainIdToHex = (networkRawValue: string): string => {
   return chainId._hex;
 };
 
-export const getTxContentType = (
+export const getTransactionType = (
   input: TransactionReference | any
 ):
   | "transactionReference"
@@ -79,21 +82,15 @@ export const getTxContentType = (
 
 export const getTxRefId = (
   txRef: TransactionReference | any,
-  txContentType:
-    | "transactionReference"
-    | "coinbaseRegular"
-    | "coinbaseSponsored"
+  txType: "transactionReference" | "coinbaseRegular" | "coinbaseSponsored"
 ): string => {
   let networkId;
 
-  if (
-    txContentType === "coinbaseRegular" ||
-    txContentType === "coinbaseSponsored"
-  ) {
+  if (txType === "coinbaseRegular" || txType === "coinbaseSponsored") {
     networkId = extractChainIdToHex(txRef.network.rawValue);
   }
 
-  switch (txContentType) {
+  switch (txType) {
     case "transactionReference":
       return `${txRef.networkId}-${txRef.reference}`;
     case "coinbaseRegular":
@@ -107,16 +104,16 @@ export function createUniformTransaction(
   input: TransactionReference | any,
   txDetails: TransactionDetails
 ): Transaction {
-  const contentType = getTxContentType(input);
+  const txType = getTransactionType(input);
   let transaction: Transaction;
 
-  if (contentType) {
-    const txRefId = getTxRefId(input, contentType);
+  if (txType) {
+    const txRefId = getTxRefId(input, txType);
 
-    switch (contentType) {
+    switch (txType) {
       case "transactionReference":
         transaction = mergeTransactionRefData(
-          contentType,
+          txType,
           input,
           txRefId,
           txDetails
@@ -124,7 +121,7 @@ export function createUniformTransaction(
         break;
       case "coinbaseRegular":
         transaction = mergeTransactionRefData(
-          contentType,
+          txType,
           {
             networkId: extractChainIdToHex(input.network.rawValue),
             reference: input.transactionHash,
@@ -135,7 +132,7 @@ export function createUniformTransaction(
         break;
       case "coinbaseSponsored":
         transaction = mergeTransactionRefData(
-          contentType,
+          txType,
           {
             networkId: extractChainIdToHex(input.network.rawValue),
             reference: txDetails.transactionHash,
