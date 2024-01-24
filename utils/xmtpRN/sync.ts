@@ -2,6 +2,7 @@ import { Client } from "@xmtp/xmtp-js";
 
 import { refreshAllSpamScores } from "../../data/helpers/conversations/spamScore";
 import { getChatStore } from "../../data/store/accountsStore";
+import { addLog } from "../debug";
 import { loadXmtpKey } from "../keychain/helpers";
 import { xmtpSignatureByAccount } from "./api";
 import {
@@ -60,6 +61,7 @@ const onSyncLost = async (account: string, error: any) => {
   console.log(
     `[XmtpRN] An error occured while syncing for ${account}: ${error}`
   );
+  addLog(`[XmtpRN] An error occured while syncing for ${account}: ${error}`);
   // If there is an error let's show it
   getChatStore(account).getState().setReconnecting(true);
   // Wait a bit before reco
@@ -71,6 +73,7 @@ const onSyncLost = async (account: string, error: any) => {
 const streamingAccounts: { [account: string]: boolean } = {};
 
 export const syncXmtpClient = async (account: string) => {
+  addLog(`[XmtpRN] Lauching sync for ${account}`);
   const lastSyncedAt = getChatStore(account).getState().lastSyncedAt || 0;
 
   // We just introduced lastSyncedTopics so it might be empty at first
