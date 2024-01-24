@@ -231,15 +231,33 @@ export default function ChatTransactionReference({ message }: Props) {
   );
 
   // Conditional rendering
+  const txRef = JSON.parse(message.content); // as TransactionReference;
+
   if (transaction.loading) {
     return (
       <>
-        <Text>Loading</Text>
+        <View
+          style={[
+            styles.innerBubble,
+            message.fromMe ? styles.innerBubbleMe : undefined,
+          ]}
+        >
+          <View style={styles.centeredStatusContainer}>
+            <Clock
+              style={styles.statusIcon}
+              fill={textSecondaryColor(colorScheme)}
+              width={15}
+              height={15}
+            />
+            <Text style={[styles.text, styles.transactionDetails]}>
+              Loading
+            </Text>
+          </View>
+        </View>
+        <View style={{ opacity: 0 }}>{metadataView}</View>
       </>
     );
   } else if (transaction.status === "PENDING" && transaction.sponsored) {
-    const txRef = JSON.parse(message.content); // as TransactionReference;
-
     return (
       <>
         <View
@@ -446,6 +464,7 @@ const useStyles = () => {
       flexDirection: "row",
       alignItems: "center",
       justifyContent: "center",
+      minWidth: 100,
     },
     transactionDetails: {
       fontSize: 16,
