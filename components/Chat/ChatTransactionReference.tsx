@@ -119,14 +119,14 @@ export default function ChatTransactionReference({ message }: Props) {
 
   useEffect(() => {
     let retryTimeout: NodeJS.Timeout;
+    const txRef = JSON.parse(message.content); // as TransactionReference;
+    const txType = getTransactionType(txRef);
 
     const go = async () => {
       if (fetchingTransaction.current) return;
       fetchingTransaction.current = true;
       setTransaction((t) => ({ ...t, loading: true }));
 
-      const txRef = JSON.parse(message.content); // as TransactionReference;
-      const txType = getTransactionType(txRef);
       let txDetails: TransactionDetails | undefined;
 
       try {
@@ -197,9 +197,6 @@ export default function ChatTransactionReference({ message }: Props) {
         fetchingTransaction.current = false;
       }
     };
-
-    const txRef = JSON.parse(message.content); // as TransactionReference;
-    const txType = getTransactionType(txRef);
 
     if (txType) {
       const txLookup = getTransactionsStore(currentAccount)
