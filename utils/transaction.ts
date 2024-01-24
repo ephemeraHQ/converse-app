@@ -36,7 +36,7 @@ export const mergeTransactionRefData = (
     | "coinbaseSponsored",
   txRef: TransactionReference,
   txRefId: string,
-  txDetails: TransactionDetails
+  txDetails?: TransactionDetails
 ): Transaction => {
   return {
     id: txRefId,
@@ -45,11 +45,14 @@ export const mergeTransactionRefData = (
     networkId: txRef.networkId,
     reference: txRef.reference,
     metadata: txRef.metadata || {},
-    status: txDetails.status,
-    sponsored: txDetails.sponsored || false,
-    blockExplorerURL: txDetails.blockExplorerURL,
-    events: txDetails.events || [],
-    chainName: txDetails.chainName,
+    status: txDetails?.status || "PENDING",
+    sponsored:
+      txDetails?.sponsored !== undefined
+        ? txDetails.sponsored
+        : transactionType === "transactionReference",
+    blockExplorerURL: txDetails?.blockExplorerURL || undefined,
+    events: txDetails?.events || [],
+    chainName: txDetails?.chainName || undefined,
   };
 };
 
@@ -102,7 +105,7 @@ export const getTxRefId = (
 
 export function createUniformTransaction(
   input: TransactionReference | any,
-  txDetails: TransactionDetails
+  txDetails?: TransactionDetails
 ): Transaction {
   const txType = getTransactionType(input);
   let transaction: Transaction;

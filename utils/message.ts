@@ -6,7 +6,6 @@ import {
   getTransactionsStore,
 } from "../data/store/accountsStore";
 import { XmtpConversation } from "../data/store/chatStore";
-import { getTransactionDetails } from "./api";
 import { saveAttachmentForPendingMessage } from "./attachment";
 import { createUniformTransaction } from "./transaction";
 import { isContentType } from "./xmtpRN/contentTypes";
@@ -54,13 +53,7 @@ export const sendMessage = async ({
 
     // Handle Ethereum chain IDs, fetch details and save to Zustand
     if (namespace === "eip155" && networkId && txHash) {
-      const txDetails = await getTransactionDetails(
-        currentAccount(),
-        networkId,
-        txHash
-      );
-      const transaction = createUniformTransaction(txRef, txDetails);
-
+      const transaction = createUniformTransaction(txRef);
       const transactionStore = getTransactionsStore(currentAccount());
       transactionStore.getState().setTransactions([transaction]);
     }
