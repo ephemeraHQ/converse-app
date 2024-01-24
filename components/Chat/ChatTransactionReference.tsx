@@ -368,7 +368,9 @@ export default function ChatTransactionReference({ message }: Props) {
           <View style={styles.transactionDetailsContainer}>
             <View style={styles.transactionStatusContainer}>
               <Text style={[styles.text, styles.transactionDetails]}>
-                {`${formatAmount(transaction.events[0], false)} -`}
+                {transaction.events[0].currency.toLowerCase().includes("usdc")
+                  ? `${formatAmount(transaction.events[0], false)} -`
+                  : `${transaction.chainName} -`}
               </Text>
               <Checkmark
                 style={styles.statusIcon}
@@ -398,6 +400,7 @@ const useStyles = () => {
     transactionStatusContainer: {
       flexDirection: "row",
       alignItems: "center",
+      justifyContent: "center",
     },
     transactionDetails: {
       fontSize: 16,

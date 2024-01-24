@@ -161,10 +161,11 @@ export const formatAmount = (
   const { amount, currency, decimals } = event;
   const actualAmount = Number(amount) / Math.pow(10, decimals);
 
-  // Format as dollars, showing decimals only if necessary
-  const formattedAmount =
-    actualAmount % 1 === 0 ? actualAmount.toFixed(0) : actualAmount.toFixed(2);
+  // Convert the number to a fixed-point notation, then remove trailing zeros and decimal point if not needed
+  let formattedAmount = actualAmount.toFixed(decimals);
+  formattedAmount = parseFloat(formattedAmount).toString();
 
+  // Apply currency formatting
   if (useCurrencySymbol && currency.toLowerCase().includes("usdc")) {
     return `$${formattedAmount}`;
   } else {
