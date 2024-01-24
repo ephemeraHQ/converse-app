@@ -1,4 +1,5 @@
 import Clipboard from "@react-native-clipboard/clipboard";
+import { TransactionReference } from "@xmtp/content-type-transaction-reference";
 import * as Linking from "expo-linking";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Platform, StyleSheet, Text, useColorScheme, View } from "react-native";
@@ -33,7 +34,6 @@ import {
   getTxRefId,
   mergeTransactionRefData,
 } from "../../utils/transaction";
-import { TransactionReference } from "../../utils/xmtpRN/contentTypes/transactionReference";
 import { showActionSheetWithOptions } from "../StateHandlers/ActionSheetStateHandler";
 import { MessageToDisplay } from "./ChatMessage";
 import ChatMessageMetadata from "./ChatMessageMetadata";
@@ -253,11 +253,6 @@ export default function ChatTransactionReference({ message }: Props) {
     };
   }, [currentAccount, message]);
 
-  const textStyle = [
-    styles.text,
-    { color: message.fromMe ? "white" : textPrimaryColor(colorScheme) },
-  ];
-
   const metadataView = (
     <ChatMessageMetadata message={message} white={showing} />
   );
@@ -279,7 +274,7 @@ export default function ChatTransactionReference({ message }: Props) {
           <Text style={[styles.text, styles.small]}>
             Transaction hash: {shortAddress(transaction.reference)}
           </Text>
-          <View style={styles.transactionStatusContainer}>
+          <View style={styles.statusContainer}>
             <Text style={[styles.text, styles.small]}>Status:</Text>
             <Clock
               style={styles.statusIcon}
@@ -288,6 +283,36 @@ export default function ChatTransactionReference({ message }: Props) {
               height={15}
             />
             <Text style={[styles.text, styles.small]}>Loading</Text>
+          </View>
+        </View>
+        <View style={{ opacity: 0 }}>{metadataView}</View>
+      </>
+    );
+  } else if (transaction.status === "PENDING" && transaction.sponsored) {
+    return (
+      <>
+        <View
+          style={[
+            styles.innerBubble,
+            message.fromMe ? styles.innerBubbleMe : undefined,
+          ]}
+        >
+          <Text style={[styles.text, styles.bold]}>Transaction</Text>
+          <Text style={[styles.text, styles.small]}>
+            Blockchain: {transaction.chainName}
+          </Text>
+          <Text style={[styles.text, styles.small]}>
+            Transaction hash: {shortAddress(transaction.reference)}
+          </Text>
+          <View style={styles.statusContainer}>
+            <Text style={[styles.text, styles.small]}>Status:</Text>
+            <Clock
+              style={styles.statusIcon}
+              fill={textSecondaryColor(colorScheme)}
+              width={15}
+              height={15}
+            />
+            <Text style={[styles.text, styles.small]}>Pending</Text>
           </View>
         </View>
         <View style={{ opacity: 0 }}>{metadataView}</View>
@@ -309,7 +334,7 @@ export default function ChatTransactionReference({ message }: Props) {
           <Text style={[styles.text, styles.small]}>
             Transaction hash: {shortAddress(transaction.reference)}
           </Text>
-          <View style={styles.transactionStatusContainer}>
+          <View style={styles.statusContainer}>
             <Text style={[styles.text, styles.small]}>Status:</Text>
             <Clock
               style={styles.statusIcon}
@@ -339,7 +364,7 @@ export default function ChatTransactionReference({ message }: Props) {
           <Text style={[styles.text, styles.small]}>
             Transaction hash: {shortAddress(transaction.reference)}
           </Text>
-          <View style={styles.transactionStatusContainer}>
+          <View style={styles.statusContainer}>
             <Text style={[styles.text, styles.small]}>Status:</Text>
             <Exclamationmark
               style={styles.statusIcon}
@@ -348,6 +373,40 @@ export default function ChatTransactionReference({ message }: Props) {
               height={15}
             />
             <Text style={[styles.text, styles.small]}>Failed</Text>
+          </View>
+        </View>
+        <View style={{ opacity: 0 }}>{metadataView}</View>
+      </>
+    );
+  } else if (transaction.status === "SUCCESS" && transaction.sponsored) {
+    return (
+      <>
+        <View
+          style={[
+            styles.innerBubble,
+            message.fromMe ? styles.innerBubbleMe : undefined,
+          ]}
+        >
+          <Text style={[styles.text, styles.amount]}>
+            {formatAmount(transaction.events[0])}
+          </Text>
+          <View style={styles.transactionDetailsContainer}>
+            <View style={styles.centeredStatusContainer}>
+              <Text style={[styles.text, styles.transactionDetails]}>
+                {transaction.events[0].currency.toLowerCase().includes("usdc")
+                  ? `${formatAmount(transaction.events[0], false)} -`
+                  : `${transaction.chainName} -`}
+              </Text>
+              <Checkmark
+                style={styles.statusIcon}
+                fill={textSecondaryColor(colorScheme)}
+                width={15}
+                height={15}
+              />
+              <Text style={[styles.text, styles.transactionDetails]}>
+                Success
+              </Text>
+            </View>
           </View>
         </View>
         <View style={{ opacity: 0 }}>{metadataView}</View>
@@ -366,7 +425,7 @@ export default function ChatTransactionReference({ message }: Props) {
             {formatAmount(transaction.events[0])}
           </Text>
           <View style={styles.transactionDetailsContainer}>
-            <View style={styles.transactionStatusContainer}>
+            <View style={styles.statusContainer}>
               <Text style={[styles.text, styles.transactionDetails]}>
                 {transaction.events[0].currency.toLowerCase().includes("usdc")
                   ? `${formatAmount(transaction.events[0], false)} -`
@@ -397,7 +456,11 @@ const useStyles = () => {
       flexDirection: "column",
       width: "100%",
     },
-    transactionStatusContainer: {
+    statusContainer: {
+      flexDirection: "row",
+      alignItems: "center",
+    },
+    centeredStatusContainer: {
       flexDirection: "row",
       alignItems: "center",
       justifyContent: "center",
