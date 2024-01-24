@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Platform, StyleSheet, Text, useColorScheme, View } from "react-native";
 
+import Clock from "../../assets/clock.svg";
 import {
   getTransactionsStore,
   useAccountsStore,
@@ -13,7 +14,9 @@ import {
   messageInnerBubbleColor,
   myMessageInnerBubbleColor,
   textPrimaryColor,
+  textSecondaryColor,
 } from "../../utils/colors";
+import { shortAddress } from "../../utils/str";
 import {
   TransactionDetails,
   TransactionEvent,
@@ -129,6 +132,14 @@ export default function ChatTransactionReference({ message }: Props) {
 
         if (txDetails && txDetails.status === "PENDING") {
           console.log("Transaction status is PENDING, retrying...");
+          const uniformTx = createUniformTransaction(txRef, txDetails);
+          setTransaction((t) => ({
+            ...t,
+            error: false,
+            loading: false,
+            ...uniformTx,
+          }));
+
           retryTimeout = setTimeout(go, 5000);
         } else if (txDetails) {
           const uniformTx = createUniformTransaction(txRef, txDetails);
@@ -142,7 +153,7 @@ export default function ChatTransactionReference({ message }: Props) {
             ...t,
             error: false,
             loading: false,
-            uniformTx,
+            ...uniformTx,
           }));
         } else {
           console.error("Transaction details could not be fetched");
@@ -214,6 +225,36 @@ export default function ChatTransactionReference({ message }: Props) {
   } else if (transaction.error) {
     return null;
     // TODO – WIP check for "transfer" events that contains an amount
+  } else if (transaction.status === "PENDING") {
+    return (
+      <>
+        <View
+          style={[
+            styles.innerBubble,
+            message.fromMe ? styles.innerBubbleMe : undefined,
+          ]}
+        >
+          <Text style={[styles.text, styles.bold]}>Transaction</Text>
+          <Text style={[styles.text, styles.small]}>
+            Blockchain: {transaction.chainName}
+          </Text>
+          <Text style={[styles.text, styles.small]}>
+            Transaction hash: {shortAddress(transaction.reference)}
+          </Text>
+          <View style={styles.transactionStatusContainer}>
+            <Text style={[styles.text, styles.small]}>Status:</Text>
+            <Clock
+              style={styles.statusIcon}
+              fill={textSecondaryColor(colorScheme)}
+              width={15}
+              height={15}
+            />
+            <Text style={[styles.text, styles.small]}>Pending</Text>
+          </View>
+        </View>
+        <View style={{ opacity: 0 }}>{metadataView}</View>
+      </>
+    );
   } else if (
     transaction.status === "SUCCESS" ||
     transaction.status === "FAILURE"
@@ -226,7 +267,7 @@ export default function ChatTransactionReference({ message }: Props) {
             message.fromMe ? styles.innerBubbleMe : undefined,
           ]}
         >
-          <Text style={styles.amount}>
+          <Text style={[styles.text, styles.amount]}>
             {formatAmount(transaction.events[0])}
           </Text>
           <Text style={textStyle}>{transaction.chainName}</Text>
@@ -238,28 +279,30 @@ export default function ChatTransactionReference({ message }: Props) {
   }
 }
 
-// TODO UPDATE STYLE
 const useStyles = () => {
   const colorScheme = useColorScheme();
   return StyleSheet.create({
-    imagePreview: {
-      borderRadius: 14,
-      width: "100%",
-      zIndex: 1,
-    },
-    amount: {
-      paddingHorizontal: 8,
-      paddingVertical: Platform.OS === "android" ? 2 : 3,
-      fontSize: 34,
-      fontWeight: "bold",
-      textAlign: "center",
-      color: textPrimaryColor(colorScheme),
+    transactionStatusContainer: {
+      flexDirection: "row",
+      alignItems: "center",
     },
     text: {
       paddingHorizontal: 8,
       paddingVertical: Platform.OS === "android" ? 2 : 3,
       fontSize: 17,
       color: textPrimaryColor(colorScheme),
+    },
+    amount: {
+      fontSize: 34,
+      fontWeight: "bold",
+      textAlign: "center",
+    },
+    bold: {
+      fontWeight: "bold",
+    },
+    small: {
+      fontSize: 15,
+      color: textSecondaryColor(colorScheme),
     },
     innerBubble: {
       backgroundColor: messageInnerBubbleColor(colorScheme),
@@ -288,6 +331,9 @@ const useStyles = () => {
         },
         android: { paddingBottom: 3, paddingTop: 2 },
       }),
+    },
+    statusIcon: {
+      marginHorizontal: -4,
     },
   });
 };
