@@ -76,6 +76,7 @@
     "expo-dev-client": "~3.3.7",
     "expo-device": "~5.9.3",
     "expo-document-picker": "~11.10.1",
+    "expo-file-system": "~16.0.5",
     "expo-image": "~1.10.5",
     "expo-image-manipulator": "~11.8.0",
     "expo-image-picker": "~14.7.1",
