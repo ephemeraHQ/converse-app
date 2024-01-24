@@ -169,7 +169,7 @@ export default function ChatTransactionReference({ message }: Props) {
             ...uniformTx,
           }));
 
-          retryTimeout = setTimeout(go, 50000);
+          retryTimeout = setTimeout(go, 10000);
         } else if (txDetails) {
           const uniformTx = createUniformTransaction(txRef, txDetails);
           console.log("Updating transaction in Zustand", uniformTx.reference);
@@ -190,7 +190,7 @@ export default function ChatTransactionReference({ message }: Props) {
       } catch (error) {
         console.error("Error fetching transaction details:", error);
         // Let's retry in case of network error
-        retryTimeout = setTimeout(go, 50000);
+        retryTimeout = setTimeout(go, 10000);
       } finally {
         fetchingTransaction.current = false;
       }
