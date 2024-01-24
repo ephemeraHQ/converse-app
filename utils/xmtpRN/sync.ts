@@ -61,7 +61,9 @@ const onSyncLost = async (account: string, error: any) => {
   console.log(
     `[XmtpRN] An error occured while syncing for ${account}: ${error}`
   );
-  addLog(`[XmtpRN] An error occured while syncing for ${account}: ${error}`);
+  addLog(
+    `[XmtpRN] An ${typeof error} error occured while syncing for ${account}: ${error}`
+  );
   // If there is an error let's show it
   getChatStore(account).getState().setReconnecting(true);
   // Wait a bit before reco
