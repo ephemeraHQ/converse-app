@@ -1,3 +1,5 @@
+import Clipboard from "@react-native-clipboard/clipboard";
+import * as Linking from "expo-linking";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Platform, StyleSheet, Text, useColorScheme, View } from "react-native";
 
@@ -12,11 +14,13 @@ import {
   getTransactionDetails,
 } from "../../utils/api";
 import {
+  actionSheetColors,
   messageInnerBubbleColor,
   myMessageInnerBubbleColor,
   textPrimaryColor,
   textSecondaryColor,
 } from "../../utils/colors";
+import { converseEventEmitter } from "../../utils/events";
 import { shortAddress } from "../../utils/str";
 import {
   TransactionDetails,
@@ -29,6 +33,7 @@ import {
   mergeTransactionRefData,
 } from "../../utils/transaction";
 import { TransactionReference } from "../../utils/xmtpRN/contentTypes/transactionReference";
+import { showActionSheetWithOptions } from "../StateHandlers/ActionSheetStateHandler";
 import { MessageToDisplay } from "./ChatMessage";
 import ChatMessageMetadata from "./ChatMessageMetadata";
 
@@ -61,6 +66,54 @@ export default function ChatTransactionReference({ message }: Props) {
   });
   const fetchingTransaction = useRef(false);
   const showing = !transaction.loading;
+  const showTransactionActionSheetRef = useRef<(() => void) | null>(null);
+
+  const openBlockExplorer = () => {
+    if (transaction.blockExplorerURL) {
+      Linking.openURL(transaction.blockExplorerURL);
+    }
+  };
+
+  const copyTransactionHash = () => {
+    Clipboard.setString(transaction.reference);
+  };
+
+  showTransactionActionSheetRef.current = () => {
+    const options = [
+      "See in block explorer",
+      "Copy transaction hash",
+      "Cancel",
+    ];
+    const methods = {
+      "See in block explorer": openBlockExplorer,
+      "Copy transaction hash": copyTransactionHash,
+    };
+
+    showActionSheetWithOptions(
+      {
+        options,
+        cancelButtonIndex: options.indexOf("Cancel"),
+        ...actionSheetColors(colorScheme),
+      },
+      (selectedIndex?: number) => {
+        if (selectedIndex === undefined) return;
+        const selectedOption = options[selectedIndex];
+        const method = (methods as any)[selectedOption];
+        method?.();
+      }
+    );
+  };
+
+  useEffect(() => {
+    const eventHandler = `showActionSheetForTxRef-${message.id}`;
+    const showSheet = () => showTransactionActionSheetRef.current?.();
+
+    converseEventEmitter.on(eventHandler, showSheet);
+
+    return () => {
+      converseEventEmitter.off(eventHandler, showSheet);
+    };
+  }, [message.id]);
 
   const saveAndDisplayTransaction = useCallback(
     (

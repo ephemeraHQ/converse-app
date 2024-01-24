@@ -27,6 +27,7 @@ import {
   getEmojiName,
   removeReactionFromMessage,
 } from "../../utils/reactions";
+import { isTransactionMessage } from "../../utils/transaction";
 import { consentToPeersOnProtocol } from "../../utils/xmtpRN/conversations";
 import EmojiPicker from "../../vendor/rn-emoji-keyboard";
 import { showActionSheetWithOptions } from "../StateHandlers/ActionSheetStateHandler";
@@ -49,6 +50,7 @@ export default function ChatMessageActions({
 }: Props) {
   const { conversation } = useConversationContext(["conversation"]);
   const isAttachment = isAttachmentMessage(message.contentType);
+  const isTransaction = isTransactionMessage(message.contentType);
   const colorScheme = useColorScheme();
   const userAddress = useCurrentAccount() as string;
   const setPeersStatus = useSettingsStore((s) => s.setPeersStatus);
@@ -136,7 +138,11 @@ export default function ChatMessageActions({
     showActionSheetWithOptions(
       {
         options,
-        title: isAttachment ? "📎 Media" : message.content,
+        title: isTransaction
+          ? "💸 Transaction"
+          : isAttachment
+          ? "📎 Media"
+          : message.content,
         cancelButtonIndex: options.indexOf("Cancel"),
         destructiveButtonIndex: message.fromMe
           ? undefined
@@ -152,14 +158,15 @@ export default function ChatMessageActions({
       }
     );
   }, [
-    colorScheme,
-    isAttachment,
-    message.content,
-    message.contentFallback,
-    message.fromMe,
     canAddReaction,
-    showMessageReportActionSheet,
+    isAttachment,
+    isTransaction,
+    message.content,
+    message.fromMe,
+    message.contentFallback,
+    colorScheme,
     showReactionModal,
+    showMessageReportActionSheet,
   ]);
 
   const doubleTapGesture = useMemo(
@@ -203,6 +210,12 @@ export default function ChatMessageActions({
               // Transfering attachment opening intent to component
               converseEventEmitter.emit(
                 `openAttachmentForMessage-${message.id}`
+              );
+            }
+            if (isTransaction) {
+              // Transfering event to component
+              converseEventEmitter.emit(
+                `showActionSheetForTxRef-${message.id}`
               );
             }
           }}
