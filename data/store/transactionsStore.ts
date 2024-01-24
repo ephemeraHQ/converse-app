@@ -8,7 +8,7 @@ import { TransactionEvent } from "../../utils/transaction";
 
 export type Transaction = {
   id: string; // Concatenation of "[networkid]-[reference]"
-  transactionType:
+  transactionType?:
     | "transactionReference"
     | "coinbaseRegular"
     | "coinbaseSponsored";
@@ -16,7 +16,7 @@ export type Transaction = {
   networkId: string | number;
   reference: string;
   metadata?: object;
-  status: "PENDING" | "FAILURE" | "SUCCESS";
+  status?: "PENDING" | "FAILURE" | "SUCCESS";
   sponsored: boolean; // by converse
   blockExplorerURL?: string;
   events?: TransactionEvent[];
