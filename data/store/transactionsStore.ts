@@ -30,7 +30,6 @@ export type TransactionsStoreType = {
   getTransaction: (id: string) => Transaction;
 
   getEvents: (id: string) => any[];
-  setEvents: (id: string, events: any[]) => void;
 };
 
 export const initTransactionsStore = (account: string) => {
@@ -61,19 +60,8 @@ export const initTransactionsStore = (account: string) => {
 
           getEvents: (id) => {
             const transaction = get().transactions[id];
-            return transaction.events ?? "[]";
+            return transaction.events ?? [];
           },
-
-          setEvents: (id, events) =>
-            set((state) => ({
-              transactions: {
-                ...state.transactions,
-                [id]: {
-                  ...state.transactions[id],
-                  events,
-                },
-              },
-            })),
         }) as TransactionsStoreType,
       {
         name: `store-${account}-transactions`, // Account-based storage so each account can have its own transactions
