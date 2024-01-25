@@ -35,10 +35,7 @@ import { usePrivySigner } from "../../utils/evm/privy";
 import provider from "../../utils/evm/provider";
 import { sendMessage } from "../../utils/message";
 import { sentryTrackError } from "../../utils/sentry";
-import {
-  refreshBalanceForAccount,
-  refreshBalanceForAccounts,
-} from "../../utils/wallet";
+import { refreshBalanceForAccount } from "../../utils/wallet";
 import ActivityIndicator from "../ActivityIndicator/ActivityIndicator";
 import ChatActionButton from "./ChatActionButton";
 
@@ -177,7 +174,6 @@ export default function ChatTransactionInput() {
         if (txReceipt.status === 1) {
           // This is success
           setTxStatus({ status: "success", canCancel: false });
-          refreshBalanceForAccounts();
           await new Promise((r) => setTimeout(r, 2000));
           sendMessage({
             conversation,
