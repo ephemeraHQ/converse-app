@@ -80,7 +80,7 @@ export default function ProfileScreen({
   const manuallyRefreshBalance = useCallback(async () => {
     setRefreshingBalance(true);
     const now = new Date().getTime();
-    await refreshBalanceForAccount(userAddress);
+    await refreshBalanceForAccount(userAddress, 0);
     const after = new Date().getTime();
     if (after - now < 1000) {
       await new Promise((r) => setTimeout(r, 1000 - after + now));
