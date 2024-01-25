@@ -120,7 +120,7 @@ const ENV = {
         decimals: 6,
       },
       rpcEndpoint:
-        "https://base-mainnet.g.alchemy.com/v2/I-IEs_vLzf_vteQDgDZBVlu0kwp76jUv",
+        "https://base-mainnet.g.alchemy.com/v2/ZPqjDRWZVyTwdBYPikn1a7iEOCyxMWqX",
     },
   },
 };
