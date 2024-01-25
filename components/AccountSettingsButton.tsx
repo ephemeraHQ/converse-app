@@ -26,7 +26,6 @@ import {
   requestPushNotificationsPermissions,
   NotificationPermissionStatus,
 } from "../utils/notifications";
-import { refreshBalanceForAccounts } from "../utils/wallet";
 import Picto from "./Picto/Picto";
 import { showActionSheetWithOptions } from "./StateHandlers/ActionSheetStateHandler";
 import { TableViewPicto } from "./TableView/TableViewImage";
@@ -57,7 +56,6 @@ export default function AccountSettingsButton({ account, navigation }: Props) {
       "Your profile page": async () => {
         if (account) {
           refreshProfileForAddress(account, account);
-          refreshBalanceForAccounts();
           setCurrentAccount(account, false);
           if (Platform.OS === "android") {
             converseEventEmitter.emit("toggle-navigation-drawer", false);
