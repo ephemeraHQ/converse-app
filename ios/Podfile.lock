@@ -24,7 +24,7 @@ PODS:
   - EXJSONUtils (0.12.3)
   - EXManifests (0.13.2):
     - ExpoModulesCore
-  - EXNotifications (0.27.4):
+  - EXNotifications (0.27.5):
     - ExpoModulesCore
   - Expo (50.0.3):
     - ExpoModulesCore
@@ -139,7 +139,7 @@ PODS:
     - RCT-Folly (= 2022.05.16.00)
     - React-Core
   - EXStructuredHeaders (3.7.2)
-  - EXTaskManager (11.7.0):
+  - EXTaskManager (11.7.1):
     - ExpoModulesCore
     - UMAppLoader
   - EXUpdates (0.24.8):
@@ -193,11 +193,11 @@ PODS:
     - libwebp/sharpyuv
   - Logging (1.0.0)
   - MessagePacker (0.4.7)
-  - MMKV (1.3.1):
-    - MMKVCore (~> 1.3.1)
-  - MMKVAppExtension (1.3.1):
-    - MMKVCore (~> 1.3.1)
-  - MMKVCore (1.3.1)
+  - MMKV (1.3.3):
+    - MMKVCore (~> 1.3.3)
+  - MMKVAppExtension (1.3.3):
+    - MMKVCore (~> 1.3.3)
+  - MMKVCore (1.3.3)
   - RCT-Folly (2022.05.16.00):
     - boost
     - DoubleConversion
@@ -1287,7 +1287,7 @@ PODS:
     - glog
     - RCT-Folly (= 2022.05.16.00)
     - React-Core
-  - RNSentry (5.16.0):
+  - RNSentry (5.17.0):
     - hermes-engine
     - React-Core
     - React-hermes
@@ -1377,9 +1377,9 @@ DEPENDENCIES:
   - glog (from `../node_modules/react-native/third-party-podspecs/glog.podspec`)
   - hermes-engine (from `../node_modules/react-native/sdks/hermes-engine/hermes-engine.podspec`)
   - libevent (~> 2.1.12)
-  - MMKV (= 1.3.1)
-  - MMKVAppExtension (= 1.3.1)
-  - MMKVCore (= 1.3.1)
+  - MMKV (= 1.3.3)
+  - MMKVAppExtension (= 1.3.3)
+  - MMKVCore (= 1.3.3)
   - RCT-Folly (from `../node_modules/react-native/third-party-podspecs/RCT-Folly.podspec`)
   - RCT-Folly/Fabric (from `../node_modules/react-native/third-party-podspecs/RCT-Folly.podspec`)
   - RCTRequired (from `../node_modules/react-native/Libraries/RCTRequired`)
@@ -1713,7 +1713,7 @@ SPEC CHECKSUMS:
   EXImageLoader: 55080616b2fe9da19ef8c7f706afd9814e279b6b
   EXJSONUtils: 5c42959e87be238b045ef37cc5268b16a6c0ad4a
   EXManifests: 5e8c29f36c716af768a4ea47ec05e1b89ab93091
-  EXNotifications: e4c08fe430ab411849bec7a7ca6ef4b98c57ae62
+  EXNotifications: ecd73833e55510edcb3fa30d59bfc536eeb4b9c6
   Expo: 88b4aa68115bbb57c1a07cc30161c2352ab2fc25
   expo-dev-client: 80a81d82fd401673ab11702ce9e54115a8852f3b
   expo-dev-launcher: 141aa2d7e603102de71caa9530c293a6c1737653
@@ -1735,7 +1735,7 @@ SPEC CHECKSUMS:
   ExpoSystemUI: 40e222dd9d52222fe1bce389724ac52e662158dc
   EXSplashScreen: e12df5ed7e7880913a3e4bad91ba252596993b90
   EXStructuredHeaders: 5b0f47259db047dc1fdfa84752e292c2bfa68ecd
-  EXTaskManager: 81b2dfaaba6d9f9a4bc3e3e2a786a98004eb9e98
+  EXTaskManager: f1a5747cf42f9304727bfe75aa86009c810e03e7
   EXUpdates: 5b27792fc3b2dd72ccbe4c6299eae4e13a811435
   EXUpdatesInterface: 3e444e2093e25b7ca0999a7d8c16e8392dee70c3
   FBLazyVector: fbc4957d9aa695250b55d879c1d86f79d7e69ab4
@@ -1752,9 +1752,9 @@ SPEC CHECKSUMS:
   libwebp: 1786c9f4ff8a279e4dac1e8f385004d5fc253009
   Logging: 9ef4ecb546ad3169398d5a723bc9bea1c46bef26
   MessagePacker: ab2fe250e86ea7aedd1a9ee47a37083edd41fd02
-  MMKV: 5a07930c70c70b86cd87761a42c8f3836fb681d7
-  MMKVAppExtension: 3cda7723ad7d53f486b4cef2782eed9ba8799f68
-  MMKVCore: e50135dbd33235b6ab390635991bab437ab873c0
+  MMKV: f902fb6719da13c2ab0965233d8963a59416f911
+  MMKVAppExtension: fcf23c6b250cc87db63507bc57be8e6ed378168d
+  MMKVCore: d26e4d3edd5cb8588c2569222cbd8be4231374e9
   RCT-Folly: 7169b2b1c44399c76a47b5deaaba715eeeb476c0
   RCTRequired: 9b1e7e262745fb671e33c51c1078d093bd30e322
   RCTTypeSafety: a759e3b086eccf3e2cbf2493d22f28e082f958e6
@@ -1817,7 +1817,7 @@ SPEC CHECKSUMS:
   RNReactNativeSharedGroupPreferences: de0121a4224c267bc7e9fb16c398f3f087c8da81
   RNReanimated: 9fc2b08ed365d7dc451bc451605d89c01f2c935b
   RNScreens: 2b73f5eb2ac5d94fbd61fa4be0bfebd345716825
-  RNSentry: 9a8aebd354d3b47c428c72ec7264b7822cf4f3c2
+  RNSentry: ed42b1443bef1fec1fc9273b5193a79b0cab1a01
   RNSVG: ba3e7232f45e34b7b47e74472386cf4e1a676d0a
   SDWebImage: 750adf017a315a280c60fde706ab1e552a3ae4e9
   SDWebImageAVIFCoder: 8348fef6d0ec69e129c66c9fe4d74fbfbf366112
@@ -1837,6 +1837,6 @@ SPEC CHECKSUMS:
   XMTPRust: 8848a2ba761b2c961d666632f2ad27d1082faa93
   Yoga: e64aa65de36c0832d04e8c7bd614396c77a80047
 
-PODFILE CHECKSUM: ee0ef1532feab28c79abcb4c9ca6fdb3e75b783d
+PODFILE CHECKSUM: 23188827bae87d792a29ed1e43af3c2caf6c9279
 
 COCOAPODS: 1.14.3
