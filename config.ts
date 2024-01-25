@@ -50,7 +50,7 @@ const defaultConfig = {
     rpcEndpoint:
       "https://base-goerli.g.alchemy.com/v2/Jl1z46xZWUzMr042dL1D7533XcOvXmb6",
   },
-  splitScreenThreshold: 414,
+  splitScreenThreshold: 600,
 };
 
 const isAndroid = Platform.OS === "android";
