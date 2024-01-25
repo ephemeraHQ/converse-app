@@ -8,7 +8,7 @@ const refreshingBalanceForAccount: { [account: string]: boolean } = {};
 
 export const refreshBalanceForAccount = async (
   account: string,
-  delayMs = 0
+  delayMs = 5000
 ) => {
   if (refreshingBalanceForAccount[account]) {
     return;
@@ -39,7 +39,7 @@ export const refreshBalanceForAccount = async (
   refreshingBalanceForAccount[account] = false;
 };
 
-export const refreshBalanceForAccounts = async (delayMs = 1000) => {
+export const refreshBalanceForAccounts = async (delayMs = 5000) => {
   const accounts = getAccountsList();
   await Promise.all(
     accounts.map((account) => refreshBalanceForAccount(account, delayMs))
