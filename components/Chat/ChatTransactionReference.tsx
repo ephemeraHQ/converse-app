@@ -14,7 +14,6 @@ import Checkmark from "../../assets/checkmark.svg";
 import Clock from "../../assets/clock.svg";
 import Exclamationmark from "../../assets/exclamationmark.triangle.svg";
 import {
-  getTransactionsStore,
   useAccountsStore,
   useTransactionsStore,
 } from "../../data/store/accountsStore";
@@ -30,7 +29,6 @@ import {
   textSecondaryColor,
 } from "../../utils/colors";
 import { converseEventEmitter } from "../../utils/events";
-import { sentryTrackMessage } from "../../utils/sentry";
 import { shortAddress } from "../../utils/str";
 import {
   TransactionContentType,
@@ -39,7 +37,6 @@ import {
   createUniformTransaction,
   extractChainIdToHex,
   getTransactionType,
-  getTxRefId,
   useTransactionForMessage,
 } from "../../utils/transaction";
 import { showActionSheetWithOptions } from "../StateHandlers/ActionSheetStateHandler";
@@ -153,10 +150,17 @@ export default function ChatTransactionReference({ message }: Props) {
   const showing = !transaction.loading;
   const setTransactions = useTransactionsStore((s) => s.setTransactions);
 
-  const { transactionDisplay, amountToDisplay } = useTransactionForMessage(
-    message,
-    currentAccount
-  );
+  const { transactionDisplay, amountToDisplay, txLookup } =
+    useTransactionForMessage(message, currentAccount);
+
+  useEffect(() => {
+    setTransaction((t) => ({
+      ...t,
+      error: false,
+      loading: false,
+      ...txLookup,
+    }));
+  }, [txLookup]);
 
   const showTransactionActionSheet = useCallback(() => {
     const options = ["Copy transaction hash", "Cancel"];
@@ -276,24 +280,15 @@ export default function ChatTransactionReference({ message }: Props) {
       }
     };
 
-    if (txType) {
-      const txLookup = getTransactionsStore(currentAccount)
-        .getState()
-        .getTransaction(getTxRefId(txRef, txType));
-
-      if (!txLookup || txLookup.status === "PENDING") {
-        go();
-      } else {
-        setTransaction((t) => ({
-          ...t,
-          error: false,
-          loading: false,
-          ...txLookup,
-        }));
-      }
+    if (!txLookup || txLookup.status === "PENDING") {
+      go();
     } else {
-      sentryTrackMessage("INVALID_TRANSACTION_REFERENCE", { message });
-      setTransaction((a) => ({ ...a, error: true, loading: false }));
+      setTransaction((t) => ({
+        ...t,
+        error: false,
+        loading: false,
+        ...txLookup,
+      }));
     }
 
     // Cleanup on unmount or dependency change
@@ -302,7 +297,7 @@ export default function ChatTransactionReference({ message }: Props) {
         clearTimeout(retryTimeout);
       }
     };
-  }, [currentAccount, message, setTransactions]);
+  }, [currentAccount, message, setTransactions, txLookup]);
 
   const metadataView = (
     <ChatMessageMetadata message={message} white={showing} />
