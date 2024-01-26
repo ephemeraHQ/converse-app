@@ -105,7 +105,9 @@ export default function Navigation() {
             }
       }
       ref={(r) => {
-        converseNavigations["mainStack"] = r;
+        if (r) {
+          converseNavigations["mainStack"] = r;
+        }
       }}
       onUnhandledAction={() => {
         // Since we're handling multiple navigators,
