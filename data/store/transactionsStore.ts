@@ -2,16 +2,16 @@ import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
 
 import { zustandMMKVStorage } from "../../utils/mmkv";
-import { TransactionEvent } from "../../utils/transaction";
+import {
+  TransactionContentType,
+  TransactionEvent,
+} from "../../utils/transaction";
 
 // Transactions for each account setup in the app
 
 export type Transaction = {
   id: string; // Concatenation of "[networkid]-[reference]"
-  transactionType?:
-    | "transactionReference"
-    | "coinbaseRegular"
-    | "coinbaseSponsored";
+  transactionType?: TransactionContentType;
   namespace?: string;
   networkId: string | number;
   reference: string;

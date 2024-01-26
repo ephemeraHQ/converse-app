@@ -4,6 +4,10 @@ import { ethers } from "ethers";
 import { Transaction } from "../data/store/transactionsStore";
 import { isContentType } from "./xmtpRN/contentTypes";
 
+export type TransactionContentType =
+  | "transactionReference"
+  | "coinbaseRegular"
+  | "coinbaseSponsored";
 export interface TransactionEvent {
   amount: number;
   contractAddress: string;
@@ -30,11 +34,7 @@ export const isTransactionMessage = (contentType?: string) =>
     : false;
 
 export const mergeTransactionRefData = (
-  transactionType:
-    | "transactionReference"
-    | "coinbaseRegular"
-    | "coinbaseSponsored"
-    | undefined,
+  transactionType: TransactionContentType,
   txRef: TransactionReference,
   txRefId: string,
   txDetails?: TransactionDetails
@@ -66,11 +66,7 @@ export const extractChainIdToHex = (networkRawValue: string): string => {
 
 export const getTransactionType = (
   input: TransactionReference | any
-):
-  | "transactionReference"
-  | "coinbaseRegular"
-  | "coinbaseSponsored"
-  | undefined => {
+): TransactionContentType | undefined => {
   if ("networkId" in input && "reference" in input) {
     // Has keys specific to TransactionReference
     return "transactionReference";
