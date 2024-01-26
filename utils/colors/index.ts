@@ -119,13 +119,8 @@ export const messageBubbleColor = (colorScheme: ColorSchemeName) => {
 };
 
 export const messageInnerBubbleColor = (colorScheme: ColorSchemeName) => {
-  if (colorScheme === "dark")
-    return Platform.OS === "android" || Platform.OS === "web"
-      ? MaterialDarkColors.surface2
-      : MESSAGE_INNER_BUBBLE_DARK;
-  return Platform.OS === "android" || Platform.OS === "web"
-    ? MaterialLightColors.surface2
-    : MESSAGE_INNER_BUBBLE_LIGHT;
+  if (colorScheme === "dark") return MESSAGE_INNER_BUBBLE_DARK;
+  return MESSAGE_INNER_BUBBLE_LIGHT;
 };
 
 const MY_MESSAGE_BUBBLE_LIGHT = "#E95C43";
