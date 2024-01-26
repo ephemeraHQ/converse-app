@@ -241,6 +241,7 @@ export const useTransactionForMessage = (
     return {
       transactionDisplay,
       amountToDisplay: formattedAmountWithCurrencySymbol,
+      txLookup: transaction,
     };
   }, [transaction]);
 
