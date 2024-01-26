@@ -42,7 +42,7 @@ const protocolMessageToStateMessage = (
       message.content as CoinbaseMessagingPaymentContent
     );
   } else {
-    contentFallback = message.content;
+    contentFallback = message.contentFallback;
   }
 
   return {

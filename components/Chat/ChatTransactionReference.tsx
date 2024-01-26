@@ -145,7 +145,7 @@ export default function ChatTransactionReference({ message }: Props) {
             ...uniformTx,
           }));
 
-          retryTimeout = setTimeout(go, 10000);
+          retryTimeout = setTimeout(go, 5000);
         } else if (txDetails) {
           const uniformTx = createUniformTransaction(txRef, txDetails);
           console.log("Updating transaction in Zustand", uniformTx.reference);
@@ -166,7 +166,7 @@ export default function ChatTransactionReference({ message }: Props) {
       } catch (error) {
         console.error("Error fetching transaction details:", error);
         // Let's retry in case of network error
-        retryTimeout = setTimeout(go, 10000);
+        retryTimeout = setTimeout(go, 5000);
       } finally {
         fetchingTransaction.current = false;
       }
@@ -318,27 +318,16 @@ export default function ChatTransactionReference({ message }: Props) {
     txRef,
   });
 
-  const openBlockExplorer = () => {
-    if (transaction.blockExplorerURL) {
-      Linking.openURL(transaction.blockExplorerURL);
-    }
-  };
-
-  const copyTransactionHash = () => {
-    Clipboard.setString(transaction.reference);
-  };
-
   showTransactionActionSheetRef.current = () => {
-    const options = [
-      "See in block explorer",
-      "Copy transaction hash",
-      "Cancel",
-    ];
-    const methods = {
-      "See in block explorer": openBlockExplorer,
-      "Copy transaction hash": copyTransactionHash,
+    const options = ["Copy transaction hash", "Cancel"];
+    const methods: { [key: string]: () => void } = {
+      "Copy transaction hash": () => Clipboard.setString(transaction.reference),
     };
-
+    if (transaction.blockExplorerURL) {
+      options.unshift("See in block explorer");
+      methods["See in block explorer"] = () =>
+        Linking.openURL(transaction.blockExplorerURL!);
+    }
     showActionSheetWithOptions(
       {
         options,
@@ -348,8 +337,10 @@ export default function ChatTransactionReference({ message }: Props) {
       (selectedIndex?: number) => {
         if (selectedIndex === undefined) return;
         const selectedOption = options[selectedIndex];
-        const method = (methods as any)[selectedOption];
-        method?.();
+        const method = methods[selectedOption];
+        if (method) {
+          method();
+        }
       }
     );
   };
