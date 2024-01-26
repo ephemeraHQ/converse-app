@@ -1,7 +1,7 @@
 import Clipboard from "@react-native-clipboard/clipboard";
 import { TransactionReference } from "@xmtp/content-type-transaction-reference";
 import * as Linking from "expo-linking";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
   ColorSchemeName,
   Platform,
@@ -73,20 +73,43 @@ export default function ChatTransactionReference({ message }: Props) {
   });
   const fetchingTransaction = useRef(false);
   const showing = !transaction.loading;
-  const showTransactionActionSheetRef = useRef<(() => void) | null>(null);
   const setTransactions = useTransactionsStore((s) => s.setTransactions);
   const txRef = JSON.parse(message.content); // as TransactionReference;
 
+  const showTransactionActionSheet = useCallback(() => {
+    const options = ["Copy transaction hash", "Cancel"];
+    const methods: { [key: string]: () => void } = {
+      "Copy transaction hash": () => Clipboard.setString(transaction.reference),
+    };
+    if (transaction.blockExplorerURL) {
+      options.unshift("See in block explorer");
+      methods["See in block explorer"] = () =>
+        Linking.openURL(transaction.blockExplorerURL!);
+    }
+    showActionSheetWithOptions(
+      {
+        options,
+        cancelButtonIndex: options.indexOf("Cancel"),
+        ...actionSheetColors(colorScheme),
+      },
+      (selectedIndex?: number) => {
+        if (selectedIndex === undefined) return;
+        const selectedOption = options[selectedIndex];
+        const method = methods[selectedOption];
+        if (method) {
+          method();
+        }
+      }
+    );
+  }, [transaction.reference, transaction.blockExplorerURL, colorScheme]);
+
   useEffect(() => {
     const eventHandler = `showActionSheetForTxRef-${message.id}`;
-    const showSheet = () => showTransactionActionSheetRef.current?.();
-
-    converseEventEmitter.on(eventHandler, showSheet);
-
+    converseEventEmitter.on(eventHandler, showTransactionActionSheet);
     return () => {
-      converseEventEmitter.off(eventHandler, showSheet);
+      converseEventEmitter.off(eventHandler, showTransactionActionSheet);
     };
-  }, [message.id]);
+  }, [message.id, showTransactionActionSheet]);
 
   useEffect(() => {
     let retryTimeout: NodeJS.Timeout;
@@ -316,33 +339,6 @@ export default function ChatTransactionReference({ message }: Props) {
     transaction,
     txRef,
   });
-
-  showTransactionActionSheetRef.current = () => {
-    const options = ["Copy transaction hash", "Cancel"];
-    const methods: { [key: string]: () => void } = {
-      "Copy transaction hash": () => Clipboard.setString(transaction.reference),
-    };
-    if (transaction.blockExplorerURL) {
-      options.unshift("See in block explorer");
-      methods["See in block explorer"] = () =>
-        Linking.openURL(transaction.blockExplorerURL!);
-    }
-    showActionSheetWithOptions(
-      {
-        options,
-        cancelButtonIndex: options.indexOf("Cancel"),
-        ...actionSheetColors(colorScheme),
-      },
-      (selectedIndex?: number) => {
-        if (selectedIndex === undefined) return;
-        const selectedOption = options[selectedIndex];
-        const method = methods[selectedOption];
-        if (method) {
-          method();
-        }
-      }
-    );
-  };
 
   // Converse sponsored transaction
   if (transaction.sponsored || transaction.status !== "PENDING") {
