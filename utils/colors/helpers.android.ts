@@ -1,7 +1,6 @@
 import { ColorSchemeName } from "react-native";
 
 import { backgroundColor, rgbStringToHex } from ".";
-import { sentryTrackError } from "../sentry";
 
 export const setAndroidSystemColor = (color: string) => {
   const BackgroundColor = require("react-native-background-color");
@@ -10,9 +9,11 @@ export const setAndroidSystemColor = (color: string) => {
   try {
     BackgroundColor.setColor(color);
   } catch (e) {
-    sentryTrackError(e);
+    console.log(e);
   }
-  SystemNavigationBar.setNavigationColor(color).catch(sentryTrackError);
+  SystemNavigationBar.setNavigationColor(color).catch((e) => {
+    console.log(e);
+  });
 };
 
 export const setAndroidColors = (colorScheme: ColorSchemeName) => {
@@ -22,5 +23,7 @@ export const setAndroidColors = (colorScheme: ColorSchemeName) => {
     require("react-native-system-navigation-bar").default;
   SystemNavigationBar.setBarMode(
     colorScheme === "dark" ? "light" : "dark"
-  ).catch(sentryTrackError);
+  ).catch((e) => {
+    console.log(e);
+  });
 };
