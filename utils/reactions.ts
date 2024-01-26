@@ -93,7 +93,7 @@ export const getEmojiName = (emojiString: string) => {
   return foundEmojiName;
 };
 
-export const getContentPreview = (
+export const getReactionsContentPreview = (
   message: XmtpMessage,
   reactionContent: string
 ) => {
@@ -120,7 +120,7 @@ export const addReactionToMessage = (
   message: XmtpMessage,
   emoji: string
 ) => {
-  const contentFallback = getContentPreview(message, emoji);
+  const contentFallback = getReactionsContentPreview(message, emoji);
   sendMessage({
     conversation,
     content: JSON.stringify({
