@@ -25,10 +25,8 @@ export type Transaction = {
 
 export type TransactionsStoreType = {
   transactions: { [id: string]: Transaction };
-
-  setTransactions: (transactions: Transaction[]) => void;
+  setTransactions: (transactions: { [id: string]: Transaction }) => void;
   getTransaction: (id: string) => Transaction;
-
   getEvents: (id: string) => any[];
 };
 
@@ -39,20 +37,11 @@ export const initTransactionsStore = (account: string) => {
         ({
           transactions: {},
 
-          setTransactions: (transactions) =>
-            set((state) => {
-              const updatedTransactions = { ...state.transactions };
-
-              transactions.forEach((transaction) => {
-                // Upsert logic
-                updatedTransactions[transaction.id] = {
-                  ...(updatedTransactions[transaction.id] || {}),
-                  ...transaction,
-                };
-              });
-
-              return { transactions: updatedTransactions };
-            }),
+          setTransactions: (newTransactions: { [id: string]: Transaction }) => {
+            set((state) => ({
+              transactions: { ...state.transactions, ...newTransactions },
+            }));
+          },
 
           getTransaction: (id: string) => {
             return get().transactions[id];
