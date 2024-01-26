@@ -120,12 +120,10 @@ export default function ChatMessageActions({
     if (canAddReaction) {
       methods["Add a reaction"] = showReactionModal;
     }
-    if (!isAttachment) {
-      methods["Copy message"] = () => {
-        message.content
-          ? Clipboard.setString(message.content)
-          : Clipboard.setString(message.contentFallback!);
-      };
+    if (!isAttachment && !isTransaction) {
+      methods["Copy message"] = message.content
+        ? () => Clipboard.setString(message.content)
+        : () => Clipboard.setString(message.contentFallback!);
       if (!message.fromMe) {
         methods["Report message"] = showMessageReportActionSheet;
       }
