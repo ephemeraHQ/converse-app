@@ -151,7 +151,9 @@ export default function ChatTransactionReference({ message }: Props) {
           console.log("Updating transaction in Zustand", uniformTx.reference);
 
           // Update zustand transaction store
-          setTransactions([uniformTx]);
+          setTransactions({
+            [uniformTx.id]: uniformTx,
+          });
 
           // Update component state
           setTransaction((t) => ({

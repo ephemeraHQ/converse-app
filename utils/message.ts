@@ -55,7 +55,9 @@ export const sendMessage = async ({
     if (namespace === "eip155" && networkId && txHash) {
       const transaction = createUniformTransaction(txRef);
       const transactionStore = getTransactionsStore(currentAccount());
-      transactionStore.getState().setTransactions([transaction]);
+      transactionStore.getState().setTransactions({
+        [transaction.id]: transaction,
+      });
     }
   }
 
