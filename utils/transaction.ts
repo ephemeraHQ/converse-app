@@ -109,10 +109,10 @@ export function createUniformTransaction(
   txDetails?: TransactionDetails
 ): Transaction {
   const txType = getTransactionType(input);
-  let transaction: Transaction;
 
   if (txType) {
     const txRefId = getTxRefId(input, txType);
+    let transaction: Transaction;
 
     switch (txType) {
       case "transactionReference":
