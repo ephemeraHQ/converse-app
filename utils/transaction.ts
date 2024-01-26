@@ -1,6 +1,9 @@
 import { TransactionReference } from "@xmtp/content-type-transaction-reference";
 import { ethers } from "ethers";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
+import { MessageToDisplay } from "../components/Chat/ChatMessage";
+import { useTransactionsStore } from "../data/store/accountsStore";
 import { Transaction } from "../data/store/transactionsStore";
 import { isContentType } from "./xmtpRN/contentTypes";
 
@@ -169,4 +172,77 @@ export const formatAmount = (
   } else {
     return `${formattedAmount} ${currency.toUpperCase()}`;
   }
+};
+
+export const useTransactionForMessage = (
+  message: MessageToDisplay,
+  currentAccount: string
+) => {
+  const getTransaction = useTransactionsStore((s) => s.getTransaction);
+  const [transaction, setTransaction] = useState<Transaction | null>(null);
+  const txRef = useRef<TransactionReference | null>(null);
+
+  useEffect(() => {
+    try {
+      const parsedTxRef = JSON.parse(message.content);
+
+      const txType = getTransactionType(parsedTxRef);
+      txRef.current = parsedTxRef;
+
+      if (txType !== undefined) {
+        const txLookup = getTransaction(getTxRefId(parsedTxRef, txType));
+
+        if (txLookup) {
+          setTransaction(txLookup);
+        }
+      }
+    } catch (error) {
+      console.error("Error parsing transaction reference:", error);
+      txRef.current = null;
+    }
+  }, [message.content, currentAccount, getTransaction]);
+
+  const getTransactionInfo = useCallback(() => {
+    if (!transaction) {
+      return {
+        transactionDisplay: "–",
+        amountToDisplay: "–",
+      };
+    }
+
+    let amount, currency, decimals;
+
+    if (transaction.events && transaction.events.length > 0) {
+      ({ amount, currency, decimals } = transaction.events[0]);
+    }
+
+    const isUSDC = currency?.toLowerCase() === "usdc";
+
+    const formattedAmountWithCurrencySymbol =
+      amount && currency && decimals !== undefined
+        ? formatAmount(amount, currency, decimals)
+        : "–";
+    const formattedAmount =
+      amount && currency && decimals !== undefined
+        ? formatAmount(amount, currency, decimals, false)
+        : "–";
+
+    const transactionDisplay = isUSDC
+      ? `${formattedAmount} –`
+      : `${transaction.chainName || "–"} –`;
+
+    if (!transaction) {
+      return {
+        transactionDisplay: "",
+        amountToDisplay: "",
+      };
+    }
+
+    return {
+      transactionDisplay,
+      amountToDisplay: formattedAmountWithCurrencySymbol,
+    };
+  }, [transaction]);
+
+  return useMemo(() => getTransactionInfo(), [getTransactionInfo]);
 };

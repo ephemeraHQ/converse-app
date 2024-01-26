@@ -1,4 +1,7 @@
-import { ContentTypeTransactionReference } from "@xmtp/content-type-transaction-reference";
+import {
+  ContentTypeTransactionReference,
+  TransactionReference,
+} from "@xmtp/content-type-transaction-reference";
 import {
   PreparedLocalMessage,
   sendPreparedMessage,
@@ -88,7 +91,7 @@ export const sendPendingMessages = async (account: string) => {
           });
         } else if (isContentType("transactionReference", message.contentType)) {
           preparedMessage = await conversation.prepareMessage(
-            JSON.parse(message.content) as any,
+            JSON.parse(message.content) as TransactionReference,
             { contentType: ContentTypeTransactionReference }
           );
         } else {

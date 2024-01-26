@@ -1,5 +1,4 @@
 import Clipboard from "@react-native-clipboard/clipboard";
-import { TransactionReference } from "@xmtp/content-type-transaction-reference";
 import * as Linking from "expo-linking";
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
@@ -19,7 +18,6 @@ import {
   useAccountsStore,
   useTransactionsStore,
 } from "../../data/store/accountsStore";
-import { Transaction } from "../../data/store/transactionsStore";
 import {
   getCoinbaseTransactionDetails,
   getTransactionDetails,
@@ -40,9 +38,9 @@ import {
   TransactionEvent,
   createUniformTransaction,
   extractChainIdToHex,
-  formatAmount,
   getTransactionType,
   getTxRefId,
+  useTransactionForMessage,
 } from "../../utils/transaction";
 import { showActionSheetWithOptions } from "../StateHandlers/ActionSheetStateHandler";
 import { MessageToDisplay } from "./ChatMessage";
@@ -50,6 +48,86 @@ import ChatMessageMetadata from "./ChatMessageMetadata";
 
 type Props = {
   message: MessageToDisplay;
+};
+
+const TransactionView = ({
+  fromMe,
+  children,
+}: {
+  fromMe: boolean;
+  children: React.ReactNode;
+}) => {
+  const styles = useStyles();
+  return (
+    <>
+      <View
+        style={[styles.innerBubble, fromMe ? styles.innerBubbleMe : undefined]}
+      >
+        {children}
+      </View>
+    </>
+  );
+};
+
+const TransactionStatusView = ({
+  fromMe,
+  transactionDisplay,
+  status,
+  colorScheme,
+}: {
+  fromMe: boolean;
+  transactionDisplay: string;
+  status?: "PENDING" | "FAILURE" | "SUCCESS";
+  colorScheme: ColorSchemeName;
+}) => {
+  const styles = useStyles();
+  const StatusIcon =
+    status === "FAILURE"
+      ? Exclamationmark
+      : status === "SUCCESS"
+      ? Checkmark
+      : Clock;
+  const statusText =
+    status === "PENDING"
+      ? "Pending"
+      : status === "FAILURE"
+      ? "Failed"
+      : status === "SUCCESS"
+      ? "Success"
+      : "Loading";
+
+  return (
+    <>
+      <View style={styles.transactionDetailsContainer}>
+        <View style={styles.centeredStatusContainer}>
+          <Text
+            style={[
+              styles.text,
+              styles.transactionDetails,
+              fromMe ? styles.textMe : undefined,
+            ]}
+          >
+            {transactionDisplay}
+          </Text>
+          <StatusIcon
+            style={styles.statusIcon}
+            fill={fromMe ? "white" : textSecondaryColor(colorScheme)}
+            width={15}
+            height={15}
+          />
+          <Text
+            style={[
+              styles.text,
+              styles.transactionDetails,
+              fromMe ? styles.textMe : undefined,
+            ]}
+          >
+            {statusText}
+          </Text>
+        </View>
+      </View>
+    </>
+  );
 };
 
 export default function ChatTransactionReference({ message }: Props) {
@@ -74,7 +152,11 @@ export default function ChatTransactionReference({ message }: Props) {
   const fetchingTransaction = useRef(false);
   const showing = !transaction.loading;
   const setTransactions = useTransactionsStore((s) => s.setTransactions);
-  const txRef = JSON.parse(message.content); // as TransactionReference;
+
+  const { transactionDisplay, amountToDisplay } = useTransactionForMessage(
+    message,
+    currentAccount
+  );
 
   const showTransactionActionSheet = useCallback(() => {
     const options = ["Copy transaction hash", "Cancel"];
@@ -113,7 +195,7 @@ export default function ChatTransactionReference({ message }: Props) {
 
   useEffect(() => {
     let retryTimeout: NodeJS.Timeout;
-    const txRef = JSON.parse(message.content); // as TransactionReference;
+    const txRef = JSON.parse(message.content);
     const txType = getTransactionType(txRef);
 
     const go = async () => {
@@ -226,120 +308,6 @@ export default function ChatTransactionReference({ message }: Props) {
     <ChatMessageMetadata message={message} white={showing} />
   );
 
-  const TransactionView = ({
-    fromMe,
-    children,
-  }: {
-    fromMe: boolean;
-    children: React.ReactNode;
-  }) => (
-    <>
-      <View
-        style={[styles.innerBubble, fromMe ? styles.innerBubbleMe : undefined]}
-      >
-        {children}
-      </View>
-    </>
-  );
-
-  const TransactionStatusView = ({
-    transactionDisplay,
-    status,
-    colorScheme,
-  }: {
-    transactionDisplay: string;
-    status?: "PENDING" | "FAILURE" | "SUCCESS";
-    colorScheme: ColorSchemeName; // Replace with appropriate type
-  }) => {
-    const StatusIcon =
-      status === "FAILURE"
-        ? Exclamationmark
-        : status === "SUCCESS"
-        ? Checkmark
-        : Clock;
-    const statusText =
-      status === "PENDING"
-        ? "Pending"
-        : status === "FAILURE"
-        ? "Failed"
-        : status === "SUCCESS"
-        ? "Success"
-        : "Loading";
-
-    return (
-      <>
-        <View style={styles.transactionDetailsContainer}>
-          <View style={styles.centeredStatusContainer}>
-            <Text
-              style={[
-                styles.text,
-                styles.transactionDetails,
-                message.fromMe ? styles.textMe : undefined,
-              ]}
-            >
-              {transactionDisplay}
-            </Text>
-            <StatusIcon
-              style={styles.statusIcon}
-              fill={message.fromMe ? "white" : textSecondaryColor(colorScheme)}
-              width={15}
-              height={15}
-            />
-            <Text
-              style={[
-                styles.text,
-                styles.transactionDetails,
-                message.fromMe ? styles.textMe : undefined,
-              ]}
-            >
-              {statusText}
-            </Text>
-          </View>
-        </View>
-      </>
-    );
-  };
-
-  const getTransactionInfo = ({
-    transaction,
-    txRef,
-  }: {
-    transaction: Transaction;
-    txRef: TransactionReference;
-  }) => {
-    let amount, currency, decimals;
-
-    if (transaction.events && transaction.events.length > 0) {
-      ({ amount, currency, decimals } = transaction.events[0]);
-    } else if (txRef.metadata) {
-      ({ amount, currency, decimals } = txRef.metadata);
-    }
-
-    const isUSDC = currency?.toLowerCase().includes("usd"); // USDC, USDT etc...
-    const formattedAmountWithCurrencySymbol =
-      amount && currency && decimals !== undefined
-        ? formatAmount(amount, currency, decimals)
-        : "–";
-    const formattedAmount =
-      amount && currency && decimals !== undefined
-        ? formatAmount(amount, currency, decimals, false)
-        : "–";
-
-    const transactionDisplay = isUSDC
-      ? `${formattedAmount} –`
-      : `${transaction.chainName || "–"} –`;
-
-    return {
-      transactionDisplay,
-      amountToDisplay: formattedAmountWithCurrencySymbol,
-    };
-  };
-
-  const { transactionDisplay, amountToDisplay } = getTransactionInfo({
-    transaction,
-    txRef,
-  });
-
   // Converse sponsored transaction
   if (transaction.sponsored || transaction.status !== "PENDING") {
     return (
@@ -355,6 +323,7 @@ export default function ChatTransactionReference({ message }: Props) {
             {amountToDisplay}
           </Text>
           <TransactionStatusView
+            fromMe={message.fromMe}
             transactionDisplay={transactionDisplay}
             status={transaction.status}
             colorScheme={colorScheme}
