@@ -4,7 +4,7 @@ PODS:
   - CoinbaseWalletSDK/Client (1.0.4)
   - CoinbaseWalletSDK/CrossPlatform (1.0.4):
     - CoinbaseWalletSDK/Client
-  - CoinbaseWalletSDKExpo (1.0.10):
+  - CoinbaseWalletSDKExpo (1.0.13):
     - CoinbaseWalletSDK/CrossPlatform (= 1.0.4)
     - ExpoModulesCore
   - Connect-Swift (0.3.0):
@@ -97,7 +97,7 @@ PODS:
     - React-Core
   - ExpoBackgroundFetch (11.8.0):
     - ExpoModulesCore
-  - ExpoClipboard (5.0.1):
+  - ExpoClipboard (4.8.0):
     - ExpoModulesCore
   - ExpoCrypto (12.8.0):
     - ExpoModulesCore
@@ -1278,7 +1278,7 @@ PODS:
     - React-Core
   - RNReactNativeSharedGroupPreferences (1.1.23):
     - React
-  - RNReanimated (3.6.1):
+  - RNReanimated (3.6.2):
     - glog
     - RCT-Folly (= 2022.05.16.00)
     - React-Core
@@ -1703,7 +1703,7 @@ SPEC CHECKSUMS:
   BigInt: 74b4d88367b0e819d9f77393549226d36faeb0d8
   boost: d3f49c53809116a5d38da093a8aa78bf551aed09
   CoinbaseWalletSDK: ea1f37512bbc69ebe07416e3b29bf840f5cc3152
-  CoinbaseWalletSDKExpo: c79420eb009f482f768c23b6768fc5b2d7c98777
+  CoinbaseWalletSDKExpo: fc6cc756974827763d7a0decf7140c2902dafca2
   Connect-Swift: d38eedc1907d440314f8d26d5a038a00cbb0f6f1
   DoubleConversion: fea03f2699887d960129cc54bba7e52542b6f953
   EASClient: a42ee8bf36c93b3128352faf2ae49405ab4f80bd
@@ -1720,7 +1720,7 @@ SPEC CHECKSUMS:
   expo-dev-menu: 1b221587615ce11b37a64da5520e9a639496571b
   expo-dev-menu-interface: 7ba029c9d1a82ac22b9b584c00514860b060553e
   ExpoBackgroundFetch: 094377b73648adb55032a440f50cad1a5d3c3a89
-  ExpoClipboard: b597982124f067ff9f5b89093eb3d97898d5d877
+  ExpoClipboard: b8f76767b0dbaefb3be7adbf85049fd85861d527
   ExpoCrypto: e2ca148f5c93a0514959df86b34256bb3c50d358
   ExpoDevice: d204395e17fffdcefa7470bdef33b07719ac41b1
   ExpoDocumentPicker: 70254802886e29a45d4ad25486e64b6fc9c8f0cc
@@ -1815,7 +1815,7 @@ SPEC CHECKSUMS:
   RNGestureHandler: 28bdf9a766c081e603120f79e925b72817c751c6
   RNLocalize: dbea38dcb344bf80ff18a1757b1becf11f70cae4
   RNReactNativeSharedGroupPreferences: de0121a4224c267bc7e9fb16c398f3f087c8da81
-  RNReanimated: 9fc2b08ed365d7dc451bc451605d89c01f2c935b
+  RNReanimated: 1873432b0b86d0224bbe19aacea7ad8eef4e7518
   RNScreens: 2b73f5eb2ac5d94fbd61fa4be0bfebd345716825
   RNSentry: ed42b1443bef1fec1fc9273b5193a79b0cab1a01
   RNSVG: ba3e7232f45e34b7b47e74472386cf4e1a676d0a
