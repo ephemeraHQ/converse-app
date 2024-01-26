@@ -181,13 +181,18 @@ func handleMessageByContentType(decodedMessage: DecodedMessage, xmtpClient: XMTP
     switch contentType {
     
     case let type where type.starts(with: "xmtp.org/text:"):
-      contentToReturn = try? decodedMessage.content()
-      contentToSave = contentToReturn
+      contentToSave = try? decodedMessage.content()
+      contentToReturn = contentToSave
+      
     
     case let type where type.starts(with: "xmtp.org/remoteStaticAttachment:"):
       let remoteAttachment: RemoteAttachment = try decodedMessage.encodedContent.decoded(with: xmtpClient)
       contentToSave = getJsonRemoteAttachment(remoteAttachment: remoteAttachment)
       contentToReturn = "📎 Media"
+      
+    case let type where type.starts(with: "xmtp.org/transactionReference:"):
+      contentToSave = try? decodedMessage.content()
+      contentToReturn = "💸 Transaction"
     
     case let type where type.starts(with: "xmtp.org/reaction:"):
       let reaction: Reaction? = try decodedMessage.content()
