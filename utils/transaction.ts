@@ -138,7 +138,7 @@ export function createUniformTransaction(
           txType,
           {
             networkId: extractChainIdToHex(input.network.rawValue),
-            reference: txDetails.transactionHash,
+            reference: txDetails?.transactionHash || input.sponsoredTxId,
           } as TransactionReference,
           txRefId,
           txDetails
