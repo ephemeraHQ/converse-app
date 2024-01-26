@@ -69,7 +69,9 @@ export default function SplitRightStackNavigation({
       linking={splashScreenHidden ? (linking as any) : undefined}
       independent
       ref={(r) => {
-        converseNavigations["splitRightStack"] = r;
+        if (r) {
+          converseNavigations["splitRightStack"] = r;
+        }
       }}
       onUnhandledAction={() => {
         // Since we're handling multiple navigators,
