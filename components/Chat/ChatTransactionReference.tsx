@@ -248,16 +248,28 @@ export default function ChatTransactionReference({ message }: Props) {
       <>
         <View style={styles.transactionDetailsContainer}>
           <View style={styles.centeredStatusContainer}>
-            <Text style={[styles.text, styles.transactionDetails]}>
+            <Text
+              style={[
+                styles.text,
+                styles.transactionDetails,
+                message.fromMe ? styles.textMe : undefined,
+              ]}
+            >
               {transactionDisplay}
             </Text>
             <StatusIcon
               style={styles.statusIcon}
-              fill={textSecondaryColor(colorScheme)}
+              fill={message.fromMe ? "white" : textSecondaryColor(colorScheme)}
               width={15}
               height={15}
             />
-            <Text style={[styles.text, styles.transactionDetails]}>
+            <Text
+              style={[
+                styles.text,
+                styles.transactionDetails,
+                message.fromMe ? styles.textMe : undefined,
+              ]}
+            >
               {statusText}
             </Text>
           </View>
@@ -347,7 +359,15 @@ export default function ChatTransactionReference({ message }: Props) {
     return (
       <>
         <TransactionView fromMe={message.fromMe}>
-          <Text style={[styles.text, styles.amount]}>{amountToDisplay}</Text>
+          <Text
+            style={[
+              styles.text,
+              styles.amount,
+              message.fromMe ? styles.textMe : undefined,
+            ]}
+          >
+            {amountToDisplay}
+          </Text>
           <TransactionStatusView
             transactionDisplay={transactionDisplay}
             status={transaction.status}
@@ -412,6 +432,9 @@ const useStyles = () => {
       fontSize: 17,
       color: textPrimaryColor(colorScheme),
     },
+    textMe: {
+      color: "white",
+    },
     amount: {
       fontSize: 34,
       fontWeight: "bold",
@@ -422,7 +445,6 @@ const useStyles = () => {
     },
     small: {
       fontSize: 15,
-      color: textSecondaryColor(colorScheme),
     },
     innerBubble: {
       backgroundColor: messageInnerBubbleColor(colorScheme),
