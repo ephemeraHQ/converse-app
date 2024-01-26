@@ -32,13 +32,9 @@ import { isDesktop } from "../../utils/device";
 import { getTransferAuthorization } from "../../utils/evm/erc20";
 import { evmHelpers, getCurrentAccountSigner } from "../../utils/evm/helpers";
 import { usePrivySigner } from "../../utils/evm/privy";
-import provider from "../../utils/evm/provider";
 import { sendMessage } from "../../utils/message";
 import { sentryTrackError } from "../../utils/sentry";
-import {
-  refreshBalanceForAccount,
-  refreshBalanceForAccounts,
-} from "../../utils/wallet";
+import { refreshBalanceForAccount } from "../../utils/wallet";
 import ActivityIndicator from "../ActivityIndicator/ActivityIndicator";
 import ChatActionButton from "./ChatActionButton";
 
@@ -62,7 +58,7 @@ export default function ChatTransactionInput() {
     overBalance: false,
   });
   const [txStatus, setTxStatus] = useState({
-    status: undefined as undefined | "sending" | "failure" | "success",
+    status: undefined as undefined | "sending" | "failure" | "sent",
     canCancel: false,
   });
 
@@ -173,34 +169,27 @@ export default function ChatTransactionInput() {
           authorization.signature
         );
 
-        const txReceipt = await provider.waitForTransaction(txHash);
-        if (txReceipt.status === 1) {
-          // This is success
-          setTxStatus({ status: "success", canCancel: false });
-          refreshBalanceForAccounts();
-          await new Promise((r) => setTimeout(r, 2000));
-          sendMessage({
-            conversation,
-            content: JSON.stringify({
-              namespace: "eip155",
-              networkId: config.evm.transactionChainId,
-              reference: txHash,
-              metadata: {
-                transactionType: "transfer",
-                currency: "USDC",
-                amount: transactionValue.value,
-                decimals: config.evm.USDC.decimals,
-                fromAddress: currentAccount(),
-                toAddress: conversation.peerAddress,
-              },
-            }),
-            contentType: "xmtp.org/transactionReference:1.0",
-          });
-          setTransactionMode(false);
-        } else {
-          // This is failure
-          setTxStatus({ status: "failure", canCancel: false });
-        }
+        setTxStatus({ status: "sent", canCancel: false });
+
+        sendMessage({
+          conversation,
+          content: JSON.stringify({
+            namespace: "eip155",
+            networkId: config.evm.transactionChainId,
+            reference: txHash,
+            metadata: {
+              transactionType: "transfer",
+              currency: "USDC",
+              amount: transactionValue.value,
+              decimals: config.evm.USDC.decimals,
+              fromAddress: currentAccount(),
+              toAddress: conversation.peerAddress,
+            },
+          }),
+          contentType: "xmtp.org/transactionReference:1.0",
+        });
+
+        setTransactionMode(false);
       } catch (e) {
         // This is failure
         sentryTrackError(e);
@@ -241,20 +230,16 @@ export default function ChatTransactionInput() {
     <View style={styles.transactionInputContainer}>
       <TouchableOpacity
         onPress={() => {
-          if (txStatus.status === "sending" || txStatus.status === "success")
+          if (txStatus.status === "sending" || txStatus.status === "sent")
             return;
           setTransactionMode(false);
         }}
         activeOpacity={
-          txStatus.status === "sending" || txStatus.status === "success"
-            ? 0
-            : 0.6
+          txStatus.status === "sending" || txStatus.status === "sent" ? 0 : 0.6
         }
         style={{
           opacity:
-            txStatus.status === "sending" || txStatus.status === "success"
-              ? 0
-              : 1,
+            txStatus.status === "sending" || txStatus.status === "sent" ? 0 : 1,
         }}
       >
         <ChatActionButton picto="xmark" style={styles.closeButton} />
@@ -314,7 +299,7 @@ export default function ChatTransactionInput() {
                 Balance: {balancePreviewText} USDC - No fee 😉
               </Text>
             )}
-            {txStatus.status === "success" && (
+            {txStatus.status === "sent" && (
               <Text style={styles.bottomMessageText}>
                 {amountPreviewText}🥳 Sent
               </Text>
