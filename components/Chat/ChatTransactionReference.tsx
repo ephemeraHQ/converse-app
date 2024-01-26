@@ -35,6 +35,7 @@ import { converseEventEmitter } from "../../utils/events";
 import { sentryTrackMessage } from "../../utils/sentry";
 import { shortAddress } from "../../utils/str";
 import {
+  TransactionContentType,
   TransactionDetails,
   TransactionEvent,
   createUniformTransaction,
@@ -59,11 +60,7 @@ export default function ChatTransactionReference({ message }: Props) {
     loading: true,
     error: false,
     id: "", // "[networkid]-[txHash | sponsoredTxId]", see helper: getTxRefId()
-    transactionType: undefined as
-      | undefined
-      | "transactionReference"
-      | "coinbaseRegular"
-      | "coinbaseSponsored",
+    transactionType: undefined as TransactionContentType | undefined,
     namespace: undefined as undefined | string,
     networkId: "" as string | number,
     reference: "",
