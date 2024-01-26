@@ -1,15 +1,12 @@
-import {
-  ContentTypeId,
-  EncodedContent,
-  JSContentCodec,
-} from "@xmtp/react-native-sdk";
+import { ContentTypeId } from "@xmtp/xmtp-js";
+import type { ContentCodec, EncodedContent } from "@xmtp/xmtp-js";
 
-const ContentTypeCoinbasePayment: ContentTypeId = {
+const ContentTypeCoinbasePayment = new ContentTypeId({
   authorityId: "coinbase.com",
   typeId: "coinbase-messaging-payment-activity",
   versionMajor: 1,
   versionMinor: 0,
-};
+});
 
 type CoinbaseMessagingRegularPaymentContent = {
   currencyCode: {
@@ -40,7 +37,7 @@ export type CoinbaseMessagingPaymentContent =
   | CoinbaseMessagingSponsoredPaymentContent;
 
 export class CoinbaseMessagingPaymentCodec
-  implements JSContentCodec<CoinbaseMessagingPaymentContent>
+  implements ContentCodec<CoinbaseMessagingPaymentContent>
 {
   contentType = ContentTypeCoinbasePayment;
 
