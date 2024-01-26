@@ -10,6 +10,7 @@ import { Signer } from "ethers";
 
 import config from "../../config";
 import { getCleanAddress } from "../eth";
+import { CoinbaseMessagingPaymentCodec } from "./contentTypes/coinbasePayment";
 
 const env = config.xmtpEnv as "dev" | "production" | "local";
 
@@ -41,13 +42,7 @@ export const getXmtpClientFromBase64Key = async (base64Key: string) => {
   client.registerCodec(new RemoteAttachmentCodec());
   client.registerCodec(new ReadReceiptCodec());
   client.registerCodec(new TransactionReferenceCodec());
-  // client.registerCodec(new CoinbaseMessagingPaymentCodec());
-  /* TODO - this fails with error:
-  Argument of type 'CoinbaseMessagingPaymentCodec' is not assignable to
-  parameter of type 'ContentCodec<any>'.
-  Types of property 'contentType' are incompatible.
-  Property 'sameAs' is missing in type
-  */
+  client.registerCodec(new CoinbaseMessagingPaymentCodec());
   return client;
 };
 
