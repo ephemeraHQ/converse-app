@@ -15,7 +15,7 @@ import { isAttachmentMessage } from "./attachment/helpers";
 import { getAddressForPeer } from "./eth";
 import { subscribeToNotifications } from "./notifications";
 import { pick } from "./objects";
-import { getContentPreview } from "./reactions";
+import { getReactionsContentPreview } from "./reactions";
 import { getMatchedPeerAddresses } from "./search";
 import { sentryTrackMessage } from "./sentry";
 import { TextInputWithValue, addressPrefix } from "./str";
@@ -86,7 +86,7 @@ export const conversationLastMessagePreview = (
             continue;
           } else {
             removedReactions = {};
-            const contentPreview = getContentPreview(
+            const contentPreview = getReactionsContentPreview(
               message,
               reactionContent.content
             );
