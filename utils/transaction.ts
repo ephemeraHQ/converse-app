@@ -167,7 +167,8 @@ export const formatAmount = (
   formattedAmount = parseFloat(formattedAmount).toString();
 
   // Apply currency formatting
-  if (useCurrencySymbol && currency.toLowerCase().includes("usdc")) {
+  const isUSDC = currency?.toLowerCase() === "usdc";
+  if (useCurrencySymbol && isUSDC) {
     return `$${formattedAmount}`;
   } else {
     return `${formattedAmount} ${currency.toUpperCase()}`;
