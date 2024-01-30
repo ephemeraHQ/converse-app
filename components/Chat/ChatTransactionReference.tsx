@@ -1,6 +1,6 @@
 import Clipboard from "@react-native-clipboard/clipboard";
 import * as Linking from "expo-linking";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect } from "react";
 import {
   ColorSchemeName,
   Platform,
@@ -14,14 +14,6 @@ import Checkmark from "../../assets/checkmark.svg";
 import Clock from "../../assets/clock.svg";
 import Exclamationmark from "../../assets/exclamationmark.triangle.svg";
 import {
-  useAccountsStore,
-  useTransactionsStore,
-} from "../../data/store/accountsStore";
-import {
-  getCoinbaseTransactionDetails,
-  getTransactionDetails,
-} from "../../utils/api";
-import {
   actionSheetColors,
   messageInnerBubbleColor,
   myMessageInnerBubbleColor,
@@ -30,15 +22,7 @@ import {
 } from "../../utils/colors";
 import { converseEventEmitter } from "../../utils/events";
 import { shortAddress } from "../../utils/str";
-import {
-  TransactionContentType,
-  TransactionDetails,
-  TransactionEvent,
-  createUniformTransaction,
-  extractChainIdToHex,
-  getTransactionType,
-  useTransactionForMessage,
-} from "../../utils/transaction";
+import { useTransactionForMessage } from "../../utils/transaction";
 import { showActionSheetWithOptions } from "../StateHandlers/ActionSheetStateHandler";
 import { MessageToDisplay } from "./ChatMessage";
 import ChatMessageMetadata from "./ChatMessageMetadata";
@@ -73,7 +57,7 @@ const TransactionStatusView = ({
   colorScheme,
 }: {
   fromMe: boolean;
-  transactionDisplay: string;
+  transactionDisplay?: string;
   status?: "PENDING" | "FAILURE" | "SUCCESS";
   colorScheme: ColorSchemeName;
 }) => {
@@ -97,15 +81,17 @@ const TransactionStatusView = ({
     <>
       <View style={styles.transactionDetailsContainer}>
         <View style={styles.centeredStatusContainer}>
-          <Text
-            style={[
-              styles.text,
-              styles.transactionDetails,
-              fromMe ? styles.textMe : undefined,
-            ]}
-          >
-            {transactionDisplay}
-          </Text>
+          {transactionDisplay && (
+            <Text
+              style={[
+                styles.text,
+                styles.transactionDetails,
+                fromMe ? styles.textMe : undefined,
+              ]}
+            >
+              {transactionDisplay}
+            </Text>
+          )}
           <StatusIcon
             style={styles.statusIcon}
             fill={fromMe ? "white" : textSecondaryColor(colorScheme)}
@@ -129,38 +115,10 @@ const TransactionStatusView = ({
 
 export default function ChatTransactionReference({ message }: Props) {
   const colorScheme = useColorScheme();
-  const currentAccount = useAccountsStore((s) => s.currentAccount);
   const styles = useStyles();
-  const [transaction, setTransaction] = useState({
-    loading: true,
-    error: false,
-    id: "", // "[networkid]-[txHash | sponsoredTxId]", see helper: getTxRefId()
-    transactionType: undefined as TransactionContentType | undefined,
-    namespace: undefined as undefined | string,
-    networkId: "" as string | number,
-    reference: "",
-    metadata: undefined as undefined | object,
-    status: undefined as undefined | "PENDING" | "FAILURE" | "SUCCESS",
-    sponsored: true, // by converse
-    blockExplorerURL: undefined as undefined | string,
-    chainName: undefined as undefined | string,
-    events: [] as TransactionEvent[],
-  });
-  const fetchingTransaction = useRef(false);
-  const showing = !transaction.loading;
-  const setTransactions = useTransactionsStore((s) => s.setTransactions);
-
-  const { transactionDisplay, amountToDisplay, txLookup } =
-    useTransactionForMessage(message, currentAccount);
-
-  useEffect(() => {
-    setTransaction((t) => ({
-      ...t,
-      error: false,
-      loading: false,
-      ...txLookup,
-    }));
-  }, [txLookup]);
+  const { transaction, transactionDisplay, amountToDisplay } =
+    useTransactionForMessage(message);
+  const showing = transaction.loading;
 
   const showTransactionActionSheet = useCallback(() => {
     const options = ["Copy transaction hash", "Cancel"];
@@ -197,108 +155,6 @@ export default function ChatTransactionReference({ message }: Props) {
     };
   }, [message.id, showTransactionActionSheet]);
 
-  useEffect(() => {
-    let retryTimeout: NodeJS.Timeout;
-    const txRef = JSON.parse(message.content);
-    const txType = getTransactionType(txRef);
-
-    const go = async () => {
-      if (fetchingTransaction.current) return;
-      fetchingTransaction.current = true;
-      setTransaction((t) => ({ ...t, loading: true }));
-
-      let txDetails: TransactionDetails | undefined;
-
-      try {
-        switch (txType) {
-          case "transactionReference": {
-            txDetails = await getTransactionDetails(
-              currentAccount,
-              txRef.networkId,
-              txRef.reference
-            );
-            break;
-          }
-          case "coinbaseRegular": {
-            txDetails = await getTransactionDetails(
-              currentAccount,
-              extractChainIdToHex(txRef.network.rawValue),
-              txRef.transactionHash
-            );
-            break;
-          }
-          case "coinbaseSponsored": {
-            txDetails = await getCoinbaseTransactionDetails(
-              currentAccount,
-              extractChainIdToHex(txRef.network.rawValue),
-              txRef.sponsoredTxId
-            );
-            break;
-          }
-          default: {
-            console.error("Invalid transaction content type");
-            break;
-          }
-        }
-
-        if (txDetails && txDetails.status === "PENDING") {
-          console.log("Transaction status is PENDING, retrying...");
-          const uniformTx = createUniformTransaction(txRef, txDetails);
-          setTransaction((t) => ({
-            ...t,
-            error: false,
-            loading: false,
-            ...uniformTx,
-          }));
-
-          retryTimeout = setTimeout(go, 5000);
-        } else if (txDetails) {
-          const uniformTx = createUniformTransaction(txRef, txDetails);
-          console.log("Updating transaction in Zustand", uniformTx.reference);
-
-          // Update zustand transaction store
-          setTransactions({
-            [uniformTx.id]: uniformTx,
-          });
-
-          // Update component state
-          setTransaction((t) => ({
-            ...t,
-            error: false,
-            loading: false,
-            ...uniformTx,
-          }));
-        } else {
-          console.error("Transaction details could not be fetched");
-        }
-      } catch (error) {
-        console.error("Error fetching transaction details:", error);
-        // Let's retry in case of network error
-        retryTimeout = setTimeout(go, 5000);
-      } finally {
-        fetchingTransaction.current = false;
-      }
-    };
-
-    if (!txLookup || txLookup.status === "PENDING") {
-      go();
-    } else {
-      setTransaction((t) => ({
-        ...t,
-        error: false,
-        loading: false,
-        ...txLookup,
-      }));
-    }
-
-    // Cleanup on unmount or dependency change
-    return () => {
-      if (retryTimeout) {
-        clearTimeout(retryTimeout);
-      }
-    };
-  }, [currentAccount, message, setTransactions, txLookup]);
-
   const metadataView = (
     <ChatMessageMetadata message={message} white={showing} />
   );
@@ -308,15 +164,17 @@ export default function ChatTransactionReference({ message }: Props) {
     return (
       <>
         <TransactionView fromMe={message.fromMe}>
-          <Text
-            style={[
-              styles.text,
-              styles.amount,
-              message.fromMe ? styles.textMe : undefined,
-            ]}
-          >
-            {amountToDisplay}
-          </Text>
+          {amountToDisplay && (
+            <Text
+              style={[
+                styles.text,
+                styles.amount,
+                message.fromMe ? styles.textMe : undefined,
+              ]}
+            >
+              {amountToDisplay}
+            </Text>
+          )}
           <TransactionStatusView
             fromMe={message.fromMe}
             transactionDisplay={transactionDisplay}

@@ -1,10 +1,14 @@
 import { TransactionReference } from "@xmtp/content-type-transaction-reference";
 import { ethers } from "ethers";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 import { MessageToDisplay } from "../components/Chat/ChatMessage";
-import { useTransactionsStore } from "../data/store/accountsStore";
+import {
+  useCurrentAccount,
+  useTransactionsStore,
+} from "../data/store/accountsStore";
 import { Transaction } from "../data/store/transactionsStore";
+import { getCoinbaseTransactionDetails, getTransactionDetails } from "./api";
 import { isContentType } from "./xmtpRN/contentTypes";
 
 export type TransactionContentType =
@@ -175,46 +179,133 @@ export const formatAmount = (
   }
 };
 
-export const useTransactionForMessage = (
-  message: MessageToDisplay,
-  currentAccount: string
-) => {
+export const useTransactionForMessage = (message: MessageToDisplay) => {
+  const currentAccount = useCurrentAccount() as string;
   const getTransaction = useTransactionsStore((s) => s.getTransaction);
-  const [transaction, setTransaction] = useState<Transaction | null>(null);
-  const txRef = useRef<TransactionReference | null>(null);
+  const saveTransactions = useTransactionsStore((s) => s.saveTransactions);
+  const fetchingTransaction = useRef(false);
+
+  const txRef = JSON.parse(message.content);
+  const txRefCurrent = useRef(txRef);
+  txRefCurrent.current = txRef;
+
+  const txType = getTransactionType(txRef);
+  const txRefId = getTxRefId(txRef, txType!); // TODO check for undefined txType?
+  const txLookup = getTransaction(txRefId);
+
+  const [transaction, setTransaction] = useState({
+    loading: false,
+    error: false,
+    ...(txLookup || {}),
+  });
 
   useEffect(() => {
-    try {
-      const parsedTxRef = JSON.parse(message.content);
+    let retryTimeout: NodeJS.Timeout;
+    const txRef = txRefCurrent.current;
 
-      const txType = getTransactionType(parsedTxRef);
-      txRef.current = parsedTxRef;
+    const go = async () => {
+      console.log("fetchingTransaction:");
+      if (fetchingTransaction.current) return;
+      fetchingTransaction.current = true;
+      setTransaction((t) => ({ ...t, loading: true }));
 
-      if (txType !== undefined) {
-        const txLookup = getTransaction(getTxRefId(parsedTxRef, txType));
+      let txDetails: TransactionDetails | undefined;
 
-        if (txLookup) {
-          setTransaction(txLookup);
+      try {
+        switch (txType) {
+          case "transactionReference": {
+            txDetails = await getTransactionDetails(
+              currentAccount,
+              txRef.networkId,
+              txRef.reference
+            );
+            break;
+          }
+          case "coinbaseRegular": {
+            txDetails = await getTransactionDetails(
+              currentAccount,
+              extractChainIdToHex(txRef.network.rawValue),
+              txRef.transactionHash
+            );
+            break;
+          }
+          case "coinbaseSponsored": {
+            txDetails = await getCoinbaseTransactionDetails(
+              currentAccount,
+              extractChainIdToHex(txRef.network.rawValue),
+              txRef.sponsoredTxId
+            );
+            break;
+          }
+          default: {
+            console.error("Invalid transaction content type");
+            break;
+          }
         }
+
+        if (txDetails && txDetails.status === "PENDING") {
+          console.log("Transaction status is PENDING, retrying...");
+          const uniformTx = createUniformTransaction(txRef, txDetails);
+
+          console.log("uniformTx:", uniformTx);
+
+          setTransaction((t) => ({
+            error: false,
+            loading: false,
+            ...uniformTx,
+          }));
+
+          retryTimeout = setTimeout(go, 5000);
+        } else if (txDetails) {
+          const uniformTx = createUniformTransaction(txRef, txDetails);
+          console.log("Updating transaction in Zustand", uniformTx.reference);
+
+          // Update zustand transaction store
+          saveTransactions({
+            [uniformTx.id]: uniformTx,
+          });
+
+          // Update component state
+          setTransaction((t) => ({
+            error: false,
+            loading: false,
+            ...uniformTx,
+          }));
+        } else {
+          console.error("Transaction details could not be fetched");
+        }
+      } catch (error) {
+        console.error("Error fetching transaction details:", error);
+        // Let's retry in case of network error
+        retryTimeout = setTimeout(go, 5000);
+      } finally {
+        fetchingTransaction.current = false;
       }
-    } catch (error) {
-      console.error("Error parsing transaction reference:", error);
-      txRef.current = null;
+    };
+
+    // Fetch tx details
+    if (
+      (!txLookup || txLookup.status === "PENDING") &&
+      !fetchingTransaction.current
+    ) {
+      go();
     }
-  }, [message.content, currentAccount, getTransaction]);
+
+    // Cleanup on unmount or dependency change
+    return () => {
+      if (retryTimeout) {
+        clearTimeout(retryTimeout);
+      }
+    };
+  }, [txType, currentAccount, txLookup, saveTransactions]);
 
   const getTransactionInfo = useCallback(() => {
-    if (!transaction) {
-      return {
-        transactionDisplay: "–",
-        amountToDisplay: "–",
-      };
-    }
-
     let amount, currency, decimals;
 
     if (transaction.events && transaction.events.length > 0) {
       ({ amount, currency, decimals } = transaction.events[0]);
+    } else {
+      return {};
     }
 
     const isUSDC = currency?.toLowerCase() === "usdc";
@@ -232,19 +323,13 @@ export const useTransactionForMessage = (
       ? `${formattedAmount} –`
       : `${transaction.chainName || "–"} –`;
 
-    if (!transaction) {
-      return {
-        transactionDisplay: "",
-        amountToDisplay: "",
-      };
-    }
-
     return {
       transactionDisplay,
       amountToDisplay: formattedAmountWithCurrencySymbol,
-      txLookup: transaction,
     };
   }, [transaction]);
 
-  return useMemo(() => getTransactionInfo(), [getTransactionInfo]);
+  const { transactionDisplay, amountToDisplay } = getTransactionInfo();
+
+  return { transaction, transactionDisplay, amountToDisplay };
 };

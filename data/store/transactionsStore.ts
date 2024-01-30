@@ -25,7 +25,7 @@ export type Transaction = {
 
 export type TransactionsStoreType = {
   transactions: { [id: string]: Transaction };
-  setTransactions: (transactions: { [id: string]: Transaction }) => void;
+  saveTransactions: (transactions: { [id: string]: Transaction }) => void;
   getTransaction: (id: string) => Transaction;
   getEvents: (id: string) => any[];
 };
@@ -37,7 +37,9 @@ export const initTransactionsStore = (account: string) => {
         ({
           transactions: {},
 
-          setTransactions: (newTransactions: { [id: string]: Transaction }) => {
+          saveTransactions: (newTransactions: {
+            [id: string]: Transaction;
+          }) => {
             set((state) => ({
               transactions: { ...state.transactions, ...newTransactions },
             }));
