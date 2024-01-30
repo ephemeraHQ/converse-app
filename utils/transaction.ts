@@ -204,7 +204,6 @@ export const useTransactionForMessage = (message: MessageToDisplay) => {
     const txRef = txRefCurrent.current;
 
     const go = async () => {
-      console.log("fetchingTransaction:");
       if (fetchingTransaction.current) return;
       fetchingTransaction.current = true;
       setTransaction((t) => ({ ...t, loading: true }));
@@ -244,10 +243,7 @@ export const useTransactionForMessage = (message: MessageToDisplay) => {
         }
 
         if (txDetails && txDetails.status === "PENDING") {
-          console.log("Transaction status is PENDING, retrying...");
           const uniformTx = createUniformTransaction(txRef, txDetails);
-
-          console.log("uniformTx:", uniformTx);
 
           setTransaction((t) => ({
             error: false,
@@ -258,7 +254,6 @@ export const useTransactionForMessage = (message: MessageToDisplay) => {
           retryTimeout = setTimeout(go, 5000);
         } else if (txDetails) {
           const uniformTx = createUniformTransaction(txRef, txDetails);
-          console.log("Updating transaction in Zustand", uniformTx.reference);
 
           // Update zustand transaction store
           saveTransactions({
