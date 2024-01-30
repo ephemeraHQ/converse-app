@@ -9,6 +9,7 @@ import {
 } from "../data/store/accountsStore";
 import { Transaction } from "../data/store/transactionsStore";
 import { getCoinbaseTransactionDetails, getTransactionDetails } from "./api";
+import { evmHelpers } from "./evm/helpers";
 import { isContentType } from "./xmtpRN/contentTypes";
 
 export type TransactionContentType =
@@ -164,11 +165,8 @@ export const formatAmount = (
   decimals: number,
   useCurrencySymbol: boolean = true
 ): string => {
-  const actualAmount = Number(amount) / Math.pow(10, decimals);
-
-  // Convert the number to a fixed-point notation, then remove trailing zeros and decimal point if not needed
-  let formattedAmount = actualAmount.toFixed(decimals);
-  formattedAmount = parseFloat(formattedAmount).toString();
+  // Use evmHelpers for conversion
+  const formattedAmount = evmHelpers.fromDecimal(amount.toString(), decimals);
 
   // Apply currency formatting
   const isUSDC = currency?.toLowerCase() === "usdc";
