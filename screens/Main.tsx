@@ -107,6 +107,7 @@ export default function Main() {
       screenToShow = <Onboarding />;
     } else if (
       showNotificationScreen &&
+      Platform.OS !== "web" &&
       (notificationsPermissionStatus === "undetermined" ||
         (notificationsPermissionStatus === "denied" &&
           Platform.OS === "android"))

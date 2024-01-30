@@ -7,6 +7,7 @@ const dumbRepository = {
   findOneBy: async () => {
     return {};
   },
+  delete: async () => {},
 };
 
 export const getRepository = async (account: string, entity: string) => {

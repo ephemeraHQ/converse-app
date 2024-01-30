@@ -25,7 +25,7 @@ import {
   textSecondaryColor,
 } from "../utils/colors";
 import { saveXmtpKey } from "../utils/keychain/helpers";
-import { getXmtpBase64KeyFromSigner } from "../utils/xmtpRN/client";
+import { getXmtpBase64KeyFromSigner } from "../utils/xmtpRN/signIn";
 import { getXmtpClient } from "../utils/xmtpRN/sync";
 
 export default function Onboarding() {

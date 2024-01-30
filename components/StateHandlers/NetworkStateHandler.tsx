@@ -1,11 +1,12 @@
 import NetInfo from "@react-native-community/netinfo";
 import { useEffect, useRef } from "react";
 
+import config from "../../config";
 import { useAppStore } from "../../data/store/appStore";
 import { useSelect } from "../../data/store/storeHelpers";
 
 NetInfo.configure({
-  reachabilityUrl: "https://production.xmtp.network",
+  reachabilityUrl: `${config.apiURI}/api/admin/healthcheck`,
   reachabilityMethod: "HEAD",
   reachabilityTest: async (response) => {
     return response.status === 200;

@@ -165,7 +165,7 @@ const Conversation = ({
       }
     });
 
-    if (Platform.OS === "web") {
+    if (Platform.OS === "web" || isDesktop) {
       handleAutoFocus();
     }
 
@@ -273,16 +273,8 @@ const Conversation = ({
       useChatStore.getState().setOpenedConversationTopic(conversation.topic);
 
       // On WEB, we load messages on arrival
-      if (Platform.OS === "web" && conversation.messagesIds.length <= 1) {
-        const firstMessage =
-          conversation.messagesIds.length > 0
-            ? conversation.messages.get(conversation.messagesIds[0])
-            : undefined;
-        loadOlderMessages(
-          currentAccount(),
-          conversation.topic,
-          firstMessage?.sent
-        );
+      if (Platform.OS === "web") {
+        loadOlderMessages(currentAccount(), conversation.topic);
       }
 
       // If we are navigating to a conversation, we reset the topic to navigate to

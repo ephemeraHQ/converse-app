@@ -52,7 +52,6 @@ export const deleteSubscribedTopics = (account: string) => {
 export const subscribeToNotifications = async (
   account: string
 ): Promise<void> => {
-  if (Platform.OS === "web") return;
   const {
     sortedConversationsWithPreview,
     topicsStatus,
@@ -134,7 +133,6 @@ export const subscribeToNotifications = async (
 export const unsubscribeFromNotifications = async (apiHeaders: {
   [key: string]: string;
 }): Promise<void> => {
-  if (Platform.OS === "web") return;
   const nativeTokenQuery = await Notifications.getDevicePushTokenAsync();
   if (nativeTokenQuery.data) {
     await api.post(
@@ -384,10 +382,21 @@ export const saveNotificationsStatus = async () => {
 export const resetNotifications = async (
   timeout: number = 0
 ): Promise<void> => {
-  if (Platform.OS === "web") return;
   setTimeout(async () => {
     await Notifications.dismissAllNotificationsAsync();
     await Notifications.setBadgeCountAsync(0);
     mmkv.set("notifications-badge", 0);
   }, timeout);
 };
+
+// This handler determines how the app handles
+// notifications that come in while the app is foregrounded
+Notifications.setNotificationHandler({
+  handleNotification: shouldShowNotificationForeground,
+});
+
+// This handler determines how the app handles
+// notifications that have been clicked on
+Notifications.addNotificationResponseReceivedListener(
+  onInteractWithNotification
+);

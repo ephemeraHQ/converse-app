@@ -77,7 +77,11 @@ export default function ChatMessageActions({
     setPeersStatus({ [message.senderAddress]: "blocked" });
   }, [message.content, message.id, message.senderAddress, setPeersStatus]);
 
-  const showMessageReportActionSheet = useCallback(() => {
+  const showMessageReportActionSheet = useCallback(async () => {
+    if (Platform.OS === "web") {
+      // Fixes double action sheet on web
+      await new Promise((r) => setTimeout(r, 100));
+    }
     const methods = {
       Report: report,
       "Report and block": reportAndBlock,

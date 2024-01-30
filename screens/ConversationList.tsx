@@ -39,7 +39,6 @@ import {
   getConversationListItemsToDisplay,
 } from "../utils/conversation";
 import { converseEventEmitter } from "../utils/events";
-import { refreshBalanceForAccount } from "../utils/wallet";
 import { useHeaderSearchBar } from "./Navigation/ConversationListNav";
 import { NavigationParamList } from "./Navigation/Navigation";
 
@@ -114,15 +113,6 @@ function ConversationList({ navigation, route, searchBarRef }: Props) {
     route,
     searchBarRef,
   });
-
-  useEffect(() => {
-    const unsubscribe = navigation.addListener("focus", () => {
-      refreshBalanceForAccount(account);
-    });
-
-    // Return the function to unsubscribe from the event so it gets removed on unmount
-    return unsubscribe;
-  }, [navigation, account]);
 
   const ListHeaderComponents: React.ReactElement[] = [];
   const showSearchTitleHeader =

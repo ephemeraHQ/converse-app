@@ -10,7 +10,7 @@ export const getMessagesToSend = async (account: string) => {
     (conversation) => {
       conversation.messages?.forEach((message) => {
         if (message.status === "sending") {
-          messagesToSend.push(message);
+          messagesToSend.push({ ...message, topic: conversation.topic });
         }
       });
     }

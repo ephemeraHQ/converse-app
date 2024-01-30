@@ -20,7 +20,8 @@ export default function WalletsStateHandler() {
           nextAppState === "active" &&
           appState.current.match(/inactive|background/)
         ) {
-          refreshBalanceForAccounts();
+          // Only refresh if last refresh < 30 min ago
+          refreshBalanceForAccounts(30 * 60 * 1000);
         } else {
         }
         appState.current = nextAppState;

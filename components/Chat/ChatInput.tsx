@@ -170,7 +170,7 @@ const useStyles = () => {
         Platform.OS === "android"
           ? chatInputBackgroundColor(colorScheme)
           : backgroundColor(colorScheme),
-      maxHeight: 130,
+      maxHeight: Platform.OS === "web" ? 37 : 130,
       flexGrow: 1,
       flexShrink: 1,
       marginLeft: 12,
@@ -185,7 +185,6 @@ const useStyles = () => {
       borderWidth: Platform.OS === "android" ? 0 : 0.5,
       borderColor: itemSeparatorColor(colorScheme),
       color: textPrimaryColor(colorScheme),
-      ...(Platform.OS === "web" ? { outlineWidth: 0 } : {}),
     },
     sendButtonContainer: {
       width: 60,

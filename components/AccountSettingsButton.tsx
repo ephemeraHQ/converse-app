@@ -1,5 +1,5 @@
 import Clipboard from "@react-native-clipboard/clipboard";
-import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import { NavigationProp } from "@react-navigation/native";
 import * as Linking from "expo-linking";
 import React, { useCallback } from "react";
 import {
@@ -14,7 +14,6 @@ import { refreshProfileForAddress } from "../data/helpers/profiles/profilesUpdat
 import { useAccountsStore } from "../data/store/accountsStore";
 import { useAppStore } from "../data/store/appStore";
 import { useSelect } from "../data/store/storeHelpers";
-import { NavigationParamList } from "../screens/Navigation/Navigation";
 import {
   actionSheetColors,
   primaryColor,
@@ -27,21 +26,16 @@ import {
   requestPushNotificationsPermissions,
   NotificationPermissionStatus,
 } from "../utils/notifications";
-import { refreshBalanceForAccounts } from "../utils/wallet";
 import Picto from "./Picto/Picto";
 import { showActionSheetWithOptions } from "./StateHandlers/ActionSheetStateHandler";
 import { TableViewPicto } from "./TableView/TableViewImage";
 
 type Props = {
   account: string;
-  navigation?: NativeStackNavigationProp<
-    NavigationParamList,
-    "Accounts",
-    undefined
-  >;
+  navigation?: NavigationProp<any>;
 };
 
-export default function AccountSettingsButton({ navigation, account }: Props) {
+export default function AccountSettingsButton({ account, navigation }: Props) {
   const { setNotificationsPermissionStatus, notificationsPermissionStatus } =
     useAppStore(
       useSelect([
@@ -59,42 +53,41 @@ export default function AccountSettingsButton({ navigation, account }: Props) {
     Keyboard.dismiss();
 
     const methods = {
-      "Your profile page": () => {
+      "Your profile page": async () => {
         if (account) {
           refreshProfileForAddress(account, account);
-          refreshBalanceForAccounts();
           setCurrentAccount(account, false);
-          if (navigation) {
-            navigation.push("Chats");
-            navigation.push("Profile", { address: account });
-          } else {
-            // On android the drawer is outside the navigation
-            // so we use Linking to navigate
+          if (Platform.OS === "android") {
             converseEventEmitter.emit("toggle-navigation-drawer", false);
-            navigate("Profile", {
-              address: account,
-            });
+          } else {
+            if (Platform.OS === "web") {
+              await new Promise((r) => setTimeout(r, 200));
+            }
+            navigation?.navigate("Chats");
           }
+          navigate("Profile", {
+            address: account,
+          });
         }
       },
       "Copy wallet address": () => {
         Clipboard.setString(account || "");
       },
-      "Contact Converse team": () => {
+      "Contact Converse team": async () => {
         setCurrentAccount(account, false);
-        if (navigation) {
-          navigation.push("Chats");
-          navigation.push("Conversation", {
-            mainConversationWithPeer: config.polAddress,
-          });
-        } else {
+        if (Platform.OS === "android") {
           // On android the drawer is outside the navigation
           // so we use Linking to navigate
           converseEventEmitter.emit("toggle-navigation-drawer", false);
-          navigate("Conversation", {
-            mainConversationWithPeer: config.polAddress,
-          });
+        } else {
+          if (Platform.OS === "web") {
+            await new Promise((r) => setTimeout(r, 200));
+          }
+          navigation?.navigate("Chats");
         }
+        navigate("Conversation", {
+          mainConversationWithPeer: config.polAddress,
+        });
       },
       "Turn on notifications": () => {
         if (notificationsPermissionStatus === "denied") {

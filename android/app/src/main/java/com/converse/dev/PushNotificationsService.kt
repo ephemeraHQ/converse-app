@@ -20,23 +20,36 @@ import expo.modules.core.ModuleRegistry
 import expo.modules.core.ViewManager
 import expo.modules.core.interfaces.InternalModule
 import expo.modules.core.interfaces.SingletonModule
+import expo.modules.kotlin.AppContext
+import expo.modules.kotlin.ModulesProvider
+import expo.modules.kotlin.modules.Module
 import expo.modules.notifications.notifications.JSONNotificationContentBuilder
 import expo.modules.notifications.notifications.model.Notification
 import expo.modules.notifications.notifications.model.NotificationContent
 import expo.modules.notifications.notifications.model.NotificationRequest
 import expo.modules.notifications.notifications.model.triggers.FirebaseNotificationTrigger
 import expo.modules.notifications.service.NotificationsService
+import expo.modules.securestore.AuthenticationHelper
 import expo.modules.securestore.SecureStoreModule
+import expo.modules.securestore.encryptors.AESEncryptor
+import expo.modules.securestore.encryptors.HybridAESEncryptor
 import org.json.JSONObject
 import org.xmtp.android.library.messages.EnvelopeBuilder
 import java.util.*
 import kotlinx.coroutines.*
+import java.lang.ref.WeakReference
+import java.security.KeyStore
+import kotlin.reflect.full.declaredMemberProperties
+import kotlin.reflect.full.memberProperties
+import kotlin.reflect.jvm.isAccessible
+import kotlin.reflect.jvm.javaField
 
 class PushNotificationsService : FirebaseMessagingService() {
     companion object {
         const val TAG = "PushNotificationsService"
         lateinit var secureStoreModule: SecureStoreModule
         lateinit var asyncStorageModule: AsyncStorageModule
+        lateinit var reactAppContext: ReactApplicationContext
     }
 
     override fun onCreate() {
@@ -74,6 +87,8 @@ class PushNotificationsService : FirebaseMessagingService() {
             Log.d(TAG, "NO XMTP CLIENT FOUND FOR TOPIC ${notificationData.contentTopic}")
             return
         }
+
+        Log.d(TAG, "INSTANTIATED XMTP CLIENT FOR ${notificationData.contentTopic}")
 
         val encryptedMessageData = Base64.decode(notificationData.message, Base64.NO_WRAP)
         val envelope = EnvelopeBuilder.buildFromString(notificationData.contentTopic, Date(notificationData.timestampNs.toLong() / 1000000), encryptedMessageData)
@@ -171,15 +186,43 @@ class PushNotificationsService : FirebaseMessagingService() {
     }
 
     private fun initSecureStore() {
-        val reactContext = ReactApplicationContext(this)
-        secureStoreModule = SecureStoreModule(reactContext)
+        // Basically hooking inside React / Expo modules internals
+        // to access the Expo SecureStore module from Kotlin
+
         val internalModules: Collection<InternalModule> = listOf()
         val exportedModules: Collection<ExportedModule> = listOf()
         val viewManagers: Collection<ViewManager<View>> = listOf()
         val singletonModules: Collection<SingletonModule> = listOf()
 
         val moduleRegistry = ModuleRegistry(internalModules, exportedModules, viewManagers, singletonModules)
-        secureStoreModule.onCreate(moduleRegistry)
+
+        reactAppContext = ReactApplicationContext(this)
+        val weakRef = WeakReference(reactAppContext)
+        val appContext = AppContext(object : ModulesProvider {
+            override fun getModulesList() =
+                listOf(
+                    SecureStoreModule::class.java,
+                )
+        }, moduleRegistry,  weakRef)
+        secureStoreModule = SecureStoreModule()
+
+
+        val appC = Module::class.declaredMemberProperties.find { it.name == "_appContext" }
+        appC?.isAccessible = true
+        appC?.javaField?.set(secureStoreModule, appContext)
+        val authenticationHelper = SecureStoreModule::class.declaredMemberProperties.find { it.name == "authenticationHelper" }
+        val hybridAESEncryptor = SecureStoreModule::class.declaredMemberProperties.find { it.name == "hybridAESEncryptor" }
+        val keyStore = SecureStoreModule::class.declaredMemberProperties.find { it.name == "keyStore" }
+
+        authenticationHelper?.isAccessible = true;
+        hybridAESEncryptor?.isAccessible = true;
+        keyStore?.isAccessible = true;
+
+        authenticationHelper?.javaField?.set(secureStoreModule, AuthenticationHelper(reactAppContext, appContext.legacyModuleRegistry))
+        hybridAESEncryptor?.javaField?.set(secureStoreModule, HybridAESEncryptor(reactAppContext, AESEncryptor()))
+        val ks = KeyStore.getInstance("AndroidKeyStore")
+        ks.load(null)
+        keyStore?.javaField?.set(secureStoreModule, ks)
     }
 
     private fun initAsyncStorage() {

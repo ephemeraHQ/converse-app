@@ -21,9 +21,11 @@ export function NavigationChatButton({
 
   const handlePress = () => {
     // On Android the accounts are not in the navigation but in a drawer
-    navigation.pop(
-      Platform.OS === "ios" ? navigationIndex - 1 : navigationIndex
-    );
+    if (Platform.OS !== "web") {
+      navigation.pop(
+        Platform.OS === "ios" ? navigationIndex - 1 : navigationIndex
+      );
+    }
     setTimeout(
       () => {
         navigate("Conversation", {

@@ -7,27 +7,12 @@ import {
   StaticAttachmentCodec,
   TextCodec,
 } from "@xmtp/react-native-sdk";
-import { Signer } from "ethers";
 
 import config from "../../config";
 import { getCleanAddress } from "../eth";
 import { CoinbaseMessagingPaymentCodec } from "./contentTypes/coinbasePayment";
 
 const env = config.xmtpEnv as "dev" | "production" | "local";
-
-export const getXmtpBase64KeyFromSigner = async (
-  signer: Signer,
-  preCreateIdentityCallback?: () => Promise<void>,
-  preEnableIdentityCallback?: () => Promise<void>
-) => {
-  const client = await Client.create(signer, {
-    env,
-    preCreateIdentityCallback,
-    preEnableIdentityCallback,
-  });
-  const key = await client.exportKeyBundle();
-  return key;
-};
 
 export const getXmtpClientFromBase64Key = (base64Key: string) =>
   Client.createFromKeyBundle(base64Key, {

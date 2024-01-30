@@ -1,3 +1,4 @@
+// @ts-nocheck
 export type RecursivePartial<T> = Partial<{
   [P in keyof T]: T[P] extends object ? Partial<T[P]> : T[P];
 }>;

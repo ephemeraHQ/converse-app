@@ -1,13 +1,13 @@
+import * as Sentry from "@sentry/react-native";
 import type { EventHint, ErrorEvent } from "@sentry/types";
-import * as Sentry from "sentry-expo";
 
 import config from "../config";
 
 export const initSentry = () => {
   Sentry.init({
     dsn: config.sentryDSN,
-    enableInExpoDevelopment: false,
-    debug: config.env === "dev",
+    debug: false,
+    enabled: config.env !== "dev",
     environment: config.env,
     beforeSend: (event: ErrorEvent, hint: EventHint) => {
       // Filtering out some errors
@@ -37,7 +37,7 @@ export const sentryAddBreadcrumb = (message: string, forceSafe = false) => {
   if (forceSafe) {
     data.safeValue = message;
   }
-  Sentry.React.addBreadcrumb({
+  Sentry.addBreadcrumb({
     category: "converse",
     message,
     level: "info",
@@ -47,16 +47,16 @@ export const sentryAddBreadcrumb = (message: string, forceSafe = false) => {
 
 export const sentryTrackMessage = (message: string, extras = {} as any) => {
   console.log(`[Sentry] ${message}`, extras);
-  Sentry.React.withScope((scope) => {
+  Sentry.withScope((scope) => {
     scope.setExtras(extras);
-    Sentry.React.captureMessage(message);
+    Sentry.captureMessage(message);
   });
 };
 
 export const sentryTrackError = (error: any, extras = {} as any) => {
   console.error(error, extras);
-  Sentry.React.withScope((scope) => {
+  Sentry.withScope((scope) => {
     scope.setExtras(extras);
-    Sentry.React.captureException(error);
+    Sentry.captureException(error);
   });
 };
