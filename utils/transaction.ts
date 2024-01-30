@@ -298,7 +298,16 @@ export const useTransactionForMessage = (message: MessageToDisplay) => {
     let amount, currency, decimals;
 
     if (transaction.events && transaction.events.length > 0) {
-      ({ amount, currency, decimals } = transaction.events[0]);
+      // Find the first event with type 'transfer'
+      const transferEvent = transaction.events.find(
+        (event) => event.type.toLowerCase() === "transfer"
+      );
+
+      if (transferEvent) {
+        ({ amount, currency, decimals } = transferEvent);
+      } else {
+        return {};
+      }
     } else {
       return {};
     }
