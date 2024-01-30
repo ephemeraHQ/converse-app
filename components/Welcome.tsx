@@ -13,7 +13,6 @@ import Ellipse from "../assets/ellipse.svg";
 import config from "../config";
 import { useRecommendationsStore } from "../data/store/accountsStore";
 import { NavigationParamList } from "../screens/Navigation/Navigation";
-import { useIsSplitScreen } from "../screens/Navigation/navHelpers";
 import { backgroundColor, textPrimaryColor } from "../utils/colors";
 import { navigate } from "../utils/navigation";
 import Button from "./Button/Button";
@@ -27,7 +26,6 @@ export default function Welcome({ ctaOnly, navigation }: Props) {
   const headerHeight = useHeaderHeight();
   const styles = useStyles();
   const frensCount = frens ? Object.keys(frens).length : 0;
-  const isSplitScreen = useIsSplitScreen();
   return (
     <View
       style={[
@@ -110,6 +108,7 @@ const useStyles = () => {
       justifyContent: "center",
       backgroundColor: backgroundColor(colorScheme),
       paddingHorizontal: 30,
+      marginTop: Platform.OS === "web" ? 60 : undefined,
     },
     welcomCtaOnly: {
       alignItems: "center",

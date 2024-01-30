@@ -42,7 +42,7 @@ export default function App() {
     },
   });
   return (
-    <SafeAreaProvider>
+    <SafeAreaProvider key={`app-${colorScheme}`}>
       <ActionSheetProvider>
         <PaperProvider
           theme={

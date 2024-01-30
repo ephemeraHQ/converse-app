@@ -1,4 +1,3 @@
-import * as Notifications from "expo-notifications";
 import { useEffect, useRef } from "react";
 import { AppState } from "react-native";
 
@@ -15,23 +14,9 @@ import { saveUser } from "../../utils/api";
 import { sortAndComputePreview } from "../../utils/conversation";
 import { executeLogoutTasks } from "../../utils/logout";
 import {
-  onInteractWithNotification,
   saveNotificationsStatus,
   resetNotifications,
-  shouldShowNotificationForeground,
 } from "../../utils/notifications";
-
-// This handler determines how the app handles
-// notifications that come in while the app is foregrounded
-Notifications.setNotificationHandler({
-  handleNotification: shouldShowNotificationForeground,
-});
-
-// This handler determines how the app handles
-// notifications that have been clicked on
-Notifications.addNotificationResponseReceivedListener(
-  onInteractWithNotification
-);
 
 export default function NotificationsStateHandler() {
   const appState = useRef(AppState.currentState);

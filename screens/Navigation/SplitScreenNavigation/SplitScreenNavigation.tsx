@@ -68,7 +68,9 @@ export default function SplitScreenNavigation() {
     <NavigationContainer
       linking={splashScreenHidden ? (linking as any) : undefined}
       ref={(r) => {
-        converseNavigations["splitScreen"] = r;
+        if (r) {
+          converseNavigations["splitScreen"] = r;
+        }
       }}
       onUnhandledAction={() => {
         // Since we're handling multiple navigators,

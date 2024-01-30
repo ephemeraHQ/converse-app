@@ -1,9 +1,11 @@
 import { InvitationContext } from "@xmtp/xmtp-js";
+import { Platform } from "react-native";
 import uuid from "react-native-uuid";
 import { In } from "typeorm/browser";
 
 import { getCleanAddress } from "../../../utils/eth";
 import { getRepository } from "../../db";
+import { Conversation } from "../../db/entities/conversationEntity";
 import { upsertRepository } from "../../db/upsert";
 import { xmtpConversationToDb } from "../../mappers";
 import { getChatStore, useChatStore } from "../../store/accountsStore";
@@ -93,9 +95,19 @@ export const upgradePendingConversationsIfNeeded = async (
   const messageRepository = await getRepository(account, "message");
 
   const peerAddresses = conversations.map((c) => c.peerAddress);
-  const pendingConversationsWithPeers = await conversationRepository.find({
-    where: { pending: true, peerAddress: In(peerAddresses) },
-  });
+  let pendingConversationsWithPeers: Conversation[] = [];
+  if (Platform.OS === "web") {
+    // On web, we don't have a database to query, we'll go over the local store
+    pendingConversationsWithPeers = Object.values(
+      getChatStore(account).getState().conversations
+    )
+      .filter((c) => c.pending && peerAddresses.includes(c.peerAddress))
+      .map(xmtpConversationToDb);
+  } else {
+    pendingConversationsWithPeers = await conversationRepository.find({
+      where: { pending: true, peerAddress: In(peerAddresses) },
+    });
+  }
 
   // If we get back a conversation from XMTP that corresponds
   // to a conversation that we have locally pending, we need

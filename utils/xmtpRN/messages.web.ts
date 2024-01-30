@@ -151,11 +151,16 @@ export const syncConversationsMessages = async (
   return messagesBatch.length;
 };
 
-export const loadOlderMessages = async (
-  account: string,
-  topic: string,
-  oldestTimestamp: number | undefined
-) => {
+const loadedOlderMessagesForTopic: {
+  [account: string]: { [topic: string]: boolean };
+} = {};
+
+export const loadOlderMessages = async (account: string, topic: string) => {
+  loadedOlderMessagesForTopic[account] =
+    loadedOlderMessagesForTopic[account] || {};
+  if (loadedOlderMessagesForTopic[account][topic]) {
+    return;
+  }
   const client = (await getXmtpClient(account)) as Client;
   const conversation = await getConversationWithTopic(account, topic);
   if (!conversation) return;
@@ -169,5 +174,6 @@ export const loadOlderMessages = async (
       },
     ])
   );
+  loadedOlderMessagesForTopic[account][topic] = true;
   saveMessages(client.address, protocolMessagesToStateMessages(messages));
 };

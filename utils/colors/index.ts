@@ -321,7 +321,7 @@ export const rgbStringToHex = (rgbString: string) => {
 };
 
 export const actionSheetColors = (colorScheme: ColorSchemeName) =>
-  Platform.OS === "android"
+  Platform.OS === "android" || Platform.OS === "web"
     ? {
         containerStyle: {
           backgroundColor:

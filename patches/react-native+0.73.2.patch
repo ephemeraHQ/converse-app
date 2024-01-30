@@ -1,0 +1,55 @@
+diff --git a/node_modules/react-native/Libraries/Text/TextInput/Multiline/RCTUITextView.mm b/node_modules/react-native/Libraries/Text/TextInput/Multiline/RCTUITextView.mm
+index 582b49c..5075947 100644
+--- a/node_modules/react-native/Libraries/Text/TextInput/Multiline/RCTUITextView.mm
++++ b/node_modules/react-native/Libraries/Text/TextInput/Multiline/RCTUITextView.mm
+@@ -316,4 +316,19 @@ - (CGRect)caretRectForPosition:(UITextPosition *)position
+ 
+ #pragma mark - Utility Methods
+ 
++- (NSArray *)keyCommands {
++    return @[[UIKeyCommand keyCommandWithInput:@"\r" modifierFlags:UIKeyModifierShift action:@selector(shiftEnter:)]];
++}
++
++
++- (void)shiftEnter:(id)sender {
++    NSRange cursorPosition = [self selectedRange];
++    NSMutableString *newText = [[NSMutableString alloc] initWithString:[super text]];
++    [newText replaceCharactersInRange:cursorPosition withString:@"\n"];
++    NSRange newPosition = NSMakeRange(cursorPosition.location + 1, 0);
++    [super setText:newText];
++    [super setSelectedRange:newPosition];
++}
++
++
+ @end
+diff --git a/node_modules/react-native/React/CoreModules/RCTAppState.mm b/node_modules/react-native/React/CoreModules/RCTAppState.mm
+index 0aa63fc..ad89b7b 100644
+--- a/node_modules/react-native/React/CoreModules/RCTAppState.mm
++++ b/node_modules/react-native/React/CoreModules/RCTAppState.mm
+@@ -92,6 +92,11 @@ - (void)startObserving
+                                                object:nil];
+   }
+ 
++  if (@available(macCatalyst 14.0, *)) {
++    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleAppStateDidChange:) name:@"NSWindowDidBecomeMainNotification" object:nil];
++    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleAppStateDidChange:) name:@"NSWindowDidResignMainNotification" object:nil];
++  }
++
+   [[NSNotificationCenter defaultCenter] addObserver:self
+                                            selector:@selector(handleMemoryWarning)
+                                                name:UIApplicationDidReceiveMemoryWarningNotification
+@@ -124,6 +129,14 @@ - (void)handleAppStateDidChange:(NSNotification *)notification
+     newState = RCTCurrentAppState();
+   }
+ 
++  if (@available(macCatalyst 14.0, *)) {
++    if ([notification.name isEqualToString:@"NSWindowDidBecomeMainNotification"]) {
++        newState = @"active";
++    } else if ([notification.name isEqualToString:@"NSWindowDidResignMainNotification"]) {
++        newState = @"background";
++    }
++  }
++
+   if (![newState isEqualToString:_lastKnownState]) {
+     _lastKnownState = newState;
+     if ([self canSendEvents_DEPRECATED]) {

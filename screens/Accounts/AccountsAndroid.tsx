@@ -1,4 +1,5 @@
-import { StyleSheet, useColorScheme } from "react-native";
+import { NavigationProp } from "@react-navigation/native";
+import { Dimensions, Platform, StyleSheet, useColorScheme } from "react-native";
 import { Drawer } from "react-native-paper";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -10,12 +11,19 @@ import {
 } from "../../data/store/accountsStore";
 import { useOnboardingStore } from "../../data/store/onboardingStore";
 import { useSelect } from "../../data/store/storeHelpers";
-import { clickedItemBackgroundColor } from "../../utils/colors";
+import {
+  backgroundColor,
+  clickedItemBackgroundColor,
+} from "../../utils/colors";
 import { converseEventEmitter } from "../../utils/events";
 import { useDisconnectWallet } from "../../utils/logout/wallet";
 import { shortAddress, useAccountsProfiles } from "../../utils/str";
 
-export default function AccountsAndroid() {
+type Props = {
+  navigation?: NavigationProp<any> | undefined;
+};
+
+export default function AccountsAndroid({ navigation }: Props) {
   const styles = useStyles();
   const accounts = useAccountsList();
   const accountsProfiles = useAccountsProfiles();
@@ -29,8 +37,17 @@ export default function AccountsAndroid() {
   const insets = useSafeAreaInsets();
   return (
     <Drawer.Section
-      title="Accounts"
-      style={{ marginTop: insets.top }}
+      title={Platform.OS === "web" ? undefined : "Accounts"}
+      style={{
+        marginTop: insets.top,
+        ...Platform.select({
+          default: {},
+          web: {
+            height: Dimensions.get("window").height,
+            backgroundColor: backgroundColor(colorScheme),
+          },
+        }),
+      }}
       showDivider={false}
     >
       {accounts.map((a) => (
@@ -41,12 +58,18 @@ export default function AccountsAndroid() {
           active={currentAccount === a}
           onPress={() => {
             setCurrentAccount(a, false);
-            converseEventEmitter.emit("toggle-navigation-drawer", false);
+            if (Platform.OS === "android") {
+              converseEventEmitter.emit("toggle-navigation-drawer", false);
+            } else {
+              navigation?.navigate("Chats");
+            }
           }}
           icon={({ color }) => (
             <Picto picto="account_circle" size={24} color={color} />
           )}
-          right={({ color }) => <AccountSettingsButton account={a} />}
+          right={({ color }) => (
+            <AccountSettingsButton account={a} navigation={navigation} />
+          )}
           rippleColor={
             currentAccount === a
               ? undefined

@@ -53,7 +53,9 @@ export default function SplitLeftStackNavigation() {
             }
       }
       ref={(r) => {
-        converseNavigations["splitLeftStack"] = r;
+        if (r) {
+          converseNavigations["splitLeftStack"] = r;
+        }
       }}
       onUnhandledAction={() => {
         // Since we're handling multiple navigators,

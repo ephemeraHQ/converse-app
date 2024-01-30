@@ -10,8 +10,11 @@ import Foundation
 
 // Code taken from Expo SecureStore to match the way it saves data
 
-func getKeychainQuery(key: String) -> [String : Any] {
-  let service = try! getInfoPlistValue(key: "AppBundleId", defaultValue: nil)
+func getKeychainQuery(key: String, requireAuthentication: Bool? = nil) -> [String : Any] {
+  var service = try! getInfoPlistValue(key: "AppBundleId", defaultValue: nil)
+  if let requireAuthentication {
+    service.append(":\(requireAuthentication ? "auth" : "no-auth")")
+  }
   let encodedKey = Data(key.utf8)
   let query = [
     kSecClass as String: kSecClassGenericPassword,
@@ -22,8 +25,8 @@ func getKeychainQuery(key: String) -> [String : Any] {
   return query
 }
 
-func getKeychainValue(forKey: String) -> String? {
-  var query = getKeychainQuery(key: forKey)
+func _getKeychainValue(forKey: String, requireAuthentication: Bool? = nil) -> String? {
+  var query = getKeychainQuery(key: forKey, requireAuthentication: requireAuthentication)
   query[kSecMatchLimit as String] = kSecMatchLimitOne
   query[kSecReturnData as String] = kCFBooleanTrue
   var item: CFTypeRef?
@@ -39,8 +42,21 @@ func getKeychainValue(forKey: String) -> String? {
   }
 }
 
+func getKeychainValue(forKey: String) -> String? {
+  if let unauthenticatedItem = _getKeychainValue(forKey: forKey, requireAuthentication: false) {
+    return unauthenticatedItem
+  }
+  if let authenticatedItem = _getKeychainValue(forKey: forKey, requireAuthentication: true) {
+    return authenticatedItem
+  }
+  if let legacyItem = _getKeychainValue(forKey: forKey) {
+    return legacyItem
+  }
+  return nil
+}
+
 func setKeychainValue(value: String, forKey: String) throws -> Bool {
-  var query = getKeychainQuery(key: forKey)
+  var query = getKeychainQuery(key: forKey, requireAuthentication: false)
   let valueData = value.data(using: .utf8)
   query[kSecValueData as String] = valueData
   let accessibility = kSecAttrAccessibleAfterFirstUnlock
@@ -57,7 +73,7 @@ func setKeychainValue(value: String, forKey: String) throws -> Bool {
 }
 
 func updateKeychainValue(value: String, forKey: String) throws -> Bool {
-  let query = getKeychainQuery(key: forKey)
+  let query = getKeychainQuery(key: forKey, requireAuthentication: false)
   let valueData = value.data(using: .utf8)
   let updateDictionary = [kSecValueData as String: valueData]
   let status = SecItemUpdate(query as CFDictionary, updateDictionary as CFDictionary)

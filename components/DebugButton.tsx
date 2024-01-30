@@ -1,9 +1,9 @@
 import { useEmbeddedWallet, usePrivy } from "@privy-io/expo";
 import Clipboard from "@react-native-clipboard/clipboard";
+import * as Sentry from "@sentry/react-native";
 import axios from "axios";
 import * as Updates from "expo-updates";
 import { forwardRef, useImperativeHandle } from "react";
-import * as Sentry from "sentry-expo";
 
 import config from "../config";
 import { resetDb, getDbPath } from "../data/db";
@@ -100,7 +100,7 @@ const DebugButton = forwardRef((props, ref) => {
           throw new Error("My first Sentry error!");
         },
         "Sentry Native error": () => {
-          Sentry.Native.nativeCrash();
+          Sentry.nativeCrash();
         },
         "Show logs": () => {
           alert(debugLogs.join("\n"));

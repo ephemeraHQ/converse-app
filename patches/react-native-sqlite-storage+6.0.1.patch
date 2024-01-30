@@ -1,0 +1,13 @@
+diff --git a/node_modules/react-native-sqlite-storage/platforms/ios/SQLite.m b/node_modules/react-native-sqlite-storage/platforms/ios/SQLite.m
+index 0cf0da4..aeb6ed3 100644
+--- a/node_modules/react-native-sqlite-storage/platforms/ios/SQLite.m
++++ b/node_modules/react-native-sqlite-storage/platforms/ios/SQLite.m
+@@ -32,7 +32,7 @@
+  * See http://opensource.org/licenses/alphabetical for full text.
+  */
+ 
+-#import "sqlite3.h"
++#import <sqlite3.h>
+ 
+ #include <regex.h>
+ 

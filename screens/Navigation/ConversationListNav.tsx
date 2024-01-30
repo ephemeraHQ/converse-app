@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   TextInput,
   Platform,
+  useWindowDimensions,
 } from "react-native";
 import { Searchbar as MaterialSearchBar } from "react-native-paper";
 
@@ -36,7 +37,6 @@ export default function ConversationListNav() {
   const colorScheme = useColorScheme();
   const styles = useStyles();
   const searchBar = useRef<TextInput | null>(null);
-  const isSplitScreen = useIsSplitScreen();
   const shouldShowConnectingOrSyncing = useShouldShowConnectingOrSyncing();
   const shouldShowConnecting = useShouldShowConnecting();
   const { searchQuery, setSearchQuery, searchBarFocused, setSearchBarFocused } =
@@ -148,6 +148,7 @@ export default function ConversationListNav() {
 const useStyles = () => {
   const colorScheme = useColorScheme();
   const isSplitScreen = useIsSplitScreen();
+  const dimensions = useWindowDimensions();
   return StyleSheet.create({
     rightButtonContainer: {
       width: 38,
@@ -161,7 +162,7 @@ const useStyles = () => {
       web: {
         flexDirection: "row",
         justifyContent: "flex-start",
-        width: isSplitScreen ? 400 : "100%",
+        width: isSplitScreen ? 400 : dimensions.width,
         marginLeft: 16,
       },
     }),

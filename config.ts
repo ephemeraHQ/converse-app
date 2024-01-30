@@ -32,8 +32,6 @@ const defaultConfig = {
   },
   thirdwebClientId: "fb80f0aa5ea6c07d74813e56c1ea53e5",
   expoProjectId: "49a65fae-3895-4487-8e8a-5bd8bee3a401",
-  web3StorageToken:
-    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJkaWQ6ZXRocjoweDBBOTAxOTI0ZTE1NzNhM2RCYzhjNDk3YzlmQ0Q1QzAwZmU3NDAyQUEiLCJpc3MiOiJ3ZWIzLXN0b3JhZ2UiLCJpYXQiOjE2ODc4MDU0MTUxMDYsIm5hbWUiOiJDb252ZXJzZSBUZXN0In0.5ItNFvSEsXpv4NYG1Uwbw9mL5dVzNQeXefOkjQht3ns",
   privy: {
     appId: "cloh5bn1p00q4l50gcg0g1mix",
     defaultChain: baseGoerli,
@@ -50,7 +48,7 @@ const defaultConfig = {
     rpcEndpoint:
       "https://base-goerli.g.alchemy.com/v2/Jl1z46xZWUzMr042dL1D7533XcOvXmb6",
   },
-  splitScreenThreshold: 414,
+  splitScreenThreshold: 600,
 };
 
 const isAndroid = Platform.OS === "android";
@@ -105,8 +103,6 @@ const ENV = {
       `http://${domain}`,
       domain,
     ]),
-    web3StorageToken:
-      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJkaWQ6ZXRocjoweGViMWU0NEJhYjU2MjYzYkI5Njk1OTVmYTk2RjU2MjRBOTUxRmJiNjUiLCJpc3MiOiJ3ZWIzLXN0b3JhZ2UiLCJpYXQiOjE2ODc4MDQ1ODIyMzMsIm5hbWUiOiJDb252ZXJzZSBBcHAifQ.S4FsNKkmFqp1OWhsxxauUTw82pKqCG3UXEjEYi1xvPM",
     privy: {
       appId: "clpb3fsrl007nlb0fj4ozei9a",
       defaultChain: base,
@@ -120,7 +116,7 @@ const ENV = {
         decimals: 6,
       },
       rpcEndpoint:
-        "https://base-mainnet.g.alchemy.com/v2/I-IEs_vLzf_vteQDgDZBVlu0kwp76jUv",
+        "https://base-mainnet.g.alchemy.com/v2/ZPqjDRWZVyTwdBYPikn1a7iEOCyxMWqX",
     },
   },
 };
