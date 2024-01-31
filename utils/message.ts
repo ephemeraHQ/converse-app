@@ -53,7 +53,7 @@ export const sendMessage = async ({
 
     // Handle Ethereum chain IDs, fetch details and save to Zustand
     if (namespace === "eip155" && networkId && txHash) {
-      const transaction = createUniformTransaction(txRef);
+      const transaction = createUniformTransaction(txRef, { sponsored: true });
       const transactionStore = getTransactionsStore(currentAccount());
       transactionStore.getState().saveTransactions({
         [transaction.id]: transaction,

@@ -180,7 +180,7 @@ export default function ChatTransactionInput() {
             metadata: {
               transactionType: "transfer",
               currency: "USDC",
-              amount: transactionValue.value,
+              amount: transactionValue.value as unknown as number,
               decimals: config.evm.USDC.decimals,
               fromAddress: currentAccount(),
               toAddress: conversation.peerAddress,

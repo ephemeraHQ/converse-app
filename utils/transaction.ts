@@ -45,7 +45,7 @@ export const mergeTransactionRefData = (
   transactionType: TransactionContentType,
   txRef: TransactionReference,
   txRefId: string,
-  txDetails?: TransactionDetails
+  txDetails?: Partial<TransactionDetails>
 ): Transaction => {
   return {
     id: txRefId,
@@ -55,10 +55,7 @@ export const mergeTransactionRefData = (
     reference: txRef.reference,
     metadata: txRef.metadata || {},
     status: txDetails?.status || "PENDING",
-    sponsored:
-      txDetails?.sponsored !== undefined
-        ? txDetails.sponsored
-        : transactionType === "transactionReference",
+    sponsored: txDetails?.sponsored || false,
     blockExplorerURL: txDetails?.blockExplorerURL || undefined,
     events: txDetails?.events || [],
     chainName: txDetails?.chainName || undefined,
@@ -90,7 +87,7 @@ export const getTransactionType = (
 
 export const getTxRefId = (
   txRef: TransactionReference | any,
-  txType: "transactionReference" | "coinbaseRegular" | "coinbaseSponsored"
+  txType?: "transactionReference" | "coinbaseRegular" | "coinbaseSponsored"
 ): string => {
   let networkId;
 
@@ -105,12 +102,14 @@ export const getTxRefId = (
       return `${networkId}-${txRef.transactionHash}`;
     case "coinbaseSponsored":
       return `${networkId}-${txRef.sponsoredTxId}`;
+    default:
+      return ``;
   }
 };
 
 export function createUniformTransaction(
   input: TransactionReference | any,
-  txDetails?: TransactionDetails
+  txDetails?: Partial<TransactionDetails>
 ): Transaction {
   const txType = getTransactionType(input);
 
@@ -184,22 +183,19 @@ export const useTransactionForMessage = (message: MessageToDisplay) => {
   const fetchingTransaction = useRef(false);
 
   const txRef = JSON.parse(message.content);
-  const txRefCurrent = useRef(txRef);
-  txRefCurrent.current = txRef;
-
   const txType = getTransactionType(txRef);
-  const txRefId = getTxRefId(txRef, txType!); // TODO check for undefined txType?
+  const txRefId = getTxRefId(txRef, txType);
   const txLookup = getTransaction(txRefId);
 
+  // Init transaction with values
   const [transaction, setTransaction] = useState({
     loading: false,
     error: false,
-    ...(txLookup || {}),
+    ...txLookup,
   });
 
   useEffect(() => {
     let retryTimeout: NodeJS.Timeout;
-    const txRef = txRefCurrent.current;
 
     const go = async () => {
       if (fetchingTransaction.current) return;
@@ -244,6 +240,7 @@ export const useTransactionForMessage = (message: MessageToDisplay) => {
           const uniformTx = createUniformTransaction(txRef, txDetails);
 
           setTransaction((t) => ({
+            ...t,
             error: false,
             loading: false,
             ...uniformTx,
@@ -260,6 +257,7 @@ export const useTransactionForMessage = (message: MessageToDisplay) => {
 
           // Update component state
           setTransaction((t) => ({
+            ...t,
             error: false,
             loading: false,
             ...uniformTx,
@@ -290,36 +288,58 @@ export const useTransactionForMessage = (message: MessageToDisplay) => {
         clearTimeout(retryTimeout);
       }
     };
-  }, [txType, currentAccount, txLookup, saveTransactions]);
+  }, [
+    currentAccount,
+    saveTransactions,
+    message.content,
+    getTransaction,
+    txLookup,
+    txType,
+    txRef,
+  ]);
 
-  const getTransactionInfo = useCallback(() => {
+  useEffect(() => {
+    setTransaction({
+      loading: false,
+      error: false,
+      ...txLookup,
+    });
+  }, [txLookup]);
+
+  const getTransactionInfo = useCallback((transaction: Transaction) => {
     let amount, currency, decimals;
 
-    if (transaction.events && transaction.events.length > 0) {
-      // Find the first event with type 'transfer'
-      const transferEvent = transaction.events.find(
-        (event) => event.type.toLowerCase() === "transfer"
-      );
-
-      if (transferEvent) {
-        ({ amount, currency, decimals } = transferEvent);
-      } else {
-        return {};
-      }
+    // Determine source of transaction details (either from transfer event or metadata)
+    const transferEvent = transaction.events?.find(
+      (event) => event.type.toLowerCase() === "transfer"
+    );
+    if (transferEvent) {
+      ({ amount, currency, decimals } = transferEvent);
+    } else if (
+      transaction.sponsored &&
+      transaction.metadata &&
+      "amount" in transaction.metadata &&
+      "currency" in transaction.metadata &&
+      "decimals" in transaction.metadata
+    ) {
+      // Display tx details to the sender, while it is creating it on chain
+      ({ amount, currency, decimals } = transaction.metadata);
     } else {
       return {};
     }
 
-    const isUSDC = currency?.toLowerCase() === "usdc";
-
-    const formattedAmountWithCurrencySymbol =
-      amount && currency && decimals !== undefined
-        ? formatAmount(amount, currency, decimals)
-        : "–";
-    const formattedAmount =
-      amount && currency && decimals !== undefined
-        ? formatAmount(amount, currency, decimals, false)
-        : "–";
+    const isUSDC = (currency as string).toLowerCase() === "usdc";
+    const formattedAmountWithCurrencySymbol = formatAmount(
+      amount as number,
+      currency as string,
+      decimals as number
+    );
+    const formattedAmount = formatAmount(
+      amount as number,
+      currency as string,
+      decimals as number,
+      false
+    );
 
     const transactionDisplay = isUSDC
       ? `${formattedAmount} –`
@@ -329,9 +349,10 @@ export const useTransactionForMessage = (message: MessageToDisplay) => {
       transactionDisplay,
       amountToDisplay: formattedAmountWithCurrencySymbol,
     };
-  }, [transaction]);
+  }, []);
 
-  const { transactionDisplay, amountToDisplay } = getTransactionInfo();
+  const { transactionDisplay, amountToDisplay } =
+    getTransactionInfo(transaction);
 
   return { transaction, transactionDisplay, amountToDisplay };
 };
