@@ -62,10 +62,33 @@ export const mergeTransactionRefData = (
   };
 };
 
-export const extractChainIdToHex = (networkRawValue: string): string => {
-  const match = networkRawValue.match(/ETHEREUM_CHAIN:(\d+)/);
-  const extractedChainId = match ? match[1] : "";
-  const chainId = ethers.BigNumber.from(extractedChainId);
+export const extractChainIdToHex = (
+  networkRawValue: string | number
+): string => {
+  let chainId;
+
+  // Check if networkRawValue is already in hexadecimal format
+  if (
+    typeof networkRawValue === "string" &&
+    /^0x[a-fA-F0-9]+$/.test(networkRawValue)
+  ) {
+    return networkRawValue;
+  }
+
+  // Handle numeric chain ID (as a number or string that represents a number)
+  const numericValue =
+    typeof networkRawValue === "string"
+      ? parseInt(networkRawValue, 10)
+      : networkRawValue;
+
+  // Ensure numericValue is a valid number
+  if (!isNaN(numericValue)) {
+    chainId = ethers.BigNumber.from(numericValue);
+  } else {
+    console.error("Invalid networkRawValue:", networkRawValue);
+    return "";
+  }
+
   return chainId._hex;
 };
 
@@ -93,11 +116,13 @@ export const getTxRefId = (
 
   if (txType === "coinbaseRegular" || txType === "coinbaseSponsored") {
     networkId = extractChainIdToHex(txRef.network.rawValue);
+  } else {
+    networkId = extractChainIdToHex(txRef.networkId);
   }
 
   switch (txType) {
     case "transactionReference":
-      return `${txRef.networkId}-${txRef.reference}`;
+      return `${networkId}-${txRef.reference}`;
     case "coinbaseRegular":
       return `${networkId}-${txRef.transactionHash}`;
     case "coinbaseSponsored":
@@ -118,14 +143,19 @@ export function createUniformTransaction(
     let transaction: Transaction;
 
     switch (txType) {
-      case "transactionReference":
+      case "transactionReference": {
+        const inputWithHexNetworkId = {
+          ...input,
+          networkId: extractChainIdToHex(input.networkId.toString()),
+        };
         transaction = mergeTransactionRefData(
           txType,
-          input,
+          inputWithHexNetworkId,
           txRefId,
           txDetails
         );
         break;
+      }
       case "coinbaseRegular":
         transaction = mergeTransactionRefData(
           txType,
@@ -209,7 +239,7 @@ export const useTransactionForMessage = (message: MessageToDisplay) => {
           case "transactionReference": {
             txDetails = await getTransactionDetails(
               currentAccount,
-              txRef.networkId,
+              extractChainIdToHex(txRef.networkId),
               txRef.reference
             );
             break;
