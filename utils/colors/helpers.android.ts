@@ -11,7 +11,7 @@ export const setAndroidSystemColor = (color: string) => {
   } catch (e) {
     console.log(e);
   }
-  SystemNavigationBar.setNavigationColor(color).catch((e) => {
+  SystemNavigationBar.setNavigationColor(color).catch((e: any) => {
     console.log(e);
   });
 };
@@ -23,7 +23,7 @@ export const setAndroidColors = (colorScheme: ColorSchemeName) => {
     require("react-native-system-navigation-bar").default;
   SystemNavigationBar.setBarMode(
     colorScheme === "dark" ? "light" : "dark"
-  ).catch((e) => {
+  ).catch((e: any) => {
     console.log(e);
   });
 };
