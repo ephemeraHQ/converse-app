@@ -24,19 +24,19 @@ PODS:
   - EXJSONUtils (0.12.3)
   - EXManifests (0.13.2):
     - ExpoModulesCore
-  - EXNotifications (0.27.5):
+  - EXNotifications (0.27.6):
     - ExpoModulesCore
-  - Expo (50.0.3):
+  - Expo (50.0.5):
     - ExpoModulesCore
-  - expo-dev-client (3.3.7):
+  - expo-dev-client (3.3.8):
     - EXManifests
     - expo-dev-launcher
     - expo-dev-menu
     - expo-dev-menu-interface
     - EXUpdatesInterface
-  - expo-dev-launcher (3.6.4):
+  - expo-dev-launcher (3.6.6):
     - EXManifests
-    - expo-dev-launcher/Main (= 3.6.4)
+    - expo-dev-launcher/Main (= 3.6.6)
     - expo-dev-menu
     - expo-dev-menu-interface
     - ExpoModulesCore
@@ -45,7 +45,7 @@ PODS:
     - RCT-Folly (= 2022.05.16.00)
     - React-Core
     - React-RCTAppDelegate
-  - expo-dev-launcher/Main (3.6.4):
+  - expo-dev-launcher/Main (3.6.6):
     - EXManifests
     - expo-dev-launcher/Unsafe
     - expo-dev-menu
@@ -56,7 +56,7 @@ PODS:
     - RCT-Folly (= 2022.05.16.00)
     - React-Core
     - React-RCTAppDelegate
-  - expo-dev-launcher/Unsafe (3.6.4):
+  - expo-dev-launcher/Unsafe (3.6.6):
     - EXManifests
     - expo-dev-menu
     - expo-dev-menu-interface
@@ -95,7 +95,7 @@ PODS:
     - glog
     - RCT-Folly (= 2022.05.16.00)
     - React-Core
-  - ExpoBackgroundFetch (11.8.0):
+  - ExpoBackgroundFetch (11.8.1):
     - ExpoModulesCore
   - ExpoClipboard (4.8.0):
     - ExpoModulesCore
@@ -107,7 +107,7 @@ PODS:
     - ExpoModulesCore
   - ExpoFileSystem (16.0.5):
     - ExpoModulesCore
-  - ExpoHead (3.4.5):
+  - ExpoHead (3.4.6):
     - ExpoModulesCore
   - ExpoImage (1.10.5):
     - ExpoModulesCore
@@ -139,10 +139,10 @@ PODS:
     - RCT-Folly (= 2022.05.16.00)
     - React-Core
   - EXStructuredHeaders (3.7.2)
-  - EXTaskManager (11.7.1):
+  - EXTaskManager (11.7.2):
     - ExpoModulesCore
     - UMAppLoader
-  - EXUpdates (0.24.8):
+  - EXUpdates (0.24.9):
     - EASClient
     - EXManifests
     - ExpoModulesCore
@@ -1713,19 +1713,19 @@ SPEC CHECKSUMS:
   EXImageLoader: 55080616b2fe9da19ef8c7f706afd9814e279b6b
   EXJSONUtils: 5c42959e87be238b045ef37cc5268b16a6c0ad4a
   EXManifests: 5e8c29f36c716af768a4ea47ec05e1b89ab93091
-  EXNotifications: ecd73833e55510edcb3fa30d59bfc536eeb4b9c6
-  Expo: 88b4aa68115bbb57c1a07cc30161c2352ab2fc25
-  expo-dev-client: 80a81d82fd401673ab11702ce9e54115a8852f3b
-  expo-dev-launcher: 141aa2d7e603102de71caa9530c293a6c1737653
+  EXNotifications: e11f0e9a5b657c064a481a5d522f3bc5a07bf7cd
+  Expo: 49cded7844f2ec4ffb1cc3b86504853f26952935
+  expo-dev-client: 025dce84f48b04c60c3891547732f001f6aad777
+  expo-dev-launcher: 4e83baafc5b7090c0da29acbceb6007e0a7ed3d8
   expo-dev-menu: 1b221587615ce11b37a64da5520e9a639496571b
   expo-dev-menu-interface: 7ba029c9d1a82ac22b9b584c00514860b060553e
-  ExpoBackgroundFetch: 094377b73648adb55032a440f50cad1a5d3c3a89
+  ExpoBackgroundFetch: 80d41ec15c6cce0bafb5d2326b8e85f42152eba7
   ExpoClipboard: b8f76767b0dbaefb3be7adbf85049fd85861d527
   ExpoCrypto: e2ca148f5c93a0514959df86b34256bb3c50d358
   ExpoDevice: d204395e17fffdcefa7470bdef33b07719ac41b1
   ExpoDocumentPicker: 70254802886e29a45d4ad25486e64b6fc9c8f0cc
   ExpoFileSystem: 04795dd4d47e76eaf12e38c92091f77d794f9e7f
-  ExpoHead: dda4dd22972750dd2baa5c0231b86dc6e10ddfd9
+  ExpoHead: b4f7388cd19ef0513ec0c0329ec995c03024300d
   ExpoImage: 2b71f20472f293c1fbbf2400795b03d5bf8dd598
   ExpoImageManipulator: c1d7cb865eacd620a35659f3da34c70531f10b59
   ExpoImagePicker: 66970181d1c838f444e5e1f81b804ab2d5ff49bd
@@ -1735,8 +1735,8 @@ SPEC CHECKSUMS:
   ExpoSystemUI: 40e222dd9d52222fe1bce389724ac52e662158dc
   EXSplashScreen: e12df5ed7e7880913a3e4bad91ba252596993b90
   EXStructuredHeaders: 5b0f47259db047dc1fdfa84752e292c2bfa68ecd
-  EXTaskManager: f1a5747cf42f9304727bfe75aa86009c810e03e7
-  EXUpdates: 5b27792fc3b2dd72ccbe4c6299eae4e13a811435
+  EXTaskManager: 3e446dbf75cd662aa6e7d6828be5bc26265241c3
+  EXUpdates: e52390093256c26c23261271d76bcf2fd8b5e02e
   EXUpdatesInterface: 3e444e2093e25b7ca0999a7d8c16e8392dee70c3
   FBLazyVector: fbc4957d9aa695250b55d879c1d86f79d7e69ab4
   FBReactNativeSpec: 86de768f89901ef6ed3207cd686362189d64ac88
