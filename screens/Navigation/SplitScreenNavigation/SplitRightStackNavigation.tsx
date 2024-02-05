@@ -26,7 +26,11 @@ import WebviewPreviewNav, {
   WebviewPreviewNavParams,
   WebviewPreviewScreenConfig,
 } from "../WebviewPreviewNav";
-import { stackGroupScreenOptions } from "../navHelpers";
+import {
+  getConverseInitialURL,
+  getConverseStateFromPath,
+  stackGroupScreenOptions,
+} from "../navHelpers";
 import { SplitScreenDrawerParams } from "./SplitScreenNavigation";
 
 export type NavigationParamList = {
@@ -53,6 +57,8 @@ const linking = {
       WebviewPreview: WebviewPreviewScreenConfig,
     },
   },
+  getStateFromPath: getConverseStateFromPath,
+  getInitialURL: getConverseInitialURL,
 };
 
 export const navigationAnimation = Platform.OS === "ios" ? "default" : "none";

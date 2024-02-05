@@ -198,6 +198,15 @@ export const openMainConversationWithPeer = async (
     );
     return;
   }
+  // We need to wait for initial load to be done on web because there is
+  // no hydration !
+  if (Platform.OS === "web") {
+    let initialLoadDone = getChatStore(account).getState().initialLoadDone;
+    while (!initialLoadDone) {
+      await new Promise((r) => setTimeout(r, 250));
+      initialLoadDone = getChatStore(account).getState().initialLoadDone;
+    }
+  }
   const conversations = getChatStore(account).getState().conversations;
   // Then, check if we already have a main conversation with this address
   const alreadyConversationWithAddress = Object.values(conversations).find(

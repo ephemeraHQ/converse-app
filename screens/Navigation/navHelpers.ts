@@ -14,6 +14,9 @@ export const getConverseStateFromPath = (path: string, options: any) => {
   // dm method must link to the Conversation Screen as well
   // but prefilling the parameters
   let pathForState = path;
+  if (Platform.OS === "web" && pathForState.startsWith("/")) {
+    pathForState = pathForState.slice(1);
+  }
   if (pathForState.startsWith("dm?peer=")) {
     const peer = pathForState.slice(8).trim().toLowerCase();
     pathForState = `conversation?mainConversationWithPeer=${peer}&focus=true`;
