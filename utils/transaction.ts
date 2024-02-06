@@ -78,7 +78,10 @@ export const extractChainIdToHex = (
   // Handle numeric chain ID (as a number or string that represents a number)
   const numericValue =
     typeof networkRawValue === "string"
-      ? parseInt(networkRawValue, 10)
+      ? parseInt(
+          networkRawValue.replace("ETHEREUM_CHAIN:", "").replace("/false", ""),
+          10
+        )
       : networkRawValue;
 
   // Ensure numericValue is a valid number
