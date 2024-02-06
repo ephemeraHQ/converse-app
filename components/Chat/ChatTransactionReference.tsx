@@ -231,7 +231,7 @@ const useStyles = () => {
       minWidth: 100,
     },
     transactionDetails: {
-      fontSize: 16,
+      fontSize: Platform.OS === "android" ? 14 : 16,
       color: textSecondaryColor(colorScheme),
     },
     text: {
@@ -244,8 +244,9 @@ const useStyles = () => {
       color: "white",
     },
     amount: {
-      fontSize: 34,
-      fontWeight: "bold",
+      fontSize: Platform.OS === "android" ? 28 : 34,
+      fontWeight: Platform.OS === "android" ? "normal" : "bold",
+      paddingVertical: 3,
       textAlign: "center",
     },
     bold: {
