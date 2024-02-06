@@ -3,6 +3,7 @@ import {
   RemoteAttachment,
   Attachment,
 } from "@xmtp/content-type-remote-attachment";
+import { TransactionReference } from "@xmtp/content-type-transaction-reference";
 import { messageApi } from "@xmtp/proto";
 import { Envelope } from "@xmtp/proto/ts/dist/types/message_api/v1/message_api.pb";
 import { Client, DecodedMessage } from "@xmtp/xmtp-js";
@@ -12,6 +13,7 @@ import { XmtpMessage } from "../../data/store/chatStore";
 import { sentryTrackError } from "../sentry";
 import { serializeRemoteAttachmentMessageContent } from "./attachments.web";
 import { isContentType } from "./contentTypes";
+import { CoinbaseMessagingPaymentContent } from "./contentTypes/coinbasePayment";
 import { getConversationWithTopic } from "./conversations.web";
 import { getXmtpClient } from "./sync";
 
@@ -33,12 +35,14 @@ const protocolMessageToStateMessage = (
   } else if (isContentType("reaction", contentType)) {
     content = JSON.stringify(message.content as Reaction);
     referencedMessageId = (message.content as Reaction).reference;
-  }
-  // else if (isContentType("coinbasePayment", contentType)) {
-  // content = JSON.stringify(messageContent as CoinbaseMessagingPaymentContent);
-  // }
-  else {
-    contentFallback = message.content;
+  } else if (isContentType("transactionReference", contentType)) {
+    content = JSON.stringify(message.content as TransactionReference);
+  } else if (isContentType("coinbasePayment", contentType)) {
+    content = JSON.stringify(
+      message.content as CoinbaseMessagingPaymentContent
+    );
+  } else {
+    contentFallback = message.contentFallback;
   }
 
   return {

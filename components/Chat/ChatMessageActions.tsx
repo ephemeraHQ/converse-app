@@ -27,6 +27,7 @@ import {
   getEmojiName,
   removeReactionFromMessage,
 } from "../../utils/reactions";
+import { isTransactionMessage } from "../../utils/transaction";
 import { consentToPeersOnProtocol } from "../../utils/xmtpRN/conversations";
 import EmojiPicker from "../../vendor/rn-emoji-keyboard";
 import { showActionSheetWithOptions } from "../StateHandlers/ActionSheetStateHandler";
@@ -49,6 +50,7 @@ export default function ChatMessageActions({
 }: Props) {
   const { conversation } = useConversationContext(["conversation"]);
   const isAttachment = isAttachmentMessage(message.contentType);
+  const isTransaction = isTransactionMessage(message.contentType);
   const colorScheme = useColorScheme();
   const userAddress = useCurrentAccount() as string;
   const setPeersStatus = useSettingsStore((s) => s.setPeersStatus);
@@ -122,10 +124,10 @@ export default function ChatMessageActions({
     if (canAddReaction) {
       methods["Add a reaction"] = showReactionModal;
     }
-    if (!isAttachment) {
-      methods["Copy message"] = () => {
-        Clipboard.setString(message.content);
-      };
+    if (!isAttachment && !isTransaction) {
+      methods["Copy message"] = message.content
+        ? () => Clipboard.setString(message.content)
+        : () => Clipboard.setString(message.contentFallback!);
       if (!message.fromMe) {
         methods["Report message"] = showMessageReportActionSheet;
       }
@@ -138,7 +140,11 @@ export default function ChatMessageActions({
     showActionSheetWithOptions(
       {
         options,
-        title: isAttachment ? "📎 Media" : message.content,
+        title: isTransaction
+          ? "💸 Transaction"
+          : isAttachment
+          ? "📎 Media"
+          : message.content,
         cancelButtonIndex: options.indexOf("Cancel"),
         destructiveButtonIndex: message.fromMe
           ? undefined
@@ -154,13 +160,15 @@ export default function ChatMessageActions({
       }
     );
   }, [
-    colorScheme,
+    canAddReaction,
     isAttachment,
+    isTransaction,
     message.content,
     message.fromMe,
-    canAddReaction,
-    showMessageReportActionSheet,
+    message.contentFallback,
+    colorScheme,
     showReactionModal,
+    showMessageReportActionSheet,
   ]);
 
   const doubleTapGesture = useMemo(
@@ -204,6 +212,12 @@ export default function ChatMessageActions({
               // Transfering attachment opening intent to component
               converseEventEmitter.emit(
                 `openAttachmentForMessage-${message.id}`
+              );
+            }
+            if (isTransaction) {
+              // Transfering event to component
+              converseEventEmitter.emit(
+                `showActionSheetForTxRef-${message.id}`
               );
             }
           }}

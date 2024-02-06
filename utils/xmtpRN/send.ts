@@ -1,4 +1,8 @@
 import {
+  ContentTypeTransactionReference,
+  TransactionReference,
+} from "@xmtp/content-type-transaction-reference";
+import {
   PreparedLocalMessage,
   sendPreparedMessage,
 } from "@xmtp/react-native-sdk";
@@ -85,6 +89,11 @@ export const sendPendingMessages = async (account: string) => {
           preparedMessage = await conversation.prepareMessage({
             reaction: JSON.parse(message.content),
           });
+        } else if (isContentType("transactionReference", message.contentType)) {
+          preparedMessage = await conversation.prepareMessage(
+            JSON.parse(message.content) as TransactionReference,
+            { contentType: ContentTypeTransactionReference }
+          );
         } else {
           preparedMessage = await conversation.prepareMessage({
             text: message.content,

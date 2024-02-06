@@ -1,15 +1,12 @@
-import {
-  ContentTypeId,
-  EncodedContent,
-  JSContentCodec,
-} from "@xmtp/react-native-sdk";
+import { ContentTypeId } from "@xmtp/xmtp-js";
+import type { ContentCodec, EncodedContent } from "@xmtp/xmtp-js";
 
-const ContentTypeCoinbasePayment: ContentTypeId = {
+const ContentTypeCoinbasePayment = new ContentTypeId({
   authorityId: "coinbase.com",
   typeId: "coinbase-messaging-payment-activity",
   versionMajor: 1,
   versionMinor: 0,
-};
+});
 
 type CoinbaseMessagingRegularPaymentContent = {
   currencyCode: {
@@ -40,7 +37,7 @@ export type CoinbaseMessagingPaymentContent =
   | CoinbaseMessagingSponsoredPaymentContent;
 
 export class CoinbaseMessagingPaymentCodec
-  implements JSContentCodec<CoinbaseMessagingPaymentContent>
+  implements ContentCodec<CoinbaseMessagingPaymentContent>
 {
   contentType = ContentTypeCoinbasePayment;
 
@@ -48,14 +45,14 @@ export class CoinbaseMessagingPaymentCodec
     return {
       type: ContentTypeCoinbasePayment,
       parameters: {},
-      content: Buffer.from(JSON.stringify(content)).toString("base64") as any,
+      content: new TextEncoder().encode(JSON.stringify(content)),
     };
   }
+
   decode(encodedContent: EncodedContent): CoinbaseMessagingPaymentContent {
-    // Handling content that is base64 encoded rather than Buffer
-    const base64Content = encodedContent.content as unknown as string;
-    const stringContent = Buffer.from(base64Content, "base64").toString();
-    return JSON.parse(stringContent) as CoinbaseMessagingPaymentContent;
+    const uint8Array = encodedContent.content;
+    const contentReceived = JSON.parse(new TextDecoder().decode(uint8Array));
+    return contentReceived as CoinbaseMessagingPaymentContent;
   }
 
   fallback(content: CoinbaseMessagingPaymentContent): string | undefined {

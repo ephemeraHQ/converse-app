@@ -214,6 +214,11 @@ fun handleMessageByContentType(
                 contentToReturn = "📎 Media"
             }
 
+            contentType.startsWith("xmtp.org/transactionReference:") -> {
+                contentToSave = decodedMessage.body
+                contentToReturn = "💸 Transaction"
+            }
+
             contentType.startsWith("xmtp.org/reaction:") -> {
                 val reaction: Reaction? = decodedMessage.content()
                 val action = reaction?.action?.javaClass?.simpleName?.lowercase()

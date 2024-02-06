@@ -1,10 +1,11 @@
-const contentTypesPrefixes = {
+export const contentTypesPrefixes: { [key: string]: string } = {
   text: "xmtp.org/text:",
   remoteAttachment: "xmtp.org/remoteStaticAttachment:",
   attachment: "xmtp.org/attachment:",
   reaction: "xmtp.org/reaction:",
   readReceipt: "xmtp.org/readReceipt:",
   coinbasePayment: "coinbase.com/coinbase-messaging-payment-activity:",
+  transactionReference: "xmtp.org/transactionReference:",
 };
 
 export const isContentType = (
@@ -14,4 +15,10 @@ export const isContentType = (
   if (!contentType) return false;
   const prefix = contentTypesPrefixes[type];
   return contentType.startsWith(prefix);
+};
+
+export const getMessageContentType = (contentType: string) => {
+  return Object.keys(contentTypesPrefixes).find((key) =>
+    contentType.startsWith(contentTypesPrefixes[key])
+  );
 };

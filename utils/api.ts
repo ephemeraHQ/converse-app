@@ -5,6 +5,7 @@ import { ProfileSocials } from "../data/store/profilesStore";
 import { Frens } from "../data/store/recommendationsStore";
 import { getXmtpApiHeaders } from "../utils/xmtpRN/api";
 import { TransferAuthorizationMessage } from "./evm/erc20";
+import { TransactionDetails } from "./transaction";
 
 const api = axios.create({
   baseURL: config.apiURI,
@@ -229,6 +230,30 @@ export const postUSDCTransferAuthorization = async (
     }
   );
   return data.txHash;
+};
+
+export const getTransactionDetails = async (
+  account: string,
+  networkId: string,
+  reference: string
+): Promise<TransactionDetails> => {
+  const { data } = await api.get("/api/evm/transactionDetails", {
+    headers: await getXmtpApiHeaders(account),
+    params: { networkId, reference },
+  });
+  return data;
+};
+
+export const getCoinbaseTransactionDetails = async (
+  account: string,
+  networkId: string,
+  sponsoredTxId: string
+): Promise<TransactionDetails> => {
+  const { data } = await api.get("/api/evm/coinbaseTransactionDetails", {
+    headers: await getXmtpApiHeaders(account),
+    params: { networkId, sponsoredTxId },
+  });
+  return data;
 };
 
 export const claimUserName = async (
