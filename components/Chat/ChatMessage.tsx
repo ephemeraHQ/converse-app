@@ -22,10 +22,14 @@ import { isDesktop } from "../../utils/device";
 import { LimitedMap } from "../../utils/objects";
 import { getMessageReactions } from "../../utils/reactions";
 import { isTransactionMessage } from "../../utils/transaction";
-import { getMessageContentType } from "../../utils/xmtpRN/contentTypes";
+import {
+  getMessageContentType,
+  isContentType,
+} from "../../utils/xmtpRN/contentTypes";
 import ClickableText from "../ClickableText";
 import ChatAttachmentBubble from "./ChatAttachmentBubble";
 import ChatMessageActions from "./ChatMessageActions";
+import ChatMessageFramePreviews from "./ChatMessageFramePreviews";
 import ChatMessageMetadata from "./ChatMessageMetadata";
 import ChatMessageReactions from "./ChatMessageReactions";
 import ChatTransactionReference from "./ChatTransactionReference";
@@ -96,9 +100,6 @@ function ChatMessage({ message, colorScheme }: Props) {
         reactions={reactions}
         style={[
           styles.messageBubble,
-          isAttachment || isTransaction
-            ? styles.messageBubbleAttachmentOrTransaction
-            : styles.messageBubbleText,
           message.fromMe ? styles.messageBubbleMe : undefined,
           Platform.select({
             default: {},
@@ -126,7 +127,19 @@ function ChatMessage({ message, colorScheme }: Props) {
           },
         ]}
       >
-        {messageContent}
+        {isContentType("text", message.contentType) && (
+          <ChatMessageFramePreviews message={message} />
+        )}
+
+        <View
+          style={[
+            isAttachment || isTransaction
+              ? styles.messageBubbleAttachmentOrTransaction
+              : styles.messageBubbleText,
+          ]}
+        >
+          {messageContent}
+        </View>
 
         <View style={styles.metadataContainer}>{metadata}</View>
 
