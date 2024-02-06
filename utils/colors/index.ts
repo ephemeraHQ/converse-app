@@ -119,8 +119,13 @@ export const messageBubbleColor = (colorScheme: ColorSchemeName) => {
 };
 
 export const messageInnerBubbleColor = (colorScheme: ColorSchemeName) => {
-  if (colorScheme === "dark") return MESSAGE_INNER_BUBBLE_DARK;
-  return MESSAGE_INNER_BUBBLE_LIGHT;
+  if (colorScheme === "dark")
+    return Platform.OS === "android" || Platform.OS === "web"
+      ? MaterialDarkColors.surface3
+      : MESSAGE_INNER_BUBBLE_DARK;
+  return Platform.OS === "android" || Platform.OS === "web"
+    ? MaterialLightColors.surface3
+    : MESSAGE_INNER_BUBBLE_LIGHT;
 };
 
 const MY_MESSAGE_BUBBLE_LIGHT = "#E95C43";
@@ -210,6 +215,7 @@ const MaterialLightColors = {
   surface: "rgb(255, 251, 255)",
   surface1: "rgb(251, 242, 245)",
   surface2: "rgb(247, 236, 239)",
+  surface3: "rgb(241, 225, 227)",
   onSurface: "rgb(32, 26, 25)",
   surfaceVariant: "rgb(245, 221, 217)",
   onSurfaceVariant: "rgb(83, 67, 64)",
@@ -255,6 +261,7 @@ const MaterialDarkColors = {
   surface: "rgb(32, 26, 25)",
   surface1: "rgb(44, 34, 32)",
   surface2: "rgb(50, 38, 36)",
+  surface3: "rgb(61, 49, 46)",
   onSurface: "rgb(237, 224, 221)",
   surfaceVariant: "rgb(83, 67, 64)",
   onSurfaceVariant: "rgb(216, 194, 190)",
