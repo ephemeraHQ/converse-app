@@ -1,6 +1,6 @@
 import { TransactionReference } from "@xmtp/content-type-transaction-reference";
 import { ethers } from "ethers";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { MessageToDisplay } from "../components/Chat/ChatMessage";
 import {
@@ -211,7 +211,11 @@ export const useTransactionForMessage = (message: MessageToDisplay) => {
   const saveTransactions = useTransactionsStore((s) => s.saveTransactions);
   const fetchingTransaction = useRef(false);
 
-  const txRef = useRef(JSON.parse(message.content)).current;
+  // Avoid too many JSON.parse but make sure to
+  // rerender if message.content changes
+
+  const txRef = useMemo(() => JSON.parse(message.content), [message.content]);
+
   const txType = getTransactionType(txRef);
   const txRefId = getTxRefId(txRef, txType);
   const txLookup = useTransactionsStore((s) => s.transactions[txRefId]);
