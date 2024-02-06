@@ -9781,6 +9781,14 @@
     "@xmtp/proto" "^3.29.0"
     "@xmtp/xmtp-js" "^11.1.2"
 
+"@xmtp/content-type-transaction-reference@^1.0.1":
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/@xmtp/content-type-transaction-reference/-/content-type-transaction-reference-1.0.1.tgz#7adbf484ef37ce2c2e83a60337f2eba9504da14b"
+  integrity sha512-EBnuWy97rHW3jTjkJAip+6gPowgHbf6TQp7SHCcrO6BoXVNlCEli5u867ci7qKsn3I9uTY3yM69VdzjYbGPJRw==
+  dependencies:
+    "@xmtp/proto" "^3.29.0"
+    "@xmtp/xmtp-js" "^11.1.2"
+
 "@xmtp/proto@^3.24.0":
   version "3.24.0"
   resolved "https://registry.yarnpkg.com/@xmtp/proto/-/proto-3.24.0.tgz#305492a5040b3cd7d5cfdbf48db7305c31db1d29"

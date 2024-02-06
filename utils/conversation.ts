@@ -15,9 +15,11 @@ import { isAttachmentMessage } from "./attachment/helpers";
 import { getAddressForPeer } from "./eth";
 import { subscribeToNotifications } from "./notifications";
 import { pick } from "./objects";
+import { getReactionsContentPreview } from "./reactions";
 import { getMatchedPeerAddresses } from "./search";
 import { sentryTrackMessage } from "./sentry";
 import { TextInputWithValue, addressPrefix } from "./str";
+import { isTransactionMessage } from "./transaction";
 import { isOnXmtp } from "./xmtpRN/client";
 import { isContentType } from "./xmtpRN/contentTypes";
 
@@ -52,6 +54,12 @@ export const conversationLastMessagePreview = (
         removedReactions = {};
         return {
           contentPreview: "📎 Media",
+          message: lastMessage,
+        };
+      } else if (isTransactionMessage(lastMessage?.contentType)) {
+        removedReactions = {};
+        return {
+          contentPreview: "💸 Transaction",
           message: lastMessage,
         };
       } else if (isContentType("reaction", lastMessage?.contentType)) {
@@ -95,12 +103,13 @@ export const conversationLastMessagePreview = (
             continue;
           } else {
             removedReactions = {};
-            const isAttachment = isAttachmentMessage(message.contentType);
+            const contentPreview = getReactionsContentPreview(
+              message,
+              reactionContent.content
+            );
             if (reactionContent.schema === "unicode") {
               return {
-                contentPreview: `Reacted ${reactionContent.content} to ${
-                  isAttachment ? "a media" : `“${message.content}”`
-                }`,
+                contentPreview,
                 message: lastMessage,
               };
             } else {

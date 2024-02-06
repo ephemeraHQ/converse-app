@@ -1,3 +1,4 @@
+import { TransactionReferenceCodec } from "@xmtp/content-type-transaction-reference";
 import {
   Client,
   ReactionCodec,
@@ -9,6 +10,7 @@ import {
 
 import config from "../../config";
 import { getCleanAddress } from "../eth";
+import { CoinbaseMessagingPaymentCodec } from "./contentTypes/coinbasePayment";
 
 const env = config.xmtpEnv as "dev" | "production" | "local";
 
@@ -21,7 +23,8 @@ export const getXmtpClientFromBase64Key = (base64Key: string) =>
       new ReadReceiptCodec(),
       new RemoteAttachmentCodec(),
       new StaticAttachmentCodec(),
-      // new CoinbaseMessagingPaymentCodec(),
+      new TransactionReferenceCodec(),
+      new CoinbaseMessagingPaymentCodec(),
       // new ReplyCodec()
     ],
   });

@@ -105,6 +105,9 @@ export const itemSeparatorColor = (colorScheme: ColorSchemeName) => {
 const MESSAGE_BUBBLE_LIGHT = "#E9E9EB";
 const MESSAGE_BUBBLE_DARK = "#262628";
 
+const MESSAGE_INNER_BUBBLE_LIGHT = "#DDDDDF";
+const MESSAGE_INNER_BUBBLE_DARK = "#1D1D1E";
+
 export const messageBubbleColor = (colorScheme: ColorSchemeName) => {
   if (colorScheme === "dark")
     return Platform.OS === "android" || Platform.OS === "web"
@@ -115,12 +118,30 @@ export const messageBubbleColor = (colorScheme: ColorSchemeName) => {
     : MESSAGE_BUBBLE_LIGHT;
 };
 
+export const messageInnerBubbleColor = (colorScheme: ColorSchemeName) => {
+  if (colorScheme === "dark")
+    return Platform.OS === "android" || Platform.OS === "web"
+      ? MaterialDarkColors.surface5
+      : MESSAGE_INNER_BUBBLE_DARK;
+  return Platform.OS === "android" || Platform.OS === "web"
+    ? MaterialLightColors.surface5
+    : MESSAGE_INNER_BUBBLE_LIGHT;
+};
+
 const MY_MESSAGE_BUBBLE_LIGHT = "#E95C43";
 const MY_MESSAGE_BUBBLE_DARK = "#E95C43";
 
 export const myMessageBubbleColor = (colorScheme: ColorSchemeName) => {
   if (colorScheme === "dark") return MY_MESSAGE_BUBBLE_DARK;
   return MY_MESSAGE_BUBBLE_LIGHT;
+};
+
+const MY_MESSAGE_INNER_BUBBLE_LIGHT = "#D2533C";
+const MY_MESSAGE_INNER_BUBBLE_DARK = "#D2533C";
+
+export const myMessageInnerBubbleColor = (colorScheme: ColorSchemeName) => {
+  if (colorScheme === "dark") return MY_MESSAGE_INNER_BUBBLE_DARK;
+  return MY_MESSAGE_INNER_BUBBLE_LIGHT;
 };
 
 const TERTIARY_BACKGROUND_LIGHT = "#EFEFF0";
@@ -194,6 +215,7 @@ const MaterialLightColors = {
   surface: "rgb(255, 251, 255)",
   surface1: "rgb(251, 242, 245)",
   surface2: "rgb(247, 236, 239)",
+  surface5: "rgb(241, 225, 227)",
   onSurface: "rgb(32, 26, 25)",
   surfaceVariant: "rgb(245, 221, 217)",
   onSurfaceVariant: "rgb(83, 67, 64)",
@@ -239,6 +261,7 @@ const MaterialDarkColors = {
   surface: "rgb(32, 26, 25)",
   surface1: "rgb(44, 34, 32)",
   surface2: "rgb(50, 38, 36)",
+  surface5: "rgb(61, 49, 46)",
   onSurface: "rgb(237, 224, 221)",
   surfaceVariant: "rgb(83, 67, 64)",
   onSurfaceVariant: "rgb(216, 194, 190)",

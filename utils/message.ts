@@ -1,9 +1,13 @@
 import uuid from "react-native-uuid";
 
 import { saveMessages } from "../data/helpers/messages";
-import { currentAccount } from "../data/store/accountsStore";
+import {
+  currentAccount,
+  getTransactionsStore,
+} from "../data/store/accountsStore";
 import { XmtpConversation } from "../data/store/chatStore";
 import { saveAttachmentForPendingMessage } from "./attachment";
+import { createUniformTransaction } from "./transaction";
 import { isContentType } from "./xmtpRN/contentTypes";
 import { sendPendingMessages } from "./xmtpRN/send";
 
@@ -32,6 +36,7 @@ export const sendMessage = async ({
   const messageId = uuid.v4().toString();
   const sentAtTime = new Date();
   const isV1Conversation = conversation.topic.startsWith("/xmtp/0/dm-");
+
   if (isContentType("remoteAttachment", contentType) && attachmentToSave) {
     // Let's move file to attachments folder right now!
     await saveAttachmentForPendingMessage(
@@ -41,6 +46,21 @@ export const sendMessage = async ({
       attachmentToSave.mimeType
     );
   }
+
+  if (isContentType("transactionReference", contentType)) {
+    const txRef = JSON.parse(content);
+    const { namespace, networkId, reference: txHash } = txRef;
+
+    // Handle Ethereum chain IDs, fetch details and save to Zustand
+    if (namespace === "eip155" && networkId && txHash) {
+      const transaction = createUniformTransaction(txRef, { sponsored: true });
+      const transactionStore = getTransactionsStore(currentAccount());
+      transactionStore.getState().saveTransactions({
+        [transaction.id]: transaction,
+      });
+    }
+  }
+
   // Save to DB immediatly
   await saveMessages(currentAccount(), [
     {
