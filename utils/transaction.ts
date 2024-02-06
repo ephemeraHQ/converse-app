@@ -208,14 +208,13 @@ export const formatAmount = (
 
 export const useTransactionForMessage = (message: MessageToDisplay) => {
   const currentAccount = useCurrentAccount() as string;
-  const getTransaction = useTransactionsStore((s) => s.getTransaction);
   const saveTransactions = useTransactionsStore((s) => s.saveTransactions);
   const fetchingTransaction = useRef(false);
 
-  const txRef = JSON.parse(message.content);
+  const txRef = useRef(JSON.parse(message.content)).current;
   const txType = getTransactionType(txRef);
   const txRefId = getTxRefId(txRef, txType);
-  const txLookup = getTransaction(txRefId);
+  const txLookup = useTransactionsStore((s) => s.transactions[txRefId]);
 
   // Init transaction with values
   const [transaction, setTransaction] = useState({
@@ -322,7 +321,6 @@ export const useTransactionForMessage = (message: MessageToDisplay) => {
     currentAccount,
     saveTransactions,
     message.content,
-    getTransaction,
     txLookup,
     txType,
     txRef,
