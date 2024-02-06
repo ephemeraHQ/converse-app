@@ -23,7 +23,7 @@ export default function ChatMessageFramePreviews({ message }: Props) {
   return (
     <View>
       {tagsForURLs.map((tagsForURL) => {
-        if (tagsForURL.type === "FRAME") {
+        if (tagsForURL.type === "FRAME" || tagsForURL.type === "XMTP_FRAME") {
           return (
             <ChatMessageFramePreview
               tagsForURL={tagsForURL}
@@ -56,6 +56,7 @@ const ChatMessageFramePreview = ({
           <View style={styles.frameButtons}>
             {buttons.map((title, i) => (
               <View
+                key={`${title}-${i}`}
                 style={[
                   styles.frameButton,
                   { marginRight: i % 2 === 0 ? "4%" : 0 },

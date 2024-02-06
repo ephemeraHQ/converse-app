@@ -8,13 +8,14 @@ import { isContentType } from "./xmtpRN/contentTypes";
 export type TagsForURL = Awaited<
   ReturnType<typeof FramesClient.readMetadata>
 > & {
-  type: "FRAME" | "PREVIEW";
+  type: "FRAME" | "XMTP_FRAME" | "PREVIEW";
 };
 
-const isValidFrame = (tags: TagsForURL["extractedTags"]) => {
-  if (tags["fc:frame"] !== "vNext") return false;
-  if (!tags["fc:frame:image"]) return false;
-  return true;
+const getFrameType = (tags: TagsForURL["extractedTags"]) => {
+  if (tags["fc:frame"] !== "vNext") return undefined;
+  if (!tags["fc:frame:image"]) return undefined;
+  if (tags["xmtp:frame:post-url"]) return "XMTP_FRAME";
+  return "FRAME";
 };
 
 export const getMetadaTagsForMessage = async (
@@ -36,8 +37,9 @@ export const getMetadaTagsForMessage = async (
 
       urlsMetadata.forEach((response) => {
         if (response && Object.keys(response.extractedTags).length > 0) {
-          if (isValidFrame(response.extractedTags)) {
-            extractedTags.push({ ...response, type: "FRAME" });
+          const frameType = getFrameType(response.extractedTags);
+          if (frameType) {
+            extractedTags.push({ ...response, type: frameType });
           }
         }
       });
@@ -49,6 +51,8 @@ export const getMetadaTagsForMessage = async (
 };
 
 export const getFrameButtons = (tagsForURL: TagsForURL) => {
+  // @todo => uncomment
+  // if (tagsForURL.type !== "XMTP_FRAME") return [];
   const buttons: string[] = [];
 
   const button1 = tagsForURL.extractedTags["fc:frame:button:1"];
