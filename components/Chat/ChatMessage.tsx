@@ -6,6 +6,7 @@ import {
   Text,
   Platform,
   ColorSchemeName,
+  DimensionValue,
 } from "react-native";
 
 import MessageTail from "../../assets/message-tail.svg";
@@ -84,6 +85,21 @@ function ChatMessage({ message, colorScheme }: Props) {
   const isTransaction = isTransactionMessage(message.contentType);
   const reactions = getMessageReactions(message);
 
+  let messageMaxWidth: DimensionValue;
+  if (isDesktop) {
+    if (isAttachment) {
+      messageMaxWidth = 366;
+    } else {
+      messageMaxWidth = 588;
+    }
+  } else {
+    if (isAttachment) {
+      messageMaxWidth = "70%";
+    } else {
+      messageMaxWidth = "85%";
+    }
+  }
+
   return (
     <View
       style={[
@@ -117,13 +133,7 @@ function ChatMessage({ message, colorScheme }: Props) {
             },
           }),
           {
-            maxWidth: isDesktop
-              ? isAttachment
-                ? 366
-                : 588
-              : isAttachment
-              ? "70%"
-              : "75%",
+            maxWidth: messageMaxWidth,
           },
         ]}
       >
