@@ -190,7 +190,8 @@ func handleMessageByContentType(decodedMessage: DecodedMessage, xmtpClient: XMTP
       contentToSave = getJsonRemoteAttachment(remoteAttachment: remoteAttachment)
       contentToReturn = "📎 Media"
       
-    case let type where type.starts(with: "xmtp.org/transactionReference:"):
+    case let type where type.starts(with: "xmtp.org/transactionReference:") ||
+      type.starts(with: "coinbase.com/coinbase-messaging-payment-activity:"):
       contentToSave = try? decodedMessage.content()
       contentToReturn = "💸 Transaction"
     
