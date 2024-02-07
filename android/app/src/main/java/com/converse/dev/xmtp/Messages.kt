@@ -214,7 +214,7 @@ fun handleMessageByContentType(
                 contentToReturn = "📎 Media"
             }
 
-            contentType.startsWith("xmtp.org/transactionReference:") -> {
+            contentType.startsWith("xmtp.org/transactionReference:") || contentType.startsWith("coinbase.com/coinbase-messaging-payment-activity:") -> {
                 contentToSave = decodedMessage.body
                 contentToReturn = "💸 Transaction"
             }
