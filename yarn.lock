@@ -9816,7 +9816,7 @@
     "@xmtp/proto" "^3.29.0"
     "@xmtp/xmtp-js" "^11.1.2"
 
-"@xmtp/frames-client@^0.2.0":
+"@xmtp/frames-client@^0.2.1":
   version "0.2.1"
   resolved "https://registry.yarnpkg.com/@xmtp/frames-client/-/frames-client-0.2.1.tgz#de8af40c03f8fb6e45c6235a337b8477c8e60eb5"
   integrity sha512-QG9xEa9fIFwCUl6arDJ0nVNG1X7aGibfkD3u9fDKF0IVSBNES5nEIoSWUfMdNbR+pbu7pmtQSPV/G3s4ratJmQ==
