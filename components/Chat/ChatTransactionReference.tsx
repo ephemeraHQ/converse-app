@@ -20,6 +20,7 @@ import {
   textPrimaryColor,
   textSecondaryColor,
 } from "../../utils/colors";
+import { useConversationContext } from "../../utils/conversation";
 import { converseEventEmitter } from "../../utils/events";
 import { shortAddress } from "../../utils/str";
 import { useTransactionForMessage } from "../../utils/transaction";
@@ -116,8 +117,9 @@ const TransactionStatusView = ({
 export default function ChatTransactionReference({ message }: Props) {
   const colorScheme = useColorScheme();
   const styles = useStyles();
+  const { conversation } = useConversationContext(["conversation"]);
   const { transaction, transactionDisplay, amountToDisplay } =
-    useTransactionForMessage(message);
+    useTransactionForMessage(message, conversation?.peerAddress);
   const showing = transaction.loading;
 
   const showTransactionActionSheet = useCallback(() => {

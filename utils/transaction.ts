@@ -63,9 +63,11 @@ export const mergeTransactionRefData = (
 };
 
 export const extractChainIdToHex = (
-  networkRawValue: string | number
+  _networkRawValue: string | number
 ): string => {
   let chainId;
+
+  let networkRawValue = _networkRawValue;
 
   // Check if networkRawValue is already in hexadecimal format
   if (
@@ -75,14 +77,19 @@ export const extractChainIdToHex = (
     return networkRawValue;
   }
 
-  // Handle numeric chain ID (as a number or string that represents a number)
-  const numericValue =
-    typeof networkRawValue === "string"
-      ? parseInt(
-          networkRawValue.replace("ETHEREUM_CHAIN:", "").replace("/false", ""),
-          10
-        )
-      : networkRawValue;
+  let numericValue: number;
+
+  if (typeof networkRawValue === "string") {
+    // Check if coinbase reference
+    const coinbaseExtractedNetwork =
+      networkRawValue.match(/ETHEREUM_CHAIN:(\d+)/);
+    if (coinbaseExtractedNetwork) {
+      networkRawValue = coinbaseExtractedNetwork[1];
+    }
+    numericValue = parseInt(networkRawValue, 10);
+  } else {
+    numericValue = networkRawValue;
+  }
 
   // Ensure numericValue is a valid number
   if (!isNaN(numericValue)) {
@@ -209,7 +216,10 @@ export const formatAmount = (
   }
 };
 
-export const useTransactionForMessage = (message: MessageToDisplay) => {
+export const useTransactionForMessage = (
+  message: MessageToDisplay,
+  peerAddress?: string
+) => {
   const currentAccount = useCurrentAccount() as string;
   const saveTransactions = useTransactionsStore((s) => s.saveTransactions);
   const fetchingTransaction = useRef(false);
@@ -341,50 +351,63 @@ export const useTransactionForMessage = (message: MessageToDisplay) => {
     });
   }, [txLookup]);
 
-  const getTransactionInfo = useCallback((transaction: Transaction) => {
-    let amount, currency, decimals;
+  const getTransactionInfo = useCallback(
+    (transaction: Transaction) => {
+      let amount, currency, decimals;
 
-    // Determine source of transaction details (either from transfer event or metadata)
-    const transferEvent = transaction.events?.find(
-      (event) => event.type.toLowerCase() === "transfer"
-    );
-    if (transferEvent) {
-      ({ amount, currency, decimals } = transferEvent);
-    } else if (
-      transaction.sponsored &&
-      transaction.metadata &&
-      "amount" in transaction.metadata &&
-      "currency" in transaction.metadata &&
-      "decimals" in transaction.metadata
-    ) {
-      // Display tx details to the sender, while it is creating it on chain
-      ({ amount, currency, decimals } = transaction.metadata);
-    } else {
-      return {};
-    }
+      const sender = message.senderAddress.toLowerCase();
+      const receiver = message.fromMe
+        ? peerAddress?.toLowerCase()
+        : currentAccount.toLowerCase();
 
-    const isUSDC = (currency as string).toLowerCase() === "usdc";
-    const formattedAmountWithCurrencySymbol = formatAmount(
-      amount as number,
-      currency as string,
-      decimals as number
-    );
-    const formattedAmount = formatAmount(
-      amount as number,
-      currency as string,
-      decimals as number,
-      false
-    );
+      // Determine source of transaction details (either from transfer event or metadata)
+      // And verify that tx is between the two peers
+      const transferEvent = transaction.events?.find(
+        (event) =>
+          event.type.toLowerCase() === "transfer" &&
+          event.from.toLowerCase() === sender &&
+          event.to.toLowerCase() === receiver
+      );
+      if (transferEvent) {
+        ({ amount, currency, decimals } = transferEvent);
+      } else if (
+        transaction.sponsored &&
+        transaction.metadata &&
+        transaction.status === "PENDING" &&
+        "amount" in transaction.metadata &&
+        "currency" in transaction.metadata &&
+        "decimals" in transaction.metadata
+      ) {
+        // Display tx details to the sender, while it is creating it on chain
+        ({ amount, currency, decimals } = transaction.metadata);
+      } else {
+        return {};
+      }
 
-    const transactionDisplay = isUSDC
-      ? `${formattedAmount} –`
-      : `${transaction.chainName || "–"} –`;
+      const isUSDC = (currency as string).toLowerCase() === "usdc";
+      const formattedAmountWithCurrencySymbol = formatAmount(
+        amount as number,
+        currency as string,
+        decimals as number
+      );
+      const formattedAmount = formatAmount(
+        amount as number,
+        currency as string,
+        decimals as number,
+        false
+      );
 
-    return {
-      transactionDisplay,
-      amountToDisplay: formattedAmountWithCurrencySymbol,
-    };
-  }, []);
+      const transactionDisplay = isUSDC
+        ? `${formattedAmount} –`
+        : `${transaction.chainName || "–"} –`;
+
+      return {
+        transactionDisplay,
+        amountToDisplay: formattedAmountWithCurrencySymbol,
+      };
+    },
+    [currentAccount, message.fromMe, message.senderAddress, peerAddress]
+  );
 
   const { transactionDisplay, amountToDisplay } =
     getTransactionInfo(transaction);
