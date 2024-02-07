@@ -31,9 +31,12 @@ export const getMetadaTagsForMessage = async (
       console.log(
         `[FramesMetadata] Found ${urls.length} URLs in message, fetching tags`
       );
+      const uniqueUrls = Array.from(new Set(urls));
       const urlsMetadata = await Promise.all(
-        urls.map(
-          (u) => FramesClient.readMetadata(u).catch((e) => console.error(e)) // We agree to have one frame that fails to preview
+        uniqueUrls.map((u) =>
+          FramesClient.readMetadata(u).catch((e) =>
+            console.log(`[FramesMetadata] ${e}`)
+          )
         )
       );
 
