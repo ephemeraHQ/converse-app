@@ -14,10 +14,14 @@ export type TagsForURL = Awaited<
 };
 
 export const getFrameType = (tags: TagsForURL["extractedTags"]) => {
-  if (tags["fc:frame"] !== "vNext") return undefined;
-  if (!tags["fc:frame:image"]) return undefined;
-  if (tags["xmtp:frame:post-url"]) return "XMTP_FRAME";
-  return "FRAME";
+  if (tags["fc:frame"] === "vNext" && tags["fc:frame:image"]) {
+    if (tags["xmtp:frame:post-url"]) return "XMTP_FRAME";
+    return "FRAME";
+  }
+  if (tags["og:image"] || tags["og:title"]) {
+    return "PREVIEW";
+  }
+  return undefined;
 };
 
 export const getMetadaTagsForMessage = async (
@@ -62,7 +66,8 @@ export type FrameButtonType = {
 };
 
 export const getFrameButtons = (tagsForURL: TagsForURL) => {
-  if (tagsForURL.type !== "XMTP_FRAME") return [];
+  if (tagsForURL.type !== "XMTP_FRAME" && tagsForURL.type !== "FRAME")
+    return [];
   const buttons: FrameButtonType[] = [];
 
   const button1 = tagsForURL.extractedTags["fc:frame:button:1"];
