@@ -1,7 +1,7 @@
 import { FramesClient } from "@xmtp/frames-client";
 import { Image } from "expo-image";
 import * as Linking from "expo-linking";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
   Alert,
   StyleSheet,
@@ -39,25 +39,33 @@ type Props = {
 };
 
 export default function ChatMessageFramePreviews({ message }: Props) {
+  const messageId = useRef(message.id);
+  const tagsFetchedOnce = useRef(false);
   const [tagsForURLs, setTagsForURLs] = useState<TagsForURL[]>([]);
 
   useEffect(() => {
-    getMetadaTagsForMessage(message).then(setTagsForURLs);
+    if (messageId.current !== message.id) {
+      messageId.current = message.id;
+      // Resetting state because components are recycled
+      setTagsForURLs([]);
+      tagsFetchedOnce.current = true;
+      getMetadaTagsForMessage(message).then(setTagsForURLs);
+    } else if (!tagsFetchedOnce.current) {
+      tagsFetchedOnce.current = true;
+      getMetadaTagsForMessage(message).then(setTagsForURLs);
+    }
   }, [message]);
 
   return (
     <View>
       {tagsForURLs.map((tagsForURL) => {
-        if (tagsForURL.type === "FRAME" || tagsForURL.type === "XMTP_FRAME") {
-          return (
-            <ChatMessageFramePreview
-              message={message}
-              initialFrame={tagsForURL}
-              key={tagsForURL.url}
-            />
-          );
-        }
-        return null;
+        return (
+          <ChatMessageFramePreview
+            message={message}
+            initialFrame={tagsForURL}
+            key={tagsForURL.url}
+          />
+        );
       })}
     </View>
   );
@@ -137,29 +145,40 @@ const ChatMessageFramePreview = ({
     },
     [account, conversation, frame, frameUrl, message.topic]
   );
+
+  const showBottom =
+    (frame.type === "PREVIEW" && frame.extractedTags["og:title"]) ||
+    buttons.length > 0 ||
+    textInput;
+  const frameImage =
+    frame.type === "PREVIEW"
+      ? frame.extractedTags["og:image"]
+      : frame.extractedTags["fc:frame:image"];
+
   return (
     <View style={styles.frameWrapper}>
       <View style={styles.frameContainer}>
-        <TouchableWithoutFeedback
-          onPress={() => {
-            const initialFrameURL =
-              initialFrame.extractedTags["xmtp:frame:post-url"];
-            if (initialFrameURL && initialFrameURL.startsWith("https")) {
-              Linking.openURL(initialFrameURL);
-            }
-          }}
-        >
-          <Image
-            source={{ uri: frame.extractedTags["fc:frame:image"] }}
-            contentFit="cover"
-            style={[styles.frameImage, { opacity: posting ? 0.8 : 1 }]}
-          />
-        </TouchableWithoutFeedback>
+        {frameImage && (
+          <TouchableWithoutFeedback
+            onPress={() => {
+              const initialFrameURL = initialFrame.url;
+              if (initialFrameURL && initialFrameURL.startsWith("https")) {
+                Linking.openURL(initialFrameURL);
+              }
+            }}
+          >
+            <Image
+              source={{ uri: frameImage }}
+              contentFit="cover"
+              style={[styles.frameImage, { opacity: posting ? 0.8 : 1 }]}
+            />
+          </TouchableWithoutFeedback>
+        )}
 
-        {(buttons.length > 0 || textInput) && (
+        {showBottom && (
           <View
             style={[
-              styles.frameActions,
+              styles.frameBottom,
               {
                 backgroundColor: message.fromMe
                   ? myMessageInnerBubbleColor(colorScheme)
@@ -167,31 +186,54 @@ const ChatMessageFramePreview = ({
               },
             ]}
           >
-            {textInput && (
-              <TextInput
-                autoCorrect={false}
-                autoComplete="off"
-                autoCapitalize="none"
-                style={styles.frameTextInput}
-                onFocus={() => {
-                  setFrameInputFocused(true);
-                }}
-                onBlur={() => {
-                  setFrameInputFocused(false);
-                }}
-                placeholder={textInput}
-              />
+            {frame.type === "XMTP_FRAME" && (
+              <>
+                {textInput && (
+                  <TextInput
+                    autoCorrect={false}
+                    autoComplete="off"
+                    autoCapitalize="none"
+                    style={styles.frameTextInput}
+                    onFocus={() => {
+                      setFrameInputFocused(true);
+                    }}
+                    onBlur={() => {
+                      setFrameInputFocused(false);
+                    }}
+                    placeholder={textInput}
+                  />
+                )}
+                {buttons.length > 0 &&
+                  buttons.map((button) => (
+                    <FrameButton
+                      key={`${button.title}-${button.index}`}
+                      posting={posting}
+                      button={button}
+                      fullWidth={buttons.length === 1}
+                      onPress={() =>
+                        setTimeout(() => onButtonPress(button), 10)
+                      }
+                    />
+                  ))}
+              </>
             )}
-            {buttons.length > 0 &&
-              buttons.map((button) => (
-                <FrameButton
-                  key={`${button.title}-${button.index}`}
-                  posting={posting}
-                  button={button}
-                  fullWidth={buttons.length === 1}
-                  onPress={() => setTimeout(() => onButtonPress(button), 10)}
-                />
-              ))}
+            {(frame.type === "FRAME" || frame.type === "PREVIEW") && (
+              <Text
+                style={[
+                  styles.frameBottomText,
+                  {
+                    color: message.fromMe
+                      ? "white"
+                      : textPrimaryColor(colorScheme),
+                    fontWeight: frame.type === "PREVIEW" ? "600" : "400",
+                  },
+                ]}
+              >
+                {frame.type === "FRAME"
+                  ? "This frame is not supported by XMTP yet, please use a Farcaster client to interact with it."
+                  : frame.extractedTags["og:title"]}
+              </Text>
+            )}
           </View>
         )}
       </View>
@@ -257,7 +299,7 @@ const useStyles = () => {
       overflow: "hidden",
     },
     frameImage: { aspectRatio: 1.91, width: "100%" },
-    frameActions: {
+    frameBottom: {
       flexDirection: "row",
       flexWrap: "wrap",
       paddingTop: 3,
@@ -297,6 +339,11 @@ const useStyles = () => {
       fontSize: 12,
       paddingVertical: 9,
       paddingHorizontal: 6,
+    },
+    frameBottomText: {
+      paddingHorizontal: 4,
+      paddingVertical: 8,
+      fontSize: 15,
     },
   });
 };
