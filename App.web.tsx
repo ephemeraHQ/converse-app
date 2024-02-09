@@ -21,7 +21,7 @@ const mainnet = {
   name: "Ethereum",
   currency: "ETH",
   explorerUrl: "https://etherscan.io",
-  rpcUrl: "https://cloudflare-eth.com",
+  rpcUrl: config.evm.rpcEndpoint,
 };
 
 createWeb3Modal({
