@@ -4,6 +4,7 @@ import {
   ReactionCodec,
   ReadReceiptCodec,
   RemoteAttachmentCodec,
+  ReplyCodec,
   StaticAttachmentCodec,
   TextCodec,
 } from "@xmtp/react-native-sdk";
@@ -21,11 +22,11 @@ export const getXmtpClientFromBase64Key = (base64Key: string) =>
       new TextCodec(),
       new ReactionCodec(),
       new ReadReceiptCodec(),
+      new ReplyCodec(),
       new RemoteAttachmentCodec(),
       new StaticAttachmentCodec(),
       new TransactionReferenceCodec(),
       new CoinbaseMessagingPaymentCodec(),
-      // new ReplyCodec()
     ],
   });
 

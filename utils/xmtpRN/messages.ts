@@ -3,6 +3,7 @@ import {
   DecodedMessage,
   ReactionContent,
   RemoteAttachmentContent,
+  ReplyContent,
   StaticAttachmentContent,
 } from "@xmtp/react-native-sdk";
 
@@ -36,6 +37,9 @@ const protocolMessageToStateMessage = (
   } else if (isContentType("reaction", contentType)) {
     content = JSON.stringify(message.content() as ReactionContent);
     referencedMessageId = (message.content() as ReactionContent).reference;
+  } else if (isContentType("reply", contentType)) {
+    content = JSON.stringify(message.content() as ReplyContent);
+    referencedMessageId = (message.content() as ReplyContent).reference;
   } else if (isContentType("transactionReference", contentType)) {
     content = JSON.stringify(message.content() as TransactionReference);
   } else if (isContentType("coinbasePayment", contentType)) {

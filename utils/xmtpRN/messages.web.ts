@@ -3,6 +3,7 @@ import {
   RemoteAttachment,
   Attachment,
 } from "@xmtp/content-type-remote-attachment";
+import { Reply } from "@xmtp/content-type-reply";
 import { TransactionReference } from "@xmtp/content-type-transaction-reference";
 import { messageApi } from "@xmtp/proto";
 import { Envelope } from "@xmtp/proto/ts/dist/types/message_api/v1/message_api.pb";
@@ -35,6 +36,9 @@ const protocolMessageToStateMessage = (
   } else if (isContentType("reaction", contentType)) {
     content = JSON.stringify(message.content as Reaction);
     referencedMessageId = (message.content as Reaction).reference;
+  } else if (isContentType("reply", contentType)) {
+    content = JSON.stringify(message.content as Reply);
+    referencedMessageId = (message.content as Reply).reference;
   } else if (isContentType("transactionReference", contentType)) {
     content = JSON.stringify(message.content as TransactionReference);
   } else if (isContentType("coinbasePayment", contentType)) {
