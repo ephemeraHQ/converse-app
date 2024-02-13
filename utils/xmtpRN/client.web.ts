@@ -4,6 +4,7 @@ import {
   AttachmentCodec,
   RemoteAttachmentCodec,
 } from "@xmtp/content-type-remote-attachment";
+import { ReplyCodec } from "@xmtp/content-type-reply";
 import { TransactionReferenceCodec } from "@xmtp/content-type-transaction-reference";
 import { Client } from "@xmtp/xmtp-js";
 
@@ -22,6 +23,7 @@ export const getXmtpClientFromBase64Key = async (base64Key: string) => {
   client.registerCodec(new AttachmentCodec());
   client.registerCodec(new RemoteAttachmentCodec());
   client.registerCodec(new ReadReceiptCodec());
+  client.registerCodec(new ReplyCodec());
   client.registerCodec(new TransactionReferenceCodec());
   client.registerCodec(new CoinbaseMessagingPaymentCodec());
   return client;

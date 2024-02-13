@@ -3,6 +3,7 @@ export const contentTypesPrefixes: { [key: string]: string } = {
   remoteAttachment: "xmtp.org/remoteStaticAttachment:",
   attachment: "xmtp.org/attachment:",
   reaction: "xmtp.org/reaction:",
+  reply: "xmtp.org/reply:",
   readReceipt: "xmtp.org/readReceipt:",
   coinbasePayment: "coinbase.com/coinbase-messaging-payment-activity:",
   transactionReference: "xmtp.org/transactionReference:",

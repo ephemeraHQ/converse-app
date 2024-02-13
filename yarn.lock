@@ -9808,6 +9808,14 @@
     "@xmtp/proto" "^3.29.0"
     "@xmtp/xmtp-js" "^11.1.2"
 
+"@xmtp/content-type-reply@^1.1.7":
+  version "1.1.7"
+  resolved "https://registry.yarnpkg.com/@xmtp/content-type-reply/-/content-type-reply-1.1.7.tgz#318f63bc303dd4e1248e7b700442141f0d82fea5"
+  integrity sha512-1qGIJhr5udHlIjLDDjwG/bcTeHRVs4Doe53VhhW+1Pyb7eV9NtI5WGvxz1tNQ0wdBWB3vVx5sc9o+zHn7wOxAQ==
+  dependencies:
+    "@xmtp/proto" "^3.29.0"
+    "@xmtp/xmtp-js" "^11.1.2"
+
 "@xmtp/content-type-transaction-reference@^1.0.1":
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/@xmtp/content-type-transaction-reference/-/content-type-transaction-reference-1.0.1.tgz#7adbf484ef37ce2c2e83a60337f2eba9504da14b"
