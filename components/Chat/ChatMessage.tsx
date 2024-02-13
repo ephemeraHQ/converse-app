@@ -1,3 +1,4 @@
+import { ReplyContent } from "@xmtp/react-native-sdk";
 import { ReactNode } from "react";
 import {
   View,
@@ -17,6 +18,7 @@ import {
   textPrimaryColor,
   textSecondaryColor,
 } from "../../utils/colors";
+import { useConversationContext } from "../../utils/conversation";
 import { getRelativeDate } from "../../utils/date";
 import { isDesktop } from "../../utils/device";
 import { LimitedMap } from "../../utils/objects";
@@ -44,6 +46,7 @@ type Props = {
 };
 
 function ChatMessage({ message, colorScheme }: Props) {
+  const { conversation } = useConversationContext(["conversation"]);
   const styles = useStyles();
 
   const metadata = (
@@ -61,6 +64,32 @@ function ChatMessage({ message, colorScheme }: Props) {
     case "coinbasePayment":
       messageContent = <ChatTransactionReference message={message} />;
       break;
+    case "reply": {
+      const replyContent = JSON.parse(message.content) as ReplyContent;
+      const replyContentType = getMessageContentType(replyContent.contentType);
+      let output = message.content;
+
+      if (replyContentType === "text") {
+        output = replyContent.content.text;
+      }
+
+      const referencedMessage = conversation?.messages.get(
+        replyContent.reference
+      );
+
+      messageContent = (
+        <ClickableText
+          style={[
+            styles.messageText,
+            message.fromMe ? styles.messageTextMe : undefined,
+          ]}
+        >
+          {referencedMessage?.content} → {output}
+          <View style={{ opacity: 0 }}>{metadata}</View>
+        </ClickableText>
+      );
+      break;
+    }
     default:
       messageContent = (
         <ClickableText
