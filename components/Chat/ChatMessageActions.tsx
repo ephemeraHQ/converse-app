@@ -118,8 +118,8 @@ export default function ChatMessageActions({
   }, []);
 
   const triggerReplyToMessage = useCallback(() => {
-    converseEventEmitter.emit("triggerReplyToMessage", message.id);
-  }, [message.id]);
+    converseEventEmitter.emit("triggerReplyToMessage", message);
+  }, [message]);
 
   const canAddReaction =
     message.status !== "sending" && message.status !== "error";
