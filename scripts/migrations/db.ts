@@ -35,7 +35,7 @@ const ensName = (): string => {
 
 const exec = (command: string) => {
   try {
-    const result = execSync(command);
+    const result = execSync(command, { cwd: __dirname });
     const trimmed = result.toString().trim();
     if (trimmed) {
       console.log(trimmed);
@@ -161,7 +161,13 @@ const commands = {
     await commands.initialize();
     console.log("Generating migration...");
     exec(
-      `./node_modules/typeorm/cli-ts-node-commonjs.js migration:generate -d scripts/migrations/datasource.ts data/db/migrations/${migrationName}`
+      `${path.join(
+        __dirname,
+        "../../node_modules/typeorm/cli-ts-node-commonjs.js"
+      )} migration:generate -d ${path.join(
+        __dirname,
+        "./datasource.ts"
+      )} ${path.join(__dirname, `../../data/db/migrations/${migrationName}`)}`
     );
   },
 };
