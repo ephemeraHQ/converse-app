@@ -15,7 +15,11 @@ export const saveMessages = async (
 ) => {
   // Infer referenced message from content if needed
   messages.forEach((c) => {
-    if (!c.referencedMessageId && isContentType("reaction", c.contentType)) {
+    if (
+      !c.referencedMessageId &&
+      (isContentType("reaction", c.contentType) ||
+        isContentType("text", c.contentType))
+    ) {
       try {
         c.referencedMessageId = JSON.parse(c.content).reference;
       } catch (e) {

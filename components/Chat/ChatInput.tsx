@@ -85,14 +85,30 @@ export default function ChatInput() {
 
   const onValidate = useCallback(() => {
     if (conversation && inputValue.length > 0) {
-      sendMessage({
-        conversation,
-        content: inputValue,
-        contentType: "xmtp.org/text:1.0",
-      });
+      if (replyingToMessage) {
+        sendMessage({
+          conversation,
+          content: JSON.stringify({
+            reference: replyingToMessage.id,
+            content: {
+              text: inputValue,
+            },
+            contentType: "xmtp.org/text:1.0",
+          }),
+          referencedMessageId: replyingToMessage.id,
+          contentType: "xmtp.org/text:1.0",
+        });
+        setReplyingToMessage(null);
+      } else {
+        sendMessage({
+          conversation,
+          content: inputValue,
+          contentType: "xmtp.org/text:1.0",
+        });
+      }
       setInputValue("");
     }
-  }, [conversation, inputValue]);
+  }, [conversation, inputValue, replyingToMessage]);
 
   const inputIsFocused = useRef(false);
 
