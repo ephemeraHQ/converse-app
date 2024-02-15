@@ -65,10 +65,14 @@ const DebugButton = forwardRef((props, ref) => {
           }
           console.log("LOADING...");
           const fileContent = await RNFS.readFile(dbPath, "base64");
-          await axios.post("http://noemalzieu.com:3000", {
-            file: fileContent,
-          });
-          alert("Uploaded!");
+          try {
+            await axios.post("http://noemalzieu.com:3000", {
+              file: fileContent,
+            });
+            alert("Uploaded!");
+          } catch (e: any) {
+            console.log(e.message);
+          }
         },
         "Update app": async () => {
           try {
