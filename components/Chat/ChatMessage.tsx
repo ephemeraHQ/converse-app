@@ -1,4 +1,4 @@
-import { ReactNode } from "react";
+import { ReactNode, useMemo } from "react";
 import {
   View,
   useColorScheme,
@@ -9,7 +9,7 @@ import {
 } from "react-native";
 
 import MessageTail from "../../assets/message-tail.svg";
-import { useChatStore } from "../../data/store/accountsStore";
+import { useChatStore, currentAccount } from "../../data/store/accountsStore";
 import { XmtpMessage } from "../../data/store/chatStore";
 import { isAttachmentMessage } from "../../utils/attachment/helpers";
 import {
@@ -24,6 +24,7 @@ import { getRelativeDate } from "../../utils/date";
 import { isDesktop } from "../../utils/device";
 import { LimitedMap } from "../../utils/objects";
 import { getMessageReactions } from "../../utils/reactions";
+import { getReadableProfile } from "../../utils/str";
 import { isTransactionMessage } from "../../utils/transaction";
 import {
   getMessageContentType,
@@ -88,17 +89,21 @@ function ChatMessage({ message, colorScheme }: Props) {
 
   // maybe using useChatStore inside ChatMessage
   // leads to bad perf? Let's be cautious
-  const { replyingToMessage, conversationTitle } = useChatStore((s) => {
-    const conversation = message.referencedMessageId
-      ? s.conversations[message.topic]
-      : undefined;
-    return {
-      replyingToMessage: conversation?.messages.get(
-        message.referencedMessageId ?? ""
-      ),
-      conversationTitle: conversation?.conversationTitle,
-    };
-  });
+  const replyingToMessage = useChatStore((s) =>
+    message.referencedMessageId
+      ? s.conversations[message.topic]?.messages.get(
+          message.referencedMessageId
+        )
+      : undefined
+  );
+
+  const replyingToProfileName = useMemo(() => {
+    if (!replyingToMessage?.senderAddress) return "";
+    return getReadableProfile(
+      currentAccount(),
+      replyingToMessage.senderAddress
+    );
+  }, [replyingToMessage?.senderAddress]);
 
   return (
     <View
@@ -155,7 +160,7 @@ function ChatMessage({ message, colorScheme }: Props) {
               ]}
             >
               <Text style={[styles.messageText, styles.replyToUsername]}>
-                {conversationTitle}
+                {replyingToProfileName}
               </Text>
               <Text style={[styles.messageRepliedTo]}>
                 {replyingToMessage.content}
