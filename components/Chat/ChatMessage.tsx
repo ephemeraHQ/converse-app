@@ -186,14 +186,10 @@ function ChatMessage({ message, colorScheme }: Props) {
               >
                 {replyingToProfileName}
               </Text>
-              <Text
-                style={[
-                  styles.messageRepliedTo,
-                  message.fromMe ? styles.messageTextMe : undefined,
-                ]}
-              >
-                <ChatMessageReplyBubble replyingToMessage={replyingToMessage} />
-              </Text>
+              <ChatMessageReplyBubble
+                replyingToMessage={replyingToMessage}
+                fromMe={message.fromMe}
+              />
             </View>
             <View
               style={
@@ -294,9 +290,6 @@ const useStyles = () => {
     },
     innerBubbleMe: {
       backgroundColor: myMessageInnerBubbleColor(colorScheme),
-    },
-    messageRepliedTo: {
-      color: textSecondaryColor(colorScheme),
     },
     messageRow: {
       flexDirection: "row",

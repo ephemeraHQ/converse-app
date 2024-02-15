@@ -8,14 +8,21 @@ import { isTransactionMessage } from "../../utils/transaction";
 
 export default function ChatMessageReplyBubble({
   replyingToMessage,
+  fromMe,
 }: {
   replyingToMessage: XmtpMessage;
+  fromMe: boolean;
 }) {
   const styles = useStyles();
 
   return (
     <View>
-      <Text style={[styles.replyToMessage]}>
+      <Text
+        style={[
+          styles.messageRepliedTo,
+          fromMe ? styles.messageTextMe : undefined,
+        ]}
+      >
         {isAttachmentMessage(replyingToMessage.contentType)
           ? `📎 Media from ${getRelativeDateTime(replyingToMessage.sent)}`
           : isTransactionMessage(replyingToMessage.contentType)
@@ -29,9 +36,12 @@ export default function ChatMessageReplyBubble({
 const useStyles = () => {
   const colorScheme = useColorScheme();
   return StyleSheet.create({
-    replyToMessage: {
+    messageRepliedTo: {
       fontSize: 15,
       color: textSecondaryColor(colorScheme),
+    },
+    messageTextMe: {
+      color: "white",
     },
   });
 };
