@@ -166,7 +166,7 @@ function ChatMessage({ message, colorScheme }: Props) {
                 {replyingToMessage.content}
               </Text>
             </View>
-            <Text
+            <View
               style={
                 isContentType("text", message.contentType)
                   ? styles.messageTextReply
@@ -174,7 +174,7 @@ function ChatMessage({ message, colorScheme }: Props) {
               }
             >
               {messageContent}
-            </Text>
+            </View>
           </View>
         ) : (
           messageContent
@@ -334,6 +334,7 @@ const useStyles = () => {
       position: "absolute",
       bottom: 6,
       right: 12,
+      zIndex: -1,
     },
   });
 };
