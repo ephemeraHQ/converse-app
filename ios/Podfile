@@ -17,8 +17,8 @@ install! 'cocoapods',
 
 
 # Version must match version from XMTP Podspec (matching @xmtp/react-native-sdk from package.json)
-# https://github.com/xmtp/xmtp-react-native/blob/v1.24.2/ios/XMTPReactNative.podspec#L29
-$xmtpVersion = '0.7.6-alpha0'
+# https://github.com/xmtp/xmtp-react-native/blob/v1.27.0-beta.11/ios/XMTPReactNative.podspec#L29
+$xmtpVersion = '0.8.5'
 
 # Pinning MMKV to 1.3.3 that has included that fix https://github.com/Tencent/MMKV/pull/1222#issuecomment-1905164314
 $mmkvVersion = '1.3.3'

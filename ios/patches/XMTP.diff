@@ -1,6 +1,6 @@
-diff --color=auto -ur Pods/XMTP/Sources/XMTP/ConversationV2.swift Pods/XMTP/Sources/XMTP/ConversationV2.swift
---- Pods/XMTP/Sources/XMTP/ConversationV2.swift	2023-12-07 14:43:36
-+++ Pods/XMTP/Sources/XMTP/ConversationV2.swift	2023-12-07 14:43:02
+diff --color=auto -ur Pods/XMTP/Sources/XMTPiOS/ConversationV2.swift Pods/XMTP/Sources/XMTPiOS/ConversationV2.swift
+--- Pods/XMTP/Sources/XMTPiOS/ConversationV2.swift	2023-12-07 14:43:36
++++ Pods/XMTP/Sources/XMTPiOS/ConversationV2.swift	2023-12-07 14:43:02
 @@ -143,7 +143,9 @@
  
  	func decrypt(envelope: Envelope) throws -> DecryptedMessage {
@@ -24,9 +24,9 @@ diff --color=auto -ur Pods/XMTP/Sources/XMTP/ConversationV2.swift Pods/XMTP/Sour
  	}
  
  	@discardableResult func send<T>(content: T, options: SendOptions? = nil) async throws -> String {
-diff --color=auto -ur Pods/XMTP/Sources/XMTP/DecodedMessage.swift Pods/XMTP/Sources/XMTP/DecodedMessage.swift
---- Pods/XMTP/Sources/XMTP/DecodedMessage.swift	2023-12-07 14:43:36
-+++ Pods/XMTP/Sources/XMTP/DecodedMessage.swift	2023-12-07 14:43:02
+diff --color=auto -ur Pods/XMTP/Sources/XMTPiOS/DecodedMessage.swift Pods/XMTP/Sources/XMTPiOS/DecodedMessage.swift
+--- Pods/XMTP/Sources/XMTPiOS/DecodedMessage.swift	2023-12-07 14:43:36
++++ Pods/XMTP/Sources/XMTPiOS/DecodedMessage.swift	2023-12-07 14:43:02
 @@ -20,6 +20,8 @@
  
  	/// When the message was sent
@@ -36,9 +36,9 @@ diff --color=auto -ur Pods/XMTP/Sources/XMTP/DecodedMessage.swift Pods/XMTP/Sour
  
  	public var client: Client
  
-diff --color=auto -ur Pods/XMTP/Sources/XMTP/Messages/DecryptedMessage.swift Pods/XMTP/Sources/XMTP/Messages/DecryptedMessage.swift
---- Pods/XMTP/Sources/XMTP/Messages/DecryptedMessage.swift	2023-12-07 14:43:36
-+++ Pods/XMTP/Sources/XMTP/Messages/DecryptedMessage.swift	2023-12-07 14:43:02
+diff --color=auto -ur Pods/XMTP/Sources/XMTPiOS/Messages/DecryptedMessage.swift Pods/XMTP/Sources/XMTPiOS/Messages/DecryptedMessage.swift
+--- Pods/XMTP/Sources/XMTPiOS/Messages/DecryptedMessage.swift	2023-12-07 14:43:36
++++ Pods/XMTP/Sources/XMTPiOS/Messages/DecryptedMessage.swift	2023-12-07 14:43:02
 @@ -9,6 +9,7 @@
  
  public struct DecryptedMessage {

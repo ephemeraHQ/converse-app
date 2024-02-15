@@ -191,6 +191,7 @@ PODS:
   - libwebp/sharpyuv (1.3.2)
   - libwebp/webp (1.3.2):
     - libwebp/sharpyuv
+  - LibXMTP (0.4.1-beta3)
   - Logging (1.0.0)
   - MessagePacker (0.4.7)
   - MMKV (1.3.3):
@@ -1323,17 +1324,16 @@ PODS:
     - GenericJSON (~> 2.0)
     - Logging (~> 1.0.0)
     - secp256k1.swift (~> 0.1)
-  - XMTP (0.7.6-alpha0):
+  - XMTP (0.8.5):
     - Connect-Swift (= 0.3.0)
     - GzipSwift
+    - LibXMTP (= 0.4.1-beta3)
     - web3.swift
-    - XMTPRust (= 0.3.7-beta0)
-  - XMTPReactNative (1.24.2):
+  - XMTPReactNative (1.27.0-beta.11):
     - ExpoModulesCore
     - MessagePacker
     - secp256k1.swift
-    - XMTP (= 0.7.6-alpha0)
-  - XMTPRust (0.3.7-beta0)
+    - XMTP (= 0.8.5)
   - Yoga (1.14.0)
 
 DEPENDENCIES:
@@ -1448,7 +1448,7 @@ DEPENDENCIES:
   - Sentry/HybridSDK (= 8.17.1)
   - SQLite.swift
   - UMAppLoader (from `../node_modules/unimodules-app-loader/ios`)
-  - XMTP (= 0.7.6-alpha0)
+  - XMTP (= 0.8.5)
   - "XMTPReactNative (from `../node_modules/@xmtp/react-native-sdk/ios`)"
   - Yoga (from `../node_modules/react-native/ReactCommon/yoga`)
 
@@ -1465,6 +1465,7 @@ SPEC REPOS:
     - libevent
     - libvmaf
     - libwebp
+    - LibXMTP
     - Logging
     - MessagePacker
     - MMKV
@@ -1484,7 +1485,6 @@ SPEC REPOS:
     - SwiftProtobuf
     - web3.swift
     - XMTP
-    - XMTPRust
 
 EXTERNAL SOURCES:
   boost:
@@ -1750,6 +1750,7 @@ SPEC CHECKSUMS:
   libevent: 4049cae6c81cdb3654a443be001fb9bdceff7913
   libvmaf: 27f523f1e63c694d14d534cd0fddd2fab0ae8711
   libwebp: 1786c9f4ff8a279e4dac1e8f385004d5fc253009
+  LibXMTP: 678390cd0049d090af4aa6a7d5c9133ded3473b3
   Logging: 9ef4ecb546ad3169398d5a723bc9bea1c46bef26
   MessagePacker: ab2fe250e86ea7aedd1a9ee47a37083edd41fd02
   MMKV: f902fb6719da13c2ab0965233d8963a59416f911
@@ -1832,11 +1833,10 @@ SPEC CHECKSUMS:
   SwiftProtobuf: b02b5075dcf60c9f5f403000b3b0c202a11b6ae1
   UMAppLoader: 5df85360d65cabaef544be5424ac64672e648482
   web3.swift: 2263d1e12e121b2c42ffb63a5a7beb1acaf33959
-  XMTP: 61788f11954c6f5fdc01ad585c5b0f756f02cb0e
-  XMTPReactNative: 82203ad1bde3aaca1b9afb3c846116f32e65f442
-  XMTPRust: 8848a2ba761b2c961d666632f2ad27d1082faa93
+  XMTP: 1957e318059e8723bc1e76b1723c1eeb98e7760b
+  XMTPReactNative: f441da5d3461ac7ea32675cbc8adc7d173c8353f
   Yoga: e64aa65de36c0832d04e8c7bd614396c77a80047
 
-PODFILE CHECKSUM: 23188827bae87d792a29ed1e43af3c2caf6c9279
+PODFILE CHECKSUM: 4eeafada087f19657bed15f41291a11eee832d61
 
 COCOAPODS: 1.14.3
