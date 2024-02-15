@@ -37,8 +37,19 @@ const protocolMessageToStateMessage = (
     content = JSON.stringify(message.content as Reaction);
     referencedMessageId = (message.content as Reaction).reference;
   } else if (isContentType("reply", contentType)) {
-    content = JSON.stringify(message.content as Reply);
-    referencedMessageId = (message.content as Reply).reference;
+    const replyContent = message.content as Reply;
+    const replyContentType = replyContent.contentType.toString();
+    let newContentType = contentType;
+    if (
+      isContentType("reply", replyContentType) ||
+      isContentType("reaction", replyContentType)
+    ) {
+      content = "";
+      newContentType = replyContentType;
+    } else {
+      content = JSON.stringify(replyContent.content);
+      referencedMessageId = replyContent.reference;
+    }
   } else if (isContentType("transactionReference", contentType)) {
     content = JSON.stringify(message.content as TransactionReference);
   } else if (isContentType("coinbasePayment", contentType)) {
