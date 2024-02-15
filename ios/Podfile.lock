@@ -1705,7 +1705,7 @@ SPEC CHECKSUMS:
   CoinbaseWalletSDK: ea1f37512bbc69ebe07416e3b29bf840f5cc3152
   CoinbaseWalletSDKExpo: fc6cc756974827763d7a0decf7140c2902dafca2
   Connect-Swift: d38eedc1907d440314f8d26d5a038a00cbb0f6f1
-  DoubleConversion: fea03f2699887d960129cc54bba7e52542b6f953
+  DoubleConversion: 5189b271737e1565bdce30deb4a08d647e3f5f54
   EASClient: a42ee8bf36c93b3128352faf2ae49405ab4f80bd
   EXApplication: 137189a3f149b4e8e546884629392c3efc94cbd3
   EXConstants: 988aa430ca0f76b43cd46b66e7fae3287f9cc2fc
@@ -1742,7 +1742,7 @@ SPEC CHECKSUMS:
   FBReactNativeSpec: 86de768f89901ef6ed3207cd686362189d64ac88
   fmt: ff9d55029c625d3757ed641535fd4a75fedc7ce9
   GenericJSON: 79a840eeb77030962e8cf02a62d36bd413b67626
-  glog: c5d68082e772fa1c511173d6b30a9de2c05a69a2
+  glog: 04b94705f318337d7ead9e6d17c019bd9b1f6b1b
   GzipSwift: 893f3e48e597a1a4f62fafcb6514220fcf8287fa
   hermes-engine: b361c9ef5ef3cda53f66e195599b47e1f84ffa35
   libaom: 144606b1da4b5915a1054383c3a4459ccdb3c661
