@@ -85,10 +85,12 @@ const ChatMessageFramePreview = ({
     "setFrameInputFocused",
   ]);
   const account = useCurrentAccount() as string;
-  const colorScheme = useColorScheme();
   const [posting, setPosting] = useState(undefined as undefined | number);
   const [imageLoading, setImageLoading] = useState(false);
-  const [frame, setFrame] = useState({ ...initialFrame, uniqueId: "" });
+  const [frame, setFrame] = useState({
+    ...initialFrame,
+    uniqueId: uuid.v4().toString(),
+  });
   const [frameUrl, setFrameUrl] = useState(
     frame.extractedTags["xmtp:frame:post-url"]
   );
@@ -283,6 +285,9 @@ const FrameImage = ({
   const styles = useStyles();
   if (!frameImage) return null;
 
+  const frameImageURL = new URL(frameImage);
+  frameImageURL.searchParams.set("converseRequestId", uniqueId);
+
   return (
     <TouchableWithoutFeedback
       onPress={() => {
@@ -295,7 +300,7 @@ const FrameImage = ({
         // Adding a uniqueId so when a new frame comes in
         // we always reload the image and don't get stale image
         // from cache
-        source={{ uri: frameImage, headers: { converseRequestId: uniqueId } }}
+        source={{ uri: frameImageURL.toString() }}
         contentFit="cover"
         // Also disable cache so we always refetch the initial image
         cachePolicy="none"
@@ -368,7 +373,10 @@ const useStyles = () => {
       width: "100%",
       overflow: "hidden",
     },
-    frameImage: { aspectRatio: 1.91, width: "100%" },
+    frameImage: {
+      aspectRatio: 1.91,
+      width: "100%",
+    },
     frameBottom: {
       flexDirection: "row",
       flexWrap: "wrap",
