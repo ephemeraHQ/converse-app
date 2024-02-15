@@ -57,7 +57,11 @@ export const getTitleFontScale = (): number => {
 
 export type TextInputWithValue = TextInput & { currentValue: string };
 
-export const getReadableProfile = (account: string, address: string) => {
+export const getReadableProfile = (
+  account: string,
+  address: string,
+  showFullUsername: boolean = false
+) => {
   const primaryUserName = getProfilesStore(account)
     .getState()
     .profiles[address]?.socials.userNames?.find((e) => e.isPrimary)?.name;
@@ -69,7 +73,7 @@ export const getReadableProfile = (account: string, address: string) => {
     .profiles[address]?.socials.unstoppableDomains?.find((e) => e.isPrimary)
     ?.domain;
   return (
-    shortDomain(primaryUserName) ||
+    (showFullUsername ? primaryUserName : shortDomain(primaryUserName)) ||
     primaryENS ||
     primaryUns ||
     shortAddress(account)
