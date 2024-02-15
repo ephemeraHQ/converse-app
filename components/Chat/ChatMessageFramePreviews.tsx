@@ -12,6 +12,7 @@ import {
   View,
 } from "react-native";
 import { TouchableWithoutFeedback } from "react-native-gesture-handler";
+import uuid from "react-native-uuid";
 
 import FrameLinkIcon from "../../assets/frameLink.svg";
 import { useCurrentAccount } from "../../data/store/accountsStore";
@@ -86,7 +87,8 @@ const ChatMessageFramePreview = ({
   const account = useCurrentAccount() as string;
   const colorScheme = useColorScheme();
   const [posting, setPosting] = useState(undefined as undefined | number);
-  const [frame, setFrame] = useState(initialFrame);
+  const [imageLoading, setImageLoading] = useState(false);
+  const [frame, setFrame] = useState({ ...initialFrame, uniqueId: "" });
   const [frameUrl, setFrameUrl] = useState(
     frame.extractedTags["xmtp:frame:post-url"]
   );
@@ -127,7 +129,11 @@ const ChatMessageFramePreview = ({
         switch (button.action) {
           case "post":
             // post action will update frame
-            setFrame({ ...frameResponse, type: "XMTP_FRAME" });
+            setFrame({
+              ...frameResponse,
+              type: "XMTP_FRAME",
+              uniqueId: uuid.v4().toString(),
+            });
             break;
 
           // case "post_redirect":
@@ -158,86 +164,150 @@ const ChatMessageFramePreview = ({
   return (
     <View style={styles.frameWrapper}>
       <View style={styles.frameContainer}>
-        {frameImage && (
-          <TouchableWithoutFeedback
-            onPress={() => {
-              const initialFrameURL = initialFrame.url;
-              if (initialFrameURL && initialFrameURL.startsWith("https")) {
-                Linking.openURL(initialFrameURL);
-              }
-            }}
-          >
-            <Image
-              source={{ uri: frameImage }}
-              contentFit="cover"
-              style={[styles.frameImage, { opacity: posting ? 0.8 : 1 }]}
-            />
-          </TouchableWithoutFeedback>
-        )}
+        <View
+          style={{ opacity: posting !== undefined || imageLoading ? 0.8 : 1 }}
+        >
+          <FrameImage
+            frameImage={frameImage}
+            initialFrameURL={initialFrame.url}
+            uniqueId={frame.uniqueId}
+            setImageLoading={setImageLoading}
+          />
+        </View>
 
         {showBottom && (
-          <View
-            style={[
-              styles.frameBottom,
-              {
-                backgroundColor: message.fromMe
-                  ? myMessageInnerBubbleColor(colorScheme)
-                  : messageInnerBubbleColor(colorScheme),
-              },
-            ]}
-          >
-            {frame.type === "XMTP_FRAME" && (
-              <>
-                {textInput && (
-                  <TextInput
-                    autoCorrect={false}
-                    autoComplete="off"
-                    autoCapitalize="none"
-                    style={styles.frameTextInput}
-                    onFocus={() => {
-                      setFrameInputFocused(true);
-                    }}
-                    onBlur={() => {
-                      setFrameInputFocused(false);
-                    }}
-                    placeholder={textInput}
-                  />
-                )}
-                {buttons.length > 0 &&
-                  buttons.map((button) => (
-                    <FrameButton
-                      key={`${button.title}-${button.index}`}
-                      posting={posting}
-                      button={button}
-                      fullWidth={buttons.length === 1}
-                      onPress={() =>
-                        setTimeout(() => onButtonPress(button), 10)
-                      }
-                    />
-                  ))}
-              </>
-            )}
-            {(frame.type === "FRAME" || frame.type === "PREVIEW") && (
-              <Text
-                style={[
-                  styles.frameBottomText,
-                  {
-                    color: message.fromMe
-                      ? "white"
-                      : textPrimaryColor(colorScheme),
-                    fontWeight: frame.type === "PREVIEW" ? "600" : "400",
-                  },
-                ]}
-              >
-                {frame.type === "FRAME"
-                  ? "This frame is not supported by XMTP yet, please use a Farcaster client to interact with it."
-                  : frame.extractedTags["og:title"]}
-              </Text>
-            )}
-          </View>
+          <FrameBottom
+            message={message}
+            frame={frame}
+            textInput={textInput}
+            buttons={buttons}
+            setFrameInputFocused={setFrameInputFocused}
+            posting={posting}
+            onButtonPress={onButtonPress}
+          />
         )}
       </View>
     </View>
+  );
+};
+
+const FrameBottom = ({
+  message,
+  frame,
+  textInput,
+  buttons,
+  setFrameInputFocused,
+  posting,
+  onButtonPress,
+}: {
+  message: MessageToDisplay;
+  frame: TagsForURL;
+  textInput: string | undefined;
+  buttons: FrameButtonType[];
+  setFrameInputFocused: (f: boolean) => void;
+  posting: number | undefined;
+  onButtonPress: (b: FrameButtonType) => void;
+}) => {
+  const styles = useStyles();
+  const colorScheme = useColorScheme();
+  return (
+    <View
+      style={[
+        styles.frameBottom,
+        {
+          backgroundColor: message.fromMe
+            ? myMessageInnerBubbleColor(colorScheme)
+            : messageInnerBubbleColor(colorScheme),
+        },
+      ]}
+    >
+      {frame.type === "XMTP_FRAME" && (
+        <>
+          {textInput && (
+            <TextInput
+              autoCorrect={false}
+              autoComplete="off"
+              autoCapitalize="none"
+              style={styles.frameTextInput}
+              onFocus={() => {
+                setFrameInputFocused(true);
+              }}
+              onBlur={() => {
+                setFrameInputFocused(false);
+              }}
+              placeholder={textInput}
+            />
+          )}
+          {buttons.length > 0 &&
+            buttons.map((button) => (
+              <FrameButton
+                key={`${button.title}-${button.index}`}
+                posting={posting}
+                button={button}
+                fullWidth={buttons.length === 1}
+                onPress={() => setTimeout(() => onButtonPress(button), 10)}
+              />
+            ))}
+        </>
+      )}
+      {(frame.type === "FRAME" || frame.type === "PREVIEW") && (
+        <Text
+          style={[
+            styles.frameBottomText,
+            {
+              color: message.fromMe ? "white" : textPrimaryColor(colorScheme),
+              fontWeight: frame.type === "PREVIEW" ? "600" : "400",
+            },
+          ]}
+        >
+          {frame.type === "FRAME"
+            ? "This frame is not supported by XMTP yet, please use a Farcaster client to interact with it."
+            : frame.extractedTags["og:title"]}
+        </Text>
+      )}
+    </View>
+  );
+};
+
+const FrameImage = ({
+  frameImage,
+  initialFrameURL,
+  uniqueId,
+  setImageLoading,
+}: {
+  frameImage: string;
+  initialFrameURL: string;
+  uniqueId: string;
+  setImageLoading: (loading: boolean) => void;
+}) => {
+  const styles = useStyles();
+  if (!frameImage) return null;
+
+  return (
+    <TouchableWithoutFeedback
+      onPress={() => {
+        if (initialFrameURL && initialFrameURL.startsWith("https")) {
+          Linking.openURL(initialFrameURL);
+        }
+      }}
+    >
+      <Image
+        // Adding a uniqueId so when a new frame comes in
+        // we always reload the image and don't get stale image
+        // from cache
+        source={{ uri: frameImage, headers: { converseRequestId: uniqueId } }}
+        contentFit="cover"
+        // Also disable cache so we always refetch the initial image
+        cachePolicy="none"
+        style={styles.frameImage}
+        onLoadStart={() => {
+          setImageLoading(true);
+        }}
+        onLoadEnd={() => {
+          setImageLoading(false);
+        }}
+      />
+    </TouchableWithoutFeedback>
   );
 };
 
