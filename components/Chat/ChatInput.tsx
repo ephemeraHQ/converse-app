@@ -50,6 +50,17 @@ export default function ChatInput() {
     }
   }, [inputRef, inputValue]);
 
+  useEffect(() => {
+    converseEventEmitter.on("triggerReplyToMessage", (messageId) => {
+      if (inputRef.current) {
+        inputRef.current?.focus();
+      }
+    });
+    return () => {
+      converseEventEmitter.off("triggerReplyToMessage");
+    };
+  }, [inputRef]);
+
   // We use an event emitter to receive actions to fill the input value
   // from outside. This enable us to keep a very small re-rendering
   // by creating the inputValue in the lowest component, this one
