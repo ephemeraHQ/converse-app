@@ -40,7 +40,6 @@ export default function ChatInputReplyPreview({
       <TouchableOpacity
         activeOpacity={0.6}
         onPress={() => {
-          console.log("yolo");
           onDismiss();
         }}
       >
