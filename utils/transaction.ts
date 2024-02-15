@@ -240,6 +240,13 @@ export const useTransactionForMessage = (
     ...txLookup,
   });
 
+  // Components are recycled, let's fix when stuff changes
+  const messageId = useRef(message.id);
+  if (message.id !== messageId.current) {
+    messageId.current = message.id;
+    setTransaction({ loading: false, error: false, ...txLookup });
+  }
+
   useEffect(() => {
     let retryTimeout: NodeJS.Timeout;
 
@@ -337,10 +344,10 @@ export const useTransactionForMessage = (
   }, [
     currentAccount,
     saveTransactions,
-    message.content,
     txLookup,
-    txType,
     txRef,
+    txType,
+    message.content,
   ]);
 
   useEffect(() => {

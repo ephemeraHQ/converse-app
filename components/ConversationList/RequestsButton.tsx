@@ -36,7 +36,7 @@ export default function RequestsButton({ navigation, requestsCount }: Props) {
       }}
     >
       <View style={styles.requestsHeader}>
-        <Text style={styles.requestsHeaderTitle}>Requests</Text>
+        <Text style={styles.requestsHeaderTitle}>Spam</Text>
         <Text style={styles.requestsCount}>{requestsCount}</Text>
         <Picto
           picto="chevron.right"
