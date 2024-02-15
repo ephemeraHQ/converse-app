@@ -14,7 +14,9 @@ import { XmtpMessage } from "../../data/store/chatStore";
 import { isAttachmentMessage } from "../../utils/attachment/helpers";
 import {
   messageBubbleColor,
+  messageInnerBubbleColor,
   myMessageBubbleColor,
+  myMessageInnerBubbleColor,
   textPrimaryColor,
   textSecondaryColor,
 } from "../../utils/colors";
@@ -23,7 +25,10 @@ import { isDesktop } from "../../utils/device";
 import { LimitedMap } from "../../utils/objects";
 import { getMessageReactions } from "../../utils/reactions";
 import { isTransactionMessage } from "../../utils/transaction";
-import { getMessageContentType } from "../../utils/xmtpRN/contentTypes";
+import {
+  getMessageContentType,
+  isContentType,
+} from "../../utils/xmtpRN/contentTypes";
 import ClickableText from "../ClickableText";
 import ChatAttachmentBubble from "./ChatAttachmentBubble";
 import ChatMessageActions from "./ChatMessageActions";
@@ -83,13 +88,17 @@ function ChatMessage({ message, colorScheme }: Props) {
 
   // maybe using useChatStore inside ChatMessage
   // leads to bad perf? Let's be cautious
-  const replyingToMessage = useChatStore((s) =>
-    message.referencedMessageId
-      ? s.conversations[message.topic]?.messages.get(
-          message.referencedMessageId
-        )
-      : undefined
-  );
+  const { replyingToMessage, conversationTitle } = useChatStore((s) => {
+    const conversation = message.referencedMessageId
+      ? s.conversations[message.topic]
+      : undefined;
+    return {
+      replyingToMessage: conversation?.messages.get(
+        message.referencedMessageId ?? ""
+      ),
+      conversationTitle: conversation?.conversationTitle,
+    };
+  });
 
   return (
     <View
@@ -107,8 +116,8 @@ function ChatMessage({ message, colorScheme }: Props) {
         reactions={reactions}
         style={[
           styles.messageBubble,
-          isAttachment || isTransaction
-            ? styles.messageBubbleAttachmentOrTransaction
+          isAttachment || isTransaction || replyingToMessage
+            ? styles.messageWithInnerBubble
             : styles.messageBubbleText,
           message.fromMe ? styles.messageBubbleMe : undefined,
           Platform.select({
@@ -137,12 +146,34 @@ function ChatMessage({ message, colorScheme }: Props) {
           },
         ]}
       >
-        {replyingToMessage && (
+        {replyingToMessage ? (
           <View>
-            <Text>REPLYING TO {replyingToMessage.content}</Text>
+            <View
+              style={[
+                styles.innerBubble,
+                message.fromMe ? styles.innerBubbleMe : undefined,
+              ]}
+            >
+              <Text style={[styles.messageText, styles.replyToUsername]}>
+                {conversationTitle}
+              </Text>
+              <Text style={[styles.messageRepliedTo]}>
+                {replyingToMessage.content}
+              </Text>
+            </View>
+            <Text
+              style={
+                isContentType("text", message.contentType)
+                  ? styles.messageTextReply
+                  : undefined
+              }
+            >
+              {messageContent}
+            </Text>
           </View>
+        ) : (
+          messageContent
         )}
-        {messageContent}
 
         <View style={styles.metadataContainer}>{metadata}</View>
 
@@ -219,6 +250,20 @@ export default function CachedChatMessage({
 const useStyles = () => {
   const colorScheme = useColorScheme();
   return StyleSheet.create({
+    innerBubble: {
+      backgroundColor: messageInnerBubbleColor(colorScheme),
+      borderRadius: 14,
+      width: "100%",
+      paddingHorizontal: 12,
+      paddingVertical: 10,
+      marginBottom: 5,
+    },
+    innerBubbleMe: {
+      backgroundColor: myMessageInnerBubbleColor(colorScheme),
+    },
+    messageRepliedTo: {
+      color: textSecondaryColor(colorScheme),
+    },
     messageRow: {
       flexDirection: "row",
       paddingHorizontal: Platform.OS === "android" ? 10 : 20,
@@ -243,12 +288,18 @@ const useStyles = () => {
       paddingHorizontal: 12,
       paddingVertical: Platform.OS === "android" ? 6 : 7,
     },
-    messageBubbleAttachmentOrTransaction: {
+    messageWithInnerBubble: {
       padding: 4,
     },
     messageBubbleMe: {
       marginLeft: "auto",
       backgroundColor: myMessageBubbleColor(colorScheme),
+    },
+    replyToUsername: {
+      fontSize: 15,
+      fontWeight: "bold",
+      marginBottom: 4,
+      color: textPrimaryColor(colorScheme),
     },
     messageText: {
       fontSize: 17,
@@ -256,6 +307,10 @@ const useStyles = () => {
     },
     messageTextMe: {
       color: "white",
+    },
+    messageTextReply: {
+      paddingHorizontal: 8,
+      paddingBottom: 4,
     },
     messageTail: {
       position: "absolute",
