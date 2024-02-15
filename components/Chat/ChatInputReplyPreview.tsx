@@ -8,7 +8,11 @@ import {
 } from "react-native";
 
 import { currentAccount } from "../../data/store/accountsStore";
-import { backgroundColor, textSecondaryColor } from "../../utils/colors";
+import {
+  backgroundColor,
+  textPrimaryColor,
+  textSecondaryColor,
+} from "../../utils/colors";
 import { getReadableProfile } from "../../utils/str";
 import Picto from "../Picto/Picto";
 import { MessageToDisplay } from "./ChatMessage";
@@ -32,8 +36,8 @@ export default function ChatInputReplyPreview({
   return (
     <View style={styles.replyContainer}>
       <View style={styles.messagePreview}>
-        <Text>{readableProfile}</Text>
-        <Text>
+        <Text style={[styles.replyToUsername]}>{readableProfile}</Text>
+        <Text style={[styles.replyToMessage]}>
           {replyingToMessage.content || replyingToMessage.contentFallback}
         </Text>
       </View>
@@ -73,13 +77,22 @@ const useStyles = () => {
     },
     messagePreview: {
       flexDirection: "column",
-      flexGrow: 1,
-      marginRight: 10,
+      flexShrink: 1,
+      marginRight: 14,
+    },
+    replyToUsername: {
+      fontSize: 15,
+      fontWeight: "bold",
+      marginBottom: 4,
+      color: textPrimaryColor(colorScheme),
+    },
+    replyToMessage: {
+      fontSize: 15,
+      color: textSecondaryColor(colorScheme),
     },
     xmark: {
-      ...Platform.select({
-        default: { width: 14, height: 14 },
-      }),
+      width: 14,
+      height: 14,
       marginRight: 13,
     },
   });
