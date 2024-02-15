@@ -1,8 +1,8 @@
 diff --git a/node_modules/@xmtp/react-native-sdk/android/build.gradle b/node_modules/@xmtp/react-native-sdk/android/build.gradle
-index bdfb960..f317f04 100644
+index 450aaf6..2ad60e2 100644
 --- a/node_modules/@xmtp/react-native-sdk/android/build.gradle
 +++ b/node_modules/@xmtp/react-native-sdk/android/build.gradle
-@@ -82,6 +82,13 @@ android {
+@@ -85,6 +85,13 @@ android {
      targetSdkVersion safeExtGet("targetSdkVersion", 31)
      versionCode 1
      versionName "0.1.0"
@@ -17,10 +17,10 @@ index bdfb960..f317f04 100644
    lintOptions {
      abortOnError false
 diff --git a/node_modules/@xmtp/react-native-sdk/android/src/main/java/expo/modules/xmtpreactnativesdk/XMTPModule.kt b/node_modules/@xmtp/react-native-sdk/android/src/main/java/expo/modules/xmtpreactnativesdk/XMTPModule.kt
-index d235ed0..2e8e489 100644
+index e438284..004e315 100644
 --- a/node_modules/@xmtp/react-native-sdk/android/src/main/java/expo/modules/xmtpreactnativesdk/XMTPModule.kt
 +++ b/node_modules/@xmtp/react-native-sdk/android/src/main/java/expo/modules/xmtpreactnativesdk/XMTPModule.kt
-@@ -499,7 +499,13 @@ class XMTPModule : Module() {
+@@ -565,7 +565,13 @@ class XMTPModule : Module() {
              val preparedData = contentResolver.openInputStream(preparedFileUrl)!!
                  .use { it.buffered().readBytes() }
              val prepared = PreparedMessage.fromSerializedData(preparedData)
@@ -48,10 +48,10 @@ index 775ef66..87318d3 100644
              "contentTypeId" to model.encodedContent.type.description,
              "content" to ContentJson(model.encodedContent).toJsonMap(),
 diff --git a/node_modules/@xmtp/react-native-sdk/build/lib/DecodedMessage.d.ts b/node_modules/@xmtp/react-native-sdk/build/lib/DecodedMessage.d.ts
-index c3a0eb2..80da776 100644
+index 4673dd9..0746f71 100644
 --- a/node_modules/@xmtp/react-native-sdk/build/lib/DecodedMessage.d.ts
 +++ b/node_modules/@xmtp/react-native-sdk/build/lib/DecodedMessage.d.ts
-@@ -4,6 +4,7 @@ export declare class DecodedMessage<ContentTypes = any> {
+@@ -6,6 +6,7 @@ export declare class DecodedMessage<ContentTypes extends DefaultContentTypes = D
      client: Client<ContentTypes>;
      id: string;
      topic: string;
@@ -59,8 +59,8 @@ index c3a0eb2..80da776 100644
      contentTypeId: string;
      senderAddress: string;
      sent: number;
-@@ -13,6 +14,7 @@ export declare class DecodedMessage<ContentTypes = any> {
-     static fromObject<ContentTypes>(object: {
+@@ -15,6 +16,7 @@ export declare class DecodedMessage<ContentTypes extends DefaultContentTypes = D
+     static fromObject<ContentTypes extends DefaultContentTypes = DefaultContentTypes>(object: {
          id: string;
          topic: string;
 +        sentViaConverse: boolean;
@@ -112,10 +112,10 @@ index 72d6c23..f266bc4 100644
  			"contentTypeId": model.encodedContent.type.description,
  			"content": try ContentJson.fromEncoded(model.encodedContent, client: client).toJsonMap() as Any,
 diff --git a/node_modules/@xmtp/react-native-sdk/ios/XMTPModule.swift b/node_modules/@xmtp/react-native-sdk/ios/XMTPModule.swift
-index 5ab661e..9eb18c1 100644
+index cdb0874..a533b95 100644
 --- a/node_modules/@xmtp/react-native-sdk/ios/XMTPModule.swift
 +++ b/node_modules/@xmtp/react-native-sdk/ios/XMTPModule.swift
-@@ -427,7 +427,13 @@ public class XMTPModule: Module {
+@@ -496,7 +496,13 @@ public class XMTPModule: Module {
  			guard let prepared = try? PreparedMessage.fromSerializedData(preparedData) else {
  				throw Error.badPreparation("unable to deserialized \(local.preparedFileUri)")
  			}
@@ -131,10 +131,10 @@ index 5ab661e..9eb18c1 100644
  				try FileManager.default.removeItem(at: URL(string: local.preparedFileUri)!)
  			} catch { /* ignore: the sending succeeds even if we fail to rm the tmp file afterward */ }
 diff --git a/node_modules/@xmtp/react-native-sdk/src/lib/DecodedMessage.ts b/node_modules/@xmtp/react-native-sdk/src/lib/DecodedMessage.ts
-index 103e311..789f8cc 100644
+index 43acd0c..ea88d20 100644
 --- a/node_modules/@xmtp/react-native-sdk/src/lib/DecodedMessage.ts
 +++ b/node_modules/@xmtp/react-native-sdk/src/lib/DecodedMessage.ts
-@@ -13,6 +13,7 @@ export class DecodedMessage<ContentTypes = any> {
+@@ -15,6 +15,7 @@ export class DecodedMessage<
    client: Client<ContentTypes>
    id: string
    topic: string
@@ -142,7 +142,7 @@ index 103e311..789f8cc 100644
    contentTypeId: string
    senderAddress: string
    sent: number // timestamp in milliseconds
-@@ -32,7 +33,8 @@ export class DecodedMessage<ContentTypes = any> {
+@@ -34,7 +35,8 @@ export class DecodedMessage<
        decoded.senderAddress,
        decoded.sent,
        decoded.content,
@@ -152,7 +152,7 @@ index 103e311..789f8cc 100644
      )
    }
  
-@@ -40,6 +42,7 @@ export class DecodedMessage<ContentTypes = any> {
+@@ -44,6 +46,7 @@ export class DecodedMessage<
      object: {
        id: string
        topic: string
@@ -160,7 +160,7 @@ index 103e311..789f8cc 100644
        contentTypeId: string
        senderAddress: string
        sent: number // timestamp in milliseconds
-@@ -56,7 +59,8 @@ export class DecodedMessage<ContentTypes = any> {
+@@ -60,7 +63,8 @@ export class DecodedMessage<
        object.senderAddress,
        object.sent,
        object.content,
@@ -170,7 +170,7 @@ index 103e311..789f8cc 100644
      )
    }
  
-@@ -68,7 +72,8 @@ export class DecodedMessage<ContentTypes = any> {
+@@ -72,7 +76,8 @@ export class DecodedMessage<
      senderAddress: string,
      sent: number,
      content: any,
@@ -180,11 +180,11 @@ index 103e311..789f8cc 100644
    ) {
      this.client = client
      this.id = id
-@@ -78,6 +83,7 @@ export class DecodedMessage<ContentTypes = any> {
+@@ -82,6 +87,7 @@ export class DecodedMessage<
      this.sent = sent
      this.nativeContent = content
      this.fallback = fallback
 +    this.sentViaConverse = sentViaConverse
    }
  
-   content(): ContentTypes {
+   content(): ExtractDecodedType<[...ContentTypes, TextCodec][number] | string> {
