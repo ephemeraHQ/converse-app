@@ -78,6 +78,7 @@ const useStyles = () => {
     messagePreview: {
       flexDirection: "column",
       flexShrink: 1,
+      flexGrow: 1,
       marginRight: 14,
     },
     replyToUsername: {
