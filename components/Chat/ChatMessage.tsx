@@ -159,10 +159,21 @@ function ChatMessage({ message, colorScheme }: Props) {
                 message.fromMe ? styles.innerBubbleMe : undefined,
               ]}
             >
-              <Text style={[styles.messageText, styles.replyToUsername]}>
+              <Text
+                style={[
+                  styles.messageText,
+                  styles.replyToUsername,
+                  message.fromMe ? styles.messageTextMe : undefined,
+                ]}
+              >
                 {replyingToProfileName}
               </Text>
-              <Text style={[styles.messageRepliedTo]}>
+              <Text
+                style={[
+                  styles.messageRepliedTo,
+                  message.fromMe ? styles.messageTextMe : undefined,
+                ]}
+              >
                 {replyingToMessage.content}
               </Text>
             </View>
