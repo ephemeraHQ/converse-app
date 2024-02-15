@@ -23,6 +23,8 @@ import { converseEventEmitter } from "../../utils/events";
 import { sendMessage } from "../../utils/message";
 import { TextInputWithValue } from "../../utils/str";
 import ChatAddAttachment from "./ChatAddAttachment";
+import ChatInputReplyPreview from "./ChatInputReplyPreview";
+import { MessageToDisplay } from "./ChatMessage";
 import ChatSendMoney from "./ChatSendMoney";
 
 export default function ChatInput() {
@@ -37,6 +39,8 @@ export default function ChatInput() {
   const colorScheme = useColorScheme();
   const styles = useStyles();
   const [inputValue, setInputValue] = useState(messageToPrefill);
+  const [replyingToMessage, setReplyingToMessage] =
+    useState<MessageToDisplay | null>(null);
 
   useEffect(() => {
     if (transactionMode) {
@@ -51,11 +55,15 @@ export default function ChatInput() {
   }, [inputRef, inputValue]);
 
   useEffect(() => {
-    converseEventEmitter.on("triggerReplyToMessage", (messageId) => {
-      if (inputRef.current) {
-        inputRef.current?.focus();
+    converseEventEmitter.on(
+      "triggerReplyToMessage",
+      (message: MessageToDisplay) => {
+        if (inputRef.current) {
+          inputRef.current?.focus();
+        }
+        setReplyingToMessage(message);
       }
-    });
+    );
     return () => {
       converseEventEmitter.off("triggerReplyToMessage");
     };
@@ -89,81 +97,91 @@ export default function ChatInput() {
   const inputIsFocused = useRef(false);
 
   return (
-    <View style={styles.chatInputContainer}>
-      <ChatAddAttachment />
-      <ChatSendMoney />
-      <TextInput
-        autoCorrect={isDesktop ? false : undefined}
-        autoComplete={isDesktop ? "off" : undefined}
-        style={styles.chatInput}
-        value={inputValue}
-        // On desktop, we modified React Native RCTUITextView.m
-        // to handle key Shift + Enter to add new line
-        // This disables the flickering on Desktop when hitting Enter
-        blurOnSubmit={isDesktop}
-        // Mainly used on Desktop so that Enter sends the message
-        onSubmitEditing={() => {
-          onValidate();
-          // But we still want to refocus on Desktop when we
-          // hit Enter so let's force it
-          if (isDesktop) {
-            setTimeout(() => {
-              inputRef.current?.focus();
-            }, 100);
-          }
-        }}
-        onChangeText={(t: string) => {
-          inputIsFocused.current = true;
-          setInputValue(t);
-        }}
-        onKeyPress={
-          Platform.OS === "web"
-            ? (event: any) => {
-                if (
-                  event.nativeEvent.key === "Enter" &&
-                  !event.altKey &&
-                  !event.metaKey &&
-                  !event.shiftKey
-                ) {
-                  event.preventDefault();
-                  onValidate();
-                  setTimeout(() => {
-                    inputRef.current?.focus();
-                  }, 100);
+    <View style={styles.chatInputWrapper}>
+      {replyingToMessage && (
+        <View style={styles.replyToMessagePreview}>
+          <ChatInputReplyPreview
+            replyingToMessage={replyingToMessage}
+            onDismiss={() => setReplyingToMessage(null)}
+          />
+        </View>
+      )}
+      <View style={styles.chatInputContainer}>
+        <ChatAddAttachment />
+        <ChatSendMoney />
+        <TextInput
+          autoCorrect={isDesktop ? false : undefined}
+          autoComplete={isDesktop ? "off" : undefined}
+          style={styles.chatInput}
+          value={inputValue}
+          // On desktop, we modified React Native RCTUITextView.m
+          // to handle key Shift + Enter to add new line
+          // This disables the flickering on Desktop when hitting Enter
+          blurOnSubmit={isDesktop}
+          // Mainly used on Desktop so that Enter sends the message
+          onSubmitEditing={() => {
+            onValidate();
+            // But we still want to refocus on Desktop when we
+            // hit Enter so let's force it
+            if (isDesktop) {
+              setTimeout(() => {
+                inputRef.current?.focus();
+              }, 100);
+            }
+          }}
+          onChangeText={(t: string) => {
+            inputIsFocused.current = true;
+            setInputValue(t);
+          }}
+          onKeyPress={
+            Platform.OS === "web"
+              ? (event: any) => {
+                  if (
+                    event.nativeEvent.key === "Enter" &&
+                    !event.altKey &&
+                    !event.metaKey &&
+                    !event.shiftKey
+                  ) {
+                    event.preventDefault();
+                    onValidate();
+                    setTimeout(() => {
+                      inputRef.current?.focus();
+                    }, 100);
+                  }
                 }
-              }
-            : undefined
-        }
-        onFocus={() => {
-          inputIsFocused.current = true;
-        }}
-        onBlur={() => {
-          inputIsFocused.current = false;
-        }}
-        multiline
-        ref={(r) => {
-          if (r && !inputRef.current) {
-            inputRef.current = r as TextInputWithValue;
-            inputRef.current.currentValue = messageToPrefill;
+              : undefined
           }
-        }}
-        placeholder="Message"
-        placeholderTextColor={
-          Platform.OS === "android"
-            ? textSecondaryColor(colorScheme)
-            : actionSecondaryColor(colorScheme)
-        }
-      />
-      <TouchableOpacity
-        onPress={onValidate}
-        activeOpacity={inputValue.length > 0 ? 0.4 : 0.6}
-        style={[
-          styles.sendButtonContainer,
-          { opacity: inputValue.length > 0 ? 1 : 0.6 },
-        ]}
-      >
-        <SendButton width={36} height={36} style={[styles.sendButton]} />
-      </TouchableOpacity>
+          onFocus={() => {
+            inputIsFocused.current = true;
+          }}
+          onBlur={() => {
+            inputIsFocused.current = false;
+          }}
+          multiline
+          ref={(r) => {
+            if (r && !inputRef.current) {
+              inputRef.current = r as TextInputWithValue;
+              inputRef.current.currentValue = messageToPrefill;
+            }
+          }}
+          placeholder="Message"
+          placeholderTextColor={
+            Platform.OS === "android"
+              ? textSecondaryColor(colorScheme)
+              : actionSecondaryColor(colorScheme)
+          }
+        />
+        <TouchableOpacity
+          onPress={onValidate}
+          activeOpacity={inputValue.length > 0 ? 0.4 : 0.6}
+          style={[
+            styles.sendButtonContainer,
+            { opacity: inputValue.length > 0 ? 1 : 0.6 },
+          ]}
+        >
+          <SendButton width={36} height={36} style={[styles.sendButton]} />
+        </TouchableOpacity>
+      </View>
     </View>
   );
 }
@@ -171,6 +189,16 @@ export default function ChatInput() {
 const useStyles = () => {
   const colorScheme = useColorScheme();
   return StyleSheet.create({
+    chatInputWrapper: {
+      flexDirection: "column",
+      backgroundColor: backgroundColor(colorScheme),
+    },
+    replyToMessagePreview: {
+      paddingHorizontal: 10,
+      paddingVertical: 8,
+      borderTopWidth: 1,
+      borderTopColor: itemSeparatorColor(colorScheme),
+    },
     chatInputContainer: {
       backgroundColor: backgroundColor(colorScheme),
       flexDirection: "row",
