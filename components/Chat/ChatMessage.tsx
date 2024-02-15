@@ -68,7 +68,23 @@ function ChatMessage({ message, colorScheme }: Props) {
     case "coinbasePayment":
       messageContent = <ChatTransactionReference message={message} />;
       break;
-    default:
+    default: {
+      // Extract the text value inside a reply message
+      let parsedMessageContent: string =
+        message.content || message.contentFallback || "";
+      if (message.referencedMessageId) {
+        try {
+          const parsedMessage = JSON.parse(message.content);
+          if (
+            typeof parsedMessage === "object" &&
+            parsedMessage.content?.text
+          ) {
+            parsedMessageContent = parsedMessage.content.text;
+          }
+        } catch (e) {
+          parsedMessageContent = message.content;
+        }
+      }
       messageContent = (
         <ClickableText
           style={[
@@ -76,11 +92,12 @@ function ChatMessage({ message, colorScheme }: Props) {
             message.fromMe ? styles.messageTextMe : undefined,
           ]}
         >
-          {message.content || message.contentFallback}
+          {parsedMessageContent}
           <View style={{ opacity: 0 }}>{metadata}</View>
         </ClickableText>
       );
       break;
+    }
   }
 
   const isAttachment = isAttachmentMessage(message.contentType);
