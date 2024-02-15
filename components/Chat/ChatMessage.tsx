@@ -32,6 +32,7 @@ import {
 } from "../../utils/xmtpRN/contentTypes";
 import ClickableText from "../ClickableText";
 import ChatAttachmentBubble from "./ChatAttachmentBubble";
+import ChatMessageReplyBubble from "./ChatInputReplyBubble";
 import ChatMessageActions from "./ChatMessageActions";
 import ChatMessageMetadata from "./ChatMessageMetadata";
 import ChatMessageReactions from "./ChatMessageReactions";
@@ -191,7 +192,7 @@ function ChatMessage({ message, colorScheme }: Props) {
                   message.fromMe ? styles.messageTextMe : undefined,
                 ]}
               >
-                {replyingToMessage.content}
+                <ChatMessageReplyBubble replyingToMessage={replyingToMessage} />
               </Text>
             </View>
             <View
