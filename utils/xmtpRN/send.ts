@@ -96,13 +96,6 @@ export const sendPendingMessages = async (account: string) => {
             JSON.parse(message.content) as TransactionReference,
             { contentType: ContentTypeTransactionReference }
           );
-          // Note: this cannot bed used as we store replies as text is the local db
-          /*} else if (isContentType("reply", message.contentType)) {
-          preparedMessage = await conversation.prepareMessage(
-            { reply: JSON.parse(message.content) },
-            { contentType: ContentTypeReply }
-          );
-        */
         } else {
           let parsedMessage: ReplyContent | string;
           try {
