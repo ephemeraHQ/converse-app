@@ -27,18 +27,6 @@
       "node": "18.16.1"
     },
     "preview": {
-      "distribution": "internal",
-      "autoIncrement": true,
-      "channel": "preview",
-      "env": {
-        "EXPO_ENV": "preview"
-      },
-      "node": "18.16.1",
-      "ios": {
-        "cocoapods": "1.14.3"
-      }
-    },
-    "preview-appstore": {
       "autoIncrement": true,
       "channel": "preview",
       "env": {
@@ -103,6 +91,17 @@
       "extends": "production"
     },
     "production-android": {
+      "extends": "production"
+    },
+    "preview": {
+      "android": {
+        "track": "internal"
+      }
+    },
+    "preview-ios": {
+      "extends": "production"
+    },
+    "preview-android": {
       "extends": "production"
     }
   }
