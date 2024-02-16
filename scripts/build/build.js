@@ -74,8 +74,8 @@ const build = async () => {
 
   const buildCommand = "eas";
   const buildProfile =
-    env === "production"
-      ? `production-${platform}${buildInternalProduction ? "-internal" : ""}`
+    env === "production" || env === "preview"
+      ? `${env}-${platform}${buildInternalProduction ? "-internal" : ""}`
       : env;
   const buildArgs = [
     "build",
@@ -221,13 +221,7 @@ const build = async () => {
     !buildInternalProduction
   ) {
     const submitCommand = "eas";
-    const submitArgs = [
-      "submit",
-      "--profile",
-      env,
-      "--platform",
-      platform,
-    ];
+    const submitArgs = ["submit", "--profile", env, "--platform", platform];
 
     try {
       await executeCommand(submitCommand, submitArgs);
