@@ -1,4 +1,4 @@
-import { FramesClient } from "@xmtp/frames-client";
+import { FramesApiResponse, FramesClient } from "@xmtp/frames-client";
 import { Client } from "@xmtp/xmtp-js";
 
 import { MessageToDisplay } from "../components/Chat/ChatMessage";
@@ -7,13 +7,12 @@ import { loadXmtpKey } from "./keychain/helpers";
 import { URL_REGEX } from "./regex";
 import { isContentType } from "./xmtpRN/contentTypes";
 
-export type TagsForURL = Awaited<
-  ReturnType<typeof FramesClient.readMetadata>
-> & {
+export type FrameToDisplay = FramesApiResponse & {
   type: "FRAME" | "XMTP_FRAME" | "PREVIEW";
+  framesClient: FramesClient;
 };
 
-export const getFrameType = (tags: TagsForURL["extractedTags"]) => {
+export const getFrameType = (tags: FrameToDisplay["extractedTags"]) => {
   if (tags["fc:frame"] === "vNext" && tags["fc:frame:image"]) {
     if (tags["xmtp:frame:post-url"]) return "XMTP_FRAME";
     return "FRAME";
@@ -25,12 +24,14 @@ export const getFrameType = (tags: TagsForURL["extractedTags"]) => {
 };
 
 export const getMetadaTagsForMessage = async (
+  account: string,
   message: MessageToDisplay
-): Promise<TagsForURL[]> => {
+): Promise<FrameToDisplay[]> => {
+  const framesClient = await getFramesClient(account);
   // OG Preview / Frames are only for text content type
   if (isContentType("text", message.contentType)) {
     const urls = message.content.match(URL_REGEX);
-    const extractedTags: TagsForURL[] = [];
+    const extractedTags: FrameToDisplay[] = [];
     if (urls) {
       console.log(
         `[FramesMetadata] Found ${urls.length} URLs in message, fetching tags`
@@ -38,9 +39,9 @@ export const getMetadaTagsForMessage = async (
       const uniqueUrls = Array.from(new Set(urls));
       const urlsMetadata = await Promise.all(
         uniqueUrls.map((u) =>
-          FramesClient.readMetadata(u).catch((e) =>
-            console.log(`[FramesMetadata] ${e}`)
-          )
+          framesClient.proxy
+            .readMetadata(u)
+            .catch((e) => console.log(`[FramesMetadata] ${e}`))
         )
       );
 
@@ -48,7 +49,7 @@ export const getMetadaTagsForMessage = async (
         if (response && Object.keys(response.extractedTags).length > 0) {
           const frameType = getFrameType(response.extractedTags);
           if (frameType) {
-            extractedTags.push({ ...response, type: frameType });
+            extractedTags.push({ ...response, type: frameType, framesClient });
           }
         }
       });
@@ -65,7 +66,7 @@ export type FrameButtonType = {
   action: FrameAction;
 };
 
-export const getFrameButtons = (tagsForURL: TagsForURL) => {
+export const getFrameButtons = (tagsForURL: FrameToDisplay) => {
   if (tagsForURL.type !== "XMTP_FRAME" && tagsForURL.type !== "FRAME")
     return [];
   const buttons: FrameButtonType[] = [];
@@ -126,13 +127,16 @@ export const getFramesClient = async (account: string) => {
 
 type FrameAction = "post" | "post_redirect" | "link";
 
-export const getFrameButtonAction = (tags: TagsForURL, buttonIndex: number) => {
+export const getFrameButtonAction = (
+  tags: FrameToDisplay,
+  buttonIndex: number
+) => {
   return (tags.extractedTags[`fc:frame:button:${buttonIndex}:action`] ||
     "post") as FrameAction;
 };
 
 export const getFrameButtonLinkTarget = (
-  tags: TagsForURL,
+  tags: FrameToDisplay,
   buttonIndex: number
 ) => {
   return tags.extractedTags[`fc:frame:button:${buttonIndex}:target`] as
