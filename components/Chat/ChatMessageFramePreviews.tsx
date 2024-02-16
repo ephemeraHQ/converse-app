@@ -118,6 +118,7 @@ const ChatMessageFramePreview = ({
       }
       if (!conversation) return;
       setPosting(button.index);
+      setImageLoading(true);
       try {
         if (button.action === "post") {
           const payload = await frame.framesClient.signFrameAction({
@@ -177,7 +178,9 @@ const ChatMessageFramePreview = ({
     <View style={styles.frameWrapper}>
       <View style={styles.frameContainer}>
         <View
-          style={{ opacity: posting !== undefined || imageLoading ? 0.8 : 1 }}
+          style={{
+            opacity: imageLoading ? (message.fromMe ? 0.8 : 0.4) : 1,
+          }}
         >
           <FrameImage
             frameImage={frame.framesClient.proxy.mediaUrl(frameImage)}
@@ -315,9 +318,6 @@ const FrameImage = ({
         // Also disable cache so we always refetch the initial image
         cachePolicy="none"
         style={styles.frameImage}
-        onLoadStart={() => {
-          setImageLoading(true);
-        }}
         onLoadEnd={() => {
           setImageLoading(false);
         }}
