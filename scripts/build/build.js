@@ -168,7 +168,10 @@ const build = async () => {
       "--output",
       `./builds/${platform}-${env}-${currentCommit}.${fileExtension}`
     );
-  } else if (env === "production" && !buildInternalProduction) {
+  } else if (
+    (env === "production" || env === "preview") &&
+    !buildInternalProduction
+  ) {
     buildArgs.push("--auto-submit");
   }
 
@@ -212,7 +215,7 @@ const build = async () => {
   }
 
   if (
-    env === "production" &&
+    (env === "production" || env === "preview") &&
     buildLocally &&
     buildSuccess &&
     !buildInternalProduction
@@ -221,7 +224,7 @@ const build = async () => {
     const submitArgs = [
       "submit",
       "--profile",
-      "production",
+      env,
       "--platform",
       platform,
     ];
