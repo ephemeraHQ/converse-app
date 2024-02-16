@@ -122,7 +122,7 @@ const build = async () => {
     await executeCommand("node", [`scripts/build/${platform}/${env}.js`]);
   }
 
-  if (platform === "ios" && ["development", "preview"].includes(env)) {
+  if (platform === "ios" && env === "development") {
     if (isAdvanced) {
       const { interactive } = await prompts([
         {
