@@ -1,9 +1,7 @@
-import { FramesClient } from "@xmtp/frames-client";
 import { Image } from "expo-image";
 import * as Linking from "expo-linking";
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
-  Alert,
   StyleSheet,
   Text,
   TextInput,
@@ -27,10 +25,9 @@ import {
 import { useConversationContext } from "../../utils/conversation";
 import {
   FrameButtonType,
-  TagsForURL,
+  FrameToDisplay,
   getFrameButtonLinkTarget,
   getFrameButtons,
-  getFramesClient,
   getMetadaTagsForMessage,
 } from "../../utils/frames";
 import { MessageToDisplay } from "./ChatMessage";
@@ -42,7 +39,8 @@ type Props = {
 export default function ChatMessageFramePreviews({ message }: Props) {
   const messageId = useRef(message.id);
   const tagsFetchedOnce = useRef(false);
-  const [tagsForURLs, setTagsForURLs] = useState<TagsForURL[]>([]);
+  const account = useCurrentAccount() as string;
+  const [tagsForURLs, setTagsForURLs] = useState<FrameToDisplay[]>([]);
 
   useEffect(() => {
     if (messageId.current !== message.id) {
@@ -50,12 +48,12 @@ export default function ChatMessageFramePreviews({ message }: Props) {
       // Resetting state because components are recycled
       setTagsForURLs([]);
       tagsFetchedOnce.current = true;
-      getMetadaTagsForMessage(message).then(setTagsForURLs);
+      getMetadaTagsForMessage(account, message).then(setTagsForURLs);
     } else if (!tagsFetchedOnce.current) {
       tagsFetchedOnce.current = true;
-      getMetadaTagsForMessage(message).then(setTagsForURLs);
+      getMetadaTagsForMessage(account, message).then(setTagsForURLs);
     }
-  }, [message]);
+  }, [message, account]);
 
   return (
     <View>
@@ -76,7 +74,7 @@ const ChatMessageFramePreview = ({
   initialFrame,
   message,
 }: {
-  initialFrame: TagsForURL;
+  initialFrame: FrameToDisplay;
   message: MessageToDisplay;
 }) => {
   const styles = useStyles();
@@ -109,42 +107,54 @@ const ChatMessageFramePreview = ({
     async (button: FrameButtonType) => {
       if (button.action === "link") {
         const link = getFrameButtonLinkTarget(frame, button.index);
-        if (!link || !link.startsWith("https") || !Linking.canOpenURL(link))
+        if (
+          !link ||
+          !link.startsWith("https") ||
+          !(await Linking.canOpenURL(link))
+        )
           return;
         Linking.openURL(link);
-        return;
-      } else if (button.action === "post_redirect") {
-        Alert.alert("This frame action is not supported yet");
         return;
       }
       if (!conversation) return;
       setPosting(button.index);
       try {
-        const client = await getFramesClient(account);
-        const payload = await client.signFrameAction({
-          frameUrl,
-          buttonIndex: button.index,
-          conversationTopic: message.topic,
-          participantAccountAddresses: [account, conversation.peerAddress],
-        });
-        const frameResponse = await FramesClient.postToFrame(frameUrl, payload);
-        switch (button.action) {
-          case "post":
-            // post action will update frame
-            setFrame({
-              ...frameResponse,
-              type: "XMTP_FRAME",
-              uniqueId: uuid.v4().toString(),
-            });
-            break;
-
-          // case "post_redirect":
-          //   console.log("IT WAS A POST_REDIRECT", frameResponse);
-          //   // post_redirect action will redirect depending on response
-          //   break;
-
-          default:
-            break;
+        if (button.action === "post") {
+          const payload = await frame.framesClient.signFrameAction({
+            frameUrl,
+            buttonIndex: button.index,
+            conversationTopic: message.topic,
+            participantAccountAddresses: [account, conversation.peerAddress],
+          });
+          const frameResponse = await frame.framesClient.proxy.post(
+            frameUrl,
+            payload
+          );
+          // post action will update frame
+          setFrame({
+            ...frameResponse,
+            type: "XMTP_FRAME",
+            uniqueId: uuid.v4().toString(),
+            framesClient: frame.framesClient,
+          });
+        } else if (button.action === "post_redirect") {
+          const payload = await frame.framesClient.signFrameAction({
+            frameUrl,
+            buttonIndex: button.index,
+            conversationTopic: message.topic,
+            participantAccountAddresses: [account, conversation.peerAddress],
+          });
+          const { redirectedTo } = await frame.framesClient.proxy.postRedirect(
+            frameUrl,
+            payload
+          );
+          if (
+            redirectedTo &&
+            redirectedTo.startsWith("https") &&
+            (await Linking.canOpenURL(redirectedTo))
+          ) {
+            Linking.openURL(redirectedTo);
+          }
         }
       } catch (e: any) {
         console.error(e);
@@ -170,7 +180,7 @@ const ChatMessageFramePreview = ({
           style={{ opacity: posting !== undefined || imageLoading ? 0.8 : 1 }}
         >
           <FrameImage
-            frameImage={frameImage}
+            frameImage={frame.framesClient.proxy.mediaUrl(frameImage)}
             initialFrameURL={initialFrame.url}
             uniqueId={frame.uniqueId}
             setImageLoading={setImageLoading}
@@ -203,7 +213,7 @@ const FrameBottom = ({
   onButtonPress,
 }: {
   message: MessageToDisplay;
-  frame: TagsForURL;
+  frame: FrameToDisplay;
   textInput: string | undefined;
   buttons: FrameButtonType[];
   setFrameInputFocused: (f: boolean) => void;
