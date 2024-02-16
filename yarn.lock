@@ -9816,10 +9816,10 @@
     "@xmtp/proto" "^3.29.0"
     "@xmtp/xmtp-js" "^11.1.2"
 
-"@xmtp/frames-client@^0.2.2":
-  version "0.2.2"
-  resolved "https://registry.yarnpkg.com/@xmtp/frames-client/-/frames-client-0.2.2.tgz#eb9eefdf416845cddfc5ac74ca80b85bad4f2bb7"
-  integrity sha512-1SvFUgaBmivuwNm+IRwfG//7yeKbxb+e1CR/eb+A5vlKWTnUMq0cKx3S7hV6LRkgxlH8mZOIWCZwg5lOF4ZKdg==
+"@xmtp/frames-client@^0.3.2":
+  version "0.3.2"
+  resolved "https://registry.yarnpkg.com/@xmtp/frames-client/-/frames-client-0.3.2.tgz#6c860e11cbf7a63aa956543b4941ee72738ed211"
+  integrity sha512-61rxA7YcNUUKndQ9e5X44LNVwWJCrrZR6sBGOWLckfMK00LqRasoiLgom1PlR34c17a59PPZmagxoNQ2QCto7A==
   dependencies:
     "@noble/hashes" "^1.3.3"
     "@xmtp/proto" "3.41.0-beta.5"
