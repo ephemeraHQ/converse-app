@@ -198,18 +198,27 @@ export const saveAttachmentForPendingMessage = async (
   await handleAttachment(pendingMessageId, fileName, mimeType || undefined);
 };
 
+const DEFAULT_ATTACHMENT = {
+  loading: true,
+  error: false,
+  mediaType: undefined as undefined | "IMAGE" | "UNSUPPORTED",
+  mediaURL: undefined as undefined | string,
+  filename: "",
+  mimeType: "",
+  contentLength: 0,
+  imageSize: undefined as undefined | { height: number; width: number },
+};
+
 export const useAttachmentForMessage = (message: MessageToDisplay) => {
   const currentAccount = useCurrentAccount() as string;
-  const [attachment, setAttachment] = useState({
-    loading: true,
-    error: false,
-    mediaType: undefined as undefined | "IMAGE" | "UNSUPPORTED",
-    mediaURL: undefined as undefined | string,
-    filename: "",
-    mimeType: "",
-    contentLength: 0,
-    imageSize: undefined as undefined | { height: number; width: number },
-  });
+  const messageId = useRef(message.id);
+  const [attachment, setAttachment] = useState(DEFAULT_ATTACHMENT);
+
+  // Resetting state because components are reclycled!
+  if (message.id !== messageId.current) {
+    messageId.current = message.id;
+    setAttachment(DEFAULT_ATTACHMENT);
+  }
 
   const saveAndDisplayLocalAttachment = useCallback(
     async (attachmentContent: SerializedAttachmentContent) => {

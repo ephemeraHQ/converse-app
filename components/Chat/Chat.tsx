@@ -1,7 +1,11 @@
 import differenceInCalendarDays from "date-fns/differenceInCalendarDays";
 import React, { useCallback, useMemo, useRef } from "react";
 import { View, useColorScheme, StyleSheet, Platform } from "react-native";
-import { useAnimatedStyle, useSharedValue } from "react-native-reanimated";
+import {
+  useAnimatedStyle,
+  useSharedValue,
+  useDerivedValue,
+} from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import {
@@ -95,13 +99,19 @@ const getListArray = (
 };
 
 export default function Chat() {
-  const { conversation, isBlockedPeer, onReadyToFocus, transactionMode } =
-    useConversationContext([
-      "conversation",
-      "isBlockedPeer",
-      "onReadyToFocus",
-      "transactionMode",
-    ]);
+  const {
+    conversation,
+    isBlockedPeer,
+    onReadyToFocus,
+    transactionMode,
+    frameInputFocused,
+  } = useConversationContext([
+    "conversation",
+    "isBlockedPeer",
+    "onReadyToFocus",
+    "transactionMode",
+    "frameInputFocused",
+  ]);
   const xmtpAddress = useCurrentAccount() as string;
   const peerSocials = useProfilesStore((s) =>
     conversation?.peerAddress
@@ -121,6 +131,9 @@ export default function Chat() {
 
   const DEFAULT_INPUT_HEIGHT = 36;
   const chatInputHeight = useSharedValue(50);
+  const chatInputDisplayedHeight = useDerivedValue(() => {
+    return frameInputFocused ? 0 : chatInputHeight.value;
+  });
 
   const insets = useSafeAreaInsets();
 
@@ -147,13 +160,11 @@ export default function Chat() {
     () => ({
       ...styles.chatContent,
       paddingBottom: showChatInput
-        ? Math.max(
-            chatInputHeight.value + insets.bottom,
-            keyboardHeight.value + chatInputHeight.value
-          )
+        ? chatInputDisplayedHeight.value +
+          Math.max(insets.bottom, keyboardHeight.value)
         : 0,
     }),
-    [showChatInput, keyboardHeight, chatInputHeight, insets.bottom]
+    [showChatInput, keyboardHeight, chatInputDisplayedHeight, insets.bottom]
   );
 
   const ListFooterComponent = useMemo(() => {
@@ -247,7 +258,10 @@ export default function Chat() {
       {showChatInput && (
         <>
           <ReanimatedView
-            style={textInputStyle}
+            style={[
+              textInputStyle,
+              { display: frameInputFocused ? "none" : "flex" },
+            ]}
             onLayout={(e) => {
               chatInputHeight.value = e.nativeEvent.layout.height;
             }}

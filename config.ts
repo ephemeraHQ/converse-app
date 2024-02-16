@@ -4,7 +4,7 @@ import { baseGoerli, base } from "viem/chains";
 
 const defaultConfig = {
   debugMenu: false,
-  polAddress: "0xc50E761C35E731d3A475eeB1e30CB917eDaFE187", // pol.converse.xyz
+  polAddress: "0xf9a3BB070c1f9b3186A547DeD991BeD04a289C5B", // polmaire.eth
   debugAddresses: [
     "0xf9a3BB070c1f9b3186A547DeD991BeD04a289C5B", // polmaire.eth
     "0xc50E761C35E731d3A475eeB1e30CB917eDaFE187", // pol.converse.xyz

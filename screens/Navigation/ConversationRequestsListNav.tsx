@@ -16,7 +16,7 @@ export default function ConversationRequestsListNav() {
       name="ChatsRequests"
       options={({ navigation }) => ({
         animation: navigationAnimation,
-        headerTitle: "Requests",
+        headerTitle: "Spam",
         headerLeft:
           Platform.OS === "ios"
             ? undefined
