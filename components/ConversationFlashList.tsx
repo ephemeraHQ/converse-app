@@ -74,6 +74,7 @@ export default function ConversationFlashList({
             )
           }
           lastMessagePreview={
+            conversation.peerAddress &&
             peersStatus[conversation.peerAddress.toLowerCase()] === "blocked"
               ? "This user is blocked"
               : lastMessagePreview

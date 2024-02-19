@@ -136,7 +136,11 @@ export default function ChatTransactionInput() {
   const txUUID = useRef("");
 
   const triggerTx = useCallback(async () => {
-    if (conversation && transactionValue.value.length > 0) {
+    if (
+      conversation &&
+      !conversation.isGroup &&
+      transactionValue.value.length > 0
+    ) {
       let signer = privySigner as Signer | undefined;
       if (!signer) {
         signer = await getCurrentAccountSigner();

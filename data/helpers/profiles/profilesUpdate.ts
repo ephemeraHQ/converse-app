@@ -25,7 +25,13 @@ export const updateProfilesForConversations = async (
     batch = rest.slice(0, 150);
     rest = rest.slice(150);
     const addressesSet = new Set<string>();
-    batch.forEach((c) => addressesSet.add(c.peerAddress));
+    batch.forEach((c) => {
+      if (c.isGroup) {
+        // @todo => refresh profiles for all members of the group?
+      } else {
+        addressesSet.add(c.peerAddress);
+      }
+    });
     console.log(`Fetching ${addressesSet.size} profiles from API...`);
     const profilesByAddress = await getProfilesForAddresses(
       Array.from(addressesSet)
@@ -57,6 +63,7 @@ export const updateProfilesForConversations = async (
 
     console.log("Done saving profiles to db!");
     const handleConversation = async (conversation: XmtpConversation) => {
+      if (conversation.isGroup) return;
       const currentTitle = conversation.conversationTitle;
       let updated = false;
       try {
@@ -124,6 +131,7 @@ export const refreshProfilesIfNeeded = async (account: string) => {
   );
   const now = new Date().getTime();
   const conversationsWithStaleProfiles = conversations.filter((c) => {
+    if (c.isGroup) return false;
     const existingProfile = knownProfiles[c.peerAddress];
     const lastProfileUpdate = existingProfile?.updatedAt || 0;
     const shouldUpdateProfile = now - lastProfileUpdate >= 24 * 3600 * 1000;

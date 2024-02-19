@@ -102,7 +102,7 @@ export default function ChatPlaceholder({ messagesCount }: Props) {
         )}
         {conversation && !isBlockedPeer && messagesCount === 0 && (
           <View>
-            {profileData ? (
+            {profileData && !conversation.isGroup ? (
               <Recommendation
                 address={conversation.peerAddress}
                 recommendationData={profileData}

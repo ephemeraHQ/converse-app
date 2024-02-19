@@ -313,7 +313,9 @@ export const saveConversationIdentifiersForNotifications = (
 ) => {
   const conversationDict: any = {
     peerAddress: conversation.peerAddress,
-    shortAddress: shortAddress(conversation.peerAddress),
+    shortAddress: conversation.peerAddress
+      ? shortAddress(conversation.peerAddress)
+      : undefined,
     title: conversationName(conversation),
   };
 

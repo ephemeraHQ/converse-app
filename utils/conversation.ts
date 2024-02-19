@@ -339,8 +339,10 @@ export function getConversationListItemsToDisplay(
 ): ConversationFlatListItem[] {
   if (searchQuery && sortedConversations) {
     const matchedPeerAddresses = getMatchedPeerAddresses(profiles, searchQuery);
-    const filteredConversations = sortedConversations.filter((conversation) =>
-      matchedPeerAddresses.includes(conversation.peerAddress)
+    const filteredConversations = sortedConversations.filter(
+      (conversation) =>
+        conversation.peerAddress &&
+        matchedPeerAddresses.includes(conversation.peerAddress)
     );
     return filteredConversations;
   } else {

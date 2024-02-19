@@ -77,7 +77,7 @@ export default function ChatConsent() {
                 ...actionSheetColors(colorScheme),
               },
               (selectedIndex?: number) => {
-                if (selectedIndex === 0) {
+                if (selectedIndex === 0 && conversation.peerAddress) {
                   consentToPeersOnProtocol(
                     currentAccount(),
                     [conversation.peerAddress],
@@ -96,6 +96,7 @@ export default function ChatConsent() {
           title="Accept"
           style={styles.cta}
           onPress={() => {
+            if (!conversation.peerAddress) return;
             consentToPeersOnProtocol(
               currentAccount(),
               [conversation.peerAddress],
