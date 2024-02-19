@@ -41,6 +41,8 @@ export const addressPrefix = (address: string) =>
   (address && address.length >= 6 ? address.slice(0, 6) : address) || "";
 
 export const conversationName = (conversation: XmtpConversation) => {
+  if (conversation.isGroup)
+    return `Group ${conversation.groupMembers.length} people`;
   return (
     conversation.conversationTitle || shortAddress(conversation.peerAddress)
   );

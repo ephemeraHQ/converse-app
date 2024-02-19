@@ -12,7 +12,11 @@ import {
   saveTopicDataToKeychain,
 } from "../keychain/helpers";
 import { sentryTrackError } from "../sentry";
-import { ConversationWithCodecsType, ConverseXmtpClientType } from "./client";
+import {
+  ConversationWithCodecsType,
+  ConverseXmtpClientType,
+  GroupWithCodecsType,
+} from "./client";
 import { syncConversationsMessages } from "./messages";
 import { getXmtpClient } from "./sync";
 
@@ -35,6 +39,23 @@ const protocolConversationToStateConversation = (
   readUntil: 0,
   pending: false,
   version: conversation.version,
+  isGroup: false,
+});
+
+const protocolGroupToStateConversation = (
+  group: GroupWithCodecsType
+): XmtpConversation => ({
+  topic: group.topic,
+  groupMembers: group.peerAddresses,
+  createdAt: group.createdAt,
+  messages: new Map(),
+  messagesIds: [],
+  conversationTitle: undefined,
+  messageDraft: undefined,
+  readUntil: 0,
+  pending: false,
+  version: group.version,
+  isGroup: true,
 });
 
 const protocolConversationsToTopicData = async (
@@ -52,12 +73,14 @@ const protocolConversationsToTopicData = async (
 };
 
 const openedConversations: {
-  [account: string]: { [topic: string]: ConversationWithCodecsType };
+  [account: string]: {
+    [topic: string]: ConversationWithCodecsType | GroupWithCodecsType;
+  };
 } = {};
 
 const setOpenedConversation = (
   account: string,
-  conversation: ConversationWithCodecsType
+  conversation: ConversationWithCodecsType | GroupWithCodecsType
 ) => {
   openedConversations[account] = openedConversations[account] || {};
   openedConversations[account][conversation.topic] = conversation;
@@ -103,16 +126,25 @@ const importTopicData = async (
 
 const handleNewConversation = async (
   client: ConverseXmtpClientType,
-  conversation: ConversationWithCodecsType
+  conversation: ConversationWithCodecsType | GroupWithCodecsType
 ) => {
   setOpenedConversation(client.address, conversation);
   saveConversations(client.address, [
-    protocolConversationToStateConversation(conversation),
+    (conversation as any).peerAddress
+      ? protocolConversationToStateConversation(
+          conversation as ConversationWithCodecsType
+        )
+      : protocolGroupToStateConversation(conversation as GroupWithCodecsType),
   ]);
-  saveTopicDataToKeychain(
-    client.address,
-    await protocolConversationsToTopicData([conversation])
-  );
+  if ((conversation as any).peerAddress) {
+    saveTopicDataToKeychain(
+      client.address,
+      await protocolConversationsToTopicData([
+        conversation as ConversationWithCodecsType,
+      ])
+    );
+  }
+
   // New conversations are not streamed immediatly
   // by the streamAllMessages method so we add this
   // trick to try and be all synced
@@ -239,7 +271,7 @@ export const consentToPeersOnProtocol = async (
 export const getConversationWithTopic = async (
   account: string,
   topic: string
-): Promise<ConversationWithCodecsType | undefined> => {
+): Promise<ConversationWithCodecsType | GroupWithCodecsType | undefined> => {
   const alreadyConversation = openedConversations[account]?.[topic];
   if (alreadyConversation) return alreadyConversation;
   // Let's try to import from keychain if we don't have it already
@@ -268,12 +300,19 @@ const createConversation = async (
         : {},
     };
   }
-  const newConversation = await client.conversations.newConversation(
-    dbConversation.peerAddress,
-    context
-  );
-  handleNewConversation(client, newConversation);
-  return newConversation.topic;
+  if (!dbConversation.isGroup && dbConversation.peerAddress) {
+    const newConversation = await client.conversations.newConversation(
+      dbConversation.peerAddress,
+      context
+    );
+    handleNewConversation(client, newConversation);
+    return newConversation.topic;
+  } else if (dbConversation.isGroup && dbConversation.groupMembers) {
+    const newGroup = await client.conversations.newGroup(
+      dbConversation.groupMembers
+    );
+    handleNewConversation(client, newGroup);
+  }
 };
 
 export const createPendingConversations = async (account: string) => {

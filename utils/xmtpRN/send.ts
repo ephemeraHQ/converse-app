@@ -14,6 +14,7 @@ import {
 } from "../../data/helpers/messages";
 import { getMessagesToSend } from "../../data/helpers/messages/getMessagesToSend";
 import { deserializeRemoteAttachmentMessageContent } from "./attachments";
+import { ConversationWithCodecsType } from "./client";
 import { isContentType } from "./contentTypes";
 import { getConversationWithTopic } from "./conversations";
 
@@ -73,10 +74,11 @@ export const sendPendingMessages = async (account: string) => {
       if (sendingMessages[message.id]) {
         continue;
       }
-      const conversation = await getConversationWithTopic(
+      // @todo => handle groups here that don't have prepareMessage method
+      const conversation = (await getConversationWithTopic(
         account,
         message.conversationId
-      );
+      )) as ConversationWithCodecsType;
       if (conversation) {
         let preparedMessage: PreparedLocalMessage;
         if (isContentType("remoteAttachment", message.contentType)) {

@@ -47,7 +47,7 @@ type ConversationListItemProps = {
   conversationTime: number | undefined;
   conversationTopic: string;
   conversationName: string;
-  conversationPeerAddress: string;
+  conversationPeerAddress: string | undefined;
   lastMessagePreview: string | undefined;
   lastMessageFromMe: boolean;
   lastMessageStatus?: "delivered" | "error" | "seen" | "sending" | "sent";
@@ -149,6 +149,7 @@ const ConversationListItem = memo(function ConversationListItem({
               ...actionSheetColors(colorScheme),
             },
             (selectedIndex?: number) => {
+              if (!conversationPeerAddress) return;
               if (selectedIndex === 0) {
                 deleteTopics(currentAccount(), [conversationTopic]);
                 setTopicsStatus({ [conversationTopic]: "deleted" });

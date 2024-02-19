@@ -27,9 +27,8 @@ type XmtpConversationContext = {
   };
 };
 
-export type XmtpConversation = {
+type XmtpConversationShared = {
   topic: string;
-  peerAddress: string;
   createdAt: number;
   context?: XmtpConversationContext;
   messages: Map<string, XmtpMessage>;
@@ -42,6 +41,20 @@ export type XmtpConversation = {
   version: string;
   spamScore?: number;
 };
+
+type XmtpDMConversation = XmtpConversationShared & {
+  isGroup: false;
+  peerAddress: string;
+  groupMembers?: undefined;
+};
+
+type XmtpGroupConversation = XmtpConversationShared & {
+  isGroup: true;
+  peerAddress?: undefined;
+  groupMembers: string[];
+};
+
+export type XmtpConversation = XmtpDMConversation | XmtpGroupConversation;
 
 export type XmtpConversationWithUpdate = XmtpConversation & {
   lastUpdateAt: number;

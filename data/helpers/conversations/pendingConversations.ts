@@ -82,6 +82,7 @@ export const createPendingConversation = async (
       readUntil: 0,
       context,
       version: "v2",
+      isGroup: false,
     },
   ]);
   return pendingConversationId;

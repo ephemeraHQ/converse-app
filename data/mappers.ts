@@ -79,6 +79,8 @@ export const xmtpConversationToDb = (
   pending: xmtpConversation.pending,
   version: xmtpConversation.version,
   spamScore: xmtpConversation.spamScore,
+  isGroup: xmtpConversation.isGroup,
+  groupMembers: xmtpConversation.groupMembers,
 });
 
 export const xmtpConversationFromDb = (
@@ -96,11 +98,13 @@ export const xmtpConversationFromDb = (
     };
   }
 
-  const conversationTitle = getPreferredName(
-    socials,
-    dbConversation.peerAddress,
-    dbConversation.contextConversationId
-  );
+  const conversationTitle = dbConversation.peerAddress
+    ? getPreferredName(
+        socials,
+        dbConversation.peerAddress,
+        dbConversation.contextConversationId
+      )
+    : undefined;
 
   const hasOneMessageFromMe = !!dbConversation.messages?.find(
     (m) => m.senderAddress === account
@@ -119,5 +123,7 @@ export const xmtpConversationFromDb = (
     version: dbConversation.version,
     hasOneMessageFromMe,
     spamScore: dbConversation.spamScore,
-  };
+    isGroup: dbConversation.isGroup,
+    groupMembers: dbConversation.groupMembers,
+  } as XmtpConversation;
 };
