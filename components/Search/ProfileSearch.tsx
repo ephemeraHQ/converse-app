@@ -50,7 +50,7 @@ export default function ProfileSearch({
   const renderFooter = () => (
     <View style={[styles.footer, { marginBottom: insets.bottom + 55 }]}>
       <Text style={styles.message}>
-        If you don’t see your contact in the list, try typing their full address
+        If you don't see your contact in the list, try typing their full address
         (with .converse.xyz, .eth, .lens, .fc, .x etc…)
       </Text>
     </View>
