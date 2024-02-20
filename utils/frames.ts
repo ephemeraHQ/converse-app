@@ -14,7 +14,7 @@ export type FrameToDisplay = FramesApiResponse & {
 
 export const getFrameType = (tags: FrameToDisplay["extractedTags"]) => {
   if (tags["fc:frame"] === "vNext" && tags["fc:frame:image"]) {
-    if (tags["xmtp:frame:post-url"]) return "XMTP_FRAME";
+    if (tags["of:accepts:xmtp"]) return "XMTP_FRAME";
     return "FRAME";
   }
   if (tags["og:image"] || tags["og:title"]) {
