@@ -51,7 +51,8 @@ export default function ChatConsent() {
     thisPeerStatus !== "consented" &&
     !isBlockedPeer &&
     !conversation.pending &&
-    !conversation.hasOneMessageFromMe;
+    !conversation.hasOneMessageFromMe &&
+    !conversation.isGroup;
 
   if (!shouldShowConsentWindow) {
     // Consent window will not be displayed

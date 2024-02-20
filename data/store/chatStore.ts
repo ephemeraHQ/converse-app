@@ -42,13 +42,13 @@ type XmtpConversationShared = {
   spamScore?: number;
 };
 
-type XmtpDMConversation = XmtpConversationShared & {
+export type XmtpDMConversation = XmtpConversationShared & {
   isGroup: false;
   peerAddress: string;
   groupMembers?: undefined;
 };
 
-type XmtpGroupConversation = XmtpConversationShared & {
+export type XmtpGroupConversation = XmtpConversationShared & {
   isGroup: true;
   peerAddress?: undefined;
   groupMembers: string[];

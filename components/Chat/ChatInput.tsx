@@ -80,7 +80,7 @@ export default function ChatInput() {
   return (
     <View style={styles.chatInputContainer}>
       <ChatAddAttachment />
-      <ChatSendMoney />
+      {!conversation?.isGroup && <ChatSendMoney />}
       <TextInput
         autoCorrect={isDesktop ? false : undefined}
         autoComplete={isDesktop ? "off" : undefined}

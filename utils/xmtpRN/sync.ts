@@ -20,6 +20,7 @@ import {
   syncConversationsMessages,
   stopStreamingAllMessage,
   streamAllMessages,
+  syncGroupsMessages,
 } from "./messages";
 
 const instantiatingClientForAccount: { [account: string]: boolean } = {};
@@ -93,9 +94,15 @@ export const syncXmtpClient = async (account: string) => {
   try {
     const now = new Date().getTime();
     updateConsentStatus(account);
-    const { newConversations } = await loadConversations(account, knownTopics);
+    const { newConversations, groups, newGroups } = await loadConversations(
+      account,
+      knownTopics
+    );
     newConversations.forEach((c) => {
       queryConversationsFromTimestamp[c.topic] = 0;
+    });
+    newGroups.forEach((g) => {
+      queryConversationsFromTimestamp[g.topic] = 0;
     });
     // As soon as we have done one query we can hide reconnecting
     getChatStore(account).getState().setReconnecting(false);
@@ -108,9 +115,11 @@ export const syncXmtpClient = async (account: string) => {
     });
     streamingAccounts[account] = true;
     const topicsToQuery = Object.keys(queryConversationsFromTimestamp);
-    const fetchedMessagesCount = await syncConversationsMessages(
-      account,
-      queryConversationsFromTimestamp
+    const [fetchedMessagesCount, fetchedGroupMessagesCount] = await Promise.all(
+      [
+        syncConversationsMessages(account, queryConversationsFromTimestamp),
+        syncGroupsMessages(account, groups, queryConversationsFromTimestamp),
+      ]
     );
 
     // Refresh spam scores after the initial load of conversation data is complete

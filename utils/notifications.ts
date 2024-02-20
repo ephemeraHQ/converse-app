@@ -71,10 +71,10 @@ export const subscribeToNotifications = async (
     const isBlocked = (peerAddress: string) =>
       peersStatus[peerAddress.toLowerCase()] === "blocked";
 
-    const isValidConversation = (c: any) => {
+    const isValidConversation = (c: XmtpConversation) => {
       const hasValidAddress = c.peerAddress;
       const isNotPending = !c.pending;
-      const isNotBlocked = !isBlocked(c.peerAddress);
+      const isNotBlocked = hasValidAddress && !isBlocked(c.peerAddress);
       const isTopicNotDeleted = topicsStatus[c.topic] !== "deleted";
 
       return (

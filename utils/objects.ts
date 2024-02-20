@@ -39,3 +39,8 @@ export class LimitedMap<K, V> extends Map<K, V> {
 
 export const isEmptyObject = <T extends object>(obj: T): boolean =>
   Object.keys(obj).length === 0;
+
+export const haveSameItems = (array1: any[], array2: any[]) => {
+  if (array1.length !== array2.length) return;
+  return array1.every((element) => array1.includes(element));
+};

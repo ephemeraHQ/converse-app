@@ -3,7 +3,7 @@ import { ConsentListEntry, ConversationContext } from "@xmtp/react-native-sdk";
 import { Conversation as DbConversation } from "../../data/db/entities/conversationEntity";
 import { getPendingConversationsToCreate } from "../../data/helpers/conversations/pendingConversations";
 import { saveConversations } from "../../data/helpers/conversations/upsertConversations";
-import { getSettingsStore } from "../../data/store/accountsStore";
+import { getChatStore, getSettingsStore } from "../../data/store/accountsStore";
 import { XmtpConversation } from "../../data/store/chatStore";
 import { SettingsStoreType } from "../../data/store/settingsStore";
 import { getCleanAddress } from "../eth";
@@ -11,6 +11,7 @@ import {
   getTopicDataFromKeychain,
   saveTopicDataToKeychain,
 } from "../keychain/helpers";
+import { haveSameItems } from "../objects";
 import { sentryTrackError } from "../sentry";
 import {
   ConversationWithCodecsType,
@@ -173,7 +174,20 @@ const listConversations = async (client: ConverseXmtpClientType) => {
   conversations.forEach((c) => {
     setOpenedConversation(client.address, c);
   });
+
   return conversations;
+};
+
+const listGroups = async (client: ConverseXmtpClientType) => {
+  await client.conversations.syncGroups();
+  const groups = await client.conversations.listGroups();
+  console.log(`Listing ${groups.length} groups for ${client.address}...`);
+  groups.forEach((g) => {
+    console.log("group with", g.peerAddresses);
+    setOpenedConversation(client.address, g);
+  });
+
+  return groups;
 };
 
 export const loadConversations = async (
@@ -183,7 +197,10 @@ export const loadConversations = async (
   try {
     const client = (await getXmtpClient(account)) as ConverseXmtpClientType;
     const now = new Date().getTime();
-    const conversations = await listConversations(client);
+    const [conversations, groups] = await Promise.all([
+      listConversations(client),
+      listGroups(client),
+    ]);
     const newConversations: ConversationWithCodecsType[] = [];
     const knownConversations: ConversationWithCodecsType[] = [];
     conversations.forEach((c) => {
@@ -191,6 +208,29 @@ export const loadConversations = async (
         newConversations.push(c);
       } else {
         knownConversations.push(c);
+      }
+    });
+
+    const newGroups: GroupWithCodecsType[] = [];
+    const updatedGroups: GroupWithCodecsType[] = [];
+    const knownGroups: GroupWithCodecsType[] = [];
+
+    groups.forEach((g) => {
+      if (!knownTopics.includes(g.topic)) {
+        newGroups.push(g);
+      } else if (
+        // @todo => maybe check the groupMembers for known topics before and pass it to this method
+        !haveSameItems(
+          g.peerAddresses,
+          getChatStore(account).getState().conversations[g.topic]
+            .groupMembers || []
+        )
+      ) {
+        console.log("this group has been updated", g);
+        updatedGroups.push(g);
+        knownGroups.push(g);
+      } else {
+        knownGroups.push(g);
       }
     });
     console.log(
@@ -201,13 +241,25 @@ export const loadConversations = async (
     const conversationsToSave = newConversations.map(
       protocolConversationToStateConversation
     );
-    saveConversations(client.address, conversationsToSave);
+    const groupsToSave = newGroups.map(protocolGroupToStateConversation);
+    const groupsToUpdate = updatedGroups.map(protocolGroupToStateConversation);
+    saveConversations(client.address, [
+      ...conversationsToSave,
+      ...groupsToSave,
+    ]);
+    saveConversations(client.address, groupsToUpdate, true); // Force update
 
     saveTopicDataToKeychain(
       client.address,
       await protocolConversationsToTopicData(newConversations)
     );
-    return { newConversations, knownConversations };
+    return {
+      newConversations,
+      knownConversations,
+      newGroups,
+      knownGroups,
+      groups,
+    };
   } catch (e) {
     const error = new Error();
     error.name = "LOAD_CONVERSATIONS_FAILED";

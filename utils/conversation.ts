@@ -295,13 +295,27 @@ export function sortAndComputePreview(
   const conversationsInbox: ConversationWithLastMessagePreview[] = [];
   Object.values(conversations).forEach(
     (conversation: ConversationWithLastMessagePreview, i) => {
+      const isNotReady =
+        (conversation.isGroup && !conversation.groupMembers) ||
+        (!conversation.isGroup && !conversation.peerAddress);
+      if (isNotReady) return;
+      const isPending = !!conversation.pending;
+      const isNotEmpty = conversation.messages.size > 0;
+      const isDeleted = topicsStatus[conversation.topic] === "deleted";
+      const isBlocked = conversation.isGroup
+        ? false // No consent for groups right now
+        : peersStatus[conversation.peerAddress.toLowerCase()] === "blocked";
+      const isConsented = conversation.isGroup
+        ? true
+        : peersStatus[conversation.peerAddress.toLowerCase()] === "consented";
+      const isV1 = conversation.version === "v1";
+      const isForbidden = conversation.topic.includes("\x00"); // Forbidden character that breaks notifications
       if (
-        conversation?.peerAddress &&
-        (!conversation.pending || conversation.messages.size > 0) &&
-        topicsStatus[conversation.topic] !== "deleted" &&
-        peersStatus[conversation.peerAddress.toLowerCase()] !== "blocked" &&
-        conversation.version !== "v1" &&
-        !conversation.topic.includes("\x00") // Forbidden character that breaks notifications
+        (!isPending || isNotEmpty) &&
+        !isDeleted &&
+        !isBlocked &&
+        !isV1 &&
+        !isForbidden
       ) {
         conversation.lastMessagePreview = conversationLastMessagePreview(
           conversation,
@@ -309,7 +323,7 @@ export function sortAndComputePreview(
         );
         if (
           conversation.hasOneMessageFromMe ||
-          peersStatus[conversation.peerAddress.toLowerCase()] === "consented" ||
+          isConsented ||
           (conversation.spamScore !== undefined &&
             (conversation.spamScore === null || conversation.spamScore < 1))
         ) {
