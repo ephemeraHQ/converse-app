@@ -1,5 +1,5 @@
 diff --git a/node_modules/@xmtp/react-native-sdk/android/build.gradle b/node_modules/@xmtp/react-native-sdk/android/build.gradle
-index 450aaf6..2ad60e2 100644
+index 942ec7e..3ab764b 100644
 --- a/node_modules/@xmtp/react-native-sdk/android/build.gradle
 +++ b/node_modules/@xmtp/react-native-sdk/android/build.gradle
 @@ -85,6 +85,13 @@ android {
@@ -17,10 +17,10 @@ index 450aaf6..2ad60e2 100644
    lintOptions {
      abortOnError false
 diff --git a/node_modules/@xmtp/react-native-sdk/android/src/main/java/expo/modules/xmtpreactnativesdk/XMTPModule.kt b/node_modules/@xmtp/react-native-sdk/android/src/main/java/expo/modules/xmtpreactnativesdk/XMTPModule.kt
-index e438284..004e315 100644
+index b52d09c..62019c0 100644
 --- a/node_modules/@xmtp/react-native-sdk/android/src/main/java/expo/modules/xmtpreactnativesdk/XMTPModule.kt
 +++ b/node_modules/@xmtp/react-native-sdk/android/src/main/java/expo/modules/xmtpreactnativesdk/XMTPModule.kt
-@@ -565,7 +565,13 @@ class XMTPModule : Module() {
+@@ -584,7 +584,13 @@ class XMTPModule : Module() {
              val preparedData = contentResolver.openInputStream(preparedFileUrl)!!
                  .use { it.buffered().readBytes() }
              val prepared = PreparedMessage.fromSerializedData(preparedData)
@@ -100,7 +100,7 @@ index a457fc4..2685752 100644
          this.senderAddress = senderAddress;
          this.sent = sent;
 diff --git a/node_modules/@xmtp/react-native-sdk/ios/Wrappers/DecodedMessageWrapper.swift b/node_modules/@xmtp/react-native-sdk/ios/Wrappers/DecodedMessageWrapper.swift
-index 72d6c23..f266bc4 100644
+index e9b5ed3..6987a1d 100644
 --- a/node_modules/@xmtp/react-native-sdk/ios/Wrappers/DecodedMessageWrapper.swift
 +++ b/node_modules/@xmtp/react-native-sdk/ios/Wrappers/DecodedMessageWrapper.swift
 @@ -7,6 +7,7 @@ struct DecodedMessageWrapper {
@@ -112,10 +112,10 @@ index 72d6c23..f266bc4 100644
  			"contentTypeId": model.encodedContent.type.description,
  			"content": try ContentJson.fromEncoded(model.encodedContent, client: client).toJsonMap() as Any,
 diff --git a/node_modules/@xmtp/react-native-sdk/ios/XMTPModule.swift b/node_modules/@xmtp/react-native-sdk/ios/XMTPModule.swift
-index cdb0874..a533b95 100644
+index 11a753d..3da2ac2 100644
 --- a/node_modules/@xmtp/react-native-sdk/ios/XMTPModule.swift
 +++ b/node_modules/@xmtp/react-native-sdk/ios/XMTPModule.swift
-@@ -496,7 +496,13 @@ public class XMTPModule: Module {
+@@ -527,7 +527,13 @@ public class XMTPModule: Module {
  			guard let prepared = try? PreparedMessage.fromSerializedData(preparedData) else {
  				throw Error.badPreparation("unable to deserialized \(local.preparedFileUri)")
  			}

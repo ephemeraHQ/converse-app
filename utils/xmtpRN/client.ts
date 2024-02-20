@@ -1,6 +1,7 @@
 import { TransactionReferenceCodec } from "@xmtp/content-type-transaction-reference";
 import {
   Client,
+  GroupChangeCodec,
   ReactionCodec,
   ReadReceiptCodec,
   RemoteAttachmentCodec,
@@ -21,12 +22,14 @@ export const getXmtpClientFromBase64Key = (base64Key: string) =>
       new TextCodec(),
       new ReactionCodec(),
       new ReadReceiptCodec(),
+      new GroupChangeCodec(),
       new RemoteAttachmentCodec(),
       new StaticAttachmentCodec(),
       new TransactionReferenceCodec(),
       new CoinbaseMessagingPaymentCodec(),
       // new ReplyCodec()
     ],
+    enableAlphaMls: true,
   });
 
 export type ConverseXmtpClientType = Awaited<

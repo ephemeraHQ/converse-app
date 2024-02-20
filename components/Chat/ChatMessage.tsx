@@ -66,6 +66,11 @@ function ChatMessage({ message, colorScheme }: Props) {
     case "coinbasePayment":
       messageContent = <ChatTransactionReference message={message} />;
       break;
+    case "groupChange":
+      messageContent = (
+        <Text>There is a change in the group: {message.content}</Text>
+      );
+      break;
     default:
       messageContent = (
         <ClickableText
@@ -83,6 +88,7 @@ function ChatMessage({ message, colorScheme }: Props) {
 
   const isAttachment = isAttachmentMessage(message.contentType);
   const isTransaction = isTransactionMessage(message.contentType);
+  const isGroupChange = isContentType("groupChange", message.contentType);
   const reactions = getMessageReactions(message);
 
   let messageMaxWidth: DimensionValue;
@@ -111,64 +117,74 @@ function ChatMessage({ message, colorScheme }: Props) {
         <Text style={styles.date}>{getRelativeDate(message.sent)}</Text>
       )}
 
-      <ChatMessageActions
-        message={message}
-        reactions={reactions}
-        style={[
-          styles.messageBubble,
-          message.fromMe ? styles.messageBubbleMe : undefined,
-          Platform.select({
-            default: {},
-            android: {
-              // Messages not from me
-              borderBottomLeftRadius:
-                !message.fromMe && message.hasNextMessageInSeries ? 2 : 18,
-              borderTopLeftRadius:
-                !message.fromMe && message.hasPreviousMessageInSeries ? 2 : 18,
-              // Messages from me
-              borderBottomRightRadius:
-                message.fromMe && message.hasNextMessageInSeries ? 2 : 18,
-              borderTopRightRadius:
-                message.fromMe && message.hasPreviousMessageInSeries ? 2 : 18,
-            },
-          }),
-          {
-            maxWidth: messageMaxWidth,
-          },
-        ]}
-      >
-        {isContentType("text", message.contentType) && (
-          <ChatMessageFramePreviews message={message} />
-        )}
+      {isGroupChange && messageContent}
 
-        <View
-          style={[
-            isAttachment || isTransaction
-              ? styles.messageBubbleAttachmentOrTransaction
-              : styles.messageBubbleText,
-          ]}
-        >
-          {messageContent}
-        </View>
+      {!isGroupChange && (
+        <>
+          <ChatMessageActions
+            message={message}
+            reactions={reactions}
+            style={[
+              styles.messageBubble,
+              message.fromMe ? styles.messageBubbleMe : undefined,
+              Platform.select({
+                default: {},
+                android: {
+                  // Messages not from me
+                  borderBottomLeftRadius:
+                    !message.fromMe && message.hasNextMessageInSeries ? 2 : 18,
+                  borderTopLeftRadius:
+                    !message.fromMe && message.hasPreviousMessageInSeries
+                      ? 2
+                      : 18,
+                  // Messages from me
+                  borderBottomRightRadius:
+                    message.fromMe && message.hasNextMessageInSeries ? 2 : 18,
+                  borderTopRightRadius:
+                    message.fromMe && message.hasPreviousMessageInSeries
+                      ? 2
+                      : 18,
+                },
+              }),
+              {
+                maxWidth: messageMaxWidth,
+              },
+            ]}
+          >
+            {isContentType("text", message.contentType) && (
+              <ChatMessageFramePreviews message={message} />
+            )}
 
-        <View style={styles.metadataContainer}>{metadata}</View>
-
-        {!message.hasNextMessageInSeries &&
-          (Platform.OS === "ios" || Platform.OS === "web") && (
-            <MessageTail
-              fill={
-                message.fromMe
-                  ? myMessageBubbleColor(colorScheme)
-                  : messageBubbleColor(colorScheme)
-              }
+            <View
               style={[
-                styles.messageTail,
-                message.fromMe ? styles.messageTailMe : undefined,
+                isAttachment || isTransaction
+                  ? styles.messageBubbleAttachmentOrTransaction
+                  : styles.messageBubbleText,
               ]}
-            />
-          )}
-      </ChatMessageActions>
-      <ChatMessageReactions message={message} reactions={reactions} />
+            >
+              {messageContent}
+            </View>
+
+            <View style={styles.metadataContainer}>{metadata}</View>
+
+            {!message.hasNextMessageInSeries &&
+              (Platform.OS === "ios" || Platform.OS === "web") && (
+                <MessageTail
+                  fill={
+                    message.fromMe
+                      ? myMessageBubbleColor(colorScheme)
+                      : messageBubbleColor(colorScheme)
+                  }
+                  style={[
+                    styles.messageTail,
+                    message.fromMe ? styles.messageTailMe : undefined,
+                  ]}
+                />
+              )}
+          </ChatMessageActions>
+          <ChatMessageReactions message={message} reactions={reactions} />
+        </>
+      )}
     </View>
   );
 }

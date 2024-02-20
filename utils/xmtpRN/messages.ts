@@ -1,6 +1,7 @@
 import { TransactionReference } from "@xmtp/content-type-transaction-reference";
 import {
   DecodedMessage,
+  GroupChangeContent,
   ReactionContent,
   RemoteAttachmentContent,
   StaticAttachmentContent,
@@ -11,7 +12,11 @@ import { XmtpMessage } from "../../data/store/chatStore";
 import { addLog } from "../debug";
 import { sentryTrackError } from "../sentry";
 import { serializeRemoteAttachmentMessageContent } from "./attachments";
-import { ConverseXmtpClientType, DecodedMessageWithCodecsType } from "./client";
+import {
+  ConverseXmtpClientType,
+  DecodedMessageWithCodecsType,
+  GroupWithCodecsType,
+} from "./client";
 import { isContentType } from "./contentTypes";
 import { CoinbaseMessagingPaymentContent } from "./contentTypes/coinbasePayment";
 import { getXmtpClient } from "./sync";
@@ -42,7 +47,10 @@ const protocolMessageToStateMessage = (
     content = JSON.stringify(
       message.content() as CoinbaseMessagingPaymentContent
     );
+  } else if (isContentType("groupChange", contentType)) {
+    content = JSON.stringify(message.content() as GroupChangeContent);
   } else {
+    console.log(message.contentTypeId);
     contentFallback = message.fallback;
   }
   return {
@@ -93,6 +101,24 @@ export const stopStreamingAllMessage = async (account: string) => {
   const client = (await getXmtpClient(account)) as ConverseXmtpClientType;
   console.log(`[XmtpRN] Stopped streaming messages for ${client.address}`);
   client.conversations.cancelStreamAllMessages();
+};
+
+export const syncGroupsMessages = async (
+  account: string,
+  groups: GroupWithCodecsType[],
+  queryConversationsFromTimestamp: { [topic: string]: number }
+) => {
+  console.log(`Syncing ${groups.length} groups...`);
+  await Promise.all(groups.map((g) => g.sync()));
+  console.log(`Synced ${groups.length} groups!!`);
+  // @todo => add pagination from queryConversationsFromTimestamp
+  const allMessages = (
+    await Promise.all(groups.map((g) => g.messages()))
+  ).flat();
+  console.log(allMessages);
+  console.log(`saving ${allMessages.length} messages from groups!!`);
+  saveMessages(account, protocolMessagesToStateMessages(allMessages));
+  return allMessages.length;
 };
 
 export const syncConversationsMessages = async (

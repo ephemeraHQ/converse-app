@@ -16,6 +16,12 @@ import { debugLogs, resetDebugLogs } from "../utils/debug";
 import { usePrivySigner } from "../utils/evm/privy";
 import { getSecureItemAsync } from "../utils/keychain";
 import mmkv from "../utils/mmkv";
+import {
+  ConverseXmtpClientType,
+  GroupWithCodecsType,
+} from "../utils/xmtpRN/client";
+import { getConversationWithTopic } from "../utils/xmtpRN/conversations";
+import { getXmtpClient } from "../utils/xmtpRN/sync";
 import { showActionSheetWithOptions } from "./StateHandlers/ActionSheetStateHandler";
 
 export const useEnableDebug = () => {
@@ -116,6 +122,42 @@ const DebugButton = forwardRef((props, ref) => {
         "Clear logs": resetDebugLogs,
         "Clear logout tasks": () => {
           mmkv.delete("converse-logout-tasks");
+        },
+        "Create group": async () => {
+          const client = (await getXmtpClient(
+            currentAccount()
+          )) as ConverseXmtpClientType;
+          console.log("creating group...");
+          try {
+            const group = await client.conversations.newGroup([
+              "0x3f37816dde4b15deca7881788411da16fc22b07c",
+              "0xe70573194bd5b4d0a907e4395f4fa8a1fbf537ac",
+            ]);
+            console.log("done!!!");
+            console.log(group);
+          } catch (e) {
+            console.error(e);
+          }
+        },
+        "Send message in group": async () => {
+          const group = await getConversationWithTopic(
+            currentAccount(),
+            "a3701b3ee29c25e2f89bb5c52e1556a3"
+          );
+          const message = await group?.send("HELLO IN GROUP");
+          console.log(message);
+        },
+        SyncGroup: async () => {
+          console.log("getting group...");
+          const group = (await getConversationWithTopic(
+            currentAccount(),
+            "a3701b3ee29c25e2f89bb5c52e1556a3"
+          )) as GroupWithCodecsType;
+          console.log("got group, syncing...");
+          await group.sync();
+          console.log("synced, getting messages...");
+          const messages = await group.messages();
+          console.log(messages);
         },
         Cancel: undefined,
       };

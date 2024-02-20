@@ -85,18 +85,20 @@ const setupAndSaveConversations = async (
 
   const conversationsToUpsert: Conversation[] = [];
   conversations.forEach((conversation) => {
-    if (conversation.isGroup) return;
     const alreadyConversationInDbWithTopic =
       alreadyConversationsByTopic[conversation.topic];
-    const profileSocials =
-      getProfilesStore(account).getState().profiles[conversation.peerAddress]
-        ?.socials;
 
-    conversation.conversationTitle = getPreferredName(
-      profileSocials,
-      conversation.peerAddress,
-      conversation.context?.conversationId
-    );
+    if (!conversation.isGroup) {
+      const profileSocials =
+        getProfilesStore(account).getState().profiles[conversation.peerAddress]
+          ?.socials;
+
+      conversation.conversationTitle = getPreferredName(
+        profileSocials,
+        conversation.peerAddress,
+        conversation.context?.conversationId
+      );
+    }
 
     conversation.readUntil =
       conversation.readUntil ||
