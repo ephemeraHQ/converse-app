@@ -15,10 +15,14 @@ export function ProfileSearchItem({
   address,
   socials,
   navigation,
+  groupMode,
+  addToGroup,
 }: {
   address: string;
   socials: ProfileSocials;
   navigation?: NativeStackNavigationProp<any>;
+  groupMode?: boolean;
+  addToGroup?: (member: ProfileSocials & { address: string }) => void;
 }) {
   const styles = useStyles();
   const preferredName = getPreferredName(socials, address);
@@ -39,7 +43,14 @@ export function ProfileSearchItem({
       </View>
       {navigation && (
         <View style={styles.right}>
-          <NavigationChatButton navigation={navigation} address={address} />
+          <NavigationChatButton
+            navigation={navigation}
+            address={address}
+            groupMode={groupMode}
+            addToGroup={
+              addToGroup ? () => addToGroup({ ...socials, address }) : undefined
+            }
+          />
         </View>
       )}
     </View>

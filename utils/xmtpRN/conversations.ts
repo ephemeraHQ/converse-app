@@ -183,7 +183,6 @@ const listGroups = async (client: ConverseXmtpClientType) => {
   const groups = await client.conversations.listGroups();
   console.log(`Listing ${groups.length} groups for ${client.address}...`);
   groups.forEach((g) => {
-    console.log("group with", g.peerAddresses);
     setOpenedConversation(client.address, g);
   });
 
@@ -226,7 +225,6 @@ export const loadConversations = async (
             .groupMembers || []
         )
       ) {
-        console.log("this group has been updated", g);
         updatedGroups.push(g);
         knownGroups.push(g);
       } else {
@@ -374,4 +372,16 @@ export const createPendingConversations = async (account: string) => {
     `Trying to create ${pendingConvos.length} pending conversations...`
   );
   await Promise.all(pendingConvos.map((c) => createConversation(account, c)));
+};
+
+export const canGroupMessage = async (account: string, peer: string) => {
+  const client = (await getXmtpClient(account)) as ConverseXmtpClientType;
+  return client.canGroupMessage([peer]);
+};
+
+export const createGroup = async (account: string, peers: string[]) => {
+  const client = (await getXmtpClient(account)) as ConverseXmtpClientType;
+  const group = await client.conversations.newGroup(peers);
+  await handleNewConversation(client, group);
+  return group.topic;
 };

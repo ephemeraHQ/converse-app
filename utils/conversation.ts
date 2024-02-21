@@ -126,6 +126,7 @@ export const conversationLastMessagePreview = (
         }
       } else if (
         isContentType("readReceipt", lastMessage?.contentType) ||
+        isContentType("groupChange", lastMessage?.contentType) ||
         (!lastMessage.content && !lastMessage.contentFallback)
       ) {
         continue;

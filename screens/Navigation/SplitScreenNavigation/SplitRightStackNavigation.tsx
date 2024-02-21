@@ -37,6 +37,7 @@ import { SplitScreenDrawerParams } from "./SplitScreenNavigation";
 export type NavigationParamList = {
   Conversation: ConversationNavParams;
   NewConversation: NewConversationNavParams;
+  NewGroupSummary: undefined;
   EnableTransactions: undefined;
   ShareProfile: undefined;
   TopUp: undefined;

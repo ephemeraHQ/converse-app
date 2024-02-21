@@ -6,6 +6,8 @@ import { XmtpConversation } from "../data/store/chatStore";
 import { ProfilesStoreType } from "../data/store/profilesStore";
 import { getPreferredName } from "./profile";
 
+const { humanize } = require("../vendor/humanhash");
+
 export const shortAddress = (address: string) =>
   address && address.length > 7
     ? `${address.slice(0, 4)}...${address.slice(
@@ -37,12 +39,14 @@ export const shortDomain = (domain: string | undefined): string => {
     : domain;
 };
 
+export const capitalize = (str: string) => str[0].toUpperCase() + str.slice(1);
+
 export const addressPrefix = (address: string) =>
   (address && address.length >= 6 ? address.slice(0, 6) : address) || "";
 
 export const conversationName = (conversation: XmtpConversation) => {
   const defaultName = conversation.isGroup
-    ? "Group"
+    ? capitalize(humanize(conversation.topic, 3, " "))
     : shortAddress(conversation.peerAddress);
   return conversation.conversationTitle || defaultName;
 };

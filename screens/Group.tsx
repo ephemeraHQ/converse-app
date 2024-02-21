@@ -6,20 +6,16 @@ import {
   useColorScheme,
   Platform,
   View,
+  Text,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import TableView from "../components/TableView/TableView";
-import {
-  currentAccount,
-  useChatStore,
-  useProfilesStore,
-} from "../data/store/accountsStore";
+import { useChatStore, useProfilesStore } from "../data/store/accountsStore";
 import { XmtpGroupConversation } from "../data/store/chatStore";
-import { backgroundColor } from "../utils/colors";
+import { backgroundColor, textPrimaryColor } from "../utils/colors";
 import { getPreferredName } from "../utils/profile";
-import { GroupWithCodecsType } from "../utils/xmtpRN/client";
-import { getConversationWithTopic } from "../utils/xmtpRN/conversations";
+import { conversationName } from "../utils/str";
 import { NavigationParamList } from "./Navigation/Navigation";
 
 export default function GroupScreen({
@@ -38,21 +34,12 @@ export default function GroupScreen({
       style={styles.group}
       contentContainerStyle={styles.groupContent}
     >
+      <Text style={styles.title}>{conversationName(group)}</Text>
       <TableView
         items={group.groupMembers.map((a) => ({
           id: a,
           title: getPreferredName(profiles[a]?.socials, a),
-          action: async () => {
-            const convo = (await getConversationWithTopic(
-              currentAccount(),
-              group.topic
-            )) as GroupWithCodecsType;
-            try {
-              await convo.removeMembers([a]);
-            } catch (e) {
-              console.error(e);
-            }
-          },
+          action: async () => {},
         }))}
         title="MEMBERS"
       />
@@ -64,6 +51,13 @@ export default function GroupScreen({
 const useStyles = () => {
   const colorScheme = useColorScheme();
   return StyleSheet.create({
+    title: {
+      color: textPrimaryColor(colorScheme),
+      fontSize: 34,
+      fontWeight: "bold",
+      textAlign: "center",
+      marginTop: 23,
+    },
     group: {
       backgroundColor: backgroundColor(colorScheme),
     },

@@ -22,9 +22,13 @@ import { ProfileSearchItem } from "./ProfileSearchItem";
 export default function ProfileSearch({
   navigation,
   profiles,
+  groupMode,
+  addToGroup,
 }: {
   navigation: NativeStackNavigationProp<any>;
   profiles: { [address: string]: ProfileSocials };
+  groupMode?: boolean;
+  addToGroup?: (member: ProfileSocials & { address: string }) => void;
 }) {
   const insets = useSafeAreaInsets();
   const styles = useStyles();
@@ -36,9 +40,11 @@ export default function ProfileSearch({
         address={item}
         socials={profiles[item]}
         navigation={navigation}
+        groupMode={groupMode}
+        addToGroup={addToGroup}
       />
     ),
-    [profiles, navigation]
+    [profiles, navigation, groupMode, addToGroup]
   );
 
   const renderHeader = () => (

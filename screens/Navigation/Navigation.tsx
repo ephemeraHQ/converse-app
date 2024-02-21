@@ -44,6 +44,7 @@ export type NavigationParamList = {
   ChatsRequests: undefined;
   Conversation: ConversationNavParams;
   NewConversation: NewConversationNavParams;
+  NewGroupSummary: undefined;
   EnableTransactions: undefined;
   ConverseMatchMaker: undefined;
   ShareProfile: undefined;

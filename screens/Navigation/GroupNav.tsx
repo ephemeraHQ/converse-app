@@ -1,6 +1,6 @@
 import { Platform, useColorScheme } from "react-native";
 
-import { textSecondaryColor } from "../../utils/colors";
+import { headerTitleStyle, textSecondaryColor } from "../../utils/colors";
 import GroupScreen from "../Group";
 import { NativeStack, navigationAnimation } from "./Navigation";
 
@@ -19,16 +19,13 @@ export default function GroupNav() {
       name="Group"
       component={GroupScreen}
       options={({ route }) => ({
-        headerTitle: "Group",
+        headerTitle: "Group info",
         headerTintColor:
           Platform.OS === "android" || Platform.OS === "web"
             ? textSecondaryColor(colorScheme)
             : undefined,
         animation: navigationAnimation,
-        headerTitleStyle: Platform.select({
-          default: {},
-          web: { left: -20 } as any,
-        }),
+        headerTitleStyle: headerTitleStyle(colorScheme),
       })}
     />
   );
