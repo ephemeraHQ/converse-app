@@ -6,6 +6,7 @@ import { NativeStack } from "./Navigation";
 
 export type NewConversationNavParams = {
   peer?: string;
+  addingToGroupTopic?: string;
 };
 
 export const NewConversationScreenConfig = {
@@ -27,7 +28,6 @@ export default function NewConversationNav() {
       options={{
         headerShown: false,
         presentation: "modal",
-        headerTitle: "coucou toi",
         headerTitleStyle: headerTitleStyle(colorScheme),
       }}
     />

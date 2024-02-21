@@ -44,6 +44,7 @@ import {
 } from "../utils/colors";
 import { evmHelpers } from "../utils/evm/helpers";
 import { useLogoutFromConverse } from "../utils/logout";
+import { navigate } from "../utils/navigation";
 import { getIPFSAssetURI } from "../utils/thirdweb";
 import { refreshBalanceForAccount } from "../utils/wallet";
 import { consentToPeersOnProtocol } from "../utils/xmtpRN/conversations";
@@ -308,6 +309,28 @@ export default function ProfileScreen({
         title="ADDRESS"
         style={styles.tableView}
       />
+
+      {route.params?.fromGroup && !isMyProfile && (
+        <TableView
+          items={[
+            {
+              id: "message",
+              title: "Send a message",
+              titleColor: primaryColor(colorScheme),
+              action: () => {
+                navigation.pop(3);
+                // @todo => check if this is the right timing on split screen / web / android
+                setTimeout(() => {
+                  navigate("Conversation", {
+                    mainConversationWithPeer: route.params.address,
+                  });
+                }, 300);
+              },
+            },
+          ]}
+          style={styles.tableView}
+        />
+      )}
 
       {socialItems.length > 0 && (
         <TableView

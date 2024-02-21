@@ -7,6 +7,7 @@ import { NativeStack, navigationAnimation } from "./Navigation";
 
 export type ProfileNavParams = {
   address: string;
+  fromGroup?: boolean;
 };
 
 export const ProfileScreenConfig = {

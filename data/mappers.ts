@@ -81,6 +81,8 @@ export const xmtpConversationToDb = (
   spamScore: xmtpConversation.spamScore,
   isGroup: xmtpConversation.isGroup,
   groupMembers: xmtpConversation.groupMembers,
+  groupAdmins: xmtpConversation.groupAdmins,
+  groupPermissionLevel: xmtpConversation.groupPermissionLevel,
 });
 
 export const xmtpConversationFromDb = (
@@ -125,5 +127,7 @@ export const xmtpConversationFromDb = (
     spamScore: dbConversation.spamScore,
     isGroup: dbConversation.isGroup,
     groupMembers: dbConversation.groupMembers,
+    groupAdmins: dbConversation.groupAdmins,
+    groupPermissionLevel: dbConversation.groupPermissionLevel,
   } as XmtpConversation;
 };
