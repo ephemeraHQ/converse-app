@@ -4,6 +4,7 @@ import {
   Platform,
   ScrollView,
   StyleSheet,
+  Switch,
   useColorScheme,
   View,
 } from "react-native";
@@ -28,6 +29,9 @@ export default function NewGroupSummary({
   const insets = useSafeAreaInsets();
   const [creatingGroup, setCreatingGroup] = useState(false);
   const isSplitScreen = useIsSplitScreen();
+  const [groupPermissionLevel, setGroupPermissionLevel] = useState<
+    "creator_admin" | "everyone_admin"
+  >("creator_admin");
 
   useEffect(() => {
     navigation.setOptions({
@@ -42,7 +46,8 @@ export default function NewGroupSummary({
               setCreatingGroup(true);
               const groupTopic = await createGroup(
                 currentAccount(),
-                route.params.members.map((m) => m.address)
+                route.params.members.map((m) => m.address),
+                groupPermissionLevel
               );
               if (Platform.OS !== "web") {
                 navigation.getParent()?.goBack();
@@ -60,7 +65,13 @@ export default function NewGroupSummary({
           />
         ),
     });
-  }, [creatingGroup, isSplitScreen, navigation, route.params.members]);
+  }, [
+    creatingGroup,
+    groupPermissionLevel,
+    isSplitScreen,
+    navigation,
+    route.params.members,
+  ]);
 
   return (
     <ScrollView
@@ -73,6 +84,25 @@ export default function NewGroupSummary({
           title: getPreferredName(a, a.address),
         }))}
         title="MEMBERS"
+      />
+      <TableView
+        items={[
+          {
+            title: "Add and remove other members",
+            id: "groupPermissionLevel",
+            rightView: (
+              <Switch
+                onValueChange={() => {
+                  setGroupPermissionLevel((p) =>
+                    p === "creator_admin" ? "everyone_admin" : "creator_admin"
+                  );
+                }}
+                value={groupPermissionLevel === "everyone_admin"}
+              />
+            ),
+          },
+        ]}
+        title="MEMBERS OF THE GROUP CAN"
       />
       <View style={{ height: insets.bottom }} />
     </ScrollView>
