@@ -10,6 +10,7 @@ import {
 } from "react-native";
 
 import MessageTail from "../../assets/message-tail.svg";
+import { useProfilesStore } from "../../data/store/accountsStore";
 import { XmtpMessage } from "../../data/store/chatStore";
 import { isAttachmentMessage } from "../../utils/attachment/helpers";
 import {
@@ -21,6 +22,7 @@ import {
 import { getRelativeDate } from "../../utils/date";
 import { isDesktop } from "../../utils/device";
 import { LimitedMap } from "../../utils/objects";
+import { getPreferredName } from "../../utils/profile";
 import { getMessageReactions } from "../../utils/reactions";
 import { isTransactionMessage } from "../../utils/transaction";
 import {
@@ -29,6 +31,7 @@ import {
 } from "../../utils/xmtpRN/contentTypes";
 import ClickableText from "../ClickableText";
 import ChatAttachmentBubble from "./ChatAttachmentBubble";
+import ChatGroupChangeMessage from "./ChatGroupChangeMessage";
 import ChatMessageActions from "./ChatMessageActions";
 import ChatMessageFramePreviews from "./ChatMessageFramePreviews";
 import ChatMessageMetadata from "./ChatMessageMetadata";
@@ -46,9 +49,22 @@ type Props = {
   account: string;
   message: MessageToDisplay;
   colorScheme: ColorSchemeName;
+  isGroup: boolean;
 };
 
-function ChatMessage({ message, colorScheme }: Props) {
+const MessageSender = ({ message }: { message: MessageToDisplay }) => {
+  const senderSocials = useProfilesStore(
+    (s) => s.profiles[message.senderAddress]?.socials
+  );
+  const styles = useStyles();
+  return (
+    <Text style={styles.groupSender}>
+      {getPreferredName(senderSocials, message.senderAddress)}
+    </Text>
+  );
+};
+
+function ChatMessage({ message, colorScheme, isGroup }: Props) {
   const styles = useStyles();
 
   const metadata = (
@@ -67,21 +83,22 @@ function ChatMessage({ message, colorScheme }: Props) {
       messageContent = <ChatTransactionReference message={message} />;
       break;
     case "groupChange":
-      messageContent = (
-        <Text>There is a change in the group: {message.content}</Text>
-      );
+      messageContent = <ChatGroupChangeMessage message={message} />;
       break;
     default:
       messageContent = (
-        <ClickableText
-          style={[
-            styles.messageText,
-            message.fromMe ? styles.messageTextMe : undefined,
-          ]}
-        >
-          {message.content || message.contentFallback}
-          <View style={{ opacity: 0 }}>{metadata}</View>
-        </ClickableText>
+        <>
+          {isGroup && !message.fromMe && <MessageSender message={message} />}
+          <ClickableText
+            style={[
+              styles.messageText,
+              message.fromMe ? styles.messageTextMe : undefined,
+            ]}
+          >
+            {message.content || message.contentFallback}
+            <View style={{ opacity: 0 }}>{metadata}</View>
+          </ClickableText>
+        </>
       );
       break;
   }
@@ -89,7 +106,9 @@ function ChatMessage({ message, colorScheme }: Props) {
   const isAttachment = isAttachmentMessage(message.contentType);
   const isTransaction = isTransactionMessage(message.contentType);
   const isGroupChange = isContentType("groupChange", message.contentType);
+
   const reactions = getMessageReactions(message);
+  const showInBubble = !isGroupChange;
 
   let messageMaxWidth: DimensionValue;
   if (isDesktop) {
@@ -116,10 +135,8 @@ function ChatMessage({ message, colorScheme }: Props) {
       {message.dateChange && (
         <Text style={styles.date}>{getRelativeDate(message.sent)}</Text>
       )}
-
-      {isGroupChange && messageContent}
-
-      {!isGroupChange && (
+      {!showInBubble && messageContent}
+      {showInBubble && (
         <>
           <ChatMessageActions
             message={message}
@@ -199,6 +216,7 @@ type RenderedChatMessage = {
   renderedMessage: JSX.Element;
   message: MessageToDisplay;
   colorScheme: ColorSchemeName;
+  isGroup: boolean;
 };
 
 const renderedMessages = new LimitedMap<string, RenderedChatMessage>(50);
@@ -207,6 +225,7 @@ export default function CachedChatMessage({
   account,
   message,
   colorScheme,
+  isGroup,
 }: Props) {
   const keysChangesToRerender: (keyof MessageToDisplay)[] = [
     "id",
@@ -227,11 +246,17 @@ export default function CachedChatMessage({
       (k) => message[k] !== alreadyRenderedMessage.message[k]
     );
   if (shouldRerender) {
-    const renderedMessage = ChatMessage({ account, message, colorScheme });
+    const renderedMessage = ChatMessage({
+      account,
+      message,
+      colorScheme,
+      isGroup,
+    });
     renderedMessages.set(`${account}-${message.id}`, {
       message,
       renderedMessage,
       colorScheme,
+      isGroup,
     });
     return renderedMessage;
   } else {
@@ -297,6 +322,10 @@ const useStyles = () => {
       position: "absolute",
       bottom: 6,
       right: 12,
+    },
+    groupSender: {
+      fontSize: 15,
+      fontWeight: "500",
     },
   });
 };

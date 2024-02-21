@@ -68,7 +68,8 @@ const getListArray = (
         if (
           previousMessage.senderAddress === message.senderAddress &&
           !message.dateChange &&
-          !isContentType("reaction", previousMessage.contentType)
+          !isContentType("reaction", previousMessage.contentType) &&
+          !isContentType("groupChange", previousMessage.contentType)
         ) {
           message.hasPreviousMessageInSeries = true;
         }
@@ -87,7 +88,8 @@ const getListArray = (
         if (
           nextMessage.senderAddress === message.senderAddress &&
           !nextMessageDateChange &&
-          !isContentType("reaction", nextMessage.contentType)
+          !isContentType("reaction", nextMessage.contentType) &&
+          !isContentType("groupChange", nextMessage.contentType)
         ) {
           message.hasNextMessageInSeries = true;
         }
@@ -200,10 +202,11 @@ export default function Chat() {
           account={xmtpAddress}
           message={{ ...item }}
           colorScheme={colorScheme}
+          isGroup={!!conversation?.isGroup}
         />
       );
     },
-    [colorScheme, xmtpAddress]
+    [colorScheme, xmtpAddress, conversation?.isGroup]
   );
   const keyExtractor = useCallback((item: MessageToDisplay) => item.id, []);
 
