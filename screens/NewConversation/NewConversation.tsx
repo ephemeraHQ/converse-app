@@ -10,6 +10,7 @@ import {
   View,
   useColorScheme,
   Platform,
+  Alert,
 } from "react-native";
 
 import ActivityIndicator from "../../components/ActivityIndicator/ActivityIndicator";
@@ -23,6 +24,7 @@ import { TableViewPicto } from "../../components/TableView/TableViewImage";
 import config from "../../config";
 import {
   currentAccount,
+  useChatStore,
   useRecommendationsStore,
 } from "../../data/store/accountsStore";
 import { ProfileSocials } from "../../data/store/profilesStore";
@@ -44,6 +46,7 @@ import { navigate } from "../../utils/navigation";
 import { isEmptyObject } from "../../utils/objects";
 import { getPreferredName } from "../../utils/profile";
 import { isOnXmtp } from "../../utils/xmtpRN/client";
+import { addMembersToGroup } from "../../utils/xmtpRN/conversations";
 import { NewConversationModalParams } from "./NewConversationModal";
 
 export default function NewConversation({
@@ -55,9 +58,15 @@ export default function NewConversation({
 >) {
   const colorScheme = useColorScheme();
   const [group, setGroup] = useState({
-    enabled: false,
+    enabled: !!route.params?.addingToGroupTopic,
     members: [] as (ProfileSocials & { address: string })[],
   });
+  const existingGroup = useChatStore((s) =>
+    route.params?.addingToGroupTopic
+      ? s.conversations[route.params.addingToGroupTopic]
+      : undefined
+  );
+  const [loading, setLoading] = useState(false);
   useEffect(() => {
     navigation.setOptions({
       headerLeft: () =>
@@ -71,22 +80,48 @@ export default function NewConversation({
         ) : (
           <AndroidBackAction navigation={navigation} />
         ),
-      headerTitle: group.enabled ? "New group" : "New conversation",
+      headerTitle: group.enabled
+        ? route.params?.addingToGroupTopic
+          ? "Add members"
+          : "New group"
+        : "New conversation",
       headerRight: () => {
         if (group.enabled && group.members.length > 0) {
-          return (
-            <Button
-              title="Next"
-              onPress={() => {
-                navigation.push("NewGroupSummary", { members: group.members });
-              }}
-            />
-          );
+          if (loading) {
+            return <ActivityIndicator style={{ marginRight: 5 }} />;
+          } else {
+            return (
+              <Button
+                title={route.params?.addingToGroupTopic ? "Add" : "Next"}
+                onPress={async () => {
+                  if (route.params?.addingToGroupTopic) {
+                    setLoading(true);
+                    try {
+                      await addMembersToGroup(
+                        currentAccount(),
+                        route.params?.addingToGroupTopic,
+                        group.members.map((m) => m.address)
+                      );
+                      navigation.goBack();
+                    } catch (e) {
+                      setLoading(false);
+                      console.error(e);
+                      Alert.alert("An error occured");
+                    }
+                  } else {
+                    navigation.push("NewGroupSummary", {
+                      members: group.members,
+                    });
+                  }
+                }}
+              />
+            );
+          }
         }
         return undefined;
       },
     });
-  }, [group, navigation]);
+  }, [group, loading, navigation, route.params?.addingToGroupTopic]);
 
   const [value, setValue] = useState(route.params?.peer || "");
   const searchingForValue = useRef("");
@@ -271,7 +306,15 @@ export default function NewConversation({
         }}
         inputPlaceholder={inputPlaceholder}
       />
-      <View style={styles.group}>
+      <View
+        style={[
+          styles.group,
+          {
+            display:
+              group.enabled && group.members.length === 0 ? "none" : "flex",
+          },
+        ]}
+      >
         {!group.enabled && (
           <ConverseButton
             variant="text"
@@ -284,11 +327,7 @@ export default function NewConversation({
             }}
           />
         )}
-        {group.enabled && group.members.length === 0 && (
-          <Text style={[styles.message, { paddingTop: 13 }]}>
-            Search for someone to add to the group
-          </Text>
-        )}
+
         {group.enabled &&
           group.members.length > 0 &&
           group.members.map((m, index) => {
@@ -326,6 +365,11 @@ export default function NewConversation({
               if (group.enabled && group.members) {
                 group.members.forEach((member) => {
                   delete searchResultsToShow[member.address];
+                });
+              }
+              if (existingGroup) {
+                existingGroup.groupMembers?.forEach((a) => {
+                  delete searchResultsToShow[a];
                 });
               }
               return searchResultsToShow;

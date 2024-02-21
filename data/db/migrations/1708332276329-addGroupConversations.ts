@@ -7,7 +7,7 @@ export class AddGroupConversations1708332276329 implements MigrationInterface {
     await queryRunner.query(`DROP INDEX "IDX_134e668e0d62c7cd93624ea4d5"`);
     await queryRunner.query(`DROP INDEX "IDX_b895a35679cdf0702fb2218718"`);
     await queryRunner.query(
-      `CREATE TABLE "temporary_conversation" ("topic" text PRIMARY KEY NOT NULL, "peerAddress" text, "createdAt" integer NOT NULL, "contextConversationId" text, "contextMetadata" text, "readUntil" integer NOT NULL DEFAULT (0), "pending" boolean NOT NULL DEFAULT (0), "version" text NOT NULL DEFAULT ('v2'), "spamScore" decimal(6,2), "isGroup" boolean NOT NULL DEFAULT (0), "groupMembers" text)`
+      `CREATE TABLE "temporary_conversation" ("topic" text PRIMARY KEY NOT NULL, "peerAddress" text, "createdAt" integer NOT NULL, "contextConversationId" text, "contextMetadata" text, "readUntil" integer NOT NULL DEFAULT (0), "pending" boolean NOT NULL DEFAULT (0), "version" text NOT NULL DEFAULT ('v2'), "spamScore" decimal(6,2), "isGroup" boolean NOT NULL DEFAULT (0), "groupMembers" text, "groupAdmins" text, "groupPermissionLevel" text)`
     );
     await queryRunner.query(
       `INSERT INTO "temporary_conversation"("topic", "peerAddress", "createdAt", "contextConversationId", "contextMetadata", "readUntil", "pending", "version", "spamScore") SELECT "topic", "peerAddress", "createdAt", "contextConversationId", "contextMetadata", "readUntil", "pending", "version", "spamScore" FROM "conversation"`

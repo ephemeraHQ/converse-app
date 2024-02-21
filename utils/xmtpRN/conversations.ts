@@ -57,6 +57,8 @@ const protocolGroupToStateConversation = (
   pending: false,
   version: group.version,
   isGroup: true,
+  groupAdmins: [group.adminAddress],
+  groupPermissionLevel: group.permissionLevel,
 });
 
 const protocolConversationsToTopicData = async (
@@ -222,7 +224,7 @@ export const loadConversations = async (
         !haveSameItems(
           g.peerAddresses,
           getChatStore(account).getState().conversations[g.topic]
-            .groupMembers || []
+            ?.groupMembers || []
         )
       ) {
         updatedGroups.push(g);
@@ -379,9 +381,41 @@ export const canGroupMessage = async (account: string, peer: string) => {
   return client.canGroupMessage([peer]);
 };
 
-export const createGroup = async (account: string, peers: string[]) => {
+export const createGroup = async (
+  account: string,
+  peers: string[],
+  permissionLevel: "everyone_admin" | "creator_admin"
+) => {
   const client = (await getXmtpClient(account)) as ConverseXmtpClientType;
-  const group = await client.conversations.newGroup(peers);
+  const group = await client.conversations.newGroup(peers, permissionLevel);
   await handleNewConversation(client, group);
   return group.topic;
+};
+
+export const removeMembersFromGroup = async (
+  account: string,
+  topic: string,
+  members: string[]
+) => {
+  const group = await getConversationWithTopic(account, topic);
+  if (!group || (group as any).peerAddress) {
+    throw new Error(
+      `Conversation with topic ${topic} does not exist or is not a group`
+    );
+  }
+  await (group as GroupWithCodecsType).removeMembers(members);
+};
+
+export const addMembersToGroup = async (
+  account: string,
+  topic: string,
+  members: string[]
+) => {
+  const group = await getConversationWithTopic(account, topic);
+  if (!group || (group as any).peerAddress) {
+    throw new Error(
+      `Conversation with topic ${topic} does not exist or is not a group`
+    );
+  }
+  await (group as GroupWithCodecsType).addMembers(members);
 };

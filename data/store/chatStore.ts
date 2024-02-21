@@ -46,12 +46,16 @@ export type XmtpDMConversation = XmtpConversationShared & {
   isGroup: false;
   peerAddress: string;
   groupMembers?: undefined;
+  groupAdmins?: undefined;
+  groupPermissionLevel?: undefined;
 };
 
 export type XmtpGroupConversation = XmtpConversationShared & {
   isGroup: true;
   peerAddress?: undefined;
   groupMembers: string[];
+  groupAdmins: string[];
+  groupPermissionLevel: "everyone_admin" | "creator_admin";
 };
 
 export type XmtpConversation = XmtpDMConversation | XmtpGroupConversation;

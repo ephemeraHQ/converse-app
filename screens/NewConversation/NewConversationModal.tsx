@@ -54,7 +54,9 @@ const NewConversationModal = ({
       <ModalStack.Screen
         name="NewConversationScreen"
         options={{
-          headerTitle: "New conversation",
+          headerTitle: route.params?.addingToGroupTopic
+            ? "Add members"
+            : "New conversation",
           presentation: "modal",
         }}
       >
