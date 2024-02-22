@@ -52,6 +52,7 @@
       }
     },
     "preview-android": {
+      "distribution": "internal",
       "autoIncrement": true,
       "channel": "preview",
       "env": {
