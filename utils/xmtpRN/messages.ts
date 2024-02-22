@@ -91,10 +91,14 @@ export const streamAllMessages = async (account: string) => {
   await stopStreamingAllMessage(account);
   const client = (await getXmtpClient(account)) as ConverseXmtpClientType;
   console.log(`[XmtpRN] Streaming messages for ${client.address}`);
-  client.conversations.streamAllMessages(async (message) => {
-    console.log(`[XmtpRN] Received a message for ${client.address}`);
+  await client.conversations.streamAllMessages(async (message) => {
+    console.log(
+      `[XmtpRN] Received a DM OR GROUP message for ${client.address}`,
+      message.nativeContent.text,
+      message.topic
+    );
     saveMessages(client.address, protocolMessagesToStateMessages([message]));
-  });
+  }); // @todo => fix and use true one day?
 };
 
 export const stopStreamingAllMessage = async (account: string) => {
@@ -103,19 +107,57 @@ export const stopStreamingAllMessage = async (account: string) => {
   client.conversations.cancelStreamAllMessages();
 };
 
+// export const streamAllGroupMessages = async (account: string) => {
+//   await stopStreamingAllGroupMessage(account);
+//   const client = (await getXmtpClient(account)) as ConverseXmtpClientType;
+//   console.log(`[XmtpRN] Streaming group messages for ${client.address}`);
+//   await client.conversations.streamAllGroupMessages(async (message) => {
+//     console.log(
+//       `[XmtpRN] Received a group message for ${client.address}`,
+//       message.nativeContent.text,
+//       message.id
+//     );
+//     saveMessages(client.address, protocolMessagesToStateMessages([message]));
+//   });
+// };
+
+// export const stopStreamingAllGroupMessage = async (account: string) => {
+//   const client = (await getXmtpClient(account)) as ConverseXmtpClientType;
+//   console.log(
+//     `[XmtpRN] Stopped streaming group messages for ${client.address}`
+//   );
+//   client.conversations.cancelStreamAllGroupMessages();
+// };
+
 export const syncGroupsMessages = async (
   account: string,
   groups: GroupWithCodecsType[],
-  queryConversationsFromTimestamp: { [topic: string]: number }
+  queryGroupsFromTimestamp: { [topic: string]: number }
 ) => {
   console.log(`Syncing ${groups.length} groups...`);
-  await Promise.all(groups.map((g) => g.sync()));
-  // @todo => add pagination from queryConversationsFromTimestamp
-  const allMessages = (
-    await Promise.all(groups.map((g) => g.messages()))
+  for (const group of groups) {
+    console.log("syncing group", group.topic);
+    await group.sync();
+    console.log("synced group", group.topic);
+  }
+  console.log(`${groups.length} groups synced!`);
+  console.log(queryGroupsFromTimestamp);
+  const newMessages = (
+    await Promise.all(
+      groups.map((g) =>
+        g.messages(
+          true, // skipSync
+          undefined, // limit
+          undefined, // before
+          queryGroupsFromTimestamp[g.topic], // after
+          "SORT_DIRECTION_ASCENDING" // direction
+        )
+      )
+    )
   ).flat();
-  saveMessages(account, protocolMessagesToStateMessages(allMessages));
-  return allMessages.length;
+  console.log(`${newMessages.length} groups messages pulled`);
+  saveMessages(account, protocolMessagesToStateMessages(newMessages));
+  return newMessages.length;
 };
 
 export const syncConversationsMessages = async (

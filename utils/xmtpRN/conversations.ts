@@ -18,7 +18,7 @@ import {
   ConverseXmtpClientType,
   GroupWithCodecsType,
 } from "./client";
-import { syncConversationsMessages } from "./messages";
+import { syncConversationsMessages, syncGroupsMessages } from "./messages";
 import { getXmtpClient } from "./sync";
 
 const protocolConversationToStateConversation = (
@@ -132,43 +132,95 @@ const handleNewConversation = async (
   conversation: ConversationWithCodecsType | GroupWithCodecsType
 ) => {
   setOpenedConversation(client.address, conversation);
-  saveConversations(client.address, [
-    (conversation as any).peerAddress
-      ? protocolConversationToStateConversation(
-          conversation as ConversationWithCodecsType
-        )
-      : protocolGroupToStateConversation(conversation as GroupWithCodecsType),
-  ]);
-  if ((conversation as any).peerAddress) {
+  const isGroup = !!(conversation as any).peerAddresses;
+  const isDMConversation = !!(conversation as any).peerAddress;
+
+  saveConversations(
+    client.address,
+    [
+      isDMConversation
+        ? protocolConversationToStateConversation(
+            conversation as ConversationWithCodecsType
+          )
+        : protocolGroupToStateConversation(conversation as GroupWithCodecsType),
+    ],
+    true
+  );
+
+  if (isDMConversation) {
     saveTopicDataToKeychain(
       client.address,
       await protocolConversationsToTopicData([
         conversation as ConversationWithCodecsType,
       ])
     );
+    // New conversations are not streamed immediatly
+    // by the streamAllMessages method so we add this
+    // trick to try and be all synced
+    syncConversationsMessages(client.address, { [conversation.topic]: 0 });
+    setTimeout(() => {
+      syncConversationsMessages(client.address, { [conversation.topic]: 0 });
+    }, 3000);
+  } else if (isGroup) {
+    syncGroupsMessages(client.address, [conversation as GroupWithCodecsType], {
+      [conversation.topic]: 0,
+    });
+    setTimeout(() => {
+      syncGroupsMessages(
+        client.address,
+        [conversation as GroupWithCodecsType],
+        {
+          [conversation.topic]: 0,
+        }
+      );
+    }, 3000);
   }
 
-  // New conversations are not streamed immediatly
-  // by the streamAllMessages method so we add this
-  // trick to try and be all synced
-  syncConversationsMessages(client.address, { [conversation.topic]: 0 });
-  setTimeout(() => {
-    syncConversationsMessages(client.address, { [conversation.topic]: 0 });
-  }, 3000);
   updateConsentStatus(client.address);
 };
 
 export const streamConversations = async (account: string) => {
   await stopStreamingConversations(account);
   const client = (await getXmtpClient(account)) as ConverseXmtpClientType;
-  client.conversations.stream((conversation) =>
-    handleNewConversation(client, conversation)
+  await client.conversations.stream(async (conversation) => {
+    console.log("GOT A NEW DM CONVO");
+    handleNewConversation(client, conversation);
+  });
+  console.log("STREAMING CONVOS");
+};
+
+// @todo => fix conversations.streamAll to stream convos AND groups
+// but until them we stream them separately
+
+const streamGroupsCancelMethods: { [account: string]: () => void } = {};
+
+export const streamGroups = async (account: string) => {
+  await stopStreamingGroups(account);
+  const client = (await getXmtpClient(account)) as ConverseXmtpClientType;
+
+  const cancelStreamGroupsForAccount = await client.conversations.streamGroups(
+    async (group) => {
+      console.log("GOT A NEW GROUP CONVO");
+      handleNewConversation(client, group);
+      // Let's reset stream if new group
+      // @todo => it should be part of the SDK
+      // streamAllGroupMessages(account);
+    }
   );
+  console.log("STREAMING GROUPS");
+  streamGroupsCancelMethods[account] = cancelStreamGroupsForAccount;
 };
 
 export const stopStreamingConversations = async (account: string) => {
   const client = (await getXmtpClient(account)) as ConverseXmtpClientType;
   return client.conversations.cancelStream();
+};
+
+export const stopStreamingGroups = async (account: string) => {
+  if (streamGroupsCancelMethods[account]) {
+    streamGroupsCancelMethods[account]();
+    delete streamGroupsCancelMethods[account];
+  }
 };
 
 const listConversations = async (client: ConverseXmtpClientType) => {
@@ -183,7 +235,6 @@ const listConversations = async (client: ConverseXmtpClientType) => {
 const listGroups = async (client: ConverseXmtpClientType) => {
   await client.conversations.syncGroups();
   const groups = await client.conversations.listGroups();
-  console.log(`Listing ${groups.length} groups for ${client.address}...`);
   groups.forEach((g) => {
     setOpenedConversation(client.address, g);
   });
@@ -221,6 +272,7 @@ export const loadConversations = async (
         newGroups.push(g);
       } else if (
         // @todo => maybe check the groupMembers for known topics before and pass it to this method
+        // in the future => maybe also check the admins, the name, etc (anything that changes)
         !haveSameItems(
           g.peerAddresses,
           getChatStore(account).getState().conversations[g.topic]
@@ -392,6 +444,19 @@ export const createGroup = async (
   return group.topic;
 };
 
+const refreshGroup = async (account: string, topic: string) => {
+  const client = (await getXmtpClient(account)) as ConverseXmtpClientType;
+  await client.conversations.syncGroups();
+  const groups = await client.conversations.listGroups();
+  const group = groups.find((g) => g.topic === topic);
+  if (!group) throw new Error(`Group ${topic} not found, cannot refresh`);
+  saveConversations(
+    client.address,
+    [protocolGroupToStateConversation(group)],
+    true
+  );
+};
+
 export const removeMembersFromGroup = async (
   account: string,
   topic: string,
@@ -404,6 +469,7 @@ export const removeMembersFromGroup = async (
     );
   }
   await (group as GroupWithCodecsType).removeMembers(members);
+  refreshGroup(account, topic);
 };
 
 export const addMembersToGroup = async (
@@ -418,4 +484,5 @@ export const addMembersToGroup = async (
     );
   }
   await (group as GroupWithCodecsType).addMembers(members);
+  refreshGroup(account, topic);
 };

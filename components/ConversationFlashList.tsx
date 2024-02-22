@@ -1,9 +1,10 @@
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { FlashList } from "@shopify/flash-list";
-import { useCallback } from "react";
+import { useCallback, useState } from "react";
 import { Platform, View, useColorScheme, StyleSheet } from "react-native";
 
 import {
+  currentAccount,
   useChatStore,
   useCurrentAccount,
   useSettingsStore,
@@ -16,6 +17,7 @@ import {
   ConversationWithLastMessagePreview,
 } from "../utils/conversation";
 import { conversationName } from "../utils/str";
+import { syncXmtpClient } from "../utils/xmtpRN/sync";
 import ConversationListItem from "./ConversationListItem";
 
 type Props = {
@@ -45,6 +47,7 @@ export default function ConversationFlashList({
     );
   const userAddress = useCurrentAccount() as string;
   const peersStatus = useSettingsStore((s) => s.peersStatus);
+  const [refreshing, setRefreshing] = useState(false);
 
   const keyExtractor = useCallback((item: ConversationFlatListItem) => {
     return item.topic;
@@ -122,6 +125,12 @@ export default function ConversationFlashList({
           estimatedItemSize={Platform.OS === "ios" ? 77 : 88}
           ListHeaderComponent={ListHeaderComponent}
           ListFooterComponent={ListFooterComponent}
+          refreshing={refreshing}
+          onRefresh={async () => {
+            setRefreshing(true);
+            await syncXmtpClient(currentAccount());
+            setRefreshing(false);
+          }}
         />
       </View>
     </View>

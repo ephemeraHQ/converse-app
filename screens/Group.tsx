@@ -7,6 +7,7 @@ import {
   Platform,
   View,
   Text,
+  Alert,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -104,9 +105,17 @@ export default function GroupScreen({
               destructiveButtonIndex,
               title: preferredName,
             },
-            (selectedIndex?: number) => {
+            async (selectedIndex?: number) => {
               if (canRemove && selectedIndex === destructiveButtonIndex) {
-                removeMembersFromGroup(currentAccount, group.topic, [a]);
+                console.log("Removing member...");
+                try {
+                  await removeMembersFromGroup(currentAccount, group.topic, [
+                    a,
+                  ]);
+                } catch (e) {
+                  console.error(e);
+                  Alert.alert("An error occurred");
+                }
               } else if (
                 selectedIndex !== undefined &&
                 selectedIndex !== destructiveButtonIndex &&

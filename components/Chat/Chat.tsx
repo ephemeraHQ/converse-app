@@ -146,7 +146,12 @@ export default function Chat() {
   const { height: keyboardHeight } = useKeyboardAnimation();
   const tertiary = tertiaryBackgroundColor(colorScheme);
 
-  const showChatInput = !!(conversation && !isBlockedPeer);
+  const showChatInput = !!(
+    conversation &&
+    !isBlockedPeer &&
+    (!conversation.isGroup ||
+      conversation.groupMembers.includes(xmtpAddress.toLowerCase()))
+  );
 
   const textInputStyle = useAnimatedStyle(
     () => ({
@@ -168,7 +173,7 @@ export default function Chat() {
       paddingBottom: showChatInput
         ? chatInputDisplayedHeight.value +
           Math.max(insets.bottom, keyboardHeight.value)
-        : 0,
+        : insets.bottom,
     }),
     [showChatInput, keyboardHeight, chatInputDisplayedHeight, insets.bottom]
   );

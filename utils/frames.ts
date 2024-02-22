@@ -32,7 +32,6 @@ export const getMetadaTagsForMessage = async (
   account: string,
   message: MessageToDisplay
 ): Promise<FramesForMessage> => {
-  const framesClient = await getFramesClient(account);
   // OG Preview / Frames are only for text content type
   if (isContentType("text", message.contentType)) {
     const urls = message.content.match(URL_REGEX);
@@ -42,6 +41,7 @@ export const getMetadaTagsForMessage = async (
         `[FramesMetadata] Found ${urls.length} URLs in message, fetching tags`
       );
       const uniqueUrls = Array.from(new Set(urls));
+      const framesClient = await getFramesClient(account);
       const urlsMetadata = await Promise.all(
         uniqueUrls.map((u) =>
           framesClient.proxy
