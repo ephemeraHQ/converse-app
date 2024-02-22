@@ -162,11 +162,7 @@ const build = async () => {
       .toString()
       .trim();
     const fileExtension =
-      platform === "ios"
-        ? "ipa"
-        : env === "production" || env === "preview"
-        ? "aab"
-        : "apk";
+      platform === "ios" ? "ipa" : env === "production" ? "aab" : "apk";
     buildArgs.push(
       "--local",
       "--output",
