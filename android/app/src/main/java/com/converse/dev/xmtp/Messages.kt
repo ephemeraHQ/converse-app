@@ -108,6 +108,8 @@ suspend fun handleNewConversationFirstMessage(
                             spamScore,
                         )
                     }
+
+                    else -> {}
                 }
 
                 val decodedMessageResult = handleMessageByContentType(
