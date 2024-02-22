@@ -444,7 +444,7 @@ export const createGroup = async (
   return group.topic;
 };
 
-const refreshGroup = async (account: string, topic: string) => {
+export const refreshGroup = async (account: string, topic: string) => {
   const client = (await getXmtpClient(account)) as ConverseXmtpClientType;
   await client.conversations.syncGroups();
   const groups = await client.conversations.listGroups();
