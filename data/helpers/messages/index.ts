@@ -65,7 +65,10 @@ export const updateMessagesIds = async (
     const messageToUpdate = messageIdsToUpdate[oldId];
     await messageRepository.update(
       { id: messageToUpdate.message.id },
-      { id: messageToUpdate.newMessageId, sent: messageToUpdate.newMessageSent }
+      {
+        id: messageToUpdate.newMessageId,
+        sent: messageToUpdate.newMessageSent,
+      }
     );
     // Let's also move message data & attachments if exists
     await moveAssetsForMessage(
@@ -110,4 +113,14 @@ export const markMessageAsSent = async (
   getChatStore(account)
     .getState()
     .updateMessageStatus(topic, messageId, "sent");
+};
+
+export const deleteMessage = async (
+  account: string,
+  topic: string,
+  messageId: string
+) => {
+  const messageRepository = await getRepository(account, "message");
+  await messageRepository.delete({ id: messageId, conversationId: topic });
+  getChatStore(account).getState().deleteMessage(topic, messageId);
 };

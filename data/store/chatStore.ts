@@ -145,6 +145,8 @@ export type ChatStoreType = {
   }) => void;
 
   setSpamScores: (topicSpamScores: TopicSpamScores) => void;
+
+  deleteMessage: (topic: string, messageId: string) => void;
 };
 
 const now = () => new Date().getTime();
@@ -553,6 +555,22 @@ export const initChatStore = (account: string) => {
                 newState.conversations[topic].spamScore = spamScore;
                 newState.conversations[topic].lastUpdateAt = now();
               });
+              return newState;
+            }),
+          // METHOD ONLY USED TEMPORARILY FOR WHEN WE SEND GROP MESSAGES
+          deleteMessage: (topic: string, messageId: string) =>
+            set((state) => {
+              // We do not use lastUpdateAt so it should not show an update
+              // until we get back the "real" message
+              const newState = { ...state };
+              if (newState.conversations[topic]) {
+                const indexOf =
+                  newState.conversations[topic]?.messagesIds.indexOf(messageId);
+                if (indexOf > -1) {
+                  newState.conversations[topic].messagesIds.splice(indexOf, 1);
+                  newState.conversations[topic].messages.delete(messageId);
+                }
+              }
               return newState;
             }),
         }) as ChatStoreType,

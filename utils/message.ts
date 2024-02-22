@@ -69,7 +69,7 @@ export const sendMessage = async ({
       sent: sentAtTime.getTime(),
       content,
       status: "sending",
-      sentViaConverse: !isV1Conversation, // V1 Convo don't support the sentViaConverse feature
+      sentViaConverse: !isV1Conversation && !conversation.isGroup, // V1 Convo & group convos don't support the sentViaConverse feature
       contentType,
       contentFallback,
       referencedMessageId,

@@ -1,7 +1,9 @@
 import { useEmbeddedWallet, usePrivy } from "@privy-io/expo";
 import Clipboard from "@react-native-clipboard/clipboard";
 import * as Sentry from "@sentry/react-native";
+import { Client } from "@xmtp/react-native-sdk";
 import axios from "axios";
+import { Wallet } from "ethers";
 import * as Updates from "expo-updates";
 import { forwardRef, useImperativeHandle } from "react";
 
@@ -16,18 +18,17 @@ import { debugLogs, resetDebugLogs } from "../utils/debug";
 import { usePrivySigner } from "../utils/evm/privy";
 import { getSecureItemAsync } from "../utils/keychain";
 import mmkv from "../utils/mmkv";
-import {
-  ConverseXmtpClientType,
-  GroupWithCodecsType,
-} from "../utils/xmtpRN/client";
-import { getConversationWithTopic } from "../utils/xmtpRN/conversations";
-import { getXmtpClient } from "../utils/xmtpRN/sync";
 import { showActionSheetWithOptions } from "./StateHandlers/ActionSheetStateHandler";
 
 export const useEnableDebug = () => {
   const userAddress = useCurrentAccount() as string;
   return config.debugMenu || config.debugAddresses.includes(userAddress);
 };
+
+export async function delayToPropogate(): Promise<void> {
+  // delay 1s to avoid clobbering
+  return new Promise((r) => setTimeout(r, 100));
+}
 
 const DebugButton = forwardRef((props, ref) => {
   const embeddedWallet = useEmbeddedWallet();
@@ -123,41 +124,122 @@ const DebugButton = forwardRef((props, ref) => {
         "Clear logout tasks": () => {
           mmkv.delete("converse-logout-tasks");
         },
-        "Create group": async () => {
-          const client = (await getXmtpClient(
-            currentAccount()
-          )) as ConverseXmtpClientType;
-          console.log("creating group...");
-          try {
-            const group = await client.conversations.newGroup([
-              "0x3f37816dde4b15deca7881788411da16fc22b07c",
-              "0xe70573194bd5b4d0a907e4395f4fa8a1fbf537ac",
-            ]);
-            console.log("done!!!");
-            console.log(group);
-          } catch (e) {
-            console.error(e);
-          }
-        },
-        "Send message in group": async () => {
-          const group = await getConversationWithTopic(
-            currentAccount(),
-            "a3701b3ee29c25e2f89bb5c52e1556a3"
+        TestGroupsLocal: async () => {
+          console.log("launching teswt");
+          const aliceWallet = new Wallet(
+            "3665c37a709b408432dbb8500114b02d68cd810e622b84b66022fba1c2ce9798"
           );
-          const message = await group?.send("HELLO IN GROUP");
-          console.log(message);
+          const alice = await Client.create(aliceWallet, {
+            env: "dev",
+            enableAlphaMls: true,
+          });
+          console.log("alice:", alice.address);
+          // const group = await alice.conversations.newGroup([currentAccount()]);
+          await alice.conversations.syncGroups();
+          const group = (await alice.conversations.listGroups()).find(
+            (g) => g.peerAddresses?.includes(currentAccount().toLowerCase())
+          );
+          if (!group) {
+            console.log("NOGROUP");
+            return;
+          }
+          const conversation = await alice.conversations.newConversation(
+            currentAccount()
+          );
+          console.log("group exists", group.id);
+          console.log("conversation exists", conversation.topic);
+          await conversation.send("CONVO MESSAGE");
+          console.log("convo message sent");
+          await group.send("GROUP MESSAGE");
+          console.log("group message sent");
         },
-        SyncGroup: async () => {
-          console.log("getting group...");
-          const group = (await getConversationWithTopic(
-            currentAccount(),
-            "a3701b3ee29c25e2f89bb5c52e1556a3"
-          )) as GroupWithCodecsType;
-          console.log("got group, syncing...");
-          await group.sync();
-          console.log("synced, getting messages...");
-          const messages = await group.messages();
-          console.log(messages);
+        TestGroups: async () => {
+          console.log("launching teswt");
+          const aliceWallet = new Wallet(
+            "3665c37a709b408432dbb8500114b02d68cd810e622b84b66022fba1c2ce9798"
+          );
+          const alice = await Client.create(aliceWallet, {
+            env: "dev",
+            enableAlphaMls: true,
+          });
+          console.log("alice:", alice.address);
+          const bobWallet = new Wallet(
+            "ed3c89e38117d92baa6132aad1a96fa1479eb5808548e1955cfb0f1830005d2b"
+          );
+          const bob = await Client.create(bobWallet, {
+            env: "dev",
+            enableAlphaMls: true,
+          });
+          console.log("bob:", bob.address);
+          console.log("created clients");
+
+          await delayToPropogate();
+
+          await bob.conversations.syncGroups();
+          await alice.conversations.syncGroups();
+
+          // Lets create
+          // const group = await alice.conversations.newGroup([bob.address]);
+
+          const aliceGroup = (await alice.conversations.listGroups())[0];
+          // console.log(aliceGroup);
+          if (aliceGroup.peerAddresses.includes(bob.address.toLowerCase())) {
+            console.log("bob is in alice group !!");
+          }
+          const groups = await bob.conversations.listGroups();
+          console.log("we have a bob group", groups.length);
+          const convo = await bob.conversations.newConversation(
+            aliceWallet.address
+          );
+          console.log("convo id", convo.topic);
+
+          let messagesReceivedCount = 0;
+
+          await alice.conversations.streamAll(async (c) => {
+            console.log("streamed a convo/group");
+          });
+
+          // console.log("created a client for alice, lets create a new group");
+          await alice.conversations.streamAllMessages(async (message) => {
+            console.log(
+              "Alice just received a message",
+              message.nativeContent?.text
+            );
+            messagesReceivedCount += 1;
+          }, true);
+
+          await bob.conversations.streamAllMessages(async (message) => {
+            console.log(
+              "Bob just received a message",
+              message.nativeContent?.text
+            );
+            messagesReceivedCount += 1;
+          }, true);
+
+          await delayToPropogate();
+
+          // Sending 8 messages, each received by 2 people
+          await convo.send("Convo message 1 from bob");
+          await convo.send("Convo message 2 from bob");
+          await groups[0].send("Group message 1 from bob");
+          await groups[0].send("Group message 2 from bob");
+          await convo.send("Convo message 3 from bob");
+          await convo.send("Convo message 4 from bob");
+          await groups[0].send("Group message 3 from bob");
+          await groups[0].send("Group message 4 from bob");
+
+          await delayToPropogate();
+          if (messagesReceivedCount !== 16) {
+            console.log("MESSAGE RECEIVED IS NOT 16 " + messagesReceivedCount);
+          }
+          // console.log("group created");
+          // const convo = await alice.conversations.newConversation(currentAccount());
+          // console.log("convo created");
+          // await alice.conversations.cancelStreamAllMessages();
+          // await delayToPropogate();
+          // await group.send("group");
+          // await convo.send("conversations")
+          // console.log("messages sent");
         },
         Cancel: undefined,
       };
