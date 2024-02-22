@@ -142,11 +142,14 @@ const ChatMessageFramePreview = ({
       setPosting(button.index);
       setImageLoading(true);
       try {
+        const participantAccountAddresses: string[] = conversation.isGroup
+          ? conversation.groupMembers || []
+          : [account, conversation.peerAddress];
         const actionInput: FrameActionInputs = {
           frameUrl,
           buttonIndex: button.index,
           conversationTopic: message.topic,
-          participantAccountAddresses: [account, conversation.peerAddress],
+          participantAccountAddresses,
         };
         if (textInput) {
           actionInput.inputText = frameTextInputValue;
