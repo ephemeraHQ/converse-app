@@ -1,13 +1,13 @@
 diff --git a/build.gradle b/build.gradle
-index c5ec9fc..e77baf5 100644
+index 861d2b9..84f494b 100644
 --- a/build.gradle
 +++ b/build.gradle
 @@ -9,23 +9,11 @@
  //}
  
  plugins {
--    id 'com.android.application' version '7.3.1' apply false
--    id 'com.android.library' version '7.3.1' apply false
+-    id 'com.android.application' version '8.0.0' apply false
+-    id 'com.android.library' version '8.0.0' apply false
 -    id 'org.jetbrains.kotlin.android' version '1.8.0' apply false
 -    id 'io.github.gradle-nexus.publish-plugin' version "1.2.0"
 +    id 'com.android.application' apply false
@@ -17,7 +17,7 @@ index c5ec9fc..e77baf5 100644
  }
  
  group = "org.xmtp"
--version = System.getenv("RELEASE_VERSION")
+ version = System.getenv("RELEASE_VERSION")
 -
 -nexusPublishing {
 -    repositories {
@@ -30,30 +30,16 @@ index c5ec9fc..e77baf5 100644
 -    }
 -}
 \ No newline at end of file
-+version = System.getenv("RELEASE_VERSION")
-\ No newline at end of file
-diff --git a/gradle/wrapper/gradle-wrapper.properties b/gradle/wrapper/gradle-wrapper.properties
-index da450a2..c4c7ed6 100644
---- a/gradle/wrapper/gradle-wrapper.properties
-+++ b/gradle/wrapper/gradle-wrapper.properties
-@@ -1,6 +1,6 @@
- #Tue Dec 20 09:09:47 PST 2022
- distributionBase=GRADLE_USER_HOME
--distributionUrl=https\://services.gradle.org/distributions/gradle-7.4-bin.zip
-+distributionUrl=https\://services.gradle.org/distributions/gradle-8.0.1-all.zip
- distributionPath=wrapper/dists
- zipStorePath=wrapper/dists
- zipStoreBase=GRADLE_USER_HOME
 diff --git a/library/src/main/java/org/xmtp/android/library/ConversationV2.kt b/library/src/main/java/org/xmtp/android/library/ConversationV2.kt
-index 3f6e610..facff52 100644
+index 6d20253..81e4cfe 100644
 --- a/library/src/main/java/org/xmtp/android/library/ConversationV2.kt
 +++ b/library/src/main/java/org/xmtp/android/library/ConversationV2.kt
-@@ -126,13 +126,15 @@ data class ConversationV2(
+@@ -128,13 +128,15 @@ data class ConversationV2(
       */
      fun decrypt(envelope: Envelope): DecryptedMessage {
          val message = Message.parseFrom(envelope.message)
 -        return MessageV2Builder.buildDecrypt(
-+        val decrypted = MessageV2Builder.buildDecrypt(
++        val decrypted =  MessageV2Builder.buildDecrypt(
              id = generateId(envelope = envelope),
              topic,
              message.v2,
@@ -65,7 +51,7 @@ index 3f6e610..facff52 100644
      }
  
      fun streamMessages(): Flow<DecodedMessage> = flow {
-@@ -148,13 +150,15 @@ data class ConversationV2(
+@@ -150,13 +152,15 @@ data class ConversationV2(
       */
      fun decodeEnvelope(envelope: Envelope): DecodedMessage {
          val message = Message.parseFrom(envelope.message)
