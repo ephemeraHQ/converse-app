@@ -326,6 +326,7 @@ const useStyles = () => {
     groupSender: {
       fontSize: 15,
       fontWeight: "500",
+      color: textPrimaryColor(colorScheme),
     },
   });
 };

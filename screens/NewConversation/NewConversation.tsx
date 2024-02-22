@@ -91,7 +91,8 @@ export default function NewConversation({
             return <ActivityIndicator style={{ marginRight: 5 }} />;
           } else {
             return (
-              <Button
+              <ConverseButton
+                variant="text"
                 title={route.params?.addingToGroupTopic ? "Add" : "Next"}
                 onPress={async () => {
                   if (route.params?.addingToGroupTopic) {
@@ -320,7 +321,11 @@ export default function NewConversation({
             variant="text"
             picto="person.2"
             title="New group"
-            style={{ marginLeft: 7, paddingTop: 13 }}
+            style={{
+              marginLeft: 7,
+              paddingTop: Platform.OS === "ios" ? 13 : 10,
+              paddingBottom: Platform.OS === "ios" ? 0 : 10,
+            }}
             textStyle={{ fontWeight: "500" }}
             onPress={() => {
               setGroup({ enabled: true, members: [] });
@@ -340,7 +345,10 @@ export default function NewConversation({
                 variant="secondary"
                 picto="xmark"
                 style={styles.groupMemberButton}
-                textStyle={{ lineHeight: 17 }}
+                textStyle={{
+                  lineHeight: 17,
+                  top: Platform.OS === "ios" ? undefined : 1,
+                }}
                 onPress={() =>
                   setGroup((g) => {
                     const members = [...g.members];
@@ -500,10 +508,10 @@ const useStyles = () => {
     },
     group: {
       minHeight: 50,
-      paddingBottom: 10,
+      paddingBottom: Platform.OS === "ios" ? 10 : 0,
       flexDirection: "row",
       alignItems: "center",
-      paddingLeft: 16,
+      paddingLeft: Platform.OS === "ios" ? 16 : 0,
       justifyContent: "flex-start",
       borderBottomWidth: Platform.OS === "android" ? 1 : 0.5,
       borderBottomColor: itemSeparatorColor(colorScheme),
@@ -514,7 +522,7 @@ const useStyles = () => {
       padding: 0,
       marginHorizontal: 0,
       marginRight: 10,
-      height: 30,
+      height: Platform.OS === "ios" ? 30 : undefined,
       marginTop: 10,
     },
   });

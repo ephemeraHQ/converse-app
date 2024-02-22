@@ -4,7 +4,7 @@ import { StyleSheet, Platform, Alert, useColorScheme } from "react-native";
 
 import { currentAccount } from "../../data/store/accountsStore";
 import { useIsSplitScreen } from "../../screens/Navigation/navHelpers";
-import { textSecondaryColor } from "../../utils/colors";
+import { backgroundColor, textSecondaryColor } from "../../utils/colors";
 import { navigate } from "../../utils/navigation";
 import { canGroupMessage } from "../../utils/xmtpRN/conversations";
 import Button from "../Button/Button";
@@ -65,6 +65,7 @@ export function NavigationChatButton({
       picto={groupMode ? (loading ? undefined : "plus") : "message"}
       title={groupMode ? (loading ? "Adding..." : "Add") : "Chat"}
       style={[styles.navigationButton, loading ? styles.loading : {}]}
+      textStyle={loading ? styles.loadingText : undefined}
       onPress={
         groupMode ? (loading ? undefined : addToGroupIfPossible) : openChat
       }
@@ -81,6 +82,10 @@ const useStyles = () => {
     },
     loading: {
       backgroundColor: textSecondaryColor(colorScheme),
+      borderRadius: 20,
+    },
+    loadingText: {
+      color: Platform.OS === "ios" ? undefined : backgroundColor(colorScheme),
     },
   });
 };
