@@ -141,7 +141,6 @@ export const syncGroupsMessages = async (
     console.log("synced group", group.topic);
   }
   console.log(`${groups.length} groups synced!`);
-  console.log(queryGroupsFromTimestamp);
   const newMessages = (
     await Promise.all(
       groups.map((g) =>
