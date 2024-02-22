@@ -16,6 +16,10 @@ import ConversationNav, {
 import ConversationRequestsListNav from "./ConversationRequestsListNav";
 import ConverseMatchMakerNav from "./ConverseMatchMakerNav";
 import EnableTransactionsNav from "./EnableTransactionsNav";
+import GroupLinkNav, {
+  GroupLinkNavParams,
+  GroupLinkScreenConfig,
+} from "./GroupLinkNav";
 import GroupNav, { GroupNavParams, GroupScreenConfig } from "./GroupNav";
 import NewConversationNav, {
   NewConversationNavParams,
@@ -51,6 +55,7 @@ export type NavigationParamList = {
   TopUp: undefined;
   Profile: ProfileNavParams;
   Group: GroupNavParams;
+  GroupLink: GroupLinkNavParams;
   WebviewPreview: WebviewPreviewNavParams;
 };
 
@@ -66,6 +71,7 @@ const linking = {
       NewConversation: NewConversationScreenConfig,
       Profile: ProfileScreenConfig,
       Group: GroupScreenConfig,
+      GroupLink: GroupLinkScreenConfig,
       ShareProfile: ShareProfileScreenConfig,
       WebviewPreview: WebviewPreviewScreenConfig,
     },
@@ -134,6 +140,7 @@ export default function Navigation() {
           {WebviewPreviewNav()}
           {ProfileNav()}
           {GroupNav()}
+          {GroupLinkNav()}
           {TopUpNav()}
           {EnableTransactionsNav()}
         </NativeStack.Group>
