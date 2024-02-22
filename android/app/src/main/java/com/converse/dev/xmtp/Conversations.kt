@@ -66,6 +66,8 @@ suspend fun getNewConversationFromEnvelope(xmtpClient: Client, envelope: Envelop
                 is Conversation.V2 -> {
                     persistNewConversation(xmtpClient.address, conversation)
                 }
+
+                else -> {}
             }
             conversation
         } else {
