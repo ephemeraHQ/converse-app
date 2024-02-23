@@ -12,6 +12,11 @@ export type FrameToDisplay = FramesApiResponse & {
   framesClient: FramesClient;
 };
 
+export type FramesForMessage = {
+  messageId: string;
+  framesToDisplay: FrameToDisplay[];
+};
+
 export const getFrameType = (tags: FrameToDisplay["extractedTags"]) => {
   if (tags["fc:frame"] === "vNext" && tags["fc:frame:image"]) {
     if (tags["of:accepts:xmtp"]) return "XMTP_FRAME";
@@ -26,7 +31,7 @@ export const getFrameType = (tags: FrameToDisplay["extractedTags"]) => {
 export const getMetadaTagsForMessage = async (
   account: string,
   message: MessageToDisplay
-): Promise<FrameToDisplay[]> => {
+): Promise<FramesForMessage> => {
   const framesClient = await getFramesClient(account);
   // OG Preview / Frames are only for text content type
   if (isContentType("text", message.contentType)) {
@@ -49,15 +54,19 @@ export const getMetadaTagsForMessage = async (
         if (response && Object.keys(response.extractedTags).length > 0) {
           const frameType = getFrameType(response.extractedTags);
           if (frameType) {
-            extractedTags.push({ ...response, type: frameType, framesClient });
+            extractedTags.push({
+              ...response,
+              type: frameType,
+              framesClient,
+            });
           }
         }
       });
 
-      return extractedTags;
+      return { messageId: message.id, framesToDisplay: extractedTags };
     }
   }
-  return [];
+  return { messageId: message.id, framesToDisplay: [] };
 };
 
 export type FrameButtonType = {

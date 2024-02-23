@@ -26,6 +26,7 @@ import { useConversationContext } from "../../utils/conversation";
 import {
   FrameButtonType,
   FrameToDisplay,
+  FramesForMessage,
   getFrameButtonLinkTarget,
   getFrameButtons,
   getMetadaTagsForMessage,
@@ -40,16 +41,18 @@ export default function ChatMessageFramePreviews({ message }: Props) {
   const messageId = useRef(message.id);
   const tagsFetchedOnce = useRef(false);
   const account = useCurrentAccount() as string;
-  const [famesToDisplay, setFramesToDisplay] = useState<FrameToDisplay[]>([]);
+  const [framesForMessage, setFramesForMessage] = useState<{
+    [messageId: string]: FrameToDisplay[];
+  }>({});
 
   const fetchTagsIfNeeded = useCallback(() => {
     if (!tagsFetchedOnce.current) {
       tagsFetchedOnce.current = true;
       getMetadaTagsForMessage(account, message).then(
-        (frames: FrameToDisplay[]) => {
-          if (frames.length > 0) {
-            setFramesToDisplay(frames);
-          }
+        (frames: FramesForMessage) => {
+          // Call is async and we have cell recycling so make sure
+          // we're still on the same message as before
+          setFramesForMessage({ [frames.messageId]: frames.framesToDisplay });
         }
       );
     }
@@ -59,17 +62,16 @@ export default function ChatMessageFramePreviews({ message }: Props) {
   if (message.id !== messageId.current) {
     messageId.current = message.id;
     tagsFetchedOnce.current = false;
-    if (famesToDisplay.length > 0) {
-      setFramesToDisplay([]);
-    }
     fetchTagsIfNeeded();
   }
 
   useEffect(fetchTagsIfNeeded, [fetchTagsIfNeeded, message.id]);
 
+  const framesToDisplay = framesForMessage[message.id] || [];
+
   return (
     <View>
-      {famesToDisplay.map((frameToDisplay) => {
+      {framesToDisplay.map((frameToDisplay) => {
         return (
           <ChatMessageFramePreview
             message={message}
