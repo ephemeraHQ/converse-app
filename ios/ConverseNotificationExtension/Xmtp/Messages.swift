@@ -7,6 +7,7 @@
 
 import Foundation
 import XMTP
+import Alamofire
 
 func handleNewConversationFirstMessage(xmtpClient: XMTP.Client, apiURI: String?, pushToken: String?, conversation: XMTP.Conversation, bestAttemptContent: inout UNMutableNotificationContent) async -> (shouldShowNotification: Bool, messageId: String?) {
   var shouldShowNotification = false
@@ -26,11 +27,12 @@ func handleNewConversationFirstMessage(xmtpClient: XMTP.Client, apiURI: String?,
             messageContent = String(data: message.encodedContent.content, encoding: .utf8)
         }
         
-        let spamScore = computeSpamScore(
+        let spamScore = await computeSpamScore(
           address: conversation.peerAddress,
           message: messageContent,
           sentViaConverse: message.sentViaConverse,
-          contentType: contentType
+          contentType: contentType,
+          apiURI: apiURI
         )
         
         do {
@@ -274,8 +276,8 @@ func getJsonReaction(reaction: Reaction) -> String? {
   }
 }
 
-func computeSpamScore(address: String, message: String?, sentViaConverse: Bool, contentType: String) -> Double {
-  var spamScore: Double = 0.0
+func computeSpamScore(address: String, message: String?, sentViaConverse: Bool, contentType: String, apiURI: String?) async -> Double {
+  var spamScore: Double = await getSenderSpamScore(address: address, apiURI: apiURI)
   if contentType.starts(with: "xmtp.org/text:"), let unwrappedMessage = message, containsURL(input: unwrappedMessage) {
     spamScore += 1
   }
@@ -283,4 +285,38 @@ func computeSpamScore(address: String, message: String?, sentViaConverse: Bool, 
     spamScore -= 1
   }
   return spamScore
+}
+
+func getSenderSpamScore(address: String, apiURI: String?) async -> Double {
+  var senderSpamScore: Double = 0.0
+  if (apiURI != nil && !apiURI!.isEmpty) {
+    let senderSpamScoreURI = "\(apiURI ?? "")/api/spam/senders/batch"
+    do {
+      let response = try await withUnsafeThrowingContinuation { continuation in
+              AF.request(senderSpamScoreURI, method: .post, parameters: ["sendersAddresses": [address]], encoding: JSONEncoding.default, headers: nil).validate().responseData { response in
+                  if let data = response.data {
+                      continuation.resume(returning: data)
+                      return
+                  }
+                  if let err = response.error {
+                      continuation.resume(throwing: err)
+                      return
+                  }
+                  fatalError("should not get here")
+              }
+          }
+      
+          if let json = try JSONSerialization.jsonObject(with: response, options: []) as? [String: Any] {
+            if let score = json[address] as? Double {
+              senderSpamScore = score
+            }
+          }
+
+
+      
+    } catch {
+      print(error)
+    }
+  }
+  return senderSpamScore
 }
