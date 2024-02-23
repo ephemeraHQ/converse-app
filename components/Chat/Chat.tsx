@@ -129,10 +129,14 @@ export default function Chat() {
     [xmtpAddress, conversation, conversation?.lastUpdateAt]
   );
 
+  const hideInputIfFrameFocused = Platform.OS !== "web";
+
   const DEFAULT_INPUT_HEIGHT = 36;
   const chatInputHeight = useSharedValue(50);
   const chatInputDisplayedHeight = useDerivedValue(() => {
-    return frameTextInputFocused ? 0 : chatInputHeight.value;
+    return frameTextInputFocused && hideInputIfFrameFocused
+      ? 0
+      : chatInputHeight.value;
   });
 
   const insets = useSafeAreaInsets();
@@ -260,7 +264,12 @@ export default function Chat() {
           <ReanimatedView
             style={[
               textInputStyle,
-              { display: frameTextInputFocused ? "none" : "flex" },
+              {
+                display:
+                  frameTextInputFocused && hideInputIfFrameFocused
+                    ? "none"
+                    : "flex",
+              },
             ]}
             onLayout={(e) => {
               chatInputHeight.value = e.nativeEvent.layout.height;
