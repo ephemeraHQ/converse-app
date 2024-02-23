@@ -193,6 +193,9 @@ const ChatMessageFramePreview = ({
       ? frame.extractedTags["og:image"]
       : frame.extractedTags["fc:frame:image"];
 
+  const frameImageAspectRatio =
+    frame.extractedTags["fc:frame:image:aspect_ratio"] || "1.91:1";
+
   return (
     <View style={styles.frameWrapper}>
       <View style={styles.frameContainer}>
@@ -206,6 +209,7 @@ const ChatMessageFramePreview = ({
             initialFrameURL={initialFrame.url}
             uniqueId={frame.uniqueId}
             setImageLoading={setImageLoading}
+            frameImageAspectRatio={frameImageAspectRatio}
           />
         </View>
 
@@ -305,11 +309,13 @@ const FrameBottom = ({
 
 const FrameImage = ({
   frameImage,
+  frameImageAspectRatio,
   initialFrameURL,
   uniqueId,
   setImageLoading,
 }: {
   frameImage: string;
+  frameImageAspectRatio: string;
   initialFrameURL: string;
   uniqueId: string;
   setImageLoading: (loading: boolean) => void;
@@ -336,7 +342,10 @@ const FrameImage = ({
         contentFit="cover"
         // Also disable cache so we always refetch the initial image
         cachePolicy="none"
-        style={styles.frameImage}
+        style={[
+          styles.frameImage,
+          { aspectRatio: frameImageAspectRatio === "1:1" ? 1 : 1.91 },
+        ]}
         onLoadEnd={() => {
           setImageLoading(false);
         }}
@@ -403,7 +412,6 @@ const useStyles = () => {
       overflow: "hidden",
     },
     frameImage: {
-      aspectRatio: 1.91,
       width: "100%",
     },
     frameBottom: {
