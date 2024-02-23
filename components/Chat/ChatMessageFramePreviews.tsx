@@ -1,3 +1,4 @@
+import { FrameActionInputs } from "@xmtp/frames-client";
 import { Image } from "expo-image";
 import * as Linking from "expo-linking";
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -92,9 +93,9 @@ const ChatMessageFramePreview = ({
   message: MessageToDisplay;
 }) => {
   const styles = useStyles();
-  const { conversation, setFrameInputFocused } = useConversationContext([
+  const { conversation, setFrameTextInputFocused } = useConversationContext([
     "conversation",
-    "setFrameInputFocused",
+    "setFrameTextInputFocused",
   ]);
   const account = useCurrentAccount() as string;
   const [posting, setPosting] = useState(undefined as undefined | number);
@@ -120,10 +121,10 @@ const ChatMessageFramePreview = ({
     }
   }, [frame.extractedTags]);
   const buttons = getFrameButtons(frame);
-  const textInput = undefined; // Until XMTP supports it
-  // const textInput = frame.extractedTags["fc:frame:input:text"] as
-  //   | string
-  //   | undefined;
+  const textInput = frame.extractedTags["fc:frame:input:text"] as
+    | string
+    | undefined;
+  const [frameTextInputValue, setFrameTextInputValue] = useState("");
   const onButtonPress = useCallback(
     async (button: FrameButtonType) => {
       if (button.action === "link") {
@@ -141,13 +142,17 @@ const ChatMessageFramePreview = ({
       setPosting(button.index);
       setImageLoading(true);
       try {
+        const actionInput: FrameActionInputs = {
+          frameUrl,
+          buttonIndex: button.index,
+          conversationTopic: message.topic,
+          participantAccountAddresses: [account, conversation.peerAddress],
+        };
+        if (textInput) {
+          actionInput.inputText = frameTextInputValue;
+        }
         if (button.action === "post") {
-          const payload = await frame.framesClient.signFrameAction({
-            frameUrl,
-            buttonIndex: button.index,
-            conversationTopic: message.topic,
-            participantAccountAddresses: [account, conversation.peerAddress],
-          });
+          const payload = await frame.framesClient.signFrameAction(actionInput);
           const frameResponse = await frame.framesClient.proxy.post(
             frameUrl,
             payload
@@ -159,13 +164,10 @@ const ChatMessageFramePreview = ({
             uniqueId: uuid.v4().toString(),
             framesClient: frame.framesClient,
           });
+          // Reset input
+          setFrameTextInputValue("");
         } else if (button.action === "post_redirect") {
-          const payload = await frame.framesClient.signFrameAction({
-            frameUrl,
-            buttonIndex: button.index,
-            conversationTopic: message.topic,
-            participantAccountAddresses: [account, conversation.peerAddress],
-          });
+          const payload = await frame.framesClient.signFrameAction(actionInput);
           const { redirectedTo } = await frame.framesClient.proxy.postRedirect(
             frameUrl,
             payload
@@ -183,7 +185,15 @@ const ChatMessageFramePreview = ({
       }
       setPosting(undefined);
     },
-    [account, conversation, frame, frameUrl, message.topic]
+    [
+      account,
+      conversation,
+      frame,
+      frameTextInputValue,
+      frameUrl,
+      message.topic,
+      textInput,
+    ]
   );
 
   const showBottom =
@@ -221,9 +231,11 @@ const ChatMessageFramePreview = ({
             frame={frame}
             textInput={textInput}
             buttons={buttons}
-            setFrameInputFocused={setFrameInputFocused}
+            setFrameTextInputFocused={setFrameTextInputFocused}
             posting={posting}
             onButtonPress={onButtonPress}
+            frameTextInputValue={frameTextInputValue}
+            setTextFrameInputValue={setFrameTextInputValue}
           />
         )}
       </View>
@@ -236,7 +248,9 @@ const FrameBottom = ({
   frame,
   textInput,
   buttons,
-  setFrameInputFocused,
+  setFrameTextInputFocused,
+  frameTextInputValue,
+  setTextFrameInputValue,
   posting,
   onButtonPress,
 }: {
@@ -244,8 +258,10 @@ const FrameBottom = ({
   frame: FrameToDisplay;
   textInput: string | undefined;
   buttons: FrameButtonType[];
-  setFrameInputFocused: (f: boolean) => void;
+  setFrameTextInputFocused: (f: boolean) => void;
   posting: number | undefined;
+  frameTextInputValue: string;
+  setTextFrameInputValue: (s: string) => void;
   onButtonPress: (b: FrameButtonType) => void;
 }) => {
   const styles = useStyles();
@@ -270,12 +286,14 @@ const FrameBottom = ({
               autoCapitalize="none"
               style={styles.frameTextInput}
               onFocus={() => {
-                setFrameInputFocused(true);
+                setFrameTextInputFocused(true);
               }}
               onBlur={() => {
-                setFrameInputFocused(false);
+                setFrameTextInputFocused(false);
               }}
+              onChangeText={setTextFrameInputValue}
               placeholder={textInput}
+              value={frameTextInputValue}
             />
           )}
           {buttons.length > 0 &&
