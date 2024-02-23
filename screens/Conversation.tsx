@@ -49,7 +49,7 @@ const Conversation = ({
   const colorScheme = useColorScheme();
   const peersStatus = useSettingsStore((s) => s.peersStatus);
   const [transactionMode, setTransactionMode] = useState(false);
-  const [frameInputFocused, setFrameInputFocused] = useState(false);
+  const [frameTextInputFocused, setFrameTextInputFocused] = useState(false);
 
   const { conversations, conversationsMapping, setConversationMessageDraft } =
     useChatStore(
@@ -325,8 +325,8 @@ const Conversation = ({
               onReadyToFocus,
               transactionMode,
               setTransactionMode,
-              frameInputFocused,
-              setFrameInputFocused,
+              frameTextInputFocused,
+              setFrameTextInputFocused,
             }}
           >
             <ConverseChat />
