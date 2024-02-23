@@ -428,7 +428,7 @@ const useStyles = () => {
       paddingHorizontal: 6,
       paddingVertical: 9,
       marginVertical: 4,
-      backgroundColor: backgroundColor(colorScheme),
+      backgroundColor: backgroundColor("light"),
     },
     frameButtonContent: {
       flexDirection: "row",
@@ -441,7 +441,7 @@ const useStyles = () => {
       marginHorizontal: 7,
     },
     frameButtonText: {
-      color: textPrimaryColor(colorScheme),
+      color: textPrimaryColor("light"),
       fontSize: 12,
       flexShrink: 1,
     },
