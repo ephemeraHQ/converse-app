@@ -104,13 +104,13 @@ export default function Chat() {
     isBlockedPeer,
     onReadyToFocus,
     transactionMode,
-    frameInputFocused,
+    frameTextInputFocused,
   } = useConversationContext([
     "conversation",
     "isBlockedPeer",
     "onReadyToFocus",
     "transactionMode",
-    "frameInputFocused",
+    "frameTextInputFocused",
   ]);
   const xmtpAddress = useCurrentAccount() as string;
   const peerSocials = useProfilesStore((s) =>
@@ -132,7 +132,7 @@ export default function Chat() {
   const DEFAULT_INPUT_HEIGHT = 36;
   const chatInputHeight = useSharedValue(50);
   const chatInputDisplayedHeight = useDerivedValue(() => {
-    return frameInputFocused ? 0 : chatInputHeight.value;
+    return frameTextInputFocused ? 0 : chatInputHeight.value;
   });
 
   const insets = useSafeAreaInsets();
@@ -260,7 +260,7 @@ export default function Chat() {
           <ReanimatedView
             style={[
               textInputStyle,
-              { display: frameInputFocused ? "none" : "flex" },
+              { display: frameTextInputFocused ? "none" : "flex" },
             ]}
             onLayout={(e) => {
               chatInputHeight.value = e.nativeEvent.layout.height;

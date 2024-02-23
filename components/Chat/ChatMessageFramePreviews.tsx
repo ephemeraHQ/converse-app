@@ -1,3 +1,4 @@
+import { FrameActionInputs } from "@xmtp/frames-client";
 import { Image } from "expo-image";
 import * as Linking from "expo-linking";
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -26,6 +27,7 @@ import { useConversationContext } from "../../utils/conversation";
 import {
   FrameButtonType,
   FrameToDisplay,
+  FramesForMessage,
   getFrameButtonLinkTarget,
   getFrameButtons,
   getMetadaTagsForMessage,
@@ -40,16 +42,18 @@ export default function ChatMessageFramePreviews({ message }: Props) {
   const messageId = useRef(message.id);
   const tagsFetchedOnce = useRef(false);
   const account = useCurrentAccount() as string;
-  const [famesToDisplay, setFramesToDisplay] = useState<FrameToDisplay[]>([]);
+  const [framesForMessage, setFramesForMessage] = useState<{
+    [messageId: string]: FrameToDisplay[];
+  }>({});
 
   const fetchTagsIfNeeded = useCallback(() => {
     if (!tagsFetchedOnce.current) {
       tagsFetchedOnce.current = true;
       getMetadaTagsForMessage(account, message).then(
-        (frames: FrameToDisplay[]) => {
-          if (frames.length > 0) {
-            setFramesToDisplay(frames);
-          }
+        (frames: FramesForMessage) => {
+          // Call is async and we have cell recycling so make sure
+          // we're still on the same message as before
+          setFramesForMessage({ [frames.messageId]: frames.framesToDisplay });
         }
       );
     }
@@ -59,17 +63,16 @@ export default function ChatMessageFramePreviews({ message }: Props) {
   if (message.id !== messageId.current) {
     messageId.current = message.id;
     tagsFetchedOnce.current = false;
-    if (famesToDisplay.length > 0) {
-      setFramesToDisplay([]);
-    }
     fetchTagsIfNeeded();
   }
 
   useEffect(fetchTagsIfNeeded, [fetchTagsIfNeeded, message.id]);
 
+  const framesToDisplay = framesForMessage[message.id] || [];
+
   return (
     <View>
-      {famesToDisplay.map((frameToDisplay) => {
+      {framesToDisplay.map((frameToDisplay) => {
         return (
           <ChatMessageFramePreview
             message={message}
@@ -90,9 +93,9 @@ const ChatMessageFramePreview = ({
   message: MessageToDisplay;
 }) => {
   const styles = useStyles();
-  const { conversation, setFrameInputFocused } = useConversationContext([
+  const { conversation, setFrameTextInputFocused } = useConversationContext([
     "conversation",
-    "setFrameInputFocused",
+    "setFrameTextInputFocused",
   ]);
   const account = useCurrentAccount() as string;
   const [posting, setPosting] = useState(undefined as undefined | number);
@@ -118,10 +121,10 @@ const ChatMessageFramePreview = ({
     }
   }, [frame.extractedTags]);
   const buttons = getFrameButtons(frame);
-  const textInput = undefined; // Until XMTP supports it
-  // const textInput = frame.extractedTags["fc:frame:input:text"] as
-  //   | string
-  //   | undefined;
+  const textInput = frame.extractedTags["fc:frame:input:text"] as
+    | string
+    | undefined;
+  const [frameTextInputValue, setFrameTextInputValue] = useState("");
   const onButtonPress = useCallback(
     async (button: FrameButtonType) => {
       if (button.action === "link") {
@@ -139,13 +142,17 @@ const ChatMessageFramePreview = ({
       setPosting(button.index);
       setImageLoading(true);
       try {
+        const actionInput: FrameActionInputs = {
+          frameUrl,
+          buttonIndex: button.index,
+          conversationTopic: message.topic,
+          participantAccountAddresses: [account, conversation.peerAddress],
+        };
+        if (textInput) {
+          actionInput.inputText = frameTextInputValue;
+        }
         if (button.action === "post") {
-          const payload = await frame.framesClient.signFrameAction({
-            frameUrl,
-            buttonIndex: button.index,
-            conversationTopic: message.topic,
-            participantAccountAddresses: [account, conversation.peerAddress],
-          });
+          const payload = await frame.framesClient.signFrameAction(actionInput);
           const frameResponse = await frame.framesClient.proxy.post(
             frameUrl,
             payload
@@ -157,13 +164,10 @@ const ChatMessageFramePreview = ({
             uniqueId: uuid.v4().toString(),
             framesClient: frame.framesClient,
           });
+          // Reset input
+          setFrameTextInputValue("");
         } else if (button.action === "post_redirect") {
-          const payload = await frame.framesClient.signFrameAction({
-            frameUrl,
-            buttonIndex: button.index,
-            conversationTopic: message.topic,
-            participantAccountAddresses: [account, conversation.peerAddress],
-          });
+          const payload = await frame.framesClient.signFrameAction(actionInput);
           const { redirectedTo } = await frame.framesClient.proxy.postRedirect(
             frameUrl,
             payload
@@ -181,7 +185,15 @@ const ChatMessageFramePreview = ({
       }
       setPosting(undefined);
     },
-    [account, conversation, frame, frameUrl, message.topic]
+    [
+      account,
+      conversation,
+      frame,
+      frameTextInputValue,
+      frameUrl,
+      message.topic,
+      textInput,
+    ]
   );
 
   const showBottom =
@@ -192,6 +204,9 @@ const ChatMessageFramePreview = ({
     frame.type === "PREVIEW"
       ? frame.extractedTags["og:image"]
       : frame.extractedTags["fc:frame:image"];
+
+  const frameImageAspectRatio =
+    frame.extractedTags["fc:frame:image:aspect_ratio"] || "1.91:1";
 
   return (
     <View style={styles.frameWrapper}>
@@ -206,6 +221,7 @@ const ChatMessageFramePreview = ({
             initialFrameURL={initialFrame.url}
             uniqueId={frame.uniqueId}
             setImageLoading={setImageLoading}
+            frameImageAspectRatio={frameImageAspectRatio}
           />
         </View>
 
@@ -215,9 +231,11 @@ const ChatMessageFramePreview = ({
             frame={frame}
             textInput={textInput}
             buttons={buttons}
-            setFrameInputFocused={setFrameInputFocused}
+            setFrameTextInputFocused={setFrameTextInputFocused}
             posting={posting}
             onButtonPress={onButtonPress}
+            frameTextInputValue={frameTextInputValue}
+            setTextFrameInputValue={setFrameTextInputValue}
           />
         )}
       </View>
@@ -230,7 +248,9 @@ const FrameBottom = ({
   frame,
   textInput,
   buttons,
-  setFrameInputFocused,
+  setFrameTextInputFocused,
+  frameTextInputValue,
+  setTextFrameInputValue,
   posting,
   onButtonPress,
 }: {
@@ -238,8 +258,10 @@ const FrameBottom = ({
   frame: FrameToDisplay;
   textInput: string | undefined;
   buttons: FrameButtonType[];
-  setFrameInputFocused: (f: boolean) => void;
+  setFrameTextInputFocused: (f: boolean) => void;
   posting: number | undefined;
+  frameTextInputValue: string;
+  setTextFrameInputValue: (s: string) => void;
   onButtonPress: (b: FrameButtonType) => void;
 }) => {
   const styles = useStyles();
@@ -264,12 +286,14 @@ const FrameBottom = ({
               autoCapitalize="none"
               style={styles.frameTextInput}
               onFocus={() => {
-                setFrameInputFocused(true);
+                setFrameTextInputFocused(true);
               }}
               onBlur={() => {
-                setFrameInputFocused(false);
+                setFrameTextInputFocused(false);
               }}
+              onChangeText={setTextFrameInputValue}
               placeholder={textInput}
+              value={frameTextInputValue}
             />
           )}
           {buttons.length > 0 &&
@@ -305,11 +329,13 @@ const FrameBottom = ({
 
 const FrameImage = ({
   frameImage,
+  frameImageAspectRatio,
   initialFrameURL,
   uniqueId,
   setImageLoading,
 }: {
   frameImage: string;
+  frameImageAspectRatio: string;
   initialFrameURL: string;
   uniqueId: string;
   setImageLoading: (loading: boolean) => void;
@@ -336,7 +362,10 @@ const FrameImage = ({
         contentFit="cover"
         // Also disable cache so we always refetch the initial image
         cachePolicy="none"
-        style={styles.frameImage}
+        style={[
+          styles.frameImage,
+          { aspectRatio: frameImageAspectRatio === "1:1" ? 1 : 1.91 },
+        ]}
         onLoadEnd={() => {
           setImageLoading(false);
         }}
@@ -403,7 +432,6 @@ const useStyles = () => {
       overflow: "hidden",
     },
     frameImage: {
-      aspectRatio: 1.91,
       width: "100%",
     },
     frameBottom: {
@@ -420,7 +448,7 @@ const useStyles = () => {
       paddingHorizontal: 6,
       paddingVertical: 9,
       marginVertical: 4,
-      backgroundColor: backgroundColor(colorScheme),
+      backgroundColor: backgroundColor("light"),
     },
     frameButtonContent: {
       flexDirection: "row",
@@ -433,7 +461,7 @@ const useStyles = () => {
       marginHorizontal: 7,
     },
     frameButtonText: {
-      color: textPrimaryColor(colorScheme),
+      color: textPrimaryColor("light"),
       fontSize: 12,
       flexShrink: 1,
     },
