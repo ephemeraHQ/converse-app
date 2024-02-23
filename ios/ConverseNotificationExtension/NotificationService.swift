@@ -8,7 +8,6 @@
 import UserNotifications
 import XMTP
 import CryptoKit
-import Alamofire
 
 func handleNotificationAsync(contentHandler: ((UNNotificationContent) -> Void), bestAttemptContent: UNMutableNotificationContent?) async {
   initSentry()
