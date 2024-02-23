@@ -40,29 +40,41 @@ export default function ChatMessageFramePreviews({ message }: Props) {
   const messageId = useRef(message.id);
   const tagsFetchedOnce = useRef(false);
   const account = useCurrentAccount() as string;
-  const [tagsForURLs, setTagsForURLs] = useState<FrameToDisplay[]>([]);
+  const [famesToDisplay, setFramesToDisplay] = useState<FrameToDisplay[]>([]);
 
-  useEffect(() => {
-    if (messageId.current !== message.id) {
-      messageId.current = message.id;
-      // Resetting state because components are recycled
-      setTagsForURLs([]);
+  const fetchTagsIfNeeded = useCallback(() => {
+    if (!tagsFetchedOnce.current) {
       tagsFetchedOnce.current = true;
-      getMetadaTagsForMessage(account, message).then(setTagsForURLs);
-    } else if (!tagsFetchedOnce.current) {
-      tagsFetchedOnce.current = true;
-      getMetadaTagsForMessage(account, message).then(setTagsForURLs);
+      getMetadaTagsForMessage(account, message).then(
+        (frames: FrameToDisplay[]) => {
+          if (frames.length > 0) {
+            setFramesToDisplay(frames);
+          }
+        }
+      );
     }
-  }, [message, account]);
+  }, [account, message]);
+
+  // Components are recycled, let's fix when stuff changes
+  if (message.id !== messageId.current) {
+    messageId.current = message.id;
+    tagsFetchedOnce.current = false;
+    if (famesToDisplay.length > 0) {
+      setFramesToDisplay([]);
+    }
+    fetchTagsIfNeeded();
+  }
+
+  useEffect(fetchTagsIfNeeded, [fetchTagsIfNeeded, message.id]);
 
   return (
     <View>
-      {tagsForURLs.map((tagsForURL) => {
+      {famesToDisplay.map((frameToDisplay) => {
         return (
           <ChatMessageFramePreview
             message={message}
-            initialFrame={tagsForURL}
-            key={tagsForURL.url}
+            initialFrame={frameToDisplay}
+            key={frameToDisplay.url}
           />
         );
       })}
@@ -90,12 +102,19 @@ const ChatMessageFramePreview = ({
     uniqueId: uuid.v4().toString(),
   });
   const [frameUrl, setFrameUrl] = useState(
-    frame.extractedTags["xmtp:frame:post-url"]
+    frame.extractedTags["of:post_url"] ||
+      frame.extractedTags["fc:frame:post_url"]
   );
   useEffect(() => {
     // If a new frame precises a new frame post url, we use it
-    if (frame.extractedTags["xmtp:frame:post-url"]) {
-      setFrameUrl(frame.extractedTags["xmtp:frame:post-url"]);
+    if (
+      frame.extractedTags["of:post_url"] ||
+      frame.extractedTags["fc:frame:post_url"]
+    ) {
+      setFrameUrl(
+        frame.extractedTags["of:post_url"] ||
+          frame.extractedTags["fc:frame:post_url"]
+      );
     }
   }, [frame.extractedTags]);
   const buttons = getFrameButtons(frame);

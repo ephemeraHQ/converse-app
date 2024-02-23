@@ -1,12 +1,12 @@
 {
   "expo": {
     "ios": {
-      "version": "1.4.0",
-      "buildNumber": "153"
+      "version": "1.4.2",
+      "buildNumber": "155"
     },
     "android": {
-      "version": "1.4.0",
-      "versionCode": 112
+      "version": "1.4.2",
+      "versionCode": 114
     }
   }
 }
