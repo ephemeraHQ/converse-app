@@ -58,7 +58,7 @@ export const computeConversationsSpamScores = async (
   conversations: XmtpConversationWithUpdate[]
 ) => {
   const conversationsPeerAddresses = new Set(
-    conversations.map((c) => c.peerAddress)
+    conversations.filter((c) => !!c.peerAddress).map((c) => c.peerAddress)
   );
   const sendersSpamScores = await getSendersSpamScores(
     Array.from(conversationsPeerAddresses)
