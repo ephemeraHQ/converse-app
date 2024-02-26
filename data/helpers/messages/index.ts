@@ -1,7 +1,6 @@
 import { Platform } from "react-native";
 
 import { moveAssetsForMessage } from "../../../utils/fileSystem";
-import { isContentType } from "../../../utils/xmtpRN/contentTypes";
 import { getRepository } from "../../db";
 import { Message } from "../../db/entities/messageEntity";
 import { upsertRepository } from "../../db/upsert";
@@ -13,20 +12,6 @@ export const saveMessages = async (
   account: string,
   messages: XmtpMessage[]
 ) => {
-  // Infer referenced message from content if needed
-  messages.forEach((c) => {
-    if (
-      !c.referencedMessageId &&
-      (isContentType("reaction", c.contentType) ||
-        isContentType("text", c.contentType))
-    ) {
-      try {
-        c.referencedMessageId = JSON.parse(c.content).reference;
-      } catch (e) {
-        console.log(e);
-      }
-    }
-  });
   // First dispatch for immediate feedback
   getChatStore(account).getState().setMessages(messages);
 
