@@ -2,11 +2,16 @@ package com.converse.dev.xmtp
 
 import android.content.Context
 import android.util.Log
+import com.android.volley.Request
+import com.android.volley.toolbox.JsonObjectRequest
+import com.android.volley.toolbox.Volley
 import com.beust.klaxon.Klaxon
 import com.converse.dev.*
 import com.converse.dev.PushNotificationsService.Companion.TAG
 import com.google.firebase.messaging.RemoteMessage
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.suspendCancellableCoroutine
 import org.json.JSONObject
 import org.xmtp.android.library.Client
 import org.xmtp.android.library.Conversation
@@ -17,6 +22,11 @@ import org.xmtp.android.library.codecs.decoded
 import org.xmtp.android.library.messages.Envelope
 import org.xmtp.proto.message.api.v1.MessageApiOuterClass
 import org.xmtp.proto.message.contents.Content
+import java.util.HashMap
+import kotlin.coroutines.Continuation
+import kotlin.coroutines.resume
+import kotlin.coroutines.resumeWithException
+import kotlin.coroutines.suspendCoroutine
 
 data class NotificationDataResult(
     val title: String = "",
@@ -59,11 +69,19 @@ suspend fun handleNewConversationFirstMessage(
                     messageContent = message.encodedContent.content.toStringUtf8()
                 }
 
+                val mmkv = getMmkv(appContext)
+                var apiURI = mmkv?.decodeString("api-uri")
+                if (apiURI == null) {
+                    apiURI = getAsyncStorage("api-uri")
+                }
+
                 val spamScore = computeSpamScore(
                     address = conversation.peerAddress,
                     message = messageContent,
                     sentViaConverse = message.sentViaConverse,
-                    contentType = contentType
+                    contentType = contentType,
+                    appContext = appContext,
+                    apiURI = apiURI
                 )
                 Log.d(TAG, "spamScore: $spamScore for topic: ${message.topic}")
 
@@ -111,11 +129,6 @@ suspend fun handleNewConversationFirstMessage(
                     Log.d(TAG, "Not showing a notification because considered spam")
                     shouldShowNotification = false
                 } else {
-                    val mmkv = getMmkv(appContext)
-                    var apiURI = mmkv?.decodeString("api-uri")
-                    if (apiURI == null) {
-                        apiURI = getAsyncStorage("api-uri")
-                    }
                     val pushToken = getKeychainValue("PUSH_TOKEN")
 
                     if (apiURI != null && pushToken !== null) {
@@ -334,8 +347,10 @@ fun getJsonReaction(decodedMessage: DecodedMessage): String {
     }
 }
 
-fun computeSpamScore(address: String, message: String?, sentViaConverse: Boolean, contentType: String): Double {
-    var spamScore = 0.0
+fun computeSpamScore(address: String, message: String?, sentViaConverse: Boolean, contentType: String, apiURI: String?, appContext: Context): Double {
+    var spamScore = runBlocking {
+        getSenderSpamScore(appContext, address, apiURI);
+    }
     if (contentType.startsWith("xmtp.org/text:") && message?.let { containsURL(it) } == true) {
         spamScore += 1
     }
@@ -343,4 +358,31 @@ fun computeSpamScore(address: String, message: String?, sentViaConverse: Boolean
         spamScore -= 1
     }
     return spamScore
+}
+
+suspend fun getSenderSpamScore(appContext: Context, address: String, apiURI: String?): Double {
+    val senderSpamScoreURI = "$apiURI/api/spam/senders/batch"
+    val params: MutableMap<String?, Any> = HashMap()
+    params["sendersAddresses"] = arrayOf(address);
+
+    val parameters = JSONObject(params as Map<*, *>?)
+
+    return suspendCancellableCoroutine { continuation ->
+        val jsonRequest = JsonObjectRequest(Request.Method.POST, senderSpamScoreURI, parameters, {
+            Log.d("PushNotificationsService", "SPAM SCORE SUCCESS ${it[address]}")
+            var result = 0.0;
+            if (it.has(address)){
+                result = (it[address] as Int).toDouble()
+            }
+            continuation.resume(result)
+
+        }) { error ->
+            error.printStackTrace()
+            continuation.resumeWithException(error)
+            Log.d("PushNotificationsService", "SPAM SCORE ERROR - $error")
+        }
+
+        Volley.newRequestQueue(appContext).add(jsonRequest)
+    }
+
 }
