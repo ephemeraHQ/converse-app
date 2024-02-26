@@ -271,7 +271,7 @@ export const claimUserName = async (
 export const getSendersSpamScores = async (sendersAddresses: string[]) => {
   if (!sendersAddresses || sendersAddresses.length === 0) return {};
   const { data } = await api.post("/api/spam/senders/batch", {
-    sendersAddresses,
+    sendersAddresses: sendersAddresses.filter((s) => !!s),
   });
   return data as { [senderAddress: string]: number };
 };
