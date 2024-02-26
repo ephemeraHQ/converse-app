@@ -1,4 +1,4 @@
-export const contentTypesPrefixes: { [key: string]: string } = {
+export const contentTypesPrefixes = {
   text: "xmtp.org/text:",
   remoteAttachment: "xmtp.org/remoteStaticAttachment:",
   attachment: "xmtp.org/attachment:",
@@ -20,6 +20,6 @@ export const isContentType = (
 
 export const getMessageContentType = (contentType: string) => {
   return Object.keys(contentTypesPrefixes).find((key) =>
-    contentType.startsWith(contentTypesPrefixes[key])
+    contentType.startsWith((contentTypesPrefixes as any)[key])
   );
 };
