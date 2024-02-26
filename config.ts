@@ -1,10 +1,10 @@
 import Constants from "expo-constants";
 import { Platform } from "react-native";
-import { baseGoerli, base } from "viem/chains";
+import { baseSepolia, base } from "viem/chains";
 
 const defaultConfig = {
   debugMenu: false,
-  polAddress: "0xc50E761C35E731d3A475eeB1e30CB917eDaFE187", // pol.converse.xyz
+  polAddress: "0xf9a3BB070c1f9b3186A547DeD991BeD04a289C5B", // polmaire.eth
   debugAddresses: [
     "0xf9a3BB070c1f9b3186A547DeD991BeD04a289C5B", // polmaire.eth
     "0xc50E761C35E731d3A475eeB1e30CB917eDaFE187", // pol.converse.xyz
@@ -34,19 +34,18 @@ const defaultConfig = {
   expoProjectId: "49a65fae-3895-4487-8e8a-5bd8bee3a401",
   privy: {
     appId: "cloh5bn1p00q4l50gcg0g1mix",
-    defaultChain: baseGoerli,
+    defaultChain: baseSepolia,
   },
   evm: {
-    transactionChainId: "0x14a33", // Base Goerli
+    transactionChainId: "0x14a34", // Base Sepolia
     USDC: {
-      contractAddress: "0x31d3a7711a74b4ec970f50c3eaf1ee47ba803a95", // Base Goerli USDC (NOTfrom doc)
-      // contractAddress: "0xf175520c52418dfe19c8098071a252da48cd1c19", // Base Goerli USDC (from doc)
-      name: "USD Coin",
+      contractAddress: "0x036CbD53842c5426634e7929541eC2318f3dCF7e", // Base Sepolia USDC
+      name: "USDC",
       version: "2",
       decimals: 6,
     },
     rpcEndpoint:
-      "https://base-goerli.g.alchemy.com/v2/Jl1z46xZWUzMr042dL1D7533XcOvXmb6",
+      "https://base-sepolia.g.alchemy.com/v2/7KmrqfAQDOXtH03pYgAAFU7xreVD_Ux7",
   },
   splitScreenThreshold: 600,
 };

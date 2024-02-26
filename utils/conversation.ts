@@ -252,6 +252,8 @@ type ConversationContextType = {
   messageToPrefill: string;
   transactionMode: boolean;
   setTransactionMode: (b: boolean) => void;
+  frameTextInputFocused: boolean;
+  setFrameTextInputFocused: (b: boolean) => void;
 };
 
 export const ConversationContext = createContext<ConversationContextType>({
@@ -262,6 +264,8 @@ export const ConversationContext = createContext<ConversationContextType>({
   messageToPrefill: "",
   transactionMode: false,
   setTransactionMode: () => {},
+  frameTextInputFocused: false,
+  setFrameTextInputFocused: () => {},
 });
 
 export const useConversationContext = <K extends keyof ConversationContextType>(

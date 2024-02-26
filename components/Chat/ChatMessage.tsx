@@ -6,6 +6,7 @@ import {
   Text,
   Platform,
   ColorSchemeName,
+  DimensionValue,
 } from "react-native";
 
 import MessageTail from "../../assets/message-tail.svg";
@@ -34,6 +35,7 @@ import ClickableText from "../ClickableText";
 import ChatAttachmentBubble from "./ChatAttachmentBubble";
 import ChatMessageReplyBubble from "./ChatInputReplyBubble";
 import ChatMessageActions from "./ChatMessageActions";
+import ChatMessageFramePreviews from "./ChatMessageFramePreviews";
 import ChatMessageMetadata from "./ChatMessageMetadata";
 import ChatMessageReactions from "./ChatMessageReactions";
 import ChatTransactionReference from "./ChatTransactionReference";
@@ -122,6 +124,20 @@ function ChatMessage({ message, colorScheme }: Props) {
       replyingToMessage.senderAddress
     );
   }, [replyingToMessage?.senderAddress]);
+  let messageMaxWidth: DimensionValue;
+  if (isDesktop) {
+    if (isAttachment) {
+      messageMaxWidth = 366;
+    } else {
+      messageMaxWidth = 588;
+    }
+  } else {
+    if (isAttachment) {
+      messageMaxWidth = "70%";
+    } else {
+      messageMaxWidth = "85%";
+    }
+  }
 
   return (
     <View
@@ -139,9 +155,6 @@ function ChatMessage({ message, colorScheme }: Props) {
         reactions={reactions}
         style={[
           styles.messageBubble,
-          isAttachment || isTransaction || replyingToMessage
-            ? styles.messageWithInnerBubble
-            : styles.messageBubbleText,
           message.fromMe ? styles.messageBubbleMe : undefined,
           Platform.select({
             default: {},
@@ -159,18 +172,15 @@ function ChatMessage({ message, colorScheme }: Props) {
             },
           }),
           {
-            maxWidth: isDesktop
-              ? isAttachment
-                ? 366
-                : 588
-              : isAttachment
-              ? "70%"
-              : "75%",
+            maxWidth: messageMaxWidth,
           },
         ]}
       >
+        {isContentType("text", message.contentType) && (
+          <ChatMessageFramePreviews message={message} />
+        )}
         {replyingToMessage ? (
-          <View>
+          <View style={styles.messageWithInnerBubble}>
             <View
               style={[
                 styles.innerBubble,
@@ -202,7 +212,15 @@ function ChatMessage({ message, colorScheme }: Props) {
             </View>
           </View>
         ) : (
-          messageContent
+          <View
+            style={[
+              isAttachment || isTransaction
+                ? styles.messageWithInnerBubble
+                : styles.messageBubbleText,
+            ]}
+          >
+            {messageContent}
+          </View>
         )}
 
         <View style={styles.metadataContainer}>{metadata}</View>

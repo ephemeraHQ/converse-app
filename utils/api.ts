@@ -268,6 +268,14 @@ export const claimUserName = async (
   return data;
 };
 
+export const getSendersSpamScores = async (sendersAddresses: string[]) => {
+  if (!sendersAddresses || sendersAddresses.length === 0) return {};
+  const { data } = await api.post("/api/spam/senders/batch", {
+    sendersAddresses: sendersAddresses.filter((s) => !!s),
+  });
+  return data as { [senderAddress: string]: number };
+};
+
 export const getPresignedUriForUpload = async (userAddress: string) => {
   const { data } = await api.get("/api/attachment/presigned", {
     headers: await getXmtpApiHeaders(userAddress),
