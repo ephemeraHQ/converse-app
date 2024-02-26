@@ -131,7 +131,7 @@
     "react-native-sqlite-storage": "^6.0.1",
     "react-native-svg": "^14.1.0",
     "react-native-svg-transformer": "^1.3.0",
-    "react-native-system-navigation-bar": "^2.6.3",
+    "react-native-system-navigation-bar": "^2.6.4",
     "react-native-tableview-simple": "^4.4.0",
     "react-native-url-polyfill": "^1.3.0",
     "react-native-uuid": "^2.0.1",
