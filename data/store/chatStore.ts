@@ -4,7 +4,7 @@ import { persist, createJSONStorage } from "zustand/middleware";
 
 import {
   TopicSpamScores,
-  handleSpamScore,
+  computeConversationsSpamScores,
 } from "../../data/helpers/conversations/spamScore";
 import { ConversationWithLastMessagePreview } from "../../utils/conversation";
 import { lastValueInMap } from "../../utils/map";
@@ -389,9 +389,7 @@ export const initChatStore = (account: string) => {
               );
               if (updateSpamScoreFor.length > 0) {
                 setImmediate(() => {
-                  updateSpamScoreFor.forEach((conversation) => {
-                    handleSpamScore(account, conversation);
-                  });
+                  computeConversationsSpamScores(account, updateSpamScoreFor);
                 });
               }
 
