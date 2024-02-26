@@ -8,12 +8,15 @@ import {
 } from "react-native";
 
 import { currentAccount } from "../../data/store/accountsStore";
+import { isAttachmentMessage } from "../../utils/attachment/helpers";
 import {
   backgroundColor,
   textPrimaryColor,
   textSecondaryColor,
 } from "../../utils/colors";
+import { getRelativeDateTime } from "../../utils/date";
 import { getReadableProfile } from "../../utils/str";
+import { isTransactionMessage } from "../../utils/transaction";
 import Picto from "../Picto/Picto";
 import { MessageToDisplay } from "./ChatMessage";
 
@@ -38,7 +41,13 @@ export default function ChatInputReplyPreview({
       <View style={styles.messagePreview}>
         <Text style={[styles.replyToUsername]}>{readableProfile}</Text>
         <Text style={[styles.replyToMessage]}>
-          {replyingToMessage.content || replyingToMessage.contentFallback}
+          {isAttachmentMessage(replyingToMessage.contentType)
+            ? `📎 Media from ${getRelativeDateTime(replyingToMessage.sent)}`
+            : isTransactionMessage(replyingToMessage.contentType)
+            ? `💸 Transaction from ${getRelativeDateTime(
+                replyingToMessage.sent
+              )}`
+            : replyingToMessage.content || replyingToMessage.contentFallback}
         </Text>
       </View>
       <TouchableOpacity

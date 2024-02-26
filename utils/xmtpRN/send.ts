@@ -1,11 +1,9 @@
-import { ContentTypeReply } from "@xmtp/content-type-reply";
 import {
   ContentTypeTransactionReference,
   TransactionReference,
 } from "@xmtp/content-type-transaction-reference";
 import {
   PreparedLocalMessage,
-  ReplyContent,
   sendPreparedMessage,
 } from "@xmtp/react-native-sdk";
 
@@ -96,26 +94,20 @@ export const sendPendingMessages = async (account: string) => {
             JSON.parse(message.content) as TransactionReference,
             { contentType: ContentTypeTransactionReference }
           );
+        } else if (
+          message.referencedMessageId &&
+          isContentType("text", message.contentType)
+        ) {
+          preparedMessage = await conversation.prepareMessage({
+            reply: {
+              reference: message.referencedMessageId,
+              content: { text: message.content },
+            },
+          });
         } else {
-          let parsedMessage: ReplyContent | string;
-          try {
-            parsedMessage = JSON.parse(message.content);
-          } catch (e) {
-            parsedMessage = message.content;
-          }
-
-          if (typeof parsedMessage !== "string" && parsedMessage.reference) {
-            // Sending message as a reply
-            preparedMessage = await conversation.prepareMessage(
-              { reply: parsedMessage },
-              { contentType: ContentTypeReply }
-            );
-          } else {
-            // Sending message as a text
-            preparedMessage = await conversation.prepareMessage({
-              text: message.content,
-            });
-          }
+          preparedMessage = await conversation.prepareMessage({
+            text: message.content,
+          });
         }
 
         const newMessageId = preparedMessage.messageId;

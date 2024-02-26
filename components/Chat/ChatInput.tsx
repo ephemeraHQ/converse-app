@@ -88,13 +88,7 @@ export default function ChatInput() {
       if (replyingToMessage) {
         sendMessage({
           conversation,
-          content: JSON.stringify({
-            reference: replyingToMessage.id,
-            content: {
-              text: inputValue,
-            },
-            contentType: "xmtp.org/text:1.0",
-          }),
+          content: inputValue,
           referencedMessageId: replyingToMessage.id,
           contentType: "xmtp.org/text:1.0",
         });

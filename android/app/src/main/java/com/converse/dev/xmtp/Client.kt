@@ -11,12 +11,14 @@ import org.xmtp.android.library.XMTPEnvironment
 import org.xmtp.android.library.codecs.AttachmentCodec
 import org.xmtp.android.library.codecs.ReactionCodec
 import org.xmtp.android.library.codecs.RemoteAttachmentCodec
+import org.xmtp.android.library.codecs.ReplyCodec
 import org.xmtp.android.library.messages.PrivateKeyBundleV1Builder
 
 fun initCodecs() {
     Client.register(codec = AttachmentCodec())
     Client.register(codec = RemoteAttachmentCodec())
     Client.register(codec = ReactionCodec())
+    Client.register(codec = ReplyCodec())
 }
 
 fun getXmtpKeyForAccount(appContext: Context, account: String): ByteArray? {

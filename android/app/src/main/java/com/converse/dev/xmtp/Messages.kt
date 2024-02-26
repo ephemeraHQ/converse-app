@@ -18,6 +18,7 @@ import org.xmtp.android.library.Conversation
 import org.xmtp.android.library.DecodedMessage
 import org.xmtp.android.library.codecs.Reaction
 import org.xmtp.android.library.codecs.RemoteAttachment
+import org.xmtp.android.library.codecs.Reply
 import org.xmtp.android.library.codecs.decoded
 import org.xmtp.android.library.messages.Envelope
 import org.xmtp.proto.message.api.v1.MessageApiOuterClass
@@ -210,33 +211,45 @@ fun handleMessageByContentType(
     xmtpClient: Client,
     sentViaConverse: Boolean
 ): DecodedMessageResult {
-    val contentType = getContentTypeString(decodedMessage.encodedContent.type)
+    var contentType = getContentTypeString(decodedMessage.encodedContent.type)
     var contentToReturn: String?
     var contentToSave: String?
+    var referencedMessageId: String? = null
     var forceIgnore = false
+
+    var messageContent = decodedMessage.content<Any>()
+
+    if (contentType.startsWith("xmtp.org/reply:")) {
+        val replyContent = messageContent as Reply
+        referencedMessageId = replyContent.reference
+        contentType = getContentTypeString(replyContent.contentType)
+        messageContent = replyContent.content
+    }
 
     try {
         when {
             contentType.startsWith("xmtp.org/text:") -> {
-                contentToSave = decodedMessage.body
+                contentToSave = messageContent as String
                 contentToReturn = contentToSave
             }
 
             contentType.startsWith("xmtp.org/remoteStaticAttachment:") -> {
-                contentToSave = getJsonRemoteAttachment(decodedMessage)
+                val remoteAttachment = messageContent as RemoteAttachment
+                contentToSave = getJsonRemoteAttachment(remoteAttachment)
                 contentToReturn = "📎 Media"
             }
 
             contentType.startsWith("xmtp.org/transactionReference:") || contentType.startsWith("coinbase.com/coinbase-messaging-payment-activity:") -> {
-                contentToSave = decodedMessage.body
+                contentToSave = messageContent as String
                 contentToReturn = "💸 Transaction"
             }
 
             contentType.startsWith("xmtp.org/reaction:") -> {
-                val reaction: Reaction? = decodedMessage.content()
+                val reaction = messageContent as Reaction?
                 val action = reaction?.action?.javaClass?.simpleName?.lowercase()
                 val schema = reaction?.schema?.javaClass?.simpleName?.lowercase()
                 val content = reaction?.content
+                referencedMessageId = reaction?.reference
                 forceIgnore = action == "removed"
                 contentToSave = getJsonReaction(decodedMessage)
                 contentToReturn = when {
@@ -263,7 +276,8 @@ fun handleMessageByContentType(
                 decodedMessage = decodedMessage,
                 content = it,
                 contentType = contentType,
-                sentViaConverse = sentViaConverse
+                sentViaConverse = sentViaConverse,
+                referencedMessageId = referencedMessageId
             )
         }
 
@@ -280,7 +294,7 @@ fun getContentTypeString(contentType: Content.ContentTypeId): String {
     return "${contentType.authorityId}/${contentType.typeId}:${contentType.versionMajor}.${contentType.versionMinor}"
 }
 
-fun saveMessageToStorage(appContext: Context, account: String, decodedMessage: DecodedMessage, content: String, contentType: String, sentViaConverse: Boolean) {
+fun saveMessageToStorage(appContext: Context, account: String, decodedMessage: DecodedMessage, content: String, contentType: String, sentViaConverse: Boolean, referencedMessageId: String?) {
     val mmkv = getMmkv(appContext)
     val currentSavedMessagesString = mmkv?.decodeString("saved-notifications-messages")
     Log.d("PushNotificationsService", "Got current saved messages from storage: $currentSavedMessagesString")
@@ -301,16 +315,15 @@ fun saveMessageToStorage(appContext: Context, account: String, decodedMessage: D
         id=decodedMessage.id,
         sentViaConverse=sentViaConverse,
         contentType=contentType,
-        account=account
+        account=account,
+        referencedMessageId=referencedMessageId
     )
     currentSavedMessages += newMessageToSave
     val newSavedMessagesString = Klaxon().toJsonString(currentSavedMessages)
     mmkv?.putString("saved-notifications-messages", newSavedMessagesString)
 }
 
-fun getJsonRemoteAttachment(decodedMessage: DecodedMessage): String {
-    val remoteAttachment =
-        decodedMessage.encodedContent.decoded<RemoteAttachment>() ?: return "";
+fun getJsonRemoteAttachment(remoteAttachment: RemoteAttachment): String {
     try {
         val dictionary =
             mapOf(

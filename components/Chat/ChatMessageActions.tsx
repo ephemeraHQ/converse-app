@@ -28,7 +28,6 @@ import {
   removeReactionFromMessage,
 } from "../../utils/reactions";
 import { isTransactionMessage } from "../../utils/transaction";
-import { isContentType } from "../../utils/xmtpRN/contentTypes";
 import { consentToPeersOnProtocol } from "../../utils/xmtpRN/conversations";
 import EmojiPicker from "../../vendor/rn-emoji-keyboard";
 import { showActionSheetWithOptions } from "../StateHandlers/ActionSheetStateHandler";
@@ -124,16 +123,12 @@ export default function ChatMessageActions({
   const canAddReaction =
     message.status !== "sending" && message.status !== "error";
 
-  const canReplyTo = isContentType("text", message.contentType);
-
   const showMessageActionSheet = useCallback(() => {
     const methods: any = {};
     if (canAddReaction) {
       methods["Add a reaction"] = showReactionModal;
     }
-    if (canReplyTo) {
-      methods["Reply"] = triggerReplyToMessage;
-    }
+    methods["Reply"] = triggerReplyToMessage;
     if (!isAttachment && !isTransaction) {
       methods["Copy message"] = message.content
         ? () => Clipboard.setString(message.content)
@@ -171,7 +166,6 @@ export default function ChatMessageActions({
     );
   }, [
     canAddReaction,
-    canReplyTo,
     isAttachment,
     isTransaction,
     message.content,

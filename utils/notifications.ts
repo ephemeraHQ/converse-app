@@ -279,6 +279,7 @@ export const loadSavedNotificationMessagesToContext = async () => {
             sentViaConverse: !!message.sentViaConverse,
             contentType: message.contentType || "xmtp.org/text:1.0",
             topic: message.topic,
+            referencedMessageId: message.referencedMessageId,
           });
         }
       });

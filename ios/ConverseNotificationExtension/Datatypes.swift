@@ -16,6 +16,7 @@ struct SavedNotificationMessage: Codable {
   var sentViaConverse: Bool
   var contentType: String
   var account: String
+  var referencedMessageId: String?
 }
 
 struct ConversationContext: Codable {
