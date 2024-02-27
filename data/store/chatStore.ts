@@ -13,6 +13,7 @@ import { subscribeToNotifications } from "../../utils/notifications";
 import { omit } from "../../utils/objects";
 import { refreshBalanceForAccount } from "../../utils/wallet";
 import { isContentType } from "../../utils/xmtpRN/contentTypes";
+import { ConverseMessageMetadata } from "../db/entities/messageEntity";
 import {
   markAllConversationsAsReadInDb,
   markConversationReadUntil,
@@ -63,6 +64,7 @@ export type XmtpMessage = XmtpProtocolMessage & {
   contentFallback?: string;
   referencedMessageId?: string;
   lastUpdateAt?: number;
+  converseMetadata?: ConverseMessageMetadata;
 };
 
 type ConversationsListItems = {
@@ -128,6 +130,12 @@ export type ChatStoreType = {
   }) => void;
 
   setSpamScores: (topicSpamScores: TopicSpamScores) => void;
+
+  setMessageMetadata: (
+    topic: string,
+    messageId: string,
+    metadata: ConverseMessageMetadata
+  ) => void;
 };
 
 const now = () => new Date().getTime();
@@ -535,6 +543,24 @@ export const initChatStore = (account: string) => {
               Object.entries(topicSpamScores).forEach(([topic, spamScore]) => {
                 newState.conversations[topic].spamScore = spamScore;
                 newState.conversations[topic].lastUpdateAt = now();
+              });
+              return newState;
+            }),
+          setMessageMetadata: (
+            topic: string,
+            messageId: string,
+            metadata: ConverseMessageMetadata
+          ) =>
+            set((state) => {
+              const conversation = state.conversations[topic];
+              if (!conversation) return state;
+              const message = conversation.messages.get(messageId);
+              if (!message) return state;
+              const newState = { ...state };
+              newState.conversations[topic].messages.set(messageId, {
+                ...message,
+                converseMetadata: metadata,
+                lastUpdateAt: now(),
               });
               return newState;
             }),

@@ -76,4 +76,17 @@ export class Message {
   )
   @JoinColumn({ name: "referencedMessageId" })
   referencingMessages?: Message[];
+
+  @Column("simple-json", { nullable: true })
+  converseMetadata?: ConverseMessageMetadata;
 }
+
+export type ConverseMessageMetadata = {
+  attachment?: {
+    size: {
+      width: number;
+      height: number;
+    };
+  };
+  frames?: string[];
+};

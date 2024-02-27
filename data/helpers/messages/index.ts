@@ -1,9 +1,13 @@
+import isDeepEqual from "fast-deep-equal";
 import { Platform } from "react-native";
 
 import { moveAssetsForMessage } from "../../../utils/fileSystem";
 import { isContentType } from "../../../utils/xmtpRN/contentTypes";
 import { getRepository } from "../../db";
-import { Message } from "../../db/entities/messageEntity";
+import {
+  ConverseMessageMetadata,
+  Message,
+} from "../../db/entities/messageEntity";
 import { upsertRepository } from "../../db/upsert";
 import { xmtpMessageFromDb, xmtpMessageToDb } from "../../mappers";
 import { getChatStore } from "../../store/accountsStore";
@@ -43,6 +47,24 @@ export const saveMessages = async (
       false
     );
   }
+};
+
+export const saveMessageMetadata = async (
+  account: string,
+  message: XmtpMessage,
+  metadata: ConverseMessageMetadata
+) => {
+  if (isDeepEqual(message.converseMetadata, metadata)) return;
+  // First dispatch locally
+  getChatStore(account)
+    .getState()
+    .setMessageMetadata(message.topic, message.id, metadata);
+  // Then save to db
+  const messageRepository = await getRepository(account, "message");
+  await messageRepository.update(
+    { id: message.id },
+    { converseMetadata: metadata }
+  );
 };
 
 export const updateMessagesIds = async (
