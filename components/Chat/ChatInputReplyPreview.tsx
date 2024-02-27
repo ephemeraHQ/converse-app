@@ -7,7 +7,7 @@ import {
   TouchableOpacity,
 } from "react-native";
 
-import { currentAccount } from "../../data/store/accountsStore";
+import { useCurrentAccount } from "../../data/store/accountsStore";
 import { isAttachmentMessage } from "../../utils/attachment/helpers";
 import {
   backgroundColor,
@@ -29,9 +29,10 @@ export default function ChatInputReplyPreview({
 }) {
   const colorScheme = useColorScheme();
   const styles = useStyles();
+  const currentAccount = useCurrentAccount() as string;
 
   const readableProfile = getReadableProfile(
-    currentAccount(),
+    currentAccount,
     replyingToMessage?.senderAddress,
     true
   );
@@ -39,7 +40,12 @@ export default function ChatInputReplyPreview({
   return (
     <View style={styles.replyContainer}>
       <View style={styles.messagePreview}>
-        <Text style={[styles.replyToUsername]}>{readableProfile}</Text>
+        <Text style={[styles.replyToUsername]}>
+          {currentAccount.toLowerCase() ===
+          replyingToMessage?.senderAddress?.toLowerCase()
+            ? "You"
+            : readableProfile}
+        </Text>
         <Text style={[styles.replyToMessage]}>
           {isAttachmentMessage(replyingToMessage.contentType)
             ? `📎 Media from ${getRelativeDateTime(replyingToMessage.sent)}`

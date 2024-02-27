@@ -101,6 +101,9 @@ export default function ChatInput() {
         });
       }
       setInputValue("");
+      converseEventEmitter.emit("scrollChatToMessage", {
+        index: 0,
+      });
     }
   }, [conversation, inputValue, replyingToMessage]);
 
@@ -206,7 +209,7 @@ const useStyles = () => {
     replyToMessagePreview: {
       paddingHorizontal: 10,
       paddingVertical: 8,
-      borderTopWidth: 1,
+      borderTopWidth: 0.5,
       borderTopColor: itemSeparatorColor(colorScheme),
     },
     chatInputContainer: {

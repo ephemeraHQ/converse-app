@@ -7,6 +7,7 @@ import {
   Platform,
   ColorSchemeName,
   DimensionValue,
+  TouchableOpacity,
 } from "react-native";
 
 import MessageTail from "../../assets/message-tail.svg";
@@ -23,6 +24,7 @@ import {
 } from "../../utils/colors";
 import { getRelativeDate } from "../../utils/date";
 import { isDesktop } from "../../utils/device";
+import { converseEventEmitter } from "../../utils/events";
 import { LimitedMap } from "../../utils/objects";
 import { getMessageReactions } from "../../utils/reactions";
 import { getReadableProfile } from "../../utils/str";
@@ -103,6 +105,7 @@ function ChatMessage({ message, colorScheme }: Props) {
 
   const replyingToProfileName = useMemo(() => {
     if (!replyingToMessage?.senderAddress) return "";
+    if (replyingToMessage.senderAddress === currentAccount()) return "You";
     return getReadableProfile(
       currentAccount(),
       replyingToMessage.senderAddress
@@ -165,11 +168,17 @@ function ChatMessage({ message, colorScheme }: Props) {
         )}
         {replyingToMessage ? (
           <View style={styles.messageWithInnerBubble}>
-            <View
+            <TouchableOpacity
               style={[
                 styles.innerBubble,
                 message.fromMe ? styles.innerBubbleMe : undefined,
               ]}
+              onPress={() => {
+                converseEventEmitter.emit("scrollChatToMessage", {
+                  messageId: replyingToMessage.id,
+                  animated: true,
+                });
+              }}
             >
               <Text
                 style={[
@@ -184,7 +193,7 @@ function ChatMessage({ message, colorScheme }: Props) {
                 replyingToMessage={replyingToMessage}
                 fromMe={message.fromMe}
               />
-            </View>
+            </TouchableOpacity>
             <View
               style={
                 isContentType("text", message.contentType)
