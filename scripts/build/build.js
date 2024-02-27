@@ -35,7 +35,7 @@ const build = async () => {
           {
             type: "select",
             name: "internalProduction",
-            message: "Build an internal build even if production?",
+            message: "Build an internal build even if production/preview?",
             choices: [{ value: "no" }, { value: "yes" }],
           },
         ]
@@ -70,7 +70,7 @@ const build = async () => {
   }
   const buildLocally = local === "local";
   const buildInternalProduction =
-    env === "production" && internalProduction === "yes";
+    (env === "production" || env === "preview") && internalProduction === "yes";
 
   const buildCommand = "eas";
   const buildProfile =

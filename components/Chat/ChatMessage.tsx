@@ -1,4 +1,4 @@
-import { ReactNode } from "react";
+import { ReactNode, useMemo } from "react";
 import {
   View,
   useColorScheme,
@@ -10,11 +10,14 @@ import {
 } from "react-native";
 
 import MessageTail from "../../assets/message-tail.svg";
+import { useChatStore, currentAccount } from "../../data/store/accountsStore";
 import { XmtpMessage } from "../../data/store/chatStore";
 import { isAttachmentMessage } from "../../utils/attachment/helpers";
 import {
   messageBubbleColor,
+  messageInnerBubbleColor,
   myMessageBubbleColor,
+  myMessageInnerBubbleColor,
   textPrimaryColor,
   textSecondaryColor,
 } from "../../utils/colors";
@@ -22,6 +25,7 @@ import { getRelativeDate } from "../../utils/date";
 import { isDesktop } from "../../utils/device";
 import { LimitedMap } from "../../utils/objects";
 import { getMessageReactions } from "../../utils/reactions";
+import { getReadableProfile } from "../../utils/str";
 import { isTransactionMessage } from "../../utils/transaction";
 import {
   getMessageContentType,
@@ -29,6 +33,7 @@ import {
 } from "../../utils/xmtpRN/contentTypes";
 import ClickableText from "../ClickableText";
 import ChatAttachmentBubble from "./ChatAttachmentBubble";
+import ChatMessageReplyBubble from "./ChatInputReplyBubble";
 import ChatMessageActions from "./ChatMessageActions";
 import ChatMessageFramePreviews from "./ChatMessageFramePreviews";
 import ChatMessageMetadata from "./ChatMessageMetadata";
@@ -66,7 +71,7 @@ function ChatMessage({ message, colorScheme }: Props) {
     case "coinbasePayment":
       messageContent = <ChatTransactionReference message={message} />;
       break;
-    default:
+    default: {
       messageContent = (
         <ClickableText
           style={[
@@ -79,12 +84,30 @@ function ChatMessage({ message, colorScheme }: Props) {
         </ClickableText>
       );
       break;
+    }
   }
 
   const isAttachment = isAttachmentMessage(message.contentType);
   const isTransaction = isTransactionMessage(message.contentType);
   const reactions = getMessageReactions(message);
 
+  // maybe using useChatStore inside ChatMessage
+  // leads to bad perf? Let's be cautious
+  const replyingToMessage = useChatStore((s) =>
+    message.referencedMessageId
+      ? s.conversations[message.topic]?.messages.get(
+          message.referencedMessageId
+        )
+      : undefined
+  );
+
+  const replyingToProfileName = useMemo(() => {
+    if (!replyingToMessage?.senderAddress) return "";
+    return getReadableProfile(
+      currentAccount(),
+      replyingToMessage.senderAddress
+    );
+  }, [replyingToMessage?.senderAddress]);
   let messageMaxWidth: DimensionValue;
   if (isDesktop) {
     if (isAttachment) {
@@ -140,16 +163,49 @@ function ChatMessage({ message, colorScheme }: Props) {
         {isContentType("text", message.contentType) && (
           <ChatMessageFramePreviews message={message} />
         )}
-
-        <View
-          style={[
-            isAttachment || isTransaction
-              ? styles.messageBubbleAttachmentOrTransaction
-              : styles.messageBubbleText,
-          ]}
-        >
-          {messageContent}
-        </View>
+        {replyingToMessage ? (
+          <View style={styles.messageWithInnerBubble}>
+            <View
+              style={[
+                styles.innerBubble,
+                message.fromMe ? styles.innerBubbleMe : undefined,
+              ]}
+            >
+              <Text
+                style={[
+                  styles.messageText,
+                  styles.replyToUsername,
+                  message.fromMe ? styles.messageTextMe : undefined,
+                ]}
+              >
+                {replyingToProfileName}
+              </Text>
+              <ChatMessageReplyBubble
+                replyingToMessage={replyingToMessage}
+                fromMe={message.fromMe}
+              />
+            </View>
+            <View
+              style={
+                isContentType("text", message.contentType)
+                  ? styles.messageTextReply
+                  : undefined
+              }
+            >
+              {messageContent}
+            </View>
+          </View>
+        ) : (
+          <View
+            style={[
+              isAttachment || isTransaction
+                ? styles.messageWithInnerBubble
+                : styles.messageBubbleText,
+            ]}
+          >
+            {messageContent}
+          </View>
+        )}
 
         <View style={styles.metadataContainer}>{metadata}</View>
 
@@ -226,6 +282,17 @@ export default function CachedChatMessage({
 const useStyles = () => {
   const colorScheme = useColorScheme();
   return StyleSheet.create({
+    innerBubble: {
+      backgroundColor: messageInnerBubbleColor(colorScheme),
+      borderRadius: 14,
+      width: "100%",
+      paddingHorizontal: 12,
+      paddingVertical: 10,
+      marginBottom: 5,
+    },
+    innerBubbleMe: {
+      backgroundColor: myMessageInnerBubbleColor(colorScheme),
+    },
     messageRow: {
       flexDirection: "row",
       paddingHorizontal: Platform.OS === "android" ? 10 : 20,
@@ -250,12 +317,18 @@ const useStyles = () => {
       paddingHorizontal: 12,
       paddingVertical: Platform.OS === "android" ? 6 : 7,
     },
-    messageBubbleAttachmentOrTransaction: {
+    messageWithInnerBubble: {
       padding: 4,
     },
     messageBubbleMe: {
       marginLeft: "auto",
       backgroundColor: myMessageBubbleColor(colorScheme),
+    },
+    replyToUsername: {
+      fontSize: 15,
+      fontWeight: "bold",
+      marginBottom: 4,
+      color: textPrimaryColor(colorScheme),
     },
     messageText: {
       fontSize: 17,
@@ -263,6 +336,10 @@ const useStyles = () => {
     },
     messageTextMe: {
       color: "white",
+    },
+    messageTextReply: {
+      paddingHorizontal: 8,
+      paddingBottom: 4,
     },
     messageTail: {
       position: "absolute",
@@ -281,6 +358,7 @@ const useStyles = () => {
       position: "absolute",
       bottom: 6,
       right: 12,
+      zIndex: -1,
     },
   });
 };

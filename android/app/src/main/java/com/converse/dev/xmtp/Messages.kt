@@ -2,21 +2,32 @@ package com.converse.dev.xmtp
 
 import android.content.Context
 import android.util.Log
+import com.android.volley.Request
+import com.android.volley.toolbox.JsonObjectRequest
+import com.android.volley.toolbox.Volley
 import com.beust.klaxon.Klaxon
 import com.converse.dev.*
 import com.converse.dev.PushNotificationsService.Companion.TAG
 import com.google.firebase.messaging.RemoteMessage
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.suspendCancellableCoroutine
 import org.json.JSONObject
 import org.xmtp.android.library.Client
 import org.xmtp.android.library.Conversation
 import org.xmtp.android.library.DecodedMessage
 import org.xmtp.android.library.codecs.Reaction
 import org.xmtp.android.library.codecs.RemoteAttachment
+import org.xmtp.android.library.codecs.Reply
 import org.xmtp.android.library.codecs.decoded
 import org.xmtp.android.library.messages.Envelope
 import org.xmtp.proto.message.api.v1.MessageApiOuterClass
 import org.xmtp.proto.message.contents.Content
+import java.util.HashMap
+import kotlin.coroutines.Continuation
+import kotlin.coroutines.resume
+import kotlin.coroutines.resumeWithException
+import kotlin.coroutines.suspendCoroutine
 
 data class NotificationDataResult(
     val title: String = "",
@@ -59,11 +70,19 @@ suspend fun handleNewConversationFirstMessage(
                     messageContent = message.encodedContent.content.toStringUtf8()
                 }
 
+                val mmkv = getMmkv(appContext)
+                var apiURI = mmkv?.decodeString("api-uri")
+                if (apiURI == null) {
+                    apiURI = getAsyncStorage("api-uri")
+                }
+
                 val spamScore = computeSpamScore(
                     address = conversation.peerAddress,
                     message = messageContent,
                     sentViaConverse = message.sentViaConverse,
-                    contentType = contentType
+                    contentType = contentType,
+                    appContext = appContext,
+                    apiURI = apiURI
                 )
                 Log.d(TAG, "spamScore: $spamScore for topic: ${message.topic}")
 
@@ -111,11 +130,6 @@ suspend fun handleNewConversationFirstMessage(
                     Log.d(TAG, "Not showing a notification because considered spam")
                     shouldShowNotification = false
                 } else {
-                    val mmkv = getMmkv(appContext)
-                    var apiURI = mmkv?.decodeString("api-uri")
-                    if (apiURI == null) {
-                        apiURI = getAsyncStorage("api-uri")
-                    }
                     val pushToken = getKeychainValue("PUSH_TOKEN")
 
                     if (apiURI != null && pushToken !== null) {
@@ -197,33 +211,45 @@ fun handleMessageByContentType(
     xmtpClient: Client,
     sentViaConverse: Boolean
 ): DecodedMessageResult {
-    val contentType = getContentTypeString(decodedMessage.encodedContent.type)
+    var contentType = getContentTypeString(decodedMessage.encodedContent.type)
     var contentToReturn: String?
     var contentToSave: String?
+    var referencedMessageId: String? = null
     var forceIgnore = false
+
+    var messageContent = decodedMessage.content<Any>()
+
+    if (contentType.startsWith("xmtp.org/reply:")) {
+        val replyContent = messageContent as Reply
+        referencedMessageId = replyContent.reference
+        contentType = getContentTypeString(replyContent.contentType)
+        messageContent = replyContent.content
+    }
 
     try {
         when {
             contentType.startsWith("xmtp.org/text:") -> {
-                contentToSave = decodedMessage.body
+                contentToSave = messageContent as String
                 contentToReturn = contentToSave
             }
 
             contentType.startsWith("xmtp.org/remoteStaticAttachment:") -> {
-                contentToSave = getJsonRemoteAttachment(decodedMessage)
+                val remoteAttachment = messageContent as RemoteAttachment
+                contentToSave = getJsonRemoteAttachment(remoteAttachment)
                 contentToReturn = "📎 Media"
             }
 
             contentType.startsWith("xmtp.org/transactionReference:") || contentType.startsWith("coinbase.com/coinbase-messaging-payment-activity:") -> {
-                contentToSave = decodedMessage.body
+                contentToSave = messageContent as String
                 contentToReturn = "💸 Transaction"
             }
 
             contentType.startsWith("xmtp.org/reaction:") -> {
-                val reaction: Reaction? = decodedMessage.content()
+                val reaction = messageContent as Reaction?
                 val action = reaction?.action?.javaClass?.simpleName?.lowercase()
                 val schema = reaction?.schema?.javaClass?.simpleName?.lowercase()
                 val content = reaction?.content
+                referencedMessageId = reaction?.reference
                 forceIgnore = action == "removed"
                 contentToSave = getJsonReaction(decodedMessage)
                 contentToReturn = when {
@@ -250,7 +276,8 @@ fun handleMessageByContentType(
                 decodedMessage = decodedMessage,
                 content = it,
                 contentType = contentType,
-                sentViaConverse = sentViaConverse
+                sentViaConverse = sentViaConverse,
+                referencedMessageId = referencedMessageId
             )
         }
 
@@ -267,7 +294,7 @@ fun getContentTypeString(contentType: Content.ContentTypeId): String {
     return "${contentType.authorityId}/${contentType.typeId}:${contentType.versionMajor}.${contentType.versionMinor}"
 }
 
-fun saveMessageToStorage(appContext: Context, account: String, decodedMessage: DecodedMessage, content: String, contentType: String, sentViaConverse: Boolean) {
+fun saveMessageToStorage(appContext: Context, account: String, decodedMessage: DecodedMessage, content: String, contentType: String, sentViaConverse: Boolean, referencedMessageId: String?) {
     val mmkv = getMmkv(appContext)
     val currentSavedMessagesString = mmkv?.decodeString("saved-notifications-messages")
     Log.d("PushNotificationsService", "Got current saved messages from storage: $currentSavedMessagesString")
@@ -288,16 +315,15 @@ fun saveMessageToStorage(appContext: Context, account: String, decodedMessage: D
         id=decodedMessage.id,
         sentViaConverse=sentViaConverse,
         contentType=contentType,
-        account=account
+        account=account,
+        referencedMessageId=referencedMessageId
     )
     currentSavedMessages += newMessageToSave
     val newSavedMessagesString = Klaxon().toJsonString(currentSavedMessages)
     mmkv?.putString("saved-notifications-messages", newSavedMessagesString)
 }
 
-fun getJsonRemoteAttachment(decodedMessage: DecodedMessage): String {
-    val remoteAttachment =
-        decodedMessage.encodedContent.decoded<RemoteAttachment>() ?: return "";
+fun getJsonRemoteAttachment(remoteAttachment: RemoteAttachment): String {
     try {
         val dictionary =
             mapOf(
@@ -334,8 +360,10 @@ fun getJsonReaction(decodedMessage: DecodedMessage): String {
     }
 }
 
-fun computeSpamScore(address: String, message: String?, sentViaConverse: Boolean, contentType: String): Double {
-    var spamScore = 0.0
+fun computeSpamScore(address: String, message: String?, sentViaConverse: Boolean, contentType: String, apiURI: String?, appContext: Context): Double {
+    var spamScore = runBlocking {
+        getSenderSpamScore(appContext, address, apiURI);
+    }
     if (contentType.startsWith("xmtp.org/text:") && message?.let { containsURL(it) } == true) {
         spamScore += 1
     }
@@ -343,4 +371,31 @@ fun computeSpamScore(address: String, message: String?, sentViaConverse: Boolean
         spamScore -= 1
     }
     return spamScore
+}
+
+suspend fun getSenderSpamScore(appContext: Context, address: String, apiURI: String?): Double {
+    val senderSpamScoreURI = "$apiURI/api/spam/senders/batch"
+    val params: MutableMap<String?, Any> = HashMap()
+    params["sendersAddresses"] = arrayOf(address);
+
+    val parameters = JSONObject(params as Map<*, *>?)
+
+    return suspendCancellableCoroutine { continuation ->
+        val jsonRequest = JsonObjectRequest(Request.Method.POST, senderSpamScoreURI, parameters, {
+            Log.d("PushNotificationsService", "SPAM SCORE SUCCESS ${it[address]}")
+            var result = 0.0;
+            if (it.has(address)){
+                result = (it[address] as Int).toDouble()
+            }
+            continuation.resume(result)
+
+        }) { error ->
+            error.printStackTrace()
+            continuation.resumeWithException(error)
+            Log.d("PushNotificationsService", "SPAM SCORE ERROR - $error")
+        }
+
+        Volley.newRequestQueue(appContext).add(jsonRequest)
+    }
+
 }

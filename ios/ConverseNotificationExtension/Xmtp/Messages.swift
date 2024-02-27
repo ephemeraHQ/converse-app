@@ -7,6 +7,7 @@
 
 import Foundation
 import XMTP
+import Alamofire
 
 func handleNewConversationFirstMessage(xmtpClient: XMTP.Client, apiURI: String?, pushToken: String?, conversation: XMTP.Conversation, bestAttemptContent: inout UNMutableNotificationContent) async -> (shouldShowNotification: Bool, messageId: String?) {
   var shouldShowNotification = false
@@ -26,11 +27,12 @@ func handleNewConversationFirstMessage(xmtpClient: XMTP.Client, apiURI: String?,
             messageContent = String(data: message.encodedContent.content, encoding: .utf8)
         }
         
-        let spamScore = computeSpamScore(
+        let spamScore = await computeSpamScore(
           address: conversation.peerAddress,
           message: messageContent,
           sentViaConverse: message.sentViaConverse,
-          contentType: contentType
+          contentType: contentType,
+          apiURI: apiURI
         )
         
         do {
@@ -141,8 +143,8 @@ func loadSavedMessages() -> [SavedNotificationMessage] {
   }
 }
 
-func saveMessage(account: String, topic: String, sent: Date, senderAddress: String, content: String, id: String, sentViaConverse: Bool, contentType: String) throws {
-  let savedMessage = SavedNotificationMessage(topic: topic, content: content, senderAddress: senderAddress, sent: Int(sent.timeIntervalSince1970 * 1000), id: id, sentViaConverse: sentViaConverse, contentType: contentType, account: account)
+func saveMessage(account: String, topic: String, sent: Date, senderAddress: String, content: String, id: String, sentViaConverse: Bool, contentType: String, referencedMessageId: String?) throws {
+  let savedMessage = SavedNotificationMessage(topic: topic, content: content, senderAddress: senderAddress, sent: Int(sent.timeIntervalSince1970 * 1000), id: id, sentViaConverse: sentViaConverse, contentType: contentType, account: account, referencedMessageId: referencedMessageId)
   
   var savedMessagesList = loadSavedMessages()
   savedMessagesList.append(savedMessage)
@@ -172,34 +174,57 @@ func decodeMessage(xmtpClient: XMTP.Client, envelope: XMTP.Envelope) async throw
 }
 
 func handleMessageByContentType(decodedMessage: DecodedMessage, xmtpClient: XMTP.Client, sentViaConverse: Bool) -> (content: String?, senderAddress: String?, forceIgnore: Bool, id: String?) {
-  let contentType = getContentTypeString(type: decodedMessage.encodedContent.type)
+  var contentType = getContentTypeString(type: decodedMessage.encodedContent.type)
   var contentToReturn: String?
   var contentToSave: String?
+  var referencedMessageId: String?
   var forceIgnore = false
+  
+  var messageContent = try? decodedMessage.content() as Any
+  
+  if (contentType.starts(with: "xmtp.org/reply:")) {
+    let replyContent = messageContent as? Reply
+    if let reply = replyContent {
+      referencedMessageId = reply.reference
+      contentType = getContentTypeString(type: reply.contentType)
+      messageContent = reply.content
+    }
+    
+  }
   
   do {
     switch contentType {
     
     case let type where type.starts(with: "xmtp.org/text:"):
-      contentToSave = try? decodedMessage.content()
+      contentToSave = messageContent as? String
       contentToReturn = contentToSave
       
-    
+    case let type where type.starts(with: "xmtp.org/reply:"):
+      let reply = messageContent as! Reply
+      let replyContentType = getContentTypeString(type: reply.contentType)
+      if (replyContentType.starts(with: "xmtp.org/text:")) {
+        // Only one that's really necessary!
+        
+      } else {
+        
+      }
+      
     case let type where type.starts(with: "xmtp.org/remoteStaticAttachment:"):
-      let remoteAttachment: RemoteAttachment = try decodedMessage.encodedContent.decoded(with: xmtpClient)
+      let remoteAttachment = messageContent as! RemoteAttachment
       contentToSave = getJsonRemoteAttachment(remoteAttachment: remoteAttachment)
       contentToReturn = "📎 Media"
       
     case let type where type.starts(with: "xmtp.org/transactionReference:") ||
       type.starts(with: "coinbase.com/coinbase-messaging-payment-activity:"):
-      contentToSave = try? decodedMessage.content()
+      contentToSave = messageContent as? String
       contentToReturn = "💸 Transaction"
     
     case let type where type.starts(with: "xmtp.org/reaction:"):
-      let reaction: Reaction? = try decodedMessage.content()
+      let reaction = messageContent as? Reaction
       let action = reaction?.action.rawValue
       let schema = reaction?.schema.rawValue
       let content = reaction?.content
+      referencedMessageId = reaction?.reference
       
       if action == "removed" {
         forceIgnore = true
@@ -230,7 +255,8 @@ func handleMessageByContentType(decodedMessage: DecodedMessage, xmtpClient: XMTP
         content: content,
         id: decodedMessage.id,
         sentViaConverse: sentViaConverse,
-        contentType: contentType
+        contentType: contentType,
+        referencedMessageId: referencedMessageId
       )
     }
     return (contentToReturn, decodedMessage.senderAddress, forceIgnore, decodedMessage.id)
@@ -274,8 +300,8 @@ func getJsonReaction(reaction: Reaction) -> String? {
   }
 }
 
-func computeSpamScore(address: String, message: String?, sentViaConverse: Bool, contentType: String) -> Double {
-  var spamScore: Double = 0.0
+func computeSpamScore(address: String, message: String?, sentViaConverse: Bool, contentType: String, apiURI: String?) async -> Double {
+  var spamScore: Double = await getSenderSpamScore(address: address, apiURI: apiURI)
   if contentType.starts(with: "xmtp.org/text:"), let unwrappedMessage = message, containsURL(input: unwrappedMessage) {
     spamScore += 1
   }
@@ -283,4 +309,38 @@ func computeSpamScore(address: String, message: String?, sentViaConverse: Bool, 
     spamScore -= 1
   }
   return spamScore
+}
+
+func getSenderSpamScore(address: String, apiURI: String?) async -> Double {
+  var senderSpamScore: Double = 0.0
+  if (apiURI != nil && !apiURI!.isEmpty) {
+    let senderSpamScoreURI = "\(apiURI ?? "")/api/spam/senders/batch"
+    do {
+      let response = try await withUnsafeThrowingContinuation { continuation in
+              AF.request(senderSpamScoreURI, method: .post, parameters: ["sendersAddresses": [address]], encoding: JSONEncoding.default, headers: nil).validate().responseData { response in
+                  if let data = response.data {
+                      continuation.resume(returning: data)
+                      return
+                  }
+                  if let err = response.error {
+                      continuation.resume(throwing: err)
+                      return
+                  }
+                  fatalError("should not get here")
+              }
+          }
+      
+          if let json = try JSONSerialization.jsonObject(with: response, options: []) as? [String: Any] {
+            if let score = json[address] as? Double {
+              senderSpamScore = score
+            }
+          }
+
+
+      
+    } catch {
+      print(error)
+    }
+  }
+  return senderSpamScore
 }

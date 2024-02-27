@@ -94,13 +94,23 @@ export const sendPendingMessages = async (account: string) => {
             JSON.parse(message.content) as TransactionReference,
             { contentType: ContentTypeTransactionReference }
           );
+        } else if (
+          message.referencedMessageId &&
+          isContentType("text", message.contentType)
+        ) {
+          preparedMessage = await conversation.prepareMessage({
+            reply: {
+              reference: message.referencedMessageId,
+              content: { text: message.content },
+            },
+          });
         } else {
           preparedMessage = await conversation.prepareMessage({
             text: message.content,
           });
         }
 
-        const newMessageId = await preparedMessage.messageId;
+        const newMessageId = preparedMessage.messageId;
         preparedMessagesToSend.set(newMessageId, {
           ...preparedMessage,
           topic: message.conversationId,

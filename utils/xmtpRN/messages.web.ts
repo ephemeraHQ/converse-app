@@ -3,6 +3,7 @@ import {
   RemoteAttachment,
   Attachment,
 } from "@xmtp/content-type-remote-attachment";
+import { Reply } from "@xmtp/content-type-reply";
 import { TransactionReference } from "@xmtp/content-type-transaction-reference";
 import { messageApi } from "@xmtp/proto";
 import { Envelope } from "@xmtp/proto/ts/dist/types/message_api/v1/message_api.pb";
@@ -17,33 +18,83 @@ import { CoinbaseMessagingPaymentContent } from "./contentTypes/coinbasePayment"
 import { getConversationWithTopic } from "./conversations.web";
 import { getXmtpClient } from "./sync";
 
+type SerializedMessageContent = {
+  content: string;
+  referencedMessageId?: string | undefined;
+  supportedContentType: boolean;
+  contentType: string;
+};
+
+const serializeProtocolMessageContent = (
+  contentType: string,
+  messageContent: any
+): SerializedMessageContent => {
+  let referencedMessageId: string | undefined = undefined;
+  let content = "";
+  let supportedContentType = true;
+  if (isContentType("text", contentType)) {
+    content = messageContent as string;
+  } else if (isContentType("remoteAttachment", contentType)) {
+    content = serializeRemoteAttachmentMessageContent(
+      messageContent as RemoteAttachment
+    );
+  } else if (isContentType("attachment", contentType)) {
+    content = JSON.stringify(messageContent as Attachment);
+  } else if (isContentType("reaction", contentType)) {
+    content = JSON.stringify(messageContent as Reaction);
+    referencedMessageId = (messageContent as Reaction).reference;
+  } else if (isContentType("reply", contentType)) {
+    const replyContent = messageContent as Reply;
+    const replyContentType = replyContent.contentType.toString();
+    // Some content types we don't handle as replies:
+    // You can't reply a reply or a reaction
+    if (
+      isContentType("reply", replyContentType) ||
+      isContentType("reaction", replyContentType)
+    ) {
+      return {
+        content: "",
+        contentType: replyContentType,
+        supportedContentType: false,
+      };
+    }
+
+    const actualReplyContent = replyContent.content;
+    // Now that we have the content of the reply,
+    // let's also pass it through the serialize method
+    const serializedReply = serializeProtocolMessageContent(
+      replyContentType,
+      actualReplyContent
+    );
+    // Now that we have the actual content of this message, we can just save it
+    // as is, and just mark it as a reference to another message
+    return {
+      ...serializedReply,
+      referencedMessageId: replyContent.reference,
+    };
+  } else if (isContentType("transactionReference", contentType)) {
+    content = JSON.stringify(messageContent as TransactionReference);
+  } else if (isContentType("coinbasePayment", contentType)) {
+    content = JSON.stringify(messageContent as CoinbaseMessagingPaymentContent);
+  } else {
+    supportedContentType = false;
+  }
+  return {
+    content,
+    contentType,
+    referencedMessageId,
+    supportedContentType,
+  };
+};
+
 const protocolMessageToStateMessage = (
   message: DecodedMessage
 ): XmtpMessage => {
-  let referencedMessageId: string | undefined = undefined;
-  const contentType = message.contentType.toString();
-  let content = "";
-  let contentFallback: string | undefined = undefined;
-  if (isContentType("text", contentType)) {
-    content = message.content as string;
-  } else if (isContentType("remoteAttachment", contentType)) {
-    content = serializeRemoteAttachmentMessageContent(
-      message.content as RemoteAttachment
+  const { content, referencedMessageId, contentType, supportedContentType } =
+    serializeProtocolMessageContent(
+      message.contentType.toString(),
+      message.content
     );
-  } else if (isContentType("attachment", contentType)) {
-    content = JSON.stringify(message.content as Attachment);
-  } else if (isContentType("reaction", contentType)) {
-    content = JSON.stringify(message.content as Reaction);
-    referencedMessageId = (message.content as Reaction).reference;
-  } else if (isContentType("transactionReference", contentType)) {
-    content = JSON.stringify(message.content as TransactionReference);
-  } else if (isContentType("coinbasePayment", contentType)) {
-    content = JSON.stringify(
-      message.content as CoinbaseMessagingPaymentContent
-    );
-  } else {
-    contentFallback = message.contentFallback;
-  }
 
   return {
     id: message.id,
@@ -55,7 +106,7 @@ const protocolMessageToStateMessage = (
     content,
     referencedMessageId,
     topic: message.contentTopic,
-    contentFallback,
+    contentFallback: supportedContentType ? undefined : message.contentFallback,
   };
 };
 
