@@ -169,7 +169,7 @@ const build = async () => {
       `./builds/${platform}-${env}-${currentCommit}.${fileExtension}`
     );
   } else if (
-    (env === "production" || env === "preview") &&
+    (env === "production" || (env === "preview" && platform === "ios")) &&
     !buildInternalProduction
   ) {
     buildArgs.push("--auto-submit");
