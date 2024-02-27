@@ -23,6 +23,7 @@ export const xmtpMessageToDb = (
   contentType: xmtpMessage.contentType,
   contentFallback: xmtpMessage.contentFallback,
   referencedMessageId: xmtpMessage.referencedMessageId,
+  converseMetadata: xmtpMessage.converseMetadata,
 });
 
 export const xmtpMessageFromDb = (message: Message): XmtpMessage => ({
@@ -36,6 +37,7 @@ export const xmtpMessageFromDb = (message: Message): XmtpMessage => ({
   contentFallback: message.contentFallback,
   referencedMessageId: message.referencedMessageId,
   topic: message.conversationId,
+  converseMetadata: message.converseMetadata,
 });
 
 const xmtpMessagesMapFromDb = (

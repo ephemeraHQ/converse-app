@@ -9,6 +9,8 @@ import RNFS from "react-native-fs";
 import RNFetchBlob from "rn-fetch-blob";
 
 import { MessageToDisplay } from "../../components/Chat/ChatMessage";
+import { ConverseMessageMetadata } from "../../data/db/entities/messageEntity";
+import { saveMessageMetadata } from "../../data/helpers/messages";
 import { useCurrentAccount } from "../../data/store/accountsStore";
 import { getPresignedUriForUpload } from "../api";
 import { moveFileAndReplace } from "../fileSystem";
@@ -335,6 +337,17 @@ export const useAttachmentForMessage = (message: MessageToDisplay) => {
       go();
     }
   }, [fetchAndDecode, message, saveLocalAttachment]);
+
+  useEffect(() => {
+    if (attachment && attachment.imageSize) {
+      const messageMetadataToSave: ConverseMessageMetadata = {
+        attachment: {
+          size: attachment.imageSize,
+        },
+      };
+      saveMessageMetadata(currentAccount, message, messageMetadataToSave);
+    }
+  }, [attachment, currentAccount, message]);
 
   return { attachment, fetch: fetchAndDecode };
 };
