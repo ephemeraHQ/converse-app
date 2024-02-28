@@ -131,10 +131,10 @@ function ChatMessage({ message, colorScheme }: Props) {
 
   return (
     <Swipeable
-      overshootRight
+      overshootLeft
       onSwipeableWillClose={() => {
         const translation = swipeableRef.current?.state.rowTranslation;
-        if (translation && (translation as any)._value < -100) {
+        if (translation && (translation as any)._value > 70) {
           converseEventEmitter.emit("triggerReplyToMessage", message);
         }
       }}
