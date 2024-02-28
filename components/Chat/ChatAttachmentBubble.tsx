@@ -69,7 +69,8 @@ export default function ChatAttachmentBubble({ message }: Props) {
   }, [message.id, clickedOnAttachmentBubble]);
 
   if (attachment.loading) {
-    return (
+    const size = message.converseMetadata?.attachment?.size;
+    const content = (
       <>
         <Text style={textStyle}>
           {emoji}{" "}
@@ -80,6 +81,14 @@ export default function ChatAttachmentBubble({ message }: Props) {
         <View style={{ opacity: 0 }}>{metadataView}</View>
       </>
     );
+    if (size) {
+      const aspectRatio = size.width / size.height;
+      return (
+        <View style={[styles.imagePreview, { aspectRatio }]}>{content}</View>
+      );
+    } else {
+      return content;
+    }
   } else if (attachment.error) {
     return (
       <>
@@ -142,6 +151,8 @@ const useStyles = () => {
       width: "100%",
       zIndex: 1,
       minWidth: Platform.OS === "web" ? 250 : undefined,
+      justifyContent: "center",
+      alignItems: "center",
     },
     text: {
       paddingHorizontal: 8,
@@ -151,8 +162,8 @@ const useStyles = () => {
     },
     metadataContainer: {
       position: "absolute",
-      bottom: 6,
-      right: 12,
+      bottom: 5,
+      right: 10,
       backgroundColor: "rgba(24, 24, 24, 0.5)",
       borderRadius: 18,
       paddingLeft: 1,

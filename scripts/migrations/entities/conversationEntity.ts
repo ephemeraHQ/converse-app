@@ -28,7 +28,7 @@ export class Conversation {
   contextMetadata?: string;
 
   @Column("text", { default: "v2" })
-  version!: "v1" | "v2";
+  version!: string;
 
   @Column("decimal", { precision: 6, scale: 2, nullable: true, default: null })
   spamScore?: number;
