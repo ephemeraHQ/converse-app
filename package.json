@@ -80,6 +80,7 @@
     "expo-device": "~5.9.3",
     "expo-document-picker": "~11.10.1",
     "expo-file-system": "~16.0.6",
+    "expo-haptics": "^12.8.1",
     "expo-image": "~1.10.6",
     "expo-image-manipulator": "~11.8.0",
     "expo-image-picker": "~14.7.1",

@@ -1,3 +1,4 @@
+import * as Haptics from "expo-haptics";
 import { ReactNode, useMemo, useRef } from "react";
 import {
   View,
@@ -8,10 +9,13 @@ import {
   ColorSchemeName,
   DimensionValue,
   TouchableOpacity,
+  Animated,
 } from "react-native";
 import { Swipeable } from "react-native-gesture-handler";
 
 import MessageTail from "../../assets/message-tail.svg";
+import ReplyIconDark from "../../assets/reply-dark.svg";
+import ReplyIconLight from "../../assets/reply.svg";
 import { useChatStore, currentAccount } from "../../data/store/accountsStore";
 import { XmtpMessage } from "../../data/store/chatStore";
 import { isAttachmentMessage } from "../../utils/attachment/helpers";
@@ -93,6 +97,7 @@ function ChatMessage({ message, colorScheme }: Props) {
   const isAttachment = isAttachmentMessage(message.contentType);
   const isTransaction = isTransactionMessage(message.contentType);
   const reactions = getMessageReactions(message);
+  const ReplyIcon = colorScheme === "dark" ? ReplyIconDark : ReplyIconLight;
 
   // maybe using useChatStore inside ChatMessage
   // leads to bad perf? Let's be cautious
@@ -130,26 +135,59 @@ function ChatMessage({ message, colorScheme }: Props) {
   const swipeableRef = useRef<Swipeable | null>(null);
 
   return (
-    <Swipeable
-      overshootLeft
-      onSwipeableWillClose={() => {
-        const translation = swipeableRef.current?.state.rowTranslation;
-        if (translation && (translation as any)._value > 70) {
-          converseEventEmitter.emit("triggerReplyToMessage", message);
-        }
-      }}
-      ref={swipeableRef}
+    <View
+      style={[
+        styles.messageRow,
+        {
+          marginBottom: !message.hasNextMessageInSeries ? 8 : 2,
+        },
+      ]}
     >
-      <View
-        style={[
-          styles.messageRow,
-          { marginBottom: !message.hasNextMessageInSeries ? 8 : 2 },
-        ]}
+      {message.dateChange && (
+        <Text style={styles.date}>{getRelativeDate(message.sent)}</Text>
+      )}
+      <Swipeable
+        overshootLeft
+        overshootFriction={1.5}
+        containerStyle={styles.messageSwipeable}
+        childrenContainerStyle={styles.messageSwipeableChildren}
+        renderLeftActions={(
+          progressAnimatedValue: Animated.AnimatedInterpolation<string | number>
+        ) => {
+          return (
+            <Animated.View
+              style={{
+                opacity: progressAnimatedValue.interpolate({
+                  inputRange: [0, 0.7, 1],
+                  outputRange: [0, 0, 1],
+                }),
+                height: "100%",
+                justifyContent: "center",
+                transform: [
+                  {
+                    translateX: progressAnimatedValue.interpolate({
+                      inputRange: [0, 0.8, 1],
+                      outputRange: [0, 0, 8],
+                      extrapolate: "clamp",
+                    }),
+                  },
+                ],
+              }}
+            >
+              <ReplyIcon />
+            </Animated.View>
+          );
+        }}
+        leftThreshold={10000} // Never trigger opening
+        onSwipeableWillClose={() => {
+          const translation = swipeableRef.current?.state.rowTranslation;
+          if (translation && (translation as any)._value > 70) {
+            Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+            converseEventEmitter.emit("triggerReplyToMessage", message);
+          }
+        }}
+        ref={swipeableRef}
       >
-        {message.dateChange && (
-          <Text style={styles.date}>{getRelativeDate(message.sent)}</Text>
-        )}
-
         <ChatMessageActions
           message={message}
           reactions={reactions}
@@ -248,9 +286,9 @@ function ChatMessage({ message, colorScheme }: Props) {
               />
             )}
         </ChatMessageActions>
-        <ChatMessageReactions message={message} reactions={reactions} />
-      </View>
-    </Swipeable>
+      </Swipeable>
+      <ChatMessageReactions message={message} reactions={reactions} />
+    </View>
   );
 }
 
@@ -320,8 +358,16 @@ const useStyles = () => {
     },
     messageRow: {
       flexDirection: "row",
-      paddingHorizontal: Platform.OS === "android" ? 10 : 20,
       flexWrap: "wrap",
+    },
+    messageSwipeable: {
+      width: "100%",
+      flexDirection: "row",
+      paddingHorizontal: Platform.OS === "android" ? 10 : 20,
+    },
+    messageSwipeableChildren: {
+      width: "100%",
+      flexDirection: "row",
     },
     date: {
       flexBasis: "100%",

@@ -107,6 +107,8 @@ PODS:
     - ExpoModulesCore
   - ExpoFileSystem (16.0.6):
     - ExpoModulesCore
+  - ExpoHaptics (12.8.1):
+    - ExpoModulesCore
   - ExpoHead (3.4.7):
     - ExpoModulesCore
   - ExpoImage (1.10.6):
@@ -1359,6 +1361,7 @@ DEPENDENCIES:
   - ExpoDevice (from `../node_modules/expo-device/ios`)
   - ExpoDocumentPicker (from `../node_modules/expo-document-picker/ios`)
   - ExpoFileSystem (from `../node_modules/expo-file-system/ios`)
+  - ExpoHaptics (from `../node_modules/expo-haptics/ios`)
   - ExpoHead (from `../node_modules/expo-router/ios`)
   - ExpoImage (from `../node_modules/expo-image/ios`)
   - ExpoImageManipulator (from `../node_modules/expo-image-manipulator/ios`)
@@ -1531,6 +1534,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/expo-document-picker/ios"
   ExpoFileSystem:
     :path: "../node_modules/expo-file-system/ios"
+  ExpoHaptics:
+    :path: "../node_modules/expo-haptics/ios"
   ExpoHead:
     :path: "../node_modules/expo-router/ios"
   ExpoImage:
@@ -1725,6 +1730,7 @@ SPEC CHECKSUMS:
   ExpoDevice: d204395e17fffdcefa7470bdef33b07719ac41b1
   ExpoDocumentPicker: 70254802886e29a45d4ad25486e64b6fc9c8f0cc
   ExpoFileSystem: a9273932e69a9a1e1a8d01b6ba895bb8294bbea2
+  ExpoHaptics: 28a771b630353cd6e8dcf1b1e3e693e38ad7c3c3
   ExpoHead: 5aa4ef0a18a83f323e21cf83ff29b94d3c53e050
   ExpoImage: 8cf2d51de3d03b7e984e9b0ba8f19c0c22057001
   ExpoImageManipulator: c1d7cb865eacd620a35659f3da34c70531f10b59
