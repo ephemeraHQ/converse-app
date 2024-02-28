@@ -1,4 +1,5 @@
-import { ReactNode, useMemo } from "react";
+import * as Haptics from "expo-haptics";
+import { ReactNode, useMemo, useRef } from "react";
 import {
   View,
   useColorScheme,
@@ -7,9 +8,14 @@ import {
   Platform,
   ColorSchemeName,
   DimensionValue,
+  TouchableOpacity,
+  Animated,
 } from "react-native";
+import { Swipeable } from "react-native-gesture-handler";
 
 import MessageTail from "../../assets/message-tail.svg";
+import ReplyIconDark from "../../assets/reply-dark.svg";
+import ReplyIconLight from "../../assets/reply.svg";
 import { useChatStore, currentAccount } from "../../data/store/accountsStore";
 import { XmtpMessage } from "../../data/store/chatStore";
 import { isAttachmentMessage } from "../../utils/attachment/helpers";
@@ -23,6 +29,7 @@ import {
 } from "../../utils/colors";
 import { getRelativeDate } from "../../utils/date";
 import { isDesktop } from "../../utils/device";
+import { converseEventEmitter } from "../../utils/events";
 import { LimitedMap } from "../../utils/objects";
 import { getMessageReactions } from "../../utils/reactions";
 import { getReadableProfile } from "../../utils/str";
@@ -90,6 +97,7 @@ function ChatMessage({ message, colorScheme }: Props) {
   const isAttachment = isAttachmentMessage(message.contentType);
   const isTransaction = isTransactionMessage(message.contentType);
   const reactions = getMessageReactions(message);
+  const ReplyIcon = colorScheme === "dark" ? ReplyIconDark : ReplyIconLight;
 
   // maybe using useChatStore inside ChatMessage
   // leads to bad perf? Let's be cautious
@@ -103,6 +111,7 @@ function ChatMessage({ message, colorScheme }: Props) {
 
   const replyingToProfileName = useMemo(() => {
     if (!replyingToMessage?.senderAddress) return "";
+    if (replyingToMessage.senderAddress === currentAccount()) return "You";
     return getReadableProfile(
       currentAccount(),
       replyingToMessage.senderAddress
@@ -123,107 +132,161 @@ function ChatMessage({ message, colorScheme }: Props) {
     }
   }
 
+  const swipeableRef = useRef<Swipeable | null>(null);
+
   return (
     <View
       style={[
         styles.messageRow,
-        { marginBottom: !message.hasNextMessageInSeries ? 8 : 2 },
+        {
+          marginBottom: !message.hasNextMessageInSeries ? 8 : 2,
+        },
       ]}
     >
       {message.dateChange && (
         <Text style={styles.date}>{getRelativeDate(message.sent)}</Text>
       )}
-
-      <ChatMessageActions
-        message={message}
-        reactions={reactions}
-        style={[
-          styles.messageBubble,
-          message.fromMe ? styles.messageBubbleMe : undefined,
-          Platform.select({
-            default: {},
-            android: {
-              // Messages not from me
-              borderBottomLeftRadius:
-                !message.fromMe && message.hasNextMessageInSeries ? 2 : 18,
-              borderTopLeftRadius:
-                !message.fromMe && message.hasPreviousMessageInSeries ? 2 : 18,
-              // Messages from me
-              borderBottomRightRadius:
-                message.fromMe && message.hasNextMessageInSeries ? 2 : 18,
-              borderTopRightRadius:
-                message.fromMe && message.hasPreviousMessageInSeries ? 2 : 18,
-            },
-          }),
-          {
-            maxWidth: messageMaxWidth,
-          },
-        ]}
+      <Swipeable
+        overshootLeft
+        overshootFriction={1.5}
+        containerStyle={styles.messageSwipeable}
+        childrenContainerStyle={styles.messageSwipeableChildren}
+        renderLeftActions={(
+          progressAnimatedValue: Animated.AnimatedInterpolation<string | number>
+        ) => {
+          return (
+            <Animated.View
+              style={{
+                opacity: progressAnimatedValue.interpolate({
+                  inputRange: [0, 0.7, 1],
+                  outputRange: [0, 0, 1],
+                }),
+                height: "100%",
+                justifyContent: "center",
+                transform: [
+                  {
+                    translateX: progressAnimatedValue.interpolate({
+                      inputRange: [0, 0.8, 1],
+                      outputRange: [0, 0, 8],
+                      extrapolate: "clamp",
+                    }),
+                  },
+                ],
+              }}
+            >
+              <ReplyIcon />
+            </Animated.View>
+          );
+        }}
+        leftThreshold={10000} // Never trigger opening
+        onSwipeableWillClose={() => {
+          const translation = swipeableRef.current?.state.rowTranslation;
+          if (translation && (translation as any)._value > 70) {
+            Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+            converseEventEmitter.emit("triggerReplyToMessage", message);
+          }
+        }}
+        ref={swipeableRef}
       >
-        {isContentType("text", message.contentType) && (
-          <ChatMessageFramePreviews message={message} />
-        )}
-        {replyingToMessage ? (
-          <View style={styles.messageWithInnerBubble}>
+        <ChatMessageActions
+          message={message}
+          reactions={reactions}
+          style={[
+            styles.messageBubble,
+            message.fromMe ? styles.messageBubbleMe : undefined,
+            Platform.select({
+              default: {},
+              android: {
+                // Messages not from me
+                borderBottomLeftRadius:
+                  !message.fromMe && message.hasNextMessageInSeries ? 2 : 18,
+                borderTopLeftRadius:
+                  !message.fromMe && message.hasPreviousMessageInSeries
+                    ? 2
+                    : 18,
+                // Messages from me
+                borderBottomRightRadius:
+                  message.fromMe && message.hasNextMessageInSeries ? 2 : 18,
+                borderTopRightRadius:
+                  message.fromMe && message.hasPreviousMessageInSeries ? 2 : 18,
+              },
+            }),
+            {
+              maxWidth: messageMaxWidth,
+            },
+          ]}
+        >
+          {isContentType("text", message.contentType) && (
+            <ChatMessageFramePreviews message={message} />
+          )}
+          {replyingToMessage ? (
+            <View style={styles.messageWithInnerBubble}>
+              <TouchableOpacity
+                style={[
+                  styles.innerBubble,
+                  message.fromMe ? styles.innerBubbleMe : undefined,
+                ]}
+                onPress={() => {
+                  converseEventEmitter.emit("scrollChatToMessage", {
+                    messageId: replyingToMessage.id,
+                    animated: true,
+                  });
+                }}
+              >
+                <Text
+                  style={[
+                    styles.messageText,
+                    styles.replyToUsername,
+                    message.fromMe ? styles.messageTextMe : undefined,
+                  ]}
+                >
+                  {replyingToProfileName}
+                </Text>
+                <ChatMessageReplyBubble
+                  replyingToMessage={replyingToMessage}
+                  fromMe={message.fromMe}
+                />
+              </TouchableOpacity>
+              <View
+                style={
+                  isContentType("text", message.contentType)
+                    ? styles.messageTextReply
+                    : undefined
+                }
+              >
+                {messageContent}
+              </View>
+            </View>
+          ) : (
             <View
               style={[
-                styles.innerBubble,
-                message.fromMe ? styles.innerBubbleMe : undefined,
+                isAttachment || isTransaction
+                  ? styles.messageWithInnerBubble
+                  : styles.messageBubbleText,
               ]}
-            >
-              <Text
-                style={[
-                  styles.messageText,
-                  styles.replyToUsername,
-                  message.fromMe ? styles.messageTextMe : undefined,
-                ]}
-              >
-                {replyingToProfileName}
-              </Text>
-              <ChatMessageReplyBubble
-                replyingToMessage={replyingToMessage}
-                fromMe={message.fromMe}
-              />
-            </View>
-            <View
-              style={
-                isContentType("text", message.contentType)
-                  ? styles.messageTextReply
-                  : undefined
-              }
             >
               {messageContent}
             </View>
-          </View>
-        ) : (
-          <View
-            style={[
-              isAttachment || isTransaction
-                ? styles.messageWithInnerBubble
-                : styles.messageBubbleText,
-            ]}
-          >
-            {messageContent}
-          </View>
-        )}
-
-        <View style={styles.metadataContainer}>{metadata}</View>
-
-        {!message.hasNextMessageInSeries &&
-          (Platform.OS === "ios" || Platform.OS === "web") && (
-            <MessageTail
-              fill={
-                message.fromMe
-                  ? myMessageBubbleColor(colorScheme)
-                  : messageBubbleColor(colorScheme)
-              }
-              style={[
-                styles.messageTail,
-                message.fromMe ? styles.messageTailMe : undefined,
-              ]}
-            />
           )}
-      </ChatMessageActions>
+
+          <View style={styles.metadataContainer}>{metadata}</View>
+
+          {!message.hasNextMessageInSeries &&
+            (Platform.OS === "ios" || Platform.OS === "web") && (
+              <MessageTail
+                fill={
+                  message.fromMe
+                    ? myMessageBubbleColor(colorScheme)
+                    : messageBubbleColor(colorScheme)
+                }
+                style={[
+                  styles.messageTail,
+                  message.fromMe ? styles.messageTailMe : undefined,
+                ]}
+              />
+            )}
+        </ChatMessageActions>
+      </Swipeable>
       <ChatMessageReactions message={message} reactions={reactions} />
     </View>
   );
@@ -295,8 +358,16 @@ const useStyles = () => {
     },
     messageRow: {
       flexDirection: "row",
-      paddingHorizontal: Platform.OS === "android" ? 10 : 20,
       flexWrap: "wrap",
+    },
+    messageSwipeable: {
+      width: "100%",
+      flexDirection: "row",
+      paddingHorizontal: Platform.OS === "android" ? 10 : 20,
+    },
+    messageSwipeableChildren: {
+      width: "100%",
+      flexDirection: "row",
     },
     date: {
       flexBasis: "100%",

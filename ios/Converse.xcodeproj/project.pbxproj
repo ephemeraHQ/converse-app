@@ -19,11 +19,11 @@
 		4C2440DB2A9C8E30004F31A3 /* MMKV.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C2440DA2A9C8E30004F31A3 /* MMKV.swift */; };
 		4C2440DD2A9C9006004F31A3 /* SQLite.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C2440DC2A9C9006004F31A3 /* SQLite.swift */; };
 		4C31F4EE29AF887B0032D062 /* Alamofire in Frameworks */ = {isa = PBXBuildFile; productRef = 4C31F4ED29AF887B0032D062 /* Alamofire */; };
+		4C3A862B2B8F669C00D7E42D /* ConverseNotificationExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 4C65044A295C7C1F00C5A40F /* ConverseNotificationExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		4C65044D295C7C1F00C5A40F /* NotificationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C65044C295C7C1F00C5A40F /* NotificationService.swift */; };
 		4C8BA28B298502DC007F0B76 /* SharedDefaults.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C8BA28A298502DC007F0B76 /* SharedDefaults.swift */; };
 		4CBD67182A9CF7C30010C648 /* Sentry.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CBD67172A9CF7C30010C648 /* Sentry.swift */; };
 		4CBD671C2A9D08050010C648 /* Utils.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CBD671B2A9D08050010C648 /* Utils.swift */; };
-		4CC856EF296C174D0011B072 /* ConverseNotificationExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 4C65044A295C7C1F00C5A40F /* ConverseNotificationExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		9D084ACEE9ED9C336AB61C71 /* Pods_Converse.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3B422A813DCADE7EA7520771 /* Pods_Converse.framework */; };
 		B18059E884C0ABDD17F3DC3D /* ExpoModulesProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAC715A2D49A985799AEE119 /* ExpoModulesProvider.swift */; };
 		B7969B4A79FE4F9F8C52019D /* noop-file.swift in Sources */ = {isa = PBXBuildFile; fileRef = 68FED7E170C7437EB719C8C6 /* noop-file.swift */; };
@@ -33,7 +33,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
-		4C65044F295C7C1F00C5A40F /* PBXContainerItemProxy */ = {
+		4C3A86292B8F669600D7E42D /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 83CBB9F71A601CBA00E9B192 /* Project object */;
 			proxyType = 1;
@@ -45,14 +45,14 @@
 /* Begin PBXCopyFilesBuildPhase section */
 		4C650452295C7C1F00C5A40F /* Embed Foundation Extensions */ = {
 			isa = PBXCopyFilesBuildPhase;
-			buildActionMask = 12;
+			buildActionMask = 8;
 			dstPath = "";
 			dstSubfolderSpec = 13;
 			files = (
-				4CC856EF296C174D0011B072 /* ConverseNotificationExtension.appex in Embed Foundation Extensions */,
+				4C3A862B2B8F669C00D7E42D /* ConverseNotificationExtension.appex in Embed Foundation Extensions */,
 			);
 			name = "Embed Foundation Extensions";
-			runOnlyForDeploymentPostprocessing = 0;
+			runOnlyForDeploymentPostprocessing = 1;
 		};
 /* End PBXCopyFilesBuildPhase section */
 
@@ -255,7 +255,7 @@
 			buildRules = (
 			);
 			dependencies = (
-				4C650450295C7C1F00C5A40F /* PBXTargetDependency */,
+				4C3A862A2B8F669600D7E42D /* PBXTargetDependency */,
 			);
 			name = Converse;
 			productName = Converse;
@@ -311,7 +311,7 @@
 			);
 			mainGroup = 83CBB9F61A601CBA00E9B192;
 			packageReferences = (
-				4C31F4EC29AF887B0032D062 /* XCRemoteSwiftPackageReference "Alamofire.git" */,
+				4C31F4EC29AF887B0032D062 /* XCRemoteSwiftPackageReference "Alamofire" */,
 			);
 			productRefGroup = 83CBBA001A601CBA00E9B192 /* Products */;
 			projectDirPath = "";
@@ -542,10 +542,10 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
-		4C650450295C7C1F00C5A40F /* PBXTargetDependency */ = {
+		4C3A862A2B8F669600D7E42D /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = 4C650449295C7C1F00C5A40F /* ConverseNotificationExtension */;
-			targetProxy = 4C65044F295C7C1F00C5A40F /* PBXContainerItemProxy */;
+			targetProxy = 4C3A86292B8F669600D7E42D /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -979,7 +979,7 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
-		4C31F4EC29AF887B0032D062 /* XCRemoteSwiftPackageReference "Alamofire.git" */ = {
+		4C31F4EC29AF887B0032D062 /* XCRemoteSwiftPackageReference "Alamofire" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/Alamofire/Alamofire.git";
 			requirement = {
@@ -992,7 +992,7 @@
 /* Begin XCSwiftPackageProductDependency section */
 		4C31F4ED29AF887B0032D062 /* Alamofire */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 4C31F4EC29AF887B0032D062 /* XCRemoteSwiftPackageReference "Alamofire.git" */;
+			package = 4C31F4EC29AF887B0032D062 /* XCRemoteSwiftPackageReference "Alamofire" */;
 			productName = Alamofire;
 		};
 /* End XCSwiftPackageProductDependency section */

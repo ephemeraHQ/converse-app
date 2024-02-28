@@ -1,7 +1,7 @@
 import { Platform, useColorScheme } from "react-native";
 
 import { useCurrentAccount } from "../../data/store/accountsStore";
-import { textSecondaryColor } from "../../utils/colors";
+import { textPrimaryColor, textSecondaryColor } from "../../utils/colors";
 import ProfileScreen from "../Profile";
 import { NativeStack, navigationAnimation } from "./Navigation";
 
@@ -29,7 +29,9 @@ export default function ProfileNav() {
             : undefined,
         animation: navigationAnimation,
         headerTitleStyle: Platform.select({
-          default: {},
+          default: {
+            color: textPrimaryColor(colorScheme),
+          },
           web: { left: -20 } as any,
         }),
       })}

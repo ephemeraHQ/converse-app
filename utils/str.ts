@@ -76,7 +76,7 @@ export const getReadableProfile = (
     (showFullUsername ? primaryUserName : shortDomain(primaryUserName)) ||
     primaryENS ||
     primaryUns ||
-    shortAddress(account)
+    shortAddress(address)
   );
 };
 
