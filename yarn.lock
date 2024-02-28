@@ -9859,9 +9859,9 @@
     undici "^5.8.1"
 
 "@xmtp/proto@^3.25.0":
-  version "3.42.0"
-  resolved "https://registry.yarnpkg.com/@xmtp/proto/-/proto-3.42.0.tgz#5b42a78d3c447f768e535bccc49a32b6f0bf9435"
-  integrity sha512-4u+RJJJm0XLv0LyXl77uJRx3uMmDydLgiByVMNQxEyNYbTHTXP+wgdkCEvfcE1oLs2vLtENUTvkoNhCVHx5ILA==
+  version "3.44.0"
+  resolved "https://registry.yarnpkg.com/@xmtp/proto/-/proto-3.44.0.tgz#6750f47869de508c2f3db596bb952e84062988bd"
+  integrity sha512-5M23JsxONb/qluZF6QMjoXHT67xDRR7pWwHTd1tfw59jS+jXTxm/+v8/UeSOoK47PBSJhDD5I90bAeA5NrLRig==
   dependencies:
     long "^5.2.0"
     protobufjs "^7.0.0"
@@ -9888,10 +9888,10 @@
     rxjs "^7.8.0"
     undici "^5.8.1"
 
-"@xmtp/react-native-sdk@^1.28.0-beta.4":
-  version "1.28.0-beta.4"
-  resolved "https://registry.yarnpkg.com/@xmtp/react-native-sdk/-/react-native-sdk-1.28.0-beta.4.tgz#cd998a859558311e9962e221b8ca42c64f0c2b7f"
-  integrity sha512-wRKjB6G6NNjquTGa/qU7qcXpKYky2DnFyqAGEqVqxuOysagz+8Mqi3Dl4v5wZ44KUvufDfH5n8LL95FmqUCuTA==
+"@xmtp/react-native-sdk@^1.28.0-beta.8":
+  version "1.28.0-beta.8"
+  resolved "https://registry.yarnpkg.com/@xmtp/react-native-sdk/-/react-native-sdk-1.28.0-beta.8.tgz#69b2e0213522ca19fd6d136801dde41496d114bc"
+  integrity sha512-dHPwYOgSZXEWV1IYhzdzvfx1ikKE5eYbAK5c4szlEsKbqFs0rw2LXPhUlvLHS59z25Iuwp6iHWBrR59+Cnf62Q==
   dependencies:
     "@ethersproject/bytes" "^5.7.0"
     "@msgpack/msgpack" "^3.0.0-beta2"

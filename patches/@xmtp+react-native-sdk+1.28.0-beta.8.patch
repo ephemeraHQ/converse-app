@@ -1,26 +1,24 @@
 diff --git a/node_modules/@xmtp/react-native-sdk/android/build.gradle b/node_modules/@xmtp/react-native-sdk/android/build.gradle
-index a8d725a..5d3be77 100644
+index d029f95..6ba139d 100644
 --- a/node_modules/@xmtp/react-native-sdk/android/build.gradle
 +++ b/node_modules/@xmtp/react-native-sdk/android/build.gradle
-@@ -85,6 +85,13 @@ android {
+@@ -85,6 +85,11 @@ android {
      targetSdkVersion safeExtGet("targetSdkVersion", 31)
      versionCode 1
      versionName "0.1.0"
-+
 +    configurations.all {
 +      resolutionStrategy.dependencySubstitution {
 +        substitute(module("org.xmtp:android")).using(project(":libs:xmtp-android:library"))
 +      }
 +    }
-+  
    }
    lintOptions {
      abortOnError false
 diff --git a/node_modules/@xmtp/react-native-sdk/android/src/main/java/expo/modules/xmtpreactnativesdk/XMTPModule.kt b/node_modules/@xmtp/react-native-sdk/android/src/main/java/expo/modules/xmtpreactnativesdk/XMTPModule.kt
-index d3b97ef..62e4dcd 100644
+index 4cd2836..efc4d4b 100644
 --- a/node_modules/@xmtp/react-native-sdk/android/src/main/java/expo/modules/xmtpreactnativesdk/XMTPModule.kt
 +++ b/node_modules/@xmtp/react-native-sdk/android/src/main/java/expo/modules/xmtpreactnativesdk/XMTPModule.kt
-@@ -620,7 +620,13 @@ class XMTPModule : Module() {
+@@ -653,7 +653,13 @@ class XMTPModule : Module() {
              val preparedData = contentResolver.openInputStream(preparedFileUrl)!!
                  .use { it.buffered().readBytes() }
              val prepared = PreparedMessage.fromSerializedData(preparedData)
@@ -112,10 +110,10 @@ index e9b5ed3..6987a1d 100644
  			"contentTypeId": model.encodedContent.type.description,
  			"content": try ContentJson.fromEncoded(model.encodedContent, client: client).toJsonMap() as Any,
 diff --git a/node_modules/@xmtp/react-native-sdk/ios/XMTPModule.swift b/node_modules/@xmtp/react-native-sdk/ios/XMTPModule.swift
-index b89a19a..9087e6f 100644
+index 3fdbfc0..9f5e9ae 100644
 --- a/node_modules/@xmtp/react-native-sdk/ios/XMTPModule.swift
 +++ b/node_modules/@xmtp/react-native-sdk/ios/XMTPModule.swift
-@@ -558,7 +558,13 @@ public class XMTPModule: Module {
+@@ -577,7 +577,13 @@ public class XMTPModule: Module {
  			guard let prepared = try? PreparedMessage.fromSerializedData(preparedData) else {
  				throw Error.badPreparation("unable to deserialized \(local.preparedFileUri)")
  			}
