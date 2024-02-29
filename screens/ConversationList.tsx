@@ -25,7 +25,6 @@ import {
   useSettingsStore,
   useProfilesStore,
   currentAccount,
-  useCurrentAccount,
 } from "../data/store/accountsStore";
 import { XmtpConversation } from "../data/store/chatStore";
 import { useSelect } from "../data/store/storeHelpers";
@@ -41,6 +40,7 @@ import {
 import { converseEventEmitter } from "../utils/events";
 import { useHeaderSearchBar } from "./Navigation/ConversationListNav";
 import { NavigationParamList } from "./Navigation/Navigation";
+import { useIsSplitScreen } from "./Navigation/navHelpers";
 
 type ConversationWithLastMessagePreview = XmtpConversation & {
   lastMessagePreview?: LastMessagePreview;
@@ -60,12 +60,16 @@ function ConversationList({ navigation, route, searchBarRef }: Props) {
     searchBarFocused,
     initialLoadDoneOnce,
     sortedConversationsWithPreview,
+    openedConversationTopic,
+    setSearchQuery,
   } = useChatStore(
     useSelect([
       "initialLoadDoneOnce",
       "searchQuery",
+      "setSearchQuery",
       "searchBarFocused",
       "sortedConversationsWithPreview",
+      "openedConversationTopic",
     ])
   );
 
@@ -73,11 +77,15 @@ function ConversationList({ navigation, route, searchBarRef }: Props) {
     useSelect(["peersStatus", "ephemeralAccount"])
   );
   const profiles = useProfilesStore((s) => s.profiles);
-  const [flatListItems, setFlatListItems] = useState<FlatListItem[]>([]);
+  const [flatListItems, setFlatListItems] = useState<{
+    items: FlatListItem[];
+    searchQuery: string;
+  }>({ items: [], searchQuery: "" });
 
   // Display logic
-  const showInitialLoad = !initialLoadDoneOnce && flatListItems.length <= 1;
-  const showNoResult = flatListItems.length === 0 && !!searchQuery;
+  const showInitialLoad =
+    !initialLoadDoneOnce && flatListItems.items.length <= 1;
+  const showNoResult = flatListItems.items.length === 0 && !!searchQuery;
 
   // Welcome screen
   const showWelcome =
@@ -85,7 +93,7 @@ function ConversationList({ navigation, route, searchBarRef }: Props) {
     !searchBarFocused &&
     sortedConversationsWithPreview.conversationsInbox.length === 0;
 
-  const account = useCurrentAccount() as string;
+  const isSplit = useIsSplitScreen();
 
   useEffect(() => {
     if (!initialLoadDoneOnce) {
@@ -100,7 +108,7 @@ function ConversationList({ navigation, route, searchBarRef }: Props) {
       sortedConversationsWithPreview.conversationsInbox,
       profiles
     );
-    setFlatListItems(listItems);
+    setFlatListItems({ items: listItems, searchQuery });
   }, [
     searchQuery,
     sortedConversationsWithPreview.conversationsInbox,
@@ -113,6 +121,15 @@ function ConversationList({ navigation, route, searchBarRef }: Props) {
     route,
     searchBarRef,
   });
+
+  useEffect(() => {
+    // In split screen, when selecting a convo with search active,
+    // let's clear the search
+    if (isSplit && openedConversationTopic) {
+      setSearchQuery("");
+      (searchBarRef.current as any)?.clearText?.();
+    }
+  }, [isSplit, openedConversationTopic, searchBarRef, setSearchQuery]);
 
   const ListHeaderComponents: React.ReactElement[] = [];
   const showSearchTitleHeader =
@@ -166,7 +183,8 @@ function ConversationList({ navigation, route, searchBarRef }: Props) {
           converseEventEmitter.emit("conversationList-scroll");
           searchBarRef.current?.blur();
         }}
-        items={showInitialLoad || showWelcome ? [] : flatListItems}
+        itemsForSearchQuery={flatListItems.searchQuery}
+        items={showInitialLoad || showWelcome ? [] : flatListItems.items}
         ListHeaderComponent={
           ListHeaderComponents.length > 0 ? (
             <>{ListHeaderComponents}</>
