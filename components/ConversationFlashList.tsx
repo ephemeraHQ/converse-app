@@ -1,6 +1,6 @@
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { FlashList } from "@shopify/flash-list";
-import { useCallback } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import { Platform, View, useColorScheme, StyleSheet } from "react-native";
 
 import {
@@ -10,6 +10,7 @@ import {
 } from "../data/store/accountsStore";
 import { useSelect } from "../data/store/storeHelpers";
 import { NavigationParamList } from "../screens/Navigation/Navigation";
+import { useIsSplitScreen } from "../screens/Navigation/navHelpers";
 import { backgroundColor } from "../utils/colors";
 import {
   ConversationFlatListItem,
@@ -21,6 +22,7 @@ import ConversationListItem from "./ConversationListItem";
 type Props = {
   onScroll?: () => void;
   items: ConversationFlatListItem[];
+  itemsForSearchQuery?: string;
   ListHeaderComponent?: React.ReactElement | null;
   ListFooterComponent?: React.ReactElement | null;
 } & NativeStackScreenProps<NavigationParamList, any>;
@@ -30,6 +32,7 @@ export default function ConversationFlashList({
   navigation,
   route,
   items,
+  itemsForSearchQuery,
   ListHeaderComponent,
   ListFooterComponent,
 }: Props) {
@@ -45,6 +48,35 @@ export default function ConversationFlashList({
     );
   const userAddress = useCurrentAccount() as string;
   const peersStatus = useSettingsStore((s) => s.peersStatus);
+  const isSplitScreen = useIsSplitScreen();
+
+  const listRef = useRef<FlashList<any> | undefined>();
+
+  const previousSearchQuery = useRef(itemsForSearchQuery);
+
+  useEffect(() => {
+    // In Split screen, when we click on a convo with search active
+    // the search clears and the selected convo may be out of screen
+    // so we scroll back to it
+    if (
+      isSplitScreen &&
+      previousSearchQuery.current &&
+      !itemsForSearchQuery &&
+      openedConversationTopic
+    ) {
+      const topicIndex = items.findIndex(
+        (c) => c.topic === openedConversationTopic
+      );
+      if (topicIndex === -1) return;
+      setTimeout(() => {
+        listRef.current?.scrollToIndex({
+          index: topicIndex,
+          viewPosition: 0.5,
+        });
+      }, 10);
+    }
+    previousSearchQuery.current = itemsForSearchQuery;
+  }, [isSplitScreen, items, openedConversationTopic, itemsForSearchQuery]);
 
   const keyExtractor = useCallback((item: ConversationFlatListItem) => {
     return item.topic;
@@ -116,6 +148,11 @@ export default function ConversationFlashList({
             initialLoadDoneOnce,
             lastUpdateAt,
           ]}
+          ref={(r) => {
+            if (r) {
+              listRef.current = r;
+            }
+          }}
           renderItem={renderItem}
           keyExtractor={keyExtractor}
           estimatedItemSize={Platform.OS === "ios" ? 77 : 88}
