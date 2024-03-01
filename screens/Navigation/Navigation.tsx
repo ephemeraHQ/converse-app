@@ -24,6 +24,7 @@ import ProfileNav, {
   ProfileNavParams,
   ProfileScreenConfig,
 } from "./ProfileNav";
+import ShareFrameNav, { ShareFrameNavParams } from "./ShareFrameNav";
 import ShareProfileNav, { ShareProfileScreenConfig } from "./ShareProfileNav";
 import TopUpNav from "./TopUpNav";
 import WebviewPreviewNav, {
@@ -46,6 +47,7 @@ export type NavigationParamList = {
   EnableTransactions: undefined;
   ConverseMatchMaker: undefined;
   ShareProfile: undefined;
+  ShareFrame: ShareFrameNavParams;
   TopUp: undefined;
   Profile: ProfileNavParams;
   WebviewPreview: WebviewPreviewNavParams;
@@ -127,6 +129,7 @@ export default function Navigation() {
           {NewConversationNav()}
           {ConverseMatchMakerNav()}
           {ShareProfileNav()}
+          {ShareFrameNav()}
           {WebviewPreviewNav()}
           {ProfileNav()}
           {TopUpNav()}

@@ -26,6 +26,7 @@ import {
 
 type HeaderSearchBarProps = {
   searchBarRef: React.RefObject<any>;
+  autoHide: boolean;
 } & NativeStackScreenProps<NavigationParamList, "Chats">;
 
 // If we set the search bar in the NativeStack.Screen and navigate to it,
@@ -36,6 +37,7 @@ type HeaderSearchBarProps = {
 export const useHeaderSearchBar = ({
   navigation,
   searchBarRef,
+  autoHide,
 }: HeaderSearchBarProps) => {
   const { setSearchQuery, setSearchBarFocused } = useChatStore(
     useSelect(["setSearchQuery", "setSearchBarFocused"])
@@ -45,10 +47,10 @@ export const useHeaderSearchBar = ({
     navigation.setOptions({
       headerSearchBarOptions: {
         ref: searchBarRef as React.RefObject<SearchBarCommands>,
-        hideNavigationBar: !isDesktop,
+        hideNavigationBar: autoHide && !isDesktop,
         // set to hideWhenScrolling to `false` to  to make the search bar always visible
         // set it to `true` to avoid a visual glitch while loading conversations during initial load
-        hideWhenScrolling: !isDesktop,
+        hideWhenScrolling: autoHide && !isDesktop,
         autoFocus: false,
         placeholder: "Search",
         onChangeText: (
@@ -60,7 +62,7 @@ export const useHeaderSearchBar = ({
         onCancelButtonPress: () => setSearchBarFocused(false),
       },
     });
-  }, [navigation, searchBarRef, setSearchBarFocused, setSearchQuery]);
+  }, [autoHide, navigation, searchBarRef, setSearchBarFocused, setSearchQuery]);
 };
 
 export default function ConversationListNav() {

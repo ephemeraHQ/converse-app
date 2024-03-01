@@ -1,4 +1,4 @@
-import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import React, { memo, useCallback, useEffect, useRef, useState } from "react";
 import {
   ColorSchemeName,
@@ -42,7 +42,6 @@ import Picto from "./Picto/Picto";
 import { showActionSheetWithOptions } from "./StateHandlers/ActionSheetStateHandler";
 
 type ConversationListItemProps = {
-  navigation: NativeStackNavigationProp<NavigationParamList, "Chats">;
   colorScheme: ColorSchemeName;
   conversationTime: number | undefined;
   conversationTopic: string;
@@ -53,10 +52,14 @@ type ConversationListItemProps = {
   lastMessageStatus?: "delivered" | "error" | "seen" | "sending" | "sent";
   showUnread: boolean;
   conversationOpened: boolean;
-};
+} & NativeStackScreenProps<
+  NavigationParamList,
+  "Chats" | "ShareFrame" | "ChatsRequests"
+>;
 
 const ConversationListItem = memo(function ConversationListItem({
   navigation,
+  route,
   colorScheme,
   conversationTopic,
   conversationTime,
@@ -78,11 +81,21 @@ const ConversationListItem = memo(function ConversationListItem({
     setSelected(false);
   }, []);
 
-  const openConversation = useCallback(() => {
+  const openConversation = useCallback(async () => {
+    if (route.params?.frameURL) {
+      // Sharing a frame !!
+      navigation.goBack();
+      if (!isSplitScreen) {
+        await new Promise((r) =>
+          setTimeout(r, Platform.OS === "ios" ? 300 : 20)
+        );
+      }
+    }
     navigate("Conversation", {
       topic: conversationTopic,
+      message: route.params?.frameURL,
     });
-  }, [conversationTopic]);
+  }, [conversationTopic, isSplitScreen, navigation, route.params?.frameURL]);
 
   useEffect(() => {
     navigation.addListener("transitionEnd", resetSelected);
