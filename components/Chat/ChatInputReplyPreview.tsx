@@ -61,6 +61,7 @@ export default function ChatInputReplyPreview({
         onPress={() => {
           onDismiss();
         }}
+        hitSlop={{ left: 8, right: 8, top: 8, bottom: 8 }}
       >
         <Picto
           picto="xmark"

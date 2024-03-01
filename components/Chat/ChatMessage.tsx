@@ -148,6 +148,7 @@ function ChatMessage({ message, colorScheme }: Props) {
       )}
       <Swipeable
         overshootLeft
+        hitSlop={{ left: -20 }}
         overshootFriction={1.5}
         containerStyle={styles.messageSwipeable}
         childrenContainerStyle={styles.messageSwipeableChildren}
