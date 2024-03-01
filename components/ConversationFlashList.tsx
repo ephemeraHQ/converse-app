@@ -25,7 +25,10 @@ type Props = {
   itemsForSearchQuery?: string;
   ListHeaderComponent?: React.ReactElement | null;
   ListFooterComponent?: React.ReactElement | null;
-} & NativeStackScreenProps<NavigationParamList, any>;
+} & NativeStackScreenProps<
+  NavigationParamList,
+  "Chats" | "ShareFrame" | "ChatsRequests"
+>;
 
 export default function ConversationFlashList({
   onScroll,
@@ -89,6 +92,7 @@ export default function ConversationFlashList({
       return (
         <ConversationListItem
           navigation={navigation}
+          route={route}
           conversationPeerAddress={conversation.peerAddress}
           colorScheme={colorScheme}
           conversationTopic={conversation.topic}
@@ -127,6 +131,7 @@ export default function ConversationFlashList({
       navigation,
       openedConversationTopic,
       peersStatus,
+      route,
       userAddress,
     ]
   );

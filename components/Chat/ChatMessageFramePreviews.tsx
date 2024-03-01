@@ -7,6 +7,7 @@ import {
   Text,
   TextInput,
   TouchableHighlight,
+  TouchableOpacity,
   useColorScheme,
   View,
 } from "react-native";
@@ -14,6 +15,8 @@ import { TouchableWithoutFeedback } from "react-native-gesture-handler";
 import uuid from "react-native-uuid";
 
 import FrameLinkIcon from "../../assets/frameLink.svg";
+import ShareDark from "../../assets/share-dark.svg";
+import ShareLight from "../../assets/share.svg";
 import { useCurrentAccount } from "../../data/store/accountsStore";
 import { useFramesStore } from "../../data/store/framesStore";
 import {
@@ -38,6 +41,7 @@ import {
   getFramesClient,
   getMetadaTagsForMessage,
 } from "../../utils/frames";
+import { navigate } from "../../utils/navigation";
 import { MessageToDisplay } from "./ChatMessage";
 
 type Props = {
@@ -114,6 +118,7 @@ const ChatMessageFramePreview = ({
     "conversation",
     "setFrameTextInputFocused",
   ]);
+  const colorScheme = useColorScheme();
   const account = useCurrentAccount() as string;
   const [posting, setPosting] = useState(undefined as undefined | number);
   const [imageLoading, setImageLoading] = useState(false);
@@ -202,6 +207,10 @@ const ChatMessageFramePreview = ({
     ]
   );
 
+  const shareFrame = useCallback(() => {
+    navigate("ShareFrame", { frameURL: initialFrame.url });
+  }, [initialFrame.url]);
+
   const showBottom =
     (frame.type === "PREVIEW" && frame.extractedTags["og:title"]) ||
     buttons.length > 0 ||
@@ -209,8 +218,24 @@ const ChatMessageFramePreview = ({
   const frameImage = getFrameImage(frame);
   const frameImageAspectRatio = getFrameAspectRatio(frame);
 
+  const ShareIcon = colorScheme === "dark" ? ShareDark : ShareLight;
+
   return (
     <View style={styles.frameWrapper}>
+      {initialFrame.type === "XMTP_FRAME" && (
+        <View
+          style={[
+            styles.shareFrameWrapper,
+            message.fromMe
+              ? styles.shareFrameWrapperMe
+              : styles.shareFrameWrapperOther,
+          ]}
+        >
+          <TouchableOpacity style={styles.shareFrame} onPress={shareFrame}>
+            <ShareIcon />
+          </TouchableOpacity>
+        </View>
+      )}
       <View style={styles.frameContainer}>
         <View
           style={{
@@ -225,7 +250,6 @@ const ChatMessageFramePreview = ({
             frameImageAspectRatio={frameImageAspectRatio}
           />
         </View>
-
         {showBottom && (
           <FrameBottom
             message={message}
@@ -480,6 +504,26 @@ const useStyles = () => {
       paddingHorizontal: 4,
       paddingVertical: 8,
       fontSize: 15,
+    },
+    shareFrameWrapper: {
+      width: 36,
+      height: "100%",
+      position: "absolute",
+      top: 4,
+      alignItems: "center",
+      justifyContent: "center",
+    },
+    shareFrameWrapperMe: {
+      left: -46,
+    },
+    shareFrameWrapperOther: {
+      right: -46,
+    },
+    shareFrame: {
+      width: 36,
+      height: 36,
+      top: 0,
+      left: 0,
     },
   });
 };
