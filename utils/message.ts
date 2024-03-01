@@ -60,7 +60,6 @@ export const sendMessage = async ({
       });
     }
   }
-
   // Save to DB immediatly
   await saveMessages(currentAccount(), [
     {

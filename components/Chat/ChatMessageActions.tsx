@@ -116,6 +116,10 @@ export default function ChatMessageActions({
     setEmojiPickerShown(true);
   }, []);
 
+  const triggerReplyToMessage = useCallback(() => {
+    converseEventEmitter.emit("triggerReplyToMessage", message);
+  }, [message]);
+
   const canAddReaction =
     message.status !== "sending" && message.status !== "error";
 
@@ -124,6 +128,7 @@ export default function ChatMessageActions({
     if (canAddReaction) {
       methods["Add a reaction"] = showReactionModal;
     }
+    methods["Reply"] = triggerReplyToMessage;
     if (!isAttachment && !isTransaction) {
       methods["Copy message"] = message.content
         ? () => Clipboard.setString(message.content)
@@ -169,6 +174,7 @@ export default function ChatMessageActions({
     colorScheme,
     showReactionModal,
     showMessageReportActionSheet,
+    triggerReplyToMessage,
   ]);
 
   const doubleTapGesture = useMemo(

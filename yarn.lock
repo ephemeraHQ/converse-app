@@ -9820,6 +9820,14 @@
     "@xmtp/proto" "^3.29.0"
     "@xmtp/xmtp-js" "^11.1.2"
 
+"@xmtp/content-type-reply@^1.1.7":
+  version "1.1.7"
+  resolved "https://registry.yarnpkg.com/@xmtp/content-type-reply/-/content-type-reply-1.1.7.tgz#318f63bc303dd4e1248e7b700442141f0d82fea5"
+  integrity sha512-1qGIJhr5udHlIjLDDjwG/bcTeHRVs4Doe53VhhW+1Pyb7eV9NtI5WGvxz1tNQ0wdBWB3vVx5sc9o+zHn7wOxAQ==
+  dependencies:
+    "@xmtp/proto" "^3.29.0"
+    "@xmtp/xmtp-js" "^11.1.2"
+
 "@xmtp/content-type-transaction-reference@^1.0.1":
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/@xmtp/content-type-transaction-reference/-/content-type-transaction-reference-1.0.1.tgz#7adbf484ef37ce2c2e83a60337f2eba9504da14b"
@@ -14093,6 +14101,11 @@ expo-font@~11.10.2:
   integrity sha512-AE0Q0LiWiVosQ/jlKUPoWoob7p3GwYM2xmLoUkuopO9RYh9NL1hZKHiMKcWBZyDG8Gww1GtBQwh7ZREST8+jjQ==
   dependencies:
     fontfaceobserver "^2.1.0"
+
+expo-haptics@^12.8.1:
+  version "12.8.1"
+  resolved "https://registry.yarnpkg.com/expo-haptics/-/expo-haptics-12.8.1.tgz#42b996763be33d661bd33bbc3b3958c3f2734b9d"
+  integrity sha512-ntLsHkfle8K8w9MW8pZEw92ZN3sguaGUSSIxv30fPKNeQFu7Cq/h47Qv3tONv2MO3wU48N9FbKnant6XlfptpA==
 
 expo-image-loader@~4.6.0:
   version "4.6.0"
