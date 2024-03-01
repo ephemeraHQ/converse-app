@@ -1,5 +1,5 @@
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import {
   Platform,
   StyleSheet,
@@ -51,7 +51,7 @@ type Props = {
   searchBarRef:
     | React.MutableRefObject<SearchBarCommands | null>
     | React.MutableRefObject<TextInput | null>;
-} & NativeStackScreenProps<NavigationParamList, "Chats">;
+} & NativeStackScreenProps<NavigationParamList, "Chats" | "ShareFrame">;
 
 function ConversationList({ navigation, route, searchBarRef }: Props) {
   const styles = useStyles();
@@ -94,6 +94,7 @@ function ConversationList({ navigation, route, searchBarRef }: Props) {
     sortedConversationsWithPreview.conversationsInbox.length === 0;
 
   const isSplit = useIsSplitScreen();
+  const sharingMode = !!route.params?.frameURL;
 
   useEffect(() => {
     if (!initialLoadDoneOnce) {
@@ -120,28 +121,48 @@ function ConversationList({ navigation, route, searchBarRef }: Props) {
     navigation,
     route,
     searchBarRef,
+    autoHide: !sharingMode,
   });
+
+  const clearSearch = useCallback(() => {
+    setSearchQuery("");
+    (searchBarRef.current as any)?.clearText?.();
+  }, [searchBarRef, setSearchQuery]);
+
+  const leavingScreen = useCallback(() => {
+    if (sharingMode) {
+      clearSearch();
+    }
+  }, [clearSearch, sharingMode]);
+
+  useEffect(() => {
+    const unsubscribe = navigation.addListener("beforeRemove", leavingScreen);
+    return unsubscribe;
+  }, [navigation, leavingScreen]);
 
   useEffect(() => {
     // In split screen, when selecting a convo with search active,
     // let's clear the search
     if (isSplit && openedConversationTopic) {
-      setSearchQuery("");
-      (searchBarRef.current as any)?.clearText?.();
+      clearSearch();
     }
-  }, [isSplit, openedConversationTopic, searchBarRef, setSearchQuery]);
+  }, [clearSearch, isSplit, openedConversationTopic]);
 
   const ListHeaderComponents: React.ReactElement[] = [];
   const showSearchTitleHeader =
-    (Platform.OS === "ios" && searchBarFocused && !showNoResult) ||
-    (Platform.OS === "android" && searchBarFocused);
+    ((Platform.OS === "ios" && searchBarFocused && !showNoResult) ||
+      (Platform.OS === "android" && searchBarFocused)) &&
+    !sharingMode;
   if (showSearchTitleHeader) {
     ListHeaderComponents.push(
       <View key="search" style={styles.searchTitleContainer}>
         <Text style={styles.searchTitle}>Chats</Text>
       </View>
     );
-  } else if (sortedConversationsWithPreview.conversationsRequests.length > 0) {
+  } else if (
+    sortedConversationsWithPreview.conversationsRequests.length > 0 &&
+    !sharingMode
+  ) {
     ListHeaderComponents.push(
       <RequestsButton
         key="requests"
@@ -162,10 +183,15 @@ function ConversationList({ navigation, route, searchBarRef }: Props) {
       <Welcome ctaOnly={false} navigation={navigation} route={route} />
     );
   } else {
-    if (ephemeralAccount && !showNoResult && !showSearchTitleHeader) {
+    if (
+      ephemeralAccount &&
+      !showNoResult &&
+      !showSearchTitleHeader &&
+      !sharingMode
+    ) {
       ListHeaderComponents.push(<EphemeralAccountBanner key="ephemeral" />);
     }
-    if (!searchQuery) {
+    if (!searchQuery && !sharingMode) {
       ListFooterComponent = (
         <Welcome ctaOnly navigation={navigation} route={route} />
       );
@@ -193,7 +219,7 @@ function ConversationList({ navigation, route, searchBarRef }: Props) {
         ListFooterComponent={ListFooterComponent}
       />
       <Recommendations navigation={navigation} visibility="HIDDEN" />
-      {(Platform.OS === "android" || Platform.OS === "web") && (
+      {(Platform.OS === "android" || Platform.OS === "web") && !sharingMode && (
         <NewConversationButton navigation={navigation} route={route} />
       )}
     </>
