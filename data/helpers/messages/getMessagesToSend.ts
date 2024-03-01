@@ -9,6 +9,7 @@ export const getMessagesToSend = async (account: string) => {
       contentType: true,
       content: true,
       contentFallback: true,
+      referencedMessageId: true,
     },
     where: {
       status: "sending",
