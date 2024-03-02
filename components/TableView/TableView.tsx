@@ -41,6 +41,7 @@ export default function TableView({ title, items, style }: Props) {
       right={() => i.rightView}
       onPress={i.action}
       description={i.subtitle}
+      style={{ marginRight: -10 }}
     />
   ));
   return (

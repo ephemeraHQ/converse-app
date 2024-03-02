@@ -46,7 +46,7 @@ export default function ChatInputReplyPreview({
             ? "You"
             : readableProfile}
         </Text>
-        <Text style={[styles.replyToMessage]}>
+        <Text style={[styles.replyToMessage]} numberOfLines={1}>
           {isAttachmentMessage(replyingToMessage.contentType)
             ? `📎 Media from ${getRelativeDateTime(replyingToMessage.sent)}`
             : isTransactionMessage(replyingToMessage.contentType)

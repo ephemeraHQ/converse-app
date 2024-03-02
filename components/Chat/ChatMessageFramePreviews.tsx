@@ -1,8 +1,10 @@
 import { FrameActionInputs, OpenFramesProxy } from "@xmtp/frames-client";
+import * as Haptics from "expo-haptics";
 import { Image } from "expo-image";
 import * as Linking from "expo-linking";
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
+  Platform,
   StyleSheet,
   Text,
   TextInput,
@@ -15,7 +17,9 @@ import { TouchableWithoutFeedback } from "react-native-gesture-handler";
 import uuid from "react-native-uuid";
 
 import FrameLinkIcon from "../../assets/frameLink.svg";
+import ShareDarkAndroid from "../../assets/share-dark.android.svg";
 import ShareDark from "../../assets/share-dark.svg";
+import ShareLightAndroid from "../../assets/share.android.svg";
 import ShareLight from "../../assets/share.svg";
 import { useCurrentAccount } from "../../data/store/accountsStore";
 import { useFramesStore } from "../../data/store/framesStore";
@@ -218,7 +222,14 @@ const ChatMessageFramePreview = ({
   const frameImage = getFrameImage(frame);
   const frameImageAspectRatio = getFrameAspectRatio(frame);
 
-  const ShareIcon = colorScheme === "dark" ? ShareDark : ShareLight;
+  const ShareIcon =
+    Platform.OS === "ios"
+      ? colorScheme === "dark"
+        ? ShareDark
+        : ShareLight
+      : colorScheme === "dark"
+      ? ShareDarkAndroid
+      : ShareLightAndroid;
 
   return (
     <View style={styles.frameWrapper}>
@@ -328,7 +339,14 @@ const FrameBottom = ({
                 posting={posting}
                 button={button}
                 fullWidth={buttons.length === 1}
-                onPress={() => setTimeout(() => onButtonPress(button), 10)}
+                onPress={() => {
+                  // Immediate haptic feedback
+                  Haptics.impactAsync();
+                  // Timeout because we still use the JS SDK for frames
+                  // and the encryption of payload happens on main thread :(
+                  // @todo => use the RN SDK when it's available to sign
+                  setTimeout(() => onButtonPress(button), 10);
+                }}
               />
             ))}
         </>
