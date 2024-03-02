@@ -278,7 +278,7 @@ const getStyles = (colorScheme: ColorSchemeName) =>
     rowSeparator: Platform.select({
       android: {},
       default: {
-        height: 76.5,
+        height: 77,
         borderBottomWidth: 0.25,
         borderBottomColor: listItemSeparatorColor(colorScheme),
       },
@@ -286,9 +286,9 @@ const getStyles = (colorScheme: ColorSchemeName) =>
     rowSeparatorMargin: {
       position: "absolute",
       width: 30,
-      height: 0.5,
+      height: 2,
       backgroundColor: backgroundColor(colorScheme),
-      bottom: -0.25,
+      bottom: -1.5,
     },
     conversationListItem: Platform.select({
       default: {
