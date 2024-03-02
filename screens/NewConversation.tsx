@@ -1,5 +1,4 @@
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import { StatusBar } from "expo-status-bar";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
   Button,
@@ -308,7 +307,6 @@ export default function NewConversation({
         paddingHorizontal: Platform.OS === "web" ? 20 : undefined,
       }}
     >
-      {Platform.OS === "ios" && <StatusBar hidden={false} style="light" />}
       <SearchBar
         value={value}
         setValue={setValue}
