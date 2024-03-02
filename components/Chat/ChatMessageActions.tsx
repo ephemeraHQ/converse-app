@@ -4,22 +4,36 @@ import {
   Alert,
   ColorSchemeName,
   Platform,
-  StyleProp,
-  TouchableOpacity,
-  ViewStyle,
   useColorScheme,
+  StyleSheet,
+  DimensionValue,
 } from "react-native";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
+import {
+  Easing,
+  ReduceMotion,
+  useAnimatedStyle,
+  useSharedValue,
+  withTiming,
+} from "react-native-reanimated";
 
 import {
   currentAccount,
   useCurrentAccount,
   useSettingsStore,
 } from "../../data/store/accountsStore";
+import { ReanimatedTouchableOpacity } from "../../utils/animations";
 import { reportMessage } from "../../utils/api";
 import { isAttachmentMessage } from "../../utils/attachment/helpers";
-import { actionSheetColors } from "../../utils/colors";
+import {
+  actionSheetColors,
+  messageBubbleColor,
+  messageHighlightedBubbleColor,
+  myMessageBubbleColor,
+  myMessageHighlightedBubbleColor,
+} from "../../utils/colors";
 import { useConversationContext } from "../../utils/conversation";
+import { isDesktop } from "../../utils/device";
 import { converseEventEmitter } from "../../utils/events";
 import {
   MessageReaction,
@@ -39,14 +53,12 @@ type Props = {
   reactions: {
     [senderAddress: string]: MessageReaction | undefined;
   };
-  style: StyleProp<ViewStyle>;
 };
 
 export default function ChatMessageActions({
   children,
   message,
   reactions,
-  style,
 }: Props) {
   const { conversation } = useConversationContext(["conversation"]);
   const isAttachment = isAttachmentMessage(message.contentType);
@@ -54,6 +66,22 @@ export default function ChatMessageActions({
   const colorScheme = useColorScheme();
   const userAddress = useCurrentAccount() as string;
   const setPeersStatus = useSettingsStore((s) => s.setPeersStatus);
+  const styles = useStyles();
+
+  let messageMaxWidth: DimensionValue;
+  if (isDesktop) {
+    if (isAttachment) {
+      messageMaxWidth = 366;
+    } else {
+      messageMaxWidth = 588;
+    }
+  } else {
+    if (isAttachment) {
+      messageMaxWidth = "70%";
+    } else {
+      messageMaxWidth = "85%";
+    }
+  }
 
   const report = useCallback(async () => {
     reportMessage({
@@ -202,6 +230,66 @@ export default function ChatMessageActions({
     setSelectedEmojis(newSelectedEmojis);
   }, [reactions, userAddress]);
 
+  const initialBubbleBackgroundColor = message.fromMe
+    ? myMessageBubbleColor(colorScheme)
+    : messageBubbleColor(colorScheme);
+
+  const bubbleBackgroundColor = useSharedValue(initialBubbleBackgroundColor);
+
+  // reinit color on recycling
+  useEffect(() => {
+    if (bubbleBackgroundColor.value !== initialBubbleBackgroundColor) {
+      bubbleBackgroundColor.value = initialBubbleBackgroundColor;
+    }
+  }, [bubbleBackgroundColor, initialBubbleBackgroundColor]);
+
+  const animatedBackgroundStyle = useAnimatedStyle(() => {
+    return {
+      backgroundColor: bubbleBackgroundColor.value,
+    };
+  }, [bubbleBackgroundColor, message.id]);
+
+  const highlightMessage = useCallback(
+    (messageId: string) => {
+      if (messageId === message.id) {
+        bubbleBackgroundColor.value = withTiming(
+          message.fromMe
+            ? myMessageHighlightedBubbleColor(colorScheme)
+            : messageHighlightedBubbleColor(colorScheme),
+          {
+            duration: 300,
+            easing: Easing.inOut(Easing.quad),
+            reduceMotion: ReduceMotion.System,
+          }
+        );
+        setTimeout(() => {
+          bubbleBackgroundColor.value = withTiming(
+            initialBubbleBackgroundColor,
+            {
+              duration: 300,
+              easing: Easing.inOut(Easing.quad),
+              reduceMotion: ReduceMotion.System,
+            }
+          );
+        }, 800);
+      }
+    },
+    [
+      bubbleBackgroundColor,
+      colorScheme,
+      initialBubbleBackgroundColor,
+      message.fromMe,
+      message.id,
+    ]
+  );
+
+  useEffect(() => {
+    converseEventEmitter.on(`highlightMessage`, highlightMessage);
+    return () => {
+      converseEventEmitter.off("highlightMessage", highlightMessage);
+    };
+  }, [highlightMessage]);
+
   // We use a mix of Gesture Detector AND TouchableOpacity
   // because GestureDetector is better for dual tap but if
   // we add the gesture detector for long press the long press
@@ -210,9 +298,33 @@ export default function ChatMessageActions({
   return (
     <>
       <GestureDetector gesture={doubleTapGesture}>
-        <TouchableOpacity
+        <ReanimatedTouchableOpacity
           activeOpacity={1}
-          style={style}
+          style={[
+            styles.messageBubble,
+            message.fromMe ? styles.messageBubbleMe : undefined,
+            animatedBackgroundStyle,
+            Platform.select({
+              default: {},
+              android: {
+                // Messages not from me
+                borderBottomLeftRadius:
+                  !message.fromMe && message.hasNextMessageInSeries ? 2 : 18,
+                borderTopLeftRadius:
+                  !message.fromMe && message.hasPreviousMessageInSeries
+                    ? 2
+                    : 18,
+                // Messages from me
+                borderBottomRightRadius:
+                  message.fromMe && message.hasNextMessageInSeries ? 2 : 18,
+                borderTopRightRadius:
+                  message.fromMe && message.hasPreviousMessageInSeries ? 2 : 18,
+              },
+            }),
+            {
+              maxWidth: messageMaxWidth,
+            },
+          ]}
           onPress={() => {
             if (isAttachment) {
               // Transfering attachment opening intent to component
@@ -230,7 +342,7 @@ export default function ChatMessageActions({
           onLongPress={showMessageActionSheet}
         >
           {children}
-        </TouchableOpacity>
+        </ReanimatedTouchableOpacity>
       </GestureDetector>
       {/* <View style={{width: 50, height: 20, backgroundColor: "red"}} />
       <GestureDetector gesture={composedGesture}>{children}</GestureDetector> */}
@@ -291,3 +403,18 @@ const getEmojiPickerTheme = (colorScheme: ColorSchemeName) =>
           containerActive: "#282829",
         },
       };
+
+const useStyles = () => {
+  return StyleSheet.create({
+    messageBubble: {
+      flexShrink: 1,
+      flexGrow: 0,
+      minHeight: 36,
+      borderRadius: 18,
+    },
+
+    messageBubbleMe: {
+      marginLeft: "auto",
+    },
+  });
+};

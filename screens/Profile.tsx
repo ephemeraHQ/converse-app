@@ -458,6 +458,7 @@ const useStyles = () => {
     balanceContainer: {
       flexDirection: "row",
       alignItems: "center",
+      marginRight: Platform.OS === "ios" ? 0 : -5,
     },
     balance: {
       color: textPrimaryColor(colorScheme),
