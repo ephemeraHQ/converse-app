@@ -1,4 +1,3 @@
-import { StatusBar } from "expo-status-bar";
 import React, { useCallback, useEffect, useRef } from "react";
 import { Dimensions, Platform, useColorScheme } from "react-native";
 
@@ -79,11 +78,6 @@ export default function Main() {
 
   const mainHeaders = (
     <>
-      <StatusBar
-        hidden={false}
-        backgroundColor={backgroundColor(colorScheme)}
-        style={colorScheme === "dark" ? "light" : "dark"}
-      />
       {Platform.OS !== "web" && (
         <>
           <HydrationStateHandler />

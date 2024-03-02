@@ -1,5 +1,4 @@
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import { StatusBar } from "expo-status-bar";
 import React, { useEffect } from "react";
 import {
   Button,
@@ -38,7 +37,6 @@ export default function ConverseMatchMaker({
 
   return (
     <View style={styles.modal}>
-      {Platform.OS === "ios" && <StatusBar hidden={false} style="light" />}
       <Recommendations navigation={navigation} visibility="FULL" />
     </View>
   );

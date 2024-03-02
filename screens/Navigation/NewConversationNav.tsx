@@ -1,3 +1,4 @@
+import { NativeStackNavigationOptions } from "@react-navigation/native-stack";
 import { Platform, useColorScheme } from "react-native";
 
 import {
@@ -24,26 +25,27 @@ export const NewConversationScreenConfig = {
 
 export default function NewConversationNav() {
   const colorScheme = useColorScheme();
+  const options: NativeStackNavigationOptions = {
+    headerTitle: "New conversation",
+    presentation: "modal",
+    headerStyle: {
+      backgroundColor: navigationSecondaryBackgroundColor(colorScheme),
+      borderBottomColor:
+        Platform.OS === "web" ? listItemSeparatorColor(colorScheme) : undefined,
+    } as any,
+    animation: navigationAnimation,
+  };
+  if (Platform.OS === "web") {
+    options.headerTitleStyle = {
+      left: -20,
+      color: textPrimaryColor(colorScheme),
+    } as any;
+  }
   return (
     <NativeStack.Screen
       name="NewConversation"
       component={NewConversation}
-      options={{
-        headerTitle: "New conversation",
-        presentation: "modal",
-        headerStyle: {
-          backgroundColor: navigationSecondaryBackgroundColor(colorScheme),
-          borderBottomColor:
-            Platform.OS === "web"
-              ? listItemSeparatorColor(colorScheme)
-              : undefined,
-        } as any,
-        headerTitleStyle: Platform.select({
-          default: {},
-          web: { left: -20, color: textPrimaryColor(colorScheme) } as any,
-        }),
-        animation: navigationAnimation,
-      }}
+      options={options}
     />
   );
 }

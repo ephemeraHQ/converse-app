@@ -95,6 +95,11 @@ const ConversationListItem = memo(function ConversationListItem({
       topic: conversationTopic,
       message: route.params?.frameURL,
     });
+    // This handle the case where the conversation is already opened
+    converseEventEmitter.emit(
+      "setCurrentConversationInputValue",
+      route.params?.frameURL
+    );
   }, [conversationTopic, isSplitScreen, navigation, route.params?.frameURL]);
 
   useEffect(() => {
@@ -124,7 +129,10 @@ const ConversationListItem = memo(function ConversationListItem({
             height={10}
           />
         ))}
-      <Text style={styles.messagePreview} numberOfLines={2}>
+      <Text
+        style={styles.messagePreview}
+        numberOfLines={Platform.OS === "ios" ? 2 : 1}
+      >
         {lastMessageFromMe ? <View style={{ width: 15 }} /> : undefined}
         {lastMessagePreview}
       </Text>
@@ -270,7 +278,7 @@ const getStyles = (colorScheme: ColorSchemeName) =>
     rowSeparator: Platform.select({
       android: {},
       default: {
-        height: 76.5,
+        height: 77,
         borderBottomWidth: 0.25,
         borderBottomColor: listItemSeparatorColor(colorScheme),
       },
@@ -278,9 +286,9 @@ const getStyles = (colorScheme: ColorSchemeName) =>
     rowSeparatorMargin: {
       position: "absolute",
       width: 30,
-      height: 0.5,
+      height: 2,
       backgroundColor: backgroundColor(colorScheme),
-      bottom: -0.25,
+      bottom: -1.5,
     },
     conversationListItem: Platform.select({
       default: {
@@ -290,7 +298,7 @@ const getStyles = (colorScheme: ColorSchemeName) =>
         marginLeft: 32,
       },
       android: {
-        height: 88,
+        height: 72,
         paddingTop: 12,
         paddingHorizontal: 16,
       },
@@ -333,7 +341,7 @@ const getStyles = (colorScheme: ColorSchemeName) =>
         },
         android: {
           top: 12,
-          right: 24,
+          right: 17,
         },
       }),
     },

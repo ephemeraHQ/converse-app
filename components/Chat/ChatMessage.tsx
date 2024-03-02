@@ -7,14 +7,15 @@ import {
   Text,
   Platform,
   ColorSchemeName,
-  DimensionValue,
   TouchableOpacity,
   Animated,
 } from "react-native";
 import { Swipeable } from "react-native-gesture-handler";
 
 import MessageTail from "../../assets/message-tail.svg";
+import ReplyIconDarkAndroid from "../../assets/reply-dark.android.svg";
 import ReplyIconDark from "../../assets/reply-dark.svg";
+import ReplyIconLightAndroid from "../../assets/reply.android.svg";
 import ReplyIconLight from "../../assets/reply.svg";
 import { useChatStore, currentAccount } from "../../data/store/accountsStore";
 import { XmtpMessage } from "../../data/store/chatStore";
@@ -97,7 +98,14 @@ function ChatMessage({ message, colorScheme }: Props) {
   const isAttachment = isAttachmentMessage(message.contentType);
   const isTransaction = isTransactionMessage(message.contentType);
   const reactions = getMessageReactions(message);
-  const ReplyIcon = colorScheme === "dark" ? ReplyIconDark : ReplyIconLight;
+  const ReplyIcon =
+    Platform.OS === "ios"
+      ? colorScheme === "dark"
+        ? ReplyIconDark
+        : ReplyIconLight
+      : colorScheme === "dark"
+      ? ReplyIconDarkAndroid
+      : ReplyIconLightAndroid;
 
   // maybe using useChatStore inside ChatMessage
   // leads to bad perf? Let's be cautious
@@ -117,20 +125,6 @@ function ChatMessage({ message, colorScheme }: Props) {
       replyingToMessage.senderAddress
     );
   }, [replyingToMessage?.senderAddress]);
-  let messageMaxWidth: DimensionValue;
-  if (isDesktop) {
-    if (isAttachment) {
-      messageMaxWidth = 366;
-    } else {
-      messageMaxWidth = 588;
-    }
-  } else {
-    if (isAttachment) {
-      messageMaxWidth = "70%";
-    } else {
-      messageMaxWidth = "85%";
-    }
-  }
 
   const swipeableRef = useRef<Swipeable | null>(null);
 
@@ -189,34 +183,7 @@ function ChatMessage({ message, colorScheme }: Props) {
         }}
         ref={swipeableRef}
       >
-        <ChatMessageActions
-          message={message}
-          reactions={reactions}
-          style={[
-            styles.messageBubble,
-            message.fromMe ? styles.messageBubbleMe : undefined,
-            Platform.select({
-              default: {},
-              android: {
-                // Messages not from me
-                borderBottomLeftRadius:
-                  !message.fromMe && message.hasNextMessageInSeries ? 2 : 18,
-                borderTopLeftRadius:
-                  !message.fromMe && message.hasPreviousMessageInSeries
-                    ? 2
-                    : 18,
-                // Messages from me
-                borderBottomRightRadius:
-                  message.fromMe && message.hasNextMessageInSeries ? 2 : 18,
-                borderTopRightRadius:
-                  message.fromMe && message.hasPreviousMessageInSeries ? 2 : 18,
-              },
-            }),
-            {
-              maxWidth: messageMaxWidth,
-            },
-          ]}
-        >
+        <ChatMessageActions message={message} reactions={reactions}>
           {isContentType("text", message.contentType) && (
             <ChatMessageFramePreviews message={message} />
           )}
@@ -227,11 +194,18 @@ function ChatMessage({ message, colorScheme }: Props) {
                   styles.innerBubble,
                   message.fromMe ? styles.innerBubbleMe : undefined,
                 ]}
+                delayPressIn={isDesktop ? 0 : 75}
                 onPress={() => {
                   converseEventEmitter.emit("scrollChatToMessage", {
                     messageId: replyingToMessage.id,
                     animated: true,
                   });
+                  setTimeout(() => {
+                    converseEventEmitter.emit(
+                      "highlightMessage",
+                      replyingToMessage.id
+                    );
+                  }, 350);
                 }}
               >
                 <Text
@@ -378,23 +352,12 @@ const useStyles = () => {
       marginTop: 12,
       marginBottom: 8,
     },
-    messageBubble: {
-      flexShrink: 1,
-      flexGrow: 0,
-      minHeight: 36,
-      backgroundColor: messageBubbleColor(colorScheme),
-      borderRadius: 18,
-    },
     messageBubbleText: {
       paddingHorizontal: 12,
       paddingVertical: Platform.OS === "android" ? 6 : 7,
     },
     messageWithInnerBubble: {
       padding: 4,
-    },
-    messageBubbleMe: {
-      marginLeft: "auto",
-      backgroundColor: myMessageBubbleColor(colorScheme),
     },
     replyToUsername: {
       fontSize: 15,

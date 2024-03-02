@@ -13,7 +13,7 @@ import { addLog } from "../debug";
 import { sentryTrackError } from "../sentry";
 import { serializeRemoteAttachmentMessageContent } from "./attachments";
 import { ConverseXmtpClientType, DecodedMessageWithCodecsType } from "./client";
-import { isContentType } from "./contentTypes";
+import { getMessageContentType, isContentType } from "./contentTypes";
 import { CoinbaseMessagingPaymentContent } from "./contentTypes/coinbasePayment";
 import { getXmtpClient } from "./sync";
 
@@ -22,7 +22,7 @@ const BATCH_QUERY_PAGE_SIZE = 30;
 type SerializedMessageContent = {
   content: string;
   referencedMessageId?: string | undefined;
-  supportedContentType: boolean;
+  supported: boolean;
   contentType: string;
 };
 
@@ -33,7 +33,7 @@ const serializeProtocolMessageContent = (
 ): SerializedMessageContent => {
   let referencedMessageId: string | undefined = undefined;
   let content = "";
-  let supportedContentType = true;
+  let supported = !!getMessageContentType(contentType);
   if (isContentType("text", contentType)) {
     content = messageContent as string;
   } else if (isContentType("remoteAttachment", contentType)) {
@@ -57,7 +57,7 @@ const serializeProtocolMessageContent = (
       return {
         content: "",
         contentType: replyContentType,
-        supportedContentType: false,
+        supported: false,
       };
     }
     const codec = client.codecRegistry[replyContentType];
@@ -80,24 +80,25 @@ const serializeProtocolMessageContent = (
   } else if (isContentType("coinbasePayment", contentType)) {
     content = JSON.stringify(messageContent as CoinbaseMessagingPaymentContent);
   } else {
-    supportedContentType = false;
+    supported = false;
   }
   return {
     content,
     contentType,
     referencedMessageId,
-    supportedContentType,
+    supported,
   };
 };
 
 const protocolMessageToStateMessage = (
   message: DecodedMessageWithCodecsType
 ): XmtpMessage => {
-  const { content, referencedMessageId, contentType, supportedContentType } =
+  const supportedContentType = !!getMessageContentType(message.contentTypeId);
+  const { content, referencedMessageId, contentType, supported } =
     serializeProtocolMessageContent(
       message.client,
       message.contentTypeId,
-      message.content()
+      supportedContentType ? message.content() : undefined
     );
   return {
     id: message.id,
@@ -109,7 +110,8 @@ const protocolMessageToStateMessage = (
     content,
     referencedMessageId,
     topic: message.topic,
-    contentFallback: supportedContentType ? undefined : message.fallback,
+    contentFallback:
+      supportedContentType && supported ? undefined : message.fallback,
   };
 };
 
