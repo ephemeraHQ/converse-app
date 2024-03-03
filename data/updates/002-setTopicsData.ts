@@ -12,6 +12,7 @@ export const setTopicsData = async (account: string) => {
   const topicsData = getChatStore(account).getState().topicsData as {
     [topic: string]: TopicData;
   };
+  console.log("CURRENT TOPICS DATA IS", topicsData);
   const conversations = getChatStore(account).getState().conversations;
   for (const topic in conversations) {
     if (conversations[topic].readUntil) {
@@ -20,6 +21,7 @@ export const setTopicsData = async (account: string) => {
         conversations[topic].readUntil;
     }
   }
+  console.log("TOPICS DATA TO SAVE WILL BE", topicsData);
   getChatStore(account).getState().setTopicsData(topicsData);
   await saveTopicsData(account, topicsData);
 };
