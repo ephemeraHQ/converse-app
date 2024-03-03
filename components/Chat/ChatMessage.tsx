@@ -12,7 +12,6 @@ import {
 } from "react-native";
 import { Swipeable } from "react-native-gesture-handler";
 
-import MessageTail from "../../assets/message-tail.svg";
 import ReplyIconDarkAndroid from "../../assets/reply-dark.android.svg";
 import ReplyIconDark from "../../assets/reply-dark.svg";
 import ReplyIconLightAndroid from "../../assets/reply.android.svg";
@@ -21,9 +20,7 @@ import { useChatStore, currentAccount } from "../../data/store/accountsStore";
 import { XmtpMessage } from "../../data/store/chatStore";
 import { isAttachmentMessage } from "../../utils/attachment/helpers";
 import {
-  messageBubbleColor,
   messageInnerBubbleColor,
-  myMessageBubbleColor,
   myMessageInnerBubbleColor,
   textPrimaryColor,
   textSecondaryColor,
@@ -245,21 +242,6 @@ function ChatMessage({ message, colorScheme }: Props) {
           )}
 
           <View style={styles.metadataContainer}>{metadata}</View>
-
-          {!message.hasNextMessageInSeries &&
-            (Platform.OS === "ios" || Platform.OS === "web") && (
-              <MessageTail
-                fill={
-                  message.fromMe
-                    ? myMessageBubbleColor(colorScheme)
-                    : messageBubbleColor(colorScheme)
-                }
-                style={[
-                  styles.messageTail,
-                  message.fromMe ? styles.messageTailMe : undefined,
-                ]}
-              />
-            )}
         </ChatMessageActions>
       </Swipeable>
       <ChatMessageReactions message={message} reactions={reactions} />
@@ -375,19 +357,6 @@ const useStyles = () => {
     messageTextReply: {
       paddingHorizontal: 8,
       paddingBottom: 4,
-    },
-    messageTail: {
-      position: "absolute",
-      left: -5,
-      bottom: 0,
-      width: 14,
-      height: 21,
-      zIndex: -1,
-    },
-    messageTailMe: {
-      left: "auto",
-      right: -5,
-      transform: [{ scaleX: -1 }],
     },
     metadataContainer: {
       position: "absolute",

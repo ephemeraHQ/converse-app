@@ -1,5 +1,5 @@
 import Clipboard from "@react-native-clipboard/clipboard";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import {
   Alert,
   ColorSchemeName,
@@ -9,14 +9,16 @@ import {
   DimensionValue,
 } from "react-native";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
-import {
+import Reanimated, {
   Easing,
   ReduceMotion,
   useAnimatedStyle,
   useSharedValue,
   withTiming,
 } from "react-native-reanimated";
+import { SvgProps } from "react-native-svg";
 
+import _MessageTail from "../../assets/message-tail.svg";
 import {
   currentAccount,
   useCurrentAccount,
@@ -46,6 +48,14 @@ import { consentToPeersOnProtocol } from "../../utils/xmtpRN/conversations";
 import EmojiPicker from "../../vendor/rn-emoji-keyboard";
 import { showActionSheetWithOptions } from "../StateHandlers/ActionSheetStateHandler";
 import { MessageToDisplay } from "./ChatMessage";
+
+class MessageTailComponent extends React.Component<SvgProps> {
+  render() {
+    return <_MessageTail {...this.props} />;
+  }
+}
+
+const MessageTail = Reanimated.createAnimatedComponent(MessageTailComponent);
 
 type Props = {
   children: React.ReactNode;
@@ -248,6 +258,14 @@ export default function ChatMessageActions({
       backgroundColor: bubbleBackgroundColor.value,
     };
   }, [bubbleBackgroundColor, message.id]);
+  const iosMessageTailStyle = useAnimatedStyle(
+    () => ({
+      ...styles.messageTail,
+      ...(message.fromMe ? styles.messageTailMe : {}),
+      color: bubbleBackgroundColor.value,
+    }),
+    [bubbleBackgroundColor, message.id, message.fromMe]
+  );
 
   const highlightMessage = useCallback(
     (messageId: string) => {
@@ -342,6 +360,10 @@ export default function ChatMessageActions({
           onLongPress={showMessageActionSheet}
         >
           {children}
+          {!message.hasNextMessageInSeries &&
+            (Platform.OS === "ios" || Platform.OS === "web") && (
+              <MessageTail style={iosMessageTailStyle} />
+            )}
         </ReanimatedTouchableOpacity>
       </GestureDetector>
       {/* <View style={{width: 50, height: 20, backgroundColor: "red"}} />
@@ -415,6 +437,19 @@ const useStyles = () => {
 
     messageBubbleMe: {
       marginLeft: "auto",
+    },
+    messageTail: {
+      position: "absolute",
+      left: -5,
+      bottom: 0,
+      width: 14,
+      height: 21,
+      zIndex: -1,
+    },
+    messageTailMe: {
+      left: "auto",
+      right: -5,
+      transform: [{ scaleX: -1 }],
     },
   });
 };
