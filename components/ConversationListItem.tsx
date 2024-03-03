@@ -90,16 +90,16 @@ const ConversationListItem = memo(function ConversationListItem({
           setTimeout(r, Platform.OS === "ios" ? 300 : 20)
         );
       }
+      // This handle the case where the conversation is already opened
+      converseEventEmitter.emit(
+        "setCurrentConversationInputValue",
+        route.params.frameURL
+      );
     }
     navigate("Conversation", {
       topic: conversationTopic,
       message: route.params?.frameURL,
     });
-    // This handle the case where the conversation is already opened
-    converseEventEmitter.emit(
-      "setCurrentConversationInputValue",
-      route.params?.frameURL
-    );
   }, [conversationTopic, isSplitScreen, navigation, route.params?.frameURL]);
 
   useEffect(() => {

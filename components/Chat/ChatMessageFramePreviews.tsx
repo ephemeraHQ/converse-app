@@ -179,8 +179,6 @@ const ChatMessageFramePreview = ({
             type: "XMTP_FRAME",
             uniqueId: uuid.v4().toString(),
           });
-          // Reset input
-          setFrameTextInputValue("");
         } else if (button.action === "post_redirect") {
           const payload = await framesClient.signFrameAction(actionInput);
           const { redirectedTo } = await framesClient.proxy.postRedirect(
@@ -195,6 +193,9 @@ const ChatMessageFramePreview = ({
             Linking.openURL(redirectedTo);
           }
         }
+        // Reset input
+        setFrameTextInputValue("");
+        setFrameTextInputFocused(false);
       } catch (e: any) {
         console.error(e);
       }
@@ -207,6 +208,7 @@ const ChatMessageFramePreview = ({
       frameTextInputValue,
       frameUrl,
       message.topic,
+      setFrameTextInputFocused,
       textInput,
     ]
   );
@@ -329,6 +331,7 @@ const FrameBottom = ({
               }}
               onChangeText={setTextFrameInputValue}
               placeholder={textInput}
+              placeholderTextColor={textSecondaryColor("light")}
               value={frameTextInputValue}
             />
           )}
@@ -509,7 +512,8 @@ const useStyles = () => {
       flexShrink: 1,
     },
     frameTextInput: {
-      backgroundColor: backgroundColor(colorScheme),
+      backgroundColor: backgroundColor("light"),
+      color: textPrimaryColor("light"),
       padding: 4,
       borderRadius: 4,
       width: "100%",
