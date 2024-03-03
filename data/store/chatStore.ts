@@ -9,17 +9,12 @@ import {
 } from "../../data/helpers/conversations/spamScore";
 import { saveTopicsData } from "../../utils/api";
 import { ConversationWithLastMessagePreview } from "../../utils/conversation";
-import { lastValueInMap } from "../../utils/map";
 import { zustandMMKVStorage } from "../../utils/mmkv";
 import { subscribeToNotifications } from "../../utils/notifications";
 import { omit } from "../../utils/objects";
 import { refreshBalanceForAccount } from "../../utils/wallet";
 import { isContentType } from "../../utils/xmtpRN/contentTypes";
 import { ConverseMessageMetadata } from "../db/entities/messageEntity";
-import {
-  markAllConversationsAsReadInDb,
-  markConversationReadUntil,
-} from "../helpers/conversations/upsertConversations";
 
 // Chat data for each user
 
@@ -39,7 +34,7 @@ export type XmtpConversation = {
   messagesIds: string[];
   conversationTitle?: string | null;
   messageDraft?: string;
-  readUntil: number;
+  readUntil: number; // UNUSED
   hasOneMessageFromMe?: boolean;
   pending: boolean;
   version: string;
@@ -169,9 +164,6 @@ export const initChatStore = (account: string) => {
                 if (lastMessageId) {
                   const lastMessage = conversation.messages.get(lastMessageId);
                   if (lastMessage) {
-                    newState.conversations[topic].readUntil = lastMessage.sent;
-                    // Also mark in db
-                    markConversationReadUntil(account, topic, lastMessage.sent);
                     newState.topicsData[topic] = {
                       status: "read",
                       readUntil: lastMessage.sent,
@@ -362,13 +354,14 @@ export const initChatStore = (account: string) => {
                   newState.conversations[topic].lastUpdateAt = now();
                   insertMessageIdAtRightIndex(conversation, message);
                   if (state.openedConversationTopic === topic) {
-                    conversation.readUntil = now();
-                    // Also mark in db
-                    markConversationReadUntil(
-                      account,
-                      conversation.topic,
-                      conversation.readUntil
-                    );
+                    newState.topicsData[topic] = {
+                      status: "read",
+                      readUntil: message.sent,
+                    };
+
+                    saveTopicsData(account, {
+                      [topic]: { status: "read", readUntil: message.sent },
+                    });
                   }
                 }
 
@@ -451,19 +444,6 @@ export const initChatStore = (account: string) => {
                 initialLoadDoneOnce: true,
                 lastUpdateAt: now(),
               };
-              if (!state.initialLoadDoneOnce) {
-                // If it's the initial sync, let's mark
-                // all conversations as read
-                for (const topic in newState.conversations) {
-                  const conversation = newState.conversations[topic];
-                  conversation.lastUpdateAt = now();
-                  if (conversation.messages.size > 0) {
-                    const lastMessage = lastValueInMap(conversation.messages);
-                    conversation.readUntil = lastMessage ? lastMessage.sent : 0;
-                  }
-                }
-                markAllConversationsAsReadInDb(account);
-              }
               return newState;
             }),
           setInitialLoadDoneOnce: () =>
