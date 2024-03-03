@@ -454,7 +454,7 @@ const useStyles = () => {
     },
     profileContent: {
       paddingHorizontal:
-        Platform.OS === "ios" || Platform.OS === "web" ? 18 : 0,
+        Platform.OS === "ios" || Platform.OS === "web" ? 18 : 6,
     },
     tableView: {},
     balanceContainer: {

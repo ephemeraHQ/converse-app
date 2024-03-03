@@ -300,7 +300,7 @@ const getStyles = (colorScheme: ColorSchemeName) =>
       android: {
         height: 72,
         paddingTop: 12,
-        paddingHorizontal: 16,
+        paddingHorizontal: 24,
       },
     }),
     conversationName: {
@@ -341,7 +341,7 @@ const getStyles = (colorScheme: ColorSchemeName) =>
         },
         android: {
           top: 12,
-          right: 17,
+          right: 24,
         },
       }),
     },

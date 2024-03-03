@@ -16,6 +16,7 @@ import Edit from "@material-symbols/svg-400/outlined/edit.svg";
 import ExpandMore from "@material-symbols/svg-400/outlined/expand_more.svg";
 import Image from "@material-symbols/svg-400/outlined/image.svg";
 import Info from "@material-symbols/svg-400/outlined/info.svg";
+import IosShare from "@material-symbols/svg-400/outlined/ios_share.svg";
 import Key from "@material-symbols/svg-400/outlined/key.svg";
 import Laptop from "@material-symbols/svg-400/outlined/laptop_chromebook.svg";
 import Link from "@material-symbols/svg-400/outlined/link.svg";
@@ -42,6 +43,7 @@ import {
 } from "react-native";
 import { SvgProps } from "react-native-svg";
 
+import Reply from "../../assets/reply.svg";
 import { primaryColor } from "../../utils/colors";
 
 type Props = {
@@ -70,7 +72,7 @@ const pictoMapping: {
   addlink: AddLink,
   "key.horizontal": Key,
   "hand.wave": WavingHand,
-  "square.and.arrow.up": Send,
+  "square.and.arrow.up": IosShare,
   "doc.on.doc": ContentCopy,
   "party.popper": Celebration,
   "lock.open": Lock,
@@ -91,6 +93,7 @@ const pictoMapping: {
   "arrow.clockwise": Refresh,
   person: Person,
   "info.circle": Info,
+  "arrowshape.turn.up.left": Reply,
 };
 
 export default function Picto({ picto, style, size, weight, color }: Props) {
