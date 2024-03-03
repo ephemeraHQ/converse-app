@@ -4,6 +4,7 @@ import appJson from "../../app.json";
 import { getAccountsList, getSettingsStore } from "../store/accountsStore";
 import { useAppStore } from "../store/appStore";
 import { setConsent } from "./001-setConsent";
+import { setTopicsData } from "./002-setTopicsData";
 
 type Step = {
   id: number;
@@ -14,6 +15,7 @@ let isRunning = false;
 
 export const updateSteps: Step[] = [
   { id: 1, method: setConsent },
+  { id: 2, method: setTopicsData },
   // Add more update steps by sequentially incrementing the id
 ];
 

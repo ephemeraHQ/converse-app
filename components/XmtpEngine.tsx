@@ -9,7 +9,7 @@ import {
 } from "../data/store/accountsStore";
 import { useAppStore } from "../data/store/appStore";
 import { useSelect } from "../data/store/storeHelpers";
-import { getTopicsStatus } from "../utils/api";
+import { getTopicsData } from "../utils/api";
 import { loadSavedNotificationMessagesToContext } from "../utils/notifications";
 import { createPendingConversations } from "../utils/xmtpRN/conversations";
 import { sendPendingMessages } from "../utils/xmtpRN/send";
@@ -27,6 +27,9 @@ export default function XmtpEngine() {
   const syncAccounts = useCallback((accountsToSync: string[]) => {
     accountsToSync.forEach((a) => {
       if (!syncingAccounts.current[a]) {
+        getTopicsData(a).then((topicsData) => {
+          getChatStore(a).getState().setTopicsData(topicsData);
+        });
         syncedAccounts.current[a] = true;
         syncingAccounts.current[a] = true;
         syncXmtpClient(a)
@@ -53,14 +56,8 @@ export default function XmtpEngine() {
         (a) => !syncedAccounts.current[a]
       );
       syncAccounts(unsyncedAccounts);
-      // Sync topics status
-      unsyncedAccounts.map((a) =>
-        getTopicsStatus(a).then((topicsStatus) => {
-          getChatStore(a).getState().setTopicsStatus(topicsStatus);
-        })
-      );
     }
-  }, [accounts, syncAccounts, hydrationDone]);
+  }, [accounts, hydrationDone, syncAccounts]);
 
   const isInternetReachableRef = useRef(isInternetReachable);
 

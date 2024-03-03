@@ -54,7 +54,7 @@ export const subscribeToNotifications = async (
 ): Promise<void> => {
   const {
     sortedConversationsWithPreview,
-    topicsStatus,
+    topicsData,
     conversationsSortedOnce,
   } = getChatStore(account).getState();
   if (subscribingByAccount[account] || !conversationsSortedOnce) {
@@ -75,7 +75,7 @@ export const subscribeToNotifications = async (
       const hasValidAddress = c.peerAddress;
       const isNotPending = !c.pending;
       const isNotBlocked = !isBlocked(c.peerAddress);
-      const isTopicNotDeleted = topicsStatus[c.topic] !== "deleted";
+      const isTopicNotDeleted = topicsData[c.topic]?.status !== "deleted";
 
       return (
         hasValidAddress && isNotPending && isNotBlocked && isTopicNotDeleted

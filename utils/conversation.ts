@@ -10,6 +10,7 @@ import {
   XmtpMessage,
   XmtpConversation,
   XmtpConversationWithUpdate,
+  TopicData,
 } from "../data/store/chatStore";
 import { isAttachmentMessage } from "./attachment/helpers";
 import { getAddressForPeer } from "./eth";
@@ -288,7 +289,7 @@ const conversationsSortMethod = (
 export function sortAndComputePreview(
   conversations: Record<string, XmtpConversation>,
   userAddress: string,
-  topicsStatus: { [topic: string]: "deleted" | "consented" },
+  topicsData: { [topic: string]: TopicData | undefined },
   peersStatus: { [peer: string]: "blocked" | "consented" }
 ) {
   const conversationsRequests: ConversationWithLastMessagePreview[] = [];
@@ -298,7 +299,7 @@ export function sortAndComputePreview(
       if (
         conversation?.peerAddress &&
         (!conversation.pending || conversation.messages.size > 0) &&
-        topicsStatus[conversation.topic] !== "deleted" &&
+        topicsData[conversation.topic]?.status !== "deleted" &&
         peersStatus[conversation.peerAddress.toLowerCase()] !== "blocked" &&
         conversation.version !== "v1" &&
         !conversation.topic.includes("\x00") // Forbidden character that breaks notifications
