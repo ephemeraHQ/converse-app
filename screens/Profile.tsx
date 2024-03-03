@@ -127,7 +127,9 @@ export default function ProfileScreen({
     ...getAddressItemsFromArray(socials?.userNames || [], "name", "name"),
     ...getAddressItemsFromArray(socials?.ensNames || [], "name", "name"),
     ...getAddressItemsFromArray(
-      socials?.unstoppableDomains || [],
+      (socials?.unstoppableDomains || []).filter(
+        (d) => !d.domain.toLowerCase().endsWith(".eth")
+      ),
       "domain",
       "domain"
     ),
