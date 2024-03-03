@@ -7,6 +7,7 @@ import {
   StyleSheet,
   Platform,
   FlatList,
+  Dimensions,
 } from "react-native";
 import {
   useAnimatedStyle,
@@ -290,8 +291,13 @@ export default function Chat() {
             //   minIndexForVisible: 0,
             //   autoscrollToTopThreshold: 100,
             // }}
+            estimatedListSize={{
+              height: Dimensions.get("screen").height,
+              width: Dimensions.get("screen").width,
+            }}
             inverted
             keyExtractor={keyExtractor}
+            getItemType={(item: MessageToDisplay) => item.contentType}
             keyboardShouldPersistTaps="handled"
             estimatedItemSize={80}
             // Size glitch on Android
