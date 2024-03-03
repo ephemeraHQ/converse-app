@@ -110,9 +110,9 @@ export default function ConversationFlashList({
             !!(
               initialLoadDoneOnce &&
               lastMessagePreview &&
-              ((topicsData[conversation.topic]?.readUntil !== undefined &&
+              (topicsData[conversation.topic]?.readUntil === undefined ||
                 ((topicsData[conversation.topic] as TopicData)
-                  .readUntil as number) < lastMessagePreview.message.sent) ||
+                  .readUntil as number) < lastMessagePreview.message.sent ||
                 topicsData[conversation.topic]?.status === "unread") &&
               lastMessagePreview.message.senderAddress ===
                 conversation.peerAddress
