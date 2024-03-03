@@ -243,8 +243,9 @@ function ChatMessage({ message, colorScheme }: Props) {
 
           <View style={styles.metadataContainer}>{metadata}</View>
         </ChatMessageActions>
+        <View style={{ height: 0, flexBasis: "100%" }} />
+        <ChatMessageReactions message={message} reactions={reactions} />
       </Swipeable>
-      <ChatMessageReactions message={message} reactions={reactions} />
     </View>
   );
 }
@@ -325,6 +326,7 @@ const useStyles = () => {
     messageSwipeableChildren: {
       width: "100%",
       flexDirection: "row",
+      flexWrap: "wrap",
     },
     date: {
       flexBasis: "100%",

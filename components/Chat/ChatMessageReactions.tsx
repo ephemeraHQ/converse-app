@@ -98,8 +98,8 @@ export default function ChatMessageReactions({ message, reactions }: Props) {
         <View
           style={[
             styles.reactionsContainer,
-            { marginRight: message.fromMe ? 30 : 0 },
-            { marginLeft: message.fromMe ? 0 : 30 },
+            { marginRight: message.fromMe ? 10 : 0 },
+            { marginLeft: message.fromMe ? 0 : 10 },
           ]}
         >
           <Text style={styles.emojis}>
