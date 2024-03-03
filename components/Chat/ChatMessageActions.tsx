@@ -10,6 +10,7 @@ import {
 } from "react-native";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import Reanimated, {
+  AnimatedStyle,
   Easing,
   ReduceMotion,
   useAnimatedStyle,
@@ -260,12 +261,10 @@ export default function ChatMessageActions({
   }, [bubbleBackgroundColor, message.id]);
   const iosMessageTailStyle = useAnimatedStyle(
     () => ({
-      ...styles.messageTail,
-      ...(message.fromMe ? styles.messageTailMe : {}),
       color: bubbleBackgroundColor.value,
     }),
-    [bubbleBackgroundColor, message.id, message.fromMe]
-  );
+    [bubbleBackgroundColor]
+  ) as AnimatedStyle;
 
   const highlightMessage = useCallback(
     (messageId: string) => {
@@ -362,7 +361,13 @@ export default function ChatMessageActions({
           {children}
           {!message.hasNextMessageInSeries &&
             (Platform.OS === "ios" || Platform.OS === "web") && (
-              <MessageTail style={iosMessageTailStyle} />
+              <MessageTail
+                style={[
+                  iosMessageTailStyle,
+                  styles.messageTail,
+                  message.fromMe ? styles.messageTailMe : {},
+                ]}
+              />
             )}
         </ReanimatedTouchableOpacity>
       </GestureDetector>

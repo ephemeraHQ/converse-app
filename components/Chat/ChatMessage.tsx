@@ -184,7 +184,7 @@ function ChatMessage({ message, colorScheme }: Props) {
                 onPress={() => {
                   converseEventEmitter.emit("scrollChatToMessage", {
                     messageId: replyingToMessage.id,
-                    animated: true,
+                    animated: false,
                   });
                   setTimeout(() => {
                     converseEventEmitter.emit(
