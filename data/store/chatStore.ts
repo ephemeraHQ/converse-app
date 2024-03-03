@@ -1,3 +1,4 @@
+import isDeepEqual from "fast-deep-equal";
 import { Platform } from "react-native";
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
@@ -6,6 +7,7 @@ import {
   TopicSpamScores,
   computeConversationsSpamScores,
 } from "../../data/helpers/conversations/spamScore";
+import { saveTopicsData } from "../../utils/api";
 import { ConversationWithLastMessagePreview } from "../../utils/conversation";
 import { lastValueInMap } from "../../utils/map";
 import { zustandMMKVStorage } from "../../utils/mmkv";
@@ -72,6 +74,11 @@ type ConversationsListItems = {
   conversationsRequests: ConversationWithLastMessagePreview[];
 };
 
+export type TopicData = {
+  status: "deleted" | "unread" | "read";
+  readUntil?: number;
+};
+
 export type ChatStoreType = {
   conversations: {
     [topic: string]: XmtpConversationWithUpdate;
@@ -89,7 +96,7 @@ export type ChatStoreType = {
   localClientConnected: boolean;
   resyncing: boolean;
   reconnecting: boolean;
-  topicsStatus: { [topic: string]: "deleted" | "consented" };
+  topicsData: { [topic: string]: TopicData | undefined };
 
   conversationsSortedOnce: boolean;
   sortedConversationsWithPreview: ConversationsListItems;
@@ -125,9 +132,7 @@ export type ChatStoreType = {
   setReconnecting: (reconnecting: boolean) => void;
   setLastSyncedAt: (synced: number, topics: string[]) => void;
 
-  setTopicsStatus: (topicsStatus: {
-    [topic: string]: "deleted" | "consented";
-  }) => void;
+  setTopicsData: (topicsData: { [topic: string]: TopicData }) => void;
 
   setSpamScores: (topicSpamScores: TopicSpamScores) => void;
 
@@ -148,16 +153,34 @@ export const initChatStore = (account: string) => {
           conversations: {},
           lastSyncedAt: 0,
           lastSyncedTopics: [],
-          topicsStatus: {},
+          topicsData: {},
           openedConversationTopic: "",
           setOpenedConversationTopic: (topic) =>
             set((state) => {
               const newState = { ...state, openedConversationTopic: topic };
               if (topic && newState.conversations[topic]) {
-                const n = now();
-                newState.conversations[topic].readUntil = n;
-                // Also mark in db
-                markConversationReadUntil(account, topic, n);
+                const conversation = newState.conversations[topic];
+                const lastMessageId =
+                  conversation.messagesIds.length > 0
+                    ? conversation.messagesIds[
+                        conversation.messagesIds.length - 1
+                      ]
+                    : undefined;
+                if (lastMessageId) {
+                  const lastMessage = conversation.messages.get(lastMessageId);
+                  if (lastMessage) {
+                    newState.conversations[topic].readUntil = lastMessage.sent;
+                    // Also mark in db
+                    markConversationReadUntil(account, topic, lastMessage.sent);
+                    newState.topicsData[topic] = {
+                      status: "read",
+                      readUntil: lastMessage.sent,
+                    };
+                    saveTopicsData(account, {
+                      [topic]: { status: "read", readUntil: lastMessage.sent },
+                    });
+                  }
+                }
               }
               return newState;
             }),
@@ -523,15 +546,18 @@ export const initChatStore = (account: string) => {
             }),
           setLastSyncedAt: (synced: number, topics: string[]) =>
             set(() => ({ lastSyncedAt: synced, lastSyncedTopics: topics })),
-          setTopicsStatus: (topicsStatus: {
-            [topic: string]: "deleted" | "consented";
-          }) =>
+          setTopicsData: (topicsData: { [topic: string]: TopicData }) =>
             set((state) => {
+              const newTopicsData = {
+                ...state.topicsData,
+                ...topicsData,
+              };
+              if (isDeepEqual(state.topicsData, newTopicsData)) return state;
               setImmediate(() => {
                 subscribeToNotifications(account);
               });
               return {
-                topicsStatus: { ...state.topicsStatus, ...topicsStatus },
+                topicsData: newTopicsData,
               };
             }),
           setSpamScores: (topicSpamScores: Record<string, number>) =>
@@ -578,7 +604,7 @@ export const initChatStore = (account: string) => {
             initialLoadDoneOnce: state.initialLoadDoneOnce,
             lastSyncedAt: state.lastSyncedAt,
             lastSyncedTopics: state.lastSyncedTopics,
-            topicsStatus: state.topicsStatus,
+            topicsData: state.topicsData,
           };
           // if (Platform.OS === "web" && state.conversations) {
           //   // On web, we persist convos without messages
@@ -597,11 +623,11 @@ export const initChatStore = (account: string) => {
           // }
           return persistedState;
         },
-        version: 1,
+        version: 2,
         migrate: (persistedState: any, version: number): ChatStoreType => {
           console.log("Zustand migration version:", version);
           // Migration from version 0: Convert 'deletedTopics' to 'topicsStatus'
-          if (version === 0 && persistedState.deletedTopics) {
+          if (version < 1 && persistedState.deletedTopics) {
             persistedState.topicsStatus = {};
             for (const [topic, isDeleted] of Object.entries(
               persistedState.deletedTopics
@@ -611,6 +637,17 @@ export const initChatStore = (account: string) => {
               }
             }
             delete persistedState.deletedTopics;
+          }
+          if (version < 2 && persistedState.topicsStatus) {
+            persistedState.topicsData = {};
+            for (const [topic, status] of Object.entries(
+              persistedState.topicsStatus
+            )) {
+              persistedState.topicsData[topic] = {
+                status,
+              };
+            }
+            delete persistedState.topicsStatus;
           }
           return persistedState as ChatStoreType;
         },

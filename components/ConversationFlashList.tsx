@@ -8,6 +8,7 @@ import {
   useCurrentAccount,
   useSettingsStore,
 } from "../data/store/accountsStore";
+import { TopicData } from "../data/store/chatStore";
 import { useSelect } from "../data/store/storeHelpers";
 import { NavigationParamList } from "../screens/Navigation/Navigation";
 import { useIsSplitScreen } from "../screens/Navigation/navHelpers";
@@ -41,14 +42,19 @@ export default function ConversationFlashList({
 }: Props) {
   const styles = useStyles();
   const colorScheme = useColorScheme();
-  const { lastUpdateAt, initialLoadDoneOnce, openedConversationTopic } =
-    useChatStore(
-      useSelect([
-        "lastUpdateAt",
-        "initialLoadDoneOnce",
-        "openedConversationTopic",
-      ])
-    );
+  const {
+    lastUpdateAt,
+    initialLoadDoneOnce,
+    openedConversationTopic,
+    topicsData,
+  } = useChatStore(
+    useSelect([
+      "lastUpdateAt",
+      "initialLoadDoneOnce",
+      "openedConversationTopic",
+      "topicsData",
+    ])
+  );
   const userAddress = useCurrentAccount() as string;
   const peersStatus = useSettingsStore((s) => s.peersStatus);
   const isSplitScreen = useIsSplitScreen();
@@ -104,7 +110,10 @@ export default function ConversationFlashList({
             !!(
               initialLoadDoneOnce &&
               lastMessagePreview &&
-              conversation.readUntil < lastMessagePreview.message.sent &&
+              ((topicsData[conversation.topic]?.readUntil !== undefined &&
+                ((topicsData[conversation.topic] as TopicData)
+                  .readUntil as number) < lastMessagePreview.message.sent) ||
+                topicsData[conversation.topic]?.status === "unread") &&
               lastMessagePreview.message.senderAddress ===
                 conversation.peerAddress
             )
@@ -132,6 +141,7 @@ export default function ConversationFlashList({
       openedConversationTopic,
       peersStatus,
       route,
+      topicsData,
       userAddress,
     ]
   );
