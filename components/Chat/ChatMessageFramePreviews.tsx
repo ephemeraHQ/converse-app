@@ -4,7 +4,6 @@ import { Image } from "expo-image";
 import * as Linking from "expo-linking";
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
-  Platform,
   StyleSheet,
   Text,
   TextInput,
@@ -17,10 +16,6 @@ import { TouchableWithoutFeedback } from "react-native-gesture-handler";
 import uuid from "react-native-uuid";
 
 import FrameLinkIcon from "../../assets/frameLink.svg";
-import ShareDarkAndroid from "../../assets/share-dark.android.svg";
-import ShareDark from "../../assets/share-dark.svg";
-import ShareLightAndroid from "../../assets/share.android.svg";
-import ShareLight from "../../assets/share.svg";
 import { useCurrentAccount } from "../../data/store/accountsStore";
 import { useFramesStore } from "../../data/store/framesStore";
 import {
@@ -46,6 +41,7 @@ import {
   getMetadaTagsForMessage,
 } from "../../utils/frames";
 import { navigate } from "../../utils/navigation";
+import ChatActionButton from "./ChatActionButton";
 import { MessageToDisplay } from "./ChatMessage";
 
 type Props = {
@@ -224,15 +220,6 @@ const ChatMessageFramePreview = ({
   const frameImage = getFrameImage(frame);
   const frameImageAspectRatio = getFrameAspectRatio(frame);
 
-  const ShareIcon =
-    Platform.OS === "ios"
-      ? colorScheme === "dark"
-        ? ShareDark
-        : ShareLight
-      : colorScheme === "dark"
-      ? ShareDarkAndroid
-      : ShareLightAndroid;
-
   return (
     <View style={styles.frameWrapper}>
       {initialFrame.type === "XMTP_FRAME" && (
@@ -245,7 +232,10 @@ const ChatMessageFramePreview = ({
           ]}
         >
           <TouchableOpacity style={styles.shareFrame} onPress={shareFrame}>
-            <ShareIcon />
+            <ChatActionButton
+              picto="square.and.arrow.up"
+              pictoStyle={{ top: -1.5 }} // Because the square & arrow doesn't look centered
+            />
           </TouchableOpacity>
         </View>
       )}

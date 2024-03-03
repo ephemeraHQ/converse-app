@@ -12,10 +12,6 @@ import {
 } from "react-native";
 import { Swipeable } from "react-native-gesture-handler";
 
-import ReplyIconDarkAndroid from "../../assets/reply-dark.android.svg";
-import ReplyIconDark from "../../assets/reply-dark.svg";
-import ReplyIconLightAndroid from "../../assets/reply.android.svg";
-import ReplyIconLight from "../../assets/reply.svg";
 import { useChatStore, currentAccount } from "../../data/store/accountsStore";
 import { XmtpMessage } from "../../data/store/chatStore";
 import { isAttachmentMessage } from "../../utils/attachment/helpers";
@@ -37,6 +33,7 @@ import {
   isContentType,
 } from "../../utils/xmtpRN/contentTypes";
 import ClickableText from "../ClickableText";
+import ChatActionButton from "./ChatActionButton";
 import ChatAttachmentBubble from "./ChatAttachmentBubble";
 import ChatMessageReplyBubble from "./ChatInputReplyBubble";
 import ChatMessageActions from "./ChatMessageActions";
@@ -95,14 +92,6 @@ function ChatMessage({ message, colorScheme }: Props) {
   const isAttachment = isAttachmentMessage(message.contentType);
   const isTransaction = isTransactionMessage(message.contentType);
   const reactions = getMessageReactions(message);
-  const ReplyIcon =
-    Platform.OS === "ios"
-      ? colorScheme === "dark"
-        ? ReplyIconDark
-        : ReplyIconLight
-      : colorScheme === "dark"
-      ? ReplyIconDarkAndroid
-      : ReplyIconLightAndroid;
 
   // maybe using useChatStore inside ChatMessage
   // leads to bad perf? Let's be cautious
@@ -166,7 +155,7 @@ function ChatMessage({ message, colorScheme }: Props) {
                 ],
               }}
             >
-              <ReplyIcon />
+              <ChatActionButton picto="arrowshape.turn.up.left" />
             </Animated.View>
           );
         }}

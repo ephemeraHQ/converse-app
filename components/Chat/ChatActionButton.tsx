@@ -13,9 +13,14 @@ import Picto from "../Picto/Picto";
 type ChatActionProps = {
   picto: string;
   style?: StyleProp<ViewStyle>;
+  pictoStyle?: StyleProp<ViewStyle>;
 };
 
-export default function ChatActionButton({ picto, style }: ChatActionProps) {
+export default function ChatActionButton({
+  picto,
+  style,
+  pictoStyle,
+}: ChatActionProps) {
   const styles = useStyles();
   const colorScheme = useColorScheme();
   return (
@@ -25,6 +30,7 @@ export default function ChatActionButton({ picto, style }: ChatActionProps) {
         color={textSecondaryColor(colorScheme)}
         size={Platform.OS === "android" ? 20 : 11.7}
         weight="medium"
+        style={pictoStyle}
       />
     </View>
   );
