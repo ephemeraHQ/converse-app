@@ -8,7 +8,6 @@ import {
   useCurrentAccount,
   useSettingsStore,
 } from "../data/store/accountsStore";
-import { TopicData } from "../data/store/chatStore";
 import { useSelect } from "../data/store/storeHelpers";
 import { NavigationParamList } from "../screens/Navigation/Navigation";
 import { useIsSplitScreen } from "../screens/Navigation/navHelpers";
@@ -106,18 +105,19 @@ export default function ConversationFlashList({
             lastMessagePreview?.message?.sent || conversation.createdAt
           }
           conversationName={conversationName(conversation)}
-          showUnread={
-            !!(
-              initialLoadDoneOnce &&
-              lastMessagePreview &&
-              (topicsData[conversation.topic]?.readUntil === undefined ||
-                ((topicsData[conversation.topic] as TopicData)
-                  .readUntil as number) < lastMessagePreview.message.sent ||
-                topicsData[conversation.topic]?.status === "unread") &&
-              lastMessagePreview.message.senderAddress ===
-                conversation.peerAddress
-            )
-          }
+          showUnread={(() => {
+            if (!initialLoadDoneOnce) return false;
+            if (!lastMessagePreview) return false;
+            // Manually marked as unread
+            if (topicsData[conversation.topic]?.status === "unread")
+              return true;
+            // If not manually markes as unread, we only show badge if last message
+            // not from me
+            if (lastMessagePreview.message.senderAddress === userAddress)
+              return false;
+            const readUntil = topicsData[conversation.topic]?.readUntil || 0;
+            return readUntil < lastMessagePreview.message.sent;
+          })()}
           lastMessagePreview={
             peersStatus[conversation.peerAddress.toLowerCase()] === "blocked"
               ? "This user is blocked"
