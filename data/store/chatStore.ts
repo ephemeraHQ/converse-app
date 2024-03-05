@@ -8,7 +8,11 @@ import {
   computeConversationsSpamScores,
 } from "../../data/helpers/conversations/spamScore";
 import { saveTopicsData } from "../../utils/api";
-import { ConversationWithLastMessagePreview } from "../../utils/conversation";
+import {
+  ConversationWithLastMessagePreview,
+  getTopicsUpdatesAsRead,
+  markConversationsAsReadIfNecessary,
+} from "../../utils/conversation";
 import { zustandMMKVStorage } from "../../utils/mmkv";
 import { subscribeToNotifications } from "../../utils/notifications";
 import { omit } from "../../utils/objects";
@@ -92,6 +96,7 @@ export type ChatStoreType = {
   resyncing: boolean;
   reconnecting: boolean;
   topicsData: { [topic: string]: TopicData | undefined };
+  topicsDataFetchedOnce: boolean | undefined;
 
   conversationsSortedOnce: boolean;
   sortedConversationsWithPreview: ConversationsListItems;
@@ -111,7 +116,6 @@ export type ChatStoreType = {
   setConversationMessageDraft: (topic: string, draft: string) => void;
 
   setInitialLoadDone: () => void;
-  setInitialLoadDoneOnce: () => void;
   setMessages: (messagesToSet: XmtpMessage[]) => void;
   updateMessagesIds: (
     updates: { topic: string; oldId: string; message: XmtpMessage }[]
@@ -127,7 +131,10 @@ export type ChatStoreType = {
   setReconnecting: (reconnecting: boolean) => void;
   setLastSyncedAt: (synced: number, topics: string[]) => void;
 
-  setTopicsData: (topicsData: { [topic: string]: TopicData }) => void;
+  setTopicsData: (
+    topicsData: { [topic: string]: TopicData },
+    markAsFetchedOnce?: boolean
+  ) => void;
 
   setSpamScores: (topicSpamScores: TopicSpamScores) => void;
 
@@ -149,6 +156,7 @@ export const initChatStore = (account: string) => {
           lastSyncedAt: 0,
           lastSyncedTopics: [],
           topicsData: {},
+          topicsDataFetchedOnce: false,
           openedConversationTopic: "",
           setOpenedConversationTopic: (topic) =>
             set((state) => {
@@ -444,10 +452,24 @@ export const initChatStore = (account: string) => {
                 initialLoadDoneOnce: true,
                 lastUpdateAt: now(),
               };
+              if (!state.initialLoadDoneOnce) {
+                if (
+                  state.topicsDataFetchedOnce &&
+                  Object.keys(state.topicsData).length === 0
+                ) {
+                  const topicsUpdates = getTopicsUpdatesAsRead(
+                    newState.conversations
+                  );
+                  newState.topicsData = topicsUpdates;
+                  saveTopicsData(account, topicsUpdates);
+                } else {
+                  setTimeout(() => {
+                    markConversationsAsReadIfNecessary(account);
+                  }, 100);
+                }
+              }
               return newState;
             }),
-          setInitialLoadDoneOnce: () =>
-            set(() => ({ initialLoadDoneOnce: true })),
           localClientConnected: false,
           setLocalClientConnected: (c) =>
             set(() => ({ localClientConnected: c })),
@@ -526,18 +548,28 @@ export const initChatStore = (account: string) => {
             }),
           setLastSyncedAt: (synced: number, topics: string[]) =>
             set(() => ({ lastSyncedAt: synced, lastSyncedTopics: topics })),
-          setTopicsData: (topicsData: { [topic: string]: TopicData }) =>
+          setTopicsData: (
+            topicsData: { [topic: string]: TopicData },
+            markAsFetchedOnce?: boolean
+          ) =>
             set((state) => {
               const newTopicsData = {
                 ...state.topicsData,
                 ...topicsData,
               };
-              if (isDeepEqual(state.topicsData, newTopicsData)) return state;
+              if (
+                isDeepEqual(state.topicsData, newTopicsData) &&
+                state.topicsDataFetchedOnce
+              )
+                return state;
               setImmediate(() => {
                 subscribeToNotifications(account);
               });
               return {
                 topicsData: newTopicsData,
+                topicsDataFetchedOnce: markAsFetchedOnce
+                  ? true
+                  : state.topicsDataFetchedOnce,
               };
             }),
           setSpamScores: (topicSpamScores: Record<string, number>) =>

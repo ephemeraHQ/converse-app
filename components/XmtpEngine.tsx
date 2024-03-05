@@ -28,7 +28,7 @@ export default function XmtpEngine() {
     accountsToSync.forEach((a) => {
       if (!syncingAccounts.current[a]) {
         getTopicsData(a).then((topicsData) => {
-          getChatStore(a).getState().setTopicsData(topicsData);
+          getChatStore(a).getState().setTopicsData(topicsData, true);
         });
         syncedAccounts.current[a] = true;
         syncingAccounts.current[a] = true;
