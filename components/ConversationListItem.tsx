@@ -380,7 +380,7 @@ const getStyles = (colorScheme: ColorSchemeName) =>
           top: 35,
         },
         android: {
-          left: 16,
+          left: 24,
           top: 39,
         },
       }),

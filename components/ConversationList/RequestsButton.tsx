@@ -69,7 +69,8 @@ const useStyles = () => {
         },
         android: {
           paddingVertical: 12,
-          paddingHorizontal: 16,
+          paddingLeft: 24,
+          paddingRight: 14,
         },
       }),
     },
