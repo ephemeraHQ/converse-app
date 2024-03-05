@@ -234,7 +234,6 @@ export const useTransactionForMessage = (
   const txRef = useMemo(() => {
     try {
       const parsed = JSON.parse(message.content);
-      return { error: "Could not parse transaction" };
       return parsed;
     } catch (e) {
       sentryTrackError(e, {
