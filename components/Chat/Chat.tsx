@@ -22,6 +22,7 @@ import {
   useRecommendationsStore,
 } from "../../data/store/accountsStore";
 import { XmtpConversationWithUpdate } from "../../data/store/chatStore";
+import { useIsSplitScreen } from "../../screens/Navigation/navHelpers";
 import {
   ReanimatedFlashList,
   ReanimatedFlatList,
@@ -127,6 +128,7 @@ export default function Chat() {
       ? s.profiles[conversation.peerAddress]?.socials
       : undefined
   );
+  const isSplitScreen = useIsSplitScreen();
   const recommendationsData = useRecommendationsStore((s) =>
     conversation?.peerAddress ? s.frens[conversation.peerAddress] : undefined
   );
@@ -291,10 +293,9 @@ export default function Chat() {
             //   minIndexForVisible: 0,
             //   autoscrollToTopThreshold: 100,
             // }}
-            estimatedListSize={{
-              height: Dimensions.get("screen").height,
-              width: Dimensions.get("screen").width,
-            }}
+            estimatedListSize={
+              isSplitScreen ? undefined : Dimensions.get("screen")
+            }
             inverted
             keyExtractor={keyExtractor}
             getItemType={(item: MessageToDisplay) => item.contentType}
