@@ -58,6 +58,7 @@ function ConversationList({ navigation, route, searchBarRef }: Props) {
   const {
     searchQuery,
     searchBarFocused,
+    setSearchBarFocused,
     initialLoadDoneOnce,
     sortedConversationsWithPreview,
     openedConversationTopic,
@@ -68,6 +69,7 @@ function ConversationList({ navigation, route, searchBarRef }: Props) {
       "searchQuery",
       "setSearchQuery",
       "searchBarFocused",
+      "setSearchBarFocused",
       "sortedConversationsWithPreview",
       "openedConversationTopic",
     ])
@@ -127,7 +129,9 @@ function ConversationList({ navigation, route, searchBarRef }: Props) {
   const clearSearch = useCallback(() => {
     setSearchQuery("");
     (searchBarRef.current as any)?.clearText?.();
-  }, [searchBarRef, setSearchQuery]);
+    (searchBarRef.current as any)?.blur?.();
+    setSearchBarFocused(false);
+  }, [searchBarRef, setSearchBarFocused, setSearchQuery]);
 
   const leavingScreen = useCallback(() => {
     if (sharingMode) {
