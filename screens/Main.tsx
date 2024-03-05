@@ -1,3 +1,4 @@
+import { StatusBar } from "expo-status-bar";
 import React, { useCallback, useEffect, useRef } from "react";
 import { Dimensions, Platform, useColorScheme } from "react-native";
 
@@ -84,7 +85,9 @@ export default function Main() {
           <InitialStateHandler />
         </>
       )}
-
+      {Platform.OS === "android" && (
+        <StatusBar backgroundColor={backgroundColor(colorScheme)} />
+      )}
       <NetworkStateHandler />
       <MainIdentityStateHandler />
       <NotificationsStateHandler />
