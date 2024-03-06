@@ -2,6 +2,7 @@ import { getSendersSpamScores } from "../../../utils/api";
 import { URL_REGEX } from "../../../utils/regex";
 import { isContentType } from "../../../utils/xmtpRN/contentTypes";
 import { getRepository } from "../../db";
+import { maxVariableCount } from "../../db/upsert";
 import { getChatStore } from "../../store/accountsStore";
 import { XmtpConversationWithUpdate } from "../../store/chatStore";
 
@@ -18,8 +19,8 @@ export const saveSpamScores = async (
   let batch: string[] = [];
   let rest = Object.keys(topicSpamScores);
   while (rest.length > 0) {
-    batch = rest.slice(0, 5000);
-    rest = rest.slice(5000);
+    batch = rest.slice(0, maxVariableCount);
+    rest = rest.slice(maxVariableCount);
     let query = `UPDATE "conversation" SET "spamScore" = (case `;
     const parameters = [] as any[];
     batch.forEach((topic) => {
