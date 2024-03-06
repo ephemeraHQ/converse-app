@@ -16,7 +16,7 @@ export const setTopicsData = async (account: string) => {
   const conversations = getChatStore(account).getState().conversations;
   for (const topic in conversations) {
     if (conversations[topic].readUntil) {
-      topicsData[topic] = topicsData[topic] || { status: "read" };
+      topicsData[topic] = topicsData[topic] || {};
       (topicsData[topic] as TopicData).readUntil =
         conversations[topic].readUntil;
     }
