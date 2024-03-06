@@ -18,9 +18,11 @@ export const saveSpamScores = async (
   // Let's update by batch
   let batch: string[] = [];
   let rest = Object.keys(topicSpamScores);
+  // There are 3 ? per topic (1 for topic and spam score, and one for topic WHERE)
+  const SLICE_SIZE = Math.floor(maxVariableCount / 3);
   while (rest.length > 0) {
-    batch = rest.slice(0, maxVariableCount);
-    rest = rest.slice(maxVariableCount);
+    batch = rest.slice(0, SLICE_SIZE);
+    rest = rest.slice(SLICE_SIZE);
     let query = `UPDATE "conversation" SET "spamScore" = (case `;
     const parameters = [] as any[];
     batch.forEach((topic) => {
