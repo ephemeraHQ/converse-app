@@ -2,7 +2,6 @@ import { buildUserInviteTopic } from "@xmtp/xmtp-js";
 import * as Notifications from "expo-notifications";
 import { Platform } from "react-native";
 
-import config from "../config";
 import { saveConversations } from "../data/helpers/conversations/upsertConversations";
 import { saveMessages } from "../data/helpers/messages";
 import {
@@ -29,7 +28,6 @@ import {
 import { conversationName, shortAddress } from "./str";
 import { getXmtpApiHeaders } from "./xmtpRN/api";
 
-let expoPushToken: string | null;
 let nativePushToken: string | null;
 
 export type NotificationPermissionStatus =
@@ -92,11 +90,7 @@ export const subscribeToNotifications = async (
       buildUserInviteTopic(account || ""),
     ];
 
-    const [expoTokenQuery, nativeTokenQuery] = await Promise.all([
-      Notifications.getExpoPushTokenAsync({ projectId: config.expoProjectId }),
-      Notifications.getDevicePushTokenAsync(),
-    ]);
-    expoPushToken = expoTokenQuery.data;
+    const nativeTokenQuery = await Notifications.getDevicePushTokenAsync();
     nativePushToken = nativeTokenQuery.data;
     if (nativePushToken) {
       savePushToken(nativePushToken);
@@ -117,7 +111,6 @@ export const subscribeToNotifications = async (
     await api.post(
       "/api/subscribe",
       {
-        expoToken: expoPushToken,
         nativeToken: nativePushToken,
         nativeTokenType: nativeTokenQuery.type,
         notificationChannel:
