@@ -9977,16 +9977,6 @@
     rxjs "^7.8.0"
     undici "^5.8.1"
 
-"@xmtp/proto@^3.25.0":
-  version "3.45.0"
-  resolved "https://registry.yarnpkg.com/@xmtp/proto/-/proto-3.45.0.tgz#2aaca656a6da85a05ae75f72340ce1ef5e4fb2ec"
-  integrity sha512-6d/UE/vqi1erpL+z/HSGvFOnJt+y7RE23g6SUUUB7tx75VAi5A0/uLwzPr/eyVkiHZGqlbktq8Rzco+HgTyTAw==
-  dependencies:
-    long "^5.2.0"
-    protobufjs "^7.0.0"
-    rxjs "^7.8.0"
-    undici "^5.8.1"
-
 "@xmtp/proto@^3.29.0":
   version "3.30.0"
   resolved "https://registry.yarnpkg.com/@xmtp/proto/-/proto-3.30.0.tgz#d8f85ea06258d3e0c2974faeedbbebb22892f97c"
@@ -10007,15 +9997,25 @@
     rxjs "^7.8.0"
     undici "^5.8.1"
 
-"@xmtp/react-native-sdk@^1.27.1":
-  version "1.27.1"
-  resolved "https://registry.yarnpkg.com/@xmtp/react-native-sdk/-/react-native-sdk-1.27.1.tgz#5b86548737f0059dd8d7171d627e0b0adca09b8c"
-  integrity sha512-pPrC9DSjX3QbiRpDgM+c+mry2DgBSgcbiAT3C3zBbLL45lqjp68MN2znnnr5i6+A1INsHdG9FC7/uHRwdQy5ww==
+"@xmtp/proto@^3.44.0":
+  version "3.45.0"
+  resolved "https://registry.yarnpkg.com/@xmtp/proto/-/proto-3.45.0.tgz#2aaca656a6da85a05ae75f72340ce1ef5e4fb2ec"
+  integrity sha512-6d/UE/vqi1erpL+z/HSGvFOnJt+y7RE23g6SUUUB7tx75VAi5A0/uLwzPr/eyVkiHZGqlbktq8Rzco+HgTyTAw==
+  dependencies:
+    long "^5.2.0"
+    protobufjs "^7.0.0"
+    rxjs "^7.8.0"
+    undici "^5.8.1"
+
+"@xmtp/react-native-sdk@^1.28.0":
+  version "1.28.0"
+  resolved "https://registry.yarnpkg.com/@xmtp/react-native-sdk/-/react-native-sdk-1.28.0.tgz#2eed57a8f4d6b457ba03e738c25bc5fa090b034a"
+  integrity sha512-d0a0c2dbPsJCcjP+CLft0vvaVXAQOIkKOiVefUS3oMDsQlc/FDn76VjAH8xyZy7qqDRjIQ1I+OnU8LdMsDQfcw==
   dependencies:
     "@ethersproject/bytes" "^5.7.0"
     "@msgpack/msgpack" "^3.0.0-beta2"
     "@noble/hashes" "^1.3.3"
-    "@xmtp/proto" "^3.25.0"
+    "@xmtp/proto" "^3.44.0"
     buffer "^6.0.3"
     text-encoding "^0.7.0"
 
