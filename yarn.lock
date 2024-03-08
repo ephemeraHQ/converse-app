@@ -9977,17 +9977,7 @@
     rxjs "^7.8.0"
     undici "^5.8.1"
 
-"@xmtp/proto@^3.34.0":
-  version "3.36.2"
-  resolved "https://registry.yarnpkg.com/@xmtp/proto/-/proto-3.36.2.tgz#47ea9437451de76ced8984c28829fb711ddd14d2"
-  integrity sha512-FsofGcm4kV/nkXCWl19rAONj2SYafkWR+U8K7HBL9ZrIgL2+RDCqS6OMCmHKc/dAxjsV3o7pQSqz0aPtdYvEBw==
-  dependencies:
-    long "^5.2.0"
-    protobufjs "^7.0.0"
-    rxjs "^7.8.0"
-    undici "^5.8.1"
-
-"@xmtp/proto@^3.44.0", "@xmtp/proto@^3.45.0":
+"@xmtp/proto@^3.39.0-beta.3", "@xmtp/proto@^3.44.0", "@xmtp/proto@^3.45.0":
   version "3.45.0"
   resolved "https://registry.yarnpkg.com/@xmtp/proto/-/proto-3.45.0.tgz#2aaca656a6da85a05ae75f72340ce1ef5e4fb2ec"
   integrity sha512-6d/UE/vqi1erpL+z/HSGvFOnJt+y7RE23g6SUUUB7tx75VAi5A0/uLwzPr/eyVkiHZGqlbktq8Rzco+HgTyTAw==
@@ -10010,9 +10000,9 @@
     text-encoding "^0.7.0"
 
 "@xmtp/user-preferences-bindings-wasm@^0.3.4":
-  version "0.3.4"
-  resolved "https://registry.yarnpkg.com/@xmtp/user-preferences-bindings-wasm/-/user-preferences-bindings-wasm-0.3.4.tgz#c2067c5e4c60c99a4662b663dd4d1283f07a121a"
-  integrity sha512-4d0j8QDZT8Z9DXIjxRJh7M1DjLNWcPV6807eeMN79gwF9SWbR1CXGSnBNqSrOgVu9nQSWqtg6qfyrrlQ3yHybA==
+  version "0.3.6"
+  resolved "https://registry.yarnpkg.com/@xmtp/user-preferences-bindings-wasm/-/user-preferences-bindings-wasm-0.3.6.tgz#4ca58dca940574483caa8cbd4d9c609577b1e0f1"
+  integrity sha512-ANi6ikrO6YBaK978sMuEEnpREvFQQnMVaNdlviaLzmc07u4Of4s/VLNnavl4qTb4F4cvwSiBWou0wSYIE5SWYg==
 
 "@xmtp/xmtp-js@^11.1.2":
   version "11.2.0"
@@ -10026,13 +10016,13 @@
     ethers "^5.5.3"
     long "^5.2.0"
 
-"@xmtp/xmtp-js@^11.3.5":
-  version "11.3.5"
-  resolved "https://registry.yarnpkg.com/@xmtp/xmtp-js/-/xmtp-js-11.3.5.tgz#1ce8b2a263c472be815257892f386fd81c266867"
-  integrity sha512-k7EA6YexuiiNfmC3D9Rr9jW+JfKrNQQ6Ub+YfD1IqINvcE/vt4OYErpLnGQgY4NMeO/SK/BPmSJNuCaX9epXlg==
+"@xmtp/xmtp-js@^11.4.0-beta.1":
+  version "11.4.0-beta.1"
+  resolved "https://registry.yarnpkg.com/@xmtp/xmtp-js/-/xmtp-js-11.4.0-beta.1.tgz#7fd633ada3394022d70c7a70742959e59d25c006"
+  integrity sha512-dnaw9gOBMTKv+ItSVp00vHOenfyWUG7fJ/m6MSsRtu/Kerz6PQlPl5OyGoIVctq7IO5pq4hgmVsAh+5atCg+Kw==
   dependencies:
     "@noble/secp256k1" "^1.5.2"
-    "@xmtp/proto" "^3.34.0"
+    "@xmtp/proto" "^3.39.0-beta.3"
     "@xmtp/user-preferences-bindings-wasm" "^0.3.4"
     async-mutex "^0.4.0"
     elliptic "^6.5.4"

@@ -81,6 +81,8 @@ export const xmtpConversationToDb = (
   pending: xmtpConversation.pending,
   version: xmtpConversation.version,
   spamScore: xmtpConversation.spamScore,
+  lastNotificationsSubscribedPeriod:
+    xmtpConversation.lastNotificationsSubscribedPeriod,
 });
 
 export const xmtpConversationFromDb = (
@@ -121,5 +123,7 @@ export const xmtpConversationFromDb = (
     version: dbConversation.version,
     hasOneMessageFromMe,
     spamScore: dbConversation.spamScore,
+    lastNotificationsSubscribedPeriod:
+      dbConversation.lastNotificationsSubscribedPeriod,
   };
 };

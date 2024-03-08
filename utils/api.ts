@@ -283,4 +283,25 @@ export const getPresignedUriForUpload = async (userAddress: string) => {
   return data as { objectKey: string; url: string };
 };
 
+export const saveNotificationsSubscribe = async (
+  account: string,
+  nativeToken: string,
+  nativeTokenType: string,
+  notificationChannel: string | null,
+  topicsWithKeys: {
+    [topic: string]: {
+      status: "PUSH" | "MUTED";
+      hmacKeys?: any;
+    };
+  }
+) => {
+  await api.post(
+    "/api/subscribe",
+    { nativeToken, nativeTokenType, notificationChannel, topicsWithKeys },
+    {
+      headers: await getXmtpApiHeaders(account),
+    }
+  );
+};
+
 export default api;

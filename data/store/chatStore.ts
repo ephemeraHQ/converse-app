@@ -43,6 +43,7 @@ export type XmtpConversation = {
   pending: boolean;
   version: string;
   spamScore?: number;
+  lastNotificationsSubscribedPeriod?: number;
 };
 
 export type XmtpConversationWithUpdate = XmtpConversation & {
@@ -143,6 +144,11 @@ export type ChatStoreType = {
     messageId: string,
     metadata: ConverseMessageMetadata
   ) => void;
+
+  setConversationsLastNotificationSubscribePeriod: (
+    topics: string[],
+    period: number
+  ) => void;
 };
 
 const now = () => new Date().getTime();
@@ -232,6 +238,7 @@ export const initChatStore = (account: string) => {
               });
 
               setImmediate(() => {
+                console.log("CALLING HERE AFTER SET CONVO");
                 subscribeToNotifications(account);
               });
 
@@ -615,6 +622,20 @@ export const initChatStore = (account: string) => {
                 lastUpdateAt: now(),
               });
               return newState;
+            }),
+          setConversationsLastNotificationSubscribePeriod: (
+            topics: string[],
+            period: number
+          ) =>
+            set((state) => {
+              const newConversations = { ...state.conversations };
+              topics.forEach((topic) => {
+                if (newConversations[topic]) {
+                  newConversations[topic].lastNotificationsSubscribedPeriod =
+                    period;
+                }
+              });
+              return { conversations: newConversations };
             }),
         }) as ChatStoreType,
       {

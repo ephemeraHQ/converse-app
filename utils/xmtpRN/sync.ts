@@ -12,7 +12,6 @@ import {
 import {
   deleteOpenedConversations,
   loadConversations,
-  loadConversationsHmacKeys,
   stopStreamingConversations,
   streamConversations,
   updateConsentStatus,
@@ -123,8 +122,6 @@ export const syncXmtpClient = async (account: string) => {
     // Need to save initial load is done
     getChatStore(account).getState().setInitialLoadDone();
 
-    // Let's get hmac keys for notifications
-    await loadConversationsHmacKeys(account);
     // Only update when we have really fetched, this might mitigate
     // the case where we never fetch some messages
     if (fetchedMessagesCount > 0) {

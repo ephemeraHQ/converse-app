@@ -133,3 +133,18 @@ export const markConversationReadUntil = async (
   const conversationRepository = await getRepository(account, "conversation");
   await conversationRepository.update({ topic }, { readUntil });
 };
+
+export const saveConversationsLastNotificationSubscribePeriod = async (
+  account: string,
+  topics: string[],
+  period: number
+) => {
+  getChatStore(account)
+    .getState()
+    .setConversationsLastNotificationSubscribePeriod(topics, period);
+  const conversationRepository = await getRepository(account, "conversation");
+  await conversationRepository.update(
+    { topic: In(topics) },
+    { lastNotificationsSubscribedPeriod: period }
+  );
+};
