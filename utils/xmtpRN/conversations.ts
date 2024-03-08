@@ -286,14 +286,7 @@ export const createPendingConversations = async (account: string) => {
 };
 
 export const loadConversationsHmacKeys = async (account: string) => {
-  const now = new Date().getTime();
-  console.log("getting hmac keys...");
   const client = (await getXmtpClient(account)) as ConverseXmtpClientType;
   const { hmacKeys } = await client.conversations.getHmacKeys();
-  console.log(
-    "got hmac keys in ",
-    (new Date().getTime() - now) / 1000,
-    " seconds - length",
-    Object.keys(hmacKeys).length
-  );
+  return hmacKeys;
 };
