@@ -362,13 +362,22 @@ export const initChatStore = (account: string) => {
                   newState.conversations[topic].lastUpdateAt = now();
                   insertMessageIdAtRightIndex(conversation, message);
                   if (state.openedConversationTopic === topic) {
+                    const newReadUntil = Math.max(
+                      message.sent,
+                      newState.topicsData[topic]?.readUntil
+                        ? (newState.topicsData[topic]?.readUntil as number)
+                        : 0
+                    );
                     newState.topicsData[topic] = {
                       status: "read",
-                      readUntil: message.sent,
+                      readUntil: newReadUntil,
                     };
 
                     saveTopicsData(account, {
-                      [topic]: { status: "read", readUntil: message.sent },
+                      [topic]: {
+                        status: "read",
+                        readUntil: newReadUntil,
+                      },
                     });
                   }
                 }
@@ -555,8 +564,13 @@ export const initChatStore = (account: string) => {
             set((state) => {
               const newTopicsData = {
                 ...state.topicsData,
-                ...topicsData,
               };
+              Object.keys(topicsData).forEach((topic) => {
+                newTopicsData[topic] = {
+                  ...(newTopicsData[topic] || {}),
+                  ...topicsData[topic],
+                };
+              });
               if (
                 isDeepEqual(state.topicsData, newTopicsData) &&
                 state.topicsDataFetchedOnce
