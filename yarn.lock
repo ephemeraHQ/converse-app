@@ -9967,16 +9967,6 @@
     rxjs "^7.8.0"
     undici "^5.8.1"
 
-"@xmtp/proto@^3.24.0":
-  version "3.24.0"
-  resolved "https://registry.yarnpkg.com/@xmtp/proto/-/proto-3.24.0.tgz#305492a5040b3cd7d5cfdbf48db7305c31db1d29"
-  integrity sha512-RPzv+E7TOttY3Xs6+LE2ctQxzVLcdZLMzSeS+MEG2vBO8Dl/bhojGs/MehJorZzWHCLtL5VDPq0IY164RLqC7w==
-  dependencies:
-    long "^5.2.0"
-    protobufjs "^7.0.0"
-    rxjs "^7.8.0"
-    undici "^5.8.1"
-
 "@xmtp/proto@^3.29.0":
   version "3.30.0"
   resolved "https://registry.yarnpkg.com/@xmtp/proto/-/proto-3.30.0.tgz#d8f85ea06258d3e0c2974faeedbbebb22892f97c"
@@ -9997,7 +9987,7 @@
     rxjs "^7.8.0"
     undici "^5.8.1"
 
-"@xmtp/proto@^3.44.0":
+"@xmtp/proto@^3.44.0", "@xmtp/proto@^3.45.0":
   version "3.45.0"
   resolved "https://registry.yarnpkg.com/@xmtp/proto/-/proto-3.45.0.tgz#2aaca656a6da85a05ae75f72340ce1ef5e4fb2ec"
   integrity sha512-6d/UE/vqi1erpL+z/HSGvFOnJt+y7RE23g6SUUUB7tx75VAi5A0/uLwzPr/eyVkiHZGqlbktq8Rzco+HgTyTAw==
