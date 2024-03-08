@@ -8,6 +8,7 @@ import Call from "@material-symbols/svg-400/outlined/call.svg";
 import ArrowUpRight from "@material-symbols/svg-400/outlined/call_made.svg";
 import Celebration from "@material-symbols/svg-400/outlined/celebration.svg";
 import Chat from "@material-symbols/svg-400/outlined/chat.svg";
+import ChatBubble from "@material-symbols/svg-400/outlined/chat_bubble.svg";
 import Close from "@material-symbols/svg-400/outlined/close.svg";
 import ContentCopy from "@material-symbols/svg-400/outlined/content_copy.svg";
 import Delete from "@material-symbols/svg-400/outlined/delete.svg";
@@ -68,6 +69,7 @@ const pictoMapping: {
   "message.circle.fill": Chat,
   signature: Signature,
   "message.badge": ChatNotification,
+  "checkmark.message": ChatBubble,
   search: Search,
   addlink: AddLink,
   "key.horizontal": Key,
