@@ -39,3 +39,12 @@ export class LimitedMap<K, V> extends Map<K, V> {
 
 export const isEmptyObject = <T extends object>(obj: T): boolean =>
   Object.keys(obj).length === 0;
+
+export const isSameUint8Array = (array1: Uint8Array, array2: Uint8Array) => {
+  if (array1.length !== array2.length) return false;
+  let isEqual = true;
+  for (let i = 0; i < array1.length && isEqual; i++) {
+    isEqual = array1[i] === array2[i];
+  }
+  return isEqual;
+};
