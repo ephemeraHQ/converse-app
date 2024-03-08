@@ -213,23 +213,18 @@ const ConversationListItem = memo(function ConversationListItem({
 
   const renderLeftActions = useCallback(() => {
     return (
-      <RectButton
-        style={[styles.leftAction]}
-        onPress={() => {
-          closeSwipeable();
-        }}
-      >
+      <RectButton style={[styles.leftAction]}>
         <Picto
-          picto="message.badge"
+          picto={showUnread ? "checkmark.message" : "message.badge"}
           color="white"
           size={Platform.OS === "ios" ? 18 : 30}
         />
       </RectButton>
     );
-  }, [closeSwipeable, styles.leftAction]);
+  }, [showUnread, styles.leftAction]);
 
   const rowItem =
-    Platform.OS === "ios" ? (
+    Platform.OS === "ios" || Platform.OS === "web" ? (
       <TouchableHighlight
         underlayColor={clickedItemBackgroundColor(colorScheme)}
         delayPressIn={isDesktop ? 0 : 75}
@@ -292,13 +287,15 @@ const ConversationListItem = memo(function ConversationListItem({
                 Haptics.NotificationFeedbackType.Success
               );
               saveTopicsData(currentAccount(), {
-                [conversationTopic]: { status: "unread" },
+                [conversationTopic]: { status: showUnread ? "read" : "unread" },
               });
-              setTopicsData({ [conversationTopic]: { status: "unread" } });
+              setTopicsData({
+                [conversationTopic]: { status: showUnread ? "read" : "unread" },
+              });
             }
           }
         }}
-        hitSlop={{ left: -60 }}
+        hitSlop={{ left: isSplitScreen ? 0 : -6 }}
       >
         {rowItem}
       </Swipeable>
