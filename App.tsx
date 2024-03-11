@@ -5,7 +5,7 @@ import { ActionSheetProvider } from "@expo/react-native-action-sheet";
 import { PrivyProvider } from "@privy-io/expo";
 import { Ethereum } from "@thirdweb-dev/chains";
 import { coinbaseWallet, ThirdwebProvider } from "@thirdweb-dev/react-native";
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import {
   Platform,
   StyleSheet,
@@ -25,7 +25,6 @@ import {
   updateLastVersionOpen,
   runAsyncUpdates,
 } from "./data/updates/asyncUpdates";
-import { migrateDataIfNeeded } from "./data/updates/initialUpdates";
 import Main from "./screens/Main";
 import { registerBackgroundFetchTask } from "./utils/background";
 import {
@@ -67,26 +66,12 @@ export default function App() {
       mmkv.set(RECENT_EMOJI_STORAGE_KEY, JSON.stringify(next));
     },
   });
-  const [refactoMigrationDone, setRefactoMigrationDone] = useState(false);
 
   const { isInternetReachable, hydrationDone } = useAppStore(
     useSelect(["isInternetReachable", "hydrationDone"])
   );
 
-  useEffect(() => {
-    migrateDataIfNeeded()
-      .then(() => {
-        setRefactoMigrationDone(true);
-
-        // last LastSyncUpdateRun
-        updateLastVersionOpen();
-      })
-      .catch((e) => {
-        sentryTrackError(e);
-        // This is still better than being stuck on home…
-        setRefactoMigrationDone(true);
-      });
-  }, []);
+  useEffect(updateLastVersionOpen, []);
 
   useEffect(() => {
     if (isInternetReachable && hydrationDone) {
@@ -95,8 +80,6 @@ export default function App() {
       });
     }
   }, [isInternetReachable, hydrationDone]);
-
-  if (!refactoMigrationDone) return null;
 
   // On Android we use the default keyboard "animation"
   const AppKeyboardProvider =

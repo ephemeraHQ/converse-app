@@ -10,7 +10,9 @@ import {
   XmtpMessage,
   XmtpConversation,
   XmtpConversationWithUpdate,
+  TopicData,
 } from "../data/store/chatStore";
+import { saveTopicsData } from "./api";
 import { isAttachmentMessage } from "./attachment/helpers";
 import { getAddressForPeer } from "./eth";
 import { subscribeToNotifications } from "./notifications";
@@ -288,7 +290,7 @@ const conversationsSortMethod = (
 export function sortAndComputePreview(
   conversations: Record<string, XmtpConversation>,
   userAddress: string,
-  topicsStatus: { [topic: string]: "deleted" | "consented" },
+  topicsData: { [topic: string]: TopicData | undefined },
   peersStatus: { [peer: string]: "blocked" | "consented" }
 ) {
   const conversationsRequests: ConversationWithLastMessagePreview[] = [];
@@ -298,7 +300,7 @@ export function sortAndComputePreview(
       if (
         conversation?.peerAddress &&
         (!conversation.pending || conversation.messages.size > 0) &&
-        topicsStatus[conversation.topic] !== "deleted" &&
+        topicsData[conversation.topic]?.status !== "deleted" &&
         peersStatus[conversation.peerAddress.toLowerCase()] !== "blocked" &&
         conversation.version !== "v1" &&
         !conversation.topic.includes("\x00") // Forbidden character that breaks notifications
@@ -347,3 +349,39 @@ export function getConversationListItemsToDisplay(
     return sortedConversations;
   }
 }
+
+export const markConversationsAsReadIfNecessary = async (account: string) => {
+  while (!getChatStore(account).getState().topicsDataFetchedOnce) {
+    await new Promise((r) => setTimeout(r, 2000));
+  }
+  if (Object.keys(getChatStore(account).getState().topicsData).length > 0) {
+    return;
+  }
+  const topicsUpdates = getTopicsUpdatesAsRead(
+    getChatStore(account).getState().conversations
+  );
+  getChatStore(account).getState().setTopicsData(topicsUpdates);
+  saveTopicsData(account, topicsUpdates);
+};
+
+export const getTopicsUpdatesAsRead = (conversations: {
+  [topic: string]: XmtpConversationWithUpdate;
+}) => {
+  const topicsUpdates: {
+    [topic: string]: TopicData;
+  } = {};
+  for (const topic in conversations) {
+    const conversation = conversations[topic];
+    const lastMessageId =
+      conversation.messagesIds.length > 0
+        ? conversation.messagesIds[conversation.messagesIds.length - 1]
+        : undefined;
+    const lastMessage = lastMessageId
+      ? conversation.messages.get(lastMessageId)
+      : undefined;
+    if (lastMessage) {
+      topicsUpdates[topic] = { status: "read", readUntil: lastMessage.sent };
+    }
+  }
+  return topicsUpdates;
+};

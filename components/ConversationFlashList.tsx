@@ -41,14 +41,19 @@ export default function ConversationFlashList({
 }: Props) {
   const styles = useStyles();
   const colorScheme = useColorScheme();
-  const { lastUpdateAt, initialLoadDoneOnce, openedConversationTopic } =
-    useChatStore(
-      useSelect([
-        "lastUpdateAt",
-        "initialLoadDoneOnce",
-        "openedConversationTopic",
-      ])
-    );
+  const {
+    lastUpdateAt,
+    initialLoadDoneOnce,
+    openedConversationTopic,
+    topicsData,
+  } = useChatStore(
+    useSelect([
+      "lastUpdateAt",
+      "initialLoadDoneOnce",
+      "openedConversationTopic",
+      "topicsData",
+    ])
+  );
   const userAddress = useCurrentAccount() as string;
   const peersStatus = useSettingsStore((s) => s.peersStatus);
   const isSplitScreen = useIsSplitScreen();
@@ -100,15 +105,19 @@ export default function ConversationFlashList({
             lastMessagePreview?.message?.sent || conversation.createdAt
           }
           conversationName={conversationName(conversation)}
-          showUnread={
-            !!(
-              initialLoadDoneOnce &&
-              lastMessagePreview &&
-              conversation.readUntil < lastMessagePreview.message.sent &&
-              lastMessagePreview.message.senderAddress ===
-                conversation.peerAddress
-            )
-          }
+          showUnread={(() => {
+            if (!initialLoadDoneOnce) return false;
+            if (!lastMessagePreview) return false;
+            // Manually marked as unread
+            if (topicsData[conversation.topic]?.status === "unread")
+              return true;
+            // If not manually markes as unread, we only show badge if last message
+            // not from me
+            if (lastMessagePreview.message.senderAddress === userAddress)
+              return false;
+            const readUntil = topicsData[conversation.topic]?.readUntil || 0;
+            return readUntil < lastMessagePreview.message.sent;
+          })()}
           lastMessagePreview={
             peersStatus[conversation.peerAddress.toLowerCase()] === "blocked"
               ? "This user is blocked"
@@ -132,6 +141,7 @@ export default function ConversationFlashList({
       openedConversationTopic,
       peersStatus,
       route,
+      topicsData,
       userAddress,
     ]
   );

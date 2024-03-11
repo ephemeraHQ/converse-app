@@ -1,4 +1,5 @@
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
+import * as Haptics from "expo-haptics";
 import React, { memo, useCallback, useEffect, useRef, useState } from "react";
 import {
   ColorSchemeName,
@@ -21,7 +22,7 @@ import {
 } from "../data/store/accountsStore";
 import { NavigationParamList } from "../screens/Navigation/Navigation";
 import { useIsSplitScreen } from "../screens/Navigation/navHelpers";
-import { deleteTopics } from "../utils/api";
+import { saveTopicsData } from "../utils/api";
 import {
   actionSecondaryColor,
   actionSheetColors,
@@ -73,7 +74,7 @@ const ConversationListItem = memo(function ConversationListItem({
 }: ConversationListItemProps) {
   const styles = getStyles(colorScheme);
   const timeToShow = getRelativeDateTime(conversationTime);
-  const setTopicsStatus = useChatStore((s) => s.setTopicsStatus);
+  const setTopicsData = useChatStore((s) => s.setTopicsData);
   const setPeersStatus = useSettingsStore((s) => s.setPeersStatus);
   const isSplitScreen = useIsSplitScreen();
   const [selected, setSelected] = useState(false);
@@ -171,11 +172,15 @@ const ConversationListItem = memo(function ConversationListItem({
             },
             (selectedIndex?: number) => {
               if (selectedIndex === 0) {
-                deleteTopics(currentAccount(), [conversationTopic]);
-                setTopicsStatus({ [conversationTopic]: "deleted" });
+                saveTopicsData(currentAccount(), {
+                  [conversationTopic]: { status: "deleted" },
+                });
+                setTopicsData({ [conversationTopic]: { status: "deleted" } });
               } else if (selectedIndex === 1) {
-                deleteTopics(currentAccount(), [conversationTopic]);
-                setTopicsStatus({ [conversationTopic]: "deleted" });
+                saveTopicsData(currentAccount(), {
+                  [conversationTopic]: { status: "deleted" },
+                });
+                setTopicsData({ [conversationTopic]: { status: "deleted" } });
                 consentToPeersOnProtocol(
                   currentAccount(),
                   [conversationPeerAddress],
@@ -199,15 +204,27 @@ const ConversationListItem = memo(function ConversationListItem({
   }, [
     conversationTopic,
     conversationPeerAddress,
-    setTopicsStatus,
+    setTopicsData,
     setPeersStatus,
     closeSwipeable,
     colorScheme,
     styles.rightAction,
   ]);
 
+  const renderLeftActions = useCallback(() => {
+    return (
+      <RectButton style={[styles.leftAction]}>
+        <Picto
+          picto={showUnread ? "checkmark.message" : "message.badge"}
+          color="white"
+          size={Platform.OS === "ios" ? 18 : 30}
+        />
+      </RectButton>
+    );
+  }, [showUnread, styles.leftAction]);
+
   const rowItem =
-    Platform.OS === "ios" ? (
+    Platform.OS === "ios" || Platform.OS === "web" ? (
       <TouchableHighlight
         underlayColor={clickedItemBackgroundColor(colorScheme)}
         delayPressIn={isDesktop ? 0 : 75}
@@ -250,19 +267,48 @@ const ConversationListItem = memo(function ConversationListItem({
       </TouchableRipple>
     );
 
+  const toggleUnreadStatusOnClose = useRef(false);
+  const [swipeableKey, setSwipeableKey] = useState(0);
+
   return (
     <View style={styles.rowSeparator}>
       <Swipeable
+        key={swipeableKey}
         renderRightActions={renderRightActions}
+        renderLeftActions={renderLeftActions}
+        leftThreshold={10000} // Never trigger opening
         overshootFriction={4}
         ref={swipeableRef}
         onSwipeableWillOpen={() => {
           converseEventEmitter.on("conversationList-scroll", closeSwipeable);
         }}
-        onSwipeableWillClose={() => {
+        onSwipeableWillClose={(direction) => {
           converseEventEmitter.off("conversationList-scroll", closeSwipeable);
+          if (direction === "left") {
+            const translation = swipeableRef.current?.state.rowTranslation;
+            if (translation && (translation as any)._value > 100) {
+              Haptics.notificationAsync(
+                Haptics.NotificationFeedbackType.Success
+              );
+              toggleUnreadStatusOnClose.current = true;
+            }
+          }
         }}
-        hitSlop={{ left: -60 }}
+        onSwipeableClose={(direction) => {
+          if (direction === "left" && toggleUnreadStatusOnClose.current) {
+            toggleUnreadStatusOnClose.current = false;
+            setTopicsData({
+              [conversationTopic]: { status: showUnread ? "read" : "unread" },
+            });
+            saveTopicsData(currentAccount(), {
+              [conversationTopic]: { status: showUnread ? "read" : "unread" },
+            });
+          }
+          if (Platform.OS === "web") {
+            setSwipeableKey(new Date().getTime());
+          }
+        }}
+        hitSlop={{ left: isSplitScreen ? 0 : -6 }}
       >
         {rowItem}
       </Swipeable>
@@ -389,6 +435,12 @@ const getStyles = (colorScheme: ColorSchemeName) =>
       width: 100,
       alignItems: "center",
       backgroundColor: dangerColor(colorScheme),
+      justifyContent: "center",
+    },
+    leftAction: {
+      width: 100,
+      alignItems: "center",
+      backgroundColor: badgeColor(colorScheme),
       justifyContent: "center",
     },
     rippleRow: {

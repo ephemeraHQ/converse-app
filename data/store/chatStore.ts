@@ -1,3 +1,4 @@
+import isDeepEqual from "fast-deep-equal";
 import { Platform } from "react-native";
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
@@ -6,18 +7,18 @@ import {
   TopicSpamScores,
   computeConversationsSpamScores,
 } from "../../data/helpers/conversations/spamScore";
-import { ConversationWithLastMessagePreview } from "../../utils/conversation";
-import { lastValueInMap } from "../../utils/map";
+import { saveTopicsData } from "../../utils/api";
+import {
+  ConversationWithLastMessagePreview,
+  getTopicsUpdatesAsRead,
+  markConversationsAsReadIfNecessary,
+} from "../../utils/conversation";
 import { zustandMMKVStorage } from "../../utils/mmkv";
 import { subscribeToNotifications } from "../../utils/notifications";
 import { omit } from "../../utils/objects";
 import { refreshBalanceForAccount } from "../../utils/wallet";
 import { isContentType } from "../../utils/xmtpRN/contentTypes";
 import { ConverseMessageMetadata } from "../db/entities/messageEntity";
-import {
-  markAllConversationsAsReadInDb,
-  markConversationReadUntil,
-} from "../helpers/conversations/upsertConversations";
 
 // Chat data for each user
 
@@ -37,7 +38,7 @@ export type XmtpConversation = {
   messagesIds: string[];
   conversationTitle?: string | null;
   messageDraft?: string;
-  readUntil: number;
+  readUntil: number; // UNUSED
   hasOneMessageFromMe?: boolean;
   pending: boolean;
   version: string;
@@ -72,6 +73,11 @@ type ConversationsListItems = {
   conversationsRequests: ConversationWithLastMessagePreview[];
 };
 
+export type TopicData = {
+  status: "deleted" | "unread" | "read";
+  readUntil?: number;
+};
+
 export type ChatStoreType = {
   conversations: {
     [topic: string]: XmtpConversationWithUpdate;
@@ -89,7 +95,8 @@ export type ChatStoreType = {
   localClientConnected: boolean;
   resyncing: boolean;
   reconnecting: boolean;
-  topicsStatus: { [topic: string]: "deleted" | "consented" };
+  topicsData: { [topic: string]: TopicData | undefined };
+  topicsDataFetchedOnce: boolean | undefined;
 
   conversationsSortedOnce: boolean;
   sortedConversationsWithPreview: ConversationsListItems;
@@ -109,7 +116,6 @@ export type ChatStoreType = {
   setConversationMessageDraft: (topic: string, draft: string) => void;
 
   setInitialLoadDone: () => void;
-  setInitialLoadDoneOnce: () => void;
   setMessages: (messagesToSet: XmtpMessage[]) => void;
   updateMessagesIds: (
     updates: { topic: string; oldId: string; message: XmtpMessage }[]
@@ -125,9 +131,10 @@ export type ChatStoreType = {
   setReconnecting: (reconnecting: boolean) => void;
   setLastSyncedAt: (synced: number, topics: string[]) => void;
 
-  setTopicsStatus: (topicsStatus: {
-    [topic: string]: "deleted" | "consented";
-  }) => void;
+  setTopicsData: (
+    topicsData: { [topic: string]: TopicData },
+    markAsFetchedOnce?: boolean
+  ) => void;
 
   setSpamScores: (topicSpamScores: TopicSpamScores) => void;
 
@@ -148,16 +155,32 @@ export const initChatStore = (account: string) => {
           conversations: {},
           lastSyncedAt: 0,
           lastSyncedTopics: [],
-          topicsStatus: {},
+          topicsData: {},
+          topicsDataFetchedOnce: false,
           openedConversationTopic: "",
           setOpenedConversationTopic: (topic) =>
             set((state) => {
               const newState = { ...state, openedConversationTopic: topic };
               if (topic && newState.conversations[topic]) {
-                const n = now();
-                newState.conversations[topic].readUntil = n;
-                // Also mark in db
-                markConversationReadUntil(account, topic, n);
+                const conversation = newState.conversations[topic];
+                const lastMessageId =
+                  conversation.messagesIds.length > 0
+                    ? conversation.messagesIds[
+                        conversation.messagesIds.length - 1
+                      ]
+                    : undefined;
+                if (lastMessageId) {
+                  const lastMessage = conversation.messages.get(lastMessageId);
+                  if (lastMessage) {
+                    newState.topicsData[topic] = {
+                      status: "read",
+                      readUntil: lastMessage.sent,
+                    };
+                    saveTopicsData(account, {
+                      [topic]: { status: "read", readUntil: lastMessage.sent },
+                    });
+                  }
+                }
               }
               return newState;
             }),
@@ -339,13 +362,23 @@ export const initChatStore = (account: string) => {
                   newState.conversations[topic].lastUpdateAt = now();
                   insertMessageIdAtRightIndex(conversation, message);
                   if (state.openedConversationTopic === topic) {
-                    conversation.readUntil = now();
-                    // Also mark in db
-                    markConversationReadUntil(
-                      account,
-                      conversation.topic,
-                      conversation.readUntil
+                    const newReadUntil = Math.max(
+                      message.sent,
+                      newState.topicsData[topic]?.readUntil
+                        ? (newState.topicsData[topic]?.readUntil as number)
+                        : 0
                     );
+                    newState.topicsData[topic] = {
+                      status: "read",
+                      readUntil: newReadUntil,
+                    };
+
+                    saveTopicsData(account, {
+                      [topic]: {
+                        status: "read",
+                        readUntil: newReadUntil,
+                      },
+                    });
                   }
                 }
 
@@ -429,22 +462,23 @@ export const initChatStore = (account: string) => {
                 lastUpdateAt: now(),
               };
               if (!state.initialLoadDoneOnce) {
-                // If it's the initial sync, let's mark
-                // all conversations as read
-                for (const topic in newState.conversations) {
-                  const conversation = newState.conversations[topic];
-                  conversation.lastUpdateAt = now();
-                  if (conversation.messages.size > 0) {
-                    const lastMessage = lastValueInMap(conversation.messages);
-                    conversation.readUntil = lastMessage ? lastMessage.sent : 0;
-                  }
+                if (
+                  state.topicsDataFetchedOnce &&
+                  Object.keys(state.topicsData).length === 0
+                ) {
+                  const topicsUpdates = getTopicsUpdatesAsRead(
+                    newState.conversations
+                  );
+                  newState.topicsData = topicsUpdates;
+                  saveTopicsData(account, topicsUpdates);
+                } else {
+                  setTimeout(() => {
+                    markConversationsAsReadIfNecessary(account);
+                  }, 100);
                 }
-                markAllConversationsAsReadInDb(account);
               }
               return newState;
             }),
-          setInitialLoadDoneOnce: () =>
-            set(() => ({ initialLoadDoneOnce: true })),
           localClientConnected: false,
           setLocalClientConnected: (c) =>
             set(() => ({ localClientConnected: c })),
@@ -523,15 +557,33 @@ export const initChatStore = (account: string) => {
             }),
           setLastSyncedAt: (synced: number, topics: string[]) =>
             set(() => ({ lastSyncedAt: synced, lastSyncedTopics: topics })),
-          setTopicsStatus: (topicsStatus: {
-            [topic: string]: "deleted" | "consented";
-          }) =>
+          setTopicsData: (
+            topicsData: { [topic: string]: TopicData },
+            markAsFetchedOnce?: boolean
+          ) =>
             set((state) => {
+              const newTopicsData = {
+                ...state.topicsData,
+              };
+              Object.keys(topicsData).forEach((topic) => {
+                newTopicsData[topic] = {
+                  ...(newTopicsData[topic] || {}),
+                  ...topicsData[topic],
+                };
+              });
+              if (
+                isDeepEqual(state.topicsData, newTopicsData) &&
+                state.topicsDataFetchedOnce
+              )
+                return state;
               setImmediate(() => {
                 subscribeToNotifications(account);
               });
               return {
-                topicsStatus: { ...state.topicsStatus, ...topicsStatus },
+                topicsData: newTopicsData,
+                topicsDataFetchedOnce: markAsFetchedOnce
+                  ? true
+                  : state.topicsDataFetchedOnce,
               };
             }),
           setSpamScores: (topicSpamScores: Record<string, number>) =>
@@ -578,7 +630,7 @@ export const initChatStore = (account: string) => {
             initialLoadDoneOnce: state.initialLoadDoneOnce,
             lastSyncedAt: state.lastSyncedAt,
             lastSyncedTopics: state.lastSyncedTopics,
-            topicsStatus: state.topicsStatus,
+            topicsData: state.topicsData,
           };
           // if (Platform.OS === "web" && state.conversations) {
           //   // On web, we persist convos without messages
@@ -597,11 +649,11 @@ export const initChatStore = (account: string) => {
           // }
           return persistedState;
         },
-        version: 1,
+        version: 2,
         migrate: (persistedState: any, version: number): ChatStoreType => {
           console.log("Zustand migration version:", version);
           // Migration from version 0: Convert 'deletedTopics' to 'topicsStatus'
-          if (version === 0 && persistedState.deletedTopics) {
+          if (version < 1 && persistedState.deletedTopics) {
             persistedState.topicsStatus = {};
             for (const [topic, isDeleted] of Object.entries(
               persistedState.deletedTopics
@@ -611,6 +663,17 @@ export const initChatStore = (account: string) => {
               }
             }
             delete persistedState.deletedTopics;
+          }
+          if (version < 2 && persistedState.topicsStatus) {
+            persistedState.topicsData = {};
+            for (const [topic, status] of Object.entries(
+              persistedState.topicsStatus
+            )) {
+              persistedState.topicsData[topic] = {
+                status,
+              };
+            }
+            delete persistedState.topicsStatus;
           }
           return persistedState as ChatStoreType;
         },
