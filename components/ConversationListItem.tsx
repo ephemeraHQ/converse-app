@@ -267,9 +267,13 @@ const ConversationListItem = memo(function ConversationListItem({
       </TouchableRipple>
     );
 
+  const toggleUnreadStatusOnClose = useRef(false);
+  const [swipeableKey, setSwipeableKey] = useState(0);
+
   return (
     <View style={styles.rowSeparator}>
       <Swipeable
+        key={swipeableKey}
         renderRightActions={renderRightActions}
         renderLeftActions={renderLeftActions}
         leftThreshold={10000} // Never trigger opening
@@ -286,13 +290,22 @@ const ConversationListItem = memo(function ConversationListItem({
               Haptics.notificationAsync(
                 Haptics.NotificationFeedbackType.Success
               );
-              saveTopicsData(currentAccount(), {
-                [conversationTopic]: { status: showUnread ? "read" : "unread" },
-              });
-              setTopicsData({
-                [conversationTopic]: { status: showUnread ? "read" : "unread" },
-              });
+              toggleUnreadStatusOnClose.current = true;
             }
+          }
+        }}
+        onSwipeableClose={(direction) => {
+          if (direction === "left" && toggleUnreadStatusOnClose.current) {
+            toggleUnreadStatusOnClose.current = false;
+            setTopicsData({
+              [conversationTopic]: { status: showUnread ? "read" : "unread" },
+            });
+            saveTopicsData(currentAccount(), {
+              [conversationTopic]: { status: showUnread ? "read" : "unread" },
+            });
+          }
+          if (Platform.OS === "web") {
+            setSwipeableKey(new Date().getTime());
           }
         }}
         hitSlop={{ left: isSplitScreen ? 0 : -6 }}
