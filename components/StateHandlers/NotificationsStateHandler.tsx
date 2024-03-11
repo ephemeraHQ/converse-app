@@ -77,14 +77,14 @@ export default function NotificationsStateHandler() {
 
 const AccountNotificationsStateHandler = ({ account }: { account: string }) => {
   const hydrationDone = useAppStore((s) => s.hydrationDone);
-  const { conversations, topicsStatus, lastUpdateAt } = useChatStoreForAccount(
+  const { conversations, topicsData, lastUpdateAt } = useChatStoreForAccount(
     account
-  )(useSelect(["conversations", "topicsStatus", "lastUpdateAt"]));
+  )(useSelect(["conversations", "topicsData", "lastUpdateAt"]));
   const peersStatus = useSettingsStoreForAccount(account)((s) => s.peersStatus);
   const lastRefreshState = useRef({
     account,
     conversations: 0,
-    topicsStatus: 0,
+    topicsData: 0,
     peersStatus: 0,
     lastUpdateAt: 0,
   });
@@ -95,7 +95,7 @@ const AccountNotificationsStateHandler = ({ account }: { account: string }) => {
     const newRefreshState = {
       account,
       conversations: Object.keys(conversations).length,
-      topicsStatus: Object.keys(topicsStatus).length,
+      topicsData: Object.keys(topicsData).length,
       peersStatus: Object.keys(peersStatus).length,
       lastUpdateAt,
     };
@@ -103,19 +103,19 @@ const AccountNotificationsStateHandler = ({ account }: { account: string }) => {
       newRefreshState.account !== lastRefreshState.current.account ||
       newRefreshState.conversations !==
         lastRefreshState.current.conversations ||
-      newRefreshState.topicsStatus !== lastRefreshState.current.topicsStatus ||
+      newRefreshState.topicsData !== lastRefreshState.current.topicsData ||
       newRefreshState.peersStatus !== lastRefreshState.current.peersStatus ||
       newRefreshState.lastUpdateAt !== lastRefreshState.current.lastUpdateAt
     ) {
       lastRefreshState.current = newRefreshState;
-      sortAndComputePreview(conversations, account, topicsStatus, peersStatus);
+      sortAndComputePreview(conversations, account, topicsData, peersStatus);
     }
   }, [
     account,
     conversations,
     hydrationDone,
     peersStatus,
-    topicsStatus,
+    topicsData,
     lastUpdateAt,
   ]);
   return null;
