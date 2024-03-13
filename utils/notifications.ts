@@ -162,12 +162,13 @@ export const subscribeToNotifications = async (
     );
 
     // Topics updated have a period, topics deleted have a period of -1
-    const updated = conversationTopicsToUpdate
-      .filter((c) => c.status === "PUSH")
-      .map((c) => c.topic);
-    const deleted = conversationTopicsToUpdate
-      .filter((c) => c.status === "MUTED")
-      .map((c) => c.topic);
+    const updated = Object.keys(topicsToUpdateForPeriod).filter(
+      (topic) => topicsToUpdateForPeriod[topic].status === "PUSH"
+    );
+
+    const deleted = Object.keys(topicsToUpdateForPeriod).filter(
+      (topic) => topicsToUpdateForPeriod[topic].status === "MUTED"
+    );
 
     await saveConversationsLastNotificationSubscribePeriod(
       account,
