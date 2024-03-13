@@ -30,7 +30,9 @@ const go = async () => {
   const newAppInfo = plist.build(appInfo);
   fs.writeFileSync(PLIST_APP_PATH, newAppInfo, "utf-8");
 
-  const extensionInfo = plist.parse(fs.readFileSync(PLIST_EXTENSION_PATH, "utf8"));
+  const extensionInfo = plist.parse(
+    fs.readFileSync(PLIST_EXTENSION_PATH, "utf8")
+  );
   extensionInfo.AppBundleId = "com.converse.native";
   extensionInfo.Env = "prod";
   const newExtensionInfo = plist.build(extensionInfo);
@@ -70,6 +72,7 @@ const go = async () => {
       "com.converse.dev",
       "com.converse.native"
     );
+  entitlementsExtension["com.apple.developer.usernotifications.filtering"] = true;
   const newEntitlementsApp = plist.build(entitlementsApp);
   fs.writeFileSync(ENTITLEMENTS_APP_PATH, newEntitlementsApp, "utf-8");
 
