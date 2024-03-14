@@ -76,6 +76,7 @@ type ConversationsListItems = {
 export type TopicData = {
   status: "deleted" | "unread" | "read";
   readUntil?: number;
+  timestamp?: number;
 };
 
 export type ChatStoreType = {
@@ -172,12 +173,14 @@ export const initChatStore = (account: string) => {
                 if (lastMessageId) {
                   const lastMessage = conversation.messages.get(lastMessageId);
                   if (lastMessage) {
-                    newState.topicsData[topic] = {
+                    const newData = {
                       status: "read",
                       readUntil: lastMessage.sent,
-                    };
+                      timestamp: now(),
+                    } as TopicData;
+                    newState.topicsData[topic] = newData;
                     saveTopicsData(account, {
-                      [topic]: { status: "read", readUntil: lastMessage.sent },
+                      [topic]: newData,
                     });
                   }
                 }
@@ -368,16 +371,16 @@ export const initChatStore = (account: string) => {
                         ? (newState.topicsData[topic]?.readUntil as number)
                         : 0
                     );
-                    newState.topicsData[topic] = {
+
+                    const newData = {
                       status: "read",
                       readUntil: newReadUntil,
-                    };
+                      timestamp: now(),
+                    } as TopicData;
+                    newState.topicsData[topic] = newData;
 
                     saveTopicsData(account, {
-                      [topic]: {
-                        status: "read",
-                        readUntil: newReadUntil,
-                      },
+                      [topic]: newData,
                     });
                   }
                 }
@@ -566,10 +569,24 @@ export const initChatStore = (account: string) => {
                 ...state.topicsData,
               };
               Object.keys(topicsData).forEach((topic) => {
-                newTopicsData[topic] = {
-                  ...(newTopicsData[topic] || {}),
-                  ...topicsData[topic],
-                };
+                const oldTopicData = (newTopicsData[topic] || {}) as TopicData;
+                const oldReadUntil = oldTopicData.readUntil;
+                const newReadUntil = topicsData[topic].readUntil;
+                const oldTimestamp = oldTopicData.timestamp;
+                const newTimestamp = topicsData[topic].timestamp;
+                if (
+                  (oldTimestamp &&
+                    newTimestamp &&
+                    newTimestamp < oldTimestamp) ||
+                  (oldReadUntil && newReadUntil && newReadUntil < oldReadUntil)
+                ) {
+                  // Ignore because it's stale data
+                } else {
+                  newTopicsData[topic] = {
+                    ...oldTopicData,
+                    ...topicsData[topic],
+                  };
+                }
               });
               if (
                 isDeepEqual(state.topicsData, newTopicsData) &&
