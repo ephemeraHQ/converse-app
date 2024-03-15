@@ -18,12 +18,13 @@ import org.xmtp.proto.keystore.api.v1.Keystore.TopicMap.TopicData
 import java.security.MessageDigest
 import java.util.HashMap
 
-fun subscribeToTopic(appContext: Context, apiURI: String, account: String, pushToken: String, topic: String) {
+fun subscribeToTopic(appContext: Context, apiURI: String, account: String, pushToken: String, topic: String, hmacKeys: String?) {
     val appendTopicURI = "$apiURI/api/subscribe/append"
     val params: MutableMap<String?, String?> = HashMap()
     params["topic"] = topic
     params["nativeToken"] = pushToken
     params["account"] = account
+    params["hmacKeys"] = hmacKeys
 
     val parameters = JSONObject(params as Map<*, *>?)
 

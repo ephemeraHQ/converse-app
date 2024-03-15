@@ -81,7 +81,7 @@ func handleNewConversationFirstMessage(xmtpClient: XMTP.Client, apiURI: String?,
           var request = Xmtp_KeystoreApi_V1_GetConversationHmacKeysRequest()
           request.topics = [conversation.topic]
           let hmacKeys = await xmtpClient.conversations.getHmacKeys(request: request);
-          let conversationHmacKeys = try? hmacKeys.hmacKeys[conversation.topic]?.jsonString();
+          let conversationHmacKeys = try hmacKeys.hmacKeys[conversation.topic]?.serializedData().base64EncodedString()
           subscribeToTopic(apiURI: apiURI, account: xmtpClient.address, pushToken: pushToken, topic: conversation.topic, hmacKeys: conversationHmacKeys)
           shouldShowNotification = true
         }
