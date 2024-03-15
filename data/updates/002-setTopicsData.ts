@@ -14,11 +14,13 @@ export const setTopicsData = async (account: string) => {
   };
   console.log("CURRENT TOPICS DATA IS", topicsData);
   const conversations = getChatStore(account).getState().conversations;
+  const timestamp = new Date().getTime();
   for (const topic in conversations) {
     if (conversations[topic].readUntil) {
       topicsData[topic] = topicsData[topic] || {};
       (topicsData[topic] as TopicData).readUntil =
         conversations[topic].readUntil;
+      (topicsData[topic] as TopicData).timestamp = timestamp;
     }
   }
   console.log("TOPICS DATA TO SAVE WILL BE", topicsData);
