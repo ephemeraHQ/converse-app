@@ -238,7 +238,6 @@ export const initChatStore = (account: string) => {
               });
 
               setImmediate(() => {
-                console.log("CALLING HERE AFTER SET CONVO");
                 subscribeToNotifications(account);
               });
 
