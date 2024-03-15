@@ -287,6 +287,18 @@ const conversationsSortMethod = (
   return bDate - aDate;
 };
 
+export const conversationShouldBeInInbox = (
+  conversation: ConversationWithLastMessagePreview,
+  peersStatus: { [peer: string]: "blocked" | "consented" }
+) => {
+  return (
+    conversation.hasOneMessageFromMe ||
+    peersStatus[conversation.peerAddress.toLowerCase()] === "consented" ||
+    (conversation.spamScore !== undefined &&
+      (conversation.spamScore === null || conversation.spamScore < 1))
+  );
+};
+
 export function sortAndComputePreview(
   conversations: Record<string, XmtpConversation>,
   userAddress: string,
@@ -309,12 +321,7 @@ export function sortAndComputePreview(
           conversation,
           userAddress
         );
-        if (
-          conversation.hasOneMessageFromMe ||
-          peersStatus[conversation.peerAddress.toLowerCase()] === "consented" ||
-          (conversation.spamScore !== undefined &&
-            (conversation.spamScore === null || conversation.spamScore < 1))
-        ) {
+        if (conversationShouldBeInInbox(conversation, peersStatus)) {
           conversationsInbox.push(conversation);
         } else {
           conversationsRequests.push(conversation);

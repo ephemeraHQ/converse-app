@@ -18,7 +18,10 @@ import {
 import { useAppStore } from "../data/store/appStore";
 import { XmtpConversation, XmtpMessage } from "../data/store/chatStore";
 import api, { saveNotificationsSubscribe } from "./api";
-import { ConversationWithLastMessagePreview } from "./conversation";
+import {
+  ConversationWithLastMessagePreview,
+  conversationShouldBeInInbox,
+} from "./conversation";
 import { savePushToken } from "./keychain/helpers";
 import mmkv from "./mmkv";
 import { navigateToConversation, setTopicToNavigateTo } from "./navigation";
@@ -91,8 +94,10 @@ export const subscribeToNotifications = async (
 
       const isNotBlocked = !isBlocked(c.peerAddress);
       const isTopicNotDeleted = topicsData[c.topic]?.status !== "deleted";
+      const isTopicInInbox = conversationShouldBeInInbox(c, peersStatus);
 
-      const status = isNotBlocked && isTopicNotDeleted ? "PUSH" : "MUTED";
+      const status =
+        isNotBlocked && isTopicNotDeleted && isTopicInInbox ? "PUSH" : "MUTED";
       const period = status === "PUSH" ? thirtyDayPeriodsSinceEpoch : -1;
 
       return {
