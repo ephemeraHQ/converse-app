@@ -26,17 +26,17 @@ PODS:
     - ExpoModulesCore
   - EXNotifications (0.27.6):
     - ExpoModulesCore
-  - Expo (50.0.11):
+  - Expo (50.0.13):
     - ExpoModulesCore
-  - expo-dev-client (3.3.9):
+  - expo-dev-client (3.3.10):
     - EXManifests
     - expo-dev-launcher
     - expo-dev-menu
     - expo-dev-menu-interface
     - EXUpdatesInterface
-  - expo-dev-launcher (3.6.7):
+  - expo-dev-launcher (3.6.8):
     - EXManifests
-    - expo-dev-launcher/Main (= 3.6.7)
+    - expo-dev-launcher/Main (= 3.6.8)
     - expo-dev-menu
     - expo-dev-menu-interface
     - ExpoModulesCore
@@ -45,7 +45,7 @@ PODS:
     - RCT-Folly (= 2022.05.16.00)
     - React-Core
     - React-RCTAppDelegate
-  - expo-dev-launcher/Main (3.6.7):
+  - expo-dev-launcher/Main (3.6.8):
     - EXManifests
     - expo-dev-launcher/Unsafe
     - expo-dev-menu
@@ -56,7 +56,7 @@ PODS:
     - RCT-Folly (= 2022.05.16.00)
     - React-Core
     - React-RCTAppDelegate
-  - expo-dev-launcher/Unsafe (3.6.7):
+  - expo-dev-launcher/Unsafe (3.6.8):
     - EXManifests
     - expo-dev-menu
     - expo-dev-menu-interface
@@ -66,14 +66,14 @@ PODS:
     - RCT-Folly (= 2022.05.16.00)
     - React-Core
     - React-RCTAppDelegate
-  - expo-dev-menu (4.5.6):
-    - expo-dev-menu/Main (= 4.5.6)
-    - expo-dev-menu/ReactNativeCompatibles (= 4.5.6)
+  - expo-dev-menu (4.5.7):
+    - expo-dev-menu/Main (= 4.5.7)
+    - expo-dev-menu/ReactNativeCompatibles (= 4.5.7)
     - glog
     - RCT-Folly (= 2022.05.16.00)
     - React-Core
   - expo-dev-menu-interface (1.7.2)
-  - expo-dev-menu/Main (4.5.6):
+  - expo-dev-menu/Main (4.5.7):
     - EXManifests
     - expo-dev-menu-interface
     - expo-dev-menu/Vendored
@@ -81,16 +81,16 @@ PODS:
     - glog
     - RCT-Folly (= 2022.05.16.00)
     - React-Core
-  - expo-dev-menu/ReactNativeCompatibles (4.5.6):
+  - expo-dev-menu/ReactNativeCompatibles (4.5.7):
     - glog
     - RCT-Folly (= 2022.05.16.00)
     - React-Core
-  - expo-dev-menu/SafeAreaView (4.5.6):
+  - expo-dev-menu/SafeAreaView (4.5.7):
     - ExpoModulesCore
     - glog
     - RCT-Folly (= 2022.05.16.00)
     - React-Core
-  - expo-dev-menu/Vendored (4.5.6):
+  - expo-dev-menu/Vendored (4.5.7):
     - expo-dev-menu/SafeAreaView
     - glog
     - RCT-Folly (= 2022.05.16.00)
@@ -124,7 +124,7 @@ PODS:
     - ExpoModulesCore
   - ExpoKeepAwake (12.8.2):
     - ExpoModulesCore
-  - ExpoModulesCore (1.11.10):
+  - ExpoModulesCore (1.11.12):
     - glog
     - RCT-Folly (= 2022.05.16.00)
     - React-Core
@@ -144,7 +144,7 @@ PODS:
   - EXTaskManager (11.7.2):
     - ExpoModulesCore
     - UMAppLoader
-  - EXUpdates (0.24.11):
+  - EXUpdates (0.24.12):
     - EASClient
     - EXManifests
     - ExpoModulesCore
@@ -1719,10 +1719,10 @@ SPEC CHECKSUMS:
   EXJSONUtils: 5c42959e87be238b045ef37cc5268b16a6c0ad4a
   EXManifests: 5e8c29f36c716af768a4ea47ec05e1b89ab93091
   EXNotifications: e11f0e9a5b657c064a481a5d522f3bc5a07bf7cd
-  Expo: bbffa600c41f904151a925e5a214d1f4c5a79794
-  expo-dev-client: dbc8e8a81d17a9d92e083a2856d056ba9a58984d
-  expo-dev-launcher: fcdb0f3e91c34778f0816b0f590c7a57f052a87c
-  expo-dev-menu: 166fc9c7b82641cdead1dc26d958d20a127ee97b
+  Expo: a7c9bd836cb7c86e699c2539a906c9ff873f19f8
+  expo-dev-client: fb0c407295ad73c7f356dbb30d858ec44c0d7b70
+  expo-dev-launcher: 56bbbb1fae815853047f8c383f714adb1e8b8ff3
+  expo-dev-menu: 01168c33c88f679d80f81ccc33041bbd01fbb359
   expo-dev-menu-interface: 7ba029c9d1a82ac22b9b584c00514860b060553e
   ExpoBackgroundFetch: 80d41ec15c6cce0bafb5d2326b8e85f42152eba7
   ExpoClipboard: b8f76767b0dbaefb3be7adbf85049fd85861d527
@@ -1736,13 +1736,13 @@ SPEC CHECKSUMS:
   ExpoImageManipulator: c1d7cb865eacd620a35659f3da34c70531f10b59
   ExpoImagePicker: 66970181d1c838f444e5e1f81b804ab2d5ff49bd
   ExpoKeepAwake: 0f5cad99603a3268e50af9a6eb8b76d0d9ac956c
-  ExpoModulesCore: cd59fedc5d2aed9122374a8c616647a5a46f75ec
+  ExpoModulesCore: 9e2287ef69fb71b578d4b1e4e8e7a3c8abb04fe4
   ExpoSecureStore: c84ae37d1c36f38524d289c67c3a2e3fc56f1108
   ExpoSystemUI: 40e222dd9d52222fe1bce389724ac52e662158dc
   EXSplashScreen: e12df5ed7e7880913a3e4bad91ba252596993b90
   EXStructuredHeaders: 5b0f47259db047dc1fdfa84752e292c2bfa68ecd
   EXTaskManager: 3e446dbf75cd662aa6e7d6828be5bc26265241c3
-  EXUpdates: 4942cdbc070421b2c07918a86f3ad3ff51be24b3
+  EXUpdates: d4b3903c86709f0bce1f7111c3abdc83114e9870
   EXUpdatesInterface: 3e444e2093e25b7ca0999a7d8c16e8392dee70c3
   FBLazyVector: 84f6edbe225f38aebd9deaf1540a4160b1f087d7
   FBReactNativeSpec: d0086a479be91c44ce4687a962956a352d2dc697
