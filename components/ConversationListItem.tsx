@@ -173,14 +173,27 @@ const ConversationListItem = memo(function ConversationListItem({
             (selectedIndex?: number) => {
               if (selectedIndex === 0) {
                 saveTopicsData(currentAccount(), {
-                  [conversationTopic]: { status: "deleted" },
+                  [conversationTopic]: {
+                    status: "deleted",
+                    timestamp: new Date().getTime(),
+                  },
                 });
-                setTopicsData({ [conversationTopic]: { status: "deleted" } });
+                setTopicsData({
+                  [conversationTopic]: {
+                    status: "deleted",
+                    timestamp: new Date().getTime(),
+                  },
+                });
               } else if (selectedIndex === 1) {
                 saveTopicsData(currentAccount(), {
                   [conversationTopic]: { status: "deleted" },
                 });
-                setTopicsData({ [conversationTopic]: { status: "deleted" } });
+                setTopicsData({
+                  [conversationTopic]: {
+                    status: "deleted",
+                    timestamp: new Date().getTime(),
+                  },
+                });
                 consentToPeersOnProtocol(
                   currentAccount(),
                   [conversationPeerAddress],
@@ -298,10 +311,16 @@ const ConversationListItem = memo(function ConversationListItem({
           if (direction === "left" && toggleUnreadStatusOnClose.current) {
             toggleUnreadStatusOnClose.current = false;
             setTopicsData({
-              [conversationTopic]: { status: showUnread ? "read" : "unread" },
+              [conversationTopic]: {
+                status: showUnread ? "read" : "unread",
+                timestamp: new Date().getTime(),
+              },
             });
             saveTopicsData(currentAccount(), {
-              [conversationTopic]: { status: showUnread ? "read" : "unread" },
+              [conversationTopic]: {
+                status: showUnread ? "read" : "unread",
+                timestamp: new Date().getTime(),
+              },
             });
           }
           if (Platform.OS === "web") {
