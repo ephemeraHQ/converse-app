@@ -76,7 +76,13 @@ func handleNewConversationFirstMessage(xmtpClient: XMTP.Client, apiURI: String?,
           print("[NotificationExtension] Not showing a notification because considered spam")
           shouldShowNotification = false
         } else {
-          subscribeToTopic(apiURI: apiURI, account: xmtpClient.address, pushToken: pushToken, topic: conversation.topic)
+          // Let's import the conversation so we can get hmac keys
+          await xmtpClient.conversations.importTopicData(data: conversation.toTopicData())
+          var request = Xmtp_KeystoreApi_V1_GetConversationHmacKeysRequest()
+          request.topics = [conversation.topic]
+          let hmacKeys = await xmtpClient.conversations.getHmacKeys(request: request);
+          let conversationHmacKeys = try? hmacKeys.hmacKeys[conversation.topic]?.jsonString();
+          subscribeToTopic(apiURI: apiURI, account: xmtpClient.address, pushToken: pushToken, topic: conversation.topic, hmacKeys: conversationHmacKeys)
           shouldShowNotification = true
         }
         break
