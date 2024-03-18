@@ -57,6 +57,9 @@ export const subscribeToNotifications = async (
     topicsData,
     conversationsSortedOnce,
   } = getChatStore(account).getState();
+  const notificationsPermissionStatus =
+    useAppStore.getState().notificationsPermissionStatus;
+  if (notificationsPermissionStatus !== "granted") return;
   if (subscribingByAccount[account] || !conversationsSortedOnce) {
     await new Promise((r) => setTimeout(r, 1000));
     await subscribeToNotifications(account);

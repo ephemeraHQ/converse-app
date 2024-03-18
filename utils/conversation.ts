@@ -241,7 +241,11 @@ export const openMainConversationWithPeer = async (
         peerAddress,
         undefined
       );
-      onSuccess(topic);
+      if (topic) {
+        onSuccess(topic);
+      } else {
+        onError();
+      }
     }
   }
 };
@@ -370,6 +374,7 @@ export const getTopicsUpdatesAsRead = (conversations: {
   const topicsUpdates: {
     [topic: string]: TopicData;
   } = {};
+  const timestamp = new Date().getTime();
   for (const topic in conversations) {
     const conversation = conversations[topic];
     const lastMessageId =
@@ -380,7 +385,11 @@ export const getTopicsUpdatesAsRead = (conversations: {
       ? conversation.messages.get(lastMessageId)
       : undefined;
     if (lastMessage) {
-      topicsUpdates[topic] = { status: "read", readUntil: lastMessage.sent };
+      topicsUpdates[topic] = {
+        status: "read",
+        readUntil: lastMessage.sent,
+        timestamp,
+      };
     }
   }
   return topicsUpdates;

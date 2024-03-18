@@ -19,8 +19,8 @@
 		4C2440DB2A9C8E30004F31A3 /* MMKV.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C2440DA2A9C8E30004F31A3 /* MMKV.swift */; };
 		4C2440DD2A9C9006004F31A3 /* SQLite.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C2440DC2A9C9006004F31A3 /* SQLite.swift */; };
 		4C31F4EE29AF887B0032D062 /* Alamofire in Frameworks */ = {isa = PBXBuildFile; productRef = 4C31F4ED29AF887B0032D062 /* Alamofire */; };
-		4C3A862B2B8F669C00D7E42D /* ConverseNotificationExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 4C65044A295C7C1F00C5A40F /* ConverseNotificationExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		4C65044D295C7C1F00C5A40F /* NotificationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C65044C295C7C1F00C5A40F /* NotificationService.swift */; };
+		4C7CF26A2BA34CB500604D4C /* ConverseNotificationExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 4C65044A295C7C1F00C5A40F /* ConverseNotificationExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		4C8BA28B298502DC007F0B76 /* SharedDefaults.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C8BA28A298502DC007F0B76 /* SharedDefaults.swift */; };
 		4CBD67182A9CF7C30010C648 /* Sentry.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CBD67172A9CF7C30010C648 /* Sentry.swift */; };
 		4CBD671C2A9D08050010C648 /* Utils.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CBD671B2A9D08050010C648 /* Utils.swift */; };
@@ -33,7 +33,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
-		4C3A86292B8F669600D7E42D /* PBXContainerItemProxy */ = {
+		4CB2521C2BA34B7E00B0BCD6 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 83CBB9F71A601CBA00E9B192 /* Project object */;
 			proxyType = 1;
@@ -45,14 +45,14 @@
 /* Begin PBXCopyFilesBuildPhase section */
 		4C650452295C7C1F00C5A40F /* Embed Foundation Extensions */ = {
 			isa = PBXCopyFilesBuildPhase;
-			buildActionMask = 8;
+			buildActionMask = 12;
 			dstPath = "";
 			dstSubfolderSpec = 13;
 			files = (
-				4C3A862B2B8F669C00D7E42D /* ConverseNotificationExtension.appex in Embed Foundation Extensions */,
+				4C7CF26A2BA34CB500604D4C /* ConverseNotificationExtension.appex in Embed Foundation Extensions */,
 			);
 			name = "Embed Foundation Extensions";
-			runOnlyForDeploymentPostprocessing = 1;
+			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXCopyFilesBuildPhase section */
 
@@ -255,7 +255,7 @@
 			buildRules = (
 			);
 			dependencies = (
-				4C3A862A2B8F669600D7E42D /* PBXTargetDependency */,
+				4CB2521D2BA34B7E00B0BCD6 /* PBXTargetDependency */,
 			);
 			name = Converse;
 			productName = Converse;
@@ -542,10 +542,10 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
-		4C3A862A2B8F669600D7E42D /* PBXTargetDependency */ = {
+		4CB2521D2BA34B7E00B0BCD6 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = 4C650449295C7C1F00C5A40F /* ConverseNotificationExtension */;
-			targetProxy = 4C3A86292B8F669600D7E42D /* PBXContainerItemProxy */;
+			targetProxy = 4CB2521C2BA34B7E00B0BCD6 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 

@@ -2,6 +2,7 @@ import { getSendersSpamScores } from "../../../utils/api";
 import { URL_REGEX } from "../../../utils/regex";
 import { isContentType } from "../../../utils/xmtpRN/contentTypes";
 import { getRepository } from "../../db";
+import { maxVariableCount } from "../../db/upsert";
 import { getChatStore } from "../../store/accountsStore";
 import { XmtpConversationWithUpdate } from "../../store/chatStore";
 
@@ -17,9 +18,11 @@ export const saveSpamScores = async (
   // Let's update by batch
   let batch: string[] = [];
   let rest = Object.keys(topicSpamScores);
+  // There are 3 ? per topic (1 for topic and spam score, and one for topic WHERE)
+  const SLICE_SIZE = Math.floor(maxVariableCount / 3);
   while (rest.length > 0) {
-    batch = rest.slice(0, 5000);
-    rest = rest.slice(5000);
+    batch = rest.slice(0, SLICE_SIZE);
+    rest = rest.slice(SLICE_SIZE);
     let query = `UPDATE "conversation" SET "spamScore" = (case `;
     const parameters = [] as any[];
     batch.forEach((topic) => {

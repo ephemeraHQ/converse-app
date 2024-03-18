@@ -25,6 +25,7 @@ import {
   useCurrentAccount,
   useSettingsStore,
 } from "../../data/store/accountsStore";
+import { useAppStore } from "../../data/store/appStore";
 import { ReanimatedTouchableOpacity } from "../../utils/animations";
 import { reportMessage } from "../../utils/api";
 import { isAttachmentMessage } from "../../utils/attachment/helpers";
@@ -56,7 +57,22 @@ class MessageTailComponent extends React.Component<SvgProps> {
   }
 }
 
-const MessageTail = Reanimated.createAnimatedComponent(MessageTailComponent);
+const MessageTailAnimated =
+  Reanimated.createAnimatedComponent(MessageTailComponent);
+
+const MessageTail = (props: any) => {
+  const actionSheetShown = useAppStore((s) => s.actionSheetShown);
+  return (
+    <MessageTailAnimated
+      {...props}
+      fill={
+        actionSheetShown && props.fromMe
+          ? myMessageBubbleColor(props.colorScheme)
+          : "currentColor"
+      }
+    />
+  );
+};
 
 type Props = {
   children: React.ReactNode;
@@ -367,6 +383,8 @@ export default function ChatMessageActions({
                   styles.messageTail,
                   message.fromMe ? styles.messageTailMe : {},
                 ]}
+                fromMe={message.fromMe}
+                colorScheme={colorScheme}
               />
             )}
         </ReanimatedTouchableOpacity>
