@@ -273,7 +273,11 @@ export default function NewConversation({
           peerAddress,
           newConversationContext
         );
-        navigateToTopic(newConversationTopic);
+        if (newConversationTopic) {
+          navigateToTopic(newConversationTopic);
+        } else {
+          setCreatingNewConversation(false);
+        }
       } catch (e: any) {
         console.log(e);
         setCreatingNewConversation(false);
