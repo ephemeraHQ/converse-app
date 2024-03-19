@@ -10,6 +10,7 @@ import {
 import { Transaction } from "../data/store/transactionsStore";
 import { getCoinbaseTransactionDetails, getTransactionDetails } from "./api";
 import { evmHelpers } from "./evm/helpers";
+import { sentryTrackError } from "./sentry";
 import { isContentType } from "./xmtpRN/contentTypes";
 
 export type TransactionContentType =
@@ -105,6 +106,7 @@ export const extractChainIdToHex = (
 export const getTransactionType = (
   input: TransactionReference | any
 ): TransactionContentType | undefined => {
+  if (input?.error) return undefined;
   if ("networkId" in input && "reference" in input) {
     // Has keys specific to TransactionReference
     return "transactionReference";
@@ -124,6 +126,8 @@ export const getTxRefId = (
 ): string => {
   let networkId;
 
+  if (txRef?.error) return "";
+
   if (txType === "coinbaseRegular" || txType === "coinbaseSponsored") {
     networkId = extractChainIdToHex(txRef.network.rawValue);
   } else {
@@ -138,7 +142,7 @@ export const getTxRefId = (
     case "coinbaseSponsored":
       return `${networkId}-${txRef.sponsoredTxId}`;
     default:
-      return ``;
+      return "";
   }
 };
 
@@ -227,7 +231,18 @@ export const useTransactionForMessage = (
   // Avoid too many JSON.parse but make sure to
   // rerender if message.content changes
 
-  const txRef = useMemo(() => JSON.parse(message.content), [message.content]);
+  const txRef = useMemo(() => {
+    try {
+      const parsed = JSON.parse(message.content);
+      return parsed;
+    } catch (e) {
+      sentryTrackError(e, {
+        error: "Could not parse tx",
+        content: message.content,
+      });
+      return { error: "Could not parse transaction" };
+    }
+  }, [message.content]);
 
   const txType = getTransactionType(txRef);
   const txRefId = getTxRefId(txRef, txType);
@@ -236,7 +251,7 @@ export const useTransactionForMessage = (
   // Init transaction with values
   const [transaction, setTransaction] = useState({
     loading: false,
-    error: false,
+    error: txRef.error,
     ...txLookup,
   });
 
@@ -244,7 +259,7 @@ export const useTransactionForMessage = (
   const messageId = useRef(message.id);
   if (message.id !== messageId.current) {
     messageId.current = message.id;
-    setTransaction({ loading: false, error: false, ...txLookup });
+    setTransaction({ loading: false, error: "", ...txLookup });
   }
 
   useEffect(() => {
@@ -253,6 +268,10 @@ export const useTransactionForMessage = (
     const go = async () => {
       if (fetchingTransaction.current) return;
       fetchingTransaction.current = true;
+      if (txRef.error) {
+        setTransaction((t) => ({ ...t, loading: false, error: txRef.error }));
+        return;
+      }
       setTransaction((t) => ({ ...t, loading: true }));
 
       let txDetails: TransactionDetails | undefined;
@@ -291,10 +310,9 @@ export const useTransactionForMessage = (
 
         if (txDetails && txDetails.status === "PENDING") {
           const uniformTx = createUniformTransaction(txRef, txDetails);
-
           setTransaction((t) => ({
             ...t,
-            error: false,
+            error: "",
             loading: false,
             ...uniformTx,
           }));
@@ -311,7 +329,7 @@ export const useTransactionForMessage = (
           // Update component state
           setTransaction((t) => ({
             ...t,
-            error: false,
+            error: "",
             loading: false,
             ...uniformTx,
           }));
@@ -351,11 +369,11 @@ export const useTransactionForMessage = (
   ]);
 
   useEffect(() => {
-    setTransaction({
+    setTransaction((t) => ({
       loading: false,
-      error: false,
+      error: t.error,
       ...txLookup,
-    });
+    }));
   }, [txLookup]);
 
   const getTransactionInfo = useCallback(

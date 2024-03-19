@@ -1,6 +1,7 @@
 import axios from "axios";
 
 import config from "../config";
+import { TopicData } from "../data/store/chatStore";
 import { ProfileSocials } from "../data/store/profilesStore";
 import { Frens } from "../data/store/recommendationsStore";
 import { getXmtpApiHeaders } from "../utils/xmtpRN/api";
@@ -198,23 +199,22 @@ export const markDesktopSessionDone = async ({
     params: { sessionId, otp },
   });
 
-export const deleteTopics = async (account: string, topics: string[]) => {
-  const topicsStatus: { [key: string]: "deleted" } = {};
-  for (const topic of topics) {
-    topicsStatus[topic] = "deleted";
+export const saveTopicsData = async (
+  account: string,
+  topicsData: {
+    [topic: string]: TopicData;
   }
-  await api.post(
-    "/api/topics/status",
-    { topicsStatus },
-    { headers: await getXmtpApiHeaders(account) }
-  );
-};
-
-export const getTopicsStatus = async (account: string) => {
-  const { data } = await api.get("/api/topics/status", {
+) => {
+  await api.post("/api/topics", topicsData, {
     headers: await getXmtpApiHeaders(account),
   });
-  return data as { [topic: string]: "deleted" | "consented" };
+};
+
+export const getTopicsData = async (account: string) => {
+  const { data } = await api.get("/api/topics", {
+    headers: await getXmtpApiHeaders(account),
+  });
+  return data as { [topic: string]: TopicData };
 };
 
 export const postUSDCTransferAuthorization = async (

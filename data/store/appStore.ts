@@ -37,6 +37,9 @@ type AppStoreType = {
 
   lastVersionOpen: string;
   setLastVersionOpen: (version: string) => void;
+
+  actionSheetShown: boolean;
+  setActionSheetShown: (s: boolean) => void;
 };
 
 export const useAppStore = create<AppStoreType>()(
@@ -67,6 +70,9 @@ export const useAppStore = create<AppStoreType>()(
       lastVersionOpen: "",
       setLastVersionOpen: (version) =>
         set(() => ({ lastVersionOpen: version })),
+
+      actionSheetShown: false,
+      setActionSheetShown: (s: boolean) => set(() => ({ actionSheetShown: s })),
     }),
     {
       name: "store-app",

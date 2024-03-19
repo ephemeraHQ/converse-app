@@ -1,6 +1,5 @@
 import Clipboard from "@react-native-clipboard/clipboard";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import { StatusBar } from "expo-status-bar";
 import React, { useEffect, useState } from "react";
 import {
   View,
@@ -64,7 +63,6 @@ export default function ShareProfileScreen({
 
   return (
     <View style={styles.shareProfile}>
-      {Platform.OS === "ios" && <StatusBar hidden={false} style="light" />}
       <View style={styles.shareProfileContent}>
         <View style={styles.qrCode}>
           <QRCode

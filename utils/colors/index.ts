@@ -105,9 +105,6 @@ export const itemSeparatorColor = (colorScheme: ColorSchemeName) => {
 const MESSAGE_BUBBLE_LIGHT = "#E9E9EB";
 const MESSAGE_BUBBLE_DARK = "#262628";
 
-const MESSAGE_INNER_BUBBLE_LIGHT = "#DDDDDF";
-const MESSAGE_INNER_BUBBLE_DARK = "#1D1D1E";
-
 export const messageBubbleColor = (colorScheme: ColorSchemeName) => {
   if (colorScheme === "dark")
     return Platform.OS === "android" || Platform.OS === "web"
@@ -118,6 +115,9 @@ export const messageBubbleColor = (colorScheme: ColorSchemeName) => {
     : MESSAGE_BUBBLE_LIGHT;
 };
 
+const MESSAGE_INNER_BUBBLE_LIGHT = "#DDDDDF";
+const MESSAGE_INNER_BUBBLE_DARK = "#1D1D1E";
+
 export const messageInnerBubbleColor = (colorScheme: ColorSchemeName) => {
   if (colorScheme === "dark")
     return Platform.OS === "android" || Platform.OS === "web"
@@ -126,6 +126,16 @@ export const messageInnerBubbleColor = (colorScheme: ColorSchemeName) => {
   return Platform.OS === "android" || Platform.OS === "web"
     ? MaterialLightColors.surface5
     : MESSAGE_INNER_BUBBLE_LIGHT;
+};
+
+export const messageHighlightedBubbleColor = (colorScheme: ColorSchemeName) => {
+  if (colorScheme === "dark")
+    return Platform.OS === "android" || Platform.OS === "web"
+      ? "#574642"
+      : "#3e3e41";
+  return Platform.OS === "android" || Platform.OS === "web"
+    ? "#e7cbce"
+    : "#c9c9cf";
 };
 
 const MY_MESSAGE_BUBBLE_LIGHT = "#E95C43";
@@ -142,6 +152,12 @@ const MY_MESSAGE_INNER_BUBBLE_DARK = "#D2533C";
 export const myMessageInnerBubbleColor = (colorScheme: ColorSchemeName) => {
   if (colorScheme === "dark") return MY_MESSAGE_INNER_BUBBLE_DARK;
   return MY_MESSAGE_INNER_BUBBLE_LIGHT;
+};
+
+export const myMessageHighlightedBubbleColor = (
+  colorScheme: ColorSchemeName
+) => {
+  return "#b4402f";
 };
 
 const TERTIARY_BACKGROUND_LIGHT = "#EFEFF0";
@@ -171,11 +187,7 @@ export const primaryColor = (colorScheme: ColorSchemeName) => {
 
 export const badgeColor = (colorScheme: ColorSchemeName) => {
   if (Platform.OS === "android" || Platform.OS === "web") {
-    if (colorScheme === "dark") {
-      return MaterialDarkColors.error;
-    } else {
-      return MaterialLightColors.error;
-    }
+    return "#004692";
   }
   return primaryColor(colorScheme);
 };

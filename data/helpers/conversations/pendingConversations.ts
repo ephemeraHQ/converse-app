@@ -1,5 +1,5 @@
 import { InvitationContext } from "@xmtp/xmtp-js";
-import { Platform } from "react-native";
+import { Alert, Platform } from "react-native";
 import uuid from "react-native-uuid";
 import { In } from "typeorm/browser";
 
@@ -58,6 +58,11 @@ export const createPendingConversation = async (
   peerAddress: string,
   context?: InvitationContext
 ) => {
+  if (account.toLowerCase() === peerAddress.toLowerCase()) {
+    // Can't create self convo!
+    Alert.alert("You can't create a conversation with yourself!");
+    return undefined;
+  }
   const cleanAddress = getCleanAddress(peerAddress);
   // Let's first check if we already have a conversation like that in db
   const alreadyConversationInDb = await getPendingConversationWithPeer(

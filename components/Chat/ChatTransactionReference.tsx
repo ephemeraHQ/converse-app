@@ -56,27 +56,32 @@ const TransactionStatusView = ({
   transactionDisplay,
   status,
   colorScheme,
+  error,
+  showingAmount,
 }: {
   fromMe: boolean;
   transactionDisplay?: string;
   status?: "PENDING" | "FAILURE" | "SUCCESS";
   colorScheme: ColorSchemeName;
+  error?: string;
+  showingAmount: boolean;
 }) => {
   const styles = useStyles();
   const StatusIcon =
-    status === "FAILURE"
+    status === "FAILURE" || error
       ? Exclamationmark
       : status === "SUCCESS"
       ? Checkmark
       : Clock;
-  const statusText =
-    status === "PENDING"
-      ? "Pending"
-      : status === "FAILURE"
-      ? "Failed"
-      : status === "SUCCESS"
-      ? "Success"
-      : "Loading";
+  const statusText = error
+    ? error
+    : status === "PENDING"
+    ? "Pending"
+    : status === "FAILURE"
+    ? "Failed"
+    : status === "SUCCESS"
+    ? "Success"
+    : "Loading";
 
   return (
     <>
@@ -94,7 +99,7 @@ const TransactionStatusView = ({
             </Text>
           )}
           <StatusIcon
-            style={styles.statusIcon}
+            style={showingAmount ? styles.statusIconInline : styles.statusIcon}
             fill={fromMe ? "white" : textSecondaryColor(colorScheme)}
             width={15}
             height={15}
@@ -120,18 +125,20 @@ export default function ChatTransactionReference({ message }: Props) {
   const { conversation } = useConversationContext(["conversation"]);
   const { transaction, transactionDisplay, amountToDisplay } =
     useTransactionForMessage(message, conversation?.peerAddress);
-  const showing = transaction.loading;
 
   const showTransactionActionSheet = useCallback(() => {
-    const options = ["Copy transaction hash", "Cancel"];
-    const methods: { [key: string]: () => void } = {
-      "Copy transaction hash": () => Clipboard.setString(transaction.reference),
-    };
-    if (transaction.blockExplorerURL) {
-      options.unshift("See in block explorer");
-      methods["See in block explorer"] = () =>
-        Linking.openURL(transaction.blockExplorerURL!);
+    const methods: { [key: string]: () => void } = {};
+    if (transaction.error) {
+      methods["Copy message content"] = () =>
+        Clipboard.setString(message.content);
+    } else {
+      if (transaction.blockExplorerURL) {
+        methods["See in block explorer"] = () =>
+          Linking.openURL(transaction.blockExplorerURL!);
+      }
     }
+    methods["Cancel"] = () => {};
+    const options = Object.keys(methods);
     showActionSheetWithOptions(
       {
         options,
@@ -147,7 +154,12 @@ export default function ChatTransactionReference({ message }: Props) {
         }
       }
     );
-  }, [transaction.reference, transaction.blockExplorerURL, colorScheme]);
+  }, [
+    colorScheme,
+    message.content,
+    transaction.blockExplorerURL,
+    transaction.error,
+  ]);
 
   useEffect(() => {
     const eventHandler = `showActionSheetForTxRef-${message.id}`;
@@ -158,7 +170,7 @@ export default function ChatTransactionReference({ message }: Props) {
   }, [message.id, showTransactionActionSheet]);
 
   const metadataView = (
-    <ChatMessageMetadata message={message} white={showing} />
+    <ChatMessageMetadata message={message} white={transaction.loading} />
   );
 
   // Converse sponsored transaction
@@ -181,7 +193,9 @@ export default function ChatTransactionReference({ message }: Props) {
             fromMe={message.fromMe}
             transactionDisplay={transactionDisplay}
             status={transaction.status}
+            error={transaction.error}
             colorScheme={colorScheme}
+            showingAmount={!!amountToDisplay}
           />
         </TransactionView>
         <View style={{ opacity: 0 }}>{metadataView}</View>
@@ -191,22 +205,58 @@ export default function ChatTransactionReference({ message }: Props) {
     return (
       <>
         <TransactionView fromMe={message.fromMe}>
-          <Text style={[styles.text, styles.bold]}>Transaction</Text>
-          <Text style={[styles.text, styles.small]}>
+          <Text
+            style={[
+              styles.text,
+              styles.bold,
+              message.fromMe ? styles.textMe : undefined,
+            ]}
+          >
+            Transaction
+          </Text>
+          <Text
+            style={[
+              styles.text,
+              styles.small,
+              message.fromMe ? styles.textMe : undefined,
+            ]}
+          >
             Blockchain: {transaction.chainName}
           </Text>
-          <Text style={[styles.text, styles.small]}>
+          <Text
+            style={[
+              styles.text,
+              styles.small,
+              message.fromMe ? styles.textMe : undefined,
+            ]}
+          >
             Transaction hash: {shortAddress(transaction.reference)}
           </Text>
           <View style={styles.statusContainer}>
-            <Text style={[styles.text, styles.small]}>Status:</Text>
+            <Text
+              style={[
+                styles.text,
+                styles.small,
+                message.fromMe ? styles.textMe : undefined,
+              ]}
+            >
+              Status:
+            </Text>
             <Clock
-              style={styles.statusIcon}
-              fill={textSecondaryColor(colorScheme)}
+              style={styles.statusIconInline}
+              fill={message.fromMe ? "white" : textSecondaryColor(colorScheme)}
               width={15}
               height={15}
             />
-            <Text style={[styles.text, styles.small]}>Pending</Text>
+            <Text
+              style={[
+                styles.text,
+                styles.small,
+                message.fromMe ? styles.textMe : undefined,
+              ]}
+            >
+              Pending
+            </Text>
           </View>
         </TransactionView>
         <View style={{ opacity: 0 }}>{metadataView}</View>
@@ -286,6 +336,10 @@ const useStyles = () => {
       }),
     },
     statusIcon: {
+      marginRight: -4,
+      marginLeft: 8,
+    },
+    statusIconInline: {
       marginHorizontal: -4,
     },
   });

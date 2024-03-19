@@ -1,5 +1,6 @@
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import { memo } from "react";
 import { Platform, useColorScheme } from "react-native";
 
 import { isDesktop } from "../../../utils/device";
@@ -21,7 +22,7 @@ export const NativeStack = createNativeStackNavigator<NavigationParamList>();
 
 export const navigationAnimation = Platform.OS === "ios" ? "default" : "none";
 
-export default function SplitLeftStackNavigation() {
+const SplitLeftStackNavigation = memo(function SplitLeftStackNavigation() {
   const colorScheme = useColorScheme();
   return (
     <NavigationContainer
@@ -73,4 +74,6 @@ export default function SplitLeftStackNavigation() {
       </NativeStack.Navigator>
     </NavigationContainer>
   );
-}
+});
+
+export default SplitLeftStackNavigation;

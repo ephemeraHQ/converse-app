@@ -79,18 +79,15 @@ export default function Main() {
 
   const mainHeaders = (
     <>
-      <StatusBar
-        hidden={false}
-        backgroundColor={backgroundColor(colorScheme)}
-        style={colorScheme === "dark" ? "light" : "dark"}
-      />
       {Platform.OS !== "web" && (
         <>
           <HydrationStateHandler />
           <InitialStateHandler />
         </>
       )}
-
+      {Platform.OS === "android" && (
+        <StatusBar backgroundColor={backgroundColor(colorScheme)} />
+      )}
       <NetworkStateHandler />
       <MainIdentityStateHandler />
       <NotificationsStateHandler />

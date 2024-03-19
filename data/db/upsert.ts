@@ -7,7 +7,9 @@ import { QueryDeepPartialEntity } from "typeorm/query-builder/QueryPartialEntity
 
 // We support SQLite from version 3.8.10.2 (embedded in Android 6.0 - SDK 23)
 const UPSERT_SUPPORTED_FROM = "3.24.0";
+const SQLITE_MAX_VARIABLE_NUMBER_INCREASED_FROM = "3.32.0";
 
+export let maxVariableCount = 990;
 export let supportsUpsert = false;
 
 export const checkUpsertSupport = async (dataSource: DataSource) => {
@@ -16,12 +18,20 @@ export const checkUpsertSupport = async (dataSource: DataSource) => {
       ?.sqlite_version
   );
   console.log(`[SQLite] Version ${sqliteVersion}`);
-  const versionCompare = sqliteVersion?.compare(UPSERT_SUPPORTED_FROM);
-  if (versionCompare === -1) {
-    console.log("Database does not support upsert");
+  const upsertVersionCompare = sqliteVersion?.compare(UPSERT_SUPPORTED_FROM);
+  if (upsertVersionCompare === -1) {
+    console.log("[SQLite] Database does not support upsert");
     supportsUpsert = false;
   } else {
     supportsUpsert = true;
+  }
+  const maxVariableVersionCompare = sqliteVersion?.compare(
+    SQLITE_MAX_VARIABLE_NUMBER_INCREASED_FROM
+  );
+  if (maxVariableVersionCompare === -1) {
+    console.log("[SQLite] Database supports only 999 variables");
+  } else {
+    maxVariableCount = 32700;
   }
 };
 

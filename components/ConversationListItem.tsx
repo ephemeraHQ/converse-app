@@ -1,4 +1,5 @@
-import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import { NativeStackScreenProps } from "@react-navigation/native-stack";
+import * as Haptics from "expo-haptics";
 import React, { memo, useCallback, useEffect, useRef, useState } from "react";
 import {
   ColorSchemeName,
@@ -21,7 +22,7 @@ import {
 } from "../data/store/accountsStore";
 import { NavigationParamList } from "../screens/Navigation/Navigation";
 import { useIsSplitScreen } from "../screens/Navigation/navHelpers";
-import { deleteTopics } from "../utils/api";
+import { saveTopicsData } from "../utils/api";
 import {
   actionSecondaryColor,
   actionSheetColors,
@@ -42,7 +43,6 @@ import Picto from "./Picto/Picto";
 import { showActionSheetWithOptions } from "./StateHandlers/ActionSheetStateHandler";
 
 type ConversationListItemProps = {
-  navigation: NativeStackNavigationProp<NavigationParamList, "Chats">;
   colorScheme: ColorSchemeName;
   conversationTime: number | undefined;
   conversationTopic: string;
@@ -53,10 +53,14 @@ type ConversationListItemProps = {
   lastMessageStatus?: "delivered" | "error" | "seen" | "sending" | "sent";
   showUnread: boolean;
   conversationOpened: boolean;
-};
+} & NativeStackScreenProps<
+  NavigationParamList,
+  "Chats" | "ShareFrame" | "ChatsRequests"
+>;
 
 const ConversationListItem = memo(function ConversationListItem({
   navigation,
+  route,
   colorScheme,
   conversationTopic,
   conversationTime,
@@ -70,7 +74,7 @@ const ConversationListItem = memo(function ConversationListItem({
 }: ConversationListItemProps) {
   const styles = getStyles(colorScheme);
   const timeToShow = getRelativeDateTime(conversationTime);
-  const setTopicsStatus = useChatStore((s) => s.setTopicsStatus);
+  const setTopicsData = useChatStore((s) => s.setTopicsData);
   const setPeersStatus = useSettingsStore((s) => s.setPeersStatus);
   const isSplitScreen = useIsSplitScreen();
   const [selected, setSelected] = useState(false);
@@ -78,11 +82,26 @@ const ConversationListItem = memo(function ConversationListItem({
     setSelected(false);
   }, []);
 
-  const openConversation = useCallback(() => {
+  const openConversation = useCallback(async () => {
+    if (route.params?.frameURL) {
+      // Sharing a frame !!
+      navigation.goBack();
+      if (!isSplitScreen) {
+        await new Promise((r) =>
+          setTimeout(r, Platform.OS === "ios" ? 300 : 20)
+        );
+      }
+      // This handle the case where the conversation is already opened
+      converseEventEmitter.emit(
+        "setCurrentConversationInputValue",
+        route.params.frameURL
+      );
+    }
     navigate("Conversation", {
       topic: conversationTopic,
+      message: route.params?.frameURL,
     });
-  }, [conversationTopic]);
+  }, [conversationTopic, isSplitScreen, navigation, route.params?.frameURL]);
 
   useEffect(() => {
     navigation.addListener("transitionEnd", resetSelected);
@@ -111,7 +130,10 @@ const ConversationListItem = memo(function ConversationListItem({
             height={10}
           />
         ))}
-      <Text style={styles.messagePreview} numberOfLines={2}>
+      <Text
+        style={styles.messagePreview}
+        numberOfLines={Platform.OS === "ios" ? 2 : 1}
+      >
         {lastMessageFromMe ? <View style={{ width: 15 }} /> : undefined}
         {lastMessagePreview}
       </Text>
@@ -151,11 +173,28 @@ const ConversationListItem = memo(function ConversationListItem({
             (selectedIndex?: number) => {
               if (!conversationPeerAddress) return;
               if (selectedIndex === 0) {
-                deleteTopics(currentAccount(), [conversationTopic]);
-                setTopicsStatus({ [conversationTopic]: "deleted" });
+                saveTopicsData(currentAccount(), {
+                  [conversationTopic]: {
+                    status: "deleted",
+                    timestamp: new Date().getTime(),
+                  },
+                });
+                setTopicsData({
+                  [conversationTopic]: {
+                    status: "deleted",
+                    timestamp: new Date().getTime(),
+                  },
+                });
               } else if (selectedIndex === 1) {
-                deleteTopics(currentAccount(), [conversationTopic]);
-                setTopicsStatus({ [conversationTopic]: "deleted" });
+                saveTopicsData(currentAccount(), {
+                  [conversationTopic]: { status: "deleted" },
+                });
+                setTopicsData({
+                  [conversationTopic]: {
+                    status: "deleted",
+                    timestamp: new Date().getTime(),
+                  },
+                });
                 consentToPeersOnProtocol(
                   currentAccount(),
                   [conversationPeerAddress],
@@ -179,15 +218,27 @@ const ConversationListItem = memo(function ConversationListItem({
   }, [
     conversationTopic,
     conversationPeerAddress,
-    setTopicsStatus,
+    setTopicsData,
     setPeersStatus,
     closeSwipeable,
     colorScheme,
     styles.rightAction,
   ]);
 
+  const renderLeftActions = useCallback(() => {
+    return (
+      <RectButton style={[styles.leftAction]}>
+        <Picto
+          picto={showUnread ? "checkmark.message" : "message.badge"}
+          color="white"
+          size={Platform.OS === "ios" ? 18 : 30}
+        />
+      </RectButton>
+    );
+  }, [showUnread, styles.leftAction]);
+
   const rowItem =
-    Platform.OS === "ios" ? (
+    Platform.OS === "ios" || Platform.OS === "web" ? (
       <TouchableHighlight
         underlayColor={clickedItemBackgroundColor(colorScheme)}
         delayPressIn={isDesktop ? 0 : 75}
@@ -230,19 +281,54 @@ const ConversationListItem = memo(function ConversationListItem({
       </TouchableRipple>
     );
 
+  const toggleUnreadStatusOnClose = useRef(false);
+  const [swipeableKey, setSwipeableKey] = useState(0);
+
   return (
     <View style={styles.rowSeparator}>
       <Swipeable
+        key={swipeableKey}
         renderRightActions={renderRightActions}
+        renderLeftActions={renderLeftActions}
+        leftThreshold={10000} // Never trigger opening
         overshootFriction={4}
         ref={swipeableRef}
         onSwipeableWillOpen={() => {
           converseEventEmitter.on("conversationList-scroll", closeSwipeable);
         }}
-        onSwipeableWillClose={() => {
+        onSwipeableWillClose={(direction) => {
           converseEventEmitter.off("conversationList-scroll", closeSwipeable);
+          if (direction === "left") {
+            const translation = swipeableRef.current?.state.rowTranslation;
+            if (translation && (translation as any)._value > 100) {
+              Haptics.notificationAsync(
+                Haptics.NotificationFeedbackType.Success
+              );
+              toggleUnreadStatusOnClose.current = true;
+            }
+          }
         }}
-        hitSlop={{ left: -60 }}
+        onSwipeableClose={(direction) => {
+          if (direction === "left" && toggleUnreadStatusOnClose.current) {
+            toggleUnreadStatusOnClose.current = false;
+            setTopicsData({
+              [conversationTopic]: {
+                status: showUnread ? "read" : "unread",
+                timestamp: new Date().getTime(),
+              },
+            });
+            saveTopicsData(currentAccount(), {
+              [conversationTopic]: {
+                status: showUnread ? "read" : "unread",
+                timestamp: new Date().getTime(),
+              },
+            });
+          }
+          if (Platform.OS === "web") {
+            setSwipeableKey(new Date().getTime());
+          }
+        }}
+        hitSlop={{ left: isSplitScreen ? 0 : -6 }}
       >
         {rowItem}
       </Swipeable>
@@ -258,7 +344,7 @@ const getStyles = (colorScheme: ColorSchemeName) =>
     rowSeparator: Platform.select({
       android: {},
       default: {
-        height: 76.5,
+        height: 77,
         borderBottomWidth: 0.25,
         borderBottomColor: listItemSeparatorColor(colorScheme),
       },
@@ -266,9 +352,9 @@ const getStyles = (colorScheme: ColorSchemeName) =>
     rowSeparatorMargin: {
       position: "absolute",
       width: 30,
-      height: 0.5,
+      height: 2,
       backgroundColor: backgroundColor(colorScheme),
-      bottom: -0.25,
+      bottom: -1.5,
     },
     conversationListItem: Platform.select({
       default: {
@@ -278,9 +364,9 @@ const getStyles = (colorScheme: ColorSchemeName) =>
         marginLeft: 32,
       },
       android: {
-        height: 88,
+        height: 72,
         paddingTop: 12,
-        paddingHorizontal: 16,
+        paddingHorizontal: 24,
       },
     }),
     conversationName: {
@@ -360,7 +446,7 @@ const getStyles = (colorScheme: ColorSchemeName) =>
           top: 35,
         },
         android: {
-          left: 16,
+          left: 24,
           top: 39,
         },
       }),
@@ -369,6 +455,12 @@ const getStyles = (colorScheme: ColorSchemeName) =>
       width: 100,
       alignItems: "center",
       backgroundColor: dangerColor(colorScheme),
+      justifyContent: "center",
+    },
+    leftAction: {
+      width: 100,
+      alignItems: "center",
+      backgroundColor: badgeColor(colorScheme),
       justifyContent: "center",
     },
     rippleRow: {

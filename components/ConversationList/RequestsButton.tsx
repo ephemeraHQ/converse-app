@@ -21,7 +21,7 @@ import Picto from "../Picto/Picto";
 
 type Props = { requestsCount: number } & NativeStackScreenProps<
   NavigationParamList,
-  "Chats"
+  "Chats" | "ShareFrame"
 >;
 
 export default function RequestsButton({ navigation, requestsCount }: Props) {
@@ -69,7 +69,8 @@ const useStyles = () => {
         },
         android: {
           paddingVertical: 12,
-          paddingHorizontal: 16,
+          paddingLeft: 24,
+          paddingRight: 14,
         },
       }),
     },
