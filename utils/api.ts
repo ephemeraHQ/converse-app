@@ -1,10 +1,12 @@
 import axios from "axios";
+import { Platform } from "react-native";
 
 import config from "../config";
 import { TopicData } from "../data/store/chatStore";
 import { ProfileSocials } from "../data/store/profilesStore";
 import { Frens } from "../data/store/recommendationsStore";
 import { getXmtpApiHeaders } from "../utils/xmtpRN/api";
+import { isDesktop } from "./device";
 import { TransferAuthorizationMessage } from "./evm/erc20";
 import { TransactionDetails } from "./transaction";
 
@@ -52,11 +54,29 @@ export const saveUser = async (address: string, privyAccountId?: string) => {
   }
   lastSaveUser[address] = now;
 
+  let platform = undefined as string | undefined;
+  if (isDesktop) {
+    platform = "macOS";
+  } else {
+    switch (Platform.OS) {
+      case "ios":
+        platform = "iOS";
+        break;
+      case "android":
+        platform = "Android";
+        break;
+      case "web":
+        platform = "Web";
+        break;
+
+      default:
+        break;
+    }
+  }
   await api.post(
     "/api/user",
-    { address, privyAccountId }
-    // @todo make authenticated API calls
-    // { headers: await getXmtpApiHeaders(address) },
+    { address, privyAccountId, platform },
+    { headers: await getXmtpApiHeaders(address) }
   );
 };
 
@@ -162,7 +182,7 @@ export const searchProfiles = async (
 
 export const findFrens = async (account: string) => {
   const { data } = await api.get("/api/frens/find", {
-    // headers: await getXmtpApiHeaders(account),
+    headers: await getXmtpApiHeaders(account),
     params: { address: account },
   });
 
