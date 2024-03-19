@@ -8,6 +8,7 @@ import Call from "@material-symbols/svg-400/outlined/call.svg";
 import ArrowUpRight from "@material-symbols/svg-400/outlined/call_made.svg";
 import Celebration from "@material-symbols/svg-400/outlined/celebration.svg";
 import Chat from "@material-symbols/svg-400/outlined/chat.svg";
+import ChatBubble from "@material-symbols/svg-400/outlined/chat_bubble.svg";
 import Close from "@material-symbols/svg-400/outlined/close.svg";
 import ContentCopy from "@material-symbols/svg-400/outlined/content_copy.svg";
 import Delete from "@material-symbols/svg-400/outlined/delete.svg";
@@ -17,6 +18,7 @@ import ExpandMore from "@material-symbols/svg-400/outlined/expand_more.svg";
 import Group from "@material-symbols/svg-400/outlined/group.svg";
 import Image from "@material-symbols/svg-400/outlined/image.svg";
 import Info from "@material-symbols/svg-400/outlined/info.svg";
+import IosShare from "@material-symbols/svg-400/outlined/ios_share.svg";
 import Key from "@material-symbols/svg-400/outlined/key.svg";
 import Laptop from "@material-symbols/svg-400/outlined/laptop_chromebook.svg";
 import Link from "@material-symbols/svg-400/outlined/link.svg";
@@ -43,6 +45,7 @@ import {
 } from "react-native";
 import { SvgProps } from "react-native-svg";
 
+import Reply from "../../assets/reply.svg";
 import { primaryColor } from "../../utils/colors";
 
 type Props = {
@@ -67,11 +70,12 @@ const pictoMapping: {
   "message.circle.fill": Chat,
   signature: Signature,
   "message.badge": ChatNotification,
+  "checkmark.message": ChatBubble,
   search: Search,
   addlink: AddLink,
   "key.horizontal": Key,
   "hand.wave": WavingHand,
-  "square.and.arrow.up": Send,
+  "square.and.arrow.up": IosShare,
   "doc.on.doc": ContentCopy,
   "party.popper": Celebration,
   "lock.open": Lock,
@@ -93,6 +97,7 @@ const pictoMapping: {
   person: Person,
   "info.circle": Info,
   "person.2": Group,
+  "arrowshape.turn.up.left": Reply,
 };
 
 export default function Picto({ picto, style, size, weight, color }: Props) {

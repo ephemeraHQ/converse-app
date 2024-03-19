@@ -54,9 +54,12 @@ export const subscribeToNotifications = async (
 ): Promise<void> => {
   const {
     sortedConversationsWithPreview,
-    topicsStatus,
+    topicsData,
     conversationsSortedOnce,
   } = getChatStore(account).getState();
+  const notificationsPermissionStatus =
+    useAppStore.getState().notificationsPermissionStatus;
+  if (notificationsPermissionStatus !== "granted") return;
   if (subscribingByAccount[account] || !conversationsSortedOnce) {
     await new Promise((r) => setTimeout(r, 1000));
     await subscribeToNotifications(account);
@@ -75,8 +78,7 @@ export const subscribeToNotifications = async (
       const hasValidAddress = c.peerAddress;
       const isNotPending = !c.pending;
       const isNotBlocked = hasValidAddress && !isBlocked(c.peerAddress);
-      const isTopicNotDeleted = topicsStatus[c.topic] !== "deleted";
-
+      const isTopicNotDeleted = topicsData[c.topic]?.status !== "deleted";
       return (
         hasValidAddress && isNotPending && isNotBlocked && isTopicNotDeleted
       );
@@ -279,6 +281,7 @@ export const loadSavedNotificationMessagesToContext = async () => {
             sentViaConverse: !!message.sentViaConverse,
             contentType: message.contentType || "xmtp.org/text:1.0",
             topic: message.topic,
+            referencedMessageId: message.referencedMessageId,
           });
         }
       });

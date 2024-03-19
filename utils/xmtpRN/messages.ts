@@ -4,6 +4,7 @@ import {
   GroupChangeContent,
   ReactionContent,
   RemoteAttachmentContent,
+  ReplyContent,
   StaticAttachmentContent,
 } from "@xmtp/react-native-sdk";
 
@@ -17,53 +18,107 @@ import {
   DecodedMessageWithCodecsType,
   GroupWithCodecsType,
 } from "./client";
-import { isContentType } from "./contentTypes";
+import { getMessageContentType, isContentType } from "./contentTypes";
 import { CoinbaseMessagingPaymentContent } from "./contentTypes/coinbasePayment";
 import { getXmtpClient } from "./sync";
 
 const BATCH_QUERY_PAGE_SIZE = 30;
 
+type SerializedMessageContent = {
+  content: string;
+  referencedMessageId?: string | undefined;
+  supported: boolean;
+  contentType: string;
+};
+
+const serializeProtocolMessageContent = (
+  client: ConverseXmtpClientType,
+  contentType: string,
+  messageContent: any
+): SerializedMessageContent => {
+  let referencedMessageId: string | undefined = undefined;
+  let content = "";
+  let supported = !!getMessageContentType(contentType);
+  if (isContentType("text", contentType)) {
+    content = messageContent as string;
+  } else if (isContentType("remoteAttachment", contentType)) {
+    content = serializeRemoteAttachmentMessageContent(
+      messageContent as RemoteAttachmentContent
+    );
+  } else if (isContentType("attachment", contentType)) {
+    content = JSON.stringify(messageContent as StaticAttachmentContent);
+  } else if (isContentType("reaction", contentType)) {
+    content = JSON.stringify(messageContent as ReactionContent);
+    referencedMessageId = (messageContent as ReactionContent).reference;
+  } else if (isContentType("reply", contentType)) {
+    const replyContent = messageContent as ReplyContent;
+    const replyContentType = replyContent.contentType;
+    // Some content types we don't handle as replies:
+    // You can't reply a reply or a reaction
+    if (
+      isContentType("reply", replyContentType) ||
+      isContentType("reaction", replyContentType)
+    ) {
+      return {
+        content: "",
+        contentType: replyContentType,
+        supported: false,
+      };
+    }
+    const codec = client.codecRegistry[replyContentType];
+    const actualReplyContent = codec.decode(replyContent.content);
+    // Now that we have the content of the reply,
+    // let's also pass it through the serialize method
+    const serializedReply = serializeProtocolMessageContent(
+      client,
+      replyContentType,
+      actualReplyContent
+    );
+    // Now that we have the actual content of this message, we can just save it
+    // as is, and just mark it as a reference to another message
+    return {
+      ...serializedReply,
+      referencedMessageId: replyContent.reference,
+    };
+  } else if (isContentType("transactionReference", contentType)) {
+    content = JSON.stringify(messageContent as TransactionReference);
+  } else if (isContentType("coinbasePayment", contentType)) {
+    content = JSON.stringify(messageContent as CoinbaseMessagingPaymentContent);
+  } else if (isContentType("groupChange", contentType)) {
+    content = JSON.stringify(messageContent as GroupChangeContent);
+  } else {
+    supported = false;
+  }
+  return {
+    content,
+    contentType,
+    referencedMessageId,
+    supported,
+  };
+};
+
 const protocolMessageToStateMessage = (
   message: DecodedMessageWithCodecsType
 ): XmtpMessage => {
-  let referencedMessageId: string | undefined = undefined;
-  const contentType = message.contentTypeId;
-  let content = "";
-  let contentFallback: string | undefined = undefined;
-  if (isContentType("text", contentType)) {
-    content = message.content() as string;
-  } else if (isContentType("remoteAttachment", contentType)) {
-    content = serializeRemoteAttachmentMessageContent(
-      message.content() as RemoteAttachmentContent
+  const supportedContentType = !!getMessageContentType(message.contentTypeId);
+  const { content, referencedMessageId, contentType, supported } =
+    serializeProtocolMessageContent(
+      message.client,
+      message.contentTypeId,
+      supportedContentType ? message.content() : undefined
     );
-  } else if (isContentType("attachment", contentType)) {
-    content = JSON.stringify(message.content() as StaticAttachmentContent);
-  } else if (isContentType("reaction", contentType)) {
-    content = JSON.stringify(message.content() as ReactionContent);
-    referencedMessageId = (message.content() as ReactionContent).reference;
-  } else if (isContentType("transactionReference", contentType)) {
-    content = JSON.stringify(message.content() as TransactionReference);
-  } else if (isContentType("coinbasePayment", contentType)) {
-    content = JSON.stringify(
-      message.content() as CoinbaseMessagingPaymentContent
-    );
-  } else if (isContentType("groupChange", contentType)) {
-    content = JSON.stringify(message.content() as GroupChangeContent);
-  } else {
-    console.log(message.contentTypeId);
-    contentFallback = message.fallback;
-  }
   return {
     id: message.id,
     senderAddress: message.senderAddress,
     sent: message.sent,
-    contentType: message.contentTypeId,
+    contentType,
     status: "delivered",
     sentViaConverse: message.sentViaConverse || false,
     content,
     referencedMessageId,
     topic: message.topic,
-    contentFallback,
+    contentFallback:
+      supportedContentType && supported ? undefined : message.fallback,
   };
 };
 

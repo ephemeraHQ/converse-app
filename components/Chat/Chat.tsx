@@ -1,6 +1,14 @@
+import { FlashList } from "@shopify/flash-list";
 import differenceInCalendarDays from "date-fns/differenceInCalendarDays";
-import React, { useCallback, useMemo, useRef } from "react";
-import { View, useColorScheme, StyleSheet, Platform } from "react-native";
+import React, { useCallback, useEffect, useMemo, useRef } from "react";
+import {
+  View,
+  useColorScheme,
+  StyleSheet,
+  Platform,
+  FlatList,
+  Dimensions,
+} from "react-native";
 import {
   useAnimatedStyle,
   useSharedValue,
@@ -14,6 +22,7 @@ import {
   useRecommendationsStore,
 } from "../../data/store/accountsStore";
 import { XmtpConversationWithUpdate } from "../../data/store/chatStore";
+import { useIsSplitScreen } from "../../screens/Navigation/navHelpers";
 import {
   ReanimatedFlashList,
   ReanimatedFlatList,
@@ -26,6 +35,7 @@ import {
   tertiaryBackgroundColor,
 } from "../../utils/colors";
 import { useConversationContext } from "../../utils/conversation";
+import { converseEventEmitter } from "../../utils/events";
 import { getProfileData } from "../../utils/profile";
 import { isContentType } from "../../utils/xmtpRN/contentTypes";
 import { Recommendation } from "../Recommendations/Recommendation";
@@ -120,6 +130,7 @@ export default function Chat() {
       ? s.profiles[conversation.peerAddress]?.socials
       : undefined
   );
+  const isSplitScreen = useIsSplitScreen();
   const recommendationsData = useRecommendationsStore((s) =>
     conversation?.peerAddress ? s.frens[conversation.peerAddress] : undefined
   );
@@ -226,6 +237,38 @@ export default function Chat() {
       ? ReanimatedFlashList
       : ReanimatedFlatList;
 
+  const messageListRef = useRef<
+    FlatList<MessageToDisplay> | FlashList<MessageToDisplay> | undefined
+  >();
+
+  const scrollToMessage = useCallback(
+    (data: {
+      messageId: string | undefined;
+      index: number | undefined;
+      animated: boolean | undefined;
+    }) => {
+      let index = data.index;
+      if (index === undefined && data.messageId) {
+        index = listArray.findIndex((m) => m.id === data.messageId);
+      }
+      if (index !== undefined) {
+        messageListRef.current?.scrollToIndex({
+          index,
+          viewPosition: 0.5,
+          animated: !!data.animated,
+        });
+      }
+    },
+    [listArray]
+  );
+
+  useEffect(() => {
+    converseEventEmitter.on("scrollChatToMessage", scrollToMessage);
+    return () => {
+      converseEventEmitter.off("scrollChatToMessage", scrollToMessage);
+    };
+  }, [scrollToMessage]);
+
   return (
     <View
       style={styles.chatContainer}
@@ -245,6 +288,11 @@ export default function Chat() {
                 onReadyToFocus();
               }, 50);
             }}
+            ref={(r) => {
+              if (r) {
+                messageListRef.current = r;
+              }
+            }}
             keyboardDismissMode="interactive"
             automaticallyAdjustContentInsets={false}
             contentInsetAdjustmentBehavior="never"
@@ -253,8 +301,12 @@ export default function Chat() {
             //   minIndexForVisible: 0,
             //   autoscrollToTopThreshold: 100,
             // }}
+            estimatedListSize={
+              isSplitScreen ? undefined : Dimensions.get("screen")
+            }
             inverted
             keyExtractor={keyExtractor}
+            getItemType={(item: MessageToDisplay) => item.contentType}
             keyboardShouldPersistTaps="handled"
             estimatedItemSize={80}
             // Size glitch on Android

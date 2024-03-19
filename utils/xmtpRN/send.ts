@@ -108,6 +108,16 @@ const getMessageContent = (message: MessageEntity) => {
       JSON.parse(message.content) as TransactionReference,
       { contentType: ContentTypeTransactionReference }
     );
+  } else if (
+    message.referencedMessageId &&
+    isContentType("text", message.contentType)
+  ) {
+    return {
+      reply: {
+        reference: message.referencedMessageId,
+        content: { text: message.content },
+      },
+    };
   } else {
     return {
       text: message.content,

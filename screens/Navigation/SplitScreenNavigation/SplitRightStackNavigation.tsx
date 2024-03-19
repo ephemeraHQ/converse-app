@@ -25,6 +25,7 @@ import ProfileNav, {
   ProfileNavParams,
   ProfileScreenConfig,
 } from "../ProfileNav";
+import ShareFrameNav, { ShareFrameNavParams } from "../ShareFrameNav";
 import ShareProfileNav, { ShareProfileScreenConfig } from "../ShareProfileNav";
 import TopUpNav from "../TopUpNav";
 import WebviewPreviewNav, {
@@ -44,6 +45,7 @@ export type NavigationParamList = {
   NewGroupSummary: undefined;
   EnableTransactions: undefined;
   ShareProfile: undefined;
+  ShareFrame: ShareFrameNavParams;
   TopUp: undefined;
   Profile: ProfileNavParams;
   Group: GroupNavParams;
@@ -100,6 +102,7 @@ export default function SplitRightStackNavigation({
           {ConversationNav(route.params)}
           {NewConversationNav()}
           {ShareProfileNav()}
+          {ShareFrameNav()}
           {WebviewPreviewNav()}
           {ProfileNav()}
           {GroupNav()}

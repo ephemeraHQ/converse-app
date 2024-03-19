@@ -39,6 +39,7 @@ func getXmtpClient(account: String) async -> XMTP.Client? {
     client.register(codec: AttachmentCodec())
     client.register(codec: RemoteAttachmentCodec())
     client.register(codec: ReactionCodec())
+    client.register(codec: ReplyCodec())
     return client
   } catch {
     sentryTrackMessage(message: "NOTIFICATION_XMTP_CLIENT_NOT_INSTANTIATED", extras: ["error": error])

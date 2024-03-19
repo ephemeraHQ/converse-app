@@ -128,7 +128,9 @@ export default function ProfileScreen({
     ...getAddressItemsFromArray(socials?.userNames || [], "name", "name"),
     ...getAddressItemsFromArray(socials?.ensNames || [], "name", "name"),
     ...getAddressItemsFromArray(
-      socials?.unstoppableDomains || [],
+      (socials?.unstoppableDomains || []).filter(
+        (d) => !d.domain.toLowerCase().endsWith(".eth")
+      ),
       "domain",
       "domain"
     ),
@@ -475,12 +477,13 @@ const useStyles = () => {
     },
     profileContent: {
       paddingHorizontal:
-        Platform.OS === "ios" || Platform.OS === "web" ? 18 : 0,
+        Platform.OS === "ios" || Platform.OS === "web" ? 18 : 6,
     },
     tableView: {},
     balanceContainer: {
       flexDirection: "row",
       alignItems: "center",
+      marginRight: Platform.OS === "ios" ? 0 : -5,
     },
     balance: {
       color: textPrimaryColor(colorScheme),

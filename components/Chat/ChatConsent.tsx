@@ -5,7 +5,6 @@ import { View, StyleSheet, useColorScheme, Text } from "react-native";
 
 import {
   currentAccount,
-  getChatStore,
   useSettingsStore,
   getSettingsStore,
 } from "../../data/store/accountsStore";
@@ -35,8 +34,6 @@ export default function ChatConsent() {
   const styles = useStyles();
   const colorScheme = useColorScheme();
 
-  const { topicsStatus } = getChatStore(currentAccount()).getState();
-  const thisTopicStatus = topicsStatus[conversation?.topic || ""];
   const setPeersStatus = useSettingsStore((s) => s.setPeersStatus);
   const { peersStatus } = getSettingsStore(currentAccount()).getState();
   const thisPeerStatus = conversation?.peerAddress
@@ -47,7 +44,6 @@ export default function ChatConsent() {
   const shouldShowConsentWindow =
     conversation &&
     conversation.messages.size > 0 &&
-    thisTopicStatus !== "consented" &&
     thisPeerStatus !== "consented" &&
     !isBlockedPeer &&
     !conversation.pending &&

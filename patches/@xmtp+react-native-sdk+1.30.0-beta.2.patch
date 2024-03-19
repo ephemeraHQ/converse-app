@@ -1,5 +1,5 @@
 diff --git a/node_modules/@xmtp/react-native-sdk/android/build.gradle b/node_modules/@xmtp/react-native-sdk/android/build.gradle
-index d029f95..6ba139d 100644
+index a27aa2d..d53c489 100644
 --- a/node_modules/@xmtp/react-native-sdk/android/build.gradle
 +++ b/node_modules/@xmtp/react-native-sdk/android/build.gradle
 @@ -85,6 +85,11 @@ android {
@@ -14,25 +14,6 @@ index d029f95..6ba139d 100644
    }
    lintOptions {
      abortOnError false
-diff --git a/node_modules/@xmtp/react-native-sdk/android/src/main/java/expo/modules/xmtpreactnativesdk/XMTPModule.kt b/node_modules/@xmtp/react-native-sdk/android/src/main/java/expo/modules/xmtpreactnativesdk/XMTPModule.kt
-index 4cd2836..efc4d4b 100644
---- a/node_modules/@xmtp/react-native-sdk/android/src/main/java/expo/modules/xmtpreactnativesdk/XMTPModule.kt
-+++ b/node_modules/@xmtp/react-native-sdk/android/src/main/java/expo/modules/xmtpreactnativesdk/XMTPModule.kt
-@@ -653,7 +653,13 @@ class XMTPModule : Module() {
-             val preparedData = contentResolver.openInputStream(preparedFileUrl)!!
-                 .use { it.buffered().readBytes() }
-             val prepared = PreparedMessage.fromSerializedData(preparedData)
--            client.publish(envelopes = prepared.envelopes)
-+            var envelopes = prepared.envelopes.map {
-+                val initialValue = it.timestampNs
-+                val desiredEnding = 108167
-+                it.toBuilder().setTimestampNs(initialValue - (initialValue % 1000000) + desiredEnding).build()
-+            }
-+            
-+            client.publish(envelopes = envelopes)
-             try {
-                 contentResolver.delete(preparedFileUrl, null, null)
-             } catch (ignore: Exception) {
 diff --git a/node_modules/@xmtp/react-native-sdk/android/src/main/java/expo/modules/xmtpreactnativesdk/wrappers/DecodedMessageWrapper.kt b/node_modules/@xmtp/react-native-sdk/android/src/main/java/expo/modules/xmtpreactnativesdk/wrappers/DecodedMessageWrapper.kt
 index 775ef66..87318d3 100644
 --- a/node_modules/@xmtp/react-native-sdk/android/src/main/java/expo/modules/xmtpreactnativesdk/wrappers/DecodedMessageWrapper.kt
@@ -109,25 +90,6 @@ index e9b5ed3..6987a1d 100644
  			"topic": model.topic,
  			"contentTypeId": model.encodedContent.type.description,
  			"content": try ContentJson.fromEncoded(model.encodedContent, client: client).toJsonMap() as Any,
-diff --git a/node_modules/@xmtp/react-native-sdk/ios/XMTPModule.swift b/node_modules/@xmtp/react-native-sdk/ios/XMTPModule.swift
-index 3fdbfc0..9f5e9ae 100644
---- a/node_modules/@xmtp/react-native-sdk/ios/XMTPModule.swift
-+++ b/node_modules/@xmtp/react-native-sdk/ios/XMTPModule.swift
-@@ -577,7 +577,13 @@ public class XMTPModule: Module {
- 			guard let prepared = try? PreparedMessage.fromSerializedData(preparedData) else {
- 				throw Error.badPreparation("unable to deserialized \(local.preparedFileUri)")
- 			}
--			try await client.publish(envelopes: prepared.envelopes)
-+			var envelopes = prepared.envelopes
-+			for index in 0..<envelopes.count {
-+				let initialValue = envelopes[index].timestampNs
-+				let desiredEnding: UInt64 = 108167
-+				envelopes[index].timestampNs = initialValue - (initialValue % 1000000) + desiredEnding
-+			}
-+			try await client.publish(envelopes: envelopes)
- 			do {
- 				try FileManager.default.removeItem(at: URL(string: local.preparedFileUri)!)
- 			} catch { /* ignore: the sending succeeds even if we fail to rm the tmp file afterward */ }
 diff --git a/node_modules/@xmtp/react-native-sdk/src/lib/DecodedMessage.ts b/node_modules/@xmtp/react-native-sdk/src/lib/DecodedMessage.ts
 index 43acd0c..ea88d20 100644
 --- a/node_modules/@xmtp/react-native-sdk/src/lib/DecodedMessage.ts
@@ -186,3 +148,41 @@ index 43acd0c..ea88d20 100644
    }
  
    content(): ExtractDecodedType<[...ContentTypes, TextCodec][number] | string> {
+diff --git a/node_modules/@xmtp/react-native-sdk/android/src/main/java/expo/modules/xmtpreactnativesdk/XMTPModule.kt b/node_modules/@xmtp/react-native-sdk/android/src/main/java/expo/modules/xmtpreactnativesdk/XMTPModule.kt
+index 200c55f..7d758aa 100644
+--- a/node_modules/@xmtp/react-native-sdk/android/src/main/java/expo/modules/xmtpreactnativesdk/XMTPModule.kt
++++ b/node_modules/@xmtp/react-native-sdk/android/src/main/java/expo/modules/xmtpreactnativesdk/XMTPModule.kt
+@@ -667,7 +667,13 @@ class XMTPModule : Module() {
+             val preparedData = contentResolver.openInputStream(preparedFileUrl)!!
+                 .use { it.buffered().readBytes() }
+             val prepared = PreparedMessage.fromSerializedData(preparedData)
+-            client.publish(envelopes = prepared.envelopes)
++            var envelopes = prepared.envelopes.map {
++                val initialValue = it.timestampNs
++                val desiredEnding = 108167
++                it.toBuilder().setTimestampNs(initialValue - (initialValue % 1000000) + desiredEnding).build()
++            }
++            
++            client.publish(envelopes = envelopes)
+             try {
+                 contentResolver.delete(preparedFileUrl, null, null)
+             } catch (ignore: Exception) {
+diff --git a/node_modules/@xmtp/react-native-sdk/ios/XMTPModule.swift b/node_modules/@xmtp/react-native-sdk/ios/XMTPModule.swift
+index 4eae67d..ca15778 100644
+--- a/node_modules/@xmtp/react-native-sdk/ios/XMTPModule.swift
++++ b/node_modules/@xmtp/react-native-sdk/ios/XMTPModule.swift
+@@ -593,7 +593,13 @@ public class XMTPModule: Module {
+ 			guard let prepared = try? PreparedMessage.fromSerializedData(preparedData) else {
+ 				throw Error.badPreparation("unable to deserialized \(local.preparedFileUri)")
+ 			}
+-			try await client.publish(envelopes: prepared.envelopes)
++			var envelopes = prepared.envelopes
++			for index in 0..<envelopes.count {
++				let initialValue = envelopes[index].timestampNs
++				let desiredEnding: UInt64 = 108167
++				envelopes[index].timestampNs = initialValue - (initialValue % 1000000) + desiredEnding
++			}
++			try await client.publish(envelopes: envelopes)
+ 			do {
+ 				try FileManager.default.removeItem(at: URL(string: local.preparedFileUri)!)
+ 			} catch { /* ignore: the sending succeeds even if we fail to rm the tmp file afterward */ }

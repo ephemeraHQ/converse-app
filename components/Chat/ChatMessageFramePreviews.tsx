@@ -1,4 +1,5 @@
-import { FrameActionInputs } from "@xmtp/frames-client";
+import { FrameActionInputs, OpenFramesProxy } from "@xmtp/frames-client";
+import * as Haptics from "expo-haptics";
 import { Image } from "expo-image";
 import * as Linking from "expo-linking";
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -7,6 +8,7 @@ import {
   Text,
   TextInput,
   TouchableHighlight,
+  TouchableOpacity,
   useColorScheme,
   View,
 } from "react-native";
@@ -15,6 +17,7 @@ import uuid from "react-native-uuid";
 
 import FrameLinkIcon from "../../assets/frameLink.svg";
 import { useCurrentAccount } from "../../data/store/accountsStore";
+import { useFramesStore } from "../../data/store/framesStore";
 import {
   backgroundColor,
   clickedItemBackgroundColor,
@@ -28,15 +31,24 @@ import {
   FrameButtonType,
   FrameToDisplay,
   FramesForMessage,
+  getFrameAspectRatio,
   getFrameButtonLinkTarget,
   getFrameButtons,
+  getFrameImage,
+  getFramePostURL,
+  getFrameTextInput,
+  getFramesClient,
   getMetadaTagsForMessage,
 } from "../../utils/frames";
+import { navigate } from "../../utils/navigation";
+import ChatActionButton from "./ChatActionButton";
 import { MessageToDisplay } from "./ChatMessage";
 
 type Props = {
   message: MessageToDisplay;
 };
+
+const framesProxy = new OpenFramesProxy();
 
 export default function ChatMessageFramePreviews({ message }: Props) {
   const messageId = useRef(message.id);
@@ -44,7 +56,11 @@ export default function ChatMessageFramePreviews({ message }: Props) {
   const account = useCurrentAccount() as string;
   const [framesForMessage, setFramesForMessage] = useState<{
     [messageId: string]: FrameToDisplay[];
-  }>({});
+  }>({
+    [message.id]: useFramesStore
+      .getState()
+      .getFramesForURLs(message.converseMetadata?.frames || []),
+  });
 
   const fetchTagsIfNeeded = useCallback(() => {
     if (!tagsFetchedOnce.current) {
@@ -53,7 +69,7 @@ export default function ChatMessageFramePreviews({ message }: Props) {
         (frames: FramesForMessage) => {
           // Call is async and we have cell recycling so make sure
           // we're still on the same message as before
-          setFramesForMessage({ [frames.messageId]: frames.framesToDisplay });
+          setFramesForMessage({ [frames.messageId]: frames.frames });
         }
       );
     }
@@ -64,6 +80,11 @@ export default function ChatMessageFramePreviews({ message }: Props) {
     messageId.current = message.id;
     tagsFetchedOnce.current = false;
     fetchTagsIfNeeded();
+    setFramesForMessage({
+      [message.id]: useFramesStore
+        .getState()
+        .getFramesForURLs(message.converseMetadata?.frames || []),
+    });
   }
 
   useEffect(fetchTagsIfNeeded, [fetchTagsIfNeeded, message.id]);
@@ -97,6 +118,7 @@ const ChatMessageFramePreview = ({
     "conversation",
     "setFrameTextInputFocused",
   ]);
+  const colorScheme = useColorScheme();
   const account = useCurrentAccount() as string;
   const [posting, setPosting] = useState(undefined as undefined | number);
   const [imageLoading, setImageLoading] = useState(false);
@@ -104,26 +126,15 @@ const ChatMessageFramePreview = ({
     ...initialFrame,
     uniqueId: uuid.v4().toString(),
   });
-  const [frameUrl, setFrameUrl] = useState(
-    frame.extractedTags["of:post_url"] ||
-      frame.extractedTags["fc:frame:post_url"]
-  );
+  const [frameUrl, setFrameUrl] = useState(getFramePostURL(frame));
   useEffect(() => {
     // If a new frame precises a new frame post url, we use it
-    if (
-      frame.extractedTags["of:post_url"] ||
-      frame.extractedTags["fc:frame:post_url"]
-    ) {
-      setFrameUrl(
-        frame.extractedTags["of:post_url"] ||
-          frame.extractedTags["fc:frame:post_url"]
-      );
+    if (getFramePostURL(frame)) {
+      setFrameUrl(getFramePostURL(frame));
     }
-  }, [frame.extractedTags]);
+  }, [frame]);
   const buttons = getFrameButtons(frame);
-  const textInput = frame.extractedTags["fc:frame:input:text"] as
-    | string
-    | undefined;
+  const textInput = getFrameTextInput(frame);
   const [frameTextInputValue, setFrameTextInputValue] = useState("");
   const onButtonPress = useCallback(
     async (button: FrameButtonType) => {
@@ -154,9 +165,10 @@ const ChatMessageFramePreview = ({
         if (textInput) {
           actionInput.inputText = frameTextInputValue;
         }
+        const framesClient = await getFramesClient(account);
         if (button.action === "post") {
-          const payload = await frame.framesClient.signFrameAction(actionInput);
-          const frameResponse = await frame.framesClient.proxy.post(
+          const payload = await framesClient.signFrameAction(actionInput);
+          const frameResponse = await framesClient.proxy.post(
             frameUrl,
             payload
           );
@@ -165,13 +177,10 @@ const ChatMessageFramePreview = ({
             ...frameResponse,
             type: "XMTP_FRAME",
             uniqueId: uuid.v4().toString(),
-            framesClient: frame.framesClient,
           });
-          // Reset input
-          setFrameTextInputValue("");
         } else if (button.action === "post_redirect") {
-          const payload = await frame.framesClient.signFrameAction(actionInput);
-          const { redirectedTo } = await frame.framesClient.proxy.postRedirect(
+          const payload = await framesClient.signFrameAction(actionInput);
+          const { redirectedTo } = await framesClient.proxy.postRedirect(
             frameUrl,
             payload
           );
@@ -183,6 +192,9 @@ const ChatMessageFramePreview = ({
             Linking.openURL(redirectedTo);
           }
         }
+        // Reset input
+        setFrameTextInputValue("");
+        setFrameTextInputFocused(false);
       } catch (e: any) {
         console.error(e);
       }
@@ -195,24 +207,41 @@ const ChatMessageFramePreview = ({
       frameTextInputValue,
       frameUrl,
       message.topic,
+      setFrameTextInputFocused,
       textInput,
     ]
   );
+
+  const shareFrame = useCallback(() => {
+    navigate("ShareFrame", { frameURL: initialFrame.url });
+  }, [initialFrame.url]);
 
   const showBottom =
     (frame.type === "PREVIEW" && frame.extractedTags["og:title"]) ||
     buttons.length > 0 ||
     textInput;
-  const frameImage =
-    frame.type === "PREVIEW"
-      ? frame.extractedTags["og:image"]
-      : frame.extractedTags["fc:frame:image"];
-
-  const frameImageAspectRatio =
-    frame.extractedTags["fc:frame:image:aspect_ratio"] || "1.91:1";
+  const frameImage = getFrameImage(frame);
+  const frameImageAspectRatio = getFrameAspectRatio(frame);
 
   return (
     <View style={styles.frameWrapper}>
+      {initialFrame.type === "XMTP_FRAME" && (
+        <View
+          style={[
+            styles.shareFrameWrapper,
+            message.fromMe
+              ? styles.shareFrameWrapperMe
+              : styles.shareFrameWrapperOther,
+          ]}
+        >
+          <TouchableOpacity style={styles.shareFrame} onPress={shareFrame}>
+            <ChatActionButton
+              picto="square.and.arrow.up"
+              pictoStyle={{ top: -1.5 }} // Because the square & arrow doesn't look centered
+            />
+          </TouchableOpacity>
+        </View>
+      )}
       <View style={styles.frameContainer}>
         <View
           style={{
@@ -220,14 +249,13 @@ const ChatMessageFramePreview = ({
           }}
         >
           <FrameImage
-            frameImage={frame.framesClient.proxy.mediaUrl(frameImage)}
+            frameImage={framesProxy.mediaUrl(frameImage)}
             initialFrameURL={initialFrame.url}
             uniqueId={frame.uniqueId}
             setImageLoading={setImageLoading}
             frameImageAspectRatio={frameImageAspectRatio}
           />
         </View>
-
         {showBottom && (
           <FrameBottom
             message={message}
@@ -296,6 +324,7 @@ const FrameBottom = ({
               }}
               onChangeText={setTextFrameInputValue}
               placeholder={textInput}
+              placeholderTextColor={textSecondaryColor("light")}
               value={frameTextInputValue}
             />
           )}
@@ -306,7 +335,14 @@ const FrameBottom = ({
                 posting={posting}
                 button={button}
                 fullWidth={buttons.length === 1}
-                onPress={() => setTimeout(() => onButtonPress(button), 10)}
+                onPress={() => {
+                  // Immediate haptic feedback
+                  Haptics.impactAsync();
+                  // Timeout because we still use the JS SDK for frames
+                  // and the encryption of payload happens on main thread :(
+                  // @todo => use the RN SDK when it's available to sign
+                  setTimeout(() => onButtonPress(button), 10);
+                }}
               />
             ))}
         </>
@@ -469,7 +505,8 @@ const useStyles = () => {
       flexShrink: 1,
     },
     frameTextInput: {
-      backgroundColor: backgroundColor(colorScheme),
+      backgroundColor: backgroundColor("light"),
+      color: textPrimaryColor("light"),
       padding: 4,
       borderRadius: 4,
       width: "100%",
@@ -482,6 +519,26 @@ const useStyles = () => {
       paddingHorizontal: 4,
       paddingVertical: 8,
       fontSize: 15,
+    },
+    shareFrameWrapper: {
+      width: 36,
+      height: "100%",
+      position: "absolute",
+      top: 4,
+      alignItems: "center",
+      justifyContent: "center",
+    },
+    shareFrameWrapperMe: {
+      left: -46,
+    },
+    shareFrameWrapperOther: {
+      right: -46,
+    },
+    shareFrame: {
+      width: 36,
+      height: 36,
+      top: 0,
+      left: 0,
     },
   });
 };

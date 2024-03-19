@@ -1,10 +1,11 @@
 import { ContentTypeReaction, Reaction } from "@xmtp/content-type-reaction";
 import { ContentTypeRemoteAttachment } from "@xmtp/content-type-remote-attachment";
+import { ContentTypeReply, Reply } from "@xmtp/content-type-reply";
 import {
   ContentTypeTransactionReference,
   TransactionReference,
 } from "@xmtp/content-type-transaction-reference";
-import { Conversation, fromNanoString } from "@xmtp/xmtp-js";
+import { ContentTypeText, Conversation, fromNanoString } from "@xmtp/xmtp-js";
 
 import { Message as MessageEntity } from "../../data/db/entities/messageEntity";
 import {
@@ -96,6 +97,19 @@ export const sendPendingMessages = async (account: string) => {
             JSON.parse(message.content) as TransactionReference,
             { contentType: ContentTypeTransactionReference }
           );
+        } else if (
+          message.referencedMessageId &&
+          isContentType("text", message.contentType)
+        ) {
+          const reply: Reply = {
+            reference: message.referencedMessageId,
+            contentType: ContentTypeText,
+            content: message.content,
+          };
+
+          preparedMessage = await conversation.prepareMessage(reply, {
+            contentType: ContentTypeReply,
+          });
         } else {
           preparedMessage = await conversation.prepareMessage(message.content);
         }
