@@ -121,6 +121,7 @@ export const syncXmtpClient = async (account: string) => {
 
     // Need to save initial load is done
     getChatStore(account).getState().setInitialLoadDone();
+
     // Only update when we have really fetched, this might mitigate
     // the case where we never fetch some messages
     if (fetchedMessagesCount > 0) {

@@ -47,4 +47,7 @@ export class Conversation {
     createForeignKeyConstraints: false,
   })
   messages?: Message[];
+
+  @Column("int", { nullable: true })
+  lastNotificationsSubscribedPeriod?: number;
 }

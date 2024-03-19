@@ -6,9 +6,13 @@ import com.android.volley.Request
 import com.android.volley.toolbox.JsonObjectRequest
 import com.android.volley.toolbox.Volley
 import com.beust.klaxon.Klaxon
+
 import com.converse.dev.*
 import com.converse.dev.PushNotificationsService.Companion.TAG
+import android.util.Base64
+import android.util.Base64.NO_WRAP
 import com.google.firebase.messaging.RemoteMessage
+import expo.modules.notifications.service.delegates.encodedInBase64
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.suspendCancellableCoroutine
@@ -19,15 +23,13 @@ import org.xmtp.android.library.DecodedMessage
 import org.xmtp.android.library.codecs.Reaction
 import org.xmtp.android.library.codecs.RemoteAttachment
 import org.xmtp.android.library.codecs.Reply
-import org.xmtp.android.library.codecs.decoded
 import org.xmtp.android.library.messages.Envelope
+import org.xmtp.proto.keystore.api.v1.Keystore
 import org.xmtp.proto.message.api.v1.MessageApiOuterClass
 import org.xmtp.proto.message.contents.Content
 import java.util.HashMap
-import kotlin.coroutines.Continuation
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
-import kotlin.coroutines.suspendCoroutine
 
 data class NotificationDataResult(
     val title: String = "",
@@ -109,6 +111,9 @@ suspend fun handleNewConversationFirstMessage(
                             spamScore,
                         )
                     }
+                    else -> {
+                        // Nothing to do (group)
+                    }
                 }
 
                 val decodedMessageResult = handleMessageByContentType(
@@ -134,7 +139,13 @@ suspend fun handleNewConversationFirstMessage(
 
                     if (apiURI != null && pushToken !== null) {
                         Log.d(TAG, "Subscribing to new topic at api: $apiURI")
-                        subscribeToTopic(appContext, apiURI, xmtpClient.address, pushToken, conversation.topic)
+                        xmtpClient.conversations.importTopicData(conversation.toTopicData())
+                        val request = Keystore.GetConversationHmacKeysRequest.newBuilder().addTopics(conversation.topic).build()
+                        val hmacKeys = xmtpClient.conversations.getHmacKeys(request)
+                        var conversationHmacKeys  = hmacKeys.hmacKeysMap[conversation.topic]?.let {
+                            Base64.encodeToString(it.toByteArray(), NO_WRAP)
+                        }
+                        subscribeToTopic(appContext, apiURI, xmtpClient.address, pushToken, conversation.topic, conversationHmacKeys)
                         shouldShowNotification = true
                     }
                 }
