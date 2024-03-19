@@ -308,7 +308,7 @@ export function sortAndComputePreview(
       if (isNotReady) return;
       const isPending = !!conversation.pending;
       const isNotEmpty = conversation.messages.size > 0;
-      const isDeleted = topicsData[conversation.topic]?.status !== "deleted";
+      const isDeleted = topicsData[conversation.topic]?.status === "deleted";
       const isBlocked = conversation.isGroup
         ? false // No consent for groups right now
         : peersStatus[conversation.peerAddress.toLowerCase()] === "blocked";
