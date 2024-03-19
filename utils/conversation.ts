@@ -241,7 +241,11 @@ export const openMainConversationWithPeer = async (
         peerAddress,
         undefined
       );
-      onSuccess(topic);
+      if (topic) {
+        onSuccess(topic);
+      } else {
+        onError();
+      }
     }
   }
 };
