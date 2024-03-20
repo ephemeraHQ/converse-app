@@ -33,7 +33,7 @@ import {
   FrameToDisplay,
   FramesForMessage,
   getFrameAspectRatio,
-  getFrameButtonLinkTarget,
+  getFrameButtonTarget,
   getFrameButtons,
   getFrameImage,
   getFramePostURL,
@@ -119,7 +119,6 @@ const ChatMessageFramePreview = ({
     "conversation",
     "setFrameTextInputFocused",
   ]);
-  const colorScheme = useColorScheme();
   const account = useCurrentAccount() as string;
   const [posting, setPosting] = useState(undefined as undefined | number);
   const [imageLoading, setImageLoading] = useState(false);
@@ -127,23 +126,16 @@ const ChatMessageFramePreview = ({
     ...initialFrame,
     uniqueId: uuid.v4().toString(),
   });
-  const [frameUrl, setFrameUrl] = useState(getFramePostURL(frame));
-  useEffect(() => {
-    // If a new frame precises a new frame post url, we use it
-    if (getFramePostURL(frame)) {
-      setFrameUrl(getFramePostURL(frame));
-    }
-  }, [frame]);
   const buttons = getFrameButtons(frame);
   const textInput = getFrameTextInput(frame);
   const [frameTextInputValue, setFrameTextInputValue] = useState("");
   const onButtonPress = useCallback(
     async (button: FrameButtonType) => {
       if (button.action === "link") {
-        const link = getFrameButtonLinkTarget(frame, button.index);
+        const link = getFrameButtonTarget(frame, button.index);
         if (
           !link ||
-          !link.startsWith("https") ||
+          !link.startsWith("http") ||
           !(await Linking.canOpenURL(link))
         )
           return;
@@ -153,9 +145,13 @@ const ChatMessageFramePreview = ({
       if (!conversation) return;
       setPosting(button.index);
       setImageLoading(true);
+      const actionPostUrl =
+        getFrameButtonTarget(frame, button.index) ||
+        getFramePostURL(frame) ||
+        initialFrame.url;
       try {
         const actionInput: FrameActionInputs = {
-          frameUrl,
+          frameUrl: actionPostUrl,
           buttonIndex: button.index,
           conversationTopic: message.topic,
           participantAccountAddresses: [account, conversation.peerAddress],
@@ -167,7 +163,7 @@ const ChatMessageFramePreview = ({
         if (button.action === "post") {
           const payload = await framesClient.signFrameAction(actionInput);
           const frameResponse = await framesClient.proxy.post(
-            frameUrl,
+            actionPostUrl,
             payload
           );
           // post action will update frame
@@ -179,12 +175,12 @@ const ChatMessageFramePreview = ({
         } else if (button.action === "post_redirect") {
           const payload = await framesClient.signFrameAction(actionInput);
           const { redirectedTo } = await framesClient.proxy.postRedirect(
-            frameUrl,
+            actionPostUrl,
             payload
           );
           if (
             redirectedTo &&
-            redirectedTo.startsWith("https") &&
+            redirectedTo.startsWith("http") &&
             (await Linking.canOpenURL(redirectedTo))
           ) {
             Linking.openURL(redirectedTo);
@@ -203,7 +199,7 @@ const ChatMessageFramePreview = ({
       conversation,
       frame,
       frameTextInputValue,
-      frameUrl,
+      initialFrame.url,
       message.topic,
       setFrameTextInputFocused,
       textInput,
@@ -388,7 +384,7 @@ const FrameImage = ({
   return (
     <TouchableWithoutFeedback
       onPress={() => {
-        if (initialFrameURL && initialFrameURL.startsWith("https")) {
+        if (initialFrameURL && initialFrameURL.startsWith("http")) {
           Linking.openURL(initialFrameURL);
         }
       }}
