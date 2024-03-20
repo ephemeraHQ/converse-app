@@ -163,7 +163,11 @@ function ChatMessage({ message, colorScheme }: Props) {
         onSwipeableWillClose={() => {
           const translation = swipeableRef.current?.state.rowTranslation;
           if (translation && (translation as any)._value > 70) {
-            Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+            if (Platform.OS !== "web") {
+              Haptics.notificationAsync(
+                Haptics.NotificationFeedbackType.Success
+              );
+            }
             converseEventEmitter.emit("triggerReplyToMessage", message);
           }
         }}
