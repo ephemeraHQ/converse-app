@@ -20,6 +20,7 @@ import { XmtpConversation, XmtpMessage } from "../data/store/chatStore";
 import api, { saveNotificationsSubscribe } from "./api";
 import {
   ConversationWithLastMessagePreview,
+  conversationShouldBeDisplayed,
   conversationShouldBeInInbox,
 } from "./conversation";
 import { savePushToken } from "./keychain/helpers";
@@ -94,7 +95,9 @@ export const subscribeToNotifications = async (
 
       const isNotBlocked = !isBlocked(c.peerAddress);
       const isTopicNotDeleted = topicsData[c.topic]?.status !== "deleted";
-      const isTopicInInbox = conversationShouldBeInInbox(c, peersStatus);
+      const isTopicInInbox =
+        conversationShouldBeDisplayed(c, topicsData, peersStatus) &&
+        conversationShouldBeInInbox(c, peersStatus);
 
       const status =
         isNotBlocked && isTopicNotDeleted && isTopicInInbox ? "PUSH" : "MUTED";
@@ -130,6 +133,10 @@ export const subscribeToNotifications = async (
           topicsToUpdateForPeriod[c.topic] = {
             status: c.status as "PUSH" | "MUTED",
             hmacKeys,
+          };
+        } else {
+          topicsToUpdateForPeriod[c.topic] = {
+            status: c.status as "PUSH" | "MUTED",
           };
         }
       });
