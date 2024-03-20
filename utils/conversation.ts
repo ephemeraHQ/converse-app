@@ -291,6 +291,24 @@ const conversationsSortMethod = (
   return bDate - aDate;
 };
 
+// Wether a conversation should appear in Inbox OR Spam
+// or just be totally hidden (blocked peer, deleted convo)
+export const conversationShouldBeDisplayed = (
+  conversation: ConversationWithLastMessagePreview,
+  topicsData: { [topic: string]: TopicData | undefined },
+  peersStatus: { [peer: string]: "blocked" | "consented" }
+) => {
+  return (
+    conversation?.peerAddress &&
+    (!conversation.pending || conversation.messages.size > 0) &&
+    topicsData[conversation.topic]?.status !== "deleted" &&
+    peersStatus[conversation.peerAddress.toLowerCase()] !== "blocked" &&
+    conversation.version !== "v1" &&
+    !conversation.topic.includes("\x00")
+  ); // Forbidden character that breaks notifications
+};
+
+// Wether a conversation should appear in Inbox tab (i.e. probably not a spam)
 export const conversationShouldBeInInbox = (
   conversation: ConversationWithLastMessagePreview,
   peersStatus: { [peer: string]: "blocked" | "consented" }
@@ -314,12 +332,7 @@ export function sortAndComputePreview(
   Object.values(conversations).forEach(
     (conversation: ConversationWithLastMessagePreview, i) => {
       if (
-        conversation?.peerAddress &&
-        (!conversation.pending || conversation.messages.size > 0) &&
-        topicsData[conversation.topic]?.status !== "deleted" &&
-        peersStatus[conversation.peerAddress.toLowerCase()] !== "blocked" &&
-        conversation.version !== "v1" &&
-        !conversation.topic.includes("\x00") // Forbidden character that breaks notifications
+        conversationShouldBeDisplayed(conversation, topicsData, peersStatus)
       ) {
         conversation.lastMessagePreview = conversationLastMessagePreview(
           conversation,
