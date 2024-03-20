@@ -9987,10 +9987,10 @@
     rxjs "^7.8.0"
     undici "^5.8.1"
 
-"@xmtp/react-native-sdk@^1.29.4":
-  version "1.29.4"
-  resolved "https://registry.yarnpkg.com/@xmtp/react-native-sdk/-/react-native-sdk-1.29.4.tgz#878e8114222a62b0db87067404c9d6a971cc0900"
-  integrity sha512-jKrwZnt+MRwpbOHiYENkkVDWy5t7kMRlBKfGbsk/mRQ4zOTCzDjftzwExuAqgU9d5vrU7GNehUd1ALnt1lwx+g==
+"@xmtp/react-native-sdk@^1.29.5":
+  version "1.29.5"
+  resolved "https://registry.yarnpkg.com/@xmtp/react-native-sdk/-/react-native-sdk-1.29.5.tgz#e2c1b90739aad8c3b86389f6de43b754369c0fff"
+  integrity sha512-Ca4TMeSNuyXqwU85zPv2aWQhWZpGe7HsOXsofiCMUGWDWi/PzVR1GrG1koTGKddZeIPs+7/KVKk4gjX3i5fZ6Q==
   dependencies:
     "@ethersproject/bytes" "^5.7.0"
     "@msgpack/msgpack" "^3.0.0-beta2"
