@@ -4,6 +4,7 @@ import { Image } from "expo-image";
 import * as Linking from "expo-linking";
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
+  Platform,
   StyleSheet,
   Text,
   TextInput,
@@ -333,8 +334,10 @@ const FrameBottom = ({
                 button={button}
                 fullWidth={buttons.length === 1}
                 onPress={() => {
-                  // Immediate haptic feedback
-                  Haptics.impactAsync();
+                  if (Platform.OS !== "web") {
+                    // Immediate haptic feedback
+                    Haptics.impactAsync();
+                  }
                   // Timeout because we still use the JS SDK for frames
                   // and the encryption of payload happens on main thread :(
                   // @todo => use the RN SDK when it's available to sign
