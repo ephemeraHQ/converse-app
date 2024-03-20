@@ -47,13 +47,14 @@ export const saveSpamScores = async (
 
 export const refreshAllSpamScores = async (account: string) => {
   const { conversations } = getChatStore(account).getState();
-  const conversationsWithoutScore = Object.values(conversations).filter(
-    (c) => c.spamScore === undefined || c.spamScore === null
+  const conversationsToScore = Object.values(conversations).filter(
+    (c) =>
+      c.messagesIds.length &&
+      (c.spamScore === undefined || c.spamScore === null)
   );
 
-  if (conversationsWithoutScore.length === 0) return;
-
-  await computeConversationsSpamScores(account, conversationsWithoutScore);
+  if (conversationsToScore.length === 0) return;
+  await computeConversationsSpamScores(account, conversationsToScore);
 };
 
 export const computeConversationsSpamScores = async (

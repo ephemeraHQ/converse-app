@@ -27,7 +27,6 @@ const instantiatingClientForAccount: { [account: string]: boolean } = {};
 export const getXmtpClient = async (
   account: string
 ): Promise<ConverseXmtpClientType | Client> => {
-  console.log(`[XmtpRN] Getting client for ${account}`);
   if (account && xmtpClientByAccount[account]) {
     return xmtpClientByAccount[account];
   }
