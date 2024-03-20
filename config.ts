@@ -1,6 +1,6 @@
 import Constants from "expo-constants";
 import { Platform } from "react-native";
-import { baseSepolia, base } from "viem/chains";
+import { base, baseSepolia } from "wagmi/chains";
 
 const defaultConfig = {
   debugMenu: false,
