@@ -7,7 +7,6 @@ import {
   getWalletStore,
   useAccountsStore,
 } from "../../data/store/accountsStore";
-import { addLog } from "../debug";
 import { deleteSecureItemAsync } from "../keychain";
 import { deleteXmtpKey } from "../keychain/helpers";
 import mmkv from "../mmkv";
@@ -142,7 +141,6 @@ export const useLogoutFromConverse = (account: string) => {
     const isPrivyAccount =
       !!useAccountsStore.getState().privyAccountId[account];
     if (isPrivyAccount) {
-      addLog("Logging out from Privy from logout helper");
       privyLogout();
     }
     const topicsByAccount: { [a: string]: string[] } = {};

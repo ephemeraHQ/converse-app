@@ -4,6 +4,7 @@ import { useEffect, useRef } from "react";
 import config from "../../config";
 import { useAppStore } from "../../data/store/appStore";
 import { useSelect } from "../../data/store/storeHelpers";
+import { addLog } from "../../utils/debug";
 
 NetInfo.configure({
   reachabilityUrl: `${config.apiURI}/api/admin/healthcheck`,
@@ -27,6 +28,7 @@ export default function NetworkStateHandler() {
     const unsubscribeNetworkInfo = NetInfo.addEventListener((netState) => {
       const reachable = !!netState.isInternetReachable;
       if (reachable !== reachableRef.current) {
+        addLog(`Internet reachable: ${reachable}`);
         setIsInternetReachable(reachable);
       }
     });
