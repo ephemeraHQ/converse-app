@@ -185,7 +185,7 @@ export default function SeedPhraseConnect() {
             terms and conditions.
           </Text>
         </Text>
-        {config.env === "dev" && (
+        {(config.env === "dev" || config.env === "preview") && (
           <Text style={styles.links}>
             <Text style={styles.link} onPress={generateWallet}>
               Try the app with an ephemeral wallet.
