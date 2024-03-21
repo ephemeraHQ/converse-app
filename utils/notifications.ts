@@ -173,11 +173,14 @@ export const subscribeToNotifications = async (
       topicsToUpdateForPeriod
     );
 
-    // Topics updated have a period, topics deleted have a period of -1
+    // Topics updated have a period
     const updated = Object.keys(topicsToUpdateForPeriod).filter(
-      (topic) => topicsToUpdateForPeriod[topic].status === "PUSH"
+      (topic) =>
+        topicsToUpdateForPeriod[topic].status === "PUSH" &&
+        topicsToUpdateForPeriod[topic].hmacKeys
     );
 
+    // Topics deleted have a period of -1
     const deleted = Object.keys(topicsToUpdateForPeriod).filter(
       (topic) => topicsToUpdateForPeriod[topic].status === "MUTED"
     );
