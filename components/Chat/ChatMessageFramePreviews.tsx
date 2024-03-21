@@ -454,7 +454,6 @@ const FrameButton = ({
 };
 
 const useStyles = () => {
-  const colorScheme = useColorScheme();
   return StyleSheet.create({
     frameWrapper: {
       padding: 4,
