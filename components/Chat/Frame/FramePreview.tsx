@@ -42,6 +42,7 @@ export default function FramePreview({
   const [firstFrameLoaded, setFirstFrameLoaded] = useState(false);
   const [frame, setFrame] = useState({
     ...initialFrame,
+    initialImageRefreshed: false,
     frameImage: getFrameImage(initialFrame)
       ? framesProxy.mediaUrl(getFrameImage(initialFrame) as string)
       : undefined,
@@ -54,21 +55,26 @@ export default function FramePreview({
   const [frameTextInputValue, setFrameTextInputValue] = useState("");
 
   useEffect(() => {
-    if (frame.isInitialFrame && !firstFrameLoaded) {
-      // We don't display anything until the frame
-      // initial image is loaded !
-      if (!frame.frameImage) {
-        setFirstFrameLoaded(true);
-        return;
-      }
-      Image.prefetch(frame.frameImage, "memory-disk").then((prefetched) => {
+    const handleInitialImage = async () => {
+      if (frame.isInitialFrame && !firstFrameLoaded) {
+        // We don't display anything until the frame
+        // initial image is loaded !
+        if (!frame.frameImage) {
+          setFirstFrameLoaded(true);
+          return;
+        }
+        const prefetched = await Image.prefetch(
+          frame.frameImage,
+          "memory-disk"
+        );
         setFirstFrameLoaded(true);
         if (!prefetched) {
           setFirstImageFailure(true);
         }
-      });
-    }
-  }, [firstFrameLoaded, frame.frameImage, frame.isInitialFrame, frame.type]);
+      }
+    };
+    handleInitialImage();
+  }, [firstFrameLoaded, frame.frameImage, frame.isInitialFrame]);
 
   const onButtonPress = useCallback(
     async (button: FrameButtonType) => {

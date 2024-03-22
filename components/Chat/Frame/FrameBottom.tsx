@@ -74,6 +74,7 @@ export default function FrameBottom({
                   }
                   onButtonPress(button);
                 }}
+                messageFromMe={message.fromMe}
               />
             ))}
         </>
