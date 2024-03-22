@@ -32,6 +32,7 @@ export default function FrameButton({
 }: FrameButtonProps) {
   const styles = useStyles();
   const colorScheme = useColorScheme();
+  const isDarkMessage = colorScheme === "dark" && !messageFromMe;
   return (
     <>
       <TouchableHighlight
@@ -45,15 +46,24 @@ export default function FrameButton({
               postingActionForButton && postingActionForButton !== button.index
                 ? 0.6
                 : 1,
-            backgroundColor:
-              colorScheme === "dark" && !messageFromMe
-                ? "rgba(255,255,255,0.9)"
-                : backgroundColor("light"),
+            backgroundColor: isDarkMessage
+              ? "rgba(255,255,255,0.1)"
+              : backgroundColor("light"),
           },
         ]}
       >
         <View style={styles.frameButtonContent}>
-          <Text style={styles.frameButtonText} numberOfLines={1}>
+          <Text
+            style={[
+              styles.frameButtonText,
+              {
+                color: isDarkMessage
+                  ? textPrimaryColor("dark")
+                  : textPrimaryColor("light"),
+              },
+            ]}
+            numberOfLines={1}
+          >
             {button.label}
           </Text>
           {(button.action === "post_redirect" || button.action === "link") && (
@@ -91,7 +101,6 @@ const useStyles = () => {
       marginHorizontal: 7,
     },
     frameButtonText: {
-      color: textPrimaryColor("light"),
       fontSize: 12,
       flexShrink: 1,
     },
