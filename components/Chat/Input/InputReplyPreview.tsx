@@ -7,18 +7,18 @@ import {
   TouchableOpacity,
 } from "react-native";
 
-import { useCurrentAccount } from "../../data/store/accountsStore";
-import { isAttachmentMessage } from "../../utils/attachment/helpers";
+import { useCurrentAccount } from "../../../data/store/accountsStore";
+import { isAttachmentMessage } from "../../../utils/attachment/helpers";
 import {
   backgroundColor,
   textPrimaryColor,
   textSecondaryColor,
-} from "../../utils/colors";
-import { getRelativeDateTime } from "../../utils/date";
-import { getReadableProfile } from "../../utils/str";
-import { isTransactionMessage } from "../../utils/transaction";
-import Picto from "../Picto/Picto";
-import { MessageToDisplay } from "./ChatMessage";
+} from "../../../utils/colors";
+import { getRelativeDateTime } from "../../../utils/date";
+import { getReadableProfile } from "../../../utils/str";
+import { isTransactionMessage } from "../../../utils/transaction";
+import Picto from "../../Picto/Picto";
+import { MessageToDisplay } from "../Message/Message";
 
 export default function ChatInputReplyPreview({
   replyingToMessage,

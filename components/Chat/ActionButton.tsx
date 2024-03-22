@@ -16,7 +16,7 @@ type ChatActionProps = {
   pictoStyle?: StyleProp<ViewStyle>;
 };
 
-export default function ChatActionButton({
+export default function ActionButton({
   picto,
   style,
   pictoStyle,

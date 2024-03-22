@@ -42,6 +42,7 @@ type XmtpConversationShared = {
   pending: boolean;
   version: string;
   spamScore?: number;
+  lastNotificationsSubscribedPeriod?: number;
 };
 
 export type XmtpDMConversation = XmtpConversationShared & {
@@ -163,6 +164,11 @@ export type ChatStoreType = {
     topic: string,
     messageId: string,
     metadata: ConverseMessageMetadata
+  ) => void;
+
+  setConversationsLastNotificationSubscribePeriod: (
+    topics: string[],
+    period: number
   ) => void;
 };
 
@@ -668,6 +674,20 @@ export const initChatStore = (account: string) => {
                 lastUpdateAt: now(),
               });
               return newState;
+            }),
+          setConversationsLastNotificationSubscribePeriod: (
+            topics: string[],
+            period: number
+          ) =>
+            set((state) => {
+              const newConversations = { ...state.conversations };
+              topics.forEach((topic) => {
+                if (newConversations[topic]) {
+                  newConversations[topic].lastNotificationsSubscribedPeriod =
+                    period;
+                }
+              });
+              return { conversations: newConversations };
             }),
         }) as ChatStoreType,
       {

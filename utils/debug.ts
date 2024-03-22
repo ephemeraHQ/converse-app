@@ -30,15 +30,11 @@ export const debugTimeSpent = ({
     console.log(
       `    ⌛  [${timestampId}] “${actionToLog}” took ${timeSpentSinceLast} seconds (since start: ${timeSpentSinceStart} seconds)`
     );
-    // addLog(
-    //   `⌛  [${timestampId}] “${actionToLog}” took ${timeSpentSinceLast} seconds (since start: ${timeSpentSinceStart} seconds)`
-    // );
   }
   if (!noReset) {
     timestamps[timestampId].last = now;
     if (!actionToLog) {
       console.log(`    ⌛  [${timestampId}] timestamp reset`);
-      // addLog(`⌛  [${timestampId}] timestamp reset`);
     }
   }
 };

@@ -14,17 +14,17 @@ import {
   useHasOnePrivyAccount,
   useLoggedWithPrivy,
   // useWalletStore,
-} from "../../data/store/accountsStore";
-import { useOnboardingStore } from "../../data/store/onboardingStore";
-import { useSelect } from "../../data/store/storeHelpers";
-import { NavigationParamList } from "../../screens/Navigation/Navigation";
-import { useConversationContext } from "../../utils/conversation";
-import { converseEventEmitter } from "../../utils/events";
-import { usePrivySigner } from "../../utils/evm/privy";
-import { executeAfterKeyboardClosed } from "../../utils/keyboard";
-import ChatActionButton from "./ChatActionButton";
+} from "../../../data/store/accountsStore";
+import { useOnboardingStore } from "../../../data/store/onboardingStore";
+import { useSelect } from "../../../data/store/storeHelpers";
+import { NavigationParamList } from "../../../screens/Navigation/Navigation";
+import { useConversationContext } from "../../../utils/conversation";
+import { converseEventEmitter } from "../../../utils/events";
+import { usePrivySigner } from "../../../utils/evm/privy";
+import { executeAfterKeyboardClosed } from "../../../utils/keyboard";
+import ActionButton from "../ActionButton";
 
-export default function ChatSendMoney() {
+export default function SendMoneyButton() {
   const { setTransactionMode } = useConversationContext(["setTransactionMode"]);
   const { setAddingNewAccount, setConnectionMethod } = useOnboardingStore(
     useSelect(["setAddingNewAccount", "setConnectionMethod"])
@@ -119,7 +119,7 @@ export default function ChatSendMoney() {
   return (
     <TouchableOpacity onPress={showMoneyInputIfPossible} activeOpacity={0.4}>
       <View style={styles.sendMoney}>
-        <ChatActionButton picto="dollarsign" />
+        <ActionButton picto="dollarsign" />
       </View>
     </TouchableOpacity>
   );

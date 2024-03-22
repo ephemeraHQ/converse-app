@@ -13,26 +13,26 @@ import {
 } from "react-native";
 import uuid from "react-native-uuid";
 
-import { useAccountsStore } from "../../data/store/accountsStore";
-import { useAppStore } from "../../data/store/appStore";
-import { useSelect } from "../../data/store/storeHelpers";
-import { uploadRemoteAttachment } from "../../utils/attachment";
-import { actionSheetColors } from "../../utils/colors";
-import { useConversationContext } from "../../utils/conversation";
-import { executeAfterKeyboardClosed } from "../../utils/keyboard";
-import { compressAndResizeImage } from "../../utils/media";
-import { sendMessage } from "../../utils/message";
-import { sentryTrackMessage } from "../../utils/sentry";
+import { useAccountsStore } from "../../../data/store/accountsStore";
+import { useAppStore } from "../../../data/store/appStore";
+import { useSelect } from "../../../data/store/storeHelpers";
+import { uploadRemoteAttachment } from "../../../utils/attachment";
+import { actionSheetColors } from "../../../utils/colors";
+import { useConversationContext } from "../../../utils/conversation";
+import { executeAfterKeyboardClosed } from "../../../utils/keyboard";
+import { compressAndResizeImage } from "../../../utils/media";
+import { sendMessage } from "../../../utils/message";
+import { sentryTrackMessage } from "../../../utils/sentry";
 import {
   encryptRemoteAttachment,
   serializeRemoteAttachmentMessageContent,
-} from "../../utils/xmtpRN/attachments";
-import { showActionSheetWithOptions } from "../StateHandlers/ActionSheetStateHandler";
-import ChatActionButton from "./ChatActionButton";
+} from "../../../utils/xmtpRN/attachments";
+import { showActionSheetWithOptions } from "../../StateHandlers/ActionSheetStateHandler";
+import ActionButton from "../ActionButton";
 
 const DATA_MIMETYPE_REGEX = /data:(.*?);/;
 
-export default function ChatAddAttachment() {
+export default function AddAttachmentButton() {
   const { conversation } = useConversationContext(["conversation"]);
   const currentAccount = useAccountsStore((s) => s.currentAccount);
   const colorScheme = useColorScheme();
@@ -218,7 +218,7 @@ export default function ChatAddAttachment() {
       activeOpacity={0.4}
     >
       <View style={styles.attachmentButton}>
-        <ChatActionButton picto="photo" />
+        <ActionButton picto="photo" />
       </View>
     </TouchableOpacity>
   );

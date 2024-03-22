@@ -292,6 +292,50 @@ const conversationsSortMethod = (
   return bDate - aDate;
 };
 
+// Wether a conversation should appear in Inbox OR Spam
+// or just be totally hidden (blocked peer, deleted convo)
+export const conversationShouldBeDisplayed = (
+  conversation: ConversationWithLastMessagePreview,
+  topicsData: { [topic: string]: TopicData | undefined },
+  peersStatus: { [peer: string]: "blocked" | "consented" }
+) => {
+  const isNotReady =
+    (conversation.isGroup && !conversation.groupMembers) ||
+    (!conversation.isGroup && !conversation.peerAddress);
+  if (isNotReady) return false;
+  const isPending = !!conversation.pending;
+  const isNotEmpty = conversation.messages.size > 0;
+  const isDeleted = topicsData[conversation.topic]?.status === "deleted";
+  const isBlocked = conversation.isGroup
+    ? false // No consent for groups right now
+    : peersStatus[conversation.peerAddress.toLowerCase()] === "blocked";
+  const isV1 = conversation.version === "v1";
+  const isForbidden = conversation.topic.includes("\x00"); // Forbidden character that breaks
+  return (
+    (!isPending || isNotEmpty) &&
+    !isDeleted &&
+    !isBlocked &&
+    !isV1 &&
+    !isForbidden
+  ); // Forbidden character that breaks notifications
+};
+
+// Wether a conversation should appear in Inbox tab (i.e. probably not a spam)
+export const conversationShouldBeInInbox = (
+  conversation: ConversationWithLastMessagePreview,
+  peersStatus: { [peer: string]: "blocked" | "consented" }
+) => {
+  const isConsented = conversation.isGroup
+    ? true
+    : peersStatus[conversation.peerAddress.toLowerCase()] === "consented";
+  return (
+    conversation.hasOneMessageFromMe ||
+    isConsented ||
+    (conversation.spamScore !== undefined &&
+      (conversation.spamScore === null || conversation.spamScore < 1))
+  );
+};
+
 export function sortAndComputePreview(
   conversations: Record<string, XmtpConversation>,
   userAddress: string,
@@ -306,34 +350,15 @@ export function sortAndComputePreview(
         (conversation.isGroup && !conversation.groupMembers) ||
         (!conversation.isGroup && !conversation.peerAddress);
       if (isNotReady) return;
-      const isPending = !!conversation.pending;
-      const isNotEmpty = conversation.messages.size > 0;
-      const isDeleted = topicsData[conversation.topic]?.status === "deleted";
-      const isBlocked = conversation.isGroup
-        ? false // No consent for groups right now
-        : peersStatus[conversation.peerAddress.toLowerCase()] === "blocked";
-      const isConsented = conversation.isGroup
-        ? true
-        : peersStatus[conversation.peerAddress.toLowerCase()] === "consented";
-      const isV1 = conversation.version === "v1";
-      const isForbidden = conversation.topic.includes("\x00"); // Forbidden character that breaks notifications
+
       if (
-        (!isPending || isNotEmpty) &&
-        !isDeleted &&
-        !isBlocked &&
-        !isV1 &&
-        !isForbidden
+        conversationShouldBeDisplayed(conversation, topicsData, peersStatus)
       ) {
         conversation.lastMessagePreview = conversationLastMessagePreview(
           conversation,
           userAddress
         );
-        if (
-          conversation.hasOneMessageFromMe ||
-          isConsented ||
-          (conversation.spamScore !== undefined &&
-            (conversation.spamScore === null || conversation.spamScore < 1))
-        ) {
+        if (conversationShouldBeInInbox(conversation, peersStatus)) {
           conversationsInbox.push(conversation);
         } else {
           conversationsRequests.push(conversation);

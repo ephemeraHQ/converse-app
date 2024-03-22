@@ -8,7 +8,7 @@ import {
 } from "../../data/store/accountsStore";
 import { textSecondaryColor } from "../../utils/colors";
 import { getPreferredName } from "../../utils/profile";
-import { MessageToDisplay } from "./ChatMessage";
+import { MessageToDisplay } from "./Message/Message";
 
 export default function ChatGroupChangeMessage({
   message,

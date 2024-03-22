@@ -1,7 +1,7 @@
 import { FramesApiResponse, FramesClient } from "@xmtp/frames-client";
 import { Client } from "@xmtp/xmtp-js";
 
-import { MessageToDisplay } from "../components/Chat/ChatMessage";
+import { MessageToDisplay } from "../components/Chat/Message/Message";
 import config from "../config";
 import { ConverseMessageMetadata } from "../data/db/entities/messageEntity";
 import { saveMessageMetadata } from "../data/helpers/messages";
@@ -165,15 +165,17 @@ export const getFrameButtonAction = (
   tags: FrameToDisplay,
   buttonIndex: number
 ) => {
-  return (tags.extractedTags[`fc:frame:button:${buttonIndex}:action`] ||
+  return (tags.extractedTags[`of:frame:button:${buttonIndex}:action`] ||
+    tags.extractedTags[`fc:frame:button:${buttonIndex}:action`] ||
     "post") as FrameAction;
 };
 
-export const getFrameButtonLinkTarget = (
+export const getFrameButtonTarget = (
   tags: FrameToDisplay,
   buttonIndex: number
 ) => {
-  return tags.extractedTags[`fc:frame:button:${buttonIndex}:target`] as
+  return (tags.extractedTags[`of:frame:button:${buttonIndex}:target`] ||
+    tags.extractedTags[`fc:frame:button:${buttonIndex}:target`]) as
     | string
     | undefined;
 };

@@ -29,6 +29,7 @@ import { AddVersionToConversation1695029413899 } from "./migrations/169502941389
 import { AddSpamScore1698068091873 } from "./migrations/1698068091873-addSpamScore";
 import { AddGroupConversations1708332276329 } from "./migrations/1708332276329-addGroupConversations";
 import { AddConverseMessageMetadata1709030178271 } from "./migrations/1709030178271-addConverseMessageMetadata";
+import { AddLastNotifSubscribePeriodToConversation1709893391562 } from "./migrations/1709893391562-addLastNotifSubscribePeriodToConversation";
 
 // We support SQLite from version 3.8.10.2 (embedded in Android 6.0 - SDK 23)
 // For supported methods see https://www.sqlite.org/changes.html
@@ -78,6 +79,7 @@ export const getDataSource = async (account: string) => {
       AddVersionToConversation1695029413899,
       AddSpamScore1698068091873,
       AddConverseMessageMetadata1709030178271,
+      AddLastNotifSubscribePeriodToConversation1709893391562,
       AddGroupConversations1708332276329,
     ],
     type: "react-native",

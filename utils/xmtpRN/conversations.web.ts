@@ -217,3 +217,5 @@ export const createPendingConversations = async (account: string) => {
   );
   await Promise.all(pendingConvos.map((c) => createConversation(account, c)));
 };
+
+export const loadConversationsHmacKeys = async (account: string) => {};

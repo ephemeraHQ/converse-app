@@ -10,23 +10,23 @@ import {
   View,
 } from "react-native";
 
-import Checkmark from "../../assets/checkmark.svg";
-import Clock from "../../assets/clock.svg";
-import Exclamationmark from "../../assets/exclamationmark.triangle.svg";
+import Checkmark from "../../../assets/checkmark.svg";
+import Clock from "../../../assets/clock.svg";
+import Exclamationmark from "../../../assets/exclamationmark.triangle.svg";
 import {
   actionSheetColors,
   messageInnerBubbleColor,
   myMessageInnerBubbleColor,
   textPrimaryColor,
   textSecondaryColor,
-} from "../../utils/colors";
-import { useConversationContext } from "../../utils/conversation";
-import { converseEventEmitter } from "../../utils/events";
-import { shortAddress } from "../../utils/str";
-import { useTransactionForMessage } from "../../utils/transaction";
-import { showActionSheetWithOptions } from "../StateHandlers/ActionSheetStateHandler";
-import { MessageToDisplay } from "./ChatMessage";
-import ChatMessageMetadata from "./ChatMessageMetadata";
+} from "../../../utils/colors";
+import { useConversationContext } from "../../../utils/conversation";
+import { converseEventEmitter } from "../../../utils/events";
+import { shortAddress } from "../../../utils/str";
+import { useTransactionForMessage } from "../../../utils/transaction";
+import { showActionSheetWithOptions } from "../../StateHandlers/ActionSheetStateHandler";
+import { MessageToDisplay } from "../Message/Message";
+import MessageMetadata from "../Message/MessageMetadata";
 
 type Props = {
   message: MessageToDisplay;
@@ -119,7 +119,7 @@ const TransactionStatusView = ({
   );
 };
 
-export default function ChatTransactionReference({ message }: Props) {
+export default function TransactionPreview({ message }: Props) {
   const colorScheme = useColorScheme();
   const styles = useStyles();
   const { conversation } = useConversationContext(["conversation"]);
@@ -170,7 +170,7 @@ export default function ChatTransactionReference({ message }: Props) {
   }, [message.id, showTransactionActionSheet]);
 
   const metadataView = (
-    <ChatMessageMetadata message={message} white={transaction.loading} />
+    <MessageMetadata message={message} white={transaction.loading} />
   );
 
   // Converse sponsored transaction

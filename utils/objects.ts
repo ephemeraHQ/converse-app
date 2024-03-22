@@ -44,3 +44,12 @@ export const haveSameItems = (array1: any[], array2: any[]) => {
   if (array1.length !== array2.length) return;
   return array1.every((element) => array1.includes(element));
 };
+
+export const isSameUint8Array = (array1: Uint8Array, array2: Uint8Array) => {
+  if (array1.length !== array2.length) return false;
+  let isEqual = true;
+  for (let i = 0; i < array1.length && isEqual; i++) {
+    isEqual = array1[i] === array2[i];
+  }
+  return isEqual;
+};
