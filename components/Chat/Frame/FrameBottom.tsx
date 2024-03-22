@@ -42,6 +42,8 @@ export default function FrameBottom({
           backgroundColor: message.fromMe
             ? myMessageInnerBubbleColor(colorScheme)
             : messageInnerBubbleColor(colorScheme),
+          paddingVertical:
+            frame.type === "PREVIEW" ? 3 : frame.type === "XMTP_FRAME" ? 4 : 0,
         },
       ]}
     >
@@ -58,11 +60,11 @@ export default function FrameBottom({
           {buttons.length > 0 &&
             buttons.map((button) => (
               <FrameButton
-                key={`${button.title}-${button.index}-${frame.uniqueId}`}
+                key={`${button.label}-${button.index}-${frame.uniqueId}`}
                 postingActionForButton={postingActionForButton}
                 button={button}
                 fullWidth={
-                  buttons.length === 1 ||
+                  (button.index === 1 && buttons.length === 1) ||
                   (button.index === 3 && buttons.length === 3)
                 }
                 onPress={() => {
@@ -100,8 +102,6 @@ const useStyles = () => {
     frameBottom: {
       flexDirection: "row",
       flexWrap: "wrap",
-      paddingTop: 3,
-      paddingBottom: 6,
       paddingHorizontal: 8,
       borderBottomLeftRadius: 14,
       borderBottomRightRadius: 14,

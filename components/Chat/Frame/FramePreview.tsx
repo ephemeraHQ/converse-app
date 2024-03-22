@@ -11,12 +11,8 @@ import {
   FrameButtonType,
   FrameToDisplay,
   FrameWithType,
-  getFrameAspectRatio,
-  getFrameButtonTarget,
   getFrameButtons,
   getFrameImage,
-  getFramePostURL,
-  getFrameTextInput,
   getFramesClient,
 } from "../../../utils/frames";
 import { navigate } from "../../../utils/navigation";
@@ -46,32 +42,38 @@ export default function FramePreview({
   const [firstFrameLoaded, setFirstFrameLoaded] = useState(false);
   const [frame, setFrame] = useState({
     ...initialFrame,
-    frameImage: framesProxy.mediaUrl(getFrameImage(initialFrame)),
+    frameImage: getFrameImage(initialFrame)
+      ? framesProxy.mediaUrl(getFrameImage(initialFrame) as string)
+      : undefined,
     isInitialFrame: true,
     uniqueId: uuid.v4().toString(),
   } as FrameToDisplay);
+  const [firstImageFailure, setFirstImageFailure] = useState(false);
   const buttons = getFrameButtons(frame);
-  const textInput = getFrameTextInput(frame);
+  const textInput = frame.frameInfo?.textInput?.content;
   const [frameTextInputValue, setFrameTextInputValue] = useState("");
 
   useEffect(() => {
     if (frame.isInitialFrame && !firstFrameLoaded) {
       // We don't display anything until the frame
       // initial image is loaded !
-      Image.prefetch(frame.frameImage, "memory-disk").then(
-        (prefetched: boolean) => {
-          if (prefetched) {
-            setFirstFrameLoaded(true);
-          }
+      if (!frame.frameImage) {
+        setFirstFrameLoaded(true);
+        return;
+      }
+      Image.prefetch(frame.frameImage, "memory-disk").then((prefetched) => {
+        setFirstFrameLoaded(true);
+        if (!prefetched) {
+          setFirstImageFailure(true);
         }
-      );
+      });
     }
-  }, [firstFrameLoaded, frame.frameImage, frame.isInitialFrame]);
+  }, [firstFrameLoaded, frame.frameImage, frame.isInitialFrame, frame.type]);
 
   const onButtonPress = useCallback(
     async (button: FrameButtonType) => {
       if (button.action === "link") {
-        const link = getFrameButtonTarget(frame, button.index);
+        const link = button.target;
         if (
           !link ||
           !link.startsWith("http") ||
@@ -84,9 +86,7 @@ export default function FramePreview({
       if (!conversation) return;
       setPostingActionForButton(button.index);
       const actionPostUrl =
-        getFrameButtonTarget(frame, button.index) ||
-        getFramePostURL(frame) ||
-        initialFrame.url;
+        button.target || frame.frameInfo?.postUrl || initialFrame.url;
       try {
         const actionInput: FrameActionInputs = {
           frameUrl: actionPostUrl,
@@ -98,7 +98,7 @@ export default function FramePreview({
           actionInput.inputText = frameTextInputValue;
         }
         const framesClient = await getFramesClient(account);
-        if (button.action === "post") {
+        if (button.action === "post" || !button.action) {
           const payload = await framesClient.signFrameAction(actionInput);
           const frameResponse = await framesClient.proxy.post(
             actionPostUrl,
@@ -106,11 +106,16 @@ export default function FramePreview({
           );
           // We should display a new frame, let's load image first
           const uniqueId = uuid.v4().toString();
-          const frameImageURL = new URL(
-            framesProxy.mediaUrl(
-              getFrameImage({ ...frameResponse, type: "XMTP_FRAME" })
-            )
-          );
+          const frameResponseImage = getFrameImage({
+            ...frameResponse,
+            type: "XMTP_FRAME",
+          });
+          if (!frameResponseImage) {
+            // couldn't load image, let's fail
+            setPostingActionForButton(undefined);
+            return;
+          }
+          const frameImageURL = new URL(frameResponseImage);
           frameImageURL.searchParams.set("converseRequestId", uniqueId);
           const frameImage = frameImageURL.toString();
           const prefetched = await Image.prefetch(frameImage, "memory");
@@ -169,15 +174,13 @@ export default function FramePreview({
     (frame.type === "PREVIEW" && frame.extractedTags["og:title"]) ||
     buttons.length > 0 ||
     textInput;
-  const frameImageAspectRatio = getFrameAspectRatio(frame);
 
   return (
     <View
       style={[
         styles.frameWrapper,
         {
-          height: firstFrameLoaded ? undefined : 0,
-          opacity: firstFrameLoaded ? 1 : 0,
+          display: firstFrameLoaded ? "flex" : "none",
         },
       ]}
     >
@@ -199,22 +202,27 @@ export default function FramePreview({
         </View>
       )}
       <View style={styles.frameContainer}>
-        <View
-          style={{
-            opacity:
-              postingActionForButton !== undefined
-                ? message.fromMe
-                  ? 0.8
-                  : 0.4
-                : 1,
-          }}
-        >
-          <FrameImage
-            frameImage={frame.frameImage}
-            frameImageAspectRatio={frameImageAspectRatio}
-            linkToOpen={initialFrame.url}
-          />
-        </View>
+        {!(frame.type === "PREVIEW" && firstImageFailure) && (
+          <View
+            style={{
+              opacity:
+                postingActionForButton !== undefined
+                  ? message.fromMe
+                    ? 0.8
+                    : 0.4
+                  : 1,
+            }}
+          >
+            <FrameImage
+              frameImage={frame.frameImage}
+              frameImageAspectRatio={
+                frame.frameInfo?.image?.aspectRatio || "1.91.1"
+              }
+              linkToOpen={initialFrame.url}
+            />
+          </View>
+        )}
+
         {showBottom && (
           <FrameBottom
             message={message}

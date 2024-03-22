@@ -8,7 +8,7 @@ import {
 
 import FrameLinkIcon from "../../../assets/frameLink.svg";
 import {
-  backgroundColor,
+  frameButtonBackgroundColor,
   clickedItemBackgroundColor,
   textPrimaryColor,
   textSecondaryColor,
@@ -31,45 +31,49 @@ export default function FrameButton({
   const styles = useStyles();
   const colorScheme = useColorScheme();
   return (
-    <TouchableHighlight
-      underlayColor={clickedItemBackgroundColor(colorScheme)}
-      onPress={postingActionForButton ? undefined : onPress}
-      style={[
-        styles.frameButton,
-        {
-          marginRight: button.index % 2 === 1 && !fullWidth ? "4%" : 0,
-          opacity:
-            postingActionForButton && postingActionForButton !== button.index
-              ? 0.6
-              : 1,
-          width: fullWidth ? "100%" : "48%",
-        },
-      ]}
-    >
-      <View style={styles.frameButtonContent}>
-        <Text style={styles.frameButtonText} numberOfLines={1}>
-          {button.title}
-        </Text>
-        {(button.action === "post_redirect" || button.action === "link") && (
-          <FrameLinkIcon
-            color={textSecondaryColor(colorScheme)}
-            fill={textSecondaryColor(colorScheme)}
-            style={styles.frameButtonPicto}
-          />
-        )}
-      </View>
-    </TouchableHighlight>
+    <>
+      <TouchableHighlight
+        underlayColor={clickedItemBackgroundColor(colorScheme)}
+        onPress={postingActionForButton ? undefined : onPress}
+        style={[
+          styles.frameButton,
+          {
+            marginRight: button.index % 2 === 1 && !fullWidth ? 8 : 0,
+            opacity:
+              postingActionForButton && postingActionForButton !== button.index
+                ? 0.6
+                : 1,
+          },
+        ]}
+      >
+        <View style={styles.frameButtonContent}>
+          <Text style={styles.frameButtonText} numberOfLines={1}>
+            {button.label}
+          </Text>
+          {(button.action === "post_redirect" || button.action === "link") && (
+            <FrameLinkIcon
+              color={textSecondaryColor(colorScheme)}
+              fill={textSecondaryColor(colorScheme)}
+              style={styles.frameButtonPicto}
+            />
+          )}
+        </View>
+      </TouchableHighlight>
+      {button.index === 2 && <View style={{ flexBasis: "100%" }} />}
+    </>
   );
 }
 
 const useStyles = () => {
   return StyleSheet.create({
     frameButton: {
-      borderRadius: 9,
+      flexGrow: 1,
+      flex: 1,
+      borderRadius: 6,
       paddingHorizontal: 6,
       paddingVertical: 9,
       marginVertical: 4,
-      backgroundColor: backgroundColor("light"),
+      backgroundColor: frameButtonBackgroundColor,
     },
     frameButtonContent: {
       flexDirection: "row",
