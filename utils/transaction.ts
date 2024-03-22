@@ -2,7 +2,7 @@ import { TransactionReference } from "@xmtp/content-type-transaction-reference";
 import { ethers } from "ethers";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
-import { MessageToDisplay } from "../components/Chat/ChatMessage";
+import { MessageToDisplay } from "../components/Chat/Message/Message";
 import {
   useCurrentAccount,
   useTransactionsStore,

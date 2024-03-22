@@ -1,9 +1,12 @@
+import { keystore } from "@xmtp/proto";
 import { buildUserInviteTopic } from "@xmtp/xmtp-js";
 import * as Notifications from "expo-notifications";
 import { Platform } from "react-native";
 
-import config from "../config";
-import { saveConversations } from "../data/helpers/conversations/upsertConversations";
+import {
+  saveConversations,
+  saveConversationsLastNotificationSubscribePeriod,
+} from "../data/helpers/conversations/upsertConversations";
 import { saveMessages } from "../data/helpers/messages";
 import {
   currentAccount,
@@ -14,7 +17,12 @@ import {
 } from "../data/store/accountsStore";
 import { useAppStore } from "../data/store/appStore";
 import { XmtpConversation, XmtpMessage } from "../data/store/chatStore";
-import api from "./api";
+import api, { saveNotificationsSubscribe } from "./api";
+import {
+  ConversationWithLastMessagePreview,
+  conversationShouldBeDisplayed,
+  conversationShouldBeInInbox,
+} from "./conversation";
 import { savePushToken } from "./keychain/helpers";
 import mmkv from "./mmkv";
 import { navigateToConversation, setTopicToNavigateTo } from "./navigation";
@@ -27,9 +35,8 @@ import {
   saveConversationDict,
 } from "./sharedData";
 import { conversationName, shortAddress } from "./str";
-import { getXmtpApiHeaders } from "./xmtpRN/api";
+import { loadConversationsHmacKeys } from "./xmtpRN/conversations";
 
-let expoPushToken: string | null;
 let nativePushToken: string | null;
 
 export type NotificationPermissionStatus =
@@ -37,12 +44,12 @@ export type NotificationPermissionStatus =
   | "undetermined"
   | "denied";
 
-const lastSubscribedTopicsByAccount: { [account: string]: string[] } = {};
 const subscribingByAccount: { [account: string]: boolean } = {};
+const subscribedOnceByAccount: { [account: string]: boolean } = {};
 
 export const deleteSubscribedTopics = (account: string) => {
-  if (account in lastSubscribedTopicsByAccount) {
-    delete lastSubscribedTopicsByAccount[account];
+  if (account in subscribedOnceByAccount) {
+    delete subscribedOnceByAccount[account];
   }
   if (account in subscribingByAccount) {
     delete subscribingByAccount[account];
@@ -52,11 +59,11 @@ export const deleteSubscribedTopics = (account: string) => {
 export const subscribeToNotifications = async (
   account: string
 ): Promise<void> => {
-  const {
-    sortedConversationsWithPreview,
-    topicsData,
-    conversationsSortedOnce,
-  } = getChatStore(account).getState();
+  const thirtyDayPeriodsSinceEpoch = Math.floor(
+    Date.now() / 1000 / 60 / 60 / 24 / 30
+  );
+  const { conversations, conversationsSortedOnce, topicsData } =
+    getChatStore(account).getState();
   const notificationsPermissionStatus =
     useAppStore.getState().notificationsPermissionStatus;
   if (notificationsPermissionStatus !== "granted") return;
@@ -67,65 +74,128 @@ export const subscribeToNotifications = async (
   }
   try {
     subscribingByAccount[account] = true;
-    const lastSubscribedTopics = lastSubscribedTopicsByAccount[account] || [];
 
     const { peersStatus } = getSettingsStore(account).getState();
 
     const isBlocked = (peerAddress: string) =>
       peersStatus[peerAddress.toLowerCase()] === "blocked";
 
-    const isValidConversation = (c: XmtpConversation) => {
+    const needToUpdateConversationSubscription = (
+      c: ConversationWithLastMessagePreview
+    ) => {
       const hasValidAddress = c.peerAddress;
-      const isNotPending = !c.pending;
+      const isPending = !!c.pending;
+
+      if (!hasValidAddress || isPending) {
+        return {
+          topic: c.topic,
+          update: false,
+        };
+      }
+
       const isNotBlocked = hasValidAddress && !isBlocked(c.peerAddress);
       const isTopicNotDeleted = topicsData[c.topic]?.status !== "deleted";
-      return (
-        hasValidAddress && isNotPending && isNotBlocked && isTopicNotDeleted
-      );
+      const isTopicInInbox =
+        conversationShouldBeDisplayed(c, topicsData, peersStatus) &&
+        conversationShouldBeInInbox(c, peersStatus);
+
+      const status =
+        isNotBlocked && isTopicNotDeleted && isTopicInInbox ? "PUSH" : "MUTED";
+      const period = status === "PUSH" ? thirtyDayPeriodsSinceEpoch : -1;
+
+      return {
+        topic: c.topic,
+        update: period !== c.lastNotificationsSubscribedPeriod,
+        status,
+        period,
+      };
     };
 
-    const topics = [
-      ...Object.values(sortedConversationsWithPreview.conversationsInbox)
-        .filter(isValidConversation)
-        .map((c) => c.topic),
-      buildUserInviteTopic(account || ""),
-    ];
+    const topicsToUpdateForPeriod: {
+      [topic: string]: {
+        status: "PUSH" | "MUTED";
+        hmacKeys?: any;
+      };
+    } = {};
 
-    const [expoTokenQuery, nativeTokenQuery] = await Promise.all([
-      Notifications.getExpoPushTokenAsync({ projectId: config.expoProjectId }),
-      Notifications.getDevicePushTokenAsync(),
-    ]);
-    expoPushToken = expoTokenQuery.data;
+    const conversationTopicsToUpdate = Object.values(conversations)
+      .map(needToUpdateConversationSubscription)
+      .filter((n) => n.update);
+
+    if (conversationTopicsToUpdate.length > 0) {
+      const conversationsKeys = await loadConversationsHmacKeys(account);
+      conversationTopicsToUpdate.forEach((c) => {
+        if (conversationsKeys[c.topic]) {
+          const hmacKeys =
+            keystore.GetConversationHmacKeysResponse_HmacKeys.toJSON(
+              conversationsKeys[c.topic]
+            );
+          topicsToUpdateForPeriod[c.topic] = {
+            status: c.status as "PUSH" | "MUTED",
+            hmacKeys,
+          };
+        } else {
+          topicsToUpdateForPeriod[c.topic] = {
+            status: c.status as "PUSH" | "MUTED",
+          };
+        }
+      });
+    } else if (subscribedOnceByAccount[account]) {
+      delete subscribingByAccount[account];
+      // No need to even make a query for invite topic if we already did!
+      return;
+    }
+
+    topicsToUpdateForPeriod[buildUserInviteTopic(account || "")] = {
+      status: "PUSH",
+    };
+
+    const nativeTokenQuery = await Notifications.getDevicePushTokenAsync();
     nativePushToken = nativeTokenQuery.data;
     if (nativePushToken) {
       savePushToken(nativePushToken);
-    }
-
-    // Let's check if we need to make the query i.e
-    // the topics are not exactly the same
-    const shouldMakeQuery =
-      lastSubscribedTopics.length !== topics.length ||
-      topics.some((t) => !lastSubscribedTopics.includes(t));
-    if (!shouldMakeQuery) {
+    } else {
       delete subscribingByAccount[account];
       return;
     }
+
     console.log(
-      `[Notifications] Subscribing to ${topics.length} topic for ${account}`
+      `[Notifications] Subscribing to ${
+        Object.keys(topicsToUpdateForPeriod).length
+      } topic for ${account}`
     );
-    await api.post(
-      "/api/subscribe",
-      {
-        expoToken: expoPushToken,
-        nativeToken: nativePushToken,
-        nativeTokenType: nativeTokenQuery.type,
-        notificationChannel:
-          nativeTokenQuery.type === "android" ? "converse-notifications" : null,
-        topics,
-      },
-      { headers: await getXmtpApiHeaders(account) }
+
+    await saveNotificationsSubscribe(
+      account,
+      nativePushToken,
+      nativeTokenQuery.type,
+      nativeTokenQuery.type === "android" ? "converse-notifications" : null,
+      topicsToUpdateForPeriod
     );
-    lastSubscribedTopicsByAccount[account] = topics;
+
+    // Topics updated have a period
+    const updated = Object.keys(topicsToUpdateForPeriod).filter(
+      (topic) =>
+        topicsToUpdateForPeriod[topic].status === "PUSH" &&
+        topicsToUpdateForPeriod[topic].hmacKeys
+    );
+
+    // Topics deleted have a period of -1
+    const deleted = Object.keys(topicsToUpdateForPeriod).filter(
+      (topic) => topicsToUpdateForPeriod[topic].status === "MUTED"
+    );
+
+    await saveConversationsLastNotificationSubscribePeriod(
+      account,
+      updated,
+      thirtyDayPeriodsSinceEpoch
+    );
+    await saveConversationsLastNotificationSubscribePeriod(
+      account,
+      deleted,
+      -1
+    );
+    subscribedOnceByAccount[account] = true;
   } catch (e) {
     console.log("[Notifications] Error while subscribing:", e);
   }

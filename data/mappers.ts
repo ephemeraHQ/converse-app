@@ -85,6 +85,8 @@ export const xmtpConversationToDb = (
   groupMembers: xmtpConversation.groupMembers,
   groupAdmins: xmtpConversation.groupAdmins,
   groupPermissionLevel: xmtpConversation.groupPermissionLevel,
+  lastNotificationsSubscribedPeriod:
+    xmtpConversation.lastNotificationsSubscribedPeriod,
 });
 
 export const xmtpConversationFromDb = (
@@ -131,5 +133,7 @@ export const xmtpConversationFromDb = (
     groupMembers: dbConversation.groupMembers,
     groupAdmins: dbConversation.groupAdmins,
     groupPermissionLevel: dbConversation.groupPermissionLevel,
+    lastNotificationsSubscribedPeriod:
+      dbConversation.lastNotificationsSubscribedPeriod,
   } as XmtpConversation;
 };

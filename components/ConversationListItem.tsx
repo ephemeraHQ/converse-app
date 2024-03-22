@@ -301,9 +301,11 @@ const ConversationListItem = memo(function ConversationListItem({
           if (direction === "left") {
             const translation = swipeableRef.current?.state.rowTranslation;
             if (translation && (translation as any)._value > 100) {
-              Haptics.notificationAsync(
-                Haptics.NotificationFeedbackType.Success
-              );
+              if (Platform.OS !== "web") {
+                Haptics.notificationAsync(
+                  Haptics.NotificationFeedbackType.Success
+                );
+              }
               toggleUnreadStatusOnClose.current = true;
             }
           }

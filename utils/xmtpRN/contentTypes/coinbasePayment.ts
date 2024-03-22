@@ -58,4 +58,8 @@ export class CoinbaseMessagingPaymentCodec
   fallback(content: CoinbaseMessagingPaymentContent): string | undefined {
     return "A Coinbase payment.";
   }
+
+  shouldPush() {
+    return true;
+  }
 }

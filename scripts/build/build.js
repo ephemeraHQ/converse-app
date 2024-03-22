@@ -215,7 +215,7 @@ const build = async () => {
   }
 
   if (
-    (env === "production" || env === "preview") &&
+    (env === "production" || (env === "preview" && platform === "ios")) &&
     buildLocally &&
     buildSuccess &&
     !buildInternalProduction

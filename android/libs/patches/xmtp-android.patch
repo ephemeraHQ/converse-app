@@ -30,8 +30,20 @@ index 861d2b9..84f494b 100644
 -    }
 -}
 \ No newline at end of file
+diff --git a/gradle/wrapper/gradle-wrapper.properties b/gradle/wrapper/gradle-wrapper.properties
+index 474c74e..c4c7ed6 100644
+--- a/gradle/wrapper/gradle-wrapper.properties
++++ b/gradle/wrapper/gradle-wrapper.properties
+@@ -1,6 +1,6 @@
+ #Tue Dec 20 09:09:47 PST 2022
+ distributionBase=GRADLE_USER_HOME
+-distributionUrl=https\://services.gradle.org/distributions/gradle-8.0-bin.zip
++distributionUrl=https\://services.gradle.org/distributions/gradle-8.0.1-all.zip
+ distributionPath=wrapper/dists
+ zipStorePath=wrapper/dists
+ zipStoreBase=GRADLE_USER_HOME
 diff --git a/library/src/main/java/org/xmtp/android/library/ConversationV2.kt b/library/src/main/java/org/xmtp/android/library/ConversationV2.kt
-index 6d20253..81e4cfe 100644
+index a0c46fb..6f26342 100644
 --- a/library/src/main/java/org/xmtp/android/library/ConversationV2.kt
 +++ b/library/src/main/java/org/xmtp/android/library/ConversationV2.kt
 @@ -128,13 +128,15 @@ data class ConversationV2(
@@ -44,7 +56,7 @@ index 6d20253..81e4cfe 100644
              topic,
              message.v2,
              keyMaterial,
-             client
+             client,
          )
 +        decrypted.sentViaConverse = (envelope.timestampNs.toString()).endsWith("108167")
 +        return decrypted
@@ -56,12 +68,12 @@ index 6d20253..81e4cfe 100644
      fun decodeEnvelope(envelope: Envelope): DecodedMessage {
          val message = Message.parseFrom(envelope.message)
 -        return MessageV2Builder.buildDecode(
-+        val decoded =  MessageV2Builder.buildDecode(
++        val decoded = MessageV2Builder.buildDecode(
              generateId(envelope = envelope),
              topic = topic,
              message.v2,
              keyMaterial = keyMaterial,
-             client = client
+             client = client,
          )
 +        decoded.sentViaConverse = (envelope.timestampNs.toString()).endsWith("108167")
 +        return decoded

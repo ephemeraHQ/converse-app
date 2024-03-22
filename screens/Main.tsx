@@ -2,7 +2,7 @@ import { StatusBar } from "expo-status-bar";
 import React, { useCallback, useEffect, useRef } from "react";
 import { Dimensions, Platform, useColorScheme } from "react-native";
 
-import ChatSendAttachment from "../components/Chat/ChatSendAttachment";
+import SendAttachmentPreview from "../components/Chat/Attachment/SendAttachmentPreview";
 import UsernameSelector from "../components/Onboarding/UsernameSelector";
 import ActionSheetStateHandler from "../components/StateHandlers/ActionSheetStateHandler";
 import HydrationStateHandler from "../components/StateHandlers/HydrationStateHandler";
@@ -136,7 +136,7 @@ export default function Main() {
     <>
       {mainHeaders}
       {screenToShow}
-      {mediaPreview?.mediaURI && <ChatSendAttachment />}
+      {mediaPreview?.mediaURI && <SendAttachmentPreview />}
     </>
   );
 }

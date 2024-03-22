@@ -19,7 +19,7 @@ import { consentToPeersOnProtocol } from "../../utils/xmtpRN/conversations";
 import Button from "../Button/Button";
 import { showActionSheetWithOptions } from "../StateHandlers/ActionSheetStateHandler";
 
-export default function ChatConsent() {
+export default function ConsentPopup() {
   const { conversation, isBlockedPeer } = useConversationContext([
     "conversation",
     "isBlockedPeer",

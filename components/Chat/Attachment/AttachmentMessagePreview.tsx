@@ -3,18 +3,18 @@ import prettyBytes from "pretty-bytes";
 import { useCallback, useEffect } from "react";
 import { Platform, StyleSheet, Text, useColorScheme, View } from "react-native";
 
-import { useAttachmentForMessage } from "../../utils/attachment";
-import { textPrimaryColor } from "../../utils/colors";
-import { converseEventEmitter } from "../../utils/events";
-import { navigate } from "../../utils/navigation";
-import { MessageToDisplay } from "./ChatMessage";
-import ChatMessageMetadata from "./ChatMessageMetadata";
+import { useAttachmentForMessage } from "../../../utils/attachment";
+import { textPrimaryColor } from "../../../utils/colors";
+import { converseEventEmitter } from "../../../utils/events";
+import { navigate } from "../../../utils/navigation";
+import { MessageToDisplay } from "../Message/Message";
+import MessageMetadata from "../Message/MessageMetadata";
 
 type Props = {
   message: MessageToDisplay;
 };
 
-export default function ChatAttachmentBubble({ message }: Props) {
+export default function AttachmentMessagePreview({ message }: Props) {
   const colorScheme = useColorScheme();
   const styles = useStyles();
 
@@ -41,9 +41,7 @@ export default function ChatAttachmentBubble({ message }: Props) {
     !!attachment.mediaURL &&
     attachment.mediaType !== "UNSUPPORTED";
 
-  const metadataView = (
-    <ChatMessageMetadata message={message} white={showing} />
-  );
+  const metadataView = <MessageMetadata message={message} white={showing} />;
   const emoji = attachment.mediaType === "IMAGE" ? "📷" : "📎";
   const filesize = prettyBytes(attachment.contentLength);
   const filename =

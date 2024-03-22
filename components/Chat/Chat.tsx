@@ -39,11 +39,11 @@ import { converseEventEmitter } from "../../utils/events";
 import { getProfileData } from "../../utils/profile";
 import { isContentType } from "../../utils/xmtpRN/contentTypes";
 import { Recommendation } from "../Recommendations/Recommendation";
-import ChatConsent from "./ChatConsent";
-import ChatInput from "./ChatInput";
-import CachedChatMessage, { MessageToDisplay } from "./ChatMessage";
 import ChatPlaceholder from "./ChatPlaceholder";
-import ChatTransactionInput from "./ChatTransactionInput";
+import ConsentPopup from "./ConsentPopup";
+import ChatInput from "./Input/Input";
+import CachedChatMessage, { MessageToDisplay } from "./Message/Message";
+import TransactionInput from "./Transaction/TransactionInput";
 
 const getListArray = (
   xmtpAddress?: string,
@@ -317,7 +317,7 @@ export default function Chat() {
         {showPlaceholder && (
           <ChatPlaceholder messagesCount={listArray.length} />
         )}
-        <ChatConsent />
+        <ConsentPopup />
       </ReanimatedView>
       {showChatInput && (
         <>
@@ -336,7 +336,7 @@ export default function Chat() {
             }}
           >
             {!transactionMode && <ChatInput />}
-            {transactionMode && <ChatTransactionInput />}
+            {transactionMode && <TransactionInput />}
           </ReanimatedView>
           <View
             style={[

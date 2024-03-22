@@ -486,3 +486,9 @@ export const addMembersToGroup = async (
   await (group as GroupWithCodecsType).addMembers(members);
   refreshGroup(account, topic);
 };
+
+export const loadConversationsHmacKeys = async (account: string) => {
+  const client = (await getXmtpClient(account)) as ConverseXmtpClientType;
+  const { hmacKeys } = await client.conversations.getHmacKeys();
+  return hmacKeys;
+};

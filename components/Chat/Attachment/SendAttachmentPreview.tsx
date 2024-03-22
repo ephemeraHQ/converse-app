@@ -11,18 +11,18 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-import SendButton from "../../assets/send-button.svg";
-import { useAppStore } from "../../data/store/appStore";
-import { useSelect } from "../../data/store/storeHelpers";
-import { dangerColor } from "../../utils/colors";
+import SendButton from "../../../assets/send-button.svg";
+import { useAppStore } from "../../../data/store/appStore";
+import { useSelect } from "../../../data/store/storeHelpers";
+import { dangerColor } from "../../../utils/colors";
 import {
   setAndroidColors,
   setAndroidSystemColor,
-} from "../../utils/colors/helpers";
-import ActivityIndicator from "../ActivityIndicator/ActivityIndicator";
-import Picto from "../Picto/Picto";
+} from "../../../utils/colors/helpers";
+import ActivityIndicator from "../../ActivityIndicator/ActivityIndicator";
+import Picto from "../../Picto/Picto";
 
-export default function ChatSendAttachment() {
+export default function SendAttachmentPreview() {
   const colorScheme = useColorScheme();
   const styles = useStyles();
   const { mediaPreview, setMediaPreview } = useAppStore(

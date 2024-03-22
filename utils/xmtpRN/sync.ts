@@ -2,6 +2,7 @@ import { Client } from "@xmtp/xmtp-js";
 
 import { refreshAllSpamScores } from "../../data/helpers/conversations/spamScore";
 import { getChatStore } from "../../data/store/accountsStore";
+import { addLog } from "../debug";
 import { loadXmtpKey } from "../keychain/helpers";
 import { xmtpSignatureByAccount } from "./api";
 import {
@@ -30,7 +31,6 @@ const instantiatingClientForAccount: { [account: string]: boolean } = {};
 export const getXmtpClient = async (
   account: string
 ): Promise<ConverseXmtpClientType | Client> => {
-  console.log(`[XmtpRN] Getting client for ${account}`);
   if (account && xmtpClientByAccount[account]) {
     return xmtpClientByAccount[account];
   }
@@ -49,6 +49,7 @@ export const getXmtpClient = async (
       console.log("get client from base64 key");
       const client = await getXmtpClientFromBase64Key(base64Key);
       console.log(`[XmtpRN] Instantiated client for ${client.address}`);
+      addLog("Local client connected");
       getChatStore(account).getState().setLocalClientConnected(true);
       xmtpClientByAccount[client.address] = client;
       delete instantiatingClientForAccount[account];
@@ -66,6 +67,7 @@ const onSyncLost = async (account: string, error: any) => {
   console.log(
     `[XmtpRN] An error occured while syncing for ${account}: ${error}`
   );
+  addLog(`An error occured while syncing for ${account}: ${error}`);
   // If there is an error let's show it
   getChatStore(account).getState().setReconnecting(true);
   // Wait a bit before reco
@@ -143,6 +145,7 @@ export const syncXmtpClient = async (account: string) => {
 
     // Need to save initial load is done
     getChatStore(account).getState().setInitialLoadDone();
+
     // Only update when we have really fetched, this might mitigate
     // the case where we never fetch some messages
     if (fetchedMessagesCount > 0 || fetchedGroupMessagesCount > 0) {

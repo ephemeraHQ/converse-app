@@ -8,7 +8,7 @@ import {
   Platform,
 } from "react-native";
 
-import SendButton from "../../assets/send-button.svg";
+import SendButton from "../../../assets/send-button.svg";
 import {
   actionSecondaryColor,
   backgroundColor,
@@ -16,16 +16,16 @@ import {
   itemSeparatorColor,
   textPrimaryColor,
   textSecondaryColor,
-} from "../../utils/colors";
-import { useConversationContext } from "../../utils/conversation";
-import { isDesktop } from "../../utils/device";
-import { converseEventEmitter } from "../../utils/events";
-import { sendMessage } from "../../utils/message";
-import { TextInputWithValue } from "../../utils/str";
-import ChatAddAttachment from "./ChatAddAttachment";
-import ChatInputReplyPreview from "./ChatInputReplyPreview";
-import { MessageToDisplay } from "./ChatMessage";
-import ChatSendMoney from "./ChatSendMoney";
+} from "../../../utils/colors";
+import { useConversationContext } from "../../../utils/conversation";
+import { isDesktop } from "../../../utils/device";
+import { converseEventEmitter } from "../../../utils/events";
+import { sendMessage } from "../../../utils/message";
+import { TextInputWithValue } from "../../../utils/str";
+import AddAttachmentButton from "../Attachment/AddAttachmentButton";
+import { MessageToDisplay } from "../Message/Message";
+import SendMoneyButton from "../Transaction/SendMoneyButton";
+import ChatInputReplyPreview from "./InputReplyPreview";
 
 export default function ChatInput() {
   const { conversation, inputRef, transactionMode, messageToPrefill } =
@@ -120,8 +120,8 @@ export default function ChatInput() {
         </View>
       )}
       <View style={styles.chatInputContainer}>
-        <ChatAddAttachment />
-        {!conversation?.isGroup && <ChatSendMoney />}
+        <AddAttachmentButton />
+        {!conversation?.isGroup && <SendMoneyButton />}
         <TextInput
           autoCorrect={isDesktop ? false : undefined}
           autoComplete={isDesktop ? "off" : undefined}
