@@ -1,7 +1,7 @@
 import { FramesApiResponse, FramesClient } from "@xmtp/frames-client";
 import { Client } from "@xmtp/xmtp-js";
 
-import { MessageToDisplay } from "../components/Chat/ChatMessage";
+import { MessageToDisplay } from "../components/Chat/Message/Message";
 import config from "../config";
 import { ConverseMessageMetadata } from "../data/db/entities/messageEntity";
 import { saveMessageMetadata } from "../data/helpers/messages";

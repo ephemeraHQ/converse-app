@@ -2,18 +2,18 @@ import format from "date-fns/format";
 import React from "react";
 import { StyleSheet, Text, useColorScheme, View } from "react-native";
 
-import Checkmark from "../../assets/checkmark.svg";
-import Clock from "../../assets/clock.svg";
-import ConverseMessageBubble from "../../assets/message-bubble.svg";
-import { textPrimaryColor } from "../../utils/colors";
-import { MessageToDisplay } from "./ChatMessage";
+import Checkmark from "../../../assets/checkmark.svg";
+import Clock from "../../../assets/clock.svg";
+import ConverseMessageBubble from "../../../assets/message-bubble.svg";
+import { textPrimaryColor } from "../../../utils/colors";
+import { MessageToDisplay } from "./Message";
 
 type Props = {
   message: MessageToDisplay;
   white: boolean;
 };
 
-export default function ChatMessageMetadata({ message, white }: Props) {
+export default function MessageMetadata({ message, white }: Props) {
   const colorScheme = useColorScheme();
   const styles = useStyles();
   return (

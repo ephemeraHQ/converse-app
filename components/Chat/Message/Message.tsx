@@ -12,35 +12,38 @@ import {
 } from "react-native";
 import { Swipeable } from "react-native-gesture-handler";
 
-import { useChatStore, currentAccount } from "../../data/store/accountsStore";
-import { XmtpMessage } from "../../data/store/chatStore";
-import { isAttachmentMessage } from "../../utils/attachment/helpers";
+import {
+  useChatStore,
+  currentAccount,
+} from "../../../data/store/accountsStore";
+import { XmtpMessage } from "../../../data/store/chatStore";
+import { isAttachmentMessage } from "../../../utils/attachment/helpers";
 import {
   messageInnerBubbleColor,
   myMessageInnerBubbleColor,
   textPrimaryColor,
   textSecondaryColor,
-} from "../../utils/colors";
-import { getRelativeDate } from "../../utils/date";
-import { isDesktop } from "../../utils/device";
-import { converseEventEmitter } from "../../utils/events";
-import { LimitedMap } from "../../utils/objects";
-import { getMessageReactions } from "../../utils/reactions";
-import { getReadableProfile } from "../../utils/str";
-import { isTransactionMessage } from "../../utils/transaction";
+} from "../../../utils/colors";
+import { getRelativeDate } from "../../../utils/date";
+import { isDesktop } from "../../../utils/device";
+import { converseEventEmitter } from "../../../utils/events";
+import { LimitedMap } from "../../../utils/objects";
+import { getMessageReactions } from "../../../utils/reactions";
+import { getReadableProfile } from "../../../utils/str";
+import { isTransactionMessage } from "../../../utils/transaction";
 import {
   getMessageContentType,
   isContentType,
-} from "../../utils/xmtpRN/contentTypes";
-import ClickableText from "../ClickableText";
-import ChatActionButton from "./ChatActionButton";
-import ChatAttachmentBubble from "./ChatAttachmentBubble";
-import ChatMessageReplyBubble from "./ChatInputReplyBubble";
-import ChatMessageActions from "./ChatMessageActions";
-import ChatMessageFramePreviews from "./ChatMessageFramePreviews";
-import ChatMessageMetadata from "./ChatMessageMetadata";
-import ChatMessageReactions from "./ChatMessageReactions";
-import ChatTransactionReference from "./ChatTransactionReference";
+} from "../../../utils/xmtpRN/contentTypes";
+import ClickableText from "../../ClickableText";
+import ActionButton from "../ActionButton";
+import AttachmentMessagePreview from "../Attachment/AttachmentMessagePreview";
+import FramesPreviews from "../Frame/FramesPreviews";
+import ChatInputReplyBubble from "../Input/InputReplyBubble";
+import TransactionPreview from "../Transaction/TransactionPreview";
+import ChatMessageActions from "./MessageActions";
+import MessageMetadata from "./MessageMetadata";
+import ChatMessageReactions from "./MessageReactions";
 
 export type MessageToDisplay = XmtpMessage & {
   hasPreviousMessageInSeries: boolean;
@@ -58,20 +61,18 @@ type Props = {
 function ChatMessage({ message, colorScheme }: Props) {
   const styles = useStyles();
 
-  const metadata = (
-    <ChatMessageMetadata message={message} white={message.fromMe} />
-  );
+  const metadata = <MessageMetadata message={message} white={message.fromMe} />;
 
   let messageContent: ReactNode;
   const contentType = getMessageContentType(message.contentType);
   switch (contentType) {
     case "attachment":
     case "remoteAttachment":
-      messageContent = <ChatAttachmentBubble message={message} />;
+      messageContent = <AttachmentMessagePreview message={message} />;
       break;
     case "transactionReference":
     case "coinbasePayment":
-      messageContent = <ChatTransactionReference message={message} />;
+      messageContent = <TransactionPreview message={message} />;
       break;
     default: {
       messageContent = (
@@ -155,7 +156,7 @@ function ChatMessage({ message, colorScheme }: Props) {
                 ],
               }}
             >
-              <ChatActionButton picto="arrowshape.turn.up.left" />
+              <ActionButton picto="arrowshape.turn.up.left" />
             </Animated.View>
           );
         }}
@@ -175,7 +176,7 @@ function ChatMessage({ message, colorScheme }: Props) {
       >
         <ChatMessageActions message={message} reactions={reactions}>
           {isContentType("text", message.contentType) && (
-            <ChatMessageFramePreviews message={message} />
+            <FramesPreviews message={message} />
           )}
           {replyingToMessage ? (
             <View style={styles.messageWithInnerBubble}>
@@ -207,7 +208,7 @@ function ChatMessage({ message, colorScheme }: Props) {
                 >
                   {replyingToProfileName}
                 </Text>
-                <ChatMessageReplyBubble
+                <ChatInputReplyBubble
                   replyingToMessage={replyingToMessage}
                   fromMe={message.fromMe}
                 />
