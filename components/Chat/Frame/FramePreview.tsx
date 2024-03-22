@@ -175,7 +175,10 @@ export default function FramePreview({
     <View
       style={[
         styles.frameWrapper,
-        { height: !firstFrameLoaded ? 0 : undefined },
+        {
+          height: firstFrameLoaded ? undefined : 0,
+          opacity: firstFrameLoaded ? 1 : 0,
+        },
       ]}
     >
       {initialFrame.type === "XMTP_FRAME" && (
