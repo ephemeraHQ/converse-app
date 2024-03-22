@@ -23,10 +23,6 @@ import { MessageToDisplay } from "../Message/Message";
 import FrameBottom from "./FrameBottom";
 import FrameImage from "./FrameImage";
 
-type Props = {
-  message: MessageToDisplay;
-};
-
 const framesProxy = new OpenFramesProxy();
 
 export default function FramePreview({

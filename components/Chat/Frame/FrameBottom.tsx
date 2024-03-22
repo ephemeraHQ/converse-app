@@ -61,7 +61,10 @@ export default function FrameBottom({
                 key={`${button.title}-${button.index}`}
                 posting={posting}
                 button={button}
-                fullWidth={buttons.length === 1}
+                fullWidth={
+                  buttons.length === 1 ||
+                  (button.index === 3 && buttons.length === 3)
+                }
                 onPress={() => {
                   if (Platform.OS !== "web") {
                     // Immediate haptic feedback
