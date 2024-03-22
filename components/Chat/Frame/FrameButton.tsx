@@ -18,14 +18,14 @@ import { FrameButtonType } from "../../../utils/frames";
 type FrameButtonProps = {
   button: FrameButtonType;
   onPress: () => void;
-  posting: number | undefined;
+  postingActionForButton: number | undefined;
   fullWidth: boolean;
 };
 
 export default function FrameButton({
   button,
   onPress,
-  posting,
+  postingActionForButton,
   fullWidth,
 }: FrameButtonProps) {
   const styles = useStyles();
@@ -33,12 +33,15 @@ export default function FrameButton({
   return (
     <TouchableHighlight
       underlayColor={clickedItemBackgroundColor(colorScheme)}
-      onPress={posting ? undefined : onPress}
+      onPress={postingActionForButton ? undefined : onPress}
       style={[
         styles.frameButton,
         {
           marginRight: button.index % 2 === 1 && !fullWidth ? "4%" : 0,
-          opacity: posting && posting !== button.index ? 0.6 : 1,
+          opacity:
+            postingActionForButton && postingActionForButton !== button.index
+              ? 0.6
+              : 1,
           width: fullWidth ? "100%" : "48%",
         },
       ]}

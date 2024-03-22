@@ -8,16 +8,22 @@ import { URL_REGEX } from "./regex";
 import { isContentType } from "./xmtpRN/contentTypes";
 import { getXmtpClient } from "./xmtpRN/sync";
 
-export type FrameToDisplay = FramesApiResponse & {
+export type FrameWithType = FramesApiResponse & {
   type: "FRAME" | "XMTP_FRAME" | "PREVIEW";
+};
+
+export type FrameToDisplay = FrameWithType & {
+  frameImage: string;
+  isInitialFrame: boolean;
+  uniqueId: string;
 };
 
 export type FramesForMessage = {
   messageId: string;
-  frames: FrameToDisplay[];
+  frames: FrameWithType[];
 };
 
-export const getFrameType = (tags: FrameToDisplay["extractedTags"]) => {
+export const getFrameType = (tags: FrameWithType["extractedTags"]) => {
   if (tags["fc:frame"] === "vNext" && tags["fc:frame:image"]) {
     if (tags["of:accepts:xmtp"]) return "XMTP_FRAME";
     return "FRAME";
@@ -36,7 +42,7 @@ export const getMetadaTagsForMessage = async (
   // OG Preview / Frames are only for text content type
   if (isContentType("text", message.contentType)) {
     const urls = message.content.match(URL_REGEX);
-    const extractedTags: FrameToDisplay[] = [];
+    const extractedTags: FrameWithType[] = [];
     if (urls) {
       console.log(
         `[FramesMetadata] Found ${urls.length} URLs in message, fetching tags`
@@ -50,13 +56,13 @@ export const getMetadaTagsForMessage = async (
         )
       );
 
-      const framesToSave: { [url: string]: FrameToDisplay } = {};
+      const framesToSave: { [url: string]: FrameWithType } = {};
 
       urlsMetadata.forEach((response) => {
         if (response && Object.keys(response.extractedTags).length > 0) {
           const frameType = getFrameType(response.extractedTags);
           if (frameType) {
-            const frameToDisplay: FrameToDisplay = {
+            const frameToDisplay: FrameWithType = {
               ...response,
               type: frameType,
             };
@@ -87,7 +93,7 @@ export type FrameButtonType = {
   action: FrameAction;
 };
 
-export const getFrameButtons = (tagsForURL: FrameToDisplay) => {
+export const getFrameButtons = (tagsForURL: FrameWithType) => {
   if (tagsForURL.type !== "XMTP_FRAME" && tagsForURL.type !== "FRAME")
     return [];
   const buttons: FrameButtonType[] = [];
@@ -151,7 +157,7 @@ export const getFramesClient = async (account: string) => {
 type FrameAction = "post" | "post_redirect" | "link";
 
 export const getFrameButtonAction = (
-  tags: FrameToDisplay,
+  tags: FramesApiResponse,
   buttonIndex: number
 ) => {
   return (tags.extractedTags[`of:frame:button:${buttonIndex}:action`] ||
@@ -160,7 +166,7 @@ export const getFrameButtonAction = (
 };
 
 export const getFrameButtonTarget = (
-  tags: FrameToDisplay,
+  tags: FramesApiResponse,
   buttonIndex: number
 ) => {
   return (tags.extractedTags[`of:frame:button:${buttonIndex}:target`] ||
@@ -169,20 +175,21 @@ export const getFrameButtonTarget = (
     | undefined;
 };
 
-export const getFrameAspectRatio = (frame: FrameToDisplay) =>
+export const getFrameAspectRatio = (frame: FramesApiResponse) =>
   frame.extractedTags["of:image:aspect_ratio"] ||
   frame.extractedTags["fc:frame:image:aspect_ratio"] ||
   "1.91:1";
 
-export const getFrameImage = (frame: FrameToDisplay) =>
+export const getFrameImage = (frame: FrameWithType) =>
   frame.type === "PREVIEW"
     ? frame.extractedTags["og:image"]
-    : frame.extractedTags["fc:frame:image"];
+    : frame.extractedTags["of:frame:image"] ||
+      frame.extractedTags["fc:frame:image"];
 
-export const getFramePostURL = (frame: FrameToDisplay) =>
+export const getFramePostURL = (frame: FramesApiResponse) =>
   frame.extractedTags["of:post_url"] ||
   frame.extractedTags["fc:frame:post_url"];
 
-export const getFrameTextInput = (frame: FrameToDisplay) =>
+export const getFrameTextInput = (frame: FramesApiResponse) =>
   (frame.extractedTags["of:input:text	"] ||
     frame.extractedTags["fc:frame:input:text"]) as string | undefined;

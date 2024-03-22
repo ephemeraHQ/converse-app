@@ -19,7 +19,7 @@ export default function FrameBottom({
   setFrameTextInputFocused,
   frameTextInputValue,
   setFrameTextInputValue,
-  posting,
+  postingActionForButton,
   onButtonPress,
 }: {
   message: MessageToDisplay;
@@ -27,7 +27,7 @@ export default function FrameBottom({
   textInput: string | undefined;
   buttons: FrameButtonType[];
   setFrameTextInputFocused: (f: boolean) => void;
-  posting: number | undefined;
+  postingActionForButton: number | undefined;
   frameTextInputValue: string;
   setFrameTextInputValue: (s: string) => void;
   onButtonPress: (b: FrameButtonType) => void;
@@ -58,8 +58,8 @@ export default function FrameBottom({
           {buttons.length > 0 &&
             buttons.map((button) => (
               <FrameButton
-                key={`${button.title}-${button.index}`}
-                posting={posting}
+                key={`${button.title}-${button.index}-${frame.uniqueId}`}
+                postingActionForButton={postingActionForButton}
                 button={button}
                 fullWidth={
                   buttons.length === 1 ||

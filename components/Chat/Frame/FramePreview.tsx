@@ -1,6 +1,7 @@
 import { FrameActionInputs, OpenFramesProxy } from "@xmtp/frames-client";
+import { Image } from "expo-image";
 import * as Linking from "expo-linking";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { StyleSheet, TouchableOpacity, View } from "react-native";
 import uuid from "react-native-uuid";
 
@@ -9,6 +10,7 @@ import { useConversationContext } from "../../../utils/conversation";
 import {
   FrameButtonType,
   FrameToDisplay,
+  FrameWithType,
   getFrameAspectRatio,
   getFrameButtonTarget,
   getFrameButtons,
@@ -29,7 +31,7 @@ export default function FramePreview({
   initialFrame,
   message,
 }: {
-  initialFrame: FrameToDisplay;
+  initialFrame: FrameWithType;
   message: MessageToDisplay;
 }) {
   const styles = useStyles();
@@ -38,15 +40,34 @@ export default function FramePreview({
     "setFrameTextInputFocused",
   ]);
   const account = useCurrentAccount() as string;
-  const [posting, setPosting] = useState(undefined as undefined | number);
-  const [imageLoading, setImageLoading] = useState(false);
+  const [postingActionForButton, setPostingActionForButton] = useState(
+    undefined as undefined | number
+  );
+  const [firstFrameLoaded, setFirstFrameLoaded] = useState(false);
   const [frame, setFrame] = useState({
     ...initialFrame,
+    frameImage: framesProxy.mediaUrl(getFrameImage(initialFrame)),
+    isInitialFrame: true,
     uniqueId: uuid.v4().toString(),
-  });
+  } as FrameToDisplay);
   const buttons = getFrameButtons(frame);
   const textInput = getFrameTextInput(frame);
   const [frameTextInputValue, setFrameTextInputValue] = useState("");
+
+  useEffect(() => {
+    if (frame.isInitialFrame && !firstFrameLoaded) {
+      // We don't display anything until the frame
+      // initial image is loaded !
+      Image.prefetch(frame.frameImage, "memory-disk").then(
+        (prefetched: boolean) => {
+          if (prefetched) {
+            setFirstFrameLoaded(true);
+          }
+        }
+      );
+    }
+  }, [firstFrameLoaded, frame.frameImage, frame.isInitialFrame]);
+
   const onButtonPress = useCallback(
     async (button: FrameButtonType) => {
       if (button.action === "link") {
@@ -61,8 +82,7 @@ export default function FramePreview({
         return;
       }
       if (!conversation) return;
-      setPosting(button.index);
-      setImageLoading(true);
+      setPostingActionForButton(button.index);
       const actionPostUrl =
         getFrameButtonTarget(frame, button.index) ||
         getFramePostURL(frame) ||
@@ -84,11 +104,28 @@ export default function FramePreview({
             actionPostUrl,
             payload
           );
-          // post action will update frame
+          // We should display a new frame, let's load image first
+          const uniqueId = uuid.v4().toString();
+          const frameImageURL = new URL(
+            framesProxy.mediaUrl(
+              getFrameImage({ ...frameResponse, type: "XMTP_FRAME" })
+            )
+          );
+          frameImageURL.searchParams.set("converseRequestId", uniqueId);
+          const frameImage = frameImageURL.toString();
+          const prefetched = await Image.prefetch(frameImage, "memory");
+          if (!prefetched) {
+            // couldn't load image, let's fail
+            setPostingActionForButton(undefined);
+            return;
+          }
+          // Updating frame to display
           setFrame({
             ...frameResponse,
+            isInitialFrame: false,
+            frameImage,
             type: "XMTP_FRAME",
-            uniqueId: uuid.v4().toString(),
+            uniqueId,
           });
         } else if (button.action === "post_redirect") {
           const payload = await framesClient.signFrameAction(actionInput);
@@ -110,7 +147,7 @@ export default function FramePreview({
       } catch (e: any) {
         console.error(e);
       }
-      setPosting(undefined);
+      setPostingActionForButton(undefined);
     },
     [
       account,
@@ -132,11 +169,15 @@ export default function FramePreview({
     (frame.type === "PREVIEW" && frame.extractedTags["og:title"]) ||
     buttons.length > 0 ||
     textInput;
-  const frameImage = getFrameImage(frame);
   const frameImageAspectRatio = getFrameAspectRatio(frame);
 
   return (
-    <View style={styles.frameWrapper}>
+    <View
+      style={[
+        styles.frameWrapper,
+        { height: !firstFrameLoaded ? 0 : undefined },
+      ]}
+    >
       {initialFrame.type === "XMTP_FRAME" && (
         <View
           style={[
@@ -157,15 +198,18 @@ export default function FramePreview({
       <View style={styles.frameContainer}>
         <View
           style={{
-            opacity: imageLoading ? (message.fromMe ? 0.8 : 0.4) : 1,
+            opacity:
+              postingActionForButton !== undefined
+                ? message.fromMe
+                  ? 0.8
+                  : 0.4
+                : 1,
           }}
         >
           <FrameImage
-            frameImage={framesProxy.mediaUrl(frameImage)}
-            initialFrameURL={initialFrame.url}
-            uniqueId={frame.uniqueId}
-            setImageLoading={setImageLoading}
+            frameImage={frame.frameImage}
             frameImageAspectRatio={frameImageAspectRatio}
+            linkToOpen={initialFrame.url}
           />
         </View>
         {showBottom && (
@@ -175,7 +219,7 @@ export default function FramePreview({
             textInput={textInput}
             buttons={buttons}
             setFrameTextInputFocused={setFrameTextInputFocused}
-            posting={posting}
+            postingActionForButton={postingActionForButton}
             onButtonPress={onButtonPress}
             frameTextInputValue={frameTextInputValue}
             setFrameTextInputValue={setFrameTextInputValue}

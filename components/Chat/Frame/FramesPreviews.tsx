@@ -4,7 +4,7 @@ import { View } from "react-native";
 import { useCurrentAccount } from "../../../data/store/accountsStore";
 import { useFramesStore } from "../../../data/store/framesStore";
 import {
-  FrameToDisplay,
+  FrameWithType,
   FramesForMessage,
   getMetadaTagsForMessage,
 } from "../../../utils/frames";
@@ -20,7 +20,7 @@ export default function FramesPreviews({ message }: Props) {
   const tagsFetchedOnce = useRef(false);
   const account = useCurrentAccount() as string;
   const [framesForMessage, setFramesForMessage] = useState<{
-    [messageId: string]: FrameToDisplay[];
+    [messageId: string]: FrameWithType[];
   }>({
     [message.id]: useFramesStore
       .getState()
