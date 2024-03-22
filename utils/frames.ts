@@ -1,14 +1,12 @@
 import { FramesApiResponse, FramesClient } from "@xmtp/frames-client";
-import { Client } from "@xmtp/xmtp-js";
 
 import { MessageToDisplay } from "../components/Chat/Message/Message";
-import config from "../config";
 import { ConverseMessageMetadata } from "../data/db/entities/messageEntity";
 import { saveMessageMetadata } from "../data/helpers/messages";
 import { useFramesStore } from "../data/store/framesStore";
-import { loadXmtpKey } from "./keychain/helpers";
 import { URL_REGEX } from "./regex";
 import { isContentType } from "./xmtpRN/contentTypes";
+import { getXmtpClient } from "./xmtpRN/sync";
 
 export type FrameToDisplay = FramesApiResponse & {
   type: "FRAME" | "XMTP_FRAME" | "PREVIEW";
@@ -140,17 +138,8 @@ export const getFramesClient = async (account: string) => {
   if (frameClientByAccount[account]) return frameClientByAccount[account];
   try {
     creatingFramesClientForAccount[account] = true;
-    // The FramesClient only works with the JS SDK - ok for now
-    const base64Key = await loadXmtpKey(account);
-    if (!base64Key)
-      throw new Error(
-        `[FramesClient] Could not instantiate client for account ${account}`
-      );
-    const jsClient = await Client.create(null, {
-      env: config.xmtpEnv as "dev" | "production" | "local",
-      privateKeyOverride: Buffer.from(base64Key, "base64"),
-    });
-    frameClientByAccount[account] = new FramesClient(jsClient);
+    const client = await getXmtpClient(account);
+    frameClientByAccount[account] = new FramesClient(client);
     delete creatingFramesClientForAccount[account];
     return frameClientByAccount[account];
   } catch (e) {
