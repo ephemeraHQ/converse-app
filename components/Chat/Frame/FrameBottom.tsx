@@ -70,10 +70,7 @@ export default function FrameBottom({
                     // Immediate haptic feedback
                     Haptics.impactAsync();
                   }
-                  // Timeout because we still use the JS SDK for frames
-                  // and the encryption of payload happens on main thread :(
-                  // @todo => use the RN SDK when it's available to sign
-                  setTimeout(() => onButtonPress(button), 10);
+                  onButtonPress(button);
                 }}
               />
             ))}
