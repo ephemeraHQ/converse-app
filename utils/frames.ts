@@ -1,3 +1,4 @@
+import { OpenFrameButton } from "@open-frames/proxy-types";
 import { FramesApiResponse, FramesClient } from "@xmtp/frames-client";
 
 import { MessageToDisplay } from "../components/Chat/Message/Message";
@@ -34,7 +35,7 @@ export const getFrameType = (tags: FrameWithType["extractedTags"]) => {
   return undefined;
 };
 
-export const getMetadaTagsForMessage = async (
+export const fetchFramesForMessage = async (
   account: string,
   message: MessageToDisplay
 ): Promise<FramesForMessage> => {
@@ -42,7 +43,7 @@ export const getMetadaTagsForMessage = async (
   // OG Preview / Frames are only for text content type
   if (isContentType("text", message.contentType)) {
     const urls = message.content.match(URL_REGEX);
-    const extractedTags: FrameWithType[] = [];
+    const fetchedFrames: FrameWithType[] = [];
     if (urls) {
       console.log(
         `[FramesMetadata] Found ${urls.length} URLs in message, fetching tags`
@@ -62,71 +63,54 @@ export const getMetadaTagsForMessage = async (
         if (response && Object.keys(response.extractedTags).length > 0) {
           const frameType = getFrameType(response.extractedTags);
           if (frameType) {
-            const frameToDisplay: FrameWithType = {
+            const frame: FrameWithType = {
               ...response,
               type: frameType,
             };
-            extractedTags.push(frameToDisplay);
-            framesToSave[response.url] = frameToDisplay;
+            fetchedFrames.push(frame);
+            framesToSave[response.url] = frame;
           }
         }
       });
 
       // Save frames urls list on message
       const messageMetadataToSave: ConverseMessageMetadata = {
-        frames: extractedTags.map((f) => f.url),
+        frames: fetchedFrames.map((f) => f.url),
       };
       saveMessageMetadata(account, message, messageMetadataToSave);
 
       // Save frame itself to store
       useFramesStore.getState().setFrames(framesToSave);
 
-      return { messageId: message.id, frames: extractedTags };
+      return { messageId: message.id, frames: fetchedFrames };
     }
   }
   return { messageId: message.id, frames: [] };
 };
 
-export type FrameButtonType = {
+export type FrameButtonType = OpenFrameButton & {
   index: number;
-  title: string;
-  action: FrameAction;
 };
 
-export const getFrameButtons = (tagsForURL: FrameWithType) => {
-  if (tagsForURL.type !== "XMTP_FRAME" && tagsForURL.type !== "FRAME")
-    return [];
+export const getFrameButtons = (frame: FrameWithType) => {
+  if (frame.type !== "XMTP_FRAME" && frame.type !== "FRAME") return [];
+  const frameButtons = frame.frameInfo?.buttons;
+  if (!frameButtons) return [];
   const buttons: FrameButtonType[] = [];
 
-  const button1 = tagsForURL.extractedTags["fc:frame:button:1"];
+  const button1 = frameButtons["1"];
 
   if (button1) {
-    buttons.push({
-      index: 1,
-      title: button1,
-      action: getFrameButtonAction(tagsForURL, 1),
-    });
-    const button2 = tagsForURL.extractedTags["fc:frame:button:2"];
+    buttons.push({ ...button1, index: 1 });
+    const button2 = frameButtons["2"];
     if (button2) {
-      buttons.push({
-        index: 2,
-        title: button2,
-        action: getFrameButtonAction(tagsForURL, 2),
-      });
-      const button3 = tagsForURL.extractedTags["fc:frame:button:3"];
+      buttons.push({ ...button2, index: 2 });
+      const button3 = frameButtons["3"];
       if (button3) {
-        buttons.push({
-          index: 3,
-          title: button3,
-          action: getFrameButtonAction(tagsForURL, 3),
-        });
-        const button4 = tagsForURL.extractedTags["fc:frame:button:4"];
+        buttons.push({ ...button3, index: 3 });
+        const button4 = frameButtons["4"];
         if (button4) {
-          buttons.push({
-            index: 4,
-            title: button4,
-            action: getFrameButtonAction(tagsForURL, 4),
-          });
+          buttons.push({ ...button4, index: 4 });
         }
       }
     }
@@ -154,42 +138,7 @@ export const getFramesClient = async (account: string) => {
   }
 };
 
-type FrameAction = "post" | "post_redirect" | "link";
-
-export const getFrameButtonAction = (
-  tags: FramesApiResponse,
-  buttonIndex: number
-) => {
-  return (tags.extractedTags[`of:frame:button:${buttonIndex}:action`] ||
-    tags.extractedTags[`fc:frame:button:${buttonIndex}:action`] ||
-    "post") as FrameAction;
-};
-
-export const getFrameButtonTarget = (
-  tags: FramesApiResponse,
-  buttonIndex: number
-) => {
-  return (tags.extractedTags[`of:frame:button:${buttonIndex}:target`] ||
-    tags.extractedTags[`fc:frame:button:${buttonIndex}:target`]) as
-    | string
-    | undefined;
-};
-
-export const getFrameAspectRatio = (frame: FramesApiResponse) =>
-  frame.extractedTags["of:image:aspect_ratio"] ||
-  frame.extractedTags["fc:frame:image:aspect_ratio"] ||
-  "1.91:1";
-
 export const getFrameImage = (frame: FrameWithType) =>
   frame.type === "PREVIEW"
-    ? frame.extractedTags["og:image"]
-    : frame.extractedTags["of:frame:image"] ||
-      frame.extractedTags["fc:frame:image"];
-
-export const getFramePostURL = (frame: FramesApiResponse) =>
-  frame.extractedTags["of:post_url"] ||
-  frame.extractedTags["fc:frame:post_url"];
-
-export const getFrameTextInput = (frame: FramesApiResponse) =>
-  (frame.extractedTags["of:input:text	"] ||
-    frame.extractedTags["fc:frame:input:text"]) as string | undefined;
+    ? frame.frameInfo?.ogImage
+    : frame.frameInfo?.image?.content;

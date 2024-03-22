@@ -6,7 +6,7 @@ import { useFramesStore } from "../../../data/store/framesStore";
 import {
   FrameWithType,
   FramesForMessage,
-  getMetadaTagsForMessage,
+  fetchFramesForMessage,
 } from "../../../utils/frames";
 import { MessageToDisplay } from "../Message/Message";
 import FramePreview from "./FramePreview";
@@ -30,7 +30,7 @@ export default function FramesPreviews({ message }: Props) {
   const fetchTagsIfNeeded = useCallback(() => {
     if (!tagsFetchedOnce.current) {
       tagsFetchedOnce.current = true;
-      getMetadaTagsForMessage(account, message).then(
+      fetchFramesForMessage(account, message).then(
         (frames: FramesForMessage) => {
           // Call is async and we have cell recycling so make sure
           // we're still on the same message as before

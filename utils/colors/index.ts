@@ -203,6 +203,8 @@ export const dangerColor = (colorScheme: ColorSchemeName) => {
   return colorScheme === "dark" ? "#FF453A" : "#FF3B30";
 };
 
+export const frameButtonBackgroundColor = "rgba(255,255,255,0.9)";
+
 // Generated using https://callstack.github.io/react-native-paper/docs/guides/theming#theme-properties
 
 const MaterialLightColors = {
