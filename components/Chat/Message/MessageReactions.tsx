@@ -10,23 +10,23 @@ import {
 import {
   useCurrentAccount,
   useProfilesStore,
-} from "../../data/store/accountsStore";
-import { isAttachmentMessage } from "../../utils/attachment/helpers";
+} from "../../../data/store/accountsStore";
+import { isAttachmentMessage } from "../../../utils/attachment/helpers";
 import {
   actionSheetColors,
   backgroundColor,
   messageBubbleColor,
   textSecondaryColor,
-} from "../../utils/colors";
-import { useConversationContext } from "../../utils/conversation";
-import { getPreferredName } from "../../utils/profile";
+} from "../../../utils/colors";
+import { useConversationContext } from "../../../utils/conversation";
+import { getPreferredName } from "../../../utils/profile";
 import {
   MessageReaction,
   getReactionContent,
   removeReactionFromMessage,
-} from "../../utils/reactions";
-import { showActionSheetWithOptions } from "../StateHandlers/ActionSheetStateHandler";
-import { MessageToDisplay } from "./ChatMessage";
+} from "../../../utils/reactions";
+import { showActionSheetWithOptions } from "../../StateHandlers/ActionSheetStateHandler";
+import { MessageToDisplay } from "./Message";
 
 type Props = {
   message: MessageToDisplay;

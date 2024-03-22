@@ -1,12 +1,12 @@
 import { View, useColorScheme, StyleSheet, Text } from "react-native";
 
-import { XmtpMessage } from "../../data/store/chatStore";
-import { isAttachmentMessage } from "../../utils/attachment/helpers";
-import { textSecondaryColor } from "../../utils/colors";
-import { getRelativeDateTime } from "../../utils/date";
-import { isTransactionMessage } from "../../utils/transaction";
+import { XmtpMessage } from "../../../data/store/chatStore";
+import { isAttachmentMessage } from "../../../utils/attachment/helpers";
+import { textSecondaryColor } from "../../../utils/colors";
+import { getRelativeDateTime } from "../../../utils/date";
+import { isTransactionMessage } from "../../../utils/transaction";
 
-export default function ChatMessageReplyBubble({
+export default function ChatInputReplyBubble({
   replyingToMessage,
   fromMe,
 }: {

@@ -14,11 +14,14 @@ import {
 } from "react-native";
 import uuid from "react-native-uuid";
 
-import SendButton from "../../assets/send-button.svg";
-import config from "../../config";
-import { currentAccount, useWalletStore } from "../../data/store/accountsStore";
-import { NavigationParamList } from "../../screens/Navigation/Navigation";
-import { postUSDCTransferAuthorization } from "../../utils/api";
+import SendButton from "../../../assets/send-button.svg";
+import config from "../../../config";
+import {
+  currentAccount,
+  useWalletStore,
+} from "../../../data/store/accountsStore";
+import { NavigationParamList } from "../../../screens/Navigation/Navigation";
+import { postUSDCTransferAuthorization } from "../../../utils/api";
 import {
   actionSecondaryColor,
   backgroundColor,
@@ -26,19 +29,22 @@ import {
   itemSeparatorColor,
   textPrimaryColor,
   textSecondaryColor,
-} from "../../utils/colors";
-import { useConversationContext } from "../../utils/conversation";
-import { isDesktop } from "../../utils/device";
-import { getTransferAuthorization } from "../../utils/evm/erc20";
-import { evmHelpers, getCurrentAccountSigner } from "../../utils/evm/helpers";
-import { usePrivySigner } from "../../utils/evm/privy";
-import { sendMessage } from "../../utils/message";
-import { sentryTrackError } from "../../utils/sentry";
-import { refreshBalanceForAccount } from "../../utils/wallet";
-import ActivityIndicator from "../ActivityIndicator/ActivityIndicator";
-import ChatActionButton from "./ChatActionButton";
+} from "../../../utils/colors";
+import { useConversationContext } from "../../../utils/conversation";
+import { isDesktop } from "../../../utils/device";
+import { getTransferAuthorization } from "../../../utils/evm/erc20";
+import {
+  evmHelpers,
+  getCurrentAccountSigner,
+} from "../../../utils/evm/helpers";
+import { usePrivySigner } from "../../../utils/evm/privy";
+import { sendMessage } from "../../../utils/message";
+import { sentryTrackError } from "../../../utils/sentry";
+import { refreshBalanceForAccount } from "../../../utils/wallet";
+import ActivityIndicator from "../../ActivityIndicator/ActivityIndicator";
+import ActionButton from "../ActionButton";
 
-export default function ChatTransactionInput() {
+export default function TransactionInput() {
   const USDCBalance = useWalletStore((s) => s.USDCBalance);
   const { conversation, setTransactionMode, transactionMode } =
     useConversationContext([
@@ -242,7 +248,7 @@ export default function ChatTransactionInput() {
             txStatus.status === "sending" || txStatus.status === "sent" ? 0 : 1,
         }}
       >
-        <ChatActionButton picto="xmark" style={styles.closeButton} />
+        <ActionButton picto="xmark" style={styles.closeButton} />
       </TouchableOpacity>
       <View style={styles.middleContainer}>
         <View style={styles.separatorView} />
