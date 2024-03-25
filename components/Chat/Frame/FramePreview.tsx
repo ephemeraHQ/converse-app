@@ -2,10 +2,11 @@ import { FrameActionInputs, OpenFramesProxy } from "@xmtp/frames-client";
 import { Image } from "expo-image";
 import * as Linking from "expo-linking";
 import { useCallback, useEffect, useState } from "react";
-import { StyleSheet, TouchableOpacity, View } from "react-native";
+import { Platform, StyleSheet, TouchableOpacity, View } from "react-native";
 import uuid from "react-native-uuid";
 
 import { useCurrentAccount } from "../../../data/store/accountsStore";
+import { cacheForMedia, fetchAndCacheMedia } from "../../../utils/cache/cache";
 import { useConversationContext } from "../../../utils/conversation";
 import {
   FrameButtonType,
@@ -15,7 +16,6 @@ import {
   getFrameImage,
   getFramesClient,
 } from "../../../utils/frames";
-import { cacheForMedia, fetchAndCacheMedia } from "../../../utils/media";
 import { navigate } from "../../../utils/navigation";
 import ActionButton from "../ActionButton";
 import { MessageToDisplay } from "../Message/Message";
@@ -63,14 +63,28 @@ export default function FramePreview({
           setFirstFrameLoaded(true);
           return;
         }
+        const proxiedInitialImage = framesProxy.mediaUrl(initialFrameImage);
         if (initialFrameImage.startsWith("data:")) {
           // These won't change so no cache to handle
           setFirstImageRefreshed(true);
           setFrame((s) => ({ ...s, frameImage: initialFrameImage }));
           setFirstFrameLoaded(true);
           return;
+        } else if (Platform.OS === "web") {
+          // No caching on web for now
+          setFirstImageRefreshed(true);
+          const prefetched = await Image.prefetch(
+            proxiedInitialImage,
+            "memory"
+          );
+          if (prefetched) {
+            setFrame((s) => ({ ...s, frameImage: proxiedInitialImage }));
+          } else {
+            setFirstImageFailure(true);
+          }
+          setFirstFrameLoaded(true);
+          return;
         }
-        const proxiedInitialImage = framesProxy.mediaUrl(initialFrameImage);
         const initialImageCache = await cacheForMedia(proxiedInitialImage);
         if (!initialImageCache) {
           const cachedImage = await fetchAndCacheMedia(proxiedInitialImage);
@@ -248,7 +262,7 @@ export default function FramePreview({
                 frame.frameInfo?.image?.aspectRatio || "1.91.1"
               }
               linkToOpen={initialFrame.url}
-              useMemoryCache={!frame.isInitialFrame}
+              useMemoryCache={!frame.isInitialFrame || Platform.OS === "web"}
             />
           </View>
         )}
