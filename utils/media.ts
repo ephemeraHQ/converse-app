@@ -380,7 +380,6 @@ export const fetchAndCacheMedia = async (mediaURI: string) => {
     await RNFS.mkdir(CACHE_FOLDER, {
       NSURLIsExcludedFromBackupKey: true,
     });
-    console.log(mediaURI);
     await RNFS.downloadFile({
       fromUrl: mediaURI,
       toFile: cachePath,
