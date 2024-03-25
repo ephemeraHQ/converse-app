@@ -63,6 +63,13 @@ export default function FramePreview({
           setFirstFrameLoaded(true);
           return;
         }
+        if (initialFrameImage.startsWith("data:")) {
+          // These won't change so no cache to handle
+          setFirstImageRefreshed(true);
+          setFrame((s) => ({ ...s, frameImage: initialFrameImage }));
+          setFirstFrameLoaded(true);
+          return;
+        }
         const proxiedInitialImage = framesProxy.mediaUrl(initialFrameImage);
         const initialImageCache = await cacheForMedia(proxiedInitialImage);
         if (!initialImageCache) {
