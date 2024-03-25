@@ -19,37 +19,37 @@ import Reanimated, {
 } from "react-native-reanimated";
 import { SvgProps } from "react-native-svg";
 
-import _MessageTail from "../../assets/message-tail.svg";
+import _MessageTail from "../../../assets/message-tail.svg";
 import {
   currentAccount,
   useCurrentAccount,
   useSettingsStore,
-} from "../../data/store/accountsStore";
-import { useAppStore } from "../../data/store/appStore";
-import { ReanimatedTouchableOpacity } from "../../utils/animations";
-import { reportMessage } from "../../utils/api";
-import { isAttachmentMessage } from "../../utils/attachment/helpers";
+} from "../../../data/store/accountsStore";
+import { useAppStore } from "../../../data/store/appStore";
+import { ReanimatedTouchableOpacity } from "../../../utils/animations";
+import { reportMessage } from "../../../utils/api";
+import { isAttachmentMessage } from "../../../utils/attachment/helpers";
 import {
   actionSheetColors,
   messageBubbleColor,
   messageHighlightedBubbleColor,
   myMessageBubbleColor,
   myMessageHighlightedBubbleColor,
-} from "../../utils/colors";
-import { useConversationContext } from "../../utils/conversation";
-import { isDesktop } from "../../utils/device";
-import { converseEventEmitter } from "../../utils/events";
+} from "../../../utils/colors";
+import { useConversationContext } from "../../../utils/conversation";
+import { isDesktop } from "../../../utils/device";
+import { converseEventEmitter } from "../../../utils/events";
 import {
   MessageReaction,
   addReactionToMessage,
   getEmojiName,
   removeReactionFromMessage,
-} from "../../utils/reactions";
-import { isTransactionMessage } from "../../utils/transaction";
-import { consentToPeersOnProtocol } from "../../utils/xmtpRN/conversations";
-import EmojiPicker from "../../vendor/rn-emoji-keyboard";
-import { showActionSheetWithOptions } from "../StateHandlers/ActionSheetStateHandler";
-import { MessageToDisplay } from "./ChatMessage";
+} from "../../../utils/reactions";
+import { isTransactionMessage } from "../../../utils/transaction";
+import { consentToPeersOnProtocol } from "../../../utils/xmtpRN/conversations";
+import EmojiPicker from "../../../vendor/rn-emoji-keyboard";
+import { showActionSheetWithOptions } from "../../StateHandlers/ActionSheetStateHandler";
+import { MessageToDisplay } from "./Message";
 
 class MessageTailComponent extends React.Component<SvgProps> {
   render() {

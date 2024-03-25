@@ -8,7 +8,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import RNFS from "react-native-fs";
 import RNFetchBlob from "rn-fetch-blob";
 
-import { MessageToDisplay } from "../../components/Chat/ChatMessage";
+import { MessageToDisplay } from "../../components/Chat/Message/Message";
 import { ConverseMessageMetadata } from "../../data/db/entities/messageEntity";
 import { saveMessageMetadata } from "../../data/helpers/messages";
 import { useCurrentAccount } from "../../data/store/accountsStore";

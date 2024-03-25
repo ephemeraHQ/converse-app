@@ -9,7 +9,7 @@ import axios from "axios";
 import mime from "mime";
 import { useCallback, useEffect, useState } from "react";
 
-import { MessageToDisplay } from "../../components/Chat/ChatMessage";
+import { MessageToDisplay } from "../../components/Chat/Message/Message";
 import { useCurrentAccount } from "../../data/store/accountsStore";
 import { getPresignedUriForUpload } from "../api";
 import { isImageMimetype } from "../media";

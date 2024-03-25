@@ -2,6 +2,7 @@ import { useEmbeddedWallet, usePrivy } from "@privy-io/expo";
 import Clipboard from "@react-native-clipboard/clipboard";
 import * as Sentry from "@sentry/react-native";
 import axios from "axios";
+import { Image } from "expo-image";
 import * as Updates from "expo-updates";
 import { forwardRef, useImperativeHandle } from "react";
 
@@ -14,7 +15,6 @@ import {
 } from "../data/store/accountsStore";
 import { debugLogs, resetDebugLogs } from "../utils/debug";
 import { usePrivySigner } from "../utils/evm/privy";
-import { getSecureItemAsync } from "../utils/keychain";
 import mmkv from "../utils/mmkv";
 import { showActionSheetWithOptions } from "./StateHandlers/ActionSheetStateHandler";
 
@@ -33,27 +33,18 @@ const DebugButton = forwardRef((props, ref) => {
   useImperativeHandle(ref, () => ({
     showDebugMenu() {
       const methods: any = {
-        Privy: async () => {
-          const keys = [
-            "privy-token",
-            "privy-refresh_token",
-            "privy-session",
-            "privy-session_transfer_token",
-            "privy-token-old",
-            "privy-refresh_token-old",
-          ];
-          const values = await Promise.all(
-            keys.map((k) => getSecureItemAsync(k))
-          );
-          let result = `Privy ready: ${privyReady}\nPrivyUser: ${!!privyUser}\nEmbedded wallet status: ${
-            embeddedWallet.status
-          }\nprivySigner: ${!!privySigner}`;
-          keys.forEach((k, i) => {
-            const v = values[i];
-            result = `${result}\n${k}:${v}\n`;
-          });
-          alert(result);
-          Clipboard.setString(result);
+        "Update OTA": async () => {
+          try {
+            const update = await Updates.fetchUpdateAsync();
+            if (update.isNew) {
+              await Updates.reloadAsync();
+            } else {
+              alert("No new update");
+            }
+          } catch (error) {
+            alert(error);
+            console.error(error);
+          }
         },
         "Export db file": async () => {
           const dbPath = await getDbPath(currentAccount());
@@ -70,37 +61,12 @@ const DebugButton = forwardRef((props, ref) => {
           });
           alert("Uploaded!");
         },
-        "Update app": async () => {
-          try {
-            const update = await Updates.fetchUpdateAsync();
-            if (update.isNew) {
-              await Updates.reloadAsync();
-            } else {
-              alert("No new update");
-            }
-          } catch (error) {
-            alert(error);
-            console.error(error);
-          }
-        },
         "Reset DB": () => {
           resetDb(currentAccount());
           getChatStore(currentAccount()).getState().setLastSyncedAt(0, []);
         },
         "Reset lastSyncedAt": () => {
           getChatStore(currentAccount()).getState().setLastSyncedAt(0, []);
-        },
-        "Clear messages attachments folder": async () => {
-          const RNFS = require("react-native-fs");
-          const messageFolder = `${RNFS.DocumentDirectoryPath}/messages`;
-          await RNFS.unlink(messageFolder);
-          alert("Cleared!");
-        },
-        "Sentry JS error": () => {
-          throw new Error("My first Sentry error!");
-        },
-        "Sentry Native error": () => {
-          Sentry.nativeCrash();
         },
         "Show logs": () => {
           alert(debugLogs.join("\n"));
@@ -112,6 +78,26 @@ const DebugButton = forwardRef((props, ref) => {
         "Clear logs": resetDebugLogs,
         "Clear logout tasks": () => {
           mmkv.delete("converse-logout-tasks");
+        },
+        "Sentry JS error": () => {
+          throw new Error("My first Sentry error!");
+        },
+        "Sentry Native error": () => {
+          Sentry.nativeCrash();
+        },
+        "Clear expo image cache": async () => {
+          await Image.clearDiskCache();
+          await Image.clearMemoryCache();
+          alert("Done!");
+        },
+        "Clear converse media cache": async () => {
+          const RNFS = require("react-native-fs");
+          await RNFS.unlink(
+            `file://${RNFS.CachesDirectoryPath}${
+              RNFS.CachesDirectoryPath.endsWith("/") ? "" : "/"
+            }mediacache`
+          );
+          alert("Done!");
         },
         Cancel: undefined,
       };

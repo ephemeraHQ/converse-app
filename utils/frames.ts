@@ -1,25 +1,30 @@
+import { OpenFrameButton } from "@open-frames/proxy-types";
 import { FramesApiResponse, FramesClient } from "@xmtp/frames-client";
-import { Client } from "@xmtp/xmtp-js";
 
-import { MessageToDisplay } from "../components/Chat/ChatMessage";
-import config from "../config";
+import { MessageToDisplay } from "../components/Chat/Message/Message";
 import { ConverseMessageMetadata } from "../data/db/entities/messageEntity";
 import { saveMessageMetadata } from "../data/helpers/messages";
 import { useFramesStore } from "../data/store/framesStore";
-import { loadXmtpKey } from "./keychain/helpers";
 import { URL_REGEX } from "./regex";
 import { isContentType } from "./xmtpRN/contentTypes";
+import { getXmtpClient } from "./xmtpRN/sync";
 
-export type FrameToDisplay = FramesApiResponse & {
+export type FrameWithType = FramesApiResponse & {
   type: "FRAME" | "XMTP_FRAME" | "PREVIEW";
+};
+
+export type FrameToDisplay = FrameWithType & {
+  frameImage: string | undefined;
+  isInitialFrame: boolean;
+  uniqueId: string;
 };
 
 export type FramesForMessage = {
   messageId: string;
-  frames: FrameToDisplay[];
+  frames: FrameWithType[];
 };
 
-export const getFrameType = (tags: FrameToDisplay["extractedTags"]) => {
+export const getFrameType = (tags: FrameWithType["extractedTags"]) => {
   if (tags["fc:frame"] === "vNext" && tags["fc:frame:image"]) {
     if (tags["of:accepts:xmtp"]) return "XMTP_FRAME";
     return "FRAME";
@@ -30,7 +35,7 @@ export const getFrameType = (tags: FrameToDisplay["extractedTags"]) => {
   return undefined;
 };
 
-export const getMetadaTagsForMessage = async (
+export const fetchFramesForMessage = async (
   account: string,
   message: MessageToDisplay
 ): Promise<FramesForMessage> => {
@@ -38,7 +43,7 @@ export const getMetadaTagsForMessage = async (
   // OG Preview / Frames are only for text content type
   if (isContentType("text", message.contentType)) {
     const urls = message.content.match(URL_REGEX);
-    const extractedTags: FrameToDisplay[] = [];
+    const fetchedFrames: FrameWithType[] = [];
     if (urls) {
       console.log(
         `[FramesMetadata] Found ${urls.length} URLs in message, fetching tags`
@@ -52,77 +57,60 @@ export const getMetadaTagsForMessage = async (
         )
       );
 
-      const framesToSave: { [url: string]: FrameToDisplay } = {};
+      const framesToSave: { [url: string]: FrameWithType } = {};
 
       urlsMetadata.forEach((response) => {
         if (response && Object.keys(response.extractedTags).length > 0) {
           const frameType = getFrameType(response.extractedTags);
           if (frameType) {
-            const frameToDisplay: FrameToDisplay = {
+            const frame: FrameWithType = {
               ...response,
               type: frameType,
             };
-            extractedTags.push(frameToDisplay);
-            framesToSave[response.url] = frameToDisplay;
+            fetchedFrames.push(frame);
+            framesToSave[response.url] = frame;
           }
         }
       });
 
       // Save frames urls list on message
       const messageMetadataToSave: ConverseMessageMetadata = {
-        frames: extractedTags.map((f) => f.url),
+        frames: fetchedFrames.map((f) => f.url),
       };
       saveMessageMetadata(account, message, messageMetadataToSave);
 
       // Save frame itself to store
       useFramesStore.getState().setFrames(framesToSave);
 
-      return { messageId: message.id, frames: extractedTags };
+      return { messageId: message.id, frames: fetchedFrames };
     }
   }
   return { messageId: message.id, frames: [] };
 };
 
-export type FrameButtonType = {
+export type FrameButtonType = OpenFrameButton & {
   index: number;
-  title: string;
-  action: FrameAction;
 };
 
-export const getFrameButtons = (tagsForURL: FrameToDisplay) => {
-  if (tagsForURL.type !== "XMTP_FRAME" && tagsForURL.type !== "FRAME")
-    return [];
+export const getFrameButtons = (frame: FrameWithType) => {
+  if (frame.type !== "XMTP_FRAME" && frame.type !== "FRAME") return [];
+  const frameButtons = frame.frameInfo?.buttons;
+  if (!frameButtons) return [];
   const buttons: FrameButtonType[] = [];
 
-  const button1 = tagsForURL.extractedTags["fc:frame:button:1"];
+  const button1 = frameButtons["1"];
 
   if (button1) {
-    buttons.push({
-      index: 1,
-      title: button1,
-      action: getFrameButtonAction(tagsForURL, 1),
-    });
-    const button2 = tagsForURL.extractedTags["fc:frame:button:2"];
+    buttons.push({ ...button1, index: 1 });
+    const button2 = frameButtons["2"];
     if (button2) {
-      buttons.push({
-        index: 2,
-        title: button2,
-        action: getFrameButtonAction(tagsForURL, 2),
-      });
-      const button3 = tagsForURL.extractedTags["fc:frame:button:3"];
+      buttons.push({ ...button2, index: 2 });
+      const button3 = frameButtons["3"];
       if (button3) {
-        buttons.push({
-          index: 3,
-          title: button3,
-          action: getFrameButtonAction(tagsForURL, 3),
-        });
-        const button4 = tagsForURL.extractedTags["fc:frame:button:4"];
+        buttons.push({ ...button3, index: 3 });
+        const button4 = frameButtons["4"];
         if (button4) {
-          buttons.push({
-            index: 4,
-            title: button4,
-            action: getFrameButtonAction(tagsForURL, 4),
-          });
+          buttons.push({ ...button4, index: 4 });
         }
       }
     }
@@ -140,17 +128,8 @@ export const getFramesClient = async (account: string) => {
   if (frameClientByAccount[account]) return frameClientByAccount[account];
   try {
     creatingFramesClientForAccount[account] = true;
-    // The FramesClient only works with the JS SDK - ok for now
-    const base64Key = await loadXmtpKey(account);
-    if (!base64Key)
-      throw new Error(
-        `[FramesClient] Could not instantiate client for account ${account}`
-      );
-    const jsClient = await Client.create(null, {
-      env: config.xmtpEnv as "dev" | "production" | "local",
-      privateKeyOverride: Buffer.from(base64Key, "base64"),
-    });
-    frameClientByAccount[account] = new FramesClient(jsClient);
+    const client = await getXmtpClient(account);
+    frameClientByAccount[account] = new FramesClient(client);
     delete creatingFramesClientForAccount[account];
     return frameClientByAccount[account];
   } catch (e) {
@@ -159,41 +138,7 @@ export const getFramesClient = async (account: string) => {
   }
 };
 
-type FrameAction = "post" | "post_redirect" | "link";
-
-export const getFrameButtonAction = (
-  tags: FrameToDisplay,
-  buttonIndex: number
-) => {
-  return (tags.extractedTags[`of:frame:button:${buttonIndex}:action`] ||
-    tags.extractedTags[`fc:frame:button:${buttonIndex}:action`] ||
-    "post") as FrameAction;
-};
-
-export const getFrameButtonTarget = (
-  tags: FrameToDisplay,
-  buttonIndex: number
-) => {
-  return (tags.extractedTags[`of:frame:button:${buttonIndex}:target`] ||
-    tags.extractedTags[`fc:frame:button:${buttonIndex}:target`]) as
-    | string
-    | undefined;
-};
-
-export const getFrameAspectRatio = (frame: FrameToDisplay) =>
-  frame.extractedTags["of:image:aspect_ratio"] ||
-  frame.extractedTags["fc:frame:image:aspect_ratio"] ||
-  "1.91:1";
-
-export const getFrameImage = (frame: FrameToDisplay) =>
+export const getFrameImage = (frame: FrameWithType) =>
   frame.type === "PREVIEW"
-    ? frame.extractedTags["og:image"]
-    : frame.extractedTags["fc:frame:image"];
-
-export const getFramePostURL = (frame: FrameToDisplay) =>
-  frame.extractedTags["of:post_url"] ||
-  frame.extractedTags["fc:frame:post_url"];
-
-export const getFrameTextInput = (frame: FrameToDisplay) =>
-  (frame.extractedTags["of:input:text	"] ||
-    frame.extractedTags["fc:frame:input:text"]) as string | undefined;
+    ? frame.frameInfo?.ogImage
+    : frame.frameInfo?.image?.content;

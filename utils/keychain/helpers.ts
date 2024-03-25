@@ -8,8 +8,6 @@ import {
   setSecureItemAsync,
 } from ".";
 import config from "../../config";
-import { addLog } from "../debug";
-import { sentryTrackMessage } from "../sentry";
 
 export const secureStoreOptions: SecureStore.SecureStoreOptions = {
   keychainService: config.bundleId,
@@ -92,26 +90,8 @@ export const savePushToken = async (pushKey: string) => {
 
 export const privySecureStorage: PrivyStorage = {
   get: (key) => getSecureItemAsync(key.replaceAll(":", "-")),
-  put: (key, val: string) => {
-    if (["privy:token", "privy:refresh_token"].includes(key) && !val) {
-      sentryTrackMessage("Logging out of privy, please check logs");
-    }
-    if (key === "privy_core_log") {
-      addLog(`Privy log: ${val}`);
-    }
-    return setSecureItemAsync(key.replaceAll(":", "-"), val);
-  },
-  del: async (key) => {
-    addLog(`Deleting ${key}`);
-    if (["privy:token", "privy:refresh_token"].includes(key)) {
-      const oldValue = await getSecureItemAsync(key.replaceAll(":", "-"));
-      if (oldValue) {
-        await setSecureItemAsync(`${key.replaceAll(":", "-")}-old`, oldValue);
-      }
-      sentryTrackMessage("Logging out of privy, please check logs");
-    }
-    return deleteSecureItemAsync(key.replaceAll(":", "-"));
-  },
+  put: (key, val: string) => setSecureItemAsync(key.replaceAll(":", "-"), val),
+  del: async (key) => deleteSecureItemAsync(key.replaceAll(":", "-")),
   getKeys: async () => [],
 };
 
