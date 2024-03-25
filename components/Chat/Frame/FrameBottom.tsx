@@ -55,6 +55,7 @@ export default function FrameBottom({
               setFrameTextInputFocused={setFrameTextInputFocused}
               setFrameTextInputValue={setFrameTextInputValue}
               frameTextInputValue={frameTextInputValue}
+              messageFromMe={message.fromMe}
             />
           )}
           {buttons.length > 0 &&

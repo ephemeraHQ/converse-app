@@ -7,14 +7,14 @@ export default function FrameImage({
   frameImage,
   frameImageAspectRatio,
   linkToOpen,
+  useMemoryCache,
 }: {
-  frameImage: string;
+  frameImage: string | undefined;
   frameImageAspectRatio: string;
   linkToOpen: string;
+  useMemoryCache: boolean;
 }) {
   const styles = useStyles();
-  if (!frameImage) return null;
-
   return (
     <TouchableWithoutFeedback
       onPress={() => {
@@ -29,8 +29,9 @@ export default function FrameImage({
         // from cache
         source={{ uri: frameImage }}
         contentFit="cover"
-        // Enable memory cache because image was just prefetched
-        cachePolicy="memory"
+        // We use no cache for first image (manually handled)
+        // and memory cache for following images
+        cachePolicy={useMemoryCache ? "memory" : "none"}
         style={[
           styles.frameImage,
           { aspectRatio: frameImageAspectRatio === "1:1" ? 1 : 1.91 },

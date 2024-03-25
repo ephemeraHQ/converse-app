@@ -14,7 +14,7 @@ export type FrameWithType = FramesApiResponse & {
 };
 
 export type FrameToDisplay = FrameWithType & {
-  frameImage: string;
+  frameImage: string | undefined;
   isInitialFrame: boolean;
   uniqueId: string;
 };

@@ -85,9 +85,18 @@ const DebugButton = forwardRef((props, ref) => {
         "Sentry Native error": () => {
           Sentry.nativeCrash();
         },
-        "Clear image cache": async () => {
+        "Clear expo image cache": async () => {
           await Image.clearDiskCache();
           await Image.clearMemoryCache();
+          alert("Done!");
+        },
+        "Clear converse media cache": async () => {
+          const RNFS = require("react-native-fs");
+          await RNFS.unlink(
+            `file://${RNFS.CachesDirectoryPath}${
+              RNFS.CachesDirectoryPath.endsWith("/") ? "" : "/"
+            }mediacache`
+          );
           alert("Done!");
         },
         Cancel: undefined,

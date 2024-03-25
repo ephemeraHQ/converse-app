@@ -37,7 +37,10 @@ export default function FrameButton({
     <>
       <TouchableHighlight
         underlayColor={clickedItemBackgroundColor(colorScheme)}
-        onPress={postingActionForButton ? undefined : onPress}
+        onPress={() => {
+          if (postingActionForButton) return;
+          onPress();
+        }}
         style={[
           styles.frameButton,
           {
@@ -101,7 +104,7 @@ const useStyles = () => {
       marginHorizontal: 7,
     },
     frameButtonText: {
-      fontSize: 12,
+      fontSize: 15,
       flexShrink: 1,
     },
   });

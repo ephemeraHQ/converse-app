@@ -15,6 +15,7 @@ import {
   getFrameImage,
   getFramesClient,
 } from "../../../utils/frames";
+import { cacheForMedia, fetchAndCacheMedia } from "../../../utils/media";
 import { navigate } from "../../../utils/navigation";
 import ActionButton from "../ActionButton";
 import { MessageToDisplay } from "../Message/Message";
@@ -40,12 +41,10 @@ export default function FramePreview({
     undefined as undefined | number
   );
   const [firstFrameLoaded, setFirstFrameLoaded] = useState(false);
+  const [firstImageRefreshed, setFirstImageRefreshed] = useState(false);
   const [frame, setFrame] = useState({
     ...initialFrame,
-    initialImageRefreshed: false,
-    frameImage: getFrameImage(initialFrame)
-      ? framesProxy.mediaUrl(getFrameImage(initialFrame) as string)
-      : undefined,
+    frameImage: undefined,
     isInitialFrame: true,
     uniqueId: uuid.v4().toString(),
   } as FrameToDisplay);
@@ -57,24 +56,40 @@ export default function FramePreview({
   useEffect(() => {
     const handleInitialImage = async () => {
       if (frame.isInitialFrame && !firstFrameLoaded) {
+        const initialFrameImage = frame.frameInfo?.image.content;
         // We don't display anything until the frame
         // initial image is loaded !
-        if (!frame.frameImage) {
+        if (!initialFrameImage) {
           setFirstFrameLoaded(true);
           return;
         }
-        const prefetched = await Image.prefetch(
-          frame.frameImage,
-          "memory-disk"
-        );
-        setFirstFrameLoaded(true);
-        if (!prefetched) {
-          setFirstImageFailure(true);
+        const proxiedInitialImage = framesProxy.mediaUrl(initialFrameImage);
+        const initialImageCache = await cacheForMedia(proxiedInitialImage);
+        if (!initialImageCache) {
+          const cachedImage = await fetchAndCacheMedia(proxiedInitialImage);
+          if (cachedImage) {
+            setFirstImageRefreshed(true);
+            setFrame((s) => ({ ...s, frameImage: cachedImage }));
+          } else {
+            setFirstImageFailure(true);
+          }
+          setFirstFrameLoaded(true);
+        } else {
+          setFrame((s) => ({ ...s, frameImage: initialImageCache }));
+          setFirstFrameLoaded(true);
+          // Now let's refresh
+          const imageCache = await fetchAndCacheMedia(proxiedInitialImage);
+          // Now let's display the new one
+          setFrame((s) => ({
+            ...s,
+            frameImage: `${imageCache}?refreshed=true`,
+          }));
+          setFirstImageRefreshed(true);
         }
       }
     };
     handleInitialImage();
-  }, [firstFrameLoaded, frame.frameImage, frame.isInitialFrame]);
+  }, [firstFrameLoaded, frame.frameInfo?.image.content, frame.isInitialFrame]);
 
   const onButtonPress = useCallback(
     async (button: FrameButtonType) => {
@@ -124,7 +139,8 @@ export default function FramePreview({
           const frameImageURL = new URL(frameResponseImage);
           frameImageURL.searchParams.set("converseRequestId", uniqueId);
           const frameImage = frameImageURL.toString();
-          const prefetched = await Image.prefetch(frameImage, "memory");
+          const proxiedImage = framesProxy.mediaUrl(frameImage);
+          const prefetched = await Image.prefetch(proxiedImage, "memory");
           if (!prefetched) {
             // couldn't load image, let's fail
             setPostingActionForButton(undefined);
@@ -134,7 +150,7 @@ export default function FramePreview({
           setFrame({
             ...frameResponse,
             isInitialFrame: false,
-            frameImage,
+            frameImage: proxiedImage,
             type: "XMTP_FRAME",
             uniqueId,
           });
@@ -212,7 +228,7 @@ export default function FramePreview({
           <View
             style={{
               opacity:
-                postingActionForButton !== undefined
+                postingActionForButton !== undefined || !firstImageRefreshed
                   ? message.fromMe
                     ? 0.8
                     : 0.4
@@ -225,6 +241,7 @@ export default function FramePreview({
                 frame.frameInfo?.image?.aspectRatio || "1.91.1"
               }
               linkToOpen={initialFrame.url}
+              useMemoryCache={!frame.isInitialFrame}
             />
           </View>
         )}
