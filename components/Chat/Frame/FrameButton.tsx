@@ -38,20 +38,19 @@ export default function FrameButton({
       <TouchableHighlight
         underlayColor={clickedItemBackgroundColor(colorScheme)}
         onPress={() => {
-          if (postingActionForButton) return;
-          onPress();
+          if (postingActionForButton !== undefined) return;
+          setImmediate(onPress);
         }}
         style={[
           styles.frameButton,
           {
             marginRight: button.index % 2 === 1 && !fullWidth ? 8 : 0,
-            opacity:
-              postingActionForButton && postingActionForButton !== button.index
-                ? 0.6
-                : 1,
+            opacity: postingActionForButton !== undefined ? 0.6 : 1,
             backgroundColor: isDarkMessage
               ? "rgba(255,255,255,0.1)"
               : backgroundColor("light"),
+            pointerEvents:
+              postingActionForButton !== undefined ? "none" : "auto",
           },
         ]}
       >
