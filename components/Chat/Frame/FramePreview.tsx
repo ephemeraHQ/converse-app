@@ -135,6 +135,7 @@ export default function FramePreview({
           buttonIndex: button.index,
           conversationTopic: message.topic,
           participantAccountAddresses: [account, conversation.peerAddress],
+          state: frame.frameInfo?.state,
         };
         if (textInput) {
           actionInput.inputText = frameTextInputValue;
