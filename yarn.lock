@@ -6838,18 +6838,13 @@
   integrity sha512-pwK+BfEBZJbKdNYpHHRTNBwBoqrN/iIMO0AiGvYsp3Hoaq0WbgGSWQR6SCldZovoDpY3yje5lkFUe6gsDgJ2vg==
 
 "@open-frames/proxy-client@^0.2.0":
-  version "0.2.0"
-  resolved "https://registry.yarnpkg.com/@open-frames/proxy-client/-/proxy-client-0.2.0.tgz#68053cb43da8e0e419f9e9c5ebd1a2c06596fbcd"
-  integrity sha512-elfy9da998KR65tQDt+Z/nvNnFeXHhYAxlIjI3lftJbg5Vt6zwAtoWvV3r10B9nTcaA4/MWipZezD5pGV5tazg==
+  version "0.2.1"
+  resolved "https://registry.yarnpkg.com/@open-frames/proxy-client/-/proxy-client-0.2.1.tgz#876c5a1cdf5acfe85b56d656f4cc73d15c9843a9"
+  integrity sha512-+TmF4dtqRiU0a1HA0BrkIhgf/8z6E+q/7W6XA80icpm/7s4G9fK9a++Vy8+ZWbQ/HVttwL3oVrBDbRrvIZWGOA==
   dependencies:
-    "@open-frames/proxy-types" "0.1.0"
+    "@open-frames/proxy-types" "0.1.1"
 
-"@open-frames/proxy-types@0.1.0":
-  version "0.1.0"
-  resolved "https://registry.yarnpkg.com/@open-frames/proxy-types/-/proxy-types-0.1.0.tgz#e8c492d30df0fc01a65c1bc394604515c129b986"
-  integrity sha512-fFcUmUmnGn3JkiBL3az6sqcs62pOnKPWc3tKar6LV9VciHaRXC059kCxpLh2mcYVfpZ0HgRILBtttEupIrAPDw==
-
-"@open-frames/proxy-types@^0.1.1":
+"@open-frames/proxy-types@0.1.1", "@open-frames/proxy-types@^0.1.1":
   version "0.1.1"
   resolved "https://registry.yarnpkg.com/@open-frames/proxy-types/-/proxy-types-0.1.1.tgz#e4a7376cbf94c51c3c9377512a524f5030c18f8b"
   integrity sha512-opAzEGigLiUrZusz58L/NMt+u6+B+XlUbnpK1IjnPbOlpB57MgQDVfrdKzM04Um+0WWmi0bFRqeGJjUqjUgNAA==
