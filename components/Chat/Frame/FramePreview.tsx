@@ -1,7 +1,7 @@
 import { FrameActionInputs, OpenFramesProxy } from "@xmtp/frames-client";
 import { Image } from "expo-image";
 import * as Linking from "expo-linking";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Platform, StyleSheet, TouchableOpacity, View } from "react-native";
 import uuid from "react-native-uuid";
 
@@ -52,11 +52,33 @@ export default function FramePreview({
   const buttons = getFrameButtons(frame);
   const textInput = frame.frameInfo?.textInput?.content;
   const [frameTextInputValue, setFrameTextInputValue] = useState("");
+  const messageId = useRef(message.id);
+  const fetchingInitialForMessageId = useRef(undefined as undefined | string);
+
+  // Components are recycled, let's fix when stuff changes
+  if (message.id !== messageId.current) {
+    messageId.current = message.id;
+    setFirstFrameLoaded(false);
+    setFirstImageRefreshed(false);
+    setFrame({
+      ...initialFrame,
+      frameImage: undefined,
+      isInitialFrame: true,
+      uniqueId: uuid.v4().toString(),
+    });
+    setFirstImageFailure(false);
+    setFrameTextInputValue("");
+  }
 
   useEffect(() => {
     const handleInitialImage = async () => {
-      if (frame.isInitialFrame && !firstFrameLoaded) {
-        const initialFrameImage = frame.frameInfo?.image.content;
+      if (
+        frame.isInitialFrame &&
+        !firstFrameLoaded &&
+        !fetchingInitialForMessageId.current
+      ) {
+        fetchingInitialForMessageId.current = message.id;
+        const initialFrameImage = getFrameImage(frame);
         // We don't display anything until the frame
         // initial image is loaded !
         if (!initialFrameImage) {
@@ -64,6 +86,7 @@ export default function FramePreview({
           return;
         }
         const proxiedInitialImage = framesProxy.mediaUrl(initialFrameImage);
+        if (fetchingInitialForMessageId.current !== messageId.current) return;
         if (initialFrameImage.startsWith("data:")) {
           // These won't change so no cache to handle
           setFirstImageRefreshed(true);
@@ -88,6 +111,7 @@ export default function FramePreview({
         const initialImageCache = await cacheForMedia(proxiedInitialImage);
         if (!initialImageCache) {
           const cachedImage = await fetchAndCacheMedia(proxiedInitialImage);
+          if (fetchingInitialForMessageId.current !== messageId.current) return;
           if (cachedImage) {
             setFirstImageRefreshed(true);
             setFrame((s) => ({ ...s, frameImage: cachedImage }));
@@ -98,6 +122,7 @@ export default function FramePreview({
         } else {
           setFrame((s) => ({ ...s, frameImage: initialImageCache }));
           setFirstFrameLoaded(true);
+          if (fetchingInitialForMessageId.current !== messageId.current) return;
           // Now let's refresh
           const imageCache = await fetchAndCacheMedia(proxiedInitialImage);
           // Now let's display the new one
@@ -107,10 +132,15 @@ export default function FramePreview({
           }));
           setFirstImageRefreshed(true);
         }
+        fetchingInitialForMessageId.current = undefined;
       }
     };
-    handleInitialImage();
-  }, [firstFrameLoaded, frame.frameInfo?.image.content, frame.isInitialFrame]);
+    handleInitialImage()
+      .then(() => {})
+      .catch(() => {
+        fetchingInitialForMessageId.current = undefined;
+      });
+  }, [firstFrameLoaded, frame, message.id]);
 
   const onButtonPress = useCallback(
     async (button: FrameButtonType) => {

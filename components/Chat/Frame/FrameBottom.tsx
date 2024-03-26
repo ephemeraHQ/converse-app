@@ -80,7 +80,7 @@ export default function FrameBottom({
             ))}
         </>
       )}
-      {(frame.type === "FRAME" || frame.type === "PREVIEW") && (
+      {(frame.type === "FARCASTER_FRAME" || frame.type === "PREVIEW") && (
         <Text
           style={[
             styles.frameBottomText,
@@ -90,7 +90,7 @@ export default function FrameBottom({
             },
           ]}
         >
-          {frame.type === "FRAME"
+          {frame.type === "FARCASTER_FRAME"
             ? "This frame is not supported by XMTP yet, please use a Farcaster client to interact with it."
             : frame.extractedTags["og:title"]}
         </Text>

@@ -1,4 +1,4 @@
-import { OpenFrameButton } from "@open-frames/proxy-types";
+import { GetMetadataResponse, OpenFrameButton } from "@open-frames/proxy-types";
 import { FramesApiResponse, FramesClient } from "@xmtp/frames-client";
 
 import { MessageToDisplay } from "../components/Chat/Message/Message";
@@ -10,7 +10,7 @@ import { isContentType } from "./xmtpRN/contentTypes";
 import { getXmtpClient } from "./xmtpRN/sync";
 
 export type FrameWithType = FramesApiResponse & {
-  type: "FRAME" | "XMTP_FRAME" | "PREVIEW";
+  type: "FARCASTER_FRAME" | "XMTP_FRAME" | "PREVIEW";
 };
 
 export type FrameToDisplay = FrameWithType & {
@@ -24,14 +24,23 @@ export type FramesForMessage = {
   frames: FrameWithType[];
 };
 
-export const getFrameType = (tags: FrameWithType["extractedTags"]) => {
-  if (tags["fc:frame"] === "vNext" && tags["fc:frame:image"]) {
-    if (tags["of:accepts:xmtp"]) return "XMTP_FRAME";
-    return "FRAME";
+const getFrameType = (frame: GetMetadataResponse) => {
+  if (
+    frame.frameInfo?.acceptedClients["xmtp"] &&
+    frame.frameInfo?.image?.content
+  ) {
+    return "XMTP_FRAME";
   }
-  if (tags["og:image"] || tags["og:title"]) {
+  if (
+    frame.frameInfo?.acceptedClients["farcaster"] &&
+    frame.frameInfo?.image?.content
+  ) {
+    return "FARCASTER_FRAME";
+  }
+  if (frame.extractedTags["og:image"] || frame.extractedTags["og:title"]) {
     return "PREVIEW";
   }
+
   return undefined;
 };
 
@@ -61,7 +70,7 @@ export const fetchFramesForMessage = async (
 
       urlsMetadata.forEach((response) => {
         if (response && Object.keys(response.extractedTags).length > 0) {
-          const frameType = getFrameType(response.extractedTags);
+          const frameType = getFrameType(response);
           if (frameType) {
             const frame: FrameWithType = {
               ...response,
@@ -93,7 +102,8 @@ export type FrameButtonType = OpenFrameButton & {
 };
 
 export const getFrameButtons = (frame: FrameWithType) => {
-  if (frame.type !== "XMTP_FRAME" && frame.type !== "FRAME") return [];
+  if (frame.type !== "XMTP_FRAME" && frame.type !== "FARCASTER_FRAME")
+    return [];
   const frameButtons = frame.frameInfo?.buttons;
   if (!frameButtons) return [];
   const buttons: FrameButtonType[] = [];
@@ -140,5 +150,5 @@ export const getFramesClient = async (account: string) => {
 
 export const getFrameImage = (frame: FrameWithType) =>
   frame.type === "PREVIEW"
-    ? frame.frameInfo?.ogImage
+    ? frame.extractedTags["og:image"]
     : frame.frameInfo?.image?.content;
