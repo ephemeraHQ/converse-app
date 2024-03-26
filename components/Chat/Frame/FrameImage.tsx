@@ -18,7 +18,7 @@ export default function FrameImage({
   return (
     <TouchableWithoutFeedback
       onPress={() => {
-        if (linkToOpen && linkToOpen.startsWith("http")) {
+        if (linkToOpen && linkToOpen.toLowerCase().startsWith("http")) {
           Linking.openURL(linkToOpen);
         }
       }}
