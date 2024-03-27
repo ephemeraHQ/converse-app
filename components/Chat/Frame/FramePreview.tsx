@@ -171,6 +171,7 @@ export default function FramePreview({
           actionInput.inputText = frameTextInputValue;
         }
         const framesClient = await getFramesClient(account);
+        let newFrameHasInput = false;
         if (button.action === "post" || !button.action) {
           const payload = await framesClient.signFrameAction(actionInput);
           const frameResponse = await framesClient.proxy.post(
@@ -198,6 +199,7 @@ export default function FramePreview({
             setPostingActionForButton(undefined);
             return;
           }
+          newFrameHasInput = !!frameResponse.frameInfo?.textInput?.content;
           // Updating frame to display
           setFrame({
             ...frameResponse,
@@ -222,7 +224,9 @@ export default function FramePreview({
         }
         // Reset input
         setFrameTextInputValue("");
-        setFrameTextInputFocused(false);
+        if (!newFrameHasInput) {
+          setFrameTextInputFocused(false);
+        }
       } catch (e: any) {
         console.error(e);
       }
