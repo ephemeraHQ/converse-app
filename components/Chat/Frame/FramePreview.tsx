@@ -15,6 +15,7 @@ import {
   getFrameButtons,
   getFrameImage,
   getFramesClient,
+  validateFrame,
 } from "../../../utils/frames";
 import { navigate } from "../../../utils/navigation";
 import ActionButton from "../ActionButton";
@@ -178,10 +179,19 @@ export default function FramePreview({
             actionPostUrl,
             payload
           );
+          const validatedFrameResponse = validateFrame(frameResponse);
+          if (
+            !validatedFrameResponse ||
+            validatedFrameResponse.type !== "XMTP_FRAME"
+          ) {
+            // error, let's fail
+            setPostingActionForButton(undefined);
+            return;
+          }
           // We should display a new frame, let's load image first
           const uniqueId = uuid.v4().toString();
           const frameResponseImage = getFrameImage({
-            ...frameResponse,
+            ...validatedFrameResponse,
             type: "XMTP_FRAME",
           });
           if (!frameResponseImage) {
@@ -199,10 +209,11 @@ export default function FramePreview({
             setPostingActionForButton(undefined);
             return;
           }
-          newFrameHasInput = !!frameResponse.frameInfo?.textInput?.content;
+          newFrameHasInput =
+            !!validatedFrameResponse.frameInfo?.textInput?.content;
           // Updating frame to display
           setFrame({
-            ...frameResponse,
+            ...validatedFrameResponse,
             isInitialFrame: false,
             frameImage: proxiedImage,
             type: "XMTP_FRAME",

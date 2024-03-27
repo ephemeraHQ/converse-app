@@ -6,6 +6,7 @@ import { ConverseMessageMetadata } from "../data/db/entities/messageEntity";
 import { saveMessageMetadata } from "../data/helpers/messages";
 import { useFramesStore } from "../data/store/framesStore";
 import { URL_REGEX } from "./regex";
+import { strByteSize } from "./str";
 import { isContentType } from "./xmtpRN/contentTypes";
 import { getXmtpClient } from "./xmtpRN/sync";
 
@@ -24,21 +25,40 @@ export type FramesForMessage = {
   frames: FrameWithType[];
 };
 
-const getFrameType = (frame: GetMetadataResponse) => {
+export const validateFrame = (
+  frame: GetMetadataResponse
+): FrameWithType | undefined => {
+  // Handle frames
   if (
-    frame.frameInfo?.acceptedClients["xmtp"] &&
-    frame.frameInfo?.image?.content
+    frame.frameInfo?.acceptedClients["xmtp"] ||
+    frame.frameInfo?.acceptedClients["farcaster"]
   ) {
-    return "XMTP_FRAME";
+    const frameImageContent = frame.frameInfo?.image?.content;
+    if (
+      frameImageContent &&
+      strByteSize(frame.frameInfo?.image?.content) <= 262144
+    ) {
+      return {
+        ...frame,
+        type: frame.frameInfo?.acceptedClients["xmtp"]
+          ? "XMTP_FRAME"
+          : "FARCASTER_FRAME",
+      };
+    }
   }
-  if (
-    frame.frameInfo?.acceptedClients["farcaster"] &&
-    frame.frameInfo?.image?.content
-  ) {
-    return "FARCASTER_FRAME";
-  }
-  if (frame.extractedTags["og:image"] || frame.extractedTags["og:title"]) {
-    return "PREVIEW";
+
+  // Handle regular previews
+  const ogImage =
+    frame.extractedTags["og:image"] &&
+    strByteSize(frame.extractedTags["og:image"]) <= 262144
+      ? frame.extractedTags["og:image"]
+      : undefined;
+  if (frame.extractedTags["og:title"] || ogImage) {
+    return {
+      ...frame,
+      extractedTags: { ...frame.extractedTags, "og:image": ogImage },
+      type: "PREVIEW",
+    };
   }
 
   return undefined;
@@ -70,14 +90,10 @@ export const fetchFramesForMessage = async (
 
       urlsMetadata.forEach((response) => {
         if (response && Object.keys(response.extractedTags).length > 0) {
-          const frameType = getFrameType(response);
-          if (frameType) {
-            const frame: FrameWithType = {
-              ...response,
-              type: frameType,
-            };
-            fetchedFrames.push(frame);
-            framesToSave[response.url] = frame;
+          const validatedFrame = validateFrame(response);
+          if (validatedFrame) {
+            fetchedFrames.push(validatedFrame);
+            framesToSave[response.url] = validatedFrame;
           }
         }
       });
@@ -148,7 +164,13 @@ export const getFramesClient = async (account: string) => {
   }
 };
 
-export const getFrameImage = (frame: FrameWithType) =>
-  frame.type === "PREVIEW"
-    ? frame.extractedTags["og:image"]
-    : frame.frameInfo?.image?.content;
+export const getFrameImage = (frame: FrameWithType) => {
+  if (frame.type === "PREVIEW") {
+    if (!frame.extractedTags["og:image"]) return undefined;
+    if (strByteSize(frame.extractedTags["og:image"]) <= 262144) {
+      return frame.extractedTags["og:image"];
+    }
+  } else {
+    return frame.frameInfo?.image?.content;
+  }
+};
