@@ -1,4 +1,4 @@
-import { OpenFrameButton } from "@open-frames/proxy-types";
+import { GetMetadataResponse, OpenFrameButton } from "@open-frames/proxy-types";
 import { FramesApiResponse, FramesClient } from "@xmtp/frames-client";
 
 import { MessageToDisplay } from "../components/Chat/Message/Message";
@@ -6,11 +6,12 @@ import { ConverseMessageMetadata } from "../data/db/entities/messageEntity";
 import { saveMessageMetadata } from "../data/helpers/messages";
 import { useFramesStore } from "../data/store/framesStore";
 import { URL_REGEX } from "./regex";
+import { strByteSize } from "./str";
 import { isContentType } from "./xmtpRN/contentTypes";
 import { getXmtpClient } from "./xmtpRN/sync";
 
 export type FrameWithType = FramesApiResponse & {
-  type: "FRAME" | "XMTP_FRAME" | "PREVIEW";
+  type: "FARCASTER_FRAME" | "XMTP_FRAME" | "PREVIEW";
 };
 
 export type FrameToDisplay = FrameWithType & {
@@ -24,14 +25,46 @@ export type FramesForMessage = {
   frames: FrameWithType[];
 };
 
-export const getFrameType = (tags: FrameWithType["extractedTags"]) => {
-  if (tags["fc:frame"] === "vNext" && tags["fc:frame:image"]) {
-    if (tags["of:accepts:xmtp"]) return "XMTP_FRAME";
-    return "FRAME";
+export const validateFrame = (
+  frame: GetMetadataResponse
+): FrameWithType | undefined => {
+  // Handle frames
+  if (
+    frame.frameInfo?.acceptedClients["xmtp"] ||
+    frame.frameInfo?.acceptedClients["farcaster"]
+  ) {
+    const frameImageContent = frame.frameInfo?.image?.content;
+    if (
+      frameImageContent &&
+      strByteSize(frame.frameInfo?.image?.content) <= 262144
+    ) {
+      return {
+        ...frame,
+        type: frame.frameInfo?.acceptedClients["xmtp"]
+          ? "XMTP_FRAME"
+          : "FARCASTER_FRAME",
+      };
+    }
   }
-  if (tags["og:image"] || tags["og:title"]) {
-    return "PREVIEW";
+
+  // Handle regular previews
+  const validOgImage =
+    frame.extractedTags["og:image"] &&
+    strByteSize(frame.extractedTags["og:image"]) <= 262144
+      ? frame.extractedTags["og:image"]
+      : undefined;
+  if (frame.extractedTags["og:title"] || validOgImage) {
+    const extractedTags = { ...frame.extractedTags };
+    if (!validOgImage) {
+      delete extractedTags["og:image"];
+    }
+    return {
+      ...frame,
+      extractedTags,
+      type: "PREVIEW",
+    };
   }
+
   return undefined;
 };
 
@@ -61,14 +94,10 @@ export const fetchFramesForMessage = async (
 
       urlsMetadata.forEach((response) => {
         if (response && Object.keys(response.extractedTags).length > 0) {
-          const frameType = getFrameType(response.extractedTags);
-          if (frameType) {
-            const frame: FrameWithType = {
-              ...response,
-              type: frameType,
-            };
-            fetchedFrames.push(frame);
-            framesToSave[response.url] = frame;
+          const validatedFrame = validateFrame(response);
+          if (validatedFrame) {
+            fetchedFrames.push(validatedFrame);
+            framesToSave[response.url] = validatedFrame;
           }
         }
       });
@@ -93,7 +122,8 @@ export type FrameButtonType = OpenFrameButton & {
 };
 
 export const getFrameButtons = (frame: FrameWithType) => {
-  if (frame.type !== "XMTP_FRAME" && frame.type !== "FRAME") return [];
+  if (frame.type !== "XMTP_FRAME" && frame.type !== "FARCASTER_FRAME")
+    return [];
   const frameButtons = frame.frameInfo?.buttons;
   if (!frameButtons) return [];
   const buttons: FrameButtonType[] = [];
@@ -138,7 +168,13 @@ export const getFramesClient = async (account: string) => {
   }
 };
 
-export const getFrameImage = (frame: FrameWithType) =>
-  frame.type === "PREVIEW"
-    ? frame.frameInfo?.ogImage
-    : frame.frameInfo?.image?.content;
+export const getFrameImage = (frame: FrameWithType) => {
+  if (frame.type === "PREVIEW") {
+    if (!frame.extractedTags["og:image"]) return undefined;
+    if (strByteSize(frame.extractedTags["og:image"]) <= 262144) {
+      return frame.extractedTags["og:image"];
+    }
+  } else {
+    return frame.frameInfo?.image?.content;
+  }
+};

@@ -1,7 +1,7 @@
 import { FrameActionInputs, OpenFramesProxy } from "@xmtp/frames-client";
 import { Image } from "expo-image";
 import * as Linking from "expo-linking";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Platform, StyleSheet, TouchableOpacity, View } from "react-native";
 import uuid from "react-native-uuid";
 
@@ -15,6 +15,7 @@ import {
   getFrameButtons,
   getFrameImage,
   getFramesClient,
+  validateFrame,
 } from "../../../utils/frames";
 import { navigate } from "../../../utils/navigation";
 import ActionButton from "../ActionButton";
@@ -52,11 +53,33 @@ export default function FramePreview({
   const buttons = getFrameButtons(frame);
   const textInput = frame.frameInfo?.textInput?.content;
   const [frameTextInputValue, setFrameTextInputValue] = useState("");
+  const messageId = useRef(message.id);
+  const fetchingInitialForMessageId = useRef(undefined as undefined | string);
+
+  // Components are recycled, let's fix when stuff changes
+  if (message.id !== messageId.current) {
+    messageId.current = message.id;
+    setFirstFrameLoaded(false);
+    setFirstImageRefreshed(false);
+    setFrame({
+      ...initialFrame,
+      frameImage: undefined,
+      isInitialFrame: true,
+      uniqueId: uuid.v4().toString(),
+    });
+    setFirstImageFailure(false);
+    setFrameTextInputValue("");
+  }
 
   useEffect(() => {
     const handleInitialImage = async () => {
-      if (frame.isInitialFrame && !firstFrameLoaded) {
-        const initialFrameImage = frame.frameInfo?.image.content;
+      if (
+        frame.isInitialFrame &&
+        !firstFrameLoaded &&
+        !fetchingInitialForMessageId.current
+      ) {
+        fetchingInitialForMessageId.current = message.id;
+        const initialFrameImage = getFrameImage(frame);
         // We don't display anything until the frame
         // initial image is loaded !
         if (!initialFrameImage) {
@@ -64,6 +87,7 @@ export default function FramePreview({
           return;
         }
         const proxiedInitialImage = framesProxy.mediaUrl(initialFrameImage);
+        if (fetchingInitialForMessageId.current !== messageId.current) return;
         if (initialFrameImage.startsWith("data:")) {
           // These won't change so no cache to handle
           setFirstImageRefreshed(true);
@@ -88,6 +112,7 @@ export default function FramePreview({
         const initialImageCache = await cacheForMedia(proxiedInitialImage);
         if (!initialImageCache) {
           const cachedImage = await fetchAndCacheMedia(proxiedInitialImage);
+          if (fetchingInitialForMessageId.current !== messageId.current) return;
           if (cachedImage) {
             setFirstImageRefreshed(true);
             setFrame((s) => ({ ...s, frameImage: cachedImage }));
@@ -98,6 +123,7 @@ export default function FramePreview({
         } else {
           setFrame((s) => ({ ...s, frameImage: initialImageCache }));
           setFirstFrameLoaded(true);
+          if (fetchingInitialForMessageId.current !== messageId.current) return;
           // Now let's refresh
           const imageCache = await fetchAndCacheMedia(proxiedInitialImage);
           // Now let's display the new one
@@ -107,10 +133,15 @@ export default function FramePreview({
           }));
           setFirstImageRefreshed(true);
         }
+        fetchingInitialForMessageId.current = undefined;
       }
     };
-    handleInitialImage();
-  }, [firstFrameLoaded, frame.frameInfo?.image.content, frame.isInitialFrame]);
+    handleInitialImage()
+      .then(() => {})
+      .catch(() => {
+        fetchingInitialForMessageId.current = undefined;
+      });
+  }, [firstFrameLoaded, frame, message.id]);
 
   const onButtonPress = useCallback(
     async (button: FrameButtonType) => {
@@ -135,21 +166,32 @@ export default function FramePreview({
           buttonIndex: button.index,
           conversationTopic: message.topic,
           participantAccountAddresses: [account, conversation.peerAddress],
+          state: frame.frameInfo?.state,
         };
         if (textInput) {
           actionInput.inputText = frameTextInputValue;
         }
         const framesClient = await getFramesClient(account);
+        let newFrameHasInput = false;
         if (button.action === "post" || !button.action) {
           const payload = await framesClient.signFrameAction(actionInput);
           const frameResponse = await framesClient.proxy.post(
             actionPostUrl,
             payload
           );
+          const validatedFrameResponse = validateFrame(frameResponse);
+          if (
+            !validatedFrameResponse ||
+            validatedFrameResponse.type !== "XMTP_FRAME"
+          ) {
+            // error, let's fail
+            setPostingActionForButton(undefined);
+            return;
+          }
           // We should display a new frame, let's load image first
           const uniqueId = uuid.v4().toString();
           const frameResponseImage = getFrameImage({
-            ...frameResponse,
+            ...validatedFrameResponse,
             type: "XMTP_FRAME",
           });
           if (!frameResponseImage) {
@@ -167,9 +209,11 @@ export default function FramePreview({
             setPostingActionForButton(undefined);
             return;
           }
+          newFrameHasInput =
+            !!validatedFrameResponse.frameInfo?.textInput?.content;
           // Updating frame to display
           setFrame({
-            ...frameResponse,
+            ...validatedFrameResponse,
             isInitialFrame: false,
             frameImage: proxiedImage,
             type: "XMTP_FRAME",
@@ -191,7 +235,9 @@ export default function FramePreview({
         }
         // Reset input
         setFrameTextInputValue("");
-        setFrameTextInputFocused(false);
+        if (!newFrameHasInput) {
+          setFrameTextInputFocused(false);
+        }
       } catch (e: any) {
         console.error(e);
       }
