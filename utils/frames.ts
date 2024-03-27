@@ -48,15 +48,19 @@ export const validateFrame = (
   }
 
   // Handle regular previews
-  const ogImage =
+  const validOgImage =
     frame.extractedTags["og:image"] &&
     strByteSize(frame.extractedTags["og:image"]) <= 262144
       ? frame.extractedTags["og:image"]
       : undefined;
-  if (frame.extractedTags["og:title"] || ogImage) {
+  if (frame.extractedTags["og:title"] || validOgImage) {
+    const extractedTags = { ...frame.extractedTags };
+    if (!validOgImage) {
+      delete extractedTags["og:image"];
+    }
     return {
       ...frame,
-      extractedTags: { ...frame.extractedTags, "og:image": ogImage },
+      extractedTags,
       type: "PREVIEW",
     };
   }
