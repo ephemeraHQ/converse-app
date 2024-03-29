@@ -19,7 +19,7 @@ export default function FrameBottom({
   setFrameTextInputFocused,
   frameTextInputValue,
   setFrameTextInputValue,
-  posting,
+  postingActionForButton,
   onButtonPress,
 }: {
   message: MessageToDisplay;
@@ -27,7 +27,7 @@ export default function FrameBottom({
   textInput: string | undefined;
   buttons: FrameButtonType[];
   setFrameTextInputFocused: (f: boolean) => void;
-  posting: number | undefined;
+  postingActionForButton: number | undefined;
   frameTextInputValue: string;
   setFrameTextInputValue: (s: string) => void;
   onButtonPress: (b: FrameButtonType) => void;
@@ -42,6 +42,8 @@ export default function FrameBottom({
           backgroundColor: message.fromMe
             ? myMessageInnerBubbleColor(colorScheme)
             : messageInnerBubbleColor(colorScheme),
+          paddingVertical:
+            frame.type === "PREVIEW" ? 3 : frame.type === "XMTP_FRAME" ? 4 : 0,
         },
       ]}
     >
@@ -53,30 +55,32 @@ export default function FrameBottom({
               setFrameTextInputFocused={setFrameTextInputFocused}
               setFrameTextInputValue={setFrameTextInputValue}
               frameTextInputValue={frameTextInputValue}
+              messageFromMe={message.fromMe}
             />
           )}
           {buttons.length > 0 &&
             buttons.map((button) => (
               <FrameButton
-                key={`${button.title}-${button.index}`}
-                posting={posting}
+                key={`${button.label}-${button.index}-${frame.uniqueId}`}
+                postingActionForButton={postingActionForButton}
                 button={button}
-                fullWidth={buttons.length === 1}
+                fullWidth={
+                  (button.index === 1 && buttons.length === 1) ||
+                  (button.index === 3 && buttons.length === 3)
+                }
                 onPress={() => {
                   if (Platform.OS !== "web") {
                     // Immediate haptic feedback
                     Haptics.impactAsync();
                   }
-                  // Timeout because we still use the JS SDK for frames
-                  // and the encryption of payload happens on main thread :(
-                  // @todo => use the RN SDK when it's available to sign
-                  setTimeout(() => onButtonPress(button), 10);
+                  onButtonPress(button);
                 }}
+                messageFromMe={message.fromMe}
               />
             ))}
         </>
       )}
-      {(frame.type === "FRAME" || frame.type === "PREVIEW") && (
+      {(frame.type === "FARCASTER_FRAME" || frame.type === "PREVIEW") && (
         <Text
           style={[
             styles.frameBottomText,
@@ -86,7 +90,7 @@ export default function FrameBottom({
             },
           ]}
         >
-          {frame.type === "FRAME"
+          {frame.type === "FARCASTER_FRAME"
             ? "This frame is not supported by XMTP yet, please use a Farcaster client to interact with it."
             : frame.extractedTags["og:title"]}
         </Text>
@@ -100,8 +104,6 @@ const useStyles = () => {
     frameBottom: {
       flexDirection: "row",
       flexWrap: "wrap",
-      paddingTop: 3,
-      paddingBottom: 6,
       paddingHorizontal: 8,
       borderBottomLeftRadius: 14,
       borderBottomRightRadius: 14,
