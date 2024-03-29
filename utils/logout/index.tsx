@@ -9,13 +9,14 @@ import {
 } from "../../data/store/accountsStore";
 import { deleteSecureItemAsync } from "../keychain";
 import { deleteXmtpKey } from "../keychain/helpers";
-import mmkv from "../mmkv";
+import mmkv, { clearSecureMmkvForAccount } from "../mmkv";
 import {
   deleteSubscribedTopics,
   unsubscribeFromNotifications,
 } from "../notifications";
 import { resetSharedData } from "../sharedData";
 import { getXmtpApiHeaders } from "../xmtpRN/api";
+import { importedTopicsDataForAccount } from "../xmtpRN/conversations";
 import { deleteXmtpClient } from "../xmtpRN/sync";
 import { useDisconnectFromPrivy } from "./privy";
 import { useDisconnectWallet } from "./wallet";
@@ -176,6 +177,8 @@ export const useLogoutFromConverse = (account: string) => {
 
     deleteXmtpClient(account);
     deleteSubscribedTopics(account);
+    clearSecureMmkvForAccount(account);
+    delete importedTopicsDataForAccount[account];
 
     saveLogoutTask(account, apiHeaders, topicsToDelete, pkPath);
 
