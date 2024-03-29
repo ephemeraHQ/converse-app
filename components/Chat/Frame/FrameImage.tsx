@@ -6,27 +6,20 @@ import { TouchableWithoutFeedback } from "react-native-gesture-handler";
 export default function FrameImage({
   frameImage,
   frameImageAspectRatio,
-  initialFrameURL,
-  uniqueId,
-  setImageLoading,
+  linkToOpen,
+  useMemoryCache,
 }: {
-  frameImage: string;
+  frameImage: string | undefined;
   frameImageAspectRatio: string;
-  initialFrameURL: string;
-  uniqueId: string;
-  setImageLoading: (loading: boolean) => void;
+  linkToOpen: string;
+  useMemoryCache: boolean;
 }) {
   const styles = useStyles();
-  if (!frameImage) return null;
-
-  const frameImageURL = new URL(frameImage);
-  frameImageURL.searchParams.set("converseRequestId", uniqueId);
-
   return (
     <TouchableWithoutFeedback
       onPress={() => {
-        if (initialFrameURL && initialFrameURL.startsWith("http")) {
-          Linking.openURL(initialFrameURL);
+        if (linkToOpen && linkToOpen.toLowerCase().startsWith("http")) {
+          Linking.openURL(linkToOpen);
         }
       }}
     >
@@ -34,17 +27,15 @@ export default function FrameImage({
         // Adding a uniqueId so when a new frame comes in
         // we always reload the image and don't get stale image
         // from cache
-        source={{ uri: frameImageURL.toString() }}
+        source={{ uri: frameImage }}
         contentFit="cover"
-        // Also disable cache so we always refetch the initial image
-        cachePolicy="none"
+        // We use no cache for first image (manually handled)
+        // and memory cache for following images
+        cachePolicy={useMemoryCache ? "memory" : "none"}
         style={[
           styles.frameImage,
           { aspectRatio: frameImageAspectRatio === "1:1" ? 1 : 1.91 },
         ]}
-        onLoadEnd={() => {
-          setImageLoading(false);
-        }}
       />
     </TouchableWithoutFeedback>
   );

@@ -118,3 +118,5 @@ export const useAccountsProfiles = () => {
 
   return accountsProfiles;
 };
+
+export const strByteSize = (str: string) => new Blob([str]).size;

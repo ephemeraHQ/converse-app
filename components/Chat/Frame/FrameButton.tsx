@@ -8,65 +8,89 @@ import {
 
 import FrameLinkIcon from "../../../assets/frameLink.svg";
 import {
-  backgroundColor,
   clickedItemBackgroundColor,
   textPrimaryColor,
   textSecondaryColor,
+  backgroundColor,
 } from "../../../utils/colors";
 import { FrameButtonType } from "../../../utils/frames";
 
 type FrameButtonProps = {
   button: FrameButtonType;
   onPress: () => void;
-  posting: number | undefined;
+  postingActionForButton: number | undefined;
   fullWidth: boolean;
+  messageFromMe: boolean;
 };
 
 export default function FrameButton({
   button,
   onPress,
-  posting,
+  postingActionForButton,
   fullWidth,
+  messageFromMe,
 }: FrameButtonProps) {
   const styles = useStyles();
   const colorScheme = useColorScheme();
+  const isDarkMessage = colorScheme === "dark" && !messageFromMe;
   return (
-    <TouchableHighlight
-      underlayColor={clickedItemBackgroundColor(colorScheme)}
-      onPress={posting ? undefined : onPress}
-      style={[
-        styles.frameButton,
-        {
-          marginRight: button.index % 2 === 1 && !fullWidth ? "4%" : 0,
-          opacity: posting && posting !== button.index ? 0.6 : 1,
-          width: fullWidth ? "100%" : "48%",
-        },
-      ]}
-    >
-      <View style={styles.frameButtonContent}>
-        <Text style={styles.frameButtonText} numberOfLines={1}>
-          {button.title}
-        </Text>
-        {(button.action === "post_redirect" || button.action === "link") && (
-          <FrameLinkIcon
-            color={textSecondaryColor(colorScheme)}
-            fill={textSecondaryColor(colorScheme)}
-            style={styles.frameButtonPicto}
-          />
-        )}
-      </View>
-    </TouchableHighlight>
+    <>
+      <TouchableHighlight
+        underlayColor={clickedItemBackgroundColor(colorScheme)}
+        onPress={() => {
+          if (postingActionForButton !== undefined) return;
+          setImmediate(onPress);
+        }}
+        style={[
+          styles.frameButton,
+          {
+            marginRight: button.index % 2 === 1 && !fullWidth ? 8 : 0,
+            opacity: postingActionForButton !== undefined ? 0.6 : 1,
+            backgroundColor: isDarkMessage
+              ? "rgba(255,255,255,0.1)"
+              : backgroundColor("light"),
+            pointerEvents:
+              postingActionForButton !== undefined ? "none" : "auto",
+          },
+        ]}
+      >
+        <View style={styles.frameButtonContent}>
+          <Text
+            style={[
+              styles.frameButtonText,
+              {
+                color: isDarkMessage
+                  ? textPrimaryColor("dark")
+                  : textPrimaryColor("light"),
+              },
+            ]}
+            numberOfLines={1}
+          >
+            {button.label}
+          </Text>
+          {(button.action === "post_redirect" || button.action === "link") && (
+            <FrameLinkIcon
+              color={textSecondaryColor(colorScheme)}
+              fill={textSecondaryColor(colorScheme)}
+              style={styles.frameButtonPicto}
+            />
+          )}
+        </View>
+      </TouchableHighlight>
+      {button.index === 2 && <View style={{ flexBasis: "100%" }} />}
+    </>
   );
 }
 
 const useStyles = () => {
   return StyleSheet.create({
     frameButton: {
-      borderRadius: 9,
+      flexGrow: 1,
+      flex: 1,
+      borderRadius: 6,
       paddingHorizontal: 6,
       paddingVertical: 9,
       marginVertical: 4,
-      backgroundColor: backgroundColor("light"),
     },
     frameButtonContent: {
       flexDirection: "row",
@@ -79,8 +103,7 @@ const useStyles = () => {
       marginHorizontal: 7,
     },
     frameButtonText: {
-      color: textPrimaryColor("light"),
-      fontSize: 12,
+      fontSize: 15,
       flexShrink: 1,
     },
   });
