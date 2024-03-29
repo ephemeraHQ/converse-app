@@ -31,6 +31,7 @@ target 'Converse' do
   pod 'MMKV', $mmkvVersion, :linkage => :dynamic
   pod 'MMKVCore', $mmkvVersion, :linkage => :dynamic
   pod 'XMTP', $xmtpVersion, :modular_headers => true
+  pod "OpenSSL-Universal", "1.1.2200"
 
   use_react_native!(
     :path => config[:reactNativePath],
