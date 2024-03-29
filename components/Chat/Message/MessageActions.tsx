@@ -13,6 +13,7 @@ import Reanimated, {
   AnimatedStyle,
   Easing,
   ReduceMotion,
+  runOnJS,
   useAnimatedStyle,
   useSharedValue,
   withTiming,
@@ -275,16 +276,18 @@ export default function ChatMessageActions({
       backgroundColor: bubbleBackgroundColor.value,
     };
   }, [bubbleBackgroundColor, message.id]);
-  const iosMessageTailStyle = useAnimatedStyle(
+  const iosAnimatedTailStyle = useAnimatedStyle(
     () => ({
       color: bubbleBackgroundColor.value,
     }),
     [bubbleBackgroundColor]
   ) as AnimatedStyle;
+  const [highlightingMessage, setHighlightingMessage] = useState(false);
 
   const highlightMessage = useCallback(
     (messageId: string) => {
       if (messageId === message.id) {
+        setHighlightingMessage(true);
         bubbleBackgroundColor.value = withTiming(
           message.fromMe
             ? myMessageHighlightedBubbleColor(colorScheme)
@@ -302,6 +305,9 @@ export default function ChatMessageActions({
               duration: 300,
               easing: Easing.inOut(Easing.quad),
               reduceMotion: ReduceMotion.System,
+            },
+            () => {
+              runOnJS(setHighlightingMessage)(false);
             }
           );
         }, 800);
@@ -336,7 +342,10 @@ export default function ChatMessageActions({
           style={[
             styles.messageBubble,
             message.fromMe ? styles.messageBubbleMe : undefined,
-            animatedBackgroundStyle,
+            {
+              backgroundColor: initialBubbleBackgroundColor,
+            },
+            highlightingMessage ? animatedBackgroundStyle : undefined,
             Platform.select({
               default: {},
               android: {
@@ -379,8 +388,11 @@ export default function ChatMessageActions({
             (Platform.OS === "ios" || Platform.OS === "web") && (
               <MessageTail
                 style={[
-                  iosMessageTailStyle,
                   styles.messageTail,
+                  {
+                    color: initialBubbleBackgroundColor,
+                  },
+                  highlightingMessage ? iosAnimatedTailStyle : undefined,
                   message.fromMe ? styles.messageTailMe : {},
                 ]}
                 fromMe={message.fromMe}
