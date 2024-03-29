@@ -1,5 +1,5 @@
 diff --git a/node_modules/@xmtp/react-native-sdk/android/build.gradle b/node_modules/@xmtp/react-native-sdk/android/build.gradle
-index 8e6983a..40ef80d 100644
+index 52a5857..1b780d6 100644
 --- a/node_modules/@xmtp/react-native-sdk/android/build.gradle
 +++ b/node_modules/@xmtp/react-native-sdk/android/build.gradle
 @@ -85,6 +85,13 @@ android {
@@ -17,10 +17,18 @@ index 8e6983a..40ef80d 100644
    lintOptions {
      abortOnError false
 diff --git a/node_modules/@xmtp/react-native-sdk/android/src/main/java/expo/modules/xmtpreactnativesdk/XMTPModule.kt b/node_modules/@xmtp/react-native-sdk/android/src/main/java/expo/modules/xmtpreactnativesdk/XMTPModule.kt
-index 05c50ac..0adcda2 100644
+index d8a7b09..7867ba8 100644
 --- a/node_modules/@xmtp/react-native-sdk/android/src/main/java/expo/modules/xmtpreactnativesdk/XMTPModule.kt
 +++ b/node_modules/@xmtp/react-native-sdk/android/src/main/java/expo/modules/xmtpreactnativesdk/XMTPModule.kt
-@@ -545,7 +545,13 @@ class XMTPModule : Module() {
+@@ -27,6 +27,7 @@ import kotlinx.coroutines.runBlocking
+ import kotlinx.coroutines.suspendCancellableCoroutine
+ import kotlinx.coroutines.withContext
+ import org.json.JSONObject
++import org.xmtp.android.library.BuildConfig
+ import org.xmtp.android.library.Client
+ import org.xmtp.android.library.ClientOptions
+ import org.xmtp.android.library.Conversation
+@@ -547,7 +548,13 @@ class XMTPModule : Module() {
              val preparedData = contentResolver.openInputStream(preparedFileUrl)!!
                  .use { it.buffered().readBytes() }
              val prepared = PreparedMessage.fromSerializedData(preparedData)
