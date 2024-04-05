@@ -347,9 +347,6 @@ const importBackedTopicsData = async (client: ConverseXmtpClientType) => {
     // If we have topics for this account, let's import them
     // so the first conversation.list() is faster
     if (topicsData.length > 0) {
-      // First import one to make sure everything works
-      // @todo => make XMTP fix it
-      await client.conversations.importTopicData(topicsData[0]);
       const importedConversations = await Promise.all(
         topicsData.map((data) => client.conversations.importTopicData(data))
       );
