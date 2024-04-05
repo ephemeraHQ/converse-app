@@ -1859,6 +1859,7 @@ SPEC CHECKSUMS:
   UMAppLoader: 5df85360d65cabaef544be5424ac64672e648482
   web3.swift: 2263d1e12e121b2c42ffb63a5a7beb1acaf33959
 <<<<<<< HEAD
+<<<<<<< HEAD
   XMTP: bb638d7ae084814be68d0a549f722d3a4ac2c4e5
   XMTPReactNative: cb5fdb7fbfad67d4e9ec85d78a424f7e25da4b26
   Yoga: d17d2cc8105eed528474683b42e2ea310e1daf61
@@ -1871,5 +1872,12 @@ PODFILE CHECKSUM: 4b773a57ded38ffdeb96c7c5737be26d09b69a58
 
 PODFILE CHECKSUM: 8c1fa909d6f5b98249fd8adabe801be204b44894
 >>>>>>> 4bcdba72 (Use MMKV secure storage to store topics data and import them fast)
+=======
+  XMTP: 603eecf511ce63f6390b2468fc78500373c1e786
+  XMTPReactNative: bd4ca6533703c33f4b2fb1bcc7399d9a67ab9f1e
+  Yoga: d17d2cc8105eed528474683b42e2ea310e1daf61
+
+PODFILE CHECKSUM: 4b83ad3a0f381e354d4ee962947a05e69e2ffcfb
+>>>>>>> 3726d8c8 (Upgrade XMTP)
 
 COCOAPODS: 1.14.3
