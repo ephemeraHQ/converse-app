@@ -1,5 +1,10 @@
+import { OpenFramesProxy } from "@open-frames/proxy-client";
 import { GetMetadataResponse, OpenFrameButton } from "@open-frames/proxy-types";
-import { FramesApiResponse, FramesClient } from "@xmtp/frames-client";
+import {
+  FramesApiResponse,
+  FramesClient,
+  OPEN_FRAMES_PROXY_URL,
+} from "@xmtp/frames-client";
 
 import { MessageToDisplay } from "../components/Chat/Message/Message";
 import { ConverseMessageMetadata } from "../data/db/entities/messageEntity";
@@ -34,10 +39,7 @@ export const validateFrame = (
     frame.frameInfo?.acceptedClients["farcaster"]
   ) {
     const frameImageContent = frame.frameInfo?.image?.content;
-    if (
-      frameImageContent &&
-      strByteSize(frame.frameInfo?.image?.content) <= 262144
-    ) {
+    if (frameImageContent) {
       return {
         ...frame,
         type: frame.frameInfo?.acceptedClients["xmtp"]
@@ -48,19 +50,9 @@ export const validateFrame = (
   }
 
   // Handle regular previews
-  const validOgImage =
-    frame.extractedTags["og:image"] &&
-    strByteSize(frame.extractedTags["og:image"]) <= 262144
-      ? frame.extractedTags["og:image"]
-      : undefined;
-  if (frame.extractedTags["og:title"] || validOgImage) {
-    const extractedTags = { ...frame.extractedTags };
-    if (!validOgImage) {
-      delete extractedTags["og:image"];
-    }
+  if (frame.extractedTags["og:title"] || frame.extractedTags["og:image"]) {
     return {
       ...frame,
-      extractedTags,
       type: "PREVIEW",
     };
   }
@@ -150,6 +142,7 @@ export const getFrameButtons = (frame: FrameWithType) => {
 
 const frameClientByAccount: { [account: string]: FramesClient } = {};
 const creatingFramesClientForAccount: { [account: string]: boolean } = {};
+export const framesProxy = new OpenFramesProxy(OPEN_FRAMES_PROXY_URL, 262144); // Max 256kb meta tag
 
 export const getFramesClient = async (account: string) => {
   while (creatingFramesClientForAccount[account]) {
@@ -159,7 +152,10 @@ export const getFramesClient = async (account: string) => {
   try {
     creatingFramesClientForAccount[account] = true;
     const client = await getXmtpClient(account);
-    frameClientByAccount[account] = new FramesClient(client);
+    frameClientByAccount[account] = new FramesClient(
+      client,
+      framesProxy as any
+    );
     delete creatingFramesClientForAccount[account];
     return frameClientByAccount[account];
   } catch (e) {

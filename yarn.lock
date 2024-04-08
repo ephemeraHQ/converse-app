@@ -6838,9 +6838,9 @@
   integrity sha512-pwK+BfEBZJbKdNYpHHRTNBwBoqrN/iIMO0AiGvYsp3Hoaq0WbgGSWQR6SCldZovoDpY3yje5lkFUe6gsDgJ2vg==
 
 "@open-frames/proxy-client@^0.2.0":
-  version "0.2.1"
-  resolved "https://registry.yarnpkg.com/@open-frames/proxy-client/-/proxy-client-0.2.1.tgz#876c5a1cdf5acfe85b56d656f4cc73d15c9843a9"
-  integrity sha512-+TmF4dtqRiU0a1HA0BrkIhgf/8z6E+q/7W6XA80icpm/7s4G9fK9a++Vy8+ZWbQ/HVttwL3oVrBDbRrvIZWGOA==
+  version "0.2.2"
+  resolved "https://registry.yarnpkg.com/@open-frames/proxy-client/-/proxy-client-0.2.2.tgz#b770e4b3e1fed5a018f950c999f8358c293739cc"
+  integrity sha512-cISpTiJe5+JqkLGXmmAnccRoi8UkLTGMMkq8D+4mdF4Nh6ZJdljv7dhJktE3qxGtceyZsmMulzNZq57gHZaFsA==
   dependencies:
     "@open-frames/proxy-types" "0.1.1"
 
