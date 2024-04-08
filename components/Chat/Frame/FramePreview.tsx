@@ -1,4 +1,4 @@
-import { FrameActionInputs, OpenFramesProxy } from "@xmtp/frames-client";
+import { FrameActionInputs } from "@xmtp/frames-client";
 import { Image } from "expo-image";
 import * as Linking from "expo-linking";
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -12,6 +12,7 @@ import {
   FrameButtonType,
   FrameToDisplay,
   FrameWithType,
+  framesProxy,
   getFrameButtons,
   getFrameImage,
   getFramesClient,
@@ -22,8 +23,6 @@ import ActionButton from "../ActionButton";
 import { MessageToDisplay } from "../Message/Message";
 import FrameBottom from "./FrameBottom";
 import FrameImage from "./FrameImage";
-
-const framesProxy = new OpenFramesProxy();
 
 export default function FramePreview({
   initialFrame,
@@ -178,10 +177,7 @@ export default function FramePreview({
         let newFrameHasInput = false;
         if (button.action === "post" || !button.action) {
           const payload = await framesClient.signFrameAction(actionInput);
-          const frameResponse = await framesClient.proxy.post(
-            actionPostUrl,
-            payload
-          );
+          const frameResponse = await framesProxy.post(actionPostUrl, payload);
           const validatedFrameResponse = validateFrame(frameResponse);
           if (
             !validatedFrameResponse ||
@@ -224,7 +220,7 @@ export default function FramePreview({
           });
         } else if (button.action === "post_redirect") {
           const payload = await framesClient.signFrameAction(actionInput);
-          const { redirectedTo } = await framesClient.proxy.postRedirect(
+          const { redirectedTo } = await framesProxy.postRedirect(
             actionPostUrl,
             payload
           );
