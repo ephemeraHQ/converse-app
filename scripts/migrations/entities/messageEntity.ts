@@ -18,6 +18,7 @@ export class Message {
   @Column("text")
   senderAddress!: string;
 
+  @Index()
   @Column("int")
   sent!: number;
 

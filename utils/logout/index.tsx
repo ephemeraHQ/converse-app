@@ -9,7 +9,7 @@ import {
 } from "../../data/store/accountsStore";
 import { deleteSecureItemAsync } from "../keychain";
 import { deleteXmtpKey } from "../keychain/helpers";
-import mmkv, { clearSecureMmkvForAccount } from "../mmkv";
+import mmkv, { clearSecureMmkvForAccount, secureMmkvByAccount } from "../mmkv";
 import {
   deleteSubscribedTopics,
   unsubscribeFromNotifications,
@@ -103,6 +103,7 @@ export const executeLogoutTasks = async () => {
       console.log(
         `[Logout] Executing logout task for ${account} (${task.topics.length} topics)`
       );
+      await clearSecureMmkvForAccount(account);
       await deleteXmtpKey(account);
       if (task.pkPath) {
         await deleteSecureItemAsync(task.pkPath);
@@ -177,8 +178,8 @@ export const useLogoutFromConverse = (account: string) => {
 
     deleteXmtpClient(account);
     deleteSubscribedTopics(account);
-    clearSecureMmkvForAccount(account);
     delete importedTopicsDataForAccount[account];
+    delete secureMmkvByAccount[account];
 
     saveLogoutTask(account, apiHeaders, topicsToDelete, pkPath);
 

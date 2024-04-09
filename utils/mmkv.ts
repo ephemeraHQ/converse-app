@@ -20,7 +20,7 @@ export const zustandMMKVStorage: StateStorage = {
   },
 };
 
-const secureMmkvByAccount: { [account: string]: MMKV } = {};
+export const secureMmkvByAccount: { [account: string]: MMKV } = {};
 
 export const getSecureMmkvForAccount = async (account: string) => {
   if (secureMmkvByAccount[account]) return secureMmkvByAccount[account];
@@ -35,9 +35,12 @@ export const getSecureMmkvForAccount = async (account: string) => {
   return secureMmkvByAccount[account];
 };
 
-export const clearSecureMmkvForAccount = (account: string) => {
-  const instance = secureMmkvByAccount[account];
-  if (!instance) return;
-  instance.clearAll();
+export const clearSecureMmkvForAccount = async (account: string) => {
+  try {
+    const instance = await getSecureMmkvForAccount(account);
+    instance.clearAll();
+  } catch (e) {
+    console.error(e);
+  }
   delete secureMmkvByAccount[account];
 };

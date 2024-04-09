@@ -1083,12 +1083,7 @@ PODS:
     - React-Core
   - react-native-netinfo (11.1.0):
     - React-Core
-  - react-native-quick-base64 (2.0.8):
-    - React-Core
-  - react-native-quick-crypto (0.6.1):
-    - OpenSSL-Universal
-    - React
-    - React-callinvoker
+  - react-native-quick-base64 (2.0.7):
     - React-Core
   - react-native-safe-area-context (4.8.2):
     - React-Core
@@ -1420,7 +1415,6 @@ DEPENDENCIES:
   - react-native-mmkv (from `../node_modules/react-native-mmkv`)
   - "react-native-netinfo (from `../node_modules/@react-native-community/netinfo`)"
   - react-native-quick-base64 (from `../node_modules/react-native-quick-base64`)
-  - react-native-quick-crypto (from `../node_modules/react-native-quick-crypto`)
   - react-native-safe-area-context (from `../node_modules/react-native-safe-area-context`)
   - react-native-sfsymbols (from `../node_modules/react-native-sfsymbols`)
   - react-native-sqlite-storage (from `../node_modules/react-native-sqlite-storage`)
@@ -1635,8 +1629,6 @@ EXTERNAL SOURCES:
     :path: "../node_modules/@react-native-community/netinfo"
   react-native-quick-base64:
     :path: "../node_modules/react-native-quick-base64"
-  react-native-quick-crypto:
-    :path: "../node_modules/react-native-quick-crypto"
   react-native-safe-area-context:
     :path: "../node_modules/react-native-safe-area-context"
   react-native-sfsymbols:
@@ -1805,8 +1797,7 @@ SPEC CHECKSUMS:
   react-native-keyboard-controller: fa41f43f87f22ac0248435c1548d5d3f45c15248
   react-native-mmkv: e97c0c79403fb94577e5d902ab1ebd42b0715b43
   react-native-netinfo: 3aa5637c18834966e0c932de8ae1ae56fea20a97
-  react-native-quick-base64: 777057ea4286f806b00259ede65dc79c7c706320
-  react-native-quick-crypto: 455c1b411db006dba1026a30681ececb19180187
+  react-native-quick-base64: a5dbe4528f1453e662fcf7351029500b8b63e7bb
   react-native-safe-area-context: 0ee144a6170530ccc37a0fd9388e28d06f516a89
   react-native-sfsymbols: bd3a0d3eab185e80b571bae60753dcf5a0d57967
   react-native-sqlite-storage: f6d515e1c446d1e6d026aa5352908a25d4de3261
@@ -1858,26 +1849,10 @@ SPEC CHECKSUMS:
   SwiftProtobuf: 407a385e97fd206c4fbe880cc84123989167e0d1
   UMAppLoader: 5df85360d65cabaef544be5424ac64672e648482
   web3.swift: 2263d1e12e121b2c42ffb63a5a7beb1acaf33959
-<<<<<<< HEAD
-<<<<<<< HEAD
   XMTP: bb638d7ae084814be68d0a549f722d3a4ac2c4e5
   XMTPReactNative: cb5fdb7fbfad67d4e9ec85d78a424f7e25da4b26
   Yoga: d17d2cc8105eed528474683b42e2ea310e1daf61
 
-PODFILE CHECKSUM: 4b773a57ded38ffdeb96c7c5737be26d09b69a58
-=======
-  XMTP: 8c520ef61c6f7ab0db6fc53e40e9947c2c32f9ad
-  XMTPReactNative: e983c362000ec804e0010c4d72403fdc1278e880
-  Yoga: d17d2cc8105eed528474683b42e2ea310e1daf61
-
-PODFILE CHECKSUM: 8c1fa909d6f5b98249fd8adabe801be204b44894
->>>>>>> 4bcdba72 (Use MMKV secure storage to store topics data and import them fast)
-=======
-  XMTP: 603eecf511ce63f6390b2468fc78500373c1e786
-  XMTPReactNative: bd4ca6533703c33f4b2fb1bcc7399d9a67ab9f1e
-  Yoga: d17d2cc8105eed528474683b42e2ea310e1daf61
-
-PODFILE CHECKSUM: 4b83ad3a0f381e354d4ee962947a05e69e2ffcfb
->>>>>>> 3726d8c8 (Upgrade XMTP)
+PODFILE CHECKSUM: 7b843b50aae1659a9050c17725694c22fee8492c
 
 COCOAPODS: 1.14.3
