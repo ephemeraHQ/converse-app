@@ -6837,6 +6837,11 @@
   resolved "https://registry.yarnpkg.com/@npmcli/name-from-folder/-/name-from-folder-2.0.0.tgz#c44d3a7c6d5c184bb6036f4d5995eee298945815"
   integrity sha512-pwK+BfEBZJbKdNYpHHRTNBwBoqrN/iIMO0AiGvYsp3Hoaq0WbgGSWQR6SCldZovoDpY3yje5lkFUe6gsDgJ2vg==
 
+"@op-engineering/op-sqlite@^4.0.0-beta1":
+  version "4.0.0-beta1"
+  resolved "https://registry.yarnpkg.com/@op-engineering/op-sqlite/-/op-sqlite-4.0.0-beta1.tgz#3ec02a93f6d85e1fccf9628b986785d65ee41d97"
+  integrity sha512-giL94Tv7r9BmNiT9RmsER3Blz+lB+gYOXepVDA7DOjcluOZusJdTvMqvm/r7uEu3+iloZ6iK7NjKI4zud7S5xA==
+
 "@open-frames/proxy-client@^0.2.0":
   version "0.2.2"
   resolved "https://registry.yarnpkg.com/@open-frames/proxy-client/-/proxy-client-0.2.2.tgz#b770e4b3e1fed5a018f950c999f8358c293739cc"

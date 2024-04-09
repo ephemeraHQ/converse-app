@@ -13,7 +13,6 @@ import {
 import { Conversation } from "./entities/conversationEntity";
 import { Message } from "./entities/messageEntity";
 import { Profile } from "./entities/profileEntity";
-import { checkUpsertSupport } from "./upsert";
 
 type RepositoriesForAccount = {
   conversation: Repository<Conversation>;
@@ -53,12 +52,15 @@ export const initDb = async (account: string): Promise<void> => {
   try {
     await dataSource.initialize();
     console.log(`Database initialized for ${account}`);
-    await checkUpsertSupport(dataSource);
     // https://phiresky.github.io/blog/2020/sqlite-performance-tuning/
-    await dataSource.query("PRAGMA journal_mode=WAL;");
-    await dataSource.query("PRAGMA synchronous=normal;");
-    await dataSource.query("PRAGMA temp_store=memory;");
-    await dataSource.query("PRAGMA mmap_size=30000000000;");
+    await Promise.all([
+      dataSource.query(
+        "PRAGMA journal_mode=WAL;PRAGMA synchronous=normal;PRAGMA temp_store=memory;"
+      ),
+      dataSource.query("PRAGMA synchronous=normal;"),
+      dataSource.query("PRAGMA temp_store=memory;"),
+      dataSource.query("PRAGMA mmap_size=30000000000;"),
+    ]);
     console.log(`Database optimized for ${account}`);
     try {
       console.log(`Running migrations for ${account}`);

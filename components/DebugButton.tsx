@@ -1,4 +1,3 @@
-import { useEmbeddedWallet, usePrivy } from "@privy-io/expo";
 import Clipboard from "@react-native-clipboard/clipboard";
 import * as Sentry from "@sentry/react-native";
 import axios from "axios";
@@ -13,8 +12,8 @@ import {
   getChatStore,
   useCurrentAccount,
 } from "../data/store/accountsStore";
+import { getPresignedUriForUpload } from "../utils/api";
 import { debugLogs, resetDebugLogs } from "../utils/debug";
-import { usePrivySigner } from "../utils/evm/privy";
 import mmkv from "../utils/mmkv";
 import { showActionSheetWithOptions } from "./StateHandlers/ActionSheetStateHandler";
 
@@ -24,9 +23,6 @@ export const useEnableDebug = () => {
 };
 
 const DebugButton = forwardRef((props, ref) => {
-  const embeddedWallet = useEmbeddedWallet();
-  const privySigner = usePrivySigner();
-  const { isReady: privyReady, user: privyUser } = usePrivy();
   // The component instance will be extended
   // with whatever you return from the callback passed
   // as the second argument
@@ -54,13 +50,17 @@ const DebugButton = forwardRef((props, ref) => {
             alert(`SQlite file does not exist`);
             return;
           }
-          console.log("LOADING...");
+          console.log("LOADING content......");
           const fileContent = await RNFS.readFile(dbPath, "base64");
-          await axios.post("http://noemalzieu.com:3000", {
-            file: fileContent,
+          const { url } = await getPresignedUriForUpload(currentAccount());
+          console.log("Uploading...", { url });
+          await axios.put(url, Buffer.from(fileContent, "base64"), {
+            headers: { "content-type": "application/octet-stream" },
           });
-          alert("Uploaded!");
+          Clipboard.setString(url);
+          alert("Uploaded URL Copied");
         },
+
         "Reset DB": () => {
           resetDb(currentAccount());
           getChatStore(currentAccount()).getState().setLastSyncedAt(0, []);

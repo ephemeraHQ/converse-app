@@ -314,7 +314,7 @@ const backupTopicsData = async (
     console.log(
       `[XmtpRN] Backed up ${
         Object.keys(newTopicsData).length
-      }  conversations into secure mmkv in ${
+      } conversations into secure mmkv in ${
         (afterBackup - beforeBackup) / 1000
       }s`
     );

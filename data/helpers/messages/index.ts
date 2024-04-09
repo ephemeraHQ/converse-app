@@ -122,3 +122,16 @@ export const markMessageAsSent = async (
     .getState()
     .updateMessageStatus(topic, messageId, "sent");
 };
+
+export const getOrderedMessages = async (account: string, topic: string) => {
+  const messageRepository = await getRepository(account, "message");
+  const messages: Message[] = await messageRepository
+    .createQueryBuilder()
+    .select("*")
+    .where("message.conversationId = :topic", {
+      topic,
+    })
+    .orderBy("sent", "ASC")
+    .execute();
+  return messages;
+};

@@ -7,6 +7,7 @@ import { refreshProfileForAddress } from "../../data/helpers/profiles/profilesUp
 import { getAccountsList } from "../../data/store/accountsStore";
 import { useAppStore } from "../../data/store/appStore";
 import { loadSavedNotificationMessagesToContext } from "../../utils/notifications";
+import { getXmtpClient } from "../../utils/xmtpRN/sync";
 import { getInstalledWallets } from "../Onboarding/supportedWallets";
 
 export default function HydrationStateHandler() {
@@ -15,10 +16,13 @@ export default function HydrationStateHandler() {
     const hydrate = async () => {
       const startTime = new Date().getTime();
       let lastTime = startTime;
-      // Let's load installed wallets
-      await getInstalledWallets(false);
-
       const accounts = getAccountsList();
+      if (accounts.length === 0) {
+        // Awaiting before showing onboarding
+        await getInstalledWallets(false);
+      } else {
+        getInstalledWallets(false);
+      }
       await Promise.all(accounts.map((a) => initDb(a)));
       console.log(
         `[Hydration] Db init took ${
@@ -26,6 +30,7 @@ export default function HydrationStateHandler() {
         } seconds`
       );
       accounts.map((a) => cleanupPendingConversations(a));
+      accounts.map((a) => getXmtpClient(a));
       lastTime = new Date().getTime();
       await loadSavedNotificationMessagesToContext();
       console.log(
