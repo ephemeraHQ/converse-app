@@ -32,7 +32,7 @@ export const getXmtpClientFromBase64Key = (base64Key: string) =>
     ],
     enableAlphaMls: true,
     // @todo => use another key!!
-    dbEncryptionKey: Buffer.from(base64Key, "base64"),
+    dbEncryptionKey: Buffer.from(base64Key, "base64").subarray(0, 32),
   });
 
 export type ConverseXmtpClientType = Awaited<
