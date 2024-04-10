@@ -17,11 +17,7 @@ index d284c73..bb214b1 100644
    lintOptions {
      abortOnError false
 diff --git a/node_modules/@xmtp/react-native-sdk/android/src/main/java/expo/modules/xmtpreactnativesdk/XMTPModule.kt b/node_modules/@xmtp/react-native-sdk/android/src/main/java/expo/modules/xmtpreactnativesdk/XMTPModule.kt
-<<<<<<<< HEAD:patches/@xmtp+react-native-sdk+1.30.0.patch
 index cf53ec4..b9508a5 100644
-========
-index c5289ce..8f3a29d 100644
->>>>>>>> 3726d8c8 (Upgrade XMTP):patches/@xmtp+react-native-sdk+1.29.9.patch
 --- a/node_modules/@xmtp/react-native-sdk/android/src/main/java/expo/modules/xmtpreactnativesdk/XMTPModule.kt
 +++ b/node_modules/@xmtp/react-native-sdk/android/src/main/java/expo/modules/xmtpreactnativesdk/XMTPModule.kt
 @@ -27,6 +27,7 @@ import kotlinx.coroutines.runBlocking
@@ -143,11 +139,7 @@ index 4af60c3..b7c8a26 100644
  				try FileManager.default.removeItem(at: URL(string: local.preparedFileUri)!)
  			} catch { /* ignore: the sending succeeds even if we fail to rm the tmp file afterward */ }
 diff --git a/node_modules/@xmtp/react-native-sdk/src/lib/DecodedMessage.ts b/node_modules/@xmtp/react-native-sdk/src/lib/DecodedMessage.ts
-<<<<<<<< HEAD:patches/@xmtp+react-native-sdk+1.30.0.patch
 index ba9f596..5eeeeea 100644
-========
-index ba9f596..f576a88 100644
->>>>>>>> 3726d8c8 (Upgrade XMTP):patches/@xmtp+react-native-sdk+1.29.9.patch
 --- a/node_modules/@xmtp/react-native-sdk/src/lib/DecodedMessage.ts
 +++ b/node_modules/@xmtp/react-native-sdk/src/lib/DecodedMessage.ts
 @@ -15,6 +15,7 @@ export class DecodedMessage<ContentTypes = any> {
@@ -186,11 +178,7 @@ index ba9f596..f576a88 100644
      )
    }
  
-<<<<<<<< HEAD:patches/@xmtp+react-native-sdk+1.30.0.patch
 @@ -70,7 +74,8 @@ export class DecodedMessage<ContentTypes = any> {
-========
-@@ -70,11 +74,13 @@ export class DecodedMessage<ContentTypes = any> {
->>>>>>>> 3726d8c8 (Upgrade XMTP):patches/@xmtp+react-native-sdk+1.29.9.patch
      senderAddress: string,
      sent: number,
      content: any,
@@ -200,14 +188,10 @@ index ba9f596..f576a88 100644
    ) {
      this.client = client
      this.id = id
-<<<<<<<< HEAD:patches/@xmtp+react-native-sdk+1.30.0.patch
 @@ -81,6 +86,7 @@ export class DecodedMessage<ContentTypes = any> {
      this.nativeContent = content
      // undefined comes back as null when bridged, ensure undefined so integrators don't have to add a new check for null as well
      this.fallback = fallback ?? undefined
-========
-     this.topic = topic
->>>>>>>> 3726d8c8 (Upgrade XMTP):patches/@xmtp+react-native-sdk+1.29.9.patch
 +    this.sentViaConverse = sentViaConverse
      this.contentTypeId = contentTypeId
      this.senderAddress = senderAddress
