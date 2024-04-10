@@ -1,9 +1,5 @@
 diff --git a/node_modules/@xmtp/react-native-sdk/android/build.gradle b/node_modules/@xmtp/react-native-sdk/android/build.gradle
-<<<<<<<< HEAD:patches/@xmtp+react-native-sdk+1.30.0-beta.5.patch
 index 725acf3..09b8be7 100644
-========
-index d284c73..bb214b1 100644
->>>>>>>> main:patches/@xmtp+react-native-sdk+1.30.0.patch
 --- a/node_modules/@xmtp/react-native-sdk/android/build.gradle
 +++ b/node_modules/@xmtp/react-native-sdk/android/build.gradle
 @@ -85,6 +85,11 @@ android {
@@ -19,25 +15,10 @@ index d284c73..bb214b1 100644
    lintOptions {
      abortOnError false
 diff --git a/node_modules/@xmtp/react-native-sdk/android/src/main/java/expo/modules/xmtpreactnativesdk/XMTPModule.kt b/node_modules/@xmtp/react-native-sdk/android/src/main/java/expo/modules/xmtpreactnativesdk/XMTPModule.kt
-<<<<<<<< HEAD:patches/@xmtp+react-native-sdk+1.30.0-beta.5.patch
 index 118f06a..115862e 100644
 --- a/node_modules/@xmtp/react-native-sdk/android/src/main/java/expo/modules/xmtpreactnativesdk/XMTPModule.kt
 +++ b/node_modules/@xmtp/react-native-sdk/android/src/main/java/expo/modules/xmtpreactnativesdk/XMTPModule.kt
 @@ -694,7 +694,13 @@ class XMTPModule : Module() {
-========
-index cf53ec4..b9508a5 100644
---- a/node_modules/@xmtp/react-native-sdk/android/src/main/java/expo/modules/xmtpreactnativesdk/XMTPModule.kt
-+++ b/node_modules/@xmtp/react-native-sdk/android/src/main/java/expo/modules/xmtpreactnativesdk/XMTPModule.kt
-@@ -27,6 +27,7 @@ import kotlinx.coroutines.runBlocking
- import kotlinx.coroutines.suspendCancellableCoroutine
- import kotlinx.coroutines.withContext
- import org.json.JSONObject
-+import org.xmtp.android.library.BuildConfig
- import org.xmtp.android.library.Client
- import org.xmtp.android.library.ClientOptions
- import org.xmtp.android.library.Conversation
-@@ -564,7 +565,13 @@ class XMTPModule : Module() {
->>>>>>>> main:patches/@xmtp+react-native-sdk+1.30.0.patch
                  val preparedData = contentResolver.openInputStream(preparedFileUrl)!!
                      .use { it.buffered().readBytes() }
                  val prepared = PreparedMessage.fromSerializedData(preparedData)
@@ -117,11 +98,7 @@ index aebacf8..aae3732 100644
          this.senderAddress = senderAddress;
          this.sent = sent;
 diff --git a/node_modules/@xmtp/react-native-sdk/ios/Wrappers/DecodedMessageWrapper.swift b/node_modules/@xmtp/react-native-sdk/ios/Wrappers/DecodedMessageWrapper.swift
-<<<<<<<< HEAD:patches/@xmtp+react-native-sdk+1.30.0-beta.5.patch
 index b978039..258f11a 100644
-========
-index b8f726f..32f1f43 100644
->>>>>>>> main:patches/@xmtp+react-native-sdk+1.30.0.patch
 --- a/node_modules/@xmtp/react-native-sdk/ios/Wrappers/DecodedMessageWrapper.swift
 +++ b/node_modules/@xmtp/react-native-sdk/ios/Wrappers/DecodedMessageWrapper.swift
 @@ -10,6 +10,7 @@ struct DecodedMessageWrapper {
@@ -152,17 +129,10 @@ index 4eae67d..ca15778 100644
  				try FileManager.default.removeItem(at: URL(string: local.preparedFileUri)!)
  			} catch { /* ignore: the sending succeeds even if we fail to rm the tmp file afterward */ }
 diff --git a/node_modules/@xmtp/react-native-sdk/src/lib/DecodedMessage.ts b/node_modules/@xmtp/react-native-sdk/src/lib/DecodedMessage.ts
-<<<<<<<< HEAD:patches/@xmtp+react-native-sdk+1.30.0-beta.5.patch
 index 244dcfb..0dc9e43 100644
 --- a/node_modules/@xmtp/react-native-sdk/src/lib/DecodedMessage.ts
 +++ b/node_modules/@xmtp/react-native-sdk/src/lib/DecodedMessage.ts
 @@ -19,6 +19,7 @@ export class DecodedMessage<
-========
-index ba9f596..5eeeeea 100644
---- a/node_modules/@xmtp/react-native-sdk/src/lib/DecodedMessage.ts
-+++ b/node_modules/@xmtp/react-native-sdk/src/lib/DecodedMessage.ts
-@@ -15,6 +15,7 @@ export class DecodedMessage<ContentTypes = any> {
->>>>>>>> main:patches/@xmtp+react-native-sdk+1.30.0.patch
    client: Client<ContentTypes>
    id: string
    topic: string
@@ -170,11 +140,7 @@ index ba9f596..5eeeeea 100644
    contentTypeId: string
    senderAddress: string
    sent: number // timestamp in milliseconds
-<<<<<<<< HEAD:patches/@xmtp+react-native-sdk+1.30.0-beta.5.patch
 @@ -38,7 +39,8 @@ export class DecodedMessage<
-========
-@@ -34,7 +35,8 @@ export class DecodedMessage<ContentTypes = any> {
->>>>>>>> main:patches/@xmtp+react-native-sdk+1.30.0.patch
        decoded.senderAddress,
        decoded.sent,
        decoded.content,
@@ -184,11 +150,7 @@ index ba9f596..5eeeeea 100644
      )
    }
  
-<<<<<<<< HEAD:patches/@xmtp+react-native-sdk+1.30.0-beta.5.patch
 @@ -48,6 +50,7 @@ export class DecodedMessage<
-========
-@@ -42,6 +44,7 @@ export class DecodedMessage<ContentTypes = any> {
->>>>>>>> main:patches/@xmtp+react-native-sdk+1.30.0.patch
      object: {
        id: string
        topic: string
@@ -196,11 +158,7 @@ index ba9f596..5eeeeea 100644
        contentTypeId: string
        senderAddress: string
        sent: number // timestamp in milliseconds
-<<<<<<<< HEAD:patches/@xmtp+react-native-sdk+1.30.0-beta.5.patch
 @@ -64,7 +67,8 @@ export class DecodedMessage<
-========
-@@ -58,7 +61,8 @@ export class DecodedMessage<ContentTypes = any> {
->>>>>>>> main:patches/@xmtp+react-native-sdk+1.30.0.patch
        object.senderAddress,
        object.sent,
        object.content,
@@ -210,11 +168,7 @@ index ba9f596..5eeeeea 100644
      )
    }
  
-<<<<<<<< HEAD:patches/@xmtp+react-native-sdk+1.30.0-beta.5.patch
 @@ -76,7 +80,8 @@ export class DecodedMessage<
-========
-@@ -70,7 +74,8 @@ export class DecodedMessage<ContentTypes = any> {
->>>>>>>> main:patches/@xmtp+react-native-sdk+1.30.0.patch
      senderAddress: string,
      sent: number,
      content: any,
@@ -224,11 +178,7 @@ index ba9f596..5eeeeea 100644
    ) {
      this.client = client
      this.id = id
-<<<<<<<< HEAD:patches/@xmtp+react-native-sdk+1.30.0-beta.5.patch
 @@ -87,6 +92,7 @@ export class DecodedMessage<
-========
-@@ -81,6 +86,7 @@ export class DecodedMessage<ContentTypes = any> {
->>>>>>>> main:patches/@xmtp+react-native-sdk+1.30.0.patch
      this.nativeContent = content
      // undefined comes back as null when bridged, ensure undefined so integrators don't have to add a new check for null as well
      this.fallback = fallback ?? undefined
