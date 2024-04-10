@@ -11,7 +11,7 @@ import {
   StyleSheet,
   Platform,
 } from "react-native";
-import uuid from "react-native-uuid";
+import { v4 as uuidv4 } from "uuid";
 
 import { useAccountsStore } from "../../../data/store/accountsStore";
 import { useAppStore } from "../../../data/store/appStore";
@@ -84,8 +84,7 @@ export default function AddAttachmentButton() {
               ? undefined
               : {
                   filePath: resizedImage.uri,
-                  fileName:
-                    asset.uri.split("/").pop() || `${uuid.v4().toString()}`,
+                  fileName: asset.uri.split("/").pop() || `${uuidv4()}`,
                   mimeType,
                 },
         });
