@@ -1,4 +1,4 @@
-import uuid from "react-native-uuid";
+import { v4 as uuidv4 } from "uuid";
 
 import { saveMessages } from "../data/helpers/messages";
 import {
@@ -33,7 +33,7 @@ export const sendMessage = async ({
   attachmentToSave,
 }: SendMessageInput) => {
   if (!conversation) return;
-  const messageId = uuid.v4().toString();
+  const messageId = uuidv4();
   const sentAtTime = new Date();
   const isV1Conversation = conversation.topic.startsWith("/xmtp/0/dm-");
 

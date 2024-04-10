@@ -269,6 +269,12 @@ fun handleMessageByContentType(
                 }
             }
 
+            contentType.startsWith("xmtp.org/readReceipt:") -> {
+                // Ignoring
+                contentToSave = null
+                contentToReturn = null
+            }
+
             else -> {
                 sentryTrackMessage(
                     "NOTIFICATION_UNKNOWN_CONTENT_TYPE",
