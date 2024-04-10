@@ -10394,7 +10394,7 @@
     "@xmtp/proto" "3.45.0"
     long "^5.2.3"
 
-"@xmtp/proto@3.45.0", "@xmtp/proto@^3.44.0", "@xmtp/proto@^3.45.0":
+"@xmtp/proto@3.45.0", "@xmtp/proto@^3.45.0":
   version "3.45.0"
   resolved "https://registry.yarnpkg.com/@xmtp/proto/-/proto-3.45.0.tgz#2aaca656a6da85a05ae75f72340ce1ef5e4fb2ec"
   integrity sha512-6d/UE/vqi1erpL+z/HSGvFOnJt+y7RE23g6SUUUB7tx75VAi5A0/uLwzPr/eyVkiHZGqlbktq8Rzco+HgTyTAw==
@@ -10414,10 +10414,20 @@
     rxjs "^7.8.0"
     undici "^5.8.1"
 
-"@xmtp/react-native-sdk@^1.29.6":
-  version "1.29.6"
-  resolved "https://registry.yarnpkg.com/@xmtp/react-native-sdk/-/react-native-sdk-1.29.6.tgz#058c156748c06cbcf817aec246cbb5964be83058"
-  integrity sha512-NdJturYyH9ZwgV2W1YWdalYwXr8e1zOBWWQeF12sk0bDU31rUQ4/4tf7+5T0u+DftIBsz97lLlF49Z5wcLNpNQ==
+"@xmtp/proto@^3.44.0":
+  version "3.48.0"
+  resolved "https://registry.yarnpkg.com/@xmtp/proto/-/proto-3.48.0.tgz#e707e26588cf28baeef94b1e778253170e4038c4"
+  integrity sha512-IiNP2YMkJGV6ghRnCLti8xrge3zE9eSf8Ld2UJbnf4qg7QEYJmAw8yM6wVSd6CkGaGv//AWS8FC19Noh1UYsDw==
+  dependencies:
+    long "^5.2.0"
+    protobufjs "^7.0.0"
+    rxjs "^7.8.0"
+    undici "^5.8.1"
+
+"@xmtp/react-native-sdk@^1.30.0":
+  version "1.30.0"
+  resolved "https://registry.yarnpkg.com/@xmtp/react-native-sdk/-/react-native-sdk-1.30.0.tgz#7b676d378eed4781c9affc9da9049952438ead18"
+  integrity sha512-mDWwa3Pe6lseJeFwnCstuwTXi+bk5iQhR0su1WuC4/dYTVLKmqK9mQ2kTwBl5ESiMj1sa9ntknq8nAg7I1JLfQ==
   dependencies:
     "@ethersproject/bytes" "^5.7.0"
     "@msgpack/msgpack" "^3.0.0-beta2"
