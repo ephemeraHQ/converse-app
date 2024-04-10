@@ -23,6 +23,7 @@ import {
   conversationShouldBeDisplayed,
   conversationShouldBeInInbox,
 } from "./conversation";
+import { addLog } from "./debug";
 import { savePushToken } from "./keychain/helpers";
 import mmkv from "./mmkv";
 import { navigateToConversation, setTopicToNavigateTo } from "./navigation";
@@ -266,22 +267,23 @@ const waitForLoadingSavedNotifications = async () => {
 
 export const loadSavedNotificationMessagesToContext = async () => {
   if (loadingSavedNotifications) {
+    addLog("waitForLoadingSavedNotifications");
     await waitForLoadingSavedNotifications();
   }
   loadingSavedNotifications = true;
-  let lastStepDone = 0;
+  addLog(`loadSavedNotificationMessagesToContext 0`);
   try {
     const knownAccounts = getAccountsList();
-    lastStepDone = 1;
+    addLog(`loadSavedNotificationMessagesToContext 1`);
     const conversations = loadSavedNotificationsConversations();
     const messages = loadSavedNotificationsMessages();
-    lastStepDone = 2;
+    addLog(`loadSavedNotificationMessagesToContext 2`);
     emptySavedNotificationsConversations();
     emptySavedNotificationsMessages();
-    lastStepDone = 3;
+    addLog(`loadSavedNotificationMessagesToContext 3`);
 
     if (conversations && conversations.length > 0) {
-      lastStepDone = 4;
+      addLog(`loadSavedNotificationMessagesToContext 4`);
       console.log(
         `Got ${conversations.length} new conversations from notifications:`,
         conversations
@@ -316,7 +318,7 @@ export const loadSavedNotificationMessagesToContext = async () => {
           });
         }
       });
-      lastStepDone = 5;
+      addLog(`loadSavedNotificationMessagesToContext 5`);
       for (const account in conversationsToSaveByAccount) {
         await saveConversations(
           account,
@@ -324,12 +326,12 @@ export const loadSavedNotificationMessagesToContext = async () => {
           true
         );
       }
-      lastStepDone = 6;
+      addLog(`loadSavedNotificationMessagesToContext 6`);
     }
-    lastStepDone = 7;
+    addLog(`loadSavedNotificationMessagesToContext 7`);
 
     if (messages && messages.length > 0) {
-      lastStepDone = 8;
+      addLog(`loadSavedNotificationMessagesToContext 8 - ${messages.length}`);
       messages.sort((m1: any, m2: any) => m1.sent - m2.sent);
       console.log(
         `Got ${messages.length} new messages from notifications:`,
@@ -353,18 +355,24 @@ export const loadSavedNotificationMessagesToContext = async () => {
             topic: message.topic,
             referencedMessageId: message.referencedMessageId,
           });
+        } else {
+          addLog(
+            `loadSavedNotificationMessagesToContext could not find account - ${
+              message.account
+            } - ${knownAccounts.join(",")}`
+          );
         }
       });
-      lastStepDone = 9;
+      addLog(`loadSavedNotificationMessagesToContext 9`);
 
       const promises: Promise<void>[] = [];
 
       for (const account in messagesToSaveByAccount) {
         promises.push(saveMessages(account, messagesToSaveByAccount[account]));
       }
-      lastStepDone = 10;
+      addLog(`loadSavedNotificationMessagesToContext 10`);
       await Promise.all(promises);
-      lastStepDone = 11;
+      addLog(`loadSavedNotificationMessagesToContext 11`);
     }
 
     loadingSavedNotifications = false;
@@ -373,7 +381,6 @@ export const loadSavedNotificationMessagesToContext = async () => {
     sentryTrackError(e, {
       error: "An error occured while loading saved notifications",
       errorType: typeof e,
-      lastStepDone,
     });
     emptySavedNotificationsConversations();
     emptySavedNotificationsMessages();
