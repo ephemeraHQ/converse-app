@@ -1,10 +1,7 @@
 import "reflect-metadata";
-import { Platform } from "react-native";
-import RNFS from "react-native-fs";
 import { DataSource } from "typeorm/browser";
 
-import { getDbFileName } from ".";
-import config from "../../config";
+import { getDbDirectory, getDbFileName } from ".";
 import { typeORMDriver } from "./driver";
 import { Conversation } from "./entities/conversationEntity";
 import { Message } from "./entities/messageEntity";
@@ -82,10 +79,7 @@ export const getDataSource = async (account: string) => {
       AddIndexToSent1712656017130,
     ],
     type: "react-native",
-    location:
-      Platform.OS === "ios"
-        ? await RNFS.pathForGroup(config.appleAppGroup)
-        : "./SQLite",
+    location: await getDbDirectory(),
     logging: true,
     maxQueryExecutionTime: 500,
     logger: new TypeORMLogger(),

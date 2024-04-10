@@ -193,6 +193,6 @@ index ba9f596..5eeeeea 100644
      // undefined comes back as null when bridged, ensure undefined so integrators don't have to add a new check for null as well
      this.fallback = fallback ?? undefined
 +    this.sentViaConverse = sentViaConverse
-     this.contentTypeId = contentTypeId
-     this.senderAddress = senderAddress
-     this.sent = sent
+   }
+ 
+   content(): ContentTypes {
