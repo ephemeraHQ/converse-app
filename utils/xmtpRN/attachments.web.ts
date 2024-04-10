@@ -5,7 +5,7 @@ import {
   RemoteAttachmentCodec,
 } from "@xmtp/content-type-remote-attachment";
 import axios from "axios";
-import uuid from "react-native-uuid";
+import { v4 as uuidv4 } from "uuid";
 
 export const encryptRemoteAttachment = async (
   account: string,
@@ -15,7 +15,7 @@ export const encryptRemoteAttachment = async (
   const response = await axios.get(fileUri, { responseType: "arraybuffer" });
   const data = new Uint8Array(response.data);
   const attachment = {
-    filename: fileUri.split("/").pop() || `${uuid.v4().toString()}`,
+    filename: fileUri.split("/").pop() || `${uuidv4()}`,
     mimeType: mimeType || "application/octet-stream",
     data,
   } as Attachment;

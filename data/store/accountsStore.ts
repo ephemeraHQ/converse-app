@@ -1,4 +1,4 @@
-import uuid from "react-native-uuid";
+import { v4 as uuidv4 } from "uuid";
 import { create, StoreApi, UseBoundStore } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
 
@@ -98,7 +98,7 @@ export const useAccountsStore = create<AccountsStoreStype>()(
       resetDatabaseId: (account) =>
         set((state) => {
           const databaseId = { ...state.databaseId };
-          databaseId[account] = uuid.v4().toString();
+          databaseId[account] = uuidv4();
           return { databaseId };
         }),
       setCurrentAccount: (account, createIfNew) =>
@@ -119,7 +119,7 @@ export const useAccountsStore = create<AccountsStoreStype>()(
           const databaseId = { ...state.databaseId };
           if (isNew) {
             accounts.push(account);
-            databaseId[account] = uuid.v4().toString();
+            databaseId[account] = uuidv4();
             removeLogoutTask(account);
             // Init lastAsyncUpdate so no async migration is run for new accounts
             getSettingsStore(account)
