@@ -99,14 +99,19 @@ export const getDbFileName = (account: string) => {
   return `converse-${dbId}.sqlite`;
 };
 
-export const getDbPath = async (account: string) => {
-  const filename = getDbFileName(account);
+export const getDbDirectory = async () => {
   if (Platform.OS === "ios") {
     const groupPath = await RNFS.pathForGroup(config.appleAppGroup);
-    return `${groupPath}/${filename}`;
+    return groupPath;
   } else {
-    return `/data/data/${config.bundleId}/databases/${filename}`;
+    return `/data/data/${config.bundleId}/databases`;
   }
+};
+
+export const getDbPath = async (account: string) => {
+  const filename = getDbFileName(account);
+  const directory = await getDbDirectory();
+  return `${directory}/${filename}`;
 };
 
 export const clearDb = async (account: string) => {
