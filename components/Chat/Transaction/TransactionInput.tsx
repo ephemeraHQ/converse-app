@@ -12,7 +12,7 @@ import {
   Text,
   Alert,
 } from "react-native";
-import uuid from "react-native-uuid";
+import { v4 as uuidv4 } from "uuid";
 
 import SendButton from "../../../assets/send-button.svg";
 import config from "../../../config";
@@ -154,7 +154,7 @@ export default function TransactionInput() {
         );
         return;
       }
-      const thisUUID = uuid.v4().toString();
+      const thisUUID = uuidv4();
       txUUID.current = thisUUID;
       setTxStatus({ status: "sending", canCancel: true });
       await new Promise((r) => setTimeout(r, 2000));

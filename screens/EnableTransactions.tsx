@@ -9,7 +9,7 @@ import {
   TextInput,
   Alert,
 } from "react-native";
-import uuid from "react-native-uuid";
+import { v4 as uuidv4 } from "uuid";
 
 import AndroidBackAction from "../components/AndroidBackAction";
 import OnboardingComponent from "../components/Onboarding/OnboardingComponent";
@@ -75,7 +75,7 @@ export default function EnableTransactionsScreen({
           return;
         }
         // Now we can save this key and setup its path
-        const pkPath = `PK-${uuid.v4().toString()}`;
+        const pkPath = `PK-${uuidv4()}`;
         try {
           await savePrivateKey(pkPath, seedPhraseSigner.privateKey);
           setPkPath(pkPath);

@@ -1,7 +1,7 @@
 import { InvitationContext } from "@xmtp/xmtp-js";
 import { Alert, Platform } from "react-native";
-import uuid from "react-native-uuid";
 import { In } from "typeorm/browser";
+import { v4 as uuidv4 } from "uuid";
 
 import { getCleanAddress } from "../../../utils/eth";
 import { getRepository } from "../../db";
@@ -75,7 +75,7 @@ export const createPendingConversation = async (
       `A conversation with ${cleanAddress} and id ${context?.conversationId} already exists`
     );
 
-  const pendingConversationId = uuid.v4().toString();
+  const pendingConversationId = uuidv4();
   await saveConversations(account, [
     {
       topic: pendingConversationId,

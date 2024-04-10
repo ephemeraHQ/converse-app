@@ -3,7 +3,7 @@ import { Image } from "expo-image";
 import * as Linking from "expo-linking";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Platform, StyleSheet, TouchableOpacity, View } from "react-native";
-import uuid from "react-native-uuid";
+import { v4 as uuidv4 } from "uuid";
 
 import { useCurrentAccount } from "../../../data/store/accountsStore";
 import { cacheForMedia, fetchAndCacheMedia } from "../../../utils/cache/cache";
@@ -46,7 +46,7 @@ export default function FramePreview({
     ...initialFrame,
     frameImage: undefined,
     isInitialFrame: true,
-    uniqueId: uuid.v4().toString(),
+    uniqueId: uuidv4(),
   } as FrameToDisplay);
   const [firstImageFailure, setFirstImageFailure] = useState(false);
   const buttons = getFrameButtons(frame);
@@ -64,7 +64,7 @@ export default function FramePreview({
       ...initialFrame,
       frameImage: undefined,
       isInitialFrame: true,
-      uniqueId: uuid.v4().toString(),
+      uniqueId: uuidv4(),
     });
     setFirstImageFailure(false);
     setFrameTextInputValue("");
@@ -185,7 +185,7 @@ export default function FramePreview({
             return;
           }
           // We should display a new frame, let's load image first
-          const uniqueId = uuid.v4().toString();
+          const uniqueId = uuidv4();
           const frameResponseImage = getFrameImage({
             ...validatedFrameResponse,
             type: "XMTP_FRAME",
