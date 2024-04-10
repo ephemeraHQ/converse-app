@@ -43,11 +43,11 @@ const protocolConversationToStateConversation = (
   isGroup: false,
 });
 
-const protocolGroupToStateConversation = (
+const protocolGroupToStateConversation = async (
   group: GroupWithCodecsType
-): XmtpConversation => ({
+): Promise<XmtpConversation> => ({
   topic: group.topic,
-  groupMembers: group.peerAddresses,
+  groupMembers: await group.memberAddresses(true),
   createdAt: group.createdAt,
   messages: new Map(),
   messagesIds: [],
@@ -142,7 +142,9 @@ const handleNewConversation = async (
         ? protocolConversationToStateConversation(
             conversation as ConversationWithCodecsType
           )
-        : protocolGroupToStateConversation(conversation as GroupWithCodecsType),
+        : await protocolGroupToStateConversation(
+            conversation as GroupWithCodecsType
+          ),
     ],
     true
   );
@@ -236,6 +238,10 @@ const listGroups = async (client: ConverseXmtpClientType) => {
   await client.conversations.syncGroups();
   const groups = await client.conversations.listGroups();
   groups.forEach((g) => {
+    // @todo => XMTP will fix this
+    if (!g.topic.startsWith("/xmtp/mls")) {
+      g.topic = `/xmtp/mls/1/g-${g.id}/proto`;
+    }
     setOpenedConversation(client.address, g);
   });
 
@@ -293,8 +299,12 @@ export const loadConversations = async (
     const conversationsToSave = newConversations.map(
       protocolConversationToStateConversation
     );
-    const groupsToSave = newGroups.map(protocolGroupToStateConversation);
-    const groupsToUpdate = updatedGroups.map(protocolGroupToStateConversation);
+    const groupsToSave = await Promise.all(
+      newGroups.map(protocolGroupToStateConversation)
+    );
+    const groupsToUpdate = await Promise.all(
+      updatedGroups.map(protocolGroupToStateConversation)
+    );
     saveConversations(client.address, [
       ...conversationsToSave,
       ...groupsToSave,
@@ -448,11 +458,17 @@ export const refreshGroup = async (account: string, topic: string) => {
   const client = (await getXmtpClient(account)) as ConverseXmtpClientType;
   await client.conversations.syncGroups();
   const groups = await client.conversations.listGroups();
-  const group = groups.find((g) => g.topic === topic);
+  const group = groups.find(
+    (g) => g.topic === topic || `/xmtp/mls/1/g-${g.id}/proto` === topic
+  );
   if (!group) throw new Error(`Group ${topic} not found, cannot refresh`);
+  // @todo => XMTP will fix this
+  if (!group.topic.startsWith("/xmtp/mls")) {
+    group.topic = `/xmtp/mls/1/g-${group.id}/proto`;
+  }
   saveConversations(
     client.address,
-    [protocolGroupToStateConversation(group)],
+    [await protocolGroupToStateConversation(group)],
     true
   );
 };

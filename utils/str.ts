@@ -46,7 +46,7 @@ export const addressPrefix = (address: string) =>
 
 export const conversationName = (conversation: XmtpConversation) => {
   const defaultName = conversation.isGroup
-    ? capitalize(humanize(conversation.topic, 3, " "))
+    ? capitalize(humanize(conversation.topic.slice(14, 46), 3, " "))
     : shortAddress(conversation.peerAddress);
   return conversation.conversationTitle || defaultName;
 };
