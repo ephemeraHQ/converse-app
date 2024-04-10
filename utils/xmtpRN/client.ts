@@ -31,6 +31,8 @@ export const getXmtpClientFromBase64Key = (base64Key: string) =>
       new CoinbaseMessagingPaymentCodec(),
     ],
     enableAlphaMls: true,
+    // @todo => use another key!!
+    dbEncryptionKey: Buffer.from(base64Key, "base64"),
   });
 
 export type ConverseXmtpClientType = Awaited<
