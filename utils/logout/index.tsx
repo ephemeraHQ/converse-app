@@ -9,7 +9,7 @@ import {
 } from "../../data/store/accountsStore";
 import { deleteSecureItemAsync } from "../keychain";
 import {
-  deleteXmtpDatabaseEncryptionKey,
+  // deleteXmtpDatabaseEncryptionKey,
   deleteXmtpKey,
 } from "../keychain/helpers";
 import mmkv from "../mmkv";
@@ -105,7 +105,7 @@ export const executeLogoutTasks = async () => {
       console.log(
         `[Logout] Executing logout task for ${account} (${task.topics.length} topics)`
       );
-      await deleteXmtpDatabaseEncryptionKey(account);
+      // await deleteXmtpDatabaseEncryptionKey(account);
       await deleteXmtpKey(account);
       if (task.pkPath) {
         await deleteSecureItemAsync(task.pkPath);
