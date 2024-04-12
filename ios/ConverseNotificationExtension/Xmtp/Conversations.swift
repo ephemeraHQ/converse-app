@@ -89,6 +89,24 @@ func getPersistedConversation(xmtpClient: XMTP.Client, contentTopic: String) asy
       sentryTrackError(error: error, extras: ["message": "Error while getting persisted topics"])
     }
   }
+  
+  // TODO => remove this a bit later
+  // During migration time, data is still in keychain, not in mmkv
+  let hashedKey = CryptoKit.SHA256.hash(data: contentTopic.data(using: .utf8)!)
+  let hashString = hashedKey.compactMap { String(format: "%02x", $0) }.joined()
+  let persistedTopicData = getKeychainValue(forKey: "XMTP_TOPIC_DATA_\(xmtpClient.address)_\(hashString)")
+  if (persistedTopicData != nil && persistedTopicData!.count > 0) {
+    do {
+      print("[NotificationExtension] Found a persisted topic data")
+      let data = try Xmtp_KeystoreApi_V1_TopicMap.TopicData(
+        serializedData: Data(base64Encoded: Data(persistedTopicData!.utf8))!
+      )
+      let conversation = await xmtpClient.conversations.importTopicData(data: data)
+      return conversation
+    } catch {
+      sentryTrackError(error: error, extras: ["message": "Could not import topic data in XMTP Client"])
+    }
+  }
   return nil;
 }
 
