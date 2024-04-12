@@ -11,16 +11,3 @@ index 1ffbdc2..6b4532c 100644
                                pathPtr);
  
    if (instance == nullptr) {
-diff --git a/node_modules/react-native-mmkv/ios/MmkvHostObject.mm b/node_modules/react-native-mmkv/ios/MmkvHostObject.mm
-index 16045fd..49e3801 100644
---- a/node_modules/react-native-mmkv/ios/MmkvHostObject.mm
-+++ b/node_modules/react-native-mmkv/ios/MmkvHostObject.mm
-@@ -13,7 +13,7 @@
- #import <vector>
- 
- MmkvHostObject::MmkvHostObject(NSString* instanceId, NSString* path, NSString* cryptKey) {
--  NSData* cryptData = cryptKey == nil ? nil : [cryptKey dataUsingEncoding:NSUTF8StringEncoding];
-+  NSData* cryptData = cryptKey == nil ? nil : [[NSData alloc] initWithBase64EncodedString:cryptKey options:0];;
- 
-   // Get appGroup value from info.plist using key "AppGroup"
-   NSString* appGroup = [[NSBundle mainBundle] objectForInfoDictionaryKey:@"AppGroup"];

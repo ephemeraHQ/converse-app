@@ -101,7 +101,7 @@ class PushNotificationsService : FirebaseMessagingService() {
             try {
                 if (isInviteTopic(notificationData.contentTopic)) {
                     Log.d(TAG, "Handling a new conversation notification")
-                    val conversation = getNewConversationFromEnvelope(xmtpClient, envelope)
+                    val conversation = getNewConversationFromEnvelope(applicationContext, xmtpClient, envelope)
                     if (conversation != null) {
                         result = handleNewConversationFirstMessage(
                             applicationContext,

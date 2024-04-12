@@ -25,8 +25,7 @@ export const secureMmkvByAccount: { [account: string]: MMKV } = {};
 export const getSecureMmkvForAccount = async (account: string) => {
   if (secureMmkvByAccount[account]) return secureMmkvByAccount[account];
   const encryptionKey = await getAccountEncryptionKey(account);
-  const mmkvEncryptionKey = Buffer.from(encryptionKey.subarray(0, 16));
-  const mmkvStringEncryptionKey = mmkvEncryptionKey.toString("base64");
+  const mmkvStringEncryptionKey = encryptionKey.toString("base64").slice(0, 16);
 
   secureMmkvByAccount[account] = new MMKV({
     id: `secure-mmkv-${account}`,
