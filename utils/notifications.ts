@@ -282,9 +282,6 @@ export const loadSavedNotificationMessagesToContext = async () => {
     const conversations = loadSavedNotificationsConversations();
     const messages = loadSavedNotificationsMessages();
     addLog(`loadSavedNotificationMessagesToContext 2`);
-    emptySavedNotificationsConversations();
-    emptySavedNotificationsMessages();
-    addLog(`loadSavedNotificationMessagesToContext 3`);
 
     if (conversations && conversations.length > 0) {
       addLog(`loadSavedNotificationMessagesToContext 4`);
@@ -379,6 +376,9 @@ export const loadSavedNotificationMessagesToContext = async () => {
       addLog(`loadSavedNotificationMessagesToContext 11`);
     }
 
+    emptySavedNotificationsConversations();
+    addLog("Emptying notif messages 1");
+    emptySavedNotificationsMessages();
     loadingSavedNotifications = false;
   } catch (e) {
     console.log("An error occured while loading saved notifications", e);
@@ -387,6 +387,7 @@ export const loadSavedNotificationMessagesToContext = async () => {
       errorType: typeof e,
     });
     emptySavedNotificationsConversations();
+    addLog("Emptying notif messages 2");
     emptySavedNotificationsMessages();
     loadingSavedNotifications = false;
   }
