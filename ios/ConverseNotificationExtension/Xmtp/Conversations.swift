@@ -22,8 +22,7 @@ func getNewConversationFromEnvelope(xmtpClient: XMTP.Client, envelope: XMTP.Enve
       return conversation
     }
   } catch {
-    sentryTrackMessage(message: "Could not decode new conversation envelope", extras: ["error": error])
-    print("[NotificationExtension] Could not decode new conversation envelope \(error)")
+    sentryTrackError(error: error, extras: ["message": "Could not decode new conversation envelope"])
   }
   return nil
 }
@@ -81,7 +80,7 @@ func getPersistedConversation(xmtpClient: XMTP.Client, contentTopic: String) asy
           let conversation = await xmtpClient.conversations.importTopicData(data: data)
           return conversation
         } catch {
-          sentryTrackMessage(message: "Could not import topic data in XMTP Client", extras: ["error": error])
+          sentryTrackError(error: error, extras: ["message": "Could not import topic data in XMTP Client"])
           return nil
         }
       }
@@ -124,7 +123,7 @@ func persistDecodedConversation(account: String, conversation: Conversation) {
           let newJsonData = try JSONSerialization.data(withJSONObject: json, options: [])
           mmkv.set(newJsonData, forKey: "XMTP_TOPICS_DATA")
         } catch {
-          sentryTrackMessage(message: "Could not save new topic data in MMKV", extras: ["error": error])
+          sentryTrackError(error: error, extras: ["message": "Could not save new topic data in MMKV"])
         }
       }
     } catch {
