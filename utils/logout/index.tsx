@@ -110,13 +110,7 @@ export const executeLogoutTasks = async () => {
         await deleteSecureItemAsync(task.pkPath);
       }
       assertNotLogged(account);
-      if (task.topics.length > 0) {
-        // This is too long and might race with re-login, let's not do it for now
-        // it could be done by having a different account id even if you re-login with
-        // same account.
-        // await deleteConversationsFromKeychain(account, task.topics);
-        resetSharedData(task.topics);
-      }
+      resetSharedData(task.topics || []);
       assertNotLogged(account);
       // This will fail if no connection (5sec timeout)
       await unsubscribeFromNotifications(task.apiHeaders);
