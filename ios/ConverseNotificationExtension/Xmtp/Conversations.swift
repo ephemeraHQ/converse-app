@@ -68,36 +68,28 @@ func getSavedConversationTitle(contentTopic: String)-> String {
 }
 
 func getPersistedConversation(xmtpClient: XMTP.Client, contentTopic: String) async -> XMTP.Conversation? {
-  let hashedKey = CryptoKit.SHA256.hash(data: contentTopic.data(using: .utf8)!)
-  let hashString = hashedKey.compactMap { String(format: "%02x", $0) }.joined()
-  let persistedTopicData = getKeychainValue(forKey: "XMTP_TOPIC_DATA_\(xmtpClient.address)_\(hashString)")
-  if (persistedTopicData != nil && persistedTopicData!.count > 0) {
+  let secureMmkv = getSecureMmkvForAccount(account: xmtpClient.address)
+  if let mmkv = secureMmkv {
+    let jsonData = mmkv.data(forKey: "XMTP_TOPICS_DATA")
     do {
-      print("[NotificationExtension] Found a persisted topic data")
-      let data = try Xmtp_KeystoreApi_V1_TopicMap.TopicData(
-        serializedData: Data(base64Encoded: Data(persistedTopicData!.utf8))!
-      )
-      let conversation = await xmtpClient.conversations.importTopicData(data: data)
-      return conversation
+      if let data = jsonData, let json = try JSONSerialization.jsonObject(with: data, options: []) as? [String: String], let topicData = json[contentTopic] {
+        do {
+          print("[NotificationExtension] Found a persisted topic data")
+          let data = try Xmtp_KeystoreApi_V1_TopicMap.TopicData(
+            serializedData: Data(base64Encoded: topicData)!
+          )
+          let conversation = await xmtpClient.conversations.importTopicData(data: data)
+          return conversation
+        } catch {
+          sentryTrackMessage(message: "Could not import topic data in XMTP Client", extras: ["error": error])
+          return nil
+        }
+      }
     } catch {
-      sentryTrackMessage(message: "Could not import topic data in XMTP Client", extras: ["error": error])
-      return nil
+      sentryTrackError(error: error, extras: ["message": "Error while getting persisted topics"])
     }
   }
-  // TODO => remove here as it's the old way of saving convos and we don't use it anymore
-  let persistedConversation = getKeychainValue(forKey: "XMTP_CONVERSATION_\(hashString)")
-  if (persistedConversation != nil && persistedConversation!.count > 0) {
-    do {
-      print("[NotificationExtension] Found a persisted conversation")
-      let conversation = try xmtpClient.importConversation(from: persistedConversation!.data(using: .utf8)!)
-      return conversation
-    } catch {
-      sentryTrackMessage(message: "Could not import conversation in XMTP Client", extras: ["error": error])
-      return nil
-    }
-  }
-  sentryTrackMessage(message: "No keychain value found for topic", extras: ["contentTopic": contentTopic])
-  return nil
+  return nil;
 }
 
 func persistDecodedConversation(account: String, conversation: Conversation) {

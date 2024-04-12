@@ -129,7 +129,9 @@ func handleOngoingConversationMessage(xmtpClient: XMTP.Client, envelope: XMTP.En
     print("[NotificationExtension] Not showing a notification because could not decode message")
     sentryTrackMessage(message: "Could not decode envelope", extras: ["envelope": envelope, "account": xmtpClient.address])
   }
-  
+  if (isDebugAccount(account: xmtpClient.address)) {
+    sentryTrackMessage(message: "DEBUG_NOTIFICATION", extras: ["shouldShowNotification": shouldShowNotification, "messageId": messageId ?? "EMPTY", "bestAttemptContentBody": bestAttemptContent.body, "bestAttemptContentTitle": bestAttemptContent.title])
+  }
   return (shouldShowNotification, messageId)
 }
 
@@ -150,6 +152,9 @@ func loadSavedMessages() -> [SavedNotificationMessage] {
 }
 
 func saveMessage(account: String, topic: String, sent: Date, senderAddress: String, content: String, id: String, sentViaConverse: Bool, contentType: String, referencedMessageId: String?) throws {
+  if (isDebugAccount(account: account)) {
+    sentryAddBreadcrumb(message: "Calling save message with sender \(senderAddress) and content \(content)")
+  }
   let savedMessage = SavedNotificationMessage(topic: topic, content: content, senderAddress: senderAddress, sent: Int(sent.timeIntervalSince1970 * 1000), id: id, sentViaConverse: sentViaConverse, contentType: contentType, account: account, referencedMessageId: referencedMessageId)
   
   var savedMessagesList = loadSavedMessages()
@@ -158,11 +163,13 @@ func saveMessage(account: String, topic: String, sent: Date, senderAddress: Stri
   let encodedString = String(data: encodedValue, encoding: .utf8)
   let mmkv = getMmkv()
   mmkv?.set(encodedString!, forKey: "saved-notifications-messages")
+  if (isDebugAccount(account: account)) {
+    sentryAddBreadcrumb(message: "Done save message - count \(savedMessagesList.count) - value \(encodedString ?? "EMPTY")")
+  }
 }
 
 func decodeMessage(xmtpClient: XMTP.Client, envelope: XMTP.Envelope) async throws -> DecodedMessage? {
   guard let conversation = await getPersistedConversation(xmtpClient: xmtpClient, contentTopic: envelope.contentTopic) else {
-    print("[NotificationExtension] NOTIFICATION_CONVERSATION_NOT_FOUND", envelope)
     sentryTrackMessage(message: "NOTIFICATION_CONVERSATION_NOT_FOUND", extras: ["envelope": envelope])
     return nil
   }
@@ -242,6 +249,10 @@ func handleMessageByContentType(decodedMessage: DecodedMessage, xmtpClient: XMTP
       sentryTrackMessage(message: "NOTIFICATION_UNKNOWN_CONTENT_TYPE", extras: ["contentType": contentType, "topic": decodedMessage.topic])
       print("[NotificationExtension] UNKOWN CONTENT TYPE: \(contentType)")
       return (nil, decodedMessage.senderAddress, false, nil)
+    }
+    
+    if (isDebugAccount(account: xmtpClient.address)) {
+      sentryAddBreadcrumb(message: "Finished handling message content - \(contentToReturn ?? "EMPTY") - tosave \(contentToSave ?? "EMPTY")")
     }
     
     // If there's content to save, save it

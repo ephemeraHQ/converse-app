@@ -25,37 +25,6 @@ export const deleteXmtpKey = async (account: string) => {
 export const loadXmtpKey = async (account: string): Promise<string | null> =>
   getSecureItemAsync(`XMTP_KEY_${account}`);
 
-// Faster than saving if already exists
-const saveIfNotExists = async (key: string, value: string) => {
-  const alreadyExists = await getSecureItemAsync(key);
-  if (alreadyExists) {
-    return;
-  }
-  await setSecureItemAsync(key, value);
-};
-
-export const saveTopicDataToKeychain = async (
-  account: string,
-  conversationTopicData: { [topic: string]: string }
-) => {
-  const promises = [];
-  const now = new Date().getTime();
-  for (const topic in conversationTopicData) {
-    const topicData = conversationTopicData[topic];
-    const key = createHash("sha256").update(topic).digest("hex");
-    promises.push(
-      saveIfNotExists(`XMTP_TOPIC_DATA_${account}_${key}`, topicData)
-    );
-  }
-  await Promise.all(promises);
-  const after = new Date().getTime();
-  console.log(
-    `Persisted ${promises.length} exported conversations in ${
-      (after - now) / 1000
-    } seconds`
-  );
-};
-
 export const getTopicDataFromKeychain = async (
   account: string,
   topics: string[]
