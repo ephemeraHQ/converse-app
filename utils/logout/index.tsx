@@ -8,7 +8,7 @@ import {
   useAccountsStore,
 } from "../../data/store/accountsStore";
 import { deleteSecureItemAsync } from "../keychain";
-import { deleteXmtpKey } from "../keychain/helpers";
+import { deleteAccountEncryptionKey, deleteXmtpKey } from "../keychain/helpers";
 import mmkv, { clearSecureMmkvForAccount, secureMmkvByAccount } from "../mmkv";
 import {
   deleteSubscribedTopics,
@@ -105,6 +105,7 @@ export const executeLogoutTasks = async () => {
       );
       await clearSecureMmkvForAccount(account);
       await deleteXmtpKey(account);
+      await deleteAccountEncryptionKey(account);
       if (task.pkPath) {
         await deleteSecureItemAsync(task.pkPath);
       }
