@@ -1,7 +1,7 @@
 import { MMKV } from "react-native-mmkv";
 import { StateStorage } from "zustand/middleware";
 
-import { loadXmtpKey } from "./keychain/helpers";
+import { getAccountEncryptionKey } from "./keychain/helpers";
 
 const storage = new MMKV();
 
@@ -24,13 +24,13 @@ export const secureMmkvByAccount: { [account: string]: MMKV } = {};
 
 export const getSecureMmkvForAccount = async (account: string) => {
   if (secureMmkvByAccount[account]) return secureMmkvByAccount[account];
-  const base64Key = await loadXmtpKey(account);
-  if (!base64Key)
-    throw new Error("MMKV - Could not find base64 key for account");
+  const encryptionKey = await getAccountEncryptionKey(account);
+  const mmkvEncryptionKey = Buffer.from(encryptionKey.subarray(0, 16));
+  const mmkvStringEncryptionKey = mmkvEncryptionKey.toString("base64");
 
   secureMmkvByAccount[account] = new MMKV({
     id: `secure-mmkv-${account}`,
-    encryptionKey: base64Key,
+    encryptionKey: mmkvStringEncryptionKey,
   });
   return secureMmkvByAccount[account];
 };

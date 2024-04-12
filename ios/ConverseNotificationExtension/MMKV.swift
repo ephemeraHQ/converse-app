@@ -33,15 +33,9 @@ func getMmkv() -> MMKV? {
 func getSecureMmkvForAccount(account: String) -> MMKV? {
   if (secureMmkvForAccount[account] == nil) {
     initializeMmkv()
-    do {
-      let xmtpKeyData = try getXmtpKeyForAccount(account: account)
-      if let keyData = xmtpKeyData {
-        let keyBase64 = keyData.base64EncodedString()
-        let keyUtf8Data = keyBase64.data(using: .utf8)
-        secureMmkvForAccount[account] = MMKV(mmapID: "secure-mmkv-\(account)", cryptKey: keyUtf8Data, mode: MMKVMode.multiProcess)
-      }
-    } catch {
-      
+    let accountEncryptionKey = getKeychainValue(forKey: "CONVERSE_ACCOUNT_ENCRYPTION_KEY_\(account)")
+    if let encryptionKey = accountEncryptionKey, let keyData = Data(base64Encoded: encryptionKey) {
+      secureMmkvForAccount[account] = MMKV(mmapID: "secure-mmkv-\(account)", cryptKey: keyData[0..<16], mode: MMKVMode.multiProcess)
     }
   }
   return secureMmkvForAccount[account] ?? nil;
@@ -63,7 +57,7 @@ func getAccountsState() -> Accounts? {
 }
 
 func getCurrentAccount() -> String? {
-  var accountsState = getAccountsState()
+  let accountsState = getAccountsState()
   if (accountsState == nil || accountsState?.currentAccount == "TEMPORARY_ACCOUNT") {
     return nil
   }
@@ -71,7 +65,7 @@ func getCurrentAccount() -> String? {
 }
 
 func getAccounts() -> [String] {
-  var accountsState = getAccountsState()
+  let accountsState = getAccountsState()
   if (accountsState == nil) {
     return []
   }
