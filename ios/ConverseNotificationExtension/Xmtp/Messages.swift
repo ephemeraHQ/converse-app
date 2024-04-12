@@ -180,8 +180,7 @@ func decodeMessage(xmtpClient: XMTP.Client, envelope: XMTP.Envelope) async throw
     print("[NotificationExtension] Message decoded!")
     return decodedMessage
   } catch {
-    sentryTrackMessage(message: "NOTIFICATION_DECODING_ERROR", extras: ["error": error, "envelope": envelope])
-    print("[NotificationExtension] ERROR WHILE DECODING \(error)")
+    sentryTrackError(error: error, extras: ["message": "NOTIFICATION_DECODING_ERROR", "envelope": envelope])
     return nil
   }
 }
@@ -272,8 +271,7 @@ func handleMessageByContentType(decodedMessage: DecodedMessage, xmtpClient: XMTP
     return (contentToReturn, decodedMessage.senderAddress, forceIgnore, decodedMessage.id)
   } catch {
     let errorType = contentType.split(separator: "/").last ?? "UNKNOWN"
-    sentryTrackMessage(message: "NOTIFICATION_\(errorType)_ERROR", extras: ["error": error, "topic": decodedMessage.topic])
-    print("[NotificationExtension] ERROR WHILE HANDLING \(contentType) \(error)")
+    sentryTrackError(error: error, extras: ["message": "NOTIFICATION_\(errorType)_ERROR", "topic": decodedMessage.topic])
     return (nil, nil, false, nil)
   }
 }
