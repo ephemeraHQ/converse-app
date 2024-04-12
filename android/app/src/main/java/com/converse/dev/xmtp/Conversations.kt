@@ -107,7 +107,7 @@ fun getPersistedConversation(appContext: Context, xmtpClient: Client, topic: Str
         val persistedTopicData = getKeychainValue("XMTP_TOPIC_DATA_${xmtpClient.address}_$encodedTopic")
         if (persistedTopicData !== null) {
             val data = TopicData.parseFrom(Base64.decode(persistedTopicData, NO_WRAP))
-            Log.d("PushNotificationsService", "Got saved conversation from topic data: $persistedTopicData")
+            Log.d("PushNotificationsService", "Got saved conversation from topic data")
             return xmtpClient.conversations.importTopicData(data)
         }
     } catch (e: Exception) {
