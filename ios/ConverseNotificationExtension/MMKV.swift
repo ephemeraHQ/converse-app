@@ -9,16 +9,42 @@ import Foundation
 import MMKVAppExtension
 
 private var mmkvInstance: MMKV? = nil;
+private var secureMmkvForAccount: [String: MMKV?] = [:];
+private var mmkvInitialized = false;
 
-func getMmkv() -> MMKV? {
-  if (mmkvInstance == nil) {
+func initializeMmkv() {
+  if (!mmkvInitialized) {
+    mmkvInitialized = true
     let groupId = "group.\(try! getInfoPlistValue(key: "AppBundleId", defaultValue: nil))"
     let groupDir = (FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: groupId)?.path)!
     MMKV.initialize(rootDir: nil, groupDir: groupDir, logLevel: MMKVLogLevel.warning)
+  }
+}
+
+func getMmkv() -> MMKV? {
+  if (mmkvInstance == nil) {
+    initializeMmkv()
     mmkvInstance = MMKV(mmapID: "mmkv.default", cryptKey: nil, mode: MMKVMode.multiProcess)
   }
   
   return mmkvInstance;
+}
+
+func getSecureMmkvForAccount(account: String) -> MMKV? {
+  if (secureMmkvForAccount[account] == nil) {
+    initializeMmkv()
+    do {
+      let xmtpKeyData = try getXmtpKeyForAccount(account: account)
+      if let keyData = xmtpKeyData {
+        let keyBase64 = keyData.base64EncodedString()
+        let keyUtf8Data = keyBase64.data(using: .utf8)
+        secureMmkvForAccount[account] = MMKV(mmapID: "secure-mmkv-\(account)", cryptKey: keyUtf8Data, mode: MMKVMode.multiProcess)
+      }
+    } catch {
+      
+    }
+  }
+  return secureMmkvForAccount[account] ?? nil;
 }
 
 func getAccountsState() -> Accounts? {

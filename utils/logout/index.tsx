@@ -117,7 +117,7 @@ export const executeLogoutTasks = async () => {
         resetSharedData(task.topics);
       }
       assertNotLogged(account);
-      // This will fail if no connection and will be tried later async
+      // This will fail if no connection (5sec timeout)
       await unsubscribeFromNotifications(task.apiHeaders);
       removeLogoutTask(account);
     } catch (e: any) {

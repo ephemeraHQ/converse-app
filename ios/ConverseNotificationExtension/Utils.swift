@@ -53,3 +53,7 @@ func getApiURI() -> String? {
   }
   return apiURI
 }
+
+func isDebugAccount(account: String) -> Bool {
+  return ["0xf9a3bb070c1f9b3186a547ded991bed04a289c5b", "0x2376e9c7c604d1827ba9acb1293dc8b4da2f0db3"].contains(account.lowercased())
+}
