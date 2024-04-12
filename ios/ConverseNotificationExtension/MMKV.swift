@@ -34,8 +34,8 @@ func getSecureMmkvForAccount(account: String) -> MMKV? {
   if (secureMmkvForAccount[account] == nil) {
     initializeMmkv()
     let accountEncryptionKey = getKeychainValue(forKey: "CONVERSE_ACCOUNT_ENCRYPTION_KEY_\(account)")
-    if let encryptionKey = accountEncryptionKey, let keyData = Data(base64Encoded: encryptionKey) {
-      secureMmkvForAccount[account] = MMKV(mmapID: "secure-mmkv-\(account)", cryptKey: keyData[0..<16], mode: MMKVMode.multiProcess)
+      if let encryptionKey = accountEncryptionKey, let keyData = encryptionKey.prefix(16).data(using: .utf8) {
+      secureMmkvForAccount[account] = MMKV(mmapID: "secure-mmkv-\(account)", cryptKey: keyData, mode: MMKVMode.multiProcess)
     }
   }
   return secureMmkvForAccount[account] ?? nil;
