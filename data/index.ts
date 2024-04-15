@@ -42,7 +42,14 @@ export const loadDataToContext = async (account: string) => {
 
   conversationsWithMessages.forEach((conversation, index) => {
     // If no limit => ASC then no reverse
-    conversation.messages = conversationsMessages[index].reverse();
+    conversation.messages = conversationsMessages[index]
+      .map((m) => ({
+        ...m,
+        converseMetadata: m.converseMetadata
+          ? JSON.parse(m.converseMetadata as any)
+          : undefined,
+      }))
+      .reverse();
   });
 
   const profilesByAddress = await loadProfilesByAddress(account);
