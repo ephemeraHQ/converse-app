@@ -233,9 +233,13 @@ const loadedOlderMessagesForTopic: {
 export const loadOlderMessages = async (account: string, topic: string) => {
   loadedOlderMessagesForTopic[account] =
     loadedOlderMessagesForTopic[account] || {};
-  if (loadedOlderMessagesForTopic[account][topic]) {
-    return;
-  }
+  const chatStore = getChatStore(account).getState();
+  // Pending convos: does not make sense
+  if (chatStore.conversations[topic]?.pending) return;
+  // Alread loaded
+  if (loadedOlderMessagesForTopic[account][topic]) return;
+  // Just mapped, so was created inside this session, no need to fetch
+  if (Object.values(chatStore.conversationsMapping).includes(topic)) return;
   await new Promise((r) => setTimeout(r, 500));
   // On mobile this loads all messages from the local db
   const messages = await getOrderedMessages(account, topic);
