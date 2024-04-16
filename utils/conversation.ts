@@ -358,7 +358,7 @@ export function sortAndComputePreview(
   });
 }
 
-export function getConversationListItemsToDisplay(
+export function getFilteredConversationsWithSearch(
   searchQuery: string,
   sortedConversations: ConversationWithLastMessagePreview[],
   profiles: Record<string, any>
