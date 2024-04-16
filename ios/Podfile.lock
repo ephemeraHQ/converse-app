@@ -1073,7 +1073,7 @@ PODS:
   - React-Mapbuffer (0.73.6):
     - glog
     - React-debug
-  - react-native-get-random-values (1.11.0):
+  - react-native-get-random-values (1.8.0):
     - React-Core
   - react-native-keyboard-controller (1.9.1):
     - React-Core
@@ -1784,7 +1784,7 @@ SPEC CHECKSUMS:
   React-jsinspector: 85583ef014ce53d731a98c66a0e24496f7a83066
   React-logger: 3eb80a977f0d9669468ef641a5e1fabbc50a09ec
   React-Mapbuffer: d81d930c1b7f4db284e1d721fe7fdc99230ca108
-  react-native-get-random-values: 21325b2244dfa6b58878f51f9aa42821e7ba3d06
+  react-native-get-random-values: a6ea6a8a65dc93e96e24a11105b1a9c8cfe1d72a
   react-native-keyboard-controller: fa41f43f87f22ac0248435c1548d5d3f45c15248
   react-native-mmkv: e97c0c79403fb94577e5d902ab1ebd42b0715b43
   react-native-netinfo: 3aa5637c18834966e0c932de8ae1ae56fea20a97
