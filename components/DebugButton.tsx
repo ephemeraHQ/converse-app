@@ -1,5 +1,6 @@
 import Clipboard from "@react-native-clipboard/clipboard";
 import * as Sentry from "@sentry/react-native";
+import { Client } from "@xmtp/react-native-sdk";
 import axios from "axios";
 import { Image } from "expo-image";
 import * as Updates from "expo-updates";
@@ -29,6 +30,39 @@ const DebugButton = forwardRef((props, ref) => {
   useImperativeHandle(ref, () => ({
     showDebugMenu() {
       const methods: any = {
+        DebugIt: async () => {
+          console.log("go");
+          const bob = await Client.createRandom({ env: "dev" });
+          const alice = await Client.createRandom({ env: "dev" });
+          const bobToAlice = await bob.conversations.newConversation(
+            alice.address
+          );
+          console.log(`Streaming messages for alice`);
+          let receivedMessages = 0;
+          await alice.conversations.streamAllMessages(async (message) => {
+            console.log(
+              `Alice received a message from ${message.senderAddress}`
+            );
+            receivedMessages += 1;
+          });
+          await bobToAlice.send("first message");
+          await new Promise((r) => setTimeout(r, 6000));
+          if (receivedMessages !== 1) {
+            alert("SHOULD BE 1");
+            return;
+          }
+          console.log({ receivedMessages });
+          let timeSpent = 0;
+          const minutesToWait = 8;
+          while (timeSpent < minutesToWait * 60 * 1000) {
+            await new Promise((r) => setTimeout(r, 5000));
+            timeSpent += 5000;
+            console.log(`${timeSpent / (minutesToWait * 60 * 10)}%`);
+          }
+          await bobToAlice.send("second message");
+          await new Promise((r) => setTimeout(r, 5000));
+          alert(`received: ${receivedMessages}`);
+        },
         "Update OTA": async () => {
           try {
             const update = await Updates.fetchUpdateAsync();
