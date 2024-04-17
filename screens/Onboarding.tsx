@@ -1,10 +1,6 @@
 import { useCallback, useEffect, useRef } from "react";
 
-import ConnectViaWallet from "../components/Onboarding/ConnectViaWallet";
-import DesktopConnect from "../components/Onboarding/DesktopConnect";
-import DesktopConnectFlow from "../components/Onboarding/DesktopConnectFlow";
 import PrivyConnect from "../components/Onboarding/PrivyConnect";
-import SeedPhraseConnect from "../components/Onboarding/SeedPhraseConnect";
 import WalletSelector from "../components/Onboarding/WalletSelector";
 import { initDb } from "../data/db";
 import {
@@ -98,15 +94,7 @@ export default function Onboarding() {
     }
   }, [connectionMethod, initXmtpClient, signer]);
 
-  if (desktopConnectSessionId) {
-    return <DesktopConnectFlow />;
-  } else if (connectionMethod === "wallet") {
-    return <ConnectViaWallet connectWithBase64Key={connectWithBase64Key} />;
-  } else if (connectionMethod === "desktop") {
-    return <DesktopConnect />;
-  } else if (connectionMethod === "seedPhrase") {
-    return <SeedPhraseConnect />;
-  } else if (connectionMethod === "phone") {
+  if (connectionMethod === "phone") {
     return <PrivyConnect />;
   }
 

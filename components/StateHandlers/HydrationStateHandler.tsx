@@ -7,7 +7,6 @@ import { refreshProfileForAddress } from "../../data/helpers/profiles/profilesUp
 import { getAccountsList } from "../../data/store/accountsStore";
 import { useAppStore } from "../../data/store/appStore";
 import { loadSavedNotificationMessagesToContext } from "../../utils/notifications";
-import { getInstalledWallets } from "../Onboarding/supportedWallets";
 
 export default function HydrationStateHandler() {
   // Initial hydration
@@ -15,8 +14,6 @@ export default function HydrationStateHandler() {
     const hydrate = async () => {
       const startTime = new Date().getTime();
       let lastTime = startTime;
-      // Let's load installed wallets
-      await getInstalledWallets(false);
 
       const accounts = getAccountsList();
       await Promise.all(accounts.map((a) => initDb(a)));
