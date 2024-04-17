@@ -1,4 +1,4 @@
-import { useLoginWithSMS, useEmbeddedWallet, usePrivy } from "@privy-io/expo";
+import { useEmbeddedWallet, useLoginWithSMS, usePrivy } from "@privy-io/expo";
 import * as LibPhoneNumber from "libphonenumber-js";
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
@@ -100,6 +100,7 @@ export default function PrivyConnect() {
         Alert.alert("The code you entered is not valid, please try again");
         otpInputRef.current?.clear();
       } else {
+        console.log("WE GOT USER", user);
         setPrivyAccountId(user.user.id);
       }
     },
@@ -132,7 +133,13 @@ export default function PrivyConnect() {
         !gotEmbeddedWallet.current
       ) {
         gotEmbeddedWallet.current = true;
-        setSigner(privySigner);
+        console.log("WE GOT SIGNER YO");
+
+        // Let's first verify is user exists. If not
+        // we will show the Invite Code screen then
+        // the username & display name screens
+
+        // setSigner(privySigner);
       }
     })();
   }, [privySigner, setSigner, status]);
