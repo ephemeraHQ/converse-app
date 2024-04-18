@@ -17,6 +17,7 @@ import PhoneInput from "react-native-phone-number-input";
 import Button from "../../components/Button/Button";
 import { useOnboardingStore } from "../../data/store/onboardingStore";
 import { useSelect } from "../../data/store/storeHelpers";
+import { getPrivyAuthenticatedUser } from "../../utils/api";
 import {
   backgroundColor,
   primaryColor,
@@ -24,22 +25,30 @@ import {
   textPrimaryColor,
   textSecondaryColor,
 } from "../../utils/colors";
-import { usePrivySigner } from "../../utils/evm/privy";
+import { usePrivyAccessToken, usePrivySigner } from "../../utils/evm/privy";
 import Picto from "../Picto/Picto";
 import OnboardingComponent from "./OnboardingComponent";
 
 export default function PrivyConnect() {
   const colorScheme = useColorScheme();
   const styles = useStyles();
-  const { setConnectionMethod, setLoading, setSigner, setPrivyAccountId } =
-    useOnboardingStore(
-      useSelect([
-        "setConnectionMethod",
-        "setLoading",
-        "setSigner",
-        "setPrivyAccountId",
-      ])
-    );
+  const {
+    setLoading,
+    setSigner,
+    privyAccountId,
+    setPrivyAccountId,
+    setStep,
+    resetOnboarding,
+  } = useOnboardingStore(
+    useSelect([
+      "setLoading",
+      "setSigner",
+      "privyAccountId",
+      "setPrivyAccountId",
+      "setStep",
+      "resetOnboarding",
+    ])
+  );
 
   const { isReady: privyReady, user: privyUser, logout } = usePrivy();
 
@@ -51,6 +60,7 @@ export default function PrivyConnect() {
 
   const embeddedWallet = useEmbeddedWallet();
   const privySigner = usePrivySigner(true);
+  const privyAccessToken = usePrivyAccessToken();
 
   const { sendCode, loginWithCode } = useLoginWithSMS();
 
@@ -100,7 +110,6 @@ export default function PrivyConnect() {
         Alert.alert("The code you entered is not valid, please try again");
         otpInputRef.current?.clear();
       } else {
-        console.log("WE GOT USER", user);
         setPrivyAccountId(user.user.id);
       }
     },
@@ -129,20 +138,37 @@ export default function PrivyConnect() {
     (async () => {
       if (
         privySigner &&
+        privyAccessToken &&
+        privyAccountId &&
         status === "verify-phone" &&
         !gotEmbeddedWallet.current
       ) {
         gotEmbeddedWallet.current = true;
-        console.log("WE GOT SIGNER YO");
 
-        // Let's first verify is user exists. If not
-        // we will show the Invite Code screen then
-        // the username & display name screens
-
-        // setSigner(privySigner);
+        try {
+          const user = await getPrivyAuthenticatedUser(privyAccessToken);
+          if (user && user.privyAccountId === privyAccountId) {
+            // Existing users can access now
+            setSigner(privySigner);
+            return;
+          }
+        } catch (e) {
+          console.log(e);
+        }
+        // Others need an invite code
+        setStep("invite");
+        setLoading(false);
       }
     })();
-  }, [privySigner, setSigner, status]);
+  }, [
+    privyAccessToken,
+    privyAccountId,
+    privySigner,
+    setLoading,
+    setSigner,
+    setStep,
+    status,
+  ]);
 
   const [showOtpTick, setShowOtpTick] = useState(true);
 
@@ -188,9 +214,7 @@ export default function PrivyConnect() {
       primaryButtonText={status === "enter-phone" ? "Continue" : undefined}
       primaryButtonAction={sendPhone}
       backButtonText="Back to home screen"
-      backButtonAction={() => {
-        setConnectionMethod(undefined);
-      }}
+      backButtonAction={resetOnboarding}
       shrinkWithKeyboard
     >
       {status === "enter-phone" && (

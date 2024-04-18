@@ -1,12 +1,11 @@
 import axios from "axios";
-import { Platform } from "react-native";
 
 import config from "../config";
 import { TopicData } from "../data/store/chatStore";
 import { ProfileSocials } from "../data/store/profilesStore";
 import { Frens } from "../data/store/recommendationsStore";
 import { getXmtpApiHeaders } from "../utils/xmtpRN/api";
-import { isDesktop } from "./device";
+import { analyticsPlatform } from "./analytics";
 import { TransferAuthorizationMessage } from "./evm/erc20";
 import { TransactionDetails } from "./transaction";
 
@@ -44,7 +43,7 @@ api.interceptors.response.use(
 
 const lastSaveUser: { [address: string]: number } = {};
 
-export const saveUser = async (address: string, privyAccountId?: string) => {
+export const saveUser = async (address: string, privyAccountId: string) => {
   const now = new Date().getTime();
   const last = lastSaveUser[address] || 0;
   if (now - last < 3000) {
@@ -54,28 +53,9 @@ export const saveUser = async (address: string, privyAccountId?: string) => {
   }
   lastSaveUser[address] = now;
 
-  let platform = undefined as string | undefined;
-  if (isDesktop) {
-    platform = "macOS";
-  } else {
-    switch (Platform.OS) {
-      case "ios":
-        platform = "iOS";
-        break;
-      case "android":
-        platform = "Android";
-        break;
-      case "web":
-        platform = "Web";
-        break;
-
-      default:
-        break;
-    }
-  }
   await api.post(
     "/api/user",
-    { address, privyAccountId, platform },
+    { address, privyAccountId, platform: analyticsPlatform },
     { headers: await getXmtpApiHeaders(address) }
   );
 };
@@ -83,6 +63,28 @@ export const saveUser = async (address: string, privyAccountId?: string) => {
 export const userExists = async (address: string) => {
   const { data } = await api.get("/api/user/exists", { params: { address } });
   return data.userExists;
+};
+
+export const getPrivyAuthenticatedUser = async (privyAccessToken: string) => {
+  const { data } = await api.get("/api/user/privyauth", {
+    params: { privyAccessToken },
+  });
+  return data;
+};
+
+export const getInvite = async (inviteCode: string): Promise<boolean> => {
+  const { data } = await api.get("/api/user/invite", {
+    params: { code: inviteCode },
+  });
+  return data.valid;
+};
+
+export const signup = async (privyAccessToken: string, inviteCode: string) => {
+  const { data } = await api.post("/api/user/signup", {
+    privyAccessToken,
+    inviteCode,
+  });
+  return data;
 };
 
 type ReportMessageQuery = {

@@ -46,7 +46,7 @@ export default function NotificationsStateHandler() {
           resetNotifications(500);
           // Save the user
           if (userAddress) {
-            saveUser(userAddress, privyAccountId[userAddress]);
+            saveUser(userAddress, privyAccountId[userAddress] as string);
           }
         } else {
           // Things to do when app status changes to inactive

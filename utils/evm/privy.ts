@@ -1,7 +1,7 @@
 import { useEmbeddedWallet, usePrivy } from "@privy-io/expo";
 import { ethers } from "ethers";
 import "@ethersproject/shims";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import config from "../../config";
 import {
@@ -39,4 +39,15 @@ export const usePrivySigner = (onboarding: boolean = false) => {
     }
   }
   return undefined;
+};
+
+export const usePrivyAccessToken = () => {
+  const [accessToken, setAccessToken] = useState(null as string | null);
+  const { getAccessToken } = usePrivy();
+  useEffect(() => {
+    getAccessToken().then((token) => {
+      setAccessToken(token);
+    });
+  }, [getAccessToken]);
+  return accessToken;
 };
