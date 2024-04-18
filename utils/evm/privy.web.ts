@@ -1,7 +1,7 @@
 import { usePrivy, useWallets } from "@privy-io/react-auth";
 import { Signer } from "ethers";
 import "@ethersproject/shims";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 import config from "../../config";
 import {
@@ -48,4 +48,15 @@ export const usePrivySigner = (onboarding: boolean = false) => {
     setupSigner();
   }
   return undefined;
+};
+
+export const usePrivyAccessToken = () => {
+  const [accessToken, setAccessToken] = useState(null as string | null);
+  const { getAccessToken } = usePrivy();
+  useEffect(() => {
+    getAccessToken().then((token) => {
+      setAccessToken(token);
+    });
+  }, [getAccessToken]);
+  return accessToken;
 };

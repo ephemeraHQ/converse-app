@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef } from "react";
+import { Platform } from "react-native";
 
 import InviteCode from "../components/Onboarding/InviteCode";
 import PrivyConnect from "../components/Onboarding/PrivyConnect";
@@ -95,7 +96,17 @@ export default function Onboarding() {
   }, [connectionMethod, initXmtpClient, signer]);
 
   if (step === "login" && connectionMethod === "phone") {
-    return <PrivyConnect />;
+    if (Platform.OS === "web") {
+      // Returning both UIs on web because PrivyConnect is just a modal
+      return (
+        <>
+          <WalletSelector />
+          <PrivyConnect />
+        </>
+      );
+    } else {
+      return <PrivyConnect />;
+    }
   } else if (step === "invite") {
     return <InviteCode />;
   }
