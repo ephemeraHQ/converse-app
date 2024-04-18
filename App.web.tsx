@@ -55,6 +55,7 @@ export default function App() {
               loginMethods: ["sms"],
               embeddedWallets: {
                 createOnLogin: "users-without-wallets",
+                noPromptOnSignature: true,
               },
               defaultChain: config.privy.defaultChain,
               supportedChains: [config.privy.defaultChain],
