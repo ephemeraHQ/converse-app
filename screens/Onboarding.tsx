@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef } from "react";
 
+import InviteCode from "../components/Onboarding/InviteCode";
 import PrivyConnect from "../components/Onboarding/PrivyConnect";
 import WalletSelector from "../components/Onboarding/WalletSelector";
 import { initDb } from "../data/db";
@@ -18,23 +19,23 @@ import { getXmtpClient } from "../utils/xmtpRN/sync";
 export default function Onboarding() {
   const {
     connectionMethod,
-    desktopConnectSessionId,
     address,
     signer,
     setLoading,
     isEphemeral,
     pkPath,
     privyAccountId,
+    step,
   } = useOnboardingStore(
     useSelect([
       "connectionMethod",
-      "desktopConnectSessionId",
       "address",
       "signer",
       "setLoading",
       "isEphemeral",
       "pkPath",
       "privyAccountId",
+      "step",
     ])
   );
 
@@ -78,7 +79,6 @@ export default function Onboarding() {
 
     try {
       const base64Key = await getXmtpBase64KeyFromSigner(signer);
-
       await connectWithBase64Key(base64Key);
     } catch (e) {
       initiatingClientFor.current = undefined;
@@ -94,8 +94,10 @@ export default function Onboarding() {
     }
   }, [connectionMethod, initXmtpClient, signer]);
 
-  if (connectionMethod === "phone") {
+  if (step === "login" && connectionMethod === "phone") {
     return <PrivyConnect />;
+  } else if (step === "invite") {
+    return <InviteCode />;
   }
 
   return <WalletSelector />;
