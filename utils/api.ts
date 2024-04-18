@@ -74,9 +74,12 @@ export const getPrivyAuthenticatedUser = async (privyAccessToken: string) => {
 
 export const getInvite = async (inviteCode: string): Promise<boolean> => {
   const { data } = await api.get("/api/user/invite", {
-    params: { code: inviteCode },
+    params: { inviteCode },
   });
-  return data.valid;
+  if (data.inviteCode !== inviteCode) {
+    throw new Error("Invalid invite code");
+  }
+  return data;
 };
 
 export const signup = async (privyAccessToken: string, inviteCode: string) => {
