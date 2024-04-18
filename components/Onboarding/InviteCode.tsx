@@ -33,8 +33,9 @@ export default function InviteCode() {
   const validateCode = useCallback(async () => {
     if (!privyAccessToken || !privySigner) return;
     setLoading(true);
-    const inviteValid = await getInvite(inviteCode);
-    if (!inviteValid) {
+    try {
+      await getInvite(inviteCode);
+    } catch (e) {
       alert("Invalid");
       setInviteCode("");
       setLoading(false);
@@ -42,8 +43,7 @@ export default function InviteCode() {
     }
     // @todo => not signup but show next screen using setStep
     try {
-      const newUser = await signup(privyAccessToken, inviteCode);
-      console.log({ newUser });
+      await signup(privyAccessToken, inviteCode);
       setSigner(privySigner);
     } catch (e) {
       alert("FAILURE");
