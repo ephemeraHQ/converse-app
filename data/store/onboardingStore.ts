@@ -18,6 +18,12 @@ export type OnboardingStep =
   | "sayhi"
   | "notifications";
 
+export type OnboardingProfile = {
+  avatar: string;
+  username: string;
+  displayName: string;
+};
+
 type OnboardingStoreType = {
   addingNewAccount: boolean;
   setAddingNewAccount: (adding: boolean) => void;
@@ -52,6 +58,9 @@ type OnboardingStoreType = {
 
   pkPath: string | undefined;
   setPkPath: (p: string) => void;
+
+  profile: OnboardingProfile;
+  setProfile: (p: OnboardingProfile) => void;
 
   resetOnboarding: () => void;
 
@@ -117,6 +126,13 @@ export const useOnboardingStore = create<OnboardingStoreType>()((set) => ({
   inviteCode: "",
   setInviteCode: (i) => set(() => ({ inviteCode: i })),
 
+  profile: {
+    username: "",
+    displayName: "",
+    avatar: "",
+  },
+  setProfile: (p: OnboardingProfile) => set(() => ({ profile: p })),
+
   step: "login",
   setStep: (s: OnboardingStep) => set(() => ({ step: s })),
 
@@ -134,5 +150,11 @@ export const useOnboardingStore = create<OnboardingStoreType>()((set) => ({
       pkPath: undefined,
       step: "login",
       inviteCode: "",
+      socials: undefined,
+      profile: {
+        username: "",
+        displayName: "",
+        avatar: "",
+      },
     })),
 }));

@@ -146,7 +146,7 @@ export default function PrivyConnect() {
         gotEmbeddedWallet.current = true;
 
         try {
-          const user = await getPrivyAuthenticatedUser(privyAccessToken);
+          const user = await getPrivyAuthenticatedUser();
           if (user && user.privyAccountId === privyAccountId) {
             // Existing users can access now
             setSigner(privySigner);

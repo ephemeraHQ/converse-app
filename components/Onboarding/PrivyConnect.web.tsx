@@ -66,7 +66,7 @@ export default function Onboarding() {
           );
 
           try {
-            const user = await getPrivyAuthenticatedUser(privyAccessToken);
+            const user = await getPrivyAuthenticatedUser();
             if (user && user.privyAccountId === privyUser.id) {
               // Existing users can access now
               setPrivyAccountId(privyUser.id);

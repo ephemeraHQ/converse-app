@@ -1,6 +1,7 @@
 import Big from "big.js";
 import { manipulateAsync, SaveFormat } from "expo-image-manipulator";
-import { Image } from "react-native";
+import * as ImagePicker from "expo-image-picker";
+import { Alert, Image, Linking } from "react-native";
 
 const imageMimeTypes = [
   "image/cgm",
@@ -346,4 +347,53 @@ export const compressAndResizeImage = async (imageURI: string) => {
     format: SaveFormat.JPEG,
   });
   return manipResult;
+};
+
+export const pickMediaFromLibrary = async () => {
+  const mediaPicked = await ImagePicker.launchImageLibraryAsync({
+    mediaTypes: ImagePicker.MediaTypeOptions.Images,
+    quality: 1,
+    base64: false,
+    allowsMultipleSelection: false,
+  });
+
+  if (mediaPicked.canceled) return;
+  const asset = mediaPicked.assets?.[0];
+  if (!asset) return;
+  return asset;
+};
+
+export const takePictureFromCamera = async () => {
+  let cameraPermissions = await ImagePicker.getCameraPermissionsAsync();
+  if (!cameraPermissions?.granted && cameraPermissions?.canAskAgain) {
+    cameraPermissions = await ImagePicker.requestCameraPermissionsAsync();
+  }
+  if (!cameraPermissions?.granted) {
+    Alert.alert(
+      "You need to grant Converse access to the camera before proceeding",
+      undefined,
+      [
+        {
+          text: "Settings",
+          isPreferred: true,
+          onPress: () => {
+            Linking.openSettings();
+          },
+        },
+        { text: "Close" },
+      ]
+    );
+    return;
+  }
+
+  const mediaPicked = await ImagePicker.launchCameraAsync({
+    mediaTypes: ImagePicker.MediaTypeOptions.Images,
+    quality: 1,
+    base64: false,
+    allowsEditing: false,
+  });
+  if (mediaPicked.canceled) return;
+  const asset = mediaPicked.assets?.[0];
+  if (!asset) return;
+  return asset;
 };
