@@ -41,13 +41,24 @@ export const usePrivySigner = (onboarding: boolean = false) => {
   return undefined;
 };
 
+let privyAccessToken: string | null;
+
 export const usePrivyAccessToken = () => {
   const [accessToken, setAccessToken] = useState(null as string | null);
-  const { getAccessToken } = usePrivy();
+  const { getAccessToken, user } = usePrivy();
   useEffect(() => {
-    getAccessToken().then((token) => {
-      setAccessToken(token);
-    });
-  }, [getAccessToken]);
+    getAccessToken()
+      .then((token) => {
+        privyAccessToken = token;
+        setAccessToken(token);
+      })
+      .catch((e) => {
+        console.error("error getting access token", e);
+      });
+  }, [getAccessToken, user?.id]);
   return accessToken;
 };
+
+export const getPrivyRequestHeaders = () => ({
+  "privy-access-token": privyAccessToken,
+});

@@ -3,30 +3,22 @@ import { StyleSheet, useColorScheme, Text, TextInput } from "react-native";
 
 import { useOnboardingStore } from "../../data/store/onboardingStore";
 import { useSelect } from "../../data/store/storeHelpers";
-import { getInvite, signup } from "../../utils/api";
+import { getInvite } from "../../utils/api";
 import { usePrivyAccessToken, usePrivySigner } from "../../utils/evm/privy";
 import OnboardingComponent from "./OnboardingComponent";
 
 export default function InviteCode() {
-  const colorScheme = useColorScheme();
   const styles = useStyles();
-  const {
-    resetOnboarding,
-    setLoading,
-    inviteCode,
-    setInviteCode,
-    setStep,
-    setSigner,
-  } = useOnboardingStore(
-    useSelect([
-      "resetOnboarding",
-      "setLoading",
-      "inviteCode",
-      "setInviteCode",
-      "setStep",
-      "setSigner",
-    ])
-  );
+  const { resetOnboarding, setLoading, inviteCode, setInviteCode, setStep } =
+    useOnboardingStore(
+      useSelect([
+        "resetOnboarding",
+        "setLoading",
+        "inviteCode",
+        "setInviteCode",
+        "setStep",
+      ])
+    );
   const privySigner = usePrivySigner(true);
   const privyAccessToken = usePrivyAccessToken();
 
@@ -41,21 +33,16 @@ export default function InviteCode() {
       setLoading(false);
       return;
     }
-    // @todo => not signup but show next screen using setStep
-    try {
-      await signup(privyAccessToken, inviteCode);
-      setSigner(privySigner);
-    } catch (e) {
-      alert("FAILURE");
-      setLoading(false);
-    }
+
+    setStep("profile");
+    setLoading(false);
   }, [
     inviteCode,
     privyAccessToken,
     privySigner,
     setInviteCode,
     setLoading,
-    setSigner,
+    setStep,
   ]);
 
   return (

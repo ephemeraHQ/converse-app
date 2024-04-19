@@ -3,6 +3,7 @@ import { Platform } from "react-native";
 
 import InviteCode from "../components/Onboarding/InviteCode";
 import PrivyConnect from "../components/Onboarding/PrivyConnect";
+import UserProfile from "../components/Onboarding/UserProfile";
 import WalletSelector from "../components/Onboarding/WalletSelector";
 import { initDb } from "../data/db";
 import {
@@ -109,6 +110,8 @@ export default function Onboarding() {
     }
   } else if (step === "invite") {
     return <InviteCode />;
+  } else if (step === "profile") {
+    return <UserProfile />;
   }
 
   return <WalletSelector />;

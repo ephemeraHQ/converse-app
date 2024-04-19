@@ -3,7 +3,6 @@ import React, { useCallback, useEffect, useRef } from "react";
 import { Dimensions, Platform, useColorScheme } from "react-native";
 
 import SendAttachmentPreview from "../components/Chat/Attachment/SendAttachmentPreview";
-import UsernameSelector from "../components/Onboarding/UsernameSelector";
 import ActionSheetStateHandler from "../components/StateHandlers/ActionSheetStateHandler";
 import HydrationStateHandler from "../components/StateHandlers/HydrationStateHandler";
 import InitialStateHandler from "../components/StateHandlers/InitialStateHandler";
@@ -15,7 +14,6 @@ import {
   useCurrentAccount,
   useSettingsStore,
   useProfilesStore,
-  useLoggedWithPrivy,
 } from "../data/store/accountsStore";
 import { useAppStore } from "../data/store/appStore";
 import { useOnboardingStore } from "../data/store/onboardingStore";
@@ -97,7 +95,6 @@ export default function Main() {
   );
 
   let screenToShow = undefined;
-  const loggedWithPrivy = useLoggedWithPrivy();
 
   if (splashScreenHidden) {
     if (!userAddress || addingNewAccount) {
@@ -110,8 +107,6 @@ export default function Main() {
           Platform.OS === "android"))
     ) {
       screenToShow = <NotificationsScreen />;
-    } else if (loggedWithPrivy && !currentUserName) {
-      screenToShow = <UsernameSelector />;
     } else if (Platform.OS === "android") {
       // On Android the whole navigation is wrapped in a drawler
       // layout to be able to display the menu

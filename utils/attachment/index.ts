@@ -163,25 +163,33 @@ export const uploadRemoteAttachment = async (
   account: string,
   attachment: EncryptedLocalAttachment
 ): Promise<RemoteAttachmentContent> => {
-  const { url } = await getPresignedUriForUpload(account);
-  await RNFetchBlob.fetch(
-    "PUT",
-    url,
-    {
-      "content-type": "application/octet-stream",
-      "x-amz-acl": "public-read",
-    },
-    RNFetchBlob.wrap(attachment.encryptedLocalFileUri.replace("file:///", "/"))
-  );
-
-  const fileURL = new URL(url);
-  const publicURL = fileURL.origin + fileURL.pathname;
+  const publicURL = await uploadFile(account, attachment.encryptedLocalFileUri);
 
   return {
     scheme: "https://",
     url: publicURL,
     ...attachment.metadata,
   };
+};
+
+export const uploadFile = async (
+  account: string | undefined,
+  localFilePath: string,
+  contentType?: string
+) => {
+  const { url } = await getPresignedUriForUpload(account, contentType);
+  await RNFetchBlob.fetch(
+    "PUT",
+    url,
+    {
+      "content-type": contentType || "application/octet-stream",
+      "x-amz-acl": "public-read",
+    },
+    RNFetchBlob.wrap(localFilePath.replace("file:///", "/"))
+  );
+  const fileURL = new URL(url);
+  const publicURL = fileURL.origin + fileURL.pathname;
+  return publicURL;
 };
 
 export const saveAttachmentForPendingMessage = async (

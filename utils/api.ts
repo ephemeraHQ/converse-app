@@ -2,11 +2,13 @@ import axios from "axios";
 
 import config from "../config";
 import { TopicData } from "../data/store/chatStore";
+import { OnboardingProfile } from "../data/store/onboardingStore";
 import { ProfileSocials } from "../data/store/profilesStore";
 import { Frens } from "../data/store/recommendationsStore";
 import { getXmtpApiHeaders } from "../utils/xmtpRN/api";
 import { analyticsPlatform } from "./analytics";
 import { TransferAuthorizationMessage } from "./evm/erc20";
+import { getPrivyRequestHeaders } from "./evm/privy";
 import { TransactionDetails } from "./transaction";
 
 const api = axios.create({
@@ -65,9 +67,9 @@ export const userExists = async (address: string) => {
   return data.userExists;
 };
 
-export const getPrivyAuthenticatedUser = async (privyAccessToken: string) => {
+export const getPrivyAuthenticatedUser = async () => {
   const { data } = await api.get("/api/user/privyauth", {
-    params: { privyAccessToken },
+    headers: getPrivyRequestHeaders(),
   });
   return data;
 };
@@ -82,11 +84,20 @@ export const getInvite = async (inviteCode: string): Promise<boolean> => {
   return data;
 };
 
-export const signup = async (privyAccessToken: string, inviteCode: string) => {
-  const { data } = await api.post("/api/user/signup", {
-    privyAccessToken,
-    inviteCode,
-  });
+type SignupInput = {
+  inviteCode: string;
+  profile: OnboardingProfile;
+};
+
+export const signup = async ({ inviteCode, profile }: SignupInput) => {
+  const { data } = await api.post(
+    "/api/user/signup",
+    {
+      inviteCode,
+      profile,
+    },
+    { headers: getPrivyRequestHeaders() }
+  );
   return data;
 };
 
@@ -293,6 +304,16 @@ export const claimUserName = async (
   return data;
 };
 
+export const checkUsernameValid = async (
+  address: string,
+  username: string
+): Promise<string> => {
+  const { data } = await api.get("/api/profile/username/valid", {
+    params: { address, username },
+  });
+  return data;
+};
+
 export const getSendersSpamScores = async (sendersAddresses: string[]) => {
   if (!sendersAddresses || sendersAddresses.length === 0) return {};
   const { data } = await api.post("/api/spam/senders/batch", {
@@ -301,9 +322,15 @@ export const getSendersSpamScores = async (sendersAddresses: string[]) => {
   return data as { [senderAddress: string]: number };
 };
 
-export const getPresignedUriForUpload = async (userAddress: string) => {
+export const getPresignedUriForUpload = async (
+  userAddress: string | undefined,
+  contentType?: string | undefined
+) => {
   const { data } = await api.get("/api/attachment/presigned", {
-    headers: await getXmtpApiHeaders(userAddress),
+    params: { contentType },
+    headers: userAddress
+      ? await getXmtpApiHeaders(userAddress)
+      : getPrivyRequestHeaders(),
   });
   return data as { objectKey: string; url: string };
 };
