@@ -1,5 +1,5 @@
 diff --git a/node_modules/@xmtp/react-native-sdk/android/build.gradle b/node_modules/@xmtp/react-native-sdk/android/build.gradle
-index b54d66d..cad4975 100644
+index d3218cc..ca3bfef 100644
 --- a/node_modules/@xmtp/react-native-sdk/android/build.gradle
 +++ b/node_modules/@xmtp/react-native-sdk/android/build.gradle
 @@ -85,6 +85,13 @@ android {
@@ -120,7 +120,7 @@ index b8f726f..32f1f43 100644
  			"contentTypeId": model.encodedContent.type.description,
  			"content": try ContentJson.fromEncoded(model.encodedContent, client: client).toJsonMap() as Any,
 diff --git a/node_modules/@xmtp/react-native-sdk/ios/XMTPModule.swift b/node_modules/@xmtp/react-native-sdk/ios/XMTPModule.swift
-index 4af60c3..b7c8a26 100644
+index 1281326..5c9d080 100644
 --- a/node_modules/@xmtp/react-native-sdk/ios/XMTPModule.swift
 +++ b/node_modules/@xmtp/react-native-sdk/ios/XMTPModule.swift
 @@ -457,7 +457,13 @@ public class XMTPModule: Module {
