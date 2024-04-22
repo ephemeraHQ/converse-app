@@ -14,7 +14,8 @@ export type OnboardingStep =
   | "login"
   | "invite"
   | "profile"
-  | "friends"
+  | "warpcast"
+  | "addressbook"
   | "sayhi"
   | "notifications";
 

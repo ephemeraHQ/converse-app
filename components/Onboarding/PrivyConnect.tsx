@@ -110,7 +110,7 @@ export default function PrivyConnect() {
         Alert.alert("The code you entered is not valid, please try again");
         otpInputRef.current?.clear();
       } else {
-        setPrivyAccountId(user.user.id);
+        setPrivyAccountId(user.id);
       }
     },
     [loginWithCode, setLoading, setPrivyAccountId]
