@@ -292,10 +292,31 @@ const Conversation = ({
     );
   }, [conversation, setConversationMessageDraft]);
 
+  const onOpeningConversation = useCallback(
+    ({ topic }: { topic: string }) => {
+      if (topic !== conversationTopic) {
+        onLeaveScreen();
+      }
+    },
+    [conversationTopic, onLeaveScreen]
+  );
+
   useEffect(() => {
-    const unsubscribe = navigation.addListener("beforeRemove", onLeaveScreen);
-    return unsubscribe;
-  }, [navigation, onLeaveScreen]);
+    const unsubscribeBeforeRemove = navigation.addListener(
+      "beforeRemove",
+      onLeaveScreen
+    );
+    if (isDesktop) {
+      converseEventEmitter.on("openingConversation", onOpeningConversation);
+    }
+
+    return () => {
+      if (isDesktop) {
+        converseEventEmitter.off("openingConversation", onOpeningConversation);
+      }
+      unsubscribeBeforeRemove();
+    };
+  }, [navigation, onLeaveScreen, onOpeningConversation]);
 
   const showInviteBanner =
     showInvite.show && showInvite.banner && !isBlockedPeer;

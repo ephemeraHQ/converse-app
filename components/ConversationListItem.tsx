@@ -97,6 +97,11 @@ const ConversationListItem = memo(function ConversationListItem({
         route.params.frameURL
       );
     }
+    if (isDesktop) {
+      converseEventEmitter.emit("openingConversation", {
+        topic: conversationTopic,
+      });
+    }
     navigate("Conversation", {
       topic: conversationTopic,
       message: route.params?.frameURL,
