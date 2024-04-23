@@ -45,9 +45,10 @@ let privyAccessToken: string | null;
 
 export const usePrivyAccessToken = () => {
   const [accessToken, setAccessToken] = useState(null as string | null);
-  const { getAccessToken, user } = usePrivy();
+  const { getAccessToken, user, isReady } = usePrivy();
   useEffect(() => {
-    getAccessToken()
+    if (!isReady) return;
+    getAccessToken?.()
       .then((token) => {
         privyAccessToken = token;
         setAccessToken(token);
@@ -55,7 +56,7 @@ export const usePrivyAccessToken = () => {
       .catch((e) => {
         console.error("error getting access token", e);
       });
-  }, [getAccessToken, user?.id]);
+  }, [getAccessToken, user?.id, isReady]);
   return accessToken;
 };
 

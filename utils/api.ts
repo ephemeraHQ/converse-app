@@ -356,4 +356,14 @@ export const saveNotificationsSubscribe = async (
   );
 };
 
+export const notifyFarcasterLinked = async () => {
+  await api.post(
+    "/api/farcaster/linked",
+    {},
+    {
+      headers: getPrivyRequestHeaders(),
+    }
+  );
+};
+
 export default api;
