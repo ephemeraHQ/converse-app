@@ -21,6 +21,7 @@ export type FarcasterUsername = {
   username: string;
   name?: string;
   avatarURI?: string;
+  linkedAccount?: boolean;
 };
 
 export type UnstoppableDomain = {
