@@ -1,4 +1,5 @@
 import axios from "axios";
+import * as Contacts from "expo-contacts";
 
 import config from "../config";
 import { TopicData } from "../data/store/chatStore";
@@ -363,6 +364,17 @@ export const notifyFarcasterLinked = async () => {
     {
       headers: getPrivyRequestHeaders(),
     }
+  );
+};
+
+export const postAddressBook = async (
+  account: string,
+  contacts: Contacts.Contact[]
+) => {
+  await api.post(
+    "/api/addressbook",
+    { contacts },
+    { headers: await getXmtpApiHeaders(account) }
   );
 };
 

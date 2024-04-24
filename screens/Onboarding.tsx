@@ -6,6 +6,7 @@ import PrivyConnect from "../components/Onboarding/PrivyConnect";
 import UserProfile from "../components/Onboarding/UserProfile";
 import WalletSelector from "../components/Onboarding/WalletSelector";
 import { initDb } from "../data/db";
+import { refreshProfileForAddress } from "../data/helpers/profiles/profilesUpdate";
 import {
   getSettingsStore,
   getWalletStore,
@@ -55,6 +56,9 @@ export default function Onboarding() {
         useAccountsStore.getState().setPrivyAccountId(address, privyAccountId);
       }
       await initDb(address);
+      await refreshProfileForAddress(address, address);
+      // Now we can really set!
+      useAccountsStore.getState().setCurrentAccount(address, false);
 
       if (isEphemeral) {
         getSettingsStore(address).getState().setEphemeralAccount(true);

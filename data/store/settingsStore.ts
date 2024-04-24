@@ -32,6 +32,9 @@ export type SettingsStoreType = {
 
   skipFarcaster: boolean;
   setSkipFarcaster: (s: boolean) => void;
+
+  skipAddressBook: boolean;
+  setSkipAddressBook: (s: boolean) => void;
 };
 
 export const initSettingsStore = (account: string) => {
@@ -83,6 +86,8 @@ export const initSettingsStore = (account: string) => {
             })),
           skipFarcaster: false,
           setSkipFarcaster: (s) => set(() => ({ skipFarcaster: s })),
+          skipAddressBook: false,
+          setSkipAddressBook: (s) => set(() => ({ skipAddressBook: s })),
         }) as SettingsStoreType,
       {
         name: `store-${account}-settings`, // Account-based storage so each account can have its own settings

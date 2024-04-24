@@ -125,8 +125,18 @@ export const useAccountsStore = create<AccountsStoreStype>()(
             getSettingsStore(account)
               .getState()
               .setLastAsyncUpdate(updateSteps.length);
+            return {
+              // No setting anymore because we want to refresh profile first
+              // currentAccount: account,
+              accounts,
+              databaseId,
+            };
           }
-          return { currentAccount: account, accounts, databaseId };
+          return {
+            currentAccount: account,
+            accounts,
+            databaseId,
+          };
         }),
       removeAccount: (accountToRemove) =>
         set((state) => {
