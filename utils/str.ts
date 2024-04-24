@@ -103,11 +103,15 @@ export const useAccountsProfiles = () => {
 
   useEffect(() => {
     accounts.forEach((account) => {
-      const currentState = getProfilesStore(account).getState();
-      handleAccount(account, currentState);
-      getProfilesStore(account).subscribe((state) => {
+      try {
+        const currentState = getProfilesStore(account).getState();
         handleAccount(account, currentState);
-      });
+        getProfilesStore(account).subscribe((state) => {
+          handleAccount(account, state);
+        });
+      } catch (e) {
+        console.error(e);
+      }
     });
   }, [accounts, handleAccount]);
 
