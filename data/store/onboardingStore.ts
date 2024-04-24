@@ -10,14 +10,7 @@ export type ConnectionMethod =
   | "desktop"
   | "seedPhrase";
 
-export type OnboardingStep =
-  | "login"
-  | "invite"
-  | "profile"
-  | "warpcast"
-  | "addressbook"
-  | "sayhi"
-  | "notifications";
+export type OnboardingStep = "login" | "invite" | "profile";
 
 export type OnboardingProfile = {
   avatar: string;

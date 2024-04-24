@@ -14748,6 +14748,11 @@ expo-constants@~15.4.0, expo-constants@~15.4.3, expo-constants@~15.4.5:
   dependencies:
     "@expo/config" "~8.5.0"
 
+expo-contacts@~12.8.2:
+  version "12.8.2"
+  resolved "https://registry.yarnpkg.com/expo-contacts/-/expo-contacts-12.8.2.tgz#5a8a208ee284e4c676e42c2bdae5b781e6323d9e"
+  integrity sha512-pCWldAwMNPA7cObOC8U0FZacGo2hemW++6xByVrVQS/j9T6dU7HwOaR/pEOLp9iXZrVNydGphXDAEVu2t2aSXg==
+
 expo-crypto-polyfills@^1.1.0:
   version "1.1.0"
   resolved "https://registry.yarnpkg.com/expo-crypto-polyfills/-/expo-crypto-polyfills-1.1.0.tgz#cc6718d0657bd9ee4d40c661d4229fddd5cd399d"
