@@ -55,7 +55,8 @@ export default function WarpcastConnect() {
         setSkipFarcaster(true);
       }}
     >
-      <Text>Error: {error}</Text>
+      <Text>Connect to Warpcast</Text>
+      {error && <Text>{error}</Text>}
     </OnboardingComponent>
   );
 }
