@@ -1,10 +1,11 @@
 const { mergeConfig } = require("@react-native/metro-config");
-const { getSentryExpoConfig } = require("@sentry/react-native/metro");
+const { getTrustedForwarders } = require("@thirdweb-dev/react-native");
+const { getDefaultConfig } = require('expo/metro-config');
 
 // eslint-disable-next-line no-undef
-const defaultConfig = getSentryExpoConfig(__dirname, {
-  // [Web-only]: Enables CSS support in Metro.
-  isCSSEnabled: true,
+const defaultConfig = getDefaultConfig(__dirname, {
+  // Disable CSS support.
+  isCSSEnabled: getTrustedForwarders,
 });
 
 const converseMetroConfig = {

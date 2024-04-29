@@ -1297,11 +1297,6 @@ PODS:
     - glog
     - RCT-Folly (= 2022.05.16.00)
     - React-Core
-  - RNSentry (5.20.0):
-    - hermes-engine
-    - React-Core
-    - React-hermes
-    - Sentry/HybridSDK (= 8.21.0)
   - RNSVG (14.1.0):
     - React-Core
   - SDWebImage (5.17.0):
@@ -1316,9 +1311,6 @@ PODS:
     - libwebp (~> 1.0)
     - SDWebImage/Core (~> 5.17)
   - secp256k1.swift (0.1.4)
-  - Sentry/HybridSDK (8.21.0):
-    - SentryPrivate (= 8.21.0)
-  - SentryPrivate (8.21.0)
   - SocketRocket (0.6.1)
   - SQLite.swift (0.14.1):
     - SQLite.swift/standard (= 0.14.1)
@@ -1456,9 +1448,7 @@ DEPENDENCIES:
   - RNReactNativeSharedGroupPreferences (from `../node_modules/react-native-shared-group-preferences`)
   - RNReanimated (from `../node_modules/react-native-reanimated`)
   - RNScreens (from `../node_modules/react-native-screens`)
-  - "RNSentry (from `../node_modules/@sentry/react-native`)"
   - RNSVG (from `../node_modules/react-native-svg`)
-  - Sentry/HybridSDK (= 8.21.0)
   - SQLite.swift
   - UMAppLoader (from `../node_modules/unimodules-app-loader/ios`)
   - XMTP (= 0.10.3)
@@ -1491,8 +1481,6 @@ SPEC REPOS:
     - SDWebImageSVGCoder
     - SDWebImageWebPCoder
     - secp256k1.swift
-    - Sentry
-    - SentryPrivate
     - SocketRocket
     - SQLite.swift
     - sqlite3
@@ -1708,8 +1696,6 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native-reanimated"
   RNScreens:
     :path: "../node_modules/react-native-screens"
-  RNSentry:
-    :path: "../node_modules/@sentry/react-native"
   RNSVG:
     :path: "../node_modules/react-native-svg"
   UMAppLoader:
@@ -1842,15 +1828,12 @@ SPEC CHECKSUMS:
   RNReactNativeSharedGroupPreferences: de0121a4224c267bc7e9fb16c398f3f087c8da81
   RNReanimated: 548d4cb6785a032be887c66433082155d12baba0
   RNScreens: a4d9ce8f68f833f4e42410140eafd88e38bba163
-  RNSentry: 5381e9284aec59a546e4a7d40e33ad0839b99c1e
   RNSVG: ba3e7232f45e34b7b47e74472386cf4e1a676d0a
   SDWebImage: 750adf017a315a280c60fde706ab1e552a3ae4e9
   SDWebImageAVIFCoder: 8348fef6d0ec69e129c66c9fe4d74fbfbf366112
   SDWebImageSVGCoder: 15a300a97ec1c8ac958f009c02220ac0402e936c
   SDWebImageWebPCoder: af09429398d99d524cae2fe00f6f0f6e491ed102
   secp256k1.swift: a7e7a214f6db6ce5db32cc6b2b45e5c4dd633634
-  Sentry: ebc12276bd17613a114ab359074096b6b3725203
-  SentryPrivate: d651efb234cf385ec9a1cdd3eff94b5e78a0e0fe
   SocketRocket: f32cd54efbe0f095c4d7594881e52619cfe80b17
   SQLite.swift: 2992550ebf3c5b268bf4352603e3df87d2a4ed72
   sqlite3: f163dbbb7aa3339ad8fc622782c2d9d7b72f7e9c
@@ -1861,6 +1844,6 @@ SPEC CHECKSUMS:
   XMTPReactNative: f83c939ee083f57decc7ac0f7db4e4b7e34b72d8
   Yoga: d17d2cc8105eed528474683b42e2ea310e1daf61
 
-PODFILE CHECKSUM: 4690f8b68183aab79a9f2d6d884bc483af8b1899
+PODFILE CHECKSUM: 9ab4bfc0b9fc6361932e4c4b0a8ce370556f67a2
 
 COCOAPODS: 1.14.3

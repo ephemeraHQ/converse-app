@@ -42,7 +42,6 @@
     "@react-navigation/drawer": "^6.6.6",
     "@react-navigation/native": "^6.0.16",
     "@react-navigation/native-stack": "^6.9.4",
-    "@sentry/react-native": "^5.20.0",
     "@shopify/flash-list": "1.6.3",
     "@stardazed/streams-polyfill": "^2.4.0",
     "@thirdweb-dev/react-native": "^0.7.2",
@@ -210,12 +209,5 @@
     "react-native-svg": "^14.1.0",
     "@expo/config-plugins": "~7.8.0"
   },
-  "packageManager": "yarn@1.22.19",
-  "expo": {
-    "install": {
-      "exclude": [
-        "@sentry/react-native"
-      ]
-    }
-  }
+  "packageManager": "yarn@1.22.19"
 }

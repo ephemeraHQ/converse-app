@@ -1,5 +1,4 @@
 import Clipboard from "@react-native-clipboard/clipboard";
-import * as Sentry from "@sentry/react-native";
 import { Client } from "@xmtp/react-native-sdk";
 import axios from "axios";
 import { Image } from "expo-image";
@@ -112,12 +111,6 @@ const DebugButton = forwardRef((props, ref) => {
         "Clear logs": resetDebugLogs,
         "Clear logout tasks": () => {
           mmkv.delete("converse-logout-tasks");
-        },
-        "Sentry JS error": () => {
-          throw new Error("My first Sentry error!");
-        },
-        "Sentry Native error": () => {
-          Sentry.nativeCrash();
         },
         "Clear expo image cache": async () => {
           await Image.clearDiskCache();

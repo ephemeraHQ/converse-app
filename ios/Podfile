@@ -101,7 +101,4 @@ target 'ConverseNotificationExtension' do
   pod 'MMKVAppExtension', $mmkvVersion, :linkage => :dynamic
   pod 'SQLite.swift'
   pod 'XMTP', $xmtpVersion, :modular_headers => true
-  # Version must match version from RNSentry Podspec (matching @sentry/react-native package from package.json)
-  # https://github.com/getsentry/sentry-react-native/blob/5.20.0/RNSentry.podspec#L36
-  pod 'Sentry/HybridSDK', '8.21.0'
 end
