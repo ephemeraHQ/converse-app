@@ -10,6 +10,7 @@ import {
 } from "../../data/store/accountsStore";
 import { useSelect } from "../../data/store/storeHelpers";
 import { notifyFarcasterLinked } from "../../utils/api";
+import { refreshRecommendationsForAccount } from "../../utils/recommendations";
 import OnboardingComponent from "./OnboardingComponent";
 
 export default function WarpcastConnect() {
@@ -25,6 +26,7 @@ export default function WarpcastConnect() {
       try {
         await notifyFarcasterLinked();
         await refreshProfileForAddress(currentAccount, currentAccount);
+        await refreshRecommendationsForAccount(currentAccount);
       } catch (e: any) {
         console.error(e);
         setError("An unknown error occurred");

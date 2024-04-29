@@ -8,6 +8,7 @@ import { useCurrentAccount } from "../data/store/accountsStore";
 import { useAppStore } from "../data/store/appStore";
 import { postAddressBook } from "./api";
 import { getDeviceId } from "./keychain/helpers";
+import { refreshRecommendationsForAccount } from "./recommendations";
 
 export type AddressBookPermissionStatus = "granted" | "undetermined" | "denied";
 
@@ -75,14 +76,21 @@ export const useAddressBookStateHandler = () => {
     };
   }, [currentAccount]);
   useEffect(() => {
-    // On load, status changes immediatly from undetermined to real status
-    // so no need to call also on load
+    // On load, share address book
+    if (previousPermissionStatus.current === "granted" && currentAccount) {
+      shareAddressBook(currentAccount);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+  useEffect(() => {
     if (
       addressBookPermissionStatus === "granted" &&
       previousPermissionStatus.current !== "granted" &&
       currentAccount
     ) {
-      shareAddressBook(currentAccount);
+      shareAddressBook(currentAccount).then(() => {
+        refreshRecommendationsForAccount(currentAccount);
+      });
     }
     previousPermissionStatus.current = addressBookPermissionStatus;
     // eslint-disable-next-line react-hooks/exhaustive-deps
