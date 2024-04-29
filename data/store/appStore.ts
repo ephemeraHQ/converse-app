@@ -90,6 +90,7 @@ export const useAppStore = create<AppStoreType>()(
       storage: createJSONStorage(() => zustandMMKVStorage),
       partialize: (state) => ({
         lastVersionOpen: state.lastVersionOpen,
+        addressBookPermissionStatus: state.addressBookPermissionStatus,
       }),
     }
   )

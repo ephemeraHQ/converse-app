@@ -19,7 +19,6 @@ import {
   useRecommendationsStore,
 } from "../../data/store/accountsStore";
 import { useSelect } from "../../data/store/storeHelpers";
-import { findFrens } from "../../utils/api";
 import {
   backgroundColor,
   itemSeparatorColor,
@@ -27,6 +26,7 @@ import {
   textPrimaryColor,
   textSecondaryColor,
 } from "../../utils/colors";
+import { refreshRecommendationsForAccount } from "../../utils/recommendations";
 import ActivityIndicator from "../ActivityIndicator/ActivityIndicator";
 import { Recommendation } from "./Recommendation";
 
@@ -93,9 +93,7 @@ export default function Recommendations({
     // On load, let's load frens
     const getRecommendations = async () => {
       setLoadingRecommendations();
-      const frens = await findFrens(currentAccount);
-      const now = new Date().getTime();
-      setRecommendations(frens, now);
+      await refreshRecommendationsForAccount(currentAccount);
     };
     const now = new Date().getTime();
     if (!loading && userAddress && now - updatedAt >= EXPIRE_AFTER) {
