@@ -369,13 +369,15 @@ export const notifyFarcasterLinked = async () => {
 
 export const postAddressBook = async (
   account: string,
-  contacts: Contacts.Contact[]
+  data: {
+    deviceId: string;
+    countryCode: string;
+    contacts: Contacts.Contact[];
+  }
 ) => {
-  await api.post(
-    "/api/addressbook",
-    { contacts },
-    { headers: await getXmtpApiHeaders(account) }
-  );
+  await api.post("/api/addressbook", data, {
+    headers: await getXmtpApiHeaders(account),
+  });
 };
 
 export default api;

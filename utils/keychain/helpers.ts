@@ -1,6 +1,7 @@
 import type { Storage as PrivyStorage } from "@privy-io/js-sdk-core";
 import { createHash } from "crypto";
 import * as SecureStore from "expo-secure-store";
+import { v4 as uuidv4 } from "uuid";
 
 import {
   deleteSecureItemAsync,
@@ -105,3 +106,11 @@ export const savePrivateKey = async (
     // TODO => add biometric authentication
     // requireAuthentication: true,
   });
+
+export const getDeviceId = async () => {
+  const deviceId = await SecureStore.getItemAsync("CONVERSE_DEVICE_ID");
+  if (deviceId) return deviceId;
+  const newDeviceId = uuidv4();
+  await SecureStore.setItemAsync("CONVERSE_DEVICE_ID", newDeviceId);
+  return newDeviceId;
+};

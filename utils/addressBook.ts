@@ -1,10 +1,13 @@
 import * as Contacts from "expo-contacts";
+import { CountryCode } from "libphonenumber-js";
 import { useEffect, useRef } from "react";
 import { AppState } from "react-native";
+import * as RNLocalize from "react-native-localize";
 
 import { useCurrentAccount } from "../data/store/accountsStore";
 import { useAppStore } from "../data/store/appStore";
 import { postAddressBook } from "./api";
+import { getDeviceId } from "./keychain/helpers";
 
 export type AddressBookPermissionStatus = "granted" | "undetermined" | "denied";
 
@@ -111,6 +114,12 @@ export const shareAddressBook = async (account: string) => {
       Contacts.Fields.SocialProfiles,
     ],
   });
-  await postAddressBook(account, data);
+  const phoneCountryCode = RNLocalize.getCountry() as CountryCode;
+  const deviceId = await getDeviceId();
+  await postAddressBook(account, {
+    deviceId,
+    countryCode: phoneCountryCode,
+    contacts: data,
+  });
   lastUpdate = new Date().getTime();
 };

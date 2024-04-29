@@ -57,8 +57,8 @@ export default function Main() {
     }
   }, [addingNewAccount, resetOnboarding, userAddress]);
 
-  const { notifications, skipFarcaster } = useSettingsStore(
-    useSelect(["notifications", "skipFarcaster"])
+  const { notifications, skipFarcaster, skipAddressBook } = useSettingsStore(
+    useSelect(["notifications", "skipFarcaster", "skipAddressBook"])
   );
   const {
     notificationsPermissionStatus,
@@ -119,7 +119,8 @@ export default function Main() {
       return <WarpcastConnect />;
     } else if (
       Platform.OS !== "web" &&
-      addressBookPermissionStatus === "undetermined"
+      addressBookPermissionStatus === "undetermined" &&
+      !skipAddressBook
     ) {
       return <AddressBook />;
     } else if (
