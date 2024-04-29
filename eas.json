@@ -84,7 +84,11 @@
       },
       "node": "18.16.1",
       "ios": {
-        "cocoapods": "1.14.3"
+        "cocoapods": "1.14.3",
+        "buildArtifactPaths": [
+          "ios/build/*"
+        ],
+        "applicationArchivePath": "ios/build/*"
       }
     },
     "production-android": {
