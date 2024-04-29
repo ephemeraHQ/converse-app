@@ -11,7 +11,7 @@ export type AddressBookPermissionStatus = "granted" | "undetermined" | "denied";
 const getAddressBookPermissionStatus = async (): Promise<
   AddressBookPermissionStatus | undefined
 > => {
-  const { status } = await Contacts.requestPermissionsAsync();
+  const { status } = await Contacts.getPermissionsAsync();
   return status;
 };
 
