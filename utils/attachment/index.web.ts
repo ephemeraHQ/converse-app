@@ -174,16 +174,10 @@ export const uploadRemoteAttachment = async (
     contentLength: number;
   }
 ): Promise<RemoteAttachment> => {
-  const { url } = await getPresignedUriForUpload(account);
-  await axios.put(url, new Blob([attachment.payload]), {
-    headers: {
-      "content-type": "application/octet-stream",
-      "x-amz-acl": "public-read",
-    },
+  const publicURL = await uploadFile({
+    account,
+    blob: new Blob([attachment.payload]),
   });
-
-  const fileURL = new URL(url);
-  const publicURL = fileURL.origin + fileURL.pathname;
 
   return {
     url: publicURL,
@@ -195,4 +189,28 @@ export const uploadRemoteAttachment = async (
     contentLength: attachment.contentLength,
     filename: attachment.filename,
   };
+};
+
+export const uploadFile = async ({
+  account,
+  blob,
+  contentType,
+}: {
+  account?: string | undefined;
+  blob: Blob | undefined;
+  contentType?: string | undefined;
+}) => {
+  if (!blob) {
+    throw new Error("blob needed to upload file from web");
+  }
+  const { url } = await getPresignedUriForUpload(account);
+  await axios.put(url, blob, {
+    headers: {
+      "content-type": contentType || "application/octet-stream",
+      "x-amz-acl": "public-read",
+    },
+  });
+  const fileURL = new URL(url);
+  const publicURL = fileURL.origin + fileURL.pathname;
+  return publicURL;
 };

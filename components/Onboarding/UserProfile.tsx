@@ -98,11 +98,20 @@ export const UserProfile = () => {
 
     // Let's upload the image to our server
     const resizedImage = await compressAndResizeImage(profile.avatar);
-    const publicAvatar = await uploadFile(
-      undefined,
-      resizedImage.uri,
-      "image/jpeg"
-    );
+    // On web we use blob, on mobile we use file path
+    const publicAvatar =
+      Platform.OS === "web"
+        ? await uploadFile({
+            contentType: "image/jpeg",
+            blob: new Blob(
+              [Buffer.from(resizedImage.base64 as string, "base64")],
+              { type: "image/png" }
+            ),
+          })
+        : await uploadFile({
+            filePath: resizedImage.uri,
+            contentType: "image/jpeg",
+          });
     try {
       await signup({
         inviteCode,

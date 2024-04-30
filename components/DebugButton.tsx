@@ -1,4 +1,3 @@
-import { useEmbeddedWallet, usePrivy } from "@privy-io/expo";
 import Clipboard from "@react-native-clipboard/clipboard";
 import * as Sentry from "@sentry/react-native";
 import axios from "axios";
@@ -14,7 +13,6 @@ import {
   useCurrentAccount,
 } from "../data/store/accountsStore";
 import { debugLogs, resetDebugLogs } from "../utils/debug";
-import { usePrivySigner } from "../utils/evm/privy";
 import mmkv from "../utils/mmkv";
 import { showActionSheetWithOptions } from "./StateHandlers/ActionSheetStateHandler";
 
@@ -24,9 +22,6 @@ export const useEnableDebug = () => {
 };
 
 const DebugButton = forwardRef((props, ref) => {
-  const embeddedWallet = useEmbeddedWallet();
-  const privySigner = usePrivySigner();
-  const { isReady: privyReady, user: privyUser } = usePrivy();
   // The component instance will be extended
   // with whatever you return from the callback passed
   // as the second argument
