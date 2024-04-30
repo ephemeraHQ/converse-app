@@ -1,7 +1,7 @@
 import Big from "big.js";
 import { manipulateAsync, SaveFormat } from "expo-image-manipulator";
 import * as ImagePicker from "expo-image-picker";
-import { Alert, Image, Linking } from "react-native";
+import { Alert, Image, Linking, Platform } from "react-native";
 
 const imageMimeTypes = [
   "image/cgm",
@@ -342,7 +342,7 @@ export const compressAndResizeImage = async (imageURI: string) => {
     `[ImageUtils] Resizing and compressing image to ${newSize.height}x${newSize.width} (was ${imageSize.height}x${imageSize.width})`
   );
   const manipResult = await manipulateAsync(imageURI, [{ resize: newSize }], {
-    base64: false,
+    base64: Platform.OS === "web",
     compress: 0.3,
     format: SaveFormat.JPEG,
   });

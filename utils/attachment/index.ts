@@ -163,7 +163,10 @@ export const uploadRemoteAttachment = async (
   account: string,
   attachment: EncryptedLocalAttachment
 ): Promise<RemoteAttachmentContent> => {
-  const publicURL = await uploadFile(account, attachment.encryptedLocalFileUri);
+  const publicURL = await uploadFile({
+    account,
+    filePath: attachment.encryptedLocalFileUri,
+  });
 
   return {
     scheme: "https://",
@@ -172,11 +175,19 @@ export const uploadRemoteAttachment = async (
   };
 };
 
-export const uploadFile = async (
-  account: string | undefined,
-  localFilePath: string,
-  contentType?: string
-) => {
+export const uploadFile = async ({
+  account,
+  filePath,
+  contentType,
+}: {
+  account?: string | undefined;
+  filePath?: string | undefined;
+  blob?: Blob | undefined;
+  contentType?: string | undefined;
+}) => {
+  if (!filePath) {
+    throw new Error("filePath needed to upload file from mobile");
+  }
   const { url } = await getPresignedUriForUpload(account, contentType);
   await RNFetchBlob.fetch(
     "PUT",
@@ -185,7 +196,7 @@ export const uploadFile = async (
       "content-type": contentType || "application/octet-stream",
       "x-amz-acl": "public-read",
     },
-    RNFetchBlob.wrap(localFilePath.replace("file:///", "/"))
+    RNFetchBlob.wrap(filePath.replace("file:///", "/"))
   );
   const fileURL = new URL(url);
   const publicURL = fileURL.origin + fileURL.pathname;

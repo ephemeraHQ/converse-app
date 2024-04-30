@@ -1,4 +1,3 @@
-import { useLinkWithFarcaster } from "@privy-io/expo";
 import { useState } from "react";
 import { StyleSheet, useColorScheme, Text } from "react-native";
 
@@ -10,6 +9,7 @@ import {
 } from "../../data/store/accountsStore";
 import { useSelect } from "../../data/store/storeHelpers";
 import { notifyFarcasterLinked } from "../../utils/api";
+import { useLinkFarcaster } from "../../utils/evm/privy";
 import { refreshRecommendationsForAccount } from "../../utils/recommendations";
 import OnboardingComponent from "./OnboardingComponent";
 
@@ -21,7 +21,7 @@ export default function WarpcastConnect() {
   const { setSkipFarcaster } = useSettingsStore(
     useSelect(["setSkipFarcaster"])
   );
-  const { linkWithFarcaster } = useLinkWithFarcaster({
+  const linkWithFarcaster = useLinkFarcaster({
     onSuccess: async () => {
       try {
         await notifyFarcasterLinked();
