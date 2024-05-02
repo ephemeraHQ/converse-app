@@ -94,7 +94,7 @@ export default function SeedPhraseConnect() {
         }
         setSigner(seedPhraseSigner);
         // Let's save
-        // const pkPath = `PK-${uuid.v4().toString()}`;
+        // const pkPath = `PK-${uuidv4()}`;
         // try {
         //   await savePrivateKey(pkPath, seedPhraseSigner.privateKey);
         //   setPkPath(pkPath);

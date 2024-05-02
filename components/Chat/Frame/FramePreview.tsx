@@ -1,20 +1,24 @@
-import { FrameActionInputs, OpenFramesProxy } from "@xmtp/frames-client";
+import { FrameActionInputs } from "@xmtp/frames-client";
 import { Image } from "expo-image";
 import * as Linking from "expo-linking";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Platform, StyleSheet, TouchableOpacity, View } from "react-native";
-import uuid from "react-native-uuid";
+import { v4 as uuidv4 } from "uuid";
 
+import config from "../../../config";
 import { useCurrentAccount } from "../../../data/store/accountsStore";
 import { cacheForMedia, fetchAndCacheMedia } from "../../../utils/cache/cache";
 import { useConversationContext } from "../../../utils/conversation";
+import { useExternalProvider } from "../../../utils/evm/external.web";
 import {
   FrameButtonType,
   FrameToDisplay,
   FrameWithType,
+  framesProxy,
   getFrameButtons,
   getFrameImage,
   getFramesClient,
+  handleTxAction,
   validateFrame,
 } from "../../../utils/frames";
 import { navigate } from "../../../utils/navigation";
@@ -22,8 +26,6 @@ import ActionButton from "../ActionButton";
 import { MessageToDisplay } from "../Message/Message";
 import FrameBottom from "./FrameBottom";
 import FrameImage from "./FrameImage";
-
-const framesProxy = new OpenFramesProxy();
 
 export default function FramePreview({
   initialFrame,
@@ -47,7 +49,7 @@ export default function FramePreview({
     ...initialFrame,
     frameImage: undefined,
     isInitialFrame: true,
-    uniqueId: uuid.v4().toString(),
+    uniqueId: uuidv4(),
   } as FrameToDisplay);
   const [firstImageFailure, setFirstImageFailure] = useState(false);
   const buttons = getFrameButtons(frame);
@@ -55,6 +57,8 @@ export default function FramePreview({
   const [frameTextInputValue, setFrameTextInputValue] = useState("");
   const messageId = useRef(message.id);
   const fetchingInitialForMessageId = useRef(undefined as undefined | string);
+
+  const { getExternalProvider } = useExternalProvider();
 
   // Components are recycled, let's fix when stuff changes
   if (message.id !== messageId.current) {
@@ -65,7 +69,7 @@ export default function FramePreview({
       ...initialFrame,
       frameImage: undefined,
       isInitialFrame: true,
-      uniqueId: uuid.v4().toString(),
+      uniqueId: uuidv4(),
     });
     setFirstImageFailure(false);
     setFrameTextInputValue("");
@@ -158,7 +162,7 @@ export default function FramePreview({
       }
       if (!conversation) return;
       setPostingActionForButton(button.index);
-      const actionPostUrl =
+      let actionPostUrl =
         button.target || frame.frameInfo?.postUrl || initialFrame.url;
       try {
         const actionInput: FrameActionInputs = {
@@ -173,12 +177,35 @@ export default function FramePreview({
         }
         const framesClient = await getFramesClient(account);
         let newFrameHasInput = false;
-        if (button.action === "post" || !button.action) {
+        if (
+          button.action === "post" ||
+          button.action === "tx" ||
+          !button.action
+        ) {
           const payload = await framesClient.signFrameAction(actionInput);
-          const frameResponse = await framesClient.proxy.post(
-            actionPostUrl,
-            payload
-          );
+
+          if (button.action === "tx") {
+            if (Platform.OS !== "web" || !config.enableTransactionFrames) {
+              alert("Transaction frames are not supported yet.");
+              throw new Error("Transaction frames not supported yet");
+            }
+            // For tx, we get the tx data from target, then trigger it, then do a POST action
+            const externalProvider = await getExternalProvider();
+            if (!externalProvider)
+              throw new Error("Could not get an external wallet provider");
+
+            const { buttonPostUrl, txHash } = await handleTxAction(
+              frame,
+              button,
+              payload,
+              externalProvider
+            );
+
+            payload.untrustedData.transactionId = txHash;
+            actionPostUrl = buttonPostUrl;
+          }
+
+          const frameResponse = await framesProxy.post(actionPostUrl, payload);
           const validatedFrameResponse = validateFrame(frameResponse);
           if (
             !validatedFrameResponse ||
@@ -189,7 +216,7 @@ export default function FramePreview({
             return;
           }
           // We should display a new frame, let's load image first
-          const uniqueId = uuid.v4().toString();
+          const uniqueId = uuidv4();
           const frameResponseImage = getFrameImage({
             ...validatedFrameResponse,
             type: "XMTP_FRAME",
@@ -221,7 +248,7 @@ export default function FramePreview({
           });
         } else if (button.action === "post_redirect") {
           const payload = await framesClient.signFrameAction(actionInput);
-          const { redirectedTo } = await framesClient.proxy.postRedirect(
+          const { redirectedTo } = await framesProxy.postRedirect(
             actionPostUrl,
             payload
           );
@@ -248,6 +275,7 @@ export default function FramePreview({
       conversation,
       frame,
       frameTextInputValue,
+      getExternalProvider,
       initialFrame.url,
       message.topic,
       setFrameTextInputFocused,

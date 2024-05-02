@@ -205,16 +205,6 @@ func handleMessageByContentType(decodedMessage: DecodedMessage, xmtpClient: XMTP
       contentToSave = messageContent as? String
       contentToReturn = contentToSave
       
-    case let type where type.starts(with: "xmtp.org/reply:"):
-      let reply = messageContent as! Reply
-      let replyContentType = getContentTypeString(type: reply.contentType)
-      if (replyContentType.starts(with: "xmtp.org/text:")) {
-        // Only one that's really necessary!
-        
-      } else {
-        
-      }
-      
     case let type where type.starts(with: "xmtp.org/remoteStaticAttachment:"):
       let remoteAttachment = messageContent as! RemoteAttachment
       contentToSave = getJsonRemoteAttachment(remoteAttachment: remoteAttachment)
@@ -244,6 +234,9 @@ func handleMessageByContentType(decodedMessage: DecodedMessage, xmtpClient: XMTP
       } else {
         contentToSave = nil
       }
+    
+    case let type where type.starts(with: "xmtp.org/readReceipt:"):
+      contentToSave = nil
     
     default:
       sentryTrackMessage(message: "NOTIFICATION_UNKNOWN_CONTENT_TYPE", extras: ["contentType": contentType, "topic": decodedMessage.topic])
