@@ -5,6 +5,7 @@ import {
   FramesClient,
   OPEN_FRAMES_PROXY_URL,
 } from "@xmtp/frames-client";
+import { BigNumber, ethers } from "ethers";
 
 import { MessageToDisplay } from "../components/Chat/Message/Message";
 import { ConverseMessageMetadata } from "../data/db/entities/messageEntity";
@@ -12,6 +13,7 @@ import { saveMessageMetadata } from "../data/helpers/messages";
 import { useFramesStore } from "../data/store/framesStore";
 import { URL_REGEX } from "./regex";
 import { strByteSize } from "./str";
+import { extractChainIdToHex } from "./transaction";
 import { isContentType } from "./xmtpRN/contentTypes";
 import { getXmtpClient } from "./xmtpRN/sync";
 
@@ -173,4 +175,57 @@ export const getFrameImage = (frame: FrameWithType) => {
   } else {
     return frame.frameInfo?.image?.content;
   }
+};
+
+export const handleTxAction = async (
+  frame: FrameToDisplay,
+  button: FrameButtonType,
+  payload: any,
+  provider: ethers.providers.Web3Provider
+) => {
+  // @todo => proxy should get upgraded to extract post url from button
+  const buttonPostUrl =
+    frame.extractedTags[`fc:frame:button:${button.index}:post_url`];
+  const buttonTarget = button.target;
+  if (!buttonPostUrl || !buttonTarget)
+    throw new Error("Missing postUrl or target");
+  const txData = await framesProxy.postTransaction(buttonTarget, payload);
+  if (txData.method !== "eth_sendTransaction") {
+    throw new Error("method should be eth_sendTransaction");
+  }
+  try {
+    await provider.send?.("wallet_switchEthereumChain", [
+      {
+        chainId: extractChainIdToHex(txData.chainId.replace("eip155:", "")),
+      },
+    ]);
+  } catch (e: any) {
+    if (e.code !== 4001) {
+      alert(
+        `Could not switch to chain ${txData.chainId}\nPlease check that this chain is configured in your wallet.`
+      );
+    }
+    throw e;
+  }
+
+  const account = (await provider.listAccounts())[0];
+  const txHash = await provider.send(txData.method, [
+    {
+      from: account,
+      to: txData.params.to,
+      data: txData.params.data,
+      value: BigNumber.from(txData.params.value).toHexString(),
+    },
+  ]);
+
+  const transactionReceipt = await provider.getTransaction(txHash);
+
+  if (
+    transactionReceipt.to?.toLowerCase() !== txData.params.to.toLowerCase() ||
+    transactionReceipt.value.toBigInt() !== BigInt(txData.params.value || 0)
+  ) {
+    // Error handle, shouldn't show frame success screen
+    throw new Error("transaction failed");
+  }
+  return { buttonPostUrl, txHash };
 };
