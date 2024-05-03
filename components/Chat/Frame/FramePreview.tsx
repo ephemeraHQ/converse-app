@@ -9,7 +9,7 @@ import config from "../../../config";
 import { useCurrentAccount } from "../../../data/store/accountsStore";
 import { cacheForMedia, fetchAndCacheMedia } from "../../../utils/cache/cache";
 import { useConversationContext } from "../../../utils/conversation";
-import { useExternalProvider } from "../../../utils/evm/external.web";
+import { useExternalProvider } from "../../../utils/evm/external";
 import {
   FrameButtonType,
   FrameToDisplay,
