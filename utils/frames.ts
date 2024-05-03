@@ -193,10 +193,30 @@ export const handleTxAction = async (
   if (txData.method !== "eth_sendTransaction") {
     throw new Error("method should be eth_sendTransaction");
   }
+  const hexChainId = extractChainIdToHex(txData.chainId.replace("eip155:", ""));
+  if (
+    ![
+      "0x5d50",
+      "0xaa37dc",
+      "0x12c",
+      "0xe705",
+      "0x14a34",
+      "0x66eee",
+      "0x8274f",
+      "0xaa36a7",
+      "0x134d7c4",
+      "0xa0c71fd",
+      "0x3b9ac9ff",
+      "0x6b6b7274",
+    ].includes(hexChainId)
+  ) {
+    alert("Transaction frames support only Sepolia testnets for now");
+    throw new Error("Transaction frames support only Sepolia testnets for now");
+  }
   try {
     await provider.send?.("wallet_switchEthereumChain", [
       {
-        chainId: extractChainIdToHex(txData.chainId.replace("eip155:", "")),
+        chainId: hexChainId,
       },
     ]);
   } catch (e: any) {
