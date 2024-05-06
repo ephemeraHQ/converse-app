@@ -98,6 +98,10 @@ const DebugButton = forwardRef((props, ref) => {
           const alice = await Client.create(aliceWallet, {
             env: "dev",
             enableAlphaMls: true,
+            dbEncryptionKey: new Uint8Array([
+              1, 2, 3, 4, 5, 1, 2, 3, 4, 5, 1, 2, 3, 4, 5, 1, 2, 3, 4, 5, 1, 2,
+              3, 4, 5, 1, 2, 3, 4, 5, 1, 2,
+            ]),
           });
           console.log("alice:", alice.address);
           // const group = await alice.conversations.newGroup([currentAccount()]);
@@ -127,6 +131,10 @@ const DebugButton = forwardRef((props, ref) => {
           const alice = await Client.create(aliceWallet, {
             env: "dev",
             enableAlphaMls: true,
+            dbEncryptionKey: new Uint8Array([
+              1, 2, 3, 4, 5, 1, 2, 3, 4, 5, 1, 2, 3, 4, 5, 1, 2, 3, 4, 5, 1, 2,
+              3, 4, 5, 1, 2, 3, 4, 5, 1, 2,
+            ]),
           });
           console.log("alice:", alice.address);
           const bobWallet = new Wallet(
@@ -135,6 +143,10 @@ const DebugButton = forwardRef((props, ref) => {
           const bob = await Client.create(bobWallet, {
             env: "dev",
             enableAlphaMls: true,
+            dbEncryptionKey: new Uint8Array([
+              1, 2, 3, 4, 5, 1, 2, 3, 4, 5, 1, 2, 3, 4, 5, 1, 2, 3, 4, 5, 1, 2,
+              3, 4, 5, 1, 2, 3, 4, 5, 1, 2,
+            ]),
           });
           console.log("bob:", bob.address);
           console.log("created clients");
