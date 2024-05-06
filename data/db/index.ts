@@ -101,8 +101,7 @@ export const getDbFileName = (account: string) => {
 
 export const getDbDirectory = async () => {
   if (Platform.OS === "ios") {
-    const groupPath = await RNFS.pathForGroup(config.appleAppGroup);
-    return groupPath;
+    return RNFS.DocumentDirectoryPath;
   } else {
     return `/data/data/${config.bundleId}/databases`;
   }
