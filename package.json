@@ -57,7 +57,7 @@
     "@xmtp/content-type-transaction-reference": "^1.0.3",
     "@xmtp/frames-client": "^0.4.3",
     "@xmtp/proto": "^3.45.0",
-    "@xmtp/react-native-sdk": "^1.30.0-beta.5",
+    "@xmtp/react-native-sdk": "^1.32.5-beta.5",
     "@xmtp/xmtp-js": "^11.5.0",
     "axios": "^1.2.1",
     "babel-plugin-transform-remove-console": "^6.9.4",

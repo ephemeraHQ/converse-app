@@ -54,6 +54,11 @@ export type DecodedMessageWithCodecsType = Awaited<
 export const isOnXmtp = async (address: string) =>
   Client.canMessage(getCleanAddress(address), {
     env,
+    // @todo => no need for dbEncryptionKey !!
+    dbEncryptionKey: new Uint8Array([
+      1, 2, 3, 4, 5, 1, 2, 3, 4, 5, 1, 2, 3, 4, 5, 1, 2, 3, 4, 5, 1, 2, 3, 4, 5,
+      1, 2, 3, 4, 5, 1, 2,
+    ]),
   });
 
 export const xmtpClientByAccount: {

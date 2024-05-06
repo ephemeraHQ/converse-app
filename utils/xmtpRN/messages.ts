@@ -201,10 +201,10 @@ export const syncGroupsMessages = async (
       groups.map((g) =>
         g.messages(
           true, // skipSync
-          undefined, // limit
-          undefined, // before
-          queryGroupsFromTimestamp[g.topic], // after
-          "SORT_DIRECTION_ASCENDING" // direction
+          {
+            after: queryGroupsFromTimestamp[g.topic],
+            direction: "SORT_DIRECTION_ASCENDING",
+          }
         )
       )
     )
