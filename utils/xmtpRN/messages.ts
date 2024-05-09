@@ -147,13 +147,13 @@ export const streamAllMessages = async (account: string) => {
   const client = (await getXmtpClient(account)) as ConverseXmtpClientType;
   console.log(`[XmtpRN] Streaming messages for ${client.address}`);
   await client.conversations.streamAllMessages(async (message) => {
-    console.log(
-      `[XmtpRN] Received a DM OR GROUP message for ${client.address}`,
-      message.nativeContent.text,
-      message.topic
-    );
+    console.log(`[XmtpRN] Received a message for ${client.address}`, {
+      id: message.id,
+      text: message.nativeContent.text,
+      topic: message.topic,
+    });
     saveMessages(client.address, protocolMessagesToStateMessages([message]));
-  }); // @todo => fix and use true one day?
+  }, true);
 };
 
 export const stopStreamingAllMessage = async (account: string) => {
