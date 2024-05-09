@@ -104,15 +104,15 @@ const DebugButton = forwardRef((props, ref) => {
             ]),
           });
           console.log("alice:", alice.address);
-          // const group = await alice.conversations.newGroup([currentAccount()]);
-          await alice.conversations.syncGroups();
-          const group = (await alice.conversations.listGroups()).find(
-            (g) => g.peerAddresses?.includes(currentAccount().toLowerCase())
-          );
-          if (!group) {
-            console.log("NOGROUP");
-            return;
-          }
+          const group = await alice.conversations.newGroup([currentAccount()]);
+          // await alice.conversations.syncGroups();
+          // const group = (await alice.conversations.listGroups()).find(
+          //   (g) => g.peerAddresses?.includes(currentAccount().toLowerCase())
+          // );
+          // if (!group) {
+          //   console.log("NOGROUP");
+          //   return;
+          // }
           const conversation = await alice.conversations.newConversation(
             currentAccount()
           );
@@ -195,16 +195,25 @@ const DebugButton = forwardRef((props, ref) => {
           }, true);
 
           await delayToPropogate();
+          console.log(0);
 
           // Sending 8 messages, each received by 2 people
           await convo.send("Convo message 1 from bob");
+          console.log(1);
           await convo.send("Convo message 2 from bob");
+          console.log(2);
           await groups[0].send("Group message 1 from bob");
+          console.log(3);
           await groups[0].send("Group message 2 from bob");
+          console.log(4);
           await convo.send("Convo message 3 from bob");
+          console.log(5);
           await convo.send("Convo message 4 from bob");
+          console.log(6);
           await groups[0].send("Group message 3 from bob");
+          console.log(7);
           await groups[0].send("Group message 4 from bob");
+          console.log(8);
 
           await delayToPropogate();
           if (messagesReceivedCount !== 16) {

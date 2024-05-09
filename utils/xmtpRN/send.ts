@@ -9,7 +9,6 @@ import {
 
 import { Message as MessageEntity } from "../../data/db/entities/messageEntity";
 import {
-  deleteMessage,
   markMessageAsSent,
   updateMessagesIds,
 } from "../../data/helpers/messages";
@@ -18,7 +17,6 @@ import { deserializeRemoteAttachmentMessageContent } from "./attachments";
 import { ConversationWithCodecsType, GroupWithCodecsType } from "./client";
 import { isContentType } from "./contentTypes";
 import { getConversationWithTopic } from "./conversations";
-import { syncGroupsMessages } from "./messages";
 
 let sendingPendingMessages = false;
 const sendingMessages: { [messageId: string]: boolean } = {};
@@ -67,21 +65,16 @@ const sendConverseGroupMessages = async (
         return;
       }
       sendingGroupMessages[id] = groupMessage.message;
-      console.log(
-        "SENDING MESSAGE WITH CONTENT",
-        getMessageContent(groupMessage.message)
-      );
-      const now = new Date().getTime();
-      // @todo => the message id returned here is the godamn
-      // group id so it does not work!!
       const newMessageId = await groupMessage.group.send(
         getMessageContent(groupMessage.message)
       );
-      console.log("MESSAGE HAS BEEN SENT SUCCESSFULLY");
-      await deleteMessage(account, groupMessage.group.topic, id);
-      await new Promise((r) => setTimeout(r, 2000));
-      syncGroupsMessages(account, [groupMessage.group], {
-        [groupMessage.group.topic]: now,
+      console.log("Group message sent", { newMessageId });
+      await updateMessagesIds(account, {
+        [groupMessage.message.id]: {
+          newMessageId,
+          message: groupMessage.message,
+          newMessageSent: new Date().getTime(),
+        },
       });
 
       delete sendingGroupMessages[id];

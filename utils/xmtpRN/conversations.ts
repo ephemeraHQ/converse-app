@@ -3,7 +3,7 @@ import { ConsentListEntry, ConversationContext } from "@xmtp/react-native-sdk";
 import { Conversation as DbConversation } from "../../data/db/entities/conversationEntity";
 import { getPendingConversationsToCreate } from "../../data/helpers/conversations/pendingConversations";
 import { saveConversations } from "../../data/helpers/conversations/upsertConversations";
-import { getChatStore, getSettingsStore } from "../../data/store/accountsStore";
+import { getSettingsStore } from "../../data/store/accountsStore";
 import { XmtpConversation } from "../../data/store/chatStore";
 import { SettingsStoreType } from "../../data/store/settingsStore";
 import { getCleanAddress } from "../eth";
@@ -11,7 +11,6 @@ import {
   getTopicDataFromKeychain,
   saveTopicDataToKeychain,
 } from "../keychain/helpers";
-import { haveSameItems } from "../objects";
 import { sentryTrackError } from "../sentry";
 import {
   ConversationWithCodecsType,
@@ -238,10 +237,6 @@ const listGroups = async (client: ConverseXmtpClientType) => {
   await client.conversations.syncGroups();
   const groups = await client.conversations.listGroups();
   groups.forEach((g) => {
-    // @todo => XMTP will fix this
-    if (!g.topic.startsWith("/xmtp/mls")) {
-      g.topic = `/xmtp/mls/1/g-${g.id}/proto`;
-    }
     setOpenedConversation(client.address, g);
   });
 
@@ -270,23 +265,14 @@ export const loadConversations = async (
     });
 
     const newGroups: GroupWithCodecsType[] = [];
-    const updatedGroups: GroupWithCodecsType[] = [];
     const knownGroups: GroupWithCodecsType[] = [];
+
+    // @todo => stop resaving ALL known groups each time,
+    // we should resave them if something changed like members / metadata
 
     groups.forEach((g) => {
       if (!knownTopics.includes(g.topic)) {
         newGroups.push(g);
-      } else if (
-        // @todo => maybe check the groupMembers for known topics before and pass it to this method
-        // in the future => maybe also check the admins, the name, etc (anything that changes)
-        !haveSameItems(
-          g.peerAddresses,
-          getChatStore(account).getState().conversations[g.topic]
-            ?.groupMembers || []
-        )
-      ) {
-        updatedGroups.push(g);
-        knownGroups.push(g);
       } else {
         knownGroups.push(g);
       }
@@ -299,15 +285,15 @@ export const loadConversations = async (
     const conversationsToSave = newConversations.map(
       protocolConversationToStateConversation
     );
-    const groupsToSave = await Promise.all(
+    const groupsToCreate = await Promise.all(
       newGroups.map(protocolGroupToStateConversation)
     );
     const groupsToUpdate = await Promise.all(
-      updatedGroups.map(protocolGroupToStateConversation)
+      knownGroups.map(protocolGroupToStateConversation)
     );
     saveConversations(client.address, [
       ...conversationsToSave,
-      ...groupsToSave,
+      ...groupsToCreate,
     ]);
     saveConversations(client.address, groupsToUpdate, true); // Force update
 
@@ -458,14 +444,9 @@ export const refreshGroup = async (account: string, topic: string) => {
   const client = (await getXmtpClient(account)) as ConverseXmtpClientType;
   await client.conversations.syncGroups();
   const groups = await client.conversations.listGroups();
-  const group = groups.find(
-    (g) => g.topic === topic || `/xmtp/mls/1/g-${g.id}/proto` === topic
-  );
+  const group = groups.find((g) => g.topic === topic);
   if (!group) throw new Error(`Group ${topic} not found, cannot refresh`);
-  // @todo => XMTP will fix this
-  if (!group.topic.startsWith("/xmtp/mls")) {
-    group.topic = `/xmtp/mls/1/g-${group.id}/proto`;
-  }
+  await group.sync();
   saveConversations(
     client.address,
     [await protocolGroupToStateConversation(group)],
