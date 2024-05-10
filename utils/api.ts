@@ -1,9 +1,9 @@
 import axios from "axios";
 import * as Contacts from "expo-contacts";
 
+import { ProfileType } from "../components/Onboarding/UserProfile";
 import config from "../config";
 import { TopicData } from "../data/store/chatStore";
-import { OnboardingProfile } from "../data/store/onboardingStore";
 import { ProfileSocials } from "../data/store/profilesStore";
 import { Frens } from "../data/store/recommendationsStore";
 import { getXmtpApiHeaders } from "../utils/xmtpRN/api";
@@ -75,32 +75,15 @@ export const getPrivyAuthenticatedUser = async () => {
   return data;
 };
 
-export const getInvite = async (inviteCode: string): Promise<boolean> => {
-  const { data } = await api.get("/api/user/invite", {
-    params: { inviteCode },
-  });
-  if (data.inviteCode !== inviteCode) {
-    throw new Error("Invalid invite code");
-  }
-  return data;
-};
-
-type SignupInput = {
-  inviteCode: string;
-  profile: OnboardingProfile;
-};
-
-export const signup = async ({ inviteCode, profile }: SignupInput) => {
-  const { data } = await api.post(
-    "/api/user/signup",
-    {
-      inviteCode,
-      profile,
-    },
-    { headers: getPrivyRequestHeaders() }
-  );
-  return data;
-};
+// export const getInvite = async (inviteCode: string): Promise<boolean> => {
+//   const { data } = await api.get("/api/user/invite", {
+//     params: { inviteCode },
+//   });
+//   if (data.inviteCode !== inviteCode) {
+//     throw new Error("Invalid invite code");
+//   }
+//   return data;
+// };
 
 type ReportMessageQuery = {
   account: string;
@@ -293,15 +276,16 @@ export const getCoinbaseTransactionDetails = async (
   return data;
 };
 
-export const claimUserName = async (
-  username: string,
-  userAddress: string
-): Promise<string> => {
-  const { data } = await api.post(
-    "/api/profile/username",
-    { username },
-    { headers: await getXmtpApiHeaders(userAddress) }
-  );
+export const claimProfile = async ({
+  account,
+  profile,
+}: {
+  account: string;
+  profile: ProfileType;
+}): Promise<string> => {
+  const { data } = await api.post("/api/profile/username", profile, {
+    headers: await getXmtpApiHeaders(account),
+  });
   return data;
 };
 

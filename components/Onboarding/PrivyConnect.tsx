@@ -17,7 +17,6 @@ import PhoneInput from "react-native-phone-number-input";
 import Button from "../../components/Button/Button";
 import { useOnboardingStore } from "../../data/store/onboardingStore";
 import { useSelect } from "../../data/store/storeHelpers";
-import { getPrivyAuthenticatedUser } from "../../utils/api";
 import {
   backgroundColor,
   primaryColor,
@@ -144,20 +143,7 @@ export default function PrivyConnect() {
         !gotEmbeddedWallet.current
       ) {
         gotEmbeddedWallet.current = true;
-
-        try {
-          const user = await getPrivyAuthenticatedUser();
-          if (user && user.privyAccountId === privyAccountId) {
-            // Existing users can access now
-            setSigner(privySigner);
-            return;
-          }
-        } catch (e) {
-          console.log(e);
-        }
-        // Others need an invite code
-        setStep("invite");
-        setLoading(false);
+        setSigner(privySigner);
       }
     })();
   }, [
