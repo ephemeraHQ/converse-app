@@ -3,8 +3,7 @@ import React, { useCallback, useEffect, useRef } from "react";
 import { Dimensions, Platform, useColorScheme } from "react-native";
 
 import SendAttachmentPreview from "../components/Chat/Attachment/SendAttachmentPreview";
-import AddressBook from "../components/Onboarding/AddressBook";
-import WarpcastConnect from "../components/Onboarding/WarpcastConnect";
+import UserProfile from "../components/Onboarding/UserProfile";
 import ActionSheetStateHandler from "../components/StateHandlers/ActionSheetStateHandler";
 import HydrationStateHandler from "../components/StateHandlers/HydrationStateHandler";
 import InitialStateHandler from "../components/StateHandlers/InitialStateHandler";
@@ -41,10 +40,10 @@ export default function Main() {
   const socials = useProfilesStore((s) =>
     userAddress ? s.profiles[userAddress]?.socials : undefined
   );
-  // const currentUserName = socials?.userNames?.find((e) => e.isPrimary)?.name;
-  const currentFarcaster = socials?.farcasterUsernames?.find(
-    (e) => e.linkedAccount
-  );
+  const currentUserName = socials?.userNames?.find((e) => e.isPrimary)?.name;
+  // const currentFarcaster = socials?.farcasterUsernames?.find(
+  //   (e) => e.linkedAccount
+  // );
   const isSplitScreen = useIsSplitScreen();
 
   const { resetOnboarding, addingNewAccount } = useOnboardingStore(
@@ -115,15 +114,17 @@ export default function Main() {
   if (splashScreenHidden) {
     if (!userAddress || addingNewAccount) {
       screenToShow = <Onboarding />;
-    } else if (!currentFarcaster && !skipFarcaster) {
-      return <WarpcastConnect />;
-    } else if (
-      Platform.OS !== "web" &&
-      addressBookPermissionStatus === "undetermined" &&
-      !skipAddressBook
-    ) {
-      return <AddressBook />;
-    } else if (
+    }
+    // else if (!currentFarcaster && !skipFarcaster) {
+    //   return <WarpcastConnect />;
+    // } else if (
+    //   Platform.OS !== "web" &&
+    //   addressBookPermissionStatus === "undetermined" &&
+    //   !skipAddressBook
+    // ) {
+    //   return <AddressBook />;
+    // }
+    else if (
       notifications.showNotificationScreen &&
       Platform.OS !== "web" &&
       (notificationsPermissionStatus === "undetermined" ||
@@ -131,6 +132,8 @@ export default function Main() {
           Platform.OS === "android"))
     ) {
       screenToShow = <NotificationsScreen />;
+    } else if (!currentUserName) {
+      screenToShow = <UserProfile />;
     } else if (Platform.OS === "android") {
       // On Android the whole navigation is wrapped in a drawler
       // layout to be able to display the menu

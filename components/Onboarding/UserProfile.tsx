@@ -9,9 +9,9 @@ import {
   Platform,
 } from "react-native";
 
-import { useOnboardingStore } from "../../data/store/onboardingStore";
-import { useSelect } from "../../data/store/storeHelpers";
-import { checkUsernameValid, signup } from "../../utils/api";
+import { refreshProfileForAddress } from "../../data/helpers/profiles/profilesUpdate";
+import { useCurrentAccount } from "../../data/store/accountsStore";
+import { checkUsernameValid, claimProfile } from "../../utils/api";
 import { uploadFile } from "../../utils/attachment";
 import {
   textInputStyle,
@@ -20,8 +20,8 @@ import {
   dangerColor,
   actionSheetColors,
 } from "../../utils/colors";
-import { usePrivyAccessToken, usePrivySigner } from "../../utils/evm/privy";
 import { executeAfterKeyboardClosed } from "../../utils/keyboard";
+import { useLogoutFromConverse } from "../../utils/logout";
 import {
   compressAndResizeImage,
   pickMediaFromLibrary,
@@ -31,35 +31,27 @@ import Button from "../Button/Button";
 import { showActionSheetWithOptions } from "../StateHandlers/ActionSheetStateHandler";
 import OnboardingComponent from "./OnboardingComponent";
 
+export type ProfileType = {
+  avatar: string;
+  username: string;
+  displayName: string;
+};
+
 export const UserProfile = () => {
   const [errorMessage, setErrorMessage] = useState("");
   const colorScheme = useColorScheme();
   const styles = useStyles(colorScheme, errorMessage);
-  const {
-    profile,
-    setProfile,
-    resetOnboarding,
-    setLoading,
-    inviteCode,
-    setSigner,
-  } = useOnboardingStore(
-    useSelect([
-      "profile",
-      "resetOnboarding",
-      "setProfile",
-      "setLoading",
-      "inviteCode",
-      "setSigner",
-    ])
-  );
 
-  const privySigner = usePrivySigner(true);
-  const privyAccessToken = usePrivyAccessToken();
+  const [profile, setProfile] = useState({
+    username: "",
+    avatar: "",
+    displayName: "",
+  } as ProfileType);
+  const [loading, setLoading] = useState(false);
+  const address = useCurrentAccount() as string;
+  const logout = useLogoutFromConverse(address);
 
   const handleContinue = useCallback(async () => {
-    if (!privyAccessToken) return;
-    const address = await privySigner?.getAddress();
-    if (!address) return;
     // Allow only alphanumeric and limit to 30 chars
     if (!/^[a-zA-Z0-9]*$/.test(profile.username)) {
       setErrorMessage("Your username can only contain letters and numbers");
@@ -98,38 +90,42 @@ export const UserProfile = () => {
 
     // Let's upload the image to our server
     const resizedImage = await compressAndResizeImage(profile.avatar);
-    // On web we use blob, on mobile we use file path
-    const publicAvatar =
-      Platform.OS === "web"
-        ? await uploadFile({
-            contentType: "image/jpeg",
-            blob: new Blob(
-              [Buffer.from(resizedImage.base64 as string, "base64")],
-              { type: "image/png" }
-            ),
-          })
-        : await uploadFile({
-            filePath: resizedImage.uri,
-            contentType: "image/jpeg",
-          });
+    let publicAvatar = "";
+
     try {
-      await signup({
-        inviteCode,
+      // On web we use blob, on mobile we use file path
+      publicAvatar =
+        Platform.OS === "web"
+          ? await uploadFile({
+              account: address,
+              contentType: "image/jpeg",
+              blob: new Blob(
+                [Buffer.from(resizedImage.base64 as string, "base64")],
+                { type: "image/png" }
+              ),
+            })
+          : await uploadFile({
+              account: address,
+              filePath: resizedImage.uri,
+              contentType: "image/jpeg",
+            });
+    } catch (e: any) {
+      setErrorMessage(e?.response?.data?.message || "An unknown error occured");
+      setLoading(false);
+      return;
+    }
+
+    try {
+      await claimProfile({
+        account: address,
         profile: { ...profile, avatar: publicAvatar },
       });
-      setSigner(privySigner);
+      await refreshProfileForAddress(address, address);
     } catch (e: any) {
       setErrorMessage(e?.response?.data?.message || "An unknown error occured");
       setLoading(false);
     }
-  }, [
-    inviteCode,
-    privyAccessToken,
-    privySigner,
-    profile,
-    setLoading,
-    setSigner,
-  ]);
+  }, [address, profile]);
 
   const pickMedia = useCallback(async () => {
     const asset = await pickMediaFromLibrary();
@@ -179,7 +175,8 @@ export const UserProfile = () => {
       primaryButtonText="Continue"
       primaryButtonAction={handleContinue}
       backButtonText="Back to home screen"
-      backButtonAction={resetOnboarding}
+      backButtonAction={logout}
+      isLoading={loading}
       shrinkWithKeyboard
     >
       <View style={styles.usernameInputContainer}>

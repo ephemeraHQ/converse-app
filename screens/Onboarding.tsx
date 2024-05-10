@@ -1,9 +1,10 @@
 import { useCallback, useEffect, useRef } from "react";
-import { Platform } from "react-native";
 
-import InviteCode from "../components/Onboarding/InviteCode";
+import ConnectViaWallet from "../components/Onboarding/ConnectViaWallet";
+import DesktopConnect from "../components/Onboarding/DesktopConnect";
+import DesktopConnectFlow from "../components/Onboarding/DesktopConnectFlow";
 import PrivyConnect from "../components/Onboarding/PrivyConnect";
-import UserProfile from "../components/Onboarding/UserProfile";
+import SeedPhraseConnect from "../components/Onboarding/SeedPhraseConnect";
 import WalletSelector from "../components/Onboarding/WalletSelector";
 import { initDb } from "../data/db";
 import { refreshProfileForAddress } from "../data/helpers/profiles/profilesUpdate";
@@ -22,23 +23,23 @@ import { getXmtpClient } from "../utils/xmtpRN/sync";
 export default function Onboarding() {
   const {
     connectionMethod,
+    desktopConnectSessionId,
     address,
     signer,
     setLoading,
     isEphemeral,
     pkPath,
     privyAccountId,
-    step,
   } = useOnboardingStore(
     useSelect([
       "connectionMethod",
+      "desktopConnectSessionId",
       "address",
       "signer",
       "setLoading",
       "isEphemeral",
       "pkPath",
       "privyAccountId",
-      "step",
     ])
   );
 
@@ -100,22 +101,16 @@ export default function Onboarding() {
     }
   }, [connectionMethod, initXmtpClient, signer]);
 
-  if (step === "login" && connectionMethod === "phone") {
-    if (Platform.OS === "web") {
-      // Returning both UIs on web because PrivyConnect is just a modal
-      return (
-        <>
-          <WalletSelector />
-          <PrivyConnect />
-        </>
-      );
-    } else {
-      return <PrivyConnect />;
-    }
-  } else if (step === "invite") {
-    return <InviteCode />;
-  } else if (step === "profile") {
-    return <UserProfile />;
+  if (desktopConnectSessionId) {
+    return <DesktopConnectFlow />;
+  } else if (connectionMethod === "wallet") {
+    return <ConnectViaWallet connectWithBase64Key={connectWithBase64Key} />;
+  } else if (connectionMethod === "desktop") {
+    return <DesktopConnect />;
+  } else if (connectionMethod === "seedPhrase") {
+    return <SeedPhraseConnect />;
+  } else if (connectionMethod === "phone") {
+    return <PrivyConnect />;
   }
 
   return <WalletSelector />;
