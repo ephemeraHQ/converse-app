@@ -161,6 +161,29 @@ func saveMessage(account: String, topic: String, sent: Date, senderAddress: Stri
 }
 
 func decodeMessage(xmtpClient: XMTP.Client, envelope: XMTP.Envelope) async throws -> DecodedMessage? {
+  // If topic is MLS, the conversation should already be there
+  // @todo except if it's new convo => call sync before?
+  if (isGroupMessageTopic(topic: envelope.contentTopic)) {
+    let groupList = try! await xmtpClient.conversations.groups()
+    if let group = groupList.first(where: { $0.topic == envelope.contentTopic }) {
+      do {
+        print("[NotificationExtension] Decoding group message...")
+        let decodedMessage = try await group.processMessage(envelopeBytes: envelope.message)
+        print("[NotificationExtension] Group message decoded!")
+        return decodedMessage
+      } catch {
+        sentryTrackMessage(message: "NOTIFICATION_DECODING_ERROR", extras: ["error": error, "envelope": envelope])
+        print("[NotificationExtension] ERROR WHILE DECODING \(error)")
+        return nil
+      }
+    } else {
+      sentryTrackMessage(message: "NOTIFICATION_GROUP_NOT_FOUND", extras: ["envelope": envelope])
+      return nil
+    }
+  }
+
+  // V1/V2 convos 1:1, will be deprecated once 1:1 are migrated to MLS
+
   guard let conversation = await getPersistedConversation(xmtpClient: xmtpClient, contentTopic: envelope.contentTopic) else {
     print("[NotificationExtension] NOTIFICATION_CONVERSATION_NOT_FOUND", envelope)
     sentryTrackMessage(message: "NOTIFICATION_CONVERSATION_NOT_FOUND", extras: ["envelope": envelope])

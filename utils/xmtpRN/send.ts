@@ -17,6 +17,7 @@ import { deserializeRemoteAttachmentMessageContent } from "./attachments";
 import { ConversationWithCodecsType, GroupWithCodecsType } from "./client";
 import { isContentType } from "./contentTypes";
 import { getConversationWithTopic } from "./conversations";
+// import { syncGroupsMessages } from "./messages";
 
 let sendingPendingMessages = false;
 const sendingMessages: { [messageId: string]: boolean } = {};
@@ -57,6 +58,7 @@ const sendConverseGroupMessages = async (
     { group: GroupWithCodecsType; message: MessageEntity }
   >
 ) => {
+  // const now = new Date().getTime();
   for (const id of groupMessages.keys()) {
     const groupMessage = groupMessages.get(id);
     if (!groupMessage) continue;
@@ -76,6 +78,10 @@ const sendConverseGroupMessages = async (
           newMessageSent: new Date().getTime(),
         },
       });
+      // Let's refresh group ?
+      // await syncGroupsMessages(account, [groupMessage.group], {
+      //   [groupMessage.group.topic]: now,
+      // });
 
       delete sendingGroupMessages[id];
     } catch (e: any) {
