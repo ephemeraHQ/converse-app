@@ -84,17 +84,19 @@ export const subscribeToNotifications = async (
     const needToUpdateConversationSubscription = (
       c: ConversationWithLastMessagePreview
     ) => {
-      const hasValidAddress = c.peerAddress;
+      const hasValidPeer =
+        c.peerAddress || (c.groupMembers && c.groupMembers.length > 0);
       const isPending = !!c.pending;
 
-      if (!hasValidAddress || isPending) {
+      if (!hasValidPeer || isPending) {
         return {
           topic: c.topic,
           update: false,
         };
       }
 
-      const isNotBlocked = hasValidAddress && !isBlocked(c.peerAddress);
+      // @todo => handle blocking groups ?
+      const isNotBlocked = !c.peerAddress || !isBlocked(c.peerAddress);
       const isTopicNotDeleted = topicsData[c.topic]?.status !== "deleted";
       const isTopicInInbox =
         conversationShouldBeDisplayed(c, topicsData, peersStatus) &&
@@ -160,6 +162,7 @@ export const subscribeToNotifications = async (
       return;
     }
 
+    // @todo => check why we always re-send groups: because no hmac?
     console.log(
       `[Notifications] Subscribing to ${
         Object.keys(topicsToUpdateForPeriod).length
