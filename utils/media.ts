@@ -349,12 +349,15 @@ export const compressAndResizeImage = async (imageURI: string) => {
   return manipResult;
 };
 
-export const pickMediaFromLibrary = async () => {
+export const pickMediaFromLibrary = async (
+  options?: ImagePicker.ImagePickerOptions | undefined
+) => {
   const mediaPicked = await ImagePicker.launchImageLibraryAsync({
     mediaTypes: ImagePicker.MediaTypeOptions.Images,
     quality: 1,
     base64: false,
     allowsMultipleSelection: false,
+    ...options,
   });
 
   if (mediaPicked.canceled) return;
@@ -363,7 +366,9 @@ export const pickMediaFromLibrary = async () => {
   return asset;
 };
 
-export const takePictureFromCamera = async () => {
+export const takePictureFromCamera = async (
+  options?: ImagePicker.ImagePickerOptions | undefined
+) => {
   let cameraPermissions = await ImagePicker.getCameraPermissionsAsync();
   if (!cameraPermissions?.granted && cameraPermissions?.canAskAgain) {
     cameraPermissions = await ImagePicker.requestCameraPermissionsAsync();
@@ -391,6 +396,7 @@ export const takePictureFromCamera = async () => {
     quality: 1,
     base64: false,
     allowsEditing: false,
+    ...options,
   });
   if (mediaPicked.canceled) return;
   const asset = mediaPicked.assets?.[0];
