@@ -9,6 +9,7 @@ import {
   Platform,
 } from "react-native";
 
+import PFPPlaceholder from "../../assets/default-pfp-light.png";
 import { refreshProfileForAddress } from "../../data/helpers/profiles/profilesUpdate";
 import { useCurrentAccount } from "../../data/store/accountsStore";
 import { checkUsernameValid, claimProfile } from "../../utils/api";
@@ -128,13 +129,19 @@ export const UserProfile = () => {
   }, [address, profile]);
 
   const pickMedia = useCallback(async () => {
-    const asset = await pickMediaFromLibrary();
+    const asset = await pickMediaFromLibrary({
+      allowsEditing: true,
+      aspect: [1, 1],
+    });
     if (!asset) return;
     setProfile({ ...profile, avatar: asset.uri });
   }, [profile, setProfile]);
 
   const openCamera = useCallback(async () => {
-    const asset = await takePictureFromCamera();
+    const asset = await takePictureFromCamera({
+      allowsEditing: true,
+      aspect: [1, 1],
+    });
     if (!asset) return;
     setProfile({ ...profile, avatar: asset.uri });
   }, [profile, setProfile]);
@@ -143,7 +150,7 @@ export const UserProfile = () => {
     const showOptions = () =>
       showActionSheetWithOptions(
         {
-          options: ["Camera", "Photo Library", "Cancel"],
+          options: ["Take photo", "Chose from library", "Cancel"],
           cancelButtonIndex: 2,
           ...actionSheetColors(colorScheme),
         },
@@ -171,7 +178,6 @@ export const UserProfile = () => {
   return (
     <OnboardingComponent
       title="Profile"
-      picto="person"
       primaryButtonText="Continue"
       primaryButtonAction={handleContinue}
       backButtonText="Back to home screen"
@@ -179,27 +185,17 @@ export const UserProfile = () => {
       isLoading={loading}
       shrinkWithKeyboard
     >
+      <Image
+        source={{ uri: profile?.avatar }}
+        placeholder={PFPPlaceholder}
+        style={styles.avatar}
+      />
+      <Button
+        variant="text"
+        title={profile?.avatar ? "Change photo" : "Add photo"}
+        onPress={addPFP}
+      />
       <View style={styles.usernameInputContainer}>
-        <Image source={{ uri: profile?.avatar }} style={styles.avatar} />
-        <Button variant="text" title="Add PFP" onPress={addPFP} />
-        <TextInput
-          style={[textInputStyle(colorScheme), styles.usernameInput]}
-          onChangeText={(text) => {
-            // Limit the username to 30 characters
-            const trimmedUsername = text.slice(0, 30);
-            setProfile({ ...profile, username: trimmedUsername });
-          }}
-          value={profile.username}
-          placeholder="username"
-          placeholderTextColor={textSecondaryColor(colorScheme)}
-          autoCapitalize="none"
-          onSubmitEditing={handleContinue}
-          enterKeyHint="done"
-          returnKeyType="done"
-          maxLength={30}
-          autoCorrect={false}
-          autoComplete="off"
-        />
         <TextInput
           style={[textInputStyle(colorScheme), styles.displayNameInput]}
           onChangeText={(text) => {
@@ -218,9 +214,27 @@ export const UserProfile = () => {
           autoCorrect={false}
           autoComplete="off"
         />
+        <TextInput
+          style={[textInputStyle(colorScheme), styles.usernameInput]}
+          onChangeText={(text) => {
+            // Limit the username to 30 characters
+            const trimmedUsername = text.slice(0, 30);
+            setProfile({ ...profile, username: trimmedUsername });
+          }}
+          value={profile.username}
+          placeholder="username"
+          placeholderTextColor={textSecondaryColor(colorScheme)}
+          autoCapitalize="none"
+          onSubmitEditing={handleContinue}
+          enterKeyHint="done"
+          returnKeyType="done"
+          maxLength={30}
+          autoCorrect={false}
+          autoComplete="off"
+        />
         <Text style={styles.p}>
           {errorMessage ||
-            "This is how people will find you and how you will appear to others."}
+            "Pick a photo, a display name and a unique username."}
         </Text>
       </View>
     </OnboardingComponent>
@@ -229,22 +243,25 @@ export const UserProfile = () => {
 
 const useStyles = (colorScheme: any, errorMessage: any) =>
   StyleSheet.create({
-    avatar: {
-      width: 100,
-      height: 100,
-      borderWidth: 1,
-    },
     usernameInputContainer: {
       width: "100%",
       paddingHorizontal: 32,
-      marginTop: 50,
+      marginTop: 23,
+      alignItems: "center",
+    },
+    avatar: {
+      width: 121,
+      height: 121,
+      borderRadius: 121,
+      marginBottom: 10,
+      marginTop: 23,
     },
     usernameInput: {
       width: "100%",
+      marginTop: 16,
     },
     displayNameInput: {
       width: "100%",
-      marginTop: 16,
     },
     p: {
       textAlign: "center",

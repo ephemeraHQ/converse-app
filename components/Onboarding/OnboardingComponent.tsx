@@ -22,7 +22,7 @@ import Picto from "../Picto/Picto";
 
 type Props = {
   title: string;
-  picto: string;
+  picto?: string | undefined;
   subtitle?: string | React.ReactNode;
   isLoading?: boolean;
   children: React.ReactNode;
@@ -67,11 +67,15 @@ export default function OnboardingComponent({
         contentContainerStyle={styles.onboardingContent}
         keyboardShouldPersistTaps="handled"
       >
-        <Picto
-          picto={picto}
-          size={Platform.OS === "android" ? 80 : 43}
-          style={[styles.picto, inModal ? { marginTop: 50 } : {}]}
-        />
+        {picto ? (
+          <Picto
+            picto={picto}
+            size={Platform.OS === "android" ? 80 : 43}
+            style={[styles.picto, inModal ? { marginTop: 50 } : {}]}
+          />
+        ) : (
+          <View style={styles.noPicto} />
+        )}
 
         <Text style={styles.title}>{title}</Text>
         {loading && (
@@ -125,6 +129,16 @@ const useStyles = () => {
       flexGrow: 1,
       alignItems: "center",
       backgroundColor: backgroundColor(colorScheme),
+    },
+    noPicto: {
+      ...Platform.select({
+        default: {
+          marginTop: 140,
+        },
+        android: {
+          marginTop: 165,
+        },
+      }),
     },
     picto: {
       ...Platform.select({
