@@ -12,6 +12,7 @@ import { deleteAccountEncryptionKey, deleteXmtpKey } from "../keychain/helpers";
 import mmkv, { clearSecureMmkvForAccount, secureMmkvByAccount } from "../mmkv";
 import {
   deleteSubscribedTopics,
+  lastNotifSubscribeHashByAccount,
   unsubscribeFromNotifications,
 } from "../notifications";
 import { resetSharedData } from "../sharedData";
@@ -175,6 +176,7 @@ export const useLogoutFromConverse = (account: string) => {
     deleteSubscribedTopics(account);
     delete importedTopicsDataForAccount[account];
     delete secureMmkvByAccount[account];
+    delete lastNotifSubscribeHashByAccount[account];
 
     saveLogoutTask(account, apiHeaders, topicsToDelete, pkPath);
 

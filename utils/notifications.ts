@@ -1,6 +1,7 @@
 import { keystore } from "@xmtp/proto";
 import { buildUserInviteTopic } from "@xmtp/xmtp-js";
 import * as Notifications from "expo-notifications";
+import objectHash from "object-hash";
 import { Platform } from "react-native";
 
 import {
@@ -17,7 +18,10 @@ import {
 } from "../data/store/accountsStore";
 import { useAppStore } from "../data/store/appStore";
 import { XmtpConversation, XmtpMessage } from "../data/store/chatStore";
-import api, { saveNotificationsSubscribe } from "./api";
+import api, {
+  getLastNotificationsSubscribeHash,
+  saveNotificationsSubscribe,
+} from "./api";
 import {
   ConversationWithLastMessagePreview,
   conversationShouldBeDisplayed,
@@ -56,6 +60,10 @@ export const deleteSubscribedTopics = (account: string) => {
     delete subscribingByAccount[account];
   }
 };
+
+export const lastNotifSubscribeHashByAccount: {
+  [account: string]: string | null;
+} = {};
 
 export const subscribeToNotifications = async (
   account: string
@@ -106,7 +114,8 @@ export const subscribeToNotifications = async (
 
       return {
         topic: c.topic,
-        update: period !== c.lastNotificationsSubscribedPeriod,
+        // update: period !== c.lastNotificationsSubscribedPeriod,
+        update: true,
         status,
         period,
       };
@@ -123,9 +132,20 @@ export const subscribeToNotifications = async (
       .map(needToUpdateConversationSubscription)
       .filter((n) => n.update);
 
+    const dataToHash = {
+      push: [] as string[],
+      muted: [] as string[],
+      period: thirtyDayPeriodsSinceEpoch,
+    };
+
     if (conversationTopicsToUpdate.length > 0) {
       const conversationsKeys = await loadConversationsHmacKeys(account);
       conversationTopicsToUpdate.forEach((c) => {
+        if (c.status === "PUSH") {
+          dataToHash.push.push(c.topic);
+        } else {
+          dataToHash.muted.push(c.topic);
+        }
         if (conversationsKeys[c.topic]) {
           const hmacKeys =
             keystore.GetConversationHmacKeysResponse_HmacKeys.toJSON(
@@ -147,9 +167,13 @@ export const subscribeToNotifications = async (
       return;
     }
 
-    topicsToUpdateForPeriod[buildUserInviteTopic(account || "")] = {
+    const userInviteTopic = buildUserInviteTopic(account || "");
+    topicsToUpdateForPeriod[userInviteTopic] = {
       status: "PUSH",
     };
+    dataToHash.push.push(userInviteTopic);
+
+    const hash = objectHash(dataToHash);
 
     const nativeTokenQuery = await Notifications.getDevicePushTokenAsync();
     nativePushToken = nativeTokenQuery.data;
@@ -160,13 +184,27 @@ export const subscribeToNotifications = async (
       return;
     }
 
+    let lastHash = lastNotifSubscribeHashByAccount[account];
+    if (!lastHash) {
+      lastHash = await getLastNotificationsSubscribeHash(
+        account,
+        nativePushToken
+      );
+      lastNotifSubscribeHashByAccount[account] = lastHash;
+    }
+
+    if (lastHash === hash) {
+      delete subscribingByAccount[account];
+      return;
+    }
+
     console.log(
       `[Notifications] Subscribing to ${
         Object.keys(topicsToUpdateForPeriod).length
       } topic for ${account}`
     );
 
-    await saveNotificationsSubscribe(
+    lastNotifSubscribeHashByAccount[account] = await saveNotificationsSubscribe(
       account,
       nativePushToken,
       nativeTokenQuery.type,
