@@ -6630,6 +6630,14 @@
     semver "^7.5.4"
     superstruct "^1.0.3"
 
+"@mfellner/react-native-fast-create-hash@^1.0.0-alpha.2":
+  version "1.0.0-alpha.2"
+  resolved "https://registry.yarnpkg.com/@mfellner/react-native-fast-create-hash/-/react-native-fast-create-hash-1.0.0-alpha.2.tgz#b653020b3d9cdba5346026293666dd47b6369b75"
+  integrity sha512-+mn3Mtxw+BJWWnhHs8+e3m3CCXtME9wFnHQKbGsGIB2Pctf+hgL0YpMRMFmxY0UU89iyk9dPFoy1fUadEPRSZQ==
+  dependencies:
+    buffer "^6.0.3"
+    rfc4648 "^1.5.1"
+
 "@motionone/animation@^10.15.1":
   version "10.15.1"
   resolved "https://registry.yarnpkg.com/@motionone/animation/-/animation-10.15.1.tgz#4a85596c31cbc5100ae8eb8b34c459fb0ccf6807"
@@ -6837,17 +6845,22 @@
   resolved "https://registry.yarnpkg.com/@npmcli/name-from-folder/-/name-from-folder-2.0.0.tgz#c44d3a7c6d5c184bb6036f4d5995eee298945815"
   integrity sha512-pwK+BfEBZJbKdNYpHHRTNBwBoqrN/iIMO0AiGvYsp3Hoaq0WbgGSWQR6SCldZovoDpY3yje5lkFUe6gsDgJ2vg==
 
-"@open-frames/proxy-client@^0.3.0":
-  version "0.3.0"
-  resolved "https://registry.yarnpkg.com/@open-frames/proxy-client/-/proxy-client-0.3.0.tgz#701743cc7b41a03beedfdbd4e560f0f155e14764"
-  integrity sha512-PWOD4SrzD69WRdDrWBTZZiWkPAeR2bpTOEzofbTnh3EWaY9uW8MtgHMUFGbnX1umdXUIXltW5lzRivjnKhTOrA==
-  dependencies:
-    "@open-frames/proxy-types" "0.2.0"
+"@op-engineering/op-sqlite@^4.0.0-beta1":
+  version "4.0.0-beta1"
+  resolved "https://registry.yarnpkg.com/@op-engineering/op-sqlite/-/op-sqlite-4.0.0-beta1.tgz#3ec02a93f6d85e1fccf9628b986785d65ee41d97"
+  integrity sha512-giL94Tv7r9BmNiT9RmsER3Blz+lB+gYOXepVDA7DOjcluOZusJdTvMqvm/r7uEu3+iloZ6iK7NjKI4zud7S5xA==
 
-"@open-frames/proxy-types@0.2.0", "@open-frames/proxy-types@^0.2.0":
-  version "0.2.0"
-  resolved "https://registry.yarnpkg.com/@open-frames/proxy-types/-/proxy-types-0.2.0.tgz#bcbe01f3d61fdc7409c6368e3f8b981694ac2f2d"
-  integrity sha512-AzDcdvVy9g/soQMEyf9eqVdhfe34VPLTDVmLUV/Gwp11m4Q12scT5Y4VXi+haYc3xLd/qrfxkL0c8Z9FFESWEw==
+"@open-frames/proxy-client@^0.3.0":
+  version "0.3.2"
+  resolved "https://registry.yarnpkg.com/@open-frames/proxy-client/-/proxy-client-0.3.2.tgz#449349a483db38ee05c1dfdbcc05e42d15ce6f7e"
+  integrity sha512-tRVA5vzCjFk3s/5V7YFBu3ntkvwM+QHVGO5p3ch9q+Kt3X8VPiQClM6ggXYvfzI9pOtb4F+Ees2OdcYUoLsL4g==
+  dependencies:
+    "@open-frames/proxy-types" "0.2.2"
+
+"@open-frames/proxy-types@0.2.2", "@open-frames/proxy-types@^0.2.0":
+  version "0.2.2"
+  resolved "https://registry.yarnpkg.com/@open-frames/proxy-types/-/proxy-types-0.2.2.tgz#ccc6a95af42e1e892348e3306c7999c2539f0aad"
+  integrity sha512-i9v6mUUnAtc9ZSIQ7z0EApKX3WtyXY4DKdHzOVCWKW5EWb2SRBDQLgkP13rp8j2MJLLimqjZvkcvIhNldCwQNw==
 
 "@openzeppelin/contracts-upgradeable@4.7.3":
   version "4.7.3"
@@ -7991,45 +8004,45 @@
     "@sentry/types" "7.100.1"
     "@sentry/utils" "7.100.1"
 
-"@sentry/cli-darwin@2.25.2":
-  version "2.25.2"
-  resolved "https://registry.yarnpkg.com/@sentry/cli-darwin/-/cli-darwin-2.25.2.tgz#9fd935aa0381acbf2e22aef23eddc90d6efc1d97"
-  integrity sha512-o1d5NnVUrc1dxDm56k7Co8tSTcOuxbApdxweVXXsiq20HblZCyIi7WxxRkAg4RfKx594sKGiw9uCVvECi+9UpA==
+"@sentry/cli-darwin@2.30.0":
+  version "2.30.0"
+  resolved "https://registry.yarnpkg.com/@sentry/cli-darwin/-/cli-darwin-2.30.0.tgz#492ecade496a54523ae5400562e3b43e719a3d0f"
+  integrity sha512-JVesQ9PznbHBOOOwuej2X8/onfXdmAEjBH6fTyWxBl6K8mB4KmBX/aHunXWMBX+VR9X32XZghIqj7acwaFUMPA==
 
-"@sentry/cli-linux-arm64@2.25.2":
-  version "2.25.2"
-  resolved "https://registry.yarnpkg.com/@sentry/cli-linux-arm64/-/cli-linux-arm64-2.25.2.tgz#4a442d55f4e0a849b6faebd151d0d2277abf5de9"
-  integrity sha512-lm5jaigV6xu9Gwo0wNk+bX6yVkl5k3gNXcSXcKCISFo+Teb7Zhf9IyXANPm4VY2DdiZAjPJt8gS1bu+Mn7irtQ==
+"@sentry/cli-linux-arm64@2.30.0":
+  version "2.30.0"
+  resolved "https://registry.yarnpkg.com/@sentry/cli-linux-arm64/-/cli-linux-arm64-2.30.0.tgz#bcbb0d9f91148a27b3c06d70653437b07e7e8aea"
+  integrity sha512-JNXPkkMubKoZVlcFIoClSmTb9C/I6Bz08DuAZm2jnjRaaOMiCBxI/l50H3dmfVZ6apjEguG9JkjFdb0kqKB90w==
 
-"@sentry/cli-linux-arm@2.25.2":
-  version "2.25.2"
-  resolved "https://registry.yarnpkg.com/@sentry/cli-linux-arm/-/cli-linux-arm-2.25.2.tgz#053430a6508450b382fc980195cbd5cc0fe90d86"
-  integrity sha512-n398jd87Ymejt5k/6RjCEjXAvntOWuqhBDANxzhgr5/9FzbODJ844g1mOpcxiIlduzKSzWlPbTEKQulMp2Mt4w==
+"@sentry/cli-linux-arm@2.30.0":
+  version "2.30.0"
+  resolved "https://registry.yarnpkg.com/@sentry/cli-linux-arm/-/cli-linux-arm-2.30.0.tgz#c98e7d1ecd65ea49df2e036f332a4993115ef23a"
+  integrity sha512-MDB3iS31WKg4krCcLo520yxbUERPeA2DCtk9Qs9vSDbQl6Er64dteHllOdx1SDOyX/7GKcxrQEQ6SMmbnOo6wg==
 
-"@sentry/cli-linux-i686@2.25.2":
-  version "2.25.2"
-  resolved "https://registry.yarnpkg.com/@sentry/cli-linux-i686/-/cli-linux-i686-2.25.2.tgz#ce72717f48890984a805c82d116a9da115fc53a1"
-  integrity sha512-/YYx2gfqO5mkxyBgFcnDbZzkZ2+2xNarwrqWcqq3Qw0XlO9DWAQB2G+twV1RW/UfSU6fFIWErn94efh2EWmyzQ==
+"@sentry/cli-linux-i686@2.30.0":
+  version "2.30.0"
+  resolved "https://registry.yarnpkg.com/@sentry/cli-linux-i686/-/cli-linux-i686-2.30.0.tgz#30bb4f6d4e3567b3fb0ab074b845b6b5fde791f7"
+  integrity sha512-WhVVziFQw/fO0Cc53pY8goPAzJtIs6ORTR89fVbKwa3ZDNkX++mEOECbP7RkmD87kuRxyKzN543RPV971PcAHw==
 
-"@sentry/cli-linux-x64@2.25.2":
-  version "2.25.2"
-  resolved "https://registry.yarnpkg.com/@sentry/cli-linux-x64/-/cli-linux-x64-2.25.2.tgz#fb178ac3540f64595a17dd95b4b2071f18aa098a"
-  integrity sha512-rRafqy84R5mYA4JEfNsUeN10af5euJnK7fgqYM0mJIaplHC2YEXT9aUYWoryWPZiYqmdNUhsA6lX7iynSW9pZw==
+"@sentry/cli-linux-x64@2.30.0":
+  version "2.30.0"
+  resolved "https://registry.yarnpkg.com/@sentry/cli-linux-x64/-/cli-linux-x64-2.30.0.tgz#b1a7a550d875b97bf261c58c79d9c081d3e646a9"
+  integrity sha512-QkiVDeSfspotZ0Au5Yauv2DAm/BC1fL9BwPek/WwddM18I2HqnDp6l4TA4bQeEY++o0KEuNF53cPahpepltPjw==
 
-"@sentry/cli-win32-i686@2.25.2":
-  version "2.25.2"
-  resolved "https://registry.yarnpkg.com/@sentry/cli-win32-i686/-/cli-win32-i686-2.25.2.tgz#e0d73977771a578439207ea7863cde422a6cfee2"
-  integrity sha512-plT/gi41F+67g9AwrEm4avRXnjCtHCcnRnJ6zPu/iINGap8mvYQJSU/qM0oGwV6hRGg3JJN66XIvJPIuIs8P8w==
+"@sentry/cli-win32-i686@2.30.0":
+  version "2.30.0"
+  resolved "https://registry.yarnpkg.com/@sentry/cli-win32-i686/-/cli-win32-i686-2.30.0.tgz#07697fa94d8461f6715150699ffcb48e6eaeb462"
+  integrity sha512-xLY9B1EEGuNYPKpK6M9PMmcu2PzofdvRtbraTcU6Ck2zALS5oXB9kmWc4dDKucZ/uu9JB0m+Lo4ebaNlca45qQ==
 
-"@sentry/cli-win32-x64@2.25.2":
-  version "2.25.2"
-  resolved "https://registry.yarnpkg.com/@sentry/cli-win32-x64/-/cli-win32-x64-2.25.2.tgz#f21f71e7c2c60f99dd62c3360e4b0cda4f27d877"
-  integrity sha512-Mb6mAyPi9gIfpzF5MTk0JXgFP9nxka3Fb7JYn6AY4RW++sOjapkTrcXL2Gp3ZfQkWj5rFTgln4+eNmZPsD2gzA==
+"@sentry/cli-win32-x64@2.30.0":
+  version "2.30.0"
+  resolved "https://registry.yarnpkg.com/@sentry/cli-win32-x64/-/cli-win32-x64-2.30.0.tgz#1b6670222eedd4ae3c50f40f7180c07df38a304e"
+  integrity sha512-CiXuxnpJI0zho0XE5PVqIS9CwjDEYoMnHQRIr4Jj9OzlGTJ2iSSU6Zp3Ykd7lgo2iK4P6MfxIBm30gFQPnSvVA==
 
-"@sentry/cli@2.25.2":
-  version "2.25.2"
-  resolved "https://registry.yarnpkg.com/@sentry/cli/-/cli-2.25.2.tgz#7e8eec38c19ee27cb3f5c5a7ba3e80ad587c6517"
-  integrity sha512-lgt1QPaCfs/QZNXwyw3gvuBR2/CLwFSdU/oT7Bpxwizz8XVXhlKS98zJF1UVCy7SecsDSoOI0Z+B+X658cpquQ==
+"@sentry/cli@2.30.0":
+  version "2.30.0"
+  resolved "https://registry.yarnpkg.com/@sentry/cli/-/cli-2.30.0.tgz#3cbe9ee269779e57e3124834bb0a89112366cd98"
+  integrity sha512-GTO5e98vy2QwEYQvhE/ZtGUiVrUu4XungLioJbazm+ZOen8cyac8YOapZfozN5mtxjWOWMOwhOqoTeCU3Q8YKQ==
   dependencies:
     https-proxy-agent "^5.0.0"
     node-fetch "^2.6.7"
@@ -8037,13 +8050,13 @@
     proxy-from-env "^1.1.0"
     which "^2.0.2"
   optionalDependencies:
-    "@sentry/cli-darwin" "2.25.2"
-    "@sentry/cli-linux-arm" "2.25.2"
-    "@sentry/cli-linux-arm64" "2.25.2"
-    "@sentry/cli-linux-i686" "2.25.2"
-    "@sentry/cli-linux-x64" "2.25.2"
-    "@sentry/cli-win32-i686" "2.25.2"
-    "@sentry/cli-win32-x64" "2.25.2"
+    "@sentry/cli-darwin" "2.30.0"
+    "@sentry/cli-linux-arm" "2.30.0"
+    "@sentry/cli-linux-arm64" "2.30.0"
+    "@sentry/cli-linux-i686" "2.30.0"
+    "@sentry/cli-linux-x64" "2.30.0"
+    "@sentry/cli-win32-i686" "2.30.0"
+    "@sentry/cli-win32-x64" "2.30.0"
 
 "@sentry/core@7.100.1":
   version "7.100.1"
@@ -8072,13 +8085,13 @@
     "@sentry/utils" "7.100.1"
     localforage "^1.8.1"
 
-"@sentry/react-native@5.19.1":
-  version "5.19.1"
-  resolved "https://registry.yarnpkg.com/@sentry/react-native/-/react-native-5.19.1.tgz#31635328fd6578daaf815be4fe3a9bf5bbaff7b4"
-  integrity sha512-i2vfbvTkohsXvvMMCozeVOrwS07zVtvwYsvooEZOvQIgq/c41QQ4LmbZK7efLrfUsxkk3MsISwMVma+MncqTHA==
+"@sentry/react-native@^5.20.0":
+  version "5.20.0"
+  resolved "https://registry.yarnpkg.com/@sentry/react-native/-/react-native-5.20.0.tgz#71c74f09545c3b2a01c8cef14deab939499ba8e6"
+  integrity sha512-1jWqQFRvQeFgYrEXfvr0TTG/kXIGV2KgtkNqlInTTuXFXo6qInFhuu4Ak4zNuitFlfr6Soh2ASlJrpkBKf2pAg==
   dependencies:
     "@sentry/browser" "7.100.1"
-    "@sentry/cli" "2.25.2"
+    "@sentry/cli" "2.30.0"
     "@sentry/core" "7.100.1"
     "@sentry/hub" "7.100.1"
     "@sentry/integrations" "7.100.1"
@@ -10439,10 +10452,10 @@
     rxjs "^7.8.0"
     undici "^5.8.1"
 
-"@xmtp/react-native-sdk@^1.30.0":
-  version "1.30.0"
-  resolved "https://registry.yarnpkg.com/@xmtp/react-native-sdk/-/react-native-sdk-1.30.0.tgz#7b676d378eed4781c9affc9da9049952438ead18"
-  integrity sha512-mDWwa3Pe6lseJeFwnCstuwTXi+bk5iQhR0su1WuC4/dYTVLKmqK9mQ2kTwBl5ESiMj1sa9ntknq8nAg7I1JLfQ==
+"@xmtp/react-native-sdk@^1.32.4":
+  version "1.32.4"
+  resolved "https://registry.yarnpkg.com/@xmtp/react-native-sdk/-/react-native-sdk-1.32.4.tgz#65102d66b21810fa6855d56d7b946e0fbe28ceb9"
+  integrity sha512-mBn3PyPB2DDeP4aaTo0Pv4OglL6dRTgU0cYvqVWkJbtzXgpSucgni2NQhKS6zZfc8rQ1LBUtK/4xapviJDU3rQ==
   dependencies:
     "@ethersproject/bytes" "^5.7.0"
     "@msgpack/msgpack" "^3.0.0-beta2"
@@ -21730,6 +21743,13 @@ react-native-quick-base64@^2.0.5, react-native-quick-base64@^2.0.7:
   dependencies:
     base64-js "^1.5.1"
 
+react-native-quick-base64@^2.0.8:
+  version "2.0.8"
+  resolved "https://registry.yarnpkg.com/react-native-quick-base64/-/react-native-quick-base64-2.0.8.tgz#7a75ea8bd85ca3c5bb38a814c1d63e0688e19531"
+  integrity sha512-2kMlnLSy0qz4NA0KXMGugd3qNB5EAizxZ6ghEVNGIxAOlc9CGvC8miv35wgpFbSKeiaBRfcPfkdTM/5Erb/6SQ==
+  dependencies:
+    base64-js "^1.5.1"
+
 react-native-quick-crypto@^0.6.1:
   version "0.6.1"
   resolved "https://registry.yarnpkg.com/react-native-quick-crypto/-/react-native-quick-crypto-0.6.1.tgz#7b89c67c4a5d3669c4491fe7884621c1c74d01bc"
@@ -22456,6 +22476,11 @@ reverse-arguments@^1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/reverse-arguments/-/reverse-arguments-1.0.0.tgz#c28095a3a921ac715d61834ddece9027992667cd"
   integrity sha512-/x8uIPdTafBqakK0TmPNJzgkLP+3H+yxpUJhCQHsLBg1rYEVNR2D8BRYNWQhVBjyOd7oo1dZRVzIkwMY2oqfYQ==
+
+rfc4648@^1.5.1:
+  version "1.5.3"
+  resolved "https://registry.yarnpkg.com/rfc4648/-/rfc4648-1.5.3.tgz#e62b81736c10361ca614efe618a566e93d0b41c0"
+  integrity sha512-MjOWxM065+WswwnmNONOT+bD1nXzY9Km6u3kzvnx8F8/HXGZdz3T6e6vZJ8Q/RIMUSp/nxqjH3GwvJDy8ijeQQ==
 
 rfdc@^1.3.0:
   version "1.3.0"

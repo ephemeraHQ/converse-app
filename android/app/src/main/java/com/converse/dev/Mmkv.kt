@@ -7,15 +7,38 @@ import org.json.JSONArray
 import org.json.JSONException
 
 private var mmkvInstance:MMKV? = null;
+private var secureMmkvForAccount:MutableMap<String, MMKV?> = mutableMapOf();
+private var mmkvInitialized = false;
 
+
+fun initializeMmkv(appContext: Context) {
+    if (!mmkvInitialized) {
+        mmkvInitialized = true;
+        MMKV.initialize(appContext)
+    }
+}
 fun getMmkv(appContext: Context): MMKV? {
     if (mmkvInstance != null) {
         return mmkvInstance;
     }
-    MMKV.initialize(appContext)
+    initializeMmkv(appContext);
     mmkvInstance = MMKV.defaultMMKV(MMKV.MULTI_PROCESS_MODE, null)
     return mmkvInstance;
 }
+
+fun getSecureMmkvForAccount(appContext: Context, account: String): MMKV? {
+    if (secureMmkvForAccount[account] != null) {
+        return secureMmkvForAccount[account];
+    }
+    initializeMmkv(appContext);
+    val accountEncryptionKey =  getKeychainValue("CONVERSE_ACCOUNT_ENCRYPTION_KEY_$account")
+    if (accountEncryptionKey === null) {
+        return null;
+    }
+    secureMmkvForAccount[account] = MMKV.mmkvWithID("secure-mmkv-$account", MMKV.MULTI_PROCESS_MODE, accountEncryptionKey.substring(0, 16))
+    return secureMmkvForAccount[account];
+}
+
 
 fun getAccountsState(appContext: Context): Accounts? {
     val mmkv = getMmkv(appContext)

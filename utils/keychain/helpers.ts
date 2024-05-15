@@ -1,5 +1,6 @@
 import type { Storage as PrivyStorage } from "@privy-io/js-sdk-core";
 import { createHash } from "crypto";
+import { getRandomBytesAsync } from "expo-crypto";
 import * as SecureStore from "expo-secure-store";
 
 import {
@@ -24,37 +25,6 @@ export const deleteXmtpKey = async (account: string) => {
 
 export const loadXmtpKey = async (account: string): Promise<string | null> =>
   getSecureItemAsync(`XMTP_KEY_${account}`);
-
-// Faster than saving if already exists
-const saveIfNotExists = async (key: string, value: string) => {
-  const alreadyExists = await getSecureItemAsync(key);
-  if (alreadyExists) {
-    return;
-  }
-  await setSecureItemAsync(key, value);
-};
-
-export const saveTopicDataToKeychain = async (
-  account: string,
-  conversationTopicData: { [topic: string]: string }
-) => {
-  const promises = [];
-  const now = new Date().getTime();
-  for (const topic in conversationTopicData) {
-    const topicData = conversationTopicData[topic];
-    const key = createHash("sha256").update(topic).digest("hex");
-    promises.push(
-      saveIfNotExists(`XMTP_TOPIC_DATA_${account}_${key}`, topicData)
-    );
-  }
-  await Promise.all(promises);
-  const after = new Date().getTime();
-  console.log(
-    `Persisted ${promises.length} exported conversations in ${
-      (after - now) / 1000
-    } seconds`
-  );
-};
 
 export const getTopicDataFromKeychain = async (
   account: string,
@@ -105,3 +75,29 @@ export const savePrivateKey = async (
     // TODO => add biometric authentication
     // requireAuthentication: true,
   });
+
+// Returns a 64 bytes key that can be used for multiple things
+// 32 bytes is used for XMTP db encryption,
+// 16 bytes is used for MMKV secure encryption
+export const getAccountEncryptionKey = async (
+  account: string
+): Promise<Buffer> => {
+  const existingKey = await getSecureItemAsync(
+    `CONVERSE_ACCOUNT_ENCRYPTION_KEY_${account}`
+  );
+  if (existingKey) {
+    return Buffer.from(existingKey, "base64");
+  }
+  console.log(
+    `[Keychain] Creating account encryption key for account ${account}`
+  );
+  const newKey = Buffer.from(await getRandomBytesAsync(64));
+  await setSecureItemAsync(
+    `CONVERSE_ACCOUNT_ENCRYPTION_KEY_${account}`,
+    newKey.toString("base64")
+  );
+  return newKey;
+};
+
+export const deleteAccountEncryptionKey = (account: string) =>
+  deleteSecureItemAsync(`CONVERSE_ACCOUNT_ENCRYPTION_KEY_${account}`);
