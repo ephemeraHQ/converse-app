@@ -8,14 +8,16 @@ import {
   useAccountsStore,
 } from "../../data/store/accountsStore";
 import { deleteSecureItemAsync } from "../keychain";
-import { deleteXmtpKey } from "../keychain/helpers";
-import mmkv from "../mmkv";
+import { deleteAccountEncryptionKey, deleteXmtpKey } from "../keychain/helpers";
+import mmkv, { clearSecureMmkvForAccount, secureMmkvByAccount } from "../mmkv";
 import {
   deleteSubscribedTopics,
+  lastNotifSubscribeHashByAccount,
   unsubscribeFromNotifications,
 } from "../notifications";
 import { resetSharedData } from "../sharedData";
 import { getXmtpApiHeaders } from "../xmtpRN/api";
+import { importedTopicsDataForAccount } from "../xmtpRN/conversations";
 import { deleteXmtpClient } from "../xmtpRN/sync";
 import { useDisconnectFromPrivy } from "./privy";
 import { useDisconnectWallet } from "./wallet";
@@ -102,20 +104,16 @@ export const executeLogoutTasks = async () => {
       console.log(
         `[Logout] Executing logout task for ${account} (${task.topics.length} topics)`
       );
+      await clearSecureMmkvForAccount(account);
       await deleteXmtpKey(account);
+      await deleteAccountEncryptionKey(account);
       if (task.pkPath) {
         await deleteSecureItemAsync(task.pkPath);
       }
       assertNotLogged(account);
-      if (task.topics.length > 0) {
-        // This is too long and might race with re-login, let's not do it for now
-        // it could be done by having a different account id even if you re-login with
-        // same account.
-        // await deleteConversationsFromKeychain(account, task.topics);
-        resetSharedData(task.topics);
-      }
+      resetSharedData(task.topics || []);
       assertNotLogged(account);
-      // This will fail if no connection and will be tried later async
+      // This will fail if no connection (5sec timeout)
       await unsubscribeFromNotifications(task.apiHeaders);
       removeLogoutTask(account);
     } catch (e: any) {
@@ -176,6 +174,9 @@ export const useLogoutFromConverse = (account: string) => {
 
     deleteXmtpClient(account);
     deleteSubscribedTopics(account);
+    delete importedTopicsDataForAccount[account];
+    delete secureMmkvByAccount[account];
+    delete lastNotifSubscribeHashByAccount[account];
 
     saveLogoutTask(account, apiHeaders, topicsToDelete, pkPath);
 

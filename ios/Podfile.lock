@@ -193,7 +193,7 @@ PODS:
   - libwebp/sharpyuv (1.3.2)
   - libwebp/webp (1.3.2):
     - libwebp/sharpyuv
-  - LibXMTP (0.4.3-beta4)
+  - LibXMTP (0.4.4-beta2)
   - Logging (1.0.0)
   - MessagePacker (0.4.7)
   - MMKV (1.3.3):
@@ -201,6 +201,11 @@ PODS:
   - MMKVAppExtension (1.3.3):
     - MMKVCore (~> 1.3.3)
   - MMKVCore (1.3.3)
+  - op-sqlite (4.0.0-beta1):
+    - React
+    - React-callinvoker
+    - React-Core
+  - OpenSSL-Universal (1.1.2200)
   - RCT-Folly (2022.05.16.00):
     - boost
     - DoubleConversion
@@ -1073,6 +1078,8 @@ PODS:
   - React-Mapbuffer (0.73.6):
     - glog
     - React-debug
+  - react-native-fast-create-hash (1.0.0-alpha.2):
+    - React-Core
   - react-native-get-random-values (1.8.0):
     - React-Core
   - react-native-keyboard-controller (1.9.1):
@@ -1081,6 +1088,8 @@ PODS:
     - MMKV (>= 1.2.13)
     - React-Core
   - react-native-netinfo (11.1.0):
+    - React-Core
+  - react-native-quick-base64 (2.0.8):
     - React-Core
   - react-native-safe-area-context (4.8.2):
     - React-Core
@@ -1290,11 +1299,11 @@ PODS:
     - glog
     - RCT-Folly (= 2022.05.16.00)
     - React-Core
-  - RNSentry (5.19.1):
+  - RNSentry (5.20.0):
     - hermes-engine
     - React-Core
     - React-hermes
-    - Sentry/HybridSDK (= 8.17.1)
+    - Sentry/HybridSDK (= 8.21.0)
   - RNSVG (14.1.0):
     - React-Core
   - SDWebImage (5.17.0):
@@ -1309,9 +1318,9 @@ PODS:
     - libwebp (~> 1.0)
     - SDWebImage/Core (~> 5.17)
   - secp256k1.swift (0.1.4)
-  - Sentry/HybridSDK (8.17.1):
-    - SentryPrivate (= 8.17.1)
-  - SentryPrivate (8.17.1)
+  - Sentry/HybridSDK (8.21.0):
+    - SentryPrivate (= 8.21.0)
+  - SentryPrivate (8.21.0)
   - SocketRocket (0.6.1)
   - SQLite.swift (0.14.1):
     - SQLite.swift/standard (= 0.14.1)
@@ -1326,16 +1335,16 @@ PODS:
     - GenericJSON (~> 2.0)
     - Logging (~> 1.0.0)
     - secp256k1.swift (~> 0.1)
-  - XMTP (0.10.0):
+  - XMTP (0.10.3):
     - Connect-Swift (= 0.12.0)
     - GzipSwift
-    - LibXMTP (= 0.4.3-beta4)
+    - LibXMTP (= 0.4.4-beta2)
     - web3.swift
-  - XMTPReactNative (1.30.0):
+  - XMTPReactNative (1.32.4):
     - ExpoModulesCore
     - MessagePacker
     - secp256k1.swift
-    - XMTP (= 0.10.0)
+    - XMTP (= 0.10.3)
   - Yoga (1.14.0)
 
 DEPENDENCIES:
@@ -1383,6 +1392,8 @@ DEPENDENCIES:
   - MMKV (= 1.3.3)
   - MMKVAppExtension (= 1.3.3)
   - MMKVCore (= 1.3.3)
+  - "op-sqlite (from `../node_modules/@op-engineering/op-sqlite`)"
+  - OpenSSL-Universal (= 1.1.2200)
   - RCT-Folly (from `../node_modules/react-native/third-party-podspecs/RCT-Folly.podspec`)
   - RCT-Folly/Fabric (from `../node_modules/react-native/third-party-podspecs/RCT-Folly.podspec`)
   - RCTRequired (from `../node_modules/react-native/Libraries/RCTRequired`)
@@ -1406,10 +1417,12 @@ DEPENDENCIES:
   - React-jsinspector (from `../node_modules/react-native/ReactCommon/jsinspector-modern`)
   - React-logger (from `../node_modules/react-native/ReactCommon/logger`)
   - React-Mapbuffer (from `../node_modules/react-native/ReactCommon`)
+  - "react-native-fast-create-hash (from `../node_modules/@mfellner/react-native-fast-create-hash`)"
   - react-native-get-random-values (from `../node_modules/react-native-get-random-values`)
   - react-native-keyboard-controller (from `../node_modules/react-native-keyboard-controller`)
   - react-native-mmkv (from `../node_modules/react-native-mmkv`)
   - "react-native-netinfo (from `../node_modules/@react-native-community/netinfo`)"
+  - react-native-quick-base64 (from `../node_modules/react-native-quick-base64`)
   - react-native-safe-area-context (from `../node_modules/react-native-safe-area-context`)
   - react-native-sfsymbols (from `../node_modules/react-native-sfsymbols`)
   - react-native-sqlite-storage (from `../node_modules/react-native-sqlite-storage`)
@@ -1448,10 +1461,10 @@ DEPENDENCIES:
   - RNScreens (from `../node_modules/react-native-screens`)
   - "RNSentry (from `../node_modules/@sentry/react-native`)"
   - RNSVG (from `../node_modules/react-native-svg`)
-  - Sentry/HybridSDK (= 8.17.1)
+  - Sentry/HybridSDK (= 8.21.0)
   - SQLite.swift
   - UMAppLoader (from `../node_modules/unimodules-app-loader/ios`)
-  - XMTP (= 0.10.0)
+  - XMTP (= 0.10.3)
   - "XMTPReactNative (from `../node_modules/@xmtp/react-native-sdk/ios`)"
   - Yoga (from `../node_modules/react-native/ReactCommon/yoga`)
 
@@ -1474,6 +1487,7 @@ SPEC REPOS:
     - MMKV
     - MMKVAppExtension
     - MMKVCore
+    - OpenSSL-Universal
     - ReachabilitySwift
     - SDWebImage
     - SDWebImageAVIFCoder
@@ -1571,6 +1585,8 @@ EXTERNAL SOURCES:
   hermes-engine:
     :podspec: "../node_modules/react-native/sdks/hermes-engine/hermes-engine.podspec"
     :tag: hermes-2024-02-20-RNv0.73.5-18f99ace4213052c5e7cdbcd39ee9766cd5df7e4
+  op-sqlite:
+    :path: "../node_modules/@op-engineering/op-sqlite"
   RCT-Folly:
     :podspec: "../node_modules/react-native/third-party-podspecs/RCT-Folly.podspec"
   RCTRequired:
@@ -1613,6 +1629,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native/ReactCommon/logger"
   React-Mapbuffer:
     :path: "../node_modules/react-native/ReactCommon"
+  react-native-fast-create-hash:
+    :path: "../node_modules/@mfellner/react-native-fast-create-hash"
   react-native-get-random-values:
     :path: "../node_modules/react-native-get-random-values"
   react-native-keyboard-controller:
@@ -1621,6 +1639,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native-mmkv"
   react-native-netinfo:
     :path: "../node_modules/@react-native-community/netinfo"
+  react-native-quick-base64:
+    :path: "../node_modules/react-native-quick-base64"
   react-native-safe-area-context:
     :path: "../node_modules/react-native-safe-area-context"
   react-native-sfsymbols:
@@ -1756,12 +1776,14 @@ SPEC CHECKSUMS:
   libevent: 4049cae6c81cdb3654a443be001fb9bdceff7913
   libvmaf: 27f523f1e63c694d14d534cd0fddd2fab0ae8711
   libwebp: 1786c9f4ff8a279e4dac1e8f385004d5fc253009
-  LibXMTP: 3813a1f6c0cc2b4cd57dc4805c80da92e4b4bcab
+  LibXMTP: 0c073613451e3850bfcaaab5438b481fe887cd97
   Logging: 9ef4ecb546ad3169398d5a723bc9bea1c46bef26
   MessagePacker: ab2fe250e86ea7aedd1a9ee47a37083edd41fd02
   MMKV: f902fb6719da13c2ab0965233d8963a59416f911
   MMKVAppExtension: fcf23c6b250cc87db63507bc57be8e6ed378168d
   MMKVCore: d26e4d3edd5cb8588c2569222cbd8be4231374e9
+  op-sqlite: 2cab6b67b198d913e7b6a57e8fbff1f229e1892a
+  OpenSSL-Universal: 6e1ae0555546e604dbc632a2b9a24a9c46c41ef6
   RCT-Folly: 7169b2b1c44399c76a47b5deaaba715eeeb476c0
   RCTRequired: ca1d7414aba0b27efcfa2ccd37637edb1ab77d96
   RCTTypeSafety: 678e344fb976ff98343ca61dc62e151f3a042292
@@ -1784,10 +1806,12 @@ SPEC CHECKSUMS:
   React-jsinspector: 85583ef014ce53d731a98c66a0e24496f7a83066
   React-logger: 3eb80a977f0d9669468ef641a5e1fabbc50a09ec
   React-Mapbuffer: d81d930c1b7f4db284e1d721fe7fdc99230ca108
+  react-native-fast-create-hash: 0d0f0ec146f12feadace675164f881bbe692f8bd
   react-native-get-random-values: a6ea6a8a65dc93e96e24a11105b1a9c8cfe1d72a
   react-native-keyboard-controller: fa41f43f87f22ac0248435c1548d5d3f45c15248
   react-native-mmkv: e97c0c79403fb94577e5d902ab1ebd42b0715b43
   react-native-netinfo: 3aa5637c18834966e0c932de8ae1ae56fea20a97
+  react-native-quick-base64: 777057ea4286f806b00259ede65dc79c7c706320
   react-native-safe-area-context: 0ee144a6170530ccc37a0fd9388e28d06f516a89
   react-native-sfsymbols: bd3a0d3eab185e80b571bae60753dcf5a0d57967
   react-native-sqlite-storage: f6d515e1c446d1e6d026aa5352908a25d4de3261
@@ -1824,25 +1848,25 @@ SPEC CHECKSUMS:
   RNReactNativeSharedGroupPreferences: de0121a4224c267bc7e9fb16c398f3f087c8da81
   RNReanimated: 548d4cb6785a032be887c66433082155d12baba0
   RNScreens: a4d9ce8f68f833f4e42410140eafd88e38bba163
-  RNSentry: 6872121e0af7aa9f3f50643f557d69adc8f7ecdc
+  RNSentry: 5381e9284aec59a546e4a7d40e33ad0839b99c1e
   RNSVG: ba3e7232f45e34b7b47e74472386cf4e1a676d0a
   SDWebImage: 750adf017a315a280c60fde706ab1e552a3ae4e9
   SDWebImageAVIFCoder: 8348fef6d0ec69e129c66c9fe4d74fbfbf366112
   SDWebImageSVGCoder: 15a300a97ec1c8ac958f009c02220ac0402e936c
   SDWebImageWebPCoder: af09429398d99d524cae2fe00f6f0f6e491ed102
   secp256k1.swift: a7e7a214f6db6ce5db32cc6b2b45e5c4dd633634
-  Sentry: d9f99f9cc13777c5d938650c1e1c85047bb4f0d1
-  SentryPrivate: 839b1e58addf58624087a80b2628e543193fa8ef
+  Sentry: ebc12276bd17613a114ab359074096b6b3725203
+  SentryPrivate: d651efb234cf385ec9a1cdd3eff94b5e78a0e0fe
   SocketRocket: f32cd54efbe0f095c4d7594881e52619cfe80b17
   SQLite.swift: 2992550ebf3c5b268bf4352603e3df87d2a4ed72
   sqlite3: f163dbbb7aa3339ad8fc622782c2d9d7b72f7e9c
   SwiftProtobuf: 407a385e97fd206c4fbe880cc84123989167e0d1
   UMAppLoader: 5df85360d65cabaef544be5424ac64672e648482
   web3.swift: 2263d1e12e121b2c42ffb63a5a7beb1acaf33959
-  XMTP: bb638d7ae084814be68d0a549f722d3a4ac2c4e5
-  XMTPReactNative: cb5fdb7fbfad67d4e9ec85d78a424f7e25da4b26
+  XMTP: bf00ef58d4fbcc8ab740145a6303591adf3fb355
+  XMTPReactNative: f83c939ee083f57decc7ac0f7db4e4b7e34b72d8
   Yoga: d17d2cc8105eed528474683b42e2ea310e1daf61
 
-PODFILE CHECKSUM: 4b773a57ded38ffdeb96c7c5737be26d09b69a58
+PODFILE CHECKSUM: 4690f8b68183aab79a9f2d6d884bc483af8b1899
 
 COCOAPODS: 1.14.3
