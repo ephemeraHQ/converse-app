@@ -1,7 +1,7 @@
+import { createHash } from "@mfellner/react-native-fast-create-hash";
 import { keystore } from "@xmtp/proto";
 import { buildUserInviteTopic } from "@xmtp/xmtp-js";
 import * as Notifications from "expo-notifications";
-import objectHash from "object-hash";
 import { Platform } from "react-native";
 
 import {
@@ -172,8 +172,14 @@ export const subscribeToNotifications = async (
       status: "PUSH",
     };
     dataToHash.push.push(userInviteTopic);
-
-    const hash = objectHash(dataToHash);
+    dataToHash.push.sort();
+    dataToHash.muted.sort();
+    const stringToHash = `${dataToHash.period}-push-${dataToHash.push.join(
+      ","
+    )}-muted-${dataToHash.muted.join(",")}`;
+    const hash = (
+      await createHash(Buffer.from(stringToHash), "sha256")
+    ).toString("hex");
 
     const nativeTokenQuery = await Notifications.getDevicePushTokenAsync();
     nativePushToken = nativeTokenQuery.data;

@@ -6630,6 +6630,14 @@
     semver "^7.5.4"
     superstruct "^1.0.3"
 
+"@mfellner/react-native-fast-create-hash@^1.0.0-alpha.2":
+  version "1.0.0-alpha.2"
+  resolved "https://registry.yarnpkg.com/@mfellner/react-native-fast-create-hash/-/react-native-fast-create-hash-1.0.0-alpha.2.tgz#b653020b3d9cdba5346026293666dd47b6369b75"
+  integrity sha512-+mn3Mtxw+BJWWnhHs8+e3m3CCXtME9wFnHQKbGsGIB2Pctf+hgL0YpMRMFmxY0UU89iyk9dPFoy1fUadEPRSZQ==
+  dependencies:
+    buffer "^6.0.3"
+    rfc4648 "^1.5.1"
+
 "@motionone/animation@^10.15.1":
   version "10.15.1"
   resolved "https://registry.yarnpkg.com/@motionone/animation/-/animation-10.15.1.tgz#4a85596c31cbc5100ae8eb8b34c459fb0ccf6807"
@@ -9101,11 +9109,6 @@
   version "2.4.1"
   resolved "https://registry.yarnpkg.com/@types/normalize-package-data/-/normalize-package-data-2.4.1.tgz#d3357479a0fdfdd5907fe67e17e0a85c906e1301"
   integrity sha512-Gj7cI7z+98M282Tqmp2K5EIsoouUEzbBJhQQzDE3jSIRk6r9gsz0oUokqIUR4u1R3dMHo0pDHM7sNOHyhulypw==
-
-"@types/object-hash@^3.0.6":
-  version "3.0.6"
-  resolved "https://registry.yarnpkg.com/@types/object-hash/-/object-hash-3.0.6.tgz#25c052428199d374ef723b7b0ed44b5bfe1b3029"
-  integrity sha512-fOBV8C1FIu2ELinoILQ+ApxcUKz4ngq+IWUYrxSGjXzzjUALijilampwkMgEtJ+h2njAW3pi853QpzNVCHB73w==
 
 "@types/parse-json@^4.0.0":
   version "4.0.2"
@@ -22463,6 +22466,11 @@ reverse-arguments@^1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/reverse-arguments/-/reverse-arguments-1.0.0.tgz#c28095a3a921ac715d61834ddece9027992667cd"
   integrity sha512-/x8uIPdTafBqakK0TmPNJzgkLP+3H+yxpUJhCQHsLBg1rYEVNR2D8BRYNWQhVBjyOd7oo1dZRVzIkwMY2oqfYQ==
+
+rfc4648@^1.5.1:
+  version "1.5.3"
+  resolved "https://registry.yarnpkg.com/rfc4648/-/rfc4648-1.5.3.tgz#e62b81736c10361ca614efe618a566e93d0b41c0"
+  integrity sha512-MjOWxM065+WswwnmNONOT+bD1nXzY9Km6u3kzvnx8F8/HXGZdz3T6e6vZJ8Q/RIMUSp/nxqjH3GwvJDy8ijeQQ==
 
 rfdc@^1.3.0:
   version "1.3.0"

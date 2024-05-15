@@ -1078,6 +1078,8 @@ PODS:
   - React-Mapbuffer (0.73.6):
     - glog
     - React-debug
+  - react-native-fast-create-hash (1.0.0-alpha.2):
+    - React-Core
   - react-native-get-random-values (1.8.0):
     - React-Core
   - react-native-keyboard-controller (1.9.1):
@@ -1415,6 +1417,7 @@ DEPENDENCIES:
   - React-jsinspector (from `../node_modules/react-native/ReactCommon/jsinspector-modern`)
   - React-logger (from `../node_modules/react-native/ReactCommon/logger`)
   - React-Mapbuffer (from `../node_modules/react-native/ReactCommon`)
+  - "react-native-fast-create-hash (from `../node_modules/@mfellner/react-native-fast-create-hash`)"
   - react-native-get-random-values (from `../node_modules/react-native-get-random-values`)
   - react-native-keyboard-controller (from `../node_modules/react-native-keyboard-controller`)
   - react-native-mmkv (from `../node_modules/react-native-mmkv`)
@@ -1626,6 +1629,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native/ReactCommon/logger"
   React-Mapbuffer:
     :path: "../node_modules/react-native/ReactCommon"
+  react-native-fast-create-hash:
+    :path: "../node_modules/@mfellner/react-native-fast-create-hash"
   react-native-get-random-values:
     :path: "../node_modules/react-native-get-random-values"
   react-native-keyboard-controller:
@@ -1801,6 +1806,7 @@ SPEC CHECKSUMS:
   React-jsinspector: 85583ef014ce53d731a98c66a0e24496f7a83066
   React-logger: 3eb80a977f0d9669468ef641a5e1fabbc50a09ec
   React-Mapbuffer: d81d930c1b7f4db284e1d721fe7fdc99230ca108
+  react-native-fast-create-hash: 0d0f0ec146f12feadace675164f881bbe692f8bd
   react-native-get-random-values: a6ea6a8a65dc93e96e24a11105b1a9c8cfe1d72a
   react-native-keyboard-controller: fa41f43f87f22ac0248435c1548d5d3f45c15248
   react-native-mmkv: e97c0c79403fb94577e5d902ab1ebd42b0715b43
