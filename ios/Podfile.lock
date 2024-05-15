@@ -201,7 +201,7 @@ PODS:
   - MMKVAppExtension (1.3.3):
     - MMKVCore (~> 1.3.3)
   - MMKVCore (1.3.3)
-  - op-sqlite (4.0.0-beta1):
+  - op-sqlite (6.0.1):
     - React
     - React-callinvoker
     - React-Core
@@ -1782,7 +1782,7 @@ SPEC CHECKSUMS:
   MMKV: f902fb6719da13c2ab0965233d8963a59416f911
   MMKVAppExtension: fcf23c6b250cc87db63507bc57be8e6ed378168d
   MMKVCore: d26e4d3edd5cb8588c2569222cbd8be4231374e9
-  op-sqlite: 2cab6b67b198d913e7b6a57e8fbff1f229e1892a
+  op-sqlite: 1ca30186b8d062cd451f1d999c691caf151d13e2
   OpenSSL-Universal: 6e1ae0555546e604dbc632a2b9a24a9c46c41ef6
   RCT-Folly: 7169b2b1c44399c76a47b5deaaba715eeeb476c0
   RCTRequired: ca1d7414aba0b27efcfa2ccd37637edb1ab77d96
