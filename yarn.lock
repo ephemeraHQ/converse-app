@@ -14896,14 +14896,7 @@ expo-system-ui@~2.9.4:
     "@react-native/normalize-color" "^2.0.0"
     debug "^4.3.2"
 
-expo-task-manager@~11.7.2:
-  version "11.7.2"
-  resolved "https://registry.yarnpkg.com/expo-task-manager/-/expo-task-manager-11.7.2.tgz#db09ee5ed4adf1ea586c131a60196cb387a7eb4a"
-  integrity sha512-cmn7xg8+mGP7gX6deYZhvrCkKMkoBRJ+E4o5aL17Z/4ihXMfo/PFcQsrpuSYRLXzgidEw0kpppxhmYm21Jswwg==
-  dependencies:
-    unimodules-app-loader "~4.5.0"
-
-expo-task-manager@~11.7.3:
+expo-task-manager@~11.7.2, expo-task-manager@~11.7.3:
   version "11.7.3"
   resolved "https://registry.yarnpkg.com/expo-task-manager/-/expo-task-manager-11.7.3.tgz#2d8b0d983e2a73fba4f1f4d65f36ef0db9356ebd"
   integrity sha512-ueIOi638o+gRYeCIb9GHVEbdIIvAKqAmm4AllcjDJIrmqB240uA+5a5YwfHm7WUrSthIqHlIzLMFcnMTFxf/9w==
@@ -24655,9 +24648,9 @@ unicode-property-aliases-ecmascript@^2.0.0:
   integrity sha512-6t3foTQI9qne+OZoVQB/8x8rk2k1eVy1gRXhV3oFQ5T6R1dqQ1xtin3XqSlx3+ATBkliTaR/hHyJBm+LVPNM8w==
 
 unimodules-app-loader@~4.5.0:
-  version "4.5.0"
-  resolved "https://registry.yarnpkg.com/unimodules-app-loader/-/unimodules-app-loader-4.5.0.tgz#5ec66088d740bd17dc5c94b88c91f21249d9f0ba"
-  integrity sha512-q/Xug4K6/20876Xac+tjOLOOAeHEu2zF66LNN/5c8EV4WPEe/+RYZEljN/woQt17KPIB2eyel9dc+d6qUMjUOg==
+  version "4.5.1"
+  resolved "https://registry.yarnpkg.com/unimodules-app-loader/-/unimodules-app-loader-4.5.1.tgz#6c8cf83617b6556e99b102fac8a6bbf011abe605"
+  integrity sha512-yQAsoL0jsCjld1C/iWS4tB5a6LZTb8+enZ9mpt9t9zHYw7YZgeInmW7yz5QZAgVE93ZMPN3SudZHWiXGuD4Wfg==
 
 unique-filename@^1.1.1:
   version "1.1.1"
