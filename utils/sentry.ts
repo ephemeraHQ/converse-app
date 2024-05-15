@@ -5,6 +5,8 @@ import { Platform } from "react-native";
 import appBuildNumbers from "../app.json";
 import config from "../config";
 
+const DISABLE_IOS_NATIVE_SENTRY = false;
+
 export const initSentry = () => {
   const sentryOptions: Sentry.ReactNativeOptions = {
     dsn: config.sentryDSN,
@@ -30,7 +32,7 @@ export const initSentry = () => {
       return event;
     },
   };
-  if (Platform.OS === "ios") {
+  if (Platform.OS === "ios" && DISABLE_IOS_NATIVE_SENTRY) {
     // According to https://developer.apple.com/forums/thread/113742 third
     // party crash reporters break Apple's crash reporting and it can be
     // best to just disable the Native part of Sentry for now on iOS.
