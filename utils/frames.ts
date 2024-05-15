@@ -1,5 +1,8 @@
 import { OpenFramesProxy } from "@open-frames/proxy-client";
-import { GetMetadataResponse, OpenFrameButton } from "@open-frames/proxy-types";
+import {
+  GetMetadataResponse,
+  OpenFrameButtonResult,
+} from "@open-frames/proxy-types";
 import {
   FramesApiResponse,
   FramesClient,
@@ -111,7 +114,7 @@ export const fetchFramesForMessage = async (
   return { messageId: message.id, frames: [] };
 };
 
-export type FrameButtonType = OpenFrameButton & {
+export type FrameButtonType = OpenFrameButtonResult & {
   index: number;
 };
 
