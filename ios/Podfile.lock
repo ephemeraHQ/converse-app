@@ -1329,7 +1329,7 @@ PODS:
     - sqlite3/common (= 3.42.0)
   - sqlite3/common (3.42.0)
   - SwiftProtobuf (1.25.2)
-  - UMAppLoader (4.5.0)
+  - UMAppLoader (4.5.1)
   - web3.swift (1.6.0):
     - BigInt (~> 5.0.0)
     - GenericJSON (~> 2.0)
@@ -1861,7 +1861,7 @@ SPEC CHECKSUMS:
   SQLite.swift: 2992550ebf3c5b268bf4352603e3df87d2a4ed72
   sqlite3: f163dbbb7aa3339ad8fc622782c2d9d7b72f7e9c
   SwiftProtobuf: 407a385e97fd206c4fbe880cc84123989167e0d1
-  UMAppLoader: 5df85360d65cabaef544be5424ac64672e648482
+  UMAppLoader: 79d3ee6aa2447a1fe2e8b0d07acf2de106e55b58
   web3.swift: 2263d1e12e121b2c42ffb63a5a7beb1acaf33959
   XMTP: bf00ef58d4fbcc8ab740145a6303591adf3fb355
   XMTPReactNative: f83c939ee083f57decc7ac0f7db4e4b7e34b72d8
