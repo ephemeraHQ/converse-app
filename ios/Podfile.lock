@@ -12,9 +12,9 @@ PODS:
   - DoubleConversion (1.1.6)
   - EASClient (0.11.2):
     - ExpoModulesCore
-  - EXApplication (5.8.3):
+  - EXApplication (5.8.4):
     - ExpoModulesCore
-  - EXConstants (15.4.5):
+  - EXConstants (15.4.6):
     - ExpoModulesCore
   - EXFont (11.10.3):
     - ExpoModulesCore
@@ -24,9 +24,9 @@ PODS:
   - EXJSONUtils (0.12.3)
   - EXManifests (0.13.2):
     - ExpoModulesCore
-  - EXNotifications (0.27.6):
+  - EXNotifications (0.27.7):
     - ExpoModulesCore
-  - Expo (50.0.15):
+  - Expo (50.0.18):
     - ExpoModulesCore
   - expo-dev-client (3.3.11):
     - EXManifests
@@ -101,15 +101,15 @@ PODS:
     - ExpoModulesCore
   - ExpoCrypto (12.8.1):
     - ExpoModulesCore
-  - ExpoDevice (5.9.3):
+  - ExpoDevice (5.9.4):
     - ExpoModulesCore
   - ExpoDocumentPicker (11.10.1):
     - ExpoModulesCore
-  - ExpoFileSystem (16.0.8):
+  - ExpoFileSystem (16.0.9):
     - ExpoModulesCore
   - ExpoHaptics (12.8.1):
     - ExpoModulesCore
-  - ExpoHead (3.4.8):
+  - ExpoHead (3.4.10):
     - ExpoModulesCore
   - ExpoImage (1.10.6):
     - ExpoModulesCore
@@ -133,15 +133,15 @@ PODS:
     - ReactCommon/turbomodule/core
   - ExpoSecureStore (12.8.1):
     - ExpoModulesCore
-  - ExpoSystemUI (2.9.3):
+  - ExpoSystemUI (2.9.4):
     - ExpoModulesCore
-  - EXSplashScreen (0.26.4):
+  - EXSplashScreen (0.26.5):
     - ExpoModulesCore
     - glog
     - RCT-Folly (= 2022.05.16.00)
     - React-Core
   - EXStructuredHeaders (3.7.2)
-  - EXTaskManager (11.7.2):
+  - EXTaskManager (11.7.3):
     - ExpoModulesCore
     - UMAppLoader
   - EXUpdates (0.24.12):
@@ -1732,14 +1732,14 @@ SPEC CHECKSUMS:
   Connect-Swift: 1de2ef4a548c59ecaeb9120812dfe0d6e07a0d47
   DoubleConversion: fea03f2699887d960129cc54bba7e52542b6f953
   EASClient: a42ee8bf36c93b3128352faf2ae49405ab4f80bd
-  EXApplication: 137189a3f149b4e8e546884629392c3efc94cbd3
-  EXConstants: 988aa430ca0f76b43cd46b66e7fae3287f9cc2fc
+  EXApplication: 16bcea16789221bd566e64b5ea2608cf7756b005
+  EXConstants: a5f6276e565d98f9eb4280f81241fc342d641590
   EXFont: f20669cb266ef48b004f1eb1f2b20db96cd1df9f
   EXImageLoader: 55080616b2fe9da19ef8c7f706afd9814e279b6b
   EXJSONUtils: 5c42959e87be238b045ef37cc5268b16a6c0ad4a
   EXManifests: 5e8c29f36c716af768a4ea47ec05e1b89ab93091
-  EXNotifications: e11f0e9a5b657c064a481a5d522f3bc5a07bf7cd
-  Expo: 0f04015e4254c8b7c74f3c4b2facdfd0b62152b0
+  EXNotifications: 1c117bf042bd05a5b1a1ffd06f4c36ff9921ed2b
+  Expo: 09bd48f31bb7f1a3c97fd5a6cb28feae89cb4e40
   expo-dev-client: 29a32387346fe7b6d2a57918fae985bc48bfe9a2
   expo-dev-launcher: 957d62f7ec983d02091c97fca9ac73c115b54f77
   expo-dev-menu: 68ea53d923996e27b20ce02b51cc820fc2327a83
@@ -1747,21 +1747,21 @@ SPEC CHECKSUMS:
   ExpoBackgroundFetch: 80d41ec15c6cce0bafb5d2326b8e85f42152eba7
   ExpoClipboard: b8f76767b0dbaefb3be7adbf85049fd85861d527
   ExpoCrypto: b6428f48599c007676dc81a9b5f72c07e62fdccc
-  ExpoDevice: d204395e17fffdcefa7470bdef33b07719ac41b1
+  ExpoDevice: 97307196d8cab694e245752b8a7afacc35c14e03
   ExpoDocumentPicker: 70254802886e29a45d4ad25486e64b6fc9c8f0cc
-  ExpoFileSystem: eecaf6796aed0f4dd20042dc2ca2cac6c4bc1185
+  ExpoFileSystem: 74cc0fae916f9f044248433971dcfc8c3befd057
   ExpoHaptics: 28a771b630353cd6e8dcf1b1e3e693e38ad7c3c3
-  ExpoHead: 8224345e80abcf4c97b31c99805dd5a3c8d3404d
+  ExpoHead: 89ffd324e60520751c2c285233fe45e875c91874
   ExpoImage: 8cf2d51de3d03b7e984e9b0ba8f19c0c22057001
   ExpoImageManipulator: c1d7cb865eacd620a35659f3da34c70531f10b59
   ExpoImagePicker: 66970181d1c838f444e5e1f81b804ab2d5ff49bd
   ExpoKeepAwake: 0f5cad99603a3268e50af9a6eb8b76d0d9ac956c
   ExpoModulesCore: 370096473359f5f6aade0871400d063333747719
   ExpoSecureStore: c84ae37d1c36f38524d289c67c3a2e3fc56f1108
-  ExpoSystemUI: 40e222dd9d52222fe1bce389724ac52e662158dc
-  EXSplashScreen: 6bd596128cd52fac91997ebc64f3d394c843a8f9
+  ExpoSystemUI: 735278045c1a28de0018a300bb5abb3f9090652b
+  EXSplashScreen: 0fabdcf746d29e7f8b8969879cb09125cdd365d2
   EXStructuredHeaders: 5b0f47259db047dc1fdfa84752e292c2bfa68ecd
-  EXTaskManager: 3e446dbf75cd662aa6e7d6828be5bc26265241c3
+  EXTaskManager: 07d427a5213dd275c13b6b6c07bba35a672e6698
   EXUpdates: 17e26679a93e626b0ae3ebbff966cd7021413a0a
   EXUpdatesInterface: 3e444e2093e25b7ca0999a7d8c16e8392dee70c3
   FBLazyVector: f64d1e2ea739b4d8f7e4740cde18089cd97fe864
