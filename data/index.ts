@@ -2,6 +2,8 @@ import "reflect-metadata";
 
 import { saveXmtpEnv, saveApiURI } from "../utils/sharedData";
 import { getRepository } from "./db";
+import { Conversation } from "./db/entities/conversationEntity";
+import { Message } from "./db/entities/messageEntity";
 import { loadProfilesByAddress } from "./helpers/profiles";
 import { xmtpConversationFromDb } from "./mappers";
 import { getChatStore, getProfilesStore } from "./store/accountsStore";
@@ -10,12 +12,46 @@ export const loadDataToContext = async (account: string) => {
   // Save env to shared data with extension
   saveXmtpEnv();
   saveApiURI();
-  const conversationRepository = await getRepository(account, "conversation");
+  const [conversationRepository, messageRepository] = await Promise.all([
+    getRepository(account, "conversation"),
+    getRepository(account, "message"),
+  ]);
+
   // Let's load conversations and messages and save to context
-  const conversationsWithMessages = await conversationRepository.find({
-    relations: { messages: true },
-    order: { messages: { sent: "ASC" } },
+
+  // We're using raw query builder for performance reason, typeorm mapping is kinda slow
+
+  const conversationsWithMessages: Conversation[] = (
+    await conversationRepository.createQueryBuilder().select("*").execute()
+  ).map((c: any) => ({ ...c }));
+
+  const conversationsMessages: Message[][] = await Promise.all(
+    conversationsWithMessages.map((c) =>
+      messageRepository
+        .createQueryBuilder()
+        .select("*")
+        .where("message.conversationId = :topic", {
+          topic: c.topic,
+        })
+        // If no limit => ASC then no reverse
+        .orderBy("sent", "DESC")
+        .limit(50)
+        .execute()
+    )
+  );
+
+  conversationsWithMessages.forEach((conversation, index) => {
+    // If no limit => ASC then no reverse
+    conversation.messages = conversationsMessages[index]
+      .map((m) => ({
+        ...m,
+        converseMetadata: m.converseMetadata
+          ? JSON.parse(m.converseMetadata as any)
+          : undefined,
+      }))
+      .reverse();
   });
+
   const profilesByAddress = await loadProfilesByAddress(account);
   getProfilesStore(account).getState().setProfiles(profilesByAddress);
   getChatStore(account)

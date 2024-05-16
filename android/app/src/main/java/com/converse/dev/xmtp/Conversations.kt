@@ -56,7 +56,7 @@ fun saveConversationToStorage(appContext: Context, account: String, topic: Strin
     mmkv?.putString("saved-notifications-conversations", newSavedConversationsString)
 }
 
-suspend fun getNewConversationFromEnvelope(xmtpClient: Client, envelope: Envelope): Conversation? {
+suspend fun getNewConversationFromEnvelope(appContext: Context, xmtpClient: Client, envelope: Envelope): Conversation? {
     return try {
         if (isInviteTopic(envelope.contentTopic)) {
             val conversation = xmtpClient.conversations.fromInvite(envelope)
@@ -65,7 +65,7 @@ suspend fun getNewConversationFromEnvelope(xmtpClient: Client, envelope: Envelop
                     // Nothing to do
                 }
                 is Conversation.V2 -> {
-                    persistNewConversation(xmtpClient.address, conversation)
+                    persistNewConversation(appContext, xmtpClient.address, conversation)
                 }
                 else -> {
                     // Nothing to do (group)
@@ -81,8 +81,26 @@ suspend fun getNewConversationFromEnvelope(xmtpClient: Client, envelope: Envelop
     }
 }
 
-fun getPersistedConversation(xmtpClient: Client, topic: String): Conversation? {
+fun getPersistedConversation(appContext: Context, xmtpClient: Client, topic: String): Conversation? {
     try {
+        val secureMmkv = getSecureMmkvForAccount(appContext, xmtpClient.address)
+        secureMmkv?.let { mmkv ->
+            val jsonData = mmkv.decodeString("XMTP_TOPICS_DATA")
+            jsonData?.let {data ->
+                val json = JSONObject(data);
+                val topData = json.optString(topic, null);
+
+                topData?.let { topicData ->
+                    val persistedTopicData = TopicData.parseFrom(Base64.decode(topicData, NO_WRAP))
+                    Log.d("PushNotificationsService", "Got saved conversation from topic data")
+                    return xmtpClient.conversations.importTopicData(persistedTopicData)
+                }
+            }
+        }
+
+
+        // TODO => remove this a bit later
+        // During migration time, data is still in keychain, not in mmkv
         val topicBytes = topic.toByteArray(Charsets.UTF_8)
         val digest = MessageDigest.getInstance("SHA-256").digest(topicBytes)
         val encodedTopic = digest.joinToString("") { "%02x".format(it) }
@@ -92,27 +110,25 @@ fun getPersistedConversation(xmtpClient: Client, topic: String): Conversation? {
             Log.d("PushNotificationsService", "Got saved conversation from topic data")
             return xmtpClient.conversations.importTopicData(data)
         }
-
-        // TODO => remove here as it's the old way of saving convos and we don't use it anymore
-        val persistedConversationData = getKeychainValue("XMTP_CONVERSATION_$encodedTopic")
-        if (persistedConversationData !== null) {
-            Log.d("PushNotificationsService", "Got saved conversation persisted data")
-            return xmtpClient.importConversation(persistedConversationData.toByteArray())
-        }
     } catch (e: Exception) {
         Log.d("PushNotificationsService", "Could not retrieve conversation: $e")
     }
     return null
 }
 
-fun persistNewConversation(account: String, conversation: Conversation) {
+fun persistNewConversation(appContext:Context, account: String, conversation: Conversation) {
     try {
-        val topicBytes = conversation.topic.toByteArray(Charsets.UTF_8)
-        val digest = MessageDigest.getInstance("SHA-256").digest(topicBytes)
-        val encodedTopic = digest.joinToString("") { "%02x".format(it) }
-        val conversationTopicData = Base64.encodeToString(conversation.toTopicData().toByteArray(), NO_WRAP)
-        setKeychainValue("XMTP_TOPIC_DATA_${account}_$encodedTopic", conversationTopicData)
-        Log.d("PushNotificationsService", "Persisted new conversation to keychain: XMTP_TOPIC_DATA_${account}_$encodedTopic")
+        val secureMmkv = getSecureMmkvForAccount(appContext, account)
+        secureMmkv?.let { mmkv ->
+            val jsonData = mmkv.decodeString("XMTP_TOPICS_DATA")
+            jsonData?.let {data ->
+                val json = JSONObject(data);
+                val conversationTopicData = Base64.encodeToString(conversation.toTopicData().toByteArray(), NO_WRAP);
+                json.put(conversation.topic, conversationTopicData);
+                val jsonString = json.toString()
+                secureMmkv.putString("XMTP_TOPICS_DATA", jsonString)
+            }
+        }
     } catch (e: Exception) {
         Log.d("PushNotificationsService", "Could not persist conversation: $e")
     }

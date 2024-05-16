@@ -18,7 +18,9 @@ import {
   resetNotifications,
 } from "../../utils/notifications";
 
-export default function NotificationsStateHandler() {
+export default function ConversationsStateHandler() {
+  // This handler checks conversations that it needs to show
+  // or not show (consent / spam etc) and also computes preview
   const appState = useRef(AppState.currentState);
   const userAddress = useCurrentAccount();
   const privyAccountId = useAccountsStore((s) => s.privyAccountId);

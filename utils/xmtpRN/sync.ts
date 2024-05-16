@@ -2,7 +2,7 @@ import { Client } from "@xmtp/xmtp-js";
 
 import { refreshAllSpamScores } from "../../data/helpers/conversations/spamScore";
 import { getChatStore } from "../../data/store/accountsStore";
-import { addLog } from "../debug";
+import { addLog, debugTimeSpent } from "../debug";
 import { loadXmtpKey } from "../keychain/helpers";
 import { xmtpSignatureByAccount } from "./api";
 import {
@@ -79,6 +79,7 @@ const onSyncLost = async (account: string, error: any) => {
 const streamingAccounts: { [account: string]: boolean } = {};
 
 export const syncXmtpClient = async (account: string) => {
+  debugTimeSpent({ id: "OPTIM", actionToLog: "Started client sync" });
   const lastSyncedAt = getChatStore(account).getState().lastSyncedAt || 0;
 
   // We just introduced lastSyncedTopics so it might be empty at first

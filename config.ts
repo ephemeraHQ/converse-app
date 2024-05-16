@@ -70,6 +70,7 @@ const ENV = {
     universalLinks: ["dev.converse.xyz/", "dev.getconverse.app/"].flatMap(
       (domain) => [`https://${domain}`, `http://${domain}`, domain]
     ),
+    enableTransactionFrames: true,
   },
   preview: {
     ...defaultConfig,
@@ -86,6 +87,7 @@ const ENV = {
       "preview.converse.xyz/",
       "preview.getconverse.app/",
     ].flatMap((domain) => [`https://${domain}`, `http://${domain}`, domain]),
+    enableTransactionFrames: true,
   },
   prod: {
     ...defaultConfig,
@@ -117,6 +119,7 @@ const ENV = {
       rpcEndpoint:
         "https://base-mainnet.g.alchemy.com/v2/ZPqjDRWZVyTwdBYPikn1a7iEOCyxMWqX",
     },
+    enableTransactionFrames: false,
   },
 };
 
