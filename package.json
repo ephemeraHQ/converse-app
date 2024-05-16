@@ -29,8 +29,10 @@
     "@expo/webpack-config": "~19.0.1",
     "@flyerhq/react-native-chat-ui": "^1.4.3",
     "@material-symbols/svg-400": "^0.5.0",
+    "@mfellner/react-native-fast-create-hash": "^1.0.0-alpha.2",
     "@noble/secp256k1": "^1.5.2",
-    "@open-frames/proxy-types": "^0.1.1",
+    "@op-engineering/op-sqlite": "^6.0.1",
+    "@open-frames/proxy-types": "^0.2.0",
     "@peculiar/webcrypto": "^1.4.1",
     "@privy-io/expo": "^0.14.1",
     "@privy-io/react-auth": "^1.60.6",
@@ -55,8 +57,8 @@
     "@xmtp/content-type-remote-attachment": "^1.1.8",
     "@xmtp/content-type-reply": "^1.1.9",
     "@xmtp/content-type-transaction-reference": "^1.0.3",
-    "@xmtp/frames-client": "^0.4.3",
-    "@xmtp/proto": "^3.45.0",
+    "@xmtp/frames-client": "^0.5.0",
+    "@xmtp/proto": "^3.57.0",
     "@xmtp/react-native-sdk": "^1.33.0",
     "@xmtp/xmtp-js": "^11.5.0",
     "axios": "^1.2.1",
@@ -130,6 +132,7 @@
     "react-native-phone-number-input": "^2.1.0",
     "react-native-polyfill-globals": "^3.1.0",
     "react-native-qrcode-svg": "^6.2.0",
+    "react-native-quick-base64": "^2.0.8",
     "react-native-reanimated": "~3.6.2",
     "react-native-safe-area-context": "4.8.2",
     "react-native-screens": "^3.29.0",
@@ -210,5 +213,12 @@
     "react-native-svg": "^14.1.0",
     "@expo/config-plugins": "~7.8.0"
   },
-  "packageManager": "yarn@1.22.19"
+  "packageManager": "yarn@1.22.19",
+  "expo": {
+    "install": {
+      "exclude": [
+        "@sentry/react-native"
+      ]
+    }
+  }
 }

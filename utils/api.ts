@@ -320,6 +320,20 @@ export const getPresignedUriForUpload = async (
   return data as { objectKey: string; url: string };
 };
 
+export const getLastNotificationsSubscribeHash = async (
+  account: string,
+  nativeToken: string
+) => {
+  const { data } = await api.post(
+    "/api/notifications/subscriptionhash",
+    { nativeToken },
+    {
+      headers: await getXmtpApiHeaders(account),
+    }
+  );
+  return data?.hash as string | null;
+};
+
 export const saveNotificationsSubscribe = async (
   account: string,
   nativeToken: string,
@@ -332,13 +346,14 @@ export const saveNotificationsSubscribe = async (
     };
   }
 ) => {
-  await api.post(
+  const { data } = await api.post(
     "/api/subscribe",
     { nativeToken, nativeTokenType, notificationChannel, topicsWithKeys },
     {
       headers: await getXmtpApiHeaders(account),
     }
   );
+  return data.subscribeHash as string;
 };
 
 export const notifyFarcasterLinked = async () => {

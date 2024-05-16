@@ -31,6 +31,7 @@ const converseMetroConfig = {
     sourceExts: [...defaultConfig.resolver.sourceExts, "svg", "mjs"],
     extraNodeModules: {
       ...require("expo-crypto-polyfills"),
+      // crypto: require.resolve("react-native-quick-crypto"),
       zlib: require.resolve("browserify-zlib"),
     },
   },

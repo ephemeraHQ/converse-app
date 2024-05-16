@@ -1,8 +1,8 @@
 import "reflect-metadata";
-import { Platform } from "react-native";
 import { DataSource } from "typeorm/browser";
 
-import { getDbFileName } from ".";
+import { getDbDirectory, getDbFileName } from ".";
+import { typeORMDriver } from "./driver";
 import { Conversation } from "./entities/conversationEntity";
 import { Message } from "./entities/messageEntity";
 import { Profile } from "./entities/profileEntity";
@@ -29,12 +29,9 @@ import { AddVersionToConversation1695029413899 } from "./migrations/169502941389
 import { AddSpamScore1698068091873 } from "./migrations/1698068091873-addSpamScore";
 import { AddConverseMessageMetadata1709030178271 } from "./migrations/1709030178271-addConverseMessageMetadata";
 import { AddLastNotifSubscribePeriodToConversation1709893391562 } from "./migrations/1709893391562-addLastNotifSubscribePeriodToConversation";
+import { AddIndexToSent1712656017130 } from "./migrations/1712656017130-addIndexToSent";
 
-// We support SQLite from version 3.8.10.2 (embedded in Android 6.0 - SDK 23)
-// For supported methods see https://www.sqlite.org/changes.html
-// Upsert is not always supported (see ./upsert.ts)
-// ADD COLUMN supported (added in version 3.2.0 - 2005-03-21)
-// DROP COLUMN NOT SUPPORTED (added in version 3.35.0 - 2021-03-12)
+// We now use built in SQLite v3.45.1 from op-sqlite
 
 const dataSources: { [account: string]: DataSource } = {};
 
@@ -52,7 +49,7 @@ export const getDataSource = async (account: string) => {
 
   const newDataSource = new DataSource({
     database: fileName,
-    driver: require("react-native-sqlite-storage"),
+    driver: typeORMDriver,
     entities: [Conversation, Message, Profile],
     synchronize: false,
     migrationsRun: false,
@@ -79,9 +76,10 @@ export const getDataSource = async (account: string) => {
       AddSpamScore1698068091873,
       AddConverseMessageMetadata1709030178271,
       AddLastNotifSubscribePeriodToConversation1709893391562,
+      AddIndexToSent1712656017130,
     ],
     type: "react-native",
-    location: Platform.OS === "ios" ? "Shared" : "./SQLite",
+    location: await getDbDirectory(),
     logging: true,
     maxQueryExecutionTime: 500,
     logger: new TypeORMLogger(),

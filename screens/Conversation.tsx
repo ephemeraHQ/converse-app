@@ -273,10 +273,8 @@ const Conversation = ({
       // On load, we mark the conversation as read and as opened
       useChatStore.getState().setOpenedConversationTopic(conversation.topic);
 
-      // On WEB, we load messages on arrival
-      if (Platform.OS === "web") {
-        loadOlderMessages(currentAccount(), conversation.topic);
-      }
+      // On Web this loads them from network, on mobile from local db
+      loadOlderMessages(currentAccount(), conversation.topic);
 
       // If we are navigating to a conversation, we reset the topic to navigate to
       if (topicToNavigateTo === conversation.topic) {
@@ -294,10 +292,31 @@ const Conversation = ({
     );
   }, [conversation, setConversationMessageDraft]);
 
+  const onOpeningConversation = useCallback(
+    ({ topic }: { topic: string }) => {
+      if (topic !== conversationTopic) {
+        onLeaveScreen();
+      }
+    },
+    [conversationTopic, onLeaveScreen]
+  );
+
   useEffect(() => {
-    const unsubscribe = navigation.addListener("beforeRemove", onLeaveScreen);
-    return unsubscribe;
-  }, [navigation, onLeaveScreen]);
+    const unsubscribeBeforeRemove = navigation.addListener(
+      "beforeRemove",
+      onLeaveScreen
+    );
+    if (isDesktop) {
+      converseEventEmitter.on("openingConversation", onOpeningConversation);
+    }
+
+    return () => {
+      if (isDesktop) {
+        converseEventEmitter.off("openingConversation", onOpeningConversation);
+      }
+      unsubscribeBeforeRemove();
+    };
+  }, [navigation, onLeaveScreen, onOpeningConversation]);
 
   const showInviteBanner =
     showInvite.show && showInvite.banner && !isBlockedPeer;

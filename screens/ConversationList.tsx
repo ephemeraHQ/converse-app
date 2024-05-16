@@ -35,7 +35,7 @@ import {
 } from "../utils/colors";
 import {
   LastMessagePreview,
-  getConversationListItemsToDisplay,
+  getFilteredConversationsWithSearch,
 } from "../utils/conversation";
 import { converseEventEmitter } from "../utils/events";
 import { useHeaderSearchBar } from "./Navigation/ConversationListNav";
@@ -106,7 +106,7 @@ function ConversationList({ navigation, route, searchBarRef }: Props) {
   }, [initialLoadDoneOnce]);
 
   useEffect(() => {
-    const listItems = getConversationListItemsToDisplay(
+    const listItems = getFilteredConversationsWithSearch(
       searchQuery,
       sortedConversationsWithPreview.conversationsInbox,
       profiles

@@ -6670,6 +6670,14 @@
     semver "^7.5.4"
     superstruct "^1.0.3"
 
+"@mfellner/react-native-fast-create-hash@^1.0.0-alpha.2":
+  version "1.0.0-alpha.2"
+  resolved "https://registry.yarnpkg.com/@mfellner/react-native-fast-create-hash/-/react-native-fast-create-hash-1.0.0-alpha.2.tgz#b653020b3d9cdba5346026293666dd47b6369b75"
+  integrity sha512-+mn3Mtxw+BJWWnhHs8+e3m3CCXtME9wFnHQKbGsGIB2Pctf+hgL0YpMRMFmxY0UU89iyk9dPFoy1fUadEPRSZQ==
+  dependencies:
+    buffer "^6.0.3"
+    rfc4648 "^1.5.1"
+
 "@motionone/animation@^10.15.1":
   version "10.15.1"
   resolved "https://registry.yarnpkg.com/@motionone/animation/-/animation-10.15.1.tgz#4a85596c31cbc5100ae8eb8b34c459fb0ccf6807"
@@ -6877,17 +6885,22 @@
   resolved "https://registry.yarnpkg.com/@npmcli/name-from-folder/-/name-from-folder-2.0.0.tgz#c44d3a7c6d5c184bb6036f4d5995eee298945815"
   integrity sha512-pwK+BfEBZJbKdNYpHHRTNBwBoqrN/iIMO0AiGvYsp3Hoaq0WbgGSWQR6SCldZovoDpY3yje5lkFUe6gsDgJ2vg==
 
-"@open-frames/proxy-client@^0.2.0":
-  version "0.2.2"
-  resolved "https://registry.yarnpkg.com/@open-frames/proxy-client/-/proxy-client-0.2.2.tgz#b770e4b3e1fed5a018f950c999f8358c293739cc"
-  integrity sha512-cISpTiJe5+JqkLGXmmAnccRoi8UkLTGMMkq8D+4mdF4Nh6ZJdljv7dhJktE3qxGtceyZsmMulzNZq57gHZaFsA==
-  dependencies:
-    "@open-frames/proxy-types" "0.1.1"
+"@op-engineering/op-sqlite@^6.0.1":
+  version "6.0.1"
+  resolved "https://registry.yarnpkg.com/@op-engineering/op-sqlite/-/op-sqlite-6.0.1.tgz#bd1bde495def0380d5b1dbec7fbd9a6ef207ed81"
+  integrity sha512-rQ/kVT9O/LcdZijqlMAuDWUK04Wl3n1kUXy7zsWty3/HIb0b2U0ppOw2z/1AiBQqs/0vF3dYUajtamF7Hq7zwg==
 
-"@open-frames/proxy-types@0.1.1", "@open-frames/proxy-types@^0.1.1":
-  version "0.1.1"
-  resolved "https://registry.yarnpkg.com/@open-frames/proxy-types/-/proxy-types-0.1.1.tgz#e4a7376cbf94c51c3c9377512a524f5030c18f8b"
-  integrity sha512-opAzEGigLiUrZusz58L/NMt+u6+B+XlUbnpK1IjnPbOlpB57MgQDVfrdKzM04Um+0WWmi0bFRqeGJjUqjUgNAA==
+"@open-frames/proxy-client@^0.3.0":
+  version "0.3.2"
+  resolved "https://registry.yarnpkg.com/@open-frames/proxy-client/-/proxy-client-0.3.2.tgz#449349a483db38ee05c1dfdbcc05e42d15ce6f7e"
+  integrity sha512-tRVA5vzCjFk3s/5V7YFBu3ntkvwM+QHVGO5p3ch9q+Kt3X8VPiQClM6ggXYvfzI9pOtb4F+Ees2OdcYUoLsL4g==
+  dependencies:
+    "@open-frames/proxy-types" "0.2.2"
+
+"@open-frames/proxy-types@0.2.2", "@open-frames/proxy-types@^0.2.0":
+  version "0.2.2"
+  resolved "https://registry.yarnpkg.com/@open-frames/proxy-types/-/proxy-types-0.2.2.tgz#ccc6a95af42e1e892348e3306c7999c2539f0aad"
+  integrity sha512-i9v6mUUnAtc9ZSIQ7z0EApKX3WtyXY4DKdHzOVCWKW5EWb2SRBDQLgkP13rp8j2MJLLimqjZvkcvIhNldCwQNw==
 
 "@openzeppelin/contracts-upgradeable@4.7.3":
   version "4.7.3"
@@ -10564,20 +10577,30 @@
     "@xmtp/proto" "^3.29.0"
     "@xmtp/xmtp-js" "^11.3.12"
 
-"@xmtp/frames-client@^0.4.3":
-  version "0.4.3"
-  resolved "https://registry.yarnpkg.com/@xmtp/frames-client/-/frames-client-0.4.3.tgz#d18e2adb13122dc7b5d601d51e1bc42ad525bbb4"
-  integrity sha512-VGQ9E/+2nIbBUZ+StQn/ROIWi2X7mnzTpAuUuTDFkCVpAcPgbLZ1GL2W3/SEp7cAZbXwhm54tCnJeJ2kw/pf8Q==
+"@xmtp/frames-client@^0.5.0":
+  version "0.5.0"
+  resolved "https://registry.yarnpkg.com/@xmtp/frames-client/-/frames-client-0.5.0.tgz#bbb386820a94682ddd447c01b44198a6d1d301c2"
+  integrity sha512-tTQFgeXsemWqfUBc1sWREeWfIqBNkf5QHwNo5FA1DZ/SSxOr9ecbwKlRCyn/Gr1aULWKHT3D/jVdWczc7DFm2Q==
   dependencies:
     "@noble/hashes" "^1.3.3"
-    "@open-frames/proxy-client" "^0.2.0"
-    "@xmtp/proto" "3.45.0"
+    "@open-frames/proxy-client" "^0.3.0"
+    "@xmtp/proto" "3.51.1"
     long "^5.2.3"
 
-"@xmtp/proto@3.45.0", "@xmtp/proto@^3.45.0":
+"@xmtp/proto@3.45.0":
   version "3.45.0"
   resolved "https://registry.yarnpkg.com/@xmtp/proto/-/proto-3.45.0.tgz#2aaca656a6da85a05ae75f72340ce1ef5e4fb2ec"
   integrity sha512-6d/UE/vqi1erpL+z/HSGvFOnJt+y7RE23g6SUUUB7tx75VAi5A0/uLwzPr/eyVkiHZGqlbktq8Rzco+HgTyTAw==
+  dependencies:
+    long "^5.2.0"
+    protobufjs "^7.0.0"
+    rxjs "^7.8.0"
+    undici "^5.8.1"
+
+"@xmtp/proto@3.51.1":
+  version "3.51.1"
+  resolved "https://registry.yarnpkg.com/@xmtp/proto/-/proto-3.51.1.tgz#651597ed85f6bb9c32b15142d35f72640c76a1f8"
+  integrity sha512-50ZyE7jCEZhc1o1dui+e87eMe5xGuDqX+Sd+GI6ZQorYB0kFjrMbStpXMrWA5U37DFQaxAEmacILC3l9LCtTzg==
   dependencies:
     long "^5.2.0"
     protobufjs "^7.0.0"
@@ -10598,6 +10621,16 @@
   version "3.30.0"
   resolved "https://registry.yarnpkg.com/@xmtp/proto/-/proto-3.30.0.tgz#d8f85ea06258d3e0c2974faeedbbebb22892f97c"
   integrity sha512-XMTKxFgA4hbHQhnfjqIQpbXn/k0m53++xmmYWzXPf8HyvwJsXitNrh0GfJNmTTgps6kQ5iZuoAM6xw+vcmVoVw==
+  dependencies:
+    long "^5.2.0"
+    protobufjs "^7.0.0"
+    rxjs "^7.8.0"
+    undici "^5.8.1"
+
+"@xmtp/proto@^3.57.0":
+  version "3.57.0"
+  resolved "https://registry.yarnpkg.com/@xmtp/proto/-/proto-3.57.0.tgz#42e491328b55d07ccaedf60ca2cef3133ea70664"
+  integrity sha512-zjU7IZ6wkJK96RVcwqPEPxBpBE84i66o2u5Fvme5SwRhR0eLF+8f6hhbXzQHDT1ahwmjvCSEIiMNTjyvoNlH7A==
   dependencies:
     long "^5.2.0"
     protobufjs "^7.0.0"
@@ -21963,6 +21996,13 @@ react-native-quick-base64@^2.0.5, react-native-quick-base64@^2.0.7:
   dependencies:
     base64-js "^1.5.1"
 
+react-native-quick-base64@^2.0.8:
+  version "2.0.8"
+  resolved "https://registry.yarnpkg.com/react-native-quick-base64/-/react-native-quick-base64-2.0.8.tgz#7a75ea8bd85ca3c5bb38a814c1d63e0688e19531"
+  integrity sha512-2kMlnLSy0qz4NA0KXMGugd3qNB5EAizxZ6ghEVNGIxAOlc9CGvC8miv35wgpFbSKeiaBRfcPfkdTM/5Erb/6SQ==
+  dependencies:
+    base64-js "^1.5.1"
+
 react-native-quick-crypto@^0.6.1:
   version "0.6.1"
   resolved "https://registry.yarnpkg.com/react-native-quick-crypto/-/react-native-quick-crypto-0.6.1.tgz#7b89c67c4a5d3669c4491fe7884621c1c74d01bc"
@@ -22689,6 +22729,11 @@ reverse-arguments@^1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/reverse-arguments/-/reverse-arguments-1.0.0.tgz#c28095a3a921ac715d61834ddece9027992667cd"
   integrity sha512-/x8uIPdTafBqakK0TmPNJzgkLP+3H+yxpUJhCQHsLBg1rYEVNR2D8BRYNWQhVBjyOd7oo1dZRVzIkwMY2oqfYQ==
+
+rfc4648@^1.5.1:
+  version "1.5.3"
+  resolved "https://registry.yarnpkg.com/rfc4648/-/rfc4648-1.5.3.tgz#e62b81736c10361ca614efe618a566e93d0b41c0"
+  integrity sha512-MjOWxM065+WswwnmNONOT+bD1nXzY9Km6u3kzvnx8F8/HXGZdz3T6e6vZJ8Q/RIMUSp/nxqjH3GwvJDy8ijeQQ==
 
 rfdc@^1.3.0:
   version "1.3.0"
