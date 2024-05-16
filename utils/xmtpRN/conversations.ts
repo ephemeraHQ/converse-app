@@ -6,11 +6,10 @@ import { saveConversations } from "../../data/helpers/conversations/upsertConver
 import { getSettingsStore } from "../../data/store/accountsStore";
 import { XmtpConversation } from "../../data/store/chatStore";
 import { SettingsStoreType } from "../../data/store/settingsStore";
+import { debugTimeSpent } from "../debug";
 import { getCleanAddress } from "../eth";
-import {
-  getTopicDataFromKeychain,
-  saveTopicDataToKeychain,
-} from "../keychain/helpers";
+import { getTopicDataFromKeychain } from "../keychain/helpers";
+import { getSecureMmkvForAccount } from "../mmkv";
 import { sentryTrackError } from "../sentry";
 import { ConversationWithCodecsType, ConverseXmtpClientType } from "./client";
 import { syncConversationsMessages } from "./messages";
@@ -69,7 +68,9 @@ export const deleteOpenedConversations = (account: string) => {
   }
 };
 
-const importTopicData = async (
+// @todo => to remove once enough device use the "backupTopicsData"
+// that puts everything in mmkv using an encryption key
+const importSingleTopicData = async (
   client: ConverseXmtpClientType,
   topics: string[]
 ) => {
@@ -109,7 +110,7 @@ const handleNewConversation = async (
   saveConversations(client.address, [
     protocolConversationToStateConversation(conversation),
   ]);
-  saveTopicDataToKeychain(
+  backupTopicsData(
     client.address,
     await protocolConversationsToTopicData([conversation])
   );
@@ -144,14 +145,26 @@ const listConversations = async (client: ConverseXmtpClientType) => {
   return conversations;
 };
 
+export const importedTopicsDataForAccount: { [account: string]: boolean } = {};
+
 export const loadConversations = async (
   account: string,
   knownTopics: string[]
 ) => {
   try {
     const client = (await getXmtpClient(account)) as ConverseXmtpClientType;
+    debugTimeSpent({ id: "OPTIM", actionToLog: "Initiated client" });
     const now = new Date().getTime();
+    if (!importedTopicsDataForAccount[account]) {
+      importedTopicsDataForAccount[account] = true;
+      await importBackedTopicsData(client);
+      debugTimeSpent({
+        id: "OPTIM",
+        actionToLog: "Imported topics into client",
+      });
+    }
     const conversations = await listConversations(client);
+    debugTimeSpent({ id: "OPTIM", actionToLog: "Listed conversations" });
     const newConversations: ConversationWithCodecsType[] = [];
     const knownConversations: ConversationWithCodecsType[] = [];
     conversations.forEach((c) => {
@@ -170,11 +183,11 @@ export const loadConversations = async (
       protocolConversationToStateConversation
     );
     saveConversations(client.address, conversationsToSave);
-
-    saveTopicDataToKeychain(
+    backupTopicsData(
       client.address,
-      await protocolConversationsToTopicData(newConversations)
+      await protocolConversationsToTopicData(conversations)
     );
+
     return { newConversations, knownConversations };
   } catch (e) {
     const error = new Error();
@@ -244,7 +257,7 @@ export const getConversationWithTopic = async (
   if (alreadyConversation) return alreadyConversation;
   // Let's try to import from keychain if we don't have it already
   const client = (await getXmtpClient(account)) as ConverseXmtpClientType;
-  await importTopicData(client, [topic]);
+  await importSingleTopicData(client, [topic]);
   return openedConversations[account]?.[topic];
 };
 
@@ -289,4 +302,76 @@ export const loadConversationsHmacKeys = async (account: string) => {
   const client = (await getXmtpClient(account)) as ConverseXmtpClientType;
   const { hmacKeys } = await client.conversations.getHmacKeys();
   return hmacKeys;
+};
+
+type TopicDataByTopic = { [topic: string]: string };
+
+const backupTopicsData = async (
+  account: string,
+  conversationTopicData: TopicDataByTopic
+) => {
+  debugTimeSpent({ id: "OPTIM", actionToLog: "Started topics backup" });
+  try {
+    const beforeBackup = new Date().getTime();
+    const alreadyTopicsData = await retrieveTopicsData(account);
+    const newTopicsData = { ...alreadyTopicsData, ...conversationTopicData };
+    const stringData = JSON.stringify(newTopicsData);
+    const mmkvInstance = await getSecureMmkvForAccount(account);
+    mmkvInstance.set("XMTP_TOPICS_DATA", stringData);
+    const afterBackup = new Date().getTime();
+    console.log(
+      `[XmtpRN] Backed up ${
+        Object.keys(newTopicsData).length
+      } conversations into secure mmkv in ${
+        (afterBackup - beforeBackup) / 1000
+      }s`
+    );
+    debugTimeSpent({ id: "OPTIM", actionToLog: "Backed up topics" });
+  } catch (e) {
+    sentryTrackError(e, { error: "Could not backup topics data" });
+  }
+};
+
+const retrieveTopicsData = async (
+  account: string
+): Promise<TopicDataByTopic> => {
+  const mmkvInstance = await getSecureMmkvForAccount(account);
+  const decryptedData = mmkvInstance.getString("XMTP_TOPICS_DATA");
+  if (decryptedData) {
+    try {
+      const conversationTopicData: TopicDataByTopic = JSON.parse(decryptedData);
+      return conversationTopicData;
+    } catch (e) {
+      return {};
+    }
+  } else {
+    return {};
+  }
+};
+
+const importBackedTopicsData = async (client: ConverseXmtpClientType) => {
+  try {
+    const beforeImport = new Date().getTime();
+    const topicsData = Object.values(await retrieveTopicsData(client.address));
+    // If we have topics for this account, let's import them
+    // so the first conversation.list() is faster
+    if (topicsData.length > 0) {
+      const importedConversations = await Promise.all(
+        topicsData.map((data) => client.conversations.importTopicData(data))
+      );
+      importedConversations.forEach((conversation) => {
+        setOpenedConversation(client.address, conversation);
+      });
+      const afterImport = new Date().getTime();
+      console.log(
+        `[XmtpRN] Imported ${
+          topicsData.length
+        } exported conversations into client in ${
+          (afterImport - beforeImport) / 1000
+        }s`
+      );
+    }
+  } catch (e) {
+    sentryTrackError(e, { error: "Could not import backed up topics data" });
+  }
 };

@@ -22,8 +22,7 @@ func getNewConversationFromEnvelope(xmtpClient: XMTP.Client, envelope: XMTP.Enve
       return conversation
     }
   } catch {
-    sentryTrackMessage(message: "Could not decode new conversation envelope", extras: ["error": error])
-    print("[NotificationExtension] Could not decode new conversation envelope \(error)")
+    sentryTrackError(error: error, extras: ["message": "Could not decode new conversation envelope"])
   }
   return nil
 }
@@ -68,6 +67,30 @@ func getSavedConversationTitle(contentTopic: String)-> String {
 }
 
 func getPersistedConversation(xmtpClient: XMTP.Client, contentTopic: String) async -> XMTP.Conversation? {
+  let secureMmkv = getSecureMmkvForAccount(account: xmtpClient.address)
+  if let mmkv = secureMmkv {
+    let jsonData = mmkv.data(forKey: "XMTP_TOPICS_DATA")
+    do {
+      if let data = jsonData, let json = try JSONSerialization.jsonObject(with: data, options: []) as? [String: String], let topicData = json[contentTopic] {
+        do {
+          print("[NotificationExtension] Found a persisted topic data")
+          let data = try Xmtp_KeystoreApi_V1_TopicMap.TopicData(
+            serializedData: Data(base64Encoded: topicData)!
+          )
+          let conversation = await xmtpClient.conversations.importTopicData(data: data)
+          return conversation
+        } catch {
+          sentryTrackError(error: error, extras: ["message": "Could not import topic data in XMTP Client"])
+          return nil
+        }
+      }
+    } catch {
+      sentryTrackError(error: error, extras: ["message": "Error while getting persisted topics"])
+    }
+  }
+  
+  // TODO => remove this a bit later
+  // During migration time, data is still in keychain, not in mmkv
   let hashedKey = CryptoKit.SHA256.hash(data: contentTopic.data(using: .utf8)!)
   let hashString = hashedKey.compactMap { String(format: "%02x", $0) }.joined()
   let persistedTopicData = getKeychainValue(forKey: "XMTP_TOPIC_DATA_\(xmtpClient.address)_\(hashString)")
@@ -80,35 +103,31 @@ func getPersistedConversation(xmtpClient: XMTP.Client, contentTopic: String) asy
       let conversation = await xmtpClient.conversations.importTopicData(data: data)
       return conversation
     } catch {
-      sentryTrackMessage(message: "Could not import topic data in XMTP Client", extras: ["error": error])
-      return nil
+      sentryTrackError(error: error, extras: ["message": "Could not import topic data in XMTP Client"])
     }
   }
-  // TODO => remove here as it's the old way of saving convos and we don't use it anymore
-  let persistedConversation = getKeychainValue(forKey: "XMTP_CONVERSATION_\(hashString)")
-  if (persistedConversation != nil && persistedConversation!.count > 0) {
-    do {
-      print("[NotificationExtension] Found a persisted conversation")
-      let conversation = try xmtpClient.importConversation(from: persistedConversation!.data(using: .utf8)!)
-      return conversation
-    } catch {
-      sentryTrackMessage(message: "Could not import conversation in XMTP Client", extras: ["error": error])
-      return nil
-    }
-  }
-  sentryTrackMessage(message: "No keychain value found for topic", extras: ["contentTopic": contentTopic])
-  return nil
+  return nil;
 }
 
 func persistDecodedConversation(account: String, conversation: Conversation) {
-  let hashedKey = CryptoKit.SHA256.hash(data: conversation.topic.data(using: .utf8)!)
-  let hashString = hashedKey.compactMap { String(format: "%02x", $0) }.joined()
-  do {
-    let conversationTopicData = try conversation.toTopicData().serializedData().base64EncodedString()
-    try setKeychainValue(value: conversationTopicData, forKey: "XMTP_TOPIC_DATA_\(account)_\(hashString)")
-    print("[NotificationExtension] Persisted the new conversation to keychain: XMTP_TOPIC_DATA_\(account)_\(hashString)")
-  } catch {
-    sentryTrackMessage(message: "Could not persist the new conversation to keychain", extras: ["error": error])
-    print("[NotificationExtension] Could not persist the new conversation to keychain")
+  let secureMmkv = getSecureMmkvForAccount(account: account)
+  if let mmkv = secureMmkv {
+    let jsonData = mmkv.data(forKey: "XMTP_TOPICS_DATA")
+    do {
+      if let data = jsonData, var json = try JSONSerialization.jsonObject(with: data, options: []) as? [String: String] {
+        do {
+          print("[NotificationExtension] Found existing topics data")
+          let conversationTopicData = try conversation.toTopicData().serializedData().base64EncodedString()
+          json[conversation.topic] = conversationTopicData
+          
+          let newJsonData = try JSONSerialization.data(withJSONObject: json, options: [])
+          mmkv.set(newJsonData, forKey: "XMTP_TOPICS_DATA")
+        } catch {
+          sentryTrackError(error: error, extras: ["message": "Could not save new topic data in MMKV"])
+        }
+      }
+    } catch {
+      sentryTrackError(error: error, extras: ["message": "Error while getting persisted topics"])
+    }
   }
 }

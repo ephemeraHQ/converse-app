@@ -25,6 +25,8 @@
 		4C8BA28B298502DC007F0B76 /* SharedDefaults.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C8BA28A298502DC007F0B76 /* SharedDefaults.swift */; };
 		4CBD67182A9CF7C30010C648 /* Sentry.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CBD67172A9CF7C30010C648 /* Sentry.swift */; };
 		4CBD671C2A9D08050010C648 /* Utils.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CBD671B2A9D08050010C648 /* Utils.swift */; };
+		4CFB3F322BCE878300A47FFE /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 4CFB3F312BCE876A00A47FFE /* PrivacyInfo.xcprivacy */; };
+		4CFB3F332BCE878A00A47FFE /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 4CFB3F312BCE876A00A47FFE /* PrivacyInfo.xcprivacy */; };
 		5AC2BE67A7DABF0FF3338D30 /* Pods_Converse.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1E33051D9258BA97BF2A963E /* Pods_Converse.framework */; };
 		B18059E884C0ABDD17F3DC3D /* ExpoModulesProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAC715A2D49A985799AEE119 /* ExpoModulesProvider.swift */; };
 		B7969B4A79FE4F9F8C52019D /* noop-file.swift in Sources */ = {isa = PBXBuildFile; fileRef = 68FED7E170C7437EB719C8C6 /* noop-file.swift */; };
@@ -80,6 +82,7 @@
 		4C8BA28A298502DC007F0B76 /* SharedDefaults.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SharedDefaults.swift; sourceTree = "<group>"; };
 		4CBD67172A9CF7C30010C648 /* Sentry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Sentry.swift; sourceTree = "<group>"; };
 		4CBD671B2A9D08050010C648 /* Utils.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Utils.swift; sourceTree = "<group>"; };
+		4CFB3F312BCE876A00A47FFE /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		68FED7E170C7437EB719C8C6 /* noop-file.swift */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 4; includeInIndex = 0; lastKnownFileType = sourcecode.swift; name = "noop-file.swift"; path = "Converse/noop-file.swift"; sourceTree = "<group>"; };
 		6D5D35519B5438AB1303C30F /* Pods-Converse.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Converse.debug.xcconfig"; path = "Target Support Files/Pods-Converse/Pods-Converse.debug.xcconfig"; sourceTree = "<group>"; };
 		A6938ECABF4488432D1495C7 /* Pods-ConverseNotificationExtension.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-ConverseNotificationExtension.release.xcconfig"; path = "Target Support Files/Pods-ConverseNotificationExtension/Pods-ConverseNotificationExtension.release.xcconfig"; sourceTree = "<group>"; };
@@ -115,6 +118,7 @@
 		13B07FAE1A68108700A75B9A /* Converse */ = {
 			isa = PBXGroup;
 			children = (
+				4CFB3F312BCE876A00A47FFE /* PrivacyInfo.xcprivacy */,
 				BB2F792B24A3F905000567C9 /* Supporting */,
 				13B07FAF1A68108700A75B9A /* AppDelegate.h */,
 				13B07FB01A68108700A75B9A /* AppDelegate.mm */,
@@ -328,6 +332,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				4CFB3F322BCE878300A47FFE /* PrivacyInfo.xcprivacy in Resources */,
 				BB2F792D24A3F905000567C9 /* Expo.plist in Resources */,
 				13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */,
 				3E461D99554A48A4959DE609 /* SplashScreen.storyboard in Resources */,
@@ -338,6 +343,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				4CFB3F332BCE878A00A47FFE /* PrivacyInfo.xcprivacy in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -375,6 +381,7 @@
 				"${PODS_CONFIGURATION_BUILD_DIR}/ExpoDevice/ExpoDevice_privacy.bundle",
 				"${PODS_CONFIGURATION_BUILD_DIR}/ExpoFileSystem/ExpoFileSystem_privacy.bundle",
 				"${PODS_CONFIGURATION_BUILD_DIR}/ExpoSystemUI/ExpoSystemUI_privacy.bundle",
+				"${PODS_CONFIGURATION_BUILD_DIR}/ReachabilitySwift/ReachabilitySwift.bundle",
 				"${PODS_CONFIGURATION_BUILD_DIR}/React-Core/RCTI18nStrings.bundle",
 				"${PODS_CONFIGURATION_BUILD_DIR}/Sentry/Sentry.bundle",
 				"${PODS_CONFIGURATION_BUILD_DIR}/expo-dev-launcher/EXDevLauncher.bundle",
@@ -391,6 +398,7 @@
 				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/ExpoDevice_privacy.bundle",
 				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/ExpoFileSystem_privacy.bundle",
 				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/ExpoSystemUI_privacy.bundle",
+				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/ReachabilitySwift.bundle",
 				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/RCTI18nStrings.bundle",
 				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/Sentry.bundle",
 				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/EXDevLauncher.bundle",
@@ -411,6 +419,7 @@
 				"${BUILT_PRODUCTS_DIR}/MMKV/MMKV.framework",
 				"${BUILT_PRODUCTS_DIR}/MMKVCore/MMKVCore.framework",
 				"${BUILT_PRODUCTS_DIR}/MMKVAppExtension/MMKVAppExtension.framework",
+				"${PODS_XCFRAMEWORKS_BUILD_DIR}/OpenSSL-Universal/OpenSSL.framework/OpenSSL",
 				"${PODS_XCFRAMEWORKS_BUILD_DIR}/hermes-engine/Pre-built/hermes.framework/hermes",
 			);
 			name = "[CP] Embed Pods Frameworks";
@@ -418,6 +427,7 @@
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/MMKV.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/MMKVCore.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/MMKVAppExtension.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/OpenSSL.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/hermes.framework",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -510,10 +520,12 @@
 			inputPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-ConverseNotificationExtension/Pods-ConverseNotificationExtension-resources.sh",
 				"${PODS_CONFIGURATION_BUILD_DIR}/Sentry/Sentry.bundle",
+				"${PODS_CONFIGURATION_BUILD_DIR}/SQLite.swift/SQLite.swift.bundle",
 			);
 			name = "[CP] Copy Pods Resources";
 			outputPaths = (
 				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/Sentry.bundle",
+				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/SQLite.swift.bundle",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
