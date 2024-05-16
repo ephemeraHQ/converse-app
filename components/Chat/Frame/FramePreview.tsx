@@ -5,9 +5,11 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { Platform, StyleSheet, TouchableOpacity, View } from "react-native";
 import { v4 as uuidv4 } from "uuid";
 
+import config from "../../../config";
 import { useCurrentAccount } from "../../../data/store/accountsStore";
 import { cacheForMedia, fetchAndCacheMedia } from "../../../utils/cache/cache";
 import { useConversationContext } from "../../../utils/conversation";
+import { useExternalProvider } from "../../../utils/evm/external";
 import {
   FrameButtonType,
   FrameToDisplay,
@@ -16,6 +18,7 @@ import {
   getFrameButtons,
   getFrameImage,
   getFramesClient,
+  handleTxAction,
   validateFrame,
 } from "../../../utils/frames";
 import { navigate } from "../../../utils/navigation";
@@ -54,6 +57,8 @@ export default function FramePreview({
   const [frameTextInputValue, setFrameTextInputValue] = useState("");
   const messageId = useRef(message.id);
   const fetchingInitialForMessageId = useRef(undefined as undefined | string);
+
+  const { getExternalProvider } = useExternalProvider();
 
   // Components are recycled, let's fix when stuff changes
   if (message.id !== messageId.current) {
@@ -157,7 +162,7 @@ export default function FramePreview({
       }
       if (!conversation) return;
       setPostingActionForButton(button.index);
-      const actionPostUrl =
+      let actionPostUrl =
         button.target || frame.frameInfo?.postUrl || initialFrame.url;
       try {
         const participantAccountAddresses: string[] = conversation.isGroup
@@ -175,8 +180,34 @@ export default function FramePreview({
         }
         const framesClient = await getFramesClient(account);
         let newFrameHasInput = false;
-        if (button.action === "post" || !button.action) {
+        if (
+          button.action === "post" ||
+          button.action === "tx" ||
+          !button.action
+        ) {
           const payload = await framesClient.signFrameAction(actionInput);
+
+          if (button.action === "tx") {
+            if (Platform.OS !== "web" || !config.enableTransactionFrames) {
+              alert("Transaction frames are not supported yet.");
+              throw new Error("Transaction frames not supported yet");
+            }
+            // For tx, we get the tx data from target, then trigger it, then do a POST action
+            const externalProvider = await getExternalProvider();
+            if (!externalProvider)
+              throw new Error("Could not get an external wallet provider");
+
+            const { buttonPostUrl, txHash } = await handleTxAction(
+              frame,
+              button,
+              payload,
+              externalProvider
+            );
+
+            payload.untrustedData.transactionId = txHash;
+            actionPostUrl = buttonPostUrl;
+          }
+
           const frameResponse = await framesProxy.post(actionPostUrl, payload);
           const validatedFrameResponse = validateFrame(frameResponse);
           if (
@@ -247,6 +278,7 @@ export default function FramePreview({
       conversation,
       frame,
       frameTextInputValue,
+      getExternalProvider,
       initialFrame.url,
       message.topic,
       setFrameTextInputFocused,

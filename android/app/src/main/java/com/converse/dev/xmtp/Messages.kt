@@ -180,7 +180,7 @@ fun handleOngoingConversationMessage(
     remoteMessage: RemoteMessage,
     sentViaConverse: Boolean
 ): NotificationDataResult {
-    val conversation = getPersistedConversation(xmtpClient, envelope.contentTopic)
+    val conversation = getPersistedConversation(appContext, xmtpClient, envelope.contentTopic)
         ?: run {
             Log.d("PushNotificationsService", "No conversation found for ${envelope.contentTopic}")
             return NotificationDataResult()

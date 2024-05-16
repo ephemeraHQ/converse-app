@@ -1,4 +1,3 @@
-import { useEmbeddedWallet, usePrivy } from "@privy-io/expo";
 import Clipboard from "@react-native-clipboard/clipboard";
 import * as Sentry from "@sentry/react-native";
 import { Client } from "@xmtp/react-native-sdk";
@@ -15,8 +14,8 @@ import {
   getChatStore,
   useCurrentAccount,
 } from "../data/store/accountsStore";
+import { getPresignedUriForUpload } from "../utils/api";
 import { debugLogs, resetDebugLogs } from "../utils/debug";
-import { usePrivySigner } from "../utils/evm/privy";
 import mmkv from "../utils/mmkv";
 import { showActionSheetWithOptions } from "./StateHandlers/ActionSheetStateHandler";
 
@@ -31,15 +30,57 @@ export async function delayToPropogate(): Promise<void> {
 }
 
 const DebugButton = forwardRef((props, ref) => {
-  const embeddedWallet = useEmbeddedWallet();
-  const privySigner = usePrivySigner();
-  const { isReady: privyReady, user: privyUser } = usePrivy();
   // The component instance will be extended
   // with whatever you return from the callback passed
   // as the second argument
   useImperativeHandle(ref, () => ({
     showDebugMenu() {
       const methods: any = {
+        DebugIt: async () => {
+          console.log("go");
+          const bob = await Client.createRandom({
+            env: "dev",
+            dbEncryptionKey: new Uint8Array([
+              1, 2, 3, 4, 5, 1, 2, 3, 4, 5, 1, 2, 3, 4, 5, 1, 2, 3, 4, 5, 1, 2,
+              3, 4, 5, 1, 2, 3, 4, 5, 1, 2,
+            ]),
+          });
+          const alice = await Client.createRandom({
+            env: "dev",
+            dbEncryptionKey: new Uint8Array([
+              1, 2, 3, 4, 5, 1, 2, 3, 4, 5, 1, 2, 3, 4, 5, 1, 2, 3, 4, 5, 1, 2,
+              3, 4, 5, 1, 2, 3, 4, 5, 1, 2,
+            ]),
+          });
+          const bobToAlice = await bob.conversations.newConversation(
+            alice.address
+          );
+          console.log(`Streaming messages for alice`);
+          let receivedMessages = 0;
+          await alice.conversations.streamAllMessages(async (message) => {
+            console.log(
+              `Alice received a message from ${message.senderAddress}`
+            );
+            receivedMessages += 1;
+          });
+          await bobToAlice.send("first message");
+          await new Promise((r) => setTimeout(r, 6000));
+          if (receivedMessages !== 1) {
+            alert("SHOULD BE 1");
+            return;
+          }
+          console.log({ receivedMessages });
+          let timeSpent = 0;
+          const minutesToWait = 8;
+          while (timeSpent < minutesToWait * 60 * 1000) {
+            await new Promise((r) => setTimeout(r, 5000));
+            timeSpent += 5000;
+            console.log(`${timeSpent / (minutesToWait * 60 * 10)}%`);
+          }
+          await bobToAlice.send("second message");
+          await new Promise((r) => setTimeout(r, 5000));
+          alert(`received: ${receivedMessages}`);
+        },
         "Update OTA": async () => {
           try {
             const update = await Updates.fetchUpdateAsync();
@@ -61,17 +102,17 @@ const DebugButton = forwardRef((props, ref) => {
             alert(`SQlite file does not exist`);
             return;
           }
-          console.log("LOADING...");
+          console.log("LOADING content......");
           const fileContent = await RNFS.readFile(dbPath, "base64");
-          try {
-            await axios.post("http://noemalzieu.com:3000", {
-              file: fileContent,
-            });
-            alert("Uploaded!");
-          } catch (e: any) {
-            console.log(e.message);
-          }
+          const { url } = await getPresignedUriForUpload(currentAccount());
+          console.log("Uploading...", { url });
+          await axios.put(url, Buffer.from(fileContent, "base64"), {
+            headers: { "content-type": "application/octet-stream" },
+          });
+          Clipboard.setString(url);
+          alert("Uploaded URL Copied");
         },
+
         "Reset DB": () => {
           resetDb(currentAccount());
           getChatStore(currentAccount()).getState().setLastSyncedAt(0, []);

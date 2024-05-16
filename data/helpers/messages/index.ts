@@ -135,3 +135,16 @@ export const deleteMessage = async (
   await messageRepository.delete({ id: messageId, conversationId: topic });
   getChatStore(account).getState().deleteMessage(topic, messageId);
 };
+
+export const getOrderedMessages = async (account: string, topic: string) => {
+  const messageRepository = await getRepository(account, "message");
+  const messages: Message[] = await messageRepository
+    .createQueryBuilder()
+    .select("*")
+    .where("message.conversationId = :topic", {
+      topic,
+    })
+    .orderBy("sent", "ASC")
+    .execute();
+  return messages;
+};

@@ -27,15 +27,16 @@ func initSentry() {
 }
 
 func sentryTrackMessage(message: String, extras: [String : Any]?) {
-  print([message, extras]);
- SentrySDK.capture(message: "NOTIFICATION_EXTENSION_ERROR_IOS") { scope in
-   var extrasWithMessage:[String: Any] = ["message": message]
+ SentrySDK.capture(message: message) { scope in
+   var extrasWithMessage:[String: Any] = ["where": "NOTIFICATION_EXTENSION_IOS"]
    if (extras != nil) {
      for (key, value) in extras! {
        extrasWithMessage[key] = value
      }
    }
    scope.setExtras(extrasWithMessage)
+   print(message);
+   print(extrasWithMessage);
  }
  SentrySDK.flush(timeout: 3)
 }
@@ -50,6 +51,8 @@ func sentryTrackError(error: Error, extras: [String : Any]?) {
      }
    }
    scope.setExtras(extrasWithMessage)
+   print(error);
+   print(extrasWithMessage);
  }
  SentrySDK.flush(timeout: 3)
 }

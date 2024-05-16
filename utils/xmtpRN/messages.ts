@@ -8,7 +8,9 @@ import {
   StaticAttachmentContent,
 } from "@xmtp/react-native-sdk";
 
-import { saveMessages } from "../../data/helpers/messages";
+import { getOrderedMessages, saveMessages } from "../../data/helpers/messages";
+import { xmtpMessageFromDb } from "../../data/mappers";
+import { getChatStore } from "../../data/store/accountsStore";
 import { XmtpMessage } from "../../data/store/chatStore";
 import { addLog } from "../debug";
 import { sentryTrackError } from "../sentry";
@@ -113,7 +115,8 @@ const protocolMessageToStateMessage = (
     sent: message.sent,
     contentType,
     status: "delivered",
-    sentViaConverse: message.sentViaConverse || false,
+    // @todo => remove altogether
+    sentViaConverse: false,
     content,
     referencedMessageId,
     topic: message.topic,
@@ -287,4 +290,23 @@ export const syncConversationsMessages = async (
   return messagesFetched;
 };
 
-export const loadOlderMessages = async (account: string, topic: string) => {};
+const loadedOlderMessagesForTopic: {
+  [account: string]: { [topic: string]: boolean };
+} = {};
+
+export const loadOlderMessages = async (account: string, topic: string) => {
+  loadedOlderMessagesForTopic[account] =
+    loadedOlderMessagesForTopic[account] || {};
+  const chatStore = getChatStore(account).getState();
+  // Pending convos: does not make sense
+  if (chatStore.conversations[topic]?.pending) return;
+  // Alread loaded
+  if (loadedOlderMessagesForTopic[account][topic]) return;
+  // Just mapped, so was created inside this session, no need to fetch
+  if (Object.values(chatStore.conversationsMapping).includes(topic)) return;
+  await new Promise((r) => setTimeout(r, 500));
+  // On mobile this loads all messages from the local db
+  const messages = await getOrderedMessages(account, topic);
+  getChatStore(account).getState().setMessages(messages.map(xmtpMessageFromDb));
+  loadedOlderMessagesForTopic[account][topic] = true;
+};

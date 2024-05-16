@@ -16,6 +16,8 @@ module.exports = {
       "module-resolver",
       {
         alias: {
+          // crypto: "react-native-quick-crypto",
+          "react-native-sqlite-storage": "@op-engineering/op-sqlite",
           crypto: "crypto-browserify",
           // This entrypoint mapping is done in @xmtp/user-preferences-bindings-wasm's "exports" in package.json
           // but we don't want to enable unstable_enablePackageExports for now in metro.config.js

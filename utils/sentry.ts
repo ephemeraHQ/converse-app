@@ -1,10 +1,14 @@
 import * as Sentry from "@sentry/react-native";
 import type { EventHint, ErrorEvent } from "@sentry/types";
+import { Platform } from "react-native";
 
+import appBuildNumbers from "../app.json";
 import config from "../config";
 
+const DISABLE_IOS_NATIVE_SENTRY = false;
+
 export const initSentry = () => {
-  Sentry.init({
+  const sentryOptions: Sentry.ReactNativeOptions = {
     dsn: config.sentryDSN,
     debug: false,
     enabled: config.env !== "dev",
@@ -27,7 +31,17 @@ export const initSentry = () => {
 
       return event;
     },
-  });
+  };
+  if (Platform.OS === "ios" && DISABLE_IOS_NATIVE_SENTRY) {
+    // According to https://developer.apple.com/forums/thread/113742 third
+    // party crash reporters break Apple's crash reporting and it can be
+    // best to just disable the Native part of Sentry for now on iOS.
+    sentryOptions.enableNative = false;
+    const releaseNumber = `${appBuildNumbers.expo.ios.version}+${appBuildNumbers.expo.ios.buildNumber}`;
+    const release = `${config.bundleId}@${releaseNumber}`;
+    sentryOptions.release = release;
+  }
+  Sentry.init(sentryOptions);
 };
 
 export const sentryAddBreadcrumb = (message: string, forceSafe = false) => {

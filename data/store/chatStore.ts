@@ -627,6 +627,7 @@ export const initChatStore = (account: string) => {
                 topicsDataFetchedOnce: markAsFetchedOnce
                   ? true
                   : state.topicsDataFetchedOnce,
+                lastUpdateAt: now(),
               };
             }),
           setSpamScores: (topicSpamScores: Record<string, number>) =>
