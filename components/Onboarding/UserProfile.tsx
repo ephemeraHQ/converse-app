@@ -131,7 +131,7 @@ export const UserProfile = ({ onboarding, navigation }: Props) => {
       publicAvatar = profile.avatar;
     } else {
       // Let's upload the image to our server
-      const resizedImage = await compressAndResizeImage(profile.avatar);
+      const resizedImage = await compressAndResizeImage(profile.avatar, true);
 
       try {
         // On web we use blob, on mobile we use file path
@@ -242,7 +242,6 @@ export const UserProfile = ({ onboarding, navigation }: Props) => {
       inNav={!onboarding}
     >
       <Avatar
-        key={`avatar-${intermediaryScreenShown}`}
         uri={profile?.avatar}
         style={styles.avatar}
         color={intermediaryScreenShown}
@@ -325,6 +324,7 @@ const useStyles = (colorScheme: any, errorMessage: any) =>
       fontSize: 17,
       marginTop: 23,
       paddingHorizontal: 32,
+      color: textPrimaryColor(colorScheme),
     },
     usernameInputContainer: {
       width: "100%",

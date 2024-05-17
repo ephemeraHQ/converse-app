@@ -1,8 +1,9 @@
 import { Image, ImageStyle } from "expo-image";
-import { StyleProp } from "react-native";
+import { StyleProp, useColorScheme } from "react-native";
 
 import PFPPlaceholderColor from "../assets/default-pfp-color.png";
-import PFPPlaceholder from "../assets/default-pfp-light.png";
+import PFPPlaceholderDark from "../assets/default-pfp-dark.png";
+import PFPPlaceholderLight from "../assets/default-pfp-light.png";
 
 type Props = {
   uri?: string | undefined;
@@ -11,11 +12,17 @@ type Props = {
   color?: boolean;
 };
 export default function Avatar({ uri, size, style, color }: Props) {
+  const colorScheme = useColorScheme();
+  const PFPPlaceholder = color
+    ? PFPPlaceholderColor
+    : colorScheme === "dark"
+    ? PFPPlaceholderDark
+    : PFPPlaceholderLight;
   return (
     <Image
-      key={uri}
+      key={`${uri}-${color}-${colorScheme}`}
       source={{ uri }}
-      placeholder={color ? PFPPlaceholderColor : PFPPlaceholder}
+      placeholder={PFPPlaceholder}
       placeholderContentFit="cover"
       contentFit="cover"
       style={[
