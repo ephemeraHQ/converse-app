@@ -56,7 +56,8 @@ const useStyles = () => {
   return StyleSheet.create({
     navigationButton: {
       paddingHorizontal: 5,
-      marginRight: 14,
+      marginLeft: 0,
+      marginRight: 16,
     },
   });
 };

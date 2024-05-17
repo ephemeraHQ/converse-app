@@ -56,22 +56,15 @@ export default function Main() {
     }
   }, [addingNewAccount, resetOnboarding, userAddress]);
 
-  const { notifications, skipFarcaster, skipAddressBook } = useSettingsStore(
-    useSelect(["notifications", "skipFarcaster", "skipAddressBook"])
-  );
-  const {
-    notificationsPermissionStatus,
-    splashScreenHidden,
-    mediaPreview,
-    addressBookPermissionStatus,
-  } = useAppStore(
-    useSelect([
-      "notificationsPermissionStatus",
-      "splashScreenHidden",
-      "mediaPreview",
-      "addressBookPermissionStatus",
-    ])
-  );
+  const { notifications } = useSettingsStore(useSelect(["notifications"]));
+  const { notificationsPermissionStatus, splashScreenHidden, mediaPreview } =
+    useAppStore(
+      useSelect([
+        "notificationsPermissionStatus",
+        "splashScreenHidden",
+        "mediaPreview",
+      ])
+    );
   const navigationDrawer = useRef<any>(null);
   const toggleNavigationDrawer = useCallback((open: boolean) => {
     if (open) {
@@ -133,7 +126,7 @@ export default function Main() {
     ) {
       screenToShow = <NotificationsScreen />;
     } else if (!currentUserName) {
-      screenToShow = <UserProfile />;
+      screenToShow = <UserProfile onboarding />;
     } else if (Platform.OS === "android") {
       // On Android the whole navigation is wrapped in a drawler
       // layout to be able to display the menu

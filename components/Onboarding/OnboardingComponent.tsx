@@ -32,6 +32,7 @@ type Props = {
   primaryButtonAction?: () => void;
   shrinkWithKeyboard?: boolean;
   inModal?: boolean;
+  inNav?: boolean;
 };
 
 export default function OnboardingComponent({
@@ -46,6 +47,7 @@ export default function OnboardingComponent({
   primaryButtonAction,
   shrinkWithKeyboard,
   inModal,
+  inNav,
 }: Props) {
   const styles = useStyles();
   const { loading: stateLoading, setLoading } = useOnboardingStore(
@@ -67,15 +69,14 @@ export default function OnboardingComponent({
         contentContainerStyle={styles.onboardingContent}
         keyboardShouldPersistTaps="handled"
       >
-        {picto ? (
+        {picto && (
           <Picto
             picto={picto}
             size={Platform.OS === "android" ? 80 : 43}
             style={[styles.picto, inModal ? { marginTop: 50 } : {}]}
           />
-        ) : (
-          <View style={styles.noPicto} />
         )}
+        {!picto && <View style={{ marginTop: inNav ? 32 : 140 }} />}
 
         <Text style={styles.title}>{title}</Text>
         {loading && (
@@ -130,16 +131,7 @@ const useStyles = () => {
       alignItems: "center",
       backgroundColor: backgroundColor(colorScheme),
     },
-    noPicto: {
-      ...Platform.select({
-        default: {
-          marginTop: 140,
-        },
-        android: {
-          marginTop: 165,
-        },
-      }),
-    },
+
     picto: {
       ...Platform.select({
         default: {

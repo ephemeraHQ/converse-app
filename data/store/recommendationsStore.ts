@@ -2,6 +2,7 @@ import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
 
 import { zustandMMKVStorage } from "../../utils/mmkv";
+import { ProfileSocials } from "./profilesStore";
 
 // Recommended profiles for each account
 
@@ -12,9 +13,12 @@ type RecommendationTag = {
 
 export type RecommendationData = {
   tags: RecommendationTag[];
+  profile?: ProfileSocials;
+
+  // This is legacy @todo => remove at some point
   ens?: string;
-  lensHandles: string[];
-  farcasterUsernames: string[];
+  lensHandles?: string[];
+  farcasterUsernames?: string[];
 };
 
 export type Frens = { [address: string]: RecommendationData };

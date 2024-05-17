@@ -11,17 +11,10 @@ export const getProfileData = (
   if (recommendationData) return recommendationData;
   // If not we get it from the profile part
   if (!socials) return undefined;
-  const ens = socials.ensNames?.find((e) => e.isPrimary)?.name;
-  const farcasterUsernames =
-    socials.farcasterUsernames?.map((f) => f.username) || [];
-  const lensHandles = socials.lensHandles?.map((l) => l.handle) || [];
-  if (!ens && farcasterUsernames.length === 0 && lensHandles.length === 0)
-    return undefined;
+
   return {
     tags: [],
-    ens,
-    farcasterUsernames,
-    lensHandles,
+    profile: socials,
   };
 };
 
@@ -38,14 +31,35 @@ export function getPreferredName(
         ) || null
       : null;
 
-  const userName = socials?.userNames?.find((e) => e.isPrimary)?.name || null;
-  const ensName = socials?.ensNames?.find((e) => e.isPrimary)?.name || null;
+  const userName = socials?.userNames?.find((e) => e.isPrimary) || null;
+  const ensName = socials?.ensNames?.find((e) => e.isPrimary) || null;
   const unsDomain =
-    socials?.unstoppableDomains?.find((d) => d.isPrimary)?.domain || null;
+    socials?.unstoppableDomains?.find((d) => d.isPrimary) || null;
 
-  return (
-    lensHandle || userName || ensName || unsDomain || shortAddress(peerAddress)
-  );
+  if (lensHandle) {
+    return lensHandle;
+  } else if (userName) {
+    return userName.displayName || userName.name;
+  } else if (ensName) {
+    return ensName.displayName || ensName.name;
+  } else if (unsDomain) {
+    return unsDomain.domain;
+  }
+
+  return shortAddress(peerAddress);
+}
+
+export function getPreferredAvatar(
+  socials: ProfileSocials | undefined
+): string | undefined {
+  const userName = socials?.userNames?.find((e) => e.isPrimary) || null;
+  const ensName = socials?.ensNames?.find((e) => e.isPrimary) || null;
+
+  if (userName) {
+    return userName.avatar;
+  } else if (ensName) {
+    return ensName.avatar;
+  }
 }
 
 export function getPrimaryNames(socials: ProfileSocials | undefined): string[] {
@@ -54,14 +68,14 @@ export function getPrimaryNames(socials: ProfileSocials | undefined): string[] {
   }
 
   const primaryNames: string[] = [];
-  if (socials.ensNames) {
-    primaryNames.push(
-      ...socials.ensNames.filter((e) => e.isPrimary).map((e) => e.name)
-    );
-  }
   if (socials.userNames) {
     primaryNames.push(
       ...socials.userNames.filter((u) => u.isPrimary).map((u) => u.name)
+    );
+  }
+  if (socials.ensNames) {
+    primaryNames.push(
+      ...socials.ensNames.filter((e) => e.isPrimary).map((e) => e.name)
     );
   }
   if (socials.unstoppableDomains) {
@@ -74,8 +88,8 @@ export function getPrimaryNames(socials: ProfileSocials | undefined): string[] {
   if (socials.farcasterUsernames) {
     primaryNames.push(
       ...socials.farcasterUsernames
-        .filter((f) => f.name)
-        .map((f) => `${f.name} on farcaster`)
+        .filter((f) => f.username)
+        .map((f) => `${f.username} on farcaster`)
     );
   }
   if (socials.lensHandles) {

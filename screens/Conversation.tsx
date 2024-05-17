@@ -1,34 +1,20 @@
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { isAddress } from "ethers/lib/utils";
 import React, { useCallback, useEffect, useState, useRef } from "react";
-import {
-  Platform,
-  StyleSheet,
-  TouchableOpacity,
-  useColorScheme,
-  View,
-} from "react-native";
+import { Platform, StyleSheet, useColorScheme, View } from "react-native";
 import { gestureHandlerRootHOC } from "react-native-gesture-handler";
 
-import Button from "../components/Button/Button";
 import ConverseChat from "../components/Chat/Chat";
 import ConversationTitle from "../components/Conversation/ConversationTitle";
-import InviteBanner from "../components/InviteBanner";
-import Picto from "../components/Picto/Picto";
-import config from "../config";
 import {
   currentAccount,
   useChatStore,
   useSettingsStore,
 } from "../data/store/accountsStore";
 import { useSelect } from "../data/store/storeHelpers";
-import { userExists } from "../utils/api";
 import {
   backgroundColor,
   headerTitleStyle,
-  itemSeparatorColor,
-  textPrimaryColor,
   textSecondaryColor,
 } from "../utils/colors";
 import {
@@ -174,43 +160,6 @@ const Conversation = ({
   }, [navigation, autofocus]);
 
   const styles = useStyles();
-  const [showInvite, setShowInvite] = useState({
-    show: false,
-    banner: false,
-  });
-
-  const alreadyCheckedIfUserExists = useRef(false);
-
-  const checkIfUserExists = useCallback(async () => {
-    if (!peerAddress || alreadyCheckedIfUserExists.current || !conversation)
-      return;
-    alreadyCheckedIfUserExists.current = true;
-    const [exists, alreadyInvided] = await Promise.all([
-      userExists(peerAddress),
-      AsyncStorage.getItem(`converse-invited-${peerAddress}`),
-    ]);
-    if (!exists) {
-      setTimeout(() => {
-        setShowInvite({
-          show: true,
-          banner: !alreadyInvided,
-        });
-      }, 200);
-    }
-  }, [conversation, peerAddress]);
-
-  const hideInviteBanner = useCallback(() => {
-    setShowInvite({ show: true, banner: false });
-    AsyncStorage.setItem(`converse-invited-${peerAddress}`, "true");
-  }, [peerAddress]);
-
-  const inviteToConverse = useCallback(() => {
-    const inviteText = `I am using Converse, the fastest XMTP client, as my web3 messaging app. You can download the app here: https://${config.websiteDomain}/`;
-    converseEventEmitter.emit("setCurrentConversationInputValue", inviteText);
-    textInputRef.current?.focus();
-    setShowInvite({ show: true, banner: false });
-    AsyncStorage.setItem(`converse-invited-${peerAddress}`, "true");
-  }, [peerAddress]);
 
   const titleFontScale = getTitleFontScale();
 
@@ -226,46 +175,16 @@ const Conversation = ({
           route={route}
         />
       ),
-      headerRight: () => {
-        return (
-          <>
-            {showInvite.show &&
-              !showInvite.banner &&
-              (Platform.OS === "android" ? (
-                <TouchableOpacity onPress={inviteToConverse}>
-                  <Picto
-                    picto="addlink"
-                    size={24}
-                    color={textSecondaryColor(colorScheme)}
-                  />
-                </TouchableOpacity>
-              ) : (
-                <Button
-                  variant="text"
-                  title="Invite"
-                  onPress={inviteToConverse}
-                  allowFontScaling={false}
-                  textStyle={{ fontSize: 17 * titleFontScale }}
-                />
-              ))}
-          </>
-        );
-      },
       headerTintColor:
         Platform.OS === "android" ? textSecondaryColor(colorScheme) : undefined,
     });
   }, [
     colorScheme,
     conversation,
-    inviteToConverse,
     isBlockedPeer,
     navigation,
     peerAddress,
     route,
-    showInvite.banner,
-    showInvite.show,
-    styles.title,
-    titleFontScale,
   ]);
 
   useEffect(() => {
@@ -318,39 +237,24 @@ const Conversation = ({
     };
   }, [navigation, onLeaveScreen, onOpeningConversation]);
 
-  const showInviteBanner =
-    showInvite.show && showInvite.banner && !isBlockedPeer;
-
   return (
-    <View
-      style={styles.container}
-      onLayout={checkIfUserExists}
-      key={`conversation-${colorScheme}`}
-    >
+    <View style={styles.container} key={`conversation-${colorScheme}`}>
       {route.params?.topic || route.params?.mainConversationWithPeer ? (
-        <>
-          {showInviteBanner && (
-            <InviteBanner
-              onClickInvite={inviteToConverse}
-              onClickHide={hideInviteBanner}
-            />
-          )}
-          <ConversationContext.Provider
-            value={{
-              conversation,
-              messageToPrefill,
-              inputRef: textInputRef,
-              isBlockedPeer,
-              onReadyToFocus,
-              transactionMode,
-              setTransactionMode,
-              frameTextInputFocused,
-              setFrameTextInputFocused,
-            }}
-          >
-            <ConverseChat />
-          </ConversationContext.Provider>
-        </>
+        <ConversationContext.Provider
+          value={{
+            conversation,
+            messageToPrefill,
+            inputRef: textInputRef,
+            isBlockedPeer,
+            onReadyToFocus,
+            transactionMode,
+            setTransactionMode,
+            frameTextInputFocused,
+            setFrameTextInputFocused,
+          }}
+        >
+          <ConverseChat />
+        </ConversationContext.Provider>
       ) : (
         <View style={styles.filler} />
       )}
@@ -365,32 +269,6 @@ const useStyles = () => {
   return StyleSheet.create({
     container: {
       flex: 1,
-    },
-    inviteBanner: {
-      height: 63,
-      borderBottomWidth: 1,
-      borderBottomColor: itemSeparatorColor(colorScheme),
-      backgroundColor: backgroundColor(colorScheme),
-      paddingHorizontal: 30,
-      alignItems: "center",
-      flexDirection: "row",
-    },
-    inviteBannerLeft: {
-      flexShrink: 1,
-      marginRight: 10,
-    },
-    inviteTitle: {
-      fontSize: 17,
-      fontWeight: "600",
-      color: textPrimaryColor(colorScheme),
-    },
-    inviteSubtitle: {
-      fontSize: 15,
-      color: textSecondaryColor(colorScheme),
-      fontWeight: "400",
-    },
-    inviteButton: {
-      marginLeft: "auto",
     },
     title: headerTitleStyle(colorScheme),
     filler: { flex: 1, backgroundColor: backgroundColor(colorScheme) },
