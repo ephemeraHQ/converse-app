@@ -40,7 +40,7 @@ export default function Main() {
   const socials = useProfilesStore((s) =>
     userAddress ? s.profiles[userAddress]?.socials : undefined
   );
-  const currentUserName = socials?.userNames?.find((e) => e.isPrimary)?.name;
+  const currentUserName = socials?.userNames?.find((e) => e.isPrimary);
   // const currentFarcaster = socials?.farcasterUsernames?.find(
   //   (e) => e.linkedAccount
   // );
@@ -125,7 +125,13 @@ export default function Main() {
           Platform.OS === "android"))
     ) {
       screenToShow = <NotificationsScreen />;
-    } else if (!currentUserName) {
+    } else if (
+      !(
+        currentUserName?.name &&
+        currentUserName?.displayName &&
+        currentUserName?.avatar
+      )
+    ) {
       screenToShow = <UserProfile onboarding />;
     } else if (Platform.OS === "android") {
       // On Android the whole navigation is wrapped in a drawler

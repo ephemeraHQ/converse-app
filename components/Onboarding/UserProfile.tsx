@@ -1,5 +1,5 @@
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -14,6 +14,7 @@ import { refreshProfileForAddress } from "../../data/helpers/profiles/profilesUp
 import {
   useCurrentAccount,
   useProfilesStore,
+  useSettingsStore,
 } from "../../data/store/accountsStore";
 import { NavigationParamList } from "../../screens/Navigation/Navigation";
 import { checkUsernameValid, claimProfile } from "../../utils/api";
@@ -53,9 +54,23 @@ type Props = OwnProps & Partial<NavProps>;
 export const UserProfile = ({ onboarding, navigation }: Props) => {
   const address = useCurrentAccount() as string;
   const profiles = useProfilesStore((state) => state.profiles);
+  const onboardedAfterProfilesRelease = useSettingsStore(
+    (s) => s.onboardedAfterProfilesRelease
+  );
   const currentUserUsername = profiles[address]?.socials?.userNames?.find(
     (u) => u.isPrimary
   );
+
+  const shouldShowIntermediaryScreen =
+    onboarding && !onboardedAfterProfilesRelease;
+
+  const [intermediaryScreenShown, setIntermediaryScreenShown] = useState(
+    shouldShowIntermediaryScreen
+  );
+
+  useEffect(() => {
+    setIntermediaryScreenShown(shouldShowIntermediaryScreen);
+  }, [shouldShowIntermediaryScreen]);
 
   const [errorMessage, setErrorMessage] = useState("");
   const colorScheme = useColorScheme();
@@ -71,6 +86,10 @@ export const UserProfile = ({ onboarding, navigation }: Props) => {
   const logout = useLogoutFromConverse(address);
 
   const handleContinue = useCallback(async () => {
+    if (intermediaryScreenShown) {
+      setIntermediaryScreenShown(false);
+      return;
+    }
     if (!profile.avatar) {
       setErrorMessage("You must define an avatar");
       return;
@@ -154,7 +173,7 @@ export const UserProfile = ({ onboarding, navigation }: Props) => {
     if (!onboarding && navigation) {
       navigation.goBack();
     }
-  }, [address, navigation, onboarding, profile]);
+  }, [address, navigation, onboarding, profile, intermediaryScreenShown]);
 
   const pickMedia = useCallback(async () => {
     const asset = await pickMediaFromLibrary({
@@ -205,66 +224,92 @@ export const UserProfile = ({ onboarding, navigation }: Props) => {
 
   return (
     <OnboardingComponent
-      title="Profile"
+      title={
+        intermediaryScreenShown ? "Introducing\nConverse Profiles" : "Profile"
+      }
       primaryButtonText="Continue"
       primaryButtonAction={handleContinue}
-      backButtonText={onboarding ? "Back to home screen" : undefined}
+      backButtonText={
+        onboarding && !intermediaryScreenShown
+          ? shouldShowIntermediaryScreen
+            ? "Logout"
+            : "Back to home screen"
+          : undefined
+      }
       backButtonAction={onboarding ? logout : undefined}
       isLoading={loading}
       shrinkWithKeyboard
       inNav={!onboarding}
     >
-      <Avatar uri={profile?.avatar} style={styles.avatar} />
-      <Button
-        variant="text"
-        title={
-          profile?.avatar ? "Change profile picture" : "Add profile picture"
-        }
-        textStyle={{ fontWeight: "500" }}
-        onPress={addPFP}
+      <Avatar
+        key={`avatar-${intermediaryScreenShown}`}
+        uri={profile?.avatar}
+        style={styles.avatar}
+        color={intermediaryScreenShown}
       />
-      <View style={styles.usernameInputContainer}>
-        <TextInput
-          style={[styles.profileInput]}
-          onChangeText={(text) => {
-            // Limit the display name to 50 characters
-            const trimmedDisplayName = text.slice(0, 50);
-            setProfile({ ...profile, displayName: trimmedDisplayName });
-          }}
-          value={profile.displayName}
-          placeholder="Display Name"
-          placeholderTextColor={textSecondaryColor(colorScheme)}
-          autoCapitalize="none"
-          onSubmitEditing={handleContinue}
-          enterKeyHint="done"
-          returnKeyType="done"
-          maxLength={30}
-          autoCorrect={false}
-          autoComplete="off"
-        />
-        <TextInput
-          style={[styles.profileInput, styles.usernameInput]}
-          onChangeText={(text) => {
-            // Limit the username to 30 characters
-            const trimmedUsername = text.slice(0, 30);
-            setProfile({ ...profile, username: trimmedUsername });
-          }}
-          value={profile.username}
-          placeholder="username"
-          placeholderTextColor={textSecondaryColor(colorScheme)}
-          autoCapitalize="none"
-          onSubmitEditing={handleContinue}
-          enterKeyHint="done"
-          returnKeyType="done"
-          maxLength={30}
-          autoCorrect={false}
-          autoComplete="off"
-        />
-        <Text style={styles.p}>
-          {errorMessage ||
-            "Pick a photo, a display name and a unique username."}
-        </Text>
-      </View>
+      {intermediaryScreenShown && (
+        <>
+          <Text style={styles.converseProfiles}>
+            Converse Profiles are free and compatible with ENS. Select a profile
+            picture, a username and a display name and enjoy a more intimate
+            Converse experience.
+          </Text>
+        </>
+      )}
+      {!intermediaryScreenShown && (
+        <>
+          <Button
+            variant="text"
+            title={
+              profile?.avatar ? "Change profile picture" : "Add profile picture"
+            }
+            textStyle={{ fontWeight: "500" }}
+            onPress={addPFP}
+          />
+          <View style={styles.usernameInputContainer}>
+            <TextInput
+              style={[styles.profileInput]}
+              onChangeText={(text) => {
+                // Limit the display name to 50 characters
+                const trimmedDisplayName = text.slice(0, 50);
+                setProfile({ ...profile, displayName: trimmedDisplayName });
+              }}
+              value={profile.displayName}
+              placeholder="Display Name"
+              placeholderTextColor={textSecondaryColor(colorScheme)}
+              autoCapitalize="words"
+              onSubmitEditing={handleContinue}
+              enterKeyHint="done"
+              returnKeyType="done"
+              maxLength={30}
+              autoCorrect={false}
+              autoComplete="off"
+            />
+            <TextInput
+              style={[styles.profileInput, styles.usernameInput]}
+              onChangeText={(text) => {
+                // Limit the username to 30 characters
+                const trimmedUsername = text.slice(0, 30);
+                setProfile({ ...profile, username: trimmedUsername });
+              }}
+              value={profile.username}
+              placeholder="username"
+              placeholderTextColor={textSecondaryColor(colorScheme)}
+              autoCapitalize="none"
+              onSubmitEditing={handleContinue}
+              enterKeyHint="done"
+              returnKeyType="done"
+              maxLength={30}
+              autoCorrect={false}
+              autoComplete="off"
+            />
+            <Text style={styles.p}>
+              {errorMessage ||
+                "Pick a photo, a display name and a unique username."}
+            </Text>
+          </View>
+        </>
+      )}
     </OnboardingComponent>
   );
 };
@@ -274,6 +319,12 @@ const useStyles = (colorScheme: any, errorMessage: any) =>
     avatar: {
       marginBottom: 10,
       marginTop: 23,
+    },
+    converseProfiles: {
+      textAlign: "center",
+      fontSize: 17,
+      marginTop: 23,
+      paddingHorizontal: 32,
     },
     usernameInputContainer: {
       width: "100%",
