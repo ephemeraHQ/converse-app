@@ -96,6 +96,9 @@ export default function Onboarding() {
           await refreshProfileForAddress(address, address);
           // Now we can really set!
           useAccountsStore.getState().setCurrentAccount(address, false);
+          getSettingsStore(address)
+            .getState()
+            .setOnboardedAfterProfilesRelease(true);
 
           // TODO => enable ephemeral on web?
           const isEphemeral = false;
