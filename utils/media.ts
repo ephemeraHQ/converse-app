@@ -316,8 +316,8 @@ const calculateImageOptiSize = (
   },
   avatar?: boolean
 ) => {
-  const maxBig = avatar ? 600 : 1600;
-  const maxSmall = avatar ? 600 : 1200;
+  const maxBig = avatar ? 400 : 1600;
+  const maxSmall = avatar ? 400 : 1200;
   const isPortrait = imageSize.height > imageSize.width;
   const biggestValue = new Big(isPortrait ? imageSize.height : imageSize.width);
   const smallestValue = new Big(
