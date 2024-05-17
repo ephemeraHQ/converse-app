@@ -1,4 +1,4 @@
-import { Image } from "expo-image";
+import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import React, { useCallback, useState } from "react";
 import {
   View,
@@ -9,17 +9,21 @@ import {
   Platform,
 } from "react-native";
 
-import PFPPlaceholder from "../../assets/default-pfp-light.png";
+import config from "../../config";
 import { refreshProfileForAddress } from "../../data/helpers/profiles/profilesUpdate";
-import { useCurrentAccount } from "../../data/store/accountsStore";
+import {
+  useCurrentAccount,
+  useProfilesStore,
+} from "../../data/store/accountsStore";
+import { NavigationParamList } from "../../screens/Navigation/Navigation";
 import { checkUsernameValid, claimProfile } from "../../utils/api";
 import { uploadFile } from "../../utils/attachment";
 import {
-  textInputStyle,
   textPrimaryColor,
   textSecondaryColor,
   dangerColor,
   actionSheetColors,
+  itemSeparatorColor,
 } from "../../utils/colors";
 import { executeAfterKeyboardClosed } from "../../utils/keyboard";
 import { useLogoutFromConverse } from "../../utils/logout";
@@ -28,6 +32,7 @@ import {
   pickMediaFromLibrary,
   takePictureFromCamera,
 } from "../../utils/media";
+import Avatar from "../Avatar";
 import Button from "../Button/Button";
 import { showActionSheetWithOptions } from "../StateHandlers/ActionSheetStateHandler";
 import OnboardingComponent from "./OnboardingComponent";
@@ -38,21 +43,46 @@ export type ProfileType = {
   displayName: string;
 };
 
-export const UserProfile = () => {
+type OwnProps = {
+  onboarding?: boolean;
+};
+type NavProps = NativeStackScreenProps<NavigationParamList, "UserProfile">;
+
+type Props = OwnProps & Partial<NavProps>;
+
+export const UserProfile = ({ onboarding, navigation }: Props) => {
+  const address = useCurrentAccount() as string;
+  const profiles = useProfilesStore((state) => state.profiles);
+  const currentUserUsername = profiles[address]?.socials?.userNames?.find(
+    (u) => u.isPrimary
+  );
+
   const [errorMessage, setErrorMessage] = useState("");
   const colorScheme = useColorScheme();
   const styles = useStyles(colorScheme, errorMessage);
 
   const [profile, setProfile] = useState({
-    username: "",
-    avatar: "",
-    displayName: "",
+    username:
+      currentUserUsername?.name?.replace(config.usernameSuffix, "") || "",
+    avatar: currentUserUsername?.avatar || "",
+    displayName: currentUserUsername?.displayName || "",
   } as ProfileType);
   const [loading, setLoading] = useState(false);
-  const address = useCurrentAccount() as string;
   const logout = useLogoutFromConverse(address);
 
   const handleContinue = useCallback(async () => {
+    if (!profile.avatar) {
+      setErrorMessage("You must define an avatar");
+      return;
+    }
+
+    if (profile.displayName.length < 3 || profile.displayName.length > 32) {
+      setErrorMessage(
+        "Your user name must be between 3 and 32 characters long"
+      );
+      return;
+    }
+
     // Allow only alphanumeric and limit to 30 chars
     if (!/^[a-zA-Z0-9]*$/.test(profile.username)) {
       setErrorMessage("Your username can only contain letters and numbers");
@@ -62,18 +92,6 @@ export const UserProfile = () => {
     if (profile.username.length < 3 || profile.username.length > 30) {
       setErrorMessage(
         "Your user name must be between 3 and 30 characters long"
-      );
-      return;
-    }
-
-    if (!profile.avatar) {
-      setErrorMessage("You must define an avatar");
-      return;
-    }
-
-    if (profile.displayName.length < 3 || profile.displayName.length > 50) {
-      setErrorMessage(
-        "Your user name must be between 3 and 50 characters long"
       );
       return;
     }
@@ -89,31 +107,37 @@ export const UserProfile = () => {
       return;
     }
 
-    // Let's upload the image to our server
-    const resizedImage = await compressAndResizeImage(profile.avatar);
     let publicAvatar = "";
+    if (profile.avatar.startsWith("https://")) {
+      publicAvatar = profile.avatar;
+    } else {
+      // Let's upload the image to our server
+      const resizedImage = await compressAndResizeImage(profile.avatar);
 
-    try {
-      // On web we use blob, on mobile we use file path
-      publicAvatar =
-        Platform.OS === "web"
-          ? await uploadFile({
-              account: address,
-              contentType: "image/jpeg",
-              blob: new Blob(
-                [Buffer.from(resizedImage.base64 as string, "base64")],
-                { type: "image/png" }
-              ),
-            })
-          : await uploadFile({
-              account: address,
-              filePath: resizedImage.uri,
-              contentType: "image/jpeg",
-            });
-    } catch (e: any) {
-      setErrorMessage(e?.response?.data?.message || "An unknown error occured");
-      setLoading(false);
-      return;
+      try {
+        // On web we use blob, on mobile we use file path
+        publicAvatar =
+          Platform.OS === "web"
+            ? await uploadFile({
+                account: address,
+                contentType: "image/jpeg",
+                blob: new Blob(
+                  [Buffer.from(resizedImage.base64 as string, "base64")],
+                  { type: "image/png" }
+                ),
+              })
+            : await uploadFile({
+                account: address,
+                filePath: resizedImage.uri,
+                contentType: "image/jpeg",
+              });
+      } catch (e: any) {
+        setErrorMessage(
+          e?.response?.data?.message || "An unknown error occured"
+        );
+        setLoading(false);
+        return;
+      }
     }
 
     try {
@@ -125,8 +149,12 @@ export const UserProfile = () => {
     } catch (e: any) {
       setErrorMessage(e?.response?.data?.message || "An unknown error occured");
       setLoading(false);
+      return;
     }
-  }, [address, profile]);
+    if (!onboarding && navigation) {
+      navigation.goBack();
+    }
+  }, [address, navigation, onboarding, profile]);
 
   const pickMedia = useCallback(async () => {
     const asset = await pickMediaFromLibrary({
@@ -180,24 +208,24 @@ export const UserProfile = () => {
       title="Profile"
       primaryButtonText="Continue"
       primaryButtonAction={handleContinue}
-      backButtonText="Back to home screen"
-      backButtonAction={logout}
+      backButtonText={onboarding ? "Back to home screen" : undefined}
+      backButtonAction={onboarding ? logout : undefined}
       isLoading={loading}
       shrinkWithKeyboard
+      inNav={!onboarding}
     >
-      <Image
-        source={{ uri: profile?.avatar }}
-        placeholder={PFPPlaceholder}
-        style={styles.avatar}
-      />
+      <Avatar uri={profile?.avatar} style={styles.avatar} />
       <Button
         variant="text"
-        title={profile?.avatar ? "Change photo" : "Add photo"}
+        title={
+          profile?.avatar ? "Change profile picture" : "Add profile picture"
+        }
+        textStyle={{ fontWeight: "500" }}
         onPress={addPFP}
       />
       <View style={styles.usernameInputContainer}>
         <TextInput
-          style={[textInputStyle(colorScheme), styles.displayNameInput]}
+          style={[styles.profileInput]}
           onChangeText={(text) => {
             // Limit the display name to 50 characters
             const trimmedDisplayName = text.slice(0, 50);
@@ -215,7 +243,7 @@ export const UserProfile = () => {
           autoComplete="off"
         />
         <TextInput
-          style={[textInputStyle(colorScheme), styles.usernameInput]}
+          style={[styles.profileInput, styles.usernameInput]}
           onChangeText={(text) => {
             // Limit the username to 30 characters
             const trimmedUsername = text.slice(0, 30);
@@ -243,25 +271,30 @@ export const UserProfile = () => {
 
 const useStyles = (colorScheme: any, errorMessage: any) =>
   StyleSheet.create({
-    usernameInputContainer: {
-      width: "100%",
-      paddingHorizontal: 32,
-      marginTop: 23,
-      alignItems: "center",
-    },
     avatar: {
-      width: 121,
-      height: 121,
-      borderRadius: 121,
       marginBottom: 10,
       marginTop: 23,
     },
-    usernameInput: {
+    usernameInputContainer: {
       width: "100%",
-      marginTop: 16,
+      paddingLeft: 16,
+      marginTop: 23,
+      alignItems: "center",
+      borderTopWidth: 1,
+      borderTopColor: itemSeparatorColor(colorScheme),
     },
-    displayNameInput: {
+    profileInput: {
+      alignContent: "flex-start",
+      color: textPrimaryColor(colorScheme),
+      paddingRight: 16,
+      paddingTop: 10,
+      paddingBottom: 10,
+      fontSize: 17,
       width: "100%",
+    },
+    usernameInput: {
+      borderTopWidth: 1,
+      borderTopColor: itemSeparatorColor(colorScheme),
     },
     p: {
       textAlign: "center",

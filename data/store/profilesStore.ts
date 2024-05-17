@@ -15,6 +15,8 @@ export type LensHandle = {
 export type EnsName = {
   name: string;
   isPrimary: boolean;
+  displayName?: string | undefined;
+  avatar?: string | undefined;
 };
 
 export type FarcasterUsername = {
@@ -29,9 +31,11 @@ export type UnstoppableDomain = {
   isPrimary: boolean;
 };
 
-export type UserName = {
+export type ConverseUserName = {
   name: string;
   isPrimary: boolean;
+  displayName?: string | undefined;
+  avatar?: string | undefined;
 };
 
 export type ProfileSocials = {
@@ -39,7 +43,7 @@ export type ProfileSocials = {
   farcasterUsernames?: FarcasterUsername[];
   lensHandles?: LensHandle[];
   unstoppableDomains?: UnstoppableDomain[];
-  userNames?: UserName[];
+  userNames?: ConverseUserName[];
 };
 
 export type ProfileByAddress = {

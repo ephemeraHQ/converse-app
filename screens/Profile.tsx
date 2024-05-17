@@ -15,6 +15,7 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import ActivityIndicator from "../components/ActivityIndicator/ActivityIndicator";
+import Avatar from "../components/Avatar";
 import { showActionSheetWithOptions } from "../components/StateHandlers/ActionSheetStateHandler";
 import TableView, {
   TableViewItemType,
@@ -44,6 +45,7 @@ import {
 } from "../utils/colors";
 import { evmHelpers } from "../utils/evm/helpers";
 import { useLogoutFromConverse } from "../utils/logout";
+import { getPreferredAvatar, getPreferredName } from "../utils/profile";
 import { getIPFSAssetURI } from "../utils/thirdweb";
 import { refreshBalanceForAccount } from "../utils/wallet";
 import { consentToPeersOnProtocol } from "../utils/xmtpRN/conversations";
@@ -264,6 +266,8 @@ export default function ProfileScreen({
       style={styles.profile}
       contentContainerStyle={styles.profileContent}
     >
+      <Avatar uri={getPreferredAvatar(socials)} style={styles.avatar} />
+      <Text style={styles.title}>{getPreferredName(socials, peerAddress)}</Text>
       {isMyProfile && (
         <TableView
           items={[
@@ -449,6 +453,13 @@ export default function ProfileScreen({
 const useStyles = () => {
   const colorScheme = useColorScheme();
   return StyleSheet.create({
+    title: {
+      textAlign: "center",
+      fontSize: 34,
+      fontWeight: "bold",
+      marginVertical: 10,
+      color: textPrimaryColor(colorScheme),
+    },
     profile: {
       backgroundColor: backgroundColor(colorScheme),
     },
@@ -466,6 +477,11 @@ const useStyles = () => {
       color: textPrimaryColor(colorScheme),
       fontSize: 17,
       marginRight: 10,
+    },
+    avatar: {
+      marginBottom: 10,
+      marginTop: 23,
+      alignSelf: "center",
     },
   });
 };

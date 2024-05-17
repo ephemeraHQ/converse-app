@@ -15,12 +15,19 @@ import {
   textPrimaryColor,
   textSecondaryColor,
 } from "../../utils/colors";
+import {
+  getPreferredAvatar,
+  getPreferredName,
+  getPrimaryNames,
+} from "../../utils/profile";
 import { shortAddress } from "../../utils/str";
+import Avatar from "../Avatar";
 import { NavigationChatButton } from "../Search/NavigationChatButton";
 
 export function Recommendation({
   address,
-  recommendationData: { ens, farcasterUsernames, lensHandles, tags },
+  // @todo => use only profile
+  recommendationData: { ens, farcasterUsernames, lensHandles, tags, profile },
   navigation,
   embedInChat,
   isVisible,
@@ -32,10 +39,20 @@ export function Recommendation({
   isVisible: boolean;
 }) {
   const styles = useStyles();
-  const socials = [
-    ...lensHandles,
-    ...farcasterUsernames.map((f) => `${f} on farcaster`),
+  let primaryNamesDisplay = [
+    ...(lensHandles || []).map((l) => `${l} on lens`),
+    ...(farcasterUsernames || []).map((f) => `${f} on farcaster`),
   ];
+  const preferredName = profile // @todo => use only preferred name
+    ? getPreferredName(profile, address)
+    : ens || shortAddress(address);
+  if (profile) {
+    const primaryNames = getPrimaryNames(profile);
+    primaryNamesDisplay = [
+      ...primaryNames.filter((name) => name !== preferredName),
+      shortAddress(address),
+    ];
+  }
   const textAlign = embedInChat ? "center" : "left";
 
   return (
@@ -48,19 +65,27 @@ export function Recommendation({
           : styles.recommendationBorderBottom,
       ]}
     >
+      {!embedInChat && (
+        <Avatar
+          uri={getPreferredAvatar(profile)}
+          size={30}
+          style={styles.avatar}
+        />
+      )}
       <View style={styles.recommendationLeft}>
         <Text style={[styles.recommendationTitle, { textAlign }]}>
-          {ens || shortAddress(address)}
+          {preferredName}
         </Text>
 
-        {socials.length > 0 && (
+        {primaryNamesDisplay.length > 0 && (
           <Text
             style={[
               styles.recommendationText,
               { textAlign, width: embedInChat ? "100%" : undefined },
             ]}
+            numberOfLines={embedInChat ? undefined : 1}
           >
-            {socials.join(" | ")}
+            {primaryNamesDisplay.join(" | ")}
           </Text>
         )}
         {tags.map((t) => (
@@ -120,11 +145,16 @@ const useStyles = () => {
         android: {},
       }),
     },
+    avatar: {
+      marginRight: 13,
+    },
     recommendationLeft: {
-      flex: 1,
+      flexGrow: 1,
+      flexShrink: 1,
       justifyContent: "center",
     },
     recommendationRight: {
+      marginLeft: 10,
       justifyContent: "center",
     },
     recommendationTitle: {

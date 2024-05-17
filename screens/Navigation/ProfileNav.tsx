@@ -1,8 +1,9 @@
 import { NativeStackNavigationOptions } from "@react-navigation/native-stack";
-import { Platform, useColorScheme } from "react-native";
+import { Button, Platform, useColorScheme } from "react-native";
 
 import { useCurrentAccount } from "../../data/store/accountsStore";
 import { textSecondaryColor } from "../../utils/colors";
+import { navigate } from "../../utils/navigation";
 import ProfileScreen from "../Profile";
 import { NativeStack, navigationAnimation } from "./Navigation";
 
@@ -32,8 +33,21 @@ export default function ProfileNav() {
       name="Profile"
       component={ProfileScreen}
       options={({ route }) => ({
-        headerTitle:
-          route.params.address === account ? "Profile" : "Contact details",
+        headerBackTitle: "Back",
+        headerTitle: "Profile",
+        headerRight: () => {
+          if (route.params.address === account) {
+            return (
+              <Button
+                title="Modify"
+                onPress={() => {
+                  navigate("UserProfile");
+                }}
+              />
+            );
+          }
+          return null;
+        },
         ...options,
       })}
     />

@@ -23,6 +23,7 @@ import ProfileNav, {
 import ShareFrameNav, { ShareFrameNavParams } from "../ShareFrameNav";
 import ShareProfileNav, { ShareProfileScreenConfig } from "../ShareProfileNav";
 import TopUpNav from "../TopUpNav";
+import UserProfileNav from "../UserProfileNav";
 import WebviewPreviewNav, {
   WebviewPreviewNavParams,
   WebviewPreviewScreenConfig,
@@ -42,6 +43,7 @@ export type NavigationParamList = {
   ShareFrame: ShareFrameNavParams;
   TopUp: undefined;
   Profile: ProfileNavParams;
+  UserProfile: undefined;
   WebviewPreview: WebviewPreviewNavParams;
 };
 
@@ -95,6 +97,7 @@ export default function SplitRightStackNavigation({
           {ShareFrameNav()}
           {WebviewPreviewNav()}
           {ProfileNav()}
+          {UserProfileNav()}
           {TopUpNav()}
           {EnableTransactionsNav()}
         </NativeStack.Group>
