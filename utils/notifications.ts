@@ -1,3 +1,4 @@
+import { createHash } from "@mfellner/react-native-fast-create-hash";
 import { keystore } from "@xmtp/proto";
 import { buildUserInviteTopic } from "@xmtp/xmtp-js";
 import * as Notifications from "expo-notifications";
@@ -17,7 +18,10 @@ import {
 } from "../data/store/accountsStore";
 import { useAppStore } from "../data/store/appStore";
 import { XmtpConversation, XmtpMessage } from "../data/store/chatStore";
-import api, { saveNotificationsSubscribe } from "./api";
+import api, {
+  getLastNotificationsSubscribeHash,
+  saveNotificationsSubscribe,
+} from "./api";
 import {
   ConversationWithLastMessagePreview,
   conversationShouldBeDisplayed,
@@ -56,6 +60,10 @@ export const deleteSubscribedTopics = (account: string) => {
     delete subscribingByAccount[account];
   }
 };
+
+export const lastNotifSubscribeHashByAccount: {
+  [account: string]: string | null;
+} = {};
 
 export const subscribeToNotifications = async (
   account: string
@@ -106,7 +114,8 @@ export const subscribeToNotifications = async (
 
       return {
         topic: c.topic,
-        update: period !== c.lastNotificationsSubscribedPeriod,
+        // update: period !== c.lastNotificationsSubscribedPeriod,
+        update: true,
         status,
         period,
       };
@@ -123,9 +132,20 @@ export const subscribeToNotifications = async (
       .map(needToUpdateConversationSubscription)
       .filter((n) => n.update);
 
+    const dataToHash = {
+      push: [] as string[],
+      muted: [] as string[],
+      period: thirtyDayPeriodsSinceEpoch,
+    };
+
     if (conversationTopicsToUpdate.length > 0) {
       const conversationsKeys = await loadConversationsHmacKeys(account);
       conversationTopicsToUpdate.forEach((c) => {
+        if (c.status === "PUSH") {
+          dataToHash.push.push(c.topic);
+        } else {
+          dataToHash.muted.push(c.topic);
+        }
         if (conversationsKeys[c.topic]) {
           const hmacKeys =
             keystore.GetConversationHmacKeysResponse_HmacKeys.toJSON(
@@ -147,9 +167,19 @@ export const subscribeToNotifications = async (
       return;
     }
 
-    topicsToUpdateForPeriod[buildUserInviteTopic(account || "")] = {
+    const userInviteTopic = buildUserInviteTopic(account || "");
+    topicsToUpdateForPeriod[userInviteTopic] = {
       status: "PUSH",
     };
+    dataToHash.push.push(userInviteTopic);
+    dataToHash.push.sort();
+    dataToHash.muted.sort();
+    const stringToHash = `${dataToHash.period}-push-${dataToHash.push.join(
+      ","
+    )}-muted-${dataToHash.muted.join(",")}`;
+    const hash = (
+      await createHash(Buffer.from(stringToHash), "sha256")
+    ).toString("hex");
 
     const nativeTokenQuery = await Notifications.getDevicePushTokenAsync();
     nativePushToken = nativeTokenQuery.data;
@@ -160,13 +190,27 @@ export const subscribeToNotifications = async (
       return;
     }
 
+    let lastHash = lastNotifSubscribeHashByAccount[account];
+    if (!lastHash) {
+      lastHash = await getLastNotificationsSubscribeHash(
+        account,
+        nativePushToken
+      );
+      lastNotifSubscribeHashByAccount[account] = lastHash;
+    }
+
+    if (lastHash === hash) {
+      delete subscribingByAccount[account];
+      return;
+    }
+
     console.log(
       `[Notifications] Subscribing to ${
         Object.keys(topicsToUpdateForPeriod).length
       } topic for ${account}`
     );
 
-    await saveNotificationsSubscribe(
+    lastNotifSubscribeHashByAccount[account] = await saveNotificationsSubscribe(
       account,
       nativePushToken,
       nativeTokenQuery.type,
@@ -206,8 +250,12 @@ export const subscribeToNotifications = async (
 export const unsubscribeFromNotifications = async (apiHeaders: {
   [key: string]: string;
 }): Promise<void> => {
-  const nativeTokenQuery = await Notifications.getDevicePushTokenAsync();
-  if (nativeTokenQuery.data) {
+  // Add a 5 sec timeout so not to block us ?
+  const nativeTokenQuery = (await Promise.race([
+    Notifications.getDevicePushTokenAsync(),
+    new Promise((res) => setTimeout(() => res(undefined), 5000)),
+  ])) as any;
+  if (nativeTokenQuery?.data) {
     await api.post(
       "/api/unsubscribe",
       {
@@ -278,9 +326,6 @@ export const loadSavedNotificationMessagesToContext = async () => {
     const conversations = loadSavedNotificationsConversations();
     const messages = loadSavedNotificationsMessages();
     addLog(`loadSavedNotificationMessagesToContext 2`);
-    emptySavedNotificationsConversations();
-    emptySavedNotificationsMessages();
-    addLog(`loadSavedNotificationMessagesToContext 3`);
 
     if (conversations && conversations.length > 0) {
       addLog(`loadSavedNotificationMessagesToContext 4`);
@@ -375,6 +420,9 @@ export const loadSavedNotificationMessagesToContext = async () => {
       addLog(`loadSavedNotificationMessagesToContext 11`);
     }
 
+    emptySavedNotificationsConversations();
+    addLog("Emptying notif messages 1");
+    emptySavedNotificationsMessages();
     loadingSavedNotifications = false;
   } catch (e) {
     console.log("An error occured while loading saved notifications", e);
@@ -383,6 +431,7 @@ export const loadSavedNotificationMessagesToContext = async () => {
       errorType: typeof e,
     });
     emptySavedNotificationsConversations();
+    addLog("Emptying notif messages 2");
     emptySavedNotificationsMessages();
     loadingSavedNotifications = false;
   }

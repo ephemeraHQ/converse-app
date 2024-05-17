@@ -1,11 +1,15 @@
 import { OpenFramesProxy } from "@open-frames/proxy-client";
-import { GetMetadataResponse, OpenFrameButton } from "@open-frames/proxy-types";
+import {
+  GetMetadataResponse,
+  OpenFrameButtonResult,
+} from "@open-frames/proxy-types";
 import {
   FramesApiResponse,
   FramesClient,
   OPEN_FRAMES_PROXY_URL,
 } from "@xmtp/frames-client";
 import { BigNumber, ethers } from "ethers";
+import { hexValue } from "ethers/lib/utils";
 
 import { MessageToDisplay } from "../components/Chat/Message/Message";
 import { ConverseMessageMetadata } from "../data/db/entities/messageEntity";
@@ -111,7 +115,7 @@ export const fetchFramesForMessage = async (
   return { messageId: message.id, frames: [] };
 };
 
-export type FrameButtonType = OpenFrameButton & {
+export type FrameButtonType = OpenFrameButtonResult & {
   index: number;
 };
 
@@ -233,8 +237,8 @@ export const handleTxAction = async (
     {
       from: account,
       to: txData.params.to,
-      data: txData.params.data,
-      value: BigNumber.from(txData.params.value).toHexString(),
+      data: txData.params.data ? hexValue(txData.params.data) : undefined,
+      value: hexValue(BigNumber.from(txData.params.value || "0").toHexString()),
     },
   ]);
 

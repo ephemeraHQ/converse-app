@@ -9,16 +9,36 @@ import Foundation
 import MMKVAppExtension
 
 private var mmkvInstance: MMKV? = nil;
+private var secureMmkvForAccount: [String: MMKV?] = [:];
+private var mmkvInitialized = false;
 
-func getMmkv() -> MMKV? {
-  if (mmkvInstance == nil) {
+func initializeMmkv() {
+  if (!mmkvInitialized) {
+    mmkvInitialized = true
     let groupId = "group.\(try! getInfoPlistValue(key: "AppBundleId", defaultValue: nil))"
     let groupDir = (FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: groupId)?.path)!
     MMKV.initialize(rootDir: nil, groupDir: groupDir, logLevel: MMKVLogLevel.warning)
+  }
+}
+
+func getMmkv() -> MMKV? {
+  if (mmkvInstance == nil) {
+    initializeMmkv()
     mmkvInstance = MMKV(mmapID: "mmkv.default", cryptKey: nil, mode: MMKVMode.multiProcess)
   }
   
   return mmkvInstance;
+}
+
+func getSecureMmkvForAccount(account: String) -> MMKV? {
+  if (secureMmkvForAccount[account] == nil) {
+    initializeMmkv()
+    let accountEncryptionKey = getKeychainValue(forKey: "CONVERSE_ACCOUNT_ENCRYPTION_KEY_\(account)")
+      if let encryptionKey = accountEncryptionKey, let keyData = encryptionKey.prefix(16).data(using: .utf8) {
+      secureMmkvForAccount[account] = MMKV(mmapID: "secure-mmkv-\(account)", cryptKey: keyData, mode: MMKVMode.multiProcess)
+    }
+  }
+  return secureMmkvForAccount[account] ?? nil;
 }
 
 func getAccountsState() -> Accounts? {
@@ -37,7 +57,7 @@ func getAccountsState() -> Accounts? {
 }
 
 func getCurrentAccount() -> String? {
-  var accountsState = getAccountsState()
+  let accountsState = getAccountsState()
   if (accountsState == nil || accountsState?.currentAccount == "TEMPORARY_ACCOUNT") {
     return nil
   }
@@ -45,7 +65,7 @@ func getCurrentAccount() -> String? {
 }
 
 func getAccounts() -> [String] {
-  var accountsState = getAccountsState()
+  let accountsState = getAccountsState()
   if (accountsState == nil) {
     return []
   }

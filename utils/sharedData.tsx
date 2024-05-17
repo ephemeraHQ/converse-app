@@ -48,6 +48,7 @@ export const emptySavedNotificationsConversations = () =>
 export const saveApiURI = () => mmkv.set("api-uri", config.apiURI);
 
 export const resetSharedData = (topics: string[]) => {
+  addLog("Emptying notif messages 3");
   emptySavedNotificationsMessages();
   emptySavedNotificationsConversations();
   topics.forEach((t) => {
