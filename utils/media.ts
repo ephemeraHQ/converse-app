@@ -309,18 +309,26 @@ export const getImageSize = (
     );
   });
 
-const calculateImageOptiSize = (imageSize: {
-  width: number;
-  height: number;
-}) => {
+const calculateImageOptiSize = (
+  imageSize: {
+    width: number;
+    height: number;
+  },
+  avatar?: boolean
+) => {
+  const maxBig = avatar ? 600 : 1600;
+  const maxSmall = avatar ? 600 : 1200;
   const isPortrait = imageSize.height > imageSize.width;
   const biggestValue = new Big(isPortrait ? imageSize.height : imageSize.width);
   const smallestValue = new Big(
     isPortrait ? imageSize.width : imageSize.height
   );
-
-  const ratio1 = biggestValue.gt(1600) ? biggestValue.div(1600) : new Big(1);
-  const ratio2 = smallestValue.gt(1200) ? smallestValue.div(1200) : new Big(1);
+  const ratio1 = biggestValue.gt(maxBig)
+    ? biggestValue.div(maxBig)
+    : new Big(1);
+  const ratio2 = smallestValue.gt(maxSmall)
+    ? smallestValue.div(maxSmall)
+    : new Big(1);
   const ratio = ratio1.gt(ratio2) ? ratio1 : ratio2;
 
   const newBiggestValue = biggestValue.div(ratio);
@@ -335,15 +343,18 @@ const calculateImageOptiSize = (imageSize: {
   };
 };
 
-export const compressAndResizeImage = async (imageURI: string) => {
+export const compressAndResizeImage = async (
+  imageURI: string,
+  avatar?: boolean
+) => {
   const imageSize = await getImageSize(imageURI);
-  const newSize = calculateImageOptiSize(imageSize);
+  const newSize = calculateImageOptiSize(imageSize, avatar);
   console.log(
     `[ImageUtils] Resizing and compressing image to ${newSize.height}x${newSize.width} (was ${imageSize.height}x${imageSize.width})`
   );
   const manipResult = await manipulateAsync(imageURI, [{ resize: newSize }], {
     base64: Platform.OS === "web",
-    compress: 0.3,
+    compress: avatar ? 0.6 : 0.3,
     format: SaveFormat.JPEG,
   });
   return manipResult;
