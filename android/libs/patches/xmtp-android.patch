@@ -43,10 +43,10 @@ index 474c74e..c4c7ed6 100644
  zipStorePath=wrapper/dists
  zipStoreBase=GRADLE_USER_HOME
 diff --git a/library/src/main/java/org/xmtp/android/library/ConversationV2.kt b/library/src/main/java/org/xmtp/android/library/ConversationV2.kt
-index 0d5c57a..afbc734 100644
+index e11fda4..d48f9ca 100644
 --- a/library/src/main/java/org/xmtp/android/library/ConversationV2.kt
 +++ b/library/src/main/java/org/xmtp/android/library/ConversationV2.kt
-@@ -126,13 +126,15 @@ data class ConversationV2(
+@@ -128,13 +128,15 @@ data class ConversationV2(
       */
      fun decrypt(envelope: Envelope): DecryptedMessage {
          val message = Message.parseFrom(envelope.message)
@@ -63,7 +63,7 @@ index 0d5c57a..afbc734 100644
      }
  
      fun streamMessages(): Flow<DecodedMessage> = flow {
-@@ -148,13 +150,15 @@ data class ConversationV2(
+@@ -150,13 +152,15 @@ data class ConversationV2(
       */
      fun decodeEnvelope(envelope: Envelope): DecodedMessage {
          val message = Message.parseFrom(envelope.message)
@@ -81,10 +81,10 @@ index 0d5c57a..afbc734 100644
  
      /**
 diff --git a/library/src/main/java/org/xmtp/android/library/DecodedMessage.kt b/library/src/main/java/org/xmtp/android/library/DecodedMessage.kt
-index 8657e2a..73dc78e 100644
+index eab903b..6765058 100644
 --- a/library/src/main/java/org/xmtp/android/library/DecodedMessage.kt
 +++ b/library/src/main/java/org/xmtp/android/library/DecodedMessage.kt
-@@ -9,6 +9,7 @@ data class DecodedMessage(
+@@ -10,6 +10,7 @@ data class DecodedMessage(
      var id: String = "",
      val client: Client,
      var topic: String,
@@ -93,7 +93,7 @@ index 8657e2a..73dc78e 100644
      var senderAddress: String,
      var sent: Date,
 diff --git a/library/src/main/java/org/xmtp/android/library/messages/DecryptedMessage.kt b/library/src/main/java/org/xmtp/android/library/messages/DecryptedMessage.kt
-index 2b39800..4713d8e 100644
+index accd894..3bd312a 100644
 --- a/library/src/main/java/org/xmtp/android/library/messages/DecryptedMessage.kt
 +++ b/library/src/main/java/org/xmtp/android/library/messages/DecryptedMessage.kt
 @@ -7,6 +7,7 @@ data class DecryptedMessage(
@@ -103,4 +103,4 @@ index 2b39800..4713d8e 100644
 +    var sentViaConverse: Boolean = false,
      var sentAt: Date,
      var topic: String = "",
- )
+     var deliveryStatus: MessageDeliveryStatus = MessageDeliveryStatus.PUBLISHED
