@@ -100,7 +100,10 @@ export default function ConversationTitle({
         <Avatar
           uri={avatar}
           size={34}
-          style={{ marginRight: 7, marginLeft: 6 }}
+          style={{
+            marginRight: Platform.OS === "android" ? 24 : 7,
+            marginLeft: Platform.OS === "ios" ? 6 : -9,
+          }}
         />
         <Text
           style={[
@@ -124,12 +127,7 @@ export default function ConversationTitle({
             // @todo => fix design on android & web
             ...Platform.select({
               default: { left: 10 },
-              // default: { right: -10, bottom: 17 },
-              // android: { right: -3, bottom: 3 },
-              // web: {
-              //   right: -23,
-              //   bottom: -3,
-              // },
+              android: { left: -10, top: 1 },
             }),
           }}
           color={textSecondaryColor(colorScheme)}

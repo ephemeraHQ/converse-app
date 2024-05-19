@@ -1,5 +1,5 @@
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import { StyleSheet, Text, View, useColorScheme } from "react-native";
+import { Platform, StyleSheet, Text, View, useColorScheme } from "react-native";
 
 import { ProfileSocials } from "../../data/store/profilesStore";
 import {
@@ -79,7 +79,7 @@ const useStyles = () => {
     },
     right: {
       justifyContent: "center",
-      marginLeft: 25,
+      marginLeft: Platform.OS === "ios" ? 30 : 0,
     },
     title: {
       fontSize: 17,

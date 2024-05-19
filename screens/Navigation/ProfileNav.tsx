@@ -1,6 +1,12 @@
 import { NativeStackNavigationOptions } from "@react-navigation/native-stack";
-import { Button, Platform, useColorScheme } from "react-native";
+import {
+  Button,
+  Platform,
+  useColorScheme,
+  TouchableOpacity,
+} from "react-native";
 
+import Picto from "../../components/Picto/Picto";
 import { useCurrentAccount } from "../../data/store/accountsStore";
 import { textSecondaryColor } from "../../utils/colors";
 import { navigate } from "../../utils/navigation";
@@ -37,13 +43,29 @@ export default function ProfileNav() {
         headerTitle: "Profile",
         headerRight: () => {
           if (route.params.address === account) {
+            if (Platform.OS === "ios") {
+              return (
+                <Button
+                  title="Modify"
+                  onPress={() => {
+                    navigate("UserProfile");
+                  }}
+                />
+              );
+            }
             return (
-              <Button
-                title="Modify"
+              <TouchableOpacity
                 onPress={() => {
                   navigate("UserProfile");
                 }}
-              />
+              >
+                <Picto
+                  picto="square.and.pencil"
+                  size={24}
+                  color={textSecondaryColor(colorScheme)}
+                  style={{ marginRight: Platform.OS === "web" ? 30 : 0 }}
+                />
+              </TouchableOpacity>
             );
           }
           return null;

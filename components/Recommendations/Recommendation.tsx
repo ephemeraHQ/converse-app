@@ -146,7 +146,7 @@ const useStyles = () => {
       }),
     },
     avatar: {
-      marginRight: 13,
+      marginRight: Platform.OS === "ios" ? 13 : 16,
     },
     recommendationLeft: {
       flexGrow: 1,
@@ -154,7 +154,7 @@ const useStyles = () => {
       justifyContent: "center",
     },
     recommendationRight: {
-      marginLeft: 10,
+      marginLeft: Platform.OS === "ios" ? 10 : 0,
       justifyContent: "center",
     },
     recommendationTitle: {
@@ -180,6 +180,7 @@ const useStyles = () => {
         },
         android: {
           fontSize: 14,
+          flexGrow: 1,
         },
       }),
       alignSelf: "flex-start",

@@ -130,25 +130,6 @@ export default function Recommendations({
             )}
           </>
         );
-      } else if (item === "signals") {
-        return (
-          <Text
-            style={[
-              styles.title,
-              { marginBottom: insets.bottom + 40, marginTop: 30 },
-            ]}
-          >
-            We’re adding matching signals very often.{" "}
-            <Text style={styles.clickableText} onPress={openSignalList}>
-              Here is the current list
-            </Text>
-            ,{" "}
-            <Text style={styles.clickableText} onPress={contactPol}>
-              contact our cofounder Pol
-            </Text>{" "}
-            if you want us to add anything.
-          </Text>
-        );
       }
       return (
         <Recommendation
@@ -160,19 +141,15 @@ export default function Recommendations({
       );
     },
     [
-      contactPol,
       frens,
-      insets.bottom,
       navigation,
-      openSignalList,
-      styles.clickableText,
       styles.emoji,
       styles.sectionTitle,
       styles.sectionTitleContainer,
       styles.title,
       styles.titleContainer,
-      visibility,
       viewableItems,
+      visibility,
     ]
   );
 
@@ -209,7 +186,7 @@ export default function Recommendations({
   return (
     <View style={styles.recommendations}>
       <FlatList
-        data={["title", ...Object.keys(frens), "signals"]}
+        data={["title", ...Object.keys(frens)]}
         keyExtractor={keyExtractor}
         renderItem={renderItem}
         onViewableItemsChanged={onViewableItemsChanged}

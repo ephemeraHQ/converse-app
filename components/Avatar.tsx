@@ -21,7 +21,7 @@ export default function Avatar({ uri, size, style, color }: Props) {
   return (
     <Image
       key={`${uri}-${color}-${colorScheme}`}
-      source={{ uri }}
+      source={uri ? { uri } : PFPPlaceholder}
       placeholder={PFPPlaceholder}
       placeholderContentFit="cover"
       contentFit="cover"

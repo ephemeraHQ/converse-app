@@ -302,11 +302,11 @@ export const UserProfile = ({ onboarding, navigation }: Props) => {
               autoCorrect={false}
               autoComplete="off"
             />
-            <Text style={styles.p}>
-              {errorMessage ||
-                "Pick a photo, a display name and a unique username."}
-            </Text>
           </View>
+          <Text style={styles.p}>
+            {errorMessage ||
+              "Pick a profile picture, a display name and a unique username."}
+          </Text>
         </>
       )}
     </OnboardingComponent>
@@ -328,24 +328,47 @@ const useStyles = (colorScheme: any, errorMessage: any) =>
     },
     usernameInputContainer: {
       width: "100%",
-      paddingLeft: 16,
       marginTop: 23,
       alignItems: "center",
-      borderTopWidth: 1,
-      borderTopColor: itemSeparatorColor(colorScheme),
+      ...Platform.select({
+        default: {
+          paddingLeft: 16,
+          borderTopWidth: 1,
+          borderTopColor: itemSeparatorColor(colorScheme),
+          borderBottomWidth: 1,
+          borderBottomColor: itemSeparatorColor(colorScheme),
+        },
+        android: { paddingHorizontal: 32 },
+      }),
     },
     profileInput: {
       alignContent: "flex-start",
       color: textPrimaryColor(colorScheme),
-      paddingRight: 16,
+
       paddingTop: 10,
       paddingBottom: 10,
       fontSize: 17,
       width: "100%",
+      ...Platform.select({
+        default: { paddingRight: 16 },
+        android: {
+          paddingHorizontal: 16,
+          borderWidth: 1,
+          borderColor: textSecondaryColor(colorScheme),
+          borderRadius: 4,
+        },
+      }),
     },
     usernameInput: {
-      borderTopWidth: 1,
-      borderTopColor: itemSeparatorColor(colorScheme),
+      ...Platform.select({
+        default: {
+          borderTopWidth: 1,
+          borderTopColor: itemSeparatorColor(colorScheme),
+        },
+        android: {
+          marginTop: 21,
+        },
+      }),
     },
     p: {
       textAlign: "center",

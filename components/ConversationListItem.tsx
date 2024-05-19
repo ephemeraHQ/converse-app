@@ -121,7 +121,7 @@ const ConversationListItem = memo(function ConversationListItem({
   const listItemContent = (
     <View style={styles.conversationListItem}>
       <Avatar
-        size={45}
+        size={Platform.OS === "ios" ? 45 : 40}
         style={styles.avatarWrapper}
         uri={conversationPeerAvatar}
       />
@@ -145,10 +145,7 @@ const ConversationListItem = memo(function ConversationListItem({
               height={10}
             />
           ))}
-        <Text
-          style={styles.messagePreview}
-          numberOfLines={Platform.OS === "ios" ? 2 : 1}
-        >
+        <Text style={styles.messagePreview} numberOfLines={2}>
           {lastMessageFromMe ? <View style={{ width: 15 }} /> : undefined}
           {lastMessagePreview}
         </Text>
@@ -389,12 +386,12 @@ const getStyles = (colorScheme: ColorSchemeName) =>
           paddingTop: 7.5,
           paddingRight: 60,
           marginLeft: 12,
-          // backgroundColor: "green"
         },
         android: {
           height: 72,
           paddingTop: 12,
-          paddingHorizontal: 24,
+          paddingLeft: 16,
+          paddingRight: 45,
         },
       }),
     },
@@ -475,7 +472,7 @@ const getStyles = (colorScheme: ColorSchemeName) =>
           top: 35,
         },
         android: {
-          left: 24,
+          left: 16,
           top: 39,
         },
       }),
