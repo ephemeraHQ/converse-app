@@ -71,7 +71,7 @@ const build = async () => {
   const buildLocally = local === "local";
   const buildInternalProduction =
     (env === "production" && internalProduction === "yes") ||
-    (env === "preview" && internalProduction !== "no");
+    (env === "preview" && platform === "ios" && internalProduction !== "no");
 
   const buildCommand = "eas";
   const buildProfile =
