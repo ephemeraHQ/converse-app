@@ -1,5 +1,5 @@
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
   View,
   Text,
@@ -197,7 +197,7 @@ export const UserProfile = ({ onboarding, navigation }: Props) => {
     const showOptions = () =>
       showActionSheetWithOptions(
         {
-          options: ["Take photo", "Chose from library", "Cancel"],
+          options: ["Take photo", "Choose from library", "Cancel"],
           cancelButtonIndex: 2,
           ...actionSheetColors(colorScheme),
         },
@@ -221,6 +221,8 @@ export const UserProfile = ({ onboarding, navigation }: Props) => {
       executeAfterKeyboardClosed(showOptions);
     }
   }, [colorScheme, openCamera, pickMedia]);
+
+  const usernameRef = useRef<TextInput>();
 
   return (
     <OnboardingComponent
@@ -277,9 +279,10 @@ export const UserProfile = ({ onboarding, navigation }: Props) => {
               placeholder="Display Name"
               placeholderTextColor={textSecondaryColor(colorScheme)}
               autoCapitalize="words"
-              onSubmitEditing={handleContinue}
-              enterKeyHint="done"
-              returnKeyType="done"
+              onSubmitEditing={() => {
+                usernameRef.current?.focus();
+              }}
+              enterKeyHint="next"
               maxLength={30}
               autoCorrect={false}
               autoComplete="off"
@@ -291,11 +294,15 @@ export const UserProfile = ({ onboarding, navigation }: Props) => {
                 const trimmedUsername = text.slice(0, 30);
                 setProfile({ ...profile, username: trimmedUsername });
               }}
+              ref={(r) => {
+                if (r) {
+                  usernameRef.current = r;
+                }
+              }}
               value={profile.username}
               placeholder="username"
               placeholderTextColor={textSecondaryColor(colorScheme)}
               autoCapitalize="none"
-              onSubmitEditing={handleContinue}
               enterKeyHint="done"
               returnKeyType="done"
               maxLength={30}

@@ -99,7 +99,7 @@ export default function ConversationTitle({
       >
         <Avatar
           uri={avatar}
-          size={34}
+          size={36}
           style={{
             marginRight: Platform.OS === "android" ? 24 : 7,
             marginLeft: Platform.OS === "ios" ? 6 : -9,
