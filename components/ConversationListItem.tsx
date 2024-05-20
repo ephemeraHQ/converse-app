@@ -365,7 +365,7 @@ const getStyles = (colorScheme: ColorSchemeName) =>
     }),
     rowSeparatorMargin: {
       position: "absolute",
-      width: 30,
+      width: 73,
       height: 2,
       backgroundColor: backgroundColor(colorScheme),
       bottom: -1.5,
