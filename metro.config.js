@@ -1,5 +1,6 @@
 const { mergeConfig } = require("@react-native/metro-config");
 const { getSentryExpoConfig } = require("@sentry/react-native/metro");
+const path = require("path");
 
 // eslint-disable-next-line no-undef
 const defaultConfig = getSentryExpoConfig(__dirname, {
@@ -25,6 +26,8 @@ const converseMetroConfig = {
   },
   resolver: {
     ...defaultConfig.resolver,
+    unstable_enablePackageExports: true,
+    // unstable_conditionNames: ["react-native", "import", "require"],
     assetExts: defaultConfig.resolver.assetExts.filter((ext) => ext !== "svg"),
     // Expo 49 issue: default metro config needs to include "mjs"
     // https://github.com/expo/expo/issues/23180
