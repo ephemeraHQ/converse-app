@@ -68,7 +68,7 @@ export function Recommendation({
       {!embedInChat && (
         <Avatar
           uri={getPreferredAvatar(profile)}
-          size={30}
+          size={40}
           style={styles.avatar}
         />
       )}
