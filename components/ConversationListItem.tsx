@@ -121,7 +121,7 @@ const ConversationListItem = memo(function ConversationListItem({
   const listItemContent = (
     <View style={styles.conversationListItem}>
       <Avatar
-        size={Platform.OS === "ios" ? 45 : 40}
+        size={Platform.OS === "ios" ? 56 : 40}
         style={styles.avatarWrapper}
         uri={conversationPeerAvatar}
       />
@@ -365,7 +365,7 @@ const getStyles = (colorScheme: ColorSchemeName) =>
     }),
     rowSeparatorMargin: {
       position: "absolute",
-      width: 73,
+      width: 84,
       height: 2,
       backgroundColor: backgroundColor(colorScheme),
       bottom: -1.5,
