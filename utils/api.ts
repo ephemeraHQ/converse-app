@@ -123,24 +123,10 @@ export const deletePeersFromDb = async (account: string): Promise<void> => {
   return data.message;
 };
 
-export const resolveUserName = async (
-  name: string
-): Promise<string | undefined> => {
-  const { data } = await api.get("/api/profile/username", { params: { name } });
-  return data.address;
-};
-
 export const resolveEnsName = async (
   name: string
 ): Promise<string | undefined> => {
   const { data } = await api.get("/api/profile/ens", { params: { name } });
-  return data.address;
-};
-
-export const resolveCbIdName = async (
-  name: string
-): Promise<string | undefined> => {
-  const { data } = await api.get("/api/profile/cbid", { params: { name } });
   return data.address;
 };
 
