@@ -33,6 +33,7 @@ import {
   pickMediaFromLibrary,
   takePictureFromCamera,
 } from "../../utils/media";
+import { useLoopTxt } from "../../utils/str";
 import Avatar from "../Avatar";
 import Button from "../Button/Button";
 import { showActionSheetWithOptions } from "../StateHandlers/ActionSheetStateHandler";
@@ -50,6 +51,18 @@ type OwnProps = {
 type NavProps = NativeStackScreenProps<NavigationParamList, "UserProfile">;
 
 type Props = OwnProps & Partial<NavProps>;
+
+const LOADING_SENTENCES = [
+  "Creating your profile",
+  "Don’t stop smiling",
+  "Move your head to the left",
+  "And to the right",
+  "All good - now breathe deeply",
+  "You’re doing great!",
+  "Clap your hands",
+  "And spin around",
+  "Let’s start again!",
+];
 
 export const UserProfile = ({ onboarding, navigation }: Props) => {
   const address = useCurrentAccount() as string;
@@ -84,6 +97,8 @@ export const UserProfile = ({ onboarding, navigation }: Props) => {
   } as ProfileType);
   const [loading, setLoading] = useState(false);
   const logout = useLogoutFromConverse(address);
+
+  const loadingSubtitle = useLoopTxt(2000, LOADING_SENTENCES, loading);
 
   const handleContinue = useCallback(async () => {
     if (intermediaryScreenShown) {
@@ -240,6 +255,7 @@ export const UserProfile = ({ onboarding, navigation }: Props) => {
       }
       backButtonAction={onboarding ? logout : undefined}
       isLoading={loading}
+      loadingSubtitle={loadingSubtitle}
       shrinkWithKeyboard
       inNav={!onboarding}
     >

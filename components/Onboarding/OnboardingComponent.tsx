@@ -33,6 +33,7 @@ type Props = {
   shrinkWithKeyboard?: boolean;
   inModal?: boolean;
   inNav?: boolean;
+  loadingSubtitle?: string;
 };
 
 export default function OnboardingComponent({
@@ -48,6 +49,7 @@ export default function OnboardingComponent({
   shrinkWithKeyboard,
   inModal,
   inNav,
+  loadingSubtitle,
 }: Props) {
   const styles = useStyles();
   const { loading: stateLoading, setLoading } = useOnboardingStore(
@@ -99,6 +101,9 @@ export default function OnboardingComponent({
               />
             )}
           </>
+        )}
+        {loading && loadingSubtitle && (
+          <Text style={styles.p}>{loadingSubtitle}</Text>
         )}
         {backButtonText && (
           <Button
