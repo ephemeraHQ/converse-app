@@ -121,7 +121,7 @@ const ConversationListItem = memo(function ConversationListItem({
   const listItemContent = (
     <View style={styles.conversationListItem}>
       <Avatar
-        size={Platform.OS === "ios" ? 56 : 40}
+        size={Platform.OS === "ios" ? 56 : 47}
         style={styles.avatarWrapper}
         uri={conversationPeerAvatar}
       />
