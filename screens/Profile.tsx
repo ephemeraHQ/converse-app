@@ -35,6 +35,8 @@ import {
   useSettingsStore,
   useWalletStore,
 } from "../data/store/accountsStore";
+import { useAppStore } from "../data/store/appStore";
+import { useSelect } from "../data/store/storeHelpers";
 import {
   actionSheetColors,
   backgroundColor,
@@ -45,6 +47,10 @@ import {
 } from "../utils/colors";
 import { evmHelpers } from "../utils/evm/helpers";
 import { useLogoutFromConverse } from "../utils/logout";
+import {
+  NotificationPermissionStatus,
+  requestPushNotificationsPermissions,
+} from "../utils/notifications";
 import { getPreferredAvatar, getPreferredName } from "../utils/profile";
 import { getIPFSAssetURI } from "../utils/thirdweb";
 import { refreshBalanceForAccount } from "../utils/wallet";
@@ -89,6 +95,14 @@ export default function ProfileScreen({
     }
     setRefreshingBalance(false);
   }, [userAddress]);
+
+  const { setNotificationsPermissionStatus, notificationsPermissionStatus } =
+    useAppStore(
+      useSelect([
+        "setNotificationsPermissionStatus",
+        "notificationsPermissionStatus",
+      ])
+    );
 
   const getAddressItemsFromArray = useCallback(
     <T,>(array: T[], titleKey: string, valueKey: string) => {
@@ -414,6 +428,43 @@ export default function ProfileScreen({
                     : primaryColor(colorScheme),
               },
               {
+                id: "notifications",
+                title: "Turn on notifications",
+                action: () => {
+                  // @todo => move that to a helper because also used in AccountSettingsButton
+                  if (notificationsPermissionStatus === "denied") {
+                    if (Platform.OS === "android") {
+                      // Android 13 is always denied first so let's try to show
+                      requestPushNotificationsPermissions().then(
+                        (
+                          newStatus: NotificationPermissionStatus | undefined
+                        ) => {
+                          if (newStatus === "denied") {
+                            Linking.openSettings();
+                          } else if (newStatus) {
+                            setNotificationsPermissionStatus(newStatus);
+                          }
+                        }
+                      );
+                    } else {
+                      Linking.openSettings();
+                    }
+                  } else if (notificationsPermissionStatus === "undetermined") {
+                    // Open popup
+                    requestPushNotificationsPermissions().then(
+                      (newStatus: NotificationPermissionStatus | undefined) => {
+                        if (!newStatus) return;
+                        setNotificationsPermissionStatus(newStatus);
+                      }
+                    );
+                  }
+                },
+                titleColor:
+                  Platform.OS === "android"
+                    ? undefined
+                    : primaryColor(colorScheme),
+              },
+              {
                 id: "logout",
                 title: "Disconnect",
                 titleColor:
@@ -427,7 +478,14 @@ export default function ProfileScreen({
                   }, 300);
                 },
               },
-            ]}
+            ].filter(
+              (i) =>
+                i.id !== "notifications" ||
+                !(
+                  notificationsPermissionStatus === "granted" ||
+                  Platform.OS === "web"
+                )
+            )}
             title="ACTIONS"
             style={styles.tableView}
           />

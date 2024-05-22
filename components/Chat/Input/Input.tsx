@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   View,
   TextInput,
@@ -8,7 +8,8 @@ import {
   Platform,
 } from "react-native";
 
-import SendButton from "../../../assets/send-button.svg";
+import SendButtonHigher from "../../../assets/send-button-higher.svg";
+import SendButtonDefault from "../../../assets/send-button.svg";
 import {
   actionSecondaryColor,
   backgroundColor,
@@ -27,6 +28,13 @@ import { MessageToDisplay } from "../Message/Message";
 import SendMoneyButton from "../Transaction/SendMoneyButton";
 import ChatInputReplyPreview from "./InputReplyPreview";
 
+const getSendButtonType = (input: string): "DEFAULT" | "HIGHER" => {
+  if (input.match(/\bhigher\b/gi)) {
+    return "HIGHER";
+  }
+  return "DEFAULT";
+};
+
 export default function ChatInput() {
   const { conversation, inputRef, transactionMode, messageToPrefill } =
     useConversationContext([
@@ -41,6 +49,11 @@ export default function ChatInput() {
   const [inputValue, setInputValue] = useState(messageToPrefill);
   const [replyingToMessage, setReplyingToMessage] =
     useState<MessageToDisplay | null>(null);
+
+  const sendButtonType = useMemo(
+    () => getSendButtonType(inputValue),
+    [inputValue]
+  );
 
   useEffect(() => {
     if (transactionMode) {
@@ -192,7 +205,24 @@ export default function ChatInput() {
             { opacity: inputValue.length > 0 ? 1 : 0.6 },
           ]}
         >
-          <SendButton width={36} height={36} style={[styles.sendButton]} />
+          <SendButtonDefault
+            width={36}
+            height={36}
+            style={
+              sendButtonType === "DEFAULT"
+                ? styles.sendButton
+                : { display: "none" }
+            }
+          />
+          <SendButtonHigher
+            width={36}
+            height={36}
+            style={
+              sendButtonType === "HIGHER"
+                ? styles.sendButton
+                : { display: "none" }
+            }
+          />
         </TouchableOpacity>
       </View>
     </View>
