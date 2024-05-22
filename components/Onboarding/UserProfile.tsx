@@ -33,7 +33,7 @@ import {
   pickMediaFromLibrary,
   takePictureFromCamera,
 } from "../../utils/media";
-import { useLoopTxt } from "../../utils/str";
+import { shortAddress, useLoopTxt } from "../../utils/str";
 import Avatar from "../Avatar";
 import Button from "../Button/Button";
 import { showActionSheetWithOptions } from "../StateHandlers/ActionSheetStateHandler";
@@ -247,11 +247,7 @@ export const UserProfile = ({ onboarding, navigation }: Props) => {
       primaryButtonText="Continue"
       primaryButtonAction={handleContinue}
       backButtonText={
-        onboarding && !intermediaryScreenShown
-          ? shouldShowIntermediaryScreen
-            ? "Logout"
-            : "Back to home screen"
-          : undefined
+        onboarding ? `Logout from ${shortAddress(address)}` : undefined
       }
       backButtonAction={onboarding ? logout : undefined}
       isLoading={loading}
@@ -328,7 +324,7 @@ export const UserProfile = ({ onboarding, navigation }: Props) => {
           </View>
           <Text style={styles.p}>
             {errorMessage ||
-              "Pick a profile picture, a display name and a unique username."}
+              "Pick a profile picture, a display name and a unique username. You can modify them later."}
           </Text>
         </>
       )}
