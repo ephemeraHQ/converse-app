@@ -90,6 +90,7 @@ export default function AccountSettingsButton({ account, navigation }: Props) {
         });
       },
       "Turn on notifications": () => {
+        // @todo => move that to a helper because also used in Profile
         if (notificationsPermissionStatus === "denied") {
           if (Platform.OS === "android") {
             // Android 13 is always denied first so let's try to show

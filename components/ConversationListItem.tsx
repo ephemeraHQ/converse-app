@@ -372,6 +372,7 @@ const getStyles = (colorScheme: ColorSchemeName) =>
     },
     conversationListItem: {
       flexDirection: "row",
+      height: "100%",
     },
     avatarWrapper: {
       marginLeft: 16,
