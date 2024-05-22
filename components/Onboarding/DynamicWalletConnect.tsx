@@ -26,7 +26,7 @@ class DynamicWalletConnect extends WalletConnectBase {
   }
 }
 
-const dynamicWalletConnect = (
+export const dynamicWalletConnect = (
   id: string,
   meta: WCMeta
 ): WalletConfig<WalletConnectBase> => {

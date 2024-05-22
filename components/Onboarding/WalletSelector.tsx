@@ -1,4 +1,8 @@
-import { useCoinbaseWallet } from "@thirdweb-dev/react-native";
+import {
+  coinbaseWallet,
+  useCreateWalletInstance,
+  useSetConnectedWallet,
+} from "@thirdweb-dev/react-native";
 import * as Linking from "expo-linking";
 import { useEffect, useRef, useState } from "react";
 import {
@@ -24,7 +28,7 @@ import {
   TableViewImage,
   TableViewPicto,
 } from "../TableView/TableViewImage";
-import { useDynamicWalletConnect } from "./DynamicWalletConnect";
+import { dynamicWalletConnect } from "./DynamicWalletConnect";
 import OnboardingComponent from "./OnboardingComponent";
 import {
   InstalledWallet,
@@ -50,10 +54,9 @@ export default function WalletSelector() {
     ])
   );
   const colorScheme = useColorScheme();
-  const connectToCoinbase = useCoinbaseWallet(
-    new URL(`https://${config.websiteDomain}/coinbase`)
-  );
-  const connectToWalletConnect = useDynamicWalletConnect();
+  const createWalletInstance = useCreateWalletInstance();
+  const setConnectedWallet = useSetConnectedWallet();
+
   const rightView = (
     <TableViewPicto
       symbol="chevron.right"
@@ -140,7 +143,15 @@ export default function WalletSelector() {
                 setConnectionMethod("wallet");
                 try {
                   if (w.name === "Coinbase Wallet") {
-                    await connectToCoinbase();
+                    const wallet = createWalletInstance(
+                      coinbaseWallet({
+                        callbackURL: new URL(
+                          `https://${config.websiteDomain}/coinbase`
+                        ),
+                      })
+                    );
+                    await wallet.connect();
+                    setConnectedWallet(wallet);
                   } else if (w.name === "EthOS Wallet") {
                     const signer = getEthOSSigner();
                     if (signer) {
@@ -152,14 +163,19 @@ export default function WalletSelector() {
                     const native = w.customScheme.endsWith("/")
                       ? w.customScheme.slice(0, w.customScheme.length - 1)
                       : w.customScheme;
-                    await connectToWalletConnect(w.walletConnectId, {
+                    const meta = {
                       name: w.name,
                       iconURL: w.iconURL,
                       links: {
                         native,
                         universal: w.universalLink || "",
                       },
-                    });
+                    };
+                    const wallet = createWalletInstance(
+                      dynamicWalletConnect(w.walletConnectId, meta)
+                    );
+                    await wallet.connect();
+                    setConnectedWallet(wallet);
                   }
                 } catch (e: any) {
                   console.log("Error connecting to wallet:", e);
