@@ -2,6 +2,7 @@ import { createHash } from "@mfellner/react-native-fast-create-hash";
 import { keystore } from "@xmtp/proto";
 import { buildUserInviteTopic } from "@xmtp/xmtp-js";
 import * as Notifications from "expo-notifications";
+import { debounce } from "perfect-debounce";
 import { Platform } from "react-native";
 
 import {
@@ -27,7 +28,7 @@ import {
   conversationShouldBeDisplayed,
   conversationShouldBeInInbox,
 } from "./conversation";
-import { addLog } from "./debug";
+import { addLog, debugTimeSpent } from "./debug";
 import { savePushToken } from "./keychain/helpers";
 import mmkv from "./mmkv";
 import { navigateToConversation, setTopicToNavigateTo } from "./navigation";
@@ -61,13 +62,14 @@ export const deleteSubscribedTopics = (account: string) => {
   }
 };
 
-export const lastNotifSubscribeHashByAccount: {
-  [account: string]: string | null;
+export const lastNotifSubscribeByAccount: {
+  [account: string]: {
+    stringToHash?: string | undefined;
+    serverHash?: string | undefined;
+  };
 } = {};
 
-export const subscribeToNotifications = async (
-  account: string
-): Promise<void> => {
+const _subscribeToNotifications = async (account: string): Promise<void> => {
   const thirtyDayPeriodsSinceEpoch = Math.floor(
     Date.now() / 1000 / 60 / 60 / 24 / 30
   );
@@ -78,7 +80,8 @@ export const subscribeToNotifications = async (
   if (notificationsPermissionStatus !== "granted") return;
   if (subscribingByAccount[account] || !conversationsSortedOnce) {
     await new Promise((r) => setTimeout(r, 1000));
-    await subscribeToNotifications(account);
+    addLog("[NO12] resubscribing...");
+    await _subscribeToNotifications(account);
     return;
   }
   try {
@@ -167,6 +170,15 @@ export const subscribeToNotifications = async (
       return;
     }
 
+    const nativeTokenQuery = await Notifications.getDevicePushTokenAsync();
+    nativePushToken = nativeTokenQuery.data;
+    if (nativePushToken) {
+      savePushToken(nativePushToken);
+    } else {
+      delete subscribingByAccount[account];
+      return;
+    }
+
     const userInviteTopic = buildUserInviteTopic(account || "");
     topicsToUpdateForPeriod[userInviteTopic] = {
       status: "PUSH",
@@ -177,46 +189,60 @@ export const subscribeToNotifications = async (
     const stringToHash = `${dataToHash.period}-push-${dataToHash.push.join(
       ","
     )}-muted-${dataToHash.muted.join(",")}`;
+
+    lastNotifSubscribeByAccount[account] =
+      lastNotifSubscribeByAccount[account] || {};
+    const lastStringToHash = lastNotifSubscribeByAccount[account]?.stringToHash;
+
+    addLog(
+      JSON.stringify({
+        stringToHash: stringToHash.length,
+        lastStringToHash: lastStringToHash?.length,
+      })
+    );
+    if (stringToHash === lastStringToHash) {
+      addLog("ALREADY SUBSCRIBED EXACTLY");
+      delete subscribingByAccount[account];
+      return;
+    }
+
+    addLog("[NO12] hashing...");
+    debugTimeSpent({ id: "hash" });
+
     const hash = (
       await createHash(Buffer.from(stringToHash), "sha256")
     ).toString("hex");
 
-    const nativeTokenQuery = await Notifications.getDevicePushTokenAsync();
-    nativePushToken = nativeTokenQuery.data;
-    if (nativePushToken) {
-      savePushToken(nativePushToken);
-    } else {
+    debugTimeSpent({ id: "hash", actionToLog: "[NO12] hashed" });
+
+    if (!lastNotifSubscribeByAccount[account]?.serverHash) {
+      lastNotifSubscribeByAccount[account].serverHash =
+        await getLastNotificationsSubscribeHash(account, nativePushToken);
+    }
+
+    if (lastNotifSubscribeByAccount[account].serverHash === hash) {
+      lastNotifSubscribeByAccount[account].stringToHash = stringToHash;
+      // We're already up to date!
       delete subscribingByAccount[account];
       return;
     }
 
-    let lastHash = lastNotifSubscribeHashByAccount[account];
-    if (!lastHash) {
-      lastHash = await getLastNotificationsSubscribeHash(
-        account,
-        nativePushToken
-      );
-      lastNotifSubscribeHashByAccount[account] = lastHash;
-    }
-
-    if (lastHash === hash) {
-      delete subscribingByAccount[account];
-      return;
-    }
-
-    console.log(
+    addLog(
       `[Notifications] Subscribing to ${
         Object.keys(topicsToUpdateForPeriod).length
       } topic for ${account}`
     );
 
-    lastNotifSubscribeHashByAccount[account] = await saveNotificationsSubscribe(
-      account,
-      nativePushToken,
-      nativeTokenQuery.type,
-      nativeTokenQuery.type === "android" ? "converse-notifications" : null,
-      topicsToUpdateForPeriod
-    );
+    lastNotifSubscribeByAccount[account].serverHash =
+      await saveNotificationsSubscribe(
+        account,
+        nativePushToken,
+        nativeTokenQuery.type,
+        nativeTokenQuery.type === "android" ? "converse-notifications" : null,
+        topicsToUpdateForPeriod
+      );
+    // Also saved the hashed string so we don't hash it again with no reason
+    lastNotifSubscribeByAccount[account].stringToHash = stringToHash;
 
     // Topics updated have a period
     const updated = Object.keys(topicsToUpdateForPeriod).filter(
@@ -240,12 +266,19 @@ export const subscribeToNotifications = async (
       deleted,
       -1
     );
+
     subscribedOnceByAccount[account] = true;
   } catch (e) {
     console.log("[Notifications] Error while subscribing:", e);
   }
   delete subscribingByAccount[account];
 };
+
+// Don't call twice in 1 sec
+export const subscribeToNotifications = debounce(
+  _subscribeToNotifications,
+  1000
+);
 
 export const unsubscribeFromNotifications = async (apiHeaders: {
   [key: string]: string;

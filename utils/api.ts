@@ -317,7 +317,7 @@ export const getLastNotificationsSubscribeHash = async (
       headers: await getXmtpApiHeaders(account),
     }
   );
-  return data?.hash as string | null;
+  return data?.hash as string | undefined;
 };
 
 export const saveNotificationsSubscribe = async (
