@@ -13,6 +13,11 @@ type AppStoreType = {
     status: AppStoreType["notificationsPermissionStatus"]
   ) => void;
 
+  addressBookPermissionStatus: "undetermined" | "granted" | "denied";
+  setAddressBookPermissionStatus: (
+    status: AppStoreType["addressBookPermissionStatus"]
+  ) => void;
+
   splashScreenHidden: boolean;
   setSplashScreenHidden: (hidden: boolean) => void;
 
@@ -51,6 +56,12 @@ export const useAppStore = create<AppStoreType>()(
           notificationsPermissionStatus: status,
         })),
 
+      addressBookPermissionStatus: "undetermined",
+      setAddressBookPermissionStatus: (status) =>
+        set(() => ({
+          addressBookPermissionStatus: status,
+        })),
+
       // On web no splash screen at all
       splashScreenHidden: Platform.OS === "web",
       setSplashScreenHidden: (hidden) =>
@@ -79,6 +90,7 @@ export const useAppStore = create<AppStoreType>()(
       storage: createJSONStorage(() => zustandMMKVStorage),
       partialize: (state) => ({
         lastVersionOpen: state.lastVersionOpen,
+        addressBookPermissionStatus: state.addressBookPermissionStatus,
       }),
     }
   )

@@ -22,7 +22,7 @@ import Picto from "../Picto/Picto";
 
 type Props = {
   title: string;
-  picto: string;
+  picto?: string | undefined;
   subtitle?: string | React.ReactNode;
   isLoading?: boolean;
   children: React.ReactNode;
@@ -32,6 +32,8 @@ type Props = {
   primaryButtonAction?: () => void;
   shrinkWithKeyboard?: boolean;
   inModal?: boolean;
+  inNav?: boolean;
+  loadingSubtitle?: string;
 };
 
 export default function OnboardingComponent({
@@ -46,6 +48,8 @@ export default function OnboardingComponent({
   primaryButtonAction,
   shrinkWithKeyboard,
   inModal,
+  inNav,
+  loadingSubtitle,
 }: Props) {
   const styles = useStyles();
   const { loading: stateLoading, setLoading } = useOnboardingStore(
@@ -67,11 +71,14 @@ export default function OnboardingComponent({
         contentContainerStyle={styles.onboardingContent}
         keyboardShouldPersistTaps="handled"
       >
-        <Picto
-          picto={picto}
-          size={Platform.OS === "android" ? 80 : 43}
-          style={[styles.picto, inModal ? { marginTop: 50 } : {}]}
-        />
+        {picto && (
+          <Picto
+            picto={picto}
+            size={Platform.OS === "android" ? 80 : 43}
+            style={[styles.picto, inModal ? { marginTop: 50 } : {}]}
+          />
+        )}
+        {!picto && <View style={{ marginTop: inNav ? 32 : 140 }} />}
 
         <Text style={styles.title}>{title}</Text>
         {loading && (
@@ -94,6 +101,9 @@ export default function OnboardingComponent({
               />
             )}
           </>
+        )}
+        {loading && loadingSubtitle && (
+          <Text style={styles.p}>{loadingSubtitle}</Text>
         )}
         {backButtonText && (
           <Button
@@ -126,6 +136,7 @@ const useStyles = () => {
       alignItems: "center",
       backgroundColor: backgroundColor(colorScheme),
     },
+
     picto: {
       ...Platform.select({
         default: {

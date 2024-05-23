@@ -1,10 +1,8 @@
 import * as ImagePicker from "expo-image-picker";
-import * as Linking from "expo-linking";
 import { setStatusBarHidden } from "expo-status-bar";
 import mime from "mime";
 import { useCallback, useEffect, useRef } from "react";
 import {
-  Alert,
   TouchableOpacity,
   View,
   useColorScheme,
@@ -20,7 +18,11 @@ import { uploadRemoteAttachment } from "../../../utils/attachment";
 import { actionSheetColors } from "../../../utils/colors";
 import { useConversationContext } from "../../../utils/conversation";
 import { executeAfterKeyboardClosed } from "../../../utils/keyboard";
-import { compressAndResizeImage } from "../../../utils/media";
+import {
+  compressAndResizeImage,
+  pickMediaFromLibrary,
+  takePictureFromCamera,
+} from "../../../utils/media";
 import { sendMessage } from "../../../utils/message";
 import { sentryTrackMessage } from "../../../utils/sentry";
 import {
@@ -120,68 +122,21 @@ export default function AddAttachmentButton() {
     if (Platform.OS === "ios") {
       setStatusBarHidden(true, "fade");
     }
-    const mediaPicked = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      quality: 1,
-      base64: false,
-      allowsMultipleSelection: false,
-    });
+    const asset = await pickMediaFromLibrary();
     if (Platform.OS === "ios") {
       setStatusBarHidden(false, "fade");
     }
-    if (mediaPicked.canceled) return;
-    const asset = mediaPicked.assets?.[0];
     if (!asset) return;
     assetRef.current = asset;
     setMediaPreview({ mediaURI: asset.uri, sending: false, error: false });
   }, [setMediaPreview]);
 
   const openCamera = useCallback(async () => {
-    const mediaPicked = await ImagePicker.launchCameraAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      quality: 1,
-      base64: false,
-      allowsEditing: false,
-    });
-    if (mediaPicked.canceled) return;
-    const asset = mediaPicked.assets?.[0];
+    const asset = await takePictureFromCamera();
     if (!asset) return;
     assetRef.current = asset;
     setMediaPreview({ mediaURI: asset.uri, sending: false, error: false });
   }, [setMediaPreview]);
-
-  const tryToOpenCamera = useCallback(async () => {
-    if (!cameraPermissions?.granted) {
-      if (cameraPermissions?.canAskAgain) {
-        const result = await requestCameraPermissions();
-        if (result.granted) {
-          await openCamera();
-        }
-      } else {
-        Alert.alert(
-          "You need to grant Converse access to the camera before proceeding",
-          undefined,
-          [
-            {
-              text: "Settings",
-              isPreferred: true,
-              onPress: () => {
-                Linking.openSettings();
-              },
-            },
-            { text: "Close" },
-          ]
-        );
-      }
-    } else {
-      await openCamera();
-    }
-  }, [
-    cameraPermissions?.canAskAgain,
-    cameraPermissions?.granted,
-    openCamera,
-    requestCameraPermissions,
-  ]);
 
   return (
     <TouchableOpacity
@@ -196,7 +151,7 @@ export default function AddAttachmentButton() {
             async (selectedIndex?: number) => {
               switch (selectedIndex) {
                 case 0: // Camera
-                  tryToOpenCamera();
+                  openCamera();
                   break;
                 case 1: // Media Library
                   pickMedia();

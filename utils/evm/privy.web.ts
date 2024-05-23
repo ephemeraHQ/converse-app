@@ -1,7 +1,7 @@
-import { usePrivy, useWallets } from "@privy-io/react-auth";
+import { useLinkAccount, usePrivy, useWallets } from "@privy-io/react-auth";
 import { Signer } from "ethers";
 import "@ethersproject/shims";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 import config from "../../config";
 import {
@@ -49,3 +49,39 @@ export const usePrivySigner = (onboarding: boolean = false) => {
   }
   return undefined;
 };
+
+let privyAccessToken: string | null;
+
+export const usePrivyAccessToken = () => {
+  const [accessToken, setAccessToken] = useState(null as string | null);
+  const { getAccessToken } = usePrivy();
+  useEffect(() => {
+    getAccessToken().then((token) => {
+      privyAccessToken = token;
+      setAccessToken(token);
+    });
+  }, [getAccessToken]);
+  return accessToken;
+};
+
+export const useLinkFarcaster = ({
+  onSuccess,
+  onError,
+}: {
+  onSuccess: () => void;
+  onError: (error: any) => void;
+}) => {
+  const { user } = usePrivy();
+  const { linkFarcaster } = useLinkAccount({ onSuccess, onError });
+  return () => {
+    if (user?.farcaster) {
+      onSuccess();
+      return;
+    }
+    linkFarcaster();
+  };
+};
+
+export const getPrivyRequestHeaders = () => ({
+  "privy-access-token": privyAccessToken,
+});

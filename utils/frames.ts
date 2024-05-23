@@ -9,6 +9,7 @@ import {
   OPEN_FRAMES_PROXY_URL,
 } from "@xmtp/frames-client";
 import { BigNumber, ethers } from "ethers";
+import { hexValue } from "ethers/lib/utils";
 
 import { MessageToDisplay } from "../components/Chat/Message/Message";
 import { ConverseMessageMetadata } from "../data/db/entities/messageEntity";
@@ -236,8 +237,8 @@ export const handleTxAction = async (
     {
       from: account,
       to: txData.params.to,
-      data: txData.params.data,
-      value: BigNumber.from(txData.params.value).toHexString(),
+      data: txData.params.data ? hexValue(txData.params.data) : undefined,
+      value: hexValue(BigNumber.from(txData.params.value || "0").toHexString()),
     },
   ]);
 

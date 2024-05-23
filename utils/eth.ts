@@ -9,11 +9,9 @@ import {
 
 import config from "../config";
 import {
-  resolveCbIdName,
   resolveEnsName,
   resolveFarcasterUsername,
   resolveUnsDomain,
-  resolveUserName,
 } from "./api";
 import { getLensOwner } from "./lens";
 import { isUNSAddress } from "./uns";
@@ -49,14 +47,12 @@ export const getAddressForPeer = async (peer: string) => {
   const isCbId = peer.endsWith(".cb.id");
   const isUNS = isUNSAddress(peer);
 
-  const resolvedAddress = isUserName
-    ? await resolveUserName(peer)
-    : isENS
+  const isENSCompatible = isUserName || isCbId || isENS;
+
+  const resolvedAddress = isENSCompatible
     ? await resolveEnsName(peer)
     : isUNS
     ? await resolveUnsDomain(peer)
-    : isCbId
-    ? await resolveCbIdName(peer)
     : isFarcaster
     ? await resolveFarcasterUsername(peer.slice(0, peer.length - 3))
     : isLens

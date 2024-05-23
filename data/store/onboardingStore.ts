@@ -10,6 +10,8 @@ export type ConnectionMethod =
   | "desktop"
   | "seedPhrase";
 
+export type OnboardingStep = "login" | "invite";
+
 type OnboardingStoreType = {
   addingNewAccount: boolean;
   setAddingNewAccount: (adding: boolean) => void;
@@ -36,10 +38,19 @@ type OnboardingStoreType = {
   privyAccountId: string | undefined;
   setPrivyAccountId: (id: string | undefined) => void;
 
+  privyAccessToken: string | undefined;
+  setPrivyAccessToken: (token: string | undefined) => void;
+
+  inviteCode: string;
+  setInviteCode: (i: string) => void;
+
   pkPath: string | undefined;
   setPkPath: (p: string) => void;
 
   resetOnboarding: () => void;
+
+  step: OnboardingStep;
+  setStep: (s: OnboardingStep) => void;
 };
 
 export const useOnboardingStore = create<OnboardingStoreType>()((set) => ({
@@ -91,8 +102,17 @@ export const useOnboardingStore = create<OnboardingStoreType>()((set) => ({
   privyAccountId: undefined,
   setPrivyAccountId: (id) => set(() => ({ privyAccountId: id })),
 
+  privyAccessToken: undefined,
+  setPrivyAccessToken: (token) => set(() => ({ privyAccessToken: token })),
+
   pkPath: undefined,
   setPkPath: (p) => set(() => ({ pkPath: p })),
+
+  inviteCode: "",
+  setInviteCode: (i) => set(() => ({ inviteCode: i })),
+
+  step: "login",
+  setStep: (s: OnboardingStep) => set(() => ({ step: s })),
 
   resetOnboarding: () =>
     set(() => ({
@@ -106,5 +126,13 @@ export const useOnboardingStore = create<OnboardingStoreType>()((set) => ({
       isEphemeral: false,
       privyAccountId: undefined,
       pkPath: undefined,
+      step: "login",
+      inviteCode: "",
+      socials: undefined,
+      profile: {
+        username: "",
+        displayName: "",
+        avatar: "",
+      },
     })),
 }));

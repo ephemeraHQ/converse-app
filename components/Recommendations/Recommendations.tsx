@@ -19,7 +19,6 @@ import {
   useRecommendationsStore,
 } from "../../data/store/accountsStore";
 import { useSelect } from "../../data/store/storeHelpers";
-import { findFrens } from "../../utils/api";
 import {
   backgroundColor,
   itemSeparatorColor,
@@ -27,6 +26,7 @@ import {
   textPrimaryColor,
   textSecondaryColor,
 } from "../../utils/colors";
+import { refreshRecommendationsForAccount } from "../../utils/recommendations";
 import ActivityIndicator from "../ActivityIndicator/ActivityIndicator";
 import { Recommendation } from "./Recommendation";
 
@@ -93,9 +93,7 @@ export default function Recommendations({
     // On load, let's load frens
     const getRecommendations = async () => {
       setLoadingRecommendations();
-      const frens = await findFrens(currentAccount);
-      const now = new Date().getTime();
-      setRecommendations(frens, now);
+      await refreshRecommendationsForAccount(currentAccount);
     };
     const now = new Date().getTime();
     if (!loading && userAddress && now - updatedAt >= EXPIRE_AFTER) {
@@ -132,25 +130,6 @@ export default function Recommendations({
             )}
           </>
         );
-      } else if (item === "signals") {
-        return (
-          <Text
-            style={[
-              styles.title,
-              { marginBottom: insets.bottom + 40, marginTop: 30 },
-            ]}
-          >
-            We’re adding matching signals very often.{" "}
-            <Text style={styles.clickableText} onPress={openSignalList}>
-              Here is the current list
-            </Text>
-            ,{" "}
-            <Text style={styles.clickableText} onPress={contactPol}>
-              contact our cofounder Pol
-            </Text>{" "}
-            if you want us to add anything.
-          </Text>
-        );
       }
       return (
         <Recommendation
@@ -162,19 +141,15 @@ export default function Recommendations({
       );
     },
     [
-      contactPol,
       frens,
-      insets.bottom,
       navigation,
-      openSignalList,
-      styles.clickableText,
       styles.emoji,
       styles.sectionTitle,
       styles.sectionTitleContainer,
       styles.title,
       styles.titleContainer,
-      visibility,
       viewableItems,
+      visibility,
     ]
   );
 
@@ -211,7 +186,7 @@ export default function Recommendations({
   return (
     <View style={styles.recommendations}>
       <FlatList
-        data={["title", ...Object.keys(frens), "signals"]}
+        data={["title", ...Object.keys(frens)]}
         keyExtractor={keyExtractor}
         renderItem={renderItem}
         onViewableItemsChanged={onViewableItemsChanged}

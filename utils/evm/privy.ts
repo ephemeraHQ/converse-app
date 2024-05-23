@@ -1,7 +1,11 @@
-import { useEmbeddedWallet, usePrivy } from "@privy-io/expo";
+import {
+  useEmbeddedWallet,
+  useLinkWithFarcaster,
+  usePrivy,
+} from "@privy-io/expo";
 import { ethers } from "ethers";
 import "@ethersproject/shims";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import config from "../../config";
 import {
@@ -39,4 +43,41 @@ export const usePrivySigner = (onboarding: boolean = false) => {
     }
   }
   return undefined;
+};
+
+let privyAccessToken: string | null;
+
+export const usePrivyAccessToken = () => {
+  const [accessToken, setAccessToken] = useState(null as string | null);
+  const { getAccessToken, user, isReady } = usePrivy();
+  useEffect(() => {
+    if (!isReady) return;
+    getAccessToken?.()
+      .then((token) => {
+        privyAccessToken = token;
+        setAccessToken(token);
+      })
+      .catch((e) => {
+        console.error("error getting access token", e);
+      });
+  }, [getAccessToken, user?.id, isReady]);
+  return accessToken;
+};
+
+export const getPrivyRequestHeaders = () => ({
+  "privy-access-token": privyAccessToken,
+});
+
+export const useLinkFarcaster = ({
+  onSuccess,
+  onError,
+}: {
+  onSuccess: () => void;
+  onError: (error: any) => void;
+}) => {
+  const { linkWithFarcaster } = useLinkWithFarcaster({
+    onSuccess,
+    onError,
+  });
+  return linkWithFarcaster;
 };
