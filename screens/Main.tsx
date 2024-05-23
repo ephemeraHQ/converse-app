@@ -3,7 +3,7 @@ import React, { useCallback, useEffect, useRef } from "react";
 import { Dimensions, Platform, useColorScheme } from "react-native";
 
 import SendAttachmentPreview from "../components/Chat/Attachment/SendAttachmentPreview";
-import UsernameSelector from "../components/Onboarding/UsernameSelector";
+import UserProfile from "../components/Onboarding/UserProfile";
 import ActionSheetStateHandler from "../components/StateHandlers/ActionSheetStateHandler";
 import HydrationStateHandler from "../components/StateHandlers/HydrationStateHandler";
 import InitialStateHandler from "../components/StateHandlers/InitialStateHandler";
@@ -15,13 +15,14 @@ import {
   useCurrentAccount,
   useSettingsStore,
   useProfilesStore,
-  useLoggedWithPrivy,
 } from "../data/store/accountsStore";
 import { useAppStore } from "../data/store/appStore";
 import { useOnboardingStore } from "../data/store/onboardingStore";
 import { useSelect } from "../data/store/storeHelpers";
+import { useAddressBookStateHandler } from "../utils/addressBook";
 import { backgroundColor } from "../utils/colors";
 import { converseEventEmitter } from "../utils/events";
+import { usePrivyAccessToken } from "../utils/evm/privy";
 import AccountsAndroid from "./Accounts/AccountsAndroid";
 import AccountsDrawer from "./Accounts/AccountsDrawer";
 import Navigation from "./Navigation/Navigation";
@@ -31,12 +32,18 @@ import NotificationsScreen from "./NotificationsScreen";
 import Onboarding from "./Onboarding";
 
 export default function Main() {
+  // Makes sure we have a Privy token ready to make API calls
+  usePrivyAccessToken();
+  useAddressBookStateHandler();
   const colorScheme = useColorScheme();
   const userAddress = useCurrentAccount();
   const socials = useProfilesStore((s) =>
     userAddress ? s.profiles[userAddress]?.socials : undefined
   );
-  const currentUserName = socials?.userNames?.find((e) => e.isPrimary)?.name;
+  const currentUserName = socials?.userNames?.find((e) => e.isPrimary);
+  // const currentFarcaster = socials?.farcasterUsernames?.find(
+  //   (e) => e.linkedAccount
+  // );
   const isSplitScreen = useIsSplitScreen();
 
   const { resetOnboarding, addingNewAccount } = useOnboardingStore(
@@ -48,9 +55,8 @@ export default function Main() {
       resetOnboarding();
     }
   }, [addingNewAccount, resetOnboarding, userAddress]);
-  const showNotificationScreen = useSettingsStore(
-    (s) => s.notifications.showNotificationScreen
-  );
+
+  const { notifications } = useSettingsStore(useSelect(["notifications"]));
   const { notificationsPermissionStatus, splashScreenHidden, mediaPreview } =
     useAppStore(
       useSelect([
@@ -97,21 +103,36 @@ export default function Main() {
   );
 
   let screenToShow = undefined;
-  const loggedWithPrivy = useLoggedWithPrivy();
 
   if (splashScreenHidden) {
     if (!userAddress || addingNewAccount) {
       screenToShow = <Onboarding />;
-    } else if (
-      showNotificationScreen &&
+    }
+    // else if (!currentFarcaster && !skipFarcaster) {
+    //   return <WarpcastConnect />;
+    // } else if (
+    //   Platform.OS !== "web" &&
+    //   addressBookPermissionStatus === "undetermined" &&
+    //   !skipAddressBook
+    // ) {
+    //   return <AddressBook />;
+    // }
+    else if (
+      notifications.showNotificationScreen &&
       Platform.OS !== "web" &&
       (notificationsPermissionStatus === "undetermined" ||
         (notificationsPermissionStatus === "denied" &&
           Platform.OS === "android"))
     ) {
       screenToShow = <NotificationsScreen />;
-    } else if (loggedWithPrivy && !currentUserName) {
-      screenToShow = <UsernameSelector />;
+    } else if (
+      !(
+        currentUserName?.name &&
+        currentUserName?.displayName &&
+        currentUserName?.avatar
+      )
+    ) {
+      screenToShow = <UserProfile onboarding />;
     } else if (Platform.OS === "android") {
       // On Android the whole navigation is wrapped in a drawler
       // layout to be able to display the menu

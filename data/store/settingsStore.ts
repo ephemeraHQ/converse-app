@@ -29,6 +29,18 @@ export type SettingsStoreType = {
 
   lastAsyncUpdate: number;
   setLastAsyncUpdate: (version: number) => void;
+
+  skipFarcaster: boolean;
+  setSkipFarcaster: (s: boolean) => void;
+
+  skipAddressBook: boolean;
+  setSkipAddressBook: (s: boolean) => void;
+
+  // A boolean stating if the user did the app onboarding
+  // before or after we released profiles. Helps to show
+  // an intermediary screen for those who onboarded before
+  onboardedAfterProfilesRelease: boolean;
+  setOnboardedAfterProfilesRelease: (s: boolean) => void;
 };
 
 export const initSettingsStore = (account: string) => {
@@ -78,6 +90,13 @@ export const initSettingsStore = (account: string) => {
             set(() => ({
               lastAsyncUpdate: version,
             })),
+          skipFarcaster: false,
+          setSkipFarcaster: (s) => set(() => ({ skipFarcaster: s })),
+          skipAddressBook: false,
+          setSkipAddressBook: (s) => set(() => ({ skipAddressBook: s })),
+          onboardedAfterProfilesRelease: false,
+          setOnboardedAfterProfilesRelease: (o) =>
+            set(() => ({ onboardedAfterProfilesRelease: o })),
         }) as SettingsStoreType,
       {
         name: `store-${account}-settings`, // Account-based storage so each account can have its own settings

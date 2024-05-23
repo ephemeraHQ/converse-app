@@ -21,6 +21,7 @@ import {
 } from "../data/store/accountsStore";
 import { backgroundColor, textPrimaryColor } from "../utils/colors";
 import { isDesktop } from "../utils/device";
+import { getPreferredUsername } from "../utils/profile";
 import { shortAddress } from "../utils/str";
 import { NavigationParamList } from "./Navigation/Navigation";
 
@@ -30,10 +31,9 @@ export default function ShareProfileScreen({
 }: NativeStackScreenProps<NavigationParamList, "ShareProfile">) {
   const colorScheme = useColorScheme();
   const userAddress = useCurrentAccount() as string;
-  const mainIdentity = useProfilesStore(
-    (s) =>
-      s.profiles[userAddress]?.socials?.ensNames?.find((n) => n.isPrimary)?.name
-  );
+  const socials = useProfilesStore((s) => s.profiles[userAddress]?.socials);
+  const mainIdentity = getPreferredUsername(socials);
+
   useEffect(() => {
     navigation.setOptions({
       headerLeft: () =>
@@ -116,7 +116,7 @@ const useStyles = () => {
     shareProfile: {
       flex: 1,
       backgroundColor: backgroundColor(colorScheme),
-      paddingHorizontal: 32,
+      paddingHorizontal: 30,
       justifyContent: "center",
     },
     shareProfileContent: {
@@ -130,6 +130,7 @@ const useStyles = () => {
       fontSize: 34,
       fontWeight: "700",
       marginBottom: 17,
+      textAlign: "center",
     },
     address: {
       color: textPrimaryColor(colorScheme),

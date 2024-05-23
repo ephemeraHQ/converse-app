@@ -8,13 +8,16 @@ import {
   Text,
   Alert,
   TextInput,
+  View,
 } from "react-native";
 
+import { useProfilesStore } from "../../data/store/accountsStore";
 import { XmtpConversation } from "../../data/store/chatStore";
 import { NavigationParamList } from "../../screens/Navigation/Navigation";
 import { headerTitleStyle, textSecondaryColor } from "../../utils/colors";
+import { getPreferredAvatar } from "../../utils/profile";
 import { conversationName, getTitleFontScale } from "../../utils/str";
-import Connecting, { useShouldShowConnectingOrSyncing } from "../Connecting";
+import Avatar from "../Avatar";
 import { useEnableDebug } from "../DebugButton";
 import Picto from "../Picto/Picto";
 
@@ -36,8 +39,15 @@ export default function ConversationTitle({
   const [title, setTitle] = useState(
     conversation ? conversationName(conversation) : ""
   );
+  const profiles = useProfilesStore((state) => state.profiles);
+  const [avatar, setAvatar] = useState(
+    getPreferredAvatar(
+      conversation?.peerAddress
+        ? profiles[conversation.peerAddress]?.socials
+        : undefined
+    )
+  );
   const enableDebug = useEnableDebug();
-  const shouldShowConnectingOrSyncing = useShouldShowConnectingOrSyncing();
   const conversationRef = useRef(conversation);
   useEffect(() => {
     if (!conversation) {
@@ -55,69 +65,78 @@ export default function ConversationTitle({
     ) {
       // New conversation, lets' set title
       setTitle(conversationName(conversation));
+      if (!conversation.peerAddress) return;
+      const socials = profiles[conversation.peerAddress]?.socials;
+      setAvatar(getPreferredAvatar(socials));
     }
     conversationRef.current = conversation;
-  }, [conversation]);
+  }, [conversation, profiles]);
   if (!conversation) return null;
   return (
-    <>
-      {!shouldShowConnectingOrSyncing && (
-        <TouchableOpacity
-          onLongPress={() => {
-            if (!enableDebug) return;
-            Clipboard.setString(
-              JSON.stringify({
-                topic: conversation?.topic || "",
-                context: conversation?.context,
-              })
-            );
-            Alert.alert("Conversation details copied");
+    <View style={{ flexDirection: "row", flexGrow: 1 }}>
+      <TouchableOpacity
+        onLongPress={() => {
+          if (!enableDebug) return;
+          Clipboard.setString(
+            JSON.stringify({
+              topic: conversation?.topic || "",
+              context: conversation?.context,
+            })
+          );
+          Alert.alert("Conversation details copied");
+        }}
+        onPress={async () => {
+          if (!conversation) return;
+          // Close keyboard
+          textInputRef?.current?.blur();
+          if (conversation.isGroup) {
+            navigation.push("Group", { topic: conversation.topic });
+          } else if (conversation.peerAddress) {
+            navigation.push("Profile", { address: conversation.peerAddress });
+          }
+        }}
+        style={{
+          flexDirection: "row",
+          alignItems: "center",
+          paddingRight: 20,
+        }}
+      >
+        <Avatar
+          uri={avatar}
+          size={36}
+          style={{
+            marginRight: Platform.OS === "android" ? 24 : 7,
+            marginLeft: Platform.OS === "ios" ? 6 : -9,
           }}
-          onPress={async () => {
-            if (!conversation) return;
-            // Close keyboard
-            textInputRef?.current?.blur();
-            if (conversation.isGroup) {
-              navigation.push("Group", { topic: conversation.topic });
-            } else if (conversation.peerAddress) {
-              navigation.push("Profile", { address: conversation.peerAddress });
-            }
-          }}
+        />
+        <Text
+          style={[
+            headerTitleStyle(colorScheme),
+            {
+              fontSize:
+                Platform.OS === "ios"
+                  ? 17 * getTitleFontScale()
+                  : headerTitleStyle(colorScheme).fontSize,
+            },
+          ]}
+          numberOfLines={1}
+          allowFontScaling={false}
         >
-          <Text
-            style={[
-              headerTitleStyle(colorScheme),
-              {
-                fontSize:
-                  Platform.OS === "ios"
-                    ? 17 * getTitleFontScale()
-                    : headerTitleStyle(colorScheme).fontSize,
-              },
-            ]}
-            numberOfLines={1}
-            allowFontScaling={false}
-          >
-            {title}
-          </Text>
-          <Picto
-            picto="chevron.right"
-            size={Platform.OS === "ios" ? 8 : 16}
-            style={{
-              position: "absolute",
-              ...Platform.select({
-                default: { right: -8, bottom: 9.5 },
-                android: { right: -3, bottom: 3 },
-                web: {
-                  right: -23,
-                  bottom: -3,
-                },
-              }),
-            }}
-            color={textSecondaryColor(colorScheme)}
-          />
-        </TouchableOpacity>
-      )}
-      {shouldShowConnectingOrSyncing && <Connecting />}
-    </>
+          {title}
+        </Text>
+        <Picto
+          picto="chevron.right"
+          size={Platform.OS === "ios" ? 9 : 16}
+          style={{
+            // @todo => fix design on android & web
+            ...Platform.select({
+              default: { left: 10 },
+              android: { left: -10, top: 1 },
+            }),
+          }}
+          color={textSecondaryColor(colorScheme)}
+        />
+      </TouchableOpacity>
+    </View>
   );
 }

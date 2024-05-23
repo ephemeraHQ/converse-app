@@ -1,13 +1,15 @@
 import axios from "axios";
-import { Platform } from "react-native";
+import * as Contacts from "expo-contacts";
 
+import { ProfileType } from "../components/Onboarding/UserProfile";
 import config from "../config";
 import { TopicData } from "../data/store/chatStore";
 import { ProfileSocials } from "../data/store/profilesStore";
 import { Frens } from "../data/store/recommendationsStore";
 import { getXmtpApiHeaders } from "../utils/xmtpRN/api";
-import { isDesktop } from "./device";
+import { analyticsPlatform } from "./analytics";
 import { TransferAuthorizationMessage } from "./evm/erc20";
+import { getPrivyRequestHeaders } from "./evm/privy";
 import { TransactionDetails } from "./transaction";
 
 const api = axios.create({
@@ -44,7 +46,7 @@ api.interceptors.response.use(
 
 const lastSaveUser: { [address: string]: number } = {};
 
-export const saveUser = async (address: string, privyAccountId?: string) => {
+export const saveUser = async (address: string, privyAccountId: string) => {
   const now = new Date().getTime();
   const last = lastSaveUser[address] || 0;
   if (now - last < 3000) {
@@ -54,28 +56,9 @@ export const saveUser = async (address: string, privyAccountId?: string) => {
   }
   lastSaveUser[address] = now;
 
-  let platform = undefined as string | undefined;
-  if (isDesktop) {
-    platform = "macOS";
-  } else {
-    switch (Platform.OS) {
-      case "ios":
-        platform = "iOS";
-        break;
-      case "android":
-        platform = "Android";
-        break;
-      case "web":
-        platform = "Web";
-        break;
-
-      default:
-        break;
-    }
-  }
   await api.post(
     "/api/user",
-    { address, privyAccountId, platform },
+    { address, privyAccountId, platform: analyticsPlatform },
     { headers: await getXmtpApiHeaders(address) }
   );
 };
@@ -84,6 +67,23 @@ export const userExists = async (address: string) => {
   const { data } = await api.get("/api/user/exists", { params: { address } });
   return data.userExists;
 };
+
+export const getPrivyAuthenticatedUser = async () => {
+  const { data } = await api.get("/api/user/privyauth", {
+    headers: getPrivyRequestHeaders(),
+  });
+  return data;
+};
+
+// export const getInvite = async (inviteCode: string): Promise<boolean> => {
+//   const { data } = await api.get("/api/user/invite", {
+//     params: { inviteCode },
+//   });
+//   if (data.inviteCode !== inviteCode) {
+//     throw new Error("Invalid invite code");
+//   }
+//   return data;
+// };
 
 type ReportMessageQuery = {
   account: string;
@@ -123,24 +123,10 @@ export const deletePeersFromDb = async (account: string): Promise<void> => {
   return data.message;
 };
 
-export const resolveUserName = async (
-  name: string
-): Promise<string | undefined> => {
-  const { data } = await api.get("/api/profile/username", { params: { name } });
-  return data.address;
-};
-
 export const resolveEnsName = async (
   name: string
 ): Promise<string | undefined> => {
   const { data } = await api.get("/api/profile/ens", { params: { name } });
-  return data.address;
-};
-
-export const resolveCbIdName = async (
-  name: string
-): Promise<string | undefined> => {
-  const { data } = await api.get("/api/profile/cbid", { params: { name } });
   return data.address;
 };
 
@@ -276,15 +262,26 @@ export const getCoinbaseTransactionDetails = async (
   return data;
 };
 
-export const claimUserName = async (
-  username: string,
-  userAddress: string
+export const claimProfile = async ({
+  account,
+  profile,
+}: {
+  account: string;
+  profile: ProfileType;
+}): Promise<string> => {
+  const { data } = await api.post("/api/profile/username", profile, {
+    headers: await getXmtpApiHeaders(account),
+  });
+  return data;
+};
+
+export const checkUsernameValid = async (
+  address: string,
+  username: string
 ): Promise<string> => {
-  const { data } = await api.post(
-    "/api/profile/username",
-    { username },
-    { headers: await getXmtpApiHeaders(userAddress) }
-  );
+  const { data } = await api.get("/api/profile/username/valid", {
+    params: { address, username },
+  });
   return data;
 };
 
@@ -296,9 +293,15 @@ export const getSendersSpamScores = async (sendersAddresses: string[]) => {
   return data as { [senderAddress: string]: number };
 };
 
-export const getPresignedUriForUpload = async (userAddress: string) => {
+export const getPresignedUriForUpload = async (
+  userAddress: string | undefined,
+  contentType?: string | undefined
+) => {
   const { data } = await api.get("/api/attachment/presigned", {
-    headers: await getXmtpApiHeaders(userAddress),
+    params: { contentType },
+    headers: userAddress
+      ? await getXmtpApiHeaders(userAddress)
+      : getPrivyRequestHeaders(),
   });
   return data as { objectKey: string; url: string };
 };
@@ -314,7 +317,7 @@ export const getLastNotificationsSubscribeHash = async (
       headers: await getXmtpApiHeaders(account),
     }
   );
-  return data?.hash as string | null;
+  return data?.hash as string | undefined;
 };
 
 export const saveNotificationsSubscribe = async (
@@ -337,6 +340,29 @@ export const saveNotificationsSubscribe = async (
     }
   );
   return data.subscribeHash as string;
+};
+
+export const notifyFarcasterLinked = async () => {
+  await api.post(
+    "/api/farcaster/linked",
+    {},
+    {
+      headers: getPrivyRequestHeaders(),
+    }
+  );
+};
+
+export const postAddressBook = async (
+  account: string,
+  data: {
+    deviceId: string;
+    countryCode: string;
+    contacts: Contacts.Contact[];
+  }
+) => {
+  await api.post("/api/addressbook", data, {
+    headers: await getXmtpApiHeaders(account),
+  });
 };
 
 export type GroupLink = { id: string; name: string; description: string };

@@ -6,6 +6,7 @@ import { Platform, View, useColorScheme, StyleSheet } from "react-native";
 import {
   useChatStore,
   useCurrentAccount,
+  useProfilesStore,
   useSettingsStore,
 } from "../data/store/accountsStore";
 import { useSelect } from "../data/store/storeHelpers";
@@ -16,6 +17,7 @@ import {
   ConversationFlatListItem,
   ConversationWithLastMessagePreview,
 } from "../utils/conversation";
+import { getPreferredAvatar } from "../utils/profile";
 import { conversationName } from "../utils/str";
 import ConversationListItem from "./ConversationListItem";
 
@@ -57,6 +59,7 @@ export default function ConversationFlashList({
   const userAddress = useCurrentAccount() as string;
   const peersStatus = useSettingsStore((s) => s.peersStatus);
   const isSplitScreen = useIsSplitScreen();
+  const profiles = useProfilesStore((state) => state.profiles);
 
   const listRef = useRef<FlashList<any> | undefined>();
 
@@ -94,11 +97,15 @@ export default function ConversationFlashList({
     ({ item }: { item: ConversationFlatListItem }) => {
       const conversation = item as ConversationWithLastMessagePreview;
       const lastMessagePreview = conversation.lastMessagePreview;
+      const socials = conversation.peerAddress
+        ? profiles[conversation.peerAddress]?.socials
+        : undefined;
       return (
         <ConversationListItem
           navigation={navigation}
           route={route}
           conversationPeerAddress={conversation.peerAddress}
+          conversationPeerAvatar={getPreferredAvatar(socials)}
           colorScheme={colorScheme}
           conversationTopic={conversation.topic}
           conversationTime={
@@ -144,6 +151,7 @@ export default function ConversationFlashList({
       route,
       topicsData,
       userAddress,
+      profiles,
     ]
   );
   return (
