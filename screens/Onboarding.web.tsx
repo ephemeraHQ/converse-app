@@ -12,6 +12,7 @@ import {
   TableViewPicto,
 } from "../components/TableView/TableViewImage";
 import config from "../config";
+import { refreshProfileForAddress } from "../data/helpers/profiles/profilesUpdate";
 import {
   getSettingsStore,
   useAccountsStore,
@@ -91,6 +92,13 @@ export default function Onboarding() {
               .getState()
               .setPrivyAccountId(address, privyUser.id);
           }
+
+          await refreshProfileForAddress(address, address);
+          // Now we can really set!
+          useAccountsStore.getState().setCurrentAccount(address, false);
+          getSettingsStore(address)
+            .getState()
+            .setOnboardedAfterProfilesRelease(true);
 
           // TODO => enable ephemeral on web?
           const isEphemeral = false;

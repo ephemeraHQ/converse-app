@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { PixelRatio, TextInput, Dimensions, Platform } from "react-native";
 
 import { getProfilesStore, useAccountsList } from "../data/store/accountsStore";
@@ -57,27 +57,10 @@ export const getTitleFontScale = (): number => {
 
 export type TextInputWithValue = TextInput & { currentValue: string };
 
-export const getReadableProfile = (
-  account: string,
-  address: string,
-  showFullUsername: boolean = false
-) => {
-  const primaryUserName = getProfilesStore(account)
-    .getState()
-    .profiles[address]?.socials.userNames?.find((e) => e.isPrimary)?.name;
-  const primaryENS = getProfilesStore(account)
-    .getState()
-    .profiles[address]?.socials.ensNames?.find((e) => e.isPrimary)?.name;
-  const primaryUns = getProfilesStore(account)
-    .getState()
-    .profiles[address]?.socials.unstoppableDomains?.find((e) => e.isPrimary)
-    ?.domain;
-  return (
-    (showFullUsername ? primaryUserName : shortDomain(primaryUserName)) ||
-    primaryENS ||
-    primaryUns ||
-    shortAddress(address)
-  );
+export const getReadableProfile = (account: string, address: string) => {
+  const socials =
+    getProfilesStore(account).getState().profiles[address]?.socials;
+  return getPreferredName(socials, address);
 };
 
 export const useAccountsProfiles = () => {
@@ -103,11 +86,15 @@ export const useAccountsProfiles = () => {
 
   useEffect(() => {
     accounts.forEach((account) => {
-      const currentState = getProfilesStore(account).getState();
-      handleAccount(account, currentState);
-      getProfilesStore(account).subscribe((state) => {
+      try {
+        const currentState = getProfilesStore(account).getState();
         handleAccount(account, currentState);
-      });
+        getProfilesStore(account).subscribe((state) => {
+          handleAccount(account, state);
+        });
+      } catch (e) {
+        console.error(e);
+      }
     });
   }, [accounts, handleAccount]);
 
@@ -115,3 +102,40 @@ export const useAccountsProfiles = () => {
 };
 
 export const strByteSize = (str: string) => new Blob([str]).size;
+
+export const useLoopTxt = (
+  intervalMs: number,
+  options: string[],
+  active: boolean
+) => {
+  const [step, setStep] = useState(0);
+  const interval = useRef<NodeJS.Timer | undefined>();
+  const startInterval = useCallback(() => {
+    if (interval.current) return;
+    setStep(0);
+    interval.current = setInterval(() => {
+      setStep((s) => s + 1);
+    }, intervalMs);
+  }, [intervalMs]);
+
+  const stopInterval = useCallback(() => {
+    if (interval.current) {
+      clearInterval(interval.current);
+      interval.current = undefined;
+    }
+  }, []);
+
+  useEffect(() => {
+    return stopInterval;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
+    if (active) {
+      startInterval();
+    } else {
+      stopInterval();
+    }
+  }, [active, startInterval, stopInterval]);
+  return options[step % options.length];
+};

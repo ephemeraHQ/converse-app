@@ -7,6 +7,7 @@ import PrivyConnect from "../components/Onboarding/PrivyConnect";
 import SeedPhraseConnect from "../components/Onboarding/SeedPhraseConnect";
 import WalletSelector from "../components/Onboarding/WalletSelector";
 import { initDb } from "../data/db";
+import { refreshProfileForAddress } from "../data/helpers/profiles/profilesUpdate";
 import {
   getSettingsStore,
   getWalletStore,
@@ -56,6 +57,12 @@ export default function Onboarding() {
         useAccountsStore.getState().setPrivyAccountId(address, privyAccountId);
       }
       await initDb(address);
+      await refreshProfileForAddress(address, address);
+      // Now we can really set!
+      useAccountsStore.getState().setCurrentAccount(address, false);
+      getSettingsStore(address)
+        .getState()
+        .setOnboardedAfterProfilesRelease(true);
 
       if (isEphemeral) {
         getSettingsStore(address).getState().setEphemeralAccount(true);
@@ -82,7 +89,6 @@ export default function Onboarding() {
 
     try {
       const base64Key = await getXmtpBase64KeyFromSigner(signer);
-
       await connectWithBase64Key(base64Key);
     } catch (e) {
       initiatingClientFor.current = undefined;

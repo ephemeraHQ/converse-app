@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { StyleSheet, useColorScheme, Text, Platform } from "react-native";
 
 import { initDb } from "../../data/db";
+import { refreshProfileForAddress } from "../../data/helpers/profiles/profilesUpdate";
 import { useAccountsStore } from "../../data/store/accountsStore";
 import { useOnboardingStore } from "../../data/store/onboardingStore";
 import { useSelect } from "../../data/store/storeHelpers";
@@ -95,6 +96,9 @@ export default function DesktopConnectFlow() {
           await saveXmtpKey(client.address, base64Key);
           useAccountsStore.getState().setCurrentAccount(client.address, true);
           await initDb(client.address);
+          await refreshProfileForAddress(client.address, client.address);
+          // Now we can really set!
+          useAccountsStore.getState().setCurrentAccount(client.address, false);
           // Now we can instantiate the XMTP Client
           getXmtpClient(client.address);
           useOnboardingStore.getState().setAddingNewAccount(false);

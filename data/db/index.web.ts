@@ -15,3 +15,5 @@ export const getRepository = async (account: string, entity: string) => {
 };
 
 export const clearDb = async (account: string) => {};
+
+export const initDb = async (account: string): Promise<void> => {};

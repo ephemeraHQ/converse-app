@@ -1,5 +1,5 @@
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import { StyleSheet, Text, View, useColorScheme } from "react-native";
+import { Platform, StyleSheet, Text, View, useColorScheme } from "react-native";
 
 import { ProfileSocials } from "../../data/store/profilesStore";
 import {
@@ -7,8 +7,13 @@ import {
   textPrimaryColor,
   textSecondaryColor,
 } from "../../utils/colors";
-import { getPreferredName, getPrimaryNames } from "../../utils/profile";
+import {
+  getPreferredAvatar,
+  getPreferredName,
+  getPrimaryNames,
+} from "../../utils/profile";
 import { shortAddress } from "../../utils/str";
+import Avatar from "../Avatar";
 import { NavigationChatButton } from "../Search/NavigationChatButton";
 
 export function ProfileSearchItem({
@@ -22,20 +27,27 @@ export function ProfileSearchItem({
 }) {
   const styles = useStyles();
   const preferredName = getPreferredName(socials, address);
+  const preferredAvatar = getPreferredAvatar(socials);
   const primaryNames = getPrimaryNames(socials);
-  const primaryNamesDisplay = primaryNames.filter(
-    (name) => name !== preferredName
-  );
+  const primaryNamesDisplay = [
+    ...primaryNames.filter((name) => name !== preferredName),
+    shortAddress(address),
+  ];
 
   return (
     <View key={address} style={[styles.container]}>
       <View style={styles.left}>
-        <Text style={[styles.title]}>
-          {preferredName || shortAddress(address)}
-        </Text>
-        {primaryNamesDisplay.length > 0 && (
-          <Text style={[styles.text]}>{primaryNamesDisplay.join(" | ")}</Text>
-        )}
+        <Avatar uri={preferredAvatar} size={40} style={styles.avatar} />
+        <View>
+          <Text style={styles.title}>
+            {preferredName || shortAddress(address)}
+          </Text>
+          {primaryNamesDisplay.length > 0 && (
+            <Text numberOfLines={1} style={styles.text}>
+              {primaryNamesDisplay.join(" | ")}
+            </Text>
+          )}
+        </View>
       </View>
       {navigation && (
         <View style={styles.right}>
@@ -59,10 +71,15 @@ const useStyles = () => {
     },
     left: {
       flex: 1,
-      justifyContent: "center",
+      flexDirection: "row",
+      alignItems: "center",
+    },
+    avatar: {
+      marginRight: 13,
     },
     right: {
       justifyContent: "center",
+      marginLeft: Platform.OS === "ios" ? 30 : 0,
     },
     title: {
       fontSize: 17,
@@ -73,7 +90,7 @@ const useStyles = () => {
     text: {
       fontSize: 15,
       color: textSecondaryColor(colorScheme),
-      alignSelf: "flex-start",
+      marginRight: 20,
     },
   });
 };

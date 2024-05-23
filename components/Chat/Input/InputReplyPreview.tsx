@@ -33,8 +33,7 @@ export default function ChatInputReplyPreview({
 
   const readableProfile = getReadableProfile(
     currentAccount,
-    replyingToMessage?.senderAddress,
-    true
+    replyingToMessage?.senderAddress
   );
 
   return (

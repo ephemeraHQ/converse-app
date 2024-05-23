@@ -39,6 +39,7 @@ import { isDesktop } from "../utils/device";
 import { converseEventEmitter } from "../utils/events";
 import { navigate } from "../utils/navigation";
 import { consentToPeersOnProtocol } from "../utils/xmtpRN/conversations";
+import Avatar from "./Avatar";
 import Picto from "./Picto/Picto";
 import { showActionSheetWithOptions } from "./StateHandlers/ActionSheetStateHandler";
 
@@ -48,6 +49,7 @@ type ConversationListItemProps = {
   conversationTopic: string;
   conversationName: string;
   conversationPeerAddress: string;
+  conversationPeerAvatar: string | undefined;
   lastMessagePreview: string | undefined;
   lastMessageFromMe: boolean;
   lastMessageStatus?: "delivered" | "error" | "seen" | "sending" | "sent";
@@ -66,6 +68,7 @@ const ConversationListItem = memo(function ConversationListItem({
   conversationTime,
   conversationName,
   conversationPeerAddress,
+  conversationPeerAvatar,
   lastMessagePreview,
   lastMessageStatus,
   lastMessageFromMe,
@@ -114,46 +117,51 @@ const ConversationListItem = memo(function ConversationListItem({
       navigation.removeListener("transitionEnd", resetSelected);
     };
   }, [navigation, resetSelected]);
+
   const listItemContent = (
     <View style={styles.conversationListItem}>
-      <Text style={styles.conversationName} numberOfLines={1}>
-        {conversationName}
-      </Text>
-      {lastMessageFromMe &&
-        (lastMessageStatus === "sending" ? (
-          <Clock
-            style={styles.lastMessageStatus}
-            fill={textSecondaryColor(colorScheme)}
-            width={12}
-            height={12}
-          />
-        ) : (
-          <Checkmark
-            style={styles.lastMessageStatus}
-            fill={textSecondaryColor(colorScheme)}
-            width={10}
-            height={10}
-          />
-        ))}
-      <Text
-        style={styles.messagePreview}
-        numberOfLines={Platform.OS === "ios" ? 2 : 1}
-      >
-        {lastMessageFromMe ? <View style={{ width: 15 }} /> : undefined}
-        {lastMessagePreview}
-      </Text>
-      <View style={styles.timeAndChevron}>
-        <Text style={styles.timeText}>{timeToShow}</Text>
-        {Platform.OS === "ios" && (
-          <Picto
-            picto="chevron.right"
-            weight="semibold"
-            color={actionSecondaryColor(colorScheme)}
-            size={10}
-          />
-        )}
+      <Avatar
+        size={Platform.OS === "ios" ? 56 : 47}
+        style={styles.avatarWrapper}
+        uri={conversationPeerAvatar}
+      />
+      <View style={styles.conversationListItemContent}>
+        <Text style={styles.conversationName} numberOfLines={1}>
+          {conversationName}
+        </Text>
+        {lastMessageFromMe &&
+          (lastMessageStatus === "sending" ? (
+            <Clock
+              style={styles.lastMessageStatus}
+              fill={textSecondaryColor(colorScheme)}
+              width={12}
+              height={12}
+            />
+          ) : (
+            <Checkmark
+              style={styles.lastMessageStatus}
+              fill={textSecondaryColor(colorScheme)}
+              width={10}
+              height={10}
+            />
+          ))}
+        <Text style={styles.messagePreview} numberOfLines={2}>
+          {lastMessageFromMe ? <View style={{ width: 15 }} /> : undefined}
+          {lastMessagePreview}
+        </Text>
+        <View style={styles.timeAndChevron}>
+          <Text style={styles.timeText}>{timeToShow}</Text>
+          {Platform.OS === "ios" && (
+            <Picto
+              picto="chevron.right"
+              weight="semibold"
+              color={actionSecondaryColor(colorScheme)}
+              size={10}
+            />
+          )}
+        </View>
+        {showUnread && <View style={styles.unread} />}
       </View>
-      {showUnread && <View style={styles.unread} />}
     </View>
   );
 
@@ -357,24 +365,37 @@ const getStyles = (colorScheme: ColorSchemeName) =>
     }),
     rowSeparatorMargin: {
       position: "absolute",
-      width: 30,
+      width: 84,
       height: 2,
       backgroundColor: backgroundColor(colorScheme),
       bottom: -1.5,
     },
-    conversationListItem: Platform.select({
-      default: {
-        height: 75.5,
-        paddingTop: 7.5,
-        paddingRight: 60,
-        marginLeft: 32,
-      },
-      android: {
-        height: 72,
-        paddingTop: 12,
-        paddingHorizontal: 24,
-      },
-    }),
+    conversationListItem: {
+      flexDirection: "row",
+      height: "100%",
+    },
+    avatarWrapper: {
+      marginLeft: 16,
+      alignSelf: "center",
+    },
+    conversationListItemContent: {
+      flexGrow: 1,
+      flexShrink: 1,
+      ...Platform.select({
+        default: {
+          height: 75.5,
+          paddingTop: 7.5,
+          paddingRight: 60,
+          marginLeft: 12,
+        },
+        android: {
+          height: 72,
+          paddingTop: 12,
+          paddingLeft: 16,
+          paddingRight: 45,
+        },
+      }),
+    },
     conversationName: {
       color: textPrimaryColor(colorScheme),
       ...Platform.select({
@@ -452,7 +473,7 @@ const getStyles = (colorScheme: ColorSchemeName) =>
           top: 35,
         },
         android: {
-          left: 24,
+          left: 16,
           top: 39,
         },
       }),
