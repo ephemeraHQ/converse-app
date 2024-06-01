@@ -1,4 +1,4 @@
-import { GroupChangeContent } from "@xmtp/react-native-sdk";
+import { GroupUpdatedContent } from "@xmtp/react-native-sdk";
 import { useMemo } from "react";
 import { StyleSheet, Text, useColorScheme } from "react-native";
 
@@ -10,27 +10,27 @@ import { textSecondaryColor } from "../../utils/colors";
 import { getPreferredName } from "../../utils/profile";
 import { MessageToDisplay } from "./Message/Message";
 
-export default function ChatGroupChangeMessage({
+export default function ChatGroupUpdatedMessage({
   message,
 }: {
   message: MessageToDisplay;
 }) {
   const styles = useStyles();
   const membersActions = useMemo(() => {
-    const content = JSON.parse(message.content) as GroupChangeContent;
+    const content = JSON.parse(message.content) as GroupUpdatedContent;
     const textMessages: string[] = [];
     const profiles = getProfilesStore(currentAccount()).getState().profiles;
     content.membersAdded.forEach((m) => {
       const readableName = getPreferredName(
-        profiles[m.address]?.socials,
-        m.address
+        profiles[m.inboxId]?.socials,
+        m.inboxId
       );
       textMessages.push(`${readableName} joined the conversation`);
     });
     content.membersRemoved.forEach((m) => {
       const readableName = getPreferredName(
-        profiles[m.address]?.socials,
-        m.address
+        profiles[m.inboxId]?.socials,
+        m.inboxId
       );
       textMessages.push(`${readableName} left the conversation`);
     });

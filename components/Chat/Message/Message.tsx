@@ -40,7 +40,7 @@ import {
 import ClickableText from "../../ClickableText";
 import ActionButton from "../ActionButton";
 import AttachmentMessagePreview from "../Attachment/AttachmentMessagePreview";
-import ChatGroupChangeMessage from "../ChatGroupChangeMessage";
+import ChatGroupUpdatedMessage from "../ChatGroupUpdatedMessage";
 import FramesPreviews from "../Frame/FramesPreviews";
 import ChatInputReplyBubble from "../Input/InputReplyBubble";
 import TransactionPreview from "../Transaction/TransactionPreview";
@@ -90,8 +90,8 @@ function ChatMessage({ message, colorScheme, isGroup }: Props) {
     case "coinbasePayment":
       messageContent = <TransactionPreview message={message} />;
       break;
-    case "groupChange":
-      messageContent = <ChatGroupChangeMessage message={message} />;
+    case "groupUpdated":
+      messageContent = <ChatGroupUpdatedMessage message={message} />;
       break;
     default: {
       messageContent = (
@@ -114,10 +114,10 @@ function ChatMessage({ message, colorScheme, isGroup }: Props) {
 
   const isAttachment = isAttachmentMessage(message.contentType);
   const isTransaction = isTransactionMessage(message.contentType);
-  const isGroupChange = isContentType("groupChange", message.contentType);
+  const isGroupUpdated = isContentType("groupUpdated", message.contentType);
 
   const reactions = getMessageReactions(message);
-  const showInBubble = !isGroupChange;
+  const showInBubble = !isGroupUpdated;
 
   // maybe using useChatStore inside ChatMessage
   // leads to bad perf? Let's be cautious

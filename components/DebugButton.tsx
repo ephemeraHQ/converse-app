@@ -202,9 +202,9 @@ const DebugButton = forwardRef((props, ref) => {
 
           const aliceGroup = (await alice.conversations.listGroups())[0];
           // console.log(aliceGroup);
-          if (aliceGroup.peerAddresses.includes(bob.address.toLowerCase())) {
-            console.log("bob is in alice group !!");
-          }
+          // if (aliceGroup.peerAddresses.includes(bob.address.toLowerCase())) {
+          //   console.log("bob is in alice group !!");
+          // }
           const groups = await bob.conversations.listGroups();
           console.log("we have a bob group", groups.length);
           const convo = await bob.conversations.newConversation(

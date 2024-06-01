@@ -10,6 +10,7 @@ import XMTP
 import Alamofire
 
 func handleNewConversationFirstMessage(xmtpClient: XMTP.Client, apiURI: String?, pushToken: String?, conversation: XMTP.Conversation, bestAttemptContent: inout UNMutableNotificationContent) async -> (shouldShowNotification: Bool, messageId: String?) {
+  // @todo => handle new group first messages?
   var shouldShowNotification = false
   var attempts = 0
   var messageId: String? = nil
@@ -27,7 +28,8 @@ func handleNewConversationFirstMessage(xmtpClient: XMTP.Client, apiURI: String?,
             messageContent = String(data: message.encodedContent.content, encoding: .utf8)
         }
         
-        let spamScore = await computeSpamScore(
+        // @todo => handle group messages here (conversation.peerAddress)
+        let spamScore = try await computeSpamScore(
           address: conversation.peerAddress,
           message: messageContent,
           sentViaConverse: message.sentViaConverse,
@@ -56,7 +58,7 @@ func handleNewConversationFirstMessage(xmtpClient: XMTP.Client, apiURI: String?,
             print("[NotificationExtension] Not showing a notification")
             break
           } else if let content = decodedMessageResult.content {
-            bestAttemptContent.title = shortAddress(address: conversation.peerAddress)
+            bestAttemptContent.title = shortAddress(address: try conversation.peerAddress)
             bestAttemptContent.body = content
             shouldShowNotification = true
             messageId = decodedMessageResult.id // @todo probably remove this?
@@ -77,7 +79,7 @@ func handleNewConversationFirstMessage(xmtpClient: XMTP.Client, apiURI: String?,
           shouldShowNotification = false
         } else {
           // Let's import the conversation so we can get hmac keys
-          await xmtpClient.conversations.importTopicData(data: conversation.toTopicData())
+          try await xmtpClient.conversations.importTopicData(data: conversation.toTopicData())
           var request = Xmtp_KeystoreApi_V1_GetConversationHmacKeysRequest()
           request.topics = [conversation.topic]
           let hmacKeys = await xmtpClient.conversations.getHmacKeys(request: request);

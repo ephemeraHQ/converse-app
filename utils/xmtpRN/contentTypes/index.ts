@@ -7,7 +7,7 @@ export const contentTypesPrefixes = {
   readReceipt: "xmtp.org/readReceipt:",
   coinbasePayment: "coinbase.com/coinbase-messaging-payment-activity:",
   transactionReference: "xmtp.org/transactionReference:",
-  groupChange: "xmtp.org/group_membership_change:",
+  groupUpdated: "xmtp.org/group_updated:",
 };
 
 export const isContentType = (
