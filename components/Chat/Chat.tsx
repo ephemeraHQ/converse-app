@@ -79,7 +79,7 @@ const getListArray = (
           previousMessage.senderAddress === message.senderAddress &&
           !message.dateChange &&
           !isContentType("reaction", previousMessage.contentType) &&
-          !isContentType("groupChange", previousMessage.contentType)
+          !isContentType("groupUpdated", previousMessage.contentType)
         ) {
           message.hasPreviousMessageInSeries = true;
         }
@@ -99,7 +99,7 @@ const getListArray = (
           nextMessage.senderAddress === message.senderAddress &&
           !nextMessageDateChange &&
           !isContentType("reaction", nextMessage.contentType) &&
-          !isContentType("groupChange", nextMessage.contentType)
+          !isContentType("groupUpdated", nextMessage.contentType)
         ) {
           message.hasNextMessageInSeries = true;
         }

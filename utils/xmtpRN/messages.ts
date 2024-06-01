@@ -1,7 +1,7 @@
 import { TransactionReference } from "@xmtp/content-type-transaction-reference";
 import {
   DecodedMessage,
-  GroupChangeContent,
+  GroupUpdatedContent,
   ReactionContent,
   RemoteAttachmentContent,
   ReplyContent,
@@ -86,8 +86,8 @@ const serializeProtocolMessageContent = (
     content = JSON.stringify(messageContent as TransactionReference);
   } else if (isContentType("coinbasePayment", contentType)) {
     content = JSON.stringify(messageContent as CoinbaseMessagingPaymentContent);
-  } else if (isContentType("groupChange", contentType)) {
-    content = JSON.stringify(messageContent as GroupChangeContent);
+  } else if (isContentType("groupUpdated", contentType)) {
+    content = JSON.stringify(messageContent as GroupUpdatedContent);
   } else {
     supported = false;
   }
