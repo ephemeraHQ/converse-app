@@ -112,7 +112,7 @@ export const UserProfile = ({ onboarding, navigation }: Props) => {
 
     if (profile.displayName.length < 3 || profile.displayName.length > 32) {
       setErrorMessage(
-        "Your user name must be between 3 and 32 characters long"
+        "Display names must be between 2 and 32 characters and can't include domain name extensions"
       );
       return;
     }
