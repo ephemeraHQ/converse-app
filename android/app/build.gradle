@@ -159,11 +159,12 @@ android {
     lint {
         abortOnError false
     }
-
     packagingOptions {
-        // Should prevent clashes with other libraries that use OpenSSL
-        pickFirst '**/libcrypto.so'
+        jniLibs {
+            pickFirsts += ['**/libcrypto.so']
+        }
     }
+
 }
 
 // Apply static values from `gradle.properties` to the `android.packagingOptions`
