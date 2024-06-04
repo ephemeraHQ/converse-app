@@ -1,7 +1,7 @@
 import { Reaction } from "@xmtp/content-type-reaction";
 import {
-  RemoteAttachment,
   Attachment,
+  RemoteAttachment,
 } from "@xmtp/content-type-remote-attachment";
 import { Reply } from "@xmtp/content-type-reply";
 import { TransactionReference } from "@xmtp/content-type-transaction-reference";
@@ -102,7 +102,6 @@ const protocolMessageToStateMessage = (
     sent: message.sent.getTime(),
     contentType,
     status: "delivered",
-    sentViaConverse: message.sentViaConverse || false,
     content,
     referencedMessageId,
     topic: message.contentTopic,
