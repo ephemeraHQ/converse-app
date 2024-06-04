@@ -45,7 +45,7 @@ const protocolGroupToStateConversation = async (
   group: GroupWithCodecsType
 ): Promise<XmtpConversation> => ({
   topic: group.topic,
-  groupMembers: await group.memberAddresses(true),
+  groupMembers: (await group.members()).map((m) => m.addresses[0]),
   createdAt: group.createdAt,
   messages: new Map(),
   messagesIds: [],
@@ -55,7 +55,12 @@ const protocolGroupToStateConversation = async (
   pending: false,
   version: group.version,
   isGroup: true,
-  groupAdmins: [group.adminAddress],
+  groupAdmins: (await group.members())
+    .filter(
+      (m) =>
+        m.permissionLevel === "admin" || m.permissionLevel === "super_admin"
+    )
+    .map((m) => m.addresses[0]),
   groupPermissionLevel: group.permissionLevel,
 });
 
@@ -132,7 +137,7 @@ const handleNewConversation = async (
   conversation: ConversationWithCodecsType | GroupWithCodecsType
 ) => {
   setOpenedConversation(client.address, conversation);
-  const isGroup = !!(conversation as any).peerAddresses;
+  const isGroup = !!(conversation as any).peerInboxIds;
   const isDMConversation = !!(conversation as any).peerAddress;
   saveConversations(
     client.address,
@@ -444,7 +449,7 @@ export const canGroupMessage = async (account: string, peer: string) => {
 export const createGroup = async (
   account: string,
   peers: string[],
-  permissionLevel: "everyone_admin" | "creator_admin"
+  permissionLevel: "all_members" | "admin_only" = "all_members"
 ) => {
   const client = (await getXmtpClient(account)) as ConverseXmtpClientType;
   const group = await client.conversations.newGroup(peers, permissionLevel);

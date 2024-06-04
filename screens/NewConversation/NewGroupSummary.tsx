@@ -30,8 +30,8 @@ export default function NewGroupSummary({
   const [creatingGroup, setCreatingGroup] = useState(false);
   const isSplitScreen = useIsSplitScreen();
   const [groupPermissionLevel, setGroupPermissionLevel] = useState<
-    "creator_admin" | "everyone_admin"
-  >("creator_admin");
+    "all_members" | "admin_only"
+  >("admin_only");
 
   useEffect(() => {
     navigation.setOptions({
@@ -94,10 +94,10 @@ export default function NewGroupSummary({
               <Switch
                 onValueChange={() => {
                   setGroupPermissionLevel((p) =>
-                    p === "creator_admin" ? "everyone_admin" : "creator_admin"
+                    p === "admin_only" ? "all_members" : "admin_only"
                   );
                 }}
-                value={groupPermissionLevel === "everyone_admin"}
+                value={groupPermissionLevel === "all_members"}
               />
             ),
           },
