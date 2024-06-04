@@ -110,9 +110,22 @@ const protocolMessageToStateMessage = (
       message.contentTypeId,
       supportedContentType ? message.content() : undefined
     );
+
+  // For now, use the group member linked address as "senderAddress"
+  // @todo => make inboxId a first class citizen
+  let senderAddress = message.senderAddress;
+  if (message.topic.startsWith("/xmtp/mls/1/g-")) {
+    const groupMember = groupMembers[message.topic]?.find(
+      (m) => m.inboxId === message.senderAddress
+    );
+    if (groupMember) {
+      senderAddress = groupMember.addresses[0];
+    }
+  }
+
   return {
     id: message.id,
-    senderAddress: message.senderAddress,
+    senderAddress,
     sent: message.sent,
     contentType,
     status: "delivered",
@@ -188,13 +201,14 @@ export const stopStreamingAllMessage = async (account: string) => {
 //   client.conversations.cancelStreamAllGroupMessages();
 // };
 
+const groupMembers: { [topic: string]: Member[] } = {};
+
 export const syncGroupsMessages = async (
   account: string,
   groups: GroupWithCodecsType[],
   queryGroupsFromTimestamp: { [topic: string]: number }
 ) => {
   console.log(`Syncing ${groups.length} groups...`);
-  const groupMembers: { [topic: string]: Member[] } = {};
   for (const group of groups) {
     console.log("syncing group", group.topic);
     await group.sync();
@@ -212,16 +226,6 @@ export const syncGroupsMessages = async (
       )
     )
   ).flat();
-  // For now, use the group member linked address as "senderAddress"
-  // @todo => make inboxId a first class citizen
-  newMessages.forEach((groupMessage) => {
-    const groupMember = groupMembers[groupMessage.topic].find(
-      (m) => m.inboxId === groupMessage.senderAddress
-    );
-    if (groupMember) {
-      groupMessage.senderAddress = groupMember.addresses[0];
-    }
-  });
   console.log(`${newMessages.length} groups messages pulled`);
   saveMessages(account, protocolMessagesToStateMessages(newMessages));
   return newMessages.length;

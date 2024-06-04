@@ -80,6 +80,9 @@ const sendConverseGroupMessages = async (
           newMessageSent: new Date().getTime(),
         },
       });
+      // Here message has been sent, let's mark it as
+      // sent locally to make sure we don't sent twice
+      await markMessageAsSent(account, newMessageId, groupMessage.group.topic);
       // Let's refresh group ?
       // await syncGroupsMessages(account, [groupMessage.group], {
       //   [groupMessage.group.topic]: now,
