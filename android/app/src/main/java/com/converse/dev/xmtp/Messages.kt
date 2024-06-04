@@ -81,7 +81,6 @@ suspend fun handleNewConversationFirstMessage(
                 val spamScore = computeSpamScore(
                     address = conversation.peerAddress,
                     message = messageContent,
-                    sentViaConverse = message.sentViaConverse,
                     contentType = contentType,
                     appContext = appContext,
                     apiURI = apiURI
@@ -120,7 +119,6 @@ suspend fun handleNewConversationFirstMessage(
                     appContext,
                     message,
                     xmtpClient,
-                    message.sentViaConverse
                 )
 
                 if (decodedMessageResult.senderAddress == xmtpClient.address || decodedMessageResult.forceIgnore) {
@@ -178,7 +176,6 @@ fun handleOngoingConversationMessage(
     xmtpClient: Client,
     envelope: Envelope,
     remoteMessage: RemoteMessage,
-    sentViaConverse: Boolean
 ): NotificationDataResult {
     val conversation = getPersistedConversation(appContext, xmtpClient, envelope.contentTopic)
         ?: run {
@@ -194,7 +191,6 @@ fun handleOngoingConversationMessage(
         appContext,
         message,
         xmtpClient,
-        sentViaConverse
     )
 
     val shouldShowNotification = if (decodedMessageResult.senderAddress != xmtpClient.address && !decodedMessageResult.forceIgnore && decodedMessageResult.content != null) {
@@ -220,7 +216,6 @@ fun handleMessageByContentType(
     appContext: Context,
     decodedMessage: DecodedMessage,
     xmtpClient: Client,
-    sentViaConverse: Boolean
 ): DecodedMessageResult {
     var contentType = getContentTypeString(decodedMessage.encodedContent.type)
     var contentToReturn: String?
@@ -293,7 +288,6 @@ fun handleMessageByContentType(
                 decodedMessage = decodedMessage,
                 content = it,
                 contentType = contentType,
-                sentViaConverse = sentViaConverse,
                 referencedMessageId = referencedMessageId
             )
         }
@@ -311,7 +305,7 @@ fun getContentTypeString(contentType: Content.ContentTypeId): String {
     return "${contentType.authorityId}/${contentType.typeId}:${contentType.versionMajor}.${contentType.versionMinor}"
 }
 
-fun saveMessageToStorage(appContext: Context, account: String, decodedMessage: DecodedMessage, content: String, contentType: String, sentViaConverse: Boolean, referencedMessageId: String?) {
+fun saveMessageToStorage(appContext: Context, account: String, decodedMessage: DecodedMessage, content: String, contentType: String, referencedMessageId: String?) {
     val mmkv = getMmkv(appContext)
     val currentSavedMessagesString = mmkv?.decodeString("saved-notifications-messages")
     Log.d("PushNotificationsService", "Got current saved messages from storage: $currentSavedMessagesString")
@@ -330,7 +324,6 @@ fun saveMessageToStorage(appContext: Context, account: String, decodedMessage: D
         senderAddress=decodedMessage.senderAddress,
         sent=decodedMessage.sent.time,
         id=decodedMessage.id,
-        sentViaConverse=sentViaConverse,
         contentType=contentType,
         account=account,
         referencedMessageId=referencedMessageId
@@ -377,15 +370,12 @@ fun getJsonReaction(decodedMessage: DecodedMessage): String {
     }
 }
 
-fun computeSpamScore(address: String, message: String?, sentViaConverse: Boolean, contentType: String, apiURI: String?, appContext: Context): Double {
+fun computeSpamScore(address: String, message: String?, contentType: String, apiURI: String?, appContext: Context): Double {
     var spamScore = runBlocking {
         getSenderSpamScore(appContext, address, apiURI);
     }
     if (contentType.startsWith("xmtp.org/text:") && message?.let { containsURL(it) } == true) {
         spamScore += 1
-    }
-    if (sentViaConverse) {
-        spamScore -= 1
     }
     return spamScore
 }
