@@ -6,6 +6,8 @@ import {
   PreparedLocalMessage,
   sendPreparedMessage,
 } from "@xmtp/react-native-sdk";
+import { ConversationSendPayload } from "@xmtp/react-native-sdk/build/lib/types";
+import { DefaultContentTypes } from "@xmtp/react-native-sdk/build/lib/types/DefaultContentType";
 
 import { Message as MessageEntity } from "../../data/db/entities/messageEntity";
 import {
@@ -91,7 +93,9 @@ const sendConverseGroupMessages = async (
   }
 };
 
-const getMessageContent = (message: MessageEntity) => {
+const getMessageContent = (
+  message: MessageEntity
+): ConversationSendPayload<DefaultContentTypes> => {
   if (isContentType("remoteAttachment", message.contentType)) {
     return {
       remoteAttachment: deserializeRemoteAttachmentMessageContent(
@@ -174,7 +178,7 @@ export const sendPendingMessages = async (account: string) => {
             newMessageSent: preparedMessage.preparedAt,
             message,
           };
-        } else if ((conversation as any).peerAddresses) {
+        } else if ((conversation as any).peerInboxIds) {
           // This is a group message
           groupMessagesToSend.set(message.id, {
             group: conversation as GroupWithCodecsType,

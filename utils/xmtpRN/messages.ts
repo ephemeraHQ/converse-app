@@ -2,6 +2,7 @@ import { TransactionReference } from "@xmtp/content-type-transaction-reference";
 import {
   DecodedMessage,
   GroupUpdatedContent,
+  Member,
   ReactionContent,
   RemoteAttachmentContent,
   ReplyContent,
@@ -193,25 +194,34 @@ export const syncGroupsMessages = async (
   queryGroupsFromTimestamp: { [topic: string]: number }
 ) => {
   console.log(`Syncing ${groups.length} groups...`);
+  const groupMembers: { [topic: string]: Member[] } = {};
   for (const group of groups) {
     console.log("syncing group", group.topic);
     await group.sync();
+    groupMembers[group.topic] = await group.members();
     console.log("synced group", group.topic);
   }
   console.log(`${groups.length} groups synced!`);
   const newMessages = (
     await Promise.all(
       groups.map((g) =>
-        g.messages(
-          true, // skipSync
-          {
-            after: queryGroupsFromTimestamp[g.topic],
-            direction: "SORT_DIRECTION_ASCENDING",
-          }
-        )
+        g.messages({
+          after: queryGroupsFromTimestamp[g.topic],
+          direction: "SORT_DIRECTION_ASCENDING",
+        })
       )
     )
   ).flat();
+  // For now, use the group member linked address as "senderAddress"
+  // @todo => make inboxId a first class citizen
+  newMessages.forEach((groupMessage) => {
+    const groupMember = groupMembers[groupMessage.topic].find(
+      (m) => m.inboxId === groupMessage.senderAddress
+    );
+    if (groupMember) {
+      groupMessage.senderAddress = groupMember.addresses[0];
+    }
+  });
   console.log(`${newMessages.length} groups messages pulled`);
   saveMessages(account, protocolMessagesToStateMessages(newMessages));
   return newMessages.length;
@@ -248,7 +258,7 @@ export const syncConversationsMessages = async (
     const messagesByTopic: { [topic: string]: DecodedMessage[] } = {};
     messagesBatch.forEach((m) => {
       messagesByTopic[m.topic] = messagesByTopic[m.topic] || [];
-      messagesByTopic[m.topic].push(m);
+      messagesByTopic[m.topic].push(m as DecodedMessage);
       if (m.sent > queryConversationsFromTimestamp[m.topic]) {
         queryConversationsFromTimestamp[m.topic] = m.sent;
       }

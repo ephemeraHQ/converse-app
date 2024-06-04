@@ -65,10 +65,7 @@ export default function GroupScreen({
       }
       return 0;
     });
-    if (
-      currentAccountIsAdmin ||
-      group.groupPermissionLevel === "everyone_admin"
-    ) {
+    if (currentAccountIsAdmin || group.groupPermissionLevel === "all_members") {
       items.push({
         id: "admin",
         title: "Add members",
@@ -90,7 +87,7 @@ export default function GroupScreen({
         action: () => {
           const canRemove =
             currentAccountIsAdmin ||
-            group.groupPermissionLevel === "everyone_admin";
+            group.groupPermissionLevel === "all_members";
           const options = ["Profile page"];
           if (canRemove) {
             options.push("Remove from group");

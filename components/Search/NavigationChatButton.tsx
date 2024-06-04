@@ -48,7 +48,7 @@ export function NavigationChatButton({
     setLoading(true);
     const allowed = await canGroupMessage(currentAccount(), address);
     setLoading(false);
-    if (!allowed) {
+    if (!allowed[address]) {
       Alert.alert("Cannot be added to group yet");
       return;
     }
