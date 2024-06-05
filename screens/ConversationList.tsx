@@ -235,22 +235,20 @@ export default gestureHandlerRootHOC(ConversationList);
 const useStyles = () => {
   const colorScheme = useColorScheme();
   return StyleSheet.create({
-    searchTitleContainer: {
-      ...Platform.select({
-        default: {
-          padding: 10,
-          paddingLeft: 16,
-          backgroundColor: backgroundColor(colorScheme),
-          borderBottomColor: itemSeparatorColor(colorScheme),
-          borderBottomWidth: 0.5,
-        },
-        android: {
-          padding: 10,
-          paddingLeft: 16,
-          borderBottomWidth: 0,
-        },
-      }),
-    },
+    searchTitleContainer: Platform.select({
+      default: {
+        padding: 10,
+        paddingLeft: 16,
+        backgroundColor: backgroundColor(colorScheme),
+        borderBottomColor: itemSeparatorColor(colorScheme),
+        borderBottomWidth: 0.5,
+      },
+      android: {
+        padding: 10,
+        paddingLeft: 16,
+        borderBottomWidth: 0,
+      },
+    }),
     searchTitle: {
       ...Platform.select({
         default: {

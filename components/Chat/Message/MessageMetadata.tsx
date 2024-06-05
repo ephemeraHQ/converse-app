@@ -1,4 +1,3 @@
-import format from "date-fns/format";
 import React from "react";
 import { StyleSheet, Text, useColorScheme, View } from "react-native";
 
@@ -6,6 +5,7 @@ import Checkmark from "../../../assets/checkmark.svg";
 import Clock from "../../../assets/clock.svg";
 import ConverseMessageBubble from "../../../assets/message-bubble.svg";
 import { textPrimaryColor } from "../../../utils/colors";
+import { getTime } from "../../../utils/date";
 import { MessageToDisplay } from "./Message";
 
 type Props = {
@@ -19,7 +19,7 @@ export default function MessageMetadata({ message, white }: Props) {
   return (
     <View style={styles.metadata}>
       <Text style={[styles.time, white ? styles.timeWhite : undefined]}>
-        {format(message.sent, "HH:mm")}
+        {getTime(message.sent)}
       </Text>
       {message.sentViaConverse && (
         <ConverseMessageBubble
