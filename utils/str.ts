@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { PixelRatio, TextInput, Dimensions, Platform } from "react-native";
+import { Dimensions, PixelRatio, Platform, TextInput } from "react-native";
 
 import { getProfilesStore, useAccountsList } from "../data/store/accountsStore";
 import { XmtpConversation } from "../data/store/chatStore";
@@ -46,7 +46,8 @@ export const addressPrefix = (address: string) =>
 
 export const conversationName = (conversation: XmtpConversation) => {
   const defaultName = conversation.isGroup
-    ? capitalize(humanize(conversation.topic.slice(14, 46), 3, " "))
+    ? conversation.groupName ??
+      capitalize(humanize(conversation.topic.slice(14, 46), 3, " "))
     : shortAddress(conversation.peerAddress);
   return conversation.conversationTitle || defaultName;
 };
