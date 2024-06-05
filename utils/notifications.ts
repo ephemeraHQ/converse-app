@@ -95,17 +95,19 @@ const _subscribeToNotifications = async (account: string): Promise<void> => {
     const needToUpdateConversationSubscription = (
       c: ConversationWithLastMessagePreview
     ) => {
-      const hasValidAddress = c.peerAddress;
+      const hasValidPeer =
+        c.peerAddress || (c.groupMembers && c.groupMembers.length > 0);
       const isPending = !!c.pending;
 
-      if (!hasValidAddress || isPending) {
+      if (!hasValidPeer || isPending) {
         return {
           topic: c.topic,
           update: false,
         };
       }
 
-      const isNotBlocked = !isBlocked(c.peerAddress);
+      // @todo => handle blocking groups ?
+      const isNotBlocked = !c.peerAddress || !isBlocked(c.peerAddress);
       const isTopicNotDeleted = topicsData[c.topic]?.status !== "deleted";
       const isTopicInInbox =
         conversationShouldBeDisplayed(c, topicsData, peersStatus) &&
@@ -475,7 +477,9 @@ export const saveConversationIdentifiersForNotifications = (
 ) => {
   const conversationDict: any = {
     peerAddress: conversation.peerAddress,
-    shortAddress: shortAddress(conversation.peerAddress),
+    shortAddress: conversation.peerAddress
+      ? shortAddress(conversation.peerAddress)
+      : undefined,
     title: conversationName(conversation),
   };
 

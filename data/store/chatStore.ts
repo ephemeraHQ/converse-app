@@ -29,9 +29,8 @@ type XmtpConversationContext = {
   };
 };
 
-export type XmtpConversation = {
+type XmtpConversationShared = {
   topic: string;
-  peerAddress: string;
   createdAt: number;
   context?: XmtpConversationContext;
   messages: Map<string, XmtpMessage>;
@@ -45,6 +44,24 @@ export type XmtpConversation = {
   spamScore?: number;
   lastNotificationsSubscribedPeriod?: number;
 };
+
+export type XmtpDMConversation = XmtpConversationShared & {
+  isGroup: false;
+  peerAddress: string;
+  groupMembers?: undefined;
+  groupAdmins?: undefined;
+  groupPermissionLevel?: undefined;
+};
+
+export type XmtpGroupConversation = XmtpConversationShared & {
+  isGroup: true;
+  peerAddress?: undefined;
+  groupMembers: string[];
+  groupAdmins: string[];
+  groupPermissionLevel: "all_members" | "admin_only";
+};
+
+export type XmtpConversation = XmtpDMConversation | XmtpGroupConversation;
 
 export type XmtpConversationWithUpdate = XmtpConversation & {
   lastUpdateAt: number;
@@ -139,6 +156,9 @@ export type ChatStoreType = {
   ) => void;
 
   setSpamScores: (topicSpamScores: TopicSpamScores) => void;
+
+  // METHOD ONLY USED TEMPORARILY FOR WHEN WE SEND GROP MESSAGES
+  deleteMessage: (topic: string, messageId: string) => void;
 
   setMessageMetadata: (
     topic: string,
@@ -620,6 +640,22 @@ export const initChatStore = (account: string) => {
                 newState.conversations[topic].spamScore = spamScore;
                 newState.conversations[topic].lastUpdateAt = now();
               });
+              return newState;
+            }),
+          // METHOD ONLY USED TEMPORARILY FOR WHEN WE SEND GROP MESSAGES
+          deleteMessage: (topic: string, messageId: string) =>
+            set((state) => {
+              // We do not use lastUpdateAt so it should not show an update
+              // until we get back the "real" message
+              const newState = { ...state };
+              if (newState.conversations[topic]) {
+                const indexOf =
+                  newState.conversations[topic]?.messagesIds.indexOf(messageId);
+                if (indexOf > -1) {
+                  newState.conversations[topic].messagesIds.splice(indexOf, 1);
+                  newState.conversations[topic].messages.delete(messageId);
+                }
+              }
               return newState;
             }),
           setMessageMetadata: (

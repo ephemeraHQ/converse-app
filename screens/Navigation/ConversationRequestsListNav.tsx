@@ -30,13 +30,14 @@ export default function ConversationRequestsListNav() {
     const methods = {
       "Clear all": async () => {
         setClearingAll(true);
+        // @todo => handle groups here
         const peers = Array.from(
           new Set(
             sortedConversationsWithPreview.conversationsRequests.map(
               (c) => c.peerAddress
             )
           )
-        );
+        ).filter((peer) => !!peer) as string[];
         await consentToPeersOnProtocol(account, peers, "deny");
         await updateConsentStatus(account);
         setClearingAll(false);

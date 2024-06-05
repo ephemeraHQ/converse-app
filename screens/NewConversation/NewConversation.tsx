@@ -1,5 +1,5 @@
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   Button,
   ScrollView,
@@ -9,52 +9,63 @@ import {
   View,
   useColorScheme,
   Platform,
+  Alert,
 } from "react-native";
 
-import ActivityIndicator from "../components/ActivityIndicator/ActivityIndicator";
-import AndroidBackAction from "../components/AndroidBackAction";
-import SearchBar from "../components/NewConversation/SearchBar";
-import Recommendations from "../components/Recommendations/Recommendations";
-import ProfileSearch from "../components/Search/ProfileSearch";
-import TableView from "../components/TableView/TableView";
-import { TableViewPicto } from "../components/TableView/TableViewImage";
-import config from "../config";
-import { createPendingConversation } from "../data/helpers/conversations/pendingConversations";
+import ActivityIndicator from "../../components/ActivityIndicator/ActivityIndicator";
+import AndroidBackAction from "../../components/AndroidBackAction";
+import ConverseButton from "../../components/Button/Button";
+import SearchBar from "../../components/NewConversation/SearchBar";
+import Recommendations from "../../components/Recommendations/Recommendations";
+import ProfileSearch from "../../components/Search/ProfileSearch";
+import TableView from "../../components/TableView/TableView";
+import { TableViewPicto } from "../../components/TableView/TableViewImage";
+import config from "../../config";
 import {
   currentAccount,
-  useCurrentAccount,
+  useChatStore,
   useRecommendationsStore,
-} from "../data/store/accountsStore";
-import { XmtpConversation } from "../data/store/chatStore";
-import { ProfileSocials } from "../data/store/profilesStore";
-import { useSelect } from "../data/store/storeHelpers";
-import { searchProfiles } from "../utils/api";
+} from "../../data/store/accountsStore";
+import { ProfileSocials } from "../../data/store/profilesStore";
+import { useSelect } from "../../data/store/storeHelpers";
+import { searchProfiles } from "../../utils/api";
 import {
   backgroundColor,
+  itemSeparatorColor,
   primaryColor,
   textPrimaryColor,
   textSecondaryColor,
-} from "../utils/colors";
-import {
-  computeNewConversationContext,
-  conversationLastMessagePreview,
-} from "../utils/conversation";
+} from "../../utils/colors";
 import {
   getAddressForPeer,
   getCleanAddress,
   isSupportedPeer,
-} from "../utils/eth";
-import { navigate } from "../utils/navigation";
-import { isEmptyObject } from "../utils/objects";
-import { isOnXmtp } from "../utils/xmtpRN/client";
-import { NavigationParamList } from "./Navigation/Navigation";
-import { useIsSplitScreen } from "./Navigation/navHelpers";
+} from "../../utils/eth";
+import { navigate } from "../../utils/navigation";
+import { isEmptyObject } from "../../utils/objects";
+import { getPreferredName } from "../../utils/profile";
+import { isOnXmtp } from "../../utils/xmtpRN/client";
+import { addMembersToGroup } from "../../utils/xmtpRN/conversations";
+import { NewConversationModalParams } from "./NewConversationModal";
 
 export default function NewConversation({
   route,
   navigation,
-}: NativeStackScreenProps<NavigationParamList, "NewConversation">) {
+}: NativeStackScreenProps<
+  NewConversationModalParams,
+  "NewConversationScreen"
+>) {
   const colorScheme = useColorScheme();
+  const [group, setGroup] = useState({
+    enabled: !!route.params?.addingToGroupTopic,
+    members: [] as (ProfileSocials & { address: string })[],
+  });
+  const existingGroup = useChatStore((s) =>
+    route.params?.addingToGroupTopic
+      ? s.conversations[route.params.addingToGroupTopic]
+      : undefined
+  );
+  const [loading, setLoading] = useState(false);
   useEffect(() => {
     navigation.setOptions({
       headerLeft: () =>
@@ -68,8 +79,49 @@ export default function NewConversation({
         ) : (
           <AndroidBackAction navigation={navigation} />
         ),
+      headerTitle: group.enabled
+        ? route.params?.addingToGroupTopic
+          ? "Add members"
+          : "New group"
+        : "New conversation",
+      headerRight: () => {
+        if (group.enabled && group.members.length > 0) {
+          if (loading) {
+            return <ActivityIndicator style={{ marginRight: 5 }} />;
+          } else {
+            return (
+              <ConverseButton
+                variant="text"
+                title={route.params?.addingToGroupTopic ? "Add" : "Next"}
+                onPress={async () => {
+                  if (route.params?.addingToGroupTopic) {
+                    setLoading(true);
+                    try {
+                      await addMembersToGroup(
+                        currentAccount(),
+                        route.params?.addingToGroupTopic,
+                        group.members.map((m) => m.address)
+                      );
+                      navigation.goBack();
+                    } catch (e) {
+                      setLoading(false);
+                      console.error(e);
+                      Alert.alert("An error occured");
+                    }
+                  } else {
+                    navigation.push("NewGroupSummary", {
+                      members: group.members,
+                    });
+                  }
+                }}
+              />
+            );
+          }
+        }
+        return undefined;
+      },
     });
-  }, [navigation]);
+  }, [group, loading, navigation, route.params?.addingToGroupTopic]);
 
   const [value, setValue] = useState(route.params?.peer || "");
   const searchingForValue = useRef("");
@@ -80,7 +132,6 @@ export default function NewConversation({
     profileSearchResults: {} as { [address: string]: ProfileSocials },
   });
 
-  const userAddress = useCurrentAccount() as string;
   const {
     updatedAt: recommendationsUpdatedAt,
     loading: recommendationsLoading,
@@ -215,53 +266,6 @@ export default function NewConversation({
     };
   }, [value]);
 
-  const isSplitScreen = useIsSplitScreen();
-
-  const navigateToTopic = useCallback(
-    (topic: string, message?: string) => {
-      if (Platform.OS !== "web") {
-        navigation.goBack();
-      }
-      setTimeout(
-        () => {
-          navigate("Conversation", { topic, message, focus: true });
-        },
-        isSplitScreen ? 0 : 300
-      );
-    },
-    [navigation, isSplitScreen]
-  );
-
-  const [creatingNewConversation, setCreatingNewConversation] = useState(false);
-
-  const createNewConversationWithPeer = useCallback(
-    async (userAddress: string, peerAddress: string) => {
-      if (creatingNewConversation) return;
-      setCreatingNewConversation(true);
-
-      try {
-        const newConversationContext = computeNewConversationContext(
-          userAddress,
-          peerAddress
-        );
-        const newConversationTopic = await createPendingConversation(
-          currentAccount(),
-          peerAddress,
-          newConversationContext
-        );
-        if (newConversationTopic) {
-          navigateToTopic(newConversationTopic);
-        } else {
-          setCreatingNewConversation(false);
-        }
-      } catch (e: any) {
-        console.log(e);
-        setCreatingNewConversation(false);
-      }
-    },
-    [creatingNewConversation, navigateToTopic]
-  );
-
   const inputRef = useRef<TextInput | null>(null);
   const initialFocus = useRef(false);
 
@@ -270,14 +274,6 @@ export default function NewConversation({
     !status.loading && value.length === 0 && recommendationsFrensCount > 0;
 
   const inputPlaceholder = ".converse.xyz, 0x, .eth, .lens, .fc, .cb.id, UD…";
-
-  const getLastMessagePreview = useCallback(
-    (c: XmtpConversation) => {
-      const lastMessage = conversationLastMessagePreview(c, userAddress);
-      return lastMessage?.contentPreview || "";
-    },
-    [userAddress]
-  );
 
   return (
     <View
@@ -309,12 +305,85 @@ export default function NewConversation({
         }}
         inputPlaceholder={inputPlaceholder}
       />
+      <View
+        style={[
+          styles.group,
+          {
+            display:
+              group.enabled && group.members.length === 0 ? "none" : "flex",
+          },
+        ]}
+      >
+        {!group.enabled && (
+          <ConverseButton
+            variant="text"
+            picto="person.2"
+            title="New group"
+            style={{
+              marginLeft: 7,
+              paddingTop: Platform.OS === "ios" ? 13 : 10,
+              paddingBottom: Platform.OS === "ios" ? 0 : 10,
+            }}
+            textStyle={{ fontWeight: "500" }}
+            onPress={() => {
+              setGroup({ enabled: true, members: [] });
+            }}
+          />
+        )}
+
+        {group.enabled &&
+          group.members.length > 0 &&
+          group.members.map((m, index) => {
+            const preferredName = getPreferredName(m, m.address);
+
+            return (
+              <ConverseButton
+                key={m.address}
+                title={preferredName}
+                variant="secondary"
+                picto="xmark"
+                style={styles.groupMemberButton}
+                textStyle={{
+                  lineHeight: 17,
+                  top: Platform.OS === "ios" ? undefined : 1,
+                }}
+                onPress={() =>
+                  setGroup((g) => {
+                    const members = [...g.members];
+                    members.splice(index, 1);
+                    return {
+                      ...g,
+                      members,
+                    };
+                  })
+                }
+              />
+            );
+          })}
+      </View>
 
       {!status.loading && !isEmptyObject(status.profileSearchResults) && (
         <View>
           <ProfileSearch
             navigation={navigation}
-            profiles={status.profileSearchResults}
+            profiles={(() => {
+              const searchResultsToShow = { ...status.profileSearchResults };
+              if (group.enabled && group.members) {
+                group.members.forEach((member) => {
+                  delete searchResultsToShow[member.address];
+                });
+              }
+              if (existingGroup) {
+                existingGroup.groupMembers?.forEach((a) => {
+                  delete searchResultsToShow[a];
+                });
+              }
+              return searchResultsToShow;
+            })()}
+            groupMode={group.enabled}
+            addToGroup={async (member) => {
+              setGroup((g) => ({ ...g, members: [...g.members, member] }));
+            }}
           />
         </View>
       )}
@@ -360,14 +429,8 @@ export default function NewConversation({
           <TableView
             items={[
               {
-                id: "reachOutToPol",
-                leftView: creatingNewConversation ? (
-                  <ActivityIndicator
-                    style={styles.tableViewActivityIndicator}
-                  />
-                ) : (
-                  <TableViewPicto symbol="link" />
-                ),
+                id: "inviteToConverse",
+                leftView: <TableViewPicto symbol="link" />,
                 title: "Invite them to Converse",
                 subtitle: "",
                 action: () => {
@@ -440,6 +503,25 @@ const useStyles = () => {
         default: { marginRight: 8 },
         android: { marginLeft: 12, marginRight: -4 },
       }),
+    },
+    group: {
+      minHeight: 50,
+      paddingBottom: Platform.OS === "ios" ? 10 : 0,
+      flexDirection: "row",
+      alignItems: "center",
+      paddingLeft: Platform.OS === "ios" ? 16 : 0,
+      justifyContent: "flex-start",
+      borderBottomWidth: Platform.OS === "android" ? 1 : 0.5,
+      borderBottomColor: itemSeparatorColor(colorScheme),
+      backgroundColor: backgroundColor(colorScheme),
+      flexWrap: "wrap",
+    },
+    groupMemberButton: {
+      padding: 0,
+      marginHorizontal: 0,
+      marginRight: 10,
+      height: Platform.OS === "ios" ? 30 : undefined,
+      marginTop: 10,
     },
   });
 };

@@ -15,6 +15,7 @@ import Delete from "@material-symbols/svg-400/outlined/delete.svg";
 import Done from "@material-symbols/svg-400/outlined/done.svg";
 import Edit from "@material-symbols/svg-400/outlined/edit.svg";
 import ExpandMore from "@material-symbols/svg-400/outlined/expand_more.svg";
+import Group from "@material-symbols/svg-400/outlined/group.svg";
 import Image from "@material-symbols/svg-400/outlined/image.svg";
 import Info from "@material-symbols/svg-400/outlined/info.svg";
 import IosShare from "@material-symbols/svg-400/outlined/ios_share.svg";
@@ -95,6 +96,7 @@ const pictoMapping: {
   "arrow.clockwise": Refresh,
   person: Person,
   "info.circle": Info,
+  "person.2": Group,
   "arrowshape.turn.up.left": Reply,
 };
 

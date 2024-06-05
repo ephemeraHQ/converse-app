@@ -2,15 +2,17 @@ import { NativeStackNavigationOptions } from "@react-navigation/native-stack";
 import { Platform, useColorScheme } from "react-native";
 
 import {
+  headerTitleStyle,
   listItemSeparatorColor,
   navigationSecondaryBackgroundColor,
   textPrimaryColor,
 } from "../../utils/colors";
-import NewConversation from "../NewConversation";
+import NewConversationModal from "../NewConversation/NewConversationModal";
 import { NativeStack, navigationAnimation } from "./Navigation";
 
 export type NewConversationNavParams = {
   peer?: string;
+  addingToGroupTopic?: string;
 };
 
 export const NewConversationScreenConfig = {
@@ -44,8 +46,12 @@ export default function NewConversationNav() {
   return (
     <NativeStack.Screen
       name="NewConversation"
-      component={NewConversation}
-      options={options}
+      component={NewConversationModal}
+      options={{
+        headerShown: false,
+        presentation: "modal",
+        headerTitleStyle: headerTitleStyle(colorScheme),
+      }}
     />
   );
 }

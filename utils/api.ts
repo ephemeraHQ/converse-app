@@ -365,4 +365,38 @@ export const postAddressBook = async (
   });
 };
 
+export type GroupLink = { id: string; name: string; description: string };
+
+export const getGroupLink = async (groupLinkId: string) => {
+  const { data } = await api.get(`/api/groups/${groupLinkId}`);
+  return data as GroupLink;
+};
+
+export type JoinGroupLinkResult =
+  | {
+      status: "SUCCESS";
+      topic: string;
+      reason: undefined;
+    }
+  | {
+      status: "DENIED";
+      reason: string | undefined;
+      topic: undefined;
+    }
+  | { status: "ERROR"; reason: undefined; topic: undefined };
+
+export const joinGroupFromLink = async (
+  userAddress: string,
+  groupLinkId: string
+) => {
+  const { data } = await api.post(
+    `/api/groups/join`,
+    { groupLinkId },
+    {
+      headers: await getXmtpApiHeaders(userAddress),
+    }
+  );
+  return data as JoinGroupLinkResult;
+};
+
 export default api;

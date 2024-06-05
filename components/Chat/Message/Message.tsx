@@ -16,6 +16,7 @@ import { Swipeable } from "react-native-gesture-handler";
 import {
   useChatStore,
   currentAccount,
+  useProfilesStore,
 } from "../../../data/store/accountsStore";
 import { XmtpMessage } from "../../../data/store/chatStore";
 import { useFramesStore } from "../../../data/store/framesStore";
@@ -30,6 +31,7 @@ import { getRelativeDate } from "../../../utils/date";
 import { isDesktop } from "../../../utils/device";
 import { converseEventEmitter } from "../../../utils/events";
 import { LimitedMap } from "../../../utils/objects";
+import { getPreferredName } from "../../../utils/profile";
 import { getMessageReactions } from "../../../utils/reactions";
 import { URL_REGEX } from "../../../utils/regex";
 import { getReadableProfile } from "../../../utils/str";
@@ -41,6 +43,7 @@ import {
 import ClickableText from "../../ClickableText";
 import ActionButton from "../ActionButton";
 import AttachmentMessagePreview from "../Attachment/AttachmentMessagePreview";
+import ChatGroupUpdatedMessage from "../ChatGroupUpdatedMessage";
 import FramesPreviews from "../Frame/FramesPreviews";
 import ChatInputReplyBubble from "../Input/InputReplyBubble";
 import TransactionPreview from "../Transaction/TransactionPreview";
@@ -59,9 +62,22 @@ type Props = {
   account: string;
   message: MessageToDisplay;
   colorScheme: ColorSchemeName;
+  isGroup: boolean;
 };
 
-function ChatMessage({ message, colorScheme }: Props) {
+const MessageSender = ({ message }: { message: MessageToDisplay }) => {
+  const senderSocials = useProfilesStore(
+    (s) => s.profiles[message.senderAddress]?.socials
+  );
+  const styles = useStyles();
+  return (
+    <Text style={styles.groupSender}>
+      {getPreferredName(senderSocials, message.senderAddress)}
+    </Text>
+  );
+};
+
+function ChatMessage({ message, colorScheme, isGroup }: Props) {
   const styles = useStyles();
 
   const metadata = <MessageMetadata message={message} white={message.fromMe} />;
@@ -90,20 +106,26 @@ function ChatMessage({ message, colorScheme }: Props) {
     case "coinbasePayment":
       messageContent = <TransactionPreview message={message} />;
       break;
+    case "groupUpdated":
+      messageContent = <ChatGroupUpdatedMessage message={message} />;
+      break;
     default: {
       messageContent = (
-        <ClickableText
-          style={[
-            styles.messageText,
-            message.fromMe ? styles.messageTextMe : undefined,
-          ]}
-        >
-          {/* Don't show URL as part of message bubble if this is a frame */}
-          {framesInStore[message.content]
-            ? ""
-            : message.content || message.contentFallback}
-          <View style={{ opacity: 0 }}>{metadata}</View>
-        </ClickableText>
+        <>
+          {isGroup && !message.fromMe && <MessageSender message={message} />}
+          <ClickableText
+            style={[
+              styles.messageText,
+              message.fromMe ? styles.messageTextMe : undefined,
+            ]}
+          >
+            {/* Don't show URL as part of message bubble if this is a frame */}
+            {framesInStore[message.content]
+              ? ""
+              : message.content || message.contentFallback}
+            <View style={{ opacity: 0 }}>{metadata}</View>
+          </ClickableText>
+        </>
       );
       break;
     }
@@ -111,7 +133,10 @@ function ChatMessage({ message, colorScheme }: Props) {
 
   const isAttachment = isAttachmentMessage(message.contentType);
   const isTransaction = isTransactionMessage(message.contentType);
+  const isGroupUpdated = isContentType("groupUpdated", message.contentType);
+
   const reactions = getMessageReactions(message);
+  const showInBubble = !isGroupUpdated;
 
   // maybe using useChatStore inside ChatMessage
   // leads to bad perf? Let's be cautious
@@ -146,137 +171,141 @@ function ChatMessage({ message, colorScheme }: Props) {
       {message.dateChange && (
         <Text style={styles.date}>{getRelativeDate(message.sent)}</Text>
       )}
-      <Swipeable
-        overshootLeft
-        hitSlop={{ left: -20 }}
-        overshootFriction={1.5}
-        containerStyle={styles.messageSwipeable}
-        childrenContainerStyle={styles.messageSwipeableChildren}
-        renderLeftActions={(
-          progressAnimatedValue: Animated.AnimatedInterpolation<string | number>
-        ) => {
-          return (
-            <Animated.View
-              style={{
-                opacity: progressAnimatedValue.interpolate({
-                  inputRange: [0, 0.7, 1],
-                  outputRange: [0, 0, 1],
-                }),
-                height: "100%",
-                justifyContent: "center",
-                transform: [
-                  {
-                    translateX: progressAnimatedValue.interpolate({
-                      inputRange: [0, 0.8, 1],
-                      outputRange: [0, 0, 8],
-                      extrapolate: "clamp",
-                    }),
-                  },
-                ],
-              }}
+      {!showInBubble && messageContent}
+      {showInBubble && (
+        <Swipeable
+          overshootLeft
+          hitSlop={{ left: -20 }}
+          overshootFriction={1.5}
+          containerStyle={styles.messageSwipeable}
+          childrenContainerStyle={styles.messageSwipeableChildren}
+          renderLeftActions={(
+            progressAnimatedValue: Animated.AnimatedInterpolation<
+              string | number
             >
-              <ActionButton picto="arrowshape.turn.up.left" />
-            </Animated.View>
-          );
-        }}
-        leftThreshold={10000} // Never trigger opening
-        onSwipeableWillClose={() => {
-          const translation = swipeableRef.current?.state.rowTranslation;
-          if (translation && (translation as any)._value > 70) {
-            if (Platform.OS !== "web") {
-              Haptics.notificationAsync(
-                Haptics.NotificationFeedbackType.Success
-              );
-            }
-            converseEventEmitter.emit("triggerReplyToMessage", message);
-          }
-        }}
-        ref={swipeableRef}
-      >
-        <ChatMessageActions message={message} reactions={reactions}>
-          {isContentType("text", message.contentType) && (
-            <FramesPreviews message={message} />
-          )}
-          {replyingToMessage ? (
-            <View style={styles.messageWithInnerBubble}>
-              <TouchableOpacity
-                style={[
-                  styles.innerBubble,
-                  message.fromMe ? styles.innerBubbleMe : undefined,
-                ]}
-                delayPressIn={isDesktop ? 0 : 75}
-                onPress={() => {
-                  converseEventEmitter.emit("scrollChatToMessage", {
-                    messageId: replyingToMessage.id,
-                    animated: false,
-                  });
-                  setTimeout(() => {
-                    converseEventEmitter.emit(
-                      "highlightMessage",
-                      replyingToMessage.id
-                    );
-                  }, 350);
+          ) => {
+            return (
+              <Animated.View
+                style={{
+                  opacity: progressAnimatedValue.interpolate({
+                    inputRange: [0, 0.7, 1],
+                    outputRange: [0, 0, 1],
+                  }),
+                  height: "100%",
+                  justifyContent: "center",
+                  transform: [
+                    {
+                      translateX: progressAnimatedValue.interpolate({
+                        inputRange: [0, 0.8, 1],
+                        outputRange: [0, 0, 8],
+                        extrapolate: "clamp",
+                      }),
+                    },
+                  ],
                 }}
               >
-                <Text
+                <ActionButton picto="arrowshape.turn.up.left" />
+              </Animated.View>
+            );
+          }}
+          leftThreshold={10000} // Never trigger opening
+          onSwipeableWillClose={() => {
+            const translation = swipeableRef.current?.state.rowTranslation;
+            if (translation && (translation as any)._value > 70) {
+              if (Platform.OS !== "web") {
+                Haptics.notificationAsync(
+                  Haptics.NotificationFeedbackType.Success
+                );
+              }
+              converseEventEmitter.emit("triggerReplyToMessage", message);
+            }
+          }}
+          ref={swipeableRef}
+        >
+          <ChatMessageActions message={message} reactions={reactions}>
+            {isContentType("text", message.contentType) && (
+              <FramesPreviews message={message} />
+            )}
+            {replyingToMessage ? (
+              <View style={styles.messageWithInnerBubble}>
+                <TouchableOpacity
                   style={[
-                    styles.messageText,
-                    styles.replyToUsername,
-                    message.fromMe ? styles.messageTextMe : undefined,
+                    styles.innerBubble,
+                    message.fromMe ? styles.innerBubbleMe : undefined,
                   ]}
+                  delayPressIn={isDesktop ? 0 : 75}
+                  onPress={() => {
+                    converseEventEmitter.emit("scrollChatToMessage", {
+                      messageId: replyingToMessage.id,
+                      animated: false,
+                    });
+                    setTimeout(() => {
+                      converseEventEmitter.emit(
+                        "highlightMessage",
+                        replyingToMessage.id
+                      );
+                    }, 350);
+                  }}
                 >
-                  {replyingToProfileName}
-                </Text>
-                <ChatInputReplyBubble
-                  replyingToMessage={replyingToMessage}
-                  fromMe={message.fromMe}
-                />
-              </TouchableOpacity>
+                  <Text
+                    style={[
+                      styles.messageText,
+                      styles.replyToUsername,
+                      message.fromMe ? styles.messageTextMe : undefined,
+                    ]}
+                  >
+                    {replyingToProfileName}
+                  </Text>
+                  <ChatInputReplyBubble
+                    replyingToMessage={replyingToMessage}
+                    fromMe={message.fromMe}
+                  />
+                </TouchableOpacity>
+                <View
+                  style={
+                    isContentType("text", message.contentType)
+                      ? styles.messageTextReply
+                      : undefined
+                  }
+                >
+                  {messageContent}
+                </View>
+              </View>
+            ) : (
               <View
-                style={
-                  isContentType("text", message.contentType)
-                    ? styles.messageTextReply
-                    : undefined
-                }
+                style={[
+                  isAttachment || isTransaction
+                    ? styles.messageWithInnerBubble
+                    : styles.messageBubbleText,
+                ]}
               >
                 {messageContent}
               </View>
-            </View>
-          ) : (
-            <View
-              style={[
-                isAttachment || isTransaction
-                  ? styles.messageWithInnerBubble
-                  : styles.messageBubbleText,
-              ]}
+            )}
+            <View style={styles.metadataContainer}>{metadata}</View>
+          </ChatMessageActions>
+          <View style={{ height: 0, flexBasis: "100%" }} />
+          {framesInStore[message.content] && (
+            <TouchableOpacity
+              style={{ flexBasis: "100%" }}
+              onPress={() => handleUrlPress(message.content)}
             >
-              {messageContent}
-            </View>
+              <Text
+                style={{
+                  fontSize: 11,
+                  padding: 4,
+                  marginBottom: 16,
+                  alignSelf: message.fromMe ? "flex-end" : "flex-start",
+                  color: textSecondaryColor(colorScheme),
+                }}
+              >
+                {message.content}
+              </Text>
+            </TouchableOpacity>
           )}
-
-          <View style={styles.metadataContainer}>{metadata}</View>
-        </ChatMessageActions>
-        <View style={{ height: 0, flexBasis: "100%" }} />
-        {framesInStore[message.content] && (
-          <TouchableOpacity
-            style={{ flexBasis: "100%" }}
-            onPress={() => handleUrlPress(message.content)}
-          >
-            <Text
-              style={{
-                fontSize: 11,
-                padding: 4,
-                marginBottom: 16,
-                alignSelf: message.fromMe ? "flex-end" : "flex-start",
-                color: textSecondaryColor(colorScheme),
-              }}
-            >
-              {message.content}
-            </Text>
-          </TouchableOpacity>
-        )}
-        <ChatMessageReactions message={message} reactions={reactions} />
-      </Swipeable>
+          <ChatMessageReactions message={message} reactions={reactions} />
+        </Swipeable>
+      )}
     </View>
   );
 }
@@ -291,6 +320,7 @@ type RenderedChatMessage = {
   renderedMessage: JSX.Element;
   message: MessageToDisplay;
   colorScheme: ColorSchemeName;
+  isGroup: boolean;
 };
 
 const renderedMessages = new LimitedMap<string, RenderedChatMessage>(50);
@@ -299,6 +329,7 @@ export default function CachedChatMessage({
   account,
   message,
   colorScheme,
+  isGroup,
 }: Props) {
   const keysChangesToRerender: (keyof MessageToDisplay)[] = [
     "id",
@@ -319,11 +350,17 @@ export default function CachedChatMessage({
       (k) => message[k] !== alreadyRenderedMessage.message[k]
     );
   if (shouldRerender) {
-    const renderedMessage = ChatMessage({ account, message, colorScheme });
+    const renderedMessage = ChatMessage({
+      account,
+      message,
+      colorScheme,
+      isGroup,
+    });
     renderedMessages.set(`${account}-${message.id}`, {
       message,
       renderedMessage,
       colorScheme,
+      isGroup,
     });
     return renderedMessage;
   } else {
@@ -396,6 +433,11 @@ const useStyles = () => {
       bottom: 6,
       right: 12,
       zIndex: -1,
+    },
+    groupSender: {
+      fontSize: 15,
+      fontWeight: "500",
+      color: textPrimaryColor(colorScheme),
     },
   });
 };

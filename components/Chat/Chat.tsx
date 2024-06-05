@@ -78,7 +78,8 @@ const getListArray = (
         if (
           previousMessage.senderAddress === message.senderAddress &&
           !message.dateChange &&
-          !isContentType("reaction", previousMessage.contentType)
+          !isContentType("reaction", previousMessage.contentType) &&
+          !isContentType("groupUpdated", previousMessage.contentType)
         ) {
           message.hasPreviousMessageInSeries = true;
         }
@@ -97,7 +98,8 @@ const getListArray = (
         if (
           nextMessage.senderAddress === message.senderAddress &&
           !nextMessageDateChange &&
-          !isContentType("reaction", nextMessage.contentType)
+          !isContentType("reaction", nextMessage.contentType) &&
+          !isContentType("groupUpdated", nextMessage.contentType)
         ) {
           message.hasNextMessageInSeries = true;
         }
@@ -155,7 +157,12 @@ export default function Chat() {
   const { height: keyboardHeight } = useKeyboardAnimation();
   const tertiary = tertiaryBackgroundColor(colorScheme);
 
-  const showChatInput = !!(conversation && !isBlockedPeer);
+  const showChatInput = !!(
+    conversation &&
+    !isBlockedPeer &&
+    (!conversation.isGroup ||
+      conversation.groupMembers.includes(xmtpAddress.toLowerCase()))
+  );
 
   const textInputStyle = useAnimatedStyle(
     () => ({
@@ -177,7 +184,7 @@ export default function Chat() {
       paddingBottom: showChatInput
         ? chatInputDisplayedHeight.value +
           Math.max(insets.bottom, keyboardHeight.value)
-        : 0,
+        : insets.bottom,
     }),
     [showChatInput, keyboardHeight, chatInputDisplayedHeight, insets.bottom]
   );
@@ -211,10 +218,11 @@ export default function Chat() {
           account={xmtpAddress}
           message={{ ...item }}
           colorScheme={colorScheme}
+          isGroup={!!conversation?.isGroup}
         />
       );
     },
-    [colorScheme, xmtpAddress]
+    [colorScheme, xmtpAddress, conversation?.isGroup]
   );
   const keyExtractor = useCallback((item: MessageToDisplay) => item.id, []);
 

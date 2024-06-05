@@ -51,7 +51,7 @@ index e11fda4..d48f9ca 100644
      fun decrypt(envelope: Envelope): DecryptedMessage {
          val message = Message.parseFrom(envelope.message)
 -        return MessageV2Builder.buildDecrypt(
-+        val decrypted = MessageV2Builder.buildDecrypt(
++        val decrypted =  MessageV2Builder.buildDecrypt(
              id = generateId(envelope = envelope),
              topic,
              message.v2,
