@@ -297,15 +297,15 @@ export default function GroupScreen({
     currentAccountIsAdmin ||
     currentAccountIsSuperAdmin ||
     group.groupPermissionLevel === "all_members";
-  const [edittedName, setEdittedName] = useState(conversationName(group));
+  const [editedName, setEditedName] = useState(conversationName(group));
   const handleNameChange = useCallback(async () => {
     try {
-      await updateGroupName(currentAccount, group.topic, edittedName);
+      await updateGroupName(currentAccount, group.topic, editedName);
     } catch (e) {
       console.error(e);
       Alert.alert("An error occurred");
     }
-  }, [currentAccount, edittedName, group.topic]);
+  }, [currentAccount, editedName, group.topic]);
 
   return (
     <ScrollView
@@ -316,8 +316,8 @@ export default function GroupScreen({
         <TextInput
           style={styles.title}
           defaultValue={conversationName(group)}
-          value={edittedName}
-          onChangeText={setEdittedName}
+          value={editedName}
+          onChangeText={setEditedName}
           blurOnSubmit
           onSubmitEditing={handleNameChange}
           returnKeyType="done"
