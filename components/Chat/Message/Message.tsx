@@ -1,5 +1,5 @@
 import * as Haptics from "expo-haptics";
-import { ReactNode, useMemo, useRef } from "react";
+import { ReactNode, useCallback, useMemo, useRef } from "react";
 import {
   View,
   useColorScheme,
@@ -9,6 +9,7 @@ import {
   ColorSchemeName,
   TouchableOpacity,
   Animated,
+  Linking,
 } from "react-native";
 import { Swipeable } from "react-native-gesture-handler";
 
@@ -17,6 +18,7 @@ import {
   currentAccount,
 } from "../../../data/store/accountsStore";
 import { XmtpMessage } from "../../../data/store/chatStore";
+import { useFramesStore } from "../../../data/store/framesStore";
 import { isAttachmentMessage } from "../../../utils/attachment/helpers";
 import {
   messageInnerBubbleColor,
@@ -29,6 +31,7 @@ import { isDesktop } from "../../../utils/device";
 import { converseEventEmitter } from "../../../utils/events";
 import { LimitedMap } from "../../../utils/objects";
 import { getMessageReactions } from "../../../utils/reactions";
+import { URL_REGEX } from "../../../utils/regex";
 import { getReadableProfile } from "../../../utils/str";
 import { isTransactionMessage } from "../../../utils/transaction";
 import {
@@ -65,6 +68,19 @@ function ChatMessage({ message, colorScheme }: Props) {
 
   let messageContent: ReactNode;
   const contentType = getMessageContentType(message.contentType);
+
+  const framesInStore = useFramesStore().frames;
+
+  if (URL_REGEX.test(message.content) && message.content.endsWith("/")) {
+    message.content = message.content.slice(0, -1);
+  }
+
+  const handleUrlPress = useCallback((url: string) => {
+    const uri = url.toLowerCase().startsWith("http") ? url : `https://${url}`;
+
+    Linking.openURL(uri);
+  }, []);
+
   switch (contentType) {
     case "attachment":
     case "remoteAttachment":
@@ -82,7 +98,10 @@ function ChatMessage({ message, colorScheme }: Props) {
             message.fromMe ? styles.messageTextMe : undefined,
           ]}
         >
-          {message.content || message.contentFallback}
+          {/* Don't show URL as part of message bubble if this is a frame */}
+          {framesInStore[message.content]
+            ? ""
+            : message.content || message.contentFallback}
           <View style={{ opacity: 0 }}>{metadata}</View>
         </ClickableText>
       );
@@ -238,6 +257,24 @@ function ChatMessage({ message, colorScheme }: Props) {
           <View style={styles.metadataContainer}>{metadata}</View>
         </ChatMessageActions>
         <View style={{ height: 0, flexBasis: "100%" }} />
+        {framesInStore[message.content] && (
+          <TouchableOpacity
+            style={{ flexBasis: "100%" }}
+            onPress={() => handleUrlPress(message.content)}
+          >
+            <Text
+              style={{
+                fontSize: 11,
+                padding: 4,
+                marginBottom: 16,
+                alignSelf: message.fromMe ? "flex-end" : "flex-start",
+                color: textSecondaryColor(colorScheme),
+              }}
+            >
+              {message.content}
+            </Text>
+          </TouchableOpacity>
+        )}
         <ChatMessageReactions message={message} reactions={reactions} />
       </Swipeable>
     </View>
