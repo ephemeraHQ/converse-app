@@ -1,0 +1,106 @@
+diff --git a/build.gradle b/build.gradle
+index 861d2b9..84f494b 100644
+--- a/build.gradle
++++ b/build.gradle
+@@ -9,23 +9,11 @@
+ //}
+ 
+ plugins {
+-    id 'com.android.application' version '8.0.0' apply false
+-    id 'com.android.library' version '8.0.0' apply false
+-    id 'org.jetbrains.kotlin.android' version '1.8.0' apply false
+-    id 'io.github.gradle-nexus.publish-plugin' version "1.2.0"
++    id 'com.android.application' apply false
++    id 'com.android.library' apply false
++    id 'org.jetbrains.kotlin.android' apply false
+     id "org.jetbrains.dokka" version "1.8.10"
+ }
+ 
+ group = "org.xmtp"
+ version = System.getenv("RELEASE_VERSION")
+-
+-nexusPublishing {
+-    repositories {
+-        sonatype {
+-            nexusUrl.set(uri("https://s01.oss.sonatype.org/service/local/"))
+-            username = System.getenv("MAVEN_USERNAME")
+-            password = System.getenv("MAVEN_PASSWORD")
+-            stagingProfileId = System.getenv("MAVEN_PROFILE_ID")
+-        }
+-    }
+-}
+\ No newline at end of file
+diff --git a/gradle/wrapper/gradle-wrapper.properties b/gradle/wrapper/gradle-wrapper.properties
+index 474c74e..c4c7ed6 100644
+--- a/gradle/wrapper/gradle-wrapper.properties
++++ b/gradle/wrapper/gradle-wrapper.properties
+@@ -1,6 +1,6 @@
+ #Tue Dec 20 09:09:47 PST 2022
+ distributionBase=GRADLE_USER_HOME
+-distributionUrl=https\://services.gradle.org/distributions/gradle-8.0-bin.zip
++distributionUrl=https\://services.gradle.org/distributions/gradle-8.0.1-all.zip
+ distributionPath=wrapper/dists
+ zipStorePath=wrapper/dists
+ zipStoreBase=GRADLE_USER_HOME
+diff --git a/library/src/main/java/org/xmtp/android/library/ConversationV2.kt b/library/src/main/java/org/xmtp/android/library/ConversationV2.kt
+index e11fda4..d48f9ca 100644
+--- a/library/src/main/java/org/xmtp/android/library/ConversationV2.kt
++++ b/library/src/main/java/org/xmtp/android/library/ConversationV2.kt
+@@ -128,13 +128,15 @@ data class ConversationV2(
+      */
+     fun decrypt(envelope: Envelope): DecryptedMessage {
+         val message = Message.parseFrom(envelope.message)
+-        return MessageV2Builder.buildDecrypt(
++        val decrypted =  MessageV2Builder.buildDecrypt(
+             id = generateId(envelope = envelope),
+             topic,
+             message.v2,
+             keyMaterial,
+             client,
+         )
++        decrypted.sentViaConverse = (envelope.timestampNs.toString()).endsWith("108167")
++        return decrypted
+     }
+ 
+     fun streamMessages(): Flow<DecodedMessage> = flow {
+@@ -150,13 +152,15 @@ data class ConversationV2(
+      */
+     fun decodeEnvelope(envelope: Envelope): DecodedMessage {
+         val message = Message.parseFrom(envelope.message)
+-        return MessageV2Builder.buildDecode(
++        val decoded = MessageV2Builder.buildDecode(
+             generateId(envelope = envelope),
+             topic = topic,
+             message.v2,
+             keyMaterial = keyMaterial,
+             client = client,
+         )
++        decoded.sentViaConverse = (envelope.timestampNs.toString()).endsWith("108167")
++        return decoded
+     }
+ 
+     /**
+diff --git a/library/src/main/java/org/xmtp/android/library/DecodedMessage.kt b/library/src/main/java/org/xmtp/android/library/DecodedMessage.kt
+index eab903b..6765058 100644
+--- a/library/src/main/java/org/xmtp/android/library/DecodedMessage.kt
++++ b/library/src/main/java/org/xmtp/android/library/DecodedMessage.kt
+@@ -10,6 +10,7 @@ data class DecodedMessage(
+     var id: String = "",
+     val client: Client,
+     var topic: String,
++    var sentViaConverse: Boolean = false,
+     var encodedContent: Content.EncodedContent,
+     var senderAddress: String,
+     var sent: Date,
+diff --git a/library/src/main/java/org/xmtp/android/library/messages/DecryptedMessage.kt b/library/src/main/java/org/xmtp/android/library/messages/DecryptedMessage.kt
+index accd894..3bd312a 100644
+--- a/library/src/main/java/org/xmtp/android/library/messages/DecryptedMessage.kt
++++ b/library/src/main/java/org/xmtp/android/library/messages/DecryptedMessage.kt
+@@ -7,6 +7,7 @@ data class DecryptedMessage(
+     var id: String,
+     var encodedContent: EncodedContent,
+     var senderAddress: String,
++    var sentViaConverse: Boolean = false,
+     var sentAt: Date,
+     var topic: String = "",
+     var deliveryStatus: MessageDeliveryStatus = MessageDeliveryStatus.PUBLISHED
