@@ -308,13 +308,6 @@ export default function ProfileScreen({
           style={styles.tableView}
         />
       )}
-      {isMyProfile && (
-        <TableView
-          items={balanceItems}
-          title="BALANCE"
-          style={styles.tableView}
-        />
-      )}
 
       {usernamesItems.length > 0 && (
         <TableView
