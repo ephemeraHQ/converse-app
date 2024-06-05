@@ -43,26 +43,41 @@ const protocolConversationToStateConversation = (
 
 const protocolGroupToStateConversation = async (
   group: GroupWithCodecsType
-): Promise<XmtpConversation> => ({
-  topic: group.topic,
-  groupMembers: (await group.members()).map((m) => m.addresses[0]),
-  createdAt: group.createdAt,
-  messages: new Map(),
-  messagesIds: [],
-  conversationTitle: undefined,
-  messageDraft: undefined,
-  readUntil: 0,
-  pending: false,
-  version: group.version,
-  isGroup: true,
-  groupAdmins: (await group.members())
-    .filter(
-      (m) =>
-        m.permissionLevel === "admin" || m.permissionLevel === "super_admin"
-    )
-    .map((m) => m.addresses[0]),
-  groupPermissionLevel: group.permissionLevel,
-});
+): Promise<XmtpConversation> => {
+  const groupMembers = await group.members();
+  const groupMembersAddresses: string[] = [];
+  const groupAdmins: string[] = [];
+  const groupSuperAdmins: string[] = [];
+  groupMembers.forEach((m) => {
+    if (m.permissionLevel === "admin" || m.permissionLevel === "super_admin") {
+      groupAdmins.push(m.addresses[0]);
+    }
+    if (m.permissionLevel === "super_admin") {
+      groupSuperAdmins.push(m.addresses[0]);
+    }
+    if (m.addresses[0]) {
+      groupMembersAddresses.push(m.addresses[0]);
+    }
+  });
+  const groupName = await group.groupName();
+  return {
+    topic: group.topic,
+    groupMembers: groupMembersAddresses,
+    createdAt: group.createdAt,
+    messages: new Map(),
+    messagesIds: [],
+    conversationTitle: undefined,
+    messageDraft: undefined,
+    readUntil: 0,
+    pending: false,
+    version: group.version,
+    isGroup: true,
+    groupAdmins,
+    groupSuperAdmins,
+    groupPermissionLevel: group.permissionLevel,
+    groupName,
+  };
+};
 
 const protocolConversationsToTopicData = async (
   conversations: ConversationWithCodecsType[]
@@ -498,6 +513,121 @@ export const addMembersToGroup = async (
     );
   }
   await (group as GroupWithCodecsType).addMembers(members);
+  refreshGroup(account, topic);
+};
+
+export const updateGroupName = async (
+  account: string,
+  topic: string,
+  groupName: string
+) => {
+  const group = await getConversationWithTopic(account, topic);
+  if (!group || (group as any).peerAddress) {
+    throw new Error(
+      `Conversation with topic ${topic} does not exist or is not a group`
+    );
+  }
+  await (group as GroupWithCodecsType).updateGroupName(groupName);
+  refreshGroup(account, topic);
+};
+
+export const promoteMemberToAdmin = async (
+  account: string,
+  topic: string,
+  memberAddress: string
+) => {
+  const group = (await getConversationWithTopic(
+    account,
+    topic
+  )) as GroupWithCodecsType;
+  if (!group || (group as any).peerAddress) {
+    throw new Error(
+      `Conversation with topic ${topic} does not exist or is not a group`
+    );
+  }
+  const members = await group.members();
+  const inboxId = members.find((m) => m.addresses[0] === memberAddress)
+    ?.inboxId;
+  if (!inboxId) {
+    throw new Error(`Member ${memberAddress} not found in group ${topic}`);
+  }
+  await (group as GroupWithCodecsType).addAdmin(inboxId);
+  console.log(`Added ${inboxId} as admin to group ${topic}`);
+  refreshGroup(account, topic);
+};
+
+export const revokeAdminAccess = async (
+  account: string,
+  topic: string,
+  memberAddress: string
+) => {
+  const group = (await getConversationWithTopic(
+    account,
+    topic
+  )) as GroupWithCodecsType;
+  if (!group || (group as any).peerAddress) {
+    throw new Error(
+      `Conversation with topic ${topic} does not exist or is not a group`
+    );
+  }
+  const members = await group.members();
+  const inboxId = members.find((m) => m.addresses[0] === memberAddress)
+    ?.inboxId;
+  if (!inboxId) {
+    throw new Error(`Member ${memberAddress} not found in group ${topic}`);
+  }
+  await (group as GroupWithCodecsType).removeAdmin(inboxId);
+  console.log(`Added ${inboxId} as admin to group ${topic}`);
+  refreshGroup(account, topic);
+};
+
+export const promoteMemberToSuperAdmin = async (
+  account: string,
+  topic: string,
+  memberAddress: string
+) => {
+  const group = (await getConversationWithTopic(
+    account,
+    topic
+  )) as GroupWithCodecsType;
+  if (!group || (group as any).peerAddress) {
+    throw new Error(
+      `Conversation with topic ${topic} does not exist or is not a group`
+    );
+  }
+  const members = await group.members();
+  const inboxId = members.find((m) => m.addresses[0] === memberAddress)
+    ?.inboxId;
+  if (!inboxId) {
+    throw new Error(`Member ${memberAddress} not found in group ${topic}`);
+  }
+  await (group as GroupWithCodecsType).addSuperAdmin(inboxId);
+  console.log(`Added ${inboxId} as admin to group ${topic}`);
+  refreshGroup(account, topic);
+};
+
+export const revokeSuperAdminAccess = async (
+  account: string,
+  topic: string,
+  memberAddress: string
+) => {
+  const group = (await getConversationWithTopic(
+    account,
+    topic
+  )) as GroupWithCodecsType;
+  if (!group || (group as any).peerAddress) {
+    throw new Error(
+      `Conversation with topic ${topic} does not exist or is not a group`
+    );
+  }
+  const members = await group.members();
+  const inboxId = members.find((m) => m.addresses[0] === memberAddress)
+    ?.inboxId;
+  if (!inboxId) {
+    throw new Error(`Member ${memberAddress} not found in group ${topic}`);
+  }
+  await (group as GroupWithCodecsType).removeSuperAdmin(inboxId);
+  console.log(`Added ${inboxId} as admin to group ${topic}`);
   refreshGroup(account, topic);
 };
 

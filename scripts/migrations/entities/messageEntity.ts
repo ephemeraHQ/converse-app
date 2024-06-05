@@ -12,6 +12,7 @@ import { type Conversation } from "./conversationEntity";
 
 @Entity()
 export class Message {
+
   @PrimaryColumn("text")
   id!: string;
 
