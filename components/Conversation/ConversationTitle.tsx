@@ -65,6 +65,7 @@ export default function ConversationTitle({
     ) {
       // New conversation, lets' set title
       setTitle(conversationName(conversation));
+      if (!conversation.peerAddress) return;
       const socials = profiles[conversation.peerAddress]?.socials;
       setAvatar(getPreferredAvatar(socials));
     }
@@ -85,11 +86,14 @@ export default function ConversationTitle({
           Alert.alert("Conversation details copied");
         }}
         onPress={async () => {
-          const address = conversation?.peerAddress;
-          if (!address) return;
+          if (!conversation) return;
           // Close keyboard
           textInputRef?.current?.blur();
-          navigation.push("Profile", { address });
+          if (conversation.isGroup) {
+            navigation.push("Group", { topic: conversation.topic });
+          } else if (conversation.peerAddress) {
+            navigation.push("Profile", { address: conversation.peerAddress });
+          }
         }}
         style={{
           flexDirection: "row",

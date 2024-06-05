@@ -61,7 +61,7 @@ export const loadDataToContext = async (account: string) => {
         xmtpConversationFromDb(
           account,
           c,
-          profilesByAddress[c.peerAddress]?.socials
+          c.peerAddress ? profilesByAddress[c.peerAddress]?.socials : undefined
         )
       )
     );

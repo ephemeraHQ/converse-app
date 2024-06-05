@@ -22,6 +22,7 @@ const protocolConversationToStateConversation = (
   readUntil: 0,
   pending: false,
   version: conversation.conversationVersion,
+  isGroup: false,
 });
 
 const openedConversations: {
@@ -194,6 +195,9 @@ const createConversation = async (
     `[XMTP] Creating a conversation with peer ${conversation.peerAddress} and id ${conversation.context?.conversationId}`
   );
   const client = (await getXmtpClient(account)) as Client;
+
+  // Groups not handled on web
+  if (!conversation.peerAddress) return;
 
   const newConversation = await client.conversations.newConversation(
     conversation.peerAddress,

@@ -12,8 +12,20 @@ export class Conversation {
   pending!: boolean;
 
   @Index()
-  @Column("text")
-  peerAddress!: string;
+  @Column("text", { nullable: true })
+  peerAddress?: string;
+
+  @Column("boolean", { default: false })
+  isGroup!: boolean;
+
+  @Column("simple-array", { nullable: true })
+  groupAdmins?: string[];
+
+  @Column("text", { nullable: true })
+  groupPermissionLevel?: string;
+
+  @Column("simple-array", { nullable: true })
+  groupMembers?: string[];
 
   @Column("int")
   createdAt!: number;

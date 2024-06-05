@@ -47,7 +47,8 @@ export default function ConsentPopup() {
     thisPeerStatus !== "consented" &&
     !isBlockedPeer &&
     !conversation.pending &&
-    !conversation.hasOneMessageFromMe;
+    !conversation.hasOneMessageFromMe &&
+    !conversation.isGroup;
 
   if (!shouldShowConsentWindow) {
     // Consent window will not be displayed
@@ -73,7 +74,7 @@ export default function ConsentPopup() {
                 ...actionSheetColors(colorScheme),
               },
               (selectedIndex?: number) => {
-                if (selectedIndex === 0) {
+                if (selectedIndex === 0 && conversation.peerAddress) {
                   consentToPeersOnProtocol(
                     currentAccount(),
                     [conversation.peerAddress],
@@ -92,6 +93,7 @@ export default function ConsentPopup() {
           title="Accept"
           style={styles.cta}
           onPress={() => {
+            if (!conversation.peerAddress) return;
             consentToPeersOnProtocol(
               currentAccount(),
               [conversation.peerAddress],

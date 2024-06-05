@@ -97,7 +97,9 @@ export default function ConversationFlashList({
     ({ item }: { item: ConversationFlatListItem }) => {
       const conversation = item as ConversationWithLastMessagePreview;
       const lastMessagePreview = conversation.lastMessagePreview;
-      const socials = profiles[conversation.peerAddress]?.socials;
+      const socials = conversation.peerAddress
+        ? profiles[conversation.peerAddress]?.socials
+        : undefined;
       return (
         <ConversationListItem
           navigation={navigation}
@@ -124,6 +126,7 @@ export default function ConversationFlashList({
             return readUntil < lastMessagePreview.message.sent;
           })()}
           lastMessagePreview={
+            conversation.peerAddress &&
             peersStatus[conversation.peerAddress.toLowerCase()] === "blocked"
               ? "This user is blocked"
               : lastMessagePreview

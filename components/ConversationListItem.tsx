@@ -3,11 +3,11 @@ import * as Haptics from "expo-haptics";
 import React, { memo, useCallback, useEffect, useRef, useState } from "react";
 import {
   ColorSchemeName,
-  Text,
-  View,
-  StyleSheet,
   Platform,
+  StyleSheet,
+  Text,
   TouchableHighlight,
+  View,
 } from "react-native";
 import { RectButton } from "react-native-gesture-handler";
 import Swipeable from "react-native-gesture-handler/Swipeable";
@@ -24,7 +24,6 @@ import { NavigationParamList } from "../screens/Navigation/Navigation";
 import { useIsSplitScreen } from "../screens/Navigation/navHelpers";
 import { saveTopicsData } from "../utils/api";
 import {
-  actionSecondaryColor,
   actionSheetColors,
   backgroundColor,
   badgeColor,
@@ -48,7 +47,7 @@ type ConversationListItemProps = {
   conversationTime: number | undefined;
   conversationTopic: string;
   conversationName: string;
-  conversationPeerAddress: string;
+  conversationPeerAddress: string | undefined;
   conversationPeerAvatar: string | undefined;
   lastMessagePreview: string | undefined;
   lastMessageFromMe: boolean;
@@ -151,14 +150,6 @@ const ConversationListItem = memo(function ConversationListItem({
         </Text>
         <View style={styles.timeAndChevron}>
           <Text style={styles.timeText}>{timeToShow}</Text>
-          {Platform.OS === "ios" && (
-            <Picto
-              picto="chevron.right"
-              weight="semibold"
-              color={actionSecondaryColor(colorScheme)}
-              size={10}
-            />
-          )}
         </View>
         {showUnread && <View style={styles.unread} />}
       </View>
@@ -184,6 +175,7 @@ const ConversationListItem = memo(function ConversationListItem({
               ...actionSheetColors(colorScheme),
             },
             (selectedIndex?: number) => {
+              if (!conversationPeerAddress) return;
               if (selectedIndex === 0) {
                 saveTopicsData(currentAccount(), {
                   [conversationTopic]: {
@@ -441,7 +433,8 @@ const getStyles = (colorScheme: ColorSchemeName) =>
     timeText: {
       color: textSecondaryColor(colorScheme),
       ...Platform.select({
-        default: { marginRight: 14, fontSize: 15 },
+        default: { fontSize: 15 },
+        web: { marginRight: 14, fontSize: 15 },
         android: { fontSize: 11 },
       }),
     },

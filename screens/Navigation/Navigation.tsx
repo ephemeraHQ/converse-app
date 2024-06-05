@@ -16,6 +16,11 @@ import ConversationNav, {
 import ConversationRequestsListNav from "./ConversationRequestsListNav";
 import ConverseMatchMakerNav from "./ConverseMatchMakerNav";
 import EnableTransactionsNav from "./EnableTransactionsNav";
+import GroupLinkNav, {
+  GroupLinkNavParams,
+  GroupLinkScreenConfig,
+} from "./GroupLinkNav";
+import GroupNav, { GroupNavParams, GroupScreenConfig } from "./GroupNav";
 import NewConversationNav, {
   NewConversationNavParams,
   NewConversationScreenConfig,
@@ -45,12 +50,15 @@ export type NavigationParamList = {
   ChatsRequests: undefined;
   Conversation: ConversationNavParams;
   NewConversation: NewConversationNavParams;
+  NewGroupSummary: undefined;
   EnableTransactions: undefined;
   ConverseMatchMaker: undefined;
   ShareProfile: undefined;
   ShareFrame: ShareFrameNavParams;
   TopUp: undefined;
   Profile: ProfileNavParams;
+  Group: GroupNavParams;
+  GroupLink: GroupLinkNavParams;
   UserProfile: undefined;
   WebviewPreview: WebviewPreviewNavParams;
 };
@@ -66,6 +74,8 @@ const linking = {
       Conversation: ConversationScreenConfig,
       NewConversation: NewConversationScreenConfig,
       Profile: ProfileScreenConfig,
+      Group: GroupScreenConfig,
+      GroupLink: GroupLinkScreenConfig,
       ShareProfile: ShareProfileScreenConfig,
       WebviewPreview: WebviewPreviewScreenConfig,
     },
@@ -134,6 +144,8 @@ export default function Navigation() {
           {ShareFrameNav()}
           {WebviewPreviewNav()}
           {ProfileNav()}
+          {GroupNav()}
+          {GroupLinkNav()}
           {UserProfileNav()}
           {TopUpNav()}
           {EnableTransactionsNav()}

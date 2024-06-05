@@ -128,6 +128,7 @@ export const conversationLastMessagePreview = (
         }
       } else if (
         isContentType("readReceipt", lastMessage?.contentType) ||
+        isContentType("groupUpdated", lastMessage?.contentType) ||
         (!lastMessage.content && !lastMessage.contentFallback)
       ) {
         continue;
@@ -298,13 +299,24 @@ export const conversationShouldBeDisplayed = (
   topicsData: { [topic: string]: TopicData | undefined },
   peersStatus: { [peer: string]: "blocked" | "consented" }
 ) => {
+  const isNotReady =
+    (conversation.isGroup && !conversation.groupMembers) ||
+    (!conversation.isGroup && !conversation.peerAddress);
+  if (isNotReady) return false;
+  const isPending = !!conversation.pending;
+  const isNotEmpty = conversation.messages.size > 0;
+  const isDeleted = topicsData[conversation.topic]?.status === "deleted";
+  const isBlocked = conversation.isGroup
+    ? false // No consent for groups right now
+    : peersStatus[conversation.peerAddress.toLowerCase()] === "blocked";
+  const isV1 = conversation.version === "v1";
+  const isForbidden = conversation.topic.includes("\x00"); // Forbidden character that breaks
   return (
-    conversation?.peerAddress &&
-    (!conversation.pending || conversation.messages.size > 0) &&
-    topicsData[conversation.topic]?.status !== "deleted" &&
-    peersStatus[conversation.peerAddress.toLowerCase()] !== "blocked" &&
-    conversation.version !== "v1" &&
-    !conversation.topic.includes("\x00")
+    (!isPending || isNotEmpty) &&
+    !isDeleted &&
+    !isBlocked &&
+    !isV1 &&
+    !isForbidden
   ); // Forbidden character that breaks notifications
 };
 
@@ -313,9 +325,12 @@ export const conversationShouldBeInInbox = (
   conversation: ConversationWithLastMessagePreview,
   peersStatus: { [peer: string]: "blocked" | "consented" }
 ) => {
+  const isConsented = conversation.isGroup
+    ? true
+    : peersStatus[conversation.peerAddress.toLowerCase()] === "consented";
   return (
     conversation.hasOneMessageFromMe ||
-    peersStatus[conversation.peerAddress.toLowerCase()] === "consented" ||
+    isConsented ||
     (conversation.spamScore !== undefined &&
       (conversation.spamScore === null || conversation.spamScore < 1))
   );
@@ -331,6 +346,11 @@ export function sortAndComputePreview(
   const conversationsInbox: ConversationWithLastMessagePreview[] = [];
   Object.values(conversations).forEach(
     (conversation: ConversationWithLastMessagePreview, i) => {
+      const isNotReady =
+        (conversation.isGroup && !conversation.groupMembers) ||
+        (!conversation.isGroup && !conversation.peerAddress);
+      if (isNotReady) return;
+
       if (
         conversationShouldBeDisplayed(conversation, topicsData, peersStatus)
       ) {
@@ -365,8 +385,10 @@ export function getFilteredConversationsWithSearch(
 ): ConversationFlatListItem[] {
   if (searchQuery && sortedConversations) {
     const matchedPeerAddresses = getMatchedPeerAddresses(profiles, searchQuery);
-    const filteredConversations = sortedConversations.filter((conversation) =>
-      matchedPeerAddresses.includes(conversation.peerAddress)
+    const filteredConversations = sortedConversations.filter(
+      (conversation) =>
+        conversation.peerAddress &&
+        matchedPeerAddresses.includes(conversation.peerAddress)
     );
     return filteredConversations;
   } else {

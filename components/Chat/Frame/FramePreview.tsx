@@ -165,11 +165,14 @@ export default function FramePreview({
       let actionPostUrl =
         button.target || frame.frameInfo?.postUrl || initialFrame.url;
       try {
+        const participantAccountAddresses: string[] = conversation.isGroup
+          ? conversation.groupMembers || []
+          : [account, conversation.peerAddress];
         const actionInput: FrameActionInputs = {
           frameUrl: actionPostUrl,
           buttonIndex: button.index,
           conversationTopic: message.topic,
-          participantAccountAddresses: [account, conversation.peerAddress],
+          participantAccountAddresses,
           state: frame.frameInfo?.state,
         };
         if (textInput) {

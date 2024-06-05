@@ -14,13 +14,16 @@ import {
   deleteOpenedConversations,
   loadConversations,
   stopStreamingConversations,
+  stopStreamingGroups,
   streamConversations,
+  streamGroups,
   updateConsentStatus,
 } from "./conversations";
 import {
   syncConversationsMessages,
   stopStreamingAllMessage,
   streamAllMessages,
+  syncGroupsMessages,
 } from "./messages";
 
 const instantiatingClientForAccount: { [account: string]: boolean } = {};
@@ -34,13 +37,16 @@ export const getXmtpClient = async (
   if (instantiatingClientForAccount[account]) {
     // Avoid instantiating 2 clients for the same account
     // which leads to buggy behaviour
+    console.log("already instantiating sorry");
     await new Promise((r) => setTimeout(r, 200));
     return getXmtpClient(account);
   }
   instantiatingClientForAccount[account] = true;
   try {
+    console.log("loading base64 key");
     const base64Key = await loadXmtpKey(account);
     if (base64Key) {
+      console.log("get client from base64 key");
       const client = await getXmtpClientFromBase64Key(base64Key);
       console.log(`[XmtpRN] Instantiated client for ${client.address}`);
       addLog("Local client connected");
@@ -90,30 +96,46 @@ export const syncXmtpClient = async (account: string) => {
     knownTopics: knownTopics.length,
   });
   const queryConversationsFromTimestamp: { [topic: string]: number } = {};
+  const queryGroupsFromTimestamp: { [topic: string]: number } = {};
   knownTopics.forEach((topic) => {
-    queryConversationsFromTimestamp[topic] = lastSyncedAt;
+    if (getChatStore(account).getState().conversations[topic]?.isGroup) {
+      queryGroupsFromTimestamp[topic] = lastSyncedAt;
+    } else {
+      queryConversationsFromTimestamp[topic] = lastSyncedAt;
+    }
   });
   try {
     const now = new Date().getTime();
     updateConsentStatus(account);
-    const { newConversations } = await loadConversations(account, knownTopics);
+    const { newConversations, groups, newGroups } = await loadConversations(
+      account,
+      knownTopics
+    );
     newConversations.forEach((c) => {
       queryConversationsFromTimestamp[c.topic] = 0;
+    });
+    newGroups.forEach((g) => {
+      queryGroupsFromTimestamp[g.topic] = 0;
     });
     // As soon as we have done one query we can hide reconnecting
     getChatStore(account).getState().setReconnecting(false);
 
-    streamAllMessages(account).catch((e) => {
+    await streamConversations(account).catch((e) => {
       onSyncLost(account, e);
     });
-    streamConversations(account).catch((e) => {
+    await streamGroups(account).catch((e) => onSyncLost(account, e));
+    // Streaming all dm messages (not groups because buggy)
+    await streamAllMessages(account).catch((e) => {
       onSyncLost(account, e);
     });
     streamingAccounts[account] = true;
-    const topicsToQuery = Object.keys(queryConversationsFromTimestamp);
-    const fetchedMessagesCount = await syncConversationsMessages(
-      account,
-      queryConversationsFromTimestamp
+
+    console.log("RECALLING syncConversationsMessages / syncGroupsMessages");
+    const [fetchedMessagesCount, fetchedGroupMessagesCount] = await Promise.all(
+      [
+        syncConversationsMessages(account, queryConversationsFromTimestamp),
+        syncGroupsMessages(account, groups, queryGroupsFromTimestamp),
+      ]
     );
 
     // Refresh spam scores after the initial load of conversation data is complete
@@ -127,11 +149,21 @@ export const syncXmtpClient = async (account: string) => {
 
     // Only update when we have really fetched, this might mitigate
     // the case where we never fetch some messages
-    if (fetchedMessagesCount > 0) {
-      getChatStore(account).getState().setLastSyncedAt(now, topicsToQuery);
+    if (fetchedMessagesCount > 0 || fetchedGroupMessagesCount > 0) {
+      const conversationTopicsToQuery = Object.keys(
+        queryConversationsFromTimestamp
+      );
+      const groupTopicsToQuery = Object.keys(queryGroupsFromTimestamp);
+      getChatStore(account)
+        .getState()
+        .setLastSyncedAt(now, [
+          ...conversationTopicsToQuery,
+          ...groupTopicsToQuery,
+        ]);
     }
     console.log(`[XmtpRN] Finished syncing ${account}`);
   } catch (e) {
+    console.log("main sync error");
     onSyncLost(account, e);
   }
 };
@@ -140,6 +172,7 @@ export const deleteXmtpClient = async (account: string) => {
   if (account in xmtpClientByAccount) {
     stopStreamingAllMessage(account);
     stopStreamingConversations(account);
+    stopStreamingGroups(account);
   }
   delete xmtpClientByAccount[account];
   deleteOpenedConversations(account);

@@ -42,6 +42,7 @@ func sentryTrackMessage(message: String, extras: [String : Any]?) {
 }
 
 func sentryTrackError(error: Error, extras: [String : Any]?) {
+  print([error, extras]);
  SentrySDK.capture(error: error) { scope in
    var extrasWithMessage:[String: Any] = [:]
    if (extras != nil) {

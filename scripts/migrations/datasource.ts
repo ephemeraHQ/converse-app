@@ -22,6 +22,7 @@ import { addReferencedMessage1691397563214 } from "../../data/db/migrations/1691
 import { removeOldReactions1691412759130 } from "../../data/db/migrations/1691412759130-removeOldReactions";
 import { AddVersionToConversation1695029413899 } from "../../data/db/migrations/1695029413899-addVersionToConversation";
 import { AddSpamScore1698068091873 } from "../../data/db/migrations/1698068091873-addSpamScore";
+import { AddGroupConversations1708332276329 } from "../../data/db/migrations/1708332276329-addGroupConversations";
 import { AddConverseMessageMetadata1709030178271 } from "../../data/db/migrations/1709030178271-addConverseMessageMetadata";
 import { AddLastNotifSubscribePeriodToConversation1709893391562 } from "../../data/db/migrations/1709893391562-addLastNotifSubscribePeriodToConversation";
 import { AddIndexToSent1712656017130 } from "../../data/db/migrations/1712656017130-addIndexToSent";
@@ -58,6 +59,7 @@ const dataSource = new DataSource({
     AddConverseMessageMetadata1709030178271,
     AddLastNotifSubscribePeriodToConversation1709893391562,
     AddIndexToSent1712656017130,
+    AddGroupConversations1708332276329,
   ],
   type: "sqlite",
 });

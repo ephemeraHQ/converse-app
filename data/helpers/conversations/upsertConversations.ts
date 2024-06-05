@@ -46,6 +46,7 @@ export const saveConversations = async (
   [alreadyKnownConversations, newlySavedConversations].forEach(
     (conversationList) => {
       conversationList.forEach((c) => {
+        if (!c.peerAddress) return;
         const existingProfile = knownProfiles[c.peerAddress];
         const lastProfileUpdate = existingProfile?.updatedAt || 0;
         const shouldUpdateProfile = now - lastProfileUpdate >= 24 * 3600 * 1000;
@@ -86,15 +87,18 @@ const setupAndSaveConversations = async (
   conversations.forEach((conversation) => {
     const alreadyConversationInDbWithTopic =
       alreadyConversationsByTopic[conversation.topic];
-    const profileSocials =
-      getProfilesStore(account).getState().profiles[conversation.peerAddress]
-        ?.socials;
 
-    conversation.conversationTitle = getPreferredName(
-      profileSocials,
-      conversation.peerAddress,
-      conversation.context?.conversationId
-    );
+    if (!conversation.isGroup) {
+      const profileSocials =
+        getProfilesStore(account).getState().profiles[conversation.peerAddress]
+          ?.socials;
+
+      conversation.conversationTitle = getPreferredName(
+        profileSocials,
+        conversation.peerAddress,
+        conversation.context?.conversationId
+      );
+    }
 
     conversation.readUntil =
       conversation.readUntil ||
