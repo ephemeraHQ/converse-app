@@ -12,6 +12,7 @@ import {
 } from "react-native";
 import { Swipeable } from "react-native-gesture-handler";
 
+import { refreshProfileForAddress } from "../../../data/helpers/profiles/profilesUpdate";
 import {
   useChatStore,
   currentAccount,
@@ -63,9 +64,13 @@ type Props = {
 };
 
 const MessageSender = ({ message }: { message: MessageToDisplay }) => {
-  const senderSocials = useProfilesStore(
-    (s) => s.profiles[message.senderAddress]?.socials
-  );
+  const senderSocials = useProfilesStore((s) => {
+    const profile = s.profiles[message.senderAddress];
+    if (!profile) {
+      refreshProfileForAddress(currentAccount(), message.senderAddress);
+    }
+    return profile?.socials;
+  });
   const styles = useStyles();
   return (
     <Text style={styles.groupSender}>
