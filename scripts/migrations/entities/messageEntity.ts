@@ -1,11 +1,11 @@
 import {
-  Entity,
   Column,
-  PrimaryColumn,
-  ManyToOne,
-  JoinColumn,
+  Entity,
   Index,
+  JoinColumn,
+  ManyToOne,
   OneToMany,
+  PrimaryColumn,
 } from "typeorm";
 
 import { type Conversation } from "./conversationEntity";
@@ -31,9 +31,6 @@ export class Message {
   @Index()
   @Column("text", { default: "sent" })
   status!: "delivered" | "error" | "seen" | "sending" | "sent";
-
-  @Column("boolean", { default: false })
-  sentViaConverse!: boolean;
 
   @Index()
   @Column("text")

@@ -1,7 +1,7 @@
 import isDeepEqual from "fast-deep-equal";
 import { Platform } from "react-native";
 import { create } from "zustand";
-import { persist, createJSONStorage } from "zustand/middleware";
+import { createJSONStorage, persist } from "zustand/middleware";
 
 import {
   TopicSpamScores,
@@ -78,7 +78,6 @@ type XmtpProtocolMessage = {
 
 export type XmtpMessage = XmtpProtocolMessage & {
   status: "delivered" | "error" | "seen" | "sending" | "sent";
-  sentViaConverse: boolean;
   reactions?: Map<string, XmtpMessage>;
   contentFallback?: string;
   referencedMessageId?: string;

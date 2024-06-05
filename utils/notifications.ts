@@ -34,10 +34,10 @@ import mmkv from "./mmkv";
 import { navigateToConversation, setTopicToNavigateTo } from "./navigation";
 import { sentryTrackError } from "./sentry";
 import {
-  emptySavedNotificationsMessages,
-  loadSavedNotificationsMessages,
   emptySavedNotificationsConversations,
+  emptySavedNotificationsMessages,
   loadSavedNotificationsConversations,
+  loadSavedNotificationsMessages,
   saveConversationDict,
 } from "./sharedData";
 import { conversationName, shortAddress } from "./str";
@@ -430,7 +430,6 @@ export const loadSavedNotificationMessagesToContext = async () => {
             sent: message.sent,
             content: message.content,
             status: "sent",
-            sentViaConverse: !!message.sentViaConverse,
             contentType: message.contentType || "xmtp.org/text:1.0",
             topic: message.topic,
             referencedMessageId: message.referencedMessageId,
