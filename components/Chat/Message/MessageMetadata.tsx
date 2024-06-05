@@ -4,6 +4,7 @@ import { StyleSheet, Text, useColorScheme, View } from "react-native";
 
 import Checkmark from "../../../assets/checkmark.svg";
 import Clock from "../../../assets/clock.svg";
+import ConverseMessageBubble from "../../../assets/message-bubble.svg";
 import { textPrimaryColor } from "../../../utils/colors";
 import { MessageToDisplay } from "./Message";
 
@@ -13,12 +14,21 @@ type Props = {
 };
 
 export default function MessageMetadata({ message, white }: Props) {
+  const colorScheme = useColorScheme();
   const styles = useStyles();
   return (
     <View style={styles.metadata}>
       <Text style={[styles.time, white ? styles.timeWhite : undefined]}>
         {format(message.sent, "HH:mm")}
       </Text>
+      {message.sentViaConverse && (
+        <ConverseMessageBubble
+          style={styles.statusIcon}
+          fill={white ? "white" : textPrimaryColor(colorScheme)}
+          width={9}
+          height={9}
+        />
+      )}
       {message.fromMe && (
         <View style={styles.statusIconContainer}>
           {message.status === "sending" ? (

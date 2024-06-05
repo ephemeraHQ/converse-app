@@ -73,7 +73,7 @@ class PushNotificationsService : FirebaseMessagingService() {
         Log.d(TAG, "Message data payload: $envelopeJSON")
 
         val notificationData = Klaxon().parse<NotificationData>(envelopeJSON) ?: return
-        Log.d(TAG, "Decoded notification data: account is ${notificationData.account} - topic is ${notificationData.contentTopic}")
+        Log.d(TAG, "Decoded notification data: account is ${notificationData.account} - topic is ${notificationData.contentTopic} - sentViaConverse is ${notificationData.sentViaConverse}")
 
         initCodecs() // Equivalent to initSentry()
         val accounts = getAccounts(this)
@@ -118,6 +118,7 @@ class PushNotificationsService : FirebaseMessagingService() {
                             notificationData.message,
                             notificationData.timestampNs,
                             conversation.topic,
+                            notificationData.sentViaConverse,
                             notificationData.account,
                         )
                         val newNotificationDataJson = Klaxon().toJsonString(newNotificationData)
@@ -125,7 +126,7 @@ class PushNotificationsService : FirebaseMessagingService() {
                     }
                 } else {
                     Log.d(TAG, "Handling an ongoing conversation message notification")
-                    result = handleOngoingConversationMessage(applicationContext, xmtpClient, envelope, remoteMessage)
+                    result = handleOngoingConversationMessage(applicationContext, xmtpClient, envelope, remoteMessage, notificationData.sentViaConverse == true)
                     if (result != NotificationDataResult()) {
                         shouldShowNotification = result.shouldShowNotification
                     }

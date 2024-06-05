@@ -129,6 +129,8 @@ const protocolMessageToStateMessage = (
     sent: message.sent,
     contentType,
     status: "delivered",
+    // @todo => remove altogether
+    sentViaConverse: false,
     content,
     referencedMessageId,
     topic: message.topic,
