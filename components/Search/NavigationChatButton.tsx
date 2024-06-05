@@ -1,6 +1,6 @@
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { useCallback, useState } from "react";
-import { StyleSheet, Platform, Alert, useColorScheme } from "react-native";
+import { Alert, Platform, StyleSheet, useColorScheme } from "react-native";
 
 import { currentAccount } from "../../data/store/accountsStore";
 import { useIsSplitScreen } from "../../screens/Navigation/navHelpers";
