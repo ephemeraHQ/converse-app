@@ -13,8 +13,8 @@ import ConversationsStateHandler from "../components/StateHandlers/Notifications
 import WalletsStateHandler from "../components/StateHandlers/WalletsStateHandler";
 import {
   useCurrentAccount,
-  useSettingsStore,
   useProfilesStore,
+  useSettingsStore,
 } from "../data/store/accountsStore";
 import { useAppStore } from "../data/store/appStore";
 import { useOnboardingStore } from "../data/store/onboardingStore";
