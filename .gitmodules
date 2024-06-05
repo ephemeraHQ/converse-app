@@ -1,0 +1,3 @@
+[submodule "android/libs/xmtp-android"]
+	path = android/libs/xmtp-android
+	url = git@github.com:Unshut-Labs/xmtp-android.git
