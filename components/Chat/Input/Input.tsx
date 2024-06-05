@@ -25,7 +25,6 @@ import { sendMessage } from "../../../utils/message";
 import { TextInputWithValue } from "../../../utils/str";
 import AddAttachmentButton from "../Attachment/AddAttachmentButton";
 import { MessageToDisplay } from "../Message/Message";
-import SendMoneyButton from "../Transaction/SendMoneyButton";
 import ChatInputReplyPreview from "./InputReplyPreview";
 
 const getSendButtonType = (input: string): "DEFAULT" | "HIGHER" => {
@@ -134,7 +133,6 @@ export default function ChatInput() {
       )}
       <View style={styles.chatInputContainer}>
         <AddAttachmentButton />
-        {!conversation?.isGroup && <SendMoneyButton />}
         <TextInput
           autoCorrect={isDesktop ? false : undefined}
           autoComplete={isDesktop ? "off" : undefined}
