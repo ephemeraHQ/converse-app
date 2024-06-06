@@ -21,8 +21,6 @@ import Picto from "../Picto/Picto";
 
 type Props = {
   requestsCount: number;
-  handleSpamPress?: () => void;
-  activated?: boolean;
 } & NativeStackScreenProps<NavigationParamList, "Chats" | "ShareFrame">;
 
 export default function RequestsButton({ navigation, requestsCount }: Props) {
