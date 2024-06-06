@@ -292,7 +292,7 @@ const conversationsSortMethod = (
   return bDate - aDate;
 };
 
-// Wether a conversation should appear in Inbox OR Spam
+// Whether a conversation should appear in Inbox OR Requests
 // or just be totally hidden (blocked peer, deleted convo)
 export const conversationShouldBeDisplayed = (
   conversation: ConversationWithLastMessagePreview,
@@ -328,12 +328,8 @@ export const conversationShouldBeInInbox = (
   const isConsented = conversation.isGroup
     ? true
     : peersStatus[conversation.peerAddress.toLowerCase()] === "consented";
-  return (
-    conversation.hasOneMessageFromMe ||
-    isConsented ||
-    (conversation.spamScore !== undefined &&
-      (conversation.spamScore === null || conversation.spamScore < 1))
-  );
+
+  return conversation.hasOneMessageFromMe || isConsented;
 };
 
 export function sortAndComputePreview(

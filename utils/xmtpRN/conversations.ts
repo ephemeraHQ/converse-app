@@ -6,6 +6,7 @@ import { saveConversations } from "../../data/helpers/conversations/upsertConver
 import { getSettingsStore } from "../../data/store/accountsStore";
 import { XmtpConversation } from "../../data/store/chatStore";
 import { SettingsStoreType } from "../../data/store/settingsStore";
+import { ConversationWithLastMessagePreview } from "../conversation";
 import { debugTimeSpent } from "../debug";
 import { getCleanAddress } from "../eth";
 import { getTopicDataFromKeychain } from "../keychain/helpers";
@@ -707,4 +708,27 @@ const importBackedTopicsData = async (client: ConverseXmtpClientType) => {
   } catch (e) {
     sentryTrackError(e, { error: "Could not import backed up topics data" });
   }
+};
+
+export const sortRequestsBySpamScore = (
+  requests: ConversationWithLastMessagePreview[]
+) => {
+  const result = {
+    likelyNotSpam: [] as ConversationWithLastMessagePreview[],
+    likelySpam: [] as ConversationWithLastMessagePreview[],
+  };
+
+  requests.forEach((conversation) => {
+    const isLikelyNotSpam =
+      conversation.spamScore !== undefined &&
+      (conversation.spamScore === null || conversation.spamScore < 1);
+
+    if (isLikelyNotSpam) {
+      result.likelyNotSpam.push(conversation);
+    } else {
+      result.likelySpam.push(conversation);
+    }
+  });
+
+  return result;
 };

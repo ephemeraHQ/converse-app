@@ -38,6 +38,7 @@ import {
   getFilteredConversationsWithSearch,
 } from "../utils/conversation";
 import { converseEventEmitter } from "../utils/events";
+import { sortRequestsBySpamScore } from "../utils/xmtpRN/conversations";
 import { useHeaderSearchBar } from "./Navigation/ConversationListNav";
 import { NavigationParamList } from "./Navigation/Navigation";
 import { useIsSplitScreen } from "./Navigation/navHelpers";
@@ -97,6 +98,10 @@ function ConversationList({ navigation, route, searchBarRef }: Props) {
 
   const isSplit = useIsSplitScreen();
   const sharingMode = !!route.params?.frameURL;
+
+  const { likelyNotSpam } = sortRequestsBySpamScore(
+    sortedConversationsWithPreview.conversationsRequests
+  );
 
   useEffect(() => {
     if (!initialLoadDoneOnce) {
@@ -172,9 +177,7 @@ function ConversationList({ navigation, route, searchBarRef }: Props) {
         key="requests"
         navigation={navigation}
         route={route}
-        requestsCount={
-          sortedConversationsWithPreview.conversationsRequests.length
-        }
+        requestsCount={likelyNotSpam.length}
       />
     );
   }
