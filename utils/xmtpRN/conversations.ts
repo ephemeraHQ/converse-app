@@ -465,10 +465,14 @@ export const canGroupMessage = async (account: string, peer: string) => {
 export const createGroup = async (
   account: string,
   peers: string[],
-  permissionLevel: "all_members" | "admin_only" = "all_members"
+  permissionLevel: "all_members" | "admin_only" = "all_members",
+  groupName?: string
 ) => {
   const client = (await getXmtpClient(account)) as ConverseXmtpClientType;
   const group = await client.conversations.newGroup(peers, permissionLevel);
+  if (groupName) {
+    await group.updateGroupName(groupName);
+  }
   await handleNewConversation(client, group);
   return group.topic;
 };
