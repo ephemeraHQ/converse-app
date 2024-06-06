@@ -32,6 +32,7 @@ import { AddConverseMessageMetadata1709030178271 } from "./migrations/1709030178
 import { AddLastNotifSubscribePeriodToConversation1709893391562 } from "./migrations/1709893391562-addLastNotifSubscribePeriodToConversation";
 import { AddIndexToSent1712656017130 } from "./migrations/1712656017130-addIndexToSent";
 import { RemoveSentViaConverse1717625558678 } from "./migrations/1717625558678-RemoveSentViaConverse";
+import { AddSuperAdmin1717631723249 } from "./migrations/1717631723249-AddSuperAdmin";
 
 // We now use built in SQLite v3.45.1 from op-sqlite
 
@@ -81,6 +82,7 @@ export const getDataSource = async (account: string) => {
       AddIndexToSent1712656017130,
       AddGroupConversations1708332276329,
       RemoveSentViaConverse1717625558678,
+      AddSuperAdmin1717631723249,
     ],
     type: "react-native",
     location: await getDbDirectory(),

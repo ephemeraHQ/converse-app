@@ -58,7 +58,9 @@ export type XmtpGroupConversation = XmtpConversationShared & {
   peerAddress?: undefined;
   groupMembers: string[];
   groupAdmins: string[];
+  groupSuperAdmins: string[];
   groupPermissionLevel: "all_members" | "admin_only";
+  groupName?: string;
 };
 
 export type XmtpConversation = XmtpDMConversation | XmtpGroupConversation;

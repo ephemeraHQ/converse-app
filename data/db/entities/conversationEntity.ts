@@ -1,9 +1,9 @@
 import {
-  Index,
-  Entity,
   Column,
-  PrimaryColumn,
+  Entity,
+  Index,
   OneToMany,
+  PrimaryColumn,
 } from "typeorm/browser";
 
 import { type Message } from "./messageEntity";
@@ -30,8 +30,14 @@ export class Conversation {
   @Column("simple-array", { nullable: true })
   groupAdmins?: string[];
 
+  @Column("simple-array", { nullable: true })
+  groupSuperAdmins?: string[];
+
   @Column("text", { nullable: true })
   groupPermissionLevel?: string;
+
+  @Column("text", { nullable: true })
+  groupName?: string;
 
   @Column("simple-array", { nullable: true })
   groupMembers?: string[];
