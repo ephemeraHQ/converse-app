@@ -19,10 +19,10 @@ import {
 } from "../../utils/colors";
 import Picto from "../Picto/Picto";
 
-type Props = {
-  requestsCount: number;
-} & NativeStackScreenProps<NavigationParamList, "Chats" | "ShareFrame">;
-
+type Props = { requestsCount: number } & NativeStackScreenProps<
+  NavigationParamList,
+  "Chats" | "ShareFrame"
+>;
 export default function RequestsButton({ navigation, requestsCount }: Props) {
   const colorScheme = useColorScheme();
   const styles = useStyles();
