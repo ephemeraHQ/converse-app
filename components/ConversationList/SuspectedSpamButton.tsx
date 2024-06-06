@@ -1,4 +1,3 @@
-import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import {
   TouchableHighlight,
   useColorScheme,
@@ -8,7 +7,6 @@ import {
   Text,
 } from "react-native";
 
-import { NavigationParamList } from "../../screens/Navigation/Navigation";
 import {
   actionSecondaryColor,
   clickedItemBackgroundColor,
@@ -20,27 +18,29 @@ import {
 import Picto from "../Picto/Picto";
 
 type Props = {
-  requestsCount: number;
-  handleSpamPress?: () => void;
-  activated?: boolean;
-} & NativeStackScreenProps<NavigationParamList, "Chats" | "ShareFrame">;
+  spamCount: number;
+  handlePress: () => void;
+  toggleActivated: boolean;
+};
 
-export default function RequestsButton({ navigation, requestsCount }: Props) {
+export default function SuspectedSpamButton({
+  spamCount,
+  handlePress,
+  toggleActivated = false,
+}: Props) {
   const colorScheme = useColorScheme();
   const styles = useStyles();
   return (
     <TouchableHighlight
       underlayColor={clickedItemBackgroundColor(colorScheme)}
-      key="requests"
-      onPress={() => {
-        navigation.push("ChatsRequests");
-      }}
+      key="spam"
+      onPress={handlePress}
     >
-      <View style={styles.requestsHeader}>
-        <Text style={styles.requestsHeaderTitle}>Requests</Text>
-        <Text style={styles.requestsCount}>{requestsCount}</Text>
+      <View style={styles.spamHeader}>
+        <Text style={styles.spamHeaderTitle}>Suspected Spam</Text>
+        <Text style={styles.spamCount}>{spamCount}</Text>
         <Picto
-          picto="chevron.right"
+          picto={toggleActivated ? "chevron.down" : "chevron.right"}
           weight="semibold"
           color={
             Platform.OS === "android"
@@ -57,7 +57,7 @@ export default function RequestsButton({ navigation, requestsCount }: Props) {
 const useStyles = () => {
   const colorScheme = useColorScheme();
   return StyleSheet.create({
-    requestsHeader: {
+    spamHeader: {
       flexDirection: "row",
       alignItems: "center",
       ...Platform.select({
@@ -75,7 +75,7 @@ const useStyles = () => {
         },
       }),
     },
-    requestsHeaderTitle: {
+    spamHeaderTitle: {
       color: textPrimaryColor(colorScheme),
       ...Platform.select({
         default: {
@@ -89,7 +89,7 @@ const useStyles = () => {
         },
       }),
     },
-    requestsCount: {
+    spamCount: {
       marginLeft: "auto",
 
       ...Platform.select({
