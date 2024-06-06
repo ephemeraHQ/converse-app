@@ -32,7 +32,6 @@ func handleNewConversationFirstMessage(xmtpClient: XMTP.Client, apiURI: String?,
         let spamScore = try await computeSpamScore(
           address: conversation.peerAddress,
           message: messageContent,
-          sentViaConverse: message.sentViaConverse,
           contentType: contentType,
           apiURI: apiURI
         )
@@ -51,7 +50,7 @@ func handleNewConversationFirstMessage(xmtpClient: XMTP.Client, apiURI: String?,
               spamScore: spamScore
             )
           }
-          let decodedMessageResult = handleMessageByContentType(decodedMessage: message, xmtpClient: xmtpClient, sentViaConverse: message.sentViaConverse);
+          let decodedMessageResult = handleMessageByContentType(decodedMessage: message, xmtpClient: xmtpClient);
           
           if decodedMessageResult.senderAddress == xmtpClient.address || decodedMessageResult.forceIgnore {
             // Message is from me or a reaction removal, let's drop it
@@ -105,15 +104,13 @@ func handleNewConversationFirstMessage(xmtpClient: XMTP.Client, apiURI: String?,
 func handleOngoingConversationMessage(xmtpClient: XMTP.Client, envelope: XMTP.Envelope, bestAttemptContent: inout UNMutableNotificationContent, body: [String: Any]) async -> (shouldShowNotification: Bool, messageId: String?) {
   var shouldShowNotification = false
   let contentTopic = envelope.contentTopic
-  var conversationTitle = getSavedConversationTitle(contentTopic: contentTopic)
-  let sentViaConverse = body["sentViaConverse"] as? Bool ?? false
-  
+  var conversationTitle = getSavedConversationTitle(contentTopic: contentTopic)  
   var messageId: String? = nil
   
   let decodedMessage = try? await decodeMessage(xmtpClient: xmtpClient, envelope: envelope)
   // If couldn't decode the message, not showing
   if let message = decodedMessage {
-    let decodedMessageResult = handleMessageByContentType(decodedMessage: message, xmtpClient: xmtpClient, sentViaConverse: sentViaConverse);
+    let decodedMessageResult = handleMessageByContentType(decodedMessage: message, xmtpClient: xmtpClient);
     
     if decodedMessageResult.senderAddress == xmtpClient.address || decodedMessageResult.forceIgnore {
       // Message is from me or a reaction removal, let's drop it
@@ -153,11 +150,11 @@ func loadSavedMessages() -> [SavedNotificationMessage] {
   }
 }
 
-func saveMessage(account: String, topic: String, sent: Date, senderAddress: String, content: String, id: String, sentViaConverse: Bool, contentType: String, referencedMessageId: String?) throws {
+func saveMessage(account: String, topic: String, sent: Date, senderAddress: String, content: String, id: String, contentType: String, referencedMessageId: String?) throws {
   if (isDebugAccount(account: account)) {
     sentryAddBreadcrumb(message: "Calling save message with sender \(senderAddress) and content \(content)")
   }
-  let savedMessage = SavedNotificationMessage(topic: topic, content: content, senderAddress: senderAddress, sent: Int(sent.timeIntervalSince1970 * 1000), id: id, sentViaConverse: sentViaConverse, contentType: contentType, account: account, referencedMessageId: referencedMessageId)
+  let savedMessage = SavedNotificationMessage(topic: topic, content: content, senderAddress: senderAddress, sent: Int(sent.timeIntervalSince1970 * 1000), id: id, contentType: contentType, account: account, referencedMessageId: referencedMessageId)
   
   var savedMessagesList = loadSavedMessages()
   savedMessagesList.append(savedMessage)
@@ -210,7 +207,7 @@ func decodeMessage(xmtpClient: XMTP.Client, envelope: XMTP.Envelope) async throw
   }
 }
 
-func handleMessageByContentType(decodedMessage: DecodedMessage, xmtpClient: XMTP.Client, sentViaConverse: Bool) -> (content: String?, senderAddress: String?, forceIgnore: Bool, id: String?) {
+func handleMessageByContentType(decodedMessage: DecodedMessage, xmtpClient: XMTP.Client) -> (content: String?, senderAddress: String?, forceIgnore: Bool, id: String?) {
   var contentType = getContentTypeString(type: decodedMessage.encodedContent.type)
   var contentToReturn: String?
   var contentToSave: String?
@@ -288,7 +285,6 @@ func handleMessageByContentType(decodedMessage: DecodedMessage, xmtpClient: XMTP
         senderAddress: decodedMessage.senderAddress,
         content: content,
         id: decodedMessage.id,
-        sentViaConverse: sentViaConverse,
         contentType: contentType,
         referencedMessageId: referencedMessageId
       )
@@ -333,13 +329,10 @@ func getJsonReaction(reaction: Reaction) -> String? {
   }
 }
 
-func computeSpamScore(address: String, message: String?, sentViaConverse: Bool, contentType: String, apiURI: String?) async -> Double {
+func computeSpamScore(address: String, message: String?, contentType: String, apiURI: String?) async -> Double {
   var spamScore: Double = await getSenderSpamScore(address: address, apiURI: apiURI)
   if contentType.starts(with: "xmtp.org/text:"), let unwrappedMessage = message, containsURL(input: unwrappedMessage) {
     spamScore += 1
-  }
-  if sentViaConverse {
-    spamScore -= 1
   }
   return spamScore
 }

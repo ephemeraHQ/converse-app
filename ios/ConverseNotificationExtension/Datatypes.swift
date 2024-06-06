@@ -13,7 +13,6 @@ struct SavedNotificationMessage: Codable {
   var senderAddress: String
   var sent: Int
   var id: String
-  var sentViaConverse: Bool
   var contentType: String
   var account: String
   var referencedMessageId: String?
