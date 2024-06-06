@@ -1,11 +1,12 @@
 import React, { useCallback, useRef, useState } from "react";
-import { Platform, View, useColorScheme, Text } from "react-native";
+import { Platform, View, useColorScheme, Text, ScrollView } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 
 import ActivityIndicator from "../../components/ActivityIndicator/ActivityIndicator";
 import AndroidBackAction from "../../components/AndroidBackAction";
 import Button from "../../components/Button/Button";
 import ConversationFlashList from "../../components/ConversationFlashList";
+import SuspectedSpamButton from "../../components/ConversationList/SuspectedSpamButton";
 import { showActionSheetWithOptions } from "../../components/StateHandlers/ActionSheetStateHandler";
 import {
   useChatStore,
@@ -14,6 +15,7 @@ import {
 import { actionSheetColors, textPrimaryColor } from "../../utils/colors";
 import {
   consentToPeersOnProtocol,
+  sortRequestsBySpamScore,
   updateConsentStatus,
 } from "../../utils/xmtpRN/conversations";
 import { NativeStack, navigationAnimation } from "./Navigation";
@@ -26,17 +28,18 @@ export default function ConversationRequestsListNav() {
   const account = useCurrentAccount() as string;
   const navRef = useRef<any>();
   const [clearingAll, setClearingAll] = useState(false);
+
+  const [isSpamToggleEnabled, setIsSpamToggleEnabled] = useState(false);
+  const allRequests = sortedConversationsWithPreview.conversationsRequests;
+  const { likelySpam, likelyNotSpam } = sortRequestsBySpamScore(allRequests);
+
   const clearAllSpam = useCallback(() => {
     const methods = {
       "Clear all": async () => {
         setClearingAll(true);
         // @todo => handle groups here
         const peers = Array.from(
-          new Set(
-            sortedConversationsWithPreview.conversationsRequests.map(
-              (c) => c.peerAddress
-            )
-          )
+          new Set(allRequests.map((c) => c.peerAddress))
         ).filter((peer) => !!peer) as string[];
         await consentToPeersOnProtocol(account, peers, "deny");
         await updateConsentStatus(account);
@@ -54,7 +57,7 @@ export default function ConversationRequestsListNav() {
         destructiveButtonIndex: options.indexOf("Clear all"),
         cancelButtonIndex: options.indexOf("Cancel"),
         title:
-          "Do you confirm? This will block all accounts that are currently tagged as spam.",
+          "Do you confirm? This will block all accounts that are currently tagged as requests.",
         ...actionSheetColors(colorScheme),
       },
       (selectedIndex?: number) => {
@@ -65,11 +68,7 @@ export default function ConversationRequestsListNav() {
         }
       }
     );
-  }, [
-    account,
-    colorScheme,
-    sortedConversationsWithPreview.conversationsRequests,
-  ]);
+  }, [account, colorScheme, allRequests]);
   return (
     <NativeStack.Screen
       name="ChatsRequests"
@@ -101,7 +100,7 @@ export default function ConversationRequestsListNav() {
                 </View>
               )
             : "Clearing..."
-          : "Spam",
+          : "Requests",
         headerLeft:
           Platform.OS === "ios"
             ? undefined
@@ -115,12 +114,39 @@ export default function ConversationRequestsListNav() {
       {(navigationProps) => {
         navRef.current = navigationProps.navigation;
         return (
-          <GestureHandlerRootView style={{ flex: 1 }}>
-            <ConversationFlashList
-              {...navigationProps}
-              items={sortedConversationsWithPreview.conversationsRequests}
-            />
-          </GestureHandlerRootView>
+          <>
+            <GestureHandlerRootView style={{ flex: 1 }}>
+              <ScrollView style={{ flex: 1 }}>
+                <View>
+                  <ConversationFlashList
+                    {...navigationProps}
+                    items={likelyNotSpam}
+                  />
+                </View>
+                <View>
+                  {likelySpam.length ? (
+                    <SuspectedSpamButton
+                      spamCount={likelySpam.length}
+                      handlePress={() =>
+                        setIsSpamToggleEnabled(!isSpamToggleEnabled)
+                      }
+                      toggleActivated={isSpamToggleEnabled}
+                    />
+                  ) : (
+                    <></>
+                  )}
+                  {isSpamToggleEnabled ? (
+                    <ConversationFlashList
+                      {...navigationProps}
+                      items={likelySpam}
+                    />
+                  ) : (
+                    <></>
+                  )}
+                </View>
+              </ScrollView>
+            </GestureHandlerRootView>
+          </>
         );
       }}
     </NativeStack.Screen>
