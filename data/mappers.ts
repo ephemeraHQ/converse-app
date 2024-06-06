@@ -82,6 +82,7 @@ export const xmtpConversationToDb = (
   isGroup: xmtpConversation.isGroup,
   groupMembers: xmtpConversation.groupMembers,
   groupAdmins: xmtpConversation.groupAdmins,
+  groupName: xmtpConversation.isGroup ? xmtpConversation.groupName : undefined,
   groupPermissionLevel: xmtpConversation.groupPermissionLevel,
   lastNotificationsSubscribedPeriod:
     xmtpConversation.lastNotificationsSubscribedPeriod,
@@ -130,6 +131,7 @@ export const xmtpConversationFromDb = (
     isGroup: dbConversation.isGroup,
     groupMembers: dbConversation.groupMembers,
     groupAdmins: dbConversation.groupAdmins,
+    groupName: dbConversation.groupName,
     groupPermissionLevel: dbConversation.groupPermissionLevel,
     lastNotificationsSubscribedPeriod:
       dbConversation.lastNotificationsSubscribedPeriod,

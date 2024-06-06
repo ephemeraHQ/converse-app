@@ -2,12 +2,12 @@ import Clipboard from "@react-native-clipboard/clipboard";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { MutableRefObject, useEffect, useRef, useState } from "react";
 import {
-  TouchableOpacity,
-  Platform,
-  useColorScheme,
-  Text,
   Alert,
+  Platform,
+  Text,
   TextInput,
+  TouchableOpacity,
+  useColorScheme,
   View,
 } from "react-native";
 
@@ -61,7 +61,10 @@ export default function ConversationTitle({
       conversation.peerAddress !== previousConversation.peerAddress ||
       conversation.context?.conversationId !==
         previousConversation.context?.conversationId ||
-      conversation.conversationTitle
+      conversation.conversationTitle ||
+      (previousConversation.isGroup &&
+        conversation.isGroup &&
+        previousConversation.groupName !== conversation.groupName)
     ) {
       // New conversation, lets' set title
       setTitle(conversationName(conversation));
@@ -71,6 +74,7 @@ export default function ConversationTitle({
     }
     conversationRef.current = conversation;
   }, [conversation, profiles]);
+
   if (!conversation) return null;
   return (
     <View style={{ flexDirection: "row", flexGrow: 1 }}>
