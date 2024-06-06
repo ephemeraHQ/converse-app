@@ -1,21 +1,21 @@
 import * as Haptics from "expo-haptics";
 import { ReactNode, useCallback, useMemo, useRef } from "react";
 import {
-  View,
-  useColorScheme,
+  Animated,
+  ColorSchemeName,
+  Linking,
+  Platform,
   StyleSheet,
   Text,
-  Platform,
-  ColorSchemeName,
   TouchableOpacity,
-  Animated,
-  Linking,
+  View,
+  useColorScheme,
 } from "react-native";
 import { Swipeable } from "react-native-gesture-handler";
 
 import {
-  useChatStore,
   currentAccount,
+  useChatStore,
   useProfilesStore,
 } from "../../../data/store/accountsStore";
 import { XmtpMessage } from "../../../data/store/chatStore";
