@@ -210,46 +210,36 @@ export const refreshProfilesIfNeeded = async (account: string) => {
     getChatStore(account).getState().conversations
   );
   const now = new Date().getTime();
-  const conversationsWithStaleProfiles = conversations.filter((c) => {
-    if (c.isGroup) return false;
-    const existingProfile = knownProfiles[c.peerAddress];
-    const lastProfileUpdate = existingProfile?.updatedAt || 0;
-    const shouldUpdateProfile = now - lastProfileUpdate >= 24 * 3600 * 1000;
-    return shouldUpdateProfile;
-  });
-  const staleProfilesWithGroups: Map<string, XmtpConversation[]> = new Map();
+  const staleProfilesWithConversations: Map<string, XmtpConversation[]> =
+    new Map();
   conversations.forEach((c) => {
     if (!c.isGroup) {
-      return false;
-    }
-    c.groupMembers.forEach((memberAddress) => {
-      const existingProfile = knownProfiles[memberAddress];
+      const existingProfile = knownProfiles[c.peerAddress];
       const lastProfileUpdate = existingProfile?.updatedAt || 0;
       const shouldUpdateProfile = now - lastProfileUpdate >= 24 * 3600 * 1000;
       if (shouldUpdateProfile) {
-        const existing = staleProfilesWithGroups.get(memberAddress) || [];
+        const existing =
+          staleProfilesWithConversations.get(c.peerAddress) || [];
         existing.push(c);
-        staleProfilesWithGroups.set(memberAddress, existing);
+        staleProfilesWithConversations.set(c.peerAddress, existing);
       }
-    });
+    } else {
+      c.groupMembers.forEach((memberAddress) => {
+        const existingProfile = knownProfiles[memberAddress];
+        const lastProfileUpdate = existingProfile?.updatedAt || 0;
+        const shouldUpdateProfile = now - lastProfileUpdate >= 24 * 3600 * 1000;
+        if (shouldUpdateProfile) {
+          const existing =
+            staleProfilesWithConversations.get(memberAddress) || [];
+          existing.push(c);
+          staleProfilesWithConversations.set(memberAddress, existing);
+        }
+      });
+    }
   });
 
-  if (conversationsWithStaleProfiles.length > 0) {
-    // If not connected we need to be able to save convo without querying the API for profiles
-    updateProfilesForConversations(
-      account,
-      conversationsWithStaleProfiles
-    ).then((resolveResult) => {
-      const updatedConversations = resolveResult
-        .filter((r) => r.updated)
-        .map((r) => r.conversation);
-      if (updatedConversations.length > 0) {
-        getChatStore(account).getState().setConversations(updatedConversations);
-      }
-    });
-  }
-  if (staleProfilesWithGroups.size > 0) {
-    updateProfilesForGroups(account, staleProfilesWithGroups).then(
+  if (staleProfilesWithConversations.size > 0) {
+    updateProfilesForGroups(account, staleProfilesWithConversations).then(
       (resolveResult) => {
         const updatedConversations = resolveResult
           .filter((r) => r.updated)
