@@ -224,7 +224,11 @@ export const refreshProfilesIfNeeded = async (account: string) => {
         staleProfilesWithConversations.set(c.peerAddress, existing);
       }
     } else {
-      c.groupMembers.forEach((memberAddress) => {
+      const groupMembers: string[] =
+        typeof c.groupMembers === "string"
+          ? (c as any).groupMembers.split(",")
+          : c.groupMembers;
+      groupMembers.forEach((memberAddress) => {
         const existingProfile = knownProfiles[memberAddress];
         const lastProfileUpdate = existingProfile?.updatedAt || 0;
         const shouldUpdateProfile = now - lastProfileUpdate >= 24 * 3600 * 1000;
