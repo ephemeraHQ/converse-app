@@ -428,6 +428,18 @@ export default function ProfileScreen({
           <TableView
             items={[
               {
+                id: "accounts",
+                title: "Change or Add Account",
+                action: () => {
+                  navigation.pop();
+                  navigation.push("Accounts");
+                },
+                titleColor:
+                  Platform.OS === "android"
+                    ? undefined
+                    : primaryColor(colorScheme),
+              },
+              {
                 id: "contact",
                 title: "Contact Converse Team",
                 action: () => {
