@@ -33,7 +33,7 @@ export default function SuspectedSpamButton({
   return (
     <TouchableHighlight
       underlayColor={clickedItemBackgroundColor(colorScheme)}
-      key="spam"
+      key="requests"
       onPress={handlePress}
     >
       <View style={styles.spamHeader}>
