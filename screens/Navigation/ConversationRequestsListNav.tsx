@@ -12,7 +12,11 @@ import {
   useChatStore,
   useCurrentAccount,
 } from "../../data/store/accountsStore";
-import { actionSheetColors, textPrimaryColor } from "../../utils/colors";
+import {
+  actionSheetColors,
+  backgroundColor,
+  textPrimaryColor,
+} from "../../utils/colors";
 import {
   consentToPeersOnProtocol,
   sortRequestsBySpamScore,
@@ -115,7 +119,9 @@ export default function ConversationRequestsListNav() {
         navRef.current = navigationProps.navigation;
         return (
           <>
-            <GestureHandlerRootView style={{ flex: 1 }}>
+            <GestureHandlerRootView
+              style={{ flex: 1, backgroundColor: backgroundColor(colorScheme) }}
+            >
               <ScrollView style={{ flex: 1 }}>
                 <View>
                   <ConversationFlashList
