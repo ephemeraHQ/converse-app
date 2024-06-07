@@ -1,4 +1,5 @@
 import "reflect-metadata";
+
 import path from "path";
 import { DataSource } from "typeorm";
 
@@ -26,6 +27,8 @@ import { AddGroupConversations1708332276329 } from "../../data/db/migrations/170
 import { AddConverseMessageMetadata1709030178271 } from "../../data/db/migrations/1709030178271-addConverseMessageMetadata";
 import { AddLastNotifSubscribePeriodToConversation1709893391562 } from "../../data/db/migrations/1709893391562-addLastNotifSubscribePeriodToConversation";
 import { AddIndexToSent1712656017130 } from "../../data/db/migrations/1712656017130-addIndexToSent";
+import { RemoveSentViaConverse1717625558678 } from "../../data/db/migrations/1717625558678-RemoveSentViaConverse";
+import { AddSuperAdmin1717631723249 } from "../../data/db/migrations/1717631723249-AddSuperAdmin";
 import { Conversation } from "./entities/conversationEntity";
 import { Message } from "./entities/messageEntity";
 import { Profile } from "./entities/profileEntity";
@@ -60,6 +63,8 @@ const dataSource = new DataSource({
     AddLastNotifSubscribePeriodToConversation1709893391562,
     AddIndexToSent1712656017130,
     AddGroupConversations1708332276329,
+    RemoveSentViaConverse1717625558678,
+    AddSuperAdmin1717631723249,
   ],
   type: "sqlite",
 });
