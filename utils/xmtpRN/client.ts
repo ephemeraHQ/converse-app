@@ -9,20 +9,16 @@ import {
   StaticAttachmentCodec,
   TextCodec,
 } from "@xmtp/react-native-sdk";
-import { Platform } from "react-native";
-import RNFS from "react-native-fs";
 
 import config from "../../config";
+import { getDbDirectory } from "../../data/db";
 import { getCleanAddress } from "../eth";
 import { CoinbaseMessagingPaymentCodec } from "./contentTypes/coinbasePayment";
 
 const env = config.xmtpEnv as "dev" | "production" | "local";
 
 export const getXmtpClientFromBase64Key = async (base64Key: string) => {
-  const dbDirectory =
-    Platform.OS === "ios"
-      ? await RNFS.pathForGroup(config.appleAppGroup)
-      : `/data/data/${config.bundleId}/databases`;
+  const dbDirectory = await getDbDirectory();
 
   return Client.createFromKeyBundle(base64Key, {
     env,

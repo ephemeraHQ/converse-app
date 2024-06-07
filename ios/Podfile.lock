@@ -237,7 +237,7 @@ PODS:
     - FBLazyVector (= 0.73.6)
     - RCTRequired (= 0.73.6)
     - React-Core (= 0.73.6)
-  - ReachabilitySwift (5.2.2)
+  - ReachabilitySwift (5.2.3)
   - React (0.73.6):
     - React-Core (= 0.73.6)
     - React-Core/DevSupport (= 0.73.6)
@@ -1339,16 +1339,16 @@ PODS:
     - GenericJSON (~> 2.0)
     - Logging (~> 1.0.0)
     - secp256k1.swift (~> 0.1)
-  - XMTP (0.11.3):
+  - XMTP (0.11.4):
     - Connect-Swift (= 0.12.0)
     - GzipSwift
     - LibXMTP (= 0.5.1-beta0)
     - web3.swift
-  - XMTPReactNative (1.34.0-beta.5):
+  - XMTPReactNative (1.34.0-beta.7):
     - ExpoModulesCore
     - MessagePacker
     - secp256k1.swift
-    - XMTP (= 0.11.3)
+    - XMTP (= 0.11.4)
   - Yoga (1.14.0)
 
 DEPENDENCIES:
@@ -1470,7 +1470,7 @@ DEPENDENCIES:
   - Sentry/HybridSDK (= 8.21.0)
   - SQLite.swift
   - UMAppLoader (from `../node_modules/unimodules-app-loader/ios`)
-  - XMTP (= 0.11.3)
+  - XMTP (= 0.11.4)
   - "XMTPReactNative (from `../node_modules/@xmtp/react-native-sdk/ios`)"
   - Yoga (from `../node_modules/react-native/ReactCommon/yoga`)
 
@@ -1799,7 +1799,7 @@ SPEC CHECKSUMS:
   RCT-Folly: 7169b2b1c44399c76a47b5deaaba715eeeb476c0
   RCTRequired: ca1d7414aba0b27efcfa2ccd37637edb1ab77d96
   RCTTypeSafety: 678e344fb976ff98343ca61dc62e151f3a042292
-  ReachabilitySwift: 2128f3a8c9107e1ad33574c6e58e8285d460b149
+  ReachabilitySwift: 7f151ff156cea1481a8411701195ac6a984f4979
   React: e296bcebb489deaad87326067204eb74145934ab
   React-callinvoker: d0b7015973fa6ccb592bb0363f6bc2164238ab8c
   React-Codegen: 627cd02719674bfc5612f2f8394b4da2bf03a7b2
@@ -1875,10 +1875,10 @@ SPEC CHECKSUMS:
   SwiftProtobuf: 407a385e97fd206c4fbe880cc84123989167e0d1
   UMAppLoader: 79d3ee6aa2447a1fe2e8b0d07acf2de106e55b58
   web3.swift: 2263d1e12e121b2c42ffb63a5a7beb1acaf33959
-  XMTP: 3e8e649cc8a6cebe4a1a16f6c396a273fefb2662
-  XMTPReactNative: ee7887a01a471b495f4c17beec775b8ebe424503
+  XMTP: 93c576a55976baeec67f3cc3911c1db8dbd3f86d
+  XMTPReactNative: e4167261b9159b5e9520e57536b0e18e3469e121
   Yoga: d17d2cc8105eed528474683b42e2ea310e1daf61
 
-PODFILE CHECKSUM: ac14530eeba8619ffa33c02a7f01a439ee17ddf2
+PODFILE CHECKSUM: 1b32ee4a2e3a1b55e63ae191b4277497bb1ea4f7
 
 COCOAPODS: 1.15.2
