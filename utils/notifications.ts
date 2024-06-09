@@ -41,7 +41,9 @@ import {
   saveConversationDict,
 } from "./sharedData";
 import { conversationName, shortAddress } from "./str";
+import { ConverseXmtpClientType } from "./xmtpRN/client";
 import { loadConversationsHmacKeys } from "./xmtpRN/conversations";
+import { getXmtpClient } from "./xmtpRN/sync";
 
 let nativePushToken: string | null;
 
@@ -52,6 +54,12 @@ export type NotificationPermissionStatus =
 
 const subscribingByAccount: { [account: string]: boolean } = {};
 const subscribedOnceByAccount: { [account: string]: boolean } = {};
+
+const buildUserGroupInviteTopic = (account: string): string => {
+  console.log("buildUserGroupInviteTopic", account);
+
+  return `/xmtp/mls/1/w-${account}/proto`;
+};
 
 export const deleteSubscribedTopics = (account: string) => {
   if (account in subscribedOnceByAccount) {
@@ -73,6 +81,10 @@ const _subscribeToNotifications = async (account: string): Promise<void> => {
   const thirtyDayPeriodsSinceEpoch = Math.floor(
     Date.now() / 1000 / 60 / 60 / 24 / 30
   );
+  const client = (await getXmtpClient(account)) as ConverseXmtpClientType;
+  if (!client) {
+    return;
+  }
   const { conversations, conversationsSortedOnce, topicsData } =
     getChatStore(account).getState();
   const notificationsPermissionStatus =
@@ -186,6 +198,13 @@ const _subscribeToNotifications = async (account: string): Promise<void> => {
       status: "PUSH",
     };
     dataToHash.push.push(userInviteTopic);
+    const userGroupInviteTopic = buildUserGroupInviteTopic(
+      client.installationId || ""
+    );
+    topicsToUpdateForPeriod[userGroupInviteTopic] = {
+      status: "PUSH",
+    };
+    dataToHash.push.push(userGroupInviteTopic);
     dataToHash.push.sort();
     dataToHash.muted.sort();
     const stringToHash = `${dataToHash.period}-push-${dataToHash.push.join(
