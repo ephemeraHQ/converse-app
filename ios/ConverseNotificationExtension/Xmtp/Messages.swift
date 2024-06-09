@@ -175,7 +175,9 @@ func decodeMessage(xmtpClient: XMTP.Client, envelope: XMTP.Envelope) async throw
     if let group = groupList.first(where: { $0.topic == envelope.contentTopic }) {
       do {
         print("[NotificationExtension] Decoding group message...")
-        let decodedMessage = try await group.processMessage(envelopeBytes: envelope.message)
+        let envelopeBytes = envelope.message
+        let _ = try await group.processMessageDecrypted(envelopeBytes: envelopeBytes)
+        let decodedMessage = try await group.processMessage(envelopeBytes: envelopeBytes)
         print("[NotificationExtension] Group message decoded!")
         return decodedMessage
       } catch {
