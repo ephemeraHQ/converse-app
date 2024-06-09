@@ -71,6 +71,10 @@ func isGroupMessageTopic(topic: String) -> Bool {
   return topic.starts(with: "/xmtp/mls/1/g-")
 }
 
+func isGroupWelcomeTopic(topic: String) -> Bool {
+  return topic.starts(with: "/xmtp/mls/1/w-")
+}
+
 func subscribeToTopic(apiURI: String?, account: String, pushToken: String?, topic: String, hmacKeys: String?) {
   if (apiURI != nil && pushToken != nil && !apiURI!.isEmpty && !pushToken!.isEmpty) {
     let appendTopicURI = "\(apiURI ?? "")/api/subscribe/append"
