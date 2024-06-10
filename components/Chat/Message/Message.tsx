@@ -48,8 +48,9 @@ import FramesPreviews from "../Frame/FramesPreviews";
 import ChatInputReplyBubble from "../Input/InputReplyBubble";
 import TransactionPreview from "../Transaction/TransactionPreview";
 import ChatMessageActions from "./MessageActions";
-import MessageMetadata from "./MessageMetadata";
 import ChatMessageReactions from "./MessageReactions";
+import MessageStatus from "./MessageStatus";
+import MessageTimestamp from "./MessageTimestamp";
 
 export type MessageToDisplay = XmtpMessage & {
   hasPreviousMessageInSeries: boolean;
@@ -80,7 +81,9 @@ const MessageSender = ({ message }: { message: MessageToDisplay }) => {
 function ChatMessage({ message, colorScheme, isGroup }: Props) {
   const styles = useStyles();
 
-  const metadata = <MessageMetadata message={message} white={message.fromMe} />;
+  const metadata = (
+    <MessageTimestamp message={message} white={message.fromMe} />
+  );
 
   let messageContent: ReactNode;
   const contentType = getMessageContentType(message.contentType);
@@ -285,24 +288,35 @@ function ChatMessage({ message, colorScheme, isGroup }: Props) {
             <View style={styles.metadataContainer}>{metadata}</View>
           </ChatMessageActions>
           <View style={{ height: 0, flexBasis: "100%" }} />
-          {framesInStore[message.content] && (
-            <TouchableOpacity
-              style={{ flexBasis: "100%" }}
-              onPress={() => handleUrlPress(message.content)}
-            >
-              <Text
-                style={{
-                  fontSize: 11,
-                  padding: 4,
-                  marginBottom: 16,
-                  alignSelf: message.fromMe ? "flex-end" : "flex-start",
-                  color: textSecondaryColor(colorScheme),
-                }}
+          <View
+            style={{
+              flexDirection: "row",
+              flexBasis: "100%",
+              justifyContent: "flex-end",
+            }}
+          >
+            {framesInStore[message.content] && (
+              <TouchableOpacity
+                style={{ flexBasis: "100%" }}
+                onPress={() => handleUrlPress(message.content)}
               >
-                {message.content}
-              </Text>
-            </TouchableOpacity>
-          )}
+                <Text
+                  style={{
+                    fontSize: 11,
+                    padding: 4,
+                    marginBottom: 16,
+                    alignSelf: message.fromMe ? "flex-end" : "flex-start",
+                    color: textSecondaryColor(colorScheme),
+                  }}
+                >
+                  {message.content}
+                </Text>
+              </TouchableOpacity>
+            )}
+            {!message.hasNextMessageInSeries && (
+              <MessageStatus message={message} />
+            )}
+          </View>
           <ChatMessageReactions message={message} reactions={reactions} />
         </Swipeable>
       )}
