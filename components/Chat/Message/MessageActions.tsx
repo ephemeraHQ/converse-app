@@ -61,7 +61,6 @@ const MessageTailAnimated =
   Reanimated.createAnimatedComponent(MessageTailComponent);
 
 const MessageTail = (props: any) => {
-  // const actionSheetShown = useAppStore((s) => s.actionSheetShown);
   return (
     <MessageTailAnimated
       {...props}
