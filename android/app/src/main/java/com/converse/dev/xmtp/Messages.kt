@@ -171,12 +171,53 @@ suspend fun handleNewConversationFirstMessage(
     )
 }
 
-fun handleOngoingConversationMessage(
+suspend fun handleOngoingConversationMessage(
     appContext: Context,
     xmtpClient: Client,
     envelope: Envelope,
     remoteMessage: RemoteMessage,
 ): NotificationDataResult {
+    if (isGroupMessageTopic(envelope.contentTopic)) {
+        xmtpClient.conversations.syncGroups()
+        val groupList = xmtpClient.conversations.listGroups()
+        val group = groupList.find { it.topic == envelope.contentTopic }
+        if (group == null) {
+            // Print length of groupList
+            Log.d("PushNotificationsService", "No group found for ${envelope.contentTopic}. Available groups: ${groupList.size}")
+            val groupTopics = groupList.map { it.topic }
+            Log.d("PushNotificationsService", "No group found for ${envelope.contentTopic}. Available groups: ${xmtpClient.address}")
+            return NotificationDataResult()
+        }
+        try {
+            var conversationTitle = getSavedConversationTitle(appContext, envelope.contentTopic)
+            val decryptedMessage = group.processMessage(envelope.message.toByteArray())
+            val message = decryptedMessage.decode()
+            val decodedMessageResult = handleMessageByContentType(
+                appContext,
+                message,
+                xmtpClient,
+            )
+            val shouldShowNotification = if (decodedMessageResult.senderAddress != xmtpClient.address && !decodedMessageResult.forceIgnore && decodedMessageResult.content != null) {
+                if (conversationTitle.isEmpty() && decodedMessageResult.senderAddress != null) {
+                    conversationTitle = shortAddress(decodedMessageResult.senderAddress)
+                }
+                true
+            } else {
+                Log.d(TAG, "[NotificationExtension] Not showing a notification")
+                false
+            }
+            return NotificationDataResult(
+                title = conversationTitle,
+                body = decodedMessageResult.content ?: "",
+                remoteMessage = remoteMessage,
+                messageId = decodedMessageResult.id,
+                shouldShowNotification = shouldShowNotification
+            )
+        } catch (e: Exception) {
+            Log.e("PushNotificationsService", "Error processing group message: $e")
+            return NotificationDataResult()
+        }
+    }
     val conversation = getPersistedConversation(appContext, xmtpClient, envelope.contentTopic)
         ?: run {
             Log.d("PushNotificationsService", "No conversation found for ${envelope.contentTopic}")
