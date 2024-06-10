@@ -59,6 +59,23 @@ func handleNotificationAsync(contentHandler: ((UNNotificationContent) -> Void), 
           conversation: conversation,
           bestAttemptContent: &content
         )
+      } else if isGroupWelcomeTopic(topic: contentTopic) {
+        guard let conversation = await getNewConversationFromEnvelope(
+          xmtpClient: xmtpClient,
+          envelope: envelope
+        ) else {
+          contentHandler(UNNotificationContent())
+          return
+        }
+
+        (shouldShowNotification, messageId) = await handleGroupWelcome(
+          xmtpClient: xmtpClient,
+          apiURI: apiURI,
+          pushToken: pushToken,
+          conversation: conversation,
+          welcomeTopic: contentTopic,
+          bestAttemptContent: &content
+        )
       } else {
         sentryAddBreadcrumb(message: "topic \(contentTopic) is not invite topic")
         (shouldShowNotification, messageId) = await handleOngoingConversationMessage(
