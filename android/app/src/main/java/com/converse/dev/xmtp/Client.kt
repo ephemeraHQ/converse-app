@@ -47,7 +47,7 @@ fun getXmtpClient(appContext: Context, account: String): Client? {
     val xmtpEnv =
         if (xmtpEnvString == "production") XMTPEnvironment.PRODUCTION else XMTPEnvironment.DEV
 
-    val options = ClientOptions(api = ClientOptions.Api(env = xmtpEnv, isSecure = true))
+    val options = ClientOptions(api = ClientOptions.Api(env = xmtpEnv, isSecure = true), enableAlphaMls = true)
 
     return Client().buildFrom(bundle = keys, options = options)
 }
