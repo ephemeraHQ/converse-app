@@ -25,10 +25,16 @@ struct ConversationContext: Codable {
 
 struct SavedNotificationConversation: Codable {
   var topic: String
-  var peerAddress: String
+  var peerAddress: String?
   var createdAt: Int
   var context: ConversationContext?
   var account: String
+  var isGroup: Bool = false
+  var groupMembers: [String?]?
+  var groupAdmins: [String?]?
+  var groupSuperAdmins: [String?]?
+  var groupPermissionLevel: String?
+  var groupName: String?
   var spamScore: Double? {
     didSet {
       if let value = spamScore {

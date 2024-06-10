@@ -25,7 +25,7 @@ func handleNewConversationFirstMessage(xmtpClient: XMTP.Client, apiURI: String?,
         
         var messageContent: String? = nil
         if (contentType.starts(with: "xmtp.org/text:")) {
-            messageContent = String(data: message.encodedContent.content, encoding: .utf8)
+          messageContent = String(data: message.encodedContent.content, encoding: .utf8)
         }
         
         // @todo => handle group messages here (conversation.peerAddress)
@@ -101,10 +101,80 @@ func handleNewConversationFirstMessage(xmtpClient: XMTP.Client, apiURI: String?,
   return (shouldShowNotification, messageId)
 }
 
+func handleGroupWelcome(xmtpClient: XMTP.Client, apiURI: String?, pushToken: String?, conversation: XMTP.Conversation, welcomeTopic: String, bestAttemptContent: inout UNMutableNotificationContent) async -> (shouldShowNotification: Bool, messageId: String?) {
+  var shouldShowNotification = false
+  let messageId = welcomeTopic
+  do {
+    
+    if case .group(let group) = conversation {
+      do {
+
+        let members = try group.members
+        let memberDictionary = members.reduce(into: [String: String]()) { dict, member in
+          let inboxId = member.inboxId
+          let address = member.addresses.first
+          dict[inboxId] = address
+        }
+        
+
+        let groupMembers = members.map { $0.addresses[0] }
+        let admins = try group.listAdmins()
+        let groupAdmins = admins.map { memberDictionary[$0] }
+        let superAdmins = try group.listSuperAdmins()
+        let groupSuperAdmins = superAdmins.map { memberDictionary[$0] }
+        let groupPermissionLevel = try group.permissionLevel()
+        let addedByInboxId = try group.addedByInboxId()
+        let addedBy = memberDictionary[addedByInboxId]
+        if let addedByAddress = addedBy {
+          let spamScore = await computeSpamScore(
+            address: addedByAddress,
+            message: "",
+            contentType: "xmtp.org/text",
+            apiURI: apiURI
+          )
+          if spamScore >= 1 {
+            print("[NotificationExtension] Not showing a notification because considered spam")
+            shouldShowNotification = false
+          } else {
+            shouldShowNotification = true
+          }
+        }
+
+        
+        let groupName = try group.groupName()
+        bestAttemptContent.title = groupName
+        bestAttemptContent.body = "You have been added to a new group"
+//        try saveGroup(
+//          account: xmtpClient.address,
+//          topic: group.topic,
+//          groupMembers: groupMembers,
+//          groupAdmins: groupAdmins,
+//          groupSuperAdmins: superAdmins,
+//          groupPermissionLevel: "\(groupPermissionLevel)",
+//          groupName: groupName,
+//          createdAt: Int(group.createdAt.timeIntervalSince1970 * 1000),
+//          context: ConversationContext(
+//            conversationId: "",
+//            metadata: [:]
+//          ),
+//          spamScore: spamScore
+//        )
+
+      }
+    }
+  } catch {
+    sentryTrackError(error: error, extras: ["message": "NOTIFICATION_SAVE_MESSAGE_ERROR_2", "topic": conversation.topic])
+    print("[NotificationExtension] Error fetching messages: \(error)")
+  }
+
+  return (shouldShowNotification, messageId)
+}
+
+
 func handleOngoingConversationMessage(xmtpClient: XMTP.Client, envelope: XMTP.Envelope, bestAttemptContent: inout UNMutableNotificationContent, body: [String: Any]) async -> (shouldShowNotification: Bool, messageId: String?) {
   var shouldShowNotification = false
   let contentTopic = envelope.contentTopic
-  var conversationTitle = getSavedConversationTitle(contentTopic: contentTopic)  
+  var conversationTitle = getSavedConversationTitle(contentTopic: contentTopic)
   var messageId: String? = nil
   
   let decodedMessage = try? await decodeMessage(xmtpClient: xmtpClient, envelope: envelope)
@@ -192,12 +262,12 @@ func decodeMessage(xmtpClient: XMTP.Client, envelope: XMTP.Envelope) async throw
   }
 
   // V1/V2 convos 1:1, will be deprecated once 1:1 are migrated to MLS
-
+  
   guard let conversation = await getPersistedConversation(xmtpClient: xmtpClient, contentTopic: envelope.contentTopic) else {
     sentryTrackMessage(message: "NOTIFICATION_CONVERSATION_NOT_FOUND", extras: ["envelope": envelope])
     return nil
   }
-
+  
   do {
     print("[NotificationExtension] Decoding message...")
     let decodedMessage = try conversation.decode(envelope)
@@ -230,7 +300,7 @@ func handleMessageByContentType(decodedMessage: DecodedMessage, xmtpClient: XMTP
   
   do {
     switch contentType {
-    
+      
     case let type where type.starts(with: "xmtp.org/text:"):
       contentToSave = messageContent as? String
       contentToReturn = contentToSave
@@ -244,7 +314,7 @@ func handleMessageByContentType(decodedMessage: DecodedMessage, xmtpClient: XMTP
       type.starts(with: "coinbase.com/coinbase-messaging-payment-activity:"):
       contentToSave = messageContent as? String
       contentToReturn = "💸 Transaction"
-    
+      
     case let type where type.starts(with: "xmtp.org/reaction:"):
       let reaction = messageContent as? Reaction
       let action = reaction?.action.rawValue
@@ -264,10 +334,10 @@ func handleMessageByContentType(decodedMessage: DecodedMessage, xmtpClient: XMTP
       } else {
         contentToSave = nil
       }
-    
+      
     case let type where type.starts(with: "xmtp.org/readReceipt:"):
       contentToSave = nil
-    
+      
     default:
       sentryTrackMessage(message: "NOTIFICATION_UNKNOWN_CONTENT_TYPE", extras: ["contentType": contentType, "topic": decodedMessage.topic])
       print("[NotificationExtension] UNKOWN CONTENT TYPE: \(contentType)")
@@ -345,26 +415,26 @@ func getSenderSpamScore(address: String, apiURI: String?) async -> Double {
     let senderSpamScoreURI = "\(apiURI ?? "")/api/spam/senders/batch"
     do {
       let response = try await withUnsafeThrowingContinuation { continuation in
-              AF.request(senderSpamScoreURI, method: .post, parameters: ["sendersAddresses": [address]], encoding: JSONEncoding.default, headers: nil).validate().responseData { response in
-                  if let data = response.data {
-                      continuation.resume(returning: data)
-                      return
-                  }
-                  if let err = response.error {
-                      continuation.resume(throwing: err)
-                      return
-                  }
-                  fatalError("should not get here")
-              }
+        AF.request(senderSpamScoreURI, method: .post, parameters: ["sendersAddresses": [address]], encoding: JSONEncoding.default, headers: nil).validate().responseData { response in
+          if let data = response.data {
+            continuation.resume(returning: data)
+            return
           }
+          if let err = response.error {
+            continuation.resume(throwing: err)
+            return
+          }
+          fatalError("should not get here")
+        }
+      }
       
-          if let json = try JSONSerialization.jsonObject(with: response, options: []) as? [String: Any] {
-            if let score = json[address] as? Double {
-              senderSpamScore = score
-            }
-          }
-
-
+      if let json = try JSONSerialization.jsonObject(with: response, options: []) as? [String: Any] {
+        if let score = json[address] as? Double {
+          senderSpamScore = score
+        }
+      }
+      
+      
       
     } catch {
       print(error)
