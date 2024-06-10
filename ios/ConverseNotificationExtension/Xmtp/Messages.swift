@@ -108,14 +108,14 @@ func handleGroupWelcome(xmtpClient: XMTP.Client, apiURI: String?, pushToken: Str
     
     if case .group(let group) = conversation {
       do {
-
+        _ = try? await Task.sleep(nanoseconds: UInt64(4 * 1_000_000_000))
+        try await group.sync()
         let members = try group.members
         let memberDictionary = members.reduce(into: [String: String]()) { dict, member in
           let inboxId = member.inboxId
           let address = member.addresses.first
           dict[inboxId] = address
         }
-        
 
         let groupMembers = members.map { $0.addresses[0] }
         let admins = try group.listAdmins()
@@ -138,28 +138,25 @@ func handleGroupWelcome(xmtpClient: XMTP.Client, apiURI: String?, pushToken: Str
           } else {
             shouldShowNotification = true
           }
+          let groupName = try group.groupName()
+          bestAttemptContent.title = groupName
+          bestAttemptContent.body = "You have been added to a new group"
+          try saveGroup(
+            account: xmtpClient.address,
+            topic: group.topic,
+            groupMembers: groupMembers,
+            groupAdmins: groupAdmins,
+            groupSuperAdmins: superAdmins,
+            groupPermissionLevel: "\(groupPermissionLevel)",
+            groupName: groupName,
+            createdAt: Int(group.createdAt.timeIntervalSince1970 * 1000),
+            context: ConversationContext(
+              conversationId: "",
+              metadata: [:]
+            ),
+            spamScore: spamScore
+          )
         }
-
-        
-        let groupName = try group.groupName()
-        bestAttemptContent.title = groupName
-        bestAttemptContent.body = "You have been added to a new group"
-//        try saveGroup(
-//          account: xmtpClient.address,
-//          topic: group.topic,
-//          groupMembers: groupMembers,
-//          groupAdmins: groupAdmins,
-//          groupSuperAdmins: superAdmins,
-//          groupPermissionLevel: "\(groupPermissionLevel)",
-//          groupName: groupName,
-//          createdAt: Int(group.createdAt.timeIntervalSince1970 * 1000),
-//          context: ConversationContext(
-//            conversationId: "",
-//            metadata: [:]
-//          ),
-//          spamScore: spamScore
-//        )
-
       }
     }
   } catch {
