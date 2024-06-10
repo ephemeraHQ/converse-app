@@ -8,7 +8,7 @@ import { textPrimaryColor } from "../../../utils/colors";
 import { converseEventEmitter } from "../../../utils/events";
 import { navigate } from "../../../utils/navigation";
 import { MessageToDisplay } from "../Message/Message";
-import MessageMetadata from "../Message/MessageMetadata";
+import MessageTimestamp from "../Message/MessageTimestamp";
 
 type Props = {
   message: MessageToDisplay;
@@ -41,7 +41,7 @@ export default function AttachmentMessagePreview({ message }: Props) {
     !!attachment.mediaURL &&
     attachment.mediaType !== "UNSUPPORTED";
 
-  const metadataView = <MessageMetadata message={message} white={showing} />;
+  const metadataView = <MessageTimestamp message={message} white={showing} />;
   const emoji = attachment.mediaType === "IMAGE" ? "📷" : "📎";
   const filesize = prettyBytes(attachment.contentLength);
   const filename =

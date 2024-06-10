@@ -26,7 +26,6 @@ import {
   useCurrentAccount,
   useSettingsStore,
 } from "../../../data/store/accountsStore";
-import { useAppStore } from "../../../data/store/appStore";
 import { ReanimatedTouchableOpacity } from "../../../utils/animations";
 import { reportMessage } from "../../../utils/api";
 import { isAttachmentMessage } from "../../../utils/attachment/helpers";
@@ -62,14 +61,14 @@ const MessageTailAnimated =
   Reanimated.createAnimatedComponent(MessageTailComponent);
 
 const MessageTail = (props: any) => {
-  const actionSheetShown = useAppStore((s) => s.actionSheetShown);
+  // const actionSheetShown = useAppStore((s) => s.actionSheetShown);
   return (
     <MessageTailAnimated
       {...props}
       fill={
-        actionSheetShown && props.fromMe
+        props.fromMe
           ? myMessageBubbleColor(props.colorScheme)
-          : "currentColor"
+          : messageBubbleColor(props.colorScheme)
       }
     />
   );
