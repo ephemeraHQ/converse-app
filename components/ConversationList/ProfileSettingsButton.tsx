@@ -1,24 +1,28 @@
 import React, { useCallback, useEffect, useState } from "react";
-import { Platform, TouchableOpacity, useColorScheme } from "react-native";
+import { Platform, TouchableOpacity } from "react-native";
 
 import config from "../../config";
 import {
   currentAccount,
   useLoggedWithPrivy,
+  useProfilesStore,
   useWalletStore,
 } from "../../data/store/accountsStore";
-import { primaryColor, textSecondaryColor } from "../../utils/colors";
 import { evmHelpers } from "../../utils/evm/helpers";
 import { navigate } from "../../utils/navigation";
+import { getPreferredAvatar } from "../../utils/profile";
+import Avatar from "../Avatar";
 import Button from "../Button/Button";
-import Picto from "../Picto/Picto";
 
 export default function ProfileSettingsButton() {
-  const colorScheme = useColorScheme();
   const isPrivy = useLoggedWithPrivy();
   const USDCBalance = useWalletStore((s) => s.USDCBalance);
   const [stringBalance, setStringBalance] = useState("");
   const [stringSize, setStringSize] = useState(0);
+  const account = currentAccount();
+  const profiles = useProfilesStore((state) => state.profiles);
+  const socials = profiles[account]?.socials;
+
   const openProfile = useCallback(() => {
     navigate("Profile", { address: currentAccount() });
   }, []);
@@ -74,14 +78,8 @@ export default function ProfileSettingsButton() {
   }
   return (
     <TouchableOpacity activeOpacity={0.2} onPress={openProfile}>
-      <Picto
-        picto="person"
-        weight="medium"
-        color={
-          Platform.OS === "ios"
-            ? primaryColor(colorScheme)
-            : textSecondaryColor(colorScheme)
-        }
+      <Avatar
+        uri={getPreferredAvatar(socials)}
         size={Platform.OS === "ios" ? 16 : 24}
         style={{
           width: Platform.OS === "android" ? undefined : 32,
