@@ -55,6 +55,7 @@ const serializeProtocolMessageContent = (
     referencedMessageId = (messageContent as ReactionContent).reference;
   } else if (isContentType("reply", contentType)) {
     const replyContent = messageContent as ReplyContent;
+    // @ts-ignore
     const replyContentType = replyContent.contentType;
     // Some content types we don't handle as replies:
     // You can't reply a reply or a reaction
@@ -69,6 +70,7 @@ const serializeProtocolMessageContent = (
       };
     }
     const codec = client.codecRegistry[replyContentType];
+    // @ts-ignore
     const actualReplyContent = codec.decode(replyContent.content);
     // Now that we have the content of the reply,
     // let's also pass it through the serialize method

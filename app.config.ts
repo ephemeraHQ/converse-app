@@ -1,4 +1,4 @@
-import { ExpoConfig, ConfigContext } from "expo/config";
+import { ConfigContext, ExpoConfig } from "expo/config";
 import warnOnce from "warn-once";
 
 import appBuildNumbers from "./app.json";
