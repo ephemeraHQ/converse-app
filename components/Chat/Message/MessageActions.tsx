@@ -26,6 +26,7 @@ import {
   useCurrentAccount,
   useSettingsStore,
 } from "../../../data/store/accountsStore";
+import { XmtpConversation } from "../../../data/store/chatStore";
 import { ReanimatedTouchableOpacity } from "../../../utils/animations";
 import { reportMessage } from "../../../utils/api";
 import { isAttachmentMessage } from "../../../utils/attachment/helpers";
@@ -242,10 +243,10 @@ export default function ChatMessageActions({
         .numberOfTaps(2)
         .onStart(() => {
           if (isAttachment || !canAddReaction) return;
-          showReactionModal();
+          addReactionToMessage(conversation as XmtpConversation, message, "❤️");
         })
         .runOnJS(true),
-    [canAddReaction, isAttachment, showReactionModal]
+    [canAddReaction, isAttachment, conversation, message]
   );
 
   const [selectedEmojis, setSelectedEmojis] = useState<string[]>([]);
