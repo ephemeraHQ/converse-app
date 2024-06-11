@@ -55,7 +55,11 @@ export default function GroupScreen({
   const colorScheme = useColorScheme();
   const currentAccount = useCurrentAccount() as string;
   const currentAccountIsAdmin = useMemo(() => {
-    return group.groupAdmins?.some?.(
+    const groupAdmins: string[] =
+      typeof group.groupAdmins === "string"
+        ? (group.groupAdmins as any).split(",")
+        : group.groupAdmins;
+    return groupAdmins.some(
       (admin) => admin.toLowerCase() === currentAccount.toLowerCase()
     );
   }, [currentAccount, group.groupAdmins]);
