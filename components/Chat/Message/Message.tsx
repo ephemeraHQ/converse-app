@@ -19,7 +19,6 @@ import {
   useProfilesStore,
 } from "../../../data/store/accountsStore";
 import { XmtpMessage } from "../../../data/store/chatStore";
-import { useFramesStore } from "../../../data/store/framesStore";
 import { isAttachmentMessage } from "../../../utils/attachment/helpers";
 import {
   messageInnerBubbleColor,
@@ -33,7 +32,6 @@ import { converseEventEmitter } from "../../../utils/events";
 import { LimitedMap } from "../../../utils/objects";
 import { getPreferredName } from "../../../utils/profile";
 import { getMessageReactions } from "../../../utils/reactions";
-import { URL_REGEX } from "../../../utils/regex";
 import { getReadableProfile } from "../../../utils/str";
 import { isTransactionMessage } from "../../../utils/transaction";
 import {
@@ -64,6 +62,7 @@ type Props = {
   message: MessageToDisplay;
   colorScheme: ColorSchemeName;
   isGroup: boolean;
+  isFrame: boolean;
 };
 
 const MessageSender = ({ message }: { message: MessageToDisplay }) => {
@@ -78,7 +77,7 @@ const MessageSender = ({ message }: { message: MessageToDisplay }) => {
   );
 };
 
-function ChatMessage({ message, colorScheme, isGroup }: Props) {
+function ChatMessage({ message, colorScheme, isGroup, isFrame }: Props) {
   const styles = useStyles();
 
   const metadata = (
@@ -87,12 +86,6 @@ function ChatMessage({ message, colorScheme, isGroup }: Props) {
 
   let messageContent: ReactNode;
   const contentType = getMessageContentType(message.contentType);
-
-  const framesInStore = useFramesStore().frames;
-
-  if (URL_REGEX.test(message.content) && message.content.endsWith("/")) {
-    message.content = message.content.slice(0, -1);
-  }
 
   const handleUrlPress = useCallback((url: string) => {
     const uri = url.toLowerCase().startsWith("http") ? url : `https://${url}`;
@@ -123,9 +116,7 @@ function ChatMessage({ message, colorScheme, isGroup }: Props) {
             ]}
           >
             {/* Don't show URL as part of message bubble if this is a frame */}
-            {framesInStore[message.content]
-              ? ""
-              : message.content || message.contentFallback}
+            {isFrame ? "" : message.content || message.contentFallback}
             <View style={{ opacity: 0 }}>{metadata}</View>
           </ClickableText>
         </>
@@ -295,7 +286,7 @@ function ChatMessage({ message, colorScheme, isGroup }: Props) {
               justifyContent: "flex-end",
             }}
           >
-            {framesInStore[message.content] && (
+            {isFrame && (
               <TouchableOpacity
                 style={{ flexBasis: "100%" }}
                 onPress={() => handleUrlPress(message.content)}
@@ -335,6 +326,7 @@ type RenderedChatMessage = {
   message: MessageToDisplay;
   colorScheme: ColorSchemeName;
   isGroup: boolean;
+  isFrame: boolean;
 };
 
 const renderedMessages = new LimitedMap<string, RenderedChatMessage>(50);
@@ -344,6 +336,7 @@ export default function CachedChatMessage({
   message,
   colorScheme,
   isGroup,
+  isFrame = false,
 }: Props) {
   const keysChangesToRerender: (keyof MessageToDisplay)[] = [
     "id",
@@ -369,12 +362,14 @@ export default function CachedChatMessage({
       message,
       colorScheme,
       isGroup,
+      isFrame,
     });
     renderedMessages.set(`${account}-${message.id}`, {
       message,
       renderedMessage,
       colorScheme,
       isGroup,
+      isFrame,
     });
     return renderedMessage;
   } else {

@@ -22,6 +22,7 @@ import {
   useRecommendationsStore,
 } from "../../data/store/accountsStore";
 import { XmtpConversationWithUpdate } from "../../data/store/chatStore";
+import { useFramesStore } from "../../data/store/framesStore";
 import { useIsSplitScreen } from "../../screens/Navigation/navHelpers";
 import {
   ReanimatedFlashList,
@@ -208,6 +209,7 @@ export default function Chat() {
     recommendationsData,
     styles.inChatRecommendations,
   ]);
+  const framesStore = useFramesStore().frames;
 
   const showPlaceholder =
     listArray.length === 0 || isBlockedPeer || !conversation;
@@ -219,10 +221,11 @@ export default function Chat() {
           message={{ ...item }}
           colorScheme={colorScheme}
           isGroup={!!conversation?.isGroup}
+          isFrame={!!framesStore[item.content.toLowerCase()]}
         />
       );
     },
-    [colorScheme, xmtpAddress, conversation?.isGroup]
+    [colorScheme, xmtpAddress, conversation?.isGroup, framesStore]
   );
   const keyExtractor = useCallback((item: MessageToDisplay) => item.id, []);
 
