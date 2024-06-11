@@ -38,6 +38,7 @@ import {
   getMessageContentType,
   isContentType,
 } from "../../../utils/xmtpRN/contentTypes";
+import { removePrefixesAndTrailingSlash } from "../../../utils/xmtpRN/messages";
 import ClickableText from "../../ClickableText";
 import ActionButton from "../ActionButton";
 import AttachmentMessagePreview from "../Attachment/AttachmentMessagePreview";
@@ -300,7 +301,7 @@ function ChatMessage({ message, colorScheme, isGroup, isFrame }: Props) {
                     color: textSecondaryColor(colorScheme),
                   }}
                 >
-                  {message.content}
+                  {removePrefixesAndTrailingSlash(message.content)}
                 </Text>
               </TouchableOpacity>
             )}

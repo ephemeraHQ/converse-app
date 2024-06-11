@@ -322,3 +322,12 @@ export const loadOlderMessages = async (account: string, topic: string) => {
   getChatStore(account).getState().setMessages(messages.map(xmtpMessageFromDb));
   loadedOlderMessagesForTopic[account][topic] = true;
 };
+
+export const removePrefixesAndTrailingSlash = (url: string) => {
+  const prefixRegex = /^(https?:\/\/)?(www\.)?/i;
+  const trailingSlashRegex = /\/$/;
+
+  let result = url.replace(prefixRegex, "");
+  result = result.replace(trailingSlashRegex, "");
+  return result;
+};
