@@ -8,13 +8,27 @@ import { MessageToDisplay } from "./Message";
 type Props = {
   message: MessageToDisplay;
   white: boolean;
+  hiddenBackground?: boolean;
 };
 
-export default function MessageTimestamp({ message, white }: Props) {
+export default function MessageTimestamp({
+  message,
+  white,
+  hiddenBackground = false,
+}: Props) {
   const styles = useStyles();
   return (
     <View style={styles.metadata}>
-      <Text style={[styles.time, white ? styles.timeWhite : undefined]}>
+      <Text
+        style={[
+          styles.time,
+          hiddenBackground
+            ? styles.timeOnHiddenBackground
+            : white
+            ? styles.timeWhite
+            : undefined,
+        ]}
+      >
         {getTime(message.sent)}
       </Text>
     </View>
@@ -35,6 +49,9 @@ const useStyles = () => {
       fontSize: 8,
       color: textPrimaryColor(colorScheme),
       marginRight: 3,
+    },
+    timeOnHiddenBackground: {
+      color: textPrimaryColor(colorScheme),
     },
     timeWhite: {
       color: "white",
