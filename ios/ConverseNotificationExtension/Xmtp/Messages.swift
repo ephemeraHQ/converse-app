@@ -108,6 +108,9 @@ func handleGroupWelcome(xmtpClient: XMTP.Client, apiURI: String?, pushToken: Str
     
     if case .group(let group) = conversation {
       do {
+        // Right now members are added to the group first and then a group name change happens as 2 separate group commits
+        // So we wait a small amount of time before syncing to get the name of the group if it's being created with the current user in it
+        // Once this moves to being included in the SDK might be able to remove this delay
         _ = try? await Task.sleep(nanoseconds: UInt64(4 * 1_000_000_000))
         try await group.sync()
         let members = try group.members
