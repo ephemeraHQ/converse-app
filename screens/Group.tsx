@@ -55,7 +55,11 @@ export default function GroupScreen({
   const colorScheme = useColorScheme();
   const currentAccount = useCurrentAccount() as string;
   const currentAccountIsAdmin = useMemo(() => {
-    return group.groupAdmins?.some(
+    const groupAdmins: string[] =
+      typeof group.groupAdmins === "string"
+        ? (group.groupAdmins as any).split(",")
+        : group.groupAdmins;
+    return groupAdmins.some(
       (admin) => admin.toLowerCase() === currentAccount.toLowerCase()
     );
   }, [currentAccount, group.groupAdmins]);
@@ -72,13 +76,13 @@ export default function GroupScreen({
     const groupMembers = [...group.groupMembers];
     // Sorting group members to show admins & me first
     groupMembers.sort((a, b) => {
-      const aIsAdmin = group.groupAdmins?.some(
+      const aIsAdmin = group.groupAdmins?.some?.(
         (admin) => admin.toLowerCase() === a.toLowerCase()
       );
       const aIsSuperAdmin = group.groupSuperAdmins?.some(
         (admin) => admin.toLowerCase() === a.toLowerCase()
       );
-      const bIsAdmin = group.groupAdmins?.some(
+      const bIsAdmin = group.groupAdmins?.some?.(
         (admin) => admin.toLowerCase() === b.toLowerCase()
       );
       const bIsSuperAdmin = group.groupSuperAdmins?.some(
