@@ -325,13 +325,9 @@ export const loadOlderMessages = async (account: string, topic: string) => {
   loadedOlderMessagesForTopic[account][topic] = true;
 };
 
-export const removePrefixesAndTrailingSlash = (url: string) => {
-  const prefixRegex = /^(https?:\/\/)?(www\.)?/i;
-  const trailingSlashRegex = /\/$/;
-
-  let result = url.replace(prefixRegex, "");
-  result = result.replace(trailingSlashRegex, "");
-  return result;
+export const getUrlToRender = (url: string) => {
+  const fullUrl = new URL(url);
+  return fullUrl.hostname;
 };
 
 const isEmoji = (character: string) => {

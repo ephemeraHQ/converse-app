@@ -39,8 +39,8 @@ import {
   isContentType,
 } from "../../../utils/xmtpRN/contentTypes";
 import {
+  getUrlToRender,
   isAllEmojisAndMaxThree,
-  removePrefixesAndTrailingSlash,
 } from "../../../utils/xmtpRN/messages";
 import ClickableText from "../../ClickableText";
 import ActionButton from "../ActionButton";
@@ -313,7 +313,7 @@ function ChatMessage({ message, colorScheme, isGroup, isFrame }: Props) {
                     color: textSecondaryColor(colorScheme),
                   }}
                 >
-                  {removePrefixesAndTrailingSlash(message.content)}
+                  {getUrlToRender(message.content)}
                 </Text>
               </TouchableOpacity>
             )}
