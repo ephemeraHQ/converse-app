@@ -95,7 +95,13 @@ export const fetchFramesForMessage = async (
           const validatedFrame = validateFrame(response);
           if (validatedFrame) {
             fetchedFrames.push(validatedFrame);
-            framesToSave[response.url] = validatedFrame;
+            // Save lowercased frame url
+            framesToSave[response.url.toLowerCase()] = validatedFrame;
+            // Save lowercase frame url with slash if no slash already
+            const lastCharacter = response.url.charAt(response.url.length - 1);
+            if (lastCharacter === "/") {
+              framesToSave[`${response.url.toLowerCase()}/`] = validatedFrame;
+            }
           }
         }
       });
