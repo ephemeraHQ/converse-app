@@ -65,7 +65,10 @@ const MessageTail = (props: any) => {
     <MessageTailAnimated
       {...props}
       fill={
-        props.fromMe
+        // No tail needed if no background
+        props.hideBackground
+          ? "transparent"
+          : props.fromMe
           ? myMessageBubbleColor(props.colorScheme)
           : messageBubbleColor(props.colorScheme)
       }
@@ -79,12 +82,14 @@ type Props = {
   reactions: {
     [senderAddress: string]: MessageReaction | undefined;
   };
+  hideBackground: boolean;
 };
 
 export default function ChatMessageActions({
   children,
   message,
   reactions,
+  hideBackground = false,
 }: Props) {
   const { conversation } = useConversationContext(["conversation"]);
   const isAttachment = isAttachmentMessage(message.contentType);
@@ -341,7 +346,9 @@ export default function ChatMessageActions({
             styles.messageBubble,
             message.fromMe ? styles.messageBubbleMe : undefined,
             {
-              backgroundColor: initialBubbleBackgroundColor,
+              backgroundColor: hideBackground
+                ? "transparent"
+                : initialBubbleBackgroundColor,
             },
             highlightingMessage ? animatedBackgroundStyle : undefined,
             Platform.select({
@@ -395,6 +402,7 @@ export default function ChatMessageActions({
                 ]}
                 fromMe={message.fromMe}
                 colorScheme={colorScheme}
+                hideBackground={hideBackground}
               />
             )}
         </ReanimatedTouchableOpacity>

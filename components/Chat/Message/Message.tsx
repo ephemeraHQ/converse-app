@@ -38,7 +38,10 @@ import {
   getMessageContentType,
   isContentType,
 } from "../../../utils/xmtpRN/contentTypes";
-import { removePrefixesAndTrailingSlash } from "../../../utils/xmtpRN/messages";
+import {
+  isAllEmojisAndMaxThree,
+  removePrefixesAndTrailingSlash,
+} from "../../../utils/xmtpRN/messages";
 import ClickableText from "../../ClickableText";
 import ActionButton from "../ActionButton";
 import AttachmentMessagePreview from "../Attachment/AttachmentMessagePreview";
@@ -80,9 +83,14 @@ const MessageSender = ({ message }: { message: MessageToDisplay }) => {
 
 function ChatMessage({ message, colorScheme, isGroup, isFrame }: Props) {
   const styles = useStyles();
+  const hideBackground = isAllEmojisAndMaxThree(message.content);
 
   const metadata = (
-    <MessageTimestamp message={message} white={message.fromMe} />
+    <MessageTimestamp
+      message={message}
+      white={message.fromMe}
+      hiddenBackground={hideBackground}
+    />
   );
 
   let messageContent: ReactNode;
@@ -217,7 +225,11 @@ function ChatMessage({ message, colorScheme, isGroup, isFrame }: Props) {
           }}
           ref={swipeableRef}
         >
-          <ChatMessageActions message={message} reactions={reactions}>
+          <ChatMessageActions
+            message={message}
+            reactions={reactions}
+            hideBackground={hideBackground}
+          >
             {isContentType("text", message.contentType) && (
               <FramesPreviews message={message} />
             )}
