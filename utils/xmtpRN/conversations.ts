@@ -474,6 +474,8 @@ export const createGroup = async (
   if (groupName) {
     // await group.updateGroupName(groupName);
   }
+  const members = await group.members();
+  saveMemberInboxIds(account, members);
   await handleNewConversation(client, group);
   return group.topic;
 };
