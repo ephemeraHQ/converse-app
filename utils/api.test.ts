@@ -19,7 +19,7 @@ jest.mock("./keychain", () => {
       Promise.resolve();
     },
     getSecureItemAsync(key: string) {
-      return Promise.resolve(data[key]);
+      return Promise.resolve(data[key] ?? null);
     },
     deleteSecureItemAsync(key: string) {
       delete data[key];
