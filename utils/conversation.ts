@@ -7,10 +7,10 @@ import config from "../config";
 import { createPendingConversation } from "../data/helpers/conversations/pendingConversations";
 import { getChatStore, useChatStore } from "../data/store/accountsStore";
 import {
-  XmtpMessage,
+  TopicData,
   XmtpConversation,
   XmtpConversationWithUpdate,
-  TopicData,
+  XmtpMessage,
 } from "../data/store/chatStore";
 import { saveTopicsData } from "./api";
 import { isAttachmentMessage } from "./attachment/helpers";
@@ -261,6 +261,7 @@ type ConversationContextType = {
   setTransactionMode: (b: boolean) => void;
   frameTextInputFocused: boolean;
   setFrameTextInputFocused: (b: boolean) => void;
+  onPullToRefresh?: () => void;
 };
 
 export const ConversationContext = createContext<ConversationContextType>({
