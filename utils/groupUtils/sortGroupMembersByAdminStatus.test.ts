@@ -37,4 +37,14 @@ describe("sortGroupMembersByAdminStatus", () => {
     const result = sortGroupMembersByAdminStatus(mixedGroup, "user4");
     expect(result).toEqual(["user2", "user3", "user4", "user1"]);
   });
+
+  test("should sort alphabetically", () => {
+    const mixedGroup: XmtpGroupConversation = {
+      groupMembers: ["user5", "user1", "user2", "user3", "user4"],
+      groupAdmins: ["user3", "user2"],
+      groupSuperAdmins: ["user2"],
+    } as any;
+    const result = sortGroupMembersByAdminStatus(mixedGroup, "user4");
+    expect(result).toEqual(["user2", "user3", "user4", "user1", "user5"]);
+  });
 });
