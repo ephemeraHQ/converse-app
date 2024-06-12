@@ -1,6 +1,7 @@
+import { useFocusEffect } from "@react-navigation/native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { isAddress } from "ethers/lib/utils";
-import React, { useCallback, useEffect, useState, useRef } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { Platform, StyleSheet, useColorScheme, View } from "react-native";
 import { gestureHandlerRootHOC } from "react-native-gesture-handler";
 
@@ -25,7 +26,12 @@ import { isDesktop } from "../utils/device";
 import { converseEventEmitter } from "../utils/events";
 import { setTopicToNavigateTo, topicToNavigateTo } from "../utils/navigation";
 import { getTitleFontScale, TextInputWithValue } from "../utils/str";
-import { loadOlderMessages } from "../utils/xmtpRN/messages";
+import { ConverseXmtpClientType } from "../utils/xmtpRN/client";
+import {
+  loadOlderMessages,
+  syncGroupsMessages,
+} from "../utils/xmtpRN/messages";
+import { getXmtpClient } from "../utils/xmtpRN/sync";
 import { NavigationParamList } from "./Navigation/Navigation";
 
 const Conversation = ({
@@ -237,6 +243,28 @@ const Conversation = ({
     };
   }, [navigation, onLeaveScreen, onOpeningConversation]);
 
+  const refreshGroup = useCallback(async () => {
+    if (!conversation?.isGroup || !conversation?.topic) return;
+    const client = (await getXmtpClient(
+      currentAccount()
+    )) as ConverseXmtpClientType;
+    if (!client) return;
+    const groups = await client.conversations.listGroups();
+    const group = groups.find((g) => g.topic === conversation.topic);
+    if (!group) return;
+    syncGroupsMessages(currentAccount(), [group], {
+      [conversation?.topic]: 0,
+    });
+  }, [conversation?.isGroup, conversation?.topic]);
+
+  useFocusEffect(
+    useCallback(() => {
+      if (conversation?.isGroup) {
+        refreshGroup();
+      }
+    }, [conversation?.isGroup, refreshGroup])
+  );
+
   return (
     <View style={styles.container} key={`conversation-${colorScheme}`}>
       {route.params?.topic || route.params?.mainConversationWithPeer ? (
@@ -251,6 +279,7 @@ const Conversation = ({
             setTransactionMode,
             frameTextInputFocused,
             setFrameTextInputFocused,
+            onPullToRefresh: conversation?.isGroup ? refreshGroup : undefined,
           }}
         >
           <ConverseChat />

@@ -46,6 +46,12 @@ export const sortGroupMembersByAdminStatus = (
     if (b.toLowerCase() === currentAccount.toLowerCase()) {
       return 1;
     }
+    if (a.toLowerCase() < b.toLowerCase()) {
+      return -1;
+    }
+    if (a.toLowerCase() > b.toLowerCase()) {
+      return 1;
+    }
     return 0;
   });
   return groupMembers;

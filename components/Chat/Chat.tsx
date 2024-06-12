@@ -2,17 +2,17 @@ import { FlashList } from "@shopify/flash-list";
 import differenceInCalendarDays from "date-fns/differenceInCalendarDays";
 import React, { useCallback, useEffect, useMemo, useRef } from "react";
 import {
+  Dimensions,
+  FlatList,
+  Platform,
+  StyleSheet,
   View,
   useColorScheme,
-  StyleSheet,
-  Platform,
-  FlatList,
-  Dimensions,
 } from "react-native";
 import {
   useAnimatedStyle,
-  useSharedValue,
   useDerivedValue,
+  useSharedValue,
 } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -118,12 +118,14 @@ export default function Chat() {
     onReadyToFocus,
     transactionMode,
     frameTextInputFocused,
+    onPullToRefresh,
   } = useConversationContext([
     "conversation",
     "isBlockedPeer",
     "onReadyToFocus",
     "transactionMode",
     "frameTextInputFocused",
+    "onPullToRefresh",
   ]);
   const xmtpAddress = useCurrentAccount() as string;
   const peerSocials = useProfilesStore((s) =>
@@ -284,6 +286,8 @@ export default function Chat() {
           <AnimatedListView
             contentContainerStyle={styles.chat}
             data={listArray}
+            onRefresh={onPullToRefresh}
+            refreshing={conversation?.pending}
             extraData={[peerSocials]}
             renderItem={renderItem}
             onLayout={() => {
