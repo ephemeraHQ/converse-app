@@ -1,5 +1,6 @@
 import { useCallback } from "react";
 
+import config from "../../config";
 import { clearDb } from "../../data/db";
 import {
   getAccountsList,
@@ -8,11 +9,7 @@ import {
   useAccountsStore,
 } from "../../data/store/accountsStore";
 import { deleteSecureItemAsync } from "../keychain";
-import {
-  deleteAccountEncryptionKey,
-  deleteXmtpKey,
-  //deleteXmtpDatabaseEncryptionKey
-} from "../keychain/helpers";
+import { deleteAccountEncryptionKey, deleteXmtpKey } from "../keychain/helpers";
 import mmkv, { clearSecureMmkvForAccount, secureMmkvByAccount } from "../mmkv";
 import {
   deleteSubscribedTopics,
@@ -25,6 +22,8 @@ import { importedTopicsDataForAccount } from "../xmtpRN/conversations";
 import { deleteXmtpClient } from "../xmtpRN/sync";
 import { useDisconnectFromPrivy } from "./privy";
 import { useDisconnectWallet } from "./wallet";
+
+const env = config.xmtpEnv as "dev" | "production" | "local";
 
 type LogoutTasks = {
   [account: string]: {
@@ -169,8 +168,9 @@ export const useLogoutFromConverse = (account: string) => {
         });
       }
     });
-
-    clearDb(account);
+    if (env !== "dev") {
+      clearDb(account);
+    }
 
     // Now that db has been deleted we can remove account
     // from store (account holds the db id so it was needed
