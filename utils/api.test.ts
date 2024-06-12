@@ -100,7 +100,7 @@ describe("GroupInviteLink", () => {
     );
     expect(joinRequest.status).toEqual("PENDING");
 
-    // Set to approved
+    // Set to rejected
     await updateGroupJoinRequestStatus(
       client.address,
       joinRequestId,
