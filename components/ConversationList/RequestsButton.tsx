@@ -10,14 +10,12 @@ import {
 
 import { NavigationParamList } from "../../screens/Navigation/Navigation";
 import {
-  actionSecondaryColor,
   clickedItemBackgroundColor,
   listItemSeparatorColor,
   primaryColor,
   textPrimaryColor,
   textSecondaryColor,
 } from "../../utils/colors";
-import Picto from "../Picto/Picto";
 
 type Props = { requestsCount: number } & NativeStackScreenProps<
   NavigationParamList,
@@ -37,16 +35,6 @@ export default function RequestsButton({ navigation, requestsCount }: Props) {
       <View style={styles.requestsHeader}>
         <Text style={styles.requestsHeaderTitle}>Requests</Text>
         <Text style={styles.requestsCount}>{requestsCount}</Text>
-        <Picto
-          picto="chevron.right"
-          weight="semibold"
-          color={
-            Platform.OS === "android"
-              ? textPrimaryColor(colorScheme)
-              : actionSecondaryColor(colorScheme)
-          }
-          size={Platform.OS === "android" ? 25 : 10}
-        />
       </View>
     </TouchableHighlight>
   );
@@ -62,7 +50,8 @@ const useStyles = () => {
         default: {
           paddingVertical: 8,
           paddingRight: 24,
-          marginLeft: 32,
+          paddingLeft: 32,
+          height: 40,
           borderBottomWidth: 0.25,
           borderBottomColor: listItemSeparatorColor(colorScheme),
         },

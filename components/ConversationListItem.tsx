@@ -29,11 +29,10 @@ import {
   badgeColor,
   clickedItemBackgroundColor,
   dangerColor,
-  listItemSeparatorColor,
   textPrimaryColor,
   textSecondaryColor,
 } from "../utils/colors";
-import { getRelativeDateTime } from "../utils/date";
+import { getMinimalDate } from "../utils/date";
 import { isDesktop } from "../utils/device";
 import { converseEventEmitter } from "../utils/events";
 import { navigate } from "../utils/navigation";
@@ -75,7 +74,7 @@ const ConversationListItem = memo(function ConversationListItem({
   conversationOpened,
 }: ConversationListItemProps) {
   const styles = getStyles(colorScheme);
-  const timeToShow = getRelativeDateTime(conversationTime);
+  const timeToShow = getMinimalDate(conversationTime as number);
   const setTopicsData = useChatStore((s) => s.setTopicsData);
   const setPeersStatus = useSettingsStore((s) => s.setPeersStatus);
   const isSplitScreen = useIsSplitScreen();
@@ -350,9 +349,7 @@ const getStyles = (colorScheme: ColorSchemeName) =>
     rowSeparator: Platform.select({
       android: {},
       default: {
-        height: 77,
-        borderBottomWidth: 0.25,
-        borderBottomColor: listItemSeparatorColor(colorScheme),
+        height: 80,
       },
     }),
     rowSeparatorMargin: {
