@@ -3,6 +3,7 @@ import { ConsentListEntry, ConversationContext } from "@xmtp/react-native-sdk";
 import { Conversation as DbConversation } from "../../data/db/entities/conversationEntity";
 import { getPendingConversationsToCreate } from "../../data/helpers/conversations/pendingConversations";
 import { saveConversations } from "../../data/helpers/conversations/upsertConversations";
+import { saveMemberInboxIds } from "../../data/helpers/inboxId/saveInboxIds";
 import { getSettingsStore } from "../../data/store/accountsStore";
 import { XmtpConversation } from "../../data/store/chatStore";
 import { SettingsStoreType } from "../../data/store/settingsStore";
@@ -551,6 +552,7 @@ export const promoteMemberToAdmin = async (
     );
   }
   const members = await group.members();
+  saveMemberInboxIds(account, members);
   const inboxId = members.find((m) => m.addresses[0] === memberAddress)
     ?.inboxId;
   if (!inboxId) {
@@ -576,6 +578,7 @@ export const revokeAdminAccess = async (
     );
   }
   const members = await group.members();
+  saveMemberInboxIds(account, members);
   const inboxId = members.find((m) => m.addresses[0] === memberAddress)
     ?.inboxId;
   if (!inboxId) {
@@ -601,6 +604,7 @@ export const promoteMemberToSuperAdmin = async (
     );
   }
   const members = await group.members();
+  saveMemberInboxIds(account, members);
   const inboxId = members.find((m) => m.addresses[0] === memberAddress)
     ?.inboxId;
   if (!inboxId) {
@@ -626,6 +630,7 @@ export const revokeSuperAdminAccess = async (
     );
   }
   const members = await group.members();
+  saveMemberInboxIds(account, members);
   const inboxId = members.find((m) => m.addresses[0] === memberAddress)
     ?.inboxId;
   if (!inboxId) {
