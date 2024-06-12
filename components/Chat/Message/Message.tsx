@@ -16,6 +16,7 @@ import { Swipeable } from "react-native-gesture-handler";
 import {
   currentAccount,
   useChatStore,
+  useInboxIdStore,
   useProfilesStore,
 } from "../../../data/store/accountsStore";
 import { XmtpMessage } from "../../../data/store/chatStore";
@@ -70,9 +71,10 @@ type Props = {
 };
 
 const MessageSender = ({ message }: { message: MessageToDisplay }) => {
-  const senderSocials = useProfilesStore(
-    (s) => s.profiles[message.senderAddress]?.socials
+  const address = useInboxIdStore(
+    (s) => s.byInboxId[message.senderAddress]?.[0] ?? message.senderAddress
   );
+  const senderSocials = useProfilesStore((s) => s.profiles[address]?.socials);
   const styles = useStyles();
   return (
     <Text style={styles.groupSender}>
