@@ -9,6 +9,7 @@ import {
   StaticAttachmentContent,
 } from "@xmtp/react-native-sdk";
 
+import { saveMemberInboxIds } from "../../data/helpers/inboxId/saveInboxIds";
 import { getOrderedMessages, saveMessages } from "../../data/helpers/messages";
 import { xmtpMessageFromDb } from "../../data/mappers";
 import { getChatStore } from "../../data/store/accountsStore";
@@ -212,7 +213,9 @@ export const syncGroupsMessages = async (
   for (const group of groups) {
     console.log("syncing group", group.topic);
     await group.sync();
-    groupMembers[group.topic] = await group.members();
+    const members = await group.members();
+    groupMembers[group.topic] = members;
+    saveMemberInboxIds(account, members);
     console.log("synced group", group.topic);
   }
   console.log(`${groups.length} groups synced!`);
