@@ -2,7 +2,7 @@ import { format } from "date-fns";
 import { enUS, fr } from "date-fns/locale";
 import { getLocales } from "react-native-localize";
 
-import { getRelativeDate, getRelativeDateTime } from "./date";
+import { getMinimalDate, getRelativeDate, getRelativeDateTime } from "./date";
 
 jest.mock("react-native-localize", () => ({
   getLocales: jest.fn(),
@@ -144,5 +144,41 @@ describe("getRelativeDate with fr-FR locale", () => {
     const date = new Date();
     date.setDate(date.getDate() - 10);
     expect(getRelativeDate(date)).toBe(format(date, "P", { locale: fr }));
+  });
+});
+
+describe("getMinimalDate", () => {
+  const now = Date.now();
+
+  it("should return an empty string for falsy input", () => {
+    expect(getMinimalDate(0)).toBe("");
+  });
+
+  it("should return correct minimal timestamp for seconds", () => {
+    expect(getMinimalDate(now - 5000)).toBe("5s");
+  });
+
+  it("should return correct minimal timestamp for minutes", () => {
+    expect(getMinimalDate(now - 5 * 60 * 1000)).toBe("5m");
+  });
+
+  it("should return correct minimal timestamp for hours", () => {
+    expect(getMinimalDate(now - 5 * 60 * 60 * 1000)).toBe("5h");
+  });
+
+  it("should return correct minimal timestamp for days", () => {
+    expect(getMinimalDate(now - 5 * 24 * 60 * 60 * 1000)).toBe("5d");
+  });
+
+  it("should return correct minimal timestamp for weeks", () => {
+    expect(getMinimalDate(now - 14 * 24 * 60 * 60 * 1000)).toBe("2w");
+  });
+
+  it("should return correct minimal timestamp for months", () => {
+    expect(getMinimalDate(now - 60 * 24 * 60 * 60 * 1000)).toBe("2mo");
+  });
+
+  it("should return correct minimal timestamp for years", () => {
+    expect(getMinimalDate(now - 2 * 365 * 24 * 60 * 60 * 1000)).toBe("2y");
   });
 });

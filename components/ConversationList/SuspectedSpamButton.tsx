@@ -64,9 +64,11 @@ const useStyles = () => {
         default: {
           paddingVertical: 8,
           paddingRight: 24,
-          marginLeft: 32,
+          paddingLeft: 32,
           borderBottomWidth: 0.25,
           borderBottomColor: listItemSeparatorColor(colorScheme),
+          borderTopWidth: 0.25,
+          borderTopColor: listItemSeparatorColor(colorScheme),
         },
         android: {
           paddingVertical: 12,
