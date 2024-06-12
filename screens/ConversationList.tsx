@@ -3,10 +3,10 @@ import React, { useCallback, useEffect, useState } from "react";
 import {
   Platform,
   StyleSheet,
-  useColorScheme,
   Text,
-  View,
   TextInput,
+  View,
+  useColorScheme,
 } from "react-native";
 import { gestureHandlerRootHOC } from "react-native-gesture-handler";
 import { SearchBarCommands } from "react-native-screens";
@@ -21,17 +21,17 @@ import NoResult from "../components/Search/NoResult";
 import Welcome from "../components/Welcome";
 import { refreshProfileForAddress } from "../data/helpers/profiles/profilesUpdate";
 import {
-  useChatStore,
-  useSettingsStore,
-  useProfilesStore,
   currentAccount,
+  useChatStore,
+  useProfilesStore,
+  useSettingsStore,
 } from "../data/store/accountsStore";
 import { XmtpConversation } from "../data/store/chatStore";
 import { useSelect } from "../data/store/storeHelpers";
 import {
-  textPrimaryColor,
   backgroundColor,
   itemSeparatorColor,
+  textPrimaryColor,
 } from "../utils/colors";
 import {
   LastMessagePreview,
