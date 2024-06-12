@@ -18,7 +18,7 @@ export const sortGroupMembersByAdminStatus = (
     const aIsAdmin = groupAdmins?.some(
       (admin) => admin.toLowerCase() === a.toLowerCase()
     );
-    const aIsSuperAdmin = groupSuperAdmins.some(
+    const aIsSuperAdmin = groupSuperAdmins?.some(
       (admin) => admin.toLowerCase() === a.toLowerCase()
     );
     const bIsAdmin = groupAdmins?.some(
