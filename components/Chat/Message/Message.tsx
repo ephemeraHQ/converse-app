@@ -30,6 +30,10 @@ import {
 import { getRelativeDate } from "../../../utils/date";
 import { isDesktop } from "../../../utils/device";
 import { converseEventEmitter } from "../../../utils/events";
+import {
+  getUrlToRender,
+  isAllEmojisAndMaxThree,
+} from "../../../utils/messageContent";
 import { LimitedMap } from "../../../utils/objects";
 import { getPreferredName } from "../../../utils/profile";
 import { getMessageReactions } from "../../../utils/reactions";
@@ -39,10 +43,6 @@ import {
   getMessageContentType,
   isContentType,
 } from "../../../utils/xmtpRN/contentTypes";
-import {
-  getUrlToRender,
-  isAllEmojisAndMaxThree,
-} from "../../../utils/xmtpRN/messages";
 import ClickableText from "../../ClickableText";
 import ActionButton from "../ActionButton";
 import AttachmentMessagePreview from "../Attachment/AttachmentMessagePreview";
