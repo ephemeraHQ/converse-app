@@ -102,6 +102,7 @@ export type ChatStoreType = {
   conversations: {
     [topic: string]: XmtpConversationWithUpdate;
   };
+  pinnedConversations: XmtpConversation[];
   openedConversationTopic: string | null;
   setOpenedConversationTopic: (topic: string | null) => void;
   conversationsMapping: {
@@ -128,6 +129,8 @@ export type ChatStoreType = {
   setSearchBarFocused: (focused: boolean) => void;
 
   setConversations: (conversations: XmtpConversation[]) => void;
+  setPinnedConversations: (conversations: XmtpConversation[]) => void;
+
   deleteConversations: (topics: string[]) => void;
   updateConversationTopic: (
     oldTopic: string,
@@ -181,6 +184,7 @@ export const initChatStore = (account: string) => {
       (set) =>
         ({
           conversations: {},
+          pinnedConversations: [],
           lastSyncedAt: 0,
           lastSyncedTopics: [],
           topicsData: {},
@@ -271,6 +275,29 @@ export const initChatStore = (account: string) => {
                 lastUpdateAt: now(),
               };
             }),
+          setPinnedConversations: (conversationsToSet) =>
+            set((state) => {
+              const conversations = { ...state.conversations };
+              const pinnedConversations = state.pinnedConversations || [];
+
+              conversationsToSet.forEach((c) => {
+                const alreadyPinnedIndex = pinnedConversations.findIndex(
+                  (item) => item.topic === c.topic
+                );
+                if (alreadyPinnedIndex !== -1) {
+                  pinnedConversations.splice(alreadyPinnedIndex, 1);
+                } else {
+                  pinnedConversations.push(c);
+                }
+              });
+
+              return {
+                ...state,
+                conversations,
+                lastUpdateAt: now(),
+              };
+            }),
+
           deleteConversations: (topics) =>
             set(({ conversations }) => {
               setImmediate(() => {
