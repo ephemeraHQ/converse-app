@@ -49,11 +49,13 @@ const useStyles = () => {
       ...Platform.select({
         default: {
           paddingVertical: 8,
-          paddingRight: 24,
-          paddingLeft: 32,
+          paddingRight: 8,
+          paddingLeft: 24,
           height: 40,
           borderBottomWidth: 0.25,
           borderBottomColor: listItemSeparatorColor(colorScheme),
+          borderTopWidth: 0.25,
+          borderTopColor: listItemSeparatorColor(colorScheme),
         },
         android: {
           paddingVertical: 12,

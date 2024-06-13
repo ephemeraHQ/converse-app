@@ -298,7 +298,8 @@ const conversationsSortMethod = (
 export const conversationShouldBeDisplayed = (
   conversation: ConversationWithLastMessagePreview,
   topicsData: { [topic: string]: TopicData | undefined },
-  peersStatus: { [peer: string]: "blocked" | "consented" }
+  peersStatus: { [peer: string]: "blocked" | "consented" },
+  pinnedConversations?: ConversationFlatListItem[]
 ) => {
   const isNotReady =
     (conversation.isGroup && !conversation.groupMembers) ||
@@ -312,12 +313,16 @@ export const conversationShouldBeDisplayed = (
     : peersStatus[conversation.peerAddress.toLowerCase()] === "blocked";
   const isV1 = conversation.version === "v1";
   const isForbidden = conversation.topic.includes("\x00"); // Forbidden character that breaks
+  const isPinned = pinnedConversations?.find(
+    (convo) => convo.topic === conversation.topic
+  );
   return (
     (!isPending || isNotEmpty) &&
     !isDeleted &&
     !isBlocked &&
     !isV1 &&
-    !isForbidden
+    !isForbidden &&
+    !isPinned
   ); // Forbidden character that breaks notifications
 };
 
@@ -337,7 +342,8 @@ export function sortAndComputePreview(
   conversations: Record<string, XmtpConversation>,
   userAddress: string,
   topicsData: { [topic: string]: TopicData | undefined },
-  peersStatus: { [peer: string]: "blocked" | "consented" }
+  peersStatus: { [peer: string]: "blocked" | "consented" },
+  pinnedConversations?: ConversationFlatListItem[]
 ) {
   const conversationsRequests: ConversationWithLastMessagePreview[] = [];
   const conversationsInbox: ConversationWithLastMessagePreview[] = [];
@@ -349,7 +355,12 @@ export function sortAndComputePreview(
       if (isNotReady) return;
 
       if (
-        conversationShouldBeDisplayed(conversation, topicsData, peersStatus)
+        conversationShouldBeDisplayed(
+          conversation,
+          topicsData,
+          peersStatus,
+          pinnedConversations
+        )
       ) {
         conversation.lastMessagePreview = conversationLastMessagePreview(
           conversation,

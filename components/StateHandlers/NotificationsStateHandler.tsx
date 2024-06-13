@@ -7,6 +7,7 @@ import {
   useCurrentAccount,
   useChatStoreForAccount,
   useSettingsStoreForAccount,
+  useChatStore,
 } from "../../data/store/accountsStore";
 import { useAppStore } from "../../data/store/appStore";
 import { useSelect } from "../../data/store/storeHelpers";
@@ -79,6 +80,7 @@ export default function ConversationsStateHandler() {
 
 const AccountNotificationsStateHandler = ({ account }: { account: string }) => {
   const hydrationDone = useAppStore((s) => s.hydrationDone);
+  const pinnedConversations = useChatStore((s) => s.pinnedConversations);
   const { conversations, topicsData, lastUpdateAt } = useChatStoreForAccount(
     account
   )(useSelect(["conversations", "topicsData", "lastUpdateAt"]));
@@ -110,7 +112,13 @@ const AccountNotificationsStateHandler = ({ account }: { account: string }) => {
       newRefreshState.lastUpdateAt !== lastRefreshState.current.lastUpdateAt
     ) {
       lastRefreshState.current = newRefreshState;
-      sortAndComputePreview(conversations, account, topicsData, peersStatus);
+      sortAndComputePreview(
+        conversations,
+        account,
+        topicsData,
+        peersStatus,
+        pinnedConversations
+      );
     }
   }, [
     account,
@@ -119,6 +127,7 @@ const AccountNotificationsStateHandler = ({ account }: { account: string }) => {
     peersStatus,
     topicsData,
     lastUpdateAt,
+    pinnedConversations,
   ]);
   return null;
 };
