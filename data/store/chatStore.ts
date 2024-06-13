@@ -294,7 +294,6 @@ export const initChatStore = (account: string) => {
               return {
                 ...state,
                 conversations,
-                lastUpdateAt: now(),
               };
             }),
 
