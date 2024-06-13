@@ -2,15 +2,15 @@ import Clipboard from "@react-native-clipboard/clipboard";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import Constants from "expo-constants";
 import * as Linking from "expo-linking";
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import {
-  StyleSheet,
-  ScrollView,
-  useColorScheme,
   Platform,
-  TouchableOpacity,
-  View,
+  ScrollView,
+  StyleSheet,
   Text,
+  TouchableOpacity,
+  useColorScheme,
+  View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -28,6 +28,7 @@ import {
 import config from "../config";
 import {
   currentAccount,
+  useChatStore,
   useCurrentAccount,
   useLoggedWithPrivy,
   useProfilesStore,
@@ -36,6 +37,7 @@ import {
   useWalletStore,
 } from "../data/store/accountsStore";
 import { useAppStore } from "../data/store/appStore";
+import { XmtpGroupConversation } from "../data/store/chatStore";
 import { useSelect } from "../data/store/storeHelpers";
 import {
   actionSheetColors,
@@ -46,6 +48,10 @@ import {
   textSecondaryColor,
 } from "../utils/colors";
 import { evmHelpers } from "../utils/evm/helpers";
+import {
+  getAccountIsAdmin,
+  getAccountIsSuperAdmin,
+} from "../utils/groupUtils/adminUtils";
 import { useLogoutFromConverse } from "../utils/logout";
 import { navigate } from "../utils/navigation";
 import {
@@ -55,7 +61,14 @@ import {
 import { getPreferredAvatar, getPreferredName } from "../utils/profile";
 import { getIPFSAssetURI } from "../utils/thirdweb";
 import { refreshBalanceForAccount } from "../utils/wallet";
-import { consentToPeersOnProtocol } from "../utils/xmtpRN/conversations";
+import {
+  consentToPeersOnProtocol,
+  promoteMemberToAdmin,
+  promoteMemberToSuperAdmin,
+  removeMembersFromGroup,
+  revokeAdminAccess,
+  revokeSuperAdminAccess,
+} from "../utils/xmtpRN/conversations";
 import { NavigationParamList } from "./Navigation/Navigation";
 
 export default function ProfileScreen({
@@ -79,6 +92,9 @@ export default function ProfileScreen({
   );
   const setPeersStatus = useSettingsStore((s) => s.setPeersStatus);
   const socials = profiles[peerAddress]?.socials;
+  const group = useChatStore(
+    (s) => s.conversations[route.params.fromGroupTopic ?? ""]
+  ) as XmtpGroupConversation | undefined;
 
   const insets = useSafeAreaInsets();
   useEffect(() => {
@@ -276,6 +292,209 @@ export default function ProfileScreen({
     });
   }
 
+  const actionsTableViewItems = useMemo(() => {
+    const items: TableViewItemType[] = [
+      {
+        id: "block",
+        title: isBlockedPeer ? "Unblock" : "Block",
+        titleColor:
+          Platform.OS === "android"
+            ? undefined
+            : isBlockedPeer
+            ? primaryColor(colorScheme)
+            : dangerColor(colorScheme),
+        leftView:
+          Platform.OS === "android" ? (
+            <TableViewPicto
+              symbol="block"
+              color={textSecondaryColor(colorScheme)}
+            />
+          ) : undefined,
+        action: () => {
+          showActionSheetWithOptions(
+            {
+              options: [isBlockedPeer ? "Unblock" : "Block", "Cancel"],
+              cancelButtonIndex: 1,
+              destructiveButtonIndex: isBlockedPeer ? undefined : 0,
+              title: isBlockedPeer
+                ? "If you unblock this contact, they will be able to send you messages again."
+                : "If you block this contact, you will not receive messages from them anymore.",
+              ...actionSheetColors(colorScheme),
+            },
+            (selectedIndex?: number) => {
+              if (selectedIndex === 0 && peerAddress) {
+                const newStatus = isBlockedPeer ? "consented" : "blocked";
+                const consentOnProtocol = isBlockedPeer ? "allow" : "deny";
+                consentToPeersOnProtocol(
+                  currentAccount(),
+                  [peerAddress],
+                  consentOnProtocol
+                );
+                setPeersStatus({ [peerAddress]: newStatus });
+
+                // Pop to conversation list, antepenultimate screen in stack
+                navigation.pop(2);
+              }
+            }
+          );
+        },
+      },
+    ];
+    if (!group || isMyProfile) {
+      return items;
+    }
+    const currentAccountIsAdmin = getAccountIsAdmin(group, userAddress);
+    const currentAccountIsSuperAdmin = getAccountIsSuperAdmin(
+      group,
+      userAddress
+    );
+    const peerIsAdmin = getAccountIsAdmin(group, peerAddress);
+    const peerIsSuperAdmin = getAccountIsSuperAdmin(group, peerAddress);
+    const groupPermissionLevel = group.groupPermissionLevel;
+    const topic = group.topic;
+    if (
+      (currentAccountIsAdmin || groupPermissionLevel === "all_members") &&
+      !peerIsSuperAdmin
+    ) {
+      items.push({
+        id: "remove",
+        title: "Remove from group",
+        titleColor:
+          Platform.OS === "android" ? undefined : dangerColor(colorScheme),
+        action: () => {
+          showActionSheetWithOptions(
+            {
+              options: ["Remove from Group", "Cancel"],
+              cancelButtonIndex: 1,
+              destructiveButtonIndex: 0,
+              title: "Are you sure?",
+              ...actionSheetColors(colorScheme),
+            },
+            async (selectedIndex?: number) => {
+              if (selectedIndex === 0 && peerAddress) {
+                await removeMembersFromGroup(userAddress, topic, [peerAddress]);
+              }
+            }
+          );
+        },
+      });
+    }
+
+    if (currentAccountIsSuperAdmin && !peerIsAdmin) {
+      items.unshift({
+        id: "promote",
+        title: "Promote to admin",
+        titleColor:
+          Platform.OS === "android" ? undefined : primaryColor(colorScheme),
+        action: () => {
+          showActionSheetWithOptions(
+            {
+              options: ["Promote to Admin", "Cancel"],
+              cancelButtonIndex: 1,
+              destructiveButtonIndex: undefined,
+              title: "Are you sure?",
+              ...actionSheetColors(colorScheme),
+            },
+            async (selectedIndex?: number) => {
+              if (selectedIndex === 0 && peerAddress) {
+                await promoteMemberToAdmin(userAddress, topic, peerAddress);
+              }
+            }
+          );
+        },
+      });
+    }
+
+    if (currentAccountIsSuperAdmin && !peerIsSuperAdmin) {
+      items.unshift({
+        id: "promoteToSuperAdmin",
+        title: "Promote to super admin",
+        titleColor:
+          Platform.OS === "android" ? undefined : primaryColor(colorScheme),
+        action: () => {
+          showActionSheetWithOptions(
+            {
+              options: ["Promote to Super Admin", "Cancel"],
+              cancelButtonIndex: 1,
+              destructiveButtonIndex: undefined,
+              title: "Are you sure?",
+              ...actionSheetColors(colorScheme),
+            },
+            async (selectedIndex?: number) => {
+              if (selectedIndex === 0 && peerAddress) {
+                await promoteMemberToSuperAdmin(
+                  userAddress,
+                  topic,
+                  peerAddress
+                );
+              }
+            }
+          );
+        },
+      });
+    }
+    if (currentAccountIsSuperAdmin && peerIsSuperAdmin) {
+      items.push({
+        id: "revokeSuperAdmin",
+        title: "Revoke super admin",
+        titleColor:
+          Platform.OS === "android" ? undefined : dangerColor(colorScheme),
+        action: () => {
+          showActionSheetWithOptions(
+            {
+              options: ["Revoke Super Admin", "Cancel"],
+              cancelButtonIndex: 1,
+              destructiveButtonIndex: 0,
+              title: "Are you sure?",
+              ...actionSheetColors(colorScheme),
+            },
+            async (selectedIndex?: number) => {
+              if (selectedIndex === 0 && peerAddress) {
+                await revokeSuperAdminAccess(userAddress, topic, peerAddress);
+              }
+            }
+          );
+        },
+      });
+    }
+
+    if (currentAccountIsSuperAdmin && !peerIsSuperAdmin && peerIsAdmin) {
+      items.push({
+        id: "revokeAdmin",
+        title: "Revoke admin",
+        titleColor:
+          Platform.OS === "android" ? undefined : dangerColor(colorScheme),
+        action: () => {
+          showActionSheetWithOptions(
+            {
+              options: ["Revoke Admin", "Cancel"],
+              cancelButtonIndex: 1,
+              destructiveButtonIndex: 0,
+              title: "Are you sure?",
+              ...actionSheetColors(colorScheme),
+            },
+            async (selectedIndex?: number) => {
+              if (selectedIndex === 0 && peerAddress) {
+                await revokeAdminAccess(userAddress, topic, peerAddress);
+              }
+            }
+          );
+        },
+      });
+    }
+
+    return items;
+  }, [
+    colorScheme,
+    group,
+    isBlockedPeer,
+    isMyProfile,
+    navigation,
+    peerAddress,
+    setPeersStatus,
+    userAddress,
+  ]);
+
   return (
     <ScrollView
       style={styles.profile}
@@ -323,7 +542,7 @@ export default function ProfileScreen({
         style={styles.tableView}
       />
 
-      {route.params?.fromGroup && !isMyProfile && (
+      {route.params?.fromGroupTopic && !isMyProfile && (
         <TableView
           items={[
             {
@@ -367,57 +586,7 @@ export default function ProfileScreen({
             />
           )}
           <TableView
-            items={[
-              {
-                id: "block",
-                title: isBlockedPeer ? "Unblock" : "Block",
-                titleColor:
-                  Platform.OS === "android"
-                    ? undefined
-                    : isBlockedPeer
-                    ? primaryColor(colorScheme)
-                    : dangerColor(colorScheme),
-                leftView:
-                  Platform.OS === "android" ? (
-                    <TableViewPicto
-                      symbol="block"
-                      color={textSecondaryColor(colorScheme)}
-                    />
-                  ) : undefined,
-                action: () => {
-                  showActionSheetWithOptions(
-                    {
-                      options: [isBlockedPeer ? "Unblock" : "Block", "Cancel"],
-                      cancelButtonIndex: 1,
-                      destructiveButtonIndex: isBlockedPeer ? undefined : 0,
-                      title: isBlockedPeer
-                        ? "If you unblock this contact, they will be able to send you messages again."
-                        : "If you block this contact, you will not receive messages from them anymore.",
-                      ...actionSheetColors(colorScheme),
-                    },
-                    (selectedIndex?: number) => {
-                      if (selectedIndex === 0 && peerAddress) {
-                        const newStatus = isBlockedPeer
-                          ? "consented"
-                          : "blocked";
-                        const consentOnProtocol = isBlockedPeer
-                          ? "allow"
-                          : "deny";
-                        consentToPeersOnProtocol(
-                          currentAccount(),
-                          [peerAddress],
-                          consentOnProtocol
-                        );
-                        setPeersStatus({ [peerAddress]: newStatus });
-
-                        // Pop to conversation list, antepenultimate screen in stack
-                        navigation.pop(2);
-                      }
-                    }
-                  );
-                },
-              },
-            ]}
+            items={actionsTableViewItems}
             title="ACTIONS"
             style={styles.tableView}
           />
