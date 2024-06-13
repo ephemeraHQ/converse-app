@@ -1101,7 +1101,7 @@ PODS:
     - React
   - react-native-sqlite-storage (6.0.1):
     - React-Core
-  - react-native-webview (13.6.4):
+  - react-native-webview (13.10.3):
     - glog
     - RCT-Folly (= 2022.05.16.00)
     - React-Core
@@ -1827,7 +1827,7 @@ SPEC CHECKSUMS:
   react-native-safe-area-context: 0ee144a6170530ccc37a0fd9388e28d06f516a89
   react-native-sfsymbols: bd3a0d3eab185e80b571bae60753dcf5a0d57967
   react-native-sqlite-storage: f6d515e1c446d1e6d026aa5352908a25d4de3261
-  react-native-webview: ad868affda04ff2b204de83546193bc0325a8280
+  react-native-webview: af5750ca782633c6c730a015946fb921497b4e7b
   React-nativeconfig: e700ac3ec3d66329076bd2c2787a204411815d43
   React-NativeModulesApple: f7fa541118d195ac850ca2ea460f338152ced167
   React-perflogger: 5f49905de275bac07ac7ea7f575a70611fa988f2
@@ -1877,7 +1877,7 @@ SPEC CHECKSUMS:
   web3.swift: 2263d1e12e121b2c42ffb63a5a7beb1acaf33959
   XMTP: 3947ed08f7b1c50878b145e4990e604abf741ba9
   XMTPReactNative: 712ab5a20d1bd7a6eb66fc8f05bdc40888acd086
-  Yoga: d17d2cc8105eed528474683b42e2ea310e1daf61
+  Yoga: 805bf71192903b20fc14babe48080582fee65a80
 
 PODFILE CHECKSUM: 8c76f61bac7d749877cbfcad34a8839783fc3b0a
 
