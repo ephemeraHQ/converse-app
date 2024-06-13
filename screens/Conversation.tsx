@@ -1,4 +1,3 @@
-import { useFocusEffect } from "@react-navigation/native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { isAddress } from "ethers/lib/utils";
 import React, { useCallback, useEffect, useRef, useState } from "react";
@@ -257,13 +256,9 @@ const Conversation = ({
     });
   }, [conversation?.isGroup, conversation?.topic]);
 
-  useFocusEffect(
-    useCallback(() => {
-      if (conversation?.isGroup) {
-        refreshGroup();
-      }
-    }, [conversation?.isGroup, refreshGroup])
-  );
+  useEffect(() => {
+    refreshGroup();
+  }, [refreshGroup]);
 
   return (
     <View style={styles.container} key={`conversation-${colorScheme}`}>
