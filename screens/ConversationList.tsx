@@ -16,6 +16,7 @@ import NewConversationButton from "../components/ConversationList/NewConversatio
 import RequestsButton from "../components/ConversationList/RequestsButton";
 import EphemeralAccountBanner from "../components/EphemeralAccountBanner";
 import InitialLoad from "../components/InitialLoad";
+import PinnedConversations from "../components/PinnedConversations/PinnedConversations";
 import Recommendations from "../components/Recommendations/Recommendations";
 import NoResult from "../components/Search/NoResult";
 import Welcome from "../components/Welcome";
@@ -80,6 +81,8 @@ function ConversationList({ navigation, route, searchBarRef }: Props) {
     useSelect(["peersStatus", "ephemeralAccount"])
   );
   const profiles = useProfilesStore((s) => s.profiles);
+  const pinnedConversations = useChatStore((s) => s.pinnedConversations);
+
   const [flatListItems, setFlatListItems] = useState<{
     items: FlatListItem[];
     searchQuery: string;
@@ -157,7 +160,9 @@ function ConversationList({ navigation, route, searchBarRef }: Props) {
     }
   }, [clearSearch, isSplit, openedConversationTopic]);
 
-  const ListHeaderComponents: React.ReactElement[] = [];
+  const ListHeaderComponents: React.ReactElement[] = [
+    <PinnedConversations convos={pinnedConversations} />,
+  ];
   const showSearchTitleHeader =
     ((Platform.OS === "ios" && searchBarFocused && !showNoResult) ||
       (Platform.OS === "android" && searchBarFocused)) &&

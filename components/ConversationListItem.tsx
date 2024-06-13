@@ -53,6 +53,7 @@ type ConversationListItemProps = {
   lastMessageStatus?: "delivered" | "error" | "seen" | "sending" | "sent";
   showUnread: boolean;
   conversationOpened: boolean;
+  onLongPress?: () => void;
 } & NativeStackScreenProps<
   NavigationParamList,
   "Chats" | "ShareFrame" | "ChatsRequests"
@@ -72,6 +73,7 @@ const ConversationListItem = memo(function ConversationListItem({
   lastMessageFromMe,
   showUnread,
   conversationOpened,
+  onLongPress,
 }: ConversationListItemProps) {
   const styles = getStyles(colorScheme);
   const timeToShow = getMinimalDate(conversationTime as number);
@@ -245,6 +247,7 @@ const ConversationListItem = memo(function ConversationListItem({
       <TouchableHighlight
         underlayColor={clickedItemBackgroundColor(colorScheme)}
         delayPressIn={isDesktop ? 0 : 75}
+        onLongPress={onLongPress}
         onPressIn={() => {
           if (!isSplitScreen) return;
           openConversation();
