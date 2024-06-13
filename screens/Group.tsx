@@ -29,6 +29,10 @@ import {
   textPrimaryColor,
   textSecondaryColor,
 } from "../utils/colors";
+import {
+  getAccountIsAdmin,
+  getAccountIsSuperAdmin,
+} from "../utils/groupUtils/adminUtils";
 import { getGroupMemberActions } from "../utils/groupUtils/getGroupMemberActions";
 import { sortGroupMembersByAdminStatus } from "../utils/groupUtils/sortGroupMembersByAdminStatus";
 import { navigate } from "../utils/navigation";
@@ -57,25 +61,16 @@ export default function GroupScreen({
   const colorScheme = useColorScheme();
   const currentAccount = useCurrentAccount() as string;
   const topic = group.topic;
-  const groupAdmins: string[] =
-    typeof group.groupAdmins === "string"
-      ? (group.groupAdmins as string).split(",")
-      : group.groupAdmins;
-  const groupSuperAdmins: string[] =
-    typeof group.groupSuperAdmins === "string"
-      ? (group.groupSuperAdmins as string).split(",")
-      : group.groupSuperAdmins;
   const currentAccountIsAdmin = useMemo(() => {
-    return groupAdmins.some(
-      (admin) => admin.toLowerCase() === currentAccount.toLowerCase()
+    return (
+      getAccountIsSuperAdmin(group, currentAccount) ||
+      getAccountIsAdmin(group, currentAccount)
     );
-  }, [currentAccount, groupAdmins]);
+  }, [currentAccount, group]);
 
   const currentAccountIsSuperAdmin = useMemo(() => {
-    return groupSuperAdmins?.some(
-      (admin) => admin.toLowerCase() === currentAccount.toLowerCase()
-    );
-  }, [currentAccount, groupSuperAdmins]);
+    return getAccountIsSuperAdmin(group, currentAccount);
+  }, [currentAccount, group]);
 
   const tableViewItems = useMemo(() => {
     const items: TableViewItemType[] = [];
@@ -92,12 +87,8 @@ export default function GroupScreen({
       });
     }
     groupMembers.forEach((a) => {
-      const isSuperAdmin = groupSuperAdmins?.some(
-        (admin) => admin.toLowerCase() === a.toLowerCase()
-      );
-      const isAdmin = groupAdmins?.some(
-        (admin) => admin.toLowerCase() === a.toLowerCase()
-      );
+      const isSuperAdmin = getAccountIsSuperAdmin(group, a);
+      const isAdmin = getAccountIsAdmin(group, a);
       const isCurrentUser = a.toLowerCase() === currentAccount.toLowerCase();
       const preferredName = getPreferredName(profiles[a]?.socials, a);
       items.push({
@@ -133,7 +124,7 @@ export default function GroupScreen({
                 case 0:
                   navigate("Profile", {
                     address: a,
-                    fromGroup: true,
+                    fromGroupTopic: topic,
                   });
                   break;
                 case promoteSuperAdminIndex:
@@ -207,8 +198,6 @@ export default function GroupScreen({
     currentAccountIsAdmin,
     currentAccountIsSuperAdmin,
     group,
-    groupAdmins,
-    groupSuperAdmins,
     profiles,
     styles.adminText,
     styles.tableViewRight,
