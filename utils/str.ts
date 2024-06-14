@@ -53,6 +53,9 @@ export const conversationName = (conversation: XmtpConversation) => {
   return conversation.conversationTitle || defaultName;
 };
 
+export const formatGroupName = (topic: string, groupName?: string) =>
+  groupName || capitalize(humanize(topic.slice(14, 46), 3, " "));
+
 export const getTitleFontScale = (): number => {
   let titleFontScale = 1;
   const fontScale = PixelRatio.getFontScale();
