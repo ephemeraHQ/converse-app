@@ -28,7 +28,6 @@ import {
 import config from "../config";
 import {
   currentAccount,
-  useChatStore,
   useCurrentAccount,
   useLoggedWithPrivy,
   useProfilesStore,
@@ -37,8 +36,9 @@ import {
   useWalletStore,
 } from "../data/store/accountsStore";
 import { useAppStore } from "../data/store/appStore";
-import { XmtpGroupConversation } from "../data/store/chatStore";
 import { useSelect } from "../data/store/storeHelpers";
+import { useGroupMembers } from "../hooks/useGroupMembers";
+import { useGroupPermissions } from "../hooks/useGroupPermissions";
 import {
   actionSheetColors,
   backgroundColor,
@@ -49,8 +49,8 @@ import {
 } from "../utils/colors";
 import { evmHelpers } from "../utils/evm/helpers";
 import {
-  getAccountIsAdmin,
-  getAccountIsSuperAdmin,
+  getAddressIsAdmin,
+  getAddressIsSuperAdmin,
 } from "../utils/groupUtils/adminUtils";
 import { useLogoutFromConverse } from "../utils/logout";
 import { navigate } from "../utils/navigation";
@@ -61,14 +61,7 @@ import {
 import { getPreferredAvatar, getPreferredName } from "../utils/profile";
 import { getIPFSAssetURI } from "../utils/thirdweb";
 import { refreshBalanceForAccount } from "../utils/wallet";
-import {
-  consentToPeersOnProtocol,
-  promoteMemberToAdmin,
-  promoteMemberToSuperAdmin,
-  removeMembersFromGroup,
-  revokeAdminAccess,
-  revokeSuperAdminAccess,
-} from "../utils/xmtpRN/conversations";
+import { consentToPeersOnProtocol } from "../utils/xmtpRN/conversations";
 import { NavigationParamList } from "./Navigation/Navigation";
 
 export default function ProfileScreen({
@@ -92,9 +85,18 @@ export default function ProfileScreen({
   );
   const setPeersStatus = useSettingsStore((s) => s.setPeersStatus);
   const socials = profiles[peerAddress]?.socials;
-  const group = useChatStore(
-    (s) => s.conversations[route.params.fromGroupTopic ?? ""]
-  ) as XmtpGroupConversation | undefined;
+  const groupTopic = route.params.fromGroupTopic;
+  const {
+    members: groupMembers,
+    removeMember,
+    revokeAdmin,
+    revokeSuperAdmin,
+    promoteToAdmin,
+    promoteToSuperAdmin,
+  } = useGroupMembers(groupTopic ?? "");
+  const { permissions: groupPermissions } = useGroupPermissions(
+    groupTopic ?? ""
+  );
 
   const insets = useSafeAreaInsets();
   useEffect(() => {
@@ -340,20 +342,22 @@ export default function ProfileScreen({
         },
       },
     ];
-    if (!group || isMyProfile) {
+    if (isMyProfile || !groupTopic || !groupMembers) {
       return items;
     }
-    const currentAccountIsAdmin = getAccountIsAdmin(group, userAddress);
-    const currentAccountIsSuperAdmin = getAccountIsSuperAdmin(
-      group,
+    const peerId = groupMembers.byAddress[peerAddress];
+    if (!peerId) {
+      return items;
+    }
+    const currentAccountIsAdmin = getAddressIsAdmin(groupMembers, userAddress);
+    const currentAccountIsSuperAdmin = getAddressIsSuperAdmin(
+      groupMembers,
       userAddress
     );
-    const peerIsAdmin = getAccountIsAdmin(group, peerAddress);
-    const peerIsSuperAdmin = getAccountIsSuperAdmin(group, peerAddress);
-    const groupPermissionLevel = group.groupPermissionLevel;
-    const topic = group.topic;
+    const peerIsAdmin = getAddressIsAdmin(groupMembers, peerAddress);
+    const peerIsSuperAdmin = getAddressIsSuperAdmin(groupMembers, peerAddress);
     if (
-      (currentAccountIsAdmin || groupPermissionLevel === "all_members") &&
+      (currentAccountIsAdmin || groupPermissions === "all_members") &&
       !peerIsSuperAdmin
     ) {
       items.push({
@@ -371,8 +375,8 @@ export default function ProfileScreen({
               ...actionSheetColors(colorScheme),
             },
             async (selectedIndex?: number) => {
-              if (selectedIndex === 0 && peerAddress) {
-                await removeMembersFromGroup(userAddress, topic, [peerAddress]);
+              if (selectedIndex === 0 && peerId) {
+                await removeMember([peerId]);
               }
             }
           );
@@ -396,8 +400,8 @@ export default function ProfileScreen({
               ...actionSheetColors(colorScheme),
             },
             async (selectedIndex?: number) => {
-              if (selectedIndex === 0 && peerAddress) {
-                await promoteMemberToAdmin(userAddress, topic, peerAddress);
+              if (selectedIndex === 0 && peerId) {
+                await promoteToAdmin(peerId);
               }
             }
           );
@@ -421,12 +425,8 @@ export default function ProfileScreen({
               ...actionSheetColors(colorScheme),
             },
             async (selectedIndex?: number) => {
-              if (selectedIndex === 0 && peerAddress) {
-                await promoteMemberToSuperAdmin(
-                  userAddress,
-                  topic,
-                  peerAddress
-                );
+              if (selectedIndex === 0 && peerId) {
+                await promoteToSuperAdmin(peerId);
               }
             }
           );
@@ -449,8 +449,8 @@ export default function ProfileScreen({
               ...actionSheetColors(colorScheme),
             },
             async (selectedIndex?: number) => {
-              if (selectedIndex === 0 && peerAddress) {
-                await revokeSuperAdminAccess(userAddress, topic, peerAddress);
+              if (selectedIndex === 0 && peerId) {
+                await revokeSuperAdmin(peerId);
               }
             }
           );
@@ -475,7 +475,7 @@ export default function ProfileScreen({
             },
             async (selectedIndex?: number) => {
               if (selectedIndex === 0 && peerAddress) {
-                await revokeAdminAccess(userAddress, topic, peerAddress);
+                await revokeAdmin(peerId);
               }
             }
           );
@@ -485,14 +485,21 @@ export default function ProfileScreen({
 
     return items;
   }, [
-    colorScheme,
-    group,
     isBlockedPeer,
+    colorScheme,
     isMyProfile,
-    navigation,
+    groupTopic,
+    groupMembers,
     peerAddress,
-    setPeersStatus,
     userAddress,
+    groupPermissions,
+    setPeersStatus,
+    navigation,
+    removeMember,
+    promoteToAdmin,
+    promoteToSuperAdmin,
+    revokeSuperAdmin,
+    revokeAdmin,
   ]);
 
   return (

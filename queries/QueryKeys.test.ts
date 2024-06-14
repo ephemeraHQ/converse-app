@@ -6,11 +6,12 @@ import {
   groupMessagesQueryKey,
   groupNameQueryKey,
   groupPendingMessagesQueryKey,
+  groupPermissionsQueryKey,
   groupPhotoQueryKey,
   groupPinnedFrameQueryKey,
   groupQueryKey,
   groupsQueryKey,
-} from "./QueryKeys"; // adjust the import path
+} from "./QueryKeys";
 
 describe("QueryKeys", () => {
   it("should match the snapshot", () => {
@@ -70,5 +71,10 @@ describe("Query Key Functions", () => {
   it("groupPinnedFrameQueryKey should return the correct array", () => {
     const result = groupPinnedFrameQueryKey(account, topic);
     expect(result).toEqual([QueryKeys.PINNED_FRAME, account, topic]);
+  });
+
+  it("groupPermissionsQueryKey should return the correct array", () => {
+    const result = groupPermissionsQueryKey(account, topic);
+    expect(result).toEqual([QueryKeys.GROUP_PERMISSIONS, account, topic]);
   });
 });
