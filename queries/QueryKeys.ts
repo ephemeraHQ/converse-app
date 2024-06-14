@@ -16,6 +16,9 @@ export enum QueryKeys {
   GROUP_DESCRIPTION = "groupDescription",
   GROUP_PHOTO = "groupPhoto",
   PINNED_FRAME = "pinnedFrame",
+
+  // Permissions
+  GROUP_PERMISSIONS = "groupPermissions",
 }
 
 export const groupsQueryKey = (account: string) => [QueryKeys.GROUPS, account];
@@ -69,6 +72,12 @@ export const groupPhotoQueryKey = (account: string, topic: string) => [
 
 export const groupPinnedFrameQueryKey = (account: string, topic: string) => [
   QueryKeys.PINNED_FRAME,
+  account,
+  topic,
+];
+
+export const groupPermissionsQueryKey = (account: string, topic: string) => [
+  QueryKeys.GROUP_PERMISSIONS,
   account,
   topic,
 ];
