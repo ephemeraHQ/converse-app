@@ -1,5 +1,4 @@
 import { Client } from "@xmtp/xmtp-js";
-import { Alert } from "react-native";
 
 import { refreshAllSpamScores } from "../../data/helpers/conversations/spamScore";
 import { getChatStore } from "../../data/store/accountsStore";
@@ -57,10 +56,6 @@ export const getXmtpClient = async (
       return client;
     }
   } catch (e: any) {
-    Alert.alert(
-      "An error occured while connecting to the network. Please try again later.",
-      typeof e === "string" ? e : e?.message
-    );
     delete instantiatingClientForAccount[account];
     throw e;
   }

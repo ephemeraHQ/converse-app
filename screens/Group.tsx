@@ -23,6 +23,8 @@ import {
   useProfilesStore,
 } from "../data/store/accountsStore";
 import { XmtpGroupConversation } from "../data/store/chatStore";
+import { useGroupMembers } from "../hooks/useGroupMembers";
+import { useGroupName } from "../hooks/useGroupName";
 import {
   backgroundColor,
   primaryColor,
@@ -32,25 +34,18 @@ import {
 import {
   getAccountIsAdmin,
   getAccountIsSuperAdmin,
+  getAddressIsAdmin,
+  getAddressIsSuperAdmin,
 } from "../utils/groupUtils/adminUtils";
 import { getGroupMemberActions } from "../utils/groupUtils/getGroupMemberActions";
 import { sortGroupMembersByAdminStatus } from "../utils/groupUtils/sortGroupMembersByAdminStatus";
 import { navigate } from "../utils/navigation";
 import { getPreferredName } from "../utils/profile";
-import { conversationName } from "../utils/str";
-import {
-  promoteMemberToAdmin,
-  promoteMemberToSuperAdmin,
-  removeMembersFromGroup,
-  revokeAdminAccess,
-  revokeSuperAdminAccess,
-  updateGroupName,
-} from "../utils/xmtpRN/conversations";
+import { formatGroupName } from "../utils/str";
 import { NavigationParamList } from "./Navigation/Navigation";
 
 export default function GroupScreen({
   route,
-  navigation,
 }: NativeStackScreenProps<NavigationParamList, "Group">) {
   const styles = useStyles();
   const group = useChatStore(
@@ -61,21 +56,30 @@ export default function GroupScreen({
   const colorScheme = useColorScheme();
   const currentAccount = useCurrentAccount() as string;
   const topic = group.topic;
-  const currentAccountIsAdmin = useMemo(() => {
-    return (
-      getAccountIsSuperAdmin(group, currentAccount) ||
-      getAccountIsAdmin(group, currentAccount)
-    );
-  }, [currentAccount, group]);
+  const { groupName, setGroupName } = useGroupName(topic);
+  const {
+    members,
+    promoteToSuperAdmin,
+    promoteToAdmin,
+    revokeAdmin,
+    revokeSuperAdmin,
+    removeMember,
+  } = useGroupMembers(topic);
+  const currentAccountIsAdmin = useMemo(
+    () => getAddressIsAdmin(members, currentAccount),
+    [currentAccount, members]
+  );
 
-  const currentAccountIsSuperAdmin = useMemo(() => {
-    return getAccountIsSuperAdmin(group, currentAccount);
-  }, [currentAccount, group]);
+  const currentAccountIsSuperAdmin = useMemo(
+    () => getAddressIsSuperAdmin(members, currentAccount),
+    [currentAccount, members]
+  );
+  const formattedGroupName = formatGroupName(topic, groupName);
 
   const tableViewItems = useMemo(() => {
     const items: TableViewItemType[] = [];
 
-    const groupMembers = sortGroupMembersByAdminStatus(group, currentAccount);
+    const groupMembers = sortGroupMembersByAdminStatus(members, currentAccount);
     if (currentAccountIsAdmin || group.groupPermissionLevel === "all_members") {
       items.push({
         id: "admin",
@@ -87,12 +91,16 @@ export default function GroupScreen({
       });
     }
     groupMembers.forEach((a) => {
-      const isSuperAdmin = getAccountIsSuperAdmin(group, a);
-      const isAdmin = getAccountIsAdmin(group, a);
-      const isCurrentUser = a.toLowerCase() === currentAccount.toLowerCase();
-      const preferredName = getPreferredName(profiles[a]?.socials, a);
+      const isSuperAdmin = getAccountIsSuperAdmin(members, a.inboxId);
+      const isAdmin = getAccountIsAdmin(members, a.inboxId);
+      const isCurrentUser =
+        a.address.toLowerCase() === currentAccount.toLowerCase();
+      const preferredName = getPreferredName(
+        profiles[a.address]?.socials,
+        a.address
+      );
       items.push({
-        id: a,
+        id: a.inboxId,
         title: `${preferredName}${isCurrentUser ? " (you)" : ""}`,
         action: () => {
           const {
@@ -123,14 +131,14 @@ export default function GroupScreen({
               switch (selectedIndex) {
                 case 0:
                   navigate("Profile", {
-                    address: a,
+                    address: a.address,
                     fromGroupTopic: topic,
                   });
                   break;
                 case promoteSuperAdminIndex:
                   console.log("Promoting super admin...");
                   try {
-                    await promoteMemberToSuperAdmin(currentAccount, topic, a);
+                    await promoteToSuperAdmin(a.inboxId);
                   } catch (e) {
                     console.error(e);
                     Alert.alert("An error occurred");
@@ -139,7 +147,7 @@ export default function GroupScreen({
                 case revokeSuperAdminIndex:
                   console.log("Revoking super admin...");
                   try {
-                    await revokeSuperAdminAccess(currentAccount, topic, a);
+                    await revokeSuperAdmin(a.inboxId);
                   } catch (e) {
                     console.error(e);
                     Alert.alert("An error occurred");
@@ -148,7 +156,7 @@ export default function GroupScreen({
                 case promoteAdminIndex:
                   console.log("Promoting member...");
                   try {
-                    await promoteMemberToAdmin(currentAccount, topic, a);
+                    await promoteToAdmin(a.inboxId);
                   } catch (e) {
                     console.error(e);
                     Alert.alert("An error occurred");
@@ -157,7 +165,7 @@ export default function GroupScreen({
                 case revokeAdminIndex:
                   console.log("Revoking admin...");
                   try {
-                    await revokeAdminAccess(currentAccount, topic, a);
+                    await revokeAdmin(a.inboxId);
                   } catch (e) {
                     console.error(e);
                     Alert.alert("An error occurred");
@@ -166,7 +174,7 @@ export default function GroupScreen({
                 case removeIndex:
                   console.log("Removing member...");
                   try {
-                    await removeMembersFromGroup(currentAccount, topic, [a]);
+                    await removeMember([a.inboxId]);
                   } catch (e) {
                     console.error(e);
                     Alert.alert("An error occurred");
@@ -197,8 +205,15 @@ export default function GroupScreen({
     currentAccount,
     currentAccountIsAdmin,
     currentAccountIsSuperAdmin,
-    group,
+    group.groupPermissionLevel,
+    group.topic,
+    members,
     profiles,
+    promoteToAdmin,
+    promoteToSuperAdmin,
+    removeMember,
+    revokeAdmin,
+    revokeSuperAdmin,
     styles.adminText,
     styles.tableViewRight,
     topic,
@@ -208,15 +223,15 @@ export default function GroupScreen({
     currentAccountIsAdmin ||
     currentAccountIsSuperAdmin ||
     group.groupPermissionLevel === "all_members";
-  const [editedName, setEditedName] = useState(conversationName(group));
+  const [editedName, setEditedName] = useState(formattedGroupName);
   const handleNameChange = useCallback(async () => {
     try {
-      await updateGroupName(currentAccount, group.topic, editedName);
+      await setGroupName(editedName);
     } catch (e) {
       console.error(e);
       Alert.alert("An error occurred");
     }
-  }, [currentAccount, editedName, group.topic]);
+  }, [editedName, setGroupName]);
 
   return (
     <ScrollView
@@ -226,7 +241,7 @@ export default function GroupScreen({
       {canEditGroupName ? (
         <TextInput
           style={styles.title}
-          defaultValue={conversationName(group)}
+          defaultValue={formattedGroupName}
           value={editedName}
           onChangeText={setEditedName}
           blurOnSubmit
@@ -234,7 +249,7 @@ export default function GroupScreen({
           returnKeyType="done"
         />
       ) : (
-        <Text style={styles.title}>{conversationName(group)}</Text>
+        <Text style={styles.title}>{formattedGroupName}</Text>
       )}
       <TableView items={tableViewItems} title="MEMBERS" />
       <View style={{ height: insets.bottom }} />
