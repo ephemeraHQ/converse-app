@@ -73,7 +73,9 @@ export default function ConversationTitle({
         previousConversation.groupName !== conversation.groupName)
     ) {
       // New conversation, lets' set title
-      setTitle(conversationName(conversation));
+      if (!conversation.isGroup) {
+        setTitle(conversationName(conversation));
+      }
       if (!conversation.peerAddress) return;
       const socials = profiles[conversation.peerAddress]?.socials;
       setAvatar(getPreferredAvatar(socials));
