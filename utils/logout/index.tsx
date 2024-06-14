@@ -1,6 +1,5 @@
 import { useCallback } from "react";
 
-import config from "../../config";
 import { clearDb } from "../../data/db";
 import {
   getAccountsList,
@@ -22,8 +21,6 @@ import { importedTopicsDataForAccount } from "../xmtpRN/conversations";
 import { deleteXmtpClient } from "../xmtpRN/sync";
 import { useDisconnectFromPrivy } from "./privy";
 import { useDisconnectWallet } from "./wallet";
-
-const env = config.xmtpEnv as "dev" | "production" | "local";
 
 type LogoutTasks = {
   [account: string]: {
@@ -168,9 +165,7 @@ export const useLogoutFromConverse = (account: string) => {
         });
       }
     });
-    if (env !== "dev") {
-      clearDb(account);
-    }
+    clearDb(account);
 
     // Now that db has been deleted we can remove account
     // from store (account holds the db id so it was needed
