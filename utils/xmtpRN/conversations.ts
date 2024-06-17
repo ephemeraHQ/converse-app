@@ -11,6 +11,8 @@ import { saveMemberInboxIds } from "../../data/helpers/inboxId/saveInboxIds";
 import { getSettingsStore } from "../../data/store/accountsStore";
 import { XmtpConversation } from "../../data/store/chatStore";
 import { SettingsStoreType } from "../../data/store/settingsStore";
+import { setGroupNameQueryData } from "../../queries/useGroupNameQuery";
+import { setGroupPhotoQueryData } from "../../queries/useGroupPhotoQuery";
 import { addGroupToGroupsQuery } from "../../queries/useGroupsQuery";
 import { ConversationWithLastMessagePreview } from "../conversation";
 import { debugTimeSpent } from "../debug";
@@ -473,13 +475,21 @@ export const createGroup = async (
   account: string,
   peers: string[],
   permissionLevel: "all_members" | "admin_only" = "all_members",
-  groupName?: string
+  groupName?: string,
+  groupPhoto?: string
 ) => {
   const client = (await getXmtpClient(account)) as ConverseXmtpClientType;
   const group = await client.conversations.newGroup(peers, {
     permissionLevel,
     name: groupName,
+    imageUrlSquare: groupPhoto,
   });
+  if (groupName) {
+    setGroupNameQueryData(account, group.topic, groupName);
+  }
+  if (groupPhoto) {
+    setGroupPhotoQueryData(account, group.topic, groupPhoto);
+  }
   const members = await group.members();
   saveMemberInboxIds(account, members);
   await handleNewConversation(client, group);
