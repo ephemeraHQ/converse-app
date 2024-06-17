@@ -4,10 +4,9 @@ import { AppState } from "react-native";
 import {
   useAccountsList,
   useAccountsStore,
-  useCurrentAccount,
   useChatStoreForAccount,
+  useCurrentAccount,
   useSettingsStoreForAccount,
-  useChatStore,
 } from "../../data/store/accountsStore";
 import { useAppStore } from "../../data/store/appStore";
 import { useSelect } from "../../data/store/storeHelpers";
@@ -15,8 +14,8 @@ import { saveUser } from "../../utils/api";
 import { sortAndComputePreview } from "../../utils/conversation";
 import { executeLogoutTasks } from "../../utils/logout";
 import {
-  saveNotificationsStatus,
   resetNotifications,
+  saveNotificationsStatus,
 } from "../../utils/notifications";
 
 export default function ConversationsStateHandler() {
@@ -80,10 +79,15 @@ export default function ConversationsStateHandler() {
 
 const AccountNotificationsStateHandler = ({ account }: { account: string }) => {
   const hydrationDone = useAppStore((s) => s.hydrationDone);
-  const pinnedConversations = useChatStore((s) => s.pinnedConversations);
-  const { conversations, topicsData, lastUpdateAt } = useChatStoreForAccount(
-    account
-  )(useSelect(["conversations", "topicsData", "lastUpdateAt"]));
+  const { conversations, topicsData, lastUpdateAt, pinnedConversations } =
+    useChatStoreForAccount(account)(
+      useSelect([
+        "conversations",
+        "topicsData",
+        "lastUpdateAt",
+        "pinnedConversations",
+      ])
+    );
   const peersStatus = useSettingsStoreForAccount(account)((s) => s.peersStatus);
   const lastRefreshState = useRef({
     account,
@@ -91,6 +95,7 @@ const AccountNotificationsStateHandler = ({ account }: { account: string }) => {
     topicsData: 0,
     peersStatus: 0,
     lastUpdateAt: 0,
+    pinnedConversations: 0,
   });
   // Sync accounts on load and when a new one is added
   useEffect(() => {
@@ -102,6 +107,7 @@ const AccountNotificationsStateHandler = ({ account }: { account: string }) => {
       topicsData: Object.keys(topicsData).length,
       peersStatus: Object.keys(peersStatus).length,
       lastUpdateAt,
+      pinnedConversations: pinnedConversations.length,
     };
     if (
       newRefreshState.account !== lastRefreshState.current.account ||
@@ -109,7 +115,9 @@ const AccountNotificationsStateHandler = ({ account }: { account: string }) => {
         lastRefreshState.current.conversations ||
       newRefreshState.topicsData !== lastRefreshState.current.topicsData ||
       newRefreshState.peersStatus !== lastRefreshState.current.peersStatus ||
-      newRefreshState.lastUpdateAt !== lastRefreshState.current.lastUpdateAt
+      newRefreshState.lastUpdateAt !== lastRefreshState.current.lastUpdateAt ||
+      newRefreshState.pinnedConversations !==
+        lastRefreshState.current.pinnedConversations
     ) {
       lastRefreshState.current = newRefreshState;
       sortAndComputePreview(
