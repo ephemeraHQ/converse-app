@@ -1,32 +1,24 @@
-import { XmtpGroupConversation } from "../../data/store/chatStore";
+import { Member } from "@xmtp/react-native-sdk";
+import { InboxId } from "@xmtp/react-native-sdk/build/lib/Client";
+
+import { EntityObjectWithAddress } from "../../queries/entify";
+import { getAccountIsAdmin, getAccountIsSuperAdmin } from "./adminUtils";
 
 export const sortGroupMembersByAdminStatus = (
-  group: XmtpGroupConversation,
+  members: EntityObjectWithAddress<Member, InboxId> | undefined,
   currentAccount: string
-): string[] => {
-  const groupMembers = [...group.groupMembers];
-  const groupAdmins =
-    typeof group.groupAdmins === "string"
-      ? (group.groupAdmins as string).split(",")
-      : group.groupAdmins;
-  const groupSuperAdmins =
-    typeof group.groupSuperAdmins === "string"
-      ? (group.groupSuperAdmins as string).split(",")
-      : group.groupSuperAdmins;
+): { inboxId: InboxId; address: string }[] => {
+  if (!members) {
+    return [];
+  }
+  const groupMembers = [...(members?.ids ?? [])];
+
   // Sorting group members to show admins & me first
   groupMembers.sort((a, b) => {
-    const aIsAdmin = groupAdmins?.some(
-      (admin) => admin.toLowerCase() === a.toLowerCase()
-    );
-    const aIsSuperAdmin = groupSuperAdmins?.some(
-      (admin) => admin.toLowerCase() === a.toLowerCase()
-    );
-    const bIsAdmin = groupAdmins?.some(
-      (admin) => admin.toLowerCase() === b.toLowerCase()
-    );
-    const bIsSuperAdmin = groupSuperAdmins?.some(
-      (admin) => admin.toLowerCase() === b.toLowerCase()
-    );
+    const aIsAdmin = getAccountIsAdmin(members, a);
+    const aIsSuperAdmin = getAccountIsSuperAdmin(members, a);
+    const bIsAdmin = getAccountIsAdmin(members, b);
+    const bIsSuperAdmin = getAccountIsSuperAdmin(members, b);
 
     if (aIsSuperAdmin && !bIsSuperAdmin) {
       return -1;
@@ -54,5 +46,9 @@ export const sortGroupMembersByAdminStatus = (
     }
     return 0;
   });
-  return groupMembers;
+  return groupMembers.map((inboxId) => ({
+    inboxId,
+    // TODO: Multiple address support
+    address: members.byId[inboxId].addresses[0],
+  }));
 };

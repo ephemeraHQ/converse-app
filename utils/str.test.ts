@@ -6,12 +6,13 @@ import {
   addressPrefix,
   capitalize,
   conversationName,
+  formatGroupName,
   getReadableProfile,
   getTitleFontScale,
   shortAddress,
   shortDomain,
   strByteSize,
-} from "./str"; // Adjust the import to your file's path
+} from "./str";
 
 jest.mock("react-native", () => ({
   Dimensions: {
@@ -163,5 +164,22 @@ describe("getReadableProfile", () => {
 describe("strByteSize", () => {
   it("should return the byte size of a string", () => {
     expect(strByteSize("hello")).toBe(5);
+  });
+});
+
+describe("formatGroupName", () => {
+  it("should return groupName if provided", () => {
+    const topic = "randomTopicString";
+    const groupName = "MyGroupName";
+    const result = formatGroupName(topic, groupName);
+    expect(result).toBe(groupName);
+  });
+
+  it("should format topic if groupName is not provided", () => {
+    const topic = "/xmtp/mls/1/g-dab181fefd94578cc791bcc42d3b207c/proto";
+    const formattedString = "Utah bluebird delta";
+    const result = formatGroupName(topic);
+
+    expect(result).toBe(formattedString);
   });
 });
