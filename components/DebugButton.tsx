@@ -8,7 +8,7 @@ import * as Updates from "expo-updates";
 import { forwardRef, useImperativeHandle } from "react";
 
 import config from "../config";
-import { resetDb, getDbPath } from "../data/db";
+import { getDbPath, resetDb } from "../data/db";
 import {
   currentAccount,
   getChatStore,
@@ -138,7 +138,7 @@ const DebugButton = forwardRef((props, ref) => {
           );
           const alice = await Client.create(aliceWallet, {
             env: "dev",
-            enableAlphaMls: true,
+            enableV3: true,
             dbEncryptionKey: new Uint8Array([
               1, 2, 3, 4, 5, 1, 2, 3, 4, 5, 1, 2, 3, 4, 5, 1, 2, 3, 4, 5, 1, 2,
               3, 4, 5, 1, 2, 3, 4, 5, 1, 2,
@@ -171,7 +171,7 @@ const DebugButton = forwardRef((props, ref) => {
           );
           const alice = await Client.create(aliceWallet, {
             env: "dev",
-            enableAlphaMls: true,
+            enableV3: true,
             dbEncryptionKey: new Uint8Array([
               1, 2, 3, 4, 5, 1, 2, 3, 4, 5, 1, 2, 3, 4, 5, 1, 2, 3, 4, 5, 1, 2,
               3, 4, 5, 1, 2, 3, 4, 5, 1, 2,
@@ -183,7 +183,7 @@ const DebugButton = forwardRef((props, ref) => {
           );
           const bob = await Client.create(bobWallet, {
             env: "dev",
-            enableAlphaMls: true,
+            enableV3: true,
             dbEncryptionKey: new Uint8Array([
               1, 2, 3, 4, 5, 1, 2, 3, 4, 5, 1, 2, 3, 4, 5, 1, 2, 3, 4, 5, 1, 2,
               3, 4, 5, 1, 2, 3, 4, 5, 1, 2,
