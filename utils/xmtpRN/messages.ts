@@ -171,7 +171,6 @@ export const streamAllMessages = async (account: string) => {
       topic: message.topic,
     });
     saveMessages(client.address, protocolMessagesToStateMessages([message]));
-    // Remove group messages stream for now
   }, true);
 };
 

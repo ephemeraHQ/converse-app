@@ -1,27 +1,46 @@
-import { XmtpGroupConversation } from "../../data/store/chatStore";
+import { Member } from "@xmtp/react-native-sdk";
+import { InboxId } from "@xmtp/react-native-sdk/build/lib/Client";
+
+import { EntityObjectWithAddress } from "../../queries/entify";
 
 export const getAccountIsAdmin = (
-  group: XmtpGroupConversation,
-  account: string
+  members: EntityObjectWithAddress<Member, InboxId> | undefined,
+  account: InboxId
 ) => {
-  const groupAdmins: string[] =
-    typeof group.groupAdmins === "string"
-      ? (group.groupAdmins as string).split(",")
-      : group.groupAdmins;
-  return groupAdmins.some(
-    (admin) => admin.toLowerCase() === account.toLowerCase()
+  return (
+    members?.byId[account]?.permissionLevel === "admin" ||
+    members?.byId[account]?.permissionLevel === "super_admin"
   );
 };
 
 export const getAccountIsSuperAdmin = (
-  group: XmtpGroupConversation,
-  account: string
+  members: EntityObjectWithAddress<Member, InboxId> | undefined,
+  account: InboxId
 ) => {
-  const groupSuperAdmins: string[] =
-    typeof group.groupSuperAdmins === "string"
-      ? (group.groupSuperAdmins as string).split(",")
-      : group.groupSuperAdmins;
-  return groupSuperAdmins?.some(
-    (admin) => admin.toLowerCase() === account.toLowerCase()
+  return members?.byId[account]?.permissionLevel === "super_admin";
+};
+
+export const getAddressIsAdmin = (
+  members: EntityObjectWithAddress<Member, InboxId> | undefined,
+  address: string
+) => {
+  const currentId = members?.byAddress[address.toLowerCase()];
+  if (!currentId) {
+    return false;
+  }
+  return (
+    members?.byId[currentId]?.permissionLevel === "admin" ||
+    members?.byId[currentId]?.permissionLevel === "super_admin"
   );
+};
+
+export const getAddressIsSuperAdmin = (
+  members: EntityObjectWithAddress<Member> | undefined,
+  address: string
+) => {
+  const currentId = members?.byAddress[address.toLowerCase()];
+  if (!currentId) {
+    return false;
+  }
+  return members?.byId[currentId]?.permissionLevel === "super_admin";
 };

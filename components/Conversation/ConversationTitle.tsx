@@ -13,6 +13,7 @@ import {
 
 import { useProfilesStore } from "../../data/store/accountsStore";
 import { XmtpConversation } from "../../data/store/chatStore";
+import { useGroupName } from "../../hooks/useGroupName";
 import { NavigationParamList } from "../../screens/Navigation/Navigation";
 import { headerTitleStyle, textSecondaryColor } from "../../utils/colors";
 import { getPreferredAvatar } from "../../utils/profile";
@@ -36,8 +37,13 @@ export default function ConversationTitle({
   navigation,
 }: Props) {
   const colorScheme = useColorScheme();
+  const { groupName } = useGroupName(conversation?.topic ?? "");
   const [title, setTitle] = useState(
-    conversation ? conversationName(conversation) : ""
+    conversation
+      ? conversation.isGroup
+        ? groupName
+        : conversationName(conversation)
+      : ""
   );
   const profiles = useProfilesStore((state) => state.profiles);
   const [avatar, setAvatar] = useState(
@@ -67,13 +73,21 @@ export default function ConversationTitle({
         previousConversation.groupName !== conversation.groupName)
     ) {
       // New conversation, lets' set title
-      setTitle(conversationName(conversation));
+      if (!conversation.isGroup) {
+        setTitle(conversationName(conversation));
+      }
       if (!conversation.peerAddress) return;
       const socials = profiles[conversation.peerAddress]?.socials;
       setAvatar(getPreferredAvatar(socials));
     }
     conversationRef.current = conversation;
   }, [conversation, profiles]);
+
+  useEffect(() => {
+    if (groupName) {
+      setTitle(groupName);
+    }
+  }, [groupName]);
 
   if (!conversation) return null;
   return (
