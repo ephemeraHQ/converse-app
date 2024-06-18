@@ -3,7 +3,7 @@ import { StyleSheet, Text, useColorScheme, View } from "react-native";
 
 import Checkmark from "../../../assets/checkmark.svg";
 import Clock from "../../../assets/clock.svg";
-import { textPrimaryColor } from "../../../utils/colors";
+import { backgroundColor } from "../../../utils/colors";
 import { getTime } from "../../../utils/date";
 import { MessageToDisplay } from "./Message";
 
@@ -24,14 +24,14 @@ export default function MessageMetadata({ message, white }: Props) {
           {message.status === "sending" ? (
             <Clock
               style={styles.statusIcon}
-              fill="white"
+              fill={styles.time.color}
               width={8}
               height={8}
             />
           ) : (
             <Checkmark
               style={styles.statusIcon}
-              fill="white"
+              fill={styles.time.color}
               width={8}
               height={8}
             />
@@ -54,7 +54,7 @@ const useStyles = () => {
     },
     time: {
       fontSize: 8,
-      color: textPrimaryColor(colorScheme),
+      color: backgroundColor(colorScheme),
       marginRight: 3,
     },
     timeWhite: {
