@@ -10,8 +10,11 @@ import {
   useColorScheme,
   View,
 } from "react-native";
+import { List } from "react-native-paper";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
+import Avatar from "../components/Avatar";
+import Button from "../components/Button/Button";
 import { showActionSheetWithOptions } from "../components/StateHandlers/ActionSheetStateHandler";
 import TableView, {
   TableViewItemType,
@@ -25,6 +28,8 @@ import {
 import { XmtpGroupConversation } from "../data/store/chatStore";
 import { useGroupMembers } from "../hooks/useGroupMembers";
 import { useGroupName } from "../hooks/useGroupName";
+import { useGroupPhoto } from "../hooks/useGroupPhoto";
+import { usePhotoSelect } from "../hooks/usePhotoSelect";
 import {
   backgroundColor,
   primaryColor,
@@ -57,6 +62,19 @@ export default function GroupScreen({
   const currentAccount = useCurrentAccount() as string;
   const topic = group.topic;
   const { groupName, setGroupName } = useGroupName(topic);
+
+  const { groupPhoto, setGroupPhoto } = useGroupPhoto(topic);
+  const onPhotoChange = useCallback(
+    (newImageUrl: string) => {
+      setGroupPhoto(newImageUrl);
+    },
+    [setGroupPhoto]
+  );
+  const { addPhoto: addGroupPhoto, photo: localGroupPhoto } = usePhotoSelect({
+    initialPhoto: groupPhoto,
+    onPhotoAdd: onPhotoChange,
+  });
+
   const {
     members,
     promoteToSuperAdmin,
@@ -219,7 +237,7 @@ export default function GroupScreen({
     topic,
   ]);
 
-  const canEditGroupName =
+  const canEditGroupMetadata =
     currentAccountIsAdmin ||
     currentAccountIsSuperAdmin ||
     group.groupPermissionLevel === "all_members";
@@ -238,7 +256,22 @@ export default function GroupScreen({
       style={styles.group}
       contentContainerStyle={styles.groupContent}
     >
-      {canEditGroupName ? (
+      <List.Section>
+        <View style={{ alignItems: "center" }}>
+          <Avatar uri={localGroupPhoto} style={styles.avatar} color={false} />
+          {canEditGroupMetadata && (
+            <Button
+              variant="text"
+              title={
+                groupPhoto ? "Change profile picture" : "Add profile picture"
+              }
+              textStyle={{ fontWeight: "500" }}
+              onPress={addGroupPhoto}
+            />
+          )}
+        </View>
+      </List.Section>
+      {canEditGroupMetadata ? (
         <TextInput
           style={styles.title}
           defaultValue={formattedGroupName}
@@ -249,7 +282,9 @@ export default function GroupScreen({
           returnKeyType="done"
         />
       ) : (
-        <Text style={styles.title}>{formattedGroupName}</Text>
+        <Text style={styles.title} ellipsizeMode="tail">
+          {formattedGroupName}
+        </Text>
       )}
       <TableView items={tableViewItems} title="MEMBERS" />
       <View style={{ height: insets.bottom }} />
@@ -260,6 +295,10 @@ export default function GroupScreen({
 const useStyles = () => {
   const colorScheme = useColorScheme();
   return StyleSheet.create({
+    avatar: {
+      marginBottom: 10,
+      marginTop: 23,
+    },
     title: {
       color: textPrimaryColor(colorScheme),
       fontSize: 34,
