@@ -1,0 +1,32 @@
+name: Typescript CI
+on:
+  pull_request:
+    paths:
+      # JS Specific Files
+      - "src/**"
+      - "e2e/**"
+      - "tsconfig.json"
+      - "App.tsx"
+      # Build Files
+      - "yarn.lock"
+      - "package.json"
+      - "patches/**"
+jobs:
+  tsc:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v3
+      - run: yarn
+      - run: yarn typecheck
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v3
+      - run: yarn
+      - run: yarn lint

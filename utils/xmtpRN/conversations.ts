@@ -470,7 +470,9 @@ export const createGroup = async (
   groupName?: string
 ) => {
   const client = (await getXmtpClient(account)) as ConverseXmtpClientType;
-  const group = await client.conversations.newGroup(peers, permissionLevel);
+  const group = await client.conversations.newGroup(peers, {
+    permissionLevel,
+  });
   if (groupName) {
     // await group.updateGroupName(groupName);
   }
