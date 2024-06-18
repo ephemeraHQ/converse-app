@@ -33,7 +33,7 @@ export const getXmtpClientFromBase64Key = async (base64Key: string) => {
       new TransactionReferenceCodec(),
       new CoinbaseMessagingPaymentCodec(),
     ],
-    enableAlphaMls: true,
+    enableV3: true,
     dbDirectory,
   });
 };
