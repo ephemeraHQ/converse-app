@@ -26,6 +26,7 @@ import {
   myMessageInnerBubbleColor,
   textPrimaryColor,
   textSecondaryColor,
+  backgroundColor,
 } from "../../../utils/colors";
 import { getRelativeDate } from "../../../utils/date";
 import { isDesktop } from "../../../utils/device";
@@ -80,7 +81,7 @@ const MessageSender = ({ message }: { message: MessageToDisplay }) => {
 function ChatMessage({ message, colorScheme, isGroup }: Props) {
   const styles = useStyles();
 
-  const metadata = <MessageMetadata message={message} white={message.fromMe} />;
+  const metadata = <MessageMetadata message={message} white={false} />;
 
   let messageContent: ReactNode;
   const contentType = getMessageContentType(message.contentType);
@@ -422,7 +423,7 @@ const useStyles = () => {
       color: textPrimaryColor(colorScheme),
     },
     messageTextMe: {
-      color: "white",
+      color: backgroundColor(colorScheme),
     },
     messageTextReply: {
       paddingHorizontal: 8,

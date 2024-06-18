@@ -72,6 +72,7 @@ export default function NewConversation({
         Platform.OS === "ios" ? (
           <Button
             title="Cancel"
+            color={textPrimaryColor(colorScheme)}
             onPress={() => {
               navigation.goBack();
             }}
@@ -121,7 +122,13 @@ export default function NewConversation({
         return undefined;
       },
     });
-  }, [group, loading, navigation, route.params?.addingToGroupTopic]);
+  }, [
+    group,
+    loading,
+    navigation,
+    route.params?.addingToGroupTopic,
+    colorScheme,
+  ]);
 
   const [value, setValue] = useState(route.params?.peer || "");
   const searchingForValue = useRef("");
