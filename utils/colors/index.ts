@@ -138,16 +138,16 @@ export const messageHighlightedBubbleColor = (colorScheme: ColorSchemeName) => {
     : "#c9c9cf";
 };
 
-const MY_MESSAGE_BUBBLE_LIGHT = "#E95C43";
-const MY_MESSAGE_BUBBLE_DARK = "#E95C43";
+const MY_MESSAGE_BUBBLE_LIGHT = "#000";
+const MY_MESSAGE_BUBBLE_DARK = "#FFF";
 
 export const myMessageBubbleColor = (colorScheme: ColorSchemeName) => {
   if (colorScheme === "dark") return MY_MESSAGE_BUBBLE_DARK;
   return MY_MESSAGE_BUBBLE_LIGHT;
 };
 
-const MY_MESSAGE_INNER_BUBBLE_LIGHT = "#D2533C";
-const MY_MESSAGE_INNER_BUBBLE_DARK = "#D2533C";
+const MY_MESSAGE_INNER_BUBBLE_LIGHT = "rgb(255, 255, 255, 0.3)";
+const MY_MESSAGE_INNER_BUBBLE_DARK = "rgb(255, 255, 255, 0.3)";
 
 export const myMessageInnerBubbleColor = (colorScheme: ColorSchemeName) => {
   if (colorScheme === "dark") return MY_MESSAGE_INNER_BUBBLE_DARK;
@@ -171,9 +171,9 @@ export const tertiaryBackgroundColor = (colorScheme: ColorSchemeName) => {
 export const primaryColor = (colorScheme: ColorSchemeName) => {
   if (Platform.OS === "ios") {
     if (colorScheme === "dark") {
-      return "#0A84FF";
+      return "#FFF";
     } else {
-      return "#007AFF";
+      return "#000";
     }
   }
   if (Platform.OS === "android" || Platform.OS === "web") {

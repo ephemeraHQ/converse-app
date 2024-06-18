@@ -8,7 +8,7 @@ import {
 
 import Picto from "../../components/Picto/Picto";
 import { useCurrentAccount } from "../../data/store/accountsStore";
-import { textSecondaryColor } from "../../utils/colors";
+import { textPrimaryColor, textSecondaryColor } from "../../utils/colors";
 import { navigate } from "../../utils/navigation";
 import ProfileScreen from "../Profile";
 import { NativeStack, navigationAnimation } from "./Navigation";
@@ -29,7 +29,7 @@ export default function ProfileNav() {
     headerTintColor:
       Platform.OS === "android" || Platform.OS === "web"
         ? textSecondaryColor(colorScheme)
-        : undefined,
+        : textPrimaryColor(colorScheme),
     animation: navigationAnimation,
   };
   if (Platform.OS === "web") {
@@ -48,6 +48,7 @@ export default function ProfileNav() {
               return (
                 <Button
                   title="Modify"
+                  color={textPrimaryColor(colorScheme)}
                   onPress={() => {
                     navigate("UserProfile");
                   }}

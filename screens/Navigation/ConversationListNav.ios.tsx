@@ -20,7 +20,7 @@ import NewConversationButton from "../../components/ConversationList/NewConversa
 import ProfileSettingsButton from "../../components/ConversationList/ProfileSettingsButton";
 import { useAccountsStore, useChatStore } from "../../data/store/accountsStore";
 import { useSelect } from "../../data/store/storeHelpers";
-import { headerTitleStyle } from "../../utils/colors";
+import { headerTitleStyle, textPrimaryColor } from "../../utils/colors";
 import { isDesktop } from "../../utils/device";
 import { getReadableProfile } from "../../utils/str";
 import ConversationList from "../ConversationList";
@@ -96,6 +96,7 @@ export default function ConversationListNav() {
             <NewConversationButton navigation={navigation} route={route} />
           </>
         ),
+        headerTintColor: textPrimaryColor(colorScheme),
         animation: navigationAnimation,
         headerLeft: () => (
           <View

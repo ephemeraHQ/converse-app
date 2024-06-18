@@ -62,7 +62,6 @@ export function NavigationChatButton({
           ? "text"
           : "secondary"
       }
-      picto={groupMode ? (loading ? undefined : "plus") : "message"}
       title={groupMode ? (loading ? "Adding..." : "Add") : "Chat"}
       style={[styles.navigationButton, loading ? styles.loading : {}]}
       textStyle={loading ? styles.loadingText : undefined}

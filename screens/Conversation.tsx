@@ -15,6 +15,7 @@ import { useSelect } from "../data/store/storeHelpers";
 import {
   backgroundColor,
   headerTitleStyle,
+  textPrimaryColor,
   textSecondaryColor,
 } from "../utils/colors";
 import {
@@ -181,7 +182,9 @@ const Conversation = ({
         />
       ),
       headerTintColor:
-        Platform.OS === "android" ? textSecondaryColor(colorScheme) : undefined,
+        Platform.OS === "android"
+          ? textSecondaryColor(colorScheme)
+          : textPrimaryColor(colorScheme),
     });
   }, [
     colorScheme,
