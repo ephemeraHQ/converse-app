@@ -1,16 +1,9 @@
 name: Typescript CI
 on:
   pull_request:
-    paths:
-      # JS Specific Files
-      - "src/**"
-      - "e2e/**"
-      - "tsconfig.json"
-      - "App.tsx"
-      # Build Files
-      - "yarn.lock"
-      - "package.json"
-      - "patches/**"
+    branches:
+      - main
+      - feat/xmtp-groups-dash
 jobs:
   tsc:
     runs-on: ubuntu-latest
