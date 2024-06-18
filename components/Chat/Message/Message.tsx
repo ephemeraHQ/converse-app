@@ -22,6 +22,7 @@ import {
 import { XmtpMessage } from "../../../data/store/chatStore";
 import { isAttachmentMessage } from "../../../utils/attachment/helpers";
 import {
+  backgroundColor,
   messageInnerBubbleColor,
   myMessageInnerBubbleColor,
   textPrimaryColor,
@@ -53,7 +54,6 @@ import TransactionPreview from "../Transaction/TransactionPreview";
 import ChatMessageActions from "./MessageActions";
 import ChatMessageReactions from "./MessageReactions";
 import MessageStatus from "./MessageStatus";
-import MessageTimestamp from "./MessageTimestamp";
 
 export type MessageToDisplay = XmtpMessage & {
   hasPreviousMessageInSeries: boolean;
@@ -87,13 +87,7 @@ function ChatMessage({ message, colorScheme, isGroup, isFrame }: Props) {
   const styles = useStyles();
   const hideBackground = isAllEmojisAndMaxThree(message.content);
 
-  const metadata = (
-    <MessageTimestamp
-      message={message}
-      white={message.fromMe}
-      hiddenBackground={hideBackground}
-    />
-  );
+  const metadata = <MessageMetadata message={message} white={false} />;
 
   let messageContent: ReactNode;
   const contentType = getMessageContentType(message.contentType);
@@ -446,7 +440,7 @@ const useStyles = () => {
       color: textPrimaryColor(colorScheme),
     },
     messageTextMe: {
-      color: "white",
+      color: backgroundColor(colorScheme),
     },
     messageTextReply: {
       paddingHorizontal: 8,

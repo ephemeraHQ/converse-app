@@ -94,7 +94,11 @@ export default function NewConversation({
     navigation.setOptions({
       headerLeft: () =>
         Platform.OS === "ios" ? (
-          <Button title="Cancel" onPress={handleBack} />
+          <Button
+            title="Cancel"
+            color={textPrimaryColor(colorScheme)}
+            onPress={handleBack}
+          />
         ) : (
           <AndroidBackAction navigation={navigation} />
         ),
@@ -129,6 +133,7 @@ export default function NewConversation({
     handleBack,
     handleRightAction,
     styles.activityIndicator,
+    colorScheme,
   ]);
 
   const [value, setValue] = useState(route.params?.peer || "");
