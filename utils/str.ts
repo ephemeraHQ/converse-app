@@ -45,11 +45,13 @@ export const addressPrefix = (address: string) =>
   (address && address.length >= 6 ? address.slice(0, 6) : address) || "";
 
 export const conversationName = (conversation: XmtpConversation) => {
-  const defaultName = conversation.isGroup
-    ? conversation.groupName
-      ? conversation.groupName
-      : capitalize(humanize(conversation.topic.slice(14, 46), 3, " "))
-    : shortAddress(conversation.peerAddress);
+  if (conversation.isGroup) {
+    return (
+      conversation.groupName ||
+      capitalize(humanize(conversation.topic.slice(14, 46), 3, " "))
+    );
+  }
+  const defaultName = shortAddress(conversation.peerAddress);
   return conversation.conversationTitle || defaultName;
 };
 
