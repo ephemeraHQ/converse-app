@@ -71,3 +71,10 @@ yarn dev
 # Back in this repo
 yarn test
 ```
+
+
+# Key Cases Needed for App Release
+
+1. Old conversations are persisted
+2. Can send a message without duplicates
+3. Can create a group
