@@ -30,6 +30,7 @@ import {
   dangerColor,
   textPrimaryColor,
   textSecondaryColor,
+  inversePrimaryColor,
 } from "../utils/colors";
 import { getMinimalDate } from "../utils/date";
 import { isDesktop } from "../utils/device";
@@ -141,7 +142,10 @@ const ConversationListItem = memo(function ConversationListItem({
         </Text>
         {(lastMessageFromMe && lastMessageStatus) === "sending" ? (
           <View style={styles.unread}>
-            <Picto picto="info.i" color={backgroundColor(colorScheme)} />
+            <Picto
+              picto="exclamation"
+              color={inversePrimaryColor(colorScheme)}
+            />
           </View>
         ) : showUnread ? (
           <View style={styles.unread} />
