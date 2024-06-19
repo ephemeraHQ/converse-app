@@ -119,7 +119,7 @@ export default function ConversationListNav() {
                 <Text
                   style={{
                     fontSize: 18,
-                    color: "rgb(21, 133, 255)",
+                    color: "black",
                     paddingBottom: 4,
                   }}
                 >

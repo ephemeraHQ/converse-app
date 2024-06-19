@@ -146,8 +146,8 @@ export const myMessageBubbleColor = (colorScheme: ColorSchemeName) => {
   return MY_MESSAGE_BUBBLE_LIGHT;
 };
 
-const MY_MESSAGE_INNER_BUBBLE_LIGHT = "rgb(255, 255, 255, 0.3)";
-const MY_MESSAGE_INNER_BUBBLE_DARK = "rgb(255, 255, 255, 0.3)";
+const MY_MESSAGE_INNER_BUBBLE_LIGHT = "#4D4D4D";
+const MY_MESSAGE_INNER_BUBBLE_DARK = "#4D4D4D";
 
 export const myMessageInnerBubbleColor = (colorScheme: ColorSchemeName) => {
   if (colorScheme === "dark") return MY_MESSAGE_INNER_BUBBLE_DARK;
