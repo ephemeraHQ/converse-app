@@ -26,7 +26,7 @@ import {
   myMessageInnerBubbleColor,
   textPrimaryColor,
   textSecondaryColor,
-  backgroundColor,
+  inversePrimaryColor,
 } from "../../../utils/colors";
 import { getRelativeDate } from "../../../utils/date";
 import { isDesktop } from "../../../utils/device";
@@ -116,6 +116,7 @@ function ChatMessage({ message, colorScheme, isGroup, isFrame }: Props) {
             style={[
               styles.messageText,
               message.fromMe ? styles.messageTextMe : undefined,
+              hideBackground ? styles.allEmojisAndMaxThree : undefined,
             ]}
           >
             {/* Don't show URL as part of message bubble if this is a frame */}
@@ -277,6 +278,9 @@ function ChatMessage({ message, colorScheme, isGroup, isFrame }: Props) {
                   isAttachment || isTransaction
                     ? styles.messageWithInnerBubble
                     : styles.messageBubbleText,
+                  hideBackground
+                    ? { paddingBottom: 0, marginBottom: 0 }
+                    : undefined,
                 ]}
               >
                 {messageContent}
@@ -310,7 +314,14 @@ function ChatMessage({ message, colorScheme, isGroup, isFrame }: Props) {
               </TouchableOpacity>
             )}
             {!message.hasNextMessageInSeries && (
-              <MessageStatus message={message} />
+              <View
+                style={[
+                  styles.statusContainer,
+                  hideBackground ? { marginVertical: 0 } : undefined,
+                ]}
+              >
+                <MessageStatus message={message} />
+              </View>
             )}
           </View>
           <ChatMessageReactions message={message} reactions={reactions} />
@@ -410,6 +421,9 @@ const useStyles = () => {
       flexDirection: "row",
       flexWrap: "wrap",
     },
+    statusContainer: {
+      marginVertical: 7,
+    },
     date: {
       flexBasis: "100%",
       textAlign: "center",
@@ -436,7 +450,11 @@ const useStyles = () => {
       color: textPrimaryColor(colorScheme),
     },
     messageTextMe: {
-      color: backgroundColor(colorScheme),
+      color: inversePrimaryColor(colorScheme),
+    },
+    allEmojisAndMaxThree: {
+      backgroundColor: "transparent",
+      fontSize: 48,
     },
     messageTextReply: {
       paddingHorizontal: 8,
