@@ -54,7 +54,6 @@ import TransactionPreview from "../Transaction/TransactionPreview";
 import ChatMessageActions from "./MessageActions";
 import ChatMessageReactions from "./MessageReactions";
 import MessageStatus from "./MessageStatus";
-import MessageTimestamp from "./MessageTimestamp";
 
 export type MessageToDisplay = XmtpMessage & {
   hasPreviousMessageInSeries: boolean;
@@ -87,14 +86,6 @@ const MessageSender = ({ message }: { message: MessageToDisplay }) => {
 function ChatMessage({ message, colorScheme, isGroup, isFrame }: Props) {
   const styles = useStyles();
   const hideBackground = isAllEmojisAndMaxThree(message.content);
-
-  const metadata = (
-    <MessageTimestamp
-      message={message}
-      white={false}
-      hiddenBackground={hideBackground}
-    />
-  );
 
   let messageContent: ReactNode;
   const contentType = getMessageContentType(message.contentType);
@@ -129,7 +120,6 @@ function ChatMessage({ message, colorScheme, isGroup, isFrame }: Props) {
           >
             {/* Don't show URL as part of message bubble if this is a frame */}
             {isFrame ? "" : message.content || message.contentFallback}
-            <View style={{ opacity: 0 }}>{metadata}</View>
           </ClickableText>
         </>
       );
@@ -170,7 +160,7 @@ function ChatMessage({ message, colorScheme, isGroup, isFrame }: Props) {
       style={[
         styles.messageRow,
         {
-          marginBottom: !message.hasNextMessageInSeries ? 8 : 2,
+          marginBottom: !message.hasNextMessageInSeries ? 8 : 4,
         },
       ]}
     >
@@ -260,8 +250,8 @@ function ChatMessage({ message, colorScheme, isGroup, isFrame }: Props) {
                   <Text
                     style={[
                       styles.messageText,
-                      styles.replyToUsername,
                       message.fromMe ? styles.messageTextMe : undefined,
+                      styles.replyToUsername,
                     ]}
                   >
                     {replyingToProfileName}
@@ -292,7 +282,6 @@ function ChatMessage({ message, colorScheme, isGroup, isFrame }: Props) {
                 {messageContent}
               </View>
             )}
-            <View style={styles.metadataContainer}>{metadata}</View>
           </ChatMessageActions>
           <View style={{ height: 0, flexBasis: "100%" }} />
           <View
@@ -402,7 +391,7 @@ const useStyles = () => {
       width: "100%",
       paddingHorizontal: 12,
       paddingVertical: 10,
-      marginBottom: 5,
+      marginBottom: 10,
     },
     innerBubbleMe: {
       backgroundColor: myMessageInnerBubbleColor(colorScheme),
@@ -434,16 +423,17 @@ const useStyles = () => {
       paddingVertical: Platform.OS === "android" ? 6 : 7,
     },
     messageWithInnerBubble: {
-      padding: 4,
+      padding: 8,
+      paddingBottom: 0,
     },
     replyToUsername: {
       fontSize: 15,
       fontWeight: "bold",
       marginBottom: 4,
-      color: textPrimaryColor(colorScheme),
+      color: "white",
     },
     messageText: {
-      fontSize: 17,
+      fontSize: 16,
       color: textPrimaryColor(colorScheme),
     },
     messageTextMe: {
@@ -451,13 +441,6 @@ const useStyles = () => {
     },
     messageTextReply: {
       paddingHorizontal: 8,
-      paddingBottom: 4,
-    },
-    metadataContainer: {
-      position: "absolute",
-      bottom: 6,
-      right: 12,
-      zIndex: -1,
     },
     groupSender: {
       fontSize: 15,

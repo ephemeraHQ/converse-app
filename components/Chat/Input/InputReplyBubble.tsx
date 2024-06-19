@@ -37,7 +37,7 @@ const useStyles = () => {
   const colorScheme = useColorScheme();
   return StyleSheet.create({
     messageRepliedTo: {
-      fontSize: 15,
+      fontSize: 16,
       color: textSecondaryColor(colorScheme),
     },
     messageTextMe: {
