@@ -14,11 +14,11 @@ import ContentCopy from "@material-symbols/svg-400/outlined/content_copy.svg";
 import Delete from "@material-symbols/svg-400/outlined/delete.svg";
 import Done from "@material-symbols/svg-400/outlined/done.svg";
 import Edit from "@material-symbols/svg-400/outlined/edit.svg";
+import Exclamation from "@material-symbols/svg-400/outlined/exclamation.svg";
 import ExpandMore from "@material-symbols/svg-400/outlined/expand_more.svg";
 import Group from "@material-symbols/svg-400/outlined/group.svg";
 import Image from "@material-symbols/svg-400/outlined/image.svg";
 import Info from "@material-symbols/svg-400/outlined/info.svg";
-import InfoI from "@material-symbols/svg-400/outlined/info_i.svg";
 import IosShare from "@material-symbols/svg-400/outlined/ios_share.svg";
 import Key from "@material-symbols/svg-400/outlined/key.svg";
 import Laptop from "@material-symbols/svg-400/outlined/laptop_chromebook.svg";
@@ -96,7 +96,7 @@ const pictoMapping: {
   gear: Settings,
   "arrow.clockwise": Refresh,
   person: Person,
-  "info.i": InfoI,
+  exclamation: Exclamation,
   "info.circle": Info,
   "person.2": Group,
   "arrowshape.turn.up.left": Reply,
