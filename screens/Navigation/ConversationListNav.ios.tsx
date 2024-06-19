@@ -97,6 +97,7 @@ export default function ConversationListNav() {
           </>
         ),
         headerTintColor: textPrimaryColor(colorScheme),
+        headerShadowVisible: false,
         animation: navigationAnimation,
         headerLeft: () => (
           <View
@@ -118,9 +119,9 @@ export default function ConversationListNav() {
               >
                 <Text
                   style={{
-                    fontSize: 18,
+                    fontSize: 16,
                     color: "black",
-                    paddingBottom: 4,
+                    paddingBottom: 6,
                   }}
                 >
                   {name}
