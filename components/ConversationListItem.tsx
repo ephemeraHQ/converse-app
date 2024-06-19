@@ -365,14 +365,14 @@ const getStyles = (colorScheme: ColorSchemeName) =>
       flexShrink: 1,
       ...Platform.select({
         default: {
-          height: 75.5,
-          paddingTop: 7.5,
+          height: 84,
+          paddingTop: 12,
           paddingRight: 45,
           marginLeft: 12,
         },
         android: {
           height: 72,
-          paddingTop: 12,
+          paddingTop: 16.5,
           paddingLeft: 16,
           paddingRight: 45,
         },
