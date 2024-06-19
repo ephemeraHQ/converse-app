@@ -140,11 +140,8 @@ const ConversationListItem = memo(function ConversationListItem({
           {lastMessageFromMe && lastMessageStatus === "sending" && (
             <View style={{ width: 15 }} />
           )}
-          {lastMessagePreview}
+          {timeToShow} ⋅ {lastMessagePreview}
         </Text>
-        <View style={styles.timeAndChevron}>
-          <Text style={styles.timeText}>{timeToShow}</Text>
-        </View>
         {showUnread && <View style={styles.unread} />}
       </View>
     </View>
@@ -370,7 +367,7 @@ const getStyles = (colorScheme: ColorSchemeName) =>
         default: {
           height: 75.5,
           paddingTop: 7.5,
-          paddingRight: 60,
+          paddingRight: 45,
           marginLeft: 12,
         },
         android: {
@@ -408,21 +405,6 @@ const getStyles = (colorScheme: ColorSchemeName) =>
         },
       }),
     },
-    timeAndChevron: {
-      position: "absolute",
-      ...Platform.select({
-        default: {
-          top: 8,
-          right: 20,
-          flexDirection: "row",
-          alignItems: "center",
-        },
-        android: {
-          top: 12,
-          right: 24,
-        },
-      }),
-    },
     timeText: {
       color: textSecondaryColor(colorScheme),
       ...Platform.select({
@@ -435,11 +417,11 @@ const getStyles = (colorScheme: ColorSchemeName) =>
       position: "absolute",
       ...Platform.select({
         default: {
-          width: 18,
-          height: 18,
-          borderRadius: 18,
-          right: 16,
-          top: 30,
+          width: 16,
+          height: 16,
+          borderRadius: 16,
+          right: 17,
+          top: 29.5,
         },
         android: {
           width: 16,
