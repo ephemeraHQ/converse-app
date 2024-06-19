@@ -40,7 +40,7 @@ export const stackGroupScreenOptions = (colorScheme: ColorSchemeName) => ({
       Platform.OS === "web" ? listItemSeparatorColor(colorScheme) : undefined,
   },
   headerTitleStyle: headerTitleStyle(colorScheme),
-  headerTintStyle:
+  headerTintColor:
     Platform.OS === "ios" ? textPrimaryColor(colorScheme) : undefined,
   headerShadowVisible: Platform.OS !== "android",
 });
