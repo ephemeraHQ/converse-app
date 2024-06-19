@@ -16,9 +16,14 @@ import {
 } from "../../data/helpers/messages";
 import { getMessagesToSend } from "../../data/helpers/messages/getMessagesToSend";
 import { deserializeRemoteAttachmentMessageContent } from "./attachments";
-import { ConversationWithCodecsType, GroupWithCodecsType } from "./client";
+import {
+  ConversationWithCodecsType,
+  ConverseXmtpClientType,
+  GroupWithCodecsType,
+} from "./client";
 import { isContentType } from "./contentTypes";
 import { getConversationWithTopic } from "./conversations";
+import { getXmtpClient } from "./sync";
 // import { syncGroupsMessages } from "./messages";
 
 let sendingPendingMessages = false;
@@ -41,7 +46,8 @@ const sendConversePreparedMessages = async (
         return;
       }
       sendingMessages[id] = true;
-      await sendPreparedMessage(account, preparedMessage);
+      const client = (await getXmtpClient(account)) as ConverseXmtpClientType;
+      await sendPreparedMessage(client.inboxId, preparedMessage);
       // Here message has been sent, let's mark it as
       // sent locally to make sure we don't sent twice
       await markMessageAsSent(account, id, preparedMessage.topic);
