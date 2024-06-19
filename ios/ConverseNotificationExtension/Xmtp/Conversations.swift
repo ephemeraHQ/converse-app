@@ -12,6 +12,7 @@ import CryptoKit
 func getNewConversationFromEnvelope(xmtpClient: XMTP.Client, envelope: XMTP.Envelope) async -> XMTP.Conversation? {
   do {
     if (isInviteTopic(topic: envelope.contentTopic)) {
+      
       let conversation = try await xmtpClient.conversations.fromInvite(envelope: envelope)
       switch conversation {
       case .v2(_): do {
@@ -20,12 +21,17 @@ func getNewConversationFromEnvelope(xmtpClient: XMTP.Client, envelope: XMTP.Enve
       default: do {}
       }
       return conversation
+    } else if (isGroupWelcomeTopic(topic: envelope.contentTopic)) {
+      if let group = try await xmtpClient.conversations.fromWelcome(envelopeBytes: envelope.message) {
+        return .group(group)
+      }
     }
   } catch {
     sentryTrackError(error: error, extras: ["message": "Could not decode new conversation envelope"])
   }
   return nil
 }
+
 
 func loadSavedConversations() -> [SavedNotificationConversation] {
   let mmkv = getMmkv()
@@ -47,6 +53,27 @@ func saveConversation(account: String, topic: String, peerAddress: String, creat
   var savedConversation = SavedNotificationConversation(topic: topic, peerAddress: peerAddress, createdAt: createdAt, context: context, account: account, spamScore: spamScore)
   var savedConversationsList = loadSavedConversations()
   savedConversationsList.append(savedConversation)
+  let encodedValue = try JSONEncoder().encode(savedConversationsList)
+  let encodedString = String(data: encodedValue, encoding: .utf8)
+  let mmkv = getMmkv()
+  mmkv?.set(encodedString!, forKey: "saved-notifications-conversations")
+}
+
+func saveGroup(account: String, topic: String, groupMembers: [String], groupAdmins: [String?], groupSuperAdmins: [String?], groupPermissionLevel: String, groupName: String?, createdAt: Int, context: ConversationContext?, spamScore: Double?) throws {
+  var savedGroup = SavedNotificationConversation(
+    topic: topic,
+    peerAddress: topic, 
+    createdAt: createdAt,
+    context: context,
+    account: account,
+    isGroup: true,
+    groupMembers: groupMembers,
+    groupAdmins: groupAdmins, 
+    groupSuperAdmins: groupSuperAdmins,
+    groupPermissionLevel: groupPermissionLevel,
+    groupName: groupName)
+  var savedConversationsList = loadSavedConversations()
+  savedConversationsList.append(savedGroup)
   let encodedValue = try JSONEncoder().encode(savedConversationsList)
   let encodedString = String(data: encodedValue, encoding: .utf8)
   let mmkv = getMmkv()

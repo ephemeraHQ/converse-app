@@ -14,6 +14,8 @@ import { Conversation } from "./entities/conversationEntity";
 import { Message } from "./entities/messageEntity";
 import { Profile } from "./entities/profileEntity";
 
+const env = config.xmtpEnv as "dev" | "production" | "local";
+
 type RepositoriesForAccount = {
   conversation: Repository<Conversation>;
   message: Repository<Message>;
@@ -140,10 +142,13 @@ export const clearDb = async (account: string) => {
       `[ClearDB] SQlite file ${dbPath} does not exist, no need to delete`
     );
   } else {
-    console.log(`[ClearDB] Deleting SQlite file ${dbPath}`);
-    await RNFS.unlink(dbPath);
+    if (env !== "dev") {
+      // Won't clear db in dev mode so Testflight users still have access
+      console.log(`[ClearDB] Deleting SQlite file ${dbPath}`);
+      await RNFS.unlink(dbPath);
 
-    console.log(`[ClearDB] Deleted SQlite file ${dbPath}`);
+      console.log(`[ClearDB] Deleted SQlite file ${dbPath}`);
+    }
   }
 };
 

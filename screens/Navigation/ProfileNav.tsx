@@ -2,8 +2,8 @@ import { NativeStackNavigationOptions } from "@react-navigation/native-stack";
 import {
   Button,
   Platform,
-  useColorScheme,
   TouchableOpacity,
+  useColorScheme,
 } from "react-native";
 
 import Picto from "../../components/Picto/Picto";
@@ -15,7 +15,7 @@ import { NativeStack, navigationAnimation } from "./Navigation";
 
 export type ProfileNavParams = {
   address: string;
-  fromGroup?: boolean;
+  fromGroupTopic?: string;
 };
 
 export const ProfileScreenConfig = {

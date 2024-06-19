@@ -4,6 +4,7 @@ import { StyleSheet, Text, useColorScheme } from "react-native";
 
 import {
   currentAccount,
+  getInboxIdStore,
   getProfilesStore,
 } from "../../data/store/accountsStore";
 import { textSecondaryColor } from "../../utils/colors";
@@ -20,17 +21,22 @@ export default function ChatGroupUpdatedMessage({
     const content = JSON.parse(message.content) as GroupUpdatedContent;
     const textMessages: string[] = [];
     const profiles = getProfilesStore(currentAccount()).getState().profiles;
+    const byInboxId = getInboxIdStore(currentAccount()).getState().byInboxId;
     content.membersAdded.forEach((m) => {
+      // TODO: Feat: handle multiple members
+      const firstAddress = byInboxId[m.inboxId]?.[0];
       const readableName = getPreferredName(
-        profiles[m.inboxId]?.socials,
-        m.inboxId
+        profiles[firstAddress]?.socials,
+        firstAddress
       );
       textMessages.push(`${readableName} joined the conversation`);
     });
     content.membersRemoved.forEach((m) => {
+      // TODO: Feat: handle multiple members
+      const firstAddress = byInboxId[m.inboxId]?.[0];
       const readableName = getPreferredName(
-        profiles[m.inboxId]?.socials,
-        m.inboxId
+        profiles[firstAddress]?.socials,
+        firstAddress
       );
       textMessages.push(`${readableName} left the conversation`);
     });
