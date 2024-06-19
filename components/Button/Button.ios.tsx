@@ -14,7 +14,7 @@ import {
 import {
   dangerColor,
   primaryColor,
-  backgroundColor,
+  inversePrimaryColor,
   tertiaryBackgroundColor,
 } from "../../utils/colors";
 import Picto from "../Picto/Picto";
@@ -100,7 +100,7 @@ const useStyles = () => {
       justifyContent: "center",
     },
     buttonPrimaryText: {
-      color: backgroundColor(colorScheme),
+      color: inversePrimaryColor(colorScheme),
       textAlign: "center",
       fontWeight: "600",
       fontSize: 17,

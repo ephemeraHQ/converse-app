@@ -185,6 +185,17 @@ export const primaryColor = (colorScheme: ColorSchemeName) => {
   }
 };
 
+export const inversePrimaryColor = (colorScheme: ColorSchemeName) => {
+  if (Platform.OS === "android" || Platform.OS === "web") {
+    if (colorScheme === "dark") {
+      return MaterialLightColors.primary;
+    } else {
+      return MaterialDarkColors.primary;
+    }
+  }
+  return colorScheme === "dark" ? "#000" : "#FFF";
+};
+
 export const badgeColor = (colorScheme: ColorSchemeName) => {
   if (Platform.OS === "android" || Platform.OS === "web") {
     return "#004692";
