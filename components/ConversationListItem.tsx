@@ -13,7 +13,6 @@ import { RectButton } from "react-native-gesture-handler";
 import Swipeable from "react-native-gesture-handler/Swipeable";
 import { TouchableRipple } from "react-native-paper";
 
-import Checkmark from "../assets/checkmark.svg";
 import Clock from "../assets/clock.svg";
 import {
   currentAccount,
@@ -129,24 +128,18 @@ const ConversationListItem = memo(function ConversationListItem({
         <Text style={styles.conversationName} numberOfLines={1}>
           {conversationName}
         </Text>
-        {lastMessageFromMe &&
-          (lastMessageStatus === "sending" ? (
-            <Clock
-              style={styles.lastMessageStatus}
-              fill={textSecondaryColor(colorScheme)}
-              width={12}
-              height={12}
-            />
-          ) : (
-            <Checkmark
-              style={styles.lastMessageStatus}
-              fill={textSecondaryColor(colorScheme)}
-              width={10}
-              height={10}
-            />
-          ))}
+        {lastMessageFromMe && lastMessageStatus === "sending" && (
+          <Clock
+            style={styles.lastMessageStatus}
+            fill={textSecondaryColor(colorScheme)}
+            width={12}
+            height={12}
+          />
+        )}
         <Text style={styles.messagePreview} numberOfLines={2}>
-          {lastMessageFromMe ? <View style={{ width: 15 }} /> : undefined}
+          {lastMessageFromMe && lastMessageStatus === "sending" && (
+            <View style={{ width: 15 }} />
+          )}
           {lastMessagePreview}
         </Text>
         <View style={styles.timeAndChevron}>
