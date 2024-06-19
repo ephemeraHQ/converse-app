@@ -1303,11 +1303,11 @@ PODS:
     - glog
     - RCT-Folly (= 2022.05.16.00)
     - React-Core
-  - RNSentry (5.20.0):
+  - RNSentry (5.24.1):
     - hermes-engine
     - React-Core
     - React-hermes
-    - Sentry/HybridSDK (= 8.21.0)
+    - Sentry/HybridSDK (= 8.29.1)
   - RNSVG (14.1.0):
     - React-Core
   - SDWebImage (5.17.0):
@@ -1322,9 +1322,7 @@ PODS:
     - libwebp (~> 1.0)
     - SDWebImage/Core (~> 5.17)
   - secp256k1.swift (0.1.4)
-  - Sentry/HybridSDK (8.21.0):
-    - SentryPrivate (= 8.21.0)
-  - SentryPrivate (8.21.0)
+  - Sentry/HybridSDK (8.29.1)
   - SocketRocket (0.6.1)
   - SQLite.swift (0.15.3):
     - SQLite.swift/standard (= 0.15.3)
@@ -1467,7 +1465,7 @@ DEPENDENCIES:
   - RNScreens (from `../node_modules/react-native-screens`)
   - "RNSentry (from `../node_modules/@sentry/react-native`)"
   - RNSVG (from `../node_modules/react-native-svg`)
-  - Sentry/HybridSDK (= 8.21.0)
+  - Sentry/HybridSDK (= 8.29.1)
   - SQLite.swift
   - UMAppLoader (from `../node_modules/unimodules-app-loader/ios`)
   - XMTP (= 0.12.1)
@@ -1501,7 +1499,6 @@ SPEC REPOS:
     - SDWebImageWebPCoder
     - secp256k1.swift
     - Sentry
-    - SentryPrivate
     - SocketRocket
     - SQLite.swift
     - sqlite3
@@ -1860,15 +1857,14 @@ SPEC CHECKSUMS:
   RNReactNativeSharedGroupPreferences: de0121a4224c267bc7e9fb16c398f3f087c8da81
   RNReanimated: 548d4cb6785a032be887c66433082155d12baba0
   RNScreens: a4d9ce8f68f833f4e42410140eafd88e38bba163
-  RNSentry: 5381e9284aec59a546e4a7d40e33ad0839b99c1e
+  RNSentry: 906151a5ec2887a48af16d11ad635249d7a5a59b
   RNSVG: ba3e7232f45e34b7b47e74472386cf4e1a676d0a
   SDWebImage: 750adf017a315a280c60fde706ab1e552a3ae4e9
   SDWebImageAVIFCoder: 8348fef6d0ec69e129c66c9fe4d74fbfbf366112
   SDWebImageSVGCoder: 15a300a97ec1c8ac958f009c02220ac0402e936c
   SDWebImageWebPCoder: af09429398d99d524cae2fe00f6f0f6e491ed102
   secp256k1.swift: a7e7a214f6db6ce5db32cc6b2b45e5c4dd633634
-  Sentry: ebc12276bd17613a114ab359074096b6b3725203
-  SentryPrivate: d651efb234cf385ec9a1cdd3eff94b5e78a0e0fe
+  Sentry: c446963245407030e17f1b926a83c6337dc99f4e
   SocketRocket: f32cd54efbe0f095c4d7594881e52619cfe80b17
   SQLite.swift: 8d054987f02728cc912b0eb5a9659650573a65a2
   sqlite3: f163dbbb7aa3339ad8fc622782c2d9d7b72f7e9c
@@ -1877,8 +1873,8 @@ SPEC CHECKSUMS:
   web3.swift: 2263d1e12e121b2c42ffb63a5a7beb1acaf33959
   XMTP: 5e28d39dd43b9f8b85861b09cce47efce1da2d8e
   XMTPReactNative: c577c25169194f6f8a808c1e20f6d3263779779c
-  Yoga: d17d2cc8105eed528474683b42e2ea310e1daf61
+  Yoga: 805bf71192903b20fc14babe48080582fee65a80
 
-PODFILE CHECKSUM: a74724745f1b5db1741d0ba56dbc1324e0a64ce2
+PODFILE CHECKSUM: 29022ef095716f8eaca7371481f2032a2a593386
 
-COCOAPODS: 1.15.2
+COCOAPODS: 1.12.1
