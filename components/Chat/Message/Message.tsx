@@ -391,7 +391,7 @@ const useStyles = () => {
       width: "100%",
       paddingHorizontal: 12,
       paddingVertical: 10,
-      marginBottom: 10,
+      marginBottom: 6,
     },
     innerBubbleMe: {
       backgroundColor: myMessageInnerBubbleColor(colorScheme),
@@ -424,7 +424,6 @@ const useStyles = () => {
     },
     messageWithInnerBubble: {
       padding: 8,
-      paddingBottom: 0,
     },
     replyToUsername: {
       fontSize: 15,
