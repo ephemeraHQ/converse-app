@@ -137,12 +137,15 @@ const ConversationListItem = memo(function ConversationListItem({
           />
         )}
         <Text style={styles.messagePreview} numberOfLines={2}>
-          {lastMessageFromMe && lastMessageStatus === "sending" && (
-            <View style={{ width: 15 }} />
-          )}
           {timeToShow} ⋅ {lastMessagePreview}
         </Text>
-        {showUnread && <View style={styles.unread} />}
+        {(lastMessageFromMe && lastMessageStatus) === "sending" ? (
+          <View style={styles.unread}>
+            <Picto picto="info.i" color={backgroundColor(colorScheme)} />
+          </View>
+        ) : showUnread ? (
+          <View style={styles.unread} />
+        ) : undefined}
       </View>
     </View>
   );
@@ -385,7 +388,7 @@ const getStyles = (colorScheme: ColorSchemeName) =>
           fontSize: 17,
           fontWeight: "600",
           marginBottom: 3,
-          marginRight: 110,
+          marginRight: 15,
         },
         android: {
           fontSize: 16,
@@ -432,6 +435,9 @@ const getStyles = (colorScheme: ColorSchemeName) =>
         },
       }),
       backgroundColor: badgeColor(colorScheme),
+      flexDirection: "row",
+      justifyContent: "center",
+      alignItems: "center",
     },
     lastMessageStatus: {
       position: "absolute",
