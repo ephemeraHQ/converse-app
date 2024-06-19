@@ -1,6 +1,7 @@
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useEffect, useMemo, useState } from "react";
 import {
+  Alert,
   Platform,
   ScrollView,
   StyleSheet,
@@ -13,6 +14,7 @@ import { List } from "react-native-paper";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import ActivityIndicator from "../../components/ActivityIndicator/ActivityIndicator";
+import Avatar from "../../components/Avatar";
 import Button from "../../components/Button/Button";
 import TableView from "../../components/TableView/TableView";
 import {
@@ -20,6 +22,8 @@ import {
   useCurrentAccount,
   useProfilesStore,
 } from "../../data/store/accountsStore";
+import { usePhotoSelect } from "../../hooks/usePhotoSelect";
+import { uploadFile } from "../../utils/attachment";
 import {
   backgroundColor,
   textInputStyle,
@@ -46,6 +50,10 @@ export default function NewGroupSummary({
   const currentAccountSocials = useProfilesStore(
     (s) => s.profiles[account ?? ""]?.socials
   );
+  const { photo: groupPhoto, addPhoto: addGroupPhoto } = usePhotoSelect();
+  const [remotePhotoUrl, setRemotePhotUrl] = useState<string | undefined>(
+    undefined
+  );
   const defaultGroupName = useMemo(() => {
     if (!account) return "";
     const members = route.params.members.slice(0, 3);
@@ -64,6 +72,20 @@ export default function NewGroupSummary({
   }, [route.params.members, account, currentAccountSocials]);
   const colorScheme = useColorScheme();
   const [groupName, setGroupName] = useState(defaultGroupName);
+  useEffect(() => {
+    if (!groupPhoto) return;
+    uploadFile({
+      account: currentAccount(),
+      filePath: groupPhoto,
+      contentType: "image/jpeg",
+    })
+      .then((url) => {
+        setRemotePhotUrl(url);
+      })
+      .catch((e) => {
+        Alert.alert("Error uploading group photo", e.message);
+      });
+  }, [groupPhoto, setRemotePhotUrl]);
 
   useEffect(() => {
     navigation.setOptions({
@@ -80,7 +102,8 @@ export default function NewGroupSummary({
                 currentAccount(),
                 route.params.members.map((m) => m.address),
                 groupPermissionLevel,
-                groupName
+                groupName,
+                remotePhotoUrl
               );
               if (Platform.OS !== "web") {
                 navigation.getParent()?.goBack();
@@ -102,8 +125,10 @@ export default function NewGroupSummary({
     creatingGroup,
     groupName,
     groupPermissionLevel,
+    groupPhoto,
     isSplitScreen,
     navigation,
+    remotePhotoUrl,
     route.params.members,
   ]);
 
@@ -112,6 +137,20 @@ export default function NewGroupSummary({
       style={styles.group}
       contentContainerStyle={styles.groupContent}
     >
+      <List.Section>
+        <View style={{ alignItems: "center" }}>
+          <Avatar uri={groupPhoto} style={styles.avatar} color={false} />
+          <Button
+            variant="text"
+            title={
+              groupPhoto ? "Change profile picture" : "Add profile picture"
+            }
+            textStyle={{ fontWeight: "500" }}
+            onPress={addGroupPhoto}
+          />
+        </View>
+      </List.Section>
+
       <List.Section>
         <List.Subheader style={styles.sectionTitle}>GROUP NAME</List.Subheader>
         <TextInput
@@ -155,6 +194,10 @@ export default function NewGroupSummary({
 const useStyles = () => {
   const colorScheme = useColorScheme();
   return StyleSheet.create({
+    avatar: {
+      marginBottom: 10,
+      marginTop: 23,
+    },
     group: {
       backgroundColor: backgroundColor(colorScheme),
     },

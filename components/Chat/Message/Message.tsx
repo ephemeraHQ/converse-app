@@ -16,10 +16,10 @@ import { Swipeable } from "react-native-gesture-handler";
 import {
   currentAccount,
   useChatStore,
+  useInboxIdStore,
   useProfilesStore,
 } from "../../../data/store/accountsStore";
 import { XmtpMessage } from "../../../data/store/chatStore";
-import { useFramesStore } from "../../../data/store/framesStore";
 import { isAttachmentMessage } from "../../../utils/attachment/helpers";
 import {
   messageInnerBubbleColor,
@@ -31,10 +31,13 @@ import {
 import { getRelativeDate } from "../../../utils/date";
 import { isDesktop } from "../../../utils/device";
 import { converseEventEmitter } from "../../../utils/events";
+import {
+  getUrlToRender,
+  isAllEmojisAndMaxThree,
+} from "../../../utils/messageContent";
 import { LimitedMap } from "../../../utils/objects";
 import { getPreferredName } from "../../../utils/profile";
 import { getMessageReactions } from "../../../utils/reactions";
-import { URL_REGEX } from "../../../utils/regex";
 import { getReadableProfile } from "../../../utils/str";
 import { isTransactionMessage } from "../../../utils/transaction";
 import {
@@ -49,8 +52,9 @@ import FramesPreviews from "../Frame/FramesPreviews";
 import ChatInputReplyBubble from "../Input/InputReplyBubble";
 import TransactionPreview from "../Transaction/TransactionPreview";
 import ChatMessageActions from "./MessageActions";
-import MessageMetadata from "./MessageMetadata";
 import ChatMessageReactions from "./MessageReactions";
+import MessageStatus from "./MessageStatus";
+import MessageTimestamp from "./MessageTimestamp";
 
 export type MessageToDisplay = XmtpMessage & {
   hasPreviousMessageInSeries: boolean;
@@ -64,12 +68,14 @@ type Props = {
   message: MessageToDisplay;
   colorScheme: ColorSchemeName;
   isGroup: boolean;
+  isFrame: boolean;
 };
 
 const MessageSender = ({ message }: { message: MessageToDisplay }) => {
-  const senderSocials = useProfilesStore(
-    (s) => s.profiles[message.senderAddress]?.socials
+  const address = useInboxIdStore(
+    (s) => s.byInboxId[message.senderAddress]?.[0] ?? message.senderAddress
   );
+  const senderSocials = useProfilesStore((s) => s.profiles[address]?.socials);
   const styles = useStyles();
   return (
     <Text style={styles.groupSender}>
@@ -78,19 +84,20 @@ const MessageSender = ({ message }: { message: MessageToDisplay }) => {
   );
 };
 
-function ChatMessage({ message, colorScheme, isGroup }: Props) {
+function ChatMessage({ message, colorScheme, isGroup, isFrame }: Props) {
   const styles = useStyles();
+  const hideBackground = isAllEmojisAndMaxThree(message.content);
 
-  const metadata = <MessageMetadata message={message} white={false} />;
+  const metadata = (
+    <MessageTimestamp
+      message={message}
+      white={false}
+      hiddenBackground={hideBackground}
+    />
+  );
 
   let messageContent: ReactNode;
   const contentType = getMessageContentType(message.contentType);
-
-  const framesInStore = useFramesStore().frames;
-
-  if (URL_REGEX.test(message.content) && message.content.endsWith("/")) {
-    message.content = message.content.slice(0, -1);
-  }
 
   const handleUrlPress = useCallback((url: string) => {
     const uri = url.toLowerCase().startsWith("http") ? url : `https://${url}`;
@@ -121,9 +128,7 @@ function ChatMessage({ message, colorScheme, isGroup }: Props) {
             ]}
           >
             {/* Don't show URL as part of message bubble if this is a frame */}
-            {framesInStore[message.content]
-              ? ""
-              : message.content || message.contentFallback}
+            {isFrame ? "" : message.content || message.contentFallback}
             <View style={{ opacity: 0 }}>{metadata}</View>
           </ClickableText>
         </>
@@ -223,7 +228,11 @@ function ChatMessage({ message, colorScheme, isGroup }: Props) {
           }}
           ref={swipeableRef}
         >
-          <ChatMessageActions message={message} reactions={reactions}>
+          <ChatMessageActions
+            message={message}
+            reactions={reactions}
+            hideBackground={hideBackground}
+          >
             {isContentType("text", message.contentType) && (
               <FramesPreviews message={message} />
             )}
@@ -286,24 +295,35 @@ function ChatMessage({ message, colorScheme, isGroup }: Props) {
             <View style={styles.metadataContainer}>{metadata}</View>
           </ChatMessageActions>
           <View style={{ height: 0, flexBasis: "100%" }} />
-          {framesInStore[message.content] && (
-            <TouchableOpacity
-              style={{ flexBasis: "100%" }}
-              onPress={() => handleUrlPress(message.content)}
-            >
-              <Text
-                style={{
-                  fontSize: 11,
-                  padding: 4,
-                  marginBottom: 16,
-                  alignSelf: message.fromMe ? "flex-end" : "flex-start",
-                  color: textSecondaryColor(colorScheme),
-                }}
+          <View
+            style={{
+              flexDirection: "row",
+              flexBasis: "100%",
+              justifyContent: "flex-end",
+            }}
+          >
+            {isFrame && (
+              <TouchableOpacity
+                style={{ flexBasis: "100%" }}
+                onPress={() => handleUrlPress(message.content)}
               >
-                {message.content}
-              </Text>
-            </TouchableOpacity>
-          )}
+                <Text
+                  style={{
+                    fontSize: 11,
+                    padding: 4,
+                    marginBottom: 16,
+                    alignSelf: message.fromMe ? "flex-end" : "flex-start",
+                    color: textSecondaryColor(colorScheme),
+                  }}
+                >
+                  {getUrlToRender(message.content)}
+                </Text>
+              </TouchableOpacity>
+            )}
+            {!message.hasNextMessageInSeries && (
+              <MessageStatus message={message} />
+            )}
+          </View>
           <ChatMessageReactions message={message} reactions={reactions} />
         </Swipeable>
       )}
@@ -322,6 +342,7 @@ type RenderedChatMessage = {
   message: MessageToDisplay;
   colorScheme: ColorSchemeName;
   isGroup: boolean;
+  isFrame: boolean;
 };
 
 const renderedMessages = new LimitedMap<string, RenderedChatMessage>(50);
@@ -331,6 +352,7 @@ export default function CachedChatMessage({
   message,
   colorScheme,
   isGroup,
+  isFrame = false,
 }: Props) {
   const keysChangesToRerender: (keyof MessageToDisplay)[] = [
     "id",
@@ -356,12 +378,14 @@ export default function CachedChatMessage({
       message,
       colorScheme,
       isGroup,
+      isFrame,
     });
     renderedMessages.set(`${account}-${message.id}`, {
       message,
       renderedMessage,
       colorScheme,
       isGroup,
+      isFrame,
     });
     return renderedMessage;
   } else {

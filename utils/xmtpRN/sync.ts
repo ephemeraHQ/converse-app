@@ -20,9 +20,9 @@ import {
   updateConsentStatus,
 } from "./conversations";
 import {
-  syncConversationsMessages,
   stopStreamingAllMessage,
   streamAllMessages,
+  syncConversationsMessages,
   syncGroupsMessages,
 } from "./messages";
 
@@ -55,7 +55,7 @@ export const getXmtpClient = async (
       delete instantiatingClientForAccount[account];
       return client;
     }
-  } catch (e) {
+  } catch (e: any) {
     delete instantiatingClientForAccount[account];
     throw e;
   }

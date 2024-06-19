@@ -8,11 +8,7 @@ import {
   useAccountsStore,
 } from "../../data/store/accountsStore";
 import { deleteSecureItemAsync } from "../keychain";
-import {
-  deleteAccountEncryptionKey,
-  deleteXmtpKey,
-  //deleteXmtpDatabaseEncryptionKey
-} from "../keychain/helpers";
+import { deleteAccountEncryptionKey, deleteXmtpKey } from "../keychain/helpers";
 import mmkv, { clearSecureMmkvForAccount, secureMmkvByAccount } from "../mmkv";
 import {
   deleteSubscribedTopics,
@@ -169,7 +165,6 @@ export const useLogoutFromConverse = (account: string) => {
         });
       }
     });
-
     clearDb(account);
 
     // Now that db has been deleted we can remove account

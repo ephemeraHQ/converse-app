@@ -26,7 +26,7 @@ import {
   useCurrentAccount,
   useSettingsStore,
 } from "../../../data/store/accountsStore";
-import { useAppStore } from "../../../data/store/appStore";
+import { XmtpConversation } from "../../../data/store/chatStore";
 import { ReanimatedTouchableOpacity } from "../../../utils/animations";
 import { reportMessage } from "../../../utils/api";
 import { isAttachmentMessage } from "../../../utils/attachment/helpers";
@@ -62,14 +62,16 @@ const MessageTailAnimated =
   Reanimated.createAnimatedComponent(MessageTailComponent);
 
 const MessageTail = (props: any) => {
-  const actionSheetShown = useAppStore((s) => s.actionSheetShown);
   return (
     <MessageTailAnimated
       {...props}
       fill={
-        actionSheetShown && props.fromMe
+        // No tail needed if no background
+        props.hideBackground
+          ? "transparent"
+          : props.fromMe
           ? myMessageBubbleColor(props.colorScheme)
-          : "currentColor"
+          : messageBubbleColor(props.colorScheme)
       }
     />
   );
@@ -81,12 +83,14 @@ type Props = {
   reactions: {
     [senderAddress: string]: MessageReaction | undefined;
   };
+  hideBackground: boolean;
 };
 
 export default function ChatMessageActions({
   children,
   message,
   reactions,
+  hideBackground = false,
 }: Props) {
   const { conversation } = useConversationContext(["conversation"]);
   const isAttachment = isAttachmentMessage(message.contentType);
@@ -239,10 +243,10 @@ export default function ChatMessageActions({
         .numberOfTaps(2)
         .onStart(() => {
           if (isAttachment || !canAddReaction) return;
-          showReactionModal();
+          addReactionToMessage(conversation as XmtpConversation, message, "❤️");
         })
         .runOnJS(true),
-    [canAddReaction, isAttachment, showReactionModal]
+    [canAddReaction, isAttachment, conversation, message]
   );
 
   const [selectedEmojis, setSelectedEmojis] = useState<string[]>([]);
@@ -343,7 +347,9 @@ export default function ChatMessageActions({
             styles.messageBubble,
             message.fromMe ? styles.messageBubbleMe : undefined,
             {
-              backgroundColor: initialBubbleBackgroundColor,
+              backgroundColor: hideBackground
+                ? "transparent"
+                : initialBubbleBackgroundColor,
             },
             highlightingMessage ? animatedBackgroundStyle : undefined,
             Platform.select({
@@ -397,6 +403,7 @@ export default function ChatMessageActions({
                 ]}
                 fromMe={message.fromMe}
                 colorScheme={colorScheme}
+                hideBackground={hideBackground}
               />
             )}
         </ReanimatedTouchableOpacity>

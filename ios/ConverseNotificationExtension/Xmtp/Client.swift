@@ -38,7 +38,7 @@ func getXmtpClient(account: String) async -> XMTP.Client? {
     
     let groupId = "group.\(try! getInfoPlistValue(key: "AppBundleId", defaultValue: nil))"
     let groupDir = (FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: groupId)?.path)!
-    let client = try await Client.from(bundle: privateKeyBundle, options: .init(api: .init(env: xmtpEnv), mlsAlpha: true, mlsDbDirectory: groupDir))
+    let client = try await Client.from(bundle: privateKeyBundle, options: .init(api: .init(env: xmtpEnv), enableV3: true, dbDirectory: groupDir))
     client.register(codec: AttachmentCodec())
     client.register(codec: RemoteAttachmentCodec())
     client.register(codec: ReactionCodec())
@@ -69,6 +69,10 @@ func isIntroTopic(topic: String) -> Bool {
 
 func isGroupMessageTopic(topic: String) -> Bool {
   return topic.starts(with: "/xmtp/mls/1/g-")
+}
+
+func isGroupWelcomeTopic(topic: String) -> Bool {
+  return topic.starts(with: "/xmtp/mls/1/w-")
 }
 
 func subscribeToTopic(apiURI: String?, account: String, pushToken: String?, topic: String, hmacKeys: String?) {

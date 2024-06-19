@@ -1,11 +1,19 @@
-import { ConsentListEntry, ConversationContext } from "@xmtp/react-native-sdk";
+import {
+  ConsentListEntry,
+  ConversationContext,
+  ConversationVersion,
+} from "@xmtp/react-native-sdk";
 
 import { Conversation as DbConversation } from "../../data/db/entities/conversationEntity";
 import { getPendingConversationsToCreate } from "../../data/helpers/conversations/pendingConversations";
 import { saveConversations } from "../../data/helpers/conversations/upsertConversations";
+import { saveMemberInboxIds } from "../../data/helpers/inboxId/saveInboxIds";
 import { getSettingsStore } from "../../data/store/accountsStore";
 import { XmtpConversation } from "../../data/store/chatStore";
 import { SettingsStoreType } from "../../data/store/settingsStore";
+import { setGroupNameQueryData } from "../../queries/useGroupNameQuery";
+import { setGroupPhotoQueryData } from "../../queries/useGroupPhotoQuery";
+import { addGroupToGroupsQuery } from "../../queries/useGroupsQuery";
 import { ConversationWithLastMessagePreview } from "../conversation";
 import { debugTimeSpent } from "../debug";
 import { getCleanAddress } from "../eth";
@@ -153,7 +161,7 @@ const handleNewConversation = async (
   conversation: ConversationWithCodecsType | GroupWithCodecsType
 ) => {
   setOpenedConversation(client.address, conversation);
-  const isGroup = !!(conversation as any).peerInboxIds;
+  const isGroup = conversation.version === ConversationVersion.GROUP;
   const isDMConversation = !!(conversation as any).peerAddress;
   saveConversations(
     client.address,
@@ -184,6 +192,7 @@ const handleNewConversation = async (
       syncConversationsMessages(client.address, { [conversation.topic]: 0 });
     }, 3000);
   } else if (isGroup) {
+    addGroupToGroupsQuery(client.address, conversation as GroupWithCodecsType);
     syncGroupsMessages(client.address, [conversation as GroupWithCodecsType], {
       [conversation.topic]: 0,
     });
@@ -466,13 +475,23 @@ export const createGroup = async (
   account: string,
   peers: string[],
   permissionLevel: "all_members" | "admin_only" = "all_members",
-  groupName?: string
+  groupName?: string,
+  groupPhoto?: string
 ) => {
   const client = (await getXmtpClient(account)) as ConverseXmtpClientType;
-  const group = await client.conversations.newGroup(peers, permissionLevel);
+  const group = await client.conversations.newGroup(peers, {
+    permissionLevel,
+    name: groupName,
+    imageUrlSquare: groupPhoto,
+  });
   if (groupName) {
-    await group.updateGroupName(groupName);
+    setGroupNameQueryData(account, group.topic, groupName);
   }
+  if (groupPhoto) {
+    setGroupPhotoQueryData(account, group.topic, groupPhoto);
+  }
+  const members = await group.members();
+  saveMemberInboxIds(account, members);
   await handleNewConversation(client, group);
   return group.topic;
 };
@@ -551,6 +570,7 @@ export const promoteMemberToAdmin = async (
     );
   }
   const members = await group.members();
+  saveMemberInboxIds(account, members);
   const inboxId = members.find((m) => m.addresses[0] === memberAddress)
     ?.inboxId;
   if (!inboxId) {
@@ -576,6 +596,7 @@ export const revokeAdminAccess = async (
     );
   }
   const members = await group.members();
+  saveMemberInboxIds(account, members);
   const inboxId = members.find((m) => m.addresses[0] === memberAddress)
     ?.inboxId;
   if (!inboxId) {
@@ -601,6 +622,7 @@ export const promoteMemberToSuperAdmin = async (
     );
   }
   const members = await group.members();
+  saveMemberInboxIds(account, members);
   const inboxId = members.find((m) => m.addresses[0] === memberAddress)
     ?.inboxId;
   if (!inboxId) {
@@ -626,6 +648,7 @@ export const revokeSuperAdminAccess = async (
     );
   }
   const members = await group.members();
+  saveMemberInboxIds(account, members);
   const inboxId = members.find((m) => m.addresses[0] === memberAddress)
     ?.inboxId;
   if (!inboxId) {
@@ -638,6 +661,7 @@ export const revokeSuperAdminAccess = async (
 
 export const loadConversationsHmacKeys = async (account: string) => {
   const client = (await getXmtpClient(account)) as ConverseXmtpClientType;
+
   const { hmacKeys } = await client.conversations.getHmacKeys();
   return hmacKeys;
 };

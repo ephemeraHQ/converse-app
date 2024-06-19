@@ -9,6 +9,7 @@ import {
   StaticAttachmentContent,
 } from "@xmtp/react-native-sdk";
 
+import { saveMemberInboxIds } from "../../data/helpers/inboxId/saveInboxIds";
 import { getOrderedMessages, saveMessages } from "../../data/helpers/messages";
 import { xmtpMessageFromDb } from "../../data/mappers";
 import { getChatStore } from "../../data/store/accountsStore";
@@ -55,6 +56,7 @@ const serializeProtocolMessageContent = (
     referencedMessageId = (messageContent as ReactionContent).reference;
   } else if (isContentType("reply", contentType)) {
     const replyContent = messageContent as ReplyContent;
+    // @ts-ignore
     const replyContentType = replyContent.contentType;
     // Some content types we don't handle as replies:
     // You can't reply a reply or a reaction
@@ -69,6 +71,7 @@ const serializeProtocolMessageContent = (
       };
     }
     const codec = client.codecRegistry[replyContentType];
+    // @ts-ignore
     const actualReplyContent = codec.decode(replyContent.content);
     // Now that we have the content of the reply,
     // let's also pass it through the serialize method
@@ -210,7 +213,9 @@ export const syncGroupsMessages = async (
   for (const group of groups) {
     console.log("syncing group", group.topic);
     await group.sync();
-    groupMembers[group.topic] = await group.members();
+    const members = await group.members();
+    groupMembers[group.topic] = members;
+    saveMemberInboxIds(account, members);
     console.log("synced group", group.topic);
   }
   console.log(`${groups.length} groups synced!`);
@@ -321,4 +326,30 @@ export const loadOlderMessages = async (account: string, topic: string) => {
   const messages = await getOrderedMessages(account, topic);
   getChatStore(account).getState().setMessages(messages.map(xmtpMessageFromDb));
   loadedOlderMessagesForTopic[account][topic] = true;
+};
+
+export const getUrlToRender = (url: string) => {
+  const fullUrl = new URL(url);
+  return fullUrl.hostname;
+};
+
+const isEmoji = (character: string) => {
+  const emojiRegex = /[\p{Emoji_Presentation}\p{Extended_Pictographic}]/gu;
+  return emojiRegex.test(character);
+};
+
+export const isAllEmojisAndMaxThree = (str: string) => {
+  const strWithoutSpaces = str.replaceAll(" ", "");
+  const iterator = [...strWithoutSpaces];
+  let emojiCount = 0;
+
+  for (const char of iterator) {
+    if (isEmoji(char)) {
+      emojiCount++;
+    } else {
+      // break if any aren't emojis
+      return false;
+    }
+  }
+  return emojiCount > 0 && emojiCount <= 3;
 };

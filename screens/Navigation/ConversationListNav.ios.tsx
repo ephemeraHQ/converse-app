@@ -4,7 +4,13 @@ import {
   NativeSyntheticEvent,
   TextInputChangeEventData,
   useColorScheme,
+  Text,
+  View,
 } from "react-native";
+import {
+  GestureHandlerRootView,
+  TouchableOpacity,
+} from "react-native-gesture-handler";
 import { SearchBarCommands } from "react-native-screens";
 
 import Connecting, {
@@ -74,6 +80,7 @@ export default function ConversationListNav() {
 
   const shouldShowConnectingOrSyncing = useShouldShowConnectingOrSyncing();
   const currentAccount = useAccountsStore((s) => s.currentAccount);
+  const name = getReadableProfile(currentAccount, currentAccount);
 
   return (
     <NativeStack.Screen
@@ -86,12 +93,42 @@ export default function ConversationListNav() {
         headerBackTitle: getReadableProfile(currentAccount, currentAccount),
         headerRight: () => (
           <>
-            <ProfileSettingsButton />
             <NewConversationButton navigation={navigation} route={route} />
           </>
         ),
         headerTintColor: textPrimaryColor(colorScheme),
         animation: navigationAnimation,
+        headerLeft: () => (
+          <View
+            style={{
+              flexDirection: "row",
+              alignItems: "flex-end",
+            }}
+          >
+            <View>
+              <ProfileSettingsButton />
+            </View>
+            <GestureHandlerRootView>
+              <TouchableOpacity
+                onPress={() => {
+                  navigation.navigate("Profile", {
+                    address: currentAccount,
+                  });
+                }}
+              >
+                <Text
+                  style={{
+                    fontSize: 18,
+                    color: "rgb(21, 133, 255)",
+                    paddingBottom: 4,
+                  }}
+                >
+                  {name}
+                </Text>
+              </TouchableOpacity>
+            </GestureHandlerRootView>
+          </View>
+        ),
       })}
     >
       {(navigationProps) => (

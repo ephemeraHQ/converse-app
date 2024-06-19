@@ -29,11 +29,10 @@ import {
   badgeColor,
   clickedItemBackgroundColor,
   dangerColor,
-  listItemSeparatorColor,
   textPrimaryColor,
   textSecondaryColor,
 } from "../utils/colors";
-import { getRelativeDateTime } from "../utils/date";
+import { getMinimalDate } from "../utils/date";
 import { isDesktop } from "../utils/device";
 import { converseEventEmitter } from "../utils/events";
 import { navigate } from "../utils/navigation";
@@ -54,6 +53,7 @@ type ConversationListItemProps = {
   lastMessageStatus?: "delivered" | "error" | "seen" | "sending" | "sent";
   showUnread: boolean;
   conversationOpened: boolean;
+  onLongPress?: () => void;
 } & NativeStackScreenProps<
   NavigationParamList,
   "Chats" | "ShareFrame" | "ChatsRequests"
@@ -73,9 +73,10 @@ const ConversationListItem = memo(function ConversationListItem({
   lastMessageFromMe,
   showUnread,
   conversationOpened,
+  onLongPress,
 }: ConversationListItemProps) {
   const styles = getStyles(colorScheme);
-  const timeToShow = getRelativeDateTime(conversationTime);
+  const timeToShow = getMinimalDate(conversationTime as number);
   const setTopicsData = useChatStore((s) => s.setTopicsData);
   const setPeersStatus = useSettingsStore((s) => s.setPeersStatus);
   const isSplitScreen = useIsSplitScreen();
@@ -246,6 +247,7 @@ const ConversationListItem = memo(function ConversationListItem({
       <TouchableHighlight
         underlayColor={clickedItemBackgroundColor(colorScheme)}
         delayPressIn={isDesktop ? 0 : 75}
+        onLongPress={onLongPress}
         onPressIn={() => {
           if (!isSplitScreen) return;
           openConversation();
@@ -350,9 +352,7 @@ const getStyles = (colorScheme: ColorSchemeName) =>
     rowSeparator: Platform.select({
       android: {},
       default: {
-        height: 77,
-        borderBottomWidth: 0.25,
-        borderBottomColor: listItemSeparatorColor(colorScheme),
+        height: 80,
       },
     }),
     rowSeparatorMargin: {

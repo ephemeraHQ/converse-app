@@ -114,6 +114,10 @@ export const xmtpConversationFromDb = (
   const hasOneMessageFromMe = !!dbConversation.messages?.find(
     (m) => m.senderAddress === account
   );
+  const groupMembers =
+    typeof dbConversation.groupMembers === "string"
+      ? (dbConversation.groupMembers as string).split(",")
+      : dbConversation.groupMembers;
 
   return {
     topic: dbConversation.topic,
@@ -129,7 +133,7 @@ export const xmtpConversationFromDb = (
     hasOneMessageFromMe,
     spamScore: dbConversation.spamScore,
     isGroup: dbConversation.isGroup,
-    groupMembers: dbConversation.groupMembers,
+    groupMembers,
     groupAdmins: dbConversation.groupAdmins,
     groupName: dbConversation.groupName,
     groupPermissionLevel: dbConversation.groupPermissionLevel,

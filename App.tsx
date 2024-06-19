@@ -1,5 +1,6 @@
 import "reflect-metadata";
 import "./polyfills";
+
 import { configure as configureCoinbase } from "@coinbase/wallet-mobile-sdk";
 import { ActionSheetProvider } from "@expo/react-native-action-sheet";
 import { PrivyProvider } from "@privy-io/expo";
@@ -7,24 +8,25 @@ import { Ethereum } from "@thirdweb-dev/chains";
 import { coinbaseWallet, ThirdwebProvider } from "@thirdweb-dev/react-native";
 import React, { useEffect } from "react";
 import {
+  LogBox,
   Platform,
   StyleSheet,
   useColorScheme,
   View,
-  LogBox,
 } from "react-native";
-import "./utils/splash/splash";
 import { KeyboardProvider } from "react-native-keyboard-controller";
 import { Provider as PaperProvider } from "react-native-paper";
+import "./utils/splash/splash";
 
 import XmtpEngine from "./components/XmtpEngine";
 import config from "./config";
 import { useAppStore } from "./data/store/appStore";
 import { useSelect } from "./data/store/storeHelpers";
 import {
-  updateLastVersionOpen,
   runAsyncUpdates,
+  updateLastVersionOpen,
 } from "./data/updates/asyncUpdates";
+import { QueryClientProvider } from "./queries/QueryProvider";
 import Main from "./screens/Main";
 import { registerBackgroundFetchTask } from "./utils/background";
 import {
@@ -86,37 +88,41 @@ export default function App() {
     Platform.OS === "ios" ? KeyboardProvider : React.Fragment;
 
   return (
-    <PrivyProvider appId={config.privy.appId} storage={privySecureStorage}>
-      <ThirdwebProvider
-        activeChain={Ethereum}
-        dAppMeta={{
-          ...config.walletConnectConfig.dappMetadata,
-          isDarkMode: colorScheme === "dark",
-        }}
-        autoConnect={false}
-        clientId={config.thirdwebClientId}
-        supportedWallets={[
-          coinbaseWallet({
-            callbackURL: new URL(`https://${config.websiteDomain}/coinbase`),
-          }),
-        ]}
-      >
-        <AppKeyboardProvider>
-          <ActionSheetProvider>
-            <PaperProvider
-              theme={
-                colorScheme === "light" ? MaterialLightTheme : MaterialDarkTheme
-              }
-            >
-              <View style={styles.safe}>
-                <XmtpEngine />
-                <Main />
-              </View>
-            </PaperProvider>
-          </ActionSheetProvider>
-        </AppKeyboardProvider>
-      </ThirdwebProvider>
-    </PrivyProvider>
+    <QueryClientProvider>
+      <PrivyProvider appId={config.privy.appId} storage={privySecureStorage}>
+        <ThirdwebProvider
+          activeChain={Ethereum}
+          dAppMeta={{
+            ...config.walletConnectConfig.dappMetadata,
+            isDarkMode: colorScheme === "dark",
+          }}
+          autoConnect={false}
+          clientId={config.thirdwebClientId}
+          supportedWallets={[
+            coinbaseWallet({
+              callbackURL: new URL(`https://${config.websiteDomain}/coinbase`),
+            }),
+          ]}
+        >
+          <AppKeyboardProvider>
+            <ActionSheetProvider>
+              <PaperProvider
+                theme={
+                  colorScheme === "light"
+                    ? MaterialLightTheme
+                    : MaterialDarkTheme
+                }
+              >
+                <View style={styles.safe}>
+                  <XmtpEngine />
+                  <Main />
+                </View>
+              </PaperProvider>
+            </ActionSheetProvider>
+          </AppKeyboardProvider>
+        </ThirdwebProvider>
+      </PrivyProvider>
+    </QueryClientProvider>
   );
 }
 
