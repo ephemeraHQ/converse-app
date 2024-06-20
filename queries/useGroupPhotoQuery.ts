@@ -37,3 +37,12 @@ export const cancelGroupPhotoQuery = async (account: string, topic: string) => {
     queryKey: groupPhotoQueryKey(account, topic),
   });
 };
+
+export const invalidateGroupPhotoQuery = async (
+  account: string,
+  topic: string
+) => {
+  return queryClient.invalidateQueries({
+    queryKey: groupPhotoQueryKey(account, topic),
+  });
+};
