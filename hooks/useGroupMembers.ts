@@ -1,4 +1,5 @@
 import { currentAccount } from "../data/store/accountsStore";
+import { useAddToGroupMutation } from "../queries/useAddToGroupMutation";
 import { useGroupMembersQuery } from "../queries/useGroupMembersQuery";
 import { usePromoteToAdminMutation } from "../queries/usePromoteToAdminMutation";
 import { usePromoteToSuperAdminMutation } from "../queries/usePromoteToSuperAdminMutation";
@@ -34,6 +35,8 @@ export const useGroupMembers = (topic: string) => {
     topic
   );
 
+  const { mutateAsync: addMembers } = useAddToGroupMutation(account, topic);
+
   return {
     members,
     isLoading,
@@ -43,5 +46,6 @@ export const useGroupMembers = (topic: string) => {
     revokeSuperAdmin,
     revokeAdmin,
     removeMember,
+    addMembers,
   };
 };
