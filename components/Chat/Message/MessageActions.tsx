@@ -114,7 +114,7 @@ export default function ChatMessageActions({
     if (isAttachment) {
       messageMaxWidth = "70%";
     } else {
-      if (isFrame && !message.fromMe) {
+      if (isFrame) {
         messageMaxWidth = "100%";
       } else messageMaxWidth = "85%";
     }
