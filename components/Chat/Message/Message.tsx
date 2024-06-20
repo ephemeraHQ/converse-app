@@ -344,45 +344,38 @@ function ChatMessage({ message, colorScheme, isGroup, isFrame }: Props) {
                     </View>
                   )}
                 </ChatMessageActions>
+                <View
+                  style={{
+                    flexDirection: "row",
+                    flexBasis: "100%",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                  }}
+                >
+                  {isFrame && (
+                    <TouchableOpacity
+                      onPress={() => handleUrlPress(message.content)}
+                      style={{ flex: 1 }}
+                    >
+                      <Text style={[styles.linkToFrame]}>
+                        {getUrlToRender(message.content)}
+                      </Text>
+                    </TouchableOpacity>
+                  )}
+                  {!message.hasNextMessageInSeries && (
+                    <View
+                      style={[
+                        styles.statusContainer,
+                        hideBackground ? { marginVertical: 0 } : undefined,
+                      ]}
+                    >
+                      <MessageStatus message={message} />
+                    </View>
+                  )}
+                </View>
               </View>
             </View>
           </View>
-          <View
-            style={{
-              flexDirection: "row",
-              flexBasis: "100%",
-              paddingLeft: "25%",
-              justifyContent: "flex-end",
-            }}
-          >
-            {isFrame && (
-              <TouchableOpacity
-                style={{ flexBasis: "100%" }}
-                onPress={() => handleUrlPress(message.content)}
-              >
-                <Text
-                  style={[
-                    styles.linkToFrame,
-                    message.fromMe
-                      ? { alignSelf: "flex-start" }
-                      : { alignSelf: "flex-end" },
-                  ]}
-                >
-                  {getUrlToRender(message.content)}
-                </Text>
-              </TouchableOpacity>
-            )}
-          </View>
-          {!message.hasNextMessageInSeries && (
-            <View
-              style={[
-                styles.statusContainer,
-                hideBackground ? { marginVertical: 0 } : undefined,
-              ]}
-            >
-              <MessageStatus message={message} />
-            </View>
-          )}
         </Swipeable>
       )}
     </View>
@@ -480,11 +473,14 @@ const useStyles = () => {
       flexWrap: "wrap",
     },
     statusContainer: {
+      marginLeft: "auto",
       marginVertical: 7,
     },
     linkToFrame: {
       fontSize: 11,
       marginVertical: 7,
+      marginLeft: 6,
+      marginRight: "auto",
       color: textSecondaryColor(colorScheme),
     },
     date: {
