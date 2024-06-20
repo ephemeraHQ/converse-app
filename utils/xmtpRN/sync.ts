@@ -63,6 +63,10 @@ export const getXmtpClient = async (
   throw new Error(`[XmtpRN] No client found for ${account}`);
 };
 
+const INITIAL_BACKOFF = 1000; // Initial backoff interval in ms
+const MAX_BACKOFF = 60000; // Maximum backoff interval in ms
+let currentBackoff = INITIAL_BACKOFF;
+
 const onSyncLost = async (account: string, error: any) => {
   console.log(
     `[XmtpRN] An error occured while syncing for ${account}: ${error}`
@@ -71,7 +75,9 @@ const onSyncLost = async (account: string, error: any) => {
   // If there is an error let's show it
   getChatStore(account).getState().setReconnecting(true);
   // Wait a bit before reco
-  await new Promise((r) => setTimeout(r, 1000));
+  console.log(`[XmtpRN] Reconnecting in ${currentBackoff}ms`);
+  await new Promise((r) => setTimeout(r, currentBackoff));
+  currentBackoff = Math.min(currentBackoff * 2, MAX_BACKOFF);
   // Now let's reload !
   syncXmtpClient(account);
 };
@@ -161,6 +167,7 @@ export const syncXmtpClient = async (account: string) => {
           ...groupTopicsToQuery,
         ]);
     }
+    currentBackoff = INITIAL_BACKOFF;
     console.log(`[XmtpRN] Finished syncing ${account}`);
   } catch (e) {
     console.log("main sync error");
