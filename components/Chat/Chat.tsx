@@ -107,7 +107,6 @@ const getListArray = (
         if (
           nextMessage.senderAddress === message.senderAddress &&
           !nextMessageDateChange &&
-          !isContentType("reaction", nextMessage.contentType) &&
           !isContentType("groupUpdated", nextMessage.contentType)
         ) {
           message.hasNextMessageInSeries = true;
