@@ -27,6 +27,7 @@ import {
   useSettingsStore,
 } from "../../../data/store/accountsStore";
 import { XmtpConversation } from "../../../data/store/chatStore";
+import { useFramesStore } from "../../../data/store/framesStore";
 import { ReanimatedTouchableOpacity } from "../../../utils/animations";
 import { reportMessage } from "../../../utils/api";
 import { isAttachmentMessage } from "../../../utils/attachment/helpers";
@@ -98,6 +99,8 @@ export default function ChatMessageActions({
   const colorScheme = useColorScheme();
   const userAddress = useCurrentAccount() as string;
   const setPeersStatus = useSettingsStore((s) => s.setPeersStatus);
+  const frames = useFramesStore().frames;
+  const isFrame = !!frames[message.content.toLowerCase()];
   const styles = useStyles();
 
   let messageMaxWidth: DimensionValue;
@@ -111,7 +114,9 @@ export default function ChatMessageActions({
     if (isAttachment) {
       messageMaxWidth = "70%";
     } else {
-      messageMaxWidth = "85%";
+      if (isFrame && !message.fromMe) {
+        messageMaxWidth = "100%";
+      } else messageMaxWidth = "85%";
     }
   }
 
