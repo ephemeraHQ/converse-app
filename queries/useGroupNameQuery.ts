@@ -37,3 +37,12 @@ export const cancelGroupNameQuery = async (account: string, topic: string) => {
     queryKey: groupNameQueryKey(account, topic),
   });
 };
+
+export const invalidateGroupNameQuery = async (
+  account: string,
+  topic: string
+) => {
+  return queryClient.invalidateQueries({
+    queryKey: groupNameQueryKey(account, topic),
+  });
+};

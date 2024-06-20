@@ -62,3 +62,9 @@ export const cancelGroupMembersQuery = async (
     queryKey: groupMembersQueryKey(account, topic),
   });
 };
+
+export const invalidateGroupMembersQuery = (account: string, topic: string) => {
+  return queryClient.invalidateQueries({
+    queryKey: groupMembersQueryKey(account, topic),
+  });
+};
