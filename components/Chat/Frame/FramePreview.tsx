@@ -365,7 +365,6 @@ export default function FramePreview({
 const useStyles = () => {
   return StyleSheet.create({
     frameWrapper: {
-      padding: 4,
       paddingBottom: 0,
     },
     frameContainer: {
