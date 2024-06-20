@@ -133,7 +133,6 @@ function ChatMessage({ message, colorScheme, isGroup, isFrame }: Props) {
         !isFrame && (
           <ClickableText
             style={[
-              { backgroundColor: "red", alignSelf: "flex-start" },
               styles.messageText,
               message.fromMe ? styles.messageTextMe : undefined,
               hideBackground ? styles.allEmojisAndMaxThree : undefined,
@@ -248,7 +247,7 @@ function ChatMessage({ message, colorScheme, isGroup, isFrame }: Props) {
             {isGroup && !message.fromMe && (
               <MessageSenderAvatar message={message} />
             )}
-            <View style={{ flex: 1, backgroundColor: "yellow" }}>
+            <View style={{ flex: 1 }}>
               {isGroup && !message.fromMe && (
                 <MessageSender message={message} />
               )}
@@ -301,7 +300,6 @@ function ChatMessage({ message, colorScheme, isGroup, isFrame }: Props) {
                           {
                             alignSelf: "flex-start",
                             flexShrink: 1,
-                            backgroundColor: "green",
                           },
                           isContentType("text", message.contentType)
                             ? styles.messageTextReply
@@ -499,6 +497,7 @@ const useStyles = () => {
     },
     messageText: {
       color: textPrimaryColor(colorScheme),
+      fontSize: 16,
       padding: 10,
     },
     messageTextMe: {
