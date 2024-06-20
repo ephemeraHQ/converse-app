@@ -119,7 +119,6 @@ function ChatMessage({ message, colorScheme, isGroup, isFrame }: Props) {
     default: {
       messageContent = (
         <>
-          {isGroup && !message.fromMe && <MessageSender message={message} />}
           <ClickableText
             style={[
               styles.messageText,
@@ -176,6 +175,7 @@ function ChatMessage({ message, colorScheme, isGroup, isFrame }: Props) {
       {message.dateChange && (
         <Text style={styles.date}>{getRelativeDate(message.sent)}</Text>
       )}
+      {isGroup && !message.fromMe && <MessageSender message={message} />}
       {!showInBubble && messageContent}
       {showInBubble && (
         <Swipeable
@@ -459,9 +459,10 @@ const useStyles = () => {
       zIndex: -1,
     },
     groupSender: {
-      fontSize: 15,
-      fontWeight: "500",
-      color: textPrimaryColor(colorScheme),
+      fontSize: 11,
+      color: textSecondaryColor(colorScheme),
+      marginLeft: 24,
+      marginTop: 16,
     },
   });
 };
