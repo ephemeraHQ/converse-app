@@ -112,7 +112,8 @@ const useStyles = () => {
     reactionsWrapper: {
       flexBasis: "100%",
       flexDirection: "row",
-      marginTop: 5,
+      marginBottom: 8,
+      marginHorizontal: 10,
     },
     reactionsContainer: {
       backgroundColor: "white",
