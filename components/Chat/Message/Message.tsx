@@ -250,17 +250,23 @@ function ChatMessage({ message, colorScheme, isGroup, isFrame }: Props) {
               {isGroup && !message.fromMe && (
                 <MessageSender message={message} />
               )}
-              <ChatMessageActions
-                message={message}
-                reactions={reactions}
-                hideBackground={hideBackground}
+              <View
+                style={
+                  message.fromMe
+                    ? { alignSelf: "flex-end" }
+                    : { alignSelf: "flex-start" }
+                }
               >
-                {isContentType("text", message.contentType) && (
-                  <FramesPreviews message={message} />
-                )}
-                <View>
+                <ChatMessageActions
+                  message={message}
+                  reactions={reactions}
+                  hideBackground={hideBackground}
+                >
+                  {isContentType("text", message.contentType) && (
+                    <FramesPreviews message={message} />
+                  )}
                   {replyingToMessage ? (
-                    <View style={[styles.messageWithInnerBubble]}>
+                    <View style={styles.messageWithInnerBubble}>
                       <TouchableOpacity
                         style={[
                           styles.innerBubble,
@@ -298,7 +304,6 @@ function ChatMessage({ message, colorScheme, isGroup, isFrame }: Props) {
                         style={[
                           {
                             alignSelf: "flex-start",
-                            flexShrink: 1,
                           },
                           isContentType("text", message.contentType)
                             ? styles.messageTextReply
@@ -324,14 +329,22 @@ function ChatMessage({ message, colorScheme, isGroup, isFrame }: Props) {
                       ]}
                     >
                       {messageContent}
-                      <ChatMessageReactions
-                        message={message}
-                        reactions={reactions}
-                      />
+                      <View
+                        style={
+                          isFrame && Object.keys(reactions).length
+                            ? { paddingTop: 10 }
+                            : undefined
+                        }
+                      >
+                        <ChatMessageReactions
+                          message={message}
+                          reactions={reactions}
+                        />
+                      </View>
                     </View>
                   )}
-                </View>
-              </ChatMessageActions>
+                </ChatMessageActions>
+              </View>
             </View>
           </View>
           <View
@@ -444,10 +457,10 @@ const useStyles = () => {
     innerBubble: {
       backgroundColor: messageInnerBubbleColor(colorScheme),
       borderRadius: 14,
-      width: "100%",
       paddingHorizontal: 12,
       paddingVertical: 10,
-      marginBottom: 6,
+      marginTop: 10,
+      marginHorizontal: 10,
     },
     innerBubbleMe: {
       backgroundColor: myMessageInnerBubbleColor(colorScheme),
@@ -482,16 +495,12 @@ const useStyles = () => {
       marginTop: 12,
       marginBottom: 8,
     },
-    messageBubbleText: {
-      paddingHorizontal: 10,
-      paddingBottom: Platform.OS === "android" ? 9 : 10,
-    },
-    messageWithInnerBubble: {
-      padding: 10,
-    },
+    messageBubbleText: {},
+    messageWithInnerBubble: {},
     replyToUsername: {
       fontSize: 12,
       marginBottom: 4,
+      padding: 0,
       color: "white",
     },
     messageText: {
@@ -505,9 +514,7 @@ const useStyles = () => {
     allEmojisAndMaxThree: {
       fontSize: 48,
     },
-    messageTextReply: {
-      paddingHorizontal: 8,
-    },
+    messageTextReply: {},
     groupSenderAvatarWrapper: {
       marginRight: 8,
     },

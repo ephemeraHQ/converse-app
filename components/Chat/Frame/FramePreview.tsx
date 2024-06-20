@@ -372,7 +372,6 @@ const useStyles = () => {
       borderTopRightRadius: 14,
       width: "100%",
       overflow: "hidden",
-      flex: 1,
     },
     shareFrameWrapper: {
       width: 36,
