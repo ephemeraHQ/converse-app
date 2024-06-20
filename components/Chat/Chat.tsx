@@ -88,7 +88,6 @@ const getListArray = (
         if (
           previousMessage.senderAddress === message.senderAddress &&
           !message.dateChange &&
-          !isContentType("reaction", previousMessage.contentType) &&
           !isContentType("groupUpdated", previousMessage.contentType)
         ) {
           message.hasPreviousMessageInSeries = true;
