@@ -22,6 +22,12 @@ export default function ChatGroupUpdatedMessage({
     const textMessages: string[] = [];
     const profiles = getProfilesStore(currentAccount()).getState().profiles;
     const byInboxId = getInboxIdStore(currentAccount()).getState().byInboxId;
+    // TODO: Feat: handle multiple members
+    const initiatedByAddress = byInboxId[content.initiatedByInboxId]?.[0];
+    const initiatedByReadableName = getPreferredName(
+      profiles[initiatedByAddress]?.socials,
+      initiatedByAddress
+    );
     content.membersAdded.forEach((m) => {
       // TODO: Feat: handle multiple members
       const firstAddress = byInboxId[m.inboxId]?.[0];
@@ -39,6 +45,17 @@ export default function ChatGroupUpdatedMessage({
         firstAddress
       );
       textMessages.push(`${readableName} left the conversation`);
+    });
+    content.metadataFieldsChanged.forEach((f) => {
+      if (f.fieldName === "group_name") {
+        textMessages.push(
+          `The group name was changed to ${f.newValue} by ${initiatedByReadableName}`
+        );
+      } else if (f.fieldName === "group_image_url_square") {
+        textMessages.push(
+          `The group photo was changed by ${initiatedByReadableName}`
+        );
+      }
     });
     return textMessages;
   }, [message.content]);

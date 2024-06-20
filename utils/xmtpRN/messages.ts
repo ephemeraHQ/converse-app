@@ -10,7 +10,11 @@ import {
 } from "@xmtp/react-native-sdk";
 
 import { saveMemberInboxIds } from "../../data/helpers/inboxId/saveInboxIds";
-import { getOrderedMessages, saveMessages } from "../../data/helpers/messages";
+import {
+  getOrderedMessages,
+  handleGroupUpdatedMessage,
+  saveMessages,
+} from "../../data/helpers/messages";
 import { xmtpMessageFromDb } from "../../data/mappers";
 import { getChatStore } from "../../data/store/accountsStore";
 import { XmtpMessage } from "../../data/store/chatStore";
@@ -171,6 +175,9 @@ export const streamAllMessages = async (account: string) => {
       topic: message.topic,
     });
     saveMessages(client.address, protocolMessagesToStateMessages([message]));
+    if (message.contentTypeId.includes("group_updated")) {
+      handleGroupUpdatedMessage(client.address, message.topic, message);
+    }
   }, true);
 };
 
