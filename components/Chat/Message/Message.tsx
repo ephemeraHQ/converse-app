@@ -228,7 +228,7 @@ function ChatMessage({ message, colorScheme, isGroup, isFrame }: Props) {
               <FramesPreviews message={message} />
             )}
             {replyingToMessage ? (
-              <View style={styles.messageWithInnerBubble}>
+              <View style={[styles.messageWithInnerBubble]}>
                 <TouchableOpacity
                   style={[
                     styles.innerBubble,
@@ -271,6 +271,7 @@ function ChatMessage({ message, colorScheme, isGroup, isFrame }: Props) {
                 >
                   {messageContent}
                 </View>
+                <ChatMessageReactions message={message} reactions={reactions} />
               </View>
             ) : (
               <View
@@ -278,20 +279,19 @@ function ChatMessage({ message, colorScheme, isGroup, isFrame }: Props) {
                   isAttachment || isTransaction
                     ? styles.messageWithInnerBubble
                     : styles.messageBubbleText,
-                  hideBackground
-                    ? { paddingBottom: 0, marginBottom: 0 }
-                    : undefined,
+                  hideBackground ? { paddingBottom: 0 } : undefined,
                 ]}
               >
                 {messageContent}
+                <ChatMessageReactions message={message} reactions={reactions} />
               </View>
             )}
           </ChatMessageActions>
-          <View style={{ height: 0, flexBasis: "100%" }} />
           <View
             style={{
               flexDirection: "row",
               flexBasis: "100%",
+              paddingLeft: "25%",
               justifyContent: "flex-end",
             }}
           >
@@ -301,13 +301,12 @@ function ChatMessage({ message, colorScheme, isGroup, isFrame }: Props) {
                 onPress={() => handleUrlPress(message.content)}
               >
                 <Text
-                  style={{
-                    fontSize: 11,
-                    padding: 4,
-                    marginBottom: 16,
-                    alignSelf: message.fromMe ? "flex-end" : "flex-start",
-                    color: textSecondaryColor(colorScheme),
-                  }}
+                  style={[
+                    styles.linkToFrame,
+                    message.fromMe
+                      ? { alignSelf: "flex-start" }
+                      : { alignSelf: "flex-end" },
+                  ]}
                 >
                   {getUrlToRender(message.content)}
                 </Text>
@@ -324,7 +323,6 @@ function ChatMessage({ message, colorScheme, isGroup, isFrame }: Props) {
               </View>
             )}
           </View>
-          <ChatMessageReactions message={message} reactions={reactions} />
         </Swipeable>
       )}
     </View>
@@ -424,6 +422,11 @@ const useStyles = () => {
     statusContainer: {
       marginVertical: 7,
     },
+    linkToFrame: {
+      fontSize: 11,
+      marginVertical: 7,
+      color: textSecondaryColor(colorScheme),
+    },
     date: {
       flexBasis: "100%",
       textAlign: "center",
@@ -433,11 +436,11 @@ const useStyles = () => {
       marginBottom: 8,
     },
     messageBubbleText: {
-      paddingHorizontal: 12,
-      paddingVertical: Platform.OS === "android" ? 6 : 7,
+      paddingHorizontal: 10,
+      paddingVertical: Platform.OS === "android" ? 9 : 10,
     },
     messageWithInnerBubble: {
-      padding: 8,
+      padding: 10,
     },
     replyToUsername: {
       fontSize: 15,
