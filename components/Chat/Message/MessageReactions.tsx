@@ -12,12 +12,7 @@ import {
   useProfilesStore,
 } from "../../../data/store/accountsStore";
 import { isAttachmentMessage } from "../../../utils/attachment/helpers";
-import {
-  actionSheetColors,
-  backgroundColor,
-  messageBubbleColor,
-  textSecondaryColor,
-} from "../../../utils/colors";
+import { actionSheetColors, textSecondaryColor } from "../../../utils/colors";
 import { useConversationContext } from "../../../utils/conversation";
 import { getPreferredName } from "../../../utils/profile";
 import {
@@ -95,13 +90,7 @@ export default function ChatMessageReactions({ message, reactions }: Props) {
       ]}
     >
       <TouchableWithoutFeedback onPress={showReactionsActionsSheet}>
-        <View
-          style={[
-            styles.reactionsContainer,
-            { marginRight: message.fromMe ? 10 : 0 },
-            { marginLeft: message.fromMe ? 0 : 10 },
-          ]}
-        >
+        <View style={styles.reactionsContainer}>
           <Text style={styles.emojis}>
             {[...new Set(reactionsList.map((r) => getReactionContent(r)))]}
           </Text>
@@ -121,19 +110,17 @@ const useStyles = () => {
       flexBasis: "100%",
       flexDirection: "row",
       justifyContent: "flex-end",
-      marginTop: -5,
+      marginTop: 5,
     },
     reactionsContainer: {
-      backgroundColor: messageBubbleColor(colorScheme),
-      paddingVertical: 6,
-      paddingHorizontal: 10,
-      borderWidth: 1,
-      borderColor: backgroundColor(colorScheme),
-      borderRadius: 30,
+      backgroundColor: "white",
+      paddingVertical: 4,
+      paddingHorizontal: 6,
+      borderRadius: 8,
       flexDirection: "row",
     },
     emojis: {
-      fontSize: 15,
+      fontSize: 13,
       lineHeight: 18.5,
     },
     count: {

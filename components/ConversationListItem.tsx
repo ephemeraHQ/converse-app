@@ -13,7 +13,6 @@ import { RectButton } from "react-native-gesture-handler";
 import Swipeable from "react-native-gesture-handler/Swipeable";
 import { TouchableRipple } from "react-native-paper";
 
-import Clock from "../assets/clock.svg";
 import {
   currentAccount,
   useChatStore,
@@ -129,14 +128,6 @@ const ConversationListItem = memo(function ConversationListItem({
         <Text style={styles.conversationName} numberOfLines={1}>
           {conversationName}
         </Text>
-        {lastMessageFromMe && lastMessageStatus === "sending" && (
-          <Clock
-            style={styles.lastMessageStatus}
-            fill={textSecondaryColor(colorScheme)}
-            width={12}
-            height={12}
-          />
-        )}
         <Text style={styles.messagePreview} numberOfLines={2}>
           {timeToShow} ⋅ {lastMessagePreview}
         </Text>
