@@ -32,4 +32,12 @@ export const handleGroupUpdatedMessage = (
       invalidateGroupPhotoQuery(account, topic);
     }
   }
+  // Admin Update
+  if (
+    content.membersAdded.length === 0 &&
+    content.membersRemoved.length === 0 &&
+    content.metadataFieldsChanged.length === 0
+  ) {
+    invalidateGroupMembersQuery(account, topic);
+  }
 };

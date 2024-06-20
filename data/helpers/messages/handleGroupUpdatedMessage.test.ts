@@ -111,7 +111,7 @@ describe("handleGroupUpdatedMessage", () => {
 
     handleGroupUpdatedMessage(account, topic, message);
 
-    expect(invalidateGroupMembersQuery).not.toHaveBeenCalled();
+    expect(invalidateGroupMembersQuery).toHaveBeenCalled();
     expect(invalidateGroupNameQuery).not.toHaveBeenCalled();
     expect(invalidateGroupPhotoQuery).not.toHaveBeenCalled();
   });
