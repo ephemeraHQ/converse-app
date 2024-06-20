@@ -86,7 +86,10 @@ export default function ChatMessageReactions({ message, reactions }: Props) {
     <View
       style={[
         styles.reactionsWrapper,
-        { justifyContent: message.fromMe ? "flex-end" : "flex-start" },
+        {
+          justifyContent: message.fromMe ? "flex-end" : "flex-start",
+          alignSelf: message.fromMe ? "flex-end" : "flex-start",
+        },
       ]}
     >
       <TouchableWithoutFeedback onPress={showReactionsActionsSheet}>
@@ -109,7 +112,6 @@ const useStyles = () => {
     reactionsWrapper: {
       flexBasis: "100%",
       flexDirection: "row",
-      justifyContent: "flex-end",
       marginTop: 5,
     },
     reactionsContainer: {
