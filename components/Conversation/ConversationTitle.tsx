@@ -16,7 +16,7 @@ import { XmtpConversation } from "../../data/store/chatStore";
 import { useGroupName } from "../../hooks/useGroupName";
 import { useGroupPhoto } from "../../hooks/useGroupPhoto";
 import { NavigationParamList } from "../../screens/Navigation/Navigation";
-import { headerTitleStyle, textPrimaryColor } from "../../utils/colors";
+import { textPrimaryColor } from "../../utils/colors";
 import { getPreferredAvatar } from "../../utils/profile";
 import { conversationName, getTitleFontScale } from "../../utils/str";
 import Avatar from "../Avatar";
@@ -126,6 +126,7 @@ export default function ConversationTitle({
         style={{
           flexDirection: "row",
           justifyContent: "space-between",
+          left: Platform.OS === "android" ? -36 : 0,
           width: "100%",
           alignItems: "center",
           paddingRight: 40,
@@ -135,11 +136,10 @@ export default function ConversationTitle({
         <Text
           style={[
             {
+              // For large groups where text will overflow the container
+              maxWidth: "80%",
               color: textPrimaryColor(colorScheme),
-              fontSize:
-                Platform.OS === "ios"
-                  ? 14 * getTitleFontScale()
-                  : headerTitleStyle(colorScheme).fontSize,
+              fontSize: 14 * getTitleFontScale(),
             },
           ]}
           numberOfLines={1}
@@ -159,7 +159,8 @@ export default function ConversationTitle({
         ) : (
           <Picto
             picto="info.circle"
-            size={16}
+            // Reason this is smaller than avatar is when it's the same size, looks like more of an error icon than an avatar placeholder
+            size={Platform.OS === "android" ? 20 : 16}
             color={textPrimaryColor(colorScheme)}
             style={{
               marginRight: Platform.OS === "android" ? 24 : 16,
