@@ -1,4 +1,4 @@
-import { useColorScheme, View } from "react-native";
+import { useColorScheme } from "react-native";
 import { TouchableOpacity } from "react-native-gesture-handler";
 
 import Picto from "../../components/Picto/Picto";
@@ -44,16 +44,14 @@ export default function ConversationNav(
             onPress={() => {
               navigate("Chats");
             }}
-            style={{ height: 40, justifyContent: "center", marginLeft: 8 }}
+            style={{ height: 40, justifyContent: "center", paddingRight: 16 }}
           >
-            <View style={{ marginRight: 8 }}>
-              <Picto
-                picto="chevron.left"
-                size={16}
-                weight="semibold"
-                color={textPrimaryColor(colorScheme)}
-              />
-            </View>
+            <Picto
+              picto="chevron.left"
+              size={16}
+              weight="semibold"
+              color={textPrimaryColor(colorScheme)}
+            />
           </TouchableOpacity>
         ),
       }}
