@@ -16,7 +16,7 @@ import { XmtpConversation } from "../../data/store/chatStore";
 import { useGroupName } from "../../hooks/useGroupName";
 import { useGroupPhoto } from "../../hooks/useGroupPhoto";
 import { NavigationParamList } from "../../screens/Navigation/Navigation";
-import { headerTitleStyle, textSecondaryColor } from "../../utils/colors";
+import { headerTitleStyle, textPrimaryColor } from "../../utils/colors";
 import { getPreferredAvatar } from "../../utils/profile";
 import { conversationName, getTitleFontScale } from "../../utils/str";
 import Avatar from "../Avatar";
@@ -125,45 +125,46 @@ export default function ConversationTitle({
         }}
         style={{
           flexDirection: "row",
+          justifyContent: "space-between",
+          width: "100%",
           alignItems: "center",
-          paddingRight: 20,
+          paddingRight: 40,
+          paddingLeft: 8,
         }}
       >
-        <Avatar
-          uri={avatar}
-          size={36}
-          style={{
-            marginRight: Platform.OS === "android" ? 24 : 7,
-            marginLeft: Platform.OS === "ios" ? 6 : -9,
-          }}
-        />
         <Text
-          style={[
-            headerTitleStyle(colorScheme),
-            {
-              fontSize:
-                Platform.OS === "ios"
-                  ? 17 * getTitleFontScale()
-                  : headerTitleStyle(colorScheme).fontSize,
-            },
-          ]}
+          style={{
+            color: textPrimaryColor(colorScheme),
+            fontSize:
+              Platform.OS === "ios"
+                ? 14 * getTitleFontScale()
+                : headerTitleStyle(colorScheme).fontSize,
+          }}
           numberOfLines={1}
           allowFontScaling={false}
         >
           {title}
         </Text>
-        <Picto
-          picto="chevron.right"
-          size={Platform.OS === "ios" ? 9 : 16}
-          style={{
-            // @todo => fix design on android & web
-            ...Platform.select({
-              default: { left: 10 },
-              android: { left: -10, top: 1 },
-            }),
-          }}
-          color={textSecondaryColor(colorScheme)}
-        />
+        {avatar ? (
+          <Avatar
+            uri={avatar}
+            size={24}
+            style={{
+              marginRight: Platform.OS === "android" ? 24 : 7,
+              marginLeft: Platform.OS === "ios" ? 6 : -9,
+            }}
+          />
+        ) : (
+          <Picto
+            picto="info.circle"
+            size={16}
+            color={textPrimaryColor(colorScheme)}
+            style={{
+              marginRight: Platform.OS === "android" ? 24 : 16,
+              marginLeft: Platform.OS === "ios" ? 6 : -9,
+            }}
+          />
+        )}
       </TouchableOpacity>
     </View>
   );

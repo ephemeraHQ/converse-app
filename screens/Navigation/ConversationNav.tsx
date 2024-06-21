@@ -1,3 +1,9 @@
+import { useColorScheme } from "react-native";
+import { TouchableOpacity } from "react-native-gesture-handler";
+
+import Picto from "../../components/Picto/Picto";
+import { textPrimaryColor } from "../../utils/colors";
+import { navigate } from "../../utils/navigation";
 import Conversation from "../Conversation";
 import { NativeStack, navigationAnimation } from "./Navigation";
 import { useIsSplitScreen } from "./navHelpers";
@@ -26,11 +32,24 @@ export default function ConversationNav(
   // but via the DrawerNavigation that passes it back to this component via prop
   // so we override the route when instantiating Conversation
   const isSplitScreen = useIsSplitScreen();
+  const colorScheme = useColorScheme();
   return (
     <NativeStack.Screen
       name="Conversation"
       options={{
         animation: navigationAnimation,
+        headerLeft: () => (
+          <TouchableOpacity
+            onPress={() => navigate("Chats")}
+            style={{ height: 40, justifyContent: "center", marginLeft: 8 }}
+          >
+            <Picto
+              picto="chevron.left"
+              size={16}
+              color={textPrimaryColor(colorScheme)}
+            />
+          </TouchableOpacity>
+        ),
       }}
     >
       {({ route, navigation }) => (

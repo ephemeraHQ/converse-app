@@ -12,6 +12,8 @@ import { xmtpMessageFromDb, xmtpMessageToDb } from "../../mappers";
 import { getChatStore } from "../../store/accountsStore";
 import { XmtpMessage } from "../../store/chatStore";
 
+export { handleGroupUpdatedMessage } from "./handleGroupUpdatedMessage";
+
 export const saveMessages = async (
   account: string,
   messages: XmtpMessage[]

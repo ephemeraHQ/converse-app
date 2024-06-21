@@ -1,15 +1,15 @@
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import React, { useEffect, useRef, useState } from "react";
 import {
+  Alert,
   Button,
+  Platform,
   ScrollView,
   StyleSheet,
   Text,
   TextInput,
   View,
   useColorScheme,
-  Platform,
-  Alert,
 } from "react-native";
 
 import ActivityIndicator from "../../components/ActivityIndicator/ActivityIndicator";
@@ -28,6 +28,7 @@ import {
 } from "../../data/store/accountsStore";
 import { ProfileSocials } from "../../data/store/profilesStore";
 import { useSelect } from "../../data/store/storeHelpers";
+import { useGroupMembers } from "../../hooks/useGroupMembers";
 import { searchProfiles } from "../../utils/api";
 import {
   backgroundColor,
@@ -45,7 +46,6 @@ import { navigate } from "../../utils/navigation";
 import { isEmptyObject } from "../../utils/objects";
 import { getPreferredName } from "../../utils/profile";
 import { isOnXmtp } from "../../utils/xmtpRN/client";
-import { addMembersToGroup } from "../../utils/xmtpRN/conversations";
 import { NewConversationModalParams } from "./NewConversationModal";
 
 export default function NewConversation({
@@ -60,6 +60,9 @@ export default function NewConversation({
     enabled: !!route.params?.addingToGroupTopic,
     members: [] as (ProfileSocials & { address: string })[],
   });
+  const { addMembers } = useGroupMembers(
+    route.params?.addingToGroupTopic ?? ""
+  );
   const existingGroup = useChatStore((s) =>
     route.params?.addingToGroupTopic
       ? s.conversations[route.params.addingToGroupTopic]
@@ -98,11 +101,7 @@ export default function NewConversation({
                   if (route.params?.addingToGroupTopic) {
                     setLoading(true);
                     try {
-                      await addMembersToGroup(
-                        currentAccount(),
-                        route.params?.addingToGroupTopic,
-                        group.members.map((m) => m.address)
-                      );
+                      await addMembers(group.members.map((m) => m.address));
                       navigation.goBack();
                     } catch (e) {
                       setLoading(false);
@@ -128,6 +127,7 @@ export default function NewConversation({
     navigation,
     route.params?.addingToGroupTopic,
     colorScheme,
+    addMembers,
   ]);
 
   const [value, setValue] = useState(route.params?.peer || "");
