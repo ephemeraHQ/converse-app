@@ -396,6 +396,9 @@ export default function ChatMessageActions({
         >
           {children}
           {!message.hasNextMessageInSeries &&
+            !isFrame &&
+            !isAttachment &&
+            isTransaction &&
             (Platform.OS === "ios" || Platform.OS === "web") && (
               <MessageTail
                 style={[

@@ -83,15 +83,7 @@ export default function ChatMessageReactions({ message, reactions }: Props) {
   ]);
   if (reactionsList.length === 0) return null;
   return (
-    <View
-      style={[
-        styles.reactionsWrapper,
-        {
-          justifyContent: message.fromMe ? "flex-end" : "flex-start",
-          alignSelf: message.fromMe ? "flex-end" : "flex-start",
-        },
-      ]}
-    >
+    <View style={styles.reactionsWrapper}>
       <TouchableWithoutFeedback onPress={showReactionsActionsSheet}>
         <View style={styles.reactionsContainer}>
           <Text style={styles.emojis}>
@@ -112,7 +104,7 @@ const useStyles = () => {
     reactionsWrapper: {
       flexBasis: "100%",
       flexDirection: "row",
-      marginBottom: 8,
+      marginBottom: 10,
       marginHorizontal: 10,
     },
     reactionsContainer: {
@@ -123,8 +115,8 @@ const useStyles = () => {
       flexDirection: "row",
     },
     emojis: {
-      fontSize: 13,
-      lineHeight: 18.5,
+      fontSize: 16,
+      lineHeight: 24,
     },
     count: {
       fontSize: 15,
