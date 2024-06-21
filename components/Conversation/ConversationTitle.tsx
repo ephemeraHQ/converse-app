@@ -130,7 +130,6 @@ export default function ConversationTitle({
           width: "100%",
           alignItems: "center",
           paddingRight: 40,
-          paddingLeft: 8,
         }}
       >
         {avatar ? (
@@ -150,7 +149,7 @@ export default function ConversationTitle({
             color={textPrimaryColor(colorScheme)}
             style={{
               marginRight: Platform.OS === "android" ? 24 : 16,
-              marginLeft: Platform.OS === "ios" ? 6 : -9,
+              marginLeft: Platform.OS === "ios" ? 0 : -9,
             }}
           />
         )}
