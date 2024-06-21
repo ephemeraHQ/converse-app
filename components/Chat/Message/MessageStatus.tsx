@@ -12,14 +12,12 @@ export default function MessageStatus({ message }: Props) {
   const styles = useStyles();
 
   return (
-    <>
-      {message.fromMe &&
-        (message.status === "sending" ? (
-          <Text style={styles.statusText}>Encrypted</Text>
-        ) : (
-          <Text style={styles.statusText}>Sent</Text>
-        ))}
-    </>
+    message.fromMe &&
+    (message.status === "sending" ? (
+      <Text style={styles.statusText}>Encrypted</Text>
+    ) : (
+      <Text style={styles.statusText}>Sent</Text>
+    ))
   );
 }
 

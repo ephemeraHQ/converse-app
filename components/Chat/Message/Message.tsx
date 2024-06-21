@@ -252,11 +252,9 @@ function ChatMessage({ message, colorScheme, isGroup, isFrame }: Props) {
                 <MessageSender message={message} />
               )}
               <View
-                style={
-                  message.fromMe
-                    ? { alignSelf: "flex-end" }
-                    : { alignSelf: "flex-start" }
-                }
+                style={{
+                  alignSelf: message.fromMe ? "flex-end" : "flex-start",
+                }}
               >
                 <ChatMessageActions
                   message={message}
@@ -492,8 +490,6 @@ const useStyles = () => {
       marginTop: 12,
       marginBottom: 8,
     },
-    messageBubbleText: {},
-    messageWithInnerBubble: {},
     replyToUsername: {
       fontSize: 12,
       marginBottom: 4,
