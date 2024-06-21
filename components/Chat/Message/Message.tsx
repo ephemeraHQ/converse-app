@@ -326,11 +326,12 @@ function ChatMessage({ message, colorScheme, isGroup, isFrame }: Props) {
                     </View>
                   ) : (
                     <View
-                      style={
+                      style={[
+                        { position: "relative" },
                         hideBackground && message.fromMe
                           ? { paddingBottom: 0 }
-                          : undefined
-                      }
+                          : undefined,
+                      ]}
                     >
                       <View style={{ zIndex: 0 }}>{messageContent}</View>
                       <View
