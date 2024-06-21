@@ -125,33 +125,20 @@ export default function ConversationTitle({
         }}
         style={{
           flexDirection: "row",
-          justifyContent: "space-between",
+          justifyContent: "flex-start",
           width: "100%",
           alignItems: "center",
           paddingRight: 40,
           paddingLeft: 8,
         }}
       >
-        <Text
-          style={{
-            color: textPrimaryColor(colorScheme),
-            fontSize:
-              Platform.OS === "ios"
-                ? 14 * getTitleFontScale()
-                : headerTitleStyle(colorScheme).fontSize,
-          }}
-          numberOfLines={1}
-          allowFontScaling={false}
-        >
-          {title}
-        </Text>
         {avatar ? (
           <Avatar
             uri={avatar}
-            size={24}
+            size={30}
             style={{
               marginRight: Platform.OS === "android" ? 24 : 7,
-              marginLeft: Platform.OS === "ios" ? 6 : -9,
+              marginLeft: Platform.OS === "ios" ? 0 : -9,
             }}
           />
         ) : (
@@ -165,6 +152,19 @@ export default function ConversationTitle({
             }}
           />
         )}
+        <Text
+          style={{
+            color: textPrimaryColor(colorScheme),
+            fontSize:
+              Platform.OS === "ios"
+                ? 16 * getTitleFontScale()
+                : headerTitleStyle(colorScheme).fontSize,
+          }}
+          numberOfLines={1}
+          allowFontScaling={false}
+        >
+          {title}
+        </Text>
       </TouchableOpacity>
     </View>
   );
