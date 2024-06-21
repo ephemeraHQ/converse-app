@@ -265,7 +265,7 @@ function ChatMessage({ message, colorScheme, isGroup, isFrame }: Props) {
                     <FramesPreviews message={message} />
                   )}
                   {replyingToMessage ? (
-                    <View style={styles.messageWithInnerBubble}>
+                    <View>
                       <TouchableOpacity
                         style={[
                           styles.innerBubble,
@@ -318,14 +318,11 @@ function ChatMessage({ message, colorScheme, isGroup, isFrame }: Props) {
                     </View>
                   ) : (
                     <View
-                      style={[
-                        isAttachment || isTransaction
-                          ? styles.messageWithInnerBubble
-                          : styles.messageBubbleText,
+                      style={
                         hideBackground && message.fromMe
                           ? { paddingBottom: 0 }
-                          : undefined,
-                      ]}
+                          : undefined
+                      }
                     >
                       {messageContent}
                       <View
