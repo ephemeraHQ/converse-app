@@ -125,7 +125,7 @@ export default function ConversationTitle({
         }}
         style={{
           flexDirection: "row",
-          justifyContent: "space-between",
+          justifyContent: "flex-start",
           left: Platform.OS === "android" ? -36 : 0,
           width: "100%",
           alignItems: "center",
@@ -133,27 +133,13 @@ export default function ConversationTitle({
           paddingLeft: 8,
         }}
       >
-        <Text
-          style={[
-            {
-              // For large groups where text will overflow the container
-              maxWidth: "80%",
-              color: textPrimaryColor(colorScheme),
-              fontSize: 14 * getTitleFontScale(),
-            },
-          ]}
-          numberOfLines={1}
-          allowFontScaling={false}
-        >
-          {title}
-        </Text>
         {avatar ? (
           <Avatar
             uri={avatar}
-            size={24}
+            size={30}
             style={{
               marginRight: Platform.OS === "android" ? 24 : 7,
-              marginLeft: Platform.OS === "ios" ? 6 : -9,
+              marginLeft: Platform.OS === "ios" ? 0 : -9,
             }}
           />
         ) : (
@@ -168,6 +154,19 @@ export default function ConversationTitle({
             }}
           />
         )}
+        <Text
+          style={{
+            color: textPrimaryColor(colorScheme),
+            fontSize:
+              Platform.OS === "ios"
+                ? 16 * getTitleFontScale()
+                : headerTitleStyle(colorScheme).fontSize,
+          }}
+          numberOfLines={1}
+          allowFontScaling={false}
+        >
+          {title}
+        </Text>
       </TouchableOpacity>
     </View>
   );
