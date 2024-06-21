@@ -118,7 +118,10 @@ export default function ConversationListNav() {
                 <Text
                   style={{
                     fontSize: 16,
-                    color: "rgba(0, 0, 0, 0.6)",
+                    color:
+                      colorScheme === "dark"
+                        ? "rgba(255, 255, 255, 0.6)"
+                        : "rgba(0, 0, 0, 0.6)",
                     paddingBottom: 6,
                   }}
                 >
