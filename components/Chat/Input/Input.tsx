@@ -204,36 +204,28 @@ export default function ChatInput() {
             { opacity: inputValue.length > 0 ? 1 : 0.6 },
           ]}
         >
-          {colorScheme === "dark" ? (
-            <SendButtonDefaultDark
+          {colorScheme === "dark"
+            ? sendButtonType === "DEFAULT" && (
+                <SendButtonDefaultDark
+                  width={36}
+                  height={36}
+                  style={styles.sendButton}
+                />
+              )
+            : sendButtonType === "DEFAULT" && (
+                <SendButtonDefaultLight
+                  width={36}
+                  height={36}
+                  style={styles.sendButton}
+                />
+              )}
+          {sendButtonType === "HIGHER" && (
+            <SendButtonHigher
               width={36}
               height={36}
-              style={
-                sendButtonType === "DEFAULT"
-                  ? styles.sendButton
-                  : { display: "none" }
-              }
-            />
-          ) : (
-            <SendButtonDefaultLight
-              width={36}
-              height={36}
-              style={
-                sendButtonType === "DEFAULT"
-                  ? styles.sendButton
-                  : { display: "none" }
-              }
+              style={styles.sendButton}
             />
           )}
-          <SendButtonHigher
-            width={36}
-            height={36}
-            style={
-              sendButtonType === "HIGHER"
-                ? styles.sendButton
-                : { display: "none" }
-            }
-          />
         </TouchableOpacity>
       </View>
     </View>
