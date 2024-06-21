@@ -1,5 +1,5 @@
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
   Alert,
   Button,
@@ -69,16 +69,32 @@ export default function NewConversation({
       : undefined
   );
   const [loading, setLoading] = useState(false);
+  const handleBack = useCallback(() => navigation.goBack(), [navigation]);
+  const styles = useStyles();
+
+  const handleRightAction = useCallback(async () => {
+    if (route.params?.addingToGroupTopic) {
+      setLoading(true);
+      try {
+        await addMembers(group.members.map((m) => m.address));
+        navigation.goBack();
+      } catch (e) {
+        setLoading(false);
+        console.error(e);
+        Alert.alert("An error occured");
+      }
+    } else {
+      navigation.push("NewGroupSummary", {
+        members: group.members,
+      });
+    }
+  }, [addMembers, group.members, navigation, route.params?.addingToGroupTopic]);
+
   useEffect(() => {
     navigation.setOptions({
       headerLeft: () =>
         Platform.OS === "ios" ? (
-          <Button
-            title="Cancel"
-            onPress={() => {
-              navigation.goBack();
-            }}
-          />
+          <Button title="Cancel" onPress={handleBack} />
         ) : (
           <AndroidBackAction navigation={navigation} />
         ),
@@ -90,29 +106,13 @@ export default function NewConversation({
       headerRight: () => {
         if (group.enabled && group.members.length > 0) {
           if (loading) {
-            return <ActivityIndicator style={{ marginRight: 5 }} />;
+            return <ActivityIndicator style={styles.activityIndicator} />;
           } else {
             return (
               <ConverseButton
                 variant="text"
                 title={route.params?.addingToGroupTopic ? "Add" : "Next"}
-                onPress={async () => {
-                  if (route.params?.addingToGroupTopic) {
-                    setLoading(true);
-                    try {
-                      await addMembers(group.members.map((m) => m.address));
-                      navigation.goBack();
-                    } catch (e) {
-                      setLoading(false);
-                      console.error(e);
-                      Alert.alert("An error occured");
-                    }
-                  } else {
-                    navigation.push("NewGroupSummary", {
-                      members: group.members,
-                    });
-                  }
-                }}
+                onPress={handleRightAction}
               />
             );
           }
@@ -126,6 +126,9 @@ export default function NewConversation({
     navigation,
     route.params?.addingToGroupTopic,
     addMembers,
+    handleBack,
+    handleRightAction,
+    styles.activityIndicator,
   ]);
 
   const [value, setValue] = useState(route.params?.peer || "");
@@ -274,40 +277,42 @@ export default function NewConversation({
   const inputRef = useRef<TextInput | null>(null);
   const initialFocus = useRef(false);
 
-  const styles = useStyles();
   const showRecommendations =
     !status.loading && value.length === 0 && recommendationsFrensCount > 0;
 
   const inputPlaceholder = ".converse.xyz, 0x, .eth, .lens, .fc, .cb.id, UD…";
+  const onRef = useCallback(
+    (r: TextInput | null) => {
+      if (!initialFocus.current) {
+        initialFocus.current = true;
+        if (
+          (!value &&
+            !recommendationsLoading &&
+            recommendationsLoadedOnce &&
+            recommendationsFrensCount === 0) ||
+          Platform.OS === "web" // On web, always focus
+        ) {
+          setTimeout(() => {
+            r?.focus();
+          }, 100);
+        }
+      }
+      inputRef.current = r;
+    },
+    [
+      recommendationsFrensCount,
+      recommendationsLoadedOnce,
+      recommendationsLoading,
+      value,
+    ]
+  );
 
   return (
-    <View
-      style={{
-        flex: 1,
-        backgroundColor: backgroundColor(colorScheme),
-        paddingHorizontal: Platform.OS === "web" ? 20 : undefined,
-      }}
-    >
+    <View style={styles.searchContainer}>
       <SearchBar
         value={value}
         setValue={setValue}
-        onRef={(r) => {
-          if (!initialFocus.current) {
-            initialFocus.current = true;
-            if (
-              (!value &&
-                !recommendationsLoading &&
-                recommendationsLoadedOnce &&
-                recommendationsFrensCount === 0) ||
-              Platform.OS === "web" // On web, always focus
-            ) {
-              setTimeout(() => {
-                r?.focus();
-              }, 100);
-            }
-          }
-          inputRef.current = r;
-        }}
+        onRef={onRef}
         inputPlaceholder={inputPlaceholder}
       />
       <View
@@ -324,11 +329,7 @@ export default function NewConversation({
             variant="text"
             picto="person.2"
             title="New group"
-            style={{
-              marginLeft: 7,
-              paddingTop: Platform.OS === "ios" ? 13 : 10,
-              paddingBottom: Platform.OS === "ios" ? 0 : 10,
-            }}
+            style={styles.newGroupButton}
             textStyle={{ fontWeight: "500" }}
             onPress={() => {
               setGroup({ enabled: true, members: [] });
@@ -388,6 +389,7 @@ export default function NewConversation({
             groupMode={group.enabled}
             addToGroup={async (member) => {
               setGroup((g) => ({ ...g, members: [...g.members, member] }));
+              setValue("");
             }}
           />
         </View>
@@ -527,6 +529,19 @@ const useStyles = () => {
       marginRight: 10,
       height: Platform.OS === "ios" ? 30 : undefined,
       marginTop: 10,
+    },
+    activityIndicator: {
+      marginRight: 5,
+    },
+    searchContainer: {
+      flex: 1,
+      backgroundColor: backgroundColor(colorScheme),
+      paddingHorizontal: Platform.OS === "web" ? 20 : undefined,
+    },
+    newGroupButton: {
+      marginLeft: 7,
+      paddingTop: Platform.OS === "ios" ? 13 : 10,
+      paddingBottom: Platform.OS === "ios" ? 0 : 10,
     },
   });
 };
