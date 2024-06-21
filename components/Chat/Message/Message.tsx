@@ -311,24 +311,33 @@ function ChatMessage({ message, colorScheme, isGroup, isFrame }: Props) {
                       >
                         {messageContent}
                       </View>
-                      <ChatMessageReactions
-                        message={message}
-                        reactions={reactions}
-                      />
+                      <View
+                        style={
+                          isAttachment || isFrame || isTransaction
+                            ? { position: "absolute", bottom: 0, zIndex: 1 }
+                            : undefined
+                        }
+                      >
+                        <ChatMessageReactions
+                          message={message}
+                          reactions={reactions}
+                        />
+                      </View>
                     </View>
                   ) : (
                     <View
-                      style={
+                      style={[
+                        { position: "relative" },
                         hideBackground && message.fromMe
                           ? { paddingBottom: 0 }
-                          : undefined
-                      }
+                          : undefined,
+                      ]}
                     >
-                      {messageContent}
+                      <View style={{ zIndex: 0 }}>{messageContent}</View>
                       <View
                         style={
-                          isFrame && Object.keys(reactions).length
-                            ? { paddingTop: 10 }
+                          isAttachment || isFrame || isTransaction
+                            ? { position: "absolute", bottom: 0, zIndex: 1 }
                             : undefined
                         }
                       >
