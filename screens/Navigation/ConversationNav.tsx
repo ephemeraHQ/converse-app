@@ -44,7 +44,8 @@ export default function ConversationNav(
             onPress={() => {
               navigate("Chats");
             }}
-            style={{ height: 40, justifyContent: "center", paddingRight: 16 }}
+            style={{ height: 40, justifyContent: "center", paddingRight: 16}}
+            hitSlop={{ top: 20, bottom: 20, left: 20, right: 10 }}
           >
             <Picto
               picto="chevron.left"
