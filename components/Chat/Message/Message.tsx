@@ -185,7 +185,9 @@ function ChatMessage({ message, colorScheme, isGroup, isFrame }: Props) {
       {message.dateChange && (
         <Text style={styles.date}>{getRelativeDate(message.sent)}</Text>
       )}
-      {isGroup && !message.fromMe && <MessageSender message={message} />}
+      {isGroup && !message.fromMe && !showInBubble && !isGroupUpdated && (
+        <MessageSender message={message} />
+      )}
       {!showInBubble && messageContent}
       {showInBubble && (
         <Swipeable
@@ -248,7 +250,7 @@ function ChatMessage({ message, colorScheme, isGroup, isFrame }: Props) {
               <MessageSenderAvatar message={message} />
             )}
             <View style={{ flex: 1 }}>
-              {isGroup && !message.fromMe && (
+              {isGroup && !message.fromMe && showInBubble && (
                 <MessageSender message={message} />
               )}
               <View
@@ -362,7 +364,7 @@ function ChatMessage({ message, colorScheme, isGroup, isFrame }: Props) {
                       onPress={() => handleUrlPress(message.content)}
                       style={{ flex: 1 }}
                     >
-                      <Text style={[styles.linkToFrame]}>
+                      <Text style={styles.linkToFrame}>
                         {getUrlToRender(message.content)}
                       </Text>
                     </TouchableOpacity>
