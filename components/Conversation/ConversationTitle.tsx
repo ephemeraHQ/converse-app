@@ -16,7 +16,7 @@ import { XmtpConversation } from "../../data/store/chatStore";
 import { useGroupName } from "../../hooks/useGroupName";
 import { useGroupPhoto } from "../../hooks/useGroupPhoto";
 import { NavigationParamList } from "../../screens/Navigation/Navigation";
-import { textPrimaryColor } from "../../utils/colors";
+import { headerTitleStyle, textPrimaryColor } from "../../utils/colors";
 import { getPreferredAvatar } from "../../utils/profile";
 import { conversationName, getTitleFontScale } from "../../utils/str";
 import Avatar from "../Avatar";
