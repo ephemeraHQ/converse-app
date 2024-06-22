@@ -8,8 +8,9 @@ import {
   Platform,
 } from "react-native";
 
+import SendButtonDefaultDark from "../../../assets/send-button-dark.svg";
 import SendButtonHigher from "../../../assets/send-button-higher.svg";
-import SendButtonDefault from "../../../assets/send-button.svg";
+import SendButtonDefaultLight from "../../../assets/send-button-light.svg";
 import {
   actionSecondaryColor,
   backgroundColor,
@@ -203,24 +204,28 @@ export default function ChatInput() {
             { opacity: inputValue.length > 0 ? 1 : 0.6 },
           ]}
         >
-          <SendButtonDefault
-            width={36}
-            height={36}
-            style={
-              sendButtonType === "DEFAULT"
-                ? styles.sendButton
-                : { display: "none" }
-            }
-          />
-          <SendButtonHigher
-            width={36}
-            height={36}
-            style={
-              sendButtonType === "HIGHER"
-                ? styles.sendButton
-                : { display: "none" }
-            }
-          />
+          {colorScheme === "dark"
+            ? sendButtonType === "DEFAULT" && (
+                <SendButtonDefaultDark
+                  width={36}
+                  height={36}
+                  style={styles.sendButton}
+                />
+              )
+            : sendButtonType === "DEFAULT" && (
+                <SendButtonDefaultLight
+                  width={36}
+                  height={36}
+                  style={styles.sendButton}
+                />
+              )}
+          {sendButtonType === "HIGHER" && (
+            <SendButtonHigher
+              width={36}
+              height={36}
+              style={styles.sendButton}
+            />
+          )}
         </TouchableOpacity>
       </View>
     </View>

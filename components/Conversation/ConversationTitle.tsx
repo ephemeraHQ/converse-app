@@ -16,7 +16,7 @@ import { XmtpConversation } from "../../data/store/chatStore";
 import { useGroupName } from "../../hooks/useGroupName";
 import { useGroupPhoto } from "../../hooks/useGroupPhoto";
 import { NavigationParamList } from "../../screens/Navigation/Navigation";
-import { textPrimaryColor } from "../../utils/colors";
+import { headerTitleStyle, textPrimaryColor } from "../../utils/colors";
 import { getPreferredAvatar } from "../../utils/profile";
 import { conversationName, getTitleFontScale } from "../../utils/str";
 import Avatar from "../Avatar";
@@ -125,35 +125,20 @@ export default function ConversationTitle({
         }}
         style={{
           flexDirection: "row",
-          justifyContent: "space-between",
+          justifyContent: "flex-start",
           left: Platform.OS === "android" ? -36 : 0,
           width: "100%",
           alignItems: "center",
           paddingRight: 40,
-          paddingLeft: 8,
         }}
       >
-        <Text
-          style={[
-            {
-              // For large groups where text will overflow the container
-              maxWidth: "80%",
-              color: textPrimaryColor(colorScheme),
-              fontSize: 14 * getTitleFontScale(),
-            },
-          ]}
-          numberOfLines={1}
-          allowFontScaling={false}
-        >
-          {title}
-        </Text>
         {avatar ? (
           <Avatar
             uri={avatar}
-            size={24}
+            size={30}
             style={{
               marginRight: Platform.OS === "android" ? 24 : 7,
-              marginLeft: Platform.OS === "ios" ? 6 : -9,
+              marginLeft: Platform.OS === "ios" ? 0 : -9,
             }}
           />
         ) : (
@@ -164,10 +149,23 @@ export default function ConversationTitle({
             color={textPrimaryColor(colorScheme)}
             style={{
               marginRight: Platform.OS === "android" ? 24 : 16,
-              marginLeft: Platform.OS === "ios" ? 6 : -9,
+              marginLeft: Platform.OS === "ios" ? 0 : -9,
             }}
           />
         )}
+        <Text
+          style={{
+            color: textPrimaryColor(colorScheme),
+            fontSize:
+              Platform.OS === "ios"
+                ? 16 * getTitleFontScale()
+                : headerTitleStyle(colorScheme).fontSize,
+          }}
+          numberOfLines={1}
+          allowFontScaling={false}
+        >
+          {title}
+        </Text>
       </TouchableOpacity>
     </View>
   );

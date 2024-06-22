@@ -20,7 +20,7 @@ import NewConversationButton from "../../components/ConversationList/NewConversa
 import ProfileSettingsButton from "../../components/ConversationList/ProfileSettingsButton";
 import { useAccountsStore, useChatStore } from "../../data/store/accountsStore";
 import { useSelect } from "../../data/store/storeHelpers";
-import { headerTitleStyle } from "../../utils/colors";
+import { textPrimaryColor } from "../../utils/colors";
 import { isDesktop } from "../../utils/device";
 import { getReadableProfile } from "../../utils/str";
 import ConversationList from "../ConversationList";
@@ -87,15 +87,15 @@ export default function ConversationListNav() {
       name="Chats"
       options={({ route, navigation }) => ({
         headerTitle: () =>
-          shouldShowConnectingOrSyncing ? <Connecting /> : undefined,
-        headerLargeTitle: true,
-        headerTitleStyle: headerTitleStyle(colorScheme),
+          shouldShowConnectingOrSyncing ? <Connecting /> : <View />,
         headerBackTitle: getReadableProfile(currentAccount, currentAccount),
         headerRight: () => (
           <>
             <NewConversationButton navigation={navigation} route={route} />
           </>
         ),
+        headerTintColor: textPrimaryColor(colorScheme),
+        headerShadowVisible: false,
         animation: navigationAnimation,
         headerLeft: () => (
           <View
@@ -117,9 +117,12 @@ export default function ConversationListNav() {
               >
                 <Text
                   style={{
-                    fontSize: 18,
-                    color: "rgb(21, 133, 255)",
-                    paddingBottom: 4,
+                    fontSize: 16,
+                    color:
+                      colorScheme === "dark"
+                        ? "rgba(255, 255, 255, 0.6)"
+                        : "rgba(0, 0, 0, 0.6)",
+                    paddingBottom: 6,
                   }}
                 >
                   {name}

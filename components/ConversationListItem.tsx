@@ -13,8 +13,6 @@ import { RectButton } from "react-native-gesture-handler";
 import Swipeable from "react-native-gesture-handler/Swipeable";
 import { TouchableRipple } from "react-native-paper";
 
-import Checkmark from "../assets/checkmark.svg";
-import Clock from "../assets/clock.svg";
 import {
   currentAccount,
   useChatStore,
@@ -31,6 +29,7 @@ import {
   dangerColor,
   textPrimaryColor,
   textSecondaryColor,
+  inversePrimaryColor,
 } from "../utils/colors";
 import { getMinimalDate } from "../utils/date";
 import { isDesktop } from "../utils/device";
@@ -129,30 +128,19 @@ const ConversationListItem = memo(function ConversationListItem({
         <Text style={styles.conversationName} numberOfLines={1}>
           {conversationName}
         </Text>
-        {lastMessageFromMe &&
-          (lastMessageStatus === "sending" ? (
-            <Clock
-              style={styles.lastMessageStatus}
-              fill={textSecondaryColor(colorScheme)}
-              width={12}
-              height={12}
-            />
-          ) : (
-            <Checkmark
-              style={styles.lastMessageStatus}
-              fill={textSecondaryColor(colorScheme)}
-              width={10}
-              height={10}
-            />
-          ))}
         <Text style={styles.messagePreview} numberOfLines={2}>
-          {lastMessageFromMe ? <View style={{ width: 15 }} /> : undefined}
-          {lastMessagePreview}
+          {timeToShow} ⋅ {lastMessagePreview}
         </Text>
-        <View style={styles.timeAndChevron}>
-          <Text style={styles.timeText}>{timeToShow}</Text>
-        </View>
-        {showUnread && <View style={styles.unread} />}
+        {(lastMessageFromMe && lastMessageStatus) === "sending" ? (
+          <View style={styles.unread}>
+            <Picto
+              picto="exclamation"
+              color={inversePrimaryColor(colorScheme)}
+            />
+          </View>
+        ) : showUnread ? (
+          <View style={styles.unread} />
+        ) : undefined}
       </View>
     </View>
   );
@@ -375,14 +363,14 @@ const getStyles = (colorScheme: ColorSchemeName) =>
       flexShrink: 1,
       ...Platform.select({
         default: {
-          height: 75.5,
-          paddingTop: 7.5,
-          paddingRight: 60,
+          height: 84,
+          paddingTop: 12,
+          paddingRight: 45,
           marginLeft: 12,
         },
         android: {
           height: 72,
-          paddingTop: 12,
+          paddingTop: 16.5,
           paddingLeft: 16,
           paddingRight: 45,
         },
@@ -395,7 +383,7 @@ const getStyles = (colorScheme: ColorSchemeName) =>
           fontSize: 17,
           fontWeight: "600",
           marginBottom: 3,
-          marginRight: 110,
+          marginRight: 15,
         },
         android: {
           fontSize: 16,
@@ -415,21 +403,6 @@ const getStyles = (colorScheme: ColorSchemeName) =>
         },
       }),
     },
-    timeAndChevron: {
-      position: "absolute",
-      ...Platform.select({
-        default: {
-          top: 8,
-          right: 20,
-          flexDirection: "row",
-          alignItems: "center",
-        },
-        android: {
-          top: 12,
-          right: 24,
-        },
-      }),
-    },
     timeText: {
       color: textSecondaryColor(colorScheme),
       ...Platform.select({
@@ -442,11 +415,11 @@ const getStyles = (colorScheme: ColorSchemeName) =>
       position: "absolute",
       ...Platform.select({
         default: {
-          width: 18,
-          height: 18,
-          borderRadius: 18,
-          right: 16,
-          top: 30,
+          width: 16,
+          height: 16,
+          borderRadius: 16,
+          right: 17,
+          top: 29.5,
         },
         android: {
           width: 16,
@@ -457,6 +430,9 @@ const getStyles = (colorScheme: ColorSchemeName) =>
         },
       }),
       backgroundColor: badgeColor(colorScheme),
+      flexDirection: "row",
+      justifyContent: "center",
+      alignItems: "center",
     },
     lastMessageStatus: {
       position: "absolute",

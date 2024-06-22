@@ -135,7 +135,6 @@ export default function AttachmentMessagePreview({ message }: Props) {
           contentFit="contain"
           style={[styles.imagePreview, { aspectRatio }]}
         />
-        <View style={styles.metadataContainer}>{metadataView}</View>
       </>
     );
   }

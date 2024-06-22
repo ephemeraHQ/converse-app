@@ -42,7 +42,8 @@ export default function ProfileSettingsButton() {
     setStringBalance(str);
     setStringSize(str.length * 10 + 10);
   }, [USDCBalance]);
-  if (isPrivy) {
+  // Disabled with "false" until payments UX sorted
+  if (isPrivy && false) {
     if (Platform.OS === "android" || Platform.OS === "web") {
       return (
         <Button

@@ -1,6 +1,10 @@
 import { Platform, useColorScheme } from "react-native";
 
-import { headerTitleStyle, textSecondaryColor } from "../../utils/colors";
+import {
+  headerTitleStyle,
+  textPrimaryColor,
+  textSecondaryColor,
+} from "../../utils/colors";
 import GroupLinkScreen from "../GroupLink";
 import { NativeStack, navigationAnimation } from "./Navigation";
 
@@ -23,7 +27,7 @@ export default function GroupLinkNav() {
         headerTintColor:
           Platform.OS === "android" || Platform.OS === "web"
             ? textSecondaryColor(colorScheme)
-            : undefined,
+            : textPrimaryColor(colorScheme),
         animation: navigationAnimation,
         headerTitleStyle: headerTitleStyle(colorScheme),
       })}

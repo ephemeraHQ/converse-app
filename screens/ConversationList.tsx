@@ -19,7 +19,6 @@ import InitialLoad from "../components/InitialLoad";
 import PinnedConversations from "../components/PinnedConversations/PinnedConversations";
 import Recommendations from "../components/Recommendations/Recommendations";
 import NoResult from "../components/Search/NoResult";
-import Welcome from "../components/Welcome";
 import { refreshProfileForAddress } from "../data/helpers/profiles/profilesUpdate";
 import {
   currentAccount,
@@ -92,12 +91,6 @@ function ConversationList({ navigation, route, searchBarRef }: Props) {
   const showInitialLoad =
     !initialLoadDoneOnce && flatListItems.items.length <= 1;
   const showNoResult = flatListItems.items.length === 0 && !!searchQuery;
-
-  // Welcome screen
-  const showWelcome =
-    !searchQuery &&
-    !searchBarFocused &&
-    sortedConversationsWithPreview.conversationsInbox.length === 0;
 
   const isSplit = useIsSplitScreen();
   const sharingMode = !!route.params?.frameURL;
@@ -190,26 +183,16 @@ function ConversationList({ navigation, route, searchBarRef }: Props) {
   let ListFooterComponent: React.ReactElement | undefined = undefined;
   if (showInitialLoad) {
     ListFooterComponent = <InitialLoad />;
-  } else if (showWelcome) {
-    ListFooterComponent = (
-      <Welcome ctaOnly={false} navigation={navigation} route={route} />
-    );
-  } else {
-    if (
-      ephemeralAccount &&
-      !showNoResult &&
-      !showSearchTitleHeader &&
-      !sharingMode
-    ) {
-      ListHeaderComponents.push(<EphemeralAccountBanner key="ephemeral" />);
-    }
-    if (!searchQuery && !sharingMode) {
-      ListFooterComponent = (
-        <Welcome ctaOnly navigation={navigation} route={route} />
-      );
-    } else if (showNoResult) {
-      ListFooterComponent = <NoResult navigation={navigation} />;
-    }
+  } else if (
+    ephemeralAccount &&
+    !showNoResult &&
+    !showSearchTitleHeader &&
+    !sharingMode
+  ) {
+    ListHeaderComponents.push(<EphemeralAccountBanner key="ephemeral" />);
+  }
+  if (showNoResult) {
+    ListFooterComponent = <NoResult navigation={navigation} />;
   }
 
   return (
@@ -222,7 +205,7 @@ function ConversationList({ navigation, route, searchBarRef }: Props) {
           searchBarRef.current?.blur();
         }}
         itemsForSearchQuery={flatListItems.searchQuery}
-        items={showInitialLoad || showWelcome ? [] : flatListItems.items}
+        items={showInitialLoad ? [] : flatListItems.items}
         ListHeaderComponent={
           ListHeaderComponents.length > 0 ? (
             <>{ListHeaderComponents}</>

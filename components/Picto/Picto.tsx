@@ -14,6 +14,7 @@ import ContentCopy from "@material-symbols/svg-400/outlined/content_copy.svg";
 import Delete from "@material-symbols/svg-400/outlined/delete.svg";
 import Done from "@material-symbols/svg-400/outlined/done.svg";
 import Edit from "@material-symbols/svg-400/outlined/edit.svg";
+import Exclamation from "@material-symbols/svg-400/outlined/exclamation.svg";
 import ExpandMore from "@material-symbols/svg-400/outlined/expand_more.svg";
 import Group from "@material-symbols/svg-400/outlined/group.svg";
 import Image from "@material-symbols/svg-400/outlined/image.svg";
@@ -95,6 +96,7 @@ const pictoMapping: {
   gear: Settings,
   "arrow.clockwise": Refresh,
   person: Person,
+  exclamation: Exclamation,
   "info.circle": Info,
   "person.2": Group,
   "arrowshape.turn.up.left": Reply,
