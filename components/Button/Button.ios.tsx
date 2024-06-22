@@ -14,6 +14,7 @@ import {
 import {
   dangerColor,
   primaryColor,
+  inversePrimaryColor,
   tertiaryBackgroundColor,
 } from "../../utils/colors";
 import Picto from "../Picto/Picto";
@@ -99,14 +100,14 @@ const useStyles = () => {
       justifyContent: "center",
     },
     buttonPrimaryText: {
-      color: "white",
+      color: inversePrimaryColor(colorScheme),
       textAlign: "center",
       fontWeight: "600",
       fontSize: 17,
     },
     buttonSecondary: {
       paddingRight: 15,
-      paddingLeft: 25,
+      paddingLeft: 15,
       borderRadius: 100,
       paddingVertical: 7,
     },
@@ -139,6 +140,7 @@ const useStyles = () => {
     },
     picto: {
       marginRight: 15,
+      marginLeft: 10,
     },
   });
 };

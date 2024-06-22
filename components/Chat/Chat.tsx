@@ -52,17 +52,26 @@ const getListArray = (
 ) => {
   if (!conversation) return [];
   const reverseArray = [];
-  for (let index = conversation.messagesIds.length - 1; index >= 0; index--) {
-    const messageId = conversation.messagesIds[index];
+  // Filter out unwanted content types before list or reactions out of order can mess up the logic
+  const filteredMessageIds = conversation.messagesIds.filter((messageId) => {
     const message = conversation.messages.get(messageId) as MessageToDisplay;
-    if (!message || (!message.content && !message.contentFallback)) continue;
+    if (!message || (!message.content && !message.contentFallback))
+      return false;
+
     // Reactions & read receipts are not displayed in the flow
     const notDisplayedContentTypes = [
       "xmtp.org/reaction:",
       "xmtp.org/readReceipt:",
     ];
-    if (notDisplayedContentTypes.some((c) => message.contentType.startsWith(c)))
-      continue;
+    return !notDisplayedContentTypes.some((c) =>
+      message.contentType.startsWith(c)
+    );
+  });
+
+  for (let index = filteredMessageIds.length - 1; index >= 0; index--) {
+    const messageId = filteredMessageIds[index];
+    const message = conversation.messages.get(messageId) as MessageToDisplay;
+
     message.fromMe =
       !!xmtpAddress &&
       xmtpAddress.toLowerCase() === message.senderAddress.toLowerCase();
@@ -71,7 +80,7 @@ const getListArray = (
     message.hasPreviousMessageInSeries = false;
 
     if (index > 0) {
-      const previousMessageId = conversation.messagesIds[index - 1];
+      const previousMessageId = filteredMessageIds[index - 1];
       const previousMessage = conversation.messages.get(previousMessageId);
       if (previousMessage) {
         message.dateChange =
@@ -79,7 +88,6 @@ const getListArray = (
         if (
           previousMessage.senderAddress === message.senderAddress &&
           !message.dateChange &&
-          !isContentType("reaction", previousMessage.contentType) &&
           !isContentType("groupUpdated", previousMessage.contentType)
         ) {
           message.hasPreviousMessageInSeries = true;
@@ -89,8 +97,8 @@ const getListArray = (
       message.dateChange = true;
     }
 
-    if (index < conversation.messagesIds.length - 1) {
-      const nextMessageId = conversation.messagesIds[index + 1];
+    if (index < filteredMessageIds.length - 1) {
+      const nextMessageId = filteredMessageIds[index + 1];
       const nextMessage = conversation.messages.get(nextMessageId);
       if (nextMessage) {
         // Here we need to check if next message has a date change
@@ -99,7 +107,6 @@ const getListArray = (
         if (
           nextMessage.senderAddress === message.senderAddress &&
           !nextMessageDateChange &&
-          !isContentType("reaction", nextMessage.contentType) &&
           !isContentType("groupUpdated", nextMessage.contentType)
         ) {
           message.hasNextMessageInSeries = true;

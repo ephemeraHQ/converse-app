@@ -37,20 +37,20 @@ export default function ConversationNav(
     <NativeStack.Screen
       name="Conversation"
       options={{
+        headerShadowVisible: false,
         animation: navigationAnimation,
         headerLeft: () => (
           <TouchableOpacity
-            onPress={() => navigate("Chats")}
-            style={{
-              height: 40,
-              justifyContent: "center",
-              marginLeft: 8,
+            onPress={() => {
+              navigate("Chats");
             }}
+            style={{ height: 40, justifyContent: "center", paddingRight: 16 }}
             hitSlop={{ top: 20, bottom: 20, left: 20, right: 10 }}
           >
             <Picto
               picto="chevron.left"
               size={16}
+              weight="semibold"
               color={textPrimaryColor(colorScheme)}
             />
           </TouchableOpacity>
