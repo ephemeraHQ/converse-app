@@ -250,9 +250,10 @@ function ChatMessage({ message, colorScheme, isGroup, isFrame }: Props) {
               <MessageSenderAvatar message={message} />
             )}
             <View style={{ flex: 1 }}>
-              {isGroup && !message.fromMe && showInBubble && (
-                <MessageSender message={message} />
-              )}
+              {isGroup &&
+                !message.fromMe &&
+                !message.hasPreviousMessageInSeries &&
+                showInBubble && <MessageSender message={message} />}
               <View
                 style={{
                   alignSelf: message.fromMe ? "flex-end" : "flex-start",
@@ -369,7 +370,7 @@ function ChatMessage({ message, colorScheme, isGroup, isFrame }: Props) {
                       </Text>
                     </TouchableOpacity>
                   )}
-                  {!message.hasNextMessageInSeries && (
+                  {!message.hasNextMessageInSeries && message.fromMe && (
                     <View
                       style={[
                         styles.statusContainer,
@@ -481,7 +482,7 @@ const useStyles = () => {
     },
     statusContainer: {
       marginLeft: "auto",
-      marginVertical: 7,
+      marginVertical: 5,
     },
     linkToFrame: {
       fontSize: 11,
