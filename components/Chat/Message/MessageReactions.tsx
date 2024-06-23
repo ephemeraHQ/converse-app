@@ -113,6 +113,7 @@ const useStyles = () => {
       paddingHorizontal: 6,
       borderRadius: 8,
       flexDirection: "row",
+      alignItems: "center",
     },
     emojis: {
       fontSize: 16,
@@ -121,7 +122,7 @@ const useStyles = () => {
     count: {
       fontSize: 15,
       color: textSecondaryColor(colorScheme),
-      marginLeft: 5,
+      marginLeft: 4,
     },
   });
 };
