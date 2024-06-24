@@ -10,8 +10,6 @@ import {
   useSettingsStore,
 } from "../data/store/accountsStore";
 import { useSelect } from "../data/store/storeHelpers";
-import { getGroupNameQueryData } from "../queries/useGroupNameQuery";
-import { getGroupPhotoQueryData } from "../queries/useGroupPhotoQuery";
 import { NavigationParamList } from "../screens/Navigation/Navigation";
 import { useIsSplitScreen } from "../screens/Navigation/navHelpers";
 import { backgroundColor } from "../utils/colors";
@@ -21,6 +19,7 @@ import {
 } from "../utils/conversation";
 import { getPreferredAvatar } from "../utils/profile";
 import { conversationName } from "../utils/str";
+import { GroupConversationItem } from "./ConversationList/GroupConversationItem";
 import ConversationListItem from "./ConversationListItem";
 
 type Props = {
@@ -107,53 +106,11 @@ export default function ConversationFlashList({
         ? profiles[conversation.peerAddress]?.socials
         : undefined;
       if (conversation.isGroup) {
-        const groupName = getGroupNameQueryData(
-          userAddress,
-          conversation.topic
-        );
-        const groupImage = getGroupPhotoQueryData(
-          userAddress,
-          conversation.topic
-        );
         return (
-          <ConversationListItem
-            onLongPress={() => {
-              setPinnedConversations([conversation]);
-            }}
+          <GroupConversationItem
+            conversation={conversation}
             navigation={navigation}
             route={route}
-            conversationPeerAddress={conversation.peerAddress}
-            conversationPeerAvatar={groupImage}
-            colorScheme={colorScheme}
-            conversationTopic={conversation.topic}
-            conversationTime={
-              lastMessagePreview?.message?.sent || conversation.createdAt
-            }
-            conversationName={
-              groupName ? groupName : conversationName(conversation)
-            }
-            showUnread={(() => {
-              if (!initialLoadDoneOnce) return false;
-              if (!lastMessagePreview) return false;
-              // Manually marked as unread
-              if (topicsData[conversation.topic]?.status === "unread")
-                return true;
-              // If not manually markes as unread, we only show badge if last message
-              // not from me
-              if (lastMessagePreview.message.senderAddress === userAddress)
-                return false;
-              const readUntil = topicsData[conversation.topic]?.readUntil || 0;
-              return readUntil < lastMessagePreview.message.sent;
-            })()}
-            lastMessagePreview={
-              lastMessagePreview ? lastMessagePreview.contentPreview : ""
-            }
-            lastMessageStatus={lastMessagePreview?.message?.status}
-            lastMessageFromMe={
-              !!lastMessagePreview &&
-              lastMessagePreview.message?.senderAddress === userAddress
-            }
-            conversationOpened={conversation.topic === openedConversationTopic}
           />
         );
       }
