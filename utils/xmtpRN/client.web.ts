@@ -37,3 +37,7 @@ export const isOnXmtp = async (address: string) =>
   Client.canMessage(getCleanAddress(address), {
     env,
   });
+
+export const dropXmtpClientsDbConnections = async () => {};
+
+export const reconnectXmtpClientsDbConnections = async () => {};
