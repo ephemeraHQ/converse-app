@@ -114,6 +114,7 @@ func computeSpamScoreGroupWelcome(client: XMTP.Client, group: XMTP.Group) async 
 func computeSpamScoreGroupMessage(client: XMTP.Client, group: XMTP.Group, decodedMessage: DecodedMessage, apiURI: String?) async -> Double {
   var senderSpamScore: Double = 0
   do {
+
     try await client.contacts.refreshConsentList()
     let groupDenied = await client.contacts.isGroupDenied(groupId: group.id)
     if groupDenied {
