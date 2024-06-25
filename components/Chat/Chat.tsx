@@ -375,13 +375,16 @@ const useStyles = () => {
       flex: 1,
       justifyContent: "flex-end",
       backgroundColor: backgroundColor(colorScheme),
+      overflow: "visible",
     },
     chatContent: {
       backgroundColor: backgroundColor(colorScheme),
       flex: 1,
+      overflow: "visible",
     },
     chat: {
       backgroundColor: backgroundColor(colorScheme),
+      overflow: "visible",
     },
     inputBottomFiller: {
       position: "absolute",
