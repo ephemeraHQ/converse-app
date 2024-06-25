@@ -19,6 +19,9 @@ export enum QueryKeys {
 
   // Permissions
   GROUP_PERMISSIONS = "groupPermissions",
+
+  // Group Consent
+  GROUP_CONSENT = "groupConsent",
 }
 
 export const groupsQueryKey = (account: string) => [QueryKeys.GROUPS, account];
@@ -78,6 +81,12 @@ export const groupPinnedFrameQueryKey = (account: string, topic: string) => [
 
 export const groupPermissionsQueryKey = (account: string, topic: string) => [
   QueryKeys.GROUP_PERMISSIONS,
+  account,
+  topic,
+];
+
+export const groupConsentQueryKey = (account: string, topic: string) => [
+  QueryKeys.GROUP_CONSENT,
   account,
   topic,
 ];
