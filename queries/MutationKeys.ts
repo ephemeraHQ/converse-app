@@ -17,6 +17,10 @@ export enum MutationKeys {
   SET_GROUP_DESCRIPTION = "setGroupDescription",
   SET_GROUP_PHOTO = "setGroupPhoto",
   SET_PINNED_FRAME = "setPinnedFrame",
+
+  // Group Consent
+  ALLOW_GROUP = "allowGroup",
+  BLOCK_GROUP = "blockGroup",
 }
 
 export const sendMessageMutationKey = (
@@ -79,6 +83,18 @@ export const setGroupPhotoMutationKey = (account: string, topic: string) => [
 
 export const setPinnedFrameMutationKey = (account: string, topic: string) => [
   MutationKeys.SET_PINNED_FRAME,
+  account,
+  topic,
+];
+
+export const allowGroupMutationKey = (account: string, topic: string) => [
+  MutationKeys.ALLOW_GROUP,
+  account,
+  topic,
+];
+
+export const blockGroupMutationKey = (account: string, topic: string) => [
+  MutationKeys.BLOCK_GROUP,
   account,
   topic,
 ];

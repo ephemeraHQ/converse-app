@@ -26,12 +26,14 @@ import {
   useProfilesStore,
 } from "../data/store/accountsStore";
 import { XmtpGroupConversation } from "../data/store/chatStore";
+import { useGroupConsent } from "../hooks/useGroupConsent";
 import { useGroupMembers } from "../hooks/useGroupMembers";
 import { useGroupName } from "../hooks/useGroupName";
 import { useGroupPhoto } from "../hooks/useGroupPhoto";
 import { usePhotoSelect } from "../hooks/usePhotoSelect";
 import {
   backgroundColor,
+  dangerColor,
   primaryColor,
   textPrimaryColor,
   textSecondaryColor,
@@ -64,6 +66,7 @@ export default function GroupScreen({
   const { groupName, setGroupName } = useGroupName(topic);
 
   const { groupPhoto, setGroupPhoto } = useGroupPhoto(topic);
+  const { consent, allowGroup, blockGroup } = useGroupConsent(topic);
   const onPhotoChange = useCallback(
     (newImageUrl: string) => {
       setGroupPhoto(newImageUrl);
@@ -237,6 +240,32 @@ export default function GroupScreen({
     topic,
   ]);
 
+  const consentTableViewItems = useMemo(() => {
+    const items: TableViewItemType[] = [];
+    if (consent !== "allowed") {
+      items.push({
+        id: "allow_group",
+        title: "Allow group",
+        titleColor: primaryColor(colorScheme),
+        action: () => {
+          allowGroup();
+        },
+      });
+    }
+    if (consent !== "denied") {
+      items.push({
+        id: "block_group",
+        title: "Block group",
+        titleColor: dangerColor(colorScheme),
+        action: () => {
+          blockGroup();
+        },
+      });
+    }
+
+    return items;
+  }, [consent, allowGroup, blockGroup, colorScheme]);
+
   const canEditGroupMetadata =
     currentAccountIsAdmin ||
     currentAccountIsSuperAdmin ||
@@ -287,6 +316,7 @@ export default function GroupScreen({
         </Text>
       )}
       <TableView items={tableViewItems} title="MEMBERS" />
+      <TableView items={consentTableViewItems} title="CONSENT" />
       <View style={{ height: insets.bottom }} />
     </ScrollView>
   );

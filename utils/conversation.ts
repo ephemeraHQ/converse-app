@@ -309,7 +309,8 @@ export const conversationShouldBeDisplayed = (
   const isNotEmpty = conversation.messages.size > 0;
   const isDeleted = topicsData[conversation.topic]?.status === "deleted";
   const isBlocked = conversation.isGroup
-    ? false // No consent for groups right now
+    ? // TODO: Add more conditions to filter out spam
+      false // No consent for groups right now
     : peersStatus[conversation.peerAddress.toLowerCase()] === "blocked";
   const isV1 = conversation.version === "v1";
   const isForbidden = conversation.topic.includes("\x00"); // Forbidden character that breaks
@@ -331,6 +332,7 @@ export const conversationShouldBeInInbox = (
   conversation: ConversationWithLastMessagePreview,
   peersStatus: { [peer: string]: "blocked" | "consented" }
 ) => {
+  // TODO: Add more conditions to filter out spam
   const isConsented = conversation.isGroup
     ? true
     : peersStatus[conversation.peerAddress.toLowerCase()] === "consented";
