@@ -130,8 +130,8 @@ func handleGroupWelcome(xmtpClient: XMTP.Client, apiURI: String?, pushToken: Str
       }
     }
   } catch {
-    sentryTrackError(error: error, extras: ["message": "NOTIFICATION_SAVE_MESSAGE_ERROR_2", "topic": conversation.topic])
-    print("[NotificationExtension] Error fetching messages: \(error)")
+    sentryTrackError(error: error, extras: ["message": "NOTIFICATION_SAVE_MESSAGE_ERROR_3", "topic": conversation.topic])
+    print("[NotificationExtension] Error handling group invites: \(error)")
   }
   
   return (shouldShowNotification, messageId)
@@ -155,6 +155,7 @@ func handleGroupMessage(xmtpClient: XMTP.Client, envelope: XMTP.Envelope, apiURI
           let spamScore = await computeSpamScoreGroupMessage(client: xmtpClient, group: group, decodedMessage: decodedMessage, apiURI: apiURI)
           
           if spamScore < 0 { // Message is going to main inbox
+            shouldShowNotification = true
             if let groupName = try? group.groupName() {
               bestAttemptContent.title = groupName
             }
@@ -170,7 +171,9 @@ func handleGroupMessage(xmtpClient: XMTP.Client, envelope: XMTP.Envelope, apiURI
       }
     }
   } catch {
-    
+    sentryTrackError(error: error, extras: ["message": "NOTIFICATION_SAVE_MESSAGE_ERROR_4", "topic": contentTopic])
+    print("[NotificationExtension] Error handling group message: \(error)")
+
   }
   return (shouldShowNotification, messageId)
 }

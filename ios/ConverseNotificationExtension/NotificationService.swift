@@ -92,6 +92,8 @@ func handleNotificationAsync(contentHandler: ((UNNotificationContent) -> Void), 
       incrementBadge(for: content)
       contentHandler(content)
     } else {
+      content.title = ""
+      content.body = ""
       cancelNotification(contentHandler: contentHandler)
       return
     }
