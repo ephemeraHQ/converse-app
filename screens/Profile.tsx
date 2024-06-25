@@ -128,20 +128,19 @@ export default function ProfileScreen({
       return array.map((e) => {
         const title = (e as any)[titleKey];
         const value = (e as any)[valueKey];
+        const handleCopyAddress = () => {
+          setCopiedAddresses((c) => ({ ...c, [title]: true }));
+          Clipboard.setString(value);
+          setTimeout(() => {
+            setCopiedAddresses((c) => ({ ...c, [title]: false }));
+          }, 1000);
+        };
         return {
           id: title,
           title,
           titleNumberOfLines: 2,
           rightView: (
-            <TouchableOpacity
-              onPress={() => {
-                setCopiedAddresses((c) => ({ ...c, [title]: true }));
-                Clipboard.setString(value);
-                setTimeout(() => {
-                  setCopiedAddresses((c) => ({ ...c, [title]: false }));
-                }, 1000);
-              }}
-            >
+            <TouchableOpacity onPress={handleCopyAddress}>
               <TableViewPicto
                 symbol={copiedAddresses[title] ? "checkmark" : "doc.on.doc"}
                 color={
@@ -203,13 +202,7 @@ export default function ProfileScreen({
           leftView: imageURI ? (
             <TableViewImage imageURI={getIPFSAssetURI(imageURI)} />
           ) : (
-            <TableViewEmoji
-              emoji="👋"
-              style={{
-                backgroundColor: "rgba(118, 118, 128, 0.12)",
-                borderRadius: 30,
-              }}
-            />
+            <TableViewEmoji emoji="👋" style={styles.emoji} />
           ),
           rightView: (
             <TableViewPicto
@@ -220,7 +213,7 @@ export default function ProfileScreen({
         };
       }) as TableViewItemType[];
     },
-    [colorScheme]
+    [colorScheme, styles.emoji]
   );
 
   const socialItems = [
@@ -744,6 +737,10 @@ const useStyles = () => {
       marginBottom: 10,
       marginTop: 23,
       alignSelf: "center",
+    },
+    emoji: {
+      backgroundColor: "rgba(118, 118, 128, 0.12)",
+      borderRadius: 30,
     },
   });
 };
