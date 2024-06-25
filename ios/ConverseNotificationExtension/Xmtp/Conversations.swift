@@ -59,27 +59,6 @@ func saveConversation(account: String, topic: String, peerAddress: String, creat
   mmkv?.set(encodedString!, forKey: "saved-notifications-conversations")
 }
 
-func saveGroup(account: String, topic: String, groupMembers: [String], groupAdmins: [String?], groupSuperAdmins: [String?], groupPermissionLevel: String, groupName: String?, createdAt: Int, context: ConversationContext?, spamScore: Double?) throws {
-  var savedGroup = SavedNotificationConversation(
-    topic: topic,
-    peerAddress: topic, 
-    createdAt: createdAt,
-    context: context,
-    account: account,
-    isGroup: true,
-    groupMembers: groupMembers,
-    groupAdmins: groupAdmins, 
-    groupSuperAdmins: groupSuperAdmins,
-    groupPermissionLevel: groupPermissionLevel,
-    groupName: groupName)
-  var savedConversationsList = loadSavedConversations()
-  savedConversationsList.append(savedGroup)
-  let encodedValue = try JSONEncoder().encode(savedConversationsList)
-  let encodedString = String(data: encodedValue, encoding: .utf8)
-  let mmkv = getMmkv()
-  mmkv?.set(encodedString!, forKey: "saved-notifications-conversations")
-}
-
 func getSavedConversationTitle(contentTopic: String)-> String {
   let mmkv = getMmkv()
   let conversationDictString = mmkv?.string(forKey: "conversation-\(contentTopic)")

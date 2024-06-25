@@ -24,7 +24,6 @@ func handleNotificationAsync(contentHandler: ((UNNotificationContent) -> Void), 
     }
     
     sentryAddBreadcrumb(message: "Received a notification for account \(account)")
-    
     let apiURI = getApiURI()
     let pushToken = getKeychainValue(forKey: "PUSH_TOKEN")
     let accounts = getAccounts()
@@ -76,6 +75,8 @@ func handleNotificationAsync(contentHandler: ((UNNotificationContent) -> Void), 
           welcomeTopic: contentTopic,
           bestAttemptContent: &content
         )
+      } else if isGroupMessageTopic(topic: contentTopic) {
+        (shouldShowNotification, messageId) = await handleGroupMessage(xmtpClient: xmtpClient, envelope: envelope, apiURI: apiURI, bestAttemptContent: &content)
       } else {
         sentryAddBreadcrumb(message: "topic \(contentTopic) is not invite topic")
         (shouldShowNotification, messageId) = await handleOngoingConversationMessage(
@@ -91,10 +92,17 @@ func handleNotificationAsync(contentHandler: ((UNNotificationContent) -> Void), 
       incrementBadge(for: content)
       contentHandler(content)
     } else {
-      contentHandler(UNNotificationContent())
+      cancelNotification(contentHandler: contentHandler)
       return
     }
   }
+}
+
+func cancelNotification(contentHandler: ((UNNotificationContent) -> Void)) {
+  let emptyContent = UNMutableNotificationContent()
+  emptyContent.title = ""
+  emptyContent.body = ""
+  contentHandler(emptyContent)
 }
 
 class NotificationService: UNNotificationServiceExtension {
