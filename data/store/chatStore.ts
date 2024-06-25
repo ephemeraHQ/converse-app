@@ -59,7 +59,7 @@ export type XmtpGroupConversation = XmtpConversationShared & {
   groupMembers: string[];
   groupAdmins: string[];
   groupSuperAdmins: string[];
-  groupPermissionLevel: "all_members" | "admin_only";
+  groupPermissionLevel: "all_members" | "admin_only" | "custom_policy";
   groupName?: string;
 };
 
