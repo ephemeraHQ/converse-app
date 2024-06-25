@@ -8,8 +8,9 @@ import {
   StyleSheet,
   DimensionValue,
 } from "react-native";
+import ContextMenu from "react-native-context-menu-view";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
-import Reanimated, {
+import {
   AnimatedStyle,
   Easing,
   ReduceMotion,
@@ -18,14 +19,13 @@ import Reanimated, {
   useSharedValue,
   withTiming,
 } from "react-native-reanimated";
-import { SvgProps } from "react-native-svg";
 
-import _MessageTail from "../../../assets/message-tail.svg";
 import {
   currentAccount,
   useCurrentAccount,
   useSettingsStore,
 } from "../../../data/store/accountsStore";
+import { useAppStore } from "../../../data/store/appStore";
 import { XmtpConversation } from "../../../data/store/chatStore";
 import { useFramesStore } from "../../../data/store/framesStore";
 import { ReanimatedTouchableOpacity } from "../../../utils/animations";
@@ -52,31 +52,7 @@ import { consentToPeersOnProtocol } from "../../../utils/xmtpRN/conversations";
 import EmojiPicker from "../../../vendor/rn-emoji-keyboard";
 import { showActionSheetWithOptions } from "../../StateHandlers/ActionSheetStateHandler";
 import { MessageToDisplay } from "./Message";
-
-class MessageTailComponent extends React.Component<SvgProps> {
-  render() {
-    return <_MessageTail {...this.props} />;
-  }
-}
-
-const MessageTailAnimated =
-  Reanimated.createAnimatedComponent(MessageTailComponent);
-
-const MessageTail = (props: any) => {
-  return (
-    <MessageTailAnimated
-      {...props}
-      fill={
-        // No tail needed if no background
-        props.hideBackground
-          ? "transparent"
-          : props.fromMe
-          ? myMessageBubbleColor(props.colorScheme)
-          : messageBubbleColor(props.colorScheme)
-      }
-    />
-  );
-};
+import MessageTail from "./MessageTail";
 
 type Props = {
   children: React.ReactNode;
@@ -338,6 +314,67 @@ export default function ChatMessageActions({
     };
   }, [highlightMessage]);
 
+  const contextMenuItems = useMemo(() => {
+    const items = [];
+
+    if (canAddReaction) {
+      items.push({ title: "Add a reaction", systemIcon: "smiley" });
+    }
+    items.push({ title: "Reply", systemIcon: "arrowshape.turn.up.left" });
+    if (!isAttachment && !isTransaction) {
+      items.push({ title: "Copy message", systemIcon: "doc.on.doc" });
+      if (!message.fromMe) {
+        items.push({
+          title: "Report message",
+          systemIcon: "exclamationmark.triangle",
+        });
+      }
+    }
+
+    return items;
+  }, [canAddReaction, isAttachment, isTransaction, message.fromMe]);
+
+  const handleContextMenuAction = useCallback(
+    (event: { nativeEvent: { index: number } }) => {
+      const { index } = event.nativeEvent;
+      switch (contextMenuItems[index].title) {
+        case "Add a reaction":
+          showReactionModal();
+          break;
+        case "Reply":
+          triggerReplyToMessage();
+          break;
+        case "Copy message":
+          if (message.content) {
+            Clipboard.setString(message.content);
+          } else if (message.contentFallback) {
+            Clipboard.setString(message.contentFallback);
+          }
+          break;
+        case "Report message":
+          Alert.alert(
+            "Report this message",
+            "This message will be forwarded to Converse. The contact will not be informed.",
+            [
+              { text: "Cancel", style: "cancel" },
+              { text: "Report", onPress: report },
+              { text: "Report and block", onPress: reportAndBlock },
+            ]
+          );
+          break;
+      }
+      useAppStore.getState().setContextMenuShown(false);
+    },
+    [
+      contextMenuItems,
+      showReactionModal,
+      triggerReplyToMessage,
+      message,
+      report,
+      reportAndBlock,
+    ]
+  );
+
   // We use a mix of Gesture Detector AND TouchableOpacity
   // because GestureDetector is better for dual tap but if
   // we add the gesture detector for long press the long press
@@ -346,75 +383,78 @@ export default function ChatMessageActions({
   return (
     <>
       <GestureDetector gesture={doubleTapGesture}>
-        <ReanimatedTouchableOpacity
-          activeOpacity={1}
-          style={[
-            styles.messageBubble,
-            message.fromMe ? styles.messageBubbleMe : undefined,
-            {
-              backgroundColor: hideBackground
-                ? "transparent"
-                : initialBubbleBackgroundColor,
-            },
-            highlightingMessage ? animatedBackgroundStyle : undefined,
-            Platform.select({
-              default: {},
-              android: {
-                // Messages not from me
-                borderBottomLeftRadius:
-                  !message.fromMe && message.hasNextMessageInSeries ? 2 : 18,
-                borderTopLeftRadius:
-                  !message.fromMe && message.hasPreviousMessageInSeries
-                    ? 2
-                    : 18,
-                // Messages from me
-                borderBottomRightRadius:
-                  message.fromMe && message.hasNextMessageInSeries ? 2 : 18,
-                borderTopRightRadius:
-                  message.fromMe && message.hasPreviousMessageInSeries ? 2 : 18,
-              },
-            }),
-            {
-              maxWidth: messageMaxWidth,
-            },
-          ]}
-          onPress={() => {
-            if (isAttachment) {
-              // Transfering attachment opening intent to component
-              converseEventEmitter.emit(
-                `openAttachmentForMessage-${message.id}`
-              );
-            }
-            if (isTransaction) {
-              // Transfering event to component
-              converseEventEmitter.emit(
-                `showActionSheetForTxRef-${message.id}`
-              );
-            }
-          }}
-          onLongPress={showMessageActionSheet}
+        <ContextMenu
+          actions={contextMenuItems}
+          onPress={handleContextMenuAction}
+          onCancel={() => useAppStore.getState().setContextMenuShown(false)}
+          previewBackgroundColor={initialBubbleBackgroundColor}
+          style={[{ width: "100%" }, { overflow: "visible" }]}
         >
-          {children}
+          <ReanimatedTouchableOpacity
+            activeOpacity={1}
+            style={[
+              styles.messageBubble,
+              message.fromMe ? styles.messageBubbleMe : undefined,
+              {
+                backgroundColor: hideBackground
+                  ? "transparent"
+                  : initialBubbleBackgroundColor,
+              },
+              highlightingMessage ? animatedBackgroundStyle : undefined,
+              Platform.select({
+                default: {},
+                android: {
+                  // Messages not from me
+                  borderBottomLeftRadius:
+                    !message.fromMe && message.hasNextMessageInSeries ? 2 : 18,
+                  borderTopLeftRadius:
+                    !message.fromMe && message.hasPreviousMessageInSeries
+                      ? 2
+                      : 18,
+                  // Messages from me
+                  borderBottomRightRadius:
+                    message.fromMe && message.hasNextMessageInSeries ? 2 : 18,
+                  borderTopRightRadius:
+                    message.fromMe && message.hasPreviousMessageInSeries
+                      ? 2
+                      : 18,
+                },
+              }),
+              {
+                maxWidth: messageMaxWidth,
+              },
+            ]}
+            onPress={() => {
+              if (isAttachment) {
+                // Transfering attachment opening intent to component
+                converseEventEmitter.emit(
+                  `openAttachmentForMessage-${message.id}`
+                );
+              }
+              if (isTransaction) {
+                // Transfering event to component
+                converseEventEmitter.emit(
+                  `showActionSheetForTxRef-${message.id}`
+                );
+              }
+            }}
+            onLongPress={() => useAppStore.getState().setContextMenuShown(true)}
+          >
+            {children}
+          </ReanimatedTouchableOpacity>
           {!message.hasNextMessageInSeries &&
             !isFrame &&
             !isAttachment &&
             !isTransaction &&
             (Platform.OS === "ios" || Platform.OS === "web") && (
               <MessageTail
-                style={[
-                  styles.messageTail,
-                  {
-                    color: initialBubbleBackgroundColor,
-                  },
-                  highlightingMessage ? iosAnimatedTailStyle : undefined,
-                  message.fromMe ? styles.messageTailMe : {},
-                ]}
+                style={highlightingMessage ? iosAnimatedTailStyle : undefined}
                 fromMe={message.fromMe}
                 colorScheme={colorScheme}
                 hideBackground={hideBackground}
               />
             )}
-        </ReanimatedTouchableOpacity>
+        </ContextMenu>
       </GestureDetector>
       {/* <View style={{width: 50, height: 20, backgroundColor: "red"}} />
       <GestureDetector gesture={composedGesture}>{children}</GestureDetector> */}
