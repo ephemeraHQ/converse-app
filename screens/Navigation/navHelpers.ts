@@ -1,14 +1,14 @@
 import { StackActions, getStateFromPath } from "@react-navigation/native";
-import { ColorSchemeName, Platform, useWindowDimensions } from "react-native";
-
-import { initialURL } from "../../components/StateHandlers/InitialStateHandler";
-import config from "../../config";
 import {
   backgroundColor,
   headerTitleStyle,
   listItemSeparatorColor,
   textPrimaryColor,
-} from "../../utils/colors";
+} from "@styles/colors";
+import { ColorSchemeName, Platform, useWindowDimensions } from "react-native";
+
+import { initialURL } from "../../components/StateHandlers/InitialStateHandler";
+import config from "../../config";
 import { isDesktop } from "../../utils/device";
 
 export const getConverseStateFromPath = (path: string, options: any) => {

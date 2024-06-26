@@ -1,4 +1,10 @@
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
+import {
+  backgroundColor,
+  headerTitleStyle,
+  textPrimaryColor,
+  textSecondaryColor,
+} from "@styles/colors";
 import { isAddress } from "ethers/lib/utils";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { Platform, StyleSheet, useColorScheme, View } from "react-native";
@@ -12,12 +18,6 @@ import {
   useSettingsStore,
 } from "../data/store/accountsStore";
 import { useSelect } from "../data/store/storeHelpers";
-import {
-  backgroundColor,
-  headerTitleStyle,
-  textPrimaryColor,
-  textSecondaryColor,
-} from "../utils/colors";
 import {
   ConversationContext,
   openMainConversationWithPeer,

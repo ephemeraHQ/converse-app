@@ -1,9 +1,9 @@
-import { Platform, useColorScheme } from "react-native";
-
 import {
   listItemSeparatorColor,
   navigationSecondaryBackgroundColor,
-} from "../../utils/colors";
+} from "@styles/colors";
+import { Platform, useColorScheme } from "react-native";
+
 import ConverseMatchMaker from "../ConverseMatchMaker";
 import { NativeStack, navigationAnimation } from "./Navigation";
 

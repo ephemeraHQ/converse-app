@@ -1,22 +1,22 @@
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import {
+  backgroundColor,
+  itemSeparatorColor,
+  textSecondaryColor,
+} from "@styles/colors";
 import { useCallback } from "react";
 import {
   FlatList,
   Keyboard,
   Platform,
   StyleSheet,
+  Text,
   View,
   useColorScheme,
-  Text,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { ProfileSocials } from "../../data/store/profilesStore";
-import {
-  backgroundColor,
-  itemSeparatorColor,
-  textSecondaryColor,
-} from "../../utils/colors";
 import { ProfileSearchItem } from "./ProfileSearchItem";
 
 export default function ProfileSearch({

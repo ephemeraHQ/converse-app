@@ -1,12 +1,19 @@
 import Clipboard from "@react-native-clipboard/clipboard";
+import {
+  actionSheetColors,
+  messageBubbleColor,
+  messageHighlightedBubbleColor,
+  myMessageBubbleColor,
+  myMessageHighlightedBubbleColor,
+} from "@styles/colors";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import {
   Alert,
   ColorSchemeName,
-  Platform,
-  useColorScheme,
-  StyleSheet,
   DimensionValue,
+  Platform,
+  StyleSheet,
+  useColorScheme,
 } from "react-native";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import Reanimated, {
@@ -31,13 +38,6 @@ import { useFramesStore } from "../../../data/store/framesStore";
 import { ReanimatedTouchableOpacity } from "../../../utils/animations";
 import { reportMessage } from "../../../utils/api";
 import { isAttachmentMessage } from "../../../utils/attachment/helpers";
-import {
-  actionSheetColors,
-  messageBubbleColor,
-  messageHighlightedBubbleColor,
-  myMessageBubbleColor,
-  myMessageHighlightedBubbleColor,
-} from "../../../utils/colors";
 import { useConversationContext } from "../../../utils/conversation";
 import { isDesktop } from "../../../utils/device";
 import { converseEventEmitter } from "../../../utils/events";

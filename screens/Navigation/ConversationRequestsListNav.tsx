@@ -1,5 +1,10 @@
+import {
+  actionSheetColors,
+  backgroundColor,
+  textPrimaryColor,
+} from "@styles/colors";
 import React, { useCallback, useRef, useState } from "react";
-import { Platform, View, useColorScheme, Text, ScrollView } from "react-native";
+import { Platform, ScrollView, Text, View, useColorScheme } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 
 import ActivityIndicator from "../../components/ActivityIndicator/ActivityIndicator";
@@ -12,11 +17,6 @@ import {
   useChatStore,
   useCurrentAccount,
 } from "../../data/store/accountsStore";
-import {
-  actionSheetColors,
-  backgroundColor,
-  textPrimaryColor,
-} from "../../utils/colors";
 import {
   consentToPeersOnProtocol,
   sortRequestsBySpamScore,

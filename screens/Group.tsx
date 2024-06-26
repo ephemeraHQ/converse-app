@@ -1,4 +1,11 @@
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
+import {
+  backgroundColor,
+  dangerColor,
+  primaryColor,
+  textPrimaryColor,
+  textSecondaryColor,
+} from "@styles/colors";
 import React, { useCallback, useMemo, useState } from "react";
 import {
   Alert,
@@ -32,13 +39,6 @@ import { useGroupName } from "../hooks/useGroupName";
 import { useGroupPhoto } from "../hooks/useGroupPhoto";
 import { usePhotoSelect } from "../hooks/usePhotoSelect";
 import { uploadFile } from "../utils/attachment";
-import {
-  backgroundColor,
-  dangerColor,
-  primaryColor,
-  textPrimaryColor,
-  textSecondaryColor,
-} from "../utils/colors";
 import {
   getAccountIsAdmin,
   getAccountIsSuperAdmin,

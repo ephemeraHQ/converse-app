@@ -1,24 +1,24 @@
+import { dangerColor } from "@styles/colors";
+import {
+  setAndroidColors,
+  setAndroidSystemColor,
+} from "@styles/colors/helpers";
 import { Image } from "expo-image";
 import { StatusBar } from "expo-status-bar";
 import { useCallback, useEffect } from "react";
 import {
-  StyleSheet,
-  useColorScheme,
-  Text,
-  View,
-  TouchableOpacity,
   Platform,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  useColorScheme,
+  View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import SendButton from "../../../assets/send-button.svg";
 import { useAppStore } from "../../../data/store/appStore";
 import { useSelect } from "../../../data/store/storeHelpers";
-import { dangerColor } from "../../../utils/colors";
-import {
-  setAndroidColors,
-  setAndroidSystemColor,
-} from "../../../utils/colors/helpers";
 import ActivityIndicator from "../../ActivityIndicator/ActivityIndicator";
 import Picto from "../../Picto/Picto";
 

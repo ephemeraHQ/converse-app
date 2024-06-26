@@ -1,3 +1,9 @@
+import {
+  dangerColor,
+  inversePrimaryColor,
+  primaryColor,
+  tertiaryBackgroundColor,
+} from "@styles/colors";
 import React from "react";
 import {
   GestureResponderEvent,
@@ -11,12 +17,6 @@ import {
   ViewStyle,
 } from "react-native";
 
-import {
-  dangerColor,
-  primaryColor,
-  inversePrimaryColor,
-  tertiaryBackgroundColor,
-} from "../../utils/colors";
 import Picto from "../Picto/Picto";
 
 type Props = {

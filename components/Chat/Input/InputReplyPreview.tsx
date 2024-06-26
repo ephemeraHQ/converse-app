@@ -1,19 +1,19 @@
 import {
-  View,
-  useColorScheme,
+  backgroundColor,
+  textPrimaryColor,
+  textSecondaryColor,
+} from "@styles/colors";
+import {
+  Platform,
   StyleSheet,
   Text,
-  Platform,
   TouchableOpacity,
+  View,
+  useColorScheme,
 } from "react-native";
 
 import { useCurrentAccount } from "../../../data/store/accountsStore";
 import { isAttachmentMessage } from "../../../utils/attachment/helpers";
-import {
-  backgroundColor,
-  textPrimaryColor,
-  textSecondaryColor,
-} from "../../../utils/colors";
 import { getRelativeDateTime } from "../../../utils/date";
 import { getReadableProfile } from "../../../utils/str";
 import { isTransactionMessage } from "../../../utils/transaction";
@@ -39,13 +39,13 @@ export default function ChatInputReplyPreview({
   return (
     <View style={styles.replyContainer}>
       <View style={styles.messagePreview}>
-        <Text style={[styles.replyToUsername]}>
+        <Text style={styles.replyToUsername}>
           {currentAccount.toLowerCase() ===
           replyingToMessage?.senderAddress?.toLowerCase()
             ? "You"
             : readableProfile}
         </Text>
-        <Text style={[styles.replyToMessage]} numberOfLines={1}>
+        <Text style={styles.replyToMessage} numberOfLines={1}>
           {isAttachmentMessage(replyingToMessage.contentType)
             ? `📎 Media from ${getRelativeDateTime(replyingToMessage.sent)}`
             : isTransactionMessage(replyingToMessage.contentType)

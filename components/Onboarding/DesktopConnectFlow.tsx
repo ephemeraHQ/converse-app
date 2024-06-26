@@ -1,7 +1,12 @@
+import {
+  primaryColor,
+  textPrimaryColor,
+  textSecondaryColor,
+} from "@styles/colors";
 import { PrivateKey, decrypt } from "eciesjs";
 import * as Linking from "expo-linking";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { StyleSheet, useColorScheme, Text, Platform } from "react-native";
+import { Platform, StyleSheet, Text, useColorScheme } from "react-native";
 
 import { initDb } from "../../data/db";
 import { refreshProfileForAddress } from "../../data/helpers/profiles/profilesUpdate";
@@ -13,11 +18,6 @@ import {
   markDesktopSessionDone,
   openDesktopSession,
 } from "../../utils/api";
-import {
-  primaryColor,
-  textPrimaryColor,
-  textSecondaryColor,
-} from "../../utils/colors";
 import { isDesktop } from "../../utils/device";
 import { saveXmtpKey } from "../../utils/keychain/helpers";
 import { getXmtpClientFromBase64Key } from "../../utils/xmtpRN/client";

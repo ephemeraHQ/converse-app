@@ -1,11 +1,11 @@
+import {
+  headerTitleStyle,
+  textPrimaryColor,
+  textSecondaryColor,
+} from "@styles/colors";
 import { Platform, useColorScheme } from "react-native";
 
 import UserProfile from "../../components/Onboarding/UserProfile";
-import {
-  textPrimaryColor,
-  textSecondaryColor,
-  headerTitleStyle,
-} from "../../utils/colors";
 import { NativeStack } from "./Navigation";
 
 export default function UserProfileNav() {

@@ -1,8 +1,8 @@
+import { textPrimaryColor } from "@styles/colors";
 import { useColorScheme } from "react-native";
 import { TouchableOpacity } from "react-native-gesture-handler";
 
 import Picto from "../../components/Picto/Picto";
-import { textPrimaryColor } from "../../utils/colors";
 import { navigate } from "../../utils/navigation";
 import Conversation from "../Conversation";
 import { NativeStack, navigationAnimation } from "./Navigation";

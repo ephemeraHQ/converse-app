@@ -1,13 +1,13 @@
+import { messageBubbleColor, textSecondaryColor } from "@styles/colors";
 import {
-  useColorScheme,
-  StyleSheet,
-  View,
-  StyleProp,
-  ViewStyle,
   Platform,
+  StyleProp,
+  StyleSheet,
+  useColorScheme,
+  View,
+  ViewStyle,
 } from "react-native";
 
-import { messageBubbleColor, textSecondaryColor } from "../../utils/colors";
 import Picto from "../Picto/Picto";
 
 type ChatActionProps = {

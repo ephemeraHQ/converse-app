@@ -1,16 +1,3 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import {
-  View,
-  TextInput,
-  StyleSheet,
-  useColorScheme,
-  TouchableOpacity,
-  Platform,
-} from "react-native";
-
-import SendButtonDefaultDark from "../../../assets/send-button-dark.svg";
-import SendButtonHigher from "../../../assets/send-button-higher.svg";
-import SendButtonDefaultLight from "../../../assets/send-button-light.svg";
 import {
   actionSecondaryColor,
   backgroundColor,
@@ -18,7 +5,20 @@ import {
   itemSeparatorColor,
   textPrimaryColor,
   textSecondaryColor,
-} from "../../../utils/colors";
+} from "@styles/colors";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+  Platform,
+  StyleSheet,
+  TextInput,
+  TouchableOpacity,
+  useColorScheme,
+  View,
+} from "react-native";
+
+import SendButtonDefaultDark from "../../../assets/send-button-dark.svg";
+import SendButtonHigher from "../../../assets/send-button-higher.svg";
+import SendButtonDefaultLight from "../../../assets/send-button-light.svg";
 import { useConversationContext } from "../../../utils/conversation";
 import { isDesktop } from "../../../utils/device";
 import { converseEventEmitter } from "../../../utils/events";

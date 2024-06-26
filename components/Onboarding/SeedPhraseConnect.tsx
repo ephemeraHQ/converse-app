@@ -1,26 +1,26 @@
 import { utils } from "@noble/secp256k1";
+import {
+  textInputStyle,
+  textPrimaryColor,
+  textSecondaryColor,
+} from "@styles/colors";
 import { Wallet } from "ethers";
 import * as Linking from "expo-linking";
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
-  View,
-  TextInput,
-  useColorScheme,
+  Alert,
+  Platform,
   StyleSheet,
   Text,
-  Platform,
-  Alert,
+  TextInput,
+  useColorScheme,
+  View,
 } from "react-native";
 import { AvoidSoftInput } from "react-native-avoid-softinput";
 
 import config from "../../config";
 import { useOnboardingStore } from "../../data/store/onboardingStore";
 import { useSelect } from "../../data/store/storeHelpers";
-import {
-  textInputStyle,
-  textPrimaryColor,
-  textSecondaryColor,
-} from "../../utils/colors";
 import { getPrivateKeyFromMnemonic, validateMnemonic } from "../../utils/eth";
 import OnboardingComponent from "./OnboardingComponent";
 

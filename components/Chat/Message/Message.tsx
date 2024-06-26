@@ -1,3 +1,11 @@
+import {
+  inversePrimaryColor,
+  messageInnerBubbleColor,
+  myMessageInnerBubbleColor,
+  textPrimaryColor,
+  textSecondaryColor,
+} from "@styles/colors";
+import { sizes } from "@styles/sizes";
 import * as Haptics from "expo-haptics";
 import { ReactNode, useCallback, useMemo, useRef } from "react";
 import {
@@ -21,13 +29,6 @@ import {
 } from "../../../data/store/accountsStore";
 import { XmtpMessage } from "../../../data/store/chatStore";
 import { isAttachmentMessage } from "../../../utils/attachment/helpers";
-import {
-  inversePrimaryColor,
-  messageInnerBubbleColor,
-  myMessageInnerBubbleColor,
-  textPrimaryColor,
-  textSecondaryColor,
-} from "../../../utils/colors";
 import { getRelativeDate } from "../../../utils/date";
 import { isDesktop } from "../../../utils/device";
 import { converseEventEmitter } from "../../../utils/events";
@@ -95,17 +96,9 @@ const MessageSenderAvatar = ({ message }: { message: MessageToDisplay }) => {
   return (
     <View style={styles.groupSenderAvatarWrapper}>
       {!message.hasNextMessageInSeries ? (
-        <Avatar
-          size={Platform.OS === "ios" ? 24 : 21}
-          uri={getPreferredAvatar(senderSocials)}
-        />
+        <Avatar size={sizes.avatar} uri={getPreferredAvatar(senderSocials)} />
       ) : (
-        <View
-          style={{
-            width: Platform.OS === "ios" ? 24 : 21,
-            height: Platform.OS === "ios" ? 24 : 21,
-          }}
-        />
+        <View style={styles.avatarPlaceholder} />
       )}
     </View>
   );
@@ -538,6 +531,10 @@ const useStyles = () => {
       color: textSecondaryColor(colorScheme),
       marginLeft: 10,
       marginVertical: 6,
+    },
+    avatarPlaceholder: {
+      width: sizes.avatar,
+      height: sizes.avatar,
     },
   });
 };

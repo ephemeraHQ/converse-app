@@ -1,3 +1,4 @@
+import { textSecondaryColor } from "@styles/colors";
 import { useCoinbaseWallet } from "@thirdweb-dev/react-native";
 import * as Linking from "expo-linking";
 import { useEffect, useRef, useState } from "react";
@@ -14,7 +15,6 @@ import config from "../../config";
 import { useHasOnePrivyAccount } from "../../data/store/accountsStore";
 import { useOnboardingStore } from "../../data/store/onboardingStore";
 import { useSelect } from "../../data/store/storeHelpers";
-import { textSecondaryColor } from "../../utils/colors";
 import { isDesktop } from "../../utils/device";
 import { getEthOSSigner } from "../../utils/ethos";
 import Button from "../Button/Button";

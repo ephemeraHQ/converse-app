@@ -1,4 +1,11 @@
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
+import {
+  backgroundColor,
+  itemSeparatorColor,
+  primaryColor,
+  textPrimaryColor,
+  textSecondaryColor,
+} from "@styles/colors";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
   Alert,
@@ -30,13 +37,6 @@ import { ProfileSocials } from "../../data/store/profilesStore";
 import { useSelect } from "../../data/store/storeHelpers";
 import { useGroupMembers } from "../../hooks/useGroupMembers";
 import { searchProfiles } from "../../utils/api";
-import {
-  backgroundColor,
-  itemSeparatorColor,
-  primaryColor,
-  textPrimaryColor,
-  textSecondaryColor,
-} from "../../utils/colors";
 import {
   getAddressForPeer,
   getCleanAddress,

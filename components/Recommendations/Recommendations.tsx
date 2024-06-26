@@ -1,4 +1,11 @@
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import {
+  backgroundColor,
+  itemSeparatorColor,
+  primaryColor,
+  textPrimaryColor,
+  textSecondaryColor,
+} from "@styles/colors";
 import * as Linking from "expo-linking";
 import { useCallback, useEffect, useState } from "react";
 import {
@@ -19,13 +26,6 @@ import {
   useRecommendationsStore,
 } from "../../data/store/accountsStore";
 import { useSelect } from "../../data/store/storeHelpers";
-import {
-  backgroundColor,
-  itemSeparatorColor,
-  primaryColor,
-  textPrimaryColor,
-  textSecondaryColor,
-} from "../../utils/colors";
 import { refreshRecommendationsForAccount } from "../../utils/recommendations";
 import ActivityIndicator from "../ActivityIndicator/ActivityIndicator";
 import { Recommendation } from "./Recommendation";

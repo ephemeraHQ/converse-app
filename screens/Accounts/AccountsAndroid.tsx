@@ -1,4 +1,5 @@
 import { NavigationProp } from "@react-navigation/native";
+import { backgroundColor, clickedItemBackgroundColor } from "@styles/colors";
 import { Dimensions, Platform, StyleSheet, useColorScheme } from "react-native";
 import { Drawer } from "react-native-paper";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -11,10 +12,6 @@ import {
 } from "../../data/store/accountsStore";
 import { useOnboardingStore } from "../../data/store/onboardingStore";
 import { useSelect } from "../../data/store/storeHelpers";
-import {
-  backgroundColor,
-  clickedItemBackgroundColor,
-} from "../../utils/colors";
 import { converseEventEmitter } from "../../utils/events";
 import { useDisconnectWallet } from "../../utils/logout/wallet";
 import { shortAddress, useAccountsProfiles } from "../../utils/str";

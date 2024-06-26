@@ -1,3 +1,4 @@
+import { textSecondaryColor } from "@styles/colors";
 import { ReactElement } from "react";
 import {
   ColorValue,
@@ -8,8 +9,6 @@ import {
   useColorScheme,
 } from "react-native";
 import { List } from "react-native-paper";
-
-import { textSecondaryColor } from "../../utils/colors";
 
 export type TableViewItemType = {
   id: string;
