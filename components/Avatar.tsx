@@ -46,13 +46,14 @@ const getStyles = (colorScheme: ColorSchemeName, size: number) =>
       width: size,
       height: size,
       borderRadius: size / 2,
-      backgroundColor: colorScheme === "dark" ? "#333" : "#ccc",
+      backgroundColor: colorScheme === "dark" ? "white" : "#374151",
       justifyContent: "center",
       alignItems: "center",
     },
     text: {
       fontSize: size / 2,
-      color: "#fff",
+      fontWeight: "500",
+      color: colorScheme === "dark" ? "#374151" : "#fff",
       textAlign: "center",
     },
   });
