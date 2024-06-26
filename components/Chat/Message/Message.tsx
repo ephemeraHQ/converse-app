@@ -94,10 +94,19 @@ const MessageSenderAvatar = ({ message }: { message: MessageToDisplay }) => {
   const styles = useStyles();
   return (
     <View style={styles.groupSenderAvatarWrapper}>
-      <Avatar
-        size={Platform.OS === "ios" ? 24 : 21}
-        uri={getPreferredAvatar(senderSocials)}
-      />
+      {!message.hasNextMessageInSeries ? (
+        <Avatar
+          size={Platform.OS === "ios" ? 24 : 21}
+          uri={getPreferredAvatar(senderSocials)}
+        />
+      ) : (
+        <View
+          style={{
+            width: Platform.OS === "ios" ? 24 : 21,
+            height: Platform.OS === "ios" ? 24 : 21,
+          }}
+        />
+      )}
     </View>
   );
 };
