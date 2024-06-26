@@ -12,12 +12,16 @@ import {
   useProfilesStore,
 } from "../../../data/store/accountsStore";
 import { isAttachmentMessage } from "../../../utils/attachment/helpers";
-import { actionSheetColors, textSecondaryColor } from "../../../utils/colors";
+import {
+  actionSheetColors,
+  messageBubbleColor,
+  textPrimaryColor,
+} from "../../../utils/colors";
 import { useConversationContext } from "../../../utils/conversation";
 import { getPreferredName } from "../../../utils/profile";
 import {
-  MessageReaction,
   getReactionContent,
+  MessageReaction,
   removeReactionFromMessage,
 } from "../../../utils/reactions";
 import { showActionSheetWithOptions } from "../../StateHandlers/ActionSheetStateHandler";
@@ -108,7 +112,7 @@ const useStyles = () => {
       marginHorizontal: 10,
     },
     reactionsContainer: {
-      backgroundColor: "white",
+      backgroundColor: messageBubbleColor(colorScheme),
       paddingVertical: 4,
       paddingHorizontal: 6,
       borderRadius: 8,
@@ -121,7 +125,7 @@ const useStyles = () => {
     },
     count: {
       fontSize: 15,
-      color: textSecondaryColor(colorScheme),
+      color: textPrimaryColor(colorScheme),
       marginLeft: 4,
     },
   });
