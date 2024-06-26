@@ -8,6 +8,7 @@
 import Foundation
 import XMTP
 import Alamofire
+import web3
 
 func getSenderSpamScore(address: String, apiURI: String?) async -> Double {
   var senderSpamScore: Double = 0.0
@@ -61,7 +62,7 @@ func getMessageSpamScore(message: String?, contentType: String) -> Double {
   }
   return spamScore
 }
-  
+
 let restrictedWords = [
   "Coinbase",
   "Airdrop",
@@ -75,16 +76,16 @@ let restrictedWords = [
 ]
 
 func containsRestrictedWords(in searchString: String) -> Bool {
-    // Convert the search string to lowercase
-    let lowercasedSearchString = searchString.lowercased()
-    
-    // Check each restricted word in the lowercase search string
-    for word in restrictedWords {
-        if lowercasedSearchString.contains(word.lowercased()) {
-            return true
-        }
+  // Convert the search string to lowercase
+  let lowercasedSearchString = searchString.lowercased()
+  
+  // Check each restricted word in the lowercase search string
+  for word in restrictedWords {
+    if lowercasedSearchString.contains(word.lowercased()) {
+      return true
     }
-    return false
+  }
+  return false
 }
 
 func computeSpamScoreGroupWelcome(client: XMTP.Client, group: XMTP.Group) async -> Double {
@@ -104,7 +105,19 @@ func computeSpamScoreGroupWelcome(client: XMTP.Client, group: XMTP.Group) async 
     if inviterDenied {
       return 1
     }
-    
+    let members = try group.members
+    if let inviterAddresses = members.first(where: {$0.inboxId == inviterInboxId})?.addresses {
+      for address in inviterAddresses {
+        if await client.contacts.isDenied(EthereumAddress(address).toChecksumAddress()) {
+          return 1
+        }
+      }
+      for address in inviterAddresses {
+        if await client.contacts.isAllowed(EthereumAddress(address).toChecksumAddress()) {
+          return -1
+        }
+      }
+    }
   } catch {
     return 0
   }
@@ -114,7 +127,7 @@ func computeSpamScoreGroupWelcome(client: XMTP.Client, group: XMTP.Group) async 
 func computeSpamScoreGroupMessage(client: XMTP.Client, group: XMTP.Group, decodedMessage: DecodedMessage, apiURI: String?) async -> Double {
   var senderSpamScore: Double = 0
   do {
-
+    
     try await client.contacts.refreshConsentList()
     let groupDenied = await client.contacts.isGroupDenied(groupId: group.id)
     if groupDenied {
@@ -127,25 +140,40 @@ func computeSpamScoreGroupMessage(client: XMTP.Client, group: XMTP.Group, decode
       // Network consent will override other checks
       return 1
     }
-        
+    
     let senderAllowed = await client.contacts.isInboxAllowed(inboxId: senderInboxId)
     if senderAllowed {
       // Network consent will override other checks
       return -1
     }
     
+    
     let groupAllowed = await client.contacts.isGroupAllowed(groupId: group.id)
     if groupAllowed {
       // Network consent will override other checks
       return -1
     }
+    
+    if let senderAddresses = try group.members.first(where: {$0.inboxId == senderInboxId})?.addresses {
+      for address in senderAddresses {
+        if await client.contacts.isDenied(EthereumAddress(address).toChecksumAddress()) {
+          return 1
+        }
+      }
+      for address in senderAddresses {
+        if await client.contacts.isAllowed(EthereumAddress(address).toChecksumAddress()) {
+          return 1
+        }
+      }
+    }
+    
     // TODO: Handling for inbox Id
     // spamScore = await getSenderSpamScore(address: senderInboxId, apiURI: apiURI)
   } catch {
     //
   }
   let contentType = getContentTypeString(type: decodedMessage.encodedContent.type)
-
+  
   let messageContent = String(data: decodedMessage.encodedContent.content, encoding: .utf8)
   let messageSpamScore = getMessageSpamScore(message: messageContent, contentType: contentType)
   
