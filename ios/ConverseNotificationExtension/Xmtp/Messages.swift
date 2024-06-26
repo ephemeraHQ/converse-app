@@ -103,7 +103,7 @@ func handleNewConversationFirstMessage(xmtpClient: XMTP.Client, apiURI: String?,
 
 func handleGroupWelcome(xmtpClient: XMTP.Client, apiURI: String?, pushToken: String?, group: XMTP.Group, welcomeTopic: String, bestAttemptContent: inout UNMutableNotificationContent) async -> (shouldShowNotification: Bool, messageId: String?) {
   var shouldShowNotification = false
-  let messageId = welcomeTopic
+  let messageId = "welcome-" + group.topic
   do {
     
     try await group.sync()
