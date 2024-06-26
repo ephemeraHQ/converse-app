@@ -1,17 +1,18 @@
 import "@expo/metro-runtime";
-import "./polyfills";
-import "./assets/web.css";
 import { ActionSheetProvider } from "@expo/react-native-action-sheet";
 import { PrivyProvider } from "@privy-io/react-auth";
 import { createWeb3Modal, defaultConfig } from "@web3modal/ethers5/react";
 import { useColorScheme } from "react-native";
 import { PaperProvider } from "react-native-paper";
 import { SafeAreaProvider } from "react-native-safe-area-context";
+import "./assets/web.css";
+import "./polyfills";
+
+import { MaterialDarkTheme, MaterialLightTheme } from "@styles/colors";
 
 import XmtpEngine from "./components/XmtpEngine";
 import config from "./config";
 import Main from "./screens/Main";
-import { MaterialDarkTheme, MaterialLightTheme } from "./utils/colors";
 import mmkv from "./utils/mmkv";
 import { DEFAULT_EMOJIS, RECENT_EMOJI_STORAGE_KEY } from "./utils/reactions";
 import { useRecentPicksPersistence } from "./vendor/rn-emoji-keyboard";

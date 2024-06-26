@@ -1,4 +1,9 @@
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
+import {
+  backgroundColor,
+  textInputStyle,
+  textSecondaryColor,
+} from "@styles/colors";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   Alert,
@@ -24,11 +29,6 @@ import {
 } from "../../data/store/accountsStore";
 import { usePhotoSelect } from "../../hooks/usePhotoSelect";
 import { uploadFile } from "../../utils/attachment";
-import {
-  backgroundColor,
-  textInputStyle,
-  textSecondaryColor,
-} from "../../utils/colors";
 import { strings } from "../../utils/i18n/strings";
 import { navigate } from "../../utils/navigation";
 import { getPreferredName } from "../../utils/profile";

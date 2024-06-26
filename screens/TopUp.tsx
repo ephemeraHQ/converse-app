@@ -1,16 +1,22 @@
 import Clipboard from "@react-native-clipboard/clipboard";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
+import {
+  backgroundColor,
+  listItemSeparatorColor,
+  primaryColor,
+  textPrimaryColor,
+} from "@styles/colors";
 import { Image } from "expo-image";
 import * as Linking from "expo-linking";
 import { useEffect, useState } from "react";
 import {
+  Button,
   Platform,
   StyleSheet,
   Text,
+  TouchableOpacity,
   useColorScheme,
   View,
-  Button,
-  TouchableOpacity,
 } from "react-native";
 
 import AndroidBackAction from "../components/AndroidBackAction";
@@ -19,12 +25,6 @@ import TableView from "../components/TableView/TableView";
 import { TableViewPicto } from "../components/TableView/TableViewImage";
 import config from "../config";
 import { useCurrentAccount } from "../data/store/accountsStore";
-import {
-  backgroundColor,
-  listItemSeparatorColor,
-  primaryColor,
-  textPrimaryColor,
-} from "../utils/colors";
 import { NavigationParamList } from "./Navigation/Navigation";
 
 export default function TopUp({

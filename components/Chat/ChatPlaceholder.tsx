@@ -1,11 +1,12 @@
+import { actionSheetColors, textPrimaryColor } from "@styles/colors";
 import {
-  useColorScheme,
-  StyleSheet,
-  Text,
-  View,
-  TouchableWithoutFeedback,
   Keyboard,
   Platform,
+  StyleSheet,
+  Text,
+  TouchableWithoutFeedback,
+  useColorScheme,
+  View,
 } from "react-native";
 
 import {
@@ -14,7 +15,6 @@ import {
   useRecommendationsStore,
   useSettingsStore,
 } from "../../data/store/accountsStore";
-import { actionSheetColors, textPrimaryColor } from "../../utils/colors";
 import { useConversationContext } from "../../utils/conversation";
 import { sendMessage } from "../../utils/message";
 import { getProfileData } from "../../utils/profile";

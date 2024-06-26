@@ -29,6 +29,15 @@ module.exports = {
           "@web3modal/scaffold-utils/ethers":
             "@web3modal/scaffold-utils/dist/esm/exports/ethers.js",
           "react-native-webview": "react-native-webview/src/index.ts",
+
+          // Folder aliases
+          "@components": "./components",
+          "@data": "./data",
+          "@hooks": "./hooks",
+          "@queries": "./queries",
+          "@screens": "./screens",
+          "@styles": "./styles",
+          "@utils": "./utils",
         },
       },
     ],

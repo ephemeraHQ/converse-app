@@ -1,20 +1,20 @@
 import {
-  TouchableHighlight,
-  useColorScheme,
-  StyleSheet,
-  Platform,
-  View,
-  Text,
-} from "react-native";
-
-import {
   actionSecondaryColor,
   clickedItemBackgroundColor,
   listItemSeparatorColor,
   primaryColor,
   textPrimaryColor,
   textSecondaryColor,
-} from "../../utils/colors";
+} from "@styles/colors";
+import {
+  Platform,
+  StyleSheet,
+  Text,
+  TouchableHighlight,
+  useColorScheme,
+  View,
+} from "react-native";
+
 import Picto from "../Picto/Picto";
 
 type Props = {

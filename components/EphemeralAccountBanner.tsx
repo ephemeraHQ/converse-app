@@ -1,17 +1,16 @@
-import React, {
-  useColorScheme,
-  StyleSheet,
-  View,
-  Text,
-  Platform,
-} from "react-native";
-
 import {
   itemSeparatorColor,
+  messageBubbleColor,
   textPrimaryColor,
   textSecondaryColor,
-  messageBubbleColor,
-} from "../utils/colors";
+} from "@styles/colors";
+import React, {
+  Platform,
+  StyleSheet,
+  Text,
+  useColorScheme,
+  View,
+} from "react-native";
 
 export default function EphemeralAccountBanner() {
   const styles = useStyles();

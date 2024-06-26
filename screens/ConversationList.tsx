@@ -1,4 +1,9 @@
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
+import {
+  backgroundColor,
+  itemSeparatorColor,
+  textPrimaryColor,
+} from "@styles/colors";
 import React, { useCallback, useEffect, useState } from "react";
 import {
   Platform,
@@ -28,11 +33,6 @@ import {
 } from "../data/store/accountsStore";
 import { XmtpConversation } from "../data/store/chatStore";
 import { useSelect } from "../data/store/storeHelpers";
-import {
-  backgroundColor,
-  itemSeparatorColor,
-  textPrimaryColor,
-} from "../utils/colors";
 import {
   LastMessagePreview,
   getFilteredConversationsWithSearch,

@@ -1,20 +1,20 @@
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import {
+  itemSeparatorColor,
+  textPrimaryColor,
+  textSecondaryColor,
+} from "@styles/colors";
+import {
+  Image,
   Platform,
   StyleSheet,
   Text,
-  View,
-  Image,
   useColorScheme,
+  View,
 } from "react-native";
 
 import IconLoading from "../../assets/icon-loading.png";
 import { RecommendationData } from "../../data/store/recommendationsStore";
-import {
-  itemSeparatorColor,
-  textPrimaryColor,
-  textSecondaryColor,
-} from "../../utils/colors";
 import {
   getPreferredAvatar,
   getPreferredName,

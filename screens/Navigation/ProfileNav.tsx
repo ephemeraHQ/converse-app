@@ -1,4 +1,5 @@
 import { NativeStackNavigationOptions } from "@react-navigation/native-stack";
+import { textPrimaryColor, textSecondaryColor } from "@styles/colors";
 import {
   Button,
   Platform,
@@ -8,7 +9,6 @@ import {
 
 import Picto from "../../components/Picto/Picto";
 import { useCurrentAccount } from "../../data/store/accountsStore";
-import { textPrimaryColor, textSecondaryColor } from "../../utils/colors";
 import { navigate } from "../../utils/navigation";
 import ProfileScreen from "../Profile";
 import { NativeStack, navigationAnimation } from "./Navigation";

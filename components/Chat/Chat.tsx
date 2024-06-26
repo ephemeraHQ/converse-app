@@ -1,4 +1,9 @@
 import { FlashList } from "@shopify/flash-list";
+import {
+  backgroundColor,
+  itemSeparatorColor,
+  tertiaryBackgroundColor,
+} from "@styles/colors";
 import differenceInCalendarDays from "date-fns/differenceInCalendarDays";
 import React, { useCallback, useEffect, useMemo, useRef } from "react";
 import {
@@ -30,11 +35,6 @@ import {
   ReanimatedView,
 } from "../../utils/animations";
 import { useKeyboardAnimation } from "../../utils/animations/keyboardAnimation";
-import {
-  backgroundColor,
-  itemSeparatorColor,
-  tertiaryBackgroundColor,
-} from "../../utils/colors";
 import { useConversationContext } from "../../utils/conversation";
 import { converseEventEmitter } from "../../utils/events";
 import { getProfileData } from "../../utils/profile";

@@ -1,4 +1,11 @@
 import Clipboard from "@react-native-clipboard/clipboard";
+import {
+  actionSheetColors,
+  messageInnerBubbleColor,
+  myMessageInnerBubbleColor,
+  textPrimaryColor,
+  textSecondaryColor,
+} from "@styles/colors";
 import * as Linking from "expo-linking";
 import { useCallback, useEffect } from "react";
 import {
@@ -13,13 +20,6 @@ import {
 import Checkmark from "../../../assets/checkmark.svg";
 import Clock from "../../../assets/clock.svg";
 import Exclamationmark from "../../../assets/exclamationmark.triangle.svg";
-import {
-  actionSheetColors,
-  messageInnerBubbleColor,
-  myMessageInnerBubbleColor,
-  textPrimaryColor,
-  textSecondaryColor,
-} from "../../../utils/colors";
 import { useConversationContext } from "../../../utils/conversation";
 import { converseEventEmitter } from "../../../utils/events";
 import { shortAddress } from "../../../utils/str";

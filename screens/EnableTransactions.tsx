@@ -1,13 +1,18 @@
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
+import {
+  backgroundColor,
+  textInputStyle,
+  textSecondaryColor,
+} from "@styles/colors";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
-  View,
-  Button,
-  StyleSheet,
-  useColorScheme,
-  Platform,
-  TextInput,
   Alert,
+  Button,
+  Platform,
+  StyleSheet,
+  TextInput,
+  useColorScheme,
+  View,
 } from "react-native";
 import { v4 as uuidv4 } from "uuid";
 
@@ -15,11 +20,6 @@ import AndroidBackAction from "../components/AndroidBackAction";
 import OnboardingComponent from "../components/Onboarding/OnboardingComponent";
 import { getSignerFromSeedPhraseOrPrivateKey } from "../components/Onboarding/SeedPhraseConnect";
 import { useCurrentAccount, useWalletStore } from "../data/store/accountsStore";
-import {
-  textSecondaryColor,
-  textInputStyle,
-  backgroundColor,
-} from "../utils/colors";
 import { converseEventEmitter } from "../utils/events";
 import { savePrivateKey } from "../utils/keychain/helpers";
 import { shortAddress } from "../utils/str";

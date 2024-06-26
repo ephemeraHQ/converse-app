@@ -1,4 +1,11 @@
 import { useEmbeddedWallet, useLoginWithSMS, usePrivy } from "@privy-io/expo";
+import {
+  backgroundColor,
+  primaryColor,
+  tertiaryBackgroundColor,
+  textPrimaryColor,
+  textSecondaryColor,
+} from "@styles/colors";
 import * as LibPhoneNumber from "libphonenumber-js";
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
@@ -17,13 +24,6 @@ import PhoneInput from "react-native-phone-number-input";
 import Button from "../../components/Button/Button";
 import { useOnboardingStore } from "../../data/store/onboardingStore";
 import { useSelect } from "../../data/store/storeHelpers";
-import {
-  backgroundColor,
-  primaryColor,
-  tertiaryBackgroundColor,
-  textPrimaryColor,
-  textSecondaryColor,
-} from "../../utils/colors";
 import { usePrivyAccessToken, usePrivySigner } from "../../utils/evm/privy";
 import Picto from "../Picto/Picto";
 import OnboardingComponent from "./OnboardingComponent";

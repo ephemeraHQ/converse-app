@@ -1,5 +1,13 @@
 import Clipboard from "@react-native-clipboard/clipboard";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
+import {
+  actionSheetColors,
+  backgroundColor,
+  dangerColor,
+  primaryColor,
+  textPrimaryColor,
+  textSecondaryColor,
+} from "@styles/colors";
 import Constants from "expo-constants";
 import * as Linking from "expo-linking";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
@@ -39,14 +47,6 @@ import { useAppStore } from "../data/store/appStore";
 import { useSelect } from "../data/store/storeHelpers";
 import { useGroupMembers } from "../hooks/useGroupMembers";
 import { useGroupPermissions } from "../hooks/useGroupPermissions";
-import {
-  actionSheetColors,
-  backgroundColor,
-  dangerColor,
-  primaryColor,
-  textPrimaryColor,
-  textSecondaryColor,
-} from "../utils/colors";
 import { evmHelpers } from "../utils/evm/helpers";
 import {
   getAddressIsAdmin,

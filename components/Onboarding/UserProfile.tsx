@@ -1,12 +1,19 @@
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
+import {
+  actionSheetColors,
+  dangerColor,
+  itemSeparatorColor,
+  textPrimaryColor,
+  textSecondaryColor,
+} from "@styles/colors";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
-  View,
+  Platform,
+  StyleSheet,
   Text,
   TextInput,
-  StyleSheet,
   useColorScheme,
-  Platform,
+  View,
 } from "react-native";
 
 import config from "../../config";
@@ -19,13 +26,6 @@ import {
 import { NavigationParamList } from "../../screens/Navigation/Navigation";
 import { checkUsernameValid, claimProfile } from "../../utils/api";
 import { uploadFile } from "../../utils/attachment";
-import {
-  textPrimaryColor,
-  textSecondaryColor,
-  dangerColor,
-  actionSheetColors,
-  itemSeparatorColor,
-} from "../../utils/colors";
 import { executeAfterKeyboardClosed } from "../../utils/keyboard";
 import { useLogoutFromConverse } from "../../utils/logout";
 import {
@@ -281,7 +281,7 @@ export const UserProfile = ({ onboarding, navigation }: Props) => {
           />
           <View style={styles.usernameInputContainer}>
             <TextInput
-              style={[styles.profileInput]}
+              style={styles.profileInput}
               onChangeText={(text) => {
                 // Limit the display name to 50 characters
                 const trimmedDisplayName = text.slice(0, 50);

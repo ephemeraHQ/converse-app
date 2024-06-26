@@ -4,6 +4,11 @@ import "./polyfills";
 import { configure as configureCoinbase } from "@coinbase/wallet-mobile-sdk";
 import { ActionSheetProvider } from "@expo/react-native-action-sheet";
 import { PrivyProvider } from "@privy-io/expo";
+import {
+  backgroundColor,
+  MaterialDarkTheme,
+  MaterialLightTheme,
+} from "@styles/colors";
 import { Ethereum } from "@thirdweb-dev/chains";
 import { coinbaseWallet, ThirdwebProvider } from "@thirdweb-dev/react-native";
 import React, { useEffect } from "react";
@@ -29,11 +34,6 @@ import {
 import { QueryClientProvider } from "./queries/QueryProvider";
 import Main from "./screens/Main";
 import { registerBackgroundFetchTask } from "./utils/background";
-import {
-  backgroundColor,
-  MaterialDarkTheme,
-  MaterialLightTheme,
-} from "./utils/colors";
 import { privySecureStorage } from "./utils/keychain/helpers";
 import mmkv from "./utils/mmkv";
 import { DEFAULT_EMOJIS, RECENT_EMOJI_STORAGE_KEY } from "./utils/reactions";

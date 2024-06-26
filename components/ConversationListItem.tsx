@@ -1,4 +1,14 @@
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
+import {
+  actionSheetColors,
+  backgroundColor,
+  badgeColor,
+  clickedItemBackgroundColor,
+  dangerColor,
+  inversePrimaryColor,
+  textPrimaryColor,
+  textSecondaryColor,
+} from "@styles/colors";
 import * as Haptics from "expo-haptics";
 import React, { memo, useCallback, useEffect, useRef, useState } from "react";
 import {
@@ -21,16 +31,6 @@ import {
 import { NavigationParamList } from "../screens/Navigation/Navigation";
 import { useIsSplitScreen } from "../screens/Navigation/navHelpers";
 import { saveTopicsData } from "../utils/api";
-import {
-  actionSheetColors,
-  backgroundColor,
-  badgeColor,
-  clickedItemBackgroundColor,
-  dangerColor,
-  textPrimaryColor,
-  textSecondaryColor,
-  inversePrimaryColor,
-} from "../utils/colors";
 import { getMinimalDate } from "../utils/date";
 import { isDesktop } from "../utils/device";
 import { converseEventEmitter } from "../utils/events";
@@ -153,7 +153,7 @@ const ConversationListItem = memo(function ConversationListItem({
   const renderRightActions = useCallback(() => {
     return (
       <RectButton
-        style={[styles.rightAction]}
+        style={styles.rightAction}
         onPress={() => {
           showActionSheetWithOptions(
             {
@@ -220,7 +220,7 @@ const ConversationListItem = memo(function ConversationListItem({
 
   const renderLeftActions = useCallback(() => {
     return (
-      <RectButton style={[styles.leftAction]}>
+      <RectButton style={styles.leftAction}>
         <Picto
           picto={showUnread ? "checkmark.message" : "message.badge"}
           color="white"
@@ -245,15 +245,13 @@ const ConversationListItem = memo(function ConversationListItem({
           openConversation();
           setSelected(true);
         }}
-        style={[
-          {
-            backgroundColor:
-              selected || (isSplitScreen && conversationOpened)
-                ? clickedItemBackgroundColor(colorScheme)
-                : backgroundColor(colorScheme),
-            height: 76,
-          },
-        ]}
+        style={{
+          backgroundColor:
+            selected || (isSplitScreen && conversationOpened)
+              ? clickedItemBackgroundColor(colorScheme)
+              : backgroundColor(colorScheme),
+          height: 76,
+        }}
       >
         {listItemContent}
       </TouchableHighlight>

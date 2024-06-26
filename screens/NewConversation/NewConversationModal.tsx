@@ -2,16 +2,16 @@ import {
   NativeStackScreenProps,
   createNativeStackNavigator,
 } from "@react-navigation/native-stack";
+import {
+  headerTitleStyle,
+  listItemSeparatorColor,
+  navigationSecondaryBackgroundColor,
+  textPrimaryColor,
+} from "@styles/colors";
 import { Platform, useColorScheme } from "react-native";
 
 import Button from "../../components/Button/Button";
 import { ProfileSocials } from "../../data/store/profilesStore";
-import {
-  navigationSecondaryBackgroundColor,
-  listItemSeparatorColor,
-  textPrimaryColor,
-  headerTitleStyle,
-} from "../../utils/colors";
 import {
   NavigationParamList,
   navigationAnimation,

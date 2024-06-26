@@ -1,12 +1,18 @@
+import {
+  chatInputBackgroundColor,
+  headerTitleStyle,
+  textPrimaryColor,
+  textSecondaryColor,
+} from "@styles/colors";
 import React, { useRef } from "react";
 import {
-  useColorScheme,
-  StyleSheet,
-  View,
-  TouchableOpacity,
-  TextInput,
   Platform,
+  StyleSheet,
+  TextInput,
+  TouchableOpacity,
+  useColorScheme,
   useWindowDimensions,
+  View,
 } from "react-native";
 import { Searchbar as MaterialSearchBar } from "react-native-paper";
 
@@ -18,12 +24,6 @@ import ProfileSettingsButton from "../../components/ConversationList/ProfileSett
 import Picto from "../../components/Picto/Picto";
 import { useChatStore } from "../../data/store/accountsStore";
 import { useSelect } from "../../data/store/storeHelpers";
-import {
-  chatInputBackgroundColor,
-  headerTitleStyle,
-  textPrimaryColor,
-  textSecondaryColor,
-} from "../../utils/colors";
 import { converseEventEmitter } from "../../utils/events";
 import ConversationList from "../ConversationList";
 import { NativeStack, navigationAnimation } from "./Navigation";

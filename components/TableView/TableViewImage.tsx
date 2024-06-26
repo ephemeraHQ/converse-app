@@ -1,3 +1,4 @@
+import { textSecondaryColor } from "@styles/colors";
 import { Image } from "expo-image";
 import React from "react";
 import {
@@ -12,7 +13,6 @@ import {
 } from "react-native";
 
 import IconLoading from "../../assets/icon-loading.png";
-import { textSecondaryColor } from "../../utils/colors";
 import Picto from "../Picto/Picto";
 import SvgImageUri from "../SvgImageUri";
 

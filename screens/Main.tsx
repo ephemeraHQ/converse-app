@@ -1,3 +1,4 @@
+import { backgroundColor } from "@styles/colors";
 import { StatusBar } from "expo-status-bar";
 import React, { useCallback, useEffect, useRef } from "react";
 import { Dimensions, Platform, useColorScheme } from "react-native";
@@ -20,7 +21,6 @@ import { useAppStore } from "../data/store/appStore";
 import { useOnboardingStore } from "../data/store/onboardingStore";
 import { useSelect } from "../data/store/storeHelpers";
 import { useAddressBookStateHandler } from "../utils/addressBook";
-import { backgroundColor } from "../utils/colors";
 import { converseEventEmitter } from "../utils/events";
 import { usePrivyAccessToken } from "../utils/evm/privy";
 import AccountsAndroid from "./Accounts/AccountsAndroid";
