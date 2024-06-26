@@ -41,7 +41,12 @@ export function ProfileSearchItem({
   return (
     <View key={address} style={styles.container}>
       <View style={styles.left}>
-        <Avatar uri={preferredAvatar} size={40} style={styles.avatar} />
+        <Avatar
+          uri={preferredAvatar}
+          size={40}
+          style={styles.avatar}
+          name={preferredName}
+        />
         <View>
           <Text style={styles.title}>
             {preferredName || shortAddress(address)}

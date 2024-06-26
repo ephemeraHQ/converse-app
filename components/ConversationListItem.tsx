@@ -123,6 +123,7 @@ const ConversationListItem = memo(function ConversationListItem({
         size={Platform.OS === "ios" ? 56 : 47}
         style={styles.avatarWrapper}
         uri={conversationPeerAvatar}
+        name={conversationName}
       />
       <View style={styles.conversationListItemContent}>
         <Text style={styles.conversationName} numberOfLines={1}>
