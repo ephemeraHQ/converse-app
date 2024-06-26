@@ -88,7 +88,7 @@ func containsRestrictedWords(in searchString: String) -> Bool {
   return false
 }
 
-func computeSpamScoreGroupWelcome(client: XMTP.Client, group: XMTP.Group) async -> Double {
+func computeSpamScoreGroupWelcome(client: XMTP.Client, group: XMTP.Group, apiURI: String?) async -> Double {
   do {
     let consentList = try await client.contacts.refreshConsentList()
     // Probably an unlikely case until consent proofs for groups exist
@@ -117,10 +117,16 @@ func computeSpamScoreGroupWelcome(client: XMTP.Client, group: XMTP.Group) async 
           return -1
         }
       }
+      if let firstAddress = inviterAddresses.first {
+        let senderSpamScore = await getSenderSpamScore(address: EthereumAddress(firstAddress).toChecksumAddress(), apiURI: apiURI)
+          return senderSpamScore
+      }
+
     }
   } catch {
     return 0
   }
+
   return 0
 }
 

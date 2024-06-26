@@ -110,7 +110,7 @@ func handleGroupWelcome(xmtpClient: XMTP.Client, apiURI: String?, pushToken: Str
     let members = try group.members
     let groupName = try group.groupName()
     
-    let spamScore = await computeSpamScoreGroupWelcome(client: xmtpClient, group: group)
+    let spamScore = await computeSpamScoreGroupWelcome(client: xmtpClient, group: group, apiURI: apiURI)
     if spamScore < 0 { // Message is going to main inbox
       shouldShowNotification = true
       bestAttemptContent.title = groupName
