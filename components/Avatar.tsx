@@ -9,6 +9,8 @@ import {
   ColorSchemeName,
 } from "react-native";
 
+import { actionSecondaryColor, textSecondaryColor } from "../utils/colors";
+
 type Props = {
   uri?: string | undefined;
   size?: number | undefined;
@@ -46,14 +48,17 @@ const getStyles = (colorScheme: ColorSchemeName, size: number) =>
       width: size,
       height: size,
       borderRadius: size / 2,
-      backgroundColor: colorScheme === "dark" ? "white" : "#374151",
+      backgroundColor:
+        colorScheme === "dark"
+          ? textSecondaryColor(colorScheme)
+          : actionSecondaryColor(colorScheme),
       justifyContent: "center",
       alignItems: "center",
     },
     text: {
       fontSize: size / 2,
       fontWeight: "500",
-      color: colorScheme === "dark" ? "#374151" : "#fff",
+      color: "white",
       textAlign: "center",
     },
   });
