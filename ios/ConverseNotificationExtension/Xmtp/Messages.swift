@@ -29,7 +29,7 @@ func handleNewConversationFirstMessage(xmtpClient: XMTP.Client, apiURI: String?,
         }
         
         // @todo => handle group messages here (conversation.peerAddress)
-        let spamScore = try await computeSpamScore(
+        let spamScore = try await computeSpamScoreConversation(
           address: conversation.peerAddress,
           message: messageContent,
           contentType: contentType,
@@ -101,72 +101,73 @@ func handleNewConversationFirstMessage(xmtpClient: XMTP.Client, apiURI: String?,
   return (shouldShowNotification, messageId)
 }
 
-func handleGroupWelcome(xmtpClient: XMTP.Client, apiURI: String?, pushToken: String?, conversation: XMTP.Conversation, welcomeTopic: String, bestAttemptContent: inout UNMutableNotificationContent) async -> (shouldShowNotification: Bool, messageId: String?) {
+func handleGroupWelcome(xmtpClient: XMTP.Client, apiURI: String?, pushToken: String?, group: XMTP.Group, welcomeTopic: String, bestAttemptContent: inout UNMutableNotificationContent) async -> (shouldShowNotification: Bool, messageId: String?) {
   var shouldShowNotification = false
-  let messageId = welcomeTopic
+  let messageId = "welcome-" + group.topic
   do {
     
-    if case .group(let group) = conversation {
-      do {
-        // Right now members are added to the group first and then a group name change happens as 2 separate group commits
-        // So we wait a small amount of time before syncing to get the name of the group if it's being created with the current user in it
-        // Once this moves to being included in the SDK might be able to remove this delay
-        _ = try? await Task.sleep(nanoseconds: UInt64(4 * 1_000_000_000))
-        try await group.sync()
-        let members = try group.members
-        let memberDictionary = members.reduce(into: [String: String]()) { dict, member in
-          let inboxId = member.inboxId
-          let address = member.addresses.first
-          dict[inboxId] = address
-        }
+    try await group.sync()
+    let members = try group.members
+    let groupName = try group.groupName()
+    
+    let spamScore = await computeSpamScoreGroupWelcome(client: xmtpClient, group: group, apiURI: apiURI)
+    if spamScore < 0 { // Message is going to main inbox
+      shouldShowNotification = true
+      bestAttemptContent.title = groupName
+      bestAttemptContent.body = "You have been added to a new group"
+    } else if spamScore == 0 { // Message is Request
+      shouldShowNotification = false
+      trackNewRequest()
+    } else { // Message is Spam
+      shouldShowNotification = false
+    }
+    
+  } catch {
+    sentryTrackError(error: error, extras: ["message": "NOTIFICATION_SAVE_MESSAGE_ERROR_3", "topic": group.topic])
+    print("[NotificationExtension] Error handling group invites: \(error)")
+  }
+  
+  return (shouldShowNotification, messageId)
+}
 
-        let groupMembers = members.map { $0.addresses[0] }
-        let admins = try group.listAdmins()
-        let groupAdmins = admins.map { memberDictionary[$0] }
-        let superAdmins = try group.listSuperAdmins()
-        let groupSuperAdmins = superAdmins.map { memberDictionary[$0] }
-        let groupPermissionLevel = try group.permissionLevel()
-        let addedByInboxId = try group.addedByInboxId()
-        let addedBy = memberDictionary[addedByInboxId]
-        if let addedByAddress = addedBy {
-          let spamScore = await computeSpamScore(
-            address: addedByAddress,
-            message: "",
-            contentType: "xmtp.org/text",
-            apiURI: apiURI
-          )
-          if spamScore >= 1 {
-            print("[NotificationExtension] Not showing a notification because considered spam")
-            shouldShowNotification = false
-          } else {
+func handleGroupMessage(xmtpClient: XMTP.Client, envelope: XMTP.Envelope, apiURI: String?, bestAttemptContent: inout UNMutableNotificationContent) async -> (shouldShowNotification: Bool, messageId: String?) {
+  var shouldShowNotification = false
+  let contentTopic = envelope.contentTopic
+  var messageId: String? = nil
+  
+  do {
+    let groups = try await xmtpClient.conversations.groups()
+    if let group = groups.first(where: { $0.topic == contentTopic }) {
+      try await group.sync()
+      if let decodedMessage = try? await decodeMessage(xmtpClient: xmtpClient, envelope: envelope) {
+        let decodedMessageResult = handleMessageByContentType(decodedMessage: decodedMessage, xmtpClient: xmtpClient);
+        messageId = decodedMessageResult.id
+        if decodedMessageResult.senderAddress == xmtpClient.address || decodedMessageResult.forceIgnore {
+          
+        } else {
+          let spamScore = await computeSpamScoreGroupMessage(client: xmtpClient, group: group, decodedMessage: decodedMessage, apiURI: apiURI)
+          
+          if spamScore < 0 { // Message is going to main inbox
             shouldShowNotification = true
+            if let groupName = try? group.groupName() {
+              bestAttemptContent.title = groupName
+            }
+            if let content = decodedMessageResult.content {
+              bestAttemptContent.body = content
+            }
+          } else if spamScore == 0 { // Message is Request
+            shouldShowNotification = false
+          } else { // Message is Spam
+            shouldShowNotification = false
           }
-          let groupName = try group.groupName()
-          bestAttemptContent.title = groupName
-          bestAttemptContent.body = "You have been added to a new group"
-          try saveGroup(
-            account: xmtpClient.address,
-            topic: group.topic,
-            groupMembers: groupMembers,
-            groupAdmins: groupAdmins,
-            groupSuperAdmins: superAdmins,
-            groupPermissionLevel: "\(groupPermissionLevel)",
-            groupName: groupName,
-            createdAt: Int(group.createdAt.timeIntervalSince1970 * 1000),
-            context: ConversationContext(
-              conversationId: "",
-              metadata: [:]
-            ),
-            spamScore: spamScore
-          )
         }
       }
     }
   } catch {
-    sentryTrackError(error: error, extras: ["message": "NOTIFICATION_SAVE_MESSAGE_ERROR_2", "topic": conversation.topic])
-    print("[NotificationExtension] Error fetching messages: \(error)")
+    sentryTrackError(error: error, extras: ["message": "NOTIFICATION_SAVE_MESSAGE_ERROR_4", "topic": contentTopic])
+    print("[NotificationExtension] Error handling group message: \(error)")
+    
   }
-
   return (shouldShowNotification, messageId)
 }
 
@@ -260,7 +261,7 @@ func decodeMessage(xmtpClient: XMTP.Client, envelope: XMTP.Envelope) async throw
       return nil
     }
   }
-
+  
   // V1/V2 convos 1:1, will be deprecated once 1:1 are migrated to MLS
   
   guard let conversation = await getPersistedConversation(xmtpClient: xmtpClient, contentTopic: envelope.contentTopic) else {
@@ -401,44 +402,6 @@ func getJsonReaction(reaction: Reaction) -> String? {
   }
 }
 
-func computeSpamScore(address: String, message: String?, contentType: String, apiURI: String?) async -> Double {
-  var spamScore: Double = await getSenderSpamScore(address: address, apiURI: apiURI)
-  if contentType.starts(with: "xmtp.org/text:"), let unwrappedMessage = message, containsURL(input: unwrappedMessage) {
-    spamScore += 1
-  }
-  return spamScore
-}
 
-func getSenderSpamScore(address: String, apiURI: String?) async -> Double {
-  var senderSpamScore: Double = 0.0
-  if (apiURI != nil && !apiURI!.isEmpty) {
-    let senderSpamScoreURI = "\(apiURI ?? "")/api/spam/senders/batch"
-    do {
-      let response = try await withUnsafeThrowingContinuation { continuation in
-        AF.request(senderSpamScoreURI, method: .post, parameters: ["sendersAddresses": [address]], encoding: JSONEncoding.default, headers: nil).validate().responseData { response in
-          if let data = response.data {
-            continuation.resume(returning: data)
-            return
-          }
-          if let err = response.error {
-            continuation.resume(throwing: err)
-            return
-          }
-          fatalError("should not get here")
-        }
-      }
-      
-      if let json = try JSONSerialization.jsonObject(with: response, options: []) as? [String: Any] {
-        if let score = json[address] as? Double {
-          senderSpamScore = score
-        }
-      }
-      
-      
-      
-    } catch {
-      print(error)
-    }
-  }
-  return senderSpamScore
-}
+
+

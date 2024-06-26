@@ -24,7 +24,6 @@ func handleNotificationAsync(contentHandler: ((UNNotificationContent) -> Void), 
     }
     
     sentryAddBreadcrumb(message: "Received a notification for account \(account)")
-    
     let apiURI = getApiURI()
     let pushToken = getKeychainValue(forKey: "PUSH_TOKEN")
     let accounts = getAccounts()
@@ -36,13 +35,13 @@ func handleNotificationAsync(contentHandler: ((UNNotificationContent) -> Void), 
     }
     
     if let xmtpClient = await getXmtpClient(account: account), !isIntroTopic(topic: contentTopic) {
-      let encryptedMessageData = Data(base64Encoded: Data(encodedMessage.utf8))!
-      let envelope = XMTP.Envelope.with { envelope in
-        envelope.message = encryptedMessageData
-        envelope.contentTopic = contentTopic
-      }
-
+      
       if isInviteTopic(topic: contentTopic) {
+        let encryptedMessageData = Data(base64Encoded: Data(encodedMessage.utf8))!
+        let envelope = XMTP.Envelope.with { envelope in
+          envelope.message = encryptedMessageData
+          envelope.contentTopic = contentTopic
+        }
         sentryAddBreadcrumb(message: "topic \(contentTopic) is invite topic")
         guard let conversation = await getNewConversationFromEnvelope(
           xmtpClient: xmtpClient,
@@ -60,23 +59,31 @@ func handleNotificationAsync(contentHandler: ((UNNotificationContent) -> Void), 
           bestAttemptContent: &content
         )
       } else if isGroupWelcomeTopic(topic: contentTopic) {
-        guard let conversation = await getNewConversationFromEnvelope(
-          xmtpClient: xmtpClient,
-          envelope: envelope
-        ) else {
+        guard let group = await getNewGroup(xmtpClient: xmtpClient, contentTopic: contentTopic)else {
           contentHandler(UNNotificationContent())
           return
         }
-
+        
         (shouldShowNotification, messageId) = await handleGroupWelcome(
           xmtpClient: xmtpClient,
           apiURI: apiURI,
           pushToken: pushToken,
-          conversation: conversation,
+          group: group,
           welcomeTopic: contentTopic,
           bestAttemptContent: &content
         )
+      } else if isGroupMessageTopic(topic: contentTopic) {        let encryptedMessageData = Data(base64Encoded: Data(encodedMessage.utf8))!
+        let envelope = XMTP.Envelope.with { envelope in
+          envelope.message = encryptedMessageData
+          envelope.contentTopic = contentTopic
+        }
+        (shouldShowNotification, messageId) = await handleGroupMessage(xmtpClient: xmtpClient, envelope: envelope, apiURI: apiURI, bestAttemptContent: &content)
       } else {
+        let encryptedMessageData = Data(base64Encoded: Data(encodedMessage.utf8))!
+        let envelope = XMTP.Envelope.with { envelope in
+          envelope.message = encryptedMessageData
+          envelope.contentTopic = contentTopic
+        }
         sentryAddBreadcrumb(message: "topic \(contentTopic) is not invite topic")
         (shouldShowNotification, messageId) = await handleOngoingConversationMessage(
           xmtpClient: xmtpClient,
@@ -91,7 +98,7 @@ func handleNotificationAsync(contentHandler: ((UNNotificationContent) -> Void), 
       incrementBadge(for: content)
       contentHandler(content)
     } else {
-      contentHandler(UNNotificationContent())
+      cancelNotification(contentHandler: contentHandler)
       return
     }
   }
@@ -103,7 +110,9 @@ class NotificationService: UNNotificationServiceExtension {
   
   override func didReceive(_ request: UNNotificationRequest, withContentHandler contentHandler: @escaping (UNNotificationContent) -> Void) {
     self.contentHandler = contentHandler
+    
     bestAttemptContent = (request.content.mutableCopy() as? UNMutableNotificationContent)
+    
     Task {
       await handleNotificationAsync(contentHandler: contentHandler, bestAttemptContent: bestAttemptContent);
     }
