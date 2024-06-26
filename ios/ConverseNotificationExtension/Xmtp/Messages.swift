@@ -101,36 +101,29 @@ func handleNewConversationFirstMessage(xmtpClient: XMTP.Client, apiURI: String?,
   return (shouldShowNotification, messageId)
 }
 
-func handleGroupWelcome(xmtpClient: XMTP.Client, apiURI: String?, pushToken: String?, conversation: XMTP.Conversation, welcomeTopic: String, bestAttemptContent: inout UNMutableNotificationContent) async -> (shouldShowNotification: Bool, messageId: String?) {
+func handleGroupWelcome(xmtpClient: XMTP.Client, apiURI: String?, pushToken: String?, group: XMTP.Group, welcomeTopic: String, bestAttemptContent: inout UNMutableNotificationContent) async -> (shouldShowNotification: Bool, messageId: String?) {
   var shouldShowNotification = false
   let messageId = welcomeTopic
   do {
     
-    if case .group(let group) = conversation {
-      do {
-        try await group.sync()
-        let members = try group.members
-        let groupName = try group.groupName()
-        let memberDictionary = members.reduce(into: [String: String]()) { dict, member in
-          let inboxId = member.inboxId
-          let address = member.addresses.first
-          dict[inboxId] = address
-        }
-        let spamScore = await computeSpamScoreGroupWelcome(client: xmtpClient, group: group)
-        if spamScore < 0 { // Message is going to main inbox
-          shouldShowNotification = true
-          bestAttemptContent.title = groupName
-          bestAttemptContent.body = "You have been added to a new group"
-        } else if spamScore == 0 { // Message is Request
-          shouldShowNotification = false
-          // TODO: Schedule/update request notification
-        } else { // Message is Spam
-          shouldShowNotification = false
-        }
-      }
+    try await group.sync()
+    let members = try group.members
+    let groupName = try group.groupName()
+    
+    let spamScore = await computeSpamScoreGroupWelcome(client: xmtpClient, group: group)
+    if spamScore < 0 { // Message is going to main inbox
+      shouldShowNotification = true
+      bestAttemptContent.title = groupName
+      bestAttemptContent.body = "You have been added to a new group"
+    } else if spamScore == 0 { // Message is Request
+      shouldShowNotification = false
+      trackNewRequest()
+    } else { // Message is Spam
+      shouldShowNotification = false
     }
+    
   } catch {
-    sentryTrackError(error: error, extras: ["message": "NOTIFICATION_SAVE_MESSAGE_ERROR_3", "topic": conversation.topic])
+    sentryTrackError(error: error, extras: ["message": "NOTIFICATION_SAVE_MESSAGE_ERROR_3", "topic": group.topic])
     print("[NotificationExtension] Error handling group invites: \(error)")
   }
   
@@ -173,7 +166,7 @@ func handleGroupMessage(xmtpClient: XMTP.Client, envelope: XMTP.Envelope, apiURI
   } catch {
     sentryTrackError(error: error, extras: ["message": "NOTIFICATION_SAVE_MESSAGE_ERROR_4", "topic": contentTopic])
     print("[NotificationExtension] Error handling group message: \(error)")
-
+    
   }
   return (shouldShowNotification, messageId)
 }
