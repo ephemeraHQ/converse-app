@@ -11,6 +11,10 @@ import { useAppStore } from "../data/store/appStore";
 import { useSelect } from "../data/store/storeHelpers";
 import { getTopicsData } from "../utils/api";
 import { loadSavedNotificationMessagesToContext } from "../utils/notifications";
+import {
+  dropXmtpClientsDbConnections,
+  reconnectXmtpClientsDbConnections,
+} from "../utils/xmtpRN/client";
 import { createPendingConversations } from "../utils/xmtpRN/conversations";
 import { sendPendingMessages } from "../utils/xmtpRN/send";
 import { syncXmtpClient } from "../utils/xmtpRN/sync";
@@ -72,10 +76,16 @@ export default function XmtpEngine() {
           appState.current.match(/inactive|background/) &&
           hydrationDone
         ) {
+          await reconnectXmtpClientsDbConnections();
           loadSavedNotificationMessagesToContext();
           if (isInternetReachableRef.current) {
             syncAccounts(accounts);
           }
+        } else if (
+          nextAppState.match(/inactive|background/) &&
+          appState.current === "active"
+        ) {
+          await dropXmtpClientsDbConnections();
         }
         appState.current = nextAppState;
       }
@@ -105,7 +115,10 @@ export default function XmtpEngine() {
   const runningCron = useRef(false);
 
   const xmtpCron = useCallback(async () => {
-    if (!useAppStore.getState().splashScreenHidden) {
+    if (
+      !useAppStore.getState().splashScreenHidden ||
+      AppState.currentState.match(/inactive|background/)
+    ) {
       return;
     }
     runningCron.current = true;

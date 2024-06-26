@@ -1,4 +1,4 @@
-import { Platform } from "react-native";
+import { AppState, Platform } from "react-native";
 import RNFS from "react-native-fs";
 import { Repository } from "typeorm/browser";
 
@@ -38,7 +38,13 @@ export const getRepository = async <T extends keyof RepositoriesForAccount>(
   // init. This means methods that try to interact with the database too
   // early will not fail but just take longer to execute!
 
-  while (!repositories[account]?.[entity]) {
+  // We also use the same mechanism to postpone writing to
+  // database if the app is in background
+
+  while (
+    !repositories[account]?.[entity] ||
+    AppState.currentState.match(/inactive|background/)
+  ) {
     console.log(`Database for ${account} not yet initialized`);
     await new Promise((r) => setTimeout(r, 100));
   }
