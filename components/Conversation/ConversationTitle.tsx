@@ -21,7 +21,6 @@ import { getPreferredAvatar } from "../../utils/profile";
 import { conversationName, getTitleFontScale } from "../../utils/str";
 import Avatar from "../Avatar";
 import { useEnableDebug } from "../DebugButton";
-import Picto from "../Picto/Picto";
 
 type Props = {
   isBlockedPeer: boolean;
@@ -132,27 +131,15 @@ export default function ConversationTitle({
           paddingRight: 40,
         }}
       >
-        {avatar ? (
-          <Avatar
-            uri={avatar}
-            size={30}
-            style={{
-              marginRight: Platform.OS === "android" ? 24 : 7,
-              marginLeft: Platform.OS === "ios" ? 0 : -9,
-            }}
-          />
-        ) : (
-          <Picto
-            picto="info.circle"
-            // Reason this is smaller than avatar is when it's the same size, looks like more of an error icon than an avatar placeholder
-            size={Platform.OS === "android" ? 20 : 16}
-            color={textPrimaryColor(colorScheme)}
-            style={{
-              marginRight: Platform.OS === "android" ? 24 : 16,
-              marginLeft: Platform.OS === "ios" ? 0 : -9,
-            }}
-          />
-        )}
+        <Avatar
+          uri={avatar}
+          size={30}
+          style={{
+            marginRight: Platform.OS === "android" ? 24 : 7,
+            marginLeft: Platform.OS === "ios" ? 0 : -9,
+          }}
+          name={conversationName(conversation)}
+        />
         <Text
           style={{
             color: textPrimaryColor(colorScheme),

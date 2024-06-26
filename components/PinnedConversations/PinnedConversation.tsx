@@ -12,7 +12,7 @@ import { XmtpConversation } from "../../data/store/chatStore";
 import { useGroupName } from "../../hooks/useGroupName";
 import { useGroupPhoto } from "../../hooks/useGroupPhoto";
 import { navigate } from "../../utils/navigation";
-import { getPreferredAvatar } from "../../utils/profile";
+import { getPreferredAvatar, getPreferredName } from "../../utils/profile";
 import Avatar from "../Avatar";
 interface Props {
   conversation: XmtpConversation;
@@ -50,6 +50,7 @@ export const PinnedConversation: FC<Props> = ({ conversation }) => {
         uri={avatar}
         size={80}
         style={styles.avatar}
+        name={getPreferredName(socials, conversation.peerAddress || "")}
       />
       <Text style={styles.text}>{title}</Text>
     </TouchableOpacity>

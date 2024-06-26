@@ -294,7 +294,12 @@ export default function GroupScreen({
     >
       <List.Section>
         <View style={{ alignItems: "center" }}>
-          <Avatar uri={localGroupPhoto} style={styles.avatar} color={false} />
+          <Avatar
+            uri={localGroupPhoto}
+            style={styles.avatar}
+            color={false}
+            name={formattedGroupName}
+          />
           {canEditGroupMetadata && (
             <Button
               variant="text"

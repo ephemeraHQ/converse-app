@@ -70,6 +70,7 @@ export function Recommendation({
           uri={getPreferredAvatar(profile)}
           size={40}
           style={styles.avatar}
+          name={preferredName}
         />
       )}
       <View style={styles.recommendationLeft}>

@@ -259,6 +259,7 @@ export const UserProfile = ({ onboarding, navigation }: Props) => {
         uri={profile?.avatar}
         style={styles.avatar}
         color={intermediaryScreenShown}
+        name={profile.displayName || "👋"}
       />
       {intermediaryScreenShown && (
         <>
