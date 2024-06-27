@@ -20,6 +20,7 @@
         "ignoreDOMComponents": true
       }
     ],
+    "react/jsx-key": "error",
 
     "prettier/prettier": "off" // We use prettier manually on the side
   },
