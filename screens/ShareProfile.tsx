@@ -1,14 +1,15 @@
 import Clipboard from "@react-native-clipboard/clipboard";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
+import { backgroundColor, textPrimaryColor } from "@styles/colors";
 import React, { useEffect, useState } from "react";
 import {
-  View,
-  Text,
   Button,
-  StyleSheet,
-  useColorScheme,
-  Share,
   Platform,
+  Share,
+  StyleSheet,
+  Text,
+  useColorScheme,
+  View,
 } from "react-native";
 import QRCode from "react-native-qrcode-svg";
 
@@ -19,7 +20,6 @@ import {
   useCurrentAccount,
   useProfilesStore,
 } from "../data/store/accountsStore";
-import { backgroundColor, textPrimaryColor } from "../utils/colors";
 import { isDesktop } from "../utils/device";
 import { getPreferredUsername } from "../utils/profile";
 import { shortAddress } from "../utils/str";

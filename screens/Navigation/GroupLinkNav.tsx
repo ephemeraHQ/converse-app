@@ -1,10 +1,10 @@
-import { Platform, useColorScheme } from "react-native";
-
 import {
   headerTitleStyle,
   textPrimaryColor,
   textSecondaryColor,
-} from "../../utils/colors";
+} from "@styles/colors";
+import { Platform, useColorScheme } from "react-native";
+
 import GroupLinkScreen from "../GroupLink";
 import { NativeStack, navigationAnimation } from "./Navigation";
 

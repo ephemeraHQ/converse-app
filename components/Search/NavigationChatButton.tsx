@@ -1,10 +1,10 @@
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import { backgroundColor, textSecondaryColor } from "@styles/colors";
 import { useCallback, useState } from "react";
 import { Alert, Platform, StyleSheet, useColorScheme } from "react-native";
 
 import { currentAccount } from "../../data/store/accountsStore";
 import { useIsSplitScreen } from "../../screens/Navigation/navHelpers";
-import { backgroundColor, textSecondaryColor } from "../../utils/colors";
 import { navigate } from "../../utils/navigation";
 import { canGroupMessage } from "../../utils/xmtpRN/conversations";
 import Button from "../Button/Button";

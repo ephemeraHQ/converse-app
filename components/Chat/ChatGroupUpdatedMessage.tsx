@@ -1,3 +1,4 @@
+import { textSecondaryColor } from "@styles/colors";
 import { GroupUpdatedContent } from "@xmtp/react-native-sdk";
 import { useMemo } from "react";
 import { StyleSheet, Text, useColorScheme } from "react-native";
@@ -7,7 +8,6 @@ import {
   getInboxIdStore,
   getProfilesStore,
 } from "../../data/store/accountsStore";
-import { textSecondaryColor } from "../../utils/colors";
 import { getPreferredName } from "../../utils/profile";
 import { MessageToDisplay } from "./Message/Message";
 

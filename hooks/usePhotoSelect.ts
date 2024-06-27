@@ -1,8 +1,8 @@
+import { actionSheetColors } from "@styles/colors";
 import { useCallback, useState } from "react";
 import { Platform, useColorScheme } from "react-native";
 
 import { showActionSheetWithOptions } from "../components/StateHandlers/ActionSheetStateHandler";
-import { actionSheetColors } from "../utils/colors";
 import { executeAfterKeyboardClosed } from "../utils/keyboard";
 import {
   compressAndResizeImage,

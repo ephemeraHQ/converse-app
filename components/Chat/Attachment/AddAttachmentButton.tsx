@@ -1,13 +1,14 @@
+import { actionSheetColors } from "@styles/colors";
 import * as ImagePicker from "expo-image-picker";
 import { setStatusBarHidden } from "expo-status-bar";
 import mime from "mime";
 import { useCallback, useEffect, useRef } from "react";
 import {
+  Platform,
+  StyleSheet,
   TouchableOpacity,
   View,
   useColorScheme,
-  StyleSheet,
-  Platform,
 } from "react-native";
 import { v4 as uuidv4 } from "uuid";
 
@@ -15,7 +16,6 @@ import { useAccountsStore } from "../../../data/store/accountsStore";
 import { useAppStore } from "../../../data/store/appStore";
 import { useSelect } from "../../../data/store/storeHelpers";
 import { uploadRemoteAttachment } from "../../../utils/attachment";
-import { actionSheetColors } from "../../../utils/colors";
 import { useConversationContext } from "../../../utils/conversation";
 import { executeAfterKeyboardClosed } from "../../../utils/keyboard";
 import {

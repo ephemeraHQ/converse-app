@@ -4,6 +4,15 @@
     "strict": true,
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
+    "paths": {
+      "@components/*": ["./components/*"],
+      "@data/*": ["./data/*"],
+      "@hooks/*": ["./hooks/*"],
+      "@queries/*": ["./queries/*"],
+      "@screens/*": ["./screens/*"],
+      "@styles/*": ["./styles/*"],
+      "@utils/*": ["./utils/*"],
+    },
   },
   "exclude": [
     "./vendor/**/*",

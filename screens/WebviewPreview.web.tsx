@@ -1,9 +1,9 @@
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
+import { backgroundColor } from "@styles/colors";
 import { useEffect } from "react";
 import { useColorScheme } from "react-native";
 
 import AndroidBackAction from "../components/AndroidBackAction";
-import { backgroundColor } from "../utils/colors";
 import { NavigationParamList } from "./Navigation/Navigation";
 
 export default function WebviewPreview({

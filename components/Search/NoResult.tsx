@@ -1,12 +1,11 @@
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import { primaryColor, textPrimaryColor } from "@styles/colors";
 import React, {
-  useColorScheme,
+  Platform,
   StyleSheet,
   Text,
-  Platform,
+  useColorScheme,
 } from "react-native";
-
-import { textPrimaryColor, primaryColor } from "../../utils/colors";
 
 export default function NoResult({
   navigation,

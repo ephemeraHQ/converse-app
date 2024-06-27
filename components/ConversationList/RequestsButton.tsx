@@ -1,21 +1,21 @@
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import {
-  TouchableHighlight,
-  useColorScheme,
-  StyleSheet,
-  Platform,
-  View,
-  Text,
-} from "react-native";
-
-import { NavigationParamList } from "../../screens/Navigation/Navigation";
-import {
   clickedItemBackgroundColor,
   listItemSeparatorColor,
   primaryColor,
   textPrimaryColor,
   textSecondaryColor,
-} from "../../utils/colors";
+} from "@styles/colors";
+import {
+  Platform,
+  StyleSheet,
+  Text,
+  TouchableHighlight,
+  useColorScheme,
+  View,
+} from "react-native";
+
+import { NavigationParamList } from "../../screens/Navigation/Navigation";
 
 type Props = { requestsCount: number } & NativeStackScreenProps<
   NavigationParamList,

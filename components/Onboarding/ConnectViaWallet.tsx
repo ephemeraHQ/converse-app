@@ -1,20 +1,20 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { textPrimaryColor, textSecondaryColor } from "@styles/colors";
 import { useDisconnect, useSigner } from "@thirdweb-dev/react-native";
 import * as Linking from "expo-linking";
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
+  Alert,
+  AppState,
   Platform,
   StyleSheet,
   Text,
   useColorScheme,
-  AppState,
-  Alert,
 } from "react-native";
 
 import { getAccountsList } from "../../data/store/accountsStore";
 import { useOnboardingStore } from "../../data/store/onboardingStore";
 import { useSelect } from "../../data/store/storeHelpers";
-import { textPrimaryColor, textSecondaryColor } from "../../utils/colors";
 import { shortAddress } from "../../utils/str";
 import { isOnXmtp } from "../../utils/xmtpRN/client";
 import { getXmtpBase64KeyFromSigner } from "../../utils/xmtpRN/signIn";

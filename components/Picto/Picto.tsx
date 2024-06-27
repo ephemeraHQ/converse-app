@@ -36,6 +36,7 @@ import Send from "@material-symbols/svg-400/outlined/send.svg";
 import Settings from "@material-symbols/svg-400/outlined/settings.svg";
 import Signature from "@material-symbols/svg-400/outlined/signature.svg";
 import WavingHand from "@material-symbols/svg-400/outlined/waving_hand.svg";
+import { primaryColor } from "@styles/colors";
 import {
   ColorValue,
   Platform,
@@ -47,7 +48,6 @@ import {
 import { SvgProps } from "react-native-svg";
 
 import Reply from "../../assets/reply.svg";
-import { primaryColor } from "../../utils/colors";
 
 type Props = {
   picto: string;
@@ -108,7 +108,7 @@ export default function Picto({ picto, style, size, weight, color }: Props) {
   if (SvgPicto) {
     const pictoSize = (size || 48) + (Platform.OS === "web" ? 6 : 0);
     return (
-      <View style={[style]}>
+      <View style={style}>
         <SvgPicto
           fill={color || primaryColor(colorScheme)}
           width={pictoSize}
@@ -118,6 +118,6 @@ export default function Picto({ picto, style, size, weight, color }: Props) {
       </View>
     );
   } else {
-    return <View style={[style]} />;
+    return <View style={style} />;
   }
 }

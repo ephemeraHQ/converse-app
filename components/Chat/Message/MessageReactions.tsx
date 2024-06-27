@@ -1,3 +1,8 @@
+import {
+  actionSheetColors,
+  messageBubbleColor,
+  textPrimaryColor,
+} from "@styles/colors";
 import { useCallback } from "react";
 import {
   StyleSheet,
@@ -12,11 +17,6 @@ import {
   useProfilesStore,
 } from "../../../data/store/accountsStore";
 import { isAttachmentMessage } from "../../../utils/attachment/helpers";
-import {
-  actionSheetColors,
-  messageBubbleColor,
-  textPrimaryColor,
-} from "../../../utils/colors";
 import { useConversationContext } from "../../../utils/conversation";
 import { getPreferredName } from "../../../utils/profile";
 import {

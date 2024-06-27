@@ -1,5 +1,10 @@
 import Clipboard from "@react-native-clipboard/clipboard";
 import { NavigationProp } from "@react-navigation/native";
+import {
+  actionSheetColors,
+  primaryColor,
+  textSecondaryColor,
+} from "@styles/colors";
 import * as Linking from "expo-linking";
 import React, { useCallback } from "react";
 import {
@@ -14,17 +19,12 @@ import { refreshProfileForAddress } from "../data/helpers/profiles/profilesUpdat
 import { useAccountsStore } from "../data/store/accountsStore";
 import { useAppStore } from "../data/store/appStore";
 import { useSelect } from "../data/store/storeHelpers";
-import {
-  actionSheetColors,
-  primaryColor,
-  textSecondaryColor,
-} from "../utils/colors";
 import { converseEventEmitter } from "../utils/events";
 import { useLogoutFromConverse } from "../utils/logout";
 import { navigate } from "../utils/navigation";
 import {
-  requestPushNotificationsPermissions,
   NotificationPermissionStatus,
+  requestPushNotificationsPermissions,
 } from "../utils/notifications";
 import Picto from "./Picto/Picto";
 import { showActionSheetWithOptions } from "./StateHandlers/ActionSheetStateHandler";

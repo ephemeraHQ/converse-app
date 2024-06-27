@@ -1,19 +1,19 @@
 import { useHeaderHeight } from "@react-navigation/elements";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
+import { backgroundColor, textPrimaryColor } from "@styles/colors";
 import {
+  Dimensions,
+  Platform,
   StyleSheet,
   Text,
   useColorScheme,
   View,
-  Platform,
-  Dimensions,
 } from "react-native";
 
 import Ellipse from "../assets/ellipse.svg";
 import config from "../config";
 import { useRecommendationsStore } from "../data/store/accountsStore";
 import { NavigationParamList } from "../screens/Navigation/Navigation";
-import { backgroundColor, textPrimaryColor } from "../utils/colors";
 import { navigate } from "../utils/navigation";
 import Button from "./Button/Button";
 
@@ -28,7 +28,7 @@ export default function Welcome({ ctaOnly, navigation }: Props) {
   const frensCount = frens ? Object.keys(frens).length : 0;
   return (
     <View
-      style={[
+      style={
         ctaOnly
           ? styles.welcomCtaOnly
           : [
@@ -40,8 +40,8 @@ export default function Welcome({ ctaOnly, navigation }: Props) {
                     ? Dimensions.get("screen").height - 2 * headerHeight
                     : undefined,
               },
-            ],
-      ]}
+            ]
+      }
     >
       {!ctaOnly && (
         <>
