@@ -6,7 +6,7 @@ export enum AvatarSizes {
   conversationListItem = Platform.OS === "ios" ? 56 : 47,
   conversationTitle = 30,
   listItemDisplay = 40,
-  messageSender = Platform.OS === "ios" ? 24 : 21,
+  messageSender = Platform.OS === "ios" ? 30 : 21,
   profileSettings = Platform.OS === "ios" ? 16 : 24,
   pinnedConversation = 80,
 }
