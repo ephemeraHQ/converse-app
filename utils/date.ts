@@ -77,5 +77,5 @@ export const getMinimalDate = (date: number) => {
   if (days > 0) return `${days}d`;
   if (hours > 0) return `${hours}h`;
   if (minutes > 0) return `${minutes}m`;
-  return `${seconds}s`;
+  return `${Math.max(seconds, 0)}s`;
 };
