@@ -11,7 +11,7 @@ export default function PinnedConversations({ convos }: Props) {
   const pinnedConvos = !convos
     ? []
     : convos?.map((convo) => {
-        return <PinnedConversation conversation={convo} />;
+        return <PinnedConversation conversation={convo} key={convo.topic} />;
       });
   return <View style={styles.container}>{pinnedConvos}</View>;
 }
