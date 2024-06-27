@@ -6,6 +6,7 @@ import {
   textPrimaryColor,
   textSecondaryColor,
 } from "@styles/colors";
+import { PictoSizes } from "@styles/sizes";
 import * as LibPhoneNumber from "libphonenumber-js";
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
@@ -246,7 +247,7 @@ export default function PrivyConnect() {
               <Picto
                 picto="chevron.down"
                 color={textSecondaryColor(colorScheme)}
-                size={Platform.OS === "ios" ? 12 : 22}
+                size={PictoSizes.privyConnect}
                 style={styles.flagChevron}
               />
             }

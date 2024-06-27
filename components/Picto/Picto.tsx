@@ -37,6 +37,7 @@ import Settings from "@material-symbols/svg-400/outlined/settings.svg";
 import Signature from "@material-symbols/svg-400/outlined/signature.svg";
 import WavingHand from "@material-symbols/svg-400/outlined/waving_hand.svg";
 import { primaryColor } from "@styles/colors";
+import { PictoSizes } from "@styles/sizes";
 import {
   ColorValue,
   Platform,
@@ -54,7 +55,6 @@ type Props = {
   style?: StyleProp<ViewStyle>;
   color?: ColorValue;
   size?: number;
-  weight?: string;
 };
 
 const pictoMapping: {
@@ -102,11 +102,16 @@ const pictoMapping: {
   "arrowshape.turn.up.left": Reply,
 };
 
-export default function Picto({ picto, style, size, weight, color }: Props) {
+export default function Picto({
+  picto,
+  style,
+  size = PictoSizes.default,
+  color,
+}: Props) {
   const SvgPicto = pictoMapping[picto];
   const colorScheme = useColorScheme();
   if (SvgPicto) {
-    const pictoSize = (size || 48) + (Platform.OS === "web" ? 6 : 0);
+    const pictoSize = size + (Platform.OS === "web" ? 6 : 0);
     return (
       <View style={style}>
         <SvgPicto

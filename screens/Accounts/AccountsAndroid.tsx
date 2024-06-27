@@ -1,5 +1,6 @@
 import { NavigationProp } from "@react-navigation/native";
 import { backgroundColor, clickedItemBackgroundColor } from "@styles/colors";
+import { PictoSizes } from "@styles/sizes";
 import { Dimensions, Platform, StyleSheet, useColorScheme } from "react-native";
 import { Drawer } from "react-native-paper";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -62,7 +63,11 @@ export default function AccountsAndroid({ navigation }: Props) {
             }
           }}
           icon={({ color }) => (
-            <Picto picto="account_circle" size={24} color={color} />
+            <Picto
+              picto="account_circle"
+              size={PictoSizes.accoutSettings}
+              color={color}
+            />
           )}
           right={({ color }) => (
             <AccountSettingsButton account={a} navigation={navigation} />
@@ -76,7 +81,9 @@ export default function AccountsAndroid({ navigation }: Props) {
       ))}
       <Drawer.Item
         label="Add an account"
-        icon={({ color }) => <Picto picto="plus" size={24} color={color} />}
+        icon={({ color }) => (
+          <Picto picto="plus" size={PictoSizes.navItem} color={color} />
+        )}
         onPress={async () => {
           try {
             await disconnectWallet();

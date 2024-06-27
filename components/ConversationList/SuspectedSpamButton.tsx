@@ -6,6 +6,7 @@ import {
   textPrimaryColor,
   textSecondaryColor,
 } from "@styles/colors";
+import { PictoSizes } from "@styles/sizes";
 import {
   Platform,
   StyleSheet,
@@ -41,13 +42,12 @@ export default function SuspectedSpamButton({
         <Text style={styles.spamCount}>{spamCount}</Text>
         <Picto
           picto={toggleActivated ? "chevron.down" : "chevron.right"}
-          weight="semibold"
           color={
             Platform.OS === "android"
               ? textPrimaryColor(colorScheme)
               : actionSecondaryColor(colorScheme)
           }
-          size={Platform.OS === "android" ? 25 : 10}
+          size={PictoSizes.suspectedSpam}
         />
       </View>
     </TouchableHighlight>
