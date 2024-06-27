@@ -1,38 +1,70 @@
-import { Image, ImageStyle } from "expo-image";
-import { StyleProp, useColorScheme } from "react-native";
-
-import PFPPlaceholderColor from "../assets/default-pfp-color.png";
-import PFPPlaceholderDark from "../assets/default-pfp-dark.png";
-import PFPPlaceholderLight from "../assets/default-pfp-light.png";
+import { actionSecondaryColor, textSecondaryColor } from "@styles/colors";
+import { AvatarSizes } from "@styles/sizes";
+import {
+  ColorSchemeName,
+  Image,
+  ImageStyle,
+  StyleProp,
+  StyleSheet,
+  Text,
+  useColorScheme,
+  View,
+} from "react-native";
 
 type Props = {
   uri?: string | undefined;
   size?: number | undefined;
   style?: StyleProp<ImageStyle>;
   color?: boolean;
+  name?: string | undefined;
 };
-export default function Avatar({ uri, size, style, color }: Props) {
+
+export default function Avatar({
+  uri,
+  size = AvatarSizes.default,
+  style,
+  color,
+  name,
+}: Props) {
   const colorScheme = useColorScheme();
-  const PFPPlaceholder = color
-    ? PFPPlaceholderColor
-    : colorScheme === "dark"
-    ? PFPPlaceholderDark
-    : PFPPlaceholderLight;
-  return (
+  const styles = getStyles(colorScheme, size);
+  const firstLetter = name ? name.charAt(0).toUpperCase() : "";
+
+  return uri ? (
     <Image
       key={`${uri}-${color}-${colorScheme}`}
-      source={uri ? { uri } : PFPPlaceholder}
-      placeholder={PFPPlaceholder}
-      placeholderContentFit="cover"
-      contentFit="cover"
-      style={[
-        {
-          width: size || 121,
-          height: size || 121,
-          borderRadius: size || 121,
-        },
-        style,
-      ]}
+      source={{ uri }}
+      style={[styles.image, style]}
     />
+  ) : (
+    <View style={[styles.placeholder, style]}>
+      <Text style={styles.text}>{firstLetter}</Text>
+    </View>
   );
 }
+
+const getStyles = (colorScheme: ColorSchemeName, size: number) =>
+  StyleSheet.create({
+    image: {
+      width: size,
+      height: size,
+      borderRadius: size,
+    },
+    placeholder: {
+      width: size,
+      height: size,
+      borderRadius: size / 2,
+      backgroundColor:
+        colorScheme === "dark"
+          ? textSecondaryColor(colorScheme)
+          : actionSecondaryColor(colorScheme),
+      justifyContent: "center",
+      alignItems: "center",
+    },
+    text: {
+      fontSize: size / 2,
+      fontWeight: "500",
+      color: "white",
+      textAlign: "center",
+    },
+  });

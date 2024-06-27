@@ -161,7 +161,12 @@ export default function NewGroupSummary({
     >
       <List.Section>
         <View style={styles.listSectionContainer}>
-          <Avatar uri={groupPhoto} style={styles.avatar} color={false} />
+          <Avatar
+            uri={groupPhoto}
+            style={styles.avatar}
+            color={false}
+            name={groupName}
+          />
           <Button
             variant="text"
             title={

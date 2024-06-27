@@ -1,3 +1,4 @@
+import { AvatarSizes } from "@styles/sizes";
 import React, { useCallback, useEffect, useState } from "react";
 import { Platform, TouchableOpacity } from "react-native";
 
@@ -10,7 +11,7 @@ import {
 } from "../../data/store/accountsStore";
 import { evmHelpers } from "../../utils/evm/helpers";
 import { navigate } from "../../utils/navigation";
-import { getPreferredAvatar } from "../../utils/profile";
+import { getPreferredAvatar, getPreferredName } from "../../utils/profile";
 import Avatar from "../Avatar";
 import Button from "../Button/Button";
 
@@ -81,13 +82,14 @@ export default function ProfileSettingsButton() {
     <TouchableOpacity activeOpacity={0.2} onPress={openProfile}>
       <Avatar
         uri={getPreferredAvatar(socials)}
-        size={Platform.OS === "ios" ? 16 : 24}
+        size={AvatarSizes.profileSettings}
         style={{
           width: Platform.OS === "android" ? undefined : 32,
           height: Platform.OS === "android" ? undefined : 32,
           marginRight: Platform.OS === "android" ? 0 : 10,
           marginTop: Platform.OS === "ios" ? 3 : 0,
         }}
+        name={getPreferredName(socials, account)}
       />
     </TouchableOpacity>
   );
