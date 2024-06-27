@@ -4,6 +4,7 @@ import {
   textPrimaryColor,
   textSecondaryColor,
 } from "@styles/colors";
+import { AvatarSizes } from "@styles/sizes";
 import {
   Image,
   Platform,
@@ -68,8 +69,9 @@ export function Recommendation({
       {!embedInChat && (
         <Avatar
           uri={getPreferredAvatar(profile)}
-          size={40}
+          size={AvatarSizes.listItemDisplay}
           style={styles.avatar}
+          name={preferredName}
         />
       )}
       <View style={styles.recommendationLeft}>

@@ -500,7 +500,11 @@ export default function ProfileScreen({
       style={styles.profile}
       contentContainerStyle={styles.profileContent}
     >
-      <Avatar uri={getPreferredAvatar(socials)} style={styles.avatar} />
+      <Avatar
+        uri={getPreferredAvatar(socials)}
+        style={styles.avatar}
+        name={getPreferredName(socials, peerAddress)}
+      />
       <Text style={styles.title}>{getPreferredName(socials, peerAddress)}</Text>
       {isMyProfile && (
         <TableView
