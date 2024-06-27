@@ -40,7 +40,8 @@ import { converseEventEmitter } from "../../utils/events";
 import { getProfileData } from "../../utils/profile";
 import { isContentType } from "../../utils/xmtpRN/contentTypes";
 import { Recommendation } from "../Recommendations/Recommendation";
-import ChatPlaceholder from "./ChatPlaceholder";
+import ChatPlaceholder from "./ChatPlaceholder/ChatPlaceholder";
+import { GroupChatPlaceholder } from "./ChatPlaceholder/GroupChatPlaceholder";
 import ConsentPopup from "./ConsentPopup";
 import ChatInput from "./Input/Input";
 import CachedChatMessage, { MessageToDisplay } from "./Message/Message";
@@ -328,8 +329,11 @@ export default function Chat() {
             ListFooterComponent={ListFooterComponent}
           />
         )}
-        {showPlaceholder && (
+        {showPlaceholder && !conversation?.isGroup && (
           <ChatPlaceholder messagesCount={listArray.length} />
+        )}
+        {showPlaceholder && conversation?.isGroup && (
+          <GroupChatPlaceholder messagesCount={listArray.length} />
         )}
         <ConsentPopup />
       </ReanimatedView>
