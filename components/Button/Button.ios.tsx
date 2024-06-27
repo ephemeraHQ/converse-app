@@ -72,7 +72,6 @@ export default function Button({
             variant === "text" ? { paddingLeft: 15 } : undefined,
           ]}
           color={variant === "text" ? primaryColor(colorScheme) : "white"}
-          weight={variant === "text" ? "medium" : "bold"}
         />
       )}
       <Text

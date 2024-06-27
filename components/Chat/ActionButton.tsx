@@ -29,7 +29,6 @@ export default function ActionButton({
         picto={picto}
         color={textSecondaryColor(colorScheme)}
         size={PictoSizes.actionButton}
-        weight="medium"
         style={pictoStyle}
       />
     </View>
