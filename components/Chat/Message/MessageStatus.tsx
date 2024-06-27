@@ -25,7 +25,7 @@ const useStyles = () => {
   const colorScheme = useColorScheme();
   return StyleSheet.create({
     statusText: {
-      fontSize: 11,
+      fontSize: 12,
       color: textSecondaryColor(colorScheme),
       marginRight: 3,
     },

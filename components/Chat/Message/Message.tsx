@@ -184,7 +184,7 @@ function ChatMessage({ message, colorScheme, isGroup, isFrame }: Props) {
       style={[
         styles.messageRow,
         {
-          marginBottom: !message.hasNextMessageInSeries ? 8 : 4,
+          marginBottom: !message.hasNextMessageInSeries ? 8 : 2,
         },
       ]}
     >
@@ -479,7 +479,7 @@ const useStyles = () => {
     messageSwipeable: {
       width: "100%",
       flexDirection: "row",
-      paddingHorizontal: Platform.OS === "android" ? 10 : 20,
+      paddingHorizontal: 10,
     },
     messageSwipeableChildren: {
       width: "100%",
@@ -491,7 +491,7 @@ const useStyles = () => {
       marginVertical: 5,
     },
     linkToFrame: {
-      fontSize: 11,
+      fontSize: 12,
       marginVertical: 7,
       marginLeft: 6,
       marginRight: "auto",
@@ -500,10 +500,11 @@ const useStyles = () => {
     date: {
       flexBasis: "100%",
       textAlign: "center",
-      fontSize: 11,
+      fontSize: 12,
       color: textSecondaryColor(colorScheme),
       marginTop: 12,
       marginBottom: 8,
+      fontWeight: "bold",
     },
     replyToUsername: {
       fontSize: 12,
@@ -514,17 +515,19 @@ const useStyles = () => {
     messageText: {
       color: textPrimaryColor(colorScheme),
       fontSize: 16,
-      padding: 10,
+      paddingVertical: 8,
+      paddingHorizontal: 14,
     },
     messageTextMe: {
       color: inversePrimaryColor(colorScheme),
     },
     allEmojisAndMaxThree: {
       fontSize: 48,
+      paddingHorizontal: 0,
     },
     messageTextReply: {},
     groupSenderAvatarWrapper: {
-      marginRight: 8,
+      marginRight: 6,
     },
     groupSenderWrapper: {
       flexDirection: "row",
