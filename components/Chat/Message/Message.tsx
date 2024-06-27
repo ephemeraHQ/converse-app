@@ -95,11 +95,15 @@ const MessageSenderAvatar = ({ message }: { message: MessageToDisplay }) => {
   const styles = useStyles();
   return (
     <View style={styles.groupSenderAvatarWrapper}>
-      <Avatar
-        size={AvatarSizes.messageSender}
-        uri={getPreferredAvatar(senderSocials)}
-        name={getPreferredName(senderSocials, message.senderAddress)}
-      />
+      {!message.hasNextMessageInSeries ? (
+        <Avatar
+          size={AvatarSizes.messageSender}
+          uri={getPreferredAvatar(senderSocials)}
+          name={getPreferredName(senderSocials, message.senderAddress)}
+        />
+      ) : (
+        <View style={styles.avatarPlaceholder} />
+      )}
     </View>
   );
 };
