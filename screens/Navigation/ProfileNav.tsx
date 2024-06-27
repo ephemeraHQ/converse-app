@@ -1,5 +1,6 @@
 import { NativeStackNavigationOptions } from "@react-navigation/native-stack";
 import { textPrimaryColor, textSecondaryColor } from "@styles/colors";
+import { PictoSizes } from "@styles/sizes";
 import {
   Button,
   Platform,
@@ -63,7 +64,7 @@ export default function ProfileNav() {
               >
                 <Picto
                   picto="square.and.pencil"
-                  size={24}
+                  size={PictoSizes.navItem}
                   color={textSecondaryColor(colorScheme)}
                   style={{ marginRight: Platform.OS === "web" ? 30 : 0 }}
                 />

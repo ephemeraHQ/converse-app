@@ -1,6 +1,6 @@
 import { messageBubbleColor, textSecondaryColor } from "@styles/colors";
+import { PictoSizes } from "@styles/sizes";
 import {
-  Platform,
   StyleProp,
   StyleSheet,
   useColorScheme,
@@ -28,7 +28,7 @@ export default function ActionButton({
       <Picto
         picto={picto}
         color={textSecondaryColor(colorScheme)}
-        size={Platform.OS === "android" ? 20 : 11.7}
+        size={PictoSizes.actionButton}
         weight="medium"
         style={pictoStyle}
       />

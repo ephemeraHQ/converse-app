@@ -1,4 +1,5 @@
 import { textSecondaryColor } from "@styles/colors";
+import { PictoSizes } from "@styles/sizes";
 import { Image } from "expo-image";
 import React from "react";
 import {
@@ -60,7 +61,7 @@ export const TableViewPicto = ({
     <View style={{ justifyContent: "center" }}>
       <Picto
         picto={symbol}
-        size={Platform.OS === "ios" ? 16 : 24}
+        size={PictoSizes.tableViewImage}
         style={Platform.select({
           default: {
             width: IMAGE_SIZE,

@@ -1,4 +1,5 @@
 import { textPrimaryColor } from "@styles/colors";
+import { PictoSizes } from "@styles/sizes";
 import { useColorScheme } from "react-native";
 import { TouchableOpacity } from "react-native-gesture-handler";
 
@@ -49,8 +50,7 @@ export default function ConversationNav(
           >
             <Picto
               picto="chevron.left"
-              size={16}
-              weight="semibold"
+              size={PictoSizes.conversationNav}
               color={textPrimaryColor(colorScheme)}
             />
           </TouchableOpacity>

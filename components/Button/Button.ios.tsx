@@ -4,6 +4,7 @@ import {
   primaryColor,
   tertiaryBackgroundColor,
 } from "@styles/colors";
+import { PictoSizes } from "@styles/sizes";
 import React from "react";
 import {
   GestureResponderEvent,
@@ -65,7 +66,7 @@ export default function Button({
       {picto && (
         <Picto
           picto={picto}
-          size={variant === "text" ? 15 : 13}
+          size={variant === "text" ? PictoSizes.textButton : PictoSizes.button}
           style={[
             styles.picto,
             variant === "text" ? { paddingLeft: 15 } : undefined,

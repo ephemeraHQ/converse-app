@@ -3,9 +3,9 @@ import {
   GestureResponderEvent,
   StyleProp,
   StyleSheet,
+  Text,
   TextStyle,
   View,
-  Text,
   ViewStyle,
 } from "react-native";
 import { Button as MaterialButton } from "react-native-paper";
