@@ -255,7 +255,10 @@ export default function GroupScreen({
         title: "Allow group",
         titleColor: primaryColor(colorScheme),
         action: () => {
-          allowGroup();
+          allowGroup({
+            includeAddedBy: false,
+            includeCreator: false,
+          });
         },
       });
     }
@@ -265,7 +268,10 @@ export default function GroupScreen({
         title: "Block group",
         titleColor: dangerColor(colorScheme),
         action: () => {
-          blockGroup();
+          blockGroup({
+            includeAddedBy: false,
+            includeCreator: false,
+          });
         },
       });
     }

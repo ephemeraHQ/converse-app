@@ -42,7 +42,8 @@ import { isContentType } from "../../utils/xmtpRN/contentTypes";
 import { Recommendation } from "../Recommendations/Recommendation";
 import ChatPlaceholder from "./ChatPlaceholder/ChatPlaceholder";
 import { GroupChatPlaceholder } from "./ChatPlaceholder/GroupChatPlaceholder";
-import ConsentPopup from "./ConsentPopup";
+import ConsentPopup from "./ConsentPopup/ConsentPopup";
+import { GroupConsentPopup } from "./ConsentPopup/GroupConsentPopup";
 import ChatInput from "./Input/Input";
 import CachedChatMessage, { MessageToDisplay } from "./Message/Message";
 import TransactionInput from "./Transaction/TransactionInput";
@@ -335,7 +336,7 @@ export default function Chat() {
         {showPlaceholder && conversation?.isGroup && (
           <GroupChatPlaceholder messagesCount={listArray.length} />
         )}
-        <ConsentPopup />
+        {conversation?.isGroup ? <GroupConsentPopup /> : <ConsentPopup />}
       </ReanimatedView>
       {showChatInput && (
         <>

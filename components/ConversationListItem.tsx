@@ -10,6 +10,7 @@ import {
   textSecondaryColor,
 } from "@styles/colors";
 import { AvatarSizes, PictoSizes } from "@styles/sizes";
+import { strings } from "@utils/i18n/strings";
 import * as Haptics from "expo-haptics";
 import React, { memo, useCallback, useEffect, useRef, useState } from "react";
 import {
@@ -54,6 +55,7 @@ type ConversationListItemProps = {
   showUnread: boolean;
   conversationOpened: boolean;
   onLongPress?: () => void;
+  onRightActionPress?: (defaultAction: () => void) => void;
 } & NativeStackScreenProps<
   NavigationParamList,
   "Chats" | "ShareFrame" | "ChatsRequests"
@@ -74,6 +76,7 @@ const ConversationListItem = memo(function ConversationListItem({
   showUnread,
   conversationOpened,
   onLongPress,
+  onRightActionPress,
 }: ConversationListItemProps) {
   const styles = getStyles(colorScheme);
   const timeToShow = getMinimalDate(conversationTime as number);
@@ -152,69 +155,72 @@ const ConversationListItem = memo(function ConversationListItem({
     swipeableRef.current?.close();
   }, []);
 
+  const handleRightPress = useCallback(() => {
+    if (onRightActionPress) {
+      onRightActionPress(closeSwipeable);
+      return;
+    }
+    showActionSheetWithOptions(
+      {
+        options: [strings.delete, strings.delete_and_block, strings.cancel],
+        cancelButtonIndex: 2,
+        destructiveButtonIndex: [0, 1],
+        title: `Delete chat with ${conversationPeerAddress}?`,
+        ...actionSheetColors(colorScheme),
+      },
+      (selectedIndex?: number) => {
+        if (!conversationPeerAddress) return;
+        if (selectedIndex === 0) {
+          saveTopicsData(currentAccount(), {
+            [conversationTopic]: {
+              status: "deleted",
+              timestamp: new Date().getTime(),
+            },
+          });
+          setTopicsData({
+            [conversationTopic]: {
+              status: "deleted",
+              timestamp: new Date().getTime(),
+            },
+          });
+        } else if (selectedIndex === 1) {
+          saveTopicsData(currentAccount(), {
+            [conversationTopic]: { status: "deleted" },
+          });
+          setTopicsData({
+            [conversationTopic]: {
+              status: "deleted",
+              timestamp: new Date().getTime(),
+            },
+          });
+          consentToPeersOnProtocol(
+            currentAccount(),
+            [conversationPeerAddress],
+            "deny"
+          );
+          setPeersStatus({ [conversationPeerAddress]: "blocked" });
+        } else {
+          closeSwipeable();
+        }
+      }
+    );
+  }, [
+    closeSwipeable,
+    colorScheme,
+    conversationPeerAddress,
+    conversationTopic,
+    onRightActionPress,
+    setPeersStatus,
+    setTopicsData,
+  ]);
+
   const renderRightActions = useCallback(() => {
     return (
-      <RectButton
-        style={styles.rightAction}
-        onPress={() => {
-          showActionSheetWithOptions(
-            {
-              options: ["Delete", "Delete and block", "Cancel"],
-              cancelButtonIndex: 2,
-              destructiveButtonIndex: [0, 1],
-              title: `Delete chat with ${conversationPeerAddress}?`,
-              ...actionSheetColors(colorScheme),
-            },
-            (selectedIndex?: number) => {
-              if (!conversationPeerAddress) return;
-              if (selectedIndex === 0) {
-                saveTopicsData(currentAccount(), {
-                  [conversationTopic]: {
-                    status: "deleted",
-                    timestamp: new Date().getTime(),
-                  },
-                });
-                setTopicsData({
-                  [conversationTopic]: {
-                    status: "deleted",
-                    timestamp: new Date().getTime(),
-                  },
-                });
-              } else if (selectedIndex === 1) {
-                saveTopicsData(currentAccount(), {
-                  [conversationTopic]: { status: "deleted" },
-                });
-                setTopicsData({
-                  [conversationTopic]: {
-                    status: "deleted",
-                    timestamp: new Date().getTime(),
-                  },
-                });
-                consentToPeersOnProtocol(
-                  currentAccount(),
-                  [conversationPeerAddress],
-                  "deny"
-                );
-                setPeersStatus({ [conversationPeerAddress]: "blocked" });
-              } else {
-                closeSwipeable();
-              }
-            }
-          );
-        }}
-      >
+      <RectButton style={styles.rightAction} onPress={handleRightPress}>
         <Picto picto="trash" color="white" size={PictoSizes.swipableItem} />
       </RectButton>
     );
-  }, [
-    conversationTopic,
-    conversationPeerAddress,
-    setTopicsData,
-    setPeersStatus,
-    closeSwipeable,
-    colorScheme,
-    styles.rightAction,
-  ]);
+  }, [styles.rightAction, handleRightPress]);
 
   const renderLeftActions = useCallback(() => {
     return (

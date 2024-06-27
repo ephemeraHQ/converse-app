@@ -10,6 +10,7 @@ export enum QueryKeys {
 
   // Members
   GROUP_MEMBERS = "groupMembers",
+  ADDED_BY = "addedBy",
 
   // Mutable Metadata
   GROUP_NAME = "groupName",
@@ -87,6 +88,12 @@ export const groupPermissionsQueryKey = (account: string, topic: string) => [
 
 export const groupConsentQueryKey = (account: string, topic: string) => [
   QueryKeys.GROUP_CONSENT,
+  account,
+  topic,
+];
+
+export const addedByQueryKey = (account: string, topic: string) => [
+  QueryKeys.ADDED_BY,
   account,
   topic,
 ];
