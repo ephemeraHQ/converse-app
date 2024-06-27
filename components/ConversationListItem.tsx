@@ -9,7 +9,7 @@ import {
   textPrimaryColor,
   textSecondaryColor,
 } from "@styles/colors";
-import { AvatarSizes } from "@styles/sizes";
+import { AvatarSizes, PictoSizes } from "@styles/sizes";
 import * as Haptics from "expo-haptics";
 import React, { memo, useCallback, useEffect, useRef, useState } from "react";
 import {
@@ -203,11 +203,7 @@ const ConversationListItem = memo(function ConversationListItem({
           );
         }}
       >
-        <Picto
-          picto="trash"
-          color="white"
-          size={Platform.OS === "ios" ? 18 : 30}
-        />
+        <Picto picto="trash" color="white" size={PictoSizes.swipableItem} />
       </RectButton>
     );
   }, [
@@ -225,12 +221,12 @@ const ConversationListItem = memo(function ConversationListItem({
       <RectButton style={styles.leftAction}>
         <Picto
           picto={showUnread ? "checkmark.message" : "message.badge"}
-          color="white"
-          size={Platform.OS === "ios" ? 18 : 30}
+          color={inversePrimaryColor(colorScheme)}
+          size={PictoSizes.swipableItem}
         />
       </RectButton>
     );
-  }, [showUnread, styles.leftAction]);
+  }, [showUnread, styles.leftAction, colorScheme]);
 
   const rowItem =
     Platform.OS === "ios" || Platform.OS === "web" ? (

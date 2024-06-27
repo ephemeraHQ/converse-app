@@ -4,6 +4,7 @@ import {
   textPrimaryColor,
   textSecondaryColor,
 } from "@styles/colors";
+import { PictoSizes } from "@styles/sizes";
 import React, { useRef } from "react";
 import {
   Platform,
@@ -108,7 +109,7 @@ export default function ConversationListNav() {
                 onChangeText={onChangeSearch}
                 value={searchQuery}
                 icon={({ color }) => (
-                  <Picto picto="menu" size={24} color={color} />
+                  <Picto picto="menu" size={PictoSizes.navItem} color={color} />
                 )}
                 onIconPress={() => {
                   if (Platform.OS === "android") {
@@ -125,7 +126,11 @@ export default function ConversationListNav() {
                 placeholderTextColor={textSecondaryColor(colorScheme)}
                 selectionColor={textPrimaryColor(colorScheme)}
                 clearIcon={({ color }) => (
-                  <Picto picto="xmark" size={24} color={color} />
+                  <Picto
+                    picto="xmark"
+                    size={PictoSizes.navItem}
+                    color={color}
+                  />
                 )}
                 onClearIconPress={() => {
                   searchBar.current?.blur();

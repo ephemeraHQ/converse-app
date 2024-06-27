@@ -1,5 +1,6 @@
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { primaryColor } from "@styles/colors";
+import { PictoSizes } from "@styles/sizes";
 import React, { useCallback, useRef } from "react";
 import { Platform, TouchableOpacity, useColorScheme } from "react-native";
 import { FAB } from "react-native-paper";
@@ -41,9 +42,8 @@ export default function NewConversationButton({
         {enableDebug && <DebugButton ref={debugRef} />}
         <Picto
           picto="square.and.pencil"
-          weight="medium"
           color={primaryColor(colorScheme)}
-          size={16}
+          size={PictoSizes.newConversationButton}
           style={{ width: 32, height: 32 }}
         />
       </TouchableOpacity>
@@ -57,9 +57,8 @@ export default function NewConversationButton({
             {enableDebug && <DebugButton ref={debugRef} />}
             <Picto
               picto="square.and.pencil"
-              weight="medium"
               color={props.color}
-              size={24}
+              size={PictoSizes.newConversationButton}
             />
           </>
         )}

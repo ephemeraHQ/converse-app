@@ -5,6 +5,7 @@ import {
   primaryColor,
   textSecondaryColor,
 } from "@styles/colors";
+import { PictoSizes } from "@styles/sizes";
 import * as Linking from "expo-linking";
 import React, { useCallback } from "react";
 import {
@@ -157,7 +158,7 @@ export default function AccountSettingsButton({ account, navigation }: Props) {
     <TouchableOpacity onPress={onPress}>
       <Picto
         picto="more_vert"
-        size={24}
+        size={PictoSizes.accoutSettings}
         color={textSecondaryColor(colorScheme)}
       />
     </TouchableOpacity>
