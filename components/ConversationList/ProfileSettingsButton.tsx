@@ -1,3 +1,4 @@
+import { AvatarSizes } from "@styles/sizes";
 import React, { useCallback, useEffect, useState } from "react";
 import { Platform, TouchableOpacity } from "react-native";
 
@@ -81,7 +82,7 @@ export default function ProfileSettingsButton() {
     <TouchableOpacity activeOpacity={0.2} onPress={openProfile}>
       <Avatar
         uri={getPreferredAvatar(socials)}
-        size={Platform.OS === "ios" ? 16 : 24}
+        size={AvatarSizes.profileSettings}
         style={{
           width: Platform.OS === "android" ? undefined : 32,
           height: Platform.OS === "android" ? undefined : 32,

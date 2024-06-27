@@ -5,7 +5,7 @@ import {
   textPrimaryColor,
   textSecondaryColor,
 } from "@styles/colors";
-import { sizes } from "@styles/sizes";
+import { AvatarSizes } from "@styles/sizes";
 import * as Haptics from "expo-haptics";
 import { ReactNode, useCallback, useMemo, useRef } from "react";
 import {
@@ -96,7 +96,7 @@ const MessageSenderAvatar = ({ message }: { message: MessageToDisplay }) => {
   return (
     <View style={styles.groupSenderAvatarWrapper}>
       <Avatar
-        size={sizes.avatar}
+        size={AvatarSizes.messageSender}
         uri={getPreferredAvatar(senderSocials)}
         name={getPreferredName(senderSocials, message.senderAddress)}
       />
@@ -533,8 +533,8 @@ const useStyles = () => {
       marginVertical: 6,
     },
     avatarPlaceholder: {
-      width: sizes.avatar,
-      height: sizes.avatar,
+      width: AvatarSizes.messageSender,
+      height: AvatarSizes.messageSender,
     },
   });
 };
