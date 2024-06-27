@@ -14,16 +14,16 @@ import {
   useProfilesStore,
   useRecommendationsStore,
   useSettingsStore,
-} from "../../data/store/accountsStore";
-import { useConversationContext } from "../../utils/conversation";
-import { sendMessage } from "../../utils/message";
-import { getProfileData } from "../../utils/profile";
-import { conversationName } from "../../utils/str";
-import { consentToPeersOnProtocol } from "../../utils/xmtpRN/conversations";
-import ActivityIndicator from "../ActivityIndicator/ActivityIndicator";
-import Button from "../Button/Button";
-import { Recommendation } from "../Recommendations/Recommendation";
-import { showActionSheetWithOptions } from "../StateHandlers/ActionSheetStateHandler";
+} from "../../../data/store/accountsStore";
+import { useConversationContext } from "../../../utils/conversation";
+import { sendMessage } from "../../../utils/message";
+import { getProfileData } from "../../../utils/profile";
+import { conversationName } from "../../../utils/str";
+import { consentToPeersOnProtocol } from "../../../utils/xmtpRN/conversations";
+import ActivityIndicator from "../../ActivityIndicator/ActivityIndicator";
+import Button from "../../Button/Button";
+import { Recommendation } from "../../Recommendations/Recommendation";
+import { showActionSheetWithOptions } from "../../StateHandlers/ActionSheetStateHandler";
 
 type Props = {
   messagesCount: number;
