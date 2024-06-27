@@ -154,7 +154,10 @@ function ConversationList({ navigation, route, searchBarRef }: Props) {
   }, [clearSearch, isSplit, openedConversationTopic]);
 
   const ListHeaderComponents: React.ReactElement[] = [
-    <PinnedConversations convos={pinnedConversations} />,
+    <PinnedConversations
+      convos={pinnedConversations}
+      key="pinnedConversations"
+    />,
   ];
   const showSearchTitleHeader =
     ((Platform.OS === "ios" && searchBarFocused && !showNoResult) ||
