@@ -5,6 +5,7 @@ import {
   backgroundColor,
   textPrimaryColor,
 } from "@styles/colors";
+import { strings } from "@utils/i18n/strings";
 import React from "react";
 import { StyleSheet, Text, useColorScheme, View } from "react-native";
 
@@ -12,12 +13,12 @@ import {
   currentAccount,
   getSettingsStore,
   useSettingsStore,
-} from "../../data/store/accountsStore";
-import { NavigationParamList } from "../../screens/Navigation/Navigation";
-import { useConversationContext } from "../../utils/conversation";
-import { consentToPeersOnProtocol } from "../../utils/xmtpRN/conversations";
-import Button from "../Button/Button";
-import { showActionSheetWithOptions } from "../StateHandlers/ActionSheetStateHandler";
+} from "../../../data/store/accountsStore";
+import { NavigationParamList } from "../../../screens/Navigation/Navigation";
+import { useConversationContext } from "../../../utils/conversation";
+import { consentToPeersOnProtocol } from "../../../utils/xmtpRN/conversations";
+import Button from "../../Button/Button";
+import { showActionSheetWithOptions } from "../../StateHandlers/ActionSheetStateHandler";
 
 export default function ConsentPopup() {
   const { conversation, isBlockedPeer } = useConversationContext([
@@ -57,20 +58,20 @@ export default function ConsentPopup() {
 
   return (
     <View style={styles.chatConsentContainer}>
-      <Text style={styles.info}>Do you trust this contact?</Text>
+      <Text style={styles.info}>{strings.do_you_trust_this_contact}</Text>
       <View style={styles.buttonsContainer}>
         <Button
           variant="secondary-danger"
           picto="xmark"
-          title="Block"
+          title={strings.block}
           style={styles.cta}
           onPress={() => {
             showActionSheetWithOptions(
               {
-                options: ["Block", "Cancel"],
+                options: [strings.block, strings.cancel],
                 cancelButtonIndex: 1,
                 destructiveButtonIndex: 0,
-                title: `If you block this contact, you will not receive messages from them anymore`,
+                title: strings.if_you_block_contact,
                 ...actionSheetColors(colorScheme),
               },
               (selectedIndex?: number) => {
@@ -90,7 +91,7 @@ export default function ConsentPopup() {
         <Button
           variant="secondary"
           picto="checkmark"
-          title="Accept"
+          title={strings.accept}
           style={styles.cta}
           onPress={() => {
             if (!conversation.peerAddress) return;

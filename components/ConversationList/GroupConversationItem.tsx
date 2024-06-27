@@ -1,8 +1,15 @@
+import { showActionSheetWithOptions } from "@components/StateHandlers/ActionSheetStateHandler";
+import { useGroupConsent } from "@hooks/useGroupConsent";
+import { useGroupQuery } from "@queries/useGroupQuery";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
+import { actionSheetColors } from "@styles/colors";
+import { saveTopicsData } from "@utils/api";
+import { strings } from "@utils/i18n/strings";
 import { FC, useCallback } from "react";
 import { useColorScheme } from "react-native";
 
 import {
+  currentAccount,
   useChatStore,
   useCurrentAccount,
 } from "../../data/store/accountsStore";
@@ -29,26 +36,79 @@ export const GroupConversationItem: FC<GroupConversationItemProps> = ({
 }) => {
   const topic = conversation.topic;
   const lastMessagePreview = conversation.lastMessagePreview;
+  const { data: group } = useGroupQuery(currentAccount(), topic);
   const { groupName } = useGroupName(topic);
   const { groupPhoto } = useGroupPhoto(topic);
+  const { blockGroup } = useGroupConsent(topic);
   const colorScheme = useColorScheme();
   const userAddress = useCurrentAccount() as string;
-  const { initialLoadDoneOnce, openedConversationTopic, topicsData } =
-    useChatStore(
-      useSelect([
-        "lastUpdateAt",
-        "initialLoadDoneOnce",
-        "openedConversationTopic",
-        "topicsData",
-      ])
-    );
-  const setPinnedConversations = useChatStore(
-    (state) => state.setPinnedConversations
+  const {
+    initialLoadDoneOnce,
+    openedConversationTopic,
+    topicsData,
+    setTopicsData,
+    setPinnedConversations,
+  } = useChatStore(
+    useSelect([
+      "initialLoadDoneOnce",
+      "openedConversationTopic",
+      "topicsData",
+      "setTopicsData",
+      "setPinnedConversations",
+    ])
   );
 
   const onLongPress = useCallback(() => {
     setPinnedConversations([conversation]);
   }, [setPinnedConversations, conversation]);
+
+  const handleDelete = useCallback(
+    (defaultAction: () => void) => {
+      if (!group) return;
+      showActionSheetWithOptions(
+        {
+          options: [strings.delete, strings.delete_and_block, strings.cancel],
+          cancelButtonIndex: 2,
+          destructiveButtonIndex: [0, 1],
+          title: `Delete ${groupName}?`,
+          ...actionSheetColors(colorScheme),
+        },
+        async (selectedIndex?: number) => {
+          if (selectedIndex === 0) {
+            saveTopicsData(currentAccount(), {
+              [topic]: {
+                status: "deleted",
+                timestamp: new Date().getTime(),
+              },
+            });
+            setTopicsData({
+              [topic]: {
+                status: "deleted",
+                timestamp: new Date().getTime(),
+              },
+            });
+          } else if (selectedIndex === 1) {
+            saveTopicsData(currentAccount(), {
+              [topic]: { status: "deleted" },
+            });
+            setTopicsData({
+              [topic]: {
+                status: "deleted",
+                timestamp: new Date().getTime(),
+              },
+            });
+            blockGroup({
+              includeAddedBy: false,
+              includeCreator: false,
+            });
+          } else {
+            defaultAction();
+          }
+        }
+      );
+    },
+    [blockGroup, colorScheme, group, groupName, setTopicsData, topic]
+  );
 
   return (
     <ConversationListItem
@@ -84,6 +144,7 @@ export const GroupConversationItem: FC<GroupConversationItemProps> = ({
         lastMessagePreview.message?.senderAddress === userAddress
       }
       conversationOpened={conversation.topic === openedConversationTopic}
+      onRightActionPress={handleDelete}
     />
   );
 };

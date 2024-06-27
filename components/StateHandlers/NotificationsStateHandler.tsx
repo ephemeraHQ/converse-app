@@ -88,7 +88,9 @@ const AccountNotificationsStateHandler = ({ account }: { account: string }) => {
         "pinnedConversations",
       ])
     );
-  const peersStatus = useSettingsStoreForAccount(account)((s) => s.peersStatus);
+  const { peersStatus, groupStatus } = useSettingsStoreForAccount(account)(
+    useSelect(["peersStatus", "groupStatus"])
+  );
   const lastRefreshState = useRef({
     account,
     conversations: 0,
@@ -96,6 +98,7 @@ const AccountNotificationsStateHandler = ({ account }: { account: string }) => {
     peersStatus: 0,
     lastUpdateAt: 0,
     pinnedConversations: 0,
+    groupStatus: 0,
   });
   // Sync accounts on load and when a new one is added
   useEffect(() => {
@@ -108,6 +111,7 @@ const AccountNotificationsStateHandler = ({ account }: { account: string }) => {
       peersStatus: Object.keys(peersStatus).length,
       lastUpdateAt,
       pinnedConversations: pinnedConversations.length,
+      groupStatus: Object.keys(groupStatus).length,
     };
     if (
       newRefreshState.account !== lastRefreshState.current.account ||
@@ -117,7 +121,8 @@ const AccountNotificationsStateHandler = ({ account }: { account: string }) => {
       newRefreshState.peersStatus !== lastRefreshState.current.peersStatus ||
       newRefreshState.lastUpdateAt !== lastRefreshState.current.lastUpdateAt ||
       newRefreshState.pinnedConversations !==
-        lastRefreshState.current.pinnedConversations
+        lastRefreshState.current.pinnedConversations ||
+      newRefreshState.groupStatus !== lastRefreshState.current.groupStatus
     ) {
       lastRefreshState.current = newRefreshState;
       sortAndComputePreview(
@@ -125,6 +130,7 @@ const AccountNotificationsStateHandler = ({ account }: { account: string }) => {
         account,
         topicsData,
         peersStatus,
+        groupStatus,
         pinnedConversations
       );
     }
@@ -136,6 +142,7 @@ const AccountNotificationsStateHandler = ({ account }: { account: string }) => {
     topicsData,
     lastUpdateAt,
     pinnedConversations,
+    groupStatus,
   ]);
   return null;
 };
