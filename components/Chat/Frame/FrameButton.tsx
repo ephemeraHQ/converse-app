@@ -1,4 +1,10 @@
 import {
+  backgroundColor,
+  clickedItemBackgroundColor,
+  textPrimaryColor,
+  textSecondaryColor,
+} from "@styles/colors";
+import {
   StyleSheet,
   Text,
   TouchableHighlight,
@@ -7,12 +13,6 @@ import {
 } from "react-native";
 
 import FrameLinkIcon from "../../../assets/frameLink.svg";
-import {
-  clickedItemBackgroundColor,
-  textPrimaryColor,
-  textSecondaryColor,
-  backgroundColor,
-} from "../../../utils/colors";
 import { FrameButtonType } from "../../../utils/frames";
 
 type FrameButtonProps = {

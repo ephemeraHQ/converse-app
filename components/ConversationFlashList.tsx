@@ -1,5 +1,6 @@
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { FlashList } from "@shopify/flash-list";
+import { backgroundColor } from "@styles/colors";
 import { useCallback, useEffect, useRef } from "react";
 import { Platform, StyleSheet, View, useColorScheme } from "react-native";
 
@@ -12,7 +13,6 @@ import {
 import { useSelect } from "../data/store/storeHelpers";
 import { NavigationParamList } from "../screens/Navigation/Navigation";
 import { useIsSplitScreen } from "../screens/Navigation/navHelpers";
-import { backgroundColor } from "../utils/colors";
 import {
   ConversationFlatListItem,
   ConversationWithLastMessagePreview,

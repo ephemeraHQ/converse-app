@@ -1,7 +1,7 @@
+import { textSecondaryColor } from "@styles/colors";
 import React from "react";
 import { StyleSheet, Text, useColorScheme } from "react-native";
 
-import { textSecondaryColor } from "../../../utils/colors";
 import { MessageToDisplay } from "./Message";
 
 type Props = {

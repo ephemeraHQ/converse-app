@@ -1,4 +1,9 @@
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
+import {
+  backgroundColor,
+  primaryColor,
+  textSecondaryColor,
+} from "@styles/colors";
 import { ScrollView, StyleSheet, View, useColorScheme } from "react-native";
 
 import AccountSettingsButton from "../../components/AccountSettingsButton";
@@ -9,11 +14,6 @@ import {
   useAccountsStore,
 } from "../../data/store/accountsStore";
 import { useOnboardingStore } from "../../data/store/onboardingStore";
-import {
-  backgroundColor,
-  primaryColor,
-  textSecondaryColor,
-} from "../../utils/colors";
 import { useDisconnectWallet } from "../../utils/logout/wallet";
 import { shortAddress, useAccountsProfiles } from "../../utils/str";
 import { NavigationParamList } from "../Navigation/Navigation";

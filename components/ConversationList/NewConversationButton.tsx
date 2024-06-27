@@ -1,10 +1,10 @@
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
+import { primaryColor } from "@styles/colors";
 import React, { useCallback, useRef } from "react";
 import { Platform, TouchableOpacity, useColorScheme } from "react-native";
 import { FAB } from "react-native-paper";
 
 import { NavigationParamList } from "../../screens/Navigation/Navigation";
-import { primaryColor } from "../../utils/colors";
 import { navigate } from "../../utils/navigation";
 import DebugButton, { useEnableDebug } from "../DebugButton";
 import Picto from "../Picto/Picto";

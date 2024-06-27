@@ -1,5 +1,6 @@
 import { createDrawerNavigator } from "@react-navigation/drawer";
 import { NavigationContainer } from "@react-navigation/native";
+import { listItemSeparatorColor } from "@styles/colors";
 import * as Linking from "expo-linking";
 import { useEffect, useRef } from "react";
 import { useColorScheme } from "react-native";
@@ -10,7 +11,6 @@ import {
   useCurrentAccount,
 } from "../../../data/store/accountsStore";
 import { useAppStore } from "../../../data/store/appStore";
-import { listItemSeparatorColor } from "../../../utils/colors";
 import { converseNavigations } from "../../../utils/navigation";
 import {
   ConversationNavParams,

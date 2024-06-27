@@ -1,3 +1,9 @@
+import {
+  backgroundColor,
+  itemSeparatorColor,
+  textPrimaryColor,
+  textSecondaryColor,
+} from "@styles/colors";
 import React from "react";
 import {
   Platform,
@@ -7,16 +13,10 @@ import {
   View,
 } from "react-native";
 import {
-  Searchbar as MaterialSearchBar,
   IconButton as MaterialIconButton,
+  Searchbar as MaterialSearchBar,
 } from "react-native-paper";
 
-import {
-  textSecondaryColor,
-  textPrimaryColor,
-  backgroundColor,
-  itemSeparatorColor,
-} from "../../utils/colors";
 import Picto from "../Picto/Picto";
 
 type Props = {

@@ -1,12 +1,12 @@
 import { NativeStackNavigationOptions } from "@react-navigation/native-stack";
-import { Platform, useColorScheme } from "react-native";
-
 import {
   headerTitleStyle,
   listItemSeparatorColor,
   navigationSecondaryBackgroundColor,
   textPrimaryColor,
-} from "../../utils/colors";
+} from "@styles/colors";
+import { Platform, useColorScheme } from "react-native";
+
 import NewConversationModal from "../NewConversation/NewConversationModal";
 import { NativeStack, navigationAnimation } from "./Navigation";
 

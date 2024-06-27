@@ -1,16 +1,16 @@
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
+import { backgroundColor } from "@styles/colors";
 import React, { useEffect } from "react";
 import {
   Button,
+  Platform,
   StyleSheet,
   View,
   useColorScheme,
-  Platform,
 } from "react-native";
 
 import AndroidBackAction from "../components/AndroidBackAction";
 import Recommendations from "../components/Recommendations/Recommendations";
-import { backgroundColor } from "../utils/colors";
 import { NavigationParamList } from "./Navigation/Navigation";
 
 export default function ConverseMatchMaker({

@@ -1,10 +1,9 @@
-import { StyleSheet, TextInput, useColorScheme } from "react-native";
-
 import {
   backgroundColor,
   textPrimaryColor,
   textSecondaryColor,
-} from "../../../utils/colors";
+} from "@styles/colors";
+import { StyleSheet, TextInput, useColorScheme } from "react-native";
 
 export default function FrameTextInput({
   textInput,

@@ -1,11 +1,11 @@
-import * as Haptics from "expo-haptics";
-import { Platform, StyleSheet, Text, useColorScheme, View } from "react-native";
-
 import {
   messageInnerBubbleColor,
   myMessageInnerBubbleColor,
   textPrimaryColor,
-} from "../../../utils/colors";
+} from "@styles/colors";
+import * as Haptics from "expo-haptics";
+import { Platform, StyleSheet, Text, useColorScheme, View } from "react-native";
+
 import { FrameButtonType, FrameToDisplay } from "../../../utils/frames";
 import { MessageToDisplay } from "../Message/Message";
 import FrameButton from "./FrameButton";

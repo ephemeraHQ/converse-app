@@ -1,3 +1,4 @@
+import { backgroundColor, textSecondaryColor } from "@styles/colors";
 import { FC, useCallback } from "react";
 import {
   StyleSheet,
@@ -10,7 +11,6 @@ import { useChatStore, useProfilesStore } from "../../data/store/accountsStore";
 import { XmtpConversation } from "../../data/store/chatStore";
 import { useGroupName } from "../../hooks/useGroupName";
 import { useGroupPhoto } from "../../hooks/useGroupPhoto";
-import { backgroundColor, textSecondaryColor } from "../../utils/colors";
 import { navigate } from "../../utils/navigation";
 import { getPreferredAvatar } from "../../utils/profile";
 import Avatar from "../Avatar";

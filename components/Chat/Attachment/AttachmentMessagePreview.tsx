@@ -1,10 +1,10 @@
+import { textPrimaryColor } from "@styles/colors";
 import { Image } from "expo-image";
 import prettyBytes from "pretty-bytes";
 import { useCallback, useEffect } from "react";
 import { Platform, StyleSheet, Text, useColorScheme, View } from "react-native";
 
 import { useAttachmentForMessage } from "../../../utils/attachment";
-import { textPrimaryColor } from "../../../utils/colors";
 import { converseEventEmitter } from "../../../utils/events";
 import { navigate } from "../../../utils/navigation";
 import { MessageToDisplay } from "../Message/Message";

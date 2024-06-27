@@ -1,12 +1,12 @@
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import { Platform, StyleSheet, Text, View, useColorScheme } from "react-native";
-
-import { ProfileSocials } from "../../data/store/profilesStore";
 import {
   itemSeparatorColor,
   textPrimaryColor,
   textSecondaryColor,
-} from "../../utils/colors";
+} from "@styles/colors";
+import { Platform, StyleSheet, Text, View, useColorScheme } from "react-native";
+
+import { ProfileSocials } from "../../data/store/profilesStore";
 import {
   getPreferredAvatar,
   getPreferredName,
@@ -39,7 +39,7 @@ export function ProfileSearchItem({
   ];
 
   return (
-    <View key={address} style={[styles.container]}>
+    <View key={address} style={styles.container}>
       <View style={styles.left}>
         <Avatar uri={preferredAvatar} size={40} style={styles.avatar} />
         <View>

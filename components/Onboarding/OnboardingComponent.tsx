@@ -1,21 +1,21 @@
 import {
+  backgroundColor,
+  textPrimaryColor,
+  textSecondaryColor,
+} from "@styles/colors";
+import {
   Platform,
-  StyleSheet,
-  useColorScheme,
-  Text,
-  View,
   ScrollView,
+  StyleSheet,
+  Text,
+  useColorScheme,
+  View,
 } from "react-native";
 import Animated, { useAnimatedStyle } from "react-native-reanimated";
 
 import { useOnboardingStore } from "../../data/store/onboardingStore";
 import { useSelect } from "../../data/store/storeHelpers";
 import { useKeyboardAnimation } from "../../utils/animations/keyboardAnimation";
-import {
-  backgroundColor,
-  textPrimaryColor,
-  textSecondaryColor,
-} from "../../utils/colors";
 import ActivityIndicator from "../ActivityIndicator/ActivityIndicator";
 import Button from "../Button/Button";
 import Picto from "../Picto/Picto";
