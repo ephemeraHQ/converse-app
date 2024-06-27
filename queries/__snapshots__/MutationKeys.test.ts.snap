@@ -3,6 +3,8 @@
 exports[`MutationKeys should match the snapshot 1`] = `
 {
   "ADD_MEMBER": "addMember",
+  "ALLOW_GROUP": "allowGroup",
+  "BLOCK_GROUP": "blockGroup",
   "PROMOTE_ADMIN": "promoteAdmin",
   "PROMOTE_SUPER_ADMIN": "promoteSuperAdmin",
   "REMOVE_MEMBER": "removeMember",

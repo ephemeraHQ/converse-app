@@ -181,4 +181,8 @@ describe("getMinimalDate", () => {
   it("should return correct minimal timestamp for years", () => {
     expect(getMinimalDate(now - 2 * 365 * 24 * 60 * 60 * 1000)).toBe("2y");
   });
+
+  it("should not show future", () => {
+    expect(getMinimalDate(now + 1)).toBe("0s");
+  });
 });
