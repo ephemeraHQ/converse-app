@@ -4,6 +4,7 @@ import {
   textPrimaryColor,
   textSecondaryColor,
 } from "@styles/colors";
+import { AvatarSizes } from "@styles/sizes";
 import { Platform, StyleSheet, Text, View, useColorScheme } from "react-native";
 
 import { ProfileSocials } from "../../data/store/profilesStore";
@@ -43,7 +44,7 @@ export function ProfileSearchItem({
       <View style={styles.left}>
         <Avatar
           uri={preferredAvatar}
-          size={40}
+          size={AvatarSizes.listItemDisplay}
           style={styles.avatar}
           name={preferredName}
         />

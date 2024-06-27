@@ -1,15 +1,15 @@
+import { actionSecondaryColor, textSecondaryColor } from "@styles/colors";
+import { AvatarSizes } from "@styles/sizes";
 import {
+  ColorSchemeName,
   Image,
   ImageStyle,
-  Text,
-  View,
-  StyleSheet,
   StyleProp,
+  StyleSheet,
+  Text,
   useColorScheme,
-  ColorSchemeName,
+  View,
 } from "react-native";
-
-import { actionSecondaryColor, textSecondaryColor } from "../utils/colors";
 
 type Props = {
   uri?: string | undefined;
@@ -19,7 +19,13 @@ type Props = {
   name?: string | undefined;
 };
 
-export default function Avatar({ uri, size = 121, style, color, name }: Props) {
+export default function Avatar({
+  uri,
+  size = AvatarSizes.default,
+  style,
+  color,
+  name,
+}: Props) {
   const colorScheme = useColorScheme();
   const styles = getStyles(colorScheme, size);
   const firstLetter = name ? name.charAt(0).toUpperCase() : "";

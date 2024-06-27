@@ -1,6 +1,7 @@
 import Clipboard from "@react-native-clipboard/clipboard";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { headerTitleStyle, textPrimaryColor } from "@styles/colors";
+import { AvatarSizes } from "@styles/sizes";
 import { MutableRefObject, useEffect, useRef, useState } from "react";
 import {
   Alert,
@@ -133,7 +134,7 @@ export default function ConversationTitle({
       >
         <Avatar
           uri={avatar}
-          size={30}
+          size={AvatarSizes.conversationTitle}
           style={{
             marginRight: Platform.OS === "android" ? 24 : 7,
             marginLeft: Platform.OS === "ios" ? 0 : -9,

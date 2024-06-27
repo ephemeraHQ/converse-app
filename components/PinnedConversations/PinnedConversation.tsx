@@ -1,4 +1,5 @@
 import { backgroundColor, textSecondaryColor } from "@styles/colors";
+import { AvatarSizes } from "@styles/sizes";
 import { FC, useCallback } from "react";
 import {
   StyleSheet,
@@ -48,7 +49,7 @@ export const PinnedConversation: FC<Props> = ({ conversation }) => {
       <Avatar
         key={conversation.topic}
         uri={avatar}
-        size={80}
+        size={AvatarSizes.pinnedConversation}
         style={styles.avatar}
         name={getPreferredName(socials, conversation.peerAddress || "")}
       />

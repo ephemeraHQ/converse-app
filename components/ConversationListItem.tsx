@@ -9,6 +9,7 @@ import {
   textPrimaryColor,
   textSecondaryColor,
 } from "@styles/colors";
+import { AvatarSizes } from "@styles/sizes";
 import * as Haptics from "expo-haptics";
 import React, { memo, useCallback, useEffect, useRef, useState } from "react";
 import {
@@ -120,7 +121,7 @@ const ConversationListItem = memo(function ConversationListItem({
   const listItemContent = (
     <View style={styles.conversationListItem}>
       <Avatar
-        size={Platform.OS === "ios" ? 56 : 47}
+        size={AvatarSizes.conversationListItem}
         style={styles.avatarWrapper}
         uri={conversationPeerAvatar}
         name={conversationName}
