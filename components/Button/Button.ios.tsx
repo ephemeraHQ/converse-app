@@ -71,7 +71,11 @@ export default function Button({
             styles.picto,
             variant === "text" ? { paddingLeft: 15 } : undefined,
           ]}
-          color={variant === "text" ? primaryColor(colorScheme) : "white"}
+          color={
+            variant === "text"
+              ? primaryColor(colorScheme)
+              : inversePrimaryColor(colorScheme)
+          }
         />
       )}
       <Text
