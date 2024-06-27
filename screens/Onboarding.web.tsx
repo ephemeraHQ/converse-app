@@ -4,6 +4,7 @@ import {
   textPrimaryColor,
   textSecondaryColor,
 } from "@styles/colors";
+import { PictoSizes } from "@styles/sizes";
 import { useWeb3Modal, useWeb3ModalProvider } from "@web3modal/ethers5/react";
 import { ethers } from "ethers";
 import { useEffect, useRef, useState } from "react";
@@ -136,7 +137,11 @@ export default function Onboarding() {
   );
   return (
     <View style={styles.container}>
-      <Picto picto="message.circle.fill" size={80} style={styles.picto} />
+      <Picto
+        picto="message.circle.fill"
+        size={PictoSizes.onboarding}
+        style={styles.picto}
+      />
 
       <Text style={styles.title}>GM</Text>
       <Text style={styles.p}>

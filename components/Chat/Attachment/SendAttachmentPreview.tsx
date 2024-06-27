@@ -1,8 +1,9 @@
-import { dangerColor } from "@styles/colors";
+import { dangerColor, textPrimaryColor } from "@styles/colors";
 import {
   setAndroidColors,
   setAndroidSystemColor,
 } from "@styles/colors/helpers";
+import { PictoSizes } from "@styles/sizes";
 import { Image } from "expo-image";
 import { StatusBar } from "expo-status-bar";
 import { useCallback, useEffect } from "react";
@@ -75,14 +76,14 @@ export default function SendAttachmentPreview() {
           >
             <Picto
               picto="xmark"
-              color="#D8C2BE"
+              color={textPrimaryColor(colorScheme)}
               style={{
                 width: 34,
                 height: 34,
                 left: 20,
                 top: 20,
               }}
-              size={34}
+              size={PictoSizes.sendButton}
             />
           </TouchableOpacity>
         ))}

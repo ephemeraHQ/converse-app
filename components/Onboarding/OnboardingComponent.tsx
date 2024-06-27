@@ -3,6 +3,7 @@ import {
   textPrimaryColor,
   textSecondaryColor,
 } from "@styles/colors";
+import { PictoSizes } from "@styles/sizes";
 import {
   Platform,
   ScrollView,
@@ -74,7 +75,7 @@ export default function OnboardingComponent({
         {picto && (
           <Picto
             picto={picto}
-            size={Platform.OS === "android" ? 80 : 43}
+            size={PictoSizes.onboardingComponent}
             style={[styles.picto, inModal ? { marginTop: 50 } : {}]}
           />
         )}

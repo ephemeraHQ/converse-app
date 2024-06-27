@@ -3,6 +3,7 @@ import {
   textPrimaryColor,
   textSecondaryColor,
 } from "@styles/colors";
+import { PictoSizes } from "@styles/sizes";
 import {
   Platform,
   StyleSheet,
@@ -57,9 +58,7 @@ export default function ChatInputReplyPreview({
       </View>
       <TouchableOpacity
         activeOpacity={0.6}
-        onPress={() => {
-          onDismiss();
-        }}
+        onPress={onDismiss}
         hitSlop={{ left: 8, right: 8, top: 8, bottom: 8 }}
       >
         <Picto
@@ -69,7 +68,7 @@ export default function ChatInputReplyPreview({
               ? textSecondaryColor(colorScheme)
               : "#8E8E93"
           }
-          size={Platform.OS === "android" ? 16 : 14}
+          size={PictoSizes.replyButton}
           style={styles.xmark}
         />
       </TouchableOpacity>

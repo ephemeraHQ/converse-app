@@ -4,6 +4,7 @@ import {
   textPrimaryColor,
   textSecondaryColor,
 } from "@styles/colors";
+import { PictoSizes } from "@styles/sizes";
 import React from "react";
 import {
   Platform,
@@ -56,7 +57,12 @@ export default function SearchBar({
           onChangeText={(query) => setValue(query.trim())}
           value={value}
           icon={({ color }) => (
-            <Picto picto="search" size={24} color={color} style={{ top: 1 }} />
+            <Picto
+              picto="search"
+              size={PictoSizes.searchBar}
+              color={color}
+              style={{ top: 1 }}
+            />
           )}
           mode="bar"
           autoCapitalize="none"
@@ -73,7 +79,11 @@ export default function SearchBar({
             return (
               <MaterialIconButton
                 icon={({ color }) => (
-                  <Picto picto="xmark" size={24} color={color} />
+                  <Picto
+                    picto="xmark"
+                    size={PictoSizes.searchBar}
+                    color={color}
+                  />
                 )}
                 onPress={() => {
                   setValue("");
