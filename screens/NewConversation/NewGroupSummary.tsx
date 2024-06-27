@@ -1,5 +1,5 @@
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   Alert,
   Platform,
@@ -29,6 +29,7 @@ import {
   textInputStyle,
   textSecondaryColor,
 } from "../../utils/colors";
+import { strings } from "../../utils/i18n/strings";
 import { navigate } from "../../utils/navigation";
 import { getPreferredName } from "../../utils/profile";
 import { createGroup } from "../../utils/xmtpRN/conversations";
@@ -51,9 +52,13 @@ export default function NewGroupSummary({
     (s) => s.profiles[account ?? ""]?.socials
   );
   const { photo: groupPhoto, addPhoto: addGroupPhoto } = usePhotoSelect();
-  const [remotePhotoUrl, setRemotePhotUrl] = useState<string | undefined>(
-    undefined
-  );
+  const [
+    { remotePhotoUrl, isLoading: isUploadingGroupPhoto },
+    setRemotePhotUrl,
+  ] = useState<{ remotePhotoUrl: string | undefined; isLoading: boolean }>({
+    remotePhotoUrl: undefined,
+    isLoading: false,
+  });
   const defaultGroupName = useMemo(() => {
     if (!account) return "";
     const members = route.params.members.slice(0, 3);
@@ -72,65 +77,82 @@ export default function NewGroupSummary({
   }, [route.params.members, account, currentAccountSocials]);
   const colorScheme = useColorScheme();
   const [groupName, setGroupName] = useState(defaultGroupName);
+
   useEffect(() => {
     if (!groupPhoto) return;
+    setRemotePhotUrl({ remotePhotoUrl: undefined, isLoading: true });
     uploadFile({
       account: currentAccount(),
       filePath: groupPhoto,
       contentType: "image/jpeg",
     })
       .then((url) => {
-        setRemotePhotUrl(url);
+        setRemotePhotUrl({
+          remotePhotoUrl: url,
+          isLoading: false,
+        });
       })
       .catch((e) => {
-        Alert.alert("Error uploading group photo", e.message);
+        Alert.alert(strings.upload_group_photo_error, e.message);
+        setRemotePhotUrl({
+          remotePhotoUrl: undefined,
+          isLoading: false,
+        });
       });
   }, [groupPhoto, setRemotePhotUrl]);
 
-  useEffect(() => {
-    navigation.setOptions({
-      headerRight: () =>
-        creatingGroup ? (
-          <ActivityIndicator style={{ marginRight: 5 }} />
-        ) : (
-          <Button
-            variant="text"
-            title="Create"
-            onPress={async () => {
-              setCreatingGroup(true);
-              const groupTopic = await createGroup(
-                currentAccount(),
-                route.params.members.map((m) => m.address),
-                groupPermissionLevel,
-                groupName,
-                remotePhotoUrl
-              );
-              if (Platform.OS !== "web") {
-                navigation.getParent()?.goBack();
-              }
-              setTimeout(
-                () => {
-                  navigate("Conversation", {
-                    topic: groupTopic,
-                    focus: true,
-                  });
-                },
-                isSplitScreen ? 0 : 300
-              );
-            }}
-          />
-        ),
-    });
+  const onCreateGroupPress = useCallback(async () => {
+    setCreatingGroup(true);
+    const groupTopic = await createGroup(
+      currentAccount(),
+      route.params.members.map((m) => m.address),
+      groupPermissionLevel,
+      groupName,
+      remotePhotoUrl
+    );
+    if (Platform.OS !== "web") {
+      navigation.getParent()?.goBack();
+    }
+    setTimeout(
+      () => {
+        navigate("Conversation", {
+          topic: groupTopic,
+          focus: true,
+        });
+      },
+      isSplitScreen ? 0 : 300
+    );
   }, [
-    creatingGroup,
     groupName,
     groupPermissionLevel,
-    groupPhoto,
     isSplitScreen,
     navigation,
     remotePhotoUrl,
     route.params.members,
   ]);
+
+  useEffect(() => {
+    navigation.setOptions({
+      headerRight: () =>
+        creatingGroup || isUploadingGroupPhoto ? (
+          <ActivityIndicator style={styles.activitySpinner} />
+        ) : (
+          <Button variant="text" title="Create" onPress={onCreateGroupPress} />
+        ),
+    });
+  }, [
+    creatingGroup,
+    isUploadingGroupPhoto,
+    navigation,
+    onCreateGroupPress,
+    styles,
+  ]);
+
+  const handleSwitch = useCallback(() => {
+    setGroupPermissionLevel((p) =>
+      p === "admin_only" ? "all_members" : "admin_only"
+    );
+  }, []);
 
   return (
     <ScrollView
@@ -138,24 +160,26 @@ export default function NewGroupSummary({
       contentContainerStyle={styles.groupContent}
     >
       <List.Section>
-        <View style={{ alignItems: "center" }}>
+        <View style={styles.listSectionContainer}>
           <Avatar uri={groupPhoto} style={styles.avatar} color={false} />
           <Button
             variant="text"
             title={
               groupPhoto ? "Change profile picture" : "Add profile picture"
             }
-            textStyle={{ fontWeight: "500" }}
+            textStyle={styles.buttonText}
             onPress={addGroupPhoto}
           />
         </View>
       </List.Section>
 
       <List.Section>
-        <List.Subheader style={styles.sectionTitle}>GROUP NAME</List.Subheader>
+        <List.Subheader style={styles.sectionTitle}>
+          {strings.group_name}
+        </List.Subheader>
         <TextInput
           defaultValue={defaultGroupName}
-          style={[textInputStyle(colorScheme), { fontSize: 16 }]}
+          style={[textInputStyle(colorScheme), styles.nameInput]}
           value={groupName}
           onChangeText={setGroupName}
         />
@@ -174,11 +198,7 @@ export default function NewGroupSummary({
             id: "groupPermissionLevel",
             rightView: (
               <Switch
-                onValueChange={() => {
-                  setGroupPermissionLevel((p) =>
-                    p === "admin_only" ? "all_members" : "admin_only"
-                  );
-                }}
+                onValueChange={handleSwitch}
                 value={groupPermissionLevel === "all_members"}
               />
             ),
@@ -210,6 +230,18 @@ const useStyles = () => {
       color: textSecondaryColor(colorScheme),
       fontSize: 13,
       fontWeight: "500",
+    },
+    activitySpinner: {
+      marginRight: 5,
+    },
+    listSectionContainer: {
+      alignItems: "center",
+    },
+    buttonText: {
+      fontWeight: "500",
+    },
+    nameInput: {
+      fontSize: 16,
     },
   });
 };

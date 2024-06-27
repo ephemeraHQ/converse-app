@@ -31,6 +31,7 @@ import { useGroupMembers } from "../hooks/useGroupMembers";
 import { useGroupName } from "../hooks/useGroupName";
 import { useGroupPhoto } from "../hooks/useGroupPhoto";
 import { usePhotoSelect } from "../hooks/usePhotoSelect";
+import { uploadFile } from "../utils/attachment";
 import {
   backgroundColor,
   dangerColor,
@@ -69,9 +70,15 @@ export default function GroupScreen({
   const { consent, allowGroup, blockGroup } = useGroupConsent(topic);
   const onPhotoChange = useCallback(
     (newImageUrl: string) => {
-      setGroupPhoto(newImageUrl);
+      uploadFile({
+        account: currentAccount,
+        filePath: newImageUrl,
+        contentType: "image/jpeg",
+      }).then((url) => {
+        setGroupPhoto(url);
+      });
     },
-    [setGroupPhoto]
+    [currentAccount, setGroupPhoto]
   );
   const { addPhoto: addGroupPhoto, photo: localGroupPhoto } = usePhotoSelect({
     initialPhoto: groupPhoto,
