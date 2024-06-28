@@ -4,9 +4,8 @@ import { useMemo } from "react";
 import { StyleSheet, Text, useColorScheme } from "react-native";
 
 import {
-  currentAccount,
-  getInboxIdStore,
-  getProfilesStore,
+  useInboxIdStore,
+  useProfilesStore,
 } from "../../data/store/accountsStore";
 import { getPreferredName } from "../../utils/profile";
 import { MessageToDisplay } from "./Message/Message";
@@ -17,48 +16,55 @@ export default function ChatGroupUpdatedMessage({
   message: MessageToDisplay;
 }) {
   const styles = useStyles();
-  const membersActions = useMemo(() => {
-    const content = JSON.parse(message.content) as GroupUpdatedContent;
-    const textMessages: string[] = [];
-    const profiles = getProfilesStore(currentAccount()).getState().profiles;
-    const byInboxId = getInboxIdStore(currentAccount()).getState().byInboxId;
+  const byInboxId = useInboxIdStore().byInboxId;
+  const profiles = useProfilesStore().profiles;
+  // JSON Parsing is heavy so useMemo
+  const parsedContent = useMemo(
+    () => JSON.parse(message.content) as GroupUpdatedContent,
+    [message.content]
+  );
+
+  // TODO: Feat: handle multiple members
+  const initiatedByAddress = byInboxId[parsedContent.initiatedByInboxId]?.[0];
+  const initiatedByReadableName = getPreferredName(
+    profiles[initiatedByAddress]?.socials,
+    initiatedByAddress
+  );
+  const membersActions: string[] = [];
+  parsedContent.membersAdded.forEach((m) => {
     // TODO: Feat: handle multiple members
-    const initiatedByAddress = byInboxId[content.initiatedByInboxId]?.[0];
-    const initiatedByReadableName = getPreferredName(
-      profiles[initiatedByAddress]?.socials,
-      initiatedByAddress
+    const firstAddress = byInboxId[m.inboxId]?.[0];
+    // We haven't synced yet the members
+    if (!firstAddress) return;
+    const readableName = getPreferredName(
+      profiles[firstAddress]?.socials,
+      firstAddress
     );
-    content.membersAdded.forEach((m) => {
-      // TODO: Feat: handle multiple members
-      const firstAddress = byInboxId[m.inboxId]?.[0];
-      const readableName = getPreferredName(
-        profiles[firstAddress]?.socials,
-        firstAddress
+    membersActions.push(`${readableName} joined the conversation`);
+  });
+  parsedContent.membersRemoved.forEach((m) => {
+    // TODO: Feat: handle multiple members
+    const firstAddress = byInboxId[m.inboxId]?.[0];
+    // We haven't synced yet the members
+    if (!firstAddress) return;
+    const readableName = getPreferredName(
+      profiles[firstAddress]?.socials,
+      firstAddress
+    );
+    membersActions.push(`${readableName} left the conversation`);
+  });
+  parsedContent.metadataFieldsChanged.forEach((f) => {
+    if (f.fieldName === "group_name") {
+      membersActions.push(
+        `The group name was changed to ${f.newValue} by ${initiatedByReadableName}`
       );
-      textMessages.push(`${readableName} joined the conversation`);
-    });
-    content.membersRemoved.forEach((m) => {
-      // TODO: Feat: handle multiple members
-      const firstAddress = byInboxId[m.inboxId]?.[0];
-      const readableName = getPreferredName(
-        profiles[firstAddress]?.socials,
-        firstAddress
+    } else if (f.fieldName === "group_image_url_square") {
+      membersActions.push(
+        `The group photo was changed by ${initiatedByReadableName}`
       );
-      textMessages.push(`${readableName} left the conversation`);
-    });
-    content.metadataFieldsChanged.forEach((f) => {
-      if (f.fieldName === "group_name") {
-        textMessages.push(
-          `The group name was changed to ${f.newValue} by ${initiatedByReadableName}`
-        );
-      } else if (f.fieldName === "group_image_url_square") {
-        textMessages.push(
-          `The group photo was changed by ${initiatedByReadableName}`
-        );
-      }
-    });
-    return textMessages;
-  }, [message.content]);
+    }
+  });
+
   return (
     <>
       {membersActions.map((a) => (

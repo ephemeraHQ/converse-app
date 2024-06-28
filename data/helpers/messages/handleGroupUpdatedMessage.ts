@@ -1,3 +1,4 @@
+import { refreshGroup } from "@utils/xmtpRN/conversations";
 import { GroupUpdatedContent } from "@xmtp/react-native-sdk";
 
 import { invalidateGroupMembersQuery } from "../../../queries/useGroupMembersQuery";
@@ -5,7 +6,7 @@ import { invalidateGroupNameQuery } from "../../../queries/useGroupNameQuery";
 import { invalidateGroupPhotoQuery } from "../../../queries/useGroupPhotoQuery";
 import { DecodedMessageWithCodecsType } from "../../../utils/xmtpRN/client";
 
-export const handleGroupUpdatedMessage = (
+export const handleGroupUpdatedMessage = async (
   account: string,
   topic: string,
   message: DecodedMessageWithCodecsType
@@ -13,6 +14,8 @@ export const handleGroupUpdatedMessage = (
   if (!message.contentTypeId.includes("group_updated")) return;
   const content = message.content() as GroupUpdatedContent;
   if (content.membersAdded.length > 0 || content.membersRemoved.length > 0) {
+    // This will refresh members
+    await refreshGroup(account, topic);
     invalidateGroupMembersQuery(account, topic);
   }
   if (content.metadataFieldsChanged.length > 0) {
