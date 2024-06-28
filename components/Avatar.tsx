@@ -1,8 +1,9 @@
 import { actionSecondaryColor, textSecondaryColor } from "@styles/colors";
 import { AvatarSizes } from "@styles/sizes";
+import { Image } from "expo-image";
+import { useCallback, useState } from "react";
 import {
   ColorSchemeName,
-  Image,
   ImageStyle,
   StyleProp,
   StyleSheet,
@@ -29,9 +30,20 @@ export default function Avatar({
   const colorScheme = useColorScheme();
   const styles = getStyles(colorScheme, size);
   const firstLetter = name ? name.charAt(0).toUpperCase() : "";
+  const [didError, setDidError] = useState(false);
 
-  return uri ? (
+  const handleImageError = useCallback(() => {
+    setDidError(true);
+  }, []);
+
+  const handleImageLoad = useCallback(() => {
+    setDidError(false);
+  }, []);
+
+  return uri && !didError ? (
     <Image
+      onLoad={handleImageLoad}
+      onError={handleImageError}
       key={`${uri}-${color}-${colorScheme}`}
       source={{ uri }}
       style={[styles.image, style]}
