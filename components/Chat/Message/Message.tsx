@@ -36,6 +36,7 @@ import {
   getUrlToRender,
   isAllEmojisAndMaxThree,
 } from "../../../utils/messageContent";
+import { navigate } from "../../../utils/navigation";
 import { LimitedMap } from "../../../utils/objects";
 import { getPreferredAvatar, getPreferredName } from "../../../utils/profile";
 import { getMessageReactions } from "../../../utils/reactions";
@@ -93,14 +94,19 @@ const MessageSenderAvatar = ({ message }: { message: MessageToDisplay }) => {
   );
   const senderSocials = useProfilesStore((s) => s.profiles[address]?.socials);
   const styles = useStyles();
+  const openProfile = useCallback(() => {
+    navigate("Profile", { address: message.senderAddress });
+  }, [message.senderAddress]);
   return (
     <View style={styles.groupSenderAvatarWrapper}>
       {!message.hasNextMessageInSeries ? (
-        <Avatar
-          size={AvatarSizes.messageSender}
-          uri={getPreferredAvatar(senderSocials)}
-          name={getPreferredName(senderSocials, message.senderAddress)}
-        />
+        <TouchableOpacity onPress={openProfile}>
+          <Avatar
+            size={AvatarSizes.messageSender}
+            uri={getPreferredAvatar(senderSocials)}
+            name={getPreferredName(senderSocials, message.senderAddress)}
+          />
+        </TouchableOpacity>
       ) : (
         <View style={styles.avatarPlaceholder} />
       )}
