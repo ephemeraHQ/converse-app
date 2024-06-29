@@ -1,13 +1,10 @@
+import { messageBubbleColor, myMessageBubbleColor } from "@styles/colors";
 import React from "react";
 import { ColorSchemeName, StyleSheet, ViewStyle } from "react-native";
 import Reanimated, { AnimatedStyleProp } from "react-native-reanimated";
 import { SvgProps } from "react-native-svg";
 
 import _MessageTail from "../../../assets/message-tail.svg";
-import {
-  messageBubbleColor,
-  myMessageBubbleColor,
-} from "../../../utils/colors";
 
 class MessageTailComponent extends React.Component<SvgProps> {
   render() {
