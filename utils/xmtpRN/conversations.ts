@@ -2,6 +2,7 @@ import {
   ConsentListEntry,
   ConversationContext,
   ConversationVersion,
+  InboxId,
 } from "@xmtp/react-native-sdk";
 
 import { Conversation as DbConversation } from "../../data/db/entities/conversationEntity";
@@ -373,6 +374,8 @@ const saveConsentState = async (
   account: string
 ) => {
   const peersStatus: SettingsStoreType["peersStatus"] = {};
+  const groupStatus: SettingsStoreType["groupStatus"] = {};
+  const inboxIdPeerStatus: SettingsStoreType["inboxIdPeerStatus"] = {};
 
   consentList.forEach((entry) => {
     if (entry.entryType === "address") {
@@ -380,6 +383,18 @@ const saveConsentState = async (
         peersStatus[entry.value] = "consented";
       } else if (entry.permissionType === "denied") {
         peersStatus[entry.value] = "blocked";
+      }
+    } else if (entry.entryType === "group_id") {
+      if (entry.permissionType === "allowed") {
+        groupStatus[entry.value] = "allowed";
+      } else if (entry.permissionType === "denied") {
+        groupStatus[entry.value] = "denied";
+      }
+    } else if (entry.entryType === "inbox_id") {
+      if (entry.permissionType === "allowed") {
+        inboxIdPeerStatus[entry.value as InboxId] = "allowed";
+      } else if (entry.permissionType === "denied") {
+        inboxIdPeerStatus[entry.value as InboxId] = "denied";
       }
     }
   });
@@ -402,6 +417,46 @@ export const consentToPeersOnProtocol = async (
       await client.contacts.allow(cleanPeers);
     } else if (consent === "deny") {
       await client.contacts.deny(cleanPeers);
+    } else {
+      throw new Error(`Invalid consent type: ${consent}`);
+    }
+  } catch (error) {
+    console.error("Error updating consent:", error);
+  }
+};
+
+export const consentToGroupsOnProtocol = async (
+  account: string,
+  groupIds: string[],
+  consent: "allow" | "deny"
+) => {
+  try {
+    const client = (await getXmtpClient(account)) as ConverseXmtpClientType;
+
+    if (consent === "allow") {
+      await client.contacts.allowGroups(groupIds);
+    } else if (consent === "deny") {
+      await client.contacts.denyGroups(groupIds);
+    } else {
+      throw new Error(`Invalid consent type: ${consent}`);
+    }
+  } catch (error) {
+    console.error("Error updating consent:", error);
+  }
+};
+
+export const consentToInboxIdsOnProtocol = async (
+  account: string,
+  inboxIds: InboxId[],
+  consent: "allow" | "deny"
+) => {
+  try {
+    const client = (await getXmtpClient(account)) as ConverseXmtpClientType;
+
+    if (consent === "allow") {
+      await client.contacts.allowInboxes(inboxIds);
+    } else if (consent === "deny") {
+      await client.contacts.denyInboxes(inboxIds);
     } else {
       throw new Error(`Invalid consent type: ${consent}`);
     }
