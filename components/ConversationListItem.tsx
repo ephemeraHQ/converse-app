@@ -128,6 +128,7 @@ const ConversationListItem = memo(function ConversationListItem({
         style={styles.avatarWrapper}
         uri={conversationPeerAvatar}
         name={conversationName}
+        topic={conversationTopic}
       />
       <View style={styles.conversationListItemContent}>
         <Text style={styles.conversationName} numberOfLines={1}>

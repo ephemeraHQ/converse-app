@@ -31,10 +31,31 @@ import { usePhotoSelect } from "../../hooks/usePhotoSelect";
 import { uploadFile } from "../../utils/attachment";
 import { strings } from "../../utils/i18n/strings";
 import { navigate } from "../../utils/navigation";
-import { getPreferredName } from "../../utils/profile";
+import { getPreferredName, getPreferredAvatar } from "../../utils/profile";
 import { createGroup } from "../../utils/xmtpRN/conversations";
 import { useIsSplitScreen } from "../Navigation/navHelpers";
 import { NewConversationModalParams } from "./NewConversationModal";
+
+const getPlaceholderGroupMembers = (
+  members: any[],
+  account: string,
+  currentAccountSocials: any
+) => {
+  const currentUser = {
+    address: account,
+    uri: getPreferredAvatar(currentAccountSocials),
+    name: getPreferredName(currentAccountSocials, account),
+  };
+
+  const memberDetails = members.map((m) => ({
+    address: m.address,
+    uri: getPreferredAvatar(
+      useProfilesStore((s) => s.profiles[m.address ?? ""]?.socials)
+    ),
+    name: getPreferredName(m, m.address),
+  }));
+  return [currentUser, ...memberDetails];
+};
 
 export default function NewGroupSummary({
   route,
@@ -169,6 +190,11 @@ export default function NewGroupSummary({
             style={styles.avatar}
             color={false}
             name={groupName}
+            placeholderGroupMembers={getPlaceholderGroupMembers(
+              route.params.members,
+              account ?? "",
+              currentAccountSocials
+            )}
           />
           <Button
             variant="text"
