@@ -82,19 +82,18 @@ export function GroupConsentPopup() {
 
   return (
     <View style={styles.chatConsentContainer}>
-      <Text style={styles.info}>{strings.do_you_trust_this_contact}</Text>
+      <Text style={styles.info}>{strings.do_you_want_to_join_this_group}</Text>
       <View style={styles.buttonsContainer}>
         <Button
-          variant="secondary-danger"
-          picto="xmark"
-          title={strings.block}
-          style={styles.cta}
+          variant="text"
+          title={strings.decline}
+          style={[styles.cta, styles.blockCta]}
           onPress={onBlock}
         />
         <Button
           variant="secondary"
           picto="checkmark"
-          title={strings.accept}
+          title={strings.join_this_group}
           style={styles.cta}
           onPress={onAccept}
         />
@@ -128,6 +127,14 @@ const useStyles = () => {
     cta: {
       alignSelf: "center",
       marginHorizontal: 6,
+    },
+    blockCta: {
+      borderWidth: 1,
+      borderRadius: 100,
+      paddingHorizontal: 15,
+      paddingVertical: 7,
+      padding: 5,
+      borderColor: textPrimaryColor(colorScheme),
     },
   });
 };
