@@ -69,12 +69,14 @@ export const initInboxIdStore = (account: string) => {
               }
               const newState = { ...state };
               members.forEach((member) => {
-                newState.byInboxId[member.inboxId] =
-                  newState.byInboxId[member.inboxId] ?? [];
+                const addresses = new Set(
+                  newState.byInboxId[member.inboxId] ?? []
+                );
                 for (const address of member.addresses) {
                   newState.byAddress[address] = member.inboxId;
-                  newState.byInboxId[member.inboxId].push(address);
+                  addresses.add(address);
                 }
+                newState.byInboxId[member.inboxId] = Array.from(addresses);
               });
               return newState;
             }),
