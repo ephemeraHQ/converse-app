@@ -140,6 +140,7 @@ export default function ConversationTitle({
             marginLeft: Platform.OS === "ios" ? 0 : -9,
           }}
           name={conversationName(conversation)}
+          topic={conversation.topic}
         />
         <Text
           style={{
