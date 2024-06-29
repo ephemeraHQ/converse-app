@@ -45,6 +45,9 @@ type AppStoreType = {
 
   actionSheetShown: boolean;
   setActionSheetShown: (s: boolean) => void;
+
+  contextMenuShown: boolean;
+  setContextMenuShown: (s: boolean) => void;
 };
 
 export const useAppStore = create<AppStoreType>()(
@@ -84,6 +87,9 @@ export const useAppStore = create<AppStoreType>()(
 
       actionSheetShown: false,
       setActionSheetShown: (s: boolean) => set(() => ({ actionSheetShown: s })),
+
+      contextMenuShown: false,
+      setContextMenuShown: (s: boolean) => set(() => ({ contextMenuShown: s })),
     }),
     {
       name: "store-app",
