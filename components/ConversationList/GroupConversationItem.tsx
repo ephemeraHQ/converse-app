@@ -67,7 +67,11 @@ export const GroupConversationItem: FC<GroupConversationItemProps> = ({
       if (!group) return;
       showActionSheetWithOptions(
         {
-          options: [strings.delete, strings.delete_and_block, strings.cancel],
+          options: [
+            strings.delete,
+            strings.delete_and_block_inviter,
+            strings.cancel,
+          ],
           cancelButtonIndex: 2,
           destructiveButtonIndex: [0, 1],
           title: `Delete ${groupName}?`,
@@ -87,6 +91,10 @@ export const GroupConversationItem: FC<GroupConversationItemProps> = ({
                 timestamp: new Date().getTime(),
               },
             });
+            blockGroup({
+              includeAddedBy: false,
+              includeCreator: false,
+            });
           } else if (selectedIndex === 1) {
             saveTopicsData(currentAccount(), {
               [topic]: { status: "deleted" },
@@ -98,7 +106,7 @@ export const GroupConversationItem: FC<GroupConversationItemProps> = ({
               },
             });
             blockGroup({
-              includeAddedBy: false,
+              includeAddedBy: true,
               includeCreator: false,
             });
           } else {
