@@ -1,25 +1,23 @@
+import { useGroupId } from "@hooks/useGroupId";
 import { useMutation } from "@tanstack/react-query";
+import { consentToGroupsOnProtocol } from "@utils/xmtpRN/conversations";
 
-import { refreshGroup } from "../utils/xmtpRN/conversations";
 import { allowGroupMutationKey } from "./MutationKeys";
-import { useClient } from "./useClient";
 import {
   cancelGroupConsentQuery,
   getGroupConsentQueryData,
   setGroupConsentQueryData,
 } from "./useGroupConsentQuery";
-import { useGroupQuery } from "./useGroupQuery";
 
 export const useAllowGroupMutation = (account: string, topic: string) => {
-  const { data: group } = useGroupQuery(account, topic);
-  const client = useClient(account);
+  const { groupId } = useGroupId(topic);
   return useMutation({
     mutationKey: allowGroupMutationKey(account, topic),
     mutationFn: async () => {
-      if (!group || !account || !topic || !client) {
+      if (!groupId || !account) {
         return;
       }
-      await client.contacts.allowGroups([group.id]);
+      await consentToGroupsOnProtocol(account, [groupId], "allow");
       return "allowed";
     },
     onMutate: async () => {
@@ -36,9 +34,8 @@ export const useAllowGroupMutation = (account: string, topic: string) => {
       }
       setGroupConsentQueryData(account, topic, context.previousConsent);
     },
-    onSuccess: (data, variables, context) => {
+    onSuccess: () => {
       console.log("onSuccess useAllowGroupMutation");
-      refreshGroup(account, topic);
     },
   });
 };

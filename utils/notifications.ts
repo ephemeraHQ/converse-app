@@ -29,6 +29,7 @@ import {
   conversationShouldBeInInbox,
 } from "./conversation";
 import { addLog, debugTimeSpent } from "./debug";
+import { getGroupIdFromTopic } from "./groupUtils/groupId";
 import { savePushToken } from "./keychain/helpers";
 import mmkv from "./mmkv";
 import { navigateToConversation, setTopicToNavigateTo } from "./navigation";
@@ -99,16 +100,18 @@ const _subscribeToNotifications = async (account: string): Promise<void> => {
   try {
     subscribingByAccount[account] = true;
 
-    const { peersStatus } = getSettingsStore(account).getState();
+    const { peersStatus, groupStatus } = getSettingsStore(account).getState();
 
     const isBlocked = (peerAddress: string) =>
       peersStatus[peerAddress.toLowerCase()] === "blocked";
 
+    const isGroupBlocked = (groupId: string) =>
+      peersStatus[groupId] === "blocked";
+
     const needToUpdateConversationSubscription = (
       c: ConversationWithLastMessagePreview
     ) => {
-      const hasValidPeer =
-        c.peerAddress || (c.groupMembers && c.groupMembers.length > 0);
+      const hasValidPeer = c.peerAddress || c.isGroup;
       const isPending = !!c.pending;
 
       if (!hasValidPeer || isPending) {
@@ -118,12 +121,17 @@ const _subscribeToNotifications = async (account: string): Promise<void> => {
         };
       }
 
-      // @todo => handle blocking groups ?
-      const isNotBlocked = !c.peerAddress || !isBlocked(c.peerAddress);
+      const isNotBlocked = c.peerAddress
+        ? !isBlocked(c.peerAddress)
+        : !isGroupBlocked(getGroupIdFromTopic(c.topic));
       const isTopicNotDeleted = topicsData[c.topic]?.status !== "deleted";
       const isTopicInInbox =
-        conversationShouldBeDisplayed(c, topicsData, peersStatus) &&
-        conversationShouldBeInInbox(c, peersStatus);
+        conversationShouldBeDisplayed(
+          c,
+          topicsData,
+          peersStatus,
+          groupStatus
+        ) && conversationShouldBeInInbox(c, peersStatus, groupStatus);
 
       const status =
         isNotBlocked && isTopicNotDeleted && isTopicInInbox ? "PUSH" : "MUTED";

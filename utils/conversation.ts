@@ -299,6 +299,7 @@ export const conversationShouldBeDisplayed = (
   conversation: ConversationWithLastMessagePreview,
   topicsData: { [topic: string]: TopicData | undefined },
   peersStatus: { [peer: string]: "blocked" | "consented" },
+  groupsStatus: { [topic: string]: "allowed" | "denied" },
   pinnedConversations?: ConversationFlatListItem[]
 ) => {
   const isNotReady =
@@ -310,7 +311,7 @@ export const conversationShouldBeDisplayed = (
   const isDeleted = topicsData[conversation.topic]?.status === "deleted";
   const isBlocked = conversation.isGroup
     ? // TODO: Add more conditions to filter out spam
-      false // No consent for groups right now
+      groupsStatus[conversation.topic] === "denied"
     : peersStatus[conversation.peerAddress.toLowerCase()] === "blocked";
   const isV1 = conversation.version === "v1";
   const isForbidden = conversation.topic.includes("\x00"); // Forbidden character that breaks
@@ -330,11 +331,12 @@ export const conversationShouldBeDisplayed = (
 // Wether a conversation should appear in Inbox tab (i.e. probably not a spam)
 export const conversationShouldBeInInbox = (
   conversation: ConversationWithLastMessagePreview,
-  peersStatus: { [peer: string]: "blocked" | "consented" }
+  peersStatus: { [peer: string]: "blocked" | "consented" },
+  groupsStatus: { [topic: string]: "allowed" | "denied" }
 ) => {
   // TODO: Add more conditions to filter out spam
   const isConsented = conversation.isGroup
-    ? true
+    ? groupsStatus[conversation.topic] === "allowed"
     : peersStatus[conversation.peerAddress.toLowerCase()] === "consented";
 
   return conversation.hasOneMessageFromMe || isConsented;
@@ -345,6 +347,7 @@ export function sortAndComputePreview(
   userAddress: string,
   topicsData: { [topic: string]: TopicData | undefined },
   peersStatus: { [peer: string]: "blocked" | "consented" },
+  groupsStatus: { [topic: string]: "allowed" | "denied" },
   pinnedConversations?: ConversationFlatListItem[]
 ) {
   const conversationsRequests: ConversationWithLastMessagePreview[] = [];
@@ -361,6 +364,7 @@ export function sortAndComputePreview(
           conversation,
           topicsData,
           peersStatus,
+          groupsStatus,
           pinnedConversations
         )
       ) {
@@ -368,7 +372,9 @@ export function sortAndComputePreview(
           conversation,
           userAddress
         );
-        if (conversationShouldBeInInbox(conversation, peersStatus)) {
+        if (
+          conversationShouldBeInInbox(conversation, peersStatus, groupsStatus)
+        ) {
           conversationsInbox.push(conversation);
         } else {
           conversationsRequests.push(conversation);
