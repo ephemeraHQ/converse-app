@@ -29,7 +29,11 @@ export default function Avatar({
 }: Props) {
   const colorScheme = useColorScheme();
   const styles = getStyles(colorScheme, size);
-  const firstLetter = name ? name.charAt(0).toUpperCase() : "";
+  const firstLetter = name
+    ? name.startsWith("0x")
+      ? name.slice(0, 2)
+      : name.charAt(0).toUpperCase()
+    : "";
   const [didError, setDidError] = useState(false);
 
   const handleImageError = useCallback(() => {
