@@ -15,9 +15,7 @@ import com.google.crypto.tink.subtle.Base64
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
 import com.reactnativecommunity.asyncstorage.AsyncStorageModule
-import expo.modules.core.ExportedModule
 import expo.modules.core.ModuleRegistry
-import expo.modules.core.ViewManager
 import expo.modules.core.interfaces.InternalModule
 import expo.modules.core.interfaces.SingletonModule
 import expo.modules.kotlin.AppContext
@@ -189,11 +187,9 @@ class PushNotificationsService : FirebaseMessagingService() {
         // to access the Expo SecureStore module from Kotlin
 
         val internalModules: Collection<InternalModule> = listOf()
-        val exportedModules: Collection<ExportedModule> = listOf()
-        val viewManagers: Collection<ViewManager<View>> = listOf()
         val singletonModules: Collection<SingletonModule> = listOf()
 
-        val moduleRegistry = ModuleRegistry(internalModules, exportedModules, viewManagers, singletonModules)
+        val moduleRegistry = ModuleRegistry(internalModules, singletonModules)
 
         reactAppContext = ReactApplicationContext(this)
         val weakRef = WeakReference(reactAppContext)
