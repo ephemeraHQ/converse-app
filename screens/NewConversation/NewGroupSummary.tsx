@@ -36,7 +36,7 @@ import { createGroup } from "../../utils/xmtpRN/conversations";
 import { useIsSplitScreen } from "../Navigation/navHelpers";
 import { NewConversationModalParams } from "./NewConversationModal";
 
-const getPlaceholderGroupMembers = (
+const getPendingGroupMembers = (
   members: any[],
   account: string,
   currentAccountSocials: any
@@ -190,11 +190,12 @@ export default function NewGroupSummary({
             style={styles.avatar}
             color={false}
             name={groupName}
-            placeholderGroupMembers={getPlaceholderGroupMembers(
+            pendingGroupMembers={getPendingGroupMembers(
               route.params.members,
               account ?? "",
               currentAccountSocials
             )}
+            excludeSelf={false}
           />
           <Button
             variant="text"

@@ -1,6 +1,6 @@
 import { actionSecondaryColor, textSecondaryColor } from "@styles/colors";
 import { AvatarSizes } from "@styles/sizes";
-import React, { useMemo, useState, useCallback } from "react";
+import React, { useMemo, useState, useEffect } from "react";
 import { useColorScheme, StyleProp, ViewStyle, Image } from "react-native";
 import Svg, {
   Circle,
@@ -54,33 +54,50 @@ const getPositions = (memberCount: number, mainCircleRadius: number) => {
   }
 };
 
-const SvgImageWithHandlers: React.FC<{
+const SafeSvgImage: React.FC<{
   uri: string;
-  index: number;
-  onError: (index: number) => void;
-  onLoad: (index: number) => void;
   x: number;
   y: number;
   size: number;
   clipPath: string;
-}> = ({ uri, index, onError, onLoad, x, y, size, clipPath }) => {
+}> = ({ uri, x, y, size, clipPath }) => {
+  const [didError, setDidError] = useState(false);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    Image.getSize(
+      uri,
+      () => {
+        if (isMounted) {
+          setDidError(false);
+        }
+      },
+      () => {
+        if (isMounted) {
+          setDidError(true);
+        }
+      }
+    );
+
+    return () => {
+      isMounted = false;
+    };
+  }, [uri]);
+
   return (
     <>
-      <Image
-        source={{ uri }}
-        style={{ width: 0, height: 0 }}
-        onError={() => onError(index)}
-        onLoad={() => onLoad(index)}
-      />
-      <SvgImage
-        x={x}
-        y={y}
-        width={size}
-        height={size}
-        href={{ uri }}
-        preserveAspectRatio="xMidYMid slice"
-        clipPath={clipPath}
-      />
+      {!didError && (
+        <SvgImage
+          x={x}
+          y={y}
+          width={size}
+          height={size}
+          href={{ uri }}
+          preserveAspectRatio="xMidYMid slice"
+          clipPath={clipPath}
+        />
+      )}
     </>
   );
 };
@@ -91,17 +108,8 @@ const GroupAvatarSvg: React.FC<GroupAvatarSvgProps> = ({
   style,
 }) => {
   const colorScheme = useColorScheme();
-  const [didError, setDidError] = useState(false);
   const memberCount = members.length;
   const mainCircleRadius = 50;
-
-  const handleImageError = useCallback((index: number) => {
-    setDidError(true);
-  }, []);
-
-  const handleImageLoad = useCallback((index: number) => {
-    setDidError(false);
-  }, []);
 
   const positions = useMemo(
     () => getPositions(memberCount, mainCircleRadius),
@@ -132,13 +140,10 @@ const GroupAvatarSvg: React.FC<GroupAvatarSvgProps> = ({
             const firstLetter = member.name
               ? member.name.charAt(0).toUpperCase()
               : "";
-            return member.uri && !didError ? (
-              <SvgImageWithHandlers
+            return member.uri ? (
+              <SafeSvgImage
                 key={index}
                 uri={member.uri}
-                index={index}
-                onError={handleImageError}
-                onLoad={handleImageLoad}
                 x={pos.x}
                 y={pos.y}
                 size={pos.size}

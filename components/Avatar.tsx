@@ -12,7 +12,10 @@ import {
   View,
 } from "react-native";
 
-import { useProfilesStore } from "../data/store/accountsStore";
+import {
+  useProfilesStore,
+  useCurrentAccount,
+} from "../data/store/accountsStore";
 import { useGroupMembers } from "../hooks/useGroupMembers";
 import { getPreferredAvatar, getPreferredName } from "../utils/profile";
 import GroupAvatarSvg from "./GroupAvatarSvg";
@@ -24,7 +27,8 @@ type Props = {
   color?: boolean;
   name?: string | undefined;
   topic?: string | undefined;
-  placeholderGroupMembers?: { address: string; uri?: string; name?: string }[];
+  pendingGroupMembers?: { address: string; uri?: string; name?: string }[];
+  excludeSelf?: boolean;
 };
 
 function Avatar({
@@ -34,7 +38,8 @@ function Avatar({
   color,
   name,
   topic,
-  placeholderGroupMembers,
+  pendingGroupMembers,
+  excludeSelf = true,
 }: Props) {
   const colorScheme = useColorScheme();
   const styles = getStyles(colorScheme, size);
@@ -46,22 +51,31 @@ function Avatar({
   const [didError, setDidError] = useState(false);
   const { members } = useGroupMembers(topic || "");
   const profiles = useProfilesStore((s) => s.profiles);
+  const account = useCurrentAccount();
 
   const memoizedGroupMembers = useMemo(() => {
     if (!members) return [];
-    return members.ids.map((id) => {
-      const member = members.byId[id];
-      const address = member.addresses[0];
-      const senderSocials = profiles[address]?.socials;
-      return {
-        address,
-        uri: getPreferredAvatar(senderSocials),
-        name: getPreferredName(senderSocials, address),
-      };
-    });
-  }, [members, profiles]);
+    return members.ids.reduce(
+      (acc: { address: string; uri?: string; name?: string }[], id) => {
+        const member = members.byId[id];
+        const address = member.addresses[0].toLowerCase();
+        const senderSocials = profiles[address]?.socials;
+        const shouldExclude =
+          excludeSelf && account && address === account.toLowerCase();
+        if (shouldExclude) return acc;
+        const newMember = {
+          address,
+          uri: getPreferredAvatar(senderSocials),
+          name: getPreferredName(senderSocials, address),
+        };
+        acc.push(newMember);
+        return acc;
+      },
+      []
+    );
+  }, [members, profiles, account, excludeSelf]);
 
-  const avatarGroupMembers = placeholderGroupMembers || memoizedGroupMembers;
+  const avatarGroupMembers = pendingGroupMembers || memoizedGroupMembers;
 
   const handleImageError = useCallback(() => {
     setDidError(true);
