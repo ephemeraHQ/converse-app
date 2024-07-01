@@ -1,11 +1,13 @@
+import { RouteProp } from "@react-navigation/native";
 import {
   actionSheetColors,
   backgroundColor,
   textPrimaryColor,
 } from "@styles/colors";
 import React, { useCallback, useRef, useState } from "react";
-import { Platform, ScrollView, Text, View, useColorScheme } from "react-native";
+import { Platform, StyleSheet, Text, useColorScheme, View } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
+import { StackAnimationTypes } from "react-native-screens";
 
 import ActivityIndicator from "../../components/ActivityIndicator/ActivityIndicator";
 import AndroidBackAction from "../../components/AndroidBackAction";
@@ -22,7 +24,11 @@ import {
   sortRequestsBySpamScore,
   updateConsentStatus,
 } from "../../utils/xmtpRN/conversations";
-import { NativeStack, navigationAnimation } from "./Navigation";
+import {
+  NativeStack,
+  navigationAnimation,
+  NavigationParamList,
+} from "./Navigation";
 
 export default function ConversationRequestsListNav() {
   const sortedConversationsWithPreview = useChatStore(
@@ -36,6 +42,7 @@ export default function ConversationRequestsListNav() {
   const [isSpamToggleEnabled, setIsSpamToggleEnabled] = useState(false);
   const allRequests = sortedConversationsWithPreview.conversationsRequests;
   const { likelySpam, likelyNotSpam } = sortRequestsBySpamScore(allRequests);
+  const styles = useStyles();
 
   const clearAllSpam = useCallback(() => {
     const methods = {
@@ -73,84 +80,75 @@ export default function ConversationRequestsListNav() {
       }
     );
   }, [account, colorScheme, allRequests]);
+
+  const navigationOptions = useCallback(
+    ({
+      navigation,
+    }: {
+      route: RouteProp<NavigationParamList, "ChatsRequests">;
+      navigation: any;
+    }) => ({
+      animation: navigationAnimation as StackAnimationTypes,
+      headerTitle: clearingAll
+        ? Platform.OS === "ios"
+          ? () => (
+              <View style={styles.headerContainer}>
+                <ActivityIndicator />
+                <Text style={styles.headerText}>Clearing</Text>
+              </View>
+            )
+          : "Clearing..."
+        : "Requests",
+      headerLeft:
+        Platform.OS === "ios"
+          ? undefined
+          : () => <AndroidBackAction navigation={navigation} />,
+      headerRight: () =>
+        clearingAll ? undefined : (
+          <Button variant="text" title="Clear all" onPress={clearAllSpam} />
+        ),
+    }),
+    [clearAllSpam, clearingAll, styles.headerContainer, styles.headerText]
+  );
+
+  const handleSpamToggle = useCallback(() => {
+    setIsSpamToggleEnabled((prev) => !prev);
+  }, []);
+
   return (
-    <NativeStack.Screen
-      name="ChatsRequests"
-      options={({ navigation }) => ({
-        animation: navigationAnimation,
-        headerTitle: clearingAll
-          ? Platform.OS === "ios"
-            ? () => (
-                <View
-                  style={{
-                    flexDirection: "row",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    width: Platform.OS === "ios" ? 110 : 130,
-                  }}
-                >
-                  <ActivityIndicator />
-                  <Text
-                    style={{
-                      marginLeft: 10,
-                      color: textPrimaryColor(colorScheme),
-                      ...Platform.select({
-                        android: { fontSize: 22, fontFamily: "Roboto" },
-                      }),
-                    }}
-                  >
-                    Clearing
-                  </Text>
-                </View>
-              )
-            : "Clearing..."
-          : "Requests",
-        headerLeft:
-          Platform.OS === "ios"
-            ? undefined
-            : () => <AndroidBackAction navigation={navigation} />,
-        headerRight: () =>
-          clearingAll ? undefined : (
-            <Button variant="text" title="Clear all" onPress={clearAllSpam} />
-          ),
-      })}
-    >
+    <NativeStack.Screen name="ChatsRequests" options={navigationOptions}>
       {(navigationProps) => {
         navRef.current = navigationProps.navigation;
         return (
           <>
-            <GestureHandlerRootView
-              style={{ flex: 1, backgroundColor: backgroundColor(colorScheme) }}
-            >
-              <ScrollView style={{ flex: 1 }}>
-                <View>
-                  <ConversationFlashList
-                    {...navigationProps}
-                    items={likelyNotSpam}
-                  />
-                </View>
-                <View>
-                  {likelySpam.length ? (
-                    <SuspectedSpamButton
-                      spamCount={likelySpam.length}
-                      handlePress={() =>
-                        setIsSpamToggleEnabled(!isSpamToggleEnabled)
-                      }
-                      toggleActivated={isSpamToggleEnabled}
-                    />
-                  ) : (
-                    <></>
-                  )}
-                  {isSpamToggleEnabled ? (
-                    <ConversationFlashList
-                      {...navigationProps}
-                      items={likelySpam}
-                    />
-                  ) : (
-                    <></>
-                  )}
-                </View>
-              </ScrollView>
+            <GestureHandlerRootView style={styles.root}>
+              <View style={styles.container}>
+                <ConversationFlashList
+                  {...navigationProps}
+                  items={likelyNotSpam}
+                  ListFooterComponent={
+                    <View>
+                      {likelySpam.length ? (
+                        <SuspectedSpamButton
+                          spamCount={likelySpam.length}
+                          handlePress={handleSpamToggle}
+                          toggleActivated={isSpamToggleEnabled}
+                        />
+                      ) : (
+                        <></>
+                      )}
+                      {isSpamToggleEnabled ? (
+                        <ConversationFlashList
+                          {...navigationProps}
+                          items={likelySpam}
+                        />
+                      ) : (
+                        <></>
+                      )}
+                    </View>
+                  }
+                />
+              </View>
             </GestureHandlerRootView>
           </>
         );
@@ -158,3 +156,30 @@ export default function ConversationRequestsListNav() {
     </NativeStack.Screen>
   );
 }
+
+const useStyles = () => {
+  const colorScheme = useColorScheme();
+  return StyleSheet.create({
+    container: {
+      flex: 1,
+    },
+    root: {
+      flex: 1,
+      backgroundColor: backgroundColor(colorScheme),
+    },
+
+    headerContainer: {
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "center",
+      width: Platform.OS === "ios" ? 110 : 130,
+    },
+    headerText: {
+      marginLeft: 10,
+      color: textPrimaryColor(colorScheme),
+      ...Platform.select({
+        android: { fontSize: 22, fontFamily: "Roboto" },
+      }),
+    },
+  });
+};
