@@ -1,6 +1,6 @@
 import { actionSecondaryColor, textSecondaryColor } from "@styles/colors";
 import { AvatarSizes } from "@styles/sizes";
-import React, { useMemo, useState, useEffect } from "react";
+import React, { useMemo, useState } from "react";
 import { useColorScheme, StyleProp, ViewStyle, Image } from "react-native";
 import Svg, {
   Circle,
@@ -61,33 +61,16 @@ const SafeSvgImage: React.FC<{
   size: number;
   clipPath: string;
 }> = ({ uri, x, y, size, clipPath }) => {
-  const [didError, setDidError] = useState(false);
-
-  useEffect(() => {
-    let isMounted = true;
-
-    Image.getSize(
-      uri,
-      () => {
-        if (isMounted) {
-          setDidError(false);
-        }
-      },
-      () => {
-        if (isMounted) {
-          setDidError(true);
-        }
-      }
-    );
-
-    return () => {
-      isMounted = false;
-    };
-  }, [uri]);
+  const [isLoaded, setIsLoaded] = useState(false);
 
   return (
     <>
-      {!didError && (
+      <Image
+        source={{ uri }}
+        style={{ width: 0, height: 0 }}
+        onLoad={() => setIsLoaded(true)}
+      />
+      {isLoaded && (
         <SvgImage
           x={x}
           y={y}
@@ -116,6 +99,57 @@ const GroupAvatarSvg: React.FC<GroupAvatarSvgProps> = ({
     [memberCount]
   );
 
+  const renderMemberAvatar = (
+    member: { uri?: string; name?: string },
+    pos: { x: number; y: number; size: number },
+    index: number
+  ) => {
+    const firstLetter = member.name ? member.name.charAt(0).toUpperCase() : "";
+
+    const placeholderAvatar = (
+      <G key={`placeholder-${index}`} x={pos.x} y={pos.y}>
+        <Circle
+          cx={pos.size / 2}
+          cy={pos.size / 2}
+          r={pos.size / 2}
+          fill={
+            colorScheme === "dark"
+              ? textSecondaryColor(colorScheme)
+              : actionSecondaryColor(colorScheme)
+          }
+        />
+        <Text
+          x={pos.size / 2}
+          y={pos.size / 2}
+          textAnchor="middle"
+          alignmentBaseline="middle"
+          fontSize={pos.size / 2}
+          fontWeight="500"
+          fill="white"
+        >
+          {firstLetter}
+        </Text>
+      </G>
+    );
+
+    if (member.uri) {
+      return (
+        <React.Fragment key={index}>
+          <SafeSvgImage
+            uri={member.uri}
+            x={pos.x}
+            y={pos.y}
+            size={pos.size}
+            clipPath={`url(#avatarClip${index})`}
+          />
+          {placeholderAvatar}
+        </React.Fragment>
+      );
+    }
+
+    return placeholderAvatar;
+  };
+
   return (
     <Svg width={size} height={size} viewBox="0 0 100 100">
       <Defs>
@@ -136,44 +170,7 @@ const GroupAvatarSvg: React.FC<GroupAvatarSvgProps> = ({
       <G clipPath="url(#groupAvatarClip)">
         {positions.map((pos, index) => {
           if (index < 4 && index < memberCount) {
-            const member = members[index];
-            const firstLetter = member.name
-              ? member.name.charAt(0).toUpperCase()
-              : "";
-            return member.uri ? (
-              <SafeSvgImage
-                key={index}
-                uri={member.uri}
-                x={pos.x}
-                y={pos.y}
-                size={pos.size}
-                clipPath={`url(#avatarClip${index})`}
-              />
-            ) : (
-              <G key={index} x={pos.x} y={pos.y}>
-                <Circle
-                  cx={pos.size / 2}
-                  cy={pos.size / 2}
-                  r={pos.size / 2}
-                  fill={
-                    colorScheme === "dark"
-                      ? textSecondaryColor(colorScheme)
-                      : actionSecondaryColor(colorScheme)
-                  }
-                />
-                <Text
-                  x={pos.size / 2}
-                  y={pos.size / 2}
-                  textAnchor="middle"
-                  alignmentBaseline="middle"
-                  fontSize={pos.size / 2}
-                  fontWeight="500"
-                  fill="white"
-                >
-                  {firstLetter}
-                </Text>
-              </G>
-            );
+            return renderMemberAvatar(members[index], pos, index);
           } else if (index === 4 && memberCount > 4) {
             const extraMembersCount = memberCount - 4;
             return (
