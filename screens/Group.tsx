@@ -1,3 +1,5 @@
+import { useGroupDescription } from "@hooks/useGroupDescription";
+import { useGroupPermissions } from "@hooks/useGroupPermissions";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import {
   backgroundColor,
@@ -6,6 +8,7 @@ import {
   textPrimaryColor,
   textSecondaryColor,
 } from "@styles/colors";
+import { memberCanUpdateGroup } from "@utils/groupUtils/memberCanUpdateGroup";
 import React, { useCallback, useMemo, useState } from "react";
 import {
   Alert,
@@ -65,6 +68,8 @@ export default function GroupScreen({
   const currentAccount = useCurrentAccount() as string;
   const topic = group.topic;
   const { groupName, setGroupName } = useGroupName(topic);
+  const { groupDescription, setGroupDescription } = useGroupDescription(topic);
+  const { permissions } = useGroupPermissions(topic);
 
   const { groupPhoto, setGroupPhoto } = useGroupPhoto(topic);
   const { consent, allowGroup, blockGroup } = useGroupConsent(topic);
@@ -279,11 +284,25 @@ export default function GroupScreen({
     return items;
   }, [consent, allowGroup, blockGroup, colorScheme]);
 
-  const canEditGroupMetadata =
-    currentAccountIsAdmin ||
-    currentAccountIsSuperAdmin ||
-    group.groupPermissionLevel === "all_members";
+  const canEditGroupName = memberCanUpdateGroup(
+    permissions?.updateGroupNamePolicy,
+    currentAccountIsAdmin,
+    currentAccountIsSuperAdmin
+  );
+  const canEditGroupImage = memberCanUpdateGroup(
+    permissions?.updateGroupImagePolicy,
+    currentAccountIsAdmin,
+    currentAccountIsSuperAdmin
+  );
+  const canEditGroupDescription = memberCanUpdateGroup(
+    permissions?.updateGroupNamePolicy,
+    currentAccountIsAdmin,
+    currentAccountIsSuperAdmin
+  );
   const [editedName, setEditedName] = useState(formattedGroupName);
+  const [editedDescription, setEditedDescription] = useState(
+    groupDescription ?? ""
+  );
   const handleNameChange = useCallback(async () => {
     try {
       await setGroupName(editedName);
@@ -292,6 +311,15 @@ export default function GroupScreen({
       Alert.alert("An error occurred");
     }
   }, [editedName, setGroupName]);
+
+  const handleDescriptionChange = useCallback(async () => {
+    try {
+      await setGroupDescription(editedDescription);
+    } catch (e) {
+      console.error(e);
+      Alert.alert("An error occurred");
+    }
+  }, [editedDescription, setGroupDescription]);
 
   return (
     <ScrollView
@@ -306,7 +334,7 @@ export default function GroupScreen({
             color={false}
             name={formattedGroupName}
           />
-          {canEditGroupMetadata && (
+          {canEditGroupImage && (
             <Button
               variant="text"
               title={
@@ -318,7 +346,7 @@ export default function GroupScreen({
           )}
         </View>
       </List.Section>
-      {canEditGroupMetadata ? (
+      {canEditGroupName ? (
         <TextInput
           style={styles.title}
           defaultValue={formattedGroupName}
@@ -331,6 +359,21 @@ export default function GroupScreen({
       ) : (
         <Text style={styles.title} ellipsizeMode="tail">
           {formattedGroupName}
+        </Text>
+      )}
+      {canEditGroupDescription ? (
+        <TextInput
+          style={styles.description}
+          defaultValue={groupDescription}
+          value={editedDescription}
+          onChangeText={setEditedDescription}
+          blurOnSubmit
+          onSubmitEditing={handleDescriptionChange}
+          returnKeyType="done"
+        />
+      ) : (
+        <Text style={styles.title} ellipsizeMode="tail">
+          {groupDescription}
         </Text>
       )}
       <TableView items={tableViewItems} title="MEMBERS" />
@@ -350,6 +393,13 @@ const useStyles = () => {
     title: {
       color: textPrimaryColor(colorScheme),
       fontSize: 34,
+      fontWeight: "bold",
+      textAlign: "center",
+      marginTop: 23,
+    },
+    description: {
+      color: textPrimaryColor(colorScheme),
+      fontSize: 11,
       fontWeight: "bold",
       textAlign: "center",
       marginTop: 23,

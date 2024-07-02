@@ -1,3 +1,4 @@
+import { setGroupDescriptionQueryData } from "@queries/useGroupDescriptionQuery";
 import {
   ConsentListEntry,
   ConversationContext,
@@ -84,7 +85,7 @@ const protocolGroupToStateConversation = async (
     isGroup: true,
     groupAdmins,
     groupSuperAdmins,
-    groupPermissionLevel: group.permissionLevel,
+    groupPermissionLevel: "custom_policy",
     groupName,
   };
 };
@@ -531,19 +532,24 @@ export const createGroup = async (
   peers: string[],
   permissionLevel: "all_members" | "admin_only" = "all_members",
   groupName?: string,
-  groupPhoto?: string
+  groupPhoto?: string,
+  groupDescription?: string
 ) => {
   const client = (await getXmtpClient(account)) as ConverseXmtpClientType;
   const group = await client.conversations.newGroup(peers, {
     permissionLevel,
     name: groupName,
     imageUrlSquare: groupPhoto,
+    description: groupDescription,
   });
   if (groupName) {
     setGroupNameQueryData(account, group.topic, groupName);
   }
   if (groupPhoto) {
     setGroupPhotoQueryData(account, group.topic, groupPhoto);
+  }
+  if (groupDescription) {
+    setGroupDescriptionQueryData(account, group.topic, groupDescription);
   }
   const members = await group.members();
   saveMemberInboxIds(account, members);
