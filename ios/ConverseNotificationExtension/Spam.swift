@@ -168,7 +168,7 @@ func computeSpamScoreGroupMessage(client: XMTP.Client, group: XMTP.Group, decode
       }
       for address in senderAddresses {
         if await client.contacts.isAllowed(EthereumAddress(address).toChecksumAddress()) {
-          return 1
+          return -1
         }
       }
     }

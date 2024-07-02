@@ -39,23 +39,6 @@ export const saveConversations = async (
   );
   // Then to context so it show immediatly even without handle
   chatStoreState.setConversations(newlySavedConversations);
-  // Let's find out which need to have the profile updated
-  const knownProfiles = getProfilesStore(account).getState().profiles;
-  const convosWithProfilesToUpdate: XmtpConversation[] = [];
-  const now = new Date().getTime();
-  [alreadyKnownConversations, newlySavedConversations].forEach(
-    (conversationList) => {
-      conversationList.forEach((c) => {
-        if (!c.peerAddress) return;
-        const existingProfile = knownProfiles[c.peerAddress];
-        const lastProfileUpdate = existingProfile?.updatedAt || 0;
-        const shouldUpdateProfile = now - lastProfileUpdate >= 24 * 3600 * 1000;
-        if (shouldUpdateProfile) {
-          convosWithProfilesToUpdate.push(c);
-        }
-      });
-    }
-  );
   refreshProfilesIfNeeded(account);
 
   // Navigate to conversation from push notification on first message

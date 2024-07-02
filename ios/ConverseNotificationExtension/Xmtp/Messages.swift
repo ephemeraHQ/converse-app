@@ -152,6 +152,15 @@ func handleGroupMessage(xmtpClient: XMTP.Client, envelope: XMTP.Envelope, apiURI
             if let groupName = try? group.groupName() {
               bestAttemptContent.title = groupName
             }
+            let profilesState = getProfilesState(account: xmtpClient.address)
+            
+            if let senderMember = try group.members.first(where:{$0.inboxId == decodedMessageResult.senderAddress} ) {
+              let senderAddress = senderMember.addresses[0]
+              if let senderProfile = profilesState?.profiles?[senderAddress] {
+                bestAttemptContent.subtitle = getPreferredName(address: senderAddress, socials: senderProfile.socials)
+              }
+            }
+
             if let content = decodedMessageResult.content {
               bestAttemptContent.body = content
             }

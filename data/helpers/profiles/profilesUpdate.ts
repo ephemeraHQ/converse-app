@@ -12,90 +12,7 @@ type ConversationHandlesUpdate = {
   updated: boolean;
 };
 
-export const updateProfilesForConversations = async (
-  account: string,
-  conversations: XmtpConversation[]
-) => {
-  const profileRepository = await getRepository(account, "profile");
-  const updates: ConversationHandlesUpdate[] = [];
-  let batch: XmtpConversation[] = [];
-  let rest = conversations;
-
-  while (rest.length > 0) {
-    batch = rest.slice(0, 150);
-    rest = rest.slice(150);
-    const addressesSet = new Set<string>();
-    batch.forEach((c) => {
-      if (c.isGroup) {
-        // @todo => refresh profiles for all members of the group?
-      } else {
-        addressesSet.add(c.peerAddress);
-      }
-    });
-    console.log(`Fetching ${addressesSet.size} profiles from API...`);
-    const profilesByAddress = await getProfilesForAddresses(
-      Array.from(addressesSet)
-    );
-    const now = new Date().getTime();
-    console.log("Saving profiles to db...");
-    // Save profiles to db
-    await upsertRepository(
-      profileRepository,
-      Object.keys(profilesByAddress).map((address) => ({
-        socials: JSON.stringify(profilesByAddress[address]),
-        updatedAt: now,
-        address,
-      })),
-      ["address"],
-      false
-    );
-    // Dispatching the profile to state
-    const socialsToDispatch: {
-      [address: string]: { socials: ProfileSocials; updatedAt: number };
-    } = {};
-    for (const address in profilesByAddress) {
-      socialsToDispatch[address] = {
-        socials: profilesByAddress[address],
-        updatedAt: now,
-      };
-    }
-    getProfilesStore(account).getState().setProfiles(socialsToDispatch);
-
-    console.log("Done saving profiles to db!");
-    const handleConversation = async (conversation: XmtpConversation) => {
-      if (conversation.isGroup) return;
-      const currentTitle = conversation.conversationTitle;
-      let updated = false;
-      try {
-        const profileForConversation =
-          profilesByAddress[conversation.peerAddress];
-
-        const newTitle = getPreferredName(
-          profileForConversation,
-          conversation.peerAddress,
-          conversation.context?.conversationId
-        );
-
-        if (newTitle !== currentTitle) {
-          updated = true;
-        }
-        conversation.conversationTitle = newTitle;
-      } catch (e) {
-        // Error (probably rate limited)
-        console.log("Could not resolve handles:", conversation.peerAddress, e);
-      }
-
-      updates.push({ conversation, updated });
-      saveConversationIdentifiersForNotifications(conversation);
-    };
-
-    await Promise.all(batch.map(handleConversation));
-  }
-
-  return updates;
-};
-
-export const updateProfilesForGroups = async (
+export const updateProfilesForConvos = async (
   account: string,
   profilesWithGroups: Map<string, XmtpConversation[]>
 ) => {
@@ -107,10 +24,7 @@ export const updateProfilesForGroups = async (
   while (rest.length > 0) {
     batch = rest.slice(0, 150);
     rest = rest.slice(150);
-    const addressesSet = new Set<string>();
-    batch.forEach((address) => {
-      addressesSet.add(address);
-    });
+    const addressesSet = new Set(batch);
     const profilesByAddress = await getProfilesForAddresses(
       Array.from(addressesSet)
     );
@@ -243,7 +157,7 @@ export const refreshProfilesIfNeeded = async (account: string) => {
   });
 
   if (staleProfilesWithConversations.size > 0) {
-    updateProfilesForGroups(account, staleProfilesWithConversations).then(
+    updateProfilesForConvos(account, staleProfilesWithConversations).then(
       (resolveResult) => {
         const updatedConversations = resolveResult
           .filter((r) => r.updated)
