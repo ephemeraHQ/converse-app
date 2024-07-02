@@ -18,7 +18,7 @@ import {
 } from "../data/store/accountsStore";
 import { useGroupMembers } from "../hooks/useGroupMembers";
 import { getPreferredAvatar, getPreferredName } from "../utils/profile";
-import GroupAvatarSvg from "./GroupAvatarSvg";
+import GroupAvatar from "./GroupAvatar";
 
 type Props = {
   uri?: string | undefined;
@@ -85,10 +85,10 @@ function Avatar({
     setDidError(false);
   }, []);
 
-  if (avatarGroupMembers && avatarGroupMembers.length > 1) {
+  if (!uri && avatarGroupMembers && avatarGroupMembers.length > 1) {
     return (
       <View style={[styles.image, style]}>
-        <GroupAvatarSvg members={avatarGroupMembers} size={size} />
+        <GroupAvatar members={avatarGroupMembers} size={size} />
       </View>
     );
   }
