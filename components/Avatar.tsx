@@ -31,6 +31,12 @@ type Props = {
   excludeSelf?: boolean;
 };
 
+export const getFirstLetter = (name: string) => {
+  return name.startsWith("0x")
+    ? name.slice(0, 2)
+    : name.charAt(0).toUpperCase();
+};
+
 function Avatar({
   uri,
   size = AvatarSizes.default,
@@ -43,11 +49,7 @@ function Avatar({
 }: Props) {
   const colorScheme = useColorScheme();
   const styles = getStyles(colorScheme, size);
-  const firstLetter = name
-    ? name.startsWith("0x")
-      ? name.slice(0, 2)
-      : name.charAt(0).toUpperCase()
-    : "";
+  const firstLetter = getFirstLetter(name || "");
   const [didError, setDidError] = useState(false);
   const { members } = useGroupMembers(topic || "");
   const profiles = useProfilesStore((s) => s.profiles);
