@@ -1,3 +1,4 @@
+import { invalidateGroupDescriptionQuery } from "@queries/useGroupDescriptionQuery";
 import { refreshGroup } from "@utils/xmtpRN/conversations";
 import { GroupUpdatedContent } from "@xmtp/react-native-sdk";
 
@@ -21,11 +22,14 @@ export const handleGroupUpdatedMessage = async (
   if (content.metadataFieldsChanged.length > 0) {
     let groupNameChanged = false;
     let groupPhotoChanged = false;
+    let groupDescriptionChanged = false;
     for (const field of content.metadataFieldsChanged) {
       if (field.fieldName === "group_name") {
         groupNameChanged = true;
       } else if (field.fieldName === "group_image_url_square") {
         groupPhotoChanged = true;
+      } else if (field.fieldName === "description") {
+        groupDescriptionChanged = true;
       }
     }
     if (groupNameChanged) {
@@ -33,6 +37,9 @@ export const handleGroupUpdatedMessage = async (
     }
     if (groupPhotoChanged) {
       invalidateGroupPhotoQuery(account, topic);
+    }
+    if (groupDescriptionChanged) {
+      invalidateGroupDescriptionQuery(account, topic);
     }
   }
   // Admin Update

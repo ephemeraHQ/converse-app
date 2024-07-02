@@ -370,9 +370,10 @@ export default function GroupScreen({
           blurOnSubmit
           onSubmitEditing={handleDescriptionChange}
           returnKeyType="done"
+          placeholder="Add a description"
         />
       ) : (
-        <Text style={styles.title} ellipsizeMode="tail">
+        <Text style={styles.description} ellipsizeMode="tail">
           {groupDescription}
         </Text>
       )}
@@ -399,10 +400,9 @@ const useStyles = () => {
     },
     description: {
       color: textPrimaryColor(colorScheme),
-      fontSize: 11,
-      fontWeight: "bold",
+      fontSize: 13,
       textAlign: "center",
-      marginTop: 23,
+      marginTop: 13,
     },
     group: {
       backgroundColor: backgroundColor(colorScheme),

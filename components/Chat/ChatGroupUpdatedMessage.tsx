@@ -62,6 +62,10 @@ export default function ChatGroupUpdatedMessage({
       membersActions.push(
         `The group photo was changed by ${initiatedByReadableName}`
       );
+    } else if (f.fieldName === "description") {
+      membersActions.push(
+        `The group description was changed to ${f.newValue} by ${initiatedByReadableName}`
+      );
     }
   });
 
