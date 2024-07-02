@@ -77,6 +77,7 @@ export default function NewGroupSummary({
   }, [route.params.members, account, currentAccountSocials]);
   const colorScheme = useColorScheme();
   const [groupName, setGroupName] = useState(defaultGroupName);
+  const [groupDescription, setGroupDescription] = useState("");
 
   useEffect(() => {
     if (!groupPhoto) return;
@@ -108,7 +109,8 @@ export default function NewGroupSummary({
       route.params.members.map((m) => m.address),
       groupPermissionLevel,
       groupName,
-      remotePhotoUrl
+      remotePhotoUrl,
+      groupDescription
     );
     if (Platform.OS !== "web") {
       navigation.getParent()?.goBack();
@@ -123,6 +125,7 @@ export default function NewGroupSummary({
       isSplitScreen ? 0 : 300
     );
   }, [
+    groupDescription,
     groupName,
     groupPermissionLevel,
     isSplitScreen,
@@ -187,6 +190,17 @@ export default function NewGroupSummary({
           style={[textInputStyle(colorScheme), styles.nameInput]}
           value={groupName}
           onChangeText={setGroupName}
+        />
+      </List.Section>
+      <List.Section>
+        <List.Subheader style={styles.sectionTitle}>
+          {strings.group_description}
+        </List.Subheader>
+        <TextInput
+          defaultValue={groupDescription}
+          style={[textInputStyle(colorScheme), styles.nameInput]}
+          value={groupDescription}
+          onChangeText={setGroupDescription}
         />
       </List.Section>
       <TableView
