@@ -11,9 +11,7 @@ export const useGroupPermissionsQuery = (account: string, topic: string) => {
       if (!group) {
         return;
       }
-      // Adding as a query for now as I imagine group permissions will be more complex
-      // in the future
-      return group.permissionLevel;
+      return group.permissionPolicySet();
     },
     enabled: !!group,
   });
