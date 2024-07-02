@@ -39,6 +39,7 @@ import { converseEventEmitter } from "../utils/events";
 import { navigate } from "../utils/navigation";
 import { consentToPeersOnProtocol } from "../utils/xmtpRN/conversations";
 import Avatar from "./Avatar";
+import GroupAvatar from "./GroupAvatar";
 import Picto from "./Picto/Picto";
 import { showActionSheetWithOptions } from "./StateHandlers/ActionSheetStateHandler";
 
@@ -54,6 +55,7 @@ type ConversationListItemProps = {
   lastMessageStatus?: "delivered" | "error" | "seen" | "sending" | "sent";
   showUnread: boolean;
   conversationOpened: boolean;
+  isGroupConversation: boolean;
   onLongPress?: () => void;
   onRightActionPress?: (defaultAction: () => void) => void;
 } & NativeStackScreenProps<
@@ -75,6 +77,7 @@ const ConversationListItem = memo(function ConversationListItem({
   lastMessageFromMe,
   showUnread,
   conversationOpened,
+  isGroupConversation = false,
   onLongPress,
   onRightActionPress,
 }: ConversationListItemProps) {
@@ -121,15 +124,25 @@ const ConversationListItem = memo(function ConversationListItem({
     };
   }, [navigation, resetSelected]);
 
+  const avatarComponent = isGroupConversation ? (
+    <GroupAvatar
+      size={AvatarSizes.conversationListItem}
+      style={styles.avatarWrapper}
+      uri={conversationPeerAvatar}
+      topic={conversationTopic}
+    />
+  ) : (
+    <Avatar
+      size={AvatarSizes.conversationListItem}
+      style={styles.avatarWrapper}
+      uri={conversationPeerAvatar}
+      name={conversationName}
+    />
+  );
+
   const listItemContent = (
     <View style={styles.conversationListItem}>
-      <Avatar
-        size={AvatarSizes.conversationListItem}
-        style={styles.avatarWrapper}
-        uri={conversationPeerAvatar}
-        name={conversationName}
-        topic={conversationTopic}
-      />
+      {avatarComponent}
       <View style={styles.conversationListItemContent}>
         <Text style={styles.conversationName} numberOfLines={1}>
           {conversationName}

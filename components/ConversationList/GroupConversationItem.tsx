@@ -153,6 +153,7 @@ export const GroupConversationItem: FC<GroupConversationItemProps> = ({
       }
       conversationOpened={conversation.topic === openedConversationTopic}
       onRightActionPress={handleDelete}
+      isGroupConversation
     />
   );
 };

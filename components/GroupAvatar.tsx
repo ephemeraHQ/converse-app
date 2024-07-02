@@ -5,19 +5,24 @@ import {
   textSecondaryColor,
 } from "@styles/colors";
 import { AvatarSizes } from "@styles/sizes";
-import { Image } from "expo-image";
-import React, { useMemo, useState, useCallback } from "react";
+import React, { useMemo } from "react";
 import {
   useColorScheme,
+  ColorSchemeName,
   StyleProp,
   StyleSheet,
   ViewStyle,
   Text,
   View,
-  ColorSchemeName,
 } from "react-native";
 
-import { getFirstLetter } from "./Avatar";
+import {
+  useProfilesStore,
+  useCurrentAccount,
+} from "../data/store/accountsStore";
+import { useGroupMembers } from "../hooks/useGroupMembers";
+import { getPreferredAvatar, getPreferredName } from "../utils/profile";
+import Avatar from "./Avatar";
 
 const MAIN_CIRCLE_RADIUS = 50;
 const MAX_VISIBLE_MEMBERS = 4;
@@ -27,9 +32,13 @@ type Position = { x: number; y: number; size: number };
 type ColorSchemeType = "light" | "dark" | null | undefined;
 
 type GroupAvatarProps = {
-  members: Member[];
+  members?: Member[];
   size?: number;
   style?: StyleProp<ViewStyle>;
+  uri?: string | undefined;
+  topic?: string | undefined;
+  pendingGroupMembers?: { address: string; uri?: string; name?: string }[];
+  excludeSelf?: boolean;
 };
 
 const calculatePositions = (
@@ -152,97 +161,93 @@ const ExtraMembersIndicator: React.FC<{
 };
 
 const GroupAvatar: React.FC<GroupAvatarProps> = ({
-  members,
   size = AvatarSizes.default,
   style,
+  uri,
+  topic,
+  pendingGroupMembers,
+  excludeSelf = true,
 }) => {
   const colorScheme = useColorScheme();
   const styles = getStyles(colorScheme);
+  const { members: groupMembers } = useGroupMembers(topic || "");
+  const profiles = useProfilesStore((s) => s.profiles);
+  const account = useCurrentAccount();
 
-  // Sort the members so that members with avatars are positioned first
-  const sortedMembers = useMemo(
-    () => [...members].sort((a, b) => (a.uri ? -1 : 1)),
-    [members]
-  );
-  const memberCount = sortedMembers.length;
-  const [loadedImages, setLoadedImages] = useState<{ [key: number]: boolean }>(
-    {}
-  );
+  const memoizedAndSortedGroupMembers = useMemo(() => {
+    if (!groupMembers) return [];
+    const members = groupMembers.ids.reduce(
+      (acc: { address: string; uri?: string; name?: string }[], id) => {
+        const member = groupMembers.byId[id];
+        const address = member.addresses[0].toLowerCase();
+        const senderSocials = profiles[address]?.socials;
+        const shouldExclude =
+          excludeSelf && account && address === account.toLowerCase();
+        if (shouldExclude) return acc;
+        const newMember = {
+          address,
+          uri: getPreferredAvatar(senderSocials),
+          name: getPreferredName(senderSocials, address),
+        };
+        acc.push(newMember);
+        return acc;
+      },
+      []
+    );
+    // Sort the members so that members with avatars are positioned first
+    return members.sort((a, b) => (a.uri ? -1 : 1));
+  }, [groupMembers, profiles, account, excludeSelf]);
+
+  const membersToDisplay = pendingGroupMembers || memoizedAndSortedGroupMembers;
+  const memberCount = membersToDisplay.length;
 
   const positions = useMemo(
     () => calculatePositions(memberCount, MAIN_CIRCLE_RADIUS),
     [memberCount]
   );
 
-  const handleImageLoad = useCallback((index: number) => {
-    setLoadedImages((prev) => ({ ...prev, [index]: true }));
-  }, []);
-
-  const renderMemberAvatar = useCallback(
-    (member: Member, pos: Position, index: number) => {
-      const firstLetter = getFirstLetter(member.name || "");
-
-      const placeholderAvatar = (
-        <PlaceholderAvatar
-          key={`placeholder-${index}`}
-          pos={pos}
-          firstLetter={firstLetter}
-          colorScheme={colorScheme}
-          size={size}
-        />
-      );
-
-      if (member.uri) {
-        return (
-          <View key={`avatar-${index}`} style={styles.avatarContainer}>
-            <Image
-              source={{ uri: member.uri }}
-              style={[
-                styles.memberImage,
-                {
-                  left: (pos.x / 100) * size,
-                  top: (pos.y / 100) * size,
-                  width: (pos.size / 100) * size,
-                  height: (pos.size / 100) * size,
-                  borderRadius: ((pos.size / 100) * size) / 2,
-                },
-              ]}
-              onLoad={() => handleImageLoad(index)}
-            />
-            {!loadedImages[index] && placeholderAvatar}
-          </View>
-        );
-      }
-
-      return placeholderAvatar;
-    },
-    [colorScheme, styles, size, loadedImages, handleImageLoad]
-  );
-
   return (
     <View style={[styles.container, { width: size, height: size }, style]}>
-      <View style={styles.overlay} />
-      <View style={styles.content}>
-        {positions.map((pos, index) => {
-          if (index < MAX_VISIBLE_MEMBERS && index < memberCount) {
-            return renderMemberAvatar(sortedMembers[index], pos, index);
-          } else if (
-            index === MAX_VISIBLE_MEMBERS &&
-            memberCount > MAX_VISIBLE_MEMBERS
-          ) {
-            return (
-              <ExtraMembersIndicator
-                key={`extra-${index}`}
-                pos={pos}
-                extraMembersCount={memberCount - MAX_VISIBLE_MEMBERS}
-                colorScheme={colorScheme}
-                size={size}
-              />
-            );
-          }
-          return null;
-        })}
-      </View>
+      {uri ? (
+        <Avatar size={size} uri={uri} />
+      ) : (
+        <View style={[styles.container, { width: size, height: size }]}>
+          <View style={styles.overlay} />
+          <View style={styles.content}>
+            {positions.map((pos, index) => {
+              if (index < MAX_VISIBLE_MEMBERS && index < memberCount) {
+                return (
+                  <Avatar
+                    key={`avatar-${index}`}
+                    uri={membersToDisplay[index].uri}
+                    name={membersToDisplay[index].name}
+                    size={(pos.size / 100) * size}
+                    style={{
+                      left: (pos.x / 100) * size,
+                      top: (pos.y / 100) * size,
+                      position: "absolute",
+                    }}
+                  />
+                );
+              } else if (
+                index === MAX_VISIBLE_MEMBERS &&
+                memberCount > MAX_VISIBLE_MEMBERS
+              ) {
+                return (
+                  <ExtraMembersIndicator
+                    key={`extra-${index}`}
+                    pos={pos}
+                    extraMembersCount={memberCount - MAX_VISIBLE_MEMBERS}
+                    colorScheme={colorScheme}
+                    size={size}
+                  />
+                );
+              }
+              return null;
+            })}
+          </View>
+        </View>
+      )}
     </View>
   );
 };

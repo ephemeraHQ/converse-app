@@ -14,7 +14,9 @@ import { useGroupName } from "../../hooks/useGroupName";
 import { useGroupPhoto } from "../../hooks/useGroupPhoto";
 import { navigate } from "../../utils/navigation";
 import { getPreferredAvatar, getPreferredName } from "../../utils/profile";
-import Avatar from "../Avatar";
+import Avatar from "..//Avatar";
+import GroupAvatar from "../GroupAvatar";
+
 interface Props {
   conversation: XmtpConversation;
 }
@@ -40,19 +42,30 @@ export const PinnedConversation: FC<Props> = ({ conversation }) => {
     setPinnedConversations([conversation]);
   }, [conversation, setPinnedConversations]);
 
+  const avatarComponent = isGroup ? (
+    <GroupAvatar
+      key={conversation.topic}
+      uri={avatar}
+      size={AvatarSizes.pinnedConversation}
+      style={styles.avatar}
+    />
+  ) : (
+    <Avatar
+      key={conversation.topic}
+      uri={avatar}
+      size={AvatarSizes.pinnedConversation}
+      style={styles.avatar}
+      name={getPreferredName(socials, conversation.peerAddress || "")}
+    />
+  );
+
   return (
     <TouchableOpacity
       style={styles.container}
       onPress={onPress}
       onLongPress={onLongPress}
     >
-      <Avatar
-        key={conversation.topic}
-        uri={avatar}
-        size={AvatarSizes.pinnedConversation}
-        style={styles.avatar}
-        name={getPreferredName(socials, conversation.peerAddress || "")}
-      />
+      {avatarComponent}
       <Text style={styles.text}>{title}</Text>
     </TouchableOpacity>
   );
