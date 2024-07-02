@@ -322,7 +322,32 @@ export default function Chat() {
             }
             inverted
             keyExtractor={keyExtractor}
-            getItemType={(item: MessageToDisplay) => item.contentType}
+            getItemType={(item: MessageToDisplay) => {
+              if (
+                isContentType("text", item.contentType) &&
+                item.converseMetadata?.frames?.[0]
+              ) {
+                const frameUrl = item.converseMetadata?.frames?.[0];
+                const frame = framesStore[frameUrl];
+                // Recycle frames with the same aspect ratio
+                return `FRAME-${
+                  frame?.frameInfo?.image?.aspectRatio || "1.91.1"
+                }`;
+              } else if (
+                (isContentType("attachment", item.contentType) ||
+                  isContentType("remoteAttachment", item.contentType)) &&
+                item.converseMetadata?.attachment?.size?.height &&
+                item.converseMetadata?.attachment?.size?.width
+              ) {
+                const aspectRatio = (
+                  item.converseMetadata.attachment.size.width /
+                  item.converseMetadata.attachment.size.height
+                ).toFixed(2);
+                return `ATTACHMENT-${aspectRatio}`;
+              } else {
+                return item.contentType;
+              }
+            }}
             keyboardShouldPersistTaps="handled"
             estimatedItemSize={80}
             // Size glitch on Android
