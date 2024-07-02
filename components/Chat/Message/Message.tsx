@@ -474,8 +474,6 @@ const useStyles = () => {
       paddingVertical: 10,
       marginTop: 10,
       marginHorizontal: 10,
-      flexDirection: "column",
-      alignItems: "flex-start",
     },
     innerBubbleMe: {
       backgroundColor: myMessageInnerBubbleColor(colorScheme),
@@ -521,7 +519,6 @@ const useStyles = () => {
       fontSize: 12,
       marginBottom: 4,
       color: "white",
-      justifyContent: "flex-start",
       paddingVertical: 0,
       paddingHorizontal: 0,
     },
