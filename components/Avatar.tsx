@@ -1,5 +1,6 @@
 import { actionSecondaryColor, textSecondaryColor } from "@styles/colors";
 import { AvatarSizes } from "@styles/sizes";
+import { getFirstLetterForAvatar } from "@utils/getFirstLetterForAvatar";
 import { Image } from "expo-image";
 import React, { useCallback, useState } from "react";
 import {
@@ -20,12 +21,6 @@ type Props = {
   name?: string | undefined;
 };
 
-const getFirstLetter = (name: string) => {
-  return name.startsWith("0x")
-    ? name.slice(0, 2)
-    : name.charAt(0).toUpperCase();
-};
-
 function Avatar({
   uri,
   size = AvatarSizes.default,
@@ -35,7 +30,7 @@ function Avatar({
 }: Props) {
   const colorScheme = useColorScheme();
   const styles = getStyles(colorScheme, size);
-  const firstLetter = getFirstLetter(name || "");
+  const firstLetter = getFirstLetterForAvatar(name || "");
   const [didError, setDidError] = useState(false);
 
   const handleImageError = useCallback(() => {
