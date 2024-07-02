@@ -474,6 +474,8 @@ const useStyles = () => {
       paddingVertical: 10,
       marginTop: 10,
       marginHorizontal: 10,
+      flexDirection: "column",
+      alignItems: "flex-start",
     },
     innerBubbleMe: {
       backgroundColor: myMessageInnerBubbleColor(colorScheme),
@@ -518,8 +520,10 @@ const useStyles = () => {
     replyToUsername: {
       fontSize: 12,
       marginBottom: 4,
-      padding: 0,
       color: "white",
+      justifyContent: "flex-start",
+      paddingVertical: 0,
+      paddingHorizontal: 0,
     },
     messageText: {
       color: textPrimaryColor(colorScheme),
