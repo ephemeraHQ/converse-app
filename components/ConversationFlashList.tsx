@@ -156,6 +156,7 @@ export default function ConversationFlashList({
             lastMessagePreview.message?.senderAddress === userAddress
           }
           conversationOpened={conversation.topic === openedConversationTopic}
+          isGroupConversation={conversation.isGroup}
         />
       );
     },
