@@ -17,6 +17,8 @@ import {
   ColorSchemeName,
 } from "react-native";
 
+import { getFirstLetter } from "./Avatar";
+
 const MAIN_CIRCLE_RADIUS = 50;
 const MAX_VISIBLE_MEMBERS = 4;
 
@@ -29,9 +31,6 @@ type GroupAvatarProps = {
   size?: number;
   style?: StyleProp<ViewStyle>;
 };
-
-const getFirstLetter = (name?: string) =>
-  name ? name.charAt(0).toUpperCase() : "";
 
 const calculatePositions = (
   memberCount: number,
@@ -181,7 +180,7 @@ const GroupAvatar: React.FC<GroupAvatarProps> = ({
 
   const renderMemberAvatar = useCallback(
     (member: Member, pos: Position, index: number) => {
-      const firstLetter = getFirstLetter(member.name);
+      const firstLetter = getFirstLetter(member.name || "");
 
       const placeholderAvatar = (
         <PlaceholderAvatar
