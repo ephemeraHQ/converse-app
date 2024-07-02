@@ -23,8 +23,8 @@ import {
 import { List } from "react-native-paper";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-import Avatar from "../components/Avatar";
 import Button from "../components/Button/Button";
+import GroupAvatar from "../components/GroupAvatar";
 import { showActionSheetWithOptions } from "../components/StateHandlers/ActionSheetStateHandler";
 import TableView, {
   TableViewItemType,
@@ -328,11 +328,10 @@ export default function GroupScreen({
     >
       <List.Section>
         <View style={{ alignItems: "center" }}>
-          <Avatar
+          <GroupAvatar
             uri={localGroupPhoto}
             style={styles.avatar}
-            color={false}
-            name={formattedGroupName}
+            topic={topic}
           />
           {canEditGroupImage && (
             <Button

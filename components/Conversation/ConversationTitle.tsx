@@ -22,6 +22,7 @@ import { getPreferredAvatar } from "../../utils/profile";
 import { conversationName, getTitleFontScale } from "../../utils/str";
 import Avatar from "../Avatar";
 import { useEnableDebug } from "../DebugButton";
+import GroupAvatar from "../GroupAvatar";
 
 type Props = {
   isBlockedPeer: boolean;
@@ -100,6 +101,29 @@ export default function ConversationTitle({
   }, [groupPhoto]);
 
   if (!conversation) return null;
+
+  const avatarComponent = conversation.isGroup ? (
+    <GroupAvatar
+      uri={avatar}
+      size={AvatarSizes.conversationTitle}
+      style={{
+        marginRight: Platform.OS === "android" ? 24 : 7,
+        marginLeft: Platform.OS === "ios" ? 0 : -9,
+      }}
+      topic={conversation.topic}
+    />
+  ) : (
+    <Avatar
+      uri={avatar}
+      size={AvatarSizes.conversationTitle}
+      style={{
+        marginRight: Platform.OS === "android" ? 24 : 7,
+        marginLeft: Platform.OS === "ios" ? 0 : -9,
+      }}
+      name={conversationName(conversation)}
+    />
+  );
+
   return (
     <View style={{ flexDirection: "row", flexGrow: 1 }}>
       <TouchableOpacity
@@ -132,16 +156,7 @@ export default function ConversationTitle({
           paddingRight: 40,
         }}
       >
-        <Avatar
-          uri={avatar}
-          size={AvatarSizes.conversationTitle}
-          style={{
-            marginRight: Platform.OS === "android" ? 24 : 7,
-            marginLeft: Platform.OS === "ios" ? 0 : -9,
-          }}
-          name={conversationName(conversation)}
-          topic={conversation.topic}
-        />
+        {avatarComponent}
         <Text
           style={{
             color: textPrimaryColor(colorScheme),

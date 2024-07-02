@@ -19,8 +19,8 @@ import { List } from "react-native-paper";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import ActivityIndicator from "../../components/ActivityIndicator/ActivityIndicator";
-import Avatar from "../../components/Avatar";
 import Button from "../../components/Button/Button";
+import GroupAvatar from "../../components/GroupAvatar";
 import TableView from "../../components/TableView/TableView";
 import {
   currentAccount,
@@ -185,11 +185,9 @@ export default function NewGroupSummary({
     >
       <List.Section>
         <View style={styles.listSectionContainer}>
-          <Avatar
+          <GroupAvatar
             uri={groupPhoto}
             style={styles.avatar}
-            color={false}
-            name={groupName}
             pendingGroupMembers={getPendingGroupMembers(
               route.params.members,
               account ?? "",
