@@ -8,6 +8,7 @@ import {
   textPrimaryColor,
   textSecondaryColor,
 } from "@styles/colors";
+import { memberCanUpdateGroup } from "@utils/groupUtils/memberCanUpdateGroup";
 import Constants from "expo-constants";
 import * as Linking from "expo-linking";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
@@ -350,7 +351,11 @@ export default function ProfileScreen({
     const peerIsAdmin = getAddressIsAdmin(groupMembers, peerAddress);
     const peerIsSuperAdmin = getAddressIsSuperAdmin(groupMembers, peerAddress);
     if (
-      (currentAccountIsAdmin || groupPermissions === "all_members") &&
+      memberCanUpdateGroup(
+        groupPermissions?.removeMemberPolicy,
+        currentAccountIsAdmin,
+        currentAccountIsSuperAdmin
+      ) &&
       !peerIsSuperAdmin
     ) {
       items.push({
@@ -377,7 +382,14 @@ export default function ProfileScreen({
       });
     }
 
-    if (currentAccountIsSuperAdmin && !peerIsAdmin) {
+    if (
+      !peerIsAdmin &&
+      memberCanUpdateGroup(
+        groupPermissions?.addAdminPolicy,
+        currentAccountIsAdmin,
+        currentAccountIsSuperAdmin
+      )
+    ) {
       items.unshift({
         id: "promote",
         title: "Promote to admin",
@@ -451,7 +463,14 @@ export default function ProfileScreen({
       });
     }
 
-    if (currentAccountIsSuperAdmin && !peerIsSuperAdmin && peerIsAdmin) {
+    if (
+      peerIsAdmin &&
+      memberCanUpdateGroup(
+        groupPermissions?.removeAdminPolicy,
+        currentAccountIsAdmin,
+        currentAccountIsSuperAdmin
+      )
+    ) {
       items.push({
         id: "revokeAdmin",
         title: "Revoke admin",

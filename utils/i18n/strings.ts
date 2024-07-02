@@ -23,5 +23,6 @@ export const strings = {
 
   // NewGroupSummary
   group_name: "GROUP NAME",
+  group_description: "GROUP DESCRIPTION",
   upload_group_photo_error: "Error uploading group photo",
 };
