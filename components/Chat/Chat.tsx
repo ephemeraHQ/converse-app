@@ -333,6 +333,17 @@ export default function Chat() {
                 return `FRAME-${
                   frame?.frameInfo?.image?.aspectRatio || "1.91.1"
                 }`;
+              } else if (
+                (isContentType("attachment", item.contentType) ||
+                  isContentType("remoteAttachment", item.contentType)) &&
+                item.converseMetadata?.attachment?.size?.height &&
+                item.converseMetadata?.attachment?.size?.width
+              ) {
+                const aspectRatio = (
+                  item.converseMetadata.attachment.size.width /
+                  item.converseMetadata.attachment.size.height
+                ).toFixed(2);
+                return `ATTACHMENT-${aspectRatio}`;
               } else {
                 return item.contentType;
               }
