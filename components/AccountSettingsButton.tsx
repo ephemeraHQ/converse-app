@@ -15,7 +15,6 @@ import {
   useColorScheme,
 } from "react-native";
 
-import config from "../config";
 import { refreshProfileForAddress } from "../data/helpers/profiles/profilesUpdate";
 import { useAccountsStore } from "../data/store/accountsStore";
 import { useAppStore } from "../data/store/appStore";
@@ -50,6 +49,39 @@ export default function AccountSettingsButton({ account, navigation }: Props) {
   );
   const logout = useLogoutFromConverse(account);
   const colorScheme = useColorScheme();
+
+  const showDeleteAccountActionSheet = useCallback(async () => {
+    if (Platform.OS === "web") {
+      // Fixes double action sheet on web
+      await new Promise((r) => setTimeout(r, 100));
+    }
+    const methods = {
+      Delete: logout,
+      Cancel: () => {},
+    };
+
+    const options = Object.keys(methods);
+
+    showActionSheetWithOptions(
+      {
+        options,
+        title: "Delete this account",
+        message:
+          "Your account data will be deleted from Converse. Messages not backed up to other devices will be unrecoverable.",
+        cancelButtonIndex: options.indexOf("Cancel"),
+        destructiveButtonIndex: [0],
+        ...actionSheetColors(colorScheme),
+      },
+      (selectedIndex?: number) => {
+        if (selectedIndex === undefined) return;
+        const method = (methods as any)[options[selectedIndex]];
+        if (method) {
+          method();
+        }
+      }
+    );
+  }, [colorScheme, logout]);
+
   const onPress = useCallback(() => {
     Keyboard.dismiss();
 
@@ -73,22 +105,6 @@ export default function AccountSettingsButton({ account, navigation }: Props) {
       },
       "Copy wallet address": () => {
         Clipboard.setString(account || "");
-      },
-      "Contact Converse team": async () => {
-        setCurrentAccount(account, false);
-        if (Platform.OS === "android") {
-          // On android the drawer is outside the navigation
-          // so we use Linking to navigate
-          converseEventEmitter.emit("toggle-navigation-drawer", false);
-        } else {
-          if (Platform.OS === "web") {
-            await new Promise((r) => setTimeout(r, 200));
-          }
-          navigation?.navigate("Chats");
-        }
-        navigate("Conversation", {
-          mainConversationWithPeer: config.polAddress,
-        });
       },
       "Turn on notifications": () => {
         // @todo => move that to a helper because also used in Profile
@@ -117,8 +133,8 @@ export default function AccountSettingsButton({ account, navigation }: Props) {
           );
         }
       },
-      Disconnect: () => {
-        logout();
+      "Delete this account": () => {
+        showDeleteAccountActionSheet();
       },
       Cancel: () => {},
     };
@@ -131,7 +147,7 @@ export default function AccountSettingsButton({ account, navigation }: Props) {
     showActionSheetWithOptions(
       {
         options,
-        destructiveButtonIndex: options.indexOf("Disconnect"),
+        destructiveButtonIndex: options.indexOf("Delete this account"),
         cancelButtonIndex: options.indexOf("Cancel"),
         title: account || undefined,
         ...actionSheetColors(colorScheme),
@@ -147,7 +163,7 @@ export default function AccountSettingsButton({ account, navigation }: Props) {
   }, [
     account,
     colorScheme,
-    logout,
+    showDeleteAccountActionSheet,
     navigation,
     notificationsPermissionStatus,
     setCurrentAccount,
