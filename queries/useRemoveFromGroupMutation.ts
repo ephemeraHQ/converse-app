@@ -1,7 +1,6 @@
 import { useMutation } from "@tanstack/react-query";
 import { InboxId } from "@xmtp/react-native-sdk/build/lib/Client";
 
-import { refreshGroup } from "../utils/xmtpRN/conversations";
 import { removeMemberMutationKey } from "./MutationKeys";
 import {
   cancelGroupMembersQuery,
@@ -9,6 +8,7 @@ import {
   setGroupMembersQueryData,
 } from "./useGroupMembersQuery";
 import { useGroupQuery } from "./useGroupQuery";
+import { refreshGroup } from "../utils/xmtpRN/conversations";
 
 export const useRemoveFromGroupMutation = (account: string, topic: string) => {
   const { data: group } = useGroupQuery(account, topic);

@@ -1,12 +1,12 @@
 import { Client, ConsentListEntry, Conversation, Stream } from "@xmtp/xmtp-js";
 
+import { syncConversationsMessages } from "./messages";
+import { getXmtpClient } from "./sync";
 import { saveConversations } from "../../data/helpers/conversations/upsertConversations";
 import { getChatStore, getSettingsStore } from "../../data/store/accountsStore";
 import { XmtpConversation } from "../../data/store/chatStore";
 import { SettingsStoreType } from "../../data/store/settingsStore";
 import { getCleanAddress } from "../eth";
-import { syncConversationsMessages } from "./messages";
-import { getXmtpClient } from "./sync";
 
 const protocolConversationToStateConversation = (
   conversation: Conversation

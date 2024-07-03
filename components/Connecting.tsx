@@ -1,7 +1,7 @@
+import ActivityIndicator from "./ActivityIndicator/ActivityIndicator";
 import { useChatStore } from "../data/store/accountsStore";
 import { useAppStore } from "../data/store/appStore";
 import { useSelect } from "../data/store/storeHelpers";
-import ActivityIndicator from "./ActivityIndicator/ActivityIndicator";
 
 export const useShouldShowConnecting = () => {
   const isInternetReachable = useAppStore((s) => s.isInternetReachable);

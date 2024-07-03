@@ -1,5 +1,7 @@
 import { useCallback } from "react";
 
+import { useDisconnectFromPrivy } from "./privy";
+import { useDisconnectWallet } from "./wallet";
 import { clearDb } from "../../data/db";
 import {
   getAccountsList,
@@ -19,8 +21,6 @@ import { resetSharedData } from "../sharedData";
 import { getXmtpApiHeaders } from "../xmtpRN/api";
 import { importedTopicsDataForAccount } from "../xmtpRN/conversations";
 import { deleteXmtpClient } from "../xmtpRN/sync";
-import { useDisconnectFromPrivy } from "./privy";
-import { useDisconnectWallet } from "./wallet";
 
 type LogoutTasks = {
   [account: string]: {

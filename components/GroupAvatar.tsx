@@ -16,13 +16,13 @@ import {
   View,
 } from "react-native";
 
+import Avatar from "./Avatar";
 import {
   useProfilesStore,
   useCurrentAccount,
 } from "../data/store/accountsStore";
 import { useGroupMembers } from "../hooks/useGroupMembers";
 import { getPreferredAvatar, getPreferredName } from "../utils/profile";
-import Avatar from "./Avatar";
 
 const MAIN_CIRCLE_RADIUS = 50;
 const MAX_VISIBLE_MEMBERS = 4;

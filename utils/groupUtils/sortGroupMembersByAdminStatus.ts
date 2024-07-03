@@ -1,8 +1,8 @@
 import { Member } from "@xmtp/react-native-sdk";
 import { InboxId } from "@xmtp/react-native-sdk/build/lib/Client";
 
-import { EntityObjectWithAddress } from "../../queries/entify";
 import { getAccountIsAdmin, getAccountIsSuperAdmin } from "./adminUtils";
+import { EntityObjectWithAddress } from "../../queries/entify";
 
 export const sortGroupMembersByAdminStatus = (
   members: EntityObjectWithAddress<Member, InboxId> | undefined,

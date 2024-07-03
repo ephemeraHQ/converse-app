@@ -23,6 +23,7 @@ import {
 import { List } from "react-native-paper";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
+import { NavigationParamList } from "./Navigation/Navigation";
 import Button from "../components/Button/Button";
 import GroupAvatar from "../components/GroupAvatar";
 import { showActionSheetWithOptions } from "../components/StateHandlers/ActionSheetStateHandler";
@@ -53,7 +54,6 @@ import { sortGroupMembersByAdminStatus } from "../utils/groupUtils/sortGroupMemb
 import { navigate } from "../utils/navigation";
 import { getPreferredName } from "../utils/profile";
 import { formatGroupName } from "../utils/str";
-import { NavigationParamList } from "./Navigation/Navigation";
 
 export default function GroupScreen({
   route,

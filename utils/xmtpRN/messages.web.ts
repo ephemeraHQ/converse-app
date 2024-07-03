@@ -9,14 +9,14 @@ import { messageApi } from "@xmtp/proto";
 import { Envelope } from "@xmtp/proto/ts/dist/types/message_api/v1/message_api.pb";
 import { Client, DecodedMessage } from "@xmtp/xmtp-js";
 
-import { saveMessages } from "../../data/helpers/messages";
-import { XmtpMessage } from "../../data/store/chatStore";
-import { sentryTrackError } from "../sentry";
 import { serializeRemoteAttachmentMessageContent } from "./attachments.web";
 import { isContentType } from "./contentTypes";
 import { CoinbaseMessagingPaymentContent } from "./contentTypes/coinbasePayment";
 import { getConversationWithTopic } from "./conversations.web";
 import { getXmtpClient } from "./sync";
+import { saveMessages } from "../../data/helpers/messages";
+import { XmtpMessage } from "../../data/store/chatStore";
+import { sentryTrackError } from "../sentry";
 
 type SerializedMessageContent = {
   content: string;

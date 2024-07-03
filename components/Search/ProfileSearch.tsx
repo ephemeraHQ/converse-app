@@ -16,8 +16,8 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-import { ProfileSocials } from "../../data/store/profilesStore";
 import { ProfileSearchItem } from "./ProfileSearchItem";
+import { ProfileSocials } from "../../data/store/profilesStore";
 
 export default function ProfileSearch({
   navigation,

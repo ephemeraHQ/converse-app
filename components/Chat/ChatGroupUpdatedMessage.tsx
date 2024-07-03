@@ -3,12 +3,12 @@ import { GroupUpdatedContent } from "@xmtp/react-native-sdk";
 import { useMemo } from "react";
 import { StyleSheet, Text, useColorScheme } from "react-native";
 
+import { MessageToDisplay } from "./Message/Message";
 import {
   useInboxIdStore,
   useProfilesStore,
 } from "../../data/store/accountsStore";
 import { getPreferredName } from "../../utils/profile";
-import { MessageToDisplay } from "./Message/Message";
 
 export default function ChatGroupUpdatedMessage({
   message,

@@ -4,8 +4,8 @@ import {
 } from "@styles/colors";
 import { Platform, useColorScheme } from "react-native";
 
-import TopUpScreen from "../TopUp";
 import { NativeStack, navigationAnimation } from "./Navigation";
+import TopUpScreen from "../TopUp";
 
 export default function TopUpNav() {
   const colorScheme = useColorScheme();

@@ -7,6 +7,9 @@ import {
 } from "@xmtp/content-type-transaction-reference";
 import { ContentTypeText, Conversation, fromNanoString } from "@xmtp/xmtp-js";
 
+import { deserializeRemoteAttachmentMessageContent } from "./attachments";
+import { isContentType } from "./contentTypes";
+import { getConversationWithTopic } from "./conversations.web";
 import { Message as MessageEntity } from "../../data/db/entities/messageEntity";
 import {
   markMessageAsSent,
@@ -14,9 +17,6 @@ import {
 } from "../../data/helpers/messages";
 import { getMessagesToSend } from "../../data/helpers/messages/getMessagesToSend.web";
 import { xmtpMessageToDb } from "../../data/mappers";
-import { deserializeRemoteAttachmentMessageContent } from "./attachments";
-import { isContentType } from "./contentTypes";
-import { getConversationWithTopic } from "./conversations.web";
 
 let sendingPendingMessages = false;
 const sendingMessages: { [messageId: string]: boolean } = {};

@@ -3,11 +3,11 @@ import { PictoSizes } from "@styles/sizes";
 import { useColorScheme } from "react-native";
 import { TouchableOpacity } from "react-native-gesture-handler";
 
+import { NativeStack, navigationAnimation } from "./Navigation";
+import { useIsSplitScreen } from "./navHelpers";
 import Picto from "../../components/Picto/Picto";
 import { navigate } from "../../utils/navigation";
 import Conversation from "../Conversation";
-import { NativeStack, navigationAnimation } from "./Navigation";
-import { useIsSplitScreen } from "./navHelpers";
 
 export type ConversationNavParams = {
   topic?: string;

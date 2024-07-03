@@ -4,6 +4,8 @@ import { backgroundColor } from "@styles/colors";
 import { useCallback, useEffect, useRef } from "react";
 import { Platform, StyleSheet, View, useColorScheme } from "react-native";
 
+import { GroupConversationItem } from "./ConversationList/GroupConversationItem";
+import ConversationListItem from "./ConversationListItem";
 import {
   useChatStore,
   useCurrentAccount,
@@ -19,8 +21,6 @@ import {
 } from "../utils/conversation";
 import { getPreferredAvatar } from "../utils/profile";
 import { conversationName } from "../utils/str";
-import { GroupConversationItem } from "./ConversationList/GroupConversationItem";
-import ConversationListItem from "./ConversationListItem";
 
 type Props = {
   onScroll?: () => void;

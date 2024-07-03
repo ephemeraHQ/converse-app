@@ -18,11 +18,11 @@ import {
 } from "react-native";
 import { AvoidSoftInput } from "react-native-avoid-softinput";
 
+import OnboardingComponent from "./OnboardingComponent";
 import config from "../../config";
 import { useOnboardingStore } from "../../data/store/onboardingStore";
 import { useSelect } from "../../data/store/storeHelpers";
 import { getPrivateKeyFromMnemonic, validateMnemonic } from "../../utils/eth";
-import OnboardingComponent from "./OnboardingComponent";
 
 export const getSignerFromSeedPhraseOrPrivateKey = async (
   seedPhraseOrPrivateKey: string

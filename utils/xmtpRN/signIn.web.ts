@@ -1,8 +1,8 @@
 import { Client } from "@xmtp/xmtp-js";
 import { Signer } from "ethers";
 
-import config from "../../config";
 import { CoinbaseMessagingPaymentCodec } from "./contentTypes/coinbasePayment";
+import config from "../../config";
 
 const env = config.xmtpEnv as "dev" | "production" | "local";
 

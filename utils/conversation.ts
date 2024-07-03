@@ -3,15 +3,6 @@ import { MutableRefObject, createRef } from "react";
 import { Alert, Platform } from "react-native";
 import { createContext, useContextSelector } from "use-context-selector";
 
-import config from "../config";
-import { createPendingConversation } from "../data/helpers/conversations/pendingConversations";
-import { getChatStore, useChatStore } from "../data/store/accountsStore";
-import {
-  TopicData,
-  XmtpConversation,
-  XmtpConversationWithUpdate,
-  XmtpMessage,
-} from "../data/store/chatStore";
 import { saveTopicsData } from "./api";
 import { isAttachmentMessage } from "./attachment/helpers";
 import { getAddressForPeer } from "./eth";
@@ -25,6 +16,15 @@ import { TextInputWithValue, addressPrefix } from "./str";
 import { isTransactionMessage } from "./transaction";
 import { isOnXmtp } from "./xmtpRN/client";
 import { isContentType } from "./xmtpRN/contentTypes";
+import config from "../config";
+import { createPendingConversation } from "../data/helpers/conversations/pendingConversations";
+import { getChatStore, useChatStore } from "../data/store/accountsStore";
+import {
+  TopicData,
+  XmtpConversation,
+  XmtpConversationWithUpdate,
+  XmtpMessage,
+} from "../data/store/chatStore";
 
 export type ConversationWithLastMessagePreview = XmtpConversation & {
   lastMessagePreview?: LastMessagePreview;

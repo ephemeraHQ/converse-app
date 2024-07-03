@@ -11,6 +11,14 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
+import { useDynamicWalletConnect } from "./DynamicWalletConnect";
+import OnboardingComponent from "./OnboardingComponent";
+import {
+  InstalledWallet,
+  POPULAR_WALLETS,
+  getInstalledWallets,
+  installedWallets,
+} from "./supportedWallets";
 import config from "../../config";
 import { useHasOnePrivyAccount } from "../../data/store/accountsStore";
 import { useOnboardingStore } from "../../data/store/onboardingStore";
@@ -24,14 +32,6 @@ import {
   TableViewImage,
   TableViewPicto,
 } from "../TableView/TableViewImage";
-import { useDynamicWalletConnect } from "./DynamicWalletConnect";
-import OnboardingComponent from "./OnboardingComponent";
-import {
-  InstalledWallet,
-  POPULAR_WALLETS,
-  getInstalledWallets,
-  installedWallets,
-} from "./supportedWallets";
 
 export default function WalletSelector() {
   const {

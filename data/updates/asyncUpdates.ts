@@ -1,10 +1,10 @@
 import { Platform } from "react-native";
 
+import { setConsent } from "./001-setConsent";
+import { setTopicsData } from "./002-setTopicsData";
 import appJson from "../../app.json";
 import { getAccountsList, getSettingsStore } from "../store/accountsStore";
 import { useAppStore } from "../store/appStore";
-import { setConsent } from "./001-setConsent";
-import { setTopicsData } from "./002-setTopicsData";
 
 type Step = {
   id: number;

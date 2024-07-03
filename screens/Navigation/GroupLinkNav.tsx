@@ -5,8 +5,8 @@ import {
 } from "@styles/colors";
 import { Platform, useColorScheme } from "react-native";
 
-import GroupLinkScreen from "../GroupLink";
 import { NativeStack, navigationAnimation } from "./Navigation";
+import GroupLinkScreen from "../GroupLink";
 
 export type GroupLinkNavParams = {
   groupLinkId: string;

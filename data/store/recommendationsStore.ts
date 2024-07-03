@@ -1,8 +1,8 @@
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
 
-import { zustandMMKVStorage } from "../../utils/mmkv";
 import { ProfileSocials } from "./profilesStore";
+import { zustandMMKVStorage } from "../../utils/mmkv";
 
 // Recommended profiles for each account
 
