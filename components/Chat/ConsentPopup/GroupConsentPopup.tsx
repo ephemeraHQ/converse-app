@@ -1,5 +1,7 @@
 import { useSelect } from "@data/store/storeHelpers";
 import { useGroupConsent } from "@hooks/useGroupConsent";
+import { useGroupCreator } from "@hooks/useGroupCreator";
+import { useGroupMembers } from "@hooks/useGroupMembers";
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import {
@@ -8,7 +10,7 @@ import {
   textPrimaryColor,
 } from "@styles/colors";
 import { strings } from "@utils/i18n/strings";
-import React, { useCallback } from "react";
+import React, { useCallback, useMemo } from "react";
 import { StyleSheet, Text, useColorScheme, View } from "react-native";
 
 import {
@@ -37,15 +39,25 @@ export function GroupConsentPopup() {
   const styles = useStyles();
   const colorScheme = useColorScheme();
   const { consent, blockGroup, allowGroup } = useGroupConsent(topic);
+  const { groupCreator } = useGroupCreator(topic);
   const { groupStatus } = useSettingsStore(useSelect(["groupStatus"]));
+  const { members } = useGroupMembers(topic);
   const groupStatusForTopic = groupStatus[topic];
+
+  const isCreator = useMemo(() => {
+    if (!members || !currentAccount) {
+      return true;
+    }
+    return groupCreator === members?.byAddress[currentAccount];
+  }, [currentAccount, groupCreator, members]);
 
   // Determine whether to show the consent window based on various conditions
   const shouldShowConsentWindow =
     conversation &&
     groupStatusForTopic !== "allowed" &&
     consent !== "allowed" &&
-    !conversation.pending;
+    !conversation.pending &&
+    !isCreator;
 
   const onBlock = useCallback(() => {
     showActionSheetWithOptions(

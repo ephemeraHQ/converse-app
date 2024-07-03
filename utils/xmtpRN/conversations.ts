@@ -399,9 +399,16 @@ const saveConsentState = async (
       }
     }
   });
-
   if (Object.keys(peersStatus).length > 0) {
     getSettingsStore(account).getState().setPeersStatus(peersStatus);
+  }
+  if (Object.keys(groupStatus).length > 0) {
+    getSettingsStore(account).getState().setGroupStatus(groupStatus);
+  }
+  if (Object.keys(inboxIdPeerStatus).length > 0) {
+    getSettingsStore(account)
+      .getState()
+      .setInboxIdPeerStatus(inboxIdPeerStatus);
   }
 };
 
