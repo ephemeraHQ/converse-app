@@ -288,6 +288,38 @@ export default function ProfileScreen({
     });
   }
 
+  const showDeleteAccountActionSheet = useCallback(async () => {
+    if (Platform.OS === "web") {
+      // Fixes double action sheet on web
+      await new Promise((r) => setTimeout(r, 100));
+    }
+    const methods = {
+      Delete: logout,
+      Cancel: () => {},
+    };
+
+    const options = Object.keys(methods);
+
+    showActionSheetWithOptions(
+      {
+        options,
+        title: "Delete this account",
+        message:
+          "Your account data will be deleted from Converse. Messages not backed up to other devices will be unrecoverable.",
+        cancelButtonIndex: options.indexOf("Cancel"),
+        destructiveButtonIndex: [0],
+        ...actionSheetColors(colorScheme),
+      },
+      (selectedIndex?: number) => {
+        if (selectedIndex === undefined) return;
+        const method = (methods as any)[options[selectedIndex]];
+        if (method) {
+          method();
+        }
+      }
+    );
+  }, [colorScheme, logout]);
+
   const actionsTableViewItems = useMemo(() => {
     const items: TableViewItemType[] = [
       {
@@ -621,26 +653,10 @@ export default function ProfileScreen({
             items={[
               {
                 id: "accounts",
-                title: "Change or Add Account",
+                title: "Change or add account",
                 action: () => {
                   navigation.pop();
                   navigation.push("Accounts");
-                },
-                titleColor:
-                  Platform.OS === "android"
-                    ? undefined
-                    : primaryColor(colorScheme),
-              },
-              {
-                id: "contact",
-                title: "Contact Converse Team",
-                action: () => {
-                  navigation.pop();
-                  setTimeout(() => {
-                    navigation.push("Conversation", {
-                      mainConversationWithPeer: config.polAddress,
-                    });
-                  }, 300);
                 },
                 titleColor:
                   Platform.OS === "android"
@@ -685,16 +701,15 @@ export default function ProfileScreen({
                     : primaryColor(colorScheme),
               },
               {
-                id: "logout",
-                title: "Disconnect",
+                id: "delete",
+                title: "Delete this account",
                 titleColor:
                   Platform.OS === "android"
                     ? undefined
                     : dangerColor(colorScheme),
                 action: () => {
-                  navigation.popToTop();
                   setTimeout(() => {
-                    logout();
+                    showDeleteAccountActionSheet();
                   }, 300);
                 },
               },
@@ -714,7 +729,7 @@ export default function ProfileScreen({
               items={[
                 {
                   id: "version",
-                  title: `v${appVersion} (${buildNumber}) - built in Paris with ❤️`,
+                  title: `v${appVersion} (${buildNumber})`,
                 },
               ]}
               title="APP VERSION"

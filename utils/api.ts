@@ -85,29 +85,29 @@ export const getPrivyAuthenticatedUser = async () => {
 //   return data;
 // };
 
-type ReportMessageQuery = {
-  account: string;
-  messageId: string;
-  messageContent: string;
-  messageSender: string;
-};
+// type ReportMessageQuery = {
+//   account: string;
+//   messageId: string;
+//   messageContent: string;
+//   messageSender: string;
+// };
 
-export const reportMessage = async ({
-  account,
-  messageId,
-  messageContent,
-  messageSender,
-}: ReportMessageQuery) => {
-  await api.post(
-    "/api/report",
-    {
-      messageId,
-      messageContent,
-      messageSender,
-    },
-    { headers: await getXmtpApiHeaders(account) }
-  );
-};
+// export const reportMessage = async ({
+//   account,
+//   messageId,
+//   messageContent,
+//   messageSender,
+// }: ReportMessageQuery) => {
+//   await api.post(
+//     "/api/report",
+//     {
+//       messageId,
+//       messageContent,
+//       messageSender,
+//     },
+//     { headers: await getXmtpApiHeaders(account) }
+//   );
+// };
 
 export const getPeersStatus = async (account: string) => {
   const { data } = await api.get("/api/consent/peer", {
