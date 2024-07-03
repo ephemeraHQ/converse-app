@@ -7,6 +7,7 @@ import com.beust.klaxon.Klaxon
 import com.converse.dev.xmtp.NotificationDataResult
 import com.converse.dev.xmtp.getNewConversationFromEnvelope
 import com.converse.dev.xmtp.getXmtpClient
+import com.converse.dev.xmtp.handleGroupMessage
 import com.converse.dev.xmtp.handleNewConversationFirstMessage
 import com.converse.dev.xmtp.handleOngoingConversationMessage
 import com.converse.dev.xmtp.initCodecs
@@ -123,6 +124,14 @@ class PushNotificationsService : FirebaseMessagingService() {
                         val newNotificationDataJson = Klaxon().toJsonString(newNotificationData)
                         remoteMessage.data["body"] = newNotificationDataJson
                     }
+                } else if (isGroupWelcomeTopic(notificationData.contentTopic)) {
+
+                }  else if (isGroupMessageTopic(notificationData.contentTopic)) {
+                    Log.d(TAG, "Handling an ongoing group message notification")
+                    result = handleGroupMessage(applicationContext, xmtpClient, envelope, remoteMessage)
+                    if (result != NotificationDataResult()) {
+                        shouldShowNotification = result.shouldShowNotification
+                    }
                 } else {
                     Log.d(TAG, "Handling an ongoing conversation message notification")
                     result = handleOngoingConversationMessage(applicationContext, xmtpClient, envelope, remoteMessage)
@@ -134,7 +143,7 @@ class PushNotificationsService : FirebaseMessagingService() {
 
                 if (shouldShowNotification && !notificationAlreadyShown) {
                     incrementBadge(applicationContext)
-                    result.remoteMessage?.let { showNotification(result.title, result.body, it) }
+                    result.remoteMessage?.let { showNotification(result.title, result.subtitle, result.body, it) }
                 }
             } catch (e: Exception) {
                 // Handle any exceptions
@@ -155,10 +164,13 @@ class PushNotificationsService : FirebaseMessagingService() {
         return NotificationRequest(identifier, content, notificationTrigger)
     }
 
-    private fun createNotificationFromRemoteMessage(title: String, message: String, remoteMessage: RemoteMessage): Notification {
+    private fun createNotificationFromRemoteMessage(title: String, subtitle:String?, message: String, remoteMessage: RemoteMessage): Notification {
         val identifier = getNotificationIdentifier(remoteMessage)
         var data = remoteMessage.data as MutableMap<Any, Any>
         data["title"] = title
+        if (subtitle !== null) {
+            data["subtitle"] = subtitle
+        }
         data["message"] = message
         Log.d(TAG, "SHOWING NOTIFICATION WITH DATA $data")
         val payload = JSONObject(data as Map<*, *>)
@@ -167,8 +179,8 @@ class PushNotificationsService : FirebaseMessagingService() {
         return Notification(request, Date(remoteMessage.sentTime))
     }
 
-    private fun showNotification(title: String, message: String, remoteMessage: RemoteMessage) {
-        NotificationsService.receive(this, createNotificationFromRemoteMessage(title, message, remoteMessage))
+    private fun showNotification(title: String, subtitle: String?, message: String, remoteMessage: RemoteMessage) {
+        NotificationsService.receive(this, createNotificationFromRemoteMessage(title, subtitle, message, remoteMessage))
     }
 
     private fun applicationInForeground(): Boolean {

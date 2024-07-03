@@ -142,7 +142,7 @@ func handleGroupMessage(xmtpClient: XMTP.Client, envelope: XMTP.Envelope, apiURI
       if let decodedMessage = try? await decodeMessage(xmtpClient: xmtpClient, envelope: envelope) {
         let decodedMessageResult = handleMessageByContentType(decodedMessage: decodedMessage, xmtpClient: xmtpClient);
         messageId = decodedMessageResult.id
-        if decodedMessageResult.senderAddress == xmtpClient.address || decodedMessageResult.forceIgnore {
+        if decodedMessageResult.senderAddress == xmtpClient.inboxId || decodedMessageResult.forceIgnore {
           
         } else {
           let spamScore = await computeSpamScoreGroupMessage(client: xmtpClient, group: group, decodedMessage: decodedMessage, apiURI: apiURI)

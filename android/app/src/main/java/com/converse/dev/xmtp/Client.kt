@@ -47,7 +47,8 @@ fun getXmtpClient(appContext: Context, account: String): Client? {
     val xmtpEnv =
         if (xmtpEnvString == "production") XMTPEnvironment.PRODUCTION else XMTPEnvironment.DEV
 
-    val options = ClientOptions(api = ClientOptions.Api(env = xmtpEnv, isSecure = true), enableV3 = true)
+    val dbDirectory = "/data/data/${appContext.packageName}/databases"
+    val options = ClientOptions(api = ClientOptions.Api(env = xmtpEnv, isSecure = true), enableV3 = true, dbDirectory = dbDirectory, appContext = appContext)
 
     return Client().buildFrom(bundle = keys, options = options)
 }
