@@ -237,7 +237,7 @@ PODS:
     - ExpoModulesCore
   - ExpoBackgroundFetch (12.0.1):
     - ExpoModulesCore
-  - ExpoClipboard (4.8.0):
+  - ExpoClipboard (6.0.3):
     - ExpoModulesCore
   - ExpoContacts (13.0.4):
     - ExpoModulesCore
@@ -2163,7 +2163,7 @@ SPEC CHECKSUMS:
   expo-dev-menu-interface: be32c09f1e03833050f0ee290dcc86b3ad0e73e4
   ExpoAsset: 323700f291684f110fb55f0d4022a3362ea9f875
   ExpoBackgroundFetch: a06c553ecaf0bade0acd691042d996b9ce926327
-  ExpoClipboard: b8f76767b0dbaefb3be7adbf85049fd85861d527
+  ExpoClipboard: 23d203f5d4843699fbc45be1cc4fe1fbd811a6fa
   ExpoContacts: a35aeccb01238821e2d7d84e44a618e51d87ad24
   ExpoCrypto: 156078f266bf28f80ecf5e2a9c3a0d6ffce07a1c
   ExpoDevice: fc94f0e42ecdfd897e7590f2874fc64dfa7e9b1c
