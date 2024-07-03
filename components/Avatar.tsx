@@ -1,7 +1,8 @@
 import { actionSecondaryColor, textSecondaryColor } from "@styles/colors";
 import { AvatarSizes } from "@styles/sizes";
+import { getFirstLetterForAvatar } from "@utils/getFirstLetterForAvatar";
 import { Image } from "expo-image";
-import { useCallback, useState } from "react";
+import React, { useCallback, useState } from "react";
 import {
   ColorSchemeName,
   ImageStyle,
@@ -20,7 +21,7 @@ type Props = {
   name?: string | undefined;
 };
 
-export default function Avatar({
+function Avatar({
   uri,
   size = AvatarSizes.default,
   style,
@@ -29,11 +30,7 @@ export default function Avatar({
 }: Props) {
   const colorScheme = useColorScheme();
   const styles = getStyles(colorScheme, size);
-  const firstLetter = name
-    ? name.startsWith("0x")
-      ? name.slice(0, 2)
-      : name.charAt(0).toUpperCase()
-    : "";
+  const firstLetter = getFirstLetterForAvatar(name || "");
   const [didError, setDidError] = useState(false);
 
   const handleImageError = useCallback(() => {
@@ -53,7 +50,13 @@ export default function Avatar({
       style={[styles.image, style]}
     />
   ) : (
-    <View style={[styles.placeholder, style]}>
+    <View
+      style={StyleSheet.flatten([
+        styles.placeholder,
+        style,
+        { width: size, height: size, borderRadius: size / 2 },
+      ])}
+    >
       <Text style={styles.text}>{firstLetter}</Text>
     </View>
   );
@@ -84,3 +87,5 @@ const getStyles = (colorScheme: ColorSchemeName, size: number) =>
       textAlign: "center",
     },
   });
+
+export default React.memo(Avatar);

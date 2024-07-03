@@ -12,7 +12,14 @@ import {
 import { AvatarSizes, PictoSizes } from "@styles/sizes";
 import { strings } from "@utils/i18n/strings";
 import * as Haptics from "expo-haptics";
-import React, { memo, useCallback, useEffect, useRef, useState } from "react";
+import React, {
+  memo,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import {
   ColorSchemeName,
   Platform,
@@ -39,6 +46,7 @@ import { converseEventEmitter } from "../utils/events";
 import { navigate } from "../utils/navigation";
 import { consentToPeersOnProtocol } from "../utils/xmtpRN/conversations";
 import Avatar from "./Avatar";
+import GroupAvatar from "./GroupAvatar";
 import Picto from "./Picto/Picto";
 import { showActionSheetWithOptions } from "./StateHandlers/ActionSheetStateHandler";
 
@@ -54,6 +62,7 @@ type ConversationListItemProps = {
   lastMessageStatus?: "delivered" | "error" | "seen" | "sending" | "sent";
   showUnread: boolean;
   conversationOpened: boolean;
+  isGroupConversation: boolean;
   onLongPress?: () => void;
   onRightActionPress?: (defaultAction: () => void) => void;
 } & NativeStackScreenProps<
@@ -75,6 +84,7 @@ const ConversationListItem = memo(function ConversationListItem({
   lastMessageFromMe,
   showUnread,
   conversationOpened,
+  isGroupConversation = false,
   onLongPress,
   onRightActionPress,
 }: ConversationListItemProps) {
@@ -121,14 +131,33 @@ const ConversationListItem = memo(function ConversationListItem({
     };
   }, [navigation, resetSelected]);
 
-  const listItemContent = (
-    <View style={styles.conversationListItem}>
+  const avatarComponent = useMemo(() => {
+    return isGroupConversation ? (
+      <GroupAvatar
+        size={AvatarSizes.conversationListItem}
+        style={styles.avatarWrapper}
+        uri={conversationPeerAvatar}
+        topic={conversationTopic}
+      />
+    ) : (
       <Avatar
         size={AvatarSizes.conversationListItem}
         style={styles.avatarWrapper}
         uri={conversationPeerAvatar}
         name={conversationName}
       />
+    );
+  }, [
+    conversationName,
+    conversationPeerAvatar,
+    conversationTopic,
+    isGroupConversation,
+    styles.avatarWrapper,
+  ]);
+
+  const listItemContent = (
+    <View style={styles.conversationListItem}>
+      {avatarComponent}
       <View style={styles.conversationListItemContent}>
         <Text style={styles.conversationName} numberOfLines={1}>
           {conversationName}
