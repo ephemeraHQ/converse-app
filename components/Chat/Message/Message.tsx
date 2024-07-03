@@ -518,8 +518,9 @@ const useStyles = () => {
     replyToUsername: {
       fontSize: 12,
       marginBottom: 4,
-      padding: 0,
       color: "white",
+      paddingVertical: 0,
+      paddingHorizontal: 0,
     },
     messageText: {
       color: textPrimaryColor(colorScheme),
