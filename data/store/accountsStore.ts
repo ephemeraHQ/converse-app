@@ -2,9 +2,6 @@ import { v4 as uuidv4 } from "uuid";
 import { create, StoreApi, UseBoundStore } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
 
-import { removeLogoutTask } from "../../utils/logout";
-import mmkv, { zustandMMKVStorage } from "../../utils/mmkv";
-import { updateSteps } from "../updates/asyncUpdates";
 import { ChatStoreType, initChatStore } from "./chatStore";
 import { InboxIdStoreType, initInboxIdStore } from "./inboxIdStore";
 import { initProfilesStore, ProfilesStoreType } from "./profilesStore";
@@ -18,6 +15,9 @@ import {
   TransactionsStoreType,
 } from "./transactionsStore";
 import { initWalletStore, WalletStoreType } from "./walletStore";
+import { removeLogoutTask } from "../../utils/logout";
+import mmkv, { zustandMMKVStorage } from "../../utils/mmkv";
+import { updateSteps } from "../updates/asyncUpdates";
 
 type AccountStoreType = {
   [K in keyof AccountStoreDataType]: UseBoundStore<

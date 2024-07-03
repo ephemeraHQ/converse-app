@@ -16,6 +16,7 @@ import {
   View,
 } from "react-native";
 
+import ChatInputReplyPreview from "./InputReplyPreview";
 import SendButtonDefaultDark from "../../../assets/send-button-dark.svg";
 import SendButtonHigher from "../../../assets/send-button-higher.svg";
 import SendButtonDefaultLight from "../../../assets/send-button-light.svg";
@@ -26,7 +27,6 @@ import { sendMessage } from "../../../utils/message";
 import { TextInputWithValue } from "../../../utils/str";
 import AddAttachmentButton from "../Attachment/AddAttachmentButton";
 import { MessageToDisplay } from "../Message/Message";
-import ChatInputReplyPreview from "./InputReplyPreview";
 
 const getSendButtonType = (input: string): "DEFAULT" | "HIGHER" => {
   if (input.match(/\bhigher\b/gi)) {

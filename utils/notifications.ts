@@ -5,20 +5,6 @@ import * as Notifications from "expo-notifications";
 import { debounce } from "perfect-debounce";
 import { Platform } from "react-native";
 
-import {
-  saveConversations,
-  saveConversationsLastNotificationSubscribePeriod,
-} from "../data/helpers/conversations/upsertConversations";
-import { saveMessages } from "../data/helpers/messages";
-import {
-  currentAccount,
-  getAccountsList,
-  getChatStore,
-  getSettingsStore,
-  useAccountsStore,
-} from "../data/store/accountsStore";
-import { useAppStore } from "../data/store/appStore";
-import { XmtpConversation, XmtpMessage } from "../data/store/chatStore";
 import api, {
   getLastNotificationsSubscribeHash,
   saveNotificationsSubscribe,
@@ -45,6 +31,20 @@ import { conversationName, shortAddress } from "./str";
 import { ConverseXmtpClientType } from "./xmtpRN/client";
 import { loadConversationsHmacKeys } from "./xmtpRN/conversations";
 import { getXmtpClient } from "./xmtpRN/sync";
+import {
+  saveConversations,
+  saveConversationsLastNotificationSubscribePeriod,
+} from "../data/helpers/conversations/upsertConversations";
+import { saveMessages } from "../data/helpers/messages";
+import {
+  currentAccount,
+  getAccountsList,
+  getChatStore,
+  getSettingsStore,
+  useAccountsStore,
+} from "../data/store/accountsStore";
+import { useAppStore } from "../data/store/appStore";
+import { XmtpConversation, XmtpMessage } from "../data/store/chatStore";
 
 let nativePushToken: string | null;
 

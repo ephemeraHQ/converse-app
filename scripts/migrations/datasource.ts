@@ -3,6 +3,9 @@ import "reflect-metadata";
 import path from "path";
 import { DataSource } from "typeorm";
 
+import { Conversation } from "./entities/conversationEntity";
+import { Message } from "./entities/messageEntity";
+import { Profile } from "./entities/profileEntity";
 import { init1671623489366 } from "../../data/db/migrations/1671623489366-init";
 import { addLensHandle1671788934503 } from "../../data/db/migrations/1671788934503-addLensHandle";
 import { addEnsName1673277126468 } from "../../data/db/migrations/1673277126468-addEnsName";
@@ -29,9 +32,6 @@ import { AddLastNotifSubscribePeriodToConversation1709893391562 } from "../../da
 import { AddIndexToSent1712656017130 } from "../../data/db/migrations/1712656017130-addIndexToSent";
 import { RemoveSentViaConverse1717625558678 } from "../../data/db/migrations/1717625558678-RemoveSentViaConverse";
 import { AddSuperAdmin1717631723249 } from "../../data/db/migrations/1717631723249-AddSuperAdmin";
-import { Conversation } from "./entities/conversationEntity";
-import { Message } from "./entities/messageEntity";
-import { Profile } from "./entities/profileEntity";
 
 const dataSource = new DataSource({
   database: path.join(__dirname, "converse-sample.sqlite"),

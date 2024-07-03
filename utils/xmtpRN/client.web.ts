@@ -8,9 +8,9 @@ import { ReplyCodec } from "@xmtp/content-type-reply";
 import { TransactionReferenceCodec } from "@xmtp/content-type-transaction-reference";
 import { Client } from "@xmtp/xmtp-js";
 
+import { CoinbaseMessagingPaymentCodec } from "./contentTypes/coinbasePayment";
 import config from "../../config";
 import { getCleanAddress } from "../eth";
-import { CoinbaseMessagingPaymentCodec } from "./contentTypes/coinbasePayment";
 
 const env = config.xmtpEnv as "dev" | "production" | "local";
 

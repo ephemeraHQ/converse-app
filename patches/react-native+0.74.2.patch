@@ -23,7 +23,7 @@ index 582b49c..5075947 100644
 +
  @end
 diff --git a/node_modules/react-native/React/CoreModules/RCTAppState.mm b/node_modules/react-native/React/CoreModules/RCTAppState.mm
-index 0aa63fc..ad89b7b 100644
+index 907e6ce..280ca38 100644
 --- a/node_modules/react-native/React/CoreModules/RCTAppState.mm
 +++ b/node_modules/react-native/React/CoreModules/RCTAppState.mm
 @@ -92,6 +92,11 @@ - (void)startObserving
@@ -38,7 +38,7 @@ index 0aa63fc..ad89b7b 100644
    [[NSNotificationCenter defaultCenter] addObserver:self
                                             selector:@selector(handleMemoryWarning)
                                                 name:UIApplicationDidReceiveMemoryWarningNotification
-@@ -124,6 +129,14 @@ - (void)handleAppStateDidChange:(NSNotification *)notification
+@@ -122,6 +127,14 @@ - (void)handleAppStateDidChange:(NSNotification *)notification
      newState = RCTCurrentAppState();
    }
  
@@ -52,4 +52,4 @@ index 0aa63fc..ad89b7b 100644
 +
    if (![newState isEqualToString:_lastKnownState]) {
      _lastKnownState = newState;
-     if ([self canSendEvents_DEPRECATED]) {
+     [self sendEventWithName:@"appStateDidChange" body:@{@"app_state" : _lastKnownState}];

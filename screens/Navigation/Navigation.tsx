@@ -4,10 +4,6 @@ import * as Linking from "expo-linking";
 import { Platform, useColorScheme } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 
-import config from "../../config";
-import { useAppStore } from "../../data/store/appStore";
-import { isDesktop } from "../../utils/device";
-import { converseNavigations } from "../../utils/navigation";
 import AccountsNav from "./AccountsNav";
 import ConversationListNav from "./ConversationListNav";
 import ConversationNav, {
@@ -44,6 +40,10 @@ import {
   screenListeners,
   stackGroupScreenOptions,
 } from "./navHelpers";
+import config from "../../config";
+import { useAppStore } from "../../data/store/appStore";
+import { isDesktop } from "../../utils/device";
+import { converseNavigations } from "../../utils/navigation";
 
 export type NavigationParamList = {
   Accounts: undefined;

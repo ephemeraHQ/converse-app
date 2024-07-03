@@ -18,6 +18,7 @@ import {
 import { List } from "react-native-paper";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
+import { NewConversationModalParams } from "./NewConversationModal";
 import ActivityIndicator from "../../components/ActivityIndicator/ActivityIndicator";
 import Button from "../../components/Button/Button";
 import GroupAvatar from "../../components/GroupAvatar";
@@ -34,7 +35,6 @@ import { navigate } from "../../utils/navigation";
 import { getPreferredName, getPreferredAvatar } from "../../utils/profile";
 import { createGroup } from "../../utils/xmtpRN/conversations";
 import { useIsSplitScreen } from "../Navigation/navHelpers";
-import { NewConversationModalParams } from "./NewConversationModal";
 
 const getPendingGroupMembers = (
   members: any[],

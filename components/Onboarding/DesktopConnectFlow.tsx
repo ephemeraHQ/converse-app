@@ -8,6 +8,7 @@ import * as Linking from "expo-linking";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Platform, StyleSheet, Text, useColorScheme } from "react-native";
 
+import OnboardingComponent from "./OnboardingComponent";
 import { initDb } from "../../data/db";
 import { refreshProfileForAddress } from "../../data/helpers/profiles/profilesUpdate";
 import { useAccountsStore } from "../../data/store/accountsStore";
@@ -22,7 +23,6 @@ import { isDesktop } from "../../utils/device";
 import { saveXmtpKey } from "../../utils/keychain/helpers";
 import { getXmtpClientFromBase64Key } from "../../utils/xmtpRN/client";
 import { getXmtpClient } from "../../utils/xmtpRN/sync";
-import OnboardingComponent from "./OnboardingComponent";
 
 export default function DesktopConnectFlow() {
   const { desktopConnectSessionId, setDesktopConnectSessionId } =

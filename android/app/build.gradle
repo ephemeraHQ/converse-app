@@ -221,7 +221,6 @@ dependencies {
     implementation("androidx.core:core-splashscreen:1.0.0")
     // implementation 'org.web3j:core:4.8.8-android'
 
-    implementation("com.facebook.react:flipper-integration")
     if (hermesEnabled.toBoolean()) {
         implementation("com.facebook.react:hermes-android")
     } else {

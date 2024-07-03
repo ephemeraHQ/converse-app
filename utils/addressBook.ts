@@ -4,11 +4,11 @@ import { useEffect, useRef } from "react";
 import { AppState } from "react-native";
 import * as RNLocalize from "react-native-localize";
 
-import { useCurrentAccount } from "../data/store/accountsStore";
-import { useAppStore } from "../data/store/appStore";
 import { postAddressBook } from "./api";
 import { getDeviceId } from "./keychain/helpers";
 import { refreshRecommendationsForAccount } from "./recommendations";
+import { useCurrentAccount } from "../data/store/accountsStore";
+import { useAppStore } from "../data/store/appStore";
 
 export type AddressBookPermissionStatus = "granted" | "undetermined" | "denied";
 

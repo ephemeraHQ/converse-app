@@ -4,8 +4,8 @@ import {
 } from "@styles/colors";
 import { Platform, useColorScheme } from "react-native";
 
-import WebviewPreview from "../WebviewPreview";
 import { NativeStack, navigationAnimation } from "./Navigation";
+import WebviewPreview from "../WebviewPreview";
 
 export type WebviewPreviewNavParams = {
   uri: string;

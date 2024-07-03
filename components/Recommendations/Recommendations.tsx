@@ -19,6 +19,7 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
+import { Recommendation } from "./Recommendation";
 import config from "../../config";
 import {
   useAccountsStore,
@@ -28,7 +29,6 @@ import {
 import { useSelect } from "../../data/store/storeHelpers";
 import { refreshRecommendationsForAccount } from "../../utils/recommendations";
 import ActivityIndicator from "../ActivityIndicator/ActivityIndicator";
-import { Recommendation } from "./Recommendation";
 
 const EXPIRE_AFTER = 86400000; // 1 DAY
 

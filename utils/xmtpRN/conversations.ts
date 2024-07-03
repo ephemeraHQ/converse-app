@@ -6,6 +6,13 @@ import {
   InboxId,
 } from "@xmtp/react-native-sdk";
 
+import {
+  ConversationWithCodecsType,
+  ConverseXmtpClientType,
+  GroupWithCodecsType,
+} from "./client";
+import { syncConversationsMessages, syncGroupsMessages } from "./messages";
+import { getXmtpClient } from "./sync";
 import { Conversation as DbConversation } from "../../data/db/entities/conversationEntity";
 import { getPendingConversationsToCreate } from "../../data/helpers/conversations/pendingConversations";
 import { saveConversations } from "../../data/helpers/conversations/upsertConversations";
@@ -22,13 +29,6 @@ import { getCleanAddress } from "../eth";
 import { getTopicDataFromKeychain } from "../keychain/helpers";
 import { getSecureMmkvForAccount } from "../mmkv";
 import { sentryTrackError } from "../sentry";
-import {
-  ConversationWithCodecsType,
-  ConverseXmtpClientType,
-  GroupWithCodecsType,
-} from "./client";
-import { syncConversationsMessages, syncGroupsMessages } from "./messages";
-import { getXmtpClient } from "./sync";
 
 const protocolConversationToStateConversation = (
   conversation: ConversationWithCodecsType

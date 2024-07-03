@@ -5,8 +5,8 @@ import {
 } from "@styles/colors";
 import { Platform, useColorScheme } from "react-native";
 
-import UserProfile from "../../components/Onboarding/UserProfile";
 import { NativeStack } from "./Navigation";
+import UserProfile from "../../components/Onboarding/UserProfile";
 
 export default function UserProfileNav() {
   const colorScheme = useColorScheme();

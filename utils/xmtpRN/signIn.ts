@@ -11,9 +11,9 @@ import {
 } from "@xmtp/react-native-sdk";
 import { Signer } from "ethers";
 
+import { CoinbaseMessagingPaymentCodec } from "./contentTypes/coinbasePayment";
 import config from "../../config";
 import { getDbDirectory } from "../../data/db";
-import { CoinbaseMessagingPaymentCodec } from "./contentTypes/coinbasePayment";
 
 const env = config.xmtpEnv as "dev" | "production" | "local";
 

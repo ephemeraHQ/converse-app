@@ -1,12 +1,12 @@
 import { useMutation } from "@tanstack/react-query";
 
-import { refreshGroup } from "../utils/xmtpRN/conversations";
 import { addMemberMutationKey } from "./MutationKeys";
 import {
   cancelGroupMembersQuery,
   invalidateGroupMembersQuery,
 } from "./useGroupMembersQuery";
 import { useGroupQuery } from "./useGroupQuery";
+import { refreshGroup } from "../utils/xmtpRN/conversations";
 
 export const useAddToGroupMutation = (account: string, topic: string) => {
   const { data: group } = useGroupQuery(account, topic);
