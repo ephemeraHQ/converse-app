@@ -481,7 +481,6 @@ const useStyles = () => {
     messageRow: {
       flexDirection: "row",
       flexWrap: "wrap",
-      overflow: "visible",
     },
     messageSwipeable: {
       width: "100%",
@@ -493,7 +492,6 @@ const useStyles = () => {
       width: "100%",
       flexDirection: "row",
       flexWrap: "wrap",
-      overflow: "visible",
     },
     statusContainer: {
       marginLeft: "auto",
