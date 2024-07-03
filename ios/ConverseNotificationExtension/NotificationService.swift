@@ -72,7 +72,8 @@ func handleNotificationAsync(contentHandler: ((UNNotificationContent) -> Void), 
           welcomeTopic: contentTopic,
           bestAttemptContent: &content
         )
-      } else if isGroupMessageTopic(topic: contentTopic) {        let encryptedMessageData = Data(base64Encoded: Data(encodedMessage.utf8))!
+      } else if isGroupMessageTopic(topic: contentTopic) {
+        let encryptedMessageData = Data(base64Encoded: Data(encodedMessage.utf8))!
         let envelope = XMTP.Envelope.with { envelope in
           envelope.message = encryptedMessageData
           envelope.contentTopic = contentTopic
