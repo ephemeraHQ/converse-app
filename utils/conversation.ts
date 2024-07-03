@@ -401,11 +401,18 @@ export function getFilteredConversationsWithSearch(
 ): ConversationFlatListItem[] {
   if (searchQuery && sortedConversations) {
     const matchedPeerAddresses = getMatchedPeerAddresses(profiles, searchQuery);
-    const filteredConversations = sortedConversations.filter(
-      (conversation) =>
-        conversation.peerAddress &&
-        matchedPeerAddresses.includes(conversation.peerAddress)
-    );
+    const filteredConversations = sortedConversations.filter((conversation) => {
+      if (conversation.isGroup) {
+        return conversation.groupName
+          ?.toLowerCase()
+          .includes(searchQuery.toLowerCase().trim());
+      } else {
+        return (
+          conversation.peerAddress &&
+          matchedPeerAddresses.includes(conversation.peerAddress)
+        );
+      }
+    });
     return filteredConversations;
   } else {
     return sortedConversations;
