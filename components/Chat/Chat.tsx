@@ -88,7 +88,8 @@ const getListArray = (
         message.dateChange =
           differenceInCalendarDays(message.sent, previousMessage.sent) > 0;
         if (
-          previousMessage.senderAddress === message.senderAddress &&
+          previousMessage.senderAddress.toLowerCase() ===
+            message.senderAddress.toLowerCase() &&
           !message.dateChange &&
           !isContentType("groupUpdated", previousMessage.contentType)
         ) {
@@ -107,7 +108,8 @@ const getListArray = (
         const nextMessageDateChange =
           differenceInCalendarDays(nextMessage.sent, message.sent) > 0;
         if (
-          nextMessage.senderAddress === message.senderAddress &&
+          nextMessage.senderAddress.toLowerCase() ===
+            message.senderAddress.toLowerCase() &&
           !nextMessageDateChange &&
           !isContentType("groupUpdated", nextMessage.contentType)
         ) {
