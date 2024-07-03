@@ -6,8 +6,10 @@ import android.view.View
 import com.beust.klaxon.Klaxon
 import com.converse.dev.xmtp.NotificationDataResult
 import com.converse.dev.xmtp.getNewConversationFromEnvelope
+import com.converse.dev.xmtp.getNewGroup
 import com.converse.dev.xmtp.getXmtpClient
 import com.converse.dev.xmtp.handleGroupMessage
+import com.converse.dev.xmtp.handleGroupWelcome
 import com.converse.dev.xmtp.handleNewConversationFirstMessage
 import com.converse.dev.xmtp.handleOngoingConversationMessage
 import com.converse.dev.xmtp.initCodecs
@@ -125,7 +127,13 @@ class PushNotificationsService : FirebaseMessagingService() {
                         remoteMessage.data["body"] = newNotificationDataJson
                     }
                 } else if (isGroupWelcomeTopic(notificationData.contentTopic)) {
-
+                    val group = getNewGroup(xmtpClient, notificationData.contentTopic)
+                    if (group != null) {
+                        result = handleGroupWelcome(applicationContext, xmtpClient, group, remoteMessage)
+                        if (result != NotificationDataResult()) {
+                            shouldShowNotification = result.shouldShowNotification
+                        }
+                    }
                 }  else if (isGroupMessageTopic(notificationData.contentTopic)) {
                     Log.d(TAG, "Handling an ongoing group message notification")
                     result = handleGroupMessage(applicationContext, xmtpClient, envelope, remoteMessage)
