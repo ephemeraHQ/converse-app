@@ -12,7 +12,14 @@ import {
 import { AvatarSizes, PictoSizes } from "@styles/sizes";
 import { strings } from "@utils/i18n/strings";
 import * as Haptics from "expo-haptics";
-import React, { memo, useCallback, useEffect, useRef, useState } from "react";
+import React, {
+  memo,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import {
   ColorSchemeName,
   Platform,
@@ -124,21 +131,29 @@ const ConversationListItem = memo(function ConversationListItem({
     };
   }, [navigation, resetSelected]);
 
-  const avatarComponent = isGroupConversation ? (
-    <GroupAvatar
-      size={AvatarSizes.conversationListItem}
-      style={styles.avatarWrapper}
-      uri={conversationPeerAvatar}
-      topic={conversationTopic}
-    />
-  ) : (
-    <Avatar
-      size={AvatarSizes.conversationListItem}
-      style={styles.avatarWrapper}
-      uri={conversationPeerAvatar}
-      name={conversationName}
-    />
-  );
+  const avatarComponent = useMemo(() => {
+    return isGroupConversation ? (
+      <GroupAvatar
+        size={AvatarSizes.conversationListItem}
+        style={styles.avatarWrapper}
+        uri={conversationPeerAvatar}
+        topic={conversationTopic}
+      />
+    ) : (
+      <Avatar
+        size={AvatarSizes.conversationListItem}
+        style={styles.avatarWrapper}
+        uri={conversationPeerAvatar}
+        name={conversationName}
+      />
+    );
+  }, [
+    conversationName,
+    conversationPeerAvatar,
+    conversationTopic,
+    isGroupConversation,
+    styles.avatarWrapper,
+  ]);
 
   const listItemContent = (
     <View style={styles.conversationListItem}>

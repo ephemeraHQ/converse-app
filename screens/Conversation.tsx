@@ -25,7 +25,7 @@ import {
 import { isDesktop } from "../utils/device";
 import { converseEventEmitter } from "../utils/events";
 import { setTopicToNavigateTo, topicToNavigateTo } from "../utils/navigation";
-import { getTitleFontScale, TextInputWithValue } from "../utils/str";
+import { TextInputWithValue } from "../utils/str";
 import { loadOlderMessages } from "../utils/xmtpRN/messages";
 import { NavigationParamList } from "./Navigation/Navigation";
 
@@ -162,15 +162,11 @@ const Conversation = ({
 
   const styles = useStyles();
 
-  const titleFontScale = getTitleFontScale();
-
   useEffect(() => {
     navigation.setOptions({
       headerTitle: () => (
         <ConversationTitle
           conversation={conversation}
-          peerAddress={peerAddress}
-          isBlockedPeer={isBlockedPeer}
           textInputRef={textInputRef}
           navigation={navigation}
           route={route}
