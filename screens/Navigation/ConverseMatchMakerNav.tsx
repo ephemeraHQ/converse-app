@@ -4,8 +4,8 @@ import {
 } from "@styles/colors";
 import { Platform, useColorScheme } from "react-native";
 
-import ConverseMatchMaker from "../ConverseMatchMaker";
 import { NativeStack, navigationAnimation } from "./Navigation";
+import ConverseMatchMaker from "../ConverseMatchMaker";
 
 export default function ConverseMatchMakerNav() {
   const colorScheme = useColorScheme();

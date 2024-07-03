@@ -1,10 +1,10 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Dimensions, PixelRatio, Platform, TextInput } from "react-native";
 
+import { getPreferredName } from "./profile";
 import { getProfilesStore, useAccountsList } from "../data/store/accountsStore";
 import { XmtpConversation } from "../data/store/chatStore";
 import { ProfilesStoreType } from "../data/store/profilesStore";
-import { getPreferredName } from "./profile";
 
 const { humanize } = require("../vendor/humanhash");
 
@@ -121,7 +121,7 @@ export const useLoopTxt = (
   active: boolean
 ) => {
   const [step, setStep] = useState(0);
-  const interval = useRef<NodeJS.Timer | undefined>();
+  const interval = useRef<NodeJS.Timeout | undefined>();
   const startInterval = useCallback(() => {
     if (interval.current) return;
     setStep(0);

@@ -3,6 +3,7 @@ import { Alert, Platform } from "react-native";
 import { In } from "typeorm/browser";
 import { v4 as uuidv4 } from "uuid";
 
+import { saveConversations } from "./upsertConversations";
 import { getCleanAddress } from "../../../utils/eth";
 import { getRepository } from "../../db";
 import { Conversation } from "../../db/entities/conversationEntity";
@@ -10,7 +11,6 @@ import { upsertRepository } from "../../db/upsert";
 import { xmtpConversationToDb } from "../../mappers";
 import { getChatStore, useChatStore } from "../../store/accountsStore";
 import { XmtpConversation } from "../../store/chatStore";
-import { saveConversations } from "./upsertConversations";
 
 export const cleanupPendingConversations = async (account: string) => {
   const conversationRepository = await getRepository(account, "conversation");

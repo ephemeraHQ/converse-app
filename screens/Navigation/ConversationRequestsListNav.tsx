@@ -9,6 +9,11 @@ import { Platform, StyleSheet, Text, useColorScheme, View } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { StackAnimationTypes } from "react-native-screens";
 
+import {
+  NativeStack,
+  navigationAnimation,
+  NavigationParamList,
+} from "./Navigation";
 import ActivityIndicator from "../../components/ActivityIndicator/ActivityIndicator";
 import AndroidBackAction from "../../components/AndroidBackAction";
 import Button from "../../components/Button/Button";
@@ -24,11 +29,6 @@ import {
   sortRequestsBySpamScore,
   updateConsentStatus,
 } from "../../utils/xmtpRN/conversations";
-import {
-  NativeStack,
-  navigationAnimation,
-  NavigationParamList,
-} from "./Navigation";
 
 export default function ConversationRequestsListNav() {
   const sortedConversationsWithPreview = useChatStore(

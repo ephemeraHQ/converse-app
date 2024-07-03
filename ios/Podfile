@@ -38,10 +38,9 @@ target 'Converse' do
     :hermes_enabled => true,
     # An absolute path to your application root.
     :app_path => "#{Pod::Config.instance.installation_root}/..",
-    #
-    # Uncomment to opt-in to using Flipper
-    # Note that if you have use_frameworks! enabled, Flipper will not work
-    # :flipper_configuration => !ENV['CI'] ? FlipperConfiguration.enabled : FlipperConfiguration.disabled,
+    # Temporarily disable privacy file aggregation by default, until React
+    # Native 0.74.2 is released with fixes.
+    :privacy_file_aggregation_enabled => podfile_properties['apple.privacyManifestAggregationEnabled'] == 'true',
   )
 
   pre_install do |installer|
@@ -59,7 +58,8 @@ target 'Converse' do
     react_native_post_install(
       installer,
       config[:reactNativePath],
-      :mac_catalyst_enabled => false
+      :mac_catalyst_enabled => false,
+      :ccache_enabled => podfile_properties['apple.ccacheEnabled'] == 'true',
     )
 
     # Reconfigure the pods, update deployment target and signing settings

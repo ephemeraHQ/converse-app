@@ -1,16 +1,16 @@
 import axios from "axios";
 import * as Contacts from "expo-contacts";
 
+import { analyticsPlatform } from "./analytics";
+import type { TransferAuthorizationMessage } from "./evm/erc20";
+import { getPrivyRequestHeaders } from "./evm/privy";
+import type { TransactionDetails } from "./transaction";
 import type { ProfileType } from "../components/Onboarding/UserProfile";
 import config from "../config";
 import type { TopicData } from "../data/store/chatStore";
 import type { ProfileSocials } from "../data/store/profilesStore";
 import type { Frens } from "../data/store/recommendationsStore";
 import { getXmtpApiHeaders } from "../utils/xmtpRN/api";
-import { analyticsPlatform } from "./analytics";
-import type { TransferAuthorizationMessage } from "./evm/erc20";
-import { getPrivyRequestHeaders } from "./evm/privy";
-import type { TransactionDetails } from "./transaction";
 
 const api = axios.create({
   baseURL: config.apiURI,

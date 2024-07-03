@@ -7,8 +7,8 @@ import { useEffect, useState } from "react";
 import { Button, Platform, useColorScheme } from "react-native";
 import { WebView } from "react-native-webview";
 
-import AndroidBackAction from "../components/AndroidBackAction";
 import { NavigationParamList } from "./Navigation/Navigation";
+import AndroidBackAction from "../components/AndroidBackAction";
 
 export default function WebviewPreview({
   route,

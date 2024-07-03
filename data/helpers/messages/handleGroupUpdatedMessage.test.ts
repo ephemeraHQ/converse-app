@@ -1,8 +1,8 @@
+import { handleGroupUpdatedMessage } from "./handleGroupUpdatedMessage";
 import { invalidateGroupMembersQuery } from "../../../queries/useGroupMembersQuery";
 import { invalidateGroupNameQuery } from "../../../queries/useGroupNameQuery";
 import { invalidateGroupPhotoQuery } from "../../../queries/useGroupPhotoQuery";
 import { DecodedMessageWithCodecsType } from "../../../utils/xmtpRN/client";
-import { handleGroupUpdatedMessage } from "./handleGroupUpdatedMessage";
 
 jest.mock("../../../queries/useGroupMembersQuery", () => ({
   invalidateGroupMembersQuery: jest.fn(),

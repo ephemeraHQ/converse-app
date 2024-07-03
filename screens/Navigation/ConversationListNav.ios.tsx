@@ -14,6 +14,11 @@ import {
 } from "react-native-gesture-handler";
 import { SearchBarCommands } from "react-native-screens";
 
+import {
+  NativeStack,
+  NavigationParamList,
+  navigationAnimation,
+} from "./Navigation";
 import Connecting, {
   useShouldShowConnectingOrSyncing,
 } from "../../components/Connecting";
@@ -24,11 +29,6 @@ import { useSelect } from "../../data/store/storeHelpers";
 import { isDesktop } from "../../utils/device";
 import { getReadableProfile } from "../../utils/str";
 import ConversationList from "../ConversationList";
-import {
-  NativeStack,
-  NavigationParamList,
-  navigationAnimation,
-} from "./Navigation";
 
 type HeaderSearchBarProps = {
   searchBarRef: React.RefObject<any>;

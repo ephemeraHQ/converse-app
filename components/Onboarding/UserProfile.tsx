@@ -16,6 +16,7 @@ import {
   View,
 } from "react-native";
 
+import OnboardingComponent from "./OnboardingComponent";
 import config from "../../config";
 import { refreshProfileForAddress } from "../../data/helpers/profiles/profilesUpdate";
 import {
@@ -37,7 +38,6 @@ import { shortAddress, useLoopTxt } from "../../utils/str";
 import Avatar from "../Avatar";
 import Button from "../Button/Button";
 import { showActionSheetWithOptions } from "../StateHandlers/ActionSheetStateHandler";
-import OnboardingComponent from "./OnboardingComponent";
 
 export type ProfileType = {
   avatar: string;

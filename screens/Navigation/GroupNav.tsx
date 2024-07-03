@@ -5,8 +5,8 @@ import {
 } from "@styles/colors";
 import { Platform, useColorScheme } from "react-native";
 
-import GroupScreen from "../Group";
 import { NativeStack, navigationAnimation } from "./Navigation";
+import GroupScreen from "../Group";
 
 export type GroupNavParams = {
   topic: string;

@@ -1,10 +1,10 @@
 import { useQuery } from "@tanstack/react-query";
 
-import { GroupWithCodecsType } from "../utils/xmtpRN/client";
 import { groupsQueryKey } from "./QueryKeys";
 import { entify, EntityObject } from "./entify";
 import { queryClient } from "./queryClient";
 import { useClient } from "./useClient";
+import { GroupWithCodecsType } from "../utils/xmtpRN/client";
 
 type GroupsRawData = GroupWithCodecsType[] | undefined;
 type GroupMembersSelectData = EntityObject<GroupWithCodecsType, string>;

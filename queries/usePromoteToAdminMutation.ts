@@ -2,7 +2,6 @@ import { useMutation } from "@tanstack/react-query";
 import { Member } from "@xmtp/react-native-sdk";
 import { InboxId } from "@xmtp/react-native-sdk/build/lib/Client";
 
-import { refreshGroup } from "../utils/xmtpRN/conversations";
 import { promoteAdminMutationKey } from "./MutationKeys";
 import {
   cancelGroupMembersQuery,
@@ -10,6 +9,7 @@ import {
   setGroupMembersQueryData,
 } from "./useGroupMembersQuery";
 import { useGroupQuery } from "./useGroupQuery";
+import { refreshGroup } from "../utils/xmtpRN/conversations";
 
 export const usePromoteToAdminMutation = (account: string, topic: string) => {
   const { data: group } = useGroupQuery(account, topic);

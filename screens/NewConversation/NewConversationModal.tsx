@@ -10,6 +10,8 @@ import {
 } from "@styles/colors";
 import { Platform, useColorScheme } from "react-native";
 
+import NewConversation from "./NewConversation";
+import NewGroupSummary from "./NewGroupSummary";
 import Button from "../../components/Button/Button";
 import { ProfileSocials } from "../../data/store/profilesStore";
 import {
@@ -17,8 +19,6 @@ import {
   navigationAnimation,
 } from "../Navigation/Navigation";
 import { NewConversationNavParams } from "../Navigation/NewConversationNav";
-import NewConversation from "./NewConversation";
-import NewGroupSummary from "./NewGroupSummary";
 
 export type NewConversationModalParams = {
   NewConversationScreen: NewConversationNavParams;

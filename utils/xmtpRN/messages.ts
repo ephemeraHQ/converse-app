@@ -9,6 +9,15 @@ import {
   StaticAttachmentContent,
 } from "@xmtp/react-native-sdk";
 
+import { serializeRemoteAttachmentMessageContent } from "./attachments";
+import {
+  ConverseXmtpClientType,
+  DecodedMessageWithCodecsType,
+  GroupWithCodecsType,
+} from "./client";
+import { getMessageContentType, isContentType } from "./contentTypes";
+import { CoinbaseMessagingPaymentContent } from "./contentTypes/coinbasePayment";
+import { getXmtpClient } from "./sync";
 import { saveMemberInboxIds } from "../../data/helpers/inboxId/saveInboxIds";
 import {
   getOrderedMessages,
@@ -20,15 +29,6 @@ import { getChatStore } from "../../data/store/accountsStore";
 import { XmtpMessage } from "../../data/store/chatStore";
 import { addLog } from "../debug";
 import { sentryTrackError } from "../sentry";
-import { serializeRemoteAttachmentMessageContent } from "./attachments";
-import {
-  ConverseXmtpClientType,
-  DecodedMessageWithCodecsType,
-  GroupWithCodecsType,
-} from "./client";
-import { getMessageContentType, isContentType } from "./contentTypes";
-import { CoinbaseMessagingPaymentContent } from "./contentTypes/coinbasePayment";
-import { getXmtpClient } from "./sync";
 
 const BATCH_QUERY_PAGE_SIZE = 30;
 

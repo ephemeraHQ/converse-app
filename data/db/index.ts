@@ -2,9 +2,6 @@ import { AppState, Platform } from "react-native";
 import RNFS from "react-native-fs";
 import { Repository } from "typeorm/browser";
 
-import config from "../../config";
-import { sentryTrackError, sentryTrackMessage } from "../../utils/sentry";
-import { useAccountsStore } from "../store/accountsStore";
 import {
   deleteDataSource,
   getDataSource,
@@ -13,6 +10,9 @@ import {
 import { Conversation } from "./entities/conversationEntity";
 import { Message } from "./entities/messageEntity";
 import { Profile } from "./entities/profileEntity";
+import config from "../../config";
+import { sentryTrackError, sentryTrackMessage } from "../../utils/sentry";
+import { useAccountsStore } from "../store/accountsStore";
 
 const env = config.xmtpEnv as "dev" | "production" | "local";
 

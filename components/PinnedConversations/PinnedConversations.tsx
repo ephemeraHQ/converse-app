@@ -1,7 +1,7 @@
 import { StyleSheet, View } from "react-native";
 
-import { XmtpConversation } from "../../data/store/chatStore";
 import { PinnedConversation } from "./PinnedConversation";
+import { XmtpConversation } from "../../data/store/chatStore";
 
 type Props = {
   convos?: XmtpConversation[];

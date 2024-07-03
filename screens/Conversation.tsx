@@ -10,6 +10,7 @@ import React, { useCallback, useEffect, useRef, useState } from "react";
 import { Platform, StyleSheet, useColorScheme, View } from "react-native";
 import { gestureHandlerRootHOC } from "react-native-gesture-handler";
 
+import { NavigationParamList } from "./Navigation/Navigation";
 import ConverseChat from "../components/Chat/Chat";
 import ConversationTitle from "../components/Conversation/ConversationTitle";
 import {
@@ -27,7 +28,6 @@ import { converseEventEmitter } from "../utils/events";
 import { setTopicToNavigateTo, topicToNavigateTo } from "../utils/navigation";
 import { TextInputWithValue } from "../utils/str";
 import { loadOlderMessages } from "../utils/xmtpRN/messages";
-import { NavigationParamList } from "./Navigation/Navigation";
 
 const Conversation = ({
   route,
