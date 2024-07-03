@@ -8,7 +8,6 @@ import {
 } from "@styles/colors";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import {
-  Alert,
   ColorSchemeName,
   DimensionValue,
   Platform,
@@ -28,7 +27,6 @@ import {
 } from "react-native-reanimated";
 
 import {
-  currentAccount,
   useCurrentAccount,
   useSettingsStore,
 } from "../../../data/store/accountsStore";
@@ -36,7 +34,6 @@ import { useAppStore } from "../../../data/store/appStore";
 import { XmtpConversation } from "../../../data/store/chatStore";
 import { useFramesStore } from "../../../data/store/framesStore";
 import { ReanimatedTouchableOpacity } from "../../../utils/animations";
-import { reportMessage } from "../../../utils/api";
 import { isAttachmentMessage } from "../../../utils/attachment/helpers";
 import { useConversationContext } from "../../../utils/conversation";
 import { isDesktop } from "../../../utils/device";
@@ -48,7 +45,6 @@ import {
   removeReactionFromMessage,
 } from "../../../utils/reactions";
 import { isTransactionMessage } from "../../../utils/transaction";
-import { consentToPeersOnProtocol } from "../../../utils/xmtpRN/conversations";
 import EmojiPicker from "../../../vendor/rn-emoji-keyboard";
 import { showActionSheetWithOptions } from "../../StateHandlers/ActionSheetStateHandler";
 import { MessageToDisplay } from "./Message";
@@ -96,61 +92,6 @@ export default function ChatMessageActions({
     }
   }
 
-  const report = useCallback(async () => {
-    reportMessage({
-      account: currentAccount(),
-      messageId: message.id,
-      messageContent: message.content,
-      messageSender: message.senderAddress,
-    });
-
-    Alert.alert("Message reported");
-  }, [message]);
-
-  const reportAndBlock = useCallback(async () => {
-    reportMessage({
-      account: currentAccount(),
-      messageId: message.id,
-      messageContent: message.content,
-      messageSender: message.senderAddress,
-    });
-    consentToPeersOnProtocol(currentAccount(), [message.senderAddress], "deny");
-    setPeersStatus({ [message.senderAddress]: "blocked" });
-  }, [message.content, message.id, message.senderAddress, setPeersStatus]);
-
-  const showMessageReportActionSheet = useCallback(async () => {
-    if (Platform.OS === "web") {
-      // Fixes double action sheet on web
-      await new Promise((r) => setTimeout(r, 100));
-    }
-    const methods = {
-      Report: report,
-      "Report and block": reportAndBlock,
-      Cancel: () => {},
-    };
-
-    const options = Object.keys(methods);
-
-    showActionSheetWithOptions(
-      {
-        options,
-        title: "Report this message",
-        message:
-          "This message will be forwarded to Converse. The contact will not be informed.",
-        cancelButtonIndex: options.indexOf("Cancel"),
-        destructiveButtonIndex: [0, 1],
-        ...actionSheetColors(colorScheme),
-      },
-      (selectedIndex?: number) => {
-        if (selectedIndex === undefined) return;
-        const method = (methods as any)[options[selectedIndex]];
-        if (method) {
-          method();
-        }
-      }
-    );
-  }, [colorScheme, report, reportAndBlock]);
-
   const [emojiPickerShown, setEmojiPickerShown] = useState(false);
 
   const showReactionModal = useCallback(() => {
@@ -174,9 +115,6 @@ export default function ChatMessageActions({
       methods["Copy message"] = message.content
         ? () => Clipboard.setString(message.content)
         : () => Clipboard.setString(message.contentFallback!);
-      if (!message.fromMe) {
-        methods["Report message"] = showMessageReportActionSheet;
-      }
     }
 
     methods.Cancel = () => {};
@@ -192,9 +130,6 @@ export default function ChatMessageActions({
           ? "📎 Media"
           : message.content,
         cancelButtonIndex: options.indexOf("Cancel"),
-        destructiveButtonIndex: message.fromMe
-          ? undefined
-          : options.indexOf("Report message"),
         ...actionSheetColors(colorScheme),
       },
       (selectedIndex?: number) => {
@@ -210,11 +145,9 @@ export default function ChatMessageActions({
     isAttachment,
     isTransaction,
     message.content,
-    message.fromMe,
     message.contentFallback,
     colorScheme,
     showReactionModal,
-    showMessageReportActionSheet,
     triggerReplyToMessage,
   ]);
 
@@ -323,16 +256,10 @@ export default function ChatMessageActions({
     items.push({ title: "Reply", systemIcon: "arrowshape.turn.up.left" });
     if (!isAttachment && !isTransaction) {
       items.push({ title: "Copy message", systemIcon: "doc.on.doc" });
-      if (!message.fromMe) {
-        items.push({
-          title: "Report message",
-          systemIcon: "exclamationmark.triangle",
-        });
-      }
     }
 
     return items;
-  }, [canAddReaction, isAttachment, isTransaction, message.fromMe]);
+  }, [canAddReaction, isAttachment, isTransaction]);
 
   const handleContextMenuAction = useCallback(
     (event: { nativeEvent: { index: number } }) => {
@@ -351,28 +278,10 @@ export default function ChatMessageActions({
             Clipboard.setString(message.contentFallback);
           }
           break;
-        case "Report message":
-          Alert.alert(
-            "Report this message",
-            "This message will be forwarded to Converse. The contact will not be informed.",
-            [
-              { text: "Cancel", style: "cancel" },
-              { text: "Report", onPress: report },
-              { text: "Report and block", onPress: reportAndBlock },
-            ]
-          );
-          break;
       }
       useAppStore.getState().setContextMenuShown(false);
     },
-    [
-      contextMenuItems,
-      showReactionModal,
-      triggerReplyToMessage,
-      message,
-      report,
-      reportAndBlock,
-    ]
+    [contextMenuItems, showReactionModal, triggerReplyToMessage, message]
   );
 
   // We use a mix of Gesture Detector AND TouchableOpacity
