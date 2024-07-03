@@ -15,6 +15,7 @@ import {
 import { saveTopicsData } from "./api";
 import { isAttachmentMessage } from "./attachment/helpers";
 import { getAddressForPeer } from "./eth";
+import { getGroupIdFromTopic } from "./groupUtils/groupId";
 import { subscribeToNotifications } from "./notifications";
 import { pick } from "./objects";
 import { getReactionsContentPreview } from "./reactions";
@@ -334,9 +335,8 @@ export const conversationShouldBeInInbox = (
   peersStatus: { [peer: string]: "blocked" | "consented" },
   groupsStatus: { [topic: string]: "allowed" | "denied" }
 ) => {
-  // TODO: Add more conditions to filter out spam
   const isConsented = conversation.isGroup
-    ? groupsStatus[conversation.topic] === "allowed"
+    ? groupsStatus[getGroupIdFromTopic(conversation.topic)] === "allowed"
     : peersStatus[conversation.peerAddress.toLowerCase()] === "consented";
 
   return conversation.hasOneMessageFromMe || isConsented;
