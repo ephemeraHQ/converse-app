@@ -138,7 +138,10 @@ export const GroupConversationItem: FC<GroupConversationItemProps> = ({
         if (topicsData[conversation.topic]?.status === "unread") return true;
         // If not manually markes as unread, we only show badge if last message
         // not from me
-        if (lastMessagePreview.message.senderAddress === userAddress)
+        if (
+          lastMessagePreview.message.senderAddress.toLowerCase() ===
+          userAddress.toLowerCase()
+        )
           return false;
         const readUntil = topicsData[conversation.topic]?.readUntil || 0;
         return readUntil < lastMessagePreview.message.sent;
