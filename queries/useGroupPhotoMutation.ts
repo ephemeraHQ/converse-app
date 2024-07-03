@@ -1,6 +1,5 @@
 import { useMutation } from "@tanstack/react-query";
 
-import { refreshGroup } from "../utils/xmtpRN/conversations";
 import { setGroupPhotoMutationKey } from "./MutationKeys";
 import {
   cancelGroupPhotoQuery,
@@ -8,6 +7,7 @@ import {
   setGroupPhotoQueryData,
 } from "./useGroupPhotoQuery";
 import { useGroupQuery } from "./useGroupQuery";
+import { refreshGroup } from "../utils/xmtpRN/conversations";
 
 export const useGroupPhotoMutation = (account: string, topic: string) => {
   const { data: group } = useGroupQuery(account, topic);

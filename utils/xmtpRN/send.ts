@@ -9,12 +9,6 @@ import {
 import { ConversationSendPayload } from "@xmtp/react-native-sdk/build/lib/types";
 import { DefaultContentTypes } from "@xmtp/react-native-sdk/build/lib/types/DefaultContentType";
 
-import { Message as MessageEntity } from "../../data/db/entities/messageEntity";
-import {
-  markMessageAsSent,
-  updateMessagesIds,
-} from "../../data/helpers/messages";
-import { getMessagesToSend } from "../../data/helpers/messages/getMessagesToSend";
 import { deserializeRemoteAttachmentMessageContent } from "./attachments";
 import {
   ConversationWithCodecsType,
@@ -24,6 +18,12 @@ import {
 import { isContentType } from "./contentTypes";
 import { getConversationWithTopic } from "./conversations";
 import { getXmtpClient } from "./sync";
+import { Message as MessageEntity } from "../../data/db/entities/messageEntity";
+import {
+  markMessageAsSent,
+  updateMessagesIds,
+} from "../../data/helpers/messages";
+import { getMessagesToSend } from "../../data/helpers/messages/getMessagesToSend";
 // import { syncGroupsMessages } from "./messages";
 
 let sendingPendingMessages = false;

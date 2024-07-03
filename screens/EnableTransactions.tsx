@@ -16,6 +16,7 @@ import {
 } from "react-native";
 import { v4 as uuidv4 } from "uuid";
 
+import { NavigationParamList } from "./Navigation/Navigation";
 import AndroidBackAction from "../components/AndroidBackAction";
 import OnboardingComponent from "../components/Onboarding/OnboardingComponent";
 import { getSignerFromSeedPhraseOrPrivateKey } from "../components/Onboarding/SeedPhraseConnect";
@@ -23,7 +24,6 @@ import { useCurrentAccount, useWalletStore } from "../data/store/accountsStore";
 import { converseEventEmitter } from "../utils/events";
 import { savePrivateKey } from "../utils/keychain/helpers";
 import { shortAddress } from "../utils/str";
-import { NavigationParamList } from "./Navigation/Navigation";
 
 export default function EnableTransactionsScreen({
   route,

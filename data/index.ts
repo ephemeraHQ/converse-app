@@ -1,12 +1,12 @@
 import "reflect-metadata";
 
-import { saveXmtpEnv, saveApiURI } from "../utils/sharedData";
 import { getRepository } from "./db";
 import { Conversation } from "./db/entities/conversationEntity";
 import { Message } from "./db/entities/messageEntity";
 import { loadProfilesByAddress } from "./helpers/profiles";
 import { xmtpConversationFromDb } from "./mappers";
 import { getChatStore, getProfilesStore } from "./store/accountsStore";
+import { saveXmtpEnv, saveApiURI } from "../utils/sharedData";
 
 export const loadDataToContext = async (account: string) => {
   // Save env to shared data with extension

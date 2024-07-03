@@ -7,6 +7,7 @@ import { Image } from "expo-image";
 import * as Updates from "expo-updates";
 import { forwardRef, useImperativeHandle } from "react";
 
+import { showActionSheetWithOptions } from "./StateHandlers/ActionSheetStateHandler";
 import config from "../config";
 import { getDbPath, resetDb } from "../data/db";
 import {
@@ -17,7 +18,6 @@ import {
 import { getPresignedUriForUpload } from "../utils/api";
 import { debugLogs, resetDebugLogs } from "../utils/debug";
 import mmkv from "../utils/mmkv";
-import { showActionSheetWithOptions } from "./StateHandlers/ActionSheetStateHandler";
 
 export const useEnableDebug = () => {
   const userAddress = useCurrentAccount() as string;

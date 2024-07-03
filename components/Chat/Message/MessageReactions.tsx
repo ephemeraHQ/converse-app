@@ -12,6 +12,7 @@ import {
   View,
 } from "react-native";
 
+import { MessageToDisplay } from "./Message";
 import {
   useCurrentAccount,
   useProfilesStore,
@@ -25,7 +26,6 @@ import {
   removeReactionFromMessage,
 } from "../../../utils/reactions";
 import { showActionSheetWithOptions } from "../../StateHandlers/ActionSheetStateHandler";
-import { MessageToDisplay } from "./Message";
 
 type Props = {
   message: MessageToDisplay;

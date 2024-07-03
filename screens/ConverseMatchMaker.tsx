@@ -9,9 +9,9 @@ import {
   useColorScheme,
 } from "react-native";
 
+import { NavigationParamList } from "./Navigation/Navigation";
 import AndroidBackAction from "../components/AndroidBackAction";
 import Recommendations from "../components/Recommendations/Recommendations";
-import { NavigationParamList } from "./Navigation/Navigation";
 
 export default function ConverseMatchMaker({
   route,

@@ -19,13 +19,13 @@ import {
   View,
 } from "react-native";
 
+import { NavigationParamList } from "./Navigation/Navigation";
 import AndroidBackAction from "../components/AndroidBackAction";
 import ConverseButton from "../components/Button/Button";
 import TableView from "../components/TableView/TableView";
 import { TableViewPicto } from "../components/TableView/TableViewImage";
 import config from "../config";
 import { useCurrentAccount } from "../data/store/accountsStore";
-import { NavigationParamList } from "./Navigation/Navigation";
 
 export default function TopUp({
   route,

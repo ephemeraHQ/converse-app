@@ -1,8 +1,8 @@
 import { PersistQueryClientProvider } from "@tanstack/react-query-persist-client";
 import React, { FC, PropsWithChildren } from "react";
 
-import { mmkvStoragePersister } from "../utils/mmkv";
 import { queryClient } from "./queryClient";
+import { mmkvStoragePersister } from "../utils/mmkv";
 
 export const QueryClientProvider: FC<PropsWithChildren> = ({ children }) => {
   return (

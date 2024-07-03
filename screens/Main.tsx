@@ -3,6 +3,13 @@ import { StatusBar } from "expo-status-bar";
 import React, { useCallback, useEffect, useRef } from "react";
 import { Dimensions, Platform, useColorScheme } from "react-native";
 
+import AccountsAndroid from "./Accounts/AccountsAndroid";
+import AccountsDrawer from "./Accounts/AccountsDrawer";
+import Navigation from "./Navigation/Navigation";
+import SplitScreenNavigation from "./Navigation/SplitScreenNavigation/SplitScreenNavigation";
+import { useIsSplitScreen } from "./Navigation/navHelpers";
+import NotificationsScreen from "./NotificationsScreen";
+import Onboarding from "./Onboarding";
 import SendAttachmentPreview from "../components/Chat/Attachment/SendAttachmentPreview";
 import UserProfile from "../components/Onboarding/UserProfile";
 import ActionSheetStateHandler from "../components/StateHandlers/ActionSheetStateHandler";
@@ -23,13 +30,6 @@ import { useSelect } from "../data/store/storeHelpers";
 import { useAddressBookStateHandler } from "../utils/addressBook";
 import { converseEventEmitter } from "../utils/events";
 import { usePrivyAccessToken } from "../utils/evm/privy";
-import AccountsAndroid from "./Accounts/AccountsAndroid";
-import AccountsDrawer from "./Accounts/AccountsDrawer";
-import Navigation from "./Navigation/Navigation";
-import SplitScreenNavigation from "./Navigation/SplitScreenNavigation/SplitScreenNavigation";
-import { useIsSplitScreen } from "./Navigation/navHelpers";
-import NotificationsScreen from "./NotificationsScreen";
-import Onboarding from "./Onboarding";
 
 export default function Main() {
   // Makes sure we have a Privy token ready to make API calls

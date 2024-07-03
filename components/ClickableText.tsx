@@ -5,6 +5,7 @@ import { useCallback } from "react";
 import { StyleProp, StyleSheet, TextStyle, useColorScheme } from "react-native";
 import ParsedText from "react-native-parsed-text";
 
+import { showActionSheetWithOptions } from "./StateHandlers/ActionSheetStateHandler";
 import { navigate } from "../utils/navigation";
 import {
   ADDRESS_REGEX,
@@ -16,7 +17,6 @@ import {
   UNS_REGEX,
   URL_REGEX,
 } from "../utils/regex";
-import { showActionSheetWithOptions } from "./StateHandlers/ActionSheetStateHandler";
 
 type Props = {
   children: React.ReactNode;

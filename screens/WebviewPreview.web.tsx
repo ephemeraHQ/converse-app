@@ -3,8 +3,8 @@ import { backgroundColor } from "@styles/colors";
 import { useEffect } from "react";
 import { useColorScheme } from "react-native";
 
-import AndroidBackAction from "../components/AndroidBackAction";
 import { NavigationParamList } from "./Navigation/Navigation";
+import AndroidBackAction from "../components/AndroidBackAction";
 
 export default function WebviewPreview({
   route,

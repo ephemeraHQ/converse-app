@@ -23,6 +23,7 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
+import { NavigationParamList } from "./Navigation/Navigation";
 import ActivityIndicator from "../components/ActivityIndicator/ActivityIndicator";
 import Avatar from "../components/Avatar";
 import { showActionSheetWithOptions } from "../components/StateHandlers/ActionSheetStateHandler";
@@ -63,7 +64,6 @@ import { getPreferredAvatar, getPreferredName } from "../utils/profile";
 import { getIPFSAssetURI } from "../utils/thirdweb";
 import { refreshBalanceForAccount } from "../utils/wallet";
 import { consentToPeersOnProtocol } from "../utils/xmtpRN/conversations";
-import { NavigationParamList } from "./Navigation/Navigation";
 
 export default function ProfileScreen({
   route,

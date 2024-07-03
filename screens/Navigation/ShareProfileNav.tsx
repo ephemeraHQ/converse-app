@@ -4,8 +4,8 @@ import {
 } from "@styles/colors";
 import { Platform, useColorScheme } from "react-native";
 
-import ShareProfileScreen from "../ShareProfile";
 import { NativeStack, navigationAnimation } from "./Navigation";
+import ShareProfileScreen from "../ShareProfile";
 
 export const ShareProfileScreenConfig = {
   path: "/shareProfile",

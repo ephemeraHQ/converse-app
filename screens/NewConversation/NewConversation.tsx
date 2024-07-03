@@ -19,6 +19,7 @@ import {
   useColorScheme,
 } from "react-native";
 
+import { NewConversationModalParams } from "./NewConversationModal";
 import ActivityIndicator from "../../components/ActivityIndicator/ActivityIndicator";
 import AndroidBackAction from "../../components/AndroidBackAction";
 import ConverseButton from "../../components/Button/Button";
@@ -46,7 +47,6 @@ import { navigate } from "../../utils/navigation";
 import { isEmptyObject } from "../../utils/objects";
 import { getPreferredName } from "../../utils/profile";
 import { isOnXmtp } from "../../utils/xmtpRN/client";
-import { NewConversationModalParams } from "./NewConversationModal";
 
 export default function NewConversation({
   route,

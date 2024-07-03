@@ -10,12 +10,12 @@ import {
   View,
 } from "react-native";
 
+import Button from "./Button/Button";
 import Ellipse from "../assets/ellipse.svg";
 import config from "../config";
 import { useRecommendationsStore } from "../data/store/accountsStore";
 import { NavigationParamList } from "../screens/Navigation/Navigation";
 import { navigate } from "../utils/navigation";
-import Button from "./Button/Button";
 
 type Props = {
   ctaOnly: boolean;

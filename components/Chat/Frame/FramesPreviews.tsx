@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { View } from "react-native";
 
+import FramePreview from "./FramePreview";
 import { useCurrentAccount } from "../../../data/store/accountsStore";
 import { useFramesStore } from "../../../data/store/framesStore";
 import {
@@ -9,7 +10,6 @@ import {
   fetchFramesForMessage,
 } from "../../../utils/frames";
 import { MessageToDisplay } from "../Message/Message";
-import FramePreview from "./FramePreview";
 
 type Props = {
   message: MessageToDisplay;

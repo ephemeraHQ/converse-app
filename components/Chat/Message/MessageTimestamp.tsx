@@ -2,8 +2,8 @@ import { textPrimaryColor } from "@styles/colors";
 import React from "react";
 import { StyleSheet, Text, useColorScheme, View } from "react-native";
 
-import { getTime } from "../../../utils/date";
 import { MessageToDisplay } from "./Message";
+import { getTime } from "../../../utils/date";
 
 type Props = {
   message: MessageToDisplay;

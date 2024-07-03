@@ -26,6 +26,8 @@ import {
   withTiming,
 } from "react-native-reanimated";
 
+import { MessageToDisplay } from "./Message";
+import MessageTail from "./MessageTail";
 import {
   useCurrentAccount,
   useSettingsStore,
@@ -47,8 +49,6 @@ import {
 import { isTransactionMessage } from "../../../utils/transaction";
 import EmojiPicker from "../../../vendor/rn-emoji-keyboard";
 import { showActionSheetWithOptions } from "../../StateHandlers/ActionSheetStateHandler";
-import { MessageToDisplay } from "./Message";
-import MessageTail from "./MessageTail";
 
 type Props = {
   children: React.ReactNode;

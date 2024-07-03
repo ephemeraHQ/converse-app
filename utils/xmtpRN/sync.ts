@@ -1,9 +1,5 @@
 import { Client } from "@xmtp/xmtp-js";
 
-import { refreshAllSpamScores } from "../../data/helpers/conversations/spamScore";
-import { getChatStore } from "../../data/store/accountsStore";
-import { addLog, debugTimeSpent } from "../debug";
-import { loadXmtpKey } from "../keychain/helpers";
 import { xmtpSignatureByAccount } from "./api";
 import {
   ConverseXmtpClientType,
@@ -25,6 +21,10 @@ import {
   syncConversationsMessages,
   syncGroupsMessages,
 } from "./messages";
+import { refreshAllSpamScores } from "../../data/helpers/conversations/spamScore";
+import { getChatStore } from "../../data/store/accountsStore";
+import { addLog, debugTimeSpent } from "../debug";
+import { loadXmtpKey } from "../keychain/helpers";
 
 const instantiatingClientForAccount: { [account: string]: boolean } = {};
 

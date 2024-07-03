@@ -1,8 +1,8 @@
 import { Platform } from "react-native";
 
+import { NativeStack } from "./Navigation";
 import Accounts from "../Accounts/Accounts";
 import AccountsAndroid from "../Accounts/AccountsAndroid";
-import { NativeStack } from "./Navigation";
 
 export default function AccountsNav() {
   return (

@@ -12,13 +12,13 @@ import {
   useColorScheme,
 } from "react-native";
 
+import OnboardingComponent from "./OnboardingComponent";
 import { getAccountsList } from "../../data/store/accountsStore";
 import { useOnboardingStore } from "../../data/store/onboardingStore";
 import { useSelect } from "../../data/store/storeHelpers";
 import { shortAddress } from "../../utils/str";
 import { isOnXmtp } from "../../utils/xmtpRN/client";
 import { getXmtpBase64KeyFromSigner } from "../../utils/xmtpRN/signIn";
-import OnboardingComponent from "./OnboardingComponent";
 
 export default function ConnectViaWallet({
   connectWithBase64Key,

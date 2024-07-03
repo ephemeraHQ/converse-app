@@ -13,6 +13,7 @@ import {
 } from "react-native";
 import QRCode from "react-native-qrcode-svg";
 
+import { NavigationParamList } from "./Navigation/Navigation";
 import AndroidBackAction from "../components/AndroidBackAction";
 import ConverseButton from "../components/Button/Button";
 import config from "../config";
@@ -23,7 +24,6 @@ import {
 import { isDesktop } from "../utils/device";
 import { getPreferredUsername } from "../utils/profile";
 import { shortAddress } from "../utils/str";
-import { NavigationParamList } from "./Navigation/Navigation";
 
 export default function ShareProfileScreen({
   route,

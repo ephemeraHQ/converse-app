@@ -22,12 +22,12 @@ import * as RNLocalize from "react-native-localize";
 import { OtpInput, OtpInputRef } from "react-native-otp-entry";
 import PhoneInput from "react-native-phone-number-input";
 
+import OnboardingComponent from "./OnboardingComponent";
 import Button from "../../components/Button/Button";
 import { useOnboardingStore } from "../../data/store/onboardingStore";
 import { useSelect } from "../../data/store/storeHelpers";
 import { usePrivyAccessToken, usePrivySigner } from "../../utils/evm/privy";
 import Picto from "../Picto/Picto";
-import OnboardingComponent from "./OnboardingComponent";
 
 export default function PrivyConnect() {
   const colorScheme = useColorScheme();

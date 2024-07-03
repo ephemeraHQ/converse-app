@@ -1,5 +1,6 @@
 import { In } from "typeorm/browser";
 
+import { upgradePendingConversationsIfNeeded } from "./pendingConversations";
 import {
   navigateToTopicWithRetry,
   topicToNavigateTo,
@@ -14,7 +15,6 @@ import { xmtpConversationToDb } from "../../mappers";
 import { getChatStore, getProfilesStore } from "../../store/accountsStore";
 import { XmtpConversation } from "../../store/chatStore";
 import { refreshProfilesIfNeeded } from "../profiles/profilesUpdate";
-import { upgradePendingConversationsIfNeeded } from "./pendingConversations";
 
 export const saveConversations = async (
   account: string,

@@ -1,11 +1,11 @@
 import "reflect-metadata";
 
-import { getPreferredName } from "../utils/profile";
-import { isContentType } from "../utils/xmtpRN/contentTypes";
 import { Conversation } from "./db/entities/conversationEntity";
 import { Message } from "./db/entities/messageEntity";
 import { XmtpConversation, XmtpMessage } from "./store/chatStore";
 import { ProfileSocials } from "./store/profilesStore";
+import { getPreferredName } from "../utils/profile";
+import { isContentType } from "../utils/xmtpRN/contentTypes";
 
 // Methods to map entities (SQLite data) to store (Zustand, in RAM)
 

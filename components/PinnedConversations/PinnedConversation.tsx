@@ -8,13 +8,13 @@ import {
   useColorScheme,
 } from "react-native";
 
+import Avatar from "..//Avatar";
 import { useChatStore, useProfilesStore } from "../../data/store/accountsStore";
 import { XmtpConversation } from "../../data/store/chatStore";
 import { useGroupName } from "../../hooks/useGroupName";
 import { useGroupPhoto } from "../../hooks/useGroupPhoto";
 import { navigate } from "../../utils/navigation";
 import { getPreferredAvatar, getPreferredName } from "../../utils/profile";
-import Avatar from "..//Avatar";
 import GroupAvatar from "../GroupAvatar";
 
 interface Props {

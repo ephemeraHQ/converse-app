@@ -15,6 +15,9 @@ import {
   useColorScheme,
 } from "react-native";
 
+import Picto from "./Picto/Picto";
+import { showActionSheetWithOptions } from "./StateHandlers/ActionSheetStateHandler";
+import { TableViewPicto } from "./TableView/TableViewImage";
 import { refreshProfileForAddress } from "../data/helpers/profiles/profilesUpdate";
 import { useAccountsStore } from "../data/store/accountsStore";
 import { useAppStore } from "../data/store/appStore";
@@ -26,9 +29,6 @@ import {
   NotificationPermissionStatus,
   requestPushNotificationsPermissions,
 } from "../utils/notifications";
-import Picto from "./Picto/Picto";
-import { showActionSheetWithOptions } from "./StateHandlers/ActionSheetStateHandler";
-import { TableViewPicto } from "./TableView/TableViewImage";
 
 type Props = {
   account: string;

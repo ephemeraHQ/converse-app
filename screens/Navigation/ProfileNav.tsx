@@ -8,11 +8,11 @@ import {
   useColorScheme,
 } from "react-native";
 
+import { NativeStack, navigationAnimation } from "./Navigation";
 import Picto from "../../components/Picto/Picto";
 import { useCurrentAccount } from "../../data/store/accountsStore";
 import { navigate } from "../../utils/navigation";
 import ProfileScreen from "../Profile";
-import { NativeStack, navigationAnimation } from "./Navigation";
 
 export type ProfileNavParams = {
   address: string;

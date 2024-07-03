@@ -32,6 +32,10 @@ import { RectButton } from "react-native-gesture-handler";
 import Swipeable from "react-native-gesture-handler/Swipeable";
 import { TouchableRipple } from "react-native-paper";
 
+import Avatar from "./Avatar";
+import GroupAvatar from "./GroupAvatar";
+import Picto from "./Picto/Picto";
+import { showActionSheetWithOptions } from "./StateHandlers/ActionSheetStateHandler";
 import {
   currentAccount,
   useChatStore,
@@ -45,10 +49,6 @@ import { isDesktop } from "../utils/device";
 import { converseEventEmitter } from "../utils/events";
 import { navigate } from "../utils/navigation";
 import { consentToPeersOnProtocol } from "../utils/xmtpRN/conversations";
-import Avatar from "./Avatar";
-import GroupAvatar from "./GroupAvatar";
-import Picto from "./Picto/Picto";
-import { showActionSheetWithOptions } from "./StateHandlers/ActionSheetStateHandler";
 
 type ConversationListItemProps = {
   colorScheme: ColorSchemeName;
