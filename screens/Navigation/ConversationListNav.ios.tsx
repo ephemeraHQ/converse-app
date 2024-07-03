@@ -107,7 +107,7 @@ export default function ConversationListNav() {
             <View>
               <ProfileSettingsButton />
             </View>
-            <GestureHandlerRootView>
+            <GestureHandlerRootView style={{ flexShrink: 1 }}>
               <TouchableOpacity
                 onPress={() => {
                   navigation.navigate("Profile", {
