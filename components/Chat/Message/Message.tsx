@@ -163,6 +163,8 @@ function ChatMessage({ message, colorScheme, isGroup, isFrame }: Props) {
 
   const reactions = getMessageReactions(message);
   const showInBubble = !isGroupUpdated;
+  const showAvatar = isGroup && !message.fromMe;
+  const showStatus = message.fromMe && !message.hasNextMessageInSeries;
 
   // maybe using useChatStore inside ChatMessage
   // leads to bad perf? Let's be cautious
@@ -258,9 +260,7 @@ function ChatMessage({ message, colorScheme, isGroup, isFrame }: Props) {
               alignItems: "flex-end",
             }}
           >
-            {isGroup && !message.fromMe && (
-              <MessageSenderAvatar message={message} />
-            )}
+            {showAvatar && <MessageSenderAvatar message={message} />}
             <View style={{ flex: 1 }}>
               {isGroup &&
                 !message.fromMe &&
@@ -269,6 +269,7 @@ function ChatMessage({ message, colorScheme, isGroup, isFrame }: Props) {
               <View
                 style={{
                   alignSelf: message.fromMe ? "flex-end" : "flex-start",
+                  alignItems: message.fromMe ? "flex-end" : "flex-start",
                 }}
               >
                 <ChatMessageActions
@@ -382,7 +383,7 @@ function ChatMessage({ message, colorScheme, isGroup, isFrame }: Props) {
                       </Text>
                     </TouchableOpacity>
                   )}
-                  {!message.hasNextMessageInSeries && message.fromMe && (
+                  {showStatus && (
                     <View
                       style={[
                         styles.statusContainer,
