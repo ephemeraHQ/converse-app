@@ -121,6 +121,61 @@ suspend fun computeSpamScoreGroupMessage(client: Client, group: Group, decodedMe
     return senderSpamScore + messageSpamScore
 }
 
+suspend fun computeSpamScoreGroupWelcome(appContext: Context, client: Client, group: Group, apiURI: String?): Double {
+    try {
+        client.contacts.refreshConsentList()
+        // Probably an unlikely case until consent proofs for groups exist
+        val groupAllowed = client.contacts.isGroupAllowed(groupId = group.id)
+        if (groupAllowed) {
+            return -1.0
+        }
+
+        val inviterInboxId = group.addedByInboxId()
+        val inviterAllowed = client.contacts.isInboxAllowed(inboxId = inviterInboxId)
+        if (inviterAllowed) {
+            return -1.0
+        }
+
+        val inviterDenied = client.contacts.isInboxDenied(inboxId = inviterInboxId)
+        if (inviterDenied) {
+            return 1.0
+        }
+        val members = group.members()
+
+        for (member in members) {
+            if (member.inboxId == inviterInboxId) {
+                member.addresses?.forEach { address ->
+                    val ethereumAddress = Keys.toChecksumAddress(address)
+                    if (client.contacts.isDenied(ethereumAddress)) {
+                        return 1.0
+                    }
+                }
+
+                member.addresses?.forEach { address ->
+                    val ethereumAddress = Keys.toChecksumAddress(address)
+                    if (client.contacts.isAllowed(ethereumAddress)) {
+                        return -1.0
+                    }
+                }
+
+                member.addresses?.firstOrNull()?.let { firstAddress ->
+                    val senderSpamScore = getSenderSpamScore(
+                        appContext = appContext,
+                        address = Keys.toChecksumAddress(firstAddress),
+                        apiURI = apiURI
+                    )
+                    return senderSpamScore
+                }
+            }
+        }
+
+
+    } catch (e: Exception) {
+        return 0.0
+    }
+    return 0.0
+}
+
 suspend fun getSenderSpamScore(appContext: Context, address: String, apiURI: String?): Double {
     val senderSpamScoreURI = "$apiURI/api/spam/senders/batch"
     val params: MutableMap<String?, Any> = HashMap()

@@ -105,11 +105,8 @@ func handleGroupWelcome(xmtpClient: XMTP.Client, apiURI: String?, pushToken: Str
   var shouldShowNotification = false
   let messageId = "welcome-" + group.topic
   do {
-    
-    try await group.sync()
-    let members = try group.members
+    // group is already synced in getNewGroup method
     let groupName = try group.groupName()
-    
     let spamScore = await computeSpamScoreGroupWelcome(client: xmtpClient, group: group, apiURI: apiURI)
     if spamScore < 0 { // Message is going to main inbox
       shouldShowNotification = true

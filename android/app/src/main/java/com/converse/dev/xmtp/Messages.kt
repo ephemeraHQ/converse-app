@@ -14,6 +14,7 @@ import android.util.Base64.NO_WRAP
 import com.google.firebase.messaging.RemoteMessage
 import computeSpamScore
 import computeSpamScoreGroupMessage
+import computeSpamScoreGroupWelcome
 import expo.modules.notifications.service.delegates.encodedInBase64
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
@@ -436,3 +437,38 @@ fun getJsonReaction(decodedMessage: DecodedMessage): String {
     }
 }
 
+
+suspend fun handleGroupWelcome(
+    appContext: Context,
+    xmtpClient: Client,
+    group: Group,
+    remoteMessage: RemoteMessage
+): NotificationDataResult {
+    var shouldShowNotification = false
+    try {
+        val mmkv = getMmkv(appContext)
+        var apiURI = mmkv?.decodeString("api-uri")
+        if (apiURI == null) {
+            apiURI = getAsyncStorage("api-uri")
+        }
+        val spamScore = computeSpamScoreGroupWelcome(appContext, xmtpClient, group, apiURI)
+        if (spamScore < 0) { // Message is going to main inbox
+            shouldShowNotification = true
+        } else if (spamScore == 0.0) { // Message is Request
+            shouldShowNotification = false
+            // @todo : trackNewRequest()
+        } else { // Message is Spam
+            shouldShowNotification = false
+        }
+    } catch (e: Exception) {
+
+    }
+    group.sync()
+    return NotificationDataResult(
+        title = group.name,
+        body = "You have been added to a new group",
+        remoteMessage = remoteMessage,
+        messageId = "welcome-${group.topic}",
+        shouldShowNotification = shouldShowNotification
+    )
+}

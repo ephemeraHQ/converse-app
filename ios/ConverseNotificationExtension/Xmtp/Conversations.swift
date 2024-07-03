@@ -34,7 +34,7 @@ func getNewGroup(xmtpClient: XMTP.Client, contentTopic: String) async -> XMTP.Gr
       // Weclome envelopes are too large to send in a push, so a bit of a hack to get the latest group
       try await xmtpClient.conversations.sync()
       let groups = try await xmtpClient.conversations.groups()
-      if let group = groups.first {
+      if let group = groups.max(by: { $0.createdAt < $1.createdAt }) {
         try await group.sync()
         return group
       }
