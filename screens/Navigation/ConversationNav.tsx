@@ -1,12 +1,18 @@
+import { NavigationProp } from "@react-navigation/native";
 import { textPrimaryColor } from "@styles/colors";
 import { PictoSizes } from "@styles/sizes";
+import { useCallback } from "react";
 import { useColorScheme } from "react-native";
 import { TouchableOpacity } from "react-native-gesture-handler";
+import { StackAnimationTypes } from "react-native-screens";
 
-import { NativeStack, navigationAnimation } from "./Navigation";
+import {
+  NativeStack,
+  navigationAnimation,
+  NavigationParamList,
+} from "./Navigation";
 import { useIsSplitScreen } from "./navHelpers";
 import Picto from "../../components/Picto/Picto";
-import { navigate } from "../../utils/navigation";
 import Conversation from "../Conversation";
 
 export type ConversationNavParams = {
@@ -34,17 +40,17 @@ export default function ConversationNav(
   // so we override the route when instantiating Conversation
   const isSplitScreen = useIsSplitScreen();
   const colorScheme = useColorScheme();
-  return (
-    <NativeStack.Screen
-      name="Conversation"
-      options={{
-        headerShadowVisible: false,
-        animation: navigationAnimation,
-        headerLeft: () => (
+  const navigationOptions = useCallback(
+    ({ navigation }: { navigation: NavigationProp<NavigationParamList> }) => ({
+      headerShadowVisible: false,
+      animation: navigationAnimation as StackAnimationTypes,
+      headerLeft: () => {
+        const handleBack = () => {
+          navigation.canGoBack() && navigation.goBack();
+        };
+        return (
           <TouchableOpacity
-            onPress={() => {
-              navigate("Chats");
-            }}
+            onPress={handleBack}
             style={{ height: 40, justifyContent: "center", paddingRight: 16 }}
             hitSlop={{ top: 20, bottom: 20, left: 20, right: 10 }}
           >
@@ -54,9 +60,13 @@ export default function ConversationNav(
               color={textPrimaryColor(colorScheme)}
             />
           </TouchableOpacity>
-        ),
-      }}
-    >
+        );
+      },
+    }),
+    [colorScheme]
+  );
+  return (
+    <NativeStack.Screen name="Conversation" options={navigationOptions}>
       {({ route, navigation }) => (
         <Conversation
           navigation={navigation}
