@@ -12,40 +12,38 @@ export default function MessageStatus({ message }: Props) {
   const styles = useStyles();
   const opacityAnim = useRef(new Animated.Value(0)).current;
   const heightAnim = useRef(new Animated.Value(0)).current;
+  const scaleAnim = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
-    if (message.status === "sent") {
+    if (message.status !== "sending") {
       Animated.parallel([
         Animated.timing(opacityAnim, {
           toValue: 1,
-          duration: 300,
+          duration: 200,
           useNativeDriver: true,
         }),
         Animated.timing(heightAnim, {
-          toValue: 20,
-          duration: 300,
+          toValue: 12,
+          duration: 200,
           useNativeDriver: false,
         }),
-      ]).start();
-    } else {
-      Animated.parallel([
-        Animated.timing(opacityAnim, {
-          toValue: 0,
-          duration: 300,
-          useNativeDriver: true,
-        }),
-        Animated.timing(heightAnim, {
-          toValue: 0,
-          duration: 300,
+        Animated.timing(scaleAnim, {
+          toValue: 1,
+          duration: 200,
           useNativeDriver: false,
         }),
       ]).start();
     }
-  }, [message.status, opacityAnim, heightAnim]);
+  }, [message.status, opacityAnim, heightAnim, scaleAnim]);
 
   return (
     message.fromMe && (
-      <Animated.View style={[styles.container, { height: heightAnim }]}>
+      <Animated.View
+        style={[
+          styles.container,
+          { height: heightAnim, transform: [{ scale: scaleAnim }] },
+        ]}
+      >
         <Animated.Text style={[styles.statusText, { opacity: opacityAnim }]}>
           Sent
         </Animated.Text>
