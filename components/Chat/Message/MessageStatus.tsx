@@ -12,7 +12,7 @@ export default function MessageStatus({ message }: Props) {
   const styles = useStyles();
   const opacityAnim = useRef(new Animated.Value(0)).current;
   const heightAnim = useRef(new Animated.Value(0)).current;
-  const scaleAnim = useRef(new Animated.Value(0)).current;
+  const scaleAnim = useRef(new Animated.Value(1)).current;
 
   useEffect(() => {
     if (message.status !== "sending") {
