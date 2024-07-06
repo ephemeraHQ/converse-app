@@ -1,6 +1,6 @@
 import { textSecondaryColor } from "@styles/colors";
 import React, { useEffect, useRef, useState } from "react";
-import { StyleSheet, useColorScheme, Animated, View } from "react-native";
+import { StyleSheet, useColorScheme, Animated } from "react-native";
 
 import { MessageToDisplay } from "./Message";
 
@@ -24,6 +24,7 @@ export default function MessageStatus({ message }: Props) {
   const isSentOrDelivered =
     message.status === "sent" || message.status === "delivered";
   const isLatestFinished = message.isLatestFinished;
+  const isVisibleRef = useRef(isSentOrDelivered && isLatestFinished);
   const opacityAnim = useRef(
     new Animated.Value(isSentOrDelivered && isLatestFinished ? 1 : 0)
   ).current;
@@ -34,7 +35,8 @@ export default function MessageStatus({ message }: Props) {
     new Animated.Value(isSentOrDelivered && isLatestFinished ? 1 : 0)
   ).current;
   const shouldAnimateIn = isSentOrDelivered && prevStatus === "sending";
-  const shouldAnimateOut = isSentOrDelivered && !isLatestFinished;
+  const shouldAnimateOut =
+    isSentOrDelivered && !isLatestFinished && isVisibleRef.current;
 
   useEffect(() => {
     if (shouldAnimateIn) {
@@ -52,9 +54,10 @@ export default function MessageStatus({ message }: Props) {
         Animated.timing(scaleAnim, {
           toValue: 1,
           duration: 200,
-          useNativeDriver: false,
+          useNativeDriver: true,
         }),
       ]).start();
+      isVisibleRef.current = true;
     } else if (shouldAnimateOut) {
       const timer = setTimeout(() => {
         Animated.parallel([
@@ -65,22 +68,28 @@ export default function MessageStatus({ message }: Props) {
           }),
           Animated.timing(heightAnim, {
             toValue: 0,
-            duration: 200,
+            duration: 300,
             useNativeDriver: false,
           }),
           Animated.timing(scaleAnim, {
             toValue: 0,
             duration: 200,
-            useNativeDriver: false,
+            useNativeDriver: true,
           }),
         ]).start();
+        isVisibleRef.current = false;
       }, 300);
       return () => clearTimeout(timer);
     }
+
+    if (!isLatestFinished) {
+      isVisibleRef.current = false;
+    }
+
     setPrevStatus(message.status);
   }, [
     message.status,
-    message.isLatestFinished,
+    isLatestFinished,
     heightAnim,
     opacityAnim,
     scaleAnim,
@@ -90,17 +99,17 @@ export default function MessageStatus({ message }: Props) {
 
   return (
     message.fromMe && (
-      <Animated.View
-        style={[
-          styles.container,
-          { height: heightAnim, transform: [{ scale: scaleAnim }] },
-        ]}
-      >
-        <View style={styles.contentContainer}>
-          <Animated.Text style={[styles.statusText, { opacity: opacityAnim }]}>
+      <Animated.View style={[styles.container, { height: heightAnim }]}>
+        <Animated.View style={styles.contentContainer}>
+          <Animated.Text
+            style={[
+              styles.statusText,
+              { opacity: opacityAnim, transform: [{ scale: scaleAnim }] },
+            ]}
+          >
             {statusMapping[message.status]}
           </Animated.Text>
-        </View>
+        </Animated.View>
       </Animated.View>
     )
   );
