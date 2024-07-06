@@ -13,7 +13,7 @@ import {
   useMemo,
   useRef,
   useState,
-  useLayoutEffect,
+  useEffect,
 } from "react";
 import {
   Animated,
@@ -71,6 +71,7 @@ export type MessageToDisplay = XmtpMessage & {
   hasNextMessageInSeries: boolean;
   dateChange: boolean;
   fromMe: boolean;
+  isLatestFinished: boolean;
 };
 
 type Props = {
@@ -183,8 +184,6 @@ function ChatMessage({ message, colorScheme, isGroup, isFrame }: Props) {
 
   const reactions = getMessageReactions(message);
   const showInBubble = !isGroupUpdated;
-  const showAvatar = isGroup && !message.fromMe;
-  const showStatus = message.fromMe && !message.hasNextMessageInSeries;
 
   const replyingToProfileName = useMemo(() => {
     if (!replyingToMessage?.senderAddress) return "";
@@ -200,16 +199,14 @@ function ChatMessage({ message, colorScheme, isGroup, isFrame }: Props) {
   const translateYAnim = useRef(new Animated.Value(20)).current;
   const contentRef = useRef<View>(null);
 
-  const isUUID = (id: string): boolean => UUID_REGEX.test(id);
-
-  // Animate the sending message. In groups, we animate the optimistic placeholder.
   const shouldAnimate =
-    message.status === "sending" && (!isGroup || isUUID(message.id));
-
+    message.status === "sending" && UUID_REGEX.test(message.id);
   const [hasAnimated, setHasAnimated] = useState(false);
 
-  useLayoutEffect(() => {
+  useEffect(() => {
     if (shouldAnimate && !hasAnimated) {
+      opacityAnim.setValue(0);
+      translateYAnim.setValue(20);
       Animated.parallel([
         Animated.timing(opacityAnim, {
           toValue: 1,
@@ -225,18 +222,10 @@ function ChatMessage({ message, colorScheme, isGroup, isFrame }: Props) {
         setHasAnimated(true);
       });
     } else {
-      // For non-animated messages, set to full opacity and no translation immediately
       opacityAnim.setValue(1);
       translateYAnim.setValue(0);
     }
-  }, [
-    message.id,
-    message.status,
-    shouldAnimate,
-    hasAnimated,
-    opacityAnim,
-    translateYAnim,
-  ]);
+  }, [shouldAnimate, hasAnimated, opacityAnim, translateYAnim]);
 
   return (
     <Animated.View
@@ -314,7 +303,7 @@ function ChatMessage({ message, colorScheme, isGroup, isFrame }: Props) {
               alignItems: "flex-end",
             }}
           >
-            {showAvatar && <MessageSenderAvatar message={message} />}
+            {!message.fromMe && <MessageSenderAvatar message={message} />}
             <View style={{ flex: 1 }}>
               {isGroup &&
                 !message.fromMe &&
@@ -432,13 +421,8 @@ function ChatMessage({ message, colorScheme, isGroup, isFrame }: Props) {
                       </Text>
                     </TouchableOpacity>
                   )}
-                  {showStatus && (
-                    <View
-                      style={[
-                        styles.statusContainer,
-                        hideBackground ? { marginVertical: 0 } : undefined,
-                      ]}
-                    >
+                  {message.fromMe && (
+                    <View style={styles.statusContainer}>
                       <MessageStatus message={message} />
                     </View>
                   )}
@@ -483,6 +467,7 @@ export default function CachedChatMessage({
     "dateChange",
     "hasNextMessageInSeries",
     "hasPreviousMessageInSeries",
+    "isLatestFinished",
   ];
   const alreadyRenderedMessage = renderedMessages.get(
     `${account}-${message.id}`
@@ -545,7 +530,6 @@ const useStyles = () => {
     },
     statusContainer: {
       marginLeft: "auto",
-      marginVertical: 5,
     },
     linkToFrame: {
       fontSize: 12,
