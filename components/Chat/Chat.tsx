@@ -70,6 +70,7 @@ const getListArray = (
     );
   });
 
+  let latestFinishedIndex = -1;
   for (let index = filteredMessageIds.length - 1; index >= 0; index--) {
     const messageId = filteredMessageIds[index];
     const message = conversation.messages.get(messageId) as MessageToDisplay;
@@ -117,8 +118,22 @@ const getListArray = (
         }
       }
     }
+
+    // Check if this is the last sent or delivered message from the current user
+    if (
+      message.fromMe &&
+      message.status !== "sending" &&
+      latestFinishedIndex === -1
+    ) {
+      latestFinishedIndex = reverseArray.length;
+      message.isLatestFinished = true;
+    } else {
+      message.isLatestFinished = false;
+    }
+
     reverseArray.push(message);
   }
+
   return reverseArray;
 };
 
