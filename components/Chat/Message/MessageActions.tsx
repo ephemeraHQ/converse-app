@@ -26,8 +26,6 @@ import Animated, {
   withTiming,
 } from "react-native-reanimated";
 
-import { MessageToDisplay } from "./Message";
-import MessageTail from "./MessageTail";
 import {
   useCurrentAccount,
   useSettingsStore,
@@ -50,6 +48,8 @@ import { UUID_REGEX } from "../../../utils/regex";
 import { isTransactionMessage } from "../../../utils/transaction";
 import EmojiPicker from "../../../vendor/rn-emoji-keyboard";
 import { showActionSheetWithOptions } from "../../StateHandlers/ActionSheetStateHandler";
+import { MessageToDisplay } from "./Message";
+import MessageTail from "./MessageTail";
 
 type Props = {
   children: React.ReactNode;
@@ -303,7 +303,7 @@ export default function ChatMessageActions({
       translateY.value = 20;
 
       const animationConfig = {
-        duration: 500,
+        duration: 300,
         onComplete: () => {
           runOnJS(setHasAnimatedIn)(true);
         },
