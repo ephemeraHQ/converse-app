@@ -21,9 +21,6 @@ import {
 } from "react-native";
 import { Swipeable } from "react-native-gesture-handler";
 
-import ChatMessageActions from "./MessageActions";
-import ChatMessageReactions from "./MessageReactions";
-import MessageStatus from "./MessageStatus";
 import {
   currentAccount,
   useChatStore,
@@ -57,6 +54,9 @@ import ChatGroupUpdatedMessage from "../ChatGroupUpdatedMessage";
 import FramesPreviews from "../Frame/FramesPreviews";
 import ChatInputReplyBubble from "../Input/InputReplyBubble";
 import TransactionPreview from "../Transaction/TransactionPreview";
+import ChatMessageActions from "./MessageActions";
+import ChatMessageReactions from "./MessageReactions";
+import MessageStatus from "./MessageStatus";
 
 export type MessageToDisplay = XmtpMessage & {
   hasPreviousMessageInSeries: boolean;
