@@ -16,7 +16,7 @@ import {
 } from "react-native";
 import ContextMenu from "react-native-context-menu-view";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
-import {
+import Animated, {
   AnimatedStyle,
   Easing,
   ReduceMotion,
@@ -46,6 +46,7 @@ import {
   getEmojiName,
   removeReactionFromMessage,
 } from "../../../utils/reactions";
+import { UUID_REGEX } from "../../../utils/regex";
 import { isTransactionMessage } from "../../../utils/transaction";
 import EmojiPicker from "../../../vendor/rn-emoji-keyboard";
 import { showActionSheetWithOptions } from "../../StateHandlers/ActionSheetStateHandler";
@@ -284,6 +285,44 @@ export default function ChatMessageActions({
     [contextMenuItems, showReactionModal, triggerReplyToMessage, message]
   );
 
+  const shouldAnimateIn =
+    message.status === "sending" && UUID_REGEX.test(message.id);
+  const [hasAnimatedIn, setHasAnimatedIn] = useState(false);
+
+  const opacity = useSharedValue(0);
+  const scale = useSharedValue(0);
+  const translateY = useSharedValue(20);
+
+  useEffect(() => {
+    if (shouldAnimateIn && !hasAnimatedIn) {
+      opacity.value = 0;
+      scale.value = 0;
+      translateY.value = 20;
+
+      const animationConfig = {
+        duration: 500,
+        onComplete: () => {
+          runOnJS(setHasAnimatedIn)(true);
+        },
+      };
+
+      opacity.value = withTiming(1, animationConfig);
+      scale.value = withTiming(1, animationConfig);
+      translateY.value = withTiming(0, animationConfig);
+    } else {
+      opacity.value = 1;
+      scale.value = 1;
+      translateY.value = 0;
+    }
+  }, [shouldAnimateIn, hasAnimatedIn, opacity, scale, translateY]);
+
+  const animateInStyle = useAnimatedStyle(() => {
+    return {
+      opacity: opacity.value,
+      transform: [{ scale: scale.value }, { translateY: translateY.value }],
+    };
+  });
+
   // We use a mix of Gesture Detector AND TouchableOpacity
   // because GestureDetector is better for dual tap but if
   // we add the gesture detector for long press the long press
@@ -299,6 +338,8 @@ export default function ChatMessageActions({
           previewBackgroundColor={initialBubbleBackgroundColor}
           style={[{ width: "100%" }, { overflow: "visible" }]}
         >
+          <Animated.View style={animateInStyle}>
+
           <ReanimatedTouchableOpacity
             activeOpacity={1}
             style={[
@@ -364,11 +405,13 @@ export default function ChatMessageActions({
                   },
                   highlightingMessage ? iosAnimatedTailStyle : undefined,
                 ]}
+                
                 fromMe={message.fromMe}
                 colorScheme={colorScheme}
                 hideBackground={hideBackground}
               />
             )}
+            </Animated.View>
         </ContextMenu>
       </GestureDetector>
       {/* <View style={{width: 50, height: 20, backgroundColor: "red"}} />
