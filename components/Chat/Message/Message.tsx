@@ -196,7 +196,8 @@ function ChatMessage({ message, colorScheme, isGroup, isFrame }: Props) {
 
   const swipeableRef = useRef<Swipeable | null>(null);
   const opacityAnim = useRef(new Animated.Value(0)).current;
-  const translateYAnim = useRef(new Animated.Value(20)).current;
+  const scaleYAnim = useRef(new Animated.Value(0)).current;
+  const translateYAnim = useRef(new Animated.Value(40)).current;
   const contentRef = useRef<View>(null);
 
   const shouldAnimate =
@@ -206,16 +207,21 @@ function ChatMessage({ message, colorScheme, isGroup, isFrame }: Props) {
   useEffect(() => {
     if (shouldAnimate && !hasAnimated) {
       opacityAnim.setValue(0);
-      translateYAnim.setValue(20);
+      translateYAnim.setValue(40);
       Animated.parallel([
         Animated.timing(opacityAnim, {
           toValue: 1,
-          duration: 200,
+          duration: 100,
+          useNativeDriver: true,
+        }),
+        Animated.timing(scaleYAnim, {
+          toValue: 1,
+          duration: 100,
           useNativeDriver: true,
         }),
         Animated.timing(translateYAnim, {
           toValue: 0,
-          duration: 200,
+          duration: 100,
           useNativeDriver: true,
         }),
       ]).start(() => {
@@ -223,9 +229,10 @@ function ChatMessage({ message, colorScheme, isGroup, isFrame }: Props) {
       });
     } else {
       opacityAnim.setValue(1);
+      scaleYAnim.setValue(1);
       translateYAnim.setValue(0);
     }
-  }, [shouldAnimate, hasAnimated, opacityAnim, translateYAnim]);
+  }, [shouldAnimate, hasAnimated, opacityAnim, translateYAnim, scaleYAnim]);
 
   return (
     <Animated.View
@@ -235,7 +242,7 @@ function ChatMessage({ message, colorScheme, isGroup, isFrame }: Props) {
         {
           marginBottom: !message.hasNextMessageInSeries ? 8 : 2,
           opacity: opacityAnim,
-          transform: [{ translateY: translateYAnim }],
+          transform: [{ translateY: translateYAnim }, { scaleY: scaleYAnim }],
         },
       ]}
     >
