@@ -479,6 +479,10 @@ const getEmojiPickerTheme = (colorScheme: ColorSchemeName) =>
 
 const useStyles = () => {
   return StyleSheet.create({
+    animateInWrapper: {
+      alignSelf: "flex-start",
+      flexDirection: "row",
+    },
     messageBubble: {
       flexShrink: 1,
       flexGrow: 0,
