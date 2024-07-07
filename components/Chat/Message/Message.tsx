@@ -7,14 +7,7 @@ import {
 } from "@styles/colors";
 import { AvatarSizes } from "@styles/sizes";
 import * as Haptics from "expo-haptics";
-import {
-  ReactNode,
-  useCallback,
-  useMemo,
-  useRef,
-  useState,
-  useEffect,
-} from "react";
+import { ReactNode, useCallback, useMemo, useRef } from "react";
 import {
   Animated,
   ColorSchemeName,
@@ -50,7 +43,6 @@ import { navigate } from "../../../utils/navigation";
 import { LimitedMap } from "../../../utils/objects";
 import { getPreferredAvatar, getPreferredName } from "../../../utils/profile";
 import { getMessageReactions } from "../../../utils/reactions";
-import { UUID_REGEX } from "../../../utils/regex";
 import { getReadableProfile } from "../../../utils/str";
 import { isTransactionMessage } from "../../../utils/transaction";
 import {
@@ -195,54 +187,13 @@ function ChatMessage({ message, colorScheme, isGroup, isFrame }: Props) {
   }, [replyingToMessage?.senderAddress]);
 
   const swipeableRef = useRef<Swipeable | null>(null);
-  const opacityAnim = useRef(new Animated.Value(0)).current;
-  const scaleYAnim = useRef(new Animated.Value(0)).current;
-  const translateYAnim = useRef(new Animated.Value(40)).current;
-  const contentRef = useRef<View>(null);
-
-  const shouldAnimate =
-    message.status === "sending" && UUID_REGEX.test(message.id);
-  const [hasAnimated, setHasAnimated] = useState(false);
-
-  useEffect(() => {
-    if (shouldAnimate && !hasAnimated) {
-      opacityAnim.setValue(0);
-      translateYAnim.setValue(40);
-      Animated.parallel([
-        Animated.timing(opacityAnim, {
-          toValue: 1,
-          duration: 100,
-          useNativeDriver: true,
-        }),
-        Animated.timing(scaleYAnim, {
-          toValue: 1,
-          duration: 100,
-          useNativeDriver: true,
-        }),
-        Animated.timing(translateYAnim, {
-          toValue: 0,
-          duration: 100,
-          useNativeDriver: true,
-        }),
-      ]).start(() => {
-        setHasAnimated(true);
-      });
-    } else {
-      opacityAnim.setValue(1);
-      scaleYAnim.setValue(1);
-      translateYAnim.setValue(0);
-    }
-  }, [shouldAnimate, hasAnimated, opacityAnim, translateYAnim, scaleYAnim]);
 
   return (
-    <Animated.View
-      ref={contentRef}
+    <View
       style={[
         styles.messageRow,
         {
           marginBottom: !message.hasNextMessageInSeries ? 8 : 2,
-          opacity: opacityAnim,
-          transform: [{ translateY: translateYAnim }, { scaleY: scaleYAnim }],
         },
       ]}
     >
@@ -439,7 +390,7 @@ function ChatMessage({ message, colorScheme, isGroup, isFrame }: Props) {
           </View>
         </Swipeable>
       )}
-    </Animated.View>
+    </View>
   );
 }
 
