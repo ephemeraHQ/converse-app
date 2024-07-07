@@ -285,11 +285,11 @@ export default function ChatMessageActions({
     [contextMenuItems, showReactionModal, triggerReplyToMessage, message]
   );
 
-  // Entrance animation for messages that are being sent.
-  // We filter on UUIDs to avoid repeating the animation
-  // when the sent message is received from the stream.
-  const shouldAnimateIn =
-    message.status === "sending" && UUID_REGEX.test(message.id);
+  // Entrance animation for new messages. For sent messages,
+  // we filter on UUIDs to avoid repeating the animation
+  // when the message is received from the stream.
+  const shouldAnimateIn = (message.isLatestSettledFromPeer) || (
+    message.status === "sending" && UUID_REGEX.test(message.id));
   const [hasAnimatedIn, setHasAnimatedIn] = useState(false);
 
   const opacity = useSharedValue(0);

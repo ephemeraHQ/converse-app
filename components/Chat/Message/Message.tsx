@@ -63,7 +63,8 @@ export type MessageToDisplay = XmtpMessage & {
   hasNextMessageInSeries: boolean;
   dateChange: boolean;
   fromMe: boolean;
-  isLatestFinished: boolean;
+  isLatestSettledFromMe: boolean;
+  isLatestSettledFromPeer: boolean;
 };
 
 type Props = {
@@ -425,7 +426,8 @@ export default function CachedChatMessage({
     "dateChange",
     "hasNextMessageInSeries",
     "hasPreviousMessageInSeries",
-    "isLatestFinished",
+    "isLatestSettledFromMe",
+    "isLatestSettledFromPeer",
   ];
   const alreadyRenderedMessage = renderedMessages.get(
     `${account}-${message.id}`

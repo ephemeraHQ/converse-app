@@ -28,7 +28,7 @@ export default function MessageStatus({ message }: Props) {
   const prevStatusRef = useRef(message.status);
   const isSentOrDelivered =
     message.status === "sent" || message.status === "delivered";
-  const isLatestFinished = message.isLatestFinished;
+  const isLatestSettledFromMe = message.isLatestSettledFromMe;
 
   const opacity = useSharedValue(0);
   const height = useSharedValue(0);
@@ -48,18 +48,18 @@ export default function MessageStatus({ message }: Props) {
       opacity.value = withTiming(1, { duration: 200 });
       height.value = withTiming(22, { duration: 200 });
       scale.value = withTiming(1, { duration: 200 });
-    } else if (isSentOrDelivered && !isLatestFinished) {
+    } else if (isSentOrDelivered && !isLatestSettledFromMe) {
       opacity.value = withTiming(0, { duration: 200 });
       height.value = withTiming(0, { duration: 200 });
       scale.value = withTiming(0, { duration: 200 });
-    } else if (isLatestFinished) {
+    } else if (isLatestSettledFromMe) {
       opacity.value = 1;
       height.value = 22;
       scale.value = 1;
     }
   }, [
     message.status,
-    isLatestFinished,
+    isLatestSettledFromMe,
     isSentOrDelivered,
     height,
     opacity,
