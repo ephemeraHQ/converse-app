@@ -1,6 +1,11 @@
 import { textSecondaryColor } from "@styles/colors";
-import React, { useEffect, useRef, useState } from "react";
-import { StyleSheet, useColorScheme, Animated } from "react-native";
+import React, { useEffect, useRef } from "react";
+import { StyleSheet, useColorScheme, View } from "react-native";
+import Animated, {
+  useSharedValue,
+  useAnimatedStyle,
+  withTiming,
+} from "react-native-reanimated";
 
 import { MessageToDisplay } from "./Message";
 
@@ -20,96 +25,55 @@ const statusMapping: {
 
 export default function MessageStatus({ message }: Props) {
   const styles = useStyles();
-  const [prevStatus, setPrevStatus] = useState(message.status);
+  const prevStatusRef = useRef(message.status);
   const isSentOrDelivered =
     message.status === "sent" || message.status === "delivered";
   const isLatestFinished = message.isLatestFinished;
-  const isVisibleRef = useRef(isSentOrDelivered && isLatestFinished);
-  const opacityAnim = useRef(
-    new Animated.Value(isSentOrDelivered && isLatestFinished ? 1 : 0)
-  ).current;
-  const heightAnim = useRef(
-    new Animated.Value(isSentOrDelivered && isLatestFinished ? 22 : 0)
-  ).current;
-  const scaleAnim = useRef(
-    new Animated.Value(isSentOrDelivered && isLatestFinished ? 1 : 0)
-  ).current;
-  const shouldAnimateIn = isSentOrDelivered && prevStatus === "sending";
-  const shouldAnimateOut =
-    isSentOrDelivered && !isLatestFinished && isVisibleRef.current;
+
+  const opacity = useSharedValue(0);
+  const height = useSharedValue(0);
+  const scale = useSharedValue(0);
+
+  const animatedStyle = useAnimatedStyle(() => ({
+    opacity: opacity.value,
+    height: height.value,
+    transform: [{ scale: scale.value }],
+  }));
 
   useEffect(() => {
-    if (shouldAnimateIn) {
-      Animated.parallel([
-        Animated.timing(opacityAnim, {
-          toValue: 1,
-          duration: 200,
-          useNativeDriver: true,
-        }),
-        Animated.timing(heightAnim, {
-          toValue: 22,
-          duration: 200,
-          useNativeDriver: false,
-        }),
-        Animated.timing(scaleAnim, {
-          toValue: 1,
-          duration: 200,
-          useNativeDriver: true,
-        }),
-      ]).start();
-      isVisibleRef.current = true;
-    } else if (shouldAnimateOut) {
-      const timer = setTimeout(() => {
-        Animated.parallel([
-          Animated.timing(opacityAnim, {
-            toValue: 0,
-            duration: 200,
-            useNativeDriver: true,
-          }),
-          Animated.timing(heightAnim, {
-            toValue: 0,
-            duration: 300,
-            useNativeDriver: false,
-          }),
-          Animated.timing(scaleAnim, {
-            toValue: 0,
-            duration: 200,
-            useNativeDriver: true,
-          }),
-        ]).start();
-        isVisibleRef.current = false;
-      }, 300);
-      return () => clearTimeout(timer);
-    }
+    const prevStatus = prevStatusRef.current;
+    prevStatusRef.current = message.status;
 
-    if (!isLatestFinished) {
-      isVisibleRef.current = false;
+    if (isSentOrDelivered && prevStatus === "sending") {
+      opacity.value = withTiming(1, { duration: 100 });
+      height.value = withTiming(22, { duration: 100 });
+      scale.value = withTiming(1, { duration: 100 });
+    } else if (isSentOrDelivered && !isLatestFinished) {
+      opacity.value = withTiming(0, { duration: 100 });
+      height.value = withTiming(0, { duration: 100 });
+      scale.value = withTiming(0, { duration: 100 });
+    } else if (isLatestFinished) {
+      opacity.value = 1;
+      height.value = 22;
+      scale.value = 1;
     }
-
-    setPrevStatus(message.status);
   }, [
     message.status,
     isLatestFinished,
-    heightAnim,
-    opacityAnim,
-    scaleAnim,
-    shouldAnimateIn,
-    shouldAnimateOut,
+    isSentOrDelivered,
+    height,
+    opacity,
+    scale,
   ]);
 
   return (
     message.fromMe && (
-      <Animated.View style={[styles.container, { height: heightAnim }]}>
-        <Animated.View style={styles.contentContainer}>
-          <Animated.Text
-            style={[
-              styles.statusText,
-              { opacity: opacityAnim, transform: [{ scale: scaleAnim }] },
-            ]}
-          >
+      <Animated.View style={[styles.container, animatedStyle]}>
+        <View style={styles.contentContainer}>
+          <Animated.Text style={styles.statusText}>
             {statusMapping[message.status]}
           </Animated.Text>
-        </Animated.View>
+        </View>
       </Animated.View>
     )
   );
@@ -122,7 +86,6 @@ const useStyles = () => {
       overflow: "hidden",
     },
     contentContainer: {
-      height: 22,
       paddingVertical: 5,
     },
     statusText: {
