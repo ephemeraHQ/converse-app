@@ -45,13 +45,13 @@ export default function MessageStatus({ message }: Props) {
     prevStatusRef.current = message.status;
 
     if (isSentOrDelivered && prevStatus === "sending") {
-      opacity.value = withTiming(1, { duration: 100 });
-      height.value = withTiming(22, { duration: 100 });
-      scale.value = withTiming(1, { duration: 100 });
+      opacity.value = withTiming(1, { duration: 200 });
+      height.value = withTiming(22, { duration: 200 });
+      scale.value = withTiming(1, { duration: 200 });
     } else if (isSentOrDelivered && !isLatestFinished) {
-      opacity.value = withTiming(0, { duration: 100 });
-      height.value = withTiming(0, { duration: 100 });
-      scale.value = withTiming(0, { duration: 100 });
+      opacity.value = withTiming(0, { duration: 200 });
+      height.value = withTiming(0, { duration: 200 });
+      scale.value = withTiming(0, { duration: 200 });
     } else if (isLatestFinished) {
       opacity.value = 1;
       height.value = 22;
