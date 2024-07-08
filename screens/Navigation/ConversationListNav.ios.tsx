@@ -87,12 +87,18 @@ export default function ConversationListNav() {
       name="Chats"
       options={({ route, navigation }) => ({
         headerTitle: () =>
-          shouldShowConnectingOrSyncing ? <Connecting /> : <View />,
+          shouldShowConnectingOrSyncing ? (
+            <View style={{ marginTop: -10 }}>
+              <Connecting />
+            </View>
+          ) : (
+            <View />
+          ),
         headerBackTitle: getReadableProfile(currentAccount, currentAccount),
         headerRight: () => (
-          <>
+          <View style={{ marginTop: -10 }}>
             <NewConversationButton navigation={navigation} route={route} />
-          </>
+          </View>
         ),
         headerTintColor: textPrimaryColor(colorScheme),
         headerShadowVisible: false,
@@ -102,6 +108,7 @@ export default function ConversationListNav() {
             style={{
               flexDirection: "row",
               alignItems: "flex-end",
+              marginTop: -10,
             }}
           >
             <View>
