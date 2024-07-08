@@ -357,7 +357,12 @@ export default function ChatMessageActions({
             !isTransaction &&
             (Platform.OS === "ios" || Platform.OS === "web") && (
               <MessageTail
-                style={highlightingMessage ? iosAnimatedTailStyle : undefined}
+                style={[
+                  {
+                    color: initialBubbleBackgroundColor,
+                  },
+                  highlightingMessage ? iosAnimatedTailStyle : undefined,
+                ]}
                 fromMe={message.fromMe}
                 colorScheme={colorScheme}
                 hideBackground={hideBackground}
@@ -436,19 +441,6 @@ const useStyles = () => {
 
     messageBubbleMe: {
       marginLeft: "auto",
-    },
-    messageTail: {
-      position: "absolute",
-      left: -5,
-      bottom: 0,
-      width: 14,
-      height: 21,
-      zIndex: -1,
-    },
-    messageTailMe: {
-      left: "auto",
-      right: -5,
-      transform: [{ scaleX: -1 }],
     },
   });
 };
