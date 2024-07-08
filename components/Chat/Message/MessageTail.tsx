@@ -1,7 +1,12 @@
 import { messageBubbleColor, myMessageBubbleColor } from "@styles/colors";
 import React from "react";
-import { ColorSchemeName, StyleSheet, ViewStyle } from "react-native";
-import Reanimated, { AnimatedStyleProp } from "react-native-reanimated";
+import {
+  ColorSchemeName,
+  StyleProp,
+  StyleSheet,
+  ViewStyle,
+} from "react-native";
+import Reanimated, { AnimatedStyle } from "react-native-reanimated";
 import { SvgProps } from "react-native-svg";
 
 import _MessageTail from "../../../assets/message-tail.svg";
@@ -19,7 +24,7 @@ interface MessageTailProps {
   fromMe: boolean;
   colorScheme: ColorSchemeName;
   hideBackground: boolean;
-  style?: AnimatedStyleProp<ViewStyle>;
+  style?: StyleProp<AnimatedStyle<StyleProp<ViewStyle>>>;
 }
 
 const MessageTail: React.FC<MessageTailProps> = ({
