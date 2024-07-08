@@ -1,4 +1,4 @@
-import { textPrimaryColor } from "@styles/colors";
+import { backgroundColor, textPrimaryColor } from "@styles/colors";
 import { Image } from "expo-image";
 import prettyBytes from "pretty-bytes";
 import { useCallback, useEffect } from "react";
@@ -150,6 +150,7 @@ const useStyles = () => {
       minWidth: Platform.OS === "web" ? 250 : undefined,
       justifyContent: "center",
       alignItems: "center",
+      backgroundColor: backgroundColor(colorScheme),
     },
     text: {
       paddingHorizontal: 8,
