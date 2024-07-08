@@ -7,11 +7,8 @@ import {
   TextInputChangeEventData,
   View,
   useColorScheme,
-} from "react-native";
-import {
-  GestureHandlerRootView,
   TouchableOpacity,
-} from "react-native-gesture-handler";
+} from "react-native";
 import { SearchBarCommands } from "react-native-screens";
 
 import {
@@ -107,28 +104,26 @@ export default function ConversationListNav() {
             <View>
               <ProfileSettingsButton />
             </View>
-            <GestureHandlerRootView>
-              <TouchableOpacity
-                onPress={() => {
-                  navigation.navigate("Profile", {
-                    address: currentAccount,
-                  });
+            <TouchableOpacity
+              onPress={() => {
+                navigation.navigate("Profile", {
+                  address: currentAccount,
+                });
+              }}
+            >
+              <Text
+                style={{
+                  fontSize: 16,
+                  color:
+                    colorScheme === "dark"
+                      ? "rgba(255, 255, 255, 0.6)"
+                      : "rgba(0, 0, 0, 0.6)",
+                  paddingBottom: 6,
                 }}
               >
-                <Text
-                  style={{
-                    fontSize: 16,
-                    color:
-                      colorScheme === "dark"
-                        ? "rgba(255, 255, 255, 0.6)"
-                        : "rgba(0, 0, 0, 0.6)",
-                    paddingBottom: 6,
-                  }}
-                >
-                  {name}
-                </Text>
-              </TouchableOpacity>
-            </GestureHandlerRootView>
+                {name}
+              </Text>
+            </TouchableOpacity>
           </View>
         ),
       })}
