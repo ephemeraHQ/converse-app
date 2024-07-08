@@ -41,6 +41,7 @@ export const getXmtpBase64KeyFromSigner = async (
     preEnableIdentityCallback,
     enableV3: true,
     dbDirectory,
+    historySyncUrl: config.historySyncUrl,
   });
   const base64Key = await client.exportKeyBundle();
   return base64Key;
