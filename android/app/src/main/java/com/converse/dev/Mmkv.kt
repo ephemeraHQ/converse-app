@@ -98,3 +98,16 @@ fun setShownNotificationIds(appContext: Context, ids: List<String>) {
     val jsonArray = JSONArray(ids)
     mmkv?.encode("notification-ids", jsonArray.toString())
 }
+
+fun getProfilesState(appContext: Context, account: String): Profiles? {
+    val mmkv = getMmkv(appContext)
+    val profilesString = mmkv?.decodeString("store-$account-profiles") ?: return null
+    try {
+        val decoded = Klaxon().parse<ProfilesStore>(profilesString)
+        return decoded?.state
+    } catch (e: Exception) {
+        sentryTrackError(e, mapOf("message" to "Could not parse the store-$account-profiles data", "profilesString" to profilesString))
+        Log.d("GetProfilesState", "Could not parse the store-$account-profiles data: $e")
+        return null
+    }
+}

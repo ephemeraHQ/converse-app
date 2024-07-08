@@ -105,11 +105,8 @@ func handleGroupWelcome(xmtpClient: XMTP.Client, apiURI: String?, pushToken: Str
   var shouldShowNotification = false
   let messageId = "welcome-" + group.topic
   do {
-    
-    try await group.sync()
-    let members = try group.members
+    // group is already synced in getNewGroup method
     let groupName = try group.groupName()
-    
     let spamScore = await computeSpamScoreGroupWelcome(client: xmtpClient, group: group, apiURI: apiURI)
     if spamScore < 0 { // Message is going to main inbox
       shouldShowNotification = true
@@ -142,7 +139,7 @@ func handleGroupMessage(xmtpClient: XMTP.Client, envelope: XMTP.Envelope, apiURI
       if let decodedMessage = try? await decodeMessage(xmtpClient: xmtpClient, envelope: envelope) {
         let decodedMessageResult = handleMessageByContentType(decodedMessage: decodedMessage, xmtpClient: xmtpClient);
         messageId = decodedMessageResult.id
-        if decodedMessageResult.senderAddress == xmtpClient.address || decodedMessageResult.forceIgnore {
+        if decodedMessageResult.senderAddress == xmtpClient.inboxID || decodedMessageResult.forceIgnore {
           
         } else {
           let spamScore = await computeSpamScoreGroupMessage(client: xmtpClient, group: group, decodedMessage: decodedMessage, apiURI: apiURI)
@@ -152,6 +149,15 @@ func handleGroupMessage(xmtpClient: XMTP.Client, envelope: XMTP.Envelope, apiURI
             if let groupName = try? group.groupName() {
               bestAttemptContent.title = groupName
             }
+            let profilesState = getProfilesState(account: xmtpClient.address)
+            
+            if let senderMember = try group.members.first(where:{$0.inboxId == decodedMessageResult.senderAddress} ) {
+              let senderAddress = senderMember.addresses[0]
+              if let senderProfile = profilesState?.profiles?[senderAddress] {
+                bestAttemptContent.subtitle = getPreferredName(address: senderAddress, socials: senderProfile.socials)
+              }
+            }
+
             if let content = decodedMessageResult.content {
               bestAttemptContent.body = content
             }

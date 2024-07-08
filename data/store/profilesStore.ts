@@ -1,4 +1,3 @@
-import { Platform } from "react-native";
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
 
@@ -67,15 +66,6 @@ export const initProfilesStore = (account: string) => {
       {
         name: `store-${account}-profiles`, // Account-based storage so each account can have its own recos
         storage: createJSONStorage(() => zustandMMKVStorage),
-        // Only persisting the information we want
-        partialize: (state) => {
-          // On web, we persist profiles because we don't store it to SQL
-          if (Platform.OS === "web") {
-            return state;
-          } else {
-            return undefined;
-          }
-        },
       }
     )
   );

@@ -12,6 +12,9 @@ import com.converse.dev.PushNotificationsService.Companion.TAG
 import android.util.Base64
 import android.util.Base64.NO_WRAP
 import com.google.firebase.messaging.RemoteMessage
+import computeSpamScore
+import computeSpamScoreGroupMessage
+import computeSpamScoreGroupWelcome
 import expo.modules.notifications.service.delegates.encodedInBase64
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
@@ -20,6 +23,7 @@ import org.json.JSONObject
 import org.xmtp.android.library.Client
 import org.xmtp.android.library.Conversation
 import org.xmtp.android.library.DecodedMessage
+import org.xmtp.android.library.Group
 import org.xmtp.android.library.codecs.Reaction
 import org.xmtp.android.library.codecs.RemoteAttachment
 import org.xmtp.android.library.codecs.Reply
@@ -33,6 +37,7 @@ import kotlin.coroutines.resumeWithException
 
 data class NotificationDataResult(
     val title: String = "",
+    val subtitle: String? = null,
     val body: String = "",
     val remoteMessage: RemoteMessage? = null,
     val messageId: String? = null,
@@ -85,7 +90,6 @@ suspend fun handleNewConversationFirstMessage(
                     appContext = appContext,
                     apiURI = apiURI
                 )
-                Log.d(TAG, "spamScore: $spamScore for topic: ${message.topic}")
 
                 when (conversation) {
                     is Conversation.V1 -> {
@@ -205,6 +209,69 @@ fun handleOngoingConversationMessage(
 
     return NotificationDataResult(
         title = conversationTitle,
+        body = decodedMessageResult.content ?: "",
+        remoteMessage = remoteMessage,
+        messageId = decodedMessageResult.id,
+        shouldShowNotification = shouldShowNotification
+    )
+}
+
+suspend fun handleGroupMessage(
+    appContext: Context,
+    xmtpClient: Client,
+    envelope: Envelope,
+    remoteMessage: RemoteMessage,
+): NotificationDataResult {
+    val groups = xmtpClient.conversations.listGroups()
+    val group = groups.find { it.topic == envelope.contentTopic }
+    if (group == null) {
+        Log.d("PushNotificationsService", "No group found for ${envelope.contentTopic}")
+        return NotificationDataResult()
+    }
+
+    val decodedMessage = group.processMessage(envelope.message.toByteArray()).decode()
+
+    val decodedMessageResult = handleMessageByContentType(
+        appContext,
+        decodedMessage,
+        xmtpClient,
+    )
+
+    var shouldShowNotification = if (decodedMessageResult.senderAddress != xmtpClient.inboxId && !decodedMessageResult.forceIgnore && decodedMessageResult.content != null) {
+        true
+    } else {
+        Log.d(TAG, "[NotificationExtension] Not showing a notification")
+        false
+    }
+
+    var subtitle: String? = null
+
+    if (shouldShowNotification) {
+        val mmkv = getMmkv(appContext)
+        var apiURI = mmkv?.decodeString("api-uri")
+        if (apiURI == null) {
+            apiURI = getAsyncStorage("api-uri")
+        }
+        val spamScore = computeSpamScoreGroupMessage(xmtpClient, group, decodedMessage, apiURI)
+        if (spamScore < 0) {
+        // Message is going to main inbox
+            val profilesState = getProfilesState(appContext, xmtpClient.address)
+            group.members().find { it.inboxId == decodedMessageResult.senderAddress }?.let { senderMember ->
+                val senderAddress = senderMember.addresses[0]
+                profilesState?.profiles?.get(senderAddress)?.let { senderProfile ->
+                    subtitle = getPreferredName(senderAddress, senderProfile.socials)
+                }
+            }
+        } else if (spamScore == 0) { // Message is Request
+          shouldShowNotification = false
+        } else { // Message is Spam
+          shouldShowNotification = false
+        }
+    }
+
+    return NotificationDataResult(
+        title = group.name,
+        subtitle = subtitle,
         body = decodedMessageResult.content ?: "",
         remoteMessage = remoteMessage,
         messageId = decodedMessageResult.id,
@@ -370,39 +437,38 @@ fun getJsonReaction(decodedMessage: DecodedMessage): String {
     }
 }
 
-fun computeSpamScore(address: String, message: String?, contentType: String, apiURI: String?, appContext: Context): Double {
-    var spamScore = runBlocking {
-        getSenderSpamScore(appContext, address, apiURI);
-    }
-    if (contentType.startsWith("xmtp.org/text:") && message?.let { containsURL(it) } == true) {
-        spamScore += 1
-    }
-    return spamScore
-}
 
-suspend fun getSenderSpamScore(appContext: Context, address: String, apiURI: String?): Double {
-    val senderSpamScoreURI = "$apiURI/api/spam/senders/batch"
-    val params: MutableMap<String?, Any> = HashMap()
-    params["sendersAddresses"] = arrayOf(address);
-
-    val parameters = JSONObject(params as Map<*, *>?)
-
-    return suspendCancellableCoroutine { continuation ->
-        val jsonRequest = JsonObjectRequest(Request.Method.POST, senderSpamScoreURI, parameters, {
-            Log.d("PushNotificationsService", "SPAM SCORE SUCCESS ${it[address]}")
-            var result = 0.0;
-            if (it.has(address)){
-                result = (it[address] as Int).toDouble()
-            }
-            continuation.resume(result)
-
-        }) { error ->
-            error.printStackTrace()
-            continuation.resumeWithException(error)
-            Log.d("PushNotificationsService", "SPAM SCORE ERROR - $error")
+suspend fun handleGroupWelcome(
+    appContext: Context,
+    xmtpClient: Client,
+    group: Group,
+    remoteMessage: RemoteMessage
+): NotificationDataResult {
+    var shouldShowNotification = false
+    try {
+        val mmkv = getMmkv(appContext)
+        var apiURI = mmkv?.decodeString("api-uri")
+        if (apiURI == null) {
+            apiURI = getAsyncStorage("api-uri")
         }
+        val spamScore = computeSpamScoreGroupWelcome(appContext, xmtpClient, group, apiURI)
+        if (spamScore < 0) { // Message is going to main inbox
+            shouldShowNotification = true
+        } else if (spamScore == 0.0) { // Message is Request
+            shouldShowNotification = false
+            // @todo : trackNewRequest()
+        } else { // Message is Spam
+            shouldShowNotification = false
+        }
+    } catch (e: Exception) {
 
-        Volley.newRequestQueue(appContext).add(jsonRequest)
     }
-
+    group.sync()
+    return NotificationDataResult(
+        title = group.name,
+        body = "You have been added to a new group",
+        remoteMessage = remoteMessage,
+        messageId = "welcome-${group.topic}",
+        shouldShowNotification = shouldShowNotification
+    )
 }

@@ -55,3 +55,34 @@ struct AccountsStore: Codable {
   var state: Accounts;
   var version: Int
 }
+
+struct EnsName: Codable {
+  var name: String;
+  var displayName: String?;
+  var isPrimary: Bool?;
+}
+
+
+struct ConverseUserName: Codable {
+  var name: String;
+  var displayName: String?;
+  var isPrimary: Bool?;
+}
+
+struct ProfileSocials: Codable {
+  var ensNames: [EnsName]?;
+  var userNames: [ConverseUserName]?;
+}
+
+struct Profile: Codable {
+  var updatedAt: Int;
+  var socials: ProfileSocials;
+}
+struct Profiles: Codable {
+  var profiles: Dictionary<String, Profile>?
+}
+
+struct ProfilesStore: Codable {
+  var state: Profiles;
+  var version: Int
+}
