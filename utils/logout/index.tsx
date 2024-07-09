@@ -1,8 +1,9 @@
+import { ConverseXmtpClientType } from "@utils/xmtpRN/client";
 import { useCallback } from "react";
 
 import { useDisconnectFromPrivy } from "./privy";
 import { useDisconnectWallet } from "./wallet";
-import { clearDb } from "../../data/db";
+import { clearConverseDb } from "../../data/db";
 import {
   getAccountsList,
   getChatStore,
@@ -20,7 +21,7 @@ import {
 import { resetSharedData } from "../sharedData";
 import { getXmtpApiHeaders } from "../xmtpRN/api";
 import { importedTopicsDataForAccount } from "../xmtpRN/conversations";
-import { deleteXmtpClient } from "../xmtpRN/sync";
+import { deleteXmtpClient, getXmtpClient } from "../xmtpRN/sync";
 
 type LogoutTasks = {
   [account: string]: {
@@ -135,54 +136,64 @@ export const executeLogoutTasks = async () => {
 export const useLogoutFromConverse = (account: string) => {
   const privyLogout = useDisconnectFromPrivy();
   const disconnectWallet = useDisconnectWallet();
-  const logout = useCallback(async () => {
-    disconnectWallet();
-    const isPrivyAccount =
-      !!useAccountsStore.getState().privyAccountId[account];
-    if (isPrivyAccount) {
-      privyLogout();
-    }
-    const topicsByAccount: { [a: string]: string[] } = {};
-    const accounts = getAccountsList();
-    accounts.forEach((a) => {
-      topicsByAccount[a] = Object.keys(
-        getChatStore(a).getState().conversations
-      );
-    });
-
-    // We need to delete topics that are in this account and not other accounts
-    // so we start with topics from this account and we'll remove topics we find in others
-    const topicsToDelete = topicsByAccount[account];
-    const pkPath = getWalletStore(account).getState().privateKeyPath;
-    const apiHeaders = await getXmtpApiHeaders(account);
-    accounts.forEach((a) => {
-      if (a !== account) {
-        topicsByAccount[a].forEach((topic) => {
-          const topicIndex = topicsToDelete.indexOf(topic);
-          if (topicIndex > -1) {
-            topicsToDelete.splice(topicIndex, 1);
-          }
-        });
+  const logout = useCallback(
+    async (dropLocalDatabase: boolean) => {
+      if (dropLocalDatabase) {
+        // This clears the libxmtp sqlite database (v3 / groups)
+        const client = (await getXmtpClient(account)) as ConverseXmtpClientType;
+        await client.deleteLocalDatabase();
       }
-    });
-    clearDb(account);
+      disconnectWallet();
+      const isPrivyAccount =
+        !!useAccountsStore.getState().privyAccountId[account];
+      if (isPrivyAccount) {
+        privyLogout();
+      }
+      const topicsByAccount: { [a: string]: string[] } = {};
+      const accounts = getAccountsList();
+      accounts.forEach((a) => {
+        topicsByAccount[a] = Object.keys(
+          getChatStore(a).getState().conversations
+        );
+      });
 
-    // Now that db has been deleted we can remove account
-    // from store (account holds the db id so it was needed
-    // to clear db)
-    useAccountsStore.getState().removeAccount(account);
+      // We need to delete topics that are in this account and not other accounts
+      // so we start with topics from this account and we'll remove topics we find in others
+      const topicsToDelete = topicsByAccount[account];
+      const pkPath = getWalletStore(account).getState().privateKeyPath;
+      const apiHeaders = await getXmtpApiHeaders(account);
+      accounts.forEach((a) => {
+        if (a !== account) {
+          topicsByAccount[a].forEach((topic) => {
+            const topicIndex = topicsToDelete.indexOf(topic);
+            if (topicIndex > -1) {
+              topicsToDelete.splice(topicIndex, 1);
+            }
+          });
+        }
+      });
 
-    deleteXmtpClient(account);
-    deleteSubscribedTopics(account);
-    delete importedTopicsDataForAccount[account];
-    delete secureMmkvByAccount[account];
-    delete lastNotifSubscribeByAccount[account];
+      // This clears the Converse sqlite database (v2)
+      clearConverseDb(account);
 
-    saveLogoutTask(account, apiHeaders, topicsToDelete, pkPath);
+      // Now that db has been deleted we can remove account
+      // from store (account holds the db id so it was needed
+      // to clear db)
+      useAccountsStore.getState().removeAccount(account);
 
-    setTimeout(() => {
-      executeLogoutTasks();
-    }, 500);
-  }, [account, disconnectWallet, privyLogout]);
+      deleteXmtpClient(account);
+      deleteSubscribedTopics(account);
+      delete importedTopicsDataForAccount[account];
+      delete secureMmkvByAccount[account];
+      delete lastNotifSubscribeByAccount[account];
+
+      saveLogoutTask(account, apiHeaders, topicsToDelete, pkPath);
+
+      setTimeout(() => {
+        executeLogoutTasks();
+      }, 500);
+    },
+    [account, disconnectWallet, privyLogout]
+  );
   return logout;
 };
