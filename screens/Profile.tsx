@@ -294,7 +294,8 @@ export default function ProfileScreen({
       await new Promise((r) => setTimeout(r, 100));
     }
     const methods = {
-      Delete: logout,
+      Disconnect: () => logout(false),
+      "Disconnect and delete group chats": () => logout(true),
       Cancel: () => {},
     };
 
@@ -303,11 +304,11 @@ export default function ProfileScreen({
     showActionSheetWithOptions(
       {
         options,
-        title: "Delete this account",
+        title: "Disconnect this account",
         message:
-          "Your account data will be deleted from Converse. Messages not backed up to other devices will be unrecoverable.",
+          "Your group chats will be encrypted and saved on your device until you delete Converse. Your DMs will be backed up by the XMTP network.",
         cancelButtonIndex: options.indexOf("Cancel"),
-        destructiveButtonIndex: [0],
+        destructiveButtonIndex: [1],
         ...actionSheetColors(colorScheme),
       },
       (selectedIndex?: number) => {
@@ -702,7 +703,7 @@ export default function ProfileScreen({
               },
               {
                 id: "delete",
-                title: "Delete this account",
+                title: "Disconnect this account",
                 titleColor:
                   Platform.OS === "android"
                     ? undefined

@@ -82,10 +82,10 @@ export const initDb = async (account: string): Promise<void> => {
     } catch (e: any) {
       sentryTrackError(e, { account, message: "Error running migrations" });
       console.log(`Error running migrations - destroying db for ${account}`, e);
-      await resetDb(account);
+      await resetConverseDb(account);
     }
   } catch (e: any) {
-    const dbPath = await getDbPath(account);
+    const dbPath = await getConverseDbPath(account);
     const dbPathExists = await RNFS.exists(dbPath);
     sentryTrackError(e, {
       account,
@@ -93,7 +93,7 @@ export const initDb = async (account: string): Promise<void> => {
       dbPath,
       dbPathExists,
     });
-    await resetDb(account);
+    await resetConverseDb(account);
   }
 };
 
@@ -116,14 +116,14 @@ export const getDbDirectory = async () => {
   }
 };
 
-export const getDbPath = async (account: string) => {
+export const getConverseDbPath = async (account: string) => {
   const filename = getDbFileName(account);
   const directory = await getDbDirectory();
   return `${directory}/${filename}`;
 };
 
-export const clearDb = async (account: string) => {
-  const dbPath = await getDbPath(account);
+export const clearConverseDb = async (account: string) => {
+  const dbPath = await getConverseDbPath(account);
   let dbExists = await RNFS.exists(dbPath);
   console.log("[ClearDB]", { dbPath, dbExists });
   try {
@@ -158,8 +158,8 @@ export const clearDb = async (account: string) => {
   }
 };
 
-export async function resetDb(account: string) {
-  await clearDb(account);
+export async function resetConverseDb(account: string) {
+  await clearConverseDb(account);
   // Change filename & path to avoid locked state due to
   // filesystem locking the previous file path
   useAccountsStore.getState().resetDatabaseId(account);

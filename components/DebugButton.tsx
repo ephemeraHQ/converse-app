@@ -9,7 +9,7 @@ import { forwardRef, useImperativeHandle } from "react";
 
 import { showActionSheetWithOptions } from "./StateHandlers/ActionSheetStateHandler";
 import config from "../config";
-import { getDbPath, resetDb } from "../data/db";
+import { getConverseDbPath, resetConverseDb } from "../data/db";
 import {
   currentAccount,
   getChatStore,
@@ -95,7 +95,7 @@ const DebugButton = forwardRef((props, ref) => {
           }
         },
         "Export db file": async () => {
-          const dbPath = await getDbPath(currentAccount());
+          const dbPath = await getConverseDbPath(currentAccount());
           const RNFS = require("react-native-fs");
           const dbExists = await RNFS.exists(dbPath);
           if (!dbExists) {
@@ -114,7 +114,7 @@ const DebugButton = forwardRef((props, ref) => {
         },
 
         "Reset DB": () => {
-          resetDb(currentAccount());
+          resetConverseDb(currentAccount());
           getChatStore(currentAccount()).getState().setLastSyncedAt(0, []);
         },
         "Reset lastSyncedAt": () => {
