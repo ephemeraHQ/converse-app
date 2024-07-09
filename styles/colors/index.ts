@@ -52,7 +52,7 @@ export const textPrimaryColor = (colorScheme: ColorSchemeName) => {
     : TEXT_PRIMARY_COLOR_LIGHT;
 };
 
-const TEXT_SECONDARY_COLOR_LIGHT = "rgba(60, 60, 67, 0.6)";
+const TEXT_SECONDARY_COLOR_LIGHT = "rgba(0, 0, 0, 0.6)";
 const TEXT_SECONDARY_COLOR_DARK = "rgba(235, 235, 245, 0.6)";
 
 export const textSecondaryColor = (colorScheme: ColorSchemeName) => {
@@ -103,7 +103,7 @@ export const itemSeparatorColor = (colorScheme: ColorSchemeName) => {
 };
 
 const MESSAGE_BUBBLE_LIGHT = "#E9E9EB";
-const MESSAGE_BUBBLE_DARK = "#262628";
+const MESSAGE_BUBBLE_DARK = "#464648";
 
 export const messageBubbleColor = (colorScheme: ColorSchemeName) => {
   if (colorScheme === "dark")
@@ -115,8 +115,8 @@ export const messageBubbleColor = (colorScheme: ColorSchemeName) => {
     : MESSAGE_BUBBLE_LIGHT;
 };
 
-const MESSAGE_INNER_BUBBLE_LIGHT = "#4D4D4D";
-const MESSAGE_INNER_BUBBLE_DARK = "#4D4D4D";
+const MESSAGE_INNER_BUBBLE_LIGHT = "rgba(255, 255, 255, 0.6)";
+const MESSAGE_INNER_BUBBLE_DARK = "rgba(235, 235, 245, 0.3)";
 
 export const messageInnerBubbleColor = (colorScheme: ColorSchemeName) => {
   if (colorScheme === "dark")
@@ -146,8 +146,8 @@ export const myMessageBubbleColor = (colorScheme: ColorSchemeName) => {
   return MY_MESSAGE_BUBBLE_LIGHT;
 };
 
-const MY_MESSAGE_INNER_BUBBLE_LIGHT = "#4D4D4D";
-const MY_MESSAGE_INNER_BUBBLE_DARK = "#4D4D4D";
+const MY_MESSAGE_INNER_BUBBLE_LIGHT = "rgba(255, 255, 255, 0.3)";
+const MY_MESSAGE_INNER_BUBBLE_DARK = "rgba(0, 0, 0, 0.08)";
 
 export const myMessageInnerBubbleColor = (colorScheme: ColorSchemeName) => {
   if (colorScheme === "dark") return MY_MESSAGE_INNER_BUBBLE_DARK;

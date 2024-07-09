@@ -21,9 +21,6 @@ import {
 } from "react-native";
 import { Swipeable } from "react-native-gesture-handler";
 
-import ChatMessageActions from "./MessageActions";
-import ChatMessageReactions from "./MessageReactions";
-import MessageStatus from "./MessageStatus";
 import {
   currentAccount,
   useChatStore,
@@ -57,6 +54,9 @@ import ChatGroupUpdatedMessage from "../ChatGroupUpdatedMessage";
 import FramesPreviews from "../Frame/FramesPreviews";
 import ChatInputReplyBubble from "../Input/InputReplyBubble";
 import TransactionPreview from "../Transaction/TransactionPreview";
+import ChatMessageActions from "./MessageActions";
+import ChatMessageReactions from "./MessageReactions";
+import MessageStatus from "./MessageStatus";
 
 export type MessageToDisplay = XmtpMessage & {
   hasPreviousMessageInSeries: boolean;
@@ -301,29 +301,26 @@ function ChatMessage({ message, colorScheme, isGroup, isFrame }: Props) {
                           }, 350);
                         }}
                       >
-                        <Text
-                          style={[
-                            styles.messageText,
-                            message.fromMe ? styles.messageTextMe : undefined,
-                            styles.replyToUsername,
-                          ]}
-                        >
-                          {replyingToProfileName}
-                        </Text>
+                        {!message.fromMe && (
+                          <Text
+                            style={[
+                              styles.messageText,
+                              message.fromMe ? styles.messageTextMe : undefined,
+                              styles.replyToUsername,
+                            ]}
+                          >
+                            {replyingToProfileName}
+                          </Text>
+                        )}
                         <ChatInputReplyBubble
                           replyingToMessage={replyingToMessage}
                           fromMe={message.fromMe}
                         />
                       </TouchableOpacity>
                       <View
-                        style={[
-                          {
-                            alignSelf: "flex-start",
-                          },
-                          isContentType("text", message.contentType)
-                            ? styles.messageTextReply
-                            : undefined,
-                        ]}
+                        style={{
+                          alignSelf: "flex-start",
+                        }}
                       >
                         {messageContent}
                       </View>
@@ -517,7 +514,7 @@ const useStyles = () => {
     replyToUsername: {
       fontSize: 12,
       marginBottom: 4,
-      color: "white",
+      color: textSecondaryColor(colorScheme),
       paddingVertical: 0,
       paddingHorizontal: 0,
     },
@@ -534,7 +531,12 @@ const useStyles = () => {
       fontSize: 48,
       paddingHorizontal: 0,
     },
-    messageTextReply: {},
+    messageTextReply: {
+      color: textPrimaryColor(colorScheme),
+    },
+    messageTextReplyMe: {
+      color: inversePrimaryColor(colorScheme),
+    },
     groupSenderAvatarWrapper: {
       marginRight: 6,
     },
@@ -546,7 +548,7 @@ const useStyles = () => {
       fontSize: 12,
       color: textSecondaryColor(colorScheme),
       marginLeft: 10,
-      marginVertical: 6,
+      marginVertical: 4,
     },
     avatarPlaceholder: {
       width: AvatarSizes.messageSender,
