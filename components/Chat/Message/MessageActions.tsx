@@ -355,6 +355,7 @@ export default function ChatMessageActions({
             !isFrame &&
             !isAttachment &&
             !isTransaction &&
+            !hideBackground &&
             (Platform.OS === "ios" || Platform.OS === "web") && (
               <MessageTail
                 style={[
