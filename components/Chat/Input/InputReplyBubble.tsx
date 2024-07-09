@@ -1,6 +1,7 @@
-import { View, StyleSheet, Text } from "react-native";
+import { View, StyleSheet, Text, useColorScheme } from "react-native";
 
 import { XmtpMessage } from "../../../data/store/chatStore";
+import { textPrimaryColor, inversePrimaryColor } from "../../../styles/colors";
 import { isAttachmentMessage } from "../../../utils/attachment/helpers";
 import { getRelativeDateTime } from "../../../utils/date";
 import { isTransactionMessage } from "../../../utils/transaction";
@@ -16,7 +17,12 @@ export default function ChatInputReplyBubble({
 
   return (
     <View>
-      <Text style={styles.messageRepliedTo}>
+      <Text
+        style={[
+          styles.messageRepliedTo,
+          fromMe ? styles.messageRepliedToMe : {},
+        ]}
+      >
         {isAttachmentMessage(replyingToMessage.contentType)
           ? `📎 Media from ${getRelativeDateTime(replyingToMessage.sent)}`
           : isTransactionMessage(replyingToMessage.contentType)
@@ -28,10 +34,14 @@ export default function ChatInputReplyBubble({
 }
 
 const useStyles = () => {
+  const colorScheme = useColorScheme();
   return StyleSheet.create({
     messageRepliedTo: {
       fontSize: 16,
-      color: "white",
+      color: textPrimaryColor(colorScheme),
+    },
+    messageRepliedToMe: {
+      color: inversePrimaryColor(colorScheme),
     },
   });
 };
