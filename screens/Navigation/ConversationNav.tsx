@@ -2,7 +2,7 @@ import { NavigationProp } from "@react-navigation/native";
 import { textPrimaryColor } from "@styles/colors";
 import { PictoSizes } from "@styles/sizes";
 import { useCallback } from "react";
-import { useColorScheme } from "react-native";
+import { Platform, StyleSheet, useColorScheme } from "react-native";
 import { TouchableOpacity } from "react-native-gesture-handler";
 import { StackAnimationTypes } from "react-native-screens";
 
@@ -51,7 +51,7 @@ export default function ConversationNav(
         return (
           <TouchableOpacity
             onPress={handleBack}
-            style={{ height: 40, justifyContent: "center", paddingRight: 16 }}
+            style={styles.iconContainer}
             hitSlop={{ top: 20, bottom: 20, left: 20, right: 10 }}
           >
             <Picto
@@ -84,3 +84,11 @@ export default function ConversationNav(
     </NativeStack.Screen>
   );
 }
+
+const styles = StyleSheet.create({
+  iconContainer: {
+    height: 40,
+    justifyContent: "center",
+    paddingRight: Platform.OS === "ios" ? 16 : 30,
+  },
+});
