@@ -116,7 +116,10 @@ const MessageSenderAvatar = ({ message }: { message: MessageToDisplay }) => {
 
 function ChatMessage({ message, colorScheme, isGroup, isFrame }: Props) {
   const styles = useStyles();
-  const hideBackground = isAllEmojisAndMaxThree(message.content);
+  const hideBackground = useMemo(
+    () => isAllEmojisAndMaxThree(message.content),
+    [message.content]
+  );
 
   let messageContent: ReactNode;
   const contentType = getMessageContentType(message.contentType);
@@ -320,9 +323,7 @@ function ChatMessage({ message, colorScheme, isGroup, isFrame }: Props) {
                           {
                             alignSelf: "flex-start",
                           },
-                          isContentType("text", message.contentType)
-                            ? styles.messageTextReply
-                            : undefined,
+                          isAttachment ? styles.attachmentReply : undefined,
                         ]}
                       >
                         {messageContent}
@@ -534,7 +535,9 @@ const useStyles = () => {
       fontSize: 48,
       paddingHorizontal: 0,
     },
-    messageTextReply: {},
+    attachmentReply: {
+      margin: 10,
+    },
     groupSenderAvatarWrapper: {
       marginRight: 6,
     },

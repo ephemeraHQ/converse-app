@@ -34,7 +34,15 @@ import ActionButton from "../ActionButton";
 
 const DATA_MIMETYPE_REGEX = /data:(.*?);/;
 
-export default function AddAttachmentButton() {
+interface Props {
+  referencedMessageId: string | undefined;
+  onSuccess: () => void;
+}
+
+export default function AddAttachmentButton({
+  referencedMessageId,
+  onSuccess,
+}: Props) {
   const { conversation } = useConversationContext(["conversation"]);
   const currentAccount = useAccountsStore((s) => s.currentAccount);
   const colorScheme = useColorScheme();
@@ -43,8 +51,6 @@ export default function AddAttachmentButton() {
   const { mediaPreview, setMediaPreview } = useAppStore(
     useSelect(["mediaPreview", "setMediaPreview"])
   );
-  const [cameraPermissions, requestCameraPermissions] =
-    ImagePicker.useCameraPermissions();
   const currentAttachmentMediaURI = useRef(mediaPreview?.mediaURI);
   const assetRef = useRef<ImagePicker.ImagePickerAsset | undefined>(undefined);
   const uploading = useRef(false);
@@ -81,6 +87,7 @@ export default function AddAttachmentButton() {
           conversation,
           content: serializeRemoteAttachmentMessageContent(uploadedAttachment),
           contentType: "xmtp.org/remoteStaticAttachment:1.0",
+          referencedMessageId,
           attachmentToSave:
             Platform.OS === "web"
               ? undefined
@@ -92,6 +99,7 @@ export default function AddAttachmentButton() {
         });
 
         uploading.current = false;
+        onSuccess();
       } catch (error) {
         uploading.current = false;
         sentryTrackMessage("ATTACHMENT_UPLOAD_ERROR", { error });
@@ -115,6 +123,8 @@ export default function AddAttachmentButton() {
     currentAccount,
     mediaPreview?.mediaURI,
     mediaPreview?.sending,
+    onSuccess,
+    referencedMessageId,
     setMediaPreview,
   ]);
 

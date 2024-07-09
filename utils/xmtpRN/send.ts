@@ -103,33 +103,32 @@ const sendConverseGroupMessages = async (
 };
 
 const getMessageContent = (
-  message: MessageEntity
+  message: MessageEntity,
+  unpackReplies = true
 ): ConversationSendPayload<DefaultContentTypes> => {
-  if (isContentType("remoteAttachment", message.contentType)) {
+  if (isContentType("reaction", message.contentType)) {
+    return {
+      reaction: JSON.parse(message.content),
+    };
+  } else if (unpackReplies && message.referencedMessageId) {
+    const innerContent = getMessageContent(message, false);
+    return {
+      reply: {
+        reference: message.referencedMessageId,
+        content: innerContent,
+      },
+    };
+  } else if (isContentType("remoteAttachment", message.contentType)) {
     return {
       remoteAttachment: deserializeRemoteAttachmentMessageContent(
         message.content
       ),
-    };
-  } else if (isContentType("reaction", message.contentType)) {
-    return {
-      reaction: JSON.parse(message.content),
     };
   } else if (isContentType("transactionReference", message.contentType)) {
     return (
       JSON.parse(message.content) as TransactionReference,
       { contentType: ContentTypeTransactionReference }
     );
-  } else if (
-    message.referencedMessageId &&
-    isContentType("text", message.contentType)
-  ) {
-    return {
-      reply: {
-        reference: message.referencedMessageId,
-        content: { text: message.content },
-      },
-    };
   } else {
     return {
       text: message.content,

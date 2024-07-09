@@ -133,7 +133,10 @@ export default function ChatInput() {
         </View>
       )}
       <View style={styles.chatInputContainer}>
-        <AddAttachmentButton />
+        <AddAttachmentButton
+          referencedMessageId={replyingToMessage?.id}
+          onSuccess={() => setReplyingToMessage(null)}
+        />
         <TextInput
           autoCorrect={isDesktop ? false : undefined}
           autoComplete={isDesktop ? "off" : undefined}
