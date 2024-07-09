@@ -36,6 +36,7 @@ export const getXmtpClientFromBase64Key = async (base64Key: string) => {
     enableV3: true,
     dbDirectory,
     historySyncUrl: config.historySyncUrl,
+    dbEncryptionKey: Buffer.from(base64Key, "base64").subarray(0, 32),
   });
 };
 
