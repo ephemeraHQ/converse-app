@@ -10,7 +10,6 @@ import SplitScreenNavigation from "./Navigation/SplitScreenNavigation/SplitScree
 import { useIsSplitScreen } from "./Navigation/navHelpers";
 import NotificationsScreen from "./NotificationsScreen";
 import Onboarding from "./Onboarding";
-import SendAttachmentPreview from "../components/Chat/Attachment/SendAttachmentPreview";
 import UserProfile from "../components/Onboarding/UserProfile";
 import ActionSheetStateHandler from "../components/StateHandlers/ActionSheetStateHandler";
 import HydrationStateHandler from "../components/StateHandlers/HydrationStateHandler";
@@ -57,14 +56,9 @@ export default function Main() {
   }, [addingNewAccount, resetOnboarding, userAddress]);
 
   const { notifications } = useSettingsStore(useSelect(["notifications"]));
-  const { notificationsPermissionStatus, splashScreenHidden, mediaPreview } =
-    useAppStore(
-      useSelect([
-        "notificationsPermissionStatus",
-        "splashScreenHidden",
-        "mediaPreview",
-      ])
-    );
+  const { notificationsPermissionStatus, splashScreenHidden } = useAppStore(
+    useSelect(["notificationsPermissionStatus", "splashScreenHidden"])
+  );
   const navigationDrawer = useRef<any>(null);
   const toggleNavigationDrawer = useCallback((open: boolean) => {
     if (open) {
@@ -157,7 +151,6 @@ export default function Main() {
     <>
       {mainHeaders}
       {screenToShow}
-      {mediaPreview?.mediaURI && <SendAttachmentPreview />}
     </>
   );
 }

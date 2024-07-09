@@ -3,6 +3,8 @@ import { manipulateAsync, SaveFormat } from "expo-image-manipulator";
 import * as ImagePicker from "expo-image-picker";
 import { Alert, Image, Linking, Platform } from "react-native";
 
+import { MediaPreview } from "../data/store/chatStore";
+
 const imageMimeTypes = [
   "image/cgm",
   "image/example",
@@ -284,6 +286,15 @@ const allowedMimeTypes = [
   ...audioMimeTypes,
   ...videoMimeTypes,
 ];
+
+export type MediaPreviewWithValue = { currentValue: MediaPreview };
+
+export type AttachmentSelectedStatus =
+  | "picked"
+  | "error"
+  | "uploading"
+  | "uploaded"
+  | "sending";
 
 export const isImageMimetype = (mimeType?: string) =>
   !!mimeType && imageMimeTypes.includes(mimeType.toLowerCase());

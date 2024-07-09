@@ -4,14 +4,17 @@ import {
   RemoteAttachmentContent,
 } from "@xmtp/react-native-sdk";
 import mime from "mime";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import RNFS from "react-native-fs";
 import RNFetchBlob from "rn-fetch-blob";
 
 import { MessageToDisplay } from "../../components/Chat/Message/Message";
 import { ConverseMessageMetadata } from "../../data/db/entities/messageEntity";
 import { saveMessageMetadata } from "../../data/helpers/messages";
-import { useCurrentAccount } from "../../data/store/accountsStore";
+import {
+  useCurrentAccount,
+  useChatStore,
+} from "../../data/store/accountsStore";
 import { getPresignedUriForUpload } from "../api";
 import { moveFileAndReplace } from "../fileSystem";
 import { getImageSize, isImageMimetype } from "../media";
@@ -233,140 +236,185 @@ const DEFAULT_ATTACHMENT = {
 export const useAttachmentForMessage = (message: MessageToDisplay) => {
   const currentAccount = useCurrentAccount() as string;
   const messageId = useRef(message.id);
-  const [attachment, setAttachment] = useState(DEFAULT_ATTACHMENT);
+  const [messageAttachment, setMessageAttachment] = useChatStore((state) => [
+    state.messageAttachments[message.id] || DEFAULT_ATTACHMENT,
+    state.setMessageAttachment,
+  ]);
 
-  // Resetting state because components are reclycled!
-  if (message.id !== messageId.current) {
-    messageId.current = message.id;
-    setAttachment(DEFAULT_ATTACHMENT);
-  }
+  useEffect(() => {
+    // Reset state if message ID changes (component recycling)
+    if (message.id !== messageId.current) {
+      messageId.current = message.id;
+      setMessageAttachment(message.id, DEFAULT_ATTACHMENT);
+    }
+  }, [message.id, message.topic, setMessageAttachment]);
 
   const saveAndDisplayLocalAttachment = useCallback(
     async (attachmentContent: SerializedAttachmentContent) => {
-      setAttachment((a) => ({ ...a, loading: true }));
-      const result = await handleStaticAttachment(
-        message.id,
-        attachmentContent
-      );
-
-      setAttachment({ ...result, loading: false, error: false });
+      setMessageAttachment(message.id, {
+        ...DEFAULT_ATTACHMENT,
+        loading: true,
+      });
+      try {
+        const result = await handleStaticAttachment(
+          message.id,
+          attachmentContent
+        );
+        setMessageAttachment(message.id, {
+          ...result,
+          loading: false,
+          error: false,
+        });
+      } catch (error) {
+        console.error("Error handling static attachment:", error);
+        setMessageAttachment(message.id, {
+          ...DEFAULT_ATTACHMENT,
+          loading: false,
+          error: true,
+        });
+      }
     },
-    [message.id]
+    [message.id, setMessageAttachment]
   );
 
   const saveAndDisplayRemoteAttachment = useCallback(
     async (attachmentContent: DecryptedLocalAttachment) => {
-      setAttachment((a) => ({ ...a, loading: true }));
-      const result = await handleDecryptedRemoteAttachment(
-        message.id,
-        attachmentContent
-      );
-
-      setAttachment({ ...result, loading: false, error: false });
+      setMessageAttachment(message.id, {
+        ...DEFAULT_ATTACHMENT,
+        loading: true,
+      });
+      try {
+        const result = await handleDecryptedRemoteAttachment(
+          message.id,
+          attachmentContent
+        );
+        setMessageAttachment(message.id, {
+          ...result,
+          loading: false,
+          error: false,
+        });
+      } catch (error) {
+        console.error("Error handling remote attachment:", error);
+        setMessageAttachment(message.id, {
+          ...DEFAULT_ATTACHMENT,
+          loading: false,
+          error: true,
+        });
+      }
     },
-    [message.id]
+    [message.id, setMessageAttachment]
   );
+
   const fetchingAttachment = useRef(false);
 
   const fetchAndDecode = useCallback(async () => {
     if (fetchingAttachment.current) return;
     fetchingAttachment.current = true;
-    setAttachment((a) => ({ ...a, loading: true }));
+    setMessageAttachment(message.id, { ...DEFAULT_ATTACHMENT, loading: true });
     try {
       const result = await fetchAndDecodeRemoteAttachment(
         currentAccount,
         message
       );
-      fetchingAttachment.current = false;
-      saveAndDisplayRemoteAttachment(result);
+      await saveAndDisplayRemoteAttachment(result);
     } catch (e) {
-      fetchingAttachment.current = false;
       sentryTrackError(e, { message });
-      setAttachment((a) => ({ ...a, loading: false, error: true }));
+      setMessageAttachment(message.id, {
+        ...DEFAULT_ATTACHMENT,
+        loading: false,
+        error: true,
+      });
+    } finally {
+      fetchingAttachment.current = false;
     }
-  }, [currentAccount, message, saveAndDisplayRemoteAttachment]);
+  }, [
+    currentAccount,
+    message,
+    saveAndDisplayRemoteAttachment,
+    setMessageAttachment,
+  ]);
 
-  const saveLocalAttachment = useCallback(
-    async (attachmentContent: SerializedAttachmentContent) => {
-      if (!attachmentContent.data) {
-        sentryTrackMessage("LOCAL_ATTACHMENT_NO_DATA", {
-          content: attachmentContent,
-        });
-        setAttachment((a) => ({ ...a, error: true, loading: false }));
-        return;
-      }
-      saveAndDisplayLocalAttachment(attachmentContent);
-    },
-    [saveAndDisplayLocalAttachment]
-  );
-
-  useEffect(() => {
-    const go = async () => {
-      const localAttachment = await getLocalAttachment(message.id);
-      if (localAttachment) {
-        setAttachment({ ...localAttachment, loading: false, error: false });
-        return;
-      }
-
-      // Either remote or direct attachement (< 1MB)
-      const isRemoteAttachment = isContentType(
-        "remoteAttachment",
-        message.contentType
-      );
-
-      let contentLength = 0;
-
-      // Let's see if we can infer type from filename
-      try {
-        const parsedEncodedContent = JSON.parse(message.content);
-        const parsedType = isRemoteAttachment
-          ? mime.getType(parsedEncodedContent.filename)
-          : parsedEncodedContent.mimeType;
-        if (isRemoteAttachment) {
-          contentLength = parsedEncodedContent.contentLength;
-          setAttachment({
-            mediaType:
-              parsedType && isImageMimetype(parsedType)
-                ? "IMAGE"
-                : "UNSUPPORTED",
-            loading: contentLength <= 10000000,
-            mediaURL: undefined,
-            imageSize: undefined,
-            contentLength: parsedEncodedContent.contentLength,
-            mimeType: parsedType || "",
-            filename: parsedEncodedContent.filename,
-            error: false,
-          });
-        } else {
-          saveLocalAttachment(parsedEncodedContent);
-        }
-      } catch (e) {
-        console.log(e);
-      }
-
-      // Last, if media is local or if remote but supported and size is ok, we fetch immediatly
-      if (isRemoteAttachment && contentLength <= 10000000) {
-        fetchAndDecode();
-      }
-    };
+  const fetchAttachment = useCallback(async () => {
     if (!message.content) {
       sentryTrackMessage("ATTACHMENT_NO_CONTENT", { message });
-      setAttachment((a) => ({ ...a, error: true, loading: false }));
-    } else {
-      go();
+      setMessageAttachment(message.id, {
+        ...DEFAULT_ATTACHMENT,
+        loading: false,
+        error: true,
+      });
+      return;
     }
-  }, [fetchAndDecode, message, saveLocalAttachment]);
+
+    const localAttachment = await getLocalAttachment(message.id);
+    if (localAttachment) {
+      setMessageAttachment(message.id, {
+        ...localAttachment,
+        loading: false,
+        error: false,
+      });
+      return;
+    }
+
+    const isRemoteAttachment = isContentType(
+      "remoteAttachment",
+      message.contentType
+    );
+
+    try {
+      const parsedEncodedContent = JSON.parse(message.content);
+      const parsedType = isRemoteAttachment
+        ? mime.getType(parsedEncodedContent.filename)
+        : parsedEncodedContent.mimeType;
+
+      if (isRemoteAttachment) {
+        const contentLength = parsedEncodedContent.contentLength;
+        setMessageAttachment(message.id, {
+          mediaType:
+            parsedType && isImageMimetype(parsedType) ? "IMAGE" : "UNSUPPORTED",
+          loading: contentLength <= 10000000,
+          mediaURL: undefined,
+          imageSize: undefined,
+          contentLength,
+          mimeType: parsedType || "",
+          filename: parsedEncodedContent.filename,
+          error: false,
+        });
+
+        if (contentLength <= 10000000) {
+          fetchAndDecode();
+        }
+      } else {
+        await saveAndDisplayLocalAttachment(parsedEncodedContent);
+      }
+    } catch (e) {
+      console.error("Error parsing message content:", e);
+      setMessageAttachment(message.id, {
+        ...DEFAULT_ATTACHMENT,
+        loading: false,
+        error: true,
+      });
+    }
+  }, [
+    message,
+    fetchAndDecode,
+    saveAndDisplayLocalAttachment,
+    setMessageAttachment,
+  ]);
 
   useEffect(() => {
-    if (attachment && attachment.imageSize) {
+    fetchAttachment();
+  }, [fetchAttachment]);
+
+  useEffect(() => {
+    if (messageAttachment && messageAttachment.imageSize) {
       const messageMetadataToSave: ConverseMessageMetadata = {
         attachment: {
-          size: attachment.imageSize,
+          size: messageAttachment.imageSize,
         },
       };
       saveMessageMetadata(currentAccount, message, messageMetadataToSave);
     }
-  }, [attachment, currentAccount, message]);
+  }, [messageAttachment, currentAccount, message]);
 
-  return { attachment, fetch: fetchAndDecode };
+  return { attachment: messageAttachment, fetch: fetchAndDecode };
 };
