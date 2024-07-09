@@ -249,7 +249,7 @@ export const UserProfile = ({ onboarding, navigation }: Props) => {
       backButtonText={
         onboarding ? `Logout from ${shortAddress(address)}` : undefined
       }
-      backButtonAction={onboarding ? logout : undefined}
+      backButtonAction={onboarding ? () => logout(false) : undefined}
       isLoading={loading}
       loadingSubtitle={loadingSubtitle}
       shrinkWithKeyboard
