@@ -3,18 +3,18 @@ import * as ImagePicker from "expo-image-picker";
 import { setStatusBarHidden } from "expo-status-bar";
 import mime from "mime";
 import { useCallback, useEffect, useRef } from "react";
-import { Platform, StyleSheet, View, useColorScheme } from "react-native";
+import { Platform, StyleSheet } from "react-native";
 import { v4 as uuidv4 } from "uuid";
 
 import { useAccountsStore } from "../../../data/store/accountsStore";
-import { useAppStore } from "../../../data/store/appStore";
-import { useSelect } from "../../../data/store/storeHelpers";
 import { uploadRemoteAttachment } from "../../../utils/attachment";
 import { useConversationContext } from "../../../utils/conversation";
+import { converseEventEmitter } from "../../../utils/events";
 import {
   compressAndResizeImage,
   pickMediaFromLibrary,
   takePictureFromCamera,
+  AttachmentSelectedStatus,
 } from "../../../utils/media";
 import { sendMessage } from "../../../utils/message";
 import { sentryTrackMessage } from "../../../utils/sentry";
@@ -26,23 +26,35 @@ import ActionButton from "../ActionButton";
 
 const DATA_MIMETYPE_REGEX = /data:(.*?);/;
 
-export default function AddAttachmentButton() {
-  const { conversation } = useConversationContext(["conversation"]);
+type AddAttachmentButtonProps = {
+  onAttachmentSelected: (
+    uri: string | null,
+    status: AttachmentSelectedStatus
+  ) => void;
+};
+
+export default function AddAttachmentButton({
+  onAttachmentSelected,
+}: AddAttachmentButtonProps) {
+  const { conversation, mediaPreviewRef } = useConversationContext([
+    "conversation",
+    "mediaPreviewRef",
+  ]);
   const currentAccount = useAccountsStore((s) => s.currentAccount);
-  const colorScheme = useColorScheme();
 
   const styles = useStyles();
-  const { mediaPreview, setMediaPreview } = useAppStore(
-    useSelect(["mediaPreview", "setMediaPreview"])
-  );
   const [cameraPermissions, requestCameraPermissions] =
     ImagePicker.useCameraPermissions();
-  const currentAttachmentMediaURI = useRef(mediaPreview?.mediaURI);
+  const currentAttachmentMediaURI = useRef(
+    mediaPreviewRef.current?.currentValue?.mediaURI
+  );
   const assetRef = useRef<ImagePicker.ImagePickerAsset | undefined>(undefined);
   const uploading = useRef(false);
+
   useEffect(() => {
-    currentAttachmentMediaURI.current = mediaPreview?.mediaURI;
-  }, [mediaPreview?.mediaURI]);
+    currentAttachmentMediaURI.current =
+      mediaPreviewRef.current?.currentValue?.mediaURI;
+  }, [mediaPreviewRef, mediaPreviewRef.current?.currentValue?.mediaURI]);
 
   useEffect(() => {
     if (!conversation) return;
@@ -62,13 +74,18 @@ export default function AddAttachmentButton() {
       );
 
       try {
+        converseEventEmitter.emit("setCurrentConversationMediaPreviewValue", {
+          mediaURI: asset.uri,
+          status: "uploading",
+        });
         const uploadedAttachment = await uploadRemoteAttachment(
           currentAccount,
           encryptedAttachment
         );
-        if (currentAttachmentMediaURI.current !== assetRef.current?.uri) return;
-        setMediaPreview(null);
-        // Send message
+        converseEventEmitter.emit("setCurrentConversationMediaPreviewValue", {
+          mediaURI: asset.uri,
+          status: "uploaded",
+        });
         sendMessage({
           conversation,
           content: serializeRemoteAttachmentMessageContent(uploadedAttachment),
@@ -82,22 +99,21 @@ export default function AddAttachmentButton() {
                   mimeType,
                 },
         });
-
         uploading.current = false;
       } catch (error) {
         uploading.current = false;
         sentryTrackMessage("ATTACHMENT_UPLOAD_ERROR", { error });
-        setMediaPreview({
+
+        converseEventEmitter.emit("setCurrentConversationMediaPreviewValue", {
           mediaURI: currentAttachmentMediaURI.current || "",
-          sending: false,
-          error: true,
+          status: "error",
         });
       }
     };
     if (
-      mediaPreview?.mediaURI &&
-      mediaPreview?.mediaURI === assetRef.current?.uri &&
-      mediaPreview?.sending &&
+      currentAttachmentMediaURI.current &&
+      currentAttachmentMediaURI.current === assetRef.current?.uri &&
+      mediaPreviewRef.current?.currentValue?.status === "sending" &&
       !uploading.current
     ) {
       uploadAsset(assetRef.current);
@@ -105,9 +121,9 @@ export default function AddAttachmentButton() {
   }, [
     conversation,
     currentAccount,
-    mediaPreview?.mediaURI,
-    mediaPreview?.sending,
-    setMediaPreview,
+    mediaPreviewRef,
+    mediaPreviewRef.current?.currentValue?.mediaURI,
+    mediaPreviewRef.current?.currentValue?.status,
   ]);
 
   const pickMedia = useCallback(async () => {
@@ -120,63 +136,64 @@ export default function AddAttachmentButton() {
     }
     if (!asset) return;
     assetRef.current = asset;
-    setMediaPreview({ mediaURI: asset.uri, sending: false, error: false });
-  }, [setMediaPreview]);
+    console.log(assetRef.current);
+    onAttachmentSelected(asset.uri, "picked");
+  }, [onAttachmentSelected]);
 
   const openCamera = useCallback(async () => {
     const asset = await takePictureFromCamera();
     if (!asset) return;
     assetRef.current = asset;
-    setMediaPreview({ mediaURI: asset.uri, sending: false, error: false });
-  }, [setMediaPreview]);
+    onAttachmentSelected(asset.uri, "picked");
+  }, [onAttachmentSelected]);
 
   return (
-    <View>
-      <MenuView
-        style={styles.menuButton}
-        onPressAction={async ({ nativeEvent }) => {
-          switch (nativeEvent.event) {
-            case "camera":
-              openCamera();
-              break;
-            case "mediaLibrary":
-              pickMedia();
-              break;
-
-            default:
-              break;
-          }
-        }}
-        actions={[
-          {
-            id: "mediaLibrary",
-            title: "Photo Library",
-            image: Platform.select({
-              ios: "square.and.arrow.up",
-              android: "square.and.arrow.up",
-            }),
-          },
-          {
-            id: "camera",
-            title: "Camera",
-            image: Platform.select({
-              ios: "camera",
-              android: "camera",
-            }),
-          },
-        ]}
-        shouldOpenOnLongPress={false}
-      >
-        <ActionButton picto="plus" />
-      </MenuView>
-    </View>
+    <MenuView
+      style={styles.menuButton}
+      onPressAction={async ({ nativeEvent }) => {
+        switch (nativeEvent.event) {
+          case "camera":
+            openCamera();
+            break;
+          case "mediaLibrary":
+            pickMedia();
+            break;
+          default:
+            break;
+        }
+        assetRef.current = undefined;
+        if (Platform.OS === "web") {
+          pickMedia();
+        }
+      }}
+      actions={[
+        {
+          id: "mediaLibrary",
+          title: "Photo Library",
+          image: Platform.select({
+            ios: "square.and.arrow.up",
+            android: "square.and.arrow.up",
+          }),
+        },
+        {
+          id: "camera",
+          title: "Camera",
+          image: Platform.select({
+            ios: "camera",
+            android: "camera",
+          }),
+        },
+      ]}
+      shouldOpenOnLongPress={false}
+    >
+      <ActionButton picto="plus" />
+    </MenuView>
   );
 }
 
 const useStyles = () => {
   return StyleSheet.create({
     menuButton: {
-      flex: 1,
       justifyContent: "center",
       alignItems: "flex-end",
       flexDirection: "row",

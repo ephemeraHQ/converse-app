@@ -1,4 +1,8 @@
-import { backgroundColor, textPrimaryColor } from "@styles/colors";
+import {
+  backgroundColor,
+  textPrimaryColor,
+  inversePrimaryColor,
+} from "@styles/colors";
 import { Image } from "expo-image";
 import prettyBytes from "pretty-bytes";
 import { useCallback, useEffect } from "react";
@@ -7,6 +11,7 @@ import { Platform, StyleSheet, Text, useColorScheme, View } from "react-native";
 import { useAttachmentForMessage } from "../../../utils/attachment";
 import { converseEventEmitter } from "../../../utils/events";
 import { navigate } from "../../../utils/navigation";
+import ActivityIndicator from "../../ActivityIndicator/ActivityIndicator";
 import { MessageToDisplay } from "../Message/Message";
 import MessageTimestamp from "../Message/MessageTimestamp";
 
@@ -48,10 +53,9 @@ export default function AttachmentMessagePreview({ message }: Props) {
     attachment.mediaType === "IMAGE"
       ? "Image"
       : attachment.filename || "Attachment";
-  const textStyle = [
-    styles.text,
-    { color: message.fromMe ? "white" : textPrimaryColor(colorScheme) },
-  ];
+  const textStyle = [styles.text, { color: inversePrimaryColor(colorScheme) }];
+
+  console.log(attachment);
 
   useEffect(() => {
     converseEventEmitter.on(
@@ -67,26 +71,11 @@ export default function AttachmentMessagePreview({ message }: Props) {
   }, [message.id, clickedOnAttachmentBubble]);
 
   if (attachment.loading) {
-    const size = message.converseMetadata?.attachment?.size;
-    const content = (
-      <>
-        <Text style={textStyle}>
-          {emoji}{" "}
-          <Text style={{ fontStyle: "italic" }}>
-            Downloading {filename.toLowerCase()}
-          </Text>
-        </Text>
-        <View style={{ opacity: 0 }}>{metadataView}</View>
-      </>
+    return (
+      <View style={styles.imagePreview}>
+        <ActivityIndicator />
+      </View>
     );
-    if (size) {
-      const aspectRatio = size.width / size.height;
-      return (
-        <View style={[styles.imagePreview, { aspectRatio }]}>{content}</View>
-      );
-    } else {
-      return content;
-    }
   } else if (attachment.error) {
     return (
       <>
@@ -125,6 +114,9 @@ export default function AttachmentMessagePreview({ message }: Props) {
     );
   } else {
     // Downloaded and supported
+    converseEventEmitter.emit(
+      `attachmentMessageProcessed-${attachment.filename}`
+    );
     const aspectRatio = attachment.imageSize
       ? attachment.imageSize.width / attachment.imageSize.height
       : undefined;
@@ -132,7 +124,7 @@ export default function AttachmentMessagePreview({ message }: Props) {
       <>
         <Image
           source={{ uri: attachment.mediaURL }}
-          contentFit="contain"
+          contentFit="cover"
           style={[styles.imagePreview, { aspectRatio }]}
         />
       </>
@@ -155,7 +147,7 @@ const useStyles = () => {
     text: {
       paddingHorizontal: 8,
       paddingVertical: Platform.OS === "android" ? 2 : 3,
-      fontSize: 17,
+      fontSize: 48,
       color: textPrimaryColor(colorScheme),
     },
     metadataContainer: {
@@ -174,6 +166,10 @@ const useStyles = () => {
         },
         android: { paddingBottom: 3, paddingTop: 2 },
       }),
+    },
+    sendingIndicator: {
+      flexDirection: "row",
+      alignItems: "center",
     },
   });
 };

@@ -27,19 +27,6 @@ type AppStoreType = {
   hydrationDone: boolean;
   setHydrationDone: (done: boolean) => void;
 
-  mediaPreview: {
-    sending: boolean;
-    mediaURI: string;
-    error: boolean;
-  } | null;
-  setMediaPreview: (
-    preview: {
-      sending: boolean;
-      mediaURI: string;
-      error: boolean;
-    } | null
-  ) => void;
-
   lastVersionOpen: string;
   setLastVersionOpen: (version: string) => void;
 
@@ -77,9 +64,6 @@ export const useAppStore = create<AppStoreType>()(
       // No hydration on web
       hydrationDone: Platform.OS === "web",
       setHydrationDone: (done) => set(() => ({ hydrationDone: done })),
-
-      mediaPreview: null,
-      setMediaPreview: (preview) => set(() => ({ mediaPreview: preview })),
 
       lastVersionOpen: "",
       setLastVersionOpen: (version) =>

@@ -7,7 +7,7 @@ import {
 } from "@styles/colors";
 import { AvatarSizes } from "@styles/sizes";
 import * as Haptics from "expo-haptics";
-import { ReactNode, useCallback, useMemo, useRef } from "react";
+import React, { ReactNode, useCallback, useMemo, useRef } from "react";
 import {
   Animated,
   ColorSchemeName,
@@ -65,6 +65,8 @@ export type MessageToDisplay = XmtpMessage & {
   fromMe: boolean;
   isLatestSettledFromMe: boolean;
   isLatestSettledFromPeer: boolean;
+  isLoadingAttachment: boolean | undefined;
+  nextMessageIsLoadingAttachment: boolean | undefined;
 };
 
 type Props = {
@@ -179,6 +181,13 @@ function ChatMessage({ message, colorScheme, isGroup, isFrame }: Props) {
 
   const reactions = getMessageReactions(message);
   const showInBubble = !isGroupUpdated;
+  const showAvatar = isGroup && !message.fromMe;
+
+  const showStatus =
+    message.fromMe &&
+    (!message.hasNextMessageInSeries ||
+      (message.hasNextMessageInSeries &&
+        message.nextMessageIsLoadingAttachment));
 
   const replyingToProfileName = useMemo(() => {
     if (!replyingToMessage?.senderAddress) return "";
@@ -189,14 +198,21 @@ function ChatMessage({ message, colorScheme, isGroup, isFrame }: Props) {
     );
   }, [replyingToMessage?.senderAddress]);
 
+  const messageAttachment = useChatStore(
+    (state) => state.messageAttachments[message.id] || null
+  );
+  const attachmentStillLoading =
+    isAttachment && (!messageAttachment || messageAttachment.loading);
+
   const swipeableRef = useRef<Swipeable | null>(null);
 
   return (
     <View
       style={[
         styles.messageRow,
+        attachmentStillLoading ? { height: 0, overflow: "hidden" } : undefined,
         {
-          marginBottom: !message.hasNextMessageInSeries ? 8 : 2,
+          marginBottom: showStatus ? 8 : 2,
         },
       ]}
     >
@@ -430,6 +446,8 @@ export default function CachedChatMessage({
     "hasPreviousMessageInSeries",
     "isLatestSettledFromMe",
     "isLatestSettledFromPeer",
+    "isLoadingAttachment",
+    "nextMessageIsLoadingAttachment",
   ];
   const alreadyRenderedMessage = renderedMessages.get(
     `${account}-${message.id}`

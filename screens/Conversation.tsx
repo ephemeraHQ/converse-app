@@ -25,6 +25,7 @@ import {
 } from "../utils/conversation";
 import { isDesktop } from "../utils/device";
 import { converseEventEmitter } from "../utils/events";
+import { MediaPreviewWithValue } from "../utils/media";
 import { setTopicToNavigateTo, topicToNavigateTo } from "../utils/navigation";
 import { TextInputWithValue } from "../utils/str";
 import { loadOlderMessages } from "../utils/xmtpRN/messages";
@@ -38,15 +39,20 @@ const Conversation = ({
   const [transactionMode, setTransactionMode] = useState(false);
   const [frameTextInputFocused, setFrameTextInputFocused] = useState(false);
 
-  const { conversations, conversationsMapping, setConversationMessageDraft } =
-    useChatStore(
-      useSelect([
-        "conversations",
-        "conversationsMapping",
-        "setConversationMessageDraft",
-        "lastUpdateAt", // Added even if unused to trigger a rerender
-      ])
-    );
+  const {
+    conversations,
+    conversationsMapping,
+    setConversationMessageDraft,
+    setConversationMediaPreview,
+  } = useChatStore(
+    useSelect([
+      "conversations",
+      "conversationsMapping",
+      "setConversationMessageDraft",
+      "setConversationMediaPreview",
+      "lastUpdateAt", // Added even if unused to trigger a rerender
+    ])
+  );
 
   // Initial conversation topic will be set only if in route params
   const [_conversationTopic, setConversationTopic] = useState(
@@ -121,10 +127,11 @@ const Conversation = ({
     : false;
 
   const textInputRef = useRef<TextInputWithValue>();
+  const mediaPreviewRef = useRef<MediaPreviewWithValue>();
 
   const messageToPrefill =
     route.params?.message || conversation?.messageDraft || "";
-
+  const mediaPreviewToPrefill = conversation?.mediaPreview || null;
   const focusOnLayout = useRef(false);
   const chatLayoutDone = useRef(false);
   const alreadyAutomaticallyFocused = useRef(false);
@@ -209,13 +216,22 @@ const Conversation = ({
   }, [conversation]);
 
   const onLeaveScreen = useCallback(async () => {
-    if (!conversation || !textInputRef.current) return;
+    if (!conversation) return;
+
     useChatStore.getState().setOpenedConversationTopic(null);
-    setConversationMessageDraft(
-      conversation.topic,
-      textInputRef.current.currentValue
-    );
-  }, [conversation, setConversationMessageDraft]);
+    if (textInputRef.current) {
+      setConversationMessageDraft(
+        conversation.topic,
+        textInputRef.current.currentValue
+      );
+    }
+    if (mediaPreviewRef.current) {
+      setConversationMediaPreview(
+        conversation.topic,
+        mediaPreviewRef.current.currentValue
+      );
+    }
+  }, [conversation, setConversationMessageDraft, setConversationMediaPreview]);
 
   const onOpeningConversation = useCallback(
     ({ topic }: { topic: string }) => {
@@ -251,6 +267,8 @@ const Conversation = ({
             conversation,
             messageToPrefill,
             inputRef: textInputRef,
+            mediaPreviewToPrefill,
+            mediaPreviewRef,
             isBlockedPeer,
             onReadyToFocus,
             transactionMode,
