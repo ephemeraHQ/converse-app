@@ -1,15 +1,9 @@
-import { actionSheetColors } from "@styles/colors";
+import { MenuView } from "@react-native-menu/menu";
 import * as ImagePicker from "expo-image-picker";
 import { setStatusBarHidden } from "expo-status-bar";
 import mime from "mime";
 import { useCallback, useEffect, useRef } from "react";
-import {
-  Platform,
-  StyleSheet,
-  TouchableOpacity,
-  View,
-  useColorScheme,
-} from "react-native";
+import { Platform, StyleSheet, View, useColorScheme } from "react-native";
 import { v4 as uuidv4 } from "uuid";
 
 import { useAccountsStore } from "../../../data/store/accountsStore";
@@ -17,7 +11,6 @@ import { useAppStore } from "../../../data/store/appStore";
 import { useSelect } from "../../../data/store/storeHelpers";
 import { uploadRemoteAttachment } from "../../../utils/attachment";
 import { useConversationContext } from "../../../utils/conversation";
-import { executeAfterKeyboardClosed } from "../../../utils/keyboard";
 import {
   compressAndResizeImage,
   pickMediaFromLibrary,
@@ -29,7 +22,6 @@ import {
   encryptRemoteAttachment,
   serializeRemoteAttachmentMessageContent,
 } from "../../../utils/xmtpRN/attachments";
-import { showActionSheetWithOptions } from "../../StateHandlers/ActionSheetStateHandler";
 import ActionButton from "../ActionButton";
 
 const DATA_MIMETYPE_REGEX = /data:(.*?);/;
@@ -139,48 +131,51 @@ export default function AddAttachmentButton() {
   }, [setMediaPreview]);
 
   return (
-    <TouchableOpacity
-      onPress={() => {
-        const showOptions = () =>
-          showActionSheetWithOptions(
-            {
-              options: ["Camera", "Photo Library", "Cancel"],
-              cancelButtonIndex: 2,
-              ...actionSheetColors(colorScheme),
-            },
-            async (selectedIndex?: number) => {
-              switch (selectedIndex) {
-                case 0: // Camera
-                  openCamera();
-                  break;
-                case 1: // Media Library
-                  pickMedia();
-                  break;
+    <View>
+      <MenuView
+        style={styles.menuButton}
+        onPressAction={async ({ nativeEvent }) => {
+          switch (nativeEvent.event) {
+            case "camera":
+              openCamera();
+              break;
+            case "mediaLibrary":
+              pickMedia();
+              break;
 
-                default:
-                  break;
-              }
-            }
-          );
-        assetRef.current = undefined;
-        if (Platform.OS === "web") {
-          pickMedia();
-        } else {
-          executeAfterKeyboardClosed(showOptions);
-        }
-      }}
-      activeOpacity={0.4}
-    >
-      <View style={styles.attachmentButton}>
-        <ActionButton picto="photo" />
-      </View>
-    </TouchableOpacity>
+            default:
+              break;
+          }
+        }}
+        actions={[
+          {
+            id: "mediaLibrary",
+            title: "Photo Library",
+            image: Platform.select({
+              ios: "square.and.arrow.up",
+              android: "square.and.arrow.up",
+            }),
+          },
+          {
+            id: "camera",
+            title: "Camera",
+            image: Platform.select({
+              ios: "camera",
+              android: "camera",
+            }),
+          },
+        ]}
+        shouldOpenOnLongPress={false}
+      >
+        <ActionButton picto="plus" />
+      </MenuView>
+    </View>
   );
 }
 
 const useStyles = () => {
   return StyleSheet.create({
-    attachmentButton: {
+    menuButton: {
       flex: 1,
       justifyContent: "center",
       alignItems: "flex-end",
