@@ -9,7 +9,7 @@ import Foundation
 import XMTP
 import Alamofire
 
-func getXmtpKeyForAccount(account: String) throws -> Data? {
+func getXmtpKeyForAccount(account: String) throws -> String? {
   let legacyKey = getKeychainValue(forKey: "XMTP_KEYS")
   if (legacyKey != nil && legacyKey!.count > 0) {
     // We have a legacy key, not yet migrated!
@@ -17,28 +17,46 @@ func getXmtpKeyForAccount(account: String) throws -> Data? {
     let decoder = JSONDecoder()
     let decoded = try decoder.decode([UInt8].self, from: legacyKey!.data(using: .utf8)!)
     let data = Data(decoded)
-    return data
+    return data.base64EncodedString()
   }
   let accountKey = getKeychainValue(forKey: "XMTP_KEY_\(account)")
   if (accountKey == nil || accountKey!.count == 0) {
     return nil
   }
   // New keys are in base64 format
-  return Data(base64Encoded: accountKey!)
+  return accountKey!
+}
+
+func base64ToSubarray(base64Key: String) -> Data? {
+    // Decode the base64 string
+    guard let data = Data(base64Encoded: base64Key) else {
+        return nil
+    }
+    
+    // Get the subarray of the first 'length' bytes
+    let subarray = data.prefix(32)
+          
+    // Convert the subarray to Data
+    return Data(subarray)
 }
 
 func getXmtpClient(account: String) async -> XMTP.Client? {
   do {
-    let xmtpKeyData = try getXmtpKeyForAccount(account: account)
+    let xmtpKey = try getXmtpKeyForAccount(account: account)
+    if xmtpKey == nil {
+      return nil;
+    }
+    let xmtpKeyData = Data(base64Encoded: xmtpKey!)
     if (xmtpKeyData == nil) {
       return nil;
     }
+    let encryptionKey = base64ToSubarray(base64Key: xmtpKey!)
     let privateKeyBundle = try! PrivateKeyBundle(serializedData: xmtpKeyData!)
     let xmtpEnv = getXmtpEnv()
     
     let groupId = "group.\(try! getInfoPlistValue(key: "AppBundleId", defaultValue: nil))"
     let groupDir = (FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: groupId)?.path)!
-    let client = try await Client.from(bundle: privateKeyBundle, options: .init(api: .init(env: xmtpEnv), enableV3: true, dbDirectory: groupDir))
+    let client = try await Client.from(bundle: privateKeyBundle, options: .init(api: .init(env: xmtpEnv), enableV3: true, encryptionKey: encryptionKey, dbDirectory: groupDir))
     client.register(codec: AttachmentCodec())
     client.register(codec: RemoteAttachmentCodec())
     client.register(codec: ReactionCodec())

@@ -21,22 +21,37 @@ fun initCodecs() {
     Client.register(codec = ReplyCodec())
 }
 
-fun getXmtpKeyForAccount(appContext: Context, account: String): ByteArray? {
+fun getXmtpKeyForAccount(appContext: Context, account: String): String? {
     val legacyKey = getKeychainValue("XMTP_BASE64_KEY")
     if (legacyKey != null && legacyKey.isNotEmpty()) {
         Log.d("XmtpClient", "Legacy Key Found: ${legacyKey} ${legacyKey.length}")
-        return Base64.decode(legacyKey)
+        return legacyKey
     }
 
     val accountKey = getKeychainValue("XMTP_KEY_${account}")
     if (accountKey != null && accountKey.isNotEmpty()) {
         Log.d("XmtpClient", "Found key for account: ${account}")
-        return Base64.decode(accountKey)
+        return accountKey
     }
     return null
 }
+
+fun base64ToSubarray(base64Key: String): ByteArray? {
+    return try {
+        // Decode the base64 string
+        val data = Base64.decode(base64Key)
+
+        // Get the subarray of the first 32 bytes
+        data.take(32).toByteArray()
+    } catch (e: IllegalArgumentException) {
+        // Return null if the base64 string is invalid
+        null
+    }
+}
+
 fun getXmtpClient(appContext: Context, account: String): Client? {
-    val keyByteArray = getXmtpKeyForAccount(appContext, account) ?: return null
+    val keyString = getXmtpKeyForAccount(appContext, account) ?: return null
+    val keyByteArray = Base64.decode(keyString)
     val keys = PrivateKeyBundleV1Builder.buildFromBundle(keyByteArray)
     val mmkv = getMmkv(appContext)
     var xmtpEnvString = mmkv?.decodeString("xmtp-env")
@@ -48,7 +63,10 @@ fun getXmtpClient(appContext: Context, account: String): Client? {
         if (xmtpEnvString == "production") XMTPEnvironment.PRODUCTION else XMTPEnvironment.DEV
 
     val dbDirectory = "/data/data/${appContext.packageName}/databases"
-    val options = ClientOptions(api = ClientOptions.Api(env = xmtpEnv, isSecure = true), enableV3 = true, dbDirectory = dbDirectory, appContext = appContext)
+
+    val dbEncryptionKey = base64ToSubarray(keyString)
+
+    val options = ClientOptions(api = ClientOptions.Api(env = xmtpEnv, isSecure = true), enableV3 = true, dbEncryptionKey = dbEncryptionKey,  dbDirectory = dbDirectory, appContext = appContext)
 
     return Client().buildFrom(bundle = keys, options = options)
 }
