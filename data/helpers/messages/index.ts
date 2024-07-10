@@ -128,6 +128,18 @@ export const markMessageAsSent = async (
     .updateMessageStatus(topic, messageId, "sent");
 };
 
+export const markMessageAsPrepared = async (
+  account: string,
+  messageId: string,
+  topic: string
+) => {
+  const messageRepository = await getRepository(account, "message");
+  await messageRepository.update({ id: messageId }, { status: "prepared" });
+  getChatStore(account)
+    .getState()
+    .updateMessageStatus(topic, messageId, "prepared");
+};
+
 export const deleteMessage = async (
   account: string,
   topic: string,

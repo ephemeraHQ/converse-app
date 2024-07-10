@@ -59,7 +59,13 @@ type ConversationListItemProps = {
   conversationPeerAvatar: string | undefined;
   lastMessagePreview: string | undefined;
   lastMessageFromMe: boolean;
-  lastMessageStatus?: "delivered" | "error" | "seen" | "sending" | "sent";
+  lastMessageStatus?:
+    | "delivered"
+    | "error"
+    | "seen"
+    | "sending"
+    | "sent"
+    | "prepared";
   showUnread: boolean;
   conversationOpened: boolean;
   isGroupConversation: boolean;
