@@ -12,7 +12,6 @@ import { type Conversation } from "./conversationEntity";
 
 @Entity()
 export class Message {
-
   @PrimaryColumn("text")
   id!: string;
 
@@ -31,7 +30,7 @@ export class Message {
 
   @Index()
   @Column("text", { default: "sent" })
-  status!: "delivered" | "error" | "seen" | "sending" | "sent";
+  status!: "delivered" | "error" | "seen" | "sending" | "sent" | "prepared";
 
   @Index()
   @Column("text")

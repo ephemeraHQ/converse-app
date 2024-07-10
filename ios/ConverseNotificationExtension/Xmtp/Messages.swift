@@ -136,7 +136,14 @@ func handleGroupMessage(xmtpClient: XMTP.Client, envelope: XMTP.Envelope, apiURI
     let groups = try await xmtpClient.conversations.groups()
     if let group = groups.first(where: { $0.topic == contentTopic }) {
       try await group.sync()
-      if let decodedMessage = try? await decodeMessage(xmtpClient: xmtpClient, envelope: envelope) {
+      if var decodedMessage = try? await decodeMessage(xmtpClient: xmtpClient, envelope: envelope) {
+        
+        // For now, use the group member linked address as "senderAddress"
+        // @todo => make inboxId a first class citizen
+        if let senderAddresses = try group.members.first(where: {$0.inboxId == decodedMessage.senderAddress})?.addresses {
+          decodedMessage.senderAddress = senderAddresses[0]
+        }
+
         let decodedMessageResult = handleMessageByContentType(decodedMessage: decodedMessage, xmtpClient: xmtpClient);
         messageId = decodedMessageResult.id
         if decodedMessageResult.senderAddress == xmtpClient.inboxID || decodedMessageResult.forceIgnore {
