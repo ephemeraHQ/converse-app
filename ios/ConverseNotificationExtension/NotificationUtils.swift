@@ -49,8 +49,6 @@ func notificationAlreadyShown(for messageId: String?) -> Bool {
 
 func cancelNotification(contentHandler: ((UNNotificationContent) -> Void)) {
   let emptyContent = UNMutableNotificationContent()
-  emptyContent.title = "Hidden Notification"
-  emptyContent.body = "You would not see this on prod"
   contentHandler(emptyContent)
 }
 
