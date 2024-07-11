@@ -1,3 +1,4 @@
+import { getDbEncryptionKey } from "@utils/keychain/helpers";
 import { TransactionReferenceCodec } from "@xmtp/content-type-transaction-reference";
 import {
   Client,
@@ -23,6 +24,7 @@ export const getXmtpBase64KeyFromSigner = async (
   preEnableIdentityCallback?: () => Promise<void>
 ) => {
   const dbDirectory = await getDbDirectory();
+  const dbEncryptionKey = await getDbEncryptionKey();
 
   const client = await Client.create(signer, {
     env,
@@ -41,6 +43,7 @@ export const getXmtpBase64KeyFromSigner = async (
     preEnableIdentityCallback,
     enableV3: true,
     dbDirectory,
+    dbEncryptionKey,
     historySyncUrl: config.historySyncUrl,
   });
   const base64Key = await client.exportKeyBundle();
