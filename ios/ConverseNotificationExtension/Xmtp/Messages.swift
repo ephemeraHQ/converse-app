@@ -8,6 +8,7 @@
 import Foundation
 import XMTP
 import Alamofire
+import Intents
 
 func handleNewConversationFirstMessage(xmtpClient: XMTP.Client, apiURI: String?, pushToken: String?, conversation: XMTP.Conversation, bestAttemptContent: inout UNMutableNotificationContent) async -> (shouldShowNotification: Bool, messageId: String?) {
   // @todo => handle new group first messages?
@@ -127,10 +128,11 @@ func handleGroupWelcome(xmtpClient: XMTP.Client, apiURI: String?, pushToken: Str
   return (shouldShowNotification, messageId)
 }
 
-func handleGroupMessage(xmtpClient: XMTP.Client, envelope: XMTP.Envelope, apiURI: String?, bestAttemptContent: inout UNMutableNotificationContent) async -> (shouldShowNotification: Bool, messageId: String?) {
+func handleGroupMessage(xmtpClient: XMTP.Client, envelope: XMTP.Envelope, apiURI: String?, bestAttemptContent: inout UNMutableNotificationContent) async -> (shouldShowNotification: Bool, messageId: String?, messageIntent: INSendMessageIntent?) {
   var shouldShowNotification = false
   let contentTopic = envelope.contentTopic
   var messageId: String? = nil
+  var messageIntent: INSendMessageIntent? = nil
   
   do {
     let groups = try await xmtpClient.conversations.groups()
@@ -168,6 +170,9 @@ func handleGroupMessage(xmtpClient: XMTP.Client, envelope: XMTP.Envelope, apiURI
             if let content = decodedMessageResult.content {
               bestAttemptContent.body = content
             }
+            
+            let groupImage = try? group.groupImageUrlSquare()
+            messageIntent = getIncomingGroupMessageIntent(group: group, content: bestAttemptContent.body, senderId: decodedMessage.senderAddress, senderName: bestAttemptContent.subtitle)
           } else if spamScore == 0 { // Message is Request
             shouldShowNotification = false
           } else { // Message is Spam
@@ -181,7 +186,7 @@ func handleGroupMessage(xmtpClient: XMTP.Client, envelope: XMTP.Envelope, apiURI
     print("[NotificationExtension] Error handling group message: \(error)")
     
   }
-  return (shouldShowNotification, messageId)
+  return (shouldShowNotification, messageId, messageIntent)
 }
 
 
