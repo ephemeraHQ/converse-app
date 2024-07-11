@@ -231,6 +231,12 @@ suspend fun handleGroupMessage(
 
     val decodedMessage = group.processMessage(envelope.message.toByteArray()).decode()
 
+    // For now, use the group member linked address as "senderAddress"
+    // @todo => make inboxId a first class citizen
+    group.members().firstOrNull { it.inboxId == decodedMessage.senderAddress }?.addresses?.get(0)?.let { senderAddress ->
+        decodedMessage.senderAddress = senderAddress
+    }
+
     val decodedMessageResult = handleMessageByContentType(
         appContext,
         decodedMessage,

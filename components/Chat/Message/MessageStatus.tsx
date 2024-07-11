@@ -13,7 +13,7 @@ export default function MessageStatus({ message }: Props) {
 
   return (
     message.fromMe &&
-    (message.status === "sending" ? (
+    (message.status === "sending" || message.status === "prepared" ? (
       <Text style={styles.statusText}>Encrypted</Text>
     ) : (
       <Text style={styles.statusText}>Sent</Text>

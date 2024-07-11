@@ -79,7 +79,7 @@ type XmtpProtocolMessage = {
 };
 
 export type XmtpMessage = XmtpProtocolMessage & {
-  status: "delivered" | "error" | "seen" | "sending" | "sent";
+  status: "delivered" | "error" | "seen" | "sending" | "sent" | "prepared";
   reactions?: Map<string, XmtpMessage>;
   contentFallback?: string;
   referencedMessageId?: string;
@@ -146,7 +146,7 @@ export type ChatStoreType = {
   updateMessageStatus: (
     topic: string,
     messageId: string,
-    status: "delivered" | "error" | "seen" | "sending" | "sent"
+    status: "delivered" | "error" | "seen" | "sending" | "sent" | "prepared"
   ) => void;
 
   setLocalClientConnected: (connected: boolean) => void;
