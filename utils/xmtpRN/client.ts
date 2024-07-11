@@ -1,3 +1,4 @@
+import { getDbEncryptionKey } from "@utils/keychain/helpers";
 import { TransactionReferenceCodec } from "@xmtp/content-type-transaction-reference";
 import {
   Client,
@@ -19,6 +20,7 @@ const env = config.xmtpEnv as "dev" | "production" | "local";
 
 export const getXmtpClientFromBase64Key = async (base64Key: string) => {
   const dbDirectory = await getDbDirectory();
+  const dbEncryptionKey = await getDbEncryptionKey();
 
   return Client.createFromKeyBundle(base64Key, {
     env,
@@ -36,7 +38,7 @@ export const getXmtpClientFromBase64Key = async (base64Key: string) => {
     enableV3: true,
     dbDirectory,
     historySyncUrl: config.historySyncUrl,
-    dbEncryptionKey: Buffer.from(base64Key, "base64").subarray(0, 32),
+    dbEncryptionKey,
   });
 };
 
