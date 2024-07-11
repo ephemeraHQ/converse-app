@@ -88,7 +88,7 @@ func handleNotificationAsync(contentHandler: ((UNNotificationContent) -> Void), 
           envelope.contentTopic = contentTopic
         }
         sentryAddBreadcrumb(message: "topic \(contentTopic) is not invite topic")
-        (shouldShowNotification, messageId) = await handleOngoingConversationMessage(
+        (shouldShowNotification, messageId, messageIntent) = await handleOngoingConversationMessage(
           xmtpClient: xmtpClient,
           envelope: envelope,
           bestAttemptContent: &content,

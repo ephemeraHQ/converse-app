@@ -72,6 +72,17 @@ func getPreferredName(address: String, socials: ProfileSocials) -> String {
   return shortAddress(address: address)
 }
 
+func getPreferredAvatar(socials: ProfileSocials) -> String? {
+  if let primaryUsername = socials.userNames?.first(where: { $0.isPrimary ?? false}) {
+    return primaryUsername.avatar;
+  }
+  
+  if let primaryEns = socials.ensNames?.first(where: { $0.isPrimary ?? false}) {
+    return primaryEns.avatar;
+  }
+  return nil
+}
+
 func getIncomingGroupMessageIntent(group: Group, content: String, senderId: String, senderName: String?) -> INSendMessageIntent {
   let handle = INPersonHandle(value: senderId, type: .unknown)
   
@@ -97,6 +108,31 @@ func getIncomingGroupMessageIntent(group: Group, content: String, senderId: Stri
     intent.setImage(avatar, forParameterNamed: \.speakableGroupName)
   }
   
+  
+  return intent
+}
+
+func getIncoming1v1MessageIntent(topic: String, senderId: String, senderName: String?, senderAvatar: String?, content: String) -> INSendMessageIntent {
+  let handle = INPersonHandle(value: senderId, type: .unknown)
+  var avatar: INImage? = nil
+  if let avatarUrlString = senderAvatar, let avatarUrl = URL(string: avatarUrlString) {
+    avatar = INImage(url: avatarUrl)
+  }
+  let sender = INPerson(personHandle: handle,
+                        nameComponents: nil,
+                        displayName: senderName,
+                        image: avatar,
+                        contactIdentifier: nil,
+                        customIdentifier: nil)
+  
+  let intent = INSendMessageIntent(recipients: nil,
+                                   outgoingMessageType: .outgoingMessageText,
+                                   content: content,
+                                   speakableGroupName: nil,
+                                   conversationIdentifier: topic,
+                                   serviceName: nil,
+                                   sender: sender,
+                                   attachments: nil)
   
   return intent
 }

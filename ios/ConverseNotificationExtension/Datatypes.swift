@@ -60,6 +60,7 @@ struct EnsName: Codable {
   var name: String;
   var displayName: String?;
   var isPrimary: Bool?;
+  var avatar: String?;
 }
 
 
@@ -67,6 +68,7 @@ struct ConverseUserName: Codable {
   var name: String;
   var displayName: String?;
   var isPrimary: Bool?;
+  var avatar: String?;
 }
 
 struct ProfileSocials: Codable {
