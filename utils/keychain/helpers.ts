@@ -128,3 +128,16 @@ export const getAccountEncryptionKey = async (
 
 export const deleteAccountEncryptionKey = (account: string) =>
   deleteSecureItemAsync(`CONVERSE_ACCOUNT_ENCRYPTION_KEY_${account}`);
+
+export const getDbEncryptionKey = async () => {
+  const existingKey = await getSecureItemAsync("LIBXMTP_DB_ENCRYPTION_KEY");
+  if (existingKey) {
+    return Buffer.from(existingKey, "base64");
+  }
+  const newKey = Buffer.from(await getRandomBytesAsync(32));
+  await setSecureItemAsync(
+    "LIBXMTP_DB_ENCRYPTION_KEY",
+    newKey.toString("base64")
+  );
+  return newKey;
+};
