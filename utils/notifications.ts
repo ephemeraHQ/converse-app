@@ -456,7 +456,7 @@ export const loadSavedNotificationMessagesToContext = async () => {
             senderAddress: message.senderAddress,
             sent: message.sent,
             content: message.content,
-            status: "sent",
+            status: "delivered",
             contentType: message.contentType || "xmtp.org/text:1.0",
             topic: message.topic,
             referencedMessageId: message.referencedMessageId,

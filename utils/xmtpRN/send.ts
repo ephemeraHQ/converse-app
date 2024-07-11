@@ -24,7 +24,6 @@ import {
   updateMessagesIds,
 } from "../../data/helpers/messages";
 import { getMessagesToSend } from "../../data/helpers/messages/getMessagesToSend";
-// import { syncGroupsMessages } from "./messages";
 
 let sendingPendingMessages = false;
 const sendingMessages: { [messageId: string]: boolean } = {};
@@ -59,46 +58,40 @@ const sendConversePreparedMessages = async (
   }
 };
 
+const publishConverseGroupMessages = async (groups: GroupWithCodecsType[]) => {
+  try {
+    await Promise.all(
+      Object.values(groups).map((g) => g.publishPreparedMessages())
+    );
+  } catch (e) {
+    console.log("Could not send message, will probably try again later", e);
+  }
+};
+
 const sendConverseGroupMessages = async (
   account: string,
   groupMessages: Map<
     string,
-    { group: GroupWithCodecsType; message: MessageEntity }
+    { group: GroupWithCodecsType; message: MessageEntity; topic: string }
   >
 ) => {
-  // const now = new Date().getTime();
+  const groups: { [groupId: string]: GroupWithCodecsType } = {};
   for (const id of groupMessages.keys()) {
-    const groupMessage = groupMessages.get(id);
-    if (!groupMessage) continue;
-    try {
-      if (sendingGroupMessages[id]) {
-        return;
-      }
-      sendingGroupMessages[id] = groupMessage.message;
-      const newMessageId = await groupMessage.group.send(
-        getMessageContent(groupMessage.message)
-      );
-      console.log("Group message sent", { newMessageId });
-      await updateMessagesIds(account, {
-        [groupMessage.message.id]: {
-          newMessageId,
-          message: groupMessage.message,
-          newMessageSent: new Date().getTime(),
-        },
-      });
-      // Here message has been sent, let's mark it as
-      // sent locally to make sure we don't sent twice
-      await markMessageAsSent(account, newMessageId, groupMessage.group.topic);
-      // Let's refresh group ?
-      // await syncGroupsMessages(account, [groupMessage.group], {
-      //   [groupMessage.group.topic]: now,
-      // });
+    const preparedGroupMessage = groupMessages.get(id);
+    if (
+      !preparedGroupMessage ||
+      sendingMessages[id] ||
+      !preparedGroupMessage.topic
+    )
+      continue;
+    sendingMessages[id] = true;
+    // await markMessageAsPrepared(account, id, preparedGroupMessage.topic);
+    groups[preparedGroupMessage.group.id] = preparedGroupMessage.group;
+  }
+  await publishConverseGroupMessages(Object.values(groups));
 
-      delete sendingGroupMessages[id];
-    } catch (e: any) {
-      console.log("Could not send message, will probably try again later", e);
-      delete sendingGroupMessages[id];
-    }
+  for (const id of groupMessages.keys()) {
+    delete sendingMessages[id];
   }
 };
 
@@ -153,7 +146,7 @@ export const sendPendingMessages = async (account: string) => {
       new Map();
     const groupMessagesToSend: Map<
       string,
-      { group: GroupWithCodecsType; message: MessageEntity }
+      { group: GroupWithCodecsType; message: MessageEntity; topic: string }
     > = new Map();
     const messageIdsToUpdate: {
       [messageId: string]: {
@@ -161,6 +154,9 @@ export const sendPendingMessages = async (account: string) => {
         newMessageSent: number;
         message: MessageEntity;
       };
+    } = {};
+    const groupsWithPreparedMessages: {
+      [groupId: string]: GroupWithCodecsType;
     } = {};
     for (const message of messagesToSend) {
       if (sendingMessages[message.id] || sendingGroupMessages[message.id]) {
@@ -172,7 +168,7 @@ export const sendPendingMessages = async (account: string) => {
         message.conversationId
       );
       if (conversation) {
-        if ((conversation as any).peerAddress) {
+        if ((conversation as any).peerAddress && message.status === "sending") {
           // DM Conversation
           const preparedMessage = await (
             conversation as ConversationWithCodecsType
@@ -188,11 +184,28 @@ export const sendPendingMessages = async (account: string) => {
             message,
           };
         } else if ((conversation as any).peerInboxIds) {
-          // This is a group message
-          groupMessagesToSend.set(message.id, {
-            group: conversation as GroupWithCodecsType,
-            message,
-          });
+          // This is a group message. Preparing it will store
+          // it in libxmtp db to be published later, it's different
+          // from 1v1 prepareMessage which needs to be sent using sendPreparedMessage
+          const group = conversation as GroupWithCodecsType;
+          if (message.status === "sending") {
+            const newMessageId = await group.prepareMessage(
+              getMessageContent(message)
+            );
+            groupMessagesToSend.set(newMessageId, {
+              group,
+              message,
+              topic: message.conversationId,
+            });
+            messageIdsToUpdate[message.id] = {
+              newMessageId,
+              newMessageSent: new Date().getTime(),
+              message,
+            };
+          } else if (message.status === "prepared") {
+            // We prepared it but was not published, let's publish them at the end
+            groupsWithPreparedMessages[group.id] = group;
+          }
         }
       } else {
         console.log(
@@ -203,6 +216,9 @@ export const sendPendingMessages = async (account: string) => {
     await updateMessagesIds(account, messageIdsToUpdate);
     await sendConversePreparedMessages(account, preparedMessagesToSend);
     await sendConverseGroupMessages(account, groupMessagesToSend);
+    await publishConverseGroupMessages(
+      Object.values(groupsWithPreparedMessages)
+    );
   } catch (e) {
     console.log(e);
   }
