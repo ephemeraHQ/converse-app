@@ -11,7 +11,7 @@
       "env": {
         "EXPO_ENV": "dev"
       },
-      "node": "18.16.1"
+      "node": "20.15.1"
     },
     "ios-simulator": {
       "developmentClient": true,
@@ -24,7 +24,7 @@
         "simulator": true,
         "cocoapods": "1.14.3"
       },
-      "node": "18.16.1"
+      "node": "20.15.1"
     },
     "preview-ios": {
       "autoIncrement": true,
@@ -33,7 +33,7 @@
         "EXPO_ENV": "preview",
         "EXPO_PLATFORM": "ios"
       },
-      "node": "18.16.1",
+      "node": "20.15.1",
       "ios": {
         "cocoapods": "1.14.3"
       }
@@ -46,7 +46,7 @@
         "EXPO_ENV": "preview",
         "EXPO_PLATFORM": "ios"
       },
-      "node": "18.16.1",
+      "node": "20.15.1",
       "ios": {
         "cocoapods": "1.14.3"
       }
@@ -59,7 +59,7 @@
         "EXPO_ENV": "preview",
         "EXPO_PLATFORM": "android"
       },
-      "node": "18.16.1",
+      "node": "20.15.1",
       "ios": {
         "cocoapods": "1.14.3"
       }
@@ -71,7 +71,7 @@
       "env": {
         "EXPO_PLATFORM": "ios"
       },
-      "node": "18.16.1",
+      "node": "20.15.1",
       "ios": {
         "cocoapods": "1.14.3"
       }
@@ -82,7 +82,7 @@
       "env": {
         "EXPO_PLATFORM": "ios"
       },
-      "node": "18.16.1",
+      "node": "20.15.1",
       "ios": {
         "cocoapods": "1.14.3"
       }
@@ -93,7 +93,7 @@
       "env": {
         "EXPO_PLATFORM": "android"
       },
-      "node": "18.16.1",
+      "node": "20.15.1",
       "ios": {
         "cocoapods": "1.14.3"
       }
@@ -102,7 +102,7 @@
       "distribution": "internal",
       "channel": "production",
       "autoIncrement": true,
-      "node": "18.16.1",
+      "node": "20.15.1",
       "ios": {
         "cocoapods": "1.14.3"
       }
