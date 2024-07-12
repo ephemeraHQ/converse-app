@@ -1,0 +1,62 @@
+name: Check Build
+
+on:
+  pull_request:
+    branches:
+      - main
+      - beta
+    paths:
+      - "ios/**"
+      - "android/**"
+      - "package.json"
+
+jobs:
+  build-android:
+    if: contains(github.event.pull_request.head.repo.pushed_at, 'android') || contains(github.event.pull_request.head.repo.pushed_at, 'package.json')
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: "16"
+
+      - name: Install dependencies
+        run: yarn install
+
+      - name: 🏗 Setup EAS
+        uses: expo/expo-github-action@v8
+        with:
+          eas-version: latest
+          token: ${{ secrets.EXPO_TOKEN }}
+
+      - name: Build for Android
+        run: eas build --profile preview-android --platform android --non-interactive
+
+  build-ios:
+    if: contains(github.event.pull_request.head.repo.pushed_at, 'ios') || contains(github.event.pull_request.head.repo.pushed_at, 'package.json')
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: "16"
+
+      - name: Install dependencies
+        run: yarn install
+
+      - name: 🏗 Setup EAS
+        uses: expo/expo-github-action@v8
+        with:
+          eas-version: latest
+          token: ${{ secrets.EXPO_TOKEN }}
+
+      - name: Build for iOS
+        run: eas build --profile preview-ios --platform ios --non-interactive
