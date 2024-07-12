@@ -1,3 +1,5 @@
+import { createThirdwebClient } from "thirdweb";
+
 import config from "../config";
 
 const thirdwebGateway = `https://${config.thirdwebClientId}.ipfscdn.io`;
@@ -12,3 +14,7 @@ export const getIPFSAssetURI = (ipfsURI?: string) => {
   }
   return ipfsURI;
 };
+
+export const thirdwebClient = createThirdwebClient({
+  clientId: config.thirdwebClientId,
+});
