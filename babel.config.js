@@ -16,6 +16,7 @@ module.exports = {
       "module-resolver",
       {
         alias: {
+          "fast-text-encoding": "text-encoding",
           // crypto: "react-native-quick-crypto",
           "react-native-sqlite-storage": "@op-engineering/op-sqlite",
           crypto: "crypto-browserify",

@@ -1,6 +1,7 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { textPrimaryColor, textSecondaryColor } from "@styles/colors";
-import { useDisconnect, useSigner } from "@thirdweb-dev/react-native";
+import { thirdwebClient } from "@utils/thirdweb";
+import { Signer } from "ethers";
 import * as Linking from "expo-linking";
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
@@ -11,6 +12,13 @@ import {
   Text,
   useColorScheme,
 } from "react-native";
+import { ethers5Adapter } from "thirdweb/adapters/ethers5";
+import { ethereum } from "thirdweb/chains";
+import {
+  useActiveAccount,
+  useActiveWallet,
+  useDisconnect,
+} from "thirdweb/react";
 
 import OnboardingComponent from "./OnboardingComponent";
 import { getAccountsList } from "../../data/store/accountsStore";
@@ -50,8 +58,24 @@ export default function ConnectViaWallet({
   );
   const [onXmtp, setOnXmtp] = useState(false);
   const styles = useStyles();
-  const thirdwebSigner = useSigner();
-  const disconnectWallet = useDisconnect();
+  const thirdwebWallet = useActiveWallet();
+  const thirdwebAccount = useActiveAccount();
+  const [thirdwebSigner, setThirdwebSigner] = useState<Signer | undefined>();
+  useEffect(() => {
+    if (thirdwebAccount) {
+      ethers5Adapter.signer
+        .toEthers({
+          client: thirdwebClient,
+          chain: ethereum,
+          account: thirdwebAccount,
+        })
+        .then(setThirdwebSigner);
+    } else {
+      setThirdwebSigner(undefined);
+    }
+  }, [thirdwebAccount]);
+
+  const { disconnect: disconnectWallet } = useDisconnect();
 
   const clickedSecondSignature = useRef(false);
 
@@ -69,7 +93,9 @@ export default function ConnectViaWallet({
       if (resetLoading) {
         setLoading(false);
       }
-      await disconnectWallet();
+      if (thirdwebWallet) {
+        await disconnectWallet(thirdwebWallet);
+      }
       const storageKeys = await AsyncStorage.getAllKeys();
       const wcKeys = storageKeys.filter((k) => k.startsWith("wc@2:"));
       await AsyncStorage.multiRemove(wcKeys);
@@ -78,9 +104,10 @@ export default function ConnectViaWallet({
     [
       disconnectWallet,
       resetOnboarding,
+      setConnectionMethod,
       setLoading,
       setWaitingForSecondSignature,
-      setConnectionMethod,
+      thirdwebWallet,
     ]
   );
 
@@ -97,6 +124,7 @@ export default function ConnectViaWallet({
           return;
         }
         const isOnNetwork = await isOnXmtp(a);
+        console.log("in here yo");
         setOnXmtp(isOnNetwork);
         setSigner(thirdwebSigner);
         setLoading(false);

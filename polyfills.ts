@@ -1,4 +1,5 @@
 // Random values must be imported first for security.
+import "@thirdweb-dev/react-native-adapter";
 import "react-native-get-random-values";
 import "@ethersproject/shims";
 
