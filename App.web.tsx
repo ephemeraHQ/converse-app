@@ -27,7 +27,7 @@ const mainnet = {
 
 createWeb3Modal({
   ethersConfig: defaultConfig({
-    metadata: config.walletConnectConfig.dappMetadata,
+    metadata: config.walletConnectConfig.appMetadata,
   }),
   chains: [mainnet],
   projectId: config.walletConnectConfig.projectId,

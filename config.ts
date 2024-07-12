@@ -27,6 +27,7 @@ const defaultConfig = {
         "Converse lets you communicate and transact freely and safely.",
       url: "https://converse.xyz",
       logoUrl: "https://converse.xyz/icon.png",
+      icons: [],
     },
   },
   thirdwebClientId: "fb80f0aa5ea6c07d74813e56c1ea53e5",

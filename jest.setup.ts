@@ -5,7 +5,7 @@ jest.mock("expo-constants", () => {
   return {
     expoConfig: {
       extra: {
-        DEV_API_URI: process.env.DEV_API_URI,
+        DEV_API_URI: (process.env as any).DEV_API_URI,
       },
     },
   };
