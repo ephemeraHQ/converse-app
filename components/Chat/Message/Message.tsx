@@ -116,7 +116,6 @@ const MessageSenderAvatar = ({ message }: { message: MessageToDisplay }) => {
 
 function ChatMessage({ message, colorScheme, isGroup, isFrame }: Props) {
   const styles = useStyles();
-  const hideBackground = isAllEmojisAndMaxThree(message.content);
 
   let messageContent: ReactNode;
   const contentType = getMessageContentType(message.contentType);
@@ -126,6 +125,19 @@ function ChatMessage({ message, colorScheme, isGroup, isFrame }: Props) {
 
     Linking.openURL(uri);
   }, []);
+
+  // maybe using useChatStore inside ChatMessage
+  // leads to bad perf? Let's be cautious
+  const replyingToMessage = useChatStore((s) =>
+    message.referencedMessageId
+      ? s.conversations[message.topic]?.messages.get(
+          message.referencedMessageId
+        )
+      : undefined
+  );
+
+  const hideBackground =
+    !replyingToMessage && isAllEmojisAndMaxThree(message.content);
 
   switch (contentType) {
     case "attachment":
@@ -165,16 +177,6 @@ function ChatMessage({ message, colorScheme, isGroup, isFrame }: Props) {
   const showInBubble = !isGroupUpdated;
   const showAvatar = isGroup && !message.fromMe;
   const showStatus = message.fromMe && !message.hasNextMessageInSeries;
-
-  // maybe using useChatStore inside ChatMessage
-  // leads to bad perf? Let's be cautious
-  const replyingToMessage = useChatStore((s) =>
-    message.referencedMessageId
-      ? s.conversations[message.topic]?.messages.get(
-          message.referencedMessageId
-        )
-      : undefined
-  );
 
   const replyingToProfileName = useMemo(() => {
     if (!replyingToMessage?.senderAddress) return "";
@@ -526,7 +528,7 @@ const useStyles = () => {
       color: inversePrimaryColor(colorScheme),
     },
     allEmojisAndMaxThree: {
-      fontSize: 48,
+      fontSize: 64,
       paddingHorizontal: 0,
     },
     messageTextReply: {
