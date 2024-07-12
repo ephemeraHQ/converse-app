@@ -335,11 +335,20 @@ export const conversationShouldBeInInbox = (
   peersStatus: { [peer: string]: "blocked" | "consented" },
   groupsStatus: { [topic: string]: "allowed" | "denied" }
 ) => {
-  const isConsented = conversation.isGroup
-    ? groupsStatus[getGroupIdFromTopic(conversation.topic)] === "allowed"
-    : peersStatus[conversation.peerAddress.toLowerCase()] === "consented";
-
-  return conversation.hasOneMessageFromMe || isConsented;
+  if (conversation.isGroup) {
+    const groupId = getGroupIdFromTopic(conversation.topic);
+    const isGroupAllowed = groupsStatus[groupId] === "allowed";
+    const isCreatorAllowed =
+      conversation.groupCreator &&
+      peersStatus[conversation.groupCreator.toLowerCase()] === "consented";
+    return (
+      conversation.hasOneMessageFromMe || isGroupAllowed || isCreatorAllowed
+    );
+  } else {
+    const isPeerConsented =
+      peersStatus[conversation.peerAddress.toLowerCase()] === "consented";
+    return conversation.hasOneMessageFromMe || isPeerConsented;
+  }
 };
 
 export function sortAndComputePreview(
