@@ -144,7 +144,7 @@ export default function WalletSelector() {
                       const coinbaseWallet = createWallet(
                         "com.coinbase.wallet",
                         {
-                          appMetadata: config.walletConnectConfig.dappMetadata,
+                          appMetadata: config.walletConnectConfig.appMetadata,
                           mobileConfig: {
                             callbackURL: `https://${config.websiteDomain}/coinbase`,
                           },
