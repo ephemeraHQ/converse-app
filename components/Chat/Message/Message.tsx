@@ -528,7 +528,7 @@ const useStyles = () => {
       color: inversePrimaryColor(colorScheme),
     },
     allEmojisAndMaxThree: {
-      fontSize: 48,
+      fontSize: 64,
       paddingHorizontal: 0,
     },
     messageTextReply: {
