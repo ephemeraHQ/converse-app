@@ -5,6 +5,7 @@ import Animated, {
   useSharedValue,
   useAnimatedStyle,
   withTiming,
+  Easing,
 } from "react-native-reanimated";
 
 import { MessageToDisplay } from "./Message";
@@ -44,14 +45,19 @@ export default function MessageStatus({ message }: Props) {
     const prevStatus = prevStatusRef.current;
     prevStatusRef.current = message.status;
 
+    const timingConfig = {
+      duration: 100,
+      easing: Easing.inOut(Easing.quad),
+    };
+
     if (isSentOrDelivered && prevStatus === "sending") {
-      opacity.value = withTiming(1, { duration: 200 });
-      height.value = withTiming(22, { duration: 200 });
-      scale.value = withTiming(1, { duration: 200 });
+      opacity.value = withTiming(1, timingConfig);
+      height.value = withTiming(22, timingConfig);
+      scale.value = withTiming(1, timingConfig);
     } else if (isSentOrDelivered && !isLatestSettledFromMe) {
-      opacity.value = withTiming(0, { duration: 200 });
-      height.value = withTiming(0, { duration: 200 });
-      scale.value = withTiming(0, { duration: 200 });
+      opacity.value = withTiming(0, timingConfig);
+      height.value = withTiming(0, timingConfig);
+      scale.value = withTiming(0, timingConfig);
     } else if (isLatestSettledFromMe) {
       opacity.value = 1;
       height.value = 22;
@@ -67,7 +73,8 @@ export default function MessageStatus({ message }: Props) {
   ]);
 
   return (
-    message.fromMe && (
+    message.fromMe &&
+    message.status != "sending" && (
       <Animated.View style={[styles.container, animatedStyle]}>
         <View style={styles.contentContainer}>
           <Animated.Text style={styles.statusText}>

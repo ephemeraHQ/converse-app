@@ -24,8 +24,11 @@ import Animated, {
   useAnimatedStyle,
   useSharedValue,
   withTiming,
+  withSpring,
 } from "react-native-reanimated";
 
+import { MessageToDisplay } from "./Message";
+import MessageTail from "./MessageTail";
 import {
   useCurrentAccount,
   useSettingsStore,
@@ -48,8 +51,6 @@ import { UUID_REGEX } from "../../../utils/regex";
 import { isTransactionMessage } from "../../../utils/transaction";
 import EmojiPicker from "../../../vendor/rn-emoji-keyboard";
 import { showActionSheetWithOptions } from "../../StateHandlers/ActionSheetStateHandler";
-import { MessageToDisplay } from "./Message";
-import MessageTail from "./MessageTail";
 
 type Props = {
   children: React.ReactNode;
@@ -303,16 +304,26 @@ export default function ChatMessageActions({
       scale.value = 0;
       translateY.value = 20;
 
-      const animationConfig = {
-        duration: 300,
+      const timingConfig = {
+        duration: 100,
+        easing: Easing.inOut(Easing.quad),
         onComplete: () => {
           runOnJS(setHasAnimatedIn)(true);
         },
       };
 
-      opacity.value = withTiming(1, animationConfig);
-      scale.value = withTiming(1, animationConfig);
-      translateY.value = withTiming(0, animationConfig);
+      const springConfig = {
+        damping: 10,
+        stiffness: 200,
+        mass: 0.2,
+        overshootClamping: false,
+        restSpeedThreshold: 0.001,
+        restDisplacementThreshold: 0.001,
+      };
+
+      opacity.value = withTiming(1, timingConfig);
+      scale.value = withSpring(1, springConfig);
+      translateY.value = withSpring(0, springConfig);
     } else {
       opacity.value = 1;
       scale.value = 1;
@@ -342,80 +353,82 @@ export default function ChatMessageActions({
           previewBackgroundColor={initialBubbleBackgroundColor}
           style={[{ width: "100%" }, { overflow: "visible" }]}
         >
-          <Animated.View style={animateInStyle}>
-
-          <ReanimatedTouchableOpacity
-            activeOpacity={1}
-            style={[
-              styles.messageBubble,
-              message.fromMe ? styles.messageBubbleMe : undefined,
-              {
-                backgroundColor: hideBackground
-                  ? "transparent"
-                  : initialBubbleBackgroundColor,
-              },
-              highlightingMessage ? animatedBackgroundStyle : undefined,
-              Platform.select({
-                default: {},
-                android: {
-                  // Messages not from me
-                  borderBottomLeftRadius:
-                    !message.fromMe && message.hasNextMessageInSeries ? 2 : 18,
-                  borderTopLeftRadius:
-                    !message.fromMe && message.hasPreviousMessageInSeries
-                      ? 2
-                      : 18,
-                  // Messages from me
-                  borderBottomRightRadius:
-                    message.fromMe && message.hasNextMessageInSeries ? 2 : 18,
-                  borderTopRightRadius:
-                    message.fromMe && message.hasPreviousMessageInSeries
-                      ? 2
-                      : 18,
+          <Animated.View style={[animateInStyle, styles.animateInWrapper]}>
+            <ReanimatedTouchableOpacity
+              activeOpacity={1}
+              style={[
+                styles.messageBubble,
+                message.fromMe ? styles.messageBubbleMe : undefined,
+                {
+                  backgroundColor: hideBackground
+                    ? "transparent"
+                    : initialBubbleBackgroundColor,
                 },
-              }),
-              {
-                maxWidth: messageMaxWidth,
-              },
-            ]}
-            onPress={() => {
-              if (isAttachment) {
-                // Transfering attachment opening intent to component
-                converseEventEmitter.emit(
-                  `openAttachmentForMessage-${message.id}`
-                );
-              }
-              if (isTransaction) {
-                // Transfering event to component
-                converseEventEmitter.emit(
-                  `showActionSheetForTxRef-${message.id}`
-                );
-              }
-            }}
-            onLongPress={() => useAppStore.getState().setContextMenuShown(true)}
-          >
-            {children}
-          </ReanimatedTouchableOpacity>
-          {!message.hasNextMessageInSeries &&
-            !isFrame &&
-            !isAttachment &&
-            !isTransaction &&
-            !hideBackground &&
-            (Platform.OS === "ios" || Platform.OS === "web") && (
-              <MessageTail
-                style={[
-                  {
-                    color: initialBubbleBackgroundColor,
+                highlightingMessage ? animatedBackgroundStyle : undefined,
+                Platform.select({
+                  default: {},
+                  android: {
+                    // Messages not from me
+                    borderBottomLeftRadius:
+                      !message.fromMe && message.hasNextMessageInSeries
+                        ? 2
+                        : 18,
+                    borderTopLeftRadius:
+                      !message.fromMe && message.hasPreviousMessageInSeries
+                        ? 2
+                        : 18,
+                    // Messages from me
+                    borderBottomRightRadius:
+                      message.fromMe && message.hasNextMessageInSeries ? 2 : 18,
+                    borderTopRightRadius:
+                      message.fromMe && message.hasPreviousMessageInSeries
+                        ? 2
+                        : 18,
                   },
-                  highlightingMessage ? iosAnimatedTailStyle : undefined,
-                ]}
-                
-                fromMe={message.fromMe}
-                colorScheme={colorScheme}
-                hideBackground={hideBackground}
-              />
-            )}
-            </Animated.View>
+                }),
+                {
+                  maxWidth: messageMaxWidth,
+                },
+              ]}
+              onPress={() => {
+                if (isAttachment) {
+                  // Transfering attachment opening intent to component
+                  converseEventEmitter.emit(
+                    `openAttachmentForMessage-${message.id}`
+                  );
+                }
+                if (isTransaction) {
+                  // Transfering event to component
+                  converseEventEmitter.emit(
+                    `showActionSheetForTxRef-${message.id}`
+                  );
+                }
+              }}
+              onLongPress={() =>
+                useAppStore.getState().setContextMenuShown(true)
+              }
+            >
+              {children}
+            </ReanimatedTouchableOpacity>
+            {!message.hasNextMessageInSeries &&
+              !isFrame &&
+              !isAttachment &&
+              !isTransaction &&
+              !hideBackground &&
+              (Platform.OS === "ios" || Platform.OS === "web") && (
+                <MessageTail
+                  style={[
+                    {
+                      color: initialBubbleBackgroundColor,
+                    },
+                    highlightingMessage ? iosAnimatedTailStyle : undefined,
+                  ]}
+                  fromMe={message.fromMe}
+                  colorScheme={colorScheme}
+                  hideBackground={hideBackground}
+                />
+              )}
+          </Animated.View>
         </ContextMenu>
       </GestureDetector>
       {/* <View style={{width: 50, height: 20, backgroundColor: "red"}} />
