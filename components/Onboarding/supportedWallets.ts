@@ -1,4 +1,5 @@
 import * as Linking from "expo-linking";
+import { WalletId } from "thirdweb/wallets";
 
 import { isDesktop } from "../../utils/device";
 import { isEthOS } from "../../utils/ethos";
@@ -49,6 +50,7 @@ export type InstalledWallet = {
   universalLink?: string;
   walletConnectId?: string;
   platforms?: string[];
+  thirdwebId?: WalletId;
 };
 
 const SUPPORTED_WALLETS: InstalledWallet[] = [
@@ -57,6 +59,7 @@ const SUPPORTED_WALLETS: InstalledWallet[] = [
     iconURL:
       "https://explorer-api.walletconnect.com/v3/logo/sm/a5ebc364-8f91-4200-fcc6-be81310a0000?projectId=2f05ae7f1116030fde2d36508f472bfb",
     customScheme: "cbwallet://",
+    thirdwebId: "com.coinbase.wallet",
   },
   {
     name: "Ledger Live",
@@ -65,6 +68,7 @@ const SUPPORTED_WALLETS: InstalledWallet[] = [
     iconURL:
       "https://explorer-api.walletconnect.com/v3/logo/sm/a7f416de-aa03-4c5e-3280-ab49269aef00?projectId=2f05ae7f1116030fde2d36508f472bfb",
     customScheme: "ledgerlive://",
+    thirdwebId: "com.ledger",
   },
   {
     name: "Rainbow",
@@ -73,6 +77,7 @@ const SUPPORTED_WALLETS: InstalledWallet[] = [
     iconURL:
       "https://explorer-api.walletconnect.com/v3/logo/sm/7a33d7f1-3d12-4b5c-f3ee-5cd83cb1b500?projectId=2f05ae7f1116030fde2d36508f472bfb",
     customScheme: "rainbow://",
+    thirdwebId: "me.rainbow",
   },
   {
     name: "MetaMask",
@@ -81,6 +86,7 @@ const SUPPORTED_WALLETS: InstalledWallet[] = [
     iconURL:
       "https://explorer-api.walletconnect.com/v3/logo/sm/5195e9db-94d8-4579-6f11-ef553be95100?projectId=2f05ae7f1116030fde2d36508f472bfb",
     customScheme: "metamask://",
+    thirdwebId: "io.metamask",
   },
   {
     name: "Trust Wallet",
@@ -89,6 +95,7 @@ const SUPPORTED_WALLETS: InstalledWallet[] = [
     iconURL:
       "https://explorer-api.walletconnect.com/v3/logo/sm/0528ee7e-16d1-4089-21e3-bbfb41933100?projectId=2f05ae7f1116030fde2d36508f472bfb",
     customScheme: "trust://",
+    thirdwebId: "com.trustwallet.app",
   },
   {
     name: "Uniswap Wallet",
@@ -97,6 +104,7 @@ const SUPPORTED_WALLETS: InstalledWallet[] = [
     iconURL:
       "https://explorer-api.walletconnect.com/v3/logo/sm/bff9cf1f-df19-42ce-f62a-87f04df13c00?projectId=2f05ae7f1116030fde2d36508f472bfb",
     customScheme: "uniswap://",
+    thirdwebId: "org.uniswap",
   },
   {
     name: "Zerion",
@@ -105,6 +113,7 @@ const SUPPORTED_WALLETS: InstalledWallet[] = [
     iconURL:
       "https://explorer-api.walletconnect.com/v3/logo/sm/73f6f52f-7862-49e7-bb85-ba93ab72cc00?projectId=2f05ae7f1116030fde2d36508f472bfb",
     customScheme: "zerion://",
+    thirdwebId: "io.zerion.wallet",
   },
   {
     name: "Exodus",
@@ -114,6 +123,7 @@ const SUPPORTED_WALLETS: InstalledWallet[] = [
       "https://explorer-api.walletconnect.com/v3/logo/sm/4c16cad4-cac9-4643-6726-c696efaf5200?projectId=2f05ae7f1116030fde2d36508f472bfb",
     customScheme: "exodus://",
     universalLink: "https://exodus.com/m",
+    thirdwebId: "com.exodus",
   },
   // {
   //   name: "1inch Wallet",

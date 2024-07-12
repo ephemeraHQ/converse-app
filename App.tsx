@@ -9,8 +9,7 @@ import {
   MaterialDarkTheme,
   MaterialLightTheme,
 } from "@styles/colors";
-import { Ethereum } from "@thirdweb-dev/chains";
-import { coinbaseWallet, ThirdwebProvider } from "@thirdweb-dev/react-native";
+import { useCoinbaseWalletListener } from "@utils/coinbaseWallet";
 import React, { useEffect } from "react";
 import {
   LogBox,
@@ -21,6 +20,7 @@ import {
 } from "react-native";
 import { KeyboardProvider } from "react-native-keyboard-controller";
 import { Provider as PaperProvider } from "react-native-paper";
+import { ThirdwebProvider } from "thirdweb/react";
 import "./utils/splash/splash";
 
 import XmtpEngine from "./components/XmtpEngine";
@@ -57,6 +57,11 @@ export default function App() {
   const colorScheme = useColorScheme();
   const styles = useStyles();
 
+  useCoinbaseWalletListener(
+    true,
+    new URL(`https://${config.websiteDomain}/coinbase`)
+  );
+
   useEffect(() => {
     registerBackgroundFetchTask();
   }, []);
@@ -90,20 +95,7 @@ export default function App() {
   return (
     <QueryClientProvider>
       <PrivyProvider appId={config.privy.appId} storage={privySecureStorage}>
-        <ThirdwebProvider
-          activeChain={Ethereum}
-          dAppMeta={{
-            ...config.walletConnectConfig.dappMetadata,
-            isDarkMode: colorScheme === "dark",
-          }}
-          autoConnect={false}
-          clientId={config.thirdwebClientId}
-          supportedWallets={[
-            coinbaseWallet({
-              callbackURL: new URL(`https://${config.websiteDomain}/coinbase`),
-            }),
-          ]}
-        >
+        <ThirdwebProvider>
           <AppKeyboardProvider>
             <ActionSheetProvider>
               <PaperProvider
