@@ -21,6 +21,13 @@ import {
 } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
+import ChatPlaceholder from "./ChatPlaceholder/ChatPlaceholder";
+import { GroupChatPlaceholder } from "./ChatPlaceholder/GroupChatPlaceholder";
+import ConsentPopup from "./ConsentPopup/ConsentPopup";
+import { GroupConsentPopup } from "./ConsentPopup/GroupConsentPopup";
+import ChatInput from "./Input/Input";
+import CachedChatMessage, { MessageToDisplay } from "./Message/Message";
+import TransactionInput from "./Transaction/TransactionInput";
 import {
   useCurrentAccount,
   useProfilesStore,
@@ -40,13 +47,6 @@ import { converseEventEmitter } from "../../utils/events";
 import { getProfileData } from "../../utils/profile";
 import { isContentType } from "../../utils/xmtpRN/contentTypes";
 import { Recommendation } from "../Recommendations/Recommendation";
-import ChatPlaceholder from "./ChatPlaceholder/ChatPlaceholder";
-import { GroupChatPlaceholder } from "./ChatPlaceholder/GroupChatPlaceholder";
-import ConsentPopup from "./ConsentPopup/ConsentPopup";
-import { GroupConsentPopup } from "./ConsentPopup/GroupConsentPopup";
-import ChatInput from "./Input/Input";
-import CachedChatMessage, { MessageToDisplay } from "./Message/Message";
-import TransactionInput from "./Transaction/TransactionInput";
 
 const getListArray = (
   xmtpAddress?: string,
@@ -124,6 +124,7 @@ const getListArray = (
     if (
       message.fromMe &&
       message.status !== "sending" &&
+      message.status !== "prepared" &&
       latestSettledFromMeIndex === -1
     ) {
       latestSettledFromMeIndex = reverseArray.length;
