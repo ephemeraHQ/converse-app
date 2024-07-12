@@ -63,6 +63,8 @@ export type MessageToDisplay = XmtpMessage & {
   hasNextMessageInSeries: boolean;
   dateChange: boolean;
   fromMe: boolean;
+  isLatestSettledFromMe: boolean;
+  isLatestSettledFromPeer: boolean;
 };
 
 type Props = {
@@ -155,15 +157,17 @@ function ChatMessage({ message, colorScheme, isGroup, isFrame }: Props) {
       messageContent =
         // Don't show URL as part of message bubble if this is a frame
         !isFrame && (
-          <ClickableText
-            style={[
-              styles.messageText,
-              message.fromMe ? styles.messageTextMe : undefined,
-              hideBackground ? styles.allEmojisAndMaxThree : undefined,
-            ]}
-          >
-            {message.content || message.contentFallback}
-          </ClickableText>
+          <View style={styles.messageContentContainer}>
+            <ClickableText
+              style={[
+                styles.messageText,
+                message.fromMe ? styles.messageTextMe : undefined,
+                hideBackground ? styles.allEmojisAndMaxThree : undefined,
+              ]}
+            >
+              {message.content || message.contentFallback}
+            </ClickableText>
+          </View>
         );
       break;
     }
@@ -175,8 +179,6 @@ function ChatMessage({ message, colorScheme, isGroup, isFrame }: Props) {
 
   const reactions = getMessageReactions(message);
   const showInBubble = !isGroupUpdated;
-  const showAvatar = isGroup && !message.fromMe;
-  const showStatus = message.fromMe && !message.hasNextMessageInSeries;
 
   const replyingToProfileName = useMemo(() => {
     if (!replyingToMessage?.senderAddress) return "";
@@ -262,7 +264,7 @@ function ChatMessage({ message, colorScheme, isGroup, isFrame }: Props) {
               alignItems: "flex-end",
             }}
           >
-            {showAvatar && <MessageSenderAvatar message={message} />}
+            {!message.fromMe && <MessageSenderAvatar message={message} />}
             <View style={{ flex: 1 }}>
               {isGroup &&
                 !message.fromMe &&
@@ -380,13 +382,8 @@ function ChatMessage({ message, colorScheme, isGroup, isFrame }: Props) {
                       </Text>
                     </TouchableOpacity>
                   )}
-                  {showStatus && (
-                    <View
-                      style={[
-                        styles.statusContainer,
-                        hideBackground ? { marginVertical: 0 } : undefined,
-                      ]}
-                    >
+                  {message.fromMe && (
+                    <View style={styles.statusContainer}>
                       <MessageStatus message={message} />
                     </View>
                   )}
@@ -431,6 +428,8 @@ export default function CachedChatMessage({
     "dateChange",
     "hasNextMessageInSeries",
     "hasPreviousMessageInSeries",
+    "isLatestSettledFromMe",
+    "isLatestSettledFromPeer",
   ];
   const alreadyRenderedMessage = renderedMessages.get(
     `${account}-${message.id}`
@@ -493,7 +492,6 @@ const useStyles = () => {
     },
     statusContainer: {
       marginLeft: "auto",
-      marginVertical: 5,
     },
     linkToFrame: {
       fontSize: 12,
@@ -518,11 +516,13 @@ const useStyles = () => {
       paddingVertical: 0,
       paddingHorizontal: 0,
     },
+    messageContentContainer: {
+      paddingVertical: 8,
+      paddingHorizontal: 14,
+    },
     messageText: {
       color: textPrimaryColor(colorScheme),
       fontSize: 16,
-      paddingVertical: 8,
-      paddingHorizontal: 14,
     },
     messageTextMe: {
       color: inversePrimaryColor(colorScheme),

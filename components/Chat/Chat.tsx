@@ -70,6 +70,9 @@ const getListArray = (
     );
   });
 
+  let latestSettledFromMeIndex = -1;
+  let latestSettledFromPeerIndex = -1;
+
   for (let index = filteredMessageIds.length - 1; index >= 0; index--) {
     const messageId = filteredMessageIds[index];
     const message = conversation.messages.get(messageId) as MessageToDisplay;
@@ -117,8 +120,28 @@ const getListArray = (
         }
       }
     }
+
+    if (
+      message.fromMe &&
+      message.status !== "sending" &&
+      message.status !== "prepared" &&
+      latestSettledFromMeIndex === -1
+    ) {
+      latestSettledFromMeIndex = reverseArray.length;
+    }
+
+    if (!message.fromMe && latestSettledFromPeerIndex === -1) {
+      latestSettledFromPeerIndex = reverseArray.length;
+    }
+
+    message.isLatestSettledFromMe =
+      reverseArray.length === latestSettledFromMeIndex;
+    message.isLatestSettledFromPeer =
+      reverseArray.length === latestSettledFromPeerIndex;
+
     reverseArray.push(message);
   }
+
   return reverseArray;
 };
 
