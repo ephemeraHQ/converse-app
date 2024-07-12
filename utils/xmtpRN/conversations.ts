@@ -59,6 +59,7 @@ const protocolGroupToStateConversation = async (
   const groupMembersAddresses: string[] = [];
   const groupAdmins: string[] = [];
   const groupSuperAdmins: string[] = [];
+  let groupCreator: string | undefined;
   groupMembers.forEach((m) => {
     if (m.permissionLevel === "admin" || m.permissionLevel === "super_admin") {
       groupAdmins.push(m.addresses[0]);
@@ -68,6 +69,9 @@ const protocolGroupToStateConversation = async (
     }
     if (m.addresses[0]) {
       groupMembersAddresses.push(m.addresses[0]);
+    }
+    if (m.inboxId === group.creatorInboxId) {
+      groupCreator = m.addresses[0];
     }
   });
   const groupName = await group.groupName();
@@ -87,6 +91,7 @@ const protocolGroupToStateConversation = async (
     groupSuperAdmins,
     groupPermissionLevel: "custom_policy",
     groupName,
+    groupCreator,
   };
 };
 
