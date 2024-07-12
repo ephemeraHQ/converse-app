@@ -21,6 +21,9 @@ import {
 } from "react-native";
 import { Swipeable } from "react-native-gesture-handler";
 
+import ChatMessageActions from "./MessageActions";
+import ChatMessageReactions from "./MessageReactions";
+import MessageStatus from "./MessageStatus";
 import {
   currentAccount,
   useChatStore,
@@ -54,9 +57,6 @@ import ChatGroupUpdatedMessage from "../ChatGroupUpdatedMessage";
 import FramesPreviews from "../Frame/FramesPreviews";
 import ChatInputReplyBubble from "../Input/InputReplyBubble";
 import TransactionPreview from "../Transaction/TransactionPreview";
-import ChatMessageActions from "./MessageActions";
-import ChatMessageReactions from "./MessageReactions";
-import MessageStatus from "./MessageStatus";
 
 export type MessageToDisplay = XmtpMessage & {
   hasPreviousMessageInSeries: boolean;
@@ -157,15 +157,17 @@ function ChatMessage({ message, colorScheme, isGroup, isFrame }: Props) {
       messageContent =
         // Don't show URL as part of message bubble if this is a frame
         !isFrame && (
-          <ClickableText
-            style={[
-              styles.messageText,
-              message.fromMe ? styles.messageTextMe : undefined,
-              hideBackground ? styles.allEmojisAndMaxThree : undefined,
-            ]}
-          >
-            {message.content || message.contentFallback}
-          </ClickableText>
+          <View style={styles.messageContentContainer}>
+            <ClickableText
+              style={[
+                styles.messageText,
+                message.fromMe ? styles.messageTextMe : undefined,
+                hideBackground ? styles.allEmojisAndMaxThree : undefined,
+              ]}
+            >
+              {message.content || message.contentFallback}
+            </ClickableText>
+          </View>
         );
       break;
     }
@@ -514,11 +516,13 @@ const useStyles = () => {
       paddingVertical: 0,
       paddingHorizontal: 0,
     },
+    messageContentContainer: {
+      paddingVertical: 8,
+      paddingHorizontal: 14,
+    },
     messageText: {
       color: textPrimaryColor(colorScheme),
       fontSize: 16,
-      paddingVertical: 8,
-      paddingHorizontal: 14,
     },
     messageTextMe: {
       color: inversePrimaryColor(colorScheme),
