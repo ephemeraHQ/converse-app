@@ -50,7 +50,7 @@ export type InstalledWallet = {
   universalLink?: string;
   walletConnectId?: string;
   platforms?: string[];
-  thirdwebId: WalletId;
+  thirdwebId?: WalletId;
 };
 
 const SUPPORTED_WALLETS: InstalledWallet[] = [
