@@ -20,6 +20,7 @@ import { getConversationWithTopic } from "./conversations";
 import { getXmtpClient } from "./sync";
 import { Message as MessageEntity } from "../../data/db/entities/messageEntity";
 import {
+  markMessageAsPrepared,
   markMessageAsSent,
   updateMessagesIds,
 } from "../../data/helpers/messages";
@@ -85,13 +86,21 @@ const sendConverseGroupMessages = async (
     )
       continue;
     sendingMessages[id] = true;
-    // await markMessageAsPrepared(account, id, preparedGroupMessage.topic);
+    await markMessageAsPrepared(account, id, preparedGroupMessage.topic);
     groups[preparedGroupMessage.group.id] = preparedGroupMessage.group;
   }
   await publishConverseGroupMessages(Object.values(groups));
-
+  // If it worked we can mark them as sent
   for (const id of groupMessages.keys()) {
+    const preparedGroupMessage = groupMessages.get(id);
+    if (
+      !preparedGroupMessage ||
+      !sendingMessages[id] ||
+      !preparedGroupMessage.topic
+    )
+      continue;
     delete sendingMessages[id];
+    await markMessageAsSent(account, id, preparedGroupMessage.topic);
   }
 };
 
