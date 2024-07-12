@@ -113,7 +113,13 @@ export default function GroupScreen({
     const items: TableViewItemType[] = [];
 
     const groupMembers = sortGroupMembersByAdminStatus(members, currentAccount);
-    if (currentAccountIsAdmin || group.groupPermissionLevel === "all_members") {
+    if (
+      memberCanUpdateGroup(
+        permissions?.addMemberPolicy,
+        currentAccountIsAdmin,
+        currentAccountIsSuperAdmin
+      )
+    ) {
       items.push({
         id: "admin",
         title: "Add members",
@@ -241,6 +247,7 @@ export default function GroupScreen({
     group.groupPermissionLevel,
     group.topic,
     members,
+    permissions,
     profiles,
     promoteToAdmin,
     promoteToSuperAdmin,
@@ -295,7 +302,7 @@ export default function GroupScreen({
     currentAccountIsSuperAdmin
   );
   const canEditGroupDescription = memberCanUpdateGroup(
-    permissions?.updateGroupNamePolicy,
+    permissions?.updateGroupDescriptionPolicy,
     currentAccountIsAdmin,
     currentAccountIsSuperAdmin
   );
