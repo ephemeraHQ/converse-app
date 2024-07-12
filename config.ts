@@ -21,7 +21,7 @@ const defaultConfig = {
     "https://fb7c7cbf876644b68a05db08623c8369@o4504757119680512.ingest.sentry.io/4504757120729088",
   walletConnectConfig: {
     projectId: "e0cc618ee5360e934f51ecd94c702d3f",
-    dappMetadata: {
+    appMetadata: {
       name: "Converse",
       description:
         "Converse lets you communicate and transact freely and safely.",
