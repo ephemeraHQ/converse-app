@@ -50,7 +50,10 @@ export default function MessageStatus({ message }: Props) {
       easing: Easing.inOut(Easing.quad),
     };
 
-    if (isSentOrDelivered && prevStatus === "sending") {
+    if (
+      isSentOrDelivered &&
+      (prevStatus === "sending" || prevStatus === "prepared")
+    ) {
       opacity.value = withTiming(1, timingConfig);
       height.value = withTiming(22, timingConfig);
       scale.value = withTiming(1, timingConfig);
