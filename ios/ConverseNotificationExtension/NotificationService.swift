@@ -8,13 +8,11 @@
 import UserNotifications
 import XMTP
 import CryptoKit
-import Intents
 
 func handleNotificationAsync(contentHandler: ((UNNotificationContent) -> Void), bestAttemptContent: UNMutableNotificationContent?) async {
   initSentry()
   var shouldShowNotification = false
   var messageId: String? = nil
-  var messageIntent: INSendMessageIntent? = nil
   
   if var content = bestAttemptContent {
     guard let body = content.userInfo["body"] as? [String: Any],
@@ -80,7 +78,7 @@ func handleNotificationAsync(contentHandler: ((UNNotificationContent) -> Void), 
           envelope.message = encryptedMessageData
           envelope.contentTopic = contentTopic
         }
-        (shouldShowNotification, messageId, messageIntent) = await handleGroupMessage(xmtpClient: xmtpClient, envelope: envelope, apiURI: apiURI, bestAttemptContent: &content)
+        (shouldShowNotification, messageId) = await handleGroupMessage(xmtpClient: xmtpClient, envelope: envelope, apiURI: apiURI, bestAttemptContent: &content)
       } else {
         let encryptedMessageData = Data(base64Encoded: Data(encodedMessage.utf8))!
         let envelope = XMTP.Envelope.with { envelope in
@@ -88,7 +86,7 @@ func handleNotificationAsync(contentHandler: ((UNNotificationContent) -> Void), 
           envelope.contentTopic = contentTopic
         }
         sentryAddBreadcrumb(message: "topic \(contentTopic) is not invite topic")
-        (shouldShowNotification, messageId, messageIntent) = await handleOngoingConversationMessage(
+        (shouldShowNotification, messageId) = await handleOngoingConversationMessage(
           xmtpClient: xmtpClient,
           envelope: envelope,
           bestAttemptContent: &content,
@@ -99,24 +97,7 @@ func handleNotificationAsync(contentHandler: ((UNNotificationContent) -> Void), 
     
     if (shouldShowNotification && !notificationAlreadyShown(for: messageId)) {
       incrementBadge(for: content)
-      guard let intent = messageIntent else {
-        contentHandler(content)
-        return
-      }
-      // Handling Communication Notifications
-      let interaction = INInteraction(intent: intent, response: nil)
-      interaction.direction = .incoming
-      do {
-        if #available(iOSApplicationExtension 15.0, *) {
-          try await interaction.donate()
-          let contentWithIntent = try content.updating(from: intent)
-          contentHandler(contentWithIntent)
-        } else {
-          contentHandler(content)
-        }
-      } catch {
-        contentHandler(content)
-      }
+      contentHandler(content)
     } else {
       cancelNotification(contentHandler: contentHandler)
       return
