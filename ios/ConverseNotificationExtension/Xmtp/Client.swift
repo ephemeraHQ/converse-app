@@ -27,18 +27,18 @@ func getXmtpKeyForAccount(account: String) throws -> String? {
   return accountKey!
 }
 
-func base64ToSubarray(base64Key: String) -> Data? {
-    // Decode the base64 string
-    guard let data = Data(base64Encoded: base64Key) else {
-        return nil
+func getDbEncryptionKey() throws -> Data {
+  if let key = getKeychainValue(forKey: "LIBXMTP_DB_ENCRYPTION_KEY") {
+        if let keyData = Data(base64Encoded: key) {
+            return keyData
+        } else {
+          throw "Unable to decode base64 key"
+        }
+    } else {
+      throw "No db encryption key found"
     }
-    
-    // Get the subarray of the first 'length' bytes
-    let subarray = data.prefix(32)
-          
-    // Convert the subarray to Data
-    return Data(subarray)
 }
+
 
 func getXmtpClient(account: String) async -> XMTP.Client? {
   do {
@@ -50,7 +50,7 @@ func getXmtpClient(account: String) async -> XMTP.Client? {
     if (xmtpKeyData == nil) {
       return nil;
     }
-    let encryptionKey = base64ToSubarray(base64Key: xmtpKey!)
+    let encryptionKey = try! getDbEncryptionKey()
     let privateKeyBundle = try! PrivateKeyBundle(serializedData: xmtpKeyData!)
     let xmtpEnv = getXmtpEnv()
     

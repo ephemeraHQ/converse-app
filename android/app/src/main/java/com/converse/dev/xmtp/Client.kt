@@ -36,16 +36,12 @@ fun getXmtpKeyForAccount(appContext: Context, account: String): String? {
     return null
 }
 
-fun base64ToSubarray(base64Key: String): ByteArray? {
-    return try {
-        // Decode the base64 string
-        val data = Base64.decode(base64Key)
-
-        // Get the subarray of the first 32 bytes
-        data.take(32).toByteArray()
-    } catch (e: IllegalArgumentException) {
-        // Return null if the base64 string is invalid
-        null
+fun getDbEncryptionKey(): ByteArray? {
+    val key = getKeychainValue("LIBXMTP_DB_ENCRYPTION_KEY")
+    if (key != null) {
+        return Base64.decode(key, Base64.DEFAULT)
+    } else {
+        throw Exception("No db encryption key found")
     }
 }
 
@@ -63,8 +59,7 @@ fun getXmtpClient(appContext: Context, account: String): Client? {
         if (xmtpEnvString == "production") XMTPEnvironment.PRODUCTION else XMTPEnvironment.DEV
 
     val dbDirectory = "/data/data/${appContext.packageName}/databases"
-
-    val dbEncryptionKey = base64ToSubarray(keyString)
+    val dbEncryptionKey = getDbEncryptionKey()
 
     val options = ClientOptions(api = ClientOptions.Api(env = xmtpEnv, isSecure = true), enableV3 = true, dbEncryptionKey = dbEncryptionKey,  dbDirectory = dbDirectory, appContext = appContext)
 
