@@ -96,7 +96,7 @@ const useStyles = () => {
       overflow: "hidden",
     },
     contentContainer: {
-      paddingVertical: 5,
+      paddingTop: 5,
     },
     statusText: {
       fontSize: 12,

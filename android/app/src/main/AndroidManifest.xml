@@ -1,4 +1,4 @@
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android" xmlns:tools="http://schemas.android.com/tools">
   <uses-permission android:name="android.permission.INTERNET"/>
   <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
   <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW"/>
@@ -10,6 +10,12 @@
   <uses-permission android:name="android.permission.WAKE_LOCK"/>
   <uses-permission android:name="android.permission.USE_FINGERPRINT"/>
   <uses-permission android:name="android.permission.USE_BIOMETRIC"/>
+  <!-- This forces minSdkVersion 23 for module reactnativeaesgcmcrypto even if the lib
+   has minSdkVersion 26. It could technically lead to failures but we don't care as it's
+   a dependency in thirdweb used only for inapp wallets which we don't care about -->
+  <uses-sdk
+      android:minSdkVersion="23"
+      tools:overrideLibrary="com.reactnativeaesgcmcrypto" />
   <queries>
     <package android:name="org.toshi"/>
     <intent>
