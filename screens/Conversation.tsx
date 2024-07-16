@@ -82,6 +82,7 @@ const Conversation = ({
   }, [conversation, peerAddress]);
 
   const openedMainConvo = useRef(false);
+  const isActive = conversation?.isGroup ? conversation.isActive : true;
 
   // When the conversation topic changes, we set the conversation object
   useEffect(() => {
@@ -108,6 +109,12 @@ const Conversation = ({
     navigation.goBack,
     route.params?.mainConversationWithPeer,
   ]);
+
+  useEffect(() => {
+    if (!isActive) {
+      return navigation.navigate("Chats");
+    }
+  }, [isActive, navigation]);
 
   const isBlockedPeer = conversation?.peerAddress
     ? peersStatus[conversation.peerAddress.toLowerCase()] === "blocked"

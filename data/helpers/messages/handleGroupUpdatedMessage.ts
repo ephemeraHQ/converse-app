@@ -1,4 +1,5 @@
 import { invalidateGroupDescriptionQuery } from "@queries/useGroupDescriptionQuery";
+import { invalidateGroupIsActiveQuery } from "@queries/useGroupIsActive";
 import { refreshGroup } from "@utils/xmtpRN/conversations";
 import { GroupUpdatedContent } from "@xmtp/react-native-sdk";
 
@@ -49,5 +50,6 @@ export const handleGroupUpdatedMessage = async (
     content.metadataFieldsChanged.length === 0
   ) {
     invalidateGroupMembersQuery(account, topic);
+    invalidateGroupIsActiveQuery(account, topic);
   }
 };

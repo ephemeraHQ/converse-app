@@ -1,16 +1,9 @@
-import {
-  Column,
-  Entity,
-  Index,
-  OneToMany,
-  PrimaryColumn,
-} from "typeorm";
+import { Column, Entity, Index, OneToMany, PrimaryColumn } from "typeorm";
 
 import { type Message } from "./messageEntity";
 
 @Entity()
 export class Conversation {
-
   @PrimaryColumn("text")
   topic!: string;
 
@@ -39,6 +32,9 @@ export class Conversation {
 
   @Column("simple-array", { nullable: true })
   groupMembers?: string[];
+
+  @Column("boolean", { nullable: true })
+  isActive?: boolean;
 
   @Column("int")
   createdAt!: number;
