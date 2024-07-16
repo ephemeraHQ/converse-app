@@ -8,7 +8,6 @@
 import Foundation
 import XMTP
 import Alamofire
-import Intents
 
 func handleNewConversationFirstMessage(xmtpClient: XMTP.Client, apiURI: String?, pushToken: String?, conversation: XMTP.Conversation, bestAttemptContent: inout UNMutableNotificationContent) async -> (shouldShowNotification: Bool, messageId: String?) {
   // @todo => handle new group first messages?
@@ -128,11 +127,10 @@ func handleGroupWelcome(xmtpClient: XMTP.Client, apiURI: String?, pushToken: Str
   return (shouldShowNotification, messageId)
 }
 
-func handleGroupMessage(xmtpClient: XMTP.Client, envelope: XMTP.Envelope, apiURI: String?, bestAttemptContent: inout UNMutableNotificationContent) async -> (shouldShowNotification: Bool, messageId: String?, messageIntent: INSendMessageIntent?) {
+func handleGroupMessage(xmtpClient: XMTP.Client, envelope: XMTP.Envelope, apiURI: String?, bestAttemptContent: inout UNMutableNotificationContent) async -> (shouldShowNotification: Bool, messageId: String?) {
   var shouldShowNotification = false
   let contentTopic = envelope.contentTopic
   var messageId: String? = nil
-  var messageIntent: INSendMessageIntent? = nil
   
   do {
     let groups = try await xmtpClient.conversations.groups()
@@ -170,9 +168,6 @@ func handleGroupMessage(xmtpClient: XMTP.Client, envelope: XMTP.Envelope, apiURI
             if let content = decodedMessageResult.content {
               bestAttemptContent.body = content
             }
-            
-            let groupImage = try? group.groupImageUrlSquare()
-            messageIntent = getIncomingGroupMessageIntent(group: group, content: bestAttemptContent.body, senderId: decodedMessage.senderAddress, senderName: bestAttemptContent.subtitle)
           } else if spamScore == 0 { // Message is Request
             shouldShowNotification = false
           } else { // Message is Spam
@@ -186,16 +181,15 @@ func handleGroupMessage(xmtpClient: XMTP.Client, envelope: XMTP.Envelope, apiURI
     print("[NotificationExtension] Error handling group message: \(error)")
     
   }
-  return (shouldShowNotification, messageId, messageIntent)
+  return (shouldShowNotification, messageId)
 }
 
 
-func handleOngoingConversationMessage(xmtpClient: XMTP.Client, envelope: XMTP.Envelope, bestAttemptContent: inout UNMutableNotificationContent, body: [String: Any]) async -> (shouldShowNotification: Bool, messageId: String?, messageIntent: INSendMessageIntent?) {
+func handleOngoingConversationMessage(xmtpClient: XMTP.Client, envelope: XMTP.Envelope, bestAttemptContent: inout UNMutableNotificationContent, body: [String: Any]) async -> (shouldShowNotification: Bool, messageId: String?) {
   var shouldShowNotification = false
   let contentTopic = envelope.contentTopic
   var conversationTitle = getSavedConversationTitle(contentTopic: contentTopic)
   var messageId: String? = nil
-  var messageIntent: INSendMessageIntent? = nil
   
   let decodedMessage = try? await decodeMessage(xmtpClient: xmtpClient, envelope: envelope)
   // If couldn't decode the message, not showing
@@ -207,21 +201,12 @@ func handleOngoingConversationMessage(xmtpClient: XMTP.Client, envelope: XMTP.En
       print("[NotificationExtension] Not showing a notification")
     } else if let content = decodedMessageResult.content {
       bestAttemptContent.body = content
-      
-      let profilesState = getProfilesState(account: xmtpClient.address)
-      var senderAvatar: String? = nil
-      if let senderAddress = decodedMessageResult.senderAddress, let senderProfile = profilesState?.profiles?[senderAddress] {
-        conversationTitle = getPreferredName(address: senderAddress, socials: senderProfile.socials)
-        senderAvatar = getPreferredAvatar(socials: senderProfile.socials)
-      }
-    
       if conversationTitle.isEmpty, let senderAddress = decodedMessageResult.senderAddress {
         conversationTitle = shortAddress(address: senderAddress)
       }
       bestAttemptContent.title = conversationTitle
       shouldShowNotification = true
       messageId = decodedMessageResult.id
-      messageIntent = getIncoming1v1MessageIntent(topic: envelope.contentTopic, senderId: decodedMessage?.senderAddress ?? "", senderName: bestAttemptContent.title, senderAvatar: senderAvatar, content: bestAttemptContent.body)
     }
   } else {
     print("[NotificationExtension] Not showing a notification because could not decode message")
@@ -230,7 +215,7 @@ func handleOngoingConversationMessage(xmtpClient: XMTP.Client, envelope: XMTP.En
   if (isDebugAccount(account: xmtpClient.address)) {
     sentryTrackMessage(message: "DEBUG_NOTIFICATION", extras: ["shouldShowNotification": shouldShowNotification, "messageId": messageId ?? "EMPTY", "bestAttemptContentBody": bestAttemptContent.body, "bestAttemptContentTitle": bestAttemptContent.title])
   }
-  return (shouldShowNotification, messageId, messageIntent)
+  return (shouldShowNotification, messageId)
 }
 
 func loadSavedMessages() -> [SavedNotificationMessage] {
