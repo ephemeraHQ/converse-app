@@ -42,6 +42,9 @@ export class Conversation {
   @Column("simple-array", { nullable: true })
   groupMembers?: string[];
 
+  @Column("boolean", { nullable: true })
+  isActive?: boolean;
+
   @Column("int")
   createdAt!: number;
 
