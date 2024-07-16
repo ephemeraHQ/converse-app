@@ -32,6 +32,7 @@ import { AddLastNotifSubscribePeriodToConversation1709893391562 } from "../../da
 import { AddIndexToSent1712656017130 } from "../../data/db/migrations/1712656017130-addIndexToSent";
 import { RemoveSentViaConverse1717625558678 } from "../../data/db/migrations/1717625558678-RemoveSentViaConverse";
 import { AddSuperAdmin1717631723249 } from "../../data/db/migrations/1717631723249-AddSuperAdmin";
+import { AddIsActive1721143963530 } from "../../data/db/migrations/1721143963530-AddIsActive";
 
 const dataSource = new DataSource({
   database: path.join(__dirname, "converse-sample.sqlite"),
@@ -65,6 +66,7 @@ const dataSource = new DataSource({
     AddGroupConversations1708332276329,
     RemoveSentViaConverse1717625558678,
     AddSuperAdmin1717631723249,
+    AddIsActive1721143963530,
   ],
   type: "sqlite",
 });

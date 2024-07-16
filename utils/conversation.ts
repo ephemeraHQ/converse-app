@@ -314,6 +314,7 @@ export const conversationShouldBeDisplayed = (
     ? // TODO: Add more conditions to filter out spam
       groupsStatus[conversation.topic] === "denied"
     : peersStatus[conversation.peerAddress.toLowerCase()] === "blocked";
+  const isActive = conversation.isGroup ? conversation.isActive : true;
   const isV1 = conversation.version === "v1";
   const isForbidden = conversation.topic.includes("\x00"); // Forbidden character that breaks
   const isPinned = pinnedConversations?.find(
@@ -325,7 +326,8 @@ export const conversationShouldBeDisplayed = (
     !isBlocked &&
     !isV1 &&
     !isForbidden &&
-    !isPinned
+    !isPinned &&
+    isActive
   ); // Forbidden character that breaks notifications
 };
 

@@ -79,6 +79,7 @@ const protocolGroupToStateConversation = async (
     }
   });
   const groupName = await group.groupName();
+  const isActive = await group.isActive();
   return {
     topic: group.topic,
     groupMembers: groupMembersAddresses,
@@ -96,6 +97,7 @@ const protocolGroupToStateConversation = async (
     groupPermissionLevel: "custom_policy",
     groupName,
     groupCreator,
+    isActive,
   };
 };
 
