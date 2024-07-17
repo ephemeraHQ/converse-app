@@ -343,8 +343,15 @@ export const conversationShouldBeInInbox = (
     const isCreatorAllowed =
       conversation.groupCreator &&
       peersStatus[conversation.groupCreator.toLowerCase()] === "consented";
+    const isAddedByAllowed =
+      conversation.groupAddedBy &&
+      peersStatus[conversation.groupAddedBy.toLowerCase()] === "consented";
+    console.log(isGroupAllowed, isCreatorAllowed, isAddedByAllowed);
     return (
-      conversation.hasOneMessageFromMe || isGroupAllowed || isCreatorAllowed
+      conversation.hasOneMessageFromMe ||
+      isGroupAllowed ||
+      isCreatorAllowed ||
+      isAddedByAllowed
     );
   } else {
     const isPeerConsented =
