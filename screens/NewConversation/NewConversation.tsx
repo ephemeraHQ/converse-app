@@ -117,6 +117,7 @@ export default function NewConversation({
                 variant="text"
                 title={route.params?.addingToGroupTopic ? "Add" : "Next"}
                 onPress={handleRightAction}
+                style={{ marginRight: -10, padding: 10 }}
               />
             );
           }
