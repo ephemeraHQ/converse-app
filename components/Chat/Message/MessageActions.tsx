@@ -296,13 +296,13 @@ export default function ChatMessageActions({
   const [hasAnimatedIn, setHasAnimatedIn] = useState(false);
 
   const opacity = useSharedValue(0);
-  const scale = useSharedValue(0);
+  const scale = useSharedValue(0.7);
   const translateY = useSharedValue(20);
 
   useEffect(() => {
     if (shouldAnimateIn && !hasAnimatedIn) {
       opacity.value = 0;
-      scale.value = 0;
+      scale.value = 0.7;
       translateY.value = 20;
 
       const timingConfig = {
