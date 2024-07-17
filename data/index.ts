@@ -8,6 +8,8 @@ import { xmtpConversationFromDb } from "./mappers";
 import { getChatStore, getProfilesStore } from "./store/accountsStore";
 import { saveXmtpEnv, saveApiURI } from "../utils/sharedData";
 
+const getTypeormBoolValue = (value: number) => value === 1;
+
 export const loadDataToContext = async (account: string) => {
   // Save env to shared data with extension
   saveXmtpEnv();
@@ -23,7 +25,12 @@ export const loadDataToContext = async (account: string) => {
 
   const conversationsWithMessages: Conversation[] = (
     await conversationRepository.createQueryBuilder().select("*").execute()
-  ).map((c: any) => ({ ...c }));
+  ).map((c: any) => ({
+    ...c,
+    isGroup: getTypeormBoolValue(c.isGroup),
+    pending: getTypeormBoolValue(c.pending),
+    isActive: getTypeormBoolValue(c.isActive),
+  }));
 
   const conversationsMessages: Message[][] = await Promise.all(
     conversationsWithMessages.map((c) =>
