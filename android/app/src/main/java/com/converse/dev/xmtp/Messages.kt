@@ -11,6 +11,7 @@ import com.converse.dev.*
 import com.converse.dev.PushNotificationsService.Companion.TAG
 import android.util.Base64
 import android.util.Base64.NO_WRAP
+import androidx.core.app.Person
 import com.google.firebase.messaging.RemoteMessage
 import computeSpamScore
 import computeSpamScoreGroupMessage
@@ -41,7 +42,9 @@ data class NotificationDataResult(
     val body: String = "",
     val remoteMessage: RemoteMessage? = null,
     val messageId: String? = null,
-    val shouldShowNotification: Boolean = false
+    val shouldShowNotification: Boolean = false,
+    val avatar: String? = null,
+    val isGroup: Boolean = false
 )
 
 data class DecodedMessageResult(
@@ -197,6 +200,17 @@ fun handleOngoingConversationMessage(
         xmtpClient,
     )
 
+    val profilesState = getProfilesState(appContext, xmtpClient.address)
+    var senderAvatar: String? = null
+    profilesState?.let { state ->
+        val senderAddress = decodedMessageResult.senderAddress
+        val senderProfile = state.profiles?.get(senderAddress)
+        if (senderAddress != null && senderProfile != null) {
+            conversationTitle = getPreferredName(address = senderAddress, socials = senderProfile.socials)
+            senderAvatar = getPreferredAvatar(socials = senderProfile.socials)
+        }
+    }
+
     val shouldShowNotification = if (decodedMessageResult.senderAddress != xmtpClient.address && !decodedMessageResult.forceIgnore && decodedMessageResult.content != null) {
         if (conversationTitle.isEmpty() && decodedMessageResult.senderAddress != null) {
             conversationTitle = shortAddress(decodedMessageResult.senderAddress)
@@ -212,7 +226,8 @@ fun handleOngoingConversationMessage(
         body = decodedMessageResult.content ?: "",
         remoteMessage = remoteMessage,
         messageId = decodedMessageResult.id,
-        shouldShowNotification = shouldShowNotification
+        shouldShowNotification = shouldShowNotification,
+        avatar = senderAvatar
     )
 }
 
@@ -243,7 +258,7 @@ suspend fun handleGroupMessage(
         xmtpClient,
     )
 
-    var shouldShowNotification = if (decodedMessageResult.senderAddress != xmtpClient.inboxId && !decodedMessageResult.forceIgnore && decodedMessageResult.content != null) {
+    var shouldShowNotification = if (decodedMessageResult.senderAddress != xmtpClient.inboxId && decodedMessageResult.senderAddress != xmtpClient.address && !decodedMessageResult.forceIgnore && decodedMessageResult.content != null) {
         true
     } else {
         Log.d(TAG, "[NotificationExtension] Not showing a notification")
@@ -260,13 +275,12 @@ suspend fun handleGroupMessage(
         }
         val spamScore = computeSpamScoreGroupMessage(xmtpClient, group, decodedMessage, apiURI)
         if (spamScore < 0) {
-        // Message is going to main inbox
+            // Message is going to main inbox
             val profilesState = getProfilesState(appContext, xmtpClient.address)
-            group.members().find { it.inboxId == decodedMessageResult.senderAddress }?.let { senderMember ->
-                val senderAddress = senderMember.addresses[0]
-                profilesState?.profiles?.get(senderAddress)?.let { senderProfile ->
-                    subtitle = getPreferredName(senderAddress, senderProfile.socials)
-                }
+            // We replaced decodedMessage.senderAddress from inboxId to actual address
+            // so it appears well in the app until inboxId is a first class citizen
+            profilesState?.profiles?.get(decodedMessage.senderAddress)?.let { senderProfile ->
+                subtitle = getPreferredName(decodedMessage.senderAddress, senderProfile.socials)
             }
         } else if (spamScore == 0) { // Message is Request
           shouldShowNotification = false
@@ -281,7 +295,9 @@ suspend fun handleGroupMessage(
         body = decodedMessageResult.content ?: "",
         remoteMessage = remoteMessage,
         messageId = decodedMessageResult.id,
-        shouldShowNotification = shouldShowNotification
+        shouldShowNotification = shouldShowNotification,
+        isGroup = true,
+        avatar = group.imageUrlSquare
     )
 }
 
