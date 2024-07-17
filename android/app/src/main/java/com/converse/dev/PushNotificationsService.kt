@@ -174,7 +174,7 @@ class PushNotificationsService : FirebaseMessagingService() {
 
                 if (shouldShowNotification && !notificationAlreadyShown) {
                     incrementBadge(applicationContext)
-                    result.remoteMessage?.let { showNotification(result.title, result.subtitle, result.body, it) }
+                    result.remoteMessage?.let { showNotification(result, it) }
                 }
             } catch (e: Exception) {
                 // Handle any exceptions
@@ -210,82 +210,13 @@ class PushNotificationsService : FirebaseMessagingService() {
         return Notification(request, Date(remoteMessage.sentTime))
     }
 
-    suspend fun getBitmapFromURL(avatarUrl: String): Bitmap {
-        var context = this;
-        return withContext(Dispatchers.IO) {
-            val bitmap = Glide.with(context)
-                .asBitmap()
-                .load(avatarUrl)
-                .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
-                .submit()
-                .get()
-
-            return@withContext bitmap
-        }
-    }
-
-//    fun getRoundedBitmap(bitmap: Bitmap, cornerRadius: Float): Bitmap {
-//        val output = Bitmap.createBitmap(bitmap.width, bitmap.height, Bitmap.Config.ARGB_8888)
-//        val canvas = Canvas(output)
-//
-//        val paint = Paint().apply {
-//            isAntiAlias = true
-//            shader = BitmapShader(bitmap, Shader.TileMode.CLAMP, Shader.TileMode.CLAMP)
-//        }
-//
-//        val rect = RectF(0f, 0f, bitmap.width.toFloat(), bitmap.height.toFloat())
-//        canvas.drawRoundRect(rect, cornerRadius, cornerRadius, paint)
-//
-//        return output
-//    }
-
-    @RequiresApi(Build.VERSION_CODES.P)
-    suspend fun createMessageNotificationStyle(
-        person: Person,
-        text: String,
-    ): NotificationCompat.MessagingStyle {
-        val chatMessageStyle = NotificationCompat.MessagingStyle(person)
-        val notificationMessage = NotificationCompat.MessagingStyle.Message(
-            text,
-            System.currentTimeMillis(),
-            person,
-        )
-        chatMessageStyle.addMessage(notificationMessage)
-        return chatMessageStyle
-    }
-
-    fun createDynamicShortcut(
-        intent: Intent,
-        shortcutId: String,
-        shortLabel: String,
-        person: Person,
-        notificationIcon: Bitmap?,
-    ) {
-        val shortcutBuilder = ShortcutInfoCompat.Builder(
-            this,
-            shortcutId,
-        )
-            .setLongLived(true)
-            .setIntent(intent)
-            .setShortLabel(shortLabel)
-            .setPerson(person)
-
-        if (notificationIcon != null) {
-            val icon = IconCompat.createWithAdaptiveBitmap(notificationIcon)
-            shortcutBuilder.setIcon(icon)
-        }
-
-        val shortcut = shortcutBuilder.build()
-        ShortcutManagerCompat.pushDynamicShortcut(this, shortcut)
-    }
-
-    private suspend fun showNotification(title: String, subtitle: String?, message: String, remoteMessage: RemoteMessage) {
+    private suspend fun showNotification(result: NotificationDataResult, remoteMessage: RemoteMessage) {
         val context = this
 
-        // Hooking into Expo's androit notification system to get the native NotificationCompat builder and customize it
+        // Hooking into Expo's android notification system to get the native NotificationCompat builder and customize it
         // while still enablig Expo's React Native notification interaction handling
 
-        val expoNotification = createNotificationFromRemoteMessage(title, subtitle, message, remoteMessage);
+        val expoNotification = createNotificationFromRemoteMessage(result.title, result.subtitle, result.body, remoteMessage);
         val expoBuilder = CategoryAwareNotificationBuilder(this, SharedPreferencesNotificationCategoriesStore(this)).also {
             it.setNotification(expoNotification)
         } as ExpoNotificationBuilder
@@ -301,65 +232,13 @@ class PushNotificationsService : FirebaseMessagingService() {
         createBuilder.isAccessible = true
         val builder = createBuilder.invoke(expoBuilder) as NotificationCompat.Builder
 
-        // For chat specific notifications with PFP, following instructions at
-        // https://proandroiddev.com/display-android-notifications-with-a-contact-image-on-the-left-like-all-messaging-apps-bbd108f5d147
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-            // Code that requires API level P (28) or higher
-            val bitmap = getBitmapFromURL("https://avatars.githubusercontent.com/u/2102342?v=4")
-            val person = Person.Builder()
-                .setName("Olivia")
-                .setIcon(IconCompat.createWithBitmap(bitmap))
-                .build()
-            val chatMessageStyle = createMessageNotificationStyle(
-                person = person,
-                text = "Hello! How are you?",
-            )
-            builder.setStyle(chatMessageStyle);
-
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-                // Code for API level 30 or higher
-                val defaultAction =
-                    NotificationAction(NotificationResponse.DEFAULT_ACTION_IDENTIFIER, null, true)
-                val intent = Intent(
-                    NOTIFICATION_EVENT_ACTION,
-                    Uri.parse("expo-notifications://notifications/").buildUpon()
-                        .appendPath(expoNotification.notificationRequest.identifier)
-                        .appendPath("actions")
-                        .appendPath(defaultAction.identifier)
-                        .build()
-                ).also { intent ->
-                    findDesignatedBroadcastReceiver(context, intent)?.let {
-                        intent.component = ComponentName(it.packageName, it.name)
-                    }
-                    intent.putExtra(EVENT_TYPE_KEY, "receiveResponse")
-//                    intent.putExtra(NOTIFICATION_KEY, expoNotification)
-//                    intent.putExtra(NOTIFICATION_ACTION_KEY, defaultAction as Parcelable)
-                }
-                createDynamicShortcut(intent, "person-shortcut", "Olivia", person, bitmap)
-                builder.setShortcutId("person-shortcut")
-            }
-        }
-
+        customizeMessageNotification(this, builder, expoNotification, result)
 
         NotificationManagerCompat.from(this).notify(
             expoNotification.notificationRequest.identifier,
             0,
             builder.build()
         )
-    }
-
-    private fun applicationInForeground(): Boolean {
-        val activityManager: ActivityManager = getSystemService(ACTIVITY_SERVICE) as ActivityManager
-        val services: List<ActivityManager.RunningAppProcessInfo> =
-            activityManager.runningAppProcesses
-        var isActivityFound = false
-        if (services[0].processName
-                .equals(packageName, ignoreCase = true) && services[0].importance === ActivityManager.RunningAppProcessInfo.IMPORTANCE_FOREGROUND
-        ) {
-            isActivityFound = true
-        }
-        return isActivityFound
     }
 
     private fun initSecureStore() {
