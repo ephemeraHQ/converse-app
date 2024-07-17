@@ -1,9 +1,26 @@
 package com.converse.dev
 
+import android.Manifest
 import android.app.ActivityManager
+import android.content.ComponentName
+import android.content.Intent
+import android.content.pm.PackageManager
+import android.graphics.Bitmap
+import android.net.Uri
+import android.os.Build
+import android.os.Parcelable
 import android.util.Log
-import android.view.View
+import androidx.annotation.RequiresApi
+import androidx.core.app.ActivityCompat
+import androidx.core.app.NotificationCompat
+import androidx.core.app.NotificationManagerCompat
+import androidx.core.app.Person
+import androidx.core.content.pm.ShortcutInfoCompat
+import androidx.core.content.pm.ShortcutManagerCompat
+import androidx.core.graphics.drawable.IconCompat
 import com.beust.klaxon.Klaxon
+import com.bumptech.glide.Glide
+import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.converse.dev.xmtp.NotificationDataResult
 import com.converse.dev.xmtp.getNewConversationFromEnvelope
 import com.converse.dev.xmtp.getNewGroup
@@ -26,22 +43,30 @@ import expo.modules.kotlin.ModulesProvider
 import expo.modules.kotlin.modules.Module
 import expo.modules.notifications.notifications.JSONNotificationContentBuilder
 import expo.modules.notifications.notifications.model.Notification
+import expo.modules.notifications.notifications.model.NotificationAction
 import expo.modules.notifications.notifications.model.NotificationContent
 import expo.modules.notifications.notifications.model.NotificationRequest
+import expo.modules.notifications.notifications.model.NotificationResponse
 import expo.modules.notifications.notifications.model.triggers.FirebaseNotificationTrigger
-import expo.modules.notifications.service.NotificationsService
+import expo.modules.notifications.notifications.presentation.builders.CategoryAwareNotificationBuilder
+import expo.modules.notifications.notifications.presentation.builders.ExpoNotificationBuilder
+import expo.modules.notifications.service.NotificationsService.Companion.EVENT_TYPE_KEY
+import expo.modules.notifications.service.NotificationsService.Companion.NOTIFICATION_ACTION_KEY
+import expo.modules.notifications.service.NotificationsService.Companion.NOTIFICATION_EVENT_ACTION
+import expo.modules.notifications.service.NotificationsService.Companion.NOTIFICATION_KEY
+import expo.modules.notifications.service.NotificationsService.Companion.findDesignatedBroadcastReceiver
+import expo.modules.notifications.service.delegates.SharedPreferencesNotificationCategoriesStore
 import expo.modules.securestore.AuthenticationHelper
 import expo.modules.securestore.SecureStoreModule
 import expo.modules.securestore.encryptors.AESEncryptor
 import expo.modules.securestore.encryptors.HybridAESEncryptor
+import kotlinx.coroutines.*
 import org.json.JSONObject
 import org.xmtp.android.library.messages.EnvelopeBuilder
-import java.util.*
-import kotlinx.coroutines.*
 import java.lang.ref.WeakReference
 import java.security.KeyStore
+import java.util.*
 import kotlin.reflect.full.declaredMemberProperties
-import kotlin.reflect.full.memberProperties
 import kotlin.reflect.jvm.isAccessible
 import kotlin.reflect.jvm.javaField
 
@@ -185,8 +210,143 @@ class PushNotificationsService : FirebaseMessagingService() {
         return Notification(request, Date(remoteMessage.sentTime))
     }
 
-    private fun showNotification(title: String, subtitle: String?, message: String, remoteMessage: RemoteMessage) {
-        NotificationsService.receive(this, createNotificationFromRemoteMessage(title, subtitle, message, remoteMessage))
+    suspend fun getBitmapFromURL(avatarUrl: String): Bitmap {
+        var context = this;
+        return withContext(Dispatchers.IO) {
+            val bitmap = Glide.with(context)
+                .asBitmap()
+                .load(avatarUrl)
+                .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
+                .submit()
+                .get()
+
+            return@withContext bitmap
+        }
+    }
+
+//    fun getRoundedBitmap(bitmap: Bitmap, cornerRadius: Float): Bitmap {
+//        val output = Bitmap.createBitmap(bitmap.width, bitmap.height, Bitmap.Config.ARGB_8888)
+//        val canvas = Canvas(output)
+//
+//        val paint = Paint().apply {
+//            isAntiAlias = true
+//            shader = BitmapShader(bitmap, Shader.TileMode.CLAMP, Shader.TileMode.CLAMP)
+//        }
+//
+//        val rect = RectF(0f, 0f, bitmap.width.toFloat(), bitmap.height.toFloat())
+//        canvas.drawRoundRect(rect, cornerRadius, cornerRadius, paint)
+//
+//        return output
+//    }
+
+    @RequiresApi(Build.VERSION_CODES.P)
+    suspend fun createMessageNotificationStyle(
+        person: Person,
+        text: String,
+    ): NotificationCompat.MessagingStyle {
+        val chatMessageStyle = NotificationCompat.MessagingStyle(person)
+        val notificationMessage = NotificationCompat.MessagingStyle.Message(
+            text,
+            System.currentTimeMillis(),
+            person,
+        )
+        chatMessageStyle.addMessage(notificationMessage)
+        return chatMessageStyle
+    }
+
+    fun createDynamicShortcut(
+        intent: Intent,
+        shortcutId: String,
+        shortLabel: String,
+        person: Person,
+        notificationIcon: Bitmap?,
+    ) {
+        val shortcutBuilder = ShortcutInfoCompat.Builder(
+            this,
+            shortcutId,
+        )
+            .setLongLived(true)
+            .setIntent(intent)
+            .setShortLabel(shortLabel)
+            .setPerson(person)
+
+        if (notificationIcon != null) {
+            val icon = IconCompat.createWithAdaptiveBitmap(notificationIcon)
+            shortcutBuilder.setIcon(icon)
+        }
+
+        val shortcut = shortcutBuilder.build()
+        ShortcutManagerCompat.pushDynamicShortcut(this, shortcut)
+    }
+
+    private suspend fun showNotification(title: String, subtitle: String?, message: String, remoteMessage: RemoteMessage) {
+        val context = this
+
+        // Hooking into Expo's androit notification system to get the native NotificationCompat builder and customize it
+        // while still enablig Expo's React Native notification interaction handling
+
+        val expoNotification = createNotificationFromRemoteMessage(title, subtitle, message, remoteMessage);
+        val expoBuilder = CategoryAwareNotificationBuilder(this, SharedPreferencesNotificationCategoriesStore(this)).also {
+            it.setNotification(expoNotification)
+        } as ExpoNotificationBuilder
+        if (ActivityCompat.checkSelfPermission(
+                this,
+                Manifest.permission.POST_NOTIFICATIONS
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
+            return
+        }
+
+        val createBuilder = ExpoNotificationBuilder::class.java.getDeclaredMethod("createBuilder")
+        createBuilder.isAccessible = true
+        val builder = createBuilder.invoke(expoBuilder) as NotificationCompat.Builder
+
+        // For chat specific notifications with PFP, following instructions at
+        // https://proandroiddev.com/display-android-notifications-with-a-contact-image-on-the-left-like-all-messaging-apps-bbd108f5d147
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            // Code that requires API level P (28) or higher
+            val bitmap = getBitmapFromURL("https://avatars.githubusercontent.com/u/2102342?v=4")
+            val person = Person.Builder()
+                .setName("Olivia")
+                .setIcon(IconCompat.createWithBitmap(bitmap))
+                .build()
+            val chatMessageStyle = createMessageNotificationStyle(
+                person = person,
+                text = "Hello! How are you?",
+            )
+            builder.setStyle(chatMessageStyle);
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                // Code for API level 30 or higher
+                val defaultAction =
+                    NotificationAction(NotificationResponse.DEFAULT_ACTION_IDENTIFIER, null, true)
+                val intent = Intent(
+                    NOTIFICATION_EVENT_ACTION,
+                    Uri.parse("expo-notifications://notifications/").buildUpon()
+                        .appendPath(expoNotification.notificationRequest.identifier)
+                        .appendPath("actions")
+                        .appendPath(defaultAction.identifier)
+                        .build()
+                ).also { intent ->
+                    findDesignatedBroadcastReceiver(context, intent)?.let {
+                        intent.component = ComponentName(it.packageName, it.name)
+                    }
+                    intent.putExtra(EVENT_TYPE_KEY, "receiveResponse")
+//                    intent.putExtra(NOTIFICATION_KEY, expoNotification)
+//                    intent.putExtra(NOTIFICATION_ACTION_KEY, defaultAction as Parcelable)
+                }
+                createDynamicShortcut(intent, "person-shortcut", "Olivia", person, bitmap)
+                builder.setShortcutId("person-shortcut")
+            }
+        }
+
+
+        NotificationManagerCompat.from(this).notify(
+            expoNotification.notificationRequest.identifier,
+            0,
+            builder.build()
+        )
     }
 
     private fun applicationInForeground(): Boolean {
