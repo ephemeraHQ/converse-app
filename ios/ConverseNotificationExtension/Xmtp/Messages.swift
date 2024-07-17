@@ -148,7 +148,7 @@ func handleGroupMessage(xmtpClient: XMTP.Client, envelope: XMTP.Envelope, apiURI
 
         let decodedMessageResult = handleMessageByContentType(decodedMessage: decodedMessage, xmtpClient: xmtpClient);
         messageId = decodedMessageResult.id
-        if decodedMessageResult.senderAddress == xmtpClient.inboxID || decodedMessageResult.forceIgnore {
+        if decodedMessageResult.senderAddress == xmtpClient.inboxID || decodedMessageResult.senderAddress == xmtpClient.address || decodedMessageResult.forceIgnore {
           
         } else {
           let spamScore = await computeSpamScoreGroupMessage(client: xmtpClient, group: group, decodedMessage: decodedMessage, apiURI: apiURI)
@@ -160,11 +160,10 @@ func handleGroupMessage(xmtpClient: XMTP.Client, envelope: XMTP.Envelope, apiURI
             }
             let profilesState = getProfilesState(account: xmtpClient.address)
             
-            if let senderMember = try group.members.first(where:{$0.inboxId == decodedMessageResult.senderAddress} ) {
-              let senderAddress = senderMember.addresses[0]
-              if let senderProfile = profilesState?.profiles?[senderAddress] {
-                bestAttemptContent.subtitle = getPreferredName(address: senderAddress, socials: senderProfile.socials)
-              }
+            // We replaced decodedMessage.senderAddress from inboxId to actual address
+            // so it appears well in the app until inboxId is a first class citizen
+            if let senderProfile = profilesState?.profiles?[decodedMessage.senderAddress] {
+              bestAttemptContent.subtitle = getPreferredName(address: decodedMessage.senderAddress, socials: senderProfile.socials)
             }
 
             if let content = decodedMessageResult.content {
