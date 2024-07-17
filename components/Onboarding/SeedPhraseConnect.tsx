@@ -19,7 +19,6 @@ import {
 import { AvoidSoftInput } from "react-native-avoid-softinput";
 
 import OnboardingComponent from "./OnboardingComponent";
-import config from "../../config";
 import { useOnboardingStore } from "../../data/store/onboardingStore";
 import { useSelect } from "../../data/store/storeHelpers";
 import { getPrivateKeyFromMnemonic, validateMnemonic } from "../../utils/eth";
@@ -185,13 +184,11 @@ export default function SeedPhraseConnect() {
             terms and conditions.
           </Text>
         </Text>
-        {(config.env === "dev" || config.env === "preview") && (
-          <Text style={styles.links}>
-            <Text style={styles.link} onPress={generateWallet}>
-              Try the app with an ephemeral wallet.
-            </Text>
+        <Text style={styles.links}>
+          <Text style={styles.link} onPress={generateWallet}>
+            Try the app with an ephemeral wallet.
           </Text>
-        )}
+        </Text>
       </View>
     </OnboardingComponent>
   );
