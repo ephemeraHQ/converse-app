@@ -7,8 +7,13 @@ PODS:
   - CoinbaseWalletSDKExpo (1.0.13):
     - CoinbaseWalletSDK/CrossPlatform (= 1.0.4)
     - ExpoModulesCore
+  - ComputableLayout (0.7.0):
+    - DGSwiftUtilities (~> 0.11)
   - Connect-Swift (0.12.0):
     - SwiftProtobuf (~> 1.25.2)
+  - ContextMenuAuxiliaryPreview (0.5.0):
+    - DGSwiftUtilities (~> 0.18.1)
+  - DGSwiftUtilities (0.18.1)
   - DoubleConversion (1.1.6)
   - EASClient (0.12.0):
     - ExpoModulesCore
@@ -1660,6 +1665,15 @@ PODS:
     - React-utils (= 0.74.3)
   - ReactNativeAvoidSoftinput (4.0.1):
     - React-Core
+  - ReactNativeIosContextMenu (2.5.1):
+    - ContextMenuAuxiliaryPreview (~> 0.3)
+    - DGSwiftUtilities
+    - ExpoModulesCore
+    - ReactNativeIosUtilities
+  - ReactNativeIosUtilities (4.4.5):
+    - ComputableLayout (~> 0.7)
+    - DGSwiftUtilities (~> 0.17)
+    - ExpoModulesCore
   - rn-fetch-blob (0.12.0):
     - React-Core
   - RNAWSCognito (6.3.12):
@@ -1901,6 +1915,8 @@ DEPENDENCIES:
   - React-utils (from `../node_modules/react-native/ReactCommon/react/utils`)
   - ReactCommon/turbomodule/core (from `../node_modules/react-native/ReactCommon`)
   - ReactNativeAvoidSoftinput (from `../node_modules/react-native-avoid-softinput`)
+  - ReactNativeIosContextMenu (from `../node_modules/react-native-ios-context-menu`)
+  - ReactNativeIosUtilities (from `../node_modules/react-native-ios-utilities`)
   - rn-fetch-blob (from `../node_modules/rn-fetch-blob`)
   - RNAWSCognito (from `../node_modules/amazon-cognito-identity-js`)
   - "RNCAsyncStorage (from `../node_modules/@react-native-async-storage/async-storage`)"
@@ -1926,7 +1942,10 @@ SPEC REPOS:
   trunk:
     - BigInt
     - CoinbaseWalletSDK
+    - ComputableLayout
     - Connect-Swift
+    - ContextMenuAuxiliaryPreview
+    - DGSwiftUtilities
     - GenericJSON
     - GzipSwift
     - libavif
@@ -2167,6 +2186,10 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native/ReactCommon"
   ReactNativeAvoidSoftinput:
     :path: "../node_modules/react-native-avoid-softinput"
+  ReactNativeIosContextMenu:
+    :path: "../node_modules/react-native-ios-context-menu"
+  ReactNativeIosUtilities:
+    :path: "../node_modules/react-native-ios-utilities"
   rn-fetch-blob:
     :path: "../node_modules/rn-fetch-blob"
   RNAWSCognito:
@@ -2207,7 +2230,10 @@ SPEC CHECKSUMS:
   boost: d3f49c53809116a5d38da093a8aa78bf551aed09
   CoinbaseWalletSDK: ea1f37512bbc69ebe07416e3b29bf840f5cc3152
   CoinbaseWalletSDKExpo: fc6cc756974827763d7a0decf7140c2902dafca2
+  ComputableLayout: c50faffac4ed9f8f05b0ce5e6f3a60df1f6042c8
   Connect-Swift: 1de2ef4a548c59ecaeb9120812dfe0d6e07a0d47
+  ContextMenuAuxiliaryPreview: 1c73742ff3100dac1e0fb70bbe30284a6e711071
+  DGSwiftUtilities: 9be88816a2057f125bc8fac3da6aca3ae89c1eec
   DoubleConversion: 76ab83afb40bddeeee456813d9c04f67f78771b5
   EASClient: 1509a9a6b48b932ec61667644634daf2562983b8
   EXApplication: c08200c34daca7af7fd76ac4b9d606077410e8ad
@@ -2325,6 +2351,8 @@ SPEC CHECKSUMS:
   React-utils: 6f7ac39d9a0de447d4334bb25d144a28c0c5d8c9
   ReactCommon: 4a09c7d8a06e93c1e2e988a3b9f3db3d2449f2fc
   ReactNativeAvoidSoftinput: a096aae8faf85c0f3225c2179bccdab00b8b6354
+  ReactNativeIosContextMenu: e5f972174bd78ab3a552bd6ee4745762ffaa42b3
+  ReactNativeIosUtilities: 638290fbfaa093c1b50d1f926715d77cabcae759
   rn-fetch-blob: f065bb7ab7fb48dd002629f8bdcb0336602d3cba
   RNAWSCognito: fe0c870c7cd9970a2efefc075b3f2d75eac913c7
   RNCAsyncStorage: 826b603ae9c0f88b5ac4e956801f755109fa4d5c

@@ -135,6 +135,8 @@
     "react-native-gesture-handler": "~2.16.1",
     "react-native-get-random-values": "~1.11.0",
     "react-native-gradle-plugin": "^0.71.19",
+    "react-native-ios-context-menu": "^2.5.1",
+    "react-native-ios-utilities": "^4.4.5",
     "react-native-keyboard-controller": "^1.12.4",
     "react-native-localize": "^3.0.2",
     "react-native-mmkv": "^2.12.2",
@@ -180,6 +182,7 @@
     "web-streams-polyfill": "^3.2.1",
     "web3": "^1.8.1",
     "web3.storage": "^4.5.5",
+    "zeego": "^1.10.0",
     "zustand": "^4.4.7"
   },
   "devDependencies": {
