@@ -21,6 +21,7 @@ const statusMapping: {
   delivered: "Sent",
   error: "Failed",
   sending: "Sending",
+  prepared: "Sending",
   seen: "Read",
 };
 
@@ -31,9 +32,14 @@ export default function MessageStatus({ message }: Props) {
     message.status === "sent" || message.status === "delivered";
   const isLatestSettledFromMe = message.isLatestSettledFromMe;
 
-  const opacity = useSharedValue(0);
-  const height = useSharedValue(0);
-  const scale = useSharedValue(0);
+  const opacity = useSharedValue(message.isLatestSettledFromMe ? 1 : 0);
+  const height = useSharedValue(message.isLatestSettledFromMe ? 22 : 0);
+  const scale = useSharedValue(message.isLatestSettledFromMe ? 1 : 0);
+
+  const timingConfig = {
+    duration: 100,
+    easing: Easing.inOut(Easing.quad),
+  };
 
   const animatedStyle = useAnimatedStyle(() => ({
     opacity: opacity.value,
@@ -41,43 +47,38 @@ export default function MessageStatus({ message }: Props) {
     transform: [{ scale: scale.value }],
   }));
 
-  useEffect(() => {
-    const prevStatus = prevStatusRef.current;
-    prevStatusRef.current = message.status;
+  useEffect(
+    () => {
+      const prevStatus = prevStatusRef.current;
+      prevStatusRef.current = message.status;
 
-    const timingConfig = {
-      duration: 100,
-      easing: Easing.inOut(Easing.quad),
-    };
-
-    if (
-      isSentOrDelivered &&
-      (prevStatus === "sending" || prevStatus === "prepared")
-    ) {
-      opacity.value = withTiming(1, timingConfig);
-      height.value = withTiming(22, timingConfig);
-      scale.value = withTiming(1, timingConfig);
-    } else if (isSentOrDelivered && !isLatestSettledFromMe) {
-      opacity.value = withTiming(0, timingConfig);
-      height.value = withTiming(0, timingConfig);
-      scale.value = withTiming(0, timingConfig);
-    } else if (isLatestSettledFromMe) {
-      opacity.value = 1;
-      height.value = 22;
-      scale.value = 1;
-    }
-  }, [
-    message.status,
-    isLatestSettledFromMe,
-    isSentOrDelivered,
-    height,
-    opacity,
-    scale,
-  ]);
+      setTimeout(() => {
+        if (
+          isSentOrDelivered &&
+          (prevStatus === "sending" || prevStatus === "prepared")
+        ) {
+          opacity.value = withTiming(1, timingConfig);
+          height.value = withTiming(22, timingConfig);
+          scale.value = withTiming(1, timingConfig);
+        } else if (isSentOrDelivered && !isLatestSettledFromMe) {
+          opacity.value = withTiming(0, timingConfig);
+          height.value = withTiming(0, timingConfig);
+          scale.value = withTiming(0, timingConfig);
+        } else if (isLatestSettledFromMe) {
+          opacity.value = 1;
+          height.value = 22;
+          scale.value = 1;
+        }
+      }, 200);
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [isLatestSettledFromMe, isSentOrDelivered]
+  );
 
   return (
     message.fromMe &&
-    message.status != "sending" && (
+    message.status != "sending" &&
+    message.status != "prepared" && (
       <Animated.View style={[styles.container, animatedStyle]}>
         <View style={styles.contentContainer}>
           <Animated.Text style={styles.statusText}>
