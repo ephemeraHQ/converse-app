@@ -8,6 +8,10 @@ import {
 
 import { type Message } from "./messageEntity";
 
+// Caution, when adding booleans here, they're not mapped correctly when
+// using createQueryBuilder directly (as they're actually integers in Sqlite)
+// see https://github.com/Unshut-Labs/converse-app/commit/5e498c99c3c1928f0256d3461299e9e5a0386b12
+
 @Entity()
 export class Conversation {
   // @ts-ignore
