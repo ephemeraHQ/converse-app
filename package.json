@@ -170,7 +170,7 @@
     "stream-http": "^3.2.0",
     "text-encoding": "^0.7.0",
     "thirdweb": "^5.34.3",
-    "typeorm": "^0.3.17",
+    "typeorm": "^0.3.20",
     "url": "^0.11.0",
     "use-context-selector": "^1.4.1",
     "uuid": "^9.0.1",
