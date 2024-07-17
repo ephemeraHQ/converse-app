@@ -346,7 +346,6 @@ export const conversationShouldBeInInbox = (
     const isAddedByAllowed =
       conversation.groupAddedBy &&
       peersStatus[conversation.groupAddedBy.toLowerCase()] === "consented";
-    console.log(isGroupAllowed, isCreatorAllowed, isAddedByAllowed);
     return (
       conversation.hasOneMessageFromMe ||
       isGroupAllowed ||
