@@ -6,6 +6,7 @@ import {
   myMessageBubbleColor,
   myMessageHighlightedBubbleColor,
 } from "@styles/colors";
+import * as Haptics from "expo-haptics";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import {
   ColorSchemeName,
@@ -404,9 +405,12 @@ export default function ChatMessageActions({
                   );
                 }
               }}
-              onLongPress={() =>
-                useAppStore.getState().setContextMenuShown(true)
-              }
+              onLongPress={() => {
+                if (Platform.OS !== "web") {
+                  Haptics.selectionAsync();
+                }
+                useAppStore.getState().setContextMenuShown(true);
+              }}
             >
               {children}
             </ReanimatedTouchableOpacity>
@@ -496,6 +500,7 @@ const useStyles = () => {
     animateInWrapper: {
       alignSelf: "flex-start",
       flexDirection: "row",
+      borderRadius: 18,
     },
     messageBubble: {
       flexShrink: 1,

@@ -1,6 +1,6 @@
 import {
   actionSheetColors,
-  messageBubbleColor,
+  inversePrimaryColor,
   textPrimaryColor,
 } from "@styles/colors";
 import { useCallback } from "react";
@@ -112,7 +112,7 @@ const useStyles = () => {
       marginHorizontal: 10,
     },
     reactionsContainer: {
-      backgroundColor: messageBubbleColor(colorScheme),
+      backgroundColor: inversePrimaryColor(colorScheme),
       paddingVertical: 4,
       paddingHorizontal: 6,
       borderRadius: 8,
