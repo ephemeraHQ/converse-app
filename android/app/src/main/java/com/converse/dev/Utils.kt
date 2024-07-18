@@ -62,3 +62,15 @@ fun getPreferredName(address: String, socials: ProfileSocials): String {
 
     return shortAddress(address)
 }
+
+fun getPreferredAvatar(socials: ProfileSocials): String? {
+    socials.userNames?.firstOrNull { it.isPrimary ?: false }?.let {
+        return it.avatar
+    }
+
+    socials.ensNames?.firstOrNull { it.isPrimary ?: false }?.let {
+        return it.avatar
+    }
+
+    return null
+}

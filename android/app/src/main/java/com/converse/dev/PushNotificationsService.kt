@@ -1,9 +1,26 @@
 package com.converse.dev
 
+import android.Manifest
 import android.app.ActivityManager
+import android.content.ComponentName
+import android.content.Intent
+import android.content.pm.PackageManager
+import android.graphics.Bitmap
+import android.net.Uri
+import android.os.Build
+import android.os.Parcelable
 import android.util.Log
-import android.view.View
+import androidx.annotation.RequiresApi
+import androidx.core.app.ActivityCompat
+import androidx.core.app.NotificationCompat
+import androidx.core.app.NotificationManagerCompat
+import androidx.core.app.Person
+import androidx.core.content.pm.ShortcutInfoCompat
+import androidx.core.content.pm.ShortcutManagerCompat
+import androidx.core.graphics.drawable.IconCompat
 import com.beust.klaxon.Klaxon
+import com.bumptech.glide.Glide
+import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.converse.dev.xmtp.NotificationDataResult
 import com.converse.dev.xmtp.getNewConversationFromEnvelope
 import com.converse.dev.xmtp.getNewGroup
@@ -26,22 +43,30 @@ import expo.modules.kotlin.ModulesProvider
 import expo.modules.kotlin.modules.Module
 import expo.modules.notifications.notifications.JSONNotificationContentBuilder
 import expo.modules.notifications.notifications.model.Notification
+import expo.modules.notifications.notifications.model.NotificationAction
 import expo.modules.notifications.notifications.model.NotificationContent
 import expo.modules.notifications.notifications.model.NotificationRequest
+import expo.modules.notifications.notifications.model.NotificationResponse
 import expo.modules.notifications.notifications.model.triggers.FirebaseNotificationTrigger
-import expo.modules.notifications.service.NotificationsService
+import expo.modules.notifications.notifications.presentation.builders.CategoryAwareNotificationBuilder
+import expo.modules.notifications.notifications.presentation.builders.ExpoNotificationBuilder
+import expo.modules.notifications.service.NotificationsService.Companion.EVENT_TYPE_KEY
+import expo.modules.notifications.service.NotificationsService.Companion.NOTIFICATION_ACTION_KEY
+import expo.modules.notifications.service.NotificationsService.Companion.NOTIFICATION_EVENT_ACTION
+import expo.modules.notifications.service.NotificationsService.Companion.NOTIFICATION_KEY
+import expo.modules.notifications.service.NotificationsService.Companion.findDesignatedBroadcastReceiver
+import expo.modules.notifications.service.delegates.SharedPreferencesNotificationCategoriesStore
 import expo.modules.securestore.AuthenticationHelper
 import expo.modules.securestore.SecureStoreModule
 import expo.modules.securestore.encryptors.AESEncryptor
 import expo.modules.securestore.encryptors.HybridAESEncryptor
+import kotlinx.coroutines.*
 import org.json.JSONObject
 import org.xmtp.android.library.messages.EnvelopeBuilder
-import java.util.*
-import kotlinx.coroutines.*
 import java.lang.ref.WeakReference
 import java.security.KeyStore
+import java.util.*
 import kotlin.reflect.full.declaredMemberProperties
-import kotlin.reflect.full.memberProperties
 import kotlin.reflect.jvm.isAccessible
 import kotlin.reflect.jvm.javaField
 
@@ -149,7 +174,7 @@ class PushNotificationsService : FirebaseMessagingService() {
 
                 if (shouldShowNotification && !notificationAlreadyShown) {
                     incrementBadge(applicationContext)
-                    result.remoteMessage?.let { showNotification(result.title, result.subtitle, result.body, it) }
+                    result.remoteMessage?.let { showNotification(result, it) }
                 }
             } catch (e: Exception) {
                 // Handle any exceptions
@@ -185,21 +210,35 @@ class PushNotificationsService : FirebaseMessagingService() {
         return Notification(request, Date(remoteMessage.sentTime))
     }
 
-    private fun showNotification(title: String, subtitle: String?, message: String, remoteMessage: RemoteMessage) {
-        NotificationsService.receive(this, createNotificationFromRemoteMessage(title, subtitle, message, remoteMessage))
-    }
+    private suspend fun showNotification(result: NotificationDataResult, remoteMessage: RemoteMessage) {
+        val context = this
 
-    private fun applicationInForeground(): Boolean {
-        val activityManager: ActivityManager = getSystemService(ACTIVITY_SERVICE) as ActivityManager
-        val services: List<ActivityManager.RunningAppProcessInfo> =
-            activityManager.runningAppProcesses
-        var isActivityFound = false
-        if (services[0].processName
-                .equals(packageName, ignoreCase = true) && services[0].importance === ActivityManager.RunningAppProcessInfo.IMPORTANCE_FOREGROUND
+        // Hooking into Expo's android notification system to get the native NotificationCompat builder and customize it
+        // while still enablig Expo's React Native notification interaction handling
+
+        val expoNotification = createNotificationFromRemoteMessage(result.title, result.subtitle, result.body, remoteMessage);
+        val expoBuilder = CategoryAwareNotificationBuilder(this, SharedPreferencesNotificationCategoriesStore(this)).also {
+            it.setNotification(expoNotification)
+        } as ExpoNotificationBuilder
+        if (ActivityCompat.checkSelfPermission(
+                this,
+                Manifest.permission.POST_NOTIFICATIONS
+            ) != PackageManager.PERMISSION_GRANTED
         ) {
-            isActivityFound = true
+            return
         }
-        return isActivityFound
+
+        val createBuilder = ExpoNotificationBuilder::class.java.getDeclaredMethod("createBuilder")
+        createBuilder.isAccessible = true
+        val builder = createBuilder.invoke(expoBuilder) as NotificationCompat.Builder
+
+        customizeMessageNotification(this, builder, expoNotification, result)
+
+        NotificationManagerCompat.from(this).notify(
+            expoNotification.notificationRequest.identifier,
+            0,
+            builder.build()
+        )
     }
 
     private fun initSecureStore() {
