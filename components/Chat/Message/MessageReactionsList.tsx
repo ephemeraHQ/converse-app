@@ -50,7 +50,7 @@ const Item: FC<MessageReactionsItemProps> = ({
         {
           justifyContent: "center",
           alignItems: "center",
-          height: AvatarSizes.pinnedConversation + Paddings.small * 2,
+          padding: Paddings.small,
         },
         animatedStyle,
       ]}
