@@ -159,7 +159,7 @@ func handleGroupMessage(xmtpClient: XMTP.Client, envelope: XMTP.Envelope, apiURI
               bestAttemptContent.title = groupName
             }
             let profilesState = getProfilesState(account: xmtpClient.address)
-            
+
             // We replaced decodedMessage.senderAddress from inboxId to actual address
             // so it appears well in the app until inboxId is a first class citizen
             if let senderProfile = profilesState?.profiles?[decodedMessage.senderAddress] {
