@@ -62,6 +62,9 @@
       "node": "20.15.1",
       "ios": {
         "cocoapods": "1.14.3"
+      },
+      "android": {
+        "buildType": "app-bundle"
       }
     },
     "production-ios-internal": {
