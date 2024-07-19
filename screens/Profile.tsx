@@ -1,4 +1,5 @@
 import Clipboard from "@react-native-clipboard/clipboard";
+import { StackActions } from "@react-navigation/native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import {
   actionSheetColors,
@@ -9,6 +10,7 @@ import {
   textSecondaryColor,
 } from "@styles/colors";
 import { memberCanUpdateGroup } from "@utils/groupUtils/memberCanUpdateGroup";
+import { strings } from "@utils/i18n/strings";
 import Constants from "expo-constants";
 import * as Linking from "expo-linking";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
@@ -23,7 +25,9 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
+import { ConversationNavParams } from "./Navigation/ConversationNav";
 import { NavigationParamList } from "./Navigation/Navigation";
+import { useIsSplitScreen } from "./Navigation/navHelpers";
 import ActivityIndicator from "../components/ActivityIndicator/ActivityIndicator";
 import Avatar from "../components/Avatar";
 import { showActionSheetWithOptions } from "../components/StateHandlers/ActionSheetStateHandler";
@@ -98,6 +102,7 @@ export default function ProfileScreen({
   const { permissions: groupPermissions } = useGroupPermissions(
     groupTopic ?? ""
   );
+  const isSplitScreen = useIsSplitScreen();
 
   const insets = useSafeAreaInsets();
   useEffect(() => {
@@ -322,54 +327,107 @@ export default function ProfileScreen({
   }, [colorScheme, logout]);
 
   const actionsTableViewItems = useMemo(() => {
-    const items: TableViewItemType[] = [
-      {
-        id: "block",
-        title: isBlockedPeer ? "Unblock" : "Block",
-        titleColor:
-          Platform.OS === "android"
-            ? undefined
-            : isBlockedPeer
-            ? primaryColor(colorScheme)
-            : dangerColor(colorScheme),
+    const items: TableViewItemType[] = [];
+    if (!isBlockedPeer) {
+      items.push({
+        id: "message",
+        title: strings.send_a_message,
+        titleColor: primaryColor(colorScheme),
+        action: () => {
+          setTimeout(
+            () => {
+              const isPreviouslyInNavStack = navigation
+                .getState()
+                .routes.some((route) => {
+                  if (route.name !== "Conversation") {
+                    return false;
+                  }
+                  const params = route.params as ConversationNavParams;
+                  return (
+                    params?.mainConversationWithPeer ===
+                    peerAddress.toLowerCase()
+                  );
+                });
+              if (isPreviouslyInNavStack) {
+                navigation.navigate({
+                  name: "Conversation",
+                  params: {
+                    mainConversationWithPeer: peerAddress,
+                    focus: true,
+                  },
+                });
+              } else {
+                navigation.dispatch(
+                  StackActions.push("Conversation", {
+                    mainConversationWithPeer: peerAddress,
+                    focus: true,
+                  })
+                );
+              }
+            },
+            isSplitScreen ? 0 : 300
+          );
+        },
         leftView:
           Platform.OS === "android" ? (
             <TableViewPicto
-              symbol="block"
-              color={textSecondaryColor(colorScheme)}
+              symbol="message"
+              color={primaryColor(colorScheme)}
             />
           ) : undefined,
-        action: () => {
-          showActionSheetWithOptions(
-            {
-              options: [isBlockedPeer ? "Unblock" : "Block", "Cancel"],
-              cancelButtonIndex: 1,
-              destructiveButtonIndex: isBlockedPeer ? undefined : 0,
-              title: isBlockedPeer
-                ? "If you unblock this contact, they will be able to send you messages again."
-                : "If you block this contact, you will not receive messages from them anymore.",
-              ...actionSheetColors(colorScheme),
-            },
-            (selectedIndex?: number) => {
-              if (selectedIndex === 0 && peerAddress) {
-                const newStatus = isBlockedPeer ? "consented" : "blocked";
-                const consentOnProtocol = isBlockedPeer ? "allow" : "deny";
-                consentToPeersOnProtocol(
-                  currentAccount(),
-                  [peerAddress],
-                  consentOnProtocol
-                );
-                setPeersStatus({ [peerAddress]: newStatus });
+      });
+    }
 
-                // Pop to conversation list, antepenultimate screen in stack
-                navigation.pop(2);
-              }
+    items.push({
+      id: "block",
+      title: isBlockedPeer ? "Unblock" : "Block",
+      titleColor:
+        Platform.OS === "android"
+          ? undefined
+          : isBlockedPeer
+          ? primaryColor(colorScheme)
+          : dangerColor(colorScheme),
+      leftView:
+        Platform.OS === "android" ? (
+          <TableViewPicto
+            symbol="block"
+            color={textSecondaryColor(colorScheme)}
+          />
+        ) : undefined,
+      action: () => {
+        showActionSheetWithOptions(
+          {
+            options: [
+              isBlockedPeer ? strings.unblock : strings.block,
+              strings.cancel,
+            ],
+            cancelButtonIndex: 1,
+            destructiveButtonIndex: isBlockedPeer ? undefined : 0,
+            title: isBlockedPeer
+              ? strings.if_you_unblock_contact
+              : strings.if_you_block_contact,
+            ...actionSheetColors(colorScheme),
+          },
+          (selectedIndex?: number) => {
+            if (selectedIndex === 0 && peerAddress) {
+              const newStatus = isBlockedPeer ? "consented" : "blocked";
+              const consentOnProtocol = isBlockedPeer ? "allow" : "deny";
+              consentToPeersOnProtocol(
+                currentAccount(),
+                [peerAddress],
+                consentOnProtocol
+              );
+              setPeersStatus({ [peerAddress]: newStatus });
+
+              // Pop to conversation list, antepenultimate screen in stack
+              navigation.pop(2);
             }
-          );
-        },
+          }
+        );
       },
-    ];
-    if (isMyProfile || !groupTopic || !groupMembers) {
+    });
+
+    if (!groupTopic || !groupMembers) {
       return items;
     }
     const peerId = groupMembers.byAddress[peerAddress];
@@ -393,16 +451,16 @@ export default function ProfileScreen({
     ) {
       items.push({
         id: "remove",
-        title: "Remove from group",
+        title: strings.remove_from_group,
         titleColor:
           Platform.OS === "android" ? undefined : dangerColor(colorScheme),
         action: () => {
           showActionSheetWithOptions(
             {
-              options: ["Remove from Group", "Cancel"],
+              options: [strings.remove_from_group, strings.cancel],
               cancelButtonIndex: 1,
               destructiveButtonIndex: 0,
-              title: "Are you sure?",
+              title: strings.are_you_sure,
               ...actionSheetColors(colorScheme),
             },
             async (selectedIndex?: number) => {
@@ -425,16 +483,16 @@ export default function ProfileScreen({
     ) {
       items.unshift({
         id: "promote",
-        title: "Promote to admin",
+        title: strings.promote_to_admin,
         titleColor:
           Platform.OS === "android" ? undefined : primaryColor(colorScheme),
         action: () => {
           showActionSheetWithOptions(
             {
-              options: ["Promote to Admin", "Cancel"],
+              options: [strings.promote_to_admin, "Cancel"],
               cancelButtonIndex: 1,
               destructiveButtonIndex: undefined,
-              title: "Are you sure?",
+              title: strings.are_you_sure,
               ...actionSheetColors(colorScheme),
             },
             async (selectedIndex?: number) => {
@@ -459,7 +517,7 @@ export default function ProfileScreen({
               options: ["Promote to Super Admin", "Cancel"],
               cancelButtonIndex: 1,
               destructiveButtonIndex: undefined,
-              title: "Are you sure?",
+              title: strings.are_you_sure,
               ...actionSheetColors(colorScheme),
             },
             async (selectedIndex?: number) => {
@@ -483,7 +541,7 @@ export default function ProfileScreen({
               options: ["Revoke Super Admin", "Cancel"],
               cancelButtonIndex: 1,
               destructiveButtonIndex: 0,
-              title: "Are you sure?",
+              title: strings.are_you_sure,
               ...actionSheetColors(colorScheme),
             },
             async (selectedIndex?: number) => {
@@ -515,7 +573,7 @@ export default function ProfileScreen({
               options: ["Revoke Admin", "Cancel"],
               cancelButtonIndex: 1,
               destructiveButtonIndex: 0,
-              title: "Are you sure?",
+              title: strings.are_you_sure,
               ...actionSheetColors(colorScheme),
             },
             async (selectedIndex?: number) => {
@@ -532,14 +590,16 @@ export default function ProfileScreen({
   }, [
     isBlockedPeer,
     colorScheme,
-    isMyProfile,
     groupTopic,
     groupMembers,
     peerAddress,
     userAddress,
-    groupPermissions,
+    groupPermissions?.removeMemberPolicy,
+    groupPermissions?.addAdminPolicy,
+    groupPermissions?.removeAdminPolicy,
     setPeersStatus,
     navigation,
+    isSplitScreen,
     removeMember,
     promoteToAdmin,
     promoteToSuperAdmin,

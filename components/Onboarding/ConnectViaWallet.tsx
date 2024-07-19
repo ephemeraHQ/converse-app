@@ -1,5 +1,6 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { textPrimaryColor, textSecondaryColor } from "@styles/colors";
+import { strings } from "@utils/i18n/strings";
 import { thirdwebClient } from "@utils/thirdweb";
 import { Signer } from "ethers";
 import * as Linking from "expo-linking";
@@ -270,20 +271,13 @@ export default function ConnectViaWallet({
       (waitingForSecondSignature && !loading) ||
       clickedSecondSignature.current
     ) {
-      title = "Sign (2/2)";
-      subtitle = (
-        <Text>
-          Please sign one last time to access Converse and start chatting.
-        </Text>
-      );
+      title = strings.sign_2_of_2;
+      subtitle = <Text>{strings.sign_access}</Text>;
     } else {
-      title = "Sign (1/2)";
+      title = strings.sign_1_of_2;
       subtitle = (
         <>
-          <Text>
-            This first signature will enable your wallet to send and receive
-            messages.{"\n\n"}
-          </Text>
+          <Text>{strings.first_signature_explanation}</Text>
           {termsAndConditions}
         </>
       );
