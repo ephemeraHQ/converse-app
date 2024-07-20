@@ -258,7 +258,7 @@ suspend fun handleGroupMessage(
         xmtpClient,
     )
 
-    var shouldShowNotification = if (decodedMessageResult.senderAddress != xmtpClient.inboxId && decodedMessageResult.senderAddress != xmtpClient.address && !decodedMessageResult.forceIgnore && decodedMessageResult.content != null) {
+    var shouldShowNotification = if (decodedMessageResult.senderAddress?.lowercase() != xmtpClient.inboxId.lowercase() && decodedMessageResult.senderAddress?.lowercase() != xmtpClient.address.lowercase() && !decodedMessageResult.forceIgnore && decodedMessageResult.content != null) {
         true
     } else {
         Log.d(TAG, "[NotificationExtension] Not showing a notification")
