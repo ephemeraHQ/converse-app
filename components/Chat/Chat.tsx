@@ -51,6 +51,7 @@ import { isAttachmentMessage } from "../../utils/attachment/helpers";
 import { useConversationContext } from "../../utils/conversation";
 import { converseEventEmitter } from "../../utils/events";
 import { getProfileData } from "../../utils/profile";
+import { UUID_REGEX } from "../../utils/regex";
 import { isContentType } from "../../utils/xmtpRN/contentTypes";
 import { Recommendation } from "../Recommendations/Recommendation";
 
@@ -81,7 +82,7 @@ const getListArray = (
       "xmtp.org/readReceipt:",
     ];
 
-    // if (UUID_REGEX.test(message.id)) return false;
+    if (UUID_REGEX.test(message.id)) return false;
 
     return !notDisplayedContentTypes.some((c) =>
       message.contentType.startsWith(c)
@@ -215,7 +216,7 @@ export default function Chat() {
 
   const hideInputIfFrameFocused = Platform.OS !== "web";
 
-  const DEFAULT_INPUT_HEIGHT = 36;
+  const DEFAULT_INPUT_HEIGHT = 50;
   const chatInputHeight = useSharedValue(0);
   const chatInputDisplayedHeight = useDerivedValue(() => {
     return frameTextInputFocused && hideInputIfFrameFocused
@@ -461,7 +462,6 @@ const useStyles = () => {
     chatContent: {
       backgroundColor: backgroundColor(colorScheme),
       flex: 1,
-      marginBottom: 10,
     },
     chat: {
       backgroundColor: backgroundColor(colorScheme),
