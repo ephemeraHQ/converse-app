@@ -198,7 +198,7 @@ const useStyles = () => {
         default: {
           paddingBottom: 6,
           width: 27,
-          height: 27,
+          height: 48,
         },
         android: {
           paddingBottom: 6,
