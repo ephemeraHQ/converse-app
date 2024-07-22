@@ -18,7 +18,6 @@ import {
   Platform,
   StyleSheet,
   TextInput,
-  TouchableOpacity,
   useColorScheme,
   View,
 } from "react-native";
@@ -30,10 +29,9 @@ import Animated, {
 } from "react-native-reanimated";
 
 import ChatInputReplyPreview from "./InputReplyPreview";
-import SendButtonDefaultDark from "../../../assets/send-button-dark.svg";
-import SendButtonHigher from "../../../assets/send-button-higher.svg";
-import SendButtonDefaultLight from "../../../assets/send-button-light.svg";
+import { SendButton } from "./SendButton";
 import { useAccountsStore } from "../../../data/store/accountsStore";
+import { MediaPreview } from "../../../data/store/chatStore";
 import { useConversationContext } from "../../../utils/conversation";
 import { isDesktop } from "../../../utils/device";
 import { converseEventEmitter } from "../../../utils/events";
@@ -44,18 +42,6 @@ import AddAttachmentButton from "../Attachment/AddAttachmentButton";
 import SendAttachmentPreview from "../Attachment/SendAttachmentPreview";
 import { MessageToDisplay } from "../Message/Message";
 
-const getSendButtonType = (input: string): "DEFAULT" | "HIGHER" => {
-  if (input.match(/\bhigher\b/gi)) {
-    return "HIGHER";
-  }
-  return "DEFAULT";
-};
-
-interface ChatInputProps {
-  inputHeight: SharedValue<number>;
-}
-
-const INITIAL_INPUT_HEIGHT = 36;
 const DEFAULT_MEDIA_PREVIEW_HEIGHT = 120;
 const MEDIA_PREVIEW_PADDING = Platform.OS === "android" ? 9 : 14;
 const LINE_HEIGHT = 22;
@@ -69,6 +55,17 @@ const SPRING_CONFIG = {
   restSpeedThreshold: 0.001,
   restDisplacementThreshold: 0.001,
 };
+
+const getSendButtonType = (input: string): "DEFAULT" | "HIGHER" => {
+  if (input.match(/\bhigher\b/gi)) {
+    return "HIGHER";
+  }
+  return "DEFAULT";
+};
+
+interface ChatInputProps {
+  inputHeight: SharedValue<number>;
+}
 
 export default function ChatInput({
   inputHeight: inputHeightAnimation,
@@ -92,12 +89,13 @@ export default function ChatInput({
   const colorScheme = useColorScheme();
   const styles = useStyles();
   const currentAccount = useAccountsStore((s) => s.currentAccount);
+
   const [inputValue, setInputValue] = useState(messageToPrefill);
   const [replyingToMessage, setReplyingToMessage] =
     useState<MessageToDisplay | null>(null);
   const [mediaPreview, setMediaPreview] = useState(mediaPreviewToPrefill);
-  useState<MessageToDisplay | null>(null);
   const [isSending, setIsSending] = useState(false);
+  const [previousNumberOfLines, setPreviousNumberOfLines] = useState(1);
 
   const assetRef = useRef<ImagePicker.ImagePickerAsset | undefined>(undefined);
 
@@ -109,9 +107,66 @@ export default function ChatInput({
 
   useEffect(() => {
     if (!mediaPreviewRef.current) {
-      mediaPreviewRef.current = { currentValue: mediaPreviewToPrefill };
+      mediaPreviewRef.current = mediaPreviewToPrefill;
     }
   }, [mediaPreviewRef, mediaPreviewToPrefill]);
+
+  useEffect(() => {
+    if (transactionMode) {
+      setInputValue("");
+    }
+  }, [transactionMode]);
+
+  useEffect(() => {
+    if (inputRef.current) {
+      inputRef.current.currentValue = inputValue;
+    }
+  }, [inputRef, inputValue]);
+
+  useEffect(() => {
+    mediaPreviewRef.current = mediaPreview;
+  }, [mediaPreviewRef, mediaPreview]);
+
+  useEffect(() => {
+    converseEventEmitter.on(
+      "triggerReplyToMessage",
+      (message: MessageToDisplay) => {
+        if (inputRef.current) {
+          inputRef.current?.focus();
+        }
+        setReplyingToMessage(message);
+      }
+    );
+    return () => {
+      converseEventEmitter.off("triggerReplyToMessage");
+    };
+  }, [inputRef]);
+
+  useEffect(() => {
+    converseEventEmitter.on("setCurrentConversationInputValue", setInputValue);
+    return () => {
+      converseEventEmitter.off(
+        "setCurrentConversationInputValue",
+        setInputValue
+      );
+    };
+  }, []);
+
+  useEffect(() => {
+    const handleMediaPreviewChange = (newMediaPreview: MediaPreview) => {
+      setMediaPreview(newMediaPreview);
+    };
+    converseEventEmitter.on(
+      "setCurrentConversationMediaPreviewValue",
+      handleMediaPreviewChange
+    );
+    return () => {
+      converseEventEmitter.off(
+        "setCurrentConversationMediaPreviewValue",
+        handleMediaPreviewChange
+      );
+    };
+  }, []);
 
   useLayoutEffect(() => {
     const messageToPrefillHeight =
@@ -156,8 +211,6 @@ export default function ChatInput({
     [inputHeightAnimation]
   );
 
-  const [previousNumberOfLines, setPreviousNumberOfLines] = useState(1);
-
   const handleTextContentSizeChange = useCallback(
     (event: { nativeEvent: { contentSize: { height: number } } }) => {
       const textContentHeight = event.nativeEvent.contentSize.height;
@@ -189,24 +242,19 @@ export default function ChatInput({
 
   const handleAttachmentClosed = useCallback(() => {
     animateAttachmentClosed();
-
     setTimeout(() => {
       setMediaPreview(null);
+      if (mediaPreviewRef.current) {
+        mediaPreviewRef.current = null;
+      }
+      assetRef.current = undefined;
     }, 300);
-
-    if (mediaPreviewRef.current) {
-      mediaPreviewRef.current.currentValue = null;
-    }
-    assetRef.current = undefined;
-  }, [mediaPreviewRef, animateAttachmentClosed]);
+  }, [animateAttachmentClosed, mediaPreviewRef]);
 
   const handleAttachmentSelected = useCallback(
     async (uri: string | null, status: AttachmentSelectedStatus) => {
       if (uri) {
         setMediaPreview({ mediaURI: uri, status });
-        if (mediaPreviewRef.current) {
-          mediaPreviewRef.current.currentValue = { mediaURI: uri, status };
-        }
 
         assetRef.current = { uri } as ImagePicker.ImagePickerAsset;
         const currentContentHeight = inputHeightAnimation.value;
@@ -223,98 +271,33 @@ export default function ChatInput({
         }, 250);
       }
     },
-    [
-      mediaPreviewRef,
-      mediaPreviewAnimation,
-      inputHeightAnimation,
-      updateInputHeight,
-    ]
+    [mediaPreviewAnimation, inputHeightAnimation, updateInputHeight]
   );
-
-  useEffect(() => {
-    if (transactionMode) {
-      setInputValue("");
-    }
-  }, [transactionMode]);
-
-  useEffect(() => {
-    if (inputRef.current) {
-      inputRef.current.currentValue = inputValue;
-    }
-  }, [inputRef, inputValue]);
-
-  useEffect(() => {
-    if (mediaPreviewRef.current) {
-      mediaPreviewRef.current.currentValue = mediaPreview;
-    }
-  }, [mediaPreviewRef, mediaPreview]);
-
-  useEffect(() => {
-    converseEventEmitter.on(
-      "triggerReplyToMessage",
-      (message: MessageToDisplay) => {
-        if (inputRef.current) {
-          inputRef.current?.focus();
-        }
-        setReplyingToMessage(message);
-      }
-    );
-    return () => {
-      converseEventEmitter.off("triggerReplyToMessage");
-    };
-  }, [inputRef]);
-
-  // We use an event emitter to receive actions to fill the input value
-  // from outside. This enable us to keep a very small re-rendering
-  // by creating the inputValue in the lowest component, this one
-  useEffect(() => {
-    converseEventEmitter.on("setCurrentConversationInputValue", setInputValue);
-    return () => {
-      converseEventEmitter.off(
-        "setCurrentConversationInputValue",
-        setInputValue
-      );
-    };
-  }, []);
-
-  useEffect(() => {
-    converseEventEmitter.on(
-      "setCurrentConversationMediaPreviewValue",
-      setMediaPreview
-    );
-    return () => {
-      converseEventEmitter.off(
-        "setCurrentConversationMediaPreviewValue",
-        setMediaPreview
-      );
-    };
-  }, []);
 
   const onValidate = useCallback(async () => {
     const waitForUploadToComplete = () => {
       return new Promise<void>((resolve) => {
         const interval = setInterval(() => {
-          if (mediaPreviewRef.current?.currentValue?.status === "uploaded") {
+          if (mediaPreviewRef.current?.status === "uploaded") {
             clearInterval(interval);
             resolve();
           }
-        }, 100);
+        }, 200);
       });
     };
     if (conversation) {
-      if (mediaPreviewRef.current?.currentValue) {
-        mediaPreviewRef.current.currentValue = {
-          ...mediaPreviewRef.current.currentValue,
+      if (mediaPreviewRef.current) {
+        mediaPreviewRef.current = {
+          ...mediaPreviewRef.current,
           status: "sending",
         };
+
         setMediaPreview((prev) =>
           prev ? { ...prev, status: "sending" } : null
         );
-
         animateAttachmentClosed();
-
+        setInputValue("");
         await waitForUploadToComplete();
-
         handleAttachmentClosed();
       }
       if (inputValue.length > 0) {
@@ -386,10 +369,43 @@ export default function ChatInput({
             autoComplete={isDesktop ? "off" : undefined}
             style={styles.chatInputField}
             value={inputValue}
+            // On desktop, we modified React Native RCTUITextView.m
+            // to handle key Shift + Enter to add new line
+            // This disables the flickering on Desktop when hitting Enter
             blurOnSubmit={isDesktop}
-            onSubmitEditing={handleSubmit}
-            onChangeText={handleInputChange}
-            onKeyPress={handleKeyPress}
+            // Mainly used on Desktop so that Enter sends the message
+            onSubmitEditing={() => {
+              onValidate();
+              // But we still want to refocus on Desktop when we
+              // hit Enter so let's force it
+              if (isDesktop) {
+                setTimeout(() => {
+                  inputRef.current?.focus();
+                }, 100);
+              }
+            }}
+            onChangeText={(t: string) => {
+              inputIsFocused.current = true;
+              setInputValue(t);
+            }}
+            onKeyPress={
+              Platform.OS === "web"
+                ? (event: any) => {
+                    if (
+                      event.nativeEvent.key === "Enter" &&
+                      !event.altKey &&
+                      !event.metaKey &&
+                      !event.shiftKey
+                    ) {
+                      event.preventDefault();
+                      onValidate();
+                      setTimeout(() => {
+                        inputRef.current?.focus();
+                      }, 100);
+                    }
+                  }
+                : undefined
+            }
             onFocus={() => {
               inputIsFocused.current = true;
             }}
@@ -398,7 +414,12 @@ export default function ChatInput({
             }}
             onContentSizeChange={handleTextContentSizeChange}
             multiline
-            ref={handleInputRef}
+            ref={(r) => {
+              if (r && !inputRef.current) {
+                inputRef.current = r as TextInputWithValue;
+                inputRef.current.currentValue = messageToPrefill;
+              }
+            }}
             placeholder="Message"
             placeholderTextColor={
               Platform.OS === "android"
@@ -407,79 +428,14 @@ export default function ChatInput({
             }
           />
         </View>
-        <TouchableOpacity
+        <SendButton
+          canSend={canSend}
           onPress={onValidate}
-          activeOpacity={canSend ? 0.4 : 0.6}
-          style={[styles.sendButtonContainer, { opacity: canSend ? 1 : 0.6 }]}
-        >
-          {renderSendButton()}
-        </TouchableOpacity>
+          sendButtonType={sendButtonType}
+        />
       </View>
     </View>
   );
-
-  function handleSubmit() {
-    onValidate();
-    // But we still want to refocus on Dekstop when we
-    // hit Enter so let's force it
-    if (isDesktop) {
-      setTimeout(() => {
-        inputRef.current?.focus();
-      }, 100);
-    }
-  }
-
-  function handleInputChange(text: string) {
-    inputIsFocused.current = true;
-    setInputValue(text);
-  }
-
-  function handleKeyPress(event: any) {
-    if (
-      Platform.OS === "web" &&
-      event.nativeEvent.key === "Enter" &&
-      !event.altKey &&
-      !event.metaKey &&
-      !event.shiftKey
-    ) {
-      event.preventDefault();
-      onValidate();
-      setTimeout(() => {
-        inputRef.current?.focus();
-      }, 100);
-    }
-  }
-
-  function handleInputRef(r: any) {
-    if (r && !inputRef.current) {
-      inputRef.current = r as TextInputWithValue;
-      inputRef.current.currentValue = messageToPrefill;
-    }
-  }
-
-  function renderSendButton() {
-    if (colorScheme === "dark") {
-      return sendButtonType === "DEFAULT" ? (
-        <SendButtonDefaultDark
-          width={36}
-          height={36}
-          style={styles.sendButton}
-        />
-      ) : (
-        <SendButtonHigher width={36} height={36} style={styles.sendButton} />
-      );
-    } else {
-      return sendButtonType === "DEFAULT" ? (
-        <SendButtonDefaultLight
-          width={36}
-          height={36}
-          style={styles.sendButton}
-        />
-      ) : (
-        <SendButtonHigher width={36} height={36} style={styles.sendButton} />
-      );
-    }
-  }
 }
 
 const useStyles = () => {
@@ -490,7 +446,6 @@ const useStyles = () => {
       left: 0,
       right: 0,
       bottom: 0,
-      backgroundColor: "transparent",
     },
     replyToMessagePreview: {
       paddingHorizontal: 10,
@@ -526,7 +481,7 @@ const useStyles = () => {
       color: textPrimaryColor(colorScheme),
       fontSize: Platform.OS === "android" ? 16 : 17,
       paddingHorizontal: 12,
-      lineHeight: 22,
+      lineHeight: LINE_HEIGHT,
       paddingVertical: Platform.OS === "android" ? 4 : 7,
       zIndex: 1,
     },

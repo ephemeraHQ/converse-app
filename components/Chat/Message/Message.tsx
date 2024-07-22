@@ -210,7 +210,6 @@ function ChatMessage({ message, colorScheme, isGroup, isFrame }: Props) {
     <View
       style={[
         styles.messageRow,
-        attachmentStillLoading ? { height: 0, overflow: "hidden" } : undefined,
         {
           marginBottom: showStatus ? 8 : 2,
         },

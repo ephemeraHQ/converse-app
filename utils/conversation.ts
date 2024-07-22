@@ -7,7 +7,6 @@ import { saveTopicsData } from "./api";
 import { isAttachmentMessage } from "./attachment/helpers";
 import { getAddressForPeer } from "./eth";
 import { getGroupIdFromTopic } from "./groupUtils/groupId";
-import { MediaPreviewWithValue } from "./media";
 import { subscribeToNotifications } from "./notifications";
 import { pick } from "./objects";
 import { getReactionsContentPreview } from "./reactions";
@@ -257,7 +256,7 @@ export const openMainConversationWithPeer = async (
 type ConversationContextType = {
   conversation?: XmtpConversationWithUpdate;
   inputRef: MutableRefObject<TextInputWithValue | undefined>;
-  mediaPreviewRef: MutableRefObject<MediaPreviewWithValue | undefined>;
+  mediaPreviewRef: MutableRefObject<MediaPreview | undefined>;
   isBlockedPeer: boolean;
   onReadyToFocus: () => void;
   messageToPrefill: string;
@@ -272,9 +271,7 @@ type ConversationContextType = {
 export const ConversationContext = createContext<ConversationContextType>({
   conversation: undefined,
   inputRef: createRef() as MutableRefObject<TextInputWithValue | undefined>,
-  mediaPreviewRef: createRef() as MutableRefObject<
-    MediaPreviewWithValue | undefined
-  >,
+  mediaPreviewRef: createRef() as MutableRefObject<MediaPreview | undefined>,
   isBlockedPeer: false,
   onReadyToFocus: () => {},
   messageToPrefill: "",

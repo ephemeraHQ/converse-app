@@ -45,16 +45,13 @@ export default function AddAttachmentButton({
   const styles = useStyles();
   const [cameraPermissions, requestCameraPermissions] =
     ImagePicker.useCameraPermissions();
-  const currentAttachmentMediaURI = useRef(
-    mediaPreviewRef.current?.currentValue?.mediaURI
-  );
+  const currentAttachmentMediaURI = useRef(mediaPreviewRef.current?.mediaURI);
   const assetRef = useRef<ImagePicker.ImagePickerAsset | undefined>(undefined);
   const uploading = useRef(false);
 
   useEffect(() => {
-    currentAttachmentMediaURI.current =
-      mediaPreviewRef.current?.currentValue?.mediaURI;
-  }, [mediaPreviewRef, mediaPreviewRef.current?.currentValue?.mediaURI]);
+    currentAttachmentMediaURI.current = mediaPreviewRef.current?.mediaURI;
+  }, [mediaPreviewRef, mediaPreviewRef.current?.mediaURI]);
 
   useEffect(() => {
     if (!conversation) return;
@@ -113,7 +110,7 @@ export default function AddAttachmentButton({
     if (
       currentAttachmentMediaURI.current &&
       currentAttachmentMediaURI.current === assetRef.current?.uri &&
-      mediaPreviewRef.current?.currentValue?.status === "sending" &&
+      mediaPreviewRef.current?.status === "sending" &&
       !uploading.current
     ) {
       uploadAsset(assetRef.current);
@@ -122,8 +119,8 @@ export default function AddAttachmentButton({
     conversation,
     currentAccount,
     mediaPreviewRef,
-    mediaPreviewRef.current?.currentValue?.mediaURI,
-    mediaPreviewRef.current?.currentValue?.status,
+    mediaPreviewRef.current?.mediaURI,
+    mediaPreviewRef.current?.status,
   ]);
 
   const pickMedia = useCallback(async () => {
@@ -136,7 +133,6 @@ export default function AddAttachmentButton({
     }
     if (!asset) return;
     assetRef.current = asset;
-    console.log(assetRef.current);
     onAttachmentSelected(asset.uri, "picked");
   }, [onAttachmentSelected]);
 

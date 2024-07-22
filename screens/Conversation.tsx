@@ -18,6 +18,7 @@ import {
   useChatStore,
   useSettingsStore,
 } from "../data/store/accountsStore";
+import { MediaPreview } from "../data/store/chatStore";
 import { useSelect } from "../data/store/storeHelpers";
 import {
   ConversationContext,
@@ -25,7 +26,6 @@ import {
 } from "../utils/conversation";
 import { isDesktop } from "../utils/device";
 import { converseEventEmitter } from "../utils/events";
-import { MediaPreviewWithValue } from "../utils/media";
 import { setTopicToNavigateTo, topicToNavigateTo } from "../utils/navigation";
 import { TextInputWithValue } from "../utils/str";
 import { loadOlderMessages } from "../utils/xmtpRN/messages";
@@ -127,7 +127,7 @@ const Conversation = ({
     : false;
 
   const textInputRef = useRef<TextInputWithValue>();
-  const mediaPreviewRef = useRef<MediaPreviewWithValue>();
+  const mediaPreviewRef = useRef<MediaPreview>();
 
   const messageToPrefill =
     route.params?.message || conversation?.messageDraft || "";
@@ -226,10 +226,7 @@ const Conversation = ({
       );
     }
     if (mediaPreviewRef.current) {
-      setConversationMediaPreview(
-        conversation.topic,
-        mediaPreviewRef.current.currentValue
-      );
+      setConversationMediaPreview(conversation.topic, mediaPreviewRef.current);
     }
   }, [conversation, setConversationMessageDraft, setConversationMediaPreview]);
 

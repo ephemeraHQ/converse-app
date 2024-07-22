@@ -1,17 +1,25 @@
 import {
   backgroundColor,
   textPrimaryColor,
-  inversePrimaryColor,
+  tertiaryBackgroundColor,
 } from "@styles/colors";
 import { Image } from "expo-image";
 import prettyBytes from "pretty-bytes";
 import { useCallback, useEffect } from "react";
-import { Platform, StyleSheet, Text, useColorScheme, View } from "react-native";
+import {
+  Platform,
+  StyleSheet,
+  Text,
+  useColorScheme,
+  View,
+  TouchableOpacity,
+} from "react-native";
 
 import { useAttachmentForMessage } from "../../../utils/attachment";
 import { converseEventEmitter } from "../../../utils/events";
 import { navigate } from "../../../utils/navigation";
 import ActivityIndicator from "../../ActivityIndicator/ActivityIndicator";
+import Picto from "../../Picto/Picto";
 import { MessageToDisplay } from "../Message/Message";
 import MessageTimestamp from "../Message/MessageTimestamp";
 
@@ -53,9 +61,10 @@ export default function AttachmentMessagePreview({ message }: Props) {
     attachment.mediaType === "IMAGE"
       ? "Image"
       : attachment.filename || "Attachment";
-  const textStyle = [styles.text, { color: inversePrimaryColor(colorScheme) }];
-
-  console.log(attachment);
+  const textStyle = [
+    styles.text,
+    { color: textPrimaryColor(colorScheme), fontSize: 12 },
+  ];
 
   useEffect(() => {
     converseEventEmitter.on(
@@ -72,45 +81,71 @@ export default function AttachmentMessagePreview({ message }: Props) {
 
   if (attachment.loading) {
     return (
-      <View style={styles.imagePreview}>
+      <View
+        style={[
+          styles.imagePreview,
+          {
+            aspectRatio: 1.5,
+            backgroundColor: tertiaryBackgroundColor(colorScheme),
+          },
+        ]}
+      >
         <ActivityIndicator />
       </View>
     );
   } else if (attachment.error) {
     return (
-      <>
-        <Text style={textStyle}>ℹ️ Couldn’t download attachment</Text>
-        <View style={{ opacity: 0 }}>{metadataView}</View>
-      </>
+      <View
+        style={[
+          styles.imagePreview,
+          {
+            aspectRatio: 1.5,
+            backgroundColor: tertiaryBackgroundColor(colorScheme),
+          },
+        ]}
+      >
+        <Text style={textStyle}>Couldn’t download attachment</Text>
+      </View>
     );
   } else if (!attachment.mediaURL) {
     // Either unsupported type or too big
     return (
-      <>
-        <Text style={textStyle}>
-          {emoji} {filename} - {filesize}{" "}
-          <Text style={{ textDecorationLine: "underline" }} onPress={fetch}>
-            download
-          </Text>
-        </Text>
+      <View
+        style={[
+          styles.imagePreview,
+          {
+            aspectRatio: 1.5,
+            backgroundColor: tertiaryBackgroundColor(colorScheme),
+          },
+        ]}
+      >
+        <TouchableOpacity onPress={fetch} style={styles.downloadButton}>
+          <Picto picto="arrow.down" size={14} color="white" />
+          <Text style={styles.downloadText}>{filesize}</Text>
+        </TouchableOpacity>
         <View style={{ opacity: 0 }}>{metadataView}</View>
-      </>
+      </View>
     );
   } else if (attachment.mediaType === "UNSUPPORTED") {
     // Downloaded but unsupported
     return (
-      <>
-        <Text style={textStyle}>
-          {emoji} {filename}{" "}
-          <Text
-            style={{ textDecorationLine: "underline" }}
-            onPress={openInWebview}
-          >
-            view
-          </Text>
+      <View
+        style={[
+          styles.imagePreview,
+          {
+            aspectRatio: 1.5,
+            backgroundColor: tertiaryBackgroundColor(colorScheme),
+          },
+        ]}
+      >
+        <Text
+          style={[textStyle, { textDecorationLine: "underline" }]}
+          onPress={openInWebview}
+        >
+          View in browser
         </Text>
         <View style={{ opacity: 0 }}>{metadataView}</View>
-      </>
+      </View>
     );
   } else {
     // Downloaded and supported
@@ -147,7 +182,7 @@ const useStyles = () => {
     text: {
       paddingHorizontal: 8,
       paddingVertical: Platform.OS === "android" ? 2 : 3,
-      fontSize: 48,
+      fontSize: 17,
       color: textPrimaryColor(colorScheme),
     },
     metadataContainer: {
@@ -170,6 +205,22 @@ const useStyles = () => {
     sendingIndicator: {
       flexDirection: "row",
       alignItems: "center",
+    },
+    downloadButton: {
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "center",
+      borderRadius: 14,
+      padding: 10,
+      paddingLeft: 16,
+      backgroundColor: "black",
+      color: "white",
+    },
+    downloadText: {
+      color: "white",
+      fontSize: 16,
+      fontWeight: "bold",
+      marginLeft: 16,
     },
   });
 };
