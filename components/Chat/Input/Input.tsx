@@ -4,6 +4,7 @@ import {
   itemSeparatorColor,
   textPrimaryColor,
   textSecondaryColor,
+  backgroundColor,
 } from "@styles/colors";
 import * as ImagePicker from "expo-image-picker";
 import React, {
@@ -46,6 +47,7 @@ const DEFAULT_MEDIA_PREVIEW_HEIGHT = 120;
 const MEDIA_PREVIEW_PADDING = Platform.OS === "android" ? 9 : 14;
 const LINE_HEIGHT = 22;
 const MAX_INPUT_HEIGHT = 500;
+const REPLYING_TO_MESSAGE_HEIGHT = 60;
 
 const SPRING_CONFIG = {
   damping: 15,
@@ -168,6 +170,32 @@ export default function ChatInput({
     };
   }, []);
 
+  useEffect(() => {
+    const adjustInputHeightForReply = () => {
+      const textContentHeight = (previousNumberOfLines - 1) * LINE_HEIGHT;
+      const mediaPreviewHeight = mediaPreview
+        ? DEFAULT_MEDIA_PREVIEW_HEIGHT + MEDIA_PREVIEW_PADDING
+        : 0;
+      const replyingToMessageHeight = replyingToMessage
+        ? REPLYING_TO_MESSAGE_HEIGHT
+        : 0;
+      const newHeight =
+        textContentHeight + mediaPreviewHeight + replyingToMessageHeight;
+      inputHeightAnimation.value = withSpring(
+        Math.min(newHeight, MAX_INPUT_HEIGHT),
+        SPRING_CONFIG
+      );
+    };
+
+    adjustInputHeightForReply();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [
+    replyingToMessage,
+    mediaPreview?.mediaURI,
+    previousNumberOfLines,
+    inputHeightAnimation,
+  ]);
+
   useLayoutEffect(() => {
     const messageToPrefillHeight =
       messageToPrefill.split("\n").length * LINE_HEIGHT;
@@ -219,14 +247,18 @@ export default function ChatInput({
       const currentMediaPreviewHeight = mediaPreview
         ? MEDIA_PREVIEW_PADDING + DEFAULT_MEDIA_PREVIEW_HEIGHT
         : 0;
+      const replyingToMessageHeight = replyingToMessage
+        ? REPLYING_TO_MESSAGE_HEIGHT
+        : 0;
       const newHeight =
         currentMediaPreviewHeight +
+        replyingToMessageHeight +
         (numberOfLines !== previousNumberOfLines ? newTextHeight : 0);
-      inputHeightAnimation.value = newHeight;
+      updateInputHeight(newHeight, false);
       setPreviousNumberOfLines(numberOfLines);
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [updateInputHeight, mediaPreview, inputHeightAnimation]
+    [replyingToMessage, updateInputHeight, mediaPreview]
   );
 
   const animateAttachmentClosed = useCallback(() => {
@@ -452,7 +484,7 @@ const useStyles = () => {
       paddingVertical: 8,
       borderTopWidth: 0.5,
       borderTopColor: itemSeparatorColor(colorScheme),
-      backgroundColor: chatInputBackgroundColor(colorScheme),
+      backgroundColor: backgroundColor(colorScheme),
     },
     chatInputContainer: {
       flexDirection: "row",
