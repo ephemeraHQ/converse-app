@@ -54,6 +54,16 @@ export default function AddAttachmentButton({
   }, [mediaPreviewRef, mediaPreviewRef.current?.mediaURI]);
 
   useEffect(() => {
+    if (!assetRef.current) {
+      assetRef.current = mediaPreviewRef.current?.mediaURI
+        ? ({
+            uri: mediaPreviewRef.current?.mediaURI,
+          } as ImagePicker.ImagePickerAsset)
+        : undefined;
+    }
+  }, [mediaPreviewRef, mediaPreviewRef.current?.mediaURI, assetRef]);
+
+  useEffect(() => {
     if (!conversation) return;
     const uploadAsset = async (asset: ImagePicker.ImagePickerAsset) => {
       const resizedImage = await compressAndResizeImage(asset.uri);

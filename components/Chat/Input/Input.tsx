@@ -13,7 +13,6 @@ import React, {
   useRef,
   useState,
   useEffect,
-  useLayoutEffect,
 } from "react";
 import {
   Platform,
@@ -31,7 +30,6 @@ import Animated, {
 
 import ChatInputReplyPreview from "./InputReplyPreview";
 import { SendButton } from "./SendButton";
-import { useAccountsStore } from "../../../data/store/accountsStore";
 import { MediaPreview } from "../../../data/store/chatStore";
 import { useConversationContext } from "../../../utils/conversation";
 import { isDesktop } from "../../../utils/device";
@@ -69,9 +67,7 @@ interface ChatInputProps {
   inputHeight: SharedValue<number>;
 }
 
-export default function ChatInput({
-  inputHeight: inputHeightAnimation,
-}: ChatInputProps) {
+export default function ChatInput({ inputHeight }: ChatInputProps) {
   const {
     conversation,
     inputRef,
@@ -90,14 +86,13 @@ export default function ChatInput({
 
   const colorScheme = useColorScheme();
   const styles = useStyles();
-  const currentAccount = useAccountsStore((s) => s.currentAccount);
 
   const [inputValue, setInputValue] = useState(messageToPrefill);
   const [replyingToMessage, setReplyingToMessage] =
     useState<MessageToDisplay | null>(null);
   const [mediaPreview, setMediaPreview] = useState(mediaPreviewToPrefill);
-  const [isSending, setIsSending] = useState(false);
-  const [previousNumberOfLines, setPreviousNumberOfLines] = useState(1);
+
+  const numberOfLinesRef = useRef(1);
 
   const assetRef = useRef<ImagePicker.ImagePickerAsset | undefined>(undefined);
 
@@ -111,7 +106,8 @@ export default function ChatInput({
     if (!mediaPreviewRef.current) {
       mediaPreviewRef.current = mediaPreviewToPrefill;
     }
-  }, [mediaPreviewRef, mediaPreviewToPrefill]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [mediaPreviewToPrefill]);
 
   useEffect(() => {
     if (transactionMode) {
@@ -170,41 +166,32 @@ export default function ChatInput({
     };
   }, []);
 
-  useEffect(() => {
-    const adjustInputHeightForReply = () => {
-      const textContentHeight = (previousNumberOfLines - 1) * LINE_HEIGHT;
-      const mediaPreviewHeight = mediaPreview
+  const calculateInputHeight = useCallback(() => {
+    const textContentHeight = (numberOfLinesRef.current - 1) * LINE_HEIGHT;
+    const mediaPreviewHeight =
+      mediaPreviewRef.current && mediaPreviewRef.current.status === "picked"
         ? DEFAULT_MEDIA_PREVIEW_HEIGHT + MEDIA_PREVIEW_PADDING
         : 0;
-      const replyingToMessageHeight = replyingToMessage
-        ? REPLYING_TO_MESSAGE_HEIGHT
-        : 0;
-      const newHeight =
-        textContentHeight + mediaPreviewHeight + replyingToMessageHeight;
-      inputHeightAnimation.value = withSpring(
-        Math.min(newHeight, MAX_INPUT_HEIGHT),
-        SPRING_CONFIG
-      );
-    };
-
-    adjustInputHeightForReply();
+    const replyingToMessageHeight = replyingToMessage
+      ? REPLYING_TO_MESSAGE_HEIGHT
+      : 0;
+    return Math.min(
+      textContentHeight + mediaPreviewHeight + replyingToMessageHeight,
+      MAX_INPUT_HEIGHT
+    );
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [
-    replyingToMessage,
-    mediaPreview?.mediaURI,
-    previousNumberOfLines,
-    inputHeightAnimation,
-  ]);
+  }, [numberOfLinesRef, replyingToMessage]);
 
-  useLayoutEffect(() => {
-    const messageToPrefillHeight =
-      messageToPrefill.split("\n").length * LINE_HEIGHT;
-    inputHeightAnimation.value =
-      messageToPrefillHeight +
-      (mediaPreviewToPrefill
-        ? DEFAULT_MEDIA_PREVIEW_HEIGHT + MEDIA_PREVIEW_PADDING
-        : 0);
-  }, [messageToPrefill, mediaPreviewToPrefill, inputHeightAnimation]);
+  const updateInputHeightWithAnimation = useCallback(
+    (newHeight: number) => {
+      inputHeight.value = withSpring(newHeight, SPRING_CONFIG);
+    },
+    [inputHeight]
+  );
+
+  useEffect(() => {
+    updateInputHeightWithAnimation(calculateInputHeight());
+  }, [calculateInputHeight, updateInputHeightWithAnimation]);
 
   const mediaPreviewAnimation = useSharedValue(mediaPreviewToPrefill ? 1 : 0);
 
@@ -212,7 +199,7 @@ export default function ChatInput({
 
   const inputHeightAnimatedStyle = useAnimatedStyle(() => {
     return {
-      maxHeight: inputHeightAnimation.value,
+      maxHeight: inputHeight.value,
     };
   });
 
@@ -224,86 +211,60 @@ export default function ChatInput({
     };
   });
 
-  const updateInputHeight = useCallback(
-    (newHeight: number, animate: boolean = true) => {
-      const targetHeight = Math.min(newHeight, MAX_INPUT_HEIGHT);
-      if (animate) {
-        setTimeout(() => {
-          inputHeightAnimation.value = withSpring(targetHeight, SPRING_CONFIG);
-        }, 100);
-      } else {
-        inputHeightAnimation.value = targetHeight;
-      }
-    },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [inputHeightAnimation]
-  );
-
   const handleTextContentSizeChange = useCallback(
     (event: { nativeEvent: { contentSize: { height: number } } }) => {
       const textContentHeight = event.nativeEvent.contentSize.height;
-      const numberOfLines = Math.ceil(textContentHeight / LINE_HEIGHT);
-      const newTextHeight = (numberOfLines - 1) * LINE_HEIGHT;
-      const currentMediaPreviewHeight = mediaPreview
-        ? MEDIA_PREVIEW_PADDING + DEFAULT_MEDIA_PREVIEW_HEIGHT
-        : 0;
-      const replyingToMessageHeight = replyingToMessage
-        ? REPLYING_TO_MESSAGE_HEIGHT
-        : 0;
-      const newHeight =
-        currentMediaPreviewHeight +
-        replyingToMessageHeight +
-        (numberOfLines !== previousNumberOfLines ? newTextHeight : 0);
-      updateInputHeight(newHeight, false);
-      setPreviousNumberOfLines(numberOfLines);
+      const newNumberOfLines = Math.ceil(textContentHeight / LINE_HEIGHT);
+
+      if (newNumberOfLines !== numberOfLinesRef.current) {
+        numberOfLinesRef.current = newNumberOfLines;
+        inputHeight.value = calculateInputHeight();
+      }
     },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [replyingToMessage, updateInputHeight, mediaPreview]
+    [calculateInputHeight, inputHeight]
   );
 
   const animateAttachmentClosed = useCallback(() => {
-    const newTextHeight = (previousNumberOfLines - 1) * LINE_HEIGHT;
-    const currentMediaPreviewHeight = 0;
-    const newHeight = newTextHeight + currentMediaPreviewHeight;
-
     requestAnimationFrame(() => {
-      updateInputHeight(newHeight, true);
-      mediaPreviewAnimation.value = withSpring(0, SPRING_CONFIG);
+      updateInputHeightWithAnimation(calculateInputHeight());
     });
-  }, [mediaPreviewAnimation, previousNumberOfLines, updateInputHeight]);
+  }, [calculateInputHeight, updateInputHeightWithAnimation]);
 
   const handleAttachmentClosed = useCallback(() => {
-    animateAttachmentClosed();
+    mediaPreviewRef.current = null;
+    assetRef.current = undefined;
+    updateInputHeightWithAnimation(calculateInputHeight());
+    setTimeout(() => {
+      mediaPreviewAnimation.value = withSpring(0, SPRING_CONFIG);
+    }, 250);
     setTimeout(() => {
       setMediaPreview(null);
-      if (mediaPreviewRef.current) {
-        mediaPreviewRef.current = null;
-      }
-      assetRef.current = undefined;
     }, 300);
-  }, [animateAttachmentClosed, mediaPreviewRef]);
+  }, [
+    mediaPreviewRef,
+    calculateInputHeight,
+    updateInputHeightWithAnimation,
+    mediaPreviewAnimation,
+  ]);
 
   const handleAttachmentSelected = useCallback(
     async (uri: string | null, status: AttachmentSelectedStatus) => {
       if (uri) {
         setMediaPreview({ mediaURI: uri, status });
-
         assetRef.current = { uri } as ImagePicker.ImagePickerAsset;
-        const currentContentHeight = inputHeightAnimation.value;
-        const newHeight =
-          currentContentHeight +
-          DEFAULT_MEDIA_PREVIEW_HEIGHT +
-          MEDIA_PREVIEW_PADDING;
-        requestAnimationFrame(() => {
-          updateInputHeight(newHeight, true);
-        });
-
+        mediaPreviewRef.current = { mediaURI: uri, status };
+        updateInputHeightWithAnimation(calculateInputHeight());
         setTimeout(() => {
           mediaPreviewAnimation.value = withSpring(1, SPRING_CONFIG);
         }, 250);
       }
     },
-    [mediaPreviewAnimation, inputHeightAnimation, updateInputHeight]
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [
+      mediaPreviewAnimation,
+      calculateInputHeight,
+      updateInputHeightWithAnimation,
+    ]
   );
 
   const onValidate = useCallback(async () => {
@@ -327,8 +288,10 @@ export default function ChatInput({
         setMediaPreview((prev) =>
           prev ? { ...prev, status: "sending" } : null
         );
-        animateAttachmentClosed();
+        numberOfLinesRef.current = 1;
+        setReplyingToMessage(null);
         setInputValue("");
+        animateAttachmentClosed();
         await waitForUploadToComplete();
         handleAttachmentClosed();
       }
@@ -341,6 +304,8 @@ export default function ChatInput({
             contentType: "xmtp.org/text:1.0",
           });
           setReplyingToMessage(null);
+          setInputValue("");
+          numberOfLinesRef.current = 1;
         } else {
           sendMessage({
             conversation,
@@ -349,6 +314,7 @@ export default function ChatInput({
           });
         }
         setInputValue("");
+        numberOfLinesRef.current = 1;
       }
       converseEventEmitter.emit("scrollChatToMessage", {
         index: 0,

@@ -225,9 +225,10 @@ const Conversation = ({
         textInputRef.current.currentValue
       );
     }
-    if (mediaPreviewRef.current) {
-      setConversationMediaPreview(conversation.topic, mediaPreviewRef.current);
-    }
+    setConversationMediaPreview(
+      conversation.topic,
+      mediaPreviewRef.current || null
+    );
   }, [conversation, setConversationMessageDraft, setConversationMediaPreview]);
 
   const onOpeningConversation = useCallback(
