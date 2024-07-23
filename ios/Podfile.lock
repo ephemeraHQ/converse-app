@@ -2293,7 +2293,6 @@ SPEC CHECKSUMS:
   react-native-get-random-values: 21325b2244dfa6b58878f51f9aa42821e7ba3d06
   react-native-keyboard-controller: 84515e06e2cf4db31a4621e52ad630b26e0b710c
   react-native-menu: d32728a357dfb360cf01cd5979cf7713c5acbb95
-  react-native-mmkv: e97c0c79403fb94577e5d902ab1ebd42b0715b43
   react-native-mmkv: 6d8259f25b80397c99ad50e2d891e22465f65e09
   react-native-netinfo: bdb108d340cdb41875c9ced535977cac6d2ff321
   react-native-quick-base64: 777057ea4286f806b00259ede65dc79c7c706320
