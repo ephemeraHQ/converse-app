@@ -19,6 +19,7 @@ const protocolConversationToStateConversation = (
   messagesIds: [],
   conversationTitle: undefined,
   messageDraft: undefined,
+  mediaPreview: undefined,
   readUntil: 0,
   pending: false,
   version: conversation.conversationVersion,

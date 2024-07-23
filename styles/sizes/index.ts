@@ -31,6 +31,7 @@ export enum PictoSizes {
   swipableItem = Platform.OS === "ios" ? 18 : 30,
   tableViewImage = Platform.OS === "ios" ? 16 : 24,
   textButton = 15,
+  cancelAttachmentButton = 6,
 }
 
 // Sizes, spaces, paddings, margins, etc.
