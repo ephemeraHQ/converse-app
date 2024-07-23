@@ -357,6 +357,13 @@ func handleMessageByContentType(decodedMessage: DecodedMessage, xmtpClient: XMTP
       } else {
         contentToReturn = "Reacted to a message"
       }
+      
+      // For groups: notify reactions to messages from me only
+      if (isGroupMessageTopic(topic: decodedMessage.topic) && referencedMessageId != nil) {
+        forceIgnore = !(try isGroupMessageFromMe(xmtpClient: xmtpClient, messageId: referencedMessageId!))
+      }
+      
+      
       if let validReaction = reaction {
         contentToSave = getJsonReaction(reaction: validReaction)
       } else {
@@ -429,6 +436,10 @@ func getJsonReaction(reaction: Reaction) -> String? {
   }
 }
 
-
-
-
+func isGroupMessageFromMe(xmtpClient: Client, messageId: String) throws -> Bool {
+  if let message = try xmtpClient.findMessage(messageId: messageId) {
+    return message.decodeOrNull()?.senderAddress == xmtpClient.inboxID
+  } else {
+    return false
+  }
+}

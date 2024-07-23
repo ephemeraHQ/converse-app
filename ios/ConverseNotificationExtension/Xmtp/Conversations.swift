@@ -150,3 +150,7 @@ func persistDecodedConversation(account: String, conversation: Conversation) {
     }
   }
 }
+
+func getGroupIdFromTopic(topic: String) -> String {
+    return topic.replacingOccurrences(of: "/xmtp/mls/1/g-", with: "").replacingOccurrences(of: "/proto", with: "")
+}

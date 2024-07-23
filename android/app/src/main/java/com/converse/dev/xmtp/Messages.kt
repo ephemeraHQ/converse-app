@@ -345,7 +345,7 @@ fun handleMessageByContentType(
                 val schema = reaction?.schema?.javaClass?.simpleName?.lowercase()
                 val content = reaction?.content
                 referencedMessageId = reaction?.reference
-                forceIgnore = action == "removed"
+                forceIgnore = action == "removed" || (isGroupMessageTopic(decodedMessage.topic) && referencedMessageId !== null && !isGroupMessageFromMe(xmtpClient, referencedMessageId))
                 contentToSave = getJsonReaction(decodedMessage)
                 contentToReturn = when {
                     action != "removed" && schema == "unicode" && content != null -> "Reacted $content to a message"
@@ -493,4 +493,13 @@ suspend fun handleGroupWelcome(
         messageId = "welcome-${group.topic}",
         shouldShowNotification = shouldShowNotification
     )
+}
+
+fun isGroupMessageFromMe(xmtpClient: Client, messageId: String): Boolean {
+    try {
+        val message = xmtpClient.findMessage(messageId)
+        return message?.decodeOrNull()?.senderAddress == xmtpClient.inboxId;
+    } catch (e: Exception) {
+        return false
+    }
 }

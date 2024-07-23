@@ -72,16 +72,20 @@ suspend fun customizeMessageNotification(context: Context, builder: Notification
     }
 }
 
-suspend fun getBitmapFromURL(context: Context, avatarUrl: String): Bitmap {
-    return withContext(Dispatchers.IO) {
-        val bitmap = Glide.with(context)
-            .asBitmap()
-            .load(avatarUrl)
-            .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
-            .submit()
-            .get()
+suspend fun getBitmapFromURL(context: Context, avatarUrl: String): Bitmap? {
+    try {
+        return withContext(Dispatchers.IO) {
+            val bitmap = Glide.with(context)
+                .asBitmap()
+                .load(avatarUrl)
+                .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
+                .submit()
+                .get()
 
-        return@withContext bitmap
+            return@withContext bitmap
+        }
+    } catch (e: Exception) {
+        return null
     }
 }
 
