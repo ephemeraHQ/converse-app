@@ -8,6 +8,7 @@ import {
   textPrimaryColor,
   textSecondaryColor,
 } from "@styles/colors";
+import { createGroupInvite } from "@utils/api";
 import { memberCanUpdateGroup } from "@utils/groupUtils/memberCanUpdateGroup";
 import React, { useCallback, useMemo, useState } from "react";
 import {
@@ -128,6 +129,20 @@ export default function GroupScreen({
           navigate("NewConversation", { addingToGroupTopic: group.topic });
         },
       });
+      items.push({
+        id: "share",
+        title: "Create group share link",
+        titleColor: primaryColor(colorScheme),
+        action: () => {
+          createGroupInvite(currentAccount, {
+            groupName: groupName ?? "",
+            description: groupDescription ?? "",
+            imageUrl: groupPhoto,
+          }).then((invite) => {
+            console.log("invite", invite);
+          });
+        },
+      });
     }
     groupMembers.forEach((a) => {
       const isSuperAdmin = getAccountIsSuperAdmin(members, a.inboxId);
@@ -246,8 +261,11 @@ export default function GroupScreen({
     currentAccountIsSuperAdmin,
     group.groupPermissionLevel,
     group.topic,
+    groupDescription,
+    groupName,
+    groupPhoto,
     members,
-    permissions,
+    permissions?.addMemberPolicy,
     profiles,
     promoteToAdmin,
     promoteToSuperAdmin,
