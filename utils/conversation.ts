@@ -20,6 +20,7 @@ import config from "../config";
 import { createPendingConversation } from "../data/helpers/conversations/pendingConversations";
 import { getChatStore, useChatStore } from "../data/store/accountsStore";
 import {
+  MediaPreview,
   TopicData,
   XmtpConversation,
   XmtpConversationWithUpdate,
@@ -255,9 +256,11 @@ export const openMainConversationWithPeer = async (
 type ConversationContextType = {
   conversation?: XmtpConversationWithUpdate;
   inputRef: MutableRefObject<TextInputWithValue | undefined>;
+  mediaPreviewRef: MutableRefObject<MediaPreview | undefined>;
   isBlockedPeer: boolean;
   onReadyToFocus: () => void;
   messageToPrefill: string;
+  mediaPreviewToPrefill: MediaPreview;
   transactionMode: boolean;
   setTransactionMode: (b: boolean) => void;
   frameTextInputFocused: boolean;
@@ -268,9 +271,11 @@ type ConversationContextType = {
 export const ConversationContext = createContext<ConversationContextType>({
   conversation: undefined,
   inputRef: createRef() as MutableRefObject<TextInputWithValue | undefined>,
+  mediaPreviewRef: createRef() as MutableRefObject<MediaPreview | undefined>,
   isBlockedPeer: false,
   onReadyToFocus: () => {},
   messageToPrefill: "",
+  mediaPreviewToPrefill: null,
   transactionMode: false,
   setTransactionMode: () => {},
   frameTextInputFocused: false,

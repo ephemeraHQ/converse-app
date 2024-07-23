@@ -6,6 +6,7 @@ import AttachMoney from "@material-symbols/svg-400/outlined/attach_money.svg";
 import Block from "@material-symbols/svg-400/outlined/block.svg";
 import Call from "@material-symbols/svg-400/outlined/call.svg";
 import ArrowUpRight from "@material-symbols/svg-400/outlined/call_made.svg";
+import ArrowDown from "@material-symbols/svg-400/outlined/call_received.svg";
 import Celebration from "@material-symbols/svg-400/outlined/celebration.svg";
 import Chat from "@material-symbols/svg-400/outlined/chat.svg";
 import ChatBubble from "@material-symbols/svg-400/outlined/chat_bubble.svg";
@@ -63,6 +64,7 @@ const pictoMapping: {
   xmark: Close,
   plus: Add,
   "arrow.up.right": ArrowUpRight,
+  "arrow.down": ArrowDown,
   link: Link,
   paperplane: Send,
   account_circle: AccountCircle,

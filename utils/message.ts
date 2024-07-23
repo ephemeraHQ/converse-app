@@ -24,14 +24,17 @@ type SendMessageInput = {
   };
 };
 
-export const sendMessage = async ({
-  conversation,
-  content,
-  contentType,
-  contentFallback,
-  referencedMessageId,
-  attachmentToSave,
-}: SendMessageInput) => {
+export const sendMessage = async (
+  {
+    conversation,
+    content,
+    contentType,
+    contentFallback,
+    referencedMessageId,
+    attachmentToSave,
+  }: SendMessageInput,
+  sendImmediately = true
+) => {
   if (!conversation) return;
   const messageId = uuidv4();
   const sentAtTime = new Date();
@@ -75,7 +78,7 @@ export const sendMessage = async ({
     },
   ]);
   // Then send for real if conversation exists
-  if (!conversation.pending) {
-    sendPendingMessages(currentAccount());
+  if (sendImmediately && !conversation.pending) {
+    await sendPendingMessages(currentAccount());
   }
 };

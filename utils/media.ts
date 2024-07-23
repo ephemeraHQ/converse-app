@@ -1,7 +1,12 @@
+import { actionSheetColors } from "@styles/colors";
 import Big from "big.js";
 import { manipulateAsync, SaveFormat } from "expo-image-manipulator";
 import * as ImagePicker from "expo-image-picker";
-import { Alert, Image, Linking, Platform } from "react-native";
+import { useCallback, useState } from "react";
+import { Alert, Image, Linking, Platform, useColorScheme } from "react-native";
+
+import { showActionSheetWithOptions } from "../components/StateHandlers/ActionSheetStateHandler";
+import { executeAfterKeyboardClosed } from "../utils/keyboard";
 
 const imageMimeTypes = [
   "image/cgm",
@@ -284,6 +289,78 @@ const allowedMimeTypes = [
   ...audioMimeTypes,
   ...videoMimeTypes,
 ];
+
+interface MediaSelect {
+  initialMedia?: string;
+  onMediaAdd?: (newUrl: string) => void;
+  isAvatar?: boolean;
+}
+
+export const useMediaSelect = (payload?: MediaSelect) => {
+  const { initialMedia, onMediaAdd, isAvatar } = payload ?? {};
+  const colorScheme = useColorScheme();
+  const [media, setMedia] = useState<string | undefined>(initialMedia);
+
+  const pickMedia = useCallback(async () => {
+    const asset = await pickMediaFromLibrary({
+      allowsEditing: true,
+      aspect: [1, 1],
+    });
+    if (!asset) return;
+    const resizedImage = await compressAndResizeImage(asset.uri, isAvatar);
+    setMedia(resizedImage.uri);
+    onMediaAdd?.(resizedImage.uri);
+  }, [onMediaAdd, isAvatar]);
+
+  const openCamera = useCallback(async () => {
+    const asset = await takePictureFromCamera({
+      allowsEditing: true,
+      aspect: [1, 1],
+    });
+    if (!asset) return;
+    const resizedImage = await compressAndResizeImage(asset.uri, isAvatar);
+    setMedia(resizedImage.uri);
+    onMediaAdd?.(resizedImage.uri);
+  }, [isAvatar, onMediaAdd]);
+
+  const addMedia = useCallback(() => {
+    const showOptions = () =>
+      showActionSheetWithOptions(
+        {
+          options: ["Take photo", "Choose from library", "Cancel"],
+          cancelButtonIndex: 2,
+          ...actionSheetColors(colorScheme),
+        },
+        async (selectedIndex?: number) => {
+          switch (selectedIndex) {
+            case 0: // Camera
+              openCamera();
+              break;
+            case 1: // Media Library
+              pickMedia();
+              break;
+
+            default:
+              break;
+          }
+        }
+      );
+    if (Platform.OS === "web") {
+      pickMedia();
+    } else {
+      executeAfterKeyboardClosed(showOptions);
+    }
+  }, [colorScheme, openCamera, pickMedia]);
+
+  return { media, addMedia };
+};
+
+export type AttachmentSelectedStatus =
+  | "picked"
+  | "error"
+  | "uploading"
+  | "uploaded"
+  | "sending";
 
 export const isImageMimetype = (mimeType?: string) =>
   !!mimeType && imageMimeTypes.includes(mimeType.toLowerCase());

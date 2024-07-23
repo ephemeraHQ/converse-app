@@ -37,6 +37,7 @@ type XmtpConversationShared = {
   messagesIds: string[];
   conversationTitle?: string | null;
   messageDraft?: string;
+  mediaPreview?: MediaPreview;
   readUntil: number; // UNUSED
   hasOneMessageFromMe?: boolean;
   pending: boolean;
@@ -88,6 +89,7 @@ export type XmtpMessage = XmtpProtocolMessage & {
   referencedMessageId?: string;
   lastUpdateAt?: number;
   converseMetadata?: ConverseMessageMetadata;
+  localMediaURI?: string;
 };
 
 type ConversationsListItems = {
@@ -99,6 +101,22 @@ export type TopicData = {
   status: "deleted" | "unread" | "read";
   readUntil?: number;
   timestamp?: number;
+};
+
+export type MediaPreview = {
+  mediaURI: string;
+  status: "error" | "picked" | "uploading" | "uploaded" | "sending";
+} | null;
+
+export type Attachment = {
+  loading: boolean;
+  error: boolean;
+  mediaType: "IMAGE" | "UNSUPPORTED" | undefined;
+  mediaURL: string | undefined;
+  filename: string;
+  mimeType: string;
+  contentLength: number;
+  imageSize: { height: number; width: number } | undefined;
 };
 
 export type ChatStoreType = {
@@ -140,6 +158,10 @@ export type ChatStoreType = {
     conversation: XmtpConversation
   ) => void;
   setConversationMessageDraft: (topic: string, draft: string) => void;
+  setConversationMediaPreview: (
+    topic: string,
+    mediaPreview: MediaPreview
+  ) => void;
 
   setInitialLoadDone: () => void;
   setMessages: (messagesToSet: XmtpMessage[]) => void;
@@ -177,12 +199,16 @@ export type ChatStoreType = {
     topics: string[],
     period: number
   ) => void;
+
+  messageAttachments: Record<string, Attachment>;
+
+  setMessageAttachment: (messageId: string, attachment: Attachment) => void;
 };
 
 const now = () => new Date().getTime();
 
 export const initChatStore = (account: string) => {
-  const recommendationsStore = create<ChatStoreType>()(
+  const chatStore = create<ChatStoreType>()(
     persist(
       (set) =>
         ({
@@ -350,6 +376,19 @@ export const initChatStore = (account: string) => {
               }
               const newState = { ...state };
               newState.conversations[topic].messageDraft = messageDraft;
+              return newState;
+            }),
+          setConversationMediaPreview: (topic, mediaPreview) =>
+            set((state) => {
+              if (!state.conversations[topic]) {
+                console.log(
+                  "[Error] Tried to set media preview on non existent conversation",
+                  topic
+                );
+                return state;
+              }
+              const newState = { ...state };
+              newState.conversations[topic].mediaPreview = mediaPreview;
               return newState;
             }),
           setMessages: (messagesToSet) =>
@@ -583,6 +622,20 @@ export const initChatStore = (account: string) => {
                       }
                     }
                   }
+                  // // Transfer attachment URL to the new message
+                  // if (oldMessage && state.messageAttachments[oldMessage.id]) {
+                  //   const oldAttachment = state.messageAttachments[oldMessage.id];
+                  //   const updatedAttachment = {
+                  //     ...oldAttachment,
+                  //     mediaURL: oldAttachment.mediaURL?.replace(oldMessage.id, messageToUpdate.message.id)
+                  //   };
+                  //   newState.messageAttachments[messageToUpdate.topic] = {
+                  //     ...newState.messageAttachments[messageToUpdate.topic],
+                  //     [messageToUpdate.message.id]: updatedAttachment
+                  //   };
+                  //   delete newState.messageAttachments[oldMessage.id];
+                  // }
+
                   insertMessageIdAtRightIndex(
                     conversation,
                     messageToUpdate.message,
@@ -720,6 +773,14 @@ export const initChatStore = (account: string) => {
               });
               return { conversations: newConversations };
             }),
+          messageAttachments: {},
+          setMessageAttachment(messageId, attachment) {
+            set((state) => {
+              const newMessageAttachments = { ...state.messageAttachments };
+              newMessageAttachments[messageId] = attachment;
+              return { messageAttachments: newMessageAttachments };
+            });
+          },
         }) as ChatStoreType,
       {
         name: `store-${account}-chat`, // Account-based storage so each account can have its own chat data
@@ -784,7 +845,7 @@ export const initChatStore = (account: string) => {
       }
     )
   );
-  return recommendationsStore;
+  return chatStore;
 };
 
 const isMessageUpdated = (oldMessage: XmtpMessage, newMessage: XmtpMessage) => {
