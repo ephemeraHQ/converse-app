@@ -216,7 +216,7 @@ export default function Chat() {
 
   const hideInputIfFrameFocused = Platform.OS !== "web";
 
-  const DEFAULT_INPUT_HEIGHT = 50;
+  const DEFAULT_INPUT_HEIGHT = 58;
   const chatInputHeight = useSharedValue(0);
   const chatInputDisplayedHeight = useDerivedValue(() => {
     return frameTextInputFocused && hideInputIfFrameFocused
