@@ -14,6 +14,7 @@ import {
   Platform,
   StyleSheet,
   useColorScheme,
+  View,
 } from "react-native";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import Animated, {
@@ -28,6 +29,7 @@ import Animated, {
 } from "react-native-reanimated";
 
 import { MessageToDisplay } from "./Message";
+import { MessageContextMenuWrapper } from "./MessageContextMenuWrapper";
 import MessageTail from "./MessageTail";
 import { useCurrentAccount } from "../../../data/store/accountsStore";
 import { useAppStore } from "../../../data/store/appStore";
@@ -233,7 +235,7 @@ export default function ChatMessageActions({
           }
           break;
       }
-      setContextMenuShown(false);
+      setContextMenuShown(null);
     },
     [
       contextMenuItems,
@@ -357,10 +359,25 @@ export default function ChatMessageActions({
               if (Platform.OS !== "web") {
                 Haptics.selectionAsync();
               }
-              useAppStore.getState().setContextMenuShown(true);
+              useAppStore.getState().setContextMenuShown(message.id);
             }}
           >
-            {children}
+            <MessageContextMenuWrapper
+              message={message}
+              reactions={reactions}
+              messageContent={
+                <View
+                  style={{
+                    alignSelf: message.fromMe ? "flex-end" : "flex-start",
+                    alignItems: message.fromMe ? "flex-end" : "flex-start",
+                  }}
+                >
+                  {children}
+                </View>
+              }
+            >
+              {children}
+            </MessageContextMenuWrapper>
           </ReanimatedTouchableOpacity>
           {!message.hasNextMessageInSeries &&
             !isFrame &&

@@ -1,5 +1,3 @@
-import { useAppStore } from "@data/store/appStore";
-import { useSelect } from "@data/store/storeHelpers";
 import { FlashList } from "@shopify/flash-list";
 import {
   backgroundColor,
@@ -214,9 +212,6 @@ export default function Chat() {
     () => getListArray(xmtpAddress, conversation, messageAttachments),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [xmtpAddress, conversation, conversation?.lastUpdateAt, messageAttachments]
-  );
-  const { setContextMenuShown, contextMenuShown } = useAppStore(
-    useSelect(["setContextMenuShown", "contextMenuShown"])
   );
 
   const hideInputIfFrameFocused = Platform.OS !== "web";

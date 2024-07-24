@@ -1,5 +1,3 @@
-import { useAppStore } from "@data/store/appStore";
-import { useSelect } from "@data/store/storeHelpers";
 import {
   inversePrimaryColor,
   messageInnerBubbleColor,
@@ -24,7 +22,6 @@ import {
 import { Swipeable } from "react-native-gesture-handler";
 
 import ChatMessageActions from "./MessageActions";
-import { MessageContextMenuWrapper } from "./MessageContextMenuWrapper";
 import ChatMessageReactions from "./MessageReactions";
 import MessageStatus from "./MessageStatus";
 import {
@@ -126,9 +123,6 @@ function ChatMessage({ message, colorScheme, isGroup, isFrame }: Props) {
 
   let messageContent: ReactNode;
   const contentType = getMessageContentType(message.contentType);
-  const { setContextMenuShown, contextMenuShown } = useAppStore(
-    useSelect(["setContextMenuShown", "contextMenuShown"])
-  );
 
   const handleUrlPress = useCallback((url: string) => {
     const uri = url.toLowerCase().startsWith("http") ? url : `https://${url}`;
@@ -291,140 +285,126 @@ function ChatMessage({ message, colorScheme, isGroup, isFrame }: Props) {
                 !message.fromMe &&
                 !message.hasPreviousMessageInSeries &&
                 showInBubble && <MessageSender message={message} />}
-              <MessageContextMenuWrapper
-                message={message}
-                reactions={reactions}
-                messageContent={
-                  <View
-                    style={{
-                      alignSelf: message.fromMe ? "flex-end" : "flex-start",
-                      alignItems: message.fromMe ? "flex-end" : "flex-start",
-                    }}
-                  >
-                    {messageContent}
-                  </View>
-                }
+              <View
+                style={{
+                  alignSelf: message.fromMe ? "flex-end" : "flex-start",
+                  alignItems: message.fromMe ? "flex-end" : "flex-start",
+                }}
               >
+                <ChatMessageActions
+                  message={message}
+                  reactions={reactions}
+                  hideBackground={hideBackground}
+                >
+                  {isContentType("text", message.contentType) && (
+                    <FramesPreviews message={message} />
+                  )}
+                  {replyingToMessage ? (
+                    <View>
+                      <TouchableOpacity
+                        style={[
+                          styles.innerBubble,
+                          message.fromMe ? styles.innerBubbleMe : undefined,
+                        ]}
+                        delayPressIn={isDesktop ? 0 : 75}
+                        onPress={() => {
+                          converseEventEmitter.emit("scrollChatToMessage", {
+                            messageId: replyingToMessage.id,
+                            animated: false,
+                          });
+                          setTimeout(() => {
+                            converseEventEmitter.emit(
+                              "highlightMessage",
+                              replyingToMessage.id
+                            );
+                          }, 350);
+                        }}
+                      >
+                        <Text
+                          style={[
+                            styles.messageText,
+                            styles.replyToUsername,
+                            message.fromMe ? styles.messageTextMe : undefined,
+                          ]}
+                        >
+                          {replyingToProfileName}
+                        </Text>
+                        <ChatInputReplyBubble
+                          replyingToMessage={replyingToMessage}
+                          fromMe={message.fromMe}
+                        />
+                      </TouchableOpacity>
+                      <View
+                        style={{
+                          alignSelf: "flex-start",
+                        }}
+                      >
+                        {messageContent}
+                      </View>
+                      <View
+                        style={
+                          isAttachment || isFrame || isTransaction
+                            ? { position: "absolute", bottom: 0, zIndex: 1 }
+                            : undefined
+                        }
+                      >
+                        <ChatMessageReactions
+                          message={message}
+                          reactions={reactions}
+                        />
+                      </View>
+                    </View>
+                  ) : (
+                    <View
+                      style={[
+                        { position: "relative" },
+                        hideBackground && message.fromMe
+                          ? { paddingBottom: 0 }
+                          : undefined,
+                      ]}
+                    >
+                      <View style={{ zIndex: 0 }}>{messageContent}</View>
+                      <View
+                        style={
+                          isAttachment || isFrame || isTransaction
+                            ? { position: "absolute", bottom: 0, zIndex: 1 }
+                            : undefined
+                        }
+                      >
+                        <ChatMessageReactions
+                          message={message}
+                          reactions={reactions}
+                        />
+                      </View>
+                    </View>
+                  )}
+                </ChatMessageActions>
                 <View
                   style={{
-                    alignSelf: message.fromMe ? "flex-end" : "flex-start",
-                    alignItems: message.fromMe ? "flex-end" : "flex-start",
+                    flexDirection: "row",
+                    flexBasis: "100%",
+                    justifyContent: "space-between",
+                    alignItems: "center",
                   }}
                 >
-                  <ChatMessageActions
-                    message={message}
-                    reactions={reactions}
-                    hideBackground={hideBackground}
-                  >
-                    {isContentType("text", message.contentType) && (
-                      <FramesPreviews message={message} />
-                    )}
-                    {replyingToMessage ? (
-                      <View>
-                        <TouchableOpacity
-                          style={[
-                            styles.innerBubble,
-                            message.fromMe ? styles.innerBubbleMe : undefined,
-                          ]}
-                          delayPressIn={isDesktop ? 0 : 75}
-                          onPress={() => {
-                            converseEventEmitter.emit("scrollChatToMessage", {
-                              messageId: replyingToMessage.id,
-                              animated: false,
-                            });
-                            setTimeout(() => {
-                              converseEventEmitter.emit(
-                                "highlightMessage",
-                                replyingToMessage.id
-                              );
-                            }, 350);
-                          }}
-                        >
-                          <Text
-                            style={[
-                              styles.messageText,
-                              styles.replyToUsername,
-                              message.fromMe ? styles.messageTextMe : undefined,
-                            ]}
-                          >
-                            {replyingToProfileName}
-                          </Text>
-                          <ChatInputReplyBubble
-                            replyingToMessage={replyingToMessage}
-                            fromMe={message.fromMe}
-                          />
-                        </TouchableOpacity>
-                        <View
-                          style={{
-                            alignSelf: "flex-start",
-                          }}
-                        >
-                          {messageContent}
-                        </View>
-                        <View
-                          style={
-                            isAttachment || isFrame || isTransaction
-                              ? { position: "absolute", bottom: 0, zIndex: 1 }
-                              : undefined
-                          }
-                        >
-                          <ChatMessageReactions
-                            message={message}
-                            reactions={reactions}
-                          />
-                        </View>
-                      </View>
-                    ) : (
-                      <View
-                        style={[
-                          { position: "relative" },
-                          hideBackground && message.fromMe
-                            ? { paddingBottom: 0 }
-                            : undefined,
-                        ]}
-                      >
-                        <View style={{ zIndex: 0 }}>{messageContent}</View>
-                        <View
-                          style={
-                            isAttachment || isFrame || isTransaction
-                              ? { position: "absolute", bottom: 0, zIndex: 1 }
-                              : undefined
-                          }
-                        >
-                          <ChatMessageReactions
-                            message={message}
-                            reactions={reactions}
-                          />
-                        </View>
-                      </View>
-                    )}
-                  </ChatMessageActions>
-                  <View
-                    style={{
-                      flexDirection: "row",
-                      flexBasis: "100%",
-                      justifyContent: "space-between",
-                      alignItems: "center",
-                    }}
-                  >
-                    {isFrame && (
-                      <TouchableOpacity
-                        onPress={() => handleUrlPress(message.content)}
-                        style={{ flex: 1 }}
-                      >
-                        <Text style={styles.linkToFrame}>
-                          {getUrlToRender(message.content)}
-                        </Text>
-                      </TouchableOpacity>
-                    )}
-                    {message.fromMe && (
-                      <View style={styles.statusContainer}>
-                        <MessageStatus message={message} />
-                      </View>
-                    )}
-                  </View>
+                  {isFrame && (
+                    <TouchableOpacity
+                      onPress={() => handleUrlPress(message.content)}
+                      style={{ flex: 1 }}
+                    >
+                      <Text style={styles.linkToFrame}>
+                        {getUrlToRender(message.content)}
+                      </Text>
+                    </TouchableOpacity>
+                  )}
+                  {message.fromMe && (
+                    <View style={styles.statusContainer}>
+                      <MessageStatus message={message} />
+                    </View>
+                  )}
                 </View>
-              </MessageContextMenuWrapper>
+              </View>
+              {/* </MessageContextMenuWrapper> */}
             </View>
           </View>
         </Swipeable>
