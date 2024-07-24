@@ -1,4 +1,4 @@
-import { Index, Entity, Column, PrimaryColumn, OneToMany } from "typeorm";
+import { Column, Entity, Index, OneToMany, PrimaryColumn } from "typeorm";
 
 import { type Message } from "./messageEntity";
 
@@ -12,8 +12,29 @@ export class Conversation {
   pending!: boolean;
 
   @Index()
-  @Column("text")
-  peerAddress!: string;
+  @Column("text", { nullable: true })
+  peerAddress?: string;
+
+  @Column("boolean", { default: false })
+  isGroup!: boolean;
+
+  @Column("simple-array", { nullable: true })
+  groupAdmins?: string[];
+
+  @Column("simple-array", { nullable: true })
+  groupSuperAdmins?: string[];
+
+  @Column("text", { nullable: true })
+  groupPermissionLevel?: string;
+
+  @Column("text", { nullable: true })
+  groupName?: string;
+
+  @Column("simple-array", { nullable: true })
+  groupMembers?: string[];
+
+  @Column("boolean", { nullable: true })
+  isActive?: boolean;
 
   @Column("int")
   createdAt!: number;

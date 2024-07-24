@@ -1,14 +1,27 @@
+import {
+  backgroundColor,
+  textPrimaryColor,
+  tertiaryBackgroundColor,
+} from "@styles/colors";
 import { Image } from "expo-image";
 import prettyBytes from "pretty-bytes";
 import { useCallback, useEffect } from "react";
-import { Platform, StyleSheet, Text, useColorScheme, View } from "react-native";
+import {
+  Platform,
+  StyleSheet,
+  Text,
+  useColorScheme,
+  View,
+  TouchableOpacity,
+} from "react-native";
 
 import { useAttachmentForMessage } from "../../../utils/attachment";
-import { textPrimaryColor } from "../../../utils/colors";
 import { converseEventEmitter } from "../../../utils/events";
 import { navigate } from "../../../utils/navigation";
+import ActivityIndicator from "../../ActivityIndicator/ActivityIndicator";
+import Picto from "../../Picto/Picto";
 import { MessageToDisplay } from "../Message/Message";
-import MessageMetadata from "../Message/MessageMetadata";
+import MessageTimestamp from "../Message/MessageTimestamp";
 
 type Props = {
   message: MessageToDisplay;
@@ -41,7 +54,7 @@ export default function AttachmentMessagePreview({ message }: Props) {
     !!attachment.mediaURL &&
     attachment.mediaType !== "UNSUPPORTED";
 
-  const metadataView = <MessageMetadata message={message} white={showing} />;
+  const metadataView = <MessageTimestamp message={message} white={showing} />;
   const emoji = attachment.mediaType === "IMAGE" ? "📷" : "📎";
   const filesize = prettyBytes(attachment.contentLength);
   const filename =
@@ -50,7 +63,7 @@ export default function AttachmentMessagePreview({ message }: Props) {
       : attachment.filename || "Attachment";
   const textStyle = [
     styles.text,
-    { color: message.fromMe ? "white" : textPrimaryColor(colorScheme) },
+    { color: textPrimaryColor(colorScheme), fontSize: 12 },
   ];
 
   useEffect(() => {
@@ -67,64 +80,78 @@ export default function AttachmentMessagePreview({ message }: Props) {
   }, [message.id, clickedOnAttachmentBubble]);
 
   if (attachment.loading) {
-    const size = message.converseMetadata?.attachment?.size;
-    const content = (
-      <>
-        <Text style={textStyle}>
-          {emoji}{" "}
-          <Text style={{ fontStyle: "italic" }}>
-            Downloading {filename.toLowerCase()}
-          </Text>
-        </Text>
-        <View style={{ opacity: 0 }}>{metadataView}</View>
-      </>
+    return (
+      <View
+        style={[
+          styles.imagePreview,
+          {
+            aspectRatio: 1.5,
+            backgroundColor: tertiaryBackgroundColor(colorScheme),
+          },
+        ]}
+      >
+        <ActivityIndicator />
+      </View>
     );
-    if (size) {
-      const aspectRatio = size.width / size.height;
-      return (
-        <View style={[styles.imagePreview, { aspectRatio }]}>{content}</View>
-      );
-    } else {
-      return content;
-    }
   } else if (attachment.error) {
     return (
-      <>
-        <Text style={textStyle}>ℹ️ Couldn’t download attachment</Text>
-        <View style={{ opacity: 0 }}>{metadataView}</View>
-      </>
+      <View
+        style={[
+          styles.imagePreview,
+          {
+            aspectRatio: 1.5,
+            backgroundColor: tertiaryBackgroundColor(colorScheme),
+          },
+        ]}
+      >
+        <Text style={textStyle}>Couldn’t download attachment</Text>
+      </View>
     );
   } else if (!attachment.mediaURL) {
     // Either unsupported type or too big
     return (
-      <>
-        <Text style={textStyle}>
-          {emoji} {filename} - {filesize}{" "}
-          <Text style={{ textDecorationLine: "underline" }} onPress={fetch}>
-            download
-          </Text>
-        </Text>
+      <View
+        style={[
+          styles.imagePreview,
+          {
+            aspectRatio: 1.5,
+            backgroundColor: tertiaryBackgroundColor(colorScheme),
+          },
+        ]}
+      >
+        <TouchableOpacity onPress={fetch} style={styles.downloadButton}>
+          <Picto picto="arrow.down" size={14} color="white" />
+          <Text style={styles.downloadText}>{filesize}</Text>
+        </TouchableOpacity>
         <View style={{ opacity: 0 }}>{metadataView}</View>
-      </>
+      </View>
     );
   } else if (attachment.mediaType === "UNSUPPORTED") {
     // Downloaded but unsupported
     return (
-      <>
-        <Text style={textStyle}>
-          {emoji} {filename}{" "}
-          <Text
-            style={{ textDecorationLine: "underline" }}
-            onPress={openInWebview}
-          >
-            view
-          </Text>
+      <View
+        style={[
+          styles.imagePreview,
+          {
+            aspectRatio: 1.5,
+            backgroundColor: tertiaryBackgroundColor(colorScheme),
+          },
+        ]}
+      >
+        <Text
+          style={[textStyle, { textDecorationLine: "underline" }]}
+          onPress={openInWebview}
+        >
+          View in browser
         </Text>
         <View style={{ opacity: 0 }}>{metadataView}</View>
-      </>
+      </View>
     );
   } else {
     // Downloaded and supported
+    converseEventEmitter.emit(
+      `attachmentMessageProcessed-${attachment.filename}`
+    );
     const aspectRatio = attachment.imageSize
       ? attachment.imageSize.width / attachment.imageSize.height
       : undefined;
@@ -132,10 +159,9 @@ export default function AttachmentMessagePreview({ message }: Props) {
       <>
         <Image
           source={{ uri: attachment.mediaURL }}
-          contentFit="contain"
+          contentFit="cover"
           style={[styles.imagePreview, { aspectRatio }]}
         />
-        <View style={styles.metadataContainer}>{metadataView}</View>
       </>
     );
   }
@@ -151,6 +177,7 @@ const useStyles = () => {
       minWidth: Platform.OS === "web" ? 250 : undefined,
       justifyContent: "center",
       alignItems: "center",
+      backgroundColor: backgroundColor(colorScheme),
     },
     text: {
       paddingHorizontal: 8,
@@ -174,6 +201,26 @@ const useStyles = () => {
         },
         android: { paddingBottom: 3, paddingTop: 2 },
       }),
+    },
+    sendingIndicator: {
+      flexDirection: "row",
+      alignItems: "center",
+    },
+    downloadButton: {
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "center",
+      borderRadius: 14,
+      padding: 10,
+      paddingLeft: 16,
+      backgroundColor: "black",
+      color: "white",
+    },
+    downloadText: {
+      color: "white",
+      fontSize: 16,
+      fontWeight: "bold",
+      marginLeft: 16,
     },
   });
 };

@@ -1,11 +1,11 @@
 import "reflect-metadata";
 
-import { getPreferredName } from "../utils/profile";
-import { isContentType } from "../utils/xmtpRN/contentTypes";
 import { Conversation } from "./db/entities/conversationEntity";
 import { Message } from "./db/entities/messageEntity";
 import { XmtpConversation, XmtpMessage } from "./store/chatStore";
 import { ProfileSocials } from "./store/profilesStore";
+import { getPreferredName } from "../utils/profile";
+import { isContentType } from "../utils/xmtpRN/contentTypes";
 
 // Methods to map entities (SQLite data) to store (Zustand, in RAM)
 
@@ -19,7 +19,6 @@ export const xmtpMessageToDb = (
   content: xmtpMessage.content || "",
   conversationId: conversationTopic,
   status: xmtpMessage.status || "sent",
-  sentViaConverse: !!xmtpMessage.sentViaConverse,
   contentType: xmtpMessage.contentType,
   contentFallback: xmtpMessage.contentFallback,
   referencedMessageId: xmtpMessage.referencedMessageId,
@@ -32,7 +31,6 @@ export const xmtpMessageFromDb = (message: Message): XmtpMessage => ({
   sent: message.sent,
   content: message.content,
   status: message.status,
-  sentViaConverse: !!message.sentViaConverse,
   contentType: message.contentType,
   contentFallback: message.contentFallback,
   referencedMessageId: message.referencedMessageId,
@@ -81,6 +79,12 @@ export const xmtpConversationToDb = (
   pending: xmtpConversation.pending,
   version: xmtpConversation.version,
   spamScore: xmtpConversation.spamScore,
+  isGroup: xmtpConversation.isGroup,
+  isActive: xmtpConversation.isGroup ? !!xmtpConversation.isActive : true,
+  groupMembers: xmtpConversation.groupMembers,
+  groupAdmins: xmtpConversation.groupAdmins,
+  groupName: xmtpConversation.isGroup ? xmtpConversation.groupName : undefined,
+  groupPermissionLevel: xmtpConversation.groupPermissionLevel,
   lastNotificationsSubscribedPeriod:
     xmtpConversation.lastNotificationsSubscribedPeriod,
 });
@@ -100,15 +104,21 @@ export const xmtpConversationFromDb = (
     };
   }
 
-  const conversationTitle = getPreferredName(
-    socials,
-    dbConversation.peerAddress,
-    dbConversation.contextConversationId
-  );
+  const conversationTitle = dbConversation.peerAddress
+    ? getPreferredName(
+        socials,
+        dbConversation.peerAddress,
+        dbConversation.contextConversationId
+      )
+    : undefined;
 
   const hasOneMessageFromMe = !!dbConversation.messages?.find(
     (m) => m.senderAddress === account
   );
+  const groupMembers =
+    typeof dbConversation.groupMembers === "string"
+      ? (dbConversation.groupMembers as string).split(",")
+      : dbConversation.groupMembers;
 
   return {
     topic: dbConversation.topic,
@@ -123,7 +133,13 @@ export const xmtpConversationFromDb = (
     version: dbConversation.version,
     hasOneMessageFromMe,
     spamScore: dbConversation.spamScore,
+    isGroup: dbConversation.isGroup,
+    isActive: dbConversation.isGroup ? !!dbConversation.isActive : true,
+    groupMembers,
+    groupAdmins: dbConversation.groupAdmins,
+    groupName: dbConversation.groupName,
+    groupPermissionLevel: dbConversation.groupPermissionLevel,
     lastNotificationsSubscribedPeriod:
       dbConversation.lastNotificationsSubscribedPeriod,
-  };
+  } as XmtpConversation;
 };

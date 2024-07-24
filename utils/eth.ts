@@ -7,7 +7,6 @@ import {
   mnemonicToEntropy,
 } from "ethers/lib/utils";
 
-import config from "../config";
 import {
   resolveEnsName,
   resolveFarcasterUsername,
@@ -15,6 +14,7 @@ import {
 } from "./api";
 import { getLensOwner } from "./lens";
 import { isUNSAddress } from "./uns";
+import config from "../config";
 
 export const isSupportedPeer = (peer: string) => {
   const is0x = isAddress(peer.toLowerCase());

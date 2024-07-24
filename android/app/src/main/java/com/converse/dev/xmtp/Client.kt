@@ -21,22 +21,33 @@ fun initCodecs() {
     Client.register(codec = ReplyCodec())
 }
 
-fun getXmtpKeyForAccount(appContext: Context, account: String): ByteArray? {
+fun getXmtpKeyForAccount(appContext: Context, account: String): String? {
     val legacyKey = getKeychainValue("XMTP_BASE64_KEY")
     if (legacyKey != null && legacyKey.isNotEmpty()) {
         Log.d("XmtpClient", "Legacy Key Found: ${legacyKey} ${legacyKey.length}")
-        return Base64.decode(legacyKey)
+        return legacyKey
     }
 
     val accountKey = getKeychainValue("XMTP_KEY_${account}")
     if (accountKey != null && accountKey.isNotEmpty()) {
         Log.d("XmtpClient", "Found key for account: ${account}")
-        return Base64.decode(accountKey)
+        return accountKey
     }
     return null
 }
+
+fun getDbEncryptionKey(): ByteArray? {
+    val key = getKeychainValue("LIBXMTP_DB_ENCRYPTION_KEY")
+    if (key != null) {
+        return Base64.decode(key, Base64.DEFAULT)
+    } else {
+        throw Exception("No db encryption key found")
+    }
+}
+
 fun getXmtpClient(appContext: Context, account: String): Client? {
-    val keyByteArray = getXmtpKeyForAccount(appContext, account) ?: return null
+    val keyString = getXmtpKeyForAccount(appContext, account) ?: return null
+    val keyByteArray = Base64.decode(keyString)
     val keys = PrivateKeyBundleV1Builder.buildFromBundle(keyByteArray)
     val mmkv = getMmkv(appContext)
     var xmtpEnvString = mmkv?.decodeString("xmtp-env")
@@ -47,7 +58,10 @@ fun getXmtpClient(appContext: Context, account: String): Client? {
     val xmtpEnv =
         if (xmtpEnvString == "production") XMTPEnvironment.PRODUCTION else XMTPEnvironment.DEV
 
-    val options = ClientOptions(api = ClientOptions.Api(env = xmtpEnv, isSecure = true))
+    val dbDirectory = "/data/data/${appContext.packageName}/databases"
+    val dbEncryptionKey = getDbEncryptionKey()
+
+    val options = ClientOptions(api = ClientOptions.Api(env = xmtpEnv, isSecure = true), enableV3 = true, dbEncryptionKey = dbEncryptionKey,  dbDirectory = dbDirectory, appContext = appContext)
 
     return Client().buildFrom(bundle = keys, options = options)
 }

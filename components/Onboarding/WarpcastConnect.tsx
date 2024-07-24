@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { StyleSheet, useColorScheme, Text } from "react-native";
 
+import OnboardingComponent from "./OnboardingComponent";
 import config from "../../config";
 import { refreshProfileForAddress } from "../../data/helpers/profiles/profilesUpdate";
 import {
@@ -11,7 +12,6 @@ import { useSelect } from "../../data/store/storeHelpers";
 import { notifyFarcasterLinked } from "../../utils/api";
 import { useLinkFarcaster } from "../../utils/evm/privy";
 import { refreshRecommendationsForAccount } from "../../utils/recommendations";
-import OnboardingComponent from "./OnboardingComponent";
 
 export default function WarpcastConnect() {
   const styles = useStyles();

@@ -1,10 +1,7 @@
-import { Platform } from "react-native";
+import { AppState, Platform } from "react-native";
 import RNFS from "react-native-fs";
 import { Repository } from "typeorm/browser";
 
-import config from "../../config";
-import { sentryTrackError, sentryTrackMessage } from "../../utils/sentry";
-import { useAccountsStore } from "../store/accountsStore";
 import {
   deleteDataSource,
   getDataSource,
@@ -13,6 +10,11 @@ import {
 import { Conversation } from "./entities/conversationEntity";
 import { Message } from "./entities/messageEntity";
 import { Profile } from "./entities/profileEntity";
+import config from "../../config";
+import { sentryTrackError, sentryTrackMessage } from "../../utils/sentry";
+import { useAccountsStore } from "../store/accountsStore";
+
+const env = config.xmtpEnv as "dev" | "production" | "local";
 
 type RepositoriesForAccount = {
   conversation: Repository<Conversation>;
@@ -36,7 +38,13 @@ export const getRepository = async <T extends keyof RepositoriesForAccount>(
   // init. This means methods that try to interact with the database too
   // early will not fail but just take longer to execute!
 
-  while (!repositories[account]?.[entity]) {
+  // We also use the same mechanism to postpone writing to
+  // database if the app is in background
+
+  while (
+    !repositories[account]?.[entity] ||
+    AppState.currentState.match(/inactive|background/)
+  ) {
     console.log(`Database for ${account} not yet initialized`);
     await new Promise((r) => setTimeout(r, 100));
   }
@@ -74,10 +82,10 @@ export const initDb = async (account: string): Promise<void> => {
     } catch (e: any) {
       sentryTrackError(e, { account, message: "Error running migrations" });
       console.log(`Error running migrations - destroying db for ${account}`, e);
-      await resetDb(account);
+      await resetConverseDb(account);
     }
   } catch (e: any) {
-    const dbPath = await getDbPath(account);
+    const dbPath = await getConverseDbPath(account);
     const dbPathExists = await RNFS.exists(dbPath);
     sentryTrackError(e, {
       account,
@@ -85,7 +93,7 @@ export const initDb = async (account: string): Promise<void> => {
       dbPath,
       dbPathExists,
     });
-    await resetDb(account);
+    await resetConverseDb(account);
   }
 };
 
@@ -108,14 +116,14 @@ export const getDbDirectory = async () => {
   }
 };
 
-export const getDbPath = async (account: string) => {
+export const getConverseDbPath = async (account: string) => {
   const filename = getDbFileName(account);
   const directory = await getDbDirectory();
   return `${directory}/${filename}`;
 };
 
-export const clearDb = async (account: string) => {
-  const dbPath = await getDbPath(account);
+export const clearConverseDb = async (account: string) => {
+  const dbPath = await getConverseDbPath(account);
   let dbExists = await RNFS.exists(dbPath);
   console.log("[ClearDB]", { dbPath, dbExists });
   try {
@@ -140,15 +148,18 @@ export const clearDb = async (account: string) => {
       `[ClearDB] SQlite file ${dbPath} does not exist, no need to delete`
     );
   } else {
-    console.log(`[ClearDB] Deleting SQlite file ${dbPath}`);
-    await RNFS.unlink(dbPath);
+    if (env !== "dev") {
+      // Won't clear db in dev mode so Testflight users still have access
+      console.log(`[ClearDB] Deleting SQlite file ${dbPath}`);
+      await RNFS.unlink(dbPath);
 
-    console.log(`[ClearDB] Deleted SQlite file ${dbPath}`);
+      console.log(`[ClearDB] Deleted SQlite file ${dbPath}`);
+    }
   }
 };
 
-export async function resetDb(account: string) {
-  await clearDb(account);
+export async function resetConverseDb(account: string) {
+  await clearConverseDb(account);
   // Change filename & path to avoid locked state due to
   // filesystem locking the previous file path
   useAccountsStore.getState().resetDatabaseId(account);

@@ -2,7 +2,7 @@ import { FrameActionInputs } from "@xmtp/frames-client";
 import { Image } from "expo-image";
 import * as Linking from "expo-linking";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Platform, StyleSheet, TouchableOpacity, View } from "react-native";
+import { Platform, StyleSheet, View } from "react-native";
 import { v4 as uuidv4 } from "uuid";
 
 import config from "../../../config";
@@ -22,7 +22,6 @@ import {
   validateFrame,
 } from "../../../utils/frames";
 import { navigate } from "../../../utils/navigation";
-import ActionButton from "../ActionButton";
 import { MessageToDisplay } from "../Message/Message";
 import FrameBottom from "./FrameBottom";
 import FrameImage from "./FrameImage";
@@ -165,11 +164,14 @@ export default function FramePreview({
       let actionPostUrl =
         button.target || frame.frameInfo?.postUrl || initialFrame.url;
       try {
+        const participantAccountAddresses: string[] = conversation.isGroup
+          ? conversation.groupMembers || []
+          : [account, conversation.peerAddress];
         const actionInput: FrameActionInputs = {
           frameUrl: actionPostUrl,
           buttonIndex: button.index,
           conversationTopic: message.topic,
-          participantAccountAddresses: [account, conversation.peerAddress],
+          participantAccountAddresses,
           state: frame.frameInfo?.state,
         };
         if (textInput) {
@@ -293,77 +295,77 @@ export default function FramePreview({
     textInput;
 
   return (
-    <View
-      style={[
-        styles.frameWrapper,
-        {
-          display: firstFrameLoaded ? "flex" : "none",
-        },
-      ]}
-    >
-      {initialFrame.type === "XMTP_FRAME" && (
+    // <View
+    //   style={[
+    //     styles.frameWrapper,
+    //     {
+    //       display: firstFrameLoaded ? "flex" : "none",
+    //     },
+    //   ]}
+    // >
+    //   {initialFrame.type === "XMTP_FRAME" && (
+    //     <View
+    //       style={[
+    //         styles.shareFrameWrapper,
+    //         message.fromMe
+    //           ? styles.shareFrameWrapperMe
+    //           : styles.shareFrameWrapperOther,
+    //       ]}
+    //     >
+    //       <TouchableOpacity style={styles.shareFrame} onPress={shareFrame}>
+    //         <ActionButton
+    //           picto="square.and.arrow.up"
+    //           pictoStyle={{ top: -1.5 }} // Because the square & arrow doesn't look centered
+    //         />
+    //       </TouchableOpacity>
+    //     </View>
+    //   )}
+    <View style={styles.frameContainer}>
+      {!(frame.type === "PREVIEW" && firstImageFailure) && (
         <View
-          style={[
-            styles.shareFrameWrapper,
-            message.fromMe
-              ? styles.shareFrameWrapperMe
-              : styles.shareFrameWrapperOther,
-          ]}
+          style={{
+            opacity:
+              postingActionForButton !== undefined || !firstImageRefreshed
+                ? message.fromMe
+                  ? 0.8
+                  : 0.4
+                : 1,
+          }}
         >
-          <TouchableOpacity style={styles.shareFrame} onPress={shareFrame}>
-            <ActionButton
-              picto="square.and.arrow.up"
-              pictoStyle={{ top: -1.5 }} // Because the square & arrow doesn't look centered
-            />
-          </TouchableOpacity>
+          <FrameImage
+            frameImage={frame.frameImage}
+            frameImageAspectRatio={
+              frame.frameInfo?.image?.aspectRatio || "1.91.1"
+            }
+            linkToOpen={initialFrame.url}
+            useMemoryCache={!frame.isInitialFrame || Platform.OS === "web"}
+          />
         </View>
       )}
-      <View style={styles.frameContainer}>
-        {!(frame.type === "PREVIEW" && firstImageFailure) && (
-          <View
-            style={{
-              opacity:
-                postingActionForButton !== undefined || !firstImageRefreshed
-                  ? message.fromMe
-                    ? 0.8
-                    : 0.4
-                  : 1,
-            }}
-          >
-            <FrameImage
-              frameImage={frame.frameImage}
-              frameImageAspectRatio={
-                frame.frameInfo?.image?.aspectRatio || "1.91.1"
-              }
-              linkToOpen={initialFrame.url}
-              useMemoryCache={!frame.isInitialFrame || Platform.OS === "web"}
-            />
-          </View>
-        )}
 
-        {showBottom && (
-          <FrameBottom
-            message={message}
-            frame={frame}
-            textInput={textInput}
-            buttons={buttons}
-            setFrameTextInputFocused={setFrameTextInputFocused}
-            postingActionForButton={postingActionForButton}
-            onButtonPress={onButtonPress}
-            frameTextInputValue={frameTextInputValue}
-            setFrameTextInputValue={setFrameTextInputValue}
-          />
-        )}
-      </View>
+      {showBottom && (
+        <FrameBottom
+          message={message}
+          frame={frame}
+          textInput={textInput}
+          buttons={buttons}
+          setFrameTextInputFocused={setFrameTextInputFocused}
+          postingActionForButton={postingActionForButton}
+          onButtonPress={onButtonPress}
+          frameTextInputValue={frameTextInputValue}
+          setFrameTextInputValue={setFrameTextInputValue}
+        />
+      )}
     </View>
+    // </View>
   );
 }
 
 const useStyles = () => {
   return StyleSheet.create({
     frameWrapper: {
-      padding: 4,
       paddingBottom: 0,
+      flexDirection: "row",
     },
     frameContainer: {
       borderTopLeftRadius: 14,

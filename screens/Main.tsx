@@ -1,8 +1,15 @@
+import { backgroundColor } from "@styles/colors";
 import { StatusBar } from "expo-status-bar";
 import React, { useCallback, useEffect, useRef } from "react";
 import { Dimensions, Platform, useColorScheme } from "react-native";
 
-import SendAttachmentPreview from "../components/Chat/Attachment/SendAttachmentPreview";
+import AccountsAndroid from "./Accounts/AccountsAndroid";
+import AccountsDrawer from "./Accounts/AccountsDrawer";
+import Navigation from "./Navigation/Navigation";
+import SplitScreenNavigation from "./Navigation/SplitScreenNavigation/SplitScreenNavigation";
+import { useIsSplitScreen } from "./Navigation/navHelpers";
+import NotificationsScreen from "./NotificationsScreen";
+import Onboarding from "./Onboarding";
 import UserProfile from "../components/Onboarding/UserProfile";
 import ActionSheetStateHandler from "../components/StateHandlers/ActionSheetStateHandler";
 import HydrationStateHandler from "../components/StateHandlers/HydrationStateHandler";
@@ -13,23 +20,15 @@ import ConversationsStateHandler from "../components/StateHandlers/Notifications
 import WalletsStateHandler from "../components/StateHandlers/WalletsStateHandler";
 import {
   useCurrentAccount,
-  useSettingsStore,
   useProfilesStore,
+  useSettingsStore,
 } from "../data/store/accountsStore";
 import { useAppStore } from "../data/store/appStore";
 import { useOnboardingStore } from "../data/store/onboardingStore";
 import { useSelect } from "../data/store/storeHelpers";
 import { useAddressBookStateHandler } from "../utils/addressBook";
-import { backgroundColor } from "../utils/colors";
 import { converseEventEmitter } from "../utils/events";
 import { usePrivyAccessToken } from "../utils/evm/privy";
-import AccountsAndroid from "./Accounts/AccountsAndroid";
-import AccountsDrawer from "./Accounts/AccountsDrawer";
-import Navigation from "./Navigation/Navigation";
-import SplitScreenNavigation from "./Navigation/SplitScreenNavigation/SplitScreenNavigation";
-import { useIsSplitScreen } from "./Navigation/navHelpers";
-import NotificationsScreen from "./NotificationsScreen";
-import Onboarding from "./Onboarding";
 
 export default function Main() {
   // Makes sure we have a Privy token ready to make API calls
@@ -57,14 +56,9 @@ export default function Main() {
   }, [addingNewAccount, resetOnboarding, userAddress]);
 
   const { notifications } = useSettingsStore(useSelect(["notifications"]));
-  const { notificationsPermissionStatus, splashScreenHidden, mediaPreview } =
-    useAppStore(
-      useSelect([
-        "notificationsPermissionStatus",
-        "splashScreenHidden",
-        "mediaPreview",
-      ])
-    );
+  const { notificationsPermissionStatus, splashScreenHidden } = useAppStore(
+    useSelect(["notificationsPermissionStatus", "splashScreenHidden"])
+  );
   const navigationDrawer = useRef<any>(null);
   const toggleNavigationDrawer = useCallback((open: boolean) => {
     if (open) {
@@ -157,7 +151,6 @@ export default function Main() {
     <>
       {mainHeaders}
       {screenToShow}
-      {mediaPreview?.mediaURI && <SendAttachmentPreview />}
     </>
   );
 }

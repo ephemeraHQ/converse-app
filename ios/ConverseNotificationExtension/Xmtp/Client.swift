@@ -9,7 +9,7 @@ import Foundation
 import XMTP
 import Alamofire
 
-func getXmtpKeyForAccount(account: String) throws -> Data? {
+func getXmtpKeyForAccount(account: String) throws -> String? {
   let legacyKey = getKeychainValue(forKey: "XMTP_KEYS")
   if (legacyKey != nil && legacyKey!.count > 0) {
     // We have a legacy key, not yet migrated!
@@ -17,25 +17,46 @@ func getXmtpKeyForAccount(account: String) throws -> Data? {
     let decoder = JSONDecoder()
     let decoded = try decoder.decode([UInt8].self, from: legacyKey!.data(using: .utf8)!)
     let data = Data(decoded)
-    return data
+    return data.base64EncodedString()
   }
   let accountKey = getKeychainValue(forKey: "XMTP_KEY_\(account)")
   if (accountKey == nil || accountKey!.count == 0) {
     return nil
   }
   // New keys are in base64 format
-  return Data(base64Encoded: accountKey!)
+  return accountKey!
 }
+
+func getDbEncryptionKey() throws -> Data {
+  if let key = getKeychainValue(forKey: "LIBXMTP_DB_ENCRYPTION_KEY") {
+        if let keyData = Data(base64Encoded: key) {
+            return keyData
+        } else {
+          throw "Unable to decode base64 key"
+        }
+    } else {
+      throw "No db encryption key found"
+    }
+}
+
 
 func getXmtpClient(account: String) async -> XMTP.Client? {
   do {
-    let xmtpKeyData = try getXmtpKeyForAccount(account: account)
+    let xmtpKey = try getXmtpKeyForAccount(account: account)
+    if xmtpKey == nil {
+      return nil;
+    }
+    let xmtpKeyData = Data(base64Encoded: xmtpKey!)
     if (xmtpKeyData == nil) {
       return nil;
     }
+    let encryptionKey = try! getDbEncryptionKey()
     let privateKeyBundle = try! PrivateKeyBundle(serializedData: xmtpKeyData!)
     let xmtpEnv = getXmtpEnv()
-    let client = try await Client.from(bundle: privateKeyBundle, options: .init(api: .init(env: xmtpEnv)))
+    
+    let groupId = "group.\(try! getInfoPlistValue(key: "AppBundleId", defaultValue: nil))"
+    let groupDir = (FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: groupId)?.path)!
+    let client = try await Client.from(bundle: privateKeyBundle, options: .init(api: .init(env: xmtpEnv), enableV3: true, encryptionKey: encryptionKey, dbDirectory: groupDir))
     client.register(codec: AttachmentCodec())
     client.register(codec: RemoteAttachmentCodec())
     client.register(codec: ReactionCodec())
@@ -62,6 +83,14 @@ func isInviteTopic(topic: String) -> Bool {
 
 func isIntroTopic(topic: String) -> Bool {
   return topic.starts(with: "/xmtp/0/intro-")
+}
+
+func isGroupMessageTopic(topic: String) -> Bool {
+  return topic.starts(with: "/xmtp/mls/1/g-")
+}
+
+func isGroupWelcomeTopic(topic: String) -> Bool {
+  return topic.starts(with: "/xmtp/mls/1/w-")
 }
 
 func subscribeToTopic(apiURI: String?, account: String, pushToken: String?, topic: String, hmacKeys: String?) {

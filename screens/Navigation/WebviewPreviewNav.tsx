@@ -1,11 +1,11 @@
-import { Platform, useColorScheme } from "react-native";
-
 import {
   listItemSeparatorColor,
   navigationSecondaryBackgroundColor,
-} from "../../utils/colors";
-import WebviewPreview from "../WebviewPreview";
+} from "@styles/colors";
+import { Platform, useColorScheme } from "react-native";
+
 import { NativeStack, navigationAnimation } from "./Navigation";
+import WebviewPreview from "../WebviewPreview";
 
 export type WebviewPreviewNavParams = {
   uri: string;

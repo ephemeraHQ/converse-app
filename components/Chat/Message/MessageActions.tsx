@@ -1,15 +1,23 @@
 import Clipboard from "@react-native-clipboard/clipboard";
+import {
+  actionSheetColors,
+  messageBubbleColor,
+  messageHighlightedBubbleColor,
+  myMessageBubbleColor,
+  myMessageHighlightedBubbleColor,
+} from "@styles/colors";
+import * as Haptics from "expo-haptics";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import {
-  Alert,
   ColorSchemeName,
-  Platform,
-  useColorScheme,
-  StyleSheet,
   DimensionValue,
+  Platform,
+  StyleSheet,
+  useColorScheme,
 } from "react-native";
+import ContextMenu from "react-native-context-menu-view";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
-import Reanimated, {
+import Animated, {
   AnimatedStyle,
   Easing,
   ReduceMotion,
@@ -17,26 +25,20 @@ import Reanimated, {
   useAnimatedStyle,
   useSharedValue,
   withTiming,
+  withSpring,
 } from "react-native-reanimated";
-import { SvgProps } from "react-native-svg";
 
-import _MessageTail from "../../../assets/message-tail.svg";
+import { MessageToDisplay } from "./Message";
+import MessageTail from "./MessageTail";
 import {
-  currentAccount,
   useCurrentAccount,
   useSettingsStore,
 } from "../../../data/store/accountsStore";
 import { useAppStore } from "../../../data/store/appStore";
+import { XmtpConversation } from "../../../data/store/chatStore";
+import { useFramesStore } from "../../../data/store/framesStore";
 import { ReanimatedTouchableOpacity } from "../../../utils/animations";
-import { reportMessage } from "../../../utils/api";
 import { isAttachmentMessage } from "../../../utils/attachment/helpers";
-import {
-  actionSheetColors,
-  messageBubbleColor,
-  messageHighlightedBubbleColor,
-  myMessageBubbleColor,
-  myMessageHighlightedBubbleColor,
-} from "../../../utils/colors";
 import { useConversationContext } from "../../../utils/conversation";
 import { isDesktop } from "../../../utils/device";
 import { converseEventEmitter } from "../../../utils/events";
@@ -46,34 +48,10 @@ import {
   getEmojiName,
   removeReactionFromMessage,
 } from "../../../utils/reactions";
+import { UUID_REGEX } from "../../../utils/regex";
 import { isTransactionMessage } from "../../../utils/transaction";
-import { consentToPeersOnProtocol } from "../../../utils/xmtpRN/conversations";
 import EmojiPicker from "../../../vendor/rn-emoji-keyboard";
 import { showActionSheetWithOptions } from "../../StateHandlers/ActionSheetStateHandler";
-import { MessageToDisplay } from "./Message";
-
-class MessageTailComponent extends React.Component<SvgProps> {
-  render() {
-    return <_MessageTail {...this.props} />;
-  }
-}
-
-const MessageTailAnimated =
-  Reanimated.createAnimatedComponent(MessageTailComponent);
-
-const MessageTail = (props: any) => {
-  const actionSheetShown = useAppStore((s) => s.actionSheetShown);
-  return (
-    <MessageTailAnimated
-      {...props}
-      fill={
-        actionSheetShown && props.fromMe
-          ? myMessageBubbleColor(props.colorScheme)
-          : "currentColor"
-      }
-    />
-  );
-};
 
 type Props = {
   children: React.ReactNode;
@@ -81,12 +59,14 @@ type Props = {
   reactions: {
     [senderAddress: string]: MessageReaction | undefined;
   };
+  hideBackground: boolean;
 };
 
 export default function ChatMessageActions({
   children,
   message,
   reactions,
+  hideBackground = false,
 }: Props) {
   const { conversation } = useConversationContext(["conversation"]);
   const isAttachment = isAttachmentMessage(message.contentType);
@@ -94,6 +74,8 @@ export default function ChatMessageActions({
   const colorScheme = useColorScheme();
   const userAddress = useCurrentAccount() as string;
   const setPeersStatus = useSettingsStore((s) => s.setPeersStatus);
+  const frames = useFramesStore().frames;
+  const isFrame = !!frames[message.content.toLowerCase()];
   const styles = useStyles();
 
   let messageMaxWidth: DimensionValue;
@@ -107,64 +89,11 @@ export default function ChatMessageActions({
     if (isAttachment) {
       messageMaxWidth = "70%";
     } else {
-      messageMaxWidth = "85%";
+      if (isFrame) {
+        messageMaxWidth = "100%";
+      } else messageMaxWidth = "85%";
     }
   }
-
-  const report = useCallback(async () => {
-    reportMessage({
-      account: currentAccount(),
-      messageId: message.id,
-      messageContent: message.content,
-      messageSender: message.senderAddress,
-    });
-
-    Alert.alert("Message reported");
-  }, [message]);
-
-  const reportAndBlock = useCallback(async () => {
-    reportMessage({
-      account: currentAccount(),
-      messageId: message.id,
-      messageContent: message.content,
-      messageSender: message.senderAddress,
-    });
-    consentToPeersOnProtocol(currentAccount(), [message.senderAddress], "deny");
-    setPeersStatus({ [message.senderAddress]: "blocked" });
-  }, [message.content, message.id, message.senderAddress, setPeersStatus]);
-
-  const showMessageReportActionSheet = useCallback(async () => {
-    if (Platform.OS === "web") {
-      // Fixes double action sheet on web
-      await new Promise((r) => setTimeout(r, 100));
-    }
-    const methods = {
-      Report: report,
-      "Report and block": reportAndBlock,
-      Cancel: () => {},
-    };
-
-    const options = Object.keys(methods);
-
-    showActionSheetWithOptions(
-      {
-        options,
-        title: "Report this message",
-        message:
-          "This message will be forwarded to Converse. The contact will not be informed.",
-        cancelButtonIndex: options.indexOf("Cancel"),
-        destructiveButtonIndex: [0, 1],
-        ...actionSheetColors(colorScheme),
-      },
-      (selectedIndex?: number) => {
-        if (selectedIndex === undefined) return;
-        const method = (methods as any)[options[selectedIndex]];
-        if (method) {
-          method();
-        }
-      }
-    );
-  }, [colorScheme, report, reportAndBlock]);
 
   const [emojiPickerShown, setEmojiPickerShown] = useState(false);
 
@@ -189,9 +118,6 @@ export default function ChatMessageActions({
       methods["Copy message"] = message.content
         ? () => Clipboard.setString(message.content)
         : () => Clipboard.setString(message.contentFallback!);
-      if (!message.fromMe) {
-        methods["Report message"] = showMessageReportActionSheet;
-      }
     }
 
     methods.Cancel = () => {};
@@ -207,9 +133,6 @@ export default function ChatMessageActions({
           ? "📎 Media"
           : message.content,
         cancelButtonIndex: options.indexOf("Cancel"),
-        destructiveButtonIndex: message.fromMe
-          ? undefined
-          : options.indexOf("Report message"),
         ...actionSheetColors(colorScheme),
       },
       (selectedIndex?: number) => {
@@ -225,11 +148,9 @@ export default function ChatMessageActions({
     isAttachment,
     isTransaction,
     message.content,
-    message.fromMe,
     message.contentFallback,
     colorScheme,
     showReactionModal,
-    showMessageReportActionSheet,
     triggerReplyToMessage,
   ]);
 
@@ -239,10 +160,10 @@ export default function ChatMessageActions({
         .numberOfTaps(2)
         .onStart(() => {
           if (isAttachment || !canAddReaction) return;
-          showReactionModal();
+          addReactionToMessage(conversation as XmtpConversation, message, "❤️");
         })
         .runOnJS(true),
-    [canAddReaction, isAttachment, showReactionModal]
+    [canAddReaction, isAttachment, conversation, message]
   );
 
   const [selectedEmojis, setSelectedEmojis] = useState<string[]>([]);
@@ -329,6 +250,95 @@ export default function ChatMessageActions({
     };
   }, [highlightMessage]);
 
+  const contextMenuItems = useMemo(() => {
+    const items = [];
+
+    if (canAddReaction) {
+      items.push({ title: "Add a reaction", systemIcon: "smiley" });
+    }
+    items.push({ title: "Reply", systemIcon: "arrowshape.turn.up.left" });
+    if (!isAttachment && !isTransaction) {
+      items.push({ title: "Copy message", systemIcon: "doc.on.doc" });
+    }
+
+    return items;
+  }, [canAddReaction, isAttachment, isTransaction]);
+
+  const handleContextMenuAction = useCallback(
+    (event: { nativeEvent: { index: number } }) => {
+      const { index } = event.nativeEvent;
+      switch (contextMenuItems[index].title) {
+        case "Add a reaction":
+          showReactionModal();
+          break;
+        case "Reply":
+          triggerReplyToMessage();
+          break;
+        case "Copy message":
+          if (message.content) {
+            Clipboard.setString(message.content);
+          } else if (message.contentFallback) {
+            Clipboard.setString(message.contentFallback);
+          }
+          break;
+      }
+      useAppStore.getState().setContextMenuShown(false);
+    },
+    [contextMenuItems, showReactionModal, triggerReplyToMessage, message]
+  );
+
+  // Entrance animation for new messages. For sent messages,
+  // we filter on UUIDs to avoid repeating the animation
+  // when the message is received from the stream.
+  const shouldAnimateIn =
+    message.isLatestSettledFromPeer ||
+    (message.status === "sending" && UUID_REGEX.test(message.id));
+  const [hasAnimatedIn, setHasAnimatedIn] = useState(false);
+
+  const opacity = useSharedValue(0);
+  const scale = useSharedValue(0.7);
+  const translateY = useSharedValue(20);
+
+  useEffect(() => {
+    if (shouldAnimateIn && !hasAnimatedIn) {
+      opacity.value = 0;
+      scale.value = 0.7;
+      translateY.value = 20;
+
+      const timingConfig = {
+        duration: 100,
+        easing: Easing.inOut(Easing.quad),
+        onComplete: () => {
+          runOnJS(setHasAnimatedIn)(true);
+        },
+      };
+
+      const springConfig = {
+        damping: 10,
+        stiffness: 200,
+        mass: 0.2,
+        overshootClamping: false,
+        restSpeedThreshold: 0.001,
+        restDisplacementThreshold: 0.001,
+      };
+
+      opacity.value = withTiming(1, timingConfig);
+      scale.value = withSpring(1, springConfig);
+      translateY.value = withSpring(0, springConfig);
+    } else {
+      opacity.value = 1;
+      scale.value = 1;
+      translateY.value = 0;
+    }
+  }, [shouldAnimateIn, hasAnimatedIn, opacity, scale, translateY]);
+
+  const animateInStyle = useAnimatedStyle(() => {
+    return {
+      opacity: opacity.value,
+      transform: [{ scale: scale.value }, { translateY: translateY.value }],
+    };
+  });
+
   // We use a mix of Gesture Detector AND TouchableOpacity
   // because GestureDetector is better for dual tap but if
   // we add the gesture detector for long press the long press
@@ -337,69 +347,93 @@ export default function ChatMessageActions({
   return (
     <>
       <GestureDetector gesture={doubleTapGesture}>
-        <ReanimatedTouchableOpacity
-          activeOpacity={1}
-          style={[
-            styles.messageBubble,
-            message.fromMe ? styles.messageBubbleMe : undefined,
-            {
-              backgroundColor: initialBubbleBackgroundColor,
-            },
-            highlightingMessage ? animatedBackgroundStyle : undefined,
-            Platform.select({
-              default: {},
-              android: {
-                // Messages not from me
-                borderBottomLeftRadius:
-                  !message.fromMe && message.hasNextMessageInSeries ? 2 : 18,
-                borderTopLeftRadius:
-                  !message.fromMe && message.hasPreviousMessageInSeries
-                    ? 2
-                    : 18,
-                // Messages from me
-                borderBottomRightRadius:
-                  message.fromMe && message.hasNextMessageInSeries ? 2 : 18,
-                borderTopRightRadius:
-                  message.fromMe && message.hasPreviousMessageInSeries ? 2 : 18,
-              },
-            }),
-            {
-              maxWidth: messageMaxWidth,
-            },
-          ]}
-          onPress={() => {
-            if (isAttachment) {
-              // Transfering attachment opening intent to component
-              converseEventEmitter.emit(
-                `openAttachmentForMessage-${message.id}`
-              );
-            }
-            if (isTransaction) {
-              // Transfering event to component
-              converseEventEmitter.emit(
-                `showActionSheetForTxRef-${message.id}`
-              );
-            }
-          }}
-          onLongPress={showMessageActionSheet}
+        <ContextMenu
+          actions={contextMenuItems}
+          onPress={handleContextMenuAction}
+          onCancel={() => useAppStore.getState().setContextMenuShown(false)}
+          previewBackgroundColor={initialBubbleBackgroundColor}
+          style={[{ width: "100%" }, { overflow: "visible" }]}
         >
-          {children}
-          {!message.hasNextMessageInSeries &&
-            (Platform.OS === "ios" || Platform.OS === "web") && (
-              <MessageTail
-                style={[
-                  styles.messageTail,
-                  {
-                    color: initialBubbleBackgroundColor,
+          <Animated.View style={[animateInStyle, styles.animateInWrapper]}>
+            <ReanimatedTouchableOpacity
+              activeOpacity={1}
+              style={[
+                styles.messageBubble,
+                message.fromMe ? styles.messageBubbleMe : undefined,
+                {
+                  backgroundColor: hideBackground
+                    ? "transparent"
+                    : initialBubbleBackgroundColor,
+                },
+                highlightingMessage ? animatedBackgroundStyle : undefined,
+                Platform.select({
+                  default: {},
+                  android: {
+                    // Messages not from me
+                    borderBottomLeftRadius:
+                      !message.fromMe && message.hasNextMessageInSeries
+                        ? 2
+                        : 18,
+                    borderTopLeftRadius:
+                      !message.fromMe && message.hasPreviousMessageInSeries
+                        ? 2
+                        : 18,
+                    // Messages from me
+                    borderBottomRightRadius:
+                      message.fromMe && message.hasNextMessageInSeries ? 2 : 18,
+                    borderTopRightRadius:
+                      message.fromMe && message.hasPreviousMessageInSeries
+                        ? 2
+                        : 18,
                   },
-                  highlightingMessage ? iosAnimatedTailStyle : undefined,
-                  message.fromMe ? styles.messageTailMe : {},
-                ]}
-                fromMe={message.fromMe}
-                colorScheme={colorScheme}
-              />
-            )}
-        </ReanimatedTouchableOpacity>
+                }),
+                {
+                  maxWidth: messageMaxWidth,
+                },
+              ]}
+              onPress={() => {
+                if (isAttachment) {
+                  // Transfering attachment opening intent to component
+                  converseEventEmitter.emit(
+                    `openAttachmentForMessage-${message.id}`
+                  );
+                }
+                if (isTransaction) {
+                  // Transfering event to component
+                  converseEventEmitter.emit(
+                    `showActionSheetForTxRef-${message.id}`
+                  );
+                }
+              }}
+              onLongPress={() => {
+                if (Platform.OS !== "web") {
+                  Haptics.selectionAsync();
+                }
+                useAppStore.getState().setContextMenuShown(true);
+              }}
+            >
+              {children}
+            </ReanimatedTouchableOpacity>
+            {!message.hasNextMessageInSeries &&
+              !isFrame &&
+              !isAttachment &&
+              !isTransaction &&
+              !hideBackground &&
+              (Platform.OS === "ios" || Platform.OS === "web") && (
+                <MessageTail
+                  style={[
+                    {
+                      color: initialBubbleBackgroundColor,
+                    },
+                    highlightingMessage ? iosAnimatedTailStyle : undefined,
+                  ]}
+                  fromMe={message.fromMe}
+                  colorScheme={colorScheme}
+                  hideBackground={hideBackground}
+                />
+              )}
+          </Animated.View>
+        </ContextMenu>
       </GestureDetector>
       {/* <View style={{width: 50, height: 20, backgroundColor: "red"}} />
       <GestureDetector gesture={composedGesture}>{children}</GestureDetector> */}
@@ -463,6 +497,11 @@ const getEmojiPickerTheme = (colorScheme: ColorSchemeName) =>
 
 const useStyles = () => {
   return StyleSheet.create({
+    animateInWrapper: {
+      alignSelf: "flex-start",
+      flexDirection: "row",
+      borderRadius: 18,
+    },
     messageBubble: {
       flexShrink: 1,
       flexGrow: 0,
@@ -472,19 +511,6 @@ const useStyles = () => {
 
     messageBubbleMe: {
       marginLeft: "auto",
-    },
-    messageTail: {
-      position: "absolute",
-      left: -5,
-      bottom: 0,
-      width: 14,
-      height: 21,
-      zIndex: -1,
-    },
-    messageTailMe: {
-      left: "auto",
-      right: -5,
-      transform: [{ scaleX: -1 }],
     },
   });
 };

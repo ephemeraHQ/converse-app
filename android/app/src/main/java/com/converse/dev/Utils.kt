@@ -42,3 +42,35 @@ fun isInviteTopic(topic: String): Boolean {
 fun isIntroTopic(topic: String): Boolean {
     return topic.startsWith("/xmtp/0/intro-")
 }
+
+fun isGroupMessageTopic(topic: String): Boolean {
+    return topic.startsWith("/xmtp/mls/1/g-")
+}
+
+fun isGroupWelcomeTopic(topic: String): Boolean {
+    return topic.startsWith("/xmtp/mls/1/w-")
+}
+
+fun getPreferredName(address: String, socials: ProfileSocials): String {
+    socials.userNames?.firstOrNull { it.isPrimary ?: false }?.let { primaryUsername ->
+        return primaryUsername.displayName ?: primaryUsername.name
+    }
+
+    socials.ensNames?.firstOrNull { it.isPrimary ?: false }?.let { primaryEns ->
+        return primaryEns.displayName ?: primaryEns.name
+    }
+
+    return shortAddress(address)
+}
+
+fun getPreferredAvatar(socials: ProfileSocials): String? {
+    socials.userNames?.firstOrNull { it.isPrimary ?: false }?.let {
+        return it.avatar
+    }
+
+    socials.ensNames?.firstOrNull { it.isPrimary ?: false }?.let {
+        return it.avatar
+    }
+
+    return null
+}

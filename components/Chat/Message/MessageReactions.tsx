@@ -1,3 +1,8 @@
+import {
+  actionSheetColors,
+  inversePrimaryColor,
+  textPrimaryColor,
+} from "@styles/colors";
 import { useCallback } from "react";
 import {
   StyleSheet,
@@ -7,26 +12,20 @@ import {
   View,
 } from "react-native";
 
+import { MessageToDisplay } from "./Message";
 import {
   useCurrentAccount,
   useProfilesStore,
 } from "../../../data/store/accountsStore";
 import { isAttachmentMessage } from "../../../utils/attachment/helpers";
-import {
-  actionSheetColors,
-  backgroundColor,
-  messageBubbleColor,
-  textSecondaryColor,
-} from "../../../utils/colors";
 import { useConversationContext } from "../../../utils/conversation";
 import { getPreferredName } from "../../../utils/profile";
 import {
-  MessageReaction,
   getReactionContent,
+  MessageReaction,
   removeReactionFromMessage,
 } from "../../../utils/reactions";
 import { showActionSheetWithOptions } from "../../StateHandlers/ActionSheetStateHandler";
-import { MessageToDisplay } from "./Message";
 
 type Props = {
   message: MessageToDisplay;
@@ -88,20 +87,9 @@ export default function ChatMessageReactions({ message, reactions }: Props) {
   ]);
   if (reactionsList.length === 0) return null;
   return (
-    <View
-      style={[
-        styles.reactionsWrapper,
-        { justifyContent: message.fromMe ? "flex-end" : "flex-start" },
-      ]}
-    >
+    <View style={styles.reactionsWrapper}>
       <TouchableWithoutFeedback onPress={showReactionsActionsSheet}>
-        <View
-          style={[
-            styles.reactionsContainer,
-            { marginRight: message.fromMe ? 10 : 0 },
-            { marginLeft: message.fromMe ? 0 : 10 },
-          ]}
-        >
+        <View style={styles.reactionsContainer}>
           <Text style={styles.emojis}>
             {[...new Set(reactionsList.map((r) => getReactionContent(r)))]}
           </Text>
@@ -120,26 +108,25 @@ const useStyles = () => {
     reactionsWrapper: {
       flexBasis: "100%",
       flexDirection: "row",
-      justifyContent: "flex-end",
-      marginTop: -5,
+      marginBottom: 10,
+      marginHorizontal: 10,
     },
     reactionsContainer: {
-      backgroundColor: messageBubbleColor(colorScheme),
-      paddingVertical: 6,
-      paddingHorizontal: 10,
-      borderWidth: 1,
-      borderColor: backgroundColor(colorScheme),
-      borderRadius: 30,
+      backgroundColor: inversePrimaryColor(colorScheme),
+      paddingVertical: 4,
+      paddingHorizontal: 6,
+      borderRadius: 8,
       flexDirection: "row",
+      alignItems: "center",
     },
     emojis: {
-      fontSize: 15,
-      lineHeight: 18.5,
+      fontSize: 16,
+      lineHeight: 24,
     },
     count: {
       fontSize: 15,
-      color: textSecondaryColor(colorScheme),
-      marginLeft: 5,
+      color: textPrimaryColor(colorScheme),
+      marginLeft: 4,
     },
   });
 };

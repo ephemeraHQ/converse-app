@@ -8,8 +8,10 @@
 import Foundation
 import XMTP
 import Alamofire
+import Intents
 
 func handleNewConversationFirstMessage(xmtpClient: XMTP.Client, apiURI: String?, pushToken: String?, conversation: XMTP.Conversation, bestAttemptContent: inout UNMutableNotificationContent) async -> (shouldShowNotification: Bool, messageId: String?) {
+  // @todo => handle new group first messages?
   var shouldShowNotification = false
   var attempts = 0
   var messageId: String? = nil
@@ -24,13 +26,13 @@ func handleNewConversationFirstMessage(xmtpClient: XMTP.Client, apiURI: String?,
         
         var messageContent: String? = nil
         if (contentType.starts(with: "xmtp.org/text:")) {
-            messageContent = String(data: message.encodedContent.content, encoding: .utf8)
+          messageContent = String(data: message.encodedContent.content, encoding: .utf8)
         }
         
-        let spamScore = await computeSpamScore(
+        // @todo => handle group messages here (conversation.peerAddress)
+        let spamScore = try await computeSpamScoreConversation(
           address: conversation.peerAddress,
           message: messageContent,
-          sentViaConverse: message.sentViaConverse,
           contentType: contentType,
           apiURI: apiURI
         )
@@ -49,14 +51,14 @@ func handleNewConversationFirstMessage(xmtpClient: XMTP.Client, apiURI: String?,
               spamScore: spamScore
             )
           }
-          let decodedMessageResult = handleMessageByContentType(decodedMessage: message, xmtpClient: xmtpClient, sentViaConverse: message.sentViaConverse);
+          let decodedMessageResult = handleMessageByContentType(decodedMessage: message, xmtpClient: xmtpClient);
           
           if decodedMessageResult.senderAddress == xmtpClient.address || decodedMessageResult.forceIgnore {
             // Message is from me or a reaction removal, let's drop it
             print("[NotificationExtension] Not showing a notification")
             break
           } else if let content = decodedMessageResult.content {
-            bestAttemptContent.title = shortAddress(address: conversation.peerAddress)
+            bestAttemptContent.title = shortAddress(address: try conversation.peerAddress)
             bestAttemptContent.body = content
             shouldShowNotification = true
             messageId = decodedMessageResult.id // @todo probably remove this?
@@ -77,7 +79,7 @@ func handleNewConversationFirstMessage(xmtpClient: XMTP.Client, apiURI: String?,
           shouldShowNotification = false
         } else {
           // Let's import the conversation so we can get hmac keys
-          await xmtpClient.conversations.importTopicData(data: conversation.toTopicData())
+          try await xmtpClient.conversations.importTopicData(data: conversation.toTopicData())
           var request = Xmtp_KeystoreApi_V1_GetConversationHmacKeysRequest()
           request.topics = [conversation.topic]
           let hmacKeys = await xmtpClient.conversations.getHmacKeys(request: request);
@@ -100,30 +102,124 @@ func handleNewConversationFirstMessage(xmtpClient: XMTP.Client, apiURI: String?,
   return (shouldShowNotification, messageId)
 }
 
-func handleOngoingConversationMessage(xmtpClient: XMTP.Client, envelope: XMTP.Envelope, bestAttemptContent: inout UNMutableNotificationContent, body: [String: Any]) async -> (shouldShowNotification: Bool, messageId: String?) {
+func handleGroupWelcome(xmtpClient: XMTP.Client, apiURI: String?, pushToken: String?, group: XMTP.Group, welcomeTopic: String, bestAttemptContent: inout UNMutableNotificationContent) async -> (shouldShowNotification: Bool, messageId: String?) {
+  var shouldShowNotification = false
+  let messageId = "welcome-" + group.topic
+  do {
+    // group is already synced in getNewGroup method
+    let groupName = try group.groupName()
+    let spamScore = await computeSpamScoreGroupWelcome(client: xmtpClient, group: group, apiURI: apiURI)
+    if spamScore < 0 { // Message is going to main inbox
+      shouldShowNotification = true
+      bestAttemptContent.title = groupName
+      bestAttemptContent.body = "You have been added to a new group"
+    } else if spamScore == 0 { // Message is Request
+      shouldShowNotification = false
+      trackNewRequest()
+    } else { // Message is Spam
+      shouldShowNotification = false
+    }
+    
+  } catch {
+    sentryTrackError(error: error, extras: ["message": "NOTIFICATION_SAVE_MESSAGE_ERROR_3", "topic": group.topic])
+    print("[NotificationExtension] Error handling group invites: \(error)")
+  }
+  
+  return (shouldShowNotification, messageId)
+}
+
+func handleGroupMessage(xmtpClient: XMTP.Client, envelope: XMTP.Envelope, apiURI: String?, bestAttemptContent: inout UNMutableNotificationContent) async -> (shouldShowNotification: Bool, messageId: String?, messageIntent: INSendMessageIntent?) {
+  var shouldShowNotification = false
+  let contentTopic = envelope.contentTopic
+  var messageId: String? = nil
+  var messageIntent: INSendMessageIntent? = nil
+  
+  do {
+    let groups = try await xmtpClient.conversations.groups()
+    if let group = groups.first(where: { $0.topic == contentTopic }) {
+      try await group.sync()
+      if var decodedMessage = try? await decodeMessage(xmtpClient: xmtpClient, envelope: envelope) {
+        
+        // For now, use the group member linked address as "senderAddress"
+        // @todo => make inboxId a first class citizen
+        if let senderAddresses = try group.members.first(where: {$0.inboxId == decodedMessage.senderAddress})?.addresses {
+          decodedMessage.senderAddress = senderAddresses[0]
+        }
+
+        let decodedMessageResult = handleMessageByContentType(decodedMessage: decodedMessage, xmtpClient: xmtpClient);
+        messageId = decodedMessageResult.id
+        if decodedMessageResult.senderAddress?.lowercased() == xmtpClient.inboxID.lowercased() || decodedMessageResult.senderAddress?.lowercased() == xmtpClient.address.lowercased() || decodedMessageResult.forceIgnore {
+        } else {
+          let spamScore = await computeSpamScoreGroupMessage(client: xmtpClient, group: group, decodedMessage: decodedMessage, apiURI: apiURI)
+          
+          if spamScore < 0 { // Message is going to main inbox
+            shouldShowNotification = true
+            if let groupName = try? group.groupName() {
+              bestAttemptContent.title = groupName
+            }
+            let profilesState = getProfilesState(account: xmtpClient.address)
+
+            // We replaced decodedMessage.senderAddress from inboxId to actual address
+            // so it appears well in the app until inboxId is a first class citizen
+            if let senderProfile = profilesState?.profiles?[decodedMessage.senderAddress] {
+              bestAttemptContent.subtitle = getPreferredName(address: decodedMessage.senderAddress, socials: senderProfile.socials)
+            }
+
+            if let content = decodedMessageResult.content {
+              bestAttemptContent.body = content
+            }
+            
+            let groupImage = try? group.groupImageUrlSquare()
+            messageIntent = getIncomingGroupMessageIntent(group: group, content: bestAttemptContent.body, senderId: decodedMessage.senderAddress, senderName: bestAttemptContent.subtitle)
+          } else if spamScore == 0 { // Message is Request
+            shouldShowNotification = false
+          } else { // Message is Spam
+            shouldShowNotification = false
+          }
+        }
+      }
+    }
+  } catch {
+    sentryTrackError(error: error, extras: ["message": "NOTIFICATION_SAVE_MESSAGE_ERROR_4", "topic": contentTopic])
+    print("[NotificationExtension] Error handling group message: \(error)")
+    
+  }
+  return (shouldShowNotification, messageId, messageIntent)
+}
+
+
+func handleOngoingConversationMessage(xmtpClient: XMTP.Client, envelope: XMTP.Envelope, bestAttemptContent: inout UNMutableNotificationContent, body: [String: Any]) async -> (shouldShowNotification: Bool, messageId: String?, messageIntent: INSendMessageIntent?) {
   var shouldShowNotification = false
   let contentTopic = envelope.contentTopic
   var conversationTitle = getSavedConversationTitle(contentTopic: contentTopic)
-  let sentViaConverse = body["sentViaConverse"] as? Bool ?? false
-  
   var messageId: String? = nil
+  var messageIntent: INSendMessageIntent? = nil
   
   let decodedMessage = try? await decodeMessage(xmtpClient: xmtpClient, envelope: envelope)
   // If couldn't decode the message, not showing
   if let message = decodedMessage {
-    let decodedMessageResult = handleMessageByContentType(decodedMessage: message, xmtpClient: xmtpClient, sentViaConverse: sentViaConverse);
+    let decodedMessageResult = handleMessageByContentType(decodedMessage: message, xmtpClient: xmtpClient);
     
     if decodedMessageResult.senderAddress == xmtpClient.address || decodedMessageResult.forceIgnore {
       // Message is from me or a reaction removal, let's drop it
       print("[NotificationExtension] Not showing a notification")
     } else if let content = decodedMessageResult.content {
       bestAttemptContent.body = content
+      
+      let profilesState = getProfilesState(account: xmtpClient.address)
+      var senderAvatar: String? = nil
+      if let senderAddress = decodedMessageResult.senderAddress, let senderProfile = profilesState?.profiles?[senderAddress] {
+        conversationTitle = getPreferredName(address: senderAddress, socials: senderProfile.socials)
+        senderAvatar = getPreferredAvatar(socials: senderProfile.socials)
+      }
+    
       if conversationTitle.isEmpty, let senderAddress = decodedMessageResult.senderAddress {
         conversationTitle = shortAddress(address: senderAddress)
       }
       bestAttemptContent.title = conversationTitle
       shouldShowNotification = true
       messageId = decodedMessageResult.id
+      messageIntent = getIncoming1v1MessageIntent(topic: envelope.contentTopic, senderId: decodedMessage?.senderAddress ?? "", senderName: bestAttemptContent.title, senderAvatar: senderAvatar, content: bestAttemptContent.body)
     }
   } else {
     print("[NotificationExtension] Not showing a notification because could not decode message")
@@ -132,7 +228,7 @@ func handleOngoingConversationMessage(xmtpClient: XMTP.Client, envelope: XMTP.En
   if (isDebugAccount(account: xmtpClient.address)) {
     sentryTrackMessage(message: "DEBUG_NOTIFICATION", extras: ["shouldShowNotification": shouldShowNotification, "messageId": messageId ?? "EMPTY", "bestAttemptContentBody": bestAttemptContent.body, "bestAttemptContentTitle": bestAttemptContent.title])
   }
-  return (shouldShowNotification, messageId)
+  return (shouldShowNotification, messageId, messageIntent)
 }
 
 func loadSavedMessages() -> [SavedNotificationMessage] {
@@ -151,11 +247,11 @@ func loadSavedMessages() -> [SavedNotificationMessage] {
   }
 }
 
-func saveMessage(account: String, topic: String, sent: Date, senderAddress: String, content: String, id: String, sentViaConverse: Bool, contentType: String, referencedMessageId: String?) throws {
+func saveMessage(account: String, topic: String, sent: Date, senderAddress: String, content: String, id: String, contentType: String, referencedMessageId: String?) throws {
   if (isDebugAccount(account: account)) {
     sentryAddBreadcrumb(message: "Calling save message with sender \(senderAddress) and content \(content)")
   }
-  let savedMessage = SavedNotificationMessage(topic: topic, content: content, senderAddress: senderAddress, sent: Int(sent.timeIntervalSince1970 * 1000), id: id, sentViaConverse: sentViaConverse, contentType: contentType, account: account, referencedMessageId: referencedMessageId)
+  let savedMessage = SavedNotificationMessage(topic: topic, content: content, senderAddress: senderAddress, sent: Int(sent.timeIntervalSince1970 * 1000), id: id, contentType: contentType, account: account, referencedMessageId: referencedMessageId)
   
   var savedMessagesList = loadSavedMessages()
   savedMessagesList.append(savedMessage)
@@ -169,11 +265,36 @@ func saveMessage(account: String, topic: String, sent: Date, senderAddress: Stri
 }
 
 func decodeMessage(xmtpClient: XMTP.Client, envelope: XMTP.Envelope) async throws -> DecodedMessage? {
+  // If topic is MLS, the conversation should already be there
+  // @todo except if it's new convo => call sync before?
+  if (isGroupMessageTopic(topic: envelope.contentTopic)) {
+    let groupList = try! await xmtpClient.conversations.groups()
+    if let group = groupList.first(where: { $0.topic == envelope.contentTopic }) {
+      do {
+        print("[NotificationExtension] Decoding group message...")
+        let envelopeBytes = envelope.message
+        let _ = try await group.processMessageDecrypted(envelopeBytes: envelopeBytes)
+        let decodedMessage = try await group.processMessage(envelopeBytes: envelopeBytes)
+        print("[NotificationExtension] Group message decoded!")
+        return decodedMessage
+      } catch {
+        sentryTrackMessage(message: "NOTIFICATION_DECODING_ERROR", extras: ["error": error, "envelope": envelope])
+        print("[NotificationExtension] ERROR WHILE DECODING \(error)")
+        return nil
+      }
+    } else {
+      sentryTrackMessage(message: "NOTIFICATION_GROUP_NOT_FOUND", extras: ["envelope": envelope])
+      return nil
+    }
+  }
+  
+  // V1/V2 convos 1:1, will be deprecated once 1:1 are migrated to MLS
+  
   guard let conversation = await getPersistedConversation(xmtpClient: xmtpClient, contentTopic: envelope.contentTopic) else {
     sentryTrackMessage(message: "NOTIFICATION_CONVERSATION_NOT_FOUND", extras: ["envelope": envelope])
     return nil
   }
-
+  
   do {
     print("[NotificationExtension] Decoding message...")
     let decodedMessage = try conversation.decode(envelope)
@@ -185,7 +306,7 @@ func decodeMessage(xmtpClient: XMTP.Client, envelope: XMTP.Envelope) async throw
   }
 }
 
-func handleMessageByContentType(decodedMessage: DecodedMessage, xmtpClient: XMTP.Client, sentViaConverse: Bool) -> (content: String?, senderAddress: String?, forceIgnore: Bool, id: String?) {
+func handleMessageByContentType(decodedMessage: DecodedMessage, xmtpClient: XMTP.Client) -> (content: String?, senderAddress: String?, forceIgnore: Bool, id: String?) {
   var contentType = getContentTypeString(type: decodedMessage.encodedContent.type)
   var contentToReturn: String?
   var contentToSave: String?
@@ -206,7 +327,7 @@ func handleMessageByContentType(decodedMessage: DecodedMessage, xmtpClient: XMTP
   
   do {
     switch contentType {
-    
+      
     case let type where type.starts(with: "xmtp.org/text:"):
       contentToSave = messageContent as? String
       contentToReturn = contentToSave
@@ -220,7 +341,7 @@ func handleMessageByContentType(decodedMessage: DecodedMessage, xmtpClient: XMTP
       type.starts(with: "coinbase.com/coinbase-messaging-payment-activity:"):
       contentToSave = messageContent as? String
       contentToReturn = "💸 Transaction"
-    
+      
     case let type where type.starts(with: "xmtp.org/reaction:"):
       let reaction = messageContent as? Reaction
       let action = reaction?.action.rawValue
@@ -235,15 +356,22 @@ func handleMessageByContentType(decodedMessage: DecodedMessage, xmtpClient: XMTP
       } else {
         contentToReturn = "Reacted to a message"
       }
+      
+      // For groups: notify reactions to messages from me only
+      if (isGroupMessageTopic(topic: decodedMessage.topic) && referencedMessageId != nil) {
+        forceIgnore = !(try isGroupMessageFromMe(xmtpClient: xmtpClient, messageId: referencedMessageId!))
+      }
+      
+      
       if let validReaction = reaction {
         contentToSave = getJsonReaction(reaction: validReaction)
       } else {
         contentToSave = nil
       }
-    
+      
     case let type where type.starts(with: "xmtp.org/readReceipt:"):
       contentToSave = nil
-    
+      
     default:
       sentryTrackMessage(message: "NOTIFICATION_UNKNOWN_CONTENT_TYPE", extras: ["contentType": contentType, "topic": decodedMessage.topic])
       print("[NotificationExtension] UNKOWN CONTENT TYPE: \(contentType)")
@@ -263,7 +391,6 @@ func handleMessageByContentType(decodedMessage: DecodedMessage, xmtpClient: XMTP
         senderAddress: decodedMessage.senderAddress,
         content: content,
         id: decodedMessage.id,
-        sentViaConverse: sentViaConverse,
         contentType: contentType,
         referencedMessageId: referencedMessageId
       )
@@ -308,47 +435,10 @@ func getJsonReaction(reaction: Reaction) -> String? {
   }
 }
 
-func computeSpamScore(address: String, message: String?, sentViaConverse: Bool, contentType: String, apiURI: String?) async -> Double {
-  var spamScore: Double = await getSenderSpamScore(address: address, apiURI: apiURI)
-  if contentType.starts(with: "xmtp.org/text:"), let unwrappedMessage = message, containsURL(input: unwrappedMessage) {
-    spamScore += 1
+func isGroupMessageFromMe(xmtpClient: Client, messageId: String) throws -> Bool {
+  if let message = try xmtpClient.findMessage(messageId: messageId) {
+    return message.decodeOrNull()?.senderAddress == xmtpClient.inboxID
+  } else {
+    return false
   }
-  if sentViaConverse {
-    spamScore -= 1
-  }
-  return spamScore
-}
-
-func getSenderSpamScore(address: String, apiURI: String?) async -> Double {
-  var senderSpamScore: Double = 0.0
-  if (apiURI != nil && !apiURI!.isEmpty) {
-    let senderSpamScoreURI = "\(apiURI ?? "")/api/spam/senders/batch"
-    do {
-      let response = try await withUnsafeThrowingContinuation { continuation in
-              AF.request(senderSpamScoreURI, method: .post, parameters: ["sendersAddresses": [address]], encoding: JSONEncoding.default, headers: nil).validate().responseData { response in
-                  if let data = response.data {
-                      continuation.resume(returning: data)
-                      return
-                  }
-                  if let err = response.error {
-                      continuation.resume(throwing: err)
-                      return
-                  }
-                  fatalError("should not get here")
-              }
-          }
-      
-          if let json = try JSONSerialization.jsonObject(with: response, options: []) as? [String: Any] {
-            if let score = json[address] as? Double {
-              senderSpamScore = score
-            }
-          }
-
-
-      
-    } catch {
-      print(error)
-    }
-  }
-  return senderSpamScore
 }

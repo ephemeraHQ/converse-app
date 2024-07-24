@@ -8,11 +8,13 @@
 import UserNotifications
 import XMTP
 import CryptoKit
+import Intents
 
 func handleNotificationAsync(contentHandler: ((UNNotificationContent) -> Void), bestAttemptContent: UNMutableNotificationContent?) async {
   initSentry()
   var shouldShowNotification = false
   var messageId: String? = nil
+  var messageIntent: INSendMessageIntent? = nil
   
   if var content = bestAttemptContent {
     guard let body = content.userInfo["body"] as? [String: Any],
@@ -24,7 +26,6 @@ func handleNotificationAsync(contentHandler: ((UNNotificationContent) -> Void), 
     }
     
     sentryAddBreadcrumb(message: "Received a notification for account \(account)")
-    
     let apiURI = getApiURI()
     let pushToken = getKeychainValue(forKey: "PUSH_TOKEN")
     let accounts = getAccounts()
@@ -36,13 +37,13 @@ func handleNotificationAsync(contentHandler: ((UNNotificationContent) -> Void), 
     }
     
     if let xmtpClient = await getXmtpClient(account: account), !isIntroTopic(topic: contentTopic) {
-      let encryptedMessageData = Data(base64Encoded: Data(encodedMessage.utf8))!
-      let envelope = XMTP.Envelope.with { envelope in
-        envelope.message = encryptedMessageData
-        envelope.contentTopic = contentTopic
-      }
-
+      
       if isInviteTopic(topic: contentTopic) {
+        let encryptedMessageData = Data(base64Encoded: Data(encodedMessage.utf8))!
+        let envelope = XMTP.Envelope.with { envelope in
+          envelope.message = encryptedMessageData
+          envelope.contentTopic = contentTopic
+        }
         sentryAddBreadcrumb(message: "topic \(contentTopic) is invite topic")
         guard let conversation = await getNewConversationFromEnvelope(
           xmtpClient: xmtpClient,
@@ -59,9 +60,35 @@ func handleNotificationAsync(contentHandler: ((UNNotificationContent) -> Void), 
           conversation: conversation,
           bestAttemptContent: &content
         )
+      } else if isGroupWelcomeTopic(topic: contentTopic) {
+        guard let group = await getNewGroup(xmtpClient: xmtpClient, contentTopic: contentTopic)else {
+          contentHandler(UNNotificationContent())
+          return
+        }
+        
+        (shouldShowNotification, messageId) = await handleGroupWelcome(
+          xmtpClient: xmtpClient,
+          apiURI: apiURI,
+          pushToken: pushToken,
+          group: group,
+          welcomeTopic: contentTopic,
+          bestAttemptContent: &content
+        )
+      } else if isGroupMessageTopic(topic: contentTopic) {
+        let encryptedMessageData = Data(base64Encoded: Data(encodedMessage.utf8))!
+        let envelope = XMTP.Envelope.with { envelope in
+          envelope.message = encryptedMessageData
+          envelope.contentTopic = contentTopic
+        }
+        (shouldShowNotification, messageId, messageIntent) = await handleGroupMessage(xmtpClient: xmtpClient, envelope: envelope, apiURI: apiURI, bestAttemptContent: &content)
       } else {
+        let encryptedMessageData = Data(base64Encoded: Data(encodedMessage.utf8))!
+        let envelope = XMTP.Envelope.with { envelope in
+          envelope.message = encryptedMessageData
+          envelope.contentTopic = contentTopic
+        }
         sentryAddBreadcrumb(message: "topic \(contentTopic) is not invite topic")
-        (shouldShowNotification, messageId) = await handleOngoingConversationMessage(
+        (shouldShowNotification, messageId, messageIntent) = await handleOngoingConversationMessage(
           xmtpClient: xmtpClient,
           envelope: envelope,
           bestAttemptContent: &content,
@@ -72,9 +99,26 @@ func handleNotificationAsync(contentHandler: ((UNNotificationContent) -> Void), 
     
     if (shouldShowNotification && !notificationAlreadyShown(for: messageId)) {
       incrementBadge(for: content)
-      contentHandler(content)
+      guard let intent = messageIntent else {
+        contentHandler(content)
+        return
+      }
+      // Handling Communication Notifications
+      let interaction = INInteraction(intent: intent, response: nil)
+      interaction.direction = .incoming
+      do {
+        if #available(iOSApplicationExtension 15.0, *) {
+          try await interaction.donate()
+          let contentWithIntent = try content.updating(from: intent)
+          contentHandler(contentWithIntent)
+        } else {
+          contentHandler(content)
+        }
+      } catch {
+        contentHandler(content)
+      }
     } else {
-      contentHandler(UNNotificationContent())
+      cancelNotification(contentHandler: contentHandler)
       return
     }
   }
@@ -86,7 +130,9 @@ class NotificationService: UNNotificationServiceExtension {
   
   override func didReceive(_ request: UNNotificationRequest, withContentHandler contentHandler: @escaping (UNNotificationContent) -> Void) {
     self.contentHandler = contentHandler
+    
     bestAttemptContent = (request.content.mutableCopy() as? UNMutableNotificationContent)
+    
     Task {
       await handleNotificationAsync(contentHandler: contentHandler, bestAttemptContent: bestAttemptContent);
     }

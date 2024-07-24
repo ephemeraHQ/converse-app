@@ -1,16 +1,16 @@
 import axios from "axios";
 import * as Contacts from "expo-contacts";
 
-import { ProfileType } from "../components/Onboarding/UserProfile";
-import config from "../config";
-import { TopicData } from "../data/store/chatStore";
-import { ProfileSocials } from "../data/store/profilesStore";
-import { Frens } from "../data/store/recommendationsStore";
-import { getXmtpApiHeaders } from "../utils/xmtpRN/api";
 import { analyticsPlatform } from "./analytics";
-import { TransferAuthorizationMessage } from "./evm/erc20";
+import type { TransferAuthorizationMessage } from "./evm/erc20";
 import { getPrivyRequestHeaders } from "./evm/privy";
-import { TransactionDetails } from "./transaction";
+import type { TransactionDetails } from "./transaction";
+import type { ProfileType } from "../components/Onboarding/UserProfile";
+import config from "../config";
+import type { TopicData } from "../data/store/chatStore";
+import type { ProfileSocials } from "../data/store/profilesStore";
+import type { Frens } from "../data/store/recommendationsStore";
+import { getXmtpApiHeaders } from "../utils/xmtpRN/api";
 
 const api = axios.create({
   baseURL: config.apiURI,
@@ -85,29 +85,29 @@ export const getPrivyAuthenticatedUser = async () => {
 //   return data;
 // };
 
-type ReportMessageQuery = {
-  account: string;
-  messageId: string;
-  messageContent: string;
-  messageSender: string;
-};
+// type ReportMessageQuery = {
+//   account: string;
+//   messageId: string;
+//   messageContent: string;
+//   messageSender: string;
+// };
 
-export const reportMessage = async ({
-  account,
-  messageId,
-  messageContent,
-  messageSender,
-}: ReportMessageQuery) => {
-  await api.post(
-    "/api/report",
-    {
-      messageId,
-      messageContent,
-      messageSender,
-    },
-    { headers: await getXmtpApiHeaders(account) }
-  );
-};
+// export const reportMessage = async ({
+//   account,
+//   messageId,
+//   messageContent,
+//   messageSender,
+// }: ReportMessageQuery) => {
+//   await api.post(
+//     "/api/report",
+//     {
+//       messageId,
+//       messageContent,
+//       messageSender,
+//     },
+//     { headers: await getXmtpApiHeaders(account) }
+//   );
+// };
 
 export const getPeersStatus = async (account: string) => {
   const { data } = await api.get("/api/consent/peer", {
@@ -363,6 +363,139 @@ export const postAddressBook = async (
   await api.post("/api/addressbook", data, {
     headers: await getXmtpApiHeaders(account),
   });
+};
+
+export type GroupLink = { id: string; name: string; description: string };
+
+export const getGroupLink = async (groupLinkId: string) => {
+  const { data } = await api.get(`/api/groups/${groupLinkId}`);
+  return data as GroupLink;
+};
+
+export type JoinGroupLinkResult =
+  | {
+      status: "SUCCESS";
+      topic: string;
+      reason: undefined;
+    }
+  | {
+      status: "DENIED";
+      reason: string | undefined;
+      topic: undefined;
+    }
+  | { status: "ERROR"; reason: undefined; topic: undefined };
+
+export const joinGroupFromLink = async (
+  userAddress: string,
+  groupLinkId: string
+) => {
+  const { data } = await api.post(
+    `/api/groups/join`,
+    { groupLinkId },
+    {
+      headers: await getXmtpApiHeaders(userAddress),
+    }
+  );
+  return data as JoinGroupLinkResult;
+};
+
+export type GroupInvite = {
+  id: string;
+  inviteLink: string;
+  createdByAddress: string;
+  groupName: string;
+  imageUrl?: string;
+  description?: string;
+};
+
+export type CreateGroupInviteResult = Pick<GroupInvite, "id" | "inviteLink">;
+
+// Create a group invite. The invite will be associated with the account used.
+export const createGroupInvite = async (
+  account: string,
+  inputs: {
+    groupName: string;
+    description?: string;
+    imageUrl?: string;
+  }
+): Promise<CreateGroupInviteResult> => {
+  const { data } = await api.post("/api/groupInvite", inputs, {
+    headers: await getXmtpApiHeaders(account),
+  });
+  return data;
+};
+
+// Get a group invite by ID. This method is unauthenticated
+export const getGroupInvite = async (
+  inviteId: string
+): Promise<GroupInvite> => {
+  const { data } = await api.get(`/api/groupInvite/${inviteId}`);
+  return data;
+};
+
+export type GroupJoinRequest = {
+  id: string;
+  status: "PENDING" | "ACCEPTED" | "REJECTED" | "ERROR";
+  invitedByAddress: string;
+  groupName: string;
+  imageUrl?: string;
+  description?: string;
+};
+
+// Create a group join request based on an invite ID.
+// This will trigger a push notification for the invite creator
+export const createGroupJoinRequest = async (
+  account: string,
+  inviteId: string
+): Promise<Pick<GroupJoinRequest, "id">> => {
+  const { data } = await api.post(
+    "/api/groupJoinRequest",
+    { inviteId },
+    {
+      headers: await getXmtpApiHeaders(account),
+    }
+  );
+  return data;
+};
+
+export const getGroupJoinRequest = async (
+  id: string
+): Promise<GroupJoinRequest> => {
+  const { data } = await api.get(`/api/groupJoinRequest/${id}`);
+  return data;
+};
+
+// Update the status of a group join request. The account must match the creator of the INVITE or the request will error
+export const updateGroupJoinRequestStatus = async (
+  account: string,
+  id: string,
+  status: GroupJoinRequest["status"]
+): Promise<Pick<GroupJoinRequest, "status" | "id">> => {
+  const { data } = await api.put(
+    `/api/groupJoinRequest/${id}`,
+    { status },
+    {
+      headers: await getXmtpApiHeaders(account),
+    }
+  );
+  return data;
+};
+
+export type PendingGroupJoinRequest = {
+  id: string; // The ID of the join request
+  groupInviteLinkId: string; // The ID of the invite link
+  requesterAddress: string; // The address of the user requesting to join the group
+  status: GroupJoinRequest["status"]; // The status of the join request. Should be pending
+};
+
+// Get all pending groupJoinRequests for all invites that the account has created
+export const getPendingGroupJoinRequests = async (
+  account: string
+): Promise<{ joinRequests: PendingGroupJoinRequest[] }> => {
+  const { data } = await api.get("/api/groupJoinRequest/pending", {
+    headers: await getXmtpApiHeaders(account),
+  });
+  return data;
 };
 
 export default api;

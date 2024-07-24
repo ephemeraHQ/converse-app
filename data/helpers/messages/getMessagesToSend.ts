@@ -10,13 +10,22 @@ export const getMessagesToSend = async (account: string) => {
       content: true,
       contentFallback: true,
       referencedMessageId: true,
+      status: true,
     },
-    where: {
-      status: "sending",
-      conversation: {
-        pending: false,
+    where: [
+      {
+        status: "sending",
+        conversation: {
+          pending: false,
+        },
       },
-    },
+      {
+        status: "prepared",
+        conversation: {
+          pending: false,
+        },
+      },
+    ],
     order: {
       sent: "ASC",
     },

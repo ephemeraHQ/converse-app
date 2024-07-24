@@ -1,7 +1,7 @@
+import { loadSavedNotificationMessagesToContext } from "./notifications";
 import { currentAccount, getChatStore } from "../data/store/accountsStore";
 import { XmtpConversation } from "../data/store/chatStore";
 import { NavigationParamList } from "../screens/Navigation/Navigation";
-import { loadSavedNotificationMessagesToContext } from "./notifications";
 
 export const converseNavigations: { [navigationName: string]: any } = {};
 

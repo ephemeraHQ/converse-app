@@ -1,10 +1,10 @@
 import { ethers } from "ethers";
 import { isAddress } from "ethers/lib/utils";
 
-import config from "../../config";
 import erc20abi from "./abis/erc20.json";
 import { evmHelpers } from "./helpers";
 import provider from "./provider";
+import config from "../../config";
 
 export const TransferWithAuthorizationTypes = {
   TransferWithAuthorization: [

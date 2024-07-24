@@ -1,16 +1,24 @@
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import {
+  actionSecondaryColor,
+  backgroundColor,
+  dangerColor,
+  itemSeparatorColor,
+  textPrimaryColor,
+  textSecondaryColor,
+} from "@styles/colors";
 import { Signer } from "ethers";
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
-  View,
-  TextInput,
-  StyleSheet,
-  useColorScheme,
-  TouchableOpacity,
-  Platform,
-  Text,
   Alert,
+  Platform,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  useColorScheme,
+  View,
 } from "react-native";
 import { v4 as uuidv4 } from "uuid";
 
@@ -22,14 +30,6 @@ import {
 } from "../../../data/store/accountsStore";
 import { NavigationParamList } from "../../../screens/Navigation/Navigation";
 import { postUSDCTransferAuthorization } from "../../../utils/api";
-import {
-  actionSecondaryColor,
-  backgroundColor,
-  dangerColor,
-  itemSeparatorColor,
-  textPrimaryColor,
-  textSecondaryColor,
-} from "../../../utils/colors";
 import { useConversationContext } from "../../../utils/conversation";
 import { isDesktop } from "../../../utils/device";
 import { getTransferAuthorization } from "../../../utils/evm/erc20";
@@ -142,7 +142,11 @@ export default function TransactionInput() {
   const txUUID = useRef("");
 
   const triggerTx = useCallback(async () => {
-    if (conversation && transactionValue.value.length > 0) {
+    if (
+      conversation &&
+      !conversation.isGroup &&
+      transactionValue.value.length > 0
+    ) {
       let signer = privySigner as Signer | undefined;
       if (!signer) {
         signer = await getCurrentAccountSigner();
@@ -333,7 +337,7 @@ export default function TransactionInput() {
           <TouchableOpacity
             onPress={triggerTx}
             activeOpacity={transactionValue.valid ? 0.4 : 0.6}
-            style={[{ opacity: transactionValue.valid ? 1 : 0.6 }]}
+            style={{ opacity: transactionValue.valid ? 1 : 0.6 }}
           >
             <SendButton width={36} height={36} style={styles.sendButton} />
           </TouchableOpacity>

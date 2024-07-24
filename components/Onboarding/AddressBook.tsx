@@ -1,9 +1,9 @@
 import { Text } from "react-native";
 
+import OnboardingComponent from "./OnboardingComponent";
 import { useSettingsStore } from "../../data/store/accountsStore";
 import { useAppStore } from "../../data/store/appStore";
 import { requestAddressBookPermissions } from "../../utils/addressBook";
-import OnboardingComponent from "./OnboardingComponent";
 
 export default function AddressBook() {
   const setSkipAddressBook = useSettingsStore((s) => s.setSkipAddressBook);

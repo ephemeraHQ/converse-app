@@ -1,8 +1,11 @@
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { FlashList } from "@shopify/flash-list";
+import { backgroundColor } from "@styles/colors";
 import { useCallback, useEffect, useRef } from "react";
-import { Platform, View, useColorScheme, StyleSheet } from "react-native";
+import { Platform, StyleSheet, View, useColorScheme } from "react-native";
 
+import { GroupConversationItem } from "./ConversationList/GroupConversationItem";
+import ConversationListItem from "./ConversationListItem";
 import {
   useChatStore,
   useCurrentAccount,
@@ -12,14 +15,12 @@ import {
 import { useSelect } from "../data/store/storeHelpers";
 import { NavigationParamList } from "../screens/Navigation/Navigation";
 import { useIsSplitScreen } from "../screens/Navigation/navHelpers";
-import { backgroundColor } from "../utils/colors";
 import {
   ConversationFlatListItem,
   ConversationWithLastMessagePreview,
 } from "../utils/conversation";
 import { getPreferredAvatar } from "../utils/profile";
 import { conversationName } from "../utils/str";
-import ConversationListItem from "./ConversationListItem";
 
 type Props = {
   onScroll?: () => void;
@@ -61,6 +62,10 @@ export default function ConversationFlashList({
   const isSplitScreen = useIsSplitScreen();
   const profiles = useProfilesStore((state) => state.profiles);
 
+  const setPinnedConversations = useChatStore(
+    (state) => state.setPinnedConversations
+  );
+
   const listRef = useRef<FlashList<any> | undefined>();
 
   const previousSearchQuery = useRef(itemsForSearchQuery);
@@ -97,9 +102,23 @@ export default function ConversationFlashList({
     ({ item }: { item: ConversationFlatListItem }) => {
       const conversation = item as ConversationWithLastMessagePreview;
       const lastMessagePreview = conversation.lastMessagePreview;
-      const socials = profiles[conversation.peerAddress]?.socials;
+      const socials = conversation.peerAddress
+        ? profiles[conversation.peerAddress]?.socials
+        : undefined;
+      if (conversation.isGroup) {
+        return (
+          <GroupConversationItem
+            conversation={conversation}
+            navigation={navigation}
+            route={route}
+          />
+        );
+      }
       return (
         <ConversationListItem
+          onLongPress={() => {
+            setPinnedConversations([conversation]);
+          }}
           navigation={navigation}
           route={route}
           conversationPeerAddress={conversation.peerAddress}
@@ -124,6 +143,7 @@ export default function ConversationFlashList({
             return readUntil < lastMessagePreview.message.sent;
           })()}
           lastMessagePreview={
+            conversation.peerAddress &&
             peersStatus[conversation.peerAddress.toLowerCase()] === "blocked"
               ? "This user is blocked"
               : lastMessagePreview
@@ -136,6 +156,7 @@ export default function ConversationFlashList({
             lastMessagePreview.message?.senderAddress === userAddress
           }
           conversationOpened={conversation.topic === openedConversationTopic}
+          isGroupConversation={conversation.isGroup}
         />
       );
     },
@@ -149,6 +170,7 @@ export default function ConversationFlashList({
       topicsData,
       userAddress,
       profiles,
+      setPinnedConversations,
     ]
   );
   return (

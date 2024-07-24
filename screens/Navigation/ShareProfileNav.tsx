@@ -1,11 +1,11 @@
-import { Platform, useColorScheme } from "react-native";
-
 import {
   listItemSeparatorColor,
   navigationSecondaryBackgroundColor,
-} from "../../utils/colors";
-import ShareProfileScreen from "../ShareProfile";
+} from "@styles/colors";
+import { Platform, useColorScheme } from "react-native";
+
 import { NativeStack, navigationAnimation } from "./Navigation";
+import ShareProfileScreen from "../ShareProfile";
 
 export const ShareProfileScreenConfig = {
   path: "/shareProfile",

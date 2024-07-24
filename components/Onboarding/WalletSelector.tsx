@@ -1,4 +1,5 @@
-import { useCoinbaseWallet } from "@thirdweb-dev/react-native";
+import { textSecondaryColor } from "@styles/colors";
+import { thirdwebClient } from "@utils/thirdweb";
 import * as Linking from "expo-linking";
 import { useEffect, useRef, useState } from "react";
 import {
@@ -9,12 +10,20 @@ import {
   useColorScheme,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useConnect, useSetActiveWallet } from "thirdweb/react";
+import { createWallet } from "thirdweb/wallets";
 
+import OnboardingComponent from "./OnboardingComponent";
+import {
+  InstalledWallet,
+  POPULAR_WALLETS,
+  getInstalledWallets,
+  installedWallets,
+} from "./supportedWallets";
 import config from "../../config";
 import { useHasOnePrivyAccount } from "../../data/store/accountsStore";
 import { useOnboardingStore } from "../../data/store/onboardingStore";
 import { useSelect } from "../../data/store/storeHelpers";
-import { textSecondaryColor } from "../../utils/colors";
 import { isDesktop } from "../../utils/device";
 import { getEthOSSigner } from "../../utils/ethos";
 import Button from "../Button/Button";
@@ -24,14 +33,6 @@ import {
   TableViewImage,
   TableViewPicto,
 } from "../TableView/TableViewImage";
-import { useDynamicWalletConnect } from "./DynamicWalletConnect";
-import OnboardingComponent from "./OnboardingComponent";
-import {
-  InstalledWallet,
-  POPULAR_WALLETS,
-  getInstalledWallets,
-  installedWallets,
-} from "./supportedWallets";
 
 export default function WalletSelector() {
   const {
@@ -50,10 +51,8 @@ export default function WalletSelector() {
     ])
   );
   const colorScheme = useColorScheme();
-  const connectToCoinbase = useCoinbaseWallet(
-    new URL(`https://${config.websiteDomain}/coinbase`)
-  );
-  const connectToWalletConnect = useDynamicWalletConnect();
+  const { connect: thirdwebConnect } = useConnect();
+  const setActiveWallet = useSetActiveWallet();
   const rightView = (
     <TableViewPicto
       symbol="chevron.right"
@@ -140,7 +139,21 @@ export default function WalletSelector() {
                 setConnectionMethod("wallet");
                 try {
                   if (w.name === "Coinbase Wallet") {
-                    await connectToCoinbase();
+                    thirdwebConnect(async () => {
+                      // instantiate wallet
+                      const coinbaseWallet = createWallet(
+                        "com.coinbase.wallet",
+                        {
+                          appMetadata: config.walletConnectConfig.appMetadata,
+                          mobileConfig: {
+                            callbackURL: `https://${config.websiteDomain}/coinbase`,
+                          },
+                        }
+                      );
+                      await coinbaseWallet.connect({ client: thirdwebClient });
+                      setActiveWallet(coinbaseWallet);
+                      return coinbaseWallet;
+                    });
                   } else if (w.name === "EthOS Wallet") {
                     const signer = getEthOSSigner();
                     if (signer) {
@@ -148,18 +161,14 @@ export default function WalletSelector() {
                     } else {
                       setLoading(false);
                     }
-                  } else if (w.walletConnectId && w.customScheme) {
-                    const native = w.customScheme.endsWith("/")
-                      ? w.customScheme.slice(0, w.customScheme.length - 1)
-                      : w.customScheme;
-                    await connectToWalletConnect(w.walletConnectId, {
-                      name: w.name,
-                      iconURL: w.iconURL,
-                      links: {
-                        native,
-                        universal: w.universalLink || "",
-                      },
+                  } else if (w.thirdwebId) {
+                    const walletConnectWallet = createWallet(w.thirdwebId);
+                    await walletConnectWallet.connect({
+                      client: thirdwebClient,
+                      walletConnect: config.walletConnectConfig,
                     });
+                    setActiveWallet(walletConnectWallet);
+                    return walletConnectWallet;
                   }
                 } catch (e: any) {
                   console.log("Error connecting to wallet:", e);

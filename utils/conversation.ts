@@ -3,18 +3,10 @@ import { MutableRefObject, createRef } from "react";
 import { Alert, Platform } from "react-native";
 import { createContext, useContextSelector } from "use-context-selector";
 
-import config from "../config";
-import { createPendingConversation } from "../data/helpers/conversations/pendingConversations";
-import { getChatStore, useChatStore } from "../data/store/accountsStore";
-import {
-  XmtpMessage,
-  XmtpConversation,
-  XmtpConversationWithUpdate,
-  TopicData,
-} from "../data/store/chatStore";
 import { saveTopicsData } from "./api";
 import { isAttachmentMessage } from "./attachment/helpers";
 import { getAddressForPeer } from "./eth";
+import { getGroupIdFromTopic } from "./groupUtils/groupId";
 import { subscribeToNotifications } from "./notifications";
 import { pick } from "./objects";
 import { getReactionsContentPreview } from "./reactions";
@@ -24,6 +16,16 @@ import { TextInputWithValue, addressPrefix } from "./str";
 import { isTransactionMessage } from "./transaction";
 import { isOnXmtp } from "./xmtpRN/client";
 import { isContentType } from "./xmtpRN/contentTypes";
+import config from "../config";
+import { createPendingConversation } from "../data/helpers/conversations/pendingConversations";
+import { getChatStore, useChatStore } from "../data/store/accountsStore";
+import {
+  MediaPreview,
+  TopicData,
+  XmtpConversation,
+  XmtpConversationWithUpdate,
+  XmtpMessage,
+} from "../data/store/chatStore";
 
 export type ConversationWithLastMessagePreview = XmtpConversation & {
   lastMessagePreview?: LastMessagePreview;
@@ -128,6 +130,7 @@ export const conversationLastMessagePreview = (
         }
       } else if (
         isContentType("readReceipt", lastMessage?.contentType) ||
+        isContentType("groupUpdated", lastMessage?.contentType) ||
         (!lastMessage.content && !lastMessage.contentFallback)
       ) {
         continue;
@@ -253,21 +256,26 @@ export const openMainConversationWithPeer = async (
 type ConversationContextType = {
   conversation?: XmtpConversationWithUpdate;
   inputRef: MutableRefObject<TextInputWithValue | undefined>;
+  mediaPreviewRef: MutableRefObject<MediaPreview | undefined>;
   isBlockedPeer: boolean;
   onReadyToFocus: () => void;
   messageToPrefill: string;
+  mediaPreviewToPrefill: MediaPreview;
   transactionMode: boolean;
   setTransactionMode: (b: boolean) => void;
   frameTextInputFocused: boolean;
   setFrameTextInputFocused: (b: boolean) => void;
+  onPullToRefresh?: () => void;
 };
 
 export const ConversationContext = createContext<ConversationContextType>({
   conversation: undefined,
   inputRef: createRef() as MutableRefObject<TextInputWithValue | undefined>,
+  mediaPreviewRef: createRef() as MutableRefObject<MediaPreview | undefined>,
   isBlockedPeer: false,
   onReadyToFocus: () => {},
   messageToPrefill: "",
+  mediaPreviewToPrefill: null,
   transactionMode: false,
   setTransactionMode: () => {},
   frameTextInputFocused: false,
@@ -291,54 +299,104 @@ const conversationsSortMethod = (
   return bDate - aDate;
 };
 
-// Wether a conversation should appear in Inbox OR Spam
+// Whether a conversation should appear in Inbox OR Requests
 // or just be totally hidden (blocked peer, deleted convo)
 export const conversationShouldBeDisplayed = (
   conversation: ConversationWithLastMessagePreview,
   topicsData: { [topic: string]: TopicData | undefined },
-  peersStatus: { [peer: string]: "blocked" | "consented" }
+  peersStatus: { [peer: string]: "blocked" | "consented" },
+  groupsStatus: { [topic: string]: "allowed" | "denied" },
+  pinnedConversations?: ConversationFlatListItem[]
 ) => {
+  const isNotReady =
+    (conversation.isGroup && !conversation.groupMembers) ||
+    (!conversation.isGroup && !conversation.peerAddress);
+  if (isNotReady) return false;
+  const isPending = !!conversation.pending;
+  const isNotEmpty = conversation.messages.size > 0;
+  const isDeleted = topicsData[conversation.topic]?.status === "deleted";
+  const isBlocked = conversation.isGroup
+    ? // TODO: Add more conditions to filter out spam
+      groupsStatus[conversation.topic] === "denied"
+    : peersStatus[conversation.peerAddress.toLowerCase()] === "blocked";
+  const isActive = conversation.isGroup ? conversation.isActive : true;
+  const isV1 = conversation.version === "v1";
+  const isForbidden = conversation.topic.includes("\x00"); // Forbidden character that breaks
+  const isPinned = pinnedConversations?.find(
+    (convo) => convo.topic === conversation.topic
+  );
   return (
-    conversation?.peerAddress &&
-    (!conversation.pending || conversation.messages.size > 0) &&
-    topicsData[conversation.topic]?.status !== "deleted" &&
-    peersStatus[conversation.peerAddress.toLowerCase()] !== "blocked" &&
-    conversation.version !== "v1" &&
-    !conversation.topic.includes("\x00")
+    (!isPending || isNotEmpty) &&
+    !isDeleted &&
+    !isBlocked &&
+    !isV1 &&
+    !isForbidden &&
+    !isPinned &&
+    isActive
   ); // Forbidden character that breaks notifications
 };
 
 // Wether a conversation should appear in Inbox tab (i.e. probably not a spam)
 export const conversationShouldBeInInbox = (
   conversation: ConversationWithLastMessagePreview,
-  peersStatus: { [peer: string]: "blocked" | "consented" }
+  peersStatus: { [peer: string]: "blocked" | "consented" },
+  groupsStatus: { [topic: string]: "allowed" | "denied" }
 ) => {
-  return (
-    conversation.hasOneMessageFromMe ||
-    peersStatus[conversation.peerAddress.toLowerCase()] === "consented" ||
-    (conversation.spamScore !== undefined &&
-      (conversation.spamScore === null || conversation.spamScore < 1))
-  );
+  if (conversation.isGroup) {
+    const groupId = getGroupIdFromTopic(conversation.topic);
+    const isGroupAllowed = groupsStatus[groupId] === "allowed";
+    const isCreatorAllowed =
+      conversation.groupCreator &&
+      peersStatus[conversation.groupCreator.toLowerCase()] === "consented";
+    const isAddedByAllowed =
+      conversation.groupAddedBy &&
+      peersStatus[conversation.groupAddedBy.toLowerCase()] === "consented";
+    return (
+      conversation.hasOneMessageFromMe ||
+      isGroupAllowed ||
+      isCreatorAllowed ||
+      isAddedByAllowed
+    );
+  } else {
+    const isPeerConsented =
+      peersStatus[conversation.peerAddress.toLowerCase()] === "consented";
+    return conversation.hasOneMessageFromMe || isPeerConsented;
+  }
 };
 
 export function sortAndComputePreview(
   conversations: Record<string, XmtpConversation>,
   userAddress: string,
   topicsData: { [topic: string]: TopicData | undefined },
-  peersStatus: { [peer: string]: "blocked" | "consented" }
+  peersStatus: { [peer: string]: "blocked" | "consented" },
+  groupsStatus: { [topic: string]: "allowed" | "denied" },
+  pinnedConversations?: ConversationFlatListItem[]
 ) {
   const conversationsRequests: ConversationWithLastMessagePreview[] = [];
   const conversationsInbox: ConversationWithLastMessagePreview[] = [];
   Object.values(conversations).forEach(
     (conversation: ConversationWithLastMessagePreview, i) => {
+      const isNotReady =
+        (conversation.isGroup && !conversation.groupMembers) ||
+        (!conversation.isGroup && !conversation.peerAddress);
+      if (isNotReady) return;
+
       if (
-        conversationShouldBeDisplayed(conversation, topicsData, peersStatus)
+        conversationShouldBeDisplayed(
+          conversation,
+          topicsData,
+          peersStatus,
+          groupsStatus,
+          pinnedConversations
+        )
       ) {
         conversation.lastMessagePreview = conversationLastMessagePreview(
           conversation,
           userAddress
         );
-        if (conversationShouldBeInInbox(conversation, peersStatus)) {
+        if (
+          conversationShouldBeInInbox(conversation, peersStatus, groupsStatus)
+        ) {
           conversationsInbox.push(conversation);
         } else {
           conversationsRequests.push(conversation);
@@ -365,9 +423,18 @@ export function getFilteredConversationsWithSearch(
 ): ConversationFlatListItem[] {
   if (searchQuery && sortedConversations) {
     const matchedPeerAddresses = getMatchedPeerAddresses(profiles, searchQuery);
-    const filteredConversations = sortedConversations.filter((conversation) =>
-      matchedPeerAddresses.includes(conversation.peerAddress)
-    );
+    const filteredConversations = sortedConversations.filter((conversation) => {
+      if (conversation.isGroup) {
+        return conversation.groupName
+          ?.toLowerCase()
+          .includes(searchQuery.toLowerCase().trim());
+      } else {
+        return (
+          conversation.peerAddress &&
+          matchedPeerAddresses.includes(conversation.peerAddress)
+        );
+      }
+    });
     return filteredConversations;
   } else {
     return sortedConversations;

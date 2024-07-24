@@ -1,7 +1,7 @@
-import config from "../config";
 import { addLog } from "./debug";
 import mmkv from "./mmkv";
 import { sentryTrackError } from "./sentry";
+import config from "../config";
 
 export const saveConversationDict = (topic: string, conversationDict: any) =>
   mmkv.set(`conversation-${topic}`, JSON.stringify(conversationDict));

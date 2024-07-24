@@ -1,8 +1,14 @@
 import { ConnectedWallet, usePrivy, useWallets } from "@privy-io/react-auth";
-import { useWeb3ModalProvider, useWeb3Modal } from "@web3modal/ethers5/react";
+import {
+  backgroundColor,
+  textPrimaryColor,
+  textSecondaryColor,
+} from "@styles/colors";
+import { PictoSizes } from "@styles/sizes";
+import { useWeb3Modal, useWeb3ModalProvider } from "@web3modal/ethers5/react";
 import { ethers } from "ethers";
 import { useEffect, useRef, useState } from "react";
-import { Text, View, useColorScheme, StyleSheet } from "react-native";
+import { StyleSheet, Text, View, useColorScheme } from "react-native";
 
 import Button from "../components/Button/Button";
 import Picto from "../components/Picto/Picto";
@@ -20,11 +26,6 @@ import {
 } from "../data/store/accountsStore";
 import { useOnboardingStore } from "../data/store/onboardingStore";
 import { useSelect } from "../data/store/storeHelpers";
-import {
-  backgroundColor,
-  textPrimaryColor,
-  textSecondaryColor,
-} from "../utils/colors";
 import { saveXmtpKey } from "../utils/keychain/helpers";
 import { getXmtpBase64KeyFromSigner } from "../utils/xmtpRN/signIn";
 import { getXmtpClient } from "../utils/xmtpRN/sync";
@@ -136,7 +137,11 @@ export default function Onboarding() {
   );
   return (
     <View style={styles.container}>
-      <Picto picto="message.circle.fill" size={80} style={[styles.picto]} />
+      <Picto
+        picto="message.circle.fill"
+        size={PictoSizes.onboarding}
+        style={styles.picto}
+      />
 
       <Text style={styles.title}>GM</Text>
       <Text style={styles.p}>
@@ -171,7 +176,7 @@ export default function Onboarding() {
         <Button
           title="Cancel"
           variant="text"
-          style={[styles.cancelButton]}
+          style={styles.cancelButton}
           onPress={() => setAddingNewAccount(false)}
         />
       )}

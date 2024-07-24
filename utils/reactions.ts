@@ -1,11 +1,11 @@
 import { ContentTypeReaction } from "@xmtp/content-type-reaction";
 
-import { XmtpConversation, XmtpMessage } from "../data/store/chatStore";
-import { emojisByCategory } from "../vendor/rn-emoji-keyboard";
 import { isAttachmentMessage } from "./attachment/helpers";
 import { sendMessage } from "./message";
 import { sentryTrackMessage } from "./sentry";
 import { getMessageContentType } from "./xmtpRN/contentTypes";
+import { XmtpConversation, XmtpMessage } from "../data/store/chatStore";
+import { emojisByCategory } from "../vendor/rn-emoji-keyboard";
 
 export type MessageReaction = {
   action: "added" | "removed";

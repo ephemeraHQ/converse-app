@@ -1,20 +1,22 @@
 import { NativeStackNavigationOptions } from "@react-navigation/native-stack";
+import { textPrimaryColor, textSecondaryColor } from "@styles/colors";
+import { PictoSizes } from "@styles/sizes";
 import {
   Button,
   Platform,
-  useColorScheme,
   TouchableOpacity,
+  useColorScheme,
 } from "react-native";
 
+import { NativeStack, navigationAnimation } from "./Navigation";
 import Picto from "../../components/Picto/Picto";
 import { useCurrentAccount } from "../../data/store/accountsStore";
-import { textSecondaryColor } from "../../utils/colors";
 import { navigate } from "../../utils/navigation";
 import ProfileScreen from "../Profile";
-import { NativeStack, navigationAnimation } from "./Navigation";
 
 export type ProfileNavParams = {
   address: string;
+  fromGroupTopic?: string;
 };
 
 export const ProfileScreenConfig = {
@@ -28,7 +30,7 @@ export default function ProfileNav() {
     headerTintColor:
       Platform.OS === "android" || Platform.OS === "web"
         ? textSecondaryColor(colorScheme)
-        : undefined,
+        : textPrimaryColor(colorScheme),
     animation: navigationAnimation,
   };
   if (Platform.OS === "web") {
@@ -47,6 +49,7 @@ export default function ProfileNav() {
               return (
                 <Button
                   title="Modify"
+                  color={textPrimaryColor(colorScheme)}
                   onPress={() => {
                     navigate("UserProfile");
                   }}
@@ -61,7 +64,7 @@ export default function ProfileNav() {
               >
                 <Picto
                   picto="square.and.pencil"
-                  size={24}
+                  size={PictoSizes.navItem}
                   color={textSecondaryColor(colorScheme)}
                   style={{ marginRight: Platform.OS === "web" ? 30 : 0 }}
                 />
