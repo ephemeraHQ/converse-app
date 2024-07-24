@@ -27,9 +27,13 @@ import { addReferencedMessage1691397563214 } from "./migrations/1691397563214-ad
 import { removeOldReactions1691412759130 } from "./migrations/1691412759130-removeOldReactions";
 import { AddVersionToConversation1695029413899 } from "./migrations/1695029413899-addVersionToConversation";
 import { AddSpamScore1698068091873 } from "./migrations/1698068091873-addSpamScore";
+import { AddGroupConversations1708332276329 } from "./migrations/1708332276329-addGroupConversations";
 import { AddConverseMessageMetadata1709030178271 } from "./migrations/1709030178271-addConverseMessageMetadata";
 import { AddLastNotifSubscribePeriodToConversation1709893391562 } from "./migrations/1709893391562-addLastNotifSubscribePeriodToConversation";
 import { AddIndexToSent1712656017130 } from "./migrations/1712656017130-addIndexToSent";
+import { RemoveSentViaConverse1717625558678 } from "./migrations/1717625558678-RemoveSentViaConverse";
+import { AddSuperAdmin1717631723249 } from "./migrations/1717631723249-AddSuperAdmin";
+import { AddIsActive1721143963530 } from "./migrations/1721143963530-addIsActive";
 
 // We now use built in SQLite v3.45.1 from op-sqlite
 
@@ -77,6 +81,10 @@ export const getDataSource = async (account: string) => {
       AddConverseMessageMetadata1709030178271,
       AddLastNotifSubscribePeriodToConversation1709893391562,
       AddIndexToSent1712656017130,
+      AddGroupConversations1708332276329,
+      RemoveSentViaConverse1717625558678,
+      AddSuperAdmin1717631723249,
+      AddIsActive1721143963530,
     ],
     type: "react-native",
     location: await getDbDirectory(),

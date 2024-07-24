@@ -1,4 +1,12 @@
 import { useEmbeddedWallet, useLoginWithSMS, usePrivy } from "@privy-io/expo";
+import {
+  backgroundColor,
+  primaryColor,
+  tertiaryBackgroundColor,
+  textPrimaryColor,
+  textSecondaryColor,
+} from "@styles/colors";
+import { PictoSizes } from "@styles/sizes";
 import * as LibPhoneNumber from "libphonenumber-js";
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
@@ -14,19 +22,12 @@ import * as RNLocalize from "react-native-localize";
 import { OtpInput, OtpInputRef } from "react-native-otp-entry";
 import PhoneInput from "react-native-phone-number-input";
 
+import OnboardingComponent from "./OnboardingComponent";
 import Button from "../../components/Button/Button";
 import { useOnboardingStore } from "../../data/store/onboardingStore";
 import { useSelect } from "../../data/store/storeHelpers";
-import {
-  backgroundColor,
-  primaryColor,
-  tertiaryBackgroundColor,
-  textPrimaryColor,
-  textSecondaryColor,
-} from "../../utils/colors";
 import { usePrivyAccessToken, usePrivySigner } from "../../utils/evm/privy";
 import Picto from "../Picto/Picto";
-import OnboardingComponent from "./OnboardingComponent";
 
 export default function PrivyConnect() {
   const colorScheme = useColorScheme();
@@ -246,7 +247,7 @@ export default function PrivyConnect() {
               <Picto
                 picto="chevron.down"
                 color={textSecondaryColor(colorScheme)}
-                size={Platform.OS === "ios" ? 12 : 22}
+                size={PictoSizes.privyConnect}
                 style={styles.flagChevron}
               />
             }

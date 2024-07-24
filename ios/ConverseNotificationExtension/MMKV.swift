@@ -56,6 +56,21 @@ func getAccountsState() -> Accounts? {
   }
 }
 
+func getProfilesState(account: String) -> Profiles? {
+  let mmkv = getMmkv()
+  let profilesString = mmkv?.string(forKey: "store-\(account)-profiles")
+  if (profilesString == nil) {
+    return nil
+  }
+  let decoder = JSONDecoder()
+  do {
+    let decoded = try decoder.decode(ProfilesStore.self, from: profilesString!.data(using: .utf8)!)
+    return decoded.state
+  } catch {
+    return nil
+  }
+}
+
 func getCurrentAccount() -> String? {
   let accountsState = getAccountsState()
   if (accountsState == nil || accountsState?.currentAccount == "TEMPORARY_ACCOUNT") {

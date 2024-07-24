@@ -1,12 +1,13 @@
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import { Platform, StyleSheet, Text, View, useColorScheme } from "react-native";
-
-import { ProfileSocials } from "../../data/store/profilesStore";
 import {
   itemSeparatorColor,
   textPrimaryColor,
   textSecondaryColor,
-} from "../../utils/colors";
+} from "@styles/colors";
+import { AvatarSizes } from "@styles/sizes";
+import { Platform, StyleSheet, Text, View, useColorScheme } from "react-native";
+
+import { ProfileSocials } from "../../data/store/profilesStore";
 import {
   getPreferredAvatar,
   getPreferredName,
@@ -20,10 +21,14 @@ export function ProfileSearchItem({
   address,
   socials,
   navigation,
+  groupMode,
+  addToGroup,
 }: {
   address: string;
   socials: ProfileSocials;
   navigation?: NativeStackNavigationProp<any>;
+  groupMode?: boolean;
+  addToGroup?: (member: ProfileSocials & { address: string }) => void;
 }) {
   const styles = useStyles();
   const preferredName = getPreferredName(socials, address);
@@ -35,9 +40,14 @@ export function ProfileSearchItem({
   ];
 
   return (
-    <View key={address} style={[styles.container]}>
+    <View key={address} style={styles.container}>
       <View style={styles.left}>
-        <Avatar uri={preferredAvatar} size={40} style={styles.avatar} />
+        <Avatar
+          uri={preferredAvatar}
+          size={AvatarSizes.listItemDisplay}
+          style={styles.avatar}
+          name={preferredName}
+        />
         <View>
           <Text style={styles.title}>
             {preferredName || shortAddress(address)}
@@ -51,7 +61,14 @@ export function ProfileSearchItem({
       </View>
       {navigation && (
         <View style={styles.right}>
-          <NavigationChatButton navigation={navigation} address={address} />
+          <NavigationChatButton
+            navigation={navigation}
+            address={address}
+            groupMode={groupMode}
+            addToGroup={
+              addToGroup ? () => addToGroup({ ...socials, address }) : undefined
+            }
+          />
         </View>
       )}
     </View>

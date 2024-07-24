@@ -1,6 +1,6 @@
+import { sentryAddBreadcrumb } from "./sentry";
 import config from "../config";
 import { currentAccount } from "../data/store/accountsStore";
-import { sentryAddBreadcrumb } from "./sentry";
 
 const timestamps: { [timestampId: string]: { start: number; last: number } } =
   {};

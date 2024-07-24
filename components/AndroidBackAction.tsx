@@ -1,8 +1,7 @@
 import { HeaderBackButton } from "@react-navigation/elements";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack/lib/typescript/src/types";
+import { textSecondaryColor } from "@styles/colors";
 import { Platform, useColorScheme } from "react-native";
-
-import { textSecondaryColor } from "../utils/colors";
 
 export default function AndroidBackAction({
   navigation,

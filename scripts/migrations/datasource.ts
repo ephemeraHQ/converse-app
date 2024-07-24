@@ -1,7 +1,11 @@
 import "reflect-metadata";
+
 import path from "path";
 import { DataSource } from "typeorm";
 
+import { Conversation } from "./entities/conversationEntity";
+import { Message } from "./entities/messageEntity";
+import { Profile } from "./entities/profileEntity";
 import { init1671623489366 } from "../../data/db/migrations/1671623489366-init";
 import { addLensHandle1671788934503 } from "../../data/db/migrations/1671788934503-addLensHandle";
 import { addEnsName1673277126468 } from "../../data/db/migrations/1673277126468-addEnsName";
@@ -22,12 +26,13 @@ import { addReferencedMessage1691397563214 } from "../../data/db/migrations/1691
 import { removeOldReactions1691412759130 } from "../../data/db/migrations/1691412759130-removeOldReactions";
 import { AddVersionToConversation1695029413899 } from "../../data/db/migrations/1695029413899-addVersionToConversation";
 import { AddSpamScore1698068091873 } from "../../data/db/migrations/1698068091873-addSpamScore";
+import { AddGroupConversations1708332276329 } from "../../data/db/migrations/1708332276329-addGroupConversations";
 import { AddConverseMessageMetadata1709030178271 } from "../../data/db/migrations/1709030178271-addConverseMessageMetadata";
 import { AddLastNotifSubscribePeriodToConversation1709893391562 } from "../../data/db/migrations/1709893391562-addLastNotifSubscribePeriodToConversation";
 import { AddIndexToSent1712656017130 } from "../../data/db/migrations/1712656017130-addIndexToSent";
-import { Conversation } from "./entities/conversationEntity";
-import { Message } from "./entities/messageEntity";
-import { Profile } from "./entities/profileEntity";
+import { RemoveSentViaConverse1717625558678 } from "../../data/db/migrations/1717625558678-RemoveSentViaConverse";
+import { AddSuperAdmin1717631723249 } from "../../data/db/migrations/1717631723249-AddSuperAdmin";
+import { AddIsActive1721143963530 } from "../../data/db/migrations/1721143963530-addIsActive";
 
 const dataSource = new DataSource({
   database: path.join(__dirname, "converse-sample.sqlite"),
@@ -58,6 +63,10 @@ const dataSource = new DataSource({
     AddConverseMessageMetadata1709030178271,
     AddLastNotifSubscribePeriodToConversation1709893391562,
     AddIndexToSent1712656017130,
+    AddGroupConversations1708332276329,
+    RemoveSentViaConverse1717625558678,
+    AddSuperAdmin1717631723249,
+    AddIsActive1721143963530,
   ],
   type: "sqlite",
 });

@@ -1,4 +1,11 @@
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import {
+  backgroundColor,
+  itemSeparatorColor,
+  primaryColor,
+  textPrimaryColor,
+  textSecondaryColor,
+} from "@styles/colors";
 import * as Linking from "expo-linking";
 import { useCallback, useEffect, useState } from "react";
 import {
@@ -12,6 +19,7 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
+import { Recommendation } from "./Recommendation";
 import config from "../../config";
 import {
   useAccountsStore,
@@ -19,16 +27,8 @@ import {
   useRecommendationsStore,
 } from "../../data/store/accountsStore";
 import { useSelect } from "../../data/store/storeHelpers";
-import {
-  backgroundColor,
-  itemSeparatorColor,
-  primaryColor,
-  textPrimaryColor,
-  textSecondaryColor,
-} from "../../utils/colors";
 import { refreshRecommendationsForAccount } from "../../utils/recommendations";
 import ActivityIndicator from "../ActivityIndicator/ActivityIndicator";
-import { Recommendation } from "./Recommendation";
 
 const EXPIRE_AFTER = 86400000; // 1 DAY
 

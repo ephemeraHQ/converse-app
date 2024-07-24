@@ -3,9 +3,9 @@ import {
   GestureResponderEvent,
   StyleProp,
   StyleSheet,
+  Text,
   TextStyle,
   View,
-  Text,
   ViewStyle,
 } from "react-native";
 import { Button as MaterialButton } from "react-native-paper";
@@ -72,7 +72,7 @@ export default function Button({
             : undefined
         }
       >
-        <Text>{title}</Text>
+        <Text style={styles.textContainer}>{title}</Text>
       </MaterialButton>
     </View>
   );
@@ -92,5 +92,8 @@ const styles = StyleSheet.create({
   },
   picto: {
     marginRight: 10,
+  },
+  textContainer: {
+    flexGrow: 1,
   },
 });

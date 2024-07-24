@@ -1,5 +1,6 @@
 import { In } from "typeorm/browser";
 
+import { upgradePendingConversationsIfNeeded } from "./pendingConversations";
 import {
   navigateToTopicWithRetry,
   topicToNavigateTo,
@@ -14,7 +15,6 @@ import { xmtpConversationToDb } from "../../mappers";
 import { getChatStore, getProfilesStore } from "../../store/accountsStore";
 import { XmtpConversation } from "../../store/chatStore";
 import { refreshProfilesIfNeeded } from "../profiles/profilesUpdate";
-import { upgradePendingConversationsIfNeeded } from "./pendingConversations";
 
 export const saveConversations = async (
   account: string,
@@ -39,22 +39,6 @@ export const saveConversations = async (
   );
   // Then to context so it show immediatly even without handle
   chatStoreState.setConversations(newlySavedConversations);
-  // Let's find out which need to have the profile updated
-  const knownProfiles = getProfilesStore(account).getState().profiles;
-  const convosWithProfilesToUpdate: XmtpConversation[] = [];
-  const now = new Date().getTime();
-  [alreadyKnownConversations, newlySavedConversations].forEach(
-    (conversationList) => {
-      conversationList.forEach((c) => {
-        const existingProfile = knownProfiles[c.peerAddress];
-        const lastProfileUpdate = existingProfile?.updatedAt || 0;
-        const shouldUpdateProfile = now - lastProfileUpdate >= 24 * 3600 * 1000;
-        if (shouldUpdateProfile) {
-          convosWithProfilesToUpdate.push(c);
-        }
-      });
-    }
-  );
   refreshProfilesIfNeeded(account);
 
   // Navigate to conversation from push notification on first message
@@ -86,15 +70,18 @@ const setupAndSaveConversations = async (
   conversations.forEach((conversation) => {
     const alreadyConversationInDbWithTopic =
       alreadyConversationsByTopic[conversation.topic];
-    const profileSocials =
-      getProfilesStore(account).getState().profiles[conversation.peerAddress]
-        ?.socials;
 
-    conversation.conversationTitle = getPreferredName(
-      profileSocials,
-      conversation.peerAddress,
-      conversation.context?.conversationId
-    );
+    if (!conversation.isGroup) {
+      const profileSocials =
+        getProfilesStore(account).getState().profiles[conversation.peerAddress]
+          ?.socials;
+
+      conversation.conversationTitle = getPreferredName(
+        profileSocials,
+        conversation.peerAddress,
+        conversation.context?.conversationId
+      );
+    }
 
     conversation.readUntil =
       conversation.readUntil ||

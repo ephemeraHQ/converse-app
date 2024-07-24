@@ -1,7 +1,7 @@
 import isDeepEqual from "fast-deep-equal";
 import { Platform } from "react-native";
 import { create } from "zustand";
-import { persist, createJSONStorage } from "zustand/middleware";
+import { createJSONStorage, persist } from "zustand/middleware";
 
 import {
   TopicSpamScores,
@@ -29,15 +29,15 @@ type XmtpConversationContext = {
   };
 };
 
-export type XmtpConversation = {
+type XmtpConversationShared = {
   topic: string;
-  peerAddress: string;
   createdAt: number;
   context?: XmtpConversationContext;
   messages: Map<string, XmtpMessage>;
   messagesIds: string[];
   conversationTitle?: string | null;
   messageDraft?: string;
+  mediaPreview?: MediaPreview;
   readUntil: number; // UNUSED
   hasOneMessageFromMe?: boolean;
   pending: boolean;
@@ -45,6 +45,29 @@ export type XmtpConversation = {
   spamScore?: number;
   lastNotificationsSubscribedPeriod?: number;
 };
+
+export type XmtpDMConversation = XmtpConversationShared & {
+  isGroup: false;
+  peerAddress: string;
+  groupMembers?: undefined;
+  groupAdmins?: undefined;
+  groupPermissionLevel?: undefined;
+};
+
+export type XmtpGroupConversation = XmtpConversationShared & {
+  isGroup: true;
+  peerAddress?: undefined;
+  groupMembers: string[];
+  groupAdmins: string[];
+  groupSuperAdmins: string[];
+  groupPermissionLevel: "all_members" | "admin_only" | "custom_policy";
+  groupName?: string;
+  groupCreator?: string;
+  groupAddedBy?: string;
+  isActive?: boolean;
+};
+
+export type XmtpConversation = XmtpDMConversation | XmtpGroupConversation;
 
 export type XmtpConversationWithUpdate = XmtpConversation & {
   lastUpdateAt: number;
@@ -60,13 +83,13 @@ type XmtpProtocolMessage = {
 };
 
 export type XmtpMessage = XmtpProtocolMessage & {
-  status: "delivered" | "error" | "seen" | "sending" | "sent";
-  sentViaConverse: boolean;
+  status: "delivered" | "error" | "seen" | "sending" | "sent" | "prepared";
   reactions?: Map<string, XmtpMessage>;
   contentFallback?: string;
   referencedMessageId?: string;
   lastUpdateAt?: number;
   converseMetadata?: ConverseMessageMetadata;
+  localMediaURI?: string;
 };
 
 type ConversationsListItems = {
@@ -80,10 +103,27 @@ export type TopicData = {
   timestamp?: number;
 };
 
+export type MediaPreview = {
+  mediaURI: string;
+  status: "error" | "picked" | "uploading" | "uploaded" | "sending";
+} | null;
+
+export type Attachment = {
+  loading: boolean;
+  error: boolean;
+  mediaType: "IMAGE" | "UNSUPPORTED" | undefined;
+  mediaURL: string | undefined;
+  filename: string;
+  mimeType: string;
+  contentLength: number;
+  imageSize: { height: number; width: number } | undefined;
+};
+
 export type ChatStoreType = {
   conversations: {
     [topic: string]: XmtpConversationWithUpdate;
   };
+  pinnedConversations: XmtpConversation[];
   openedConversationTopic: string | null;
   setOpenedConversationTopic: (topic: string | null) => void;
   conversationsMapping: {
@@ -110,12 +150,18 @@ export type ChatStoreType = {
   setSearchBarFocused: (focused: boolean) => void;
 
   setConversations: (conversations: XmtpConversation[]) => void;
+  setPinnedConversations: (conversations: XmtpConversation[]) => void;
+
   deleteConversations: (topics: string[]) => void;
   updateConversationTopic: (
     oldTopic: string,
     conversation: XmtpConversation
   ) => void;
   setConversationMessageDraft: (topic: string, draft: string) => void;
+  setConversationMediaPreview: (
+    topic: string,
+    mediaPreview: MediaPreview
+  ) => void;
 
   setInitialLoadDone: () => void;
   setMessages: (messagesToSet: XmtpMessage[]) => void;
@@ -125,7 +171,7 @@ export type ChatStoreType = {
   updateMessageStatus: (
     topic: string,
     messageId: string,
-    status: "delivered" | "error" | "seen" | "sending" | "sent"
+    status: "delivered" | "error" | "seen" | "sending" | "sent" | "prepared"
   ) => void;
 
   setLocalClientConnected: (connected: boolean) => void;
@@ -140,6 +186,9 @@ export type ChatStoreType = {
 
   setSpamScores: (topicSpamScores: TopicSpamScores) => void;
 
+  // METHOD ONLY USED TEMPORARILY FOR WHEN WE SEND GROP MESSAGES
+  deleteMessage: (topic: string, messageId: string) => void;
+
   setMessageMetadata: (
     topic: string,
     messageId: string,
@@ -150,16 +199,21 @@ export type ChatStoreType = {
     topics: string[],
     period: number
   ) => void;
+
+  messageAttachments: Record<string, Attachment>;
+
+  setMessageAttachment: (messageId: string, attachment: Attachment) => void;
 };
 
 const now = () => new Date().getTime();
 
 export const initChatStore = (account: string) => {
-  const recommendationsStore = create<ChatStoreType>()(
+  const chatStore = create<ChatStoreType>()(
     persist(
       (set) =>
         ({
           conversations: {},
+          pinnedConversations: [],
           lastSyncedAt: 0,
           lastSyncedTopics: [],
           topicsData: {},
@@ -250,6 +304,28 @@ export const initChatStore = (account: string) => {
                 lastUpdateAt: now(),
               };
             }),
+          setPinnedConversations: (conversationsToSet) =>
+            set((state) => {
+              const conversations = { ...state.conversations };
+              const pinnedConversations = state.pinnedConversations || [];
+
+              conversationsToSet.forEach((c) => {
+                const alreadyPinnedIndex = pinnedConversations.findIndex(
+                  (item) => item.topic === c.topic
+                );
+                if (alreadyPinnedIndex !== -1) {
+                  pinnedConversations.splice(alreadyPinnedIndex, 1);
+                } else {
+                  pinnedConversations.push(c);
+                }
+              });
+
+              return {
+                ...state,
+                conversations,
+              };
+            }),
+
           deleteConversations: (topics) =>
             set(({ conversations }) => {
               setImmediate(() => {
@@ -300,6 +376,19 @@ export const initChatStore = (account: string) => {
               }
               const newState = { ...state };
               newState.conversations[topic].messageDraft = messageDraft;
+              return newState;
+            }),
+          setConversationMediaPreview: (topic, mediaPreview) =>
+            set((state) => {
+              if (!state.conversations[topic]) {
+                console.log(
+                  "[Error] Tried to set media preview on non existent conversation",
+                  topic
+                );
+                return state;
+              }
+              const newState = { ...state };
+              newState.conversations[topic].mediaPreview = mediaPreview;
               return newState;
             }),
           setMessages: (messagesToSet) =>
@@ -533,6 +622,20 @@ export const initChatStore = (account: string) => {
                       }
                     }
                   }
+                  // // Transfer attachment URL to the new message
+                  // if (oldMessage && state.messageAttachments[oldMessage.id]) {
+                  //   const oldAttachment = state.messageAttachments[oldMessage.id];
+                  //   const updatedAttachment = {
+                  //     ...oldAttachment,
+                  //     mediaURL: oldAttachment.mediaURL?.replace(oldMessage.id, messageToUpdate.message.id)
+                  //   };
+                  //   newState.messageAttachments[messageToUpdate.topic] = {
+                  //     ...newState.messageAttachments[messageToUpdate.topic],
+                  //     [messageToUpdate.message.id]: updatedAttachment
+                  //   };
+                  //   delete newState.messageAttachments[oldMessage.id];
+                  // }
+
                   insertMessageIdAtRightIndex(
                     conversation,
                     messageToUpdate.message,
@@ -622,6 +725,22 @@ export const initChatStore = (account: string) => {
               });
               return newState;
             }),
+          // METHOD ONLY USED TEMPORARILY FOR WHEN WE SEND GROP MESSAGES
+          deleteMessage: (topic: string, messageId: string) =>
+            set((state) => {
+              // We do not use lastUpdateAt so it should not show an update
+              // until we get back the "real" message
+              const newState = { ...state };
+              if (newState.conversations[topic]) {
+                const indexOf =
+                  newState.conversations[topic]?.messagesIds.indexOf(messageId);
+                if (indexOf > -1) {
+                  newState.conversations[topic].messagesIds.splice(indexOf, 1);
+                  newState.conversations[topic].messages.delete(messageId);
+                }
+              }
+              return newState;
+            }),
           setMessageMetadata: (
             topic: string,
             messageId: string,
@@ -654,6 +773,14 @@ export const initChatStore = (account: string) => {
               });
               return { conversations: newConversations };
             }),
+          messageAttachments: {},
+          setMessageAttachment(messageId, attachment) {
+            set((state) => {
+              const newMessageAttachments = { ...state.messageAttachments };
+              newMessageAttachments[messageId] = attachment;
+              return { messageAttachments: newMessageAttachments };
+            });
+          },
         }) as ChatStoreType,
       {
         name: `store-${account}-chat`, // Account-based storage so each account can have its own chat data
@@ -718,7 +845,7 @@ export const initChatStore = (account: string) => {
       }
     )
   );
-  return recommendationsStore;
+  return chatStore;
 };
 
 const isMessageUpdated = (oldMessage: XmtpMessage, newMessage: XmtpMessage) => {

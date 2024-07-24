@@ -1,11 +1,11 @@
-import { Platform, useColorScheme } from "react-native";
-
 import {
   listItemSeparatorColor,
   navigationSecondaryBackgroundColor,
-} from "../../utils/colors";
-import TopUpScreen from "../TopUp";
+} from "@styles/colors";
+import { Platform, useColorScheme } from "react-native";
+
 import { NativeStack, navigationAnimation } from "./Navigation";
+import TopUpScreen from "../TopUp";
 
 export default function TopUpNav() {
   const colorScheme = useColorScheme();

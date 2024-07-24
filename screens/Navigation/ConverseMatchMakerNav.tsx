@@ -1,11 +1,11 @@
-import { Platform, useColorScheme } from "react-native";
-
 import {
   listItemSeparatorColor,
   navigationSecondaryBackgroundColor,
-} from "../../utils/colors";
-import ConverseMatchMaker from "../ConverseMatchMaker";
+} from "@styles/colors";
+import { Platform, useColorScheme } from "react-native";
+
 import { NativeStack, navigationAnimation } from "./Navigation";
+import ConverseMatchMaker from "../ConverseMatchMaker";
 
 export default function ConverseMatchMakerNav() {
   const colorScheme = useColorScheme();

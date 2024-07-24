@@ -1,29 +1,26 @@
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import {
-  TouchableHighlight,
-  useColorScheme,
-  StyleSheet,
-  Platform,
-  View,
-  Text,
-} from "react-native";
-
-import { NavigationParamList } from "../../screens/Navigation/Navigation";
-import {
-  actionSecondaryColor,
   clickedItemBackgroundColor,
   listItemSeparatorColor,
   primaryColor,
   textPrimaryColor,
   textSecondaryColor,
-} from "../../utils/colors";
-import Picto from "../Picto/Picto";
+} from "@styles/colors";
+import {
+  Platform,
+  StyleSheet,
+  Text,
+  TouchableHighlight,
+  useColorScheme,
+  View,
+} from "react-native";
+
+import { NavigationParamList } from "../../screens/Navigation/Navigation";
 
 type Props = { requestsCount: number } & NativeStackScreenProps<
   NavigationParamList,
   "Chats" | "ShareFrame"
 >;
-
 export default function RequestsButton({ navigation, requestsCount }: Props) {
   const colorScheme = useColorScheme();
   const styles = useStyles();
@@ -36,18 +33,8 @@ export default function RequestsButton({ navigation, requestsCount }: Props) {
       }}
     >
       <View style={styles.requestsHeader}>
-        <Text style={styles.requestsHeaderTitle}>Spam</Text>
+        <Text style={styles.requestsHeaderTitle}>Requests</Text>
         <Text style={styles.requestsCount}>{requestsCount}</Text>
-        <Picto
-          picto="chevron.right"
-          weight="semibold"
-          color={
-            Platform.OS === "android"
-              ? textPrimaryColor(colorScheme)
-              : actionSecondaryColor(colorScheme)
-          }
-          size={Platform.OS === "android" ? 25 : 10}
-        />
       </View>
     </TouchableHighlight>
   );
@@ -62,10 +49,13 @@ const useStyles = () => {
       ...Platform.select({
         default: {
           paddingVertical: 8,
-          paddingRight: 24,
-          marginLeft: 32,
+          paddingRight: 8,
+          paddingLeft: 24,
+          height: 40,
           borderBottomWidth: 0.25,
           borderBottomColor: listItemSeparatorColor(colorScheme),
+          borderTopWidth: 0.25,
+          borderTopColor: listItemSeparatorColor(colorScheme),
         },
         android: {
           paddingVertical: 12,

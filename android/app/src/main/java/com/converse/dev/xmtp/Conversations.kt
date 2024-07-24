@@ -13,6 +13,7 @@ import com.google.crypto.tink.subtle.Base64
 import org.json.JSONObject
 import org.xmtp.android.library.Client
 import org.xmtp.android.library.Conversation
+import org.xmtp.android.library.Group
 import org.xmtp.android.library.messages.Envelope
 import org.xmtp.proto.keystore.api.v1.Keystore.TopicMap.TopicData
 import java.security.MessageDigest
@@ -143,5 +144,24 @@ fun getSavedConversationTitle(appContext: Context, topic: String): String {
         return parsedConversationDict?.title ?: parsedConversationDict?.shortAddress ?: ""
     } catch (e: Exception) {
         return ""
+    }
+}
+
+suspend fun getNewGroup(xmtpClient: Client, contentTopic: String): Group? {
+    return try {
+        if (isGroupWelcomeTopic(contentTopic)) {
+            // Welcome envelopes are too large to send in a push, so a bit of a hack to get the latest group
+            xmtpClient.conversations.syncGroups()
+            val groups = xmtpClient.conversations.listGroups()
+            val group = groups.maxByOrNull { it.createdAt }
+
+            group?.sync()
+            group
+        } else {
+            null
+        }
+    } catch (error: Exception) {
+        sentryTrackError(error, mapOf("message" to "Could not sync new group"))
+        null
     }
 }

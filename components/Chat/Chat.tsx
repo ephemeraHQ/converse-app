@@ -1,27 +1,45 @@
 import { FlashList } from "@shopify/flash-list";
+import {
+  backgroundColor,
+  itemSeparatorColor,
+  tertiaryBackgroundColor,
+} from "@styles/colors";
 import differenceInCalendarDays from "date-fns/differenceInCalendarDays";
 import React, { useCallback, useEffect, useMemo, useRef } from "react";
 import {
+  Dimensions,
+  FlatList,
+  Platform,
+  StyleSheet,
   View,
   useColorScheme,
-  StyleSheet,
-  Platform,
-  FlatList,
-  Dimensions,
 } from "react-native";
-import {
+import Animated, {
   useAnimatedStyle,
-  useSharedValue,
   useDerivedValue,
+  useSharedValue,
 } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
+import ChatPlaceholder from "./ChatPlaceholder/ChatPlaceholder";
+import { GroupChatPlaceholder } from "./ChatPlaceholder/GroupChatPlaceholder";
+import ConsentPopup from "./ConsentPopup/ConsentPopup";
+import { GroupConsentPopup } from "./ConsentPopup/GroupConsentPopup";
+import ChatInput from "./Input/Input";
+import CachedChatMessage, { MessageToDisplay } from "./Message/Message";
+import TransactionInput from "./Transaction/TransactionInput";
 import {
   useCurrentAccount,
   useProfilesStore,
   useRecommendationsStore,
+  useChatStore,
 } from "../../data/store/accountsStore";
-import { XmtpConversationWithUpdate } from "../../data/store/chatStore";
+import {
+  XmtpConversationWithUpdate,
+  ChatStoreType,
+} from "../../data/store/chatStore";
+import { useFramesStore } from "../../data/store/framesStore";
+import { useSelect } from "../../data/store/storeHelpers";
 import { useIsSplitScreen } from "../../screens/Navigation/navHelpers";
 import {
   ReanimatedFlashList,
@@ -29,39 +47,55 @@ import {
   ReanimatedView,
 } from "../../utils/animations";
 import { useKeyboardAnimation } from "../../utils/animations/keyboardAnimation";
-import {
-  backgroundColor,
-  itemSeparatorColor,
-  tertiaryBackgroundColor,
-} from "../../utils/colors";
+import { isAttachmentMessage } from "../../utils/attachment/helpers";
 import { useConversationContext } from "../../utils/conversation";
 import { converseEventEmitter } from "../../utils/events";
 import { getProfileData } from "../../utils/profile";
+import { UUID_REGEX } from "../../utils/regex";
 import { isContentType } from "../../utils/xmtpRN/contentTypes";
 import { Recommendation } from "../Recommendations/Recommendation";
-import ChatPlaceholder from "./ChatPlaceholder";
-import ConsentPopup from "./ConsentPopup";
-import ChatInput from "./Input/Input";
-import CachedChatMessage, { MessageToDisplay } from "./Message/Message";
-import TransactionInput from "./Transaction/TransactionInput";
 
 const getListArray = (
   xmtpAddress?: string,
-  conversation?: XmtpConversationWithUpdate
+  conversation?: XmtpConversationWithUpdate,
+  messageAttachments?: Pick<
+    ChatStoreType,
+    "messageAttachments"
+  >["messageAttachments"]
 ) => {
+  const isAttachmentLoading = (messageId: string) => {
+    const attachment = messageAttachments && messageAttachments[messageId];
+    return attachment?.loading;
+  };
+
   if (!conversation) return [];
   const reverseArray = [];
-  for (let index = conversation.messagesIds.length - 1; index >= 0; index--) {
-    const messageId = conversation.messagesIds[index];
+  // Filter out unwanted content types before list or reactions out of order can mess up the logic
+  const filteredMessageIds = conversation.messagesIds.filter((messageId) => {
     const message = conversation.messages.get(messageId) as MessageToDisplay;
-    if (!message || (!message.content && !message.contentFallback)) continue;
+    if (!message || (!message.content && !message.contentFallback))
+      return false;
+
     // Reactions & read receipts are not displayed in the flow
     const notDisplayedContentTypes = [
       "xmtp.org/reaction:",
       "xmtp.org/readReceipt:",
     ];
-    if (notDisplayedContentTypes.some((c) => message.contentType.startsWith(c)))
-      continue;
+
+    if (UUID_REGEX.test(message.id)) return false;
+
+    return !notDisplayedContentTypes.some((c) =>
+      message.contentType.startsWith(c)
+    );
+  });
+
+  let latestSettledFromMeIndex = -1;
+  let latestSettledFromPeerIndex = -1;
+
+  for (let index = filteredMessageIds.length - 1; index >= 0; index--) {
+    const messageId = filteredMessageIds[index];
+    const message = conversation.messages.get(messageId) as MessageToDisplay;
+
     message.fromMe =
       !!xmtpAddress &&
       xmtpAddress.toLowerCase() === message.senderAddress.toLowerCase();
@@ -70,15 +104,16 @@ const getListArray = (
     message.hasPreviousMessageInSeries = false;
 
     if (index > 0) {
-      const previousMessageId = conversation.messagesIds[index - 1];
+      const previousMessageId = filteredMessageIds[index - 1];
       const previousMessage = conversation.messages.get(previousMessageId);
       if (previousMessage) {
         message.dateChange =
           differenceInCalendarDays(message.sent, previousMessage.sent) > 0;
         if (
-          previousMessage.senderAddress === message.senderAddress &&
+          previousMessage.senderAddress.toLowerCase() ===
+            message.senderAddress.toLowerCase() &&
           !message.dateChange &&
-          !isContentType("reaction", previousMessage.contentType)
+          !isContentType("groupUpdated", previousMessage.contentType)
         ) {
           message.hasPreviousMessageInSeries = true;
         }
@@ -87,24 +122,58 @@ const getListArray = (
       message.dateChange = true;
     }
 
-    if (index < conversation.messagesIds.length - 1) {
-      const nextMessageId = conversation.messagesIds[index + 1];
+    if (index < filteredMessageIds.length - 1) {
+      const nextMessageId = filteredMessageIds[index + 1];
       const nextMessage = conversation.messages.get(nextMessageId);
       if (nextMessage) {
         // Here we need to check if next message has a date change
         const nextMessageDateChange =
           differenceInCalendarDays(nextMessage.sent, message.sent) > 0;
         if (
-          nextMessage.senderAddress === message.senderAddress &&
+          nextMessage.senderAddress.toLowerCase() ===
+            message.senderAddress.toLowerCase() &&
           !nextMessageDateChange &&
-          !isContentType("reaction", nextMessage.contentType)
+          !isContentType("groupUpdated", nextMessage.contentType)
         ) {
           message.hasNextMessageInSeries = true;
         }
       }
     }
+
+    if (
+      message.fromMe &&
+      message.status !== "sending" &&
+      message.status !== "prepared" &&
+      latestSettledFromMeIndex === -1
+    ) {
+      latestSettledFromMeIndex = reverseArray.length;
+    }
+
+    if (!message.fromMe && latestSettledFromPeerIndex === -1) {
+      latestSettledFromPeerIndex = reverseArray.length;
+    }
+
+    message.isLatestSettledFromMe =
+      reverseArray.length === latestSettledFromMeIndex;
+    message.isLatestSettledFromPeer =
+      reverseArray.length === latestSettledFromPeerIndex;
+
+    if (index === filteredMessageIds.length - 1) {
+      message.isLoadingAttachment =
+        isAttachmentMessage(message.contentType) &&
+        isAttachmentLoading(message.id);
+    }
+
+    if (index === filteredMessageIds.length - 2) {
+      const nextMessageId = filteredMessageIds[index + 1];
+      const nextMessage = conversation.messages.get(nextMessageId);
+      message.nextMessageIsLoadingAttachment =
+        isAttachmentMessage(nextMessage?.contentType) &&
+        isAttachmentLoading(nextMessageId);
+    }
     reverseArray.push(message);
   }
+
   return reverseArray;
 };
 
@@ -115,12 +184,14 @@ export default function Chat() {
     onReadyToFocus,
     transactionMode,
     frameTextInputFocused,
+    onPullToRefresh,
   } = useConversationContext([
     "conversation",
     "isBlockedPeer",
     "onReadyToFocus",
     "transactionMode",
     "frameTextInputFocused",
+    "onPullToRefresh",
   ]);
   const xmtpAddress = useCurrentAccount() as string;
   const peerSocials = useProfilesStore((s) =>
@@ -134,20 +205,23 @@ export default function Chat() {
   );
   const colorScheme = useColorScheme();
   const styles = useStyles();
+  const { messageAttachments } = useChatStore(
+    useSelect(["messageAttachments"])
+  );
   const listArray = useMemo(
-    () => getListArray(xmtpAddress, conversation),
+    () => getListArray(xmtpAddress, conversation, messageAttachments),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [xmtpAddress, conversation, conversation?.lastUpdateAt]
+    [xmtpAddress, conversation, conversation?.lastUpdateAt, messageAttachments]
   );
 
   const hideInputIfFrameFocused = Platform.OS !== "web";
 
-  const DEFAULT_INPUT_HEIGHT = 36;
-  const chatInputHeight = useSharedValue(50);
+  const DEFAULT_INPUT_HEIGHT = 58;
+  const chatInputHeight = useSharedValue(0);
   const chatInputDisplayedHeight = useDerivedValue(() => {
     return frameTextInputFocused && hideInputIfFrameFocused
       ? 0
-      : chatInputHeight.value;
+      : chatInputHeight.value + DEFAULT_INPUT_HEIGHT;
   });
 
   const insets = useSafeAreaInsets();
@@ -155,7 +229,12 @@ export default function Chat() {
   const { height: keyboardHeight } = useKeyboardAnimation();
   const tertiary = tertiaryBackgroundColor(colorScheme);
 
-  const showChatInput = !!(conversation && !isBlockedPeer);
+  const showChatInput = !!(
+    conversation &&
+    !isBlockedPeer &&
+    (!conversation.isGroup ||
+      conversation.groupMembers.includes(xmtpAddress.toLowerCase()))
+  );
 
   const textInputStyle = useAnimatedStyle(
     () => ({
@@ -177,7 +256,7 @@ export default function Chat() {
       paddingBottom: showChatInput
         ? chatInputDisplayedHeight.value +
           Math.max(insets.bottom, keyboardHeight.value)
-        : 0,
+        : insets.bottom,
     }),
     [showChatInput, keyboardHeight, chatInputDisplayedHeight, insets.bottom]
   );
@@ -201,6 +280,7 @@ export default function Chat() {
     recommendationsData,
     styles.inChatRecommendations,
   ]);
+  const framesStore = useFramesStore().frames;
 
   const showPlaceholder =
     listArray.length === 0 || isBlockedPeer || !conversation;
@@ -211,10 +291,12 @@ export default function Chat() {
           account={xmtpAddress}
           message={{ ...item }}
           colorScheme={colorScheme}
+          isGroup={!!conversation?.isGroup}
+          isFrame={!!framesStore[item.content.toLowerCase()]}
         />
       );
     },
-    [colorScheme, xmtpAddress]
+    [colorScheme, xmtpAddress, conversation?.isGroup, framesStore]
   );
   const keyExtractor = useCallback((item: MessageToDisplay) => item.id, []);
 
@@ -268,11 +350,13 @@ export default function Chat() {
         conversation?.context?.conversationId || ""
       }-${isBlockedPeer}`}
     >
-      <ReanimatedView style={chatContentStyle}>
+      <Animated.View style={chatContentStyle}>
         {conversation && listArray.length > 0 && !isBlockedPeer && (
           <AnimatedListView
             contentContainerStyle={styles.chat}
             data={listArray}
+            onRefresh={onPullToRefresh}
+            refreshing={conversation?.pending}
             extraData={[peerSocials]}
             renderItem={renderItem}
             onLayout={() => {
@@ -298,7 +382,32 @@ export default function Chat() {
             }
             inverted
             keyExtractor={keyExtractor}
-            getItemType={(item: MessageToDisplay) => item.contentType}
+            getItemType={(item: MessageToDisplay) => {
+              if (
+                isContentType("text", item.contentType) &&
+                item.converseMetadata?.frames?.[0]
+              ) {
+                const frameUrl = item.converseMetadata?.frames?.[0];
+                const frame = framesStore[frameUrl];
+                // Recycle frames with the same aspect ratio
+                return `FRAME-${
+                  frame?.frameInfo?.image?.aspectRatio || "1.91.1"
+                }`;
+              } else if (
+                (isContentType("attachment", item.contentType) ||
+                  isContentType("remoteAttachment", item.contentType)) &&
+                item.converseMetadata?.attachment?.size?.height &&
+                item.converseMetadata?.attachment?.size?.width
+              ) {
+                const aspectRatio = (
+                  item.converseMetadata.attachment.size.width /
+                  item.converseMetadata.attachment.size.height
+                ).toFixed(2);
+                return `ATTACHMENT-${aspectRatio}`;
+              } else {
+                return item.contentType;
+              }
+            }}
             keyboardShouldPersistTaps="handled"
             estimatedItemSize={80}
             // Size glitch on Android
@@ -306,11 +415,14 @@ export default function Chat() {
             ListFooterComponent={ListFooterComponent}
           />
         )}
-        {showPlaceholder && (
+        {showPlaceholder && !conversation?.isGroup && (
           <ChatPlaceholder messagesCount={listArray.length} />
         )}
-        <ConsentPopup />
-      </ReanimatedView>
+        {showPlaceholder && conversation?.isGroup && (
+          <GroupChatPlaceholder messagesCount={listArray.length} />
+        )}
+        {conversation?.isGroup ? <GroupConsentPopup /> : <ConsentPopup />}
+      </Animated.View>
       {showChatInput && (
         <>
           <ReanimatedView
@@ -323,11 +435,8 @@ export default function Chat() {
                     : "flex",
               },
             ]}
-            onLayout={(e) => {
-              chatInputHeight.value = e.nativeEvent.layout.height;
-            }}
           >
-            {!transactionMode && <ChatInput />}
+            {!transactionMode && <ChatInput inputHeight={chatInputHeight} />}
             {transactionMode && <TransactionInput />}
           </ReanimatedView>
           <View

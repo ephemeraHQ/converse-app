@@ -96,11 +96,21 @@ const commands = {
       conversationIndex++
     ) {
       const topic = `topic-${nanoid()}`;
+      const groupTopic = `topic-${nanoid()}`;
       const peerAddress = ethAddress();
       await dataSource.getRepository(Conversation).insert({
         topic,
         peerAddress,
         createdAt: new Date().getTime(),
+      });
+      await dataSource.getRepository(Conversation).insert({
+        isGroup: true,
+        topic: groupTopic,
+        peerAddress,
+        createdAt: new Date().getTime(),
+        groupMembers: [peerAddress, myAddress],
+        groupAdmins: [myAddress],
+        groupSuperAdmins: [myAddress],
       });
       await dataSource.getRepository(Profile).insert({
         address: peerAddress,

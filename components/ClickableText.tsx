@@ -1,22 +1,22 @@
 import Clipboard from "@react-native-clipboard/clipboard";
+import { actionSheetColors } from "@styles/colors";
 import * as Linking from "expo-linking";
 import { useCallback } from "react";
 import { StyleProp, StyleSheet, TextStyle, useColorScheme } from "react-native";
 import ParsedText from "react-native-parsed-text";
 
-import { actionSheetColors } from "../utils/colors";
+import { showActionSheetWithOptions } from "./StateHandlers/ActionSheetStateHandler";
 import { navigate } from "../utils/navigation";
 import {
-  URL_REGEX,
   ADDRESS_REGEX,
-  LENS_REGEX,
-  ETH_REGEX,
-  UNS_REGEX,
-  FARCASTER_REGEX,
   CB_ID_REGEX,
   EMAIL_REGEX,
+  ETH_REGEX,
+  FARCASTER_REGEX,
+  LENS_REGEX,
+  UNS_REGEX,
+  URL_REGEX,
 } from "../utils/regex";
-import { showActionSheetWithOptions } from "./StateHandlers/ActionSheetStateHandler";
 
 type Props = {
   children: React.ReactNode;

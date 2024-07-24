@@ -7,6 +7,7 @@ export const contentTypesPrefixes = {
   readReceipt: "xmtp.org/readReceipt:",
   coinbasePayment: "coinbase.com/coinbase-messaging-payment-activity:",
   transactionReference: "xmtp.org/transactionReference:",
+  groupUpdated: "xmtp.org/group_updated:",
 };
 
 export const isContentType = (
@@ -20,6 +21,8 @@ export const isContentType = (
 
 export const getMessageContentType = (contentType: string) => {
   return Object.keys(contentTypesPrefixes).find((key) =>
-    contentType.startsWith((contentTypesPrefixes as any)[key])
+    contentType.startsWith(
+      contentTypesPrefixes[key as keyof typeof contentTypesPrefixes]
+    )
   );
 };

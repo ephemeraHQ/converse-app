@@ -12,6 +12,7 @@ import CryptoKit
 func getNewConversationFromEnvelope(xmtpClient: XMTP.Client, envelope: XMTP.Envelope) async -> XMTP.Conversation? {
   do {
     if (isInviteTopic(topic: envelope.contentTopic)) {
+      
       let conversation = try await xmtpClient.conversations.fromInvite(envelope: envelope)
       switch conversation {
       case .v2(_): do {
@@ -26,6 +27,24 @@ func getNewConversationFromEnvelope(xmtpClient: XMTP.Client, envelope: XMTP.Enve
   }
   return nil
 }
+
+func getNewGroup(xmtpClient: XMTP.Client, contentTopic: String) async -> XMTP.Group? {
+  do {
+    if (isGroupWelcomeTopic(topic: contentTopic)) {
+      // Weclome envelopes are too large to send in a push, so a bit of a hack to get the latest group
+      try await xmtpClient.conversations.sync()
+      let groups = try await xmtpClient.conversations.groups()
+      if let group = groups.max(by: { $0.createdAt < $1.createdAt }) {
+        try await group.sync()
+        return group
+      }
+    }
+  } catch {
+    sentryTrackError(error: error, extras: ["message": "Could not sync new group"])
+  }
+  return nil
+}
+
 
 func loadSavedConversations() -> [SavedNotificationConversation] {
   let mmkv = getMmkv()
@@ -130,4 +149,8 @@ func persistDecodedConversation(account: String, conversation: Conversation) {
       sentryTrackError(error: error, extras: ["message": "Error while getting persisted topics"])
     }
   }
+}
+
+func getGroupIdFromTopic(topic: String) -> String {
+    return topic.replacingOccurrences(of: "/xmtp/mls/1/g-", with: "").replacingOccurrences(of: "/proto", with: "")
 }

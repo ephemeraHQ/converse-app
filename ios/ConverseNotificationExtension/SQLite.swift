@@ -61,7 +61,7 @@ func getDb(account: String) throws -> Connection {
 
 func hasTopic(account: String, topic: String) throws -> Bool {
   let conversations = Table("conversation")
-  let topicColumn = Expression<String>("topic")
+  let topicColumn = Expression<String>(value: "topic")
   let db = try getDb(account: account)
   let count = try db.scalar(conversations.filter(topicColumn == topic).count)
   return count > 0

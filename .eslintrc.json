@@ -1,12 +1,27 @@
 {
   "extends": "universe/native",
   "ignorePatterns": ["dist/", "node_modules/", "vendor/"],
-  "plugins": ["react", "import", "unused-imports", "react-hooks"],
+  "plugins": ["react", "import", "unused-imports", "react-hooks", "react-native"],
   "rules": {
     "no-unused-vars": "off",
     "unused-imports/no-unused-imports": "error",
     "react-hooks/rules-of-hooks": "error",
     "react-hooks/exhaustive-deps": "error",
+    "react-native/no-inline-styles": "warn",
+    "react-native/no-raw-text": "warn",
+    "react-native/no-single-element-style-arrays": "warn",
+    "react/jsx-no-bind": [
+      "warn",
+      {
+        "ignoreRefs": true,
+        "allowArrowFunctions": false,
+        "allowFunctions": false,
+        "allowBind": false,
+        "ignoreDOMComponents": true
+      }
+    ],
+    "react/jsx-key": "error",
+
     "prettier/prettier": "off" // We use prettier manually on the side
   },
   "root": true
