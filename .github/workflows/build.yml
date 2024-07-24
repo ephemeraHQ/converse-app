@@ -6,10 +6,10 @@ on:
       - main
       - beta
       - feat/xmtp-groups-dash
-    paths:
-      - "ios/**"
-      - "android/**"
-      - "package.json"
+    # paths:
+    #   - "ios/**"
+    #   - "android/**"
+    #   - "package.json"
 
 jobs:
   build-android:
