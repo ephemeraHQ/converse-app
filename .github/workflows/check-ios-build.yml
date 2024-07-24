@@ -1,0 +1,42 @@
+name: iOS App Build
+
+on:
+  pull_request:
+    branches:
+      - feat/xmtp-groups-dash
+    # Uncomment after verification
+    # paths:
+    #   - "ios/**"
+    #   - "package.json"
+
+jobs:
+  build:
+    runs-on: macos-latest
+    steps:
+      - name: Setup repo
+        uses: actions/checkout@v4
+
+      - name: Setup node
+        uses: actions/setup-node@v4.0.2
+        with:
+          node-version: 18.x
+          cache: "yarn"
+
+      - name: Setup Expo
+        uses: expo/expo-github-action@v8
+        with:
+          expo-version: latest
+          eas-version: latest
+          token: ${{ secrets.EXPO_TOKEN }}
+
+      - name: Install dependencies
+        run: yarn install
+
+      - name: Build iOS app
+        run: eas build --platform ios --local --non-interactive --output ${{ github.workspace }}/app-release.ipa
+      # Don't upload the artifact for now
+      # - name: Upload IPA artifact
+      #   uses: actions/upload-artifact@v4
+      #   with:
+      #     name: app-release
+      #     path: ${{ github.workspace }}/app-release.ipa
