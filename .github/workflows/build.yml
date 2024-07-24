@@ -13,7 +13,7 @@ on:
 
 jobs:
   build-android:
-    if: contains(github.event.pull_request.head.repo.pushed_at, 'android') || contains(github.event.pull_request.head.repo.pushed_at, 'package.json')
+    # if: contains(github.event.pull_request.head.repo.pushed_at, 'android') || contains(github.event.pull_request.head.repo.pushed_at, 'package.json')
     runs-on: ubuntu-latest
 
     steps:
@@ -38,7 +38,7 @@ jobs:
         run: eas build --profile production-android --platform android --non-interactive
 
   build-ios:
-    if: contains(github.event.pull_request.head.repo.pushed_at, 'ios') || contains(github.event.pull_request.head.repo.pushed_at, 'package.json')
+    # if: contains(github.event.pull_request.head.repo.pushed_at, 'ios') || contains(github.event.pull_request.head.repo.pushed_at, 'package.json')
     runs-on: ubuntu-latest
 
     steps:
