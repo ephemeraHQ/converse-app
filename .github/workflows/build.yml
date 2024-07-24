@@ -5,6 +5,7 @@ on:
     branches:
       - main
       - beta
+      - feat/xmtp-groups-dash
     paths:
       - "ios/**"
       - "android/**"
@@ -34,11 +35,11 @@ jobs:
           token: ${{ secrets.EXPO_TOKEN }}
 
       - name: Build for Android
-        run: eas build --profile preview-android --platform android --non-interactive
+        run: eas build --profile production-android --platform android --non-interactive
 
   build-ios:
     if: contains(github.event.pull_request.head.repo.pushed_at, 'ios') || contains(github.event.pull_request.head.repo.pushed_at, 'package.json')
-    runs-on: macos-latest
+    runs-on: ubuntu-latest
 
     steps:
       - name: Checkout repository
@@ -59,4 +60,4 @@ jobs:
           token: ${{ secrets.EXPO_TOKEN }}
 
       - name: Build for iOS
-        run: eas build --profile preview-ios --platform ios --non-interactive
+        run: eas build --profile production-ios --platform ios --non-interactive
