@@ -255,5 +255,8 @@
         "@sentry/react-native"
       ]
     }
+  },
+  "engines": {
+    "node": ">=18"
   }
 }
