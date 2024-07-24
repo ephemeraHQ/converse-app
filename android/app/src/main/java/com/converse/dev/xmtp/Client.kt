@@ -45,7 +45,7 @@ fun getDbEncryptionKey(): ByteArray? {
     }
 }
 
-fun getXmtpClient(appContext: Context, account: String): Client? {
+suspend fun getXmtpClient(appContext: Context, account: String): Client? {
     val keyString = getXmtpKeyForAccount(appContext, account) ?: return null
     val keyByteArray = Base64.decode(keyString)
     val keys = PrivateKeyBundleV1Builder.buildFromBundle(keyByteArray)

@@ -109,11 +109,6 @@ class PushNotificationsService : FirebaseMessagingService() {
             return
         }
 
-        val xmtpClient = getXmtpClient(this, notificationData.account) ?: run {
-            Log.d(TAG, "NO XMTP CLIENT FOUND FOR TOPIC ${notificationData.contentTopic}")
-            return
-        }
-
         Log.d(TAG, "INSTANTIATED XMTP CLIENT FOR ${notificationData.contentTopic}")
 
         val encryptedMessageData = Base64.decode(notificationData.message, Base64.NO_WRAP)
@@ -121,10 +116,15 @@ class PushNotificationsService : FirebaseMessagingService() {
 
         var shouldShowNotification = false
         var result = NotificationDataResult()
+        var context = this
 
         // Using IO dispatcher for background work, not blocking the main thread and UI
         serviceScope.launch {
             try {
+                val xmtpClient = getXmtpClient(context, notificationData.account) ?: run {
+                    Log.d(TAG, "NO XMTP CLIENT FOUND FOR TOPIC ${notificationData.contentTopic}")
+                    return@launch
+                }
                 if (isInviteTopic(notificationData.contentTopic)) {
                     Log.d(TAG, "Handling a new conversation notification")
                     val conversation = getNewConversationFromEnvelope(applicationContext, xmtpClient, envelope)
