@@ -4,6 +4,7 @@ import {
   textInputStyle,
   textSecondaryColor,
 } from "@styles/colors";
+import { PermissionPolicySet } from "@xmtp/react-native-sdk/build/lib/types/PermissionPolicySet";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   Alert,
@@ -65,9 +66,17 @@ export default function NewGroupSummary({
   const insets = useSafeAreaInsets();
   const [creatingGroup, setCreatingGroup] = useState(false);
   const isSplitScreen = useIsSplitScreen();
-  const [groupPermissionLevel, setGroupPermissionLevel] = useState<
-    "all_members" | "admin_only"
-  >("admin_only");
+  const [permissionPolicySet, setPermissionPolicySet] =
+    useState<PermissionPolicySet>({
+      addMemberPolicy: "allow",
+      removeMemberPolicy: "admin",
+      addAdminPolicy: "superAdmin",
+      removeAdminPolicy: "superAdmin",
+      updateGroupNamePolicy: "allow",
+      updateGroupDescriptionPolicy: "allow",
+      updateGroupImagePolicy: "allow",
+      updateGroupPinnedFrameUrlPolicy: "allow",
+    });
   const account = useCurrentAccount();
   const currentAccountSocials = useProfilesStore(
     (s) => s.profiles[account ?? ""]?.socials
@@ -128,7 +137,7 @@ export default function NewGroupSummary({
     const groupTopic = await createGroup(
       currentAccount(),
       route.params.members.map((m) => m.address),
-      groupPermissionLevel,
+      permissionPolicySet,
       groupName,
       remotePhotoUrl,
       groupDescription
@@ -148,7 +157,7 @@ export default function NewGroupSummary({
   }, [
     groupDescription,
     groupName,
-    groupPermissionLevel,
+    permissionPolicySet,
     isSplitScreen,
     navigation,
     remotePhotoUrl,
@@ -172,11 +181,32 @@ export default function NewGroupSummary({
     styles,
   ]);
 
-  const handleSwitch = useCallback(() => {
-    setGroupPermissionLevel((p) =>
-      p === "admin_only" ? "all_members" : "admin_only"
-    );
-  }, []);
+  const handlePermissionSwitch = useCallback(
+    (permissionName: "addMembers" | "editMetadata") => () => {
+      if (permissionName === "addMembers") {
+        const currentPermission = permissionPolicySet.addMemberPolicy;
+        const newPermission = currentPermission === "allow" ? "admin" : "allow";
+        setPermissionPolicySet((currentSet) => ({
+          ...currentSet,
+          addMemberPolicy: newPermission,
+        }));
+      } else if (permissionName === "editMetadata") {
+        const currentPermission = permissionPolicySet.updateGroupNamePolicy;
+        const newPermission = currentPermission === "allow" ? "admin" : "allow";
+        setPermissionPolicySet((currentSet) => ({
+          ...currentSet,
+          updateGroupDescriptionPolicy: newPermission,
+          updateGroupImagePolicy: newPermission,
+          updateGroupNamePolicy: newPermission,
+          updateGroupPinnedFrameUrlPolicy: newPermission,
+        }));
+      }
+    },
+    [
+      permissionPolicySet.addMemberPolicy,
+      permissionPolicySet.updateGroupNamePolicy,
+    ]
+  );
 
   return (
     <ScrollView
@@ -238,12 +268,22 @@ export default function NewGroupSummary({
       <TableView
         items={[
           {
-            title: "Add and remove other members",
-            id: "groupPermissionLevel",
+            title: "Add members",
+            id: "addMembers",
             rightView: (
               <Switch
-                onValueChange={handleSwitch}
-                value={groupPermissionLevel === "all_members"}
+                onValueChange={handlePermissionSwitch("addMembers")}
+                value={permissionPolicySet.addMemberPolicy === "allow"}
+              />
+            ),
+          },
+          {
+            title: "Edit group metadata",
+            id: "editMetadata",
+            rightView: (
+              <Switch
+                onValueChange={handlePermissionSwitch("editMetadata")}
+                value={permissionPolicySet.updateGroupNamePolicy === "allow"}
               />
             ),
           },
