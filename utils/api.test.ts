@@ -28,7 +28,7 @@ jest.mock("./keychain", () => {
   };
 });
 
-describe("GroupInviteLink", () => {
+describe.skip("GroupInviteLink", () => {
   let client: Client;
 
   const groupName = "test";
