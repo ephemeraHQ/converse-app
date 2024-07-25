@@ -14,12 +14,12 @@ import React, { FC, useMemo, useEffect, useCallback } from "react";
 import {
   FlatList,
   ListRenderItem,
-  Pressable,
   Text,
   useColorScheme,
   View,
   StyleSheet,
 } from "react-native";
+import { TouchableOpacity } from "react-native-gesture-handler";
 import Animated, {
   Easing,
   useAnimatedStyle,
@@ -131,11 +131,17 @@ const EmojiItem: FC<{
   ]);
 
   return (
-    <View style={styles.flexGrow}>
-      <Pressable onPress={handlePress}>
-        <Text style={styles.emojiText}>{content}</Text>
-      </Pressable>
-    </View>
+    <TouchableOpacity
+      hitSlop={{
+        top: 40,
+        right: 20,
+        left: 20,
+        bottom: 40,
+      }}
+      onPress={handlePress}
+    >
+      <Text style={styles.emojiText}>{content}</Text>
+    </TouchableOpacity>
   );
 };
 
@@ -243,8 +249,10 @@ const useStyles = () => {
       flexGrow: 1,
     },
     emojiText: {
-      fontSize: 24,
-      padding: Paddings.small,
+      flexGrow: 1,
+      fontSize: 16,
+      marginHorizontal: Paddings.small,
+      marginVertical: Paddings.small,
     },
     container: {
       justifyContent: "space-between",
@@ -252,7 +260,7 @@ const useStyles = () => {
     },
     reactionsContainer: {
       borderRadius: BorderRadius.large,
-      padding: Paddings.default,
+      margin: Paddings.default,
     },
     flex1: {
       flex: 1,

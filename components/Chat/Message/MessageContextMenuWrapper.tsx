@@ -13,7 +13,6 @@ import {
   Platform,
   useColorScheme,
   useWindowDimensions,
-  View,
 } from "react-native";
 import * as ContextMenu from "zeego/context-menu";
 
@@ -48,21 +47,13 @@ export const MessageContextMenuWrapper: FC<MessageContextMenuWrapperProps> = ({
 
   const contextMenuItems = useMemo(() => {
     const items = [];
-
-    if (canAddReaction) {
-      items.push({ title: "Add a reaction", systemIcon: "smiley" });
-    }
     items.push({ title: "Reply", systemIcon: "arrowshape.turn.up.left" });
     if (!isAttachment && !isTransaction) {
       items.push({ title: "Copy message", systemIcon: "doc.on.doc" });
     }
 
     return items;
-  }, [canAddReaction, isAttachment, isTransaction]);
-
-  const showReactionModal = useCallback(() => {
-    // setEmojiPickerShown(true);
-  }, []);
+  }, [isAttachment, isTransaction]);
 
   useEffect(() => {
     let openEventSubscription: EmitterSubscription | null = null;
@@ -103,9 +94,6 @@ export const MessageContextMenuWrapper: FC<MessageContextMenuWrapperProps> = ({
     (event: { nativeEvent: { index: number } }) => {
       const { index } = event.nativeEvent;
       switch (contextMenuItems[index].title) {
-        case "Add a reaction":
-          showReactionModal();
-          break;
         case "Reply":
           triggerReplyToMessage();
           break;
@@ -122,7 +110,6 @@ export const MessageContextMenuWrapper: FC<MessageContextMenuWrapperProps> = ({
     [
       contextMenuItems,
       setContextMenuShown,
-      showReactionModal,
       triggerReplyToMessage,
       message.content,
       message.contentFallback,
@@ -141,7 +128,7 @@ export const MessageContextMenuWrapper: FC<MessageContextMenuWrapperProps> = ({
   );
 
   return (
-    <View>
+    <>
       <ContextMenu.Root onOpenWillChange={handleOpenWillChange}>
         <ContextMenu.Content
           loop={false}
@@ -159,7 +146,7 @@ export const MessageContextMenuWrapper: FC<MessageContextMenuWrapperProps> = ({
             }
             key="reactions"
             width={width * 0.8}
-            height={200}
+            height={220}
           >
             {({ dismissMenu }) => (
               <MessageReactionsList
@@ -208,6 +195,6 @@ export const MessageContextMenuWrapper: FC<MessageContextMenuWrapperProps> = ({
           </>
         </ContextMenu.Trigger>
       </ContextMenu.Root>
-    </View>
+    </>
   );
 };

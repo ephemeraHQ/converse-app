@@ -404,7 +404,6 @@ function ChatMessage({ message, colorScheme, isGroup, isFrame }: Props) {
                   )}
                 </View>
               </View>
-              {/* </MessageContextMenuWrapper> */}
             </View>
           </View>
         </Swipeable>

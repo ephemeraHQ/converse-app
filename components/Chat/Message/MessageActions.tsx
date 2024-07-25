@@ -6,7 +6,6 @@ import {
   myMessageBubbleColor,
   myMessageHighlightedBubbleColor,
 } from "@styles/colors";
-import * as Haptics from "expo-haptics";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import {
   ColorSchemeName,
@@ -306,98 +305,97 @@ export default function ChatMessageActions({
   return (
     <>
       <GestureDetector gesture={doubleTapGesture}>
-        <Animated.View style={[animateInStyle, styles.animateInWrapper]}>
-          <ReanimatedTouchableOpacity
-            activeOpacity={1}
-            style={[
-              styles.messageBubble,
-              message.fromMe ? styles.messageBubbleMe : undefined,
-              {
-                backgroundColor: hideBackground
-                  ? "transparent"
-                  : initialBubbleBackgroundColor,
-              },
-              highlightingMessage ? animatedBackgroundStyle : undefined,
-              Platform.select({
-                default: {},
-                android: {
-                  // Messages not from me
-                  borderBottomLeftRadius:
-                    !message.fromMe && message.hasNextMessageInSeries ? 2 : 18,
-                  borderTopLeftRadius:
-                    !message.fromMe && message.hasPreviousMessageInSeries
-                      ? 2
-                      : 18,
-                  // Messages from me
-                  borderBottomRightRadius:
-                    message.fromMe && message.hasNextMessageInSeries ? 2 : 18,
-                  borderTopRightRadius:
-                    message.fromMe && message.hasPreviousMessageInSeries
-                      ? 2
-                      : 18,
+        <View style={{ flexGrow: 1 }}>
+          <Animated.View style={[animateInStyle, styles.animateInWrapper]}>
+            <ReanimatedTouchableOpacity
+              activeOpacity={1}
+              style={[
+                styles.messageBubble,
+                message.fromMe ? styles.messageBubbleMe : undefined,
+                {
+                  backgroundColor: hideBackground
+                    ? "transparent"
+                    : initialBubbleBackgroundColor,
                 },
-              }),
-              {
-                maxWidth: messageMaxWidth,
-              },
-            ]}
-            onPress={() => {
-              if (isAttachment) {
-                // Transfering attachment opening intent to component
-                converseEventEmitter.emit(
-                  `openAttachmentForMessage-${message.id}`
-                );
-              }
-              if (isTransaction) {
-                // Transfering event to component
-                converseEventEmitter.emit(
-                  `showActionSheetForTxRef-${message.id}`
-                );
-              }
-            }}
-            onLongPress={() => {
-              if (Platform.OS !== "web") {
-                Haptics.selectionAsync();
-              }
-              useAppStore.getState().setContextMenuShown(message.id);
-            }}
-          >
-            <MessageContextMenuWrapper
-              message={message}
-              reactions={reactions}
-              messageContent={
-                <View
-                  style={{
-                    alignSelf: message.fromMe ? "flex-end" : "flex-start",
-                    alignItems: message.fromMe ? "flex-end" : "flex-start",
-                  }}
-                >
-                  {children}
-                </View>
-              }
-            >
-              {children}
-            </MessageContextMenuWrapper>
-          </ReanimatedTouchableOpacity>
-          {!message.hasNextMessageInSeries &&
-            !isFrame &&
-            !isAttachment &&
-            !isTransaction &&
-            !hideBackground &&
-            (Platform.OS === "ios" || Platform.OS === "web") && (
-              <MessageTail
-                style={[
-                  {
-                    color: initialBubbleBackgroundColor,
+                highlightingMessage ? animatedBackgroundStyle : undefined,
+                Platform.select({
+                  default: {},
+                  android: {
+                    // Messages not from me
+                    borderBottomLeftRadius:
+                      !message.fromMe && message.hasNextMessageInSeries
+                        ? 2
+                        : 18,
+                    borderTopLeftRadius:
+                      !message.fromMe && message.hasPreviousMessageInSeries
+                        ? 2
+                        : 18,
+                    // Messages from me
+                    borderBottomRightRadius:
+                      message.fromMe && message.hasNextMessageInSeries ? 2 : 18,
+                    borderTopRightRadius:
+                      message.fromMe && message.hasPreviousMessageInSeries
+                        ? 2
+                        : 18,
                   },
-                  highlightingMessage ? iosAnimatedTailStyle : undefined,
-                ]}
-                fromMe={message.fromMe}
-                colorScheme={colorScheme}
-                hideBackground={hideBackground}
-              />
-            )}
-        </Animated.View>
+                }),
+                {
+                  maxWidth: messageMaxWidth,
+                },
+              ]}
+              onPress={() => {
+                if (isAttachment) {
+                  // Transfering attachment opening intent to component
+                  converseEventEmitter.emit(
+                    `openAttachmentForMessage-${message.id}`
+                  );
+                }
+                if (isTransaction) {
+                  // Transfering event to component
+                  converseEventEmitter.emit(
+                    `showActionSheetForTxRef-${message.id}`
+                  );
+                }
+              }}
+            >
+              <MessageContextMenuWrapper
+                message={message}
+                reactions={reactions}
+                messageContent={
+                  <View
+                    style={{
+                      alignSelf: message.fromMe ? "flex-end" : "flex-start",
+                      alignItems: message.fromMe ? "flex-end" : "flex-start",
+                    }}
+                  >
+                    {children}
+                  </View>
+                }
+              >
+                {children}
+              </MessageContextMenuWrapper>
+            </ReanimatedTouchableOpacity>
+
+            {!message.hasNextMessageInSeries &&
+              !isFrame &&
+              !isAttachment &&
+              !isTransaction &&
+              !hideBackground &&
+              (Platform.OS === "ios" || Platform.OS === "web") && (
+                <MessageTail
+                  style={[
+                    {
+                      color: initialBubbleBackgroundColor,
+                    },
+                    highlightingMessage ? iosAnimatedTailStyle : undefined,
+                  ]}
+                  fromMe={message.fromMe}
+                  colorScheme={colorScheme}
+                  hideBackground={hideBackground}
+                />
+              )}
+          </Animated.View>
+        </View>
       </GestureDetector>
       {/* <View style={{width: 50, height: 20, backgroundColor: "red"}} />
       <GestureDetector gesture={composedGesture}>{children}</GestureDetector> */}
