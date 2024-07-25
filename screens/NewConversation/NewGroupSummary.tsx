@@ -4,6 +4,7 @@ import {
   textInputStyle,
   textSecondaryColor,
 } from "@styles/colors";
+import { sentryTrackError } from "@utils/sentry";
 import { PermissionPolicySet } from "@xmtp/react-native-sdk/build/lib/types/PermissionPolicySet";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
@@ -134,26 +135,32 @@ export default function NewGroupSummary({
 
   const onCreateGroupPress = useCallback(async () => {
     setCreatingGroup(true);
-    const groupTopic = await createGroup(
-      currentAccount(),
-      route.params.members.map((m) => m.address),
-      permissionPolicySet,
-      groupName,
-      remotePhotoUrl,
-      groupDescription
-    );
-    if (Platform.OS !== "web") {
-      navigation.getParent()?.goBack();
+    try {
+      const groupTopic = await createGroup(
+        currentAccount(),
+        route.params.members.map((m) => m.address),
+        permissionPolicySet,
+        groupName,
+        remotePhotoUrl,
+        groupDescription
+      );
+      if (Platform.OS !== "web") {
+        navigation.getParent()?.goBack();
+      }
+      setTimeout(
+        () => {
+          navigate("Conversation", {
+            topic: groupTopic,
+            focus: true,
+          });
+        },
+        isSplitScreen ? 0 : 300
+      );
+    } catch (e) {
+      Alert.alert("An error occurred");
+      setCreatingGroup(false);
+      sentryTrackError(e);
     }
-    setTimeout(
-      () => {
-        navigate("Conversation", {
-          topic: groupTopic,
-          focus: true,
-        });
-      },
-      isSplitScreen ? 0 : 300
-    );
   }, [
     groupDescription,
     groupName,
