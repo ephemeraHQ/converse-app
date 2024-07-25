@@ -1,6 +1,11 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { textPrimaryColor, textSecondaryColor } from "@styles/colors";
 import { strings } from "@utils/i18n/strings";
+import {
+  sentryAddBreadcrumb,
+  sentryTrackError,
+  sentryTrackMessage,
+} from "@utils/sentry";
 import { thirdwebClient } from "@utils/thirdweb";
 import { Signer } from "ethers";
 import * as Linking from "expo-linking";
@@ -184,20 +189,30 @@ export default function ConnectViaWallet({
   }, [disconnect]);
 
   const initXmtpClient = useCallback(async () => {
+    console.log("in initixmtpclient");
     if (!signer || !address || initiatingClientFor.current === address) {
       return;
     }
     initiatingClientFor.current = address;
+    let onboardingDone = false;
+    setTimeout(() => {
+      if (onboardingDone === false) {
+        sentryTrackMessage("Onboarding took more than 30 seconds");
+      }
+    }, 30000);
 
     try {
+      sentryAddBreadcrumb("Onboarding using a wallet");
       const base64Key = await getXmtpBase64KeyFromSigner(
         signer,
         async () => {
+          sentryAddBreadcrumb("Asking for signature 1");
           // Before calling "create" signature
           setWaitingForSecondSignature(true);
           clickedSecondSignature.current = false;
         },
         async () => {
+          sentryAddBreadcrumb("Asking for signature 2");
           // Before calling "enable" signature
           const waitForClickSecondSignature = async () => {
             while (!clickedSecondSignature.current) {
@@ -207,18 +222,24 @@ export default function ConnectViaWallet({
 
           if (waitingForSecondSignatureRef.current) {
             setLoading(false);
+            sentryAddBreadcrumb("Waiting until second click...");
             await waitForClickSecondSignature();
+            sentryAddBreadcrumb("Second click done!");
             setWaitingForSecondSignature(false);
           }
         }
       );
+      sentryAddBreadcrumb("Got base64 key, now connecting");
       await connectWithBase64Key(base64Key);
+      sentryTrackMessage("Successfully logged in using a wallet", { address });
+      onboardingDone = true;
     } catch (e) {
       initiatingClientFor.current = undefined;
       setLoading(false);
       clickedSecondSignature.current = false;
       setWaitingForSecondSignature(false);
       console.error(e);
+      sentryTrackError(e, { address });
     }
   }, [
     address,
