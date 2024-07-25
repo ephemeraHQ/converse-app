@@ -1,6 +1,11 @@
-import { useDisconnect } from "@thirdweb-dev/react-native";
+import { useActiveWallet, useDisconnect } from "thirdweb/react";
 
 export const useDisconnectWallet = () => {
-  const disconnectWallet = useDisconnect();
-  return disconnectWallet;
+  const { disconnect: disconnectWallet } = useDisconnect();
+  const thirdwebWallet = useActiveWallet();
+  return () => {
+    if (thirdwebWallet) {
+      disconnectWallet(thirdwebWallet);
+    }
+  };
 };

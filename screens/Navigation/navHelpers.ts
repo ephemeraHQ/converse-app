@@ -1,13 +1,14 @@
 import { StackActions, getStateFromPath } from "@react-navigation/native";
-import { ColorSchemeName, Platform, useWindowDimensions } from "react-native";
-
-import { initialURL } from "../../components/StateHandlers/InitialStateHandler";
-import config from "../../config";
 import {
   backgroundColor,
   headerTitleStyle,
   listItemSeparatorColor,
-} from "../../utils/colors";
+  textPrimaryColor,
+} from "@styles/colors";
+import { ColorSchemeName, Platform, useWindowDimensions } from "react-native";
+
+import { initialURL } from "../../components/StateHandlers/InitialStateHandler";
+import config from "../../config";
 import { isDesktop } from "../../utils/device";
 
 export const getConverseStateFromPath = (path: string, options: any) => {
@@ -39,6 +40,8 @@ export const stackGroupScreenOptions = (colorScheme: ColorSchemeName) => ({
       Platform.OS === "web" ? listItemSeparatorColor(colorScheme) : undefined,
   },
   headerTitleStyle: headerTitleStyle(colorScheme),
+  headerTintColor:
+    Platform.OS === "ios" ? textPrimaryColor(colorScheme) : undefined,
   headerShadowVisible: Platform.OS !== "android",
 });
 

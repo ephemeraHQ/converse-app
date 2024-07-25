@@ -1,24 +1,33 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useDisconnect, useSigner } from "@thirdweb-dev/react-native";
+import { textPrimaryColor, textSecondaryColor } from "@styles/colors";
+import { strings } from "@utils/i18n/strings";
+import { thirdwebClient } from "@utils/thirdweb";
+import { Signer } from "ethers";
 import * as Linking from "expo-linking";
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
+  Alert,
+  AppState,
   Platform,
   StyleSheet,
   Text,
   useColorScheme,
-  AppState,
-  Alert,
 } from "react-native";
+import { ethers5Adapter } from "thirdweb/adapters/ethers5";
+import { ethereum } from "thirdweb/chains";
+import {
+  useActiveAccount,
+  useActiveWallet,
+  useDisconnect,
+} from "thirdweb/react";
 
+import OnboardingComponent from "./OnboardingComponent";
 import { getAccountsList } from "../../data/store/accountsStore";
 import { useOnboardingStore } from "../../data/store/onboardingStore";
 import { useSelect } from "../../data/store/storeHelpers";
-import { textPrimaryColor, textSecondaryColor } from "../../utils/colors";
 import { shortAddress } from "../../utils/str";
 import { isOnXmtp } from "../../utils/xmtpRN/client";
 import { getXmtpBase64KeyFromSigner } from "../../utils/xmtpRN/signIn";
-import OnboardingComponent from "./OnboardingComponent";
 
 export default function ConnectViaWallet({
   connectWithBase64Key,
@@ -50,8 +59,24 @@ export default function ConnectViaWallet({
   );
   const [onXmtp, setOnXmtp] = useState(false);
   const styles = useStyles();
-  const thirdwebSigner = useSigner();
-  const disconnectWallet = useDisconnect();
+  const thirdwebWallet = useActiveWallet();
+  const thirdwebAccount = useActiveAccount();
+  const [thirdwebSigner, setThirdwebSigner] = useState<Signer | undefined>();
+  useEffect(() => {
+    if (thirdwebAccount) {
+      ethers5Adapter.signer
+        .toEthers({
+          client: thirdwebClient,
+          chain: ethereum,
+          account: thirdwebAccount,
+        })
+        .then(setThirdwebSigner);
+    } else {
+      setThirdwebSigner(undefined);
+    }
+  }, [thirdwebAccount]);
+
+  const { disconnect: disconnectWallet } = useDisconnect();
 
   const clickedSecondSignature = useRef(false);
 
@@ -69,7 +94,9 @@ export default function ConnectViaWallet({
       if (resetLoading) {
         setLoading(false);
       }
-      await disconnectWallet();
+      if (thirdwebWallet) {
+        await disconnectWallet(thirdwebWallet);
+      }
       const storageKeys = await AsyncStorage.getAllKeys();
       const wcKeys = storageKeys.filter((k) => k.startsWith("wc@2:"));
       await AsyncStorage.multiRemove(wcKeys);
@@ -78,9 +105,10 @@ export default function ConnectViaWallet({
     [
       disconnectWallet,
       resetOnboarding,
+      setConnectionMethod,
       setLoading,
       setWaitingForSecondSignature,
-      setConnectionMethod,
+      thirdwebWallet,
     ]
   );
 
@@ -97,6 +125,7 @@ export default function ConnectViaWallet({
           return;
         }
         const isOnNetwork = await isOnXmtp(a);
+        console.log("in here yo");
         setOnXmtp(isOnNetwork);
         setSigner(thirdwebSigner);
         setLoading(false);
@@ -242,20 +271,13 @@ export default function ConnectViaWallet({
       (waitingForSecondSignature && !loading) ||
       clickedSecondSignature.current
     ) {
-      title = "Sign (2/2)";
-      subtitle = (
-        <Text>
-          Please sign one last time to access Converse and start chatting.
-        </Text>
-      );
+      title = strings.sign_2_of_2;
+      subtitle = <Text>{strings.sign_access}</Text>;
     } else {
-      title = "Sign (1/2)";
+      title = strings.sign_1_of_2;
       subtitle = (
         <>
-          <Text>
-            This first signature will enable your wallet to send and receive
-            messages.{"\n\n"}
-          </Text>
+          <Text>{strings.first_signature_explanation}</Text>
           {termsAndConditions}
         </>
       );

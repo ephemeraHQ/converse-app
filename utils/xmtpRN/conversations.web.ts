@@ -1,12 +1,12 @@
 import { Client, ConsentListEntry, Conversation, Stream } from "@xmtp/xmtp-js";
 
+import { syncConversationsMessages } from "./messages";
+import { getXmtpClient } from "./sync";
 import { saveConversations } from "../../data/helpers/conversations/upsertConversations";
 import { getChatStore, getSettingsStore } from "../../data/store/accountsStore";
 import { XmtpConversation } from "../../data/store/chatStore";
 import { SettingsStoreType } from "../../data/store/settingsStore";
 import { getCleanAddress } from "../eth";
-import { syncConversationsMessages } from "./messages";
-import { getXmtpClient } from "./sync";
 
 const protocolConversationToStateConversation = (
   conversation: Conversation
@@ -19,9 +19,11 @@ const protocolConversationToStateConversation = (
   messagesIds: [],
   conversationTitle: undefined,
   messageDraft: undefined,
+  mediaPreview: undefined,
   readUntil: 0,
   pending: false,
   version: conversation.conversationVersion,
+  isGroup: false,
 });
 
 const openedConversations: {
@@ -194,6 +196,9 @@ const createConversation = async (
     `[XMTP] Creating a conversation with peer ${conversation.peerAddress} and id ${conversation.context?.conversationId}`
   );
   const client = (await getXmtpClient(account)) as Client;
+
+  // Groups not handled on web
+  if (!conversation.peerAddress) return;
 
   const newConversation = await client.conversations.newConversation(
     conversation.peerAddress,

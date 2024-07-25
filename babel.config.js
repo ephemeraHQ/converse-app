@@ -16,6 +16,7 @@ module.exports = {
       "module-resolver",
       {
         alias: {
+          "fast-text-encoding": "text-encoding",
           // crypto: "react-native-quick-crypto",
           "react-native-sqlite-storage": "@op-engineering/op-sqlite",
           crypto: "crypto-browserify",
@@ -29,6 +30,15 @@ module.exports = {
           "@web3modal/scaffold-utils/ethers":
             "@web3modal/scaffold-utils/dist/esm/exports/ethers.js",
           "react-native-webview": "react-native-webview/src/index.ts",
+
+          // Folder aliases
+          "@components": "./components",
+          "@data": "./data",
+          "@hooks": "./hooks",
+          "@queries": "./queries",
+          "@screens": "./screens",
+          "@styles": "./styles",
+          "@utils": "./utils",
         },
       },
     ],

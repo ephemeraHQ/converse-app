@@ -1,28 +1,27 @@
 import { utils } from "@noble/secp256k1";
-import { Wallet } from "ethers";
-import * as Linking from "expo-linking";
-import { useCallback, useEffect, useRef, useState } from "react";
-import {
-  View,
-  TextInput,
-  useColorScheme,
-  StyleSheet,
-  Text,
-  Platform,
-  Alert,
-} from "react-native";
-import { AvoidSoftInput } from "react-native-avoid-softinput";
-
-import config from "../../config";
-import { useOnboardingStore } from "../../data/store/onboardingStore";
-import { useSelect } from "../../data/store/storeHelpers";
 import {
   textInputStyle,
   textPrimaryColor,
   textSecondaryColor,
-} from "../../utils/colors";
-import { getPrivateKeyFromMnemonic, validateMnemonic } from "../../utils/eth";
+} from "@styles/colors";
+import { Wallet } from "ethers";
+import * as Linking from "expo-linking";
+import { useCallback, useEffect, useRef, useState } from "react";
+import {
+  Alert,
+  Platform,
+  StyleSheet,
+  Text,
+  TextInput,
+  useColorScheme,
+  View,
+} from "react-native";
+import { AvoidSoftInput } from "react-native-avoid-softinput";
+
 import OnboardingComponent from "./OnboardingComponent";
+import { useOnboardingStore } from "../../data/store/onboardingStore";
+import { useSelect } from "../../data/store/storeHelpers";
+import { getPrivateKeyFromMnemonic, validateMnemonic } from "../../utils/eth";
 
 export const getSignerFromSeedPhraseOrPrivateKey = async (
   seedPhraseOrPrivateKey: string
@@ -185,13 +184,11 @@ export default function SeedPhraseConnect() {
             terms and conditions.
           </Text>
         </Text>
-        {(config.env === "dev" || config.env === "preview") && (
-          <Text style={styles.links}>
-            <Text style={styles.link} onPress={generateWallet}>
-              Try the app with an ephemeral wallet.
-            </Text>
+        <Text style={styles.links}>
+          <Text style={styles.link} onPress={generateWallet}>
+            Try the app with an ephemeral wallet.
           </Text>
-        )}
+        </Text>
       </View>
     </OnboardingComponent>
   );

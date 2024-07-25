@@ -1,12 +1,10 @@
 import { v4 as uuidv4 } from "uuid";
 import { create, StoreApi, UseBoundStore } from "zustand";
-import { persist, createJSONStorage } from "zustand/middleware";
+import { createJSONStorage, persist } from "zustand/middleware";
 
-import { removeLogoutTask } from "../../utils/logout";
-import mmkv, { zustandMMKVStorage } from "../../utils/mmkv";
-import { updateSteps } from "../updates/asyncUpdates";
 import { ChatStoreType, initChatStore } from "./chatStore";
-import { ProfilesStoreType, initProfilesStore } from "./profilesStore";
+import { InboxIdStoreType, initInboxIdStore } from "./inboxIdStore";
+import { initProfilesStore, ProfilesStoreType } from "./profilesStore";
 import {
   initRecommendationsStore,
   RecommendationsStoreType,
@@ -17,6 +15,9 @@ import {
   TransactionsStoreType,
 } from "./transactionsStore";
 import { initWalletStore, WalletStoreType } from "./walletStore";
+import { removeLogoutTask } from "../../utils/logout";
+import mmkv, { zustandMMKVStorage } from "../../utils/mmkv";
+import { updateSteps } from "../updates/asyncUpdates";
 
 type AccountStoreType = {
   [K in keyof AccountStoreDataType]: UseBoundStore<
@@ -41,6 +42,7 @@ export const initStores = (account: string) => {
       chat: initChatStore(account),
       wallet: initWalletStore(account),
       transactions: initTransactionsStore(account),
+      inboxId: initInboxIdStore(account),
     };
   }
 };
@@ -196,6 +198,7 @@ type AccountStoreDataType = {
   chat: ChatStoreType;
   wallet: WalletStoreType;
   transactions: TransactionsStoreType;
+  inboxId: InboxIdStoreType;
 };
 
 const getAccountStore = (account: string) => {
@@ -312,3 +315,9 @@ export const useTransactionsStoreForAccount = (account: string) =>
   accountStoreHook("transactions", account);
 export const getTransactionsStore = (account: string) =>
   getAccountStore(account).transactions;
+
+export const useInboxIdStore = currentAccountStoreHook("inboxId");
+export const useInboxIdStoreForAccount = (account: string) =>
+  accountStoreHook("inboxId", account);
+export const getInboxIdStore = (account: string) =>
+  getAccountStore(account).inboxId;

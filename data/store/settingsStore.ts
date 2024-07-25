@@ -1,6 +1,7 @@
+import { InboxId } from "@xmtp/react-native-sdk";
 import { Platform } from "react-native";
 import { create } from "zustand";
-import { persist, createJSONStorage } from "zustand/middleware";
+import { createJSONStorage, persist } from "zustand/middleware";
 
 import { zustandMMKVStorage } from "../../utils/mmkv";
 import { subscribeToNotifications } from "../../utils/notifications";
@@ -22,6 +23,16 @@ export type SettingsStoreType = {
   peersStatus: { [peerAddress: string]: "blocked" | "consented" };
   setPeersStatus: (peersStatus: {
     [peerAddress: string]: "blocked" | "consented";
+  }) => void;
+
+  inboxIdPeerStatus: { [inboxId: InboxId]: "allowed" | "denied" };
+  setInboxIdPeerStatus: (inboxIdPeerStatus: {
+    [inboxId: InboxId]: "allowed" | "denied";
+  }) => void;
+
+  groupStatus: { [groupId: string]: "allowed" | "denied" };
+  setGroupStatus: (groupStatus: {
+    [groupId: string]: "allowed" | "denied";
   }) => void;
 
   ephemeralAccount: boolean;
@@ -73,6 +84,37 @@ export const initSettingsStore = (account: string) => {
                 },
               };
             }),
+
+          inboxIdPeerStatus: {},
+          setInboxIdPeerStatus: (peersStatus: {
+            [inboxId: InboxId]: "allowed" | "denied";
+          }) =>
+            set((state) => {
+              return {
+                inboxIdPeerStatus: {
+                  ...state.inboxIdPeerStatus,
+                  ...Object.fromEntries(
+                    Object.entries(peersStatus).map(([key, value]) => [
+                      // Normalize to lowercase before merging
+                      key.toLowerCase(),
+                      value,
+                    ])
+                  ),
+                },
+              };
+            }),
+
+          groupStatus: {},
+          setGroupStatus: (groupStatus: {
+            [groupId: string]: "allowed" | "denied";
+          }) =>
+            set((state) => ({
+              groupStatus: {
+                ...state.groupStatus,
+                ...groupStatus,
+              },
+            })),
+
           setNotificationsSettings: (notificationsSettings) =>
             set((state) => ({
               notifications: {

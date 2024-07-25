@@ -1,0 +1,25 @@
+name: Typescript CI
+on:
+  pull_request:
+    branches:
+      - main
+      - feat/xmtp-groups-dash
+jobs:
+  tsc:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v3
+      - run: yarn
+      - run: yarn typecheck
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v3
+      - run: yarn
+      - run: yarn lint

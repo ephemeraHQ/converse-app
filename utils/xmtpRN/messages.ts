@@ -1,23 +1,34 @@
 import { TransactionReference } from "@xmtp/content-type-transaction-reference";
 import {
   DecodedMessage,
+  GroupUpdatedContent,
+  Member,
   ReactionContent,
   RemoteAttachmentContent,
   ReplyContent,
   StaticAttachmentContent,
 } from "@xmtp/react-native-sdk";
 
-import { getOrderedMessages, saveMessages } from "../../data/helpers/messages";
+import { serializeRemoteAttachmentMessageContent } from "./attachments";
+import {
+  ConverseXmtpClientType,
+  DecodedMessageWithCodecsType,
+  GroupWithCodecsType,
+} from "./client";
+import { getMessageContentType, isContentType } from "./contentTypes";
+import { CoinbaseMessagingPaymentContent } from "./contentTypes/coinbasePayment";
+import { getXmtpClient } from "./sync";
+import { saveMemberInboxIds } from "../../data/helpers/inboxId/saveInboxIds";
+import {
+  getOrderedMessages,
+  handleGroupUpdatedMessage,
+  saveMessages,
+} from "../../data/helpers/messages";
 import { xmtpMessageFromDb } from "../../data/mappers";
 import { getChatStore } from "../../data/store/accountsStore";
 import { XmtpMessage } from "../../data/store/chatStore";
 import { addLog } from "../debug";
 import { sentryTrackError } from "../sentry";
-import { serializeRemoteAttachmentMessageContent } from "./attachments";
-import { ConverseXmtpClientType, DecodedMessageWithCodecsType } from "./client";
-import { getMessageContentType, isContentType } from "./contentTypes";
-import { CoinbaseMessagingPaymentContent } from "./contentTypes/coinbasePayment";
-import { getXmtpClient } from "./sync";
 
 const BATCH_QUERY_PAGE_SIZE = 30;
 
@@ -49,6 +60,7 @@ const serializeProtocolMessageContent = (
     referencedMessageId = (messageContent as ReactionContent).reference;
   } else if (isContentType("reply", contentType)) {
     const replyContent = messageContent as ReplyContent;
+    // @ts-ignore
     const replyContentType = replyContent.contentType;
     // Some content types we don't handle as replies:
     // You can't reply a reply or a reaction
@@ -63,6 +75,7 @@ const serializeProtocolMessageContent = (
       };
     }
     const codec = client.codecRegistry[replyContentType];
+    // @ts-ignore
     const actualReplyContent = codec.decode(replyContent.content);
     // Now that we have the content of the reply,
     // let's also pass it through the serialize method
@@ -81,6 +94,8 @@ const serializeProtocolMessageContent = (
     content = JSON.stringify(messageContent as TransactionReference);
   } else if (isContentType("coinbasePayment", contentType)) {
     content = JSON.stringify(messageContent as CoinbaseMessagingPaymentContent);
+  } else if (isContentType("groupUpdated", contentType)) {
+    content = JSON.stringify(messageContent as GroupUpdatedContent);
   } else {
     supported = false;
   }
@@ -102,13 +117,25 @@ const protocolMessageToStateMessage = (
       message.contentTypeId,
       supportedContentType ? message.content() : undefined
     );
+
+  // For now, use the group member linked address as "senderAddress"
+  // @todo => make inboxId a first class citizen
+  let senderAddress = message.senderAddress;
+  if (message.topic.startsWith("/xmtp/mls/1/g-")) {
+    const groupMember = groupMembers[message.topic]?.find(
+      (m) => m.inboxId === message.senderAddress
+    );
+    if (groupMember) {
+      senderAddress = groupMember.addresses[0];
+    }
+  }
+
   return {
     id: message.id,
-    senderAddress: message.senderAddress,
+    senderAddress,
     sent: message.sent,
     contentType,
     status: "delivered",
-    sentViaConverse: message.sentViaConverse || false,
     content,
     referencedMessageId,
     topic: message.topic,
@@ -141,16 +168,77 @@ export const streamAllMessages = async (account: string) => {
   await stopStreamingAllMessage(account);
   const client = (await getXmtpClient(account)) as ConverseXmtpClientType;
   console.log(`[XmtpRN] Streaming messages for ${client.address}`);
-  client.conversations.streamAllMessages(async (message) => {
-    console.log(`[XmtpRN] Received a message for ${client.address}`);
+  await client.conversations.streamAllMessages(async (message) => {
+    console.log(`[XmtpRN] Received a message for ${client.address}`, {
+      id: message.id,
+      text: message.nativeContent.text,
+      topic: message.topic,
+    });
     saveMessages(client.address, protocolMessagesToStateMessages([message]));
-  });
+    if (message.contentTypeId.includes("group_updated")) {
+      handleGroupUpdatedMessage(client.address, message.topic, message);
+    }
+  }, true);
 };
 
 export const stopStreamingAllMessage = async (account: string) => {
   const client = (await getXmtpClient(account)) as ConverseXmtpClientType;
   console.log(`[XmtpRN] Stopped streaming messages for ${client.address}`);
   client.conversations.cancelStreamAllMessages();
+};
+
+// export const streamAllGroupMessages = async (account: string) => {
+//   await stopStreamingAllGroupMessage(account);
+//   const client = (await getXmtpClient(account)) as ConverseXmtpClientType;
+//   console.log(`[XmtpRN] Streaming group messages for ${client.address}`);
+//   await client.conversations.streamAllGroupMessages(async (message) => {
+//     console.log(
+//       `[XmtpRN] Received a group message for ${client.address}`,
+//       message.nativeContent.text,
+//       message.id
+//     );
+//     saveMessages(client.address, protocolMessagesToStateMessages([message]));
+//   });
+// };
+
+// export const stopStreamingAllGroupMessage = async (account: string) => {
+//   const client = (await getXmtpClient(account)) as ConverseXmtpClientType;
+//   console.log(
+//     `[XmtpRN] Stopped streaming group messages for ${client.address}`
+//   );
+//   client.conversations.cancelStreamAllGroupMessages();
+// };
+
+const groupMembers: { [topic: string]: Member[] } = {};
+
+export const syncGroupsMessages = async (
+  account: string,
+  groups: GroupWithCodecsType[],
+  queryGroupsFromTimestamp: { [topic: string]: number }
+) => {
+  console.log(`Syncing ${groups.length} groups...`);
+  for (const group of groups) {
+    console.log("syncing group", group.topic);
+    await group.sync();
+    const members = await group.members();
+    groupMembers[group.topic] = members;
+    saveMemberInboxIds(account, members);
+    console.log("synced group", group.topic);
+  }
+  console.log(`${groups.length} groups synced!`);
+  const newMessages = (
+    await Promise.all(
+      groups.map((g) =>
+        g.messages({
+          after: queryGroupsFromTimestamp[g.topic],
+          direction: "SORT_DIRECTION_ASCENDING",
+        })
+      )
+    )
+  ).flat();
+  console.log(`${newMessages.length} groups messages pulled`);
+  saveMessages(account, protocolMessagesToStateMessages(newMessages));
+  return newMessages.length;
 };
 
 export const syncConversationsMessages = async (
@@ -184,7 +272,7 @@ export const syncConversationsMessages = async (
     const messagesByTopic: { [topic: string]: DecodedMessage[] } = {};
     messagesBatch.forEach((m) => {
       messagesByTopic[m.topic] = messagesByTopic[m.topic] || [];
-      messagesByTopic[m.topic].push(m);
+      messagesByTopic[m.topic].push(m as DecodedMessage);
       if (m.sent > queryConversationsFromTimestamp[m.topic]) {
         queryConversationsFromTimestamp[m.topic] = m.sent;
       }
@@ -245,4 +333,9 @@ export const loadOlderMessages = async (account: string, topic: string) => {
   const messages = await getOrderedMessages(account, topic);
   getChatStore(account).getState().setMessages(messages.map(xmtpMessageFromDb));
   loadedOlderMessagesForTopic[account][topic] = true;
+};
+
+export const getUrlToRender = (url: string) => {
+  const fullUrl = new URL(url);
+  return fullUrl.hostname;
 };

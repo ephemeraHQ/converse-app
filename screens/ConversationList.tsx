@@ -1,46 +1,47 @@
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
+import {
+  backgroundColor,
+  itemSeparatorColor,
+  textPrimaryColor,
+} from "@styles/colors";
 import React, { useCallback, useEffect, useState } from "react";
 import {
   Platform,
   StyleSheet,
-  useColorScheme,
   Text,
-  View,
   TextInput,
+  View,
+  useColorScheme,
 } from "react-native";
 import { gestureHandlerRootHOC } from "react-native-gesture-handler";
 import { SearchBarCommands } from "react-native-screens";
 
+import { useHeaderSearchBar } from "./Navigation/ConversationListNav";
+import { NavigationParamList } from "./Navigation/Navigation";
+import { useIsSplitScreen } from "./Navigation/navHelpers";
 import ConversationFlashList from "../components/ConversationFlashList";
 import NewConversationButton from "../components/ConversationList/NewConversationButton";
 import RequestsButton from "../components/ConversationList/RequestsButton";
 import EphemeralAccountBanner from "../components/EphemeralAccountBanner";
 import InitialLoad from "../components/InitialLoad";
+import PinnedConversations from "../components/PinnedConversations/PinnedConversations";
 import Recommendations from "../components/Recommendations/Recommendations";
 import NoResult from "../components/Search/NoResult";
-import Welcome from "../components/Welcome";
 import { refreshProfileForAddress } from "../data/helpers/profiles/profilesUpdate";
 import {
-  useChatStore,
-  useSettingsStore,
-  useProfilesStore,
   currentAccount,
+  useChatStore,
+  useProfilesStore,
+  useSettingsStore,
 } from "../data/store/accountsStore";
 import { XmtpConversation } from "../data/store/chatStore";
 import { useSelect } from "../data/store/storeHelpers";
-import {
-  textPrimaryColor,
-  backgroundColor,
-  itemSeparatorColor,
-} from "../utils/colors";
 import {
   LastMessagePreview,
   getFilteredConversationsWithSearch,
 } from "../utils/conversation";
 import { converseEventEmitter } from "../utils/events";
-import { useHeaderSearchBar } from "./Navigation/ConversationListNav";
-import { NavigationParamList } from "./Navigation/Navigation";
-import { useIsSplitScreen } from "./Navigation/navHelpers";
+import { sortRequestsBySpamScore } from "../utils/xmtpRN/conversations";
 
 type ConversationWithLastMessagePreview = XmtpConversation & {
   lastMessagePreview?: LastMessagePreview;
@@ -79,6 +80,8 @@ function ConversationList({ navigation, route, searchBarRef }: Props) {
     useSelect(["peersStatus", "ephemeralAccount"])
   );
   const profiles = useProfilesStore((s) => s.profiles);
+  const pinnedConversations = useChatStore((s) => s.pinnedConversations);
+
   const [flatListItems, setFlatListItems] = useState<{
     items: FlatListItem[];
     searchQuery: string;
@@ -89,14 +92,12 @@ function ConversationList({ navigation, route, searchBarRef }: Props) {
     !initialLoadDoneOnce && flatListItems.items.length <= 1;
   const showNoResult = flatListItems.items.length === 0 && !!searchQuery;
 
-  // Welcome screen
-  const showWelcome =
-    !searchQuery &&
-    !searchBarFocused &&
-    sortedConversationsWithPreview.conversationsInbox.length === 0;
-
   const isSplit = useIsSplitScreen();
   const sharingMode = !!route.params?.frameURL;
+
+  const { likelyNotSpam } = sortRequestsBySpamScore(
+    sortedConversationsWithPreview.conversationsRequests
+  );
 
   useEffect(() => {
     if (!initialLoadDoneOnce) {
@@ -152,7 +153,12 @@ function ConversationList({ navigation, route, searchBarRef }: Props) {
     }
   }, [clearSearch, isSplit, openedConversationTopic]);
 
-  const ListHeaderComponents: React.ReactElement[] = [];
+  const ListHeaderComponents: React.ReactElement[] = [
+    <PinnedConversations
+      convos={pinnedConversations}
+      key="pinnedConversations"
+    />,
+  ];
   const showSearchTitleHeader =
     ((Platform.OS === "ios" && searchBarFocused && !showNoResult) ||
       (Platform.OS === "android" && searchBarFocused)) &&
@@ -172,9 +178,7 @@ function ConversationList({ navigation, route, searchBarRef }: Props) {
         key="requests"
         navigation={navigation}
         route={route}
-        requestsCount={
-          sortedConversationsWithPreview.conversationsRequests.length
-        }
+        requestsCount={likelyNotSpam.length}
       />
     );
   }
@@ -182,26 +186,16 @@ function ConversationList({ navigation, route, searchBarRef }: Props) {
   let ListFooterComponent: React.ReactElement | undefined = undefined;
   if (showInitialLoad) {
     ListFooterComponent = <InitialLoad />;
-  } else if (showWelcome) {
-    ListFooterComponent = (
-      <Welcome ctaOnly={false} navigation={navigation} route={route} />
-    );
-  } else {
-    if (
-      ephemeralAccount &&
-      !showNoResult &&
-      !showSearchTitleHeader &&
-      !sharingMode
-    ) {
-      ListHeaderComponents.push(<EphemeralAccountBanner key="ephemeral" />);
-    }
-    if (!searchQuery && !sharingMode) {
-      ListFooterComponent = (
-        <Welcome ctaOnly navigation={navigation} route={route} />
-      );
-    } else if (showNoResult) {
-      ListFooterComponent = <NoResult navigation={navigation} />;
-    }
+  } else if (
+    ephemeralAccount &&
+    !showNoResult &&
+    !showSearchTitleHeader &&
+    !sharingMode
+  ) {
+    ListHeaderComponents.push(<EphemeralAccountBanner key="ephemeral" />);
+  }
+  if (showNoResult) {
+    ListFooterComponent = <NoResult navigation={navigation} />;
   }
 
   return (
@@ -214,7 +208,7 @@ function ConversationList({ navigation, route, searchBarRef }: Props) {
           searchBarRef.current?.blur();
         }}
         itemsForSearchQuery={flatListItems.searchQuery}
-        items={showInitialLoad || showWelcome ? [] : flatListItems.items}
+        items={showInitialLoad ? [] : flatListItems.items}
         ListHeaderComponent={
           ListHeaderComponents.length > 0 ? (
             <>{ListHeaderComponents}</>
@@ -235,22 +229,20 @@ export default gestureHandlerRootHOC(ConversationList);
 const useStyles = () => {
   const colorScheme = useColorScheme();
   return StyleSheet.create({
-    searchTitleContainer: {
-      ...Platform.select({
-        default: {
-          padding: 10,
-          paddingLeft: 16,
-          backgroundColor: backgroundColor(colorScheme),
-          borderBottomColor: itemSeparatorColor(colorScheme),
-          borderBottomWidth: 0.5,
-        },
-        android: {
-          padding: 10,
-          paddingLeft: 16,
-          borderBottomWidth: 0,
-        },
-      }),
-    },
+    searchTitleContainer: Platform.select({
+      default: {
+        padding: 10,
+        paddingLeft: 16,
+        backgroundColor: backgroundColor(colorScheme),
+        borderBottomColor: itemSeparatorColor(colorScheme),
+        borderBottomWidth: 0.5,
+      },
+      android: {
+        padding: 10,
+        paddingLeft: 16,
+        borderBottomWidth: 0,
+      },
+    }),
     searchTitle: {
       ...Platform.select({
         default: {

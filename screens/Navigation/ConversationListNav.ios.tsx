@@ -1,12 +1,21 @@
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
+import { textPrimaryColor } from "@styles/colors";
 import React, { useLayoutEffect } from "react";
 import {
   NativeSyntheticEvent,
+  Text,
   TextInputChangeEventData,
+  View,
   useColorScheme,
+  TouchableOpacity,
 } from "react-native";
 import { SearchBarCommands } from "react-native-screens";
 
+import {
+  NativeStack,
+  NavigationParamList,
+  navigationAnimation,
+} from "./Navigation";
 import Connecting, {
   useShouldShowConnectingOrSyncing,
 } from "../../components/Connecting";
@@ -14,15 +23,9 @@ import NewConversationButton from "../../components/ConversationList/NewConversa
 import ProfileSettingsButton from "../../components/ConversationList/ProfileSettingsButton";
 import { useAccountsStore, useChatStore } from "../../data/store/accountsStore";
 import { useSelect } from "../../data/store/storeHelpers";
-import { headerTitleStyle } from "../../utils/colors";
 import { isDesktop } from "../../utils/device";
 import { getReadableProfile } from "../../utils/str";
 import ConversationList from "../ConversationList";
-import {
-  NativeStack,
-  NavigationParamList,
-  navigationAnimation,
-} from "./Navigation";
 
 type HeaderSearchBarProps = {
   searchBarRef: React.RefObject<any>;
@@ -74,23 +77,62 @@ export default function ConversationListNav() {
 
   const shouldShowConnectingOrSyncing = useShouldShowConnectingOrSyncing();
   const currentAccount = useAccountsStore((s) => s.currentAccount);
+  const name = getReadableProfile(currentAccount, currentAccount);
 
   return (
     <NativeStack.Screen
       name="Chats"
       options={({ route, navigation }) => ({
         headerTitle: () =>
-          shouldShowConnectingOrSyncing ? <Connecting /> : undefined,
-        headerLargeTitle: true,
-        headerTitleStyle: headerTitleStyle(colorScheme),
+          shouldShowConnectingOrSyncing ? (
+            <View style={{ marginTop: -10 }}>
+              <Connecting />
+            </View>
+          ) : (
+            <View />
+          ),
         headerBackTitle: getReadableProfile(currentAccount, currentAccount),
         headerRight: () => (
-          <>
-            <ProfileSettingsButton />
+          <View style={{ marginTop: -10 }}>
             <NewConversationButton navigation={navigation} route={route} />
-          </>
+          </View>
         ),
+        headerTintColor: textPrimaryColor(colorScheme),
+        headerShadowVisible: false,
         animation: navigationAnimation,
+        headerLeft: () => (
+          <View
+            style={{
+              flexDirection: "row",
+              alignItems: "flex-end",
+              marginTop: -10,
+            }}
+          >
+            <View>
+              <ProfileSettingsButton />
+            </View>
+            <TouchableOpacity
+              onPress={() => {
+                navigation.navigate("Profile", {
+                  address: currentAccount,
+                });
+              }}
+            >
+              <Text
+                style={{
+                  fontSize: 16,
+                  color:
+                    colorScheme === "dark"
+                      ? "rgba(255, 255, 255, 0.6)"
+                      : "rgba(0, 0, 0, 0.6)",
+                  paddingBottom: 6,
+                }}
+              >
+                {name}
+              </Text>
+            </TouchableOpacity>
+          </View>
+        ),
       })}
     >
       {(navigationProps) => (

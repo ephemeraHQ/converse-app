@@ -1,3 +1,5 @@
+import { textSecondaryColor } from "@styles/colors";
+import { PictoSizes } from "@styles/sizes";
 import { Image } from "expo-image";
 import React from "react";
 import {
@@ -12,7 +14,6 @@ import {
 } from "react-native";
 
 import IconLoading from "../../assets/icon-loading.png";
-import { textSecondaryColor } from "../../utils/colors";
 import Picto from "../Picto/Picto";
 import SvgImageUri from "../SvgImageUri";
 
@@ -60,7 +61,7 @@ export const TableViewPicto = ({
     <View style={{ justifyContent: "center" }}>
       <Picto
         picto={symbol}
-        size={Platform.OS === "ios" ? 16 : 24}
+        size={PictoSizes.tableViewImage}
         style={Platform.select({
           default: {
             width: IMAGE_SIZE,

@@ -1,7 +1,6 @@
+import { primaryColor } from "@styles/colors";
 import { ColorValue, StyleProp, useColorScheme, ViewStyle } from "react-native";
 import { SFSymbol } from "react-native-sfsymbols";
-
-import { primaryColor } from "../../utils/colors";
 
 type Props = {
   picto: string;

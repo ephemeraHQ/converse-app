@@ -1,15 +1,15 @@
 import { v4 as uuidv4 } from "uuid";
 
+import { saveAttachmentForPendingMessage } from "./attachment";
+import { createUniformTransaction } from "./transaction";
+import { isContentType } from "./xmtpRN/contentTypes";
+import { sendPendingMessages } from "./xmtpRN/send";
 import { saveMessages } from "../data/helpers/messages";
 import {
   currentAccount,
   getTransactionsStore,
 } from "../data/store/accountsStore";
 import { XmtpConversation } from "../data/store/chatStore";
-import { saveAttachmentForPendingMessage } from "./attachment";
-import { createUniformTransaction } from "./transaction";
-import { isContentType } from "./xmtpRN/contentTypes";
-import { sendPendingMessages } from "./xmtpRN/send";
 
 type SendMessageInput = {
   conversation: XmtpConversation;
@@ -24,14 +24,17 @@ type SendMessageInput = {
   };
 };
 
-export const sendMessage = async ({
-  conversation,
-  content,
-  contentType,
-  contentFallback,
-  referencedMessageId,
-  attachmentToSave,
-}: SendMessageInput) => {
+export const sendMessage = async (
+  {
+    conversation,
+    content,
+    contentType,
+    contentFallback,
+    referencedMessageId,
+    attachmentToSave,
+  }: SendMessageInput,
+  sendImmediately = true
+) => {
   if (!conversation) return;
   const messageId = uuidv4();
   const sentAtTime = new Date();
@@ -68,7 +71,6 @@ export const sendMessage = async ({
       sent: sentAtTime.getTime(),
       content,
       status: "sending",
-      sentViaConverse: !isV1Conversation, // V1 Convo don't support the sentViaConverse feature
       contentType,
       contentFallback,
       referencedMessageId,
@@ -76,7 +78,7 @@ export const sendMessage = async ({
     },
   ]);
   // Then send for real if conversation exists
-  if (!conversation.pending) {
-    sendPendingMessages(currentAccount());
+  if (sendImmediately && !conversation.pending) {
+    await sendPendingMessages(currentAccount());
   }
 };

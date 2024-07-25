@@ -1,51 +1,67 @@
 import Clipboard from "@react-native-clipboard/clipboard";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import { MutableRefObject, useEffect, useRef, useState } from "react";
+import { headerTitleStyle, textPrimaryColor } from "@styles/colors";
+import { AvatarSizes } from "@styles/sizes";
 import {
-  TouchableOpacity,
-  Platform,
-  useColorScheme,
-  Text,
+  MutableRefObject,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
+import {
   Alert,
+  Platform,
+  StyleSheet,
+  Text,
   TextInput,
+  TouchableOpacity,
+  useColorScheme,
   View,
 } from "react-native";
 
 import { useProfilesStore } from "../../data/store/accountsStore";
 import { XmtpConversation } from "../../data/store/chatStore";
+import { useGroupName } from "../../hooks/useGroupName";
+import { useGroupPhoto } from "../../hooks/useGroupPhoto";
 import { NavigationParamList } from "../../screens/Navigation/Navigation";
-import { headerTitleStyle, textSecondaryColor } from "../../utils/colors";
 import { getPreferredAvatar } from "../../utils/profile";
 import { conversationName, getTitleFontScale } from "../../utils/str";
 import Avatar from "../Avatar";
 import { useEnableDebug } from "../DebugButton";
-import Picto from "../Picto/Picto";
+import GroupAvatar from "../GroupAvatar";
 
 type Props = {
-  isBlockedPeer: boolean;
-  peerAddress?: string;
   conversation?: XmtpConversation;
   textInputRef: MutableRefObject<TextInput | undefined>;
 } & NativeStackScreenProps<NavigationParamList, "Conversation">;
 
 export default function ConversationTitle({
-  isBlockedPeer,
-  peerAddress,
   conversation,
   textInputRef,
   navigation,
 }: Props) {
   const colorScheme = useColorScheme();
+  const styles = useStyles();
+  const { groupName } = useGroupName(conversation?.topic ?? "");
+  const { groupPhoto } = useGroupPhoto(conversation?.topic ?? "");
   const [title, setTitle] = useState(
-    conversation ? conversationName(conversation) : ""
+    conversation
+      ? conversation.isGroup
+        ? groupName
+        : conversationName(conversation)
+      : ""
   );
   const profiles = useProfilesStore((state) => state.profiles);
   const [avatar, setAvatar] = useState(
-    getPreferredAvatar(
-      conversation?.peerAddress
-        ? profiles[conversation.peerAddress]?.socials
-        : undefined
-    )
+    conversation?.isGroup
+      ? groupPhoto
+      : getPreferredAvatar(
+          conversation?.peerAddress
+            ? profiles[conversation.peerAddress]?.socials
+            : undefined
+        )
   );
   const enableDebug = useEnableDebug();
   const conversationRef = useRef(conversation);
@@ -61,78 +77,125 @@ export default function ConversationTitle({
       conversation.peerAddress !== previousConversation.peerAddress ||
       conversation.context?.conversationId !==
         previousConversation.context?.conversationId ||
-      conversation.conversationTitle
+      conversation.conversationTitle ||
+      (previousConversation.isGroup &&
+        conversation.isGroup &&
+        previousConversation.groupName !== conversation.groupName)
     ) {
       // New conversation, lets' set title
-      setTitle(conversationName(conversation));
+      if (!conversation.isGroup) {
+        setTitle(conversationName(conversation));
+      }
+      if (!conversation.peerAddress) return;
       const socials = profiles[conversation.peerAddress]?.socials;
       setAvatar(getPreferredAvatar(socials));
     }
     conversationRef.current = conversation;
   }, [conversation, profiles]);
+
+  useEffect(() => {
+    if (groupName) {
+      setTitle(groupName);
+    }
+  }, [groupName]);
+
+  useEffect(() => {
+    if (groupPhoto) {
+      setAvatar(groupPhoto);
+    }
+  }, [groupPhoto]);
+
+  const avatarComponent = useMemo(() => {
+    if (!conversation) return null;
+    return conversation?.isGroup ? (
+      <GroupAvatar
+        uri={avatar}
+        size={AvatarSizes.conversationTitle}
+        style={styles.avatar}
+        topic={conversation.topic}
+      />
+    ) : (
+      <Avatar
+        uri={avatar}
+        size={AvatarSizes.conversationTitle}
+        style={styles.avatar}
+        name={conversationName(conversation)}
+      />
+    );
+  }, [avatar, conversation, styles.avatar]);
+
+  const handleLongPress = useCallback(() => {
+    if (!enableDebug) return;
+    Clipboard.setString(
+      JSON.stringify({
+        topic: conversation?.topic || "",
+        context: conversation?.context,
+      })
+    );
+    Alert.alert("Conversation details copied");
+  }, [conversation?.context, conversation?.topic, enableDebug]);
+
+  const onPress = useCallback(() => {
+    if (!conversation) return;
+    // Close keyboard
+    textInputRef?.current?.blur();
+    if (conversation.isGroup) {
+      navigation.push("Group", { topic: conversation.topic });
+    } else if (conversation.peerAddress) {
+      navigation.push("Profile", { address: conversation.peerAddress });
+    }
+  }, [conversation, navigation, textInputRef]);
+
   if (!conversation) return null;
+
   return (
-    <View style={{ flexDirection: "row", flexGrow: 1 }}>
+    <View style={styles.container}>
       <TouchableOpacity
-        onLongPress={() => {
-          if (!enableDebug) return;
-          Clipboard.setString(
-            JSON.stringify({
-              topic: conversation?.topic || "",
-              context: conversation?.context,
-            })
-          );
-          Alert.alert("Conversation details copied");
-        }}
-        onPress={async () => {
-          const address = conversation?.peerAddress;
-          if (!address) return;
-          // Close keyboard
-          textInputRef?.current?.blur();
-          navigation.push("Profile", { address });
-        }}
-        style={{
-          flexDirection: "row",
-          alignItems: "center",
-          paddingRight: 20,
-        }}
+        onLongPress={handleLongPress}
+        onPress={onPress}
+        style={styles.touchableContainer}
       >
-        <Avatar
-          uri={avatar}
-          size={36}
-          style={{
-            marginRight: Platform.OS === "android" ? 24 : 7,
-            marginLeft: Platform.OS === "ios" ? 6 : -9,
-          }}
-        />
+        {avatarComponent}
         <Text
-          style={[
-            headerTitleStyle(colorScheme),
-            {
-              fontSize:
-                Platform.OS === "ios"
-                  ? 17 * getTitleFontScale()
-                  : headerTitleStyle(colorScheme).fontSize,
-            },
-          ]}
+          style={{
+            color: textPrimaryColor(colorScheme),
+            fontSize:
+              Platform.OS === "ios"
+                ? 16 * getTitleFontScale()
+                : headerTitleStyle(colorScheme).fontSize,
+          }}
           numberOfLines={1}
           allowFontScaling={false}
         >
           {title}
         </Text>
-        <Picto
-          picto="chevron.right"
-          size={Platform.OS === "ios" ? 9 : 16}
-          style={{
-            // @todo => fix design on android & web
-            ...Platform.select({
-              default: { left: 10 },
-              android: { left: -10, top: 1 },
-            }),
-          }}
-          color={textSecondaryColor(colorScheme)}
-        />
       </TouchableOpacity>
     </View>
   );
 }
+
+const useStyles = () => {
+  const colorScheme = useColorScheme();
+  return StyleSheet.create({
+    avatar: {
+      marginRight: Platform.OS === "android" ? 24 : 7,
+      marginLeft: Platform.OS === "ios" ? 0 : -9,
+    },
+    container: { flexDirection: "row", flexGrow: 1 },
+    touchableContainer: {
+      flexDirection: "row",
+      justifyContent: "flex-start",
+      left: Platform.OS === "android" ? -36 : 0,
+      width: "100%",
+      alignItems: "center",
+      paddingRight: 40,
+    },
+    title: {
+      color: textPrimaryColor(colorScheme),
+      fontSize:
+        Platform.OS === "ios"
+          ? 16 * getTitleFontScale()
+          : headerTitleStyle(colorScheme).fontSize,
+    },
+  });
+};

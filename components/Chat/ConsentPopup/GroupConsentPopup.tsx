@@ -1,0 +1,152 @@
+import { useSelect } from "@data/store/storeHelpers";
+import { useGroupConsent } from "@hooks/useGroupConsent";
+import { useGroupCreator } from "@hooks/useGroupCreator";
+import { useGroupMembers } from "@hooks/useGroupMembers";
+import { useNavigation } from "@react-navigation/native";
+import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import {
+  actionSheetColors,
+  backgroundColor,
+  textPrimaryColor,
+} from "@styles/colors";
+import { strings } from "@utils/i18n/strings";
+import React, { useCallback, useMemo } from "react";
+import { StyleSheet, Text, useColorScheme, View } from "react-native";
+
+import {
+  useCurrentAccount,
+  useSettingsStore,
+} from "../../../data/store/accountsStore";
+import { NavigationParamList } from "../../../screens/Navigation/Navigation";
+import { useConversationContext } from "../../../utils/conversation";
+import Button from "../../Button/Button";
+import { showActionSheetWithOptions } from "../../StateHandlers/ActionSheetStateHandler";
+
+export function GroupConsentPopup() {
+  const { conversation } = useConversationContext(["conversation"]);
+
+  const navigation = useNavigation() as NativeStackNavigationProp<
+    NavigationParamList,
+    "Chats",
+    undefined
+  >;
+  const currentAccount = useCurrentAccount();
+  if (!conversation?.isGroup || !conversation?.topic || !currentAccount) {
+    throw new Error("This component should only be used for group chats");
+  }
+  const topic = conversation.topic;
+
+  const styles = useStyles();
+  const colorScheme = useColorScheme();
+  const { consent, blockGroup, allowGroup } = useGroupConsent(topic);
+  const { groupCreator } = useGroupCreator(topic);
+  const { groupStatus } = useSettingsStore(useSelect(["groupStatus"]));
+  const { members } = useGroupMembers(topic);
+  const groupStatusForTopic = groupStatus[topic];
+
+  const isCreator = useMemo(() => {
+    if (!members || !currentAccount) {
+      return true;
+    }
+    return groupCreator === members?.byAddress[currentAccount];
+  }, [currentAccount, groupCreator, members]);
+
+  // Determine whether to show the consent window based on various conditions
+  const shouldShowConsentWindow =
+    conversation &&
+    groupStatusForTopic !== "allowed" &&
+    consent !== "allowed" &&
+    !conversation.pending &&
+    !isCreator;
+
+  const onBlock = useCallback(() => {
+    showActionSheetWithOptions(
+      {
+        options: [strings.block, strings.cancel],
+        cancelButtonIndex: 1,
+        destructiveButtonIndex: 0,
+        title: strings.if_you_unblock_group,
+        ...actionSheetColors(colorScheme),
+      },
+      (selectedIndex?: number) => {
+        if (selectedIndex === 0 && conversation.peerAddress) {
+          blockGroup({
+            includeCreator: false,
+            includeAddedBy: false,
+          });
+          navigation.pop();
+        }
+      }
+    );
+  }, [blockGroup, colorScheme, conversation.peerAddress, navigation]);
+
+  const onAccept = useCallback(() => {
+    allowGroup({
+      includeCreator: false,
+      includeAddedBy: false,
+    });
+  }, [allowGroup]);
+
+  if (!shouldShowConsentWindow) {
+    // Consent window will not be displayed
+    return null;
+  }
+
+  return (
+    <View style={styles.chatConsentContainer}>
+      <Text style={styles.info}>{strings.do_you_want_to_join_this_group}</Text>
+      <View style={styles.buttonsContainer}>
+        <Button
+          variant="text"
+          title={strings.decline}
+          style={[styles.cta, styles.blockCta]}
+          onPress={onBlock}
+        />
+        <Button
+          variant="secondary"
+          picto="checkmark"
+          title={strings.join_this_group}
+          style={styles.cta}
+          onPress={onAccept}
+        />
+      </View>
+    </View>
+  );
+}
+
+const useStyles = () => {
+  const colorScheme = useColorScheme();
+  return StyleSheet.create({
+    chatConsentContainer: {
+      backgroundColor: backgroundColor(colorScheme),
+      flexDirection: "column",
+      alignItems: "center",
+      justifyContent: "center",
+      paddingVertical: 17,
+      paddingHorizontal: 10,
+      marginTop: 10,
+    },
+    info: {
+      color: textPrimaryColor(colorScheme),
+      textAlign: "center",
+      fontSize: 15,
+    },
+    buttonsContainer: {
+      flexDirection: "row",
+      justifyContent: "center",
+      marginTop: 10,
+    },
+    cta: {
+      alignSelf: "center",
+      marginHorizontal: 6,
+    },
+    blockCta: {
+      borderWidth: 1,
+      borderRadius: 100,
+      paddingHorizontal: 15,
+      paddingVertical: 7,
+      padding: 5,
+      borderColor: textPrimaryColor(colorScheme),
+    },
+  });
+};

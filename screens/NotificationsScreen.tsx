@@ -1,12 +1,13 @@
+import { textPrimaryColor } from "@styles/colors";
+import { PictoSizes } from "@styles/sizes";
 import * as Linking from "expo-linking";
 import React from "react";
-import { View, StyleSheet, Text, useColorScheme, Platform } from "react-native";
+import { Platform, StyleSheet, Text, useColorScheme, View } from "react-native";
 
 import Button from "../components/Button/Button";
 import Picto from "../components/Picto/Picto";
 import { useSettingsStore } from "../data/store/accountsStore";
 import { useAppStore } from "../data/store/appStore";
-import { textPrimaryColor } from "../utils/colors";
 import { requestPushNotificationsPermissions } from "../utils/notifications";
 
 export default function NotificationsScreen() {
@@ -21,7 +22,7 @@ export default function NotificationsScreen() {
     <View style={styles.notifications}>
       <Picto
         picto="message.badge"
-        size={Platform.OS === "android" ? 80 : 43}
+        size={PictoSizes.notification}
         style={styles.picto}
       />
       <Text style={styles.title}>Accept notifications</Text>

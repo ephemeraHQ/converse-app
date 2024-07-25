@@ -1,3 +1,8 @@
+import {
+  tertiaryBackgroundColor,
+  textPrimaryColor,
+  textSecondaryColor,
+} from "@styles/colors";
 import { ReactElement } from "react";
 import {
   ColorValue,
@@ -9,15 +14,9 @@ import {
 } from "react-native";
 import {
   Cell,
-  Section,
   TableView as RNTableView,
+  Section,
 } from "react-native-tableview-simple";
-
-import {
-  tertiaryBackgroundColor,
-  textPrimaryColor,
-  textSecondaryColor,
-} from "../../utils/colors";
 
 export type TableViewItemType = {
   id: string;

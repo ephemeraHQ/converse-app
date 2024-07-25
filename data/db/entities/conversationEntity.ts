@@ -1,12 +1,16 @@
 import {
-  Index,
-  Entity,
   Column,
-  PrimaryColumn,
+  Entity,
+  Index,
   OneToMany,
+  PrimaryColumn,
 } from "typeorm/browser";
 
 import { type Message } from "./messageEntity";
+
+// Caution, when adding booleans here, they're not mapped correctly when
+// using createQueryBuilder directly (as they're actually integers in Sqlite)
+// see https://github.com/Unshut-Labs/converse-app/commit/5e498c99c3c1928f0256d3461299e9e5a0386b12
 
 @Entity()
 export class Conversation {
@@ -21,8 +25,29 @@ export class Conversation {
   pending!: boolean;
 
   @Index()
-  @Column("text")
-  peerAddress!: string;
+  @Column("text", { nullable: true })
+  peerAddress?: string;
+
+  @Column("boolean", { default: false })
+  isGroup!: boolean;
+
+  @Column("simple-array", { nullable: true })
+  groupAdmins?: string[];
+
+  @Column("simple-array", { nullable: true })
+  groupSuperAdmins?: string[];
+
+  @Column("text", { nullable: true })
+  groupPermissionLevel?: string;
+
+  @Column("text", { nullable: true })
+  groupName?: string;
+
+  @Column("simple-array", { nullable: true })
+  groupMembers?: string[];
+
+  @Column("boolean", { nullable: true })
+  isActive?: boolean;
 
   @Column("int")
   createdAt!: number;

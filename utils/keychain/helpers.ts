@@ -27,6 +27,24 @@ export const deleteXmtpKey = async (account: string) => {
 export const loadXmtpKey = async (account: string): Promise<string | null> =>
   getSecureItemAsync(`XMTP_KEY_${account}`);
 
+// export const getXmtpDatabaseEncryptionKey = async (
+//   account: string
+// ): Promise<string> => {
+//   const existingKey = await getSecureItemAsync(
+//     `XMTP_DB_ENCRYPTION_KEY_${account}`
+//   );
+//   if (existingKey) {
+//     return existingKey;
+//   }
+//   console.log(`[Keychain] Creating db encryption key for account ${account}`);
+//   const newKey = uuidv4();
+//   await setSecureItemAsync(`XMTP_DB_ENCRYPTION_KEY_${account}`, newKey);
+//   return newKey;
+// };
+
+// export const deleteXmtpDatabaseEncryptionKey = (account: string) =>
+//   deleteSecureItemAsync(`XMTP_DB_ENCRYPTION_KEY_${account}`);
+
 export const getTopicDataFromKeychain = async (
   account: string,
   topics: string[]
@@ -110,3 +128,16 @@ export const getAccountEncryptionKey = async (
 
 export const deleteAccountEncryptionKey = (account: string) =>
   deleteSecureItemAsync(`CONVERSE_ACCOUNT_ENCRYPTION_KEY_${account}`);
+
+export const getDbEncryptionKey = async () => {
+  const existingKey = await getSecureItemAsync("LIBXMTP_DB_ENCRYPTION_KEY");
+  if (existingKey) {
+    return Buffer.from(existingKey, "base64");
+  }
+  const newKey = Buffer.from(await getRandomBytesAsync(32));
+  await setSecureItemAsync(
+    "LIBXMTP_DB_ENCRYPTION_KEY",
+    newKey.toString("base64")
+  );
+  return newKey;
+};

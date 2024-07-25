@@ -2,6 +2,7 @@ import { Entity, Column, PrimaryColumn } from "typeorm";
 
 @Entity()
 export class Profile {
+
   @PrimaryColumn("text")
   address!: string;
 
