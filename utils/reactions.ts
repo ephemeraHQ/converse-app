@@ -16,9 +16,9 @@ export type MessageReaction = {
 };
 
 export const getMessageReactions = (message: XmtpMessage) => {
-  // Returns the last reaction for each sender
   try {
     if (!message.reactions || message.reactions.size === 0) return {};
+
     const reactions = Array.from(message.reactions.values()).map(
       (c) =>
         ({
@@ -27,39 +27,50 @@ export const getMessageReactions = (message: XmtpMessage) => {
           sent: c.sent,
         }) as MessageReaction
     );
-    const sortedReactions = reactions.sort((a, b) => a.sent - b.sent);
+
+    // Sort reactions by sent time, descending (most recent first)
+    const sortedReactions = reactions.sort((a, b) => b.sent - a.sent);
 
     const reactionsBySender: {
       [senderAddress: string]: { [reactionContent: string]: MessageReaction };
     } = {};
-    // We get all reactions for each sender, there might be multiple
-    // but we'll only show one!
-    sortedReactions.forEach((reaction) => {
-      if (
-        reaction.action === "removed" &&
-        reactionsBySender[reaction.senderAddress]?.[reaction.content]
-      ) {
-        delete reactionsBySender[reaction.senderAddress][reaction.content];
-      } else if (reaction.action === "added") {
-        reactionsBySender[reaction.senderAddress] =
-          reactionsBySender[reaction.senderAddress] || {};
-        reactionsBySender[reaction.senderAddress][reaction.content] = reaction;
-      }
-    });
 
-    const lastReactionBySender: {
-      [senderAddress: string]: MessageReaction;
+    const processedPairs = new Set<string>();
+
+    // Process reactions, considering the most recent action for each unique sender-reaction pair
+    for (const reaction of sortedReactions) {
+      const pairKey = `${reaction.senderAddress}:${reaction.content}`;
+
+      if (!processedPairs.has(pairKey)) {
+        processedPairs.add(pairKey);
+
+        if (reaction.action === "added") {
+          if (!reactionsBySender[reaction.senderAddress]) {
+            reactionsBySender[reaction.senderAddress] = {};
+          }
+          reactionsBySender[reaction.senderAddress][reaction.content] =
+            reaction;
+        } else if (reaction.action === "removed") {
+          // If the action is "removed", delete the reaction for this sender if it exists
+          if (reactionsBySender[reaction.senderAddress]) {
+            delete reactionsBySender[reaction.senderAddress][reaction.content];
+          }
+        }
+      }
+    }
+
+    // Convert the reactionsBySender object to the desired output format
+    const activeReactionsBySender: {
+      [senderAddress: string]: MessageReaction[];
     } = {};
 
     for (const senderAddress in reactionsBySender) {
-      const reactions = Object.values(reactionsBySender[senderAddress]).sort(
-        (a, b) => b.sent - a.sent
+      activeReactionsBySender[senderAddress] = Object.values(
+        reactionsBySender[senderAddress]
       );
-      if (reactions.length > 0) {
-        lastReactionBySender[senderAddress] = reactions[0];
-      }
     }
-    return lastReactionBySender;
+
+    return activeReactionsBySender;
   } catch (error) {
     const data = { error, reactions: message.reactions };
     console.log(data);
@@ -109,7 +120,7 @@ export const getReactionsContentPreview = (
       contentPreview = `Reacted ${reactionContent} to a transaction`;
       break;
     default: // Handles 'text' and other types
-      contentPreview = `Reacted ${reactionContent} to “${message.content}”`;
+      contentPreview = `Reacted ${reactionContent} to "${message.content}"`;
       break;
   }
   return contentPreview;
@@ -151,7 +162,7 @@ export const removeReactionFromMessage = (
     }),
     contentType: ContentTypeReaction.toString(),
     contentFallback: `Removed the reaction to ${
-      isAttachment ? "an attachment" : `“${message.content}”`
+      isAttachment ? "an attachment" : `"${message.content}"`
     }`,
     referencedMessageId: message.id,
   });
