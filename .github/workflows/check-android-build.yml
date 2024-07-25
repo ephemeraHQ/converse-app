@@ -41,6 +41,14 @@ jobs:
       - name: Install dependencies
         run: yarn install
 
+      - name: Clean Android Device
+        # https://github.com/actions/runner-images/issues/2840#issuecomment-790492173
+        run: |
+          sudo rm -rf /usr/share/dotnet
+          sudo rm -rf /opt/ghc
+          sudo rm -rf "/usr/local/share/boost"
+          sudo rm -rf "$AGENT_TOOLSDIRECTORY"
+
       - name: Build Android app
         run: eas build --platform android --profile development --local --output ${{ github.workspace }}/app-release.apk
       # Don't upload the artifact for now as we just want to make sure it builds
