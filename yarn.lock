@@ -13583,10 +13583,10 @@ expo-constants@~16.0.0, expo-constants@~16.0.2:
     "@expo/config" "~9.0.0"
     "@expo/env" "~0.3.0"
 
-expo-contacts@~13.0.4:
-  version "13.0.4"
-  resolved "https://registry.yarnpkg.com/expo-contacts/-/expo-contacts-13.0.4.tgz#b056ebfd097f1b558ee01d17a01dd9fc22444569"
-  integrity sha512-H1hnNrfjIHAXb2uedNKa7tAlt3s85LS4JVw1t/NRYPIgno7ijtp476kvuliufbdWHYivtHJ5vJ1zkoDDftPMZw==
+expo-contacts@~13.0.5:
+  version "13.0.5"
+  resolved "https://registry.yarnpkg.com/expo-contacts/-/expo-contacts-13.0.5.tgz#c8d8818c5a82cc15fbd38be2f5ac6a321a734cfb"
+  integrity sha512-jFdmrh0c7iMfaxEmt7bbDTBoz5Onyq3uLhvLxWzhb3dFXsEtQ/6SsdATtXbNQ9cP8gsD3itz3Ev2oxYXGFAMQw==
 
 expo-crypto-polyfills@^1.1.0:
   version "1.1.0"
