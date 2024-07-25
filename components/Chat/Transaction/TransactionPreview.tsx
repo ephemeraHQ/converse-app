@@ -1,4 +1,11 @@
 import Clipboard from "@react-native-clipboard/clipboard";
+import {
+  actionSheetColors,
+  messageInnerBubbleColor,
+  myMessageInnerBubbleColor,
+  textPrimaryColor,
+  textSecondaryColor,
+} from "@styles/colors";
 import * as Linking from "expo-linking";
 import { useCallback, useEffect } from "react";
 import {
@@ -13,20 +20,13 @@ import {
 import Checkmark from "../../../assets/checkmark.svg";
 import Clock from "../../../assets/clock.svg";
 import Exclamationmark from "../../../assets/exclamationmark.triangle.svg";
-import {
-  actionSheetColors,
-  messageInnerBubbleColor,
-  myMessageInnerBubbleColor,
-  textPrimaryColor,
-  textSecondaryColor,
-} from "../../../utils/colors";
 import { useConversationContext } from "../../../utils/conversation";
 import { converseEventEmitter } from "../../../utils/events";
 import { shortAddress } from "../../../utils/str";
 import { useTransactionForMessage } from "../../../utils/transaction";
 import { showActionSheetWithOptions } from "../../StateHandlers/ActionSheetStateHandler";
 import { MessageToDisplay } from "../Message/Message";
-import MessageMetadata from "../Message/MessageMetadata";
+import MessageTimestamp from "../Message/MessageTimestamp";
 
 type Props = {
   message: MessageToDisplay;
@@ -170,7 +170,7 @@ export default function TransactionPreview({ message }: Props) {
   }, [message.id, showTransactionActionSheet]);
 
   const metadataView = (
-    <MessageMetadata message={message} white={transaction.loading} />
+    <MessageTimestamp message={message} white={transaction.loading} />
   );
 
   // Converse sponsored transaction

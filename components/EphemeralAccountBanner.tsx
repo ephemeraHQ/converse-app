@@ -1,17 +1,16 @@
-import React, {
-  useColorScheme,
-  StyleSheet,
-  View,
-  Text,
-  Platform,
-} from "react-native";
-
 import {
   itemSeparatorColor,
+  messageBubbleColor,
   textPrimaryColor,
   textSecondaryColor,
-  messageBubbleColor,
-} from "../utils/colors";
+} from "@styles/colors";
+import React, {
+  Platform,
+  StyleSheet,
+  Text,
+  useColorScheme,
+  View,
+} from "react-native";
 
 export default function EphemeralAccountBanner() {
   const styles = useStyles();
@@ -42,11 +41,12 @@ const useStyles = () => {
       zIndex: 1000,
       ...Platform.select({
         default: {
-          paddingVertical: 8,
+          marginTop: 12,
+          marginBottom: 8,
+          paddingVertical: 12,
           paddingLeft: 30,
-          borderBottomWidth: 0.5,
         },
-        android: { paddingVertical: 12, paddingLeft: 16, borderBottomWidth: 0 },
+        android: { paddingVertical: 14, paddingLeft: 16 },
       }),
     },
     demoAccountBannerLeft: {

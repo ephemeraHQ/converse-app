@@ -34,6 +34,8 @@ const converseMetroConfig = {
       // crypto: require.resolve("react-native-quick-crypto"),
       zlib: require.resolve("browserify-zlib"),
     },
+    unstable_enablePackageExports: true,
+    unstable_conditionNames: ["react-native", "browser", "require"],
   },
 };
 

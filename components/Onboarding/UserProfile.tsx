@@ -1,14 +1,22 @@
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
+import {
+  actionSheetColors,
+  dangerColor,
+  itemSeparatorColor,
+  textPrimaryColor,
+  textSecondaryColor,
+} from "@styles/colors";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
-  View,
+  Platform,
+  StyleSheet,
   Text,
   TextInput,
-  StyleSheet,
   useColorScheme,
-  Platform,
+  View,
 } from "react-native";
 
+import OnboardingComponent from "./OnboardingComponent";
 import config from "../../config";
 import { refreshProfileForAddress } from "../../data/helpers/profiles/profilesUpdate";
 import {
@@ -19,13 +27,6 @@ import {
 import { NavigationParamList } from "../../screens/Navigation/Navigation";
 import { checkUsernameValid, claimProfile } from "../../utils/api";
 import { uploadFile } from "../../utils/attachment";
-import {
-  textPrimaryColor,
-  textSecondaryColor,
-  dangerColor,
-  actionSheetColors,
-  itemSeparatorColor,
-} from "../../utils/colors";
 import { executeAfterKeyboardClosed } from "../../utils/keyboard";
 import { useLogoutFromConverse } from "../../utils/logout";
 import {
@@ -37,7 +38,6 @@ import { shortAddress, useLoopTxt } from "../../utils/str";
 import Avatar from "../Avatar";
 import Button from "../Button/Button";
 import { showActionSheetWithOptions } from "../StateHandlers/ActionSheetStateHandler";
-import OnboardingComponent from "./OnboardingComponent";
 
 export type ProfileType = {
   avatar: string;
@@ -249,7 +249,7 @@ export const UserProfile = ({ onboarding, navigation }: Props) => {
       backButtonText={
         onboarding ? `Logout from ${shortAddress(address)}` : undefined
       }
-      backButtonAction={onboarding ? logout : undefined}
+      backButtonAction={onboarding ? () => logout(false) : undefined}
       isLoading={loading}
       loadingSubtitle={loadingSubtitle}
       shrinkWithKeyboard
@@ -259,6 +259,7 @@ export const UserProfile = ({ onboarding, navigation }: Props) => {
         uri={profile?.avatar}
         style={styles.avatar}
         color={intermediaryScreenShown}
+        name={profile.displayName || "👋"}
       />
       {intermediaryScreenShown && (
         <>
@@ -281,7 +282,7 @@ export const UserProfile = ({ onboarding, navigation }: Props) => {
           />
           <View style={styles.usernameInputContainer}>
             <TextInput
-              style={[styles.profileInput]}
+              style={styles.profileInput}
               onChangeText={(text) => {
                 // Limit the display name to 50 characters
                 const trimmedDisplayName = text.slice(0, 50);

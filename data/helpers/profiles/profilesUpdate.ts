@@ -12,21 +12,19 @@ type ConversationHandlesUpdate = {
   updated: boolean;
 };
 
-export const updateProfilesForConversations = async (
+export const updateProfilesForConvos = async (
   account: string,
-  conversations: XmtpConversation[]
+  profilesWithGroups: Map<string, XmtpConversation[]>
 ) => {
   const profileRepository = await getRepository(account, "profile");
   const updates: ConversationHandlesUpdate[] = [];
-  let batch: XmtpConversation[] = [];
-  let rest = conversations;
+  let batch: string[] = [];
+  let rest = Array.from(profilesWithGroups.keys());
 
   while (rest.length > 0) {
     batch = rest.slice(0, 150);
     rest = rest.slice(150);
-    const addressesSet = new Set<string>();
-    batch.forEach((c) => addressesSet.add(c.peerAddress));
-    console.log(`Fetching ${addressesSet.size} profiles from API...`);
+    const addressesSet = new Set(batch);
     const profilesByAddress = await getProfilesForAddresses(
       Array.from(addressesSet)
     );
@@ -54,9 +52,9 @@ export const updateProfilesForConversations = async (
       };
     }
     getProfilesStore(account).getState().setProfiles(socialsToDispatch);
-
     console.log("Done saving profiles to db!");
     const handleConversation = async (conversation: XmtpConversation) => {
+      if (conversation.isGroup) return;
       const currentTitle = conversation.conversationTitle;
       let updated = false;
       try {
@@ -81,8 +79,11 @@ export const updateProfilesForConversations = async (
       updates.push({ conversation, updated });
       saveConversationIdentifiersForNotifications(conversation);
     };
-
-    await Promise.all(batch.map(handleConversation));
+    const allGroups: XmtpConversation[] = [];
+    batch.forEach((address) => {
+      allGroups.push(...(profilesWithGroups.get(address) || []));
+    });
+    await Promise.all(allGroups.map(handleConversation));
   }
 
   return updates;
@@ -123,22 +124,50 @@ export const refreshProfilesIfNeeded = async (account: string) => {
     getChatStore(account).getState().conversations
   );
   const now = new Date().getTime();
-  const conversationsWithStaleProfiles = conversations.filter((c) => {
-    const existingProfile = knownProfiles[c.peerAddress];
-    const lastProfileUpdate = existingProfile?.updatedAt || 0;
-    const shouldUpdateProfile = now - lastProfileUpdate >= 24 * 3600 * 1000;
-    return shouldUpdateProfile;
-  });
-  if (conversationsWithStaleProfiles.length === 0) return;
-  // If not connected we need to be able to save convo without querying the API for profiles
-  updateProfilesForConversations(account, conversationsWithStaleProfiles).then(
-    (resolveResult) => {
-      const updatedConversations = resolveResult
-        .filter((r) => r.updated)
-        .map((r) => r.conversation);
-      if (updatedConversations.length > 0) {
-        getChatStore(account).getState().setConversations(updatedConversations);
+  const staleProfilesWithConversations: Map<string, XmtpConversation[]> =
+    new Map();
+  conversations.forEach((c) => {
+    if (!c.isGroup) {
+      const existingProfile = knownProfiles[c.peerAddress];
+      const lastProfileUpdate = existingProfile?.updatedAt || 0;
+      const shouldUpdateProfile = now - lastProfileUpdate >= 24 * 3600 * 1000;
+      if (shouldUpdateProfile) {
+        const existing =
+          staleProfilesWithConversations.get(c.peerAddress) || [];
+        existing.push(c);
+        staleProfilesWithConversations.set(c.peerAddress, existing);
       }
+    } else {
+      const groupMembers: string[] =
+        typeof c.groupMembers === "string"
+          ? (c as any).groupMembers.split(",")
+          : c.groupMembers;
+      groupMembers.forEach((memberAddress) => {
+        const existingProfile = knownProfiles[memberAddress];
+        const lastProfileUpdate = existingProfile?.updatedAt || 0;
+        const shouldUpdateProfile = now - lastProfileUpdate >= 24 * 3600 * 1000;
+        if (shouldUpdateProfile) {
+          const existing =
+            staleProfilesWithConversations.get(memberAddress) || [];
+          existing.push(c);
+          staleProfilesWithConversations.set(memberAddress, existing);
+        }
+      });
     }
-  );
+  });
+
+  if (staleProfilesWithConversations.size > 0) {
+    updateProfilesForConvos(account, staleProfilesWithConversations).then(
+      (resolveResult) => {
+        const updatedConversations = resolveResult
+          .filter((r) => r.updated)
+          .map((r) => r.conversation);
+        if (updatedConversations.length > 0) {
+          getChatStore(account)
+            .getState()
+            .setConversations(updatedConversations);
+        }
+      }
+    );
+  }
 };

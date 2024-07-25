@@ -1,3 +1,10 @@
+import {
+  dangerColor,
+  inversePrimaryColor,
+  primaryColor,
+  tertiaryBackgroundColor,
+} from "@styles/colors";
+import { PictoSizes } from "@styles/sizes";
 import React from "react";
 import {
   GestureResponderEvent,
@@ -11,11 +18,6 @@ import {
   ViewStyle,
 } from "react-native";
 
-import {
-  dangerColor,
-  primaryColor,
-  tertiaryBackgroundColor,
-} from "../../utils/colors";
 import Picto from "../Picto/Picto";
 
 type Props = {
@@ -64,13 +66,16 @@ export default function Button({
       {picto && (
         <Picto
           picto={picto}
-          size={variant === "text" ? 15 : 13}
+          size={variant === "text" ? PictoSizes.textButton : PictoSizes.button}
           style={[
             styles.picto,
             variant === "text" ? { paddingLeft: 15 } : undefined,
           ]}
-          color={variant === "text" ? primaryColor(colorScheme) : "white"}
-          weight={variant === "text" ? "medium" : "bold"}
+          color={
+            variant === "text"
+              ? primaryColor(colorScheme)
+              : inversePrimaryColor(colorScheme)
+          }
         />
       )}
       <Text
@@ -99,14 +104,14 @@ const useStyles = () => {
       justifyContent: "center",
     },
     buttonPrimaryText: {
-      color: "white",
+      color: inversePrimaryColor(colorScheme),
       textAlign: "center",
       fontWeight: "600",
       fontSize: 17,
     },
     buttonSecondary: {
       paddingRight: 15,
-      paddingLeft: 25,
+      paddingLeft: 15,
       borderRadius: 100,
       paddingVertical: 7,
     },
@@ -139,6 +144,7 @@ const useStyles = () => {
     },
     picto: {
       marginRight: 15,
+      marginLeft: 10,
     },
   });
 };

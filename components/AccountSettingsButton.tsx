@@ -1,5 +1,11 @@
 import Clipboard from "@react-native-clipboard/clipboard";
 import { NavigationProp } from "@react-navigation/native";
+import {
+  actionSheetColors,
+  primaryColor,
+  textSecondaryColor,
+} from "@styles/colors";
+import { PictoSizes } from "@styles/sizes";
 import * as Linking from "expo-linking";
 import React, { useCallback } from "react";
 import {
@@ -9,26 +15,20 @@ import {
   useColorScheme,
 } from "react-native";
 
-import config from "../config";
+import Picto from "./Picto/Picto";
+import { showActionSheetWithOptions } from "./StateHandlers/ActionSheetStateHandler";
+import { TableViewPicto } from "./TableView/TableViewImage";
 import { refreshProfileForAddress } from "../data/helpers/profiles/profilesUpdate";
 import { useAccountsStore } from "../data/store/accountsStore";
 import { useAppStore } from "../data/store/appStore";
 import { useSelect } from "../data/store/storeHelpers";
-import {
-  actionSheetColors,
-  primaryColor,
-  textSecondaryColor,
-} from "../utils/colors";
 import { converseEventEmitter } from "../utils/events";
 import { useLogoutFromConverse } from "../utils/logout";
 import { navigate } from "../utils/navigation";
 import {
-  requestPushNotificationsPermissions,
   NotificationPermissionStatus,
+  requestPushNotificationsPermissions,
 } from "../utils/notifications";
-import Picto from "./Picto/Picto";
-import { showActionSheetWithOptions } from "./StateHandlers/ActionSheetStateHandler";
-import { TableViewPicto } from "./TableView/TableViewImage";
 
 type Props = {
   account: string;
@@ -49,6 +49,40 @@ export default function AccountSettingsButton({ account, navigation }: Props) {
   );
   const logout = useLogoutFromConverse(account);
   const colorScheme = useColorScheme();
+
+  const showDeleteAccountActionSheet = useCallback(async () => {
+    if (Platform.OS === "web") {
+      // Fixes double action sheet on web
+      await new Promise((r) => setTimeout(r, 100));
+    }
+    const methods = {
+      Disconnect: () => logout(false),
+      "Disconnect and delete group chats": () => logout(true),
+      Cancel: () => {},
+    };
+
+    const options = Object.keys(methods);
+
+    showActionSheetWithOptions(
+      {
+        options,
+        title: "Disconnect this account",
+        message:
+          "Your group chats will be encrypted and saved on your device until you delete Converse. Your DMs will be backed up by the XMTP network.",
+        cancelButtonIndex: options.indexOf("Cancel"),
+        destructiveButtonIndex: [1],
+        ...actionSheetColors(colorScheme),
+      },
+      (selectedIndex?: number) => {
+        if (selectedIndex === undefined) return;
+        const method = (methods as any)[options[selectedIndex]];
+        if (method) {
+          method();
+        }
+      }
+    );
+  }, [colorScheme, logout]);
+
   const onPress = useCallback(() => {
     Keyboard.dismiss();
 
@@ -72,22 +106,6 @@ export default function AccountSettingsButton({ account, navigation }: Props) {
       },
       "Copy wallet address": () => {
         Clipboard.setString(account || "");
-      },
-      "Contact Converse team": async () => {
-        setCurrentAccount(account, false);
-        if (Platform.OS === "android") {
-          // On android the drawer is outside the navigation
-          // so we use Linking to navigate
-          converseEventEmitter.emit("toggle-navigation-drawer", false);
-        } else {
-          if (Platform.OS === "web") {
-            await new Promise((r) => setTimeout(r, 200));
-          }
-          navigation?.navigate("Chats");
-        }
-        navigate("Conversation", {
-          mainConversationWithPeer: config.polAddress,
-        });
       },
       "Turn on notifications": () => {
         // @todo => move that to a helper because also used in Profile
@@ -116,8 +134,8 @@ export default function AccountSettingsButton({ account, navigation }: Props) {
           );
         }
       },
-      Disconnect: () => {
-        logout();
+      "Disconnect this account": () => {
+        showDeleteAccountActionSheet();
       },
       Cancel: () => {},
     };
@@ -130,7 +148,7 @@ export default function AccountSettingsButton({ account, navigation }: Props) {
     showActionSheetWithOptions(
       {
         options,
-        destructiveButtonIndex: options.indexOf("Disconnect"),
+        destructiveButtonIndex: options.indexOf("Disconnect this account"),
         cancelButtonIndex: options.indexOf("Cancel"),
         title: account || undefined,
         ...actionSheetColors(colorScheme),
@@ -146,7 +164,7 @@ export default function AccountSettingsButton({ account, navigation }: Props) {
   }, [
     account,
     colorScheme,
-    logout,
+    showDeleteAccountActionSheet,
     navigation,
     notificationsPermissionStatus,
     setCurrentAccount,
@@ -157,7 +175,7 @@ export default function AccountSettingsButton({ account, navigation }: Props) {
     <TouchableOpacity onPress={onPress}>
       <Picto
         picto="more_vert"
-        size={24}
+        size={PictoSizes.accoutSettings}
         color={textSecondaryColor(colorScheme)}
       />
     </TouchableOpacity>

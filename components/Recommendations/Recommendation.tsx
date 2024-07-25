@@ -1,20 +1,21 @@
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import {
+  itemSeparatorColor,
+  textPrimaryColor,
+  textSecondaryColor,
+} from "@styles/colors";
+import { AvatarSizes } from "@styles/sizes";
+import {
+  Image,
   Platform,
   StyleSheet,
   Text,
-  View,
-  Image,
   useColorScheme,
+  View,
 } from "react-native";
 
 import IconLoading from "../../assets/icon-loading.png";
 import { RecommendationData } from "../../data/store/recommendationsStore";
-import {
-  itemSeparatorColor,
-  textPrimaryColor,
-  textSecondaryColor,
-} from "../../utils/colors";
 import {
   getPreferredAvatar,
   getPreferredName,
@@ -68,8 +69,9 @@ export function Recommendation({
       {!embedInChat && (
         <Avatar
           uri={getPreferredAvatar(profile)}
-          size={40}
+          size={AvatarSizes.listItemDisplay}
           style={styles.avatar}
+          name={preferredName}
         />
       )}
       <View style={styles.recommendationLeft}>

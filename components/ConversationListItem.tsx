@@ -1,20 +1,41 @@
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
+import {
+  actionSheetColors,
+  backgroundColor,
+  badgeColor,
+  clickedItemBackgroundColor,
+  dangerColor,
+  inversePrimaryColor,
+  textPrimaryColor,
+  textSecondaryColor,
+} from "@styles/colors";
+import { AvatarSizes, PictoSizes } from "@styles/sizes";
+import { strings } from "@utils/i18n/strings";
 import * as Haptics from "expo-haptics";
-import React, { memo, useCallback, useEffect, useRef, useState } from "react";
+import React, {
+  memo,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import {
   ColorSchemeName,
-  Text,
-  View,
-  StyleSheet,
   Platform,
+  StyleSheet,
+  Text,
   TouchableHighlight,
+  View,
 } from "react-native";
 import { RectButton } from "react-native-gesture-handler";
 import Swipeable from "react-native-gesture-handler/Swipeable";
 import { TouchableRipple } from "react-native-paper";
 
-import Checkmark from "../assets/checkmark.svg";
-import Clock from "../assets/clock.svg";
+import Avatar from "./Avatar";
+import GroupAvatar from "./GroupAvatar";
+import Picto from "./Picto/Picto";
+import { showActionSheetWithOptions } from "./StateHandlers/ActionSheetStateHandler";
 import {
   currentAccount,
   useChatStore,
@@ -23,38 +44,33 @@ import {
 import { NavigationParamList } from "../screens/Navigation/Navigation";
 import { useIsSplitScreen } from "../screens/Navigation/navHelpers";
 import { saveTopicsData } from "../utils/api";
-import {
-  actionSecondaryColor,
-  actionSheetColors,
-  backgroundColor,
-  badgeColor,
-  clickedItemBackgroundColor,
-  dangerColor,
-  listItemSeparatorColor,
-  textPrimaryColor,
-  textSecondaryColor,
-} from "../utils/colors";
-import { getRelativeDateTime } from "../utils/date";
+import { getMinimalDate } from "../utils/date";
 import { isDesktop } from "../utils/device";
 import { converseEventEmitter } from "../utils/events";
 import { navigate } from "../utils/navigation";
 import { consentToPeersOnProtocol } from "../utils/xmtpRN/conversations";
-import Avatar from "./Avatar";
-import Picto from "./Picto/Picto";
-import { showActionSheetWithOptions } from "./StateHandlers/ActionSheetStateHandler";
 
 type ConversationListItemProps = {
   colorScheme: ColorSchemeName;
   conversationTime: number | undefined;
   conversationTopic: string;
   conversationName: string;
-  conversationPeerAddress: string;
+  conversationPeerAddress: string | undefined;
   conversationPeerAvatar: string | undefined;
   lastMessagePreview: string | undefined;
   lastMessageFromMe: boolean;
-  lastMessageStatus?: "delivered" | "error" | "seen" | "sending" | "sent";
+  lastMessageStatus?:
+    | "delivered"
+    | "error"
+    | "seen"
+    | "sending"
+    | "sent"
+    | "prepared";
   showUnread: boolean;
   conversationOpened: boolean;
+  isGroupConversation: boolean;
+  onLongPress?: () => void;
+  onRightActionPress?: (defaultAction: () => void) => void;
 } & NativeStackScreenProps<
   NavigationParamList,
   "Chats" | "ShareFrame" | "ChatsRequests"
@@ -74,9 +90,12 @@ const ConversationListItem = memo(function ConversationListItem({
   lastMessageFromMe,
   showUnread,
   conversationOpened,
+  isGroupConversation = false,
+  onLongPress,
+  onRightActionPress,
 }: ConversationListItemProps) {
   const styles = getStyles(colorScheme);
-  const timeToShow = getRelativeDateTime(conversationTime);
+  const timeToShow = getMinimalDate(conversationTime as number);
   const setTopicsData = useChatStore((s) => s.setTopicsData);
   const setPeersStatus = useSettingsStore((s) => s.setPeersStatus);
   const isSplitScreen = useIsSplitScreen();
@@ -118,49 +137,50 @@ const ConversationListItem = memo(function ConversationListItem({
     };
   }, [navigation, resetSelected]);
 
-  const listItemContent = (
-    <View style={styles.conversationListItem}>
-      <Avatar
-        size={Platform.OS === "ios" ? 56 : 47}
+  const avatarComponent = useMemo(() => {
+    return isGroupConversation ? (
+      <GroupAvatar
+        size={AvatarSizes.conversationListItem}
         style={styles.avatarWrapper}
         uri={conversationPeerAvatar}
+        topic={conversationTopic}
       />
+    ) : (
+      <Avatar
+        size={AvatarSizes.conversationListItem}
+        style={styles.avatarWrapper}
+        uri={conversationPeerAvatar}
+        name={conversationName}
+      />
+    );
+  }, [
+    conversationName,
+    conversationPeerAvatar,
+    conversationTopic,
+    isGroupConversation,
+    styles.avatarWrapper,
+  ]);
+
+  const listItemContent = (
+    <View style={styles.conversationListItem}>
+      {avatarComponent}
       <View style={styles.conversationListItemContent}>
         <Text style={styles.conversationName} numberOfLines={1}>
           {conversationName}
         </Text>
-        {lastMessageFromMe &&
-          (lastMessageStatus === "sending" ? (
-            <Clock
-              style={styles.lastMessageStatus}
-              fill={textSecondaryColor(colorScheme)}
-              width={12}
-              height={12}
-            />
-          ) : (
-            <Checkmark
-              style={styles.lastMessageStatus}
-              fill={textSecondaryColor(colorScheme)}
-              width={10}
-              height={10}
-            />
-          ))}
         <Text style={styles.messagePreview} numberOfLines={2}>
-          {lastMessageFromMe ? <View style={{ width: 15 }} /> : undefined}
-          {lastMessagePreview}
+          {timeToShow} ⋅ {lastMessagePreview}
         </Text>
-        <View style={styles.timeAndChevron}>
-          <Text style={styles.timeText}>{timeToShow}</Text>
-          {Platform.OS === "ios" && (
+        {(lastMessageFromMe && lastMessageStatus) === "sending" ? (
+          <View style={styles.unread}>
             <Picto
-              picto="chevron.right"
-              weight="semibold"
-              color={actionSecondaryColor(colorScheme)}
-              size={10}
+              picto="exclamation"
+              color={inversePrimaryColor(colorScheme)}
             />
-          )}
-        </View>
-        {showUnread && <View style={styles.unread} />}
+          </View>
+        ) : showUnread ? (
+          <View style={styles.unread} />
+        ) : undefined}
       </View>
     </View>
   );
@@ -170,90 +190,91 @@ const ConversationListItem = memo(function ConversationListItem({
     swipeableRef.current?.close();
   }, []);
 
-  const renderRightActions = useCallback(() => {
-    return (
-      <RectButton
-        style={[styles.rightAction]}
-        onPress={() => {
-          showActionSheetWithOptions(
-            {
-              options: ["Delete", "Delete and block", "Cancel"],
-              cancelButtonIndex: 2,
-              destructiveButtonIndex: [0, 1],
-              title: `Delete chat with ${conversationPeerAddress}?`,
-              ...actionSheetColors(colorScheme),
+  const handleRightPress = useCallback(() => {
+    if (onRightActionPress) {
+      onRightActionPress(closeSwipeable);
+      return;
+    }
+    showActionSheetWithOptions(
+      {
+        options: [strings.delete, strings.delete_and_block, strings.cancel],
+        cancelButtonIndex: 2,
+        destructiveButtonIndex: [0, 1],
+        title: `Delete chat with ${conversationPeerAddress}?`,
+        ...actionSheetColors(colorScheme),
+      },
+      (selectedIndex?: number) => {
+        if (!conversationPeerAddress) return;
+        if (selectedIndex === 0) {
+          saveTopicsData(currentAccount(), {
+            [conversationTopic]: {
+              status: "deleted",
+              timestamp: new Date().getTime(),
             },
-            (selectedIndex?: number) => {
-              if (selectedIndex === 0) {
-                saveTopicsData(currentAccount(), {
-                  [conversationTopic]: {
-                    status: "deleted",
-                    timestamp: new Date().getTime(),
-                  },
-                });
-                setTopicsData({
-                  [conversationTopic]: {
-                    status: "deleted",
-                    timestamp: new Date().getTime(),
-                  },
-                });
-              } else if (selectedIndex === 1) {
-                saveTopicsData(currentAccount(), {
-                  [conversationTopic]: { status: "deleted" },
-                });
-                setTopicsData({
-                  [conversationTopic]: {
-                    status: "deleted",
-                    timestamp: new Date().getTime(),
-                  },
-                });
-                consentToPeersOnProtocol(
-                  currentAccount(),
-                  [conversationPeerAddress],
-                  "deny"
-                );
-                setPeersStatus({ [conversationPeerAddress]: "blocked" });
-              } else {
-                closeSwipeable();
-              }
-            }
+          });
+          setTopicsData({
+            [conversationTopic]: {
+              status: "deleted",
+              timestamp: new Date().getTime(),
+            },
+          });
+        } else if (selectedIndex === 1) {
+          saveTopicsData(currentAccount(), {
+            [conversationTopic]: { status: "deleted" },
+          });
+          setTopicsData({
+            [conversationTopic]: {
+              status: "deleted",
+              timestamp: new Date().getTime(),
+            },
+          });
+          consentToPeersOnProtocol(
+            currentAccount(),
+            [conversationPeerAddress],
+            "deny"
           );
-        }}
-      >
-        <Picto
-          picto="trash"
-          color="white"
-          size={Platform.OS === "ios" ? 18 : 30}
-        />
-      </RectButton>
+          setPeersStatus({ [conversationPeerAddress]: "blocked" });
+        } else {
+          closeSwipeable();
+        }
+      }
     );
   }, [
-    conversationTopic,
-    conversationPeerAddress,
-    setTopicsData,
-    setPeersStatus,
     closeSwipeable,
     colorScheme,
-    styles.rightAction,
+    conversationPeerAddress,
+    conversationTopic,
+    onRightActionPress,
+    setPeersStatus,
+    setTopicsData,
   ]);
+
+  const renderRightActions = useCallback(() => {
+    return (
+      <RectButton style={styles.rightAction} onPress={handleRightPress}>
+        <Picto picto="trash" color="white" size={PictoSizes.swipableItem} />
+      </RectButton>
+    );
+  }, [styles.rightAction, handleRightPress]);
 
   const renderLeftActions = useCallback(() => {
     return (
-      <RectButton style={[styles.leftAction]}>
+      <RectButton style={styles.leftAction}>
         <Picto
           picto={showUnread ? "checkmark.message" : "message.badge"}
-          color="white"
-          size={Platform.OS === "ios" ? 18 : 30}
+          color={inversePrimaryColor(colorScheme)}
+          size={PictoSizes.swipableItem}
         />
       </RectButton>
     );
-  }, [showUnread, styles.leftAction]);
+  }, [showUnread, styles.leftAction, colorScheme]);
 
   const rowItem =
     Platform.OS === "ios" || Platform.OS === "web" ? (
       <TouchableHighlight
         underlayColor={clickedItemBackgroundColor(colorScheme)}
         delayPressIn={isDesktop ? 0 : 75}
+        onLongPress={onLongPress}
         onPressIn={() => {
           if (!isSplitScreen) return;
           openConversation();
@@ -263,15 +284,13 @@ const ConversationListItem = memo(function ConversationListItem({
           openConversation();
           setSelected(true);
         }}
-        style={[
-          {
-            backgroundColor:
-              selected || (isSplitScreen && conversationOpened)
-                ? clickedItemBackgroundColor(colorScheme)
-                : backgroundColor(colorScheme),
-            height: 76,
-          },
-        ]}
+        style={{
+          backgroundColor:
+            selected || (isSplitScreen && conversationOpened)
+              ? clickedItemBackgroundColor(colorScheme)
+              : backgroundColor(colorScheme),
+          height: 76,
+        }}
       >
         {listItemContent}
       </TouchableHighlight>
@@ -358,9 +377,7 @@ const getStyles = (colorScheme: ColorSchemeName) =>
     rowSeparator: Platform.select({
       android: {},
       default: {
-        height: 77,
-        borderBottomWidth: 0.25,
-        borderBottomColor: listItemSeparatorColor(colorScheme),
+        height: 80,
       },
     }),
     rowSeparatorMargin: {
@@ -383,14 +400,14 @@ const getStyles = (colorScheme: ColorSchemeName) =>
       flexShrink: 1,
       ...Platform.select({
         default: {
-          height: 75.5,
-          paddingTop: 7.5,
-          paddingRight: 60,
+          height: 84,
+          paddingTop: 12,
+          paddingRight: 45,
           marginLeft: 12,
         },
         android: {
           height: 72,
-          paddingTop: 12,
+          paddingTop: 16.5,
           paddingLeft: 16,
           paddingRight: 45,
         },
@@ -403,7 +420,7 @@ const getStyles = (colorScheme: ColorSchemeName) =>
           fontSize: 17,
           fontWeight: "600",
           marginBottom: 3,
-          marginRight: 110,
+          marginRight: 15,
         },
         android: {
           fontSize: 16,
@@ -423,25 +440,11 @@ const getStyles = (colorScheme: ColorSchemeName) =>
         },
       }),
     },
-    timeAndChevron: {
-      position: "absolute",
-      ...Platform.select({
-        default: {
-          top: 8,
-          right: 20,
-          flexDirection: "row",
-          alignItems: "center",
-        },
-        android: {
-          top: 12,
-          right: 24,
-        },
-      }),
-    },
     timeText: {
       color: textSecondaryColor(colorScheme),
       ...Platform.select({
-        default: { marginRight: 14, fontSize: 15 },
+        default: { fontSize: 15 },
+        web: { marginRight: 14, fontSize: 15 },
         android: { fontSize: 11 },
       }),
     },
@@ -449,11 +452,11 @@ const getStyles = (colorScheme: ColorSchemeName) =>
       position: "absolute",
       ...Platform.select({
         default: {
-          width: 18,
-          height: 18,
-          borderRadius: 18,
-          right: 16,
-          top: 30,
+          width: 16,
+          height: 16,
+          borderRadius: 16,
+          right: 17,
+          top: 29.5,
         },
         android: {
           width: 16,
@@ -464,6 +467,9 @@ const getStyles = (colorScheme: ColorSchemeName) =>
         },
       }),
       backgroundColor: badgeColor(colorScheme),
+      flexDirection: "row",
+      justifyContent: "center",
+      alignItems: "center",
     },
     lastMessageStatus: {
       position: "absolute",

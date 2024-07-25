@@ -27,24 +27,14 @@ type AppStoreType = {
   hydrationDone: boolean;
   setHydrationDone: (done: boolean) => void;
 
-  mediaPreview: {
-    sending: boolean;
-    mediaURI: string;
-    error: boolean;
-  } | null;
-  setMediaPreview: (
-    preview: {
-      sending: boolean;
-      mediaURI: string;
-      error: boolean;
-    } | null
-  ) => void;
-
   lastVersionOpen: string;
   setLastVersionOpen: (version: string) => void;
 
   actionSheetShown: boolean;
   setActionSheetShown: (s: boolean) => void;
+
+  contextMenuShown: boolean;
+  setContextMenuShown: (s: boolean) => void;
 };
 
 export const useAppStore = create<AppStoreType>()(
@@ -75,15 +65,15 @@ export const useAppStore = create<AppStoreType>()(
       hydrationDone: Platform.OS === "web",
       setHydrationDone: (done) => set(() => ({ hydrationDone: done })),
 
-      mediaPreview: null,
-      setMediaPreview: (preview) => set(() => ({ mediaPreview: preview })),
-
       lastVersionOpen: "",
       setLastVersionOpen: (version) =>
         set(() => ({ lastVersionOpen: version })),
 
       actionSheetShown: false,
       setActionSheetShown: (s: boolean) => set(() => ({ actionSheetShown: s })),
+
+      contextMenuShown: false,
+      setContextMenuShown: (s: boolean) => set(() => ({ contextMenuShown: s })),
     }),
     {
       name: "store-app",

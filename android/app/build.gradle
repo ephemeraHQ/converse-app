@@ -120,9 +120,6 @@ android {
                     details.useTarget group: details.requested.group, name: 'lifecycle-viewmodel-ktx', version: '2.5.0'
                 }
             }
-            resolutionStrategy.dependencySubstitution {
-                substitute(module("org.xmtp:android")).using(project(":libs:xmtp-android:library"))
-            }
         }
 
     }
@@ -159,11 +156,12 @@ android {
     lint {
         abortOnError false
     }
-
     packagingOptions {
-        // Should prevent clashes with other libraries that use OpenSSL
-        pickFirst '**/libcrypto.so'
+        jniLibs {
+            pickFirsts += ['**/libcrypto.so']
+        }
     }
+
 }
 
 // Apply static values from `gradle.properties` to the `android.packagingOptions`
@@ -193,13 +191,16 @@ dependencies {
     implementation 'com.google.firebase:firebase-messaging-ktx:23.0.3'
     implementation 'com.beust:klaxon:5.5'
     implementation 'androidx.security:security-crypto:1.1.0-alpha05'
-    // No need to precise a version as we're substituting for local version anyway
     implementation "org.xmtp:android"
+    implementation 'org.web3j:crypto'
     implementation 'com.google.crypto.tink:tink-android:1.7.0'
     implementation 'com.android.volley:volley:1.2.1'
     implementation 'com.tencent:mmkv:1.3.1'
     implementation 'me.leolin:ShortcutBadger:1.1.22'
     implementation "org.jetbrains.kotlin:kotlin-reflect:1.9.22"
+    implementation 'com.github.bumptech.glide:glide:4.13.2'
+    annotationProcessor 'com.github.bumptech.glide:compiler:4.13.2'
+
 
 
     def isGifEnabled = (findProperty('expo.gif.enabled') ?: "") == "true";
@@ -223,7 +224,6 @@ dependencies {
     implementation("androidx.core:core-splashscreen:1.0.0")
     // implementation 'org.web3j:core:4.8.8-android'
 
-    implementation("com.facebook.react:flipper-integration")
     if (hermesEnabled.toBoolean()) {
         implementation("com.facebook.react:hermes-android")
     } else {

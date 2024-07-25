@@ -5,6 +5,32 @@ import * as Notifications from "expo-notifications";
 import { debounce } from "perfect-debounce";
 import { Platform } from "react-native";
 
+import api, {
+  getLastNotificationsSubscribeHash,
+  saveNotificationsSubscribe,
+} from "./api";
+import {
+  ConversationWithLastMessagePreview,
+  conversationShouldBeDisplayed,
+  conversationShouldBeInInbox,
+} from "./conversation";
+import { addLog, debugTimeSpent } from "./debug";
+import { getGroupIdFromTopic } from "./groupUtils/groupId";
+import { savePushToken } from "./keychain/helpers";
+import mmkv from "./mmkv";
+import { navigateToConversation, setTopicToNavigateTo } from "./navigation";
+import { sentryTrackError } from "./sentry";
+import {
+  emptySavedNotificationsConversations,
+  emptySavedNotificationsMessages,
+  loadSavedNotificationsConversations,
+  loadSavedNotificationsMessages,
+  saveConversationDict,
+} from "./sharedData";
+import { conversationName, shortAddress } from "./str";
+import { ConverseXmtpClientType } from "./xmtpRN/client";
+import { loadConversationsHmacKeys } from "./xmtpRN/conversations";
+import { getXmtpClient } from "./xmtpRN/sync";
 import {
   saveConversations,
   saveConversationsLastNotificationSubscribePeriod,
@@ -19,29 +45,6 @@ import {
 } from "../data/store/accountsStore";
 import { useAppStore } from "../data/store/appStore";
 import { XmtpConversation, XmtpMessage } from "../data/store/chatStore";
-import api, {
-  getLastNotificationsSubscribeHash,
-  saveNotificationsSubscribe,
-} from "./api";
-import {
-  ConversationWithLastMessagePreview,
-  conversationShouldBeDisplayed,
-  conversationShouldBeInInbox,
-} from "./conversation";
-import { addLog, debugTimeSpent } from "./debug";
-import { savePushToken } from "./keychain/helpers";
-import mmkv from "./mmkv";
-import { navigateToConversation, setTopicToNavigateTo } from "./navigation";
-import { sentryTrackError } from "./sentry";
-import {
-  emptySavedNotificationsMessages,
-  loadSavedNotificationsMessages,
-  emptySavedNotificationsConversations,
-  loadSavedNotificationsConversations,
-  saveConversationDict,
-} from "./sharedData";
-import { conversationName, shortAddress } from "./str";
-import { loadConversationsHmacKeys } from "./xmtpRN/conversations";
 
 let nativePushToken: string | null;
 
@@ -52,6 +55,12 @@ export type NotificationPermissionStatus =
 
 const subscribingByAccount: { [account: string]: boolean } = {};
 const subscribedOnceByAccount: { [account: string]: boolean } = {};
+
+const buildUserGroupInviteTopic = (account: string): string => {
+  console.log("buildUserGroupInviteTopic", account);
+
+  return `/xmtp/mls/1/w-${account}/proto`;
+};
 
 export const deleteSubscribedTopics = (account: string) => {
   if (account in subscribedOnceByAccount) {
@@ -73,6 +82,10 @@ const _subscribeToNotifications = async (account: string): Promise<void> => {
   const thirtyDayPeriodsSinceEpoch = Math.floor(
     Date.now() / 1000 / 60 / 60 / 24 / 30
   );
+  const client = (await getXmtpClient(account)) as ConverseXmtpClientType;
+  if (!client) {
+    return;
+  }
   const { conversations, conversationsSortedOnce, topicsData } =
     getChatStore(account).getState();
   const notificationsPermissionStatus =
@@ -87,29 +100,38 @@ const _subscribeToNotifications = async (account: string): Promise<void> => {
   try {
     subscribingByAccount[account] = true;
 
-    const { peersStatus } = getSettingsStore(account).getState();
+    const { peersStatus, groupStatus } = getSettingsStore(account).getState();
 
     const isBlocked = (peerAddress: string) =>
       peersStatus[peerAddress.toLowerCase()] === "blocked";
 
+    const isGroupBlocked = (groupId: string) =>
+      peersStatus[groupId] === "blocked";
+
     const needToUpdateConversationSubscription = (
       c: ConversationWithLastMessagePreview
     ) => {
-      const hasValidAddress = c.peerAddress;
+      const hasValidPeer = c.peerAddress || c.isGroup;
       const isPending = !!c.pending;
 
-      if (!hasValidAddress || isPending) {
+      if (!hasValidPeer || isPending) {
         return {
           topic: c.topic,
           update: false,
         };
       }
 
-      const isNotBlocked = !isBlocked(c.peerAddress);
+      const isNotBlocked = c.peerAddress
+        ? !isBlocked(c.peerAddress)
+        : !isGroupBlocked(getGroupIdFromTopic(c.topic));
       const isTopicNotDeleted = topicsData[c.topic]?.status !== "deleted";
       const isTopicInInbox =
-        conversationShouldBeDisplayed(c, topicsData, peersStatus) &&
-        conversationShouldBeInInbox(c, peersStatus);
+        conversationShouldBeDisplayed(
+          c,
+          topicsData,
+          peersStatus,
+          groupStatus
+        ) && conversationShouldBeInInbox(c, peersStatus, groupStatus);
 
       const status =
         isNotBlocked && isTopicNotDeleted && isTopicInInbox ? "PUSH" : "MUTED";
@@ -184,6 +206,13 @@ const _subscribeToNotifications = async (account: string): Promise<void> => {
       status: "PUSH",
     };
     dataToHash.push.push(userInviteTopic);
+    const userGroupInviteTopic = buildUserGroupInviteTopic(
+      client.installationId || ""
+    );
+    topicsToUpdateForPeriod[userGroupInviteTopic] = {
+      status: "PUSH",
+    };
+    dataToHash.push.push(userGroupInviteTopic);
     dataToHash.push.sort();
     dataToHash.muted.sort();
     const stringToHash = `${dataToHash.period}-push-${dataToHash.push.join(
@@ -427,8 +456,7 @@ export const loadSavedNotificationMessagesToContext = async () => {
             senderAddress: message.senderAddress,
             sent: message.sent,
             content: message.content,
-            status: "sent",
-            sentViaConverse: !!message.sentViaConverse,
+            status: "delivered",
             contentType: message.contentType || "xmtp.org/text:1.0",
             topic: message.topic,
             referencedMessageId: message.referencedMessageId,
@@ -475,7 +503,9 @@ export const saveConversationIdentifiersForNotifications = (
 ) => {
   const conversationDict: any = {
     peerAddress: conversation.peerAddress,
-    shortAddress: shortAddress(conversation.peerAddress),
+    shortAddress: conversation.peerAddress
+      ? shortAddress(conversation.peerAddress)
+      : undefined,
     title: conversationName(conversation),
   };
 

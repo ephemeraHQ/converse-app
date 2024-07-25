@@ -12,6 +12,8 @@ import { xmtpMessageFromDb, xmtpMessageToDb } from "../../mappers";
 import { getChatStore } from "../../store/accountsStore";
 import { XmtpMessage } from "../../store/chatStore";
 
+export { handleGroupUpdatedMessage } from "./handleGroupUpdatedMessage";
+
 export const saveMessages = async (
   account: string,
   messages: XmtpMessage[]
@@ -76,7 +78,10 @@ export const updateMessagesIds = async (
     const messageToUpdate = messageIdsToUpdate[oldId];
     await messageRepository.update(
       { id: messageToUpdate.message.id },
-      { id: messageToUpdate.newMessageId, sent: messageToUpdate.newMessageSent }
+      {
+        id: messageToUpdate.newMessageId,
+        sent: messageToUpdate.newMessageSent,
+      }
     );
     // Let's also move message data & attachments if exists
     await moveAssetsForMessage(
@@ -121,6 +126,28 @@ export const markMessageAsSent = async (
   getChatStore(account)
     .getState()
     .updateMessageStatus(topic, messageId, "sent");
+};
+
+export const markMessageAsPrepared = async (
+  account: string,
+  messageId: string,
+  topic: string
+) => {
+  const messageRepository = await getRepository(account, "message");
+  await messageRepository.update({ id: messageId }, { status: "prepared" });
+  getChatStore(account)
+    .getState()
+    .updateMessageStatus(topic, messageId, "prepared");
+};
+
+export const deleteMessage = async (
+  account: string,
+  topic: string,
+  messageId: string
+) => {
+  const messageRepository = await getRepository(account, "message");
+  await messageRepository.delete({ id: messageId, conversationId: topic });
+  getChatStore(account).getState().deleteMessage(topic, messageId);
 };
 
 export const getOrderedMessages = async (account: string, topic: string) => {

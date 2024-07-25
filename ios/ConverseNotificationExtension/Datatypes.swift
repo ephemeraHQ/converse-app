@@ -13,7 +13,6 @@ struct SavedNotificationMessage: Codable {
   var senderAddress: String
   var sent: Int
   var id: String
-  var sentViaConverse: Bool
   var contentType: String
   var account: String
   var referencedMessageId: String?
@@ -26,10 +25,16 @@ struct ConversationContext: Codable {
 
 struct SavedNotificationConversation: Codable {
   var topic: String
-  var peerAddress: String
+  var peerAddress: String?
   var createdAt: Int
   var context: ConversationContext?
   var account: String
+  var isGroup: Bool = false
+  var groupMembers: [String?]?
+  var groupAdmins: [String?]?
+  var groupSuperAdmins: [String?]?
+  var groupPermissionLevel: String?
+  var groupName: String?
   var spamScore: Double? {
     didSet {
       if let value = spamScore {
@@ -48,5 +53,38 @@ struct Accounts: Codable {
 
 struct AccountsStore: Codable {
   var state: Accounts;
+  var version: Int
+}
+
+struct EnsName: Codable {
+  var name: String;
+  var displayName: String?;
+  var isPrimary: Bool?;
+  var avatar: String?;
+}
+
+
+struct ConverseUserName: Codable {
+  var name: String;
+  var displayName: String?;
+  var isPrimary: Bool?;
+  var avatar: String?;
+}
+
+struct ProfileSocials: Codable {
+  var ensNames: [EnsName]?;
+  var userNames: [ConverseUserName]?;
+}
+
+struct Profile: Codable {
+  var updatedAt: Int;
+  var socials: ProfileSocials;
+}
+struct Profiles: Codable {
+  var profiles: Dictionary<String, Profile>?
+}
+
+struct ProfilesStore: Codable {
+  var state: Profiles;
   var version: Int
 }

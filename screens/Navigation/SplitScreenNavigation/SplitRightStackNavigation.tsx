@@ -3,6 +3,7 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import * as Linking from "expo-linking";
 import { Platform, useColorScheme } from "react-native";
 
+import { SplitScreenDrawerParams } from "./SplitScreenNavigation";
 import config from "../../../config";
 import { useAppStore } from "../../../data/store/appStore";
 import { isDesktop } from "../../../utils/device";
@@ -12,6 +13,11 @@ import ConversationNav, {
   ConversationScreenConfig,
 } from "../ConversationNav";
 import EnableTransactionsNav from "../EnableTransactionsNav";
+import GroupLinkNav, {
+  GroupLinkNavParams,
+  GroupLinkScreenConfig,
+} from "../GroupLinkNav";
+import GroupNav, { GroupNavParams, GroupScreenConfig } from "../GroupNav";
 import NewConversationNav, {
   NewConversationNavParams,
   NewConversationScreenConfig,
@@ -33,16 +39,18 @@ import {
   getConverseStateFromPath,
   stackGroupScreenOptions,
 } from "../navHelpers";
-import { SplitScreenDrawerParams } from "./SplitScreenNavigation";
 
 export type NavigationParamList = {
   Conversation: ConversationNavParams;
   NewConversation: NewConversationNavParams;
+  NewGroupSummary: undefined;
   EnableTransactions: undefined;
   ShareProfile: undefined;
   ShareFrame: ShareFrameNavParams;
   TopUp: undefined;
   Profile: ProfileNavParams;
+  Group: GroupNavParams;
+  GroupLink: GroupLinkNavParams;
   UserProfile: undefined;
   WebviewPreview: WebviewPreviewNavParams;
 };
@@ -57,6 +65,8 @@ const linking = {
       Conversation: ConversationScreenConfig,
       NewConversation: NewConversationScreenConfig,
       Profile: ProfileScreenConfig,
+      Group: GroupScreenConfig,
+      GroupLink: GroupLinkScreenConfig,
       ShareProfile: ShareProfileScreenConfig,
       WebviewPreview: WebviewPreviewScreenConfig,
     },
@@ -97,6 +107,8 @@ export default function SplitRightStackNavigation({
           {ShareFrameNav()}
           {WebviewPreviewNav()}
           {ProfileNav()}
+          {GroupNav()}
+          {GroupLinkNav()}
           {UserProfileNav()}
           {TopUpNav()}
           {EnableTransactionsNav()}

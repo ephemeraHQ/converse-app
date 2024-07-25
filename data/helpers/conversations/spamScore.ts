@@ -61,8 +61,11 @@ export const computeConversationsSpamScores = async (
   account: string,
   conversations: XmtpConversationWithUpdate[]
 ) => {
+  // @todo => spam score for group convos??
   const conversationsPeerAddresses = new Set(
-    conversations.filter((c) => !!c.peerAddress).map((c) => c.peerAddress)
+    conversations
+      .filter((c) => !!c.peerAddress)
+      .map((c) => c.peerAddress as string)
   );
   const sendersSpamScores = await getSendersSpamScores(
     Array.from(conversationsPeerAddresses)
@@ -70,6 +73,7 @@ export const computeConversationsSpamScores = async (
   const topicSpamScores: TopicSpamScores = {};
 
   conversations.forEach((conversation) => {
+    if (!conversation.peerAddress) return;
     const senderSpamScore = sendersSpamScores[conversation.peerAddress];
     if (!conversation.messagesIds.length && senderSpamScore) {
       // Cannot score an empty conversation further, score is just the
@@ -82,7 +86,6 @@ export const computeConversationsSpamScores = async (
     if (firstMessage) {
       const firstMessageSpamScore = computeSpamScore(
         firstMessage.content,
-        firstMessage.sentViaConverse,
         firstMessage.contentType
       );
 
@@ -94,20 +97,13 @@ export const computeConversationsSpamScores = async (
   await saveSpamScores(account, topicSpamScores);
 };
 
-const computeSpamScore = (
-  message: string,
-  sentViaConverse: boolean,
-  contentType: string
-): number => {
+const computeSpamScore = (message: string, contentType: string): number => {
   let spamScore: number = 0.0;
 
   URL_REGEX.lastIndex = 0;
 
   if (isContentType("text", contentType) && URL_REGEX.test(message)) {
     spamScore += 1;
-  }
-  if (sentViaConverse) {
-    spamScore -= 1;
   }
   return spamScore;
 };

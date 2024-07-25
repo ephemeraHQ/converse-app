@@ -1,7 +1,7 @@
-import { ProfileSocials } from "../data/store/profilesStore";
-import { RecommendationData } from "../data/store/recommendationsStore";
 import { getLensHandleFromConversationIdAndPeer } from "./lens";
 import { shortAddress } from "./str";
+import { ProfileSocials } from "../data/store/profilesStore";
+import { RecommendationData } from "../data/store/recommendationsStore";
 
 export const getProfileData = (
   recommendationData?: RecommendationData,

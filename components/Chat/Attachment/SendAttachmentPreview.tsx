@@ -1,114 +1,86 @@
-import { Image } from "expo-image";
-import { StatusBar } from "expo-status-bar";
-import { useCallback, useEffect } from "react";
-import {
-  StyleSheet,
-  useColorScheme,
-  Text,
-  View,
-  TouchableOpacity,
-  Platform,
-} from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
-
-import SendButton from "../../../assets/send-button.svg";
-import { useAppStore } from "../../../data/store/appStore";
-import { useSelect } from "../../../data/store/storeHelpers";
-import { dangerColor } from "../../../utils/colors";
 import {
   setAndroidColors,
   setAndroidSystemColor,
-} from "../../../utils/colors/helpers";
+} from "@styles/colors/helpers";
+import { PictoSizes } from "@styles/sizes";
+import { Image } from "expo-image";
+import { useEffect } from "react";
+import {
+  StyleSheet,
+  TouchableOpacity,
+  useColorScheme,
+  View,
+} from "react-native";
+import Animated from "react-native-reanimated";
+
 import ActivityIndicator from "../../ActivityIndicator/ActivityIndicator";
 import Picto from "../../Picto/Picto";
 
-export default function SendAttachmentPreview() {
+type SendAttachmentPreviewProps = {
+  currentAttachmentMediaURI: string;
+  onClose: () => void;
+  isLoading: boolean;
+  error: boolean;
+  scale: Animated.SharedValue<number>;
+};
+
+export default function SendAttachmentPreview({
+  currentAttachmentMediaURI,
+  onClose,
+  isLoading,
+  error,
+  scale,
+}: SendAttachmentPreviewProps) {
   const colorScheme = useColorScheme();
   const styles = useStyles();
-  const { mediaPreview, setMediaPreview } = useAppStore(
-    useSelect(["mediaPreview", "setMediaPreview"])
-  );
-  const insets = useSafeAreaInsets();
-  const sendMedia = useCallback(() => {
-    if (mediaPreview?.mediaURI) {
-      setMediaPreview({
-        mediaURI: mediaPreview.mediaURI,
-        error: false,
-        sending: true,
-      });
-    }
-  }, [mediaPreview?.mediaURI, setMediaPreview]);
+
   useEffect(() => {
     setAndroidSystemColor("#000000");
     return () => {
       setAndroidColors(colorScheme);
     };
   }, [colorScheme]);
-  if (!mediaPreview) return null;
-  const { sending, error } = mediaPreview;
+  if (!currentAttachmentMediaURI) return null;
   return (
     <View style={styles.previewContainer}>
-      <StatusBar hidden={false} style="light" backgroundColor="black" />
       <View style={styles.imageContainer}>
         <Image
-          source={{ uri: mediaPreview.mediaURI }}
+          source={{ uri: currentAttachmentMediaURI }}
           style={styles.image}
-          contentFit="contain"
+          contentFit="cover"
         />
-      </View>
-      {Platform.OS === "ios" && (
-        <Text
-          style={[styles.text, styles.cancel]}
-          onPress={() => {
-            setMediaPreview(null);
-          }}
-        >
-          Cancel
-        </Text>
-      )}
-      {Platform.OS === "android" ||
-        (Platform.OS === "web" && (
-          <TouchableOpacity
-            onPress={() => {
-              setMediaPreview(null);
-            }}
-          >
-            <Picto
-              picto="xmark"
-              color="#D8C2BE"
-              style={{
-                width: 34,
-                height: 34,
-                left: 20,
-                top: 20,
-              }}
-              size={34}
+        {isLoading && (
+          <View style={styles.overlay}>
+            <ActivityIndicator
+              size="small"
+              color="#ffffff"
+              style={styles.activityIndicator}
             />
-          </TouchableOpacity>
-        ))}
-      <View style={[styles.controls, { bottom: insets.bottom }]}>
-        {!sending && !error && (
-          <TouchableOpacity onPress={sendMedia} activeOpacity={0.6}>
-            <SendButton width={36} height={36} style={styles.sendButton} />
-          </TouchableOpacity>
-        )}
-        {sending && !error && (
-          <>
-            <ActivityIndicator size="small" />
-            <Text style={[styles.text, { marginLeft: 10 }]}>Sending</Text>
-          </>
-        )}
-        {error && (
-          <>
-            <Text style={[styles.text, { color: dangerColor(colorScheme) }]}>
-              There was an error
-            </Text>
-            <Text style={[styles.text, { marginLeft: 10 }]} onPress={sendMedia}>
-              Try again
-            </Text>
-          </>
+          </View>
         )}
       </View>
+      <Animated.View
+        style={[
+          styles.closeButton,
+          {
+            transform: [{ scale }],
+            opacity: scale,
+          },
+        ]}
+      >
+        <TouchableOpacity
+          onPress={() => {
+            onClose();
+          }}
+          hitSlop={10}
+        >
+          <Picto
+            picto="xmark"
+            color="white"
+            size={PictoSizes.cancelAttachmentButton}
+          />
+        </TouchableOpacity>
+      </Animated.View>
     </View>
   );
 }
@@ -116,33 +88,20 @@ export default function SendAttachmentPreview() {
 const useStyles = () => {
   return StyleSheet.create({
     previewContainer: {
-      position: "absolute",
-      top: 0,
-      left: 0,
-      bottom: 0,
-      right: 0,
-      backgroundColor: "black",
+      borderRadius: 4,
+      aspectRatio: 0.75,
+      position: "relative",
+      overflow: "hidden",
+      maxHeight: 120,
     },
     imageContainer: {
-      position: "absolute",
-      top: 0,
-      left: 0,
-      bottom: 0,
-      right: 0,
-      justifyContent: "center",
-    },
-    text: {
-      color: "white",
-      fontSize: 17,
-    },
-    cancel: {
-      paddingTop: 75,
-      marginBottom: 9,
-      marginLeft: 16,
+      maxHeight: 120,
+      position: "relative",
     },
     image: {
-      height: "65%",
       width: "100%",
+      height: "100%",
+      maxHeight: 120,
     },
     controls: {
       width: "100%",
@@ -156,6 +115,33 @@ const useStyles = () => {
     sendButton: {
       marginTop: "auto",
       marginBottom: 6,
+    },
+    closeButton: {
+      position: "absolute",
+      top: 4,
+      right: 4,
+      width: 18,
+      height: 18,
+      alignItems: "center",
+      justifyContent: "center",
+      zIndex: 1,
+      padding: 2,
+      borderColor: "white",
+      borderWidth: 1,
+      backgroundColor: "black",
+      borderRadius: 12,
+    },
+    activityIndicator: {
+      position: "absolute",
+      top: "50%",
+      left: "50%",
+      transform: [{ translateX: -12 }, { translateY: -12 }],
+    },
+    overlay: {
+      ...StyleSheet.absoluteFillObject,
+      backgroundColor: "rgba(0, 0, 0, 0.5)",
+      justifyContent: "center",
+      alignItems: "center",
     },
   });
 };

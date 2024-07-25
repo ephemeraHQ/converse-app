@@ -1,12 +1,14 @@
 import "reflect-metadata";
 
-import { saveXmtpEnv, saveApiURI } from "../utils/sharedData";
 import { getRepository } from "./db";
 import { Conversation } from "./db/entities/conversationEntity";
 import { Message } from "./db/entities/messageEntity";
 import { loadProfilesByAddress } from "./helpers/profiles";
 import { xmtpConversationFromDb } from "./mappers";
 import { getChatStore, getProfilesStore } from "./store/accountsStore";
+import { saveXmtpEnv, saveApiURI } from "../utils/sharedData";
+
+const getTypeormBoolValue = (value: number) => value === 1;
 
 export const loadDataToContext = async (account: string) => {
   // Save env to shared data with extension
@@ -23,7 +25,12 @@ export const loadDataToContext = async (account: string) => {
 
   const conversationsWithMessages: Conversation[] = (
     await conversationRepository.createQueryBuilder().select("*").execute()
-  ).map((c: any) => ({ ...c }));
+  ).map((c: any) => ({
+    ...c,
+    isGroup: getTypeormBoolValue(c.isGroup),
+    pending: getTypeormBoolValue(c.pending),
+    isActive: getTypeormBoolValue(c.isActive),
+  }));
 
   const conversationsMessages: Message[][] = await Promise.all(
     conversationsWithMessages.map((c) =>
@@ -61,7 +68,7 @@ export const loadDataToContext = async (account: string) => {
         xmtpConversationFromDb(
           account,
           c,
-          profilesByAddress[c.peerAddress]?.socials
+          c.peerAddress ? profilesByAddress[c.peerAddress]?.socials : undefined
         )
       )
     );

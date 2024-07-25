@@ -1,9 +1,9 @@
 import { StyleSheet, Text } from "react-native";
 
+import OnboardingComponent from "./OnboardingComponent";
 import config from "../../config";
 import { useOnboardingStore } from "../../data/store/onboardingStore";
 import Button from "../Button/Button";
-import OnboardingComponent from "./OnboardingComponent";
 
 export default function DesktopConnect() {
   const styles = useStyles();

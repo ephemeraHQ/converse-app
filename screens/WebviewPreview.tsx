@@ -1,14 +1,14 @@
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import { useEffect, useState } from "react";
-import { Platform, Button, useColorScheme } from "react-native";
-import { WebView } from "react-native-webview";
-
-import AndroidBackAction from "../components/AndroidBackAction";
 import {
   setAndroidColors,
   setAndroidSystemColor,
-} from "../utils/colors/helpers";
+} from "@styles/colors/helpers";
+import { useEffect, useState } from "react";
+import { Button, Platform, useColorScheme } from "react-native";
+import { WebView } from "react-native-webview";
+
 import { NavigationParamList } from "./Navigation/Navigation";
+import AndroidBackAction from "../components/AndroidBackAction";
 
 export default function WebviewPreview({
   route,

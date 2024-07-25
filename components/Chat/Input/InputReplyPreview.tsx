@@ -1,19 +1,20 @@
 import {
-  View,
-  useColorScheme,
+  backgroundColor,
+  textPrimaryColor,
+  textSecondaryColor,
+} from "@styles/colors";
+import { PictoSizes } from "@styles/sizes";
+import {
+  Platform,
   StyleSheet,
   Text,
-  Platform,
   TouchableOpacity,
+  View,
+  useColorScheme,
 } from "react-native";
 
 import { useCurrentAccount } from "../../../data/store/accountsStore";
 import { isAttachmentMessage } from "../../../utils/attachment/helpers";
-import {
-  backgroundColor,
-  textPrimaryColor,
-  textSecondaryColor,
-} from "../../../utils/colors";
 import { getRelativeDateTime } from "../../../utils/date";
 import { getReadableProfile } from "../../../utils/str";
 import { isTransactionMessage } from "../../../utils/transaction";
@@ -39,13 +40,13 @@ export default function ChatInputReplyPreview({
   return (
     <View style={styles.replyContainer}>
       <View style={styles.messagePreview}>
-        <Text style={[styles.replyToUsername]}>
+        <Text style={styles.replyToUsername}>
           {currentAccount.toLowerCase() ===
           replyingToMessage?.senderAddress?.toLowerCase()
             ? "You"
             : readableProfile}
         </Text>
-        <Text style={[styles.replyToMessage]} numberOfLines={1}>
+        <Text style={styles.replyToMessage} numberOfLines={1}>
           {isAttachmentMessage(replyingToMessage.contentType)
             ? `📎 Media from ${getRelativeDateTime(replyingToMessage.sent)}`
             : isTransactionMessage(replyingToMessage.contentType)
@@ -57,9 +58,7 @@ export default function ChatInputReplyPreview({
       </View>
       <TouchableOpacity
         activeOpacity={0.6}
-        onPress={() => {
-          onDismiss();
-        }}
+        onPress={onDismiss}
         hitSlop={{ left: 8, right: 8, top: 8, bottom: 8 }}
       >
         <Picto
@@ -69,7 +68,7 @@ export default function ChatInputReplyPreview({
               ? textSecondaryColor(colorScheme)
               : "#8E8E93"
           }
-          size={Platform.OS === "android" ? 16 : 14}
+          size={PictoSizes.replyButton}
           style={styles.xmark}
         />
       </TouchableOpacity>

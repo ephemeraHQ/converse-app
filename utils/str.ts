@@ -1,10 +1,12 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { PixelRatio, TextInput, Dimensions, Platform } from "react-native";
+import { Dimensions, PixelRatio, Platform, TextInput } from "react-native";
 
+import { getPreferredName } from "./profile";
 import { getProfilesStore, useAccountsList } from "../data/store/accountsStore";
 import { XmtpConversation } from "../data/store/chatStore";
 import { ProfilesStoreType } from "../data/store/profilesStore";
-import { getPreferredName } from "./profile";
+
+const { humanize } = require("../vendor/humanhash");
 
 export const shortAddress = (address: string) =>
   address && address.length > 7
@@ -37,14 +39,24 @@ export const shortDomain = (domain: string | undefined): string => {
     : domain;
 };
 
+export const capitalize = (str: string) => str[0].toUpperCase() + str.slice(1);
+
 export const addressPrefix = (address: string) =>
   (address && address.length >= 6 ? address.slice(0, 6) : address) || "";
 
 export const conversationName = (conversation: XmtpConversation) => {
-  return (
-    conversation.conversationTitle || shortAddress(conversation.peerAddress)
-  );
+  if (conversation.isGroup) {
+    return (
+      conversation.groupName ||
+      capitalize(humanize(conversation.topic.slice(14, 46), 3, " "))
+    );
+  }
+  const defaultName = shortAddress(conversation.peerAddress);
+  return conversation.conversationTitle || defaultName;
 };
+
+export const formatGroupName = (topic: string, groupName?: string) =>
+  groupName || capitalize(humanize(topic.slice(14, 46), 3, " "));
 
 export const getTitleFontScale = (): number => {
   let titleFontScale = 1;
@@ -109,7 +121,7 @@ export const useLoopTxt = (
   active: boolean
 ) => {
   const [step, setStep] = useState(0);
-  const interval = useRef<NodeJS.Timer | undefined>();
+  const interval = useRef<NodeJS.Timeout | undefined>();
   const startInterval = useCallback(() => {
     if (interval.current) return;
     setStep(0);

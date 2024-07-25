@@ -1,0 +1,19 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`MutationKeys should match the snapshot 1`] = `
+{
+  "ADD_MEMBER": "addMember",
+  "ALLOW_GROUP": "allowGroup",
+  "BLOCK_GROUP": "blockGroup",
+  "PROMOTE_ADMIN": "promoteAdmin",
+  "PROMOTE_SUPER_ADMIN": "promoteSuperAdmin",
+  "REMOVE_MEMBER": "removeMember",
+  "REVOKE_ADMIN": "revokeAdmin",
+  "REVOKE_SUPER_ADMIN": "revokeSuperAdmin",
+  "SEND_MESSAGE": "sendMessage",
+  "SET_GROUP_DESCRIPTION": "setGroupDescription",
+  "SET_GROUP_NAME": "setGroupName",
+  "SET_GROUP_PHOTO": "setGroupPhoto",
+  "SET_PINNED_FRAME": "setPinnedFrame",
+}
+`;

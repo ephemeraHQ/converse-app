@@ -1,14 +1,14 @@
 import { useHeaderHeight } from "@react-navigation/elements";
+import { backgroundColor, textPrimaryColor } from "@styles/colors";
 import {
+  Dimensions,
+  Platform,
   StyleSheet,
   Text,
   useColorScheme,
   View,
-  Platform,
-  Dimensions,
 } from "react-native";
 
-import { backgroundColor, textPrimaryColor } from "../utils/colors";
 import ActivityIndicator from "./ActivityIndicator/ActivityIndicator";
 
 export default function InitialLoad() {

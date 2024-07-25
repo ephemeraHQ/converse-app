@@ -1,15 +1,24 @@
+import {
+  chatInputBackgroundColor,
+  headerTitleStyle,
+  textPrimaryColor,
+  textSecondaryColor,
+} from "@styles/colors";
+import { PictoSizes } from "@styles/sizes";
 import React, { useRef } from "react";
 import {
-  useColorScheme,
-  StyleSheet,
-  View,
-  TouchableOpacity,
-  TextInput,
   Platform,
+  StyleSheet,
+  TextInput,
+  TouchableOpacity,
+  useColorScheme,
   useWindowDimensions,
+  View,
 } from "react-native";
 import { Searchbar as MaterialSearchBar } from "react-native-paper";
 
+import { NativeStack, navigationAnimation } from "./Navigation";
+import { useIsSplitScreen } from "./navHelpers";
 import {
   useShouldShowConnecting,
   useShouldShowConnectingOrSyncing,
@@ -18,16 +27,8 @@ import ProfileSettingsButton from "../../components/ConversationList/ProfileSett
 import Picto from "../../components/Picto/Picto";
 import { useChatStore } from "../../data/store/accountsStore";
 import { useSelect } from "../../data/store/storeHelpers";
-import {
-  chatInputBackgroundColor,
-  headerTitleStyle,
-  textPrimaryColor,
-  textSecondaryColor,
-} from "../../utils/colors";
 import { converseEventEmitter } from "../../utils/events";
 import ConversationList from "../ConversationList";
-import { NativeStack, navigationAnimation } from "./Navigation";
-import { useIsSplitScreen } from "./navHelpers";
 
 export const useHeaderSearchBar = (props: any) => {
   // No-op
@@ -108,7 +109,7 @@ export default function ConversationListNav() {
                 onChangeText={onChangeSearch}
                 value={searchQuery}
                 icon={({ color }) => (
-                  <Picto picto="menu" size={24} color={color} />
+                  <Picto picto="menu" size={PictoSizes.navItem} color={color} />
                 )}
                 onIconPress={() => {
                   if (Platform.OS === "android") {
@@ -125,7 +126,11 @@ export default function ConversationListNav() {
                 placeholderTextColor={textSecondaryColor(colorScheme)}
                 selectionColor={textPrimaryColor(colorScheme)}
                 clearIcon={({ color }) => (
-                  <Picto picto="xmark" size={24} color={color} />
+                  <Picto
+                    picto="xmark"
+                    size={PictoSizes.navItem}
+                    color={color}
+                  />
                 )}
                 onClearIconPress={() => {
                   searchBar.current?.blur();

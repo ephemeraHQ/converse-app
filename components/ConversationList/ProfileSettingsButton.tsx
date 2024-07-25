@@ -1,24 +1,29 @@
+import { AvatarSizes } from "@styles/sizes";
 import React, { useCallback, useEffect, useState } from "react";
-import { Platform, TouchableOpacity, useColorScheme } from "react-native";
+import { Platform, TouchableOpacity } from "react-native";
 
 import config from "../../config";
 import {
   currentAccount,
   useLoggedWithPrivy,
+  useProfilesStore,
   useWalletStore,
 } from "../../data/store/accountsStore";
-import { primaryColor, textSecondaryColor } from "../../utils/colors";
 import { evmHelpers } from "../../utils/evm/helpers";
 import { navigate } from "../../utils/navigation";
+import { getPreferredAvatar, getPreferredName } from "../../utils/profile";
+import Avatar from "../Avatar";
 import Button from "../Button/Button";
-import Picto from "../Picto/Picto";
 
 export default function ProfileSettingsButton() {
-  const colorScheme = useColorScheme();
   const isPrivy = useLoggedWithPrivy();
   const USDCBalance = useWalletStore((s) => s.USDCBalance);
   const [stringBalance, setStringBalance] = useState("");
   const [stringSize, setStringSize] = useState(0);
+  const account = currentAccount();
+  const profiles = useProfilesStore((state) => state.profiles);
+  const socials = profiles[account]?.socials;
+
   const openProfile = useCallback(() => {
     navigate("Profile", { address: currentAccount() });
   }, []);
@@ -38,7 +43,8 @@ export default function ProfileSettingsButton() {
     setStringBalance(str);
     setStringSize(str.length * 10 + 10);
   }, [USDCBalance]);
-  if (isPrivy) {
+  // Disabled with "false" until payments UX sorted
+  if (isPrivy && false) {
     if (Platform.OS === "android" || Platform.OS === "web") {
       return (
         <Button
@@ -74,21 +80,16 @@ export default function ProfileSettingsButton() {
   }
   return (
     <TouchableOpacity activeOpacity={0.2} onPress={openProfile}>
-      <Picto
-        picto="person"
-        weight="medium"
-        color={
-          Platform.OS === "ios"
-            ? primaryColor(colorScheme)
-            : textSecondaryColor(colorScheme)
-        }
-        size={Platform.OS === "ios" ? 16 : 24}
+      <Avatar
+        uri={getPreferredAvatar(socials)}
+        size={AvatarSizes.profileSettings}
         style={{
           width: Platform.OS === "android" ? undefined : 32,
           height: Platform.OS === "android" ? undefined : 32,
           marginRight: Platform.OS === "android" ? 0 : 10,
           marginTop: Platform.OS === "ios" ? 3 : 0,
         }}
+        name={getPreferredName(socials, account)}
       />
     </TouchableOpacity>
   );

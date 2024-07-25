@@ -1,9 +1,16 @@
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
+import {
+  backgroundColor,
+  headerTitleStyle,
+  textPrimaryColor,
+  textSecondaryColor,
+} from "@styles/colors";
 import { isAddress } from "ethers/lib/utils";
-import React, { useCallback, useEffect, useState, useRef } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { Platform, StyleSheet, useColorScheme, View } from "react-native";
 import { gestureHandlerRootHOC } from "react-native-gesture-handler";
 
+import { NavigationParamList } from "./Navigation/Navigation";
 import ConverseChat from "../components/Chat/Chat";
 import ConversationTitle from "../components/Conversation/ConversationTitle";
 import {
@@ -11,12 +18,8 @@ import {
   useChatStore,
   useSettingsStore,
 } from "../data/store/accountsStore";
+import { MediaPreview } from "../data/store/chatStore";
 import { useSelect } from "../data/store/storeHelpers";
-import {
-  backgroundColor,
-  headerTitleStyle,
-  textSecondaryColor,
-} from "../utils/colors";
 import {
   ConversationContext,
   openMainConversationWithPeer,
@@ -24,9 +27,8 @@ import {
 import { isDesktop } from "../utils/device";
 import { converseEventEmitter } from "../utils/events";
 import { setTopicToNavigateTo, topicToNavigateTo } from "../utils/navigation";
-import { getTitleFontScale, TextInputWithValue } from "../utils/str";
+import { TextInputWithValue } from "../utils/str";
 import { loadOlderMessages } from "../utils/xmtpRN/messages";
-import { NavigationParamList } from "./Navigation/Navigation";
 
 const Conversation = ({
   route,
@@ -37,15 +39,20 @@ const Conversation = ({
   const [transactionMode, setTransactionMode] = useState(false);
   const [frameTextInputFocused, setFrameTextInputFocused] = useState(false);
 
-  const { conversations, conversationsMapping, setConversationMessageDraft } =
-    useChatStore(
-      useSelect([
-        "conversations",
-        "conversationsMapping",
-        "setConversationMessageDraft",
-        "lastUpdateAt", // Added even if unused to trigger a rerender
-      ])
-    );
+  const {
+    conversations,
+    conversationsMapping,
+    setConversationMessageDraft,
+    setConversationMediaPreview,
+  } = useChatStore(
+    useSelect([
+      "conversations",
+      "conversationsMapping",
+      "setConversationMessageDraft",
+      "setConversationMediaPreview",
+      "lastUpdateAt", // Added even if unused to trigger a rerender
+    ])
+  );
 
   // Initial conversation topic will be set only if in route params
   const [_conversationTopic, setConversationTopic] = useState(
@@ -81,6 +88,7 @@ const Conversation = ({
   }, [conversation, peerAddress]);
 
   const openedMainConvo = useRef(false);
+  const isActive = conversation?.isGroup ? conversation.isActive : true;
 
   // When the conversation topic changes, we set the conversation object
   useEffect(() => {
@@ -108,15 +116,22 @@ const Conversation = ({
     route.params?.mainConversationWithPeer,
   ]);
 
+  useEffect(() => {
+    if (!isActive) {
+      return navigation.navigate("Chats");
+    }
+  }, [isActive, navigation]);
+
   const isBlockedPeer = conversation?.peerAddress
     ? peersStatus[conversation.peerAddress.toLowerCase()] === "blocked"
     : false;
 
   const textInputRef = useRef<TextInputWithValue>();
+  const mediaPreviewRef = useRef<MediaPreview>();
 
   const messageToPrefill =
     route.params?.message || conversation?.messageDraft || "";
-
+  const mediaPreviewToPrefill = conversation?.mediaPreview || null;
   const focusOnLayout = useRef(false);
   const chatLayoutDone = useRef(false);
   const alreadyAutomaticallyFocused = useRef(false);
@@ -161,22 +176,20 @@ const Conversation = ({
 
   const styles = useStyles();
 
-  const titleFontScale = getTitleFontScale();
-
   useEffect(() => {
     navigation.setOptions({
       headerTitle: () => (
         <ConversationTitle
           conversation={conversation}
-          peerAddress={peerAddress}
-          isBlockedPeer={isBlockedPeer}
           textInputRef={textInputRef}
           navigation={navigation}
           route={route}
         />
       ),
       headerTintColor:
-        Platform.OS === "android" ? textSecondaryColor(colorScheme) : undefined,
+        Platform.OS === "android"
+          ? textSecondaryColor(colorScheme)
+          : textPrimaryColor(colorScheme),
     });
   }, [
     colorScheme,
@@ -203,13 +216,20 @@ const Conversation = ({
   }, [conversation]);
 
   const onLeaveScreen = useCallback(async () => {
-    if (!conversation || !textInputRef.current) return;
+    if (!conversation) return;
+
     useChatStore.getState().setOpenedConversationTopic(null);
-    setConversationMessageDraft(
+    if (textInputRef.current) {
+      setConversationMessageDraft(
+        conversation.topic,
+        textInputRef.current.currentValue
+      );
+    }
+    setConversationMediaPreview(
       conversation.topic,
-      textInputRef.current.currentValue
+      mediaPreviewRef.current || null
     );
-  }, [conversation, setConversationMessageDraft]);
+  }, [conversation, setConversationMessageDraft, setConversationMediaPreview]);
 
   const onOpeningConversation = useCallback(
     ({ topic }: { topic: string }) => {
@@ -245,6 +265,8 @@ const Conversation = ({
             conversation,
             messageToPrefill,
             inputRef: textInputRef,
+            mediaPreviewToPrefill,
+            mediaPreviewRef,
             isBlockedPeer,
             onReadyToFocus,
             transactionMode,
