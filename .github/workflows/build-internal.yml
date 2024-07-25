@@ -2,14 +2,9 @@ name: Check Build
 
 on:
   pull_request:
+    # Remove after validation
     branches:
       - main
-      - beta
-      - feat/xmtp-groups-dash
-    # paths:
-    #   - "ios/**"
-    #   - "android/**"
-    #   - "package.json"
   schedule:
     # These will run only on the default branch
     - cron: "0 18 * * 2" # Tuesdays at 11 AM PT
@@ -18,7 +13,6 @@ on:
 
 jobs:
   build-android:
-    # if: contains(github.event.pull_request.head.repo.pushed_at, 'android') || contains(github.event.pull_request.head.repo.pushed_at, 'package.json')
     runs-on: ubuntu-latest
 
     steps:
@@ -43,7 +37,6 @@ jobs:
         run: eas build --profile production-android --platform android --non-interactive
 
   build-ios:
-    # if: contains(github.event.pull_request.head.repo.pushed_at, 'ios') || contains(github.event.pull_request.head.repo.pushed_at, 'package.json')
     runs-on: ubuntu-latest
 
     steps:
@@ -108,4 +101,4 @@ jobs:
           branch: increment-version
           title: "Increment version numbers"
           body: "This PR increments the buildNumber for iOS and the versionCode for Android."
-          base: feat/xmtp-groups-dash # Change the base branch if needed
+          base: main # Change the base branch if needed

@@ -3,7 +3,7 @@ name: Android App APK Build
 on:
   pull_request:
     branches:
-      - feat/xmtp-groups-dash
+      - main
     # Uncomment after verification
     # paths:
     #   - "android/**"
@@ -42,7 +42,7 @@ jobs:
         run: yarn install
 
       - name: Build Android app
-        run: eas build --platform android --profile preview --local --output ${{ github.workspace }}/app-release.apk
+        run: eas build --platform android --profile development --local --output ${{ github.workspace }}/app-release.apk
       # Don't upload the artifact for now as we just want to make sure it builds
       # - name: Upload APK artifact
       #   uses: actions/upload-artifact@v4

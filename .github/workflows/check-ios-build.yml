@@ -3,7 +3,7 @@ name: iOS App Build
 on:
   pull_request:
     branches:
-      - feat/xmtp-groups-dash
+      - main
     # Uncomment after verification
     # paths:
     #   - "ios/**"
@@ -33,7 +33,7 @@ jobs:
         run: yarn install
 
       - name: Build iOS app
-        run: eas build --platform ios --local --non-interactive --output ${{ github.workspace }}/app-release.ipa
+        run: eas build --profile ios-simulator --platform ios --local --non-interactive --output ${{ github.workspace }}/app-release.ipa
       # Don't upload the artifact for now
       # - name: Upload IPA artifact
       #   uses: actions/upload-artifact@v4
