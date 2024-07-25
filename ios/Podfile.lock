@@ -380,7 +380,7 @@ PODS:
   - libwebp/sharpyuv (1.3.2)
   - libwebp/webp (1.3.2):
     - libwebp/sharpyuv
-  - LibXMTP (0.5.6-beta0)
+  - LibXMTP (0.5.6-beta2)
   - Logging (1.0.0)
   - MessagePacker (0.4.7)
   - MMKV (1.3.3):
@@ -1776,16 +1776,16 @@ PODS:
     - GenericJSON (~> 2.0)
     - Logging (~> 1.0.0)
     - secp256k1.swift (~> 0.1)
-  - XMTP (0.13.8):
+  - XMTP (0.13.11):
     - Connect-Swift (= 0.12.0)
     - GzipSwift
-    - LibXMTP (= 0.5.6-beta0)
+    - LibXMTP (= 0.5.6-beta2)
     - web3.swift
-  - XMTPReactNative (2.0.0):
+  - XMTPReactNative (2.1.2):
     - ExpoModulesCore
     - MessagePacker
     - secp256k1.swift
-    - XMTP (= 0.13.8)
+    - XMTP (= 0.13.11)
   - Yoga (0.0.0)
 
 DEPENDENCIES:
@@ -1918,7 +1918,7 @@ DEPENDENCIES:
   - Sentry/HybridSDK (= 8.29.1)
   - SQLite.swift
   - UMAppLoader (from `../node_modules/unimodules-app-loader/ios`)
-  - XMTP (= 0.13.8)
+  - XMTP (= 0.13.11)
   - "XMTPReactNative (from `../node_modules/@xmtp/react-native-sdk/ios`)"
   - Yoga (from `../node_modules/react-native/ReactCommon/yoga`)
 
@@ -2208,7 +2208,7 @@ SPEC CHECKSUMS:
   CoinbaseWalletSDK: ea1f37512bbc69ebe07416e3b29bf840f5cc3152
   CoinbaseWalletSDKExpo: fc6cc756974827763d7a0decf7140c2902dafca2
   Connect-Swift: 1de2ef4a548c59ecaeb9120812dfe0d6e07a0d47
-  DoubleConversion: fea03f2699887d960129cc54bba7e52542b6f953
+  DoubleConversion: 76ab83afb40bddeeee456813d9c04f67f78771b5
   EASClient: 1509a9a6b48b932ec61667644634daf2562983b8
   EXApplication: c08200c34daca7af7fd76ac4b9d606077410e8ad
   EXConstants: 409690fbfd5afea964e5e9d6c4eb2c2b59222c59
@@ -2248,13 +2248,13 @@ SPEC CHECKSUMS:
   FBLazyVector: 7e977dd099937dc5458851233141583abba49ff2
   fmt: 4c2741a687cc09f0634a2e2c72a838b99f1ff120
   GenericJSON: 79a840eeb77030962e8cf02a62d36bd413b67626
-  glog: c5d68082e772fa1c511173d6b30a9de2c05a69a2
+  glog: fdfdfe5479092de0c4bdbebedd9056951f092c4f
   GzipSwift: 893f3e48e597a1a4f62fafcb6514220fcf8287fa
   hermes-engine: 1f547997900dd0752dc0cc0ae6dd16173c49e09b
   libavif: 84bbb62fb232c3018d6f1bab79beea87e35de7b7
   libdav1d: 23581a4d8ec811ff171ed5e2e05cd27bad64c39f
   libwebp: 1786c9f4ff8a279e4dac1e8f385004d5fc253009
-  LibXMTP: e7682dedb10e18343c011280d494a8e4a43d9eb7
+  LibXMTP: cae91842555974022b1fda751a63e695fc45fc7f
   Logging: 9ef4ecb546ad3169398d5a723bc9bea1c46bef26
   MessagePacker: ab2fe250e86ea7aedd1a9ee47a37083edd41fd02
   MMKV: f902fb6719da13c2ab0965233d8963a59416f911
@@ -2263,7 +2263,7 @@ SPEC CHECKSUMS:
   op-sqlite: 1ca30186b8d062cd451f1d999c691caf151d13e2
   OpenSSL-Universal: 6e1ae0555546e604dbc632a2b9a24a9c46c41ef6
   RCT-Folly: 02617c592a293bd6d418e0a88ff4ee1f88329b47
-  RCTDeprecation: 4c7eeb42be0b2e95195563c49be08d0b839d22b4
+  RCTDeprecation: 9db9faca3e832ec057b106c5c74f95cd2535e510
   RCTRequired: d530a0f489699c8500e944fde963102c42dcd0c2
   RCTTypeSafety: b20878506b094fa3d9007d7b9e4be0faa3562499
   ReachabilitySwift: 7f151ff156cea1481a8411701195ac6a984f4979
@@ -2328,7 +2328,7 @@ SPEC CHECKSUMS:
   rn-fetch-blob: f065bb7ab7fb48dd002629f8bdcb0336602d3cba
   RNAWSCognito: fe0c870c7cd9970a2efefc075b3f2d75eac913c7
   RNCAsyncStorage: 826b603ae9c0f88b5ac4e956801f755109fa4d5c
-  RNCClipboard: 0a720adef5ec193aa0e3de24c3977222c7e52a37
+  RNCClipboard: 327eda72df65abf65e430eeb2e527cf95264ab12
   RNDeviceInfo: 02ea8b23e2280fa18e00a06d7e62804d74028579
   RNFlashList: b521ebdd7f9352673817f1d98e8bdc0c8cf8545b
   RNFS: 4ac0f0ea233904cb798630b3c077808c06931688
@@ -2337,8 +2337,8 @@ SPEC CHECKSUMS:
   RNReactNativeSharedGroupPreferences: de0121a4224c267bc7e9fb16c398f3f087c8da81
   RNReanimated: d51431fd3597a8f8320319dce8e42cee82a5445f
   RNScreens: 30249f9331c3b00ae7cb7922e11f58b3ed369c07
-  RNSentry: e9aa15bb2f3e18c822c002eea13bbd3b222ab493
-  RNSVG: 43b64ed39c14ce830d840903774154ca0c1f27ec
+  RNSentry: 906151a5ec2887a48af16d11ad635249d7a5a59b
+  RNSVG: 16a7fd5293e14799a541332ece19c22d1509ed3b
   SDWebImage: 066c47b573f408f18caa467d71deace7c0f8280d
   SDWebImageAVIFCoder: 00310d246aab3232ce77f1d8f0076f8c4b021d90
   SDWebImageSVGCoder: 15a300a97ec1c8ac958f009c02220ac0402e936c
@@ -2351,10 +2351,10 @@ SPEC CHECKSUMS:
   SwiftProtobuf: 407a385e97fd206c4fbe880cc84123989167e0d1
   UMAppLoader: f17a5ee8e85b536ace0fc254b447a37ed198d57e
   web3.swift: 2263d1e12e121b2c42ffb63a5a7beb1acaf33959
-  XMTP: 7d0a3f3b22916acfbb0ae67f1ca6bbd3f5956138
-  XMTPReactNative: 2895209c3ba8f2dab49cbb18e8c5c293abceb093
-  Yoga: bd92064a0d558be92786820514d74fc4dddd1233
+  XMTP: 8c00384ebe4ca0952093236c02f04cbf4abc7b0e
+  XMTPReactNative: fd3f0bcd32dad77b4b49dfb6e06dba1526260de4
+  Yoga: eed50599a85bd9f6882a9938d118aed6a397db9c
 
-PODFILE CHECKSUM: ab4587e1374eb06e8ae897930e3cfc276841c577
+PODFILE CHECKSUM: 1e82480a640932f99ca123158d5f5de18f1fa6cf
 
-COCOAPODS: 1.15.2
+COCOAPODS: 1.12.1
