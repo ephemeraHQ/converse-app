@@ -1,4 +1,4 @@
-name: Check Build
+name: Build Internal
 
 on:
   pull_request:
@@ -38,7 +38,7 @@ jobs:
         run: node scripts/build/android/production.js
 
       - name: Build for Android
-        run: eas build --profile production-android --platform android --non-interactive
+        run: eas build --profile production-android --platform android --non-interactive --auto-submit
 
   build-ios:
     runs-on: ubuntu-latest
@@ -66,7 +66,7 @@ jobs:
         run: node scripts/build/ios/production.js
 
       - name: Build for iOS
-        run: eas build --profile production-ios --platform ios --non-interactive
+        run: eas build --profile production-ios --platform ios --non-interactive --auto-submit
 
   increment-build-numbers:
     runs-on: ubuntu-latest
