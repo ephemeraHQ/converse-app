@@ -82,7 +82,8 @@ const getListArray = (
       "xmtp.org/readReceipt:",
     ];
 
-    if (UUID_REGEX.test(message.id)) return false;
+    if (isAttachmentMessage(message.contentType) && UUID_REGEX.test(message.id))
+      return false;
 
     return !notDisplayedContentTypes.some((c) =>
       message.contentType.startsWith(c)

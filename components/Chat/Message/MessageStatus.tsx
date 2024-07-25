@@ -53,22 +53,24 @@ export default function MessageStatus({ message }: Props) {
       prevStatusRef.current = message.status;
 
       setTimeout(() => {
-        if (
-          isSentOrDelivered &&
-          (prevStatus === "sending" || prevStatus === "prepared")
-        ) {
-          opacity.value = withTiming(1, timingConfig);
-          height.value = withTiming(22, timingConfig);
-          scale.value = withTiming(1, timingConfig);
-        } else if (isSentOrDelivered && !isLatestSettledFromMe) {
-          opacity.value = withTiming(0, timingConfig);
-          height.value = withTiming(0, timingConfig);
-          scale.value = withTiming(0, timingConfig);
-        } else if (isLatestSettledFromMe) {
-          opacity.value = 1;
-          height.value = 22;
-          scale.value = 1;
-        }
+        requestAnimationFrame(() => {
+          if (
+            isSentOrDelivered &&
+            (prevStatus === "sending" || prevStatus === "prepared")
+          ) {
+            opacity.value = withTiming(1, timingConfig);
+            height.value = withTiming(22, timingConfig);
+            scale.value = withTiming(1, timingConfig);
+          } else if (isSentOrDelivered && !isLatestSettledFromMe) {
+            opacity.value = withTiming(0, timingConfig);
+            height.value = withTiming(0, timingConfig);
+            scale.value = withTiming(0, timingConfig);
+          } else if (isLatestSettledFromMe) {
+            opacity.value = 1;
+            height.value = 22;
+            scale.value = 1;
+          }
+        });
       }, 200);
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
