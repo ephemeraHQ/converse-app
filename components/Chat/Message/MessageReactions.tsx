@@ -2,14 +2,17 @@ import {
   actionSheetColors,
   inversePrimaryColor,
   textPrimaryColor,
+  backgroundColor,
+  primaryColor,
 } from "@styles/colors";
-import { useCallback } from "react";
+import { useCallback, useMemo } from "react";
 import {
   StyleSheet,
   Text,
-  TouchableWithoutFeedback,
+  TouchableOpacity,
   useColorScheme,
   View,
+  Image,
 } from "react-native";
 
 import { MessageToDisplay } from "./Message";
@@ -19,19 +22,30 @@ import {
 } from "../../../data/store/accountsStore";
 import { isAttachmentMessage } from "../../../utils/attachment/helpers";
 import { useConversationContext } from "../../../utils/conversation";
-import { getPreferredName } from "../../../utils/profile";
+import { getPreferredName, getPreferredAvatar } from "../../../utils/profile";
 import {
   getReactionContent,
   MessageReaction,
+  addReactionToMessage,
   removeReactionFromMessage,
 } from "../../../utils/reactions";
 import { showActionSheetWithOptions } from "../../StateHandlers/ActionSheetStateHandler";
 
+const MAX_REACTORS_TO_SHOW = 3;
+
 type Props = {
   message: MessageToDisplay;
   reactions: {
-    [senderAddress: string]: MessageReaction;
+    [senderAddress: string]: MessageReaction[];
   };
+};
+
+type ReactionCount = {
+  content: string;
+  count: number;
+  userReacted: boolean;
+  reactors: string[];
+  firstReactionTime: number;
 };
 
 export default function ChatMessageReactions({ message, reactions }: Props) {
@@ -40,9 +54,64 @@ export default function ChatMessageReactions({ message, reactions }: Props) {
   const styles = useStyles();
   const userAddress = useCurrentAccount();
   const profiles = useProfilesStore((state) => state.profiles);
-  const reactionsList = Object.values(reactions).sort(
-    (r1, r2) => r1.sent - r2.sent
+
+  const reactionsList = useMemo(() => {
+    return Object.entries(reactions)
+      .flatMap(([senderAddress, reactions]) =>
+        reactions.map((reaction) => ({ ...reaction, senderAddress }))
+      )
+      .sort((r1, r2) => r1.sent - r2.sent);
+  }, [reactions]);
+
+  const reactionCounts = useMemo(() => {
+    const counts: { [content: string]: ReactionCount } = {};
+
+    Object.values(reactions).forEach((reactionArray) => {
+      reactionArray.forEach((reaction) => {
+        if (!counts[reaction.content]) {
+          counts[reaction.content] = {
+            content: reaction.content,
+            count: 0,
+            userReacted: false,
+            reactors: [],
+            firstReactionTime: reaction.sent,
+          };
+        }
+        counts[reaction.content].count++;
+        counts[reaction.content].reactors.push(reaction.senderAddress);
+        if (
+          reaction.senderAddress.toLowerCase() === userAddress?.toLowerCase()
+        ) {
+          counts[reaction.content].userReacted = true;
+        }
+        // Keep track of the earliest reaction time for this emoji
+        counts[reaction.content].firstReactionTime = Math.min(
+          counts[reaction.content].firstReactionTime,
+          reaction.sent
+        );
+      });
+    });
+
+    // Convert to array and sort
+    return Object.values(counts).sort((a, b) => {
+      // Sort by the time of the first reaction (ascending)
+      return a.firstReactionTime - b.firstReactionTime;
+    });
+  }, [reactions, userAddress]);
+
+  const handleReactionPress = useCallback(
+    (reaction: ReactionCount) => {
+      if (!conversation || !userAddress) return;
+
+      if (reaction.userReacted) {
+        removeReactionFromMessage(conversation, message, reaction.content);
+      } else {
+        addReactionToMessage(conversation, message, reaction.content);
+      }
+    },
+    [conversation, message, userAddress]
   );
+
   const showReactionsActionsSheet = useCallback(() => {
     const methods: any = {};
     reactionsList.forEach((r) => {
@@ -86,18 +155,61 @@ export default function ChatMessageReactions({ message, reactions }: Props) {
     conversation,
   ]);
   if (reactionsList.length === 0) return null;
+
   return (
     <View style={styles.reactionsWrapper}>
-      <TouchableWithoutFeedback onPress={showReactionsActionsSheet}>
-        <View style={styles.reactionsContainer}>
-          <Text style={styles.emojis}>
-            {[...new Set(reactionsList.map((r) => getReactionContent(r)))]}
-          </Text>
-          {reactionsList.length > 1 && (
-            <Text style={styles.count}>{reactionsList.length}</Text>
-          )}
-        </View>
-      </TouchableWithoutFeedback>
+      {reactionCounts.map((reaction) => {
+        const reactorCount = reaction.reactors.length;
+        const containerWidth =
+          reactorCount > MAX_REACTORS_TO_SHOW ? 20 : reactorCount * 15 + 5;
+
+        return (
+          <TouchableOpacity
+            key={reaction.content}
+            onPress={() => handleReactionPress(reaction)}
+            onLongPress={showReactionsActionsSheet}
+            style={[
+              styles.reactionButton,
+              reaction.userReacted
+                ? styles.myReactionButton
+                : styles.otherReactionButton,
+            ]}
+          >
+            <Text style={styles.emoji}>{reaction.content}</Text>
+            <View style={[styles.reactorContainer, { width: containerWidth }]}>
+              {reaction.reactors &&
+              reaction.reactors.length <= MAX_REACTORS_TO_SHOW ? (
+                reaction.reactors.slice(0, 3).map((reactor, index) => (
+                  <Image
+                    key={reactor}
+                    source={{
+                      uri: getPreferredAvatar(profiles[reactor]?.socials),
+                    }}
+                    style={[
+                      styles.profileImage,
+                      reaction.userReacted
+                        ? { borderColor: primaryColor(colorScheme) }
+                        : {},
+                      { right: index * 13 },
+                    ]}
+                  />
+                ))
+              ) : (
+                <Text
+                  style={[
+                    styles.reactorCount,
+                    reaction.userReacted
+                      ? { color: inversePrimaryColor(colorScheme) }
+                      : {},
+                  ]}
+                >
+                  +{reaction.reactors.length}
+                </Text>
+              )}
+            </View>
+          </TouchableOpacity>
+        );
+      })}
     </View>
   );
 }
@@ -106,27 +218,48 @@ const useStyles = () => {
   const colorScheme = useColorScheme();
   return StyleSheet.create({
     reactionsWrapper: {
-      flexBasis: "100%",
       flexDirection: "row",
-      marginBottom: 10,
+      flexWrap: "wrap",
       marginHorizontal: 10,
     },
-    reactionsContainer: {
-      backgroundColor: inversePrimaryColor(colorScheme),
-      paddingVertical: 4,
-      paddingHorizontal: 6,
-      borderRadius: 8,
+    reactionButton: {
       flexDirection: "row",
       alignItems: "center",
+      marginRight: 8,
+      marginBottom: 8,
+      paddingHorizontal: 8,
+      paddingVertical: 4,
+      borderRadius: 16,
     },
-    emojis: {
-      fontSize: 16,
-      lineHeight: 24,
+    myReactionButton: {
+      backgroundColor: primaryColor(colorScheme),
+      borderWidth: 0.5,
+      borderColor: inversePrimaryColor(colorScheme),
     },
-    count: {
-      fontSize: 15,
+    otherReactionButton: {
+      backgroundColor: backgroundColor(colorScheme),
+    },
+    emoji: {
+      fontSize: 18,
+      marginRight: 2,
+    },
+    reactorContainer: {
+      flexDirection: "row",
+      alignItems: "center",
+      height: 20,
+      position: "relative",
+    },
+    profileImage: {
+      width: 20,
+      height: 20,
+      borderRadius: 10,
+      position: "absolute",
+      borderWidth: 0.5,
+      borderColor: inversePrimaryColor(colorScheme),
+    },
+    reactorCount: {
+      fontSize: 12,
       color: textPrimaryColor(colorScheme),
-      marginLeft: 4,
     },
   });
 };
