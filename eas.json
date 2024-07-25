@@ -118,7 +118,10 @@
       }
     },
     "production-ios": {
-      "extends": "production"
+      "extends": "production",
+      "ios": {
+        "ascAppId": "1658819514"
+      }
     },
     "production-android": {
       "extends": "production"
