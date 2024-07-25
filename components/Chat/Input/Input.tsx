@@ -6,7 +6,6 @@ import {
   textSecondaryColor,
   backgroundColor,
 } from "@styles/colors";
-import * as ImagePicker from "expo-image-picker";
 import React, {
   useCallback,
   useMemo,
@@ -35,8 +34,9 @@ import { useConversationContext } from "../../../utils/conversation";
 import { isDesktop } from "../../../utils/device";
 import { converseEventEmitter } from "../../../utils/events";
 import { AttachmentSelectedStatus } from "../../../utils/media";
-import { sendMessage } from "../../../utils/message";
+import { sendMessage, SendMessageInput } from "../../../utils/message";
 import { TextInputWithValue } from "../../../utils/str";
+import { serializeRemoteAttachmentMessageContent } from "../../../utils/xmtpRN/attachments";
 import AddAttachmentButton from "../Attachment/AddAttachmentButton";
 import SendAttachmentPreview from "../Attachment/SendAttachmentPreview";
 import { MessageToDisplay } from "../Message/Message";
@@ -47,13 +47,22 @@ const LINE_HEIGHT = 22;
 const MAX_INPUT_HEIGHT = 500;
 const REPLYING_TO_MESSAGE_HEIGHT = 60;
 
-const SPRING_CONFIG = {
-  damping: 15,
-  mass: 0.35,
-  stiffness: 250,
+const HEIGHT_SPRING_CONFIG = {
+  damping: 12,
+  mass: 0.3,
+  stiffness: 300,
   overshootClamping: true,
-  restSpeedThreshold: 0.001,
-  restDisplacementThreshold: 0.001,
+  restSpeedThreshold: 0.005,
+  restDisplacementThreshold: 0.005,
+};
+
+const PREVIEW_SPRING_CONFIG = {
+  damping: 15,
+  mass: 0.5,
+  stiffness: 200,
+  overshootClamping: false,
+  restSpeedThreshold: 0.01,
+  restDisplacementThreshold: 0.01,
 };
 
 const getSendButtonType = (input: string): "DEFAULT" | "HIGHER" => {
@@ -90,11 +99,12 @@ export default function ChatInput({ inputHeight }: ChatInputProps) {
   const [inputValue, setInputValue] = useState(messageToPrefill);
   const [replyingToMessage, setReplyingToMessage] =
     useState<MessageToDisplay | null>(null);
+  const replyingToMessageRef = useRef<MessageToDisplay | null>(null);
   const [mediaPreview, setMediaPreview] = useState(mediaPreviewToPrefill);
+  const preparedAttachmentMessageRef = useRef<SendMessageInput | null>(null);
+  const isAnimatingHeightRef = useRef(false);
 
   const numberOfLinesRef = useRef(1);
-
-  const assetRef = useRef<ImagePicker.ImagePickerAsset | undefined>(undefined);
 
   const sendButtonType = useMemo(
     () => getSendButtonType(inputValue),
@@ -126,6 +136,10 @@ export default function ChatInput({ inputHeight }: ChatInputProps) {
   }, [mediaPreviewRef, mediaPreview]);
 
   useEffect(() => {
+    replyingToMessageRef.current = replyingToMessage;
+  }, [replyingToMessage]);
+
+  useEffect(() => {
     converseEventEmitter.on(
       "triggerReplyToMessage",
       (message: MessageToDisplay) => {
@@ -133,6 +147,7 @@ export default function ChatInput({ inputHeight }: ChatInputProps) {
           inputRef.current?.focus();
         }
         setReplyingToMessage(message);
+        replyingToMessageRef.current = message;
       }
     );
     return () => {
@@ -169,10 +184,13 @@ export default function ChatInput({ inputHeight }: ChatInputProps) {
   const calculateInputHeight = useCallback(() => {
     const textContentHeight = (numberOfLinesRef.current - 1) * LINE_HEIGHT;
     const mediaPreviewHeight =
-      mediaPreviewRef.current && mediaPreviewRef.current.status === "picked"
+      mediaPreviewRef.current &&
+      (mediaPreviewRef.current.status === "picked" ||
+        mediaPreviewRef.current.status === "uploading" ||
+        mediaPreviewRef.current.status === "uploaded")
         ? DEFAULT_MEDIA_PREVIEW_HEIGHT + MEDIA_PREVIEW_PADDING
         : 0;
-    const replyingToMessageHeight = replyingToMessage
+    const replyingToMessageHeight = replyingToMessageRef.current
       ? REPLYING_TO_MESSAGE_HEIGHT
       : 0;
     return Math.min(
@@ -180,11 +198,22 @@ export default function ChatInput({ inputHeight }: ChatInputProps) {
       MAX_INPUT_HEIGHT
     );
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [numberOfLinesRef, replyingToMessage]);
+  }, [
+    numberOfLinesRef.current,
+    replyingToMessageRef.current,
+    mediaPreviewRef.current?.mediaURI,
+  ]);
 
   const updateInputHeightWithAnimation = useCallback(
     (newHeight: number) => {
-      inputHeight.value = withSpring(newHeight, SPRING_CONFIG);
+      if (isAnimatingHeightRef.current || inputHeight.value === newHeight) {
+        return;
+      }
+      isAnimatingHeightRef.current = true;
+      requestAnimationFrame(() => {
+        inputHeight.value = withSpring(newHeight, HEIGHT_SPRING_CONFIG);
+        isAnimatingHeightRef.current = false;
+      });
     },
     [inputHeight]
   );
@@ -224,21 +253,14 @@ export default function ChatInput({ inputHeight }: ChatInputProps) {
     [calculateInputHeight, inputHeight]
   );
 
-  const animateAttachmentClosed = useCallback(() => {
-    requestAnimationFrame(() => {
-      updateInputHeightWithAnimation(calculateInputHeight());
-    });
-  }, [calculateInputHeight, updateInputHeightWithAnimation]);
-
   const handleAttachmentClosed = useCallback(() => {
     mediaPreviewRef.current = null;
-    assetRef.current = undefined;
+    mediaPreviewAnimation.value = withSpring(0, PREVIEW_SPRING_CONFIG);
+
     updateInputHeightWithAnimation(calculateInputHeight());
     setTimeout(() => {
-      mediaPreviewAnimation.value = withSpring(0, SPRING_CONFIG);
-    }, 250);
-    setTimeout(() => {
       setMediaPreview(null);
+      preparedAttachmentMessageRef.current = null;
     }, 300);
   }, [
     mediaPreviewRef,
@@ -247,25 +269,22 @@ export default function ChatInput({ inputHeight }: ChatInputProps) {
     mediaPreviewAnimation,
   ]);
 
-  const handleAttachmentSelected = useCallback(
-    async (uri: string | null, status: AttachmentSelectedStatus) => {
-      if (uri) {
-        setMediaPreview({ mediaURI: uri, status });
-        assetRef.current = { uri } as ImagePicker.ImagePickerAsset;
-        mediaPreviewRef.current = { mediaURI: uri, status };
-        updateInputHeightWithAnimation(calculateInputHeight());
-        setTimeout(() => {
-          mediaPreviewAnimation.value = withSpring(1, SPRING_CONFIG);
-        }, 250);
-      }
-    },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [
-      mediaPreviewAnimation,
-      calculateInputHeight,
-      updateInputHeightWithAnimation,
-    ]
-  );
+  const handleAttachmentSelection = (
+    status: AttachmentSelectedStatus,
+    attachment: any
+  ) => {
+    if (status === "picked") {
+      setMediaPreview({ mediaURI: attachment.uri, status });
+      mediaPreviewRef.current = { mediaURI: attachment.uri, status };
+      mediaPreviewAnimation.value = withSpring(1, PREVIEW_SPRING_CONFIG);
+    } else if (status === "uploaded" && conversation) {
+      preparedAttachmentMessageRef.current = {
+        conversation,
+        content: serializeRemoteAttachmentMessageContent(attachment),
+        contentType: "xmtp.org/remoteStaticAttachment:1.0",
+      };
+    }
+  };
 
   const onValidate = useCallback(async () => {
     const waitForUploadToComplete = () => {
@@ -280,6 +299,14 @@ export default function ChatInput({ inputHeight }: ChatInputProps) {
     };
     if (conversation) {
       if (mediaPreviewRef.current) {
+        if (mediaPreviewRef.current?.status === "uploading") {
+          await waitForUploadToComplete();
+        }
+        setReplyingToMessage(null);
+        replyingToMessageRef.current = null;
+        setInputValue("");
+        numberOfLinesRef.current = 1;
+        handleAttachmentClosed();
         mediaPreviewRef.current = {
           ...mediaPreviewRef.current,
           status: "sending",
@@ -288,34 +315,28 @@ export default function ChatInput({ inputHeight }: ChatInputProps) {
         setMediaPreview((prev) =>
           prev ? { ...prev, status: "sending" } : null
         );
-        numberOfLinesRef.current = 1;
+
+        if (preparedAttachmentMessageRef.current) {
+          await sendMessage(preparedAttachmentMessageRef.current);
+          preparedAttachmentMessageRef.current = null;
+        }
+      }
+
+      if (inputValue.length > 0) {
+        const messageToSend = {
+          conversation,
+          content: inputValue,
+          contentType: "xmtp.org/text:1.0",
+          referencedMessageId: replyingToMessage
+            ? replyingToMessage.id
+            : undefined,
+        };
+        sendMessage(messageToSend);
         setReplyingToMessage(null);
         setInputValue("");
-        animateAttachmentClosed();
-        await waitForUploadToComplete();
-        handleAttachmentClosed();
-      }
-      if (inputValue.length > 0) {
-        if (replyingToMessage) {
-          sendMessage({
-            conversation,
-            content: inputValue,
-            referencedMessageId: replyingToMessage.id,
-            contentType: "xmtp.org/text:1.0",
-          });
-          setReplyingToMessage(null);
-          setInputValue("");
-          numberOfLinesRef.current = 1;
-        } else {
-          sendMessage({
-            conversation,
-            content: inputValue,
-            contentType: "xmtp.org/text:1.0",
-          });
-        }
-        setInputValue("");
         numberOfLinesRef.current = 1;
       }
+
       converseEventEmitter.emit("scrollChatToMessage", {
         index: 0,
       });
@@ -324,7 +345,6 @@ export default function ChatInput({ inputHeight }: ChatInputProps) {
     conversation,
     inputValue,
     replyingToMessage,
-    animateAttachmentClosed,
     handleAttachmentClosed,
     mediaPreviewRef,
   ]);
@@ -337,12 +357,17 @@ export default function ChatInput({ inputHeight }: ChatInputProps) {
         <View style={styles.replyToMessagePreview}>
           <ChatInputReplyPreview
             replyingToMessage={replyingToMessage}
-            onDismiss={() => setReplyingToMessage(null)}
+            onDismiss={() => {
+              setReplyingToMessage(null);
+              replyingToMessageRef.current = null;
+            }}
           />
         </View>
       )}
       <View style={styles.chatInputContainer}>
-        <AddAttachmentButton onAttachmentSelected={handleAttachmentSelected} />
+        <AddAttachmentButton
+          onSelectionStatusChange={handleAttachmentSelection}
+        />
         <View style={styles.chatInput}>
           <Animated.View style={inputHeightAnimatedStyle}>
             {mediaPreview?.mediaURI && (
