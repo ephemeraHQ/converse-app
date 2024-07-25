@@ -22,10 +22,9 @@ jobs:
           node-version: 18.x
           cache: "yarn"
 
-      - name: Setup Expo
+      - name: 🏗 Setup EAS
         uses: expo/expo-github-action@v8
         with:
-          expo-version: latest
           eas-version: latest
           token: ${{ secrets.EXPO_TOKEN }}
 
@@ -34,9 +33,8 @@ jobs:
 
       - name: Build iOS app
         run: eas build --profile ios-simulator --platform ios --local --non-interactive --output ${{ github.workspace }}/app-release.ipa
-      # Don't upload the artifact for now
-      # - name: Upload IPA artifact
-      #   uses: actions/upload-artifact@v4
-      #   with:
-      #     name: app-release
-      #     path: ${{ github.workspace }}/app-release.ipa
+      - name: Upload IPA artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-release
+          path: ${{ github.workspace }}/app-release.ipa
