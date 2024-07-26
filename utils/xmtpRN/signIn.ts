@@ -44,7 +44,6 @@ export const getXmtpBase64KeyFromSigner = async (
     enableV3: true,
     dbDirectory,
     dbEncryptionKey,
-    historySyncUrl: config.historySyncUrl,
   });
   const base64Key = await client.exportKeyBundle();
   // This Client is only be used to extract the key, we can disconnect
