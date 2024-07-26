@@ -48,6 +48,7 @@ export const PinnedConversation: FC<Props> = ({ conversation }) => {
       uri={avatar}
       size={AvatarSizes.pinnedConversation}
       style={styles.avatar}
+      topic={conversation.topic}
     />
   ) : (
     <Avatar
