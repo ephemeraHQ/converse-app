@@ -48,7 +48,6 @@ const defaultConfig = {
       "https://base-sepolia.g.alchemy.com/v2/7KmrqfAQDOXtH03pYgAAFU7xreVD_Ux7",
   },
   splitScreenThreshold: 600,
-  historySyncUrl: "http://history.dev.xmtp.network/",
 };
 
 const isAndroid = Platform.OS === "android";
