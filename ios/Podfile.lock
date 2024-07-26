@@ -380,7 +380,7 @@ PODS:
   - libwebp/sharpyuv (1.3.2)
   - libwebp/webp (1.3.2):
     - libwebp/sharpyuv
-  - LibXMTP (0.5.6-beta2)
+  - LibXMTP (0.5.6-beta3)
   - Logging (1.0.0)
   - MessagePacker (0.4.7)
   - MMKV (1.3.3):
@@ -1776,16 +1776,16 @@ PODS:
     - GenericJSON (~> 2.0)
     - Logging (~> 1.0.0)
     - secp256k1.swift (~> 0.1)
-  - XMTP (0.13.11):
+  - XMTP (0.13.12):
     - Connect-Swift (= 0.12.0)
     - GzipSwift
-    - LibXMTP (= 0.5.6-beta2)
+    - LibXMTP (= 0.5.6-beta3)
     - web3.swift
-  - XMTPReactNative (2.1.2):
+  - XMTPReactNative (2.1.3):
     - ExpoModulesCore
     - MessagePacker
     - secp256k1.swift
-    - XMTP (= 0.13.11)
+    - XMTP (= 0.13.12)
   - Yoga (0.0.0)
 
 DEPENDENCIES:
@@ -1918,7 +1918,7 @@ DEPENDENCIES:
   - Sentry/HybridSDK (= 8.29.1)
   - SQLite.swift
   - UMAppLoader (from `../node_modules/unimodules-app-loader/ios`)
-  - XMTP (= 0.13.11)
+  - XMTP (= 0.13.12)
   - "XMTPReactNative (from `../node_modules/@xmtp/react-native-sdk/ios`)"
   - Yoga (from `../node_modules/react-native/ReactCommon/yoga`)
 
@@ -2254,7 +2254,7 @@ SPEC CHECKSUMS:
   libavif: 84bbb62fb232c3018d6f1bab79beea87e35de7b7
   libdav1d: 23581a4d8ec811ff171ed5e2e05cd27bad64c39f
   libwebp: 1786c9f4ff8a279e4dac1e8f385004d5fc253009
-  LibXMTP: cae91842555974022b1fda751a63e695fc45fc7f
+  LibXMTP: 37008ba93a197bdfdcef5a1d7a6a3206e26a958e
   Logging: 9ef4ecb546ad3169398d5a723bc9bea1c46bef26
   MessagePacker: ab2fe250e86ea7aedd1a9ee47a37083edd41fd02
   MMKV: f902fb6719da13c2ab0965233d8963a59416f911
@@ -2351,10 +2351,10 @@ SPEC CHECKSUMS:
   SwiftProtobuf: 407a385e97fd206c4fbe880cc84123989167e0d1
   UMAppLoader: f17a5ee8e85b536ace0fc254b447a37ed198d57e
   web3.swift: 2263d1e12e121b2c42ffb63a5a7beb1acaf33959
-  XMTP: 8c00384ebe4ca0952093236c02f04cbf4abc7b0e
-  XMTPReactNative: fd3f0bcd32dad77b4b49dfb6e06dba1526260de4
+  XMTP: 9be1cec6720c282d91ebfa054a10a426a9b9d123
+  XMTPReactNative: 18bb27b63c5fb94c1d388d2ba54aab436465bf11
   Yoga: eed50599a85bd9f6882a9938d118aed6a397db9c
 
-PODFILE CHECKSUM: 815f5fadca2904b4fb0fbd1d5ee34d2b87097263
+PODFILE CHECKSUM: 5c1623276593cca3843da0991e336e39caa72407
 
 COCOAPODS: 1.15.2
