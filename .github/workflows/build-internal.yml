@@ -1,10 +1,6 @@
 name: Build Internal
 
 on:
-  pull_request:
-    # Remove after validation
-    branches:
-      - main
   schedule:
     # These will run only on the default branch
     - cron: "0 18 * * 2" # Tuesdays at 11 AM PT
