@@ -22,10 +22,21 @@ import ActionButton from "../ActionButton";
 
 const DATA_MIMETYPE_REGEX = /data:(.*?);/;
 
+type AttachmentToSave = {
+  filePath: string;
+  fileName: string;
+  mimeType: string | null;
+};
+
+type SelectedAttachment = {
+  uri: string;
+  attachmentToSave?: AttachmentToSave;
+};
+
 type AddAttachmentButtonProps = {
   onSelectionStatusChange: (
     status: AttachmentSelectedStatus,
-    attachment: any
+    attachment: SelectedAttachment
   ) => void;
 };
 
@@ -89,7 +100,7 @@ export default function AddAttachmentButton({
             encryptedAttachment
           );
           onSelectionStatusChange("uploaded", {
-            ...uploadedAttachment,
+            uri,
             attachmentToSave:
               Platform.OS === "web"
                 ? undefined
