@@ -1,0 +1,108 @@
+name: Build Internal
+
+on:
+  schedule:
+    # These will run only on the default branch
+    - cron: "0 18 * * 2" # Tuesdays at 11 AM PT
+    - cron: "0 23 * * 4" # Thursdays at 4 PM PT
+  workflow_dispatch:
+
+jobs:
+  build-android:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: "18"
+
+      - name: Install dependencies
+        run: yarn install
+
+      - name: 🏗 Setup EAS
+        uses: expo/expo-github-action@v8
+        with:
+          eas-version: latest
+          token: ${{ secrets.EXPO_TOKEN }}
+
+      - name: Update Android Files
+        # TODO: This should be handled by build configs in the future
+        run: node scripts/build/android/production.js
+
+      - name: Build for Android
+        run: eas build --profile production-android --platform android --non-interactive --auto-submit
+
+  build-ios:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: "18"
+
+      - name: Install dependencies
+        run: yarn install
+
+      - name: 🏗 Setup EAS
+        uses: expo/expo-github-action@v8
+        with:
+          eas-version: latest
+          token: ${{ secrets.EXPO_TOKEN }}
+
+      - name: Update iOS Files
+        # TODO: This should be handled by schemes in the future
+        run: node scripts/build/ios/production.js
+
+      - name: Build for iOS
+        run: eas build --profile production-ios --platform ios --non-interactive --auto-submit
+
+  increment-build-numbers:
+    runs-on: ubuntu-latest
+    needs: [build-android, build-ios]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: "18"
+
+      - name: Increment version numbers
+        run: node scripts/build/incrementBuildNumbers.js
+
+      - name: Commit changes
+        run: |
+          git config --global user.name 'github-actions[bot]'
+          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+          git add app.json
+          git commit -m "Increment version numbers"
+
+      - name: Push changes
+        run: git push origin HEAD:increment-version
+
+  create-pull-request:
+    runs-on: ubuntu-latest
+    needs: increment-build-numbers
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          branch: increment-version
+          title: "Increment version numbers"
+          body: "This PR increments the buildNumber for iOS and the versionCode for Android."
+          base: main # Change the base branch if needed
