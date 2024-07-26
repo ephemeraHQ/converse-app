@@ -793,6 +793,7 @@ export const initChatStore = (account: string) => {
             lastSyncedAt: state.lastSyncedAt,
             lastSyncedTopics: state.lastSyncedTopics,
             topicsData: state.topicsData,
+            pinnedConversations: state.pinnedConversations,
           };
           // if (Platform.OS === "web" && state.conversations) {
           //   // On web, we persist convos without messages
