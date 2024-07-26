@@ -1,4 +1,5 @@
 import { MenuView } from "@react-native-menu/menu";
+import { RemoteAttachmentContent } from "@xmtp/react-native-sdk";
 import * as ImagePicker from "expo-image-picker";
 import { setStatusBarHidden } from "expo-status-bar";
 import mime from "mime";
@@ -29,8 +30,9 @@ type AttachmentToSave = {
 };
 
 type SelectedAttachment = {
-  uri: string;
+  uploadedAttachment?: RemoteAttachmentContent;
   attachmentToSave?: AttachmentToSave;
+  uri?: string;
 };
 
 type AddAttachmentButtonProps = {
@@ -100,7 +102,7 @@ export default function AddAttachmentButton({
             encryptedAttachment
           );
           onSelectionStatusChange("uploaded", {
-            uri,
+            ...uploadedAttachment,
             attachmentToSave:
               Platform.OS === "web"
                 ? undefined
