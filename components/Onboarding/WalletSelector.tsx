@@ -189,23 +189,23 @@ export default function WalletSelector() {
               : "CONNECT EXISTING WALLET"
           }
           items={[
-            {
-              id: "desktop",
-              leftView: <TableViewEmoji emoji={isDesktop ? "😎" : "💻"} />,
-              title: isDesktop
-                ? "Connect via browser wallet"
-                : "Connect via desktop",
-              rightView,
-              action: () => {
-                if (isDesktop) {
-                  Linking.openURL(
-                    `https://${config.websiteDomain}/connect?desktop=true`
-                  );
-                } else {
-                  setConnectionMethod("desktop");
-                }
-              },
-            },
+            // {
+            //   id: "desktop",
+            //   leftView: <TableViewEmoji emoji={isDesktop ? "😎" : "💻"} />,
+            //   title: isDesktop
+            //     ? "Connect via browser wallet"
+            //     : "Connect via desktop",
+            //   rightView,
+            //   action: () => {
+            //     if (isDesktop) {
+            //       Linking.openURL(
+            //         `https://${config.websiteDomain}/connect?desktop=true`
+            //       );
+            //     } else {
+            //       setConnectionMethod("desktop");
+            //     }
+            //   },
+            // },
             {
               id: "seedphrase",
               leftView: <TableViewEmoji emoji="🔑" />,
