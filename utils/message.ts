@@ -11,7 +11,7 @@ import {
 } from "../data/store/accountsStore";
 import { XmtpConversation } from "../data/store/chatStore";
 
-type SendMessageInput = {
+export type SendMessageInput = {
   conversation: XmtpConversation;
   content: string;
   contentType: string;

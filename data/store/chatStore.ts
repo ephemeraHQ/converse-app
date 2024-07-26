@@ -1,3 +1,4 @@
+import { RemoteAttachmentContent } from "@xmtp/react-native-sdk";
 import isDeepEqual from "fast-deep-equal";
 import { Platform } from "react-native";
 import { create } from "zustand";
@@ -105,7 +106,13 @@ export type TopicData = {
 
 export type MediaPreview = {
   mediaURI: string;
-  status: "error" | "picked" | "uploading" | "uploaded" | "sending";
+  status: "picked" | "uploading" | "uploaded" | "error" | "sending";
+  uploadedAttachment?: RemoteAttachmentContent | null;
+  attachmentToSave?: {
+    filePath: string;
+    mimeType: string | null;
+    fileName: string;
+  };
 } | null;
 
 export type Attachment = {
@@ -327,14 +334,14 @@ export const initChatStore = (account: string) => {
             }),
 
           deleteConversations: (topics) =>
-            set(({ conversations }) => {
-              setImmediate(() => {
-                subscribeToNotifications(account);
-              });
-              return {
-                conversations: omit(conversations, topics),
-              };
-            }),
+            set(
+              ({ conversations }) =>
+                setImmediate(() => {
+                  subscribeToNotifications(account);
+                }) && {
+                  conversations: omit(conversations, topics),
+                }
+            ),
           updateConversationTopic: (oldTopic, conversation) =>
             set((state) => {
               if (oldTopic in state.conversations) {
@@ -493,12 +500,9 @@ export const initChatStore = (account: string) => {
                   if (referencedMessage) {
                     referencedMessage.reactions =
                       referencedMessage.reactions || new Map();
-                    const alreadyReaction = referencedMessage.reactions.get(
-                      message.id
-                    );
-                    if (!alreadyReaction) {
-                      isUpdated = true;
-                      newState.conversations[topic].lastUpdateAt = now();
+                    isUpdated = true;
+                    newState.conversations[topic].lastUpdateAt = now();
+                    if (!referencedMessage.reactions.has(message.id)) {
                       referencedMessage.reactions.set(message.id, message);
                       referencedMessage.lastUpdateAt = now();
                     }
@@ -796,6 +800,7 @@ export const initChatStore = (account: string) => {
             lastSyncedAt: state.lastSyncedAt,
             lastSyncedTopics: state.lastSyncedTopics,
             topicsData: state.topicsData,
+            pinnedConversations: state.pinnedConversations,
           };
           // if (Platform.OS === "web" && state.conversations) {
           //   // On web, we persist convos without messages

@@ -5,6 +5,7 @@ import {
   ConversationVersion,
   InboxId,
 } from "@xmtp/react-native-sdk";
+import { PermissionPolicySet } from "@xmtp/react-native-sdk/build/lib/types/PermissionPolicySet";
 
 import {
   ConversationWithCodecsType,
@@ -557,18 +558,21 @@ export const canGroupMessage = async (account: string, peer: string) => {
 export const createGroup = async (
   account: string,
   peers: string[],
-  permissionLevel: "all_members" | "admin_only" = "all_members",
+  permissionPolicySet: PermissionPolicySet,
   groupName?: string,
   groupPhoto?: string,
   groupDescription?: string
 ) => {
   const client = (await getXmtpClient(account)) as ConverseXmtpClientType;
-  const group = await client.conversations.newGroup(peers, {
-    permissionLevel,
-    name: groupName,
-    imageUrlSquare: groupPhoto,
-    description: groupDescription,
-  });
+  const group = await client.conversations.newGroupCustomPermissions(
+    peers,
+    permissionPolicySet,
+    {
+      name: groupName,
+      imageUrlSquare: groupPhoto,
+      description: groupDescription,
+    }
+  );
   // Groups that are created are not streamed immediatly so we need to restart the stream
   await streamAllMessages(account);
   if (groupName) {

@@ -57,7 +57,7 @@ type Props = {
   children: React.ReactNode;
   message: MessageToDisplay;
   reactions: {
-    [senderAddress: string]: MessageReaction | undefined;
+    [senderAddress: string]: MessageReaction[];
   };
   hideBackground: boolean;
 };
@@ -168,14 +168,15 @@ export default function ChatMessageActions({
 
   const [selectedEmojis, setSelectedEmojis] = useState<string[]>([]);
   useEffect(() => {
-    const myReaction = reactions[userAddress];
-    const newSelectedEmojis = [];
-    if (myReaction && myReaction.schema === "unicode") {
-      const emojiName = getEmojiName(myReaction.content);
-      if (emojiName) {
-        newSelectedEmojis.push(emojiName);
-      }
-    }
+    const myReactions = reactions[userAddress] || [];
+    const newSelectedEmojis = Array.from(
+      new Set(
+        myReactions
+          .filter((reaction) => reaction.schema === "unicode")
+          .map((reaction) => getEmojiName(reaction.content))
+          .filter((emojiName): emojiName is string => emojiName !== null)
+      )
+    );
     setSelectedEmojis(newSelectedEmojis);
   }, [reactions, userAddress]);
 
@@ -291,8 +292,10 @@ export default function ChatMessageActions({
   // we filter on UUIDs to avoid repeating the animation
   // when the message is received from the stream.
   const shouldAnimateIn =
+    isAttachmentMessage(message.contentType) ||
     message.isLatestSettledFromPeer ||
-    (message.status === "sending" && UUID_REGEX.test(message.id));
+    ((message.status === "sending" || message.status === "prepared") &&
+      UUID_REGEX.test(message.id));
   const [hasAnimatedIn, setHasAnimatedIn] = useState(false);
 
   const opacity = useSharedValue(0);
@@ -443,15 +446,6 @@ export default function ChatMessageActions({
           if (e.alreadySelected) {
             removeReactionFromMessage(conversation, message, e.emoji);
           } else {
-            // We want to remove all emojis first
-            const myReaction = reactions[userAddress];
-            if (myReaction && myReaction.schema === "unicode") {
-              removeReactionFromMessage(
-                conversation,
-                message,
-                myReaction.content
-              );
-            }
             addReactionToMessage(conversation, message, e.emoji);
           }
         }}
