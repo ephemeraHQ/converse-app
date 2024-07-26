@@ -1,14 +1,14 @@
 import { useQuery } from "@tanstack/react-query";
 import { getGroupIdFromTopic } from "@utils/groupUtils/groupId";
-import { useClient } from "@xmtp/react-native-sdk";
 
 import { groupConsentQueryKey } from "./QueryKeys";
 import { queryClient } from "./queryClient";
+import { useClient } from "./useClient";
 
 type Consent = "allowed" | "denied" | "unknown";
 
 export const useGroupConsentQuery = (account: string, topic: string) => {
-  const { client } = useClient();
+  const client = useClient(account);
   return useQuery({
     queryKey: groupConsentQueryKey(account, topic),
     queryFn: async () => {
