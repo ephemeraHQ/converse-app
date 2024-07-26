@@ -1,9 +1,9 @@
 import { currentAccount, useSettingsStore } from "@data/store/accountsStore";
 import { useSelect } from "@data/store/storeHelpers";
-import { useAddedByQuery } from "@queries/useAddedByQuery";
 import { useAllowGroupMutation } from "@queries/useAllowGroupMutation";
 import { useBlockGroupMutation } from "@queries/useBlockGroupMutation";
 import { useGroupConsentQuery } from "@queries/useGroupConsentQuery";
+import { useGroupQuery } from "@queries/useGroupQuery";
 import { getGroupIdFromTopic } from "@utils/groupUtils/groupId";
 import { consentToInboxIdsOnProtocol } from "@utils/xmtpRN/conversations";
 import { InboxId } from "@xmtp/react-native-sdk";
@@ -18,8 +18,8 @@ interface OnConsentOptions {
 
 export const useGroupConsent = (topic: string) => {
   const account = currentAccount();
+  const { data: group } = useGroupQuery(account, topic);
   const { groupCreator } = useGroupCreator(topic);
-  const { data: addedBy } = useAddedByQuery(account, topic);
   const { data, isLoading, isError } = useGroupConsentQuery(account, topic);
   const { mutateAsync: allowGroupMutation } = useAllowGroupMutation(
     account,
@@ -39,9 +39,15 @@ export const useGroupConsent = (topic: string) => {
       setGroupStatus({ [getGroupIdFromTopic(topic).toLowerCase()]: "allowed" });
       const inboxIdsToAllow: InboxId[] = [];
       const inboxIds: { [inboxId: string]: "allowed" } = {};
-      if (options.includeAddedBy && addedBy) {
-        inboxIds[addedBy] = "allowed";
-        inboxIdsToAllow.push(addedBy);
+      if (
+        options.includeAddedBy &&
+        typeof group?.addedByInboxId === "function"
+      ) {
+        const addedBy = await group?.addedByInboxId();
+        if (addedBy) {
+          inboxIds[addedBy as string] = "allowed";
+          inboxIdsToAllow.push(addedBy);
+        }
       }
       if (options.includeCreator && groupCreator) {
         inboxIds[groupCreator] = "allowed";
@@ -56,8 +62,8 @@ export const useGroupConsent = (topic: string) => {
       allowGroupMutation,
       setGroupStatus,
       topic,
-      addedBy,
       groupCreator,
+      group,
       setInboxIdPeerStatus,
     ]
   );
@@ -68,9 +74,15 @@ export const useGroupConsent = (topic: string) => {
       setGroupStatus({ [getGroupIdFromTopic(topic).toLowerCase()]: "denied" });
       const inboxIdsToDeny: InboxId[] = [];
       const inboxIds: { [inboxId: string]: "denied" } = {};
-      if (options.includeAddedBy && addedBy) {
-        inboxIds[addedBy] = "denied";
-        inboxIdsToDeny.push(addedBy);
+      if (
+        options.includeAddedBy &&
+        typeof group?.addedByInboxId === "function"
+      ) {
+        const addedBy = await group.addedByInboxId();
+        if (addedBy) {
+          inboxIds[addedBy] = "denied";
+          inboxIdsToDeny.push(addedBy);
+        }
       }
       if (options.includeCreator && groupCreator) {
         inboxIds[groupCreator] = "denied";
@@ -85,8 +97,8 @@ export const useGroupConsent = (topic: string) => {
       blockGroupMutation,
       setGroupStatus,
       topic,
-      addedBy,
       groupCreator,
+      group,
       setInboxIdPeerStatus,
     ]
   );
