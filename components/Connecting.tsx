@@ -2,7 +2,7 @@ import { sentryTrackMessage } from "@utils/sentry";
 import { useEffect, useRef } from "react";
 
 import ActivityIndicator from "./ActivityIndicator/ActivityIndicator";
-import { currentAccount, useChatStore } from "../data/store/accountsStore";
+import { useChatStore } from "../data/store/accountsStore";
 import { useAppStore } from "../data/store/appStore";
 import { useSelect } from "../data/store/storeHelpers";
 
@@ -28,7 +28,6 @@ export const useShouldShowConnecting = () => {
             isInternetReachable,
             localClientConnected,
             reconnecting,
-            account: currentAccount(),
           });
 
           conditionTrueTime.current = 0;
@@ -66,9 +65,7 @@ export const useShouldShowConnectingOrSyncing = () => {
 
       interval = setInterval(() => {
         if (Date.now() - conditionTrueTime.current >= 15000) {
-          sentryTrackMessage("Initial load has been running for 15 seconds", {
-            account: currentAccount(),
-          });
+          sentryTrackMessage("Initial load has been running for 15 seconds");
 
           conditionTrueTime.current = 0;
           clearInterval(interval); // Clear interval after logging

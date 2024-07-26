@@ -231,7 +231,7 @@ export default function ConnectViaWallet({
       );
       sentryAddBreadcrumb("Got base64 key, now connecting");
       await connectWithBase64Key(base64Key);
-      sentryTrackMessage("Successfully logged in using a wallet", { address });
+      sentryTrackMessage("Successfully logged in using a wallet");
       onboardingDone = true;
     } catch (e) {
       initiatingClientFor.current = undefined;
@@ -239,7 +239,7 @@ export default function ConnectViaWallet({
       clickedSecondSignature.current = false;
       setWaitingForSecondSignature(false);
       console.error(e);
-      sentryTrackError(e, { address });
+      sentryTrackError(e);
     }
   }, [
     address,

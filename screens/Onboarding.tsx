@@ -85,7 +85,7 @@ export default function Onboarding() {
       useOnboardingStore.getState().setAddingNewAccount(false);
       // Now we can instantiate the XMTP Client
       getXmtpClient(address);
-      sentryTrackMessage("Connecting done!", { address });
+      sentryTrackMessage("Connecting done!");
     },
     [address, connectionMethod, isEphemeral, pkPath, privyAccountId]
   );
