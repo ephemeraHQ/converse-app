@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { getGroupIdFromTopic } from "@utils/groupUtils/groupId";
+import { getGroupIdFromTopic, isGroupTopic } from "@utils/groupUtils/groupId";
 
 import { groupQueryKey } from "./QueryKeys";
 import { useClient } from "./useClient";
@@ -26,6 +26,6 @@ export const useGroupQuery = (account: string, topic: string) => {
       await group.sync();
       return group;
     },
-    enabled: !!data && !!client,
+    enabled: !!data && !!client && isGroupTopic(topic),
   });
 };
