@@ -1,22 +1,32 @@
 import { useQuery } from "@tanstack/react-query";
+import { getGroupIdFromTopic } from "@utils/groupUtils/groupId";
 
 import { groupConsentQueryKey } from "./QueryKeys";
 import { queryClient } from "./queryClient";
-import { useGroupQuery } from "./useGroupQuery";
+import { useClient } from "./useClient";
 
 type Consent = "allowed" | "denied" | "unknown";
 
 export const useGroupConsentQuery = (account: string, topic: string) => {
-  const { data: group } = useGroupQuery(account, topic);
+  const client = useClient(account);
   return useQuery({
     queryKey: groupConsentQueryKey(account, topic),
     queryFn: async () => {
-      if (!group) {
+      if (!client) {
         return;
       }
-      return group.consentState();
+      const groupId = getGroupIdFromTopic(topic);
+      const isAllowed = await client.contacts.isGroupAllowed(groupId);
+      if (isAllowed) {
+        return "allowed";
+      }
+      const isDenied = await client.contacts.isGroupDenied(groupId);
+      if (isDenied) {
+        return "denied";
+      }
+      return "unknown";
     },
-    enabled: !!group,
+    enabled: !!client,
   });
 };
 
