@@ -150,6 +150,7 @@ export default function ConversationFlashList({
               ? lastMessagePreview.contentPreview
               : ""
           }
+          lastMessageImageUrl={lastMessagePreview?.imageUrl}
           lastMessageStatus={lastMessagePreview?.message?.status}
           lastMessageFromMe={
             !!lastMessagePreview &&

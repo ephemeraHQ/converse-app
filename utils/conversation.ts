@@ -4,7 +4,10 @@ import { Alert, Platform } from "react-native";
 import { createContext, useContextSelector } from "use-context-selector";
 
 import { saveTopicsData } from "./api";
-import { isAttachmentMessage } from "./attachment/helpers";
+import {
+  isAttachmentMessage,
+  fetchLocalAttachmentUrl,
+} from "./attachment/helpers";
 import { getAddressForPeer } from "./eth";
 import { getGroupIdFromTopic } from "./groupUtils/groupId";
 import { subscribeToNotifications } from "./notifications";
@@ -37,17 +40,19 @@ export type ConversationFlatListItem =
 export type LastMessagePreview = {
   contentPreview: string;
   message: XmtpMessage;
+  imageUrl?: string;
 };
 
-export const conversationLastMessagePreview = (
+export const conversationLastMessagePreview = async (
   conversation: XmtpConversation,
   myAddress: string
-): LastMessagePreview | undefined => {
+): Promise<LastMessagePreview | undefined> => {
   if (!conversation.messages?.size) return undefined;
   const messageIds = conversation.messagesIds;
   let removedReactions: {
     [messageId: string]: { [reactionContent: string]: Reaction };
   } = {};
+
   for (let index = messageIds.length - 1; index >= 0; index--) {
     const lastMessageId = messageIds[index];
     const lastMessage = conversation.messages.get(lastMessageId);
@@ -56,9 +61,11 @@ export const conversationLastMessagePreview = (
     } else {
       if (isAttachmentMessage(lastMessage.contentType)) {
         removedReactions = {};
+        const imageUrl = await fetchLocalAttachmentUrl(lastMessage.id);
         return {
-          contentPreview: "📎 Media",
+          contentPreview: "Shared an image",
           message: lastMessage,
+          imageUrl,
         };
       } else if (isTransactionMessage(lastMessage?.contentType)) {
         removedReactions = {};
@@ -364,7 +371,7 @@ export const conversationShouldBeInInbox = (
   }
 };
 
-export function sortAndComputePreview(
+export async function sortAndComputePreview(
   conversations: Record<string, XmtpConversation>,
   userAddress: string,
   topicsData: { [topic: string]: TopicData | undefined },
@@ -374,35 +381,35 @@ export function sortAndComputePreview(
 ) {
   const conversationsRequests: ConversationWithLastMessagePreview[] = [];
   const conversationsInbox: ConversationWithLastMessagePreview[] = [];
-  Object.values(conversations).forEach(
-    (conversation: ConversationWithLastMessagePreview, i) => {
-      const isNotReady =
-        (conversation.isGroup && !conversation.groupMembers) ||
-        (!conversation.isGroup && !conversation.peerAddress);
-      if (isNotReady) return;
+  await Promise.all(
+    Object.values(conversations).map(
+      async (conversation: ConversationWithLastMessagePreview, i) => {
+        const isNotReady =
+          (conversation.isGroup && !conversation.groupMembers) ||
+          (!conversation.isGroup && !conversation.peerAddress);
+        if (isNotReady) return;
 
-      if (
-        conversationShouldBeDisplayed(
-          conversation,
-          topicsData,
-          peersStatus,
-          groupsStatus,
-          pinnedConversations
-        )
-      ) {
-        conversation.lastMessagePreview = conversationLastMessagePreview(
-          conversation,
-          userAddress
-        );
         if (
-          conversationShouldBeInInbox(conversation, peersStatus, groupsStatus)
+          conversationShouldBeDisplayed(
+            conversation,
+            topicsData,
+            peersStatus,
+            groupsStatus,
+            pinnedConversations
+          )
         ) {
-          conversationsInbox.push(conversation);
-        } else {
-          conversationsRequests.push(conversation);
+          conversation.lastMessagePreview =
+            await conversationLastMessagePreview(conversation, userAddress);
+          if (
+            conversationShouldBeInInbox(conversation, peersStatus, groupsStatus)
+          ) {
+            conversationsInbox.push(conversation);
+          } else {
+            conversationsRequests.push(conversation);
+          }
         }
       }
-    }
+    )
   );
   conversationsRequests.sort(conversationsSortMethod);
   conversationsInbox.sort(conversationsSortMethod);

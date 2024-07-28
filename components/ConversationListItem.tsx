@@ -12,6 +12,7 @@ import {
 import { AvatarSizes, PictoSizes } from "@styles/sizes";
 import { strings } from "@utils/i18n/strings";
 import * as Haptics from "expo-haptics";
+import { Image } from "expo-image";
 import React, {
   memo,
   useCallback,
@@ -58,6 +59,7 @@ type ConversationListItemProps = {
   conversationPeerAddress: string | undefined;
   conversationPeerAvatar: string | undefined;
   lastMessagePreview: string | undefined;
+  lastMessageImageUrl: string | undefined;
   lastMessageFromMe: boolean;
   lastMessageStatus?:
     | "delivered"
@@ -86,6 +88,7 @@ const ConversationListItem = memo(function ConversationListItem({
   conversationPeerAddress,
   conversationPeerAvatar,
   lastMessagePreview,
+  lastMessageImageUrl,
   lastMessageStatus,
   lastMessageFromMe,
   showUnread,
@@ -103,6 +106,8 @@ const ConversationListItem = memo(function ConversationListItem({
   const resetSelected = useCallback(() => {
     setSelected(false);
   }, []);
+  const hasImagePreview = lastMessageImageUrl && lastMessagePreview;
+  const showError = lastMessageFromMe && lastMessageStatus === "error";
 
   const openConversation = useCallback(async () => {
     if (route.params?.frameURL) {
@@ -165,23 +170,48 @@ const ConversationListItem = memo(function ConversationListItem({
     <View style={styles.conversationListItem}>
       {avatarComponent}
       <View style={styles.conversationListItemContent}>
-        <Text style={styles.conversationName} numberOfLines={1}>
+        <Text
+          style={[
+            styles.conversationName,
+            hasImagePreview ? styles.conversationNameWithImage : {},
+            !showUnread && !showError && { marginRight: 37 },
+          ]}
+          numberOfLines={1}
+        >
           {conversationName}
         </Text>
-        <Text style={styles.messagePreview} numberOfLines={2}>
+        <Text
+          style={[
+            styles.messagePreview,
+            hasImagePreview ? styles.messagePreviewWithImage : {},
+            !showUnread && !showError && { marginRight: 37 },
+          ]}
+          numberOfLines={2}
+        >
           {timeToShow} ⋅ {lastMessagePreview}
         </Text>
-        {(lastMessageFromMe && lastMessageStatus) === "sending" ? (
-          <View style={styles.unread}>
-            <Picto
-              picto="exclamation"
-              color={inversePrimaryColor(colorScheme)}
-            />
-          </View>
-        ) : showUnread ? (
-          <View style={styles.unread} />
-        ) : undefined}
       </View>
+      {showError ? (
+        <View style={[styles.unread, { backgroundColor: "transparent" }]}>
+          <Picto
+            picto="info.circle"
+            color={dangerColor(colorScheme)}
+            size={PictoSizes.button}
+          />
+        </View>
+      ) : showUnread ? (
+        <View style={styles.unread} />
+      ) : undefined}
+      {hasImagePreview && (
+        <Image
+          source={{ uri: lastMessageImageUrl }}
+          style={[
+            styles.imagePreview,
+            !showUnread && !showError && { right: 10 },
+          ]}
+          contentFit="cover"
+        />
+      )}
     </View>
   );
 
@@ -452,15 +482,15 @@ const getStyles = (colorScheme: ColorSchemeName) =>
       position: "absolute",
       ...Platform.select({
         default: {
-          width: 16,
-          height: 16,
+          width: 13,
+          height: 13,
           borderRadius: 16,
           right: 17,
-          top: 29.5,
+          top: 34,
         },
         android: {
-          width: 16,
-          height: 16,
+          width: 13,
+          height: 13,
           borderRadius: 16,
           right: 24,
           top: 36,
@@ -498,5 +528,42 @@ const getStyles = (colorScheme: ColorSchemeName) =>
     },
     rippleRow: {
       backgroundColor: backgroundColor(colorScheme),
+    },
+    conversationNameWithImage: {
+      ...Platform.select({
+        default: {
+          marginRight: 72,
+        },
+        android: {
+          marginRight: 60,
+        },
+      }),
+    },
+    messagePreviewWithImage: {
+      ...Platform.select({
+        default: {
+          marginRight: 72,
+        },
+        android: {
+          marginRight: 60,
+        },
+      }),
+    },
+    imagePreview: {
+      height: 56,
+      width: 56,
+      marginHorizontal: 7,
+      marginTop: 12,
+      borderRadius: 4,
+      aspectRatio: 1,
+      position: "absolute",
+      ...Platform.select({
+        default: {
+          right: 45,
+        },
+        android: {
+          right: 40,
+        },
+      }),
     },
   });

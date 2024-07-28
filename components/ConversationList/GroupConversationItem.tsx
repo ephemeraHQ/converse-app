@@ -149,6 +149,7 @@ export const GroupConversationItem: FC<GroupConversationItemProps> = ({
       lastMessagePreview={
         lastMessagePreview ? lastMessagePreview.contentPreview : ""
       }
+      lastMessageImageUrl={lastMessagePreview?.imageUrl}
       lastMessageStatus={lastMessagePreview?.message?.status}
       lastMessageFromMe={
         !!lastMessagePreview &&
