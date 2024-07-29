@@ -1,3 +1,4 @@
+import { sentryAddBreadcrumb, sentryTrackMessage } from "@utils/sentry";
 import { useCallback, useEffect, useRef } from "react";
 
 import ConnectViaWallet from "../components/Onboarding/ConnectViaWallet";
@@ -47,16 +48,25 @@ export default function Onboarding() {
 
   const connectWithBase64Key = useCallback(
     async (base64Key: string) => {
-      if (!address) return;
+      sentryAddBreadcrumb("In connectWithBase64Key");
+      if (!address) {
+        sentryTrackMessage("Could not connect because no address");
+        return;
+      }
+      sentryAddBreadcrumb("Waiting for logout tasks");
       await waitForLogoutTasksDone(500);
+      sentryAddBreadcrumb("Logout tasks done, saving xmtp key");
       await saveXmtpKey(address, base64Key);
+      sentryAddBreadcrumb("XMTP Key saved");
       // Successfull login for user, let's setup
       // the storage !
       useAccountsStore.getState().setCurrentAccount(address, true);
       if (connectionMethod === "phone" && privyAccountId) {
         useAccountsStore.getState().setPrivyAccountId(address, privyAccountId);
       }
+      sentryAddBreadcrumb("Initiating converse db");
       await initDb(address);
+      sentryAddBreadcrumb("Refreshing profiles");
       await refreshProfileForAddress(address, address);
       // Now we can really set!
       useAccountsStore.getState().setCurrentAccount(address, false);
@@ -75,6 +85,7 @@ export default function Onboarding() {
       useOnboardingStore.getState().setAddingNewAccount(false);
       // Now we can instantiate the XMTP Client
       getXmtpClient(address);
+      sentryTrackMessage("Connecting done!");
     },
     [address, connectionMethod, isEphemeral, pkPath, privyAccountId]
   );

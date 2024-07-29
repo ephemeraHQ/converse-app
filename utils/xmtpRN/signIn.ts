@@ -1,4 +1,5 @@
 import { getDbEncryptionKey } from "@utils/keychain/helpers";
+import { sentryAddBreadcrumb } from "@utils/sentry";
 import { TransactionReferenceCodec } from "@xmtp/content-type-transaction-reference";
 import {
   Client,
@@ -26,6 +27,8 @@ export const getXmtpBase64KeyFromSigner = async (
   const dbDirectory = await getDbDirectory();
   const dbEncryptionKey = await getDbEncryptionKey();
 
+  sentryAddBreadcrumb("Instantiating client from signer");
+
   const client = await Client.create(signer, {
     env,
     codecs: [
@@ -45,9 +48,11 @@ export const getXmtpBase64KeyFromSigner = async (
     dbDirectory,
     dbEncryptionKey,
   });
+  sentryAddBreadcrumb("Instantiated client from signer, exporting key bundle");
   const base64Key = await client.exportKeyBundle();
   // This Client is only be used to extract the key, we can disconnect
   // it to prevent locks happening during Onboarding
   await client.dropLocalDatabaseConnection();
+  sentryAddBreadcrumb("Exported key bundle");
   return base64Key;
 };
