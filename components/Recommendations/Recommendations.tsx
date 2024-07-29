@@ -68,7 +68,7 @@ export default function Recommendations({
     navigation.popToTop();
     setTimeout(() => {
       navigation.navigate("Conversation", {
-        mainConversationWithPeer: config.polAddress,
+        mainConversationWithPeer: config.contactAddress,
         focus: true,
       });
     }, 300);

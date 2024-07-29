@@ -2,25 +2,22 @@ import Constants from "expo-constants";
 import { Platform } from "react-native";
 import { base, baseSepolia } from "wagmi/chains";
 
+declare const process: {
+  env: {
+    [key: string]: string;
+  };
+};
+
 const defaultConfig = {
   debugMenu: false,
-  polAddress: "0xf9a3BB070c1f9b3186A547DeD991BeD04a289C5B", // polmaire.eth
-  debugAddresses: [
-    "0xf9a3BB070c1f9b3186A547DeD991BeD04a289C5B", // polmaire.eth
-    "0xc50E761C35E731d3A475eeB1e30CB917eDaFE187", // pol.converse.xyz
-    "0xd3f4Ab0210235e639290B3E1284198bcE42FaA7D", // 0xno12.converse.xyz
-    "0x4496848684441C15A915fa9bF07D131155603253", // No12 first address
-    "0x2376e9C7C604D1827bA9aCb1293Dc8b4DA2f0DB3", // 0xno12.eth
-    "0xFA08a80e822F7FA002c4Ae81b7a6De7cE79499dB", // lourou.eth
-    "0xbAc42d62181A57b59afB9d3E9e607Ef73fa8CeD1", // cvandroid.converse.xyz
-  ],
+  contactAddress: process.env.EXPO_PUBLIC_CONTACT_ADDRESS,
+  debugAddresses: process.env.EXPO_PUBLIC_DEBUG_ADDRESSES?.split(",") || [],
   conversationDomain: "converse.xyz",
   lensApiDomain: "api.lens.dev",
   lensSuffix: ".lens",
-  sentryDSN:
-    "https://fb7c7cbf876644b68a05db08623c8369@o4504757119680512.ingest.sentry.io/4504757120729088",
+  sentryDSN: process.env.EXPO_PUBLIC_SENTRY_DSN,
   walletConnectConfig: {
-    projectId: "e0cc618ee5360e934f51ecd94c702d3f",
+    projectId: process.env.EXPO_PUBLIC_WALLETCONNECT_PROJECT_ID,
     appMetadata: {
       name: "Converse",
       description:
@@ -30,10 +27,10 @@ const defaultConfig = {
       icons: [],
     },
   },
-  thirdwebClientId: "fb80f0aa5ea6c07d74813e56c1ea53e5",
-  expoProjectId: "49a65fae-3895-4487-8e8a-5bd8bee3a401",
+  thirdwebClientId: process.env.EXPO_PUBLIC_THIRDWEB_CLIENT_ID,
+  expoProjectId: process.env.EXPO_PUBLIC_EXPO_PROJECT_ID,
   privy: {
-    appId: "cloh5bn1p00q4l50gcg0g1mix",
+    appId: process.env.EXPO_PUBLIC_PRIVY_APP_ID,
     defaultChain: baseSepolia,
   },
   evm: {
@@ -44,8 +41,7 @@ const defaultConfig = {
       version: "2",
       decimals: 6,
     },
-    rpcEndpoint:
-      "https://base-sepolia.g.alchemy.com/v2/7KmrqfAQDOXtH03pYgAAFU7xreVD_Ux7",
+    rpcEndpoint: process.env.EXPO_PUBLIC_EVM_RPC_ENDPOINT,
   },
   splitScreenThreshold: 600,
 };
@@ -56,11 +52,11 @@ const ENV = {
   dev: {
     ...defaultConfig,
     env: "dev",
-    xmtpEnv: Constants.expoConfig?.extra?.DEV_XMTP_ENV || "dev",
+    xmtpEnv: process.env.EXPO_PUBLIC_DEV_XMTP_ENV || "dev",
     apiURI:
       Platform.OS === "web"
         ? "http://localhost:9875"
-        : Constants.expoConfig?.extra?.DEV_API_URI || "",
+        : process.env.EXPO_PUBLIC_DEV_API_URI || "",
     debugMenu: true,
     bundleId: "com.converse.dev",
     appleAppGroup: "group.com.converse.dev",
@@ -105,7 +101,7 @@ const ENV = {
       domain,
     ]),
     privy: {
-      appId: "clpb3fsrl007nlb0fj4ozei9a",
+      appId: process.env.EXPO_PUBLIC_PRIVY_APP_ID,
       defaultChain: base,
     },
     evm: {
@@ -116,8 +112,7 @@ const ENV = {
         version: "2",
         decimals: 6,
       },
-      rpcEndpoint:
-        "https://base-mainnet.g.alchemy.com/v2/ZPqjDRWZVyTwdBYPikn1a7iEOCyxMWqX",
+      rpcEndpoint: process.env.EXPO_PUBLIC_EVM_RPC_ENDPOINT,
     },
     enableTransactionFrames: false,
   },
