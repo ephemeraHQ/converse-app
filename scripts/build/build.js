@@ -70,7 +70,6 @@ const build = async () => {
       }
     }
   }
-  handleEnv(env);
   const buildLocally = local === "local";
   const buildInternalProduction =
     (env === "production" && internalProduction === "yes") ||
@@ -219,6 +218,7 @@ const build = async () => {
     if (env === "production") {
       commandEnv.NODE_ENV = "production";
     }
+    handleEnv(env);
     await executeCommand(buildCommand, buildArgs, commandEnv);
     buildSuccess = true;
   } catch (e) {
