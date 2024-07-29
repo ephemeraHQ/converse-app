@@ -132,12 +132,12 @@ export const deleteAccountEncryptionKey = (account: string) =>
 export const getDbEncryptionKey = async () => {
   const existingKey = await getSecureItemAsync("LIBXMTP_DB_ENCRYPTION_KEY");
   if (existingKey) {
-    return Buffer.from(existingKey, "base64");
+    return new Uint8Array(Buffer.from(existingKey, "base64"));
   }
   const newKey = Buffer.from(await getRandomBytesAsync(32));
   await setSecureItemAsync(
     "LIBXMTP_DB_ENCRYPTION_KEY",
     newKey.toString("base64")
   );
-  return newKey;
+  return new Uint8Array(newKey);
 };
