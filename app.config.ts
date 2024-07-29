@@ -7,8 +7,8 @@ const env = process.env as any;
 const isDev = env.EXPO_ENV === "dev";
 
 warnOnce(
-  isDev && !(process.env as any).DEV_API_URI,
-  "\n\n🚧 Running the app without DEV_API_URI setup\n\n"
+  isDev && !(process.env as any).EXPO_PUBLIC_DEV_API_URI,
+  "\n\n🚧 Running the app without EXPO_PUBLIC_DEV_API_URI setup\n\n"
 );
 
 const isPreview = env.EXPO_ENV === "preview";
@@ -59,8 +59,6 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
       projectId: "49a65fae-3895-4487-8e8a-5bd8bee3a401",
     },
     ENV: isDev ? "dev" : isPreview ? "preview" : "prod",
-    DEV_API_URI: (process.env as any).DEV_API_URI,
-    DEV_XMTP_ENV: (process.env as any).DEV_XMTP_ENV,
   },
   runtimeVersion:
     env.EXPO_PLATFORM === "android"
