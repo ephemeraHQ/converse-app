@@ -196,6 +196,7 @@ const build = async () => {
         execSync("git restore --staged --worktree android", {
           cwd: PROJECT_ROOT,
         });
+        execSync("git restore eas.json");
       }
     } else if (env === "dev") {
       execSync("git restore ios/Converse/Supporting/Expo.plist", {

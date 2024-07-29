@@ -2,6 +2,7 @@ const dotenv = require("dotenv");
 const fs = require("fs");
 
 const handleEnv = (environment) => {
+  if (environment !== "production" && environment !== "preview") return;
   const EAS_PATH = "eas.json";
   const ENV_PATH = environment === "production" ? ".env.production" : ".env";
   const hasConfig = fs.existsSync(ENV_PATH);
