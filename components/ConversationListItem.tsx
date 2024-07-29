@@ -174,7 +174,9 @@ const ConversationListItem = memo(function ConversationListItem({
           style={[
             styles.conversationName,
             hasImagePreview ? styles.conversationNameWithImage : {},
-            !showUnread && !showError && { marginRight: 37 },
+            !showUnread &&
+              !showError &&
+              styles.conversationNameWithImageAndIndicator,
           ]}
           numberOfLines={1}
         >
@@ -184,7 +186,9 @@ const ConversationListItem = memo(function ConversationListItem({
           style={[
             styles.messagePreview,
             hasImagePreview ? styles.messagePreviewWithImage : {},
-            !showUnread && !showError && { marginRight: 37 },
+            !showUnread &&
+              !showError &&
+              styles.messagePreviewWithImageAndIndicator,
           ]}
           numberOfLines={2}
         >
@@ -207,7 +211,7 @@ const ConversationListItem = memo(function ConversationListItem({
           source={{ uri: lastMessageImageUrl }}
           style={[
             styles.imagePreview,
-            !showUnread && !showError && { right: 10 },
+            !showUnread && !showError && styles.imagePreviewWithIndicator,
           ]}
           contentFit="cover"
         />
@@ -565,5 +569,14 @@ const getStyles = (colorScheme: ColorSchemeName) =>
           right: 40,
         },
       }),
+    },
+    conversationNameWithImageAndIndicator: {
+      marginRight: 37,
+    },
+    messagePreviewWithImageAndIndicator: {
+      marginRight: 37,
+    },
+    imagePreviewWithIndicator: {
+      right: 10,
     },
   });
