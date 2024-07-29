@@ -34,6 +34,18 @@ export enum PictoSizes {
   cancelAttachmentButton = 6,
 }
 
+export const BorderRadius = {
+  default: 8,
+  small: 4,
+  large: 16,
+};
+
+export const Paddings = {
+  default: 16,
+  small: 8,
+  large: 24,
+};
+
 // Sizes, spaces, paddings, margins, etc.
 export const sizes = {};
 
