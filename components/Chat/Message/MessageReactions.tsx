@@ -167,7 +167,6 @@ export default function ChatMessageReactions({ message, reactions }: Props) {
           <TouchableOpacity
             key={reaction.content}
             onPress={() => handleReactionPress(reaction)}
-            onLongPress={showReactionsActionsSheet}
             style={[
               styles.reactionButton,
               reaction.userReacted
