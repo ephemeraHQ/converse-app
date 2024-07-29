@@ -63,7 +63,7 @@ export default function Welcome({ ctaOnly, navigation }: Props) {
           picto="hand.wave"
           onPress={() => {
             navigate("Conversation", {
-              mainConversationWithPeer: config.polAddress,
+              mainConversationWithPeer: config.contactAddress,
             });
           }}
         />

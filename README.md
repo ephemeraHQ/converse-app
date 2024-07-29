@@ -63,7 +63,7 @@ yarn lint
 
 # Testing
 
-Before running the tests make sure that you have a `.env` file setup with the `DEV_API_URI` variable set
+Before running the tests make sure that you have a `.env` file setup with the variables variable set
 
 ```sh
 # In the `converse-backend` repo

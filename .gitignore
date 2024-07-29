@@ -14,5 +14,5 @@ web-build/
 .DS_Store
 .vscode
 builds
-.env
+.env*
 .vercel
