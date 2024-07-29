@@ -1,9 +1,10 @@
 const { spawn, execSync } = require("child_process");
+const fs = require("fs");
 const isClean = require("git-is-clean");
 const path = require("path");
 const prompts = require("prompts");
-const fs = require("fs");
 
+const { handleEnv } = require("./eas");
 const appJson = require("../../app.json");
 
 // eslint-disable-next-line no-undef
@@ -69,13 +70,7 @@ const build = async () => {
       }
     }
   }
-  const envFile = env === "production" ? ".env.production" : ".env";
-  const hasConfig = fs.existsSync(path.join(PROJECT_ROOT, envFile));
-  if (!hasConfig) {
-    throw new Error(
-      `To build for ${env} you need a ${envFile} env file in the project root`
-    );
-  }
+  handleEnv(env);
   const buildLocally = local === "local";
   const buildInternalProduction =
     (env === "production" && internalProduction === "yes") ||
