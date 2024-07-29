@@ -1,9 +1,10 @@
 const { spawn, execSync } = require("child_process");
+const fs = require("fs");
 const isClean = require("git-is-clean");
 const path = require("path");
 const prompts = require("prompts");
-const fs = require("fs");
 
+const { handleEnv } = require("./eas");
 const appJson = require("../../app.json");
 
 // eslint-disable-next-line no-undef
@@ -68,13 +69,6 @@ const build = async () => {
         process.exit(1);
       }
     }
-  }
-  const envFile = env === "production" ? ".env.production" : ".env";
-  const hasConfig = fs.existsSync(path.join(PROJECT_ROOT, envFile));
-  if (!hasConfig) {
-    throw new Error(
-      `To build for ${env} you need a ${envFile} env file in the project root`
-    );
   }
   const buildLocally = local === "local";
   const buildInternalProduction =
@@ -201,6 +195,7 @@ const build = async () => {
         execSync("git restore --staged --worktree android", {
           cwd: PROJECT_ROOT,
         });
+        execSync("git restore eas.json");
       }
     } else if (env === "dev") {
       execSync("git restore ios/Converse/Supporting/Expo.plist", {
@@ -219,6 +214,11 @@ const build = async () => {
     if (keepLogs) {
       commandEnv.EAS_LOCAL_BUILD_SKIP_CLEANUP = 1;
     }
+    // Use .env.production file
+    if (env === "production") {
+      commandEnv.NODE_ENV = "production";
+    }
+    handleEnv(env);
     await executeCommand(buildCommand, buildArgs, commandEnv);
     buildSuccess = true;
   } catch (e) {
