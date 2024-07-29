@@ -1,5 +1,7 @@
 # Building the App - iOS
 
+The following assumes you have followed the React Native environment setup guide in the [React Native Docs](https://reactnative.dev/docs/0.70/environment-setup?platform=ios)
+
 ### Install JS/React Native Dependencies
 
 ```
@@ -17,17 +19,12 @@ npx pod-install
 Open ios/Converse.xcworkspace in Xcode and Build
 
 # Building the App - Android
+The following assumes you have followed the React Native environment setup guide in the [React Native Docs](https://reactnative.dev/docs/0.70/environment-setup?platform=android)
 
 ### Install JS/React Native Dependencies
 
 ```
 yarn
-```
-
-### Install submodules for Android patched fork
-
-```
-git submodule update
 ```
 
 ### Build the Android App
@@ -38,10 +35,10 @@ Click the play/build button to build and install the app
 
 ### Forward backend port
 
-if running the backend locally
+if running the backend locally on an Android Device
 
 ```
-adb reverse tcp:9875 tcp:9875
+yarn android:reverse
 ```
 
 # Running the App
