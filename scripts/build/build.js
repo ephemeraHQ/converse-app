@@ -219,6 +219,10 @@ const build = async () => {
     if (keepLogs) {
       commandEnv.EAS_LOCAL_BUILD_SKIP_CLEANUP = 1;
     }
+    // Use .env.production file
+    if (env === "production") {
+      commandEnv.NODE_ENV = "production";
+    }
     await executeCommand(buildCommand, buildArgs, commandEnv);
     buildSuccess = true;
   } catch (e) {
