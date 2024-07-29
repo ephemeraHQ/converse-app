@@ -1,5 +1,11 @@
 import { useGroupDescription } from "@hooks/useGroupDescription";
 import { useGroupPermissions } from "@hooks/useGroupPermissions";
+import { invalidateGroupConsentQuery } from "@queries/useGroupConsentQuery";
+import { invalidateGroupDescriptionQuery } from "@queries/useGroupDescriptionQuery";
+import { invalidateGroupMembersQuery } from "@queries/useGroupMembersQuery";
+import { invalidateGroupNameQuery } from "@queries/useGroupNameQuery";
+import { invalidateGroupPhotoQuery } from "@queries/useGroupPhotoQuery";
+import { useFocusEffect } from "@react-navigation/native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import {
   backgroundColor,
@@ -101,6 +107,17 @@ export default function GroupScreen({
   const currentAccountIsAdmin = useMemo(
     () => getAddressIsAdmin(members, currentAccount),
     [currentAccount, members]
+  );
+
+  useFocusEffect(
+    useCallback(() => {
+      // Favoring invalidating individual queries
+      invalidateGroupNameQuery(currentAccount, topic);
+      invalidateGroupDescriptionQuery(currentAccount, topic);
+      invalidateGroupPhotoQuery(currentAccount, topic);
+      invalidateGroupMembersQuery(currentAccount, topic);
+      invalidateGroupConsentQuery(currentAccount, topic);
+    }, [currentAccount, topic])
   );
 
   const currentAccountIsSuperAdmin = useMemo(
