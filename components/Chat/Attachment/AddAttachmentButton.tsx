@@ -1,10 +1,12 @@
 import { MenuView } from "@react-native-menu/menu";
+import { textPrimaryColor } from "@styles/colors";
+import { strings } from "@utils/i18n/strings";
 import { RemoteAttachmentContent } from "@xmtp/react-native-sdk";
 import * as ImagePicker from "expo-image-picker";
 import { setStatusBarHidden } from "expo-status-bar";
 import mime from "mime";
 import { useCallback, useEffect, useRef } from "react";
-import { Platform, StyleSheet } from "react-native";
+import { Platform, StyleSheet, useColorScheme } from "react-native";
 import { v4 as uuidv4 } from "uuid";
 
 import { useAccountsStore } from "../../../data/store/accountsStore";
@@ -45,15 +47,14 @@ type AddAttachmentButtonProps = {
 export default function AddAttachmentButton({
   onSelectionStatusChange,
 }: AddAttachmentButtonProps) {
-  const { conversation, mediaPreviewRef } = useConversationContext([
+  const colorScheme = useColorScheme();
+  const { mediaPreviewRef } = useConversationContext([
     "conversation",
     "mediaPreviewRef",
   ]);
   const currentAccount = useAccountsStore((s) => s.currentAccount);
 
   const styles = useStyles();
-  const [cameraPermissions, requestCameraPermissions] =
-    ImagePicker.useCameraPermissions();
   const currentAttachmentMediaURI = useRef(mediaPreviewRef.current?.mediaURI);
   const assetRef = useRef<ImagePicker.ImagePickerAsset | undefined>(undefined);
 
@@ -170,18 +171,28 @@ export default function AddAttachmentButton({
       actions={[
         {
           id: "mediaLibrary",
-          title: "Photo Library",
+          title: strings.photo_library,
+          titleColor: textPrimaryColor(colorScheme),
+          imageColor: Platform.select({
+            ios: undefined,
+            android: textPrimaryColor(colorScheme),
+          }),
           image: Platform.select({
             ios: "square.and.arrow.up",
-            android: "square.and.arrow.up",
+            android: "ic_menu_share",
           }),
         },
         {
           id: "camera",
-          title: "Camera",
+          title: strings.camera,
+          titleColor: textPrimaryColor(colorScheme),
+          imageColor: Platform.select({
+            ios: undefined,
+            android: textPrimaryColor(colorScheme),
+          }),
           image: Platform.select({
             ios: "camera",
-            android: "camera",
+            android: "ic_menu_camera",
           }),
         },
       ]}

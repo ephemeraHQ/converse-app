@@ -224,8 +224,6 @@ export default function ChatInput({ inputHeight }: ChatInputProps) {
 
   const mediaPreviewAnimation = useSharedValue(mediaPreviewToPrefill ? 1 : 0);
 
-  const inputContainerRef = useRef<View>(null);
-
   const inputHeightAnimatedStyle = useAnimatedStyle(() => {
     return {
       maxHeight: inputHeight.value,
@@ -352,7 +350,7 @@ export default function ChatInput({ inputHeight }: ChatInputProps) {
   const inputIsFocused = useRef(false);
 
   return (
-    <View ref={inputContainerRef} style={styles.chatInputWrapper}>
+    <View style={styles.chatInputWrapper}>
       {replyingToMessage && (
         <View style={styles.replyToMessagePreview}>
           <ChatInputReplyPreview
@@ -465,9 +463,8 @@ const useStyles = () => {
   const colorScheme = useColorScheme();
   return StyleSheet.create({
     chatInputWrapper: {
-      position: "absolute",
-      left: 0,
-      right: 0,
+      backgroundColor: backgroundColor(colorScheme),
+      width: "100%",
       bottom: 0,
     },
     replyToMessagePreview: {
