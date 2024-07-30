@@ -1,3 +1,4 @@
+import { MessageContextMenuWrapperIOS } from "@components/MessageContextMenuWrappers/MessageContextMenuWrapperiOS";
 import { useSelect } from "@data/store/storeHelpers";
 import Clipboard from "@react-native-clipboard/clipboard";
 import {
@@ -28,7 +29,6 @@ import Animated, {
 } from "react-native-reanimated";
 
 import { MessageToDisplay } from "./Message";
-import { MessageContextMenuWrapper } from "./MessageContextMenuWrapper";
 import MessageTail from "./MessageTail";
 import { useCurrentAccount } from "../../../data/store/accountsStore";
 import { useAppStore } from "../../../data/store/appStore";
@@ -361,7 +361,7 @@ export default function ChatMessageActions({
                 }
               }}
             >
-              <MessageContextMenuWrapper
+              <MessageContextMenuWrapperIOS
                 message={message}
                 reactions={reactions}
                 messageContent={
@@ -376,7 +376,7 @@ export default function ChatMessageActions({
                 }
               >
                 {children}
-              </MessageContextMenuWrapper>
+              </MessageContextMenuWrapperIOS>
             </ReanimatedTouchableOpacity>
 
             {!message.hasNextMessageInSeries &&

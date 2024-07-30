@@ -18,6 +18,7 @@ import {
   useColorScheme,
   View,
   StyleSheet,
+  Platform,
 } from "react-native";
 import { TouchableOpacity } from "react-native-gesture-handler";
 import Animated, {
@@ -211,15 +212,7 @@ export const MessageReactionsList: FC<MessageReactionsListProps> = ({
       ) : (
         <View style={styles.flex1} />
       )}
-      <View
-        style={[
-          styles.emojiListContainer,
-          {
-            backgroundColor: messageBubbleColor(colorScheme),
-            marginVertical: Paddings.large,
-          },
-        ]}
-      >
+      <View style={styles.emojiListContainer}>
         <FlatList
           data={emojiList}
           horizontal
@@ -268,7 +261,12 @@ const useStyles = () => {
     emojiListContainer: {
       borderRadius: BorderRadius.large,
       padding: Paddings.default,
-      flexShrink: 1,
+      flexShrink: Platform.select({
+        android: 0,
+        default: 1,
+      }),
+      marginVertical: Platform.OS === "android" ? 0 : Paddings.large,
+      backgroundColor: messageBubbleColor(colorScheme),
     },
   });
 };

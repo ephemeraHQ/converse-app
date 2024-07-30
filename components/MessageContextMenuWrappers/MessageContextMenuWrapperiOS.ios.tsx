@@ -1,3 +1,5 @@
+import { MessageToDisplay } from "@components/Chat/Message/Message";
+import { MessageReactionsList } from "@components/Chat/Message/MessageReactionsList";
 import { useAppStore } from "@data/store/appStore";
 import { useSelect } from "@data/store/storeHelpers";
 import Clipboard from "@react-native-clipboard/clipboard";
@@ -16,10 +18,7 @@ import {
 } from "react-native";
 import * as ContextMenu from "zeego/context-menu";
 
-import { MessageToDisplay } from "./Message";
-import { MessageReactionsList } from "./MessageReactionsList";
-
-interface MessageContextMenuWrapperProps {
+interface MessageContextMenuWrapperIOSProps {
   message: MessageToDisplay;
   messageContent: React.ReactNode;
   children: React.ReactNode;
@@ -28,12 +27,9 @@ interface MessageContextMenuWrapperProps {
   };
 }
 
-export const MessageContextMenuWrapper: FC<MessageContextMenuWrapperProps> = ({
-  children,
-  message,
-  messageContent,
-  reactions,
-}) => {
+export const MessageContextMenuWrapperIOS: FC<
+  MessageContextMenuWrapperIOSProps
+> = ({ children, message, reactions }) => {
   const colorScheme = useColorScheme();
   const { setContextMenuShown, contextMenuShownId } = useAppStore(
     useSelect(["setContextMenuShown", "contextMenuShownId"])
@@ -41,8 +37,6 @@ export const MessageContextMenuWrapper: FC<MessageContextMenuWrapperProps> = ({
   const { width } = useWindowDimensions();
   const isAttachment = isAttachmentMessage(message.contentType);
   const isTransaction = isTransactionMessage(message.contentType);
-  const canAddReaction =
-    message.status !== "sending" && message.status !== "error";
   const currentlyShown = contextMenuShownId === message.id;
 
   const contextMenuItems = useMemo(() => {
