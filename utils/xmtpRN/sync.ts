@@ -51,11 +51,13 @@ export const getXmtpClient = async (
       console.log(`[XmtpRN] Instantiated client for ${client.address}`);
       addLog("Local client connected");
       getChatStore(account).getState().setLocalClientConnected(true);
+      getChatStore(account).getState().setErrored(false);
       xmtpClientByAccount[client.address] = client;
       delete instantiatingClientForAccount[account];
       return client;
     }
   } catch (e: any) {
+    getChatStore(account).getState().setErrored(true);
     delete instantiatingClientForAccount[account];
     throw e;
   }

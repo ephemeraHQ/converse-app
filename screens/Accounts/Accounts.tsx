@@ -1,6 +1,7 @@
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import {
   backgroundColor,
+  dangerColor,
   primaryColor,
   textSecondaryColor,
 } from "@styles/colors";
@@ -12,6 +13,7 @@ import { TableViewPicto } from "../../components/TableView/TableViewImage";
 import {
   useAccountsList,
   useAccountsStore,
+  useErroredAccountsMap,
 } from "../../data/store/accountsStore";
 import { useOnboardingStore } from "../../data/store/onboardingStore";
 import { useDisconnectWallet } from "../../utils/logout/wallet";
@@ -24,6 +26,7 @@ export default function Accounts({
 }: NativeStackScreenProps<NavigationParamList, "Accounts">) {
   const styles = useStyles();
   const accounts = useAccountsList();
+  const erroredAccounts = useErroredAccountsMap();
   const accountsProfiles = useAccountsProfiles();
   const setCurrentAccount = useAccountsStore((s) => s.setCurrentAccount);
   const setAddingNewAccount = useOnboardingStore((s) => s.setAddingNewAccount);
@@ -45,6 +48,12 @@ export default function Accounts({
           },
           rightView: (
             <View style={{ flexDirection: "row" }}>
+              {erroredAccounts[a] && (
+                <TableViewPicto
+                  symbol="exclamationmark.triangle"
+                  color={dangerColor(colorScheme)}
+                />
+              )}
               <AccountSettingsButton account={a} navigation={navigation} />
               <TableViewPicto
                 symbol="chevron.right"
