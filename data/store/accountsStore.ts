@@ -69,6 +69,20 @@ export const useAccountsList = () => {
   return accounts.filter((a) => a && a !== TEMPORARY_ACCOUNT_NAME);
 };
 
+export const useErroredAccountsMap = () => {
+  const accounts = useAccountsList();
+  return accounts.reduce(
+    (acc, a) => {
+      const errored = getChatStore(a).getState().errored;
+      if (errored) {
+        acc[a] = errored;
+      }
+      return acc;
+    },
+    {} as { [account: string]: boolean }
+  );
+};
+
 // This store is global (i.e. not linked to an account)
 // For now we only use a single account so we initialize it
 // and don't add a setter.

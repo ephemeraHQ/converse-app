@@ -41,6 +41,7 @@ export const strings = {
   are_you_sure: "Are you sure?",
   promote_to_admin: "Promote to admin",
   send_a_message: "Send a message",
+  client_error: "Looks like something went wrong, please try reconnecting.",
 
   // Attachments
   photo_library: "Photo Library",
