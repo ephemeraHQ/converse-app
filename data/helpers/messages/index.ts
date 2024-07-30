@@ -160,5 +160,10 @@ export const getOrderedMessages = async (account: string, topic: string) => {
     })
     .orderBy("sent", "ASC")
     .execute();
-  return messages;
+  return messages.map((m) => ({
+    ...m,
+    converseMetadata: m.converseMetadata
+      ? JSON.parse(m.converseMetadata as any)
+      : undefined,
+  }));
 };

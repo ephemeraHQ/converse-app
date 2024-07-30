@@ -28,7 +28,7 @@ export const useFramesStore = create<FramesStoreType>()(
         const framesToReturn: FrameWithType[] = [];
         const allFrames = get().frames;
         urls.forEach((url) => {
-          const frame = allFrames[url];
+          const frame = allFrames[url.toLowerCase()] || allFrames[url];
           if (frame) {
             framesToReturn.push(frame);
           }
