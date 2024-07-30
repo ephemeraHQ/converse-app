@@ -102,38 +102,42 @@ const AccountNotificationsStateHandler = ({ account }: { account: string }) => {
   });
   // Sync accounts on load and when a new one is added
   useEffect(() => {
-    if (!hydrationDone) return;
-    // Let's sortAndComputePreview to subscribe to the right notifications
-    const newRefreshState = {
-      account,
-      conversations: Object.keys(conversations).length,
-      topicsData: Object.keys(topicsData).length,
-      peersStatus: Object.keys(peersStatus).length,
-      lastUpdateAt,
-      pinnedConversations: pinnedConversations.length,
-      groupStatus: Object.keys(groupStatus).length,
-    };
-    if (
-      newRefreshState.account !== lastRefreshState.current.account ||
-      newRefreshState.conversations !==
-        lastRefreshState.current.conversations ||
-      newRefreshState.topicsData !== lastRefreshState.current.topicsData ||
-      newRefreshState.peersStatus !== lastRefreshState.current.peersStatus ||
-      newRefreshState.lastUpdateAt !== lastRefreshState.current.lastUpdateAt ||
-      newRefreshState.pinnedConversations !==
-        lastRefreshState.current.pinnedConversations ||
-      newRefreshState.groupStatus !== lastRefreshState.current.groupStatus
-    ) {
-      lastRefreshState.current = newRefreshState;
-      sortAndComputePreview(
-        conversations,
+    const updatePreview = async () => {
+      if (!hydrationDone) return;
+      // Let's sortAndComputePreview to subscribe to the right notifications
+      const newRefreshState = {
         account,
-        topicsData,
-        peersStatus,
-        groupStatus,
-        pinnedConversations
-      );
-    }
+        conversations: Object.keys(conversations).length,
+        topicsData: Object.keys(topicsData).length,
+        peersStatus: Object.keys(peersStatus).length,
+        lastUpdateAt,
+        pinnedConversations: pinnedConversations.length,
+        groupStatus: Object.keys(groupStatus).length,
+      };
+      if (
+        newRefreshState.account !== lastRefreshState.current.account ||
+        newRefreshState.conversations !==
+          lastRefreshState.current.conversations ||
+        newRefreshState.topicsData !== lastRefreshState.current.topicsData ||
+        newRefreshState.peersStatus !== lastRefreshState.current.peersStatus ||
+        newRefreshState.lastUpdateAt !==
+          lastRefreshState.current.lastUpdateAt ||
+        newRefreshState.pinnedConversations !==
+          lastRefreshState.current.pinnedConversations ||
+        newRefreshState.groupStatus !== lastRefreshState.current.groupStatus
+      ) {
+        lastRefreshState.current = newRefreshState;
+        await sortAndComputePreview(
+          conversations,
+          account,
+          topicsData,
+          peersStatus,
+          groupStatus,
+          pinnedConversations
+        );
+      }
+    };
+    updatePreview();
   }, [
     account,
     conversations,

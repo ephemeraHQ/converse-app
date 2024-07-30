@@ -12,6 +12,7 @@ import {
 import { AvatarSizes, PictoSizes } from "@styles/sizes";
 import { strings } from "@utils/i18n/strings";
 import * as Haptics from "expo-haptics";
+import { Image } from "expo-image";
 import React, {
   memo,
   useCallback,
@@ -58,6 +59,7 @@ type ConversationListItemProps = {
   conversationPeerAddress: string | undefined;
   conversationPeerAvatar: string | undefined;
   lastMessagePreview: string | undefined;
+  lastMessageImageUrl: string | undefined;
   lastMessageFromMe: boolean;
   lastMessageStatus?:
     | "delivered"
@@ -86,6 +88,7 @@ const ConversationListItem = memo(function ConversationListItem({
   conversationPeerAddress,
   conversationPeerAvatar,
   lastMessagePreview,
+  lastMessageImageUrl,
   lastMessageStatus,
   lastMessageFromMe,
   showUnread,
@@ -103,6 +106,8 @@ const ConversationListItem = memo(function ConversationListItem({
   const resetSelected = useCallback(() => {
     setSelected(false);
   }, []);
+  const hasImagePreview = lastMessageImageUrl && lastMessagePreview;
+  const showError = lastMessageFromMe && lastMessageStatus === "error";
 
   const openConversation = useCallback(async () => {
     if (route.params?.frameURL) {
@@ -164,24 +169,41 @@ const ConversationListItem = memo(function ConversationListItem({
   const listItemContent = (
     <View style={styles.conversationListItem}>
       {avatarComponent}
-      <View style={styles.conversationListItemContent}>
+      <View style={styles.messagePreviewContainer}>
         <Text style={styles.conversationName} numberOfLines={1}>
           {conversationName}
         </Text>
         <Text style={styles.messagePreview} numberOfLines={2}>
           {timeToShow} ⋅ {lastMessagePreview}
         </Text>
-        {(lastMessageFromMe && lastMessageStatus) === "sending" ? (
-          <View style={styles.unread}>
-            <Picto
-              picto="exclamation"
-              color={inversePrimaryColor(colorScheme)}
-            />
-          </View>
-        ) : showUnread ? (
-          <View style={styles.unread} />
-        ) : undefined}
       </View>
+      {hasImagePreview && (
+        <View style={styles.imagePreviewContainer}>
+          <Image
+            source={{ uri: lastMessageImageUrl }}
+            style={styles.imagePreview}
+            contentFit="cover"
+          />
+        </View>
+      )}
+      {(showUnread || showError) && (
+        <View style={styles.unreadContainer}>
+          <View
+            style={[
+              styles.unread,
+              (!showUnread || showError) && styles.placeholder,
+            ]}
+          >
+            {showError && (
+              <Picto
+                picto="info.circle"
+                color={dangerColor(colorScheme)}
+                size={PictoSizes.button}
+              />
+            )}
+          </View>
+        </View>
+      )}
     </View>
   );
 
@@ -390,26 +412,26 @@ const getStyles = (colorScheme: ColorSchemeName) =>
     conversationListItem: {
       flexDirection: "row",
       height: "100%",
+      paddingRight: 16,
     },
     avatarWrapper: {
       marginLeft: 16,
       alignSelf: "center",
     },
-    conversationListItemContent: {
+    messagePreviewContainer: {
       flexGrow: 1,
       flexShrink: 1,
+      paddingRight: 16,
       ...Platform.select({
         default: {
           height: 84,
           paddingTop: 12,
-          paddingRight: 45,
           marginLeft: 12,
         },
         android: {
           height: 72,
           paddingTop: 16.5,
           paddingLeft: 16,
-          paddingRight: 45,
         },
       }),
     },
@@ -420,7 +442,6 @@ const getStyles = (colorScheme: ColorSchemeName) =>
           fontSize: 17,
           fontWeight: "600",
           marginBottom: 3,
-          marginRight: 15,
         },
         android: {
           fontSize: 16,
@@ -429,7 +450,6 @@ const getStyles = (colorScheme: ColorSchemeName) =>
     },
     messagePreview: {
       color: textSecondaryColor(colorScheme),
-      flex: 1,
       ...Platform.select({
         default: {
           fontSize: 15,
@@ -448,41 +468,23 @@ const getStyles = (colorScheme: ColorSchemeName) =>
         android: { fontSize: 11 },
       }),
     },
+    unreadContainer: {
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "flex-end",
+      marginLeft: 16,
+    },
     unread: {
-      position: "absolute",
-      ...Platform.select({
-        default: {
-          width: 16,
-          height: 16,
-          borderRadius: 16,
-          right: 17,
-          top: 29.5,
-        },
-        android: {
-          width: 16,
-          height: 16,
-          borderRadius: 16,
-          right: 24,
-          top: 36,
-        },
-      }),
+      width: 14,
+      height: 14,
+      borderRadius: 16,
       backgroundColor: badgeColor(colorScheme),
       flexDirection: "row",
       justifyContent: "center",
       alignItems: "center",
     },
-    lastMessageStatus: {
-      position: "absolute",
-      ...Platform.select({
-        default: {
-          left: 0,
-          top: 35,
-        },
-        android: {
-          left: 16,
-          top: 39,
-        },
-      }),
+    placeholder: {
+      backgroundColor: "transparent",
     },
     rightAction: {
       width: 100,
@@ -498,5 +500,17 @@ const getStyles = (colorScheme: ColorSchemeName) =>
     },
     rippleRow: {
       backgroundColor: backgroundColor(colorScheme),
+    },
+    imagePreviewContainer: {
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "flex-end",
+      marginLeft: 16,
+    },
+    imagePreview: {
+      height: 56,
+      width: 56,
+      borderRadius: 4,
+      aspectRatio: 1,
     },
   });
