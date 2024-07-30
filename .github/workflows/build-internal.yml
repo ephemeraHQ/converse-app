@@ -49,6 +49,7 @@ jobs:
 
   build-ios:
     runs-on: ubuntu-latest
+    environment: Production
 
     steps:
       - name: Checkout repository
@@ -67,6 +68,17 @@ jobs:
         with:
           eas-version: latest
           token: ${{ secrets.EXPO_TOKEN }}
+
+      - name: Create .env file from secrets
+        run: |
+          echo "EXPO_PUBLIC_CONTACT_ADDRESS=${{ secrets.EXPO_PUBLIC_CONTACT_ADDRESS }}" >> .env.production
+          echo "EXPO_PUBLIC_DEBUG_ADDRESSES=${{ secrets.EXPO_PUBLIC_DEBUG_ADDRESSES }}" >> .env.production
+          echo "EXPO_PUBLIC_SENTRY_DSN=${{ secrets.EXPO_PUBLIC_SENTRY_DSN }}" >> .env.production
+          echo "EXPO_PUBLIC_WALLETCONNECT_PROJECT_ID=${{ secrets.EXPO_PUBLIC_WALLETCONNECT_PROJECT_ID }}" >> .env.production
+          echo "EXPO_PUBLIC_THIRDWEB_CLIENT_ID=${{ secrets.EXPO_PUBLIC_THIRDWEB_CLIENT_ID }}" >> .env.production
+          echo "EXPO_PUBLIC_EXPO_PROJECT_ID=${{ secrets.EXPO_PUBLIC_EXPO_PROJECT_ID }}" >> .env.production
+          echo "EXPO_PUBLIC_PRIVY_APP_ID=${{ secrets.EXPO_PUBLIC_PRIVY_APP_ID }}" >> .env.production
+          echo "EXPO_PUBLIC_EVM_RPC_ENDPOINT=${{ secrets.EXPO_PUBLIC_EVM_RPC_ENDPOINT }}" >> .env.production
 
       - name: Update iOS Files
         # TODO: This should be handled by schemes in the future
