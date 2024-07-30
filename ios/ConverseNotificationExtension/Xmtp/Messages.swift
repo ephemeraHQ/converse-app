@@ -51,7 +51,7 @@ func handleNewConversationFirstMessage(xmtpClient: XMTP.Client, apiURI: String?,
               spamScore: spamScore
             )
           }
-          let decodedMessageResult = handleMessageByContentType(decodedMessage: message, xmtpClient: xmtpClient);
+          let decodedMessageResult = await handleMessageByContentType(decodedMessage: message, xmtpClient: xmtpClient);
           
           if decodedMessageResult.senderAddress == xmtpClient.address || decodedMessageResult.forceIgnore {
             // Message is from me or a reaction removal, let's drop it
@@ -146,7 +146,7 @@ func handleGroupMessage(xmtpClient: XMTP.Client, envelope: XMTP.Envelope, apiURI
           decodedMessage.senderAddress = senderAddresses[0]
         }
 
-        let decodedMessageResult = handleMessageByContentType(decodedMessage: decodedMessage, xmtpClient: xmtpClient);
+        let decodedMessageResult = await handleMessageByContentType(decodedMessage: decodedMessage, xmtpClient: xmtpClient);
         messageId = decodedMessageResult.id
         if decodedMessageResult.senderAddress?.lowercased() == xmtpClient.inboxID.lowercased() || decodedMessageResult.senderAddress?.lowercased() == xmtpClient.address.lowercased() || decodedMessageResult.forceIgnore {
         } else {
@@ -198,7 +198,7 @@ func handleOngoingConversationMessage(xmtpClient: XMTP.Client, envelope: XMTP.En
   let decodedMessage = try? await decodeMessage(xmtpClient: xmtpClient, envelope: envelope)
   // If couldn't decode the message, not showing
   if let message = decodedMessage {
-    let decodedMessageResult = handleMessageByContentType(decodedMessage: message, xmtpClient: xmtpClient);
+    let decodedMessageResult = await handleMessageByContentType(decodedMessage: message, xmtpClient: xmtpClient);
     
     if decodedMessageResult.senderAddress == xmtpClient.address || decodedMessageResult.forceIgnore {
       // Message is from me or a reaction removal, let's drop it
@@ -306,7 +306,7 @@ func decodeMessage(xmtpClient: XMTP.Client, envelope: XMTP.Envelope) async throw
   }
 }
 
-func handleMessageByContentType(decodedMessage: DecodedMessage, xmtpClient: XMTP.Client) -> (content: String?, senderAddress: String?, forceIgnore: Bool, id: String?) {
+func handleMessageByContentType(decodedMessage: DecodedMessage, xmtpClient: XMTP.Client) async -> (content: String?, senderAddress: String?, forceIgnore: Bool, id: String?) {
   var contentType = getContentTypeString(type: decodedMessage.encodedContent.type)
   var contentToReturn: String?
   var contentToSave: String?
@@ -359,7 +359,7 @@ func handleMessageByContentType(decodedMessage: DecodedMessage, xmtpClient: XMTP
       
       // For groups: notify reactions to messages from me only
       if (isGroupMessageTopic(topic: decodedMessage.topic) && referencedMessageId != nil) {
-        forceIgnore = !(try isGroupMessageFromMe(xmtpClient: xmtpClient, messageId: referencedMessageId!))
+        forceIgnore = !(try await isGroupMessageFromMe(xmtpClient: xmtpClient, messageId: referencedMessageId!))
       }
       
       
