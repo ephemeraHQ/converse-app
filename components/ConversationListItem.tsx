@@ -170,52 +170,38 @@ const ConversationListItem = memo(function ConversationListItem({
     <View style={styles.conversationListItem}>
       {avatarComponent}
       <View style={styles.conversationListItemContent}>
-        <Text
-          style={[
-            styles.conversationName,
-            hasImagePreview ? styles.conversationNameWithImage : {},
-            !showUnread &&
-              !showError &&
-              styles.conversationNameWithImageAndIndicator,
-          ]}
-          numberOfLines={1}
-        >
+        <Text style={styles.conversationName} numberOfLines={1}>
           {conversationName}
         </Text>
-        <Text
-          style={[
-            styles.messagePreview,
-            hasImagePreview ? styles.messagePreviewWithImage : {},
-            !showUnread &&
-              !showError &&
-              styles.messagePreviewWithImageAndIndicator,
-          ]}
-          numberOfLines={2}
-        >
+        <Text style={styles.messagePreview} numberOfLines={2}>
           {timeToShow} ⋅ {lastMessagePreview}
         </Text>
       </View>
-      {showError ? (
-        <View style={[styles.unread, { backgroundColor: "transparent" }]}>
-          <Picto
-            picto="info.circle"
-            color={dangerColor(colorScheme)}
-            size={PictoSizes.button}
+      {hasImagePreview && (
+        <View style={styles.imagePreviewContainer}>
+          <Image
+            source={{ uri: lastMessageImageUrl }}
+            style={styles.imagePreview}
+            contentFit="cover"
           />
         </View>
-      ) : showUnread ? (
-        <View style={styles.unread} />
-      ) : undefined}
-      {hasImagePreview && (
-        <Image
-          source={{ uri: lastMessageImageUrl }}
-          style={[
-            styles.imagePreview,
-            !showUnread && !showError && styles.imagePreviewWithIndicator,
-          ]}
-          contentFit="cover"
-        />
       )}
+      <View style={styles.unreadContainer}>
+        <View
+          style={[
+            styles.unread,
+            (!showUnread || showError) && styles.placeholder,
+          ]}
+        >
+          {showError && (
+            <Picto
+              picto="info.circle"
+              color={dangerColor(colorScheme)}
+              size={PictoSizes.button}
+            />
+          )}
+        </View>
+      </View>
     </View>
   );
 
@@ -436,14 +422,12 @@ const getStyles = (colorScheme: ColorSchemeName) =>
         default: {
           height: 84,
           paddingTop: 12,
-          paddingRight: 45,
           marginLeft: 12,
         },
         android: {
           height: 72,
           paddingTop: 16.5,
           paddingLeft: 16,
-          paddingRight: 45,
         },
       }),
     },
@@ -454,7 +438,6 @@ const getStyles = (colorScheme: ColorSchemeName) =>
           fontSize: 17,
           fontWeight: "600",
           marginBottom: 3,
-          marginRight: 15,
         },
         android: {
           fontSize: 16,
@@ -463,7 +446,6 @@ const getStyles = (colorScheme: ColorSchemeName) =>
     },
     messagePreview: {
       color: textSecondaryColor(colorScheme),
-      flex: 1,
       ...Platform.select({
         default: {
           fontSize: 15,
@@ -482,41 +464,24 @@ const getStyles = (colorScheme: ColorSchemeName) =>
         android: { fontSize: 11 },
       }),
     },
+    unreadContainer: {
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "flex-end",
+      marginRight: 16,
+      marginLeft: 16,
+    },
     unread: {
-      position: "absolute",
-      ...Platform.select({
-        default: {
-          width: 13,
-          height: 13,
-          borderRadius: 16,
-          right: 17,
-          top: 34,
-        },
-        android: {
-          width: 13,
-          height: 13,
-          borderRadius: 16,
-          right: 24,
-          top: 36,
-        },
-      }),
+      width: 14,
+      height: 14,
+      borderRadius: 16,
       backgroundColor: badgeColor(colorScheme),
       flexDirection: "row",
       justifyContent: "center",
       alignItems: "center",
     },
-    lastMessageStatus: {
-      position: "absolute",
-      ...Platform.select({
-        default: {
-          left: 0,
-          top: 35,
-        },
-        android: {
-          left: 16,
-          top: 39,
-        },
-      }),
+    placeholder: {
+      backgroundColor: "transparent",
     },
     rightAction: {
       width: 100,
@@ -533,50 +498,16 @@ const getStyles = (colorScheme: ColorSchemeName) =>
     rippleRow: {
       backgroundColor: backgroundColor(colorScheme),
     },
-    conversationNameWithImage: {
-      ...Platform.select({
-        default: {
-          marginRight: 72,
-        },
-        android: {
-          marginRight: 60,
-        },
-      }),
-    },
-    messagePreviewWithImage: {
-      ...Platform.select({
-        default: {
-          marginRight: 72,
-        },
-        android: {
-          marginRight: 60,
-        },
-      }),
+    imagePreviewContainer: {
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "flex-end",
+      marginLeft: 16,
     },
     imagePreview: {
       height: 56,
       width: 56,
-      marginHorizontal: 7,
-      marginTop: 12,
       borderRadius: 4,
       aspectRatio: 1,
-      position: "absolute",
-      ...Platform.select({
-        default: {
-          right: 45,
-        },
-        android: {
-          right: 40,
-        },
-      }),
-    },
-    conversationNameWithImageAndIndicator: {
-      marginRight: 37,
-    },
-    messagePreviewWithImageAndIndicator: {
-      marginRight: 37,
-    },
-    imagePreviewWithIndicator: {
-      right: 10,
     },
   });
