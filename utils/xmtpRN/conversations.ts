@@ -1,4 +1,5 @@
 import { setGroupDescriptionQueryData } from "@queries/useGroupDescriptionQuery";
+import { getGroupIdFromTopic } from "@utils/groupUtils/groupId";
 import {
   ConsentListEntry,
   ConversationContext,
@@ -593,8 +594,9 @@ export const createGroup = async (
 export const refreshGroup = async (account: string, topic: string) => {
   const client = (await getXmtpClient(account)) as ConverseXmtpClientType;
   await client.conversations.syncGroups();
-  const groups = await client.conversations.listGroups();
-  const group = groups.find((g) => g.topic === topic);
+  const group = await client.conversations.findGroup(
+    getGroupIdFromTopic(topic)
+  );
   if (!group) throw new Error(`Group ${topic} not found, cannot refresh`);
   await group.sync();
   saveConversations(
