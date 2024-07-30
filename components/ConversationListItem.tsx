@@ -169,7 +169,7 @@ const ConversationListItem = memo(function ConversationListItem({
   const listItemContent = (
     <View style={styles.conversationListItem}>
       {avatarComponent}
-      <View style={styles.conversationListItemContent}>
+      <View style={styles.messagePreviewContainer}>
         <Text style={styles.conversationName} numberOfLines={1}>
           {conversationName}
         </Text>
@@ -186,22 +186,24 @@ const ConversationListItem = memo(function ConversationListItem({
           />
         </View>
       )}
-      <View style={styles.unreadContainer}>
-        <View
-          style={[
-            styles.unread,
-            (!showUnread || showError) && styles.placeholder,
-          ]}
-        >
-          {showError && (
-            <Picto
-              picto="info.circle"
-              color={dangerColor(colorScheme)}
-              size={PictoSizes.button}
-            />
-          )}
+      {(showUnread || showError) && (
+        <View style={styles.unreadContainer}>
+          <View
+            style={[
+              styles.unread,
+              (!showUnread || showError) && styles.placeholder,
+            ]}
+          >
+            {showError && (
+              <Picto
+                picto="info.circle"
+                color={dangerColor(colorScheme)}
+                size={PictoSizes.button}
+              />
+            )}
+          </View>
         </View>
-      </View>
+      )}
     </View>
   );
 
@@ -410,14 +412,16 @@ const getStyles = (colorScheme: ColorSchemeName) =>
     conversationListItem: {
       flexDirection: "row",
       height: "100%",
+      paddingRight: 16,
     },
     avatarWrapper: {
       marginLeft: 16,
       alignSelf: "center",
     },
-    conversationListItemContent: {
+    messagePreviewContainer: {
       flexGrow: 1,
       flexShrink: 1,
+      paddingRight: 16,
       ...Platform.select({
         default: {
           height: 84,
@@ -468,7 +472,6 @@ const getStyles = (colorScheme: ColorSchemeName) =>
       flexDirection: "row",
       alignItems: "center",
       justifyContent: "flex-end",
-      marginRight: 16,
       marginLeft: 16,
     },
     unread: {
