@@ -1,3 +1,5 @@
+import Picto from "@components/Picto/Picto";
+import { useShouldShowErrored } from "@hooks/useShouldShowErrored";
 import Clipboard from "@react-native-clipboard/clipboard";
 import { StackActions } from "@react-navigation/native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
@@ -9,6 +11,7 @@ import {
   textPrimaryColor,
   textSecondaryColor,
 } from "@styles/colors";
+import { PictoSizes } from "@styles/sizes";
 import { memberCanUpdateGroup } from "@utils/groupUtils/memberCanUpdateGroup";
 import { strings } from "@utils/i18n/strings";
 import Constants from "expo-constants";
@@ -105,6 +108,7 @@ export default function ProfileScreen({
   const isSplitScreen = useIsSplitScreen();
 
   const insets = useSafeAreaInsets();
+  const shouldShowError = useShouldShowErrored();
   useEffect(() => {
     refreshBalanceForAccount(userAddress);
   }, [userAddress]);
@@ -618,6 +622,17 @@ export default function ProfileScreen({
         name={getPreferredName(socials, peerAddress)}
       />
       <Text style={styles.title}>{getPreferredName(socials, peerAddress)}</Text>
+      {isMyProfile && shouldShowError && (
+        <View style={styles.errorContainer}>
+          <Picto
+            picto="exclamationmark.triangle"
+            color={dangerColor(colorScheme)}
+            size={PictoSizes.textButton}
+            style={styles.errorIcon}
+          />
+          <Text style={styles.errorText}>{strings.client_error}</Text>
+        </View>
+      )}
       {isMyProfile && (
         <TableView
           items={[
@@ -840,6 +855,19 @@ const useStyles = () => {
     emoji: {
       backgroundColor: "rgba(118, 118, 128, 0.12)",
       borderRadius: 30,
+    },
+    errorText: {
+      color: dangerColor(colorScheme),
+      textAlign: "center",
+    },
+    errorContainer: {
+      flexDirection: "row",
+      alignSelf: "center",
+    },
+    errorIcon: {
+      width: PictoSizes.textButton,
+      height: PictoSizes.textButton,
+      marginRight: 5,
     },
   });
 };

@@ -1,3 +1,5 @@
+import { ErroredHeader } from "@components/ErroredHeader";
+import { useShouldShowErrored } from "@hooks/useShouldShowErrored";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { textPrimaryColor } from "@styles/colors";
 import React, { useLayoutEffect } from "react";
@@ -8,6 +10,7 @@ import {
   View,
   useColorScheme,
   TouchableOpacity,
+  StyleSheet,
 } from "react-native";
 import { SearchBarCommands } from "react-native-screens";
 
@@ -51,8 +54,6 @@ export const useHeaderSearchBar = ({
       headerSearchBarOptions: {
         ref: searchBarRef as React.RefObject<SearchBarCommands>,
         hideNavigationBar: autoHide && !isDesktop,
-        // set to hideWhenScrolling to `false` to  to make the search bar always visible
-        // set it to `true` to avoid a visual glitch while loading conversations during initial load
         hideWhenScrolling: autoHide && !isDesktop,
         autoFocus: false,
         placeholder: "Search",
@@ -76,6 +77,7 @@ export default function ConversationListNav() {
   ) as React.MutableRefObject<SearchBarCommands | null>;
 
   const shouldShowConnectingOrSyncing = useShouldShowConnectingOrSyncing();
+  const shouldShowError = useShouldShowErrored();
   const currentAccount = useAccountsStore((s) => s.currentAccount);
   const name = getReadableProfile(currentAccount, currentAccount);
 
@@ -85,15 +87,15 @@ export default function ConversationListNav() {
       options={({ route, navigation }) => ({
         headerTitle: () =>
           shouldShowConnectingOrSyncing ? (
-            <View style={{ marginTop: -10 }}>
-              <Connecting />
+            <View style={styles.connectingContainer}>
+              {shouldShowConnectingOrSyncing && <Connecting />}
             </View>
           ) : (
             <View />
           ),
         headerBackTitle: getReadableProfile(currentAccount, currentAccount),
         headerRight: () => (
-          <View style={{ marginTop: -10 }}>
+          <View style={styles.headerRight}>
             <NewConversationButton navigation={navigation} route={route} />
           </View>
         ),
@@ -101,13 +103,7 @@ export default function ConversationListNav() {
         headerShadowVisible: false,
         animation: navigationAnimation,
         headerLeft: () => (
-          <View
-            style={{
-              flexDirection: "row",
-              alignItems: "flex-end",
-              marginTop: -10,
-            }}
-          >
+          <View style={styles.headerLeftContainer}>
             <View>
               <ProfileSettingsButton />
             </View>
@@ -118,18 +114,22 @@ export default function ConversationListNav() {
                 });
               }}
             >
-              <Text
-                style={{
-                  fontSize: 16,
-                  color:
-                    colorScheme === "dark"
-                      ? "rgba(255, 255, 255, 0.6)"
-                      : "rgba(0, 0, 0, 0.6)",
-                  paddingBottom: 6,
-                }}
-              >
-                {name}
-              </Text>
+              <View style={styles.headerLeftTouchable}>
+                <Text
+                  style={[
+                    styles.headerLeftText,
+                    {
+                      color:
+                        colorScheme === "dark"
+                          ? "rgba(255, 255, 255, 0.6)"
+                          : "rgba(0, 0, 0, 0.6)",
+                    },
+                  ]}
+                >
+                  {name}
+                </Text>
+                {shouldShowError && <ErroredHeader />}
+              </View>
             </TouchableOpacity>
           </View>
         ),
@@ -141,3 +141,26 @@ export default function ConversationListNav() {
     </NativeStack.Screen>
   );
 }
+
+const styles = StyleSheet.create({
+  connectingContainer: {
+    marginTop: -10,
+  },
+  headerRight: {
+    marginTop: -10,
+  },
+  headerLeftContainer: {
+    flexDirection: "row",
+    alignItems: "flex-end",
+    marginTop: -10,
+  },
+  headerLeftTouchable: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "flex-start",
+  },
+  headerLeftText: {
+    fontSize: 16,
+    paddingBottom: 6,
+  },
+});

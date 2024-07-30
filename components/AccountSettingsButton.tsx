@@ -2,6 +2,7 @@ import Clipboard from "@react-native-clipboard/clipboard";
 import { NavigationProp } from "@react-navigation/native";
 import {
   actionSheetColors,
+  dangerColor,
   primaryColor,
   textSecondaryColor,
 } from "@styles/colors";
@@ -19,7 +20,10 @@ import Picto from "./Picto/Picto";
 import { showActionSheetWithOptions } from "./StateHandlers/ActionSheetStateHandler";
 import { TableViewPicto } from "./TableView/TableViewImage";
 import { refreshProfileForAddress } from "../data/helpers/profiles/profilesUpdate";
-import { useAccountsStore } from "../data/store/accountsStore";
+import {
+  useAccountsStore,
+  useErroredAccountsMap,
+} from "../data/store/accountsStore";
 import { useAppStore } from "../data/store/appStore";
 import { useSelect } from "../data/store/storeHelpers";
 import { converseEventEmitter } from "../utils/events";
@@ -36,17 +40,22 @@ type Props = {
 };
 
 export default function AccountSettingsButton({ account, navigation }: Props) {
-  const { setNotificationsPermissionStatus, notificationsPermissionStatus } =
-    useAppStore(
-      useSelect([
-        "setNotificationsPermissionStatus",
-        "notificationsPermissionStatus",
-      ])
-    );
+  const {
+    setNotificationsPermissionStatus,
+    notificationsPermissionStatus,
+    isInternetReachable,
+  } = useAppStore(
+    useSelect([
+      "setNotificationsPermissionStatus",
+      "notificationsPermissionStatus",
+      "isInternetReachable",
+    ])
+  );
 
   const { setCurrentAccount } = useAccountsStore(
     useSelect(["setCurrentAccount"])
   );
+  const erroredAccountsMap = useErroredAccountsMap();
   const logout = useLogoutFromConverse(account);
   const colorScheme = useColorScheme();
 
@@ -141,6 +150,20 @@ export default function AccountSettingsButton({ account, navigation }: Props) {
     };
 
     const options = Object.keys(methods);
+    const icons = [];
+    if (erroredAccountsMap[account] && isInternetReachable) {
+      icons.push(
+        <Picto
+          style={{
+            width: PictoSizes.tableViewImage,
+            height: PictoSizes.tableViewImage,
+          }}
+          size={PictoSizes.tableViewImage}
+          picto="exclamationmark.triangle"
+          color={dangerColor(colorScheme)}
+        />
+      );
+    }
     if (notificationsPermissionStatus === "granted" || Platform.OS === "web") {
       options.splice(options.indexOf("Turn on notifications"), 1);
     }
@@ -148,6 +171,7 @@ export default function AccountSettingsButton({ account, navigation }: Props) {
     showActionSheetWithOptions(
       {
         options,
+        icons,
         destructiveButtonIndex: options.indexOf("Disconnect this account"),
         cancelButtonIndex: options.indexOf("Cancel"),
         title: account || undefined,
@@ -162,13 +186,15 @@ export default function AccountSettingsButton({ account, navigation }: Props) {
       }
     );
   }, [
+    erroredAccountsMap,
     account,
-    colorScheme,
-    showDeleteAccountActionSheet,
-    navigation,
+    isInternetReachable,
     notificationsPermissionStatus,
+    colorScheme,
     setCurrentAccount,
+    navigation,
     setNotificationsPermissionStatus,
+    showDeleteAccountActionSheet,
   ]);
 
   return Platform.OS === "android" ? (
