@@ -8,6 +8,7 @@ import { invalidateGroupPhotoQuery } from "@queries/useGroupPhotoQuery";
 import { useFocusEffect } from "@react-navigation/native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import {
+  actionSheetColors,
   backgroundColor,
   dangerColor,
   primaryColor,
@@ -182,6 +183,7 @@ export default function GroupScreen({
               cancelButtonIndex,
               destructiveButtonIndex,
               title: preferredName,
+              ...actionSheetColors(colorScheme),
             },
             async (selectedIndex?: number) => {
               switch (selectedIndex) {
