@@ -168,7 +168,7 @@ const build = async () => {
       platform === "ios"
         ? "ipa"
         : env === "production" || env === "preview"
-        ? "aab"
+        ? "apk"
         : "apk";
     buildArgs.push(
       "--local",
@@ -179,7 +179,7 @@ const build = async () => {
     (env === "production" || (env === "preview" && platform === "ios")) &&
     !buildInternalProduction
   ) {
-    buildArgs.push("--auto-submit");
+    // buildArgs.push("--auto-submit");
   }
 
   let buildSuccess = false;
@@ -227,23 +227,23 @@ const build = async () => {
     throw e;
   }
 
-  if (
-    (env === "production" || (env === "preview" && platform === "ios")) &&
-    buildLocally &&
-    buildSuccess &&
-    !buildInternalProduction
-  ) {
-    const submitCommand = "eas";
-    const submitArgs = ["submit", "--profile", env, "--platform", platform];
+  // if (
+  //   (env === "production" || (env === "preview" && platform === "ios")) &&
+  //   buildLocally &&
+  //   buildSuccess &&
+  //   !buildInternalProduction
+  // ) {
+  //   const submitCommand = "eas";
+  //   const submitArgs = ["submit", "--profile", env, "--platform", platform];
 
-    try {
-      await executeCommand(submitCommand, submitArgs);
-    } catch (e) {
-      console.log("Error during submission");
-      cleanup();
-      throw e;
-    }
-  }
+  //   try {
+  //     await executeCommand(submitCommand, submitArgs);
+  //   } catch (e) {
+  //     console.log("Error during submission");
+  //     cleanup();
+  //     throw e;
+  //   }
+  // }
 
   cleanup();
 };
