@@ -272,7 +272,7 @@ export default function ConnectViaWallet({
     }
   };
 
-  if (!loading && address) {
+  if (address) {
     backButtonText = `Log out from ${shortAddress(address)}`;
     backButtonAction = disconnect;
   }

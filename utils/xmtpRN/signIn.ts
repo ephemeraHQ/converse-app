@@ -1,3 +1,8 @@
+import {
+  copyDatabasesToTemporaryDirectory,
+  createTemporaryDirectory,
+  moveTemporaryDatabasesToDatabaseDirecory,
+} from "@utils/fileSystem";
 import { getDbEncryptionKey } from "@utils/keychain/helpers";
 import { sentryAddBreadcrumb } from "@utils/sentry";
 import { TransactionReferenceCodec } from "@xmtp/content-type-transaction-reference";
@@ -15,7 +20,6 @@ import { Signer } from "ethers";
 
 import { CoinbaseMessagingPaymentCodec } from "./contentTypes/coinbasePayment";
 import config from "../../config";
-import { getDbDirectory } from "../../data/db";
 
 const env = config.xmtpEnv as "dev" | "production" | "local";
 
@@ -24,9 +28,9 @@ export const getXmtpBase64KeyFromSigner = async (
   preCreateIdentityCallback?: () => Promise<void>,
   preEnableIdentityCallback?: () => Promise<void>
 ) => {
-  const dbDirectory = await getDbDirectory();
+  const tempDirectory = await createTemporaryDirectory();
+  await copyDatabasesToTemporaryDirectory(tempDirectory);
   const dbEncryptionKey = await getDbEncryptionKey();
-
   sentryAddBreadcrumb("Instantiating client from signer");
 
   const client = await Client.create(signer, {
@@ -45,14 +49,16 @@ export const getXmtpBase64KeyFromSigner = async (
     preCreateIdentityCallback,
     preEnableIdentityCallback,
     enableV3: true,
-    dbDirectory,
+    dbDirectory: tempDirectory,
     dbEncryptionKey,
   });
+
   sentryAddBreadcrumb("Instantiated client from signer, exporting key bundle");
   const base64Key = await client.exportKeyBundle();
   // This Client is only be used to extract the key, we can disconnect
   // it to prevent locks happening during Onboarding
   await client.dropLocalDatabaseConnection();
+  await moveTemporaryDatabasesToDatabaseDirecory(tempDirectory, client.inboxId);
   sentryAddBreadcrumb("Exported key bundle");
   return base64Key;
 };
