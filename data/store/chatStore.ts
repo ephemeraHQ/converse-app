@@ -144,6 +144,7 @@ export type ChatStoreType = {
   localClientConnected: boolean;
   resyncing: boolean;
   reconnecting: boolean;
+  errored: boolean;
   topicsData: { [topic: string]: TopicData | undefined };
   topicsDataFetchedOnce: boolean | undefined;
 
@@ -184,6 +185,7 @@ export type ChatStoreType = {
   setLocalClientConnected: (connected: boolean) => void;
   setResyncing: (syncing: boolean) => void;
   setReconnecting: (reconnecting: boolean) => void;
+  setErrored: (errored: boolean) => void;
   setLastSyncedAt: (synced: number, topics: string[]) => void;
 
   setTopicsData: (
@@ -588,6 +590,8 @@ export const initChatStore = (account: string) => {
           setResyncing: (syncing) => set(() => ({ resyncing: syncing })),
           reconnecting: false,
           setReconnecting: (reconnecting) => set(() => ({ reconnecting })),
+          errored: false,
+          setErrored: (errored) => set(() => ({ errored })),
           updateMessagesIds: (updates) =>
             set((state) => {
               if (updates.length === 0) return state;
