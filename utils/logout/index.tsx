@@ -138,10 +138,12 @@ export const useLogoutFromConverse = (account: string) => {
   const disconnectWallet = useDisconnectWallet();
   const logout = useCallback(
     async (dropLocalDatabase: boolean) => {
+      // This clears the libxmtp sqlite database (v3 / groups)
+      const client = (await getXmtpClient(account)) as ConverseXmtpClientType;
       if (dropLocalDatabase) {
-        // This clears the libxmtp sqlite database (v3 / groups)
-        const client = (await getXmtpClient(account)) as ConverseXmtpClientType;
         await client.deleteLocalDatabase();
+      } else {
+        await client.dropLocalDatabaseConnection();
       }
       disconnectWallet();
       const isPrivyAccount =
