@@ -26,7 +26,7 @@ import { getChatStore } from "../../data/store/accountsStore";
 import { addLog, debugTimeSpent } from "../debug";
 import { loadXmtpKey } from "../keychain/helpers";
 
-const instantiatingClientForAccount: { [account: string]: boolean } = {};
+const instantiatingClientForAccount: { [account: string]: number } = {};
 
 export const getXmtpClient = async (
   account: string
@@ -34,14 +34,18 @@ export const getXmtpClient = async (
   if (account && xmtpClientByAccount[account]) {
     return xmtpClientByAccount[account];
   }
+  const now = new Date().getTime();
+  // Avoid instantiating 2 clients for the same account
+  // which leads to buggy behaviour
   if (instantiatingClientForAccount[account]) {
-    // Avoid instantiating 2 clients for the same account
-    // which leads to buggy behaviour
-    console.log("already instantiating sorry");
+    if (now - instantiatingClientForAccount[account] > 1000) {
+      console.log(`Client for ${account} already instantiating`);
+      instantiatingClientForAccount[account] = now;
+    }
     await new Promise((r) => setTimeout(r, 200));
     return getXmtpClient(account);
   }
-  instantiatingClientForAccount[account] = true;
+  instantiatingClientForAccount[account] = now;
   try {
     console.log("loading base64 key");
     const base64Key = await loadXmtpKey(account);
