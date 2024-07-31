@@ -252,6 +252,7 @@ export default function NewGroupSummary({
           style={[textInputStyle(colorScheme), styles.nameInput]}
           value={groupName}
           onChangeText={setGroupName}
+          clearButtonMode="while-editing"
         />
       </List.Section>
       <List.Section>
@@ -263,6 +264,7 @@ export default function NewGroupSummary({
           style={[textInputStyle(colorScheme), styles.nameInput]}
           value={groupDescription}
           onChangeText={setGroupDescription}
+          clearButtonMode="while-editing"
         />
       </List.Section>
       <TableView
