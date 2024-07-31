@@ -218,8 +218,9 @@ export const syncGroupsMessages = async (
 ) => {
   console.log(`Syncing ${groups.length} groups...`);
   for (const group of groups) {
-    console.log("syncing group", group.topic);
-    await group.sync();
+    // No need to group.sync here as syncGroupsMessages is called either
+    // from handleNewConversation which syncs before, or on groups returned
+    // by listGroups which syncs also
     const members = await group.members();
     groupMembers[group.topic] = members;
     saveMemberInboxIds(account, members);

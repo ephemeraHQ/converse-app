@@ -130,7 +130,6 @@ export default function ConnectViaWallet({
           return;
         }
         const isOnNetwork = await isOnXmtp(a);
-        console.log("in here yo");
         setOnXmtp(isOnNetwork);
         setSigner(thirdwebSigner);
         setLoading(false);
