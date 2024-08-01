@@ -39,18 +39,24 @@ export const createTemporaryDirectory = async () => {
   return tempDir;
 };
 
-export const copyDatabasesToTemporaryDirectory = async (
-  tempDirectory: string
-) => {
+export const getDatabaseFilesForInboxId = async (inboxId: string) => {
   const dbDirectory = await getDbDirectory();
   const dbDirectoryExists = await RNFS.exists(dbDirectory);
-  if (!dbDirectoryExists) return;
+  if (!dbDirectoryExists) return [];
   const dbDirectoryFiles = await RNFS.readDir(dbDirectory);
   const dbDirectoryXmtpDbFiles = dbDirectoryFiles.filter(
-    (f) => f.name.startsWith("xmtp-") && f.name.endsWith(".db3")
+    (f) => f.name.startsWith("xmtp-") && f.name.includes(`${inboxId}.db3`)
   );
+  return dbDirectoryXmtpDbFiles;
+};
+
+export const copyDatabasesToTemporaryDirectory = async (
+  tempDirectory: string,
+  inboxId: string
+) => {
+  const dbDirectoryXmtpDbFiles = await getDatabaseFilesForInboxId(inboxId);
   for (const dbFile of dbDirectoryXmtpDbFiles) {
-    console.log("Copying DB file", dbFile.name);
+    console.log("Copying database file", dbFile.name);
     await RNFS.copyFile(dbFile.path, path.join(tempDirectory, dbFile.name));
   }
 };
@@ -84,19 +90,34 @@ export const moveTemporaryDatabasesToDatabaseDirecory = async (
       console.log("Deleting destination db file");
       await RNFS.unlink(destinationPath);
     }
-    const walFileExists = await RNFS.exists(`${destinationPath}-wal`);
-    if (walFileExists) {
+    const destinationWalFileExists = await RNFS.exists(
+      `${destinationPath}-wal`
+    );
+    if (destinationWalFileExists) {
       console.log("Deleting destination wal file");
       await RNFS.unlink(`${destinationPath}-wal`);
     }
-    const shmFileExists = await RNFS.exists(`${destinationPath}-shm`);
-    if (shmFileExists) {
+    const destinationShmFileExists = await RNFS.exists(
+      `${destinationPath}-shm`
+    );
+    if (destinationShmFileExists) {
       console.log("Deleting destination db shm file");
       await RNFS.unlink(`${destinationPath}-shm`);
     }
 
     console.log(`Moving ${dbFile.name} to db directory`);
     await RNFS.moveFile(sourcePath, destinationPath);
+
+    const originWalFileExists = await RNFS.exists(`${sourcePath}-wal`);
+    if (originWalFileExists) {
+      console.log("Moving origin wal file");
+      await RNFS.moveFile(`${sourcePath}-wal`, `${destinationPath}-wal`);
+    }
+    const originShmFileExists = await RNFS.exists(`${sourcePath}-shm`);
+    if (originShmFileExists) {
+      console.log("Moving origin shm file");
+      await RNFS.moveFile(`${sourcePath}-shm`, `${destinationPath}-shm`);
+    }
   }
 
   console.log("All files moved successfully");

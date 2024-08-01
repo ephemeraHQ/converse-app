@@ -1,9 +1,10 @@
 export const strings = {
   // Onboarding
-  sign_1_of_2: "Sign (1/2)",
+  sign: "Sign",
   first_signature_explanation:
-    "This first signature will enable your wallet to send and receive messages.\n\n",
-  sign_2_of_2: "Sign (2/2)",
+    "This first signature will create your identity on the XMTP Network.\n\n",
+  second_signature_explanation:
+    "This signature will enable your identity on the XMTP Network.\n\n",
   sign_access:
     "Please sign one last time to access Converse and start chatting.",
 

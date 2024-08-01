@@ -215,18 +215,16 @@ const handleNewConversation = async (
       syncConversationsMessages(client.address, { [conversation.topic]: 0 });
     }, 3000);
   } else if (isGroup) {
-    addGroupToGroupsQuery(client.address, conversation as GroupWithCodecsType);
-    syncGroupsMessages(client.address, [conversation as GroupWithCodecsType], {
+    const group = conversation as GroupWithCodecsType;
+    await group.sync();
+    addGroupToGroupsQuery(client.address, group);
+    syncGroupsMessages(client.address, [group], {
       [conversation.topic]: 0,
     });
     setTimeout(() => {
-      syncGroupsMessages(
-        client.address,
-        [conversation as GroupWithCodecsType],
-        {
-          [conversation.topic]: 0,
-        }
-      );
+      syncGroupsMessages(client.address, [group], {
+        [conversation.topic]: 0,
+      });
     }, 3000);
   }
 
@@ -289,10 +287,10 @@ const listConversations = async (client: ConverseXmtpClientType) => {
 const listGroups = async (client: ConverseXmtpClientType) => {
   await client.conversations.syncGroups();
   const groups = await client.conversations.listGroups();
-  groups.forEach((g) => {
-    setOpenedConversation(client.address, g);
-  });
-
+  for (const group of groups) {
+    await group.sync();
+    setOpenedConversation(client.address, group);
+  }
   return groups;
 };
 
