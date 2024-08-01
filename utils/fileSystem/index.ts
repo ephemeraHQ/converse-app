@@ -39,41 +39,25 @@ export const createTemporaryDirectory = async () => {
   return tempDir;
 };
 
-export const copyDatabasesToTemporaryDirectory = async (
-  tempDirectory: string
-) => {
+export const getDatabaseFilesForInboxId = async (inboxId: string) => {
   const dbDirectory = await getDbDirectory();
   const dbDirectoryExists = await RNFS.exists(dbDirectory);
-  if (!dbDirectoryExists) return;
+  if (!dbDirectoryExists) return [];
   const dbDirectoryFiles = await RNFS.readDir(dbDirectory);
   const dbDirectoryXmtpDbFiles = dbDirectoryFiles.filter(
-    (f) => f.name.startsWith("xmtp-") && f.name.endsWith(".db3")
+    (f) => f.name.startsWith("xmtp-") && f.name.includes(`${inboxId}.db3`)
   );
+  return dbDirectoryXmtpDbFiles;
+};
+
+export const copyDatabasesToTemporaryDirectory = async (
+  tempDirectory: string,
+  inboxId: string
+) => {
+  const dbDirectoryXmtpDbFiles = await getDatabaseFilesForInboxId(inboxId);
   for (const dbFile of dbDirectoryXmtpDbFiles) {
-    console.log("Copying DB file", dbFile.name);
+    console.log("Copying database file", dbFile.name);
     await RNFS.copyFile(dbFile.path, path.join(tempDirectory, dbFile.name));
-    const walFileExists = await RNFS.exists(`${dbFile.path}-wal`);
-    if (walFileExists) {
-      console.log(
-        "Copying previous WAL file to ",
-        path.join(tempDirectory, `${dbFile.name}-wal`)
-      );
-      await RNFS.copyFile(
-        `${dbFile.path}-wal`,
-        path.join(tempDirectory, `${dbFile.name}-wal`)
-      );
-    }
-    const shmFileExists = await RNFS.exists(`${dbFile.path}-shm`);
-    if (shmFileExists) {
-      console.log(
-        "Copying previous SHM file to ",
-        path.join(tempDirectory, `${dbFile.name}-shm`)
-      );
-      await RNFS.copyFile(
-        `${dbFile.path}-shm`,
-        path.join(tempDirectory, `${dbFile.name}-shm`)
-      );
-    }
   }
 };
 

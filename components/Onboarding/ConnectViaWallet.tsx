@@ -1,5 +1,6 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { textPrimaryColor, textSecondaryColor } from "@styles/colors";
+import { getDatabaseFilesForInboxId } from "@utils/fileSystem";
 import { strings } from "@utils/i18n/strings";
 import {
   sentryAddBreadcrumb,
@@ -32,7 +33,10 @@ import { useOnboardingStore } from "../../data/store/onboardingStore";
 import { useSelect } from "../../data/store/storeHelpers";
 import { shortAddress } from "../../utils/str";
 import { isOnXmtp } from "../../utils/xmtpRN/client";
-import { getXmtpBase64KeyFromSigner } from "../../utils/xmtpRN/signIn";
+import {
+  getInboxId,
+  getXmtpBase64KeyFromSigner,
+} from "../../utils/xmtpRN/signIn";
 
 export default function ConnectViaWallet({
   connectWithBase64Key,
@@ -46,8 +50,6 @@ export default function ConnectViaWallet({
     address,
     loading,
     setLoading,
-    waitingForSecondSignature,
-    setWaitingForSecondSignature,
     resetOnboarding,
   } = useOnboardingStore(
     useSelect([
@@ -56,13 +58,12 @@ export default function ConnectViaWallet({
       "setSigner",
       "loading",
       "setLoading",
-      "waitingForSecondSignature",
-      "setWaitingForSecondSignature",
       "address",
       "resetOnboarding",
     ])
   );
   const [onXmtp, setOnXmtp] = useState(false);
+  const [alreadyV3Db, setAlreadyV3Db] = useState(false);
   const styles = useStyles();
   const thirdwebWallet = useActiveWallet();
   const thirdwebAccount = useActiveAccount();
@@ -83,17 +84,18 @@ export default function ConnectViaWallet({
 
   const { disconnect: disconnectWallet } = useDisconnect();
 
-  const clickedSecondSignature = useRef(false);
+  const clickedSignature = useRef(false);
 
-  const waitingForSecondSignatureRef = useRef(waitingForSecondSignature);
+  const [waitingForNextSignature, setWaitingForNextSignature] = useState(false);
+  const waitingForNextSignatureRef = useRef(waitingForNextSignature);
   useEffect(() => {
-    waitingForSecondSignatureRef.current = waitingForSecondSignature;
-  }, [waitingForSecondSignature]);
+    waitingForNextSignatureRef.current = waitingForNextSignature;
+  }, [waitingForNextSignature]);
 
   const disconnect = useCallback(
     async (resetLoading = true) => {
-      setWaitingForSecondSignature(false);
-      clickedSecondSignature.current = false;
+      setWaitingForNextSignature(false);
+      clickedSignature.current = false;
       initiatingClientFor.current = undefined;
       resetOnboarding();
       if (resetLoading) {
@@ -112,7 +114,7 @@ export default function ConnectViaWallet({
       resetOnboarding,
       setConnectionMethod,
       setLoading,
-      setWaitingForSecondSignature,
+      setWaitingForNextSignature,
       thirdwebWallet,
     ]
   );
@@ -131,6 +133,9 @@ export default function ConnectViaWallet({
         }
         const isOnNetwork = await isOnXmtp(a);
         setOnXmtp(isOnNetwork);
+        const inboxId = await getInboxId(a);
+        const v3Dbs = await getDatabaseFilesForInboxId(inboxId);
+        setAlreadyV3Db(v3Dbs.length > 0);
         setSigner(thirdwebSigner);
         setLoading(false);
       }
@@ -187,6 +192,14 @@ export default function ConnectViaWallet({
     };
   }, [disconnect]);
 
+  const waitForClickSignature = useCallback(async () => {
+    while (!clickedSignature.current) {
+      await new Promise((r) => setTimeout(r, 100));
+    }
+  }, []);
+
+  const [signaturesDone, setSignaturesDone] = useState(0);
+
   const initXmtpClient = useCallback(async () => {
     console.log("in initixmtpclient");
     if (!signer || !address || initiatingClientFor.current === address) {
@@ -205,26 +218,44 @@ export default function ConnectViaWallet({
       const base64Key = await getXmtpBase64KeyFromSigner(
         signer,
         async () => {
-          sentryAddBreadcrumb("Asking for signature 1");
+          sentryAddBreadcrumb("Asking for create signature");
           // Before calling "create" signature
-          setWaitingForSecondSignature(true);
-          clickedSecondSignature.current = false;
+          setWaitingForNextSignature(true);
+          clickedSignature.current = false;
         },
         async () => {
-          sentryAddBreadcrumb("Asking for signature 2");
+          sentryAddBreadcrumb("Asking for enable signature");
           // Before calling "enable" signature
-          const waitForClickSecondSignature = async () => {
-            while (!clickedSecondSignature.current) {
-              await new Promise((r) => setTimeout(r, 100));
-            }
-          };
-
-          if (waitingForSecondSignatureRef.current) {
+          if (waitingForNextSignatureRef.current) {
+            setSignaturesDone((s) => s + 1);
             setLoading(false);
-            sentryAddBreadcrumb("Waiting until second click...");
-            await waitForClickSecondSignature();
-            sentryAddBreadcrumb("Second click done!");
-            setWaitingForSecondSignature(false);
+            sentryAddBreadcrumb("Waiting until signature click for Enable");
+            await waitForClickSignature();
+            sentryAddBreadcrumb("Click on Sign done for Enable");
+          }
+          if (onXmtp && !alreadyV3Db) {
+            sentryAddBreadcrumb(
+              "Already on XMTP, but not db present, will need a new signature"
+            );
+            setWaitingForNextSignature(true);
+          } else {
+            sentryAddBreadcrumb(
+              "New to XMTP, or db already present, will not need a new signature"
+            );
+            setWaitingForNextSignature(false);
+          }
+        },
+        async () => {
+          sentryAddBreadcrumb("Asking for auth to inbox signature");
+          if (waitingForNextSignatureRef.current) {
+            setSignaturesDone((s) => s + 1);
+            setLoading(false);
+            sentryAddBreadcrumb(
+              "Waiting until signature click for Authenticate"
+            );
+            await waitForClickSignature();
+            sentryAddBreadcrumb("Click on Sign done for Authenticate");
+            setWaitingForNextSignature(false);
           }
         }
       );
@@ -235,17 +266,19 @@ export default function ConnectViaWallet({
     } catch (e) {
       initiatingClientFor.current = undefined;
       setLoading(false);
-      clickedSecondSignature.current = false;
-      setWaitingForSecondSignature(false);
+      clickedSignature.current = false;
+      setWaitingForNextSignature(false);
       console.error(e);
       sentryTrackError(e);
     }
   }, [
     address,
+    alreadyV3Db,
     connectWithBase64Key,
+    onXmtp,
     setLoading,
-    setWaitingForSecondSignature,
     signer,
+    waitForClickSignature,
   ]);
 
   let subtitle = (
@@ -262,9 +295,9 @@ export default function ConnectViaWallet({
   let backButtonAction = () => {};
 
   const primaryButtonAction = () => {
-    if (waitingForSecondSignature) {
+    if (waitingForNextSignature) {
       setLoading(true);
-      clickedSecondSignature.current = true;
+      clickedSignature.current = true;
     } else {
       setLoading(true);
       initXmtpClient();
@@ -278,23 +311,26 @@ export default function ConnectViaWallet({
 
   if (signer && address) {
     if (onXmtp) {
+      if (!alreadyV3Db) {
+        title = `${strings.sign} (${signaturesDone + 1}/2)`;
+      }
       subtitle = (
         <>
           <Text>
-            Second and last step: please sign with your wallet so that we make
-            sure you own it.{"\n\n"}
+            Please sign with your wallet so that we make sure you own it.
+            {"\n\n"}
           </Text>
           {termsAndConditions}
         </>
       );
     } else if (
-      (waitingForSecondSignature && !loading) ||
-      clickedSecondSignature.current
+      (waitingForNextSignature && !loading) ||
+      clickedSignature.current
     ) {
-      title = strings.sign_2_of_2;
+      title = `${strings.sign} (2/2)`;
       subtitle = <Text>{strings.sign_access}</Text>;
     } else {
-      title = strings.sign_1_of_2;
+      title = `${strings.sign} (1/2)`;
       subtitle = (
         <>
           <Text>{strings.first_signature_explanation}</Text>
