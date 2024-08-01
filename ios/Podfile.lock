@@ -22,20 +22,20 @@ PODS:
   - EXJSONUtils (0.13.1)
   - EXManifests (0.14.3):
     - ExpoModulesCore
-  - EXNotifications (0.28.10):
+  - EXNotifications (0.28.14):
     - ExpoModulesCore
-  - Expo (51.0.21):
+  - Expo (51.0.24):
     - ExpoModulesCore
-  - expo-dev-client (4.0.20):
+  - expo-dev-client (4.0.21):
     - EXManifests
     - expo-dev-launcher
     - expo-dev-menu
     - expo-dev-menu-interface
     - EXUpdatesInterface
-  - expo-dev-launcher (4.0.22):
+  - expo-dev-launcher (4.0.23):
     - DoubleConversion
     - EXManifests
-    - expo-dev-launcher/Main (= 4.0.22)
+    - expo-dev-launcher/Main (= 4.0.23)
     - expo-dev-menu
     - expo-dev-menu-interface
     - ExpoModulesCore
@@ -61,7 +61,7 @@ PODS:
     - ReactCommon/turbomodule/bridging
     - ReactCommon/turbomodule/core
     - Yoga
-  - expo-dev-launcher/Main (4.0.22):
+  - expo-dev-launcher/Main (4.0.23):
     - DoubleConversion
     - EXManifests
     - expo-dev-launcher/Unsafe
@@ -90,7 +90,7 @@ PODS:
     - ReactCommon/turbomodule/bridging
     - ReactCommon/turbomodule/core
     - Yoga
-  - expo-dev-launcher/Unsafe (4.0.22):
+  - expo-dev-launcher/Unsafe (4.0.23):
     - DoubleConversion
     - EXManifests
     - expo-dev-menu
@@ -118,10 +118,10 @@ PODS:
     - ReactCommon/turbomodule/bridging
     - ReactCommon/turbomodule/core
     - Yoga
-  - expo-dev-menu (5.0.16):
+  - expo-dev-menu (5.0.17):
     - DoubleConversion
-    - expo-dev-menu/Main (= 5.0.16)
-    - expo-dev-menu/ReactNativeCompatibles (= 5.0.16)
+    - expo-dev-menu/Main (= 5.0.17)
+    - expo-dev-menu/ReactNativeCompatibles (= 5.0.17)
     - glog
     - hermes-engine
     - RCT-Folly (= 2024.01.01.00)
@@ -142,7 +142,7 @@ PODS:
     - ReactCommon/turbomodule/core
     - Yoga
   - expo-dev-menu-interface (1.8.3)
-  - expo-dev-menu/Main (5.0.16):
+  - expo-dev-menu/Main (5.0.17):
     - DoubleConversion
     - EXManifests
     - expo-dev-menu-interface
@@ -168,7 +168,7 @@ PODS:
     - ReactCommon/turbomodule/bridging
     - ReactCommon/turbomodule/core
     - Yoga
-  - expo-dev-menu/ReactNativeCompatibles (5.0.16):
+  - expo-dev-menu/ReactNativeCompatibles (5.0.17):
     - DoubleConversion
     - glog
     - hermes-engine
@@ -189,7 +189,7 @@ PODS:
     - ReactCommon/turbomodule/bridging
     - ReactCommon/turbomodule/core
     - Yoga
-  - expo-dev-menu/SafeAreaView (5.0.16):
+  - expo-dev-menu/SafeAreaView (5.0.17):
     - DoubleConversion
     - ExpoModulesCore
     - glog
@@ -211,7 +211,7 @@ PODS:
     - ReactCommon/turbomodule/bridging
     - ReactCommon/turbomodule/core
     - Yoga
-  - expo-dev-menu/Vendored (5.0.16):
+  - expo-dev-menu/Vendored (5.0.17):
     - DoubleConversion
     - expo-dev-menu/SafeAreaView
     - glog
@@ -253,7 +253,7 @@ PODS:
     - ExpoModulesCore
   - ExpoHaptics (13.0.1):
     - ExpoModulesCore
-  - ExpoHead (3.5.18):
+  - ExpoHead (3.5.20):
     - ExpoModulesCore
   - ExpoImage (1.12.13):
     - ExpoModulesCore
@@ -270,7 +270,7 @@ PODS:
     - ExpoModulesCore
   - ExpoKeepAwake (13.0.2):
     - ExpoModulesCore
-  - ExpoModulesCore (1.12.19):
+  - ExpoModulesCore (1.12.20):
     - DoubleConversion
     - glog
     - hermes-engine
@@ -325,7 +325,7 @@ PODS:
   - EXTaskManager (11.8.2):
     - ExpoModulesCore
     - UMAppLoader
-  - EXUpdates (0.25.20):
+  - EXUpdates (0.25.21):
     - DoubleConversion
     - EASClient
     - EXManifests
@@ -1402,7 +1402,7 @@ PODS:
     - ReactCommon/turbomodule/bridging
     - ReactCommon/turbomodule/core
     - Yoga
-  - react-native-safe-area-context (4.10.1):
+  - react-native-safe-area-context (4.10.5):
     - React-Core
   - react-native-sfsymbols (1.2.1):
     - React
@@ -1776,16 +1776,16 @@ PODS:
     - GenericJSON (~> 2.0)
     - Logging (~> 1.0.0)
     - secp256k1.swift (~> 0.1)
-  - XMTP (0.13.13):
+  - XMTP (0.13.14):
     - Connect-Swift (= 0.12.0)
     - GzipSwift
     - LibXMTP (= 0.5.6-beta4)
     - web3.swift
-  - XMTPReactNative (2.1.4):
+  - XMTPReactNative (2.1.5):
     - ExpoModulesCore
     - MessagePacker
     - secp256k1.swift
-    - XMTP (= 0.13.13)
+    - XMTP (= 0.13.14)
   - Yoga (0.0.0)
 
 DEPENDENCIES:
@@ -1918,7 +1918,7 @@ DEPENDENCIES:
   - Sentry/HybridSDK (= 8.29.1)
   - SQLite.swift
   - UMAppLoader (from `../node_modules/unimodules-app-loader/ios`)
-  - XMTP (= 0.13.13)
+  - XMTP (= 0.13.14)
   - "XMTPReactNative (from `../node_modules/@xmtp/react-native-sdk/ios`)"
   - Yoga (from `../node_modules/react-native/ReactCommon/yoga`)
 
@@ -2215,11 +2215,11 @@ SPEC CHECKSUMS:
   EXImageLoader: ab589d67d6c5f2c33572afea9917304418566334
   EXJSONUtils: 30c17fd9cc364d722c0946a550dfbf1be92ef6a4
   EXManifests: c1fab4c3237675e7b0299ea8df0bcb14baca4f42
-  EXNotifications: e4738fea8e8e3a9f2ba4e98c73977b7914cb5a52
-  Expo: 6ff8c293719c5e5d23204e3f5fc9f472b5d0fd32
-  expo-dev-client: d24806e84d072563b0a26537c22ec902443e77d6
-  expo-dev-launcher: d5d9578924f01ed6647e4d406b35b985cc84c788
-  expo-dev-menu: 1a5c625ec904ae230ee552aeddb5c09949db4882
+  EXNotifications: 3d5a21d567df63efce497947c9106c80be3c6ba2
+  Expo: 798848eae1daf13363d69790986146b08d0cf92f
+  expo-dev-client: 3a5d838e562927099488c094acba1818296c6bc6
+  expo-dev-launcher: 84d56525632d4aa70ef5781ad7bc3c008097e4c1
+  expo-dev-menu: 8e776642ae80f793203b5b8cce63d9963d6ba07b
   expo-dev-menu-interface: be32c09f1e03833050f0ee290dcc86b3ad0e73e4
   ExpoAsset: 323700f291684f110fb55f0d4022a3362ea9f875
   ExpoBackgroundFetch: a06c553ecaf0bade0acd691042d996b9ce926327
@@ -2231,19 +2231,19 @@ SPEC CHECKSUMS:
   ExpoFileSystem: 80bfe850b1f9922c16905822ecbf97acd711dc51
   ExpoFont: e7f2275c10ca8573c991e007329ad6bf98086485
   ExpoHaptics: 5a3a88971af384255baf2504f38b41189cec6984
-  ExpoHead: 7880300d9c1519420530cf591d333d3f96ff9f6e
+  ExpoHead: 3e8eacccdad1256f0643b657d89bf972c27afb1d
   ExpoImage: cbe7617b4e0e7ba064cc4caa51bfc96262e51ef3
   ExpoImageManipulator: aea99205c66043a00a0af90e345395637b9902fa
   ExpoImagePicker: 12a420923383ae38dccb069847218f27a3b87816
   ExpoKeepAwake: 3b8815d9dd1d419ee474df004021c69fdd316d08
-  ExpoModulesCore: 0095fc6f64a1c1e2b939da5752f081adcb8fd8d3
+  ExpoModulesCore: 17a5163fddddcc6472ccf9d57a64f5a075a4c6db
   ExpoSecureStore: 060cebcb956b80ddae09821610ac1aa9e1ac74cd
   ExpoSystemUI: d4f065a016cae6721b324eb659cdee4d4cf0cb26
   ExpoWebBrowser: 7595ccac6938eb65b076385fd23d035db9ecdc8e
   EXSplashScreen: d8b3c547b9b18a41d80c6f6b274c4c26664febd4
   EXStructuredHeaders: cb8d1f698e144f4c5547b4c4963e1552f5d2b457
   EXTaskManager: 9c3520305c3aa1b4a12a7c6d1e3f85f2779c06e9
-  EXUpdates: bb875f363ef53f4a4b5074727479ef039131eef5
+  EXUpdates: e5a7de5d50a90efc4e4a071d1aeab487037abb43
   EXUpdatesInterface: 996527fd7d1a5d271eb523258d603f8f92038f24
   FBLazyVector: 7e977dd099937dc5458851233141583abba49ff2
   fmt: 4c2741a687cc09f0634a2e2c72a838b99f1ff120
@@ -2297,7 +2297,7 @@ SPEC CHECKSUMS:
   react-native-netinfo: bdb108d340cdb41875c9ced535977cac6d2ff321
   react-native-quick-base64: 777057ea4286f806b00259ede65dc79c7c706320
   react-native-quick-crypto: 09c5986efae9b05e31b0aba0be75fac9e4d8bd44
-  react-native-safe-area-context: dcab599c527c2d7de2d76507a523d20a0b83823d
+  react-native-safe-area-context: a240ad4b683349e48b1d51fed1611138d1bdad97
   react-native-sfsymbols: bd3a0d3eab185e80b571bae60753dcf5a0d57967
   react-native-sqlite-storage: f6d515e1c446d1e6d026aa5352908a25d4de3261
   react-native-webview: 5951c8e0d457322e39c580778dd8505daf3f0327
@@ -2351,10 +2351,10 @@ SPEC CHECKSUMS:
   SwiftProtobuf: 407a385e97fd206c4fbe880cc84123989167e0d1
   UMAppLoader: f17a5ee8e85b536ace0fc254b447a37ed198d57e
   web3.swift: 2263d1e12e121b2c42ffb63a5a7beb1acaf33959
-  XMTP: bce55f0cd8f4481b8f460581ddf7808dcd09c1de
-  XMTPReactNative: 365c997aa4607eb9857f12508240e631c16bfcc7
+  XMTP: f590939a897f00a0f957223eba31d5d6bee10a48
+  XMTPReactNative: ca743c3eedf7d9d6a8cc9b72e05db515c284da93
   Yoga: eed50599a85bd9f6882a9938d118aed6a397db9c
 
-PODFILE CHECKSUM: fe116c82af3523b3d5a4587e5d1fbb256bf8e5d9
+PODFILE CHECKSUM: 6d5072a4c5cbe78e24816127f6a5fdc8671ef508
 
 COCOAPODS: 1.15.2
