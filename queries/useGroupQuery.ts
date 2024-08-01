@@ -25,7 +25,6 @@ export const useGroupQuery = (account: string, topic: string) => {
           return null;
         }
       }
-      await group.sync();
       return group;
     },
     enabled: !!data && !!client && isGroupTopic(topic),
