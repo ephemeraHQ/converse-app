@@ -1,3 +1,7 @@
+import {
+  dropConverseDbConnections,
+  reconnectConverseDbConnections,
+} from "@data/db/driver";
 import { useCallback, useEffect, useRef } from "react";
 import { AppState, Platform } from "react-native";
 
@@ -76,6 +80,7 @@ export default function XmtpEngine() {
           appState.current.match(/inactive|background/) &&
           hydrationDone
         ) {
+          reconnectConverseDbConnections();
           await reconnectXmtpClientsDbConnections();
           loadSavedNotificationMessagesToContext();
           if (isInternetReachableRef.current) {
@@ -85,6 +90,7 @@ export default function XmtpEngine() {
           nextAppState.match(/inactive|background/) &&
           appState.current === "active"
         ) {
+          dropConverseDbConnections();
           await dropXmtpClientsDbConnections();
         }
         appState.current = nextAppState;

@@ -3,7 +3,7 @@ import { useCallback } from "react";
 
 import { useDisconnectFromPrivy } from "./privy";
 import { useDisconnectWallet } from "./wallet";
-import { clearConverseDb } from "../../data/db";
+import { clearConverseDb, getConverseDbPath } from "../../data/db";
 import {
   getAccountsList,
   getChatStore,
@@ -138,10 +138,13 @@ export const useLogoutFromConverse = (account: string) => {
   const disconnectWallet = useDisconnectWallet();
   const logout = useCallback(
     async (dropLocalDatabase: boolean) => {
+      // This clears the libxmtp sqlite database (v3 / groups)
+      const client = (await getXmtpClient(account)) as ConverseXmtpClientType;
+      await client.dropLocalDatabaseConnection();
+      console.log("[Logout] successfully dropped connection to libxmp db");
       if (dropLocalDatabase) {
-        // This clears the libxmtp sqlite database (v3 / groups)
-        const client = (await getXmtpClient(account)) as ConverseXmtpClientType;
         await client.deleteLocalDatabase();
+        console.log("[Logout] successfully deleted libxmp db");
       }
       disconnectWallet();
       const isPrivyAccount =
@@ -173,13 +176,14 @@ export const useLogoutFromConverse = (account: string) => {
         }
       });
 
-      // This clears the Converse sqlite database (v2)
-      clearConverseDb(account);
+      // Get converse db path before deleting account
+      const converseDbPath = await getConverseDbPath(account);
 
-      // Now that db has been deleted we can remove account
-      // from store (account holds the db id so it was needed
-      // to clear db)
+      // Remove account so we don't use it anymore
       useAccountsStore.getState().removeAccount(account);
+
+      // This clears the Converse sqlite database (v2)
+      clearConverseDb(account, converseDbPath);
 
       deleteXmtpClient(account);
       deleteSubscribedTopics(account);

@@ -1,6 +1,36 @@
-import { open, QueryResult, Transaction } from "@op-engineering/op-sqlite";
+import {
+  open,
+  OPSQLiteConnection,
+  QueryResult,
+  Transaction,
+} from "@op-engineering/op-sqlite";
+import { v4 as uuidv4 } from "uuid";
 
 // Inspired from https://github.com/margelo/react-native-quick-sqlite/blob/be9235eef7d892ed46177f4d4031cc1a9af723ad/src/index.ts#L348
+
+const databasesConnections: {
+  [id: string]: {
+    connection: OPSQLiteConnection;
+    options: { name: string; location?: string };
+  };
+} = {};
+
+export const dropConverseDbConnections = () => {
+  Object.values(databasesConnections).forEach((db) => {
+    db.connection.close();
+  });
+};
+
+export const reconnectConverseDbConnections = () => {
+  Object.keys(databasesConnections).forEach((dbId) => {
+    const options = databasesConnections[dbId].options;
+    const newDb = open({
+      name: options.name,
+      location: options.location,
+    });
+    databasesConnections[dbId].connection = newDb;
+  });
+};
 
 export const typeORMDriver = {
   openDatabase: (
@@ -12,10 +42,15 @@ export const typeORMDriver = {
     fail: (msg: string) => void
   ): any => {
     try {
+      const dbId = uuidv4();
       const db = open({
         name: options.name,
         location: options.location,
       });
+      databasesConnections[dbId] = {
+        connection: db,
+        options,
+      };
 
       const connection = {
         executeSql: async (
@@ -25,7 +60,9 @@ export const typeORMDriver = {
           fail: (msg: string) => void
         ) => {
           try {
-            const response = await db.executeAsync(sql, params);
+            const response = await databasesConnections[
+              dbId
+            ].connection.executeAsync(sql, params);
             ok(response);
           } catch (e: any) {
             fail(e);
@@ -34,11 +71,12 @@ export const typeORMDriver = {
         transaction: (
           fn: (tx: Transaction) => Promise<void>
         ): Promise<void> => {
-          return db.transaction(fn);
+          return databasesConnections[dbId].connection.transaction(fn);
         },
         close: (ok: any, fail: any) => {
           try {
-            db.close();
+            databasesConnections[dbId].connection.close();
+            delete databasesConnections[dbId];
             ok();
           } catch (e) {
             fail(e);
@@ -50,12 +88,16 @@ export const typeORMDriver = {
           location: string | undefined,
           callback: () => void
         ) => {
-          db.attach(dbNameToAttach, alias, location);
+          databasesConnections[dbId].connection.attach(
+            dbNameToAttach,
+            alias,
+            location
+          );
 
           callback();
         },
         detach: (alias: any, callback: () => void) => {
-          db.detach(alias);
+          databasesConnections[dbId].connection.detach(alias);
 
           callback();
         },

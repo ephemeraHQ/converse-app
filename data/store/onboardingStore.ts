@@ -29,9 +29,6 @@ type OnboardingStoreType = {
   loading: boolean;
   setLoading: (l: boolean) => void;
 
-  waitingForSecondSignature: boolean;
-  setWaitingForSecondSignature: (w: boolean) => void;
-
   isEphemeral: boolean;
   setIsEphemeral: (e: boolean) => void;
 
@@ -89,10 +86,6 @@ export const useOnboardingStore = create<OnboardingStoreType>()((set) => ({
       loading: l,
     })),
 
-  waitingForSecondSignature: false,
-  setWaitingForSecondSignature: (w) =>
-    set(() => ({ waitingForSecondSignature: w })),
-
   isEphemeral: false,
   setIsEphemeral: (e) =>
     set(() => ({
@@ -122,7 +115,6 @@ export const useOnboardingStore = create<OnboardingStoreType>()((set) => ({
       signer: undefined,
       address: undefined,
       loading: false,
-      waitingForSecondSignature: false,
       isEphemeral: false,
       privyAccountId: undefined,
       pkPath: undefined,

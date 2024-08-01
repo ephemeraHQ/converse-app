@@ -219,7 +219,7 @@ const getAccountStore = (account: string) => {
   if (account in storesByAccount) {
     return storesByAccount[account];
   } else {
-    throw new Error(`Tried to access non existent store for ${account}`);
+    return storesByAccount[TEMPORARY_ACCOUNT_NAME];
   }
 };
 

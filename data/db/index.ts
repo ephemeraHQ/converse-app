@@ -122,8 +122,7 @@ export const getConverseDbPath = async (account: string) => {
   return `${directory}/${filename}`;
 };
 
-export const clearConverseDb = async (account: string) => {
-  const dbPath = await getConverseDbPath(account);
+export const clearConverseDb = async (account: string, dbPath: string) => {
   let dbExists = await RNFS.exists(dbPath);
   console.log("[ClearDB]", { dbPath, dbExists });
   try {
@@ -159,7 +158,8 @@ export const clearConverseDb = async (account: string) => {
 };
 
 export async function resetConverseDb(account: string) {
-  await clearConverseDb(account);
+  const dbPath = await getConverseDbPath(account);
+  await clearConverseDb(account, dbPath);
   // Change filename & path to avoid locked state due to
   // filesystem locking the previous file path
   useAccountsStore.getState().resetDatabaseId(account);
