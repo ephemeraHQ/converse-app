@@ -10,7 +10,6 @@ import SplitScreenNavigation from "./Navigation/SplitScreenNavigation/SplitScree
 import { useIsSplitScreen } from "./Navigation/navHelpers";
 import NotificationsScreen from "./NotificationsScreen";
 import Onboarding from "./Onboarding";
-import UserProfile from "../components/Onboarding/UserProfile";
 import ActionSheetStateHandler from "../components/StateHandlers/ActionSheetStateHandler";
 import HydrationStateHandler from "../components/StateHandlers/HydrationStateHandler";
 import InitialStateHandler from "../components/StateHandlers/InitialStateHandler";
@@ -119,14 +118,14 @@ export default function Main() {
           Platform.OS === "android"))
     ) {
       screenToShow = <NotificationsScreen />;
-    } else if (
-      !(
-        currentUserName?.name &&
-        currentUserName?.displayName &&
-        currentUserName?.avatar
-      )
-    ) {
-      screenToShow = <UserProfile onboarding />;
+      // } else if (
+      //   !(
+      //     currentUserName?.name &&
+      //     currentUserName?.displayName &&
+      //     currentUserName?.avatar
+      //   )
+      // ) {
+      //   screenToShow = <UserProfile onboarding />;
     } else if (Platform.OS === "android") {
       // On Android the whole navigation is wrapped in a drawler
       // layout to be able to display the menu

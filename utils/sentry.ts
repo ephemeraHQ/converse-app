@@ -51,6 +51,7 @@ export const sentryAddBreadcrumb = (message: string, forceSafe = false) => {
   if (forceSafe) {
     data.safeValue = message;
   }
+  console.log(message);
   Sentry.addBreadcrumb({
     category: "converse",
     message,
