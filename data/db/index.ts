@@ -122,8 +122,7 @@ export const getConverseDbPath = async (account: string) => {
   return `${directory}/${filename}`;
 };
 
-export const clearConverseDb = async (account: string) => {
-  const dbPath = await getConverseDbPath(account);
+export const clearConverseDb = async (account: string, dbPath: string) => {
   let dbExists = await RNFS.exists(dbPath);
   console.log("[ClearDB]", { dbPath, dbExists });
   try {
