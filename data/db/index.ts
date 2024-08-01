@@ -158,7 +158,8 @@ export const clearConverseDb = async (account: string, dbPath: string) => {
 };
 
 export async function resetConverseDb(account: string) {
-  await clearConverseDb(account);
+  const dbPath = await getConverseDbPath(account);
+  await clearConverseDb(account, dbPath);
   // Change filename & path to avoid locked state due to
   // filesystem locking the previous file path
   useAccountsStore.getState().resetDatabaseId(account);
