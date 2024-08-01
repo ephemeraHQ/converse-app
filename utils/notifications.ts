@@ -377,20 +377,15 @@ const waitForLoadingSavedNotifications = async () => {
 
 export const loadSavedNotificationMessagesToContext = async () => {
   if (loadingSavedNotifications) {
-    addLog("waitForLoadingSavedNotifications");
     await waitForLoadingSavedNotifications();
   }
   loadingSavedNotifications = true;
-  addLog(`loadSavedNotificationMessagesToContext 0`);
   try {
     const knownAccounts = getAccountsList();
-    addLog(`loadSavedNotificationMessagesToContext 1`);
     const conversations = loadSavedNotificationsConversations();
     const messages = loadSavedNotificationsMessages();
-    addLog(`loadSavedNotificationMessagesToContext 2`);
 
     if (conversations && conversations.length > 0) {
-      addLog(`loadSavedNotificationMessagesToContext 4`);
       console.log(
         `Got ${conversations.length} new conversations from notifications:`,
         conversations
@@ -425,7 +420,6 @@ export const loadSavedNotificationMessagesToContext = async () => {
           });
         }
       });
-      addLog(`loadSavedNotificationMessagesToContext 5`);
       for (const account in conversationsToSaveByAccount) {
         await saveConversations(
           account,
@@ -433,12 +427,9 @@ export const loadSavedNotificationMessagesToContext = async () => {
           true
         );
       }
-      addLog(`loadSavedNotificationMessagesToContext 6`);
     }
-    addLog(`loadSavedNotificationMessagesToContext 7`);
 
     if (messages && messages.length > 0) {
-      addLog(`loadSavedNotificationMessagesToContext 8 - ${messages.length}`);
       messages.sort((m1: any, m2: any) => m1.sent - m2.sent);
       console.log(
         `Got ${messages.length} new messages from notifications:`,
@@ -461,28 +452,18 @@ export const loadSavedNotificationMessagesToContext = async () => {
             topic: message.topic,
             referencedMessageId: message.referencedMessageId,
           });
-        } else {
-          addLog(
-            `loadSavedNotificationMessagesToContext could not find account - ${
-              message.account
-            } - ${knownAccounts.join(",")}`
-          );
         }
       });
-      addLog(`loadSavedNotificationMessagesToContext 9`);
 
       const promises: Promise<void>[] = [];
 
       for (const account in messagesToSaveByAccount) {
         promises.push(saveMessages(account, messagesToSaveByAccount[account]));
       }
-      addLog(`loadSavedNotificationMessagesToContext 10`);
       await Promise.all(promises);
-      addLog(`loadSavedNotificationMessagesToContext 11`);
     }
 
     emptySavedNotificationsConversations();
-    addLog("Emptying notif messages 1");
     emptySavedNotificationsMessages();
     loadingSavedNotifications = false;
   } catch (e) {
@@ -492,7 +473,6 @@ export const loadSavedNotificationMessagesToContext = async () => {
       errorType: typeof e,
     });
     emptySavedNotificationsConversations();
-    addLog("Emptying notif messages 2");
     emptySavedNotificationsMessages();
     loadingSavedNotifications = false;
   }
