@@ -1,3 +1,4 @@
+import logger from "@utils/logger";
 import { TransactionReference } from "@xmtp/content-type-transaction-reference";
 import {
   DecodedMessage,
@@ -27,7 +28,6 @@ import {
 import { xmtpMessageFromDb } from "../../data/mappers";
 import { getChatStore } from "../../data/store/accountsStore";
 import { XmtpMessage } from "../../data/store/chatStore";
-import { addLog } from "../debug";
 import { sentryTrackError } from "../sentry";
 
 const BATCH_QUERY_PAGE_SIZE = 30;
@@ -167,9 +167,9 @@ const protocolMessagesToStateMessages = (
 export const streamAllMessages = async (account: string) => {
   await stopStreamingAllMessage(account);
   const client = (await getXmtpClient(account)) as ConverseXmtpClientType;
-  console.log(`[XmtpRN] Streaming messages for ${client.address}`);
+  logger.info(`[XmtpRN] Streaming messages for ${client.address}`);
   await client.conversations.streamAllMessages(async (message) => {
-    console.log(`[XmtpRN] Received a message for ${client.address}`, {
+    logger.info(`[XmtpRN] Received a message for ${client.address}`, {
       id: message.id,
       text: message.nativeContent.text,
       topic: message.topic,
@@ -183,16 +183,16 @@ export const streamAllMessages = async (account: string) => {
 
 export const stopStreamingAllMessage = async (account: string) => {
   const client = (await getXmtpClient(account)) as ConverseXmtpClientType;
-  console.log(`[XmtpRN] Stopped streaming messages for ${client.address}`);
+  logger.debug(`[XmtpRN] Stopped streaming messages for ${client.address}`);
   client.conversations.cancelStreamAllMessages();
 };
 
 // export const streamAllGroupMessages = async (account: string) => {
 //   await stopStreamingAllGroupMessage(account);
 //   const client = (await getXmtpClient(account)) as ConverseXmtpClientType;
-//   console.log(`[XmtpRN] Streaming group messages for ${client.address}`);
+//   logger.debug(`[XmtpRN] Streaming group messages for ${client.address}`);
 //   await client.conversations.streamAllGroupMessages(async (message) => {
-//     console.log(
+//     logger.debug(
 //       `[XmtpRN] Received a group message for ${client.address}`,
 //       message.nativeContent.text,
 //       message.id
@@ -203,7 +203,7 @@ export const stopStreamingAllMessage = async (account: string) => {
 
 // export const stopStreamingAllGroupMessage = async (account: string) => {
 //   const client = (await getXmtpClient(account)) as ConverseXmtpClientType;
-//   console.log(
+//   logger.debug(
 //     `[XmtpRN] Stopped streaming group messages for ${client.address}`
 //   );
 //   client.conversations.cancelStreamAllGroupMessages();
@@ -216,7 +216,7 @@ export const syncGroupsMessages = async (
   groups: GroupWithCodecsType[],
   queryGroupsFromTimestamp: { [topic: string]: number }
 ) => {
-  console.log(`Syncing ${groups.length} groups...`);
+  logger.info(`Syncing ${groups.length} groups...`);
   for (const group of groups) {
     // No need to group.sync here as syncGroupsMessages is called either
     // from handleNewConversation which syncs before, or on groups returned
@@ -224,9 +224,9 @@ export const syncGroupsMessages = async (
     const members = await group.members();
     groupMembers[group.topic] = members;
     saveMemberInboxIds(account, members);
-    console.log("synced group", group.topic);
+    logger.debug("synced group", group.topic);
   }
-  console.log(`${groups.length} groups synced!`);
+  logger.info(`${groups.length} groups synced!`);
   const newMessages = (
     await Promise.all(
       groups.map((g) =>
@@ -237,7 +237,7 @@ export const syncGroupsMessages = async (
       )
     )
   ).flat();
-  console.log(`${newMessages.length} groups messages pulled`);
+  logger.info(`${newMessages.length} groups messages pulled`);
   saveMessages(account, protocolMessagesToStateMessages(newMessages));
   return newMessages.length;
 };
@@ -262,7 +262,7 @@ export const syncConversationsMessages = async (
         direction: "SORT_DIRECTION_ASCENDING",
       }))
     );
-    console.log(
+    logger.debug(
       `[XmtpRn] Fetched ${messagesBatch.length} messages from network for ${client.address}`
     );
 
@@ -297,7 +297,7 @@ export const syncConversationsMessages = async (
         queryConversationsFromTimestamp[topic] ===
         oldQueryConversationsFromTimestamp[topic]
       ) {
-        console.log(
+        logger.debug(
           "[XmtpRn] Avoiding a loop during sync due to weird timestamps"
         );
         queryConversationsFromTimestamp[topic] += 1;
@@ -311,7 +311,7 @@ export const syncConversationsMessages = async (
       protocolMessagesToStateMessages(messagesBatch)
     );
   }
-  addLog(`Fetched ${messagesFetched} messages from network`);
+  logger.info(`Fetched ${messagesFetched} 1:1 messages from network`);
   return messagesFetched;
 };
 

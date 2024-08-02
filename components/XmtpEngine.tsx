@@ -2,6 +2,7 @@ import {
   dropConverseDbConnections,
   reconnectConverseDbConnections,
 } from "@data/db/driver";
+import logger from "@utils/logger";
 import { useCallback, useEffect, useRef } from "react";
 import { AppState, Platform } from "react-native";
 
@@ -138,7 +139,7 @@ export default function XmtpEngine() {
           await createPendingConversations(account);
           await sendPendingMessages(account);
         } catch (e) {
-          console.log(e);
+          logger.error(e);
         }
       }
     }

@@ -6,6 +6,7 @@ import {
   textPrimaryColor,
   textSecondaryColor,
 } from "@styles/colors";
+import logger from "@utils/logger";
 import { useCallback, useEffect, useState } from "react";
 import { StyleSheet, Text, View, useColorScheme } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -64,7 +65,7 @@ export default function GroupScreen({
             await refreshGroup(account, topic);
             foundGroup = true;
           } catch (e) {
-            console.log(e);
+            logger.warn(e);
             await new Promise((r) => setTimeout(r, 1000));
           }
         }

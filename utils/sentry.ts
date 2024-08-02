@@ -51,7 +51,6 @@ export const sentryAddBreadcrumb = (message: string, forceSafe = false) => {
   if (forceSafe) {
     data.safeValue = message;
   }
-  console.log(message);
   Sentry.addBreadcrumb({
     category: "converse",
     message,
@@ -69,7 +68,6 @@ export const sentryTrackMessage = (message: string, extras = {} as any) => {
 };
 
 export const sentryTrackError = (error: any, extras = {} as any) => {
-  console.error(error, extras);
   Sentry.withScope((scope) => {
     scope.setExtras(extras);
     Sentry.captureException(error);

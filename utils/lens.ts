@@ -1,5 +1,6 @@
 import axios from "axios";
 
+import logger from "./logger";
 import config from "../config";
 import { LensHandle } from "../data/store/profilesStore";
 
@@ -32,7 +33,7 @@ export const getLensOwner = async (handle: string): Promise<string | null> => {
     });
     return data.data?.profile?.ownedBy || null;
   } catch (e: any) {
-    console.log(e?.response);
+    logger.warn(e?.response);
   }
   return null;
 };

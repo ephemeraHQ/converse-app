@@ -1,3 +1,4 @@
+import logger from "@utils/logger";
 import { RemoteAttachmentContent } from "@xmtp/react-native-sdk";
 import isDeepEqual from "fast-deep-equal";
 import { Platform } from "react-native";
@@ -347,7 +348,7 @@ export const initChatStore = (account: string) => {
           updateConversationTopic: (oldTopic, conversation) =>
             set((state) => {
               if (oldTopic in state.conversations) {
-                console.log(
+                logger.debug(
                   `TOPIC UPDATE: old topic ${oldTopic} to new topic ${conversation.topic}`
                 );
                 const newState = { ...state };
@@ -377,7 +378,7 @@ export const initChatStore = (account: string) => {
           setConversationMessageDraft: (topic, messageDraft) =>
             set((state) => {
               if (!state.conversations[topic]) {
-                console.log(
+                logger.warn(
                   "[Error] Tried to set message draft on non existent conversation",
                   topic
                 );
@@ -390,7 +391,7 @@ export const initChatStore = (account: string) => {
           setConversationMediaPreview: (topic, mediaPreview) =>
             set((state) => {
               if (!state.conversations[topic]) {
-                console.log(
+                logger.warn(
                   "[Error] Tried to set media preview on non existent conversation",
                   topic
                 );
@@ -825,7 +826,7 @@ export const initChatStore = (account: string) => {
         },
         version: 2,
         migrate: (persistedState: any, version: number): ChatStoreType => {
-          console.log("Zustand migration version:", version);
+          logger.debug("Zustand migration version:", version);
           // Migration from version 0: Convert 'deletedTopics' to 'topicsStatus'
           if (version < 1 && persistedState.deletedTopics) {
             persistedState.topicsStatus = {};

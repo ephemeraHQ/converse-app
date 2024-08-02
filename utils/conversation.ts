@@ -10,6 +10,7 @@ import {
 } from "./attachment/helpers";
 import { getAddressForPeer } from "./eth";
 import { getGroupIdFromTopic } from "./groupUtils/groupId";
+import logger from "./logger";
 import { subscribeToNotifications } from "./notifications";
 import { pick } from "./objects";
 import { getReactionsContentPreview } from "./reactions";
@@ -131,7 +132,7 @@ export const conversationLastMessagePreview = async (
             }
           }
         } catch (e) {
-          console.log(e);
+          logger.error(e);
           removedReactions = {};
           continue;
         }

@@ -1,3 +1,4 @@
+import logger from "@utils/logger";
 import { ConverseXmtpClientType } from "@utils/xmtpRN/client";
 import { useCallback } from "react";
 
@@ -37,7 +38,7 @@ export const getLogoutTasks = (): LogoutTasks => {
     try {
       return JSON.parse(logoutTasksString);
     } catch (e) {
-      console.log(e);
+      logger.warn(e);
       return {};
     }
   } else {
@@ -50,7 +51,7 @@ export const removeLogoutTask = (account: string) => {
   if (account in logoutTasks) {
     delete logoutTasks[account];
     mmkv.set("converse-logout-tasks", JSON.stringify(logoutTasks));
-    console.log(`[Logout] Removed ${account} from logout tasks`);
+    logger.debug(`[Logout] Removed ${account} from logout tasks`);
   }
 };
 
@@ -63,14 +64,14 @@ export const saveLogoutTask = (
   const logoutTasks = getLogoutTasks();
   logoutTasks[account] = { topics, apiHeaders, pkPath };
   mmkv.set("converse-logout-tasks", JSON.stringify(logoutTasks));
-  console.log(
+  logger.debug(
     `[Logout] Saved ${topics.length} topics to logout for ${account}`
   );
 };
 
 export const waitForLogoutTasksDone = async (ms: number) => {
   while (executingLogoutTasks) {
-    console.log(`[Logout] Executing logout tasks, waiting for a bit`);
+    logger.debug(`[Logout] Executing logout tasks, waiting for a bit`);
     await new Promise((r) => setTimeout(r, ms));
   }
 };
@@ -102,7 +103,7 @@ export const executeLogoutTasks = async () => {
     try {
       assertNotLogged(account);
       const task = tasks[account];
-      console.log(
+      logger.debug(
         `[Logout] Executing logout task for ${account} (${task.topics.length} topics)`
       );
       // await deleteXmtpDatabaseEncryptionKey(account);
@@ -141,10 +142,10 @@ export const useLogoutFromConverse = (account: string) => {
       // This clears the libxmtp sqlite database (v3 / groups)
       const client = (await getXmtpClient(account)) as ConverseXmtpClientType;
       await client.dropLocalDatabaseConnection();
-      console.log("[Logout] successfully dropped connection to libxmp db");
+      logger.debug("[Logout] successfully dropped connection to libxmp db");
       if (dropLocalDatabase) {
         await client.deleteLocalDatabase();
-        console.log("[Logout] successfully deleted libxmp db");
+        logger.debug("[Logout] successfully deleted libxmp db");
       }
       disconnectWallet();
       const isPrivyAccount =

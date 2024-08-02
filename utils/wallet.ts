@@ -1,7 +1,8 @@
-import config from "../config";
-import { getAccountsList, getWalletStore } from "../data/store/accountsStore";
 import { getErc20BalanceForAddress } from "./evm/erc20";
 import provider from "./evm/provider";
+import logger from "./logger";
+import config from "../config";
+import { getAccountsList, getWalletStore } from "../data/store/accountsStore";
 
 const lastRefreshByAccount: { [account: string]: number } = {};
 const refreshingBalanceForAccount: { [account: string]: boolean } = {};
@@ -16,7 +17,7 @@ export const refreshBalanceForAccount = async (
   const lastRefresh = lastRefreshByAccount[account] || 0;
   const now = new Date().getTime();
   if (now - lastRefresh < delayMs) {
-    console.log(
+    logger.info(
       `Balance for ${account} already refreshed less than ${
         delayMs / 1000
       }s ago`
@@ -32,7 +33,6 @@ export const refreshBalanceForAccount = async (
     );
     lastRefreshByAccount[account] = now;
     getWalletStore(account).getState().setUSDCBalance(balance);
-    console.log(`Got USDC Balance for ${account}: ${balance}`);
   } catch (e) {
     console.error(e);
   }

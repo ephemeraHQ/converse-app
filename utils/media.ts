@@ -5,6 +5,7 @@ import * as ImagePicker from "expo-image-picker";
 import { useCallback, useState } from "react";
 import { Alert, Image, Linking, Platform, useColorScheme } from "react-native";
 
+import logger from "./logger";
 import { showActionSheetWithOptions } from "../components/StateHandlers/ActionSheetStateHandler";
 import { executeAfterKeyboardClosed } from "../utils/keyboard";
 
@@ -426,7 +427,7 @@ export const compressAndResizeImage = async (
 ) => {
   const imageSize = await getImageSize(imageURI);
   const newSize = calculateImageOptiSize(imageSize, avatar);
-  console.log(
+  logger.debug(
     `[ImageUtils] Resizing and compressing image to ${newSize.height}x${newSize.width} (was ${imageSize.height}x${imageSize.width})`
   );
   const manipResult = await manipulateAsync(imageURI, [{ resize: newSize }], {

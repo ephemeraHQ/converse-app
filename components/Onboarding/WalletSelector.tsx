@@ -1,4 +1,5 @@
 import { textSecondaryColor } from "@styles/colors";
+import logger from "@utils/logger";
 import { thirdwebClient } from "@utils/thirdweb";
 import * as Linking from "expo-linking";
 import { useEffect, useRef, useState } from "react";
@@ -171,7 +172,7 @@ export default function WalletSelector() {
                     return walletConnectWallet;
                   }
                 } catch (e: any) {
-                  console.log("Error connecting to wallet:", e);
+                  logger.error("Error connecting to wallet:", e);
                   setConnectionMethod(undefined);
                   setLoading(false);
                 }

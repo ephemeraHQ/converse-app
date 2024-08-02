@@ -1,3 +1,4 @@
+import logger from "@utils/logger";
 import { AppState, Platform } from "react-native";
 import RNFS from "react-native-fs";
 import { Repository } from "typeorm/browser";
@@ -45,7 +46,7 @@ export const getRepository = async <T extends keyof RepositoriesForAccount>(
     !repositories[account]?.[entity] ||
     AppState.currentState.match(/inactive|background/)
   ) {
-    console.log(`Database for ${account} not yet initialized`);
+    logger.debug(`Database for ${account} not yet initialized`);
     await new Promise((r) => setTimeout(r, 100));
   }
   return repositories[account][entity];
@@ -56,10 +57,10 @@ export const initDb = async (account: string): Promise<void> => {
   if (dataSource.isInitialized) {
     return;
   }
-  console.log(`Initializing Database for ${account}`);
+  logger.debug(`Initializing Database for ${account}`);
   try {
     await dataSource.initialize();
-    console.log(`Database initialized for ${account}`);
+    logger.debug(`Database initialized for ${account}`);
     // https://phiresky.github.io/blog/2020/sqlite-performance-tuning/
     await Promise.all([
       dataSource.query(
@@ -69,11 +70,11 @@ export const initDb = async (account: string): Promise<void> => {
       dataSource.query("PRAGMA temp_store=memory;"),
       dataSource.query("PRAGMA mmap_size=30000000000;"),
     ]);
-    console.log(`Database optimized for ${account}`);
+    logger.debug(`Database optimized for ${account}`);
     try {
-      console.log(`Running migrations for ${account}`);
+      logger.debug(`Running migrations for ${account}`);
       const r = await dataSource.runMigrations();
-      console.log(`Migrations done for ${account}`, r);
+      logger.debug(`Migrations done for ${account}`);
       repositories[account] = {
         conversation: dataSource.getRepository(Conversation),
         message: dataSource.getRepository(Message),
@@ -81,7 +82,6 @@ export const initDb = async (account: string): Promise<void> => {
       };
     } catch (e: any) {
       sentryTrackError(e, { account, message: "Error running migrations" });
-      console.log(`Error running migrations - destroying db for ${account}`, e);
       await resetConverseDb(account);
     }
   } catch (e: any) {
@@ -124,18 +124,18 @@ export const getConverseDbPath = async (account: string) => {
 
 export const clearConverseDb = async (account: string, dbPath: string) => {
   let dbExists = await RNFS.exists(dbPath);
-  console.log("[ClearDB]", { dbPath, dbExists });
+  logger.debug("[ClearDB]", { dbPath, dbExists });
   try {
     const dataSource = getExistingDataSource(account);
     if (dataSource) {
       await dataSource.destroy();
-      console.log(`[ClearDB] Datasource destroyed - ${account}`);
+      logger.debug(`[ClearDB] Datasource destroyed - ${account}`);
     } else {
-      console.log(`[ClearDB] Not datasource to destroy for ${account}`);
+      logger.debug(`[ClearDB] Not datasource to destroy for ${account}`);
     }
   } catch (e) {
     sentryTrackError(e, { message: "Couldn't destroy datasource", account });
-    console.log(`[ClearDB] Couldn't destroy datasource ${account} ${e}`);
+    logger.debug(`[ClearDB] Couldn't destroy datasource ${account} ${e}`);
   }
   deleteDataSource(account);
   delete repositories[account];
@@ -143,16 +143,16 @@ export const clearConverseDb = async (account: string, dbPath: string) => {
   // Now let's delete the database file
   dbExists = await RNFS.exists(dbPath);
   if (!dbExists) {
-    console.log(
+    logger.debug(
       `[ClearDB] SQlite file ${dbPath} does not exist, no need to delete`
     );
   } else {
     if (env !== "dev") {
       // Won't clear db in dev mode so Testflight users still have access
-      console.log(`[ClearDB] Deleting SQlite file ${dbPath}`);
+      logger.debug(`[ClearDB] Deleting SQlite file ${dbPath}`);
       await RNFS.unlink(dbPath);
 
-      console.log(`[ClearDB] Deleted SQlite file ${dbPath}`);
+      logger.debug(`[ClearDB] Deleted SQlite file ${dbPath}`);
     }
   }
 };

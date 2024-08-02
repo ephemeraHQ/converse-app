@@ -1,3 +1,4 @@
+import logger from "@utils/logger";
 import {
   Attachment,
   EncryptedEncodedContent,
@@ -78,7 +79,7 @@ export const useAttachmentForMessage = (message: MessageToDisplay) => {
         try {
           imageSize = await getImageSize(url);
         } catch (e) {
-          console.log(e);
+          logger.warn(e);
         }
       }
 
@@ -148,7 +149,7 @@ export const useAttachmentForMessage = (message: MessageToDisplay) => {
           } as Attachment);
         }
       } catch (e) {
-        console.log(e);
+        logger.warn(e);
       }
 
       // Last, if media is local or if remote but supported and size is ok, we fetch immediatly

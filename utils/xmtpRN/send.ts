@@ -1,3 +1,4 @@
+import logger from "@utils/logger";
 import {
   ContentTypeTransactionReference,
   TransactionReference,
@@ -53,7 +54,7 @@ const sendConversePreparedMessages = async (
       await markMessageAsSent(account, id, preparedMessage.topic);
       delete sendingMessages[id];
     } catch (e: any) {
-      console.log("Could not send message, will probably try again later", e);
+      logger.warn("Could not send message, will probably try again later", e);
       delete sendingMessages[id];
     }
   }
@@ -65,7 +66,7 @@ const publishConverseGroupMessages = async (groups: GroupWithCodecsType[]) => {
       Object.values(groups).map((g) => g.publishPreparedMessages())
     );
   } catch (e) {
-    console.log("Could not send message, will probably try again later", e);
+    logger.warn("Could not send message, will probably try again later", e);
   }
 };
 
@@ -150,7 +151,7 @@ export const sendPendingMessages = async (account: string) => {
       sendingPendingMessages = false;
       return;
     }
-    console.log(`Trying to send ${messagesToSend.length} pending messages...`);
+    logger.info(`Trying to send ${messagesToSend.length} pending messages...`);
     const preparedMessagesToSend: Map<string, ConversePreparedMessage> =
       new Map();
     const groupMessagesToSend: Map<
@@ -217,7 +218,7 @@ export const sendPendingMessages = async (account: string) => {
           }
         }
       } else {
-        console.log(
+        logger.warn(
           `Did not find the conversation for topic ${message.conversationId}, will retry...`
         );
       }
@@ -229,7 +230,7 @@ export const sendPendingMessages = async (account: string) => {
       Object.values(groupsWithPreparedMessages)
     );
   } catch (e) {
-    console.log(e);
+    logger.warn(e);
   }
   sendingPendingMessages = false;
 };

@@ -14,12 +14,12 @@ import {
   conversationShouldBeDisplayed,
   conversationShouldBeInInbox,
 } from "./conversation";
-import { addLog, debugTimeSpent } from "./debug";
+import { debugTimeSpent } from "./debug";
 import { getGroupIdFromTopic } from "./groupUtils/groupId";
 import { savePushToken } from "./keychain/helpers";
+import logger from "./logger";
 import mmkv from "./mmkv";
 import { navigateToConversation, setTopicToNavigateTo } from "./navigation";
-import { sentryTrackError } from "./sentry";
 import {
   emptySavedNotificationsConversations,
   emptySavedNotificationsMessages,
@@ -57,8 +57,6 @@ const subscribingByAccount: { [account: string]: boolean } = {};
 const subscribedOnceByAccount: { [account: string]: boolean } = {};
 
 const buildUserGroupInviteTopic = (account: string): string => {
-  console.log("buildUserGroupInviteTopic", account);
-
   return `/xmtp/mls/1/w-${account}/proto`;
 };
 
@@ -93,7 +91,7 @@ const _subscribeToNotifications = async (account: string): Promise<void> => {
   if (notificationsPermissionStatus !== "granted") return;
   if (subscribingByAccount[account] || !conversationsSortedOnce) {
     await new Promise((r) => setTimeout(r, 1000));
-    addLog("[NO12] resubscribing...");
+    logger.debug("Resubscribing to notifications in 1sec");
     await _subscribeToNotifications(account);
     return;
   }
@@ -223,19 +221,11 @@ const _subscribeToNotifications = async (account: string): Promise<void> => {
       lastNotifSubscribeByAccount[account] || {};
     const lastStringToHash = lastNotifSubscribeByAccount[account]?.stringToHash;
 
-    addLog(
-      JSON.stringify({
-        stringToHash: stringToHash.length,
-        lastStringToHash: lastStringToHash?.length,
-      })
-    );
     if (stringToHash === lastStringToHash) {
-      addLog("ALREADY SUBSCRIBED EXACTLY");
       delete subscribingByAccount[account];
       return;
     }
 
-    addLog("[NO12] hashing...");
     debugTimeSpent({ id: "hash" });
 
     const hash = (
@@ -256,7 +246,7 @@ const _subscribeToNotifications = async (account: string): Promise<void> => {
       return;
     }
 
-    addLog(
+    logger.info(
       `[Notifications] Subscribing to ${
         Object.keys(topicsToUpdateForPeriod).length
       } topic for ${account}`
@@ -298,7 +288,7 @@ const _subscribeToNotifications = async (account: string): Promise<void> => {
 
     subscribedOnceByAccount[account] = true;
   } catch (e) {
-    console.log("[Notifications] Error while subscribing:", e);
+    logger.error(e, { context: "Error while subscribing to notifications" });
   }
   delete subscribingByAccount[account];
 };
@@ -386,7 +376,7 @@ export const loadSavedNotificationMessagesToContext = async () => {
     const messages = loadSavedNotificationsMessages();
 
     if (conversations && conversations.length > 0) {
-      console.log(
+      logger.debug(
         `Got ${conversations.length} new conversations from notifications:`,
         conversations
       );
@@ -431,7 +421,7 @@ export const loadSavedNotificationMessagesToContext = async () => {
 
     if (messages && messages.length > 0) {
       messages.sort((m1: any, m2: any) => m1.sent - m2.sent);
-      console.log(
+      logger.debug(
         `Got ${messages.length} new messages from notifications:`,
         messages
       );
@@ -467,11 +457,11 @@ export const loadSavedNotificationMessagesToContext = async () => {
     emptySavedNotificationsMessages();
     loadingSavedNotifications = false;
   } catch (e) {
-    console.log("An error occured while loading saved notifications", e);
-    sentryTrackError(e, {
+    logger.error(e, {
       error: "An error occured while loading saved notifications",
       errorType: typeof e,
     });
+
     emptySavedNotificationsConversations();
     emptySavedNotificationsMessages();
     loadingSavedNotifications = false;

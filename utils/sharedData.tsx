@@ -1,6 +1,5 @@
-import { addLog } from "./debug";
+import logger from "./logger";
 import mmkv from "./mmkv";
-import { sentryTrackError } from "./sentry";
 import config from "../config";
 
 export const saveConversationDict = (topic: string, conversationDict: any) =>
@@ -9,19 +8,16 @@ export const saveConversationDict = (topic: string, conversationDict: any) =>
 export const saveXmtpEnv = () => mmkv.set("xmtp-env", config.xmtpEnv);
 
 export const loadSavedNotificationsMessages = () => {
-  addLog("loadSavedNotificationMessagesToContext loading from MMKV");
   const value = mmkv.getString("saved-notifications-messages");
-  addLog(`loadSavedNotificationMessagesToContext loaded from MMKV - ${value}`);
   if (value) {
     try {
       return JSON.parse(value);
     } catch (e) {
-      addLog(`loadSavedNotificationMessagesToContext mmkv error : ${e}`);
-      sentryTrackError(e);
+      logger.error(e, {
+        context: "loadSavedNotificationMessagesToContext mmkv",
+      });
       return [];
     }
-  } else {
-    addLog("loadSavedNotificationMessagesToContext no value loading from MMKV");
   }
   return [];
 };
@@ -35,7 +31,7 @@ export const loadSavedNotificationsConversations = () => {
     try {
       return JSON.parse(value);
     } catch (e) {
-      console.log(e);
+      logger.warn(e);
       return [];
     }
   }
@@ -48,7 +44,6 @@ export const emptySavedNotificationsConversations = () =>
 export const saveApiURI = () => mmkv.set("api-uri", config.apiURI);
 
 export const resetSharedData = (topics: string[]) => {
-  addLog("Emptying notif messages 3");
   emptySavedNotificationsMessages();
   emptySavedNotificationsConversations();
   topics.forEach((t) => {

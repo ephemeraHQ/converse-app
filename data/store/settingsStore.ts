@@ -1,3 +1,4 @@
+import logger from "@utils/logger";
 import { InboxId } from "@xmtp/react-native-sdk";
 import { Platform } from "react-native";
 import { create } from "zustand";
@@ -145,7 +146,7 @@ export const initSettingsStore = (account: string) => {
         storage: createJSONStorage(() => zustandMMKVStorage),
         version: 1,
         migrate: (persistedState: any, version: number): SettingsStoreType => {
-          console.log("Zustand migration version:", version);
+          logger.debug("Zustand migration version:", version);
 
           // Migration from version 0: Convert 'blockedPeers' to 'peersStatus'
           if (version === 0 && persistedState.blockedPeers) {
