@@ -1,4 +1,5 @@
 import "reflect-metadata";
+import logger from "@utils/logger";
 import { DataSource } from "typeorm/browser";
 
 import { getDbDirectory, getDbFileName } from ".";
@@ -49,7 +50,7 @@ export const getDataSource = async (account: string) => {
   const existingDatasource = getExistingDataSource(account);
   if (existingDatasource) return existingDatasource;
   const fileName = getDbFileName(account);
-  console.log(`[Datasource] Initializing datasource for ${fileName}`);
+  logger.debug(`[Datasource] Initializing datasource for ${fileName}`);
 
   const newDataSource = new DataSource({
     database: fileName,

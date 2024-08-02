@@ -1,4 +1,5 @@
 import { useMutation } from "@tanstack/react-query";
+import logger from "@utils/logger";
 
 import { setGroupPhotoMutationKey } from "./MutationKeys";
 import {
@@ -28,14 +29,14 @@ export const useGroupPhotoMutation = (account: string, topic: string) => {
     },
     // eslint-disable-next-line node/handle-callback-err
     onError: (_error, _variables, context) => {
-      console.log("onError useGroupPhotoMutation");
+      logger.warn("onError useGroupPhotoMutation");
       if (context?.previousGroupPhoto === undefined) {
         return;
       }
       setGroupPhotoQueryData(account, topic, context.previousGroupPhoto);
     },
     onSuccess: (data, variables, context) => {
-      console.log("onSuccess useGroupPhotoMutation");
+      logger.debug("onSuccess useGroupPhotoMutation");
       refreshGroup(account, topic);
     },
   });

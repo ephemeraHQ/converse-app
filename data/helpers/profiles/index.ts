@@ -1,4 +1,5 @@
-import { sentryTrackMessage } from "../../../utils/sentry";
+import logger from "@utils/logger";
+
 import { getRepository } from "../../db";
 import { Profile } from "../../db/entities/profileEntity";
 import { ProfileSocials } from "../../store/profilesStore";
@@ -24,9 +25,7 @@ const getSocials = (profileEntity: Profile): ProfileSocials => {
     const parsed = JSON.parse(profileEntity.socials);
     return parsed;
   } catch (error) {
-    const data = { error, socials: profileEntity.socials };
-    console.log(data);
-    sentryTrackMessage("SOCIALS_PARSING_ERROR", data);
+    logger.error(error, { socials: profileEntity.socials });
     return {};
   }
 };

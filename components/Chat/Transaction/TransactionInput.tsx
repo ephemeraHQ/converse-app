@@ -130,7 +130,6 @@ export default function TransactionInput() {
         overBalance: false,
       });
     } catch (e) {
-      console.log(e);
       setTransactionValue({
         valid: false,
         value: "",

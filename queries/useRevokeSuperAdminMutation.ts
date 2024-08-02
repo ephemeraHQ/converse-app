@@ -1,4 +1,5 @@
 import { useMutation } from "@tanstack/react-query";
+import logger from "@utils/logger";
 import { Member } from "@xmtp/react-native-sdk";
 import { InboxId } from "@xmtp/react-native-sdk/build/lib/Client";
 
@@ -44,14 +45,14 @@ export const useRevokeSuperAdminMutation = (account: string, topic: string) => {
       return { previousGroupMembers };
     },
     onError: (_error, _variables, context) => {
-      console.log("onError useRevokeSuperAdminMutation");
+      logger.warn("onError useRevokeSuperAdminMutation");
       if (context?.previousGroupMembers === undefined) {
         return;
       }
       setGroupMembersQueryData(account, topic, context.previousGroupMembers);
     },
     onSuccess: (data, variables, context) => {
-      console.log("onSuccess useRevokeSuperAdminMutation");
+      logger.debug("onSuccess useRevokeSuperAdminMutation");
       refreshGroup(account, topic);
     },
   });

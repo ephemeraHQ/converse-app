@@ -1,3 +1,4 @@
+import logger from "@utils/logger";
 import { ConsentListEntry } from "@xmtp/react-native-sdk";
 
 import { getChatStore, getSettingsStore } from "../../data/store/accountsStore";
@@ -7,7 +8,9 @@ import { getXmtpClient } from "../../utils/xmtpRN/sync";
 import { SettingsStoreType } from "../store/settingsStore";
 
 export const setConsent = async (account: string) => {
-  console.log(`[Async Updates] Running 001-setConsent for account: ${account}`);
+  logger.debug(
+    `[Async Updates] Running 001-setConsent for account: ${account}`
+  );
 
   // Sync peers status from API
   const peersStatusFromAPI = await getPeersStatus(account);

@@ -3,6 +3,7 @@ import {
   textPrimaryColor,
   textSecondaryColor,
 } from "@styles/colors";
+import logger from "@utils/logger";
 import { PrivateKey, decrypt } from "eciesjs";
 import * as Linking from "expo-linking";
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -110,7 +111,7 @@ export default function DesktopConnectFlow() {
         inDesktopConnectInterval.current = false;
       }
     } catch (e: any) {
-      console.log(e);
+      logger.error(e);
       setLocalState((s) => ({
         ...s,
         subtitle: (

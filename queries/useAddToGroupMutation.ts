@@ -1,4 +1,5 @@
 import { useMutation } from "@tanstack/react-query";
+import logger from "@utils/logger";
 
 import { addMemberMutationKey } from "./MutationKeys";
 import {
@@ -24,10 +25,10 @@ export const useAddToGroupMutation = (account: string, topic: string) => {
       await cancelGroupMembersQuery(account, topic);
     },
     onError: (_error, _variables, _context) => {
-      console.log("onError useAddToGroupMutation");
+      logger.warn("onError useAddToGroupMutation");
     },
     onSuccess: (_data, _variables, _context) => {
-      console.log("onSuccess useAddToGroupMutation");
+      logger.debug("onSuccess useAddToGroupMutation");
       invalidateGroupMembersQuery(account, topic);
       refreshGroup(account, topic);
     },

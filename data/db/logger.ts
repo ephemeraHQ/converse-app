@@ -1,6 +1,5 @@
+import logger from "@utils/logger";
 import { Logger, QueryRunner } from "typeorm/browser";
-
-import { sentryTrackMessage } from "../../utils/sentry";
 
 export class TypeORMLogger implements Logger {
   logQueryError(
@@ -9,7 +8,7 @@ export class TypeORMLogger implements Logger {
     parameters?: any[] | undefined,
     queryRunner?: QueryRunner | undefined
   ) {
-    sentryTrackMessage("TYPEORM_QUERY_ERROR", { error, query, parameters });
+    logger.error(error, { type: "TYPEORM_QUERY_ERROR", query, parameters });
   }
 
   logQuerySlow(
@@ -18,26 +17,26 @@ export class TypeORMLogger implements Logger {
     parameters?: any[] | undefined,
     queryRunner?: QueryRunner | undefined
   ) {
-    // console.log(`⏰ SLOW QUERY ${time}ms: ${query}`, parameters);
+    // logger.debug(`⏰ SLOW QUERY ${time}ms: ${query}`, parameters);
   }
   logMigration(message: string, queryRunner?: QueryRunner | undefined) {
-    // console.log(message);
+    // logger.debug(message);
   }
   logQuery(
     query: string,
     parameters?: any[] | undefined,
     queryRunner?: QueryRunner | undefined
   ) {
-    // console.log(query);
+    // logger.debug(query);
   }
   log(
     level: "log" | "info" | "warn",
     message: any,
     queryRunner?: QueryRunner | undefined
   ) {
-    // console.log(message);
+    // logger.debug(message);
   }
   logSchemaBuild(message: string, queryRunner?: QueryRunner | undefined) {
-    // console.log(message);
+    // logger.debug(message);
   }
 }

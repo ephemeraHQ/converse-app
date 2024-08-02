@@ -1,3 +1,4 @@
+import logger from "@utils/logger";
 import { Client } from "@xmtp/xmtp-js";
 
 import { xmtpSignatureByAccount } from "./api";
@@ -23,7 +24,6 @@ import {
 } from "./messages";
 import { refreshAllSpamScores } from "../../data/helpers/conversations/spamScore";
 import { getChatStore } from "../../data/store/accountsStore";
-import { addLog, debugTimeSpent } from "../debug";
 import { loadXmtpKey } from "../keychain/helpers";
 
 const instantiatingClientForAccount: { [account: string]: number } = {};
@@ -39,7 +39,7 @@ export const getXmtpClient = async (
   // which leads to buggy behaviour
   if (instantiatingClientForAccount[account]) {
     if (now - instantiatingClientForAccount[account] > 1000) {
-      console.log(`Client for ${account} already instantiating`);
+      logger.debug(`Client for ${account} already instantiating`);
       instantiatingClientForAccount[account] = now;
     }
     await new Promise((r) => setTimeout(r, 200));
@@ -47,13 +47,12 @@ export const getXmtpClient = async (
   }
   instantiatingClientForAccount[account] = now;
   try {
-    console.log("loading base64 key");
+    logger.debug("loading base64 key");
     const base64Key = await loadXmtpKey(account);
     if (base64Key) {
-      console.log("get client from base64 key");
+      logger.debug("get client from base64 key");
       const client = await getXmtpClientFromBase64Key(base64Key);
-      console.log(`[XmtpRN] Instantiated client for ${client.address}`);
-      addLog("Local client connected");
+      logger.info(`[XmtpRN] Instantiated client for ${client.address}`);
       getChatStore(account).getState().setLocalClientConnected(true);
       getChatStore(account).getState().setErrored(false);
       xmtpClientByAccount[client.address] = client;
@@ -74,14 +73,13 @@ const MAX_BACKOFF = 60000; // Maximum backoff interval in ms
 let currentBackoff = INITIAL_BACKOFF;
 
 const onSyncLost = async (account: string, error: any) => {
-  console.log(
-    `[XmtpRN] An error occured while syncing for ${account}: ${error}`
-  );
-  addLog(`An error occured while syncing for ${account}: ${error}`);
+  logger.error(error, {
+    context: `An error occured while syncing for ${account}`,
+  });
   // If there is an error let's show it
   getChatStore(account).getState().setReconnecting(true);
   // Wait a bit before reco
-  console.log(`[XmtpRN] Reconnecting in ${currentBackoff}ms`);
+  logger.debug(`[XmtpRN] Reconnecting in ${currentBackoff}ms`);
   await new Promise((r) => setTimeout(r, currentBackoff));
   currentBackoff = Math.min(currentBackoff * 2, MAX_BACKOFF);
   // Now let's reload !
@@ -91,7 +89,6 @@ const onSyncLost = async (account: string, error: any) => {
 const streamingAccounts: { [account: string]: boolean } = {};
 
 export const syncXmtpClient = async (account: string) => {
-  debugTimeSpent({ id: "OPTIM", actionToLog: "Started client sync" });
   const lastSyncedAt = getChatStore(account).getState().lastSyncedAt || 0;
 
   // We just introduced lastSyncedTopics so it might be empty at first
@@ -103,7 +100,7 @@ export const syncXmtpClient = async (account: string) => {
     lastSyncedTopics.length > 0
       ? lastSyncedTopics
       : Object.keys(getChatStore(account).getState().conversations);
-  console.log(`[XmtpRN] Syncing ${account}`, {
+  logger.info(`[XmtpRN] Syncing ${account}`, {
     lastSyncedAt,
     knownTopics: knownTopics.length,
   });
@@ -142,7 +139,7 @@ export const syncXmtpClient = async (account: string) => {
     });
     streamingAccounts[account] = true;
 
-    console.log("RECALLING syncConversationsMessages / syncGroupsMessages");
+    logger.debug("RECALLING syncConversationsMessages / syncGroupsMessages");
     const [fetchedMessagesCount, fetchedGroupMessagesCount] = await Promise.all(
       [
         syncConversationsMessages(account, queryConversationsFromTimestamp),
@@ -174,9 +171,8 @@ export const syncXmtpClient = async (account: string) => {
         ]);
     }
     currentBackoff = INITIAL_BACKOFF;
-    console.log(`[XmtpRN] Finished syncing ${account}`);
+    logger.info(`[XmtpRN] Finished syncing ${account}`);
   } catch (e) {
-    console.log("main sync error");
     onSyncLost(account, e);
   }
 };

@@ -30,15 +30,12 @@ export const getSignerFromSeedPhraseOrPrivateKey = async (
     const signer = new Wallet(seedPhraseOrPrivateKey);
     return signer;
   } catch (e: any) {
-    console.log(
-      "Could not instantitate directly from private key, trying to decode seed phrase"
-    );
+    //
   }
   let rightMnemonic = seedPhraseOrPrivateKey;
   try {
     rightMnemonic = validateMnemonic(seedPhraseOrPrivateKey);
   } catch (e) {
-    console.log(e);
     Alert.alert("This private key / seed phrase is invalid. Please try again");
     return;
   }
@@ -47,7 +44,6 @@ export const getSignerFromSeedPhraseOrPrivateKey = async (
     const signer = new Wallet(privateKey);
     return signer;
   } catch (e) {
-    console.log(e);
     Alert.alert("This private key / seed phrase is invalid. Please try again");
   }
 };

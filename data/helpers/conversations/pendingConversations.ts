@@ -1,3 +1,4 @@
+import logger from "@utils/logger";
 import { InvitationContext } from "@xmtp/xmtp-js";
 import { Alert, Platform } from "react-native";
 import { In } from "typeorm/browser";
@@ -22,7 +23,7 @@ export const cleanupPendingConversations = async (account: string) => {
     (c) => c.pending && c.messages?.length === 0
   );
   if (pendingConversationsWithoutMessages.length === 0) return;
-  console.log(
+  logger.debug(
     `Cleaning up ${pendingConversationsWithoutMessages.length} pending convos`
   );
   const topicsToDelete = pendingConversationsWithoutMessages.map(

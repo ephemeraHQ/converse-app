@@ -1,3 +1,4 @@
+import logger from "@utils/logger";
 import { ColorSchemeName } from "react-native";
 
 import { backgroundColor, rgbStringToHex } from ".";
@@ -9,10 +10,10 @@ export const setAndroidSystemColor = (color: string) => {
   try {
     BackgroundColor.setColor(color);
   } catch (e) {
-    console.log(e);
+    logger.error(e);
   }
   SystemNavigationBar.setNavigationColor(color).catch((e: any) => {
-    console.log(e);
+    logger.error(e);
   });
 };
 
@@ -24,6 +25,6 @@ export const setAndroidColors = (colorScheme: ColorSchemeName) => {
   SystemNavigationBar.setBarMode(
     colorScheme === "dark" ? "light" : "dark"
   ).catch((e: any) => {
-    console.log(e);
+    logger.error(e);
   });
 };

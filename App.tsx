@@ -2,6 +2,7 @@ import "reflect-metadata";
 import "./polyfills";
 
 import { configure as configureCoinbase } from "@coinbase/wallet-mobile-sdk";
+import { useEnableDebug } from "@components/DebugButton";
 import { ActionSheetProvider } from "@expo/react-native-action-sheet";
 import { PrivyProvider } from "@privy-io/expo";
 import {
@@ -10,8 +11,10 @@ import {
   MaterialLightTheme,
 } from "@styles/colors";
 import { useCoinbaseWalletListener } from "@utils/coinbaseWallet";
+import logger from "@utils/logger";
 import React, { useEffect } from "react";
 import {
+  Alert,
   LogBox,
   Platform,
   StyleSheet,
@@ -37,8 +40,10 @@ import { registerBackgroundFetchTask } from "./utils/background";
 import { privySecureStorage } from "./utils/keychain/helpers";
 import mmkv from "./utils/mmkv";
 import { DEFAULT_EMOJIS, RECENT_EMOJI_STORAGE_KEY } from "./utils/reactions";
-import { initSentry, sentryTrackError } from "./utils/sentry";
+import { initSentry } from "./utils/sentry";
 import { useRecentPicksPersistence } from "./vendor/rn-emoji-keyboard";
+
+import RNShake from "react-native-shake";
 
 LogBox.ignoreLogs([
   "Privy: Expected status code 200, received 400", // Privy
@@ -57,6 +62,8 @@ export default function App() {
   const colorScheme = useColorScheme();
   const styles = useStyles();
 
+  const enableDebug = useEnableDebug();
+
   useCoinbaseWalletListener(
     true,
     new URL(`https://${config.websiteDomain}/coinbase`)
@@ -65,6 +72,18 @@ export default function App() {
   useEffect(() => {
     registerBackgroundFetchTask();
   }, []);
+
+  useEffect(() => {
+    if (!enableDebug) return;
+    const subscription = RNShake.addListener(() => {
+      Alert.alert("Shake detected!", "You shook the device!");
+    });
+
+    // Clean up the subscription on unmount
+    return () => {
+      subscription.remove();
+    };
+  }, [enableDebug]);
 
   useRecentPicksPersistence({
     initialization: () =>
@@ -83,7 +102,7 @@ export default function App() {
   useEffect(() => {
     if (isInternetReachable && hydrationDone) {
       runAsyncUpdates().catch((e) => {
-        sentryTrackError(e);
+        logger.error(e);
       });
     }
   }, [isInternetReachable, hydrationDone]);

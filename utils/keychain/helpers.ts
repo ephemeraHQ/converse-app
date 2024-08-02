@@ -1,4 +1,5 @@
 import type { Storage as PrivyStorage } from "@privy-io/js-sdk-core";
+import logger from "@utils/logger";
 import { createHash } from "crypto";
 import { getRandomBytesAsync } from "expo-crypto";
 import * as SecureStore from "expo-secure-store";
@@ -21,7 +22,7 @@ export const saveXmtpKey = (account: string, base64Key: string) =>
 
 export const deleteXmtpKey = async (account: string) => {
   await deleteSecureItemAsync(`XMTP_KEY_${account}`);
-  console.log(`[Keychain] Deleted XMTP Key for account ${account}`);
+  logger.debug(`[Keychain] Deleted XMTP Key for account ${account}`);
 };
 
 export const loadXmtpKey = async (account: string): Promise<string | null> =>
@@ -36,7 +37,7 @@ export const loadXmtpKey = async (account: string): Promise<string | null> =>
 //   if (existingKey) {
 //     return existingKey;
 //   }
-//   console.log(`[Keychain] Creating db encryption key for account ${account}`);
+//   logger.debug(`[Keychain] Creating db encryption key for account ${account}`);
 //   const newKey = uuidv4();
 //   await setSecureItemAsync(`XMTP_DB_ENCRYPTION_KEY_${account}`, newKey);
 //   return newKey;
@@ -115,7 +116,7 @@ export const getAccountEncryptionKey = async (
   if (existingKey) {
     return Buffer.from(existingKey, "base64");
   }
-  console.log(
+  logger.debug(
     `[Keychain] Creating account encryption key for account ${account}`
   );
   const newKey = Buffer.from(await getRandomBytesAsync(64));

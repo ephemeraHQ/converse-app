@@ -4,6 +4,7 @@ import * as Contacts from "expo-contacts";
 import { analyticsPlatform } from "./analytics";
 import type { TransferAuthorizationMessage } from "./evm/erc20";
 import { getPrivyRequestHeaders } from "./evm/privy";
+import logger from "./logger";
 import type { TransactionDetails } from "./transaction";
 import type { ProfileType } from "../components/Onboarding/UserProfile";
 import config from "../config";
@@ -38,7 +39,7 @@ api.interceptors.response.use(
       );
     } else {
       // Something happened in setting up the request that triggered an Error
-      console.log("Error", error.message);
+      logger.warn("Error", error.message);
     }
     return Promise.reject(error);
   }
