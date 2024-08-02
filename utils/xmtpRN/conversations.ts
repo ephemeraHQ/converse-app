@@ -14,11 +14,7 @@ import {
   ConverseXmtpClientType,
   GroupWithCodecsType,
 } from "./client";
-import {
-  streamAllMessages,
-  syncConversationsMessages,
-  syncGroupsMessages,
-} from "./messages";
+import { syncConversationsMessages, syncGroupsMessages } from "./messages";
 import { getXmtpClient } from "./sync";
 import { Conversation as DbConversation } from "../../data/db/entities/conversationEntity";
 import { getPendingConversationsToCreate } from "../../data/helpers/conversations/pendingConversations";
@@ -553,8 +549,6 @@ export const createGroup = async (
       description: groupDescription,
     }
   );
-  // Groups that are created are not streamed immediatly so we need to restart the stream
-  await streamAllMessages(account);
   if (groupName) {
     setGroupNameQueryData(account, group.topic, groupName);
   }
