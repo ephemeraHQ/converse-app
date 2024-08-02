@@ -13,7 +13,10 @@ import { Message } from "./entities/messageEntity";
 import { Profile } from "./entities/profileEntity";
 import config from "../../config";
 import { sentryTrackError, sentryTrackMessage } from "../../utils/sentry";
-import { useAccountsStore } from "../store/accountsStore";
+import {
+  TEMPORARY_ACCOUNT_NAME,
+  useAccountsStore,
+} from "../store/accountsStore";
 
 const env = config.xmtpEnv as "dev" | "production" | "local";
 
@@ -46,8 +49,12 @@ export const getRepository = async <T extends keyof RepositoriesForAccount>(
     !repositories[account]?.[entity] ||
     AppState.currentState.match(/inactive|background/)
   ) {
-    logger.debug(`Database for ${account} not yet initialized`);
-    await new Promise((r) => setTimeout(r, 100));
+    if (account === TEMPORARY_ACCOUNT_NAME) {
+      await new Promise((r) => setTimeout(r, 2000));
+    } else {
+      logger.debug(`Database for ${account} not yet initialized`);
+      await new Promise((r) => setTimeout(r, 100));
+    }
   }
   return repositories[account][entity];
 };

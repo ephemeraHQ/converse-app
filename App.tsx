@@ -2,7 +2,7 @@ import "reflect-metadata";
 import "./polyfills";
 
 import { configure as configureCoinbase } from "@coinbase/wallet-mobile-sdk";
-import { useEnableDebug } from "@components/DebugButton";
+import DebugButton, { useEnableDebug } from "@components/DebugButton";
 import { ActionSheetProvider } from "@expo/react-native-action-sheet";
 import { PrivyProvider } from "@privy-io/expo";
 import {
@@ -12,9 +12,9 @@ import {
 } from "@styles/colors";
 import { useCoinbaseWalletListener } from "@utils/coinbaseWallet";
 import logger from "@utils/logger";
-import React, { useEffect } from "react";
+import { useDoOnShake } from "@utils/shake";
+import React, { useCallback, useEffect, useRef } from "react";
 import {
-  Alert,
   LogBox,
   Platform,
   StyleSheet,
@@ -43,8 +43,6 @@ import { DEFAULT_EMOJIS, RECENT_EMOJI_STORAGE_KEY } from "./utils/reactions";
 import { initSentry } from "./utils/sentry";
 import { useRecentPicksPersistence } from "./vendor/rn-emoji-keyboard";
 
-import RNShake from "react-native-shake";
-
 LogBox.ignoreLogs([
   "Privy: Expected status code 200, received 400", // Privy
   "Error destroying session", // Privy
@@ -61,7 +59,7 @@ initSentry();
 export default function App() {
   const colorScheme = useColorScheme();
   const styles = useStyles();
-
+  const debugRef = useRef();
   const enableDebug = useEnableDebug();
 
   useCoinbaseWalletListener(
@@ -73,17 +71,18 @@ export default function App() {
     registerBackgroundFetchTask();
   }, []);
 
-  useEffect(() => {
-    if (!enableDebug) return;
-    const subscription = RNShake.addListener(() => {
-      Alert.alert("Shake detected!", "You shook the device!");
-    });
-
-    // Clean up the subscription on unmount
-    return () => {
-      subscription.remove();
-    };
+  const showDebugMenu = useCallback(() => {
+    if (
+      !enableDebug ||
+      !debugRef.current ||
+      !(debugRef.current as any).showDebugMenu
+    ) {
+      return;
+    }
+    (debugRef.current as any).showDebugMenu();
   }, [enableDebug]);
+
+  useDoOnShake(showDebugMenu);
 
   useRecentPicksPersistence({
     initialization: () =>
@@ -127,6 +126,7 @@ export default function App() {
                 <View style={styles.safe}>
                   <XmtpEngine />
                   <Main />
+                  {enableDebug && <DebugButton ref={debugRef} />}
                 </View>
               </PaperProvider>
             </ActionSheetProvider>
