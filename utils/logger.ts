@@ -13,6 +13,9 @@ import config from "../config";
 export let loggingFilePath: string;
 
 export const rotateLoggingFile = async () => {
+  if (loggingFilePath && (await RNFS.exists(loggingFilePath))) {
+    await RNFS.unlink(loggingFilePath);
+  }
   const tempDir = RNFS.TemporaryDirectoryPath;
   loggingFilePath = path.join(tempDir, `${uuidv4()}.log`);
   await RNFS.writeFile(loggingFilePath, "");
