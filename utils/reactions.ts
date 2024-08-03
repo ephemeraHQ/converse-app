@@ -1,8 +1,8 @@
 import { ContentTypeReaction } from "@xmtp/content-type-reaction";
 
 import { isAttachmentMessage } from "./attachment/helpers";
+import logger from "./logger";
 import { sendMessage } from "./message";
-import { sentryTrackMessage } from "./sentry";
 import { getMessageContentType } from "./xmtpRN/contentTypes";
 import { XmtpConversation, XmtpMessage } from "../data/store/chatStore";
 import { emojisByCategory } from "../vendor/rn-emoji-keyboard";
@@ -72,9 +72,10 @@ export const getMessageReactions = (message: XmtpMessage) => {
 
     return activeReactionsBySender;
   } catch (error) {
-    const data = { error, reactions: message.reactions };
-    console.log(data);
-    sentryTrackMessage("REACTIONS_PARSING_ERROR", data);
+    logger.error(error, {
+      context: "REACTIONS_PARSING_ERROR",
+      reactions: message.reactions,
+    });
     return {};
   }
 };

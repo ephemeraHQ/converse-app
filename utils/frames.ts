@@ -11,6 +11,7 @@ import {
 import { BigNumber, ethers } from "ethers";
 import { hexValue } from "ethers/lib/utils";
 
+import logger from "./logger";
 import { URL_REGEX } from "./regex";
 import { strByteSize } from "./str";
 import { extractChainIdToHex } from "./transaction";
@@ -75,7 +76,7 @@ export const fetchFramesForMessage = async (
     const urls = message.content.match(URL_REGEX);
     const fetchedFrames: FrameWithType[] = [];
     if (urls) {
-      console.log(
+      logger.debug(
         `[FramesMetadata] Found ${urls.length} URLs in message, fetching tags`
       );
       const uniqueUrls = Array.from(new Set(urls));
@@ -84,7 +85,7 @@ export const fetchFramesForMessage = async (
         uniqueUrls.map((u) =>
           framesClient.proxy
             .readMetadata(u)
-            .catch((e) => console.log(`[FramesMetadata] ${e}`))
+            .catch((e) => logger.warn(`[FramesMetadata] ${e}`))
         )
       );
 

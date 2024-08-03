@@ -1,3 +1,4 @@
+import logger from "@utils/logger";
 import { Platform } from "react-native";
 
 import { setConsent } from "./001-setConsent";
@@ -26,7 +27,7 @@ const waitForAsyncUpdatesToFinish = async () => {
 };
 
 export const updateLastVersionOpen = () => {
-  console.log(
+  logger.debug(
     `[Async Updates] Last version open: ${
       useAppStore.getState().lastVersionOpen
     }`
@@ -48,7 +49,7 @@ export const runAsyncUpdates = async () => {
   const accountList = getAccountsList();
 
   for (const account of accountList) {
-    console.log(`[Async Updates] Account: ${account}`);
+    logger.debug(`[Async Updates] Account: ${account}`);
     await runAsyncUpdatesForAccount(account);
   }
 
@@ -57,7 +58,7 @@ export const runAsyncUpdates = async () => {
 
 const runAsyncUpdatesForAccount = async (account: string) => {
   const lastAsyncUpdate = getSettingsStore(account).getState().lastAsyncUpdate;
-  console.log(`[Async Updates] lastAsyncUpdate: ${lastAsyncUpdate}`);
+  logger.debug(`[Async Updates] lastAsyncUpdate: ${lastAsyncUpdate}`);
 
   for (const updateKey of updateSteps) {
     if (updateKey.id > lastAsyncUpdate) {

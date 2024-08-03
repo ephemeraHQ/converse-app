@@ -4,6 +4,7 @@ import {
   textInputStyle,
   textSecondaryColor,
 } from "@styles/colors";
+import logger from "@utils/logger";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
   Alert,
@@ -87,7 +88,7 @@ export default function EnableTransactionsScreen({
           setLoading(false);
         }
       } catch (e) {
-        console.log(e);
+        logger.warn(e);
       }
       setLoading(false);
     }, 10);

@@ -1,4 +1,5 @@
 import { useMutation } from "@tanstack/react-query";
+import logger from "@utils/logger";
 import { Member } from "@xmtp/react-native-sdk";
 import { InboxId } from "@xmtp/react-native-sdk/build/lib/Client";
 
@@ -50,7 +51,7 @@ export const usePromoteToAdminMutation = (account: string, topic: string) => {
     // Use onError to revert the cache if the mutation fails
     // eslint-disable-next-line node/handle-callback-err
     onError: (_error, _variables, context) => {
-      console.log("onError usePromoteToAdminMutation");
+      logger.warn("onError usePromoteToAdminMutation");
       if (context?.previousGroupMembers === undefined) {
         return;
       }
@@ -58,7 +59,7 @@ export const usePromoteToAdminMutation = (account: string, topic: string) => {
     },
     // For now we need to make sure the group is updated for handling on the conversation screen
     onSuccess: () => {
-      console.log("onSuccess usePromoteToAdminMutation");
+      logger.debug("onSuccess usePromoteToAdminMutation");
       refreshGroup(account, topic);
     },
   });

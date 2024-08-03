@@ -2,11 +2,8 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { textPrimaryColor, textSecondaryColor } from "@styles/colors";
 import { getDatabaseFilesForInboxId } from "@utils/fileSystem";
 import { strings } from "@utils/i18n/strings";
-import {
-  sentryAddBreadcrumb,
-  sentryTrackError,
-  sentryTrackMessage,
-} from "@utils/sentry";
+import logger from "@utils/logger";
+import { sentryTrackMessage } from "@utils/sentry";
 import { thirdwebClient } from "@utils/thirdweb";
 import { Signer } from "ethers";
 import * as Linking from "expo-linking";
@@ -178,7 +175,7 @@ export default function ConnectViaWallet({
             // After we come back to the app, if we still don't
             // have a signer after 2 secs, let's reset state
             if (!signerRef.current) {
-              console.log("Still not signer after 1.5 sec");
+              logger.debug("Still not signer after 1.5 sec");
               disconnect();
             }
           }, 1500);
@@ -201,7 +198,7 @@ export default function ConnectViaWallet({
   const [signaturesDone, setSignaturesDone] = useState(0);
 
   const initXmtpClient = useCallback(async () => {
-    console.log("in initixmtpclient");
+    logger.debug("ConnectViaWallet initixmtpclient");
     if (!signer || !address || initiatingClientFor.current === address) {
       return;
     }
@@ -214,62 +211,59 @@ export default function ConnectViaWallet({
     }, 30000);
 
     try {
-      sentryAddBreadcrumb("Onboarding using a wallet");
+      logger.debug("Onboarding using a wallet");
       const base64Key = await getXmtpBase64KeyFromSigner(
         signer,
         async () => {
-          sentryAddBreadcrumb("Asking for create signature");
+          logger.debug("Asking for create signature");
           // Before calling "create" signature
           setWaitingForNextSignature(true);
           clickedSignature.current = false;
         },
         async () => {
-          sentryAddBreadcrumb("Asking for enable signature");
+          logger.debug("Asking for enable signature");
           // Before calling "enable" signature
           if (waitingForNextSignatureRef.current) {
             setSignaturesDone((s) => s + 1);
             setLoading(false);
-            sentryAddBreadcrumb("Waiting until signature click for Enable");
+            logger.debug("Waiting until signature click for Enable");
             await waitForClickSignature();
-            sentryAddBreadcrumb("Click on Sign done for Enable");
+            logger.debug("Click on Sign done for Enable");
           }
           if (onXmtp && !alreadyV3Db) {
-            sentryAddBreadcrumb(
+            logger.debug(
               "Already on XMTP, but not db present, will need a new signature"
             );
             setWaitingForNextSignature(true);
           } else {
-            sentryAddBreadcrumb(
+            logger.debug(
               "New to XMTP, or db already present, will not need a new signature"
             );
             setWaitingForNextSignature(false);
           }
         },
         async () => {
-          sentryAddBreadcrumb("Asking for auth to inbox signature");
+          logger.debug("Asking for auth to inbox signature");
           if (waitingForNextSignatureRef.current) {
             setSignaturesDone((s) => s + 1);
             setLoading(false);
-            sentryAddBreadcrumb(
-              "Waiting until signature click for Authenticate"
-            );
+            logger.debug("Waiting until signature click for Authenticate");
             await waitForClickSignature();
-            sentryAddBreadcrumb("Click on Sign done for Authenticate");
+            logger.debug("Click on Sign done for Authenticate");
             setWaitingForNextSignature(false);
           }
         }
       );
-      sentryAddBreadcrumb("Got base64 key, now connecting");
+      logger.debug("Got base64 key, now connecting");
       await connectWithBase64Key(base64Key);
-      sentryTrackMessage("Successfully logged in using a wallet");
+      logger.info("Successfully logged in using a wallet");
       onboardingDone = true;
     } catch (e) {
       initiatingClientFor.current = undefined;
       setLoading(false);
       clickedSignature.current = false;
       setWaitingForNextSignature(false);
-      console.error(e);
-      sentryTrackError(e);
+      logger.error(e);
     }
   }, [
     address,

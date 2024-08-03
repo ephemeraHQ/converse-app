@@ -1,4 +1,5 @@
 import { getDbDirectory } from "@data/db";
+import logger from "@utils/logger";
 import path from "path";
 import RNFS from "react-native-fs";
 import { v4 as uuidv4 } from "uuid";
@@ -56,7 +57,7 @@ export const copyDatabasesToTemporaryDirectory = async (
 ) => {
   const dbDirectoryXmtpDbFiles = await getDatabaseFilesForInboxId(inboxId);
   for (const dbFile of dbDirectoryXmtpDbFiles) {
-    console.log("Copying database file", dbFile.name);
+    logger.debug("Copying database file", dbFile.name);
     await RNFS.copyFile(dbFile.path, path.join(tempDirectory, dbFile.name));
   }
 };
@@ -87,39 +88,39 @@ export const moveTemporaryDatabasesToDatabaseDirecory = async (
     const destinationPath = `${dbDirectory}/${dbFile.name}`;
     const destinationFileExists = await RNFS.exists(destinationPath);
     if (destinationFileExists) {
-      console.log("Deleting destination db file");
+      logger.debug("Deleting destination db file");
       await RNFS.unlink(destinationPath);
     }
     const destinationWalFileExists = await RNFS.exists(
       `${destinationPath}-wal`
     );
     if (destinationWalFileExists) {
-      console.log("Deleting destination wal file");
+      logger.debug("Deleting destination wal file");
       await RNFS.unlink(`${destinationPath}-wal`);
     }
     const destinationShmFileExists = await RNFS.exists(
       `${destinationPath}-shm`
     );
     if (destinationShmFileExists) {
-      console.log("Deleting destination db shm file");
+      logger.debug("Deleting destination db shm file");
       await RNFS.unlink(`${destinationPath}-shm`);
     }
 
-    console.log(`Moving ${dbFile.name} to db directory`);
+    logger.debug(`Moving ${dbFile.name} to db directory`);
     await RNFS.moveFile(sourcePath, destinationPath);
 
     const originWalFileExists = await RNFS.exists(`${sourcePath}-wal`);
     if (originWalFileExists) {
-      console.log("Moving origin wal file");
+      logger.debug("Moving origin wal file");
       await RNFS.moveFile(`${sourcePath}-wal`, `${destinationPath}-wal`);
     }
     const originShmFileExists = await RNFS.exists(`${sourcePath}-shm`);
     if (originShmFileExists) {
-      console.log("Moving origin shm file");
+      logger.debug("Moving origin shm file");
       await RNFS.moveFile(`${sourcePath}-shm`, `${destinationPath}-shm`);
     }
   }
 
-  console.log("All files moved successfully");
+  logger.debug("All files moved successfully");
   await RNFS.unlink(tempDirectory);
 };

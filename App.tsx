@@ -2,6 +2,7 @@ import "reflect-metadata";
 import "./polyfills";
 
 import { configure as configureCoinbase } from "@coinbase/wallet-mobile-sdk";
+import DebugButton, { useEnableDebug } from "@components/DebugButton";
 import { ActionSheetProvider } from "@expo/react-native-action-sheet";
 import { PrivyProvider } from "@privy-io/expo";
 import {
@@ -10,7 +11,9 @@ import {
   MaterialLightTheme,
 } from "@styles/colors";
 import { useCoinbaseWalletListener } from "@utils/coinbaseWallet";
-import React, { useEffect } from "react";
+import logger from "@utils/logger";
+import { useDoOnShake } from "@utils/shake";
+import React, { useCallback, useEffect, useRef } from "react";
 import {
   LogBox,
   Platform,
@@ -37,7 +40,7 @@ import { registerBackgroundFetchTask } from "./utils/background";
 import { privySecureStorage } from "./utils/keychain/helpers";
 import mmkv from "./utils/mmkv";
 import { DEFAULT_EMOJIS, RECENT_EMOJI_STORAGE_KEY } from "./utils/reactions";
-import { initSentry, sentryTrackError } from "./utils/sentry";
+import { initSentry } from "./utils/sentry";
 import { useRecentPicksPersistence } from "./vendor/rn-emoji-keyboard";
 
 LogBox.ignoreLogs([
@@ -56,6 +59,8 @@ initSentry();
 export default function App() {
   const colorScheme = useColorScheme();
   const styles = useStyles();
+  const debugRef = useRef();
+  const enableDebug = useEnableDebug();
 
   useCoinbaseWalletListener(
     true,
@@ -65,6 +70,19 @@ export default function App() {
   useEffect(() => {
     registerBackgroundFetchTask();
   }, []);
+
+  const showDebugMenu = useCallback(() => {
+    if (
+      !enableDebug ||
+      !debugRef.current ||
+      !(debugRef.current as any).showDebugMenu
+    ) {
+      return;
+    }
+    (debugRef.current as any).showDebugMenu();
+  }, [enableDebug]);
+
+  useDoOnShake(showDebugMenu);
 
   useRecentPicksPersistence({
     initialization: () =>
@@ -83,7 +101,7 @@ export default function App() {
   useEffect(() => {
     if (isInternetReachable && hydrationDone) {
       runAsyncUpdates().catch((e) => {
-        sentryTrackError(e);
+        logger.error(e);
       });
     }
   }, [isInternetReachable, hydrationDone]);
@@ -108,6 +126,7 @@ export default function App() {
                 <View style={styles.safe}>
                   <XmtpEngine />
                   <Main />
+                  {enableDebug && <DebugButton ref={debugRef} />}
                 </View>
               </PaperProvider>
             </ActionSheetProvider>

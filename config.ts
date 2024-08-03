@@ -90,6 +90,7 @@ const ENV = {
     env: "prod",
     xmtpEnv: "production",
     apiURI: "https://backend-prod.converse.xyz",
+    debugMenu: true, // @todo => disable debug by default on prod!
     bundleId: isAndroid ? "com.converse.prod" : "com.converse.native",
     appleAppGroup: "group.com.converse.native",
     scheme: "converse",

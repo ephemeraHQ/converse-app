@@ -4,6 +4,8 @@ import "@ethersproject/shims";
 import { currentAccount, getWalletStore } from "../../data/store/accountsStore";
 import { getSecureItemAsync } from "../keychain";
 
+import logger from "@utils/logger";
+
 export const getCurrentAccountSigner = async () => {
   const account = currentAccount();
   const pkPath = getWalletStore(account).getState().privateKeyPath;
@@ -15,8 +17,7 @@ export const getCurrentAccountSigner = async () => {
     if (!pk) return;
     return new Wallet(pk);
   } catch (e) {
-    console.log(e);
-    // sentryTrackError(e);
+    logger.warn(e);
   }
 };
 

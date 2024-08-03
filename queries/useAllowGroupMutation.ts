@@ -1,5 +1,6 @@
 import { useGroupId } from "@hooks/useGroupId";
 import { useMutation } from "@tanstack/react-query";
+import logger from "@utils/logger";
 import { consentToGroupsOnProtocol } from "@utils/xmtpRN/conversations";
 
 import { allowGroupMutationKey } from "./MutationKeys";
@@ -28,14 +29,14 @@ export const useAllowGroupMutation = (account: string, topic: string) => {
     },
     // eslint-disable-next-line node/handle-callback-err
     onError: (_error, _variables, context) => {
-      console.log("onError useAllowGroupMutation");
+      logger.warn("onError useAllowGroupMutation");
       if (context?.previousConsent === undefined) {
         return;
       }
       setGroupConsentQueryData(account, topic, context.previousConsent);
     },
     onSuccess: () => {
-      console.log("onSuccess useAllowGroupMutation");
+      logger.debug("onSuccess useAllowGroupMutation");
     },
   });
 };

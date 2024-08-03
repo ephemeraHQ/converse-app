@@ -1,3 +1,4 @@
+import logger from "@utils/logger";
 import { Client, ConsentListEntry, Conversation, Stream } from "@xmtp/xmtp-js";
 
 import { syncConversationsMessages } from "./messages";
@@ -104,7 +105,7 @@ export const loadConversations = async (
         knownConversations.push(c);
       }
     });
-    console.log(
+    logger.debug(
       `[XmtpJS] Listing ${conversations.length} conversations for ${
         client.address
       } took ${(new Date().getTime() - now) / 1000} seconds`
@@ -192,7 +193,7 @@ const createConversation = async (
   if (!conversation.pending) {
     throw new Error("Can only create a conversation that is pending");
   }
-  console.log(
+  logger.debug(
     `[XMTP] Creating a conversation with peer ${conversation.peerAddress} and id ${conversation.context?.conversationId}`
   );
   const client = (await getXmtpClient(account)) as Client;
@@ -213,7 +214,7 @@ export const createPendingConversations = async (account: string) => {
     getChatStore(account).getState().conversations
   ).filter((c) => c.pending && c.messages?.size > 0);
   if (pendingConvos.length === 0) return;
-  console.log(
+  logger.debug(
     `Trying to create ${pendingConvos.length} pending conversations...`
   );
   await Promise.all(pendingConvos.map((c) => createConversation(account, c)));

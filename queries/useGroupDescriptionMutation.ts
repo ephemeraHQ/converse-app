@@ -1,4 +1,5 @@
 import { useMutation } from "@tanstack/react-query";
+import logger from "@utils/logger";
 
 import { setGroupDescriptionMutationKey } from "./MutationKeys";
 import {
@@ -31,7 +32,7 @@ export const useGroupDescriptionMutation = (account: string, topic: string) => {
     },
     // eslint-disable-next-line node/handle-callback-err
     onError: (_error, _variables, context) => {
-      console.log("onError useGroupDescriptionMutation");
+      logger.warn("onError useGroupDescriptionMutation");
       if (context?.previousGroupDescription === undefined) {
         return;
       }
@@ -42,7 +43,7 @@ export const useGroupDescriptionMutation = (account: string, topic: string) => {
       );
     },
     onSuccess: (data, variables, context) => {
-      console.log("onSuccess useGroupDescriptionMutation");
+      logger.debug("onSuccess useGroupDescriptionMutation");
       refreshGroup(account, topic);
     },
   });

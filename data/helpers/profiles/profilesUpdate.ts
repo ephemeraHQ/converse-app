@@ -1,3 +1,5 @@
+import logger from "@utils/logger";
+
 import { getProfilesForAddresses } from "../../../utils/api";
 import { saveConversationIdentifiersForNotifications } from "../../../utils/notifications";
 import { getPreferredName } from "../../../utils/profile";
@@ -29,7 +31,6 @@ export const updateProfilesForConvos = async (
       Array.from(addressesSet)
     );
     const now = new Date().getTime();
-    console.log("Saving profiles to db...");
     // Save profiles to db
     await upsertRepository(
       profileRepository,
@@ -52,7 +53,6 @@ export const updateProfilesForConvos = async (
       };
     }
     getProfilesStore(account).getState().setProfiles(socialsToDispatch);
-    console.log("Done saving profiles to db!");
     const handleConversation = async (conversation: XmtpConversation) => {
       if (conversation.isGroup) return;
       const currentTitle = conversation.conversationTitle;
@@ -73,7 +73,7 @@ export const updateProfilesForConvos = async (
         conversation.conversationTitle = newTitle;
       } catch (e) {
         // Error (probably rate limited)
-        console.log("Could not resolve handles:", conversation.peerAddress, e);
+        logger.warn("Could not resolve handles:", conversation.peerAddress, e);
       }
 
       updates.push({ conversation, updated });

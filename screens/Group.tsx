@@ -16,6 +16,7 @@ import {
   textSecondaryColor,
 } from "@styles/colors";
 import { memberCanUpdateGroup } from "@utils/groupUtils/memberCanUpdateGroup";
+import logger from "@utils/logger";
 import React, { useCallback, useMemo, useState } from "react";
 import {
   Alert,
@@ -194,7 +195,7 @@ export default function GroupScreen({
                   });
                   break;
                 case promoteSuperAdminIndex:
-                  console.log("Promoting super admin...");
+                  logger.debug("Promoting super admin...");
                   try {
                     await promoteToSuperAdmin(a.inboxId);
                   } catch (e) {
@@ -203,7 +204,7 @@ export default function GroupScreen({
                   }
                   break;
                 case revokeSuperAdminIndex:
-                  console.log("Revoking super admin...");
+                  logger.debug("Revoking super admin...");
                   try {
                     await revokeSuperAdmin(a.inboxId);
                   } catch (e) {
@@ -212,7 +213,7 @@ export default function GroupScreen({
                   }
                   break;
                 case promoteAdminIndex:
-                  console.log("Promoting member...");
+                  logger.debug("Promoting member...");
                   try {
                     await promoteToAdmin(a.inboxId);
                   } catch (e) {
@@ -221,7 +222,7 @@ export default function GroupScreen({
                   }
                   break;
                 case revokeAdminIndex:
-                  console.log("Revoking admin...");
+                  logger.debug("Revoking admin...");
                   try {
                     await revokeAdmin(a.inboxId);
                   } catch (e) {
@@ -230,7 +231,7 @@ export default function GroupScreen({
                   }
                   break;
                 case removeIndex:
-                  console.log("Removing member...");
+                  logger.debug("Removing member...");
                   try {
                     await removeMember([a.inboxId]);
                   } catch (e) {
