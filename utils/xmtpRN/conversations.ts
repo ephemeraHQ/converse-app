@@ -1,5 +1,6 @@
 import { setGroupDescriptionQueryData } from "@queries/useGroupDescriptionQuery";
 import { getGroupIdFromTopic } from "@utils/groupUtils/groupId";
+import logger from "@utils/logger";
 import {
   ConsentListEntry,
   ConversationContext,
@@ -165,7 +166,7 @@ const importSingleTopicData = async (
         setOpenedConversation(client.address, conversation);
       });
       const afterImport = new Date().getTime();
-      console.log(
+      logger.debug(
         `[XmtpRN] Imported ${
           topicsData.length
         } exported conversations into client in ${
@@ -173,9 +174,8 @@ const importSingleTopicData = async (
         }s`
       );
     } catch (e) {
-      console.log(e);
       // It's ok if import failed it will just be slower
-      sentryTrackError(e);
+      logger.error(e);
     }
   }
 };
@@ -236,10 +236,10 @@ export const streamConversations = async (account: string) => {
   await stopStreamingConversations(account);
   const client = (await getXmtpClient(account)) as ConverseXmtpClientType;
   await client.conversations.stream(async (conversation) => {
-    console.log("GOT A NEW DM CONVO");
+    logger.info("GOT A NEW DM CONVO");
     handleNewConversation(client, conversation);
   });
-  console.log("STREAMING CONVOS");
+  logger.info("STREAMING CONVOS");
 };
 
 // @todo => fix conversations.streamAll to stream convos AND groups
@@ -253,14 +253,14 @@ export const streamGroups = async (account: string) => {
 
   const cancelStreamGroupsForAccount = await client.conversations.streamGroups(
     async (group) => {
-      console.log("GOT A NEW GROUP CONVO");
+      logger.info("GOT A NEW GROUP CONVO");
       handleNewConversation(client, group);
       // Let's reset stream if new group
       // @todo => it should be part of the SDK
       // streamAllGroupMessages(account);
     }
   );
-  console.log("STREAMING GROUPS");
+  logger.info("STREAMING GROUPS");
   streamGroupsCancelMethods[account] = cancelStreamGroupsForAccount;
 };
 
@@ -341,7 +341,7 @@ export const loadConversations = async (
         knownGroups.push(g);
       }
     });
-    console.log(
+    logger.debug(
       `[XmtpRN] Listing ${conversations.length} conversations for ${
         client.address
       } took ${(new Date().getTime() - now) / 1000} seconds`
@@ -512,7 +512,7 @@ const createConversation = async (
   if (!dbConversation.pending) {
     throw new Error("Can only create a conversation that is pending");
   }
-  console.log(
+  logger.info(
     `[XMTP] Creating a conversation with peer ${dbConversation.peerAddress} and id ${dbConversation.contextConversationId}`
   );
   const client = (await getXmtpClient(account)) as ConverseXmtpClientType;
@@ -543,7 +543,7 @@ const createConversation = async (
 export const createPendingConversations = async (account: string) => {
   const pendingConvos = await getPendingConversationsToCreate(account);
   if (pendingConvos.length === 0) return;
-  console.log(
+  logger.info(
     `Trying to create ${pendingConvos.length} pending conversations...`
   );
   await Promise.all(pendingConvos.map((c) => createConversation(account, c)));
@@ -628,7 +628,7 @@ const backupTopicsData = async (
     const mmkvInstance = await getSecureMmkvForAccount(account);
     mmkvInstance.set("XMTP_TOPICS_DATA", stringData);
     const afterBackup = new Date().getTime();
-    console.log(
+    logger.debug(
       `[XmtpRN] Backed up ${
         Object.keys(newTopicsData).length
       } conversations into secure mmkv in ${
@@ -672,7 +672,7 @@ const importBackedTopicsData = async (client: ConverseXmtpClientType) => {
         setOpenedConversation(client.address, conversation);
       });
       const afterImport = new Date().getTime();
-      console.log(
+      logger.debug(
         `[XmtpRN] Imported ${
           topicsData.length
         } exported conversations into client in ${

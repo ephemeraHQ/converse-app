@@ -1,3 +1,4 @@
+import logger from "@utils/logger";
 import {
   DecryptedLocalAttachment,
   EncryptedLocalAttachment,
@@ -157,7 +158,7 @@ export const getLocalAttachment = async (messageId: string) => {
         };
       }
     } catch (e) {
-      console.log(e);
+      logger.warn(e);
     }
   }
 };

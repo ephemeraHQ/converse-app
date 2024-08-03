@@ -1,4 +1,5 @@
 import { setAndroidColors } from "@styles/colors/helpers";
+import logger from "@utils/logger";
 import * as Linking from "expo-linking";
 import { useCallback, useEffect, useRef } from "react";
 import { useColorScheme } from "react-native";
@@ -55,7 +56,7 @@ export default function InitialStateHandler() {
           setDesktopConnectSessionId(sessionId);
         }
       } catch (e) {
-        console.log(e);
+        logger.error(e);
       }
     },
     [setDesktopConnectSessionId]

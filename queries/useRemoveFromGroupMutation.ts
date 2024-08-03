@@ -1,4 +1,5 @@
 import { useMutation } from "@tanstack/react-query";
+import logger from "@utils/logger";
 import { InboxId } from "@xmtp/react-native-sdk/build/lib/Client";
 
 import { removeMemberMutationKey } from "./MutationKeys";
@@ -38,14 +39,14 @@ export const useRemoveFromGroupMutation = (account: string, topic: string) => {
       return { previousGroupMembers };
     },
     onError: (_error, _variables, context) => {
-      console.log("onError useRemoveFromGroupMutation");
+      logger.warn("onError useRemoveFromGroupMutation");
       if (context?.previousGroupMembers === undefined) {
         return;
       }
       setGroupMembersQueryData(account, topic, context.previousGroupMembers);
     },
     onSuccess: (data, variables, context) => {
-      console.log("onSuccess useRemoveFromGroupMutation");
+      logger.debug("onSuccess useRemoveFromGroupMutation");
       refreshGroup(account, topic);
     },
   });

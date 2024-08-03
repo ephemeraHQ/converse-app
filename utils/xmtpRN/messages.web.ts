@@ -1,3 +1,4 @@
+import logger from "@utils/logger";
 import { Reaction } from "@xmtp/content-type-reaction";
 import {
   Attachment,
@@ -134,16 +135,16 @@ const messagesStream: {
 export const streamAllMessages = async (account: string) => {
   await stopStreamingAllMessage(account);
   const client = (await getXmtpClient(account)) as Client;
-  console.log(`[XmtpJS] Streaming messages for ${client.address}`);
+  logger.debug(`[XmtpJS] Streaming messages for ${client.address}`);
   messagesStream[account] = await client.conversations.streamAllMessages();
   for await (const message of messagesStream[account]) {
-    console.log(`[XmtpJS] Received a message for ${client.address}`);
+    logger.debug(`[XmtpJS] Received a message for ${client.address}`);
     saveMessages(client.address, protocolMessagesToStateMessages([message]));
   }
 };
 
 export const stopStreamingAllMessage = async (account: string) => {
-  console.log(`[XmtpJS] Stopped streaming messages for ${account}`);
+  logger.debug(`[XmtpJS] Stopped streaming messages for ${account}`);
   if (messagesStream[account]) {
     await messagesStream[account].return(null);
     delete messagesStream[account];
@@ -167,7 +168,7 @@ const decodeBatchMessages = async (
           messagesBatch.push(message);
         }
       } catch (e: any) {
-        console.log("A message could not be decoded");
+        logger.debug("A message could not be decoded");
       }
     })
   );
@@ -191,7 +192,7 @@ export const syncConversationsMessages = async (
       }))
     )
   );
-  console.log(
+  logger.debug(
     `[XmtpJS] Fetched ${messagesBatch.length} envelopes from network for ${client.address}`
   );
   messagesBatch.sort(

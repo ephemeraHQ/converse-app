@@ -1,13 +1,12 @@
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { primaryColor } from "@styles/colors";
 import { PictoSizes } from "@styles/sizes";
-import React, { useCallback, useRef } from "react";
+import React, { useCallback } from "react";
 import { Platform, TouchableOpacity, useColorScheme } from "react-native";
 import { FAB } from "react-native-paper";
 
 import { NavigationParamList } from "../../screens/Navigation/Navigation";
 import { navigate } from "../../utils/navigation";
-import DebugButton, { useEnableDebug } from "../DebugButton";
 import Picto from "../Picto/Picto";
 
 export default function NewConversationButton({
@@ -17,29 +16,13 @@ export default function NewConversationButton({
   "Chats" | "Conversation" | "ShareFrame"
 >) {
   const colorScheme = useColorScheme();
-  const debugRef = useRef();
-  const enableDebug = useEnableDebug();
   const onPress = useCallback(() => {
     navigate("NewConversation");
   }, []);
-  const onLongPress = useCallback(() => {
-    if (
-      !enableDebug ||
-      !debugRef.current ||
-      !(debugRef.current as any).showDebugMenu
-    ) {
-      return;
-    }
-    (debugRef.current as any).showDebugMenu();
-  }, [enableDebug]);
+
   if (Platform.OS === "ios") {
     return (
-      <TouchableOpacity
-        activeOpacity={0.2}
-        onPress={onPress}
-        onLongPress={onLongPress}
-      >
-        {enableDebug && <DebugButton ref={debugRef} />}
+      <TouchableOpacity activeOpacity={0.2} onPress={onPress}>
         <Picto
           picto="square.and.pencil"
           color={primaryColor(colorScheme)}
@@ -54,7 +37,6 @@ export default function NewConversationButton({
         key={`FAB-newConversation-${colorScheme}`}
         icon={(props) => (
           <>
-            {enableDebug && <DebugButton ref={debugRef} />}
             <Picto
               picto="square.and.pencil"
               color={props.color}
@@ -70,7 +52,6 @@ export default function NewConversationButton({
           bottom: 20,
         }}
         onPress={onPress}
-        onLongPress={onLongPress}
       />
     );
   }

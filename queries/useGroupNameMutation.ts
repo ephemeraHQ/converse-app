@@ -1,4 +1,5 @@
 import { useMutation } from "@tanstack/react-query";
+import logger from "@utils/logger";
 
 import { setGroupNameMutationKey } from "./MutationKeys";
 import {
@@ -28,14 +29,14 @@ export const useGroupNameMutation = (account: string, topic: string) => {
     },
     // eslint-disable-next-line node/handle-callback-err
     onError: (_error, _variables, context) => {
-      console.log("onError useGroupNameMutation");
+      logger.warn("onError useGroupNameMutation");
       if (context?.previousGroupName === undefined) {
         return;
       }
       setGroupNameQueryData(account, topic, context.previousGroupName);
     },
     onSuccess: (data, variables, context) => {
-      console.log("onSuccess useGroupNameMutation");
+      logger.debug("onSuccess useGroupNameMutation");
       refreshGroup(account, topic);
     },
   });

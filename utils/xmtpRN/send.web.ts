@@ -1,3 +1,4 @@
+import logger from "@utils/logger";
 import { ContentTypeReaction, Reaction } from "@xmtp/content-type-reaction";
 import { ContentTypeRemoteAttachment } from "@xmtp/content-type-remote-attachment";
 import { ContentTypeReply, Reply } from "@xmtp/content-type-reply";
@@ -45,7 +46,7 @@ const sendConversePreparedMessages = async (
       await markMessageAsSent(account, id, preparedMessage.topic);
       delete sendingMessages[id];
     } catch (e: any) {
-      console.log("Could not send message, will probably try again later", e);
+      logger.debug("Could not send message, will probably try again later", e);
       delete sendingMessages[id];
     }
   }
@@ -62,7 +63,7 @@ export const sendPendingMessages = async (account: string) => {
       sendingPendingMessages = false;
       return;
     }
-    console.log(`Trying to send ${messagesToSend.length} pending messages...`);
+    logger.debug(`Trying to send ${messagesToSend.length} pending messages...`);
     const preparedMessagesToSend: Map<string, ConversePreparedMessage> =
       new Map();
     const messageIdsToUpdate: {
@@ -131,7 +132,7 @@ export const sendPendingMessages = async (account: string) => {
           message: xmtpMessageToDb(message, message.topic),
         };
       } else {
-        console.log(
+        logger.debug(
           `Did not find the conversation for topic ${message.topic}, will retry...`
         );
       }
@@ -139,7 +140,7 @@ export const sendPendingMessages = async (account: string) => {
     await updateMessagesIds(account, messageIdsToUpdate);
     await sendConversePreparedMessages(account, preparedMessagesToSend);
   } catch (e) {
-    console.log(e);
+    logger.debug(e);
   }
   sendingPendingMessages = false;
 };

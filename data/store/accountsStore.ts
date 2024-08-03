@@ -1,3 +1,4 @@
+import logger from "@utils/logger";
 import { v4 as uuidv4 } from "uuid";
 import { create, StoreApi, UseBoundStore } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
@@ -32,7 +33,7 @@ const storesByAccount: {
 // And here call the init method of each store
 export const initStores = (account: string) => {
   if (!(account in storesByAccount)) {
-    console.log(`[AccountsStore] Initiating account ${account}`);
+    logger.debug(`[AccountsStore] Initiating account ${account}`);
     // If adding a persisted store here, please add
     // the deletion method in deleteStores
     storesByAccount[account] = {
@@ -48,7 +49,7 @@ export const initStores = (account: string) => {
 };
 
 const deleteStores = (account: string) => {
-  console.log(`[AccountsStore] Deleting account ${account}`);
+  logger.debug(`[AccountsStore] Deleting account ${account}`);
   delete storesByAccount[account];
   mmkv.delete(`store-${account}-chat`);
   mmkv.delete(`store-${account}-recommendations`);
@@ -128,7 +129,7 @@ export const useAccountsStore = create<AccountsStoreStype>()(
             );
             return state;
           }
-          console.log(`[AccountsStore] Setting current account: ${account}`);
+          logger.debug(`[AccountsStore] Setting current account: ${account}`);
           if (!storesByAccount[account]) {
             initStores(account);
           }
@@ -186,7 +187,7 @@ export const useAccountsStore = create<AccountsStoreStype>()(
       onRehydrateStorage: () => {
         return (state, error) => {
           if (error) {
-            console.log("An error happened during hydration", error);
+            logger.warn("An error happened during hydration", error);
           } else {
             if (state?.accounts && state.accounts.length > 0) {
               state.accounts.map(initStores);
