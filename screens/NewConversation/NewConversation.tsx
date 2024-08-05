@@ -31,6 +31,7 @@ import { TableViewPicto } from "../../components/TableView/TableViewImage";
 import config from "../../config";
 import {
   currentAccount,
+  getProfilesStore,
   useChatStore,
   useRecommendationsStore,
 } from "../../data/store/accountsStore";
@@ -219,6 +220,10 @@ export default function NewConversation({
                 );
 
                 if (!isEmptyObject(profiles)) {
+                  // Let's save the profiles for future use
+                  getProfilesStore(currentAccount())
+                    .getState()
+                    .saveSocials(profiles);
                   setStatus({
                     loading: false,
                     error: "",
@@ -254,6 +259,8 @@ export default function NewConversation({
           const profiles = await searchProfiles(value, currentAccount());
 
           if (!isEmptyObject(profiles)) {
+            // Let's save the profiles for future use
+            getProfilesStore(currentAccount()).getState().saveSocials(profiles);
             setStatus({
               loading: false,
               error: "",
