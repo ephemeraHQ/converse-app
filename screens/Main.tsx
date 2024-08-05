@@ -1,3 +1,4 @@
+import UserProfile from "@components/Onboarding/UserProfile";
 import { backgroundColor } from "@styles/colors";
 import { StatusBar } from "expo-status-bar";
 import React, { useCallback, useEffect, useRef } from "react";
@@ -118,14 +119,14 @@ export default function Main() {
           Platform.OS === "android"))
     ) {
       screenToShow = <NotificationsScreen />;
-      // } else if (
-      //   !(
-      //     currentUserName?.name &&
-      //     currentUserName?.displayName &&
-      //     currentUserName?.avatar
-      //   )
-      // ) {
-      //   screenToShow = <UserProfile onboarding />;
+    } else if (
+      !(
+        currentUserName?.name &&
+        currentUserName?.displayName &&
+        currentUserName?.avatar
+      )
+    ) {
+      screenToShow = <UserProfile onboarding />;
     } else if (Platform.OS === "android") {
       // On Android the whole navigation is wrapped in a drawler
       // layout to be able to display the menu
