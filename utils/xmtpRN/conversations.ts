@@ -107,7 +107,7 @@ const protocolGroupToStateConversation = async (
     groupName: group.name,
     groupCreator,
     groupAddedBy,
-    isActive: group.isGroupActive ?? true,
+    isActive: group.isGroupActive,
   };
 };
 
