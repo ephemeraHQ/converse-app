@@ -15,6 +15,7 @@ export const useGroupIsActiveQuery = (account: string, topic: string) => {
       return group.isActive();
     },
     enabled: !!group,
+    initialData: group?.isGroupActive,
   });
 };
 
