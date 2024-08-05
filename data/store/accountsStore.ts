@@ -124,7 +124,7 @@ export const useAccountsStore = create<AccountsStoreStype>()(
           const accounts = [...state.accounts];
           const isNew = !accounts.includes(account);
           if (isNew && !createIfNew) {
-            console.error(
+            logger.warn(
               `[AccountsStore] Account ${account} is new but createIfNew is false`
             );
             return state;

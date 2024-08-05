@@ -5,6 +5,7 @@ import {
   textSecondaryColor,
 } from "@styles/colors";
 import { PictoSizes } from "@styles/sizes";
+import logger from "@utils/logger";
 import { useWeb3Modal, useWeb3ModalProvider } from "@web3modal/ethers5/react";
 import { ethers } from "ethers";
 import { useEffect, useRef, useState } from "react";
@@ -114,7 +115,7 @@ export default function Onboarding() {
           // Now we can instantiate the XMTP Client
           getXmtpClient(address);
         } catch (e) {
-          console.error(e);
+          logger.error(e);
         }
         connectingToXmtp.current = false;
       }

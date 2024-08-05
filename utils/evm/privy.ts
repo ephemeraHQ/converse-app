@@ -13,6 +13,8 @@ import {
   useCurrentAccount,
 } from "../../data/store/accountsStore";
 
+import logger from "@utils/logger";
+
 export const usePrivySigner = (onboarding: boolean = false) => {
   const currentAccount = useCurrentAccount();
   const privyAccountId = useAccountsStore((s) => s.privyAccountId);
@@ -35,7 +37,7 @@ export const usePrivySigner = (onboarding: boolean = false) => {
         .then(() => {
           setHasSwitchedNetwork(true);
         })
-        .catch(console.error);
+        .catch(logger.error);
     } else {
       const ethersProvider = new ethers.providers.Web3Provider(provider);
       const ethersSigner = ethersProvider.getSigner();
@@ -58,7 +60,7 @@ export const usePrivyAccessToken = () => {
         setAccessToken(token);
       })
       .catch((e) => {
-        console.error("error getting access token", e);
+        logger.error(e, { context: "error getting privy access token" });
       });
   }, [getAccessToken, user?.id, isReady]);
   return accessToken;

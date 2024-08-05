@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Dimensions, PixelRatio, Platform, TextInput } from "react-native";
 
+import logger from "./logger";
 import { getPreferredName } from "./profile";
 import { getProfilesStore, useAccountsList } from "../data/store/accountsStore";
 import { XmtpConversation } from "../data/store/chatStore";
@@ -105,7 +106,7 @@ export const useAccountsProfiles = () => {
           handleAccount(account, state);
         });
       } catch (e) {
-        console.error(e);
+        logger.error(e);
       }
     });
   }, [accounts, handleAccount]);
