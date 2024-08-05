@@ -88,8 +88,6 @@ const protocolGroupToStateConversation = async (
       groupAddedBy = m.addresses[0];
     }
   });
-  const groupName = await group.groupName();
-  const isActive = await group.isActive();
   return {
     topic: group.topic,
     groupMembers: groupMembersAddresses,
@@ -106,10 +104,10 @@ const protocolGroupToStateConversation = async (
     groupAdmins,
     groupSuperAdmins,
     groupPermissionLevel: "custom_policy",
-    groupName,
+    groupName: group.name,
     groupCreator,
     groupAddedBy,
-    isActive,
+    isActive: group.isGroupActive,
   };
 };
 
