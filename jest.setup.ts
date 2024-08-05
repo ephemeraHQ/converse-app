@@ -66,3 +66,6 @@ jest.mock("rn-fetch-blob", () => {
     polyfill: () => {},
   };
 });
+
+jest.mock("@sentry/react-native", () => ({}));
+jest.mock("expo-constants", () => ({}));
