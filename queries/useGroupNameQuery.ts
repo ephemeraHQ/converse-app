@@ -15,6 +15,7 @@ export const useGroupNameQuery = (account: string, topic: string) => {
       return group.groupName();
     },
     enabled: !!group,
+    initialData: group?.name,
   });
 };
 
