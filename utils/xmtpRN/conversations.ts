@@ -31,7 +31,6 @@ import { setGroupNameQueryData } from "../../queries/useGroupNameQuery";
 import { setGroupPhotoQueryData } from "../../queries/useGroupPhotoQuery";
 import { addGroupToGroupsQuery } from "../../queries/useGroupsQuery";
 import { ConversationWithLastMessagePreview } from "../conversation";
-import { debugTimeSpent } from "../debug";
 import { getCleanAddress } from "../eth";
 import { getTopicDataFromKeychain } from "../keychain/helpers";
 import { getSecureMmkvForAccount } from "../mmkv";
@@ -301,21 +300,15 @@ export const loadConversations = async (
 ) => {
   try {
     const client = (await getXmtpClient(account)) as ConverseXmtpClientType;
-    debugTimeSpent({ id: "OPTIM", actionToLog: "Initiated client" });
     const now = new Date().getTime();
     if (!importedTopicsDataForAccount[account]) {
       importedTopicsDataForAccount[account] = true;
       await importBackedTopicsData(client);
-      debugTimeSpent({
-        id: "OPTIM",
-        actionToLog: "Imported topics into client",
-      });
     }
     const [conversations, groups] = await Promise.all([
       listConversations(client),
       listGroups(client),
     ]);
-    debugTimeSpent({ id: "OPTIM", actionToLog: "Listed conversations" });
     const newConversations: ConversationWithCodecsType[] = [];
     const knownConversations: ConversationWithCodecsType[] = [];
     conversations.forEach((c) => {
@@ -617,7 +610,6 @@ const backupTopicsData = async (
   account: string,
   conversationTopicData: TopicDataByTopic
 ) => {
-  debugTimeSpent({ id: "OPTIM", actionToLog: "Started topics backup" });
   try {
     const beforeBackup = new Date().getTime();
     const alreadyTopicsData = await retrieveTopicsData(account);
@@ -633,7 +625,6 @@ const backupTopicsData = async (
         (afterBackup - beforeBackup) / 1000
       }s`
     );
-    debugTimeSpent({ id: "OPTIM", actionToLog: "Backed up topics" });
   } catch (e) {
     sentryTrackError(e, { error: "Could not backup topics data" });
   }

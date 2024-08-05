@@ -14,7 +14,6 @@ import {
   conversationShouldBeDisplayed,
   conversationShouldBeInInbox,
 } from "./conversation";
-import { debugTimeSpent } from "./debug";
 import { getGroupIdFromTopic } from "./groupUtils/groupId";
 import { savePushToken } from "./keychain/helpers";
 import logger from "./logger";
@@ -226,13 +225,9 @@ const _subscribeToNotifications = async (account: string): Promise<void> => {
       return;
     }
 
-    debugTimeSpent({ id: "hash" });
-
     const hash = (
       await createHash(Buffer.from(stringToHash), "sha256")
     ).toString("hex");
-
-    debugTimeSpent({ id: "hash", actionToLog: "[NO12] hashed" });
 
     if (!lastNotifSubscribeByAccount[account]?.serverHash) {
       lastNotifSubscribeByAccount[account].serverHash =
