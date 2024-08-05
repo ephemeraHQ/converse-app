@@ -15,6 +15,7 @@ export const useGroupPhotoQuery = (account: string, topic: string) => {
       return group.groupImageUrlSquare();
     },
     enabled: !!group,
+    initialData: group?.imageUrlSquare,
   });
 };
 
