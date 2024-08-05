@@ -1,8 +1,9 @@
 import { getCleanAddress } from "@utils/eth";
+import logger from "@utils/logger";
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
 
-import { zustandMMKVStorage } from "../../utils/mmkv";
+import mmkv, { zustandMMKVStorage } from "../../utils/mmkv";
 
 export type LensHandle = {
   profileId: string;
@@ -54,6 +55,7 @@ export type ProfilesStoreType = {
   profiles: ProfileByAddress;
   setProfiles: (profiles: ProfileByAddress) => void;
   saveSocials: (socials: { [address: string]: ProfileSocials }) => void;
+  refreshFromStorage: () => void;
 };
 
 export const initProfilesStore = (account: string) => {
@@ -75,6 +77,20 @@ export const initProfilesStore = (account: string) => {
               };
             });
             return newState;
+          }),
+        refreshFromStorage: () =>
+          set((state) => {
+            const mmkvState = mmkv.getString(`store-${account}-profiles`);
+            if (!mmkvState) return state;
+            try {
+              const parsed = JSON.parse(mmkvState);
+              return parsed.state;
+            } catch (error) {
+              logger.error(error, {
+                context: "Could not refresh profiles from storage",
+              });
+            }
+            return state;
           }),
       }),
       {

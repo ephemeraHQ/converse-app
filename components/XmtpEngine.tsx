@@ -10,6 +10,7 @@ import { getExistingDataSource } from "../data/db/datasource";
 import {
   getAccountsList,
   getChatStore,
+  getProfilesStore,
   useAccountsList,
 } from "../data/store/accountsStore";
 import { useAppStore } from "../data/store/appStore";
@@ -84,6 +85,11 @@ export default function XmtpEngine() {
           reconnectConverseDbConnections();
           await reconnectXmtpClientsDbConnections();
           loadSavedNotificationMessagesToContext();
+          // Refreshing profiles store from mmkv
+          // as we could have added data from notification
+          accounts.forEach((a) => {
+            getProfilesStore(a).getState().refreshFromStorage();
+          });
           if (isInternetReachableRef.current) {
             syncAccounts(accounts);
           }
