@@ -1,3 +1,4 @@
+import logger from "@utils/logger";
 import { useState } from "react";
 import { StyleSheet, useColorScheme, Text } from "react-native";
 
@@ -28,7 +29,7 @@ export default function WarpcastConnect() {
         await refreshProfileForAddress(currentAccount, currentAccount);
         await refreshRecommendationsForAccount(currentAccount);
       } catch (e: any) {
-        console.error(e);
+        logger.error(e);
         setError("An unknown error occurred");
       }
       setLoading(false);

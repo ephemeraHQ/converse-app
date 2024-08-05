@@ -24,7 +24,7 @@ api.interceptors.response.use(
   },
   function (error) {
     if (error.response) {
-      console.error(
+      logger.warn(
         `[API] HTTP Error ${error.response.status} - ${error.request._url}`,
         JSON.stringify(
           { headers: error.request._headers, response: error.response.data },
@@ -33,7 +33,7 @@ api.interceptors.response.use(
         )
       );
     } else if (error.request) {
-      console.error(
+      logger.warn(
         `[API] HTTP Error - No response received - ${error.request._url}`,
         error.request
       );

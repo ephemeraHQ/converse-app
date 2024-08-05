@@ -34,7 +34,7 @@ export const refreshBalanceForAccount = async (
     lastRefreshByAccount[account] = now;
     getWalletStore(account).getState().setUSDCBalance(balance);
   } catch (e) {
-    console.error(e);
+    logger.error(e);
   }
   refreshingBalanceForAccount[account] = false;
 };

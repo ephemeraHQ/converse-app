@@ -386,7 +386,7 @@ export const updateConsentStatus = async (account: string) => {
     const consentList = await client.contacts.refreshConsentList();
     await saveConsentState(consentList, client.address);
   } catch (error) {
-    console.error("Failed to update consent status:", error);
+    logger.error(error, { context: "Failed to update consent status:" });
   }
 };
 
@@ -449,7 +449,7 @@ export const consentToPeersOnProtocol = async (
       throw new Error(`Invalid consent type: ${consent}`);
     }
   } catch (error) {
-    console.error("Error updating consent:", error);
+    logger.error(error, { context: "Error updating consent" });
   }
 };
 
@@ -469,7 +469,7 @@ export const consentToGroupsOnProtocol = async (
       throw new Error(`Invalid consent type: ${consent}`);
     }
   } catch (error) {
-    console.error("Error updating consent:", error);
+    logger.error(error, { context: "Error updating consent" });
   }
 };
 
@@ -489,7 +489,7 @@ export const consentToInboxIdsOnProtocol = async (
       throw new Error(`Invalid consent type: ${consent}`);
     }
   } catch (error) {
-    console.error("Error updating consent:", error);
+    logger.error(error, { context: "Error updating consent" });
   }
 };
 
