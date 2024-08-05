@@ -157,11 +157,9 @@ func handleGroupMessage(xmtpClient: XMTP.Client, envelope: XMTP.Envelope, apiURI
             if let groupName = try? group.groupName() {
               bestAttemptContent.title = groupName
             }
-            let profilesState = getProfilesState(account: xmtpClient.address)
-
             // We replaced decodedMessage.senderAddress from inboxId to actual address
             // so it appears well in the app until inboxId is a first class citizen
-            if let senderProfile = profilesState?.profiles?[decodedMessage.senderAddress] {
+            if let senderProfile = await getProfile(account: xmtpClient.address, address: decodedMessage.senderAddress) {
               bestAttemptContent.subtitle = getPreferredName(address: decodedMessage.senderAddress, socials: senderProfile.socials)
             }
 
@@ -206,9 +204,8 @@ func handleOngoingConversationMessage(xmtpClient: XMTP.Client, envelope: XMTP.En
     } else if let content = decodedMessageResult.content {
       bestAttemptContent.body = content
       
-      let profilesState = getProfilesState(account: xmtpClient.address)
       var senderAvatar: String? = nil
-      if let senderAddress = decodedMessageResult.senderAddress, let senderProfile = profilesState?.profiles?[senderAddress] {
+      if let senderAddress = decodedMessageResult.senderAddress, let senderProfile = await getProfile(account: xmtpClient.address, address: senderAddress) {
         conversationTitle = getPreferredName(address: senderAddress, socials: senderProfile.socials)
         senderAvatar = getPreferredAvatar(socials: senderProfile.socials)
       }
