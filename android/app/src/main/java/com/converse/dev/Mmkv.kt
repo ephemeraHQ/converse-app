@@ -5,6 +5,7 @@ import com.beust.klaxon.Klaxon
 import com.tencent.mmkv.MMKV
 import org.json.JSONArray
 import org.json.JSONException
+import java.util.Date
 
 private var mmkvInstance:MMKV? = null;
 private var secureMmkvForAccount:MutableMap<String, MMKV?> = mutableMapOf();
@@ -99,15 +100,41 @@ fun setShownNotificationIds(appContext: Context, ids: List<String>) {
     mmkv?.encode("notification-ids", jsonArray.toString())
 }
 
-fun getProfilesState(appContext: Context, account: String): Profiles? {
+fun getProfilesStore(appContext: Context, account: String): ProfilesStore? {
     val mmkv = getMmkv(appContext)
     val profilesString = mmkv?.decodeString("store-$account-profiles") ?: return null
     try {
         val decoded = Klaxon().parse<ProfilesStore>(profilesString)
-        return decoded?.state
+        return decoded
     } catch (e: Exception) {
         sentryTrackError(e, mapOf("message" to "Could not parse the store-$account-profiles data", "profilesString" to profilesString))
         Log.d("GetProfilesState", "Could not parse the store-$account-profiles data: $e")
         return null
     }
+}
+
+fun saveProfileSocials(appContext: Context, account: String, address: String, socials: ProfileSocials) {
+    // Retrieve the current profiles store or create a new one if it doesn't exist
+    var profilesStore = getProfilesStore(appContext, account) ?: ProfilesStore(Profiles(mutableMapOf()), 0)
+
+    // Ensure the profiles map is not null
+    if (profilesStore.state.profiles == null) {
+        profilesStore.state.profiles = mutableMapOf()
+    }
+
+    // Get the current timestamp
+    val updatedAt = (Date().time / 1000).toLong()
+
+    // Create a new profile with the updated timestamp and socials
+    val newProfile = Profile(updatedAt, socials)
+
+    // Update the profiles map with the new profile
+    profilesStore.state.profiles!![address] = newProfile
+
+    // Get the MMKV instance
+    val mmkv = getMmkv(appContext)
+
+    // Encode the profiles store to JSON and save it to MMKV
+    val jsonString = Klaxon().toJsonString(profilesStore)
+    mmkv?.encode("store-$account-profiles", jsonString)
 }

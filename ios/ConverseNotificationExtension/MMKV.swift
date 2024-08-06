@@ -56,7 +56,7 @@ func getAccountsState() -> Accounts? {
   }
 }
 
-func getProfilesState(account: String) -> Profiles? {
+func getProfilesStore(account: String) -> ProfilesStore? {
   let mmkv = getMmkv()
   let profilesString = mmkv?.string(forKey: "store-\(account)-profiles")
   if (profilesString == nil) {
@@ -65,10 +65,26 @@ func getProfilesState(account: String) -> Profiles? {
   let decoder = JSONDecoder()
   do {
     let decoded = try decoder.decode(ProfilesStore.self, from: profilesString!.data(using: .utf8)!)
-    return decoded.state
+    return decoded
   } catch {
     return nil
   }
+}
+
+func saveProfileSocials(account: String, address: String, socials: ProfileSocials) {
+  var profilesStore = getProfilesStore(account: account) ?? ProfilesStore(state: Profiles(profiles: [:]), version: 0)
+  if profilesStore.state.profiles == nil {
+    profilesStore.state.profiles = [:]
+  }
+  
+  let updatedAt = Int(Date().timeIntervalSince1970)
+  let newProfile = Profile(updatedAt: updatedAt, socials: socials)
+  profilesStore.state.profiles![address] = newProfile
+  let mmkv = getMmkv()
+  if let jsonData = try? JSONEncoder().encode(profilesStore), let jsonString = String(data: jsonData, encoding: .utf8) {
+    mmkv?.set(jsonString, forKey: "store-\(account)-profiles")
+  }
+  
 }
 
 func getCurrentAccount() -> String? {

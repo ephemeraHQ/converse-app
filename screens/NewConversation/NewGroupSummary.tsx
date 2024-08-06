@@ -4,7 +4,7 @@ import {
   textInputStyle,
   textSecondaryColor,
 } from "@styles/colors";
-import { sentryTrackError } from "@utils/sentry";
+import logger from "@utils/logger";
 import { PermissionPolicySet } from "@xmtp/react-native-sdk/build/lib/types/PermissionPolicySet";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
@@ -157,9 +157,9 @@ export default function NewGroupSummary({
         isSplitScreen ? 0 : 300
       );
     } catch (e) {
+      logger.error(e);
       Alert.alert("An error occurred");
       setCreatingGroup(false);
-      sentryTrackError(e);
     }
   }, [
     groupDescription,
