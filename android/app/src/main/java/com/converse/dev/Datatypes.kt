@@ -12,7 +12,7 @@ class EnsName(val name: String, val displayName: String? = null, val isPrimary: 
 class ConverseUserName(val name: String, val displayName: String? = null, val isPrimary: Boolean? = false, val avatar: String? = null)
 class ProfileSocials(val ensNames: Array<EnsName>? = null, val userNames: Array<ConverseUserName>? = null)
 class Profile(val updatedAt: Long, val socials: ProfileSocials)
-class Profiles(val profiles: Map<String, Profile>? = null)
+class Profiles(var profiles: MutableMap<String, Profile>? = null)
 class ProfilesStore(val state: Profiles, val version: Int)
 class SavedNotificationConversation(val topic: String, val peerAddress: String, val createdAt: Long, val context: ConversationContext?, val account: String? = null, spamScore: Double?) {
   // Whenever spamScore is set, round it to two decimal to ensure it fits as a 2-digit float in the database
