@@ -7,7 +7,7 @@ interface MessageContextMenuWrapperProps {
   messageContent: React.ReactNode;
   children: React.ReactNode;
   reactions: {
-    [senderAddress: string]: MessageReaction | undefined;
+    [senderAddress: string]: MessageReaction[];
   };
 }
 

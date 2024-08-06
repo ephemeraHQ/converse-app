@@ -33,7 +33,7 @@ import { MessageToDisplay } from "./Message";
 
 interface MessageReactionsListProps {
   reactions: {
-    [senderAddress: string]: MessageReaction | undefined;
+    [senderAddress: string]: MessageReaction[];
   };
   message: MessageToDisplay;
   dismissMenu?: () => void;
@@ -97,15 +97,11 @@ const Item: FC<MessageReactionsItemProps> = ({ content, addresses, index }) => {
 const EmojiItem: FC<{
   content: string;
   message: MessageToDisplay;
-  reactions: {
-    [senderAddress: string]: MessageReaction | undefined;
-  };
+  alreadySelected: boolean;
   dismissMenu?: () => void;
-}> = ({ content, message, reactions, dismissMenu }) => {
+}> = ({ content, message, alreadySelected, dismissMenu }) => {
   const styles = useStyles();
   const { conversation } = useConversationContext(["conversation"]);
-  const userAddress = useCurrentAccount() as string;
-  const alreadySelected = reactions[userAddress]?.content === content;
   const handlePress = useCallback(() => {
     if (!conversation) {
       return;
@@ -113,23 +109,10 @@ const EmojiItem: FC<{
     if (alreadySelected) {
       removeReactionFromMessage(conversation, message, content);
     } else {
-      // We want to remove all emojis first
-      const myReaction = reactions[userAddress];
-      if (myReaction && myReaction.schema === "unicode") {
-        removeReactionFromMessage(conversation, message, myReaction.content);
-      }
       addReactionToMessage(conversation, message, content);
     }
     dismissMenu?.();
-  }, [
-    alreadySelected,
-    content,
-    conversation,
-    dismissMenu,
-    message,
-    reactions,
-    userAddress,
-  ]);
+  }, [alreadySelected, content, conversation, dismissMenu, message]);
 
   return (
     <TouchableOpacity
@@ -141,7 +124,9 @@ const EmojiItem: FC<{
       }}
       onPress={handlePress}
     >
-      <Text style={styles.emojiText}>{content}</Text>
+      <View style={alreadySelected ? styles.selectedEmojiText : undefined}>
+        <Text style={styles.emojiText}>{content}</Text>
+      </View>
     </TouchableOpacity>
   );
 };
@@ -153,21 +138,39 @@ export const MessageReactionsList: FC<MessageReactionsListProps> = ({
   message,
   dismissMenu,
 }) => {
+  const currentUser = useCurrentAccount();
   const styles = useStyles();
   const colorScheme = useColorScheme();
   const list = useMemo(() => {
     const reactionMap: Record<string, string[]> = {};
-    Object.entries(reactions).forEach(([senderAddress, reaction]) => {
-      if (!reaction) {
+    Object.entries(reactions).forEach(([senderAddress, reactions]) => {
+      if (!reactions || reactions.length === 0) {
         return;
       }
-      if (!reactionMap[getReactionContent(reaction)]) {
-        reactionMap[getReactionContent(reaction)] = [];
+      for (const reaction of reactions) {
+        if (!reactionMap[getReactionContent(reaction)]) {
+          reactionMap[getReactionContent(reaction)] = [];
+        }
+        reactionMap[getReactionContent(reaction)].push(senderAddress);
       }
-      reactionMap[getReactionContent(reaction)].push(senderAddress);
     });
     return Object.entries(reactionMap);
   }, [reactions]);
+
+  const currentUserEmojiMap = useMemo(() => {
+    const emojiSet: Record<string, boolean> = {};
+    if (!currentUser) {
+      return emojiSet;
+    }
+    const userReactions = reactions[currentUser];
+    if (!userReactions) {
+      return emojiSet;
+    }
+    for (const reaction of userReactions) {
+      emojiSet[getReactionContent(reaction)] = true;
+    }
+    return emojiSet;
+  }, [reactions, currentUser]);
 
   const animatedValue = useSharedValue(0);
 
@@ -186,7 +189,7 @@ export const MessageReactionsList: FC<MessageReactionsListProps> = ({
     return (
       <EmojiItem
         content={item}
-        reactions={reactions}
+        alreadySelected={currentUserEmojiMap[item]}
         message={message}
         dismissMenu={dismissMenu}
       />
@@ -242,10 +245,14 @@ const useStyles = () => {
       flexGrow: 1,
     },
     emojiText: {
-      flexGrow: 1,
       fontSize: 16,
       marginHorizontal: Paddings.small,
-      marginVertical: Paddings.small,
+      marginVertical: Platform.OS === "ios" ? Paddings.small : 0,
+      marginBottom: Platform.OS === "android" ? Paddings.small : Paddings.small,
+    },
+    selectedEmojiText: {
+      backgroundColor: "rgba(0, 0, 0, 0.1)",
+      borderRadius: BorderRadius.large,
     },
     container: {
       justifyContent: "space-between",

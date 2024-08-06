@@ -23,7 +23,7 @@ interface MessageContextMenuWrapperIOSProps {
   messageContent: React.ReactNode;
   children: React.ReactNode;
   reactions: {
-    [senderAddress: string]: MessageReaction | undefined;
+    [senderAddress: string]: MessageReaction[];
   };
 }
 
@@ -122,73 +122,64 @@ export const MessageContextMenuWrapperIOS: FC<
   );
 
   return (
-    <>
-      <ContextMenu.Root onOpenWillChange={handleOpenWillChange}>
-        <ContextMenu.Content
-          loop={false}
-          avoidCollisions
-          collisionPadding={30}
-          alignOffset={10}
+    <ContextMenu.Root onOpenWillChange={handleOpenWillChange}>
+      <ContextMenu.Content
+        loop={false}
+        avoidCollisions
+        collisionPadding={30}
+        alignOffset={10}
+      >
+        <ContextMenu.Auxiliary
+          anchorPosition="automatic"
+          transitionEntranceDelay="RECOMMENDED"
+          marginPreview={60}
+          marginWithScreenEdge={20}
+          alignmentHorizontal={
+            message.fromMe ? "previewTrailing" : "previewLeading"
+          }
+          key="reactions"
+          width={width * 0.8}
+          height={220}
         >
-          <ContextMenu.Auxiliary
-            anchorPosition="automatic"
-            transitionEntranceDelay="RECOMMENDED"
-            marginPreview={60}
-            marginWithScreenEdge={20}
-            alignmentHorizontal={
-              message.fromMe ? "previewTrailing" : "previewLeading"
-            }
-            key="reactions"
-            width={width * 0.8}
-            height={220}
+          {({ dismissMenu }) => (
+            <MessageReactionsList
+              dismissMenu={dismissMenu}
+              reactions={reactions}
+              message={message}
+            />
+          )}
+        </ContextMenu.Auxiliary>
+        <ContextMenu.Preview
+          borderRadius={14}
+          backgroundColor={
+            message.fromMe
+              ? myMessageBubbleColor(colorScheme)
+              : messageBubbleColor(colorScheme)
+          }
+        >
+          {() => {
+            return children;
+          }}
+        </ContextMenu.Preview>
+        {contextMenuItems.map((item, index) => (
+          <ContextMenu.Item
+            key={item.title}
+            onSelect={() => handleContextMenuAction({ nativeEvent: { index } })}
           >
-            {({ dismissMenu }) => (
-              <MessageReactionsList
-                dismissMenu={dismissMenu}
-                reactions={reactions}
-                message={message}
-              />
-            )}
-          </ContextMenu.Auxiliary>
-          <ContextMenu.Preview
-            borderRadius={14}
-            backgroundColor={
-              message.fromMe
-                ? myMessageBubbleColor(colorScheme)
-                : messageBubbleColor(colorScheme)
-            }
-          >
-            {() => {
-              return children;
-            }}
-          </ContextMenu.Preview>
-          {contextMenuItems.map((item, index) => (
-            <ContextMenu.Item
-              key={item.title}
-              onSelect={() =>
-                handleContextMenuAction({ nativeEvent: { index } })
-              }
-            >
-              <ContextMenu.ItemTitle style={{ color: "white" }}>
-                {item.title}
-              </ContextMenu.ItemTitle>
-              <ContextMenu.ItemIcon
-                ios={{ name: item.systemIcon }}
-                androidIconName={item.systemIcon}
-              />
-            </ContextMenu.Item>
-          ))}
-        </ContextMenu.Content>
+            <ContextMenu.ItemTitle style={{ color: "white" }}>
+              {item.title}
+            </ContextMenu.ItemTitle>
+            <ContextMenu.ItemIcon
+              ios={{ name: item.systemIcon }}
+              androidIconName={item.systemIcon}
+            />
+          </ContextMenu.Item>
+        ))}
+      </ContextMenu.Content>
 
-        <ContextMenu.Trigger>
-          <>
-            {currentlyShown && Platform.OS !== "ios" && (
-              <MessageReactionsList reactions={reactions} message={message} />
-            )}
-            {children}
-          </>
-        </ContextMenu.Trigger>
-      </ContextMenu.Root>
-    </>
+      <ContextMenu.Trigger>
+        <>{children}</>
+      </ContextMenu.Trigger>
+    </ContextMenu.Root>
   );
 };

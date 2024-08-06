@@ -1,6 +1,5 @@
 import { MessageContextMenuWrapperIOS } from "@components/MessageContextMenuWrappers/MessageContextMenuWrapperiOS";
 import { useSelect } from "@data/store/storeHelpers";
-import Clipboard from "@react-native-clipboard/clipboard";
 import {
   messageBubbleColor,
   messageHighlightedBubbleColor,
@@ -95,14 +94,6 @@ export default function ChatMessageActions({
 
   const [emojiPickerShown, setEmojiPickerShown] = useState(false);
 
-  const showReactionModal = useCallback(() => {
-    setEmojiPickerShown(true);
-  }, []);
-
-  const triggerReplyToMessage = useCallback(() => {
-    converseEventEmitter.emit("triggerReplyToMessage", message);
-  }, [message]);
-
   const canAddReaction =
     message.status !== "sending" && message.status !== "error";
 
@@ -117,6 +108,26 @@ export default function ChatMessageActions({
         .runOnJS(true),
     [canAddReaction, isAttachment, conversation, message]
   );
+
+  const longPressGesture = useMemo(() => {
+    return Gesture.LongPress()
+      .onStart(() => {
+        converseEventEmitter.emit("scrollChatToMessage", {
+          messageId: message.id,
+          animated: true,
+        });
+        setContextMenuShown(message.id);
+      })
+      .runOnJS(true);
+  }, [message.id, setContextMenuShown]);
+
+  const composed = useMemo(() => {
+    // iOS Context Menu will handle the long press itself
+    if (Platform.OS === "ios") {
+      return Gesture.Simultaneous(doubleTapGesture);
+    }
+    return Gesture.Simultaneous(doubleTapGesture, longPressGesture);
+  }, [doubleTapGesture, longPressGesture]);
 
   const [selectedEmojis, setSelectedEmojis] = useState<string[]>([]);
   useEffect(() => {
@@ -203,50 +214,6 @@ export default function ChatMessageActions({
     };
   }, [highlightMessage]);
 
-  const contextMenuItems = useMemo(() => {
-    const items = [];
-
-    if (canAddReaction) {
-      items.push({ title: "Add a reaction", systemIcon: "smiley" });
-    }
-    items.push({ title: "Reply", systemIcon: "arrowshape.turn.up.left" });
-    if (!isAttachment && !isTransaction) {
-      items.push({ title: "Copy message", systemIcon: "doc.on.doc" });
-    }
-
-    return items;
-  }, [canAddReaction, isAttachment, isTransaction]);
-
-  const handleContextMenuAction = useCallback(
-    (event: { nativeEvent: { index: number } }) => {
-      const { index } = event.nativeEvent;
-      switch (contextMenuItems[index].title) {
-        case "Add a reaction":
-          showReactionModal();
-          break;
-        case "Reply":
-          triggerReplyToMessage();
-          break;
-        case "Copy message":
-          if (message.content) {
-            Clipboard.setString(message.content);
-          } else if (message.contentFallback) {
-            Clipboard.setString(message.contentFallback);
-          }
-          break;
-      }
-      setContextMenuShown(null);
-    },
-    [
-      contextMenuItems,
-      setContextMenuShown,
-      showReactionModal,
-      triggerReplyToMessage,
-      message.content,
-      message.contentFallback,
-    ]
-  );
-
   // Entrance animation for new messages. For sent messages,
   // we filter on UUIDs to avoid repeating the animation
   // when the message is received from the stream.
@@ -307,8 +274,8 @@ export default function ChatMessageActions({
 
   return (
     <>
-      <GestureDetector gesture={doubleTapGesture}>
-        <View style={{ flexGrow: 1 }}>
+      <GestureDetector gesture={composed}>
+        <View style={{ width: "100%" }}>
           <Animated.View style={[animateInStyle, styles.animateInWrapper]}>
             <ReanimatedTouchableOpacity
               activeOpacity={1}
