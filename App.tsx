@@ -47,6 +47,7 @@ import { useRecentPicksPersistence } from "./vendor/rn-emoji-keyboard";
 LogBox.ignoreLogs([
   "Privy: Expected status code 200, received 400", // Privy
   "Error destroying session", // Privy
+  'event="noNetwork', // ethers
 ]);
 
 configureCoinbase({
