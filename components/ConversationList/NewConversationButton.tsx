@@ -1,6 +1,7 @@
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { primaryColor } from "@styles/colors";
 import { PictoSizes } from "@styles/sizes";
+import { converseEventEmitter } from "@utils/events";
 import React, { useCallback } from "react";
 import { Platform, TouchableOpacity, useColorScheme } from "react-native";
 import { FAB } from "react-native-paper";
@@ -19,10 +20,17 @@ export default function NewConversationButton({
   const onPress = useCallback(() => {
     navigate("NewConversation");
   }, []);
+  const onLongPress = useCallback(() => {
+    converseEventEmitter.emit("showDebugMenu");
+  }, []);
 
   if (Platform.OS === "ios") {
     return (
-      <TouchableOpacity activeOpacity={0.2} onPress={onPress}>
+      <TouchableOpacity
+        activeOpacity={0.2}
+        onPress={onPress}
+        onLongPress={onLongPress}
+      >
         <Picto
           picto="square.and.pencil"
           color={primaryColor(colorScheme)}
@@ -52,6 +60,7 @@ export default function NewConversationButton({
           bottom: 20,
         }}
         onPress={onPress}
+        onLongPress={onLongPress}
       />
     );
   }

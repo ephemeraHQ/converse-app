@@ -11,6 +11,7 @@ import {
   MaterialLightTheme,
 } from "@styles/colors";
 import { useCoinbaseWalletListener } from "@utils/coinbaseWallet";
+import { converseEventEmitter } from "@utils/events";
 import logger from "@utils/logger";
 import { useDoOnShake } from "@utils/shake";
 import React, { useCallback, useEffect, useRef } from "react";
@@ -83,6 +84,12 @@ export default function App() {
   }, [enableDebug]);
 
   useDoOnShake(showDebugMenu);
+  useEffect(() => {
+    converseEventEmitter.on("showDebugMenu", showDebugMenu);
+    return () => {
+      converseEventEmitter.off("showDebugMenu", showDebugMenu);
+    };
+  }, [showDebugMenu]);
 
   useRecentPicksPersistence({
     initialization: () =>
