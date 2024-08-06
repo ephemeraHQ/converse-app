@@ -178,7 +178,7 @@ suspend fun handleNewConversationFirstMessage(
     )
 }
 
-fun handleOngoingConversationMessage(
+suspend fun handleOngoingConversationMessage(
     appContext: Context,
     xmtpClient: Client,
     envelope: Envelope,
@@ -200,15 +200,12 @@ fun handleOngoingConversationMessage(
         xmtpClient,
     )
 
-    val profilesState = getProfilesState(appContext, xmtpClient.address)
+    val senderProfile =
+        decodedMessageResult.senderAddress?.let { getProfile(appContext, xmtpClient.address, it) }
     var senderAvatar: String? = null
-    profilesState?.let { state ->
-        val senderAddress = decodedMessageResult.senderAddress
-        val senderProfile = state.profiles?.get(senderAddress)
-        if (senderAddress != null && senderProfile != null) {
-            conversationTitle = getPreferredName(address = senderAddress, socials = senderProfile.socials)
-            senderAvatar = getPreferredAvatar(socials = senderProfile.socials)
-        }
+    senderProfile?.let { senderProfile ->
+        conversationTitle = getPreferredName(address = decodedMessageResult.senderAddress, socials = senderProfile.socials)
+        senderAvatar = getPreferredAvatar(socials = senderProfile.socials)
     }
 
     val shouldShowNotification = if (decodedMessageResult.senderAddress != xmtpClient.address && !decodedMessageResult.forceIgnore && decodedMessageResult.content != null) {
@@ -276,10 +273,10 @@ suspend fun handleGroupMessage(
         val spamScore = computeSpamScoreGroupMessage(xmtpClient, group, decodedMessage, apiURI)
         if (spamScore < 0) {
             // Message is going to main inbox
-            val profilesState = getProfilesState(appContext, xmtpClient.address)
             // We replaced decodedMessage.senderAddress from inboxId to actual address
             // so it appears well in the app until inboxId is a first class citizen
-            profilesState?.profiles?.get(decodedMessage.senderAddress)?.let { senderProfile ->
+            val senderProfile = getProfile(appContext, xmtpClient.address, decodedMessage.senderAddress)
+            senderProfile?.let { senderProfile ->
                 subtitle = getPreferredName(decodedMessage.senderAddress, senderProfile.socials)
             }
         } else if (spamScore == 0) { // Message is Request
