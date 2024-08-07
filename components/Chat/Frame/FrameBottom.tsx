@@ -6,10 +6,10 @@ import {
 import * as Haptics from "expo-haptics";
 import { Platform, StyleSheet, Text, useColorScheme, View } from "react-native";
 
-import { FrameButtonType, FrameToDisplay } from "../../../utils/frames";
-import { MessageToDisplay } from "../Message/Message";
 import FrameButton from "./FrameButton";
 import FrameTextInput from "./FrameTextInput";
+import { FrameButtonType, FrameToDisplay } from "../../../utils/frames";
+import { MessageToDisplay } from "../Message/Message";
 
 export default function FrameBottom({
   message,

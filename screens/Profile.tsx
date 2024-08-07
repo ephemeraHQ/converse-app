@@ -1,5 +1,6 @@
 import Picto from "@components/Picto/Picto";
 import { useShouldShowErrored } from "@hooks/useShouldShowErrored";
+import { translate } from "@i18n/translate";
 import Clipboard from "@react-native-clipboard/clipboard";
 import { StackActions } from "@react-navigation/native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
@@ -13,7 +14,6 @@ import {
 } from "@styles/colors";
 import { PictoSizes } from "@styles/sizes";
 import { memberCanUpdateGroup } from "@utils/groupUtils/memberCanUpdateGroup";
-import { strings } from "@utils/i18n/strings";
 import Constants from "expo-constants";
 import * as Linking from "expo-linking";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
@@ -335,7 +335,7 @@ export default function ProfileScreen({
     if (!isBlockedPeer) {
       items.push({
         id: "message",
-        title: strings.send_a_message,
+        title: translate("send_a_message"),
         titleColor: primaryColor(colorScheme),
         action: () => {
           setTimeout(
@@ -402,14 +402,14 @@ export default function ProfileScreen({
         showActionSheetWithOptions(
           {
             options: [
-              isBlockedPeer ? strings.unblock : strings.block,
-              strings.cancel,
+              isBlockedPeer ? translate("unblock") : translate("block"),
+              translate("cancel"),
             ],
             cancelButtonIndex: 1,
             destructiveButtonIndex: isBlockedPeer ? undefined : 0,
             title: isBlockedPeer
-              ? strings.if_you_unblock_contact
-              : strings.if_you_block_contact,
+              ? translate("if_you_unblock_contact")
+              : translate("if_you_block_contact"),
             ...actionSheetColors(colorScheme),
           },
           (selectedIndex?: number) => {
@@ -455,16 +455,16 @@ export default function ProfileScreen({
     ) {
       items.push({
         id: "remove",
-        title: strings.remove_from_group,
+        title: translate("remove_from_group"),
         titleColor:
           Platform.OS === "android" ? undefined : dangerColor(colorScheme),
         action: () => {
           showActionSheetWithOptions(
             {
-              options: [strings.remove_from_group, strings.cancel],
+              options: [translate("remove_from_group"), translate("cancel")],
               cancelButtonIndex: 1,
               destructiveButtonIndex: 0,
-              title: strings.are_you_sure,
+              title: translate("are_you_sure"),
               ...actionSheetColors(colorScheme),
             },
             async (selectedIndex?: number) => {
@@ -487,16 +487,16 @@ export default function ProfileScreen({
     ) {
       items.unshift({
         id: "promote",
-        title: strings.promote_to_admin,
+        title: translate("promote_to_admin"),
         titleColor:
           Platform.OS === "android" ? undefined : primaryColor(colorScheme),
         action: () => {
           showActionSheetWithOptions(
             {
-              options: [strings.promote_to_admin, "Cancel"],
+              options: [translate("promote_to_admin"), "Cancel"],
               cancelButtonIndex: 1,
               destructiveButtonIndex: undefined,
-              title: strings.are_you_sure,
+              title: translate("are_you_sure"),
               ...actionSheetColors(colorScheme),
             },
             async (selectedIndex?: number) => {
@@ -521,7 +521,7 @@ export default function ProfileScreen({
               options: ["Promote to Super Admin", "Cancel"],
               cancelButtonIndex: 1,
               destructiveButtonIndex: undefined,
-              title: strings.are_you_sure,
+              title: translate("are_you_sure"),
               ...actionSheetColors(colorScheme),
             },
             async (selectedIndex?: number) => {
@@ -545,7 +545,7 @@ export default function ProfileScreen({
               options: ["Revoke Super Admin", "Cancel"],
               cancelButtonIndex: 1,
               destructiveButtonIndex: 0,
-              title: strings.are_you_sure,
+              title: translate("are_you_sure"),
               ...actionSheetColors(colorScheme),
             },
             async (selectedIndex?: number) => {
@@ -577,7 +577,7 @@ export default function ProfileScreen({
               options: ["Revoke Admin", "Cancel"],
               cancelButtonIndex: 1,
               destructiveButtonIndex: 0,
-              title: strings.are_you_sure,
+              title: translate("are_you_sure"),
               ...actionSheetColors(colorScheme),
             },
             async (selectedIndex?: number) => {
@@ -630,7 +630,7 @@ export default function ProfileScreen({
             size={PictoSizes.textButton}
             style={styles.errorIcon}
           />
-          <Text style={styles.errorText}>{strings.client_error}</Text>
+          <Text style={styles.errorText}>{translate("client_error")}</Text>
         </View>
       )}
       {isMyProfile && (

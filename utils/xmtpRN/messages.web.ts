@@ -167,7 +167,7 @@ const decodeBatchMessages = async (
         if (message) {
           messagesBatch.push(message);
         }
-      } catch (e: any) {
+      } catch {
         logger.debug("A message could not be decoded");
       }
     })

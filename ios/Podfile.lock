@@ -270,6 +270,8 @@ PODS:
     - ExpoModulesCore
   - ExpoKeepAwake (13.0.2):
     - ExpoModulesCore
+  - ExpoLocalization (15.0.3):
+    - ExpoModulesCore
   - ExpoModulesCore (1.12.20):
     - DoubleConversion
     - glog
@@ -294,8 +296,6 @@ PODS:
     - ReactCommon/turbomodule/core
     - Yoga
   - ExpoSecureStore (13.0.2):
-    - ExpoModulesCore
-  - ExpoSensors (13.0.9):
     - ExpoModulesCore
   - ExpoSystemUI (3.0.7):
     - ExpoModulesCore
@@ -1821,9 +1821,9 @@ DEPENDENCIES:
   - ExpoImageManipulator (from `../node_modules/expo-image-manipulator/ios`)
   - ExpoImagePicker (from `../node_modules/expo-image-picker/ios`)
   - ExpoKeepAwake (from `../node_modules/expo-keep-awake/ios`)
+  - ExpoLocalization (from `../node_modules/expo-localization/ios`)
   - ExpoModulesCore (from `../node_modules/expo-modules-core`)
   - ExpoSecureStore (from `../node_modules/expo-secure-store/ios`)
-  - ExpoSensors (from `../node_modules/expo-sensors/ios`)
   - ExpoSystemUI (from `../node_modules/expo-system-ui/ios`)
   - ExpoWebBrowser (from `../node_modules/expo-web-browser/ios`)
   - EXSplashScreen (from `../node_modules/expo-splash-screen/ios`)
@@ -2017,12 +2017,12 @@ EXTERNAL SOURCES:
     :path: "../node_modules/expo-image-picker/ios"
   ExpoKeepAwake:
     :path: "../node_modules/expo-keep-awake/ios"
+  ExpoLocalization:
+    :path: "../node_modules/expo-localization/ios"
   ExpoModulesCore:
     :path: "../node_modules/expo-modules-core"
   ExpoSecureStore:
     :path: "../node_modules/expo-secure-store/ios"
-  ExpoSensors:
-    :path: "../node_modules/expo-sensors/ios"
   ExpoSystemUI:
     :path: "../node_modules/expo-system-ui/ios"
   ExpoWebBrowser:
@@ -2241,9 +2241,9 @@ SPEC CHECKSUMS:
   ExpoImageManipulator: aea99205c66043a00a0af90e345395637b9902fa
   ExpoImagePicker: 12a420923383ae38dccb069847218f27a3b87816
   ExpoKeepAwake: 3b8815d9dd1d419ee474df004021c69fdd316d08
+  ExpoLocalization: f04eeec2e35bed01ab61c72ee1768ec04d093d01
   ExpoModulesCore: 17a5163fddddcc6472ccf9d57a64f5a075a4c6db
   ExpoSecureStore: 060cebcb956b80ddae09821610ac1aa9e1ac74cd
-  ExpoSensors: 3bc12e5186b94703464d1554ce5ebfff05f91093
   ExpoSystemUI: d4f065a016cae6721b324eb659cdee4d4cf0cb26
   ExpoWebBrowser: 7595ccac6938eb65b076385fd23d035db9ecdc8e
   EXSplashScreen: d8b3c547b9b18a41d80c6f6b274c4c26664febd4
@@ -2361,6 +2361,6 @@ SPEC CHECKSUMS:
   XMTPReactNative: b9a396475e19762f72590b7a7ce1c505050cb114
   Yoga: 1ab23c1835475da69cf14e211a560e73aab24cb0
 
-PODFILE CHECKSUM: 78ab2e6fa35f30b7d6cce68725a2d684c8261cb5
+PODFILE CHECKSUM: 170760880c444127b891465e24c4450a402d9091
 
 COCOAPODS: 1.15.2

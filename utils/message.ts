@@ -38,7 +38,6 @@ export const sendMessage = async (
   if (!conversation) return;
   const messageId = uuidv4();
   const sentAtTime = new Date();
-  const isV1Conversation = conversation.topic.startsWith("/xmtp/0/dm-");
 
   if (isContentType("remoteAttachment", contentType) && attachmentToSave) {
     // Let's move file to attachments folder right now!
