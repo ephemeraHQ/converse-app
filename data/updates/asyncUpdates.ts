@@ -68,12 +68,12 @@ const runAsyncUpdatesForAccount = async (account: string) => {
           await update;
           getSettingsStore(account).getState().setLastAsyncUpdate(updateKey.id);
         } else {
-          console.error(
+          logger.error(
             `[Async Updates] Failed to run migration: ${updateKey} [Error: migration function not found]`
           );
         }
       } catch (error) {
-        console.error(
+        logger.error(
           `[Async Updates] Failed to run migration: ${updateKey} [Error: ${error}]`
         );
         // Break out in case of error

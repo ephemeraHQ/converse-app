@@ -1,3 +1,4 @@
+import logger from "@utils/logger";
 import { FrameActionInputs } from "@xmtp/frames-client";
 import { Image } from "expo-image";
 import * as Linking from "expo-linking";
@@ -5,6 +6,8 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { Platform, StyleSheet, View } from "react-native";
 import { v4 as uuidv4 } from "uuid";
 
+import FrameBottom from "./FrameBottom";
+import FrameImage from "./FrameImage";
 import config from "../../../config";
 import { useCurrentAccount } from "../../../data/store/accountsStore";
 import { cacheForMedia, fetchAndCacheMedia } from "../../../utils/cache/cache";
@@ -23,8 +26,6 @@ import {
 } from "../../../utils/frames";
 import { navigate } from "../../../utils/navigation";
 import { MessageToDisplay } from "../Message/Message";
-import FrameBottom from "./FrameBottom";
-import FrameImage from "./FrameImage";
 
 export default function FramePreview({
   initialFrame,
@@ -268,7 +269,7 @@ export default function FramePreview({
           setFrameTextInputFocused(false);
         }
       } catch (e: any) {
-        console.error(e);
+        logger.error(e);
       }
       setPostingActionForButton(undefined);
     },

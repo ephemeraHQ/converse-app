@@ -267,7 +267,7 @@ export const useAttachmentForMessage = (message: MessageToDisplay) => {
           error: false,
         });
       } catch (error) {
-        console.error("Error handling static attachment:", error);
+        logger.error(error, { context: "Error handling static attachment" });
         setMessageAttachment(message.id, {
           ...DEFAULT_ATTACHMENT,
           loading: false,
@@ -295,7 +295,7 @@ export const useAttachmentForMessage = (message: MessageToDisplay) => {
           error: false,
         });
       } catch (error) {
-        console.error("Error handling remote attachment:", error);
+        logger.error(error, { context: "Error handling remote attachment" });
         setMessageAttachment(message.id, {
           ...DEFAULT_ATTACHMENT,
           loading: false,
@@ -388,7 +388,7 @@ export const useAttachmentForMessage = (message: MessageToDisplay) => {
         await saveAndDisplayLocalAttachment(parsedEncodedContent);
       }
     } catch (e) {
-      console.error("Error parsing message content:", e);
+      logger.error(e, { context: "Error parsing message content" });
       setMessageAttachment(message.id, {
         ...DEFAULT_ATTACHMENT,
         loading: false,

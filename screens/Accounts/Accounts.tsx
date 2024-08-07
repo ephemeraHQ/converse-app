@@ -5,6 +5,7 @@ import {
   primaryColor,
   textSecondaryColor,
 } from "@styles/colors";
+import logger from "@utils/logger";
 import { ScrollView, StyleSheet, View, useColorScheme } from "react-native";
 
 import AccountSettingsButton from "../../components/AccountSettingsButton";
@@ -73,7 +74,7 @@ export default function Accounts({
               try {
                 await disconnectWallet();
               } catch (e) {
-                console.error(e);
+                logger.error(e);
               }
               setAddingNewAccount(true);
             },

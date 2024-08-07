@@ -4,6 +4,7 @@ import { MMKV } from "react-native-mmkv";
 import { StateStorage } from "zustand/middleware";
 
 import { getAccountEncryptionKey } from "./keychain/helpers";
+import logger from "./logger";
 
 const storage = new MMKV();
 
@@ -41,7 +42,7 @@ export const clearSecureMmkvForAccount = async (account: string) => {
     const instance = await getSecureMmkvForAccount(account);
     instance.clearAll();
   } catch (e) {
-    console.error(e);
+    logger.error(e);
   }
   delete secureMmkvByAccount[account];
 };

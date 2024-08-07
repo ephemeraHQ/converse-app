@@ -1,6 +1,7 @@
 import { NavigationProp } from "@react-navigation/native";
 import { backgroundColor, clickedItemBackgroundColor } from "@styles/colors";
 import { PictoSizes } from "@styles/sizes";
+import logger from "@utils/logger";
 import { Dimensions, Platform, StyleSheet, useColorScheme } from "react-native";
 import { Drawer } from "react-native-paper";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -88,7 +89,7 @@ export default function AccountsAndroid({ navigation }: Props) {
           try {
             await disconnectWallet();
           } catch (e) {
-            console.error(e);
+            logger.error(e);
           }
           setAddingNewAccount(true);
         }}

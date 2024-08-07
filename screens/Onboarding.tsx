@@ -1,3 +1,4 @@
+import logger from "@utils/logger";
 import { sentryAddBreadcrumb, sentryTrackMessage } from "@utils/sentry";
 import { useCallback, useEffect, useRef } from "react";
 
@@ -104,7 +105,7 @@ export default function Onboarding() {
     } catch (e) {
       initiatingClientFor.current = undefined;
       setLoading(false);
-      console.error(e);
+      logger.error(e);
     }
   }, [address, connectWithBase64Key, setLoading, signer]);
 

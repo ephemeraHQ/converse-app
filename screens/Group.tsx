@@ -199,7 +199,7 @@ export default function GroupScreen({
                   try {
                     await promoteToSuperAdmin(a.inboxId);
                   } catch (e) {
-                    console.error(e);
+                    logger.error(e);
                     Alert.alert("An error occurred");
                   }
                   break;
@@ -208,7 +208,7 @@ export default function GroupScreen({
                   try {
                     await revokeSuperAdmin(a.inboxId);
                   } catch (e) {
-                    console.error(e);
+                    logger.error(e);
                     Alert.alert("An error occurred");
                   }
                   break;
@@ -217,7 +217,7 @@ export default function GroupScreen({
                   try {
                     await promoteToAdmin(a.inboxId);
                   } catch (e) {
-                    console.error(e);
+                    logger.error(e);
                     Alert.alert("An error occurred");
                   }
                   break;
@@ -226,7 +226,7 @@ export default function GroupScreen({
                   try {
                     await revokeAdmin(a.inboxId);
                   } catch (e) {
-                    console.error(e);
+                    logger.error(e);
                     Alert.alert("An error occurred");
                   }
                   break;
@@ -235,7 +235,7 @@ export default function GroupScreen({
                   try {
                     await removeMember([a.inboxId]);
                   } catch (e) {
-                    console.error(e);
+                    logger.error(e);
                     Alert.alert("An error occurred");
                   }
                   break;
@@ -334,7 +334,7 @@ export default function GroupScreen({
     try {
       await setGroupName(editedName);
     } catch (e) {
-      console.error(e);
+      logger.error(e);
       Alert.alert("An error occurred");
     }
   }, [editedName, setGroupName]);
@@ -343,7 +343,7 @@ export default function GroupScreen({
     try {
       await setGroupDescription(editedDescription);
     } catch (e) {
-      console.error(e);
+      logger.error(e);
       Alert.alert("An error occurred");
     }
   }, [editedDescription, setGroupDescription]);
