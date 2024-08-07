@@ -1,3 +1,4 @@
+import logger from "@utils/logger";
 import { useEffect, useState } from "react";
 
 import {
@@ -19,7 +20,7 @@ export const useClient = (account: string) => {
           setClient(newClient as ConverseXmtpClientType);
         })
         .catch((e) => {
-          console.error(e);
+          logger.error(e);
           setClient(null);
         });
       setClient(xmtpClientByAccount[account]);

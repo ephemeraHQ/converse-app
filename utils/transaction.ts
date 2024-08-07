@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { getCoinbaseTransactionDetails, getTransactionDetails } from "./api";
 import { evmHelpers } from "./evm/helpers";
+import logger from "./logger";
 import { sentryTrackError } from "./sentry";
 import { isContentType } from "./xmtpRN/contentTypes";
 import { MessageToDisplay } from "../components/Chat/Message/Message";
@@ -96,7 +97,7 @@ export const extractChainIdToHex = (
   if (!isNaN(numericValue)) {
     chainId = ethers.BigNumber.from(numericValue);
   } else {
-    console.error("Invalid networkRawValue:", networkRawValue);
+    logger.error("Invalid networkRawValue:", networkRawValue);
     return "";
   }
 
@@ -303,7 +304,7 @@ export const useTransactionForMessage = (
             break;
           }
           default: {
-            console.error("Invalid transaction content type");
+            logger.error("Invalid transaction content type");
             break;
           }
         }
@@ -334,10 +335,10 @@ export const useTransactionForMessage = (
             ...uniformTx,
           }));
         } else {
-          console.error("Transaction details could not be fetched");
+          logger.error("Transaction details could not be fetched");
         }
       } catch (error) {
-        console.error("Error fetching transaction details:", error);
+        logger.error(error, { context: "Error fetching transaction details" });
         // Let's retry in case of network error
         retryTimeout = setTimeout(go, 5000);
       } finally {

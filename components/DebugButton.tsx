@@ -48,7 +48,6 @@ const DebugButton = forwardRef((props, ref) => {
             }
           } catch (error) {
             alert(error);
-            console.error(error);
           }
         },
         "Export db file": async () => {

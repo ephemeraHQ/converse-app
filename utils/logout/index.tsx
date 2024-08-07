@@ -123,10 +123,9 @@ export const executeLogoutTasks = async () => {
       if (e.toString().includes("CONVERSE_ACCOUNT_LOGGED_IN")) {
         removeLogoutTask(account);
       } else {
-        console.error(
-          `[Logout] Could not finish logging out for ${account}`,
-          e
-        );
+        logger.error(e, {
+          context: `[Logout] Could not finish logging out for ${account}`,
+        });
       }
     }
   }

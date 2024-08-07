@@ -81,7 +81,7 @@ export default function GroupScreen({
         }
       }
     } catch (e) {
-      console.error(e);
+      logger.error(e);
       setJoining(false);
     }
   }, [account, groupLink?.id, navigation]);
