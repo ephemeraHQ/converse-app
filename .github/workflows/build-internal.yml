@@ -104,7 +104,7 @@ jobs:
         id: create_branch
         run: |
           BRANCH_NAME="increment-version-$(date +'%Y%m%d%H%M%S')"
-          echo "::set-output name=branch-name::$BRANCH_NAME"
+          echo "branch-name=$BRANCH_NAME" >> $GITHUB_OUTPUT
           git checkout -b $BRANCH_NAME
 
       - name: Increment version numbers
