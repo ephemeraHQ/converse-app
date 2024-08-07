@@ -186,12 +186,12 @@
     "zustand": "^4.4.7"
   },
   "devDependencies": {
-    "@babel/core": "^7.24.0",
-    "@babel/plugin-transform-class-properties": "^7.22.5",
-    "@babel/plugin-transform-flow-strip-types": "^7.22.5",
-    "@babel/plugin-transform-private-methods": "^7.22.5",
-    "@babel/runtime": "^7.22.6",
-    "@babel/traverse": "^7.24.7",
+    "@babel/core": "^7.25.2",
+    "@babel/plugin-transform-class-properties": "^7.24.7",
+    "@babel/plugin-transform-flow-strip-types": "^7.25.2",
+    "@babel/plugin-transform-private-methods": "^7.24.7",
+    "@babel/runtime": "^7.25.0",
+    "@babel/traverse": "^7.25.3",
     "@faker-js/faker": "^7.6.0",
     "@types/base-64": "^1.0.0",
     "@types/big.js": "^6.2.2",
