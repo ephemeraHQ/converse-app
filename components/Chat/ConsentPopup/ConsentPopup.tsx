@@ -1,3 +1,4 @@
+import { translate } from "@i18n/index";
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import {
@@ -5,7 +6,6 @@ import {
   backgroundColor,
   textPrimaryColor,
 } from "@styles/colors";
-import { strings } from "@utils/i18n/strings";
 import React from "react";
 import { StyleSheet, Text, useColorScheme, View } from "react-native";
 
@@ -58,20 +58,20 @@ export default function ConsentPopup() {
 
   return (
     <View style={styles.chatConsentContainer}>
-      <Text style={styles.info}>{strings.do_you_trust_this_contact}</Text>
+      <Text style={styles.info}>{translate("do_you_trust_this_contact")}</Text>
       <View style={styles.buttonsContainer}>
         <Button
           variant="secondary-danger"
           picto="xmark"
-          title={strings.block}
+          title={translate("block")}
           style={styles.cta}
           onPress={() => {
             showActionSheetWithOptions(
               {
-                options: [strings.block, strings.cancel],
+                options: [translate("block"), translate("cancel")],
                 cancelButtonIndex: 1,
                 destructiveButtonIndex: 0,
-                title: strings.if_you_block_contact,
+                title: translate("if_you_block_contact"),
                 ...actionSheetColors(colorScheme),
               },
               (selectedIndex?: number) => {
@@ -91,7 +91,7 @@ export default function ConsentPopup() {
         <Button
           variant="secondary"
           picto="checkmark"
-          title={strings.accept}
+          title={translate("accept")}
           style={styles.cta}
           onPress={() => {
             if (!conversation.peerAddress) return;

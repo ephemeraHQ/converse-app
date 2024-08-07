@@ -1,3 +1,4 @@
+import { translate } from "@i18n/translate";
 import {
   backgroundColor,
   textPrimaryColor,
@@ -55,12 +56,7 @@ export default function AttachmentMessagePreview({ message }: Props) {
     attachment.mediaType !== "UNSUPPORTED";
 
   const metadataView = <MessageTimestamp message={message} white={showing} />;
-  const emoji = attachment.mediaType === "IMAGE" ? "📷" : "📎";
   const filesize = prettyBytes(attachment.contentLength);
-  const filename =
-    attachment.mediaType === "IMAGE"
-      ? "Image"
-      : attachment.filename || "Attachment";
   const textStyle = [
     styles.text,
     { color: textPrimaryColor(colorScheme), fontSize: 12 },
@@ -104,7 +100,9 @@ export default function AttachmentMessagePreview({ message }: Props) {
           },
         ]}
       >
-        <Text style={textStyle}>Couldn’t download attachment</Text>
+        <Text style={textStyle}>
+          {translate("attachment_message_error_download")}
+        </Text>
       </View>
     );
   } else if (!attachment.mediaURL) {
@@ -138,11 +136,8 @@ export default function AttachmentMessagePreview({ message }: Props) {
           },
         ]}
       >
-        <Text
-          style={[textStyle, { textDecorationLine: "underline" }]}
-          onPress={openInWebview}
-        >
-          View in browser
+        <Text style={[textStyle, styles.textUnderline]} onPress={openInWebview}>
+          {translate("attachment_message_view_in_browser")}
         </Text>
         <View style={{ opacity: 0 }}>{metadataView}</View>
       </View>
@@ -184,6 +179,9 @@ const useStyles = () => {
       paddingVertical: Platform.OS === "android" ? 2 : 3,
       fontSize: 17,
       color: textPrimaryColor(colorScheme),
+    },
+    textUnderline: {
+      textDecorationLine: "underline",
     },
     metadataContainer: {
       position: "absolute",

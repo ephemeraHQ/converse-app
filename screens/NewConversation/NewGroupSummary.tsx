@@ -1,3 +1,4 @@
+import { translate } from "@i18n/index";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import {
   backgroundColor,
@@ -32,7 +33,6 @@ import {
 } from "../../data/store/accountsStore";
 import { usePhotoSelect } from "../../hooks/usePhotoSelect";
 import { uploadFile } from "../../utils/attachment";
-import { strings } from "../../utils/i18n/strings";
 import { navigate } from "../../utils/navigation";
 import { getPreferredName, getPreferredAvatar } from "../../utils/profile";
 import { createGroup } from "../../utils/xmtpRN/conversations";
@@ -125,7 +125,7 @@ export default function NewGroupSummary({
         });
       })
       .catch((e) => {
-        Alert.alert(strings.upload_group_photo_error, e.message);
+        Alert.alert(translate("upload_group_photo_error"), e.message);
         setRemotePhotUrl({
           remotePhotoUrl: undefined,
           isLoading: false,
@@ -245,7 +245,7 @@ export default function NewGroupSummary({
 
       <List.Section>
         <List.Subheader style={styles.sectionTitle}>
-          {strings.group_name}
+          {translate("group_name")}
         </List.Subheader>
         <TextInput
           defaultValue={defaultGroupName}
@@ -257,7 +257,7 @@ export default function NewGroupSummary({
       </List.Section>
       <List.Section>
         <List.Subheader style={styles.sectionTitle}>
-          {strings.group_description}
+          {translate("group_description")}
         </List.Subheader>
         <TextInput
           defaultValue={groupDescription}

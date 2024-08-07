@@ -1,9 +1,9 @@
 import { useGroupConsent } from "@hooks/useGroupConsent";
 import { useGroupMembers } from "@hooks/useGroupMembers";
 import { useGroupName } from "@hooks/useGroupName";
+import { translate } from "@i18n/index";
 import { useGroupQuery } from "@queries/useGroupQuery";
 import { actionSheetColors, textPrimaryColor } from "@styles/colors";
-import { strings } from "@utils/i18n/strings";
 import { useCallback, useMemo } from "react";
 import {
   Keyboard,
@@ -80,10 +80,10 @@ export function GroupChatPlaceholder({ messagesCount }: Props) {
   const onUnblock = useCallback(() => {
     showActionSheetWithOptions(
       {
-        options: [strings.unblock, strings.cancel],
+        options: [translate("unblock"), translate("cancel")],
         cancelButtonIndex: 1,
         destructiveButtonIndex: isBlockedGroup ? undefined : 0,
-        title: strings.if_you_unblock_group,
+        title: translate("if_you_unblock_group"),
         ...actionSheetColors(colorScheme),
       },
       (selectedIndex?: number) => {
@@ -104,19 +104,19 @@ export function GroupChatPlaceholder({ messagesCount }: Props) {
           <View>
             <ActivityIndicator style={styles.activitySpinner} />
             <Text style={styles.chatPlaceholderText}>
-              {strings.opening_conversation}
+              {translate("opening_conversation")}
             </Text>
           </View>
         )}
         {conversation && isBlockedGroup && (
           <View>
             <Text style={styles.chatPlaceholderText}>
-              {strings.this_group_is_blocked}
+              {translate("this_group_is_blocked")}
             </Text>
             <Button
               variant="secondary"
               picto="lock.open"
-              title={strings.unblock}
+              title={translate("unblock")}
               style={styles.cta}
               onPress={onUnblock}
             />
@@ -134,7 +134,7 @@ export function GroupChatPlaceholder({ messagesCount }: Props) {
               <Button
                 variant="secondary"
                 picto="hand.wave"
-                title={strings.say_hi}
+                title={translate("say_hi")}
                 style={styles.cta}
                 onPress={handleSend}
               />
