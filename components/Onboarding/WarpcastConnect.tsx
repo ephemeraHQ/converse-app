@@ -1,6 +1,6 @@
 import logger from "@utils/logger";
 import { useState } from "react";
-import { StyleSheet, useColorScheme, Text } from "react-native";
+import { Text } from "react-native";
 
 import OnboardingComponent from "./OnboardingComponent";
 import config from "../../config";
@@ -15,7 +15,6 @@ import { useLinkFarcaster } from "../../utils/evm/privy";
 import { refreshRecommendationsForAccount } from "../../utils/recommendations";
 
 export default function WarpcastConnect() {
-  const styles = useStyles();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const currentAccount = useCurrentAccount() as string;
@@ -63,8 +62,3 @@ export default function WarpcastConnect() {
     </OnboardingComponent>
   );
 }
-
-const useStyles = () => {
-  const colorScheme = useColorScheme();
-  return StyleSheet.create({});
-};

@@ -639,7 +639,7 @@ const retrieveTopicsData = async (
     try {
       const conversationTopicData: TopicDataByTopic = JSON.parse(decryptedData);
       return conversationTopicData;
-    } catch (e) {
+    } catch {
       return {};
     }
   } else {

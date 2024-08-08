@@ -1,6 +1,6 @@
+import { translate } from "@i18n/index";
 import { MenuView } from "@react-native-menu/menu";
 import { textPrimaryColor } from "@styles/colors";
-import { strings } from "@utils/i18n/strings";
 import { RemoteAttachmentContent } from "@xmtp/react-native-sdk";
 import * as ImagePicker from "expo-image-picker";
 import { setStatusBarHidden } from "expo-status-bar";
@@ -171,7 +171,7 @@ export default function AddAttachmentButton({
       actions={[
         {
           id: "mediaLibrary",
-          title: strings.photo_library,
+          title: translate("photo_library"),
           titleColor: textPrimaryColor(colorScheme),
           imageColor: Platform.select({
             ios: undefined,
@@ -184,7 +184,7 @@ export default function AddAttachmentButton({
         },
         {
           id: "camera",
-          title: strings.camera,
+          title: translate("camera"),
           titleColor: textPrimaryColor(colorScheme),
           imageColor: Platform.select({
             ios: undefined,

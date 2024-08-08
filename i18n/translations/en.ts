@@ -1,4 +1,4 @@
-export const strings = {
+const en = {
   // Onboarding
   sign: "Sign",
   first_signature_explanation:
@@ -47,4 +47,26 @@ export const strings = {
   // Attachments
   photo_library: "Photo Library",
   camera: "Camera",
+
+  disconnect: "Disconnect",
+  disconnect_delete_group_chats: "Disconnect and delete group chats",
+  disconnect_this_account: "Disconnect this account",
+  disconnect_account_description:
+    "Your group chats will be encrypted and saved on your device until you delete Converse. Your DMs will be backed up by the XMTP network.",
+  your_profile_page: "Your profile page",
+  copy_wallet_address: "Copy wallet address",
+  turn_on_notifications: "Turn on notifications",
+  attachment_message_error_download: "Couldn’t download attachment",
+  attachment_message_view_in_browser: "View in browser",
+  attachment: "Attachment",
+
+  // Reactions
+  reacted_to_media: "Reacted {{reactionContent}} to a media",
+  reacted_to_transaction: "Reacted {{reactionContent}} to a transaction",
+  reacted_to_other: 'Reacted {{reactionContent}} to "{{content}}"',
+  removed_reaction_to_attachment: "Removed the reaction to an attachment",
+  removed_reaction_to: 'Removed the reaction to "{{content}}"',
 };
+
+export default en;
+export type Translations = typeof en;

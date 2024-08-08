@@ -1,7 +1,5 @@
 import { PixelRatio } from "react-native";
 
-import { getProfilesStore } from "../data/store/accountsStore";
-import { XmtpConversation } from "../data/store/chatStore";
 import {
   addressPrefix,
   capitalize,
@@ -13,6 +11,8 @@ import {
   shortDomain,
   strByteSize,
 } from "./str";
+import { getProfilesStore } from "../data/store/accountsStore";
+import { XmtpConversation } from "../data/store/chatStore";
 
 jest.mock("react-native", () => ({
   Dimensions: {

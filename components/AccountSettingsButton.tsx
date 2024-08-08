@@ -1,3 +1,4 @@
+import { translate } from "@i18n/index";
 import Clipboard from "@react-native-clipboard/clipboard";
 import { NavigationProp } from "@react-navigation/native";
 import {
@@ -65,9 +66,9 @@ export default function AccountSettingsButton({ account, navigation }: Props) {
       await new Promise((r) => setTimeout(r, 100));
     }
     const methods = {
-      Disconnect: () => logout(false),
-      "Disconnect and delete group chats": () => logout(true),
-      Cancel: () => {},
+      [translate("disconnect")]: () => logout(false),
+      [translate("disconnect_delete_group_chats")]: () => logout(true),
+      [translate("cancel")]: () => {},
     };
 
     const options = Object.keys(methods);
@@ -75,10 +76,9 @@ export default function AccountSettingsButton({ account, navigation }: Props) {
     showActionSheetWithOptions(
       {
         options,
-        title: "Disconnect this account",
-        message:
-          "Your group chats will be encrypted and saved on your device until you delete Converse. Your DMs will be backed up by the XMTP network.",
-        cancelButtonIndex: options.indexOf("Cancel"),
+        title: translate("disconnect_this_account"),
+        message: translate("disconnect_account_description"),
+        cancelButtonIndex: options.indexOf(translate("cancel")),
         destructiveButtonIndex: [1],
         ...actionSheetColors(colorScheme),
       },
@@ -96,7 +96,7 @@ export default function AccountSettingsButton({ account, navigation }: Props) {
     Keyboard.dismiss();
 
     const methods = {
-      "Your profile page": async () => {
+      [translate("your_profile_page")]: async () => {
         if (account) {
           refreshProfileForAddress(account, account);
           setCurrentAccount(account, false);
@@ -113,10 +113,10 @@ export default function AccountSettingsButton({ account, navigation }: Props) {
           });
         }
       },
-      "Copy wallet address": () => {
+      [translate("copy_wallet_address")]: () => {
         Clipboard.setString(account || "");
       },
-      "Turn on notifications": () => {
+      [translate("turn_on_notifications")]: () => {
         // @todo => move that to a helper because also used in Profile
         if (notificationsPermissionStatus === "denied") {
           if (Platform.OS === "android") {
@@ -143,10 +143,10 @@ export default function AccountSettingsButton({ account, navigation }: Props) {
           );
         }
       },
-      "Disconnect this account": () => {
+      [translate("disconnect_this_account")]: () => {
         showDeleteAccountActionSheet();
       },
-      Cancel: () => {},
+      [translate("cancel")]: () => {},
     };
 
     const options = Object.keys(methods);
@@ -165,15 +165,17 @@ export default function AccountSettingsButton({ account, navigation }: Props) {
       );
     }
     if (notificationsPermissionStatus === "granted" || Platform.OS === "web") {
-      options.splice(options.indexOf("Turn on notifications"), 1);
+      options.splice(options.indexOf(translate("turn_on_notifications")), 1);
     }
 
     showActionSheetWithOptions(
       {
         options,
         icons,
-        destructiveButtonIndex: options.indexOf("Disconnect this account"),
-        cancelButtonIndex: options.indexOf("Cancel"),
+        destructiveButtonIndex: options.indexOf(
+          translate("disconnect_this_account")
+        ),
+        cancelButtonIndex: options.indexOf(translate("cancel")),
         title: account || undefined,
         ...actionSheetColors(colorScheme),
       },

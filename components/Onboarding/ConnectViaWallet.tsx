@@ -1,7 +1,7 @@
+import { translate } from "@i18n/index";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { textPrimaryColor, textSecondaryColor } from "@styles/colors";
 import { getDatabaseFilesForInboxId } from "@utils/fileSystem";
-import { strings } from "@utils/i18n/strings";
 import logger from "@utils/logger";
 import { sentryTrackMessage } from "@utils/sentry";
 import { thirdwebClient } from "@utils/thirdweb";
@@ -306,7 +306,7 @@ export default function ConnectViaWallet({
   if (signer && address) {
     if (onXmtp) {
       if (!alreadyV3Db) {
-        title = `${strings.sign} (${signaturesDone + 1}/2)`;
+        title = `${translate("sign")} (${signaturesDone + 1}/2)`;
       }
       subtitle = (
         <>
@@ -321,13 +321,13 @@ export default function ConnectViaWallet({
       (waitingForNextSignature && !loading) ||
       clickedSignature.current
     ) {
-      title = `${strings.sign} (2/2)`;
-      subtitle = <Text>{strings.sign_access}</Text>;
+      title = `${translate("sign")} (2/2)`;
+      subtitle = <Text>{translate("sign_access")}</Text>;
     } else {
-      title = `${strings.sign} (1/2)`;
+      title = `${translate("sign")} (1/2)`;
       subtitle = (
         <>
-          <Text>{strings.first_signature_explanation}</Text>
+          <Text>{translate("first_signature_explanation")}</Text>
           {termsAndConditions}
         </>
       );
