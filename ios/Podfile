@@ -82,9 +82,6 @@ target 'Converse' do
       end
     end
 
-    # Patch package
-    system('patch -i patches/XMTP.diff -N')
-
   end
 
   post_integrate do |installer|
