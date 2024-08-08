@@ -110,7 +110,6 @@
     "expo-notifications": "~0.28.15",
     "expo-router": "~3.5.20",
     "expo-secure-store": "~13.0.2",
-    "expo-sensors": "~13.0.9",
     "expo-splash-screen": "~0.27.5",
     "expo-status-bar": "~1.12.1",
     "expo-system-ui": "~3.0.7",
