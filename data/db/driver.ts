@@ -4,6 +4,7 @@ import {
   QueryResult,
   Transaction,
 } from "@op-engineering/op-sqlite";
+import logger from "@utils/logger";
 import { v4 as uuidv4 } from "uuid";
 
 // Inspired from https://github.com/margelo/react-native-quick-sqlite/blob/be9235eef7d892ed46177f4d4031cc1a9af723ad/src/index.ts#L348
@@ -17,7 +18,17 @@ const databasesConnections: {
 
 export const dropConverseDbConnections = () => {
   Object.values(databasesConnections).forEach((db) => {
-    db.connection.close();
+    try {
+      db.connection.close();
+    } catch (e) {
+      if (`${e}`.includes("DB is not open")) {
+        logger.debug(
+          `Could not close ${db.options.name} as it's already closed.`
+        );
+      } else {
+        throw e;
+      }
+    }
   });
 };
 
