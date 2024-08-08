@@ -1,3 +1,5 @@
+import { useSelect } from "@data/store/storeHelpers";
+import { useExistingGroupInviteLink } from "@hooks/useExistingGroupInviteLink";
 import { useGroupDescription } from "@hooks/useGroupDescription";
 import { useGroupPermissions } from "@hooks/useGroupPermissions";
 import { invalidateGroupConsentQuery } from "@queries/useGroupConsentQuery";
@@ -5,6 +7,7 @@ import { invalidateGroupDescriptionQuery } from "@queries/useGroupDescriptionQue
 import { invalidateGroupMembersQuery } from "@queries/useGroupMembersQuery";
 import { invalidateGroupNameQuery } from "@queries/useGroupNameQuery";
 import { invalidateGroupPhotoQuery } from "@queries/useGroupPhotoQuery";
+import Clipboard from "@react-native-clipboard/clipboard";
 import { useFocusEffect } from "@react-navigation/native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import {
@@ -15,6 +18,9 @@ import {
   textPrimaryColor,
   textSecondaryColor,
 } from "@styles/colors";
+import { createGroupInvite } from "@utils/api";
+import { saveGroupInviteLink } from "@utils/groupInvites";
+import { getGroupIdFromTopic } from "@utils/groupUtils/groupId";
 import { memberCanUpdateGroup } from "@utils/groupUtils/memberCanUpdateGroup";
 import logger from "@utils/logger";
 import React, { useCallback, useMemo, useState } from "react";
@@ -81,6 +87,10 @@ export default function GroupScreen({
 
   const { groupPhoto, setGroupPhoto } = useGroupPhoto(topic);
   const { consent, allowGroup, blockGroup } = useGroupConsent(topic);
+  const groupInviteLink = useExistingGroupInviteLink(topic);
+  const { setGroupInviteLink } = useChatStore(
+    useSelect(["setGroupInviteLink"])
+  );
   const onPhotoChange = useCallback(
     (newImageUrl: string) => {
       uploadFile({
@@ -139,6 +149,40 @@ export default function GroupScreen({
         currentAccountIsSuperAdmin
       )
     ) {
+      if (groupInviteLink) {
+        items.push({
+          id: "invite_link",
+          title: "Group Invite Link",
+          titleColor: primaryColor(colorScheme),
+          action: () => {
+            Clipboard.setString(groupInviteLink);
+            Alert.alert("Group invite link copied to clipboard");
+          },
+        });
+      } else {
+        items.push({
+          id: "invite",
+          title: "Create Group Invite",
+          titleColor: primaryColor(colorScheme),
+          action: () => {
+            createGroupInvite(currentAccount, {
+              groupName: groupName ?? "New Group",
+              imageUrl: groupPhoto,
+              description: groupDescription,
+            })
+              .then((groupInvite) => {
+                console.log("Group invite created", groupInvite);
+                saveGroupInviteLink(groupInvite.id, getGroupIdFromTopic(topic));
+                setGroupInviteLink(group.topic, groupInvite.inviteLink);
+                Clipboard.setString(groupInvite.inviteLink);
+              })
+              .catch((err) => {
+                console.error("Error creating group invite", err);
+                Alert.alert("An error occurred");
+              });
+          },
+        });
+      }
       items.push({
         id: "admin",
         title: "Add members",
@@ -266,14 +310,19 @@ export default function GroupScreen({
     currentAccountIsSuperAdmin,
     group.groupPermissionLevel,
     group.topic,
+    groupDescription,
+    groupInviteLink,
+    groupName,
+    groupPhoto,
     members,
-    permissions,
+    permissions?.addMemberPolicy,
     profiles,
     promoteToAdmin,
     promoteToSuperAdmin,
     removeMember,
     revokeAdmin,
     revokeSuperAdmin,
+    setGroupInviteLink,
     styles.adminText,
     styles.tableViewRight,
     topic,
