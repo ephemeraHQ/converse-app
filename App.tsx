@@ -13,7 +13,6 @@ import {
 import { useCoinbaseWalletListener } from "@utils/coinbaseWallet";
 import { converseEventEmitter } from "@utils/events";
 import logger from "@utils/logger";
-import { useDoOnShake } from "@utils/shake";
 import React, { useCallback, useEffect, useRef } from "react";
 import {
   LogBox,
@@ -84,7 +83,6 @@ export default function App() {
     (debugRef.current as any).showDebugMenu();
   }, [enableDebug]);
 
-  useDoOnShake(showDebugMenu);
   useEffect(() => {
     converseEventEmitter.on("showDebugMenu", showDebugMenu);
     return () => {
