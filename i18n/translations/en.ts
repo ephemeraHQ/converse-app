@@ -63,9 +63,9 @@ const en = {
   // Reactions
   reacted_to_media: "Reacted {{reactionContent}} to a media",
   reacted_to_transaction: "Reacted {{reactionContent}} to a transaction",
-  reacted_to_other: 'Reacted {{reactionContent}} to "{{content}"',
+  reacted_to_other: 'Reacted {{reactionContent}} to "{{content}}"',
   removed_reaction_to_attachment: "Removed the reaction to an attachment",
-  removed_reaction_to: 'Removed the reaction to "{{content}"',
+  removed_reaction_to: 'Removed the reaction to "{{content}}"',
 };
 
 export default en;
