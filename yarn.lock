@@ -14010,13 +14010,6 @@ expo-secure-store@~13.0.2:
   resolved "https://registry.yarnpkg.com/expo-secure-store/-/expo-secure-store-13.0.2.tgz#ba8f6076fc38062a28bb2ce5edab9cd28ef88598"
   integrity sha512-3QYgoneo8p8yeeBPBiAfokNNc2xq6+n8+Ob4fAlErEcf4H7Y72LH+K/dx0nQyWau2ZKZUXBxyyfuHFyVKrEVLg==
 
-expo-sensors@~13.0.9:
-  version "13.0.9"
-  resolved "https://registry.yarnpkg.com/expo-sensors/-/expo-sensors-13.0.9.tgz#7c937925df131f6ea3abd247d60464f80987eb42"
-  integrity sha512-yi/TERUP8dpsJWWRgjT+UuQ7PI604PMndwXh9iBnfNO7q+dtoKZKsVSNJw61IKLNflbtCAyJxgmzPoe/JDT04Q==
-  dependencies:
-    invariant "^2.2.4"
-
 expo-splash-screen@0.27.5, expo-splash-screen@~0.27.5:
   version "0.27.5"
   resolved "https://registry.yarnpkg.com/expo-splash-screen/-/expo-splash-screen-0.27.5.tgz#bcc1ebb4e761e19a1f2112469f3d424a36fb1e2c"

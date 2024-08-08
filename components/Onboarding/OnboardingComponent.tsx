@@ -1,9 +1,12 @@
+import { useEnableDebug } from "@components/DebugButton";
 import {
   backgroundColor,
   textPrimaryColor,
   textSecondaryColor,
 } from "@styles/colors";
 import { PictoSizes } from "@styles/sizes";
+import { converseEventEmitter } from "@utils/events";
+import { useCallback } from "react";
 import {
   Platform,
   ScrollView,
@@ -56,6 +59,10 @@ export default function OnboardingComponent({
   const { loading: stateLoading, setLoading } = useOnboardingStore(
     useSelect(["loading", "setLoading"])
   );
+  const enableDebug = useEnableDebug();
+  const showDebug = useCallback(() => {
+    converseEventEmitter.emit("showDebugMenu");
+  }, []);
   const loading = stateLoading || isLoading;
 
   const { height: keyboardHeight } = useKeyboardAnimation();
@@ -81,7 +88,12 @@ export default function OnboardingComponent({
         )}
         {!picto && <View style={{ marginTop: inNav ? 32 : 140 }} />}
 
-        <Text style={styles.title}>{title}</Text>
+        <Text
+          style={styles.title}
+          onLongPress={enableDebug ? showDebug : undefined}
+        >
+          {title}
+        </Text>
         {loading && (
           <ActivityIndicator size="large" style={{ marginTop: 30 }} />
         )}
