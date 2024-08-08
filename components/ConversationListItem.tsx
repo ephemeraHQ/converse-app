@@ -1,3 +1,4 @@
+import { translate } from "@i18n/index";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import {
   actionSheetColors,
@@ -10,7 +11,6 @@ import {
   textSecondaryColor,
 } from "@styles/colors";
 import { AvatarSizes, PictoSizes } from "@styles/sizes";
-import { strings } from "@utils/i18n/strings";
 import * as Haptics from "expo-haptics";
 import { Image } from "expo-image";
 import React, {
@@ -219,7 +219,11 @@ const ConversationListItem = memo(function ConversationListItem({
     }
     showActionSheetWithOptions(
       {
-        options: [strings.delete, strings.delete_and_block, strings.cancel],
+        options: [
+          translate("delete"),
+          translate("delete_and_block"),
+          translate("cancel"),
+        ],
         cancelButtonIndex: 2,
         destructiveButtonIndex: [0, 1],
         title: `Delete chat with ${conversationPeerAddress}?`,

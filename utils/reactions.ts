@@ -1,3 +1,4 @@
+import { translate } from "@i18n/translate";
 import { ContentTypeReaction } from "@xmtp/content-type-reaction";
 
 import { isAttachmentMessage } from "./attachment/helpers";
@@ -114,14 +115,17 @@ export const getReactionsContentPreview = (
   switch (contentType) {
     case "attachment":
     case "remoteAttachment":
-      contentPreview = `Reacted ${reactionContent} to a media`;
+      contentPreview = translate("reacted_to_media", { reactionContent });
       break;
     case "transactionReference":
     case "coinbasePayment":
-      contentPreview = `Reacted ${reactionContent} to a transaction`;
+      contentPreview = translate("reacted_to_transaction", { reactionContent });
       break;
     default: // Handles 'text' and other types
-      contentPreview = `Reacted ${reactionContent} to "${message.content}"`;
+      contentPreview = translate("reacted_to_other", {
+        reactionContent,
+        content: message.content,
+      });
       break;
   }
   return contentPreview;
@@ -162,9 +166,11 @@ export const removeReactionFromMessage = (
       schema: "unicode",
     }),
     contentType: ContentTypeReaction.toString(),
-    contentFallback: `Removed the reaction to ${
-      isAttachment ? "an attachment" : `"${message.content}"`
-    }`,
+    contentFallback: isAttachment
+      ? translate("removed_reaction_to_attachment")
+      : translate("removed_reaction_to", {
+          content: message.content,
+        }),
     referencedMessageId: message.id,
   });
 };

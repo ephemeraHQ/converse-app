@@ -1,10 +1,10 @@
 import { showActionSheetWithOptions } from "@components/StateHandlers/ActionSheetStateHandler";
 import { useGroupConsent } from "@hooks/useGroupConsent";
+import { translate } from "@i18n/index";
 import { useGroupQuery } from "@queries/useGroupQuery";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { actionSheetColors } from "@styles/colors";
 import { saveTopicsData } from "@utils/api";
-import { strings } from "@utils/i18n/strings";
 import { FC, useCallback } from "react";
 import { useColorScheme } from "react-native";
 
@@ -68,9 +68,9 @@ export const GroupConversationItem: FC<GroupConversationItemProps> = ({
       showActionSheetWithOptions(
         {
           options: [
-            strings.delete,
-            strings.delete_and_block_inviter,
-            strings.cancel,
+            translate("delete"),
+            translate("delete_and_block_inviter"),
+            translate("cancel"),
           ],
           cancelButtonIndex: 2,
           destructiveButtonIndex: [0, 1],

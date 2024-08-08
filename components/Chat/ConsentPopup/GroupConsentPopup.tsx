@@ -2,6 +2,7 @@ import { useSelect } from "@data/store/storeHelpers";
 import { useGroupConsent } from "@hooks/useGroupConsent";
 import { useGroupCreator } from "@hooks/useGroupCreator";
 import { useGroupMembers } from "@hooks/useGroupMembers";
+import { translate } from "@i18n/index";
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import {
@@ -9,7 +10,6 @@ import {
   backgroundColor,
   textPrimaryColor,
 } from "@styles/colors";
-import { strings } from "@utils/i18n/strings";
 import React, { useCallback, useMemo } from "react";
 import { StyleSheet, Text, useColorScheme, View } from "react-native";
 
@@ -62,10 +62,10 @@ export function GroupConsentPopup() {
   const onBlock = useCallback(() => {
     showActionSheetWithOptions(
       {
-        options: [strings.block, strings.cancel],
+        options: [translate("block"), translate("cancel")],
         cancelButtonIndex: 1,
         destructiveButtonIndex: 0,
-        title: strings.if_you_unblock_group,
+        title: translate("if_you_unblock_group"),
         ...actionSheetColors(colorScheme),
       },
       (selectedIndex?: number) => {
@@ -94,18 +94,20 @@ export function GroupConsentPopup() {
 
   return (
     <View style={styles.chatConsentContainer}>
-      <Text style={styles.info}>{strings.do_you_want_to_join_this_group}</Text>
+      <Text style={styles.info}>
+        {translate("do_you_want_to_join_this_group")}
+      </Text>
       <View style={styles.buttonsContainer}>
         <Button
           variant="text"
-          title={strings.decline}
+          title={translate("decline")}
           style={[styles.cta, styles.blockCta]}
           onPress={onBlock}
         />
         <Button
           variant="secondary"
           picto="checkmark"
-          title={strings.join_this_group}
+          title={translate("join_this_group")}
           style={styles.cta}
           onPress={onAccept}
         />

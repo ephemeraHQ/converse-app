@@ -35,6 +35,7 @@ module.exports = {
           "@components": "./components",
           "@data": "./data",
           "@hooks": "./hooks",
+          "@i18n": "./i18n",
           "@queries": "./queries",
           "@screens": "./screens",
           "@styles": "./styles",

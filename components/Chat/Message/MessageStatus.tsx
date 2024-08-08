@@ -79,8 +79,8 @@ export default function MessageStatus({ message }: Props) {
 
   return (
     message.fromMe &&
-    message.status != "sending" &&
-    message.status != "prepared" && (
+    message.status !== "sending" &&
+    message.status !== "prepared" && (
       <Animated.View style={[styles.container, animatedStyle]}>
         <View style={styles.contentContainer}>
           <Animated.Text style={styles.statusText}>

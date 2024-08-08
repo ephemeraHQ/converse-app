@@ -3,7 +3,7 @@
   "ignorePatterns": ["dist/", "node_modules/", "vendor/"],
   "plugins": ["react", "import", "unused-imports", "react-hooks", "react-native"],
   "rules": {
-    "no-unused-vars": "off",
+    "@typescript-eslint/no-unused-vars": "warn",
     "unused-imports/no-unused-imports": "error",
     "react-hooks/rules-of-hooks": "error",
     "react-hooks/exhaustive-deps": "error",
