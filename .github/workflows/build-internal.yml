@@ -39,6 +39,9 @@ jobs:
           echo "EXPO_PUBLIC_EXPO_PROJECT_ID=${{ secrets.EXPO_PUBLIC_EXPO_PROJECT_ID }}" >> .env.production
           echo "EXPO_PUBLIC_PRIVY_APP_ID=${{ secrets.EXPO_PUBLIC_PRIVY_APP_ID }}" >> .env.production
           echo "EXPO_PUBLIC_EVM_RPC_ENDPOINT=${{ secrets.EXPO_PUBLIC_EVM_RPC_ENDPOINT }}" >> .env.production
+      
+      - name: Update EAS config with env variables
+        run: node scripts/build/eas.js --env production
 
       - name: Update Android Files
         # TODO: This should be handled by build configs in the future
@@ -79,6 +82,9 @@ jobs:
           echo "EXPO_PUBLIC_EXPO_PROJECT_ID=${{ secrets.EXPO_PUBLIC_EXPO_PROJECT_ID }}" >> .env.production
           echo "EXPO_PUBLIC_PRIVY_APP_ID=${{ secrets.EXPO_PUBLIC_PRIVY_APP_ID }}" >> .env.production
           echo "EXPO_PUBLIC_EVM_RPC_ENDPOINT=${{ secrets.EXPO_PUBLIC_EVM_RPC_ENDPOINT }}" >> .env.production
+      
+      - name: Update EAS config with env variables
+        run: node scripts/build/eas.js --env production
 
       - name: Update iOS Files
         # TODO: This should be handled by schemes in the future
