@@ -23,3 +23,11 @@ const handleEnv = (environment) => {
 };
 
 module.exports = { handleEnv };
+
+if (require.main === module) {
+  const args = process.argv.slice(2);
+  if (args[0] !== "--env") {
+    throw new Error("Only --env argument is supported");
+  }
+  handleEnv(args[1]);
+}
