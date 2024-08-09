@@ -95,10 +95,10 @@ const AccountNotificationsStateHandler = ({ account }: { account: string }) => {
     account,
     conversations: 0,
     topicsData: 0,
-    peersStatus: 0,
+    peersStatus: "",
     lastUpdateAt: 0,
     pinnedConversations: 0,
-    groupStatus: 0,
+    groupStatus: "",
   });
   // Sync accounts on load and when a new one is added
   useEffect(() => {
@@ -109,10 +109,14 @@ const AccountNotificationsStateHandler = ({ account }: { account: string }) => {
         account,
         conversations: Object.keys(conversations).length,
         topicsData: Object.keys(topicsData).length,
-        peersStatus: Object.keys(peersStatus).length,
+        peersStatus: Object.keys(peersStatus)
+          .map((peer) => `${peer}-${peersStatus[peer]}`)
+          .join(","),
         lastUpdateAt,
         pinnedConversations: pinnedConversations.length,
-        groupStatus: Object.keys(groupStatus).length,
+        groupStatus: Object.keys(groupStatus)
+          .map((groupId) => `${groupId}-${groupStatus[groupId]}`)
+          .join(","),
       };
       if (
         newRefreshState.account !== lastRefreshState.current.account ||
