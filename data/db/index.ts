@@ -45,18 +45,20 @@ export const getRepository = async <T extends keyof RepositoriesForAccount>(
   // We also use the same mechanism to postpone writing to
   // database if the app is in background
 
-  const isBackgrounded = AppState.currentState.match(/inactive|background/);
-  const repositoryDoesNotExist = !repositories[account]?.[entity];
+  let repository = repositories[account]?.[entity];
+  let isBackgrounded = AppState.currentState.match(/inactive|background/);
 
-  while (repositoryDoesNotExist || isBackgrounded) {
+  while (!repository || isBackgrounded) {
     if (account === TEMPORARY_ACCOUNT_NAME || isBackgrounded) {
       await new Promise((r) => setTimeout(r, 1000));
     } else {
       logger.debug(`Database for ${account} not yet initialized`);
       await new Promise((r) => setTimeout(r, 100));
     }
+    repository = repositories[account]?.[entity];
+    isBackgrounded = AppState.currentState.match(/inactive|background/);
   }
-  return repositories[account][entity];
+  return repository;
 };
 
 export const initDb = async (account: string): Promise<void> => {
@@ -80,7 +82,7 @@ export const initDb = async (account: string): Promise<void> => {
     logger.debug(`Database optimized for ${account}`);
     try {
       logger.debug(`Running migrations for ${account}`);
-      const r = await dataSource.runMigrations();
+      await dataSource.runMigrations();
       logger.debug(`Migrations done for ${account}`);
       repositories[account] = {
         conversation: dataSource.getRepository(Conversation),

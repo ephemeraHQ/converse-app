@@ -1,12 +1,17 @@
 import Clipboard from "@react-native-clipboard/clipboard";
 import * as Sentry from "@sentry/react-native";
-import { loggingFilePath, rotateLoggingFile } from "@utils/logger";
+import {
+  getPreviousSessionLoggingFile,
+  loggingFilePath,
+  rotateLoggingFile,
+} from "@utils/logger";
+import { navigate } from "@utils/navigation";
 import axios from "axios";
 import Constants from "expo-constants";
 import { Image } from "expo-image";
 import * as Updates from "expo-updates";
 import { forwardRef, useImperativeHandle } from "react";
-import { Platform, Share } from "react-native";
+import { Platform, Alert, Share } from "react-native";
 
 import { showActionSheetWithOptions } from "./StateHandlers/ActionSheetStateHandler";
 import config from "../config";
@@ -37,13 +42,33 @@ const DebugButton = forwardRef((props, ref) => {
   useImperativeHandle(ref, () => ({
     showDebugMenu() {
       const methods: any = {
-        "Share session logs": async () => {
+        "Share current session logs": async () => {
           Share.share({
             title: "Converse Log Session",
             url: `file://${loggingFilePath}`,
           });
         },
+        "Share previous session logs": async () => {
+          const previousLoggingFile = await getPreviousSessionLoggingFile();
+          if (!previousLoggingFile) {
+            return Alert.alert("No previous session logging file found");
+          }
+          Share.share({
+            title: "Converse Log Session",
+            url: `file://${previousLoggingFile}`,
+          });
+        },
         "New log session": rotateLoggingFile,
+        "Display current session logs": async () => {
+          navigate("WebviewPreview", { uri: loggingFilePath });
+        },
+        "Display previous session logs": async () => {
+          const previousLoggingFile = await getPreviousSessionLoggingFile();
+          if (!previousLoggingFile) {
+            return Alert.alert("No previous session logging file found");
+          }
+          navigate("WebviewPreview", { uri: previousLoggingFile });
+        },
         "Trigger OTA Update": async () => {
           try {
             const update = await Updates.fetchUpdateAsync();
