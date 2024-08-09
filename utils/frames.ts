@@ -92,7 +92,10 @@ export const fetchFramesForMessage = async (
       const framesToSave: { [url: string]: FrameWithType } = {};
 
       urlsMetadata.forEach((response) => {
-        if (response && Object.keys(response.extractedTags).length > 0) {
+        if (
+          response?.extractedTags &&
+          Object.keys(response.extractedTags).length > 0
+        ) {
           const validatedFrame = validateFrame(response);
           if (validatedFrame) {
             fetchedFrames.push(validatedFrame);
