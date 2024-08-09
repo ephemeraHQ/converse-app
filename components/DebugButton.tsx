@@ -2,10 +2,11 @@ import Clipboard from "@react-native-clipboard/clipboard";
 import * as Sentry from "@sentry/react-native";
 import { loggingFilePath, rotateLoggingFile } from "@utils/logger";
 import axios from "axios";
+import Constants from "expo-constants";
 import { Image } from "expo-image";
 import * as Updates from "expo-updates";
 import { forwardRef, useImperativeHandle } from "react";
-import { Share } from "react-native";
+import { Platform, Share } from "react-native";
 
 import { showActionSheetWithOptions } from "./StateHandlers/ActionSheetStateHandler";
 import config from "../config";
@@ -25,6 +26,11 @@ export async function delayToPropogate(): Promise<void> {
 }
 
 const DebugButton = forwardRef((props, ref) => {
+  const appVersion = Constants.expoConfig?.version;
+  const buildNumber =
+    Platform.OS === "ios"
+      ? Constants.expoConfig?.ios?.buildNumber
+      : Constants.expoConfig?.android?.versionCode;
   // The component instance will be extended
   // with whatever you return from the callback passed
   // as the second argument
@@ -95,6 +101,7 @@ const DebugButton = forwardRef((props, ref) => {
 
       showActionSheetWithOptions(
         {
+          title: `Converse v${appVersion} (${buildNumber})`,
           options,
           cancelButtonIndex: options.indexOf("Cancel"),
         },
