@@ -12,12 +12,33 @@ import config from "../config";
 
 export let loggingFilePath: string;
 
+export const getPreviousSessionLoggingFile = async () => {
+  const tempDir = RNFS.TemporaryDirectoryPath;
+  const files = await RNFS.readDir(tempDir);
+  const logFiles = files.filter((file) =>
+    file.name.endsWith(".converse.log.txt")
+  );
+
+  if (logFiles.length <= 1) {
+    return null;
+  }
+
+  logFiles.sort((a, b) => {
+    const aTime = a.mtime ? a.mtime.getTime() : 0;
+    const bTime = b.mtime ? b.mtime.getTime() : 0;
+    return bTime - aTime;
+  });
+
+  // Return the second most recent file
+  return logFiles[1]?.path;
+};
+
 export const rotateLoggingFile = async () => {
   if (loggingFilePath && (await RNFS.exists(loggingFilePath))) {
     await RNFS.unlink(loggingFilePath);
   }
   const tempDir = RNFS.TemporaryDirectoryPath;
-  loggingFilePath = path.join(tempDir, `${uuidv4()}.log`);
+  loggingFilePath = path.join(tempDir, `${uuidv4()}.converse.log.txt`);
   await RNFS.writeFile(loggingFilePath, "");
 };
 
@@ -35,7 +56,7 @@ const converseTransport: transportFunctionType = async (props) => {
   if (!loggingFilePath) {
     await rotateLoggingFile();
   }
-  await RNFS.appendFile(loggingFilePath, props.msg, "utf8");
+  await RNFS.appendFile(loggingFilePath, `${props.msg}\n`, "utf8");
 };
 
 const _logger = RNLogger.createLogger({
