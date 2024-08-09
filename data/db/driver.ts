@@ -20,9 +20,10 @@ export const dropConverseDbConnections = () => {
   Object.values(databasesConnections).forEach((db) => {
     try {
       db.connection.close();
+      logger.debug(`Closed db ${db.options.name}`);
     } catch (e) {
       if (`${e}`.includes("DB is not open")) {
-        logger.debug(
+        logger.warn(
           `Could not close ${db.options.name} as it's already closed.`
         );
       } else {
@@ -35,6 +36,22 @@ export const dropConverseDbConnections = () => {
 export const reconnectConverseDbConnections = () => {
   Object.keys(databasesConnections).forEach((dbId) => {
     const options = databasesConnections[dbId].options;
+    const previousConnection = databasesConnections[dbId].connection;
+    // Make sure we killed the previous one
+    // N.B.: it should already be the case thanks to dropConverseDbConnections but
+    // if we leave and come back to the app very fast we could get into a weird state
+    try {
+      previousConnection.close();
+      logger.warn(
+        `Managed to close ${options.name} but it should already be closed`
+      );
+    } catch (e) {
+      if (`${e}`.includes("DB is not open")) {
+        // Do nothing as this is the normal state
+      } else {
+        throw e;
+      }
+    }
     const newDb = open({
       name: options.name,
       location: options.location,
