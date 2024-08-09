@@ -20,6 +20,7 @@ export const dropConverseDbConnections = () => {
   Object.values(databasesConnections).forEach((db) => {
     try {
       db.connection.close();
+      logger.debug(`Closed db ${db.options.name}`);
     } catch (e) {
       if (`${e}`.includes("DB is not open")) {
         logger.debug(

@@ -45,12 +45,12 @@ export const getRepository = async <T extends keyof RepositoriesForAccount>(
   // We also use the same mechanism to postpone writing to
   // database if the app is in background
 
-  while (
-    !repositories[account]?.[entity] ||
-    AppState.currentState.match(/inactive|background/)
-  ) {
-    if (account === TEMPORARY_ACCOUNT_NAME) {
-      await new Promise((r) => setTimeout(r, 2000));
+  const isBackgrounded = AppState.currentState.match(/inactive|background/);
+  const repositoryDoesNotExist = !repositories[account]?.[entity];
+
+  while (repositoryDoesNotExist || isBackgrounded) {
+    if (account === TEMPORARY_ACCOUNT_NAME || isBackgrounded) {
+      await new Promise((r) => setTimeout(r, 1000));
     } else {
       logger.debug(`Database for ${account} not yet initialized`);
       await new Promise((r) => setTimeout(r, 100));
