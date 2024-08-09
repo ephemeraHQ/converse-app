@@ -1783,7 +1783,7 @@ PODS:
     - GzipSwift
     - LibXMTP (= 0.5.7-beta0)
     - web3.swift
-  - XMTPReactNative (2.2.5):
+  - XMTPReactNative (2.4.1):
     - ExpoModulesCore
     - MessagePacker
     - secp256k1.swift
@@ -2256,7 +2256,7 @@ SPEC CHECKSUMS:
   GenericJSON: 79a840eeb77030962e8cf02a62d36bd413b67626
   glog: fdfdfe5479092de0c4bdbebedd9056951f092c4f
   GzipSwift: 893f3e48e597a1a4f62fafcb6514220fcf8287fa
-  hermes-engine: 8c1577f3fdb849cbe7729c2e7b5abc4b845e88f8
+  hermes-engine: 767c3b922b9b0bc2d781aeee462f8b55bf285218
   libavif: 84bbb62fb232c3018d6f1bab79beea87e35de7b7
   libdav1d: 23581a4d8ec811ff171ed5e2e05cd27bad64c39f
   libwebp: 1786c9f4ff8a279e4dac1e8f385004d5fc253009
@@ -2269,7 +2269,7 @@ SPEC CHECKSUMS:
   op-sqlite: 1ca30186b8d062cd451f1d999c691caf151d13e2
   OpenSSL-Universal: 6e1ae0555546e604dbc632a2b9a24a9c46c41ef6
   RCT-Folly: 02617c592a293bd6d418e0a88ff4ee1f88329b47
-  RCTDeprecation: 3afceddffa65aee666dafd6f0116f1d975db1584
+  RCTDeprecation: 121d32efb5b3b0712c2c177beb858d050e5f48c5
   RCTRequired: ec1239bc9d8bf63e10fb92bd8b26171a9258e0c1
   RCTTypeSafety: f5ecbc86c5c5fa163c05acb7a1c5012e15b5f994
   ReachabilitySwift: 7f151ff156cea1481a8411701195ac6a984f4979
@@ -2334,7 +2334,7 @@ SPEC CHECKSUMS:
   rn-fetch-blob: f065bb7ab7fb48dd002629f8bdcb0336602d3cba
   RNAWSCognito: fe0c870c7cd9970a2efefc075b3f2d75eac913c7
   RNCAsyncStorage: 826b603ae9c0f88b5ac4e956801f755109fa4d5c
-  RNCClipboard: 0a720adef5ec193aa0e3de24c3977222c7e52a37
+  RNCClipboard: 327eda72df65abf65e430eeb2e527cf95264ab12
   RNDeviceInfo: 02ea8b23e2280fa18e00a06d7e62804d74028579
   RNFlashList: b521ebdd7f9352673817f1d98e8bdc0c8cf8545b
   RNFS: 4ac0f0ea233904cb798630b3c077808c06931688
@@ -2343,8 +2343,8 @@ SPEC CHECKSUMS:
   RNReactNativeSharedGroupPreferences: de0121a4224c267bc7e9fb16c398f3f087c8da81
   RNReanimated: d51431fd3597a8f8320319dce8e42cee82a5445f
   RNScreens: 30249f9331c3b00ae7cb7922e11f58b3ed369c07
-  RNSentry: e9aa15bb2f3e18c822c002eea13bbd3b222ab493
-  RNSVG: 43b64ed39c14ce830d840903774154ca0c1f27ec
+  RNSentry: 906151a5ec2887a48af16d11ad635249d7a5a59b
+  RNSVG: 16a7fd5293e14799a541332ece19c22d1509ed3b
   SDWebImage: 066c47b573f408f18caa467d71deace7c0f8280d
   SDWebImageAVIFCoder: 00310d246aab3232ce77f1d8f0076f8c4b021d90
   SDWebImageSVGCoder: 15a300a97ec1c8ac958f009c02220ac0402e936c
@@ -2358,9 +2358,9 @@ SPEC CHECKSUMS:
   UMAppLoader: f17a5ee8e85b536ace0fc254b447a37ed198d57e
   web3.swift: 2263d1e12e121b2c42ffb63a5a7beb1acaf33959
   XMTP: 593cf8bf4e9dc0737a6efc90a0e51fe7602101fd
-  XMTPReactNative: b9a396475e19762f72590b7a7ce1c505050cb114
+  XMTPReactNative: 352bc2ff9f26133cad5f73a147224e72f7e1450c
   Yoga: 1ab23c1835475da69cf14e211a560e73aab24cb0
 
 PODFILE CHECKSUM: 170760880c444127b891465e24c4450a402d9091
 
-COCOAPODS: 1.15.2
+COCOAPODS: 1.12.1

@@ -17,10 +17,6 @@ import { useAppStore } from "../data/store/appStore";
 import { useSelect } from "../data/store/storeHelpers";
 import { getTopicsData } from "../utils/api";
 import { loadSavedNotificationMessagesToContext } from "../utils/notifications";
-import {
-  dropXmtpClientsDbConnections,
-  reconnectXmtpClientsDbConnections,
-} from "../utils/xmtpRN/client";
 import { createPendingConversations } from "../utils/xmtpRN/conversations";
 import { sendPendingMessages } from "../utils/xmtpRN/send";
 import { syncXmtpClient } from "../utils/xmtpRN/sync";
@@ -83,7 +79,6 @@ export default function XmtpEngine() {
           hydrationDone
         ) {
           reconnectConverseDbConnections();
-          await reconnectXmtpClientsDbConnections();
           loadSavedNotificationMessagesToContext();
           // Refreshing profiles store from mmkv
           // as we could have added data from notification
@@ -98,7 +93,6 @@ export default function XmtpEngine() {
           appState.current === "active"
         ) {
           dropConverseDbConnections();
-          await dropXmtpClientsDbConnections();
         }
         appState.current = nextAppState;
       }
