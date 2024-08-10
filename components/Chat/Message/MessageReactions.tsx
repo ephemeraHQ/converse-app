@@ -32,6 +32,7 @@ import {
 import { showActionSheetWithOptions } from "../../StateHandlers/ActionSheetStateHandler";
 
 const MAX_REACTORS_TO_SHOW = 3;
+const REACTOR_OFFSET = 10;
 
 type Props = {
   message: MessageToDisplay;
@@ -160,9 +161,6 @@ export default function ChatMessageReactions({ message, reactions }: Props) {
     <View style={styles.reactionsWrapper}>
       {reactionCounts.map((reaction) => {
         const reactorCount = reaction.reactors.length;
-        const containerWidth =
-          reactorCount > MAX_REACTORS_TO_SHOW ? 20 : reactorCount * 15 + 5;
-
         return (
           <TouchableOpacity
             key={reaction.content}
@@ -176,25 +174,36 @@ export default function ChatMessageReactions({ message, reactions }: Props) {
             ]}
           >
             <Text style={styles.emoji}>{reaction.content}</Text>
-            <View style={[styles.reactorContainer, { width: containerWidth }]}>
-              {reaction.reactors &&
-              reaction.reactors.length <= MAX_REACTORS_TO_SHOW ? (
-                reaction.reactors.slice(0, 3).map((reactor, index) => (
-                  <Image
-                    key={reactor}
-                    source={{
-                      uri: getPreferredAvatar(profiles[reactor]?.socials),
-                    }}
-                    style={[
-                      styles.profileImage,
-                      reaction.userReacted
-                        ? { borderColor: primaryColor(colorScheme) }
-                        : {},
-                      { right: index * 13 },
-                    ]}
-                  />
-                ))
-              ) : (
+            {reactorCount <= MAX_REACTORS_TO_SHOW ? (
+              <View
+                style={[
+                  styles.reactorContainer,
+                  { marginRight: (reactorCount - 1) * -REACTOR_OFFSET },
+                ]}
+              >
+                {reaction.reactors
+                  .slice(0, MAX_REACTORS_TO_SHOW)
+                  .map((reactor, index) => (
+                    <Image
+                      key={reactor}
+                      source={{
+                        uri: getPreferredAvatar(profiles[reactor]?.socials),
+                      }}
+                      style={[
+                        styles.profileImage,
+                        {
+                          left: index * -REACTOR_OFFSET,
+                          zIndex: MAX_REACTORS_TO_SHOW - (index + 1),
+                        },
+                        reaction.userReacted
+                          ? { borderColor: primaryColor(colorScheme) }
+                          : {},
+                      ]}
+                    />
+                  ))}
+              </View>
+            ) : (
+              <View style={styles.reactorContainer}>
                 <Text
                   style={[
                     styles.reactorCount,
@@ -203,10 +212,10 @@ export default function ChatMessageReactions({ message, reactions }: Props) {
                       : {},
                   ]}
                 >
-                  +{reaction.reactors.length}
+                  {reactorCount}
                 </Text>
-              )}
-            </View>
+              </View>
+            )}
           </TouchableOpacity>
         );
       })}
@@ -233,32 +242,29 @@ const useStyles = () => {
     },
     myReactionButton: {
       backgroundColor: primaryColor(colorScheme),
-      borderWidth: 0.5,
-      borderColor: inversePrimaryColor(colorScheme),
     },
     otherReactionButton: {
       backgroundColor: backgroundColor(colorScheme),
     },
     emoji: {
-      fontSize: 18,
-      marginRight: 2,
+      fontSize: 14,
+      marginHorizontal: 2,
     },
     reactorContainer: {
       flexDirection: "row",
       alignItems: "center",
-      height: 20,
-      position: "relative",
+      height: 22,
     },
     profileImage: {
-      width: 20,
-      height: 20,
-      borderRadius: 10,
-      position: "absolute",
-      borderWidth: 0.5,
+      width: 22,
+      height: 22,
+      borderRadius: 22,
+      borderWidth: 1,
       borderColor: inversePrimaryColor(colorScheme),
     },
     reactorCount: {
       fontSize: 12,
+      marginHorizontal: 2,
       color: textPrimaryColor(colorScheme),
     },
   });
