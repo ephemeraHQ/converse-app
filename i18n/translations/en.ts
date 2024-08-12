@@ -66,6 +66,32 @@ const en = {
   reacted_to_other: 'Reacted {{reactionContent}} to "{{content}}"',
   removed_reaction_to_attachment: "Removed the reaction to an attachment",
   removed_reaction_to: 'Removed the reaction to "{{content}}"',
+
+  // Group Invites
+  group_admin_approval:
+    "A group admin may need to approve your membership prior to joining.",
+  joining: "Joining...",
+  join_group: "Join group",
+  group_join_error: "An error occurred",
+  group_join_invite_invalid: "This invite is no longer valid",
+
+  // Group Overview
+  change_profile_picture: "Change profile picture",
+  add_profile_picture: "Add profile picture",
+  add_description: "Add a description",
+  allow_group: "Allow group",
+  block_group: "Block group",
+  consent_title: "CONSENT",
+  members_title: "MEMBERS",
+  pending_approval_title: "PENDING APPROVAL",
+  group_invite_link_created_copied: "Invite link created and copied!",
+  group_invite_link_copied: "Invite link copied!",
+  add_more_members: "Add more members",
+  copy_invite_link: "Copy invite link",
+  pending: "Pending",
+  approve: "Approve",
+  deny: "Deny",
+  approve_member_to_this_group: "Approve {{name}} to this group",
 };
 
 export default en;

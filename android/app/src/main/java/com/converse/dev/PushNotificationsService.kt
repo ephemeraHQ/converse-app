@@ -22,6 +22,7 @@ import com.beust.klaxon.Klaxon
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.converse.dev.xmtp.NotificationDataResult
+import com.converse.dev.xmtp.getGroup
 import com.converse.dev.xmtp.getNewConversationFromEnvelope
 import com.converse.dev.xmtp.getNewGroup
 import com.converse.dev.xmtp.getXmtpClient
@@ -95,91 +96,131 @@ class PushNotificationsService : FirebaseMessagingService() {
         // Check if message contains a data payload.
         if (remoteMessage.data.isEmpty()) return
 
-        val envelopeJSON = remoteMessage.data["body"] ?: return
-        Log.d(TAG, "Message data payload: $envelopeJSON")
+        if (remoteMessage.data.containsKey("body")) {
+            val envelopeJSON = remoteMessage.data["body"] ?: return
+            Log.d(TAG, "Message data payload: $envelopeJSON")
 
-        val notificationData = Klaxon().parse<NotificationData>(envelopeJSON) ?: return
-        Log.d(TAG, "Decoded notification data: account is ${notificationData.account} - topic is ${notificationData.contentTopic}")
+            val notificationData = Klaxon().parse<NotificationData>(envelopeJSON) ?: return
+            Log.d(TAG, "Decoded notification data: account is ${notificationData.account} - topic is ${notificationData.contentTopic}")
 
-        initCodecs() // Equivalent to initSentry()
-        val accounts = getAccounts(this)
+            initCodecs() // Equivalent to initSentry()
+            val accounts = getAccounts(this)
 
-        if (!accounts.contains(notificationData.account)) {
-            Log.d(TAG, "Account ${notificationData.account} is not in store")
-            return
-        }
+            if (!accounts.contains(notificationData.account)) {
+                Log.d(TAG, "Account ${notificationData.account} is not in store")
+                return
+            }
 
-        Log.d(TAG, "INSTANTIATED XMTP CLIENT FOR ${notificationData.contentTopic}")
+            Log.d(TAG, "INSTANTIATED XMTP CLIENT FOR ${notificationData.contentTopic}")
 
-        val encryptedMessageData = Base64.decode(notificationData.message, Base64.NO_WRAP)
-        val envelope = EnvelopeBuilder.buildFromString(notificationData.contentTopic, Date(notificationData.timestampNs.toLong() / 1000000), encryptedMessageData)
+            val encryptedMessageData = Base64.decode(notificationData.message, Base64.NO_WRAP)
+            val envelope = EnvelopeBuilder.buildFromString(
+                notificationData.contentTopic,
+                Date(notificationData.timestampNs.toLong() / 1000000),
+                encryptedMessageData
+            )
 
-        var shouldShowNotification = false
-        var result = NotificationDataResult()
-        var context = this
+            var shouldShowNotification = false
+            var result = NotificationDataResult()
+            var context = this
 
-        // Using IO dispatcher for background work, not blocking the main thread and UI
-        serviceScope.launch {
-            try {
-                val xmtpClient = getXmtpClient(context, notificationData.account) ?: run {
-                    Log.d(TAG, "NO XMTP CLIENT FOUND FOR TOPIC ${notificationData.contentTopic}")
-                    return@launch
-                }
-                if (isInviteTopic(notificationData.contentTopic)) {
-                    Log.d(TAG, "Handling a new conversation notification")
-                    val conversation = getNewConversationFromEnvelope(applicationContext, xmtpClient, envelope)
-                    if (conversation != null) {
-                        result = handleNewConversationFirstMessage(
+            // Using IO dispatcher for background work, not blocking the main thread and UI
+            serviceScope.launch {
+                try {
+                    val xmtpClient = getXmtpClient(context, notificationData.account) ?: run {
+                        Log.d(
+                            TAG,
+                            "NO XMTP CLIENT FOUND FOR TOPIC ${notificationData.contentTopic}"
+                        )
+                        return@launch
+                    }
+                    if (isInviteTopic(notificationData.contentTopic)) {
+                        Log.d(TAG, "Handling a new conversation notification")
+                        val conversation =
+                            getNewConversationFromEnvelope(applicationContext, xmtpClient, envelope)
+                        if (conversation != null) {
+                            result = handleNewConversationFirstMessage(
+                                applicationContext,
+                                xmtpClient,
+                                conversation,
+                                remoteMessage
+                            )
+                            if (result != NotificationDataResult()) {
+                                shouldShowNotification = result.shouldShowNotification
+                            }
+
+                            // Replace invite-topic with the topic in the notification content
+                            val newNotificationData = NotificationData(
+                                notificationData.message,
+                                notificationData.timestampNs,
+                                conversation.topic,
+                                notificationData.account,
+                            )
+                            val newNotificationDataJson = Klaxon().toJsonString(newNotificationData)
+                            remoteMessage.data["body"] = newNotificationDataJson
+                        }
+                    } else if (isGroupWelcomeTopic(notificationData.contentTopic)) {
+                        val group = getNewGroup(xmtpClient, notificationData.contentTopic)
+                        if (group != null) {
+                            result = handleGroupWelcome(
+                                applicationContext,
+                                xmtpClient,
+                                group,
+                                remoteMessage
+                            )
+                            if (result != NotificationDataResult()) {
+                                shouldShowNotification = result.shouldShowNotification
+                            }
+                        }
+                    } else if (isGroupMessageTopic(notificationData.contentTopic)) {
+                        Log.d(TAG, "Handling an ongoing group message notification")
+                        result = handleGroupMessage(
                             applicationContext,
                             xmtpClient,
-                            conversation,
+                            envelope,
                             remoteMessage
                         )
                         if (result != NotificationDataResult()) {
                             shouldShowNotification = result.shouldShowNotification
                         }
-
-                        // Replace invite-topic with the topic in the notification content
-                        val newNotificationData = NotificationData(
-                            notificationData.message,
-                            notificationData.timestampNs,
-                            conversation.topic,
-                            notificationData.account,
+                    } else {
+                        Log.d(TAG, "Handling an ongoing conversation message notification")
+                        result = handleOngoingConversationMessage(
+                            applicationContext,
+                            xmtpClient,
+                            envelope,
+                            remoteMessage
                         )
-                        val newNotificationDataJson = Klaxon().toJsonString(newNotificationData)
-                        remoteMessage.data["body"] = newNotificationDataJson
-                    }
-                } else if (isGroupWelcomeTopic(notificationData.contentTopic)) {
-                    val group = getNewGroup(xmtpClient, notificationData.contentTopic)
-                    if (group != null) {
-                        result = handleGroupWelcome(applicationContext, xmtpClient, group, remoteMessage)
                         if (result != NotificationDataResult()) {
                             shouldShowNotification = result.shouldShowNotification
                         }
                     }
-                }  else if (isGroupMessageTopic(notificationData.contentTopic)) {
-                    Log.d(TAG, "Handling an ongoing group message notification")
-                    result = handleGroupMessage(applicationContext, xmtpClient, envelope, remoteMessage)
-                    if (result != NotificationDataResult()) {
-                        shouldShowNotification = result.shouldShowNotification
-                    }
-                } else {
-                    Log.d(TAG, "Handling an ongoing conversation message notification")
-                    result = handleOngoingConversationMessage(applicationContext, xmtpClient, envelope, remoteMessage)
-                    if (result != NotificationDataResult()) {
-                        shouldShowNotification = result.shouldShowNotification
-                    }
-                }
-                val notificationAlreadyShown = notificationAlreadyShown(applicationContext, result.messageId)
+                    val notificationAlreadyShown =
+                        notificationAlreadyShown(applicationContext, result.messageId)
 
-                if (shouldShowNotification && !notificationAlreadyShown) {
-                    incrementBadge(applicationContext)
-                    result.remoteMessage?.let { showNotification(result, it) }
+                    if (shouldShowNotification && !notificationAlreadyShown) {
+                        incrementBadge(applicationContext)
+                        result.remoteMessage?.let { showNotification(result, it) }
+                    }
+                } catch (e: Exception) {
+                    // Handle any exceptions
+                    Log.e(TAG, "Error on IO Dispatcher coroutine", e)
                 }
-            } catch (e: Exception) {
-                // Handle any exceptions
-                Log.e(TAG, "Error on IO Dispatcher coroutine", e)
             }
+        } else if (remoteMessage.data.containsKey("data")) {
+            Log.i(TAG, "Handling Converse Notification")
+            val envelopeJSON = remoteMessage.data["data"] ?: return
+            val klaxon = Klaxon().converter(NotificationConverter())
+            val payload = klaxon.parse<NotificationPayload>(envelopeJSON)
+            if (payload is GroupInviteNotification) {
+                handleGroupInviteNotification(payload)
+                println("This is an GroupInviteNotification with message: ${payload.groupInviteId}")
+            } else {
+                println("Unknown payload type")
+            }
+
+        } else {
+            Log.i(TAG, "Empty Notification")
         }
     }
 
@@ -193,6 +234,44 @@ class PushNotificationsService : FirebaseMessagingService() {
         notificationTrigger: FirebaseNotificationTrigger
     ): NotificationRequest {
         return NotificationRequest(identifier, content, notificationTrigger)
+    }
+
+    private fun handleGroupInviteNotification(notification: GroupInviteNotification) {
+        val context = this
+
+        // Using IO dispatcher for background work, not blocking the main thread and UI
+        serviceScope.launch {
+            try {
+                val mmkv = getMmkv(context)
+                val xmtpClient = getXmtpClient(context, notification.account) ?: run {
+                    Log.d(
+                        TAG,
+                        "NO XMTP CLIENT FOUND FOR GROUP INVITE ${notification.groupInviteId}"
+                    )
+                    return@launch
+                }
+                val groupId = mmkv?.decodeString("group-invites-link-" + notification.groupInviteId)
+                if (groupId == null) {
+                    throw Error()
+                }
+                var apiURI = mmkv?.decodeString("api-uri")
+                if (apiURI == null) {
+                    apiURI = getAsyncStorage("api-uri")
+                }
+                print(groupId)
+                val group = getGroup(xmtpClient, groupId)
+                if (group != null && apiURI != null) {
+                    group.addMembers(listOf(notification.address))
+                    val test = "http://10.0.2.2:9875"
+                    putGroupInviteRequest(applicationContext, test, xmtpClient, notification.joinRequestId, "ACCEPTED" )
+                }
+
+
+            } catch (e: Exception) {
+                // Handle any exceptions
+                Log.e(TAG, "Error on IO Dispatcher coroutine", e)
+            }
+        }
     }
 
     private fun createNotificationFromRemoteMessage(title: String, subtitle:String?, message: String, remoteMessage: RemoteMessage): Notification {
