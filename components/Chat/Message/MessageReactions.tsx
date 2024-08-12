@@ -2,7 +2,7 @@ import {
   actionSheetColors,
   inversePrimaryColor,
   textPrimaryColor,
-  backgroundColor,
+  tertiaryBackgroundColor,
   primaryColor,
 } from "@styles/colors";
 import { useCallback, useMemo } from "react";
@@ -20,7 +20,6 @@ import {
   useCurrentAccount,
   useProfilesStore,
 } from "../../../data/store/accountsStore";
-import { isAttachmentMessage } from "../../../utils/attachment/helpers";
 import { useConversationContext } from "../../../utils/conversation";
 import { getPreferredName, getPreferredAvatar } from "../../../utils/profile";
 import {
@@ -128,14 +127,12 @@ export default function ChatMessageReactions({ message, reactions }: Props) {
       };
     });
     methods["Back"] = () => {};
-    const isAttachment = isAttachmentMessage(message.contentType);
 
     const options = Object.keys(methods);
 
     showActionSheetWithOptions(
       {
         options,
-        title: isAttachment ? "📎 Media" : message.content,
         cancelButtonIndex: options.indexOf("Back"),
         ...actionSheetColors(colorScheme),
       },
@@ -158,7 +155,12 @@ export default function ChatMessageReactions({ message, reactions }: Props) {
   if (reactionsList.length === 0) return null;
 
   return (
-    <View style={styles.reactionsWrapper}>
+    <View
+      style={[
+        styles.reactionsWrapper,
+        message.fromMe && { justifyContent: "flex-end" },
+      ]}
+    >
       {reactionCounts.map((reaction) => {
         const reactorCount = reaction.reactors.length;
         return (
@@ -169,7 +171,9 @@ export default function ChatMessageReactions({ message, reactions }: Props) {
             style={[
               styles.reactionButton,
               reaction.userReacted
-                ? styles.myReactionButton
+                ? message.fromMe
+                  ? styles.myReactionToMyMessageButton
+                  : styles.myReactionToOtherMessageButton
                 : styles.otherReactionButton,
             ]}
           >
@@ -196,8 +200,10 @@ export default function ChatMessageReactions({ message, reactions }: Props) {
                           zIndex: MAX_REACTORS_TO_SHOW - (index + 1),
                         },
                         reaction.userReacted
-                          ? { borderColor: primaryColor(colorScheme) }
-                          : {},
+                          ? message.fromMe
+                            ? styles.myReactionToMyMessageProfileImage
+                            : styles.myReactionToOtherMessageProfileImage
+                          : styles.otherProfileImage,
                       ]}
                     />
                   ))}
@@ -229,22 +235,43 @@ const useStyles = () => {
     reactionsWrapper: {
       flexDirection: "row",
       flexWrap: "wrap",
-      marginHorizontal: 10,
+      rowGap: 4,
+      columnGap: 5,
     },
     reactionButton: {
       flexDirection: "row",
       alignItems: "center",
-      marginRight: 8,
-      marginBottom: 8,
-      paddingHorizontal: 8,
-      paddingVertical: 4,
+      paddingHorizontal: 4,
+      paddingVertical: 2,
       borderRadius: 16,
+      borderWidth: 0.25,
     },
-    myReactionButton: {
-      backgroundColor: primaryColor(colorScheme),
+    profileImage: {
+      width: 22,
+      height: 22,
+      borderRadius: 22,
+      borderWidth: 1,
     },
     otherReactionButton: {
-      backgroundColor: backgroundColor(colorScheme),
+      backgroundColor: tertiaryBackgroundColor(colorScheme),
+      borderColor: tertiaryBackgroundColor(colorScheme),
+    },
+    otherProfileImage: {
+      borderColor: tertiaryBackgroundColor(colorScheme),
+    },
+    myReactionToOtherMessageButton: {
+      backgroundColor: primaryColor(colorScheme),
+      borderColor: primaryColor(colorScheme),
+    },
+    myReactionToOtherMessageProfileImage: {
+      borderColor: primaryColor(colorScheme),
+    },
+    myReactionToMyMessageButton: {
+      backgroundColor: primaryColor(colorScheme),
+      borderColor: tertiaryBackgroundColor(colorScheme),
+    },
+    myReactionToMyMessageProfileImage: {
+      borderColor: primaryColor(colorScheme),
     },
     emoji: {
       fontSize: 14,
@@ -254,13 +281,6 @@ const useStyles = () => {
       flexDirection: "row",
       alignItems: "center",
       height: 22,
-    },
-    profileImage: {
-      width: 22,
-      height: 22,
-      borderRadius: 22,
-      borderWidth: 1,
-      borderColor: inversePrimaryColor(colorScheme),
     },
     reactorCount: {
       fontSize: 12,

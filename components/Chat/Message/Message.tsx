@@ -18,6 +18,7 @@ import {
   TouchableOpacity,
   View,
   useColorScheme,
+  DimensionValue,
 } from "react-native";
 import { Swipeable } from "react-native-gesture-handler";
 
@@ -182,6 +183,24 @@ function ChatMessage({ message, colorScheme, isGroup, isFrame }: Props) {
   const reactions = getMessageReactions(message);
   const showInBubble = !isGroupUpdated;
   const showAvatar = isGroup && !message.fromMe;
+  const showReactionsOutside = isAttachment || isFrame || isTransaction;
+
+  let messageMaxWidth: DimensionValue;
+  if (isDesktop) {
+    if (isAttachment) {
+      messageMaxWidth = 366;
+    } else {
+      messageMaxWidth = 588;
+    }
+  } else {
+    if (isAttachment) {
+      messageMaxWidth = "70%";
+    } else {
+      if (isFrame) {
+        messageMaxWidth = "100%";
+      } else messageMaxWidth = "85%";
+    }
+  }
 
   const showStatus =
     message.fromMe &&
@@ -289,6 +308,7 @@ function ChatMessage({ message, colorScheme, isGroup, isFrame }: Props) {
                 style={{
                   alignSelf: message.fromMe ? "flex-end" : "flex-start",
                   alignItems: message.fromMe ? "flex-end" : "flex-start",
+                  maxWidth: messageMaxWidth,
                 }}
               >
                 <ChatMessageActions
@@ -341,18 +361,6 @@ function ChatMessage({ message, colorScheme, isGroup, isFrame }: Props) {
                       >
                         {messageContent}
                       </View>
-                      <View
-                        style={
-                          isAttachment || isFrame || isTransaction
-                            ? { position: "absolute", bottom: 0, zIndex: 1 }
-                            : undefined
-                        }
-                      >
-                        <ChatMessageReactions
-                          message={message}
-                          reactions={reactions}
-                        />
-                      </View>
                     </View>
                   ) : (
                     <View
@@ -363,39 +371,34 @@ function ChatMessage({ message, colorScheme, isGroup, isFrame }: Props) {
                           : undefined,
                       ]}
                     >
-                      <View style={{ zIndex: 0 }}>{messageContent}</View>
-                      <View
-                        style={
-                          isAttachment || isFrame || isTransaction
-                            ? { position: "absolute", bottom: 0, zIndex: 1 }
-                            : undefined
-                        }
-                      >
+                      <View>{messageContent}</View>
+                    </View>
+                  )}
+                  {Object.keys(reactions).length > 0 &&
+                    !showReactionsOutside && (
+                      <View style={{ marginHorizontal: 8, marginBottom: 8 }}>
                         <ChatMessageReactions
                           message={message}
                           reactions={reactions}
                         />
                       </View>
-                    </View>
-                  )}
+                    )}
                 </ChatMessageActions>
-                <View
-                  style={{
-                    flexDirection: "row",
-                    flexBasis: "100%",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                  }}
-                >
+                <View style={{ marginTop: showReactionsOutside ? 4 : 0 }}>
                   {isFrame && (
                     <TouchableOpacity
                       onPress={() => handleUrlPress(message.content)}
-                      style={{ flex: 1 }}
                     >
                       <Text style={styles.linkToFrame}>
                         {getUrlToRender(message.content)}
                       </Text>
                     </TouchableOpacity>
+                  )}
+                  {showReactionsOutside && (
+                    <ChatMessageReactions
+                      message={message}
+                      reactions={reactions}
+                    />
                   )}
                   {message.fromMe && (
                     <View style={styles.statusContainer}>
@@ -534,8 +537,8 @@ const useStyles = () => {
       paddingHorizontal: 0,
     },
     messageContentContainer: {
-      paddingVertical: 8,
-      paddingHorizontal: 14,
+      paddingVertical: 6,
+      paddingHorizontal: 10,
     },
     messageText: {
       color: textPrimaryColor(colorScheme),
