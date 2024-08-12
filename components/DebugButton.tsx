@@ -6,6 +6,7 @@ import {
   rotateLoggingFile,
 } from "@utils/logger";
 import { navigate } from "@utils/navigation";
+import { getNativeLogFile } from "@utils/xmtpRN/logs";
 import axios from "axios";
 import Constants from "expo-constants";
 import { Image } from "expo-image";
@@ -48,6 +49,13 @@ const DebugButton = forwardRef((props, ref) => {
             url: `file://${loggingFilePath}`,
           });
         },
+        "Share native logs": async () => {
+          const nativeLogFilePath = await getNativeLogFile();
+          Share.share({
+            title: "LibXMTP Logs",
+            url: `file://${nativeLogFilePath}`,
+          });
+        },
         "Share previous session logs": async () => {
           const previousLoggingFile = await getPreviousSessionLoggingFile();
           if (!previousLoggingFile) {
@@ -61,6 +69,10 @@ const DebugButton = forwardRef((props, ref) => {
         "New log session": rotateLoggingFile,
         "Display current session logs": async () => {
           navigate("WebviewPreview", { uri: loggingFilePath });
+        },
+        "Display native logs": async () => {
+          const nativeLogFilePath = await getNativeLogFile();
+          navigate("WebviewPreview", { uri: nativeLogFilePath });
         },
         "Display previous session logs": async () => {
           const previousLoggingFile = await getPreviousSessionLoggingFile();
