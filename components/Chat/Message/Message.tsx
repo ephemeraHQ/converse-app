@@ -220,8 +220,8 @@ function ChatMessage({ message, colorScheme, isGroup, isFrame }: Props) {
   const messageAttachment = useChatStore(
     (state) => state.messageAttachments[message.id] || null
   );
-  const attachmentStillLoading =
-    isAttachment && (!messageAttachment || messageAttachment.loading);
+
+  const hasReactions = Object.keys(reactions).length > 0;
 
   const swipeableRef = useRef<Swipeable | null>(null);
 
@@ -374,17 +374,18 @@ function ChatMessage({ message, colorScheme, isGroup, isFrame }: Props) {
                       <View>{messageContent}</View>
                     </View>
                   )}
-                  {Object.keys(reactions).length > 0 &&
-                    !showReactionsOutside && (
-                      <View style={{ marginHorizontal: 8, marginBottom: 8 }}>
-                        <ChatMessageReactions
-                          message={message}
-                          reactions={reactions}
-                        />
-                      </View>
-                    )}
+                  {hasReactions && !showReactionsOutside && (
+                    <View style={styles.reactionsContainer}>
+                      <ChatMessageReactions
+                        message={message}
+                        reactions={reactions}
+                      />
+                    </View>
+                  )}
                 </ChatMessageActions>
-                <View style={{ marginTop: showReactionsOutside ? 4 : 0 }}>
+                <View
+                  style={showReactionsOutside && styles.outsideMetaContainer}
+                >
                   {isFrame && (
                     <TouchableOpacity
                       onPress={() => handleUrlPress(message.content)}
@@ -395,15 +396,15 @@ function ChatMessage({ message, colorScheme, isGroup, isFrame }: Props) {
                     </TouchableOpacity>
                   )}
                   {showReactionsOutside && (
-                    <ChatMessageReactions
-                      message={message}
-                      reactions={reactions}
-                    />
-                  )}
-                  {message.fromMe && (
-                    <View style={styles.statusContainer}>
-                      <MessageStatus message={message} />
+                    <View style={styles.outsideReactionsContainer}>
+                      <ChatMessageReactions
+                        message={message}
+                        reactions={reactions}
+                      />
                     </View>
+                  )}
+                  {message.fromMe && !hasReactions && (
+                    <MessageStatus message={message} />
                   )}
                 </View>
               </View>
@@ -510,15 +511,11 @@ const useStyles = () => {
       flexDirection: "row",
       flexWrap: "wrap",
     },
-    statusContainer: {
-      marginLeft: "auto",
-    },
     linkToFrame: {
       fontSize: 12,
-      marginVertical: 7,
-      marginLeft: 6,
-      marginRight: "auto",
+      padding: 6,
       color: textSecondaryColor(colorScheme),
+      flexGrow: 1,
     },
     date: {
       flexBasis: "100%",
@@ -573,6 +570,21 @@ const useStyles = () => {
     avatarPlaceholder: {
       width: AvatarSizes.messageSender,
       height: AvatarSizes.messageSender,
+    },
+    outsideMetaContainer: {
+      marginTop: 4,
+      flexDirection: "row",
+      justifyContent: "flex-start",
+      columnGap: 8,
+      width: "100%",
+    },
+    reactionsContainer: {
+      marginHorizontal: 8,
+      marginBottom: 8,
+    },
+    outsideReactionsContainer: {
+      flexShrink: 1,
+      flexGrow: 1,
     },
   });
 };
