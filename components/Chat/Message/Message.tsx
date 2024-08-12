@@ -583,8 +583,7 @@ const useStyles = () => {
       marginBottom: 8,
     },
     outsideReactionsContainer: {
-      flexShrink: 1,
-      flexGrow: 1,
+      flex: 1,
     },
   });
 };
