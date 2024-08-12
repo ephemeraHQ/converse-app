@@ -1,4 +1,5 @@
 import { setGroupDescriptionQueryData } from "@queries/useGroupDescriptionQuery";
+import { converseEventEmitter } from "@utils/events";
 import { getGroupIdFromTopic } from "@utils/groupUtils/groupId";
 import logger from "@utils/logger";
 import {
@@ -252,6 +253,7 @@ export const streamGroups = async (account: string) => {
     async (group) => {
       logger.info("GOT A NEW GROUP CONVO");
       handleNewConversation(client, group);
+      converseEventEmitter.emit("newGroup", group);
       // Let's reset stream if new group
       // @todo => it should be part of the SDK
       // streamAllGroupMessages(account);

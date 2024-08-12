@@ -23,7 +23,8 @@ export default function GroupInviteNav() {
       name="GroupInvite"
       component={GroupInviteScreen}
       options={({ route }) => ({
-        headerTitle: "Loading...",
+        headerShadowVisible: false,
+        headerTitle: "",
         headerTintColor:
           Platform.OS === "android" || Platform.OS === "web"
             ? textSecondaryColor(colorScheme)

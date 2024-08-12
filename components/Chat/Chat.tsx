@@ -317,11 +317,7 @@ export default function Chat() {
   >();
 
   const scrollToMessage = useCallback(
-    (data: {
-      messageId: string | undefined;
-      index: number | undefined;
-      animated: boolean | undefined;
-    }) => {
+    (data: { messageId?: string; index?: number; animated?: boolean }) => {
       let index = data.index;
       if (index === undefined && data.messageId) {
         index = listArray.findIndex((m) => m.id === data.messageId);

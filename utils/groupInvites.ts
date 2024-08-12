@@ -2,8 +2,8 @@ import mmkv from "./mmkv";
 
 const GROUP_INVITE_LINKS_STORAGE_KEY_PREFIX = "group-invites-link-";
 
-export const createGroupInviteLinkStoragekey = (topic: string) => {
-  return `${GROUP_INVITE_LINKS_STORAGE_KEY_PREFIX}${topic}`;
+export const createGroupInviteLinkStoragekey = (inviteId: string) => {
+  return `${GROUP_INVITE_LINKS_STORAGE_KEY_PREFIX}${inviteId}`;
 };
 
 export const saveGroupInviteLink = (inviteId: string, groupId: string) => {

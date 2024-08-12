@@ -162,7 +162,7 @@ export default function TransactionPreview({ message }: Props) {
   ]);
 
   useEffect(() => {
-    const eventHandler = `showActionSheetForTxRef-${message.id}`;
+    const eventHandler = `showActionSheetForTxRef-${message.id}` as const;
     converseEventEmitter.on(eventHandler, showTransactionActionSheet);
     return () => {
       converseEventEmitter.off(eventHandler, showTransactionActionSheet);
