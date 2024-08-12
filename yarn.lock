@@ -9583,7 +9583,7 @@
 
 "@xmtp/react-native-sdk@^2.4.1":
   version "2.4.1"
-  resolved "https://registry.npmjs.org/@xmtp/react-native-sdk/-/react-native-sdk-2.4.1.tgz#862884a1dba377ef867526ccd9e9a1d1dc98154a"
+  resolved "https://registry.yarnpkg.com/@xmtp/react-native-sdk/-/react-native-sdk-2.4.1.tgz#862884a1dba377ef867526ccd9e9a1d1dc98154a"
   integrity sha512-yVnHsAUb58ex/ypADWqwGnPYi1Xsk98UUUNpFCd/8+/kym1mEghSz8subBt3/ZjYOx49ie0wggRsVlY7jDq85g==
   dependencies:
     "@ethersproject/bytes" "^5.7.0"
