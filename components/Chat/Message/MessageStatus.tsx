@@ -1,5 +1,5 @@
 import { textSecondaryColor } from "@styles/colors";
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { StyleSheet, useColorScheme, View } from "react-native";
 import Animated, {
   useSharedValue,
@@ -32,12 +32,13 @@ export default function MessageStatus({ message }: Props) {
     message.status === "sent" || message.status === "delivered";
   const isLatestSettledFromMe = message.isLatestSettledFromMe;
 
+  const [renderText, setRenderText] = useState(false);
   const opacity = useSharedValue(message.isLatestSettledFromMe ? 1 : 0);
   const height = useSharedValue(message.isLatestSettledFromMe ? 22 : 0);
   const scale = useSharedValue(message.isLatestSettledFromMe ? 1 : 0);
 
   const timingConfig = {
-    duration: 100,
+    duration: 200,
     easing: Easing.inOut(Easing.quad),
   };
 
@@ -61,17 +62,20 @@ export default function MessageStatus({ message }: Props) {
             opacity.value = withTiming(1, timingConfig);
             height.value = withTiming(22, timingConfig);
             scale.value = withTiming(1, timingConfig);
+            setRenderText(true);
           } else if (isSentOrDelivered && !isLatestSettledFromMe) {
             opacity.value = withTiming(0, timingConfig);
             height.value = withTiming(0, timingConfig);
             scale.value = withTiming(0, timingConfig);
+            setTimeout(() => setRenderText(false), timingConfig.duration);
           } else if (isLatestSettledFromMe) {
             opacity.value = 1;
             height.value = 22;
             scale.value = 1;
+            setRenderText(true);
           }
         });
-      }, 200);
+      }, 100);
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [isLatestSettledFromMe, isSentOrDelivered]
@@ -84,7 +88,7 @@ export default function MessageStatus({ message }: Props) {
       <Animated.View style={[styles.container, animatedStyle]}>
         <View style={styles.contentContainer}>
           <Animated.Text style={styles.statusText}>
-            {statusMapping[message.status]}
+            {renderText && statusMapping[message.status]}
           </Animated.Text>
         </View>
       </Animated.View>
@@ -104,7 +108,6 @@ const useStyles = () => {
     statusText: {
       fontSize: 12,
       color: textSecondaryColor(colorScheme),
-      marginRight: 3,
     },
   });
 };

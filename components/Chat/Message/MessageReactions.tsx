@@ -2,7 +2,7 @@ import {
   actionSheetColors,
   inversePrimaryColor,
   textPrimaryColor,
-  backgroundColor,
+  tertiaryBackgroundColor,
   primaryColor,
 } from "@styles/colors";
 import { useCallback, useMemo } from "react";
@@ -20,7 +20,6 @@ import {
   useCurrentAccount,
   useProfilesStore,
 } from "../../../data/store/accountsStore";
-import { isAttachmentMessage } from "../../../utils/attachment/helpers";
 import { useConversationContext } from "../../../utils/conversation";
 import { getPreferredName, getPreferredAvatar } from "../../../utils/profile";
 import {
@@ -32,6 +31,7 @@ import {
 import { showActionSheetWithOptions } from "../../StateHandlers/ActionSheetStateHandler";
 
 const MAX_REACTORS_TO_SHOW = 3;
+const REACTOR_OFFSET = 10;
 
 type Props = {
   message: MessageToDisplay;
@@ -127,14 +127,12 @@ export default function ChatMessageReactions({ message, reactions }: Props) {
       };
     });
     methods["Back"] = () => {};
-    const isAttachment = isAttachmentMessage(message.contentType);
 
     const options = Object.keys(methods);
 
     showActionSheetWithOptions(
       {
         options,
-        title: isAttachment ? "📎 Media" : message.content,
         cancelButtonIndex: options.indexOf("Back"),
         ...actionSheetColors(colorScheme),
       },
@@ -157,12 +155,14 @@ export default function ChatMessageReactions({ message, reactions }: Props) {
   if (reactionsList.length === 0) return null;
 
   return (
-    <View style={styles.reactionsWrapper}>
+    <View
+      style={[
+        styles.reactionsWrapper,
+        message.fromMe && { justifyContent: "flex-end" },
+      ]}
+    >
       {reactionCounts.map((reaction) => {
         const reactorCount = reaction.reactors.length;
-        const containerWidth =
-          reactorCount > MAX_REACTORS_TO_SHOW ? 20 : reactorCount * 15 + 5;
-
         return (
           <TouchableOpacity
             key={reaction.content}
@@ -171,30 +171,45 @@ export default function ChatMessageReactions({ message, reactions }: Props) {
             style={[
               styles.reactionButton,
               reaction.userReacted
-                ? styles.myReactionButton
+                ? message.fromMe
+                  ? styles.myReactionToMyMessageButton
+                  : styles.myReactionToOtherMessageButton
                 : styles.otherReactionButton,
             ]}
           >
             <Text style={styles.emoji}>{reaction.content}</Text>
-            <View style={[styles.reactorContainer, { width: containerWidth }]}>
-              {reaction.reactors &&
-              reaction.reactors.length <= MAX_REACTORS_TO_SHOW ? (
-                reaction.reactors.slice(0, 3).map((reactor, index) => (
-                  <Image
-                    key={reactor}
-                    source={{
-                      uri: getPreferredAvatar(profiles[reactor]?.socials),
-                    }}
-                    style={[
-                      styles.profileImage,
-                      reaction.userReacted
-                        ? { borderColor: primaryColor(colorScheme) }
-                        : {},
-                      { right: index * 13 },
-                    ]}
-                  />
-                ))
-              ) : (
+            {reactorCount <= MAX_REACTORS_TO_SHOW ? (
+              <View
+                style={[
+                  styles.reactorContainer,
+                  { marginRight: (reactorCount - 1) * -REACTOR_OFFSET },
+                ]}
+              >
+                {reaction.reactors
+                  .slice(0, MAX_REACTORS_TO_SHOW)
+                  .map((reactor, index) => (
+                    <Image
+                      key={reactor}
+                      source={{
+                        uri: getPreferredAvatar(profiles[reactor]?.socials),
+                      }}
+                      style={[
+                        styles.profileImage,
+                        {
+                          left: index * -REACTOR_OFFSET,
+                          zIndex: MAX_REACTORS_TO_SHOW - (index + 1),
+                        },
+                        reaction.userReacted
+                          ? message.fromMe
+                            ? styles.myReactionToMyMessageProfileImage
+                            : styles.myReactionToOtherMessageProfileImage
+                          : styles.otherProfileImage,
+                      ]}
+                    />
+                  ))}
+              </View>
+            ) : (
+              <View style={styles.reactorContainer}>
                 <Text
                   style={[
                     styles.reactorCount,
@@ -203,10 +218,10 @@ export default function ChatMessageReactions({ message, reactions }: Props) {
                       : {},
                   ]}
                 >
-                  +{reaction.reactors.length}
+                  {reactorCount}
                 </Text>
-              )}
-            </View>
+              </View>
+            )}
           </TouchableOpacity>
         );
       })}
@@ -220,45 +235,56 @@ const useStyles = () => {
     reactionsWrapper: {
       flexDirection: "row",
       flexWrap: "wrap",
-      marginHorizontal: 10,
+      rowGap: 4,
+      columnGap: 5,
     },
     reactionButton: {
       flexDirection: "row",
       alignItems: "center",
-      marginRight: 8,
-      marginBottom: 8,
-      paddingHorizontal: 8,
-      paddingVertical: 4,
+      paddingHorizontal: 4,
+      paddingVertical: 2,
       borderRadius: 16,
+      borderWidth: 0.25,
     },
-    myReactionButton: {
-      backgroundColor: primaryColor(colorScheme),
-      borderWidth: 0.5,
-      borderColor: inversePrimaryColor(colorScheme),
+    profileImage: {
+      width: 22,
+      height: 22,
+      borderRadius: 22,
+      borderWidth: 1,
     },
     otherReactionButton: {
-      backgroundColor: backgroundColor(colorScheme),
+      backgroundColor: tertiaryBackgroundColor(colorScheme),
+      borderColor: tertiaryBackgroundColor(colorScheme),
+    },
+    otherProfileImage: {
+      borderColor: tertiaryBackgroundColor(colorScheme),
+    },
+    myReactionToOtherMessageButton: {
+      backgroundColor: primaryColor(colorScheme),
+      borderColor: primaryColor(colorScheme),
+    },
+    myReactionToOtherMessageProfileImage: {
+      borderColor: primaryColor(colorScheme),
+    },
+    myReactionToMyMessageButton: {
+      backgroundColor: primaryColor(colorScheme),
+      borderColor: tertiaryBackgroundColor(colorScheme),
+    },
+    myReactionToMyMessageProfileImage: {
+      borderColor: primaryColor(colorScheme),
     },
     emoji: {
-      fontSize: 18,
-      marginRight: 2,
+      fontSize: 14,
+      marginHorizontal: 2,
     },
     reactorContainer: {
       flexDirection: "row",
       alignItems: "center",
-      height: 20,
-      position: "relative",
-    },
-    profileImage: {
-      width: 20,
-      height: 20,
-      borderRadius: 10,
-      position: "absolute",
-      borderWidth: 0.5,
-      borderColor: inversePrimaryColor(colorScheme),
+      height: 22,
     },
     reactorCount: {
       fontSize: 12,
+      marginHorizontal: 2,
       color: textPrimaryColor(colorScheme),
     },
   });
