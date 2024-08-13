@@ -69,7 +69,7 @@ export function GroupConsentPopup() {
         ...actionSheetColors(colorScheme),
       },
       (selectedIndex?: number) => {
-        if (selectedIndex === 0 && conversation.peerAddress) {
+        if (selectedIndex === 0) {
           blockGroup({
             includeCreator: false,
             includeAddedBy: false,
@@ -78,7 +78,7 @@ export function GroupConsentPopup() {
         }
       }
     );
-  }, [blockGroup, colorScheme, conversation.peerAddress, navigation]);
+  }, [blockGroup, colorScheme, navigation]);
 
   const onAccept = useCallback(() => {
     allowGroup({
