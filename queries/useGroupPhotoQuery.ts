@@ -1,11 +1,17 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, UseQueryOptions } from "@tanstack/react-query";
 
 import { groupPhotoQueryKey } from "./QueryKeys";
 import { queryClient } from "./queryClient";
 import { useGroupQuery } from "./useGroupQuery";
 
-export const useGroupPhotoQuery = (account: string, topic: string) => {
-  const { data: group } = useGroupQuery(account, topic);
+export const useGroupPhotoQuery = (
+  account: string,
+  topic: string,
+  queryOptions?: Partial<
+    UseQueryOptions<string | undefined, Error, string | undefined>
+  >
+) => {
+  const { data: group, dataUpdatedAt } = useGroupQuery(account, topic);
   return useQuery({
     queryKey: groupPhotoQueryKey(account, topic),
     queryFn: async () => {
@@ -16,6 +22,8 @@ export const useGroupPhotoQuery = (account: string, topic: string) => {
     },
     enabled: !!group,
     initialData: group?.imageUrlSquare,
+    initialDataUpdatedAt: dataUpdatedAt,
+    ...queryOptions,
   });
 };
 

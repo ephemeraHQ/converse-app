@@ -60,8 +60,6 @@ export type XmtpGroupConversation = XmtpConversationShared & {
   isGroup: true;
   peerAddress?: undefined;
   groupMembers: string[];
-  groupAdmins: string[];
-  groupSuperAdmins: string[];
   groupPermissionLevel: "all_members" | "admin_only" | "custom_policy";
   groupName?: string;
   groupCreator?: string;

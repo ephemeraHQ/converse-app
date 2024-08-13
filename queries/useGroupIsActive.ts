@@ -5,7 +5,7 @@ import { queryClient } from "./queryClient";
 import { useGroupQuery } from "./useGroupQuery";
 
 export const useGroupIsActiveQuery = (account: string, topic: string) => {
-  const { data: group } = useGroupQuery(account, topic);
+  const { data: group, dataUpdatedAt } = useGroupQuery(account, topic);
   return useQuery({
     queryKey: groupIsActiveQueryKey(account, topic),
     queryFn: async () => {
@@ -16,6 +16,7 @@ export const useGroupIsActiveQuery = (account: string, topic: string) => {
     },
     enabled: !!group,
     initialData: group?.isGroupActive,
+    initialDataUpdatedAt: dataUpdatedAt,
   });
 };
 
