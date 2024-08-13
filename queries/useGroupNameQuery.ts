@@ -1,11 +1,17 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, UseQueryOptions } from "@tanstack/react-query";
 
 import { groupNameQueryKey } from "./QueryKeys";
 import { queryClient } from "./queryClient";
 import { useGroupQuery } from "./useGroupQuery";
 
-export const useGroupNameQuery = (account: string, topic: string) => {
-  const { data: group } = useGroupQuery(account, topic);
+export const useGroupNameQuery = (
+  account: string,
+  topic: string,
+  queryOptions?: Partial<
+    UseQueryOptions<string | undefined, Error, string | undefined>
+  >
+) => {
+  const { data: group, dataUpdatedAt } = useGroupQuery(account, topic);
   return useQuery({
     queryKey: groupNameQueryKey(account, topic),
     queryFn: async () => {
@@ -14,8 +20,10 @@ export const useGroupNameQuery = (account: string, topic: string) => {
       }
       return group.groupName();
     },
-    enabled: !!group,
+    enabled: !!group && !!account,
     initialData: group?.name,
+    initialDataUpdatedAt: dataUpdatedAt,
+    ...queryOptions,
   });
 };
 

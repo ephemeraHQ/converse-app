@@ -1,7 +1,8 @@
 import { showActionSheetWithOptions } from "@components/StateHandlers/ActionSheetStateHandler";
 import { useGroupConsent } from "@hooks/useGroupConsent";
 import { translate } from "@i18n/index";
-import { useGroupQuery } from "@queries/useGroupQuery";
+import { useGroupNameQuery } from "@queries/useGroupNameQuery";
+import { useGroupPhotoQuery } from "@queries/useGroupPhotoQuery";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { actionSheetColors } from "@styles/colors";
 import { saveTopicsData } from "@utils/api";
@@ -14,8 +15,6 @@ import {
   useCurrentAccount,
 } from "../../data/store/accountsStore";
 import { useSelect } from "../../data/store/storeHelpers";
-import { useGroupName } from "../../hooks/useGroupName";
-import { useGroupPhoto } from "../../hooks/useGroupPhoto";
 import { NavigationParamList } from "../../screens/Navigation/Navigation";
 import { ConversationWithLastMessagePreview } from "../../utils/conversation";
 import { conversationName } from "../../utils/str";
@@ -34,14 +33,17 @@ export const GroupConversationItem: FC<GroupConversationItemProps> = ({
   route,
   conversation,
 }) => {
+  const userAddress = useCurrentAccount() as string;
   const topic = conversation.topic;
   const lastMessagePreview = conversation.lastMessagePreview;
-  const { data: group } = useGroupQuery(currentAccount(), topic);
-  const { groupName } = useGroupName(topic);
-  const { groupPhoto } = useGroupPhoto(topic);
+  const { data: groupName } = useGroupNameQuery(userAddress, topic, {
+    refetchOnMount: false,
+  });
+  const { data: groupPhoto } = useGroupPhotoQuery(userAddress, topic, {
+    refetchOnMount: false,
+  });
   const { blockGroup } = useGroupConsent(topic);
   const colorScheme = useColorScheme();
-  const userAddress = useCurrentAccount() as string;
   const {
     initialLoadDoneOnce,
     openedConversationTopic,
@@ -64,7 +66,6 @@ export const GroupConversationItem: FC<GroupConversationItemProps> = ({
 
   const handleDelete = useCallback(
     (defaultAction: () => void) => {
-      if (!group) return;
       showActionSheetWithOptions(
         {
           options: [
@@ -115,7 +116,7 @@ export const GroupConversationItem: FC<GroupConversationItemProps> = ({
         }
       );
     },
-    [blockGroup, colorScheme, group, groupName, setTopicsData, topic]
+    [blockGroup, colorScheme, groupName, setTopicsData, topic]
   );
 
   return (
