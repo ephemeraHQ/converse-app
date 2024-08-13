@@ -26,7 +26,9 @@ import { refreshAllSpamScores } from "../../data/helpers/conversations/spamScore
 import { getChatStore } from "../../data/store/accountsStore";
 import { loadXmtpKey } from "../keychain/helpers";
 
-const instantiatingClientForAccount: { [account: string]: number } = {};
+const instantiatingClientForAccount: {
+  [account: string]: Promise<ConverseXmtpClientType | Client> | undefined;
+} = {};
 
 export const getXmtpClient = async (
   account: string
@@ -34,38 +36,40 @@ export const getXmtpClient = async (
   if (account && xmtpClientByAccount[account]) {
     return xmtpClientByAccount[account];
   }
-  const now = new Date().getTime();
-  // Avoid instantiating 2 clients for the same account
-  // which leads to buggy behaviour
-  if (instantiatingClientForAccount[account]) {
-    if (now - instantiatingClientForAccount[account] > 1000) {
-      logger.debug(`Client for ${account} already instantiating`);
-      instantiatingClientForAccount[account] = now;
-    }
+  // Return the existing instantiating promise to avoid race condition
+  const alreadyInstantiating = instantiatingClientForAccount[account];
+  if (alreadyInstantiating) {
+    return alreadyInstantiating;
+  }
+  // Avoid instantiating any 2 clients at the same time to avoid
+  // blocking the Expo Async Thread
+  if (Object.keys(instantiatingClientForAccount).length > 0) {
     await new Promise((r) => setTimeout(r, 200));
     return getXmtpClient(account);
   }
-  instantiatingClientForAccount[account] = now;
-  try {
-    logger.debug("loading base64 key");
-    const base64Key = await loadXmtpKey(account);
-    if (base64Key) {
-      logger.debug("get client from base64 key");
-      const client = await getXmtpClientFromBase64Key(base64Key);
-      logger.info(`[XmtpRN] Instantiated client for ${client.address}`);
-      getChatStore(account).getState().setLocalClientConnected(true);
-      getChatStore(account).getState().setErrored(false);
-      xmtpClientByAccount[client.address] = client;
+  instantiatingClientForAccount[account] = (async () => {
+    try {
+      logger.debug("[XmtpRN] Loading base64 key");
+      const base64Key = await loadXmtpKey(account);
+      if (base64Key) {
+        logger.debug("[XmtpRN] Getting client from base64 key");
+        const client = await getXmtpClientFromBase64Key(base64Key);
+        logger.info(`[XmtpRN] Instantiated client for ${client.address}`);
+        getChatStore(account).getState().setLocalClientConnected(true);
+        getChatStore(account).getState().setErrored(false);
+        xmtpClientByAccount[client.address] = client;
+        return client;
+      } else {
+        throw new Error(`[XmtpRN] No client found for ${account}`);
+      }
+    } catch (e: any) {
+      getChatStore(account).getState().setErrored(true);
+      throw e;
+    } finally {
       delete instantiatingClientForAccount[account];
-      return client;
     }
-  } catch (e: any) {
-    getChatStore(account).getState().setErrored(true);
-    delete instantiatingClientForAccount[account];
-    throw e;
-  }
-  delete instantiatingClientForAccount[account];
-  throw new Error(`[XmtpRN] No client found for ${account}`);
+  })();
+  return instantiatingClientForAccount[account];
 };
 
 const INITIAL_BACKOFF = 1000; // Initial backoff interval in ms
