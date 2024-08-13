@@ -31,8 +31,6 @@ struct SavedNotificationConversation: Codable {
   var account: String
   var isGroup: Bool = false
   var groupMembers: [String?]?
-  var groupAdmins: [String?]?
-  var groupSuperAdmins: [String?]?
   var groupPermissionLevel: String?
   var groupName: String?
   var spamScore: Double? {

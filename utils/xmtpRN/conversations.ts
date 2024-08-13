@@ -64,19 +64,11 @@ const protocolGroupToStateConversation = async (
 ): Promise<XmtpConversation> => {
   const groupMembers = await group.members();
   const groupMembersAddresses: string[] = [];
-  const groupAdmins: string[] = [];
-  const groupSuperAdmins: string[] = [];
   const groupAddedByInboxId = await group.addedByInboxId();
   let groupCreator: string | undefined;
   let groupAddedBy: string | undefined;
 
   groupMembers.forEach((m) => {
-    if (m.permissionLevel === "admin" || m.permissionLevel === "super_admin") {
-      groupAdmins.push(m.addresses[0]);
-    }
-    if (m.permissionLevel === "super_admin") {
-      groupSuperAdmins.push(m.addresses[0]);
-    }
     if (m.addresses[0]) {
       groupMembersAddresses.push(m.addresses[0]);
     }
@@ -100,8 +92,6 @@ const protocolGroupToStateConversation = async (
     pending: false,
     version: group.version,
     isGroup: true,
-    groupAdmins,
-    groupSuperAdmins,
     groupPermissionLevel: "custom_policy",
     groupName: group.name,
     groupCreator,

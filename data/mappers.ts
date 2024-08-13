@@ -82,7 +82,6 @@ export const xmtpConversationToDb = (
   isGroup: xmtpConversation.isGroup,
   isActive: xmtpConversation.isGroup ? !!xmtpConversation.isActive : true,
   groupMembers: xmtpConversation.groupMembers,
-  groupAdmins: xmtpConversation.groupAdmins,
   groupName: xmtpConversation.isGroup ? xmtpConversation.groupName : undefined,
   groupPermissionLevel: xmtpConversation.groupPermissionLevel,
   lastNotificationsSubscribedPeriod:
