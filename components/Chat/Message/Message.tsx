@@ -18,6 +18,7 @@ import {
   TouchableOpacity,
   View,
   useColorScheme,
+  DimensionValue,
 } from "react-native";
 import { Swipeable } from "react-native-gesture-handler";
 
@@ -182,6 +183,24 @@ function ChatMessage({ message, colorScheme, isGroup, isFrame }: Props) {
   const reactions = getMessageReactions(message);
   const showInBubble = !isGroupUpdated;
   const showAvatar = isGroup && !message.fromMe;
+  const showReactionsOutside = isAttachment || isFrame || isTransaction;
+
+  let messageMaxWidth: DimensionValue;
+  if (isDesktop) {
+    if (isAttachment) {
+      messageMaxWidth = 366;
+    } else {
+      messageMaxWidth = 588;
+    }
+  } else {
+    if (isAttachment) {
+      messageMaxWidth = "70%";
+    } else {
+      if (isFrame) {
+        messageMaxWidth = "100%";
+      } else messageMaxWidth = "85%";
+    }
+  }
 
   const showStatus =
     message.fromMe &&
@@ -201,8 +220,8 @@ function ChatMessage({ message, colorScheme, isGroup, isFrame }: Props) {
   const messageAttachment = useChatStore(
     (state) => state.messageAttachments[message.id] || null
   );
-  const attachmentStillLoading =
-    isAttachment && (!messageAttachment || messageAttachment.loading);
+
+  const hasReactions = Object.keys(reactions).length > 0;
 
   const swipeableRef = useRef<Swipeable | null>(null);
 
@@ -289,6 +308,7 @@ function ChatMessage({ message, colorScheme, isGroup, isFrame }: Props) {
                 style={{
                   alignSelf: message.fromMe ? "flex-end" : "flex-start",
                   alignItems: message.fromMe ? "flex-end" : "flex-start",
+                  maxWidth: messageMaxWidth,
                 }}
               >
                 <ChatMessageActions
@@ -341,18 +361,6 @@ function ChatMessage({ message, colorScheme, isGroup, isFrame }: Props) {
                       >
                         {messageContent}
                       </View>
-                      <View
-                        style={
-                          isAttachment || isFrame || isTransaction
-                            ? { position: "absolute", bottom: 0, zIndex: 1 }
-                            : undefined
-                        }
-                      >
-                        <ChatMessageReactions
-                          message={message}
-                          reactions={reactions}
-                        />
-                      </View>
                     </View>
                   ) : (
                     <View
@@ -363,44 +371,40 @@ function ChatMessage({ message, colorScheme, isGroup, isFrame }: Props) {
                           : undefined,
                       ]}
                     >
-                      <View style={{ zIndex: 0 }}>{messageContent}</View>
-                      <View
-                        style={
-                          isAttachment || isFrame || isTransaction
-                            ? { position: "absolute", bottom: 0, zIndex: 1 }
-                            : undefined
-                        }
-                      >
-                        <ChatMessageReactions
-                          message={message}
-                          reactions={reactions}
-                        />
-                      </View>
+                      <View>{messageContent}</View>
+                    </View>
+                  )}
+                  {hasReactions && !showReactionsOutside && (
+                    <View style={styles.reactionsContainer}>
+                      <ChatMessageReactions
+                        message={message}
+                        reactions={reactions}
+                      />
                     </View>
                   )}
                 </ChatMessageActions>
                 <View
-                  style={{
-                    flexDirection: "row",
-                    flexBasis: "100%",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                  }}
+                  style={showReactionsOutside && styles.outsideMetaContainer}
                 >
                   {isFrame && (
                     <TouchableOpacity
                       onPress={() => handleUrlPress(message.content)}
-                      style={{ flex: 1 }}
                     >
                       <Text style={styles.linkToFrame}>
                         {getUrlToRender(message.content)}
                       </Text>
                     </TouchableOpacity>
                   )}
-                  {message.fromMe && (
-                    <View style={styles.statusContainer}>
-                      <MessageStatus message={message} />
+                  {showReactionsOutside && (
+                    <View style={styles.outsideReactionsContainer}>
+                      <ChatMessageReactions
+                        message={message}
+                        reactions={reactions}
+                      />
                     </View>
+                  )}
+                  {message.fromMe && !hasReactions && (
+                    <MessageStatus message={message} />
                   )}
                 </View>
               </View>
@@ -507,15 +511,11 @@ const useStyles = () => {
       flexDirection: "row",
       flexWrap: "wrap",
     },
-    statusContainer: {
-      marginLeft: "auto",
-    },
     linkToFrame: {
       fontSize: 12,
-      marginVertical: 7,
-      marginLeft: 6,
-      marginRight: "auto",
+      padding: 6,
       color: textSecondaryColor(colorScheme),
+      flexGrow: 1,
     },
     date: {
       flexBasis: "100%",
@@ -534,8 +534,8 @@ const useStyles = () => {
       paddingHorizontal: 0,
     },
     messageContentContainer: {
-      paddingVertical: 8,
-      paddingHorizontal: 14,
+      paddingVertical: 6,
+      paddingHorizontal: 10,
     },
     messageText: {
       color: textPrimaryColor(colorScheme),
@@ -570,6 +570,20 @@ const useStyles = () => {
     avatarPlaceholder: {
       width: AvatarSizes.messageSender,
       height: AvatarSizes.messageSender,
+    },
+    outsideMetaContainer: {
+      marginTop: 4,
+      flexDirection: "row",
+      justifyContent: "flex-start",
+      columnGap: 8,
+      width: "100%",
+    },
+    reactionsContainer: {
+      marginHorizontal: 8,
+      marginBottom: 8,
+    },
+    outsideReactionsContainer: {
+      flex: 1,
     },
   });
 };

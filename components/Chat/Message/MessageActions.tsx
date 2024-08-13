@@ -10,7 +10,6 @@ import * as Haptics from "expo-haptics";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import {
   ColorSchemeName,
-  DimensionValue,
   Platform,
   StyleSheet,
   useColorScheme,
@@ -40,7 +39,6 @@ import { useFramesStore } from "../../../data/store/framesStore";
 import { ReanimatedTouchableOpacity } from "../../../utils/animations";
 import { isAttachmentMessage } from "../../../utils/attachment/helpers";
 import { useConversationContext } from "../../../utils/conversation";
-import { isDesktop } from "../../../utils/device";
 import { converseEventEmitter } from "../../../utils/events";
 import {
   MessageReaction,
@@ -77,23 +75,6 @@ export default function ChatMessageActions({
   const frames = useFramesStore().frames;
   const isFrame = !!frames[message.content.toLowerCase()];
   const styles = useStyles();
-
-  let messageMaxWidth: DimensionValue;
-  if (isDesktop) {
-    if (isAttachment) {
-      messageMaxWidth = 366;
-    } else {
-      messageMaxWidth = 588;
-    }
-  } else {
-    if (isAttachment) {
-      messageMaxWidth = "70%";
-    } else {
-      if (isFrame) {
-        messageMaxWidth = "100%";
-      } else messageMaxWidth = "85%";
-    }
-  }
 
   const [emojiPickerShown, setEmojiPickerShown] = useState(false);
 
@@ -391,7 +372,7 @@ export default function ChatMessageActions({
                   },
                 }),
                 {
-                  maxWidth: messageMaxWidth,
+                  // maxWidth: messageMaxWidth,
                 },
               ]}
               onPress={() => {
@@ -499,10 +480,9 @@ const useStyles = () => {
     messageBubble: {
       flexShrink: 1,
       flexGrow: 0,
-      minHeight: 36,
-      borderRadius: 18,
+      minHeight: 32,
+      borderRadius: 16,
     },
-
     messageBubbleMe: {
       marginLeft: "auto",
     },
