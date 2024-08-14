@@ -262,8 +262,7 @@ class PushNotificationsService : FirebaseMessagingService() {
                 val group = getGroup(xmtpClient, groupId)
                 if (group != null && apiURI != null) {
                     group.addMembers(listOf(notification.address))
-                    val test = "http://10.0.2.2:9875"
-                    putGroupInviteRequest(applicationContext, test, xmtpClient, notification.joinRequestId, "ACCEPTED" )
+                    putGroupInviteRequest(applicationContext, apiURI, xmtpClient, notification.joinRequestId, "ACCEPTED" )
                 }
 
 
