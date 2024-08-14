@@ -23,7 +23,7 @@ import ConversationListItem from "../ConversationListItem";
 interface GroupConversationItemProps
   extends NativeStackScreenProps<
     NavigationParamList,
-    "Chats" | "ShareFrame" | "ChatsRequests"
+    "Chats" | "ShareFrame" | "ChatsRequests" | "Blocked"
   > {
   conversation: ConversationWithLastMessagePreview;
 }
