@@ -325,11 +325,6 @@ export const conversationShouldBeDisplayed = (
   const isPending = !!conversation.pending;
   const isNotEmpty = conversation.messages.size > 0;
   const isDeleted = topicsData[conversation.topic]?.status === "deleted";
-  const groupId = getGroupIdFromTopic(conversation.topic);
-  const isBlocked = conversation.isGroup
-    ? // TODO: Add more conditions to filter out spam
-      groupStatus[groupId] === "denied"
-    : peersStatus[conversation.peerAddress.toLowerCase()] === "blocked";
   const isActive = conversation.isGroup ? conversation.isActive : true;
   const isV1 = conversation.version === "v1";
   const isForbidden = conversation.topic.includes("\x00"); // Forbidden character that breaks
@@ -339,7 +334,6 @@ export const conversationShouldBeDisplayed = (
   return (
     (!isPending || isNotEmpty) &&
     !isDeleted &&
-    !isBlocked &&
     !isV1 &&
     !isForbidden &&
     !isPinned &&
@@ -375,6 +369,23 @@ export const conversationShouldBeInInbox = (
   }
 };
 
+// Wether a conversation is blocked
+export const isConversationBlocked = (
+  conversation: ConversationWithLastMessagePreview,
+  peersStatus: PeersStatus,
+  groupStatus: GroupStatus
+) => {
+  if (conversation.isGroup) {
+    const groupId = getGroupIdFromTopic(conversation.topic);
+    const isGroupBlocked = groupStatus[groupId] === "denied";
+    return isGroupBlocked;
+  } else {
+    const isPeerBlocked =
+      peersStatus[conversation.peerAddress.toLowerCase()] === "blocked";
+    return isPeerBlocked;
+  }
+};
+
 export async function sortAndComputePreview(
   conversations: Record<string, XmtpConversation>,
   userAddress: string,
@@ -385,6 +396,7 @@ export async function sortAndComputePreview(
 ) {
   const conversationsRequests: ConversationWithLastMessagePreview[] = [];
   const conversationsInbox: ConversationWithLastMessagePreview[] = [];
+  const conversationsBlocked: ConversationWithLastMessagePreview[] = [];
   await Promise.all(
     Object.values(conversations).map(
       async (conversation: ConversationWithLastMessagePreview, i) => {
@@ -408,6 +420,10 @@ export async function sortAndComputePreview(
             conversationShouldBeInInbox(conversation, peersStatus, groupStatus)
           ) {
             conversationsInbox.push(conversation);
+          } else if (
+            isConversationBlocked(conversation, peersStatus, groupStatus)
+          ) {
+            conversationsBlocked.push(conversation);
           } else {
             conversationsRequests.push(conversation);
           }
@@ -417,10 +433,12 @@ export async function sortAndComputePreview(
   );
   conversationsRequests.sort(conversationsSortMethod);
   conversationsInbox.sort(conversationsSortMethod);
+  conversationsBlocked.sort(conversationsSortMethod);
 
   getChatStore(userAddress).getState().setSortedConversationsWithPreview({
     conversationsInbox,
     conversationsRequests,
+    conversationsBlocked,
   });
   setImmediate(() => {
     subscribeToNotifications(userAddress);
