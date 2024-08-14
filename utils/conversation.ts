@@ -323,9 +323,10 @@ export const conversationShouldBeDisplayed = (
   const isPending = !!conversation.pending;
   const isNotEmpty = conversation.messages.size > 0;
   const isDeleted = topicsData[conversation.topic]?.status === "deleted";
+  const groupId = getGroupIdFromTopic(conversation.topic);
   const isBlocked = conversation.isGroup
     ? // TODO: Add more conditions to filter out spam
-      groupsStatus[conversation.topic] === "denied"
+      groupsStatus[groupId] === "denied"
     : peersStatus[conversation.peerAddress.toLowerCase()] === "blocked";
   const isActive = conversation.isGroup ? conversation.isActive : true;
   const isV1 = conversation.version === "v1";
