@@ -40,7 +40,7 @@ export const GroupConversationItem: FC<GroupConversationItemProps> = ({
   const { data: groupPhoto } = useGroupPhotoQuery(userAddress, topic, {
     refetchOnMount: false,
   });
-  const { blockGroup } = useGroupConsent(topic);
+  const { consent, blockGroup } = useGroupConsent(topic);
   const colorScheme = useColorScheme();
   const {
     initialLoadDoneOnce,
@@ -57,8 +57,11 @@ export const GroupConversationItem: FC<GroupConversationItemProps> = ({
   );
 
   const onLongPress = useCallback(() => {
-    setPinnedConversations([conversation]);
-  }, [setPinnedConversations, conversation]);
+    // Prevent this for blocked chats
+    if (consent !== "denied") {
+      setPinnedConversations([conversation]);
+    }
+  }, [setPinnedConversations, conversation, consent]);
 
   const handleDelete = useCallback(
     (defaultAction: () => void) => {
