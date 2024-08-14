@@ -103,6 +103,10 @@ export type TopicData = {
   timestamp?: number;
 };
 
+export type TopicsData = {
+  [topic: string]: TopicData | undefined;
+};
+
 export type MediaPreview = {
   mediaURI: string;
   status: "picked" | "uploading" | "uploaded" | "error" | "sending";
@@ -144,7 +148,7 @@ export type ChatStoreType = {
   resyncing: boolean;
   reconnecting: boolean;
   errored: boolean;
-  topicsData: { [topic: string]: TopicData | undefined };
+  topicsData: TopicsData;
   topicsDataFetchedOnce: boolean | undefined;
 
   conversationsSortedOnce: boolean;
