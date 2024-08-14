@@ -75,7 +75,7 @@ type ConversationListItemProps = {
   onRightActionPress?: (defaultAction: () => void) => void;
 } & NativeStackScreenProps<
   NavigationParamList,
-  "Chats" | "ShareFrame" | "ChatsRequests"
+  "Chats" | "ShareFrame" | "ChatsRequests" | "Blocked"
 >;
 
 const ConversationListItem = memo(function ConversationListItem({

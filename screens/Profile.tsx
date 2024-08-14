@@ -728,6 +728,30 @@ export default function ProfileScreen({
           <TableView
             items={[
               {
+                id: "blocked",
+                title: "View blocked chats",
+                action: () => {
+                  navigation.push("Blocked");
+                },
+                titleColor:
+                  Platform.OS === "android"
+                    ? undefined
+                    : primaryColor(colorScheme),
+                rightView: (
+                  <TableViewPicto
+                    symbol="chevron.right"
+                    color={
+                      Platform.OS === "android"
+                        ? primaryColor(colorScheme)
+                        : undefined
+                    }
+                    onPress={() => {
+                      navigation.navigate("ShareProfile");
+                    }}
+                  />
+                ),
+              },
+              {
                 id: "accounts",
                 title: "Change or add account",
                 action: () => {

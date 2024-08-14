@@ -5,6 +5,7 @@ import { Platform, useColorScheme } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 
 import AccountsNav from "./AccountsNav";
+import ConversationBlockedListNav from "./ConversationBlockedListNav";
 import ConversationListNav from "./ConversationListNav";
 import ConversationNav, {
   ConversationNavParams,
@@ -51,6 +52,7 @@ import { converseNavigations } from "../../utils/navigation";
 
 export type NavigationParamList = {
   Accounts: undefined;
+  Blocked: undefined;
   Chats: undefined;
   ChatsRequests: undefined;
   Conversation: ConversationNavParams;
@@ -147,6 +149,7 @@ export default function Navigation() {
             {AccountsNav()}
             {ConversationListNav()}
             {ConversationRequestsListNav()}
+            {ConversationBlockedListNav()}
             {ConversationNav()}
             {NewConversationNav()}
             {ConverseMatchMakerNav()}

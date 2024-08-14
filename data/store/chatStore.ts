@@ -95,6 +95,7 @@ export type XmtpMessage = XmtpProtocolMessage & {
 type ConversationsListItems = {
   conversationsInbox: ConversationWithLastMessagePreview[];
   conversationsRequests: ConversationWithLastMessagePreview[];
+  conversationsBlocked: ConversationWithLastMessagePreview[];
 };
 
 export type TopicData = {
@@ -270,6 +271,7 @@ export const initChatStore = (account: string) => {
           sortedConversationsWithPreview: {
             conversationsInbox: [],
             conversationsRequests: [],
+            conversationsBlocked: [],
           },
           setSortedConversationsWithPreview: (items) =>
             set(() => ({
