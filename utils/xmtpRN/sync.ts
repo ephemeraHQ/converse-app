@@ -69,7 +69,9 @@ export const getXmtpClient = async (
       delete instantiatingClientForAccount[account];
     }
   })();
-  return instantiatingClientForAccount[account];
+  return instantiatingClientForAccount[account] as Promise<
+    ConverseXmtpClientType | Client
+  >;
 };
 
 const INITIAL_BACKOFF = 1000; // Initial backoff interval in ms
