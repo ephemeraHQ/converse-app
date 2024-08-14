@@ -46,14 +46,12 @@ export const GroupConversationItem: FC<GroupConversationItemProps> = ({
     initialLoadDoneOnce,
     openedConversationTopic,
     topicsData,
-    setTopicsData,
     setPinnedConversations,
   } = useChatStore(
     useSelect([
       "initialLoadDoneOnce",
       "openedConversationTopic",
       "topicsData",
-      "setTopicsData",
       "setPinnedConversations",
     ])
   );
