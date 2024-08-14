@@ -1,6 +1,10 @@
 import GroupAvatar from "@components/GroupAvatar";
 import { useCurrentAccount, useProfilesStore } from "@data/store/accountsStore";
-import { messageBubbleColor, textSecondaryColor } from "@styles/colors";
+import {
+  backgroundColor,
+  messageBubbleColor,
+  textSecondaryColor,
+} from "@styles/colors";
 import { AvatarSizes, BorderRadius, Paddings } from "@styles/sizes";
 import { useConversationContext } from "@utils/conversation";
 import { getPreferredAvatar, getPreferredName } from "@utils/profile";
@@ -116,11 +120,15 @@ const EmojiItem: FC<{
   }, [alreadySelected, content, conversation, dismissMenu, message]);
 
   return (
-    <TouchableOpacity
-      style={alreadySelected ? styles.selectedEmojiText : undefined}
-      onPress={handlePress}
-    >
-      <Text style={styles.emojiText}>{content}</Text>
+    <TouchableOpacity onPress={handlePress}>
+      <Text
+        style={[
+          styles.emojiText,
+          alreadySelected ? styles.selectedEmojiText : undefined,
+        ]}
+      >
+        {content}
+      </Text>
     </TouchableOpacity>
   );
 };
@@ -194,7 +202,14 @@ export const MessageReactionsList: FC<MessageReactionsListProps> = ({
       ) : (
         <View style={styles.flex1} />
       )}
-      <View style={styles.emojiListContainer}>
+      <View
+        style={[
+          styles.emojiListContainer,
+          message.fromMe
+            ? styles.emojiListContainerFromMe
+            : styles.emojiListContainerFromOther,
+        ]}
+      >
         {emojiList.map((emoji) => (
           <EmojiItem
             key={emoji}
@@ -227,15 +242,15 @@ const useStyles = () => {
       flexGrow: 1,
     },
     emojiText: {
-      fontSize: 16,
-      lineHeight: 24,
-      marginHorizontal: Paddings.small,
-      marginVertical: Platform.OS === "ios" ? Paddings.small : 0,
-      marginBottom: Platform.OS === "android" ? Paddings.small : Paddings.small,
+      textAlignVertical: "center",
+      fontSize: 24,
+      marginHorizontal: 2,
+      padding: 2,
     },
     selectedEmojiText: {
       backgroundColor: "rgba(0, 0, 0, 0.1)",
-      borderRadius: BorderRadius.large,
+      borderRadius: 10,
+      overflow: "hidden",
     },
     container: {
       flexGrow: 1,
@@ -260,12 +275,21 @@ const useStyles = () => {
     },
     emojiListContainer: {
       height: 70,
-      width: 45 * emojiList.length,
       flexDirection: "row",
+      justifyContent: "space-around",
+      alignItems: "center",
       borderRadius: BorderRadius.large,
       padding: Paddings.default,
       marginVertical: Platform.OS === "android" ? 0 : Paddings.large,
-      backgroundColor: messageBubbleColor(colorScheme),
+      backgroundColor: backgroundColor(colorScheme),
+    },
+    emojiListContainerFromMe: {
+      alignSelf: "flex-end",
+      marginRight: SIDE_MARGIN * 2,
+    },
+    emojiListContainerFromOther: {
+      alignSelf: "flex-start",
+      marginLeft: SIDE_MARGIN * 2,
     },
   });
 };
