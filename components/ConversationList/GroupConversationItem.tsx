@@ -5,12 +5,10 @@ import { useGroupNameQuery } from "@queries/useGroupNameQuery";
 import { useGroupPhotoQuery } from "@queries/useGroupPhotoQuery";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { actionSheetColors } from "@styles/colors";
-import { saveTopicsData } from "@utils/api";
 import { FC, useCallback } from "react";
 import { useColorScheme } from "react-native";
 
 import {
-  currentAccount,
   useChatStore,
   useCurrentAccount,
 } from "../../data/store/accountsStore";
@@ -69,43 +67,22 @@ export const GroupConversationItem: FC<GroupConversationItemProps> = ({
       showActionSheetWithOptions(
         {
           options: [
-            translate("delete"),
-            translate("delete_and_block_inviter"),
+            translate("block"),
+            translate("block_chat_and_inviter"),
             translate("cancel"),
           ],
           cancelButtonIndex: 2,
           destructiveButtonIndex: [0, 1],
-          title: `Delete ${groupName}?`,
+          title: `Block ${groupName}?`,
           ...actionSheetColors(colorScheme),
         },
         async (selectedIndex?: number) => {
           if (selectedIndex === 0) {
-            saveTopicsData(currentAccount(), {
-              [topic]: {
-                status: "deleted",
-                timestamp: new Date().getTime(),
-              },
-            });
-            setTopicsData({
-              [topic]: {
-                status: "deleted",
-                timestamp: new Date().getTime(),
-              },
-            });
             blockGroup({
               includeAddedBy: false,
               includeCreator: false,
             });
           } else if (selectedIndex === 1) {
-            saveTopicsData(currentAccount(), {
-              [topic]: { status: "deleted" },
-            });
-            setTopicsData({
-              [topic]: {
-                status: "deleted",
-                timestamp: new Date().getTime(),
-              },
-            });
             blockGroup({
               includeAddedBy: true,
               includeCreator: false,
@@ -116,7 +93,7 @@ export const GroupConversationItem: FC<GroupConversationItemProps> = ({
         }
       );
     },
-    [blockGroup, colorScheme, groupName, setTopicsData, topic]
+    [blockGroup, colorScheme, groupName]
   );
 
   return (
