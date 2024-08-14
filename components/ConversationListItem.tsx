@@ -108,6 +108,7 @@ const ConversationListItem = memo(function ConversationListItem({
   }, []);
   const hasImagePreview = lastMessageImageUrl && lastMessagePreview;
   const showError = lastMessageFromMe && lastMessageStatus === "error";
+  const isBlockedChatView = route.name === "Blocked";
 
   const openConversation = useCallback(async () => {
     if (route.params?.frameURL) {
@@ -276,12 +277,29 @@ const ConversationListItem = memo(function ConversationListItem({
   ]);
 
   const renderRightActions = useCallback(() => {
-    return (
-      <RectButton style={styles.rightAction} onPress={handleRightPress}>
-        <Picto picto="trash" color="white" size={PictoSizes.swipableItem} />
-      </RectButton>
-    );
-  }, [styles.rightAction, handleRightPress]);
+    if (isBlockedChatView) {
+      return (
+        <RectButton style={styles.rightAction} onPress={handleRightPress}>
+          <Picto
+            picto="checkmark"
+            color="white"
+            size={PictoSizes.swipableItem}
+          />
+        </RectButton>
+      );
+    } else {
+      return (
+        <RectButton style={styles.rightActionRed} onPress={handleRightPress}>
+          <Picto picto="trash" color="white" size={PictoSizes.swipableItem} />
+        </RectButton>
+      );
+    }
+  }, [
+    styles.rightAction,
+    styles.rightActionRed,
+    handleRightPress,
+    isBlockedChatView,
+  ]);
 
   const renderLeftActions = useCallback(() => {
     return (
@@ -491,6 +509,12 @@ const getStyles = (colorScheme: ColorSchemeName) =>
       backgroundColor: "transparent",
     },
     rightAction: {
+      width: 100,
+      alignItems: "center",
+      backgroundColor: badgeColor(colorScheme),
+      justifyContent: "center",
+    },
+    rightActionRed: {
       width: 100,
       alignItems: "center",
       backgroundColor: dangerColor(colorScheme),

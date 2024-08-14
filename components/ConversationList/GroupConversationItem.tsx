@@ -40,7 +40,7 @@ export const GroupConversationItem: FC<GroupConversationItemProps> = ({
   const { data: groupPhoto } = useGroupPhotoQuery(userAddress, topic, {
     refetchOnMount: false,
   });
-  const { consent, blockGroup } = useGroupConsent(topic);
+  const { consent, blockGroup, allowGroup } = useGroupConsent(topic);
   const colorScheme = useColorScheme();
   const {
     initialLoadDoneOnce,
@@ -65,36 +65,67 @@ export const GroupConversationItem: FC<GroupConversationItemProps> = ({
 
   const handleDelete = useCallback(
     (defaultAction: () => void) => {
-      showActionSheetWithOptions(
-        {
-          options: [
-            translate("block"),
-            translate("block_chat_and_inviter"),
-            translate("cancel"),
-          ],
-          cancelButtonIndex: 2,
-          destructiveButtonIndex: [0, 1],
-          title: `Block ${groupName}?`,
-          ...actionSheetColors(colorScheme),
-        },
-        async (selectedIndex?: number) => {
-          if (selectedIndex === 0) {
-            blockGroup({
-              includeAddedBy: false,
-              includeCreator: false,
-            });
-          } else if (selectedIndex === 1) {
-            blockGroup({
-              includeAddedBy: true,
-              includeCreator: false,
-            });
-          } else {
-            defaultAction();
+      if (consent === "denied") {
+        showActionSheetWithOptions(
+          {
+            options: [
+              translate("accept"),
+              translate("accept_chat_and_inviter"),
+              translate("cancel"),
+            ],
+            cancelButtonIndex: 2,
+            destructiveButtonIndex: [0, 1],
+            title: `Allow ${groupName}?`,
+            ...actionSheetColors(colorScheme),
+          },
+          async (selectedIndex?: number) => {
+            if (selectedIndex === 0) {
+              allowGroup({
+                includeAddedBy: false,
+                includeCreator: false,
+              });
+            } else if (selectedIndex === 1) {
+              allowGroup({
+                includeAddedBy: true,
+                includeCreator: false,
+              });
+            } else {
+              defaultAction();
+            }
           }
-        }
-      );
+        );
+      } else {
+        showActionSheetWithOptions(
+          {
+            options: [
+              translate("block"),
+              translate("block_chat_and_inviter"),
+              translate("cancel"),
+            ],
+            cancelButtonIndex: 2,
+            destructiveButtonIndex: [0, 1],
+            title: `Block ${groupName}?`,
+            ...actionSheetColors(colorScheme),
+          },
+          async (selectedIndex?: number) => {
+            if (selectedIndex === 0) {
+              blockGroup({
+                includeAddedBy: false,
+                includeCreator: false,
+              });
+            } else if (selectedIndex === 1) {
+              blockGroup({
+                includeAddedBy: true,
+                includeCreator: false,
+              });
+            } else {
+              defaultAction();
+            }
+          }
+        );
+      }
     },
-    [blockGroup, colorScheme, groupName]
+    [allowGroup, blockGroup, consent, colorScheme, groupName]
   );
 
   return (
