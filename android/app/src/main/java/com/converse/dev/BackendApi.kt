@@ -55,8 +55,7 @@ private suspend fun makePutRequest(appContext: Context, apiURI: String, address:
 
 suspend fun putGroupInviteRequest(appContext: Context, apiURI: String, xmtpClient: Client, joinRequestId: String, status: String) {
     val groupInviteEndpoint = "$apiURI/api/groupJoinRequest/$joinRequestId"
-    val test = xmtpClient.keys.identityKey
-    val privateKey = PrivateKeyBuilder.buildFromSignedPrivateKey(test)
+    val privateKey = PrivateKeyBuilder.buildFromSignedPrivateKey(xmtpClient.keys.identityKey)
     val signature = Base64.encodeToString(PrivateKeyBuilder(privateKey).sign("XMTP_IDENTITY".toByteArray()).toByteArray(), NO_WRAP)
     val address = xmtpClient.address
     val body = JSONObject().apply {
