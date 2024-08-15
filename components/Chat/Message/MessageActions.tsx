@@ -1,20 +1,19 @@
-import Clipboard from "@react-native-clipboard/clipboard";
+import { MessageContextMenuWrapperIOS } from "@components/MessageContextMenuWrappers/MessageContextMenuWrapperiOS";
+import { useSelect } from "@data/store/storeHelpers";
 import {
-  actionSheetColors,
   messageBubbleColor,
   messageHighlightedBubbleColor,
   myMessageBubbleColor,
   myMessageHighlightedBubbleColor,
 } from "@styles/colors";
-import * as Haptics from "expo-haptics";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import {
   ColorSchemeName,
   Platform,
   StyleSheet,
   useColorScheme,
+  View,
 } from "react-native";
-import ContextMenu from "react-native-context-menu-view";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import Animated, {
   AnimatedStyle,
@@ -29,10 +28,7 @@ import Animated, {
 
 import { MessageToDisplay } from "./Message";
 import MessageTail from "./MessageTail";
-import {
-  useCurrentAccount,
-  useSettingsStore,
-} from "../../../data/store/accountsStore";
+import { useCurrentAccount } from "../../../data/store/accountsStore";
 import { useAppStore } from "../../../data/store/appStore";
 import { XmtpConversation } from "../../../data/store/chatStore";
 import { useFramesStore } from "../../../data/store/framesStore";
@@ -49,7 +45,6 @@ import {
 import { UUID_REGEX } from "../../../utils/regex";
 import { isTransactionMessage } from "../../../utils/transaction";
 import EmojiPicker from "../../../vendor/rn-emoji-keyboard";
-import { showActionSheetWithOptions } from "../../StateHandlers/ActionSheetStateHandler";
 
 type Props = {
   children: React.ReactNode;
@@ -71,69 +66,16 @@ export default function ChatMessageActions({
   const isTransaction = isTransactionMessage(message.contentType);
   const colorScheme = useColorScheme();
   const userAddress = useCurrentAccount() as string;
-  const setPeersStatus = useSettingsStore((s) => s.setPeersStatus);
   const frames = useFramesStore().frames;
   const isFrame = !!frames[message.content.toLowerCase()];
   const styles = useStyles();
-
+  const { setContextMenuShown } = useAppStore(
+    useSelect(["setContextMenuShown"])
+  );
   const [emojiPickerShown, setEmojiPickerShown] = useState(false);
-
-  const showReactionModal = useCallback(() => {
-    setEmojiPickerShown(true);
-  }, []);
-
-  const triggerReplyToMessage = useCallback(() => {
-    converseEventEmitter.emit("triggerReplyToMessage", message);
-  }, [message]);
 
   const canAddReaction =
     message.status !== "sending" && message.status !== "error";
-
-  const showMessageActionSheet = useCallback(() => {
-    const methods: any = {};
-    if (canAddReaction) {
-      methods["Add a reaction"] = showReactionModal;
-    }
-    methods["Reply"] = triggerReplyToMessage;
-    if (!isAttachment && !isTransaction) {
-      methods["Copy message"] = message.content
-        ? () => Clipboard.setString(message.content)
-        : () => Clipboard.setString(message.contentFallback!);
-    }
-
-    methods.Cancel = () => {};
-
-    const options = Object.keys(methods);
-
-    showActionSheetWithOptions(
-      {
-        options,
-        title: isTransaction
-          ? "💸 Transaction"
-          : isAttachment
-          ? "📎 Media"
-          : message.content,
-        cancelButtonIndex: options.indexOf("Cancel"),
-        ...actionSheetColors(colorScheme),
-      },
-      (selectedIndex?: number) => {
-        if (selectedIndex === undefined) return;
-        const method = (methods as any)[options[selectedIndex]];
-        if (method) {
-          method();
-        }
-      }
-    );
-  }, [
-    canAddReaction,
-    isAttachment,
-    isTransaction,
-    message.content,
-    message.contentFallback,
-    colorScheme,
-    showReactionModal,
-    triggerReplyToMessage,
-  ]);
 
   const doubleTapGesture = useMemo(
     () =>
@@ -146,6 +88,26 @@ export default function ChatMessageActions({
         .runOnJS(true),
     [canAddReaction, isAttachment, conversation, message]
   );
+
+  const longPressGesture = useMemo(() => {
+    return Gesture.LongPress()
+      .onStart(() => {
+        converseEventEmitter.emit("scrollChatToMessage", {
+          messageId: message.id,
+          animated: true,
+        });
+        setContextMenuShown(message.id);
+      })
+      .runOnJS(true);
+  }, [message.id, setContextMenuShown]);
+
+  const composed = useMemo(() => {
+    // iOS Context Menu will handle the long press itself
+    if (Platform.OS === "ios") {
+      return Gesture.Simultaneous(doubleTapGesture);
+    }
+    return Gesture.Simultaneous(doubleTapGesture, longPressGesture);
+  }, [doubleTapGesture, longPressGesture]);
 
   const [selectedEmojis, setSelectedEmojis] = useState<string[]>([]);
   useEffect(() => {
@@ -232,43 +194,6 @@ export default function ChatMessageActions({
     };
   }, [highlightMessage]);
 
-  const contextMenuItems = useMemo(() => {
-    const items = [];
-
-    if (canAddReaction) {
-      items.push({ title: "Add a reaction", systemIcon: "smiley" });
-    }
-    items.push({ title: "Reply", systemIcon: "arrowshape.turn.up.left" });
-    if (!isAttachment && !isTransaction) {
-      items.push({ title: "Copy message", systemIcon: "doc.on.doc" });
-    }
-
-    return items;
-  }, [canAddReaction, isAttachment, isTransaction]);
-
-  const handleContextMenuAction = useCallback(
-    (event: { nativeEvent: { index: number } }) => {
-      const { index } = event.nativeEvent;
-      switch (contextMenuItems[index].title) {
-        case "Add a reaction":
-          showReactionModal();
-          break;
-        case "Reply":
-          triggerReplyToMessage();
-          break;
-        case "Copy message":
-          if (message.content) {
-            Clipboard.setString(message.content);
-          } else if (message.contentFallback) {
-            Clipboard.setString(message.contentFallback);
-          }
-          break;
-      }
-      useAppStore.getState().setContextMenuShown(false);
-    },
-    [contextMenuItems, showReactionModal, triggerReplyToMessage, message]
-  );
-
   // Entrance animation for new messages. For sent messages,
   // we filter on UUIDs to avoid repeating the animation
   // when the message is received from the stream.
@@ -322,7 +247,6 @@ export default function ChatMessageActions({
       transform: [{ scale: scale.value }, { translateY: translateY.value }],
     };
   });
-
   // We use a mix of Gesture Detector AND TouchableOpacity
   // because GestureDetector is better for dual tap but if
   // we add the gesture detector for long press the long press
@@ -330,14 +254,8 @@ export default function ChatMessageActions({
 
   return (
     <>
-      <GestureDetector gesture={doubleTapGesture}>
-        <ContextMenu
-          actions={contextMenuItems}
-          onPress={handleContextMenuAction}
-          onCancel={() => useAppStore.getState().setContextMenuShown(false)}
-          previewBackgroundColor={initialBubbleBackgroundColor}
-          style={[{ width: "100%" }, { overflow: "visible" }]}
-        >
+      <GestureDetector gesture={composed}>
+        <View style={[{ width: "100%" }, { overflow: "visible" }]}>
           <Animated.View style={[animateInStyle, styles.animateInWrapper]}>
             <ReanimatedTouchableOpacity
               activeOpacity={1}
@@ -389,14 +307,23 @@ export default function ChatMessageActions({
                   );
                 }
               }}
-              onLongPress={() => {
-                if (Platform.OS !== "web") {
-                  Haptics.selectionAsync();
-                }
-                useAppStore.getState().setContextMenuShown(true);
-              }}
             >
-              {children}
+              <MessageContextMenuWrapperIOS
+                message={message}
+                reactions={reactions}
+                messageContent={
+                  <View
+                    style={{
+                      alignSelf: message.fromMe ? "flex-end" : "flex-start",
+                      alignItems: message.fromMe ? "flex-end" : "flex-start",
+                    }}
+                  >
+                    {children}
+                  </View>
+                }
+              >
+                {children}
+              </MessageContextMenuWrapperIOS>
             </ReanimatedTouchableOpacity>
             {!message.hasNextMessageInSeries &&
               !isFrame &&
@@ -417,7 +344,7 @@ export default function ChatMessageActions({
                 />
               )}
           </Animated.View>
-        </ContextMenu>
+        </View>
       </GestureDetector>
       {/* <View style={{width: 50, height: 20, backgroundColor: "red"}} />
       <GestureDetector gesture={composedGesture}>{children}</GestureDetector> */}
