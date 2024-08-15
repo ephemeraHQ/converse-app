@@ -21,8 +21,7 @@ func handleNotificationAsync(contentHandler: ((UNNotificationContent) -> Void), 
           let contentTopic = body["contentTopic"] as? String,
           let encodedMessage = body["message"] as? String,
           let account = body["account"] as? String else {
-      contentHandler(UNNotificationContent())
-      return
+       return await handleConverseNotification(contentHandler: contentHandler, bestAttemptContent: bestAttemptContent)
     }
     
     sentryAddBreadcrumb(message: "Received a notification for account \(account)")
@@ -124,6 +123,74 @@ func handleNotificationAsync(contentHandler: ((UNNotificationContent) -> Void), 
   }
 }
 
+func handleConverseNotification(contentHandler: ((UNNotificationContent) -> Void), bestAttemptContent: UNMutableNotificationContent?) async {
+  if var content = bestAttemptContent {
+    guard let data = content.userInfo as? [String: Any] else {
+      contentHandler(UNNotificationContent())
+      return
+    }
+    guard let type = data["type"] as? String else {
+      contentHandler(UNNotificationContent())
+      return
+    }
+    
+    // Handle the notification based on type with switch case
+    switch type {
+    case "group_join_request":
+      guard let groupInviteId = data["groupInviteId"] as? String,
+            let joinRequestId = data["joinRequestId"] as? String,
+            let address = data["address"] as? String,
+            let account = data["account"] as? String else {
+        contentHandler(UNNotificationContent())
+        return
+      }
+      await handleGroupJoinRequestNotification(
+        groupInviteId: groupInviteId,
+        joinRequestId: joinRequestId,
+        address: address,
+        account: account,
+        content: content
+      )
+      contentHandler(UNNotificationContent())
+      break
+    default:
+      contentHandler(UNNotificationContent())
+      return
+    }
+    
+  }
+  
+  func handleGroupJoinRequestNotification(groupInviteId: String, joinRequestId: String, address: String, account: String, content: UNMutableNotificationContent) async {
+    do {
+      
+      let mmkv = getMmkv()
+      if let xmtpClient = await getXmtpClient(account: account){
+        guard let groupId = mmkv?.string(forKey: "group-invites-link-\(groupInviteId)") else {
+          // Don't handle this as it's stored on a different device
+          return
+        }
+        var apiURI = mmkv?.string(forKey: "api-uri")
+        if (apiURI == nil) {
+          let sharedDefaults = try! SharedDefaults()
+          apiURI = sharedDefaults.string(forKey: "api-uri")?.replacingOccurrences(of: "\"", with: "")
+        }
+        
+        if let group = await getGroup(xmtpClient: xmtpClient, groupId: groupId), let apiURI = apiURI {
+          try await group.addMembers(addresses: [address])
+          let test = "http://localhost:9875"
+          await putGroupInviteRequest(apiURI: test, account: account, xmtpClient: xmtpClient, status: "ACCEPTED", joinRequestId: joinRequestId)
+        }
+      } else {
+        sentryTrackMessage(message: "No client found for account", extras: ["account": account])
+      }
+    } catch {
+      sentryTrackError(error: error, extras: ["message": "Could not get or sync group"])
+      
+    }
+    
+  }
+}
+
 class NotificationService: UNNotificationServiceExtension {
   var contentHandler: ((UNNotificationContent) -> Void)?
   var bestAttemptContent: UNMutableNotificationContent?
@@ -151,3 +218,4 @@ class NotificationService: UNNotificationServiceExtension {
     }
   }
 }
+
