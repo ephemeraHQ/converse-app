@@ -216,6 +216,7 @@ export type ChatStoreType = {
     [topic: string]: string;
   };
   setGroupInviteLink: (topic: string, inviteLink: string) => void;
+  deleteGroupInviteLink: (topic: string) => void;
 };
 
 const now = () => new Date().getTime();
@@ -798,6 +799,13 @@ export const initChatStore = (account: string) => {
             set((state) => {
               const newGroupInvites = { ...state.groupInviteLinks };
               newGroupInvites[topic] = inviteLink;
+              return { groupInviteLinks: newGroupInvites };
+            });
+          },
+          deleteGroupInviteLink(topic) {
+            set((state) => {
+              const newGroupInvites = { ...state.groupInviteLinks };
+              delete newGroupInvites[topic];
               return { groupInviteLinks: newGroupInvites };
             });
           },
