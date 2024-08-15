@@ -112,5 +112,10 @@
 	<array>
 		<string>INSendMessageIntent</string>
 	</array>
+	<key>OSLogPreferences</key>
+	<dict>
+        <key>Enable-Private-Data</key>
+        <true/>
+	</dict>
 </dict>
 </plist>
