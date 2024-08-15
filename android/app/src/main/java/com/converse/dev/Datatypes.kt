@@ -2,7 +2,7 @@ package com.converse.dev
 
 import kotlin.math.roundToInt
 
-class NotificationData(val message: String, val timestampNs: String, val contentTopic: String, val account: String)
+class NotificationData(val message: String, val timestampNs: String, val contentTopic: String, val account: String) : NotificationPayload()
 class ConversationDictData(val shortAddress: String? = null, val title: String? = null)
 class SavedNotificationMessage(val topic: String, val content: String, val senderAddress: String, val sent: Long, val id: String, val contentType: String, val account: String? = null, val referencedMessageId: String? = null)
 class ConversationContext(val conversationId: String, val metadata: Map<String, Any>)

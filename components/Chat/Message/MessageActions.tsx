@@ -297,7 +297,7 @@ export default function ChatMessageActions({
                 if (isAttachment) {
                   // Transfering attachment opening intent to component
                   converseEventEmitter.emit(
-                    `openAttachmentForMessage-${message.id}`
+                    `openAttachmentForMessage-${message.id}` as const
                   );
                 }
                 if (isTransaction) {
