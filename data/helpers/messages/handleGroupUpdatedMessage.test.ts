@@ -13,8 +13,16 @@ jest.mock("@utils/xmtpRN/conversations", () => ({
   refreshGroup: jest.fn().mockResolvedValue(""),
 }));
 
-jest.mock("@queries/useClient.ts", () => ({
-  useClient: jest.fn(),
+jest.mock("@utils/xmtpRN/sync", () => ({
+  getXmtpClient: jest.fn().mockResolvedValue({
+    conversations: {
+      streamAllMessages: jest.fn(() => {}),
+      cancelStreamAllMessages: jest.fn(() => {}),
+      cancelStream: jest.fn(() => {}),
+    },
+    exportKeyBundle: jest.fn(() => "keybundle"),
+    canMessage: jest.fn(() => true),
+  }),
 }));
 
 jest.mock("../../../utils/xmtpRN/client", () => ({

@@ -1,20 +1,28 @@
+import { QueryObserverOptions } from "@tanstack/react-query";
+
 import { currentAccount } from "../data/store/accountsStore";
 import { useAddToGroupMutation } from "../queries/useAddToGroupMutation";
-import { useGroupMembersQuery } from "../queries/useGroupMembersQuery";
+import {
+  GroupMembersSelectData,
+  useGroupMembersQuery,
+} from "../queries/useGroupMembersQuery";
 import { usePromoteToAdminMutation } from "../queries/usePromoteToAdminMutation";
 import { usePromoteToSuperAdminMutation } from "../queries/usePromoteToSuperAdminMutation";
 import { useRemoveFromGroupMutation } from "../queries/useRemoveFromGroupMutation";
 import { useRevokeAdminMutation } from "../queries/useRevokeAdminMutation";
 import { useRevokeSuperAdminMutation } from "../queries/useRevokeSuperAdminMutation";
 
-export const useGroupMembers = (topic: string) => {
+export const useGroupMembers = (
+  topic: string,
+  queryOptions?: Partial<QueryObserverOptions<GroupMembersSelectData>>
+) => {
   const account = currentAccount();
 
   const {
     data: members,
     isLoading,
     isError,
-  } = useGroupMembersQuery(account, topic);
+  } = useGroupMembersQuery(account, topic, queryOptions);
   const { mutateAsync: promoteToAdmin } = usePromoteToAdminMutation(
     account,
     topic
