@@ -33,8 +33,8 @@ type AppStoreType = {
   actionSheetShown: boolean;
   setActionSheetShown: (s: boolean) => void;
 
-  contextMenuShown: boolean;
-  setContextMenuShown: (s: boolean) => void;
+  contextMenuShownId: string | null;
+  setContextMenuShown: (messageId: string | null) => void;
 };
 
 export const useAppStore = create<AppStoreType>()(
@@ -72,8 +72,9 @@ export const useAppStore = create<AppStoreType>()(
       actionSheetShown: false,
       setActionSheetShown: (s: boolean) => set(() => ({ actionSheetShown: s })),
 
-      contextMenuShown: false,
-      setContextMenuShown: (s: boolean) => set(() => ({ contextMenuShown: s })),
+      contextMenuShownId: null,
+      setContextMenuShown: (messageId: string | null) =>
+        set(() => ({ contextMenuShownId: messageId })),
     }),
     {
       name: "store-app",
