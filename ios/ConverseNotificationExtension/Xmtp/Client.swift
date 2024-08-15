@@ -101,3 +101,30 @@ func subscribeToTopic(apiURI: String?, account: String, pushToken: String?, topi
     }
   }
 }
+
+func putGroupInviteRequest(apiURI: String?, account: String, xmtpClient: Client, status: String, joinRequestId: String) async {
+  if let apiURI = apiURI, !apiURI.isEmpty {
+    do {
+      
+      let joinRequestUri = "\(apiURI)/api/groupJoinRequest/\(joinRequestId)"
+      let privateKey = try PrivateKey(xmtpClient.keys.identityKey)
+      guard let digest = "XMTP_IDENTITY".data(using: .utf8) else {
+        return
+      }
+      let signature = try await privateKey.sign(digest).serializedData().base64EncodedString()
+      let headers: HTTPHeaders = [
+          "xmtp-api-signature": signature,
+          "xmtp-api-address": account
+      ]
+      let body: [String: Any] = [
+            "status": status,
+        ]
+      
+      AF.request(joinRequestUri, method: .put, parameters: body, encoding: JSONEncoding.default, headers: headers).response { response in
+          debugPrint("Response: \(response)")
+      }
+    } catch {
+      
+    }
+  }
+}
