@@ -9,7 +9,6 @@ import {
   GroupWithCodecsType,
 } from "../utils/xmtpRN/client";
 
-type GroupsRawData = GroupWithCodecsType[] | undefined;
 type GroupMembersSelectData = EntityObject<GroupWithCodecsType, string>;
 
 export const useGroupsQuery = (account: string) => {
@@ -35,10 +34,15 @@ export const invalidateGroupsQuery = (account: string) => {
   return queryClient.invalidateQueries({ queryKey: groupsQueryKey(account) });
 };
 
-const getGroupsQueryData = (account: string): GroupsRawData | undefined =>
+const getGroupsQueryData = (
+  account: string
+): GroupMembersSelectData | undefined =>
   queryClient.getQueryData(groupsQueryKey(account));
 
-const setGroupsQueryData = (account: string, groups: GroupsRawData) => {
+const setGroupsQueryData = (
+  account: string,
+  groups: GroupMembersSelectData
+) => {
   queryClient.setQueryData(groupsQueryKey(account), groups);
 };
 
@@ -46,9 +50,16 @@ export const addGroupToGroupsQuery = (
   account: string,
   group: GroupWithCodecsType
 ) => {
-  const previousGroups = getGroupsQueryData(account);
-  if (!previousGroups) {
+  const previousGroupsData = getGroupsQueryData(account);
+  if (!previousGroupsData) {
     return;
   }
-  setGroupsQueryData(account, [...previousGroups, group]);
+
+  setGroupsQueryData(account, {
+    byId: {
+      ...previousGroupsData.byId,
+      [group.topic]: group,
+    },
+    ids: [...previousGroupsData.ids, group.topic],
+  });
 };
