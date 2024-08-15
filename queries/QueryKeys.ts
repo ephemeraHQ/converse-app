@@ -1,6 +1,6 @@
 export enum QueryKeys {
   // Conversations
-  GROUPS = "groups",
+  GROUPS = "groupsv2", // When changing the shape of response, update the keys as persistance will break
   GROUP = "group",
 
   // Messages
@@ -9,7 +9,7 @@ export enum QueryKeys {
   GROUP_PENDING_MESSAGES = "groupPendingMessages",
 
   // Members
-  GROUP_MEMBERS = "groupMembers",
+  GROUP_MEMBERS = "groupMembersv2",
   ADDED_BY = "addedBy",
 
   // Mutable Metadata
