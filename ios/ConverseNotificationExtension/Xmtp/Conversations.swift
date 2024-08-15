@@ -158,8 +158,8 @@ func getGroupIdFromTopic(topic: String) -> String {
 func getGroup(xmtpClient: Client, groupId: String) async -> Group? {
     do {
       try await xmtpClient.conversations.sync()
-       let groups = try await xmtpClient.conversations.groups()
-      if let group = groups.first(where: { $0.id == groupId }) {
+      let foundGroup = try xmtpClient.findGroup(groupId: groupId)
+      if let group = foundGroup {
         try await group.sync()
         return group
       }
