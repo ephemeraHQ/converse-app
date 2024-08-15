@@ -4,7 +4,7 @@ on:
   schedule:
     # These will run only on the default branch
     - cron: "0 18 * * 2" # Tuesdays at 11 AM PT
-    - cron: "0 23 * * 4" # Thursdays at 4 PM PT
+    - cron: "0 21 * * 4" # Thursdays at 2 PM PT
   workflow_dispatch:
 
 jobs:
@@ -39,7 +39,7 @@ jobs:
           echo "EXPO_PUBLIC_EXPO_PROJECT_ID=${{ secrets.EXPO_PUBLIC_EXPO_PROJECT_ID }}" >> .env.production
           echo "EXPO_PUBLIC_PRIVY_APP_ID=${{ secrets.EXPO_PUBLIC_PRIVY_APP_ID }}" >> .env.production
           echo "EXPO_PUBLIC_EVM_RPC_ENDPOINT=${{ secrets.EXPO_PUBLIC_EVM_RPC_ENDPOINT }}" >> .env.production
-      
+
       - name: Update EAS config with env variables
         run: node scripts/build/eas.js --env production
 
@@ -82,7 +82,7 @@ jobs:
           echo "EXPO_PUBLIC_EXPO_PROJECT_ID=${{ secrets.EXPO_PUBLIC_EXPO_PROJECT_ID }}" >> .env.production
           echo "EXPO_PUBLIC_PRIVY_APP_ID=${{ secrets.EXPO_PUBLIC_PRIVY_APP_ID }}" >> .env.production
           echo "EXPO_PUBLIC_EVM_RPC_ENDPOINT=${{ secrets.EXPO_PUBLIC_EVM_RPC_ENDPOINT }}" >> .env.production
-      
+
       - name: Update EAS config with env variables
         run: node scripts/build/eas.js --env production
 
