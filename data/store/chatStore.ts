@@ -211,6 +211,11 @@ export type ChatStoreType = {
   messageAttachments: Record<string, Attachment>;
 
   setMessageAttachment: (messageId: string, attachment: Attachment) => void;
+
+  groupInviteLinks: {
+    [topic: string]: string;
+  };
+  setGroupInviteLink: (topic: string, inviteLink: string) => void;
 };
 
 const now = () => new Date().getTime();
@@ -788,6 +793,14 @@ export const initChatStore = (account: string) => {
               return { messageAttachments: newMessageAttachments };
             });
           },
+          groupInviteLinks: {},
+          setGroupInviteLink(topic, inviteLink) {
+            set((state) => {
+              const newGroupInvites = { ...state.groupInviteLinks };
+              newGroupInvites[topic] = inviteLink;
+              return { groupInviteLinks: newGroupInvites };
+            });
+          },
         }) as ChatStoreType,
       {
         name: `store-${account}-chat`, // Account-based storage so each account can have its own chat data
@@ -804,6 +817,7 @@ export const initChatStore = (account: string) => {
             lastSyncedTopics: state.lastSyncedTopics,
             topicsData: state.topicsData,
             pinnedConversations: state.pinnedConversations,
+            groupInviteLinks: state.groupInviteLinks,
           };
           // if (Platform.OS === "web" && state.conversations) {
           //   // On web, we persist convos without messages

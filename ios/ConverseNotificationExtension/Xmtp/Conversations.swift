@@ -154,3 +154,18 @@ func persistDecodedConversation(account: String, conversation: Conversation) {
 func getGroupIdFromTopic(topic: String) -> String {
     return topic.replacingOccurrences(of: "/xmtp/mls/1/g-", with: "").replacingOccurrences(of: "/proto", with: "")
 }
+
+func getGroup(xmtpClient: Client, groupId: String) async -> Group? {
+    do {
+      try await xmtpClient.conversations.sync()
+      let foundGroup = try xmtpClient.findGroup(groupId: groupId)
+      if let group = foundGroup {
+        try await group.sync()
+        return group
+      }
+
+    } catch {
+      sentryTrackError(error: error, extras: ["message": "Could not get or sync group"])
+    }
+  return nil
+}

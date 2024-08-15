@@ -18,6 +18,7 @@ import Edit from "@material-symbols/svg-400/outlined/edit.svg";
 import Exclamation from "@material-symbols/svg-400/outlined/exclamation.svg";
 import ExpandMore from "@material-symbols/svg-400/outlined/expand_more.svg";
 import Group from "@material-symbols/svg-400/outlined/group.svg";
+import GroupAdd from "@material-symbols/svg-400/outlined/group_add-fill.svg";
 import Image from "@material-symbols/svg-400/outlined/image.svg";
 import Info from "@material-symbols/svg-400/outlined/info.svg";
 import IosShare from "@material-symbols/svg-400/outlined/ios_share.svg";
@@ -102,6 +103,7 @@ const pictoMapping: {
   "info.circle": Info,
   "person.2": Group,
   "arrowshape.turn.up.left": Reply,
+  "person.crop.circle.badge.plus": GroupAdd,
 };
 
 export default function Picto({

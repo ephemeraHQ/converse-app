@@ -26,6 +26,11 @@ export enum QueryKeys {
 
   // Group info
   GROUP_ACTIVE = "groupActive",
+
+  // Group Invites
+  GROUP_INVITE = "groupInvite",
+  GROUP_JOIN_REQUEST = "groupJoinRequest",
+  PENDING_JOIN_REQUESTS = "pendingJoinRequests",
 }
 
 export const groupsQueryKey = (account: string) => [QueryKeys.GROUPS, account];
@@ -105,4 +110,20 @@ export const groupIsActiveQueryKey = (account: string, topic: string) => [
   QueryKeys.GROUP_ACTIVE,
   account,
   topic,
+];
+
+export const groupInviteQueryKey = (account: string, inviteId: string) => [
+  QueryKeys.GROUP_INVITE,
+  account,
+  inviteId,
+];
+
+export const groupJoinRequestQueryKey = (
+  account: string,
+  requestId: string
+) => [QueryKeys.GROUP_JOIN_REQUEST, account, requestId];
+
+export const pendingJoinRequestsQueryKey = (account: string) => [
+  QueryKeys.PENDING_JOIN_REQUESTS,
+  account,
 ];

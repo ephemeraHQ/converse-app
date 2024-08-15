@@ -165,3 +165,16 @@ suspend fun getNewGroup(xmtpClient: Client, contentTopic: String): Group? {
         null
     }
 }
+
+suspend fun getGroup(xmtpClient: Client, groupId: String): Group? {
+    return try {
+        // Welcome envelopes are too large to send in a push, so a bit of a hack to get the latest group
+        xmtpClient.conversations.syncGroups()
+        val group = xmtpClient.findGroup(groupId)
+        group?.sync()
+        group
+    } catch (error: Exception) {
+        sentryTrackError(error, mapOf("message" to "Could not sync new group"))
+        null
+    }
+}
