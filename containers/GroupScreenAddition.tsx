@@ -15,10 +15,14 @@ import {
 } from "@styles/colors";
 import { PictoSizes } from "@styles/sizes";
 import { createGroupInvite } from "@utils/api";
-import { saveGroupInviteLink } from "@utils/groupInvites";
+import {
+  saveGroupInviteLink,
+  deleteGroupInviteLink as clearGroupInviteLink,
+} from "@utils/groupInvites";
 import { getGroupIdFromTopic } from "@utils/groupUtils/groupId";
 import { memberCanUpdateGroup } from "@utils/groupUtils/memberCanUpdateGroup";
 import { navigate } from "@utils/navigation";
+import * as Haptics from "expo-haptics";
 import { FC, useCallback, useState } from "react";
 import {
   Alert,
@@ -56,8 +60,8 @@ export const GroupScreenAddition: FC<GroupScreenAdditionProps> = ({
   const { groupDescription } = useGroupDescription(topic);
 
   const groupInviteLink = useExistingGroupInviteLink(topic);
-  const { setGroupInviteLink } = useChatStore(
-    useSelect(["setGroupInviteLink"])
+  const { setGroupInviteLink, deleteGroupInviteLink } = useChatStore(
+    useSelect(["setGroupInviteLink", "deleteGroupInviteLink"])
   );
   const onAddMemberPress = useCallback(() => {
     navigate("NewConversation", { addingToGroupTopic: topic });
@@ -81,6 +85,7 @@ export const GroupScreenAddition: FC<GroupScreenAdditionProps> = ({
         saveGroupInviteLink(groupInvite.id, getGroupIdFromTopic(topic));
         setGroupInviteLink(topic, groupInvite.inviteLink);
         Clipboard.setString(groupInvite.inviteLink);
+        setShowSnack(true);
       })
       .catch((err) => {
         console.error("Error creating group invite", err);
@@ -94,6 +99,12 @@ export const GroupScreenAddition: FC<GroupScreenAdditionProps> = ({
     setGroupInviteLink,
     topic,
   ]);
+
+  const onDeleteInviteLink = useCallback(() => {
+    Haptics.impactAsync();
+    deleteGroupInviteLink(topic);
+    clearGroupInviteLink(topic);
+  }, [deleteGroupInviteLink, topic]);
 
   const dismissSnackBar = useCallback(() => {
     setShowSnack(false);
@@ -125,6 +136,7 @@ export const GroupScreenAddition: FC<GroupScreenAdditionProps> = ({
         <TouchableOpacity
           onPress={onCopyInviteLinkPress}
           style={[styles.itemContainer, styles.inviteContainer]}
+          onLongPress={onDeleteInviteLink}
         >
           <Picto size={pictoSize} style={styles.icon} picto="link" />
           <Text style={styles.text}>Copy Invite Link</Text>
@@ -132,6 +144,7 @@ export const GroupScreenAddition: FC<GroupScreenAdditionProps> = ({
       ) : (
         <TouchableOpacity
           onPress={onCreateInviteLinkPress}
+          onLongPress={() => {}}
           style={[styles.itemContainer, styles.inviteContainer]}
         >
           <Picto size={pictoSize} style={styles.icon} picto="link" />
