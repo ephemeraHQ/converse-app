@@ -1,3 +1,5 @@
+import { entifyWithAddress } from "@queries/entify";
+import { setGroupMembersQueryData } from "@queries/useGroupMembersQuery";
 import logger from "@utils/logger";
 import { TransactionReference } from "@xmtp/content-type-transaction-reference";
 import {
@@ -222,6 +224,16 @@ export const syncGroupsMessages = async (
     // from handleNewConversation which syncs before, or on groups returned
     // by listGroups which syncs also
     const members = await group.members();
+    setGroupMembersQueryData(
+      account,
+      group.topic,
+      entifyWithAddress(
+        members,
+        (member) => member.inboxId,
+        // TODO: Multiple addresses support
+        (member) => member.addresses[0]
+      )
+    );
     groupMembers[group.topic] = members;
     saveMemberInboxIds(account, members);
     logger.debug("synced group", group.topic);

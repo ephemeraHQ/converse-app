@@ -149,6 +149,7 @@ const ConversationListItem = memo(function ConversationListItem({
         style={styles.avatarWrapper}
         uri={conversationPeerAvatar}
         topic={conversationTopic}
+        onConversationListScreen
       />
     ) : (
       <Avatar

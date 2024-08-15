@@ -38,9 +38,13 @@ export const GroupConversationItem: FC<GroupConversationItemProps> = ({
   const lastMessagePreview = conversation.lastMessagePreview;
   const { data: groupName } = useGroupNameQuery(userAddress, topic, {
     refetchOnMount: false,
+    staleTime: Infinity,
+    gcTime: Infinity,
   });
   const { data: groupPhoto } = useGroupPhotoQuery(userAddress, topic, {
     refetchOnMount: false,
+    staleTime: Infinity,
+    gcTime: Infinity,
   });
   const { blockGroup } = useGroupConsent(topic);
   const colorScheme = useColorScheme();
