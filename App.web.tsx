@@ -47,7 +47,7 @@ export default function App() {
       <ActionSheetProvider>
         <PaperProvider
           theme={
-            colorScheme === "light" ? MaterialLightTheme : MaterialDarkTheme
+            colorScheme === "dark" ? MaterialDarkTheme : MaterialLightTheme
           }
         >
           <PrivyProvider
