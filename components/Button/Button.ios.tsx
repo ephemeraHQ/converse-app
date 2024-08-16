@@ -128,7 +128,7 @@ const useStyles = () => {
       borderRadius: 100,
     },
     buttonGreyText: {
-      color: colorScheme === "light" ? primaryColor(colorScheme) : "white",
+      color: colorScheme === "dark" ? "white" : primaryColor(colorScheme),
       textAlign: "center",
       fontWeight: "600",
       fontSize: 17,
