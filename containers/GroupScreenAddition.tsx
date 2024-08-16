@@ -3,6 +3,7 @@ import { useChatStore, useCurrentAccount } from "@data/store/accountsStore";
 import { useSelect } from "@data/store/storeHelpers";
 import { useExistingGroupInviteLink } from "@hooks/useExistingGroupInviteLink";
 import { useGroupDescription } from "@hooks/useGroupDescription";
+import { useGroupMembers } from "@hooks/useGroupMembers";
 import { useGroupName } from "@hooks/useGroupName";
 import { useGroupPermissions } from "@hooks/useGroupPermissions";
 import { useGroupPhoto } from "@hooks/useGroupPhoto";
@@ -19,11 +20,15 @@ import {
   saveGroupInviteLink,
   deleteGroupInviteLink as clearGroupInviteLink,
 } from "@utils/groupInvites";
+import {
+  getAddressIsAdmin,
+  getAddressIsSuperAdmin,
+} from "@utils/groupUtils/adminUtils";
 import { getGroupIdFromTopic } from "@utils/groupUtils/groupId";
 import { memberCanUpdateGroup } from "@utils/groupUtils/memberCanUpdateGroup";
 import { navigate } from "@utils/navigation";
 import * as Haptics from "expo-haptics";
-import { FC, useCallback, useState } from "react";
+import { FC, useCallback, useMemo, useState } from "react";
 import {
   Alert,
   Platform,
@@ -36,17 +41,24 @@ import { Portal, Snackbar, Text } from "react-native-paper";
 
 interface GroupScreenAdditionProps {
   topic: string;
-  currentAccountIsAdmin: boolean;
-  currentAccountIsSuperAdmin: boolean;
 }
 
 export const GroupScreenAddition: FC<GroupScreenAdditionProps> = ({
   topic,
-  currentAccountIsAdmin,
-  currentAccountIsSuperAdmin,
 }) => {
   const colorScheme = useColorScheme();
   const currentAccount = useCurrentAccount() as string;
+  const { members } = useGroupMembers(topic);
+  const { currentAccountIsAdmin, currentAccountIsSuperAdmin } = useMemo(
+    () => ({
+      currentAccountIsAdmin: getAddressIsAdmin(members, currentAccount),
+      currentAccountIsSuperAdmin: getAddressIsSuperAdmin(
+        members,
+        currentAccount
+      ),
+    }),
+    [currentAccount, members]
+  );
   const styles = useStyles();
   const [showSnack, setShowSnack] = useState(false);
   const { permissions } = useGroupPermissions(topic);
