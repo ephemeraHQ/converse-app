@@ -1,10 +1,12 @@
 import logger from "@utils/logger";
 import { Client } from "@xmtp/xmtp-js";
+import { AppState } from "react-native";
 
 import { xmtpSignatureByAccount } from "./api";
 import {
   ConverseXmtpClientType,
   getXmtpClientFromBase64Key,
+  reconnectXmtpClientsDbConnections,
   xmtpClientByAccount,
 } from "./client";
 import {
@@ -79,11 +81,33 @@ const MAX_BACKOFF = 60000; // Maximum backoff interval in ms
 let currentBackoff = INITIAL_BACKOFF;
 
 const onSyncLost = async (account: string, error: any) => {
-  logger.error(error, {
-    context: `An error occured while syncing for ${account}`,
-  });
   // If there is an error let's show it
   getChatStore(account).getState().setReconnecting(true);
+  // If error is a libxmtp database reconnection issue, let's
+  // try to reconnect if we're active
+  if (
+    `${error}`.includes("storage error: Pool needs to  reconnect before use")
+  ) {
+    if (AppState.currentState === "active") {
+      logger.error(
+        "Reconnecting XMTP Pool because it didn't reconnect automatically"
+      );
+      console.log("reconnecting!!");
+      await reconnectXmtpClientsDbConnections();
+    } else if (AppState.currentState === "background") {
+      // This error is normal when backgrounded, fail silently
+      // as reopening the app will launch a resync
+      return;
+    } else {
+      logger.error(error, {
+        context: `An error occured while syncing for ${account}`,
+      });
+    }
+  } else {
+    logger.error(error, {
+      context: `An error occured while syncing for ${account}`,
+    });
+  }
   // Wait a bit before reco
   logger.debug(`[XmtpRN] Reconnecting in ${currentBackoff}ms`);
   await new Promise((r) => setTimeout(r, currentBackoff));
