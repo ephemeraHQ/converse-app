@@ -44,7 +44,11 @@ export const GroupConversationItem: FC<GroupConversationItemProps> = ({
     staleTime: Infinity,
     gcTime: Infinity,
   });
-  const { consent, blockGroup, allowGroup } = useGroupConsent(topic);
+  const { consent, blockGroup, allowGroup } =  useGroupConsent(topic, {
+    refetchOnMount: false,
+    staleTime: Infinity,
+    gcTime: Infinity,
+  });
   const colorScheme = useColorScheme();
   const {
     initialLoadDoneOnce,

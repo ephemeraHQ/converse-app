@@ -1,12 +1,17 @@
 import Button from "@components/Button/Button";
 import GroupAvatar from "@components/GroupAvatar";
 import { useCurrentAccount } from "@data/store/accountsStore";
+import { useGroupMembers } from "@hooks/useGroupMembers";
 import { useGroupPermissions } from "@hooks/useGroupPermissions";
 import { useGroupPhoto } from "@hooks/useGroupPhoto";
 import { usePhotoSelect } from "@hooks/usePhotoSelect";
 import { translate } from "@i18n/index";
+import {
+  getAddressIsAdmin,
+  getAddressIsSuperAdmin,
+} from "@utils/groupUtils/adminUtils";
 import { memberCanUpdateGroup } from "@utils/groupUtils/memberCanUpdateGroup";
-import { FC, useCallback } from "react";
+import { FC, useCallback, useMemo } from "react";
 import { StyleSheet, View } from "react-native";
 import { List } from "react-native-paper";
 
@@ -14,18 +19,24 @@ import { uploadFile } from "../utils/attachment";
 
 interface GroupScreenImageProps {
   topic: string;
-  currentAccountIsAdmin: boolean;
-  currentAccountIsSuperAdmin: boolean;
 }
 
-export const GroupScreenImage: FC<GroupScreenImageProps> = ({
-  topic,
-  currentAccountIsAdmin,
-  currentAccountIsSuperAdmin,
-}) => {
+export const GroupScreenImage: FC<GroupScreenImageProps> = ({ topic }) => {
   const currentAccount = useCurrentAccount() as string;
   const { groupPhoto, setGroupPhoto } = useGroupPhoto(topic);
   const { permissions } = useGroupPermissions(topic);
+  const { members } = useGroupMembers(topic);
+  const { currentAccountIsAdmin, currentAccountIsSuperAdmin } = useMemo(
+    () => ({
+      currentAccountIsAdmin: getAddressIsAdmin(members, currentAccount),
+      currentAccountIsSuperAdmin: getAddressIsSuperAdmin(
+        members,
+        currentAccount
+      ),
+    }),
+    [currentAccount, members]
+  );
+
   const canEditGroupImage = memberCanUpdateGroup(
     permissions?.updateGroupImagePolicy,
     currentAccountIsAdmin,
