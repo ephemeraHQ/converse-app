@@ -381,9 +381,8 @@ export default function ChatMessageActions({
 }
 
 const getEmojiPickerTheme = (colorScheme: ColorSchemeName) =>
-  colorScheme === "light"
-    ? {}
-    : {
+  colorScheme === "dark"
+    ? {
         backdrop: "#16161888",
         knob: "#766dfc",
         container: "#282829",
@@ -395,7 +394,8 @@ const getEmojiPickerTheme = (colorScheme: ColorSchemeName) =>
           container: "#252427",
           containerActive: "#282829",
         },
-      };
+      }
+    : {};
 
 const useStyles = () => {
   return StyleSheet.create({
