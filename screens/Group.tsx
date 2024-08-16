@@ -10,7 +10,7 @@ import {
   textPrimaryColor,
   textSecondaryColor,
 } from "@styles/colors";
-import React, { useCallback, useMemo } from "react";
+import React, { useCallback, useRef } from "react";
 import {
   Platform,
   ScrollView,
@@ -30,15 +30,11 @@ import { GroupScreenMembersTable } from "../containers/GroupScreenMembersTable";
 import { GroupScreenName } from "../containers/GroupScreenName";
 import { useChatStore, useCurrentAccount } from "../data/store/accountsStore";
 import { XmtpGroupConversation } from "../data/store/chatStore";
-import { useGroupMembers } from "../hooks/useGroupMembers";
-import {
-  getAddressIsAdmin,
-  getAddressIsSuperAdmin,
-} from "../utils/groupUtils/adminUtils";
 
 export default function GroupScreen({
   route,
 }: NativeStackScreenProps<NavigationParamList, "Group">) {
+  const isFirstRun = useRef(false);
   const styles = useStyles();
   const group = useChatStore(
     (s) => s.conversations[route.params.topic]
@@ -47,14 +43,13 @@ export default function GroupScreen({
   const currentAccount = useCurrentAccount() as string;
   const topic = group.topic;
 
-  const { members } = useGroupMembers(topic);
-  const currentAccountIsAdmin = useMemo(
-    () => getAddressIsAdmin(members, currentAccount),
-    [currentAccount, members]
-  );
-
   useFocusEffect(
     useCallback(() => {
+      // This can be changed to use AppState for the focus manager instead, but would need some additional checks to make sure it's not hitting the native bridge too often
+      if (!isFirstRun.current) {
+        isFirstRun.current = true;
+        return;
+      }
       // Favoring invalidating individual queries
       invalidateGroupNameQuery(currentAccount, topic);
       invalidateGroupDescriptionQuery(currentAccount, topic);
@@ -64,36 +59,15 @@ export default function GroupScreen({
     }, [currentAccount, topic])
   );
 
-  const currentAccountIsSuperAdmin = useMemo(
-    () => getAddressIsSuperAdmin(members, currentAccount),
-    [currentAccount, members]
-  );
-
   return (
     <ScrollView
       style={styles.group}
       contentContainerStyle={styles.groupContent}
     >
-      <GroupScreenImage
-        currentAccountIsAdmin={currentAccountIsAdmin}
-        currentAccountIsSuperAdmin={currentAccountIsSuperAdmin}
-        topic={topic}
-      />
-      <GroupScreenName
-        currentAccountIsAdmin={currentAccountIsAdmin}
-        currentAccountIsSuperAdmin={currentAccountIsSuperAdmin}
-        topic={topic}
-      />
-      <GroupScreenDescription
-        currentAccountIsAdmin={currentAccountIsAdmin}
-        currentAccountIsSuperAdmin={currentAccountIsSuperAdmin}
-        topic={topic}
-      />
-      <GroupScreenAddition
-        topic={topic}
-        currentAccountIsAdmin={currentAccountIsAdmin}
-        currentAccountIsSuperAdmin={currentAccountIsSuperAdmin}
-      />
+      <GroupScreenImage topic={topic} />
+      <GroupScreenName topic={topic} />
+      <GroupScreenDescription topic={topic} />
+      <GroupScreenAddition topic={topic} />
       <GroupPendingRequestsTable topic={topic} />
       <GroupScreenMembersTable
         topic={topic}

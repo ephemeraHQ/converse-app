@@ -31,9 +31,13 @@ export const useRemoveFromGroupMutation = (account: string, topic: string) => {
       if (!previousGroupMembers) {
         return;
       }
-      const newGroupMembers = previousGroupMembers.filter(
-        (member) => !removeSet.has(member.inboxId)
-      );
+
+      const newGroupMembers = {
+        ...previousGroupMembers,
+        ids: previousGroupMembers.ids.filter(
+          (member) => !removeSet.has(member)
+        ),
+      };
       setGroupMembersQueryData(account, topic, newGroupMembers);
 
       return { previousGroupMembers };

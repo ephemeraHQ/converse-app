@@ -1,4 +1,6 @@
-import { useQuery } from "@tanstack/react-query";
+import { useSettingsStore } from "@data/store/accountsStore";
+import { QueryObserverOptions, useQuery } from "@tanstack/react-query";
+import { useShallow } from "zustand/react/shallow";
 
 import { groupConsentQueryKey } from "./QueryKeys";
 import { queryClient } from "./queryClient";
@@ -6,18 +8,28 @@ import { useGroupQuery } from "./useGroupQuery";
 
 type Consent = "allowed" | "denied" | "unknown";
 
-export const useGroupConsentQuery = (account: string, topic: string) => {
+export const useGroupConsentQuery = (
+  account: string,
+  topic: string,
+  queryOptions?: Partial<QueryObserverOptions<"allowed" | "denied" | "unknown">>
+) => {
+  const statusFromState = useSettingsStore(
+    useShallow((s) => s.groupStatus[topic])
+  );
+  const initialDataUpdatedAt = useSettingsStore(
+    useShallow((s) => s.lastAsyncUpdate)
+  );
   const { data: group } = useGroupQuery(account, topic);
   return useQuery({
     queryKey: groupConsentQueryKey(account, topic),
     queryFn: async () => {
-      if (!group) {
-        return;
-      }
-      const consent = await group.consentState();
+      const consent = await group!.consentState();
       return consent;
     },
     enabled: !!group,
+    initialData: statusFromState ?? "unknown",
+    initialDataUpdatedAt,
+    ...queryOptions,
   });
 };
 

@@ -1,6 +1,5 @@
 import { useMutation } from "@tanstack/react-query";
 import logger from "@utils/logger";
-import { Member } from "@xmtp/react-native-sdk";
 import { InboxId } from "@xmtp/react-native-sdk/build/lib/Client";
 
 import { promoteSuperAdminMutationKey } from "./MutationKeys";
@@ -34,16 +33,12 @@ export const usePromoteToSuperAdminMutation = (
       if (!previousGroupMembers) {
         return;
       }
-      const newGroupMembers: Member[] = previousGroupMembers.map((member) => {
-        if (member.inboxId === inboxId) {
-          return {
-            ...member,
-            permissionLevel: "super_admin",
-          };
-        }
-        return member;
-      });
-      setGroupMembersQueryData(account, topic, newGroupMembers);
+      const newMembers = { ...previousGroupMembers };
+      if (!newMembers.byId[inboxId]) {
+        return;
+      }
+      newMembers.byId[inboxId].permissionLevel = "super_admin";
+      setGroupMembersQueryData(account, topic, newMembers);
 
       return { previousGroupMembers };
     },

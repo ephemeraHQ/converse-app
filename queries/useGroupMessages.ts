@@ -10,7 +10,10 @@ export const useGroupMessages = (account: string, topic: string) => {
     queryKey: groupMessagesQueryKey(account, topic),
     queryFn: async () => {
       if (!group) {
-        return;
+        return {
+          ids: [],
+          entities: {},
+        };
       }
       const messages = await group.messages();
       return entify(messages, (message) => message.id);
