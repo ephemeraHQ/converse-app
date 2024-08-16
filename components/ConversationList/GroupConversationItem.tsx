@@ -65,64 +65,77 @@ export const GroupConversationItem: FC<GroupConversationItemProps> = ({
 
   const handleDelete = useCallback(
     (defaultAction: () => void) => {
-      if (consent === "denied") {
+      const showOptions = (
+        options: string[],
+        title: string,
+        actions: (() => void)[]
+      ) => {
         showActionSheetWithOptions(
           {
-            options: [
+            options,
+            cancelButtonIndex: options.length - 1,
+            destructiveButtonIndex: [0, 1],
+            title,
+            ...actionSheetColors(colorScheme),
+          },
+          async (selectedIndex?: number) => {
+            if (selectedIndex !== undefined && selectedIndex < actions.length) {
+              actions[selectedIndex]();
+            } else {
+              defaultAction();
+            }
+          }
+        );
+      };
+
+      switch (consent) {
+        case "allowed":
+          showOptions(
+            [
+              translate("remove"),
+              translate("remove_and_block_inviter"),
+              translate("cancel"),
+            ],
+            `${translate("remove")} ${groupName}?`,
+            [
+              () =>
+                blockGroup({ includeAddedBy: false, includeCreator: false }),
+              () => blockGroup({ includeAddedBy: true, includeCreator: false }),
+            ]
+          );
+          break;
+
+        case "denied":
+          showOptions(
+            [
+              translate("restore"),
+              translate("restore_and_unblock_inviter"),
+              translate("cancel"),
+            ],
+            `${translate("restore")} ${groupName}?`,
+            [
+              () =>
+                allowGroup({ includeAddedBy: false, includeCreator: false }),
+              () => allowGroup({ includeAddedBy: true, includeCreator: false }),
+            ]
+          );
+          break;
+
+        default:
+          showOptions(
+            [
               translate("accept"),
               translate("accept_chat_and_inviter"),
               translate("cancel"),
             ],
-            cancelButtonIndex: 2,
-            destructiveButtonIndex: [0, 1],
-            title: `Allow ${groupName}?`,
-            ...actionSheetColors(colorScheme),
-          },
-          async (selectedIndex?: number) => {
-            if (selectedIndex === 0) {
-              allowGroup({
-                includeAddedBy: false,
-                includeCreator: false,
-              });
-            } else if (selectedIndex === 1) {
-              allowGroup({
-                includeAddedBy: true,
-                includeCreator: false,
-              });
-            } else {
-              defaultAction();
-            }
-          }
-        );
-      } else {
-        showActionSheetWithOptions(
-          {
-            options: [
-              translate("block"),
-              translate("block_chat_and_inviter"),
-              translate("cancel"),
-            ],
-            cancelButtonIndex: 2,
-            destructiveButtonIndex: [0, 1],
-            title: `Block ${groupName}?`,
-            ...actionSheetColors(colorScheme),
-          },
-          async (selectedIndex?: number) => {
-            if (selectedIndex === 0) {
-              blockGroup({
-                includeAddedBy: false,
-                includeCreator: false,
-              });
-            } else if (selectedIndex === 1) {
-              blockGroup({
-                includeAddedBy: true,
-                includeCreator: false,
-              });
-            } else {
-              defaultAction();
-            }
-          }
-        );
+            `${translate("accept")} ${groupName}?`,
+            [
+              () =>
+                allowGroup({ includeAddedBy: false, includeCreator: false }),
+              () => allowGroup({ includeAddedBy: true, includeCreator: false }),
+            ]
+          );
+          break;
       }
     },
     [allowGroup, blockGroup, consent, colorScheme, groupName]
