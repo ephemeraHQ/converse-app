@@ -99,8 +99,15 @@ export const GroupConversationItem: FC<GroupConversationItemProps> = ({
             `${translate("remove")} ${groupName}?`,
             [
               () =>
-                blockGroup({ includeAddedBy: false, includeCreator: false }),
-              () => blockGroup({ includeAddedBy: true, includeCreator: false }),
+                blockGroup({
+                  includeAddedBy: false,
+                  includeCreator: false,
+                }),
+              () =>
+                blockGroup({
+                  includeAddedBy: true,
+                  includeCreator: false,
+                }),
             ]
           );
           break;
@@ -115,8 +122,15 @@ export const GroupConversationItem: FC<GroupConversationItemProps> = ({
             `${translate("restore")} ${groupName}?`,
             [
               () =>
-                allowGroup({ includeAddedBy: false, includeCreator: false }),
-              () => allowGroup({ includeAddedBy: true, includeCreator: false }),
+                allowGroup({
+                  includeAddedBy: false,
+                  includeCreator: false,
+                }),
+              () =>
+                allowGroup({
+                  includeAddedBy: true,
+                  includeCreator: false,
+                }),
             ]
           );
           break;
@@ -131,8 +145,15 @@ export const GroupConversationItem: FC<GroupConversationItemProps> = ({
             `${translate("accept")} ${groupName}?`,
             [
               () =>
-                allowGroup({ includeAddedBy: false, includeCreator: false }),
-              () => allowGroup({ includeAddedBy: true, includeCreator: false }),
+                allowGroup({
+                  includeAddedBy: false,
+                  includeCreator: false,
+                }),
+              () =>
+                allowGroup({
+                  includeAddedBy: true,
+                  includeCreator: false,
+                }),
             ]
           );
           break;
