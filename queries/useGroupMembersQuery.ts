@@ -30,6 +30,7 @@ export const useGroupMembersQuery = (
           ids: [],
         };
       }
+      await group.sync();
       const updatedMembers = await group.membersList();
       return entifyWithAddress(
         updatedMembers,
