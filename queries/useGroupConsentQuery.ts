@@ -16,9 +16,6 @@ export const useGroupConsentQuery = (
   const statusFromState = useSettingsStore(
     useShallow((s) => s.groupStatus[topic])
   );
-  const initialDataUpdatedAt = useSettingsStore(
-    useShallow((s) => s.lastAsyncUpdate)
-  );
   const { data: group } = useGroupQuery(account, topic);
   return useQuery({
     queryKey: groupConsentQueryKey(account, topic),
@@ -28,7 +25,6 @@ export const useGroupConsentQuery = (
     },
     enabled: !!group,
     initialData: statusFromState ?? "unknown",
-    initialDataUpdatedAt,
     ...queryOptions,
   });
 };

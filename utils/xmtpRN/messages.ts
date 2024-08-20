@@ -218,7 +218,6 @@ export const syncGroupsMessages = async (
   groups: GroupWithCodecsType[],
   queryGroupsFromTimestamp: { [topic: string]: number }
 ) => {
-  logger.info(`Syncing ${groups.length} groups...`);
   for (const group of groups) {
     // No need to group.sync here as syncGroupsMessages is called either
     // from handleNewConversation which syncs before, or on groups returned
@@ -235,9 +234,7 @@ export const syncGroupsMessages = async (
     );
     groupMembers[group.topic] = group.members;
     saveMemberInboxIds(account, group.members);
-    logger.debug("synced group", group.topic);
   }
-  logger.info(`${groups.length} groups synced!`);
   const newMessages = (
     await Promise.all(
       groups.map((g) =>
