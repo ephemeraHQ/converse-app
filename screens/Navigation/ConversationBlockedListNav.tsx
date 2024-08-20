@@ -1,7 +1,11 @@
 import { RouteProp } from "@react-navigation/native";
-import { backgroundColor } from "@styles/colors";
+import {
+  backgroundColor,
+  primaryColor,
+  textPrimaryColor,
+} from "@styles/colors";
 import React, { useCallback, useRef } from "react";
-import { Platform, StyleSheet, useColorScheme, View } from "react-native";
+import { Platform, StyleSheet, useColorScheme, View, Text } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { StackAnimationTypes } from "react-native-screens";
 
@@ -47,10 +51,14 @@ export default function ConversationBlockedListNav() {
           <>
             <GestureHandlerRootView style={styles.root}>
               <View style={styles.container}>
-                <ConversationFlashList
-                  {...navigationProps}
-                  items={allBlockedChats}
-                />
+                {allBlockedChats.length > 0 ? (
+                  <ConversationFlashList
+                    {...navigationProps}
+                    items={allBlockedChats}
+                  />
+                ) : (
+                  <NoResult />
+                )}
               </View>
             </GestureHandlerRootView>
           </>
@@ -59,6 +67,22 @@ export default function ConversationBlockedListNav() {
     </NativeStack.Screen>
   );
 }
+
+const NoResult = () => {
+  const styles = useStyles();
+
+  return (
+    <>
+      <Text style={styles.emoji}>👀</Text>
+      <Text style={styles.title}>
+        <Text>
+          We could not find any removed group chat in your existing
+          conversations.
+        </Text>
+      </Text>
+    </>
+  );
+};
 
 const useStyles = () => {
   const colorScheme = useColorScheme();
@@ -69,6 +93,40 @@ const useStyles = () => {
     root: {
       flex: 1,
       backgroundColor: backgroundColor(colorScheme),
+    },
+    emoji: {
+      ...Platform.select({
+        default: {
+          textAlign: "center",
+          marginTop: 150,
+          fontSize: 34,
+          marginBottom: 12,
+        },
+        android: {
+          display: "none",
+        },
+      }),
+    },
+    title: {
+      color: textPrimaryColor(colorScheme),
+      ...Platform.select({
+        default: {
+          textAlign: "center",
+          fontSize: 17,
+          paddingHorizontal: 32,
+        },
+        android: {
+          textAlign: "left",
+          fontSize: 16,
+          lineHeight: 22,
+          paddingTop: 10,
+          paddingHorizontal: 16,
+        },
+      }),
+    },
+    clickableText: {
+      color: primaryColor(colorScheme),
+      fontWeight: "500",
     },
   });
 };
