@@ -270,11 +270,14 @@ const listConversations = async (client: ConverseXmtpClientType) => {
 const listGroups = async (client: ConverseXmtpClientType) => {
   await client.conversations.syncGroups();
   const groups = await client.conversations.listGroups();
+  // @todo => use a syncAllGroups before calling listGroups
   for (const group of groups) {
     await group.sync();
     setOpenedConversation(client.address, group);
   }
-  return groups;
+  // Re-listing to get updated members from group.sync()
+  // @todo => remove once we have a syncAllGroups method
+  return await client.conversations.listGroups();
 };
 
 export const importedTopicsDataForAccount: { [account: string]: boolean } = {};
