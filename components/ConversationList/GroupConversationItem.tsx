@@ -63,7 +63,7 @@ export const GroupConversationItem: FC<GroupConversationItemProps> = ({
     }
   }, [setPinnedConversations, conversation, consent]);
 
-  const handleDelete = useCallback(
+  const handleRemove = useCallback(
     (defaultAction: () => void) => {
       const showOptions = (
         options: string[],
@@ -200,7 +200,7 @@ export const GroupConversationItem: FC<GroupConversationItemProps> = ({
         lastMessagePreview.message?.senderAddress === userAddress
       }
       conversationOpened={conversation.topic === openedConversationTopic}
-      onRightActionPress={handleDelete}
+      onRightActionPress={handleRemove}
       isGroupConversation
     />
   );
