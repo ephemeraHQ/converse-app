@@ -11,7 +11,10 @@ const en = {
   // Conversation List
   delete: "Delete",
   delete_and_block: "Delete and block",
-  delete_and_block_inviter: "Delete and block inviter",
+  remove: "Remove",
+  remove_and_block_inviter: "Remove and block inviter",
+  restore: "Restore",
+  restore_and_unblock_inviter: "Restore and unblock inviter",
   cancel: "Cancel",
 
   // Conversation

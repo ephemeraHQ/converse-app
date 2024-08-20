@@ -123,12 +123,8 @@ const _subscribeToNotifications = async (account: string): Promise<void> => {
         : !isGroupBlocked(getGroupIdFromTopic(c.topic));
       const isTopicNotDeleted = topicsData[c.topic]?.status !== "deleted";
       const isTopicInInbox =
-        conversationShouldBeDisplayed(
-          c,
-          topicsData,
-          peersStatus,
-          groupStatus
-        ) && conversationShouldBeInInbox(c, peersStatus, groupStatus);
+        conversationShouldBeDisplayed(c, topicsData) &&
+        conversationShouldBeInInbox(c, peersStatus, groupStatus);
 
       const status =
         isNotBlocked && isTopicNotDeleted && isTopicInInbox ? "PUSH" : "MUTED";

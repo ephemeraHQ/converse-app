@@ -6,6 +6,7 @@ import { Platform, useColorScheme } from "react-native";
 import { isDesktop } from "../../../utils/device";
 import { converseNavigations } from "../../../utils/navigation";
 import AccountsNav from "../AccountsNav";
+import ConversationBlockedListNav from "../ConversationBlockedListNav";
 import ConversationListNav from "../ConversationListNav";
 import ConversationRequestsListNav from "../ConversationRequestsListNav";
 import ConverseMatchMakerNav from "../ConverseMatchMakerNav";
@@ -16,6 +17,7 @@ export type NavigationParamList = {
   Chats: undefined;
   ChatsRequests: undefined;
   ConverseMatchMaker: undefined;
+  Blocked: undefined;
 };
 
 export const NativeStack = createNativeStackNavigator<NavigationParamList>();
@@ -70,6 +72,7 @@ const SplitLeftStackNavigation = memo(function SplitLeftStackNavigation() {
           {ConversationListNav()}
           {ConversationRequestsListNav()}
           {ConverseMatchMakerNav()}
+          {ConversationBlockedListNav()}
         </NativeStack.Group>
       </NativeStack.Navigator>
     </NavigationContainer>

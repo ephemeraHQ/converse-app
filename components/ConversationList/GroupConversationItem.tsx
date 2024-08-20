@@ -5,12 +5,10 @@ import { useGroupNameQuery } from "@queries/useGroupNameQuery";
 import { useGroupPhotoQuery } from "@queries/useGroupPhotoQuery";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { actionSheetColors } from "@styles/colors";
-import { saveTopicsData } from "@utils/api";
 import { FC, useCallback } from "react";
 import { useColorScheme } from "react-native";
 
 import {
-  currentAccount,
   useChatStore,
   useCurrentAccount,
 } from "../../data/store/accountsStore";
@@ -23,7 +21,7 @@ import ConversationListItem from "../ConversationListItem";
 interface GroupConversationItemProps
   extends NativeStackScreenProps<
     NavigationParamList,
-    "Chats" | "ShareFrame" | "ChatsRequests"
+    "Chats" | "ShareFrame" | "ChatsRequests" | "Blocked"
   > {
   conversation: ConversationWithLastMessagePreview;
 }
@@ -42,81 +40,104 @@ export const GroupConversationItem: FC<GroupConversationItemProps> = ({
   const { data: groupPhoto } = useGroupPhotoQuery(userAddress, topic, {
     refetchOnMount: false,
   });
-  const { blockGroup } = useGroupConsent(topic);
+  const { consent, blockGroup, allowGroup } = useGroupConsent(topic);
   const colorScheme = useColorScheme();
   const {
     initialLoadDoneOnce,
     openedConversationTopic,
     topicsData,
-    setTopicsData,
     setPinnedConversations,
   } = useChatStore(
     useSelect([
       "initialLoadDoneOnce",
       "openedConversationTopic",
       "topicsData",
-      "setTopicsData",
       "setPinnedConversations",
     ])
   );
 
   const onLongPress = useCallback(() => {
-    setPinnedConversations([conversation]);
-  }, [setPinnedConversations, conversation]);
+    // Prevent this for blocked chats
+    if (consent !== "denied") {
+      setPinnedConversations([conversation]);
+    }
+  }, [setPinnedConversations, conversation, consent]);
 
-  const handleDelete = useCallback(
+  const handleRemove = useCallback(
     (defaultAction: () => void) => {
-      showActionSheetWithOptions(
-        {
-          options: [
-            translate("delete"),
-            translate("delete_and_block_inviter"),
-            translate("cancel"),
-          ],
-          cancelButtonIndex: 2,
-          destructiveButtonIndex: [0, 1],
-          title: `Delete ${groupName}?`,
-          ...actionSheetColors(colorScheme),
-        },
-        async (selectedIndex?: number) => {
-          if (selectedIndex === 0) {
-            saveTopicsData(currentAccount(), {
-              [topic]: {
-                status: "deleted",
-                timestamp: new Date().getTime(),
-              },
-            });
-            setTopicsData({
-              [topic]: {
-                status: "deleted",
-                timestamp: new Date().getTime(),
-              },
-            });
-            blockGroup({
-              includeAddedBy: false,
-              includeCreator: false,
-            });
-          } else if (selectedIndex === 1) {
-            saveTopicsData(currentAccount(), {
-              [topic]: { status: "deleted" },
-            });
-            setTopicsData({
-              [topic]: {
-                status: "deleted",
-                timestamp: new Date().getTime(),
-              },
-            });
-            blockGroup({
-              includeAddedBy: true,
-              includeCreator: false,
-            });
-          } else {
-            defaultAction();
+      const showOptions = (
+        options: string[],
+        title: string,
+        actions: (() => void)[]
+      ) => {
+        showActionSheetWithOptions(
+          {
+            options,
+            cancelButtonIndex: options.length - 1,
+            destructiveButtonIndex: [0, 1],
+            title,
+            ...actionSheetColors(colorScheme),
+          },
+          async (selectedIndex?: number) => {
+            if (selectedIndex !== undefined && selectedIndex < actions.length) {
+              actions[selectedIndex]();
+            } else {
+              defaultAction();
+            }
           }
-        }
-      );
+        );
+      };
+
+      switch (consent) {
+        case "denied":
+          showOptions(
+            [
+              translate("restore"),
+              translate("restore_and_unblock_inviter"),
+              translate("cancel"),
+            ],
+            `${translate("restore")} ${groupName}?`,
+            [
+              () =>
+                allowGroup({
+                  includeAddedBy: false,
+                  includeCreator: false,
+                }),
+              () =>
+                allowGroup({
+                  includeAddedBy: true,
+                  includeCreator: false,
+                }),
+            ]
+          );
+          break;
+
+        // for allowed and unknown
+        default:
+          showOptions(
+            [
+              translate("remove"),
+              translate("remove_and_block_inviter"),
+              translate("cancel"),
+            ],
+            `${translate("remove")} ${groupName}?`,
+            [
+              () =>
+                blockGroup({
+                  includeAddedBy: false,
+                  includeCreator: false,
+                }),
+              () =>
+                blockGroup({
+                  includeAddedBy: true,
+                  includeCreator: false,
+                }),
+            ]
+          );
+          break;
+      }
     },
-    [blockGroup, colorScheme, groupName, setTopicsData, topic]
+    [allowGroup, blockGroup, consent, colorScheme, groupName]
   );
 
   return (
@@ -157,7 +178,7 @@ export const GroupConversationItem: FC<GroupConversationItemProps> = ({
         lastMessagePreview.message?.senderAddress === userAddress
       }
       conversationOpened={conversation.topic === openedConversationTopic}
-      onRightActionPress={handleDelete}
+      onRightActionPress={handleRemove}
       isGroupConversation
     />
   );

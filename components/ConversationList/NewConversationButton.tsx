@@ -14,7 +14,7 @@ export default function NewConversationButton({
   navigation,
 }: NativeStackScreenProps<
   NavigationParamList,
-  "Chats" | "Conversation" | "ShareFrame"
+  "Chats" | "Conversation" | "ShareFrame" | "Blocked"
 >) {
   const colorScheme = useColorScheme();
   const onPress = useCallback(() => {
