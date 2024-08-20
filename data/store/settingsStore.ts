@@ -15,23 +15,27 @@ type NotificationsSettings = {
   showNotificationScreen: boolean;
 };
 
+export type PeersStatus = { [peerAddress: string]: "blocked" | "consented" };
+export type InboxIdPeerStatus = { [inboxId: InboxId]: "allowed" | "denied" };
+export type GroupStatus = { [groupId: string]: "allowed" | "denied" };
+
 export type SettingsStoreType = {
   notifications: NotificationsSettings;
   setNotificationsSettings: (
     notificationsSettings: Partial<NotificationsSettings>
   ) => void;
 
-  peersStatus: { [peerAddress: string]: "blocked" | "consented" };
+  peersStatus: PeersStatus;
   setPeersStatus: (peersStatus: {
     [peerAddress: string]: "blocked" | "consented";
   }) => void;
 
-  inboxIdPeerStatus: { [inboxId: InboxId]: "allowed" | "denied" };
+  inboxIdPeerStatus: InboxIdPeerStatus;
   setInboxIdPeerStatus: (inboxIdPeerStatus: {
     [inboxId: InboxId]: "allowed" | "denied";
   }) => void;
 
-  groupStatus: { [groupId: string]: "allowed" | "denied" };
+  groupStatus: GroupStatus;
   setGroupStatus: (groupStatus: {
     [groupId: string]: "allowed" | "denied";
   }) => void;

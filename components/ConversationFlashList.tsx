@@ -30,7 +30,7 @@ type Props = {
   ListFooterComponent?: React.ReactElement | null;
 } & NativeStackScreenProps<
   NavigationParamList,
-  "Chats" | "ShareFrame" | "ChatsRequests"
+  "Chats" | "ShareFrame" | "ChatsRequests" | "Blocked"
 >;
 
 export default function ConversationFlashList({

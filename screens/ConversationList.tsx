@@ -52,7 +52,10 @@ type Props = {
   searchBarRef:
     | React.MutableRefObject<SearchBarCommands | null>
     | React.MutableRefObject<TextInput | null>;
-} & NativeStackScreenProps<NavigationParamList, "Chats" | "ShareFrame">;
+} & NativeStackScreenProps<
+  NavigationParamList,
+  "Chats" | "ShareFrame" | "Blocked"
+>;
 
 function ConversationList({ navigation, route, searchBarRef }: Props) {
   const styles = useStyles();

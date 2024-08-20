@@ -1,3 +1,4 @@
+import { PeersStatus, GroupStatus } from "@data/store/settingsStore";
 import { Reaction } from "@xmtp/content-type-reaction";
 import { MutableRefObject, createRef } from "react";
 import { Alert, Platform } from "react-native";
@@ -26,6 +27,7 @@ import { getChatStore, useChatStore } from "../data/store/accountsStore";
 import {
   MediaPreview,
   TopicData,
+  TopicsData,
   XmtpConversation,
   XmtpConversationWithUpdate,
   XmtpMessage,
@@ -311,9 +313,7 @@ const conversationsSortMethod = (
 // or just be totally hidden (blocked peer, deleted convo)
 export const conversationShouldBeDisplayed = (
   conversation: ConversationWithLastMessagePreview,
-  topicsData: { [topic: string]: TopicData | undefined },
-  peersStatus: { [peer: string]: "blocked" | "consented" },
-  groupsStatus: { [topic: string]: "allowed" | "denied" },
+  topicsData: TopicsData,
   pinnedConversations?: ConversationFlatListItem[]
 ) => {
   const isNotReady =
@@ -323,10 +323,6 @@ export const conversationShouldBeDisplayed = (
   const isPending = !!conversation.pending;
   const isNotEmpty = conversation.messages.size > 0;
   const isDeleted = topicsData[conversation.topic]?.status === "deleted";
-  const isBlocked = conversation.isGroup
-    ? // TODO: Add more conditions to filter out spam
-      groupsStatus[conversation.topic] === "denied"
-    : peersStatus[conversation.peerAddress.toLowerCase()] === "blocked";
   const isActive = conversation.isGroup ? conversation.isActive : true;
   const isV1 = conversation.version === "v1";
   const isForbidden = conversation.topic.includes("\x00"); // Forbidden character that breaks
@@ -336,7 +332,6 @@ export const conversationShouldBeDisplayed = (
   return (
     (!isPending || isNotEmpty) &&
     !isDeleted &&
-    !isBlocked &&
     !isV1 &&
     !isForbidden &&
     !isPinned &&
@@ -347,12 +342,12 @@ export const conversationShouldBeDisplayed = (
 // Wether a conversation should appear in Inbox tab (i.e. probably not a spam)
 export const conversationShouldBeInInbox = (
   conversation: ConversationWithLastMessagePreview,
-  peersStatus: { [peer: string]: "blocked" | "consented" },
-  groupsStatus: { [topic: string]: "allowed" | "denied" }
+  peersStatus: PeersStatus,
+  groupStatus: GroupStatus
 ) => {
   if (conversation.isGroup) {
     const groupId = getGroupIdFromTopic(conversation.topic);
-    const isGroupAllowed = groupsStatus[groupId] === "allowed";
+    const isGroupAllowed = groupStatus[groupId] === "allowed";
     const isCreatorAllowed =
       conversation.groupCreator &&
       peersStatus[conversation.groupCreator.toLowerCase()] === "consented";
@@ -372,16 +367,34 @@ export const conversationShouldBeInInbox = (
   }
 };
 
+// Wether a conversation is blocked
+export const isConversationBlocked = (
+  conversation: ConversationWithLastMessagePreview,
+  peersStatus: PeersStatus,
+  groupStatus: GroupStatus
+) => {
+  if (conversation.isGroup) {
+    const groupId = getGroupIdFromTopic(conversation.topic);
+    const isGroupBlocked = groupStatus[groupId] === "denied";
+    return isGroupBlocked;
+  } else {
+    const isPeerBlocked =
+      peersStatus[conversation.peerAddress.toLowerCase()] === "blocked";
+    return isPeerBlocked;
+  }
+};
+
 export async function sortAndComputePreview(
   conversations: Record<string, XmtpConversation>,
   userAddress: string,
-  topicsData: { [topic: string]: TopicData | undefined },
-  peersStatus: { [peer: string]: "blocked" | "consented" },
-  groupsStatus: { [topic: string]: "allowed" | "denied" },
+  topicsData: TopicsData,
+  peersStatus: PeersStatus,
+  groupStatus: GroupStatus,
   pinnedConversations?: ConversationFlatListItem[]
 ) {
   const conversationsRequests: ConversationWithLastMessagePreview[] = [];
   const conversationsInbox: ConversationWithLastMessagePreview[] = [];
+  const conversationsBlocked: ConversationWithLastMessagePreview[] = [];
   await Promise.all(
     Object.values(conversations).map(
       async (conversation: ConversationWithLastMessagePreview, i) => {
@@ -394,17 +407,19 @@ export async function sortAndComputePreview(
           conversationShouldBeDisplayed(
             conversation,
             topicsData,
-            peersStatus,
-            groupsStatus,
             pinnedConversations
           )
         ) {
           conversation.lastMessagePreview =
             await conversationLastMessagePreview(conversation, userAddress);
           if (
-            conversationShouldBeInInbox(conversation, peersStatus, groupsStatus)
+            conversationShouldBeInInbox(conversation, peersStatus, groupStatus)
           ) {
             conversationsInbox.push(conversation);
+          } else if (
+            isConversationBlocked(conversation, peersStatus, groupStatus)
+          ) {
+            conversationsBlocked.push(conversation);
           } else {
             conversationsRequests.push(conversation);
           }
@@ -414,10 +429,12 @@ export async function sortAndComputePreview(
   );
   conversationsRequests.sort(conversationsSortMethod);
   conversationsInbox.sort(conversationsSortMethod);
+  conversationsBlocked.sort(conversationsSortMethod);
 
   getChatStore(userAddress).getState().setSortedConversationsWithPreview({
     conversationsInbox,
     conversationsRequests,
+    conversationsBlocked,
   });
   setImmediate(() => {
     subscribeToNotifications(userAddress);

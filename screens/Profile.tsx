@@ -728,6 +728,17 @@ export default function ProfileScreen({
           <TableView
             items={[
               {
+                id: "blocked",
+                title: "View removed chats",
+                action: () => {
+                  navigate("Blocked");
+                },
+                titleColor:
+                  Platform.OS === "android"
+                    ? undefined
+                    : primaryColor(colorScheme),
+              },
+              {
                 id: "accounts",
                 title: "Change or add account",
                 action: () => {

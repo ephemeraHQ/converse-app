@@ -95,12 +95,17 @@ export type XmtpMessage = XmtpProtocolMessage & {
 type ConversationsListItems = {
   conversationsInbox: ConversationWithLastMessagePreview[];
   conversationsRequests: ConversationWithLastMessagePreview[];
+  conversationsBlocked: ConversationWithLastMessagePreview[];
 };
 
 export type TopicData = {
   status: "deleted" | "unread" | "read";
   readUntil?: number;
   timestamp?: number;
+};
+
+export type TopicsData = {
+  [topic: string]: TopicData | undefined;
 };
 
 export type MediaPreview = {
@@ -144,7 +149,7 @@ export type ChatStoreType = {
   resyncing: boolean;
   reconnecting: boolean;
   errored: boolean;
-  topicsData: { [topic: string]: TopicData | undefined };
+  topicsData: TopicsData;
   topicsDataFetchedOnce: boolean | undefined;
 
   conversationsSortedOnce: boolean;
@@ -266,6 +271,7 @@ export const initChatStore = (account: string) => {
           sortedConversationsWithPreview: {
             conversationsInbox: [],
             conversationsRequests: [],
+            conversationsBlocked: [],
           },
           setSortedConversationsWithPreview: (items) =>
             set(() => ({

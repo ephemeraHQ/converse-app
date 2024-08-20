@@ -19,7 +19,7 @@ import { NavigationParamList } from "../../screens/Navigation/Navigation";
 
 type Props = { requestsCount: number } & NativeStackScreenProps<
   NavigationParamList,
-  "Chats" | "ShareFrame"
+  "Chats" | "ShareFrame" | "Blocked"
 >;
 export default function RequestsButton({ navigation, requestsCount }: Props) {
   const colorScheme = useColorScheme();
