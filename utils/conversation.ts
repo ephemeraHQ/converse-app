@@ -314,8 +314,6 @@ const conversationsSortMethod = (
 export const conversationShouldBeDisplayed = (
   conversation: ConversationWithLastMessagePreview,
   topicsData: TopicsData,
-  peersStatus: PeersStatus,
-  groupStatus: GroupStatus,
   pinnedConversations?: ConversationFlatListItem[]
 ) => {
   const isNotReady =
@@ -409,8 +407,6 @@ export async function sortAndComputePreview(
           conversationShouldBeDisplayed(
             conversation,
             topicsData,
-            peersStatus,
-            groupStatus,
             pinnedConversations
           )
         ) {
