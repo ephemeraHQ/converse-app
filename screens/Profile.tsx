@@ -729,27 +729,14 @@ export default function ProfileScreen({
             items={[
               {
                 id: "blocked",
-                title: "View blocked chats",
+                title: "View removed chats",
                 action: () => {
-                  navigation.push("Blocked");
+                  navigate("Blocked");
                 },
                 titleColor:
                   Platform.OS === "android"
                     ? undefined
                     : primaryColor(colorScheme),
-                rightView: (
-                  <TableViewPicto
-                    symbol="chevron.right"
-                    color={
-                      Platform.OS === "android"
-                        ? primaryColor(colorScheme)
-                        : undefined
-                    }
-                    onPress={() => {
-                      navigation.navigate("ShareProfile");
-                    }}
-                  />
-                ),
               },
               {
                 id: "accounts",

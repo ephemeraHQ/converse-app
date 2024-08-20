@@ -30,7 +30,7 @@ export default function ConversationBlockedListNav() {
       navigation: any;
     }) => ({
       animation: navigationAnimation as StackAnimationTypes,
-      headerTitle: "Blocked Chats",
+      headerTitle: "Removed Chats",
       headerLeft:
         Platform.OS === "ios"
           ? undefined
