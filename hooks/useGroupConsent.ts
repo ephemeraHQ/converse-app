@@ -47,15 +47,10 @@ export const useGroupConsent = (
       setGroupStatus({ [getGroupIdFromTopic(topic).toLowerCase()]: "allowed" });
       const inboxIdsToAllow: InboxId[] = [];
       const inboxIds: { [inboxId: string]: "allowed" } = {};
-      if (
-        options.includeAddedBy &&
-        typeof group?.addedByInboxId === "function"
-      ) {
-        const addedBy = await group?.addedByInboxId();
-        if (addedBy) {
-          inboxIds[addedBy as string] = "allowed";
-          inboxIdsToAllow.push(addedBy);
-        }
+      if (options.includeAddedBy && group?.addedByInboxId) {
+        const addedBy = group.addedByInboxId;
+        inboxIds[addedBy as string] = "allowed";
+        inboxIdsToAllow.push(addedBy);
       }
       if (options.includeCreator && groupCreator) {
         inboxIds[groupCreator] = "allowed";
@@ -82,15 +77,10 @@ export const useGroupConsent = (
       setGroupStatus({ [getGroupIdFromTopic(topic).toLowerCase()]: "denied" });
       const inboxIdsToDeny: InboxId[] = [];
       const inboxIds: { [inboxId: string]: "denied" } = {};
-      if (
-        options.includeAddedBy &&
-        typeof group?.addedByInboxId === "function"
-      ) {
-        const addedBy = await group.addedByInboxId();
-        if (addedBy) {
-          inboxIds[addedBy] = "denied";
-          inboxIdsToDeny.push(addedBy);
-        }
+      if (options.includeAddedBy && group?.addedByInboxId) {
+        const addedBy = group.addedByInboxId;
+        inboxIds[addedBy] = "denied";
+        inboxIdsToDeny.push(addedBy);
       }
       if (options.includeCreator && groupCreator) {
         inboxIds[groupCreator] = "denied";

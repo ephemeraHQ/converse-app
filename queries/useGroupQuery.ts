@@ -47,7 +47,7 @@ export const useGroupQuery = (account: string, topic: string) => {
         return null;
       }
       // Recreate the group object with the client
-      return new Group(client!, data);
+      return new Group(client!, data, (data as any)?.members);
     },
   });
 };
