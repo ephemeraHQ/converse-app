@@ -223,19 +223,18 @@ export const syncGroupsMessages = async (
     // No need to group.sync here as syncGroupsMessages is called either
     // from handleNewConversation which syncs before, or on groups returned
     // by listGroups which syncs also
-    const members = await group.members();
     setGroupMembersQueryData(
       account,
       group.topic,
       entifyWithAddress(
-        members,
+        group.members,
         (member) => member.inboxId,
         // TODO: Multiple addresses support
         (member) => member.addresses[0]
       )
     );
-    groupMembers[group.topic] = members;
-    saveMemberInboxIds(account, members);
+    groupMembers[group.topic] = group.members;
+    saveMemberInboxIds(account, group.members);
     logger.debug("synced group", group.topic);
   }
   logger.info(`${groups.length} groups synced!`);

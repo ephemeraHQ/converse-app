@@ -25,9 +25,8 @@ export const useGroupMembersQuery = (
           ids: [],
         };
       }
-      const members = await group.members();
       return entifyWithAddress(
-        members,
+        group.members,
         (member) => member.inboxId,
         // TODO: Multiple addresses support
         (member) => member.addresses[0]

@@ -56,16 +56,15 @@ const protocolConversationToStateConversation = (
   isGroup: false,
 });
 
-const protocolGroupToStateConversation = async (
+const protocolGroupToStateConversation = (
   group: GroupWithCodecsType
-): Promise<XmtpConversation> => {
-  const groupMembers = await group.members();
+): XmtpConversation => {
   const groupMembersAddresses: string[] = [];
-  const groupAddedByInboxId = await group.addedByInboxId();
+  const groupAddedByInboxId = group.addedByInboxId;
   let groupCreator: string | undefined;
   let groupAddedBy: string | undefined;
 
-  groupMembers.forEach((m) => {
+  group.members.forEach((m) => {
     if (m.addresses[0]) {
       groupMembersAddresses.push(m.addresses[0]);
     }
@@ -178,9 +177,7 @@ const handleNewConversation = async (
         ? protocolConversationToStateConversation(
             conversation as ConversationWithCodecsType
           )
-        : await protocolGroupToStateConversation(
-            conversation as GroupWithCodecsType
-          ),
+        : protocolGroupToStateConversation(conversation as GroupWithCodecsType),
     ],
     true
   );
@@ -328,12 +325,8 @@ export const loadConversations = async (
     const conversationsToSave = newConversations.map(
       protocolConversationToStateConversation
     );
-    const groupsToCreate = await Promise.all(
-      newGroups.map(protocolGroupToStateConversation)
-    );
-    const groupsToUpdate = await Promise.all(
-      knownGroups.map(protocolGroupToStateConversation)
-    );
+    const groupsToCreate = newGroups.map(protocolGroupToStateConversation);
+    const groupsToUpdate = knownGroups.map(protocolGroupToStateConversation);
     saveConversations(client.address, [
       ...conversationsToSave,
       ...groupsToCreate,
@@ -560,8 +553,7 @@ export const createGroup = async (
   if (groupDescription) {
     setGroupDescriptionQueryData(account, group.topic, groupDescription);
   }
-  const members = await group.members();
-  saveMemberInboxIds(account, members);
+  saveMemberInboxIds(account, group.members);
   await handleNewConversation(client, group);
   return group.topic;
 };
@@ -576,11 +568,10 @@ export const refreshGroup = async (account: string, topic: string) => {
   await group.sync();
   saveConversations(
     client.address,
-    [await protocolGroupToStateConversation(group)],
+    [protocolGroupToStateConversation(group)],
     true
   );
-  const members = await group.members();
-  saveMemberInboxIds(account, members);
+  saveMemberInboxIds(account, group.members);
 };
 
 export const loadConversationsHmacKeys = async (account: string) => {
