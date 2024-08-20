@@ -571,7 +571,8 @@ export const refreshGroup = async (account: string, topic: string) => {
     [protocolGroupToStateConversation(group)],
     true
   );
-  saveMemberInboxIds(account, group.members);
+  const updatedMembers = await group.membersList();
+  saveMemberInboxIds(account, updatedMembers);
 };
 
 export const loadConversationsHmacKeys = async (account: string) => {
