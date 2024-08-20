@@ -89,29 +89,6 @@ export const GroupConversationItem: FC<GroupConversationItemProps> = ({
       };
 
       switch (consent) {
-        case "allowed":
-          showOptions(
-            [
-              translate("remove"),
-              translate("remove_and_block_inviter"),
-              translate("cancel"),
-            ],
-            `${translate("remove")} ${groupName}?`,
-            [
-              () =>
-                blockGroup({
-                  includeAddedBy: false,
-                  includeCreator: false,
-                }),
-              () =>
-                blockGroup({
-                  includeAddedBy: true,
-                  includeCreator: false,
-                }),
-            ]
-          );
-          break;
-
         case "denied":
           showOptions(
             [
@@ -135,22 +112,23 @@ export const GroupConversationItem: FC<GroupConversationItemProps> = ({
           );
           break;
 
+        // for allowed and unknown
         default:
           showOptions(
             [
-              translate("accept"),
-              translate("accept_chat_and_inviter"),
+              translate("remove"),
+              translate("remove_and_block_inviter"),
               translate("cancel"),
             ],
-            `${translate("accept")} ${groupName}?`,
+            `${translate("remove")} ${groupName}?`,
             [
               () =>
-                allowGroup({
+                blockGroup({
                   includeAddedBy: false,
                   includeCreator: false,
                 }),
               () =>
-                allowGroup({
+                blockGroup({
                   includeAddedBy: true,
                   includeCreator: false,
                 }),
