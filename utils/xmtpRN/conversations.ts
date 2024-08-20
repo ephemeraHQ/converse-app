@@ -1,4 +1,5 @@
 import { setGroupDescriptionQueryData } from "@queries/useGroupDescriptionQuery";
+import { setGroupQueryData } from "@queries/useGroupQuery";
 import { converseEventEmitter } from "@utils/events";
 import { getGroupIdFromTopic } from "@utils/groupUtils/groupId";
 import logger from "@utils/logger";
@@ -6,6 +7,7 @@ import {
   ConsentListEntry,
   ConversationContext,
   ConversationVersion,
+  Group,
   InboxId,
 } from "@xmtp/react-native-sdk";
 import { PermissionPolicySet } from "@xmtp/react-native-sdk/build/lib/types/PermissionPolicySet";
@@ -57,8 +59,10 @@ const protocolConversationToStateConversation = (
 });
 
 const protocolGroupToStateConversation = (
+  account: string,
   group: GroupWithCodecsType
 ): XmtpConversation => {
+  setGroupQueryData(account, group.topic, group as Group);
   const groupMembersAddresses: string[] = [];
   const groupAddedByInboxId = group.addedByInboxId;
   let groupCreator: string | undefined;
@@ -177,7 +181,10 @@ const handleNewConversation = async (
         ? protocolConversationToStateConversation(
             conversation as ConversationWithCodecsType
           )
-        : protocolGroupToStateConversation(conversation as GroupWithCodecsType),
+        : protocolGroupToStateConversation(
+            client.address,
+            conversation as GroupWithCodecsType
+          ),
     ],
     true
   );
@@ -328,8 +335,12 @@ export const loadConversations = async (
     const conversationsToSave = newConversations.map(
       protocolConversationToStateConversation
     );
-    const groupsToCreate = newGroups.map(protocolGroupToStateConversation);
-    const groupsToUpdate = knownGroups.map(protocolGroupToStateConversation);
+    const groupsToCreate = newGroups.map((g) =>
+      protocolGroupToStateConversation(account, g)
+    );
+    const groupsToUpdate = knownGroups.map((g) =>
+      protocolGroupToStateConversation(account, g)
+    );
     saveConversations(client.address, [
       ...conversationsToSave,
       ...groupsToCreate,
@@ -571,7 +582,7 @@ export const refreshGroup = async (account: string, topic: string) => {
   await group.sync();
   saveConversations(
     client.address,
-    [protocolGroupToStateConversation(group)],
+    [protocolGroupToStateConversation(account, group)],
     true
   );
   const updatedMembers = await group.membersList();

@@ -4,6 +4,7 @@ import {
   TransactionReference,
 } from "@xmtp/content-type-transaction-reference";
 import {
+  ConversationVersion,
   PreparedLocalMessage,
   sendPreparedMessage,
 } from "@xmtp/react-native-sdk";
@@ -178,7 +179,10 @@ export const sendPendingMessages = async (account: string) => {
         message.conversationId
       );
       if (conversation) {
-        if ((conversation as any).peerAddress && message.status === "sending") {
+        if (
+          conversation.version === ConversationVersion.DIRECT &&
+          message.status === "sending"
+        ) {
           // DM Conversation
           const preparedMessage = await (
             conversation as ConversationWithCodecsType
@@ -193,7 +197,7 @@ export const sendPendingMessages = async (account: string) => {
             newMessageSent: preparedMessage.preparedAt,
             message,
           };
-        } else if ((conversation as any).peerInboxIds) {
+        } else if (conversation.version === ConversationVersion.GROUP) {
           // This is a group message. Preparing it will store
           // it in libxmtp db to be published later, it's different
           // from 1v1 prepareMessage which needs to be sent using sendPreparedMessage

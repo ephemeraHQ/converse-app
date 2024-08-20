@@ -1,8 +1,6 @@
-import { useSettingsStore } from "@data/store/accountsStore";
 import { QueryObserverOptions, useQuery } from "@tanstack/react-query";
 import { Member } from "@xmtp/react-native-sdk";
 import { InboxId } from "@xmtp/react-native-sdk/build/lib/Client";
-import { useShallow } from "zustand/react/shallow";
 
 import { groupMembersQueryKey } from "./QueryKeys";
 import { entifyWithAddress, EntityObjectWithAddress } from "./entify";
@@ -16,10 +14,7 @@ export const useGroupMembersQuery = (
   topic: string,
   queryOptions?: Partial<QueryObserverOptions<GroupMembersSelectData>>
 ) => {
-  const { data: group } = useGroupQuery(account, topic);
-  const initialDataUpdatedAt = useSettingsStore(
-    useShallow((s) => s.lastAsyncUpdate)
-  );
+  const { data: group, dataUpdatedAt } = useGroupQuery(account, topic);
   return useQuery<GroupMembersSelectData>({
     queryKey: groupMembersQueryKey(account, topic),
     queryFn: async () => {
@@ -30,7 +25,6 @@ export const useGroupMembersQuery = (
           ids: [],
         };
       }
-      await group.sync();
       const updatedMembers = await group.membersList();
       return entifyWithAddress(
         updatedMembers,
@@ -47,7 +41,7 @@ export const useGroupMembersQuery = (
           (member) => member.addresses[0]
         )
       : undefined,
-    initialDataUpdatedAt,
+    initialDataUpdatedAt: dataUpdatedAt,
     enabled: !!group,
     ...queryOptions,
   });

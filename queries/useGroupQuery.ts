@@ -57,3 +57,11 @@ export const invalidateGroupQuery = (account: string, topic: string) => {
     queryKey: groupQueryKey(account, topic),
   });
 };
+
+export const setGroupQueryData = (
+  account: string,
+  topic: string,
+  group: Group
+) => {
+  queryClient.setQueryData(groupQueryKey(account, topic), group);
+};
