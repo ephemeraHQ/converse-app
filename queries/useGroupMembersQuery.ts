@@ -1,4 +1,8 @@
-import { QueryObserverOptions, useQuery } from "@tanstack/react-query";
+import {
+  QueryObserverOptions,
+  SetDataOptions,
+  useQuery,
+} from "@tanstack/react-query";
 import { Member } from "@xmtp/react-native-sdk";
 import { InboxId } from "@xmtp/react-native-sdk/build/lib/Client";
 
@@ -33,15 +37,6 @@ export const useGroupMembersQuery = (
         (member) => member.addresses[0]
       );
     },
-    initialData: group?.members
-      ? entifyWithAddress(
-          group.members,
-          (member) => member.inboxId,
-          // TODO: Multiple addresses support
-          (member) => member.addresses[0]
-        )
-      : undefined,
-    initialDataUpdatedAt: dataUpdatedAt,
     enabled: !!group,
     ...queryOptions,
   });
@@ -56,9 +51,14 @@ export const getGroupMembersQueryData = (
 export const setGroupMembersQueryData = (
   account: string,
   topic: string,
-  members: GroupMembersSelectData
+  members: GroupMembersSelectData,
+  options?: SetDataOptions
 ) => {
-  queryClient.setQueryData(groupMembersQueryKey(account, topic), members);
+  queryClient.setQueryData(
+    groupMembersQueryKey(account, topic),
+    members,
+    options
+  );
 };
 
 export const cancelGroupMembersQuery = async (

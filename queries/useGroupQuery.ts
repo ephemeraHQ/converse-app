@@ -8,11 +8,15 @@ import { getXmtpClient } from "@utils/xmtpRN/sync";
 import { Group } from "@xmtp/react-native-sdk";
 
 import { groupQueryKey } from "./QueryKeys";
+import { entifyWithAddress } from "./entify";
 import { queryClient } from "./queryClient";
+import { setGroupMembersQueryData } from "./useGroupMembersQuery";
+import { setGroupNameQueryData } from "./useGroupNameQuery";
+import { setGroupPhotoQueryData } from "./useGroupPhotoQuery";
 import { useGroupsQuery } from "./useGroupsQuery";
 
 export const useGroupQuery = (account: string, topic: string) => {
-  const { data } = useGroupsQuery(account);
+  const { data, dataUpdatedAt } = useGroupsQuery(account);
   return useQuery({
     queryKey: groupQueryKey(account, topic),
     queryFn: async () => {
@@ -24,14 +28,37 @@ export const useGroupQuery = (account: string, topic: string) => {
         return null;
       }
       let group = data?.byId[topic];
+      let groupDataUpdatedAt = dataUpdatedAt;
       if (!group) {
         group = await client?.conversations.findGroup(
           getGroupIdFromTopic(topic)
         );
+        groupDataUpdatedAt = new Date().getTime();
         if (!group) {
           return null;
         }
       }
+      // We'll pre-cache some queries since we know
+      // how old is our current group instance
+      setGroupNameQueryData(account, topic, group.name, {
+        updatedAt: groupDataUpdatedAt,
+      });
+      setGroupPhotoQueryData(account, topic, group.imageUrlSquare, {
+        updatedAt: groupDataUpdatedAt,
+      });
+      setGroupMembersQueryData(
+        account,
+        topic,
+        entifyWithAddress(
+          group.members,
+          (member) => member.inboxId,
+          // TODO: Multiple addresses support
+          (member) => member.addresses[0]
+        ),
+        {
+          updatedAt: groupDataUpdatedAt,
+        }
+      );
       return group;
     },
     enabled: !!data && isGroupTopic(topic),
