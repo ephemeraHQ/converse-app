@@ -251,14 +251,11 @@ class PushNotificationsService : FirebaseMessagingService() {
                     return@launch
                 }
                 val groupId = mmkv?.decodeString("group-invites-link-" + notification.groupInviteId)
-                if (groupId == null) {
-                    throw Error()
-                }
-                var apiURI = mmkv?.decodeString("api-uri")
+                    ?: return@launch
+                var apiURI = mmkv.decodeString("api-uri")
                 if (apiURI == null) {
                     apiURI = getAsyncStorage("api-uri")
                 }
-                print(groupId)
                 val group = getGroup(xmtpClient, groupId)
                 if (group != null && apiURI != null) {
                     group.addMembers(listOf(notification.address))

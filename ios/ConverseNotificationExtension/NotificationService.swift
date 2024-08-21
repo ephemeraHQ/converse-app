@@ -177,8 +177,7 @@ func handleConverseNotification(contentHandler: ((UNNotificationContent) -> Void
         
         if let group = await getGroup(xmtpClient: xmtpClient, groupId: groupId), let apiURI = apiURI {
           try await group.addMembers(addresses: [address])
-          let test = "http://localhost:9875"
-          await putGroupInviteRequest(apiURI: test, account: account, xmtpClient: xmtpClient, status: "ACCEPTED", joinRequestId: joinRequestId)
+          await putGroupInviteRequest(apiURI: apiURI, account: account, xmtpClient: xmtpClient, status: "ACCEPTED", joinRequestId: joinRequestId)
         }
       } else {
         sentryTrackMessage(message: "No client found for account", extras: ["account": account])

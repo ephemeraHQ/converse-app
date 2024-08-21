@@ -77,6 +77,7 @@ const en = {
   join_group: "Join group",
   group_join_error: "An error occurred",
   group_join_invite_invalid: "This invite is no longer valid",
+  group_finished_polling: "This is taking longer than expected",
 
   // Group Overview
   change_profile_picture: "Change profile picture",
