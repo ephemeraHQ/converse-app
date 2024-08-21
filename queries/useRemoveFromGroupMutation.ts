@@ -1,5 +1,6 @@
 import { useMutation } from "@tanstack/react-query";
 import logger from "@utils/logger";
+import { sentryTrackError } from "@utils/sentry";
 import { InboxId } from "@xmtp/react-native-sdk/build/lib/Client";
 
 import { removeMemberMutationKey } from "./MutationKeys";
@@ -38,8 +39,9 @@ export const useRemoveFromGroupMutation = (account: string, topic: string) => {
 
       return { previousGroupMembers };
     },
-    onError: (_error, _variables, context) => {
+    onError: (error, _variables, context) => {
       logger.warn("onError useRemoveFromGroupMutation");
+      sentryTrackError(error);
       if (context?.previousGroupMembers === undefined) {
         return;
       }

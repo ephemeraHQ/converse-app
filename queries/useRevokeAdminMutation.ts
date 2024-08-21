@@ -1,5 +1,6 @@
 import { useMutation } from "@tanstack/react-query";
 import logger from "@utils/logger";
+import { sentryTrackError } from "@utils/sentry";
 import { Member } from "@xmtp/react-native-sdk";
 import { InboxId } from "@xmtp/react-native-sdk/build/lib/Client";
 
@@ -44,8 +45,9 @@ export const useRevokeAdminMutation = (account: string, topic: string) => {
 
       return { previousGroupMembers };
     },
-    onError: (_error, _variables, context) => {
+    onError: (error, _variables, context) => {
       logger.warn("onError useRevokeAdminMutation");
+      sentryTrackError(error);
       if (context?.previousGroupMembers === undefined) {
         return;
       }

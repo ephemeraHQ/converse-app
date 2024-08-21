@@ -1,5 +1,6 @@
 import { useMutation } from "@tanstack/react-query";
 import logger from "@utils/logger";
+import { sentryTrackError } from "@utils/sentry";
 
 import { setGroupDescriptionMutationKey } from "./MutationKeys";
 import {
@@ -30,9 +31,9 @@ export const useGroupDescriptionMutation = (account: string, topic: string) => {
       setGroupDescriptionQueryData(account, topic, groupDescription);
       return { previousGroupDescription };
     },
-    // eslint-disable-next-line node/handle-callback-err
-    onError: (_error, _variables, context) => {
+    onError: (error, _variables, context) => {
       logger.warn("onError useGroupDescriptionMutation");
+      sentryTrackError(error);
       if (context?.previousGroupDescription === undefined) {
         return;
       }
