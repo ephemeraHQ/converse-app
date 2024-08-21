@@ -1,4 +1,6 @@
+import { entifyWithAddress } from "@queries/entify";
 import { setGroupDescriptionQueryData } from "@queries/useGroupDescriptionQuery";
+import { setGroupMembersQueryData } from "@queries/useGroupMembersQuery";
 import { setGroupQueryData } from "@queries/useGroupQuery";
 import { converseEventEmitter } from "@utils/events";
 import { getGroupIdFromTopic } from "@utils/groupUtils/groupId";
@@ -28,7 +30,10 @@ import { XmtpConversation } from "../../data/store/chatStore";
 import { SettingsStoreType } from "../../data/store/settingsStore";
 import { setGroupNameQueryData } from "../../queries/useGroupNameQuery";
 import { setGroupPhotoQueryData } from "../../queries/useGroupPhotoQuery";
-import { addGroupToGroupsQuery } from "../../queries/useGroupsQuery";
+import {
+  addGroupToGroupsQuery,
+  fetchGroupsQuery,
+} from "../../queries/useGroupsQuery";
 import { ConversationWithLastMessagePreview } from "../conversation";
 import { getCleanAddress } from "../eth";
 import { getTopicDataFromKeychain } from "../keychain/helpers";
@@ -62,7 +67,21 @@ const protocolGroupToStateConversation = (
   account: string,
   group: GroupWithCodecsType
 ): XmtpConversation => {
+  // We'll pre-cache some queries since we know
+  // this data is up to date - was just queried!
   setGroupQueryData(account, group.topic, group as Group);
+  setGroupNameQueryData(account, group.topic, group.name);
+  setGroupPhotoQueryData(account, group.topic, group.imageUrlSquare);
+  setGroupMembersQueryData(
+    account,
+    group.topic,
+    entifyWithAddress(
+      group.members,
+      (member) => member.inboxId,
+      // TODO: Multiple addresses support
+      (member) => member.addresses[0]
+    )
+  );
   const groupMembersAddresses: string[] = [];
   const groupAddedByInboxId = group.addedByInboxId;
   let groupCreator: string | undefined;
@@ -275,16 +294,20 @@ const listConversations = async (client: ConverseXmtpClientType) => {
 };
 
 const listGroups = async (client: ConverseXmtpClientType) => {
-  await client.conversations.syncGroups();
-  const groups = await client.conversations.listGroups();
-  // @todo => use a syncAllGroups before calling listGroups
-  for (const group of groups) {
+  // @todo => this will be adapted once we have a syncAllGroups method
+  const groups = await fetchGroupsQuery(client.address);
+  // Resync process
+  for (const id of groups.ids) {
+    const group = groups.byId[id];
+    incrementMethodCounter(group.topic, "sync", "listGroups");
     await group.sync();
-    setOpenedConversation(client.address, group);
   }
-  // Re-listing to get updated members from group.sync()
-  // @todo => remove once we have a syncAllGroups method
-  return await client.conversations.listGroups();
+  // Now that it's synced, let's refresh
+  const updatedGroups = await fetchGroupsQuery(client.address, 0);
+  return updatedGroups.ids.map((id) => {
+    setOpenedConversation(client.address, updatedGroups.byId[id]);
+    return updatedGroups.byId[id];
+  });
 };
 
 export const importedTopicsDataForAccount: { [account: string]: boolean } = {};
