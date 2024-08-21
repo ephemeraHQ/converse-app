@@ -863,8 +863,6 @@
 				OTHER_LDFLAGS = (
 					"-l\"xmtpv3\"",
 					"$(inherited)",
-					"-Wl",
-					"-ld_classic",
 				);
 				REACT_NATIVE_PATH = "${PODS_ROOT}/../../node_modules/react-native";
 				SDKROOT = iphoneos;
@@ -974,8 +972,6 @@
 				OTHER_LDFLAGS = (
 					"-l\"xmtpv3\"",
 					"$(inherited)",
-					"-Wl",
-					"-ld_classic",
 				);
 				REACT_NATIVE_PATH = "${PODS_ROOT}/../../node_modules/react-native";
 				SDKROOT = iphoneos;
