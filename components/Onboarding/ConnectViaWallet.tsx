@@ -1,4 +1,4 @@
-import { translate } from "@i18n/index";
+import { translate } from "@i18n";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { textPrimaryColor, textSecondaryColor } from "@styles/colors";
 import { getDatabaseFilesForInboxId } from "@utils/fileSystem";

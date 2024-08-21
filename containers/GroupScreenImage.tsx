@@ -5,7 +5,7 @@ import { useGroupMembers } from "@hooks/useGroupMembers";
 import { useGroupPermissions } from "@hooks/useGroupPermissions";
 import { useGroupPhoto } from "@hooks/useGroupPhoto";
 import { usePhotoSelect } from "@hooks/usePhotoSelect";
-import { translate } from "@i18n/index";
+import { translate } from "@i18n";
 import {
   getAddressIsAdmin,
   getAddressIsSuperAdmin,

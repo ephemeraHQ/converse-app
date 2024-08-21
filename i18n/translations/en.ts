@@ -46,6 +46,17 @@ const en = {
   promote_to_admin: "Promote to admin",
   send_a_message: "Send a message",
   client_error: "Looks like something went wrong, please try reconnecting.",
+  actions: "ACTIONS",
+  common_activity: "COMMON ACTIVITY",
+  social: "SOCIAL",
+  address: "ADDRESS",
+  youre_the_og: "YOU'RE THE OG",
+  app_version: "APP VERSION",
+  security: "SECURITY",
+  revoke_other_installations: "Revoke other installations",
+  revoke_all_other_installations: "Revoke all other installations",
+  revoke_description:
+    "Revoke all other group installations of XMTP on other applications and devices.",
 
   // Attachments
   photo_library: "Photo Library",

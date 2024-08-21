@@ -1,7 +1,7 @@
 import { useGroupConsent } from "@hooks/useGroupConsent";
 import { useGroupMembers } from "@hooks/useGroupMembers";
 import { useGroupName } from "@hooks/useGroupName";
-import { translate } from "@i18n/index";
+import { translate } from "@i18n";
 import { useGroupQuery } from "@queries/useGroupQuery";
 import { actionSheetColors, textPrimaryColor } from "@styles/colors";
 import { useCallback, useMemo } from "react";

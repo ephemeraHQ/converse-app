@@ -2,7 +2,7 @@ import { showActionSheetWithOptions } from "@components/StateHandlers/ActionShee
 import { TableViewPicto } from "@components/TableView/TableViewImage";
 import { useCurrentAccount, useProfilesStore } from "@data/store/accountsStore";
 import { useGroupPendingRequests } from "@hooks/useGroupPendingRequests";
-import { translate } from "@i18n/translate";
+import { translate } from "@i18n";
 import { useAddToGroupMutation } from "@queries/useAddToGroupMutation";
 import { invalidatePendingJoinRequestsQuery } from "@queries/usePendingRequestsQuery";
 import { actionSheetColors, textSecondaryColor } from "@styles/colors";
