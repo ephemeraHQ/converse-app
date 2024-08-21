@@ -1,37 +1,42 @@
 import { useQuery } from "@tanstack/react-query";
+import { getXmtpClient } from "@utils/xmtpRN/sync";
 
 import { groupsQueryKey } from "./QueryKeys";
 import { entify, EntityObject } from "./entify";
 import { queryClient } from "./queryClient";
-import { useClient } from "./useClient";
-import { GroupWithCodecsType } from "../utils/xmtpRN/client";
+import {
+  ConverseXmtpClientType,
+  GroupWithCodecsType,
+} from "../utils/xmtpRN/client";
 
-type GroupsRawData = GroupWithCodecsType[] | undefined;
 type GroupMembersSelectData = EntityObject<GroupWithCodecsType, string>;
 
-export const useGroupsQuery = (account: string) => {
-  const client = useClient(account);
+const groupsQueryFn = async (account: string) => {
+  const client = (await getXmtpClient(account)) as ConverseXmtpClientType;
+  if (!client) {
+    return {
+      byId: {},
+      ids: [],
+    };
+  }
+  await client.conversations.syncGroups();
+  const groups = await client.conversations.listGroups();
+  return entify(groups, (group) => group.topic);
+};
 
-  return useQuery<GroupsRawData, unknown, GroupMembersSelectData>({
+export const useGroupsQuery = (account: string) => {
+  return useQuery<GroupMembersSelectData>({
     queryKey: groupsQueryKey(account),
-    queryFn: async () => {
-      if (!client) {
-        return;
-      }
-      await client.conversations.syncGroups();
-      const groups = await client.conversations.listGroups();
-      return groups;
-    },
-    enabled: !!client,
-    select: (data): EntityObject<GroupWithCodecsType> => {
-      if (!data) {
-        return {
-          byId: {},
-          ids: [],
-        };
-      }
-      return entify(data, (group) => group.topic);
-    },
+    queryFn: () => groupsQueryFn(account),
+    enabled: !!account,
+  });
+};
+
+export const fetchGroupsQuery = (account: string, staleTime?: number) => {
+  return queryClient.fetchQuery({
+    queryKey: groupsQueryKey(account),
+    queryFn: () => groupsQueryFn(account),
+    staleTime,
   });
 };
 
@@ -39,10 +44,15 @@ export const invalidateGroupsQuery = (account: string) => {
   return queryClient.invalidateQueries({ queryKey: groupsQueryKey(account) });
 };
 
-const getGroupsQueryData = (account: string): GroupsRawData | undefined =>
+const getGroupsQueryData = (
+  account: string
+): GroupMembersSelectData | undefined =>
   queryClient.getQueryData(groupsQueryKey(account));
 
-const setGroupsQueryData = (account: string, groups: GroupsRawData) => {
+const setGroupsQueryData = (
+  account: string,
+  groups: GroupMembersSelectData
+) => {
   queryClient.setQueryData(groupsQueryKey(account), groups);
 };
 
@@ -50,9 +60,16 @@ export const addGroupToGroupsQuery = (
   account: string,
   group: GroupWithCodecsType
 ) => {
-  const previousGroups = getGroupsQueryData(account);
-  if (!previousGroups) {
+  const previousGroupsData = getGroupsQueryData(account);
+  if (!previousGroupsData) {
     return;
   }
-  setGroupsQueryData(account, [...previousGroups, group]);
+
+  setGroupsQueryData(account, {
+    byId: {
+      ...previousGroupsData.byId,
+      [group.topic]: group,
+    },
+    ids: [...previousGroupsData.ids, group.topic],
+  });
 };

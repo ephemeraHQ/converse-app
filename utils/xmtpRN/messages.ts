@@ -1,3 +1,5 @@
+import { entifyWithAddress } from "@queries/entify";
+import { setGroupMembersQueryData } from "@queries/useGroupMembersQuery";
 import logger from "@utils/logger";
 import { TransactionReference } from "@xmtp/content-type-transaction-reference";
 import {
@@ -216,17 +218,23 @@ export const syncGroupsMessages = async (
   groups: GroupWithCodecsType[],
   queryGroupsFromTimestamp: { [topic: string]: number }
 ) => {
-  logger.info(`Syncing ${groups.length} groups...`);
   for (const group of groups) {
     // No need to group.sync here as syncGroupsMessages is called either
     // from handleNewConversation which syncs before, or on groups returned
     // by listGroups which syncs also
-    const members = await group.members();
-    groupMembers[group.topic] = members;
-    saveMemberInboxIds(account, members);
-    logger.debug("synced group", group.topic);
+    setGroupMembersQueryData(
+      account,
+      group.topic,
+      entifyWithAddress(
+        group.members,
+        (member) => member.inboxId,
+        // TODO: Multiple addresses support
+        (member) => member.addresses[0]
+      )
+    );
+    groupMembers[group.topic] = group.members;
+    saveMemberInboxIds(account, group.members);
   }
-  logger.info(`${groups.length} groups synced!`);
   const newMessages = (
     await Promise.all(
       groups.map((g) =>

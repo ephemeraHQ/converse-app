@@ -1,10 +1,16 @@
+import { useCurrentAccount } from "@data/store/accountsStore";
+import { useGroupMembers } from "@hooks/useGroupMembers";
 import { useGroupName } from "@hooks/useGroupName";
 import { useGroupPermissions } from "@hooks/useGroupPermissions";
 import { textPrimaryColor } from "@styles/colors";
+import {
+  getAddressIsAdmin,
+  getAddressIsSuperAdmin,
+} from "@utils/groupUtils/adminUtils";
 import { memberCanUpdateGroup } from "@utils/groupUtils/memberCanUpdateGroup";
 import logger from "@utils/logger";
 import { formatGroupName } from "@utils/str";
-import React, { FC, useCallback, useState } from "react";
+import React, { FC, useCallback, useMemo, useState } from "react";
 import {
   StyleSheet,
   TextInput,
@@ -15,19 +21,25 @@ import {
 
 interface GroupScreenNameProps {
   topic: string;
-  currentAccountIsAdmin: boolean;
-  currentAccountIsSuperAdmin: boolean;
 }
 
-export const GroupScreenName: FC<GroupScreenNameProps> = ({
-  topic,
-  currentAccountIsAdmin,
-  currentAccountIsSuperAdmin,
-}) => {
+export const GroupScreenName: FC<GroupScreenNameProps> = ({ topic }) => {
   const styles = useStyles();
   const { permissions } = useGroupPermissions(topic);
   const { groupName, setGroupName } = useGroupName(topic);
   const formattedGroupName = formatGroupName(topic, groupName);
+  const currentAccount = useCurrentAccount() as string;
+  const { members } = useGroupMembers(topic);
+  const { currentAccountIsAdmin, currentAccountIsSuperAdmin } = useMemo(
+    () => ({
+      currentAccountIsAdmin: getAddressIsAdmin(members, currentAccount),
+      currentAccountIsSuperAdmin: getAddressIsSuperAdmin(
+        members,
+        currentAccount
+      ),
+    }),
+    [currentAccount, members]
+  );
 
   const [editedName, setEditedName] = useState(formattedGroupName);
 
