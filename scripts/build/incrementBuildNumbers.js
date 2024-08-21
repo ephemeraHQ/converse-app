@@ -7,12 +7,14 @@ const filePath = "./app.json";
 const appJson = JSON.parse(fs.readFileSync(filePath, "utf-8"));
 
 // Increment build numbers
-appJson.expo.ios.buildNumber = (
+const newBuildNumber = (
   parseInt(appJson.expo.ios.buildNumber, 10) + 1
 ).toString();
+appJson.expo.ios.buildNumber = newBuildNumber;
 appJson.expo.android.versionCode = appJson.expo.android.versionCode + 1;
 
 // Write the updated app.json back to the file
-fs.writeFileSync(filePath, JSON.stringify(appJson, null, 2), "utf-8");
+fs.writeFileSync(filePath, JSON.stringify(appJson, null, 2) + "\n", "utf-8");
 
 console.log("Version numbers incremented successfully.");
+console.log(`::set-output name=new_ios_build_number::${newBuildNumber}`);
