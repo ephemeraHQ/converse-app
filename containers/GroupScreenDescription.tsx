@@ -1,10 +1,16 @@
+import { useCurrentAccount } from "@data/store/accountsStore";
 import { useGroupDescription } from "@hooks/useGroupDescription";
+import { useGroupMembers } from "@hooks/useGroupMembers";
 import { useGroupPermissions } from "@hooks/useGroupPermissions";
 import { translate } from "@i18n/translate";
 import { textPrimaryColor } from "@styles/colors";
+import {
+  getAddressIsAdmin,
+  getAddressIsSuperAdmin,
+} from "@utils/groupUtils/adminUtils";
 import { memberCanUpdateGroup } from "@utils/groupUtils/memberCanUpdateGroup";
 import logger from "@utils/logger";
-import { FC, useCallback, useState } from "react";
+import { FC, useCallback, useMemo, useState } from "react";
 import {
   Alert,
   StyleSheet,
@@ -15,15 +21,23 @@ import {
 
 interface GroupScreenDescriptionProps {
   topic: string;
-  currentAccountIsAdmin: boolean;
-  currentAccountIsSuperAdmin: boolean;
 }
 
 export const GroupScreenDescription: FC<GroupScreenDescriptionProps> = ({
   topic,
-  currentAccountIsAdmin,
-  currentAccountIsSuperAdmin,
 }) => {
+  const currentAccount = useCurrentAccount() as string;
+  const { members } = useGroupMembers(topic);
+  const { currentAccountIsAdmin, currentAccountIsSuperAdmin } = useMemo(
+    () => ({
+      currentAccountIsAdmin: getAddressIsAdmin(members, currentAccount),
+      currentAccountIsSuperAdmin: getAddressIsSuperAdmin(
+        members,
+        currentAccount
+      ),
+    }),
+    [currentAccount, members]
+  );
   const styles = useStyles();
   const { permissions } = useGroupPermissions(topic);
   const { groupDescription, setGroupDescription } = useGroupDescription(topic);

@@ -1,4 +1,7 @@
+import { entifyWithAddress } from "@queries/entify";
 import { setGroupDescriptionQueryData } from "@queries/useGroupDescriptionQuery";
+import { setGroupMembersQueryData } from "@queries/useGroupMembersQuery";
+import { setGroupQueryData } from "@queries/useGroupQuery";
 import { converseEventEmitter } from "@utils/events";
 import { getGroupIdFromTopic } from "@utils/groupUtils/groupId";
 import logger from "@utils/logger";
@@ -6,6 +9,7 @@ import {
   ConsentListEntry,
   ConversationContext,
   ConversationVersion,
+  Group,
   InboxId,
 } from "@xmtp/react-native-sdk";
 import { PermissionPolicySet } from "@xmtp/react-native-sdk/build/lib/types/PermissionPolicySet";
@@ -26,7 +30,10 @@ import { XmtpConversation } from "../../data/store/chatStore";
 import { SettingsStoreType } from "../../data/store/settingsStore";
 import { setGroupNameQueryData } from "../../queries/useGroupNameQuery";
 import { setGroupPhotoQueryData } from "../../queries/useGroupPhotoQuery";
-import { addGroupToGroupsQuery } from "../../queries/useGroupsQuery";
+import {
+  addGroupToGroupsQuery,
+  fetchGroupsQuery,
+} from "../../queries/useGroupsQuery";
 import { ConversationWithLastMessagePreview } from "../conversation";
 import { getCleanAddress } from "../eth";
 import { getTopicDataFromKeychain } from "../keychain/helpers";
@@ -56,16 +63,31 @@ const protocolConversationToStateConversation = (
   isGroup: false,
 });
 
-const protocolGroupToStateConversation = async (
+const protocolGroupToStateConversation = (
+  account: string,
   group: GroupWithCodecsType
-): Promise<XmtpConversation> => {
-  const groupMembers = await group.members();
+): XmtpConversation => {
+  // We'll pre-cache some queries since we know
+  // this data is up to date - was just queried!
+  setGroupQueryData(account, group.topic, group as Group);
+  setGroupNameQueryData(account, group.topic, group.name);
+  setGroupPhotoQueryData(account, group.topic, group.imageUrlSquare);
+  setGroupMembersQueryData(
+    account,
+    group.topic,
+    entifyWithAddress(
+      group.members,
+      (member) => member.inboxId,
+      // TODO: Multiple addresses support
+      (member) => member.addresses[0]
+    )
+  );
   const groupMembersAddresses: string[] = [];
-  const groupAddedByInboxId = await group.addedByInboxId();
+  const groupAddedByInboxId = group.addedByInboxId;
   let groupCreator: string | undefined;
   let groupAddedBy: string | undefined;
 
-  groupMembers.forEach((m) => {
+  group.members.forEach((m) => {
     if (m.addresses[0]) {
       groupMembersAddresses.push(m.addresses[0]);
     }
@@ -178,7 +200,8 @@ const handleNewConversation = async (
         ? protocolConversationToStateConversation(
             conversation as ConversationWithCodecsType
           )
-        : await protocolGroupToStateConversation(
+        : protocolGroupToStateConversation(
+            client.address,
             conversation as GroupWithCodecsType
           ),
     ],
@@ -271,13 +294,19 @@ const listConversations = async (client: ConverseXmtpClientType) => {
 };
 
 const listGroups = async (client: ConverseXmtpClientType) => {
-  await client.conversations.syncGroups();
-  const groups = await client.conversations.listGroups();
-  for (const group of groups) {
+  // @todo => this will be adapted once we have a syncAllGroups method
+  const groups = await fetchGroupsQuery(client.address);
+  // Resync process
+  for (const id of groups.ids) {
+    const group = groups.byId[id];
     await group.sync();
-    setOpenedConversation(client.address, group);
   }
-  return groups;
+  // Now that it's synced, let's refresh
+  const updatedGroups = await fetchGroupsQuery(client.address, 0);
+  return updatedGroups.ids.map((id) => {
+    setOpenedConversation(client.address, updatedGroups.byId[id]);
+    return updatedGroups.byId[id];
+  });
 };
 
 export const importedTopicsDataForAccount: { [account: string]: boolean } = {};
@@ -328,11 +357,11 @@ export const loadConversations = async (
     const conversationsToSave = newConversations.map(
       protocolConversationToStateConversation
     );
-    const groupsToCreate = await Promise.all(
-      newGroups.map(protocolGroupToStateConversation)
+    const groupsToCreate = newGroups.map((g) =>
+      protocolGroupToStateConversation(account, g)
     );
-    const groupsToUpdate = await Promise.all(
-      knownGroups.map(protocolGroupToStateConversation)
+    const groupsToUpdate = knownGroups.map((g) =>
+      protocolGroupToStateConversation(account, g)
     );
     saveConversations(client.address, [
       ...conversationsToSave,
@@ -560,8 +589,7 @@ export const createGroup = async (
   if (groupDescription) {
     setGroupDescriptionQueryData(account, group.topic, groupDescription);
   }
-  const members = await group.members();
-  saveMemberInboxIds(account, members);
+  saveMemberInboxIds(account, group.members);
   await handleNewConversation(client, group);
   return group.topic;
 };
@@ -576,11 +604,11 @@ export const refreshGroup = async (account: string, topic: string) => {
   await group.sync();
   saveConversations(
     client.address,
-    [await protocolGroupToStateConversation(group)],
+    [protocolGroupToStateConversation(account, group)],
     true
   );
-  const members = await group.members();
-  saveMemberInboxIds(account, members);
+  const updatedMembers = await group.membersList();
+  saveMemberInboxIds(account, updatedMembers);
 };
 
 export const loadConversationsHmacKeys = async (account: string) => {
