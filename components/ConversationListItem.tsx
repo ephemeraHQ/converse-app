@@ -218,54 +218,93 @@ const ConversationListItem = memo(function ConversationListItem({
       onRightActionPress(closeSwipeable);
       return;
     }
-    showActionSheetWithOptions(
-      {
-        options: [
+
+    const showOptions = (
+      options: string[],
+      title: string,
+      actions: (() => void)[]
+    ) => {
+      showActionSheetWithOptions(
+        {
+          options,
+          cancelButtonIndex: options.length - 1,
+          // Only show red buttons for destructive actions
+          destructiveButtonIndex: isBlockedChatView ? undefined : [0, 1],
+          title,
+          ...actionSheetColors(colorScheme),
+        },
+        async (selectedIndex?: number) => {
+          if (selectedIndex !== undefined && selectedIndex < actions.length) {
+            actions[selectedIndex]();
+          } else {
+            closeSwipeable();
+          }
+        }
+      );
+    };
+
+    if (isBlockedChatView) {
+      showOptions(
+        [translate("unblock_and_restore"), translate("cancel")],
+        `${translate("unblock")} ${conversationPeerAddress}?`,
+        [
+          () => {
+            if (!conversationPeerAddress) return;
+            consentToPeersOnProtocol(
+              currentAccount(),
+              [conversationPeerAddress],
+              "allow"
+            );
+            setPeersStatus({ [conversationPeerAddress]: "consented" });
+          },
+        ]
+      );
+    } else {
+      // for allowed and unknown peer status
+      showOptions(
+        [
           translate("delete"),
           translate("delete_and_block"),
           translate("cancel"),
         ],
-        cancelButtonIndex: 2,
-        destructiveButtonIndex: [0, 1],
-        title: `Delete chat with ${conversationPeerAddress}?`,
-        ...actionSheetColors(colorScheme),
-      },
-      (selectedIndex?: number) => {
-        if (!conversationPeerAddress) return;
-        if (selectedIndex === 0) {
-          saveTopicsData(currentAccount(), {
-            [conversationTopic]: {
-              status: "deleted",
-              timestamp: new Date().getTime(),
-            },
-          });
-          setTopicsData({
-            [conversationTopic]: {
-              status: "deleted",
-              timestamp: new Date().getTime(),
-            },
-          });
-        } else if (selectedIndex === 1) {
-          saveTopicsData(currentAccount(), {
-            [conversationTopic]: { status: "deleted" },
-          });
-          setTopicsData({
-            [conversationTopic]: {
-              status: "deleted",
-              timestamp: new Date().getTime(),
-            },
-          });
-          consentToPeersOnProtocol(
-            currentAccount(),
-            [conversationPeerAddress],
-            "deny"
-          );
-          setPeersStatus({ [conversationPeerAddress]: "blocked" });
-        } else {
-          closeSwipeable();
-        }
-      }
-    );
+        `${translate("delete_chat_with")} ${conversationPeerAddress}?`,
+        [
+          () => {
+            if (!conversationPeerAddress) return;
+            saveTopicsData(currentAccount(), {
+              [conversationTopic]: {
+                status: "deleted",
+                timestamp: new Date().getTime(),
+              },
+            }),
+              setTopicsData({
+                [conversationTopic]: {
+                  status: "deleted",
+                  timestamp: new Date().getTime(),
+                },
+              });
+          },
+          () => {
+            if (!conversationPeerAddress) return;
+            saveTopicsData(currentAccount(), {
+              [conversationTopic]: { status: "deleted" },
+            });
+            setTopicsData({
+              [conversationTopic]: {
+                status: "deleted",
+                timestamp: new Date().getTime(),
+              },
+            });
+            consentToPeersOnProtocol(
+              currentAccount(),
+              [conversationPeerAddress],
+              "deny"
+            );
+            setPeersStatus({ [conversationPeerAddress]: "blocked" });
+          },
+        ]
+      );
+    }
   }, [
     closeSwipeable,
     colorScheme,
@@ -274,6 +313,7 @@ const ConversationListItem = memo(function ConversationListItem({
     onRightActionPress,
     setPeersStatus,
     setTopicsData,
+    isBlockedChatView,
   ]);
 
   const renderRightActions = useCallback(() => {
