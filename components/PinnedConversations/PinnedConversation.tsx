@@ -1,8 +1,11 @@
+import { useSelect } from "@data/store/storeHelpers";
 import { useGroupNameQuery } from "@queries/useGroupNameQuery";
 import { useGroupPhotoQuery } from "@queries/useGroupPhotoQuery";
 import { backgroundColor, textSecondaryColor } from "@styles/colors";
 import { AvatarSizes } from "@styles/sizes";
-import { FC, useCallback } from "react";
+import { ConversationWithLastMessagePreview } from "@utils/conversation";
+import { showUnreadOnConversation } from "@utils/conversation/showUnreadOnConversation";
+import { FC, useCallback, useMemo } from "react";
 import {
   StyleSheet,
   Text,
@@ -16,13 +19,12 @@ import {
   useCurrentAccount,
   useProfilesStore,
 } from "../../data/store/accountsStore";
-import { XmtpConversation } from "../../data/store/chatStore";
 import { navigate } from "../../utils/navigation";
 import { getPreferredAvatar, getPreferredName } from "../../utils/profile";
 import GroupAvatar from "../GroupAvatar";
 
 interface Props {
-  conversation: XmtpConversation;
+  conversation: ConversationWithLastMessagePreview;
 }
 
 export const PinnedConversation: FC<Props> = ({ conversation }) => {
@@ -50,6 +52,21 @@ export const PinnedConversation: FC<Props> = ({ conversation }) => {
   const onLongPress = useCallback(() => {
     setPinnedConversations([conversation]);
   }, [conversation, setPinnedConversations]);
+  const { initialLoadDoneOnce, topicsData } = useChatStore(
+    useSelect(["initialLoadDoneOnce", "topicsData"])
+  );
+
+  const showUnread = useMemo(
+    () =>
+      showUnreadOnConversation(
+        initialLoadDoneOnce,
+        conversation.lastMessagePreview,
+        topicsData,
+        conversation,
+        account
+      ),
+    [account, conversation, initialLoadDoneOnce, topicsData]
+  );
 
   const avatarComponent = isGroup ? (
     <GroupAvatar
@@ -58,6 +75,7 @@ export const PinnedConversation: FC<Props> = ({ conversation }) => {
       size={AvatarSizes.pinnedConversation}
       style={styles.avatar}
       topic={conversation.topic}
+      showIndicator={showUnread}
     />
   ) : (
     <Avatar
@@ -66,6 +84,7 @@ export const PinnedConversation: FC<Props> = ({ conversation }) => {
       size={AvatarSizes.pinnedConversation}
       style={styles.avatar}
       name={getPreferredName(socials, conversation.peerAddress || "")}
+      showIndicator={showUnread}
     />
   );
 

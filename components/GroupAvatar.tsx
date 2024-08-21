@@ -17,6 +17,7 @@ import {
 } from "react-native";
 
 import Avatar from "./Avatar";
+import { Indicator } from "./Indicator";
 import {
   useProfilesStore,
   useCurrentAccount,
@@ -42,6 +43,7 @@ type GroupAvatarProps = {
   // Converstion List should not make requests across the bridge
   // Use data from the initial sync, and as the query gets updated
   onConversationListScreen?: boolean;
+  showIndicator?: boolean;
 };
 
 const calculatePositions = (
@@ -76,48 +78,6 @@ const calculatePositions = (
       { x: mainCircleRadius * 0.5, y: mainCircleRadius * 1.2, size: 30 },
       { x: mainCircleRadius * 1.1, y: mainCircleRadius * 0.9, size: 35 },
     ]
-  );
-};
-
-const PlaceholderAvatar: React.FC<{
-  pos: Position;
-  firstLetter: string;
-  colorScheme: ColorSchemeType;
-  size: number;
-}> = ({ pos, firstLetter, colorScheme, size }) => {
-  const styles = getStyles(colorScheme);
-  return (
-    <View
-      style={[
-        styles.placeholderAvatar,
-        {
-          left: (pos.x / 100) * size,
-          top: (pos.y / 100) * size,
-          width: (pos.size / 100) * size,
-          height: (pos.size / 100) * size,
-          borderRadius: ((pos.size / 100) * size) / 2,
-          backgroundColor:
-            colorScheme === "dark"
-              ? textSecondaryColor(colorScheme)
-              : actionSecondaryColor(colorScheme),
-        },
-      ]}
-    >
-      <Text
-        style={[
-          styles.placeholderText,
-          {
-            color:
-              colorScheme === "dark"
-                ? textPrimaryColor(colorScheme)
-                : inversePrimaryColor(colorScheme),
-            fontSize: ((pos.size / 100) * size) / 2,
-          },
-        ]}
-      >
-        {firstLetter}
-      </Text>
-    </View>
   );
 };
 
@@ -171,6 +131,7 @@ const GroupAvatar: React.FC<GroupAvatarProps> = ({
   pendingGroupMembers,
   excludeSelf = true,
   onConversationListScreen = false,
+  showIndicator = false,
 }) => {
   const colorScheme = useColorScheme();
   const styles = getStyles(colorScheme);
@@ -224,7 +185,7 @@ const GroupAvatar: React.FC<GroupAvatarProps> = ({
   return (
     <View style={[styles.container, { width: size, height: size }, style]}>
       {uri ? (
-        <Avatar size={size} uri={uri} />
+        <Avatar size={size} uri={uri} showIndicator={showIndicator} />
       ) : (
         <View style={[styles.container, { width: size, height: size }]}>
           <View style={styles.overlay} />
@@ -261,6 +222,7 @@ const GroupAvatar: React.FC<GroupAvatarProps> = ({
               return null;
             })}
           </View>
+          {showIndicator && <Indicator size={size} />}
         </View>
       )}
     </View>

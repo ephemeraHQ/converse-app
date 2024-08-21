@@ -1,7 +1,7 @@
 import { actionSecondaryColor, textSecondaryColor } from "@styles/colors";
 import { AvatarSizes } from "@styles/sizes";
 import { getFirstLetterForAvatar } from "@utils/getFirstLetterForAvatar";
-import { Image } from "expo-image";
+import { ImageBackground } from "expo-image";
 import React, { useCallback, useState } from "react";
 import {
   ColorSchemeName,
@@ -13,12 +13,15 @@ import {
   View,
 } from "react-native";
 
+import { Indicator } from "./Indicator";
+
 type Props = {
   uri?: string | undefined;
   size?: number | undefined;
   style?: StyleProp<ImageStyle>;
   color?: boolean;
   name?: string | undefined;
+  showIndicator?: boolean;
 };
 
 function Avatar({
@@ -27,6 +30,7 @@ function Avatar({
   style,
   color,
   name,
+  showIndicator,
 }: Props) {
   const colorScheme = useColorScheme();
   const styles = getStyles(colorScheme, size);
@@ -40,15 +44,19 @@ function Avatar({
   const handleImageLoad = useCallback(() => {
     setDidError(false);
   }, []);
-
   return uri && !didError ? (
-    <Image
-      onLoad={handleImageLoad}
-      onError={handleImageError}
-      key={`${uri}-${color}-${colorScheme}`}
-      source={{ uri }}
-      style={[styles.image, style]}
-    />
+    <>
+      <ImageBackground
+        onLoad={handleImageLoad}
+        onError={handleImageError}
+        key={`${uri}-${color}-${colorScheme}`}
+        source={{ uri }}
+        style={[styles.imageContainer, style]}
+        imageStyle={styles.image}
+      >
+        {showIndicator && <Indicator size={size} />}
+      </ImageBackground>
+    </>
   ) : (
     <View
       style={StyleSheet.flatten([
@@ -58,6 +66,7 @@ function Avatar({
       ])}
     >
       <Text style={styles.text}>{firstLetter}</Text>
+      {showIndicator && <Indicator size={size} />}
     </View>
   );
 }
@@ -65,9 +74,11 @@ function Avatar({
 const getStyles = (colorScheme: ColorSchemeName, size: number) =>
   StyleSheet.create({
     image: {
+      borderRadius: size,
+    },
+    imageContainer: {
       width: size,
       height: size,
-      borderRadius: size,
     },
     placeholder: {
       width: size,
