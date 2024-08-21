@@ -9,7 +9,7 @@ import { MessageReaction } from "@utils/reactions";
 import { isTransactionMessage } from "@utils/transaction";
 import { FC, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useWindowDimensions, View } from "react-native";
-import { Menu } from "react-native-paper";
+import { Menu, Portal } from "react-native-paper";
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
@@ -38,9 +38,11 @@ export const MessageContextMenuWrapper: FC<MessageContextMenuWrapperProps> = ({
   const anchor = useRef({
     x: 0,
     y: 0,
+    height: 0,
   });
   const viewRef = useRef<View>(null);
   const [lowerPadding, setLowerPadding] = useState(0);
+  const [messageTop, setMessageTop] = useState(0);
   const { height: screenHeight } = useWindowDimensions();
   const { setContextMenuShown, contextMenuShownId } = useAppStore(
     useSelect(["setContextMenuShown", "contextMenuShownId"])
@@ -91,9 +93,13 @@ export const MessageContextMenuWrapper: FC<MessageContextMenuWrapperProps> = ({
     }
   }, [currentlyShown, lowerHeight, lowerPadding]);
 
-  const animatedStyle = useAnimatedStyle(() => ({
-    height: height.value,
-  }));
+  const animatedStyle = useAnimatedStyle(() => {
+    return {
+      height: height.value,
+      elevation: 200,
+      position: "absolute",
+    };
+  }, [height, anchor]);
 
   const lowerAnimatedStyle = useAnimatedStyle(() => ({
     height: lowerHeight.value,
@@ -104,16 +110,10 @@ export const MessageContextMenuWrapper: FC<MessageContextMenuWrapperProps> = ({
     if (viewRef.current) {
       viewRef.current.measureInWindow((x, y, width, height) => {
         // Check if the element is too low on the screen
-        console.log("layout", {
-          y,
-          height,
-          screenHeight,
-          MENU_HEIGHT,
-        });
         const newHeight = y + height + MENU_HEIGHT - screenHeight;
-        console.log("newHeight", newHeight);
         setLowerPadding(Math.max(10, newHeight));
-        anchor.current = { x: x + width / 2, y: y + height };
+        anchor.current = { x: x + width / 2, y: y + height, height };
+        setMessageTop(y - height);
       });
     }
   }, [screenHeight]);
@@ -130,12 +130,6 @@ export const MessageContextMenuWrapper: FC<MessageContextMenuWrapperProps> = ({
 
   return (
     <>
-      {currentlyShown && (
-        <Animated.View style={animatedStyle}>
-          <MessageReactionsList reactions={reactions} message={message} />
-        </Animated.View>
-      )}
-
       <Menu
         visible={currentlyShown}
         onDismiss={closeMenu}
@@ -154,6 +148,13 @@ export const MessageContextMenuWrapper: FC<MessageContextMenuWrapperProps> = ({
           />
         ))}
       </Menu>
+      {currentlyShown && (
+        <Portal>
+          <Animated.View style={[animatedStyle, { top: messageTop - 80 }]}>
+            <MessageReactionsList reactions={reactions} message={message} />
+          </Animated.View>
+        </Portal>
+      )}
       {currentlyShown && <Animated.View style={lowerAnimatedStyle} />}
     </>
   );
