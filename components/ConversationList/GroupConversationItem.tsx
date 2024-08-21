@@ -82,7 +82,8 @@ export const GroupConversationItem: FC<GroupConversationItemProps> = ({
           {
             options,
             cancelButtonIndex: options.length - 1,
-            destructiveButtonIndex: [0, 1],
+            // Only show red buttons for destructive actions
+            destructiveButtonIndex: consent === "denied" ? undefined : [0, 1],
             title,
             ...actionSheetColors(colorScheme),
           },
@@ -96,53 +97,49 @@ export const GroupConversationItem: FC<GroupConversationItemProps> = ({
         );
       };
 
-      switch (consent) {
-        case "denied":
-          showOptions(
-            [
-              translate("restore"),
-              translate("restore_and_unblock_inviter"),
-              translate("cancel"),
-            ],
-            `${translate("restore")} ${groupName}?`,
-            [
-              () =>
-                allowGroup({
-                  includeAddedBy: false,
-                  includeCreator: false,
-                }),
-              () =>
-                allowGroup({
-                  includeAddedBy: true,
-                  includeCreator: false,
-                }),
-            ]
-          );
-          break;
-
-        // for allowed and unknown
-        default:
-          showOptions(
-            [
-              translate("remove"),
-              translate("remove_and_block_inviter"),
-              translate("cancel"),
-            ],
-            `${translate("remove")} ${groupName}?`,
-            [
-              () =>
-                blockGroup({
-                  includeAddedBy: false,
-                  includeCreator: false,
-                }),
-              () =>
-                blockGroup({
-                  includeAddedBy: true,
-                  includeCreator: false,
-                }),
-            ]
-          );
-          break;
+      if (consent === "denied") {
+        showOptions(
+          [
+            translate("restore"),
+            translate("restore_and_unblock_inviter"),
+            translate("cancel"),
+          ],
+          `${translate("restore")} ${groupName}?`,
+          [
+            () =>
+              allowGroup({
+                includeAddedBy: false,
+                includeCreator: false,
+              }),
+            () =>
+              allowGroup({
+                includeAddedBy: true,
+                includeCreator: false,
+              }),
+          ]
+        );
+      } else {
+        // for allowed and unknown consent
+        showOptions(
+          [
+            translate("remove"),
+            translate("remove_and_block_inviter"),
+            translate("cancel"),
+          ],
+          `${translate("remove")} ${groupName}?`,
+          [
+            () =>
+              blockGroup({
+                includeAddedBy: false,
+                includeCreator: false,
+              }),
+            () =>
+              blockGroup({
+                includeAddedBy: true,
+                includeCreator: false,
+              }),
+          ]
+        );
       }
     },
     [allowGroup, blockGroup, consent, colorScheme, groupName]
