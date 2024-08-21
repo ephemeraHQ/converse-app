@@ -2,7 +2,7 @@ import { showActionSheetWithOptions } from "@components/StateHandlers/ActionShee
 import { TableViewPicto } from "@components/TableView/TableViewImage";
 import { useCurrentAccount, useProfilesStore } from "@data/store/accountsStore";
 import { useGroupMembers } from "@hooks/useGroupMembers";
-import { translate } from "@i18n/translate";
+import { translate } from "@i18n";
 import { actionSheetColors, textSecondaryColor } from "@styles/colors";
 import {
   getAccountIsAdmin,

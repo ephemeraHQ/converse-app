@@ -2,7 +2,7 @@ import { useCurrentAccount } from "@data/store/accountsStore";
 import { useGroupDescription } from "@hooks/useGroupDescription";
 import { useGroupMembers } from "@hooks/useGroupMembers";
 import { useGroupPermissions } from "@hooks/useGroupPermissions";
-import { translate } from "@i18n/translate";
+import { translate } from "@i18n";
 import { textPrimaryColor } from "@styles/colors";
 import {
   getAddressIsAdmin,
