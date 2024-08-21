@@ -1,5 +1,6 @@
 import { useSettingsStore } from "@data/store/accountsStore";
 import { QueryObserverOptions, useQuery } from "@tanstack/react-query";
+import { getGroupIdFromTopic } from "@utils/groupUtils/groupId";
 import { useShallow } from "zustand/react/shallow";
 
 import { groupConsentQueryKey } from "./QueryKeys";
@@ -14,7 +15,7 @@ export const useGroupConsentQuery = (
   queryOptions?: Partial<QueryObserverOptions<"allowed" | "denied" | "unknown">>
 ) => {
   const statusFromState = useSettingsStore(
-    useShallow((s) => s.groupStatus[topic])
+    useShallow((s) => s.groupStatus[getGroupIdFromTopic(topic)])
   );
   const { data: group } = useGroupQuery(account, topic);
   return useQuery({
