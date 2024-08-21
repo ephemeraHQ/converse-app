@@ -296,6 +296,7 @@ const listConversations = async (client: ConverseXmtpClientType) => {
 const listGroups = async (client: ConverseXmtpClientType) => {
   // @todo => this will be adapted once we have a syncAllGroups method
   const groups = await fetchGroupsQuery(client.address);
+  // client.conversations.syncAllGroups();
   // Resync process
   for (const id of groups.ids) {
     const group = groups.byId[id];

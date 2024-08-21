@@ -1,6 +1,6 @@
 import Picto from "@components/Picto/Picto";
 import { useShouldShowErrored } from "@hooks/useShouldShowErrored";
-import { translate } from "@i18n/translate";
+import { translate } from "@i18n";
 import Clipboard from "@react-native-clipboard/clipboard";
 import { StackActions } from "@react-navigation/native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
@@ -14,6 +14,7 @@ import {
 } from "@styles/colors";
 import { PictoSizes } from "@styles/sizes";
 import { memberCanUpdateGroup } from "@utils/groupUtils/memberCanUpdateGroup";
+import { revokeOtherInstallations } from "@utils/xmtpRN/client";
 import Constants from "expo-constants";
 import * as Linking from "expo-linking";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
@@ -329,6 +330,38 @@ export default function ProfileScreen({
       }
     );
   }, [colorScheme, logout]);
+
+  const showRevokeActionSheet = useCallback(async () => {
+    if (Platform.OS === "web") {
+      // Fixes double action sheet on web
+      await new Promise((r) => setTimeout(r, 100));
+    }
+    const methods = {
+      [translate("revoke_other_installations")]: () =>
+        revokeOtherInstallations(userAddress),
+      [translate("cancel")]: () => {},
+    };
+
+    const options = Object.keys(methods);
+
+    showActionSheetWithOptions(
+      {
+        options,
+        title: translate("revoke_all_other_installations"),
+        message: translate("revoke_description"),
+        cancelButtonIndex: options.indexOf(translate("cancel")),
+        destructiveButtonIndex: [0],
+        ...actionSheetColors(colorScheme),
+      },
+      (selectedIndex?: number) => {
+        if (selectedIndex === undefined) return;
+        const method = (methods as any)[options[selectedIndex]];
+        if (method) {
+          method();
+        }
+      }
+    );
+  }, [colorScheme, userAddress]);
 
   const actionsTableViewItems = useMemo(() => {
     const items: TableViewItemType[] = [];
@@ -654,7 +687,7 @@ export default function ProfileScreen({
               ),
             },
           ]}
-          title="YOU'RE THE OG"
+          title={translate("youre_the_og")}
           style={styles.tableView}
         />
       )}
@@ -669,7 +702,7 @@ export default function ProfileScreen({
 
       <TableView
         items={addressItems}
-        title="ADDRESS"
+        title={translate("address")}
         style={styles.tableView}
       />
 
@@ -698,7 +731,7 @@ export default function ProfileScreen({
       {socialItems.length > 0 && (
         <TableView
           items={socialItems}
-          title="SOCIAL"
+          title={translate("social")}
           style={styles.tableView}
         />
       )}
@@ -712,13 +745,13 @@ export default function ProfileScreen({
                 titleNumberOfLines: 3,
                 leftView: <TableViewImage imageURI={t.image} />,
               }))}
-              title="COMMON ACTIVITY"
+              title={translate("common_activity")}
               style={styles.tableView}
             />
           )}
           <TableView
             items={actionsTableViewItems}
-            title="ACTIONS"
+            title={translate("actions")}
             style={styles.tableView}
           />
         </>
@@ -808,7 +841,26 @@ export default function ProfileScreen({
                   Platform.OS === "web"
                 )
             )}
-            title="ACTIONS"
+            title={translate("actions")}
+            style={styles.tableView}
+          />
+          <TableView
+            items={[
+              {
+                id: "revoke",
+                title: translate("revoke_other_installations"),
+                titleColor:
+                  Platform.OS === "android"
+                    ? undefined
+                    : dangerColor(colorScheme),
+                action: () => {
+                  setTimeout(() => {
+                    showRevokeActionSheet();
+                  }, 300);
+                },
+              },
+            ]}
+            title={translate("security")}
             style={styles.tableView}
           />
           {Platform.OS !== "web" && (
@@ -819,7 +871,7 @@ export default function ProfileScreen({
                   title: `v${appVersion} (${buildNumber})`,
                 },
               ]}
-              title="APP VERSION"
+              title={translate("app_version")}
               style={styles.tableView}
             />
           )}
