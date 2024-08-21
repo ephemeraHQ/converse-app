@@ -4,7 +4,7 @@ import {
   backgroundColor,
   textPrimaryColor,
 } from "@styles/colors";
-import React, { useCallback, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { Platform, StyleSheet, Text, useColorScheme, View } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { StackAnimationTypes } from "react-native-screens";
@@ -114,6 +114,16 @@ export default function ConversationRequestsListNav() {
   const handleSpamToggle = useCallback(() => {
     setIsSpamToggleEnabled((prev) => !prev);
   }, []);
+
+  // Navigate back to the main screen when no request to display
+  useEffect(() => {
+    const unsubscribe = navRef.current?.addListener("focus", () => {
+      if (allRequests.length === 0) {
+        navRef.current?.goBack();
+      }
+    });
+    return unsubscribe;
+  }, [allRequests]);
 
   return (
     <NativeStack.Screen name="ChatsRequests" options={navigationOptions}>
