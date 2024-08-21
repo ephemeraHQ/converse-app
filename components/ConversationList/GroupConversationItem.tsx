@@ -5,6 +5,7 @@ import { useGroupNameQuery } from "@queries/useGroupNameQuery";
 import { useGroupPhotoQuery } from "@queries/useGroupPhotoQuery";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { actionSheetColors } from "@styles/colors";
+import { showUnreadOnConversation } from "@utils/conversation/showUnreadOnConversation";
 import { FC, useCallback } from "react";
 import { useColorScheme } from "react-native";
 
@@ -44,7 +45,7 @@ export const GroupConversationItem: FC<GroupConversationItemProps> = ({
     staleTime: Infinity,
     gcTime: Infinity,
   });
-  const { consent, blockGroup, allowGroup } =  useGroupConsent(topic, {
+  const { consent, blockGroup, allowGroup } = useGroupConsent(topic, {
     refetchOnMount: false,
     staleTime: Infinity,
     gcTime: Infinity,
@@ -161,21 +162,13 @@ export const GroupConversationItem: FC<GroupConversationItemProps> = ({
         lastMessagePreview?.message?.sent || conversation.createdAt
       }
       conversationName={groupName ? groupName : conversationName(conversation)}
-      showUnread={(() => {
-        if (!initialLoadDoneOnce) return false;
-        if (!lastMessagePreview) return false;
-        // Manually marked as unread
-        if (topicsData[conversation.topic]?.status === "unread") return true;
-        // If not manually markes as unread, we only show badge if last message
-        // not from me
-        if (
-          lastMessagePreview.message.senderAddress.toLowerCase() ===
-          userAddress.toLowerCase()
-        )
-          return false;
-        const readUntil = topicsData[conversation.topic]?.readUntil || 0;
-        return readUntil < lastMessagePreview.message.sent;
-      })()}
+      showUnread={showUnreadOnConversation(
+        initialLoadDoneOnce,
+        lastMessagePreview,
+        topicsData,
+        conversation,
+        userAddress
+      )}
       lastMessagePreview={
         lastMessagePreview ? lastMessagePreview.contentPreview : ""
       }
