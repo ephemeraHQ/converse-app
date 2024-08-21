@@ -1,5 +1,6 @@
 import { useMutation } from "@tanstack/react-query";
 import logger from "@utils/logger";
+import { sentryTrackError } from "@utils/sentry";
 
 import { setGroupNameMutationKey } from "./MutationKeys";
 import {
@@ -27,9 +28,9 @@ export const useGroupNameMutation = (account: string, topic: string) => {
       setGroupNameQueryData(account, topic, groupName);
       return { previousGroupName };
     },
-    // eslint-disable-next-line node/handle-callback-err
-    onError: (_error, _variables, context) => {
+    onError: (error, _variables, context) => {
       logger.warn("onError useGroupNameMutation");
+      sentryTrackError(error);
       if (context?.previousGroupName === undefined) {
         return;
       }

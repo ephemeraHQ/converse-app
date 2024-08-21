@@ -1,5 +1,6 @@
 import { useMutation } from "@tanstack/react-query";
 import logger from "@utils/logger";
+import { sentryTrackError } from "@utils/sentry";
 
 import { addMemberMutationKey } from "./MutationKeys";
 import {
@@ -24,8 +25,9 @@ export const useAddToGroupMutation = (account: string, topic: string) => {
     onMutate: async (_addresses: string[]) => {
       await cancelGroupMembersQuery(account, topic);
     },
-    onError: (_error, _variables, _context) => {
+    onError: (error, _variables, _context) => {
       logger.warn("onError useAddToGroupMutation");
+      sentryTrackError(error);
     },
     onSuccess: (_data, _variables, _context) => {
       logger.debug("onSuccess useAddToGroupMutation");

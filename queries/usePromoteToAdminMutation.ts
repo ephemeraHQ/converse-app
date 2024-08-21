@@ -1,5 +1,6 @@
 import { useMutation } from "@tanstack/react-query";
 import logger from "@utils/logger";
+import { sentryTrackError } from "@utils/sentry";
 import { Member } from "@xmtp/react-native-sdk";
 import { InboxId } from "@xmtp/react-native-sdk/build/lib/Client";
 
@@ -49,9 +50,9 @@ export const usePromoteToAdminMutation = (account: string, topic: string) => {
       return { previousGroupMembers };
     },
     // Use onError to revert the cache if the mutation fails
-    // eslint-disable-next-line node/handle-callback-err
-    onError: (_error, _variables, context) => {
+    onError: (error, _variables, context) => {
       logger.warn("onError usePromoteToAdminMutation");
+      sentryTrackError(error);
       if (context?.previousGroupMembers === undefined) {
         return;
       }

@@ -1,5 +1,6 @@
 import { useMutation } from "@tanstack/react-query";
 import logger from "@utils/logger";
+import { sentryTrackError } from "@utils/sentry";
 
 import { setGroupPhotoMutationKey } from "./MutationKeys";
 import {
@@ -27,9 +28,9 @@ export const useGroupPhotoMutation = (account: string, topic: string) => {
       setGroupPhotoQueryData(account, topic, groupPhoto);
       return { previousGroupPhoto };
     },
-    // eslint-disable-next-line node/handle-callback-err
-    onError: (_error, _variables, context) => {
+    onError: (error, _variables, context) => {
       logger.warn("onError useGroupPhotoMutation");
+      sentryTrackError(error);
       if (context?.previousGroupPhoto === undefined) {
         return;
       }
