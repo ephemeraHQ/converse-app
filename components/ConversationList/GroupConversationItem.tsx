@@ -74,7 +74,8 @@ export const GroupConversationItem: FC<GroupConversationItemProps> = ({
           {
             options,
             cancelButtonIndex: options.length - 1,
-            destructiveButtonIndex: [0, 1],
+            // Only show red buttons for destructive actions
+            destructiveButtonIndex: consent === "denied" ? undefined : [0, 1],
             title,
             ...actionSheetColors(colorScheme),
           },
