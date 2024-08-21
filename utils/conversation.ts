@@ -347,6 +347,7 @@ export const conversationShouldBeInInbox = (
 ) => {
   if (conversation.isGroup) {
     const groupId = getGroupIdFromTopic(conversation.topic);
+    const isGroupBlocked = groupStatus[groupId] === "denied";
     const isGroupAllowed = groupStatus[groupId] === "allowed";
     const isCreatorAllowed =
       conversation.groupCreator &&
@@ -354,6 +355,9 @@ export const conversationShouldBeInInbox = (
     const isAddedByAllowed =
       conversation.groupAddedBy &&
       peersStatus[conversation.groupAddedBy.toLowerCase()] === "consented";
+    if (isGroupBlocked) {
+      return false;
+    }
     return (
       conversation.hasOneMessageFromMe ||
       isGroupAllowed ||
@@ -361,9 +365,13 @@ export const conversationShouldBeInInbox = (
       isAddedByAllowed
     );
   } else {
+    const isBlockedPeer =
+      peersStatus[conversation.peerAddress.toLowerCase()] === "blocked";
     const isPeerConsented =
       peersStatus[conversation.peerAddress.toLowerCase()] === "consented";
-    return conversation.hasOneMessageFromMe || isPeerConsented;
+    return (
+      (!isBlockedPeer && conversation.hasOneMessageFromMe) || isPeerConsented
+    );
   }
 };
 
