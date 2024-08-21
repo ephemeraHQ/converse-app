@@ -299,7 +299,6 @@ const listGroups = async (client: ConverseXmtpClientType) => {
   // Resync process
   for (const id of groups.ids) {
     const group = groups.byId[id];
-    incrementMethodCounter(group.topic, "sync", "listGroups");
     await group.sync();
   }
   // Now that it's synced, let's refresh
