@@ -1,6 +1,7 @@
 import { useGroupId } from "@hooks/useGroupId";
 import { useMutation } from "@tanstack/react-query";
 import logger from "@utils/logger";
+import { sentryTrackError } from "@utils/sentry";
 import { consentToGroupsOnProtocol } from "@utils/xmtpRN/conversations";
 
 import { blockGroupMutationKey } from "./MutationKeys";
@@ -27,9 +28,9 @@ export const useBlockGroupMutation = (account: string, topic: string) => {
       setGroupConsentQueryData(account, topic, "denied");
       return { previousConsent };
     },
-    // eslint-disable-next-line node/handle-callback-err
-    onError: (_error, _variables, context) => {
+    onError: (error, _variables, context) => {
       logger.warn("onError useDenyGroupMutation");
+      sentryTrackError(error);
       if (context?.previousConsent === undefined) {
         return;
       }

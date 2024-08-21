@@ -1,5 +1,6 @@
 import { useMutation } from "@tanstack/react-query";
 import logger from "@utils/logger";
+import { sentryTrackError } from "@utils/sentry";
 import { Member } from "@xmtp/react-native-sdk";
 import { InboxId } from "@xmtp/react-native-sdk/build/lib/Client";
 
@@ -47,8 +48,9 @@ export const usePromoteToSuperAdminMutation = (
 
       return { previousGroupMembers };
     },
-    onError: (_error, _variables, context) => {
+    onError: (error, _variables, context) => {
       logger.warn("onError usePromoteToSuperAdminMutation");
+      sentryTrackError(error);
       if (context?.previousGroupMembers === undefined) {
         return;
       }
