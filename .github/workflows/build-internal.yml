@@ -96,6 +96,9 @@ jobs:
   increment-build-numbers:
     runs-on: ubuntu-latest
     needs: [build-android, build-ios]
+    outputs:
+      branch-name: ${{ steps.create_branch.outputs.branch-name }}
+      new_ios_build_number: ${{ steps.increment_version.outputs.new_ios_build_number }}
 
     steps:
       - name: Checkout repository
@@ -111,7 +114,6 @@ jobs:
         run: |
           BRANCH_NAME="increment-version-$(date +'%Y%m%d%H%M%S')"
           echo "branch-name=$BRANCH_NAME" >> $GITHUB_OUTPUT
-          git checkout -b $BRANCH_NAME
 
       - name: Increment version numbers
         run: node scripts/build/incrementBuildNumbers.js
