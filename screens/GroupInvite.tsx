@@ -1,8 +1,6 @@
 import Avatar from "@components/Avatar";
 import { translate } from "@i18n/index";
-import { useCreateGroupJoinRequestMutation } from "@queries/useCreateGroupJoinRequestMutation";
 import { useGroupInviteQuery } from "@queries/useGroupInviteQuery";
-import { useGroupJoinRequestQuery } from "@queries/useGroupJoinRequestQuery";
 import { useHeaderHeight } from "@react-navigation/elements";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import {
@@ -12,9 +10,10 @@ import {
   textSecondaryColor,
 } from "@styles/colors";
 import { AvatarSizes } from "@styles/sizes";
+import { createGroupJoinRequest, getGroupJoinRequest } from "@utils/api";
 import { converseEventEmitter } from "@utils/events";
 import { GroupWithCodecsType } from "@utils/xmtpRN/client";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 import { StyleSheet, Text, View, useColorScheme } from "react-native";
 import { ActivityIndicator } from "react-native-paper";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -39,40 +38,12 @@ export default function GroupInviteScreen({
     error: groupInviteError,
     isLoading,
   } = useGroupInviteQuery(route.params.groupInviteId);
-  const [groupJoinRequestId, setGroupJoinRequest] = useState<
-    string | undefined
-  >(undefined);
-
+  const [polling, setPolling] = useState<boolean>(false);
+  const [finishedPolling, setFinishedPolling] = useState<boolean>(false);
+  const [joinStatus, setJoinStatus] = useState<
+    null | "PENDING" | "ERROR" | "REJECTED" | "ACCEPTED"
+  >(null);
   const colorScheme = useColorScheme();
-  const { mutateAsync, isPending } = useCreateGroupJoinRequestMutation({
-    onSuccess: (data) => {
-      setGroupJoinRequest(data.id);
-    },
-  });
-  const { data: groupJoinData, refetch } =
-    useGroupJoinRequestQuery(groupJoinRequestId);
-
-  useEffect(() => {
-    const poll = async () => {
-      if (groupJoinData?.status === "PENDING") {
-        let count = 0;
-        let status = "PENDING";
-        while (count < 10 && status === "PENDING") {
-          const { data } = await refetch();
-          if (data) {
-            if (data?.status === "PENDING") {
-              await new Promise((r) => setTimeout(r, 500));
-              count += 1;
-            } else {
-              status = data?.status;
-              break;
-            }
-          }
-        }
-      }
-    };
-    poll();
-  }, [groupJoinData, refetch]);
 
   const handleNewGroup = useCallback(
     async (group: GroupWithCodecsType) => {
@@ -91,11 +62,32 @@ export default function GroupInviteScreen({
   const joinGroup = useCallback(async () => {
     if (!groupInvite?.id) return;
     converseEventEmitter.on("newGroup", handleNewGroup);
-    await mutateAsync(groupInvite?.id);
+    const joinRequest = await createGroupJoinRequest(account, groupInvite?.id);
+    setPolling(true);
+    let count = 0;
+    let status = "PENDING";
+    setJoinStatus("PENDING");
+    while (count < 10 && status === "PENDING") {
+      const joinRequestData = await getGroupJoinRequest(joinRequest.id);
+      if (joinRequestData.status === "PENDING") {
+        await new Promise((r) => setTimeout(r, 500));
+        count += 1;
+      } else {
+        status = joinRequestData?.status;
+        setJoinStatus(joinRequestData?.status);
+        break;
+      }
+    }
+    if (count === 10 && status === "PENDING") {
+      setFinishedPolling(true);
+    } else {
+      setPolling(false);
+    }
+
     return () => {
       converseEventEmitter.off("newGroup", handleNewGroup);
     };
-  }, [groupInvite?.id, handleNewGroup, mutateAsync]);
+  }, [account, groupInvite?.id, handleNewGroup]);
   const insets = useSafeAreaInsets();
   const headerHeight = useHeaderHeight();
 
@@ -119,33 +111,37 @@ export default function GroupInviteScreen({
           {groupInvite.description && (
             <Text style={styles.description}>{groupInvite.description}</Text>
           )}
-          {!groupJoinData && (
+          {!polling && (
             <Button
               variant="primary"
               title={translate("join_group")}
-              style={styles.joinButton}
+              style={styles.cta}
               onPress={joinGroup}
             />
           )}
-          {isPending ||
-            (groupJoinData?.status === "PENDING" && (
-              <Button
-                variant="primary"
-                title={translate("joining")}
-                style={styles.joiningButton}
-              />
-            ))}
-          {groupJoinData?.status === "ERROR" && (
-            <Text style={styles.error}>{translate("group_join_error")}</Text>
-          )}
-          {groupJoinData?.status === "REJECTED" && (
-            <Text style={styles.error}>
-              {translate("group_join_invite_invalid")}
-            </Text>
+          {joinStatus === "PENDING" && (
+            <Button
+              variant="primary"
+              title={translate("joining")}
+              style={styles.cta}
+            />
           )}
           <Text style={styles.notification}>
             {translate("group_admin_approval")}
           </Text>
+          {finishedPolling && (
+            <Text style={styles.notification}>
+              {translate("group_finished_polling")}
+            </Text>
+          )}
+          {joinStatus === "ERROR" && (
+            <Text style={styles.error}>{translate("group_join_error")}</Text>
+          )}
+          {joinStatus === "REJECTED" && (
+            <Text style={styles.error}>
+              {translate("group_join_invite_invalid")}
+            </Text>
+          )}
         </>
       )}
       <View style={{ height: insets.bottom + headerHeight }} />
@@ -194,12 +190,8 @@ const useStyles = () => {
       textAlign: "center",
       marginTop: 20,
     },
-    joinButton: {
+    cta: {
       marginTop: 20,
-    },
-    joiningButton: {
-      marginTop: 20,
-      backgroundColor: textSecondaryColor(colorScheme),
     },
   });
 };
