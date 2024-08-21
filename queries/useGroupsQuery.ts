@@ -11,22 +11,32 @@ import {
 
 type GroupMembersSelectData = EntityObject<GroupWithCodecsType, string>;
 
+const groupsQueryFn = async (account: string) => {
+  const client = (await getXmtpClient(account)) as ConverseXmtpClientType;
+  if (!client) {
+    return {
+      byId: {},
+      ids: [],
+    };
+  }
+  await client.conversations.syncGroups();
+  const groups = await client.conversations.listGroups();
+  return entify(groups, (group) => group.topic);
+};
+
 export const useGroupsQuery = (account: string) => {
   return useQuery<GroupMembersSelectData>({
     queryKey: groupsQueryKey(account),
-    queryFn: async () => {
-      const client = (await getXmtpClient(account)) as ConverseXmtpClientType;
-      if (!client) {
-        return {
-          byId: {},
-          ids: [],
-        };
-      }
-      await client.conversations.syncGroups();
-      const groups = await client.conversations.listGroups();
-      return entify(groups, (group) => group.topic);
-    },
+    queryFn: () => groupsQueryFn(account),
     enabled: !!account,
+  });
+};
+
+export const fetchGroupsQuery = (account: string, staleTime?: number) => {
+  return queryClient.fetchQuery({
+    queryKey: groupsQueryKey(account),
+    queryFn: () => groupsQueryFn(account),
+    staleTime,
   });
 };
 
