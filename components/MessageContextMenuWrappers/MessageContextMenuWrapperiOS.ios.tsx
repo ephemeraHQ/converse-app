@@ -93,7 +93,6 @@ const MessageContextMenuWrapperIOSInner: FC<
 
   return (
     <ContextMenuView
-      key={message.id}
       ref={ref}
       onMenuWillHide={handleMenuWillHide}
       onMenuWillShow={handleMenuWillShow}
