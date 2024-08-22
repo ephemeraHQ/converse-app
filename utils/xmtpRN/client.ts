@@ -1,4 +1,5 @@
 import { getDbEncryptionKey } from "@utils/keychain/helpers";
+import { sentryTrackMessage } from "@utils/sentry";
 import { TransactionReferenceCodec } from "@xmtp/content-type-transaction-reference";
 import {
   Client,
@@ -88,4 +89,12 @@ export const reconnectXmtpClientsDbConnections = async () => {
   await Promise.all(
     Object.values(xmtpClientByAccount).map((c) => c.reconnectLocalDatabase())
   );
+};
+
+export const revokeOtherInstallations = async (account: string) => {
+  const client = xmtpClientByAccount[account];
+  if (!client) {
+    sentryTrackMessage("revokeOtherInstallations: client not found");
+  }
+  // await client.revokeOtherInstallations();
 };
