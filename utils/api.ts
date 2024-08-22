@@ -434,6 +434,15 @@ export const getGroupInvite = async (
   return data;
 };
 
+export const deleteGroupInvite = async (
+  account: string,
+  inviteId: string
+): Promise<void> => {
+  await api.delete(`/api/groupInvite/${inviteId}`, {
+    headers: await getXmtpApiHeaders(account),
+  });
+};
+
 export type GroupJoinRequest = {
   id: string;
   status: "PENDING" | "ACCEPTED" | "REJECTED" | "ERROR";
