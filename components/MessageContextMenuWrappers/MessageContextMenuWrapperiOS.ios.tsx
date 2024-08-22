@@ -19,14 +19,13 @@ enum ContextMenuActions {
 
 interface MessageContextMenuWrapperIOSProps {
   message: MessageToDisplay;
-  messageContent: React.ReactNode;
   children: React.ReactNode;
   reactions: {
     [senderAddress: string]: MessageReaction[];
   };
 }
 
-export const MessageContextMenuWrapperIOS: FC<
+const MessageContextMenuWrapperIOSInner: FC<
   MessageContextMenuWrapperIOSProps
 > = ({ children, message, reactions }) => {
   const colorScheme = useColorScheme();
@@ -94,6 +93,7 @@ export const MessageContextMenuWrapperIOS: FC<
 
   return (
     <ContextMenuView
+      key={message.id}
       ref={ref}
       onMenuWillHide={handleMenuWillHide}
       onMenuWillShow={handleMenuWillShow}
@@ -148,7 +148,11 @@ export const MessageContextMenuWrapperIOS: FC<
         );
       }}
     >
-      <>{children}</>
+      {children}
     </ContextMenuView>
   );
 };
+
+export const MessageContextMenuWrapperIOS = React.memo(
+  MessageContextMenuWrapperIOSInner
+);
