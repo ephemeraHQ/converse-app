@@ -1,4 +1,4 @@
-import { translate } from "@i18n/index";
+import { translate } from "@i18n";
 import { MenuView } from "@react-native-menu/menu";
 import { textPrimaryColor } from "@styles/colors";
 import { RemoteAttachmentContent } from "@xmtp/react-native-sdk";

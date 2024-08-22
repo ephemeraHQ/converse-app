@@ -1,4 +1,4 @@
-import { translate } from "@i18n/index";
+import { translate } from "@i18n";
 import { ContentTypeReaction } from "@xmtp/content-type-reaction";
 
 import { isAttachmentMessage } from "./attachment/helpers";

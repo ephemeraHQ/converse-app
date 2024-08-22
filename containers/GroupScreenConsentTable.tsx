@@ -1,5 +1,5 @@
 import { useGroupConsent } from "@hooks/useGroupConsent";
-import { translate } from "@i18n/translate";
+import { translate } from "@i18n";
 import { dangerColor, primaryColor } from "@styles/colors";
 import { FC, useMemo } from "react";
 import { useColorScheme } from "react-native";

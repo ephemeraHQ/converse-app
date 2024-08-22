@@ -1,5 +1,5 @@
 import Avatar from "@components/Avatar";
-import { translate } from "@i18n/index";
+import { translate } from "@i18n";
 import { useGroupInviteQuery } from "@queries/useGroupInviteQuery";
 import { useHeaderHeight } from "@react-navigation/elements";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";

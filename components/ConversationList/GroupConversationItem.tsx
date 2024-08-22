@@ -1,6 +1,6 @@
 import { showActionSheetWithOptions } from "@components/StateHandlers/ActionSheetStateHandler";
 import { useGroupConsent } from "@hooks/useGroupConsent";
-import { translate } from "@i18n/index";
+import { translate } from "@i18n";
 import { useGroupNameQuery } from "@queries/useGroupNameQuery";
 import { useGroupPhotoQuery } from "@queries/useGroupPhotoQuery";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
@@ -44,7 +44,7 @@ export const GroupConversationItem: FC<GroupConversationItemProps> = ({
     staleTime: Infinity,
     gcTime: Infinity,
   });
-  const { consent, blockGroup, allowGroup } =  useGroupConsent(topic, {
+  const { consent, blockGroup, allowGroup } = useGroupConsent(topic, {
     refetchOnMount: false,
     staleTime: Infinity,
     gcTime: Infinity,

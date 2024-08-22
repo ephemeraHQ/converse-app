@@ -1,4 +1,4 @@
-import { translate } from "@i18n/translate";
+import { translate } from "@i18n";
 import {
   backgroundColor,
   textPrimaryColor,
