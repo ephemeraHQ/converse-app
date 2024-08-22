@@ -1,4 +1,4 @@
-import { translate } from "@i18n/index";
+import { translate } from "@i18n";
 import Clipboard from "@react-native-clipboard/clipboard";
 import { NavigationProp } from "@react-navigation/native";
 import {
