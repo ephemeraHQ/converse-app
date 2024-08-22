@@ -58,7 +58,7 @@ const en = {
   revoke_other_installations: "Revoke other installations",
   revoke_all_other_installations: "Revoke all other installations",
   revoke_description:
-    "Revoke all other group installations of XMTP on other applications and devices.",
+    "Revoke all other V3 installations of XMTP on other applications and devices.",
 
   // Attachments
   photo_library: "Photo Library",
