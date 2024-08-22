@@ -4,7 +4,6 @@ import React, { FC } from "react";
 
 interface MessageContextMenuWrapperProps {
   message: MessageToDisplay;
-  messageContent: React.ReactNode;
   children: React.ReactNode;
   reactions: {
     [senderAddress: string]: MessageReaction[];

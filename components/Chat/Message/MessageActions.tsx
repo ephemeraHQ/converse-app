@@ -311,16 +311,6 @@ export default function ChatMessageActions({
               <MessageContextMenuWrapperIOS
                 message={message}
                 reactions={reactions}
-                messageContent={
-                  <View
-                    style={{
-                      alignSelf: message.fromMe ? "flex-end" : "flex-start",
-                      alignItems: message.fromMe ? "flex-end" : "flex-start",
-                    }}
-                  >
-                    {children}
-                  </View>
-                }
               >
                 {children}
               </MessageContextMenuWrapperIOS>
