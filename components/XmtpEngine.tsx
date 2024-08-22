@@ -75,18 +75,19 @@ export default function XmtpEngine() {
       async (nextAppState) => {
         if (
           nextAppState === "active" &&
-          appState.current.match(/inactive|background/) &&
-          hydrationDone
+          appState.current.match(/inactive|background/)
         ) {
           reconnectConverseDbConnections();
-          loadSavedNotificationMessagesToContext();
-          // Refreshing profiles store from mmkv
-          // as we could have added data from notification
-          accounts.forEach((a) => {
-            getProfilesStore(a).getState().refreshFromStorage();
-          });
-          if (isInternetReachableRef.current) {
-            syncAccounts(accounts);
+          if (hydrationDone) {
+            loadSavedNotificationMessagesToContext();
+            // Refreshing profiles store from mmkv
+            // as we could have added data from notification
+            accounts.forEach((a) => {
+              getProfilesStore(a).getState().refreshFromStorage();
+            });
+            if (isInternetReachableRef.current) {
+              syncAccounts(accounts);
+            }
           }
         } else if (
           nextAppState.match(/inactive|background/) &&
