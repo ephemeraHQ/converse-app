@@ -56,6 +56,7 @@ export const reconnectConverseDbConnections = () => {
       name: options.name,
       location: options.location,
     });
+    logger.debug(`Reopened db ${options.name}`);
     databasesConnections[dbId].connection = newDb;
   });
 };

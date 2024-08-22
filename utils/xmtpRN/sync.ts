@@ -1,5 +1,6 @@
 import logger from "@utils/logger";
 import { Client } from "@xmtp/xmtp-js";
+import intersect from "fast_array_intersect";
 import { AppState } from "react-native";
 
 import { xmtpSignatureByAccount } from "./api";
@@ -121,11 +122,15 @@ const streamingAccounts: { [account: string]: boolean } = {};
 export const syncXmtpClient = async (account: string) => {
   const lastSyncedAt = getChatStore(account).getState().lastSyncedAt || 0;
 
-  // We just introduced lastSyncedTopics so it might be empty at first
   // Last synced topics enable us not to miss messages from new conversations
   // That we didn't get through notifications
-  const lastSyncedTopics =
+  const _lastSyncedTopics =
     getChatStore(account).getState().lastSyncedTopics || [];
+  // Making sure we know about those convos in case of database issue
+  const lastSyncedTopics = intersect([
+    _lastSyncedTopics,
+    Object.keys(getChatStore(account).getState().conversations),
+  ]);
   const knownTopics =
     lastSyncedTopics.length > 0
       ? lastSyncedTopics
