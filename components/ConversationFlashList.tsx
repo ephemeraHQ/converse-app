@@ -1,6 +1,7 @@
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { FlashList } from "@shopify/flash-list";
 import { backgroundColor } from "@styles/colors";
+import { showUnreadOnConversation } from "@utils/conversation/showUnreadOnConversation";
 import { useCallback, useEffect, useRef } from "react";
 import { Platform, StyleSheet, View, useColorScheme } from "react-native";
 
@@ -129,19 +130,13 @@ export default function ConversationFlashList({
             lastMessagePreview?.message?.sent || conversation.createdAt
           }
           conversationName={conversationName(conversation)}
-          showUnread={(() => {
-            if (!initialLoadDoneOnce) return false;
-            if (!lastMessagePreview) return false;
-            // Manually marked as unread
-            if (topicsData[conversation.topic]?.status === "unread")
-              return true;
-            // If not manually markes as unread, we only show badge if last message
-            // not from me
-            if (lastMessagePreview.message.senderAddress === userAddress)
-              return false;
-            const readUntil = topicsData[conversation.topic]?.readUntil || 0;
-            return readUntil < lastMessagePreview.message.sent;
-          })()}
+          showUnread={showUnreadOnConversation(
+            initialLoadDoneOnce,
+            lastMessagePreview,
+            topicsData,
+            conversation,
+            userAddress
+          )}
           lastMessagePreview={
             conversation.peerAddress &&
             peersStatus[conversation.peerAddress.toLowerCase()] === "blocked"
