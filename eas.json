@@ -68,6 +68,7 @@
       }
     },
     "production-ios-internal": {
+      "developmentClient": true,
       "distribution": "internal",
       "channel": "production",
       "autoIncrement": true,
