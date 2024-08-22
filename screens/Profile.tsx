@@ -844,7 +844,8 @@ export default function ProfileScreen({
             title={translate("actions")}
             style={styles.tableView}
           />
-          <TableView
+          {/* Removing until revoking is available */}
+          {/* <TableView
             items={[
               {
                 id: "revoke",
@@ -862,7 +863,7 @@ export default function ProfileScreen({
             ]}
             title={translate("security")}
             style={styles.tableView}
-          />
+          /> */}
           {Platform.OS !== "web" && (
             <TableView
               items={[
