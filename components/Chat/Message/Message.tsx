@@ -181,9 +181,8 @@ function ChatMessage({ message, colorScheme, isGroup, isFrame }: Props) {
   const isTransaction = isTransactionMessage(message.contentType);
   const isGroupUpdated = isContentType("groupUpdated", message.contentType);
 
-  const reactions = getMessageReactions(message);
+  const reactions = useMemo(() => getMessageReactions(message), [message]);
   const showInBubble = !isGroupUpdated;
-  const showAvatar = isGroup && !message.fromMe;
   const showReactionsOutside = isAttachment || isFrame || isTransaction;
 
   let messageMaxWidth: DimensionValue;
@@ -217,10 +216,6 @@ function ChatMessage({ message, colorScheme, isGroup, isFrame }: Props) {
       replyingToMessage.senderAddress
     );
   }, [replyingToMessage?.senderAddress]);
-
-  const messageAttachment = useChatStore(
-    (state) => state.messageAttachments[message.id] || null
-  );
 
   const hasReactions = Object.keys(reactions).length > 0;
 
@@ -380,8 +375,12 @@ function ChatMessage({ message, colorScheme, isGroup, isFrame }: Props) {
                         <View>{messageContent}</View>
                       </View>
                     )}
-                    {hasReactions && !showReactionsOutside && (
-                      <View style={styles.reactionsContainer}>
+                    {!showReactionsOutside && (
+                      <View
+                        style={
+                          hasReactions ? styles.reactionsContainer : { flex: 1 }
+                        }
+                      >
                         <ChatMessageReactions
                           message={message}
                           reactions={reactions}
@@ -458,6 +457,7 @@ export default function CachedChatMessage({
     "isLatestSettledFromPeer",
     "isLoadingAttachment",
     "nextMessageIsLoadingAttachment",
+    "reactions",
   ];
   const alreadyRenderedMessage = renderedMessages.get(
     `${account}-${message.id}`
