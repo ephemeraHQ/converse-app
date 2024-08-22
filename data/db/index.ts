@@ -71,7 +71,7 @@ export const initDb = async (account: string): Promise<void> => {
   try {
     await dataSource.initialize();
     logger.debug(`Database initialized for ${account}`);
-    await waitUntilAppActive(500, 1500);
+    await waitUntilAppActive(1500);
     // https://phiresky.github.io/blog/2020/sqlite-performance-tuning/
     await Promise.all([
       dataSource.query(
@@ -84,7 +84,7 @@ export const initDb = async (account: string): Promise<void> => {
     logger.debug(`Database optimized for ${account}`);
     try {
       logger.debug(`Running migrations for ${account}`);
-      await waitUntilAppActive(500, 1500);
+      await waitUntilAppActive(1500);
       await dataSource.runMigrations();
       logger.debug(`Migrations done for ${account}`);
       repositories[account] = {
@@ -140,7 +140,7 @@ export const clearConverseDb = async (account: string, dbPath: string) => {
   try {
     const dataSource = getExistingDataSource(account);
     if (dataSource) {
-      await waitUntilAppActive(500, 1500);
+      await waitUntilAppActive(1500);
       await dataSource.destroy();
       logger.debug(`[ClearDB] Datasource destroyed - ${account}`);
     } else {
