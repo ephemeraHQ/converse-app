@@ -132,6 +132,20 @@ const DebugButton = forwardRef((props, ref) => {
           );
           alert("Done!");
         },
+        "Show config": () => {
+          Alert.alert(
+            "Config",
+            JSON.stringify(
+              {
+                env: config.env,
+                xmtpEnv: config.xmtpEnv,
+                apiURI: config.apiURI,
+              },
+              null,
+              2
+            )
+          );
+        },
       };
       const methods: any = {
         ...(debugEnabled ? debugMethods : {}),
