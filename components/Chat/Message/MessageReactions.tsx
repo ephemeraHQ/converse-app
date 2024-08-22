@@ -1,11 +1,10 @@
 import {
-  actionSheetColors,
   inversePrimaryColor,
   textPrimaryColor,
   tertiaryBackgroundColor,
   primaryColor,
 } from "@styles/colors";
-import { useCallback, useMemo } from "react";
+import { memo, useCallback, useMemo } from "react";
 import {
   StyleSheet,
   Text,
@@ -21,14 +20,12 @@ import {
   useProfilesStore,
 } from "../../../data/store/accountsStore";
 import { useConversationContext } from "../../../utils/conversation";
-import { getPreferredName, getPreferredAvatar } from "../../../utils/profile";
+import { getPreferredAvatar } from "../../../utils/profile";
 import {
-  getReactionContent,
   MessageReaction,
   addReactionToMessage,
   removeReactionFromMessage,
 } from "../../../utils/reactions";
-import { showActionSheetWithOptions } from "../../StateHandlers/ActionSheetStateHandler";
 
 const MAX_REACTORS_TO_SHOW = 3;
 const REACTOR_OFFSET = 10;
@@ -48,7 +45,7 @@ type ReactionCount = {
   firstReactionTime: number;
 };
 
-export default function ChatMessageReactions({ message, reactions }: Props) {
+function ChatMessageReactions({ message, reactions }: Props) {
   const { conversation } = useConversationContext(["conversation"]);
   const colorScheme = useColorScheme();
   const styles = useStyles();
@@ -112,46 +109,6 @@ export default function ChatMessageReactions({ message, reactions }: Props) {
     [conversation, message, userAddress]
   );
 
-  const showReactionsActionsSheet = useCallback(() => {
-    const methods: any = {};
-    reactionsList.forEach((r) => {
-      const peerAddress = r.senderAddress;
-      const fromMe = peerAddress.toLowerCase() === userAddress?.toLowerCase();
-      const socials = profiles[peerAddress]?.socials;
-      const peer = getPreferredName(socials, peerAddress);
-      methods[
-        `${getReactionContent(r)} ${fromMe ? "you - tap to remove" : peer}`
-      ] = () => {
-        if (!fromMe || !conversation) return;
-        removeReactionFromMessage(conversation, message, r.content);
-      };
-    });
-    methods["Back"] = () => {};
-
-    const options = Object.keys(methods);
-
-    showActionSheetWithOptions(
-      {
-        options,
-        cancelButtonIndex: options.indexOf("Back"),
-        ...actionSheetColors(colorScheme),
-      },
-      (selectedIndex?: number) => {
-        if (selectedIndex === undefined) return;
-        const method = (methods as any)[options[selectedIndex]];
-        if (method) {
-          method();
-        }
-      }
-    );
-  }, [
-    reactionsList,
-    message,
-    colorScheme,
-    userAddress,
-    profiles,
-    conversation,
-  ]);
   if (reactionsList.length === 0) return null;
 
   return (
@@ -227,6 +184,8 @@ export default function ChatMessageReactions({ message, reactions }: Props) {
     </View>
   );
 }
+
+export default memo(ChatMessageReactions);
 
 const useStyles = () => {
   const colorScheme = useColorScheme();

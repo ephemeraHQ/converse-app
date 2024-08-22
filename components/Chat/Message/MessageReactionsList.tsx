@@ -135,7 +135,7 @@ const EmojiItem: FC<{
 
 const emojiList = ["❤️", "👍", "👎", "😂", "🤔", "😲", "➕"];
 
-export const MessageReactionsList: FC<MessageReactionsListProps> = ({
+const MessageReactionsListInner: FC<MessageReactionsListProps> = ({
   reactions,
   message,
   dismissMenu,
@@ -223,6 +223,8 @@ export const MessageReactionsList: FC<MessageReactionsListProps> = ({
     </View>
   );
 };
+
+export const MessageReactionsList = React.memo(MessageReactionsListInner);
 
 const useStyles = () => {
   const colorScheme = useColorScheme();
