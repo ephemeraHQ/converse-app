@@ -1,4 +1,5 @@
 import { useCurrentAccount } from "@data/store/accountsStore";
+import { translate } from "@i18n";
 import { awaitableAlert } from "@utils/alert";
 import { getDbEncryptionKey } from "@utils/keychain/helpers";
 import logger from "@utils/logger";
@@ -111,8 +112,8 @@ export const useCheckCurrentInstallation = () => {
       if (!inboxState.installationIds.includes(client.installationId)) {
         logger.warn(`Installation ${client.installationId} has been revoked`);
         await awaitableAlert(
-          "Installation revoked",
-          "The current installation has been revoked, you will now get logged out and group chats will be deleted"
+          translate("current_installation_revoked"),
+          translate("current_installation_revoked_description")
         );
         logout(true);
         accountCheck.current = undefined;

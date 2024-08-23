@@ -1,3 +1,4 @@
+import { translate } from "@i18n";
 import { awaitableAlert } from "@utils/alert";
 import {
   copyDatabasesToTemporaryDirectory,
@@ -93,8 +94,10 @@ const revokeOtherInstallations = async (
     if (showAlert) {
       // We're on a mobile wallet so we need to ask the user first
       await awaitableAlert(
-        `You have ${otherInstallations.length} other installations`,
-        "Temporary debugging feature: we will revoke those installations now"
+        translate("other_installations_count", {
+          count: otherInstallations.length,
+        }),
+        translate("temporary_revoke_description")
       );
     }
     /* On iOS, when we leave the app, it will automatically disconnect db
