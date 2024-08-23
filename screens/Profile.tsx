@@ -330,38 +330,6 @@ export default function ProfileScreen({
     );
   }, [colorScheme, logout]);
 
-  const showRevokeActionSheet = useCallback(async () => {
-    if (Platform.OS === "web") {
-      // Fixes double action sheet on web
-      await new Promise((r) => setTimeout(r, 100));
-    }
-    const methods = {
-      [translate("revoke_other_installations")]: () =>
-        revokeOtherInstallations(userAddress),
-      [translate("cancel")]: () => {},
-    };
-
-    const options = Object.keys(methods);
-
-    showActionSheetWithOptions(
-      {
-        options,
-        title: translate("revoke_all_other_installations"),
-        message: translate("revoke_description"),
-        cancelButtonIndex: options.indexOf(translate("cancel")),
-        destructiveButtonIndex: [0],
-        ...actionSheetColors(colorScheme),
-      },
-      (selectedIndex?: number) => {
-        if (selectedIndex === undefined) return;
-        const method = (methods as any)[options[selectedIndex]];
-        if (method) {
-          method();
-        }
-      }
-    );
-  }, [colorScheme, userAddress]);
-
   const actionsTableViewItems = useMemo(() => {
     const items: TableViewItemType[] = [];
     if (!isBlockedPeer) {
