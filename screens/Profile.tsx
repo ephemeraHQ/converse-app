@@ -14,7 +14,6 @@ import {
 } from "@styles/colors";
 import { PictoSizes } from "@styles/sizes";
 import { memberCanUpdateGroup } from "@utils/groupUtils/memberCanUpdateGroup";
-import { revokeOtherInstallations } from "@utils/xmtpRN/client";
 import Constants from "expo-constants";
 import * as Linking from "expo-linking";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
