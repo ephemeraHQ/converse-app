@@ -1,5 +1,8 @@
+import { useCurrentAccount } from "@data/store/accountsStore";
+import { awaitableAlert } from "@utils/alert";
 import { getDbEncryptionKey } from "@utils/keychain/helpers";
-import { sentryTrackMessage } from "@utils/sentry";
+import logger from "@utils/logger";
+import { useLogoutFromConverse } from "@utils/logout";
 import { TransactionReferenceCodec } from "@xmtp/content-type-transaction-reference";
 import {
   Client,
@@ -11,8 +14,10 @@ import {
   StaticAttachmentCodec,
   TextCodec,
 } from "@xmtp/react-native-sdk";
+import { useEffect, useRef } from "react";
 
 import { CoinbaseMessagingPaymentCodec } from "./contentTypes/coinbasePayment";
+import { getXmtpClient } from "./sync";
 import config from "../../config";
 import { getDbDirectory } from "../../data/db";
 import { getCleanAddress } from "../eth";
@@ -91,10 +96,35 @@ export const reconnectXmtpClientsDbConnections = async () => {
   );
 };
 
-export const revokeOtherInstallations = async (account: string) => {
-  const client = xmtpClientByAccount[account];
-  if (!client) {
-    sentryTrackMessage("revokeOtherInstallations: client not found");
-  }
-  // await client.revokeOtherInstallations();
+export const useCheckCurrentInstallation = () => {
+  const account = useCurrentAccount() as string;
+  const logout = useLogoutFromConverse(account);
+  // To make sure we're checking only once
+  const accountCheck = useRef<string | undefined>(undefined);
+  useEffect(() => {
+    const check = async () => {
+      if (!account) return;
+      if (accountCheck.current === account) return;
+      accountCheck.current = account;
+      const client = (await getXmtpClient(account)) as ConverseXmtpClientType;
+      const inboxState = await client.inboxState(true);
+      if (!inboxState.installationIds.includes(client.installationId)) {
+        logger.warn(`Installation ${client.installationId} has been revoked`);
+        await awaitableAlert(
+          "Installation revoked",
+          "The current installation has been revoked, you will now get logged out and group chats will be deleted"
+        );
+        logout(true);
+        accountCheck.current = undefined;
+      } else {
+        logger.debug(`Installation ${client.installationId} is not revoked`);
+      }
+    };
+    check().catch((e) => {
+      accountCheck.current = undefined;
+      logger.warn(e, {
+        error: `Could not check inbox state for ${account}`,
+      });
+    });
+  }, [account, logout]);
 };
