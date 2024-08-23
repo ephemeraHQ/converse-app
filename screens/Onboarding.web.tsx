@@ -1,3 +1,4 @@
+import { translate } from "@i18n/index";
 import { ConnectedWallet, usePrivy, useWallets } from "@privy-io/react-auth";
 import {
   backgroundColor,
@@ -5,6 +6,7 @@ import {
   textSecondaryColor,
 } from "@styles/colors";
 import { PictoSizes } from "@styles/sizes";
+import { awaitableAlert } from "@utils/alert";
 import logger from "@utils/logger";
 import { useWeb3Modal, useWeb3ModalProvider } from "@web3modal/ethers5/react";
 import { ethers } from "ethers";
@@ -34,9 +36,10 @@ import { getXmtpClient } from "../utils/xmtpRN/sync";
 export default function Onboarding() {
   const styles = useStyles();
   const { walletProvider } = useWeb3ModalProvider();
-  const { addingNewAccount, setAddingNewAccount } = useOnboardingStore(
-    useSelect(["addingNewAccount", "setAddingNewAccount"])
-  );
+  const { addingNewAccount, setAddingNewAccount, resetOnboarding } =
+    useOnboardingStore(
+      useSelect(["addingNewAccount", "setAddingNewAccount", "resetOnboarding"])
+    );
   const { open: openModal } = useWeb3Modal();
   const hasOnePrivy = useHasOnePrivyAccount();
   const connectingToXmtp = useRef(false);
@@ -84,7 +87,17 @@ export default function Onboarding() {
           const signer = provider.getSigner();
 
           const address = await signer.getAddress();
-          const base64Key = await getXmtpBase64KeyFromSigner(signer);
+          const base64Key = await getXmtpBase64KeyFromSigner(
+            signer,
+            async () => {
+              await awaitableAlert(
+                translate("current_installation_revoked"),
+                translate("current_installation_revoked_description")
+              );
+              resetOnboarding();
+            }
+          );
+          if (!base64Key) return;
           await saveXmtpKey(address, base64Key);
           // Successfull login for user, let's setup
           // the storage !
@@ -121,7 +134,13 @@ export default function Onboarding() {
       }
     };
     connectToXmtp();
-  }, [connectionMethod, privyEmbeddedWallet, privyUser, walletProvider]);
+  }, [
+    connectionMethod,
+    privyEmbeddedWallet,
+    privyUser,
+    resetOnboarding,
+    walletProvider,
+  ]);
 
   const colorScheme = useColorScheme();
 

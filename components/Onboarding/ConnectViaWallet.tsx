@@ -1,6 +1,7 @@
 import { translate } from "@i18n";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { textPrimaryColor, textSecondaryColor } from "@styles/colors";
+import { awaitableAlert } from "@utils/alert";
 import { getDatabaseFilesForInboxId } from "@utils/fileSystem";
 import logger from "@utils/logger";
 import { sentryTrackMessage } from "@utils/sentry";
@@ -215,6 +216,13 @@ export default function ConnectViaWallet({
       const base64Key = await getXmtpBase64KeyFromSigner(
         signer,
         async () => {
+          await awaitableAlert(
+            translate("current_installation_revoked"),
+            translate("current_installation_revoked_description")
+          );
+          disconnect();
+        },
+        async () => {
           logger.debug("Asking for create signature");
           // Before calling "create" signature
           setWaitingForNextSignature(true);
@@ -254,6 +262,7 @@ export default function ConnectViaWallet({
           }
         }
       );
+      if (!base64Key) return;
       logger.debug("Got base64 key, now connecting");
       await connectWithBase64Key(base64Key);
       logger.info("Successfully logged in using a wallet");
@@ -269,6 +278,7 @@ export default function ConnectViaWallet({
     address,
     alreadyV3Db,
     connectWithBase64Key,
+    disconnect,
     onXmtp,
     setLoading,
     signer,

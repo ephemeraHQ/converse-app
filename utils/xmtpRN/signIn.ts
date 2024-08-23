@@ -3,6 +3,7 @@ import { awaitableAlert } from "@utils/alert";
 import {
   copyDatabasesToTemporaryDirectory,
   createTemporaryDirectory,
+  deleteLibXmtpDatabaseForInboxId,
   moveTemporaryDatabasesToDatabaseDirecory as moveTemporaryDatabasesToDatabaseDirectory,
 } from "@utils/fileSystem";
 import { getDbEncryptionKey } from "@utils/keychain/helpers";
@@ -12,6 +13,7 @@ import { Client } from "@xmtp/react-native-sdk";
 import { Signer } from "ethers";
 import { AppState } from "react-native";
 
+import { isClientInstallationValid } from "./client";
 import config from "../../config";
 
 const env = config.xmtpEnv as "dev" | "production" | "local";
@@ -21,6 +23,7 @@ export const getInboxId = (address: string) =>
 
 export const getXmtpBase64KeyFromSigner = async (
   signer: Signer,
+  onInstallationRevoked: () => Promise<void>,
   preCreateIdentityCallback?: () => Promise<void>,
   preEnableIdentityCallback?: () => Promise<void>,
   preAuthenticateToInboxCallback?: () => Promise<void>
@@ -54,6 +57,16 @@ export const getXmtpBase64KeyFromSigner = async (
     throw new Error("Inbox ids don't match");
   }
 
+  // In case we're logging with an existing libxmtp database, make sure
+  // the installation has not already been revoked
+  const installationValid = await isClientInstallationValid(client);
+  if (!installationValid) {
+    await client.dropLocalDatabaseConnection();
+    await deleteLibXmtpDatabaseForInboxId(inboxId);
+    onInstallationRevoked();
+    return;
+  }
+
   sentryAddBreadcrumb("Instantiated client from signer, exporting key bundle");
   const base64Key = await client.exportKeyBundle();
 
@@ -84,13 +97,16 @@ const revokeOtherInstallations = async (
   showAlert: boolean
 ) => {
   const state = await client.inboxState(true);
-  logger.warn(
-    `Inbox ${client.inboxId} has ${state.installationIds.length} installations`
+  logger.debug(
+    `Current installation id : ${client.installationId} - All installation ids : ${state.installationIds}`
   );
   const otherInstallations = state.installationIds.filter(
     (installationId) => installationId !== client.installationId
   );
   if (otherInstallations.length > 0) {
+    logger.warn(
+      `Inbox ${client.inboxId} has ${otherInstallations.length} installations to revoke`
+    );
     if (showAlert) {
       // We're on a mobile wallet so we need to ask the user first
       await awaitableAlert(

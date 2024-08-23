@@ -97,6 +97,20 @@ export const reconnectXmtpClientsDbConnections = async () => {
   );
 };
 
+export const isClientInstallationValid = async (client: Client) => {
+  const inboxState = await client.inboxState(true);
+  logger.debug(
+    `Current installation id : ${client.installationId} - All installation ids : ${inboxState.installationIds}`
+  );
+  if (!inboxState.installationIds.includes(client.installationId)) {
+    logger.warn(`Installation ${client.installationId} has been revoked`);
+    return false;
+  } else {
+    logger.debug(`Installation ${client.installationId} is not revoked`);
+    return true;
+  }
+};
+
 export const useCheckCurrentInstallation = () => {
   const account = useCurrentAccount() as string;
   const logout = useLogoutFromConverse(account);
@@ -107,18 +121,16 @@ export const useCheckCurrentInstallation = () => {
       if (!account) return;
       if (accountCheck.current === account) return;
       accountCheck.current = account;
-      const client = (await getXmtpClient(account)) as ConverseXmtpClientType;
-      const inboxState = await client.inboxState(true);
-      if (!inboxState.installationIds.includes(client.installationId)) {
-        logger.warn(`Installation ${client.installationId} has been revoked`);
+      const client = (await getXmtpClient(account)) as Client;
+      const installationValid = await isClientInstallationValid(client);
+
+      if (!installationValid) {
         await awaitableAlert(
           translate("current_installation_revoked"),
           translate("current_installation_revoked_description")
         );
         logout(true);
         accountCheck.current = undefined;
-      } else {
-        logger.debug(`Installation ${client.installationId} is not revoked`);
       }
     };
     check().catch((e) => {
