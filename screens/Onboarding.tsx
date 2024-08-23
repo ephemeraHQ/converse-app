@@ -1,3 +1,5 @@
+import { translate } from "@i18n/index";
+import { awaitableAlert } from "@utils/alert";
 import logger from "@utils/logger";
 import { sentryAddBreadcrumb, sentryTrackMessage } from "@utils/sentry";
 import { useCallback, useEffect, useRef } from "react";
@@ -32,6 +34,7 @@ export default function Onboarding() {
     isEphemeral,
     pkPath,
     privyAccountId,
+    resetOnboarding,
   } = useOnboardingStore(
     useSelect([
       "connectionMethod",
@@ -42,6 +45,7 @@ export default function Onboarding() {
       "isEphemeral",
       "pkPath",
       "privyAccountId",
+      "resetOnboarding",
     ])
   );
 
@@ -100,14 +104,21 @@ export default function Onboarding() {
     initiatingClientFor.current = address;
 
     try {
-      const base64Key = await getXmtpBase64KeyFromSigner(signer);
+      const base64Key = await getXmtpBase64KeyFromSigner(signer, async () => {
+        await awaitableAlert(
+          translate("current_installation_revoked"),
+          translate("current_installation_revoked_description")
+        );
+        resetOnboarding();
+      });
+      if (!base64Key) return;
       await connectWithBase64Key(base64Key);
     } catch (e) {
       initiatingClientFor.current = undefined;
       setLoading(false);
       logger.error(e);
     }
-  }, [address, connectWithBase64Key, setLoading, signer]);
+  }, [address, connectWithBase64Key, resetOnboarding, setLoading, signer]);
 
   useEffect(() => {
     if (signer && connectionMethod !== "wallet") {
