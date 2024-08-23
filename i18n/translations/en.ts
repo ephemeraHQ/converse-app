@@ -55,10 +55,12 @@ const en = {
   youre_the_og: "YOU'RE THE OG",
   app_version: "APP VERSION",
   security: "SECURITY",
-  revoke_other_installations: "Revoke other installations",
-  revoke_all_other_installations: "Revoke all other installations",
-  revoke_description:
-    "Revoke all other V3 installations of XMTP on other applications and devices.",
+  current_installation_revoked: "Installation revoked",
+  current_installation_revoked_description:
+    "The current installation has been revoked, you will now get logged out and group chats will be deleted",
+  other_installations_count: "You have {{count}} other installations",
+  temporary_revoke_description:
+    "Temporary debugging feature: we will revoke those installations now",
 
   // Attachments
   photo_library: "Photo Library",
