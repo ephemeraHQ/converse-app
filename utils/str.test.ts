@@ -7,6 +7,7 @@ import {
   formatGroupName,
   getReadableProfile,
   getTitleFontScale,
+  shortDisplayName,
   shortAddress,
   strByteSize,
 } from "./str";
@@ -57,19 +58,19 @@ describe("shortAddress", () => {
   });
 });
 
-describe("shortdisplayName", () => {
+describe("shortDisplayName", () => {
   it("should shorten the domain correctly based on screen width", () => {
-    expect(shortdisplayName("thisisaverylongdomainname.com")).toBe(
+    expect(shortDisplayName("thisisaverylongdomainname.com")).toBe(
       "thisisaverylong..."
     );
   });
 
   it("should return the original domain if shorter than maxLength", () => {
-    expect(shortdisplayName("short.com")).toBe("short.com");
+    expect(shortDisplayName("short.com")).toBe("short.com");
   });
 
   it("should return an empty string if domain is undefined", () => {
-    expect(shortdisplayName(undefined)).toBe("");
+    expect(shortDisplayName(undefined)).toBe("");
   });
 });
 
