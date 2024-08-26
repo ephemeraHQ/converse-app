@@ -1,5 +1,5 @@
 import { sentryTrackMessage } from "@utils/sentry";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import ActivityIndicator from "./ActivityIndicator/ActivityIndicator";
 import { useChatStore } from "../data/store/accountsStore";
@@ -13,6 +13,7 @@ export const useShouldShowConnecting = () => {
   );
 
   const conditionTrueTime = useRef(0);
+  const [warnMessage, setWarnMessage] = useState<string | null>(null);
 
   useEffect(() => {
     let interval: NodeJS.Timeout | undefined = undefined;
@@ -30,12 +31,21 @@ export const useShouldShowConnecting = () => {
             reconnecting,
           });
 
+          if (!isInternetReachable) {
+            setWarnMessage("Waiting for network");
+          } else if (reconnecting) {
+            setWarnMessage("Reconnecting");
+          } else {
+            setWarnMessage("Syncing");
+          }
+
           conditionTrueTime.current = 0;
           clearInterval(interval); // Clear interval after logging
         }
       }, 1000);
     } else {
       conditionTrueTime.current = 0;
+      setWarnMessage(null);
       if (interval) {
         clearInterval(interval);
       }
@@ -44,7 +54,10 @@ export const useShouldShowConnecting = () => {
     return () => clearInterval(interval);
   }, [isInternetReachable, localClientConnected, reconnecting]);
 
-  return !isInternetReachable || !localClientConnected || reconnecting;
+  const shouldShow =
+    !isInternetReachable || !localClientConnected || reconnecting;
+
+  return { shouldShow, warnMessage };
 };
 
 export const useShouldShowConnectingOrSyncing = () => {
