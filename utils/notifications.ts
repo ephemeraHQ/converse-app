@@ -477,12 +477,19 @@ export const saveConversationIdentifiersForNotifications = (
 export const onInteractWithNotification = (
   event: Notifications.NotificationResponse
 ) => {
-  const notificationData = event.notification.request.content.data;
+  let notificationData = event.notification.request.content.data;
+  // Android returns the data in the body as a string
+  if (
+    typeof notificationData === "object" &&
+    "body" in notificationData &&
+    typeof notificationData["body"] === "string"
+  ) {
+    notificationData = JSON.parse(notificationData.body);
+  }
   if (!notificationData) return;
   const conversationTopic = notificationData["contentTopic"] as
     | string
     | undefined;
-
   const account =
     notificationData["account"] || useAccountsStore.getState().currentAccount;
 
