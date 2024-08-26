@@ -8,7 +8,6 @@ import {
   getReadableProfile,
   getTitleFontScale,
   shortAddress,
-  shortDomain,
   strByteSize,
 } from "./str";
 import { getProfilesStore } from "../data/store/accountsStore";
@@ -58,19 +57,19 @@ describe("shortAddress", () => {
   });
 });
 
-describe("shortDomain", () => {
+describe("shortdisplayName", () => {
   it("should shorten the domain correctly based on screen width", () => {
-    expect(shortDomain("thisisaverylongdomainname.com")).toBe(
+    expect(shortdisplayName("thisisaverylongdomainname.com")).toBe(
       "thisisaverylong..."
     );
   });
 
   it("should return the original domain if shorter than maxLength", () => {
-    expect(shortDomain("short.com")).toBe("short.com");
+    expect(shortdisplayName("short.com")).toBe("short.com");
   });
 
   it("should return an empty string if domain is undefined", () => {
-    expect(shortDomain(undefined)).toBe("");
+    expect(shortdisplayName(undefined)).toBe("");
   });
 });
 
