@@ -95,7 +95,7 @@ export const useShouldShowConnectingOrSyncing = () => {
   }, [conversations, initialLoadDoneOnce]);
 
   return (
-    shouldShowConnecting ||
+    shouldShowConnecting.shouldShow ||
     (!initialLoadDoneOnce && Object.keys(conversations).length > 0)
   );
 };
