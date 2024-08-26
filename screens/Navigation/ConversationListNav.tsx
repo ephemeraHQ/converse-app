@@ -80,7 +80,7 @@ export default function ConversationListNav() {
   const onChangeSearch = (query: string) => setSearchQuery(query);
   const searchPlaceholder = (): string => {
     if (shouldShowConnectingOrSyncing && !searchBarFocused) {
-      return shouldShowConnecting ? "Connecting…" : "Syncing…";
+      return shouldShowConnecting.shouldShow ? "Connecting…" : "Syncing…";
     }
     return "Search chats";
   };
