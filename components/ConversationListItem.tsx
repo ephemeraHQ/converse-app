@@ -323,7 +323,7 @@ const ConversationListItem = memo(function ConversationListItem({
         <RectButton style={styles.rightAction} onPress={handleRightPress}>
           <Picto
             picto="checkmark"
-            color="white"
+            color={inversePrimaryColor(colorScheme)}
             size={PictoSizes.swipableItem}
           />
         </RectButton>
@@ -340,6 +340,7 @@ const ConversationListItem = memo(function ConversationListItem({
     styles.rightActionRed,
     handleRightPress,
     isBlockedChatView,
+    colorScheme,
   ]);
 
   const renderLeftActions = useCallback(() => {
