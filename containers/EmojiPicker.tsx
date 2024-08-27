@@ -1,43 +1,29 @@
 import { MessageToDisplay } from "@components/Chat/Message/Message";
 import { Drawer, DrawerRef } from "@components/Drawer";
-import SearchBar from "@components/NewConversation/SearchBar";
+import { EmojiRowList } from "@components/EmojiPicker/EmojiRowList";
+import { EmojiSearchBar } from "@components/EmojiPicker/EmojiSearchBar";
 import { useChatStore, useCurrentAccount } from "@data/store/accountsStore";
 import { useSelect } from "@data/store/storeHelpers";
-import { textPrimaryColor } from "@styles/colors";
-import { ReanimatedFlashList, ReanimatedView } from "@utils/animations";
+import { textSecondaryColor } from "@styles/colors";
 import { useConversationContext } from "@utils/conversation";
 import { emojis } from "@utils/emojis/emojis";
 import { favoritedEmojis } from "@utils/emojis/favoritedEmojis";
+import { CategorizedEmojisRecord, Emoji } from "@utils/emojis/interfaces";
 import {
   addReactionToMessage,
   getMessageReactions,
   getReactionContent,
   removeReactionFromMessage,
 } from "@utils/reactions";
-import { FC, useCallback, useMemo, useRef, useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 import {
   View,
   StyleSheet,
-  Platform,
   useColorScheme,
-  Pressable,
   useWindowDimensions,
 } from "react-native";
 import { Text } from "react-native-paper";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-
-interface Emoji {
-  emoji: string;
-  name: string;
-  toneEnabled: boolean;
-  keywords: string[];
-}
-
-interface CategorizedEmojisRecord {
-  id: string;
-  category: string;
-  emojis: Emoji[];
-}
 
 const flatEmojis = emojis.flatMap((category) => category.data);
 
@@ -69,53 +55,6 @@ const sliceEmojis = (emojis: Emoji[]) => {
 const myEmojis = sliceEmojis(
   flatEmojis.filter((emoji) => favoritedEmojis.isFavorite(emoji.emoji))
 );
-
-interface EmojiRowListProps {
-  emojis: CategorizedEmojisRecord[];
-  ListHeader?: React.ReactNode;
-  onPress: (emoji: string) => void;
-}
-
-const EmojiRowList: FC<EmojiRowListProps> = ({
-  emojis,
-  ListHeader,
-  onPress,
-}) => {
-  const styles = useStyles();
-  const { height: windowHeight } = useWindowDimensions();
-  const height = Math.min(emojis.length * 50, windowHeight * 0.75);
-  return (
-    <ReanimatedView style={{ height }}>
-      <ReanimatedFlashList
-        ListHeaderComponent={() => ListHeader}
-        showsVerticalScrollIndicator={false}
-        estimatedItemSize={50}
-        data={emojis}
-        scrollEnabled={emojis.length > 1}
-        keyExtractor={(_, index) => String(index)}
-        renderItem={({ item }) => (
-          <View
-            style={{
-              flexDirection: "row",
-              width: "100%",
-              height: 50,
-            }}
-          >
-            {item.emojis.map((emoji) => (
-              <Pressable
-                key={emoji.emoji}
-                onPress={() => onPress(emoji.emoji)}
-                style={{ width: "auto", marginHorizontal: 8 }}
-              >
-                <Text style={styles.listEmoji}>{emoji.emoji}</Text>
-              </Pressable>
-            ))}
-          </View>
-        )}
-      />
-    </ReanimatedView>
-  );
-};
 
 export const EmojiPicker = ({ message }: { message: MessageToDisplay }) => {
   const currentUser = useCurrentAccount();
@@ -149,19 +88,17 @@ export const EmojiPicker = ({ message }: { message: MessageToDisplay }) => {
     return sliceEmojis(
       flatEmojis.filter((emoji) =>
         emoji.keywords.some((keyword) =>
-          keyword.includes(searchInput.toLowerCase())
+          keyword.includes(searchInput.toLowerCase().trim())
         )
       )
     );
   }, [searchInput]);
-  const insets = useSafeAreaInsets();
   const closeMenu = useCallback(() => {
     setReactMenuMessageId(null);
   }, [setReactMenuMessageId]);
   const { conversation } = useConversationContext(["conversation"]);
   const handleReaction = useCallback(
     (emoji: string) => {
-      console.log("handleReaction", conversation, message, emoji);
       if (!conversation) return;
       const alreadySelected = currentUserEmojiMap[emoji];
       if (alreadySelected) {
@@ -173,17 +110,11 @@ export const EmojiPicker = ({ message }: { message: MessageToDisplay }) => {
     },
     [conversation, message, currentUserEmojiMap, closeMenu]
   );
-  const { height } = useWindowDimensions();
 
   return (
     <Drawer visible={visible} onClose={closeMenu} ref={drawerRef}>
-      <SearchBar
-        value={searchInput}
-        setValue={setSearchInput}
-        inputPlaceholder="Search"
-        onRef={() => {}}
-      />
-      <View style={{ flex: 1, maxHeight: height * 0.75, height: "auto" }}>
+      <EmojiSearchBar value={searchInput} setValue={setSearchInput} />
+      <View style={styles.container}>
         {searchInput.length > 0 ? (
           <EmojiRowList emojis={filteredReactions} onPress={handleReaction} />
         ) : (
@@ -201,7 +132,7 @@ export const EmojiPicker = ({ message }: { message: MessageToDisplay }) => {
             />
           </>
         )}
-        <View style={{ height: insets.bottom }} />
+        <View style={styles.bottom} />
       </View>
     </Drawer>
   );
@@ -209,27 +140,17 @@ export const EmojiPicker = ({ message }: { message: MessageToDisplay }) => {
 
 const useStyles = () => {
   const colorScheme = useColorScheme();
+  const { height } = useWindowDimensions();
+  const insets = useSafeAreaInsets();
   return StyleSheet.create({
-    textInput: {
-      width: "100%",
-      color: textPrimaryColor(colorScheme),
-      fontSize: Platform.OS === "android" ? 16 : 17,
-      paddingHorizontal: 12,
-      lineHeight: 22,
-      paddingVertical: Platform.OS === "android" ? 4 : 7,
-      zIndex: 1,
-    },
-    searchEmoji: {
-      fontSize: 32,
-    },
-    listEmoji: {
-      fontSize: 40,
-      flexGrow: 1,
-    },
+    container: { flex: 1, maxHeight: height * 0.75, height: "auto" },
     headerText: {
-      fontSize: 12,
-      fontWeight: "bold",
+      fontSize: 13,
       padding: 8,
+      color: textSecondaryColor(colorScheme),
+    },
+    bottom: {
+      height: insets.bottom,
     },
   });
 };
