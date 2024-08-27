@@ -95,10 +95,7 @@ jobs:
 
   increment-build-numbers:
     runs-on: ubuntu-latest
-    needs: [build-android, build-ios]
-    outputs:
-      branch-name: ${{ steps.create_branch.outputs.branch-name }}
-      new_ios_build_number: ${{ steps.increment_version.outputs.new_ios_build_number }}
+    # needs: [build-android, build-ios]
 
     steps:
       - name: Checkout repository
@@ -109,38 +106,13 @@ jobs:
         with:
           node-version: "18"
 
-      - name: Create a new branch
-        id: create_branch
-        run: |
-          BRANCH_NAME="increment-version-$(date +'%Y%m%d%H%M%S')"
-          echo "branch-name=$BRANCH_NAME" >> $GITHUB_OUTPUT
-
       - name: Increment version numbers
         run: node scripts/build/incrementBuildNumbers.js
-
-      - name: Commit changes
-        run: |
-          git config --global user.name 'github-actions[bot]'
-          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
-          git add app.json
-          git commit -m "Increment version numbers"
-
-      - name: Push changes
-        run: git push origin HEAD:${{ steps.create_branch.outputs.branch-name }}
-
-  create-pull-request:
-    runs-on: ubuntu-latest
-    needs: increment-build-numbers
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v2
 
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v4
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          branch: ${{ needs.increment-build-numbers.outputs.branch-name }}
+          branch: increment-version
           title: "Increment version numbers"
           body: "This PR increments the buildNumber for iOS and the versionCode for Android."
-          base: main # Change the base branch if needed
