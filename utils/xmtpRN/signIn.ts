@@ -109,12 +109,15 @@ const revokeOtherInstallations = async (
     );
     if (showAlert) {
       // We're on a mobile wallet so we need to ask the user first
-      await awaitableAlert(
+      const doRevoke = await awaitableAlert(
         translate("other_installations_count", {
           count: otherInstallations.length,
         }),
-        translate("temporary_revoke_description")
+        translate("temporary_revoke_description"),
+        "Yes",
+        "No"
       );
+      if (!doRevoke) return;
     }
     /* On iOS, when we leave the app, it will automatically disconnect db
     and might not reconect fast enough when coming back from that signature
