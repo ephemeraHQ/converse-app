@@ -7,13 +7,7 @@ import {
   myMessageHighlightedBubbleColor,
 } from "@styles/colors";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import {
-  ColorSchemeName,
-  Platform,
-  StyleSheet,
-  useColorScheme,
-  View,
-} from "react-native";
+import { Platform, StyleSheet, useColorScheme, View } from "react-native";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import Animated, {
   AnimatedStyle,
@@ -28,6 +22,7 @@ import Animated, {
 
 import { MessageToDisplay } from "./Message";
 import MessageTail from "./MessageTail";
+import { EmojiPicker } from "../../../containers/EmojiPicker";
 import { useCurrentAccount } from "../../../data/store/accountsStore";
 import { useAppStore } from "../../../data/store/appStore";
 import { XmtpConversation } from "../../../data/store/chatStore";
@@ -40,11 +35,9 @@ import {
   MessageReaction,
   addReactionToMessage,
   getEmojiName,
-  removeReactionFromMessage,
 } from "../../../utils/reactions";
 import { UUID_REGEX } from "../../../utils/regex";
 import { isTransactionMessage } from "../../../utils/transaction";
-import EmojiPicker from "../../../vendor/rn-emoji-keyboard";
 
 type Props = {
   children: React.ReactNode;
@@ -72,7 +65,6 @@ export default function ChatMessageActions({
   const { setContextMenuShown } = useAppStore(
     useSelect(["setContextMenuShown"])
   );
-  const [emojiPickerShown, setEmojiPickerShown] = useState(false);
 
   const canAddReaction =
     message.status !== "sending" && message.status !== "error";
@@ -338,54 +330,10 @@ export default function ChatMessageActions({
       </GestureDetector>
       {/* <View style={{width: 50, height: 20, backgroundColor: "red"}} />
       <GestureDetector gesture={composedGesture}>{children}</GestureDetector> */}
-      <EmojiPicker
-        onEmojiSelected={(e) => {
-          if (!conversation) return;
-          if (e.alreadySelected) {
-            removeReactionFromMessage(conversation, message, e.emoji);
-          } else {
-            addReactionToMessage(conversation, message, e.emoji);
-          }
-        }}
-        open={emojiPickerShown}
-        onClose={() => setEmojiPickerShown(false)}
-        enableRecentlyUsed
-        enableCategoryChangeAnimation={false}
-        enableCategoryChangeGesture
-        enableSearchAnimation={false}
-        enableSearchBar={false}
-        expandable={false}
-        categoryPosition="bottom"
-        categoryOrder={["recently_used"]}
-        selectedEmojis={selectedEmojis}
-        theme={getEmojiPickerTheme(colorScheme)}
-        styles={{
-          container: {
-            borderBottomLeftRadius: Platform.OS === "android" ? 0 : undefined,
-            borderBottomRightRadius: Platform.OS === "android" ? 0 : undefined,
-          },
-        }}
-      />
+      <EmojiPicker message={message} />
     </>
   );
 }
-
-const getEmojiPickerTheme = (colorScheme: ColorSchemeName) =>
-  colorScheme === "dark"
-    ? {
-        backdrop: "#16161888",
-        knob: "#766dfc",
-        container: "#282829",
-        header: "#fff",
-        skinTonesContainer: "#252427",
-        category: {
-          icon: "#766dfc",
-          iconActive: "#fff",
-          container: "#252427",
-          containerActive: "#282829",
-        },
-      }
-    : {};
 
 const useStyles = () => {
   return StyleSheet.create({
