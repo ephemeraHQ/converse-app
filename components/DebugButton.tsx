@@ -7,6 +7,8 @@ import {
 } from "@utils/logger";
 import { navigate } from "@utils/navigation";
 import { getNativeLogFile } from "@utils/xmtpRN/logs";
+import { getXmtpClient } from "@utils/xmtpRN/sync";
+import { Client } from "@xmtp/react-native-sdk";
 import axios from "axios";
 import Constants from "expo-constants";
 import { Image } from "expo-image";
@@ -80,6 +82,18 @@ const DebugButton = forwardRef((props, ref) => {
             return Alert.alert("No previous session logging file found");
           }
           navigate("WebviewPreview", { uri: previousLoggingFile });
+        },
+        "Get installations": async () => {
+          const client = (await getXmtpClient(currentAccount())) as Client;
+          const state = await client.inboxState(true);
+          Alert.alert(
+            `${state.installationIds.length} installations`,
+            `InboxId: ${client.inboxId}\n\nCurrent installation: ${
+              client.installationId
+            }\n\nAll installations:\n\n${state.installationIds
+              .map((i) => `${i}`)
+              .join("\n\n")}`
+          );
         },
         "Trigger OTA Update": async () => {
           try {

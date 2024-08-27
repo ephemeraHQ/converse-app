@@ -1,5 +1,9 @@
+import { useCurrentAccount } from "@data/store/accountsStore";
+import { translate } from "@i18n";
+import { awaitableAlert } from "@utils/alert";
 import { getDbEncryptionKey } from "@utils/keychain/helpers";
-import { sentryTrackMessage } from "@utils/sentry";
+import logger from "@utils/logger";
+import { useLogoutFromConverse } from "@utils/logout";
 import { TransactionReferenceCodec } from "@xmtp/content-type-transaction-reference";
 import {
   Client,
@@ -11,8 +15,10 @@ import {
   StaticAttachmentCodec,
   TextCodec,
 } from "@xmtp/react-native-sdk";
+import { useEffect, useRef } from "react";
 
 import { CoinbaseMessagingPaymentCodec } from "./contentTypes/coinbasePayment";
+import { getXmtpClient } from "./sync";
 import config from "../../config";
 import { getDbDirectory } from "../../data/db";
 import { getCleanAddress } from "../eth";
@@ -91,10 +97,47 @@ export const reconnectXmtpClientsDbConnections = async () => {
   );
 };
 
-export const revokeOtherInstallations = async (account: string) => {
-  const client = xmtpClientByAccount[account];
-  if (!client) {
-    sentryTrackMessage("revokeOtherInstallations: client not found");
+export const isClientInstallationValid = async (client: Client) => {
+  const inboxState = await client.inboxState(true);
+  logger.debug(
+    `Current installation id : ${client.installationId} - All installation ids : ${inboxState.installationIds}`
+  );
+  if (!inboxState.installationIds.includes(client.installationId)) {
+    logger.warn(`Installation ${client.installationId} has been revoked`);
+    return false;
+  } else {
+    logger.debug(`Installation ${client.installationId} is not revoked`);
+    return true;
   }
-  // await client.revokeOtherInstallations();
+};
+
+export const useCheckCurrentInstallation = () => {
+  const account = useCurrentAccount() as string;
+  const logout = useLogoutFromConverse(account);
+  // To make sure we're checking only once
+  const accountCheck = useRef<string | undefined>(undefined);
+  useEffect(() => {
+    const check = async () => {
+      if (!account) return;
+      if (accountCheck.current === account) return;
+      accountCheck.current = account;
+      const client = (await getXmtpClient(account)) as Client;
+      const installationValid = await isClientInstallationValid(client);
+
+      if (!installationValid) {
+        await awaitableAlert(
+          translate("current_installation_revoked"),
+          translate("current_installation_revoked_description")
+        );
+        logout(true);
+        accountCheck.current = undefined;
+      }
+    };
+    check().catch((e) => {
+      accountCheck.current = undefined;
+      logger.warn(e, {
+        error: `Could not check inbox state for ${account}`,
+      });
+    });
+  }, [account, logout]);
 };

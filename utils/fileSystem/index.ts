@@ -62,6 +62,14 @@ export const copyDatabasesToTemporaryDirectory = async (
   }
 };
 
+export const deleteLibXmtpDatabaseForInboxId = async (inboxId: string) => {
+  const dbDirectoryXmtpDbFiles = await getDatabaseFilesForInboxId(inboxId);
+  for (const dbFile of dbDirectoryXmtpDbFiles) {
+    logger.debug("Deleting database file", dbFile.name);
+    await RNFS.unlink(dbFile.path);
+  }
+};
+
 export const moveTemporaryDatabasesToDatabaseDirecory = async (
   tempDirectory: string,
   inboxId: string
