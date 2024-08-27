@@ -1,12 +1,20 @@
 import GroupAvatar from "@components/GroupAvatar";
-import { useCurrentAccount, useProfilesStore } from "@data/store/accountsStore";
+import {
+  useChatStore,
+  useCurrentAccount,
+  useProfilesStore,
+} from "@data/store/accountsStore";
+import { useSelect } from "@data/store/storeHelpers";
 import {
   backgroundColor,
+  clickedItemBackgroundColor,
   messageBubbleColor,
+  textPrimaryColor,
   textSecondaryColor,
 } from "@styles/colors";
 import { AvatarSizes, BorderRadius, Paddings } from "@styles/sizes";
 import { useConversationContext } from "@utils/conversation";
+import { favoritedEmojis } from "@utils/emojis/favoritedEmojis";
 import { getPreferredAvatar, getPreferredName } from "@utils/profile";
 import {
   addReactionToMessage,
@@ -133,13 +141,14 @@ const EmojiItem: FC<{
   );
 };
 
-const emojiList = ["❤️", "👍", "👎", "😂", "🤔", "😲", "➕"];
-
 const MessageReactionsListInner: FC<MessageReactionsListProps> = ({
   reactions,
   message,
   dismissMenu,
 }) => {
+  const { setReactMenuMessageId } = useChatStore(
+    useSelect(["setReactMenuMessageId"])
+  );
   const currentUser = useCurrentAccount();
   const styles = useStyles();
   const colorScheme = useColorScheme();
@@ -178,6 +187,11 @@ const MessageReactionsListInner: FC<MessageReactionsListProps> = ({
     return <Item content={item[0]} addresses={item[1]} index={index} />;
   };
 
+  const handlePlusPress = useCallback(() => {
+    dismissMenu?.();
+    setReactMenuMessageId(message.id);
+  }, [dismissMenu, message.id, setReactMenuMessageId]);
+
   return (
     <View
       style={[
@@ -210,7 +224,7 @@ const MessageReactionsListInner: FC<MessageReactionsListProps> = ({
             : styles.emojiListContainerFromOther,
         ]}
       >
-        {emojiList.map((emoji) => (
+        {favoritedEmojis.getEmojis().map((emoji) => (
           <EmojiItem
             key={emoji}
             content={emoji}
@@ -219,6 +233,11 @@ const MessageReactionsListInner: FC<MessageReactionsListProps> = ({
             dismissMenu={dismissMenu}
           />
         ))}
+        <TouchableOpacity onPress={handlePlusPress}>
+          <View style={styles.plusContainer}>
+            <Text style={styles.plusText}>+</Text>
+          </View>
+        </TouchableOpacity>
       </View>
     </View>
   );
@@ -292,6 +311,22 @@ const useStyles = () => {
     emojiListContainerFromOther: {
       alignSelf: "flex-start",
       marginLeft: SIDE_MARGIN * 2,
+    },
+    plusContainer: {
+      borderRadius: 32,
+      backgroundColor: clickedItemBackgroundColor(colorScheme),
+      justifyContent: "center",
+      alignItems: "center",
+      textAlign: "center",
+      textAlignVertical: "center",
+      height: 32,
+      width: 32,
+    },
+    plusText: {
+      textAlign: "center",
+      textAlignVertical: "center",
+      fontSize: 16,
+      color: textPrimaryColor(colorScheme),
     },
   });
 };
