@@ -8,7 +8,6 @@ import {
 } from "@utils/fileSystem";
 import { getDbEncryptionKey } from "@utils/keychain/helpers";
 import logger from "@utils/logger";
-import { sentryAddBreadcrumb } from "@utils/sentry";
 import { Client } from "@xmtp/react-native-sdk";
 import { Signer } from "ethers";
 import { AppState } from "react-native";
@@ -44,7 +43,7 @@ export const getXmtpBase64KeyFromSigner = async (
 
   await copyDatabasesToTemporaryDirectory(tempDirectory, inboxId);
 
-  sentryAddBreadcrumb("Instantiating client from signer");
+  logger.debug("Instantiating client from signer");
 
   const client = await Client.create(signer, {
     ...options,
@@ -67,14 +66,10 @@ export const getXmtpBase64KeyFromSigner = async (
     return;
   }
 
-  sentryAddBreadcrumb("Instantiated client from signer, exporting key bundle");
+  logger.debug("Instantiated client from signer, exporting key bundle");
   const base64Key = await client.exportKeyBundle();
 
-  const isConnectingViaWallet =
-    !!preCreateIdentityCallback ||
-    !!preEnableIdentityCallback ||
-    !!preAuthenticateToInboxCallback;
-  await revokeOtherInstallations(signer, client, isConnectingViaWallet);
+  await revokeOtherInstallations(signer, client);
 
   // This Client is only be used to extract the key, we can disconnect
   // it to prevent locks happening during Onboarding
@@ -83,7 +78,7 @@ export const getXmtpBase64KeyFromSigner = async (
     tempDirectory,
     client.inboxId
   );
-  sentryAddBreadcrumb("Exported key bundle");
+  logger.debug("Exported key bundle");
   return base64Key;
 };
 
@@ -91,11 +86,7 @@ export const getXmtpBase64KeyFromSigner = async (
 Temporary method for XMTP team to revoke other installations
 when logging in to remove weird, broken installation
 */
-const revokeOtherInstallations = async (
-  signer: Signer,
-  client: Client,
-  showAlert: boolean
-) => {
+const revokeOtherInstallations = async (signer: Signer, client: Client) => {
   const state = await client.inboxState(true);
   logger.debug(
     `Current installation id : ${client.installationId} - All installation ids : ${state.installationIds}`
@@ -107,18 +98,16 @@ const revokeOtherInstallations = async (
     logger.warn(
       `Inbox ${client.inboxId} has ${otherInstallations.length} installations to revoke`
     );
-    if (showAlert) {
-      // We're on a mobile wallet so we need to ask the user first
-      const doRevoke = await awaitableAlert(
-        translate("other_installations_count", {
-          count: otherInstallations.length,
-        }),
-        translate("temporary_revoke_description"),
-        "Yes",
-        "No"
-      );
-      if (!doRevoke) return;
-    }
+    // We're on a mobile wallet so we need to ask the user first
+    const doRevoke = await awaitableAlert(
+      translate("other_installations_count", {
+        count: otherInstallations.length,
+      }),
+      translate("temporary_revoke_description"),
+      "Yes",
+      "No"
+    );
+    if (!doRevoke) return;
     /* On iOS, when we leave the app, it will automatically disconnect db
     and might not reconect fast enough when coming back from that signature
     and hit "Client error: storage error: Pool needs to  reconnect before use"
