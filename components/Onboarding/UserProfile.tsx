@@ -40,7 +40,7 @@ import Button from "../Button/Button";
 import { showActionSheetWithOptions } from "../StateHandlers/ActionSheetStateHandler";
 
 export type ProfileType = {
-  avatar: string;
+  avatar?: string;
   username: string;
   displayName: string;
 };
@@ -105,10 +105,6 @@ export const UserProfile = ({ onboarding, navigation }: Props) => {
       setIntermediaryScreenShown(false);
       return;
     }
-    if (!profile.avatar) {
-      setErrorMessage("You must define an avatar");
-      return;
-    }
 
     if (profile.displayName.length < 3 || profile.displayName.length > 32) {
       setErrorMessage(
@@ -142,35 +138,37 @@ export const UserProfile = ({ onboarding, navigation }: Props) => {
     }
 
     let publicAvatar = "";
-    if (profile.avatar.startsWith("https://")) {
-      publicAvatar = profile.avatar;
-    } else {
-      // Let's upload the image to our server
-      const resizedImage = await compressAndResizeImage(profile.avatar, true);
+    if (profile.avatar) {
+      if (profile.avatar.startsWith("https://")) {
+        publicAvatar = profile.avatar;
+      } else {
+        // Let's upload the image to our server
+        const resizedImage = await compressAndResizeImage(profile.avatar, true);
 
-      try {
-        // On web we use blob, on mobile we use file path
-        publicAvatar =
-          Platform.OS === "web"
-            ? await uploadFile({
-                account: address,
-                contentType: "image/jpeg",
-                blob: new Blob(
-                  [Buffer.from(resizedImage.base64 as string, "base64")],
-                  { type: "image/png" }
-                ),
-              })
-            : await uploadFile({
-                account: address,
-                filePath: resizedImage.uri,
-                contentType: "image/jpeg",
-              });
-      } catch (e: any) {
-        setErrorMessage(
-          e?.response?.data?.message || "An unknown error occured"
-        );
-        setLoading(false);
-        return;
+        try {
+          // On web we use blob, on mobile we use file path
+          publicAvatar =
+            Platform.OS === "web"
+              ? await uploadFile({
+                  account: address,
+                  contentType: "image/jpeg",
+                  blob: new Blob(
+                    [Buffer.from(resizedImage.base64 as string, "base64")],
+                    { type: "image/png" }
+                  ),
+                })
+              : await uploadFile({
+                  account: address,
+                  filePath: resizedImage.uri,
+                  contentType: "image/jpeg",
+                });
+        } catch (e: any) {
+          setErrorMessage(
+            e?.response?.data?.message || "An unknown error occured"
+          );
+          setLoading(false);
+          return;
+        }
       }
     }
 
