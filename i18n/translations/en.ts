@@ -24,7 +24,6 @@ const en = {
   block: "Block",
   decline: "Decline",
   unblock: "Unblock",
-  this_group_is_blocked: "This group is blocked",
   if_you_unblock_contact:
     "If you unblock this contact, they will be able to send you messages again.",
   if_you_block_contact:
