@@ -1,5 +1,6 @@
 import UserProfile from "@components/Onboarding/UserProfile";
 import { backgroundColor } from "@styles/colors";
+import { useCheckCurrentInstallation } from "@utils/xmtpRN/client";
 import { StatusBar } from "expo-status-bar";
 import React, { useCallback, useEffect, useRef } from "react";
 import { Dimensions, Platform, useColorScheme } from "react-native";
@@ -34,6 +35,7 @@ export default function Main() {
   // Makes sure we have a Privy token ready to make API calls
   usePrivyAccessToken();
   useAddressBookStateHandler();
+  useCheckCurrentInstallation();
   const colorScheme = useColorScheme();
   const userAddress = useCurrentAccount();
   const socials = useProfilesStore((s) =>

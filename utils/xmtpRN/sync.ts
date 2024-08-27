@@ -93,7 +93,6 @@ const onSyncLost = async (account: string, error: any) => {
       logger.error(
         "Reconnecting XMTP Pool because it didn't reconnect automatically"
       );
-      console.log("reconnecting!!");
       await reconnectXmtpClientsDbConnections();
     } else if (AppState.currentState === "background") {
       // This error is normal when backgrounded, fail silently
