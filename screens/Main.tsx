@@ -119,13 +119,7 @@ export default function Main() {
           Platform.OS === "android"))
     ) {
       screenToShow = <NotificationsScreen />;
-    } else if (
-      !(
-        currentUserName?.name &&
-        currentUserName?.displayName &&
-        currentUserName?.avatar
-      )
-    ) {
+    } else if (!(currentUserName?.name && currentUserName?.displayName)) {
       screenToShow = <UserProfile onboarding />;
     } else if (Platform.OS === "android") {
       // On Android the whole navigation is wrapped in a drawler
