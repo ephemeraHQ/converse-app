@@ -3,7 +3,7 @@ import { useGroupMembers } from "@hooks/useGroupMembers";
 import { useGroupName } from "@hooks/useGroupName";
 import { translate } from "@i18n";
 import { useGroupQuery } from "@queries/useGroupQuery";
-import { actionSheetColors, textPrimaryColor } from "@styles/colors";
+import { textPrimaryColor } from "@styles/colors";
 import { useCallback, useMemo } from "react";
 import {
   Keyboard,
@@ -20,7 +20,6 @@ import { useConversationContext } from "../../../utils/conversation";
 import { sendMessage } from "../../../utils/message";
 import ActivityIndicator from "../../ActivityIndicator/ActivityIndicator";
 import Button from "../../Button/Button";
-import { showActionSheetWithOptions } from "../../StateHandlers/ActionSheetStateHandler";
 
 type Props = {
   messagesCount: number;
@@ -77,26 +76,6 @@ export function GroupChatPlaceholder({ messagesCount }: Props) {
     }
   }, [conversation, messagesCount, onReadyToFocus]);
 
-  const onUnblock = useCallback(() => {
-    showActionSheetWithOptions(
-      {
-        options: [translate("unblock"), translate("cancel")],
-        cancelButtonIndex: 1,
-        destructiveButtonIndex: isBlockedGroup ? undefined : 0,
-        title: translate("if_you_unblock_group"),
-        ...actionSheetColors(colorScheme),
-      },
-      (selectedIndex?: number) => {
-        if (selectedIndex === 0) {
-          allowGroup({
-            includeCreator: false,
-            includeAddedBy: false,
-          });
-        }
-      }
-    );
-  }, [isBlockedGroup, colorScheme, allowGroup]);
-
   return (
     <TouchableWithoutFeedback onPress={handleDismiss}>
       <View onLayout={onLayout} style={styles.chatPlaceholder}>
@@ -108,38 +87,21 @@ export function GroupChatPlaceholder({ messagesCount }: Props) {
             </Text>
           </View>
         )}
-        {conversation && isBlockedGroup && (
+        {conversation && messagesCount === 0 && !groupCreatedByUser && (
           <View>
             <Text style={styles.chatPlaceholderText}>
-              {translate("this_group_is_blocked")}
+              This is the beginning of your{"\n"}conversation in {groupName}
             </Text>
+
             <Button
               variant="secondary"
-              picto="lock.open"
-              title={translate("unblock")}
+              picto="hand.wave"
+              title={translate("say_hi")}
               style={styles.cta}
-              onPress={onUnblock}
+              onPress={handleSend}
             />
           </View>
         )}
-        {conversation &&
-          !isBlockedGroup &&
-          messagesCount === 0 &&
-          !groupCreatedByUser && (
-            <View>
-              <Text style={styles.chatPlaceholderText}>
-                This is the beginning of your{"\n"}conversation in {groupName}
-              </Text>
-
-              <Button
-                variant="secondary"
-                picto="hand.wave"
-                title={translate("say_hi")}
-                style={styles.cta}
-                onPress={handleSend}
-              />
-            </View>
-          )}
       </View>
     </TouchableWithoutFeedback>
   );
