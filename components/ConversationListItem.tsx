@@ -201,7 +201,7 @@ const ConversationListItem = memo(function ConversationListItem({
     return () => {
       navigation.removeListener("transitionEnd", resetSelected);
     };
-  }, [navigation, resetSelected, isGroupConversation]);
+  }, [navigation, resetSelected]);
 
   const avatarComponent = useMemo(() => {
     return isGroupConversation ? (
