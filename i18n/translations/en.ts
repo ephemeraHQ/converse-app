@@ -59,8 +59,7 @@ const en = {
   current_installation_revoked_description:
     "The current installation has been revoked, you will now get logged out and group chats will be deleted",
   other_installations_count: "You have {{count}} other installations",
-  temporary_revoke_description:
-    "Temporary debugging feature: we will revoke those installations now",
+  temporary_revoke_description: "Can we revoke those installations now?",
 
   // Attachments
   photo_library: "Photo Library",
