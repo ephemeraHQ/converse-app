@@ -114,6 +114,11 @@ const en = {
   approve: "Approve",
   deny: "Deny",
   approve_member_to_this_group: "Approve {{name}} to this group",
+
+  // V3 Migration
+  v3_migration_needed_title: "Group chat is here!",
+  v3_migration_needed_description:
+    "For security reasons, your current app does not have group chat enabled. We'll now log you out, please log back in to activate!",
 };
 
 export default en;
