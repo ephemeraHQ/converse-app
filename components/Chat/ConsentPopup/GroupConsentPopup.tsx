@@ -10,6 +10,7 @@ import {
   backgroundColor,
   textPrimaryColor,
 } from "@styles/colors";
+import { getGroupIdFromTopic } from "@utils/groupUtils/groupId";
 import React, { useCallback, useMemo } from "react";
 import { StyleSheet, Text, useColorScheme, View } from "react-native";
 
@@ -42,7 +43,8 @@ export function GroupConsentPopup() {
   const { groupCreator } = useGroupCreator(topic);
   const { groupStatus } = useSettingsStore(useSelect(["groupStatus"]));
   const { members } = useGroupMembers(topic);
-  const groupStatusForTopic = groupStatus[topic];
+  const groupId = getGroupIdFromTopic(topic);
+  const groupStatusForTopic = groupStatus[groupId];
 
   const isCreator = useMemo(() => {
     if (!members || !currentAccount) {

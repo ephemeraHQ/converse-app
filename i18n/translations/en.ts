@@ -18,13 +18,15 @@ const en = {
   restore_and_unblock_inviter: "Restore and unblock inviter",
   unblock_and_restore: "Unblock and restore",
   cancel: "Cancel",
+  view_only: "View only",
+  view_and_restore: "View and Restore",
+  view_removed_group_chat: "View removed group chat?",
 
   // Conversation
   accept: "Accept",
   block: "Block",
   decline: "Decline",
   unblock: "Unblock",
-  this_group_is_blocked: "This group is blocked",
   if_you_unblock_contact:
     "If you unblock this contact, they will be able to send you messages again.",
   if_you_block_contact:
