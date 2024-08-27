@@ -1,3 +1,4 @@
+import { useGroupConsent } from "@hooks/useGroupConsent";
 import { translate } from "@i18n";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import {
@@ -109,8 +110,58 @@ const ConversationListItem = memo(function ConversationListItem({
   const hasImagePreview = lastMessageImageUrl && lastMessagePreview;
   const showError = lastMessageFromMe && lastMessageStatus === "error";
   const isBlockedChatView = route.name === "Blocked";
+  const { allowGroup } = useGroupConsent(conversationTopic);
 
   const openConversation = useCallback(async () => {
+    const getUserAction = async () => {
+      const methods = {
+        [translate("view_only")]: () => {},
+        [translate("view_and_restore")]: () => {
+          allowGroup({
+            includeCreator: false,
+            includeAddedBy: false,
+          });
+          // Take the user back to wherever the conversation was restored "to"
+          // https://github.com/ephemeraHQ/converse-app/issues/315#issuecomment-2312903441
+          navigation.pop(isSplitScreen ? 1 : 2);
+        },
+        [translate("cancel")]: () => {},
+      };
+      const options = Object.keys(methods);
+
+      return new Promise<(() => void) | null>((resolve) => {
+        showActionSheetWithOptions(
+          {
+            options,
+            title: translate("view_removed_group_chat"),
+            cancelButtonIndex: 2,
+            ...actionSheetColors(colorScheme),
+          },
+          (selectedIndex?: number) => {
+            if (
+              selectedIndex === undefined ||
+              options[selectedIndex] === translate("cancel")
+            ) {
+              return resolve(null);
+            }
+            const method = (methods as any)[options[selectedIndex]];
+            resolve(method);
+          }
+        );
+      });
+    };
+
+    // Ask user's approval when visiting blocked group chats
+    if (isGroupConversation && isBlockedChatView) {
+      const userAction = await getUserAction();
+      if (userAction === null) {
+        setSelected(false);
+        return; // User canceled, stop further execution
+      }
+      userAction();
+    }
+
+    // Open conversation
     if (route.params?.frameURL) {
       // Sharing a frame !!
       navigation.goBack();
@@ -134,7 +185,16 @@ const ConversationListItem = memo(function ConversationListItem({
       topic: conversationTopic,
       message: route.params?.frameURL,
     });
-  }, [conversationTopic, isSplitScreen, navigation, route.params?.frameURL]);
+  }, [
+    conversationTopic,
+    isSplitScreen,
+    navigation,
+    route.params?.frameURL,
+    colorScheme,
+    isGroupConversation,
+    isBlockedChatView,
+    allowGroup,
+  ]);
 
   useEffect(() => {
     navigation.addListener("transitionEnd", resetSelected);
