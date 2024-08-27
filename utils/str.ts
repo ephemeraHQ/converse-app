@@ -17,9 +17,9 @@ export const shortAddress = (address: string) =>
       )}`
     : address || "";
 
-export const shortDomain = (domain: string | undefined): string => {
-  if (!domain) return "";
-  if (Platform.OS === "web") return domain;
+export const shortDisplayName = (displayName: string | undefined): string => {
+  if (!displayName) return "";
+  if (Platform.OS === "web") return displayName;
 
   const screenWidth = Dimensions.get("window").width;
   let maxLength;
@@ -35,9 +35,9 @@ export const shortDomain = (domain: string | undefined): string => {
     maxLength = 12;
   }
 
-  return domain.length > maxLength
-    ? `${domain.slice(0, maxLength)}...`
-    : domain;
+  return displayName.length > maxLength
+    ? `${displayName.slice(0, maxLength)}...`
+    : displayName;
 };
 
 export const capitalize = (str: string) => str[0].toUpperCase() + str.slice(1);

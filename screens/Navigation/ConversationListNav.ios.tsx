@@ -20,6 +20,7 @@ import {
   navigationAnimation,
 } from "./Navigation";
 import Connecting, {
+  useShouldShowConnecting,
   useShouldShowConnectingOrSyncing,
 } from "../../components/Connecting";
 import NewConversationButton from "../../components/ConversationList/NewConversationButton";
@@ -27,7 +28,7 @@ import ProfileSettingsButton from "../../components/ConversationList/ProfileSett
 import { useAccountsStore, useChatStore } from "../../data/store/accountsStore";
 import { useSelect } from "../../data/store/storeHelpers";
 import { isDesktop } from "../../utils/device";
-import { getReadableProfile } from "../../utils/str";
+import { getReadableProfile, shortDisplayName } from "../../utils/str";
 import ConversationList from "../ConversationList";
 
 type HeaderSearchBarProps = {
@@ -77,6 +78,7 @@ export default function ConversationListNav() {
   ) as React.MutableRefObject<SearchBarCommands | null>;
 
   const shouldShowConnectingOrSyncing = useShouldShowConnectingOrSyncing();
+  const shouldShowConnecting = useShouldShowConnecting();
   const shouldShowError = useShouldShowErrored();
   const currentAccount = useAccountsStore((s) => s.currentAccount);
   const name = getReadableProfile(currentAccount, currentAccount);
@@ -89,6 +91,11 @@ export default function ConversationListNav() {
           shouldShowConnectingOrSyncing ? (
             <View style={styles.connectingContainer}>
               {shouldShowConnectingOrSyncing && <Connecting />}
+              {shouldShowConnecting.warnMessage && (
+                <Text style={styles.warn}>
+                  {shouldShowConnecting.warnMessage}
+                </Text>
+              )}
             </View>
           ) : (
             <View />
@@ -126,7 +133,9 @@ export default function ConversationListNav() {
                     },
                   ]}
                 >
-                  {name}
+                  {shouldShowConnecting.warnMessage
+                    ? shortDisplayName(name)
+                    : name}
                 </Text>
                 {shouldShowError && <ErroredHeader />}
               </View>
@@ -144,7 +153,12 @@ export default function ConversationListNav() {
 
 const styles = StyleSheet.create({
   connectingContainer: {
-    marginTop: -10,
+    marginTop: -5,
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  warn: {
+    marginLeft: 8,
   },
   headerRight: {
     marginTop: -10,
