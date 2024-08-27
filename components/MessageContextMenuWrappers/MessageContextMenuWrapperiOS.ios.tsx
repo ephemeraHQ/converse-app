@@ -100,6 +100,7 @@ const MessageContextMenuWrapperIOSInner: FC<
       isContextMenuEnabled
       onPressMenuItem={handleContextMenuAction}
       shouldPreventLongPressGestureFromPropagating
+      renderPreview={() => <>{children}</>}
       menuConfig={{
         menuTitle: "",
         menuItems: contextMenuItems.map((item) => ({
@@ -119,22 +120,18 @@ const MessageContextMenuWrapperIOSInner: FC<
           ? myMessageBubbleColor(colorScheme)
           : messageBubbleColor(colorScheme),
         borderRadius: 15,
+        previewSize: "INHERIT",
+        previewType: "CUSTOM",
       }}
       auxiliaryPreviewConfig={{
-        anchorPosition: "automatic",
+        verticalAnchorPosition: "top",
         alignmentHorizontal: message.fromMe
           ? "previewTrailing"
           : "previewLeading",
         horizontalAlignment: message.fromMe
           ? "targetTrailing"
           : "targetLeading",
-        transitionConfigEntrance: {
-          mode: "syncedToMenuEntranceTransition",
-          shouldAnimateSize: true,
-        },
-        transitionExitPreset: {
-          mode: "fade",
-        },
+        anchorPosition: "top",
       }}
       lazyPreview
       renderAuxiliaryPreview={() => {
@@ -152,6 +149,4 @@ const MessageContextMenuWrapperIOSInner: FC<
   );
 };
 
-export const MessageContextMenuWrapperIOS = React.memo(
-  MessageContextMenuWrapperIOSInner
-);
+export const MessageContextMenuWrapperIOS = MessageContextMenuWrapperIOSInner;

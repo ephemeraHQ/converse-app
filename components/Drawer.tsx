@@ -5,6 +5,7 @@ import React, {
   useCallback,
   useEffect,
   useImperativeHandle,
+  useMemo,
 } from "react";
 import {
   StyleSheet,
@@ -81,6 +82,13 @@ export const Drawer = forwardRef<DrawerRef, DrawerProps>(function Drawer(
       }
     });
 
+  const nativeGesture = useMemo(() => Gesture.Native(), []);
+
+  const composed = useMemo(
+    () => Gesture.Simultaneous(nativeGesture, panGesture),
+    [nativeGesture, panGesture]
+  );
+
   const animtedStyle = useAnimatedStyle(() => ({
     transform: [{ translateY: translation.value }],
   }));
@@ -153,7 +161,7 @@ export const Drawer = forwardRef<DrawerRef, DrawerProps>(function Drawer(
           <TouchableWithoutFeedback onPress={handleClose}>
             <ReanimatedView style={[styles.backdrop, backgroundStyle]} />
           </TouchableWithoutFeedback>
-          <GestureDetector gesture={panGesture}>
+          <GestureDetector gesture={composed}>
             <ReanimatedView
               style={[styles.trayContainer, animtedStyle]}
               layout={LinearTransition.springify()}
@@ -192,7 +200,10 @@ const useStyles = () => {
       marginTop: 4,
       height: 3,
       width: 50,
-      backgroundColor: "rgba(0, 0, 0, 0.3)",
+      backgroundColor:
+        colorScheme === "dark"
+          ? "rgba(255, 255, 255, 0.3)"
+          : "rgba(0, 0, 0, 0.3)",
       alignSelf: "center",
       borderRadius: 2,
     },

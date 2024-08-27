@@ -33,6 +33,7 @@ import {
   Platform,
   TouchableOpacity,
   useWindowDimensions,
+  InteractionManager,
 } from "react-native";
 import Animated, {
   Easing,
@@ -124,11 +125,29 @@ const EmojiItem: FC<{
     } else {
       addReactionToMessage(conversation, message, content);
     }
-    dismissMenu?.();
+    InteractionManager.runAfterInteractions(() => {
+      if (Platform.OS === "ios") {
+        // Cleans up rerendering of the message reactions list
+        // Feels more animation, and less jarring
+        setTimeout(() => {
+          dismissMenu?.();
+        }, 100);
+      } else {
+        dismissMenu?.();
+      }
+    });
   }, [alreadySelected, content, conversation, dismissMenu, message]);
 
   return (
-    <TouchableOpacity onPress={handlePress}>
+    <TouchableOpacity
+      hitSlop={{
+        top: 10,
+        bottom: 10,
+        left: 10,
+        right: 10,
+      }}
+      onPress={handlePress}
+    >
       <Text
         style={[
           styles.emojiText,
@@ -183,13 +202,18 @@ const MessageReactionsListInner: FC<MessageReactionsListProps> = ({
     return emojiSet;
   }, [reactions, currentUser]);
 
-  const renderItem: ListRenderItem<[string, string[]]> = ({ item, index }) => {
-    return <Item content={item[0]} addresses={item[1]} index={index} />;
-  };
+  const renderItem: ListRenderItem<[string, string[]]> = useCallback(
+    ({ item, index }) => {
+      return <Item content={item[0]} addresses={item[1]} index={index} />;
+    },
+    []
+  );
 
   const handlePlusPress = useCallback(() => {
-    dismissMenu?.();
     setReactMenuMessageId(message.id);
+    InteractionManager.runAfterInteractions(() => {
+      dismissMenu?.();
+    });
   }, [dismissMenu, message.id, setReactMenuMessageId]);
 
   return (
@@ -233,7 +257,15 @@ const MessageReactionsListInner: FC<MessageReactionsListProps> = ({
             dismissMenu={dismissMenu}
           />
         ))}
-        <TouchableOpacity onPress={handlePlusPress}>
+        <TouchableOpacity
+          hitSlop={{
+            top: 10,
+            bottom: 10,
+            left: 10,
+            right: 10,
+          }}
+          onPress={handlePlusPress}
+        >
           <View style={styles.plusContainer}>
             <Text style={styles.plusText}>+</Text>
           </View>
