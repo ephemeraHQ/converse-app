@@ -14,7 +14,8 @@ import Constants from "expo-constants";
 import { Image } from "expo-image";
 import * as Updates from "expo-updates";
 import { forwardRef, useImperativeHandle } from "react";
-import { Platform, Alert, Share } from "react-native";
+import { Platform, Alert } from "react-native";
+import Share from "react-native-share";
 
 import { showActionSheetWithOptions } from "./StateHandlers/ActionSheetStateHandler";
 import config from "../config";
@@ -46,16 +47,18 @@ const DebugButton = forwardRef((props, ref) => {
     showDebugMenu() {
       const methods: any = {
         "Share current session logs": async () => {
-          Share.share({
+          Share.open({
             title: "Converse Log Session",
             url: `file://${loggingFilePath}`,
+            type: "text/plain",
           });
         },
         "Share native logs": async () => {
           const nativeLogFilePath = await getNativeLogFile();
-          Share.share({
+          Share.open({
             title: "LibXMTP Logs",
             url: `file://${nativeLogFilePath}`,
+            type: "text/plain",
           });
         },
         "Share previous session logs": async () => {
@@ -63,9 +66,10 @@ const DebugButton = forwardRef((props, ref) => {
           if (!previousLoggingFile) {
             return Alert.alert("No previous session logging file found");
           }
-          Share.share({
+          Share.open({
             title: "Converse Log Session",
             url: `file://${previousLoggingFile}`,
+            type: "text/plain",
           });
         },
         "New log session": rotateLoggingFile,
