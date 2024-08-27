@@ -1,7 +1,7 @@
 import { translate } from "@i18n/index";
 import { awaitableAlert } from "@utils/alert";
 import logger from "@utils/logger";
-import { sentryAddBreadcrumb, sentryTrackMessage } from "@utils/sentry";
+import { sentryTrackMessage } from "@utils/sentry";
 import { useCallback, useEffect, useRef } from "react";
 
 import ConnectViaWallet from "../components/Onboarding/ConnectViaWallet";
@@ -53,25 +53,25 @@ export default function Onboarding() {
 
   const connectWithBase64Key = useCallback(
     async (base64Key: string) => {
-      sentryAddBreadcrumb("In connectWithBase64Key");
+      logger.debug("In connectWithBase64Key");
       if (!address) {
         sentryTrackMessage("Could not connect because no address");
         return;
       }
-      sentryAddBreadcrumb("Waiting for logout tasks");
+      logger.debug("Waiting for logout tasks");
       await waitForLogoutTasksDone(500);
-      sentryAddBreadcrumb("Logout tasks done, saving xmtp key");
+      logger.debug("Logout tasks done, saving xmtp key");
       await saveXmtpKey(address, base64Key);
-      sentryAddBreadcrumb("XMTP Key saved");
+      logger.debug("XMTP Key saved");
       // Successfull login for user, let's setup
       // the storage !
       useAccountsStore.getState().setCurrentAccount(address, true);
       if (connectionMethod === "phone" && privyAccountId) {
         useAccountsStore.getState().setPrivyAccountId(address, privyAccountId);
       }
-      sentryAddBreadcrumb("Initiating converse db");
+      logger.debug("Initiating converse db");
       await initDb(address);
-      sentryAddBreadcrumb("Refreshing profiles");
+      logger.debug("Refreshing profiles");
       await refreshProfileForAddress(address, address);
       // Now we can really set!
       useAccountsStore.getState().setCurrentAccount(address, false);
