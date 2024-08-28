@@ -121,7 +121,7 @@ const MESSAGE_INNER_BUBBLE_DARK = "rgba(235, 235, 245, 0.3)";
 export const messageInnerBubbleColor = (colorScheme: ColorSchemeName) => {
   if (colorScheme === "dark")
     return Platform.OS === "android" || Platform.OS === "web"
-      ? MaterialDarkColors.inverseSurface
+      ? MaterialDarkColors.inverseOnSurface
       : MESSAGE_INNER_BUBBLE_DARK;
   return Platform.OS === "android" || Platform.OS === "web"
     ? MaterialLightColors.inverseSurface
