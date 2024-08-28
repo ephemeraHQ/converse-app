@@ -304,7 +304,8 @@ const useStyles = () => {
     emojiText: {
       textAlignVertical: "center",
       fontSize: 24,
-      marginHorizontal: 2,
+      marginHorizontal: Platform.OS === "ios" ? 2 : 0,
+      paddingVertical: Platform.OS === "ios" ? 2 : 0,
       padding: 2,
     },
     selectedEmojiText: {
