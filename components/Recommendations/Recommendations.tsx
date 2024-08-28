@@ -1,4 +1,4 @@
-import { ProfileSocials } from "@data/store/profilesStore";
+import { ProfileByAddress, ProfileSocials } from "@data/store/profilesStore";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import {
   backgroundColor,
@@ -36,12 +36,14 @@ const EXPIRE_AFTER = 86400000; // 1 DAY
 export default function Recommendations({
   navigation,
   visibility,
+  profiles,
   groupMode,
   groupMembers,
   addToGroup,
 }: {
   navigation: NativeStackNavigationProp<any>;
   visibility: "FULL" | "EMBEDDED" | "GROUPS" | "HIDDEN";
+  profiles: ProfileByAddress;
   groupMode?: boolean;
   groupMembers?: (ProfileSocials & { address: string })[];
   addToGroup?: (member: ProfileSocials & { address: string }) => void;
@@ -154,6 +156,7 @@ export default function Recommendations({
           recommendationData={frens[item]}
           navigation={navigation}
           isVisible={!!viewableItems[item]}
+          socials={profiles[item]?.socials}
           groupMode={groupMode}
           addToGroup={addToGroup}
         />
@@ -169,6 +172,7 @@ export default function Recommendations({
       styles.titleContainer,
       viewableItems,
       visibility,
+      profiles,
       groupMembers,
       groupMode,
       addToGroup,
