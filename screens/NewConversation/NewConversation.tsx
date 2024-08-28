@@ -408,14 +408,23 @@ export default function NewConversation({
         </View>
       )}
 
-      {isEmptyObject(status.profileSearchResults) && !group.enabled && (
+      {isEmptyObject(status.profileSearchResults) && (
         <View
           style={{
             backgroundColor: backgroundColor(colorScheme),
             height: showRecommendations ? undefined : 0,
           }}
         >
-          <Recommendations visibility="EMBEDDED" navigation={navigation} />
+          <Recommendations
+            visibility={group.enabled ? "GROUPS" : "EMBEDDED"}
+            navigation={navigation}
+            groupMode={group.enabled}
+            groupMembers={group.members}
+            addToGroup={async (member) => {
+              setGroup((g) => ({ ...g, members: [...g.members, member] }));
+              setValue("");
+            }}
+          />
         </View>
       )}
 

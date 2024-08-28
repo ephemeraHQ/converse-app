@@ -1,3 +1,4 @@
+import { ProfileSocials } from "@data/store/profilesStore";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import {
   itemSeparatorColor,
@@ -32,12 +33,18 @@ export function Recommendation({
   navigation,
   embedInChat,
   isVisible,
+  //socials,
+  groupMode,
+  addToGroup,
 }: {
   address: string;
   recommendationData: RecommendationData;
   navigation?: NativeStackNavigationProp<any>;
   embedInChat?: boolean;
+  //socials: ProfileSocials;
   isVisible: boolean;
+  groupMode?: boolean;
+  addToGroup?: (member: ProfileSocials & { address: string }) => void;
 }) {
   const styles = useStyles();
   let primaryNamesDisplay = [
@@ -117,7 +124,15 @@ export function Recommendation({
       </View>
       {!embedInChat && navigation && (
         <View style={styles.recommendationRight}>
-          <NavigationChatButton navigation={navigation} address={address} />
+          <NavigationChatButton
+            navigation={navigation}
+            address={address}
+            groupMode={groupMode}
+            addToGroup={
+              // Should we include socials here? addToGroup({ ...socials, address })
+              addToGroup ? () => addToGroup({ address }) : undefined
+            }
+          />
         </View>
       )}
     </View>
