@@ -26,7 +26,7 @@ import {
   syncGroupsMessages,
 } from "./messages";
 import { refreshAllSpamScores } from "../../data/helpers/conversations/spamScore";
-import { getChatStore } from "../../data/store/accountsStore";
+import { getAccountsList, getChatStore } from "../../data/store/accountsStore";
 import { loadXmtpKey } from "../keychain/helpers";
 
 const instantiatingClientForAccount: {
@@ -112,8 +112,10 @@ const onSyncLost = async (account: string, error: any) => {
   logger.debug(`[XmtpRN] Reconnecting in ${currentBackoff}ms`);
   await new Promise((r) => setTimeout(r, currentBackoff));
   currentBackoff = Math.min(currentBackoff * 2, MAX_BACKOFF);
-  // Now let's reload !
-  syncXmtpClient(account);
+  // Now let's reload if this is still an opened account
+  if (getAccountsList().includes(account)) {
+    syncXmtpClient(account);
+  }
 };
 
 const streamingAccounts: { [account: string]: boolean } = {};

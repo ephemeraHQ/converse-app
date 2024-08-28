@@ -133,7 +133,15 @@ export const useCheckCurrentInstallation = () => {
         accountCheck.current = undefined;
       }
     };
-    check().catch((e) => {
+    check().catch(async (e) => {
+      if (
+        `${e}`.includes(
+          "No v3 keys found, you must pass a SigningKey in order to enable alpha MLS features"
+        )
+      ) {
+        logout(true, false);
+        accountCheck.current = undefined;
+      }
       accountCheck.current = undefined;
       logger.warn(e, {
         error: `Could not check inbox state for ${account}`,
