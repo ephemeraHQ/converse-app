@@ -39,6 +39,7 @@ import {
   currentAccount,
   getAccountsList,
   getChatStore,
+  getProfilesStore,
   getSettingsStore,
   useAccountsStore,
 } from "../data/store/accountsStore";
@@ -442,6 +443,11 @@ export const loadSavedNotificationMessagesToContext = async () => {
         promises.push(saveMessages(account, messagesToSaveByAccount[account]));
       }
       await Promise.all(promises);
+      for (const account in messagesToSaveByAccount) {
+        // Refreshing profiles store from mmkv
+        // as we could have added data from notification
+        getProfilesStore(account).getState().refreshFromStorage();
+      }
     }
 
     emptySavedNotificationsConversations();
