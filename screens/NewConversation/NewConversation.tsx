@@ -291,7 +291,10 @@ export default function NewConversation({
   const initialFocus = useRef(false);
 
   const showRecommendations =
-    !status.loading && value.length === 0 && recommendationsFrensCount > 0;
+    !status.loading &&
+    value.length === 0 &&
+    recommendationsFrensCount > 0 &&
+    !route.params?.addingToGroupTopic;
 
   const inputPlaceholder = ".converse.xyz, 0x, .eth, .lens, .fc, .cb.id, UD…";
   const onRef = useCallback(
