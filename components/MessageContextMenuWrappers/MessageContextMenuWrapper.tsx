@@ -50,10 +50,14 @@ export const MessageContextMenuWrapper: FC<MessageContextMenuWrapperProps> = ({
   const isAttachment = isAttachmentMessage(message.contentType);
   const isTransaction = isTransactionMessage(message.contentType);
   const currentlyShown = contextMenuShownId === message.id;
+  const closeMenu = useCallback(() => {
+    setContextMenuShown(null);
+  }, [setContextMenuShown]);
 
   const triggerReplyToMessage = useCallback(() => {
     converseEventEmitter.emit("triggerReplyToMessage", message);
-  }, [message]);
+    closeMenu();
+  }, [message, closeMenu]);
 
   const handleCopyMessage = useCallback(() => {
     if (message.content) {
@@ -61,7 +65,8 @@ export const MessageContextMenuWrapper: FC<MessageContextMenuWrapperProps> = ({
     } else if (message.contentFallback) {
       Clipboard.setString(message.contentFallback);
     }
-  }, [message.content, message.contentFallback]);
+    closeMenu();
+  }, [message.content, message.contentFallback, closeMenu]);
 
   const contextMenuItems = useMemo(() => {
     const items = [];
@@ -117,10 +122,6 @@ export const MessageContextMenuWrapper: FC<MessageContextMenuWrapperProps> = ({
       });
     }
   }, [screenHeight]);
-
-  const closeMenu = useCallback(() => {
-    setContextMenuShown(null);
-  }, [setContextMenuShown]);
 
   useEffect(() => {
     if (currentlyShown) {
