@@ -60,7 +60,7 @@ const setupAndSaveConversations = async (
   account: string,
   conversations: XmtpConversation[]
 ): Promise<XmtpConversation[]> => {
-  if (conversations.length === 0) return;
+  if (conversations.length === 0) return [];
   // If there are here conversations newly created that correspond to
   // pending convos in our local db, let's update them
   await upgradePendingConversationsIfNeeded(account, conversations);
