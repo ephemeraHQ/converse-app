@@ -139,8 +139,10 @@ export default function Recommendations({
         );
       }
 
-      // Check if the address is already in groupMembers
-      if (groupMembers?.some((member) => member.address === item)) {
+      // If address is in groupMembers, remove profile from recommendations
+      if (
+        groupMembers?.some((member) => member.address === item.toLowerCase())
+      ) {
         return null;
       }
 
