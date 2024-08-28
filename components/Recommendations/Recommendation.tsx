@@ -33,7 +33,7 @@ export function Recommendation({
   navigation,
   embedInChat,
   isVisible,
-  //socials,
+  socials,
   groupMode,
   addToGroup,
 }: {
@@ -41,8 +41,8 @@ export function Recommendation({
   recommendationData: RecommendationData;
   navigation?: NativeStackNavigationProp<any>;
   embedInChat?: boolean;
-  //socials: ProfileSocials;
   isVisible: boolean;
+  socials?: ProfileSocials;
   groupMode?: boolean;
   addToGroup?: (member: ProfileSocials & { address: string }) => void;
 }) {
@@ -129,8 +129,7 @@ export function Recommendation({
             address={address}
             groupMode={groupMode}
             addToGroup={
-              // Should we include socials here? addToGroup({ ...socials, address })
-              addToGroup ? () => addToGroup({ address }) : undefined
+              addToGroup ? () => addToGroup({ ...socials, address }) : undefined
             }
           />
         </View>

@@ -296,6 +296,8 @@ export default function NewConversation({
     recommendationsFrensCount > 0 &&
     !route.params?.addingToGroupTopic;
 
+  const profiles = getProfilesStore(currentAccount()).getState().profiles;
+
   const inputPlaceholder = ".converse.xyz, 0x, .eth, .lens, .fc, .cb.id, UD…";
   const onRef = useCallback(
     (r: TextInput | null) => {
@@ -421,6 +423,7 @@ export default function NewConversation({
           <Recommendations
             visibility={group.enabled ? "GROUPS" : "EMBEDDED"}
             navigation={navigation}
+            profiles={profiles}
             groupMode={group.enabled}
             groupMembers={group.members}
             addToGroup={async (member) => {
