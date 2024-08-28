@@ -79,6 +79,8 @@ type Props = {
   isFrame: boolean;
 };
 
+const noop = () => {};
+
 const MessageSender = ({ message }: { message: MessageToDisplay }) => {
   const address = useInboxIdStore(
     (s) => s.byInboxId[message.senderAddress]?.[0] ?? message.senderAddress
@@ -327,6 +329,8 @@ function ChatMessage({ message, colorScheme, isGroup, isFrame }: Props) {
                             styles.innerBubble,
                             message.fromMe ? styles.innerBubbleMe : undefined,
                           ]}
+                          delayLongPress={100}
+                          onLongPress={noop}
                           delayPressIn={isDesktop ? 0 : 75}
                           onPress={() => {
                             converseEventEmitter.emit("scrollChatToMessage", {
