@@ -17,6 +17,7 @@ import {
   useColorScheme,
   Text,
   Alert,
+  Pressable,
 } from "react-native";
 
 interface GroupScreenNameProps {
@@ -40,11 +41,12 @@ export const GroupScreenName: FC<GroupScreenNameProps> = ({ topic }) => {
     }),
     [currentAccount, members]
   );
-
+  const [editing, setEditing] = useState(false);
   const [editedName, setEditedName] = useState(formattedGroupName);
 
   const handleNameChange = useCallback(async () => {
     try {
+      setEditing(false);
       await setGroupName(editedName);
     } catch (e) {
       logger.error(e);
@@ -56,20 +58,28 @@ export const GroupScreenName: FC<GroupScreenNameProps> = ({ topic }) => {
     currentAccountIsAdmin,
     currentAccountIsSuperAdmin
   );
-  return canEditGroupName ? (
+
+  const toggleEditing = useCallback(() => {
+    setEditing((prev) => !prev);
+  }, []);
+
+  return editing ? (
     <TextInput
       style={styles.title}
       defaultValue={formattedGroupName}
-      value={editedName}
       onChangeText={setEditedName}
       blurOnSubmit
       onSubmitEditing={handleNameChange}
       returnKeyType="done"
+      autoFocus
+      textBreakStrategy="simple"
     />
   ) : (
-    <Text style={styles.title} ellipsizeMode="tail">
-      {formattedGroupName}
-    </Text>
+    <Pressable onPress={canEditGroupName ? toggleEditing : undefined}>
+      <Text style={styles.title} ellipsizeMode="tail" numberOfLines={1}>
+        {formattedGroupName}
+      </Text>
+    </Pressable>
   );
 };
 

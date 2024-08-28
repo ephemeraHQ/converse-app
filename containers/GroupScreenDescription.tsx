@@ -3,7 +3,7 @@ import { useGroupDescription } from "@hooks/useGroupDescription";
 import { useGroupMembers } from "@hooks/useGroupMembers";
 import { useGroupPermissions } from "@hooks/useGroupPermissions";
 import { translate } from "@i18n";
-import { textPrimaryColor } from "@styles/colors";
+import { textPrimaryColor, textSecondaryColor } from "@styles/colors";
 import {
   getAddressIsAdmin,
   getAddressIsSuperAdmin,
@@ -13,6 +13,7 @@ import logger from "@utils/logger";
 import { FC, useCallback, useMemo, useState } from "react";
 import {
   Alert,
+  Pressable,
   StyleSheet,
   Text,
   TextInput,
@@ -41,6 +42,7 @@ export const GroupScreenDescription: FC<GroupScreenDescriptionProps> = ({
   const styles = useStyles();
   const { permissions } = useGroupPermissions(topic);
   const { groupDescription, setGroupDescription } = useGroupDescription(topic);
+  const [editing, setEditing] = useState(false);
   const [editedDescription, setEditedDescription] = useState(
     groupDescription ?? ""
   );
@@ -59,21 +61,35 @@ export const GroupScreenDescription: FC<GroupScreenDescriptionProps> = ({
     }
   }, [editedDescription, setGroupDescription]);
 
-  return canEditGroupDescription ? (
+  const toggleEditing = useCallback(() => {
+    setEditing((prev) => !prev);
+  }, []);
+
+  return editing ? (
     <TextInput
       style={styles.description}
       defaultValue={groupDescription}
-      value={editedDescription}
       onChangeText={setEditedDescription}
       blurOnSubmit
       onSubmitEditing={handleDescriptionChange}
       returnKeyType="done"
       placeholder={translate("add_description")}
+      autoFocus
     />
   ) : (
-    <Text style={styles.description} ellipsizeMode="tail">
-      {groupDescription}
-    </Text>
+    <Pressable onPress={canEditGroupDescription ? toggleEditing : undefined}>
+      <Text
+        style={[
+          styles.description,
+          !groupDescription && styles.descriptionPlaceholder,
+        ]}
+        ellipsizeMode="tail"
+        textBreakStrategy="highQuality"
+        numberOfLines={1}
+      >
+        {groupDescription ? groupDescription : translate("add_description")}
+      </Text>
+    </Pressable>
   );
 };
 
@@ -85,6 +101,9 @@ const useStyles = () => {
       fontSize: 13,
       textAlign: "center",
       marginTop: 13,
+    },
+    descriptionPlaceholder: {
+      color: textSecondaryColor(colorScheme),
     },
   });
 };
