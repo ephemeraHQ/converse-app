@@ -141,7 +141,9 @@ export default function Recommendations({
 
       // If address is in groupMembers, remove profile from recommendations
       if (
-        groupMembers?.some((member) => member.address === item.toLowerCase())
+        groupMembers?.some(
+          (member) => member.address.toLowerCase() === item.toLowerCase()
+        )
       ) {
         return null;
       }
