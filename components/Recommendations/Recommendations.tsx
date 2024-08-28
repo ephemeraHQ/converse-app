@@ -42,8 +42,8 @@ export default function Recommendations({
   addToGroup,
 }: {
   navigation: NativeStackNavigationProp<any>;
-  visibility: "FULL" | "EMBEDDED" | "GROUPS" | "HIDDEN";
-  profiles: ProfileByAddress;
+  visibility: "FULL" | "EMBEDDED" | "HIDDEN";
+  profiles?: ProfileByAddress;
   groupMode?: boolean;
   groupMembers?: (ProfileSocials & { address: string })[];
   addToGroup?: (member: ProfileSocials & { address: string }) => void;
@@ -156,7 +156,7 @@ export default function Recommendations({
           recommendationData={frens[item]}
           navigation={navigation}
           isVisible={!!viewableItems[item]}
-          socials={profiles[item]?.socials}
+          socials={profiles?.[item]?.socials}
           groupMode={groupMode}
           addToGroup={addToGroup}
         />

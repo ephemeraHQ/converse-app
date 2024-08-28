@@ -294,6 +294,7 @@ export default function NewConversation({
     !status.loading &&
     value.length === 0 &&
     recommendationsFrensCount > 0 &&
+    // hide recommendations when adding users to a group
     !route.params?.addingToGroupTopic;
 
   const profiles = getProfilesStore(currentAccount()).getState().profiles;
@@ -421,7 +422,7 @@ export default function NewConversation({
           }}
         >
           <Recommendations
-            visibility={group.enabled ? "GROUPS" : "EMBEDDED"}
+            visibility="EMBEDDED"
             navigation={navigation}
             profiles={profiles}
             groupMode={group.enabled}
