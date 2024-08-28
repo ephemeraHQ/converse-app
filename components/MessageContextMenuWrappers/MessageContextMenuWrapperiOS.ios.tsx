@@ -23,11 +23,12 @@ interface MessageContextMenuWrapperIOSProps {
   reactions: {
     [senderAddress: string]: MessageReaction[];
   };
+  hideBackground: boolean;
 }
 
 const MessageContextMenuWrapperIOSInner: FC<
   MessageContextMenuWrapperIOSProps
-> = ({ children, message, reactions }) => {
+> = ({ children, message, reactions, hideBackground }) => {
   const colorScheme = useColorScheme();
   const { setContextMenuShown } = useAppStore(
     useSelect(["setContextMenuShown", "contextMenuShownId"])
@@ -116,10 +117,12 @@ const MessageContextMenuWrapperIOSInner: FC<
         })),
       }}
       previewConfig={{
-        backgroundColor: message.fromMe
+        backgroundColor: hideBackground
+          ? undefined
+          : message.fromMe
           ? myMessageBubbleColor(colorScheme)
           : messageBubbleColor(colorScheme),
-        borderRadius: 15,
+        borderRadius: 18,
         previewSize: "INHERIT",
         previewType: "CUSTOM",
       }}
@@ -132,6 +135,7 @@ const MessageContextMenuWrapperIOSInner: FC<
           ? "targetTrailing"
           : "targetLeading",
         anchorPosition: "top",
+        height: 400,
       }}
       lazyPreview
       renderAuxiliaryPreview={() => {

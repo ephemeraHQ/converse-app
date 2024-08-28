@@ -8,7 +8,6 @@ import { useSelect } from "@data/store/storeHelpers";
 import {
   backgroundColor,
   clickedItemBackgroundColor,
-  messageBubbleColor,
   textPrimaryColor,
   textSecondaryColor,
 } from "@styles/colors";
@@ -62,7 +61,7 @@ interface MessageReactionsItemProps {
 const INITIAL_DELAY = 800;
 const ITEM_DELAY = 200;
 const ITEM_ANIMATION_DURATION = 500;
-const SIDE_MARGIN = 15;
+const SIDE_MARGIN = 20;
 
 const keyExtractor = (item: [string, string[]]) => item[0];
 
@@ -97,10 +96,18 @@ const Item: FC<MessageReactionsItemProps> = ({ content, addresses, index }) => {
 
   return (
     <Animated.View style={[styles.itemContainer, animatedStyle]}>
-      <GroupAvatar
-        pendingGroupMembers={membersSocials}
-        size={AvatarSizes.pinnedConversation}
-      />
+      <View
+        style={{
+          height: AvatarSizes.reactionsOverlay,
+          justifyContent: "center",
+          alignItems: "center",
+        }}
+      >
+        <GroupAvatar
+          pendingGroupMembers={membersSocials}
+          size={AvatarSizes.reactionsOverlay}
+        />
+      </View>
       <Text style={styles.itemText}>
         {content} {addresses.length}
       </Text>
@@ -148,14 +155,14 @@ const EmojiItem: FC<{
       }}
       onPress={handlePress}
     >
-      <Text
+      <View
         style={[
-          styles.emojiText,
-          alreadySelected ? styles.selectedEmojiText : undefined,
+          styles.emojiContainer,
+          alreadySelected && styles.selectedEmojiText,
         ]}
       >
-        {content}
-      </Text>
+        <Text style={styles.emojiText}>{content}</Text>
+      </View>
     </TouchableOpacity>
   );
 };
@@ -170,7 +177,6 @@ const MessageReactionsListInner: FC<MessageReactionsListProps> = ({
   );
   const currentUser = useCurrentAccount();
   const styles = useStyles();
-  const colorScheme = useColorScheme();
   const list = useMemo(() => {
     const reactionMap: Record<string, string[]> = {};
     Object.entries(reactions).forEach(([senderAddress, reactions]) => {
@@ -186,6 +192,7 @@ const MessageReactionsListInner: FC<MessageReactionsListProps> = ({
     });
     return Object.entries(reactionMap);
   }, [reactions]);
+  const hasEmojiOverlay = list.length !== 0;
 
   const currentUserEmojiMap = useMemo(() => {
     const emojiSet: Record<string, boolean> = {};
@@ -224,12 +231,7 @@ const MessageReactionsListInner: FC<MessageReactionsListProps> = ({
       ]}
     >
       {list.length !== 0 ? (
-        <View
-          style={[
-            styles.reactionsContainer,
-            { backgroundColor: messageBubbleColor(colorScheme) },
-          ]}
-        >
+        <View style={styles.reactionsContainer}>
           <FlatList
             data={list}
             horizontal
@@ -240,6 +242,7 @@ const MessageReactionsListInner: FC<MessageReactionsListProps> = ({
       ) : (
         <View style={styles.flex1} />
       )}
+      {hasEmojiOverlay && <View style={styles.flexGrow} />}
       <View
         style={[
           styles.emojiListContainer,
@@ -285,14 +288,18 @@ const useStyles = () => {
     itemContainer: {
       justifyContent: "center",
       alignItems: "center",
-      padding: Paddings.small,
+      width: 76,
+      height: 119.5,
     },
     itemText: {
-      paddingTop: Paddings.small,
       color: textSecondaryColor(colorScheme),
+      fontSize: 16,
+      lineHeight: 20,
+      marginTop: 20,
     },
     flexGrow: {
       flexGrow: 1,
+      height: "auto",
     },
     emojiText: {
       textAlignVertical: "center",
@@ -306,22 +313,23 @@ const useStyles = () => {
       overflow: "hidden",
     },
     container: {
-      flexGrow: 1,
       alignSelf: "center",
       alignItems: "center",
       justifyContent: "center",
-      width,
+      flexGrow: 1,
+      marginHorizontal: SIDE_MARGIN,
+      width: width - SIDE_MARGIN * 2,
     },
     fromMeContainer: {
-      right: -2 * SIDE_MARGIN,
+      left: SIDE_MARGIN,
     },
     fromOtherContainer: {
-      left: -2 * SIDE_MARGIN,
+      right: SIDE_MARGIN,
     },
     reactionsContainer: {
-      flex: 1,
       borderRadius: BorderRadius.large,
-      margin: Paddings.default,
+      height: 120,
+      backgroundColor: backgroundColor(colorScheme),
     },
     flex1: {
       flex: 1,
@@ -333,16 +341,19 @@ const useStyles = () => {
       alignItems: "center",
       borderRadius: BorderRadius.large,
       padding: Paddings.default,
-      marginVertical: Platform.OS === "android" ? 0 : Paddings.large,
       backgroundColor: backgroundColor(colorScheme),
     },
     emojiListContainerFromMe: {
       alignSelf: "flex-end",
-      marginRight: SIDE_MARGIN * 2,
     },
     emojiListContainerFromOther: {
       alignSelf: "flex-start",
-      marginLeft: SIDE_MARGIN * 2,
+    },
+    emojiContainer: {
+      height: 32,
+      width: 32,
+      justifyContent: "center",
+      alignItems: "center",
     },
     plusContainer: {
       borderRadius: 32,
@@ -357,7 +368,7 @@ const useStyles = () => {
     plusText: {
       textAlign: "center",
       textAlignVertical: "center",
-      fontSize: 16,
+      fontSize: 20,
       color: textPrimaryColor(colorScheme),
     },
   });

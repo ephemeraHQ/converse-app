@@ -303,6 +303,7 @@ export default function ChatMessageActions({
               <MessageContextMenuWrapperIOS
                 message={message}
                 reactions={reactions}
+                hideBackground={hideBackground}
               >
                 {children}
               </MessageContextMenuWrapperIOS>

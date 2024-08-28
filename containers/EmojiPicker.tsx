@@ -23,7 +23,6 @@ import {
   useWindowDimensions,
 } from "react-native";
 import { Text } from "react-native-paper";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 const flatEmojis = emojis.flatMap((category) => category.data);
 
@@ -124,15 +123,15 @@ export const EmojiPicker = ({ message }: { message: MessageToDisplay }) => {
               onPress={handleReaction}
               ListHeader={
                 <>
-                  <Text style={styles.headerText}>Your Reactions</Text>
-                  <EmojiRowList emojis={myEmojis} onPress={handleReaction} />
+                  {/* Removing until customization is ready */}
+                  {/* <Text style={styles.headerText}>Your Reactions</Text>
+                  <EmojiRowList emojis={myEmojis} onPress={handleReaction} /> */}
                   <Text style={styles.headerText}>All</Text>
                 </>
               }
             />
           </>
         )}
-        <View style={styles.bottom} />
       </View>
     </Drawer>
   );
@@ -141,16 +140,12 @@ export const EmojiPicker = ({ message }: { message: MessageToDisplay }) => {
 const useStyles = () => {
   const colorScheme = useColorScheme();
   const { height } = useWindowDimensions();
-  const insets = useSafeAreaInsets();
   return StyleSheet.create({
     container: { flex: 1, maxHeight: height * 0.75, height: "auto" },
     headerText: {
       fontSize: 13,
       padding: 8,
       color: textSecondaryColor(colorScheme),
-    },
-    bottom: {
-      height: insets.bottom,
     },
   });
 };
