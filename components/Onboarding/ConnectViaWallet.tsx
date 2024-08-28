@@ -26,7 +26,10 @@ import {
 } from "thirdweb/react";
 
 import OnboardingComponent from "./OnboardingComponent";
-import { getAccountsList } from "../../data/store/accountsStore";
+import {
+  getAccountsList,
+  useAccountsStore,
+} from "../../data/store/accountsStore";
 import { useOnboardingStore } from "../../data/store/onboardingStore";
 import { useSelect } from "../../data/store/storeHelpers";
 import { shortAddress } from "../../utils/str";
@@ -127,6 +130,9 @@ export default function ConnectViaWallet({
             "This account is already connected to Converse."
           );
           disconnect();
+          // At least activate said wallet so user can logout again
+          // but not be stuck
+          useAccountsStore.getState().setCurrentAccount(a, false);
           return;
         }
         const isOnNetwork = await isOnXmtp(a);
