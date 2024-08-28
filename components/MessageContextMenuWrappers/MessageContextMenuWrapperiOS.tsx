@@ -8,6 +8,7 @@ interface MessageContextMenuWrapperProps {
   reactions: {
     [senderAddress: string]: MessageReaction[];
   };
+  hideBackground: boolean;
 }
 
 export const MessageContextMenuWrapperIOS: FC<

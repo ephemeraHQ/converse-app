@@ -1,9 +1,20 @@
 import { ListRenderItem as FlashListRenderItem } from "@shopify/flash-list";
 import { ReanimatedView, ReanimatedFlashList } from "@utils/animations";
 import { CategorizedEmojisRecord } from "@utils/emojis/interfaces";
-import React, { FC, useCallback } from "react";
-import { ListRenderItem, Platform, useWindowDimensions } from "react-native";
+import React, { FC, useCallback, useEffect } from "react";
+import {
+  ListRenderItem,
+  Platform,
+  StyleSheet,
+  useWindowDimensions,
+} from "react-native";
 import { FlatList } from "react-native-gesture-handler";
+import {
+  useAnimatedStyle,
+  useSharedValue,
+  withTiming,
+} from "react-native-reanimated";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { EmojiRow } from "./EmojiRow";
 
@@ -20,8 +31,20 @@ export const EmojiRowList: FC<EmojiRowListProps> = ({
   ListHeader,
   onPress,
 }) => {
+  const styles = useStyles();
   const { height: windowHeight } = useWindowDimensions();
-  const height = Math.min(emojis.length * 50, windowHeight * 0.75);
+  const height = useSharedValue(
+    Math.min(emojis.length * 50, windowHeight * 0.75)
+  );
+
+  useEffect(() => {
+    height.value = withTiming(
+      Math.min(emojis.length * 50, windowHeight * 0.75),
+      {
+        duration: 400,
+      }
+    );
+  }, [emojis.length, height, windowHeight]);
 
   const renderItem: ListRenderItem<CategorizedEmojisRecord> &
     FlashListRenderItem<CategorizedEmojisRecord> = useCallback(
@@ -32,8 +55,14 @@ export const EmojiRowList: FC<EmojiRowListProps> = ({
   // Works around issue with Android not picking up scrolls
   const ListRenderer = Platform.OS === "ios" ? ReanimatedFlashList : FlatList;
 
+  const animatedStyle = useAnimatedStyle(() => {
+    return {
+      height: height.value,
+    };
+  });
+
   return (
-    <ReanimatedView style={{ height, overflow: "hidden" }}>
+    <ReanimatedView style={[animatedStyle, styles.container]}>
       <ListRenderer
         ListHeaderComponent={() => ListHeader}
         showsVerticalScrollIndicator={false}
@@ -45,4 +74,15 @@ export const EmojiRowList: FC<EmojiRowListProps> = ({
       />
     </ReanimatedView>
   );
+};
+
+const useStyles = () => {
+  const insets = useSafeAreaInsets();
+
+  return StyleSheet.create({
+    container: {
+      overflow: "hidden",
+      marginBottom: insets.bottom,
+    },
+  });
 };

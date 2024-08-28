@@ -10,6 +10,7 @@ export enum AvatarSizes {
   profileSettings = Platform.OS === "ios" ? 16 : 24,
   pinnedConversation = 80,
   messageReactor = 22,
+  reactionsOverlay = 56,
 }
 
 export enum PictoSizes {
