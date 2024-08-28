@@ -22,6 +22,8 @@ type Props = {
   color?: boolean;
   name?: string | undefined;
   showIndicator?: boolean;
+  // Inverts the color of the place holder
+  invertColor?: boolean;
 };
 
 function Avatar({
@@ -31,9 +33,10 @@ function Avatar({
   color,
   name,
   showIndicator,
+  invertColor,
 }: Props) {
   const colorScheme = useColorScheme();
-  const styles = getStyles(colorScheme, size);
+  const styles = getStyles(colorScheme, size, invertColor || false);
   const firstLetter = getFirstLetterForAvatar(name || "");
   const [didError, setDidError] = useState(false);
 
@@ -53,6 +56,7 @@ function Avatar({
         source={{ uri }}
         style={[styles.imageContainer, style]}
         imageStyle={styles.image}
+        cachePolicy="memory-disk"
       >
         {showIndicator && <Indicator size={size} />}
       </ImageBackground>
@@ -71,7 +75,11 @@ function Avatar({
   );
 }
 
-const getStyles = (colorScheme: ColorSchemeName, size: number) =>
+const getStyles = (
+  colorScheme: ColorSchemeName,
+  size: number,
+  invertColor: boolean
+) =>
   StyleSheet.create({
     image: {
       borderRadius: size,
@@ -86,7 +94,11 @@ const getStyles = (colorScheme: ColorSchemeName, size: number) =>
       borderRadius: size / 2,
       backgroundColor:
         colorScheme === "dark"
-          ? textSecondaryColor(colorScheme)
+          ? invertColor
+            ? actionSecondaryColor("light")
+            : textSecondaryColor(colorScheme)
+          : invertColor
+          ? textSecondaryColor("dark")
           : actionSecondaryColor(colorScheme),
       justifyContent: "center",
       alignItems: "center",

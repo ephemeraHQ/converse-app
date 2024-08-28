@@ -9,6 +9,7 @@ export enum AvatarSizes {
   messageSender = Platform.OS === "ios" ? 30 : 21,
   profileSettings = Platform.OS === "ios" ? 16 : 24,
   pinnedConversation = 80,
+  messageReactor = 22,
 }
 
 export enum PictoSizes {

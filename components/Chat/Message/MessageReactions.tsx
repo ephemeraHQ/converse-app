@@ -1,9 +1,11 @@
+import Avatar from "@components/Avatar";
 import {
   inversePrimaryColor,
   textPrimaryColor,
   tertiaryBackgroundColor,
   primaryColor,
 } from "@styles/colors";
+import { AvatarSizes } from "@styles/sizes";
 import { memo, useCallback, useMemo } from "react";
 import {
   StyleSheet,
@@ -11,7 +13,6 @@ import {
   TouchableOpacity,
   useColorScheme,
   View,
-  Image,
 } from "react-native";
 
 import { MessageToDisplay } from "./Message";
@@ -20,7 +21,7 @@ import {
   useProfilesStore,
 } from "../../../data/store/accountsStore";
 import { useConversationContext } from "../../../utils/conversation";
-import { getPreferredAvatar } from "../../../utils/profile";
+import { getPreferredAvatar, getPreferredName } from "../../../utils/profile";
 import {
   MessageReaction,
   addReactionToMessage,
@@ -144,11 +145,15 @@ function ChatMessageReactions({ message, reactions }: Props) {
                 {reaction.reactors
                   .slice(0, MAX_REACTORS_TO_SHOW)
                   .map((reactor, index) => (
-                    <Image
+                    <Avatar
                       key={reactor}
-                      source={{
-                        uri: getPreferredAvatar(profiles[reactor]?.socials),
-                      }}
+                      uri={getPreferredAvatar(profiles[reactor]?.socials)}
+                      name={getPreferredName(
+                        profiles[reactor]?.socials,
+                        reactor
+                      )}
+                      size={AvatarSizes.messageReactor}
+                      invertColor={message.fromMe}
                       style={[
                         styles.profileImage,
                         {
