@@ -6,6 +6,7 @@ import React, { useCallback, useState } from "react";
 import {
   ColorSchemeName,
   ImageStyle,
+  Platform,
   StyleProp,
   StyleSheet,
   Text,
@@ -14,6 +15,7 @@ import {
 } from "react-native";
 
 import { Indicator } from "./Indicator";
+import Picto from "./Picto/Picto";
 
 type Props = {
   uri?: string | undefined;
@@ -65,7 +67,15 @@ function Avatar({
         { width: size, height: size, borderRadius: size / 2 },
       ])}
     >
-      <Text style={styles.text}>{firstLetter}</Text>
+      {name ? (
+        <Text style={styles.text}>{firstLetter}</Text>
+      ) : (
+        <Picto
+          picto="photo"
+          size={Platform.OS === "ios" ? size / 3 : size / 2}
+          color="white"
+        />
+      )}
       {showIndicator && <Indicator size={size} />}
     </View>
   );
