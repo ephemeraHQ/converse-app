@@ -2,6 +2,7 @@ import { entifyWithAddress } from "@queries/entify";
 import { setGroupDescriptionQueryData } from "@queries/useGroupDescriptionQuery";
 import { setGroupMembersQueryData } from "@queries/useGroupMembersQuery";
 import { setGroupQueryData } from "@queries/useGroupQuery";
+import { arraysContainSameElements } from "@utils/array";
 import { converseEventEmitter } from "@utils/events";
 import { getGroupIdFromTopic } from "@utils/groupUtils/groupId";
 import logger from "@utils/logger";
@@ -25,8 +26,11 @@ import { Conversation as DbConversation } from "../../data/db/entities/conversat
 import { getPendingConversationsToCreate } from "../../data/helpers/conversations/pendingConversations";
 import { saveConversations } from "../../data/helpers/conversations/upsertConversations";
 import { saveMemberInboxIds } from "../../data/helpers/inboxId/saveInboxIds";
-import { getSettingsStore } from "../../data/store/accountsStore";
-import { XmtpConversation } from "../../data/store/chatStore";
+import { getChatStore, getSettingsStore } from "../../data/store/accountsStore";
+import {
+  XmtpConversation,
+  XmtpGroupConversation,
+} from "../../data/store/chatStore";
 import { SettingsStoreType } from "../../data/store/settingsStore";
 import { setGroupNameQueryData } from "../../queries/useGroupNameQuery";
 import { setGroupPhotoQueryData } from "../../queries/useGroupPhotoQuery";
@@ -335,15 +339,32 @@ export const loadConversations = async (
 
     const newGroups: GroupWithCodecsType[] = [];
     const knownGroups: GroupWithCodecsType[] = [];
-
-    // @todo => stop resaving ALL known groups each time,
-    // we should resave them if something changed like members / metadata
+    const updatedGroups: GroupWithCodecsType[] = [];
 
     groups.forEach((g) => {
       if (!knownTopics.includes(g.topic)) {
         newGroups.push(g);
       } else {
         knownGroups.push(g);
+        const existingGroup = getChatStore(account).getState().conversations[
+          g.topic
+        ] as XmtpGroupConversation;
+        if (!existingGroup) {
+          updatedGroups.push(g);
+        } else {
+          // We check if the group need to be pushed again to Zustand & SQlite
+          // because only a few attributes can change after group creation
+          if (
+            existingGroup.groupName !== g.name ||
+            existingGroup.isActive !== g.isGroupActive ||
+            !arraysContainSameElements(
+              existingGroup.groupMembers,
+              g.members.map((m) => m.addresses[0])
+            )
+          ) {
+            updatedGroups.push(g);
+          }
+        }
       }
     });
     logger.debug(
@@ -357,7 +378,7 @@ export const loadConversations = async (
     const groupsToCreate = newGroups.map((g) =>
       protocolGroupToStateConversation(account, g)
     );
-    const groupsToUpdate = knownGroups.map((g) =>
+    const groupsToUpdate = updatedGroups.map((g) =>
       protocolGroupToStateConversation(account, g)
     );
     saveConversations(client.address, [
