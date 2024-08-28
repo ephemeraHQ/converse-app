@@ -48,7 +48,8 @@ export function NavigationChatButton({
     setLoading(true);
     const allowed = await canGroupMessage(currentAccount(), address);
     setLoading(false);
-    if (!allowed[address]) {
+    // canGroupMessage() returns lowercase addresses
+    if (!allowed[address.toLowerCase()]) {
       Alert.alert("Cannot be added to group yet");
       return;
     }
