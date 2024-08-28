@@ -291,7 +291,13 @@ export default function NewConversation({
   const initialFocus = useRef(false);
 
   const showRecommendations =
-    !status.loading && value.length === 0 && recommendationsFrensCount > 0;
+    !status.loading &&
+    value.length === 0 &&
+    recommendationsFrensCount > 0 &&
+    // hide recommendations when adding users to a group
+    !route.params?.addingToGroupTopic;
+
+  const profiles = getProfilesStore(currentAccount()).getState().profiles;
 
   const inputPlaceholder = ".converse.xyz, 0x, .eth, .lens, .fc, .cb.id, UD…";
   const onRef = useCallback(
@@ -408,14 +414,24 @@ export default function NewConversation({
         </View>
       )}
 
-      {isEmptyObject(status.profileSearchResults) && !group.enabled && (
+      {isEmptyObject(status.profileSearchResults) && (
         <View
           style={{
             backgroundColor: backgroundColor(colorScheme),
             height: showRecommendations ? undefined : 0,
           }}
         >
-          <Recommendations visibility="EMBEDDED" navigation={navigation} />
+          <Recommendations
+            visibility="EMBEDDED"
+            navigation={navigation}
+            profiles={profiles}
+            groupMode={group.enabled}
+            groupMembers={group.members}
+            addToGroup={async (member) => {
+              setGroup((g) => ({ ...g, members: [...g.members, member] }));
+              setValue("");
+            }}
+          />
         </View>
       )}
 

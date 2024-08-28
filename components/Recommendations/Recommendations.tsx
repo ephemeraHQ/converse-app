@@ -1,3 +1,4 @@
+import { ProfileByAddress, ProfileSocials } from "@data/store/profilesStore";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import {
   backgroundColor,
@@ -35,9 +36,17 @@ const EXPIRE_AFTER = 86400000; // 1 DAY
 export default function Recommendations({
   navigation,
   visibility,
+  profiles,
+  groupMode,
+  groupMembers,
+  addToGroup,
 }: {
   navigation: NativeStackNavigationProp<any>;
   visibility: "FULL" | "EMBEDDED" | "HIDDEN";
+  profiles?: ProfileByAddress;
+  groupMode?: boolean;
+  groupMembers?: (ProfileSocials & { address: string })[];
+  addToGroup?: (member: ProfileSocials & { address: string }) => void;
 }) {
   const userAddress = useCurrentAccount();
   const currentAccount = useAccountsStore((s) => s.currentAccount);
@@ -131,12 +140,25 @@ export default function Recommendations({
           </>
         );
       }
+
+      // If address is in groupMembers, remove profile from recommendations
+      if (
+        groupMembers?.some(
+          (member) => member.address.toLowerCase() === item.toLowerCase()
+        )
+      ) {
+        return null;
+      }
+
       return (
         <Recommendation
           address={item}
           recommendationData={frens[item]}
           navigation={navigation}
           isVisible={!!viewableItems[item]}
+          socials={profiles?.[item]?.socials}
+          groupMode={groupMode}
+          addToGroup={addToGroup}
         />
       );
     },
@@ -150,6 +172,10 @@ export default function Recommendations({
       styles.titleContainer,
       viewableItems,
       visibility,
+      profiles,
+      groupMembers,
+      groupMode,
+      addToGroup,
     ]
   );
 
@@ -183,6 +209,7 @@ export default function Recommendations({
       </>
     );
   }
+
   return (
     <View style={styles.recommendations}>
       <FlatList
