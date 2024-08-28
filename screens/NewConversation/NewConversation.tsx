@@ -408,7 +408,7 @@ export default function NewConversation({
         </View>
       )}
 
-      {isEmptyObject(status.profileSearchResults) && (
+      {isEmptyObject(status.profileSearchResults) && !group.enabled && (
         <View
           style={{
             backgroundColor: backgroundColor(colorScheme),
