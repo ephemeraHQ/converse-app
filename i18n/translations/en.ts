@@ -57,11 +57,6 @@ const en = {
   youre_the_og: "YOU'RE THE OG",
   app_version: "APP VERSION",
   security: "SECURITY",
-  current_installation_revoked: "Installation revoked",
-  current_installation_revoked_description:
-    "The current installation has been revoked, you will now get logged out and group chats will be deleted",
-  other_installations_count: "You have {{count}} other installations",
-  temporary_revoke_description: "Can we revoke those installations now?",
 
   // Attachments
   photo_library: "Photo Library",
@@ -115,10 +110,12 @@ const en = {
   deny: "Deny",
   approve_member_to_this_group: "Approve {{name}} to this group",
 
-  // V3 Migration
-  v3_migration_needed_title: "Group chat is here!",
-  v3_migration_needed_description:
-    "For security reasons, your current app does not have group chat enabled. We'll now log you out, please log back in to activate!",
+  // Revocation
+  current_installation_revoked: "Installation revoked",
+  current_installation_revoked_description:
+    "The current installation has been revoked, you will now get logged out and group chats will be deleted",
+  other_installations_count: "You have {{count}} other installations",
+  temporary_revoke_description: "Can we revoke those installations now?",
 };
 
 export default en;

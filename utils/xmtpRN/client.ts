@@ -139,10 +139,6 @@ export const useCheckCurrentInstallation = () => {
           "No v3 keys found, you must pass a SigningKey in order to enable alpha MLS features"
         )
       ) {
-        await awaitableAlert(
-          translate("v3_migration_needed_title"),
-          translate("v3_migration_needed_description")
-        );
         logout(true, false);
         accountCheck.current = undefined;
       }
