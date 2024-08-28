@@ -1,7 +1,7 @@
 import { ErroredHeader } from "@components/ErroredHeader";
 import { useShouldShowErrored } from "@hooks/useShouldShowErrored";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import { textPrimaryColor } from "@styles/colors";
+import { textPrimaryColor, textSecondaryColor } from "@styles/colors";
 import React, { useLayoutEffect } from "react";
 import {
   NativeSyntheticEvent,
@@ -92,7 +92,12 @@ export default function ConversationListNav() {
             <View style={styles.connectingContainer}>
               {shouldShowConnectingOrSyncing && <Connecting />}
               {shouldShowConnecting.warnMessage && (
-                <Text style={styles.warn}>
+                <Text
+                  style={[
+                    styles.warn,
+                    { color: textSecondaryColor(colorScheme) },
+                  ]}
+                >
                   {shouldShowConnecting.warnMessage}
                 </Text>
               )}
