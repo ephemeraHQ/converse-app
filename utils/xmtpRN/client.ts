@@ -149,3 +149,5 @@ export const useCheckCurrentInstallation = () => {
     });
   }, [account, logout]);
 };
+
+export const dropXmtpClient = (inboxId: string) => Client.dropClient(inboxId);
