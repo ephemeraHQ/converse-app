@@ -7,9 +7,9 @@ import {
 import { useSelect } from "@data/store/storeHelpers";
 import {
   backgroundColor,
-  clickedItemBackgroundColor,
   textPrimaryColor,
   textSecondaryColor,
+  tertiaryBackgroundColor,
 } from "@styles/colors";
 import { AvatarSizes, BorderRadius, Paddings } from "@styles/sizes";
 import { useConversationContext } from "@utils/conversation";
@@ -23,7 +23,6 @@ import {
 } from "@utils/reactions";
 import React, { FC, useMemo, useEffect, useCallback } from "react";
 import {
-  FlatList,
   ListRenderItem,
   Text,
   useColorScheme,
@@ -43,6 +42,7 @@ import Animated, {
 } from "react-native-reanimated";
 
 import { MessageToDisplay } from "./Message";
+import Picto from "../../Picto/Picto.ios";
 
 interface MessageReactionsListProps {
   reactions: {
@@ -177,6 +177,7 @@ const MessageReactionsListInner: FC<MessageReactionsListProps> = ({
   );
   const currentUser = useCurrentAccount();
   const styles = useStyles();
+  const colorScheme = useColorScheme();
   const list = useMemo(() => {
     const reactionMap: Record<string, string[]> = {};
     Object.entries(reactions).forEach(([senderAddress, reactions]) => {
@@ -230,7 +231,7 @@ const MessageReactionsListInner: FC<MessageReactionsListProps> = ({
         message.fromMe ? styles.fromMeContainer : styles.fromOtherContainer,
       ]}
     >
-      {list.length !== 0 ? (
+      {/* {list.length !== 0 ? (
         <View style={styles.reactionsContainer}>
           <FlatList
             data={list}
@@ -242,7 +243,7 @@ const MessageReactionsListInner: FC<MessageReactionsListProps> = ({
       ) : (
         <View style={styles.flex1} />
       )}
-      {hasEmojiOverlay && <View style={styles.flexGrow} />}
+      {hasEmojiOverlay && <View style={styles.flexGrow} />} */}
       <View
         style={[
           styles.emojiListContainer,
@@ -270,7 +271,11 @@ const MessageReactionsListInner: FC<MessageReactionsListProps> = ({
           onPress={handlePlusPress}
         >
           <View style={styles.plusContainer}>
-            <Text style={styles.plusText}>+</Text>
+            <Picto
+              picto="plus"
+              size={10}
+              color={textPrimaryColor(colorScheme)}
+            />
           </View>
         </TouchableOpacity>
       </View>
@@ -304,9 +309,6 @@ const useStyles = () => {
     emojiText: {
       textAlignVertical: "center",
       fontSize: 24,
-      marginHorizontal: Platform.OS === "ios" ? 2 : 0,
-      paddingVertical: Platform.OS === "ios" ? 2 : 0,
-      padding: 2,
     },
     selectedEmojiText: {
       backgroundColor: "rgba(0, 0, 0, 0.1)",
@@ -336,12 +338,11 @@ const useStyles = () => {
       flex: 1,
     },
     emojiListContainer: {
-      height: 70,
       flexDirection: "row",
       justifyContent: "space-around",
       alignItems: "center",
       borderRadius: BorderRadius.large,
-      padding: Paddings.default,
+      padding: Paddings.small,
       backgroundColor: backgroundColor(colorScheme),
     },
     emojiListContainerFromMe: {
@@ -355,22 +356,15 @@ const useStyles = () => {
       width: 32,
       justifyContent: "center",
       alignItems: "center",
+      marginRight: 4,
     },
     plusContainer: {
       borderRadius: 32,
-      backgroundColor: clickedItemBackgroundColor(colorScheme),
+      backgroundColor: tertiaryBackgroundColor(colorScheme),
       justifyContent: "center",
       alignItems: "center",
-      textAlign: "center",
-      textAlignVertical: "center",
       height: 32,
       width: 32,
-    },
-    plusText: {
-      textAlign: "center",
-      textAlignVertical: "center",
-      fontSize: 20,
-      color: textPrimaryColor(colorScheme),
     },
   });
 };
