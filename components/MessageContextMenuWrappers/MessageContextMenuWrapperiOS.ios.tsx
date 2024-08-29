@@ -127,6 +127,7 @@ const MessageContextMenuWrapperIOSInner: FC<
         previewType: "CUSTOM",
       }}
       auxiliaryPreviewConfig={{
+        transitionEntranceDelay: "RECOMMENDED",
         verticalAnchorPosition: "top",
         alignmentHorizontal: message.fromMe
           ? "previewTrailing"
@@ -135,7 +136,6 @@ const MessageContextMenuWrapperIOSInner: FC<
           ? "targetTrailing"
           : "targetLeading",
         anchorPosition: "top",
-        height: 400,
       }}
       lazyPreview
       renderAuxiliaryPreview={() => {

@@ -559,8 +559,7 @@ const useStyles = () => {
       paddingHorizontal: 0,
     },
     messageContentContainer: {
-      paddingVertical: 6,
-      paddingHorizontal: 10,
+      padding: 10,
     },
     messageText: {
       color: textPrimaryColor(colorScheme),
