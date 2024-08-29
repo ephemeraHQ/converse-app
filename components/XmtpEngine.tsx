@@ -72,6 +72,9 @@ export default function XmtpEngine() {
     const subscription = AppState.addEventListener(
       "change",
       async (nextAppState) => {
+        logger.debug(
+          `[AppState] App is was ${appState.current} - now ${nextAppState}`
+        );
         if (
           nextAppState === "active" &&
           appState.current.match(/inactive|background/)
