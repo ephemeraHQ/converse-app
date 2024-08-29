@@ -1,5 +1,6 @@
 import logger from "@utils/logger";
-import { ConverseXmtpClientType } from "@utils/xmtpRN/client";
+import { ConverseXmtpClientType, dropXmtpClient } from "@utils/xmtpRN/client";
+import { getInboxId } from "@utils/xmtpRN/signIn";
 import { useCallback } from "react";
 
 import { useDisconnectFromPrivy } from "./privy";
@@ -138,6 +139,9 @@ export const useLogoutFromConverse = (account: string) => {
   const disconnectWallet = useDisconnectWallet();
   const logout = useCallback(
     async (dropLocalDatabase: boolean, isV3Enabled: boolean = true) => {
+      logger.debug(
+        `[Logout] Logging out from ${account} with dropLocalDatabase=${dropLocalDatabase} and isV3Enabled=${isV3Enabled}`
+      );
       if (isV3Enabled) {
         // This clears the libxmtp sqlite database (v3 / groups)
         const client = (await getXmtpClient(account)) as ConverseXmtpClientType;
@@ -148,6 +152,7 @@ export const useLogoutFromConverse = (account: string) => {
           logger.debug("[Logout] successfully deleted libxmp db");
         }
       }
+      await dropXmtpClient(await getInboxId(account));
       disconnectWallet();
       const isPrivyAccount =
         !!useAccountsStore.getState().privyAccountId[account];
