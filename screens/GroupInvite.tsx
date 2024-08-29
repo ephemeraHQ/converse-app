@@ -12,6 +12,10 @@ import {
 import { AvatarSizes } from "@styles/sizes";
 import { createGroupJoinRequest, getGroupJoinRequest } from "@utils/api";
 import { converseEventEmitter } from "@utils/events";
+import {
+  getInviteJoinRequest,
+  saveInviteJoinRequest,
+} from "@utils/groupInvites";
 import { GroupWithCodecsType } from "@utils/xmtpRN/client";
 import { useCallback, useState } from "react";
 import { StyleSheet, Text, View, useColorScheme } from "react-native";
@@ -62,13 +66,21 @@ export default function GroupInviteScreen({
   const joinGroup = useCallback(async () => {
     if (!groupInvite?.id) return;
     converseEventEmitter.on("newGroup", handleNewGroup);
-    const joinRequest = await createGroupJoinRequest(account, groupInvite?.id);
+    let joinRequestId = getInviteJoinRequest(account, groupInvite?.id);
+    if (!joinRequestId) {
+      const joinRequest = await createGroupJoinRequest(
+        account,
+        groupInvite?.id
+      );
+      joinRequestId = joinRequest.id;
+      saveInviteJoinRequest(account, groupInvite?.id, joinRequestId);
+    }
     setPolling(true);
     let count = 0;
     let status = "PENDING";
     setJoinStatus("PENDING");
     while (count < 10 && status === "PENDING") {
-      const joinRequestData = await getGroupJoinRequest(joinRequest.id);
+      const joinRequestData = await getGroupJoinRequest(joinRequestId);
       if (joinRequestData.status === "PENDING") {
         await new Promise((r) => setTimeout(r, 500));
         count += 1;
