@@ -107,7 +107,13 @@ const revokeOtherInstallations = async (signer: Signer, client: Client) => {
       "Yes",
       "No"
     );
-    if (!doRevoke) return;
+    if (!doRevoke) {
+      logger.debug(`[Onboarding] User decided not to revoke`);
+      return;
+    }
+    logger.debug(
+      `[Onboarding] User decided to revoke ${otherInstallations.length} installation`
+    );
     /* On iOS, when we leave the app, it will automatically disconnect db
     and might not reconect fast enough when coming back from that signature
     and hit "Client error: storage error: Pool needs to  reconnect before use"
@@ -131,5 +137,6 @@ const revokeOtherInstallations = async (signer: Signer, client: Client) => {
       }
     );
     await client.revokeAllOtherInstallations(signer);
+    logger.debug(`[Onboarding] Installations revoked.`);
   }
 };

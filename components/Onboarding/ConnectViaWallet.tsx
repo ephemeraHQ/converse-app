@@ -95,6 +95,7 @@ export default function ConnectViaWallet({
 
   const disconnect = useCallback(
     async (resetLoading = true) => {
+      logger.debug("[Onboarding] Logging logout");
       setWaitingForNextSignature(false);
       clickedSignature.current = false;
       initiatingClientFor.current = undefined;
@@ -142,9 +143,16 @@ export default function ConnectViaWallet({
         setAlreadyV3Db(v3Dbs.length > 0);
         setSigner(thirdwebSigner);
         setLoading(false);
+        logger.debug(
+          `[Onboarding] User connected wallet ${thirdwebWallet?.id} (${a}). ${
+            isOnNetwork ? "Already" : "Not yet"
+          } on XMTP. V3 database ${
+            v3Dbs.length > 0 ? "already" : "not"
+          } present`
+        );
       }
     })();
-  }, [thirdwebSigner, setSigner, setLoading, disconnect]);
+  }, [thirdwebSigner, setSigner, setLoading, disconnect, thirdwebWallet?.id]);
 
   const initiatingClientFor = useRef<string | undefined>(undefined);
   const termsAndConditions = (
@@ -182,7 +190,7 @@ export default function ConnectViaWallet({
             // After we come back to the app, if we still don't
             // have a signer after 2 secs, let's reset state
             if (!signerRef.current) {
-              logger.debug("Still not signer after 1.5 sec");
+              logger.debug("[Onboarding] Still not signer after 1.5 sec");
               disconnect();
             }
           }, 1500);
@@ -205,7 +213,7 @@ export default function ConnectViaWallet({
   const [signaturesDone, setSignaturesDone] = useState(0);
 
   const initXmtpClient = useCallback(async () => {
-    logger.debug("ConnectViaWallet initixmtpclient");
+    logger.debug("[Onboarding] ConnectViaWallet initiXmtpClient");
     if (!signer || !address || initiatingClientFor.current === address) {
       return;
     }
@@ -217,8 +225,14 @@ export default function ConnectViaWallet({
       }
     }, 30000);
 
+    const signaturesAsked = {
+      create: false,
+      enable: false,
+      authenticate: false,
+    };
+
     try {
-      logger.debug("Onboarding using a wallet");
+      logger.debug("[Onboarding] Connecting to XMTP using an external wallet");
       const base64Key = await getXmtpBase64KeyFromSigner(
         signer,
         async () => {
@@ -229,13 +243,17 @@ export default function ConnectViaWallet({
           disconnect();
         },
         async () => {
-          logger.debug("Asking for create signature");
+          signaturesAsked.create = true;
+          logger.debug("[Onboarding] Triggering create signature");
           // Before calling "create" signature
           setWaitingForNextSignature(true);
           clickedSignature.current = false;
         },
         async () => {
-          logger.debug("Asking for enable signature");
+          signaturesAsked.enable = true;
+          if (signaturesAsked.create) {
+            logger.debug("[Onboarding] Create signature success!");
+          }
           // Before calling "enable" signature
           if (waitingForNextSignatureRef.current) {
             setSignaturesDone((s) => s + 1);
@@ -244,6 +262,7 @@ export default function ConnectViaWallet({
             await waitForClickSignature();
             logger.debug("Click on Sign done for Enable");
           }
+          logger.debug("[Onboarding] Triggering enable signature");
           if (onXmtp && !alreadyV3Db) {
             logger.debug(
               "Already on XMTP, but not db present, will need a new signature"
@@ -257,7 +276,9 @@ export default function ConnectViaWallet({
           }
         },
         async () => {
-          logger.debug("Asking for auth to inbox signature");
+          if (signaturesAsked.enable) {
+            logger.debug("[Onboarding] Enable signature success!");
+          }
           if (waitingForNextSignatureRef.current) {
             setSignaturesDone((s) => s + 1);
             setLoading(false);
@@ -266,12 +287,15 @@ export default function ConnectViaWallet({
             logger.debug("Click on Sign done for Authenticate");
             setWaitingForNextSignature(false);
           }
+          logger.debug(
+            "[Onboarding] Triggering authenticate to inbox signature"
+          );
         }
       );
       if (!base64Key) return;
-      logger.debug("Got base64 key, now connecting");
+      logger.debug("[Onboarding] Got base64 key, now connecting");
       await connectWithBase64Key(base64Key);
-      logger.info("Successfully logged in using a wallet");
+      logger.info("[Onboarding] Successfully logged in using a wallet");
       onboardingDone = true;
     } catch (e) {
       initiatingClientFor.current = undefined;
@@ -309,6 +333,7 @@ export default function ConnectViaWallet({
       setLoading(true);
       clickedSignature.current = true;
     } else {
+      logger.debug("[Onboarding] User clicked on initial sign button");
       setLoading(true);
       initXmtpClient();
     }
