@@ -138,6 +138,9 @@ export default function WalletSelector() {
               action: async () => {
                 setLoading(true);
                 setConnectionMethod("wallet");
+                logger.debug(
+                  `[Onboarding] Clicked on wallet ${w.name} - opening external app`
+                );
                 try {
                   if (w.name === "Coinbase Wallet") {
                     thirdwebConnect(async () => {
