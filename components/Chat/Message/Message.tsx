@@ -79,7 +79,19 @@ type Props = {
   isFrame: boolean;
 };
 
+// On iOS, the native context menu view handles the long press, but could potentially trigger the onPress event
+// So we have to set a noop on long press on iOS so it doens't also trigger the onPress event
+const platformTouchableLongPressDelay = Platform.select({
+  ios: 100,
+  default: undefined,
+});
+
 const noop = () => {};
+
+const platformTouchableOnLongPress = Platform.select({
+  ios: noop,
+  default: undefined,
+});
 
 const MessageSender = ({ message }: { message: MessageToDisplay }) => {
   const address = useInboxIdStore(
@@ -329,8 +341,8 @@ function ChatMessage({ message, colorScheme, isGroup, isFrame }: Props) {
                             styles.innerBubble,
                             message.fromMe ? styles.innerBubbleMe : undefined,
                           ]}
-                          delayLongPress={100}
-                          onLongPress={noop}
+                          delayLongPress={platformTouchableLongPressDelay}
+                          onLongPress={platformTouchableOnLongPress}
                           delayPressIn={isDesktop ? 0 : 75}
                           onPress={() => {
                             converseEventEmitter.emit("scrollChatToMessage", {
@@ -399,6 +411,8 @@ function ChatMessage({ message, colorScheme, isGroup, isFrame }: Props) {
                   {isFrame && (
                     <TouchableOpacity
                       onPress={() => handleUrlPress(message.content)}
+                      delayLongPress={platformTouchableLongPressDelay}
+                      onLongPress={platformTouchableOnLongPress}
                     >
                       <Text style={styles.linkToFrame}>
                         {getUrlToRender(message.content)}
