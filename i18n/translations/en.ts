@@ -116,6 +116,9 @@ const en = {
     "The current installation has been revoked, you will now get logged out and group chats will be deleted",
   other_installations_count: "You have {{count}} other installations",
   temporary_revoke_description: "Can we revoke those installations now?",
+
+  // Emoji Picker
+  search_emojis: "Search emojis",
 };
 
 export default en;

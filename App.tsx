@@ -38,10 +38,7 @@ import { QueryClientProvider } from "./queries/QueryProvider";
 import Main from "./screens/Main";
 import { registerBackgroundFetchTask } from "./utils/background";
 import { privySecureStorage } from "./utils/keychain/helpers";
-import mmkv from "./utils/mmkv";
-import { DEFAULT_EMOJIS, RECENT_EMOJI_STORAGE_KEY } from "./utils/reactions";
 import { initSentry } from "./utils/sentry";
-import { useRecentPicksPersistence } from "./vendor/rn-emoji-keyboard";
 
 LogBox.ignoreLogs([
   "Privy: Expected status code 200, received 400", // Privy
@@ -89,14 +86,6 @@ export default function App() {
       converseEventEmitter.off("showDebugMenu", showDebugMenu);
     };
   }, [showDebugMenu]);
-
-  useRecentPicksPersistence({
-    initialization: () =>
-      JSON.parse(mmkv.getString(RECENT_EMOJI_STORAGE_KEY) || DEFAULT_EMOJIS),
-    onStateChange: (next) => {
-      mmkv.set(RECENT_EMOJI_STORAGE_KEY, JSON.stringify(next));
-    },
-  });
 
   const { isInternetReachable, hydrationDone } = useAppStore(
     useSelect(["isInternetReachable", "hydrationDone"])

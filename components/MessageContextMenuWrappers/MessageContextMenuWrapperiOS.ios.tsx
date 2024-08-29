@@ -23,11 +23,12 @@ interface MessageContextMenuWrapperIOSProps {
   reactions: {
     [senderAddress: string]: MessageReaction[];
   };
+  hideBackground: boolean;
 }
 
 const MessageContextMenuWrapperIOSInner: FC<
   MessageContextMenuWrapperIOSProps
-> = ({ children, message, reactions }) => {
+> = ({ children, message, reactions, hideBackground }) => {
   const colorScheme = useColorScheme();
   const { setContextMenuShown } = useAppStore(
     useSelect(["setContextMenuShown", "contextMenuShownId"])
@@ -100,6 +101,7 @@ const MessageContextMenuWrapperIOSInner: FC<
       isContextMenuEnabled
       onPressMenuItem={handleContextMenuAction}
       shouldPreventLongPressGestureFromPropagating
+      renderPreview={() => <>{children}</>}
       menuConfig={{
         menuTitle: "",
         menuItems: contextMenuItems.map((item) => ({
@@ -115,26 +117,25 @@ const MessageContextMenuWrapperIOSInner: FC<
         })),
       }}
       previewConfig={{
-        backgroundColor: message.fromMe
+        backgroundColor: hideBackground
+          ? undefined
+          : message.fromMe
           ? myMessageBubbleColor(colorScheme)
           : messageBubbleColor(colorScheme),
-        borderRadius: 15,
+        borderRadius: 18,
+        previewSize: "INHERIT",
+        previewType: "CUSTOM",
       }}
       auxiliaryPreviewConfig={{
-        anchorPosition: "automatic",
+        verticalAnchorPosition: "top",
         alignmentHorizontal: message.fromMe
           ? "previewTrailing"
           : "previewLeading",
         horizontalAlignment: message.fromMe
           ? "targetTrailing"
           : "targetLeading",
-        transitionConfigEntrance: {
-          mode: "syncedToMenuEntranceTransition",
-          shouldAnimateSize: true,
-        },
-        transitionExitPreset: {
-          mode: "fade",
-        },
+        anchorPosition: "top",
+        height: 400,
       }}
       lazyPreview
       renderAuxiliaryPreview={() => {
@@ -152,6 +153,4 @@ const MessageContextMenuWrapperIOSInner: FC<
   );
 };
 
-export const MessageContextMenuWrapperIOS = React.memo(
-  MessageContextMenuWrapperIOSInner
-);
+export const MessageContextMenuWrapperIOS = MessageContextMenuWrapperIOSInner;

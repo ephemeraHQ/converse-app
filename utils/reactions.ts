@@ -2,11 +2,11 @@ import { translate } from "@i18n";
 import { ContentTypeReaction } from "@xmtp/content-type-reaction";
 
 import { isAttachmentMessage } from "./attachment/helpers";
+import { emojis } from "./emojis/emojis";
 import logger from "./logger";
 import { sendMessage } from "./message";
 import { getMessageContentType } from "./xmtpRN/contentTypes";
 import { XmtpConversation, XmtpMessage } from "../data/store/chatStore";
-import { emojisByCategory } from "../vendor/rn-emoji-keyboard";
 
 export type MessageReaction = {
   action: "added" | "removed";
@@ -91,8 +91,8 @@ export const getReactionContent = (r: MessageReaction) =>
 export const getEmojiName = (emojiString: string) => {
   let foundEmojiName: string | undefined = undefined;
   let categoryId = 0;
-  while (!foundEmojiName && categoryId < emojisByCategory.length) {
-    const category = emojisByCategory[categoryId];
+  while (!foundEmojiName && categoryId < emojis.length) {
+    const category = emojis[categoryId];
     let emojiId = 0;
     while (!foundEmojiName && emojiId < category.data.length) {
       const emoji = category.data[emojiId];
