@@ -1,3 +1,4 @@
+import logger from "@utils/logger";
 import { In } from "typeorm/browser";
 
 import { upgradePendingConversationsIfNeeded } from "./pendingConversations";
@@ -21,6 +22,12 @@ export const saveConversations = async (
   conversations: XmtpConversation[],
   forceUpdate = false
 ) => {
+  if (conversations.length === 0) return;
+  logger.debug(
+    `Calling saveConversations for ${account} with ${
+      conversations.length
+    } convos and ${forceUpdate ? "forceUpdate" : "no forceUpdate"}`
+  );
   const chatStoreState = getChatStore(account).getState();
   const alreadyKnownConversations: XmtpConversation[] = [];
   const conversationsToUpsert: XmtpConversation[] = [];
@@ -38,7 +45,9 @@ export const saveConversations = async (
     conversationsToUpsert
   );
   // Then to context so it show immediatly even without handle
-  chatStoreState.setConversations(newlySavedConversations);
+  if (newlySavedConversations.length > 0) {
+    chatStoreState.setConversations(newlySavedConversations);
+  }
   refreshProfilesIfNeeded(account);
 
   // Navigate to conversation from push notification on first message
@@ -51,6 +60,7 @@ const setupAndSaveConversations = async (
   account: string,
   conversations: XmtpConversation[]
 ): Promise<XmtpConversation[]> => {
+  if (conversations.length === 0) return [];
   // If there are here conversations newly created that correspond to
   // pending convos in our local db, let's update them
   await upgradePendingConversationsIfNeeded(account, conversations);
