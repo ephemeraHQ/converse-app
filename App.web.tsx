@@ -1,6 +1,7 @@
 import "@expo/metro-runtime";
 import { ActionSheetProvider } from "@expo/react-native-action-sheet";
 import { PrivyProvider } from "@privy-io/react-auth";
+import { MaterialDarkTheme, MaterialLightTheme } from "@styles/colors";
 import { createWeb3Modal, defaultConfig } from "@web3modal/ethers5/react";
 import { useColorScheme } from "react-native";
 import { PaperProvider } from "react-native-paper";
@@ -8,14 +9,9 @@ import { SafeAreaProvider } from "react-native-safe-area-context";
 import "./assets/web.css";
 import "./polyfills";
 
-import { MaterialDarkTheme, MaterialLightTheme } from "@styles/colors";
-
 import XmtpEngine from "./components/XmtpEngine";
 import config from "./config";
 import Main from "./screens/Main";
-import mmkv from "./utils/mmkv";
-import { DEFAULT_EMOJIS, RECENT_EMOJI_STORAGE_KEY } from "./utils/reactions";
-import { useRecentPicksPersistence } from "./vendor/rn-emoji-keyboard";
 
 const mainnet = {
   chainId: 1,
@@ -35,13 +31,6 @@ createWeb3Modal({
 
 export default function App() {
   const colorScheme = useColorScheme();
-  useRecentPicksPersistence({
-    initialization: () =>
-      JSON.parse(mmkv.getString(RECENT_EMOJI_STORAGE_KEY) || DEFAULT_EMOJIS),
-    onStateChange: (next) => {
-      mmkv.set(RECENT_EMOJI_STORAGE_KEY, JSON.stringify(next));
-    },
-  });
   return (
     <SafeAreaProvider key={`app-${colorScheme}`}>
       <ActionSheetProvider>

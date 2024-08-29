@@ -263,7 +263,7 @@ export const openMainConversationWithPeer = async (
   }
 };
 
-type ConversationContextType = {
+export type ConversationContextType = {
   conversation?: XmtpConversationWithUpdate;
   inputRef: MutableRefObject<TextInputWithValue | undefined>;
   mediaPreviewRef: MutableRefObject<MediaPreview | undefined>;

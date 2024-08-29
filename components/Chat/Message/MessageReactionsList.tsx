@@ -1,12 +1,19 @@
 import GroupAvatar from "@components/GroupAvatar";
-import { useCurrentAccount, useProfilesStore } from "@data/store/accountsStore";
+import {
+  useChatStore,
+  useCurrentAccount,
+  useProfilesStore,
+} from "@data/store/accountsStore";
+import { useSelect } from "@data/store/storeHelpers";
 import {
   backgroundColor,
-  messageBubbleColor,
+  clickedItemBackgroundColor,
+  textPrimaryColor,
   textSecondaryColor,
 } from "@styles/colors";
 import { AvatarSizes, BorderRadius, Paddings } from "@styles/sizes";
 import { useConversationContext } from "@utils/conversation";
+import { favoritedEmojis } from "@utils/emojis/favoritedEmojis";
 import { getPreferredAvatar, getPreferredName } from "@utils/profile";
 import {
   addReactionToMessage,
@@ -25,6 +32,7 @@ import {
   Platform,
   TouchableOpacity,
   useWindowDimensions,
+  InteractionManager,
 } from "react-native";
 import Animated, {
   Easing,
@@ -53,7 +61,7 @@ interface MessageReactionsItemProps {
 const INITIAL_DELAY = 800;
 const ITEM_DELAY = 200;
 const ITEM_ANIMATION_DURATION = 500;
-const SIDE_MARGIN = 15;
+const SIDE_MARGIN = 20;
 
 const keyExtractor = (item: [string, string[]]) => item[0];
 
@@ -88,10 +96,18 @@ const Item: FC<MessageReactionsItemProps> = ({ content, addresses, index }) => {
 
   return (
     <Animated.View style={[styles.itemContainer, animatedStyle]}>
-      <GroupAvatar
-        pendingGroupMembers={membersSocials}
-        size={AvatarSizes.pinnedConversation}
-      />
+      <View
+        style={{
+          height: AvatarSizes.reactionsOverlay,
+          justifyContent: "center",
+          alignItems: "center",
+        }}
+      >
+        <GroupAvatar
+          pendingGroupMembers={membersSocials}
+          size={AvatarSizes.reactionsOverlay}
+        />
+      </View>
       <Text style={styles.itemText}>
         {content} {addresses.length}
       </Text>
@@ -116,33 +132,51 @@ const EmojiItem: FC<{
     } else {
       addReactionToMessage(conversation, message, content);
     }
-    dismissMenu?.();
+    InteractionManager.runAfterInteractions(() => {
+      if (Platform.OS === "ios") {
+        // Cleans up rerendering of the message reactions list
+        // Feels more animation, and less jarring
+        setTimeout(() => {
+          dismissMenu?.();
+        }, 100);
+      } else {
+        dismissMenu?.();
+      }
+    });
   }, [alreadySelected, content, conversation, dismissMenu, message]);
 
   return (
-    <TouchableOpacity onPress={handlePress}>
-      <Text
+    <TouchableOpacity
+      hitSlop={{
+        top: 10,
+        bottom: 10,
+        left: 10,
+        right: 10,
+      }}
+      onPress={handlePress}
+    >
+      <View
         style={[
-          styles.emojiText,
-          alreadySelected ? styles.selectedEmojiText : undefined,
+          styles.emojiContainer,
+          alreadySelected && styles.selectedEmojiText,
         ]}
       >
-        {content}
-      </Text>
+        <Text style={styles.emojiText}>{content}</Text>
+      </View>
     </TouchableOpacity>
   );
 };
-
-const emojiList = ["❤️", "👍", "👎", "😂", "🤔", "😲", "➕"];
 
 const MessageReactionsListInner: FC<MessageReactionsListProps> = ({
   reactions,
   message,
   dismissMenu,
 }) => {
+  const { setReactMenuMessageId } = useChatStore(
+    useSelect(["setReactMenuMessageId"])
+  );
   const currentUser = useCurrentAccount();
   const styles = useStyles();
-  const colorScheme = useColorScheme();
   const list = useMemo(() => {
     const reactionMap: Record<string, string[]> = {};
     Object.entries(reactions).forEach(([senderAddress, reactions]) => {
@@ -158,6 +192,7 @@ const MessageReactionsListInner: FC<MessageReactionsListProps> = ({
     });
     return Object.entries(reactionMap);
   }, [reactions]);
+  const hasEmojiOverlay = list.length !== 0;
 
   const currentUserEmojiMap = useMemo(() => {
     const emojiSet: Record<string, boolean> = {};
@@ -174,9 +209,19 @@ const MessageReactionsListInner: FC<MessageReactionsListProps> = ({
     return emojiSet;
   }, [reactions, currentUser]);
 
-  const renderItem: ListRenderItem<[string, string[]]> = ({ item, index }) => {
-    return <Item content={item[0]} addresses={item[1]} index={index} />;
-  };
+  const renderItem: ListRenderItem<[string, string[]]> = useCallback(
+    ({ item, index }) => {
+      return <Item content={item[0]} addresses={item[1]} index={index} />;
+    },
+    []
+  );
+
+  const handlePlusPress = useCallback(() => {
+    setReactMenuMessageId(message.id);
+    InteractionManager.runAfterInteractions(() => {
+      dismissMenu?.();
+    });
+  }, [dismissMenu, message.id, setReactMenuMessageId]);
 
   return (
     <View
@@ -186,12 +231,7 @@ const MessageReactionsListInner: FC<MessageReactionsListProps> = ({
       ]}
     >
       {list.length !== 0 ? (
-        <View
-          style={[
-            styles.reactionsContainer,
-            { backgroundColor: messageBubbleColor(colorScheme) },
-          ]}
-        >
+        <View style={styles.reactionsContainer}>
           <FlatList
             data={list}
             horizontal
@@ -202,6 +242,7 @@ const MessageReactionsListInner: FC<MessageReactionsListProps> = ({
       ) : (
         <View style={styles.flex1} />
       )}
+      {hasEmojiOverlay && <View style={styles.flexGrow} />}
       <View
         style={[
           styles.emojiListContainer,
@@ -210,7 +251,7 @@ const MessageReactionsListInner: FC<MessageReactionsListProps> = ({
             : styles.emojiListContainerFromOther,
         ]}
       >
-        {emojiList.map((emoji) => (
+        {favoritedEmojis.getEmojis().map((emoji) => (
           <EmojiItem
             key={emoji}
             content={emoji}
@@ -219,6 +260,19 @@ const MessageReactionsListInner: FC<MessageReactionsListProps> = ({
             dismissMenu={dismissMenu}
           />
         ))}
+        <TouchableOpacity
+          hitSlop={{
+            top: 10,
+            bottom: 10,
+            left: 10,
+            right: 10,
+          }}
+          onPress={handlePlusPress}
+        >
+          <View style={styles.plusContainer}>
+            <Text style={styles.plusText}>+</Text>
+          </View>
+        </TouchableOpacity>
       </View>
     </View>
   );
@@ -234,19 +288,24 @@ const useStyles = () => {
     itemContainer: {
       justifyContent: "center",
       alignItems: "center",
-      padding: Paddings.small,
+      width: 76,
+      height: 119.5,
     },
     itemText: {
-      paddingTop: Paddings.small,
       color: textSecondaryColor(colorScheme),
+      fontSize: 16,
+      lineHeight: 20,
+      marginTop: 20,
     },
     flexGrow: {
       flexGrow: 1,
+      height: "auto",
     },
     emojiText: {
       textAlignVertical: "center",
       fontSize: 24,
-      marginHorizontal: 2,
+      marginHorizontal: Platform.OS === "ios" ? 2 : 0,
+      paddingVertical: Platform.OS === "ios" ? 2 : 0,
       padding: 2,
     },
     selectedEmojiText: {
@@ -255,22 +314,23 @@ const useStyles = () => {
       overflow: "hidden",
     },
     container: {
-      flexGrow: 1,
       alignSelf: "center",
       alignItems: "center",
       justifyContent: "center",
-      width,
+      flexGrow: 1,
+      marginHorizontal: SIDE_MARGIN,
+      width: width - SIDE_MARGIN * 2,
     },
     fromMeContainer: {
-      right: -2 * SIDE_MARGIN,
+      left: SIDE_MARGIN,
     },
     fromOtherContainer: {
-      left: -2 * SIDE_MARGIN,
+      right: SIDE_MARGIN,
     },
     reactionsContainer: {
-      flex: 1,
       borderRadius: BorderRadius.large,
-      margin: Paddings.default,
+      height: 120,
+      backgroundColor: backgroundColor(colorScheme),
     },
     flex1: {
       flex: 1,
@@ -282,16 +342,35 @@ const useStyles = () => {
       alignItems: "center",
       borderRadius: BorderRadius.large,
       padding: Paddings.default,
-      marginVertical: Platform.OS === "android" ? 0 : Paddings.large,
       backgroundColor: backgroundColor(colorScheme),
     },
     emojiListContainerFromMe: {
       alignSelf: "flex-end",
-      marginRight: SIDE_MARGIN * 2,
     },
     emojiListContainerFromOther: {
       alignSelf: "flex-start",
-      marginLeft: SIDE_MARGIN * 2,
+    },
+    emojiContainer: {
+      height: 32,
+      width: 32,
+      justifyContent: "center",
+      alignItems: "center",
+    },
+    plusContainer: {
+      borderRadius: 32,
+      backgroundColor: clickedItemBackgroundColor(colorScheme),
+      justifyContent: "center",
+      alignItems: "center",
+      textAlign: "center",
+      textAlignVertical: "center",
+      height: 32,
+      width: 32,
+    },
+    plusText: {
+      textAlign: "center",
+      textAlignVertical: "center",
+      fontSize: 20,
+      color: textPrimaryColor(colorScheme),
     },
   });
 };

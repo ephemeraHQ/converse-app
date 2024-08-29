@@ -4,6 +4,11 @@ import { useAppStore } from "@data/store/appStore";
 import { useSelect } from "@data/store/storeHelpers";
 import Clipboard from "@react-native-clipboard/clipboard";
 import { isAttachmentMessage } from "@utils/attachment/helpers";
+import {
+  ConversationContext,
+  ConversationContextType,
+  useConversationContext,
+} from "@utils/conversation";
 import { converseEventEmitter } from "@utils/events";
 import { MessageReaction } from "@utils/reactions";
 import { isTransactionMessage } from "@utils/transaction";
@@ -128,6 +133,7 @@ export const MessageContextMenuWrapper: FC<MessageContextMenuWrapperProps> = ({
       onLayout();
     }
   }, [currentlyShown, onLayout]);
+  const conversationContext = useConversationContext(["conversation"]);
 
   return (
     <>
@@ -151,9 +157,18 @@ export const MessageContextMenuWrapper: FC<MessageContextMenuWrapperProps> = ({
       </Menu>
       {currentlyShown && (
         <Portal>
-          <Animated.View style={[animatedStyle, { top: messageTop - 80 }]}>
-            <MessageReactionsList reactions={reactions} message={message} />
-          </Animated.View>
+          {/* Portal has it's own context, so pass what is needed */}
+          <ConversationContext.Provider
+            value={conversationContext as ConversationContextType}
+          >
+            <Animated.View style={[animatedStyle, { top: messageTop - 80 }]}>
+              <MessageReactionsList
+                dismissMenu={closeMenu}
+                reactions={reactions}
+                message={message}
+              />
+            </Animated.View>
+          </ConversationContext.Provider>
         </Portal>
       )}
       {currentlyShown && <Animated.View style={lowerAnimatedStyle} />}
