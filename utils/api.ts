@@ -1,7 +1,11 @@
 import axios from "axios";
 import * as Contacts from "expo-contacts";
 
-import { analyticsPlatform } from "./analytics";
+import {
+  analyticsPlatform,
+  analyticsAppVersion,
+  analyticsBuildNumber,
+} from "./analytics";
 import type { TransferAuthorizationMessage } from "./evm/erc20";
 import { getPrivyRequestHeaders } from "./evm/privy";
 import logger from "./logger";
@@ -59,7 +63,13 @@ export const saveUser = async (address: string, privyAccountId: string) => {
 
   await api.post(
     "/api/user",
-    { address, privyAccountId, platform: analyticsPlatform },
+    {
+      address,
+      privyAccountId,
+      platform: analyticsPlatform,
+      version: analyticsAppVersion,
+      build: analyticsBuildNumber,
+    },
     { headers: await getXmtpApiHeaders(address) }
   );
 };
