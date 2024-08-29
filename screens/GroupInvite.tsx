@@ -101,16 +101,18 @@ export default function GroupInviteScreen({
       )}
       {groupInvite && (
         <>
-          <Avatar
-            size={AvatarSizes.default}
-            uri={groupInvite.imageUrl}
-            name={groupInvite.groupName}
-            style={styles.avatar}
-          />
-          <Text style={styles.title}>{groupInvite.groupName}</Text>
-          {groupInvite.description && (
-            <Text style={styles.description}>{groupInvite.description}</Text>
-          )}
+          <View style={styles.groupInfo}>
+            <Avatar
+              size={AvatarSizes.default}
+              uri={groupInvite.imageUrl}
+              name={groupInvite.groupName}
+              style={styles.avatar}
+            />
+            <Text style={styles.title}>{groupInvite.groupName}</Text>
+            {groupInvite.description && (
+              <Text style={styles.description}>{groupInvite.description}</Text>
+            )}
+          </View>
           {!polling && (
             <Button
               variant="primary"
@@ -144,7 +146,7 @@ export default function GroupInviteScreen({
           )}
         </>
       )}
-      <View style={{ height: insets.bottom + headerHeight }} />
+      <View style={{ height: headerHeight - insets.bottom }} />
     </View>
   );
 }
@@ -154,6 +156,7 @@ const useStyles = () => {
   return StyleSheet.create({
     avatar: {
       alignSelf: "center",
+      marginTop: 11,
     },
     groupInvite: {
       backgroundColor: backgroundColor(colorScheme),
@@ -162,36 +165,44 @@ const useStyles = () => {
       justifyContent: "flex-end",
       paddingHorizontal: 20,
     },
+    groupInfo: {
+      flex: 1,
+    },
     title: {
       color: textPrimaryColor(colorScheme),
-      fontSize: 30,
-      fontWeight: "bold",
+      fontSize: 25,
+      fontWeight: "600",
       textAlign: "center",
-      marginTop: 23,
-      marginBottom: 20,
+      marginTop: 16,
     },
     description: {
-      fontSize: 17,
-      color: textPrimaryColor(colorScheme),
-      marginVertical: 20,
-      fontStyle: "italic",
+      fontSize: 15,
+      lineHeight: 22,
+      color: textSecondaryColor(colorScheme),
+      marginVertical: 12,
+      marginHorizontal: 20,
       textAlign: "center",
     },
     error: {
       color: dangerColor(colorScheme),
-      fontSize: 17,
+      fontSize: 13,
+      lineHeight: 18,
       paddingHorizontal: 20,
       textAlign: "center",
-      marginTop: 20,
+      marginTop: 8,
     },
     notification: {
       color: textSecondaryColor(colorScheme),
-      fontSize: 17,
+      fontSize: 13,
+      lineHeight: 18,
       textAlign: "center",
-      marginTop: 20,
+      marginTop: 8,
     },
     cta: {
       marginTop: 20,
+      borderRadius: 8,
+      paddingVertical: 16,
+      marginHorizontal: 4,
     },
   });
 };
