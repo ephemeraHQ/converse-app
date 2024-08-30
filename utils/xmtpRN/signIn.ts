@@ -1,3 +1,4 @@
+import { debugEnabled } from "@components/DebugButton";
 import { translate } from "@i18n";
 import { awaitableAlert } from "@utils/alert";
 import {
@@ -86,6 +87,9 @@ Temporary method for XMTP team to revoke other installations
 when logging in to remove weird, broken installation
 */
 const revokeOtherInstallations = async (signer: Signer, client: Client) => {
+  if (!debugEnabled(client.address)) {
+    return;
+  }
   const state = await client.inboxState(true);
   logger.debug(
     `Current installation id : ${client.installationId} - All installation ids : ${state.installationIds}`
