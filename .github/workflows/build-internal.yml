@@ -1,6 +1,7 @@
 name: Build Internal
 
 permissions:
+  contents: write
   pull-requests: write
 
 on:
