@@ -84,8 +84,6 @@ export default function ProfileSettingsButton() {
         uri={getPreferredAvatar(socials)}
         size={AvatarSizes.profileSettings}
         style={{
-          width: Platform.OS === "android" ? undefined : 32,
-          height: Platform.OS === "android" ? undefined : 32,
           marginRight: Platform.OS === "android" ? 0 : 10,
           marginTop: Platform.OS === "ios" ? 3 : 0,
         }}
