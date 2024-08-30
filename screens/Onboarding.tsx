@@ -3,6 +3,7 @@ import { awaitableAlert } from "@utils/alert";
 import logger from "@utils/logger";
 import { sentryTrackMessage } from "@utils/sentry";
 import { useCallback, useEffect, useRef } from "react";
+import { Alert } from "react-native";
 
 import ConnectViaWallet from "../components/Onboarding/ConnectViaWallet";
 import DesktopConnect from "../components/Onboarding/DesktopConnect";
@@ -20,7 +21,7 @@ import {
 import { useOnboardingStore } from "../data/store/onboardingStore";
 import { useSelect } from "../data/store/storeHelpers";
 import { saveXmtpKey } from "../utils/keychain/helpers";
-import { waitForLogoutTasksDone } from "../utils/logout";
+import { logoutAccount, waitForLogoutTasksDone } from "../utils/logout";
 import { getXmtpBase64KeyFromSigner } from "../utils/xmtpRN/signIn";
 import { getXmtpClient } from "../utils/xmtpRN/sync";
 
@@ -52,7 +53,7 @@ export default function Onboarding() {
   const initiatingClientFor = useRef<string | undefined>(undefined);
 
   const connectWithBase64Key = useCallback(
-    async (base64Key: string) => {
+    async (base64Key: string, onError: () => void) => {
       logger.debug("In connectWithBase64Key");
       if (!address) {
         sentryTrackMessage("Could not connect because no address");
@@ -66,31 +67,40 @@ export default function Onboarding() {
       // Successfull login for user, let's setup
       // the storage !
       useAccountsStore.getState().setCurrentAccount(address, true);
-      if (connectionMethod === "phone" && privyAccountId) {
-        useAccountsStore.getState().setPrivyAccountId(address, privyAccountId);
-      }
-      logger.debug("Initiating converse db");
-      await initDb(address);
-      logger.debug("Refreshing profiles");
-      await refreshProfileForAddress(address, address);
-      // Now we can really set!
-      useAccountsStore.getState().setCurrentAccount(address, false);
-      getSettingsStore(address)
-        .getState()
-        .setOnboardedAfterProfilesRelease(true);
+      try {
+        if (connectionMethod === "phone" && privyAccountId) {
+          useAccountsStore
+            .getState()
+            .setPrivyAccountId(address, privyAccountId);
+        }
+        logger.debug("Initiating converse db");
+        await initDb(address);
+        logger.debug("Refreshing profiles");
+        await refreshProfileForAddress(address, address);
+        // Now we can really set!
+        useAccountsStore.getState().setCurrentAccount(address, false);
+        getSettingsStore(address)
+          .getState()
+          .setOnboardedAfterProfilesRelease(true);
 
-      if (isEphemeral) {
-        getSettingsStore(address).getState().setEphemeralAccount(true);
-      } else {
-        getSettingsStore(address).getState().setEphemeralAccount(false);
+        if (isEphemeral) {
+          getSettingsStore(address).getState().setEphemeralAccount(true);
+        } else {
+          getSettingsStore(address).getState().setEphemeralAccount(false);
+        }
+        if (pkPath) {
+          getWalletStore(address).getState().setPrivateKeyPath(pkPath);
+        }
+        useOnboardingStore.getState().setAddingNewAccount(false);
+        // Now we can instantiate the XMTP Client
+        getXmtpClient(address);
+        sentryTrackMessage("Connecting done!");
+      } catch (e) {
+        logger.error(e, { context: "Onboarding - connectWithBase64Key" });
+        // Cleanup
+        Alert.alert(translate("onboarding_error"));
+        onError();
       }
-      if (pkPath) {
-        getWalletStore(address).getState().setPrivateKeyPath(pkPath);
-      }
-      useOnboardingStore.getState().setAddingNewAccount(false);
-      // Now we can instantiate the XMTP Client
-      getXmtpClient(address);
-      sentryTrackMessage("Connecting done!");
     },
     [address, connectionMethod, isEphemeral, pkPath, privyAccountId]
   );
@@ -112,7 +122,15 @@ export default function Onboarding() {
         resetOnboarding();
       });
       if (!base64Key) return;
-      await connectWithBase64Key(base64Key);
+      await connectWithBase64Key(base64Key, async () => {
+        logoutAccount(
+          await signer.getAddress(),
+          false,
+          true,
+          () => {},
+          () => {}
+        );
+      });
     } catch (e) {
       initiatingClientFor.current = undefined;
       setLoading(false);

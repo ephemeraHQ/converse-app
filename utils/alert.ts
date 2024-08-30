@@ -1,12 +1,15 @@
 import { Alert, AlertButton } from "react-native";
 
+import { waitUntilAppActive } from "./appState";
+
 export const awaitableAlert = (
   title: string,
   message?: string,
   okButton?: string,
   cancelButton?: string
 ): Promise<boolean> =>
-  new Promise((resolve) => {
+  new Promise(async (resolve) => {
+    await waitUntilAppActive(500);
     const buttons: AlertButton[] = [
       {
         text: okButton || "Ok",

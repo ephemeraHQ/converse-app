@@ -117,9 +117,8 @@ export const executeLogoutTasks = async () => {
       assertNotLogged(account);
       resetSharedData(task.topics || []);
       assertNotLogged(account);
-      // This will fail if no connection (5sec timeout)
       if (task.apiHeaders) {
-        await unsubscribeFromNotifications(task.apiHeaders);
+        unsubscribeFromNotifications(task.apiHeaders);
       }
       removeLogoutTask(account);
     } catch (e: any) {
@@ -136,95 +135,106 @@ export const executeLogoutTasks = async () => {
   return true;
 };
 
+export const logoutAccount = async (
+  account: string,
+  dropLocalDatabase: boolean,
+  isV3Enabled: boolean = true,
+  disconnectWallet: () => void,
+  privyLogout: () => void
+) => {
+  logger.debug(
+    `[Logout] Logging out from ${account} with dropLocalDatabase=${dropLocalDatabase} and isV3Enabled=${isV3Enabled}`
+  );
+  if (isV3Enabled) {
+    // This clears the libxmtp sqlite database (v3 / groups)
+    try {
+      const client = (await getXmtpClient(account)) as ConverseXmtpClientType;
+      await client.dropLocalDatabaseConnection();
+      logger.debug("[Logout] successfully dropped connection to libxmp db");
+      if (dropLocalDatabase) {
+        await client.deleteLocalDatabase();
+        logger.debug("[Logout] successfully deleted libxmp db");
+      }
+    } catch (error) {
+      logger.warn("Could not get XMTP Client while logging out", {
+        error,
+      });
+    }
+  }
+  await dropXmtpClient(await getInboxId(account));
+  disconnectWallet();
+  const isPrivyAccount = !!useAccountsStore.getState().privyAccountId[account];
+  if (isPrivyAccount) {
+    privyLogout();
+  }
+  const topicsByAccount: { [a: string]: string[] } = {};
+  const accounts = getAccountsList();
+  accounts.forEach((a) => {
+    topicsByAccount[a] = Object.keys(getChatStore(a).getState().conversations);
+  });
+
+  // We need to delete topics that are in this account and not other accounts
+  // so we start with topics from this account and we'll remove topics we find in others
+  const topicsToDelete = topicsByAccount[account] || [];
+  const pkPath = getWalletStore(account).getState().privateKeyPath;
+
+  let apiHeaders: { [key: string]: string } | undefined;
+
+  try {
+    apiHeaders = await getXmtpApiHeaders(account);
+  } catch (error) {
+    // If we have a broken client we might not be able
+    // to generate the headers
+    logger.warn("Could not get API headers while logging out", {
+      error,
+    });
+  }
+
+  accounts.forEach((a) => {
+    if (a !== account) {
+      topicsByAccount[a].forEach((topic) => {
+        const topicIndex = topicsToDelete.indexOf(topic);
+        if (topicIndex > -1) {
+          topicsToDelete.splice(topicIndex, 1);
+        }
+      });
+    }
+  });
+
+  // Get converse db path before deleting account
+  const converseDbPath = await getConverseDbPath(account);
+
+  // Remove account so we don't use it anymore
+  useAccountsStore.getState().removeAccount(account);
+
+  // This clears the Converse sqlite database (v2)
+  clearConverseDb(account, converseDbPath);
+
+  deleteXmtpClient(account);
+  deleteSubscribedTopics(account);
+  delete importedTopicsDataForAccount[account];
+  delete secureMmkvByAccount[account];
+  delete lastNotifSubscribeByAccount[account];
+
+  saveLogoutTask(account, apiHeaders, topicsToDelete, pkPath);
+
+  setTimeout(() => {
+    executeLogoutTasks();
+  }, 500);
+};
+
 export const useLogoutFromConverse = (account: string) => {
   const privyLogout = useDisconnectFromPrivy();
   const disconnectWallet = useDisconnectWallet();
   const logout = useCallback(
     async (dropLocalDatabase: boolean, isV3Enabled: boolean = true) => {
-      logger.debug(
-        `[Logout] Logging out from ${account} with dropLocalDatabase=${dropLocalDatabase} and isV3Enabled=${isV3Enabled}`
+      logoutAccount(
+        account,
+        dropLocalDatabase,
+        isV3Enabled,
+        disconnectWallet,
+        privyLogout
       );
-      if (isV3Enabled) {
-        // This clears the libxmtp sqlite database (v3 / groups)
-        try {
-          const client = (await getXmtpClient(
-            account
-          )) as ConverseXmtpClientType;
-          await client.dropLocalDatabaseConnection();
-          logger.debug("[Logout] successfully dropped connection to libxmp db");
-          if (dropLocalDatabase) {
-            await client.deleteLocalDatabase();
-            logger.debug("[Logout] successfully deleted libxmp db");
-          }
-        } catch (e) {
-          logger.error(e, {
-            context: "Could not get XMTP Client while logging out",
-          });
-        }
-      }
-      await dropXmtpClient(await getInboxId(account));
-      disconnectWallet();
-      const isPrivyAccount =
-        !!useAccountsStore.getState().privyAccountId[account];
-      if (isPrivyAccount) {
-        privyLogout();
-      }
-      const topicsByAccount: { [a: string]: string[] } = {};
-      const accounts = getAccountsList();
-      accounts.forEach((a) => {
-        topicsByAccount[a] = Object.keys(
-          getChatStore(a).getState().conversations
-        );
-      });
-
-      // We need to delete topics that are in this account and not other accounts
-      // so we start with topics from this account and we'll remove topics we find in others
-      const topicsToDelete = topicsByAccount[account];
-      const pkPath = getWalletStore(account).getState().privateKeyPath;
-
-      let apiHeaders: { [key: string]: string } | undefined;
-
-      try {
-        apiHeaders = await getXmtpApiHeaders(account);
-      } catch (e) {
-        // If we have a broken client we might not be able
-        // to generate the headers
-        logger.error(e, {
-          context: "Could not get API headers while logging out",
-        });
-      }
-
-      accounts.forEach((a) => {
-        if (a !== account) {
-          topicsByAccount[a].forEach((topic) => {
-            const topicIndex = topicsToDelete.indexOf(topic);
-            if (topicIndex > -1) {
-              topicsToDelete.splice(topicIndex, 1);
-            }
-          });
-        }
-      });
-
-      // Get converse db path before deleting account
-      const converseDbPath = await getConverseDbPath(account);
-
-      // Remove account so we don't use it anymore
-      useAccountsStore.getState().removeAccount(account);
-
-      // This clears the Converse sqlite database (v2)
-      clearConverseDb(account, converseDbPath);
-
-      deleteXmtpClient(account);
-      deleteSubscribedTopics(account);
-      delete importedTopicsDataForAccount[account];
-      delete secureMmkvByAccount[account];
-      delete lastNotifSubscribeByAccount[account];
-
-      saveLogoutTask(account, apiHeaders, topicsToDelete, pkPath);
-
-      setTimeout(() => {
-        executeLogoutTasks();
-      }, 500);
     },
     [account, disconnectWallet, privyLogout]
   );
