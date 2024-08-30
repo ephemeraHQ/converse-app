@@ -42,7 +42,7 @@ import Animated, {
 } from "react-native-reanimated";
 
 import { MessageToDisplay } from "./Message";
-import Picto from "../../Picto/Picto.ios";
+import Picto from "../../Picto/Picto";
 
 interface MessageReactionsListProps {
   reactions: {
