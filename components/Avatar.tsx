@@ -17,7 +17,7 @@ import {
 import { Indicator } from "./Indicator";
 import Picto from "./Picto/Picto";
 
-type Props = {
+export type AvatarProps = {
   uri?: string | undefined;
   size?: number | undefined;
   style?: StyleProp<ImageStyle>;
@@ -36,7 +36,7 @@ function Avatar({
   name,
   showIndicator,
   invertColor,
-}: Props) {
+}: AvatarProps) {
   const colorScheme = useColorScheme();
   const styles = getStyles(colorScheme, size, invertColor || false);
   const firstLetter = getFirstLetterForAvatar(name || "");
