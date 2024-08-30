@@ -11,7 +11,8 @@ declare const process: {
 const defaultConfig = {
   debugMenu: false,
   contactAddress: process.env.EXPO_PUBLIC_CONTACT_ADDRESS,
-  debugAddresses: process.env.EXPO_PUBLIC_DEBUG_ADDRESSES?.split(",") || [],
+  debugAddresses:
+    process.env.EXPO_PUBLIC_DEBUG_ADDRESSES?.toLowerCase().split(",") || [],
   conversationDomain: "converse.xyz",
   lensApiDomain: "api.lens.dev",
   lensSuffix: ".lens",
@@ -90,7 +91,7 @@ const ENV = {
     env: "prod",
     xmtpEnv: "production",
     apiURI: "https://backend-prod.converse.xyz",
-    debugMenu: true, // @todo => disable debug by default on prod!
+    debugMenu: false,
     bundleId: isAndroid ? "com.converse.prod" : "com.converse.native",
     appleAppGroup: "group.com.converse.native",
     scheme: "converse",
