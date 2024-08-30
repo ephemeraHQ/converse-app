@@ -20,13 +20,29 @@ import Share from "react-native-share";
 import { showActionSheetWithOptions } from "./StateHandlers/ActionSheetStateHandler";
 import config from "../config";
 import { getConverseDbPath } from "../data/db";
-import { currentAccount, useCurrentAccount } from "../data/store/accountsStore";
+import { currentAccount, useAccountsList } from "../data/store/accountsStore";
 import { getPresignedUriForUpload } from "../utils/api";
 import mmkv from "../utils/mmkv";
 
-export const useEnableDebug = () => {
-  const userAddress = useCurrentAccount() as string;
-  return config.debugMenu || config.debugAddresses.includes(userAddress);
+export const useDebugEnabled = (address?: string) => {
+  const accounts = useAccountsList();
+  if (address && debugEnabled(address)) {
+    return true;
+  }
+  for (const account of accounts) {
+    if (debugEnabled(account)) {
+      return true;
+    }
+  }
+
+  return false;
+};
+
+export const debugEnabled = (address?: string) => {
+  return (
+    config.debugMenu ||
+    (address && config.debugAddresses.includes(address.toLowerCase()))
+  );
 };
 
 export async function delayToPropogate(): Promise<void> {

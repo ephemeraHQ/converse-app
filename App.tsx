@@ -2,7 +2,7 @@ import "reflect-metadata";
 import "./polyfills";
 
 import { configure as configureCoinbase } from "@coinbase/wallet-mobile-sdk";
-import DebugButton, { useEnableDebug } from "@components/DebugButton";
+import DebugButton from "@components/DebugButton";
 import { ActionSheetProvider } from "@expo/react-native-action-sheet";
 import { PrivyProvider } from "@privy-io/expo";
 import {
@@ -58,7 +58,6 @@ export default function App() {
   const colorScheme = useColorScheme();
   const styles = useStyles();
   const debugRef = useRef();
-  const enableDebug = useEnableDebug();
 
   useCoinbaseWalletListener(
     true,
@@ -70,15 +69,11 @@ export default function App() {
   }, []);
 
   const showDebugMenu = useCallback(() => {
-    if (
-      !enableDebug ||
-      !debugRef.current ||
-      !(debugRef.current as any).showDebugMenu
-    ) {
+    if (!debugRef.current || !(debugRef.current as any).showDebugMenu) {
       return;
     }
     (debugRef.current as any).showDebugMenu();
-  }, [enableDebug]);
+  }, []);
 
   useEffect(() => {
     converseEventEmitter.on("showDebugMenu", showDebugMenu);
@@ -121,7 +116,7 @@ export default function App() {
                 <View style={styles.safe}>
                   <XmtpEngine />
                   <Main />
-                  {enableDebug && <DebugButton ref={debugRef} />}
+                  <DebugButton ref={debugRef} />
                 </View>
               </PaperProvider>
             </ActionSheetProvider>
