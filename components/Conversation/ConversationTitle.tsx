@@ -29,7 +29,7 @@ import { NavigationParamList } from "../../screens/Navigation/Navigation";
 import { getPreferredAvatar } from "../../utils/profile";
 import { conversationName, getTitleFontScale } from "../../utils/str";
 import Avatar from "../Avatar";
-import { useEnableDebug } from "../DebugButton";
+import { useDebugEnabled } from "../DebugButton";
 import GroupAvatar from "../GroupAvatar";
 
 type Props = {
@@ -63,7 +63,7 @@ export default function ConversationTitle({
             : undefined
         )
   );
-  const enableDebug = useEnableDebug();
+  const debugEnabled = useDebugEnabled();
   const conversationRef = useRef(conversation);
   useEffect(() => {
     if (!conversation) {
@@ -125,7 +125,7 @@ export default function ConversationTitle({
   }, [avatar, conversation, styles.avatar]);
 
   const handleLongPress = useCallback(() => {
-    if (!enableDebug) return;
+    if (!debugEnabled) return;
     Clipboard.setString(
       JSON.stringify({
         topic: conversation?.topic || "",
@@ -133,7 +133,7 @@ export default function ConversationTitle({
       })
     );
     Alert.alert("Conversation details copied");
-  }, [conversation?.context, conversation?.topic, enableDebug]);
+  }, [conversation?.context, conversation?.topic, debugEnabled]);
 
   const onPress = useCallback(() => {
     if (!conversation) return;

@@ -1,4 +1,4 @@
-import { useEnableDebug } from "@components/DebugButton";
+import { useDebugEnabled } from "@components/DebugButton";
 import {
   backgroundColor,
   textPrimaryColor,
@@ -56,10 +56,12 @@ export default function OnboardingComponent({
   loadingSubtitle,
 }: Props) {
   const styles = useStyles();
-  const { loading: stateLoading, setLoading } = useOnboardingStore(
-    useSelect(["loading", "setLoading"])
-  );
-  const enableDebug = useEnableDebug();
+  const {
+    loading: stateLoading,
+    setLoading,
+    address,
+  } = useOnboardingStore(useSelect(["loading", "setLoading", "address"]));
+  const debugEnabled = useDebugEnabled(address);
   const showDebug = useCallback(() => {
     converseEventEmitter.emit("showDebugMenu");
   }, []);
@@ -90,7 +92,7 @@ export default function OnboardingComponent({
 
         <Text
           style={styles.title}
-          onLongPress={enableDebug ? showDebug : undefined}
+          onLongPress={debugEnabled ? showDebug : undefined}
         >
           {title}
         </Text>
