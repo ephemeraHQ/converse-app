@@ -7,6 +7,7 @@ const en = {
     "This signature will enable your identity on the XMTP Network.\n\n",
   sign_access:
     "Please sign one last time to access Converse and start chatting.",
+  onboarding_error: "An error occurred while logging you in. Please try again.",
 
   // Conversation List
   delete: "Delete",

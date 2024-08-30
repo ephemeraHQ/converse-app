@@ -4,9 +4,11 @@ import { textPrimaryColor, textSecondaryColor } from "@styles/colors";
 import { awaitableAlert } from "@utils/alert";
 import { getDatabaseFilesForInboxId } from "@utils/fileSystem";
 import logger from "@utils/logger";
+import { logoutAccount } from "@utils/logout";
 import { sentryTrackMessage } from "@utils/sentry";
 import { thirdwebClient } from "@utils/thirdweb";
 import { Signer } from "ethers";
+import { reloadAppAsync } from "expo";
 import * as Linking from "expo-linking";
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
@@ -42,7 +44,7 @@ import {
 export default function ConnectViaWallet({
   connectWithBase64Key,
 }: {
-  connectWithBase64Key: (base64Key: string) => void;
+  connectWithBase64Key: (base64Key: string, onError: () => void) => void;
 }) {
   const {
     setConnectionMethod,
@@ -93,9 +95,30 @@ export default function ConnectViaWallet({
     waitingForNextSignatureRef.current = waitingForNextSignature;
   }, [waitingForNextSignature]);
 
+  const inXmtpClientCreationFlow = useRef(false);
+
   const disconnect = useCallback(
     async (resetLoading = true) => {
-      logger.debug("[Onboarding] Logging logout");
+      if (inXmtpClientCreationFlow.current) {
+        /*
+        Pretty edge case where user has started the XMTP flow 
+        i.e. user has done at least one signature but then decides
+        to logout before going to the end of the flow. The XMTP SDK
+        gets into a broken state
+        */
+        reloadAppAsync();
+        return;
+      }
+      logger.debug("[Onboarding] Logging out");
+      if (address) {
+        logoutAccount(
+          address,
+          false,
+          true,
+          () => {},
+          () => {}
+        );
+      }
       setWaitingForNextSignature(false);
       clickedSignature.current = false;
       initiatingClientFor.current = undefined;
@@ -118,38 +141,47 @@ export default function ConnectViaWallet({
       setLoading,
       setWaitingForNextSignature,
       thirdwebWallet,
+      address,
     ]
   );
 
+  const handlingThirdwebSigner = useRef("");
+
   useEffect(() => {
     (async () => {
-      if (thirdwebSigner) {
-        const a = await thirdwebSigner.getAddress();
-        if (getAccountsList().includes(a)) {
-          Alert.alert(
-            "Already connected",
-            "This account is already connected to Converse."
+      if (thirdwebSigner && !handlingThirdwebSigner.current) {
+        try {
+          const a = await thirdwebSigner.getAddress();
+          handlingThirdwebSigner.current = a;
+          if (getAccountsList().includes(a)) {
+            Alert.alert(
+              "Already connected",
+              "This account is already connected to Converse."
+            );
+            disconnect();
+            // At least activate said wallet so user can logout again
+            // but not be stuck
+            useAccountsStore.getState().setCurrentAccount(a, false);
+            return;
+          }
+          const isOnNetwork = await isOnXmtp(a);
+          setOnXmtp(isOnNetwork);
+          const inboxId = await getInboxId(a);
+          const v3Dbs = await getDatabaseFilesForInboxId(inboxId);
+          setAlreadyV3Db(v3Dbs.length > 0);
+          setSigner(thirdwebSigner);
+          setLoading(false);
+          logger.debug(
+            `[Onboarding] User connected wallet ${thirdwebWallet?.id} (${a}). ${
+              isOnNetwork ? "Already" : "Not yet"
+            } on XMTP. V3 database ${
+              v3Dbs.length > 0 ? "already" : "not"
+            } present`
           );
-          disconnect();
-          // At least activate said wallet so user can logout again
-          // but not be stuck
-          useAccountsStore.getState().setCurrentAccount(a, false);
-          return;
+        } catch (e) {
+          logger.error(e, { context: "Handling thirdweb signer" });
+          handlingThirdwebSigner.current = "";
         }
-        const isOnNetwork = await isOnXmtp(a);
-        setOnXmtp(isOnNetwork);
-        const inboxId = await getInboxId(a);
-        const v3Dbs = await getDatabaseFilesForInboxId(inboxId);
-        setAlreadyV3Db(v3Dbs.length > 0);
-        setSigner(thirdwebSigner);
-        setLoading(false);
-        logger.debug(
-          `[Onboarding] User connected wallet ${thirdwebWallet?.id} (${a}). ${
-            isOnNetwork ? "Already" : "Not yet"
-          } on XMTP. V3 database ${
-            v3Dbs.length > 0 ? "already" : "not"
-          } present`
-        );
       }
     })();
   }, [thirdwebSigner, setSigner, setLoading, disconnect, thirdwebWallet?.id]);
@@ -233,6 +265,7 @@ export default function ConnectViaWallet({
 
     try {
       logger.debug("[Onboarding] Connecting to XMTP using an external wallet");
+      inXmtpClientCreationFlow.current = true;
       const base64Key = await getXmtpBase64KeyFromSigner(
         signer,
         async () => {
@@ -292,9 +325,10 @@ export default function ConnectViaWallet({
           );
         }
       );
+      inXmtpClientCreationFlow.current = false;
       if (!base64Key) return;
       logger.debug("[Onboarding] Got base64 key, now connecting");
-      await connectWithBase64Key(base64Key);
+      await connectWithBase64Key(base64Key, disconnect);
       logger.info("[Onboarding] Successfully logged in using a wallet");
       onboardingDone = true;
     } catch (e) {
