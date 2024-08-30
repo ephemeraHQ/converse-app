@@ -31,6 +31,9 @@ export enum QueryKeys {
   GROUP_INVITE = "groupInvite",
   GROUP_JOIN_REQUEST = "groupJoinRequest",
   PENDING_JOIN_REQUESTS = "pendingJoinRequests",
+
+  // Profiles
+  PROFILE_SOCIALS = "profileSocials",
 }
 
 export const groupsQueryKey = (account: string) => [QueryKeys.GROUPS, account];
@@ -127,3 +130,8 @@ export const pendingJoinRequestsQueryKey = (account: string) => [
   QueryKeys.PENDING_JOIN_REQUESTS,
   account,
 ];
+
+export const profileSocialsQueryKey = (
+  account: string,
+  peerAddress: string
+) => [QueryKeys.PROFILE_SOCIALS, account, peerAddress];

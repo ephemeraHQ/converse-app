@@ -1,3 +1,4 @@
+import { setProfileSocialsQueryData } from "@queries/useProfileSocialsQuery";
 import { getCleanAddress } from "@utils/evm/address";
 
 import { getProfilesForAddresses } from "../../../utils/api";
@@ -31,7 +32,14 @@ export const updateProfilesForConvos = async (
         updatedAt: now,
       };
     }
-    getProfilesStore(account).getState().setProfiles(socialsToDispatch);
+    for (const peerAddress in socialsToDispatch) {
+      setProfileSocialsQueryData(
+        account,
+        peerAddress,
+        socialsToDispatch[peerAddress].socials,
+        socialsToDispatch[peerAddress].updatedAt
+      );
+    }
   }
 };
 
@@ -43,14 +51,7 @@ export const refreshProfileForAddress = async (
   const profilesByAddress = await getProfilesForAddresses([address]);
   // Save profiles to db
 
-  getProfilesStore(account)
-    .getState()
-    .setProfiles({
-      [address]: {
-        socials: profilesByAddress[address],
-        updatedAt: now,
-      },
-    });
+  setProfileSocialsQueryData(account, address, profilesByAddress[address], now);
 };
 
 export const refreshProfilesIfNeeded = async (account: string) => {
