@@ -1,5 +1,8 @@
 name: Build Internal
 
+permissions:
+  pull-requests: write
+
 on:
   schedule:
     # These will run only on the default branch
