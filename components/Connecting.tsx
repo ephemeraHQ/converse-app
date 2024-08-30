@@ -2,6 +2,7 @@ import { sentryTrackMessage } from "@utils/sentry";
 import { useEffect, useRef, useState } from "react";
 
 import ActivityIndicator from "./ActivityIndicator/ActivityIndicator";
+import { useEnableDebug } from "./DebugButton";
 import { useChatStore } from "../data/store/accountsStore";
 import { useAppStore } from "../data/store/appStore";
 import { useSelect } from "../data/store/storeHelpers";
@@ -11,6 +12,7 @@ export const useShouldShowConnecting = () => {
   const { localClientConnected, reconnecting } = useChatStore(
     useSelect(["localClientConnected", "reconnecting"])
   );
+  const enableDebug = useEnableDebug();
 
   const conditionTrueTime = useRef(0);
   const [warnMessage, setWarnMessage] = useState<string | null>(null);
@@ -31,12 +33,15 @@ export const useShouldShowConnecting = () => {
             reconnecting,
           });
 
-          if (!isInternetReachable) {
-            setWarnMessage("Waiting for network");
-          } else if (reconnecting) {
-            setWarnMessage("Reconnecting");
-          } else {
-            setWarnMessage("Syncing");
+          // Display warn messages for debug addresses only
+          if (enableDebug) {
+            if (!isInternetReachable) {
+              setWarnMessage("Waiting for network");
+            } else if (reconnecting) {
+              setWarnMessage("Reconnecting");
+            } else {
+              setWarnMessage("Syncing");
+            }
           }
 
           conditionTrueTime.current = 0;
@@ -52,7 +57,7 @@ export const useShouldShowConnecting = () => {
     }
 
     return () => clearInterval(interval);
-  }, [isInternetReachable, localClientConnected, reconnecting]);
+  }, [isInternetReachable, localClientConnected, reconnecting, enableDebug]);
 
   const shouldShow =
     !isInternetReachable || !localClientConnected || reconnecting;
