@@ -10,7 +10,6 @@ import { getDbEncryptionKey } from "@utils/keychain/helpers";
 import logger from "@utils/logger";
 import { Client } from "@xmtp/react-native-sdk";
 import { Signer } from "ethers";
-import { AppState } from "react-native";
 
 import { isClientInstallationValid } from "./client";
 import config from "../../config";
@@ -113,28 +112,6 @@ const revokeOtherInstallations = async (signer: Signer, client: Client) => {
     }
     logger.debug(
       `[Onboarding] User decided to revoke ${otherInstallations.length} installation`
-    );
-    /* On iOS, when we leave the app, it will automatically disconnect db
-    and might not reconect fast enough when coming back from that signature
-    and hit "Client error: storage error: Pool needs to  reconnect before use"
-    We should find a long term solution but in the meantime making sure we reconnect!
-    */
-    const reconnectWhenBackgrounded = AppState.addEventListener(
-      "change",
-      (state) => {
-        if (state.match(/inactive|background/)) {
-          reconnectWhenBackgrounded.remove();
-          // We don't really know when database will be disconnected so
-          // might as well try a few times...
-          client.reconnectLocalDatabase();
-          setTimeout(() => {
-            client.reconnectLocalDatabase();
-          }, 500);
-          setTimeout(() => {
-            client.reconnectLocalDatabase();
-          }, 1000);
-        }
-      }
     );
     await client.revokeAllOtherInstallations(signer);
     logger.debug(`[Onboarding] Installations revoked.`);

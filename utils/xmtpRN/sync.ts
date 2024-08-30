@@ -94,6 +94,7 @@ const onSyncLost = async (account: string, error: any) => {
         "Reconnecting XMTP Pool because it didn't reconnect automatically"
       );
       await reconnectXmtpClientsDbConnections();
+      logger.debug("Done reconnecting XMTP Pool");
     } else if (AppState.currentState === "background") {
       // This error is normal when backgrounded, fail silently
       // as reopening the app will launch a resync
