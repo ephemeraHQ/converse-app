@@ -312,6 +312,13 @@ const listGroups = async (client: ConverseXmtpClientType) => {
 
 export const importedTopicsDataForAccount: { [account: string]: boolean } = {};
 
+// Helper function to compare two sets
+function areSetsEqual(setA: Set<any>, setB: Set<any>): boolean {
+  if (setA.size !== setB.size) return false;
+  for (const a of setA) if (!setB.has(a)) return false;
+  return true;
+}
+
 export const loadConversations = async (
   account: string,
   knownTopics: string[]
@@ -327,13 +334,16 @@ export const loadConversations = async (
       listConversations(client),
       listGroups(client),
     ]);
+
+    const knownTopicsSet = new Set(knownTopics);
     const newConversations: ConversationWithCodecsType[] = [];
     const knownConversations: ConversationWithCodecsType[] = [];
+
     conversations.forEach((c) => {
-      if (!knownTopics.includes(c.topic)) {
-        newConversations.push(c);
-      } else {
+      if (knownTopicsSet.has(c.topic)) {
         knownConversations.push(c);
+      } else {
+        newConversations.push(c);
       }
     });
 
@@ -342,36 +352,35 @@ export const loadConversations = async (
     const updatedGroups: GroupWithCodecsType[] = [];
 
     groups.forEach((g) => {
-      if (!knownTopics.includes(g.topic)) {
+      if (!knownTopicsSet.has(g.topic)) {
         newGroups.push(g);
       } else {
         knownGroups.push(g);
-        const existingGroup = getChatStore(account).getState().conversations[
-          g.topic
-        ] as XmtpGroupConversation;
+        const existingGroup = getChatStore(account).getState().conversations[g.topic] as XmtpGroupConversation;
+        
         if (!existingGroup) {
           updatedGroups.push(g);
         } else {
-          // We check if the group need to be pushed again to Zustand & SQlite
-          // because only a few attributes can change after group creation
+          const currentMembersSet = new Set(existingGroup.groupMembers);
+          const newMembersSet = new Set(g.members.map((m) => m.addresses[0]));
+
           if (
             existingGroup.groupName !== g.name ||
             existingGroup.isActive !== g.isGroupActive ||
-            !arraysContainSameElements(
-              existingGroup.groupMembers,
-              g.members.map((m) => m.addresses[0])
-            )
+            !areSetsEqual(currentMembersSet, newMembersSet)
           ) {
             updatedGroups.push(g);
           }
         }
       }
     });
+
     logger.debug(
       `[XmtpRN] Listing ${conversations.length} conversations for ${
         client.address
       } took ${(new Date().getTime() - now) / 1000} seconds`
     );
+
     const conversationsToSave = newConversations.map(
       protocolConversationToStateConversation
     );
