@@ -689,9 +689,12 @@ const importBackedTopicsData = async (client: ConverseXmtpClientType) => {
       const importedConversations = await Promise.all(
         topicsData.map((data) => client.conversations.importTopicData(data))
       );
-      importedConversations.forEach((conversation) => {
-        setOpenedConversation(client.address, conversation);
-      });
+
+      const setOpenedPromises = importedConversations.map((conversation) =>
+        setOpenedConversation(client.address, conversation)
+      );
+      await Promise.all(setOpenedPromises);
+
       const afterImport = new Date().getTime();
       logger.debug(
         `[XmtpRN] Imported ${
