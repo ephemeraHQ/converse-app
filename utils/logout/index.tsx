@@ -28,7 +28,7 @@ import { deleteXmtpClient, getXmtpClient } from "../xmtpRN/sync";
 type LogoutTasks = {
   [account: string]: {
     topics: string[];
-    apiHeaders: { [key: string]: string };
+    apiHeaders: { [key: string]: string } | undefined;
     pkPath: string | undefined;
   };
 };
@@ -58,7 +58,7 @@ export const removeLogoutTask = (account: string) => {
 
 export const saveLogoutTask = (
   account: string,
-  apiHeaders: { [key: string]: string },
+  apiHeaders: { [key: string]: string } | undefined,
   topics: string[],
   pkPath: string | undefined
 ) => {
@@ -118,7 +118,9 @@ export const executeLogoutTasks = async () => {
       resetSharedData(task.topics || []);
       assertNotLogged(account);
       // This will fail if no connection (5sec timeout)
-      await unsubscribeFromNotifications(task.apiHeaders);
+      if (task.apiHeaders) {
+        await unsubscribeFromNotifications(task.apiHeaders);
+      }
       removeLogoutTask(account);
     } catch (e: any) {
       if (e.toString().includes("CONVERSE_ACCOUNT_LOGGED_IN")) {
@@ -144,12 +146,20 @@ export const useLogoutFromConverse = (account: string) => {
       );
       if (isV3Enabled) {
         // This clears the libxmtp sqlite database (v3 / groups)
-        const client = (await getXmtpClient(account)) as ConverseXmtpClientType;
-        await client.dropLocalDatabaseConnection();
-        logger.debug("[Logout] successfully dropped connection to libxmp db");
-        if (dropLocalDatabase) {
-          await client.deleteLocalDatabase();
-          logger.debug("[Logout] successfully deleted libxmp db");
+        try {
+          const client = (await getXmtpClient(
+            account
+          )) as ConverseXmtpClientType;
+          await client.dropLocalDatabaseConnection();
+          logger.debug("[Logout] successfully dropped connection to libxmp db");
+          if (dropLocalDatabase) {
+            await client.deleteLocalDatabase();
+            logger.debug("[Logout] successfully deleted libxmp db");
+          }
+        } catch (e) {
+          logger.error(e, {
+            context: "Could not get XMTP Client while logging out",
+          });
         }
       }
       await dropXmtpClient(await getInboxId(account));
@@ -171,7 +181,19 @@ export const useLogoutFromConverse = (account: string) => {
       // so we start with topics from this account and we'll remove topics we find in others
       const topicsToDelete = topicsByAccount[account];
       const pkPath = getWalletStore(account).getState().privateKeyPath;
-      const apiHeaders = await getXmtpApiHeaders(account);
+
+      let apiHeaders: { [key: string]: string } | undefined;
+
+      try {
+        apiHeaders = await getXmtpApiHeaders(account);
+      } catch (e) {
+        // If we have a broken client we might not be able
+        // to generate the headers
+        logger.error(e, {
+          context: "Could not get API headers while logging out",
+        });
+      }
+
       accounts.forEach((a) => {
         if (a !== account) {
           topicsByAccount[a].forEach((topic) => {
