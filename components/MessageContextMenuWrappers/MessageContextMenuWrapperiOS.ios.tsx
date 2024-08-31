@@ -122,7 +122,7 @@ const MessageContextMenuWrapperIOSInner: FC<
           : message.fromMe
           ? myMessageBubbleColor(colorScheme)
           : messageBubbleColor(colorScheme),
-        borderRadius: 18,
+        borderRadius: 16,
         previewSize: "INHERIT",
         previewType: "CUSTOM",
       }}
