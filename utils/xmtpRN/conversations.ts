@@ -2,10 +2,10 @@ import { entifyWithAddress } from "@queries/entify";
 import { setGroupDescriptionQueryData } from "@queries/useGroupDescriptionQuery";
 import { setGroupMembersQueryData } from "@queries/useGroupMembersQuery";
 import { setGroupQueryData } from "@queries/useGroupQuery";
-import { arraysContainSameElements } from "@utils/array";
 import { converseEventEmitter } from "@utils/events";
 import { getGroupIdFromTopic } from "@utils/groupUtils/groupId";
 import logger from "@utils/logger";
+import { areSetsEqual } from "@utils/set";
 import {
   ConsentListEntry,
   ConversationContext,
@@ -312,13 +312,6 @@ const listGroups = async (client: ConverseXmtpClientType) => {
 
 export const importedTopicsDataForAccount: { [account: string]: boolean } = {};
 
-// Helper function to compare two sets
-function areSetsEqual(setA: Set<any>, setB: Set<any>): boolean {
-  if (setA.size !== setB.size) return false;
-  for (const a of setA) if (!setB.has(a)) return false;
-  return true;
-}
-
 export const loadConversations = async (
   account: string,
   knownTopics: string[]
@@ -356,8 +349,10 @@ export const loadConversations = async (
         newGroups.push(g);
       } else {
         knownGroups.push(g);
-        const existingGroup = getChatStore(account).getState().conversations[g.topic] as XmtpGroupConversation;
-        
+        const existingGroup = getChatStore(account).getState().conversations[
+          g.topic
+        ] as XmtpGroupConversation;
+
         if (!existingGroup) {
           updatedGroups.push(g);
         } else {
@@ -699,10 +694,9 @@ const importBackedTopicsData = async (client: ConverseXmtpClientType) => {
         topicsData.map((data) => client.conversations.importTopicData(data))
       );
 
-      const setOpenedPromises = importedConversations.map((conversation) =>
-        setOpenedConversation(client.address, conversation)
-      );
-      await Promise.all(setOpenedPromises);
+      importedConversations.forEach((conversation) => {
+        setOpenedConversation(client.address, conversation);
+      });
 
       const afterImport = new Date().getTime();
       logger.debug(
