@@ -166,7 +166,7 @@ const useStyles = () => {
   const colorScheme = useColorScheme();
   return StyleSheet.create({
     imagePreview: {
-      borderRadius: 14,
+      borderRadius: 16,
       width: "100%",
       zIndex: 1,
       minWidth: Platform.OS === "web" ? 250 : undefined,
