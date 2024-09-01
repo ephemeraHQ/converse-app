@@ -16,9 +16,12 @@ export const EmojiRow: FC<EmojiRowProps> = ({ item, onPress }) => {
           onPress={() => onPress(emoji.emoji)}
           style={styles.pressable}
         >
-          <Text style={styles.listEmoji}>{emoji.emoji}</Text>
+          <Text adjustsFontSizeToFit style={styles.listEmoji}>
+            {emoji.emoji}
+          </Text>
         </Pressable>
       ))}
+      {item.emojis.length !== 6 && <View style={{ flexGrow: 1 }} />}
     </View>
   );
 };
@@ -31,10 +34,13 @@ const styles = StyleSheet.create({
   },
   rowContainer: {
     flexDirection: "row",
+    width: "100%",
   },
   pressable: {
-    width: "auto",
+    flex: 1,
     marginHorizontal: Platform.OS === "ios" ? 8 : 0,
     paddingHorizontal: Platform.OS === "android" ? 8 : 0,
+    justifyContent: "center",
+    alignItems: "center",
   },
 });
