@@ -1,3 +1,4 @@
+import { useDisconnectActionSheet } from "@hooks/useDisconnectActionSheet";
 import {
   itemSeparatorColor,
   messageBubbleColor,
@@ -8,29 +9,35 @@ import React, {
   Platform,
   StyleSheet,
   Text,
+  TouchableOpacity,
   useColorScheme,
   View,
 } from "react-native";
 
 export default function EphemeralAccountBanner() {
   const styles = useStyles();
+  const colorScheme = useColorScheme();
+  const showDisconnectActionSheet = useDisconnectActionSheet();
   return (
-    <View style={styles.demoAccountBanner}>
-      <View style={styles.demoAccountBannerLeft}>
-        <Text style={styles.demoAccountTitle}>This account is ephemeral</Text>
-        <Text style={styles.demoAccountSubtitle} numberOfLines={4}>
-          If you log out, you’ll lose all of your conversations. Log in with an
-          existing wallet when you’re ready.
+    <TouchableOpacity
+      onPress={() => showDisconnectActionSheet(colorScheme)}
+      style={styles.tempAccountBanner}
+    >
+      <View style={styles.tempAccountBannerLeft}>
+        <Text style={styles.tempAccountTitle}>This account is ephemeral</Text>
+        <Text style={styles.tempAccountSubtitle} numberOfLines={4}>
+          Disconnect to permanently remove your device from these conversations
+          and ensure deniability.
         </Text>
       </View>
-    </View>
+    </TouchableOpacity>
   );
 }
 
 const useStyles = () => {
   const colorScheme = useColorScheme();
   return StyleSheet.create({
-    demoAccountBanner: {
+    tempAccountBanner: {
       width: "100%",
       borderBottomColor: itemSeparatorColor(colorScheme),
       backgroundColor: messageBubbleColor(colorScheme),
@@ -41,7 +48,6 @@ const useStyles = () => {
       zIndex: 1000,
       ...Platform.select({
         default: {
-          marginTop: 12,
           marginBottom: 8,
           paddingVertical: 12,
           paddingLeft: 30,
@@ -49,11 +55,11 @@ const useStyles = () => {
         android: { paddingVertical: 14, paddingLeft: 16 },
       }),
     },
-    demoAccountBannerLeft: {
+    tempAccountBannerLeft: {
       flexShrink: 1,
       marginRight: 10,
     },
-    demoAccountTitle: {
+    tempAccountTitle: {
       color: textPrimaryColor(colorScheme),
       ...Platform.select({
         default: {
@@ -65,7 +71,7 @@ const useStyles = () => {
         },
       }),
     },
-    demoAccountSubtitle: {
+    tempAccountSubtitle: {
       fontSize: Platform.OS === "android" ? 14 : 15,
       color: textSecondaryColor(colorScheme),
       fontWeight: "400",

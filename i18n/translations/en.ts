@@ -64,7 +64,7 @@ const en = {
   camera: "Camera",
 
   disconnect: "Disconnect",
-  disconnect_delete_group_chats: "Disconnect and delete group chats",
+  disconnect_delete_local_data: "Disconnect and delete local data",
   disconnect_this_account: "Disconnect this account",
   disconnect_account_description:
     "Your group chats will be encrypted and saved on your device until you delete Converse. Your DMs will be backed up by the XMTP network.",
