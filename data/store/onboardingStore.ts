@@ -8,7 +8,8 @@ export type ConnectionMethod =
   | "wallet"
   | "phone"
   | "desktop"
-  | "seedPhrase";
+  | "privateKey"
+  | "ephemeral";
 
 export type OnboardingStep = "login" | "invite";
 

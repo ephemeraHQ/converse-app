@@ -1,12 +1,159 @@
 const en = {
   // Onboarding
-  sign: "Sign",
-  first_signature_explanation:
-    "This first signature will create your identity on the XMTP Network.\n\n",
-  second_signature_explanation:
-    "This signature will enable your identity on the XMTP Network.\n\n",
-  sign_access:
-    "Please sign one last time to access Converse and start chatting.",
+  walletSelector: {
+    title: "Your messages.\nYour privacy.",
+    subtitle: "Secure messages owned by you.\nNo phone numbers required.",
+    converseAccount: {
+      title: "CONVERSE ACCOUNT",
+      connectViaPhone: "Connect via Phone",
+      createEphemeral: "Create ephemeral account",
+    },
+    installedApps: {
+      title: "INSTALLED APPS",
+      connectWallet: "Connect {{walletName}}",
+    },
+    connectionOptions: {
+      title: "CONNECTION OPTIONS",
+      otherOptions: "OTHER OPTIONS",
+      connectExistingWallet: "CONNECT EXISTING WALLET",
+      connectViaBrowserWallet: "Connect via browser wallet",
+      connectViaDesktop: "Connect via desktop",
+      connectViaKey: "Connect via key",
+    },
+    popularMobileApps: {
+      title: "POPULAR MOBILE APPS",
+    },
+    cancel: "Cancel",
+  },
+  privyConnect: {
+    title: {
+      enterPhone: "Phone number",
+      verifyPhone: "Confirmation code",
+    },
+    subtitle:
+      "Connect an account with a phone number. Converse must save and share it with Privy so you can log back into this account on any app.",
+    buttons: {
+      continue: "Continue",
+      back: "Back",
+      resendCode: "Resend code",
+    },
+    phoneInput: {
+      placeholder: "Enter your phone number",
+    },
+    otpInput: {
+      enterCode: "Enter confirmation code sent to",
+    },
+    errors: {
+      invalidPhoneNumber: "Please enter a valid phone number",
+      invalidCode: "The code you entered is not valid, please try again",
+    },
+    resendCodeIn: "Resend code in {{seconds}} seconds...",
+  },
+  createEphemeral: {
+    title: "Create an ephemeral account",
+    subtitle:
+      "This account will be created with a new private key stored securely on your device.",
+    disconnect_to_remove:
+      "When you disconnect it, you'll permanently remove its data from your device.",
+    createButton: "Create",
+    backButton: "Back",
+  },
+  privateKeyConnect: {
+    title: "Connect via key",
+    subtitle:
+      "Please enter the private key for the address you are connecting.\n\nIt will only be stored locally in {{storage}}.",
+    storage: {
+      ios: "your iPhone's Secure Enclave",
+      android: "the Android Keystore system",
+    },
+    connectButton: "Connect",
+    backButton: "Back",
+    privateKeyPlaceholder: "Enter a private key",
+    termsText: "By signing in you agree to our",
+    termsLink: "terms and conditions.",
+    invalidPrivateKey: "This private key is invalid. Please try again",
+  },
+  connectViaWallet: {
+    sign: "Sign",
+    firstSignature: {
+      title: "Create your\nXMTP Inbox",
+      explanation:
+        "Converse is built on XMTP, an open-source secure messaging protocol.\n\n",
+    },
+    secondSignature: {
+      title: "Allow Converse",
+      explanation:
+        "Converse needs your permission to send and receive messages.\n\nYou can revoke this anytime.\n\n",
+    },
+    valueProps: {
+      e2eEncryption: {
+        title: "End-to-end encrypted with MLS",
+        subtitle:
+          "XMTP uses IETF-standard cryptography to deliver Signal-level security that scales.",
+      },
+      ownCommunications: {
+        title: "Own your communications — forever",
+        subtitle: "Never lose access to your messages.",
+      },
+      chatSecurely: {
+        title: "Chat securely with close contacts",
+        subtitle: "Find people onchain or share your private QR code.",
+      },
+    },
+    termsAndConditions: {
+      text: "By signing in you agree to our",
+      link: "terms and conditions.",
+    },
+    log_out_from: "Log out from",
+    alreadyConnected: {
+      title: "Already connected",
+      message: "This account is already connected to Converse.",
+    },
+  },
+  userProfile: {
+    title: {
+      profile: "Profile",
+    },
+    buttons: {
+      continue: "Continue",
+      logout: "Logout from {{address}}",
+      addProfilePicture: "Add profile picture",
+      changeProfilePicture: "Change profile picture",
+    },
+    inputs: {
+      username: {
+        placeholder: "Identity (.converse.xyz)",
+      },
+      displayName: {
+        placeholder: "Display name (optional)",
+      },
+    },
+    errors: {
+      displayNameLength:
+        "Display names must be between 2 and 32 characters and can't include domain name extensions",
+      usernameAlphanumeric:
+        "Your username can only contain letters and numbers",
+      usernameLength: "Your user name must be between 3 and 30 characters long",
+    },
+    converseProfiles:
+      "Claim your identity in the Converse ENS namespace. This name will be publicly discoverable.",
+    instructions:
+      "Claim your identity in the Converse ENS namespace. This name will be publicly discoverable.",
+    loadingSentences: {
+      claimingIdentity: "Claiming your identity",
+      connectingENS: "Connecting to ENS",
+      confirmingAvailability: "Confirming availability",
+      enablingCCIP: "Enabling CCIP",
+      registering: "Registering",
+      configuringResolver: "Configuring offchain resolver",
+      wrappingUp: "Wrapping up",
+    },
+    mediaOptions: {
+      takePhoto: "Take photo",
+      chooseFromLibrary: "Choose from library",
+      cancel: "Cancel",
+    },
+  },
   onboarding_error: "An error occurred while logging you in. Please try again.",
 
   // Conversation List
