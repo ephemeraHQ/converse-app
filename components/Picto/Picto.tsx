@@ -20,6 +20,7 @@ import ExpandMore from "@material-symbols/svg-400/outlined/expand_more.svg";
 import Group from "@material-symbols/svg-400/outlined/group.svg";
 import GroupAdd from "@material-symbols/svg-400/outlined/group_add-fill.svg";
 import Image from "@material-symbols/svg-400/outlined/image.svg";
+import Inbox from "@material-symbols/svg-400/outlined/inbox.svg";
 import Info from "@material-symbols/svg-400/outlined/info.svg";
 import IosShare from "@material-symbols/svg-400/outlined/ios_share.svg";
 import Key from "@material-symbols/svg-400/outlined/key.svg";
@@ -104,6 +105,7 @@ const pictoMapping: {
   "person.2": Group,
   "arrowshape.turn.up.left": Reply,
   "person.crop.circle.badge.plus": GroupAdd,
+  tray: Inbox,
 };
 
 export default function Picto({
