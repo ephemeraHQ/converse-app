@@ -55,9 +55,3 @@ export const useDisconnectActionSheet = () => {
     [logout, ephemeralAccount]
   );
 };
-
-export const showDeleteAccountActionSheet = async (
-  colorScheme: ColorSchemeName,
-  logout: (deleteLocalChats: boolean) => void,
-  ephemeralAccount: boolean
-) => {};
