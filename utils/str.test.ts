@@ -46,7 +46,7 @@ jest.mock("./profile", () => ({
 
 describe("shortAddress", () => {
   it("should shorten the address correctly", () => {
-    expect(shortAddress("0x1234567890abcdef")).toBe("0x12...cdef");
+    expect(shortAddress("0x1234567890abcdef")).toBe("0x1234...cdef");
   });
 
   it("should return the original address if shorter than 7 characters", () => {
@@ -118,7 +118,7 @@ describe("conversationName", () => {
       topic: "",
       peerAddress: "0x1234567890abcdef",
     } as unknown as XmtpConversation;
-    expect(conversationName(conversation)).toBe("0x12...cdef");
+    expect(conversationName(conversation)).toBe("0x1234...cdef");
   });
 
   it("should return the conversation title if provided", () => {
