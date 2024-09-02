@@ -18,10 +18,14 @@ export default function ShareProfileNav() {
       name="ShareProfile"
       component={ShareProfileScreen}
       options={{
-        headerTitle: "Your Converse link",
+        headerTitle: "",
         presentation: "modal",
+        headerShadowVisible: false,
         headerStyle: {
-          backgroundColor: navigationSecondaryBackgroundColor(colorScheme),
+          backgroundColor:
+            Platform.OS === "web"
+              ? navigationSecondaryBackgroundColor(colorScheme)
+              : undefined,
           borderBottomColor:
             Platform.OS === "web"
               ? listItemSeparatorColor(colorScheme)
