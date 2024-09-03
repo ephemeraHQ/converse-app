@@ -274,8 +274,8 @@ const useStyles = () => {
       flexDirection: "row",
       justifyContent: "space-between",
       alignItems: "center",
-      paddingTop: 6,
-      paddingBottom: 2,
+      paddingTop: 12,
+      paddingBottom: 8,
       paddingHorizontal: 16,
       ...Platform.select({
         default: {
