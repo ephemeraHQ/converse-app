@@ -40,11 +40,7 @@ const useStyles = () => {
   return StyleSheet.create({
     requestsHeader: {
       ...Platform.select({
-        default: {
-          paddingVertical: 8,
-        },
         android: {
-          paddingVertical: 12,
           paddingLeft: 24,
           paddingRight: 14,
         },
