@@ -289,10 +289,19 @@ export const stopStreamingGroups = async (account: string) => {
 };
 
 const listConversations = async (client: ConverseXmtpClientType) => {
+  const beforeList = new Date().getTime();
   const conversations = await client.conversations.list();
   conversations.forEach((c) => {
     setOpenedConversation(client.address, c);
   });
+  const afterList = new Date().getTime();
+  logger.debug(
+    `[XmtpRN] Listing ${
+      conversations.length
+    } 1:1 conversations from network took ${
+      (afterList - beforeList) / 1000
+    } sec`
+  );
 
   return conversations;
 };
@@ -325,7 +334,6 @@ export const loadConversations = async (
 ) => {
   try {
     const client = (await getXmtpClient(account)) as ConverseXmtpClientType;
-    const now = new Date().getTime();
     if (!importedTopicsDataForAccount[account]) {
       importedTopicsDataForAccount[account] = true;
       await importBackedTopicsData(client);
@@ -334,6 +342,8 @@ export const loadConversations = async (
       listConversations(client),
       listGroups(client),
     ]);
+
+    const beforeCompareGroups = new Date().getTime();
 
     const knownTopicsSet = new Set(knownTopics);
     const newConversations: ConversationWithCodecsType[] = [];
@@ -377,10 +387,12 @@ export const loadConversations = async (
       }
     });
 
+    const afterCompareGroups = new Date().getTime();
+
     logger.debug(
-      `[XmtpRN] Listing ${conversations.length} conversations for ${
-        client.address
-      } took ${(new Date().getTime() - now) / 1000} seconds`
+      `[XmtpRN] Handled new & updated groups for ${client.address} in ${
+        (afterCompareGroups - beforeCompareGroups) / 1000
+      } sec`
     );
 
     const conversationsToSave = newConversations.map(
@@ -392,6 +404,15 @@ export const loadConversations = async (
     const groupsToUpdate = updatedGroups.map((g) =>
       protocolGroupToStateConversation(account, g)
     );
+
+    const afterMappedConvos = new Date().getTime();
+
+    logger.debug(
+      `[XmtpRN] Mapped groups & conversations for ${client.address} in ${
+        (afterMappedConvos - afterCompareGroups) / 1000
+      } sec`
+    );
+
     saveConversations(client.address, [
       ...conversationsToSave,
       ...groupsToCreate,
