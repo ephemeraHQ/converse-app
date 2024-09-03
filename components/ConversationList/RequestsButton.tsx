@@ -1,16 +1,10 @@
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import {
-  clickedItemBackgroundColor,
-  listItemSeparatorColor,
-  primaryColor,
-  textPrimaryColor,
-  textSecondaryColor,
-} from "@styles/colors";
+import { actionSecondaryColor, requestsTextColor } from "@styles/colors";
 import {
   Platform,
+  Pressable,
   StyleSheet,
   Text,
-  TouchableHighlight,
   useColorScheme,
   View,
 } from "react-native";
@@ -22,21 +16,22 @@ type Props = { requestsCount: number } & NativeStackScreenProps<
   "Chats" | "ShareFrame" | "Blocked"
 >;
 export default function RequestsButton({ navigation, requestsCount }: Props) {
-  const colorScheme = useColorScheme();
   const styles = useStyles();
+
   return (
-    <TouchableHighlight
-      underlayColor={clickedItemBackgroundColor(colorScheme)}
+    <Pressable
       key="requests"
-      onPress={() => {
-        navigation.push("ChatsRequests");
-      }}
+      onPress={() => navigation.push("ChatsRequests")}
+      style={styles.requestsHeader}
     >
-      <View style={styles.requestsHeader}>
-        <Text style={styles.requestsHeaderTitle}>Requests</Text>
-        <Text style={styles.requestsCount}>{requestsCount}</Text>
-      </View>
-    </TouchableHighlight>
+      {({ pressed }) => (
+        <View>
+          <Text style={[styles.requestsCount, pressed && styles.pressedText]}>
+            Requests ({requestsCount})
+          </Text>
+        </View>
+      )}
+    </Pressable>
   );
 }
 
@@ -44,18 +39,9 @@ const useStyles = () => {
   const colorScheme = useColorScheme();
   return StyleSheet.create({
     requestsHeader: {
-      flexDirection: "row",
-      alignItems: "center",
       ...Platform.select({
         default: {
           paddingVertical: 8,
-          paddingRight: 8,
-          paddingLeft: 24,
-          height: 40,
-          borderBottomWidth: 0.25,
-          borderBottomColor: listItemSeparatorColor(colorScheme),
-          borderTopWidth: 0.25,
-          borderTopColor: listItemSeparatorColor(colorScheme),
         },
         android: {
           paddingVertical: 12,
@@ -64,35 +50,21 @@ const useStyles = () => {
         },
       }),
     },
-    requestsHeaderTitle: {
-      color: textPrimaryColor(colorScheme),
-      ...Platform.select({
-        default: {
-          fontSize: 17,
-          fontWeight: "600",
-          marginBottom: 3,
-          marginRight: 110,
-        },
-        android: {
-          fontSize: 16,
-        },
-      }),
-    },
     requestsCount: {
-      marginLeft: "auto",
-
+      fontWeight: "600",
+      color: requestsTextColor(colorScheme),
       ...Platform.select({
         default: {
-          marginRight: 16,
-          fontSize: 15,
-          color: textSecondaryColor(colorScheme),
+          fontSize: 14,
         },
         android: {
           marginRight: 1,
           fontSize: 11,
-          color: primaryColor(colorScheme),
         },
       }),
+    },
+    pressedText: {
+      color: actionSecondaryColor(colorScheme),
     },
   });
 };
