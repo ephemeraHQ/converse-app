@@ -1,4 +1,5 @@
 import Picto from "@components/Picto/Picto";
+import { useDisconnectActionSheet } from "@hooks/useDisconnectActionSheet";
 import { useShouldShowErrored } from "@hooks/useShouldShowErrored";
 import { translate } from "@i18n";
 import Clipboard from "@react-native-clipboard/clipboard";
@@ -61,7 +62,6 @@ import {
   getAddressIsAdmin,
   getAddressIsSuperAdmin,
 } from "../utils/groupUtils/adminUtils";
-import { useLogoutFromConverse } from "../utils/logout";
 import { navigate } from "../utils/navigation";
 import {
   NotificationPermissionStatus,
@@ -188,7 +188,7 @@ export default function ProfileScreen({
   ];
 
   const isPrivy = useLoggedWithPrivy();
-  const logout = useLogoutFromConverse(userAddress);
+  const showDisconnectActionSheet = useDisconnectActionSheet();
 
   const getSocialItemsFromArray = useCallback(
     <T,>(
@@ -296,39 +296,6 @@ export default function ProfileScreen({
       ),
     });
   }
-
-  const showDeleteAccountActionSheet = useCallback(async () => {
-    if (Platform.OS === "web") {
-      // Fixes double action sheet on web
-      await new Promise((r) => setTimeout(r, 100));
-    }
-    const methods = {
-      Disconnect: () => logout(false),
-      "Disconnect and delete group chats": () => logout(true),
-      Cancel: () => {},
-    };
-
-    const options = Object.keys(methods);
-
-    showActionSheetWithOptions(
-      {
-        options,
-        title: "Disconnect this account",
-        message:
-          "Your group chats will be encrypted and saved on your device until you delete Converse. Your DMs will be backed up by the XMTP network.",
-        cancelButtonIndex: options.indexOf("Cancel"),
-        destructiveButtonIndex: [1],
-        ...actionSheetColors(colorScheme),
-      },
-      (selectedIndex?: number) => {
-        if (selectedIndex === undefined) return;
-        const method = (methods as any)[options[selectedIndex]];
-        if (method) {
-          method();
-        }
-      }
-    );
-  }, [colorScheme, logout]);
 
   const actionsTableViewItems = useMemo(() => {
     const items: TableViewItemType[] = [];
@@ -796,7 +763,7 @@ export default function ProfileScreen({
                     : dangerColor(colorScheme),
                 action: () => {
                   setTimeout(() => {
-                    showDeleteAccountActionSheet();
+                    showDisconnectActionSheet(colorScheme);
                   }, 300);
                 },
               },

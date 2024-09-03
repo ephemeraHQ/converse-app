@@ -1,3 +1,4 @@
+import { useDisconnectActionSheet } from "@hooks/useDisconnectActionSheet";
 import { translate } from "@i18n";
 import Clipboard from "@react-native-clipboard/clipboard";
 import { NavigationProp } from "@react-navigation/native";
@@ -28,7 +29,6 @@ import {
 import { useAppStore } from "../data/store/appStore";
 import { useSelect } from "../data/store/storeHelpers";
 import { converseEventEmitter } from "../utils/events";
-import { useLogoutFromConverse } from "../utils/logout";
 import { navigate } from "../utils/navigation";
 import {
   NotificationPermissionStatus,
@@ -57,40 +57,8 @@ export default function AccountSettingsButton({ account, navigation }: Props) {
     useSelect(["setCurrentAccount"])
   );
   const erroredAccountsMap = useErroredAccountsMap();
-  const logout = useLogoutFromConverse(account);
   const colorScheme = useColorScheme();
-
-  const showDeleteAccountActionSheet = useCallback(async () => {
-    if (Platform.OS === "web") {
-      // Fixes double action sheet on web
-      await new Promise((r) => setTimeout(r, 100));
-    }
-    const methods = {
-      [translate("disconnect")]: () => logout(false),
-      [translate("disconnect_delete_group_chats")]: () => logout(true),
-      [translate("cancel")]: () => {},
-    };
-
-    const options = Object.keys(methods);
-
-    showActionSheetWithOptions(
-      {
-        options,
-        title: translate("disconnect_this_account"),
-        message: translate("disconnect_account_description"),
-        cancelButtonIndex: options.indexOf(translate("cancel")),
-        destructiveButtonIndex: [1],
-        ...actionSheetColors(colorScheme),
-      },
-      (selectedIndex?: number) => {
-        if (selectedIndex === undefined) return;
-        const method = (methods as any)[options[selectedIndex]];
-        if (method) {
-          method();
-        }
-      }
-    );
-  }, [colorScheme, logout]);
+  const showDisconnectActionSheet = useDisconnectActionSheet();
 
   const onPress = useCallback(() => {
     Keyboard.dismiss();
@@ -143,9 +111,8 @@ export default function AccountSettingsButton({ account, navigation }: Props) {
           );
         }
       },
-      [translate("disconnect_this_account")]: () => {
-        showDeleteAccountActionSheet();
-      },
+      [translate("disconnect_this_account")]: () =>
+        showDisconnectActionSheet(colorScheme),
       [translate("cancel")]: () => {},
     };
 
@@ -196,7 +163,7 @@ export default function AccountSettingsButton({ account, navigation }: Props) {
     setCurrentAccount,
     navigation,
     setNotificationsPermissionStatus,
-    showDeleteAccountActionSheet,
+    showDisconnectActionSheet,
   ]);
 
   return Platform.OS === "android" ? (
