@@ -13,7 +13,7 @@ export type GroupInviteNavParams = {
 };
 
 export const GroupInviteScreenConfig = {
-  path: "/groupInvite/:groupInviteId",
+  path: "/group-invite/:groupInviteId",
 };
 
 export default function GroupInviteNav() {
