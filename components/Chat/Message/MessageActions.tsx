@@ -69,6 +69,23 @@ export default function ChatMessageActions({
   const canAddReaction =
     message.status !== "sending" && message.status !== "error";
 
+  const tapGesture = useMemo(() => {
+    return Gesture.Tap()
+      .onStart(() => {
+        if (isAttachment) {
+          // Transfering attachment opening intent to component
+          converseEventEmitter.emit(
+            `openAttachmentForMessage-${message.id}` as const
+          );
+        }
+        if (isTransaction) {
+          // Transfering event to component
+          converseEventEmitter.emit(`showActionSheetForTxRef-${message.id}`);
+        }
+      })
+      .runOnJS(true);
+  }, [isAttachment, isTransaction, message]);
+
   const doubleTapGesture = useMemo(
     () =>
       Gesture.Tap()
@@ -96,10 +113,10 @@ export default function ChatMessageActions({
   const composed = useMemo(() => {
     // iOS Context Menu will handle the long press itself
     if (Platform.OS === "ios") {
-      return Gesture.Simultaneous(doubleTapGesture);
+      return Gesture.Simultaneous(tapGesture, doubleTapGesture);
     }
-    return Gesture.Simultaneous(doubleTapGesture, longPressGesture);
-  }, [doubleTapGesture, longPressGesture]);
+    return Gesture.Simultaneous(tapGesture, doubleTapGesture, longPressGesture);
+  }, [tapGesture, doubleTapGesture, longPressGesture]);
 
   const [selectedEmojis, setSelectedEmojis] = useState<string[]>([]);
   useEffect(() => {
@@ -281,24 +298,7 @@ export default function ChatMessageActions({
                         : 18,
                   },
                 }),
-                {
-                  // maxWidth: messageMaxWidth,
-                },
               ]}
-              onPress={() => {
-                if (isAttachment) {
-                  // Transfering attachment opening intent to component
-                  converseEventEmitter.emit(
-                    `openAttachmentForMessage-${message.id}` as const
-                  );
-                }
-                if (isTransaction) {
-                  // Transfering event to component
-                  converseEventEmitter.emit(
-                    `showActionSheetForTxRef-${message.id}`
-                  );
-                }
-              }}
             >
               <MessageContextMenuWrapperIOS
                 message={message}
@@ -347,7 +347,7 @@ const useStyles = () => {
       flexShrink: 1,
       flexGrow: 0,
       minHeight: 32,
-      borderRadius: 16,
+      borderRadius: 18,
     },
     messageBubbleMe: {
       marginLeft: "auto",
