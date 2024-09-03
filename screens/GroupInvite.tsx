@@ -212,8 +212,7 @@ const useStyles = () => {
     },
     cta: {
       marginTop: 20,
-      borderRadius: 8,
-      paddingVertical: 16,
+      borderRadius: 16,
       marginHorizontal: 4,
     },
   });
