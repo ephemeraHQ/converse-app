@@ -76,8 +76,8 @@ export const MessageContextMenuWrapper: FC<MessageContextMenuWrapperProps> = ({
     closeMenu();
   }, [message.content, message.contentFallback, closeMenu]);
 
-  const isFrame = isFrameMessage(message);
   const frameURL = useMemo(() => {
+    const isFrame = isFrameMessage(message);
     if (isFrame) {
       const frames = useFramesStore
         .getState()
@@ -85,7 +85,7 @@ export const MessageContextMenuWrapper: FC<MessageContextMenuWrapperProps> = ({
       return frames[0]?.url;
     }
     return null;
-  }, [isFrame, message.converseMetadata?.frames]);
+  }, [message]);
 
   const contextMenuItems = useMemo(() => {
     const items = [];
@@ -101,7 +101,7 @@ export const MessageContextMenuWrapper: FC<MessageContextMenuWrapperProps> = ({
         onPress: handleCopyMessage,
       });
     }
-    if (isFrame && frameURL) {
+    if (frameURL) {
       items.push({
         title: "Share",
         systemIcon: "square.and.arrow.up",
@@ -118,7 +118,6 @@ export const MessageContextMenuWrapper: FC<MessageContextMenuWrapperProps> = ({
     isTransaction,
     triggerReplyToMessage,
     handleCopyMessage,
-    isFrame,
     frameURL,
     closeMenu,
   ]);
