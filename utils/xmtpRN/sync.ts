@@ -152,7 +152,6 @@ export const syncXmtpClient = async (account: string) => {
   });
   try {
     const now = new Date().getTime();
-    updateConsentStatus(account);
     const { newConversations, groups, newGroups } = await loadConversations(
       account,
       knownTopics
@@ -208,6 +207,7 @@ export const syncXmtpClient = async (account: string) => {
         ]);
     }
     currentBackoff = INITIAL_BACKOFF;
+    await updateConsentStatus(account);
     logger.info(`[XmtpRN] Finished syncing ${account}`);
   } catch (e) {
     onSyncLost(account, e);

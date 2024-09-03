@@ -420,8 +420,19 @@ export const loadConversations = async (
 export const updateConsentStatus = async (account: string) => {
   try {
     const client = (await getXmtpClient(account)) as ConverseXmtpClientType;
+    const beforeFetch = new Date().getTime();
     const consentList = await client.contacts.refreshConsentList();
+    const afterFetch = new Date().getTime();
+    logger.debug(
+      `[Consent] Fetched consent state in ${
+        (afterFetch - beforeFetch) / 1000
+      } sec`
+    );
     await saveConsentState(consentList, client.address);
+    const afterSave = new Date().getTime();
+    logger.debug(
+      `[Consent] SAved consent state in ${(afterSave - afterFetch) / 1000} sec`
+    );
   } catch (error) {
     logger.error(error, { context: "Failed to update consent status:" });
   }
@@ -692,8 +703,14 @@ const retrieveTopicsData = async (
 
 const importBackedTopicsData = async (client: ConverseXmtpClientType) => {
   try {
-    const beforeImport = new Date().getTime();
+    const beforeRetrieve = new Date().getTime();
     const topicsData = Object.values(await retrieveTopicsData(client.address));
+    const beforeImport = new Date().getTime();
+    logger.debug(
+      `[XmtpRN] Retrieved ${topicsData.length} topic data from mmkv in ${
+        (beforeImport - beforeRetrieve) / 1000
+      } sec`
+    );
     // If we have topics for this account, let's import them
     // so the first conversation.list() is faster
     if (topicsData.length > 0) {
