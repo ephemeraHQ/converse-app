@@ -126,8 +126,21 @@ export default function ConversationRequestsListNav() {
     setSelectedSegment(index);
   };
 
+  const renderSegmentedController = () => {
+    if (likelyNotSpam.length > 0 && likelySpam.length > 0) {
+      return (
+        <RequestsSegmentedController
+          options={["You might know", "Spam"]}
+          selectedIndex={selectedSegment}
+          onSelect={handleSegmentChange}
+        />
+      );
+    }
+    return null;
+  };
+
   const renderSuggestionText = () => {
-    if (selectedSegment === 0 && likelyNotSpam.length > 0) {
+    if (likelyNotSpam.length > 0) {
       return (
         <Text style={styles.suggestionText}>
           Based on your onchain history, we've made some suggestions on who you
@@ -138,6 +151,44 @@ export default function ConversationRequestsListNav() {
     return null;
   };
 
+  const renderContent = (navigationProps: {
+    route: RouteProp<NavigationParamList, "ChatsRequests">;
+    navigation: any;
+  }) => {
+    if (likelyNotSpam.length === 0 && likelySpam.length === 0) {
+      return (
+        <View style={styles.emptyContainer}>
+          <Text style={styles.emptyText}>
+            No message requests at this time.
+          </Text>
+        </View>
+      );
+    }
+
+    if (likelyNotSpam.length === 0 && likelySpam.length > 0) {
+      return (
+        <>
+          <Text style={styles.spamOnlyText}>
+            You have some message requests that might be spam. Review them
+            carefully.
+          </Text>
+          <ConversationFlashList {...navigationProps} items={likelySpam} />
+        </>
+      );
+    }
+
+    return (
+      <>
+        {renderSegmentedController()}
+        {renderSuggestionText()}
+        <ConversationFlashList
+          {...navigationProps}
+          items={selectedSegment === 0 ? likelyNotSpam : likelySpam}
+        />
+      </>
+    );
+  };
+
   return (
     <NativeStack.Screen name="ChatsRequests" options={navigationOptions}>
       {(navigationProps) => {
@@ -146,16 +197,7 @@ export default function ConversationRequestsListNav() {
           <>
             <GestureHandlerRootView style={styles.root}>
               <View style={styles.container}>
-                <RequestsSegmentedController
-                  options={["You might know", "Spam"]}
-                  selectedIndex={selectedSegment}
-                  onSelect={handleSegmentChange}
-                />
-                {renderSuggestionText()}
-                <ConversationFlashList
-                  {...navigationProps}
-                  items={selectedSegment === 0 ? likelyNotSpam : likelySpam}
-                />
+                {renderContent(navigationProps)}
               </View>
             </GestureHandlerRootView>
           </>
@@ -193,6 +235,23 @@ const useStyles = () => {
     suggestionText: {
       fontSize: 14,
       color: textSecondaryColor(colorScheme),
+      textAlign: "center",
+      marginVertical: 8,
+      marginHorizontal: 16,
+    },
+    emptyContainer: {
+      flex: 1,
+      justifyContent: "center",
+      alignItems: "center",
+    },
+    emptyText: {
+      fontSize: 16,
+      color: "#666",
+      textAlign: "center",
+    },
+    spamOnlyText: {
+      fontSize: 14,
+      color: "#666",
       textAlign: "center",
       marginVertical: 8,
       marginHorizontal: 16,
