@@ -289,10 +289,19 @@ export const stopStreamingGroups = async (account: string) => {
 };
 
 const listConversations = async (client: ConverseXmtpClientType) => {
+  const beforeList = new Date().getTime();
   const conversations = await client.conversations.list();
   conversations.forEach((c) => {
     setOpenedConversation(client.address, c);
   });
+  const afterList = new Date().getTime();
+  logger.debug(
+    `[XmtpRN] Listing ${
+      conversations.length
+    } 1:1 conversations from network took ${
+      (afterList - beforeList) / 1000
+    } sec`
+  );
 
   return conversations;
 };
@@ -301,7 +310,14 @@ const listGroups = async (client: ConverseXmtpClientType) => {
   // @todo => this will be adapted once we have a syncAllGroups method
   await fetchGroupsQuery(client.address);
   // Resync process
+  const beforeSyncAll = new Date().getTime();
   await client.conversations.syncAllGroups();
+  const afterSyncAll = new Date().getTime();
+  logger.debug(
+    `[Groups] Syncing all groups took ${
+      (afterSyncAll - beforeSyncAll) / 1000
+    } sec`
+  );
   // Now that it's synced, let's refresh
   const updatedGroups = await fetchGroupsQuery(client.address, 0);
   return updatedGroups.ids.map((id) => {
@@ -318,7 +334,6 @@ export const loadConversations = async (
 ) => {
   try {
     const client = (await getXmtpClient(account)) as ConverseXmtpClientType;
-    const now = new Date().getTime();
     if (!importedTopicsDataForAccount[account]) {
       importedTopicsDataForAccount[account] = true;
       await importBackedTopicsData(client);
@@ -327,6 +342,8 @@ export const loadConversations = async (
       listConversations(client),
       listGroups(client),
     ]);
+
+    const beforeCompareGroups = new Date().getTime();
 
     const knownTopicsSet = new Set(knownTopics);
     const newConversations: ConversationWithCodecsType[] = [];
@@ -370,10 +387,12 @@ export const loadConversations = async (
       }
     });
 
+    const afterCompareGroups = new Date().getTime();
+
     logger.debug(
-      `[XmtpRN] Listing ${conversations.length} conversations for ${
-        client.address
-      } took ${(new Date().getTime() - now) / 1000} seconds`
+      `[XmtpRN] Handled new & updated groups for ${client.address} in ${
+        (afterCompareGroups - beforeCompareGroups) / 1000
+      } sec`
     );
 
     const conversationsToSave = newConversations.map(
@@ -385,6 +404,15 @@ export const loadConversations = async (
     const groupsToUpdate = updatedGroups.map((g) =>
       protocolGroupToStateConversation(account, g)
     );
+
+    const afterMappedConvos = new Date().getTime();
+
+    logger.debug(
+      `[XmtpRN] Mapped groups & conversations for ${client.address} in ${
+        (afterMappedConvos - afterCompareGroups) / 1000
+      } sec`
+    );
+
     saveConversations(client.address, [
       ...conversationsToSave,
       ...groupsToCreate,
@@ -413,8 +441,19 @@ export const loadConversations = async (
 export const updateConsentStatus = async (account: string) => {
   try {
     const client = (await getXmtpClient(account)) as ConverseXmtpClientType;
+    const beforeFetch = new Date().getTime();
     const consentList = await client.contacts.refreshConsentList();
+    const afterFetch = new Date().getTime();
+    logger.debug(
+      `[Consent] Fetched consent state in ${
+        (afterFetch - beforeFetch) / 1000
+      } sec`
+    );
     await saveConsentState(consentList, client.address);
+    const afterSave = new Date().getTime();
+    logger.debug(
+      `[Consent] SAved consent state in ${(afterSave - afterFetch) / 1000} sec`
+    );
   } catch (error) {
     logger.error(error, { context: "Failed to update consent status:" });
   }
@@ -635,8 +674,14 @@ export const refreshGroup = async (account: string, topic: string) => {
 
 export const loadConversationsHmacKeys = async (account: string) => {
   const client = (await getXmtpClient(account)) as ConverseXmtpClientType;
-
+  const before = new Date().getTime();
   const { hmacKeys } = await client.conversations.getHmacKeys();
+  const after = new Date().getTime();
+  logger.debug(
+    `[XmtpRn] Fetched ${Object.keys(hmacKeys).length} hmac keys in ${
+      (after - before) / 1000
+    } sec`
+  );
   return hmacKeys;
 };
 
@@ -685,8 +730,14 @@ const retrieveTopicsData = async (
 
 const importBackedTopicsData = async (client: ConverseXmtpClientType) => {
   try {
-    const beforeImport = new Date().getTime();
+    const beforeRetrieve = new Date().getTime();
     const topicsData = Object.values(await retrieveTopicsData(client.address));
+    const beforeImport = new Date().getTime();
+    logger.debug(
+      `[XmtpRN] Retrieved ${topicsData.length} topic data from mmkv in ${
+        (beforeImport - beforeRetrieve) / 1000
+      } sec`
+    );
     // If we have topics for this account, let's import them
     // so the first conversation.list() is faster
     if (topicsData.length > 0) {
