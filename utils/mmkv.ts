@@ -12,6 +12,9 @@ export default storage;
 
 export const zustandMMKVStorage: StateStorage = {
   setItem: (name, value) => {
+    // Deleting before setting to avoid memory leak
+    // https://github.com/mrousavy/react-native-mmkv/issues/440
+    storage.delete(name);
     return storage.set(name, value);
   },
   getItem: (name) => {
@@ -47,17 +50,22 @@ export const clearSecureMmkvForAccount = async (account: string) => {
   delete secureMmkvByAccount[account];
 };
 
+const reactQueryPersister = new MMKV({ id: "converse-react-query" });
+
 export const mmkvStoragePersister = createSyncStoragePersister({
   storage: {
     setItem: (key, value) => {
-      storage.set(key, value);
+      // Deleting before setting to avoid memory leak
+      // https://github.com/mrousavy/react-native-mmkv/issues/440
+      reactQueryPersister.delete(key);
+      reactQueryPersister.set(key, value);
     },
     getItem: (key) => {
-      const value = storage.getString(key);
+      const value = reactQueryPersister.getString(key);
       return value === undefined ? null : value;
     },
     removeItem: (key) => {
-      storage.delete(key);
+      reactQueryPersister.delete(key);
     },
   },
   serialize: stringify,
