@@ -39,7 +39,17 @@ const MessageContextMenuWrapperIOSInner: FC<
   );
   const isAttachment = isAttachmentMessage(message.contentType);
   const isTransaction = isTransactionMessage(message.contentType);
-  const isFrame = isFrameMessage(message);
+
+  const frameURL = useMemo(() => {
+    const isFrame = isFrameMessage(message);
+    if (isFrame) {
+      const frames = useFramesStore
+        .getState()
+        .getFramesForURLs(message.converseMetadata?.frames || []);
+      return frames[0]?.url;
+    }
+    return null;
+  }, [message]);
 
   const contextMenuItems = useMemo(() => {
     const items = [];
@@ -55,7 +65,7 @@ const MessageContextMenuWrapperIOSInner: FC<
         actionKey: ContextMenuActions.COPY_MESSAGE,
       });
     }
-    if (isFrame) {
+    if (frameURL) {
       items.push({
         title: "Share",
         systemIcon: "square.and.arrow.up",
@@ -64,17 +74,7 @@ const MessageContextMenuWrapperIOSInner: FC<
     }
 
     return items;
-  }, [isAttachment, isTransaction, isFrame]);
-
-  const frameURL = useMemo(() => {
-    if (isFrame) {
-      const frames = useFramesStore
-        .getState()
-        .getFramesForURLs(message.converseMetadata?.frames || []);
-      return frames[0]?.url;
-    }
-    return null;
-  }, [isFrame, message.converseMetadata?.frames]);
+  }, [isAttachment, isTransaction, frameURL]);
 
   const triggerReplyToMessage = useCallback(() => {
     converseEventEmitter.emit("triggerReplyToMessage", message);
@@ -95,7 +95,7 @@ const MessageContextMenuWrapperIOSInner: FC<
           }
           break;
         case ContextMenuActions.SHARE_FRAME:
-          if (isFrame && frameURL) {
+          if (frameURL) {
             navigate("ShareFrame", { frameURL });
           }
           break;
@@ -107,7 +107,6 @@ const MessageContextMenuWrapperIOSInner: FC<
       triggerReplyToMessage,
       message.content,
       message.contentFallback,
-      isFrame,
       frameURL,
     ]
   );
