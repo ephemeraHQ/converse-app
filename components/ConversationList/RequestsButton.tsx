@@ -58,6 +58,7 @@ const useStyles = () => {
       ...Platform.select({
         default: {
           fontSize: 14,
+          marginBottom: 3,
         },
         android: {
           marginRight: 1,
