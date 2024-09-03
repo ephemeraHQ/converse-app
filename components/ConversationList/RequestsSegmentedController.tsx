@@ -24,7 +24,6 @@ const RequestsSegmentedController: React.FC<SegmentedControllerProps> = ({
   selectedIndex,
   onSelect,
 }) => {
-  const colorScheme = useColorScheme();
   const styles = useStyles();
 
   return (

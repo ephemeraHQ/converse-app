@@ -4,6 +4,7 @@ import {
   actionSheetColors,
   backgroundColor,
   textPrimaryColor,
+  textSecondaryColor,
 } from "@styles/colors";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { Platform, StyleSheet, Text, useColorScheme, View } from "react-native";
@@ -125,6 +126,18 @@ export default function ConversationRequestsListNav() {
     setSelectedSegment(index);
   };
 
+  const renderSuggestionText = () => {
+    if (selectedSegment === 0 && likelyNotSpam.length > 0) {
+      return (
+        <Text style={styles.suggestionText}>
+          Based on your onchain history, we've made some suggestions on who you
+          may know.
+        </Text>
+      );
+    }
+    return null;
+  };
+
   return (
     <NativeStack.Screen name="ChatsRequests" options={navigationOptions}>
       {(navigationProps) => {
@@ -138,6 +151,7 @@ export default function ConversationRequestsListNav() {
                   selectedIndex={selectedSegment}
                   onSelect={handleSegmentChange}
                 />
+                {renderSuggestionText()}
                 <ConversationFlashList
                   {...navigationProps}
                   items={selectedSegment === 0 ? likelyNotSpam : likelySpam}
@@ -175,6 +189,13 @@ const useStyles = () => {
       ...Platform.select({
         android: { fontSize: 22, fontFamily: "Roboto" },
       }),
+    },
+    suggestionText: {
+      fontSize: 14,
+      color: textSecondaryColor(colorScheme),
+      textAlign: "center",
+      marginVertical: 8,
+      marginHorizontal: 16,
     },
   });
 };
