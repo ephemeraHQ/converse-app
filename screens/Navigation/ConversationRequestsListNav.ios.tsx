@@ -1,5 +1,5 @@
 import { RouteProp } from "@react-navigation/native";
-import { actionSheetColors, textPrimaryColor } from "@styles/colors";
+import { actionSheetColors, backgroundColor, textPrimaryColor } from "@styles/colors";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { Platform, StyleSheet, Text, useColorScheme, View } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
@@ -25,6 +25,7 @@ import {
   sortRequestsBySpamScore,
   updateConsentStatus,
 } from "../../utils/xmtpRN/conversations";
+import RequestsSegmentedController from "@components/ConversationList/RequestsSegmentedController";
 
 export default function ConversationRequestsListNav() {
   const sortedConversationsWithPreview = useChatStore(
@@ -35,7 +36,7 @@ export default function ConversationRequestsListNav() {
   const navRef = useRef<any>();
   const [clearingAll, setClearingAll] = useState(false);
 
-  const [isSpamToggleEnabled, setIsSpamToggleEnabled] = useState(false);
+  const [selectedSegment, setSelectedSegment] = useState(0);
   const allRequests = sortedConversationsWithPreview.conversationsRequests;
   const { likelySpam, likelyNotSpam } = sortRequestsBySpamScore(allRequests);
   const styles = useStyles();
@@ -107,10 +108,6 @@ export default function ConversationRequestsListNav() {
     [clearAllSpam, clearingAll, styles.headerContainer, styles.headerText]
   );
 
-  const handleSpamToggle = useCallback(() => {
-    setIsSpamToggleEnabled((prev) => !prev);
-  }, []);
-
   // Navigate back to the main screen when no request to display
   useEffect(() => {
     const unsubscribe = navRef.current?.addListener("focus", () => {
@@ -121,6 +118,10 @@ export default function ConversationRequestsListNav() {
     return unsubscribe;
   }, [allRequests]);
 
+  const handleSegmentChange = (index: number) => {
+    setSelectedSegment(index);
+  };
+
   return (
     <NativeStack.Screen name="ChatsRequests" options={navigationOptions}>
       {(navigationProps) => {
@@ -129,30 +130,14 @@ export default function ConversationRequestsListNav() {
           <>
             <GestureHandlerRootView style={styles.root}>
               <View style={styles.container}>
+                <RequestsSegmentedController
+                  options={["You might know", "Spam"]}
+                  selectedIndex={selectedSegment}
+                  onSelect={handleSegmentChange}
+                />
                 <ConversationFlashList
                   {...navigationProps}
-                  items={likelyNotSpam}
-                  ListFooterComponent={
-                    <View>
-                      {likelySpam.length ? (
-                        <SuspectedSpamButton
-                          spamCount={likelySpam.length}
-                          handlePress={handleSpamToggle}
-                          toggleActivated={isSpamToggleEnabled}
-                        />
-                      ) : (
-                        <></>
-                      )}
-                      {isSpamToggleEnabled ? (
-                        <ConversationFlashList
-                          {...navigationProps}
-                          items={likelySpam}
-                        />
-                      ) : (
-                        <></>
-                      )}
-                    </View>
-                  }
+                  items={selectedSegment === 0 ? likelyNotSpam : likelySpam}
                 />
               </View>
             </GestureHandlerRootView>
@@ -167,11 +152,12 @@ const useStyles = () => {
   const colorScheme = useColorScheme();
   return StyleSheet.create({
     container: {
+      paddingTop: 4,
       flex: 1,
     },
     root: {
       flex: 1,
-      backgroundColor: "red",
+      backgroundColor: backgroundColor(colorScheme),
     },
 
     headerContainer: {
