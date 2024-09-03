@@ -26,8 +26,14 @@ export default function RequestsButton({ navigation, requestsCount }: Props) {
     >
       {({ pressed }) => (
         <View>
-          <Text style={[styles.requestsCount, pressed && styles.pressedText]}>
-            Requests ({requestsCount})
+          <Text
+            style={[
+              styles.requestsCount,
+              requestsCount === 0 && styles.zeroRequests,
+              pressed && styles.pressedText,
+            ]}
+          >
+            {requestsCount === 0 ? "Requests" : `Requests (${requestsCount})`}
           </Text>
         </View>
       )}
@@ -58,6 +64,9 @@ const useStyles = () => {
           fontSize: 11,
         },
       }),
+    },
+    zeroRequests: {
+      color: actionSecondaryColor(colorScheme),
     },
     pressedText: {
       color: actionSecondaryColor(colorScheme),
