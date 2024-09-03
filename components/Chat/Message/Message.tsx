@@ -157,7 +157,10 @@ function ChatMessage({ message, colorScheme, isGroup, isFrame }: Props) {
   );
 
   const hideBackground =
-    !replyingToMessage && isAllEmojisAndMaxThree(message.content);
+    isAttachmentMessage(message.contentType) ||
+    (isContentType("text", message.contentType) &&
+      !replyingToMessage &&
+      isAllEmojisAndMaxThree(message.content));
 
   switch (contentType) {
     case "attachment":
@@ -208,7 +211,7 @@ function ChatMessage({ message, colorScheme, isGroup, isFrame }: Props) {
     }
   } else {
     if (isAttachment) {
-      messageMaxWidth = "70%";
+      messageMaxWidth = "60%";
     } else {
       if (isFrame) {
         messageMaxWidth = "100%";
@@ -232,6 +235,11 @@ function ChatMessage({ message, colorScheme, isGroup, isFrame }: Props) {
   }, [replyingToMessage?.senderAddress]);
 
   const hasReactions = Object.keys(reactions).length > 0;
+  const shouldShowOutsideReactionsMetaContainer =
+    isFrame ||
+    hasReactions ||
+    (message.fromMe &&
+      (message.status === "sending" || message.status === "prepared"));
 
   const swipeableRef = useRef<Swipeable | null>(null);
 
@@ -240,7 +248,7 @@ function ChatMessage({ message, colorScheme, isGroup, isFrame }: Props) {
       style={[
         styles.messageRow,
         {
-          marginBottom: showStatus ? 8 : 2,
+          marginBottom: showStatus ? 8 : 1,
         },
       ]}
     >
@@ -405,32 +413,34 @@ function ChatMessage({ message, colorScheme, isGroup, isFrame }: Props) {
                     )}
                   </ChatMessageActions>
                 </MessageContextMenuWrapper>
-                <View
-                  style={showReactionsOutside && styles.outsideMetaContainer}
-                >
-                  {isFrame && (
-                    <TouchableOpacity
-                      onPress={() => handleUrlPress(message.content)}
-                      delayLongPress={platformTouchableLongPressDelay}
-                      onLongPress={platformTouchableOnLongPress}
-                    >
-                      <Text style={styles.linkToFrame}>
-                        {getUrlToRender(message.content)}
-                      </Text>
-                    </TouchableOpacity>
-                  )}
-                  {showReactionsOutside && (
-                    <View style={styles.outsideReactionsContainer}>
-                      <ChatMessageReactions
-                        message={message}
-                        reactions={reactions}
-                      />
-                    </View>
-                  )}
-                  {message.fromMe && !hasReactions && (
-                    <MessageStatus message={message} />
-                  )}
-                </View>
+                {shouldShowOutsideReactionsMetaContainer && (
+                  <View
+                    style={showReactionsOutside && styles.outsideMetaContainer}
+                  >
+                    {isFrame && (
+                      <TouchableOpacity
+                        onPress={() => handleUrlPress(message.content)}
+                        delayLongPress={platformTouchableLongPressDelay}
+                        onLongPress={platformTouchableOnLongPress}
+                      >
+                        <Text style={styles.linkToFrame}>
+                          {getUrlToRender(message.content)}
+                        </Text>
+                      </TouchableOpacity>
+                    )}
+                    {showReactionsOutside && (
+                      <View style={styles.outsideReactionsContainer}>
+                        <ChatMessageReactions
+                          message={message}
+                          reactions={reactions}
+                        />
+                      </View>
+                    )}
+                    {message.fromMe && !hasReactions && (
+                      <MessageStatus message={message} />
+                    )}
+                  </View>
+                )}
               </View>
             </View>
           </View>
@@ -559,11 +569,12 @@ const useStyles = () => {
       paddingHorizontal: 0,
     },
     messageContentContainer: {
-      padding: 10,
+      paddingHorizontal: 13,
+      paddingVertical: 6,
     },
     messageText: {
       color: textPrimaryColor(colorScheme),
-      fontSize: 16,
+      fontSize: 17,
     },
     messageTextMe: {
       color: inversePrimaryColor(colorScheme),
@@ -596,7 +607,7 @@ const useStyles = () => {
       height: AvatarSizes.messageSender,
     },
     outsideMetaContainer: {
-      marginTop: 4,
+      marginVertical: 4,
       flexDirection: "row",
       justifyContent: "flex-start",
       columnGap: 8,
