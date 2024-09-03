@@ -214,6 +214,14 @@ export const dangerColor = (colorScheme: ColorSchemeName) => {
   return colorScheme === "dark" ? "#FF453A" : "#FF3B30";
 };
 
+const REQUESTS_TEXT_LIGHT = "rgba(126, 0, 204, 1)";
+const REQUESTS_TEXT_DARK = "rgba(126, 0, 204, 1)";
+
+export const requestsTextColor = (colorScheme: ColorSchemeName) => {
+  if (colorScheme === "dark") return REQUESTS_TEXT_DARK;
+  return REQUESTS_TEXT_LIGHT;
+};
+
 // Generated using https://callstack.github.io/react-native-paper/docs/guides/theming#theme-properties
 
 const MaterialLightColors = {

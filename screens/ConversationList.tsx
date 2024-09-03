@@ -1,7 +1,7 @@
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import {
   backgroundColor,
-  itemSeparatorColor,
+  listItemSeparatorColor,
   textPrimaryColor,
 } from "@styles/colors";
 import React, { useCallback, useEffect, useState } from "react";
@@ -166,24 +166,27 @@ function ConversationList({ navigation, route, searchBarRef }: Props) {
     ((Platform.OS === "ios" && searchBarFocused && !showNoResult) ||
       (Platform.OS === "android" && searchBarFocused)) &&
     !sharingMode;
-  if (showSearchTitleHeader) {
-    ListHeaderComponents.push(
-      <View key="search" style={styles.searchTitleContainer}>
-        <Text style={styles.searchTitle}>Chats</Text>
-      </View>
-    );
-  } else if (
-    sortedConversationsWithPreview.conversationsRequests.length > 0 &&
-    !sharingMode
-  ) {
-    ListHeaderComponents.push(
-      <RequestsButton
-        key="requests"
-        navigation={navigation}
-        route={route}
-        requestsCount={likelyNotSpam.length}
-      />
-    );
+
+  if (!sharingMode) {
+    if (sortedConversationsWithPreview.conversationsRequests.length > 0) {
+      ListHeaderComponents.push(
+        <View key="search" style={styles.headerTitleContainer}>
+          <Text style={styles.headerTitle}>Messages</Text>
+          <RequestsButton
+            key="requests"
+            navigation={navigation}
+            route={route}
+            requestsCount={likelyNotSpam.length}
+          />
+        </View>
+      );
+    } else {
+      ListHeaderComponents.push(
+        <View key="search" style={styles.headerTitleContainer}>
+          <Text style={styles.headerTitle}>Messages</Text>
+        </View>
+      );
+    }
   }
 
   let ListFooterComponent: React.ReactElement | undefined = undefined;
@@ -232,32 +235,34 @@ export default gestureHandlerRootHOC(ConversationList);
 const useStyles = () => {
   const colorScheme = useColorScheme();
   return StyleSheet.create({
-    searchTitleContainer: Platform.select({
-      default: {
-        padding: 10,
-        paddingLeft: 16,
-        backgroundColor: backgroundColor(colorScheme),
-        borderBottomColor: itemSeparatorColor(colorScheme),
-        borderBottomWidth: 0.5,
-      },
-      android: {
-        padding: 10,
-        paddingLeft: 16,
-        borderBottomWidth: 0,
-      },
-    }),
-    searchTitle: {
+    headerTitleContainer: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+      alignItems: "center",
+      paddingVertical: 4,
+      paddingHorizontal: 16,
       ...Platform.select({
         default: {
-          fontSize: 22,
-          fontWeight: "bold",
-          color: textPrimaryColor(colorScheme),
+          backgroundColor: backgroundColor(colorScheme),
+          borderTopWidth: 0.25,
+          borderTopColor: listItemSeparatorColor(colorScheme),
         },
         android: {
-          fontSize: 11,
-          textTransform: "uppercase",
-          fontWeight: "bold",
-          color: textPrimaryColor(colorScheme),
+          borderBottomWidth: 0,
+        },
+      }),
+    },
+    headerTitle: {
+      color: textPrimaryColor(colorScheme),
+      ...Platform.select({
+        default: {
+          fontSize: 16,
+          fontWeight: "600",
+          marginBottom: 3,
+          marginRight: 110,
+        },
+        android: {
+          fontSize: 16,
         },
       }),
     },
