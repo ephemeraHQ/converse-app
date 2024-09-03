@@ -653,8 +653,14 @@ export const refreshGroup = async (account: string, topic: string) => {
 
 export const loadConversationsHmacKeys = async (account: string) => {
   const client = (await getXmtpClient(account)) as ConverseXmtpClientType;
-
+  const before = new Date().getTime();
   const { hmacKeys } = await client.conversations.getHmacKeys();
+  const after = new Date().getTime();
+  logger.debug(
+    `[XmtpRn] Fetched ${Object.keys(hmacKeys).length} hmac keys in ${
+      (after - before) / 1000
+    } sec`
+  );
   return hmacKeys;
 };
 
