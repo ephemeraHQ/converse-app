@@ -1,6 +1,17 @@
-import { inversePrimaryColor, navigationSecondaryBackgroundColor, textPrimaryColor } from "@styles/colors";
+import {
+  tertiaryBackgroundColor,
+  textPrimaryColor,
+  BACKGROUND_LIGHT,
+  TEXT_PRIMARY_COLOR_LIGHT,
+} from "@styles/colors";
 import React from "react";
-import { View, Text, TouchableOpacity, StyleSheet, useColorScheme } from "react-native";
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  StyleSheet,
+  useColorScheme,
+} from "react-native";
 
 interface SegmentedControllerProps {
   options: string[];
@@ -8,7 +19,11 @@ interface SegmentedControllerProps {
   onSelect: (index: number) => void;
 }
 
-const RequestsSegmentedController: React.FC<SegmentedControllerProps> = ({ options, selectedIndex, onSelect }) => {
+const RequestsSegmentedController: React.FC<SegmentedControllerProps> = ({
+  options,
+  selectedIndex,
+  onSelect,
+}) => {
   const colorScheme = useColorScheme();
   const styles = useStyles();
 
@@ -25,7 +40,12 @@ const RequestsSegmentedController: React.FC<SegmentedControllerProps> = ({ optio
           ]}
           onPress={() => onSelect(index)}
         >
-          <Text style={[styles.optionText, index === selectedIndex && styles.selectedOptionText]}>
+          <Text
+            style={[
+              styles.optionText,
+              index === selectedIndex && styles.selectedOptionText,
+            ]}
+          >
             {option}
           </Text>
         </TouchableOpacity>
@@ -38,8 +58,8 @@ const useStyles = () => {
   const colorScheme = useColorScheme();
   return StyleSheet.create({
     container: {
-      flexDirection: 'row',
-      backgroundColor: navigationSecondaryBackgroundColor(colorScheme),
+      flexDirection: "row",
+      backgroundColor: tertiaryBackgroundColor(colorScheme),
       borderRadius: 8,
       padding: 2,
       marginHorizontal: 16,
@@ -48,11 +68,11 @@ const useStyles = () => {
     option: {
       flex: 1,
       paddingVertical: 8,
-      alignItems: 'center',
-      justifyContent: 'center',
+      alignItems: "center",
+      justifyContent: "center",
     },
     selectedOption: {
-      backgroundColor: 'white',
+      backgroundColor: BACKGROUND_LIGHT,
       borderRadius: 6,
     },
     firstOption: {
@@ -68,8 +88,8 @@ const useStyles = () => {
       color: textPrimaryColor(colorScheme),
     },
     selectedOptionText: {
-      fontWeight: 'bold',
-      color: inversePrimaryColor(colorScheme),
+      fontWeight: "bold",
+      color: TEXT_PRIMARY_COLOR_LIGHT,
     },
   });
 };

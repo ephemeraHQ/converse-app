@@ -1,5 +1,10 @@
+import RequestsSegmentedController from "@components/ConversationList/RequestsSegmentedController";
 import { RouteProp } from "@react-navigation/native";
-import { actionSheetColors, backgroundColor, textPrimaryColor } from "@styles/colors";
+import {
+  actionSheetColors,
+  backgroundColor,
+  textPrimaryColor,
+} from "@styles/colors";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { Platform, StyleSheet, Text, useColorScheme, View } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
@@ -14,7 +19,6 @@ import ActivityIndicator from "../../components/ActivityIndicator/ActivityIndica
 import AndroidBackAction from "../../components/AndroidBackAction";
 import Button from "../../components/Button/Button";
 import ConversationFlashList from "../../components/ConversationFlashList";
-import SuspectedSpamButton from "../../components/ConversationList/SuspectedSpamButton";
 import { showActionSheetWithOptions } from "../../components/StateHandlers/ActionSheetStateHandler";
 import {
   useChatStore,
@@ -25,7 +29,6 @@ import {
   sortRequestsBySpamScore,
   updateConsentStatus,
 } from "../../utils/xmtpRN/conversations";
-import RequestsSegmentedController from "@components/ConversationList/RequestsSegmentedController";
 
 export default function ConversationRequestsListNav() {
   const sortedConversationsWithPreview = useChatStore(
