@@ -2,10 +2,10 @@ import { entifyWithAddress } from "@queries/entify";
 import { setGroupDescriptionQueryData } from "@queries/useGroupDescriptionQuery";
 import { setGroupMembersQueryData } from "@queries/useGroupMembersQuery";
 import { setGroupQueryData } from "@queries/useGroupQuery";
-import { arraysContainSameElements } from "@utils/array";
 import { converseEventEmitter } from "@utils/events";
 import { getGroupIdFromTopic } from "@utils/groupUtils/groupId";
 import logger from "@utils/logger";
+import { areSetsEqual } from "@utils/set";
 import {
   ConsentListEntry,
   ConversationContext,
@@ -327,13 +327,16 @@ export const loadConversations = async (
       listConversations(client),
       listGroups(client),
     ]);
+
+    const knownTopicsSet = new Set(knownTopics);
     const newConversations: ConversationWithCodecsType[] = [];
     const knownConversations: ConversationWithCodecsType[] = [];
+
     conversations.forEach((c) => {
-      if (!knownTopics.includes(c.topic)) {
-        newConversations.push(c);
-      } else {
+      if (knownTopicsSet.has(c.topic)) {
         knownConversations.push(c);
+      } else {
+        newConversations.push(c);
       }
     });
 
@@ -342,36 +345,37 @@ export const loadConversations = async (
     const updatedGroups: GroupWithCodecsType[] = [];
 
     groups.forEach((g) => {
-      if (!knownTopics.includes(g.topic)) {
+      if (!knownTopicsSet.has(g.topic)) {
         newGroups.push(g);
       } else {
         knownGroups.push(g);
         const existingGroup = getChatStore(account).getState().conversations[
           g.topic
         ] as XmtpGroupConversation;
+
         if (!existingGroup) {
           updatedGroups.push(g);
         } else {
-          // We check if the group need to be pushed again to Zustand & SQlite
-          // because only a few attributes can change after group creation
+          const currentMembersSet = new Set(existingGroup.groupMembers);
+          const newMembersSet = new Set(g.members.map((m) => m.addresses[0]));
+
           if (
             existingGroup.groupName !== g.name ||
             existingGroup.isActive !== g.isGroupActive ||
-            !arraysContainSameElements(
-              existingGroup.groupMembers,
-              g.members.map((m) => m.addresses[0])
-            )
+            !areSetsEqual(currentMembersSet, newMembersSet)
           ) {
             updatedGroups.push(g);
           }
         }
       }
     });
+
     logger.debug(
       `[XmtpRN] Listing ${conversations.length} conversations for ${
         client.address
       } took ${(new Date().getTime() - now) / 1000} seconds`
     );
+
     const conversationsToSave = newConversations.map(
       protocolConversationToStateConversation
     );
@@ -689,9 +693,11 @@ const importBackedTopicsData = async (client: ConverseXmtpClientType) => {
       const importedConversations = await Promise.all(
         topicsData.map((data) => client.conversations.importTopicData(data))
       );
+
       importedConversations.forEach((conversation) => {
         setOpenedConversation(client.address, conversation);
       });
+
       const afterImport = new Date().getTime();
       logger.debug(
         `[XmtpRN] Imported ${
