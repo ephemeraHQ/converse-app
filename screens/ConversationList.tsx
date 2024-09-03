@@ -1,6 +1,7 @@
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import {
   backgroundColor,
+  itemSeparatorColor,
   listItemSeparatorColor,
   textPrimaryColor,
 } from "@styles/colors";
@@ -162,31 +163,39 @@ function ConversationList({ navigation, route, searchBarRef }: Props) {
       key="pinnedConversations"
     />,
   ];
+
   const showSearchTitleHeader =
     ((Platform.OS === "ios" && searchBarFocused && !showNoResult) ||
       (Platform.OS === "android" && searchBarFocused)) &&
     !sharingMode;
 
-  if (!sharingMode) {
-    if (sortedConversationsWithPreview.conversationsRequests.length > 0) {
-      ListHeaderComponents.push(
-        <View key="search" style={styles.headerTitleContainer}>
-          <Text style={styles.headerTitle}>Messages</Text>
-          <RequestsButton
-            key="requests"
-            navigation={navigation}
-            route={route}
-            requestsCount={likelyNotSpam.length}
-          />
-        </View>
-      );
-    } else {
-      ListHeaderComponents.push(
-        <View key="search" style={styles.headerTitleContainer}>
-          <Text style={styles.headerTitle}>Messages</Text>
-        </View>
-      );
-    }
+  if (showSearchTitleHeader) {
+    ListHeaderComponents.push(
+      <View key="search" style={styles.searchTitleContainer}>
+        <Text style={styles.searchTitle}>Messages</Text>
+      </View>
+    );
+  } else if (
+    sortedConversationsWithPreview.conversationsRequests.length > 0 &&
+    !sharingMode
+  ) {
+    ListHeaderComponents.push(
+      <View key="search" style={styles.headerTitleContainer}>
+        <Text style={styles.headerTitle}>Messages</Text>
+        <RequestsButton
+          key="requests"
+          navigation={navigation}
+          route={route}
+          requestsCount={likelyNotSpam.length}
+        />
+      </View>
+    );
+  } else if (!sharingMode) {
+    ListHeaderComponents.push(
+      <View key="search" style={styles.headerTitleContainer}>
+        <Text style={styles.headerTitle}>Messages</Text>
+      </View>
+    );
   }
 
   let ListFooterComponent: React.ReactElement | undefined = undefined;
@@ -235,11 +244,38 @@ export default gestureHandlerRootHOC(ConversationList);
 const useStyles = () => {
   const colorScheme = useColorScheme();
   return StyleSheet.create({
+    searchTitleContainer: Platform.select({
+      default: {
+        padding: 10,
+        paddingLeft: 16,
+        backgroundColor: backgroundColor(colorScheme),
+        borderBottomColor: itemSeparatorColor(colorScheme),
+        borderBottomWidth: 0.5,
+      },
+      android: {
+        padding: 10,
+        paddingLeft: 16,
+        borderBottomWidth: 0,
+      },
+    }),
+    searchTitle: {
+      ...Platform.select({
+        default: {
+          fontSize: 22,
+          fontWeight: "bold",
+          color: textPrimaryColor(colorScheme),
+        },
+        android: {
+          fontSize: 16,
+        },
+      }),
+    },
     headerTitleContainer: {
       flexDirection: "row",
       justifyContent: "space-between",
       alignItems: "center",
-      paddingVertical: 4,
+      paddingTop: 6,
+      paddingBottom: 2,
       paddingHorizontal: 16,
       ...Platform.select({
         default: {
