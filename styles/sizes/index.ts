@@ -11,6 +11,7 @@ export enum AvatarSizes {
   pinnedConversation = 80,
   messageReactor = 22,
   reactionsOverlay = 56,
+  shareProfile = 56,
 }
 
 export enum PictoSizes {
