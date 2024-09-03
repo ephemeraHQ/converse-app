@@ -301,7 +301,14 @@ const listGroups = async (client: ConverseXmtpClientType) => {
   // @todo => this will be adapted once we have a syncAllGroups method
   await fetchGroupsQuery(client.address);
   // Resync process
+  const beforeSyncAll = new Date().getTime();
   await client.conversations.syncAllGroups();
+  const afterSyncAll = new Date().getTime();
+  logger.debug(
+    `[Groups] Syncing all groups took ${
+      (afterSyncAll - beforeSyncAll) / 1000
+    } sec`
+  );
   // Now that it's synced, let's refresh
   const updatedGroups = await fetchGroupsQuery(client.address, 0);
   return updatedGroups.ids.map((id) => {
