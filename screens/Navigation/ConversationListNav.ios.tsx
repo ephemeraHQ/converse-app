@@ -115,6 +115,7 @@ export default function ConversationListNav() {
               variant="text"
               picto="qrcode"
               onPress={() => navigate("ShareProfile")}
+              hitSlop={8}
             />
             <View style={styles.offsetComposeIcon}>
               <NewConversationButton navigation={navigation} route={route} />
