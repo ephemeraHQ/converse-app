@@ -199,8 +199,15 @@ function ChatMessage({ message, colorScheme, isGroup, isFrame }: Props) {
   const isGroupUpdated = isContentType("groupUpdated", message.contentType);
 
   const reactions = useMemo(() => getMessageReactions(message), [message]);
-  const showInBubble = !isGroupUpdated;
-  const showReactionsOutside = isAttachment || isFrame || isTransaction;
+  const hasReactions = Object.keys(reactions).length > 0;
+  const isChatMessage = !isGroupUpdated;
+  const shouldShowReactionsOutside =
+    isChatMessage && (isAttachment || isFrame || isTransaction);
+  const shouldShowReactionsInside =
+    isChatMessage && !shouldShowReactionsOutside;
+  const shouldShowOutsideContentRow =
+    isChatMessage &&
+    (isTransaction || isFrame || (isAttachment && hasReactions));
 
   let messageMaxWidth: DimensionValue;
   if (isDesktop) {
@@ -234,13 +241,6 @@ function ChatMessage({ message, colorScheme, isGroup, isFrame }: Props) {
     );
   }, [replyingToMessage?.senderAddress]);
 
-  const hasReactions = Object.keys(reactions).length > 0;
-  const shouldShowOutsideReactionsMetaContainer =
-    isFrame ||
-    hasReactions ||
-    (message.fromMe &&
-      (message.status === "sending" || message.status === "prepared"));
-
   const swipeableRef = useRef<Swipeable | null>(null);
 
   return (
@@ -255,11 +255,8 @@ function ChatMessage({ message, colorScheme, isGroup, isFrame }: Props) {
       {message.dateChange && (
         <Text style={styles.date}>{getRelativeDate(message.sent)}</Text>
       )}
-      {isGroup && !message.fromMe && !showInBubble && !isGroupUpdated && (
-        <MessageSender message={message} />
-      )}
-      {!showInBubble && messageContent}
-      {showInBubble && (
+      {isGroupUpdated && messageContent}
+      {isChatMessage && (
         <Swipeable
           overshootLeft
           hitSlop={{ left: -20 }}
@@ -321,7 +318,7 @@ function ChatMessage({ message, colorScheme, isGroup, isFrame }: Props) {
               {isGroup &&
                 !message.fromMe &&
                 !message.hasPreviousMessageInSeries &&
-                showInBubble && <MessageSender message={message} />}
+                isChatMessage && <MessageSender message={message} />}
               <View
                 style={{
                   alignSelf: message.fromMe ? "flex-end" : "flex-start",
@@ -399,7 +396,7 @@ function ChatMessage({ message, colorScheme, isGroup, isFrame }: Props) {
                         <View>{messageContent}</View>
                       </View>
                     )}
-                    {!showReactionsOutside && (
+                    {shouldShowReactionsInside && (
                       <View
                         style={
                           hasReactions ? styles.reactionsContainer : { flex: 1 }
@@ -413,10 +410,8 @@ function ChatMessage({ message, colorScheme, isGroup, isFrame }: Props) {
                     )}
                   </ChatMessageActions>
                 </MessageContextMenuWrapper>
-                {shouldShowOutsideReactionsMetaContainer && (
-                  <View
-                    style={showReactionsOutside && styles.outsideMetaContainer}
-                  >
+                {shouldShowOutsideContentRow ? (
+                  <View style={styles.outsideContentRow}>
                     {isFrame && (
                       <TouchableOpacity
                         onPress={() => handleUrlPress(message.content)}
@@ -428,7 +423,7 @@ function ChatMessage({ message, colorScheme, isGroup, isFrame }: Props) {
                         </Text>
                       </TouchableOpacity>
                     )}
-                    {showReactionsOutside && (
+                    {shouldShowReactionsOutside && (
                       <View style={styles.outsideReactionsContainer}>
                         <ChatMessageReactions
                           message={message}
@@ -436,10 +431,13 @@ function ChatMessage({ message, colorScheme, isGroup, isFrame }: Props) {
                         />
                       </View>
                     )}
-                    {message.fromMe && !hasReactions && (
+                    {isFrame && message.fromMe && !hasReactions && (
                       <MessageStatus message={message} />
                     )}
                   </View>
+                ) : (
+                  message.fromMe &&
+                  !hasReactions && <MessageStatus message={message} />
                 )}
               </View>
             </View>
@@ -606,8 +604,8 @@ const useStyles = () => {
       width: AvatarSizes.messageSender,
       height: AvatarSizes.messageSender,
     },
-    outsideMetaContainer: {
-      marginVertical: 4,
+    outsideContentRow: {
+      marginTop: 1,
       flexDirection: "row",
       justifyContent: "flex-start",
       columnGap: 8,
