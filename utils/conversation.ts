@@ -9,7 +9,7 @@ import {
   isAttachmentMessage,
   fetchLocalAttachmentUrl,
 } from "./attachment/helpers";
-import { getAddressForPeer } from "./eth";
+import { getAddressForPeer } from "./evm/address";
 import { getGroupIdFromTopic } from "./groupUtils/groupId";
 import logger from "./logger";
 import { subscribeToNotifications } from "./notifications";

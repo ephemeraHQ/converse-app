@@ -759,6 +759,17 @@ export default function ProfileScreen({
                     : primaryColor(colorScheme),
               },
               {
+                id: "revokeOtherInstallations",
+                title: "Revoke other installations",
+                titleColor:
+                  Platform.OS === "android"
+                    ? undefined
+                    : primaryColor(colorScheme),
+                action: () => {
+                  console.log("YOYOOYUO");
+                },
+              },
+              {
                 id: "delete",
                 title: "Disconnect this account",
                 titleColor:
