@@ -6,6 +6,7 @@ import {
   rotateLoggingFile,
 } from "@utils/logger";
 import { navigate } from "@utils/navigation";
+import Share from "@utils/share";
 import { getNativeLogFile } from "@utils/xmtpRN/logs";
 import { getXmtpClient } from "@utils/xmtpRN/sync";
 import { Client } from "@xmtp/react-native-sdk";
@@ -15,7 +16,6 @@ import { Image } from "expo-image";
 import * as Updates from "expo-updates";
 import { forwardRef, useImperativeHandle } from "react";
 import { Platform, Alert } from "react-native";
-import Share from "react-native-share";
 
 import { showActionSheetWithOptions } from "./StateHandlers/ActionSheetStateHandler";
 import config from "../config";
