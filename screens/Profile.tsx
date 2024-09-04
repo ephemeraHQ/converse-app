@@ -14,11 +14,20 @@ import {
   textSecondaryColor,
 } from "@styles/colors";
 import { PictoSizes } from "@styles/sizes";
+import { waitUntilAppActive } from "@utils/appState";
+import { useExternalSigner } from "@utils/evm/external";
 import { memberCanUpdateGroup } from "@utils/groupUtils/memberCanUpdateGroup";
+import { ConverseXmtpClientType } from "@utils/xmtpRN/client";
+import {
+  getOtherInstallations,
+  revokeOtherInstallations,
+} from "@utils/xmtpRN/revoke";
+import { getXmtpClient } from "@utils/xmtpRN/sync";
 import Constants from "expo-constants";
 import * as Linking from "expo-linking";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import {
+  Alert,
   Platform,
   ScrollView,
   StyleSheet,
@@ -110,6 +119,7 @@ export default function ProfileScreen({
     groupTopic ?? ""
   );
   const isSplitScreen = useIsSplitScreen();
+  const { getExternalSigner, resetExternalSigner } = useExternalSigner();
 
   const insets = useSafeAreaInsets();
   const shouldShowError = useShouldShowErrored();
@@ -765,8 +775,44 @@ export default function ProfileScreen({
                   Platform.OS === "android"
                     ? undefined
                     : primaryColor(colorScheme),
-                action: () => {
-                  console.log("YOYOOYUO");
+                action: async () => {
+                  const client = (await getXmtpClient(
+                    userAddress
+                  )) as ConverseXmtpClientType;
+                  const otherInstallations = await getOtherInstallations(
+                    client
+                  );
+                  if (otherInstallations.length === 0) {
+                    Alert.alert(
+                      translate("revoke_done_title"),
+                      translate("revoke_empty")
+                    );
+                    return;
+                  }
+                  const signer = await getExternalSigner();
+                  const address = await signer.getAddress();
+                  if (address.toLowerCase() !== userAddress.toLowerCase()) {
+                    Alert.alert(
+                      translate("xmtp_wrong_signer"),
+                      translate("xmtp_wrong_signer_description")
+                    );
+                    resetExternalSigner();
+                    return;
+                  }
+                  await waitUntilAppActive(500);
+                  const revoked = await revokeOtherInstallations(
+                    signer,
+                    client,
+                    otherInstallations.length
+                  );
+                  if (revoked) {
+                    Alert.alert(
+                      translate("revoke_done_title"),
+                      translate("revoke_done_description", {
+                        count: otherInstallations.length,
+                      })
+                    );
+                  }
                 },
               },
               {

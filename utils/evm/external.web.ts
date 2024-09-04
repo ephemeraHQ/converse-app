@@ -6,7 +6,7 @@ import {
 import { ethers } from "ethers";
 import { useCallback, useEffect, useRef } from "react";
 
-export const useExternalProvider = () => {
+export const useExternalSigner = () => {
   const { walletProvider } = useWeb3ModalProvider();
 
   const currentWalletProvider = useRef(walletProvider);
@@ -20,9 +20,11 @@ export const useExternalProvider = () => {
     currentWeb3ModalOpen.current = isWeb3ModalOpen;
   }, [isWeb3ModalOpen]);
 
-  const getExternalProvider = useCallback(async () => {
+  const getExternalSigner = useCallback(async () => {
     if (currentWalletProvider.current) {
-      return new ethers.providers.Web3Provider(currentWalletProvider.current);
+      return new ethers.providers.Web3Provider(
+        currentWalletProvider.current
+      ).getSigner();
     }
     await openWeb3Modal();
     while (!currentWeb3ModalOpen.current) {
@@ -39,9 +41,16 @@ export const useExternalProvider = () => {
       i += 1;
     }
     if (currentWalletProvider.current) {
-      return new ethers.providers.Web3Provider(currentWalletProvider.current);
+      return new ethers.providers.Web3Provider(
+        currentWalletProvider.current
+      ).getSigner();
     }
     return undefined;
   }, [openWeb3Modal]);
-  return { getExternalProvider };
+
+  const resetExternalSigner = useCallback(() => {
+    currentWalletProvider.current = undefined;
+  }, []);
+
+  return { getExternalSigner, resetExternalSigner };
 };
