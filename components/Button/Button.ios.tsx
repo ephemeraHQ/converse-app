@@ -29,6 +29,7 @@ type Props = {
   allowFontScaling?: boolean;
   picto?: string;
   numberOfLines?: number;
+  hitSlop?: number;
 };
 
 export default function Button({
@@ -40,6 +41,7 @@ export default function Button({
   picto,
   allowFontScaling = true,
   numberOfLines,
+  hitSlop,
 }: Props) {
   const colorScheme = useColorScheme();
   const styles = useStyles();
@@ -62,7 +64,11 @@ export default function Button({
       ? [styles.buttonGreyText]
       : [styles.buttonTextText];
   return (
-    <TouchableOpacity style={[...buttonStyle, style]} onPress={onPress}>
+    <TouchableOpacity
+      style={[...buttonStyle, style]}
+      onPress={onPress}
+      hitSlop={hitSlop}
+    >
       {picto && (
         <Picto
           picto={picto}
