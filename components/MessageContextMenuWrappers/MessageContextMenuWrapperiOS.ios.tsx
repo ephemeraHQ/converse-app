@@ -1,11 +1,14 @@
 import { MessageToDisplay } from "@components/Chat/Message/Message";
 import { MessageReactionsList } from "@components/Chat/Message/MessageReactionsList";
 import { useAppStore } from "@data/store/appStore";
+import { useFramesStore } from "@data/store/framesStore"; // Add this import
 import { useSelect } from "@data/store/storeHelpers";
 import Clipboard from "@react-native-clipboard/clipboard";
 import { messageBubbleColor, myMessageBubbleColor } from "@styles/colors";
 import { isAttachmentMessage } from "@utils/attachment/helpers";
 import { converseEventEmitter } from "@utils/events";
+import { isFrameMessage } from "@utils/frames"; // Add this import
+import { navigate } from "@utils/navigation";
 import { MessageReaction } from "@utils/reactions";
 import { isTransactionMessage } from "@utils/transaction";
 import React, { FC, useCallback, useMemo, useRef } from "react";
@@ -14,7 +17,8 @@ import { ContextMenuView } from "react-native-ios-context-menu";
 
 enum ContextMenuActions {
   REPLY = "Reply",
-  COPY_MESSAGE = "Copy message",
+  COPY_MESSAGE = "Copy",
+  SHARE_FRAME = "Share",
 }
 
 interface MessageContextMenuWrapperIOSProps {
@@ -36,6 +40,17 @@ const MessageContextMenuWrapperIOSInner: FC<
   const isAttachment = isAttachmentMessage(message.contentType);
   const isTransaction = isTransactionMessage(message.contentType);
 
+  const frameURL = useMemo(() => {
+    const isFrame = isFrameMessage(message);
+    if (isFrame) {
+      const frames = useFramesStore
+        .getState()
+        .getFramesForURLs(message.converseMetadata?.frames || []);
+      return frames[0]?.url;
+    }
+    return null;
+  }, [message]);
+
   const contextMenuItems = useMemo(() => {
     const items = [];
     items.push({
@@ -45,14 +60,22 @@ const MessageContextMenuWrapperIOSInner: FC<
     });
     if (!isAttachment && !isTransaction) {
       items.push({
-        title: "Copy message",
+        title: "Copy",
         systemIcon: "doc.on.doc",
         actionKey: ContextMenuActions.COPY_MESSAGE,
       });
     }
+    if (frameURL) {
+      items.push({
+        title: "Share",
+        systemIcon: "square.and.arrow.up",
+        actionKey: ContextMenuActions.SHARE_FRAME,
+      });
+    }
 
     return items;
-  }, [isAttachment, isTransaction]);
+  }, [isAttachment, isTransaction, frameURL]);
+
   const triggerReplyToMessage = useCallback(() => {
     converseEventEmitter.emit("triggerReplyToMessage", message);
   }, [message]);
@@ -71,6 +94,11 @@ const MessageContextMenuWrapperIOSInner: FC<
             Clipboard.setString(message.contentFallback);
           }
           break;
+        case ContextMenuActions.SHARE_FRAME:
+          if (frameURL) {
+            navigate("ShareFrame", { frameURL });
+          }
+          break;
       }
       setContextMenuShown(null);
     },
@@ -79,6 +107,7 @@ const MessageContextMenuWrapperIOSInner: FC<
       triggerReplyToMessage,
       message.content,
       message.contentFallback,
+      frameURL,
     ]
   );
 

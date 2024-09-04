@@ -263,3 +263,12 @@ export const handleTxAction = async (
   }
   return { buttonPostUrl, txHash };
 };
+
+export const isFrameMessage = (message: MessageToDisplay): boolean => {
+  const framesStore = useFramesStore.getState().frames;
+  return (
+    isContentType("text", message.contentType) &&
+    !!message.converseMetadata?.frames?.[0] &&
+    !!framesStore[message.converseMetadata.frames[0].toLowerCase()]
+  );
+};
