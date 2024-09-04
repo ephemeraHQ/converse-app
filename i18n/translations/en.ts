@@ -228,6 +228,9 @@ const en = {
   youre_the_og: "YOU'RE THE OG",
   app_version: "APP VERSION",
   security: "SECURITY",
+  xmtp_wrong_signer: "Wrong wallet",
+  xmtp_wrong_signer_description:
+    "Please connect the wallet that owns this XMTP account",
 
   // Context Menu
   reply: "Reply",
@@ -293,7 +296,10 @@ const en = {
   current_installation_revoked_description:
     "The current installation has been revoked, you will now get logged out and group chats will be deleted",
   other_installations_count: "You have {{count}} other installations",
-  temporary_revoke_description: "Can we revoke those installations now?",
+  revoke_description: "Can we revoke those installations now?",
+  revoke_done_title: "Done",
+  revoke_done_description: "{{count}} other installations successfully revoked",
+  revoke_empty: "You have no other installations",
 
   // Emoji Picker
   search_emojis: "Search emojis",
