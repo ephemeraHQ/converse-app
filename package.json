@@ -58,6 +58,7 @@
     "@sentry/react-native": "^5.24.1",
     "@shopify/flash-list": "1.6.4",
     "@stardazed/streams-polyfill": "^2.4.0",
+    "@tanstack/query-persist-client-core": "^5.54.1",
     "@tanstack/query-sync-storage-persister": "^5.45.0",
     "@tanstack/react-query": "^5.45.0",
     "@tanstack/react-query-persist-client": "^5.45.0",
