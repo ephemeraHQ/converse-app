@@ -61,12 +61,14 @@ const useStyles = () => {
       backgroundColor: tertiaryBackgroundColor(colorScheme),
       borderRadius: 8,
       padding: 2,
+      height: 32,
+      marginTop: 10,
+      marginBottom: 2,
       marginHorizontal: 16,
-      marginVertical: 8,
     },
     option: {
       flex: 1,
-      paddingVertical: 8,
+      paddingVertical: 6,
       alignItems: "center",
       justifyContent: "center",
     },
@@ -83,11 +85,11 @@ const useStyles = () => {
       borderBottomRightRadius: 6,
     },
     optionText: {
-      fontSize: 14,
+      fontSize: 13,
       color: textPrimaryColor(colorScheme),
     },
     selectedOptionText: {
-      fontWeight: "bold",
+      fontWeight: "500",
       color: TEXT_PRIMARY_COLOR_LIGHT,
     },
   });

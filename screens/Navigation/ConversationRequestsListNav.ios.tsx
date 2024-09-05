@@ -218,7 +218,6 @@ const useStyles = () => {
       flex: 1,
       backgroundColor: backgroundColor(colorScheme),
     },
-
     headerContainer: {
       flexDirection: "row",
       alignItems: "center",
@@ -233,10 +232,11 @@ const useStyles = () => {
       }),
     },
     suggestionText: {
-      fontSize: 14,
+      fontSize: 12,
       color: textSecondaryColor(colorScheme),
       textAlign: "center",
-      marginVertical: 8,
+      marginTop: 14,
+      marginBottom: 10,
       marginHorizontal: 16,
     },
     emptyContainer: {
@@ -245,15 +245,16 @@ const useStyles = () => {
       alignItems: "center",
     },
     emptyText: {
-      fontSize: 16,
-      color: "#666",
+      fontSize: 12,
+      color: textSecondaryColor(colorScheme),
       textAlign: "center",
     },
     spamOnlyText: {
-      fontSize: 14,
-      color: "#666",
+      fontSize: 12,
+      color: textSecondaryColor(colorScheme),
       textAlign: "center",
-      marginVertical: 8,
+      marginTop: 14,
+      marginBottom: 10,
       marginHorizontal: 16,
     },
   });
