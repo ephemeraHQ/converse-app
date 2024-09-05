@@ -41,3 +41,5 @@ export const isOnXmtp = async (address: string) =>
 export const dropXmtpClientsDbConnections = async () => {};
 
 export const reconnectXmtpClientsDbConnections = async () => {};
+
+export const useCheckCurrentInstallation = () => {};
