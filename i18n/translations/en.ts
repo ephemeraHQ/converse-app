@@ -2,7 +2,7 @@ const en = {
   // Onboarding
   walletSelector: {
     title: "Your messages.\nYour privacy.",
-    subtitle: "Secure messages owned by you.\nNo phone numbers required.",
+    subtitle: "Decentralized messaging,\nsecure and owned by you.",
     converseAccount: {
       title: "CONVERSE ACCOUNT",
       connectViaPhone: "Connect via Phone",
@@ -31,7 +31,7 @@ const en = {
       verifyPhone: "Confirmation code",
     },
     subtitle:
-      "Connect an account with a phone number. Converse must save and share it with Privy so you can log back into this account on any app.",
+      "Your phone number will own your Converse wallet address and identity. It is stored securely and never visible to others.",
     buttons: {
       continue: "Continue",
       back: "Back",
@@ -52,9 +52,9 @@ const en = {
   createEphemeral: {
     title: "Create an ephemeral account",
     subtitle:
-      "This account will be created with a new private key stored securely on your device.",
+      "Create conversations, connections, and relationships without sharing your identity, and stay connected without sharing personal data.",
     disconnect_to_remove:
-      "When you disconnect it, you'll permanently remove its data from your device.",
+      "When you disconnect this account, you'll permanently remove its data from your device.",
     createButton: "Create",
     backButton: "Back",
   },
@@ -74,11 +74,11 @@ const en = {
     invalidPrivateKey: "This private key is invalid. Please try again",
   },
   connectViaWallet: {
-    sign: "Sign",
+    sign: "Sign to create",
     firstSignature: {
-      title: "Create your\nXMTP Inbox",
+      title: "Get started",
       explanation:
-        "Converse is built on XMTP, an open-source secure messaging protocol.\n\n",
+        "The secure inbox you own.\nConverse is built on XMTP, an open-source secure messaging protocol.\n\n",
     },
     secondSignature: {
       title: "Allow Converse",
@@ -89,14 +89,14 @@ const en = {
       e2eEncryption: {
         title: "End-to-end encrypted with MLS",
         subtitle:
-          "XMTP uses IETF-standard cryptography to deliver Signal-level security that scales.",
+          "XMTP uses IETF-standard cryptography to enhance every conversation with Signal-level security.",
       },
       ownCommunications: {
         title: "Own your communications — forever",
-        subtitle: "Never lose access to your messages.",
+        subtitle: "You own your messages, not the app.",
       },
       chatSecurely: {
-        title: "Chat securely with close contacts",
+        title: "Invite your friends",
         subtitle: "Find people onchain or share your private QR code.",
       },
     },
