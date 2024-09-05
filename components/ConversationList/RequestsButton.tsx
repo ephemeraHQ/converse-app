@@ -1,5 +1,9 @@
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import { actionSecondaryColor, requestsTextColor } from "@styles/colors";
+import {
+  actionSecondaryColor,
+  requestsTextColor,
+  textSecondaryColor,
+} from "@styles/colors";
 import {
   Platform,
   Pressable,
@@ -53,7 +57,7 @@ const useStyles = () => {
       }),
     },
     requestsCount: {
-      fontWeight: "600",
+      fontWeight: "500",
       color: requestsTextColor(colorScheme),
       ...Platform.select({
         default: {
@@ -67,7 +71,7 @@ const useStyles = () => {
       }),
     },
     zeroRequests: {
-      color: actionSecondaryColor(colorScheme),
+      color: textSecondaryColor(colorScheme),
     },
     pressedText: {
       color: actionSecondaryColor(colorScheme),
