@@ -24,6 +24,9 @@ export const getConverseStateFromPath = (path: string, options: any) => {
   } else if (pathForState.startsWith("dm/")) {
     const peer = pathForState.slice(3).trim().toLowerCase();
     pathForState = `conversation?mainConversationWithPeer=${peer}&focus=true`;
+  } else if (pathForState.startsWith("groupInvite")) {
+    // TODO: Remove this once enough users have updated (September 30, 2024)
+    pathForState = pathForState.replace("groupInvite", "group-invite");
   }
   const state = getStateFromPath(pathForState, options);
   return state;
