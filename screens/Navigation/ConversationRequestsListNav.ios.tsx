@@ -121,30 +121,22 @@ export default function ConversationRequestsListNav() {
     return unsubscribe;
   }, [allRequests]);
 
+  const hasLikelyNotSpam = likelyNotSpam.length > 0;
+  const hasSpam = likelySpam.length > 0;
+  const hasBothTypesOfRequests = hasLikelyNotSpam && hasSpam;
+
   const handleSegmentChange = (index: number) => {
     setSelectedSegment(index);
   };
 
   const renderSegmentedController = () => {
-    if (likelyNotSpam.length > 0 && likelySpam.length > 0) {
+    if (hasBothTypesOfRequests) {
       return (
         <RequestsSegmentedController
-          options={["You might know", "Spam"]}
+          options={["You might know", "Hidden requests"]}
           selectedIndex={selectedSegment}
           onSelect={handleSegmentChange}
         />
-      );
-    }
-    return null;
-  };
-
-  const renderSuggestionText = () => {
-    if (likelyNotSpam.length > 0) {
-      return (
-        <Text style={styles.suggestionText}>
-          Based on your onchain history, we've made some suggestions on who you
-          may know.
-        </Text>
       );
     }
     return null;
@@ -154,36 +146,36 @@ export default function ConversationRequestsListNav() {
     route: RouteProp<NavigationParamList, "ChatsRequests">;
     navigation: NativeStackNavigationProp<NavigationParamList, "ChatsRequests">;
   }) => {
-    if (likelyNotSpam.length === 0 && likelySpam.length === 0) {
-      return (
-        <View style={styles.emptyContainer}>
-          <Text style={styles.emptyText}>
-            No message requests at this time.
-          </Text>
-        </View>
-      );
-    }
-
-    if (likelyNotSpam.length === 0 && likelySpam.length > 0) {
-      return (
-        <>
-          <Text style={styles.spamOnlyText}>
-            You have some message requests that might be spam. Review them
-            carefully.
-          </Text>
-          <ConversationFlashList {...navigationProps} items={likelySpam} />
-        </>
-      );
-    }
+    const showSuggestionText =
+      (hasBothTypesOfRequests && selectedSegment === 0) ||
+      (!hasBothTypesOfRequests && hasLikelyNotSpam);
+    const showSpamWarning =
+      (hasBothTypesOfRequests && selectedSegment === 1) ||
+      (!hasBothTypesOfRequests && hasSpam);
+    const itemsToShow = hasBothTypesOfRequests
+      ? selectedSegment === 0
+        ? likelyNotSpam
+        : likelySpam
+      : hasLikelyNotSpam
+      ? likelyNotSpam
+      : likelySpam;
 
     return (
       <>
-        {renderSegmentedController()}
-        {renderSuggestionText()}
-        <ConversationFlashList
-          {...navigationProps}
-          items={selectedSegment === 0 ? likelyNotSpam : likelySpam}
-        />
+        {hasBothTypesOfRequests && renderSegmentedController()}
+        {showSuggestionText && (
+          <Text style={styles.suggestionText}>
+            Based on your onchain history, we've made some suggestions on who
+            you may know.
+          </Text>
+        )}
+        {showSpamWarning && (
+          <Text style={styles.suggestionText}>
+            Requests containing messages that may be offensive or unwanted are
+            moved to this folder.
+          </Text>
+        )}
+        <ConversationFlashList {...navigationProps} items={itemsToShow} />
       </>
     );
   };
@@ -227,30 +219,18 @@ const useStyles = () => {
       marginLeft: 10,
       color: textPrimaryColor(colorScheme),
     },
-    suggestionText: {
-      fontSize: 12,
-      color: textSecondaryColor(colorScheme),
-      textAlign: "center",
-      marginTop: 14,
-      marginBottom: 10,
-      marginHorizontal: 16,
-    },
     emptyContainer: {
       flex: 1,
       justifyContent: "center",
       alignItems: "center",
     },
-    emptyText: {
+    suggestionText: {
       fontSize: 12,
       color: textSecondaryColor(colorScheme),
       textAlign: "center",
-    },
-    spamOnlyText: {
-      fontSize: 12,
-      color: textSecondaryColor(colorScheme),
-      textAlign: "center",
+      paddingHorizontal: 16,
       marginTop: 14,
-      marginBottom: 10,
+      marginBottom: 12,
       marginHorizontal: 16,
     },
   });
