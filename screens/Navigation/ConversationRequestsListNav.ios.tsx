@@ -7,7 +7,7 @@ import {
   textSecondaryColor,
 } from "@styles/colors";
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import { Platform, StyleSheet, Text, useColorScheme, View } from "react-native";
+import { StyleSheet, Text, useColorScheme, View } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { StackAnimationTypes } from "react-native-screens";
 
@@ -17,7 +17,6 @@ import {
   NavigationParamList,
 } from "./Navigation";
 import ActivityIndicator from "../../components/ActivityIndicator/ActivityIndicator";
-import AndroidBackAction from "../../components/AndroidBackAction";
 import Button from "../../components/Button/Button";
 import ConversationFlashList from "../../components/ConversationFlashList";
 import { showActionSheetWithOptions } from "../../components/StateHandlers/ActionSheetStateHandler";
@@ -91,19 +90,14 @@ export default function ConversationRequestsListNav() {
     }) => ({
       animation: navigationAnimation as StackAnimationTypes,
       headerTitle: clearingAll
-        ? Platform.OS === "ios"
-          ? () => (
-              <View style={styles.headerContainer}>
-                <ActivityIndicator />
-                <Text style={styles.headerText}>Clearing</Text>
-              </View>
-            )
-          : "Clearing..."
+        ? () => (
+            <View style={styles.headerContainer}>
+              <ActivityIndicator />
+              <Text style={styles.headerText}>Clearing</Text>
+            </View>
+          )
         : "Message requests",
-      headerLeft:
-        Platform.OS === "ios"
-          ? undefined
-          : () => <AndroidBackAction navigation={navigation} />,
+      headerLeft: undefined,
       headerRight: () =>
         clearingAll ? undefined : (
           <Button variant="text" title="Clear all" onPress={clearAllSpam} />
@@ -222,14 +216,11 @@ const useStyles = () => {
       flexDirection: "row",
       alignItems: "center",
       justifyContent: "center",
-      width: Platform.OS === "ios" ? 110 : 130,
+      width: 110,
     },
     headerText: {
       marginLeft: 10,
       color: textPrimaryColor(colorScheme),
-      ...Platform.select({
-        android: { fontSize: 22, fontFamily: "Roboto" },
-      }),
     },
     suggestionText: {
       fontSize: 12,
