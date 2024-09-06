@@ -1,5 +1,7 @@
 import { MessageToDisplay } from "@components/Chat/Message/Message";
 import { MessageReactionsList } from "@components/Chat/Message/MessageReactionsList";
+import HoldItem from "@components/HoldMenu/HoldItem";
+import { HoldMenuProvider } from "@components/HoldMenu/HoldProvider";
 import { useAppStore } from "@data/store/appStore";
 import { useFramesStore } from "@data/store/framesStore"; // Add this import
 import { useSelect } from "@data/store/storeHelpers";
@@ -12,7 +14,7 @@ import { navigate } from "@utils/navigation";
 import { MessageReaction } from "@utils/reactions";
 import { isTransactionMessage } from "@utils/transaction";
 import React, { FC, useCallback, useMemo, useRef } from "react";
-import { useColorScheme } from "react-native";
+import { useColorScheme, View } from "react-native";
 import { ContextMenuView } from "react-native-ios-context-menu";
 
 enum ContextMenuActions {
@@ -120,6 +122,19 @@ const MessageContextMenuWrapperIOSInner: FC<
   }, [setContextMenuShown, message.id]);
 
   const ref = useRef<ContextMenuView>(null);
+  return (
+    <HoldMenuProvider>
+      <HoldItem
+        items={[
+          {
+            text: "Reply",
+          },
+        ]}
+      >
+        <View>{children}</View>
+      </HoldItem>
+    </HoldMenuProvider>
+  );
 
   return (
     <ContextMenuView

@@ -1,4 +1,3 @@
-import { MessageContextMenuWrapperIOS } from "@components/MessageContextMenuWrappers/MessageContextMenuWrapperiOS";
 import { useSelect } from "@data/store/storeHelpers";
 import {
   messageBubbleColor,
@@ -9,6 +8,7 @@ import {
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { Platform, StyleSheet, useColorScheme, View } from "react-native";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
+import { HoldItem } from "react-native-hold-menu";
 import Animated, {
   AnimatedStyle,
   Easing,
@@ -36,6 +36,7 @@ import {
 } from "../../../utils/reactions";
 import { UUID_REGEX } from "../../../utils/regex";
 import { isTransactionMessage } from "../../../utils/transaction";
+// import HoldItem from "@components/HoldMenu/HoldItem";
 
 type Props = {
   children: React.ReactNode;
@@ -297,13 +298,18 @@ export default function ChatMessageActions({
                 }),
               ]}
             >
-              <MessageContextMenuWrapperIOS
-                message={message}
-                reactions={reactions}
-                hideBackground={hideBackground}
+              <HoldItem
+                items={[
+                  {
+                    text: "Delete",
+                    onPress: () => {
+                      console.log("Delete");
+                    },
+                  },
+                ]}
               >
-                {children}
-              </MessageContextMenuWrapperIOS>
+                <View>{children}</View>
+              </HoldItem>
             </ReanimatedTouchableOpacity>
             {!message.hasNextMessageInSeries &&
               !isFrame &&
