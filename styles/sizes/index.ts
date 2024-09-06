@@ -30,7 +30,7 @@ export enum PictoSizes {
   replyButton = Platform.OS === "android" ? 16 : 14,
   searchBar = 24,
   sendButton = 34,
-  suspectedSpam = Platform.OS === "android" ? 25 : 10,
+  hiddenRequests = Platform.OS === "android" ? 25 : 10,
   swipableItem = Platform.OS === "ios" ? 18 : 30,
   tableViewImage = Platform.OS === "ios" ? 16 : 24,
   textButton = 15,
