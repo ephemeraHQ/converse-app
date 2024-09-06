@@ -1,5 +1,6 @@
 import RequestsSegmentedController from "@components/ConversationList/RequestsSegmentedController";
 import { RouteProp } from "@react-navigation/native";
+import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import {
   actionSheetColors,
   backgroundColor,
@@ -83,10 +84,14 @@ export default function ConversationRequestsListNav() {
 
   const navigationOptions = useCallback(
     ({
+      route,
       navigation,
     }: {
       route: RouteProp<NavigationParamList, "ChatsRequests">;
-      navigation: any;
+      navigation: NativeStackNavigationProp<
+        NavigationParamList,
+        "ChatsRequests"
+      >;
     }) => ({
       animation: navigationAnimation as StackAnimationTypes,
       headerTitle: clearingAll
@@ -147,7 +152,7 @@ export default function ConversationRequestsListNav() {
 
   const renderContent = (navigationProps: {
     route: RouteProp<NavigationParamList, "ChatsRequests">;
-    navigation: any;
+    navigation: NativeStackNavigationProp<NavigationParamList, "ChatsRequests">;
   }) => {
     if (likelyNotSpam.length === 0 && likelySpam.length === 0) {
       return (
