@@ -18,7 +18,7 @@ import ActivityIndicator from "../../components/ActivityIndicator/ActivityIndica
 import AndroidBackAction from "../../components/AndroidBackAction";
 import Button from "../../components/Button/Button";
 import ConversationFlashList from "../../components/ConversationFlashList";
-import SuspectedSpamButton from "../../components/ConversationList/SuspectedSpamButton";
+import HiddenRequestsButton from "../../components/ConversationList/HiddenRequestsButton";
 import { showActionSheetWithOptions } from "../../components/StateHandlers/ActionSheetStateHandler";
 import {
   useChatStore,
@@ -29,6 +29,10 @@ import {
   sortRequestsBySpamScore,
   updateConsentStatus,
 } from "../../utils/xmtpRN/conversations";
+
+// TODO: Remove iOS-specific code due to the existence of a .ios file
+// TODO: Alternatively, implement an Android equivalent for the segmented controller
+// See issue: https://github.com/ephemeraHQ/converse-app/issues/659
 
 export default function ConversationRequestsListNav() {
   const sortedConversationsWithPreview = useChatStore(
@@ -139,7 +143,7 @@ export default function ConversationRequestsListNav() {
                   ListFooterComponent={
                     <View>
                       {likelySpam.length ? (
-                        <SuspectedSpamButton
+                        <HiddenRequestsButton
                           spamCount={likelySpam.length}
                           handlePress={handleSpamToggle}
                           toggleActivated={isSpamToggleEnabled}
