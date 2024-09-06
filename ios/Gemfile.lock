@@ -62,6 +62,7 @@ GEM
     escape (0.0.4)
     ethon (0.16.0)
       ffi (>= 1.15.0)
+    ffi (1.17.0)
     ffi (1.17.0-arm64-darwin)
     fourflusher (2.3.1)
     fuzzy_match (2.0.4)
@@ -96,6 +97,7 @@ GEM
 PLATFORMS
   arm64-darwin-22
   arm64-darwin-23
+  ruby
 
 DEPENDENCIES
   activesupport (>= 6.1.7.3, < 7.1.0)
