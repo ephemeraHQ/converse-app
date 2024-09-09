@@ -248,7 +248,10 @@ function ChatMessage({ message, colorScheme, isGroup, isFrame }: Props) {
       style={[
         styles.messageRow,
         {
-          marginBottom: showStatus ? 8 : 1,
+          marginBottom:
+            showStatus || (!message.fromMe && !message.hasNextMessageInSeries)
+              ? 8
+              : 1,
         },
       ]}
     >
