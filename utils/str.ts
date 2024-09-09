@@ -63,7 +63,7 @@ export const conversationName = (
     const preferredName = getPreferredName(socials, conversation.peerAddress);
     if (preferredName) {
       logger.error(
-        `1:1 conversation with ${conversation.peerAddress} does not have a title but it should`
+        `1:1 conversation with ${conversation.peerAddress} has empty conversationTitle but it should not`
       );
       return preferredName;
     }
