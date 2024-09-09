@@ -1,5 +1,7 @@
 import RequestsSegmentedController from "@components/ConversationList/RequestsSegmentedController";
+import { translate } from "@i18n";
 import { RouteProp } from "@react-navigation/native";
+import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import {
   actionSheetColors,
   backgroundColor,
@@ -7,7 +9,7 @@ import {
   textSecondaryColor,
 } from "@styles/colors";
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import { Platform, StyleSheet, Text, useColorScheme, View } from "react-native";
+import { StyleSheet, Text, useColorScheme, View } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { StackAnimationTypes } from "react-native-screens";
 
@@ -17,7 +19,6 @@ import {
   NavigationParamList,
 } from "./Navigation";
 import ActivityIndicator from "../../components/ActivityIndicator/ActivityIndicator";
-import AndroidBackAction from "../../components/AndroidBackAction";
 import Button from "../../components/Button/Button";
 import ConversationFlashList from "../../components/ConversationFlashList";
 import { showActionSheetWithOptions } from "../../components/StateHandlers/ActionSheetStateHandler";
@@ -46,8 +47,13 @@ export default function ConversationRequestsListNav() {
   const styles = useStyles();
 
   const clearAllSpam = useCallback(() => {
+    const options = {
+      clearAll: translate("clear_all"),
+      cancel: translate("cancel"),
+    };
+
     const methods = {
-      "Clear all!": async () => {
+      [options.clearAll]: async () => {
         setClearingAll(true);
         // @todo => handle groups here
         const peers = Array.from(
@@ -58,23 +64,22 @@ export default function ConversationRequestsListNav() {
         setClearingAll(false);
         navRef.current?.goBack();
       },
-      Cancel: () => {},
+      [options.cancel]: () => {},
     };
 
-    const options = Object.keys(methods);
+    const optionKeys = [options.clearAll, options.cancel];
 
     showActionSheetWithOptions(
       {
-        options,
-        destructiveButtonIndex: options.indexOf("Clear all"),
-        cancelButtonIndex: options.indexOf("Cancel"),
-        title:
-          "Do you confirm? This will block all accounts that are currently tagged as requests.",
+        options: optionKeys,
+        destructiveButtonIndex: optionKeys.indexOf(options.clearAll),
+        cancelButtonIndex: optionKeys.indexOf(options.cancel),
+        title: translate("clear_confirm"),
         ...actionSheetColors(colorScheme),
       },
       (selectedIndex?: number) => {
         if (selectedIndex === undefined) return;
-        const method = (methods as any)[options[selectedIndex]];
+        const method = (methods as any)[optionKeys[selectedIndex]];
         if (method) {
           method();
         }
@@ -84,29 +89,32 @@ export default function ConversationRequestsListNav() {
 
   const navigationOptions = useCallback(
     ({
+      route,
       navigation,
     }: {
       route: RouteProp<NavigationParamList, "ChatsRequests">;
-      navigation: any;
+      navigation: NativeStackNavigationProp<
+        NavigationParamList,
+        "ChatsRequests"
+      >;
     }) => ({
       animation: navigationAnimation as StackAnimationTypes,
       headerTitle: clearingAll
-        ? Platform.OS === "ios"
-          ? () => (
-              <View style={styles.headerContainer}>
-                <ActivityIndicator />
-                <Text style={styles.headerText}>Clearing</Text>
-              </View>
-            )
-          : "Clearing..."
+        ? () => (
+            <View style={styles.headerContainer}>
+              <ActivityIndicator />
+              <Text style={styles.headerText}>{translate("clearing")}</Text>
+            </View>
+          )
         : "Message requests",
-      headerLeft:
-        Platform.OS === "ios"
-          ? undefined
-          : () => <AndroidBackAction navigation={navigation} />,
+      headerLeft: undefined,
       headerRight: () =>
         clearingAll ? undefined : (
-          <Button variant="text" title="Clear all" onPress={clearAllSpam} />
+          <Button
+            variant="text"
+            title={translate("clear_all")}
+            onPress={clearAllSpam}
+          />
         ),
     }),
     [clearAllSpam, clearingAll, styles.headerContainer, styles.headerText]
@@ -122,15 +130,19 @@ export default function ConversationRequestsListNav() {
     return unsubscribe;
   }, [allRequests]);
 
+  const hasLikelyNotSpam = likelyNotSpam.length > 0;
+  const hasSpam = likelySpam.length > 0;
+  const hasBothTypesOfRequests = hasLikelyNotSpam && hasSpam;
+
   const handleSegmentChange = (index: number) => {
     setSelectedSegment(index);
   };
 
   const renderSegmentedController = () => {
-    if (likelyNotSpam.length > 0 && likelySpam.length > 0) {
+    if (hasBothTypesOfRequests) {
       return (
         <RequestsSegmentedController
-          options={["You might know", "Spam"]}
+          options={[translate("you_might_know"), translate("hidden_requests")]}
           selectedIndex={selectedSegment}
           onSelect={handleSegmentChange}
         />
@@ -139,52 +151,38 @@ export default function ConversationRequestsListNav() {
     return null;
   };
 
-  const renderSuggestionText = () => {
-    if (likelyNotSpam.length > 0) {
-      return (
-        <Text style={styles.suggestionText}>
-          Based on your onchain history, we've made some suggestions on who you
-          may know.
-        </Text>
-      );
-    }
-    return null;
-  };
-
   const renderContent = (navigationProps: {
     route: RouteProp<NavigationParamList, "ChatsRequests">;
-    navigation: any;
+    navigation: NativeStackNavigationProp<NavigationParamList, "ChatsRequests">;
   }) => {
-    if (likelyNotSpam.length === 0 && likelySpam.length === 0) {
-      return (
-        <View style={styles.emptyContainer}>
-          <Text style={styles.emptyText}>
-            No message requests at this time.
-          </Text>
-        </View>
-      );
-    }
-
-    if (likelyNotSpam.length === 0 && likelySpam.length > 0) {
-      return (
-        <>
-          <Text style={styles.spamOnlyText}>
-            You have some message requests that might be spam. Review them
-            carefully.
-          </Text>
-          <ConversationFlashList {...navigationProps} items={likelySpam} />
-        </>
-      );
-    }
+    const showSuggestionText =
+      (hasBothTypesOfRequests && selectedSegment === 0) ||
+      (!hasBothTypesOfRequests && hasLikelyNotSpam);
+    const showSpamWarning =
+      (hasBothTypesOfRequests && selectedSegment === 1) ||
+      (!hasBothTypesOfRequests && hasSpam);
+    const itemsToShow = hasBothTypesOfRequests
+      ? selectedSegment === 0
+        ? likelyNotSpam
+        : likelySpam
+      : hasLikelyNotSpam
+      ? likelyNotSpam
+      : likelySpam;
 
     return (
       <>
-        {renderSegmentedController()}
-        {renderSuggestionText()}
-        <ConversationFlashList
-          {...navigationProps}
-          items={selectedSegment === 0 ? likelyNotSpam : likelySpam}
-        />
+        {hasBothTypesOfRequests && renderSegmentedController()}
+        {showSuggestionText && (
+          <Text style={styles.suggestionText}>
+            {translate("suggestion_text")}
+          </Text>
+        )}
+        {showSpamWarning && (
+          <Text style={styles.suggestionText}>
+            {translate("hidden_requests_warn")}
+          </Text>
+        )}
+        <ConversationFlashList {...navigationProps} items={itemsToShow} />
       </>
     );
   };
@@ -222,39 +220,24 @@ const useStyles = () => {
       flexDirection: "row",
       alignItems: "center",
       justifyContent: "center",
-      width: Platform.OS === "ios" ? 110 : 130,
+      width: 110,
     },
     headerText: {
       marginLeft: 10,
       color: textPrimaryColor(colorScheme),
-      ...Platform.select({
-        android: { fontSize: 22, fontFamily: "Roboto" },
-      }),
-    },
-    suggestionText: {
-      fontSize: 12,
-      color: textSecondaryColor(colorScheme),
-      textAlign: "center",
-      marginTop: 14,
-      marginBottom: 10,
-      marginHorizontal: 16,
     },
     emptyContainer: {
       flex: 1,
       justifyContent: "center",
       alignItems: "center",
     },
-    emptyText: {
+    suggestionText: {
       fontSize: 12,
       color: textSecondaryColor(colorScheme),
       textAlign: "center",
-    },
-    spamOnlyText: {
-      fontSize: 12,
-      color: textSecondaryColor(colorScheme),
-      textAlign: "center",
+      paddingHorizontal: 16,
       marginTop: 14,
-      marginBottom: 10,
+      marginBottom: 12,
       marginHorizontal: 16,
     },
   });
