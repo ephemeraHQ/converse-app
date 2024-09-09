@@ -329,10 +329,11 @@ export default function ChatInput({ inputHeight }: ChatInputProps) {
             ? replyingToMessage.id
             : undefined,
         };
-        sendMessage(messageToSend);
-        setReplyingToMessage(null);
         setInputValue("");
+        setReplyingToMessage(null);
         numberOfLinesRef.current = 1;
+        await new Promise((r) => setTimeout(r, 5));
+        sendMessage(messageToSend);
       }
 
       converseEventEmitter.emit("scrollChatToMessage", {
