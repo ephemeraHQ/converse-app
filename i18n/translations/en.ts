@@ -2,11 +2,11 @@ const en = {
   // Onboarding
   walletSelector: {
     title: "Your messages.\nYour privacy.",
-    subtitle: "Decentralized messaging,\nsecure and owned by you.",
+    subtitle: "Decentralized messaging,\nsecure by design and owned by you.",
     converseAccount: {
-      title: "CONVERSE ACCOUNT",
+      title: "CONVERSE ACCOUNTS",
       connectViaPhone: "Connect via Phone",
-      createEphemeral: "Create ephemeral account",
+      createEphemeral: "Create Ephemeral Account",
     },
     installedApps: {
       title: "INSTALLED APPS",
@@ -16,9 +16,10 @@ const en = {
       title: "CONNECTION OPTIONS",
       otherOptions: "OTHER OPTIONS",
       connectExistingWallet: "CONNECT EXISTING WALLET",
+      connectForDevs: "FOR DEVS",
       connectViaBrowserWallet: "Connect via browser wallet",
       connectViaDesktop: "Connect via desktop",
-      connectViaKey: "Connect via key",
+      connectViaKey: "Connect via Key",
     },
     popularMobileApps: {
       title: "POPULAR MOBILE APPS",
@@ -31,7 +32,7 @@ const en = {
       verifyPhone: "Confirmation code",
     },
     subtitle:
-      "Your phone number will own your Converse wallet address and identity. It is stored securely and never visible to others.",
+      "Use your phone number to access your Converse account. It's stored securely and never shown to others.",
     buttons: {
       continue: "Continue",
       back: "Back",
@@ -61,7 +62,7 @@ const en = {
   privateKeyConnect: {
     title: "Connect via key",
     subtitle:
-      "Please enter the private key for the address you are connecting.\n\nIt will only be stored locally in {{storage}}.",
+      "Please enter the private key for the address you are connecting.\nIt will only be stored locally in {{storage}}.",
     storage: {
       ios: "your iPhone's Secure Enclave",
       android: "the Android Keystore system",
@@ -74,16 +75,16 @@ const en = {
     invalidPrivateKey: "This private key is invalid. Please try again",
   },
   connectViaWallet: {
-    sign: "Sign to create",
+    sign: "Sign",
     firstSignature: {
       title: "Get started",
       explanation:
-        "The secure inbox you own.\nConverse is built on XMTP, an open-source secure messaging protocol.\n\n",
+        "The secure inbox you own.\nConverse is built on XMTP, an open-source secure messaging protocol.",
     },
     secondSignature: {
       title: "Allow Converse",
       explanation:
-        "Converse needs your permission to send and receive messages.\n\nYou can revoke this anytime.\n\n",
+        "Converse needs your permission\nto send and receive messages.\nYou can revoke this anytime.",
     },
     valueProps: {
       e2eEncryption: {

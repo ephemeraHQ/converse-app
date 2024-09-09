@@ -350,11 +350,10 @@ export default function ConnectViaWallet({
     waitForClickSignature,
   ]);
 
-  let title = translate("connectViaWallet.sign");
+  let title = translate("connectViaWallet.firstSignature.title");
   let subtitle = (
     <>
       <Text>{translate("connectViaWallet.firstSignature.explanation")}</Text>
-      {termsAndConditions}
     </>
   );
   let backButtonText = undefined as string | undefined;
@@ -390,7 +389,6 @@ export default function ConnectViaWallet({
           <Text>
             {translate("connectViaWallet.secondSignature.explanation")}
           </Text>
-          {termsAndConditions}
         </>
       );
     } else if (
@@ -446,7 +444,6 @@ const useStyles = () => {
       textAlign: "center",
       marginLeft: 32,
       marginRight: 32,
-      marginTop: 30,
       ...Platform.select({
         default: {
           fontSize: 17,
