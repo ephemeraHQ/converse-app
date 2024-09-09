@@ -6,7 +6,13 @@ import {
   textSecondaryColor,
 } from "@styles/colors";
 import { isAddress } from "ethers/lib/utils";
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { Platform, StyleSheet, useColorScheme, View } from "react-native";
 import { gestureHandlerRootHOC } from "react-native-gesture-handler";
 
@@ -91,8 +97,12 @@ const Conversation = ({
   const isActive = conversation?.isGroup ? conversation.isActive : true;
 
   // When the conversation topic changes, we set the conversation object
+  const conversationTopicRef = useRef(conversationTopic);
   useEffect(() => {
-    if (conversationTopic) {
+    if (
+      conversationTopic &&
+      conversationTopicRef.current !== conversationTopic
+    ) {
       const foundConversation = conversations[conversationTopic];
       if (foundConversation) {
         setConversation(foundConversation);
@@ -109,6 +119,7 @@ const Conversation = ({
         navigation.goBack
       );
     }
+    conversationTopicRef.current = conversationTopic;
   }, [
     conversationTopic,
     conversations,
@@ -122,16 +133,25 @@ const Conversation = ({
     }
   }, [isActive, navigation]);
 
-  const isBlockedPeer = conversation?.peerAddress
-    ? peersStatus[conversation.peerAddress.toLowerCase()] === "blocked"
-    : false;
+  const isBlockedPeer = useMemo(
+    () =>
+      conversation?.peerAddress
+        ? peersStatus[conversation.peerAddress.toLowerCase()] === "blocked"
+        : false,
+    [conversation?.peerAddress, peersStatus]
+  );
 
   const textInputRef = useRef<TextInputWithValue>();
   const mediaPreviewRef = useRef<MediaPreview>();
 
-  const messageToPrefill =
-    route.params?.message || conversation?.messageDraft || "";
-  const mediaPreviewToPrefill = conversation?.mediaPreview || null;
+  const messageToPrefill = useMemo(
+    () => route.params?.message || conversation?.messageDraft || "",
+    [conversation?.messageDraft, route.params?.message]
+  );
+  const mediaPreviewToPrefill = useMemo(
+    () => conversation?.mediaPreview || null,
+    [conversation?.mediaPreview]
+  );
   const focusOnLayout = useRef(false);
   const chatLayoutDone = useRef(false);
   const alreadyAutomaticallyFocused = useRef(false);

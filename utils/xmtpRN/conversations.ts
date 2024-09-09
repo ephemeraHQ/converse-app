@@ -3,7 +3,7 @@ import { setGroupDescriptionQueryData } from "@queries/useGroupDescriptionQuery"
 import { setGroupMembersQueryData } from "@queries/useGroupMembersQuery";
 import { setGroupQueryData } from "@queries/useGroupQuery";
 import { converseEventEmitter } from "@utils/events";
-import { getGroupIdFromTopic } from "@utils/groupUtils/groupId";
+import { getGroupIdFromTopic, isGroupTopic } from "@utils/groupUtils/groupId";
 import logger from "@utils/logger";
 import { areSetsEqual } from "@utils/set";
 import {
@@ -308,7 +308,10 @@ const listConversations = async (client: ConverseXmtpClientType) => {
 
 const listGroups = async (client: ConverseXmtpClientType) => {
   // @todo => this will be adapted once we have a syncAllGroups method
-  await fetchGroupsQuery(client.address);
+  const beforeSyncGroups = await fetchGroupsQuery(client.address);
+  beforeSyncGroups.ids.forEach((id) => {
+    setOpenedConversation(client.address, beforeSyncGroups.byId[id]);
+  });
   // Resync process
   const beforeSyncAll = new Date().getTime();
   await client.conversations.syncAllGroups();
@@ -568,10 +571,20 @@ export const getConversationWithTopic = async (
 ): Promise<ConversationWithCodecsType | GroupWithCodecsType | undefined> => {
   const alreadyConversation = openedConversations[account]?.[topic];
   if (alreadyConversation) return alreadyConversation;
-  // Let's try to import from keychain if we don't have it already
   const client = (await getXmtpClient(account)) as ConverseXmtpClientType;
-  await importSingleTopicData(client, [topic]);
-  return openedConversations[account]?.[topic];
+  if (isGroupTopic(topic)) {
+    const group = await client.conversations.findGroup(
+      getGroupIdFromTopic(topic)
+    );
+    if (group) {
+      setOpenedConversation(client.address, group);
+    }
+    return group;
+  } else {
+    // Let's try to import from keychain if we don't have it already
+    await importSingleTopicData(client, [topic]);
+    return openedConversations[account]?.[topic];
+  }
 };
 
 const createConversation = async (
