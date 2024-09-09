@@ -1,3 +1,4 @@
+import { translate } from "@i18n";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import {
   actionSecondaryColor,
@@ -37,7 +38,9 @@ export default function RequestsButton({ navigation, requestsCount }: Props) {
               pressed && styles.pressedText,
             ]}
           >
-            {requestsCount === 0 ? "Requests" : `Requests (${requestsCount})`}
+            {requestsCount === 0
+              ? translate("requests")
+              : `${translate("requests")} (${requestsCount})`}
           </Text>
         </View>
       )}
@@ -52,7 +55,6 @@ const useStyles = () => {
       ...Platform.select({
         android: {
           paddingLeft: 24,
-          paddingRight: 14,
         },
       }),
     },

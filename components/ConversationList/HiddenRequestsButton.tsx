@@ -1,3 +1,4 @@
+import { translate } from "@i18n";
 import {
   actionSecondaryColor,
   clickedItemBackgroundColor,
@@ -38,7 +39,9 @@ export default function HiddenRequestsButton({
       onPress={handlePress}
     >
       <View style={styles.spamHeader}>
-        <Text style={styles.spamHeaderTitle}>Hidden requests</Text>
+        <Text style={styles.spamHeaderTitle}>
+          {translate("hidden_requests")}
+        </Text>
         <Text style={styles.spamCount}>{spamCount}</Text>
         <Picto
           picto={toggleActivated ? "chevron.down" : "chevron.right"}

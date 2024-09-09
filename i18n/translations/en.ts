@@ -24,6 +24,7 @@ const en = {
   view_removed_group_chat: "View removed group chat?",
 
   // Requests
+  requests: "Requests",
   clear_all: "Clear all",
   clear_confirm:
     "Do you confirm? This will block all accounts that are currently tagged as requests.",
