@@ -51,7 +51,7 @@ const myEmojis = sliceEmojis(
 );
 
 export const EmojiPicker = ({ message }: { message: MessageToDisplay }) => {
-  const currentUser = useCurrentAccount();
+  const currentUser = useCurrentAccount() as string;
   const { reactionMenuMessageId, setReactMenuMessageId } = useChatStore(
     useSelect(["reactionMenuMessageId", "setReactMenuMessageId"])
   );
@@ -97,13 +97,13 @@ export const EmojiPicker = ({ message }: { message: MessageToDisplay }) => {
       if (!conversation) return;
       const alreadySelected = currentUserEmojiMap[emoji];
       if (alreadySelected) {
-        removeReactionFromMessage(conversation, message, emoji);
+        removeReactionFromMessage(currentUser, message, emoji);
       } else {
-        addReactionToMessage(conversation, message, emoji);
+        addReactionToMessage(currentUser, message, emoji);
       }
       drawerRef?.current?.closeDrawer(closeMenu);
     },
-    [conversation, message, currentUserEmojiMap, closeMenu]
+    [closeMenu, conversation, currentUser, currentUserEmojiMap, message]
   );
 
   return (

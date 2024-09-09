@@ -1,3 +1,4 @@
+import { getChatStore } from "@data/store/accountsStore";
 import { translate } from "@i18n";
 import { ContentTypeReaction } from "@xmtp/content-type-reaction";
 
@@ -6,7 +7,7 @@ import { emojis } from "./emojis/emojis";
 import logger from "./logger";
 import { sendMessage } from "./message";
 import { getMessageContentType } from "./xmtpRN/contentTypes";
-import { XmtpConversation, XmtpMessage } from "../data/store/chatStore";
+import { XmtpMessage } from "../data/store/chatStore";
 
 export type MessageReaction = {
   action: "added" | "removed";
@@ -132,10 +133,13 @@ export const getReactionsContentPreview = (
 };
 
 export const addReactionToMessage = (
-  conversation: XmtpConversation,
+  account: string,
   message: XmtpMessage,
   emoji: string
 ) => {
+  const conversation =
+    getChatStore(account).getState().conversations[message.topic];
+  if (!conversation) throw new Error("No conversation found");
   const contentFallback = getReactionsContentPreview(message, emoji);
   sendMessage({
     conversation,
@@ -152,10 +156,13 @@ export const addReactionToMessage = (
 };
 
 export const removeReactionFromMessage = (
-  conversation: XmtpConversation,
+  account: string,
   message: XmtpMessage,
   emoji: string
 ) => {
+  const conversation =
+    getChatStore(account).getState().conversations[message.topic];
+  if (!conversation) throw new Error("No conversation found");
   const isAttachment = isAttachmentMessage(message.contentType);
   sendMessage({
     conversation,

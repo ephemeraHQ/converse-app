@@ -25,11 +25,9 @@ import MessageTail from "./MessageTail";
 import { EmojiPicker } from "../../../containers/EmojiPicker";
 import { useCurrentAccount } from "../../../data/store/accountsStore";
 import { useAppStore } from "../../../data/store/appStore";
-import { XmtpConversation } from "../../../data/store/chatStore";
 import { useFramesStore } from "../../../data/store/framesStore";
 import { ReanimatedTouchableOpacity } from "../../../utils/animations";
 import { isAttachmentMessage } from "../../../utils/attachment/helpers";
-import { useConversationContext } from "../../../utils/conversation";
 import { converseEventEmitter } from "../../../utils/events";
 import {
   MessageReaction,
@@ -54,7 +52,6 @@ export default function ChatMessageActions({
   reactions,
   hideBackground = false,
 }: Props) {
-  const { conversation } = useConversationContext(["conversation"]);
   const isAttachment = isAttachmentMessage(message.contentType);
   const isTransaction = isTransactionMessage(message.contentType);
   const colorScheme = useColorScheme();
@@ -92,10 +89,10 @@ export default function ChatMessageActions({
         .numberOfTaps(2)
         .onStart(() => {
           if (isAttachment || !canAddReaction) return;
-          addReactionToMessage(conversation as XmtpConversation, message, "❤️");
+          addReactionToMessage(userAddress, message, "❤️");
         })
         .runOnJS(true),
-    [canAddReaction, isAttachment, conversation, message]
+    [canAddReaction, isAttachment, userAddress, message]
   );
 
   const longPressGesture = useMemo(() => {

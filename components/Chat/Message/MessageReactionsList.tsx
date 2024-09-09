@@ -120,7 +120,8 @@ const EmojiItem: FC<{
   message: MessageToDisplay;
   alreadySelected: boolean;
   dismissMenu?: () => void;
-}> = ({ content, message, alreadySelected, dismissMenu }) => {
+  currentUser: string;
+}> = ({ content, message, alreadySelected, dismissMenu, currentUser }) => {
   const styles = useStyles();
   const { conversation } = useConversationContext(["conversation"]);
   const handlePress = useCallback(() => {
@@ -128,9 +129,9 @@ const EmojiItem: FC<{
       return;
     }
     if (alreadySelected) {
-      removeReactionFromMessage(conversation, message, content);
+      removeReactionFromMessage(currentUser, message, content);
     } else {
-      addReactionToMessage(conversation, message, content);
+      addReactionToMessage(currentUser, message, content);
     }
     InteractionManager.runAfterInteractions(() => {
       if (Platform.OS === "ios") {
@@ -143,7 +144,14 @@ const EmojiItem: FC<{
         dismissMenu?.();
       }
     });
-  }, [alreadySelected, content, conversation, dismissMenu, message]);
+  }, [
+    alreadySelected,
+    content,
+    conversation,
+    currentUser,
+    dismissMenu,
+    message,
+  ]);
 
   return (
     <TouchableOpacity
@@ -175,7 +183,7 @@ const MessageReactionsListInner: FC<MessageReactionsListProps> = ({
   const { setReactMenuMessageId } = useChatStore(
     useSelect(["setReactMenuMessageId"])
   );
-  const currentUser = useCurrentAccount();
+  const currentUser = useCurrentAccount() as string;
   const styles = useStyles();
   const colorScheme = useColorScheme();
   const list = useMemo(() => {
@@ -258,6 +266,7 @@ const MessageReactionsListInner: FC<MessageReactionsListProps> = ({
             content={emoji}
             alreadySelected={currentUserEmojiMap[emoji]}
             message={message}
+            currentUser={currentUser}
             dismissMenu={dismissMenu}
           />
         ))}
