@@ -102,9 +102,9 @@ function ChatMessageReactions({ message, reactions }: Props) {
       if (!conversation || !userAddress) return;
 
       if (reaction.userReacted) {
-        removeReactionFromMessage(conversation, message, reaction.content);
+        removeReactionFromMessage(userAddress, message, reaction.content);
       } else {
-        addReactionToMessage(conversation, message, reaction.content);
+        addReactionToMessage(userAddress, message, reaction.content);
       }
     },
     [conversation, message, userAddress]
