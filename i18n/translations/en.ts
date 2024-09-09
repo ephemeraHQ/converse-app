@@ -23,6 +23,18 @@ const en = {
   view_and_restore: "View and Restore",
   view_removed_group_chat: "View removed group chat?",
 
+  // Requests
+  clear_all: "Clear all",
+  clear_confirm:
+    "Do you confirm? This will block all accounts that are currently tagged as requests.",
+  clearing: "Clearing",
+  you_might_know: "You might know",
+  hidden_requests: "Hidden requests",
+  suggestion_text:
+    "Based on your onchain history, we've made some suggestions on who you may know.",
+  hidden_requests_warn:
+    "Requests containing messages that may be offensive or unwanted are moved to this folder.",
+
   // Conversation
   accept: "Accept",
   block: "Block",
