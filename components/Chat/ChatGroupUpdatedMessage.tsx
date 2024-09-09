@@ -56,15 +56,15 @@ export default function ChatGroupUpdatedMessage({
   parsedContent.metadataFieldsChanged.forEach((f) => {
     if (f.fieldName === "group_name") {
       membersActions.push(
-        `The group name was changed to ${f.newValue} by ${initiatedByReadableName}`
+        `${initiatedByReadableName} changed the group name to "${f.newValue}".`
       );
     } else if (f.fieldName === "group_image_url_square") {
       membersActions.push(
-        `The group photo was changed by ${initiatedByReadableName}`
+        `${initiatedByReadableName} changed the group photo.`
       );
     } else if (f.fieldName === "description") {
       membersActions.push(
-        `The group description was changed to ${f.newValue} by ${initiatedByReadableName}`
+        `${initiatedByReadableName} changed the group description to "${f.newValue}".`
       );
     }
   });
@@ -90,6 +90,7 @@ const useStyles = () => {
       width: "100%",
       marginTop: 5,
       marginBottom: 9,
+      paddingHorizontal: 24,
     },
   });
 };
