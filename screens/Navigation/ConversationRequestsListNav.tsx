@@ -1,3 +1,4 @@
+import { translate } from "@i18n";
 import { RouteProp } from "@react-navigation/native";
 import {
   actionSheetColors,
@@ -18,7 +19,7 @@ import ActivityIndicator from "../../components/ActivityIndicator/ActivityIndica
 import AndroidBackAction from "../../components/AndroidBackAction";
 import Button from "../../components/Button/Button";
 import ConversationFlashList from "../../components/ConversationFlashList";
-import SuspectedSpamButton from "../../components/ConversationList/SuspectedSpamButton";
+import HiddenRequestsButton from "../../components/ConversationList/HiddenRequestsButton";
 import { showActionSheetWithOptions } from "../../components/StateHandlers/ActionSheetStateHandler";
 import {
   useChatStore,
@@ -29,6 +30,10 @@ import {
   sortRequestsBySpamScore,
   updateConsentStatus,
 } from "../../utils/xmtpRN/conversations";
+
+// TODO: Remove iOS-specific code due to the existence of a .ios file
+// TODO: Alternatively, implement an Android equivalent for the segmented controller
+// See issue: https://github.com/ephemeraHQ/converse-app/issues/659
 
 export default function ConversationRequestsListNav() {
   const sortedConversationsWithPreview = useChatStore(
@@ -45,8 +50,13 @@ export default function ConversationRequestsListNav() {
   const styles = useStyles();
 
   const clearAllSpam = useCallback(() => {
+    const options = {
+      clearAll: translate("clear_all"),
+      cancel: translate("cancel"),
+    };
+
     const methods = {
-      "Clear all": async () => {
+      [options.clearAll]: async () => {
         setClearingAll(true);
         // @todo => handle groups here
         const peers = Array.from(
@@ -57,23 +67,22 @@ export default function ConversationRequestsListNav() {
         setClearingAll(false);
         navRef.current?.goBack();
       },
-      Cancel: () => {},
+      [options.cancel]: () => {},
     };
 
-    const options = Object.keys(methods);
+    const optionKeys = [options.clearAll, options.cancel];
 
     showActionSheetWithOptions(
       {
-        options,
-        destructiveButtonIndex: options.indexOf("Clear all"),
-        cancelButtonIndex: options.indexOf("Cancel"),
-        title:
-          "Do you confirm? This will block all accounts that are currently tagged as requests.",
+        options: optionKeys,
+        destructiveButtonIndex: optionKeys.indexOf(options.clearAll),
+        cancelButtonIndex: optionKeys.indexOf(options.cancel),
+        title: translate("clear_confirm"),
         ...actionSheetColors(colorScheme),
       },
       (selectedIndex?: number) => {
         if (selectedIndex === undefined) return;
-        const method = (methods as any)[options[selectedIndex]];
+        const method = (methods as any)[optionKeys[selectedIndex]];
         if (method) {
           method();
         }
@@ -94,7 +103,7 @@ export default function ConversationRequestsListNav() {
           ? () => (
               <View style={styles.headerContainer}>
                 <ActivityIndicator />
-                <Text style={styles.headerText}>Clearing</Text>
+                <Text style={styles.headerText}>{translate("clearing")}</Text>
               </View>
             )
           : "Clearing..."
@@ -105,7 +114,11 @@ export default function ConversationRequestsListNav() {
           : () => <AndroidBackAction navigation={navigation} />,
       headerRight: () =>
         clearingAll ? undefined : (
-          <Button variant="text" title="Clear all" onPress={clearAllSpam} />
+          <Button
+            variant="text"
+            title={translate("clear_all")}
+            onPress={clearAllSpam}
+          />
         ),
     }),
     [clearAllSpam, clearingAll, styles.headerContainer, styles.headerText]
@@ -139,7 +152,7 @@ export default function ConversationRequestsListNav() {
                   ListFooterComponent={
                     <View>
                       {likelySpam.length ? (
-                        <SuspectedSpamButton
+                        <HiddenRequestsButton
                           spamCount={likelySpam.length}
                           handlePress={handleSpamToggle}
                           toggleActivated={isSpamToggleEnabled}
