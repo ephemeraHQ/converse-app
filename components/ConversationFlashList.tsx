@@ -129,7 +129,7 @@ export default function ConversationFlashList({
           conversationTime={
             lastMessagePreview?.message?.sent || conversation.createdAt
           }
-          conversationName={conversationName(conversation)}
+          conversationName={conversationName(conversation, socials)}
           showUnread={showUnreadOnConversation(
             initialLoadDoneOnce,
             lastMessagePreview,
