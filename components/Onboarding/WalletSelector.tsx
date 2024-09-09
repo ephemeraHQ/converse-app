@@ -206,9 +206,7 @@ export default function WalletSelector() {
               ? translate("walletSelector.connectionOptions.title")
               : hasInstalledWallets
               ? translate("walletSelector.connectionOptions.otherOptions")
-              : translate(
-                  "walletSelector.connectionOptions.connectExistingWallet"
-                )
+              : translate("walletSelector.connectionOptions.connectForDevs")
           }
           items={[
             // {
