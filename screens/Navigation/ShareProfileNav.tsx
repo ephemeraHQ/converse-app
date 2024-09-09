@@ -1,6 +1,7 @@
 import {
   listItemSeparatorColor,
   navigationSecondaryBackgroundColor,
+  backgroundColor,
 } from "@styles/colors";
 import { Platform, useColorScheme } from "react-native";
 
@@ -25,7 +26,7 @@ export default function ShareProfileNav() {
           backgroundColor:
             Platform.OS === "web"
               ? navigationSecondaryBackgroundColor(colorScheme)
-              : undefined,
+              : backgroundColor(colorScheme),
           borderBottomColor:
             Platform.OS === "web"
               ? listItemSeparatorColor(colorScheme)
