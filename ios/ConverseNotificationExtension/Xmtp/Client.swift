@@ -107,11 +107,10 @@ func putGroupInviteRequest(apiURI: String?, account: String, xmtpClient: Client,
     do {
       
       let joinRequestUri = "\(apiURI)/api/groupJoinRequest/\(joinRequestId)"
-      let privateKey = try PrivateKey(xmtpClient.keys.identityKey)
       guard let digest = "XMTP_IDENTITY".data(using: .utf8) else {
         return
       }
-      let signature = try await privateKey.sign(digest).serializedData().base64EncodedString()
+      let signature = try await xmtpClient.keys.identityKey.sign(Util.keccak256(digest)).serializedData().base64EncodedString()
       let headers: HTTPHeaders = [
           "xmtp-api-signature": signature,
           "xmtp-api-address": account
