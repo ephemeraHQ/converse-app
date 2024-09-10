@@ -8,7 +8,6 @@
 import Foundation
 import XMTP
 import Alamofire
-import CryptoKit
 
 func getXmtpKeyForAccount(account: String) throws -> String? {
   let legacyKey = getKeychainValue(forKey: "XMTP_KEYS")
@@ -106,51 +105,26 @@ func subscribeToTopic(apiURI: String?, account: String, pushToken: String?, topi
 func putGroupInviteRequest(apiURI: String?, account: String, xmtpClient: Client, status: String, joinRequestId: String) async {
   if let apiURI = apiURI, !apiURI.isEmpty {
     do {
+      
       let joinRequestUri = "\(apiURI)/api/groupJoinRequest/\(joinRequestId)"
       let privateKey = try PrivateKey(xmtpClient.keys.identityKey)
-      if privateKey.address.lowercased() == account.lowercased() {
-        print("here1111")
-      } else {
-        print("here1123123123", privateKey.address, account, xmtpClient.address, xmtpClient.keys.hasIdentityKey)
+      guard let digest = "XMTP_IDENTITY".data(using: .utf8) else {
+        return
       }
-      // Use raw data for signing
-      let message = "XMTP_IDENTITY"
-      guard let messageToSign = message.data(using: .utf8) else {
-          fatalError("Failed to encode string to UTF-8 data")
-      }
-
-      // Step 2: Sign the UTF-8 encoded data directly using the private key
-      let signature = try await privateKey.sign(messageToSign)
-
-      // Step 3: Convert the signature object to a raw byte array
-      let sig = try signature.serializedData().base64EncodedString()
-
-      // Step 4: Encode the raw signature bytes to a Base64 string
-
+      let signature = try await privateKey.sign(digest).serializedData().base64EncodedString()
       let headers: HTTPHeaders = [
-          "xmtp-api-signature": sig,
-          "xmtp-api-address": privateKey.address
+          "xmtp-api-signature": signature,
+          "xmtp-api-address": account
       ]
-
       let body: [String: Any] = [
-          "status": status
-      ]
-      print(sig)
+            "status": status,
+        ]
+      
       AF.request(joinRequestUri, method: .put, parameters: body, encoding: JSONEncoding.default, headers: headers).response { response in
-          switch response.result {
-          case .success(let data):
-              if let data = data, let jsonString = String(data: data, encoding: .utf8) {
-                  print("Response Data9: \(jsonString)")
-              } else {
-                  print("No data received or data could not be converted to string")
-              }
-          case .failure(let error):
-            print("Request failed with error: \(error.localizedDescription)")
-            sentryTrackError(error: error, extras: ["message": "UPDATE_GROUP_JOIN_REQUEST_FAILED"])
-          }
+          debugPrint("Response: \(response)")
       }
     } catch {
-      sentryTrackError(error: error, extras: ["message": "UPDATE_GROUP_JOIN_REQUEST_FAILED"])
+      
     }
   }
 }

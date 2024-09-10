@@ -1,14 +1,18 @@
 import TableView, { TableViewItemType } from "@components/TableView/TableView";
+import { calculateMenuHeight } from "@utils/contextMenu/calculateMenuHeight";
 import {
+  AUXILIARY_VIEW_MIN_HEIGHT,
   BACKDROP_DARK_BACKGROUND_COLOR,
   BACKDROP_LIGHT_BACKGROUND_COLOR,
   HOLD_ITEM_TRANSFORM_DURATION,
-  IS_IOS,
+  ITEM_WIDTH,
+  SIDE_MARGIN,
   SPRING_CONFIGURATION,
-} from "@utils/contextMenu/contstants";
+} from "@utils/contextMenu/constants";
 import { BlurView } from "expo-blur";
 import React, { FC, memo, useEffect, useMemo } from "react";
 import {
+  Platform,
   StyleSheet,
   TouchableWithoutFeedback,
   useColorScheme,
@@ -27,13 +31,10 @@ import Animated, {
   withTiming,
 } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-const AnimatedBlurView = IS_IOS
-  ? Animated.createAnimatedComponent(BlurView)
-  : Animated.createAnimatedComponent(View);
-
-const SIDE_MARGIN = 20;
-const ITEM_WIDTH = 150;
-const AUXILIARY_VIEW_MIN_HEIGHT = 190;
+const AnimatedBlurView =
+  Platform.OS === "ios"
+    ? Animated.createAnimatedComponent(BlurView)
+    : Animated.createAnimatedComponent(View);
 
 const BackdropComponent: FC<{
   isActive: boolean;
@@ -73,7 +74,7 @@ const BackdropComponent: FC<{
     });
   }, [activeValue, isActive, opacityValue, intensityValue]);
   const menuHeight = useMemo(() => {
-    return items.length * 44 + 10;
+    return calculateMenuHeight(items.length);
   }, [items]);
 
   const animatedContainerProps = useAnimatedProps(() => {
