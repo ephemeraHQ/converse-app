@@ -10,7 +10,6 @@ import com.android.volley.toolbox.Volley
 import org.json.JSONObject
 import org.xmtp.android.library.Client
 import org.xmtp.android.library.messages.PrivateKeyBuilder
-import org.xmtp.android.library.Util
 import kotlin.coroutines.resume
 import android.util.Base64
 import android.util.Base64.NO_WRAP
@@ -59,7 +58,7 @@ suspend fun putGroupInviteRequest(appContext: Context, apiURI: String, xmtpClien
     val groupInviteEndpoint = "$apiURI/api/groupJoinRequest/$joinRequestId"
 
     val messageToSign = "XMTP_IDENTITY".toByteArray(Charsets.UTF_8)
-    val signature = Base64.encodeToString(xmtpClient.keys.identityKey.sign(Util.keccak256(messageToSign)).toByteArray(), NO_WRAP)
+    val signature = Base64.encodeToString(xmtpClient.keys.identityKey.sign(messageToSign).toByteArray(), NO_WRAP)
     val address = xmtpClient.address
     val body = JSONObject().apply {
         put("status", status)
