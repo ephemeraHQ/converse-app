@@ -8,7 +8,7 @@ import {
   textSecondaryColor,
 } from "@styles/colors";
 import logger from "@utils/logger";
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, { useCallback, useRef, useState } from "react";
 import {
   Platform,
   StyleSheet,
