@@ -451,6 +451,7 @@ const ConversationListItem = memo(function ConversationListItem({
           if (isSplitScreen) return;
           openConversation();
         }}
+        onLongPress={onLongPress}
         style={styles.rippleRow}
         rippleColor={clickedItemBackgroundColor(colorScheme)}
       >

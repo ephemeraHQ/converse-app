@@ -1,3 +1,4 @@
+import { translate } from "@i18n";
 import {
   actionSecondaryColor,
   clickedItemBackgroundColor,
@@ -24,7 +25,7 @@ type Props = {
   toggleActivated: boolean;
 };
 
-export default function SuspectedSpamButton({
+export default function HiddenRequestsButton({
   spamCount,
   handlePress,
   toggleActivated = false,
@@ -38,7 +39,9 @@ export default function SuspectedSpamButton({
       onPress={handlePress}
     >
       <View style={styles.spamHeader}>
-        <Text style={styles.spamHeaderTitle}>Suspected Spam</Text>
+        <Text style={styles.spamHeaderTitle}>
+          {translate("hidden_requests")}
+        </Text>
         <Text style={styles.spamCount}>{spamCount}</Text>
         <Picto
           picto={toggleActivated ? "chevron.down" : "chevron.right"}
@@ -47,7 +50,7 @@ export default function SuspectedSpamButton({
               ? textPrimaryColor(colorScheme)
               : actionSecondaryColor(colorScheme)
           }
-          size={PictoSizes.suspectedSpam}
+          size={PictoSizes.hiddenRequests}
         />
       </View>
     </TouchableHighlight>

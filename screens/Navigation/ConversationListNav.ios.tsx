@@ -19,6 +19,7 @@ import {
   NavigationParamList,
   navigationAnimation,
 } from "./Navigation";
+import Button from "../../components/Button/Button.ios";
 import Connecting, {
   useShouldShowConnecting,
   useShouldShowConnectingOrSyncing,
@@ -28,6 +29,7 @@ import ProfileSettingsButton from "../../components/ConversationList/ProfileSett
 import { useAccountsStore, useChatStore } from "../../data/store/accountsStore";
 import { useSelect } from "../../data/store/storeHelpers";
 import { isDesktop } from "../../utils/device";
+import { navigate } from "../../utils/navigation";
 import { getReadableProfile, shortDisplayName } from "../../utils/str";
 import ConversationList from "../ConversationList";
 
@@ -107,8 +109,17 @@ export default function ConversationListNav() {
           ),
         headerBackTitle: getReadableProfile(currentAccount, currentAccount),
         headerRight: () => (
-          <View style={styles.headerRight}>
-            <NewConversationButton navigation={navigation} route={route} />
+          <View style={styles.headerRightContainer}>
+            <Button
+              title=""
+              variant="text"
+              picto="qrcode"
+              onPress={() => navigate("ShareProfile")}
+              hitSlop={8}
+            />
+            <View style={styles.offsetComposeIcon}>
+              <NewConversationButton navigation={navigation} route={route} />
+            </View>
           </View>
         ),
         headerTintColor: textPrimaryColor(colorScheme),
@@ -165,13 +176,18 @@ const styles = StyleSheet.create({
   warn: {
     marginLeft: 8,
   },
-  headerRight: {
-    marginTop: -10,
+  headerRightContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginTop: -8,
   },
   headerLeftContainer: {
     flexDirection: "row",
     alignItems: "flex-end",
     marginTop: -10,
+  },
+  offsetComposeIcon: {
+    top: -2,
   },
   headerLeftTouchable: {
     flexDirection: "row",

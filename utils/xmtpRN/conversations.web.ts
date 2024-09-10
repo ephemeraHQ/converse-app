@@ -1,3 +1,4 @@
+import { ConversationWithLastMessagePreview } from "@utils/conversation";
 import logger from "@utils/logger";
 import { Client, ConsentListEntry, Conversation, Stream } from "@xmtp/xmtp-js";
 
@@ -221,3 +222,26 @@ export const createPendingConversations = async (account: string) => {
 };
 
 export const loadConversationsHmacKeys = async (account: string) => {};
+
+export const sortRequestsBySpamScore = (
+  requests: ConversationWithLastMessagePreview[]
+) => {
+  const result = {
+    likelyNotSpam: [] as ConversationWithLastMessagePreview[],
+    likelySpam: [] as ConversationWithLastMessagePreview[],
+  };
+
+  requests.forEach((conversation) => {
+    const isLikelyNotSpam =
+      conversation.spamScore !== undefined &&
+      (conversation.spamScore === null || conversation.spamScore < 1);
+
+    if (isLikelyNotSpam) {
+      result.likelyNotSpam.push(conversation);
+    } else {
+      result.likelySpam.push(conversation);
+    }
+  });
+
+  return result;
+};

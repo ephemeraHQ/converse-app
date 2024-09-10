@@ -44,6 +44,29 @@ if running the backend locally
 adb reverse tcp:9875 tcp:9875
 ```
 
+# Building the App - Web
+
+### Install JS/React Native Dependencies
+
+```
+yarn
+```
+
+### Building the Web App
+```
+yarn start
+```
+
+Once the expo server starts press W to launch the web app
+
+### Please Note
+
+Currently Groups and V3 Identity is not supported on Web at the SDK layer, but is actively being worked on by the team
+
+Until then Converse web will only show 1 to 1 conversations and the majority of testing and development are native app focused.
+
+Web support is an end goal and the team is happy to fix any issues that are reported
+
 # Running the App
 
 Once the app builds it will open the Expo App

@@ -11,6 +11,7 @@ export enum AvatarSizes {
   pinnedConversation = 80,
   messageReactor = 22,
   reactionsOverlay = 56,
+  shareProfile = 56,
 }
 
 export enum PictoSizes {
@@ -29,7 +30,7 @@ export enum PictoSizes {
   replyButton = Platform.OS === "android" ? 16 : 14,
   searchBar = 24,
   sendButton = 34,
-  suspectedSpam = Platform.OS === "android" ? 25 : 10,
+  hiddenRequests = Platform.OS === "android" ? 25 : 10,
   swipableItem = Platform.OS === "ios" ? 18 : 30,
   tableViewImage = Platform.OS === "ios" ? 16 : 24,
   textButton = 15,
@@ -39,7 +40,7 @@ export enum PictoSizes {
 export const BorderRadius = {
   default: 8,
   small: 4,
-  large: 16,
+  large: 14,
 };
 
 export const Paddings = {

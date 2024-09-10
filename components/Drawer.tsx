@@ -1,5 +1,6 @@
 import { backgroundColor } from "@styles/colors";
 import { ReanimatedView } from "@utils/animations";
+import { useKeyboardAnimation } from "@utils/animations/keyboardAnimation";
 import React, {
   forwardRef,
   useCallback,
@@ -8,9 +9,11 @@ import React, {
   useMemo,
 } from "react";
 import {
+  Platform,
   StyleSheet,
   TouchableWithoutFeedback,
   useColorScheme,
+  useWindowDimensions,
   View,
 } from "react-native";
 import {
@@ -27,6 +30,7 @@ import {
   useSharedValue,
   withTiming,
 } from "react-native-reanimated";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 const DRAWER_ANIMATION_DURATION = 300;
 const DRAWER_THRESHOLD = 100;
@@ -89,10 +93,6 @@ export const Drawer = forwardRef<DrawerRef, DrawerProps>(function Drawer(
     [nativeGesture, panGesture]
   );
 
-  const animtedStyle = useAnimatedStyle(() => ({
-    transform: [{ translateY: translation.value }],
-  }));
-
   useEffect(() => {
     if (visible) {
       translation.value = withTiming(0, {
@@ -149,6 +149,14 @@ export const Drawer = forwardRef<DrawerRef, DrawerProps>(function Drawer(
       ["rgba(0, 0, 0, 0)", "rgba(0, 0, 0, 0.5)"]
     ),
   }));
+  const { height: keyboardHeight } = useKeyboardAnimation();
+  const { bottom } = useSafeAreaInsets();
+
+  const animtedStyle = useAnimatedStyle(() => ({
+    transform: [{ translateY: translation.value }],
+    paddingBottom: Platform.OS === "ios" ? keyboardHeight.value + bottom : 0,
+  }));
+
   if (!visible) {
     return null;
   }
@@ -178,6 +186,7 @@ export const Drawer = forwardRef<DrawerRef, DrawerProps>(function Drawer(
 
 const useStyles = () => {
   const colorScheme = useColorScheme();
+  const { height } = useWindowDimensions();
   return StyleSheet.create({
     gestureHandlerContainer: {
       flex: 1,
@@ -195,6 +204,7 @@ const useStyles = () => {
       paddingHorizontal: 15,
       borderTopRightRadius: 15,
       borderTopLeftRadius: 15,
+      maxHeight: Platform.OS === "ios" ? height * 0.8 : height * 0.6,
     },
     handle: {
       marginTop: 4,

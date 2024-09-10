@@ -12,7 +12,6 @@ import {
   tertiaryBackgroundColor,
 } from "@styles/colors";
 import { AvatarSizes, BorderRadius, Paddings } from "@styles/sizes";
-import { useConversationContext } from "@utils/conversation";
 import { favoritedEmojis } from "@utils/emojis/favoritedEmojis";
 import { getPreferredAvatar, getPreferredName } from "@utils/profile";
 import {
@@ -28,11 +27,10 @@ import {
   useColorScheme,
   View,
   StyleSheet,
-  Platform,
   TouchableOpacity,
-  useWindowDimensions,
   InteractionManager,
 } from "react-native";
+import { FlatList } from "react-native-gesture-handler";
 import Animated, {
   Easing,
   useAnimatedStyle,
@@ -58,10 +56,9 @@ interface MessageReactionsItemProps {
   index: number;
 }
 
-const INITIAL_DELAY = 800;
+const INITIAL_DELAY = 0;
 const ITEM_DELAY = 200;
 const ITEM_ANIMATION_DURATION = 500;
-const SIDE_MARGIN = 20;
 
 const keyExtractor = (item: [string, string[]]) => item[0];
 
@@ -120,30 +117,16 @@ const EmojiItem: FC<{
   message: MessageToDisplay;
   alreadySelected: boolean;
   dismissMenu?: () => void;
-}> = ({ content, message, alreadySelected, dismissMenu }) => {
+  currentUser: string;
+}> = ({ content, message, alreadySelected, currentUser }) => {
   const styles = useStyles();
-  const { conversation } = useConversationContext(["conversation"]);
   const handlePress = useCallback(() => {
-    if (!conversation) {
-      return;
-    }
     if (alreadySelected) {
-      removeReactionFromMessage(conversation, message, content);
+      removeReactionFromMessage(currentUser, message, content);
     } else {
-      addReactionToMessage(conversation, message, content);
+      addReactionToMessage(currentUser, message, content);
     }
-    InteractionManager.runAfterInteractions(() => {
-      if (Platform.OS === "ios") {
-        // Cleans up rerendering of the message reactions list
-        // Feels more animation, and less jarring
-        setTimeout(() => {
-          dismissMenu?.();
-        }, 100);
-      } else {
-        dismissMenu?.();
-      }
-    });
-  }, [alreadySelected, content, conversation, dismissMenu, message]);
+  }, [alreadySelected, content, currentUser, message]);
 
   return (
     <TouchableOpacity
@@ -175,7 +158,7 @@ const MessageReactionsListInner: FC<MessageReactionsListProps> = ({
   const { setReactMenuMessageId } = useChatStore(
     useSelect(["setReactMenuMessageId"])
   );
-  const currentUser = useCurrentAccount();
+  const currentUser = useCurrentAccount() as string;
   const styles = useStyles();
   const colorScheme = useColorScheme();
   const list = useMemo(() => {
@@ -225,25 +208,20 @@ const MessageReactionsListInner: FC<MessageReactionsListProps> = ({
   }, [dismissMenu, message.id, setReactMenuMessageId]);
 
   return (
-    <View
-      style={[
-        styles.container,
-        message.fromMe ? styles.fromMeContainer : styles.fromOtherContainer,
-      ]}
-    >
-      {/* {list.length !== 0 ? (
-        <View style={styles.reactionsContainer}>
-          <FlatList
-            data={list}
-            horizontal
-            renderItem={renderItem}
-            keyExtractor={keyExtractor}
-          />
-        </View>
+    <View style={styles.container}>
+      {list.length !== 0 ? (
+        <FlatList
+          contentContainerStyle={styles.reactionsContainer}
+          data={list}
+          horizontal
+          renderItem={renderItem}
+          keyExtractor={keyExtractor}
+          showsHorizontalScrollIndicator={false}
+        />
       ) : (
         <View style={styles.flex1} />
       )}
-      {hasEmojiOverlay && <View style={styles.flexGrow} />} */}
+      {hasEmojiOverlay && <View style={styles.flexGrow} />}
       <View
         style={[
           styles.emojiListContainer,
@@ -258,6 +236,7 @@ const MessageReactionsListInner: FC<MessageReactionsListProps> = ({
             content={emoji}
             alreadySelected={currentUserEmojiMap[emoji]}
             message={message}
+            currentUser={currentUser}
             dismissMenu={dismissMenu}
           />
         ))}
@@ -287,7 +266,6 @@ export const MessageReactionsList = React.memo(MessageReactionsListInner);
 
 const useStyles = () => {
   const colorScheme = useColorScheme();
-  const { width } = useWindowDimensions();
 
   return StyleSheet.create({
     itemContainer: {
@@ -316,18 +294,7 @@ const useStyles = () => {
       overflow: "hidden",
     },
     container: {
-      alignSelf: "center",
-      alignItems: "center",
-      justifyContent: "center",
-      flexGrow: 1,
-      marginHorizontal: SIDE_MARGIN,
-      width: width - SIDE_MARGIN * 2,
-    },
-    fromMeContainer: {
-      left: SIDE_MARGIN,
-    },
-    fromOtherContainer: {
-      right: SIDE_MARGIN,
+      flex: 1,
     },
     reactionsContainer: {
       borderRadius: BorderRadius.large,
@@ -341,6 +308,7 @@ const useStyles = () => {
       flexDirection: "row",
       justifyContent: "space-around",
       alignItems: "center",
+      alignSelf: "flex-end",
       borderRadius: BorderRadius.large,
       padding: Paddings.small,
       backgroundColor: backgroundColor(colorScheme),

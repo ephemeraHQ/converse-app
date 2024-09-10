@@ -171,6 +171,19 @@ const en = {
   view_and_restore: "View and Restore",
   view_removed_group_chat: "View removed group chat?",
 
+  // Requests
+  requests: "Requests",
+  clear_all: "Clear all",
+  clear_confirm:
+    "Do you confirm? This will block all accounts that are currently tagged as requests.",
+  clearing: "Clearing",
+  you_might_know: "You might know",
+  hidden_requests: "Hidden requests",
+  suggestion_text:
+    "Based on your onchain history, we've made some suggestions on who you may know.",
+  hidden_requests_warn:
+    "Requests containing messages that may be offensive or unwanted are moved to this folder.",
+
   // Conversation
   accept: "Accept",
   block: "Block",
@@ -207,12 +220,17 @@ const en = {
   app_version: "APP VERSION",
   security: "SECURITY",
 
+  // Context Menu
+  reply: "Reply",
+  copy: "Copy",
+  share: "Share",
+
   // Attachments
   photo_library: "Photo Library",
   camera: "Camera",
 
   disconnect: "Disconnect",
-  disconnect_delete_group_chats: "Disconnect and delete group chats",
+  disconnect_delete_local_data: "Disconnect and delete local data",
   disconnect_this_account: "Disconnect this account",
   disconnect_account_description:
     "Your group chats will be encrypted and saved on your device until you delete Converse. Your DMs will be backed up by the XMTP network.",
