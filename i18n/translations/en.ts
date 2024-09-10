@@ -72,6 +72,11 @@ const en = {
   app_version: "APP VERSION",
   security: "SECURITY",
 
+  // Context Menu
+  reply: "Reply",
+  copy: "Copy",
+  share: "Share",
+
   // Attachments
   photo_library: "Photo Library",
   camera: "Camera",
