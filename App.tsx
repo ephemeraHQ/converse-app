@@ -4,6 +4,7 @@ import "./polyfills";
 import { configure as configureCoinbase } from "@coinbase/wallet-mobile-sdk";
 import DebugButton from "@components/DebugButton";
 import { ActionSheetProvider } from "@expo/react-native-action-sheet";
+import { PortalProvider } from "@gorhom/portal";
 import { PrivyProvider } from "@privy-io/expo";
 import { queryClient } from "@queries/queryClient";
 import {
@@ -114,11 +115,13 @@ export default function App() {
                     : MaterialLightTheme
                 }
               >
-                <View style={styles.safe}>
-                  <XmtpEngine />
-                  <Main />
-                  <DebugButton ref={debugRef} />
-                </View>
+                <PortalProvider>
+                  <View style={styles.safe}>
+                    <XmtpEngine />
+                    <Main />
+                    <DebugButton ref={debugRef} />
+                  </View>
+                </PortalProvider>
               </PaperProvider>
             </ActionSheetProvider>
           </AppKeyboardProvider>

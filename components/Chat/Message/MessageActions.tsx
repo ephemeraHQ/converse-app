@@ -1,11 +1,17 @@
-import { MessageContextMenuWrapperIOS } from "@components/MessageContextMenuWrappers/MessageContextMenuWrapperiOS";
+import { MessageContextMenu } from "@components/Chat/Message/MessageContextMenu";
+import { TableViewItemType } from "@components/TableView/TableView";
+import { TableViewPicto } from "@components/TableView/TableViewImage";
 import { useSelect } from "@data/store/storeHelpers";
+import { translate } from "@i18n/index";
+import Clipboard from "@react-native-clipboard/clipboard";
 import {
   messageBubbleColor,
   messageHighlightedBubbleColor,
   myMessageBubbleColor,
   myMessageHighlightedBubbleColor,
 } from "@styles/colors";
+import { isFrameMessage } from "@utils/frames";
+import { navigate } from "@utils/navigation";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { Platform, StyleSheet, useColorScheme, View } from "react-native";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
@@ -18,9 +24,13 @@ import Animated, {
   useSharedValue,
   withTiming,
   withSpring,
+  measure,
+  useAnimatedRef,
+  withDelay,
 } from "react-native-reanimated";
 
 import { MessageToDisplay } from "./Message";
+import { MessageReactionsList } from "./MessageReactionsList";
 import MessageTail from "./MessageTail";
 import { EmojiPicker } from "../../../containers/EmojiPicker";
 import { useCurrentAccount } from "../../../data/store/accountsStore";
@@ -46,6 +56,12 @@ type Props = {
   hideBackground: boolean;
 };
 
+enum ContextMenuActions {
+  REPLY = "Reply",
+  COPY_MESSAGE = "Copy",
+  SHARE_FRAME = "Share",
+}
+
 export default function ChatMessageActions({
   children,
   message,
@@ -62,6 +78,59 @@ export default function ChatMessageActions({
   const { setContextMenuShown } = useAppStore(
     useSelect(["setContextMenuShown"])
   );
+  const opacity = useSharedValue(0);
+  const scale = useSharedValue(0.7);
+  const translateY = useSharedValue(20);
+  const itemRectY = useSharedValue(0);
+  const itemRectX = useSharedValue(0);
+  const itemRectHeight = useSharedValue(0);
+  const itemRectWidth = useSharedValue(0);
+  const containerRef = useAnimatedRef<View>();
+  const [isActive, setIsActive] = useState(false);
+
+  const scaleBack = useCallback(() => {
+    "worklet";
+    scale.value = withTiming(1, {
+      duration: 150 / 2,
+    });
+  }, [scale]);
+
+  const activateAnimation = useCallback(() => {
+    "worklet";
+    const measured = measure(containerRef);
+    if (!measured) return;
+
+    itemRectY.value = measured.pageY;
+    itemRectX.value = measured.pageX;
+    itemRectHeight.value = measured.height;
+    itemRectWidth.value = measured.width;
+    opacity.value = withDelay(100, withTiming(0));
+  }, [
+    containerRef,
+    itemRectY,
+    itemRectX,
+    itemRectHeight,
+    itemRectWidth,
+    opacity,
+  ]);
+
+  const onLongHoldCompletion = useCallback(
+    (isFinised?: boolean) => {
+      "worklet";
+      console.log("isFinised", isFinised);
+      if (isFinised) {
+        activateAnimation();
+        runOnJS(setIsActive)(true);
+        scaleBack();
+      }
+    },
+    [activateAnimation, scaleBack]
+  );
+
+  const scaleHold = useCallback(() => {
+    "worklet";
+    scale.value = withTiming(1.05, { duration: 210 }, onLongHoldCompletion);
+  }, [scale, onLongHoldCompletion]);
 
   const canAddReaction =
     message.status !== "sending" && message.status !== "error";
@@ -98,20 +167,16 @@ export default function ChatMessageActions({
   const longPressGesture = useMemo(() => {
     return Gesture.LongPress()
       .onStart(() => {
-        converseEventEmitter.emit("scrollChatToMessage", {
-          messageId: message.id,
-          animated: true,
-        });
+        scaleHold();
         setContextMenuShown(message.id);
       })
+      .onEnd(() => {
+        scaleBack();
+      })
       .runOnJS(true);
-  }, [message.id, setContextMenuShown]);
+  }, [message.id, scaleBack, scaleHold, setContextMenuShown]);
 
   const composed = useMemo(() => {
-    // iOS Context Menu will handle the long press itself
-    if (Platform.OS === "ios") {
-      return Gesture.Simultaneous(tapGesture, doubleTapGesture);
-    }
     return Gesture.Simultaneous(tapGesture, doubleTapGesture, longPressGesture);
   }, [tapGesture, doubleTapGesture, longPressGesture]);
 
@@ -210,9 +275,64 @@ export default function ChatMessageActions({
       UUID_REGEX.test(message.id));
   const [hasAnimatedIn, setHasAnimatedIn] = useState(false);
 
-  const opacity = useSharedValue(0);
-  const scale = useSharedValue(0.7);
-  const translateY = useSharedValue(20);
+  const triggerReplyToMessage = useCallback(() => {
+    converseEventEmitter.emit("triggerReplyToMessage", message);
+  }, [message]);
+
+  const frameURL = useMemo(() => {
+    const isFrame = isFrameMessage(message);
+    if (isFrame) {
+      const frames = useFramesStore
+        .getState()
+        .getFramesForURLs(message.converseMetadata?.frames || []);
+      return frames[0]?.url;
+    }
+    return null;
+  }, [message]);
+
+  const contextMenuItems = useMemo(() => {
+    const items: TableViewItemType[] = [];
+    items.push({
+      title: translate("reply"),
+      action: triggerReplyToMessage,
+      id: ContextMenuActions.REPLY,
+      rightView: <TableViewPicto symbol="arrowshape.turn.up.left" />,
+    });
+    if (!isAttachment && !isTransaction) {
+      items.push({
+        title: translate("copy"),
+        rightView: <TableViewPicto symbol="doc.on.doc" />,
+        id: ContextMenuActions.COPY_MESSAGE,
+        action: () => {
+          if (message.content) {
+            Clipboard.setString(message.content);
+          } else if (message.contentFallback) {
+            Clipboard.setString(message.contentFallback);
+          }
+        },
+      });
+    }
+    if (frameURL) {
+      items.push({
+        title: translate("share"),
+        rightView: <TableViewPicto symbol="square.and.arrow.up" />,
+        id: ContextMenuActions.SHARE_FRAME,
+        action: () => {
+          if (frameURL) {
+            navigate("ShareFrame", { frameURL });
+          }
+        },
+      });
+    }
+    return items;
+  }, [
+    frameURL,
+    isAttachment,
+    isTransaction,
+    message.content,
+    message.contentFallback,
+    triggerReplyToMessage,
+  ]);
 
   useEffect(() => {
     if (shouldAnimateIn && !hasAnimatedIn) {
@@ -253,82 +373,128 @@ export default function ChatMessageActions({
       transform: [{ scale: scale.value }, { translateY: translateY.value }],
     };
   });
+
+  const onContextCloseAnimation = useCallback(() => {
+    "worklet";
+    opacity.value = 1;
+    runOnJS(setIsActive)(false);
+  }, [setIsActive, opacity]);
+
+  const onContextClose = useCallback(() => {
+    onContextCloseAnimation();
+  }, [onContextCloseAnimation]);
+
   // We use a mix of Gesture Detector AND TouchableOpacity
   // because GestureDetector is better for dual tap but if
   // we add the gesture detector for long press the long press
   // in the parsed text stops working (https://github.com/software-mansion/react-native-gesture-handler/issues/867)
 
+  const StyledMessage = useMemo(() => {
+    return () => (
+      <>
+        <ReanimatedTouchableOpacity
+          activeOpacity={1}
+          style={[
+            styles.messageBubble,
+            message.fromMe ? styles.messageBubbleMe : undefined,
+            {
+              backgroundColor: hideBackground
+                ? "transparent"
+                : initialBubbleBackgroundColor,
+            },
+            highlightingMessage ? animatedBackgroundStyle : undefined,
+            Platform.select({
+              default: {},
+              android: {
+                // Messages not from me
+                borderBottomLeftRadius:
+                  !message.fromMe && message.hasNextMessageInSeries ? 2 : 18,
+                borderTopLeftRadius:
+                  !message.fromMe && message.hasPreviousMessageInSeries
+                    ? 2
+                    : 18,
+                // Messages from me
+                borderBottomRightRadius:
+                  message.fromMe && message.hasNextMessageInSeries ? 2 : 18,
+                borderTopRightRadius:
+                  message.fromMe && message.hasPreviousMessageInSeries ? 2 : 18,
+              },
+            }),
+          ]}
+        >
+          {children}
+        </ReanimatedTouchableOpacity>
+        {!message.hasNextMessageInSeries &&
+          !isFrame &&
+          !isAttachment &&
+          !isTransaction &&
+          !hideBackground &&
+          (Platform.OS === "ios" || Platform.OS === "web") && (
+            <MessageTail
+              style={[
+                {
+                  color: initialBubbleBackgroundColor,
+                },
+                highlightingMessage ? iosAnimatedTailStyle : undefined,
+              ]}
+              fromMe={message.fromMe}
+              colorScheme={colorScheme}
+              hideBackground={hideBackground}
+            />
+          )}
+      </>
+    );
+  }, [
+    styles.messageBubble,
+    styles.messageBubbleMe,
+    message.fromMe,
+    message.hasNextMessageInSeries,
+    message.hasPreviousMessageInSeries,
+    hideBackground,
+    initialBubbleBackgroundColor,
+    highlightingMessage,
+    animatedBackgroundStyle,
+    children,
+    isFrame,
+    isAttachment,
+    isTransaction,
+    iosAnimatedTailStyle,
+    colorScheme,
+  ]);
+
   return (
     <>
       <GestureDetector gesture={composed}>
         <View style={[{ width: "100%" }, { overflow: "visible" }]}>
-          <Animated.View style={[animateInStyle, styles.animateInWrapper]}>
-            <ReanimatedTouchableOpacity
-              activeOpacity={1}
-              style={[
-                styles.messageBubble,
-                message.fromMe ? styles.messageBubbleMe : undefined,
-                {
-                  backgroundColor: hideBackground
-                    ? "transparent"
-                    : initialBubbleBackgroundColor,
-                },
-                highlightingMessage ? animatedBackgroundStyle : undefined,
-                Platform.select({
-                  default: {},
-                  android: {
-                    // Messages not from me
-                    borderBottomLeftRadius:
-                      !message.fromMe && message.hasNextMessageInSeries
-                        ? 2
-                        : 18,
-                    borderTopLeftRadius:
-                      !message.fromMe && message.hasPreviousMessageInSeries
-                        ? 2
-                        : 18,
-                    // Messages from me
-                    borderBottomRightRadius:
-                      message.fromMe && message.hasNextMessageInSeries ? 2 : 18,
-                    borderTopRightRadius:
-                      message.fromMe && message.hasPreviousMessageInSeries
-                        ? 2
-                        : 18,
-                  },
-                }),
-              ]}
-            >
-              <MessageContextMenuWrapperIOS
-                message={message}
-                reactions={reactions}
-                hideBackground={hideBackground}
-              >
-                {children}
-              </MessageContextMenuWrapperIOS>
-            </ReanimatedTouchableOpacity>
-            {!message.hasNextMessageInSeries &&
-              !isFrame &&
-              !isAttachment &&
-              !isTransaction &&
-              !hideBackground &&
-              (Platform.OS === "ios" || Platform.OS === "web") && (
-                <MessageTail
-                  style={[
-                    {
-                      color: initialBubbleBackgroundColor,
-                    },
-                    highlightingMessage ? iosAnimatedTailStyle : undefined,
-                  ]}
-                  fromMe={message.fromMe}
-                  colorScheme={colorScheme}
-                  hideBackground={hideBackground}
-                />
-              )}
+          <Animated.View
+            ref={containerRef}
+            style={[animateInStyle, styles.animateInWrapper]}
+          >
+            <StyledMessage />
           </Animated.View>
         </View>
       </GestureDetector>
-      {/* <View style={{width: 50, height: 20, backgroundColor: "red"}} />
-      <GestureDetector gesture={composedGesture}>{children}</GestureDetector> */}
       <EmojiPicker message={message} />
+
+      <MessageContextMenu
+        items={contextMenuItems}
+        auxiliaryView={
+          <MessageReactionsList
+            dismissMenu={onContextClose}
+            reactions={reactions}
+            message={message}
+          />
+        }
+        isActive={isActive}
+        onClose={onContextClose}
+        itemRectY={itemRectY}
+        itemRectX={itemRectX}
+        itemRectHeight={itemRectHeight}
+        itemRectWidth={itemRectWidth}
+        fromMe={message.fromMe}
+      >
+        <StyledMessage />
+      </MessageContextMenu>
     </>
   );
 }
