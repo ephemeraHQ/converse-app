@@ -1,3 +1,4 @@
+import { translate } from "@i18n";
 import { textSecondaryColor } from "@styles/colors";
 import logger from "@utils/logger";
 import { thirdwebClient } from "@utils/thirdweb";
@@ -97,9 +98,9 @@ export default function WalletSelector() {
   const alreadyConnectedToPrivy = useHasOnePrivyAccount();
   return (
     <OnboardingComponent
-      title="GM"
+      title={translate("walletSelector.title")}
       picto="message.circle.fill"
-      subtitle="Converse lets you communicate and transact freely and safely."
+      subtitle={translate("walletSelector.subtitle")}
     >
       <View
         style={[
@@ -112,15 +113,28 @@ export default function WalletSelector() {
       >
         {!alreadyConnectedToPrivy && (
           <TableView
-            title="CONVERSE ACCOUNT"
+            title={translate("walletSelector.converseAccount.title")}
             items={[
               {
                 id: "phone",
                 leftView: <TableViewEmoji emoji="📞" />,
-                title: "Connect via Phone",
+                title: translate(
+                  "walletSelector.converseAccount.connectViaPhone"
+                ),
                 rightView,
                 action: () => {
                   setConnectionMethod("phone");
+                },
+              },
+              {
+                id: "ephemeral",
+                leftView: <TableViewEmoji emoji="☁️" />,
+                title: translate(
+                  "walletSelector.converseAccount.createEphemeral"
+                ),
+                rightView,
+                action: () => {
+                  setConnectionMethod("ephemeral");
                 },
               },
             ]}
@@ -129,12 +143,14 @@ export default function WalletSelector() {
 
         {hasInstalledWallets && !isDesktop && (
           <TableView
-            title="INSTALLED APPS"
+            title={translate("walletSelector.installedApps.title")}
             items={walletsInstalled.list.map((w) => ({
               id: w.name,
               leftView: <TableViewImage imageURI={w.iconURL} />,
               rightView,
-              title: `Connect ${w.name}`,
+              title: translate("walletSelector.installedApps.connectWallet", {
+                walletName: w.name,
+              }),
               action: async () => {
                 setLoading(true);
                 setConnectionMethod("wallet");
@@ -187,10 +203,10 @@ export default function WalletSelector() {
         <TableView
           title={
             isDesktop
-              ? "CONNECTION OPTIONS"
+              ? translate("walletSelector.connectionOptions.title")
               : hasInstalledWallets
-              ? "OTHER OPTIONS"
-              : "CONNECT EXISTING WALLET"
+              ? translate("walletSelector.connectionOptions.otherOptions")
+              : translate("walletSelector.connectionOptions.connectForDevs")
           }
           items={[
             // {
@@ -211,19 +227,21 @@ export default function WalletSelector() {
             //   },
             // },
             {
-              id: "seedphrase",
+              id: "privateKey",
               leftView: <TableViewEmoji emoji="🔑" />,
-              title: "Connect via key",
+              title: translate(
+                "walletSelector.connectionOptions.connectViaKey"
+              ),
               rightView,
               action: () => {
-                setConnectionMethod("seedPhrase");
+                setConnectionMethod("privateKey");
               },
             },
           ]}
         />
         {!hasInstalledWallets && !isDesktop && (
           <TableView
-            title="POPULAR MOBILE APPS"
+            title={translate("walletSelector.popularMobileApps.title")}
             items={POPULAR_WALLETS.map((w) => ({
               id: w.name,
               title: w.name,
@@ -238,7 +256,7 @@ export default function WalletSelector() {
       </View>
       {addingNewAccount && (
         <Button
-          title="Cancel"
+          title={translate("walletSelector.cancel")}
           variant="text"
           style={[styles.cancelButton, { top: insets.top + 9 }]}
           onPress={() => setAddingNewAccount(false)}

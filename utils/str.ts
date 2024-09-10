@@ -135,24 +135,31 @@ export const strByteSize = (str: string) => new Blob([str]).size;
 export const useLoopTxt = (
   intervalMs: number,
   options: string[],
-  active: boolean
+  active: boolean,
+  loop: boolean = true
 ) => {
   const [step, setStep] = useState(0);
   const interval = useRef<NodeJS.Timeout | undefined>();
-  const startInterval = useCallback(() => {
-    if (interval.current) return;
-    setStep(0);
-    interval.current = setInterval(() => {
-      setStep((s) => s + 1);
-    }, intervalMs);
-  }, [intervalMs]);
-
   const stopInterval = useCallback(() => {
     if (interval.current) {
       clearInterval(interval.current);
       interval.current = undefined;
     }
   }, []);
+
+  const startInterval = useCallback(() => {
+    if (interval.current) return;
+    setStep(0);
+    interval.current = setInterval(() => {
+      setStep((s) => {
+        if (!loop && s === options.length - 1) {
+          stopInterval();
+          return s;
+        }
+        return s + 1;
+      });
+    }, intervalMs);
+  }, [intervalMs, loop, stopInterval, options.length]);
 
   useEffect(() => {
     return stopInterval;

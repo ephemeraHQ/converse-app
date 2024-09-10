@@ -1,3 +1,4 @@
+import { translate } from "@i18n";
 import { useEmbeddedWallet, useLoginWithSMS, usePrivy } from "@privy-io/expo";
 import {
   backgroundColor,
@@ -23,6 +24,7 @@ import { OtpInput, OtpInputRef } from "react-native-otp-entry";
 import PhoneInput from "react-native-phone-number-input";
 
 import OnboardingComponent from "./OnboardingComponent";
+import ValueProps from "./ValueProps";
 import Button from "../../components/Button/Button";
 import { useOnboardingStore } from "../../data/store/onboardingStore";
 import { useSelect } from "../../data/store/storeHelpers";
@@ -90,7 +92,7 @@ export default function PrivyConnect() {
   const sendPhone = useCallback(async () => {
     const parsed = LibPhoneNumber.parsePhoneNumberFromString(formattedPhone);
     if (!parsed?.isValid()) {
-      Alert.alert("Please enter a valid phone number");
+      Alert.alert(translate("privyConnect.errors.invalidPhoneNumber"));
       return;
     }
     setLoading(true);
@@ -107,7 +109,7 @@ export default function PrivyConnect() {
       const user = await loginWithCode({ code: otpCode });
       if (!user) {
         setLoading(false);
-        Alert.alert("The code you entered is not valid, please try again");
+        Alert.alert(translate("privyConnect.errors.invalidCode"));
         otpInputRef.current?.clear();
       } else {
         setPrivyAccountId(user.id);
@@ -196,16 +198,26 @@ export default function PrivyConnect() {
 
   return (
     <OnboardingComponent
-      title={status === "enter-phone" ? "Phone number" : "Confirmation code"}
+      title={
+        status === "enter-phone"
+          ? translate("privyConnect.title.enterPhone")
+          : translate("privyConnect.title.verifyPhone")
+      }
+      subtitle={translate("privyConnect.subtitle")}
       picto="phone"
-      primaryButtonText={status === "enter-phone" ? "Continue" : undefined}
+      primaryButtonText={
+        status === "enter-phone"
+          ? translate("privyConnect.buttons.continue")
+          : undefined
+      }
       primaryButtonAction={sendPhone}
-      backButtonText="Back to home screen"
+      backButtonText={translate("privyConnect.buttons.back")}
       backButtonAction={resetOnboarding}
       shrinkWithKeyboard
     >
       {status === "enter-phone" && (
         <>
+          <ValueProps />
           <PhoneInput
             ref={phoneInputRef}
             defaultCode={RNLocalize.getCountry() as CountryCode}
@@ -241,6 +253,7 @@ export default function PrivyConnect() {
             textInputProps={{
               placeholderTextColor: textSecondaryColor(colorScheme),
               selectionColor: textPrimaryColor(colorScheme),
+              placeholder: translate("privyConnect.phoneInput.placeholder"),
             }}
             codeTextStyle={styles.phoneCountryCode}
             renderDropdownImage={
@@ -254,9 +267,6 @@ export default function PrivyConnect() {
             // @ts-ignore
             flagSize={17}
           />
-          <Text style={styles.text}>
-            We need your phone number to identify you
-          </Text>
         </>
       )}
       {status === "verify-phone" && (
@@ -283,7 +293,8 @@ export default function PrivyConnect() {
             }}
           />
           <Text style={styles.text}>
-            Enter confirmation code sent to{"\n"}
+            {translate("privyConnect.otpInput.enterCode")}
+            {"\n"}
             {beautifulPhone}
           </Text>
           <Button
@@ -297,8 +308,10 @@ export default function PrivyConnect() {
             variant="text"
             title={
               retrySeconds > 0
-                ? `Resend code in ${retrySeconds} seconds...`
-                : "Resend code"
+                ? translate("privyConnect.resendCodeIn", {
+                    seconds: retrySeconds,
+                  })
+                : translate("privyConnect.buttons.resendCode")
             }
             onPress={() => {
               if (retrySeconds > 0) return;

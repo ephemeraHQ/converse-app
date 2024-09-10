@@ -168,8 +168,9 @@ const useStyles = () => {
       textAlign: "center",
       ...Platform.select({
         default: {
-          fontWeight: "700",
+          fontWeight: "600",
           fontSize: 34,
+          lineHeight: 40,
           color: textPrimaryColor(colorScheme),
         },
         android: {
@@ -186,7 +187,7 @@ const useStyles = () => {
       ...Platform.select({
         default: {
           fontSize: 17,
-          color: textPrimaryColor(colorScheme),
+          color: textSecondaryColor(colorScheme),
         },
         android: {
           fontSize: 14,

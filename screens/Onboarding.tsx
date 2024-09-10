@@ -6,10 +6,11 @@ import { useCallback, useEffect, useRef } from "react";
 import { Alert } from "react-native";
 
 import ConnectViaWallet from "../components/Onboarding/ConnectViaWallet";
+import CreateEphemeral from "../components/Onboarding/CreateEphemeral";
 import DesktopConnect from "../components/Onboarding/DesktopConnect";
 import DesktopConnectFlow from "../components/Onboarding/DesktopConnectFlow";
+import PrivateKeyConnect from "../components/Onboarding/PrivateKeyConnect";
 import PrivyConnect from "../components/Onboarding/PrivyConnect";
-import SeedPhraseConnect from "../components/Onboarding/SeedPhraseConnect";
 import WalletSelector from "../components/Onboarding/WalletSelector";
 import { initDb } from "../data/db";
 import { refreshProfileForAddress } from "../data/helpers/profiles/profilesUpdate";
@@ -151,10 +152,12 @@ export default function Onboarding() {
     return <ConnectViaWallet connectWithBase64Key={connectWithBase64Key} />;
   } else if (connectionMethod === "desktop") {
     return <DesktopConnect />;
-  } else if (connectionMethod === "seedPhrase") {
-    return <SeedPhraseConnect />;
+  } else if (connectionMethod === "privateKey") {
+    return <PrivateKeyConnect />;
   } else if (connectionMethod === "phone") {
     return <PrivyConnect />;
+  } else if (connectionMethod === "ephemeral") {
+    return <CreateEphemeral />;
   }
 
   return <WalletSelector />;
