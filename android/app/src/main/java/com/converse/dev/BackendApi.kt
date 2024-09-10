@@ -15,7 +15,6 @@ import android.util.Base64
 import android.util.Base64.NO_WRAP
 
 
-
 private suspend fun makePutRequest(appContext: Context, apiURI: String, address: String, signature: String, jsonObject: JSONObject): ByteArray {
 
     return suspendCancellableCoroutine { continuation ->
