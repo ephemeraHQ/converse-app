@@ -15,7 +15,6 @@ import React, {
 } from "react";
 import { Platform, StyleSheet, useColorScheme, View } from "react-native";
 import { gestureHandlerRootHOC } from "react-native-gesture-handler";
-import { HoldMenuProvider } from "react-native-hold-menu";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { NavigationParamList } from "./Navigation/Navigation";
@@ -37,7 +36,6 @@ import { converseEventEmitter } from "../utils/events";
 import { setTopicToNavigateTo, topicToNavigateTo } from "../utils/navigation";
 import { TextInputWithValue } from "../utils/str";
 import { loadOlderMessages } from "../utils/xmtpRN/messages";
-// import { HoldMenuProvider } from "@components/HoldMenu/HoldProvider";
 
 const Conversation = ({
   route,
@@ -299,9 +297,7 @@ const Conversation = ({
             setFrameTextInputFocused,
           }}
         >
-          <HoldMenuProvider safeAreaInsets={safeAreaInsets}>
-            <ConverseChat />
-          </HoldMenuProvider>
+          <ConverseChat />
         </ConversationContext.Provider>
       ) : (
         <View style={styles.filler} />
