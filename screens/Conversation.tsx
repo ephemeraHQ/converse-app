@@ -15,7 +15,6 @@ import React, {
 } from "react";
 import { Platform, StyleSheet, useColorScheme, View } from "react-native";
 import { gestureHandlerRootHOC } from "react-native-gesture-handler";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { NavigationParamList } from "./Navigation/Navigation";
 import ConverseChat from "../components/Chat/Chat";
@@ -169,7 +168,6 @@ const Conversation = ({
   }, []);
 
   const autofocus = route.params?.focus || isDesktop || Platform.OS === "web";
-  const safeAreaInsets = useSafeAreaInsets();
 
   useEffect(() => {
     const handleAutoFocus = () => {

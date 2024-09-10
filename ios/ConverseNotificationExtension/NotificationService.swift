@@ -175,10 +175,10 @@ func handleConverseNotification(contentHandler: ((UNNotificationContent) -> Void
           apiURI = sharedDefaults.string(forKey: "api-uri")?.replacingOccurrences(of: "\"", with: "")
         }
         
-       if let group = await getGroup(xmtpClient: xmtpClient, groupId: groupId), let apiURI = apiURI {
-//          try await group.addMembers(addresses: [address])
+        if let group = await getGroup(xmtpClient: xmtpClient, groupId: groupId), let apiURI = apiURI {
+          try await group.addMembers(addresses: [address])
           await putGroupInviteRequest(apiURI: apiURI, account: account, xmtpClient: xmtpClient, status: "ACCEPTED", joinRequestId: joinRequestId)
-       } 
+        }
       } else {
         sentryTrackMessage(message: "No client found for account", extras: ["account": account])
       }
