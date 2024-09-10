@@ -7,7 +7,7 @@ import {
 } from "@styles/colors";
 import { AvatarSizes } from "@styles/sizes";
 import * as Haptics from "expo-haptics";
-import React, { ReactNode, useCallback, useMemo, useRef } from "react";
+import React, { memo, ReactNode, useCallback, useMemo, useRef } from "react";
 import {
   Animated,
   ColorSchemeName,
@@ -41,7 +41,6 @@ import {
   isAllEmojisAndMaxThree,
 } from "../../../utils/messageContent";
 import { navigate } from "../../../utils/navigation";
-import { LimitedMap } from "../../../utils/objects";
 import { getPreferredAvatar, getPreferredName } from "../../../utils/profile";
 import { getMessageReactions } from "../../../utils/reactions";
 import { getReadableProfile } from "../../../utils/str";
@@ -444,29 +443,7 @@ function ChatMessage({ message, colorScheme, isGroup, isFrame }: Props) {
   );
 }
 
-// We use a cache for chat messages so that it doesn't rerender too often.
-// Indeed, since we use an inverted FlashList for chat, when a new message
-// arrives it is pushed at the BEGINNING of the array, and FlashList internals
-// rerenders a bunch of messages which can have an impact on performance.
-// With this LimitedMap we keep 50 rendered messages in RAM for better perf.
-
-type RenderedChatMessage = {
-  renderedMessage: JSX.Element;
-  message: MessageToDisplay;
-  colorScheme: ColorSchemeName;
-  isGroup: boolean;
-  isFrame: boolean;
-};
-
-const renderedMessages = new LimitedMap<string, RenderedChatMessage>(50);
-
-export default function CachedChatMessage({
-  account,
-  message,
-  colorScheme,
-  isGroup,
-  isFrame = false,
-}: Props) {
+export default memo(ChatMessage, (prevProps, nextProps) => {
   const keysChangesToRerender: (keyof MessageToDisplay)[] = [
     "id",
     "sent",
@@ -481,35 +458,13 @@ export default function CachedChatMessage({
     "nextMessageIsLoadingAttachment",
     "reactions",
   ];
-  const alreadyRenderedMessage = renderedMessages.get(
-    `${account}-${message.id}`
-  );
   const shouldRerender =
-    !alreadyRenderedMessage ||
-    alreadyRenderedMessage.colorScheme !== colorScheme ||
+    prevProps.colorScheme !== nextProps.colorScheme ||
     keysChangesToRerender.some(
-      (k) => message[k] !== alreadyRenderedMessage.message[k]
+      (k) => prevProps.message[k] !== nextProps.message[k]
     );
-  if (shouldRerender) {
-    const renderedMessage = ChatMessage({
-      account,
-      message,
-      colorScheme,
-      isGroup,
-      isFrame,
-    });
-    renderedMessages.set(`${account}-${message.id}`, {
-      message,
-      renderedMessage,
-      colorScheme,
-      isGroup,
-      isFrame,
-    });
-    return renderedMessage;
-  } else {
-    return alreadyRenderedMessage.renderedMessage;
-  }
-}
+  return !shouldRerender;
+});
 
 const useStyles = () => {
   const colorScheme = useColorScheme();

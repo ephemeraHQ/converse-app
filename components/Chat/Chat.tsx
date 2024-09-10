@@ -27,7 +27,7 @@ import { GroupChatPlaceholder } from "./ChatPlaceholder/GroupChatPlaceholder";
 import ConsentPopup from "./ConsentPopup/ConsentPopup";
 import { GroupConsentPopup } from "./ConsentPopup/GroupConsentPopup";
 import ChatInput from "./Input/Input";
-import CachedChatMessage, { MessageToDisplay } from "./Message/Message";
+import ChatMessage, { MessageToDisplay } from "./Message/Message";
 import TransactionInput from "./Transaction/TransactionInput";
 import {
   useCurrentAccount,
@@ -291,7 +291,7 @@ export default function Chat() {
   const renderItem = useCallback(
     ({ item }: { item: MessageToDisplay }) => {
       return (
-        <CachedChatMessage
+        <ChatMessage
           account={xmtpAddress}
           message={{ ...item }}
           colorScheme={colorScheme}
@@ -302,7 +302,6 @@ export default function Chat() {
     },
     [colorScheme, xmtpAddress, conversation?.isGroup, framesStore]
   );
-  const keyExtractor = useCallback((item: MessageToDisplay) => item.id, []);
 
   // The first message was really buggy on iOS & Android and this is due to FlashList
   // so we keep FlatList for new convos and switch to FlashList for bigger convos
@@ -456,6 +455,8 @@ export default function Chat() {
     </View>
   );
 }
+
+const keyExtractor = (item: MessageToDisplay) => item.id;
 
 const useStyles = () => {
   const colorScheme = useColorScheme();
