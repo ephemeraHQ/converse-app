@@ -20,6 +20,7 @@ import Animated, {
   useSharedValue,
 } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useShallow } from "zustand/react/shallow";
 
 import ChatPlaceholder from "./ChatPlaceholder/ChatPlaceholder";
 import { GroupChatPlaceholder } from "./ChatPlaceholder/GroupChatPlaceholder";
@@ -34,12 +35,8 @@ import {
   useRecommendationsStore,
   useChatStore,
 } from "../../data/store/accountsStore";
-import {
-  XmtpConversationWithUpdate,
-  ChatStoreType,
-} from "../../data/store/chatStore";
+import { XmtpConversationWithUpdate } from "../../data/store/chatStore";
 import { useFramesStore } from "../../data/store/framesStore";
-import { useSelect } from "../../data/store/storeHelpers";
 import { useIsSplitScreen } from "../../screens/Navigation/navHelpers";
 import {
   ReanimatedFlashList,
@@ -57,12 +54,9 @@ import { Recommendation } from "../Recommendations/Recommendation";
 
 const getListArray = (
   xmtpAddress?: string,
-  conversation?: XmtpConversationWithUpdate,
-  messageAttachments?: Pick<
-    ChatStoreType,
-    "messageAttachments"
-  >["messageAttachments"]
+  conversation?: XmtpConversationWithUpdate
 ) => {
+  const messageAttachments = useChatStore.getState().messageAttachments;
   const isAttachmentLoading = (messageId: string) => {
     const attachment = messageAttachments && messageAttachments[messageId];
     return attachment?.loading;
@@ -195,24 +189,33 @@ export default function Chat() {
     "onPullToRefresh",
   ]);
   const xmtpAddress = useCurrentAccount() as string;
-  const peerSocials = useProfilesStore((s) =>
-    conversation?.peerAddress
-      ? s.profiles[conversation.peerAddress]?.socials
-      : undefined
+  const peerSocials = useProfilesStore(
+    useShallow((s) =>
+      conversation?.peerAddress
+        ? s.profiles[conversation.peerAddress]?.socials
+        : undefined
+    )
   );
   const isSplitScreen = useIsSplitScreen();
-  const recommendationsData = useRecommendationsStore((s) =>
-    conversation?.peerAddress ? s.frens[conversation.peerAddress] : undefined
+  const recommendationsData = useRecommendationsStore(
+    useShallow((s) =>
+      conversation?.peerAddress ? s.frens[conversation.peerAddress] : undefined
+    )
   );
   const colorScheme = useColorScheme();
   const styles = useStyles();
-  const { messageAttachments } = useChatStore(
-    useSelect(["messageAttachments"])
+  const messageAttachmentsLength = useChatStore(
+    useShallow((s) => Object.keys(s.messageAttachments).length)
   );
   const listArray = useMemo(
-    () => getListArray(xmtpAddress, conversation, messageAttachments),
+    () => getListArray(xmtpAddress, conversation),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [xmtpAddress, conversation, conversation?.lastUpdateAt, messageAttachments]
+    [
+      xmtpAddress,
+      conversation,
+      conversation?.lastUpdateAt,
+      messageAttachmentsLength,
+    ]
   );
 
   const hideInputIfFrameFocused = Platform.OS !== "web";
