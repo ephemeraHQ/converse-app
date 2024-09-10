@@ -22,6 +22,7 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.suspendCancellableCoroutine
 import org.json.JSONObject
 import org.xmtp.android.library.Client
+import org.xmtp.android.library.ConsentState
 import org.xmtp.android.library.Conversation
 import org.xmtp.android.library.DecodedMessage
 import org.xmtp.android.library.Group
@@ -472,7 +473,15 @@ suspend fun handleGroupWelcome(
         }
         val spamScore = computeSpamScoreGroupWelcome(appContext, xmtpClient, group, apiURI)
         if (spamScore < 0) { // Message is going to main inbox
-            shouldShowNotification = true
+            // consent list loaded in computeSpamScoreGroupWelcome
+            val groupAllowed = xmtpClient.contacts.isGroupAllowed(groupId = group.id)
+            val groupDenied = xmtpClient.contacts.isGroupDenied(groupId = group.id)
+            // If group is already consented (either way) then don't show a notification for welcome as this will likely be a second+ installation
+            if (!groupAllowed && !groupDenied) {
+                shouldShowNotification = true
+            } else {
+                shouldShowNotification = false
+            }
         } else if (spamScore == 0.0) { // Message is Request
             shouldShowNotification = false
             // @todo : trackNewRequest()

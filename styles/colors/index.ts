@@ -1,8 +1,8 @@
 import { ColorSchemeName, Platform } from "react-native";
 import { MD3DarkTheme, MD3LightTheme } from "react-native-paper";
 
-const BACKGROUND_LIGHT = "#FFF";
-const BACKGROUND_DARK = "#111";
+export const BACKGROUND_LIGHT = "#FFF";
+export const BACKGROUND_DARK = "#111";
 
 export const backgroundColor = (colorScheme: ColorSchemeName) => {
   if (colorScheme === "dark")
@@ -39,8 +39,8 @@ export const chatInputBackgroundColor = (colorScheme: ColorSchemeName) => {
     : NAVIGATION_SECONDARY_BACKGROUND_LIGHT;
 };
 
-const TEXT_PRIMARY_COLOR_LIGHT = "#000";
-const TEXT_PRIMARY_COLOR_DARK = "#FFF";
+export const TEXT_PRIMARY_COLOR_LIGHT = "#000";
+export const TEXT_PRIMARY_COLOR_DARK = "#FFF";
 
 export const textPrimaryColor = (colorScheme: ColorSchemeName) => {
   if (colorScheme === "dark")
@@ -212,6 +212,14 @@ export const dangerColor = (colorScheme: ColorSchemeName) => {
     }
   }
   return colorScheme === "dark" ? "#FF453A" : "#FF3B30";
+};
+
+const REQUESTS_TEXT_LIGHT = "rgba(126, 0, 204, 1)";
+const REQUESTS_TEXT_DARK = "rgba(126, 0, 204, 1)";
+
+export const requestsTextColor = (colorScheme: ColorSchemeName) => {
+  if (colorScheme === "dark") return REQUESTS_TEXT_DARK;
+  return REQUESTS_TEXT_LIGHT;
 };
 
 // Generated using https://callstack.github.io/react-native-paper/docs/guides/theming#theme-properties

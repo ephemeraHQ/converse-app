@@ -7,6 +7,7 @@ import {
   Platform,
   StyleSheet,
   useWindowDimensions,
+  View,
 } from "react-native";
 import { FlatList } from "react-native-gesture-handler";
 import {
@@ -71,6 +72,7 @@ export const EmojiRowList: FC<EmojiRowListProps> = ({
         scrollEnabled={emojis.length > 1}
         keyExtractor={keyExtractor}
         renderItem={renderItem}
+        ListFooterComponent={() => <View style={styles.bottom} />}
       />
     </ReanimatedView>
   );
@@ -82,7 +84,9 @@ const useStyles = () => {
   return StyleSheet.create({
     container: {
       overflow: "hidden",
-      marginBottom: insets.bottom,
+    },
+    bottom: {
+      height: insets.bottom,
     },
   });
 };

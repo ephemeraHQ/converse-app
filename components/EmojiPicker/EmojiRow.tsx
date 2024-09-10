@@ -1,5 +1,5 @@
-import { CategorizedEmojisRecord } from "@utils/emojis/interfaces";
-import { FC } from "react";
+import { CategorizedEmojisRecord, Emoji } from "@utils/emojis/interfaces";
+import { FC, memo, useMemo } from "react";
 import { Platform, Pressable, StyleSheet, Text, View } from "react-native";
 
 interface EmojiRowProps {
@@ -7,21 +7,35 @@ interface EmojiRowProps {
   onPress: (emoji: string) => void;
 }
 
-export const EmojiRow: FC<EmojiRowProps> = ({ item, onPress }) => {
+export const EmojiRow: FC<EmojiRowProps> = memo(({ item, onPress }) => {
+  const items = useMemo(() => {
+    const sliced: (string | Emoji)[] = item.emojis.slice(0, 6);
+    while (sliced.length < 6) {
+      sliced.push("");
+    }
+    return sliced;
+  }, [item.emojis]);
   return (
     <View style={styles.rowContainer}>
-      {item.emojis.map((emoji) => (
-        <Pressable
-          key={emoji.emoji}
-          onPress={() => onPress(emoji.emoji)}
-          style={styles.pressable}
-        >
-          <Text style={styles.listEmoji}>{emoji.emoji}</Text>
-        </Pressable>
-      ))}
+      {items.map((emoji, id) => {
+        if (typeof emoji === "string")
+          return <View key={id} style={styles.empty} />;
+        return (
+          <Pressable
+            key={emoji.emoji}
+            onPress={() => onPress(emoji.emoji)}
+            style={styles.pressable}
+          >
+            <Text adjustsFontSizeToFit style={styles.listEmoji}>
+              {emoji.emoji}
+            </Text>
+          </Pressable>
+        );
+      })}
+      {item.emojis.length !== 6 && <View style={{ flexGrow: 1 }} />}
     </View>
   );
-};
+});
 
 const styles = StyleSheet.create({
   listEmoji: {
@@ -31,10 +45,16 @@ const styles = StyleSheet.create({
   },
   rowContainer: {
     flexDirection: "row",
+    width: "100%",
   },
   pressable: {
-    width: "auto",
+    flex: 1,
     marginHorizontal: Platform.OS === "ios" ? 8 : 0,
     paddingHorizontal: Platform.OS === "android" ? 8 : 0,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  empty: {
+    flex: 1,
   },
 });

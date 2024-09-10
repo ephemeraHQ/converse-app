@@ -5,13 +5,13 @@ import logger from "./logger";
 import { getPreferredName } from "./profile";
 import { getProfilesStore, useAccountsList } from "../data/store/accountsStore";
 import { XmtpConversation } from "../data/store/chatStore";
-import { ProfilesStoreType } from "../data/store/profilesStore";
+import { ProfileSocials, ProfilesStoreType } from "../data/store/profilesStore";
 
 const { humanize } = require("../vendor/humanhash");
 
 export const shortAddress = (address: string) =>
   address && address.length > 7
-    ? `${address.slice(0, 4)}...${address.slice(
+    ? `${address.slice(0, 6)}...${address.slice(
         address.length - 4,
         address.length
       )}`
@@ -45,15 +45,31 @@ export const capitalize = (str: string) => str[0].toUpperCase() + str.slice(1);
 export const addressPrefix = (address: string) =>
   (address && address.length >= 6 ? address.slice(0, 6) : address) || "";
 
-export const conversationName = (conversation: XmtpConversation) => {
+export const conversationName = (
+  conversation: XmtpConversation,
+  socials?: ProfileSocials
+) => {
   if (conversation.isGroup) {
     return (
       conversation.groupName ||
       capitalize(humanize(conversation.topic.slice(14, 46), 3, " "))
     );
   }
-  const defaultName = shortAddress(conversation.peerAddress);
-  return conversation.conversationTitle || defaultName;
+  if (conversation.conversationTitle) {
+    return conversation.conversationTitle;
+  }
+
+  if (socials) {
+    const preferredName = getPreferredName(socials, conversation.peerAddress);
+    if (preferredName) {
+      logger.error(
+        `1:1 conversation with ${conversation.peerAddress} has empty conversationTitle but it should not`
+      );
+      return preferredName;
+    }
+  }
+
+  return shortAddress(conversation.peerAddress);
 };
 
 export const formatGroupName = (topic: string, groupName?: string) =>

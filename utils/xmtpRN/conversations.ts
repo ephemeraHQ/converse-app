@@ -2,10 +2,10 @@ import { entifyWithAddress } from "@queries/entify";
 import { setGroupDescriptionQueryData } from "@queries/useGroupDescriptionQuery";
 import { setGroupMembersQueryData } from "@queries/useGroupMembersQuery";
 import { setGroupQueryData } from "@queries/useGroupQuery";
-import { arraysContainSameElements } from "@utils/array";
 import { converseEventEmitter } from "@utils/events";
-import { getGroupIdFromTopic } from "@utils/groupUtils/groupId";
+import { getGroupIdFromTopic, isGroupTopic } from "@utils/groupUtils/groupId";
 import logger from "@utils/logger";
+import { areSetsEqual } from "@utils/set";
 import {
   ConsentListEntry,
   ConversationContext,
@@ -289,19 +289,38 @@ export const stopStreamingGroups = async (account: string) => {
 };
 
 const listConversations = async (client: ConverseXmtpClientType) => {
+  const beforeList = new Date().getTime();
   const conversations = await client.conversations.list();
   conversations.forEach((c) => {
     setOpenedConversation(client.address, c);
   });
+  const afterList = new Date().getTime();
+  logger.debug(
+    `[XmtpRN] Listing ${
+      conversations.length
+    } 1:1 conversations from network took ${
+      (afterList - beforeList) / 1000
+    } sec`
+  );
 
   return conversations;
 };
 
 const listGroups = async (client: ConverseXmtpClientType) => {
   // @todo => this will be adapted once we have a syncAllGroups method
-  await fetchGroupsQuery(client.address);
+  const beforeSyncGroups = await fetchGroupsQuery(client.address);
+  beforeSyncGroups.ids.forEach((id) => {
+    setOpenedConversation(client.address, beforeSyncGroups.byId[id]);
+  });
   // Resync process
+  const beforeSyncAll = new Date().getTime();
   await client.conversations.syncAllGroups();
+  const afterSyncAll = new Date().getTime();
+  logger.debug(
+    `[Groups] Syncing all groups took ${
+      (afterSyncAll - beforeSyncAll) / 1000
+    } sec`
+  );
   // Now that it's synced, let's refresh
   const updatedGroups = await fetchGroupsQuery(client.address, 0);
   return updatedGroups.ids.map((id) => {
@@ -318,7 +337,6 @@ export const loadConversations = async (
 ) => {
   try {
     const client = (await getXmtpClient(account)) as ConverseXmtpClientType;
-    const now = new Date().getTime();
     if (!importedTopicsDataForAccount[account]) {
       importedTopicsDataForAccount[account] = true;
       await importBackedTopicsData(client);
@@ -327,13 +345,18 @@ export const loadConversations = async (
       listConversations(client),
       listGroups(client),
     ]);
+
+    const beforeCompareGroups = new Date().getTime();
+
+    const knownTopicsSet = new Set(knownTopics);
     const newConversations: ConversationWithCodecsType[] = [];
     const knownConversations: ConversationWithCodecsType[] = [];
+
     conversations.forEach((c) => {
-      if (!knownTopics.includes(c.topic)) {
-        newConversations.push(c);
-      } else {
+      if (knownTopicsSet.has(c.topic)) {
         knownConversations.push(c);
+      } else {
+        newConversations.push(c);
       }
     });
 
@@ -342,36 +365,39 @@ export const loadConversations = async (
     const updatedGroups: GroupWithCodecsType[] = [];
 
     groups.forEach((g) => {
-      if (!knownTopics.includes(g.topic)) {
+      if (!knownTopicsSet.has(g.topic)) {
         newGroups.push(g);
       } else {
         knownGroups.push(g);
         const existingGroup = getChatStore(account).getState().conversations[
           g.topic
         ] as XmtpGroupConversation;
+
         if (!existingGroup) {
           updatedGroups.push(g);
         } else {
-          // We check if the group need to be pushed again to Zustand & SQlite
-          // because only a few attributes can change after group creation
+          const currentMembersSet = new Set(existingGroup.groupMembers);
+          const newMembersSet = new Set(g.members.map((m) => m.addresses[0]));
+
           if (
             existingGroup.groupName !== g.name ||
             existingGroup.isActive !== g.isGroupActive ||
-            !arraysContainSameElements(
-              existingGroup.groupMembers,
-              g.members.map((m) => m.addresses[0])
-            )
+            !areSetsEqual(currentMembersSet, newMembersSet)
           ) {
             updatedGroups.push(g);
           }
         }
       }
     });
+
+    const afterCompareGroups = new Date().getTime();
+
     logger.debug(
-      `[XmtpRN] Listing ${conversations.length} conversations for ${
-        client.address
-      } took ${(new Date().getTime() - now) / 1000} seconds`
+      `[XmtpRN] Handled new & updated groups for ${client.address} in ${
+        (afterCompareGroups - beforeCompareGroups) / 1000
+      } sec`
     );
+
     const conversationsToSave = newConversations.map(
       protocolConversationToStateConversation
     );
@@ -381,6 +407,15 @@ export const loadConversations = async (
     const groupsToUpdate = updatedGroups.map((g) =>
       protocolGroupToStateConversation(account, g)
     );
+
+    const afterMappedConvos = new Date().getTime();
+
+    logger.debug(
+      `[XmtpRN] Mapped groups & conversations for ${client.address} in ${
+        (afterMappedConvos - afterCompareGroups) / 1000
+      } sec`
+    );
+
     saveConversations(client.address, [
       ...conversationsToSave,
       ...groupsToCreate,
@@ -409,8 +444,19 @@ export const loadConversations = async (
 export const updateConsentStatus = async (account: string) => {
   try {
     const client = (await getXmtpClient(account)) as ConverseXmtpClientType;
+    const beforeFetch = new Date().getTime();
     const consentList = await client.contacts.refreshConsentList();
+    const afterFetch = new Date().getTime();
+    logger.debug(
+      `[Consent] Fetched consent state in ${
+        (afterFetch - beforeFetch) / 1000
+      } sec`
+    );
     await saveConsentState(consentList, client.address);
+    const afterSave = new Date().getTime();
+    logger.debug(
+      `[Consent] SAved consent state in ${(afterSave - afterFetch) / 1000} sec`
+    );
   } catch (error) {
     logger.error(error, { context: "Failed to update consent status:" });
   }
@@ -525,10 +571,20 @@ export const getConversationWithTopic = async (
 ): Promise<ConversationWithCodecsType | GroupWithCodecsType | undefined> => {
   const alreadyConversation = openedConversations[account]?.[topic];
   if (alreadyConversation) return alreadyConversation;
-  // Let's try to import from keychain if we don't have it already
   const client = (await getXmtpClient(account)) as ConverseXmtpClientType;
-  await importSingleTopicData(client, [topic]);
-  return openedConversations[account]?.[topic];
+  if (isGroupTopic(topic)) {
+    const group = await client.conversations.findGroup(
+      getGroupIdFromTopic(topic)
+    );
+    if (group) {
+      setOpenedConversation(client.address, group);
+    }
+    return group;
+  } else {
+    // Let's try to import from keychain if we don't have it already
+    await importSingleTopicData(client, [topic]);
+    return openedConversations[account]?.[topic];
+  }
 };
 
 const createConversation = async (
@@ -631,8 +687,14 @@ export const refreshGroup = async (account: string, topic: string) => {
 
 export const loadConversationsHmacKeys = async (account: string) => {
   const client = (await getXmtpClient(account)) as ConverseXmtpClientType;
-
+  const before = new Date().getTime();
   const { hmacKeys } = await client.conversations.getHmacKeys();
+  const after = new Date().getTime();
+  logger.debug(
+    `[XmtpRn] Fetched ${Object.keys(hmacKeys).length} hmac keys in ${
+      (after - before) / 1000
+    } sec`
+  );
   return hmacKeys;
 };
 
@@ -681,17 +743,25 @@ const retrieveTopicsData = async (
 
 const importBackedTopicsData = async (client: ConverseXmtpClientType) => {
   try {
-    const beforeImport = new Date().getTime();
+    const beforeRetrieve = new Date().getTime();
     const topicsData = Object.values(await retrieveTopicsData(client.address));
+    const beforeImport = new Date().getTime();
+    logger.debug(
+      `[XmtpRN] Retrieved ${topicsData.length} topic data from mmkv in ${
+        (beforeImport - beforeRetrieve) / 1000
+      } sec`
+    );
     // If we have topics for this account, let's import them
     // so the first conversation.list() is faster
     if (topicsData.length > 0) {
       const importedConversations = await Promise.all(
         topicsData.map((data) => client.conversations.importTopicData(data))
       );
+
       importedConversations.forEach((conversation) => {
         setOpenedConversation(client.address, conversation);
       });
+
       const afterImport = new Date().getTime();
       logger.debug(
         `[XmtpRN] Imported ${

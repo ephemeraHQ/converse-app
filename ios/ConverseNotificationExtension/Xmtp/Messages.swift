@@ -107,12 +107,21 @@ func handleGroupWelcome(xmtpClient: XMTP.Client, apiURI: String?, pushToken: Str
   let messageId = "welcome-" + group.topic
   do {
     // group is already synced in getNewGroup method
+
     let groupName = try group.groupName()
     let spamScore = await computeSpamScoreGroupWelcome(client: xmtpClient, group: group, apiURI: apiURI)
     if spamScore < 0 { // Message is going to main inbox
-      shouldShowNotification = true
-      bestAttemptContent.title = groupName
-      bestAttemptContent.body = "You have been added to a new group"
+      // Consent list is loaded in computeSpamScoreGroupWelcome
+      let groupAllowed = await xmtpClient.contacts.isGroupAllowed(groupId: group.id)
+      let groupDenied = await xmtpClient.contacts.isGroupDenied(groupId: group.id)
+      // If group is already consented (either way) then don't show a notification for welcome as this will likely be a second+ installation
+      if !groupAllowed && !groupDenied {
+        shouldShowNotification = true
+        bestAttemptContent.title = groupName
+        bestAttemptContent.body = "You have been added to a new group"
+      } else {
+        shouldShowNotification = false
+      }
     } else if spamScore == 0 { // Message is Request
       shouldShowNotification = false
       trackNewRequest()

@@ -7,7 +7,8 @@ import {
   textPrimaryColor,
   textSecondaryColor,
 } from "@styles/colors";
-import React, { useCallback, useRef, useState } from "react";
+import logger from "@utils/logger";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
   Platform,
   StyleSheet,
@@ -105,6 +106,7 @@ export const UserProfile = ({ onboarding, navigation }: Props) => {
     try {
       await checkUsernameValid(address, profile.username);
     } catch (e: any) {
+      logger.error(e, { context: "UserProfile: Checking username valid" });
       setLoading(false);
       setErrorMessage(e?.response?.data?.message || "An unknown error occured");
       return;
@@ -136,6 +138,7 @@ export const UserProfile = ({ onboarding, navigation }: Props) => {
                   contentType: "image/jpeg",
                 });
         } catch (e: any) {
+          logger.error(e, { context: "UserProfile: uploading profile pic" });
           setErrorMessage(
             e?.response?.data?.message || "An unknown error occured"
           );
@@ -152,6 +155,7 @@ export const UserProfile = ({ onboarding, navigation }: Props) => {
       });
       await refreshProfileForAddress(address, address);
     } catch (e: any) {
+      logger.error(e, { context: "UserProfile: claiming and refreshing" });
       setErrorMessage(e?.response?.data?.message || "An unknown error occured");
       setLoading(false);
       return;

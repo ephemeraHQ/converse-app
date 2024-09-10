@@ -1,4 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
+import logger from "@utils/logger";
 import { getXmtpClient } from "@utils/xmtpRN/sync";
 
 import { groupsQueryKey } from "./QueryKeys";
@@ -19,8 +20,19 @@ const groupsQueryFn = async (account: string) => {
       ids: [],
     };
   }
+  const beforeSync = new Date().getTime();
   await client.conversations.syncGroups();
+  const afterSync = new Date().getTime();
+  logger.debug(
+    `[Groups] Fetching group list took ${(afterSync - beforeSync) / 1000} sec`
+  );
   const groups = await client.conversations.listGroups();
+  const afterList = new Date().getTime();
+  logger.debug(
+    `[Groups] Listing ${groups.length} groups took ${
+      (afterList - afterSync) / 1000
+    } sec`
+  );
   return entify(groups, (group) => group.topic);
 };
 

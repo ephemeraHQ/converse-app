@@ -152,11 +152,11 @@ export const syncXmtpClient = async (account: string) => {
   });
   try {
     const now = new Date().getTime();
-    updateConsentStatus(account);
-    const { newConversations, groups, newGroups } = await loadConversations(
-      account,
-      knownTopics
-    );
+    const {
+      newConversations,
+      groups,
+      newGroups = [],
+    } = await loadConversations(account, knownTopics);
     newConversations.forEach((c) => {
       queryConversationsFromTimestamp[c.topic] = 0;
     });
@@ -169,7 +169,9 @@ export const syncXmtpClient = async (account: string) => {
     await streamConversations(account).catch((e) => {
       onSyncLost(account, e);
     });
-    await streamGroups(account).catch((e) => onSyncLost(account, e));
+    await streamGroups(account).catch((e) => {
+      onSyncLost(account, e);
+    });
     // Streaming all dm messages (not groups because buggy)
     await streamAllMessages(account).catch((e) => {
       onSyncLost(account, e);
@@ -208,6 +210,7 @@ export const syncXmtpClient = async (account: string) => {
         ]);
     }
     currentBackoff = INITIAL_BACKOFF;
+    await updateConsentStatus(account);
     logger.info(`[XmtpRN] Finished syncing ${account}`);
   } catch (e) {
     onSyncLost(account, e);

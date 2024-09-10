@@ -1,6 +1,7 @@
 import {
   listItemSeparatorColor,
   navigationSecondaryBackgroundColor,
+  backgroundColor,
 } from "@styles/colors";
 import { Platform, useColorScheme } from "react-native";
 
@@ -18,10 +19,14 @@ export default function ShareProfileNav() {
       name="ShareProfile"
       component={ShareProfileScreen}
       options={{
-        headerTitle: "Your Converse link",
+        headerTitle: "",
         presentation: "modal",
+        headerShadowVisible: false,
         headerStyle: {
-          backgroundColor: navigationSecondaryBackgroundColor(colorScheme),
+          backgroundColor:
+            Platform.OS === "web"
+              ? navigationSecondaryBackgroundColor(colorScheme)
+              : backgroundColor(colorScheme),
           borderBottomColor:
             Platform.OS === "web"
               ? listItemSeparatorColor(colorScheme)

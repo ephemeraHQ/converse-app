@@ -16,12 +16,7 @@ import {
   removeReactionFromMessage,
 } from "@utils/reactions";
 import { useCallback, useMemo, useRef, useState } from "react";
-import {
-  View,
-  StyleSheet,
-  useColorScheme,
-  useWindowDimensions,
-} from "react-native";
+import { View, StyleSheet, useColorScheme } from "react-native";
 import { Text } from "react-native-paper";
 
 const flatEmojis = emojis.flatMap((category) => category.data);
@@ -56,7 +51,7 @@ const myEmojis = sliceEmojis(
 );
 
 export const EmojiPicker = ({ message }: { message: MessageToDisplay }) => {
-  const currentUser = useCurrentAccount();
+  const currentUser = useCurrentAccount() as string;
   const { reactionMenuMessageId, setReactMenuMessageId } = useChatStore(
     useSelect(["reactionMenuMessageId", "setReactMenuMessageId"])
   );
@@ -94,6 +89,7 @@ export const EmojiPicker = ({ message }: { message: MessageToDisplay }) => {
   }, [searchInput]);
   const closeMenu = useCallback(() => {
     setReactMenuMessageId(null);
+    setSearchInput("");
   }, [setReactMenuMessageId]);
   const { conversation } = useConversationContext(["conversation"]);
   const handleReaction = useCallback(
@@ -101,13 +97,13 @@ export const EmojiPicker = ({ message }: { message: MessageToDisplay }) => {
       if (!conversation) return;
       const alreadySelected = currentUserEmojiMap[emoji];
       if (alreadySelected) {
-        removeReactionFromMessage(conversation, message, emoji);
+        removeReactionFromMessage(currentUser, message, emoji);
       } else {
-        addReactionToMessage(conversation, message, emoji);
+        addReactionToMessage(currentUser, message, emoji);
       }
       drawerRef?.current?.closeDrawer(closeMenu);
     },
-    [conversation, message, currentUserEmojiMap, closeMenu]
+    [closeMenu, conversation, currentUser, currentUserEmojiMap, message]
   );
 
   return (
@@ -139,9 +135,11 @@ export const EmojiPicker = ({ message }: { message: MessageToDisplay }) => {
 
 const useStyles = () => {
   const colorScheme = useColorScheme();
-  const { height } = useWindowDimensions();
   return StyleSheet.create({
-    container: { flex: 1, maxHeight: height * 0.75, height: "auto" },
+    container: {
+      flex: 1,
+      height: "auto",
+    },
     headerText: {
       fontSize: 13,
       padding: 8,

@@ -4,12 +4,15 @@ import "./polyfills";
 import { configure as configureCoinbase } from "@coinbase/wallet-mobile-sdk";
 import DebugButton from "@components/DebugButton";
 import { ActionSheetProvider } from "@expo/react-native-action-sheet";
+import { PortalProvider } from "@gorhom/portal";
 import { PrivyProvider } from "@privy-io/expo";
+import { queryClient } from "@queries/queryClient";
 import {
   backgroundColor,
   MaterialDarkTheme,
   MaterialLightTheme,
 } from "@styles/colors";
+import { QueryClientProvider } from "@tanstack/react-query";
 import { useCoinbaseWalletListener } from "@utils/coinbaseWallet";
 import { converseEventEmitter } from "@utils/events";
 import logger from "@utils/logger";
@@ -34,7 +37,6 @@ import {
   runAsyncUpdates,
   updateLastVersionOpen,
 } from "./data/updates/asyncUpdates";
-import { QueryClientProvider } from "./queries/QueryProvider";
 import Main from "./screens/Main";
 import { registerBackgroundFetchTask } from "./utils/background";
 import { privySecureStorage } from "./utils/keychain/helpers";
@@ -101,7 +103,7 @@ export default function App() {
     Platform.OS === "ios" ? KeyboardProvider : React.Fragment;
 
   return (
-    <QueryClientProvider>
+    <QueryClientProvider client={queryClient}>
       <PrivyProvider appId={config.privy.appId} storage={privySecureStorage}>
         <ThirdwebProvider>
           <AppKeyboardProvider>
@@ -113,11 +115,13 @@ export default function App() {
                     : MaterialLightTheme
                 }
               >
-                <View style={styles.safe}>
-                  <XmtpEngine />
-                  <Main />
-                  <DebugButton ref={debugRef} />
-                </View>
+                <PortalProvider>
+                  <View style={styles.safe}>
+                    <XmtpEngine />
+                    <Main />
+                    <DebugButton ref={debugRef} />
+                  </View>
+                </PortalProvider>
               </PaperProvider>
             </ActionSheetProvider>
           </AppKeyboardProvider>
