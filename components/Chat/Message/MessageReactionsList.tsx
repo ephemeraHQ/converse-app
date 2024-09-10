@@ -12,7 +12,6 @@ import {
   tertiaryBackgroundColor,
 } from "@styles/colors";
 import { AvatarSizes, BorderRadius, Paddings } from "@styles/sizes";
-import { useConversationContext } from "@utils/conversation";
 import { favoritedEmojis } from "@utils/emojis/favoritedEmojis";
 import { getPreferredAvatar, getPreferredName } from "@utils/profile";
 import {
@@ -119,27 +118,15 @@ const EmojiItem: FC<{
   alreadySelected: boolean;
   dismissMenu?: () => void;
   currentUser: string;
-}> = ({ content, message, alreadySelected, dismissMenu, currentUser }) => {
+}> = ({ content, message, alreadySelected, currentUser }) => {
   const styles = useStyles();
-  const { conversation } = useConversationContext(["conversation"]);
   const handlePress = useCallback(() => {
-    if (!conversation) {
-      return;
-    }
     if (alreadySelected) {
       removeReactionFromMessage(currentUser, message, content);
     } else {
       addReactionToMessage(currentUser, message, content);
     }
-    dismissMenu?.();
-  }, [
-    alreadySelected,
-    content,
-    conversation,
-    currentUser,
-    dismissMenu,
-    message,
-  ]);
+  }, [alreadySelected, content, currentUser, message]);
 
   return (
     <TouchableOpacity

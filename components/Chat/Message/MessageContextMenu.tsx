@@ -221,7 +221,7 @@ const BackdropComponent: FC<{
       <GestureHandlerRootView style={styles.gestureHandlerContainer}>
         <AnimatedBlurView
           tint="default"
-          style={{ flex: 1 }}
+          style={styles.flex}
           animatedProps={animatedContainerProps}
         >
           <TouchableWithoutFeedback onPress={onClose}>
@@ -259,6 +259,9 @@ export const styles = StyleSheet.create({
     borderColor: "red",
   },
   gestureHandlerContainer: {
+    flex: 1,
+  },
+  flex: {
     flex: 1,
   },
 });
