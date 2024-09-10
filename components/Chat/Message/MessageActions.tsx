@@ -3,6 +3,7 @@ import { TableViewItemType } from "@components/TableView/TableView";
 import { TableViewPicto } from "@components/TableView/TableViewImage";
 import { useSelect } from "@data/store/storeHelpers";
 import { translate } from "@i18n/index";
+import Clipboard from "@react-native-clipboard/clipboard";
 import {
   messageBubbleColor,
   messageHighlightedBubbleColor,
@@ -10,6 +11,7 @@ import {
   myMessageHighlightedBubbleColor,
 } from "@styles/colors";
 import { isFrameMessage } from "@utils/frames";
+import { navigate } from "@utils/navigation";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { Platform, StyleSheet, useColorScheme, View } from "react-native";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
@@ -301,6 +303,13 @@ export default function ChatMessageActions({
         title: translate("copy"),
         rightView: <TableViewPicto symbol="doc.on.doc" />,
         id: ContextMenuActions.COPY_MESSAGE,
+        action: () => {
+          if (message.content) {
+            Clipboard.setString(message.content);
+          } else if (message.contentFallback) {
+            Clipboard.setString(message.contentFallback);
+          }
+        },
       });
     }
     if (frameURL) {
@@ -308,10 +317,22 @@ export default function ChatMessageActions({
         title: translate("share"),
         rightView: <TableViewPicto symbol="square.and.arrow.up" />,
         id: ContextMenuActions.SHARE_FRAME,
+        action: () => {
+          if (frameURL) {
+            navigate("ShareFrame", { frameURL });
+          }
+        },
       });
     }
     return items;
-  }, [frameURL, isAttachment, isTransaction, triggerReplyToMessage]);
+  }, [
+    frameURL,
+    isAttachment,
+    isTransaction,
+    message.content,
+    message.contentFallback,
+    triggerReplyToMessage,
+  ]);
 
   useEffect(() => {
     if (shouldAnimateIn && !hasAnimatedIn) {
@@ -368,8 +389,8 @@ export default function ChatMessageActions({
   // we add the gesture detector for long press the long press
   // in the parsed text stops working (https://github.com/software-mansion/react-native-gesture-handler/issues/867)
 
-  const StyledMessage = () => {
-    return (
+  const StyledMessage = useMemo(() => {
+    return () => (
       <>
         <ReanimatedTouchableOpacity
           activeOpacity={1}
@@ -423,7 +444,23 @@ export default function ChatMessageActions({
           )}
       </>
     );
-  };
+  }, [
+    styles.messageBubble,
+    styles.messageBubbleMe,
+    message.fromMe,
+    message.hasNextMessageInSeries,
+    message.hasPreviousMessageInSeries,
+    hideBackground,
+    initialBubbleBackgroundColor,
+    highlightingMessage,
+    animatedBackgroundStyle,
+    children,
+    isFrame,
+    isAttachment,
+    isTransaction,
+    iosAnimatedTailStyle,
+    colorScheme,
+  ]);
 
   return (
     <>
@@ -443,7 +480,7 @@ export default function ChatMessageActions({
         items={contextMenuItems}
         auxiliaryView={
           <MessageReactionsList
-            dismissMenu={() => {}}
+            dismissMenu={onContextClose}
             reactions={reactions}
             message={message}
           />
