@@ -11,7 +11,7 @@ const runProd = async () => {
     );
   }
 
-  execSync("npx expo start --no-dev", { stdio: "inherit" });
+  execSync("npx expo start --clear --no-dev", { stdio: "inherit" });
 };
 
 runProd();
