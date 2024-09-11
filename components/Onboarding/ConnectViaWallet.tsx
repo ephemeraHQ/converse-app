@@ -28,6 +28,7 @@ import {
 } from "thirdweb/react";
 
 import OnboardingComponent from "./OnboardingComponent";
+import ValueProps from "./ValueProps";
 import {
   getAccountsList,
   useAccountsStore,
@@ -155,8 +156,8 @@ export default function ConnectViaWallet({
           handlingThirdwebSigner.current = a;
           if (getAccountsList().includes(a)) {
             Alert.alert(
-              "Already connected",
-              "This account is already connected to Converse."
+              translate("connectViaWallet.alreadyConnected.title"),
+              translate("connectViaWallet.alreadyConnected.message")
             );
             disconnect();
             // At least activate said wallet so user can logout again
@@ -190,7 +191,7 @@ export default function ConnectViaWallet({
   const termsAndConditions = (
     <>
       <Text style={styles.terms}>
-        By signing in you agree to our{" "}
+        {translate("connectViaWallet.termsAndConditions.text")}{" "}
         <Text
           style={styles.link}
           onPress={() =>
@@ -199,7 +200,7 @@ export default function ConnectViaWallet({
             )
           }
         >
-          terms and conditions.
+          {translate("connectViaWallet.termsAndConditions.link")}
         </Text>
       </Text>
     </>
@@ -349,16 +350,12 @@ export default function ConnectViaWallet({
     waitForClickSignature,
   ]);
 
+  let title = translate("connectViaWallet.firstSignature.title");
   let subtitle = (
     <>
-      <Text>
-        This first signature will enable your wallet to send and receive
-        messages.{"\n\n"}
-      </Text>
-      {termsAndConditions}
+      <Text>{translate("connectViaWallet.firstSignature.explanation")}</Text>
     </>
   );
-  let title = "Sign";
   let backButtonText = undefined as string | undefined;
   let backButtonAction = () => {};
 
@@ -374,52 +371,65 @@ export default function ConnectViaWallet({
   };
 
   if (address) {
-    backButtonText = `Log out from ${shortAddress(address)}`;
+    backButtonText = `${translate(
+      "connectViaWallet.log_out_from"
+    )} ${shortAddress(address)}`;
     backButtonAction = disconnect;
   }
 
   if (signer && address) {
     if (onXmtp) {
       if (!alreadyV3Db) {
-        title = `${translate("sign")} (${signaturesDone + 1}/2)`;
+        title = `${translate("connectViaWallet.sign")} (${
+          signaturesDone + 1
+        }/2)`;
       }
       subtitle = (
         <>
           <Text>
-            Please sign with your wallet so that we make sure you own it.
-            {"\n\n"}
+            {translate("connectViaWallet.secondSignature.explanation")}
           </Text>
-          {termsAndConditions}
         </>
       );
     } else if (
       (waitingForNextSignature && !loading) ||
       clickedSignature.current
     ) {
-      title = `${translate("sign")} (2/2)`;
-      subtitle = <Text>{translate("sign_access")}</Text>;
+      title = translate("connectViaWallet.secondSignature.title");
+      subtitle = (
+        <Text>{translate("connectViaWallet.secondSignature.explanation")}</Text>
+      );
     } else {
-      title = `${translate("sign")} (1/2)`;
+      title = translate("connectViaWallet.firstSignature.title");
       subtitle = (
         <>
-          <Text>{translate("first_signature_explanation")}</Text>
-          {termsAndConditions}
+          <Text>
+            {translate("connectViaWallet.firstSignature.explanation")}
+          </Text>
         </>
       );
     }
   }
 
+  const showValueProps =
+    !(waitingForNextSignature && !loading) || clickedSignature.current;
+
   return (
     <OnboardingComponent
-      picto="signature"
+      picto="tray"
       title={title}
       subtitle={subtitle}
       primaryButtonAction={primaryButtonAction}
-      primaryButtonText={title}
+      primaryButtonText={translate("connectViaWallet.sign")}
       backButtonText={backButtonText}
       backButtonAction={backButtonAction}
     >
-      <></>
+      {showValueProps && (
+        <>
+          <ValueProps />
+          {termsAndConditions}
+        </>
+      )}
     </OnboardingComponent>
   );
 }
@@ -434,7 +444,6 @@ const useStyles = () => {
       textAlign: "center",
       marginLeft: 32,
       marginRight: 32,
-      marginTop: 30,
       ...Platform.select({
         default: {
           fontSize: 17,

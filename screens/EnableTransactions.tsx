@@ -20,7 +20,7 @@ import { v4 as uuidv4 } from "uuid";
 import { NavigationParamList } from "./Navigation/Navigation";
 import AndroidBackAction from "../components/AndroidBackAction";
 import OnboardingComponent from "../components/Onboarding/OnboardingComponent";
-import { getSignerFromSeedPhraseOrPrivateKey } from "../components/Onboarding/SeedPhraseConnect";
+import { getSignerFromPrivateKey } from "../components/Onboarding/PrivateKeyConnect";
 import { useCurrentAccount, useWalletStore } from "../data/store/accountsStore";
 import { converseEventEmitter } from "../utils/events";
 import { savePrivateKey } from "../utils/keychain/helpers";
@@ -31,7 +31,7 @@ export default function EnableTransactionsScreen({
   navigation,
 }: NativeStackScreenProps<NavigationParamList, "EnableTransactions">) {
   const colorScheme = useColorScheme();
-  const [seedPhrase, setSeedPhrase] = useState("");
+  const [privateKey, setPrivateKey] = useState("");
   const currentAccount = useCurrentAccount();
   const textInputRef = useRef<TextInput | null>(null);
   const [loading, setLoading] = useState(false);
@@ -53,19 +53,17 @@ export default function EnableTransactionsScreen({
     });
   }, [navigation]);
   const styles = useStyles();
-  const handleSeedPhrase = useCallback(async () => {
-    if (!seedPhrase || seedPhrase.trim().length === 0) return;
+  const handlePrivateKey = useCallback(async () => {
+    if (privateKey || privateKey.trim().length === 0) return;
     setLoading(true);
     setTimeout(async () => {
       try {
-        const seedPhraseSigner = await getSignerFromSeedPhraseOrPrivateKey(
-          seedPhrase.trim()
-        );
-        if (!seedPhraseSigner) {
+        const signer = await getSignerFromPrivateKey(privateKey.trim());
+        if (!signer) {
           setLoading(false);
           return;
         }
-        if (seedPhraseSigner.address !== currentAccount) {
+        if (signer.address !== currentAccount) {
           Alert.alert(
             "Wrong key",
             `This private key / seed phrase does not match your current wallet (${shortAddress(
@@ -78,7 +76,7 @@ export default function EnableTransactionsScreen({
         // Now we can save this key and setup its path
         const pkPath = `PK-${uuidv4()}`;
         try {
-          await savePrivateKey(pkPath, seedPhraseSigner.privateKey);
+          await savePrivateKey(pkPath, signer.privateKey);
           setPkPath(pkPath);
           setLoading(false);
           navigation.goBack();
@@ -92,7 +90,7 @@ export default function EnableTransactionsScreen({
       }
       setLoading(false);
     }, 10);
-  }, [currentAccount, navigation, seedPhrase, setPkPath]);
+  }, [currentAccount, navigation, privateKey, setPkPath]);
 
   return (
     <View style={styles.enableTransactionsContainer}>
@@ -105,7 +103,7 @@ export default function EnableTransactionsScreen({
         }.`}
         picto="key.horizontal"
         primaryButtonText="Connect"
-        primaryButtonAction={handleSeedPhrase}
+        primaryButtonAction={handlePrivateKey}
         backButtonText="Cancel"
         backButtonAction={() => {
           navigation.goBack();
@@ -125,12 +123,12 @@ export default function EnableTransactionsScreen({
             placeholder="Enter your seed phrase or private key"
             placeholderTextColor={textSecondaryColor(colorScheme)}
             onChangeText={(content) => {
-              setSeedPhrase(content.replace(/\n/g, " "));
+              setPrivateKey(content.replace(/\n/g, " "));
             }}
             onFocus={() => {
-              setSeedPhrase(seedPhrase.trim());
+              setPrivateKey(privateKey.trim());
             }}
-            value={seedPhrase}
+            value={privateKey}
             ref={(r) => {
               textInputRef.current = r;
             }}
