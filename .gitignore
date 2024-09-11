@@ -16,3 +16,6 @@ web-build/
 builds
 .env*
 .vercel
+
+# iOS
+ios/Converse.xcworkspace/xcshareddata/swiftpm/Package.resolved
