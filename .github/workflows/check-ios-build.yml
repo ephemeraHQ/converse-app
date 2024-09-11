@@ -28,12 +28,34 @@ jobs:
           token: ${{ secrets.EXPO_TOKEN }}
 
       - name: Install dependencies
-        run: yarn install
+        run: |
+          yarn install
+          yarn cache clean
+
+      - name: Check disk space before cleanup
+        run: df -h
+
+      - name: Free up disk space
+        run: |
+          sudo rm -rf ~/Library/Developer/Xcode/DerivedData/*
+          sudo rm -rf /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/Library/CoreSimulator/Profiles/Runtimes/*
+          sudo rm -rf ~/Library/Developer/CoreSimulator/Devices/*
+          sudo rm -rf ~/Library/Developer/CoreSimulator/Caches/*
+
+      - name: Check disk space after cleanup
+        run: df -h
 
       - name: Build iOS app
         run: eas build --profile ios-simulator --platform ios --local --non-interactive --output ${{ github.workspace }}/app-release.ipa
+
+      - name: Clean up Derived Data and Cache
+        run: |
+          rm -rf ~/Library/Developer/Xcode/DerivedData/*
+          rm -rf ~/Library/Caches/expo/*
+
       - name: Upload IPA artifact
         uses: actions/upload-artifact@v4
         with:
           name: app-release
           path: ${{ github.workspace }}/app-release.ipa
+
