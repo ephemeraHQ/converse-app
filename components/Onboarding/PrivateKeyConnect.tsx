@@ -1,4 +1,4 @@
-import { utils } from "@noble/secp256k1";
+import { translate } from "@i18n";
 import {
   textInputStyle,
   textPrimaryColor,
@@ -21,73 +21,35 @@ import { AvoidSoftInput } from "react-native-avoid-softinput";
 import OnboardingComponent from "./OnboardingComponent";
 import { useOnboardingStore } from "../../data/store/onboardingStore";
 import { useSelect } from "../../data/store/storeHelpers";
-import { getPrivateKeyFromMnemonic, validateMnemonic } from "../../utils/eth";
 
-export const getSignerFromSeedPhraseOrPrivateKey = async (
-  seedPhraseOrPrivateKey: string
-) => {
+export const getSignerFromPrivateKey = async (privateKey: string) => {
   try {
-    const signer = new Wallet(seedPhraseOrPrivateKey);
-    return signer;
-  } catch (e: any) {
-    //
-  }
-  let rightMnemonic = seedPhraseOrPrivateKey;
-  try {
-    rightMnemonic = validateMnemonic(seedPhraseOrPrivateKey);
-  } catch (e) {
-    Alert.alert("This private key / seed phrase is invalid. Please try again");
-    return;
-  }
-  try {
-    const privateKey = await getPrivateKeyFromMnemonic(rightMnemonic);
     const signer = new Wallet(privateKey);
     return signer;
-  } catch (e) {
-    Alert.alert("This private key / seed phrase is invalid. Please try again");
+  } catch (e: any) {
+    Alert.alert(translate("privateKeyConnect.invalidPrivateKey"));
   }
 };
 
-export default function SeedPhraseConnect() {
-  const { setLoading, setConnectionMethod, setSigner, setIsEphemeral } =
-    useOnboardingStore(
-      useSelect([
-        "setLoading",
-        "setConnectionMethod",
-        "setSigner",
-        "setIsEphemeral",
-      ])
-    );
-  const [seedPhrase, setSeedPhrase] = useState("");
+export default function PrivateKeyConnect() {
+  const [privateKey, setPrivateKey] = useState("");
   const colorScheme = useColorScheme();
   const textInputRef = useRef<TextInput | null>(null);
   const styles = useStyles();
+  const { setLoading, setConnectionMethod, setSigner } = useOnboardingStore(
+    useSelect(["setLoading", "setConnectionMethod", "setSigner"])
+  );
 
-  const generateWallet = useCallback(async () => {
-    setLoading(true);
-    const signer = new Wallet(utils.randomPrivateKey());
-    setIsEphemeral(true);
-    setSigner(signer);
-  }, [setIsEphemeral, setLoading, setSigner]);
-
-  useEffect(() => {
-    return () => {
-      setIsEphemeral(false);
-    };
-  }, [setIsEphemeral]);
-
-  const loginWithSeedPhrase = useCallback(
-    async (mnemonic: string) => {
+  const loginWithPrivateKey = useCallback(
+    async (privateKey: string) => {
       setLoading(true);
       setTimeout(async () => {
-        const seedPhraseSigner = await getSignerFromSeedPhraseOrPrivateKey(
-          mnemonic
-        );
-        if (!seedPhraseSigner) {
+        const signer = await getSignerFromPrivateKey(privateKey);
+        if (!signer) {
           setLoading(false);
           return;
         }
-        setSigner(seedPhraseSigner);
+        setSigner(signer);
         // Let's save
         // const pkPath = `PK-${uuidv4()}`;
         // try {
@@ -122,24 +84,26 @@ export default function SeedPhraseConnect() {
 
   return (
     <OnboardingComponent
-      title="Connect via key"
-      subtitle={`Please enter your wallet’s seed phrase or private key. It will be stored locally in the ${
-        Platform.OS === "ios"
-          ? "secure enclave of your phone"
-          : "Android Keystore system"
-      }.`}
+      title={translate("privateKeyConnect.title")}
+      subtitle={translate("privateKeyConnect.subtitle", {
+        storage: translate(
+          `privateKeyConnect.storage.${
+            Platform.OS === "ios" ? "ios" : "android"
+          }`
+        ),
+      })}
       picto="key.horizontal"
-      primaryButtonText="Connect"
+      primaryButtonText={translate("privateKeyConnect.connectButton")}
       primaryButtonAction={() => {
-        if (!seedPhrase || seedPhrase.trim().length === 0) return;
-        loginWithSeedPhrase(seedPhrase.trim());
+        if (!privateKey || privateKey.trim().length === 0) return;
+        loginWithPrivateKey(privateKey.trim());
       }}
-      backButtonText="Back to home screen"
+      backButtonText={translate("privateKeyConnect.backButton")}
       backButtonAction={() => {
         setConnectionMethod(undefined);
       }}
     >
-      <View style={styles.seedPhraseContainer}>
+      <View style={styles.entryContainer}>
         <TextInput
           multiline
           textAlignVertical="top"
@@ -147,15 +111,15 @@ export default function SeedPhraseConnect() {
             textInputStyle(colorScheme),
             { width: "100%", height: "100%" },
           ]}
-          placeholder="Enter your seed phrase or private key"
+          placeholder={translate("privateKeyConnect.privateKeyPlaceholder")}
           placeholderTextColor={textSecondaryColor(colorScheme)}
           onChangeText={(content) => {
-            setSeedPhrase(content.replace(/\n/g, " "));
+            setPrivateKey(content.replace(/\n/g, " "));
           }}
           onFocus={() => {
-            setSeedPhrase(seedPhrase.trim());
+            setPrivateKey(privateKey.trim());
           }}
-          value={seedPhrase}
+          value={privateKey}
           ref={(r) => {
             textInputRef.current = r;
           }}
@@ -168,7 +132,7 @@ export default function SeedPhraseConnect() {
       </View>
       <View style={{ marginBottom: 20 }}>
         <Text style={styles.links}>
-          By signing in you agree to our{" "}
+          {translate("privateKeyConnect.termsText")}{" "}
           <Text
             style={styles.link}
             onPress={() =>
@@ -177,23 +141,17 @@ export default function SeedPhraseConnect() {
               )
             }
           >
-            terms and conditions.
-          </Text>
-        </Text>
-        <Text style={styles.links}>
-          <Text style={styles.link} onPress={generateWallet}>
-            Try the app with an ephemeral wallet.
+            {translate("privateKeyConnect.termsLink")}
           </Text>
         </Text>
       </View>
     </OnboardingComponent>
   );
 }
-
 const useStyles = () => {
   const colorScheme = useColorScheme();
   return StyleSheet.create({
-    seedPhraseContainer: {
+    entryContainer: {
       width: "100%",
       paddingRight: 25,
       paddingLeft: 25,
