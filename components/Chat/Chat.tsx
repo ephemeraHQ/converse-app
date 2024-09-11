@@ -173,21 +173,12 @@ const getListArray = (
 };
 
 export default function Chat() {
-  const {
-    conversation,
-    isBlockedPeer,
-    onReadyToFocus,
-    transactionMode,
-    frameTextInputFocused,
-    onPullToRefresh,
-  } = useConversationContext([
-    "conversation",
-    "isBlockedPeer",
-    "onReadyToFocus",
-    "transactionMode",
-    "frameTextInputFocused",
-    "onPullToRefresh",
-  ]);
+  const conversation = useConversationContext("conversation");
+  const isBlockedPeer = useConversationContext("isBlockedPeer");
+  const onReadyToFocus = useConversationContext("onReadyToFocus");
+  const transactionMode = useConversationContext("transactionMode");
+  const frameTextInputFocused = useConversationContext("frameTextInputFocused");
+
   const xmtpAddress = useCurrentAccount() as string;
   const peerSocials = useProfilesStore(
     useShallow((s) =>
@@ -386,7 +377,6 @@ export default function Chat() {
           <AnimatedListView
             contentContainerStyle={styles.chat}
             data={listArray}
-            onRefresh={onPullToRefresh}
             refreshing={conversation?.pending}
             extraData={[peerSocials]}
             renderItem={renderItem}

@@ -46,12 +46,10 @@ import ActionButton from "../ActionButton";
 
 export default function TransactionInput() {
   const USDCBalance = useWalletStore((s) => s.USDCBalance);
-  const { conversation, setTransactionMode, transactionMode } =
-    useConversationContext([
-      "conversation",
-      "setTransactionMode",
-      "transactionMode",
-    ]);
+  const conversation = useConversationContext("conversation");
+  const setTransactionMode = useConversationContext("setTransactionMode");
+  const transactionMode = useConversationContext("transactionMode");
+
   const privySigner = usePrivySigner();
 
   const colorScheme = useColorScheme();

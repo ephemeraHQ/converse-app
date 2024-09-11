@@ -24,7 +24,7 @@ import Button from "../../Button/Button";
 import { showActionSheetWithOptions } from "../../StateHandlers/ActionSheetStateHandler";
 
 export function GroupConsentPopup() {
-  const { conversation } = useConversationContext(["conversation"]);
+  const conversation = useConversationContext("conversation");
 
   const navigation = useNavigation() as NativeStackNavigationProp<
     NavigationParamList,

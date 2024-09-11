@@ -25,7 +25,7 @@ import { executeAfterKeyboardClosed } from "../../../utils/keyboard";
 import ActionButton from "../ActionButton";
 
 export default function SendMoneyButton() {
-  const { setTransactionMode } = useConversationContext(["setTransactionMode"]);
+  const setTransactionMode = useConversationContext("setTransactionMode");
   const { setAddingNewAccount, setConnectionMethod } = useOnboardingStore(
     useSelect(["setAddingNewAccount", "setConnectionMethod"])
   );

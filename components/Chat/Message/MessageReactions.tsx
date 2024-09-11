@@ -20,7 +20,6 @@ import {
   useCurrentAccount,
   useProfilesStore,
 } from "../../../data/store/accountsStore";
-import { useConversationContext } from "../../../utils/conversation";
 import { getPreferredAvatar, getPreferredName } from "../../../utils/profile";
 import {
   MessageReaction,
@@ -47,7 +46,6 @@ type ReactionCount = {
 };
 
 function ChatMessageReactions({ message, reactions }: Props) {
-  const { conversation } = useConversationContext(["conversation"]);
   const colorScheme = useColorScheme();
   const styles = useStyles();
   const userAddress = useCurrentAccount();
@@ -99,7 +97,7 @@ function ChatMessageReactions({ message, reactions }: Props) {
 
   const handleReactionPress = useCallback(
     (reaction: ReactionCount) => {
-      if (!conversation || !userAddress) return;
+      if (!userAddress) return;
 
       if (reaction.userReacted) {
         removeReactionFromMessage(userAddress, message, reaction.content);
@@ -107,7 +105,7 @@ function ChatMessageReactions({ message, reactions }: Props) {
         addReactionToMessage(userAddress, message, reaction.content);
       }
     },
-    [conversation, message, userAddress]
+    [message, userAddress]
   );
 
   if (reactionsList.length === 0) return null;
@@ -190,7 +188,15 @@ function ChatMessageReactions({ message, reactions }: Props) {
   );
 }
 
-export default memo(ChatMessageReactions);
+export default memo(ChatMessageReactions, (prevProps, nextProps) => {
+  if (prevProps.message.id !== nextProps.message.id) {
+    return false;
+  }
+  if (prevProps.message.lastUpdateAt !== nextProps.message.lastUpdateAt) {
+    return false;
+  }
+  return true;
+});
 
 const useStyles = () => {
   const colorScheme = useColorScheme();

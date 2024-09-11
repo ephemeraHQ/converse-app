@@ -48,10 +48,7 @@ export default function AddAttachmentButton({
   onSelectionStatusChange,
 }: AddAttachmentButtonProps) {
   const colorScheme = useColorScheme();
-  const { mediaPreviewRef } = useConversationContext([
-    "conversation",
-    "mediaPreviewRef",
-  ]);
+  const mediaPreviewRef = useConversationContext("mediaPreviewRef");
   const currentAccount = useAccountsStore((s) => s.currentAccount);
 
   const styles = useStyles();

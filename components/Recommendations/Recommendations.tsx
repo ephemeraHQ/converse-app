@@ -18,7 +18,6 @@ import {
   View,
   useColorScheme,
 } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { Recommendation } from "./Recommendation";
 import config from "../../config";
@@ -65,7 +64,6 @@ export default function Recommendations({
       "updatedAt",
     ])
   );
-  const insets = useSafeAreaInsets();
   const styles = useStyles();
 
   const openSignalList = useCallback(() => {

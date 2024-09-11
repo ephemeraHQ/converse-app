@@ -122,7 +122,7 @@ const TransactionStatusView = ({
 export default function TransactionPreview({ message }: Props) {
   const colorScheme = useColorScheme();
   const styles = useStyles();
-  const { conversation } = useConversationContext(["conversation"]);
+  const conversation = useConversationContext("conversation");
   const { transaction, transactionDisplay, amountToDisplay } =
     useTransactionForMessage(message, conversation?.peerAddress);
 
