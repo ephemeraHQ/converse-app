@@ -1,3 +1,5 @@
+import { useEffect } from "react";
+
 import logger from "./logger";
 
 const timestamps: { [timestampId: string]: { start: number; last: number } } =
@@ -35,4 +37,22 @@ export const debugTimeSpent = ({
       logger.debug(`    ⌛  [${timestampId}] timestamp reset`);
     }
   }
+};
+
+const componentRenderCount: {
+  [componentName: string]: { total: number; byId: { [id: string]: number } };
+} = {};
+
+export const useLogRenderCount = (componentName: string, id: string) => {
+  useEffect(() => {
+    componentRenderCount[componentName] = componentRenderCount[
+      componentName
+    ] || { total: 0, byId: {} };
+    componentRenderCount[componentName].total += 1;
+    componentRenderCount[componentName].byId[id] =
+      (componentRenderCount[componentName].byId[id] || 0) + 1;
+    logger.warn(
+      `${componentName} rendered - for ${id} ${componentRenderCount[componentName].byId[id]} - total ${componentRenderCount[componentName].total}`
+    );
+  });
 };

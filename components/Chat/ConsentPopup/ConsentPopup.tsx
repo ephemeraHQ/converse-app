@@ -21,10 +21,8 @@ import Button from "../../Button/Button";
 import { showActionSheetWithOptions } from "../../StateHandlers/ActionSheetStateHandler";
 
 export default function ConsentPopup() {
-  const { conversation, isBlockedPeer } = useConversationContext([
-    "conversation",
-    "isBlockedPeer",
-  ]);
+  const conversation = useConversationContext("conversation");
+  const isBlockedPeer = useConversationContext("isBlockedPeer");
 
   const navigation = useNavigation() as NativeStackNavigationProp<
     NavigationParamList,
