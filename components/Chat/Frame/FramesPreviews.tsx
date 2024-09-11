@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import { View } from "react-native";
 
 import FramePreview from "./FramePreview";
@@ -16,8 +16,10 @@ type Props = {
 };
 
 export default function FramesPreviews({ message }: Props) {
-  const messageId = useRef(message.id);
-  const tagsFetchedOnce = useRef(false);
+  const messageId = useRef<string | undefined>(undefined);
+  const tagsFetchedOnceForMessage = useRef<{ [messageId: string]: boolean }>(
+    {}
+  );
   const account = useCurrentAccount() as string;
   const [framesForMessage, setFramesForMessage] = useState<{
     [messageId: string]: FrameWithType[];
@@ -28,12 +30,10 @@ export default function FramesPreviews({ message }: Props) {
   });
 
   const fetchTagsIfNeeded = useCallback(() => {
-    if (!tagsFetchedOnce.current) {
-      tagsFetchedOnce.current = true;
+    if (!tagsFetchedOnceForMessage.current[message.id]) {
+      tagsFetchedOnceForMessage.current[message.id] = true;
       fetchFramesForMessage(account, message).then(
         (frames: FramesForMessage) => {
-          // Call is async and we have cell recycling so make sure
-          // we're still on the same message as before
           setFramesForMessage({ [frames.messageId]: frames.frames });
         }
       );
@@ -43,7 +43,6 @@ export default function FramesPreviews({ message }: Props) {
   // Components are recycled, let's fix when stuff changes
   if (message.id !== messageId.current) {
     messageId.current = message.id;
-    tagsFetchedOnce.current = false;
     fetchTagsIfNeeded();
     setFramesForMessage({
       [message.id]: useFramesStore
@@ -51,8 +50,6 @@ export default function FramesPreviews({ message }: Props) {
         .getFramesForURLs(message.converseMetadata?.frames || []),
     });
   }
-
-  useEffect(fetchTagsIfNeeded, [fetchTagsIfNeeded, message.id]);
 
   const framesToDisplay = framesForMessage[message.id] || [];
 

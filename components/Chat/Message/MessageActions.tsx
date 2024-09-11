@@ -42,7 +42,6 @@ import { converseEventEmitter } from "../../../utils/events";
 import {
   MessageReaction,
   addReactionToMessage,
-  getEmojiName,
 } from "../../../utils/reactions";
 import { UUID_REGEX } from "../../../utils/regex";
 import { isTransactionMessage } from "../../../utils/transaction";
@@ -72,8 +71,6 @@ export default function ChatMessageActions({
   const isTransaction = isTransactionMessage(message.contentType);
   const colorScheme = useColorScheme();
   const userAddress = useCurrentAccount() as string;
-  const frames = useFramesStore().frames;
-  const isFrame = !!frames[message.content.toLowerCase()];
   const styles = useStyles();
   const { setContextMenuShown } = useAppStore(
     useSelect(["setContextMenuShown"])
@@ -179,20 +176,6 @@ export default function ChatMessageActions({
   const composed = useMemo(() => {
     return Gesture.Simultaneous(tapGesture, doubleTapGesture, longPressGesture);
   }, [tapGesture, doubleTapGesture, longPressGesture]);
-
-  const [selectedEmojis, setSelectedEmojis] = useState<string[]>([]);
-  useEffect(() => {
-    const myReactions = reactions[userAddress] || [];
-    const newSelectedEmojis = Array.from(
-      new Set(
-        myReactions
-          .filter((reaction) => reaction.schema === "unicode")
-          .map((reaction) => getEmojiName(reaction.content))
-          .filter((emojiName): emojiName is string => emojiName !== null)
-      )
-    );
-    setSelectedEmojis(newSelectedEmojis);
-  }, [reactions, userAddress]);
 
   const initialBubbleBackgroundColor = message.fromMe
     ? myMessageBubbleColor(colorScheme)
@@ -425,7 +408,7 @@ export default function ChatMessageActions({
           {children}
         </ReanimatedTouchableOpacity>
         {!message.hasNextMessageInSeries &&
-          !isFrame &&
+          !frameURL &&
           !isAttachment &&
           !isTransaction &&
           !hideBackground &&
@@ -455,7 +438,7 @@ export default function ChatMessageActions({
     highlightingMessage,
     animatedBackgroundStyle,
     children,
-    isFrame,
+    frameURL,
     isAttachment,
     isTransaction,
     iosAnimatedTailStyle,
