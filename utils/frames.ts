@@ -73,9 +73,12 @@ export const fetchFramesForMessage = async (
 ): Promise<FramesForMessage> => {
   // OG Preview / Frames are only for text content type
   if (isContentType("text", message.contentType)) {
-    const urls = message.content.match(URL_REGEX);
+    const urls = (message.content.match(URL_REGEX) || []).filter((u) => {
+      const lower = u.toLowerCase();
+      return lower.startsWith("http://") || lower.startsWith("https://");
+    });
     const fetchedFrames: FrameWithType[] = [];
-    if (urls) {
+    if (urls.length > 0) {
       logger.debug(
         `[FramesMetadata] Found ${urls.length} URLs in message, fetching tags`
       );
