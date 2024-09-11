@@ -8,7 +8,7 @@ import OnboardingComponent from "./OnboardingComponent";
 import ValueProps from "./ValueProps";
 import { useOnboardingStore } from "../../data/store/onboardingStore";
 import { useSelect } from "../../data/store/storeHelpers";
-import { textSecondaryColor } from "../../styles/colors";
+import { textPrimaryColor } from "../../styles/colors";
 
 export default function CreateEphemeral() {
   const styles = useStyles();
@@ -46,13 +46,12 @@ export default function CreateEphemeral() {
       backButtonAction={() => {
         setConnectionMethod(undefined);
       }}
+      showTerms
     >
-      <>
-        <ValueProps />
-        <Text style={styles.p}>
-          {translate("createEphemeral.disconnect_to_remove")}
-        </Text>
-      </>
+      <ValueProps />
+      <Text style={styles.p}>
+        {translate("createEphemeral.disconnect_to_remove")}
+      </Text>
     </OnboardingComponent>
   );
 }
@@ -66,13 +65,14 @@ const useStyles = () => {
       marginRight: 32,
       ...Platform.select({
         default: {
-          fontSize: 17,
-          color: textSecondaryColor(colorScheme),
+          fontSize: 13,
+          lineHeight: 17,
+          color: textPrimaryColor(colorScheme),
         },
         android: {
           fontSize: 14,
           lineHeight: 20,
-          color: textSecondaryColor(colorScheme),
+          color: textPrimaryColor(colorScheme),
           maxWidth: 260,
         },
       }),
