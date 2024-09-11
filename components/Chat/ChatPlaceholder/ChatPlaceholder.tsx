@@ -30,8 +30,9 @@ type Props = {
 };
 
 export default function ChatPlaceholder({ messagesCount }: Props) {
-  const { conversation, isBlockedPeer, onReadyToFocus } =
-    useConversationContext(["conversation", "isBlockedPeer", "onReadyToFocus"]);
+  const conversation = useConversationContext("conversation");
+  const isBlockedPeer = useConversationContext("isBlockedPeer");
+  const onReadyToFocus = useConversationContext("onReadyToFocus");
   const colorScheme = useColorScheme();
   const styles = useStyles();
   const setPeersStatus = useSettingsStore((s) => s.setPeersStatus);

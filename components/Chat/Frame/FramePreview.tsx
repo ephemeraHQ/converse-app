@@ -24,7 +24,6 @@ import {
   handleTxAction,
   validateFrame,
 } from "../../../utils/frames";
-import { navigate } from "../../../utils/navigation";
 import { MessageToDisplay } from "../Message/Message";
 
 export default function FramePreview({
@@ -35,10 +34,10 @@ export default function FramePreview({
   message: MessageToDisplay;
 }) {
   const styles = useStyles();
-  const { conversation, setFrameTextInputFocused } = useConversationContext([
-    "conversation",
-    "setFrameTextInputFocused",
-  ]);
+  const conversation = useConversationContext("conversation");
+  const setFrameTextInputFocused = useConversationContext(
+    "setFrameTextInputFocused"
+  );
   const account = useCurrentAccount() as string;
   const [postingActionForButton, setPostingActionForButton] = useState(
     undefined as undefined | number
@@ -286,9 +285,9 @@ export default function FramePreview({
     ]
   );
 
-  const shareFrame = useCallback(() => {
-    navigate("ShareFrame", { frameURL: initialFrame.url });
-  }, [initialFrame.url]);
+  // const shareFrame = useCallback(() => {
+  //   navigate("ShareFrame", { frameURL: initialFrame.url });
+  // }, [initialFrame.url]);
 
   const showBottom =
     (frame.type === "PREVIEW" && frame.extractedTags["og:title"]) ||
