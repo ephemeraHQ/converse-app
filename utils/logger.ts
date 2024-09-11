@@ -54,7 +54,7 @@ export const rotateLoggingFile = async () => {
 
 const converseTransport: transportFunctionType = async (props) => {
   // Logs are subperformant, so only in dev
-  if (config.env === "dev") {
+  if (config.env === "dev" || config.debugProdLogs) {
     consoleTransport(props);
   }
   if (props.level.severity >= 3) {

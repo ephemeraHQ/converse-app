@@ -45,6 +45,7 @@ const defaultConfig = {
     rpcEndpoint: process.env.EXPO_PUBLIC_EVM_RPC_ENDPOINT,
   },
   splitScreenThreshold: 600,
+  debugProdLogs: !!Constants.expoConfig?.extra?.DEBUG_PROD_LOGS,
 };
 
 const isAndroid = Platform.OS === "android";
@@ -127,7 +128,7 @@ const ENV = {
 };
 
 const getConfig = () => {
-  if (__DEV__) {
+  if (Constants.expoConfig?.extra?.ENV === "dev") {
     return ENV.dev;
   } else if (Constants.expoConfig?.extra?.ENV === "preview") {
     return ENV.preview;

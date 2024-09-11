@@ -15,7 +15,8 @@
     "typecheck": "echo \"➜ Typechecking project...\" && tsc --noEmit",
     "update": "node scripts/build/update.js",
     "web:preview": "EXPO_ENV=preview expo export -p web",
-    "prod": "node scripts/runProd.js"
+    "prod": "node scripts/runProd.js",
+    "prod:debug": "node scripts/runProd.js --debug"
   },
   "cross-os": {
     "postinstall": {
