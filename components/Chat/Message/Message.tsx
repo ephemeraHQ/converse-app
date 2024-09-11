@@ -532,7 +532,8 @@ const useStyles = () => {
     messageSwipeable: {
       width: "100%",
       flexDirection: "row",
-      paddingHorizontal: 10,
+      paddingLeft: 12,
+      paddingRight: 15,
       overflow: "visible",
     },
     messageSwipeableChildren: {
