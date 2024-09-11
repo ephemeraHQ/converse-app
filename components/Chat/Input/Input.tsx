@@ -77,21 +77,12 @@ interface ChatInputProps {
 }
 
 export default function ChatInput({ inputHeight }: ChatInputProps) {
-  const {
-    conversation,
-    inputRef,
-    transactionMode,
-    messageToPrefill,
-    mediaPreviewRef,
-    mediaPreviewToPrefill,
-  } = useConversationContext([
-    "conversation",
-    "inputRef",
-    "messageToPrefill",
-    "mediaPreviewRef",
-    "mediaPreviewToPrefill",
-    "transactionMode",
-  ]);
+  const conversation = useConversationContext("conversation");
+  const inputRef = useConversationContext("inputRef");
+  const transactionMode = useConversationContext("transactionMode");
+  const messageToPrefill = useConversationContext("messageToPrefill");
+  const mediaPreviewRef = useConversationContext("mediaPreviewRef");
+  const mediaPreviewToPrefill = useConversationContext("mediaPreviewToPrefill");
 
   const colorScheme = useColorScheme();
   const styles = useStyles();

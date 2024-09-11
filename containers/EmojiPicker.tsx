@@ -7,7 +7,6 @@ import { useSelect } from "@data/store/storeHelpers";
 import { textSecondaryColor } from "@styles/colors";
 import { useConversationContext } from "@utils/conversation";
 import { emojis } from "@utils/emojis/emojis";
-import { favoritedEmojis } from "@utils/emojis/favoritedEmojis";
 import { CategorizedEmojisRecord, Emoji } from "@utils/emojis/interfaces";
 import {
   addReactionToMessage,
@@ -46,9 +45,9 @@ const sliceEmojis = (emojis: Emoji[]) => {
   return slicedEmojis;
 };
 
-const myEmojis = sliceEmojis(
-  flatEmojis.filter((emoji) => favoritedEmojis.isFavorite(emoji.emoji))
-);
+// const myEmojis = sliceEmojis(
+//   flatEmojis.filter((emoji) => favoritedEmojis.isFavorite(emoji.emoji))
+// );
 
 export const EmojiPicker = ({ message }: { message: MessageToDisplay }) => {
   const currentUser = useCurrentAccount() as string;
@@ -91,7 +90,7 @@ export const EmojiPicker = ({ message }: { message: MessageToDisplay }) => {
     setReactMenuMessageId(null);
     setSearchInput("");
   }, [setReactMenuMessageId]);
-  const { conversation } = useConversationContext(["conversation"]);
+  const conversation = useConversationContext("conversation");
   const handleReaction = useCallback(
     (emoji: string) => {
       if (!conversation) return;

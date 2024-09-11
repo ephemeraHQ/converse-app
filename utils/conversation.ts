@@ -13,7 +13,6 @@ import { getAddressForPeer } from "./eth";
 import { getGroupIdFromTopic } from "./groupUtils/groupId";
 import logger from "./logger";
 import { subscribeToNotifications } from "./notifications";
-import { pick } from "./objects";
 import { getReactionsContentPreview } from "./reactions";
 import { getMatchedPeerAddresses } from "./search";
 import { sentryTrackMessage } from "./sentry";
@@ -275,7 +274,6 @@ export type ConversationContextType = {
   setTransactionMode: (b: boolean) => void;
   frameTextInputFocused: boolean;
   setFrameTextInputFocused: (b: boolean) => void;
-  onPullToRefresh?: () => void;
 };
 
 export const ConversationContext = createContext<ConversationContextType>({
@@ -293,8 +291,8 @@ export const ConversationContext = createContext<ConversationContextType>({
 });
 
 export const useConversationContext = <K extends keyof ConversationContextType>(
-  keys: K[]
-) => useContextSelector(ConversationContext, (s) => pick(s, keys));
+  key: K
+) => useContextSelector(ConversationContext, (s) => s[key]);
 
 const conversationsSortMethod = (
   a: ConversationWithLastMessagePreview,

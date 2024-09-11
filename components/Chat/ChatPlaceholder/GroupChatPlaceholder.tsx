@@ -1,4 +1,3 @@
-import { useGroupConsent } from "@hooks/useGroupConsent";
 import { useGroupMembers } from "@hooks/useGroupMembers";
 import { useGroupName } from "@hooks/useGroupName";
 import { translate } from "@i18n";
@@ -26,24 +25,18 @@ type Props = {
 };
 
 export function GroupChatPlaceholder({ messagesCount }: Props) {
-  const { conversation, onReadyToFocus } = useConversationContext([
-    "conversation",
-    "isBlockedPeer",
-    "onReadyToFocus",
-  ]);
+  const conversation = useConversationContext("conversation");
+  const onReadyToFocus = useConversationContext("onReadyToFocus");
+
   const currentAccount = useCurrentAccount();
   const { data: group } = useGroupQuery(
     currentAccount ?? "",
     conversation?.topic ?? ""
   );
-  const { consent } = useGroupConsent(conversation?.topic ?? "");
   const { groupName } = useGroupName(conversation?.topic ?? "");
   const { members } = useGroupMembers(conversation?.topic ?? "");
-  const isBlockedGroup = consent === "denied";
 
-  const colorScheme = useColorScheme();
   const styles = useStyles();
-  const { allowGroup } = useGroupConsent(conversation?.topic ?? "");
   const groupCreatedByUser = useMemo(() => {
     if (!group || !currentAccount) {
       return false;
