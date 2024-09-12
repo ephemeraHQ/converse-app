@@ -12,6 +12,7 @@ import {
 } from "@styles/colors";
 import { isFrameMessage } from "@utils/frames";
 import { navigate } from "@utils/navigation";
+import * as Haptics from "expo-haptics";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { Platform, StyleSheet, useColorScheme, View } from "react-native";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
@@ -162,6 +163,7 @@ export default function ChatMessageActions({
   const longPressGesture = useMemo(() => {
     return Gesture.LongPress()
       .onStart(() => {
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
         scaleHold();
         setContextMenuShown(message.id);
       })
