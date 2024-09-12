@@ -96,7 +96,7 @@ const BackdropComponent: FC<{
   const animatedAuxiliaryViewStyle = useAnimatedStyle(() => {
     const getTransformValue = () => {
       if (itemRectY.value > AUXILIARY_VIEW_MIN_HEIGHT + safeAreaInsets.top) {
-        const spacing = 10;
+        const spacing = 16;
         const topTransform =
           itemRectY.value +
           itemRectHeight.value +

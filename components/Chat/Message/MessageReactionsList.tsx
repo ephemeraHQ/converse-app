@@ -327,10 +327,9 @@ const useStyles = () => {
       flexDirection: "row",
       justifyContent: "space-around",
       alignItems: "center",
-      alignSelf: "flex-end",
       borderRadius: BorderRadius.large,
       padding: Paddings.small,
-      margin: Margins.small,
+      marginVertical: Margins.small,
       backgroundColor: backgroundColor(colorScheme),
     },
     emojiListContainerFromMe: {
