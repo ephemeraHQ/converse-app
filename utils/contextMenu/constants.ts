@@ -11,7 +11,7 @@ const SPRING_CONFIGURATION = {
 };
 
 const SIDE_MARGIN = 20;
-const ITEM_WIDTH = 150;
+const ITEM_WIDTH = 180;
 const AUXILIARY_VIEW_MIN_HEIGHT = 190;
 
 export {
