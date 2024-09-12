@@ -1760,11 +1760,29 @@ PODS:
     - ReactCommon/turbomodule/bridging
     - ReactCommon/turbomodule/core
     - Yoga
-  - RNSentry (5.24.1):
+  - RNSentry (5.31.1):
+    - DoubleConversion
+    - glog
     - hermes-engine
+    - RCT-Folly (= 2024.01.01.00)
+    - RCTRequired
+    - RCTTypeSafety
+    - React-Codegen
     - React-Core
+    - React-debug
+    - React-Fabric
+    - React-featureflags
+    - React-graphics
     - React-hermes
-    - Sentry/HybridSDK (= 8.29.1)
+    - React-ImageManager
+    - React-NativeModulesApple
+    - React-RCTFabric
+    - React-rendererdebug
+    - React-utils
+    - ReactCommon/turbomodule/bridging
+    - ReactCommon/turbomodule/core
+    - Sentry/HybridSDK (= 8.36.0)
+    - Yoga
   - RNShare (10.2.1):
     - React-Core
   - RNSVG (15.2.0):
@@ -1781,7 +1799,7 @@ PODS:
     - libwebp (~> 1.0)
     - SDWebImage/Core (~> 5.17)
   - secp256k1.swift (0.1.4)
-  - Sentry/HybridSDK (8.29.1)
+  - Sentry/HybridSDK (8.36.0)
   - SocketRocket (0.7.0)
   - SQLite.swift (0.15.3):
     - SQLite.swift/standard (= 0.15.3)
@@ -1940,7 +1958,7 @@ DEPENDENCIES:
   - "RNSentry (from `../node_modules/@sentry/react-native`)"
   - RNShare (from `../node_modules/react-native-share`)
   - RNSVG (from `../node_modules/react-native-svg`)
-  - Sentry/HybridSDK (= 8.29.1)
+  - Sentry/HybridSDK (= 8.36.0)
   - SQLite.swift
   - UMAppLoader (from `../node_modules/unimodules-app-loader/ios`)
   - XMTP (= 0.14.12)
@@ -2382,7 +2400,7 @@ SPEC CHECKSUMS:
   RNReactNativeSharedGroupPreferences: de0121a4224c267bc7e9fb16c398f3f087c8da81
   RNReanimated: d51431fd3597a8f8320319dce8e42cee82a5445f
   RNScreens: 30249f9331c3b00ae7cb7922e11f58b3ed369c07
-  RNSentry: e9aa15bb2f3e18c822c002eea13bbd3b222ab493
+  RNSentry: 09c5679c6b4e84f64f99ef14f6eb759eec5063a5
   RNShare: 0fad69ae2d71de9d1f7b9a43acf876886a6cb99c
   RNSVG: 43b64ed39c14ce830d840903774154ca0c1f27ec
   SDWebImage: 8a6b7b160b4d710e2a22b6900e25301075c34cb3
@@ -2390,7 +2408,7 @@ SPEC CHECKSUMS:
   SDWebImageSVGCoder: 15a300a97ec1c8ac958f009c02220ac0402e936c
   SDWebImageWebPCoder: e38c0a70396191361d60c092933e22c20d5b1380
   secp256k1.swift: a7e7a214f6db6ce5db32cc6b2b45e5c4dd633634
-  Sentry: c446963245407030e17f1b926a83c6337dc99f4e
+  Sentry: f8374b5415bc38dfb5645941b3ae31230fbeae57
   SocketRocket: abac6f5de4d4d62d24e11868d7a2f427e0ef940d
   SQLite.swift: 8d054987f02728cc912b0eb5a9659650573a65a2
   sqlite3: 02d1f07eaaa01f80a1c16b4b31dfcbb3345ee01a
