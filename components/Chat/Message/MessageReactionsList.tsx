@@ -11,7 +11,7 @@ import {
   textSecondaryColor,
   tertiaryBackgroundColor,
 } from "@styles/colors";
-import { AvatarSizes, BorderRadius, Paddings } from "@styles/sizes";
+import { AvatarSizes, BorderRadius, Paddings, Margins } from "@styles/sizes";
 import { favoritedEmojis } from "@utils/emojis/favoritedEmojis";
 import { getPreferredAvatar, getPreferredName } from "@utils/profile";
 import {
@@ -30,7 +30,8 @@ import {
   TouchableOpacity,
   InteractionManager,
 } from "react-native";
-import { FlatList } from "react-native-gesture-handler";
+import { FlatList, GestureHandlerRootView } from "react-native-gesture-handler";
+import { Portal } from "react-native-paper";
 import Animated, {
   Easing,
   useAnimatedStyle,
@@ -38,6 +39,7 @@ import Animated, {
   withDelay,
   withTiming,
 } from "react-native-reanimated";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { MessageToDisplay } from "./Message";
 import Picto from "../../Picto/Picto";
@@ -210,14 +212,20 @@ const MessageReactionsListInner: FC<MessageReactionsListProps> = ({
   return (
     <View style={styles.container}>
       {list.length !== 0 ? (
-        <FlatList
-          contentContainerStyle={styles.reactionsContainer}
-          data={list}
-          horizontal
-          renderItem={renderItem}
-          keyExtractor={keyExtractor}
-          showsHorizontalScrollIndicator={false}
-        />
+        <Portal>
+          <View style={styles.portalContainer}>
+            <GestureHandlerRootView>
+              <FlatList
+                contentContainerStyle={styles.reactionsContainer}
+                data={list}
+                horizontal
+                renderItem={renderItem}
+                keyExtractor={keyExtractor}
+                showsHorizontalScrollIndicator={false}
+              />
+            </GestureHandlerRootView>
+          </View>
+        </Portal>
       ) : (
         <View style={styles.flex1} />
       )}
@@ -266,6 +274,7 @@ export const MessageReactionsList = React.memo(MessageReactionsListInner);
 
 const useStyles = () => {
   const colorScheme = useColorScheme();
+  const safeAreaInsets = useSafeAreaInsets();
 
   return StyleSheet.create({
     itemContainer: {
@@ -296,10 +305,19 @@ const useStyles = () => {
     container: {
       flex: 1,
     },
+    portalContainer: {
+      position: "absolute",
+      top: safeAreaInsets.top + 10,
+      left: 0,
+      right: 0,
+      justifyContent: "center",
+      alignItems: "center",
+      pointerEvents: "box-none",
+    },
     reactionsContainer: {
       borderRadius: BorderRadius.large,
-      height: 120,
       backgroundColor: backgroundColor(colorScheme),
+      height: 120,
     },
     flex1: {
       flex: 1,
@@ -308,9 +326,9 @@ const useStyles = () => {
       flexDirection: "row",
       justifyContent: "space-around",
       alignItems: "center",
-      alignSelf: "flex-end",
       borderRadius: BorderRadius.large,
       padding: Paddings.small,
+      marginVertical: Margins.small,
       backgroundColor: backgroundColor(colorScheme),
     },
     emojiListContainerFromMe: {
