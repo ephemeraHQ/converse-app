@@ -49,6 +49,12 @@ export const Paddings = {
   large: 24,
 };
 
+export const Margins = {
+  default: 16,
+  small: 8,
+  large: 24,
+};
+
 // Sizes, spaces, paddings, margins, etc.
 export const sizes = {};
 
