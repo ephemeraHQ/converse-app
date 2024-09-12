@@ -112,21 +112,19 @@ export default function ChatMessageActions({
   ]);
 
   const onLongHoldCompletion = useCallback(
-    (isFinised?: boolean) => {
+    (isFinished?: boolean) => {
       "worklet";
-      console.log("isFinised", isFinised);
-      if (isFinised) {
+      if (isFinished) {
         activateAnimation();
         runOnJS(setIsActive)(true);
-        scaleBack();
       }
     },
-    [activateAnimation, scaleBack]
+    [activateAnimation]
   );
 
   const scaleHold = useCallback(() => {
     "worklet";
-    scale.value = withTiming(1.05, { duration: 210 }, onLongHoldCompletion);
+    scale.value = withTiming(1.02, { duration: 210 }, onLongHoldCompletion);
   }, [scale, onLongHoldCompletion]);
 
   const canAddReaction =
@@ -374,7 +372,12 @@ export default function ChatMessageActions({
 
   const StyledMessage = useMemo(() => {
     return () => (
-      <>
+      <View
+        style={[
+          styles.messageContainer,
+          { alignSelf: message.fromMe ? "flex-start" : "flex-end" },
+        ]}
+      >
         <ReanimatedTouchableOpacity
           activeOpacity={1}
           style={[
@@ -425,9 +428,10 @@ export default function ChatMessageActions({
               hideBackground={hideBackground}
             />
           )}
-      </>
+      </View>
     );
   }, [
+    styles.messageContainer,
     styles.messageBubble,
     styles.messageBubbleMe,
     message.fromMe,
@@ -497,6 +501,9 @@ const useStyles = () => {
     },
     messageBubbleMe: {
       marginLeft: "auto",
+    },
+    messageContainer: {
+      flexDirection: "row",
     },
   });
 };
