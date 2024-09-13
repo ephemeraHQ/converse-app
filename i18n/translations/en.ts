@@ -24,15 +24,15 @@ const en = {
     popularMobileApps: {
       title: "POPULAR MOBILE APPS",
     },
-    cancel: "Cancel",
+    backButton: "Back",
   },
   privyConnect: {
     title: {
-      enterPhone: "Phone number",
+      enterPhone: "Connect via\nphone number",
       verifyPhone: "Confirmation code",
     },
-    subtitle:
-      "Use your phone number to access your Converse account. It's stored securely and never shown to others.",
+    storedSecurely:
+      "Your phone number is stored securely and only shared with Privy so you can log back in.",
     buttons: {
       continue: "Continue",
       back: "Back",
@@ -42,7 +42,7 @@ const en = {
       placeholder: "Enter your phone number",
     },
     otpInput: {
-      enterCode: "Enter confirmation code sent to",
+      enterCode: "Enter the confirmation code sent to",
     },
     errors: {
       invalidPhoneNumber: "Please enter a valid phone number",
@@ -53,7 +53,7 @@ const en = {
   createEphemeral: {
     title: "Create an ephemeral account",
     subtitle:
-      "Create conversations, connections, and relationships without sharing your identity, and stay connected without sharing personal data.",
+      "Create conversations and connections without sharing your identity, and stay connected without sharing personal data.",
     disconnect_to_remove:
       "When you disconnect this account, you'll permanently remove its data from your device.",
     createButton: "Create",
@@ -62,7 +62,7 @@ const en = {
   privateKeyConnect: {
     title: "Connect via key",
     subtitle:
-      "Please enter the private key for the address you are connecting.\nIt will only be stored locally in {{storage}}.",
+      "Enter the private key for the address you are connecting.\n\nYour private key will only be stored locally in {{storage}}.",
     storage: {
       ios: "your iPhone's Secure Enclave",
       android: "the Android Keystore system",
@@ -70,8 +70,6 @@ const en = {
     connectButton: "Connect",
     backButton: "Back",
     privateKeyPlaceholder: "Enter a private key",
-    termsText: "By signing in you agree to our",
-    termsLink: "terms and conditions.",
     invalidPrivateKey: "This private key is invalid. Please try again",
   },
   connectViaWallet: {
@@ -90,22 +88,21 @@ const en = {
       e2eEncryption: {
         title: "End-to-end encrypted with MLS",
         subtitle:
-          "XMTP uses IETF-standard cryptography to enhance every conversation with Signal-level security.",
+          "IETF-standard cryptography that brings Signal-level security to every conversation.",
       },
       ownCommunications: {
         title: "Own your communications — forever",
-        subtitle: "You own your messages, not the app.",
+        subtitle:
+          "Your messages are yours. You own and control them completely, not the app.",
       },
       chatSecurely: {
         title: "Invite your friends",
-        subtitle: "Find people onchain or share your private QR code.",
+        subtitle:
+          "Find people you know onchain or share your private QR code with your friends.",
       },
     },
-    termsAndConditions: {
-      text: "By signing in you agree to our",
-      link: "terms and conditions.",
-    },
-    log_out_from: "Log out from",
+    cancel: "Cancel",
+    backButton: "Back",
     alreadyConnected: {
       title: "Already connected",
       message: "This account is already connected to Converse.",
@@ -118,6 +115,7 @@ const en = {
     buttons: {
       continue: "Continue",
       logout: "Logout from {{address}}",
+      cancel: "Cancel",
       addProfilePicture: "Add profile picture",
       changeProfilePicture: "Change profile picture",
     },
@@ -156,6 +154,8 @@ const en = {
     },
   },
   onboarding_error: "An error occurred while logging you in. Please try again.",
+  termsText: "By signing in you agree to our",
+  termsLink: "terms and conditions.",
 
   // Conversation List
   delete: "Delete",
@@ -286,6 +286,19 @@ const en = {
 
   // Emoji Picker
   search_emojis: "Search emojis",
+
+  // Chat null state
+  connectWithYourNetwork: "Connect with your network",
+  shareYourQRCode: "Share your QR code",
+  moveOrConnect:
+    "Move a conversation to Converse,\nor connect with someone new.",
+  findContacts: "Find potential contacts based on\nyour onchain activity",
+  copyShareLink: "Copy Share Link",
+  alphaTestTitle: "Help shape the future of Converse!",
+  alphaTestDescription:
+    "Share your feedback and ideas with the Converse team and other alpha testers.",
+  joinAlphaGroup: "Join Converse VIP Alpha Chat",
+  linkCopied: "Link copied",
 };
 
 export default en;

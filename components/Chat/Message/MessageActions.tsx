@@ -12,6 +12,7 @@ import {
 } from "@styles/colors";
 import { isFrameMessage } from "@utils/frames";
 import { navigate } from "@utils/navigation";
+import * as Haptics from "expo-haptics";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { Platform, StyleSheet, useColorScheme, View } from "react-native";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
@@ -162,6 +163,7 @@ export default function ChatMessageActions({
   const longPressGesture = useMemo(() => {
     return Gesture.LongPress()
       .onStart(() => {
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
         scaleHold();
         setContextMenuShown(message.id);
       })
@@ -271,11 +273,31 @@ export default function ChatMessageActions({
     return null;
   }, [message]);
 
+  const animateInStyle = useAnimatedStyle(() => {
+    return {
+      opacity: opacity.value,
+      transform: [{ scale: scale.value }, { translateY: translateY.value }],
+    };
+  });
+
+  const onContextCloseAnimation = useCallback(() => {
+    "worklet";
+    opacity.value = 1;
+    runOnJS(setIsActive)(false);
+  }, [setIsActive, opacity]);
+
+  const onContextClose = useCallback(() => {
+    onContextCloseAnimation();
+  }, [onContextCloseAnimation]);
+
   const contextMenuItems = useMemo(() => {
     const items: TableViewItemType[] = [];
     items.push({
       title: translate("reply"),
-      action: triggerReplyToMessage,
+      action: () => {
+        triggerReplyToMessage();
+        onContextClose();
+      },
       id: ContextMenuActions.REPLY,
       rightView: <TableViewPicto symbol="arrowshape.turn.up.left" />,
     });
@@ -290,6 +312,9 @@ export default function ChatMessageActions({
           } else if (message.contentFallback) {
             Clipboard.setString(message.contentFallback);
           }
+          setTimeout(() => {
+            onContextClose();
+          }, 200);
         },
       });
     }
@@ -302,6 +327,7 @@ export default function ChatMessageActions({
           if (frameURL) {
             navigate("ShareFrame", { frameURL });
           }
+          onContextClose();
         },
       });
     }
@@ -313,6 +339,7 @@ export default function ChatMessageActions({
     message.content,
     message.contentFallback,
     triggerReplyToMessage,
+    onContextClose,
   ]);
 
   useEffect(() => {
@@ -347,23 +374,6 @@ export default function ChatMessageActions({
       translateY.value = 0;
     }
   }, [shouldAnimateIn, hasAnimatedIn, opacity, scale, translateY]);
-
-  const animateInStyle = useAnimatedStyle(() => {
-    return {
-      opacity: opacity.value,
-      transform: [{ scale: scale.value }, { translateY: translateY.value }],
-    };
-  });
-
-  const onContextCloseAnimation = useCallback(() => {
-    "worklet";
-    opacity.value = 1;
-    runOnJS(setIsActive)(false);
-  }, [setIsActive, opacity]);
-
-  const onContextClose = useCallback(() => {
-    onContextCloseAnimation();
-  }, [onContextCloseAnimation]);
 
   // We use a mix of Gesture Detector AND TouchableOpacity
   // because GestureDetector is better for dual tap but if

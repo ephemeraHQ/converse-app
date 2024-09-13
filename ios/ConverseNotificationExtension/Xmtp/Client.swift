@@ -105,15 +105,16 @@ func subscribeToTopic(apiURI: String?, account: String, pushToken: String?, topi
 func putGroupInviteRequest(apiURI: String?, account: String, xmtpClient: Client, status: String, joinRequestId: String) async {
   if let apiURI = apiURI, !apiURI.isEmpty {
     do {
-      
       let joinRequestUri = "\(apiURI)/api/groupJoinRequest/\(joinRequestId)"
-      let privateKey = try PrivateKey(xmtpClient.keys.identityKey)
-      guard let digest = "XMTP_IDENTITY".data(using: .utf8) else {
+      let secureMmkv = getSecureMmkvForAccount(account: account)
+      guard let mmkv = secureMmkv else {
+          return
+      }
+      guard let apiKey = mmkv.string(forKey: "CONVERSE_API_KEY") else {
         return
       }
-      let signature = try await privateKey.sign(digest).serializedData().base64EncodedString()
       let headers: HTTPHeaders = [
-          "xmtp-api-signature": signature,
+          "xmtp-api-signature": apiKey,
           "xmtp-api-address": account
       ]
       let body: [String: Any] = [
@@ -121,7 +122,7 @@ func putGroupInviteRequest(apiURI: String?, account: String, xmtpClient: Client,
         ]
       
       AF.request(joinRequestUri, method: .put, parameters: body, encoding: JSONEncoding.default, headers: headers).response { response in
-          debugPrint("Response: \(response)")
+          debugPrint("Group Invite Response: \(response)")
       }
     } catch {
       
