@@ -3,6 +3,7 @@ import {
   reconnectConverseDbConnections,
 } from "@data/db/driver";
 import logger from "@utils/logger";
+import { stopStreamingAllMessage } from "@utils/xmtpRN/messages";
 import { useCallback, useEffect, useRef } from "react";
 import { AppState, Platform } from "react-native";
 
@@ -16,7 +17,11 @@ import { useAppStore } from "../data/store/appStore";
 import { useSelect } from "../data/store/storeHelpers";
 import { getTopicsData } from "../utils/api";
 import { loadSavedNotificationMessagesToContext } from "../utils/notifications";
-import { createPendingConversations } from "../utils/xmtpRN/conversations";
+import {
+  createPendingConversations,
+  stopStreamingConversations,
+  stopStreamingGroups,
+} from "../utils/xmtpRN/conversations";
 import { sendPendingMessages } from "../utils/xmtpRN/send";
 import { syncXmtpClient } from "../utils/xmtpRN/sync";
 
@@ -90,6 +95,13 @@ export default function XmtpEngine() {
           nextAppState.match(/inactive|background/) &&
           appState.current === "active"
         ) {
+          for (const account of accounts) {
+            await Promise.all([
+              stopStreamingAllMessage(account),
+              stopStreamingConversations(account),
+              stopStreamingGroups(account),
+            ]);
+          }
           dropConverseDbConnections();
         }
         appState.current = nextAppState;
