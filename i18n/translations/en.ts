@@ -286,6 +286,19 @@ const en = {
 
   // Emoji Picker
   search_emojis: "Search emojis",
+
+  // Chat null state
+  connectWithYourNetwork: "Connect with your network",
+  shareYourQRCode: "Share your QR code",
+  moveOrConnect:
+    "Move a conversation to Converse,\nor connect with someone new.",
+  findContacts: "Find potential contacts based on\nyour onchain activity",
+  copyShareLink: "Copy Share Link",
+  alphaTestTitle: "Help shape the future of Converse!",
+  alphaTestDescription:
+    "Share your feedback and ideas with the Converse team and other alpha testers.",
+  joinAlphaGroup: "Join Converse VIP Alpha Chat",
+  linkCopied: "Link copied",
 };
 
 export default en;

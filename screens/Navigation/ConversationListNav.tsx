@@ -85,6 +85,10 @@ export default function ConversationListNav() {
     return "Search chats";
   };
 
+  const conversations = useChatStore(
+    (s) => s.sortedConversationsWithPreview.conversationsInbox
+  );
+
   return (
     <NativeStack.Screen
       name="Chats"

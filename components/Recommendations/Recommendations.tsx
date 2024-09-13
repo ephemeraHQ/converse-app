@@ -39,6 +39,7 @@ export default function Recommendations({
   groupMode,
   groupMembers,
   addToGroup,
+  showTitle = true,
 }: {
   navigation: NativeStackNavigationProp<any>;
   visibility: "FULL" | "EMBEDDED" | "HIDDEN";
@@ -46,6 +47,7 @@ export default function Recommendations({
   groupMode?: boolean;
   groupMembers?: (ProfileSocials & { address: string })[];
   addToGroup?: (member: ProfileSocials & { address: string }) => void;
+  showTitle?: boolean;
 }) {
   const userAddress = useCurrentAccount();
   const currentAccount = useAccountsStore((s) => s.currentAccount);
@@ -121,16 +123,18 @@ export default function Recommendations({
       if (item === "title") {
         return (
           <>
-            {visibility === "FULL" && (
+            {visibility === "FULL" && showTitle && (
               <View style={styles.titleContainer}>
-                <Text style={styles.emoji}>👋</Text>
-                <Text style={styles.title}>
-                  Find people who have interests in common with you. Start
-                  talking to them.
-                </Text>
+                <>
+                  <Text style={styles.emoji}>👋</Text>
+                  <Text style={styles.title}>
+                    Find people who have interests in common with you. Start
+                    talking to them.
+                  </Text>
+                </>
               </View>
             )}
-            {visibility === "EMBEDDED" && (
+            {visibility === "EMBEDDED" && showTitle && (
               <View style={styles.sectionTitleContainer}>
                 <Text style={styles.sectionTitle}>RECOMMENDED PROFILES</Text>
               </View>
@@ -174,6 +178,7 @@ export default function Recommendations({
       groupMembers,
       groupMode,
       addToGroup,
+      showTitle,
     ]
   );
 
@@ -252,7 +257,7 @@ const useStyles = () => {
     recommendations: {
       marginBottom: 30,
       backgroundColor: backgroundColor(colorScheme),
-      marginLeft: 16,
+      marginLeft: Platform.OS === "android" ? 16 : 0,
     },
     fetching: {
       flexGrow: 1,
