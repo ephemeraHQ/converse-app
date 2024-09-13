@@ -12,6 +12,7 @@ export enum AvatarSizes {
   messageReactor = 22,
   reactionsOverlay = 56,
   shareProfile = 56,
+  shareProfileCompact = 50,
 }
 
 export enum PictoSizes {

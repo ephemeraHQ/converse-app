@@ -85,6 +85,11 @@ export default function ConversationListNav() {
     return "Search chats";
   };
 
+  const conversations = useChatStore(
+    (s) => s.sortedConversationsWithPreview.conversationsInbox
+  );
+  const showChatNullState = conversations.length === 0;
+
   return (
     <NativeStack.Screen
       name="Chats"
@@ -96,51 +101,59 @@ export default function ConversationListNav() {
           lineHeight: 26,
         },
         animation: navigationAnimation,
-        headerLeft: () => (
-          <View style={styles.searchBarContainer}>
-            <View style={styles.searchBarWrapper}>
-              <MaterialSearchBar
-                ref={searchBar}
-                onFocus={() => setSearchBarFocused(true)}
-                onBlur={() => setSearchBarFocused(false)}
-                style={styles.searchBar}
-                inputStyle={styles.searchBarInputStyle}
-                placeholder={searchPlaceholder()}
-                onChangeText={onChangeSearch}
-                value={searchQuery}
-                icon={({ color }) => (
-                  <Picto picto="menu" size={PictoSizes.navItem} color={color} />
-                )}
-                onIconPress={() => {
-                  if (Platform.OS === "android") {
-                    converseEventEmitter.emit("toggle-navigation-drawer", true);
-                  } else if (Platform.OS === "web") {
-                    navigation.goBack();
-                  }
-                }}
-                mode="bar"
-                autoCapitalize="none"
-                autoFocus={false}
-                autoCorrect={false}
-                traileringIcon={() => null}
-                placeholderTextColor={textSecondaryColor(colorScheme)}
-                selectionColor={textPrimaryColor(colorScheme)}
-                clearIcon={({ color }) => (
-                  <Picto
-                    picto="xmark"
-                    size={PictoSizes.navItem}
-                    color={color}
-                  />
-                )}
-                onClearIconPress={() => {
-                  searchBar.current?.blur();
-                }}
-                {...rightProps}
-              />
+        headerLeft: () =>
+          showChatNullState ? null : (
+            <View style={styles.searchBarContainer}>
+              <View style={styles.searchBarWrapper}>
+                <MaterialSearchBar
+                  ref={searchBar}
+                  onFocus={() => setSearchBarFocused(true)}
+                  onBlur={() => setSearchBarFocused(false)}
+                  style={styles.searchBar}
+                  inputStyle={styles.searchBarInputStyle}
+                  placeholder={searchPlaceholder()}
+                  onChangeText={onChangeSearch}
+                  value={searchQuery}
+                  icon={({ color }) => (
+                    <Picto
+                      picto="menu"
+                      size={PictoSizes.navItem}
+                      color={color}
+                    />
+                  )}
+                  onIconPress={() => {
+                    if (Platform.OS === "android") {
+                      converseEventEmitter.emit(
+                        "toggle-navigation-drawer",
+                        true
+                      );
+                    } else if (Platform.OS === "web") {
+                      navigation.goBack();
+                    }
+                  }}
+                  mode="bar"
+                  autoCapitalize="none"
+                  autoFocus={false}
+                  autoCorrect={false}
+                  traileringIcon={() => null}
+                  placeholderTextColor={textSecondaryColor(colorScheme)}
+                  selectionColor={textPrimaryColor(colorScheme)}
+                  clearIcon={({ color }) => (
+                    <Picto
+                      picto="xmark"
+                      size={PictoSizes.navItem}
+                      color={color}
+                    />
+                  )}
+                  onClearIconPress={() => {
+                    searchBar.current?.blur();
+                  }}
+                  {...rightProps}
+                />
+              </View>
+              <View style={styles.searchBarSpacer}>{/* Right spacer */}</View>
             </View>
-            <View style={styles.searchBarSpacer}>{/* Right spacer */}</View>
-          </View>
-        ),
+          ),
       })}
     >
       {(navigationProps) => (
