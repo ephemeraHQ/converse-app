@@ -96,6 +96,7 @@ type AccountsStoreStype = {
   accounts: string[];
   removeAccount: (account: string) => void;
   databaseId: { [account: string]: string };
+  setDatabaseId: (account: string, id: string) => void;
   resetDatabaseId: (account: string) => void;
   privyAccountId: { [account: string]: string | undefined };
   setPrivyAccountId: (account: string, id: string | undefined) => void;
@@ -114,6 +115,12 @@ export const useAccountsStore = create<AccountsStoreStype>()(
           return { privyAccountId };
         }),
       databaseId: {},
+      setDatabaseId: (account, id) =>
+        set((state) => {
+          const databaseId = { ...state.databaseId };
+          databaseId[account] = id;
+          return { databaseId };
+        }),
       resetDatabaseId: (account) =>
         set((state) => {
           const databaseId = { ...state.databaseId };

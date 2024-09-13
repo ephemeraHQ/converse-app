@@ -1,0 +1,19 @@
+diff --git a/node_modules/@op-engineering/op-sqlite/cpp/bindings.cpp b/node_modules/@op-engineering/op-sqlite/cpp/bindings.cpp
+index 792dbba..c3398b9 100644
+--- a/node_modules/@op-engineering/op-sqlite/cpp/bindings.cpp
++++ b/node_modules/@op-engineering/op-sqlite/cpp/bindings.cpp
+@@ -73,10 +73,10 @@ void install(jsi::Runtime &rt,
+     }
+ 
+ #ifdef OP_SQLITE_USE_SQLCIPHER
+-    if (encryptionKey.empty()) {
+-      throw std::runtime_error(
+-          "[OP SQLite] using SQLCipher encryption key is required");
+-    }
++//    if (encryptionKey.empty()) {
++//      throw std::runtime_error(
++//          "[OP SQLite] using SQLCipher encryption key is required");
++//    }
+ //      TODO(osp) find a way to display the yellow box from c++
+ #else
+     // if (!encryptionKey.empty()) {
