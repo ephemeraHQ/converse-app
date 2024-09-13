@@ -120,7 +120,7 @@ const EmojiItem: FC<{
   alreadySelected: boolean;
   dismissMenu?: () => void;
   currentUser: string;
-}> = ({ content, message, alreadySelected, currentUser }) => {
+}> = ({ content, message, alreadySelected, dismissMenu, currentUser }) => {
   const styles = useStyles();
   const handlePress = useCallback(() => {
     if (alreadySelected) {
@@ -128,7 +128,10 @@ const EmojiItem: FC<{
     } else {
       addReactionToMessage(currentUser, message, content);
     }
-  }, [alreadySelected, content, currentUser, message]);
+    InteractionManager.runAfterInteractions(() => {
+      dismissMenu?.();
+    });
+  }, [alreadySelected, content, currentUser, message, dismissMenu]);
 
   return (
     <TouchableOpacity
