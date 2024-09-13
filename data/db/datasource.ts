@@ -1,4 +1,8 @@
 import "reflect-metadata";
+import {
+  getDbEncryptionKey,
+  getDbEncryptionSalt,
+} from "@utils/keychain/helpers";
 import logger from "@utils/logger";
 import { DataSource } from "typeorm/browser";
 
@@ -50,11 +54,20 @@ export const getDataSource = async (account: string) => {
   const existingDatasource = getExistingDataSource(account);
   if (existingDatasource) return existingDatasource;
   const fileName = getDbFileName(account);
+  const [dbEncryptionKey, dbEncryptionSalt] = await Promise.all([
+    getDbEncryptionKey(),
+    getDbEncryptionSalt(),
+  ]);
+
   logger.debug(`[Datasource] Initializing datasource for ${fileName}`);
 
   const newDataSource = new DataSource({
     database: fileName,
-    driver: typeORMDriver,
+    driver: typeORMDriver(
+      account,
+      Buffer.from(dbEncryptionKey).toString("base64"),
+      dbEncryptionSalt
+    ),
     entities: [Conversation, Message, Profile],
     synchronize: false,
     migrationsRun: false,

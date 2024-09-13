@@ -1,3 +1,4 @@
+import { useAccountsStore } from "@data/store/accountsStore";
 import {
   open,
   OPSQLiteConnection,
@@ -5,14 +6,20 @@ import {
   Transaction,
 } from "@op-engineering/op-sqlite";
 import logger from "@utils/logger";
+import path from "path";
+import RNFS from "react-native-fs";
 import { v4 as uuidv4 } from "uuid";
-
 // Inspired from https://github.com/margelo/react-native-quick-sqlite/blob/be9235eef7d892ed46177f4d4031cc1a9af723ad/src/index.ts#L348
 
 const databasesConnections: {
   [id: string]: {
     connection: OPSQLiteConnection;
-    options: { name: string; location?: string };
+    options: {
+      name: string;
+      location?: string;
+      encryptionKey: string;
+      encryptionSalt: string;
+    };
   };
 } = {};
 
@@ -55,27 +62,64 @@ export const reconnectConverseDbConnections = () => {
     const newDb = open({
       name: options.name,
       location: options.location,
+      encryptionKey: options.encryptionKey,
     });
+    newDb.execute(`PRAGMA cipher_plaintext_header_size = 32;`);
+    newDb.execute(`PRAGMA cipher_salt = "x'${options.encryptionSalt}'";`);
     logger.debug(`Reopened db ${options.name}`);
     databasesConnections[dbId].connection = newDb;
   });
 };
 
-export const typeORMDriver = {
+export const typeORMDriver = (
+  account: string,
+  encryptionKey: string,
+  encryptionSalt: string
+) => ({
   openDatabase: (
-    options: {
+    _options: {
       name: string;
       location?: string;
     },
     ok: (db: any) => void,
     fail: (msg: string) => void
   ): any => {
+    let options = { ..._options, encryptionKey, encryptionSalt };
     try {
       const dbId = uuidv4();
-      const db = open({
-        name: options.name,
-        location: options.location,
-      });
+      const initialDbPath = options.location
+        ? path.join(options.location, options.name)
+        : options.name;
+      // First check if we can open it without an encryption key
+      let db = open(options);
+      db.execute(`PRAGMA cipher_plaintext_header_size = 32;`);
+      db.execute(`PRAGMA cipher_salt = "x'${encryptionSalt}'";`);
+      try {
+        // Try to execute a query with an encryption key
+        db.execute("SELECT name FROM sqlite_master WHERE type='table';");
+      } catch (e: any) {
+        logger.warn(
+          `Converse database ${options.name} seems unencrypted. Encrypting.`
+        );
+        db.close();
+        const encryptionResult = encryptPlaintextConverseDb({
+          name: options.name,
+          location: options.location,
+          encryptionKey,
+          encryptionSalt,
+        });
+        // Update the database id in state
+        useAccountsStore
+          .getState()
+          .setDatabaseId(account, encryptionResult.dbId);
+        options = { ...options, name: encryptionResult.dbName };
+        db = encryptionResult.db;
+        // Delete the old database
+        RNFS.unlink(initialDbPath);
+        logger.info(
+          `Converse database now encrypted! New database: ${encryptionResult.dbName}`
+        );
+      }
       databasesConnections[dbId] = {
         connection: db,
         options,
@@ -139,4 +183,60 @@ export const typeORMDriver = {
       fail(e.toString());
     }
   },
+});
+
+const encryptPlaintextConverseDb = (options: {
+  name: string;
+  location?: string;
+  encryptionKey: string;
+  encryptionSalt: string;
+}) => {
+  const encryptedDbId = uuidv4();
+  const encryptedDbName = `converse-${encryptedDbId}.sqlite`;
+
+  logger.debug(
+    `[Encryption 1/7] Opening unencrypted database in plaintext mode`
+  );
+  const plaintextDb = open({
+    name: options.name,
+    location: options.location,
+    encryptionKey: "",
+  });
+
+  logger.debug(
+    `[Encryption 2/7] Testing communication with plaintext database`
+  );
+  plaintextDb.execute(`SELECT name FROM sqlite_master WHERE type='table';`);
+
+  logger.debug(`[Encryption 3/7] Attaching new database using encryption key`);
+  plaintextDb.execute(
+    `ATTACH DATABASE '${
+      options.location
+        ? path.join(options.location, encryptedDbName)
+        : encryptedDbName
+    }' AS encrypted KEY '${options.encryptionKey}';`
+  );
+
+  logger.debug(`[Encryption 4/7] Setting PRAGMA for new encrypted db`);
+  plaintextDb.execute(`PRAGMA encrypted.cipher_plaintext_header_size = 32;`);
+  plaintextDb.execute(
+    `PRAGMA encrypted.cipher_salt = "x'${options.encryptionSalt}'";`
+  );
+
+  logger.debug(`[Encryption 5/7] Encrypting plaintext data to encrypted db`);
+  plaintextDb.execute(`SELECT sqlcipher_export('encrypted');`);
+
+  logger.debug(`[Encryption 6/7] Closing`);
+  plaintextDb.detach("encrypted");
+  plaintextDb.close();
+
+  logger.debug(`[Encryption 7/7] Returning encrypted database to the app`);
+  const encryptedDb = open({
+    name: encryptedDbName,
+    location: options.location,
+    encryptionKey: options.encryptionKey,
+  });
+  encryptedDb.execute(`PRAGMA cipher_plaintext_header_size = 32;`);
+  encryptedDb.execute(`PRAGMA cipher_salt = "x'${options.encryptionSalt}'";`);
+  return { dbId: encryptedDbId, dbName: encryptedDbName, db: encryptedDb };
 };
