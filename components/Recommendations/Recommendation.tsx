@@ -148,6 +148,7 @@ const useStyles = () => {
       ...Platform.select({
         default: {
           paddingVertical: 15,
+          paddingLeft: 16,
         },
         android: { paddingVertical: 12 },
       }),

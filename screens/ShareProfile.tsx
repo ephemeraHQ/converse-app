@@ -24,6 +24,7 @@ import AndroidBackAction from "../components/AndroidBackAction";
 import Avatar from "../components/Avatar";
 import ConverseButton from "../components/Button/Button";
 import ActionButton from "../components/Chat/ActionButton";
+import Picto from "../components/Picto/Picto";
 import config from "../config";
 import {
   useCurrentAccount,
@@ -37,15 +38,128 @@ import {
 } from "../utils/profile";
 import { shortAddress } from "../utils/str";
 
+const ShareProfileContent = ({
+  userAddress,
+  username,
+  displayName,
+  avatar,
+  profileUrl,
+  compact = false,
+}: {
+  userAddress: string;
+  username?: string;
+  displayName: string;
+  avatar: string;
+  profileUrl: string;
+  compact?: boolean;
+}) => {
+  const colorScheme = useColorScheme();
+  const headerHeight = useHeaderHeight();
+  const styles = useStyles();
+  const [copiedLink, setCopiedLink] = useState(false);
+
+  const shareDict =
+    Platform.OS === "ios" && !isDesktop
+      ? { url: profileUrl }
+      : { message: profileUrl };
+
+  const shareButtonText =
+    Platform.OS === "web"
+      ? copiedLink
+        ? "Link copied"
+        : "Copy link"
+      : "Share link";
+
+  const handleShare = () => {
+    if (Platform.OS === "web") {
+      setCopiedLink(true);
+      Clipboard.setString(profileUrl);
+      setTimeout(() => {
+        setCopiedLink(false);
+      }, 1000);
+    } else {
+      Share.share(shareDict);
+    }
+  };
+  return (
+    <View style={compact ? styles.shareProfileCompact : styles.shareProfile}>
+      <View style={styles.shareProfileContent}>
+        <Avatar
+          uri={avatar}
+          name={displayName}
+          size={
+            compact ? AvatarSizes.shareProfileCompact : AvatarSizes.shareProfile
+          }
+          style={styles.avatar}
+        />
+        <Text style={[styles.identity, compact && styles.identityCompact]}>
+          {displayName || username || shortAddress(userAddress || "")}
+        </Text>
+        {displayName !== username && (
+          <Text style={styles.username}>
+            {username || shortAddress(userAddress || "")}
+          </Text>
+        )}
+        {username && (
+          <Text style={styles.address}>{shortAddress(userAddress || "")}</Text>
+        )}
+      </View>
+      <View style={[styles.qrCode, compact && styles.qrCodeCompact]}>
+        <QRCode
+          size={compact ? 200 : 220}
+          value={profileUrl}
+          backgroundColor={backgroundColor(colorScheme)}
+          color={textPrimaryColor(colorScheme)}
+        />
+      </View>
+      <View
+        style={[
+          styles.shareButtonContainer,
+          compact && styles.shareButtonContainerCompact,
+        ]}
+      >
+        {!compact ? (
+          <ConverseButton
+            variant="primary"
+            title={shareButtonText}
+            style={styles.shareButton}
+            picto={
+              Platform.OS === "web"
+                ? copiedLink
+                  ? "checkmark"
+                  : "doc.on.doc"
+                : "square.and.arrow.up"
+            }
+            onPress={handleShare}
+          />
+        ) : (
+          <TouchableOpacity
+            onPress={handleShare}
+            style={styles.shareButtonCompact}
+          >
+            <Picto
+              picto="square.and.arrow.up"
+              style={styles.shareButtonIconCompact}
+              size={12}
+            />
+            <Text style={styles.shareButtonTextCompact}>{shareButtonText}</Text>
+          </TouchableOpacity>
+        )}
+      </View>
+      {!compact && <View style={{ height: headerHeight }} />}
+    </View>
+  );
+};
+
+export { ShareProfileContent };
+
 export default function ShareProfileScreen({
   route,
   navigation,
 }: NativeStackScreenProps<NavigationParamList, "ShareProfile">) {
-  const colorScheme = useColorScheme();
-  const headerHeight = useHeaderHeight();
   const userAddress = useCurrentAccount() as string;
   const socials = useProfilesStore((s) => s.profiles[userAddress]?.socials);
-  const mainIdentity = getPreferredUsername(socials);
+  const username = getPreferredUsername(socials);
   const displayName = getPreferredName(socials, userAddress);
   const avatar = getPreferredAvatar(socials);
 
@@ -68,78 +182,19 @@ export default function ShareProfileScreen({
         Platform.OS !== "ios" && <AndroidBackAction navigation={navigation} />,
     });
   }, [navigation]);
-  const styles = useStyles();
+
   const profileUrl = `https://${config.websiteDomain}/dm/${
-    mainIdentity || userAddress
+    username || userAddress
   }`;
 
-  const shareDict =
-    Platform.OS === "ios" && !isDesktop
-      ? { url: profileUrl }
-      : { message: profileUrl };
-
-  const [copiedLink, setCopiedLink] = useState(false);
-
   return (
-    <View style={styles.shareProfile}>
-      <View style={styles.shareProfileContent}>
-        <Avatar
-          uri={avatar}
-          name={displayName}
-          size={AvatarSizes.shareProfile}
-          style={styles.avatar}
-        />
-        <Text style={styles.identity}>
-          {displayName || mainIdentity || shortAddress(userAddress || "")}
-        </Text>
-        <Text style={styles.username}>
-          {mainIdentity || shortAddress(userAddress || "")}
-        </Text>
-        {mainIdentity && (
-          <Text style={styles.address}>{shortAddress(userAddress || "")}</Text>
-        )}
-      </View>
-      <View style={styles.qrCode}>
-        <QRCode
-          size={220}
-          value={profileUrl}
-          backgroundColor={backgroundColor(colorScheme)}
-          color={textPrimaryColor(colorScheme)}
-        />
-      </View>
-      <View style={styles.shareButtonContainer}>
-        <ConverseButton
-          variant="primary"
-          title={
-            Platform.OS === "web"
-              ? copiedLink
-                ? "Link copied"
-                : "Copy link"
-              : "Share link"
-          }
-          style={styles.shareButton}
-          picto={
-            Platform.OS === "web"
-              ? copiedLink
-                ? "checkmark"
-                : "doc.on.doc"
-              : "square.and.arrow.up"
-          }
-          onPress={() => {
-            if (Platform.OS === "web") {
-              setCopiedLink(true);
-              Clipboard.setString(profileUrl);
-              setTimeout(() => {
-                setCopiedLink(false);
-              }, 1000);
-            } else {
-              Share.share(shareDict);
-            }
-          }}
-        />
-      </View>
-      <View style={{ height: headerHeight }} />
-    </View>
+    <ShareProfileContent
+      userAddress={userAddress}
+      username={username}
+      displayName={displayName}
+      avatar={avatar || ""}
+      profileUrl={profileUrl}
+    />
   );
 }
 
@@ -149,6 +204,9 @@ const useStyles = () => {
     shareProfile: {
       flex: 1,
       backgroundColor: backgroundColor(colorScheme),
+    },
+    shareProfileCompact: {
+      flex: 0,
     },
     shareProfileContent: {
       alignItems: "center",
@@ -161,12 +219,18 @@ const useStyles = () => {
       justifyContent: "center",
       marginTop: 40,
     },
+    qrCodeCompact: {
+      marginTop: 20,
+    },
     identity: {
       color: textPrimaryColor(colorScheme),
       fontSize: 25,
       fontWeight: "600",
       textAlign: "center",
       marginTop: 8,
+    },
+    identityCompact: {
+      fontSize: 20,
     },
     username: {
       fontSize: 15,
@@ -187,10 +251,28 @@ const useStyles = () => {
       justifyContent: "flex-end",
       alignItems: "center",
     },
+    shareButtonContainerCompact: {
+      flex: 0,
+    },
     shareButton: {
       maxWidth: Platform.OS === "web" ? 300 : undefined,
       borderRadius: 16,
       marginHorizontal: 24,
+    },
+    shareButtonIconCompact: {
+      marginRight: 8,
+      width: 16,
+      height: 16,
+    },
+    shareButtonCompact: {
+      flexDirection: "row",
+      alignItems: "center",
+      paddingHorizontal: 8,
+      marginTop: 4,
+    },
+    shareButtonTextCompact: {
+      fontSize: 15,
+      marginTop: 4,
     },
   });
 };

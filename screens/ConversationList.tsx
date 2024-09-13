@@ -20,6 +20,7 @@ import { SearchBarCommands } from "react-native-screens";
 import { useHeaderSearchBar } from "./Navigation/ConversationListNav";
 import { NavigationParamList } from "./Navigation/Navigation";
 import { useIsSplitScreen } from "./Navigation/navHelpers";
+import ChatNullState from "../components/Chat/ChatNullState";
 import ConversationFlashList from "../components/ConversationFlashList";
 import NewConversationButton from "../components/ConversationList/NewConversationButton";
 import RequestsButton from "../components/ConversationList/RequestsButton";
@@ -102,6 +103,10 @@ function ConversationList({ navigation, route, searchBarRef }: Props) {
   const { likelyNotSpam } = sortRequestsBySpamScore(
     sortedConversationsWithPreview.conversationsRequests
   );
+  const conversations = useChatStore(
+    (s) => s.sortedConversationsWithPreview.conversationsInbox
+  );
+  const showChatNullState = conversations.length === 0 && !searchQuery;
 
   useEffect(() => {
     if (!initialLoadDoneOnce) {
@@ -129,6 +134,7 @@ function ConversationList({ navigation, route, searchBarRef }: Props) {
     route,
     searchBarRef,
     autoHide: !sharingMode,
+    showSearchBar: !showChatNullState,
   });
 
   const clearSearch = useCallback(() => {
@@ -167,7 +173,8 @@ function ConversationList({ navigation, route, searchBarRef }: Props) {
   const showSearchTitleHeader =
     ((Platform.OS === "ios" && searchBarFocused && !showNoResult) ||
       (Platform.OS === "android" && searchBarFocused)) &&
-    !sharingMode;
+    !sharingMode &&
+    !showChatNullState;
 
   if (showSearchTitleHeader) {
     ListHeaderComponents.push(
@@ -211,6 +218,16 @@ function ConversationList({ navigation, route, searchBarRef }: Props) {
   }
   if (showNoResult) {
     ListFooterComponent = <NoResult navigation={navigation} />;
+  }
+
+  if (showChatNullState) {
+    // return <Welcome ctaOnly={true} navigation={navigation} route={route} />;
+    return (
+      <ChatNullState
+        currentAccount={currentAccount()}
+        navigation={navigation}
+      />
+    );
   }
 
   return (
