@@ -221,7 +221,6 @@ function ConversationList({ navigation, route, searchBarRef }: Props) {
   }
 
   if (showChatNullState) {
-    // return <Welcome ctaOnly={true} navigation={navigation} route={route} />;
     return (
       <ChatNullState
         currentAccount={currentAccount()}
