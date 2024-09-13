@@ -1,6 +1,10 @@
 import Clipboard from "@react-native-clipboard/clipboard";
 import * as Sentry from "@sentry/react-native";
 import {
+  getDbEncryptionKey,
+  getDbEncryptionSalt,
+} from "@utils/keychain/helpers";
+import {
   getPreviousSessionLoggingFile,
   loggingFilePath,
   rotateLoggingFile,
@@ -138,10 +142,26 @@ const DebugButton = forwardRef((props, ref) => {
           const fileContent = await RNFS.readFile(dbPath, "base64");
           const { url } = await getPresignedUriForUpload(currentAccount());
           await axios.put(url, Buffer.from(fileContent, "base64"), {
-            headers: { "content-type": "application/octet-stream" },
+            headers: {
+              "content-type": "application/octet-stream",
+              "x-amz-acl": "public-read",
+            },
           });
-          Clipboard.setString(url);
-          alert("Uploaded URL Copied");
+          const fileURL = new URL(url);
+          const publicURL = fileURL.origin + fileURL.pathname;
+          const [dbEncryptionKey, dbEncryptionSalt] = await Promise.all([
+            getDbEncryptionKey(),
+            getDbEncryptionSalt(),
+          ]);
+
+          Clipboard.setString(
+            `Database URL: ${publicURL}\n\nPRAGMA key = '${Buffer.from(
+              dbEncryptionKey
+            ).toString(
+              "base64"
+            )}';\nPRAGMA cipher_plaintext_header_size = 32;\nPRAGMA cipher_salt = "x'${dbEncryptionSalt}'";`
+          );
+          alert("Database information copied to clipboard");
         },
         "Clear logout tasks": () => {
           mmkv.delete("converse-logout-tasks");
