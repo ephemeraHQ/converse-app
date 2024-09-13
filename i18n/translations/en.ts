@@ -237,7 +237,7 @@ const en = {
   your_profile_page: "Your profile page",
   copy_wallet_address: "Copy wallet address",
   turn_on_notifications: "Turn on notifications",
-  attachment_message_error_download: "Couldn't download attachment",
+  attachment_message_error_download: "Couldn’t download attachment",
   attachment_message_view_in_browser: "View in browser",
   attachment: "Attachment",
 
@@ -290,8 +290,9 @@ const en = {
   // Chat null state
   connectWithYourNetwork: "Connect with your network",
   shareYourQRCode: "Share your QR code",
-  startAConversationWith: "Show this to someone to start a conversation",
-  findContacts: "Find potential contacts based on\nyour on-chain activity",
+  moveOrConnect:
+    "Move a conversation to Converse,\nor connect with someone new.",
+  findContacts: "Find potential contacts based on\nyour onchain activity",
   copyShareLink: "Copy Share Link",
   betaTestTitle: "Help shape the future of Converse!",
   betaTestDescription:

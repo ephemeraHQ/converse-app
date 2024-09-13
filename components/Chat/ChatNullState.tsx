@@ -9,7 +9,14 @@ import {
 } from "@styles/colors";
 import { BorderRadius, Paddings, Margins } from "@styles/sizes";
 import React from "react";
-import { View, Text, StyleSheet, useColorScheme, Platform } from "react-native";
+import {
+  View,
+  Text,
+  StyleSheet,
+  useColorScheme,
+  Platform,
+  Linking,
+} from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import config from "../../config";
@@ -17,12 +24,6 @@ import {
   useProfilesStore,
   useRecommendationsStore,
 } from "../../data/store/accountsStore";
-import {
-  EnsName,
-  LensHandle,
-  UnstoppableDomain,
-} from "../../data/store/profilesStore";
-import { Frens } from "../../data/store/recommendationsStore";
 import { ShareProfileContent } from "../../screens/ShareProfile";
 import {
   getPreferredUsername,
@@ -58,153 +59,6 @@ const ChatNullState: React.FC<ChatNullStateProps> = ({
   );
   const hasRecommendations = Object.keys(frens).length > 0;
 
-  const addMockFrens = () => {
-    const mockFrens: Frens = {
-      "0x1234567890123456789012345678901234567890": {
-        tags: [
-          { text: "Crypto", image: "crypto_icon_url" },
-          { text: "DeFi", image: "defi_icon_url" },
-        ],
-        profile: {
-          ensNames: [{ name: "alice.eth" } as EnsName],
-          farcasterUsernames: [
-            {
-              username: "alice_fc",
-              name: "Alice",
-              avatarURI: "https://example.com/alice_avatar.jpg",
-              linkedAccount: true,
-            },
-          ],
-          lensHandles: [{ handle: "alice.lens" } as LensHandle],
-          unstoppableDomains: [{ domain: "alice.crypto" } as UnstoppableDomain],
-          userNames: [
-            {
-              name: "alice_converse",
-              isPrimary: true,
-              displayName: "Alice on Converse",
-              avatar: "https://example.com/alice_converse_avatar.jpg",
-            },
-          ],
-        },
-      },
-      "0x2345678901234567890123456789012345678901": {
-        tags: [
-          { text: "Smart Contracts", image: "smart_contracts_icon_url" },
-          { text: "dApps", image: "dapps_icon_url" },
-        ],
-        profile: {
-          ensNames: [{ name: "bob.eth" } as EnsName],
-          farcasterUsernames: [
-            {
-              username: "bob_fc",
-              name: "Bob",
-              avatarURI: "https://example.com/bob_avatar.jpg",
-              linkedAccount: true,
-            },
-          ],
-          lensHandles: [{ handle: "bob.lens" } as LensHandle],
-          unstoppableDomains: [{ domain: "bob.crypto" } as UnstoppableDomain],
-          userNames: [
-            {
-              name: "bob_converse",
-              isPrimary: true,
-              displayName: "Bob on Converse",
-              avatar: "https://example.com/bob_converse_avatar.jpg",
-            },
-          ],
-        },
-      },
-      "0x3456789012345678901234567890123456789012": {
-        tags: [
-          { text: "Digital Art", image: "digital_art_icon_url" },
-          { text: "Collectibles", image: "collectibles_icon_url" },
-        ],
-        profile: {
-          ensNames: [{ name: "charlie.eth" } as EnsName],
-          farcasterUsernames: [
-            {
-              username: "charlie_fc",
-              name: "Charlie",
-              avatarURI: "https://example.com/charlie_avatar.jpg",
-              linkedAccount: true,
-            },
-          ],
-          lensHandles: [{ handle: "charlie.lens" } as LensHandle],
-          unstoppableDomains: [
-            { domain: "charlie.crypto" } as UnstoppableDomain,
-          ],
-          userNames: [
-            {
-              name: "charlie_converse",
-              isPrimary: true,
-              displayName: "Charlie on Converse",
-              avatar: "https://example.com/charlie_converse_avatar.jpg",
-            },
-          ],
-        },
-      },
-      "0x3456789012345678901234567890123456781012": {
-        tags: [
-          { text: "Digital Art", image: "digital_art_icon_url" },
-          { text: "Collectibles", image: "collectibles_icon_url" },
-        ],
-        profile: {
-          ensNames: [{ name: "charlie.eth" } as EnsName],
-          farcasterUsernames: [
-            {
-              username: "charlie_fc",
-              name: "Charlie",
-              avatarURI: "https://example.com/charlie_avatar.jpg",
-              linkedAccount: true,
-            },
-          ],
-          lensHandles: [{ handle: "charlie.lens" } as LensHandle],
-          unstoppableDomains: [
-            { domain: "charlie.crypto" } as UnstoppableDomain,
-          ],
-          userNames: [
-            {
-              name: "charlie_converse",
-              isPrimary: true,
-              displayName: "Charlie on Converse",
-              avatar: "https://example.com/charlie_converse_avatar.jpg",
-            },
-          ],
-        },
-      },
-      "0x3456789012345678901234567890123456789013": {
-        tags: [
-          { text: "Digital Art", image: "digital_art_icon_url" },
-          { text: "Collectibles", image: "collectibles_icon_url" },
-        ],
-        profile: {
-          ensNames: [{ name: "charlie.eth" } as EnsName],
-          farcasterUsernames: [
-            {
-              username: "charlie_fc",
-              name: "Charlie",
-              avatarURI: "https://example.com/charlie_avatar.jpg",
-              linkedAccount: true,
-            },
-          ],
-          lensHandles: [{ handle: "charlie.lens" } as LensHandle],
-          unstoppableDomains: [
-            { domain: "charlie.crypto" } as UnstoppableDomain,
-          ],
-          userNames: [
-            {
-              name: "charlie_converse",
-              isPrimary: true,
-              displayName: "Charlie on Converse",
-              avatar: "https://example.com/charlie_converse_avatar.jpg",
-            },
-          ],
-        },
-      },
-    };
-    setRecommendations(mockFrens, Date.now());
-  };
-
   return (
     <View style={styles.container}>
       <View style={styles.contentContainer}>
@@ -225,7 +79,7 @@ const ChatNullState: React.FC<ChatNullStateProps> = ({
           <Text style={styles.subtitle}>
             {hasRecommendations
               ? translate("findContacts")
-              : translate("startAConversationWith")}
+              : translate("moveOrConnect")}
           </Text>
         </View>
         {hasRecommendations ? (
@@ -263,9 +117,7 @@ const ChatNullState: React.FC<ChatNullStateProps> = ({
             style={styles.betaGroupButton}
             textStyle={styles.betaGroupButtonText}
             onPress={() => {
-              addMockFrens();
-              // Navigate to the beta group chat or show an invite modal
-              console.log("Navigate to beta group chat");
+              Linking.openURL(config.betaGroupChatUrl);
             }}
           />
         </View>
@@ -281,8 +133,8 @@ const useStyles = () => {
     container: {
       flex: 1,
       backgroundColor: backgroundColor(colorScheme),
-      borderTopWidth: 1,
-      borderTopColor: itemSeparatorColor(colorScheme),
+      borderTopWidth: Platform.OS === "android" ? 0 : 1,
+      borderTopColor: tertiaryBackgroundColor(colorScheme),
     },
     contentContainer: {
       flex: 1,
@@ -316,6 +168,7 @@ const useStyles = () => {
       shadowOpacity: 0.1,
       shadowRadius: 4,
       elevation: 3,
+      marginTop: Platform.OS === "android" ? Margins.large : 0,
     },
     identityContainer: {
       marginTop: Margins.large,
@@ -344,6 +197,7 @@ const useStyles = () => {
     },
     chinContent: {
       alignItems: "center",
+      paddingHorizontal: Paddings.large,
     },
     chinTitle: {
       color: textPrimaryColor(colorScheme),
