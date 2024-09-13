@@ -3,20 +3,32 @@ import {
   textPrimaryColor,
   textSecondaryColor,
   itemSeparatorColor,
+  primaryColor,
 } from "@styles/colors";
 import React from "react";
-import { View, Text, StyleSheet, useColorScheme } from "react-native";
+import { View, Text, StyleSheet, useColorScheme, Platform } from "react-native";
 
-import Encrypted from "../../assets/encrypted.svg";
+import Encrypted from "../../assets/Encrypted";
 import Picto from "../Picto/Picto";
 
 const ValueProps = () => {
   const styles = useStyles();
+  const colorScheme = useColorScheme();
 
   return (
     <View style={styles.valuePropsContainer}>
       <ValuePropItem
-        icon={<Encrypted width={32} height={32} />}
+        icon={
+          Platform.OS === "ios" ? (
+            <Encrypted
+              width={32}
+              height={32}
+              color={primaryColor(colorScheme)}
+            />
+          ) : (
+            <Picto picto="lock" size={18} />
+          )
+        }
         titleKey="connectViaWallet.valueProps.e2eEncryption.title"
         subtitleKey="connectViaWallet.valueProps.e2eEncryption.subtitle"
       />
