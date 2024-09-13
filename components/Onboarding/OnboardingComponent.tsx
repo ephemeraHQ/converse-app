@@ -97,6 +97,9 @@ export default function OnboardingComponent({
               ? { paddingLeft: 16 }
               : {},
           ]}
+          textStyle={{
+            bottom: Platform.OS === "android" ? 1 : undefined,
+          }}
           onPress={() => {
             setLoading(false);
             if (backButtonAction) {
@@ -165,14 +168,15 @@ const useStyles = (showTerms: boolean) => {
       flexGrow: 1,
       alignItems: "center",
       backgroundColor: backgroundColor(colorScheme),
-      // paddingTop: insets.top,
     },
     backButton: {
       paddingVertical: 8,
       marginTop: insets.top,
+      width: Platform.OS === "android" ? 40 : undefined,
+      marginLeft: Platform.OS === "android" ? 10 : undefined,
     },
     picto: {
-      marginBottom: 8,
+      marginBottom: Platform.OS === "ios" ? 8 : 20,
       height: 64,
     },
     title: {
