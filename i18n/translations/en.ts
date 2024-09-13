@@ -294,10 +294,10 @@ const en = {
     "Move a conversation to Converse,\nor connect with someone new.",
   findContacts: "Find potential contacts based on\nyour onchain activity",
   copyShareLink: "Copy Share Link",
-  betaTestTitle: "Help shape the future of Converse!",
-  betaTestDescription:
-    "Join a private group chat for beta testersand share your feedback and ideas.",
-  joinBetaGroup: "Join Private Beta Group Chat",
+  alphaTestTitle: "Help shape the future of Converse!",
+  alphaTestDescription:
+    "Share your feedback and ideas with the Converse team and other alpha testers.",
+  joinAlphaGroup: "Join Converse VIP Alpha Chat",
   linkCopied: "Link copied",
 };
 
