@@ -1,4 +1,5 @@
 import * as secp from "@noble/secp256k1";
+import { getSecureMmkvForAccount } from "@utils/mmkv";
 import { privateKey, signature } from "@xmtp/proto";
 
 import { loadXmtpKey } from "../keychain/helpers";
@@ -34,6 +35,8 @@ const getXmtpApiSignature = async (account: string, message: string) => {
   const encodedSignature = Buffer.from(
     signature.Signature.encode(signatureProto).finish()
   ).toString("base64");
+  const secureMmkv = await getSecureMmkvForAccount(account);
+  secureMmkv.set("CONVERSE_API_KEY", encodedSignature);
   return encodedSignature;
 };
 

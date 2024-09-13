@@ -52,8 +52,8 @@ export const textPrimaryColor = (colorScheme: ColorSchemeName) => {
     : TEXT_PRIMARY_COLOR_LIGHT;
 };
 
-const TEXT_SECONDARY_COLOR_LIGHT = "rgba(0, 0, 0, 0.6)";
-const TEXT_SECONDARY_COLOR_DARK = "rgba(235, 235, 245, 0.6)";
+const TEXT_SECONDARY_COLOR_LIGHT = "#666";
+const TEXT_SECONDARY_COLOR_DARK = "#EBEBEB";
 
 export const textSecondaryColor = (colorScheme: ColorSchemeName) => {
   if (colorScheme === "dark")

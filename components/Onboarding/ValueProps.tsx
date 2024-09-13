@@ -1,18 +1,34 @@
 import { translate, TxKeyPath } from "@i18n";
-import { textPrimaryColor, textSecondaryColor } from "@styles/colors";
+import {
+  textPrimaryColor,
+  textSecondaryColor,
+  itemSeparatorColor,
+  primaryColor,
+} from "@styles/colors";
 import React from "react";
-import { View, Text, StyleSheet, useColorScheme } from "react-native";
+import { View, Text, StyleSheet, useColorScheme, Platform } from "react-native";
 
-import Encrypted from "../../assets/encrypted.svg";
+import Encrypted from "../../assets/Encrypted";
 import Picto from "../Picto/Picto";
 
 const ValueProps = () => {
   const styles = useStyles();
+  const colorScheme = useColorScheme();
 
   return (
     <View style={styles.valuePropsContainer}>
       <ValuePropItem
-        icon={<Encrypted width={32} height={32} />}
+        icon={
+          Platform.OS === "ios" ? (
+            <Encrypted
+              width={32}
+              height={32}
+              color={primaryColor(colorScheme)}
+            />
+          ) : (
+            <Picto picto="lock" size={18} />
+          )
+        }
         titleKey="connectViaWallet.valueProps.e2eEncryption.title"
         subtitleKey="connectViaWallet.valueProps.e2eEncryption.subtitle"
       />
@@ -57,19 +73,22 @@ const useStyles = () => {
   return StyleSheet.create({
     valuePropsContainer: {
       flexDirection: "column",
-      gap: 32,
-      maxWidth: 340,
+      gap: 8,
       alignSelf: "center",
-      paddingVertical: 24,
+      padding: 24,
     },
     valuePropsItem: {
       flexDirection: "row",
       alignItems: "flex-start",
-      gap: 16,
+      gap: 12,
+      borderWidth: 1,
+      borderColor: itemSeparatorColor(colorScheme),
+      borderRadius: 8,
+      padding: 16,
     },
     valuePropsItemIconContainer: {
-      width: 48,
-      height: 48,
+      width: 24,
+      height: 24,
       justifyContent: "center",
       alignItems: "center",
     },
@@ -79,13 +98,13 @@ const useStyles = () => {
       gap: 4,
     },
     valuePropsItemTitle: {
-      fontWeight: "500",
-      fontSize: 16,
-      lineHeight: 22,
+      fontWeight: "600",
+      fontSize: 15,
+      lineHeight: 20,
       color: textPrimaryColor(colorScheme),
     },
     valuePropsItemText: {
-      fontSize: 14,
+      fontSize: 13,
       lineHeight: 20,
       color: textSecondaryColor(colorScheme),
     },

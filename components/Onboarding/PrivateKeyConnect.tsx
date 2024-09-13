@@ -1,17 +1,15 @@
 import { translate } from "@i18n";
 import {
-  textInputStyle,
-  textPrimaryColor,
+  primaryColor,
+  backgroundColor,
   textSecondaryColor,
 } from "@styles/colors";
 import { Wallet } from "ethers";
-import * as Linking from "expo-linking";
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
   Alert,
   Platform,
   StyleSheet,
-  Text,
   TextInput,
   useColorScheme,
   View,
@@ -102,15 +100,13 @@ export default function PrivateKeyConnect() {
       backButtonAction={() => {
         setConnectionMethod(undefined);
       }}
+      showTerms
     >
       <View style={styles.entryContainer}>
         <TextInput
           multiline
           textAlignVertical="top"
-          style={[
-            textInputStyle(colorScheme),
-            { width: "100%", height: "100%" },
-          ]}
+          style={styles.textInput}
           placeholder={translate("privateKeyConnect.privateKeyPlaceholder")}
           placeholderTextColor={textSecondaryColor(colorScheme)}
           onChangeText={(content) => {
@@ -130,24 +126,10 @@ export default function PrivateKeyConnect() {
           }}
         />
       </View>
-      <View style={{ marginBottom: 20 }}>
-        <Text style={styles.links}>
-          {translate("privateKeyConnect.termsText")}{" "}
-          <Text
-            style={styles.link}
-            onPress={() =>
-              Linking.openURL(
-                "https://converseapp.notion.site/Terms-and-conditions-004036ad55044aba888cc83e21b8cbdb"
-              )
-            }
-          >
-            {translate("privateKeyConnect.termsLink")}
-          </Text>
-        </Text>
-      </View>
     </OnboardingComponent>
   );
 }
+
 const useStyles = () => {
   const colorScheme = useColorScheme();
   return StyleSheet.create({
@@ -158,26 +140,14 @@ const useStyles = () => {
       height: 130,
       marginTop: 38,
     },
-    links: {
-      textAlign: "center",
-      marginLeft: 32,
-      marginRight: 32,
-      marginTop: 30,
-      ...Platform.select({
-        default: {
-          fontSize: 17,
-          color: textPrimaryColor(colorScheme),
-        },
-        android: {
-          fontSize: 14,
-          lineHeight: 20,
-          color: textSecondaryColor(colorScheme),
-          maxWidth: 260,
-        },
-      }),
-    },
-    link: {
-      textDecorationLine: "underline",
+    textInput: {
+      width: "100%",
+      height: "100%",
+      padding: 12,
+      borderWidth: 1,
+      borderRadius: 8,
+      borderColor: primaryColor(colorScheme),
+      backgroundColor: backgroundColor(colorScheme),
     },
   });
 };

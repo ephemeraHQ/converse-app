@@ -23,12 +23,10 @@ import {
   installedWallets,
 } from "./supportedWallets";
 import config from "../../config";
-import { useHasOnePrivyAccount } from "../../data/store/accountsStore";
 import { useOnboardingStore } from "../../data/store/onboardingStore";
 import { useSelect } from "../../data/store/storeHelpers";
 import { isDesktop } from "../../utils/device";
 import { getEthOSSigner } from "../../utils/ethos";
-import Button from "../Button/Button";
 import TableView from "../TableView/TableView";
 import {
   TableViewEmoji,
@@ -95,12 +93,13 @@ export default function WalletSelector() {
 
   const hasInstalledWallets = walletsInstalled.list.length > 0;
   const insets = useSafeAreaInsets();
-  const alreadyConnectedToPrivy = useHasOnePrivyAccount();
   return (
     <OnboardingComponent
       title={translate("walletSelector.title")}
       picto="message.circle.fill"
       subtitle={translate("walletSelector.subtitle")}
+      backButtonText={translate("walletSelector.backButton")}
+      backButtonAction={() => setAddingNewAccount(false)}
     >
       <View
         style={[
@@ -111,35 +110,33 @@ export default function WalletSelector() {
           },
         ]}
       >
-        {!alreadyConnectedToPrivy && (
-          <TableView
-            title={translate("walletSelector.converseAccount.title")}
-            items={[
-              {
-                id: "phone",
-                leftView: <TableViewEmoji emoji="📞" />,
-                title: translate(
-                  "walletSelector.converseAccount.connectViaPhone"
-                ),
-                rightView,
-                action: () => {
-                  setConnectionMethod("phone");
-                },
+        <TableView
+          title={translate("walletSelector.converseAccount.title")}
+          items={[
+            {
+              id: "phone",
+              leftView: <TableViewEmoji emoji="📞" />,
+              title: translate(
+                "walletSelector.converseAccount.connectViaPhone"
+              ),
+              rightView,
+              action: () => {
+                setConnectionMethod("phone");
               },
-              {
-                id: "ephemeral",
-                leftView: <TableViewEmoji emoji="☁️" />,
-                title: translate(
-                  "walletSelector.converseAccount.createEphemeral"
-                ),
-                rightView,
-                action: () => {
-                  setConnectionMethod("ephemeral");
-                },
+            },
+            {
+              id: "ephemeral",
+              leftView: <TableViewEmoji emoji="☁️" />,
+              title: translate(
+                "walletSelector.converseAccount.createEphemeral"
+              ),
+              rightView,
+              action: () => {
+                setConnectionMethod("ephemeral");
               },
-            ]}
-          />
-        )}
+            },
+          ]}
+        />
 
         {hasInstalledWallets && !isDesktop && (
           <TableView
@@ -254,14 +251,6 @@ export default function WalletSelector() {
           />
         )}
       </View>
-      {addingNewAccount && (
-        <Button
-          title={translate("walletSelector.cancel")}
-          variant="text"
-          style={[styles.cancelButton, { top: insets.top + 9 }]}
-          onPress={() => setAddingNewAccount(false)}
-        />
-      )}
     </OnboardingComponent>
   );
 }

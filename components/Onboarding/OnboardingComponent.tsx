@@ -16,7 +16,9 @@ import {
   View,
 } from "react-native";
 import Animated, { useAnimatedStyle } from "react-native-reanimated";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
+import Terms from "./Terms";
 import { useOnboardingStore } from "../../data/store/onboardingStore";
 import { useSelect } from "../../data/store/storeHelpers";
 import { useKeyboardAnimation } from "../../utils/animations/keyboardAnimation";
@@ -38,6 +40,7 @@ type Props = {
   inModal?: boolean;
   inNav?: boolean;
   loadingSubtitle?: string;
+  showTerms?: boolean;
 };
 
 export default function OnboardingComponent({
@@ -54,8 +57,11 @@ export default function OnboardingComponent({
   inModal,
   inNav,
   loadingSubtitle,
+  showTerms = false,
 }: Props) {
-  const styles = useStyles();
+  const styles = useStyles(showTerms);
+  const insets = useSafeAreaInsets();
+
   const {
     loading: stateLoading,
     setLoading,
@@ -76,6 +82,32 @@ export default function OnboardingComponent({
 
   return (
     <View style={{ flex: 1, flexDirection: "column" }}>
+      {backButtonText && (
+        <Button
+          variant="text"
+          picto={
+            backButtonText.toLowerCase().includes("back")
+              ? "chevron.left"
+              : undefined
+          }
+          title={backButtonText}
+          style={[
+            styles.backButton,
+            !backButtonText.toLowerCase().includes("back")
+              ? { paddingLeft: 16 }
+              : {},
+          ]}
+          textStyle={{
+            bottom: Platform.OS === "android" ? 1 : undefined,
+          }}
+          onPress={() => {
+            setLoading(false);
+            if (backButtonAction) {
+              backButtonAction();
+            }
+          }}
+        />
+      )}
       <ScrollView
         alwaysBounceVertical={false}
         contentContainerStyle={styles.onboardingContent}
@@ -103,39 +135,24 @@ export default function OnboardingComponent({
           <>
             {subtitle && <Text style={styles.p}>{subtitle}</Text>}
             {children}
-            <View style={{ height: 32 }} />
+            <View style={{ flexGrow: 1, minHeight: 32 }} />
             {primaryButtonText && (
               <Button
                 title={primaryButtonText}
                 variant="primary"
-                style={{
-                  marginTop: "auto",
-                  marginBottom: !backButtonText ? 51 : 21,
-                }}
+                style={styles.primaryButton}
                 onPress={primaryButtonAction}
               />
+            )}
+            {showTerms && (
+              <View style={styles.termsContainer}>
+                <Terms />
+              </View>
             )}
           </>
         )}
         {loading && loadingSubtitle && (
           <Text style={styles.p}>{loadingSubtitle}</Text>
-        )}
-        {backButtonText && (
-          <Button
-            variant="text"
-            title={backButtonText}
-            textStyle={{ fontWeight: "600" }}
-            style={{
-              marginBottom: 51,
-              marginTop: primaryButtonText && !loading ? 0 : "auto",
-            }}
-            onPress={() => {
-              setLoading(false);
-              if (backButtonAction) {
-                backButtonAction();
-              }
-            }}
-          />
         )}
       </ScrollView>
       {shrinkWithKeyboard && <Animated.View style={animatedStyle} />}
@@ -143,26 +160,24 @@ export default function OnboardingComponent({
   );
 }
 
-const useStyles = () => {
+const useStyles = (showTerms: boolean) => {
   const colorScheme = useColorScheme();
+  const insets = useSafeAreaInsets();
   return StyleSheet.create({
     onboardingContent: {
       flexGrow: 1,
       alignItems: "center",
       backgroundColor: backgroundColor(colorScheme),
     },
-
+    backButton: {
+      paddingVertical: 8,
+      marginTop: insets.top,
+      width: Platform.OS === "android" ? 40 : undefined,
+      marginLeft: Platform.OS === "android" ? 10 : undefined,
+    },
     picto: {
-      ...Platform.select({
-        default: {
-          marginTop: 140,
-          marginBottom: 60,
-        },
-        android: {
-          marginTop: 165,
-          marginBottom: 61,
-        },
-      }),
+      marginBottom: Platform.OS === "ios" ? 8 : 20,
+      height: 64,
     },
     title: {
       textAlign: "center",
@@ -181,12 +196,13 @@ const useStyles = () => {
     },
     p: {
       textAlign: "center",
-      marginTop: 21,
+      marginTop: 8,
       marginLeft: 32,
       marginRight: 32,
       ...Platform.select({
         default: {
-          fontSize: 17,
+          fontSize: 16,
+          lineHeight: 20,
           color: textSecondaryColor(colorScheme),
         },
         android: {
@@ -196,6 +212,12 @@ const useStyles = () => {
           maxWidth: 260,
         },
       }),
+    },
+    primaryButton: {
+      marginBottom: showTerms ? 16 : 51,
+    },
+    termsContainer: {
+      marginBottom: 35,
     },
   });
 };
