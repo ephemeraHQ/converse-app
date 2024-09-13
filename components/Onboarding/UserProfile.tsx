@@ -35,7 +35,7 @@ import {
   pickMediaFromLibrary,
   takePictureFromCamera,
 } from "../../utils/media";
-import { shortAddress, useLoopTxt } from "../../utils/str";
+import { useLoopTxt } from "../../utils/str";
 import Avatar from "../Avatar";
 import Button from "../Button/Button";
 import { showActionSheetWithOptions } from "../StateHandlers/ActionSheetStateHandler";
@@ -224,11 +224,7 @@ export const UserProfile = ({ onboarding, navigation }: Props) => {
       primaryButtonText={translate("userProfile.buttons.continue")}
       primaryButtonAction={handleContinue}
       backButtonText={
-        onboarding
-          ? translate("userProfile.buttons.logout", {
-              address: shortAddress(address),
-            })
-          : undefined
+        onboarding ? translate("userProfile.buttons.cancel") : undefined
       }
       backButtonAction={onboarding ? () => logout(false) : undefined}
       isLoading={loading}
@@ -311,7 +307,6 @@ const useStyles = (colorScheme: any, errorMessage: any) =>
       alignItems: "center",
       ...Platform.select({
         default: {
-          paddingLeft: 16,
           borderTopWidth: 1,
           borderTopColor: itemSeparatorColor(colorScheme),
           borderBottomWidth: 1,
@@ -329,7 +324,7 @@ const useStyles = (colorScheme: any, errorMessage: any) =>
       fontSize: 17,
       width: "100%",
       ...Platform.select({
-        default: { paddingRight: 16 },
+        default: { paddingHorizontal: 16 },
         android: {
           paddingHorizontal: 16,
           borderWidth: 1,

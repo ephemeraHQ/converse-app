@@ -9,7 +9,6 @@ import { sentryTrackMessage } from "@utils/sentry";
 import { thirdwebClient } from "@utils/thirdweb";
 import { Signer } from "ethers";
 import { reloadAppAsync } from "expo";
-import * as Linking from "expo-linking";
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
   Alert,
@@ -35,7 +34,6 @@ import {
 } from "../../data/store/accountsStore";
 import { useOnboardingStore } from "../../data/store/onboardingStore";
 import { useSelect } from "../../data/store/storeHelpers";
-import { shortAddress } from "../../utils/str";
 import { isOnXmtp } from "../../utils/xmtpRN/client";
 import {
   getInboxId,
@@ -188,23 +186,6 @@ export default function ConnectViaWallet({
   }, [thirdwebSigner, setSigner, setLoading, disconnect, thirdwebWallet?.id]);
 
   const initiatingClientFor = useRef<string | undefined>(undefined);
-  const termsAndConditions = (
-    <>
-      <Text style={styles.terms}>
-        {translate("connectViaWallet.termsAndConditions.text")}{" "}
-        <Text
-          style={styles.link}
-          onPress={() =>
-            Linking.openURL(
-              "https://converseapp.notion.site/Terms-and-conditions-004036ad55044aba888cc83e21b8cbdb"
-            )
-          }
-        >
-          {translate("connectViaWallet.termsAndConditions.link")}
-        </Text>
-      </Text>
-    </>
-  );
 
   const appState = useRef(AppState.currentState);
   const signerRef = useRef(thirdwebSigner);
@@ -371,10 +352,13 @@ export default function ConnectViaWallet({
   };
 
   if (address) {
-    backButtonText = `${translate(
-      "connectViaWallet.log_out_from"
-    )} ${shortAddress(address)}`;
+    backButtonText = translate("connectViaWallet.cancel");
     backButtonAction = disconnect;
+  } else {
+    backButtonText = translate("connectViaWallet.backButton");
+    backButtonAction = () => {
+      setConnectionMethod(undefined);
+    };
   }
 
   if (signer && address) {
@@ -411,7 +395,7 @@ export default function ConnectViaWallet({
     }
   }
 
-  const showValueProps =
+  const showValuePropsAndTerms =
     !(waitingForNextSignature && !loading) || clickedSignature.current;
 
   return (
@@ -423,11 +407,11 @@ export default function ConnectViaWallet({
       primaryButtonText={translate("connectViaWallet.sign")}
       backButtonText={backButtonText}
       backButtonAction={backButtonAction}
+      showTerms={showValuePropsAndTerms}
     >
-      {showValueProps && (
+      {showValuePropsAndTerms && (
         <>
           <ValueProps />
-          {termsAndConditions}
         </>
       )}
     </OnboardingComponent>
