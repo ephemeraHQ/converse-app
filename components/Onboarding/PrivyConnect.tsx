@@ -1,9 +1,7 @@
 import { translate } from "@i18n";
 import { useEmbeddedWallet, useLoginWithSMS, usePrivy } from "@privy-io/expo";
 import {
-  backgroundColor,
   primaryColor,
-  tertiaryBackgroundColor,
   textPrimaryColor,
   textSecondaryColor,
 } from "@styles/colors";
@@ -17,6 +15,7 @@ import {
   StyleSheet,
   Text,
   useColorScheme,
+  View,
 } from "react-native";
 import { CountryCode } from "react-native-country-picker-modal";
 import * as RNLocalize from "react-native-localize";
@@ -203,8 +202,7 @@ export default function PrivyConnect() {
           ? translate("privyConnect.title.enterPhone")
           : translate("privyConnect.title.verifyPhone")
       }
-      subtitle={translate("privyConnect.subtitle")}
-      picto="phone"
+      picto={status === "enter-phone" ? "phone" : "checkmark.circle"}
       primaryButtonText={
         status === "enter-phone"
           ? translate("privyConnect.buttons.continue")
@@ -214,6 +212,7 @@ export default function PrivyConnect() {
       backButtonText={translate("privyConnect.buttons.back")}
       backButtonAction={resetOnboarding}
       shrinkWithKeyboard
+      showTerms
     >
       {status === "enter-phone" && (
         <>
@@ -254,23 +253,48 @@ export default function PrivyConnect() {
               placeholderTextColor: textSecondaryColor(colorScheme),
               selectionColor: textPrimaryColor(colorScheme),
               placeholder: translate("privyConnect.phoneInput.placeholder"),
+              style: {},
             }}
-            codeTextStyle={styles.phoneCountryCode}
+            codeTextStyle={{ display: "none" }}
             renderDropdownImage={
-              <Picto
-                picto="chevron.down"
-                color={textSecondaryColor(colorScheme)}
-                size={PictoSizes.privyConnect}
-                style={styles.flagChevron}
-              />
+              <>
+                <View
+                  style={{
+                    flexDirection: "row",
+                    justifyContent: "flex-start",
+                    alignItems: "center",
+                  }}
+                >
+                  <Text style={styles.phoneCountryCode}>
+                    +
+                    {phoneInputRef.current?.getCallingCode() ||
+                      phoneInputRef.current?.getCountryCode()}
+                  </Text>
+                  <Picto
+                    picto="chevron.down"
+                    color={textSecondaryColor(colorScheme)}
+                    size={PictoSizes.privyConnect}
+                    style={styles.flagChevron}
+                  />
+                </View>
+              </>
             }
             // @ts-ignore
-            flagSize={17}
+            flagSize={20}
           />
+          <Text style={styles.p}>
+            {translate("privyConnect.storedSecurely")}
+          </Text>
         </>
       )}
       {status === "verify-phone" && (
         <>
+          <Text style={styles.text}>
+            {translate("privyConnect.otpInput.enterCode")}
+          </Text>
+          <Text style={[styles.text, { fontWeight: "600" }]}>
+            {beautifulPhone}
+          </Text>
           <OtpInput
             numberOfDigits={6}
             onFilled={(text) => {
@@ -292,14 +316,10 @@ export default function PrivyConnect() {
               pinCodeTextStyle: styles.otpText,
             }}
           />
-          <Text style={styles.text}>
-            {translate("privyConnect.otpInput.enterCode")}
-            {"\n"}
-            {beautifulPhone}
-          </Text>
           <Button
-            style={{ marginTop: 32 }}
+            style={{ marginTop: 16 }}
             textStyle={{
+              fontSize: 15,
               color:
                 retrySeconds > 0
                   ? textSecondaryColor(colorScheme)
@@ -328,8 +348,9 @@ const useStyles = () => {
   const colorScheme = useColorScheme();
   return StyleSheet.create({
     text: {
-      fontSize: 17,
-      marginTop: 32,
+      fontSize: 16,
+      lineHeight: 20,
+      marginTop: 8,
       marginHorizontal: 50,
       textAlign: "center",
       color:
@@ -337,62 +358,56 @@ const useStyles = () => {
           ? textSecondaryColor(colorScheme)
           : textPrimaryColor(colorScheme),
     },
-    phoneInputContainer: {
-      marginTop: 32,
-      backgroundColor: backgroundColor(colorScheme),
+    p: {
+      textAlign: "center",
+      marginLeft: 32,
+      marginRight: 32,
+      ...Platform.select({
+        default: {
+          fontSize: 13,
+          lineHeight: 17,
+          color: textPrimaryColor(colorScheme),
+        },
+        android: {
+          fontSize: 14,
+          lineHeight: 20,
+          color: textPrimaryColor(colorScheme),
+          maxWidth: 260,
+        },
+      }),
     },
-    phoneInput: Platform.select({
-      default: {
-        backgroundColor: tertiaryBackgroundColor(colorScheme),
-        borderRadius: 10,
-        height: 36,
-        marginLeft: 20,
-      },
-      android: {
-        backgroundColor: backgroundColor(colorScheme),
-        borderRadius: 4,
-        borderWidth: 1,
-        borderColor: textSecondaryColor(colorScheme),
-        marginLeft: 10,
-      },
-    }),
+    phoneInputContainer: {
+      marginTop: 6,
+      borderColor: textSecondaryColor(colorScheme),
+      borderWidth: 1,
+      borderRadius: 8,
+      paddingLeft: 12,
+      marginBottom: 8,
+    },
+    phoneInput: { backgroundColor: "transparent", left: 0 },
     phoneInputText: {
-      height: 25,
+      height: 20,
       color: textPrimaryColor(colorScheme),
     },
     phoneCountryCode: {
       height: Platform.OS === "android" ? undefined : 20,
-      color: textPrimaryColor(colorScheme),
-      fontWeight: "400",
+      color: textSecondaryColor(colorScheme),
+      marginRight: 5,
+      right: 8,
+      top: 1,
     },
-    flagButton: Platform.select({
-      default: {
-        backgroundColor: tertiaryBackgroundColor(colorScheme),
-        borderRadius: 10,
-        height: 36,
-        width: 58,
-      },
-      android: {
-        backgroundColor: backgroundColor(colorScheme),
-        borderRadius: 4,
-        borderWidth: 1,
-        borderColor: textSecondaryColor(colorScheme),
-      },
-    }),
-    flagChevron: Platform.select({
-      default: { marginRight: 9, marginLeft: -2 },
-      android: {
-        marginLeft: -5,
-      },
-    }),
+    flagButton: {
+      flexDirection: "row",
+      justifyContent: "flex-start",
+    },
+    flagChevron: {
+      marginLeft: Platform.OS === "android" ? -5 : undefined,
+    },
     countryPicker: {
       paddingLeft: 12,
     },
     otp: {
-      flex: 1,
-      flexDirection: "row",
-      flexGrow: 0,
-      width: Platform.OS === "android" ? 252 : 210,
+      paddingHorizontal: 14,
       marginTop: 32,
     },
     otpFocus: {
@@ -400,29 +415,15 @@ const useStyles = () => {
       width: 1.75,
     },
     otpText: {
-      fontSize: 17,
+      fontSize: 24,
       color: textPrimaryColor(colorScheme),
+      fontWeight: "600",
     },
     otpInput: {
-      marginRight: 5,
-      marginLeft: 5,
-      ...Platform.select({
-        default: {
-          minWidth: 25,
-          minHeight: 30,
-          borderRadius: 3,
-          borderWidth: 0,
-          backgroundColor: tertiaryBackgroundColor(colorScheme),
-        },
-        android: {
-          backgroundColor: backgroundColor(colorScheme),
-          borderRadius: 4,
-          borderWidth: 1,
-          borderColor: textSecondaryColor(colorScheme),
-          minHeight: 56,
-          minWidth: 32,
-        },
-      }),
+      borderRadius: 8,
+      borderWidth: 1,
+      borderColor: textSecondaryColor(colorScheme),
+      minWidth: 51,
     },
   });
 };
