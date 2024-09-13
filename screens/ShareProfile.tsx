@@ -140,7 +140,7 @@ const ShareProfileContent = ({
             <Picto
               picto="square.and.arrow.up"
               style={styles.shareButtonIconCompact}
-              size={12}
+              size={Platform.OS === "android" ? 16 : 12}
             />
             <Text style={styles.shareButtonTextCompact}>{shareButtonText}</Text>
           </TouchableOpacity>
@@ -263,6 +263,7 @@ const useStyles = () => {
       marginRight: 8,
       width: 16,
       height: 16,
+      top: Platform.OS === "android" ? 2 : 0,
     },
     shareButtonCompact: {
       flexDirection: "row",
@@ -271,6 +272,7 @@ const useStyles = () => {
       marginTop: 4,
     },
     shareButtonTextCompact: {
+      color: textPrimaryColor(colorScheme),
       fontSize: 15,
       marginTop: 4,
     },

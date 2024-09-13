@@ -125,22 +125,18 @@ export default function Recommendations({
           <>
             {visibility === "FULL" && showTitle && (
               <View style={styles.titleContainer}>
-                {showTitle && (
-                  <>
-                    <Text style={styles.emoji}>👋</Text>
-                    <Text style={styles.title}>
-                      Find people who have interests in common with you. Start
-                      talking to them.
-                    </Text>
-                  </>
-                )}
+                <>
+                  <Text style={styles.emoji}>👋</Text>
+                  <Text style={styles.title}>
+                    Find people who have interests in common with you. Start
+                    talking to them.
+                  </Text>
+                </>
               </View>
             )}
             {visibility === "EMBEDDED" && showTitle && (
               <View style={styles.sectionTitleContainer}>
-                {showTitle && (
-                  <Text style={styles.sectionTitle}>RECOMMENDED PROFILES</Text>
-                )}
+                <Text style={styles.sectionTitle}>RECOMMENDED PROFILES</Text>
               </View>
             )}
           </>
@@ -261,6 +257,7 @@ const useStyles = () => {
     recommendations: {
       marginBottom: 30,
       backgroundColor: backgroundColor(colorScheme),
+      marginLeft: Platform.OS === "android" ? 16 : 0,
     },
     fetching: {
       flexGrow: 1,
