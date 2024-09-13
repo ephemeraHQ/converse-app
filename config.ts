@@ -68,7 +68,8 @@ const ENV = {
       (domain) => [`https://${domain}`, `http://${domain}`, domain]
     ),
     enableTransactionFrames: true,
-    betaGroupChatUrl: "https://converse.xyz/group-invite/NfrIwpnhZdRCx2ZyGCg-S",
+    alphaGroupChatUrl:
+      "https://converse.xyz/group-invite/NfrIwpnhZdRCx2ZyGCg-S",
   },
   preview: {
     ...defaultConfig,
@@ -86,7 +87,8 @@ const ENV = {
       "preview.getconverse.app/",
     ].flatMap((domain) => [`https://${domain}`, `http://${domain}`, domain]),
     enableTransactionFrames: true,
-    betaGroupChatUrl: "https://converse.xyz/group-invite/FVxZDYzvp600445MRztND",
+    alphaGroupChatUrl:
+      "https://converse.xyz/group-invite/eQAvo-WvwrdBTsHINuSMJ",
   },
   prod: {
     ...defaultConfig,
@@ -119,7 +121,8 @@ const ENV = {
       rpcEndpoint: process.env.EXPO_PUBLIC_EVM_RPC_ENDPOINT,
     },
     enableTransactionFrames: false,
-    betaGroupChatUrl: "https://converse.xyz/group-invite/FVxZDYzvp600445MRztND",
+    alphaGroupChatUrl:
+      "https://converse.xyz/group-invite/eQAvo-WvwrdBTsHINuSMJ",
   },
 };
 

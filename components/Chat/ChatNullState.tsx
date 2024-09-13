@@ -106,18 +106,18 @@ const ChatNullState: React.FC<ChatNullStateProps> = ({
 
       <View style={styles.chin}>
         <View style={styles.chinContent}>
-          <Text style={styles.chinTitle}>{translate("betaTestTitle")}</Text>
+          <Text style={styles.chinTitle}>{translate("alphaTestTitle")}</Text>
           <Text style={styles.chinDescription}>
-            {translate("betaTestDescription")}
+            {translate("alphaTestDescription")}
           </Text>
 
           <ConverseButton
-            title={translate("joinBetaGroup")}
+            title={translate("joinAlphaGroup")}
             variant="primary"
-            style={styles.betaGroupButton}
-            textStyle={styles.betaGroupButtonText}
+            style={styles.alphaGroupButton}
+            textStyle={styles.alphaGroupButtonText}
             onPress={() => {
-              Linking.openURL(config.betaGroupChatUrl);
+              Linking.openURL(config.alphaGroupChatUrl);
             }}
           />
         </View>
@@ -160,7 +160,8 @@ const useStyles = () => {
       color: textSecondaryColor(colorScheme),
     },
     qrCodeContainer: {
-      padding: Paddings.large,
+      paddingVertical: Paddings.default,
+      paddingHorizontal: Paddings.large,
       backgroundColor: backgroundColor(colorScheme),
       borderRadius: BorderRadius.large,
       shadowColor: textSecondaryColor(colorScheme),
@@ -168,7 +169,7 @@ const useStyles = () => {
       shadowOpacity: 0.1,
       shadowRadius: 4,
       elevation: 3,
-      marginTop: Platform.OS === "android" ? Margins.large : 0,
+      marginTop: Platform.OS === "android" ? Margins.large : Margins.small,
     },
     identityContainer: {
       marginTop: Margins.large,
@@ -193,7 +194,7 @@ const useStyles = () => {
       borderTopWidth: 1,
       borderTopColor: tertiaryBackgroundColor(colorScheme),
       backgroundColor: backgroundColor(colorScheme),
-      paddingBottom: insets.bottom + 24,
+      paddingBottom: insets.bottom,
     },
     chinContent: {
       alignItems: "center",
@@ -213,12 +214,12 @@ const useStyles = () => {
       textAlign: "center",
       marginBottom: Margins.default,
     },
-    betaGroupButton: {
+    alphaGroupButton: {
       maxWidth: Platform.OS === "web" ? 300 : undefined,
       borderRadius: 16,
       marginHorizontal: 24,
     },
-    betaGroupButtonText: {},
+    alphaGroupButtonText: {},
   });
 };
 
