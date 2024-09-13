@@ -90,12 +90,11 @@ export const typeORMDriver = (
       const initialDbPath = options.location
         ? path.join(options.location, options.name)
         : options.name;
-      // First check if we can open it without an encryption key
       let db = open(options);
       db.execute(`PRAGMA cipher_plaintext_header_size = 32;`);
       db.execute(`PRAGMA cipher_salt = "x'${encryptionSalt}'";`);
       try {
-        // Try to execute a query with an encryption key
+        // Try to execute a query with the encryption key
         db.execute("SELECT name FROM sqlite_master WHERE type='table';");
       } catch (e: any) {
         logger.warn(

@@ -146,7 +146,7 @@ export const getDbEncryptionKey = async () => {
 export const getDbEncryptionSalt = async () => {
   const existingSalt = await getSecureItemAsync("CONVERSE_DB_ENCRYPTION_SALT");
   if (existingSalt) {
-    return existingSalt.slice(0, 32);
+    return existingSalt;
   }
   const newKey = Buffer.from(await getRandomBytesAsync(16));
   const newKeyHex = newKey.toString("hex");
