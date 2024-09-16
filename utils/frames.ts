@@ -117,10 +117,10 @@ export const fetchFramesForMessage = async (
       const messageMetadataToSave: ConverseMessageMetadata = {
         frames: fetchedFrames.map((f) => f.url),
       };
-      saveMessageMetadata(account, message, messageMetadataToSave);
-
-      // Save frame itself to store
+      // Save frame to store
       useFramesStore.getState().setFrames(framesToSave);
+      // Then update message to reflect change
+      saveMessageMetadata(account, message, messageMetadataToSave);
 
       return { messageId: message.id, frames: fetchedFrames };
     }

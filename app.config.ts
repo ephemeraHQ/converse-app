@@ -12,7 +12,7 @@ warnOnce(
 );
 
 const isPreview = env.EXPO_ENV === "preview";
-export const isProduction = !isDev && !isPreview;
+const isProduction = !isDev && !isPreview;
 
 export default ({ config }: ConfigContext): ExpoConfig => ({
   ...config,
