@@ -79,3 +79,12 @@ export const getMinimalDate = (date: number) => {
   if (minutes > 0) return `${minutes}m`;
   return `${Math.max(seconds, 0)}s`;
 };
+
+export const getLocalizedTime = (date: number | Date): string => {
+  if (!date) return "";
+
+  const locale = getLocale();
+  const inputDate = new Date(date);
+
+  return format(inputDate, "p", { locale });
+};
