@@ -239,6 +239,9 @@
     "typescript": "^5.3.0",
     "warn-once": "^0.1.1"
   },
+  "op-sqlite": {
+    "sqlcipher": true
+  },
   "private": true,
   "lint-staged": {
     "*.{tsx,ts}": [
