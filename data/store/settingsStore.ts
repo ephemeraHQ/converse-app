@@ -57,94 +57,99 @@ export type SettingsStoreType = {
   // an intermediary screen for those who onboarded before
   onboardedAfterProfilesRelease: boolean;
   setOnboardedAfterProfilesRelease: (s: boolean) => void;
+
+  hasUserDismissedBanner: boolean;
+  setHasUserDismissedBanner: (dismissed: boolean) => void;
 };
 
 export const initSettingsStore = (account: string) => {
-  const profilesStore = create<SettingsStoreType>()(
+  const settingsStore = create<SettingsStoreType>()(
     persist(
-      (set) =>
-        ({
-          notifications: {
-            // On web we never show notifications screen
-            showNotificationScreen: Platform.OS !== "web",
-          },
-          peersStatus: {},
-          setPeersStatus: (peersStatus: {
-            [peerAddress: string]: "blocked" | "consented";
-          }) =>
-            set((state) => {
-              setImmediate(() => {
-                subscribeToNotifications(account);
-              });
-              return {
-                peersStatus: {
-                  ...state.peersStatus,
-                  ...Object.fromEntries(
-                    Object.entries(peersStatus).map(([key, value]) => [
-                      // Normalize to lowercase before merging
-                      key.toLowerCase(),
-                      value,
-                    ])
-                  ),
-                },
-              };
-            }),
-
-          inboxIdPeerStatus: {},
-          setInboxIdPeerStatus: (peersStatus: {
-            [inboxId: InboxId]: "allowed" | "denied";
-          }) =>
-            set((state) => {
-              return {
-                inboxIdPeerStatus: {
-                  ...state.inboxIdPeerStatus,
-                  ...Object.fromEntries(
-                    Object.entries(peersStatus).map(([key, value]) => [
-                      // Normalize to lowercase before merging
-                      key.toLowerCase(),
-                      value,
-                    ])
-                  ),
-                },
-              };
-            }),
-
-          groupStatus: {},
-          setGroupStatus: (groupStatus: {
-            [groupId: string]: "allowed" | "denied";
-          }) =>
-            set((state) => ({
-              groupStatus: {
-                ...state.groupStatus,
-                ...groupStatus,
+      (set) => ({
+        notifications: {
+          // On web we never show notifications screen
+          showNotificationScreen: Platform.OS !== "web",
+        },
+        peersStatus: {},
+        setPeersStatus: (peersStatus: {
+          [peerAddress: string]: "blocked" | "consented";
+        }) =>
+          set((state) => {
+            setImmediate(() => {
+              subscribeToNotifications(account);
+            });
+            return {
+              peersStatus: {
+                ...state.peersStatus,
+                ...Object.fromEntries(
+                  Object.entries(peersStatus).map(([key, value]) => [
+                    // Normalize to lowercase before merging
+                    key.toLowerCase(),
+                    value,
+                  ])
+                ),
               },
-            })),
+            };
+          }),
 
-          setNotificationsSettings: (notificationsSettings) =>
-            set((state) => ({
-              notifications: {
-                ...state.notifications,
-                ...notificationsSettings,
+        inboxIdPeerStatus: {},
+        setInboxIdPeerStatus: (peersStatus: {
+          [inboxId: InboxId]: "allowed" | "denied";
+        }) =>
+          set((state) => {
+            return {
+              inboxIdPeerStatus: {
+                ...state.inboxIdPeerStatus,
+                ...Object.fromEntries(
+                  Object.entries(peersStatus).map(([key, value]) => [
+                    // Normalize to lowercase before merging
+                    key.toLowerCase(),
+                    value,
+                  ])
+                ),
               },
-            })),
-          ephemeralAccount: false,
-          setEphemeralAccount: (ephemeral) =>
-            set(() => ({
-              ephemeralAccount: ephemeral,
-            })),
-          lastAsyncUpdate: 0,
-          setLastAsyncUpdate: (version) =>
-            set(() => ({
-              lastAsyncUpdate: version,
-            })),
-          skipFarcaster: false,
-          setSkipFarcaster: (s) => set(() => ({ skipFarcaster: s })),
-          skipAddressBook: false,
-          setSkipAddressBook: (s) => set(() => ({ skipAddressBook: s })),
-          onboardedAfterProfilesRelease: false,
-          setOnboardedAfterProfilesRelease: (o) =>
-            set(() => ({ onboardedAfterProfilesRelease: o })),
-        }) as SettingsStoreType,
+            };
+          }),
+
+        groupStatus: {},
+        setGroupStatus: (groupStatus: {
+          [groupId: string]: "allowed" | "denied";
+        }) =>
+          set((state) => ({
+            groupStatus: {
+              ...state.groupStatus,
+              ...groupStatus,
+            },
+          })),
+
+        setNotificationsSettings: (notificationsSettings) =>
+          set((state) => ({
+            notifications: {
+              ...state.notifications,
+              ...notificationsSettings,
+            },
+          })),
+        ephemeralAccount: false,
+        setEphemeralAccount: (ephemeral) =>
+          set(() => ({
+            ephemeralAccount: ephemeral,
+          })),
+        lastAsyncUpdate: 0,
+        setLastAsyncUpdate: (version) =>
+          set(() => ({
+            lastAsyncUpdate: version,
+          })),
+        skipFarcaster: false,
+        setSkipFarcaster: (s) => set(() => ({ skipFarcaster: s })),
+        skipAddressBook: false,
+        setSkipAddressBook: (s) => set(() => ({ skipAddressBook: s })),
+        onboardedAfterProfilesRelease: false,
+        setOnboardedAfterProfilesRelease: (o) =>
+          set(() => ({ onboardedAfterProfilesRelease: o })),
+        hasUserDismissedBanner: false,
+        setHasUserDismissedBanner: (dismissed) =>
+          set({ hasUserDismissedBanner: dismissed }),
+      }),
       {
         name: `store-${account}-settings`, // Account-based storage so each account can have its own settings
         storage: createJSONStorage(() => zustandMMKVStorage),
@@ -165,5 +170,5 @@ export const initSettingsStore = (account: string) => {
       }
     )
   );
-  return profilesStore;
+  return settingsStore;
 };
