@@ -12,7 +12,6 @@ import React, {
   useCallback,
   useMemo,
   useState,
-  forwardRef,
   useRef,
   useEffect,
 } from "react";
@@ -145,20 +144,15 @@ interface ChatMessageMethods {
   toggleTime: () => void;
 }
 
-const ChatMessage = forwardRef<
-  ChatMessageMethods,
-  Props & { showTime: boolean; toggleTime: () => void }
->(function ChatMessage(props, ref) {
-  const {
-    account,
-    message,
-    colorScheme,
-    isGroup,
-    isFrame,
-    showTime,
-    toggleTime,
-  } = props;
-
+const ChatMessage = ({
+  account,
+  message,
+  colorScheme,
+  isGroup,
+  isFrame,
+  showTime,
+  toggleTime,
+}: Props & { showTime: boolean; toggleTime: () => void }) => {
   const styles = useStyles();
 
   const messageDate = useMemo(
@@ -275,6 +269,7 @@ const ChatMessage = forwardRef<
   }, [replyingToMessage?.senderAddress]);
 
   const swipeableRef = useRef<Swipeable | null>(null);
+
   return (
     <View
       style={[
@@ -476,7 +471,7 @@ const ChatMessage = forwardRef<
       )}
     </View>
   );
-});
+};
 
 // We use a cache for chat messages so that it doesn't rerender too often.
 // Indeed, since we use an inverted FlashList for chat, when a new message
@@ -501,15 +496,12 @@ export default function CachedChatMessage({
   isGroup,
   isFrame = false,
 }: Props) {
-  const chatMessageRef = useRef<ChatMessageMethods>(null);
-  const [showTime, setShowTime] = useState(false); // State to trigger re-renders
+  // State to trigger re-renders
+  const [showTime, setShowTime] = useState(false);
 
-  // TODO Review this
+  // Toggle the showTime state
   const toggleTime = useCallback(() => {
-    // Toggle the showTime state
     setShowTime((prev) => !prev);
-    // Call the method in child component
-    chatMessageRef.current?.toggleTime();
   }, []);
 
   const keysChangesToRerender: (keyof MessageToDisplay)[] = [
@@ -540,7 +532,6 @@ export default function CachedChatMessage({
   const renderedMessage = useMemo(
     () => (
       <ChatMessage
-        ref={chatMessageRef}
         account={account}
         message={message}
         colorScheme={colorScheme}
