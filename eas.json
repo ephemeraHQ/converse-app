@@ -76,6 +76,7 @@
       },
       "node": "20.15.1",
       "ios": {
+        "resourceClass": "large",
         "cocoapods": "1.14.3"
       }
     },
@@ -87,6 +88,7 @@
       },
       "node": "20.15.1",
       "ios": {
+        "resourceClass": "large",
         "cocoapods": "1.14.3"
       }
     },
@@ -99,6 +101,9 @@
       "node": "20.15.1",
       "ios": {
         "cocoapods": "1.14.3"
+      },
+      "android": {
+        "resourceClass": "large"
       }
     },
     "production-android-internal": {
@@ -108,6 +113,9 @@
       "node": "20.15.1",
       "ios": {
         "cocoapods": "1.14.3"
+      },
+      "android": {
+        "resourceClass": "large"
       }
     }
   },
