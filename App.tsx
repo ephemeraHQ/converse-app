@@ -1,7 +1,6 @@
 import "reflect-metadata";
 import "./polyfills";
 
-import { configure as configureCoinbase } from "@coinbase/wallet-mobile-sdk";
 import DebugButton from "@components/DebugButton";
 import { ActionSheetProvider } from "@expo/react-native-action-sheet";
 import { PortalProvider } from "@gorhom/portal";
@@ -47,12 +46,6 @@ LogBox.ignoreLogs([
   "Error destroying session", // Privy
   'event="noNetwork', // ethers
 ]);
-
-configureCoinbase({
-  callbackURL: new URL(`https://${config.websiteDomain}/coinbase`),
-  hostURL: new URL("https://wallet.coinbase.com/wsegue"),
-  hostPackageName: "org.toshi",
-});
 
 initSentry();
 
