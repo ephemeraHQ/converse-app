@@ -194,8 +194,6 @@ const en = {
     "If you unblock this contact, they will be able to send you messages again.",
   if_you_block_contact:
     "If you block this contact, you will not receive messages from them anymore",
-  if_you_unblock_group:
-    "If you unblock this group, you will be able to receive messages from it.",
   opening_conversation: "Opening your conversation",
   say_hi: "Say hi",
   do_you_trust_this_contact: "Do you trust this contact?",

@@ -52,13 +52,15 @@ export const GroupConversationItem: FC<GroupConversationItemProps> = ({
     );
 
   const handleRemoveRestore = useCallback(() => {
-    return groupRemoveRestoreHandler(
+    groupRemoveRestoreHandler(
       consent,
       colorScheme,
       groupName,
       allowGroup,
-      blockGroup
-    );
+      blockGroup,
+    )((success: boolean) => {
+      // If not successful, do nothing (user canceled)
+    });
   }, [consent, colorScheme, groupName, allowGroup, blockGroup]);
 
   return (
