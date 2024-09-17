@@ -16,7 +16,7 @@ import React, {
   useEffect,
 } from "react";
 import {
-  Animated,
+  Animated as RNAnimated,
   ColorSchemeName,
   Linking,
   Platform,
@@ -28,6 +28,11 @@ import {
   DimensionValue,
 } from "react-native";
 import { Swipeable } from "react-native-gesture-handler";
+import Animated, {
+  useSharedValue,
+  useAnimatedStyle,
+  withTiming,
+} from "react-native-reanimated";
 
 import ChatMessageActions from "./MessageActions";
 import ChatMessageReactions from "./MessageReactions";
@@ -140,10 +145,6 @@ const MessageSenderAvatar = ({ message }: { message: MessageToDisplay }) => {
   );
 };
 
-interface ChatMessageMethods {
-  toggleTime: () => void;
-}
-
 const ChatMessage = ({
   account,
   message,
@@ -163,6 +164,38 @@ const ChatMessage = ({
     () => getLocalizedTime(message.sent),
     [message.sent]
   );
+
+  // Shared values for height, translateY, and opacity
+  const height = useSharedValue(0);
+  const translateY = useSharedValue(20);
+  const opacity = useSharedValue(0);
+
+  // Define animated styles using shared values
+  const animatedStyle = useAnimatedStyle(() => {
+    return {
+      minHeight: height.value, // Use minHeight for more stable height animations
+      transform: [{ translateY: translateY.value }],
+      opacity: opacity.value,
+    };
+  });
+
+  // Handle animation based on showTime prop
+  React.useEffect(() => {
+    if (showTime) {
+      // Animate to show: increase height, move up, and fade in
+      height.value = withTiming(34, { duration: 300 }); // Adjust target height as needed
+      translateY.value = withTiming(0, { duration: 300 });
+      opacity.value = withTiming(1, { duration: 300 });
+    } else {
+      // Animate to hide: collapse height, move down, and fade out
+      opacity.value = withTiming(0, { duration: 300 }); // Start fade out first
+      height.value = withTiming(0, { duration: 300 }, (finished) => {
+        if (finished) {
+          translateY.value = withTiming(20, { duration: 300 }); // Then move down
+        }
+      });
+    }
+  }, [showTime, height, opacity, translateY]);
 
   let messageContent: ReactNode;
   const contentType = getMessageContentType(message.contentType);
@@ -283,12 +316,14 @@ const ChatMessage = ({
       ]}
     >
       {message.dateChange && (
-        <Text style={styles.date}>
+        <Text style={styles.dateTime}>
           {messageDate} {showTime && `– ${messageTime}`}
         </Text>
       )}
       {!message.dateChange && showTime && (
-        <Text style={styles.date}>{messageTime}</Text>
+        <Animated.View style={[animatedStyle, styles.dateTimeContainer]}>
+          <Text style={styles.dateTime}>{messageTime}</Text>
+        </Animated.View>
       )}
       {isGroupUpdated && messageContent}
       {isChatMessage && (
@@ -299,12 +334,12 @@ const ChatMessage = ({
           containerStyle={styles.messageSwipeable}
           childrenContainerStyle={styles.messageSwipeableChildren}
           renderLeftActions={(
-            progressAnimatedValue: Animated.AnimatedInterpolation<
+            progressAnimatedValue: RNAnimated.AnimatedInterpolation<
               string | number
             >
           ) => {
             return (
-              <Animated.View
+              <RNAnimated.View
                 style={{
                   opacity: progressAnimatedValue.interpolate({
                     inputRange: [0, 0.7, 1],
@@ -324,7 +359,7 @@ const ChatMessage = ({
                 }}
               >
                 <ActionButton picto="arrowshape.turn.up.left" />
-              </Animated.View>
+              </RNAnimated.View>
             );
           }}
           leftThreshold={10000} // Never trigger opening
@@ -607,7 +642,12 @@ const useStyles = () => {
       color: textSecondaryColor(colorScheme),
       flexGrow: 1,
     },
-    date: {
+    dateTimeContainer: {
+      overflow: "hidden",
+      width: "100%",
+      minHeight: 20,
+    },
+    dateTime: {
       flexBasis: "100%",
       textAlign: "center",
       fontSize: 12,
@@ -615,14 +655,6 @@ const useStyles = () => {
       marginTop: 12,
       marginBottom: 8,
       fontWeight: "bold",
-    },
-    time: {
-      flexBasis: "100%",
-      textAlign: "center",
-      fontSize: 12,
-      color: textSecondaryColor(colorScheme),
-      marginTop: 4,
-      marginBottom: 4,
     },
     replyToUsername: {
       fontSize: 12,
