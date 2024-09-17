@@ -98,10 +98,12 @@ const Conversation = ({
 
   // When the conversation topic changes, we set the conversation object
   const conversationTopicRef = useRef(conversationTopic);
+  const currentLastUpdateAt = conversation?.lastUpdateAt;
   useEffect(() => {
     if (
       conversationTopic &&
-      conversationTopicRef.current !== conversationTopic
+      (conversationTopicRef.current !== conversationTopic ||
+        conversations[conversationTopic]?.lastUpdateAt !== currentLastUpdateAt)
     ) {
       const foundConversation = conversations[conversationTopic];
       if (foundConversation) {
@@ -121,6 +123,7 @@ const Conversation = ({
     }
     conversationTopicRef.current = conversationTopic;
   }, [
+    currentLastUpdateAt,
     conversationTopic,
     conversations,
     navigation.goBack,
