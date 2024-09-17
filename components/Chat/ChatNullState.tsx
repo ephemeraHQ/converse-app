@@ -32,15 +32,18 @@ import {
   getPreferredName,
   getPreferredAvatar,
 } from "../../utils/profile";
+import NewConversationButton from "../ConversationList/NewConversationButton";
 
 interface ChatNullStateProps {
   currentAccount: string;
   navigation: any;
+  route: any;
 }
 
 const ChatNullState: React.FC<ChatNullStateProps> = ({
   currentAccount,
   navigation,
+  route,
 }) => {
   const colorScheme = useColorScheme();
   const styles = useStyles();
@@ -126,6 +129,9 @@ const ChatNullState: React.FC<ChatNullStateProps> = ({
           </View>
         )}
       </View>
+      {Platform.OS === "android" && (
+        <NewConversationButton navigation={navigation} route={route} />
+      )}
     </View>
   );
 };

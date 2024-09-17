@@ -225,6 +225,7 @@ function ConversationList({ navigation, route, searchBarRef }: Props) {
       <ChatNullState
         currentAccount={currentAccount()}
         navigation={navigation}
+        route={route}
       />
     );
   }

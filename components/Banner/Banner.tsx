@@ -16,6 +16,7 @@ import {
   StyleProp,
   ViewStyle,
   LayoutChangeEvent,
+  Platform,
 } from "react-native";
 
 interface BannerProps {
@@ -57,7 +58,7 @@ const Banner: React.FC<BannerProps> = ({
           <Text style={styles.ctaButtonText}>{cta}</Text>
           <Picto
             picto="arrow.right.circle.fill"
-            size={14}
+            size={Platform.OS === "ios" ? 14 : 20}
             color={primaryColor(colorScheme)}
             style={styles.ctaPicto}
           />
@@ -70,7 +71,7 @@ const Banner: React.FC<BannerProps> = ({
       >
         <Picto
           picto="xmark.circle.fill"
-          size={14}
+          size={Platform.OS === "ios" ? 14 : 20}
           color={inversePrimaryColor(colorScheme)}
         />
       </TouchableOpacity>
@@ -108,8 +109,8 @@ const useStyles = (colorScheme: ColorSchemeName) => {
     dismissButtonContainer: {},
     dismissButton: {
       position: "absolute",
-      top: Margins.large,
-      right: Margins.large,
+      top: Platform.OS === "ios" ? Margins.large : Margins.default,
+      right: Platform.OS === "ios" ? Margins.large : Margins.default,
       zIndex: 1000,
     },
     ctaButton: {
@@ -127,8 +128,8 @@ const useStyles = (colorScheme: ColorSchemeName) => {
       color: primaryColor(colorScheme),
     },
     ctaPicto: {
-      marginRight: Margins.small + 2,
-      marginLeft: Margins.default + 2,
+      marginRight: Platform.OS === "ios" ? Margins.small + 2 : 0,
+      marginLeft: Platform.OS === "ios" ? Margins.default + 2 : Margins.small,
     },
   });
 };
