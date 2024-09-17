@@ -770,7 +770,7 @@ export default function ProfileScreen({
               },
               {
                 id: "revokeOtherInstallations",
-                title: "Revoke other installations",
+                title: translate("revoke_others_cta"),
                 titleColor:
                   Platform.OS === "android"
                     ? undefined
