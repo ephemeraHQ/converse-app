@@ -69,7 +69,7 @@ const ENV = {
     ),
     enableTransactionFrames: true,
     alphaGroupChatUrl:
-      "https://converse.xyz/group-invite/NfrIwpnhZdRCx2ZyGCg-S",
+      "https://converse.xyz/group-invite/UDv3aYZONQGc6_XPJY6Ch",
   },
   preview: {
     ...defaultConfig,
