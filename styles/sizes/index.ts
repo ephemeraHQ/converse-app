@@ -42,6 +42,7 @@ export const BorderRadius = {
   default: 8,
   small: 4,
   large: 14,
+  xLarge: 24,
 };
 
 export const Paddings = {

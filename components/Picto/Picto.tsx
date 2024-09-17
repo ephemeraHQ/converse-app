@@ -1,6 +1,7 @@
 import AccountCircle from "@material-symbols/svg-400/outlined/account_circle.svg";
 import Add from "@material-symbols/svg-400/outlined/add.svg";
 import AddLink from "@material-symbols/svg-400/outlined/add_link.svg";
+import ArrowCircleRight from "@material-symbols/svg-400/outlined/arrow_circle_right.svg";
 import ArrowLeft from "@material-symbols/svg-400/outlined/arrow_left.svg";
 import ArrowRight from "@material-symbols/svg-400/outlined/arrow_right.svg";
 import AttachMoney from "@material-symbols/svg-400/outlined/attach_money.svg";
@@ -67,6 +68,7 @@ const pictoMapping: {
   [key: string]: React.FC<SvgProps> | undefined;
 } = {
   xmark: Close,
+  "xmark.circle.fill": Close,
   plus: Add,
   "arrow.up.right": ArrowUpRight,
   "arrow.down": ArrowDown,
@@ -95,6 +97,7 @@ const pictoMapping: {
   block: Block,
   "chevron.left": ArrowLeft,
   "chevron.right": ArrowRight,
+  "arrow.right.circle.fill": ArrowCircleRight,
   "lock.open.laptopcomputer": Laptop,
   trash: Delete,
   menu: Menu,
