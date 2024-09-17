@@ -103,7 +103,18 @@ function ConversationList({ navigation, route, searchBarRef }: Props) {
   const { likelyNotSpam } = sortRequestsBySpamScore(
     sortedConversationsWithPreview.conversationsRequests
   );
-  const showChatNullState = likelyNotSpam.length === 0 && !searchQuery;
+
+  const conversations = useChatStore(
+    (s) => s.sortedConversationsWithPreview.conversationsInbox
+  );
+  const conversationsRequests = useChatStore(
+    (s) => s.sortedConversationsWithPreview.conversationsRequests
+  );
+
+  const showChatNullState =
+    conversations.length === 0 &&
+    conversationsRequests.length === 0 &&
+    !searchQuery;
 
   useEffect(() => {
     if (!initialLoadDoneOnce) {
