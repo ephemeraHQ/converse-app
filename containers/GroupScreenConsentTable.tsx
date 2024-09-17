@@ -22,8 +22,8 @@ export const GroupScreenConsentTable: FC<GroupScreenConsentTableProps> = ({
     const items: TableViewItemType[] = [];
     if (consent !== "allowed") {
       items.push({
-        id: "allow_group",
-        title: translate("allow_group"),
+        id: "restore_group",
+        title: translate("restore_group"),
         titleColor: primaryColor(colorScheme),
         action: () => {
           allowGroup({
@@ -35,8 +35,8 @@ export const GroupScreenConsentTable: FC<GroupScreenConsentTableProps> = ({
     }
     if (consent !== "denied") {
       items.push({
-        id: "block_group",
-        title: translate("block_group"),
+        id: "remove_group",
+        title: translate("remove_group"),
         titleColor: dangerColor(colorScheme),
         action: () => {
           blockGroup({
