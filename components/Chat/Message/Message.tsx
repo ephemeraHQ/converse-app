@@ -7,7 +7,15 @@ import {
 } from "@styles/colors";
 import { AvatarSizes } from "@styles/sizes";
 import * as Haptics from "expo-haptics";
-import React, { ReactNode, useCallback, useMemo, useRef } from "react";
+import React, {
+  ReactNode,
+  useCallback,
+  useMemo,
+  useState,
+  forwardRef,
+  useRef,
+  useEffect,
+} from "react";
 import {
   Animated,
   ColorSchemeName,
@@ -133,8 +141,34 @@ const MessageSenderAvatar = ({ message }: { message: MessageToDisplay }) => {
   );
 };
 
-function ChatMessage({ message, colorScheme, isGroup, isFrame }: Props) {
+interface ChatMessageMethods {
+  toggleTime: () => void;
+}
+
+const ChatMessage = forwardRef<
+  ChatMessageMethods,
+  Props & { showTime: boolean; toggleTime: () => void }
+>(function ChatMessage(props, ref) {
+  const {
+    account,
+    message,
+    colorScheme,
+    isGroup,
+    isFrame,
+    showTime,
+    toggleTime,
+  } = props;
+
   const styles = useStyles();
+
+  const messageDate = useMemo(
+    () => getRelativeDate(message.sent),
+    [message.sent]
+  );
+  const messageTime = useMemo(
+    () => getLocalizedTime(message.sent),
+    [message.sent]
+  );
 
   let messageContent: ReactNode;
   const contentType = getMessageContentType(message.contentType);
@@ -241,15 +275,6 @@ function ChatMessage({ message, colorScheme, isGroup, isFrame }: Props) {
   }, [replyingToMessage?.senderAddress]);
 
   const swipeableRef = useRef<Swipeable | null>(null);
-
-  const messageTime = useMemo(() => {
-    console.log(
-      "getLocalizedTime(message.sent):",
-      getLocalizedTime(message.sent)
-    );
-    return getLocalizedTime(message.sent);
-  }, [message.sent]);
-
   return (
     <View
       style={[
@@ -263,7 +288,12 @@ function ChatMessage({ message, colorScheme, isGroup, isFrame }: Props) {
       ]}
     >
       {message.dateChange && (
-        <Text style={styles.date}>{getRelativeDate(message.sent)}</Text>
+        <Text style={styles.date}>
+          {messageDate} {showTime && `– ${messageTime}`}
+        </Text>
+      )}
+      {!message.dateChange && showTime && (
+        <Text style={styles.date}>{messageTime}</Text>
       )}
       {isGroupUpdated && messageContent}
       {isChatMessage && (
@@ -317,139 +347,136 @@ function ChatMessage({ message, colorScheme, isGroup, isFrame }: Props) {
           ref={swipeableRef}
         >
           <View style={styles.messageContainer}>
-            <View style={styles.messageContent}>
-              {!message.fromMe && <MessageSenderAvatar message={message} />}
-              <View style={{ flex: 1 }}>
-                {isGroup &&
-                  !message.fromMe &&
-                  !message.hasPreviousMessageInSeries &&
-                  isChatMessage && <MessageSender message={message} />}
-                <View
-                  style={{
-                    alignSelf: message.fromMe ? "flex-end" : "flex-start",
-                    alignItems: message.fromMe ? "flex-end" : "flex-start",
-                    maxWidth: messageMaxWidth,
-                  }}
+            {!message.fromMe && <MessageSenderAvatar message={message} />}
+            <View style={{ flex: 1 }}>
+              {isGroup &&
+                !message.fromMe &&
+                !message.hasPreviousMessageInSeries &&
+                isChatMessage && <MessageSender message={message} />}
+              <View
+                style={{
+                  alignSelf: message.fromMe ? "flex-end" : "flex-start",
+                  alignItems: message.fromMe ? "flex-end" : "flex-start",
+                  maxWidth: messageMaxWidth,
+                }}
+              >
+                <ChatMessageActions
+                  message={message}
+                  reactions={reactions}
+                  hideBackground={hideBackground}
                 >
-                  <ChatMessageActions
-                    message={message}
-                    reactions={reactions}
-                    hideBackground={hideBackground}
-                  >
-                    {isContentType("text", message.contentType) && (
-                      <FramesPreviews message={message} />
-                    )}
-                    {replyingToMessage ? (
-                      <View>
-                        <TouchableOpacity
-                          style={[
-                            styles.innerBubble,
-                            message.fromMe ? styles.innerBubbleMe : undefined,
-                          ]}
-                          delayLongPress={platformTouchableLongPressDelay}
-                          onLongPress={platformTouchableOnLongPress}
-                          delayPressIn={isDesktop ? 0 : 75}
-                          onPress={() => {
-                            converseEventEmitter.emit("scrollChatToMessage", {
-                              messageId: replyingToMessage.id,
-                              animated: false,
-                            });
-                            setTimeout(() => {
-                              converseEventEmitter.emit(
-                                "highlightMessage",
-                                replyingToMessage.id
-                              );
-                            }, 350);
-                          }}
-                        >
-                          <Text
-                            style={[
-                              styles.messageText,
-                              styles.replyToUsername,
-                              message.fromMe ? styles.messageTextMe : undefined,
-                            ]}
-                          >
-                            {replyingToProfileName}
-                          </Text>
-                          <ChatInputReplyBubble
-                            replyingToMessage={replyingToMessage}
-                            fromMe={message.fromMe}
-                          />
-                        </TouchableOpacity>
-                        <View
-                          style={{
-                            alignSelf: "flex-start",
-                          }}
-                        >
-                          {messageContent}
-                        </View>
-                      </View>
-                    ) : (
-                      <View
+                  {isContentType("text", message.contentType) && (
+                    <FramesPreviews message={message} />
+                  )}
+                  {replyingToMessage ? (
+                    <View>
+                      <TouchableOpacity
                         style={[
-                          { position: "relative" },
-                          hideBackground && message.fromMe
-                            ? { paddingBottom: 0 }
-                            : undefined,
+                          styles.innerBubble,
+                          message.fromMe ? styles.innerBubbleMe : undefined,
                         ]}
+                        delayLongPress={platformTouchableLongPressDelay}
+                        onLongPress={platformTouchableOnLongPress}
+                        delayPressIn={isDesktop ? 0 : 75}
+                        onPress={() => {
+                          converseEventEmitter.emit("scrollChatToMessage", {
+                            messageId: replyingToMessage.id,
+                            animated: false,
+                          });
+                          setTimeout(() => {
+                            converseEventEmitter.emit(
+                              "highlightMessage",
+                              replyingToMessage.id
+                            );
+                          }, 350);
+                        }}
                       >
-                        <View>{messageContent}</View>
-                      </View>
-                    )}
-                    {shouldShowReactionsInside && (
+                        <Text
+                          style={[
+                            styles.messageText,
+                            styles.replyToUsername,
+                            message.fromMe ? styles.messageTextMe : undefined,
+                          ]}
+                        >
+                          {replyingToProfileName}
+                        </Text>
+                        <ChatInputReplyBubble
+                          replyingToMessage={replyingToMessage}
+                          fromMe={message.fromMe}
+                        />
+                      </TouchableOpacity>
                       <View
-                        style={
-                          hasReactions ? styles.reactionsContainer : { flex: 1 }
-                        }
+                        style={{
+                          alignSelf: "flex-start",
+                        }}
                       >
+                        {messageContent}
+                      </View>
+                    </View>
+                  ) : (
+                    <View
+                      style={[
+                        { position: "relative" },
+                        hideBackground && message.fromMe
+                          ? { paddingBottom: 0 }
+                          : undefined,
+                      ]}
+                    >
+                      <TouchableOpacity onPress={toggleTime} activeOpacity={1}>
+                        <View>{messageContent}</View>
+                      </TouchableOpacity>
+                    </View>
+                  )}
+                  {shouldShowReactionsInside && (
+                    <View
+                      style={
+                        hasReactions ? styles.reactionsContainer : { flex: 1 }
+                      }
+                    >
+                      <ChatMessageReactions
+                        message={message}
+                        reactions={reactions}
+                      />
+                    </View>
+                  )}
+                </ChatMessageActions>
+                {shouldShowOutsideContentRow ? (
+                  <View style={styles.outsideContentRow}>
+                    {isFrame && (
+                      <TouchableOpacity
+                        onPress={() => handleUrlPress(message.content)}
+                        delayLongPress={platformTouchableLongPressDelay}
+                        onLongPress={platformTouchableOnLongPress}
+                      >
+                        <Text style={styles.linkToFrame}>
+                          {getUrlToRender(message.content)}
+                        </Text>
+                      </TouchableOpacity>
+                    )}
+                    {shouldShowReactionsOutside && (
+                      <View style={styles.outsideReactionsContainer}>
                         <ChatMessageReactions
                           message={message}
                           reactions={reactions}
                         />
                       </View>
                     )}
-                  </ChatMessageActions>
-                  {shouldShowOutsideContentRow ? (
-                    <View style={styles.outsideContentRow}>
-                      {isFrame && (
-                        <TouchableOpacity
-                          onPress={() => handleUrlPress(message.content)}
-                          delayLongPress={platformTouchableLongPressDelay}
-                          onLongPress={platformTouchableOnLongPress}
-                        >
-                          <Text style={styles.linkToFrame}>
-                            {getUrlToRender(message.content)}
-                          </Text>
-                        </TouchableOpacity>
-                      )}
-                      {shouldShowReactionsOutside && (
-                        <View style={styles.outsideReactionsContainer}>
-                          <ChatMessageReactions
-                            message={message}
-                            reactions={reactions}
-                          />
-                        </View>
-                      )}
-                      {isFrame && message.fromMe && !hasReactions && (
-                        <MessageStatus message={message} />
-                      )}
-                    </View>
-                  ) : (
-                    message.fromMe &&
-                    !hasReactions && <MessageStatus message={message} />
-                  )}
-                </View>
+                    {isFrame && message.fromMe && !hasReactions && (
+                      <MessageStatus message={message} />
+                    )}
+                  </View>
+                ) : (
+                  message.fromMe &&
+                  !hasReactions && <MessageStatus message={message} />
+                )}
               </View>
-            </View>
-            <View style={styles.timeColumn}>
-              <Text style={styles.timeText}>{messageTime}</Text>
             </View>
           </View>
         </Swipeable>
       )}
     </View>
   );
-}
+});
 
 // We use a cache for chat messages so that it doesn't rerender too often.
 // Indeed, since we use an inverted FlashList for chat, when a new message
@@ -474,6 +501,17 @@ export default function CachedChatMessage({
   isGroup,
   isFrame = false,
 }: Props) {
+  const chatMessageRef = useRef<ChatMessageMethods>(null);
+  const [showTime, setShowTime] = useState(false); // State to trigger re-renders
+
+  // TODO Review this
+  const toggleTime = useCallback(() => {
+    // Toggle the showTime state
+    setShowTime((prev) => !prev);
+    // Call the method in child component
+    chatMessageRef.current?.toggleTime();
+  }, []);
+
   const keysChangesToRerender: (keyof MessageToDisplay)[] = [
     "id",
     "sent",
@@ -488,39 +526,63 @@ export default function CachedChatMessage({
     "nextMessageIsLoadingAttachment",
     "reactions",
   ];
-  const alreadyRenderedMessage = renderedMessages.get(
-    `${account}-${message.id}`
-  );
+
+  const cacheKey = `${account}-${message.id}`;
+  const alreadyRenderedMessage = renderedMessages.get(cacheKey);
+
   const shouldRerender =
     !alreadyRenderedMessage ||
     alreadyRenderedMessage.colorScheme !== colorScheme ||
     keysChangesToRerender.some(
       (k) => message[k] !== alreadyRenderedMessage.message[k]
     );
-  if (shouldRerender) {
-    const renderedMessage = ChatMessage({
-      account,
-      message,
-      colorScheme,
-      isGroup,
-      isFrame,
-    });
-    renderedMessages.set(`${account}-${message.id}`, {
+
+  const renderedMessage = useMemo(
+    () => (
+      <ChatMessage
+        ref={chatMessageRef}
+        account={account}
+        message={message}
+        colorScheme={colorScheme}
+        isGroup={isGroup}
+        isFrame={isFrame}
+        showTime={showTime}
+        toggleTime={toggleTime}
+      />
+    ),
+    [account, message, colorScheme, isGroup, isFrame, showTime, toggleTime]
+  );
+
+  useEffect(() => {
+    renderedMessages.set(cacheKey, {
       message,
       renderedMessage,
       colorScheme,
       isGroup,
       isFrame,
     });
-    return renderedMessage;
-  } else {
-    return alreadyRenderedMessage.renderedMessage;
-  }
+  }, [
+    cacheKey,
+    message,
+    renderedMessage,
+    colorScheme,
+    isGroup,
+    isFrame,
+    shouldRerender,
+    toggleTime,
+  ]);
+
+  return renderedMessage;
 }
 
 const useStyles = () => {
   const colorScheme = useColorScheme();
   return StyleSheet.create({
+    messageContainer: {
+      flexDirection: "row",
+      width: "100%",
+      alignItems: "flex-end",
+    },
     innerBubble: {
       backgroundColor: messageInnerBubbleColor(colorScheme),
       borderRadius: 14,
@@ -562,6 +624,14 @@ const useStyles = () => {
       marginTop: 12,
       marginBottom: 8,
       fontWeight: "bold",
+    },
+    time: {
+      flexBasis: "100%",
+      textAlign: "center",
+      fontSize: 12,
+      color: textSecondaryColor(colorScheme),
+      marginTop: 4,
+      marginBottom: 4,
     },
     replyToUsername: {
       fontSize: 12,
@@ -621,26 +691,6 @@ const useStyles = () => {
     },
     outsideReactionsContainer: {
       flex: 1,
-    },
-
-    messageContainer: {
-      flexDirection: "row",
-      width: "100%",
-    },
-    messageContent: {
-      flexDirection: "row",
-      alignItems: "flex-end",
-      flex: 1,
-      paddingRight: 55, // Reduce width for time
-    },
-    timeColumn: {
-      width: 55,
-      justifyContent: "center",
-      alignItems: "flex-end",
-    },
-    timeText: {
-      fontSize: 12,
-      color: textSecondaryColor(colorScheme),
     },
   });
 };
