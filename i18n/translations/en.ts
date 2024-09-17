@@ -300,6 +300,7 @@ const en = {
   revoke_done_title: "Done",
   revoke_done_description: "{{count}} other installations successfully revoked",
   revoke_empty: "You have no other installations",
+  revoke_others_cta: "Revoke other installations",
 
   // Emoji Picker
   search_emojis: "Search emojis",

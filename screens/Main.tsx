@@ -1,3 +1,4 @@
+import ExternalWalletPicker from "@components/ExternalWalletPicker";
 import UserProfile from "@components/Onboarding/UserProfile";
 import { backgroundColor } from "@styles/colors";
 import { getProfile } from "@utils/profile";
@@ -148,6 +149,7 @@ export default function Main() {
     <>
       {mainHeaders}
       {screenToShow}
+      <ExternalWalletPicker />
     </>
   );
 }
