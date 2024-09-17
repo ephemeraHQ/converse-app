@@ -1,4 +1,6 @@
-import ConverseButton from "@components/Button/Button";
+import AnimatedBanner from "@components/Banner/AnimatedBanner";
+import Recommendations from "@components/Recommendations/Recommendations";
+import { useSettingsStore } from "@data/store/accountsStore";
 import { translate } from "@i18n/index";
 import {
   backgroundColor,
@@ -6,6 +8,7 @@ import {
   textSecondaryColor,
   tertiaryBackgroundColor,
   itemSeparatorColor,
+  primaryColor,
 } from "@styles/colors";
 import { BorderRadius, Paddings, Margins } from "@styles/sizes";
 import React from "react";
@@ -17,7 +20,6 @@ import {
   Platform,
   Linking,
 } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import config from "../../config";
 import {
@@ -30,19 +32,20 @@ import {
   getPreferredName,
   getPreferredAvatar,
 } from "../../utils/profile";
-import Recommendations from "../Recommendations/Recommendations";
+import NewConversationButton from "../ConversationList/NewConversationButton";
 
 interface ChatNullStateProps {
   currentAccount: string;
   navigation: any;
+  route: any;
 }
 
 const ChatNullState: React.FC<ChatNullStateProps> = ({
   currentAccount,
   navigation,
+  route,
 }) => {
   const colorScheme = useColorScheme();
-
   const styles = useStyles();
 
   const socials = useProfilesStore((s) => s.profiles[currentAccount]?.socials);
@@ -54,13 +57,26 @@ const ChatNullState: React.FC<ChatNullStateProps> = ({
   const avatar = getPreferredAvatar(socials);
 
   const frens = useRecommendationsStore((s) => s.frens);
-  const setRecommendations = useRecommendationsStore(
-    (s) => s.setRecommendations
-  );
   const hasRecommendations = Object.keys(frens).length > 0;
+
+  const hasUserDismissedBanner = useSettingsStore(
+    (s) => s.hasUserDismissedBanner
+  );
 
   return (
     <View style={styles.container}>
+      {!hasUserDismissedBanner && (
+        <AnimatedBanner
+          title={translate("alphaTestTitle")}
+          description={translate("alphaTestDescription")}
+          cta={translate("joinAlphaGroup")}
+          style={{ marginBottom: 0 }}
+          onButtonPress={() => {
+            Linking.openURL(config.alphaGroupChatUrl);
+          }}
+        />
+      )}
+
       <View style={styles.contentContainer}>
         <View
           style={[
@@ -71,12 +87,22 @@ const ChatNullState: React.FC<ChatNullStateProps> = ({
             },
           ]}
         >
-          <Text style={styles.title}>
+          <Text
+            style={[
+              styles.title,
+              hasRecommendations ? styles.titleWithRecommendations : {},
+            ]}
+          >
             {hasRecommendations
               ? translate("connectWithYourNetwork")
               : translate("shareYourQRCode")}
           </Text>
-          <Text style={styles.subtitle}>
+          <Text
+            style={[
+              styles.description,
+              hasRecommendations ? styles.descriptionWithRecommendations : {},
+            ]}
+          >
             {hasRecommendations
               ? translate("findContacts")
               : translate("moveOrConnect")}
@@ -103,32 +129,15 @@ const ChatNullState: React.FC<ChatNullStateProps> = ({
           </View>
         )}
       </View>
-
-      <View style={styles.chin}>
-        <View style={styles.chinContent}>
-          <Text style={styles.chinTitle}>{translate("alphaTestTitle")}</Text>
-          <Text style={styles.chinDescription}>
-            {translate("alphaTestDescription")}
-          </Text>
-
-          <ConverseButton
-            title={translate("joinAlphaGroup")}
-            variant="primary"
-            style={styles.alphaGroupButton}
-            textStyle={styles.alphaGroupButtonText}
-            onPress={() => {
-              Linking.openURL(config.alphaGroupChatUrl);
-            }}
-          />
-        </View>
-      </View>
+      {Platform.OS === "android" && (
+        <NewConversationButton navigation={navigation} route={route} />
+      )}
     </View>
   );
 };
 
 const useStyles = () => {
   const colorScheme = useColorScheme();
-  const insets = useSafeAreaInsets();
   return StyleSheet.create({
     container: {
       flex: 1,
@@ -140,33 +149,45 @@ const useStyles = () => {
       flex: 1,
       alignItems: "center",
       justifyContent: "flex-start",
-      paddingTop: Paddings.large,
+      paddingTop: Paddings.default,
     },
     titlesContainer: {
       width: "100%",
       borderBottomColor: tertiaryBackgroundColor(colorScheme),
     },
     title: {
-      fontSize: 28,
+      fontSize: 24,
       fontWeight: "bold",
       marginBottom: Margins.small,
       color: textPrimaryColor(colorScheme),
       textAlign: "center",
+      letterSpacing: -0.4,
+      marginTop: Margins.small,
     },
-    subtitle: {
-      fontSize: 16,
+    titleWithRecommendations: {
+      textAlign: "left",
+      marginLeft: Margins.default,
+      marginTop: 0,
+    },
+    description: {
+      fontSize: 14,
       textAlign: "center",
       marginBottom: Margins.large,
-      color: textSecondaryColor(colorScheme),
+      color: textPrimaryColor(colorScheme),
+      letterSpacing: -0.3,
+    },
+    descriptionWithRecommendations: {
+      textAlign: "left",
+      marginLeft: Margins.default,
     },
     qrCodeContainer: {
       paddingVertical: Paddings.default,
       paddingHorizontal: Paddings.large,
       backgroundColor: backgroundColor(colorScheme),
       borderRadius: BorderRadius.large,
-      shadowColor: textSecondaryColor(colorScheme),
+      shadowColor: primaryColor(colorScheme),
       shadowOffset: { width: 0, height: 2 },
-      shadowOpacity: 0.1,
+      shadowOpacity: 0.2,
       shadowRadius: 4,
       elevation: 3,
       marginTop: Platform.OS === "android" ? Margins.large : Margins.small,
@@ -190,36 +211,6 @@ const useStyles = () => {
       width: "100%",
       height: "100%",
     },
-    chin: {
-      borderTopWidth: 1,
-      borderTopColor: tertiaryBackgroundColor(colorScheme),
-      backgroundColor: backgroundColor(colorScheme),
-      paddingBottom: insets.bottom,
-    },
-    chinContent: {
-      alignItems: "center",
-      paddingHorizontal: Paddings.large,
-    },
-    chinTitle: {
-      color: textPrimaryColor(colorScheme),
-      fontSize: 15,
-      fontWeight: "600",
-      textAlign: "center",
-      marginTop: Margins.default,
-      marginBottom: Margins.small,
-    },
-    chinDescription: {
-      color: textSecondaryColor(colorScheme),
-      fontSize: 14,
-      textAlign: "center",
-      marginBottom: Margins.default,
-    },
-    alphaGroupButton: {
-      maxWidth: Platform.OS === "web" ? 300 : undefined,
-      borderRadius: 16,
-      marginHorizontal: 24,
-    },
-    alphaGroupButtonText: {},
   });
 };
 
