@@ -19,6 +19,7 @@ import { gestureHandlerRootHOC } from "react-native-gesture-handler";
 import { NavigationParamList } from "./Navigation/Navigation";
 import ConverseChat from "../components/Chat/Chat";
 import ConversationTitle from "../components/Conversation/ConversationTitle";
+import { EmojiPicker } from "../containers/EmojiPicker";
 import {
   currentAccount,
   useChatStore,
@@ -303,6 +304,7 @@ const Conversation = ({
       ) : (
         <View style={styles.filler} />
       )}
+      <EmojiPicker />
     </View>
   );
 };

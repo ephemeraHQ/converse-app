@@ -160,8 +160,8 @@ const MessageReactionsListInner: FC<MessageReactionsListProps> = ({
   message,
   dismissMenu,
 }) => {
-  const { setReactMenuMessageId } = useChatStore(
-    useSelect(["setReactMenuMessageId"])
+  const { setReactingToMessage } = useChatStore(
+    useSelect(["setReactingToMessage"])
   );
   const currentUser = useCurrentAccount() as string;
   const styles = useStyles();
@@ -206,11 +206,11 @@ const MessageReactionsListInner: FC<MessageReactionsListProps> = ({
   );
 
   const handlePlusPress = useCallback(() => {
-    setReactMenuMessageId(message.id);
+    setReactingToMessage({ topic: message.topic, messageId: message.id });
     InteractionManager.runAfterInteractions(() => {
       dismissMenu?.();
     });
-  }, [dismissMenu, message.id, setReactMenuMessageId]);
+  }, [dismissMenu, message.id, message.topic, setReactingToMessage]);
 
   return (
     <View style={styles.container}>
