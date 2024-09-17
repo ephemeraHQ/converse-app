@@ -7,7 +7,7 @@ import { groupConsentQueryKey } from "./QueryKeys";
 import { queryClient } from "./queryClient";
 import { useGroupQuery } from "./useGroupQuery";
 
-type Consent = "allowed" | "denied" | "unknown";
+export type Consent = "allowed" | "denied" | "unknown";
 
 export const useGroupConsentQuery = (
   account: string,
