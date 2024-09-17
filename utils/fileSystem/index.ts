@@ -114,6 +114,14 @@ export const moveTemporaryDatabasesToDatabaseDirecory = async (
       await RNFS.unlink(`${destinationPath}-shm`);
     }
 
+    const destinationSaltFileExists = await RNFS.exists(
+      `${destinationPath}.sqlcipher_salt`
+    );
+    if (destinationSaltFileExists) {
+      logger.debug("Deleting destination db salt file");
+      await RNFS.unlink(`${destinationPath}.sqlcipher_salt`);
+    }
+
     logger.debug(`Moving ${dbFile.name} to db directory`);
     await RNFS.moveFile(sourcePath, destinationPath);
 
@@ -126,6 +134,16 @@ export const moveTemporaryDatabasesToDatabaseDirecory = async (
     if (originShmFileExists) {
       logger.debug("Moving origin shm file");
       await RNFS.moveFile(`${sourcePath}-shm`, `${destinationPath}-shm`);
+    }
+    const originSaltFileExists = await RNFS.exists(
+      `${sourcePath}.sqlcipher_salt`
+    );
+    if (originSaltFileExists) {
+      logger.debug("Moving origin salt file");
+      await RNFS.moveFile(
+        `${sourcePath}.sqlcipher_salt`,
+        `${destinationPath}.sqlcipher_salt`
+      );
     }
   }
 
