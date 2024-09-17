@@ -59,9 +59,6 @@ const ChatNullState: React.FC<ChatNullStateProps> = ({
   const hasUserDismissedBanner = useSettingsStore(
     (s) => s.hasUserDismissedBanner
   );
-  const setHasUserDismissedBanner = useSettingsStore(
-    (s) => s.setHasUserDismissedBanner
-  );
 
   return (
     <View style={styles.container}>
