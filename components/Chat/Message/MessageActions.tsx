@@ -33,7 +33,6 @@ import Animated, {
 import { MessageToDisplay } from "./Message";
 import { MessageReactionsList } from "./MessageReactionsList";
 import MessageTail from "./MessageTail";
-import { EmojiPicker } from "../../../containers/EmojiPicker";
 import { useCurrentAccount } from "../../../data/store/accountsStore";
 import { useAppStore } from "../../../data/store/appStore";
 import { useFramesStore } from "../../../data/store/framesStore";
@@ -471,7 +470,6 @@ export default function ChatMessageActions({
           </Animated.View>
         </View>
       </GestureDetector>
-      <EmojiPicker message={message} />
 
       <MessageContextMenu
         items={contextMenuItems}

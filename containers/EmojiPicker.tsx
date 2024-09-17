@@ -1,11 +1,9 @@
-import { MessageToDisplay } from "@components/Chat/Message/Message";
 import { Drawer, DrawerRef } from "@components/Drawer";
 import { EmojiRowList } from "@components/EmojiPicker/EmojiRowList";
 import { EmojiSearchBar } from "@components/EmojiPicker/EmojiSearchBar";
 import { useChatStore, useCurrentAccount } from "@data/store/accountsStore";
 import { useSelect } from "@data/store/storeHelpers";
 import { textSecondaryColor } from "@styles/colors";
-import { useConversationContext } from "@utils/conversation";
 import { emojis } from "@utils/emojis/emojis";
 import { CategorizedEmojisRecord, Emoji } from "@utils/emojis/interfaces";
 import {
@@ -49,17 +47,25 @@ const sliceEmojis = (emojis: Emoji[]) => {
 //   flatEmojis.filter((emoji) => favoritedEmojis.isFavorite(emoji.emoji))
 // );
 
-export const EmojiPicker = ({ message }: { message: MessageToDisplay }) => {
+export const EmojiPicker = () => {
   const currentUser = useCurrentAccount() as string;
-  const { reactionMenuMessageId, setReactMenuMessageId } = useChatStore(
-    useSelect(["reactionMenuMessageId", "setReactMenuMessageId"])
+  const { reactingToMessage, setReactingToMessage } = useChatStore(
+    useSelect(["reactingToMessage", "setReactingToMessage"])
   );
   const drawerRef = useRef<DrawerRef>(null);
   const [searchInput, setSearchInput] = useState("");
-  const visible = reactionMenuMessageId === message.id;
+  const visible = !!reactingToMessage;
   const styles = useStyles();
+  const conversation = useChatStore((s) =>
+    reactingToMessage ? s.conversations[reactingToMessage.topic] : undefined
+  );
+  const message = useChatStore((s) =>
+    reactingToMessage && conversation
+      ? conversation.messages.get(reactingToMessage.messageId)
+      : undefined
+  );
   const reactions = useMemo(() => {
-    return getMessageReactions(message);
+    return message ? getMessageReactions(message) : {};
   }, [message]);
 
   const currentUserEmojiMap = useMemo(() => {
@@ -87,13 +93,12 @@ export const EmojiPicker = ({ message }: { message: MessageToDisplay }) => {
     );
   }, [searchInput]);
   const closeMenu = useCallback(() => {
-    setReactMenuMessageId(null);
+    setReactingToMessage(null);
     setSearchInput("");
-  }, [setReactMenuMessageId]);
-  const conversation = useConversationContext("conversation");
+  }, [setReactingToMessage]);
   const handleReaction = useCallback(
     (emoji: string) => {
-      if (!conversation) return;
+      if (!conversation || !message) return;
       const alreadySelected = currentUserEmojiMap[emoji];
       if (alreadySelected) {
         removeReactionFromMessage(currentUser, message, emoji);
