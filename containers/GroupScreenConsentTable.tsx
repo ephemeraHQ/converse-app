@@ -53,7 +53,7 @@ export const GroupScreenConsentTable: FC<GroupScreenConsentTableProps> = ({
   return (
     <TableView
       items={consentTableViewItems}
-      title={translate("consent_title")}
+      title={translate("actions_title")}
     />
   );
 };
