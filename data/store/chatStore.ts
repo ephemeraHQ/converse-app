@@ -774,6 +774,7 @@ export const initChatStore = (account: string) => {
               const message = conversation.messages.get(messageId);
               if (!message) return state;
               const newState = { ...state };
+              newState.conversations[topic].lastUpdateAt = now();
               newState.conversations[topic].messages.set(messageId, {
                 ...message,
                 converseMetadata: metadata,

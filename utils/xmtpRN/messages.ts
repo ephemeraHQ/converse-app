@@ -21,7 +21,7 @@ import {
 import { getMessageContentType, isContentType } from "./contentTypes";
 import { CoinbaseMessagingPaymentContent } from "./contentTypes/coinbasePayment";
 import { getXmtpClient } from "./sync";
-import { isProduction } from "../../app.config";
+import config from "../../config";
 import { saveMemberInboxIds } from "../../data/helpers/inboxId/saveInboxIds";
 import {
   getOrderedMessages,
@@ -174,7 +174,7 @@ export const streamAllMessages = async (account: string) => {
   await client.conversations.streamAllMessages(async (message) => {
     logger.info(`[XmtpRN] Received a message for ${client.address}`, {
       id: message.id,
-      text: isProduction ? "Redacted" : message.nativeContent.text,
+      text: config.env === "prod" ? "Redacted" : message.nativeContent.text,
       topic: message.topic,
     });
     saveMessages(client.address, protocolMessagesToStateMessages([message]));

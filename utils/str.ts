@@ -59,9 +59,11 @@ export const conversationName = (
     return conversation.conversationTitle;
   }
 
+  const short = shortAddress(conversation.peerAddress);
+
   if (socials) {
     const preferredName = getPreferredName(socials, conversation.peerAddress);
-    if (preferredName) {
+    if (preferredName && preferredName !== short) {
       logger.error(
         `1:1 conversation with ${conversation.peerAddress} has empty conversationTitle but it should not`
       );
@@ -69,7 +71,7 @@ export const conversationName = (
     }
   }
 
-  return shortAddress(conversation.peerAddress);
+  return short;
 };
 
 export const formatGroupName = (topic: string, groupName?: string) =>
