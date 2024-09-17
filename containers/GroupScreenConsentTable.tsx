@@ -11,7 +11,7 @@ import TableView, {
 
 interface GroupScreenConsentTableProps {
   topic: string;
-  groupName: string;
+  groupName?: string;
 }
 
 export const GroupScreenConsentTable: FC<GroupScreenConsentTableProps> = ({
@@ -23,40 +23,39 @@ export const GroupScreenConsentTable: FC<GroupScreenConsentTableProps> = ({
 
   const consentTableViewItems = useMemo(() => {
     const items: TableViewItemType[] = [];
-    if (consent !== "allowed") {
+
+    if (consent === "denied") {
       items.push({
         id: "restore_group",
         title: translate("restore_group"),
         titleColor: primaryColor(colorScheme),
         action: () => {
-          const handleAction = groupRemoveRestoreHandler(
-            "denied",
+          groupRemoveRestoreHandler(
+            consent,
             colorScheme,
             groupName,
             allowGroup,
             blockGroup
-          );
-          handleAction(() => {
-            // User canceled, no op
+          )((success: boolean) => {
+            // If not successful, do nothing (user canceled)
           });
         },
       });
-    }
-    if (consent !== "denied") {
+    } else {
+      // consent is "allowed", "unknown" or undefined
       items.push({
         id: "remove_group",
         title: translate("remove_group"),
         titleColor: dangerColor(colorScheme),
         action: () => {
-          const handleAction = groupRemoveRestoreHandler(
-            "allowed",
+          groupRemoveRestoreHandler(
+            consent,
             colorScheme,
             groupName,
             allowGroup,
             blockGroup
-          );
-          handleAction(() => {
-            // User canceled, no op
+          )((success: boolean) => {
+            // If not successful, do nothing (user canceled)
           });
         },
       });

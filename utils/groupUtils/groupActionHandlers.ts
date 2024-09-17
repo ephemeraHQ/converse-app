@@ -18,7 +18,7 @@ export const groupRemoveRestoreHandler = (
   allowGroup: GroupActionHandler,
   blockGroup: GroupActionHandler
 ) => {
-  return (defaultAction: () => void) => {
+  return (callback: (success: boolean) => void) => {
     const showOptions = (
       options: string[],
       title: string,
@@ -35,8 +35,9 @@ export const groupRemoveRestoreHandler = (
         async (selectedIndex?: number) => {
           if (selectedIndex !== undefined && selectedIndex < actions.length) {
             actions[selectedIndex]();
+            callback(true);
           } else {
-            defaultAction();
+            callback(false);
           }
         }
       );
