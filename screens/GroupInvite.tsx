@@ -1,6 +1,8 @@
 import Avatar from "@components/Avatar";
+import { useGroupConsent } from "@hooks/useGroupConsent";
 import { translate } from "@i18n";
 import { useGroupInviteQuery } from "@queries/useGroupInviteQuery";
+import { fetchGroupsQuery } from "@queries/useGroupsQuery";
 import { useHeaderHeight } from "@react-navigation/elements";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import {
@@ -11,13 +13,12 @@ import {
 } from "@styles/colors";
 import { AvatarSizes } from "@styles/sizes";
 import { createGroupJoinRequest, getGroupJoinRequest } from "@utils/api";
-import { converseEventEmitter } from "@utils/events";
 import {
   getInviteJoinRequest,
   saveInviteJoinRequest,
 } from "@utils/groupInvites";
 import { GroupWithCodecsType } from "@utils/xmtpRN/client";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { StyleSheet, Text, View, useColorScheme } from "react-native";
 import { ActivityIndicator } from "react-native-paper";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -26,10 +27,7 @@ import { NavigationParamList } from "./Navigation/Navigation";
 import Button from "../components/Button/Button";
 import { useCurrentAccount } from "../data/store/accountsStore";
 import { navigate } from "../utils/navigation";
-import {
-  consentToGroupsOnProtocol,
-  refreshGroup,
-} from "../utils/xmtpRN/conversations";
+import { refreshGroup } from "../utils/xmtpRN/conversations";
 
 export default function GroupInviteScreen({
   route,
@@ -48,11 +46,20 @@ export default function GroupInviteScreen({
     null | "PENDING" | "ERROR" | "REJECTED" | "ACCEPTED"
   >(null);
   const colorScheme = useColorScheme();
+  const [newGroup, setNewGroup] = useState<GroupWithCodecsType | undefined>(
+    undefined
+  );
+  const { allowGroup } = useGroupConsent(newGroup?.topic || "");
+  const handlingNewGroup = useRef(false);
 
   const handleNewGroup = useCallback(
     async (group: GroupWithCodecsType) => {
-      if (group.client.address === account) {
-        await consentToGroupsOnProtocol(account, [group.id], "allow");
+      if (group.client.address === account && !handlingNewGroup.current) {
+        handlingNewGroup.current = true;
+        await allowGroup({
+          includeCreator: false,
+          includeAddedBy: false,
+        });
         await refreshGroup(account, group.topic);
         navigation.goBack();
         setTimeout(() => {
@@ -60,12 +67,20 @@ export default function GroupInviteScreen({
         }, 300);
       }
     },
-    [account, navigation]
+    [account, allowGroup, navigation]
   );
+
+  useEffect(() => {
+    if (newGroup) {
+      handleNewGroup(newGroup);
+    }
+  }, [handleNewGroup, newGroup]);
 
   const joinGroup = useCallback(async () => {
     if (!groupInvite?.id) return;
-    converseEventEmitter.on("newGroup", handleNewGroup);
+    setPolling(true);
+    setJoinStatus("PENDING");
+    const groupsBeforeJoining = await fetchGroupsQuery(account);
     let joinRequestId = getInviteJoinRequest(account, groupInvite?.id);
     if (!joinRequestId) {
       const joinRequest = await createGroupJoinRequest(
@@ -75,10 +90,8 @@ export default function GroupInviteScreen({
       joinRequestId = joinRequest.id;
       saveInviteJoinRequest(account, groupInvite?.id, joinRequestId);
     }
-    setPolling(true);
     let count = 0;
     let status = "PENDING";
-    setJoinStatus("PENDING");
     while (count < 10 && status === "PENDING") {
       const joinRequestData = await getGroupJoinRequest(joinRequestId);
       if (joinRequestData.status === "PENDING") {
@@ -93,13 +106,19 @@ export default function GroupInviteScreen({
     if (count === 10 && status === "PENDING") {
       setFinishedPolling(true);
     } else {
-      setPolling(false);
-    }
+      const groupsAfterJoining = await fetchGroupsQuery(account);
+      console.log("after joining", groupsAfterJoining.ids.length);
 
-    return () => {
-      converseEventEmitter.off("newGroup", handleNewGroup);
-    };
-  }, [account, groupInvite?.id, handleNewGroup]);
+      const newGroupId = groupsAfterJoining.ids.find(
+        (id) => !groupsBeforeJoining.ids.includes(id)
+      );
+      if (newGroupId) {
+        setNewGroup(groupsAfterJoining.byId[newGroupId]);
+      } else {
+        setPolling(false);
+      }
+    }
+  }, [account, groupInvite?.id]);
   const insets = useSafeAreaInsets();
   const headerHeight = useHeaderHeight();
 
