@@ -223,8 +223,10 @@ export type ChatStoreType = {
   setGroupInviteLink: (topic: string, inviteLink: string) => void;
   deleteGroupInviteLink: (topic: string) => void;
 
-  reactionMenuMessageId: string | null;
-  setReactMenuMessageId: (messageId: string | null) => void;
+  reactingToMessage: { topic: string; messageId: string } | null;
+  setReactingToMessage: (
+    r: { topic: string; messageId: string } | null
+  ) => void;
 };
 
 const now = () => new Date().getTime();
@@ -819,9 +821,10 @@ export const initChatStore = (account: string) => {
               return { groupInviteLinks: newGroupInvites };
             });
           },
-          reactionMenuMessageId: null,
-          setReactMenuMessageId: (messageId) =>
-            set(() => ({ reactionMenuMessageId: messageId })),
+          reactingToMessage: null,
+          setReactingToMessage: (
+            r: { topic: string; messageId: string } | null
+          ) => set(() => ({ reactingToMessage: r })),
         }) as ChatStoreType,
       {
         name: `store-${account}-chat`, // Account-based storage so each account can have its own chat data
