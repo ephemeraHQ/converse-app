@@ -165,12 +165,11 @@ const ChatMessage = ({
     [message.sent]
   );
 
-  // Shared values for height, translateY, and opacity
+  // Reanimated shared values for height, translateY, and opacity
   const height = useSharedValue(0);
   const translateY = useSharedValue(20);
   const opacity = useSharedValue(0);
 
-  // Define animated styles using shared values
   const animatedStyle = useAnimatedStyle(() => {
     return {
       minHeight: height.value, // Use minHeight for more stable height animations
@@ -182,16 +181,14 @@ const ChatMessage = ({
   // Handle animation based on showTime prop
   React.useEffect(() => {
     if (showTime) {
-      // Animate to show: increase height, move up, and fade in
-      height.value = withTiming(34, { duration: 300 }); // Adjust target height as needed
+      height.value = withTiming(34, { duration: 300 });
       translateY.value = withTiming(0, { duration: 300 });
       opacity.value = withTiming(1, { duration: 300 });
     } else {
-      // Animate to hide: collapse height, move down, and fade out
-      opacity.value = withTiming(0, { duration: 300 }); // Start fade out first
+      opacity.value = withTiming(0, { duration: 300 });
       height.value = withTiming(0, { duration: 300 }, (finished) => {
         if (finished) {
-          translateY.value = withTiming(20, { duration: 300 }); // Then move down
+          translateY.value = withTiming(20, { duration: 300 });
         }
       });
     }
