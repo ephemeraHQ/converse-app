@@ -266,7 +266,7 @@ const en = {
   add_description: "Add a description",
   allow_group: "Allow group",
   block_group: "Block group",
-  consent_title: "CONSENT",
+  actions_title: "ACTIONS",
   members_title: "MEMBERS",
   pending_approval_title: "PENDING APPROVAL",
   group_invite_link_created_copied: "Invite link created and copied!",
