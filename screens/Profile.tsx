@@ -16,6 +16,7 @@ import {
 import { PictoSizes } from "@styles/sizes";
 import { waitUntilAppActive } from "@utils/appState";
 import { useExternalSigner } from "@utils/evm/external";
+import { usePrivySigner } from "@utils/evm/privy";
 import { memberCanUpdateGroup } from "@utils/groupUtils/memberCanUpdateGroup";
 import { ConverseXmtpClientType } from "@utils/xmtpRN/client";
 import {
@@ -23,6 +24,7 @@ import {
   revokeOtherInstallations,
 } from "@utils/xmtpRN/revoke";
 import { getXmtpClient } from "@utils/xmtpRN/sync";
+import { Signer } from "ethers";
 import Constants from "expo-constants";
 import * as Linking from "expo-linking";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
@@ -120,6 +122,7 @@ export default function ProfileScreen({
   );
   const isSplitScreen = useIsSplitScreen();
   const { getExternalSigner, resetExternalSigner } = useExternalSigner();
+  const privySigner = usePrivySigner();
 
   const insets = useSafeAreaInsets();
   const shouldShowError = useShouldShowErrored();
@@ -789,16 +792,34 @@ export default function ProfileScreen({
                     );
                     return;
                   }
-                  const signer = await getExternalSigner();
-                  const address = await signer.getAddress();
-                  if (address.toLowerCase() !== userAddress.toLowerCase()) {
-                    Alert.alert(
-                      translate("xmtp_wrong_signer"),
-                      translate("xmtp_wrong_signer_description")
-                    );
-                    resetExternalSigner();
-                    return;
+                  let signer: Signer | undefined = undefined;
+
+                  if (privySigner) {
+                    const privyAddress = await privySigner.getAddress();
+                    if (
+                      privyAddress.toLowerCase() ===
+                      client.address.toLowerCase()
+                    ) {
+                      signer = privySigner;
+                    }
                   }
+
+                  if (!signer) {
+                    signer = await getExternalSigner();
+                    const externalAddress = await signer.getAddress();
+                    if (
+                      externalAddress.toLowerCase() !==
+                      client.address.toLowerCase()
+                    ) {
+                      Alert.alert(
+                        translate("xmtp_wrong_signer"),
+                        translate("xmtp_wrong_signer_description")
+                      );
+                      resetExternalSigner();
+                      return;
+                    }
+                  }
+
                   await waitUntilAppActive(500);
                   const revoked = await revokeOtherInstallations(
                     signer,
