@@ -6,23 +6,119 @@ import {
   textPrimaryColor,
 } from "@styles/colors";
 import { PictoSizes } from "@styles/sizes";
+import { waitUntilAppActive } from "@utils/appState";
+import { converseEventEmitter } from "@utils/events";
+import { thirdwebClient } from "@utils/thirdweb";
 import { Image } from "expo-image";
-import { useCallback, useRef, useState } from "react";
-import { StyleSheet, Text, useColorScheme, View } from "react-native";
+import { useCallback, useEffect, useRef, useState } from "react";
+import {
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  useColorScheme,
+  View,
+} from "react-native";
+import { Account, createWallet, Wallet } from "thirdweb/wallets";
 
 import Button from "./Button/Button";
 import { Drawer, DrawerRef } from "./Drawer";
-import { useInstalledWallets } from "./Onboarding/supportedWallets";
+import {
+  InstalledWallet,
+  useInstalledWallets,
+} from "./Onboarding/supportedWallets";
 import Picto from "./Picto/Picto";
+import config from "../config";
 
 export default function ExternalWalletPicker() {
   const styles = useStyles();
   const colorScheme = useColorScheme();
   const drawerRef = useRef<DrawerRef>(null);
-  const [visible, setVisible] = useState(true);
+  const [visible, setVisible] = useState(false);
+  const [title, setTitle] = useState<string | undefined>(undefined);
+  const [subtitle, setSubtitle] = useState<string | undefined>(undefined);
+
+  const displayExternalWalletPicker = useCallback(
+    (title?: string, subtitle?: string) => {
+      setTitle(title);
+      setSubtitle(subtitle);
+      setVisible(true);
+    },
+    []
+  );
+
+  const pickExternalWallet = useCallback(
+    async (w: InstalledWallet | undefined) => {
+      if (!w) {
+        converseEventEmitter.emit("externalWalletPicked", {
+          wallet: undefined,
+          account: undefined,
+        });
+        setVisible(false);
+        return;
+      }
+      let wallet: Wallet | undefined = undefined;
+      let account: Account | undefined = undefined;
+      if (w.name === "Coinbase Wallet") {
+        wallet = createWallet("com.coinbase.wallet", {
+          appMetadata: config.walletConnectConfig.appMetadata,
+          mobileConfig: {
+            callbackURL: `https://${config.websiteDomain}/coinbase`,
+          },
+        });
+      } else if (w.thirdwebId) {
+        wallet = createWallet(w.thirdwebId);
+      }
+      if (!wallet) {
+        converseEventEmitter.emit("externalWalletPicked", {
+          wallet: undefined,
+          account: undefined,
+        });
+        setVisible(false);
+        return;
+      }
+      try {
+        account = await wallet.autoConnect({ client: thirdwebClient });
+      } catch {
+        account = await wallet.connect({
+          client: thirdwebClient,
+          walletConnect: config.walletConnectConfig,
+        });
+      }
+
+      if (wallet && account) {
+        converseEventEmitter.emit("externalWalletPicked", {
+          wallet,
+          account,
+        });
+      } else {
+        converseEventEmitter.emit("externalWalletPicked", {
+          wallet: undefined,
+          account: undefined,
+        });
+      }
+      await waitUntilAppActive(500);
+      setVisible(false);
+    },
+    []
+  );
+
   const closeMenu = useCallback(() => {
-    setVisible(false);
-  }, []);
+    pickExternalWallet(undefined);
+  }, [pickExternalWallet]);
+
+  useEffect(() => {
+    converseEventEmitter.on(
+      "displayExternalWalletPicker",
+      displayExternalWalletPicker
+    );
+    return () => {
+      converseEventEmitter.off(
+        "displayExternalWalletPicker",
+        displayExternalWalletPicker
+      );
+    };
+  }, [displayExternalWalletPicker]);
   const wallets = useInstalledWallets();
   return (
     <Drawer
@@ -31,9 +127,16 @@ export default function ExternalWalletPicker() {
       ref={drawerRef}
       style={styles.drawer}
     >
-      <View>
+      <ScrollView style={styles.wallets} alwaysBounceVertical={false}>
+        {title && <Text style={styles.title}>{title}</Text>}
+        {subtitle && <Text style={styles.subtitle}>{subtitle}</Text>}
+        {(title || subtitle) && <View style={styles.separator} />}
         {wallets.map((w) => (
-          <View key={w.name} style={styles.wallet}>
+          <TouchableOpacity
+            key={w.name}
+            style={styles.wallet}
+            onPress={() => pickExternalWallet(w)}
+          >
             <Image source={{ uri: w.iconURL }} style={styles.walletIcon} />
             <Text style={styles.walletName}>{w.name}</Text>
             <Picto
@@ -43,15 +146,16 @@ export default function ExternalWalletPicker() {
               color={textPrimaryColor(colorScheme)}
               weight="semibold"
             />
-          </View>
+          </TouchableOpacity>
         ))}
+        {wallets.length === 0 && <Text>No wallet detected</Text>}
         <Button
           variant="primary"
           title={translate("cancel")}
           style={styles.cta}
-          onPress={() => drawerRef.current?.closeDrawer(() => {})}
+          onPress={closeMenu}
         />
-      </View>
+      </ScrollView>
     </Drawer>
   );
 }
@@ -61,7 +165,19 @@ const useStyles = () => {
   return StyleSheet.create({
     drawer: {
       backgroundColor: tertiaryBackgroundColor(colorScheme),
+      paddingHorizontal: 0,
     },
+    title: {
+      fontSize: 16,
+      fontWeight: "700",
+    },
+    subtitle: {
+      fontSize: 14,
+    },
+    separator: {
+      marginTop: 13,
+    },
+    wallets: { paddingTop: 10, paddingHorizontal: 15 },
     cta: {
       marginHorizontal: 0,
       marginTop: 20,

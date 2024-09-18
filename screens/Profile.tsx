@@ -14,10 +14,10 @@ import {
   textSecondaryColor,
 } from "@styles/colors";
 import { PictoSizes } from "@styles/sizes";
-import { waitUntilAppActive } from "@utils/appState";
 import { useExternalSigner } from "@utils/evm/external";
 import { usePrivySigner } from "@utils/evm/privy";
 import { memberCanUpdateGroup } from "@utils/groupUtils/memberCanUpdateGroup";
+import { shortAddress } from "@utils/str";
 import { ConverseXmtpClientType } from "@utils/xmtpRN/client";
 import {
   getOtherInstallations,
@@ -82,6 +82,7 @@ import {
   getPreferredAvatar,
   getPreferredName,
   getProfile,
+  getPreferredUsername,
 } from "../utils/profile";
 import { getIPFSAssetURI } from "../utils/thirdweb";
 import { refreshBalanceForAccount } from "../utils/wallet";
@@ -805,7 +806,18 @@ export default function ProfileScreen({
                   }
 
                   if (!signer) {
-                    signer = await getExternalSigner();
+                    const socials =
+                      useProfilesStore.getState().profiles[client.address]
+                        ?.socials;
+                    signer = await getExternalSigner(
+                      translate("revoke_wallet_picker_title"),
+                      translate("revoke_wallet_picker_description", {
+                        wallet:
+                          getPreferredUsername(socials) ||
+                          shortAddress(client.address),
+                      })
+                    );
+                    if (!signer) return;
                     const externalAddress = await signer.getAddress();
                     if (
                       externalAddress.toLowerCase() !==
@@ -819,8 +831,6 @@ export default function ProfileScreen({
                       return;
                     }
                   }
-
-                  await waitUntilAppActive(500);
                   const revoked = await revokeOtherInstallations(
                     signer,
                     client,

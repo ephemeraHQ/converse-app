@@ -1,3 +1,4 @@
+import { converseEventEmitter, waitForConverseEvent } from "@utils/events";
 import logger from "@utils/logger";
 import { thirdwebClient } from "@utils/thirdweb";
 import { Signer } from "ethers";
@@ -10,9 +11,7 @@ import {
   useDisconnect,
   useSetActiveWallet,
 } from "thirdweb/react";
-import { Account, createWallet, Wallet } from "thirdweb/wallets";
-
-import config from "../../config";
+import { Wallet } from "thirdweb/wallets";
 
 export const useExternalSigner = () => {
   const thirdwebSigner = useRef<Signer | undefined>();
@@ -22,38 +21,33 @@ export const useExternalSigner = () => {
   const activeWallet = useActiveWallet();
   const { disconnect } = useDisconnect();
 
-  const getExternalSigner = useCallback(async () => {
-    if (thirdwebSigner.current) return thirdwebSigner.current;
-    if (activeAccount) {
+  const getExternalSigner = useCallback(
+    async (title?: string, subtitle?: string) => {
+      if (thirdwebSigner.current) return thirdwebSigner.current;
+      if (activeAccount) {
+        thirdwebSigner.current = await ethers5Adapter.signer.toEthers({
+          client: thirdwebClient,
+          chain: ethereum,
+          account: activeAccount,
+        });
+        return thirdwebSigner.current;
+      }
+      converseEventEmitter.emit("displayExternalWalletPicker", title, subtitle);
+      const [{ wallet, account }] = await waitForConverseEvent(
+        "externalWalletPicked"
+      );
+      if (!wallet || !account) return;
+      setActiveWallet(wallet);
       thirdwebSigner.current = await ethers5Adapter.signer.toEthers({
         client: thirdwebClient,
         chain: ethereum,
-        account: activeAccount,
+        account,
       });
+      thirdwebWallet.current = wallet;
       return thirdwebSigner.current;
-    }
-    const coinbaseWallet = createWallet("com.coinbase.wallet", {
-      appMetadata: config.walletConnectConfig.appMetadata,
-      mobileConfig: {
-        callbackURL: `https://${config.websiteDomain}/coinbase`,
-      },
-    });
-    // Let's first try to autoconnect
-    let account: Account | undefined = undefined;
-    try {
-      account = await coinbaseWallet.autoConnect({ client: thirdwebClient });
-    } catch {
-      account = await coinbaseWallet.connect({ client: thirdwebClient });
-    }
-    setActiveWallet(coinbaseWallet);
-    thirdwebSigner.current = await ethers5Adapter.signer.toEthers({
-      client: thirdwebClient,
-      chain: ethereum,
-      account,
-    });
-    thirdwebWallet.current = coinbaseWallet;
-    return thirdwebSigner.current;
-  }, [activeAccount, setActiveWallet]);
+    },
+    [activeAccount, setActiveWallet]
+  );
 
   const resetExternalSigner = useCallback(() => {
     try {

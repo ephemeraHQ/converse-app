@@ -1,6 +1,7 @@
 import { MessageToDisplay } from "@components/Chat/Message/Message";
 import { MediaPreview } from "@data/store/chatStore";
 import EventEmitter from "eventemitter3";
+import { Account, Wallet } from "thirdweb/wallets";
 
 import { GroupWithCodecsType } from "./xmtpRN/client";
 
@@ -26,6 +27,11 @@ type ConverseEvents = {
     animated?: boolean;
   }) => void;
   toggleSpamRequests: () => void;
+  displayExternalWalletPicker: (title?: string, subtitle?: string) => void;
+  externalWalletPicked: (walletPicked: {
+    wallet: Wallet | undefined;
+    account: Account | undefined;
+  }) => void;
 };
 
 type ShowActionSheetEvents = {
@@ -46,3 +52,13 @@ type Events = ConverseEvents &
   AttachmentMessageProcessedEvents;
 
 export const converseEventEmitter = new EventEmitter<Events>();
+
+export async function waitForConverseEvent<K extends keyof Events>(
+  eventName: K
+): Promise<Parameters<Events[K]>> {
+  return new Promise<Parameters<Events[K]>>((resolve) => {
+    converseEventEmitter.once(eventName, (...args: unknown[]) => {
+      resolve(args as Parameters<Events[K]>);
+    });
+  });
+}
