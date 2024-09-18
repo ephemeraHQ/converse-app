@@ -11,7 +11,6 @@ import React, {
   ReactNode,
   useCallback,
   useMemo,
-  useState,
   useRef,
   useEffect,
 } from "react";
@@ -151,9 +150,7 @@ const ChatMessage = ({
   colorScheme,
   isGroup,
   isFrame,
-  showTime,
-  toggleTime,
-}: Props & { showTime: boolean; toggleTime: () => void }) => {
+}: Props) => {
   const styles = useStyles();
 
   const messageDate = useMemo(
@@ -172,19 +169,24 @@ const ChatMessage = ({
 
   const animatedStyle = useAnimatedStyle(() => {
     return {
-      minHeight: height.value, // Use minHeight for more stable height animations
+      height: height.value,
+      overflow: "hidden",
+      width: "100%",
       transform: [{ translateY: translateY.value }],
       opacity: opacity.value,
     };
   });
 
-  // Handle animation based on showTime prop
-  React.useEffect(() => {
-    if (showTime) {
+  // Handle showTime animation
+  const showTime = useRef<boolean>(false);
+  const animateTime = useCallback(() => {
+    if (showTime.current === false) {
+      showTime.current = true;
       height.value = withTiming(34, { duration: 300 });
       translateY.value = withTiming(0, { duration: 300 });
       opacity.value = withTiming(1, { duration: 300 });
     } else {
+      showTime.current = false;
       opacity.value = withTiming(0, { duration: 300 });
       height.value = withTiming(0, { duration: 300 }, (finished) => {
         if (finished) {
@@ -192,7 +194,7 @@ const ChatMessage = ({
         }
       });
     }
-  }, [showTime, height, opacity, translateY]);
+  }, [height, translateY, opacity]);
 
   let messageContent: ReactNode;
   const contentType = getMessageContentType(message.contentType);
@@ -318,7 +320,7 @@ const ChatMessage = ({
         </Text>
       )}
       {!message.dateChange && showTime && (
-        <Animated.View style={[animatedStyle, styles.dateTimeContainer]}>
+        <Animated.View style={animatedStyle}>
           <Text style={styles.dateTime}>{messageTime}</Text>
         </Animated.View>
       )}
@@ -449,7 +451,7 @@ const ChatMessage = ({
                           : undefined,
                       ]}
                     >
-                      <TouchableOpacity onPress={toggleTime} activeOpacity={1}>
+                      <TouchableOpacity onPress={animateTime} activeOpacity={1}>
                         <View>{messageContent}</View>
                       </TouchableOpacity>
                     </View>
@@ -528,14 +530,6 @@ export default function CachedChatMessage({
   isGroup,
   isFrame = false,
 }: Props) {
-  // State to trigger re-renders
-  const [showTime, setShowTime] = useState(false);
-
-  // Toggle the showTime state
-  const toggleTime = useCallback(() => {
-    setShowTime((prev) => !prev);
-  }, []);
-
   const keysChangesToRerender: (keyof MessageToDisplay)[] = [
     "id",
     "sent",
@@ -569,11 +563,9 @@ export default function CachedChatMessage({
         colorScheme={colorScheme}
         isGroup={isGroup}
         isFrame={isFrame}
-        showTime={showTime}
-        toggleTime={toggleTime}
       />
     ),
-    [account, message, colorScheme, isGroup, isFrame, showTime, toggleTime]
+    [account, message, colorScheme, isGroup, isFrame]
   );
 
   useEffect(() => {
@@ -592,7 +584,6 @@ export default function CachedChatMessage({
     isGroup,
     isFrame,
     shouldRerender,
-    toggleTime,
   ]);
 
   return renderedMessage;
@@ -639,11 +630,6 @@ const useStyles = () => {
       color: textSecondaryColor(colorScheme),
       flexGrow: 1,
     },
-    dateTimeContainer: {
-      overflow: "hidden",
-      width: "100%",
-      minHeight: 20,
-    },
     dateTime: {
       flexBasis: "100%",
       textAlign: "center",
@@ -652,6 +638,7 @@ const useStyles = () => {
       marginTop: 12,
       marginBottom: 8,
       fontWeight: "bold",
+      height: 20,
     },
     replyToUsername: {
       fontSize: 12,
