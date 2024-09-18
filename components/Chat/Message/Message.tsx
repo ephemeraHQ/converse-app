@@ -7,13 +7,7 @@ import {
 } from "@styles/colors";
 import { AvatarSizes } from "@styles/sizes";
 import * as Haptics from "expo-haptics";
-import React, {
-  ReactNode,
-  useCallback,
-  useMemo,
-  useRef,
-  useEffect,
-} from "react";
+import React, { ReactNode, useCallback, useMemo, useRef } from "react";
 import {
   Animated as RNAnimated,
   ColorSchemeName,
@@ -546,49 +540,34 @@ export default function CachedChatMessage({
     "nextMessageIsLoadingAttachment",
     "reactions",
   ];
-
-  const cacheKey = `${account}-${message.id}`;
-  const alreadyRenderedMessage = renderedMessages.get(cacheKey);
-
+  const alreadyRenderedMessage = renderedMessages.get(
+    `${account}-${message.id}`
+  );
   const shouldRerender =
     !alreadyRenderedMessage ||
     alreadyRenderedMessage.colorScheme !== colorScheme ||
     keysChangesToRerender.some(
       (k) => message[k] !== alreadyRenderedMessage.message[k]
     );
-
-  const renderedMessage = useMemo(
-    () => (
-      <ChatMessage
-        account={account}
-        message={message}
-        colorScheme={colorScheme}
-        isGroup={isGroup}
-        isFrame={isFrame}
-      />
-    ),
-    [account, message, colorScheme, isGroup, isFrame]
-  );
-
-  useEffect(() => {
-    renderedMessages.set(cacheKey, {
+  if (shouldRerender) {
+    const renderedMessage = ChatMessage({
+      account,
+      message,
+      colorScheme,
+      isGroup,
+      isFrame,
+    });
+    renderedMessages.set(`${account}-${message.id}`, {
       message,
       renderedMessage,
       colorScheme,
       isGroup,
       isFrame,
     });
-  }, [
-    cacheKey,
-    message,
-    renderedMessage,
-    colorScheme,
-    isGroup,
-    isFrame,
-    shouldRerender,
-  ]);
-
-  return renderedMessage;
+    return renderedMessage;
+  } else {
+    return alreadyRenderedMessage.renderedMessage;
+  }
 }
 
 const useStyles = () => {
