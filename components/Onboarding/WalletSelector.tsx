@@ -1,4 +1,3 @@
-import { configure as configureCoinbase } from "@coinbase/wallet-mobile-sdk";
 import { translate } from "@i18n";
 import { textSecondaryColor } from "@styles/colors";
 import logger from "@utils/logger";
@@ -36,15 +35,21 @@ import {
 } from "../TableView/TableViewImage";
 
 export default function WalletSelector() {
-  const { setConnectionMethod, setSigner, setLoading, setAddingNewAccount } =
-    useOnboardingStore(
-      useSelect([
-        "setConnectionMethod",
-        "setSigner",
-        "setLoading",
-        "setAddingNewAccount",
-      ])
-    );
+  const {
+    setConnectionMethod,
+    setSigner,
+    setLoading,
+    addingNewAccount,
+    setAddingNewAccount,
+  } = useOnboardingStore(
+    useSelect([
+      "setConnectionMethod",
+      "setSigner",
+      "setLoading",
+      "addingNewAccount",
+      "setAddingNewAccount",
+    ])
+  );
   const colorScheme = useColorScheme();
   const { connect: thirdwebConnect } = useConnect();
   const setActiveWallet = useSetActiveWallet();
@@ -152,14 +157,6 @@ export default function WalletSelector() {
                 try {
                   if (w.name === "Coinbase Wallet") {
                     thirdwebConnect(async () => {
-                      // Default Coinbase configuration
-                      configureCoinbase({
-                        callbackURL: new URL(
-                          `https://${config.websiteDomain}/coinbase`
-                        ),
-                        hostURL: new URL("https://wallet.coinbase.com/wsegue"),
-                        hostPackageName: "org.toshi",
-                      });
                       // instantiate wallet
                       const coinbaseWallet = createWallet(
                         "com.coinbase.wallet",
@@ -173,32 +170,6 @@ export default function WalletSelector() {
                       await coinbaseWallet.connect({ client: thirdwebClient });
                       setActiveWallet(coinbaseWallet);
                       return coinbaseWallet;
-                    });
-                  } else if (w.name === "Rainbow") {
-                    thirdwebConnect(async () => {
-                      // Rainbow now uses Mobile Wallet Protocol
-                      // naming in thirdweb still includes Coinbase
-                      // but it now also works for Rainbow!
-                      configureCoinbase({
-                        callbackURL: new URL(
-                          `https://${config.websiteDomain}/coinbase`
-                        ),
-                        hostURL: new URL("rainbow://wsegue"),
-                        hostPackageName: "me.rainbow",
-                      });
-                      // instantiate wallet
-                      const rainbowWallet = createWallet(
-                        "com.coinbase.wallet",
-                        {
-                          appMetadata: config.walletConnectConfig.appMetadata,
-                          mobileConfig: {
-                            callbackURL: `https://${config.websiteDomain}/coinbase`,
-                          },
-                        }
-                      );
-                      await rainbowWallet.connect({ client: thirdwebClient });
-                      setActiveWallet(rainbowWallet);
-                      return rainbowWallet;
                     });
                   } else if (w.name === "EthOS Wallet") {
                     const signer = getEthOSSigner();
