@@ -7,9 +7,15 @@ import {
 } from "@styles/colors";
 import { AvatarSizes } from "@styles/sizes";
 import * as Haptics from "expo-haptics";
-import React, { ReactNode, useCallback, useMemo, useRef } from "react";
+import React, {
+  ReactNode,
+  useCallback,
+  useMemo,
+  useRef,
+  useEffect,
+} from "react";
 import {
-  Animated,
+  Animated as RNAnimated,
   ColorSchemeName,
   Linking,
   Platform,
@@ -21,6 +27,11 @@ import {
   DimensionValue,
 } from "react-native";
 import { Swipeable } from "react-native-gesture-handler";
+import Animated, {
+  useSharedValue,
+  useAnimatedStyle,
+  withTiming,
+} from "react-native-reanimated";
 
 import ChatMessageActions from "./MessageActions";
 import ChatMessageReactions from "./MessageReactions";
@@ -33,7 +44,7 @@ import {
 } from "../../../data/store/accountsStore";
 import { XmtpMessage } from "../../../data/store/chatStore";
 import { isAttachmentMessage } from "../../../utils/attachment/helpers";
-import { getRelativeDate } from "../../../utils/date";
+import { getLocalizedTime, getRelativeDate } from "../../../utils/date";
 import { isDesktop } from "../../../utils/device";
 import { converseEventEmitter } from "../../../utils/events";
 import {
@@ -133,8 +144,57 @@ const MessageSenderAvatar = ({ message }: { message: MessageToDisplay }) => {
   );
 };
 
-function ChatMessage({ message, colorScheme, isGroup, isFrame }: Props) {
+const ChatMessage = ({
+  account,
+  message,
+  colorScheme,
+  isGroup,
+  isFrame,
+}: Props) => {
   const styles = useStyles();
+
+  const messageDate = useMemo(
+    () => getRelativeDate(message.sent),
+    [message.sent]
+  );
+  const messageTime = useMemo(
+    () => getLocalizedTime(message.sent),
+    [message.sent]
+  );
+
+  // Reanimated shared values for height, translateY, and opacity
+  const height = useSharedValue(0);
+  const translateY = useSharedValue(20);
+  const opacity = useSharedValue(0);
+
+  const animatedStyle = useAnimatedStyle(() => {
+    return {
+      height: height.value,
+      overflow: "hidden",
+      width: "100%",
+      transform: [{ translateY: translateY.value }],
+      opacity: opacity.value,
+    };
+  });
+
+  // Handle showTime animation
+  const showTime = useRef<boolean>(false);
+  const animateTime = useCallback(() => {
+    if (showTime.current === false) {
+      showTime.current = true;
+      height.value = withTiming(34, { duration: 300 });
+      translateY.value = withTiming(0, { duration: 300 });
+      opacity.value = withTiming(1, { duration: 300 });
+    } else {
+      showTime.current = false;
+      opacity.value = withTiming(0, { duration: 300 });
+      height.value = withTiming(0, { duration: 300 }, (finished) => {
+        if (finished) {
+          translateY.value = withTiming(20, { duration: 300 });
+        }
+      });
+    }
+  }, [height, translateY, opacity]);
 
   let messageContent: ReactNode;
   const contentType = getMessageContentType(message.contentType);
@@ -255,7 +315,14 @@ function ChatMessage({ message, colorScheme, isGroup, isFrame }: Props) {
       ]}
     >
       {message.dateChange && (
-        <Text style={styles.date}>{getRelativeDate(message.sent)}</Text>
+        <Text style={styles.dateTime}>
+          {messageDate} {showTime && `– ${messageTime}`}
+        </Text>
+      )}
+      {!message.dateChange && showTime && (
+        <Animated.View style={animatedStyle}>
+          <Text style={styles.dateTime}>{messageTime}</Text>
+        </Animated.View>
       )}
       {isGroupUpdated && messageContent}
       {isChatMessage && (
@@ -266,12 +333,12 @@ function ChatMessage({ message, colorScheme, isGroup, isFrame }: Props) {
           containerStyle={styles.messageSwipeable}
           childrenContainerStyle={styles.messageSwipeableChildren}
           renderLeftActions={(
-            progressAnimatedValue: Animated.AnimatedInterpolation<
+            progressAnimatedValue: RNAnimated.AnimatedInterpolation<
               string | number
             >
           ) => {
             return (
-              <Animated.View
+              <RNAnimated.View
                 style={{
                   opacity: progressAnimatedValue.interpolate({
                     inputRange: [0, 0.7, 1],
@@ -291,7 +358,7 @@ function ChatMessage({ message, colorScheme, isGroup, isFrame }: Props) {
                 }}
               >
                 <ActionButton picto="arrowshape.turn.up.left" />
-              </Animated.View>
+              </RNAnimated.View>
             );
           }}
           leftThreshold={10000} // Never trigger opening
@@ -308,13 +375,7 @@ function ChatMessage({ message, colorScheme, isGroup, isFrame }: Props) {
           }}
           ref={swipeableRef}
         >
-          <View
-            style={{
-              width: "100%",
-              flexDirection: "row",
-              alignItems: "flex-end",
-            }}
-          >
+          <View style={styles.messageContainer}>
             {!message.fromMe && <MessageSenderAvatar message={message} />}
             <View style={{ flex: 1 }}>
               {isGroup &&
@@ -390,7 +451,9 @@ function ChatMessage({ message, colorScheme, isGroup, isFrame }: Props) {
                           : undefined,
                       ]}
                     >
-                      <View>{messageContent}</View>
+                      <TouchableOpacity onPress={animateTime} activeOpacity={1}>
+                        <View>{messageContent}</View>
+                      </TouchableOpacity>
                     </View>
                   )}
                   {shouldShowReactionsInside && (
@@ -442,7 +505,7 @@ function ChatMessage({ message, colorScheme, isGroup, isFrame }: Props) {
       )}
     </View>
   );
-}
+};
 
 // We use a cache for chat messages so that it doesn't rerender too often.
 // Indeed, since we use an inverted FlashList for chat, when a new message
@@ -481,39 +544,59 @@ export default function CachedChatMessage({
     "nextMessageIsLoadingAttachment",
     "reactions",
   ];
-  const alreadyRenderedMessage = renderedMessages.get(
-    `${account}-${message.id}`
-  );
+
+  const cacheKey = `${account}-${message.id}`;
+  const alreadyRenderedMessage = renderedMessages.get(cacheKey);
+
   const shouldRerender =
     !alreadyRenderedMessage ||
     alreadyRenderedMessage.colorScheme !== colorScheme ||
     keysChangesToRerender.some(
       (k) => message[k] !== alreadyRenderedMessage.message[k]
     );
-  if (shouldRerender) {
-    const renderedMessage = ChatMessage({
-      account,
-      message,
-      colorScheme,
-      isGroup,
-      isFrame,
-    });
-    renderedMessages.set(`${account}-${message.id}`, {
+
+  const renderedMessage = useMemo(
+    () => (
+      <ChatMessage
+        account={account}
+        message={message}
+        colorScheme={colorScheme}
+        isGroup={isGroup}
+        isFrame={isFrame}
+      />
+    ),
+    [account, message, colorScheme, isGroup, isFrame]
+  );
+
+  useEffect(() => {
+    renderedMessages.set(cacheKey, {
       message,
       renderedMessage,
       colorScheme,
       isGroup,
       isFrame,
     });
-    return renderedMessage;
-  } else {
-    return alreadyRenderedMessage.renderedMessage;
-  }
+  }, [
+    cacheKey,
+    message,
+    renderedMessage,
+    colorScheme,
+    isGroup,
+    isFrame,
+    shouldRerender,
+  ]);
+
+  return renderedMessage;
 }
 
 const useStyles = () => {
   const colorScheme = useColorScheme();
   return StyleSheet.create({
+    messageContainer: {
+      flexDirection: "row",
+      width: "100%",
+      alignItems: "flex-end",
+    },
     innerBubble: {
       backgroundColor: messageInnerBubbleColor(colorScheme),
       borderRadius: 14,
@@ -547,7 +630,7 @@ const useStyles = () => {
       color: textSecondaryColor(colorScheme),
       flexGrow: 1,
     },
-    date: {
+    dateTime: {
       flexBasis: "100%",
       textAlign: "center",
       fontSize: 12,
@@ -555,6 +638,7 @@ const useStyles = () => {
       marginTop: 12,
       marginBottom: 8,
       fontWeight: "bold",
+      height: 20,
     },
     replyToUsername: {
       fontSize: 12,
