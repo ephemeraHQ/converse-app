@@ -315,9 +315,11 @@ const ChatMessage = ({
       ]}
     >
       {message.dateChange && (
-        <Text style={styles.dateTime}>
-          {messageDate} {showTime && `– ${messageTime}`}
-        </Text>
+        <Animated.View style={styles.dateTimeContainer}>
+          <Text style={styles.dateTime}>
+            {messageDate} {showTime && `– ${messageTime}`}
+          </Text>
+        </Animated.View>
       )}
       {!message.dateChange && showTime && (
         <Animated.View style={animatedStyle}>
@@ -630,8 +632,10 @@ const useStyles = () => {
       color: textSecondaryColor(colorScheme),
       flexGrow: 1,
     },
+    dateTimeContainer: {
+      width: "100%",
+    },
     dateTime: {
-      flexBasis: "100%",
       textAlign: "center",
       fontSize: 12,
       color: textSecondaryColor(colorScheme),
