@@ -2,7 +2,8 @@ const en = {
   // Onboarding
   walletSelector: {
     title: "Your messages.\nYour privacy.",
-    subtitle: "Decentralized messaging,\nsecure by design and owned by you.",
+    subtitle:
+      "Decentralized messaging,\nend-to-end encrypted and owned by you.",
     converseAccount: {
       title: "CONVERSE ACCOUNTS",
       connectViaPhone: "Connect via Phone",
