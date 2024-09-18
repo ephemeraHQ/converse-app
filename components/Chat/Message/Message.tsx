@@ -7,13 +7,7 @@ import {
 } from "@styles/colors";
 import { AvatarSizes } from "@styles/sizes";
 import * as Haptics from "expo-haptics";
-import React, {
-  ReactNode,
-  useCallback,
-  useMemo,
-  useRef,
-  useEffect,
-} from "react";
+import React, { ReactNode, useCallback, useMemo, useRef } from "react";
 import {
   Animated as RNAnimated,
   ColorSchemeName,
@@ -162,39 +156,53 @@ const ChatMessage = ({
     [message.sent]
   );
 
-  // Reanimated shared values for height, translateY, and opacity
-  const height = useSharedValue(0);
-  const translateY = useSharedValue(20);
-  const opacity = useSharedValue(0);
+  // Reanimated shared values for time and date-time animations
+  const timeHeight = useSharedValue(0);
+  const timeTranslateY = useSharedValue(20);
+  const timeOpacity = useSharedValue(0);
+  const timeAnimatedStyle = useAnimatedStyle(() => ({
+    height: timeHeight.value,
+    overflow: "hidden",
+    width: "100%",
+    transform: [{ translateY: timeTranslateY.value }],
+    opacity: timeOpacity.value,
+  }));
 
-  const animatedStyle = useAnimatedStyle(() => {
-    return {
-      height: height.value,
-      overflow: "hidden",
-      width: "100%",
-      transform: [{ translateY: translateY.value }],
-      opacity: opacity.value,
-    };
-  });
+  const dateTimeDisplay = useSharedValue<"none" | "flex">("none");
+  const dateTimeAnimatedStyle = useAnimatedStyle(() => ({
+    display: dateTimeDisplay.value,
+  }));
 
   // Handle showTime animation
   const showTime = useRef<boolean>(false);
+  const showDateTime = useRef<boolean>(false);
   const animateTime = useCallback(() => {
-    if (showTime.current === false) {
-      showTime.current = true;
-      height.value = withTiming(34, { duration: 300 });
-      translateY.value = withTiming(0, { duration: 300 });
-      opacity.value = withTiming(1, { duration: 300 });
+    // For messages with date change
+    if (message.dateChange) {
+      showDateTime.current = !showDateTime.current;
+      dateTimeDisplay.value = showDateTime.current ? "flex" : "none";
+      return;
+    }
+    // For all other messages
+    showTime.current = !showTime.current;
+    const animationConfig = { duration: 300 };
+    if (showTime.current) {
+      timeHeight.value = withTiming(34, animationConfig);
+      timeTranslateY.value = withTiming(0, animationConfig);
+      timeOpacity.value = withTiming(1, animationConfig);
     } else {
-      showTime.current = false;
-      opacity.value = withTiming(0, { duration: 300 });
-      height.value = withTiming(0, { duration: 300 }, (finished) => {
-        if (finished) {
-          translateY.value = withTiming(20, { duration: 300 });
-        }
+      timeOpacity.value = withTiming(0, animationConfig);
+      timeHeight.value = withTiming(0, animationConfig, () => {
+        timeTranslateY.value = withTiming(20, animationConfig);
       });
     }
-  }, [height, translateY, opacity]);
+  }, [
+    timeHeight,
+    timeTranslateY,
+    timeOpacity,
+    dateTimeDisplay,
+    message.dateChange,
+  ]);
 
   let messageContent: ReactNode;
   const contentType = getMessageContentType(message.contentType);
@@ -315,12 +323,15 @@ const ChatMessage = ({
       ]}
     >
       {message.dateChange && (
-        <Text style={styles.dateTime}>
-          {messageDate} {showTime && `– ${messageTime}`}
-        </Text>
+        <View style={styles.dateTimeContainer}>
+          <Text style={styles.dateTime}>{messageDate}</Text>
+          <Animated.Text style={[dateTimeAnimatedStyle, styles.dateTime]}>
+            {` – ${messageTime}`}
+          </Animated.Text>
+        </View>
       )}
       {!message.dateChange && showTime && (
-        <Animated.View style={animatedStyle}>
+        <Animated.View style={timeAnimatedStyle}>
           <Text style={styles.dateTime}>{messageTime}</Text>
         </Animated.View>
       )}
@@ -544,49 +555,34 @@ export default function CachedChatMessage({
     "nextMessageIsLoadingAttachment",
     "reactions",
   ];
-
-  const cacheKey = `${account}-${message.id}`;
-  const alreadyRenderedMessage = renderedMessages.get(cacheKey);
-
+  const alreadyRenderedMessage = renderedMessages.get(
+    `${account}-${message.id}`
+  );
   const shouldRerender =
     !alreadyRenderedMessage ||
     alreadyRenderedMessage.colorScheme !== colorScheme ||
     keysChangesToRerender.some(
       (k) => message[k] !== alreadyRenderedMessage.message[k]
     );
-
-  const renderedMessage = useMemo(
-    () => (
-      <ChatMessage
-        account={account}
-        message={message}
-        colorScheme={colorScheme}
-        isGroup={isGroup}
-        isFrame={isFrame}
-      />
-    ),
-    [account, message, colorScheme, isGroup, isFrame]
-  );
-
-  useEffect(() => {
-    renderedMessages.set(cacheKey, {
+  if (shouldRerender) {
+    const renderedMessage = ChatMessage({
+      account,
+      message,
+      colorScheme,
+      isGroup,
+      isFrame,
+    });
+    renderedMessages.set(`${account}-${message.id}`, {
       message,
       renderedMessage,
       colorScheme,
       isGroup,
       isFrame,
     });
-  }, [
-    cacheKey,
-    message,
-    renderedMessage,
-    colorScheme,
-    isGroup,
-    isFrame,
-    shouldRerender,
-  ]);
-
-  return renderedMessage;
+    return renderedMessage;
+  } else {
+    return alreadyRenderedMessage.renderedMessage;
+  }
 }
 
 const useStyles = () => {
@@ -630,8 +626,13 @@ const useStyles = () => {
       color: textSecondaryColor(colorScheme),
       flexGrow: 1,
     },
+    dateTimeContainer: {
+      width: "100%",
+      flexDirection: "row",
+      justifyContent: "center",
+      alignItems: "center",
+    },
     dateTime: {
-      flexBasis: "100%",
       textAlign: "center",
       fontSize: 12,
       color: textSecondaryColor(colorScheme),
