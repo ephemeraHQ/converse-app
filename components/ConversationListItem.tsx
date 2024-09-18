@@ -34,10 +34,10 @@ import { RectButton } from "react-native-gesture-handler";
 import Swipeable from "react-native-gesture-handler/Swipeable";
 import { TouchableRipple } from "react-native-paper";
 
-import Avatar from "./Avatar";
 import GroupAvatar from "./GroupAvatar";
 import Picto from "./Picto/Picto";
 import { showActionSheetWithOptions } from "./StateHandlers/ActionSheetStateHandler";
+import { ConnectedAvatar } from "../containers/ConnectedAvatar";
 import {
   currentAccount,
   useChatStore,
@@ -213,15 +213,14 @@ const ConversationListItem = memo(function ConversationListItem({
         onConversationListScreen
       />
     ) : (
-      <Avatar
+      <ConnectedAvatar
         size={AvatarSizes.conversationListItem}
         style={styles.avatarWrapper}
-        uri={conversationPeerAvatar}
-        name={conversationName}
+        peerAddress={conversationPeerAddress!}
       />
     );
   }, [
-    conversationName,
+    conversationPeerAddress,
     conversationPeerAvatar,
     conversationTopic,
     isGroupConversation,

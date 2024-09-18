@@ -1,3 +1,4 @@
+import { setProfileSocialsQueryData } from "@queries/useProfileSocialsQuery";
 import logger from "@utils/logger";
 
 import { getProfilesForAddresses } from "../../../utils/api";
@@ -52,7 +53,14 @@ export const updateProfilesForConvos = async (
         updatedAt: now,
       };
     }
-    getProfilesStore(account).getState().setProfiles(socialsToDispatch);
+    for (const peerAddress in socialsToDispatch) {
+      setProfileSocialsQueryData(
+        account,
+        peerAddress,
+        socialsToDispatch[peerAddress].socials,
+        socialsToDispatch[peerAddress].updatedAt
+      );
+    }
     const handleConversation = async (conversation: XmtpConversation) => {
       if (conversation.isGroup) return;
       const currentTitle = conversation.conversationTitle;
@@ -108,14 +116,7 @@ export const refreshProfileForAddress = async (
     ["address"],
     false
   );
-  getProfilesStore(account)
-    .getState()
-    .setProfiles({
-      [address]: {
-        socials: profilesByAddress[address],
-        updatedAt: now,
-      },
-    });
+  setProfileSocialsQueryData(account, address, profilesByAddress[address], now);
 };
 
 export const refreshProfilesIfNeeded = async (account: string) => {
