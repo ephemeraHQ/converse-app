@@ -301,6 +301,9 @@ const en = {
   revoke_done_description: "{{count}} other installations successfully revoked",
   revoke_empty: "You have no other installations",
   revoke_others_cta: "Revoke other installations",
+  revoke_wallet_picker_title: "Revoke other installations",
+  revoke_wallet_picker_description:
+    "Connect the wallet associated with your XMTP account: {{wallet}}",
 
   // Emoji Picker
   search_emojis: "Search emojis",
