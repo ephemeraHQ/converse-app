@@ -45,6 +45,9 @@ const Conversation = ({
   const peersStatus = useSettingsStore((s) => s.peersStatus);
   const [transactionMode, setTransactionMode] = useState(false);
   const [frameTextInputFocused, setFrameTextInputFocused] = useState(false);
+  const tagsFetchedOnceForMessage = useRef<{ [messageId: string]: boolean }>(
+    {}
+  );
 
   const {
     conversations,
@@ -297,6 +300,7 @@ const Conversation = ({
             setTransactionMode,
             frameTextInputFocused,
             setFrameTextInputFocused,
+            tagsFetchedOnceForMessage,
           }}
         >
           <ConverseChat />

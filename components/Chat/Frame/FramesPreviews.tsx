@@ -1,3 +1,4 @@
+import { useConversationContext } from "@utils/conversation";
 import { useCallback, useRef, useState } from "react";
 import { View } from "react-native";
 
@@ -17,8 +18,8 @@ type Props = {
 
 export default function FramesPreviews({ message }: Props) {
   const messageId = useRef<string | undefined>(undefined);
-  const tagsFetchedOnceForMessage = useRef<{ [messageId: string]: boolean }>(
-    {}
+  const tagsFetchedOnceForMessage = useConversationContext(
+    "tagsFetchedOnceForMessage"
   );
   const account = useCurrentAccount() as string;
   const [framesForMessage, setFramesForMessage] = useState<{
@@ -38,7 +39,7 @@ export default function FramesPreviews({ message }: Props) {
         }
       );
     }
-  }, [account, message]);
+  }, [account, message, tagsFetchedOnceForMessage]);
 
   // Components are recycled, let's fix when stuff changes
   if (message.id !== messageId.current) {
