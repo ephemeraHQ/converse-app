@@ -197,6 +197,22 @@ const handleNewConversation = async (
   setOpenedConversation(client.address, conversation);
   const isGroup = conversation.version === ConversationVersion.GROUP;
   const isDMConversation = !!(conversation as any).peerAddress;
+
+  // Temporary fix to stop receiving messages for groups
+  // we are not member of
+  const shouldSkip =
+    isGroup &&
+    !(conversation as GroupWithCodecsType).members.some(
+      (m) => m.addresses[0] === client.address
+    );
+  if (shouldSkip) {
+    logger.warn(
+      `Skipping group; ${client.address} is not a member of ${
+        (conversation as GroupWithCodecsType).id
+      }`
+    );
+    return;
+  }
   saveConversations(
     client.address,
     [
