@@ -17,6 +17,7 @@ import {
   TextInput,
   useColorScheme,
   View,
+  Text,
 } from "react-native";
 import { List } from "react-native-paper";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -287,18 +288,21 @@ export default function NewGroupSummary({
             ),
           },
           {
-            title: "Edit group metadata",
-            id: "editMetadata",
+            title: "Edit group info",
+            id: "editGroupInfo",
             rightView: (
               <Switch
                 onValueChange={handlePermissionSwitch("editMetadata")}
-                value={permissionPolicySet.updateGroupNamePolicy === "allow"}
+                value={permissionPolicySet.updateGroupNamePolicy === "admin"}
               />
             ),
           },
         ]}
-        title="MEMBERS OF THE GROUP CAN"
+        title="MEMBERS CAN"
       />
+      <Text style={styles.p}>
+        {translate("promote_to_admin_to_manage_group")}
+      </Text>
       <View style={{ height: insets.bottom }} />
     </ScrollView>
   );
@@ -335,6 +339,18 @@ const useStyles = () => {
     },
     nameInput: {
       fontSize: 16,
+    },
+    p: {
+      textAlign: "center",
+      marginLeft: 32,
+      marginRight: 32,
+      ...Platform.select({
+        default: {
+          fontSize: 13,
+          lineHeight: 17,
+          color: textSecondaryColor(colorScheme),
+        },
+      }),
     },
   });
 };
