@@ -50,8 +50,8 @@ export const PinnedConversation: FC<Props> = ({ conversation }) => {
   }, [conversation.topic]);
 
   const onLongPress = useCallback(() => {
-    setPinnedConversations([conversation]);
-  }, [conversation, setPinnedConversations]);
+    setPinnedConversations([conversation.topic]);
+  }, [conversation.topic, setPinnedConversations]);
   const { initialLoadDoneOnce, topicsData } = useChatStore(
     useSelect(["initialLoadDoneOnce", "topicsData"])
   );

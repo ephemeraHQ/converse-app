@@ -63,10 +63,6 @@ export default function ConversationFlashList({
   const isSplitScreen = useIsSplitScreen();
   const profiles = useProfilesStore((state) => state.profiles);
 
-  const setPinnedConversations = useChatStore(
-    (state) => state.setPinnedConversations
-  );
-
   const listRef = useRef<FlashList<any> | undefined>();
 
   const previousSearchQuery = useRef(itemsForSearchQuery);
@@ -117,9 +113,6 @@ export default function ConversationFlashList({
       }
       return (
         <ConversationListItem
-          onLongPress={() => {
-            setPinnedConversations([conversation]);
-          }}
           navigation={navigation}
           route={route}
           conversationPeerAddress={conversation.peerAddress}
@@ -166,7 +159,6 @@ export default function ConversationFlashList({
       topicsData,
       userAddress,
       profiles,
-      setPinnedConversations,
     ]
   );
   return (
