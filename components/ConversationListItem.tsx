@@ -1,6 +1,6 @@
+import { useSelect } from "@data/store/storeHelpers";
 import { useGroupConsent } from "@hooks/useGroupConsent";
 import { translate } from "@i18n";
-import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import {
   actionSheetColors,
   backgroundColor,
@@ -12,6 +12,7 @@ import {
   textSecondaryColor,
 } from "@styles/colors";
 import { AvatarSizes, PictoSizes } from "@styles/sizes";
+import { useConversationListContext } from "@utils/conversationList";
 import * as Haptics from "expo-haptics";
 import { Image } from "expo-image";
 import React, {
@@ -43,7 +44,6 @@ import {
   useChatStore,
   useSettingsStore,
 } from "../data/store/accountsStore";
-import { NavigationParamList } from "../screens/Navigation/Navigation";
 import { useIsSplitScreen } from "../screens/Navigation/navHelpers";
 import { saveTopicsData } from "../utils/api";
 import { getMinimalDate } from "../utils/date";
@@ -72,16 +72,10 @@ type ConversationListItemProps = {
   showUnread: boolean;
   conversationOpened: boolean;
   isGroupConversation: boolean;
-  onLongPress?: () => void;
   onRightActionPress?: (defaultAction: () => void) => void;
-} & NativeStackScreenProps<
-  NavigationParamList,
-  "Chats" | "ShareFrame" | "ChatsRequests" | "Blocked"
->;
+};
 
 const ConversationListItem = memo(function ConversationListItem({
-  navigation,
-  route,
   colorScheme,
   conversationTopic,
   conversationTime,
@@ -95,12 +89,13 @@ const ConversationListItem = memo(function ConversationListItem({
   showUnread,
   conversationOpened,
   isGroupConversation = false,
-  onLongPress,
   onRightActionPress,
 }: ConversationListItemProps) {
   const styles = getStyles(colorScheme);
   const timeToShow = getMinimalDate(conversationTime as number);
-  const setTopicsData = useChatStore((s) => s.setTopicsData);
+  const { setTopicsData, setPinnedConversations } = useChatStore(
+    useSelect(["setTopicsData", "setPinnedConversations"])
+  );
   const setPeersStatus = useSettingsStore((s) => s.setPeersStatus);
   const isSplitScreen = useIsSplitScreen();
   const [selected, setSelected] = useState(false);
@@ -109,8 +104,15 @@ const ConversationListItem = memo(function ConversationListItem({
   }, []);
   const hasImagePreview = lastMessageImageUrl && lastMessagePreview;
   const showError = lastMessageFromMe && lastMessageStatus === "error";
-  const isBlockedChatView = route.name === "Blocked";
-  const { allowGroup } = useGroupConsent(conversationTopic);
+  const routeName = useConversationListContext("routeName");
+  const routeParams = useConversationListContext("routeParams");
+  const navigationRef = useConversationListContext("navigationRef");
+  const isBlockedChatView = routeName === "Blocked";
+  const { allowGroup } = useGroupConsent(conversationTopic, {
+    refetchOnMount: false,
+    staleTime: Infinity,
+    gcTime: Infinity,
+  });
 
   const openConversation = useCallback(async () => {
     const getUserAction = async () => {
@@ -123,7 +125,7 @@ const ConversationListItem = memo(function ConversationListItem({
           });
           // Take the user back to wherever the conversation was restored "to"
           // https://github.com/ephemeraHQ/converse-app/issues/315#issuecomment-2312903441
-          navigation.pop(isSplitScreen ? 1 : 2);
+          navigationRef.current?.pop(isSplitScreen ? 1 : 2);
         },
         [translate("cancel")]: () => {},
       };
@@ -162,9 +164,9 @@ const ConversationListItem = memo(function ConversationListItem({
     }
 
     // Open conversation
-    if (route.params?.frameURL) {
+    if (routeParams?.frameURL) {
       // Sharing a frame !!
-      navigation.goBack();
+      navigationRef.current?.goBack();
       if (!isSplitScreen) {
         await new Promise((r) =>
           setTimeout(r, Platform.OS === "ios" ? 300 : 20)
@@ -173,7 +175,7 @@ const ConversationListItem = memo(function ConversationListItem({
       // This handle the case where the conversation is already opened
       converseEventEmitter.emit(
         "setCurrentConversationInputValue",
-        route.params.frameURL
+        routeParams.frameURL
       );
     }
     if (isDesktop) {
@@ -183,25 +185,26 @@ const ConversationListItem = memo(function ConversationListItem({
     }
     navigate("Conversation", {
       topic: conversationTopic,
-      message: route.params?.frameURL,
+      message: routeParams?.frameURL,
     });
   }, [
-    conversationTopic,
-    isSplitScreen,
-    navigation,
-    route.params?.frameURL,
-    colorScheme,
     isGroupConversation,
     isBlockedChatView,
+    routeParams?.frameURL,
+    conversationTopic,
     allowGroup,
+    navigationRef,
+    isSplitScreen,
+    colorScheme,
   ]);
 
   useEffect(() => {
-    navigation.addListener("transitionEnd", resetSelected);
+    const navRef = navigationRef.current;
+    navRef?.addListener("transitionEnd", resetSelected);
     return () => {
-      navigation.removeListener("transitionEnd", resetSelected);
+      navRef?.removeListener("transitionEnd", resetSelected);
     };
-  }, [navigation, resetSelected]);
+  }, [navigationRef, resetSelected]);
 
   const avatarComponent = useMemo(() => {
     return isGroupConversation ? (
@@ -414,6 +417,10 @@ const ConversationListItem = memo(function ConversationListItem({
       </RectButton>
     );
   }, [showUnread, styles.leftAction, colorScheme]);
+
+  const onLongPress = useCallback(() => {
+    setPinnedConversations([conversationTopic]);
+  }, [conversationTopic, setPinnedConversations]);
 
   const rowItem =
     Platform.OS === "ios" || Platform.OS === "web" ? (

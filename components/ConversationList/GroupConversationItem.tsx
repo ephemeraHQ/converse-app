@@ -3,7 +3,6 @@ import { useGroupConsent } from "@hooks/useGroupConsent";
 import { translate } from "@i18n";
 import { useGroupNameQuery } from "@queries/useGroupNameQuery";
 import { useGroupPhotoQuery } from "@queries/useGroupPhotoQuery";
-import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { actionSheetColors } from "@styles/colors";
 import { showUnreadOnConversation } from "@utils/conversation/showUnreadOnConversation";
 import { FC, useCallback } from "react";
@@ -14,22 +13,15 @@ import {
   useCurrentAccount,
 } from "../../data/store/accountsStore";
 import { useSelect } from "../../data/store/storeHelpers";
-import { NavigationParamList } from "../../screens/Navigation/Navigation";
 import { ConversationWithLastMessagePreview } from "../../utils/conversation";
 import { conversationName } from "../../utils/str";
 import ConversationListItem from "../ConversationListItem";
 
-interface GroupConversationItemProps
-  extends NativeStackScreenProps<
-    NavigationParamList,
-    "Chats" | "ShareFrame" | "ChatsRequests" | "Blocked"
-  > {
+interface GroupConversationItemProps {
   conversation: ConversationWithLastMessagePreview;
 }
 
 export const GroupConversationItem: FC<GroupConversationItemProps> = ({
-  navigation,
-  route,
   conversation,
 }) => {
   const userAddress = useCurrentAccount() as string;
@@ -51,26 +43,14 @@ export const GroupConversationItem: FC<GroupConversationItemProps> = ({
     gcTime: Infinity,
   });
   const colorScheme = useColorScheme();
-  const {
-    initialLoadDoneOnce,
-    openedConversationTopic,
-    topicsData,
-    setPinnedConversations,
-  } = useChatStore(
-    useSelect([
-      "initialLoadDoneOnce",
-      "openedConversationTopic",
-      "topicsData",
-      "setPinnedConversations",
-    ])
-  );
-
-  const onLongPress = useCallback(() => {
-    // Prevent this for blocked chats
-    if (consent !== "denied") {
-      setPinnedConversations([conversation]);
-    }
-  }, [setPinnedConversations, conversation, consent]);
+  const { initialLoadDoneOnce, openedConversationTopic, topicsData } =
+    useChatStore(
+      useSelect([
+        "initialLoadDoneOnce",
+        "openedConversationTopic",
+        "topicsData",
+      ])
+    );
 
   const handleRemove = useCallback(
     (defaultAction: () => void) => {
@@ -148,9 +128,6 @@ export const GroupConversationItem: FC<GroupConversationItemProps> = ({
 
   return (
     <ConversationListItem
-      onLongPress={onLongPress}
-      navigation={navigation}
-      route={route}
       conversationPeerAddress={conversation.peerAddress}
       conversationPeerAvatar={groupPhoto}
       colorScheme={colorScheme}

@@ -1,3 +1,4 @@
+import { getGroupIdFromTopic, isGroupTopic } from "@utils/groupUtils/groupId";
 import logger from "@utils/logger";
 import { RemoteAttachmentContent } from "@xmtp/react-native-sdk";
 import isDeepEqual from "fast-deep-equal";
@@ -5,6 +6,7 @@ import { Platform } from "react-native";
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
 
+import { useSettingsStore } from "./accountsStore";
 import {
   TopicSpamScores,
   computeConversationsSpamScores,
@@ -162,7 +164,7 @@ export type ChatStoreType = {
   setSearchBarFocused: (focused: boolean) => void;
 
   setConversations: (conversations: XmtpConversation[]) => void;
-  setPinnedConversations: (conversations: XmtpConversation[]) => void;
+  setPinnedConversations: (conversationsTopics: string[]) => void;
 
   deleteConversations: (topics: string[]) => void;
   updateConversationTopic: (
@@ -329,25 +331,33 @@ export const initChatStore = (account: string) => {
                 lastUpdateAt: now(),
               };
             }),
-          setPinnedConversations: (conversationsToSet) =>
+          setPinnedConversations: (conversationsTopics: string[]) =>
             set((state) => {
-              const conversations = { ...state.conversations };
-              const pinnedConversations = state.pinnedConversations || [];
-
-              conversationsToSet.forEach((c) => {
+              const pinnedConversations = [
+                ...(state.pinnedConversations || []),
+              ];
+              conversationsTopics.forEach((topic) => {
                 const alreadyPinnedIndex = pinnedConversations.findIndex(
-                  (item) => item.topic === c.topic
+                  (item) => item.topic === topic
                 );
+                const isGroup = isGroupTopic(topic);
+                if (
+                  isGroup &&
+                  useSettingsStore.getState().groupStatus[
+                    getGroupIdFromTopic(topic)
+                  ] === "denied"
+                ) {
+                  return;
+                }
                 if (alreadyPinnedIndex !== -1) {
                   pinnedConversations.splice(alreadyPinnedIndex, 1);
                 } else {
-                  pinnedConversations.push(c);
+                  const conversation = state.conversations[topic];
+                  pinnedConversations.push(conversation);
                 }
               });
-
               return {
-                ...state,
-                conversations,
+                pinnedConversations,
               };
             }),
 
