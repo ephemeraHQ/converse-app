@@ -108,7 +108,11 @@ const ConversationListItem = memo(function ConversationListItem({
   const routeParams = useConversationListContext("routeParams");
   const navigationRef = useConversationListContext("navigationRef");
   const isBlockedChatView = routeName === "Blocked";
-  const { allowGroup } = useGroupConsent(conversationTopic);
+  const { allowGroup } = useGroupConsent(conversationTopic, {
+    refetchOnMount: false,
+    staleTime: Infinity,
+    gcTime: Infinity,
+  });
 
   const openConversation = useCallback(async () => {
     const getUserAction = async () => {
