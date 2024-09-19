@@ -9,6 +9,7 @@ import {
   SIDE_MARGIN,
   SPRING_CONFIGURATION,
 } from "@utils/contextMenu/constants";
+import { ConversationContext } from "@utils/conversation";
 import { BlurView } from "expo-blur";
 import React, { FC, memo, useEffect, useMemo } from "react";
 import {
@@ -31,6 +32,7 @@ import Animated, {
   withTiming,
 } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useContext } from "use-context-selector";
 const AnimatedBlurView =
   Platform.OS === "ios"
     ? Animated.createAnimatedComponent(BlurView)
@@ -59,6 +61,10 @@ const BackdropComponent: FC<{
   items,
   fromMe,
 }) => {
+  /* Portal is eating the context so passing down context values
+    If it causes too many rerenders we could just pass down a
+    few needed context values but painful to maintain */
+  const conversationContext = useContext(ConversationContext);
   const activeValue = useSharedValue(false);
   const opacityValue = useSharedValue(0);
   const intensityValue = useSharedValue(0);
@@ -218,35 +224,38 @@ const BackdropComponent: FC<{
 
   return (
     <Portal>
-      <GestureHandlerRootView style={styles.gestureHandlerContainer}>
-        <AnimatedBlurView
-          tint="default"
-          style={styles.flex}
-          animatedProps={animatedContainerProps}
-        >
-          <TouchableWithoutFeedback onPress={onClose}>
-            <Animated.View
-              style={[StyleSheet.absoluteFill, animatedInnerContainerStyle]}
-            >
-              <Animated.View style={animatedPortalStyle}>
-                {children}
+      {/* Portal is eating the context so passing down context values */}
+      <ConversationContext.Provider value={conversationContext}>
+        <GestureHandlerRootView style={styles.gestureHandlerContainer}>
+          <AnimatedBlurView
+            tint="default"
+            style={styles.flex}
+            animatedProps={animatedContainerProps}
+          >
+            <TouchableWithoutFeedback onPress={onClose}>
+              <Animated.View
+                style={[StyleSheet.absoluteFill, animatedInnerContainerStyle]}
+              >
+                <Animated.View style={animatedPortalStyle}>
+                  {children}
+                </Animated.View>
+                <Animated.View style={animatedAuxiliaryViewStyle}>
+                  {auxiliaryView}
+                </Animated.View>
+                <Animated.View style={animatedMenuStyle}>
+                  <TableView
+                    style={{
+                      // flex: 1,
+                      width: ITEM_WIDTH,
+                    }}
+                    items={items}
+                  />
+                </Animated.View>
               </Animated.View>
-              <Animated.View style={animatedAuxiliaryViewStyle}>
-                {auxiliaryView}
-              </Animated.View>
-              <Animated.View style={animatedMenuStyle}>
-                <TableView
-                  style={{
-                    // flex: 1,
-                    width: ITEM_WIDTH,
-                  }}
-                  items={items}
-                />
-              </Animated.View>
-            </Animated.View>
-          </TouchableWithoutFeedback>
-        </AnimatedBlurView>
-      </GestureHandlerRootView>
+            </TouchableWithoutFeedback>
+          </AnimatedBlurView>
+        </GestureHandlerRootView>
+      </ConversationContext.Provider>
     </Portal>
   );
 };
