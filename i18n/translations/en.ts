@@ -206,6 +206,8 @@ const en = {
   group_name: "GROUP NAME",
   group_description: "GROUP DESCRIPTION",
   upload_group_photo_error: "Error uploading group photo",
+  promote_to_admin_to_manage_group:
+    "After creating the group, you can promote anyone to admin to manage members and group info.",
 
   // Profile
   remove_from_group: "Remove from group",
