@@ -1,3 +1,4 @@
+import { useSelect } from "@data/store/storeHelpers";
 import { useGroupConsent } from "@hooks/useGroupConsent";
 import { translate } from "@i18n";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
@@ -72,7 +73,6 @@ type ConversationListItemProps = {
   showUnread: boolean;
   conversationOpened: boolean;
   isGroupConversation: boolean;
-  onLongPress?: () => void;
   onRightActionPress?: (defaultAction: () => void) => void;
 } & NativeStackScreenProps<
   NavigationParamList,
@@ -95,12 +95,13 @@ const ConversationListItem = memo(function ConversationListItem({
   showUnread,
   conversationOpened,
   isGroupConversation = false,
-  onLongPress,
   onRightActionPress,
 }: ConversationListItemProps) {
   const styles = getStyles(colorScheme);
   const timeToShow = getMinimalDate(conversationTime as number);
-  const setTopicsData = useChatStore((s) => s.setTopicsData);
+  const { setTopicsData, setPinnedConversations } = useChatStore(
+    useSelect(["setTopicsData", "setPinnedConversations"])
+  );
   const setPeersStatus = useSettingsStore((s) => s.setPeersStatus);
   const isSplitScreen = useIsSplitScreen();
   const [selected, setSelected] = useState(false);
@@ -414,6 +415,10 @@ const ConversationListItem = memo(function ConversationListItem({
       </RectButton>
     );
   }, [showUnread, styles.leftAction, colorScheme]);
+
+  const onLongPress = useCallback(() => {
+    setPinnedConversations([conversationTopic]);
+  }, [conversationTopic, setPinnedConversations]);
 
   const rowItem =
     Platform.OS === "ios" || Platform.OS === "web" ? (

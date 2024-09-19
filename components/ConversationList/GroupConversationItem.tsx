@@ -51,26 +51,14 @@ export const GroupConversationItem: FC<GroupConversationItemProps> = ({
     gcTime: Infinity,
   });
   const colorScheme = useColorScheme();
-  const {
-    initialLoadDoneOnce,
-    openedConversationTopic,
-    topicsData,
-    setPinnedConversations,
-  } = useChatStore(
-    useSelect([
-      "initialLoadDoneOnce",
-      "openedConversationTopic",
-      "topicsData",
-      "setPinnedConversations",
-    ])
-  );
-
-  const onLongPress = useCallback(() => {
-    // Prevent this for blocked chats
-    if (consent !== "denied") {
-      setPinnedConversations([conversation]);
-    }
-  }, [setPinnedConversations, conversation, consent]);
+  const { initialLoadDoneOnce, openedConversationTopic, topicsData } =
+    useChatStore(
+      useSelect([
+        "initialLoadDoneOnce",
+        "openedConversationTopic",
+        "topicsData",
+      ])
+    );
 
   const handleRemove = useCallback(
     (defaultAction: () => void) => {
@@ -148,7 +136,6 @@ export const GroupConversationItem: FC<GroupConversationItemProps> = ({
 
   return (
     <ConversationListItem
-      onLongPress={onLongPress}
       navigation={navigation}
       route={route}
       conversationPeerAddress={conversation.peerAddress}
