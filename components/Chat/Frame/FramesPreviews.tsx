@@ -31,6 +31,9 @@ export default function FramesPreviews({ message }: Props) {
   });
 
   const fetchTagsIfNeeded = useCallback(() => {
+    if (!tagsFetchedOnceForMessage.current) {
+      tagsFetchedOnceForMessage.current = {};
+    }
     if (!tagsFetchedOnceForMessage.current[message.id]) {
       tagsFetchedOnceForMessage.current[message.id] = true;
       fetchFramesForMessage(account, message).then(
