@@ -2,6 +2,7 @@ import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { FlashList } from "@shopify/flash-list";
 import { backgroundColor } from "@styles/colors";
 import { showUnreadOnConversation } from "@utils/conversation/showUnreadOnConversation";
+import { ConversationListContext } from "@utils/conversationList";
 import { useCallback, useEffect, useRef } from "react";
 import { Platform, StyleSheet, View, useColorScheme } from "react-native";
 
@@ -43,6 +44,10 @@ export default function ConversationFlashList({
   ListHeaderComponent,
   ListFooterComponent,
 }: Props) {
+  const navigationRef = useRef(navigation);
+  useEffect(() => {
+    navigationRef.current = navigation;
+  }, [navigation]);
   const styles = useStyles();
   const colorScheme = useColorScheme();
   const {
@@ -103,18 +108,10 @@ export default function ConversationFlashList({
         ? profiles[conversation.peerAddress]?.socials
         : undefined;
       if (conversation.isGroup) {
-        return (
-          <GroupConversationItem
-            conversation={conversation}
-            navigation={navigation}
-            route={route}
-          />
-        );
+        return <GroupConversationItem conversation={conversation} />;
       }
       return (
         <ConversationListItem
-          navigation={navigation}
-          route={route}
           conversationPeerAddress={conversation.peerAddress}
           conversationPeerAvatar={getPreferredAvatar(socials)}
           colorScheme={colorScheme}
@@ -152,46 +149,52 @@ export default function ConversationFlashList({
     [
       colorScheme,
       initialLoadDoneOnce,
-      navigation,
       openedConversationTopic,
       peersStatus,
-      route,
+      profiles,
       topicsData,
       userAddress,
-      profiles,
     ]
   );
   return (
-    <View style={styles.container}>
-      <View style={styles.conversationList}>
-        <FlashList
-          keyboardShouldPersistTaps="handled"
-          onMomentumScrollBegin={onScroll}
-          onScrollBeginDrag={onScroll}
-          alwaysBounceVertical={items.length > 0}
-          contentInsetAdjustmentBehavior="automatic"
-          data={items}
-          extraData={[
-            colorScheme,
-            navigation,
-            route,
-            userAddress,
-            initialLoadDoneOnce,
-            lastUpdateAt,
-          ]}
-          ref={(r) => {
-            if (r) {
-              listRef.current = r;
-            }
-          }}
-          renderItem={renderItem}
-          keyExtractor={keyExtractor}
-          estimatedItemSize={Platform.OS === "ios" ? 77 : 88}
-          ListHeaderComponent={ListHeaderComponent}
-          ListFooterComponent={ListFooterComponent}
-        />
+    <ConversationListContext.Provider
+      value={{
+        navigationRef,
+        routeName: route.name,
+        routeParams: route.params,
+      }}
+    >
+      <View style={styles.container}>
+        <View style={styles.conversationList}>
+          <FlashList
+            keyboardShouldPersistTaps="handled"
+            onMomentumScrollBegin={onScroll}
+            onScrollBeginDrag={onScroll}
+            alwaysBounceVertical={items.length > 0}
+            contentInsetAdjustmentBehavior="automatic"
+            data={items}
+            extraData={[
+              colorScheme,
+              navigation,
+              route,
+              userAddress,
+              initialLoadDoneOnce,
+              lastUpdateAt,
+            ]}
+            ref={(r) => {
+              if (r) {
+                listRef.current = r;
+              }
+            }}
+            renderItem={renderItem}
+            keyExtractor={keyExtractor}
+            estimatedItemSize={Platform.OS === "ios" ? 77 : 88}
+            ListHeaderComponent={ListHeaderComponent}
+            ListFooterComponent={ListFooterComponent}
+          />
+        </View>
       </View>
-    </View>
+    </ConversationListContext.Provider>
   );
 }
 
