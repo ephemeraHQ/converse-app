@@ -10,9 +10,9 @@ import {
 } from "../data/store/accountsStore";
 import { useLogoutFromConverse } from "../utils/logout";
 
-export const useDisconnectActionSheet = () => {
-  const account = useAccountsStore((s) => s.currentAccount);
-  const logout = useLogoutFromConverse(account);
+export const useDisconnectActionSheet = (account?: string) => {
+  const currentAccount = useAccountsStore((s) => s.currentAccount);
+  const logout = useLogoutFromConverse(account || currentAccount);
   const { ephemeralAccount } = useSettingsStore((s) => ({
     ephemeralAccount: s.ephemeralAccount,
   }));

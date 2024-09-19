@@ -58,7 +58,7 @@ export default function AccountSettingsButton({ account, navigation }: Props) {
   );
   const erroredAccountsMap = useErroredAccountsMap();
   const colorScheme = useColorScheme();
-  const showDisconnectActionSheet = useDisconnectActionSheet();
+  const showDisconnectActionSheet = useDisconnectActionSheet(account);
 
   const onPress = useCallback(() => {
     Keyboard.dismiss();
