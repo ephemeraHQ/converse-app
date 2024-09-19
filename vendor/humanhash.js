@@ -1,4 +1,6 @@
-﻿const wordlist = [
+﻿import { capitalize } from "../utils/str";
+
+const wordlist = [
   "ack",
   "alabama",
   "alanine",
@@ -257,7 +259,7 @@
   "zulu",
 ];
 
-export const humanize = function (digest, numWords, separator) {
+export const humanize = function (digest, numWords, separator, shouldCapitalize) {
   var chars,
     i,
     len,
@@ -268,7 +270,8 @@ export const humanize = function (digest, numWords, separator) {
 
   // defaults
   numWords = numWords || 4;
-  separator = separator || "-";
+  separator = (separator !== undefined && separator !== null) ? separator : "-";
+  shouldCapitalize = shouldCapitalize || false;
 
   if (!/^[a-fA-F0-9]+$/.test(digest)) {
     throw new Error("`digest` must be hexadecimal characters only.");
@@ -286,7 +289,7 @@ export const humanize = function (digest, numWords, separator) {
   compressedBytes = compress(bytes, numWords);
 
   for (var i = 0; i < numWords; i += 1) {
-    output.push(wordlist[compressedBytes[i]]);
+    output.push(shouldCapitalize ? capitalize(wordlist[compressedBytes[i]]) : wordlist[compressedBytes[i]]);
   }
 
   return output.join(separator);

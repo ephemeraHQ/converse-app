@@ -122,8 +122,9 @@ const en = {
     },
     inputs: {
       username: {
-        placeholder: "Identity (.converse.xyz)",
+        placeholder: "Username",
       },
+      usernameSuffix: ".converse.xyz",
       displayName: {
         placeholder: "Display name (optional)",
       },

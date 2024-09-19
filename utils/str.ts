@@ -77,6 +77,14 @@ export const conversationName = (
 export const formatGroupName = (topic: string, groupName?: string) =>
   groupName || capitalize(humanize(topic.slice(14, 46), 3, " "));
 
+export const formatEphemeralUsername = (address: string, username?: string) =>
+  username || humanize(address.slice(2, 42), 2, "");
+
+export const formatEphemeralDisplayName = (
+  address: string,
+  displayName?: string
+) => displayName || capitalize(humanize(address.slice(2, 42), 2, "", true));
+
 export const getTitleFontScale = (): number => {
   let titleFontScale = 1;
   const fontScale = PixelRatio.getFontScale();
