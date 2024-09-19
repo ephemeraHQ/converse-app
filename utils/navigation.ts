@@ -1,3 +1,4 @@
+import logger from "./logger";
 import { loadSavedNotificationMessagesToContext } from "./notifications";
 import { currentAccount, getChatStore } from "../data/store/accountsStore";
 import { XmtpConversation } from "../data/store/chatStore";
@@ -9,6 +10,11 @@ export const navigate = async <T extends keyof NavigationParamList>(
   screen: T,
   params?: NavigationParamList[T]
 ) => {
+  logger.debug(
+    `[Navigation] Navigating to ${screen} ${
+      params ? JSON.stringify(params) : ""
+    }`
+  );
   // Navigate to a screen in all navigators
   // like Linking.openURL but without redirect on web
   Object.values(converseNavigations).forEach((navigation) => {

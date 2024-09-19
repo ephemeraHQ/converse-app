@@ -79,9 +79,7 @@ export const fetchFramesForMessage = async (
     });
     const fetchedFrames: FrameWithType[] = [];
     if (urls.length > 0) {
-      logger.debug(
-        `[FramesMetadata] Found ${urls.length} URLs in message, fetching tags`
-      );
+      logger.debug(`[FramesMetadata] Fetching Open Graph tags for ${urls}`);
       const uniqueUrls = Array.from(new Set(urls));
       const framesClient = await getFramesClient(account);
       const urlsMetadata = await Promise.all(
