@@ -274,6 +274,9 @@ export type ConversationContextType = {
   setTransactionMode: (b: boolean) => void;
   frameTextInputFocused: boolean;
   setFrameTextInputFocused: (b: boolean) => void;
+  tagsFetchedOnceForMessage: MutableRefObject<{
+    [messageId: string]: boolean;
+  }>;
 };
 
 export const ConversationContext = createContext<ConversationContextType>({
@@ -288,6 +291,9 @@ export const ConversationContext = createContext<ConversationContextType>({
   setTransactionMode: () => {},
   frameTextInputFocused: false,
   setFrameTextInputFocused: () => {},
+  tagsFetchedOnceForMessage: createRef() as MutableRefObject<{
+    [messageId: string]: boolean;
+  }>,
 });
 
 export const useConversationContext = <K extends keyof ConversationContextType>(
