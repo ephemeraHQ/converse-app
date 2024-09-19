@@ -83,7 +83,7 @@ export const formatEphemeralUsername = (address: string, username?: string) =>
 export const formatEphemeralDisplayName = (
   address: string,
   displayName?: string
-) => displayName || capitalize(humanize(address.slice(2, 42), 2, "", true));
+) => displayName || humanize(address.slice(2, 42), 2, "", true);
 
 export const getTitleFontScale = (): number => {
   let titleFontScale = 1;
