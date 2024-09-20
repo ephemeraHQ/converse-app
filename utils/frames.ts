@@ -1,3 +1,4 @@
+import { debugEnabled } from "@components/DebugButton";
 import { OpenFramesProxy } from "@open-frames/proxy-client";
 import {
   GetMetadataResponse,
@@ -80,7 +81,9 @@ export const fetchFramesForMessage = async (
     const fetchedFrames: FrameWithType[] = [];
     if (urls.length > 0) {
       logger.debug(
-        `[FramesMetadata] Found ${urls.length} URLs in message, fetching tags`
+        `[FramesMetadata] Fetching Open Graph tags for ${
+          debugEnabled(account) ? urls : "<redacted>"
+        }`
       );
       const uniqueUrls = Array.from(new Set(urls));
       const framesClient = await getFramesClient(account);

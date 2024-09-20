@@ -1,4 +1,6 @@
+import Constants from "expo-constants";
 import path from "path";
+import { Platform } from "react-native";
 import * as RNFS from "react-native-fs";
 import {
   consoleTransport,
@@ -39,7 +41,15 @@ export const rotateLoggingFile = async () => {
   }
   const tempDir = RNFS.TemporaryDirectoryPath;
   loggingFilePath = path.join(tempDir, `${uuidv4()}.converse.log.txt`);
-  await RNFS.writeFile(loggingFilePath, "");
+  const appVersion = Constants.expoConfig?.version;
+  const buildNumber =
+    Platform.OS === "ios"
+      ? Constants.expoConfig?.ios?.buildNumber
+      : Constants.expoConfig?.android?.versionCode;
+  await RNFS.writeFile(
+    loggingFilePath,
+    `Converse ${Platform.OS} logs - v${appVersion} (${buildNumber})\n\n`
+  );
 };
 
 const converseTransport: transportFunctionType = async (props) => {
