@@ -2,6 +2,7 @@ import logger from "@utils/logger";
 import { In } from "typeorm/browser";
 
 import { upgradePendingConversationsIfNeeded } from "./pendingConversations";
+import { computeConversationsSpamScores } from "./spamScore";
 import {
   navigateToTopicWithRetry,
   topicToNavigateTo,
@@ -12,7 +13,10 @@ import { Conversation } from "../../db/entities/conversationEntity";
 import { upsertRepository } from "../../db/upsert";
 import { xmtpConversationToDb } from "../../mappers";
 import { getChatStore } from "../../store/accountsStore";
-import { XmtpConversation } from "../../store/chatStore";
+import {
+  XmtpConversation,
+  XmtpConversationWithUpdate,
+} from "../../store/chatStore";
 import { refreshProfilesIfNeeded } from "../profiles/profilesUpdate";
 
 export const saveConversations = async (
@@ -78,6 +82,17 @@ const setupAndSaveConversations = async (
   conversations.forEach((conversation) => {
     const alreadyConversationInDbWithTopic =
       alreadyConversationsByTopic[conversation.topic];
+
+    // If spam score is not computed, compute it
+    if (
+      conversation.spamScore === undefined ||
+      conversation.spamScore === null
+    ) {
+      logger.debug("Empty spam score, computing...");
+      computeConversationsSpamScores(account, [
+        conversation as XmtpConversationWithUpdate,
+      ]);
+    }
 
     conversation.readUntil =
       conversation.readUntil ||

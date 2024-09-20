@@ -110,6 +110,8 @@ const commands = {
         groupMembers: [peerAddress, myAddress],
         groupAdmins: [myAddress],
         groupSuperAdmins: [myAddress],
+        groupCreator: myAddress,
+        groupAddedBy: myAddress,
       });
 
       for (let messageIndex = 0; messageIndex < 10; messageIndex++) {

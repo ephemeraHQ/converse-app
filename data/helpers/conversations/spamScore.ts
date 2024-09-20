@@ -48,11 +48,8 @@ export const saveSpamScores = async (
 export const refreshAllSpamScores = async (account: string) => {
   const { conversations } = getChatStore(account).getState();
   const conversationsToScore = Object.values(conversations).filter(
-    (c) =>
-      c.messagesIds.length &&
-      (c.spamScore === undefined || c.spamScore === null)
+    (c) => c.spamScore === undefined || c.spamScore === null
   );
-
   if (conversationsToScore.length === 0) return;
   await computeConversationsSpamScores(account, conversationsToScore);
 };
@@ -61,21 +58,30 @@ export const computeConversationsSpamScores = async (
   account: string,
   conversations: XmtpConversationWithUpdate[]
 ) => {
-  // @todo => spam score for group convos??
-  const conversationsPeerAddresses = new Set(
+  const conversationsRequesterAddresses = new Set(
     conversations
-      .filter((c) => !!c.peerAddress)
-      .map((c) => c.peerAddress as string)
+      .filter((c) => !!c.peerAddress || !!c.groupAddedBy)
+      .map((c) => (c.isGroup ? c.groupAddedBy : (c.peerAddress as string)))
+      .filter((address): address is string => address !== undefined)
   );
   const sendersSpamScores = await getSendersSpamScores(
-    Array.from(conversationsPeerAddresses)
+    Array.from(conversationsRequesterAddresses)
   );
   const topicSpamScores: TopicSpamScores = {};
 
   conversations.forEach((conversation) => {
-    if (!conversation.peerAddress) return;
-    const senderSpamScore = sendersSpamScores[conversation.peerAddress];
-    if (!conversation.messagesIds.length && senderSpamScore) {
+    if (!(conversation.peerAddress || conversation.groupAddedBy)) return;
+
+    const senderKey = conversation.isGroup
+      ? conversation.groupAddedBy
+      : conversation.peerAddress;
+    if (!senderKey) return;
+
+    const senderSpamScore = sendersSpamScores[senderKey];
+    if (
+      !conversation.messagesIds.length &&
+      typeof senderSpamScore === "number"
+    ) {
       // Cannot score an empty conversation further, score is just the
       // sender spam score
       topicSpamScores[conversation.topic] = senderSpamScore;

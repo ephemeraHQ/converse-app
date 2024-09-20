@@ -55,6 +55,8 @@ export type XmtpDMConversation = XmtpConversationShared & {
   groupMembers?: undefined;
   groupAdmins?: undefined;
   groupPermissionLevel?: undefined;
+  groupCreator?: undefined;
+  groupAddedBy?: undefined;
 };
 
 export type XmtpGroupConversation = XmtpConversationShared & {

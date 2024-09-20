@@ -183,6 +183,8 @@ const en = {
   hidden_requests: "Hidden requests",
   suggestion_text:
     "Based on your onchain history, we've made some suggestions on who you may know.",
+  no_suggestions_text:
+    "You currently have no message requests. We'll make suggestions here as you connect with others.",
   hidden_requests_warn:
     "Requests containing messages that may be offensive or unwanted are moved to this folder.",
 
