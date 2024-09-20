@@ -88,6 +88,7 @@ const setupAndSaveConversations = async (
       conversation.spamScore === undefined ||
       conversation.spamScore === null
     ) {
+      logger.debug("Empty spam score, computing...");
       computeConversationsSpamScores(account, [
         conversation as XmtpConversationWithUpdate,
       ]);
