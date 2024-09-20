@@ -76,5 +76,10 @@ export const getPrivateKeyFromMnemonic = (mnemonic: string): Promise<string> =>
     });
   });
 
-export const getCleanAddress = (address: string) =>
-  getAddress(address.toLowerCase());
+export const getCleanAddress = (address: string) => {
+  const lowercased = address.toLowerCase();
+  if (isAddress(lowercased)) {
+    return getAddress(lowercased);
+  }
+  return address;
+};
