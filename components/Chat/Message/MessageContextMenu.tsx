@@ -1,4 +1,5 @@
 import TableView, { TableViewItemType } from "@components/TableView/TableView";
+import { backgroundColor } from "@styles/colors";
 import { calculateMenuHeight } from "@utils/contextMenu/calculateMenuHeight";
 import {
   AUXILIARY_VIEW_MIN_HEIGHT,
@@ -247,6 +248,11 @@ const BackdropComponent: FC<{
                     style={{
                       // flex: 1,
                       width: ITEM_WIDTH,
+                      backgroundColor:
+                        Platform.OS === "android"
+                          ? backgroundColor(colorScheme)
+                          : undefined,
+                      borderRadius: Platform.OS === "android" ? 10 : undefined,
                     }}
                     items={items}
                   />

@@ -52,4 +52,4 @@ export const contextMenuStyleGuide = {
 export const BACKDROP_LIGHT_BACKGROUND_COLOR =
   Platform.OS === "ios" ? "rgba(0,0,0,0.2)" : "rgba(19, 19, 19, 0.95)";
 export const BACKDROP_DARK_BACKGROUND_COLOR =
-  Platform.OS === "ios" ? "rgba(0,0,0,0.75)" : "rgba(0,0,0,0.95)";
+  Platform.OS === "ios" ? "rgba(0,0,0,0.75)" : "rgba(120,120,120,0.2)";

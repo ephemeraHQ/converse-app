@@ -376,7 +376,7 @@ const useStyles = (colorScheme: any, errorMessage: any) =>
     },
     usernameSuffixLabel: {
       position: "absolute",
-      right: 10,
+      right: Platform.OS === "ios" ? 10 : 46,
       top: 12,
       fontSize: 16,
       color: textSecondaryColor(colorScheme),
