@@ -25,6 +25,7 @@ import React, {
 } from "react";
 import {
   ColorSchemeName,
+  LayoutChangeEvent,
   Platform,
   StyleSheet,
   Text,
@@ -34,6 +35,7 @@ import {
 import { RectButton } from "react-native-gesture-handler";
 import Swipeable from "react-native-gesture-handler/Swipeable";
 import { TouchableRipple } from "react-native-paper";
+import { useSharedValue, useAnimatedRef } from "react-native-reanimated";
 
 import Avatar from "./Avatar";
 import GroupAvatar from "./GroupAvatar";
@@ -113,6 +115,26 @@ const ConversationListItem = memo(function ConversationListItem({
     staleTime: Infinity,
     gcTime: Infinity,
   });
+
+  const [isContextMenuVisible, setIsContextMenuVisible] = useState(false);
+  const itemRect = useSharedValue({ x: 0, y: 0, width: 0, height: 0 });
+  const containerRef = useAnimatedRef<View>();
+
+  const onLayoutView = useCallback(
+    (event: LayoutChangeEvent) => {
+      const { x, y, width, height } = event.nativeEvent.layout;
+      itemRect.value = { x, y, width, height };
+    },
+    [itemRect]
+  );
+
+  const showContextMenu = useCallback(() => {
+    setIsContextMenuVisible(true);
+  }, []);
+
+  const closeContextMenu = useCallback(() => {
+    setIsContextMenuVisible(false);
+  }, []);
 
   const openConversation = useCallback(async () => {
     const getUserAction = async () => {
@@ -418,6 +440,7 @@ const ConversationListItem = memo(function ConversationListItem({
     );
   }, [showUnread, styles.leftAction, colorScheme]);
 
+  // TODO: Move to context menu
   const onLongPress = useCallback(() => {
     setPinnedConversations([conversationTopic]);
   }, [conversationTopic, setPinnedConversations]);
