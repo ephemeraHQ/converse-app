@@ -4,8 +4,6 @@ import logger from "@utils/logger";
 import { getProfilesForAddresses } from "../../../utils/api";
 import { saveConversationIdentifiersForNotifications } from "../../../utils/notifications";
 import { getPreferredName, getProfile } from "../../../utils/profile";
-import { getRepository } from "../../db";
-import { upsertRepository } from "../../db/upsert";
 import { getChatStore, getProfilesStore } from "../../store/accountsStore";
 import { XmtpConversation } from "../../store/chatStore";
 import { ProfileSocials } from "../../store/profilesStore";
@@ -19,7 +17,6 @@ export const updateProfilesForConvos = async (
   account: string,
   profilesWithGroups: Map<string, XmtpConversation[]>
 ) => {
-  const profileRepository = await getRepository(account, "profile");
   const updates: ConversationHandlesUpdate[] = [];
   let batch: string[] = [];
   let rest = Array.from(profilesWithGroups.keys());
@@ -32,17 +29,6 @@ export const updateProfilesForConvos = async (
       Array.from(addressesSet)
     );
     const now = new Date().getTime();
-    // Save profiles to db
-    await upsertRepository(
-      profileRepository,
-      Object.keys(profilesByAddress).map((address) => ({
-        socials: JSON.stringify(profilesByAddress[address]),
-        updatedAt: now,
-        address,
-      })),
-      ["address"],
-      false
-    );
     // Dispatching the profile to state
     const socialsToDispatch: {
       [address: string]: { socials: ProfileSocials; updatedAt: number };
@@ -98,17 +84,6 @@ export const refreshProfileForAddress = async (
   const profilesByAddress = await getProfilesForAddresses([address]);
   // Save profiles to db
 
-  const profileRepository = await getRepository(account, "profile");
-  await upsertRepository(
-    profileRepository,
-    Object.keys(profilesByAddress).map((address) => ({
-      socials: JSON.stringify(profilesByAddress[address]),
-      updatedAt: now,
-      address,
-    })),
-    ["address"],
-    false
-  );
   getProfilesStore(account)
     .getState()
     .setProfiles({

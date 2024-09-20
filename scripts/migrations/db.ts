@@ -10,7 +10,6 @@ import { argv } from "process";
 import dataSource from "./datasource";
 import { Conversation } from "./entities/conversationEntity";
 import { Message } from "./entities/messageEntity";
-import { Profile } from "./entities/profileEntity";
 
 const ethAddress = (): string => {
   const wallet = ethers.Wallet.createRandom();
@@ -111,24 +110,6 @@ const commands = {
         groupMembers: [peerAddress, myAddress],
         groupAdmins: [myAddress],
         groupSuperAdmins: [myAddress],
-      });
-      await dataSource.getRepository(Profile).insert({
-        address: peerAddress,
-        socials: JSON.stringify({
-          ensNames: [
-            {
-              name: ensName(),
-              isPrimary: true,
-            },
-          ],
-          lensHandles: [
-            {
-              handle: lensHandle(),
-              isDefault: false,
-            },
-          ],
-          farcasterUsernames: [username()],
-        }),
       });
 
       for (let messageIndex = 0; messageIndex < 10; messageIndex++) {
