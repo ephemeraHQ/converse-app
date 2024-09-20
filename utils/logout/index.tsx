@@ -1,3 +1,4 @@
+import { deleteLibXmtpDatabaseForInboxId } from "@utils/fileSystem";
 import logger from "@utils/logger";
 import { ConverseXmtpClientType, dropXmtpClient } from "@utils/xmtpRN/client";
 import { getInboxId } from "@utils/xmtpRN/signIn";
@@ -154,6 +155,8 @@ export const logoutAccount = async (
       if (dropLocalDatabase) {
         await client.deleteLocalDatabase();
         logger.debug("[Logout] successfully deleted libxmp db");
+        // Manual delete database files
+        await deleteLibXmtpDatabaseForInboxId(client.inboxId);
       }
     } catch (error) {
       logger.warn("Could not get XMTP Client while logging out", {
