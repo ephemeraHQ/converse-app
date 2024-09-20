@@ -8,6 +8,7 @@ import {
   textSecondaryColor,
 } from "@styles/colors";
 import logger from "@utils/logger";
+import { getProfile } from "@utils/profile";
 import React, { useCallback, useRef, useState } from "react";
 import {
   Platform,
@@ -60,9 +61,10 @@ const LOADING_SENTENCES = Object.values(
 export const UserProfile = ({ onboarding, navigation }: Props) => {
   const address = useCurrentAccount() as string;
   const profiles = useProfilesStore((state) => state.profiles);
-  const currentUserUsername = profiles[address]?.socials?.userNames?.find(
-    (u) => u.isPrimary
-  );
+  const currentUserUsername = getProfile(
+    address,
+    profiles
+  )?.socials?.userNames?.find((u) => u.isPrimary);
 
   const [errorMessage, setErrorMessage] = useState("");
   const colorScheme = useColorScheme();

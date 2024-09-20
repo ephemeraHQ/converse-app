@@ -388,6 +388,7 @@ export const initChatStore = (account: string) => {
                   messages: oldMessages,
                   messagesIds: oldMessagesIds,
                   hasOneMessageFromMe: oldHasOneMessageFromMe,
+                  conversationTitle: existingConversation.conversationTitle,
                 };
                 newState.lastUpdateAt = now();
                 delete newState.conversations[oldTopic];

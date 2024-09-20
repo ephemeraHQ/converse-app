@@ -11,7 +11,11 @@ import {
 } from "../../data/store/accountsStore";
 import { evmHelpers } from "../../utils/evm/helpers";
 import { navigate } from "../../utils/navigation";
-import { getPreferredAvatar, getPreferredName } from "../../utils/profile";
+import {
+  getPreferredAvatar,
+  getPreferredName,
+  getProfile,
+} from "../../utils/profile";
 import Avatar from "../Avatar";
 import Button from "../Button/Button";
 
@@ -22,7 +26,7 @@ export default function ProfileSettingsButton() {
   const [stringSize, setStringSize] = useState(0);
   const account = currentAccount();
   const profiles = useProfilesStore((state) => state.profiles);
-  const socials = profiles[account]?.socials;
+  const socials = getProfile(account, profiles)?.socials;
 
   const openProfile = useCallback(() => {
     navigate("Profile", { address: currentAccount() });

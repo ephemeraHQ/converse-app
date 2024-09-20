@@ -14,7 +14,7 @@ import { getGroupMemberActions } from "@utils/groupUtils/getGroupMemberActions";
 import { sortGroupMembersByAdminStatus } from "@utils/groupUtils/sortGroupMembersByAdminStatus";
 import logger from "@utils/logger";
 import { navigate } from "@utils/navigation";
-import { getPreferredName } from "@utils/profile";
+import { getPreferredName, getProfile } from "@utils/profile";
 import { FC, useMemo } from "react";
 import { Alert, StyleSheet, Text, useColorScheme, View } from "react-native";
 
@@ -62,7 +62,7 @@ export const GroupScreenMembersTable: FC<GroupScreenMembersTableProps> = ({
       const isCurrentUser =
         a.address.toLowerCase() === currentAccount.toLowerCase();
       const preferredName = getPreferredName(
-        profiles[a.address]?.socials,
+        getProfile(a.address, profiles)?.socials,
         a.address
       );
       items.push({

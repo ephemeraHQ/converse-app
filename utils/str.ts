@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { Dimensions, PixelRatio, Platform, TextInput } from "react-native";
 
 import logger from "./logger";
-import { getPreferredName } from "./profile";
+import { getPreferredName, getProfile } from "./profile";
 import { getProfilesStore, useAccountsList } from "../data/store/accountsStore";
 import { XmtpConversation } from "../data/store/chatStore";
 import { ProfileSocials, ProfilesStoreType } from "../data/store/profilesStore";
@@ -89,8 +89,10 @@ export const getTitleFontScale = (): number => {
 export type TextInputWithValue = TextInput & { currentValue: string };
 
 export const getReadableProfile = (account: string, address: string) => {
-  const socials =
-    getProfilesStore(account).getState().profiles[address]?.socials;
+  const socials = getProfile(
+    address,
+    getProfilesStore(account).getState().profiles
+  )?.socials;
   return getPreferredName(socials, address);
 };
 
@@ -102,7 +104,7 @@ export const useAccountsProfiles = () => {
 
   const handleAccount = useCallback(
     (account: string, state: ProfilesStoreType) => {
-      const socials = state.profiles[account]?.socials;
+      const socials = getProfile(account, state.profiles)?.socials;
       const readableProfile = getPreferredName(socials, account);
 
       if (accountsProfiles[account] !== readableProfile) {

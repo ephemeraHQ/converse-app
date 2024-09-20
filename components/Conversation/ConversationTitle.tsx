@@ -26,7 +26,7 @@ import { XmtpConversation } from "../../data/store/chatStore";
 import { useGroupName } from "../../hooks/useGroupName";
 import { useGroupPhoto } from "../../hooks/useGroupPhoto";
 import { NavigationParamList } from "../../screens/Navigation/Navigation";
-import { getPreferredAvatar } from "../../utils/profile";
+import { getPreferredAvatar, getProfile } from "../../utils/profile";
 import { conversationName, getTitleFontScale } from "../../utils/str";
 import Avatar from "../Avatar";
 import { useDebugEnabled } from "../DebugButton";
@@ -59,7 +59,7 @@ export default function ConversationTitle({
       ? groupPhoto
       : getPreferredAvatar(
           conversation?.peerAddress
-            ? profiles[conversation.peerAddress]?.socials
+            ? getProfile(conversation.peerAddress, profiles)?.socials
             : undefined
         )
   );
@@ -87,7 +87,7 @@ export default function ConversationTitle({
         setTitle(conversationName(conversation));
       }
       if (!conversation.peerAddress) return;
-      const socials = profiles[conversation.peerAddress]?.socials;
+      const socials = getProfile(conversation.peerAddress, profiles)?.socials;
       setAvatar(getPreferredAvatar(socials));
     }
     conversationRef.current = conversation;

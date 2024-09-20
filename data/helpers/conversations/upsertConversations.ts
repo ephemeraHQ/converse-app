@@ -7,7 +7,7 @@ import {
   topicToNavigateTo,
 } from "../../../utils/navigation";
 import { saveConversationIdentifiersForNotifications } from "../../../utils/notifications";
-import { getPreferredName } from "../../../utils/profile";
+import { getPreferredName, getProfile } from "../../../utils/profile";
 import { getRepository } from "../../db";
 import { getExistingDataSource } from "../../db/datasource";
 import { Conversation } from "../../db/entities/conversationEntity";
@@ -82,9 +82,10 @@ const setupAndSaveConversations = async (
       alreadyConversationsByTopic[conversation.topic];
 
     if (!conversation.isGroup) {
-      const profileSocials =
-        getProfilesStore(account).getState().profiles[conversation.peerAddress]
-          ?.socials;
+      const profileSocials = getProfile(
+        conversation.peerAddress,
+        getProfilesStore(account).getState().profiles
+      )?.socials;
 
       conversation.conversationTitle = getPreferredName(
         profileSocials,

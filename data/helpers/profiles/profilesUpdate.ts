@@ -1,8 +1,9 @@
+import { getCleanAddress } from "@utils/eth";
 import logger from "@utils/logger";
 
 import { getProfilesForAddresses } from "../../../utils/api";
 import { saveConversationIdentifiersForNotifications } from "../../../utils/notifications";
-import { getPreferredName } from "../../../utils/profile";
+import { getPreferredName, getProfile } from "../../../utils/profile";
 import { getRepository } from "../../db";
 import { upsertRepository } from "../../db/upsert";
 import { getChatStore, getProfilesStore } from "../../store/accountsStore";
@@ -128,7 +129,7 @@ export const refreshProfilesIfNeeded = async (account: string) => {
     new Map();
   conversations.forEach((c) => {
     if (!c.isGroup) {
-      const existingProfile = knownProfiles[c.peerAddress];
+      const existingProfile = getProfile(c.peerAddress, knownProfiles);
       const lastProfileUpdate = existingProfile?.updatedAt || 0;
       const shouldUpdateProfile = now - lastProfileUpdate >= 24 * 3600 * 1000;
       if (shouldUpdateProfile) {
@@ -142,8 +143,9 @@ export const refreshProfilesIfNeeded = async (account: string) => {
         typeof c.groupMembers === "string"
           ? (c as any).groupMembers.split(",")
           : c.groupMembers;
-      groupMembers.forEach((memberAddress) => {
-        const existingProfile = knownProfiles[memberAddress];
+      groupMembers.forEach((_memberAddress) => {
+        const memberAddress = getCleanAddress(_memberAddress);
+        const existingProfile = getProfile(memberAddress, knownProfiles);
         const lastProfileUpdate = existingProfile?.updatedAt || 0;
         const shouldUpdateProfile = now - lastProfileUpdate >= 24 * 3600 * 1000;
         if (shouldUpdateProfile) {

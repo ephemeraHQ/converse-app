@@ -47,7 +47,7 @@ import { useKeyboardAnimation } from "../../utils/animations/keyboardAnimation";
 import { isAttachmentMessage } from "../../utils/attachment/helpers";
 import { useConversationContext } from "../../utils/conversation";
 import { converseEventEmitter } from "../../utils/events";
-import { getProfileData } from "../../utils/profile";
+import { getProfile, getProfileData } from "../../utils/profile";
 import { UUID_REGEX } from "../../utils/regex";
 import { isContentType } from "../../utils/xmtpRN/contentTypes";
 import { Recommendation } from "../Recommendations/Recommendation";
@@ -183,7 +183,7 @@ export default function Chat() {
   const peerSocials = useProfilesStore(
     useShallow((s) =>
       conversation?.peerAddress
-        ? s.profiles[conversation.peerAddress]?.socials
+        ? getProfile(conversation.peerAddress, s.profiles)?.socials
         : undefined
     )
   );

@@ -7,6 +7,7 @@ import {
   textPrimaryColor,
   textSecondaryColor,
 } from "@styles/colors";
+import { getProfile } from "@utils/profile";
 import * as Linking from "expo-linking";
 import { useCallback, useEffect, useState } from "react";
 import {
@@ -158,7 +159,7 @@ export default function Recommendations({
           recommendationData={frens[item]}
           navigation={navigation}
           isVisible={!!viewableItems[item]}
-          socials={profiles?.[item]?.socials}
+          socials={getProfile(item, profiles)?.socials}
           groupMode={groupMode}
           addToGroup={addToGroup}
         />
