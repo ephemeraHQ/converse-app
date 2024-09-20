@@ -20,7 +20,11 @@ import {
   useProfilesStore,
 } from "../../data/store/accountsStore";
 import { navigate } from "../../utils/navigation";
-import { getPreferredAvatar, getPreferredName } from "../../utils/profile";
+import {
+  getPreferredAvatar,
+  getPreferredName,
+  getProfile,
+} from "../../utils/profile";
 import GroupAvatar from "../GroupAvatar";
 
 interface Props {
@@ -38,7 +42,7 @@ export const PinnedConversation: FC<Props> = ({ conversation }) => {
     refetchOnMount: false,
   });
   const title = isGroup ? groupName : conversation.conversationTitle;
-  const socials = profiles[conversation.peerAddress as string]?.socials;
+  const socials = getProfile(conversation.peerAddress, profiles)?.socials;
   const avatar = isGroup ? groupPhoto : getPreferredAvatar(socials);
   const setPinnedConversations = useChatStore((s) => s.setPinnedConversations);
   const styles = useStyles();

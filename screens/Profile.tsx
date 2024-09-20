@@ -67,7 +67,11 @@ import {
   NotificationPermissionStatus,
   requestPushNotificationsPermissions,
 } from "../utils/notifications";
-import { getPreferredAvatar, getPreferredName } from "../utils/profile";
+import {
+  getPreferredAvatar,
+  getPreferredName,
+  getProfile,
+} from "../utils/profile";
 import { getIPFSAssetURI } from "../utils/thirdweb";
 import { refreshBalanceForAccount } from "../utils/wallet";
 import { consentToPeersOnProtocol } from "../utils/xmtpRN/conversations";
@@ -92,7 +96,7 @@ export default function ProfileScreen({
     (s) => s.peersStatus[peerAddress.toLowerCase()] === "blocked"
   );
   const setPeersStatus = useSettingsStore((s) => s.setPeersStatus);
-  const socials = profiles[peerAddress]?.socials;
+  const socials = getProfile(peerAddress, profiles)?.socials;
   const groupTopic = route.params.fromGroupTopic;
   const {
     members: groupMembers,

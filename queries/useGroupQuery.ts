@@ -1,4 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
+import { getCleanAddress } from "@utils/eth";
 import { getGroupIdFromTopic, isGroupTopic } from "@utils/groupUtils/groupId";
 import {
   ConverseXmtpClientType,
@@ -53,7 +54,7 @@ export const useGroupQuery = (account: string, topic: string) => {
           group.members,
           (member) => member.inboxId,
           // TODO: Multiple addresses support
-          (member) => member.addresses[0]
+          (member) => getCleanAddress(member.addresses[0])
         ),
         {
           updatedAt: groupDataUpdatedAt,

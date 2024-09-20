@@ -1,5 +1,6 @@
 import UserProfile from "@components/Onboarding/UserProfile";
 import { backgroundColor } from "@styles/colors";
+import { getProfile } from "@utils/profile";
 import { useCheckCurrentInstallation } from "@utils/xmtpRN/client";
 import { StatusBar } from "expo-status-bar";
 import React, { useCallback, useEffect, useRef } from "react";
@@ -39,7 +40,7 @@ export default function Main() {
   const colorScheme = useColorScheme();
   const userAddress = useCurrentAccount();
   const socials = useProfilesStore((s) =>
-    userAddress ? s.profiles[userAddress]?.socials : undefined
+    userAddress ? getProfile(userAddress, s.profiles)?.socials : undefined
   );
   const currentUserName = socials?.userNames?.find((e) => e.isPrimary);
   // const currentFarcaster = socials?.farcasterUsernames?.find(
