@@ -1,3 +1,4 @@
+import { getCleanAddress } from "@utils/eth";
 import { Member } from "@xmtp/react-native-sdk";
 import { InboxId } from "@xmtp/react-native-sdk/build/lib/Client";
 
@@ -24,7 +25,10 @@ export const getAddressIsAdmin = (
   members: EntityObjectWithAddress<Member, InboxId> | undefined,
   address: string
 ) => {
-  const currentId = members?.byAddress[address.toLowerCase()];
+  const currentId =
+    members?.byAddress[address] ||
+    members?.byAddress[getCleanAddress(address)] ||
+    members?.byAddress[address.toLowerCase()];
   if (!currentId) {
     return false;
   }
@@ -38,7 +42,10 @@ export const getAddressIsSuperAdmin = (
   members: EntityObjectWithAddress<Member> | undefined,
   address: string
 ) => {
-  const currentId = members?.byAddress[address.toLowerCase()];
+  const currentId =
+    members?.byAddress[address] ||
+    members?.byAddress[getCleanAddress(address)] ||
+    members?.byAddress[address.toLowerCase()];
   if (!currentId) {
     return false;
   }
