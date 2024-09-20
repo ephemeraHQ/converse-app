@@ -1,5 +1,6 @@
 import "reflect-metadata";
 
+import logger from "@utils/logger";
 import { getProfile } from "@utils/profile";
 
 import { getRepository } from "./db";
@@ -33,6 +34,10 @@ export const loadDataToContext = async (account: string) => {
     isActive: getTypeormBoolValue(c.isActive),
   }));
 
+  logger.debug(
+    `[InitialData] ${account}: Loading ${conversationsWithMessages.length} conversations from local db`
+  );
+
   const conversationsMessages: Message[][] = await Promise.all(
     conversationsWithMessages.map((c) =>
       messageRepository
@@ -46,6 +51,15 @@ export const loadDataToContext = async (account: string) => {
         .limit(50)
         .execute()
     )
+  );
+
+  const totalMessagesCount = conversationsMessages.reduce(
+    (count, conversation) => count + conversation.length,
+    0
+  );
+
+  logger.debug(
+    `[InitialData] ${account}: Loading ${totalMessagesCount} messages from local db`
   );
 
   conversationsWithMessages.forEach((conversation, index) => {

@@ -1,5 +1,4 @@
 import { getCleanAddress } from "./eth";
-import { getLensHandleFromConversationIdAndPeer } from "./lens";
 import { shortAddress } from "./str";
 import { ProfileByAddress, ProfileSocials } from "../data/store/profilesStore";
 import { RecommendationData } from "../data/store/recommendationsStore";
@@ -21,25 +20,14 @@ export const getProfileData = (
 
 export function getPreferredName(
   socials: ProfileSocials | undefined,
-  peerAddress: string,
-  conversationId?: string | null
+  peerAddress: string
 ): string {
-  const lensHandle =
-    conversationId && socials?.lensHandles
-      ? getLensHandleFromConversationIdAndPeer(
-          conversationId,
-          socials.lensHandles
-        ) || null
-      : null;
-
   const userName = socials?.userNames?.find((e) => e.isPrimary) || null;
   const ensName = socials?.ensNames?.find((e) => e.isPrimary) || null;
   const unsDomain =
     socials?.unstoppableDomains?.find((d) => d.isPrimary) || null;
 
-  if (lensHandle) {
-    return lensHandle;
-  } else if (userName) {
+  if (userName) {
     return userName.displayName || userName.name;
   } else if (ensName) {
     return ensName.displayName || ensName.name;

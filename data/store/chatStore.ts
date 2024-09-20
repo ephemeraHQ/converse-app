@@ -39,7 +39,6 @@ type XmtpConversationShared = {
   context?: XmtpConversationContext;
   messages: Map<string, XmtpMessage>;
   messagesIds: string[];
-  conversationTitle?: string | null;
   messageDraft?: string;
   mediaPreview?: MediaPreview;
   readUntil: number; // UNUSED
@@ -388,7 +387,6 @@ export const initChatStore = (account: string) => {
                   messages: oldMessages,
                   messagesIds: oldMessagesIds,
                   hasOneMessageFromMe: oldHasOneMessageFromMe,
-                  conversationTitle: existingConversation.conversationTitle,
                 };
                 newState.lastUpdateAt = now();
                 delete newState.conversations[oldTopic];

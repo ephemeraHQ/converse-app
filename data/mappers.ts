@@ -104,11 +104,7 @@ export const xmtpConversationFromDb = (
   }
 
   const conversationTitle = dbConversation.peerAddress
-    ? getPreferredName(
-        socials,
-        dbConversation.peerAddress,
-        dbConversation.contextConversationId
-      )
+    ? getPreferredName(socials, dbConversation.peerAddress)
     : undefined;
 
   const hasOneMessageFromMe = !!dbConversation.messages?.find(

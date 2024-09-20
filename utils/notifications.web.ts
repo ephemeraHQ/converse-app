@@ -1,7 +1,5 @@
 import * as Notifications from "expo-notifications";
 
-import { XmtpConversation } from "../data/store/chatStore";
-
 export type NotificationPermissionStatus =
   | "granted"
   | "undetermined"
@@ -24,10 +22,6 @@ export const requestPushNotificationsPermissions = async (): Promise<
 };
 
 export const loadSavedNotificationMessagesToContext = async () => {};
-
-export const saveConversationIdentifiersForNotifications = (
-  conversation: XmtpConversation
-) => {};
 
 export const onInteractWithNotification = (
   event: Notifications.NotificationResponse

@@ -72,19 +72,6 @@ func saveConversation(account: String, topic: String, peerAddress: String, creat
   mmkv?.set(encodedString!, forKey: "saved-notifications-conversations")
 }
 
-func getSavedConversationTitle(contentTopic: String)-> String {
-  let mmkv = getMmkv()
-  let conversationDictString = mmkv?.string(forKey: "conversation-\(contentTopic)")
-  if let data = conversationDictString?.data(using: .utf8) {
-    if let conversationDict = try! JSONSerialization.jsonObject(with: data, options: .allowFragments) as? [String: Any] {
-      let shortAddress = conversationDict["shortAddress"]
-      let title = conversationDict["title"]
-      return "\(title ?? shortAddress ?? "")"
-    }
-  }
-  return "";
-}
-
 func getPersistedConversation(xmtpClient: XMTP.Client, contentTopic: String) async -> XMTP.Conversation? {
   let secureMmkv = getSecureMmkvForAccount(account: xmtpClient.address)
   if let mmkv = secureMmkv {
