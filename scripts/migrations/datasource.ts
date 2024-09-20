@@ -33,6 +33,7 @@ import { AddIndexToSent1712656017130 } from "../../data/db/migrations/1712656017
 import { RemoveSentViaConverse1717625558678 } from "../../data/db/migrations/1717625558678-RemoveSentViaConverse";
 import { AddSuperAdmin1717631723249 } from "../../data/db/migrations/1717631723249-AddSuperAdmin";
 import { AddIsActive1721143963530 } from "../../data/db/migrations/1721143963530-addIsActive";
+import { AddGroupCreatorAndAddedBy1726807503232 } from "../../data/db/migrations/1726807503232-AddGroupCreatorAndAddedBy";
 
 const dataSource = new DataSource({
   database: path.join(__dirname, "converse-sample.sqlite"),
@@ -67,6 +68,7 @@ const dataSource = new DataSource({
     RemoveSentViaConverse1717625558678,
     AddSuperAdmin1717631723249,
     AddIsActive1721143963530,
+    AddGroupCreatorAndAddedBy1726807503232,
   ],
   type: "sqlite",
 });

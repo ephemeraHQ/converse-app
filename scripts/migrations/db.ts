@@ -111,6 +111,8 @@ const commands = {
         groupMembers: [peerAddress, myAddress],
         groupAdmins: [myAddress],
         groupSuperAdmins: [myAddress],
+        groupCreator: myAddress,
+        groupAddedBy: myAddress,
       });
       await dataSource.getRepository(Profile).insert({
         address: peerAddress,
