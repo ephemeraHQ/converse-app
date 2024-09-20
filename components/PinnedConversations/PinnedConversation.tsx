@@ -5,6 +5,7 @@ import { backgroundColor, textSecondaryColor } from "@styles/colors";
 import { AvatarSizes } from "@styles/sizes";
 import { ConversationWithLastMessagePreview } from "@utils/conversation";
 import { showUnreadOnConversation } from "@utils/conversation/showUnreadOnConversation";
+import { conversationName } from "@utils/str";
 import { FC, useCallback, useMemo } from "react";
 import {
   StyleSheet,
@@ -41,7 +42,7 @@ export const PinnedConversation: FC<Props> = ({ conversation }) => {
   const { data: groupPhoto } = useGroupPhotoQuery(account, topic, {
     refetchOnMount: false,
   });
-  const title = isGroup ? groupName : conversation.conversationTitle;
+  const title = isGroup ? groupName : conversationName(conversation);
   const socials = getProfile(conversation.peerAddress, profiles)?.socials;
   const avatar = isGroup ? groupPhoto : getPreferredAvatar(socials);
   const setPinnedConversations = useChatStore((s) => s.setPinnedConversations);

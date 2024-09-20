@@ -6,14 +6,12 @@ import {
   navigateToTopicWithRetry,
   topicToNavigateTo,
 } from "../../../utils/navigation";
-import { saveConversationIdentifiersForNotifications } from "../../../utils/notifications";
-import { getPreferredName, getProfile } from "../../../utils/profile";
 import { getRepository } from "../../db";
 import { getExistingDataSource } from "../../db/datasource";
 import { Conversation } from "../../db/entities/conversationEntity";
 import { upsertRepository } from "../../db/upsert";
 import { xmtpConversationToDb } from "../../mappers";
-import { getChatStore, getProfilesStore } from "../../store/accountsStore";
+import { getChatStore } from "../../store/accountsStore";
 import { XmtpConversation } from "../../store/chatStore";
 import { refreshProfilesIfNeeded } from "../profiles/profilesUpdate";
 
@@ -81,26 +79,12 @@ const setupAndSaveConversations = async (
     const alreadyConversationInDbWithTopic =
       alreadyConversationsByTopic[conversation.topic];
 
-    if (!conversation.isGroup) {
-      const profileSocials = getProfile(
-        conversation.peerAddress,
-        getProfilesStore(account).getState().profiles
-      )?.socials;
-
-      conversation.conversationTitle = getPreferredName(
-        profileSocials,
-        conversation.peerAddress,
-        conversation.context?.conversationId
-      );
-    }
-
     conversation.readUntil =
       conversation.readUntil ||
       alreadyConversationInDbWithTopic?.readUntil ||
       0;
 
     conversationsToUpsert.push(xmtpConversationToDb(conversation));
-    saveConversationIdentifiersForNotifications(conversation);
   });
 
   // Let's save by batch to avoid hermes issues

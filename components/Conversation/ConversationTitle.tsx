@@ -77,7 +77,7 @@ export default function ConversationTitle({
       conversation.peerAddress !== previousConversation.peerAddress ||
       conversation.context?.conversationId !==
         previousConversation.context?.conversationId ||
-      conversation.conversationTitle ||
+      conversationName(conversation) ||
       (previousConversation.isGroup &&
         conversation.isGroup &&
         previousConversation.groupName !== conversation.groupName)

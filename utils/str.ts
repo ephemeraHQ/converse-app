@@ -3,7 +3,11 @@ import { Dimensions, PixelRatio, Platform, TextInput } from "react-native";
 
 import logger from "./logger";
 import { getPreferredName, getProfile } from "./profile";
-import { getProfilesStore, useAccountsList } from "../data/store/accountsStore";
+import {
+  currentAccount,
+  getProfilesStore,
+  useAccountsList,
+} from "../data/store/accountsStore";
 import { XmtpConversation } from "../data/store/chatStore";
 import { ProfileSocials, ProfilesStoreType } from "../data/store/profilesStore";
 
@@ -47,7 +51,7 @@ export const addressPrefix = (address: string) =>
 
 export const conversationName = (
   conversation: XmtpConversation,
-  socials?: ProfileSocials
+  _socials?: ProfileSocials
 ) => {
   if (conversation.isGroup) {
     return (
@@ -56,25 +60,19 @@ export const conversationName = (
     );
   }
 
-  const short = shortAddress(conversation.peerAddress);
-
-  if (
-    conversation.conversationTitle &&
-    conversation.conversationTitle?.toLowerCase() !== short.toLowerCase()
-  ) {
-    return conversation.conversationTitle;
-  }
+  const socials =
+    _socials ||
+    getProfile(
+      conversation.peerAddress,
+      getProfilesStore(currentAccount()).getState().profiles
+    )?.socials;
 
   if (socials) {
     const preferredName = getPreferredName(socials, conversation.peerAddress);
-    if (preferredName && preferredName !== short) {
-      logger.error(
-        `1:1 conversation with ${conversation.peerAddress} has empty conversationTitle but it should not`
-      );
-      return preferredName;
-    }
+    return preferredName;
   }
 
+  const short = shortAddress(conversation.peerAddress);
   return short;
 };
 

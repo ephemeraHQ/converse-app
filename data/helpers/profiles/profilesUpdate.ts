@@ -1,9 +1,7 @@
 import { getCleanAddress } from "@utils/eth";
-import logger from "@utils/logger";
 
 import { getProfilesForAddresses } from "../../../utils/api";
-import { saveConversationIdentifiersForNotifications } from "../../../utils/notifications";
-import { getPreferredName, getProfile } from "../../../utils/profile";
+import { getProfile } from "../../../utils/profile";
 import { getChatStore, getProfilesStore } from "../../store/accountsStore";
 import { XmtpConversation } from "../../store/chatStore";
 import { ProfileSocials } from "../../store/profilesStore";
@@ -17,7 +15,6 @@ export const updateProfilesForConvos = async (
   account: string,
   profilesWithGroups: Map<string, XmtpConversation[]>
 ) => {
-  const updates: ConversationHandlesUpdate[] = [];
   let batch: string[] = [];
   let rest = Array.from(profilesWithGroups.keys());
 
@@ -40,40 +37,7 @@ export const updateProfilesForConvos = async (
       };
     }
     getProfilesStore(account).getState().setProfiles(socialsToDispatch);
-    const handleConversation = async (conversation: XmtpConversation) => {
-      if (conversation.isGroup) return;
-      const currentTitle = conversation.conversationTitle;
-      let updated = false;
-      try {
-        const profileForConversation =
-          profilesByAddress[conversation.peerAddress];
-
-        const newTitle = getPreferredName(
-          profileForConversation,
-          conversation.peerAddress,
-          conversation.context?.conversationId
-        );
-
-        if (newTitle !== currentTitle) {
-          updated = true;
-        }
-        conversation.conversationTitle = newTitle;
-      } catch (e) {
-        // Error (probably rate limited)
-        logger.warn("Could not resolve handles:", conversation.peerAddress, e);
-      }
-
-      updates.push({ conversation, updated });
-      saveConversationIdentifiersForNotifications(conversation);
-    };
-    const allGroups: XmtpConversation[] = [];
-    batch.forEach((address) => {
-      allGroups.push(...(profilesWithGroups.get(address) || []));
-    });
-    await Promise.all(allGroups.map(handleConversation));
   }
-
-  return updates;
 };
 
 export const refreshProfileForAddress = async (
@@ -134,17 +98,6 @@ export const refreshProfilesIfNeeded = async (account: string) => {
   });
 
   if (staleProfilesWithConversations.size > 0) {
-    updateProfilesForConvos(account, staleProfilesWithConversations).then(
-      (resolveResult) => {
-        const updatedConversations = resolveResult
-          .filter((r) => r.updated)
-          .map((r) => r.conversation);
-        if (updatedConversations.length > 0) {
-          getChatStore(account)
-            .getState()
-            .setConversations(updatedConversations);
-        }
-      }
-    );
+    updateProfilesForConvos(account, staleProfilesWithConversations);
   }
 };

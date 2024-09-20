@@ -11,8 +11,8 @@ import web3
 
 func getProfile(account: String, address: String) async -> Profile? {
   var profileState = getProfilesStore(account: account)?.state
-  var lowercasedAddress = address.lowercased()
-  var formattedAddress = EthereumAddress(lowercasedAddress).toChecksumAddress()
+  let lowercasedAddress = address.lowercased()
+  let formattedAddress = EthereumAddress(lowercasedAddress).toChecksumAddress()
   if let profile = profileState?.profiles?[address] ?? profileState?.profiles?[formattedAddress] ?? profileState?.profiles?[lowercasedAddress] {
     return profile
   }
