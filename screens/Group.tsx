@@ -73,7 +73,7 @@ export default function GroupScreen({
         topic={topic}
         groupPermissionLevel={group.groupPermissionLevel}
       />
-      <GroupScreenConsentTable topic={topic} />
+      <GroupScreenConsentTable topic={topic} groupName={group.groupName} />
       <View style={{ height: insets.bottom }} />
     </ScrollView>
   );

@@ -1,4 +1,5 @@
 import { actionSheetColors, textPrimaryColor } from "@styles/colors";
+import { translate } from "i18n-js";
 import {
   Keyboard,
   Platform,
@@ -81,8 +82,7 @@ export default function ChatPlaceholder({ messagesCount }: Props) {
                     options: ["Unblock", "Cancel"],
                     cancelButtonIndex: 1,
                     destructiveButtonIndex: isBlockedPeer ? undefined : 0,
-                    title:
-                      "If you unblock this contact, they will be able to send you messages again.",
+                    title: translate("if_you_unblock_contact"),
                     ...actionSheetColors(colorScheme),
                   },
                   (selectedIndex?: number) => {
