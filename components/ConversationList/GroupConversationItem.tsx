@@ -1,7 +1,6 @@
 import { useGroupConsent } from "@hooks/useGroupConsent";
 import { useGroupNameQuery } from "@queries/useGroupNameQuery";
 import { useGroupPhotoQuery } from "@queries/useGroupPhotoQuery";
-import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { showUnreadOnConversation } from "@utils/conversation/showUnreadOnConversation";
 import { groupRemoveRestoreHandler } from "@utils/groupUtils/groupActionHandlers";
 import { FC, useCallback } from "react";
@@ -57,7 +56,7 @@ export const GroupConversationItem: FC<GroupConversationItemProps> = ({
       colorScheme,
       groupName,
       allowGroup,
-      blockGroup,
+      blockGroup
     )((success: boolean) => {
       // If not successful, do nothing (user canceled)
     });
