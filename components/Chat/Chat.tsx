@@ -4,6 +4,7 @@ import {
   itemSeparatorColor,
   tertiaryBackgroundColor,
 } from "@styles/colors";
+import { getCleanAddress } from "@utils/eth";
 import differenceInCalendarDays from "date-fns/differenceInCalendarDays";
 import React, { useCallback, useEffect, useMemo, useRef } from "react";
 import {
@@ -228,7 +229,7 @@ export default function Chat() {
     conversation &&
     !isBlockedPeer &&
     (!conversation.isGroup ||
-      conversation.groupMembers.includes(xmtpAddress.toLowerCase()))
+      conversation.groupMembers.includes(getCleanAddress(xmtpAddress)))
   );
 
   const textInputStyle = useAnimatedStyle(
