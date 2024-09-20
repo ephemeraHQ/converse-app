@@ -47,7 +47,11 @@ import {
 } from "../../../utils/messageContent";
 import { navigate } from "../../../utils/navigation";
 import { LimitedMap } from "../../../utils/objects";
-import { getPreferredAvatar, getPreferredName } from "../../../utils/profile";
+import {
+  getPreferredAvatar,
+  getPreferredName,
+  getProfile,
+} from "../../../utils/profile";
 import { getMessageReactions } from "../../../utils/reactions";
 import { getReadableProfile } from "../../../utils/str";
 import { isTransactionMessage } from "../../../utils/transaction";
@@ -101,7 +105,9 @@ const MessageSender = ({ message }: { message: MessageToDisplay }) => {
   const address = useInboxIdStore(
     (s) => s.byInboxId[message.senderAddress]?.[0] ?? message.senderAddress
   );
-  const senderSocials = useProfilesStore((s) => s.profiles[address]?.socials);
+  const senderSocials = useProfilesStore(
+    (s) => getProfile(address, s.profiles)?.socials
+  );
   const styles = useStyles();
   return (
     <View style={styles.groupSenderWrapper}>
@@ -116,7 +122,9 @@ const MessageSenderAvatar = ({ message }: { message: MessageToDisplay }) => {
   const address = useInboxIdStore(
     (s) => s.byInboxId[message.senderAddress]?.[0] ?? message.senderAddress
   );
-  const senderSocials = useProfilesStore((s) => s.profiles[address]?.socials);
+  const senderSocials = useProfilesStore(
+    (s) => getProfile(address, s.profiles)?.socials
+  );
   const styles = useStyles();
   const openProfile = useCallback(() => {
     navigate("Profile", { address: message.senderAddress });

@@ -192,14 +192,17 @@ suspend fun handleOngoingConversationMessage(
         }
 
     val message = conversation.decode(envelope)
-    val contentTopic = envelope.contentTopic
-    var conversationTitle = getSavedConversationTitle(appContext, contentTopic)
+    var conversationTitle = ""
 
     val decodedMessageResult = handleMessageByContentType(
         appContext,
         message,
         xmtpClient,
     )
+
+    decodedMessageResult.senderAddress?.let {
+        conversationTitle = shortAddress(it)
+    }
 
     val senderProfile =
         decodedMessageResult.senderAddress?.let { getProfile(appContext, xmtpClient.address, it) }
@@ -210,7 +213,7 @@ suspend fun handleOngoingConversationMessage(
     }
 
     val shouldShowNotification = if (decodedMessageResult.senderAddress != xmtpClient.address && !decodedMessageResult.forceIgnore && decodedMessageResult.content != null) {
-        if (conversationTitle.isEmpty() && decodedMessageResult.senderAddress != null) {
+        if ((conversationTitle == null || conversationTitle!!.isEmpty()) && decodedMessageResult.senderAddress != null) {
             conversationTitle = shortAddress(decodedMessageResult.senderAddress)
         }
         true

@@ -13,7 +13,11 @@ import {
 } from "@styles/colors";
 import { AvatarSizes, BorderRadius, Paddings, Margins } from "@styles/sizes";
 import { favoritedEmojis } from "@utils/emojis/favoritedEmojis";
-import { getPreferredAvatar, getPreferredName } from "@utils/profile";
+import {
+  getPreferredAvatar,
+  getPreferredName,
+  getProfile,
+} from "@utils/profile";
 import {
   addReactionToMessage,
   getReactionContent,
@@ -69,7 +73,7 @@ const Item: FC<MessageReactionsItemProps> = ({ content, addresses, index }) => {
   const animatedValue = useSharedValue(0);
   const membersSocials = useProfilesStore((s) =>
     addresses.map((address) => {
-      const socials = s.profiles[address]?.socials;
+      const socials = getProfile(address, s.profiles)?.socials;
       return {
         address,
         uri: getPreferredAvatar(socials),

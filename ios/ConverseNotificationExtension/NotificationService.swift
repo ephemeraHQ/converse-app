@@ -209,8 +209,6 @@ class NotificationService: UNNotificationServiceExtension {
     sentryTrackMessage(message: "NOTIFICATION_TIMEOUT", extras: ["body": bestAttemptContent?.userInfo["body"]])
     if let contentHandler = contentHandler, let bestAttemptContent =  bestAttemptContent {
       if let body = bestAttemptContent.userInfo["body"] as? [String: Any], let contentTopic = body["contentTopic"] as? String {
-        let conversationTitle = getSavedConversationTitle(contentTopic: contentTopic);
-        bestAttemptContent.title = conversationTitle;
         incrementBadge(for: bestAttemptContent)
       }
       contentHandler(bestAttemptContent)
