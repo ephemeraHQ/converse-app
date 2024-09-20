@@ -39,7 +39,7 @@ import { AddIndexToSent1712656017130 } from "./migrations/1712656017130-addIndex
 import { RemoveSentViaConverse1717625558678 } from "./migrations/1717625558678-RemoveSentViaConverse";
 import { AddSuperAdmin1717631723249 } from "./migrations/1717631723249-AddSuperAdmin";
 import { AddIsActive1721143963530 } from "./migrations/1721143963530-addIsActive";
-
+import { AddGroupCreatorAndAddedBy1726807503232 } from "./migrations/1726807503232-AddGroupCreatorAndAddedBy";
 // We now use built in SQLite v3.45.1 from op-sqlite
 
 const dataSources: { [account: string]: DataSource } = {};
@@ -99,6 +99,7 @@ export const getDataSource = async (account: string) => {
       RemoveSentViaConverse1717625558678,
       AddSuperAdmin1717631723249,
       AddIsActive1721143963530,
+      AddGroupCreatorAndAddedBy1726807503232,
     ],
     type: "react-native",
     location: await getDbDirectory(),
