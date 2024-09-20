@@ -1,10 +1,8 @@
-import { showActionSheetWithOptions } from "@components/StateHandlers/ActionSheetStateHandler";
 import { useGroupConsent } from "@hooks/useGroupConsent";
-import { translate } from "@i18n";
 import { useGroupNameQuery } from "@queries/useGroupNameQuery";
 import { useGroupPhotoQuery } from "@queries/useGroupPhotoQuery";
-import { actionSheetColors } from "@styles/colors";
 import { showUnreadOnConversation } from "@utils/conversation/showUnreadOnConversation";
+import { groupRemoveRestoreHandler } from "@utils/groupUtils/groupActionHandlers";
 import { FC, useCallback } from "react";
 import { useColorScheme } from "react-native";
 
@@ -52,79 +50,17 @@ export const GroupConversationItem: FC<GroupConversationItemProps> = ({
       ])
     );
 
-  const handleRemove = useCallback(
-    (defaultAction: () => void) => {
-      const showOptions = (
-        options: string[],
-        title: string,
-        actions: (() => void)[]
-      ) => {
-        showActionSheetWithOptions(
-          {
-            options,
-            cancelButtonIndex: options.length - 1,
-            // Only show red buttons for destructive actions
-            destructiveButtonIndex: consent === "denied" ? undefined : [0, 1],
-            title,
-            ...actionSheetColors(colorScheme),
-          },
-          async (selectedIndex?: number) => {
-            if (selectedIndex !== undefined && selectedIndex < actions.length) {
-              actions[selectedIndex]();
-            } else {
-              defaultAction();
-            }
-          }
-        );
-      };
-
-      if (consent === "denied") {
-        showOptions(
-          [
-            translate("restore"),
-            translate("restore_and_unblock_inviter"),
-            translate("cancel"),
-          ],
-          `${translate("restore")} ${groupName}?`,
-          [
-            () =>
-              allowGroup({
-                includeAddedBy: false,
-                includeCreator: false,
-              }),
-            () =>
-              allowGroup({
-                includeAddedBy: true,
-                includeCreator: false,
-              }),
-          ]
-        );
-      } else {
-        // for allowed and unknown consent
-        showOptions(
-          [
-            translate("remove"),
-            translate("remove_and_block_inviter"),
-            translate("cancel"),
-          ],
-          `${translate("remove")} ${groupName}?`,
-          [
-            () =>
-              blockGroup({
-                includeAddedBy: false,
-                includeCreator: false,
-              }),
-            () =>
-              blockGroup({
-                includeAddedBy: true,
-                includeCreator: false,
-              }),
-          ]
-        );
-      }
-    },
-    [allowGroup, blockGroup, consent, colorScheme, groupName]
-  );
+  const handleRemoveRestore = useCallback(() => {
+    groupRemoveRestoreHandler(
+      consent,
+      colorScheme,
+      groupName,
+      allowGroup,
+      blockGroup
+    )((success: boolean) => {
+      // If not successful, do nothing (user canceled)
+    });
+  }, [consent, colorScheme, groupName, allowGroup, blockGroup]);
 
   return (
     <ConversationListItem
@@ -153,7 +89,7 @@ export const GroupConversationItem: FC<GroupConversationItemProps> = ({
         lastMessagePreview.message?.senderAddress === userAddress
       }
       conversationOpened={conversation.topic === openedConversationTopic}
-      onRightActionPress={handleRemove}
+      onRightActionPress={handleRemoveRestore}
       isGroupConversation
     />
   );

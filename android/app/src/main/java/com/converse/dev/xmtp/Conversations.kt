@@ -135,18 +135,6 @@ fun persistNewConversation(appContext:Context, account: String, conversation: Co
     }
 }
 
-fun getSavedConversationTitle(appContext: Context, topic: String): String {
-    try {
-        Log.d("PushNotificationsService", "Getting data conversation-$topic")
-        val mmkv = getMmkv(appContext)
-        val savedConversationDict = mmkv?.decodeString("conversation-$topic") ?: return ""
-        val parsedConversationDict = Klaxon().parse<ConversationDictData>(savedConversationDict)
-        return parsedConversationDict?.title ?: parsedConversationDict?.shortAddress ?: ""
-    } catch (e: Exception) {
-        return ""
-    }
-}
-
 suspend fun getNewGroup(xmtpClient: Client, contentTopic: String): Group? {
     return try {
         if (isGroupWelcomeTopic(contentTopic)) {

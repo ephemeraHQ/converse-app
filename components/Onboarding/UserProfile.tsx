@@ -8,6 +8,7 @@ import {
   textSecondaryColor,
 } from "@styles/colors";
 import logger from "@utils/logger";
+import { getProfile } from "@utils/profile";
 import React, { useCallback, useRef, useState } from "react";
 import {
   Platform,
@@ -24,7 +25,9 @@ import { refreshProfileForAddress } from "../../data/helpers/profiles/profilesUp
 import {
   useCurrentAccount,
   useProfilesStore,
+  useSettingsStore,
 } from "../../data/store/accountsStore";
+import { useSelect } from "../../data/store/storeHelpers";
 import { NavigationParamList } from "../../screens/Navigation/Navigation";
 import { checkUsernameValid, claimProfile } from "../../utils/api";
 import { uploadFile } from "../../utils/attachment";
@@ -35,7 +38,11 @@ import {
   pickMediaFromLibrary,
   takePictureFromCamera,
 } from "../../utils/media";
-import { useLoopTxt } from "../../utils/str";
+import {
+  useLoopTxt,
+  formatEphemeralUsername,
+  formatEphemeralDisplayName,
+} from "../../utils/str";
 import Avatar from "../Avatar";
 import Button from "../Button/Button";
 import { showActionSheetWithOptions } from "../StateHandlers/ActionSheetStateHandler";
@@ -60,20 +67,40 @@ const LOADING_SENTENCES = Object.values(
 export const UserProfile = ({ onboarding, navigation }: Props) => {
   const address = useCurrentAccount() as string;
   const profiles = useProfilesStore((state) => state.profiles);
-  const currentUserUsername = profiles[address]?.socials?.userNames?.find(
-    (u) => u.isPrimary
-  );
+  const currentUserUsername = getProfile(
+    address,
+    profiles
+  )?.socials?.userNames?.find((u) => u.isPrimary);
 
   const [errorMessage, setErrorMessage] = useState("");
   const colorScheme = useColorScheme();
   const styles = useStyles(colorScheme, errorMessage);
 
-  const [profile, setProfile] = useState({
-    username:
-      currentUserUsername?.name?.replace(config.usernameSuffix, "") || "",
+  const { ephemeralAccount } = useSettingsStore(
+    useSelect(["ephemeralAccount"])
+  );
+  const usernameWithoutSuffix = currentUserUsername?.name?.replace(
+    config.usernameSuffix,
+    ""
+  );
+  const defaultEphemeralUsername = formatEphemeralUsername(
+    address,
+    usernameWithoutSuffix
+  );
+  const defaultEphemeralDisplayName = formatEphemeralDisplayName(
+    address,
+    currentUserUsername?.displayName
+  );
+
+  const [profile, setProfile] = useState<ProfileType>({
+    username: ephemeralAccount
+      ? defaultEphemeralUsername
+      : usernameWithoutSuffix || "",
     avatar: currentUserUsername?.avatar || "",
-    displayName: currentUserUsername?.displayName || "",
-  } as ProfileType);
+    displayName: ephemeralAccount
+      ? defaultEphemeralDisplayName
+      : currentUserUsername?.displayName || "",
+  });
   const [loading, setLoading] = useState(false);
   const logout = useLogoutFromConverse(address);
 
@@ -269,6 +296,9 @@ export const UserProfile = ({ onboarding, navigation }: Props) => {
           autoCorrect={false}
           autoComplete="off"
         />
+        <Text style={styles.usernameSuffixLabel}>
+          {translate("userProfile.inputs.usernameSuffix")}
+        </Text>
         <TextInput
           style={[styles.profileInput, styles.displayNameInput]}
           onChangeText={(text) => {
@@ -343,6 +373,14 @@ const useStyles = (colorScheme: any, errorMessage: any) =>
           marginTop: 21,
         },
       }),
+    },
+    usernameSuffixLabel: {
+      position: "absolute",
+      right: 10,
+      top: 12,
+      fontSize: 16,
+      color: textSecondaryColor(colorScheme),
+      zIndex: 1,
     },
     p: {
       textAlign: "center",

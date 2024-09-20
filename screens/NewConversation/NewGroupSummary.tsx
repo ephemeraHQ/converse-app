@@ -35,7 +35,11 @@ import {
 import { usePhotoSelect } from "../../hooks/usePhotoSelect";
 import { uploadFile } from "../../utils/attachment";
 import { navigate } from "../../utils/navigation";
-import { getPreferredName, getPreferredAvatar } from "../../utils/profile";
+import {
+  getPreferredName,
+  getPreferredAvatar,
+  getProfile,
+} from "../../utils/profile";
 import { createGroup } from "../../utils/xmtpRN/conversations";
 import { useIsSplitScreen } from "../Navigation/navHelpers";
 
@@ -53,7 +57,7 @@ const getPendingGroupMembers = (
   const memberDetails = members.map((m) => ({
     address: m.address,
     uri: getPreferredAvatar(
-      useProfilesStore((s) => s.profiles[m.address ?? ""]?.socials)
+      useProfilesStore((s) => getProfile(m.address, s.profiles)?.socials)
     ),
     name: getPreferredName(m, m.address),
   }));
@@ -81,7 +85,7 @@ export default function NewGroupSummary({
     });
   const account = useCurrentAccount();
   const currentAccountSocials = useProfilesStore(
-    (s) => s.profiles[account ?? ""]?.socials
+    (s) => getProfile(account, s.profiles)?.socials
   );
   const { photo: groupPhoto, addPhoto: addGroupPhoto } = usePhotoSelect();
   const [

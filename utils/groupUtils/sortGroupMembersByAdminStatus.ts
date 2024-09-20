@@ -1,3 +1,4 @@
+import { getCleanAddress } from "@utils/eth";
 import { Member } from "@xmtp/react-native-sdk";
 import { InboxId } from "@xmtp/react-native-sdk/build/lib/Client";
 
@@ -49,6 +50,6 @@ export const sortGroupMembersByAdminStatus = (
   return groupMembers.map((inboxId) => ({
     inboxId,
     // TODO: Multiple address support
-    address: members.byId[inboxId].addresses[0],
+    address: getCleanAddress(members.byId[inboxId].addresses[0]),
   }));
 };

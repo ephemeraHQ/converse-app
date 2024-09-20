@@ -1,9 +1,11 @@
 import "reflect-metadata";
 
+import logger from "@utils/logger";
+import { getProfile } from "@utils/profile";
+
 import { getRepository } from "./db";
 import { Conversation } from "./db/entities/conversationEntity";
 import { Message } from "./db/entities/messageEntity";
-import { loadProfilesByAddress } from "./helpers/profiles";
 import { xmtpConversationFromDb } from "./mappers";
 import { getChatStore, getProfilesStore } from "./store/accountsStore";
 import { saveXmtpEnv, saveApiURI } from "../utils/sharedData";
@@ -32,6 +34,10 @@ export const loadDataToContext = async (account: string) => {
     isActive: getTypeormBoolValue(c.isActive),
   }));
 
+  logger.debug(
+    `[InitialData] ${account}: Loading ${conversationsWithMessages.length} conversations from local db`
+  );
+
   const conversationsMessages: Message[][] = await Promise.all(
     conversationsWithMessages.map((c) =>
       messageRepository
@@ -47,6 +53,15 @@ export const loadDataToContext = async (account: string) => {
     )
   );
 
+  const totalMessagesCount = conversationsMessages.reduce(
+    (count, conversation) => count + conversation.length,
+    0
+  );
+
+  logger.debug(
+    `[InitialData] ${account}: Loading ${totalMessagesCount} messages from local db`
+  );
+
   conversationsWithMessages.forEach((conversation, index) => {
     // If no limit => ASC then no reverse
     conversation.messages = conversationsMessages[index]
@@ -59,8 +74,7 @@ export const loadDataToContext = async (account: string) => {
       .reverse();
   });
 
-  const profilesByAddress = await loadProfilesByAddress(account);
-  getProfilesStore(account).getState().setProfiles(profilesByAddress);
+  const profilesByAddress = getProfilesStore(account).getState().profiles;
   getChatStore(account)
     .getState()
     .setConversations(
@@ -68,7 +82,9 @@ export const loadDataToContext = async (account: string) => {
         xmtpConversationFromDb(
           account,
           c,
-          c.peerAddress ? profilesByAddress[c.peerAddress]?.socials : undefined
+          c.peerAddress
+            ? getProfile(c.peerAddress, profilesByAddress)?.socials
+            : undefined
         )
       )
     );

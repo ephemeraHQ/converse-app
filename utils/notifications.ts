@@ -24,9 +24,7 @@ import {
   emptySavedNotificationsMessages,
   loadSavedNotificationsConversations,
   loadSavedNotificationsMessages,
-  saveConversationDict,
 } from "./sharedData";
-import { conversationName, shortAddress } from "./str";
 import { ConverseXmtpClientType } from "./xmtpRN/client";
 import { loadConversationsHmacKeys } from "./xmtpRN/conversations";
 import { getXmtpClient } from "./xmtpRN/sync";
@@ -44,7 +42,7 @@ import {
   useAccountsStore,
 } from "../data/store/accountsStore";
 import { useAppStore } from "../data/store/appStore";
-import { XmtpConversation, XmtpMessage } from "../data/store/chatStore";
+import { XmtpMessage } from "../data/store/chatStore";
 
 let nativePushToken: string | null;
 
@@ -463,21 +461,6 @@ export const loadSavedNotificationMessagesToContext = async () => {
     emptySavedNotificationsMessages();
     loadingSavedNotifications = false;
   }
-};
-
-export const saveConversationIdentifiersForNotifications = (
-  conversation: XmtpConversation
-) => {
-  const conversationDict: any = {
-    peerAddress: conversation.peerAddress,
-    shortAddress: conversation.peerAddress
-      ? shortAddress(conversation.peerAddress)
-      : undefined,
-    title: conversationName(conversation),
-  };
-
-  // Also save to shared preferences to be able to show notification
-  saveConversationDict(conversation.topic, conversationDict);
 };
 
 export const onInteractWithNotification = (

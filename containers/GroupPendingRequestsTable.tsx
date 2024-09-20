@@ -7,7 +7,7 @@ import { useAddToGroupMutation } from "@queries/useAddToGroupMutation";
 import { invalidatePendingJoinRequestsQuery } from "@queries/usePendingRequestsQuery";
 import { actionSheetColors, textSecondaryColor } from "@styles/colors";
 import { updateGroupJoinRequestStatus } from "@utils/api";
-import { getPreferredName } from "@utils/profile";
+import { getPreferredName, getProfile } from "@utils/profile";
 import { FC, useMemo } from "react";
 import { StyleSheet, Text, useColorScheme, View } from "react-native";
 
@@ -37,7 +37,7 @@ export const GroupPendingRequestsTable: FC<GroupPendingRequestsTableProps> = ({
       const address = a[0];
       const request = a[1];
       const preferredName = getPreferredName(
-        profiles[address]?.socials,
+        getProfile(address, profiles)?.socials,
         address
       );
       items.push({

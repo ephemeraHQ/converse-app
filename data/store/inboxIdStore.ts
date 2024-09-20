@@ -1,3 +1,4 @@
+import { getCleanAddress } from "@utils/eth";
 import { Member } from "@xmtp/react-native-sdk";
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
@@ -72,7 +73,8 @@ export const initInboxIdStore = (account: string) => {
                 const addresses = new Set(
                   newState.byInboxId[member.inboxId] ?? []
                 );
-                for (const address of member.addresses) {
+                for (const _address of member.addresses) {
+                  const address = getCleanAddress(_address);
                   newState.byAddress[address] = member.inboxId;
                   addresses.add(address);
                 }

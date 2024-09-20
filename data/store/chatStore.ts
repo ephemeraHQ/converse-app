@@ -39,7 +39,6 @@ type XmtpConversationShared = {
   context?: XmtpConversationContext;
   messages: Map<string, XmtpMessage>;
   messagesIds: string[];
-  conversationTitle?: string | null;
   messageDraft?: string;
   mediaPreview?: MediaPreview;
   readUntil: number; // UNUSED

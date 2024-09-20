@@ -7,6 +7,7 @@ import com.android.volley.toolbox.JsonObjectRequest
 import com.android.volley.toolbox.Volley
 import com.beust.klaxon.Klaxon
 import kotlinx.coroutines.suspendCancellableCoroutine
+import org.web3j.crypto.Keys
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 
@@ -14,18 +15,22 @@ import kotlin.coroutines.resumeWithException
 suspend fun getProfile(appContext: Context, account: String, address: String): Profile? {
 
     var profileState = getProfilesStore(appContext, account)?.state
+    var lowercasedAddress = address.lowercase()
+    var formattedAddress = Keys.toChecksumAddress(address)
     profileState?.profiles?.get(address)?.let { return it }
+    profileState?.profiles?.get(formattedAddress)?.let { return it }
+    profileState?.profiles?.get(lowercasedAddress)?.let { return it }
 
     // If profile is nil, let's refresh it
     try {
-        refreshProfileFromBackend(appContext, account, address)
+        refreshProfileFromBackend(appContext, account, formattedAddress)
     } catch (e: Exception) {
         // Handle exception if needed
     }
 
     profileState = getProfilesStore(appContext, account)?.state
 
-    return profileState?.profiles?.get(address)
+    return profileState?.profiles?.get(formattedAddress)
 }
 
 suspend fun refreshProfileFromBackend(appContext: Context, account: String, address: String) {

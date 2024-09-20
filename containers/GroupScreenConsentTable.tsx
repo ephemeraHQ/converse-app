@@ -1,6 +1,7 @@
 import { useGroupConsent } from "@hooks/useGroupConsent";
 import { translate } from "@i18n";
 import { dangerColor, primaryColor } from "@styles/colors";
+import { groupRemoveRestoreHandler } from "@utils/groupUtils/groupActionHandlers";
 import { FC, useMemo } from "react";
 import { useColorScheme } from "react-native";
 
@@ -10,50 +11,63 @@ import TableView, {
 
 interface GroupScreenConsentTableProps {
   topic: string;
+  groupName?: string;
 }
 
 export const GroupScreenConsentTable: FC<GroupScreenConsentTableProps> = ({
   topic,
+  groupName,
 }) => {
   const colorScheme = useColorScheme();
   const { consent, allowGroup, blockGroup } = useGroupConsent(topic);
 
   const consentTableViewItems = useMemo(() => {
     const items: TableViewItemType[] = [];
-    if (consent !== "allowed") {
+
+    if (consent === "denied") {
       items.push({
-        id: "allow_group",
-        title: translate("allow_group"),
+        id: "restore_group",
+        title: translate("restore_group"),
         titleColor: primaryColor(colorScheme),
         action: () => {
-          allowGroup({
-            includeAddedBy: false,
-            includeCreator: false,
+          groupRemoveRestoreHandler(
+            consent,
+            colorScheme,
+            groupName,
+            allowGroup,
+            blockGroup
+          )((success: boolean) => {
+            // If not successful, do nothing (user canceled)
           });
         },
       });
-    }
-    if (consent !== "denied") {
+    } else {
+      // consent is "allowed", "unknown" or undefined
       items.push({
-        id: "block_group",
-        title: translate("block_group"),
+        id: "remove_group",
+        title: translate("remove_group"),
         titleColor: dangerColor(colorScheme),
         action: () => {
-          blockGroup({
-            includeAddedBy: false,
-            includeCreator: false,
+          groupRemoveRestoreHandler(
+            consent,
+            colorScheme,
+            groupName,
+            allowGroup,
+            blockGroup
+          )((success: boolean) => {
+            // If not successful, do nothing (user canceled)
           });
         },
       });
     }
 
     return items;
-  }, [consent, allowGroup, blockGroup, colorScheme]);
+  }, [consent, allowGroup, blockGroup, colorScheme, groupName]);
 
   return (
     <TableView
       items={consentTableViewItems}
-      title={translate("consent_title")}
+      title={translate("actions_title")}
     />
   );
 };

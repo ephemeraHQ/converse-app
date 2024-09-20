@@ -21,7 +21,7 @@ import {
   ConversationFlatListItem,
   ConversationWithLastMessagePreview,
 } from "../utils/conversation";
-import { getPreferredAvatar } from "../utils/profile";
+import { getPreferredAvatar, getProfile } from "../utils/profile";
 import { conversationName } from "../utils/str";
 
 type Props = {
@@ -105,7 +105,7 @@ export default function ConversationFlashList({
       const conversation = item as ConversationWithLastMessagePreview;
       const lastMessagePreview = conversation.lastMessagePreview;
       const socials = conversation.peerAddress
-        ? profiles[conversation.peerAddress]?.socials
+        ? getProfile(conversation.peerAddress, profiles)?.socials
         : undefined;
       if (conversation.isGroup) {
         return <GroupConversationItem conversation={conversation} />;

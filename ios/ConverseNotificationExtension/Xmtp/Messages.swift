@@ -58,7 +58,13 @@ func handleNewConversationFirstMessage(xmtpClient: XMTP.Client, apiURI: String?,
             print("[NotificationExtension] Not showing a notification")
             break
           } else if let content = decodedMessageResult.content {
-            bestAttemptContent.title = shortAddress(address: try conversation.peerAddress)
+            let senderAddress = try conversation.peerAddress
+            let conversationTitle: String? = nil
+            if let senderProfile = await getProfile(account: xmtpClient.address, address: senderAddress) {
+              bestAttemptContent.title = getPreferredName(address: senderAddress, socials: senderProfile.socials)
+            } else {
+              bestAttemptContent.title = shortAddress(address: senderAddress)
+            }
             bestAttemptContent.body = content
             shouldShowNotification = true
             messageId = decodedMessageResult.id // @todo probably remove this?
@@ -198,7 +204,7 @@ func handleGroupMessage(xmtpClient: XMTP.Client, envelope: XMTP.Envelope, apiURI
 func handleOngoingConversationMessage(xmtpClient: XMTP.Client, envelope: XMTP.Envelope, bestAttemptContent: inout UNMutableNotificationContent, body: [String: Any]) async -> (shouldShowNotification: Bool, messageId: String?, messageIntent: INSendMessageIntent?) {
   var shouldShowNotification = false
   let contentTopic = envelope.contentTopic
-  var conversationTitle = getSavedConversationTitle(contentTopic: contentTopic)
+  var conversationTitle: String? = nil
   var messageId: String? = nil
   var messageIntent: INSendMessageIntent? = nil
   
@@ -206,7 +212,7 @@ func handleOngoingConversationMessage(xmtpClient: XMTP.Client, envelope: XMTP.En
   // If couldn't decode the message, not showing
   if let message = decodedMessage {
     let decodedMessageResult = handleMessageByContentType(decodedMessage: message, xmtpClient: xmtpClient);
-    
+
     if decodedMessageResult.senderAddress == xmtpClient.address || decodedMessageResult.forceIgnore {
       // Message is from me or a reaction removal, let's drop it
       print("[NotificationExtension] Not showing a notification")
@@ -218,11 +224,14 @@ func handleOngoingConversationMessage(xmtpClient: XMTP.Client, envelope: XMTP.En
         conversationTitle = getPreferredName(address: senderAddress, socials: senderProfile.socials)
         senderAvatar = getPreferredAvatar(socials: senderProfile.socials)
       }
-    
-      if conversationTitle.isEmpty, let senderAddress = decodedMessageResult.senderAddress {
+      
+      if (conversationTitle == nil), let senderAddress = decodedMessageResult.senderAddress {
         conversationTitle = shortAddress(address: senderAddress)
       }
-      bestAttemptContent.title = conversationTitle
+      if let convoTitle = conversationTitle {
+        bestAttemptContent.title = convoTitle
+      }
+      
       shouldShowNotification = true
       messageId = decodedMessageResult.id
       messageIntent = getIncoming1v1MessageIntent(topic: envelope.contentTopic, senderId: decodedMessage?.senderAddress ?? "", senderName: bestAttemptContent.title, senderAvatar: senderAvatar, content: bestAttemptContent.body)

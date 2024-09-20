@@ -31,6 +31,7 @@ import {
   getPreferredUsername,
   getPreferredName,
   getPreferredAvatar,
+  getProfile,
 } from "../../utils/profile";
 import NewConversationButton from "../ConversationList/NewConversationButton";
 
@@ -48,7 +49,9 @@ const ChatNullState: React.FC<ChatNullStateProps> = ({
   const colorScheme = useColorScheme();
   const styles = useStyles();
 
-  const socials = useProfilesStore((s) => s.profiles[currentAccount]?.socials);
+  const socials = useProfilesStore(
+    (s) => getProfile(currentAccount, s.profiles)?.socials
+  );
   const username = getPreferredUsername(socials);
   const displayName = getPreferredName(socials, currentAccount);
   const profileUrl = `https://${config.websiteDomain}/dm/${

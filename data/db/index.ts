@@ -11,7 +11,6 @@ import {
 } from "./datasource";
 import { Conversation } from "./entities/conversationEntity";
 import { Message } from "./entities/messageEntity";
-import { Profile } from "./entities/profileEntity";
 import config from "../../config";
 import { sentryTrackError, sentryTrackMessage } from "../../utils/sentry";
 import {
@@ -24,7 +23,6 @@ const env = config.xmtpEnv as "dev" | "production" | "local";
 type RepositoriesForAccount = {
   conversation: Repository<Conversation>;
   message: Repository<Message>;
-  profile: Repository<Profile>;
 };
 
 const repositories: {
@@ -85,12 +83,12 @@ export const initDb = async (account: string): Promise<void> => {
     try {
       logger.debug(`Running migrations for ${account}`);
       await waitUntilAppActive(1500);
-      await dataSource.runMigrations();
+      const migrationsResult = await dataSource.runMigrations();
       logger.debug(`Migrations done for ${account}`);
+      console.log(migrationsResult);
       repositories[account] = {
         conversation: dataSource.getRepository(Conversation),
         message: dataSource.getRepository(Message),
-        profile: dataSource.getRepository(Profile),
       };
     } catch (e: any) {
       logger.error(e, { account, message: "Error running migrations" });

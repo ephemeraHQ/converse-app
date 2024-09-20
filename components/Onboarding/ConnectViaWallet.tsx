@@ -66,7 +66,6 @@ export default function ConnectViaWallet({
   );
   const [onXmtp, setOnXmtp] = useState(false);
   const [alreadyV3Db, setAlreadyV3Db] = useState(false);
-  const styles = useStyles();
   const thirdwebWallet = useActiveWallet();
   const thirdwebAccount = useActiveAccount();
   const [thirdwebSigner, setThirdwebSigner] = useState<Signer | undefined>();
@@ -167,7 +166,9 @@ export default function ConnectViaWallet({
           setOnXmtp(isOnNetwork);
           const inboxId = await getInboxId(a);
           const v3Dbs = await getDatabaseFilesForInboxId(inboxId);
-          setAlreadyV3Db(v3Dbs.length > 0);
+          setAlreadyV3Db(
+            v3Dbs.filter((n) => n.name.endsWith(".db3")).length > 0
+          );
           setSigner(thirdwebSigner);
           setLoading(false);
           logger.debug(
