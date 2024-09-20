@@ -172,7 +172,7 @@ const useStyles = (showTerms: boolean) => {
     backButton: {
       paddingVertical: 8,
       marginTop: insets.top,
-      width: Platform.OS === "android" ? 40 : undefined,
+      width: Platform.OS === "android" ? 100 : undefined,
       marginLeft: Platform.OS === "android" ? 10 : undefined,
     },
     picto: {
