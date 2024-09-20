@@ -2,8 +2,12 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { Dimensions, PixelRatio, Platform, TextInput } from "react-native";
 
 import logger from "./logger";
-import { getPreferredName } from "./profile";
-import { getProfilesStore, useAccountsList } from "../data/store/accountsStore";
+import { getPreferredName, getProfile } from "./profile";
+import {
+  currentAccount,
+  getProfilesStore,
+  useAccountsList,
+} from "../data/store/accountsStore";
 import { XmtpConversation } from "../data/store/chatStore";
 import { ProfileSocials, ProfilesStoreType } from "../data/store/profilesStore";
 
@@ -47,7 +51,7 @@ export const addressPrefix = (address: string) =>
 
 export const conversationName = (
   conversation: XmtpConversation,
-  socials?: ProfileSocials
+  _socials?: ProfileSocials
 ) => {
   if (conversation.isGroup) {
     return (
@@ -55,27 +59,33 @@ export const conversationName = (
       capitalize(humanize(conversation.topic.slice(14, 46), 3, " "))
     );
   }
-  if (conversation.conversationTitle) {
-    return conversation.conversationTitle;
-  }
 
-  const short = shortAddress(conversation.peerAddress);
+  const socials =
+    _socials ||
+    getProfile(
+      conversation.peerAddress,
+      getProfilesStore(currentAccount()).getState().profiles
+    )?.socials;
 
   if (socials) {
     const preferredName = getPreferredName(socials, conversation.peerAddress);
-    if (preferredName && preferredName !== short) {
-      logger.error(
-        `1:1 conversation with ${conversation.peerAddress} has empty conversationTitle but it should not`
-      );
-      return preferredName;
-    }
+    return preferredName;
   }
 
+  const short = shortAddress(conversation.peerAddress);
   return short;
 };
 
 export const formatGroupName = (topic: string, groupName?: string) =>
   groupName || capitalize(humanize(topic.slice(14, 46), 3, " "));
+
+export const formatEphemeralUsername = (address: string, username?: string) =>
+  username || humanize(address.slice(2, 42), 2, "");
+
+export const formatEphemeralDisplayName = (
+  address: string,
+  displayName?: string
+) => displayName || humanize(address.slice(2, 42), 2, "", true);
 
 export const getTitleFontScale = (): number => {
   let titleFontScale = 1;
@@ -89,8 +99,10 @@ export const getTitleFontScale = (): number => {
 export type TextInputWithValue = TextInput & { currentValue: string };
 
 export const getReadableProfile = (account: string, address: string) => {
-  const socials =
-    getProfilesStore(account).getState().profiles[address]?.socials;
+  const socials = getProfile(
+    address,
+    getProfilesStore(account).getState().profiles
+  )?.socials;
   return getPreferredName(socials, address);
 };
 
@@ -102,7 +114,7 @@ export const useAccountsProfiles = () => {
 
   const handleAccount = useCallback(
     (account: string, state: ProfilesStoreType) => {
-      const socials = state.profiles[account]?.socials;
+      const socials = getProfile(account, state.profiles)?.socials;
       const readableProfile = getPreferredName(socials, account);
 
       if (accountsProfiles[account] !== readableProfile) {

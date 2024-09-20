@@ -5,7 +5,6 @@ import { DataSource } from "typeorm";
 
 import { Conversation } from "./entities/conversationEntity";
 import { Message } from "./entities/messageEntity";
-import { Profile } from "./entities/profileEntity";
 import { init1671623489366 } from "../../data/db/migrations/1671623489366-init";
 import { addLensHandle1671788934503 } from "../../data/db/migrations/1671788934503-addLensHandle";
 import { addEnsName1673277126468 } from "../../data/db/migrations/1673277126468-addEnsName";
@@ -34,10 +33,11 @@ import { RemoveSentViaConverse1717625558678 } from "../../data/db/migrations/171
 import { AddSuperAdmin1717631723249 } from "../../data/db/migrations/1717631723249-AddSuperAdmin";
 import { AddIsActive1721143963530 } from "../../data/db/migrations/1721143963530-addIsActive";
 import { AddGroupCreatorAndAddedBy1726807503232 } from "../../data/db/migrations/1726807503232-AddGroupCreatorAndAddedBy";
+import { RemoveProfile1726828413530 } from "../../data/db/migrations/1726828413530-removeProfileDb";
 
 const dataSource = new DataSource({
   database: path.join(__dirname, "converse-sample.sqlite"),
-  entities: [Conversation, Message, Profile],
+  entities: [Conversation, Message],
   synchronize: false,
   migrationsRun: false,
   migrations: [
@@ -69,6 +69,7 @@ const dataSource = new DataSource({
     AddSuperAdmin1717631723249,
     AddIsActive1721143963530,
     AddGroupCreatorAndAddedBy1726807503232,
+    RemoveProfile1726828413530,
   ],
   type: "sqlite",
 });

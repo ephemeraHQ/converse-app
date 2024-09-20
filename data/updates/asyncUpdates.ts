@@ -1,9 +1,8 @@
 import logger from "@utils/logger";
-import { Platform } from "react-native";
+import Constants from "expo-constants";
 
 import { setConsent } from "./001-setConsent";
 import { setTopicsData } from "./002-setTopicsData";
-import appJson from "../../app.json";
 import { getAccountsList, getSettingsStore } from "../store/accountsStore";
 import { useAppStore } from "../store/appStore";
 
@@ -28,15 +27,10 @@ const waitForAsyncUpdatesToFinish = async () => {
 
 export const updateLastVersionOpen = () => {
   logger.debug(
-    `[Async Updates] Last version open: ${
-      useAppStore.getState().lastVersionOpen
-    }`
+    `Last version opened: ${useAppStore.getState().lastVersionOpen}`
   );
-  const version =
-    Platform.OS === "ios"
-      ? appJson.expo.ios.version
-      : appJson.expo.android.version;
-  useAppStore.getState().setLastVersionOpen(version);
+  const appVersion = Constants.expoConfig?.version;
+  useAppStore.getState().setLastVersionOpen(appVersion || "");
 };
 
 export const runAsyncUpdates = async () => {

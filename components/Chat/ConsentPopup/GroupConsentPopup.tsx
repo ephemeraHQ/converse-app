@@ -5,11 +5,8 @@ import { useGroupMembers } from "@hooks/useGroupMembers";
 import { translate } from "@i18n";
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import {
-  actionSheetColors,
-  backgroundColor,
-  textPrimaryColor,
-} from "@styles/colors";
+import { backgroundColor, textPrimaryColor } from "@styles/colors";
+import { groupRemoveRestoreHandler } from "@utils/groupUtils/groupActionHandlers";
 import { getGroupIdFromTopic } from "@utils/groupUtils/groupId";
 import React, { useCallback, useMemo } from "react";
 import { StyleSheet, Text, useColorScheme, View } from "react-native";
@@ -21,7 +18,6 @@ import {
 import { NavigationParamList } from "../../../screens/Navigation/Navigation";
 import { useConversationContext } from "../../../utils/conversation";
 import Button from "../../Button/Button";
-import { showActionSheetWithOptions } from "../../StateHandlers/ActionSheetStateHandler";
 
 export function GroupConsentPopup() {
   const conversation = useConversationContext("conversation");
@@ -62,25 +58,19 @@ export function GroupConsentPopup() {
     !isCreator;
 
   const onBlock = useCallback(() => {
-    showActionSheetWithOptions(
-      {
-        options: [translate("block"), translate("cancel")],
-        cancelButtonIndex: 1,
-        destructiveButtonIndex: 0,
-        title: translate("if_you_unblock_group"),
-        ...actionSheetColors(colorScheme),
-      },
-      (selectedIndex?: number) => {
-        if (selectedIndex === 0) {
-          blockGroup({
-            includeCreator: false,
-            includeAddedBy: false,
-          });
-          navigation.pop();
-        }
+    groupRemoveRestoreHandler(
+      "unknown", // To display "Remove & Block inviter"
+      colorScheme,
+      conversation.groupName,
+      allowGroup,
+      blockGroup
+    )((success: boolean) => {
+      if (success) {
+        navigation.pop();
       }
-    );
-  }, [blockGroup, colorScheme, navigation]);
+      // If not successful, do nothing (user canceled)
+    });
+  }, [blockGroup, allowGroup, conversation.groupName, colorScheme, navigation]);
 
   const onAccept = useCallback(() => {
     allowGroup({

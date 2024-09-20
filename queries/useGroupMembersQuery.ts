@@ -3,6 +3,7 @@ import {
   SetDataOptions,
   useQuery,
 } from "@tanstack/react-query";
+import { getCleanAddress } from "@utils/eth";
 import { Member } from "@xmtp/react-native-sdk";
 import { InboxId } from "@xmtp/react-native-sdk/build/lib/Client";
 
@@ -18,7 +19,7 @@ export const useGroupMembersQuery = (
   topic: string,
   queryOptions?: Partial<QueryObserverOptions<GroupMembersSelectData>>
 ) => {
-  const { data: group, dataUpdatedAt } = useGroupQuery(account, topic);
+  const { data: group } = useGroupQuery(account, topic);
   return useQuery<GroupMembersSelectData>({
     queryKey: groupMembersQueryKey(account, topic),
     queryFn: async () => {
@@ -34,7 +35,7 @@ export const useGroupMembersQuery = (
         updatedMembers,
         (member) => member.inboxId,
         // TODO: Multiple addresses support
-        (member) => member.addresses[0]
+        (member) => getCleanAddress(member.addresses[0])
       );
     },
     enabled: !!group,

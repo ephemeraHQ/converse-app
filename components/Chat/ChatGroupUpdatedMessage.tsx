@@ -8,7 +8,7 @@ import {
   useInboxIdStore,
   useProfilesStore,
 } from "../../data/store/accountsStore";
-import { getPreferredName } from "../../utils/profile";
+import { getPreferredName, getProfile } from "../../utils/profile";
 
 export default function ChatGroupUpdatedMessage({
   message,
@@ -27,7 +27,7 @@ export default function ChatGroupUpdatedMessage({
   // TODO: Feat: handle multiple members
   const initiatedByAddress = byInboxId[parsedContent.initiatedByInboxId]?.[0];
   const initiatedByReadableName = getPreferredName(
-    profiles[initiatedByAddress]?.socials,
+    getProfile(initiatedByAddress, profiles)?.socials,
     initiatedByAddress
   );
   const membersActions: string[] = [];
@@ -37,7 +37,7 @@ export default function ChatGroupUpdatedMessage({
     // We haven't synced yet the members
     if (!firstAddress) return;
     const readableName = getPreferredName(
-      profiles[firstAddress]?.socials,
+      getProfile(firstAddress, profiles)?.socials,
       firstAddress
     );
     membersActions.push(`${readableName} joined the conversation`);
@@ -48,7 +48,7 @@ export default function ChatGroupUpdatedMessage({
     // We haven't synced yet the members
     if (!firstAddress) return;
     const readableName = getPreferredName(
-      profiles[firstAddress]?.socials,
+      getProfile(firstAddress, profiles)?.socials,
       firstAddress
     );
     membersActions.push(`${readableName} left the conversation`);

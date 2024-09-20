@@ -1,4 +1,5 @@
 import { actionSheetColors, textPrimaryColor } from "@styles/colors";
+import { translate } from "i18n-js";
 import {
   Keyboard,
   Platform,
@@ -17,7 +18,7 @@ import {
 } from "../../../data/store/accountsStore";
 import { useConversationContext } from "../../../utils/conversation";
 import { sendMessage } from "../../../utils/message";
-import { getProfileData } from "../../../utils/profile";
+import { getProfile, getProfileData } from "../../../utils/profile";
 import { conversationName } from "../../../utils/str";
 import { consentToPeersOnProtocol } from "../../../utils/xmtpRN/conversations";
 import ActivityIndicator from "../../ActivityIndicator/ActivityIndicator";
@@ -41,7 +42,7 @@ export default function ChatPlaceholder({ messagesCount }: Props) {
   );
   const peerSocials = useProfilesStore((s) =>
     conversation?.peerAddress
-      ? s.profiles[conversation.peerAddress]?.socials
+      ? getProfile(conversation.peerAddress, s.profiles)?.socials
       : undefined
   );
   const profileData = getProfileData(recommendationData, peerSocials);
@@ -81,8 +82,7 @@ export default function ChatPlaceholder({ messagesCount }: Props) {
                     options: ["Unblock", "Cancel"],
                     cancelButtonIndex: 1,
                     destructiveButtonIndex: isBlockedPeer ? undefined : 0,
-                    title:
-                      "If you unblock this contact, they will be able to send you messages again.",
+                    title: translate("if_you_unblock_contact"),
                     ...actionSheetColors(colorScheme),
                   },
                   (selectedIndex?: number) => {

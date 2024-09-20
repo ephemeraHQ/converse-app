@@ -7,14 +7,12 @@ import {
   navigateToTopicWithRetry,
   topicToNavigateTo,
 } from "../../../utils/navigation";
-import { saveConversationIdentifiersForNotifications } from "../../../utils/notifications";
-import { getPreferredName } from "../../../utils/profile";
 import { getRepository } from "../../db";
 import { getExistingDataSource } from "../../db/datasource";
 import { Conversation } from "../../db/entities/conversationEntity";
 import { upsertRepository } from "../../db/upsert";
 import { xmtpConversationToDb } from "../../mappers";
-import { getChatStore, getProfilesStore } from "../../store/accountsStore";
+import { getChatStore } from "../../store/accountsStore";
 import {
   XmtpConversation,
   XmtpConversationWithUpdate,
@@ -95,25 +93,12 @@ const setupAndSaveConversations = async (
       ]);
     }
 
-    if (!conversation.isGroup) {
-      const profileSocials =
-        getProfilesStore(account).getState().profiles[conversation.peerAddress]
-          ?.socials;
-
-      conversation.conversationTitle = getPreferredName(
-        profileSocials,
-        conversation.peerAddress,
-        conversation.context?.conversationId
-      );
-    }
-
     conversation.readUntil =
       conversation.readUntil ||
       alreadyConversationInDbWithTopic?.readUntil ||
       0;
 
     conversationsToUpsert.push(xmtpConversationToDb(conversation));
-    saveConversationIdentifiersForNotifications(conversation);
   });
 
   // Let's save by batch to avoid hermes issues

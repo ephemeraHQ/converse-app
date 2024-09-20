@@ -122,8 +122,9 @@ const en = {
     },
     inputs: {
       username: {
-        placeholder: "Identity (.converse.xyz)",
+        placeholder: "Username",
       },
+      usernameSuffix: ".converse.xyz",
       displayName: {
         placeholder: "Display name (optional)",
       },
@@ -196,8 +197,6 @@ const en = {
     "If you unblock this contact, they will be able to send you messages again.",
   if_you_block_contact:
     "If you block this contact, you will not receive messages from them anymore",
-  if_you_unblock_group:
-    "If you unblock this group, you will be able to receive messages from it.",
   opening_conversation: "Opening your conversation",
   say_hi: "Say hi",
   do_you_trust_this_contact: "Do you trust this contact?",
@@ -266,9 +265,9 @@ const en = {
   change_profile_picture: "Change profile picture",
   add_profile_picture: "Add profile picture",
   add_description: "Add a description",
-  allow_group: "Allow group",
-  block_group: "Block group",
-  consent_title: "CONSENT",
+  restore_group: "Restore group",
+  remove_group: "Remove group",
+  actions_title: "ACTIONS",
   members_title: "MEMBERS",
   pending_approval_title: "PENDING APPROVAL",
   group_invite_link_created_copied: "Invite link created and copied!",

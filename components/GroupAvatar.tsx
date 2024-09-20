@@ -23,7 +23,11 @@ import {
   useCurrentAccount,
 } from "../data/store/accountsStore";
 import { useGroupMembers } from "../hooks/useGroupMembers";
-import { getPreferredAvatar, getPreferredName } from "../utils/profile";
+import {
+  getPreferredAvatar,
+  getPreferredName,
+  getProfile,
+} from "../utils/profile";
 
 const MAIN_CIRCLE_RADIUS = 50;
 const MAX_VISIBLE_MEMBERS = 4;
@@ -156,7 +160,7 @@ const GroupAvatar: React.FC<GroupAvatarProps> = ({
       (acc: { address: string; uri?: string; name?: string }[], id) => {
         const member = groupMembers.byId[id];
         const address = member.addresses[0].toLowerCase();
-        const senderSocials = profiles[address]?.socials;
+        const senderSocials = getProfile(address, profiles)?.socials;
         const shouldExclude =
           excludeSelf && account && address === account.toLowerCase();
         if (shouldExclude) return acc;

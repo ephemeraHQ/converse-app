@@ -58,7 +58,6 @@ const protocolConversationToStateConversation = (
     : undefined,
   messages: new Map(),
   messagesIds: [],
-  conversationTitle: undefined,
   messageDraft: undefined,
   mediaPreview: undefined,
   readUntil: 0,
@@ -83,7 +82,7 @@ const protocolGroupToStateConversation = (
       group.members,
       (member) => member.inboxId,
       // TODO: Multiple addresses support
-      (member) => member.addresses[0]
+      (member) => getCleanAddress(member.addresses[0])
     )
   );
   const groupMembersAddresses: string[] = [];
@@ -92,14 +91,15 @@ const protocolGroupToStateConversation = (
   let groupAddedBy: string | undefined;
 
   group.members.forEach((m) => {
-    if (m.addresses[0]) {
-      groupMembersAddresses.push(m.addresses[0]);
-    }
-    if (m.inboxId === group.creatorInboxId) {
-      groupCreator = m.addresses[0];
-    }
-    if (m.inboxId === groupAddedByInboxId) {
-      groupAddedBy = m.addresses[0];
+    const firstAddress = getCleanAddress(m.addresses[0]);
+    if (firstAddress) {
+      groupMembersAddresses.push(firstAddress);
+      if (m.inboxId === group.creatorInboxId) {
+        groupCreator = firstAddress;
+      }
+      if (m.inboxId === groupAddedByInboxId) {
+        groupAddedBy = firstAddress;
+      }
     }
   });
   return {
@@ -108,7 +108,6 @@ const protocolGroupToStateConversation = (
     createdAt: group.createdAt,
     messages: new Map(),
     messagesIds: [],
-    conversationTitle: undefined,
     messageDraft: undefined,
     mediaPreview: undefined,
     readUntil: 0,
@@ -197,6 +196,22 @@ const handleNewConversation = async (
   setOpenedConversation(client.address, conversation);
   const isGroup = conversation.version === ConversationVersion.GROUP;
   const isDMConversation = !!(conversation as any).peerAddress;
+
+  // Temporary fix to stop receiving messages for groups
+  // we are not member of
+  const shouldSkip =
+    isGroup &&
+    !(conversation as GroupWithCodecsType).members.some(
+      (m) => m.addresses[0].toLowerCase() === client.address.toLowerCase()
+    );
+  if (shouldSkip) {
+    logger.warn(
+      `Skipping group; ${client.address} is not a member of ${
+        (conversation as GroupWithCodecsType).id
+      }`
+    );
+    return;
+  }
   saveConversations(
     client.address,
     [
@@ -377,7 +392,9 @@ export const loadConversations = async (
           updatedGroups.push(g);
         } else {
           const currentMembersSet = new Set(existingGroup.groupMembers);
-          const newMembersSet = new Set(g.members.map((m) => m.addresses[0]));
+          const newMembersSet = new Set(
+            g.members.map((m) => getCleanAddress(m.addresses[0]))
+          );
 
           if (
             existingGroup.groupName !== g.name ||
