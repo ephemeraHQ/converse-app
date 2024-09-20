@@ -55,11 +55,15 @@ export const conversationName = (
       capitalize(humanize(conversation.topic.slice(14, 46), 3, " "))
     );
   }
-  if (conversation.conversationTitle) {
-    return conversation.conversationTitle;
-  }
 
   const short = shortAddress(conversation.peerAddress);
+
+  if (
+    conversation.conversationTitle &&
+    conversation.conversationTitle?.toLowerCase() !== short.toLowerCase()
+  ) {
+    return conversation.conversationTitle;
+  }
 
   if (socials) {
     const preferredName = getPreferredName(socials, conversation.peerAddress);
