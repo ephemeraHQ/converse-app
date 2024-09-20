@@ -177,6 +177,9 @@ const ChatMessage = ({
   const showTime = useRef<boolean>(false);
   const showDateTime = useRef<boolean>(false);
   const animateTime = useCallback(() => {
+    if (isAttachmentMessage()) {
+      return;
+    }
     // For messages with date change
     if (message.dateChange) {
       showDateTime.current = !showDateTime.current;
