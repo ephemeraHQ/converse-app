@@ -445,13 +445,11 @@ const ChatMessage = ({
                           fromMe={message.fromMe}
                         />
                       </TouchableOpacity>
-                      <View
-                        style={{
-                          alignSelf: "flex-start",
-                        }}
-                      >
-                        {messageContent}
-                      </View>
+                      <TouchableOpacity onPress={animateTime} activeOpacity={1}>
+                        <View style={{ alignSelf: "flex-start" }}>
+                          {messageContent}
+                        </View>
+                      </TouchableOpacity>
                     </View>
                   ) : (
                     <View
