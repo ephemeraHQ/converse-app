@@ -177,6 +177,9 @@ const ChatMessage = ({
   const showTime = useRef<boolean>(false);
   const showDateTime = useRef<boolean>(false);
   const animateTime = useCallback(() => {
+    if (isAttachmentMessage()) {
+      return;
+    }
     // For messages with date change
     if (message.dateChange) {
       showDateTime.current = !showDateTime.current;
@@ -445,13 +448,11 @@ const ChatMessage = ({
                           fromMe={message.fromMe}
                         />
                       </TouchableOpacity>
-                      <View
-                        style={{
-                          alignSelf: "flex-start",
-                        }}
-                      >
-                        {messageContent}
-                      </View>
+                      <TouchableOpacity onPress={animateTime} activeOpacity={1}>
+                        <View style={{ alignSelf: "flex-start" }}>
+                          {messageContent}
+                        </View>
+                      </TouchableOpacity>
                     </View>
                   ) : (
                     <View
