@@ -81,7 +81,7 @@ const setupAndSaveConversations = async (
   });
 
   const conversationsToUpsert: Conversation[] = [];
-  conversations.forEach(async (conversation) => {
+  conversations.forEach((conversation) => {
     const alreadyConversationInDbWithTopic =
       alreadyConversationsByTopic[conversation.topic];
 
@@ -90,7 +90,7 @@ const setupAndSaveConversations = async (
       conversation.spamScore === undefined ||
       conversation.spamScore === null
     ) {
-      await computeConversationsSpamScores(account, [
+      computeConversationsSpamScores(account, [
         conversation as XmtpConversationWithUpdate,
       ]);
     }
