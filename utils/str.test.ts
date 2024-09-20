@@ -1,5 +1,6 @@
 import { PixelRatio } from "react-native";
 
+import * as profileModule from "./profile";
 import {
   addressPrefix,
   capitalize,
@@ -28,8 +29,21 @@ jest.mock("react-native", () => ({
 }));
 
 jest.mock("../data/store/accountsStore", () => ({
-  getProfilesStore: jest.fn(),
+  getProfilesStore: jest
+    .fn()
+    .mockReturnValue({ getState: jest.fn().mockReturnValue({ profiles: {} }) }),
   useAccountsList: jest.fn().mockReturnValue(["account1", "account2"]),
+  currentAccount: jest.fn().mockReturnValue("currentAccount"),
+}));
+
+jest.mock("expo-crypto", () => ({
+  getRandomBytesAsync: jest.fn().mockReturnValue([0, 1, 2, 3, 4]),
+}));
+
+jest.mock("expo-secure-store", () => ({
+  setItemAsync: jest.fn(),
+  deleteItemAsync: jest.fn(),
+  getItemAsync: jest.fn().mockReturnValue(""),
 }));
 
 jest.mock("../data/store/chatStore", () => ({
@@ -40,9 +54,9 @@ jest.mock("../data/store/profilesStore", () => ({
   ProfilesStoreType: jest.fn(),
 }));
 
-jest.mock("./profile", () => ({
-  getPreferredName: jest.fn((socials, address) => address),
-}));
+jest
+  .spyOn(profileModule, "getPreferredName")
+  .mockImplementation((socials, address) => address);
 
 describe("shortAddress", () => {
   it("should shorten the address correctly", () => {
@@ -119,17 +133,6 @@ describe("conversationName", () => {
       peerAddress: "0x1234567890abcdef",
     } as unknown as XmtpConversation;
     expect(conversationName(conversation)).toBe("0x1234...cdef");
-  });
-
-  it("should return the conversation title if provided", () => {
-    const conversation = {
-      isGroup: false,
-      groupName: "",
-      topic: "",
-      peerAddress: "0x1234567890abcdef",
-      conversationTitle: "Custom Title",
-    } as unknown as XmtpConversation;
-    expect(conversationName(conversation)).toBe("Custom Title");
   });
 });
 

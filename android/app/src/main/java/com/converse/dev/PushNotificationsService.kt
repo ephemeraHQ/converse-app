@@ -70,6 +70,8 @@ import java.util.*
 import kotlin.reflect.full.declaredMemberProperties
 import kotlin.reflect.jvm.isAccessible
 import kotlin.reflect.jvm.javaField
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.ProcessLifecycleOwner
 
 class PushNotificationsService : FirebaseMessagingService() {
     companion object {
@@ -111,6 +113,12 @@ class PushNotificationsService : FirebaseMessagingService() {
                 return
             }
 
+            val appIsInForeground = ProcessLifecycleOwner.get().lifecycle.currentState.isAtLeast(Lifecycle.State.STARTED)
+            val currentAccount = getCurrentAccount(this)
+            if (appIsInForeground && currentAccount !== null && currentAccount.lowercase() == notificationData.account.lowercase()) {
+                Log.d(TAG, "Preventing notification for ${notificationData.account} because user is on it")
+                return
+            }
             Log.d(TAG, "INSTANTIATED XMTP CLIENT FOR ${notificationData.contentTopic}")
 
             val encryptedMessageData = Base64.decode(notificationData.message, Base64.NO_WRAP)

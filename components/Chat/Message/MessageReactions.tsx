@@ -20,7 +20,11 @@ import {
   useCurrentAccount,
   useProfilesStore,
 } from "../../../data/store/accountsStore";
-import { getPreferredAvatar, getPreferredName } from "../../../utils/profile";
+import {
+  getPreferredAvatar,
+  getPreferredName,
+  getProfile,
+} from "../../../utils/profile";
 import {
   MessageReaction,
   addReactionToMessage,
@@ -145,9 +149,11 @@ function ChatMessageReactions({ message, reactions }: Props) {
                   .map((reactor, index) => (
                     <Avatar
                       key={reactor}
-                      uri={getPreferredAvatar(profiles[reactor]?.socials)}
+                      uri={getPreferredAvatar(
+                        getProfile(reactor, profiles)?.socials
+                      )}
                       name={getPreferredName(
-                        profiles[reactor]?.socials,
+                        getProfile(reactor, profiles)?.socials,
                         reactor
                       )}
                       size={AvatarSizes.messageReactor}

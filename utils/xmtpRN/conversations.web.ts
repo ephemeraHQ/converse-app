@@ -19,7 +19,6 @@ const protocolConversationToStateConversation = (
   context: conversation.context || undefined,
   messages: new Map(),
   messagesIds: [],
-  conversationTitle: undefined,
   messageDraft: undefined,
   mediaPreview: undefined,
   readUntil: 0,

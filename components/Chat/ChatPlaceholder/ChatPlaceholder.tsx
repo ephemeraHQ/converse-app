@@ -18,7 +18,7 @@ import {
 } from "../../../data/store/accountsStore";
 import { useConversationContext } from "../../../utils/conversation";
 import { sendMessage } from "../../../utils/message";
-import { getProfileData } from "../../../utils/profile";
+import { getProfile, getProfileData } from "../../../utils/profile";
 import { conversationName } from "../../../utils/str";
 import { consentToPeersOnProtocol } from "../../../utils/xmtpRN/conversations";
 import ActivityIndicator from "../../ActivityIndicator/ActivityIndicator";
@@ -42,7 +42,7 @@ export default function ChatPlaceholder({ messagesCount }: Props) {
   );
   const peerSocials = useProfilesStore((s) =>
     conversation?.peerAddress
-      ? s.profiles[conversation.peerAddress]?.socials
+      ? getProfile(conversation.peerAddress, s.profiles)?.socials
       : undefined
   );
   const profileData = getProfileData(recommendationData, peerSocials);

@@ -1,5 +1,6 @@
 import { entifyWithAddress } from "@queries/entify";
 import { setGroupMembersQueryData } from "@queries/useGroupMembersQuery";
+import { getCleanAddress } from "@utils/eth";
 import logger from "@utils/logger";
 import { TransactionReference } from "@xmtp/content-type-transaction-reference";
 import {
@@ -129,7 +130,7 @@ const protocolMessageToStateMessage = (
       (m) => m.inboxId === message.senderAddress
     );
     if (groupMember) {
-      senderAddress = groupMember.addresses[0];
+      senderAddress = getCleanAddress(groupMember.addresses[0]);
     }
   }
 
@@ -230,7 +231,7 @@ export const syncGroupsMessages = async (
         group.members,
         (member) => member.inboxId,
         // TODO: Multiple addresses support
-        (member) => member.addresses[0]
+        (member) => getCleanAddress(member.addresses[0])
       )
     );
     groupMembers[group.topic] = group.members;

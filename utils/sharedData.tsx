@@ -2,9 +2,6 @@ import logger from "./logger";
 import mmkv from "./mmkv";
 import config from "../config";
 
-export const saveConversationDict = (topic: string, conversationDict: any) =>
-  mmkv.set(`conversation-${topic}`, JSON.stringify(conversationDict));
-
 export const saveXmtpEnv = () => mmkv.set("xmtp-env", config.xmtpEnv);
 
 export const loadSavedNotificationsMessages = () => {
