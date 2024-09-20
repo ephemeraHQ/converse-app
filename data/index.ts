@@ -1,5 +1,7 @@
 import "reflect-metadata";
 
+import { getProfile } from "@utils/profile";
+
 import { getRepository } from "./db";
 import { Conversation } from "./db/entities/conversationEntity";
 import { Message } from "./db/entities/messageEntity";
@@ -68,7 +70,9 @@ export const loadDataToContext = async (account: string) => {
         xmtpConversationFromDb(
           account,
           c,
-          c.peerAddress ? profilesByAddress[c.peerAddress]?.socials : undefined
+          c.peerAddress
+            ? getProfile(c.peerAddress, profilesByAddress)?.socials
+            : undefined
         )
       )
     );

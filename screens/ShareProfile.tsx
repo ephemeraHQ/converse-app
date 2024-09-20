@@ -35,6 +35,7 @@ import {
   getPreferredUsername,
   getPreferredAvatar,
   getPreferredName,
+  getProfile,
 } from "../utils/profile";
 import { shortAddress } from "../utils/str";
 
@@ -158,7 +159,9 @@ export default function ShareProfileScreen({
   navigation,
 }: NativeStackScreenProps<NavigationParamList, "ShareProfile">) {
   const userAddress = useCurrentAccount() as string;
-  const socials = useProfilesStore((s) => s.profiles[userAddress]?.socials);
+  const socials = useProfilesStore(
+    (s) => getProfile(userAddress, s.profiles)?.socials
+  );
   const username = getPreferredUsername(socials);
   const displayName = getPreferredName(socials, userAddress);
   const avatar = getPreferredAvatar(socials);
