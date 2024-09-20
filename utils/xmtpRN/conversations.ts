@@ -804,7 +804,9 @@ export const sortRequestsBySpamScore = (
   requests.forEach((conversation) => {
     const isLikelyNotSpam =
       conversation.spamScore !== undefined &&
-      (conversation.spamScore === null || conversation.spamScore < 1);
+      (conversation.spamScore === null || conversation.spamScore < 1) &&
+      conversation.version !== ConversationVersion.GROUP;
+    // @todo => remove this once we have group-specific spam scores
 
     if (isLikelyNotSpam) {
       result.likelyNotSpam.push(conversation);
