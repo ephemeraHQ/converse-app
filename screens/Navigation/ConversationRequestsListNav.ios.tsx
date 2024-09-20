@@ -132,49 +132,42 @@ export default function ConversationRequestsListNav() {
 
   const hasLikelyNotSpam = likelyNotSpam.length > 0;
   const hasSpam = likelySpam.length > 0;
-  const hasBothTypesOfRequests = hasLikelyNotSpam && hasSpam;
+  const hasBothTypesOfRequests = true;
 
   const handleSegmentChange = (index: number) => {
     setSelectedSegment(index);
   };
 
   const renderSegmentedController = () => {
-    if (hasBothTypesOfRequests) {
-      return (
-        <RequestsSegmentedController
-          options={[translate("you_might_know"), translate("hidden_requests")]}
-          selectedIndex={selectedSegment}
-          onSelect={handleSegmentChange}
-        />
-      );
-    }
-    return null;
+    return (
+      <RequestsSegmentedController
+        options={[translate("you_might_know"), translate("hidden_requests")]}
+        selectedIndex={selectedSegment}
+        onSelect={handleSegmentChange}
+      />
+    );
   };
 
   const renderContent = (navigationProps: {
     route: RouteProp<NavigationParamList, "ChatsRequests">;
     navigation: NativeStackNavigationProp<NavigationParamList, "ChatsRequests">;
   }) => {
-    const showSuggestionText =
-      (hasBothTypesOfRequests && selectedSegment === 0) ||
-      (!hasBothTypesOfRequests && hasLikelyNotSpam);
-    const showSpamWarning =
-      (hasBothTypesOfRequests && selectedSegment === 1) ||
-      (!hasBothTypesOfRequests && hasSpam);
-    const itemsToShow = hasBothTypesOfRequests
-      ? selectedSegment === 0
-        ? likelyNotSpam
-        : likelySpam
-      : hasLikelyNotSpam
-      ? likelyNotSpam
-      : likelySpam;
+    const showSuggestionText = selectedSegment === 0 && hasLikelyNotSpam;
+    const showNoSuggestionsText = selectedSegment === 0 && !hasLikelyNotSpam;
+    const showSpamWarning = selectedSegment === 1;
+    const itemsToShow = selectedSegment === 0 ? likelyNotSpam : likelySpam;
 
     return (
       <>
-        {hasBothTypesOfRequests && renderSegmentedController()}
+        {renderSegmentedController()}
         {showSuggestionText && (
           <Text style={styles.suggestionText}>
             {translate("suggestion_text")}
+          </Text>
+        )}
+        {showNoSuggestionsText && (
+          <Text style={styles.suggestionText}>
+            {translate("no_suggestions_text")}
           </Text>
         )}
         {showSpamWarning && (
