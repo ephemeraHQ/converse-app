@@ -298,6 +298,7 @@ const useStyles = () => {
         default: {
           borderBottomWidth: 0.5,
           borderBottomColor: itemSeparatorColor(colorScheme),
+          paddingLeft: 16,
         },
         android: {},
         web: {},
