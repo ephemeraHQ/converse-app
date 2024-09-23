@@ -21,6 +21,9 @@ import { useHeaderSearchBar } from "./Navigation/ConversationListNav";
 import { NavigationParamList } from "./Navigation/Navigation";
 import { useIsSplitScreen } from "./Navigation/navHelpers";
 import ChatNullState from "../components/Chat/ChatNullState";
+import Connecting, {
+  useShouldShowConnectingOrSyncing,
+} from "../components/Connecting";
 import ConversationFlashList from "../components/ConversationFlashList";
 import NewConversationButton from "../components/ConversationList/NewConversationButton";
 import RequestsButton from "../components/ConversationList/RequestsButton";
@@ -86,6 +89,7 @@ function ConversationList({ navigation, route, searchBarRef }: Props) {
   );
   const profiles = useProfilesStore((s) => s.profiles);
   const pinnedConversations = useChatStore((s) => s.pinnedConversations);
+  const shouldShowConnectingOrSyncing = useShouldShowConnectingOrSyncing();
 
   const [flatListItems, setFlatListItems] = useState<{
     items: FlatListItem[];
@@ -230,11 +234,17 @@ function ConversationList({ navigation, route, searchBarRef }: Props) {
 
   if (showChatNullState) {
     return (
-      <ChatNullState
-        currentAccount={currentAccount()}
-        navigation={navigation}
-        route={route}
-      />
+      <>
+        {shouldShowConnectingOrSyncing ? (
+          <Connecting />
+        ) : (
+          <ChatNullState
+            currentAccount={currentAccount()}
+            navigation={navigation}
+            route={route}
+          />
+        )}
+      </>
     );
   }
 
