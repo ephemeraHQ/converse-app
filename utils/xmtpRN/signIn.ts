@@ -68,9 +68,6 @@ export const getXmtpBase64KeyFromSigner = async (
 
   logger.debug("Instantiated client from signer, exporting key bundle");
   const base64Key = await client.exportKeyBundle();
-
-  await revokeOtherInstallations(signer, client);
-
   // This Client is only be used to extract the key, we can disconnect
   // it to prevent locks happening during Onboarding
   await client.dropLocalDatabaseConnection();
