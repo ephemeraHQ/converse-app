@@ -114,7 +114,8 @@ function ConversationList({ navigation, route, searchBarRef }: Props) {
   const showChatNullState =
     conversations.length === 0 &&
     conversationsRequests.length === 0 &&
-    !searchQuery;
+    !searchQuery &&
+    initialLoadDoneOnce;
 
   useEffect(() => {
     if (!initialLoadDoneOnce) {
