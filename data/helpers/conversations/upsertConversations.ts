@@ -85,8 +85,8 @@ const setupAndSaveConversations = async (
 
     // If spam score is not computed, compute it
     if (
-      conversation.spamScore === undefined ||
-      conversation.spamScore === null
+      getChatStore(account).getState().initialLoadDoneOnce &&
+      (conversation.spamScore === undefined || conversation.spamScore === null)
     ) {
       logger.debug("Empty spam score, computing...");
       computeConversationsSpamScores(account, [
