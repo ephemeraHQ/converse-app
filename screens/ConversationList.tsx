@@ -5,7 +5,7 @@ import {
   listItemSeparatorColor,
   textPrimaryColor,
 } from "@styles/colors";
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import {
   Platform,
   StyleSheet,
@@ -100,22 +100,19 @@ function ConversationList({ navigation, route, searchBarRef }: Props) {
   const isSplit = useIsSplitScreen();
   const sharingMode = !!route.params?.frameURL;
 
-  const { likelyNotSpam } = sortRequestsBySpamScore(
-    sortedConversationsWithPreview.conversationsRequests
-  );
+  const requestsCount = useMemo(() => {
+    const { likelyNotSpam } = sortRequestsBySpamScore(
+      sortedConversationsWithPreview.conversationsRequests
+    );
+    return likelyNotSpam.length;
+  }, [sortedConversationsWithPreview.conversationsRequests]);
 
-  const conversations = useChatStore(
-    (s) => s.sortedConversationsWithPreview.conversationsInbox
-  );
-  const conversationsRequests = useChatStore(
-    (s) => s.sortedConversationsWithPreview.conversationsRequests
+  const conversationsCount = useChatStore(
+    (s) => Object.keys(s.conversations).length
   );
 
   const showChatNullState =
-    conversations.length === 0 &&
-    conversationsRequests.length === 0 &&
-    !searchQuery &&
-    initialLoadDoneOnce;
+    conversationsCount === 0 && !searchQuery && initialLoadDoneOnce;
 
   useEffect(() => {
     if (!initialLoadDoneOnce) {
@@ -202,7 +199,7 @@ function ConversationList({ navigation, route, searchBarRef }: Props) {
           key="requests"
           navigation={navigation}
           route={route}
-          requestsCount={likelyNotSpam.length}
+          requestsCount={requestsCount}
         />
       </View>
     );
