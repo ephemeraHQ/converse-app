@@ -17,6 +17,7 @@ import {
   getInviteJoinRequest,
   saveInviteJoinRequest,
 } from "@utils/groupInvites";
+import logger from "@utils/logger";
 import { GroupWithCodecsType } from "@utils/xmtpRN/client";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { StyleSheet, Text, View, useColorScheme } from "react-native";
@@ -81,8 +82,14 @@ export default function GroupInviteScreen({
     setPolling(true);
     setJoinStatus("PENDING");
     const groupsBeforeJoining = await fetchGroupsQuery(account);
+    logger.debug(
+      `[GroupInvite] Before joining, group count = ${groupsBeforeJoining.ids.length}`
+    );
     let joinRequestId = getInviteJoinRequest(account, groupInvite?.id);
     if (!joinRequestId) {
+      logger.debug(
+        `[GroupInvite] Sending the group join request to Converse backend`
+      );
       const joinRequest = await createGroupJoinRequest(
         account,
         groupInvite?.id
@@ -94,6 +101,9 @@ export default function GroupInviteScreen({
     let status = "PENDING";
     while (count < 10 && status === "PENDING") {
       const joinRequestData = await getGroupJoinRequest(joinRequestId);
+      logger.debug(
+        `[GroupInvite] Group join request status is ${joinRequestData.status}`
+      );
       if (joinRequestData.status === "PENDING") {
         await new Promise((r) => setTimeout(r, 500));
         count += 1;
@@ -107,7 +117,9 @@ export default function GroupInviteScreen({
       setFinishedPolling(true);
     } else {
       const groupsAfterJoining = await fetchGroupsQuery(account);
-      console.log("after joining", groupsAfterJoining.ids.length);
+      logger.debug(
+        `[GroupInvite] After joining, group count = ${groupsBeforeJoining.ids.length}`
+      );
 
       const newGroupId = groupsAfterJoining.ids.find(
         (id) => !groupsBeforeJoining.ids.includes(id)
