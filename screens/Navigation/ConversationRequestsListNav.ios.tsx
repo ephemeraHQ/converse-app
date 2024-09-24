@@ -8,7 +8,13 @@ import {
   textPrimaryColor,
   textSecondaryColor,
 } from "@styles/colors";
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { StyleSheet, Text, useColorScheme, View } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { StackAnimationTypes } from "react-native-screens";
@@ -43,7 +49,10 @@ export default function ConversationRequestsListNav() {
 
   const [selectedSegment, setSelectedSegment] = useState(0);
   const allRequests = sortedConversationsWithPreview.conversationsRequests;
-  const { likelySpam, likelyNotSpam } = sortRequestsBySpamScore(allRequests);
+  const { likelySpam, likelyNotSpam } = useMemo(
+    () => sortRequestsBySpamScore(allRequests),
+    [allRequests]
+  );
   const styles = useStyles();
 
   const clearAllSpam = useCallback(() => {
