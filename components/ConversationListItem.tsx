@@ -32,12 +32,21 @@ import {
   TouchableHighlight,
   View,
 } from "react-native";
-import { RectButton } from "react-native-gesture-handler";
+import {
+  Gesture,
+  GestureDetector,
+  RectButton,
+} from "react-native-gesture-handler";
 import Swipeable from "react-native-gesture-handler/Swipeable";
 import { TouchableRipple } from "react-native-paper";
-import { useSharedValue, useAnimatedRef } from "react-native-reanimated";
+import Animated, {
+  useSharedValue,
+  useAnimatedRef,
+  runOnJS,
+} from "react-native-reanimated";
 
 import Avatar from "./Avatar";
+import { ConversationContextMenu } from "./ConversationContextMenu";
 import GroupAvatar from "./GroupAvatar";
 import Picto from "./Picto/Picto";
 import { showActionSheetWithOptions } from "./StateHandlers/ActionSheetStateHandler";
@@ -135,6 +144,54 @@ const ConversationListItem = memo(function ConversationListItem({
   const closeContextMenu = useCallback(() => {
     setIsContextMenuVisible(false);
   }, []);
+
+  const triggerHapticFeedback = useCallback(() => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+  }, []);
+
+  const longPressGesture = useMemo(() => {
+    return Gesture.LongPress()
+      .onStart(() => {
+        runOnJS(triggerHapticFeedback)();
+        runOnJS(showContextMenu)();
+      })
+      .minDuration(500);
+  }, [triggerHapticFeedback, showContextMenu]);
+
+  const contextMenuItems = useMemo(
+    () => [
+      {
+        title: translate("pin"),
+        action: () => {
+          setPinnedConversations([conversationTopic]);
+          closeContextMenu();
+        },
+        id: "pin",
+      },
+      {
+        title: translate("mark_as_unread"),
+        action: () => {
+          setTopicsData({
+            [conversationTopic]: {
+              status: "unread",
+              timestamp: new Date().getTime(),
+            },
+          });
+          closeContextMenu();
+        },
+        id: "markAsUnread",
+      },
+      {
+        title: translate("delete"),
+        action: () => {
+          // Implement delete logic here
+          closeContextMenu();
+        },
+        id: "delete",
+      },
+    ],
+    [closeContextMenu, conversationTopic, setPinnedConversations, setTopicsData]
+  );
 
   const openConversation = useCallback(async () => {
     const getUserAction = async () => {
@@ -445,49 +502,27 @@ const ConversationListItem = memo(function ConversationListItem({
     setPinnedConversations([conversationTopic]);
   }, [conversationTopic, setPinnedConversations]);
 
-  const rowItem =
-    Platform.OS === "ios" || Platform.OS === "web" ? (
-      <TouchableHighlight
-        underlayColor={clickedItemBackgroundColor(colorScheme)}
-        delayPressIn={isDesktop ? 0 : 75}
-        onLongPress={onLongPress}
-        onPressIn={() => {
-          if (!isSplitScreen) return;
-          openConversation();
-        }}
-        onPress={() => {
-          if (isSplitScreen) return;
-          openConversation();
-          setSelected(true);
-        }}
-        style={{
-          backgroundColor:
-            selected || (isSplitScreen && conversationOpened)
-              ? clickedItemBackgroundColor(colorScheme)
-              : backgroundColor(colorScheme),
-          height: 76,
-        }}
-      >
-        {listItemContent}
-      </TouchableHighlight>
-    ) : (
-      <TouchableRipple
-        unstable_pressDelay={isDesktop || isSplitScreen ? 0 : 75}
-        onPressIn={() => {
-          if (!isSplitScreen) return;
-          openConversation();
-        }}
-        onPress={() => {
-          if (isSplitScreen) return;
-          openConversation();
-        }}
-        onLongPress={onLongPress}
-        style={styles.rippleRow}
-        rippleColor={clickedItemBackgroundColor(colorScheme)}
-      >
-        {listItemContent}
-      </TouchableRipple>
-    );
+  const rowItem = (
+    <GestureDetector gesture={longPressGesture}>
+      <Animated.View ref={containerRef} onLayout={onLayoutView}>
+        {Platform.OS === "ios" ? (
+          <TouchableHighlight
+            onPress={openConversation}
+            underlayColor={clickedItemBackgroundColor(colorScheme)}
+          >
+            {listItemContent}
+          </TouchableHighlight>
+        ) : (
+          <TouchableRipple
+            onPress={openConversation}
+            rippleColor={clickedItemBackgroundColor(colorScheme)}
+          >
+            {listItemContent}
+          </TouchableRipple>
+        )}
+      </Animated.View>
+    </GestureDetector>
+  );
 
   const toggleUnreadStatusOnClose = useRef(false);
   const [swipeableKey, setSwipeableKey] = useState(0);
@@ -541,8 +576,13 @@ const ConversationListItem = memo(function ConversationListItem({
         hitSlop={{ left: isSplitScreen ? 0 : -6 }}
       >
         {rowItem}
+        <ConversationContextMenu
+          isVisible={isContextMenuVisible}
+          onClose={closeContextMenu}
+          items={contextMenuItems}
+          itemRect={itemRect}
+        />
       </Swipeable>
-      {/* Hide part of the border to mimic margin*/}
       {Platform.OS === "ios" && <View style={styles.rowSeparatorMargin} />}
     </View>
   );
