@@ -203,6 +203,10 @@ const en = {
   do_you_want_to_join_this_group: "Do you want to join this group?",
   join_this_group: "Join this group",
 
+  // Conversation Context Menu
+  pin: "Pin",
+  mark_as_unread: "Mark as unread",
+
   // NewGroupSummary
   group_name: "GROUP NAME",
   group_description: "GROUP DESCRIPTION",
