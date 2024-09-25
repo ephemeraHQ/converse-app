@@ -497,11 +497,6 @@ const ConversationListItem = memo(function ConversationListItem({
     );
   }, [showUnread, styles.leftAction, colorScheme]);
 
-  // TODO: Move to context menu
-  const onLongPress = useCallback(() => {
-    setPinnedConversations([conversationTopic]);
-  }, [conversationTopic, setPinnedConversations]);
-
   const rowItem = (
     <GestureDetector gesture={longPressGesture}>
       <Animated.View ref={containerRef} onLayout={onLayoutView}>
@@ -580,7 +575,6 @@ const ConversationListItem = memo(function ConversationListItem({
           isVisible={isContextMenuVisible}
           onClose={closeContextMenu}
           items={contextMenuItems}
-          itemRect={itemRect}
           conversation={{ name: conversationName, lastMessagePreview }}
         />
       </Swipeable>
