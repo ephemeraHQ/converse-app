@@ -1463,6 +1463,7 @@ export const emojis = [
           "test",
           "pass",
           "hundred",
+          "100",
         ],
       },
       {
