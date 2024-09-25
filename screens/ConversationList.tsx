@@ -65,12 +65,14 @@ function ConversationList({ navigation, route, searchBarRef }: Props) {
     searchQuery,
     searchBarFocused,
     setSearchBarFocused,
+    initialLoadDone,
     initialLoadDoneOnce,
     sortedConversationsWithPreview,
     openedConversationTopic,
     setSearchQuery,
   } = useChatStore(
     useSelect([
+      "initialLoadDone",
       "initialLoadDoneOnce",
       "searchQuery",
       "setSearchQuery",
@@ -112,6 +114,7 @@ function ConversationList({ navigation, route, searchBarRef }: Props) {
   );
 
   const showChatNullState =
+    initialLoadDone &&
     conversations.length === 0 &&
     conversationsRequests.length === 0 &&
     !searchQuery;
