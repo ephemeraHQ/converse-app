@@ -291,11 +291,7 @@ export default function NewConversation({
   const initialFocus = useRef(false);
 
   const showRecommendations =
-    !status.loading &&
-    value.length === 0 &&
-    recommendationsFrensCount > 0 &&
-    // hide recommendations when adding users to a group
-    !route.params?.addingToGroupTopic;
+    !status.loading && value.length === 0 && recommendationsFrensCount > 0;
 
   const profiles = getProfilesStore(currentAccount()).getState().profiles;
 
