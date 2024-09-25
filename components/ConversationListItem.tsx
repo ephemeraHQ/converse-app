@@ -581,6 +581,7 @@ const ConversationListItem = memo(function ConversationListItem({
           onClose={closeContextMenu}
           items={contextMenuItems}
           itemRect={itemRect}
+          conversation={{ name: conversationName, lastMessagePreview }}
         />
       </Swipeable>
       {Platform.OS === "ios" && <View style={styles.rowSeparatorMargin} />}
