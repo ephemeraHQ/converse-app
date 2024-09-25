@@ -85,11 +85,14 @@ export const EmojiPicker = () => {
 
   const filteredReactions = useMemo(() => {
     return sliceEmojis(
-      flatEmojis.filter((emoji) =>
-        emoji.keywords.some((keyword) =>
-          keyword.includes(searchInput.toLowerCase().trim())
-        )
-      )
+      flatEmojis.filter((emoji) => {
+        const cleanedSearch = searchInput.toLowerCase().trim();
+        return (
+          emoji.keywords.some((keyword) => keyword.includes(cleanedSearch)) ||
+          emoji.name.includes(cleanedSearch) ||
+          emoji.emoji === cleanedSearch
+        );
+      })
     );
   }, [searchInput]);
   const closeMenu = useCallback(() => {
