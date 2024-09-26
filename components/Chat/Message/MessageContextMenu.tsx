@@ -15,6 +15,7 @@ import { BlurView } from "expo-blur";
 import React, { FC, memo, useEffect, useMemo } from "react";
 import {
   Platform,
+  StatusBar,
   StyleSheet,
   TouchableWithoutFeedback,
   useColorScheme,
@@ -71,6 +72,7 @@ const BackdropComponent: FC<{
   const intensityValue = useSharedValue(0);
   const { height, width } = useWindowDimensions();
   const safeAreaInsets = useSafeAreaInsets();
+  const styles = useStyles();
   useEffect(() => {
     activeValue.value = isActive;
     opacityValue.value = withTiming(isActive ? 1 : 0, {
@@ -109,6 +111,7 @@ const BackdropComponent: FC<{
           itemRectHeight.value +
           menuHeight +
           spacing +
+          (Platform.OS === "android" ? StatusBar.currentHeight ?? 0 : 0) +
           (safeAreaInsets?.bottom || 0);
         return topTransform > height ? height - topTransform : 0;
       } else {
@@ -244,18 +247,7 @@ const BackdropComponent: FC<{
                   {auxiliaryView}
                 </Animated.View>
                 <Animated.View style={animatedMenuStyle}>
-                  <TableView
-                    style={{
-                      // flex: 1,
-                      width: ITEM_WIDTH,
-                      backgroundColor:
-                        Platform.OS === "android"
-                          ? backgroundColor(colorScheme)
-                          : undefined,
-                      borderRadius: Platform.OS === "android" ? 10 : undefined,
-                    }}
-                    items={items}
-                  />
+                  <TableView style={styles.table} items={items} />
                 </Animated.View>
               </Animated.View>
             </TouchableWithoutFeedback>
@@ -266,19 +258,28 @@ const BackdropComponent: FC<{
   );
 };
 
-export const styles = StyleSheet.create({
-  container: {
-    ...StyleSheet.absoluteFillObject,
-    zIndex: 0,
-    borderWidth: 1,
-    borderColor: "red",
-  },
-  gestureHandlerContainer: {
-    flex: 1,
-  },
-  flex: {
-    flex: 1,
-  },
-});
+const useStyles = () => {
+  const colorScheme = useColorScheme();
+  return StyleSheet.create({
+    container: {
+      ...StyleSheet.absoluteFillObject,
+      zIndex: 0,
+      borderWidth: 1,
+      borderColor: "red",
+    },
+    gestureHandlerContainer: {
+      flex: 1,
+    },
+    flex: {
+      flex: 1,
+    },
+    table: {
+      width: ITEM_WIDTH,
+      backgroundColor:
+        Platform.OS === "android" ? backgroundColor(colorScheme) : undefined,
+      borderRadius: Platform.OS === "android" ? 10 : undefined,
+    },
+  });
+};
 
 export const MessageContextMenu = memo(BackdropComponent);

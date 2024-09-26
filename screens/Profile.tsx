@@ -255,7 +255,7 @@ export default function ProfileScreen({
     Platform.OS === "ios"
       ? Constants.expoConfig?.ios?.buildNumber
       : Constants.expoConfig?.android?.versionCode;
-  const balanceItems = [
+  const balanceItems: TableViewItemType[] = [
     {
       id: "balance",
       title: "Your balance (USDC)",
@@ -283,7 +283,7 @@ export default function ProfileScreen({
         </View>
       ),
     },
-  ] as TableViewItemType[];
+  ];
 
   if (isPrivy) {
     balanceItems.push({
