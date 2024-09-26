@@ -455,9 +455,15 @@ export const deleteGroupInvite = async (
   });
 };
 
+export type GroupJoinRequestStatus =
+  | "PENDING"
+  | "ACCEPTED"
+  | "REJECTED"
+  | "ERROR";
+
 export type GroupJoinRequest = {
   id: string;
-  status: "PENDING" | "ACCEPTED" | "REJECTED" | "ERROR";
+  status: GroupJoinRequestStatus;
   invitedByAddress: string;
   groupName: string;
   imageUrl?: string;
