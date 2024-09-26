@@ -1,7 +1,7 @@
 import { translate } from "@i18n";
 import {
-  primaryColor,
   backgroundColor,
+  primaryColor,
   textSecondaryColor,
   textPrimaryColor,
 } from "@styles/colors";

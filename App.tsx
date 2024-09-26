@@ -42,6 +42,8 @@ import { registerBackgroundFetchTask } from "./utils/background";
 import { privySecureStorage } from "./utils/keychain/helpers";
 import { initSentry } from "./utils/sentry";
 
+import { GestureHandlerRootView } from "react-native-gesture-handler";
+
 LogBox.ignoreLogs([
   "Privy: Expected status code 200, received 400", // Privy
   "Error destroying session", // Privy
@@ -115,13 +117,15 @@ export default function App() {
                     : MaterialLightTheme
                 }
               >
-                <PortalProvider>
-                  <View style={styles.safe}>
-                    <XmtpEngine />
-                    <Main />
-                    <DebugButton ref={debugRef} />
-                  </View>
-                </PortalProvider>
+                <GestureHandlerRootView style={{ flex: 1 }}>
+                  <PortalProvider>
+                    <View style={styles.safe}>
+                      <XmtpEngine />
+                      <Main />
+                      <DebugButton ref={debugRef} />
+                    </View>
+                  </PortalProvider>
+                </GestureHandlerRootView>
               </PaperProvider>
             </ActionSheetProvider>
           </AppKeyboardProvider>

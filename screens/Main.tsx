@@ -1,4 +1,3 @@
-import UserProfile from "@components/Onboarding/UserProfile";
 import { backgroundColor } from "@styles/colors";
 import { getProfile } from "@utils/profile";
 import { useCheckCurrentInstallation } from "@utils/xmtpRN/client";
@@ -11,8 +10,6 @@ import AccountsDrawer from "./Accounts/AccountsDrawer";
 import Navigation from "./Navigation/Navigation";
 import SplitScreenNavigation from "./Navigation/SplitScreenNavigation/SplitScreenNavigation";
 import { useIsSplitScreen } from "./Navigation/navHelpers";
-import NotificationsScreen from "./NotificationsScreen";
-import Onboarding from "./Onboarding";
 import ActionSheetStateHandler from "../components/StateHandlers/ActionSheetStateHandler";
 import HydrationStateHandler from "../components/StateHandlers/HydrationStateHandler";
 import InitialStateHandler from "../components/StateHandlers/InitialStateHandler";
@@ -23,11 +20,13 @@ import WalletsStateHandler from "../components/StateHandlers/WalletsStateHandler
 import {
   useCurrentAccount,
   useProfilesStore,
-  useSettingsStore,
 } from "../data/store/accountsStore";
 import { useAppStore } from "../data/store/appStore";
 import { useOnboardingStore } from "../data/store/onboardingStore";
 import { useSelect } from "../data/store/storeHelpers";
+import AuthNavigation from "../navigation/AuthNavigation";
+import NavigationContainer from "../navigation/NavigationContainer";
+import NewAccountNavigation from "../navigation/NewAccountNavigation";
 import { useAddressBookStateHandler } from "../utils/addressBook";
 import { converseEventEmitter } from "../utils/events";
 import { usePrivyAccessToken } from "../utils/evm/privy";
@@ -37,32 +36,100 @@ export default function Main() {
   usePrivyAccessToken();
   useAddressBookStateHandler();
   useCheckCurrentInstallation();
-  const colorScheme = useColorScheme();
-  const userAddress = useCurrentAccount();
-  const socials = useProfilesStore((s) =>
-    userAddress ? getProfile(userAddress, s.profiles)?.socials : undefined
+
+  return (
+    <>
+      <Header />
+      <NavigationContainer>
+        <NavigationContent />
+      </NavigationContainer>
+    </>
   );
-  const currentUserName = socials?.userNames?.find((e) => e.isPrimary);
-  // const currentFarcaster = socials?.farcasterUsernames?.find(
-  //   (e) => e.linkedAccount
-  // );
+}
+
+const NavigationContent = () => {
+  const colorScheme = useColorScheme();
   const isSplitScreen = useIsSplitScreen();
 
-  const { resetOnboarding, addingNewAccount } = useOnboardingStore(
+  const { splashScreenHidden } = useAppStore(
+    useSelect(["notificationsPermissionStatus", "splashScreenHidden"])
+  );
+
+  const { navigationDrawer } = useNavigationDrawer();
+  const { userAddress, addingNewAccount } = useUserStatus();
+
+  const { resetOnboarding } = useOnboardingStore(
     useSelect(["resetOnboarding", "addingNewAccount"])
   );
-  // Once the user is fully connected, let's remove the Desktop Connect session id
+
   useEffect(() => {
     if (userAddress && !addingNewAccount) {
       resetOnboarding();
     }
   }, [addingNewAccount, resetOnboarding, userAddress]);
 
-  const { notifications } = useSettingsStore(useSelect(["notifications"]));
-  const { notificationsPermissionStatus, splashScreenHidden } = useAppStore(
-    useSelect(["notificationsPermissionStatus", "splashScreenHidden"])
+  if (!splashScreenHidden) {
+    // TODO: Add a loading screen
+    return null;
+  }
+
+  if (!userAddress) {
+    return <AuthNavigation />;
+  }
+
+  // TODO: Should not be here
+  if (addingNewAccount) {
+    return <NewAccountNavigation />;
+  }
+
+  if (Platform.OS === "android") {
+    return (
+      <AccountsDrawer
+        drawerBackgroundColor={backgroundColor(colorScheme)}
+        ref={navigationDrawer}
+        drawerWidth={Dimensions.get("screen").width * 0.77}
+        renderNavigationView={() => <AccountsAndroid />}
+      >
+        <Navigation />
+      </AccountsDrawer>
+    );
+  }
+
+  if (isSplitScreen) {
+    return <SplitScreenNavigation />;
+  }
+
+  return <Navigation />;
+};
+
+const Header = () => {
+  const colorScheme = useColorScheme();
+  const isWeb = Platform.OS === "web";
+  const isAndroid = Platform.OS === "android";
+
+  return (
+    <>
+      {!isWeb && (
+        <>
+          <HydrationStateHandler />
+          <InitialStateHandler />
+        </>
+      )}
+      {isAndroid && (
+        <StatusBar backgroundColor={backgroundColor(colorScheme)} />
+      )}
+      <NetworkStateHandler />
+      <MainIdentityStateHandler />
+      <ConversationsStateHandler />
+      <ActionSheetStateHandler />
+      <WalletsStateHandler />
+    </>
   );
+};
+
+const useNavigationDrawer = () => {
   const navigationDrawer = useRef<any>(null);
+
   const toggleNavigationDrawer = useCallback((open: boolean) => {
     if (open) {
       navigationDrawer.current?.openDrawer();
@@ -70,6 +137,7 @@ export default function Main() {
       navigationDrawer.current?.closeDrawer();
     }
   }, []);
+
   useEffect(() => {
     converseEventEmitter.on("toggle-navigation-drawer", toggleNavigationDrawer);
     return () => {
@@ -80,74 +148,24 @@ export default function Main() {
     };
   }, [toggleNavigationDrawer]);
 
-  const mainHeaders = (
-    <>
-      {Platform.OS !== "web" && (
-        <>
-          <HydrationStateHandler />
-          <InitialStateHandler />
-        </>
-      )}
-      {Platform.OS === "android" && (
-        <StatusBar backgroundColor={backgroundColor(colorScheme)} />
-      )}
-      <NetworkStateHandler />
-      <MainIdentityStateHandler />
-      <ConversationsStateHandler />
-      <ActionSheetStateHandler />
-      <WalletsStateHandler />
-    </>
+  return { navigationDrawer, toggleNavigationDrawer };
+};
+
+const useUserStatus = () => {
+  const userAddress = useCurrentAccount();
+  const socials = useProfilesStore((s) =>
+    userAddress ? getProfile(userAddress, s.profiles)?.socials : undefined
+  );
+  const currentUserName = socials?.userNames?.find((e) => e.isPrimary);
+  const { resetOnboarding, addingNewAccount } = useOnboardingStore(
+    useSelect(["resetOnboarding", "addingNewAccount"])
   );
 
-  let screenToShow = undefined;
-
-  if (splashScreenHidden) {
-    if (!userAddress || addingNewAccount) {
-      screenToShow = <Onboarding />;
+  useEffect(() => {
+    if (userAddress && !addingNewAccount) {
+      resetOnboarding();
     }
-    // else if (!currentFarcaster && !skipFarcaster) {
-    //   return <WarpcastConnect />;
-    // } else if (
-    //   Platform.OS !== "web" &&
-    //   addressBookPermissionStatus === "undetermined" &&
-    //   !skipAddressBook
-    // ) {
-    //   return <AddressBook />;
-    // }
-    else if (
-      notifications.showNotificationScreen &&
-      Platform.OS !== "web" &&
-      (notificationsPermissionStatus === "undetermined" ||
-        (notificationsPermissionStatus === "denied" &&
-          Platform.OS === "android"))
-    ) {
-      screenToShow = <NotificationsScreen />;
-    } else if (!currentUserName?.name) {
-      screenToShow = <UserProfile onboarding />;
-    } else if (Platform.OS === "android") {
-      // On Android the whole navigation is wrapped in a drawler
-      // layout to be able to display the menu
-      screenToShow = (
-        <AccountsDrawer
-          drawerBackgroundColor={backgroundColor(colorScheme)}
-          ref={navigationDrawer}
-          drawerWidth={Dimensions.get("screen").width * 0.77}
-          renderNavigationView={() => <AccountsAndroid />}
-        >
-          <Navigation />
-        </AccountsDrawer>
-      );
-    } else if (isSplitScreen) {
-      screenToShow = <SplitScreenNavigation />;
-    } else {
-      screenToShow = <Navigation />;
-    }
-  }
+  }, [addingNewAccount, resetOnboarding, userAddress]);
 
-  return (
-    <>
-      {mainHeaders}
-      {screenToShow}
-    </>
-  );
-}
+  return { userAddress, currentUserName, addingNewAccount };
+};
