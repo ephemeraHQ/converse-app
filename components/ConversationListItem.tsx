@@ -545,6 +545,24 @@ const ConversationListItem = memo(function ConversationListItem({
   const toggleUnreadStatusOnClose = useRef(false);
   const [swipeableKey, setSwipeableKey] = useState(0);
 
+  const contextMenuComponent = useMemo(
+    () => (
+      <ConversationContextMenu
+        isVisible={isContextMenuVisible}
+        onClose={closeContextMenu}
+        items={contextMenuItems}
+        conversation={{ name: conversationName, lastMessagePreview }}
+      />
+    ),
+    [
+      isContextMenuVisible,
+      closeContextMenu,
+      contextMenuItems,
+      conversationName,
+      lastMessagePreview,
+    ]
+  );
+
   return (
     <View style={styles.rowSeparator}>
       <Swipeable
@@ -594,13 +612,7 @@ const ConversationListItem = memo(function ConversationListItem({
         hitSlop={{ left: isSplitScreen ? 0 : -6 }}
       >
         {rowItem}
-
-        <ConversationContextMenu
-          isVisible={isContextMenuVisible}
-          onClose={closeContextMenu}
-          items={contextMenuItems}
-          conversation={{ name: conversationName, lastMessagePreview }}
-        />
+        {contextMenuComponent}
       </Swipeable>
       {Platform.OS === "ios" && <View style={styles.rowSeparatorMargin} />}
     </View>
