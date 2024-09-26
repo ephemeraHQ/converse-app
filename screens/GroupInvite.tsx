@@ -41,11 +41,18 @@ export default function GroupInviteScreen({
     error: groupInviteError,
     isLoading,
   } = useGroupInviteQuery(route.params.groupInviteId);
-  const [polling, setPolling] = useState<boolean>(false);
-  const [finishedPolling, setFinishedPolling] = useState<boolean>(false);
-  const [joinStatus, setJoinStatus] = useState<
-    null | "PENDING" | "ERROR" | "REJECTED" | "ACCEPTED"
-  >(null);
+  const [
+    { polling, finishedPollingUnsuccessfully, joinStatus },
+    setGroupJoinState,
+  ] = useState<{
+    polling: boolean;
+    finishedPollingUnsuccessfully: boolean;
+    joinStatus: null | "PENDING" | "ERROR" | "REJECTED" | "ACCEPTED";
+  }>({
+    polling: false,
+    finishedPollingUnsuccessfully: false,
+    joinStatus: null,
+  });
   const colorScheme = useColorScheme();
   const [newGroup, setNewGroup] = useState<GroupWithCodecsType | undefined>(
     undefined
@@ -79,8 +86,11 @@ export default function GroupInviteScreen({
 
   const joinGroup = useCallback(async () => {
     if (!groupInvite?.id) return;
-    setPolling(true);
-    setJoinStatus("PENDING");
+    setGroupJoinState({
+      polling: true,
+      finishedPollingUnsuccessfully: false,
+      joinStatus: "PENDING",
+    });
     const groupsBeforeJoining = await fetchGroupsQuery(account);
     logger.debug(
       `[GroupInvite] Before joining, group count = ${groupsBeforeJoining.ids.length}`
@@ -109,13 +119,21 @@ export default function GroupInviteScreen({
         count += 1;
       } else {
         status = joinRequestData?.status;
-        setJoinStatus(joinRequestData?.status);
+        setGroupJoinState({
+          polling: false,
+          finishedPollingUnsuccessfully: false,
+          joinStatus: joinRequestData?.status,
+        });
         break;
       }
     }
-    if (count === 10 && status === "PENDING") {
-      setFinishedPolling(true);
-    } else {
+    if (status === "PENDING") {
+      setGroupJoinState({
+        polling: false,
+        finishedPollingUnsuccessfully: true,
+        joinStatus: "ERROR",
+      });
+    } else if (status === "ACCEPTED") {
       const groupsAfterJoining = await fetchGroupsQuery(account);
       logger.debug(
         `[GroupInvite] After joining, group count = ${groupsBeforeJoining.ids.length}`
@@ -127,7 +145,11 @@ export default function GroupInviteScreen({
       if (newGroupId) {
         setNewGroup(groupsAfterJoining.byId[newGroupId]);
       } else {
-        setPolling(false);
+        setGroupJoinState({
+          polling: false,
+          finishedPollingUnsuccessfully: false,
+          joinStatus: "ACCEPTED",
+        });
       }
     }
   }, [account, groupInvite?.id]);
@@ -156,7 +178,12 @@ export default function GroupInviteScreen({
               <Text style={styles.description}>{groupInvite.description}</Text>
             )}
           </View>
-          {!polling && (
+          {joinStatus === "ACCEPTED" && (
+            <Text style={styles.accepted}>
+              {translate("group_already_joined")}
+            </Text>
+          )}
+          {!polling && (joinStatus === "PENDING" || joinStatus === null) && (
             <Button
               variant="primary"
               title={translate("join_group")}
@@ -171,20 +198,21 @@ export default function GroupInviteScreen({
               style={styles.cta}
             />
           )}
-          <Text style={styles.notification}>
-            {translate("group_admin_approval")}
-          </Text>
-          {finishedPolling && (
-            <Text style={styles.notification}>
-              {translate("group_finished_polling")}
-            </Text>
-          )}
+          {/* We may want to add some way for a user to get out of this state, but it's not likely to happen */}
           {joinStatus === "ERROR" && (
             <Text style={styles.error}>{translate("group_join_error")}</Text>
           )}
           {joinStatus === "REJECTED" && (
             <Text style={styles.error}>
               {translate("group_join_invite_invalid")}
+            </Text>
+          )}
+          <Text style={styles.notification}>
+            {translate("group_admin_approval")}
+          </Text>
+          {finishedPollingUnsuccessfully && (
+            <Text style={styles.notification}>
+              {translate("group_finished_polling")}
             </Text>
           )}
         </>
@@ -240,6 +268,14 @@ const useStyles = () => {
       lineHeight: 18,
       textAlign: "center",
       marginTop: 8,
+    },
+    accepted: {
+      color: textSecondaryColor(colorScheme),
+      fontSize: 20,
+      lineHeight: 18,
+      textAlign: "center",
+      marginTop: 8,
+      marginBottom: 20,
     },
     cta: {
       marginTop: 20,
