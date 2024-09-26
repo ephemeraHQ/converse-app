@@ -12,11 +12,16 @@ import {
   textSecondaryColor,
 } from "@styles/colors";
 import { AvatarSizes } from "@styles/sizes";
-import { createGroupJoinRequest, getGroupJoinRequest } from "@utils/api";
+import {
+  createGroupJoinRequest,
+  getGroupJoinRequest,
+  GroupJoinRequestStatus,
+} from "@utils/api";
 import {
   getInviteJoinRequest,
   saveInviteJoinRequest,
 } from "@utils/groupInvites";
+import { getTopicFromGroupId } from "@utils/groupUtils/groupId";
 import logger from "@utils/logger";
 import { GroupWithCodecsType } from "@utils/xmtpRN/client";
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -47,7 +52,7 @@ export default function GroupInviteScreen({
   ] = useState<{
     polling: boolean;
     finishedPollingUnsuccessfully: boolean;
-    joinStatus: null | "PENDING" | "ERROR" | "REJECTED" | "ACCEPTED";
+    joinStatus: null | GroupJoinRequestStatus;
   }>({
     polling: false,
     finishedPollingUnsuccessfully: false,
@@ -91,7 +96,11 @@ export default function GroupInviteScreen({
       finishedPollingUnsuccessfully: false,
       joinStatus: "PENDING",
     });
-    const groupsBeforeJoining = await fetchGroupsQuery(account);
+    const groupId = groupInvite.groupId;
+    // Group ID is not available on previous versions of the app, so we need to fetch the groups
+    const groupsBeforeJoining = groupId
+      ? await fetchGroupsQuery(account)
+      : { ids: [], byId: {} };
     logger.debug(
       `[GroupInvite] Before joining, group count = ${groupsBeforeJoining.ids.length}`
     );
@@ -108,7 +117,7 @@ export default function GroupInviteScreen({
       saveInviteJoinRequest(account, groupInvite?.id, joinRequestId);
     }
     let count = 0;
-    let status = "PENDING";
+    let status: GroupJoinRequestStatus = "PENDING";
     while (count < 10 && status === "PENDING") {
       const joinRequestData = await getGroupJoinRequest(joinRequestId);
       logger.debug(
@@ -119,11 +128,6 @@ export default function GroupInviteScreen({
         count += 1;
       } else {
         status = joinRequestData?.status;
-        setGroupJoinState({
-          polling: false,
-          finishedPollingUnsuccessfully: false,
-          joinStatus: joinRequestData?.status,
-        });
         break;
       }
     }
@@ -131,16 +135,43 @@ export default function GroupInviteScreen({
       setGroupJoinState({
         polling: false,
         finishedPollingUnsuccessfully: true,
-        joinStatus: "ERROR",
+        joinStatus: "PENDING",
       });
     } else if (status === "ACCEPTED") {
       const groupsAfterJoining = await fetchGroupsQuery(account);
-      logger.debug(
-        `[GroupInvite] After joining, group count = ${groupsBeforeJoining.ids.length}`
-      );
+      // Group ID was not on original invites, so we need to handle it separately
+      if (groupId) {
+        logger.debug(`[GroupInvite] Group ID exists`);
+        const groupTopic = getTopicFromGroupId(groupId);
+        const group = groupsAfterJoining.byId[groupTopic];
+        if (group) {
+          logger.debug(`[GroupInvite] Group found`);
+          // Check if the user has been removed from the group
+          if (group.isGroupActive) {
+            setNewGroup(group);
+          } else {
+            // The group is not active, so the user has been removed
+            logger.debug(`[GroupInvite] Group not found`);
+            setGroupJoinState({
+              polling: false,
+              finishedPollingUnsuccessfully: false,
+              joinStatus: "REJECTED",
+            });
+          }
+        } else {
+          logger.debug(`[GroupInvite] Group not found`);
+          setGroupJoinState({
+            polling: false,
+            finishedPollingUnsuccessfully: false,
+            joinStatus: "ACCEPTED",
+          });
+        }
+        return;
+      }
 
+      const oldGroupIds = new Set(groupsBeforeJoining.ids);
       const newGroupId = groupsAfterJoining.ids.find(
-        (id) => !groupsBeforeJoining.ids.includes(id)
+        (id) => !oldGroupIds.has(id)
       );
       if (newGroupId) {
         setNewGroup(groupsAfterJoining.byId[newGroupId]);
@@ -151,8 +182,14 @@ export default function GroupInviteScreen({
           joinStatus: "ACCEPTED",
         });
       }
+    } else {
+      setGroupJoinState({
+        polling: false,
+        finishedPollingUnsuccessfully: false,
+        joinStatus: status,
+      });
     }
-  }, [account, groupInvite?.id]);
+  }, [account, groupInvite?.id, groupInvite?.groupId]);
   const insets = useSafeAreaInsets();
   const headerHeight = useHeaderHeight();
 
@@ -183,15 +220,17 @@ export default function GroupInviteScreen({
               {translate("group_already_joined")}
             </Text>
           )}
-          {!polling && (joinStatus === "PENDING" || joinStatus === null) && (
-            <Button
-              variant="primary"
-              title={translate("join_group")}
-              style={styles.cta}
-              onPress={joinGroup}
-            />
-          )}
-          {joinStatus === "PENDING" && (
+          {!polling &&
+            joinStatus !== "ACCEPTED" &&
+            joinStatus !== "REJECTED" && (
+              <Button
+                variant="primary"
+                title={translate("join_group")}
+                style={styles.cta}
+                onPress={joinGroup}
+              />
+            )}
+          {polling && (
             <Button
               variant="primary"
               title={translate("joining")}

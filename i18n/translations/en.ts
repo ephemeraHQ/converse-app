@@ -261,6 +261,7 @@ const en = {
   group_join_invite_invalid: "This invite is no longer valid",
   group_finished_polling: "This is taking longer than expected",
   group_already_joined: "This invite has already been accepted",
+  group_invite_default_group_name: "New Group",
 
   // Group Overview
   change_profile_picture: "Change profile picture",

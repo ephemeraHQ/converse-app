@@ -417,6 +417,7 @@ export type GroupInvite = {
   groupName: string;
   imageUrl?: string;
   description?: string;
+  groupId?: string;
 };
 
 export type CreateGroupInviteResult = Pick<GroupInvite, "id" | "inviteLink">;
@@ -428,6 +429,7 @@ export const createGroupInvite = async (
     groupName: string;
     description?: string;
     imageUrl?: string;
+    groupId: string;
   }
 ): Promise<CreateGroupInviteResult> => {
   const { data } = await api.post("/api/groupInvite", inputs, {
@@ -460,6 +462,7 @@ export type GroupJoinRequest = {
   groupName: string;
   imageUrl?: string;
   description?: string;
+  groupId?: string;
 };
 
 // Create a group join request based on an invite ID.

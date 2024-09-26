@@ -93,9 +93,10 @@ export const GroupScreenAddition: FC<GroupScreenAdditionProps> = ({
 
   const onCreateInviteLinkPress = useCallback(() => {
     createGroupInvite(currentAccount, {
-      groupName: groupName ?? "New Group",
+      groupName: groupName ?? translate("group_invite_default_group_name"),
       imageUrl: groupPhoto,
       description: groupDescription,
+      groupId: getGroupIdFromTopic(topic),
     })
       .then((groupInvite) => {
         saveInviteIdByGroupId(getGroupIdFromTopic(topic), groupInvite.id);
