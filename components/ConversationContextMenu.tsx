@@ -1,6 +1,10 @@
 import TableView, { TableViewItemType } from "@components/TableView/TableView";
-import { backgroundColor } from "@styles/colors";
-import { HOLD_ITEM_TRANSFORM_DURATION } from "@utils/contextMenu/constants";
+import {
+  SIDE_MARGIN,
+  AUXILIARY_VIEW_MIN_HEIGHT,
+  HOLD_ITEM_TRANSFORM_DURATION,
+  contextMenuStyleGuide,
+} from "@utils/contextMenu/constants";
 import { BlurView } from "expo-blur";
 import React, { FC, memo, useCallback, useEffect } from "react";
 import {
@@ -50,7 +54,7 @@ const ConversationContextMenuComponent: FC<ConversationContextMenuProps> = ({
   const activeValue = useSharedValue(false);
   const opacityValue = useSharedValue(0);
   const intensityValue = useSharedValue(0);
-  const { height } = useWindowDimensions();
+  const { height, width } = useWindowDimensions();
   const safeAreaInsets = useSafeAreaInsets();
   const colorScheme = useColorScheme();
 
@@ -67,7 +71,9 @@ const ConversationContextMenuComponent: FC<ConversationContextMenuProps> = ({
   const translateY = useSharedValue(height);
 
   useEffect(() => {
-    translateY.value = withTiming(isVisible ? 0 : height, { duration: 300 });
+    translateY.value = withTiming(isVisible ? 0 : height, {
+      duration: HOLD_ITEM_TRANSFORM_DURATION,
+    });
   }, [isVisible, translateY, height]);
 
   const animatedStyle = useAnimatedStyle(() => ({
@@ -81,9 +87,13 @@ const ConversationContextMenuComponent: FC<ConversationContextMenuProps> = ({
   });
 
   const closeMenu = useCallback(() => {
-    translateY.value = withTiming(height, { duration: 300 }, () => {
-      runOnJS(onClose)();
-    });
+    translateY.value = withTiming(
+      height,
+      { duration: HOLD_ITEM_TRANSFORM_DURATION },
+      () => {
+        runOnJS(onClose)();
+      }
+    );
   }, [height, onClose, translateY]);
 
   const gesture = Gesture.Pan()
@@ -97,7 +107,9 @@ const ConversationContextMenuComponent: FC<ConversationContextMenuProps> = ({
       if (event.velocityY > 500 || event.translationY > height * 0.2) {
         runOnJS(closeMenu)();
       } else {
-        translateY.value = withTiming(0, { duration: 300 });
+        translateY.value = withTiming(0, {
+          duration: HOLD_ITEM_TRANSFORM_DURATION,
+        });
       }
     });
 
@@ -116,6 +128,7 @@ const ConversationContextMenuComponent: FC<ConversationContextMenuProps> = ({
           >
             <View style={styles.overlay}>
               <Animated.View style={[styles.container, animatedStyle]}>
+                <View style={styles.handle} />
                 <View style={styles.previewContainer}>
                   <Text style={styles.conversationName}>
                     {conversation.name}
@@ -127,13 +140,7 @@ const ConversationContextMenuComponent: FC<ConversationContextMenuProps> = ({
                 <View style={styles.menuContainer}>
                   <TableView
                     style={{
-                      backgroundColor:
-                        Platform.OS === "android"
-                          ? backgroundColor(colorScheme)
-                          : undefined,
-                      borderTopLeftRadius: 20,
-                      borderTopRightRadius: 20,
-                      paddingBottom: safeAreaInsets.bottom,
+                      maxWidth: width * 0.6,
                     }}
                     items={items}
                   />
@@ -156,22 +163,41 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "flex-end",
   },
+  handle: {
+    marginTop: 70,
+    marginBottom: 10,
+    width: 36,
+    height: 5,
+    backgroundColor: contextMenuStyleGuide.palette.secondary,
+    alignSelf: "center",
+    borderRadius: 2.5,
+  },
   previewContainer: {
     flex: 1,
-    backgroundColor: "white",
-    padding: 20,
-    justifyContent: "center",
+    margin: SIDE_MARGIN,
+    padding: contextMenuStyleGuide.spacing,
+    justifyContent: "flex-start",
+    minHeight: AUXILIARY_VIEW_MIN_HEIGHT,
+    backgroundColor: contextMenuStyleGuide.palette.common.white,
+    borderRadius: 16,
   },
   conversationName: {
-    fontSize: 24,
-    fontWeight: "bold",
-    marginBottom: 10,
+    ...contextMenuStyleGuide.typography.body,
+    fontWeight: "600",
+    marginBottom: contextMenuStyleGuide.spacing,
   },
   lastMessagePreview: {
-    fontSize: 16,
+    ...contextMenuStyleGuide.typography.callout,
+    color:
+      Platform.OS === "ios"
+        ? contextMenuStyleGuide.palette.secondary
+        : contextMenuStyleGuide.palette.common.black,
   },
   menuContainer: {
-    maxHeight: 300,
+    marginHorizontal: SIDE_MARGIN,
+    minHeight: 300,
+    borderRadius: 16,
+    overflow: "hidden",
   },
   flex: {
     flex: 1,
