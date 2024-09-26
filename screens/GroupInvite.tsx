@@ -216,7 +216,7 @@ export default function GroupInviteScreen({
           </Text>
           {finishedPollingUnsuccessfully && (
             <Text style={styles.notification}>
-              {translate("group_finished_polling")}
+              {translate("group_finished_polling_unsuccessfully")}
             </Text>
           )}
         </>
