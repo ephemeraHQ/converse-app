@@ -3,6 +3,7 @@ import {
   primaryColor,
   backgroundColor,
   textSecondaryColor,
+  textPrimaryColor,
 } from "@styles/colors";
 import { Wallet } from "ethers";
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -148,6 +149,7 @@ const useStyles = () => {
       borderRadius: 8,
       borderColor: primaryColor(colorScheme),
       backgroundColor: backgroundColor(colorScheme),
+      color: textPrimaryColor(colorScheme),
     },
   });
 };
