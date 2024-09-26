@@ -46,6 +46,8 @@ export default function GroupInviteScreen({
     setGroupJoinState,
   ] = useState<{
     polling: boolean;
+    /* Unsuccessfully here means that we have not yet received confirmation 
+        from the invitee that we have been added to the group */
     finishedPollingUnsuccessfully: boolean;
     joinStatus: null | "PENDING" | "ERROR" | "REJECTED" | "ACCEPTED";
   }>({
