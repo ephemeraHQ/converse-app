@@ -5,6 +5,8 @@ import {
   backgroundColor,
   textPrimaryColor,
 } from "@styles/colors";
+import { ConversationFlatListItem } from "@utils/conversation";
+import { converseEventEmitter } from "@utils/events";
 import React, {
   useCallback,
   useEffect,
@@ -25,7 +27,6 @@ import ActivityIndicator from "../../components/ActivityIndicator/ActivityIndica
 import AndroidBackAction from "../../components/AndroidBackAction";
 import Button from "../../components/Button/Button";
 import ConversationFlashList from "../../components/ConversationFlashList";
-import HiddenRequestsButton from "../../components/ConversationList/HiddenRequestsButton";
 import { showActionSheetWithOptions } from "../../components/StateHandlers/ActionSheetStateHandler";
 import {
   useChatStore,
@@ -133,9 +134,16 @@ export default function ConversationRequestsListNav() {
     [clearAllSpam, clearingAll, styles.headerContainer, styles.headerText]
   );
 
-  const handleSpamToggle = useCallback(() => {
+  const toggleSpamRequests = useCallback(() => {
     setIsSpamToggleEnabled((prev) => !prev);
   }, []);
+
+  useEffect(() => {
+    converseEventEmitter.on("toggleSpamRequests", toggleSpamRequests);
+    return () => {
+      converseEventEmitter.off("toggleSpamRequests", toggleSpamRequests);
+    };
+  }, [toggleSpamRequests]);
 
   // Navigate back to the main screen when no request to display
   useEffect(() => {
@@ -151,35 +159,32 @@ export default function ConversationRequestsListNav() {
     <NativeStack.Screen name="ChatsRequests" options={navigationOptions}>
       {(navigationProps) => {
         navRef.current = navigationProps.navigation;
+        let items: ConversationFlatListItem[] = likelyNotSpam;
+        if (likelySpam.length > 0) {
+          items = isSpamToggleEnabled
+            ? [
+                ...likelyNotSpam,
+                {
+                  topic: "hiddenRequestsButton",
+                  toggleActivated: true,
+                  spamCount: likelySpam.length,
+                },
+                ...likelySpam,
+              ]
+            : [
+                ...likelyNotSpam,
+                {
+                  topic: "hiddenRequestsButton",
+                  toggleActivated: false,
+                  spamCount: likelySpam.length,
+                },
+              ];
+        }
         return (
           <>
             <GestureHandlerRootView style={styles.root}>
               <View style={styles.container}>
-                <ConversationFlashList
-                  {...navigationProps}
-                  items={likelyNotSpam}
-                  ListFooterComponent={
-                    <View>
-                      {likelySpam.length ? (
-                        <HiddenRequestsButton
-                          spamCount={likelySpam.length}
-                          handlePress={handleSpamToggle}
-                          toggleActivated={isSpamToggleEnabled}
-                        />
-                      ) : (
-                        <></>
-                      )}
-                      {isSpamToggleEnabled ? (
-                        <ConversationFlashList
-                          {...navigationProps}
-                          items={likelySpam}
-                        />
-                      ) : (
-                        <></>
-                      )}
-                    </View>
-                  }
-                />
+                <ConversationFlashList {...navigationProps} items={items} />
               </View>
             </GestureHandlerRootView>
           </>
