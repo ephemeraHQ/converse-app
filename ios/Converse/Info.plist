@@ -72,6 +72,12 @@
 	<string>We need this so that you can take photos to share.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>We need this so that you can share photos from your library.</string>
+	<key>NSContactsUsageDescription</key>
+	<string>We need this to suggest contacts you know.</string>
+	<key>NSFaceIDUsageDescription</key>
+	<string>We need this to use biometrics to secure your data.</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>We need this to record audio messages.</string>
 	<key>NSUserActivityTypes</key>
 	<array>
 		<string>INSendMessageIntent</string>
