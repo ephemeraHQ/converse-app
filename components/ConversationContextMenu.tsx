@@ -2,18 +2,23 @@ import TableView, { TableViewItemType } from "@components/TableView/TableView";
 import { backgroundColor } from "@styles/colors";
 import { HOLD_ITEM_TRANSFORM_DURATION } from "@utils/contextMenu/constants";
 import { BlurView } from "expo-blur";
-import React, { FC, memo, useEffect } from "react";
+import React, { FC, memo, useCallback, useEffect } from "react";
 import {
   Text,
   Platform,
   StyleSheet,
-  TouchableWithoutFeedback,
   useColorScheme,
   useWindowDimensions,
   View,
 } from "react-native";
+import {
+  Gesture,
+  GestureDetector,
+  GestureHandlerRootView,
+} from "react-native-gesture-handler";
 import { Portal } from "react-native-paper";
 import Animated, {
+  runOnJS,
   useAnimatedProps,
   useAnimatedStyle,
   useSharedValue,
@@ -75,44 +80,69 @@ const ConversationContextMenuComponent: FC<ConversationContextMenuProps> = ({
     };
   });
 
+  const closeMenu = useCallback(() => {
+    translateY.value = withTiming(height, { duration: 300 }, () => {
+      runOnJS(onClose)();
+    });
+  }, [height, onClose, translateY]);
+
+  const gesture = Gesture.Pan()
+    .onStart(() => {
+      translateY.value = translateY.value;
+    })
+    .onUpdate((event) => {
+      translateY.value = Math.max(0, event.translationY);
+    })
+    .onEnd((event) => {
+      if (event.velocityY > 500 || event.translationY > height * 0.2) {
+        runOnJS(closeMenu)();
+      } else {
+        translateY.value = withTiming(0, { duration: 300 });
+      }
+    });
+
   if (!isVisible) {
     return null;
   }
 
   return (
     <Portal>
-      <TouchableWithoutFeedback onPress={onClose}>
-        <AnimatedBlurView
-          tint="default"
-          style={styles.flex}
-          animatedProps={animatedContainerProps}
-        >
-          <View style={styles.overlay}>
-            <Animated.View style={[styles.container, animatedStyle]}>
-              <View style={styles.previewContainer}>
-                <Text style={styles.conversationName}>{conversation.name}</Text>
-                <Text style={styles.lastMessagePreview}>
-                  {conversation.lastMessagePreview}
-                </Text>
-              </View>
-              <View style={styles.menuContainer}>
-                <TableView
-                  style={{
-                    backgroundColor:
-                      Platform.OS === "android"
-                        ? backgroundColor(colorScheme)
-                        : undefined,
-                    borderTopLeftRadius: 20,
-                    borderTopRightRadius: 20,
-                    paddingBottom: safeAreaInsets.bottom,
-                  }}
-                  items={items}
-                />
-              </View>
-            </Animated.View>
-          </View>
-        </AnimatedBlurView>
-      </TouchableWithoutFeedback>
+      <GestureHandlerRootView style={StyleSheet.absoluteFill}>
+        <GestureDetector gesture={gesture}>
+          <AnimatedBlurView
+            tint="default"
+            style={styles.flex}
+            animatedProps={animatedContainerProps}
+          >
+            <View style={styles.overlay}>
+              <Animated.View style={[styles.container, animatedStyle]}>
+                <View style={styles.previewContainer}>
+                  <Text style={styles.conversationName}>
+                    {conversation.name}
+                  </Text>
+                  <Text style={styles.lastMessagePreview}>
+                    {conversation.lastMessagePreview}
+                  </Text>
+                </View>
+                <View style={styles.menuContainer}>
+                  <TableView
+                    style={{
+                      backgroundColor:
+                        Platform.OS === "android"
+                          ? backgroundColor(colorScheme)
+                          : undefined,
+                      borderTopLeftRadius: 20,
+                      borderTopRightRadius: 20,
+                      paddingBottom: safeAreaInsets.bottom,
+                    }}
+                    items={items}
+                  />
+                </View>
+              </Animated.View>
+            </View>
+          </AnimatedBlurView>
+        </GestureDetector>
+      </GestureHandlerRootView>
     </Portal>
   );
 };
