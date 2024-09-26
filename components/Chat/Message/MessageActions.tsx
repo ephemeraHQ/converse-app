@@ -10,11 +10,24 @@ import {
   myMessageBubbleColor,
   myMessageHighlightedBubbleColor,
 } from "@styles/colors";
+import { useConversationContext } from "@utils/conversation";
 import { isFrameMessage } from "@utils/frames";
 import { navigate } from "@utils/navigation";
 import * as Haptics from "expo-haptics";
-import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { Platform, StyleSheet, useColorScheme, View } from "react-native";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
+import {
+  Keyboard,
+  Platform,
+  StyleSheet,
+  useColorScheme,
+  View,
+} from "react-native";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import Animated, {
   AnimatedStyle,
@@ -75,6 +88,7 @@ export default function ChatMessageActions({
   const { setContextMenuShown } = useAppStore(
     useSelect(["setContextMenuShown"])
   );
+  const inputRef = useConversationContext("inputRef");
   const opacity = useSharedValue(0);
   const scale = useSharedValue(0.7);
   const translateY = useSharedValue(20);
@@ -84,6 +98,7 @@ export default function ChatMessageActions({
   const itemRectWidth = useSharedValue(0);
   const containerRef = useAnimatedRef<View>();
   const [isActive, setIsActive] = useState(false);
+  const keyboardWasOpen = useRef(false);
 
   const scaleBack = useCallback(() => {
     "worklet";
@@ -111,15 +126,25 @@ export default function ChatMessageActions({
     opacity,
   ]);
 
+  const dismissKeyboard = useCallback(() => {
+    const isVisible = Keyboard.isVisible();
+    keyboardWasOpen.current = isVisible;
+    if (isVisible) {
+      Keyboard.dismiss();
+    }
+  }, []);
+
   const onLongHoldCompletion = useCallback(
     (isFinished?: boolean) => {
       "worklet";
       if (isFinished) {
         activateAnimation();
+        runOnJS(dismissKeyboard)();
         runOnJS(setIsActive)(true);
+        runOnJS(setContextMenuShown)(message.id);
       }
     },
-    [activateAnimation]
+    [activateAnimation, message.id, setContextMenuShown, dismissKeyboard]
   );
 
   const scaleHold = useCallback(() => {
@@ -164,13 +189,12 @@ export default function ChatMessageActions({
       .onStart(() => {
         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
         scaleHold();
-        setContextMenuShown(message.id);
       })
       .onEnd(() => {
         scaleBack();
       })
       .runOnJS(true);
-  }, [message.id, scaleBack, scaleHold, setContextMenuShown]);
+  }, [scaleBack, scaleHold]);
 
   const composed = useMemo(() => {
     return Gesture.Simultaneous(tapGesture, doubleTapGesture, longPressGesture);
@@ -283,7 +307,10 @@ export default function ChatMessageActions({
     "worklet";
     opacity.value = 1;
     runOnJS(setIsActive)(false);
-  }, [setIsActive, opacity]);
+    if (keyboardWasOpen.current && inputRef.current) {
+      inputRef.current.focus();
+    }
+  }, [inputRef, opacity]);
 
   const onContextClose = useCallback(() => {
     onContextCloseAnimation();
@@ -461,7 +488,7 @@ export default function ChatMessageActions({
   return (
     <>
       <GestureDetector gesture={composed}>
-        <View style={[{ width: "100%" }, { overflow: "visible" }]}>
+        <View style={styles.wrapper}>
           <Animated.View
             ref={containerRef}
             style={[animateInStyle, styles.animateInWrapper]}
@@ -512,6 +539,10 @@ const useStyles = () => {
     },
     messageContainer: {
       flexDirection: "row",
+    },
+    wrapper: {
+      width: "100%",
+      overflow: "visible",
     },
   });
 };
