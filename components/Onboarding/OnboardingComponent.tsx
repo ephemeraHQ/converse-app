@@ -82,7 +82,7 @@ export default function OnboardingComponent({
 
   return (
     <View style={{ flex: 1, flexDirection: "column" }}>
-      {backButtonText && (
+      {/* {backButtonText && (
         <Button
           variant="text"
           picto={
@@ -107,7 +107,7 @@ export default function OnboardingComponent({
             }
           }}
         />
-      )}
+      )} */}
       <ScrollView
         alwaysBounceVertical={false}
         contentContainerStyle={styles.onboardingContent}

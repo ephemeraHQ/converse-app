@@ -2,7 +2,6 @@ import { LinkingOptions, NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import * as Linking from "expo-linking";
 import { Platform, useColorScheme } from "react-native";
-import { GestureHandlerRootView } from "react-native-gesture-handler";
 
 import AccountsNav from "./AccountsNav";
 import ConversationBlockedListNav from "./ConversationBlockedListNav";
@@ -101,77 +100,73 @@ export default function Navigation() {
   const splashScreenHidden = useAppStore((s) => s.splashScreenHidden);
 
   return (
-    <GestureHandlerRootView style={{ flex: 1 }}>
-      <NavigationContainer
-        linking={splashScreenHidden ? linking : undefined}
-        onReady={() => {
-          logger.debug("Navigation ready");
-          useAppStore.setState({ navigationReady: true });
-        }}
-        initialState={
-          Platform.OS === "ios" || Platform.OS === "web"
-            ? {
-                // On iOS, the Accounts switcher is available through a back button
-                index: 1,
-                routes: [
-                  {
-                    name: "Accounts",
-                  },
-                  {
-                    name: "Chats",
-                  },
-                ],
-                type: "stack",
-              }
-            : {
-                // On Android, the Accounts switcher is available through the drawer
-                index: 0,
-                routes: [
-                  {
-                    name: "Chats",
-                  },
-                ],
-                type: "stack",
-              }
+    <NavigationContainer
+      linking={splashScreenHidden ? linking : undefined}
+      onReady={() => {
+        logger.debug("Navigation ready");
+        useAppStore.setState({ navigationReady: true });
+      }}
+      initialState={
+        Platform.OS === "ios" || Platform.OS === "web"
+          ? {
+              // On iOS, the Accounts switcher is available through a back button
+              index: 1,
+              routes: [
+                {
+                  name: "Accounts",
+                },
+                {
+                  name: "Chats",
+                },
+              ],
+              type: "stack",
+            }
+          : {
+              // On Android, the Accounts switcher is available through the drawer
+              index: 0,
+              routes: [
+                {
+                  name: "Chats",
+                },
+              ],
+              type: "stack",
+            }
+      }
+      ref={(r) => {
+        if (r) {
+          converseNavigations["mainStack"] = r;
         }
-        ref={(r) => {
-          if (r) {
-            converseNavigations["mainStack"] = r;
-          }
-        }}
-        onUnhandledAction={() => {
-          // Since we're handling multiple navigators,
-          // let's silence errors when the action
-          // is not meant for this one
-        }}
+      }}
+      onUnhandledAction={() => {
+        // Since we're handling multiple navigators,
+        // let's silence errors when the action
+        // is not meant for this one
+      }}
+    >
+      <NativeStack.Navigator
+        screenOptions={{ gestureEnabled: !isDesktop }}
+        screenListeners={screenListeners("fullStackNavigation")}
       >
-        <NativeStack.Navigator
-          screenOptions={{ gestureEnabled: !isDesktop }}
-          screenListeners={screenListeners("fullStackNavigation")}
-        >
-          <NativeStack.Group
-            screenOptions={stackGroupScreenOptions(colorScheme)}
-          >
-            {AccountsNav()}
-            {ConversationListNav()}
-            {ConversationRequestsListNav()}
-            {ConversationBlockedListNav()}
-            {ConversationNav()}
-            {NewConversationNav()}
-            {ConverseMatchMakerNav()}
-            {ShareProfileNav()}
-            {ShareFrameNav()}
-            {WebviewPreviewNav()}
-            {ProfileNav()}
-            {GroupNav()}
-            {GroupLinkNav()}
-            {GroupInviteNav()}
-            {UserProfileNav()}
-            {TopUpNav()}
-            {EnableTransactionsNav()}
-          </NativeStack.Group>
-        </NativeStack.Navigator>
-      </NavigationContainer>
-    </GestureHandlerRootView>
+        <NativeStack.Group screenOptions={stackGroupScreenOptions(colorScheme)}>
+          {AccountsNav()}
+          {ConversationListNav()}
+          {ConversationRequestsListNav()}
+          {ConversationBlockedListNav()}
+          {ConversationNav()}
+          {NewConversationNav()}
+          {ConverseMatchMakerNav()}
+          {ShareProfileNav()}
+          {ShareFrameNav()}
+          {WebviewPreviewNav()}
+          {ProfileNav()}
+          {GroupNav()}
+          {GroupLinkNav()}
+          {GroupInviteNav()}
+          {UserProfileNav()}
+          {TopUpNav()}
+          {EnableTransactionsNav()}
+        </NativeStack.Group>
+      </NativeStack.Navigator>
+    </NavigationContainer>
   );
 }

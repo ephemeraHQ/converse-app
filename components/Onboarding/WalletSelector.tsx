@@ -25,6 +25,7 @@ import {
 import config from "../../config";
 import { useOnboardingStore } from "../../data/store/onboardingStore";
 import { useSelect } from "../../data/store/storeHelpers";
+import { useAuthNavigation } from "../../navigation/use-navigation";
 import { isDesktop } from "../../utils/device";
 import { getEthOSSigner } from "../../utils/ethos";
 import TableView from "../TableView/TableView";
@@ -35,21 +36,18 @@ import {
 } from "../TableView/TableViewImage";
 
 export default function WalletSelector() {
-  const {
-    setConnectionMethod,
-    setSigner,
-    setLoading,
-    addingNewAccount,
-    setAddingNewAccount,
-  } = useOnboardingStore(
-    useSelect([
-      "setConnectionMethod",
-      "setSigner",
-      "setLoading",
-      "addingNewAccount",
-      "setAddingNewAccount",
-    ])
-  );
+  const router = useAuthNavigation();
+
+  const { setConnectionMethod, setSigner, setLoading, setAddingNewAccount } =
+    useOnboardingStore(
+      useSelect([
+        "setConnectionMethod",
+        "setSigner",
+        "setLoading",
+        "addingNewAccount",
+        "setAddingNewAccount",
+      ])
+    );
   const colorScheme = useColorScheme();
   const { connect: thirdwebConnect } = useConnect();
   const setActiveWallet = useSetActiveWallet();
@@ -72,7 +70,7 @@ export default function WalletSelector() {
       setWalletsInstalled({ checked: true, list });
     };
     loadInstalledWallets(false);
-    // Things to do when app status changes (does NOT include first load)
+
     const subscription = AppState.addEventListener(
       "change",
       async (nextAppState) => {
@@ -80,19 +78,17 @@ export default function WalletSelector() {
           nextAppState === "active" &&
           appState.current.match(/inactive|background/)
         ) {
-          // App is back to active state
           loadInstalledWallets(true);
         }
         appState.current = nextAppState;
       }
     );
-    return () => {
-      subscription.remove();
-    };
-  }, [setWalletsInstalled]);
+    return () => subscription.remove();
+  }, []);
 
   const hasInstalledWallets = walletsInstalled.list.length > 0;
   const insets = useSafeAreaInsets();
+
   return (
     <OnboardingComponent
       title={translate("walletSelector.title")}
@@ -121,7 +117,7 @@ export default function WalletSelector() {
               ),
               rightView,
               action: () => {
-                setConnectionMethod("phone");
+                router.push("PhoneLogin");
               },
             },
             {
@@ -132,7 +128,7 @@ export default function WalletSelector() {
               ),
               rightView,
               action: () => {
-                setConnectionMethod("ephemeral");
+                router.push("EphemeralLogin");
               },
             },
           ]}
@@ -157,7 +153,6 @@ export default function WalletSelector() {
                 try {
                   if (w.name === "Coinbase Wallet") {
                     thirdwebConnect(async () => {
-                      // instantiate wallet
                       const coinbaseWallet = createWallet(
                         "com.coinbase.wallet",
                         {
@@ -173,11 +168,7 @@ export default function WalletSelector() {
                     });
                   } else if (w.name === "EthOS Wallet") {
                     const signer = getEthOSSigner();
-                    if (signer) {
-                      setSigner(signer);
-                    } else {
-                      setLoading(false);
-                    }
+                    signer ? setSigner(signer) : setLoading(false);
                   } else if (w.thirdwebId) {
                     const walletConnectWallet = createWallet(w.thirdwebId);
                     await walletConnectWallet.connect({
@@ -206,23 +197,6 @@ export default function WalletSelector() {
               : translate("walletSelector.connectionOptions.connectForDevs")
           }
           items={[
-            // {
-            //   id: "desktop",
-            //   leftView: <TableViewEmoji emoji={isDesktop ? "😎" : "💻"} />,
-            //   title: isDesktop
-            //     ? "Connect via browser wallet"
-            //     : "Connect via desktop",
-            //   rightView,
-            //   action: () => {
-            //     if (isDesktop) {
-            //       Linking.openURL(
-            //         `https://${config.websiteDomain}/connect?desktop=true`
-            //       );
-            //     } else {
-            //       setConnectionMethod("desktop");
-            //     }
-            //   },
-            // },
             {
               id: "privateKey",
               leftView: <TableViewEmoji emoji="🔑" />,
@@ -230,9 +204,7 @@ export default function WalletSelector() {
                 "walletSelector.connectionOptions.connectViaKey"
               ),
               rightView,
-              action: () => {
-                setConnectionMethod("privateKey");
-              },
+              action: () => router.push("ConnectWallet"),
             },
           ]}
         />
@@ -244,9 +216,7 @@ export default function WalletSelector() {
               title: w.name,
               leftView: <TableViewImage imageURI={w.iconURL} />,
               rightView,
-              action: () => {
-                Linking.openURL(w.url);
-              },
+              action: () => Linking.openURL(w.url),
             }))}
           />
         )}
