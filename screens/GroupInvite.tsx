@@ -183,15 +183,17 @@ export default function GroupInviteScreen({
               {translate("group_already_joined")}
             </Text>
           )}
-          {!polling && (joinStatus === "PENDING" || joinStatus === null) && (
-            <Button
-              variant="primary"
-              title={translate("join_group")}
-              style={styles.cta}
-              onPress={joinGroup}
-            />
-          )}
-          {joinStatus === "PENDING" && (
+          {!polling &&
+            joinStatus !== "ACCEPTED" &&
+            joinStatus !== "REJECTED" && (
+              <Button
+                variant="primary"
+                title={translate("join_group")}
+                style={styles.cta}
+                onPress={joinGroup}
+              />
+            )}
+          {polling && (
             <Button
               variant="primary"
               title={translate("joining")}
