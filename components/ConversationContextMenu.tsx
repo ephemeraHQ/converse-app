@@ -6,6 +6,9 @@ import {
   AUXILIARY_VIEW_MIN_HEIGHT,
   HOLD_ITEM_TRANSFORM_DURATION,
   contextMenuStyleGuide,
+  BACKDROP_DARK_BACKGROUND_COLOR,
+  BACKDROP_LIGHT_BACKGROUND_COLOR,
+  ITEM_WIDTH,
 } from "@utils/contextMenu/constants";
 import { BlurView } from "expo-blur";
 import React, { FC, memo, useCallback, useEffect } from "react";
@@ -55,6 +58,7 @@ const ConversationContextMenuComponent: FC<ConversationContextMenuProps> = ({
   const intensityValue = useSharedValue(0);
   const isSplitScreen = useIsSplitScreen();
   const { height, width } = useWindowDimensions();
+  const colorScheme = useColorScheme();
   const styles = useStyles();
 
   useEffect(() => {
@@ -84,6 +88,15 @@ const ConversationContextMenuComponent: FC<ConversationContextMenuProps> = ({
       intensity: intensityValue.value,
     };
   });
+
+  const backDropContainerStyle = useAnimatedStyle(() => {
+    const backgroundColor =
+      colorScheme === "dark"
+        ? BACKDROP_DARK_BACKGROUND_COLOR
+        : BACKDROP_LIGHT_BACKGROUND_COLOR;
+
+    return { backgroundColor };
+  }, []);
 
   const closeMenu = useCallback(() => {
     translateY.value = withTiming(
@@ -119,7 +132,10 @@ const ConversationContextMenuComponent: FC<ConversationContextMenuProps> = ({
         <GestureDetector gesture={gesture}>
           <AnimatedBlurView
             tint="default"
-            style={styles.flex}
+            style={[
+              styles.flex,
+              Platform.OS === "android" ? backDropContainerStyle : undefined,
+            ]}
             animatedProps={animatedContainerProps}
           >
             <View style={styles.overlay}>
@@ -140,13 +156,7 @@ const ConversationContextMenuComponent: FC<ConversationContextMenuProps> = ({
                   </GestureDetector>
                 </View>
                 <View style={styles.menuContainer}>
-                  <TableView
-                    style={{
-                      width: width * 0.6,
-                      maxWidth: 250,
-                    }}
-                    items={items}
-                  />
+                  <TableView style={styles.table} items={items} />
                 </View>
               </Animated.View>
             </View>
@@ -207,6 +217,12 @@ const useStyles = () => {
     },
     flex: {
       flex: 1,
+    },
+    table: {
+      width: ITEM_WIDTH,
+      backgroundColor:
+        Platform.OS === "android" ? backgroundColor(colorScheme) : undefined,
+      borderRadius: Platform.OS === "android" ? 10 : undefined,
     },
   });
 };
