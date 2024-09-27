@@ -53,20 +53,10 @@ import {
   View,
   ViewStyle,
 } from "react-native";
-import { SvgProps } from "react-native-svg";
 
 import Reply from "../../assets/reply.svg";
 
-type Props = {
-  picto: string;
-  style?: StyleProp<ViewStyle>;
-  color?: ColorValue;
-  size?: number;
-};
-
-const pictoMapping: {
-  [key: string]: React.FC<SvgProps> | undefined;
-} = {
+const pictoMapping = {
   xmark: Close,
   "xmark.circle.fill": Close,
   plus: Add,
@@ -116,6 +106,15 @@ const pictoMapping: {
   "person.crop.circle.badge.plus": GroupAdd,
   tray: Inbox,
   cloud: Cloud,
+} as const;
+
+export type IPicto = keyof typeof pictoMapping;
+
+export type IPictoProps = {
+  picto: IPicto;
+  style?: StyleProp<ViewStyle>;
+  color?: ColorValue;
+  size?: number;
 };
 
 export default function Picto({
@@ -123,7 +122,7 @@ export default function Picto({
   style,
   size = PictoSizes.default,
   color,
-}: Props) {
+}: IPictoProps) {
   const SvgPicto = pictoMapping[picto];
   const colorScheme = useColorScheme();
   if (SvgPicto) {

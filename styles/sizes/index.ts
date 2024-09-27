@@ -25,7 +25,7 @@ export enum PictoSizes {
   newConversationButton = Platform.OS === "ios" ? 16 : 24,
   navItem = 24,
   notification = Platform.OS === "android" ? 80 : 43,
-  onboardingComponent = Platform.OS === "android" ? 80 : 43,
+  onboardingComponent = Platform.OS === "android" ? 80 : 80,
   onboarding = 80,
   privyConnect = Platform.OS === "ios" ? 12 : 22,
   replyButton = Platform.OS === "android" ? 16 : 14,
