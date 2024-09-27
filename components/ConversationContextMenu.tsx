@@ -152,7 +152,7 @@ const ConversationContextMenuComponent: FC<ConversationContextMenuProps> = ({
                       }
                     })}
                   >
-                    <ConversationReadOnly topic={conversationTopic} readOnly />
+                    <ConversationReadOnly topic={conversationTopic} />
                   </GestureDetector>
                 </View>
                 <View style={styles.menuContainer}>
