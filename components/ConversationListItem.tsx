@@ -551,15 +551,14 @@ const ConversationListItem = memo(function ConversationListItem({
         isVisible={isContextMenuVisible}
         onClose={closeContextMenu}
         items={contextMenuItems}
-        conversation={{ name: conversationName, lastMessagePreview }}
+        conversationTopic={conversationTopic}
       />
     ),
     [
       isContextMenuVisible,
       closeContextMenu,
       contextMenuItems,
-      conversationName,
-      lastMessagePreview,
+      conversationTopic,
     ]
   );
 
@@ -614,6 +613,7 @@ const ConversationListItem = memo(function ConversationListItem({
         {rowItem}
         {contextMenuComponent}
       </Swipeable>
+      {/* Hide part of the border to mimic margin*/}
       {Platform.OS === "ios" && <View style={styles.rowSeparatorMargin} />}
     </View>
   );

@@ -1,4 +1,5 @@
 import TableView, { TableViewItemType } from "@components/TableView/TableView";
+import { ConversationReadOnly } from "@screens/ConversationReadOnly";
 import {
   SIDE_MARGIN,
   AUXILIARY_VIEW_MIN_HEIGHT,
@@ -8,7 +9,6 @@ import {
 import { BlurView } from "expo-blur";
 import React, { FC, memo, useCallback, useEffect } from "react";
 import {
-  Text,
   Platform,
   StyleSheet,
   useColorScheme,
@@ -39,17 +39,14 @@ type ConversationContextMenuProps = {
   isVisible: boolean;
   onClose: () => void;
   items: TableViewItemType[];
-  conversation: {
-    name: string;
-    lastMessagePreview?: string;
-  };
+  conversationTopic: string;
 };
 
 const ConversationContextMenuComponent: FC<ConversationContextMenuProps> = ({
   isVisible,
   onClose,
   items,
-  conversation,
+  conversationTopic,
 }) => {
   const activeValue = useSharedValue(false);
   const opacityValue = useSharedValue(0);
@@ -130,12 +127,7 @@ const ConversationContextMenuComponent: FC<ConversationContextMenuProps> = ({
               <Animated.View style={[styles.container, animatedStyle]}>
                 <View style={styles.handle} />
                 <View style={styles.previewContainer}>
-                  <Text style={styles.conversationName}>
-                    {conversation.name}
-                  </Text>
-                  <Text style={styles.lastMessagePreview}>
-                    {conversation.lastMessagePreview}
-                  </Text>
+                  <ConversationReadOnly topic={conversationTopic} readOnly />
                 </View>
                 <View style={styles.menuContainer}>
                   <TableView
@@ -175,7 +167,8 @@ const styles = StyleSheet.create({
   previewContainer: {
     flex: 1,
     margin: SIDE_MARGIN,
-    padding: contextMenuStyleGuide.spacing,
+    paddingBottom: contextMenuStyleGuide.spacing,
+    overflow: "hidden",
     justifyContent: "flex-start",
     minHeight: AUXILIARY_VIEW_MIN_HEIGHT,
     backgroundColor: contextMenuStyleGuide.palette.common.white,
