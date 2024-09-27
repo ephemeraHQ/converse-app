@@ -133,23 +133,6 @@ const ConversationListItem = memo(function ConversationListItem({
     [itemRect]
   );
 
-  const showContextMenu = useCallback(() => {
-    setIsContextMenuVisible(true);
-  }, []);
-
-  const closeContextMenu = useCallback(() => {
-    setIsContextMenuVisible(false);
-  }, []);
-
-  const triggerHapticFeedback = useCallback(() => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-  }, []);
-
-  const onLongPress = useCallback(() => {
-    runOnJS(triggerHapticFeedback)();
-    runOnJS(showContextMenu)();
-  }, [triggerHapticFeedback, showContextMenu]);
-
   const openConversation = useCallback(async () => {
     const getUserAction = async () => {
       const methods = {
@@ -233,6 +216,29 @@ const ConversationListItem = memo(function ConversationListItem({
     isSplitScreen,
     colorScheme,
   ]);
+
+  const showContextMenu = useCallback(() => {
+    setIsContextMenuVisible(true);
+  }, []);
+
+  const closeContextMenu = useCallback(
+    (openConversationOnClose = false) => {
+      setIsContextMenuVisible(false);
+      if (openConversationOnClose) {
+        openConversation();
+      }
+    },
+    [openConversation]
+  );
+
+  const triggerHapticFeedback = useCallback(() => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+  }, []);
+
+  const onLongPress = useCallback(() => {
+    runOnJS(triggerHapticFeedback)();
+    runOnJS(showContextMenu)();
+  }, [triggerHapticFeedback, showContextMenu]);
 
   useEffect(() => {
     const navRef = navigationRef.current;

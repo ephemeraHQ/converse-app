@@ -37,7 +37,7 @@ const AnimatedBlurView =
 
 type ConversationContextMenuProps = {
   isVisible: boolean;
-  onClose: () => void;
+  onClose: (openConversationOnClose?: boolean) => void;
   items: TableViewItemType[];
   conversationTopic: string;
 };
@@ -93,9 +93,6 @@ const ConversationContextMenuComponent: FC<ConversationContextMenuProps> = ({
   }, [height, onClose, translateY]);
 
   const gesture = Gesture.Pan()
-    .onStart(() => {
-      translateY.value = translateY.value;
-    })
     .onUpdate((event) => {
       translateY.value = Math.max(0, event.translationY);
     })
@@ -126,7 +123,13 @@ const ConversationContextMenuComponent: FC<ConversationContextMenuProps> = ({
               <Animated.View style={[styles.container, animatedStyle]}>
                 <View style={styles.handle} />
                 <View style={styles.previewContainer}>
-                  <ConversationReadOnly topic={conversationTopic} readOnly />
+                  <GestureDetector
+                    gesture={Gesture.Tap().onEnd(() => {
+                      runOnJS(onClose)(true);
+                    })}
+                  >
+                    <ConversationReadOnly topic={conversationTopic} readOnly />
+                  </GestureDetector>
                 </View>
                 <View style={styles.menuContainer}>
                   <TableView
