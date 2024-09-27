@@ -1,4 +1,3 @@
-import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { backgroundColor, headerTitleStyle } from "@styles/colors";
 import React, {
   useCallback,
@@ -9,7 +8,6 @@ import React, {
 } from "react";
 import { StyleSheet, useColorScheme, View } from "react-native";
 
-import { NavigationParamList } from "./Navigation/Navigation";
 import ConverseChat from "../components/Chat/Chat";
 import { EmojiPicker } from "../containers/EmojiPicker";
 import {
@@ -24,13 +22,10 @@ import { setTopicToNavigateTo, topicToNavigateTo } from "../utils/navigation";
 import { TextInputWithValue } from "../utils/str";
 import { loadOlderMessages } from "../utils/xmtpRN/messages";
 
-export const ConversationReadOnly = ({
-  topic,
-  readOnly,
-}: NativeStackScreenProps<NavigationParamList, "Conversation"> & {
+export const ConversationReadOnly: React.FC<{
   topic?: string;
   readOnly?: boolean;
-}) => {
+}> = ({ topic, readOnly = true }) => {
   const colorScheme = useColorScheme();
   const peersStatus = useSettingsStore((s) => s.peersStatus);
   const [transactionMode, setTransactionMode] = useState(false);
