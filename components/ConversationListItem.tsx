@@ -454,6 +454,23 @@ const ConversationListItem = memo(function ConversationListItem({
     );
   }, [showUnread, styles.leftAction, colorScheme]);
 
+  const toggleReadStatus = useCallback(() => {
+    const newStatus = showUnread ? "read" : "unread";
+    const timestamp = new Date().getTime();
+    setTopicsData({
+      [conversationTopic]: {
+        status: newStatus,
+        timestamp,
+      },
+    });
+    saveTopicsData(currentAccount(), {
+      [conversationTopic]: {
+        status: newStatus,
+        timestamp,
+      },
+    });
+  }, [setTopicsData, conversationTopic, showUnread]);
+
   const contextMenuItems = useMemo(
     () => [
       {
@@ -465,14 +482,11 @@ const ConversationListItem = memo(function ConversationListItem({
         id: "pin",
       },
       {
-        title: translate("mark_as_unread"),
+        title: showUnread
+          ? translate("mark_as_read")
+          : translate("mark_as_unread"),
         action: () => {
-          setTopicsData({
-            [conversationTopic]: {
-              status: "unread",
-              timestamp: new Date().getTime(),
-            },
-          });
+          toggleReadStatus();
           closeContextMenu();
         },
         id: "markAsUnread",
@@ -489,9 +503,10 @@ const ConversationListItem = memo(function ConversationListItem({
     [
       conversationTopic,
       setPinnedConversations,
-      setTopicsData,
       handleDelete,
       closeContextMenu,
+      showUnread,
+      toggleReadStatus,
     ]
   );
 
@@ -591,18 +606,7 @@ const ConversationListItem = memo(function ConversationListItem({
         onSwipeableClose={(direction) => {
           if (direction === "left" && toggleUnreadStatusOnClose.current) {
             toggleUnreadStatusOnClose.current = false;
-            setTopicsData({
-              [conversationTopic]: {
-                status: showUnread ? "read" : "unread",
-                timestamp: new Date().getTime(),
-              },
-            });
-            saveTopicsData(currentAccount(), {
-              [conversationTopic]: {
-                status: showUnread ? "read" : "unread",
-                timestamp: new Date().getTime(),
-              },
-            });
+            toggleReadStatus();
           }
           if (Platform.OS === "web") {
             setSwipeableKey(new Date().getTime());
