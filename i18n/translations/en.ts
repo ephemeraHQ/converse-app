@@ -205,6 +205,7 @@ const en = {
 
   // Conversation Context Menu
   pin: "Pin",
+  mark_as_read: "Mark as read",
   mark_as_unread: "Mark as unread",
 
   // NewGroupSummary
