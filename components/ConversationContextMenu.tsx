@@ -30,6 +30,8 @@ import Animated, {
   withTiming,
 } from "react-native-reanimated";
 
+import { useIsSplitScreen } from "../screens/Navigation/navHelpers";
+
 const AnimatedBlurView =
   Platform.OS === "ios"
     ? Animated.createAnimatedComponent(BlurView)
@@ -51,6 +53,7 @@ const ConversationContextMenuComponent: FC<ConversationContextMenuProps> = ({
   const activeValue = useSharedValue(false);
   const opacityValue = useSharedValue(0);
   const intensityValue = useSharedValue(0);
+  const isSplitScreen = useIsSplitScreen();
   const { height, width } = useWindowDimensions();
   const styles = useStyles();
 
@@ -125,7 +128,12 @@ const ConversationContextMenuComponent: FC<ConversationContextMenuProps> = ({
                 <View style={styles.previewContainer}>
                   <GestureDetector
                     gesture={Gesture.Tap().onEnd(() => {
-                      runOnJS(onClose)(true);
+                      if (isSplitScreen) {
+                        runOnJS(closeMenu)();
+                      } else {
+                        // Navigate to conversation
+                        runOnJS(onClose)(true);
+                      }
                     })}
                   >
                     <ConversationReadOnly topic={conversationTopic} readOnly />
@@ -134,7 +142,8 @@ const ConversationContextMenuComponent: FC<ConversationContextMenuProps> = ({
                 <View style={styles.menuContainer}>
                   <TableView
                     style={{
-                      maxWidth: width * 0.6,
+                      width: width * 0.6,
+                      maxWidth: 250,
                     }}
                     items={items}
                   />
