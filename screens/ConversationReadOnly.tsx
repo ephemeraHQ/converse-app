@@ -24,8 +24,7 @@ import { loadOlderMessages } from "../utils/xmtpRN/messages";
 
 export const ConversationReadOnly: React.FC<{
   topic?: string;
-  readOnly?: boolean;
-}> = ({ topic, readOnly = true }) => {
+}> = ({ topic }) => {
   const colorScheme = useColorScheme();
   const peersStatus = useSettingsStore((s) => s.peersStatus);
   const [transactionMode, setTransactionMode] = useState(false);
@@ -174,7 +173,7 @@ export const ConversationReadOnly: React.FC<{
             tagsFetchedOnceForMessage,
           }}
         >
-          <ConverseChat readOnly={readOnly} />
+          <ConverseChat readOnly />
         </ConversationContext.Provider>
       ) : (
         <View style={styles.filler} />
