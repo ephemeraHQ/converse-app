@@ -101,8 +101,8 @@ export default function GroupInviteScreen({
     const groupId = groupInvite.groupId;
     // Group ID is not available on previous versions of the app, so we need to fetch the groups
     const groupsBeforeJoining = groupId
-      ? await fetchGroupsQuery(account)
-      : { ids: [], byId: {} };
+      ? { ids: [], byId: {} }
+      : await fetchGroupsQuery(account);
     logger.debug(
       `[GroupInvite] Before joining, group count = ${groupsBeforeJoining.ids.length}`
     );
