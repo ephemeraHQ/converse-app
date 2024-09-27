@@ -1,5 +1,6 @@
 import TableView, { TableViewItemType } from "@components/TableView/TableView";
 import { ConversationReadOnly } from "@screens/ConversationReadOnly";
+import { backgroundColor } from "@styles/colors";
 import {
   SIDE_MARGIN,
   AUXILIARY_VIEW_MIN_HEIGHT,
@@ -28,7 +29,6 @@ import Animated, {
   useSharedValue,
   withTiming,
 } from "react-native-reanimated";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 const AnimatedBlurView =
   Platform.OS === "ios"
@@ -52,8 +52,7 @@ const ConversationContextMenuComponent: FC<ConversationContextMenuProps> = ({
   const opacityValue = useSharedValue(0);
   const intensityValue = useSharedValue(0);
   const { height, width } = useWindowDimensions();
-  const safeAreaInsets = useSafeAreaInsets();
-  const colorScheme = useColorScheme();
+  const styles = useStyles();
 
   useEffect(() => {
     activeValue.value = isVisible;
@@ -146,55 +145,58 @@ const ConversationContextMenuComponent: FC<ConversationContextMenuProps> = ({
   );
 };
 
-const styles = StyleSheet.create({
-  overlay: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
-  },
-  container: {
-    flex: 1,
-    justifyContent: "flex-end",
-  },
-  handle: {
-    marginTop: 70,
-    marginBottom: 10,
-    width: 36,
-    height: 5,
-    backgroundColor: contextMenuStyleGuide.palette.secondary,
-    alignSelf: "center",
-    borderRadius: 2.5,
-  },
-  previewContainer: {
-    flex: 1,
-    margin: SIDE_MARGIN,
-    paddingBottom: contextMenuStyleGuide.spacing,
-    overflow: "hidden",
-    justifyContent: "flex-start",
-    minHeight: AUXILIARY_VIEW_MIN_HEIGHT,
-    backgroundColor: contextMenuStyleGuide.palette.common.white,
-    borderRadius: 16,
-  },
-  conversationName: {
-    ...contextMenuStyleGuide.typography.body,
-    fontWeight: "600",
-    marginBottom: contextMenuStyleGuide.spacing,
-  },
-  lastMessagePreview: {
-    ...contextMenuStyleGuide.typography.callout,
-    color:
-      Platform.OS === "ios"
-        ? contextMenuStyleGuide.palette.secondary
-        : contextMenuStyleGuide.palette.common.black,
-  },
-  menuContainer: {
-    marginHorizontal: SIDE_MARGIN,
-    minHeight: 300,
-    borderRadius: 16,
-    overflow: "hidden",
-  },
-  flex: {
-    flex: 1,
-  },
-});
+const useStyles = () => {
+  const colorScheme = useColorScheme();
+  return StyleSheet.create({
+    overlay: {
+      ...StyleSheet.absoluteFillObject,
+      backgroundColor: "rgba(0, 0, 0, 0.5)",
+    },
+    container: {
+      flex: 1,
+      justifyContent: "flex-end",
+    },
+    handle: {
+      marginTop: 70,
+      marginBottom: 10,
+      width: 36,
+      height: 5,
+      backgroundColor: contextMenuStyleGuide.palette.secondary,
+      alignSelf: "center",
+      borderRadius: 2.5,
+    },
+    previewContainer: {
+      flex: 1,
+      margin: SIDE_MARGIN,
+      paddingBottom: contextMenuStyleGuide.spacing,
+      overflow: "hidden",
+      justifyContent: "flex-start",
+      minHeight: AUXILIARY_VIEW_MIN_HEIGHT,
+      backgroundColor: backgroundColor(colorScheme),
+      borderRadius: 16,
+    },
+    conversationName: {
+      ...contextMenuStyleGuide.typography.body,
+      fontWeight: "600",
+      marginBottom: contextMenuStyleGuide.spacing,
+    },
+    lastMessagePreview: {
+      ...contextMenuStyleGuide.typography.callout,
+      color:
+        Platform.OS === "ios"
+          ? contextMenuStyleGuide.palette.secondary
+          : contextMenuStyleGuide.palette.common.black,
+    },
+    menuContainer: {
+      marginHorizontal: SIDE_MARGIN,
+      minHeight: 300,
+      borderRadius: 16,
+      overflow: "hidden",
+    },
+    flex: {
+      flex: 1,
+    },
+  });
+};
 
 export const ConversationContextMenu = memo(ConversationContextMenuComponent);
