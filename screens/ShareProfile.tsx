@@ -83,17 +83,21 @@ const ShareProfileContent = ({
     }
   };
   return (
-    <View style={compact ? styles.shareProfileCompact : styles.shareProfile}>
-      <View style={styles.shareProfileContent}>
+    <View
+      style={compact ? staticStyles.shareProfileCompact : styles.shareProfile}
+    >
+      <View style={staticStyles.shareProfileContent}>
         <Avatar
           uri={avatar}
           name={displayName}
           size={
             compact ? AvatarSizes.shareProfileCompact : AvatarSizes.shareProfile
           }
-          style={styles.avatar}
+          style={staticStyles.avatar}
         />
-        <Text style={[styles.identity, compact && styles.identityCompact]}>
+        <Text
+          style={[styles.identity, compact && staticStyles.identityCompact]}
+        >
           {displayName || username || shortAddress(userAddress || "")}
         </Text>
         {displayName !== username && (
@@ -105,7 +109,9 @@ const ShareProfileContent = ({
           <Text style={styles.address}>{shortAddress(userAddress || "")}</Text>
         )}
       </View>
-      <View style={[styles.qrCode, compact && styles.qrCodeCompact]}>
+      <View
+        style={[staticStyles.qrCode, compact && staticStyles.qrCodeCompact]}
+      >
         <QRCode
           size={compact ? 200 : 220}
           value={profileUrl}
@@ -115,15 +121,15 @@ const ShareProfileContent = ({
       </View>
       <View
         style={[
-          styles.shareButtonContainer,
-          compact && styles.shareButtonContainerCompact,
+          staticStyles.shareButtonContainer,
+          compact && staticStyles.shareButtonContainerCompact,
         ]}
       >
         {!compact ? (
           <ConverseButton
             variant="primary"
             title={shareButtonText}
-            style={styles.shareButton}
+            style={staticStyles.shareButton}
             picto={
               Platform.OS === "web"
                 ? copiedLink
@@ -136,11 +142,11 @@ const ShareProfileContent = ({
         ) : (
           <TouchableOpacity
             onPress={handleShare}
-            style={styles.shareButtonCompact}
+            style={staticStyles.shareButtonCompact}
           >
             <Picto
               picto="square.and.arrow.up"
-              style={styles.shareButtonIconCompact}
+              style={staticStyles.shareButtonIconCompact}
               size={Platform.OS === "android" ? 16 : 12}
             />
             <Text style={styles.shareButtonTextCompact}>{shareButtonText}</Text>
@@ -175,10 +181,7 @@ export default function ShareProfileScreen({
               navigation.goBack();
             }}
           >
-            <ActionButton
-              picto="xmark"
-              style={{ width: 30, height: 30, marginTop: 10 }}
-            />
+            <ActionButton picto="xmark" style={staticStyles.closeButton} />
           </TouchableOpacity>
         ),
       headerLeft: () =>
@@ -201,6 +204,59 @@ export default function ShareProfileScreen({
   );
 }
 
+const staticStyles = StyleSheet.create({
+  closeButton: {
+    width: 30,
+    height: 30,
+    marginTop: 10,
+  },
+  shareButtonCompact: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: 8,
+    marginTop: 4,
+  },
+  shareButtonContainer: {
+    flex: 1,
+    justifyContent: "flex-end",
+    alignItems: "center",
+  },
+  shareButtonContainerCompact: {
+    flex: 0,
+  },
+  shareButton: {
+    maxWidth: Platform.OS === "web" ? 300 : undefined,
+    borderRadius: 16,
+    marginHorizontal: 24,
+  },
+  shareButtonIconCompact: {
+    marginRight: 8,
+    width: 16,
+    height: 16,
+    top: Platform.OS === "android" ? 2 : 0,
+  },
+  identityCompact: {
+    fontSize: 20,
+  },
+  shareProfileCompact: {
+    flex: 0,
+  },
+  shareProfileContent: {
+    alignItems: "center",
+  },
+  avatar: {
+    alignSelf: "center",
+  },
+  qrCode: {
+    alignSelf: "center",
+    justifyContent: "center",
+    marginTop: 40,
+  },
+  qrCodeCompact: {
+    marginTop: 20,
+  },
+});
+
 const useStyles = () => {
   const colorScheme = useColorScheme();
   return StyleSheet.create({
@@ -208,32 +264,12 @@ const useStyles = () => {
       flex: 1,
       backgroundColor: backgroundColor(colorScheme),
     },
-    shareProfileCompact: {
-      flex: 0,
-    },
-    shareProfileContent: {
-      alignItems: "center",
-    },
-    avatar: {
-      alignSelf: "center",
-    },
-    qrCode: {
-      alignSelf: "center",
-      justifyContent: "center",
-      marginTop: 40,
-    },
-    qrCodeCompact: {
-      marginTop: 20,
-    },
     identity: {
       color: textPrimaryColor(colorScheme),
       fontSize: 25,
       fontWeight: "600",
       textAlign: "center",
       marginTop: 8,
-    },
-    identityCompact: {
-      fontSize: 20,
     },
     username: {
       fontSize: 15,
@@ -248,31 +284,6 @@ const useStyles = () => {
       color: textSecondaryColor(colorScheme),
       marginHorizontal: 20,
       textAlign: "center",
-    },
-    shareButtonContainer: {
-      flex: 1,
-      justifyContent: "flex-end",
-      alignItems: "center",
-    },
-    shareButtonContainerCompact: {
-      flex: 0,
-    },
-    shareButton: {
-      maxWidth: Platform.OS === "web" ? 300 : undefined,
-      borderRadius: 16,
-      marginHorizontal: 24,
-    },
-    shareButtonIconCompact: {
-      marginRight: 8,
-      width: 16,
-      height: 16,
-      top: Platform.OS === "android" ? 2 : 0,
-    },
-    shareButtonCompact: {
-      flexDirection: "row",
-      alignItems: "center",
-      paddingHorizontal: 8,
-      marginTop: 4,
     },
     shareButtonTextCompact: {
       color: textPrimaryColor(colorScheme),

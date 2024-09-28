@@ -425,12 +425,9 @@ export default function Chat() {
           <ReanimatedView
             style={[
               textInputStyle,
-              {
-                display:
-                  frameTextInputFocused && hideInputIfFrameFocused
-                    ? "none"
-                    : "flex",
-              },
+              frameTextInputFocused && hideInputIfFrameFocused
+                ? styles.displayNone
+                : styles.displayFlex,
             ]}
           >
             {!transactionMode && <ChatInput inputHeight={chatInputHeight} />}
@@ -475,6 +472,12 @@ const useStyles = () => {
       borderBottomColor: itemSeparatorColor(colorScheme),
       marginHorizontal: 20,
       marginBottom: 10,
+    },
+    displayNone: {
+      display: "none",
+    },
+    displayFlex: {
+      display: "flex",
     },
   });
 };

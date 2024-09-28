@@ -4,7 +4,12 @@ import { primaryColor } from "@styles/colors";
 import { PictoSizes } from "@styles/sizes";
 import { converseEventEmitter } from "@utils/events";
 import React, { useCallback } from "react";
-import { Platform, TouchableOpacity, useColorScheme } from "react-native";
+import {
+  Platform,
+  StyleSheet,
+  TouchableOpacity,
+  useColorScheme,
+} from "react-native";
 import { FAB } from "react-native-paper";
 
 import { NavigationParamList } from "../../screens/Navigation/Navigation";
@@ -37,7 +42,7 @@ export default function NewConversationButton({
           picto="square.and.pencil"
           color={primaryColor(colorScheme)}
           size={PictoSizes.newConversationButton}
-          style={{ width: 32, height: 32 }}
+          style={styles.iconStyle}
         />
       </TouchableOpacity>
     );
@@ -55,15 +60,23 @@ export default function NewConversationButton({
           </>
         )}
         animated={false}
-        style={{
-          position: "absolute",
-          margin: 0,
-          right: 16,
-          bottom: 20,
-        }}
+        style={styles.fabStyle}
         onPress={onPress}
         onLongPress={debugEnabled ? showDebug : undefined}
       />
     );
   }
 }
+
+const styles = StyleSheet.create({
+  fabStyle: {
+    position: "absolute",
+    margin: 0,
+    right: 16,
+    bottom: 20,
+  },
+  iconStyle: {
+    width: 32,
+    height: 32,
+  },
+});

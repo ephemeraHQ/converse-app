@@ -50,7 +50,7 @@ export default function NotificationsScreen() {
         title="Later"
         style={styles.later}
         variant="text"
-        textStyle={{ fontWeight: "600" }}
+        textStyle={styles.laterText}
         onPress={() => {
           setNotificationsSettings({ showNotificationScreen: false });
         }}
@@ -95,6 +95,9 @@ const useStyles = () => {
     later: {
       marginBottom: 54,
       marginTop: 21,
+    },
+    laterText: {
+      fontWeight: "600",
     },
   });
 };

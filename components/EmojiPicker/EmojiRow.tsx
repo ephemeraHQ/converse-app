@@ -32,7 +32,7 @@ export const EmojiRow: FC<EmojiRowProps> = memo(({ item, onPress }) => {
           </Pressable>
         );
       })}
-      {item.emojis.length !== 6 && <View style={{ flexGrow: 1 }} />}
+      {item.emojis.length !== 6 && <View style={styles.flexGrow} />}
     </View>
   );
 });
@@ -56,5 +56,8 @@ const styles = StyleSheet.create({
   },
   empty: {
     flex: 1,
+  },
+  flexGrow: {
+    flexGrow: 1,
   },
 });

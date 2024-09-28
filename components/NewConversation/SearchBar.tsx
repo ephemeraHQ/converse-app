@@ -61,7 +61,7 @@ export default function SearchBar({
               picto="search"
               size={PictoSizes.searchBar}
               color={color}
-              style={{ top: 1 }}
+              style={styles.icon}
             />
           )}
           mode="bar"
@@ -113,6 +113,9 @@ const useStyles = () => {
       marginRight: 8,
       fontSize: 17,
       color: textPrimaryColor(colorScheme),
+    },
+    icon: {
+      top: 1,
     },
   });
 };

@@ -264,9 +264,9 @@ export default function ProfileScreen({
           <Text style={styles.balance}>
             ${evmHelpers.fromDecimal(USDCBalance, config.evm.USDC.decimals, 2)}
           </Text>
-          <View style={{ width: 30 }}>
+          <View style={styles.balanceRefresh}>
             {!refreshingBalance && (
-              <View style={{ left: Platform.OS === "ios" ? 0 : -14 }}>
+              <View style={styles.balanceRefreshIcon}>
                 <TableViewPicto
                   symbol="arrow.clockwise"
                   color={
@@ -870,6 +870,12 @@ const useStyles = () => {
       width: PictoSizes.textButton,
       height: PictoSizes.textButton,
       marginRight: 5,
+    },
+    balanceRefresh: {
+      width: 30,
+    },
+    balanceRefreshIcon: {
+      left: Platform.OS === "ios" ? 0 : -14,
     },
   });
 };

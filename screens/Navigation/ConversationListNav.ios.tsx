@@ -89,6 +89,7 @@ export const useHeaderSearchBar = ({
 
 export default function ConversationListNav() {
   const colorScheme = useColorScheme();
+  const dynamicStyles = useStyles();
 
   const searchBarRef = React.useRef<SearchBarCommands>(
     null
@@ -154,15 +155,7 @@ export default function ConversationListNav() {
             >
               <View style={styles.headerLeftTouchable}>
                 <Text
-                  style={[
-                    styles.headerLeftText,
-                    {
-                      color:
-                        colorScheme === "dark"
-                          ? "rgba(255, 255, 255, 0.6)"
-                          : "rgba(0, 0, 0, 0.6)",
-                    },
-                  ]}
+                  style={[styles.headerLeftText, dynamicStyles.headerLeftText]}
                 >
                   {shouldShowConnecting.warnMessage
                     ? shortDisplayName(name)
@@ -214,3 +207,15 @@ const styles = StyleSheet.create({
     paddingBottom: 6,
   },
 });
+
+const useStyles = () => {
+  const colorScheme = useColorScheme();
+  return StyleSheet.create({
+    headerLeftText: {
+      color:
+        colorScheme === "dark"
+          ? "rgba(255, 255, 255, 0.6)"
+          : "rgba(0, 0, 0, 0.6)",
+    },
+  });
+};

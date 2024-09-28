@@ -6,6 +6,7 @@ import {
   ColorValue,
   Platform,
   StyleProp,
+  StyleSheet,
   Text,
   TouchableOpacity,
   View,
@@ -27,7 +28,7 @@ export const TableViewImage = ({ imageURI }: { imageURI?: string }) => {
     marginLeft: Platform.OS === "ios" ? 0 : 16,
   };
   return (
-    <View style={{ justifyContent: "center" }}>
+    <View style={staticStyles.imageContainer}>
       {imageURI?.endsWith(".svg") ? (
         <SvgImageUri
           uri={imageURI}
@@ -58,7 +59,7 @@ export const TableViewPicto = ({
 }) => {
   const colorScheme = useColorScheme();
   const pictoView = (
-    <View style={{ justifyContent: "center" }}>
+    <View style={staticStyles.imageContainer}>
       <Picto
         picto={symbol}
         size={PictoSizes.tableViewImage}
@@ -88,19 +89,21 @@ export const TableViewEmoji = ({
   style?: StyleProp<ViewStyle>;
 }) => {
   return (
-    <View
-      style={[
-        {
-          width: IMAGE_SIZE,
-          height: IMAGE_SIZE,
-          justifyContent: "center",
-          alignItems: "center",
-          marginLeft: Platform.OS === "android" ? 16 : 0,
-        },
-        style,
-      ]}
-    >
+    <View style={[staticStyles.emojiContainer, style]}>
       <Text>{emoji}</Text>
     </View>
   );
 };
+
+const staticStyles = StyleSheet.create({
+  imageContainer: {
+    justifyContent: "center",
+  },
+  emojiContainer: {
+    width: IMAGE_SIZE,
+    height: IMAGE_SIZE,
+    justifyContent: "center",
+    alignItems: "center",
+    marginLeft: Platform.OS === "android" ? 16 : 0,
+  },
+});

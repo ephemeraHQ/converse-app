@@ -58,22 +58,21 @@ export default function TableView({ title, items, style }: Props) {
             titleTextProps={{ numberOfLines: i.titleNumberOfLines || 1 }}
             titleTextStyle={[
               styles.itemTitle,
+              i.subtitle
+                ? styles.itemTitleWithSubtitle
+                : styles.itemTitleWithoutSubtitle,
               {
-                marginTop: i.subtitle ? 5 : 0,
-                marginBottom: i.subtitle ? 2 : 0,
                 color: i.titleColor || textPrimaryColor(colorScheme),
               },
             ]}
             cellImageView={
               i.leftView ? (
-                <View style={{ marginRight: 8 }}>{i.leftView}</View>
+                <View style={styles.cellImageView}>{i.leftView}</View>
               ) : undefined
             }
             cellAccessoryView={
               i.rightView ? (
-                <View style={{ marginRight: -8, marginLeft: 8 }}>
-                  {i.rightView}
-                </View>
+                <View style={styles.cellAccessoryView}>{i.rightView}</View>
               ) : undefined
             }
             cellStyle={i.subtitle ? "Subtitle" : "Basic"}
@@ -95,9 +94,24 @@ const useStyles = () => {
     itemTitle: {
       fontSize: 17,
     },
+    itemTitleWithSubtitle: {
+      marginTop: 5,
+      marginBottom: 2,
+    },
+    itemTitleWithoutSubtitle: {
+      marginTop: 0,
+      marginBottom: 0,
+    },
     itemSubtitle: {
       fontSize: 12,
       marginBottom: 5,
+    },
+    cellImageView: {
+      marginRight: 8,
+    },
+    cellAccessoryView: {
+      marginRight: -8,
+      marginLeft: 8,
     },
   });
 };

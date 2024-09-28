@@ -6,6 +6,7 @@ import {
   Platform,
   TouchableOpacity,
   useColorScheme,
+  StyleSheet,
 } from "react-native";
 
 import { NativeStack, navigationAnimation } from "./Navigation";
@@ -32,10 +33,9 @@ export default function ProfileNav() {
         ? textSecondaryColor(colorScheme)
         : textPrimaryColor(colorScheme),
     animation: navigationAnimation,
+    headerTitleStyle: styles.headerTitleStyle as any,
   };
-  if (Platform.OS === "web") {
-    options.headerTitleStyle = { left: -20 } as any;
-  }
+
   return (
     <NativeStack.Screen
       name="Profile"
@@ -66,7 +66,7 @@ export default function ProfileNav() {
                   picto="square.and.pencil"
                   size={PictoSizes.navItem}
                   color={textSecondaryColor(colorScheme)}
-                  style={{ marginRight: Platform.OS === "web" ? 30 : 0 }}
+                  style={styles.picto}
                 />
               </TouchableOpacity>
             );
@@ -78,3 +78,12 @@ export default function ProfileNav() {
     />
   );
 }
+
+const styles = StyleSheet.create({
+  picto: {
+    marginRight: Platform.OS === "web" ? 30 : 0,
+  },
+  headerTitleStyle: {
+    left: Platform.OS === "web" ? -20 : undefined,
+  },
+});

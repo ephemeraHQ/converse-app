@@ -72,7 +72,7 @@ export default function TopUp({
         address below).
       </Text>
       <TableView
-        style={{ width: "100%" }}
+        style={styles.table}
         items={[
           {
             id: "address",
@@ -102,7 +102,7 @@ export default function TopUp({
         ]}
       />
       <Image
-        style={{ width: 305, height: 110, marginTop: 16 }}
+        style={styles.image}
         source={
           colorScheme === "dark"
             ? require("../assets/baseUSDCOnly-dark.png")
@@ -142,6 +142,14 @@ const useStyles = () => {
     },
     primary: {
       color: primaryColor(colorScheme),
+    },
+    image: {
+      width: 305,
+      height: 110,
+      marginTop: 16,
+    },
+    table: {
+      width: "100%",
     },
   });
 };

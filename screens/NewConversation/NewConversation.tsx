@@ -118,7 +118,7 @@ export default function NewConversation({
                 variant="text"
                 title={route.params?.addingToGroupTopic ? "Add" : "Next"}
                 onPress={handleRightAction}
-                style={{ marginRight: -10, padding: 10 }}
+                style={styles.rightAction}
               />
             );
           }
@@ -136,6 +136,7 @@ export default function NewConversation({
     handleRightAction,
     styles.activityIndicator,
     colorScheme,
+    styles.rightAction,
   ]);
 
   const [value, setValue] = useState(route.params?.peer || "");
@@ -333,10 +334,9 @@ export default function NewConversation({
       <View
         style={[
           styles.group,
-          {
-            display:
-              group.enabled && group.members.length === 0 ? "none" : "flex",
-          },
+          group.enabled && group.members.length === 0
+            ? styles.displayNone
+            : styles.displayFlex,
         ]}
       >
         {!group.enabled && (
@@ -345,7 +345,7 @@ export default function NewConversation({
             picto="person.2"
             title="New group"
             style={styles.newGroupButton}
-            textStyle={{ fontWeight: "500" }}
+            textStyle={styles.newGroupButtonText}
             onPress={() => {
               setGroup({ enabled: true, members: [] });
             }}
@@ -364,10 +364,7 @@ export default function NewConversation({
                 variant="secondary"
                 picto="xmark"
                 style={styles.groupMemberButton}
-                textStyle={{
-                  lineHeight: 17,
-                  top: Platform.OS === "ios" ? undefined : 1,
-                }}
+                textStyle={styles.groupMemberButtonText}
                 onPress={() =>
                   setGroup((g) => {
                     const members = [...g.members];
@@ -412,10 +409,12 @@ export default function NewConversation({
 
       {isEmptyObject(status.profileSearchResults) && (
         <View
-          style={{
-            backgroundColor: backgroundColor(colorScheme),
-            height: showRecommendations ? undefined : 0,
-          }}
+          style={[
+            styles.recommendationsContainer,
+            showRecommendations
+              ? styles.showRecommendations
+              : styles.hideRecommendations,
+          ]}
         >
           <Recommendations
             visibility="EMBEDDED"
@@ -432,7 +431,12 @@ export default function NewConversation({
       )}
 
       <ScrollView
-        style={[styles.modal, { height: showRecommendations ? 0 : undefined }]}
+        style={[
+          styles.modal,
+          showRecommendations
+            ? styles.showRecommendations
+            : styles.hideRecommendations,
+        ]}
         keyboardShouldPersistTaps="handled"
         onTouchStart={() => {
           inputRef.current?.blur();
@@ -567,6 +571,32 @@ const useStyles = () => {
       marginLeft: 7,
       paddingTop: Platform.OS === "ios" ? 13 : 10,
       paddingBottom: Platform.OS === "ios" ? 0 : 10,
+    },
+    rightAction: {
+      marginRight: -10,
+      padding: 10,
+    },
+    newGroupButtonText: {
+      fontWeight: "500",
+    },
+    groupMemberButtonText: {
+      lineHeight: 17,
+      top: Platform.OS === "ios" ? undefined : 1,
+    },
+    recommendationsContainer: {
+      backgroundColor: backgroundColor(colorScheme),
+    },
+    showRecommendations: {
+      height: undefined,
+    },
+    hideRecommendations: {
+      height: 0,
+    },
+    displayNone: {
+      display: "none",
+    },
+    displayFlex: {
+      display: "flex",
     },
   });
 };

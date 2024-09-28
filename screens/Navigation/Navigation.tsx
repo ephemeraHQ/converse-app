@@ -1,7 +1,7 @@
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import * as Linking from "expo-linking";
-import { Platform, useColorScheme } from "react-native";
+import { Platform, StyleSheet, useColorScheme } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 
 import AccountsNav from "./AccountsNav";
@@ -18,10 +18,6 @@ import GroupInviteNav, {
   GroupInviteNavParams,
   GroupInviteScreenConfig,
 } from "./GroupInviteNav";
-import GroupLinkNav, {
-  GroupLinkNavParams,
-  GroupLinkScreenConfig,
-} from "./GroupLinkNav";
 import GroupNav, { GroupNavParams, GroupScreenConfig } from "./GroupNav";
 import NewConversationNav, {
   NewConversationNavParams,
@@ -65,10 +61,15 @@ export type NavigationParamList = {
   TopUp: undefined;
   Profile: ProfileNavParams;
   Group: GroupNavParams;
-  GroupLink: GroupLinkNavParams;
   GroupInvite: GroupInviteNavParams;
   UserProfile: undefined;
   WebviewPreview: WebviewPreviewNavParams;
+};
+
+const onUnhandledAction = () => {
+  // Since we're handling multiple navigators,
+  // let's silence errors when the action
+  // is not meant for this one
 };
 
 export const NativeStack = createNativeStackNavigator<NavigationParamList>();
@@ -83,7 +84,6 @@ const linking = {
       NewConversation: NewConversationScreenConfig,
       Profile: ProfileScreenConfig,
       Group: GroupScreenConfig,
-      GroupLink: GroupLinkScreenConfig,
       GroupInvite: GroupInviteScreenConfig,
       ShareProfile: ShareProfileScreenConfig,
       WebviewPreview: WebviewPreviewScreenConfig,
@@ -99,7 +99,7 @@ export default function Navigation() {
   const colorScheme = useColorScheme();
   const splashScreenHidden = useAppStore((s) => s.splashScreenHidden);
   return (
-    <GestureHandlerRootView style={{ flex: 1 }}>
+    <GestureHandlerRootView style={styles.container}>
       <NavigationContainer
         linking={splashScreenHidden ? (linking as any) : undefined}
         initialState={
@@ -133,11 +133,7 @@ export default function Navigation() {
             converseNavigations["mainStack"] = r;
           }
         }}
-        onUnhandledAction={() => {
-          // Since we're handling multiple navigators,
-          // let's silence errors when the action
-          // is not meant for this one
-        }}
+        onUnhandledAction={onUnhandledAction}
       >
         <NativeStack.Navigator
           screenOptions={{ gestureEnabled: !isDesktop }}
@@ -158,7 +154,6 @@ export default function Navigation() {
             {WebviewPreviewNav()}
             {ProfileNav()}
             {GroupNav()}
-            {GroupLinkNav()}
             {GroupInviteNav()}
             {UserProfileNav()}
             {TopUpNav()}
@@ -169,3 +164,9 @@ export default function Navigation() {
     </GestureHandlerRootView>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
+});

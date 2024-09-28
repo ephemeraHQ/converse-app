@@ -48,7 +48,7 @@ export default function Accounts({
             navigation.push("Chats");
           },
           rightView: (
-            <View style={{ flexDirection: "row" }}>
+            <View style={staticStyles.rightViewContainer}>
               {erroredAccounts[a] && (
                 <TableViewPicto
                   symbol="exclamationmark.triangle"
@@ -80,11 +80,20 @@ export default function Accounts({
             },
           },
         ]}
-        style={{ margin: 0 }}
+        style={staticStyles.bottomTable}
       />
     </ScrollView>
   );
 }
+
+const staticStyles = StyleSheet.create({
+  bottomTable: {
+    margin: 0,
+  },
+  rightViewContainer: {
+    flexDirection: "row",
+  },
+});
 
 const useStyles = () => {
   const colorScheme = useColorScheme();
