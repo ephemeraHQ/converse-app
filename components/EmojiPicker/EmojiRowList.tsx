@@ -27,6 +27,9 @@ interface EmojiRowListProps {
 
 const keyExtractor = (_: unknown, index: number) => String(index);
 
+// Works around issue with Android not picking up scrolls
+const ListRenderer = Platform.OS === "ios" ? ReanimatedFlashList : FlatList;
+
 export const EmojiRowList: FC<EmojiRowListProps> = ({
   emojis,
   ListHeader,
@@ -53,9 +56,6 @@ export const EmojiRowList: FC<EmojiRowListProps> = ({
     [onPress]
   );
 
-  // Works around issue with Android not picking up scrolls
-  const ListRenderer = Platform.OS === "ios" ? ReanimatedFlashList : FlatList;
-
   const animatedStyle = useAnimatedStyle(() => {
     return {
       height: height.value,
@@ -72,6 +72,7 @@ export const EmojiRowList: FC<EmojiRowListProps> = ({
         scrollEnabled={emojis.length > 1}
         keyExtractor={keyExtractor}
         renderItem={renderItem}
+        keyboardShouldPersistTaps="handled"
         ListFooterComponent={() => <View style={styles.bottom} />}
       />
     </ReanimatedView>
