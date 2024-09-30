@@ -5,11 +5,6 @@ import React from "react";
 
 import Avatar from "../Avatar"; // Adjust the path as needed
 
-// Mock the utility function
-jest.mock("@utils/getFirstLetterForAvatar", () => ({
-  getFirstLetterForAvatar: jest.fn((name) => name.charAt(0).toUpperCase()),
-}));
-
 // Mock the useColorScheme hook to always return 'light' for consistency in tests
 jest.mock("react-native/Libraries/Utilities/useColorScheme", () => ({
   __esModule: true,
