@@ -1,4 +1,17 @@
+import ConverseChat from "@components/Chat/Chat";
+import { EmojiPicker } from "@containers/EmojiPicker";
+import {
+  currentAccount,
+  useChatStore,
+  useSettingsStore,
+} from "@data/store/accountsStore";
+import { MediaPreview } from "@data/store/chatStore";
+import { useSelect } from "@data/store/storeHelpers";
 import { backgroundColor, headerTitleStyle } from "@styles/colors";
+import { ConversationContext } from "@utils/conversation";
+import { setTopicToNavigateTo, topicToNavigateTo } from "@utils/navigation";
+import { TextInputWithValue } from "@utils/str";
+import { loadOlderMessages } from "@utils/xmtpRN/messages";
 import React, {
   useCallback,
   useEffect,
@@ -7,20 +20,6 @@ import React, {
   useState,
 } from "react";
 import { StyleSheet, useColorScheme, View } from "react-native";
-
-import ConverseChat from "../components/Chat/Chat";
-import { EmojiPicker } from "../containers/EmojiPicker";
-import {
-  currentAccount,
-  useChatStore,
-  useSettingsStore,
-} from "../data/store/accountsStore";
-import { MediaPreview } from "../data/store/chatStore";
-import { useSelect } from "../data/store/storeHelpers";
-import { ConversationContext } from "../utils/conversation";
-import { setTopicToNavigateTo, topicToNavigateTo } from "../utils/navigation";
-import { TextInputWithValue } from "../utils/str";
-import { loadOlderMessages } from "../utils/xmtpRN/messages";
 
 export const ConversationReadOnly: React.FC<{
   topic?: string;
