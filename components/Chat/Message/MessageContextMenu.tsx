@@ -1,3 +1,4 @@
+import { AnimatedBlurView } from "@components/AnimatedBlurView";
 import TableView, { TableViewItemType } from "@components/TableView/TableView";
 import { backgroundColor } from "@styles/colors";
 import { calculateMenuHeight } from "@utils/contextMenu/calculateMenuHeight";
@@ -11,7 +12,6 @@ import {
   SPRING_CONFIGURATION,
 } from "@utils/contextMenu/constants";
 import { ConversationContext } from "@utils/conversation";
-import { BlurView } from "expo-blur";
 import React, { FC, memo, useEffect, useMemo } from "react";
 import {
   Platform,
@@ -20,7 +20,6 @@ import {
   TouchableWithoutFeedback,
   useColorScheme,
   useWindowDimensions,
-  View,
 } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { Portal } from "react-native-paper";
@@ -35,10 +34,6 @@ import Animated, {
 } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useContext } from "use-context-selector";
-const AnimatedBlurView =
-  Platform.OS === "ios"
-    ? Animated.createAnimatedComponent(BlurView)
-    : Animated.createAnimatedComponent(View);
 
 const BackdropComponent: FC<{
   isActive: boolean;

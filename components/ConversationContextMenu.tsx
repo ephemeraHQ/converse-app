@@ -1,5 +1,7 @@
+import { AnimatedBlurView } from "@components/AnimatedBlurView";
 import TableView, { TableViewItemType } from "@components/TableView/TableView";
 import { ConversationReadOnly } from "@screens/ConversationReadOnly";
+import { useIsSplitScreen } from "@screens/Navigation/navHelpers";
 import { backgroundColor } from "@styles/colors";
 import {
   SIDE_MARGIN,
@@ -10,7 +12,6 @@ import {
   BACKDROP_LIGHT_BACKGROUND_COLOR,
   ITEM_WIDTH,
 } from "@utils/contextMenu/constants";
-import { BlurView } from "expo-blur";
 import React, { FC, memo, useCallback, useEffect } from "react";
 import {
   Platform,
@@ -32,13 +33,6 @@ import Animated, {
   useSharedValue,
   withTiming,
 } from "react-native-reanimated";
-
-import { useIsSplitScreen } from "../screens/Navigation/navHelpers";
-
-const AnimatedBlurView =
-  Platform.OS === "ios"
-    ? Animated.createAnimatedComponent(BlurView)
-    : Animated.createAnimatedComponent(View);
 
 type ConversationContextMenuProps = {
   isVisible: boolean;
