@@ -1,4 +1,5 @@
 import * as Localization from "expo-localization";
+// eslint-disable-next-line no-restricted-imports
 import i18n from "i18n-js";
 import { I18nManager } from "react-native";
 
