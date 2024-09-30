@@ -21,9 +21,7 @@ We have decided to refactor the group joining feature using patterns inspired by
 
 ## Considered Options
 1. Maintain current architecture and focus on bug fixing
-2. Complete rewrite of the feature using a new framework
 3. Refactor using Composable Architecture-inspired patterns
-4. Adopt a different architectural pattern (e.g., Clean Architecture, MVVM)
 
 ## Pros and Cons of the Options
 
@@ -67,10 +65,21 @@ Positive:
   effectively across React on various different 
   platforms such as web (React), mobile (React Native), 
   and desktop (Electron)
+- Simulatable business logic allows for 
+  non-programming stakeholders to understand and find 
+  high level bugs in the business logic
+- State Charts will be automatically derived from the 
+  state machine definition and can be paired with 
+  Figma designs to further add color to the various 
+  states the application can be in and how it will 
+  handle them.
 
 Negative:
-- Initial learning curve for the team to understand and implement new patterns
-- Temporary slowdown in development velocity during the refactoring process
+- Initial learning curve for the team to understand 
+  and implement new patterns/xstate
+- Temporary slowdown in development velocity during 
+  the refactoring process (leading to increased 
+  productivity and quality in the longer term)
 - Potential for introducing new bugs during the refactoring (mitigated by comprehensive testing)
 
 ## Related Decisions
