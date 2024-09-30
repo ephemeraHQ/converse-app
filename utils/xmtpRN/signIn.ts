@@ -1,6 +1,3 @@
-import { debugEnabled } from "@components/DebugButton";
-import { translate } from "@i18n";
-import { awaitableAlert } from "@utils/alert";
 import {
   copyDatabasesToTemporaryDirectory,
   createTemporaryDirectory,
@@ -77,44 +74,4 @@ export const getXmtpBase64KeyFromSigner = async (
   );
   logger.debug("Exported key bundle");
   return base64Key;
-};
-
-/*
-Temporary method for XMTP team to revoke other installations
-when logging in to remove weird, broken installation
-*/
-const revokeOtherInstallations = async (signer: Signer, client: Client) => {
-  if (!debugEnabled(client.address)) {
-    return;
-  }
-  const state = await client.inboxState(true);
-  logger.debug(
-    `Current installation id : ${client.installationId} - All installation ids : ${state.installationIds}`
-  );
-  const otherInstallations = state.installationIds.filter(
-    (installationId) => installationId !== client.installationId
-  );
-  if (otherInstallations.length > 0) {
-    logger.warn(
-      `Inbox ${client.inboxId} has ${otherInstallations.length} installations to revoke`
-    );
-    // We're on a mobile wallet so we need to ask the user first
-    const doRevoke = await awaitableAlert(
-      translate("other_installations_count", {
-        count: otherInstallations.length,
-      }),
-      translate("temporary_revoke_description"),
-      "Yes",
-      "No"
-    );
-    if (!doRevoke) {
-      logger.debug(`[Onboarding] User decided not to revoke`);
-      return;
-    }
-    logger.debug(
-      `[Onboarding] User decided to revoke ${otherInstallations.length} installation`
-    );
-    await client.revokeAllOtherInstallations(signer);
-    logger.debug(`[Onboarding] Installations revoked.`);
-  }
 };

@@ -111,11 +111,11 @@ const DebugButton = forwardRef((props, ref) => {
           const client = (await getXmtpClient(currentAccount())) as Client;
           const state = await client.inboxState(true);
           Alert.alert(
-            `${state.installationIds.length} installations`,
+            `${state.installations.length} installations`,
             `InboxId: ${client.inboxId}\n\nCurrent installation: ${
               client.installationId
-            }\n\nAll installations:\n\n${state.installationIds
-              .map((i) => `${i}`)
+            }\n\nAll installations:\n\n${state.installations
+              .map((i) => `${i.id}`)
               .join("\n\n")}`
           );
         },
