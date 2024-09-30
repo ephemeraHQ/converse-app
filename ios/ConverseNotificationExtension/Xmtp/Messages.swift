@@ -118,8 +118,8 @@ func handleGroupWelcome(xmtpClient: XMTP.Client, apiURI: String?, pushToken: Str
     let spamScore = await computeSpamScoreGroupWelcome(client: xmtpClient, group: group, apiURI: apiURI)
     if spamScore < 0 { // Message is going to main inbox
       // Consent list is loaded in computeSpamScoreGroupWelcome
-      let groupAllowed = await xmtpClient.contacts.isGroupAllowed(groupId: group.id)
-      let groupDenied = await xmtpClient.contacts.isGroupDenied(groupId: group.id)
+      let groupAllowed = try await xmtpClient.contacts.isGroupAllowed(groupId: group.id)
+      let groupDenied = try await xmtpClient.contacts.isGroupDenied(groupId: group.id)
       // If group is already consented (either way) then don't show a notification for welcome as this will likely be a second+ installation
       if !groupAllowed && !groupDenied {
         shouldShowNotification = true
@@ -157,7 +157,7 @@ func handleGroupMessage(xmtpClient: XMTP.Client, envelope: XMTP.Envelope, apiURI
         
         // For now, use the group member linked address as "senderAddress"
         // @todo => make inboxId a first class citizen
-        if let senderAddresses = try group.members.first(where: {$0.inboxId == decodedMessage.senderAddress})?.addresses {
+        if let senderAddresses = try await group.members.first(where: {$0.inboxId == decodedMessage.senderAddress})?.addresses {
           decodedMessage.senderAddress = senderAddresses[0]
         }
 
