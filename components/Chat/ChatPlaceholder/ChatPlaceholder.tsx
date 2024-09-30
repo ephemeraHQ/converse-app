@@ -1,5 +1,5 @@
+import { translate } from "@i18n";
 import { actionSheetColors, textPrimaryColor } from "@styles/colors";
-import { translate } from "i18n-js";
 import {
   Keyboard,
   Platform,
