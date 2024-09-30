@@ -1,5 +1,5 @@
 import { Platform } from "react-native";
-const HOLD_ITEM_TRANSFORM_DURATION = 150;
+const HOLD_ITEM_TRANSFORM_DURATION = 280;
 
 const MENU_ITEM_HEIGHT = 44;
 const SPRING_CONFIGURATION = {
