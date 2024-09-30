@@ -479,7 +479,6 @@ export function Chat() {
 }
 
 // Lightweight chat preview component used for longpress on chat
-// limited to the last 20 messages
 export function ChatPreview() {
   const conversation = useConversationContext("conversation");
   const isBlockedPeer = useConversationContext("isBlockedPeer");
