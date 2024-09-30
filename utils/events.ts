@@ -25,6 +25,7 @@ type ConverseEvents = {
     messageId?: string;
     animated?: boolean;
   }) => void;
+  toggleSpamRequests: () => void;
 };
 
 type ShowActionSheetEvents = {

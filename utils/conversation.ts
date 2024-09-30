@@ -35,9 +35,16 @@ import {
 export type ConversationWithLastMessagePreview = XmtpConversation & {
   lastMessagePreview?: LastMessagePreview;
 };
+
+export type ConversationFlatListHiddenRequestItem = {
+  topic: "hiddenRequestsButton";
+  toggleActivated: boolean;
+  spamCount: number;
+};
+
 export type ConversationFlatListItem =
   | ConversationWithLastMessagePreview
-  | { topic: string };
+  | ConversationFlatListHiddenRequestItem;
 
 export type LastMessagePreview = {
   contentPreview: string;

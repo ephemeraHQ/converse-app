@@ -67,6 +67,7 @@ export const computeConversationsSpamScores = async (
   const sendersSpamScores = await getSendersSpamScores(
     Array.from(conversationsRequesterAddresses)
   );
+
   const topicSpamScores: TopicSpamScores = {};
 
   conversations.forEach((conversation) => {
@@ -80,7 +81,10 @@ export const computeConversationsSpamScores = async (
     const senderSpamScore = sendersSpamScores[senderKey];
     if (
       !conversation.messagesIds.length &&
-      typeof senderSpamScore === "number"
+      typeof senderSpamScore === "number" &&
+      // 1:1 Conversations without messages and no specific sender spam score
+      // should not get a spam score now (waiting for first message)
+      (conversation.isGroup || senderSpamScore !== 0)
     ) {
       // Cannot score an empty conversation further, score is just the
       // sender spam score
