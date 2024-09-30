@@ -17,13 +17,6 @@ import {
 import { PictoSizes } from "@styles/sizes";
 import { createGroupInvite, deleteGroupInvite } from "@utils/api";
 import {
-  saveGroupInviteLink,
-  deleteGroupInviteLink as deleteLinkFromStore,
-  saveInviteIdByGroupId,
-  deleteInviteIdByGroupId,
-  getInviteIdByGroupId,
-} from "@utils/groupInvites";
-import {
   getAddressIsAdmin,
   getAddressIsSuperAdmin,
 } from "@utils/groupUtils/adminUtils";
@@ -41,6 +34,14 @@ import {
   View,
 } from "react-native";
 import { Portal, Snackbar, Text } from "react-native-paper";
+
+import {
+  saveGroupInviteLink,
+  deleteGroupInviteLink as deleteLinkFromStore,
+  saveInviteIdByGroupId,
+  deleteInviteIdByGroupId,
+  getInviteIdByGroupId,
+} from "../features/GroupInvites/groupInvites.utils";
 
 interface GroupScreenAdditionProps {
   topic: string;
@@ -93,7 +94,7 @@ export const GroupScreenAddition: FC<GroupScreenAdditionProps> = ({
 
   const onCreateInviteLinkPress = useCallback(() => {
     createGroupInvite(currentAccount, {
-      groupName: groupName ?? translate("group_invite_default_group_name"),
+      groupName: groupName ?? translate("New Group"),
       imageUrl: groupPhoto,
       description: groupDescription,
       groupId: getGroupIdFromTopic(topic),
@@ -156,7 +157,7 @@ export const GroupScreenAddition: FC<GroupScreenAdditionProps> = ({
           picto="person.crop.circle.badge.plus"
         />
         <Text numberOfLines={2} style={styles.text}>
-          {translate("add_more_members")}
+          {translate("Add more members")}
         </Text>
       </TouchableOpacity>
       {groupInviteLink ? (

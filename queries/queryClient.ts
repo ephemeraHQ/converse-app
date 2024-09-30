@@ -16,3 +16,42 @@ export const queryClient = new QueryClient({
     },
   },
 });
+
+// const account = "0x123"
+// const topic = "0x123"
+// const queryObserver = new QueryObserver(queryClient, { queryKey: [groupConsentQueryKey(account, topic)] })
+//
+// queryObserver.subscribe(something => {
+//   // console.log(something.)
+// })
+
+// queryClient.getMutationCache().
+// const mutationObserver = new MutationObserver(queryClient, {
+//     mutationKey: allowGroupMutationKey(account, topic),
+//     mutationFn: async () => {
+//       if (!groupId || !account) {
+//         return;
+//       }
+//       await consentToGroupsOnProtocol(account, [groupId], "allow");
+//       return "allowed";
+//     },
+//     onMutate: async () => {
+//       await cancelGroupConsentQuery(account, topic);
+//       const previousConsent = getGroupConsentQueryData(account, topic);
+//       setGroupConsentQueryData(account, topic, "allowed");
+//       return { previousConsent };
+//     },
+//     onError: (error, _variables, context) => {
+//       logger.warn("onError useAllowGroupMutation");
+//       sentryTrackError(error);
+//       if (context?.previousConsent === undefined) {
+//         return;
+//       }
+//       setGroupConsentQueryData(account, topic, context.previousConsent);
+//     },
+//     onSuccess: () => {
+//       logger.debug("onSuccess useAllowGroupMutation");
+//     },
+//   })
+
+// observer.mutate(allowGroupMutationKey(account, topic))

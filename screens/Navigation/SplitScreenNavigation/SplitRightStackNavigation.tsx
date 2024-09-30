@@ -6,6 +6,10 @@ import { Platform, useColorScheme } from "react-native";
 import { SplitScreenDrawerParams } from "./SplitScreenNavigation";
 import config from "../../../config";
 import { useAppStore } from "../../../data/store/appStore";
+import GroupLinkNav, {
+  GroupLinkNavParams,
+  GroupLinkScreenConfig,
+} from "../../../features/GroupInvites/GroupLinkNav";
 import { isDesktop } from "../../../utils/device";
 import { converseNavigations } from "../../../utils/navigation";
 import ConversationNav, {
@@ -13,10 +17,6 @@ import ConversationNav, {
   ConversationScreenConfig,
 } from "../ConversationNav";
 import EnableTransactionsNav from "../EnableTransactionsNav";
-import GroupLinkNav, {
-  GroupLinkNavParams,
-  GroupLinkScreenConfig,
-} from "../GroupLinkNav";
 import GroupNav, { GroupNavParams, GroupScreenConfig } from "../GroupNav";
 import NewConversationNav, {
   NewConversationNavParams,

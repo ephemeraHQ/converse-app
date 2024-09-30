@@ -1,4 +1,7 @@
-import GroupInviteScreen from "@screens/GroupInvite";
+import {
+  NativeStack,
+  navigationAnimation,
+} from "@screens/Navigation/Navigation";
 import {
   headerTitleStyle,
   textPrimaryColor,
@@ -6,7 +9,7 @@ import {
 } from "@styles/colors";
 import { Platform, useColorScheme } from "react-native";
 
-import { NativeStack, navigationAnimation } from "./Navigation";
+import GroupInviteScreen from "./GroupInvite.screen";
 
 export type GroupInviteNavParams = {
   groupInviteId: string;
@@ -16,7 +19,7 @@ export const GroupInviteScreenConfig = {
   path: "/group-invite/:groupInviteId",
 };
 
-export default function GroupInviteNav() {
+export function GroupInviteNavigation() {
   const colorScheme = useColorScheme();
   return (
     <NativeStack.Screen

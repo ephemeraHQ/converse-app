@@ -260,13 +260,23 @@ const en = {
   // Group Invites
   group_admin_approval:
     "A group admin may need to approve your membership prior to joining.",
+  "A group admin may need to approve your membership prior to joining.":
+    "A group admin may need to approve your membership prior to joining.",
   joining: "Joining...",
+  "Joining...": "Joining...",
   join_group: "Join group",
+  "Join group": "Join group",
   group_join_error: "An error occurred",
+  "An error occurred": "An error occurred",
   group_join_invite_invalid: "This invite is no longer valid",
+  "This invite is no longer valid": "This invite is no longer valid",
   group_finished_polling_unsuccessfully: "This is taking longer than expected",
+  "This is taking longer than expected": "This is taking longer than expected",
   group_already_joined: "This invite has already been accepted",
+  "This invite has already been accepted":
+    "This invite has already been accepted",
   group_invite_default_group_name: "New Group",
+  "New Group": "New Group",
 
   // Group Overview
   change_profile_picture: "Change profile picture",
@@ -280,7 +290,7 @@ const en = {
   group_invite_link_created_copied: "Invite link created and copied!",
   group_invite_link_copied: "Invite link copied!",
   group_invite_link_deleted: "Invite link deleted!",
-  add_more_members: "Add more members",
+  "Add more members": "Add more members",
   copy_invite_link: "Copy invite link",
   create_invite_link: "Create invite link",
   pending: "Pending",

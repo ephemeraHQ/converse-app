@@ -1,10 +1,13 @@
 import Avatar from "@components/Avatar";
+import Button from "@components/Button/Button";
+import { useCurrentAccount } from "@data/store/accountsStore";
 import { useGroupConsent } from "@hooks/useGroupConsent";
 import { translate } from "@i18n";
 import { useGroupInviteQuery } from "@queries/useGroupInviteQuery";
 import { fetchGroupsQuery } from "@queries/useGroupsQuery";
 import { useHeaderHeight } from "@react-navigation/elements";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
+import { NavigationParamList } from "@screens/Navigation/Navigation";
 import {
   backgroundColor,
   dangerColor,
@@ -17,41 +20,56 @@ import {
   getGroupJoinRequest,
   GroupJoinRequestStatus,
 } from "@utils/api";
-import {
-  getInviteJoinRequest,
-  saveInviteJoinRequest,
-} from "@utils/groupInvites";
 import { getTopicFromGroupId } from "@utils/groupUtils/groupId";
 import logger from "@utils/logger";
+import { navigate } from "@utils/navigation";
 import { GroupWithCodecsType } from "@utils/xmtpRN/client";
+import { refreshGroup } from "@utils/xmtpRN/conversations";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { StyleSheet, Text, View, useColorScheme } from "react-native";
 import { ActivityIndicator } from "react-native-paper";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-import { NavigationParamList } from "./Navigation/Navigation";
-import Button from "../components/Button/Button";
-import { useCurrentAccount } from "../data/store/accountsStore";
-import { navigate } from "../utils/navigation";
-import { refreshGroup } from "../utils/xmtpRN/conversations";
+import {
+  getInviteJoinRequest,
+  saveInviteJoinRequest,
+} from "./groupInvites.utils";
 
 export default function GroupInviteScreen({
   route,
   navigation,
 }: NativeStackScreenProps<NavigationParamList, "GroupInvite">) {
+  /**************************************************************
+   * View/UI
+   * ************************************************************/
   const styles = useStyles();
+  const colorScheme = useColorScheme();
+  const insets = useSafeAreaInsets();
+  const headerHeight = useHeaderHeight();
+
+  /**************************************************************
+   * Zustand
+   * ************************************************************/
   const account = useCurrentAccount() as string;
+
+  /**************************************************************
+   * React Query
+   * ************************************************************/
   const {
     data: groupInvite,
     error: groupInviteError,
     isLoading,
   } = useGroupInviteQuery(route.params.groupInviteId);
+
+  /**************************************************************
+   * React State
+   * ************************************************************/
   const [
     { polling, finishedPollingUnsuccessfully, joinStatus },
     setGroupJoinState,
   ] = useState<{
     polling: boolean;
-    /* Unsuccessfully here means that we have not yet received confirmation 
+    /* Unsuccessfully here means that we have not yet received confirmation
         from the invitee that we have been added to the group */
     finishedPollingUnsuccessfully: boolean;
     joinStatus: null | GroupJoinRequestStatus;
@@ -60,22 +78,29 @@ export default function GroupInviteScreen({
     finishedPollingUnsuccessfully: false,
     joinStatus: null,
   });
-  const colorScheme = useColorScheme();
+
   const [newGroup, setNewGroup] = useState<GroupWithCodecsType | undefined>(
     undefined
   );
+
   const { allowGroup } = useGroupConsent(newGroup?.topic || "");
   const handlingNewGroup = useRef(false);
 
   const handleNewGroup = useCallback(
     async (group: GroupWithCodecsType) => {
-      if (group.client.address === account && !handlingNewGroup.current) {
+      const whatDoesThisConditionIndicate =
+        group.client.address === account && !handlingNewGroup.current;
+
+      if (whatDoesThisConditionIndicate) {
         handlingNewGroup.current = true;
+
         await allowGroup({
           includeCreator: false,
           includeAddedBy: false,
         });
         await refreshGroup(account, group.topic);
+
+        // Navigation Logic: Replace current screen with conversation screen for topic
         navigation.goBack();
         setTimeout(() => {
           navigate("Conversation", { topic: group.topic });
@@ -91,8 +116,13 @@ export default function GroupInviteScreen({
     }
   }, [handleNewGroup, newGroup]);
 
+  // invoked when the user clicks the "Join Group" button
   const joinGroup = useCallback(async () => {
     if (!groupInvite?.id) return;
+
+    // we cant rely on our stream from the sdk at the moment,
+    // so our hack is to poll
+    //react state required to track implicit state machine
     setGroupJoinState({
       polling: true,
       finishedPollingUnsuccessfully: false,
@@ -100,12 +130,17 @@ export default function GroupInviteScreen({
     });
     const groupId = groupInvite.groupId;
     // Group ID is not available on previous versions of the app, so we need to fetch the groups
+    // during our poll loop, we need to grab the old list in order to perform
+    // a diff against it to determine what the new group added is
+    // note: this is a bug if the user joins two groups ina very short time
     const groupsBeforeJoining = groupId
       ? { ids: [], byId: {} }
       : await fetchGroupsQuery(account);
     logger.debug(
       `[GroupInvite] Before joining, group count = ${groupsBeforeJoining.ids.length}`
     );
+    // this is super strange logic, we're getting a string from mmkv,
+    // assigning it to a variable called ID, then ignoring
     let joinRequestId = getInviteJoinRequest(account, groupInvite?.id);
     if (!joinRequestId) {
       logger.debug(
@@ -192,8 +227,6 @@ export default function GroupInviteScreen({
       });
     }
   }, [account, groupInvite?.id, groupInvite?.groupId]);
-  const insets = useSafeAreaInsets();
-  const headerHeight = useHeaderHeight();
 
   return (
     <View style={styles.groupInvite}>
@@ -201,7 +234,7 @@ export default function GroupInviteScreen({
         <ActivityIndicator color={textPrimaryColor(colorScheme)} size="large" />
       )}
       {groupInviteError && (
-        <Text style={styles.error}>{translate("group_join_error")}</Text>
+        <Text style={styles.error}>{translate("An error occurred")}</Text>
       )}
       {groupInvite && (
         <>
@@ -219,7 +252,7 @@ export default function GroupInviteScreen({
           </View>
           {joinStatus === "ACCEPTED" && (
             <Text style={styles.accepted}>
-              {translate("group_already_joined")}
+              {translate("This invite has already been accepted")}
             </Text>
           )}
           {!polling &&
@@ -227,7 +260,7 @@ export default function GroupInviteScreen({
             joinStatus !== "REJECTED" && (
               <Button
                 variant="primary"
-                title={translate("join_group")}
+                title={translate("Join group")}
                 style={styles.cta}
                 onPress={joinGroup}
               />
@@ -235,25 +268,27 @@ export default function GroupInviteScreen({
           {polling && (
             <Button
               variant="primary"
-              title={translate("joining")}
+              title={translate("Joining...")}
               style={styles.cta}
             />
           )}
           {/* We may want to add some way for a user to get out of this state, but it's not likely to happen */}
           {joinStatus === "ERROR" && (
-            <Text style={styles.error}>{translate("group_join_error")}</Text>
+            <Text style={styles.error}>{translate("An error occurred")}</Text>
           )}
           {joinStatus === "REJECTED" && (
             <Text style={styles.error}>
-              {translate("group_join_invite_invalid")}
+              {translate("This invite is no longer valid")}
             </Text>
           )}
           <Text style={styles.notification}>
-            {translate("group_admin_approval")}
+            {translate(
+              "A group admin may need to approve your membership prior to joining."
+            )}
           </Text>
           {finishedPollingUnsuccessfully && (
             <Text style={styles.notification}>
-              {translate("group_finished_polling_unsuccessfully")}
+              {translate("This is taking longer than expected")}
             </Text>
           )}
         </>

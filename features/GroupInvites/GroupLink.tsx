@@ -1,22 +1,21 @@
+import Button from "@components/Button/Button";
+import { useCurrentAccount } from "@data/store/accountsStore";
 import { useHeaderHeight } from "@react-navigation/elements";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
+import { NavigationParamList } from "@screens/Navigation/Navigation";
 import {
   backgroundColor,
   dangerColor,
   textPrimaryColor,
   textSecondaryColor,
 } from "@styles/colors";
+import { GroupLink, getGroupLink, joinGroupFromLink } from "@utils/api";
 import logger from "@utils/logger";
+import { navigate } from "@utils/navigation";
+import { refreshGroup } from "@utils/xmtpRN/conversations";
 import { useCallback, useEffect, useState } from "react";
 import { StyleSheet, Text, View, useColorScheme } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-
-import { NavigationParamList } from "./Navigation/Navigation";
-import Button from "../components/Button/Button";
-import { useCurrentAccount } from "../data/store/accountsStore";
-import { GroupLink, getGroupLink, joinGroupFromLink } from "../utils/api";
-import { navigate } from "../utils/navigation";
-import { refreshGroup } from "../utils/xmtpRN/conversations";
 
 export default function GroupScreen({
   route,
