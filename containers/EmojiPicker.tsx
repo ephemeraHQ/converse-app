@@ -12,6 +12,7 @@ import {
   getReactionContent,
   removeReactionFromMessage,
 } from "@utils/reactions";
+import { matchSorter } from "match-sorter";
 import { useCallback, useMemo, useRef, useState } from "react";
 import { View, StyleSheet, useColorScheme } from "react-native";
 import { Text } from "react-native-paper";
@@ -84,14 +85,13 @@ export const EmojiPicker = () => {
   }, [reactions, currentUser]);
 
   const filteredReactions = useMemo(() => {
+    const cleanedSearch = searchInput.toLowerCase().trim();
+    if (cleanedSearch.length === 0) {
+      return sliceEmojis(flatEmojis);
+    }
     return sliceEmojis(
-      flatEmojis.filter((emoji) => {
-        const cleanedSearch = searchInput.toLowerCase().trim();
-        return (
-          emoji.keywords.some((keyword) => keyword.includes(cleanedSearch)) ||
-          emoji.name.includes(cleanedSearch) ||
-          emoji.emoji === cleanedSearch
-        );
+      matchSorter(flatEmojis, cleanedSearch, {
+        keys: ["keywords", "name", "emoji"],
       })
     );
   }, [searchInput]);

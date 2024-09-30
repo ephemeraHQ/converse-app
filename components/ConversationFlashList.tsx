@@ -7,6 +7,7 @@ import { useCallback, useEffect, useRef } from "react";
 import { Platform, StyleSheet, View, useColorScheme } from "react-native";
 
 import { GroupConversationItem } from "./ConversationList/GroupConversationItem";
+import HiddenRequestsButton from "./ConversationList/HiddenRequestsButton";
 import ConversationListItem from "./ConversationListItem";
 import {
   useChatStore,
@@ -18,6 +19,7 @@ import { useSelect } from "../data/store/storeHelpers";
 import { NavigationParamList } from "../screens/Navigation/Navigation";
 import { useIsSplitScreen } from "../screens/Navigation/navHelpers";
 import {
+  ConversationFlatListHiddenRequestItem,
   ConversationFlatListItem,
   ConversationWithLastMessagePreview,
 } from "../utils/conversation";
@@ -102,6 +104,15 @@ export default function ConversationFlashList({
 
   const renderItem = useCallback(
     ({ item }: { item: ConversationFlatListItem }) => {
+      if (item.topic === "hiddenRequestsButton") {
+        const hiddenRequestItem = item as ConversationFlatListHiddenRequestItem;
+        return (
+          <HiddenRequestsButton
+            spamCount={hiddenRequestItem.spamCount}
+            toggleActivated={hiddenRequestItem.toggleActivated}
+          />
+        );
+      }
       const conversation = item as ConversationWithLastMessagePreview;
       const lastMessagePreview = conversation.lastMessagePreview;
       const socials = conversation.peerAddress

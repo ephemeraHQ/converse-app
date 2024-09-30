@@ -34,6 +34,7 @@ describe.skip("GroupInviteLink", () => {
   const groupName = "test";
   const description = "description";
   const imageUrl = "image";
+  const groupId = "group";
 
   beforeEach(async () => {
     client = await randomClient("dev");
@@ -44,6 +45,7 @@ describe.skip("GroupInviteLink", () => {
       groupName,
       description,
       imageUrl,
+      groupId,
     });
     expect(groupInviteLink.id).toBeDefined();
 
@@ -58,6 +60,7 @@ describe.skip("GroupInviteLink", () => {
       groupName,
       description,
       imageUrl,
+      groupId,
     });
 
     const secondClient = await randomClient("dev");
@@ -82,6 +85,7 @@ describe.skip("GroupInviteLink", () => {
       groupName,
       description,
       imageUrl,
+      groupId,
     });
 
     const secondClient = await randomClient("dev");

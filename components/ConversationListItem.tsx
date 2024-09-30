@@ -25,6 +25,7 @@ import React, {
 } from "react";
 import {
   ColorSchemeName,
+  LayoutChangeEvent,
   Platform,
   StyleSheet,
   Text,
@@ -34,8 +35,14 @@ import {
 import { RectButton } from "react-native-gesture-handler";
 import Swipeable from "react-native-gesture-handler/Swipeable";
 import { TouchableRipple } from "react-native-paper";
+import Animated, {
+  useSharedValue,
+  useAnimatedRef,
+  runOnJS,
+} from "react-native-reanimated";
 
 import Avatar from "./Avatar";
+import { ConversationContextMenu } from "./ConversationContextMenu";
 import GroupAvatar from "./GroupAvatar";
 import Picto from "./Picto/Picto";
 import { showActionSheetWithOptions } from "./StateHandlers/ActionSheetStateHandler";
@@ -113,6 +120,18 @@ const ConversationListItem = memo(function ConversationListItem({
     staleTime: Infinity,
     gcTime: Infinity,
   });
+
+  const [isContextMenuVisible, setIsContextMenuVisible] = useState(false);
+  const itemRect = useSharedValue({ x: 0, y: 0, width: 0, height: 0 });
+  const containerRef = useAnimatedRef<View>();
+
+  const onLayoutView = useCallback(
+    (event: LayoutChangeEvent) => {
+      const { x, y, width, height } = event.nativeEvent.layout;
+      itemRect.value = { x, y, width, height };
+    },
+    [itemRect]
+  );
 
   const openConversation = useCallback(async () => {
     const getUserAction = async () => {
@@ -198,6 +217,29 @@ const ConversationListItem = memo(function ConversationListItem({
     colorScheme,
   ]);
 
+  const showContextMenu = useCallback(() => {
+    setIsContextMenuVisible(true);
+  }, []);
+
+  const closeContextMenu = useCallback(
+    (openConversationOnClose = false) => {
+      setIsContextMenuVisible(false);
+      if (openConversationOnClose) {
+        openConversation();
+      }
+    },
+    [openConversation]
+  );
+
+  const triggerHapticFeedback = useCallback(() => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+  }, []);
+
+  const onLongPress = useCallback(() => {
+    runOnJS(triggerHapticFeedback)();
+    runOnJS(showContextMenu)();
+  }, [triggerHapticFeedback, showContextMenu]);
+
   useEffect(() => {
     const navRef = navigationRef.current;
     navRef?.addListener("transitionEnd", resetSelected);
@@ -277,7 +319,7 @@ const ConversationListItem = memo(function ConversationListItem({
     swipeableRef.current?.close();
   }, []);
 
-  const handleRightPress = useCallback(() => {
+  const handleDelete = useCallback(() => {
     if (onRightActionPress) {
       onRightActionPress(closeSwipeable);
       return;
@@ -383,7 +425,7 @@ const ConversationListItem = memo(function ConversationListItem({
   const renderRightActions = useCallback(() => {
     if (isBlockedChatView) {
       return (
-        <RectButton style={styles.rightAction} onPress={handleRightPress}>
+        <RectButton style={styles.rightAction} onPress={handleDelete}>
           <Picto
             picto="checkmark"
             color={inversePrimaryColor(colorScheme)}
@@ -393,7 +435,7 @@ const ConversationListItem = memo(function ConversationListItem({
       );
     } else {
       return (
-        <RectButton style={styles.rightActionRed} onPress={handleRightPress}>
+        <RectButton style={styles.rightActionRed} onPress={handleDelete}>
           <Picto picto="trash" color="white" size={PictoSizes.swipableItem} />
         </RectButton>
       );
@@ -401,7 +443,7 @@ const ConversationListItem = memo(function ConversationListItem({
   }, [
     styles.rightAction,
     styles.rightActionRed,
-    handleRightPress,
+    handleDelete,
     isBlockedChatView,
     colorScheme,
   ]);
@@ -418,56 +460,128 @@ const ConversationListItem = memo(function ConversationListItem({
     );
   }, [showUnread, styles.leftAction, colorScheme]);
 
-  const onLongPress = useCallback(() => {
-    setPinnedConversations([conversationTopic]);
-  }, [conversationTopic, setPinnedConversations]);
+  const toggleReadStatus = useCallback(() => {
+    const newStatus = showUnread ? "read" : "unread";
+    const timestamp = new Date().getTime();
+    setTopicsData({
+      [conversationTopic]: {
+        status: newStatus,
+        timestamp,
+      },
+    });
+    saveTopicsData(currentAccount(), {
+      [conversationTopic]: {
+        status: newStatus,
+        timestamp,
+      },
+    });
+  }, [setTopicsData, conversationTopic, showUnread]);
 
-  const rowItem =
-    Platform.OS === "ios" || Platform.OS === "web" ? (
-      <TouchableHighlight
-        underlayColor={clickedItemBackgroundColor(colorScheme)}
-        delayPressIn={isDesktop ? 0 : 75}
-        onLongPress={onLongPress}
-        onPressIn={() => {
-          if (!isSplitScreen) return;
-          openConversation();
-        }}
-        onPress={() => {
-          if (isSplitScreen) return;
-          openConversation();
-          setSelected(true);
-        }}
-        style={{
-          backgroundColor:
-            selected || (isSplitScreen && conversationOpened)
-              ? clickedItemBackgroundColor(colorScheme)
-              : backgroundColor(colorScheme),
-          height: 76,
-        }}
-      >
-        {listItemContent}
-      </TouchableHighlight>
-    ) : (
-      <TouchableRipple
-        unstable_pressDelay={isDesktop || isSplitScreen ? 0 : 75}
-        onPressIn={() => {
-          if (!isSplitScreen) return;
-          openConversation();
-        }}
-        onPress={() => {
-          if (isSplitScreen) return;
-          openConversation();
-        }}
-        onLongPress={onLongPress}
-        style={styles.rippleRow}
-        rippleColor={clickedItemBackgroundColor(colorScheme)}
-      >
-        {listItemContent}
-      </TouchableRipple>
-    );
+  const contextMenuItems = useMemo(
+    () => [
+      {
+        title: translate("pin"),
+        action: () => {
+          setPinnedConversations([conversationTopic]);
+          closeContextMenu();
+        },
+        id: "pin",
+      },
+      {
+        title: showUnread
+          ? translate("mark_as_read")
+          : translate("mark_as_unread"),
+        action: () => {
+          toggleReadStatus();
+          closeContextMenu();
+        },
+        id: "markAsUnread",
+      },
+      {
+        title: translate("delete"),
+        action: () => {
+          handleDelete();
+          closeContextMenu();
+        },
+        id: "delete",
+      },
+    ],
+    [
+      conversationTopic,
+      setPinnedConversations,
+      handleDelete,
+      closeContextMenu,
+      showUnread,
+      toggleReadStatus,
+    ]
+  );
+
+  const rowItem = (
+    <Animated.View ref={containerRef} onLayout={onLayoutView}>
+      {Platform.OS === "ios" || Platform.OS === "web" ? (
+        <TouchableHighlight
+          underlayColor={clickedItemBackgroundColor(colorScheme)}
+          delayPressIn={isDesktop ? 0 : 75}
+          onLongPress={onLongPress}
+          onPressIn={() => {
+            if (!isSplitScreen) return;
+            openConversation();
+          }}
+          onPress={() => {
+            if (isSplitScreen) return;
+            openConversation();
+            setSelected(true);
+          }}
+          style={{
+            backgroundColor:
+              selected || (isSplitScreen && conversationOpened)
+                ? clickedItemBackgroundColor(colorScheme)
+                : backgroundColor(colorScheme),
+            height: 76,
+          }}
+        >
+          {listItemContent}
+        </TouchableHighlight>
+      ) : (
+        <TouchableRipple
+          unstable_pressDelay={isDesktop || isSplitScreen ? 0 : 75}
+          onPressIn={() => {
+            if (!isSplitScreen) return;
+            openConversation();
+          }}
+          onPress={() => {
+            if (isSplitScreen) return;
+            openConversation();
+          }}
+          onLongPress={onLongPress}
+          style={styles.rippleRow}
+          rippleColor={clickedItemBackgroundColor(colorScheme)}
+        >
+          {listItemContent}
+        </TouchableRipple>
+      )}
+    </Animated.View>
+  );
 
   const toggleUnreadStatusOnClose = useRef(false);
   const [swipeableKey, setSwipeableKey] = useState(0);
+
+  const contextMenuComponent = useMemo(
+    () => (
+      <ConversationContextMenu
+        isVisible={isContextMenuVisible}
+        onClose={closeContextMenu}
+        items={contextMenuItems}
+        conversationTopic={conversationTopic}
+      />
+    ),
+    [
+      isContextMenuVisible,
+      closeContextMenu,
+      contextMenuItems,
+      conversationTopic,
+    ]
+  );
 
   return (
     <View style={styles.rowSeparator}>
@@ -498,18 +612,7 @@ const ConversationListItem = memo(function ConversationListItem({
         onSwipeableClose={(direction) => {
           if (direction === "left" && toggleUnreadStatusOnClose.current) {
             toggleUnreadStatusOnClose.current = false;
-            setTopicsData({
-              [conversationTopic]: {
-                status: showUnread ? "read" : "unread",
-                timestamp: new Date().getTime(),
-              },
-            });
-            saveTopicsData(currentAccount(), {
-              [conversationTopic]: {
-                status: showUnread ? "read" : "unread",
-                timestamp: new Date().getTime(),
-              },
-            });
+            toggleReadStatus();
           }
           if (Platform.OS === "web") {
             setSwipeableKey(new Date().getTime());
@@ -518,6 +621,7 @@ const ConversationListItem = memo(function ConversationListItem({
         hitSlop={{ left: isSplitScreen ? 0 : -6 }}
       >
         {rowItem}
+        {contextMenuComponent}
       </Swipeable>
       {/* Hide part of the border to mimic margin*/}
       {Platform.OS === "ios" && <View style={styles.rowSeparatorMargin} />}

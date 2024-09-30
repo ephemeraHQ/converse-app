@@ -203,6 +203,11 @@ const en = {
   do_you_want_to_join_this_group: "Do you want to join this group?",
   join_this_group: "Join this group",
 
+  // Conversation Context Menu
+  pin: "Pin",
+  mark_as_read: "Mark as read",
+  mark_as_unread: "Mark as unread",
+
   // NewGroupSummary
   group_name: "GROUP NAME",
   group_description: "GROUP DESCRIPTION",
@@ -261,6 +266,7 @@ const en = {
   group_join_invite_invalid: "This invite is no longer valid",
   group_finished_polling_unsuccessfully: "This is taking longer than expected",
   group_already_joined: "This invite has already been accepted",
+  group_invite_default_group_name: "New Group",
 
   // Group Overview
   change_profile_picture: "Change profile picture",
