@@ -33,6 +33,7 @@ module.exports = {
 
           // Folder aliases
           "@components": "./components",
+          "@containers": "./containers",
           "@data": "./data",
           "@hooks": "./hooks",
           "@i18n": "./i18n",
