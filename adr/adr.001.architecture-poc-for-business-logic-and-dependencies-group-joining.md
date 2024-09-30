@@ -8,7 +8,11 @@ PROPOSED
 - **Agreed**: [To be filled after agreement]
 
 ## Context
-Our mobile application's group joining feature has been experiencing bugs and inconsistencies. The current implementation lacks testability and uses a mix of Zustand for state management and React Query for API logic, making it difficult to maintain and extend. We need to improve the architecture to increase testability, consistency, and maintainability while addressing existing bugs.
+During our week-long offsite in Nashville from September 23rd to 27th, 2024, we discussed exciting opportunities with our newly expanded team. Michael, a recent addition, brings experience from his previous role where he implemented patterns to increase testability and separate business logic from UI, enhancing code robustness. He also introduced a pattern for controlling dependencies and side effects in applications.
+
+Given the potential benefits, we've decided to adapt these patterns for our codebase. The proof of concept is estimated to take 2-4 weeks. Naomi and Michael felt it was important to document the deliverables, provide a high-level overview of the pattern, and discuss alternatives, even though we've already agreed on the approach during the offsite.
+
+This document also serves as our first Architecture Decision Record (ADR). Michael suggests using ADRs to record our team's decision-making process in source control, allowing us to review and improve it over time.
 
 ## Decision
 We have decided to refactor the group joining feature using patterns inspired by the Composable Architecture, adapting them for JavaScript and React Native. This refactoring will involve:
