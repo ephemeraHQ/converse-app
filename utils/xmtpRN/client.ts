@@ -99,10 +99,11 @@ export const reconnectXmtpClientsDbConnections = async () => {
 
 export const isClientInstallationValid = async (client: Client) => {
   const inboxState = await client.inboxState(true);
+  const installationsIds = inboxState.installations.map((i) => i.id);
   logger.debug(
-    `Current installation id : ${client.installationId} - All installation ids : ${inboxState.installationIds}`
+    `Current installation id : ${client.installationId} - All installation ids : ${installationsIds}`
   );
-  if (!inboxState.installationIds.includes(client.installationId)) {
+  if (!installationsIds.includes(client.installationId)) {
     logger.warn(`Installation ${client.installationId} has been revoked`);
     return false;
   } else {
