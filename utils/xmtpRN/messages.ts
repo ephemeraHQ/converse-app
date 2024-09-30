@@ -1,6 +1,6 @@
 import { entifyWithAddress } from "@queries/entify";
 import { setGroupMembersQueryData } from "@queries/useGroupMembersQuery";
-import { getCleanAddress } from "@utils/eth";
+import { getCleanAddress } from "@utils/evm/address";
 import logger from "@utils/logger";
 import { TransactionReference } from "@xmtp/content-type-transaction-reference";
 import {
